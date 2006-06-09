@@ -1,0 +1,39 @@
+<UserConfig>
+	<Menu>
+		<MenuGroup name="Dashboards">
+			<MenuItem name="Home" link="dashboard.jsp"/>
+		</MenuGroup>
+		<MenuGroup name="Reports">
+			<MenuItem name="Jobs by Facility" link="viewer.jsp?__report=[ReportsFolder]JobsByFacility.rptdesign"/>
+			<MenuItem name="Jobs by Probe" link="viewer.jsp?__report=[ReportsFolder]JobsByProbeNoFacility.rptdesign"/>
+			<MenuItem name="Jobs by VO" link="viewer.jsp?__report=[ReportsFolder]JobsByVO.rptdesign"/>
+			<MenuItem name="Usage by Facility" link="viewer.jsp?__report=[ReportsFolder]UsageByFacility.rptdesign"/>
+			<MenuItem name="Usage by VO" link="viewer.jsp?__report=[ReportsFolder]UsageByVO.rptdesign"/>
+			<MenuItem name="Daily Jobs by Facility" link="viewer.jsp?__report=[ReportsFolder]DailyJobsByFacility.rptdesign"/>
+			<MenuItem name="Daily Jobs by Probe" link="viewer.jsp?__report=[ReportsFolder]DailyJobsByProbe.rptdesign"/>
+			<MenuItem name="Daily Jobs by VO" link="viewer.jsp?__report=[ReportsFolder]DailyJobsByVO.rptdesign"/>
+			<MenuItem name="Daily Usage by Facility" link="viewer.jsp?__report=[ReportsFolder]DailyUsageByFacility.rptdesign"/>
+			<MenuItem name="Daily Usage by Probe" link="viewer.jsp?__report=[ReportsFolder]DailyUsageByProbe.rptdesign"/>
+			<MenuItem name="Daily Usage by VO" link="viewer.jsp?__report=[ReportsFolder]DailyUsageByVO.rptdesign"/>
+			<MenuItem name="Usage Report" link="viewer.jsp?__report=[ReportsFolder]UsageReport.rptdesign"/>
+		</MenuGroup>
+		<MenuGroup name="SQL Queries">
+			<MenuItem name="Custom SQL Report" link="admin.jsp"/>
+			<MenuItem name="Distinct Probe Names" link="admin.jsp?sql=select distinct ProbeName from JobUsageRecord"/>
+			<MenuItem name="Probes Without Facilities" link="admin.jsp?sql=select distinct ProbeName from JobUsageRecord j where not exists(select ProbeName from FacilityProbes f where f.probe_name = j.probename)"/>
+			<MenuItem name="Records Without Dates" link="admin.jsp?sql=select count(*) from JobUsageRecord where starttime is null or endtime is null"/>
+		</MenuGroup>
+	</Menu>
+	<Dashboard>		
+		<Row>
+			<DashboardItem link="viewer.jsp?__report=[ReportsFolder]JobsByVO.rptdesign&amp;Start+Date=01/01/1990&amp;End+Date=12/31/2999"/>			
+			<DashboardItem link="viewer.jsp?__report=[ReportsFolder]UsageByVO.rptdesign&amp;Start+Date=01/01/1990&amp;End+Date=12/31/2999"/>			
+		</Row>			
+		<Row>
+			<DashboardItem link="viewer.jsp?__report=[ReportsFolder]DailyJobsByVO.rptdesign&amp;Start+Date=01/01/1990&amp;End+Date=12/31/2999"/>			
+		</Row>
+		<Row>
+			<DashboardItem link="viewer.jsp?__report=[ReportsFolder]DailyUsageByVO.rptdesign&amp;Start+Date=01/01/1990&amp;End+Date=12/31/2999"/>			
+		</Row>
+	</Dashboard>
+</UserConfig>

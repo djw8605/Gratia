@@ -1,0 +1,43 @@
+import java.text.*;
+import java.util.*;
+import javax.xml.datatype.*;
+
+date1 = "2006-01-01T00:00:00";
+date2 = "2006-01-01T00:00:00Z";
+
+factory = DatatypeFactory.newInstance();
+
+calendar1 = factory.newXMLGregorianCalendar(date1);
+calendar2 = factory.newXMLGregorianCalendar(date2);
+
+print("date1: " + calendar1);
+print("date2: " + calendar2);
+
+greg01 = calendar1.toGregorianCalendar();
+greg02 = calendar2.toGregorianCalendar();
+
+print("greg01: " + greg01 + "\n");
+print("greg02: " + greg02 + "\n");
+
+greg01.setTimeZone(TimeZone.getTimeZone("GMT"));
+greg02.setTimeZone(TimeZone.getTimeZone("GMT"));
+
+print("greg01X: " + greg01 + "\n");
+print("greg02X: " + greg02 + "\n");
+
+result1 = new Date(greg01.getTimeInMillis());
+result2 = new Date(greg02.getTimeInMillis());
+
+print("result1: " + result1 + "\n");
+print("result2: " + result2 + "\n");
+
+greg01 = calendar1.toGregorianCalendar();
+greg02 = calendar2.toGregorianCalendar();
+
+result1 = new Date(greg01.getTimeInMillis());
+result2 = new Date(greg02.getTimeInMillis());
+
+format = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss'Z'");
+
+print("result1: " + format.format(result1));
+print("result2: " + format.format(result2));

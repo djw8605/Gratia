@@ -1,0 +1,18 @@
+<ProbeConfiguration 
+	JClarensHost="https://cd-psg2.fnal.gov:8443" 
+	SOAPHost="localhost:8880" 
+	CollectorService="/GratiaServices/services/Collector" 
+	MeterName="generic" 
+	UseJClarens="0" 
+	DebugLevel="1" 
+	GratiaExtension="gratia.xml"
+    CertificateFile="/etc/grid-security/hostcert.pem"
+    KeyFile="/etc/grid-security/hostkey.pem"
+    MaxPendingFiles="1000"
+    WorkingFolder="/temp"
+    LogFolder="/temp"
+    VDTSetupFile="/data/test-vdt/setup.sh"
+    PSACCTFileRepository="/home/xxx/cvs/acct_gen/prod_root/farms/DATA07/fnsfh/"
+    PSACCTBackupFileRepository="/home/xxx/backup/"
+    PSACCTExceptionsRepository="/home/xxx/exceptions/"
+/>
