@@ -26,7 +26,11 @@ del %root%\configuration\*#
 del %root%\configuration-psg3\*~
 del %root%\configuration-psg3\*#
 
+del %root%\configuration-release\*~
+del %root%\configuration-release\*#
+
 del %root%\target\*.war
+mkdir %root%\target
 
 del *~
 del *#
