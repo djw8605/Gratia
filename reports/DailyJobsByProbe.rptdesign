@@ -34,13 +34,8 @@
 //printWriter.println("2.TimeAxisPattern: " + params["TimeAxisPattern"]);
 //printWriter.flush();
 
-//printWriter.close();
-]]></method>
+//printWriter.close();]]></method>
     <list-property name="configVars">
-        <structure>
-            <property name="name">DatabaseURL</property>
-            <property name="value">jdbc:mysql://fermigrid1.fnal.gov:49151/gratia</property>
-        </structure>
         <structure>
             <property name="name">DatabaseUser</property>
             <property name="value">gratia</property>
@@ -76,7 +71,7 @@
                     <property name="allowBlank">false</property>
                     <property name="format">Unformatted</property>
                     <property name="controlType">text-box</property>
-                    <property name="defaultValue">jdbc:mysql://fermigrid1.fnal.gov:49151/gratia</property>
+                    <property name="defaultValue">jdbc:mysql://fermigrid1.fnal.gov:49151/gratia_rtest</property>
                 </scalar-parameter>
                 <scalar-parameter name="DatabaseUser" id="83">
                     <property name="hidden">true</property>
@@ -152,7 +147,7 @@
     <data-sources>
         <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="fermigrid1" id="4">
             <property name="odaDriverClass">com.mysql.jdbc.Driver</property>
-            <property name="odaURL">jdbc:mysql://fermigrid1.fnal.gov:49151/gratia</property>
+            <property name="odaURL">jdbc:mysql://fermigrid1.fnal.gov:49151/gratia_rtest</property>
             <property name="odaUser">gratia</property>
             <encrypted-property name="odaPassword">cHJvdG8=</encrypted-property>
         </oda-data-source>
@@ -200,7 +195,6 @@ and (? &lt;= endtime and endtime &lt;= ?)
 group by date_format(endtime, ?), CEProbes.probename
 order by JobUsageRecord.EndTime
 </property>
-
         </oda-data-set>
     </data-sets>
     <page-setup>
