@@ -52,7 +52,7 @@
                     <property name="allowBlank">false</property>
                     <property name="format">Unformatted</property>
                     <property name="controlType">text-box</property>
-                    <property name="defaultValue">jdbc:mysql://fermigrid1.fnal.gov:49151/gratia</property>
+                    <property name="defaultValue">jdbc:mysql://fermigrid1.fnal.gov:49151/gratia_rtest</property>
                 </scalar-parameter>
                 <scalar-parameter name="DatabaseUser" id="83">
                     <property name="hidden">true</property>
