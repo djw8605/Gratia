@@ -23,6 +23,9 @@ del %root%\reporting\net\sf\gratia\reporting\*.class
 del %root%\configuration\*~
 del %root%\configuration\*#
 
+del %root%\configuration-local\*~
+del %root%\configuration-local\*#
+
 del %root%\configuration-psg3\*~
 del %root%\configuration-psg3\*#
 

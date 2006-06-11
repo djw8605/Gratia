@@ -7,6 +7,8 @@ call build-servlets.bat
 call build-reporting.bat
 call build-reports.bat
 call build-configurator.bat
-copy %root%\configuration-psg3\* \tomcat\gratia
+mkdir %catalina_home%\gratia
+copy %root%\configuration\* %catalina_home%\gratia
+copy %root%\configuration-local\* %catalina_home%\gratia
 copy %root%\wars\* %root%\target
-copy %root%\target\* \tomcat\webapps
+copy %root%\target\* %catalina_home%\webapps
