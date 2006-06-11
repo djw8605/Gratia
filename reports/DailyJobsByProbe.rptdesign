@@ -861,7 +861,7 @@ printWriter.close();
       <TitlePosition>Left</TitlePosition>
       <SeriesDefinitions>
         <Query>
-          <Definition>row[&quot;probe_name&quot;]</Definition>
+          <Definition>row[&quot;probename&quot;]</Definition>
         </Query>
         <SeriesPalette>
           <Entries xsi:type="attribute:ColorDefinition">
