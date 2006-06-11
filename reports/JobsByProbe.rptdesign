@@ -762,7 +762,7 @@ order by name</property>
         <Visible>false</Visible>
       </Label>
       <DataDefinition>
-        <Definition>row[&quot;probe_name&quot;]</Definition>
+        <Definition>row[&quot;probename&quot;]</Definition>
       </DataDefinition>
       <SeriesIdentifier>Job Count</SeriesIdentifier>
       <DataPoint>
