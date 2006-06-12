@@ -32,7 +32,7 @@ del %root%\configuration-psg3\*#
 del %root%\configuration-release\*~
 del %root%\configuration-release\*#
 
-del %root%\target\*.war
+del /q %root%\target\*
 mkdir %root%\target
 
 del *~
