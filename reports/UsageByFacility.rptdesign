@@ -129,13 +129,13 @@
                 </structure>
             </list-property>
             <property name="queryText">
-select Facility.facility_name, sum(JobUsageRecord.WallDuration)
-from Facility, CEProbes, JobUsageRecord
-where CEProbes.facility_id = Facility.facility_id
+select CETable.facility_name, sum(JobUsageRecord.WallDuration)
+from CETable, CEProbes, JobUsageRecord
+where CEProbes.facility_id = CETable.facility_id
 and JobUsageRecord.ProbeName = CEProbes.probename
 and (? &lt;= EndTime and EndTime &lt;= ?)
-group by Facility.facility_name
-order by Facility.facility_name</property>
+group by CETable.facility_name
+order by CETable.facility_name</property>
         </oda-data-set>
     </data-sets>
     <page-setup>
@@ -602,7 +602,7 @@ order by Facility.facility_name</property>
         <DataDefinition>
           <Definition>row[&quot;sum(JobUsageRecord.WallDuration)&quot;]</Definition>
         </DataDefinition>
-        <SeriesIdentifier>Facility</SeriesIdentifier>
+        <SeriesIdentifier>CETable</SeriesIdentifier>
         <DataPoint>
           <Components>
             <Type>Orthogonal_Value</Type>
@@ -683,7 +683,7 @@ order by Facility.facility_name</property>
 &lt;/structure>
 
 </BaseUrl>
-              <BaseParameterName>Facility</BaseParameterName>
+              <BaseParameterName>CETable</BaseParameterName>
               <ValueParameterName></ValueParameterName>
               <SeriesParameterName></SeriesParameterName>
             </Value>

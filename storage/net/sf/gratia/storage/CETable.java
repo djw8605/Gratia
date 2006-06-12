@@ -1,6 +1,6 @@
 package net.sf.gratia.storage;
 
-public class Facility
+public class CETable
 {
 		private int _facility_id;
 		private String _facility_name;
@@ -22,7 +22,7 @@ public class Facility
 		}
 	
 		public String toString() {
-				String output = "Facility: " + "_facility_id: " + _facility_id + " _facility_name: " + _facility_name;
+				String output = "CETable: " + "_facility_id: " + _facility_id + " _facility_name: " + _facility_name;
         return output;
     }
 }

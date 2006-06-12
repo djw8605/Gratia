@@ -263,8 +263,8 @@ else
                 </structure>
             </list-property>
             <property name="queryText">select CEProbes.probename, date_format(JobUsageRecord.EndTime, ?), sum(JobUsageRecord.WallDuration)
-from Facility, CEProbes, JobUsageRecord
-where CEProbes.facility_id = Facility.facility_id
+from CETable, CEProbes, JobUsageRecord
+where CEProbes.facility_id = CETable.facility_id
 and JobUsageRecord.ProbeName = CEProbes.probename
 and date_format(JobUsageRecord.EndTime, '%m/%d/%Y %T') BETWEEN ? and ?
 group by date_format(JobUsageRecord.EndTime, ?), CEProbes.probename

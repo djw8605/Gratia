@@ -224,7 +224,7 @@ else
         </oda-data-source>
     </data-sources>
     <data-sets>
-        <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="CPUUsageByFacility" id="85">
+        <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="CPUUsageByCETable" id="85">
             <property name="dataSource">fermigrid1</property>
             <list-property name="parameters">
                 <structure>
@@ -262,13 +262,13 @@ else
                     <property name="isInput">true</property>
                 </structure>
             </list-property>
-            <property name="queryText">select Facility.facility_name, date_format(JobUsageRecord.EndTime, ?), sum(JobUsageRecord.WallDuration)
-from Facility, CEProbes, JobUsageRecord
-where CEProbes.facility_id = Facility.facility_id
+            <property name="queryText">select CETable.facility_name, date_format(JobUsageRecord.EndTime, ?), sum(JobUsageRecord.WallDuration)
+from CETable, CEProbes, JobUsageRecord
+where CEProbes.facility_id = CETable.facility_id
 and JobUsageRecord.ProbeName = CEProbes.probename
 and date_format(JobUsageRecord.EndTime, '%m/%d/%Y %T') BETWEEN ? and ?
-group by date_format(JobUsageRecord.EndTime, ?), Facility.facility_name
-order by JobUsageRecord.EndTime, Facility.facility_name</property>
+group by date_format(JobUsageRecord.EndTime, ?), CETable.facility_name
+order by JobUsageRecord.EndTime, CETable.facility_name</property>
         </oda-data-set>
     </data-sets>
     <page-setup>
@@ -281,7 +281,7 @@ order by JobUsageRecord.EndTime, Facility.facility_name</property>
         <extended-item extensionName="Chart" id="90">
             <property name="height">300px</property>
             <property name="width">800px</property>
-            <property name="dataSet">CPUUsageByFacility</property>
+            <property name="dataSet">CPUUsageByCETable</property>
             <list-property name="paramBindings">
                 <structure>
                     <property name="paramName">GroupByFormat1</property>
@@ -335,7 +335,7 @@ order by JobUsageRecord.EndTime, Facility.facility_name</property>
       <Visible>true</Visible>
       <Label>
         <Caption>
-          <Value>CPU Usage by Facility</Value>
+          <Value>CPU Usage by CETable</Value>
           <Font>
             <Size>12.0</Size>
             <Bold>true</Bold>
@@ -1015,7 +1015,7 @@ function beforeDrawAxisLabel( axis, label, context )
 
     &lt;property name=&quot;linkType&quot;>drill-through&lt;/property>
 
-    &lt;property name=&quot;reportName&quot;>DailyUsageByFacility.rptdesign&lt;/property>
+    &lt;property name=&quot;reportName&quot;>DailyUsageByCETable.rptdesign&lt;/property>
 
     &lt;property name=&quot;targetWindow&quot;>_self&lt;/property>
 
@@ -1431,7 +1431,7 @@ function beforeDrawAxisLabel( axis, label, context )
             <property name="outputFormat">SVG</property>
         </extended-item>
         <data id="93">
-            <property name="dataSet">CPUUsageByFacility</property>
+            <property name="dataSet">CPUUsageByCETable</property>
             <list-property name="paramBindings">
                 <structure>
                     <property name="paramName">StartDate</property>

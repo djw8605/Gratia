@@ -185,14 +185,14 @@
                 </structure>
             </list-property>
             <property name="queryText">
-select Facility.facility_name, 
+select CETable.facility_name, 
        JobUsageRecord.EndTime as endtime, 
        count(JobUsageRecord.dbid)
-from Facility, CEProbes, JobUsageRecord
-where CEProbes.facility_id = Facility.facility_id
+from CETable, CEProbes, JobUsageRecord
+where CEProbes.facility_id = CETable.facility_id
 and JobUsageRecord.ProbeName = CEProbes.probename
 and (? &lt;= endtime and endtime &lt;= ?)
-group by date_format(endtime, ?), Facility.facility_name
+group by date_format(endtime, ?), CETable.facility_name
 order by JobUsageRecord.EndTime
 </property>
         </oda-data-set>
@@ -967,7 +967,7 @@ printWriter.close();
                 <BaseUrl>&lt;structure name=&quot;action&quot;>
     &lt;property name=&quot;formatType&quot;>html&lt;/property>
     &lt;property name=&quot;linkType&quot;>drill-through&lt;/property>
-    &lt;property name=&quot;reportName&quot;>DailyJobsByFacility.rptdesign&lt;/property>
+    &lt;property name=&quot;reportName&quot;>DailyJobsByCETable.rptdesign&lt;/property>
     &lt;property name=&quot;targetWindow&quot;>_self&lt;/property>
     &lt;list-property name=&quot;paramBindings&quot;>
         &lt;structure>

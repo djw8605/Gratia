@@ -188,8 +188,8 @@
 select CEProbes.probename, 
        JobUsageRecord.EndTime as endtime, 
         sum(JobUsageRecord.WallDuration)
-from Facility, CEProbes, JobUsageRecord
-where CEProbes.facility_id = Facility.facility_id
+from CETable, CEProbes, JobUsageRecord
+where CEProbes.facility_id = CETable.facility_id
 and JobUsageRecord.ProbeName = CEProbes.probename
 and (? &lt;= EndTime and EndTime &lt;= ?)
 group by date_format(JobUsageRecord.EndTime, ?),CEProbes.probename

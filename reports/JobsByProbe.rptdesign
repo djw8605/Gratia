@@ -42,7 +42,7 @@
             <property name="value">12/31/2999</property>
         </structure>
         <structure>
-            <property name="name">Facility</property>
+            <property name="name">CETable</property>
             <property name="value">FNAL</property>
         </structure>
     </list-property>
@@ -98,11 +98,11 @@
             <property name="controlType">text-box</property>
             <property name="defaultValue">12/31/2999</property>
         </scalar-parameter>
-        <scalar-parameter name="Facility" id="90">
+        <scalar-parameter name="CETable" id="90">
             <text-property name="helpText">Select the facility to show records for</text-property>
             <property name="valueType">dynamic</property>
             <property name="dataType">string</property>
-            <property name="promptText">Facility</property>
+            <property name="promptText">CETable</property>
             <property name="format">Unformatted</property>
             <property name="controlType">list-box</property>
             <property name="dataSetName">AllFacilities</property>
@@ -126,7 +126,7 @@
             <property name="dataSource">fermigrid1</property>
             <list-property name="parameters">
                 <structure>
-                    <property name="name">FacilityAll</property>
+                    <property name="name">CETableAll</property>
                     <property name="dataType">string</property>
                     <property name="position">1</property>
                     <expression name="defaultValue">'All'</expression>
@@ -134,7 +134,7 @@
                     <property name="isOutput">false</property>
                 </structure>
                 <structure>
-                    <property name="name">Facility</property>
+                    <property name="name">CETable</property>
                     <property name="dataType">string</property>
                     <property name="position">2</property>
                     <expression name="defaultValue">'All'</expression>
@@ -162,9 +162,9 @@
                 </structure>
             </list-property>
             <property name="queryText">select CEProbes.probename, count(JobUsageRecord.dbid)
-from Facility, CEProbes, JobUsageRecord
-where (? = 'All' or Facility.facility_name = ?)
-and CEProbes.facility_id = Facility.facility_id
+from CETable, CEProbes, JobUsageRecord
+where (? = 'All' or CETable.facility_name = ?)
+and CEProbes.facility_id = CETable.facility_id
 and JobUsageRecord.ProbeName = CEProbes.probename
 and (? &lt;= JobUsageRecord.EndTime and JobUsageRecord.EndTime &lt;= ?)
 group by CEProbes.probename
@@ -173,10 +173,10 @@ order by CEProbes.probename</property>
         <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="AllFacilities" id="89">
             <property name="dataSource">fermigrid1</property>
             <property name="queryText">select 'All' as name
-from Facility
+from CETable
 union
-select Facility.facility_name as name
-from Facility
+select CETable.facility_name as name
+from CETable
 order by name</property>
         </oda-data-set>
     </data-sets>
@@ -193,12 +193,12 @@ order by name</property>
             <property name="dataSet">JobsCountByWhere</property>
             <list-property name="paramBindings">
                 <structure>
-                    <property name="paramName">FacilityAll</property>
-                    <expression name="expression">params["Facility"]</expression>
+                    <property name="paramName">CETableAll</property>
+                    <expression name="expression">params["CETable"]</expression>
                 </structure>
                 <structure>
-                    <property name="paramName">Facility</property>
-                    <expression name="expression">params["Facility"]</expression>
+                    <property name="paramName">CETable</property>
+                    <expression name="expression">params["CETable"]</expression>
                 </structure>
                 <structure>
                     <property name="paramName">StartDate</property>
@@ -789,12 +789,12 @@ order by name</property>
             <property name="dataSet">JobsCountByWhere</property>
             <list-property name="paramBindings">
                 <structure>
-                    <property name="paramName">FacilityAll</property>
-                    <expression name="expression">params["Facility"]</expression>
+                    <property name="paramName">CETableAll</property>
+                    <expression name="expression">params["CETable"]</expression>
                 </structure>
                 <structure>
-                    <property name="paramName">Facility</property>
-                    <expression name="expression">params["Facility"]</expression>
+                    <property name="paramName">CETable</property>
+                    <expression name="expression">params["CETable"]</expression>
                 </structure>
                 <structure>
                     <property name="paramName">StartDate</property>

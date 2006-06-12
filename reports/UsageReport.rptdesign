@@ -148,10 +148,10 @@
             <property name="dataSource">fermigrid1</property>
             <property name="queryText">
 select 'All' as name
-from Facility
+from CETable
 union
-select Facility.facility_name as name
-from Facility
+select CETable.facility_name as name
+from CETable
 order by name</property>
         </oda-data-set>
         <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="AllProbes" id="91">
@@ -196,14 +196,14 @@ order by name</property>
                     <property name="isInput">true</property>
                 </structure>
                 <structure>
-                    <property name="name">FacilityAll</property>
+                    <property name="name">CETableAll</property>
                     <property name="dataType">string</property>
                     <property name="position">5</property>
                     <expression name="defaultValue">'All'</expression>
                     <property name="isInput">true</property>
                 </structure>
                 <structure>
-                    <property name="name">Facility</property>
+                    <property name="name">CETable</property>
                     <property name="dataType">string</property>
                     <property name="position">6</property>
                     <expression name="defaultValue">'All'</expression>
@@ -218,14 +218,14 @@ order by name</property>
                 </structure>
             </list-property>
             <property name="queryText">
-select JobUsageRecord.JobName, Facility.facility_name, CEProbes.probename, 
+select JobUsageRecord.JobName, CETable.facility_name, CEProbes.probename, 
         JobUsageRecord.StartTime, JobUsageRecord.EndTime, JobUsageRecord.JobNameDescription 
-from JobUsageRecord, Facility, CEProbes
-where CEProbes.facility_id = Facility.facility_id
+from JobUsageRecord, CETable, CEProbes
+where CEProbes.facility_id = CETable.facility_id
 and JobUsageRecord.ProbeName = CEProbes.probename
 and (? &lt;= JobUsageRecord.EndTime and JobUsageRecord.EndTime &lt;= ?)
 and (? = 'All' or JobUsageRecord.ProbeName = ?)
-and (? = 'All' or Facility.facility_name = ?)</property>
+and (? = 'All' or CETable.facility_name = ?)</property>
         </oda-data-set>
     </data-sets>
     <styles>
@@ -268,11 +268,11 @@ and (? = 'All' or Facility.facility_name = ?)</property>
                     <expression name="expression">params["Probe"]</expression>
                 </structure>
                 <structure>
-                    <property name="paramName">FacilityAll</property>
+                    <property name="paramName">CETableAll</property>
                     <expression name="expression">params["Compute Element"]</expression>
                 </structure>
                 <structure>
-                    <property name="paramName">Facility</property>
+                    <property name="paramName">CETable</property>
                     <expression name="expression">params["Compute Element"]</expression>
                 </structure>
             </list-property>
@@ -552,11 +552,11 @@ else
                     <expression name="expression">params["Probe"]</expression>
                 </structure>
                 <structure>
-                    <property name="paramName">FacilityAll</property>
+                    <property name="paramName">CETableAll</property>
                     <expression name="expression">params["Compute Element"]</expression>
                 </structure>
                 <structure>
-                    <property name="paramName">Facility</property>
+                    <property name="paramName">CETable</property>
                     <expression name="expression">params["Compute Element"]</expression>
                 </structure>
             </list-property>

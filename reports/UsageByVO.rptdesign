@@ -37,10 +37,6 @@
             <property name="name">Start Date</property>
             <property name="value">3/1/2006</property>
         </structure>
-        <structure>
-            <property name="name">End Date</property>
-            <property name="value">12/31/2999</property>
-        </structure>
     </list-property>
     <parameters>
         <parameter-group name="DatabaseAccess" id="84">
@@ -52,7 +48,7 @@
                     <property name="allowBlank">false</property>
                     <property name="format">Unformatted</property>
                     <property name="controlType">text-box</property>
-                    <property name="defaultValue">jdbc:mysql://fermigrid1.fnal.gov:49151/gratia_rtest</property>
+                    <property name="defaultValue">jdbc:mysql://fermigrid1.fnal.gov:49151/gratia_itest</property>
                 </scalar-parameter>
                 <scalar-parameter name="DatabaseUser" id="83">
                     <property name="hidden">true</property>
@@ -92,13 +88,13 @@
             <property name="allowBlank">false</property>
             <property name="format">Unformatted</property>
             <property name="controlType">text-box</property>
-            <property name="defaultValue">12/31/2999</property>
+            <property name="defaultValue">06/12/2006</property>
         </scalar-parameter>
     </parameters>
     <data-sources>
         <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="fermigrid1" id="4">
             <property name="odaDriverClass">com.mysql.jdbc.Driver</property>
-            <property name="odaURL">jdbc:mysql://fermigrid1.fnal.gov:49151/gratia_rtest</property>
+            <property name="odaURL">jdbc:mysql://fermigrid1.fnal.gov:49151/gratia_itest</property>
             <property name="odaUser">gratia</property>
             <encrypted-property name="odaPassword">cHJvdG8=</encrypted-property>
         </oda-data-source>
