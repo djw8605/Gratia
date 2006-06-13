@@ -172,7 +172,7 @@ where (? = 'All' or CETable.facility_name = ?)
 and CEProbes.facility_id = CETable.facility_id
 and JobUsageRecord.ProbeName = CEProbes.probename
 and (? &lt;= JobUsageRecord.EndTime and JobUsageRecord.EndTime &lt;= ?)
-and ProbeName not like 'psacct:%'
+and JobUsageRecord.ProbeName not like 'psacct:%'
 group by CEProbes.probename
 order by CEProbes.probename</property>
         </oda-data-set>

@@ -116,7 +116,7 @@ from CETable, CEProbes, JobUsageRecord
 where CEProbes.facility_id = CETable.facility_id
 and JobUsageRecord.ProbeName = CEProbes.probename
 and (? &lt;= JobUsageRecord.EndTime and JobUsageRecord.EndTime &lt;= ?)
-and ProbeName not like 'psacct:%'
+and JobUsageRecord.ProbeName not like 'psacct:%'
 group by CETable.facility_name
 order by CETable.facility_name</property>
         </oda-data-set>

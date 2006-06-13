@@ -164,7 +164,7 @@
             <property name="queryText">select CEProbes.probename, count(JobUsageRecord.dbid)
 from CETable, CEProbes, JobUsageRecord
 where (? = 'All' or CETable.facility_name = ?)
-and ProbeName not like 'psacct:%'
+and JobUsageRecord.ProbeName not like 'psacct:%'
 and CEProbes.facility_id = CETable.facility_id
 and JobUsageRecord.ProbeName = CEProbes.probename
 and (? &lt;= JobUsageRecord.EndTime and JobUsageRecord.EndTime &lt;= ?)

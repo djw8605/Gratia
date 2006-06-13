@@ -128,7 +128,7 @@
 select JobUsageRecord.probename, count(JobUsageRecord.dbid)
 from JobUsageRecord
 where (? &lt;= JobUsageRecord.EndTime and JobUsageRecord.EndTime &lt;= ?)
-and ProbeName not like 'psacct:%'
+and JobUsageRecord.ProbeName not like 'psacct:%'
 group by JobUsageRecord.probename
 order by JobUsageRecord.probename</property>
         </oda-data-set>

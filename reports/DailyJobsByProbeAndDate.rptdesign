@@ -265,7 +265,7 @@ else
             <property name="queryText">select CEProbes.probename, date_format(JobUsageRecord.EndTime, ?), count(JobUsageRecord.dbid)
 from CETable, CEProbes, JobUsageRecord
 where CEProbes.facility_id = CETable.facility_id
-and ProbeName not like 'psacct:%'
+and JobUsageRecord.ProbeName not like 'psacct:%'
 and JobUsageRecord.ProbeName = CEProbes.probename
 and date_format(JobUsageRecord.EndTime, '%m/%d/%Y %T') BETWEEN ? and ?
 group by date_format(JobUsageRecord.EndTime, ?), CEProbes.probename

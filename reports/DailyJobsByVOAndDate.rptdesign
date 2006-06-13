@@ -265,7 +265,7 @@ else
             <property name="queryText">select JobUsageRecord.VOName, date_format(JobUsageRecord.EndTime, ?) as endtime, count(JobUsageRecord.dbid)
 from JobUsageRecord
 where date_format(JobUsageRecord.EndTime, '%m/%d/%Y %T') BETWEEN ? and ?
-and ProbeName not like 'psacct:%'
+and JobUsageRecord.ProbeName not like 'psacct:%'
 group by date_format(JobUsageRecord.EndTime, ?), JobUsageRecord.VOName
 order by JobUsageRecord.EndTime, JobUsageRecord.VOName</property>
         </oda-data-set>
