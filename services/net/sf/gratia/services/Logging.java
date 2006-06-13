@@ -82,4 +82,15 @@ public class Logging
 						}
 				logger.warning(message);
 		}
+
+		public static void debug(String message)
+		{
+				if (! initialized)
+						{
+								System.out.println("Logger Not Initialized !!");
+								return;
+						}
+				System.out.println(message);
+		}
+
 }

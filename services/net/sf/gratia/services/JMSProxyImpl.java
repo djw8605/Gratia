@@ -89,6 +89,7 @@ public class JMSProxyImpl extends UnicastRemoteObject implements JMSProxy
 								msg.setText(xml);
 								msg.setStringProperty("rawxml",rawxml);
 								msg.setStringProperty("extraxml",extraxml);
+								msg.setStringProperty("dbid","" + dbid);
 								messageProducer.send(queue1,msg);
 								queueSession.commit();
 								queueConnection.close();

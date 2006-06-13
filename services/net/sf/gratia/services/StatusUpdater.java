@@ -34,7 +34,7 @@ public class StatusUpdater
 						}
 		}
 
-		public void update(JobUsageRecord record)
+		public void update(JobUsageRecord record,String rawxml)
 		{
 				String probeName = record.getProbeName().getValue();
 				String dq = "\"";
@@ -56,6 +56,7 @@ public class StatusUpdater
 						{
 								Logging.warning("StatusUpdater: Error During Update");
 								Logging.warning(xp.parseException(e));
+								Logging.warning("StatusUpdater: xml: " + "\n" + rawxml + "\n");
 						}
 		}
 }

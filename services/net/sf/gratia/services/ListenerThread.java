@@ -166,13 +166,18 @@ public class ListenerThread extends Thread
 																String xml = ((TextMessage) msg).getText();
 																rawxml = msg.getStringProperty("rawxml");
 																extraxml = msg.getStringProperty("extraxml");
+																String dbid = msg.getStringProperty("dbid");
+
+																// Logging.debug("ListenerThread: dbid: " + "\n" + dbid + "\n");
+																// Logging.debug("ListenerThread: xml: " + "\n" + xml + "\n");
+																// Logging.debug("ListenerThread: rawxml: " + "\n" + rawxml + "\n");
 
 																ArrayList records = convert(xml);
 												
 																for(int i=0; i < records.size(); i++)
 																		{
 																				JobUsageRecord current = (JobUsageRecord) records.get(i);
-																				statusUpdater.update(current);
+																				statusUpdater.update(current,rawxml);
 																				if (gotDuplicate(current.getJobIdentity(), current.getStartTime(), session) == true)
 																						{
 																								Logging.warning("Duplicate: " + current);
