@@ -99,7 +99,7 @@ public class DataPump extends Thread
 								return;
 						}
 
-				command = "select dbid,rawxml,extraxml from jobusagerecord" +
+				command = "select dbid,RawXml,ExtraXml from JobUsageRecord" +
 						" where dbid > " + dbid +
 						" order by dbid";
 
