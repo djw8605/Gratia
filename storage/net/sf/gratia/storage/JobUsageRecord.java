@@ -153,7 +153,7 @@ public class JobUsageRecord {
         if (VolumeResource != null)    output = output + listAsXml("VolumeResource", VolumeResource);
         if (ConsumableResource != null)output = output + listAsXml("ConsumableResource", ConsumableResource);
         if (Resource != null)          output = output + listAsXml("Resource", Resource);
-
+				if (ProbeName != null)         output = output + ProbeName.asXml("ProbeName");
         // if (ExtraXml != null)         output = output + ExtraXml;
 				output = output + "</JobUsageRecord>" + "\n";
         return output;

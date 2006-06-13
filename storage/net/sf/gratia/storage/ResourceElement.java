@@ -91,7 +91,14 @@ public class ResourceElement implements XmlElement {
         if (Description != null) output = output + "urwg:description=\"" + Description + "\" ";
         if (Type != null) output = output + "urwg:type=\"" + Type + "\" ";
         if (Unit != null) output = output + "urwg:unit=\"" + Unit + "\" ";
-        if (PhaseUnit != null) output = output + "urwg:phaseUnit=\"" + PhaseUnit + "\" ";
+				try
+						{
+								if (PhaseUnit != null) output = output + "urwg:phaseUnit=\"" + Utils.DurationToXml(PhaseUnit) + "\" ";
+						}
+				catch (Exception e)
+						{
+								e.printStackTrace();
+						}
         if (StorageUnit != null) output = output + "urwg:storageUnit=\"" + StorageUnit + "\" ";
         if (Metrics != null) output = output + "urwg:metrics=\"" + Metrics + "\" ";
         output = output + ">" + Value + "</" + elementName + ">\n";
