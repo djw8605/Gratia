@@ -80,7 +80,7 @@ public class UserIdentity {
 		if (LocalUserId != null) output = output + "<LocalUserId>" + LocalUserId + "<LocalUserId>\n";
 		if (KeyInfo != null) output = output + KeyInfo.asXML();
 		if (VOName != null) output = output + "<VOName>" + VOName + "<VOName>\n";
-		if (CommonName != null) output = output + "<CommonName>" + CommonName + "<CommonName>\n";
+		if (CommonName != null) output = output + "<CommonName>" + CommonName + "</CommonName>\n";
         output = output + "</UserIdentity>\n";
         return output;
     }
