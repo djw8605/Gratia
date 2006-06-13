@@ -135,7 +135,7 @@ public class StatusListenerThread extends Thread
 								try
 										{
 												statement = connection.createStatement();
-												String command = "update ceprobes set" +
+												String command = "update CEProbes set" +
 														" currenttime = timestamp(" + dq + format.format(new java.util.Date()) + dq + ")" + comma +
 														" status = " + dq + status + dq +
 														" where probename = " + dq + probename + dq;
@@ -144,7 +144,7 @@ public class StatusListenerThread extends Thread
 												if (tokens.length == 3)
 														if (tokens[1].equals("lost"))
 																{
-																		command = "insert into ceprobestatus (currenttime,probename,probestatus,jobs,lostjobs) values(" +
+																		command = "insert into CEProbeStatus (currenttime,probename,probestatus,jobs,lostjobs) values(" +
 																				"timestamp(" + dq + format.format(new java.util.Date()) + dq + ")" + comma +
 																				dq + probename + dq + comma +
 																				dq + "lost" + dq + comma +

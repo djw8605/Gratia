@@ -48,7 +48,7 @@ public class ProbeMonitorThread extends Thread
 								String password = p.getProperty("service.mysql.password");
 								Class.forName(driver);
 								Connection connection = DriverManager.getConnection(url,user,password);
-								String sql = "delete from ceprobes";
+								String sql = "delete from CEProbes";
 								Statement statement = connection.createStatement();
 								statement.execute(sql);
 								statement.close();
@@ -164,7 +164,7 @@ public class ProbeMonitorThread extends Thread
 								return;
 						}
 
-				String command = "select * from ceprobes";
+				String command = "select * from CEProbes";
 
 				try
 						{
@@ -208,7 +208,7 @@ public class ProbeMonitorThread extends Thread
 												java.util.Date previous = new java.util.Date(now2 - monitor);
 
 												String command2 =
-														"select count(*) from ceprobestatus where" +
+														"select count(*) from CEProbeStatus where" +
 														" probename = " + dq + probename + dq +
 														" and currenttime >= " + "timestamp(" + dq + format.format(previous) + dq + ")";
 
@@ -237,7 +237,7 @@ public class ProbeMonitorThread extends Thread
 														{
 																
 																command2 =
-																		"insert into ceprobestatus (currenttime,probename,probestatus,jobs,lostjobs) values(" +
+																		"insert into CEProbeStatus (currenttime,probename,probestatus,jobs,lostjobs) values(" +
 																		"timestamp(" + dq + format.format(now1) + dq + ")" + comma +
 																		dq + probename + dq + comma +
 																		dq + "dead" + dq + comma +
@@ -257,7 +257,7 @@ public class ProbeMonitorThread extends Thread
 																jobtable.put(probename,new Integer(jobs));
 
 																command2 =
-																		"insert into ceprobestatus (currenttime,probename,probestatus,jobs,lostjobs) values(" +
+																		"insert into CEProbeStatus (currenttime,probename,probestatus,jobs,lostjobs) values(" +
 																		"timestamp(" + dq + format.format(now1) + dq + ")" + comma +
 																		dq + probename + dq + comma +
 																		dq + "alive" + dq + comma +

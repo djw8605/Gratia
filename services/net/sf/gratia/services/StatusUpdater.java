@@ -40,7 +40,7 @@ public class StatusUpdater
 				String dq = "\"";
 				String comma = ",";
 
-				String command = "update ceprobes set" +
+				String command = "update CEProbes set" +
 						" currenttime = " + dq + format.format(new java.util.Date()) + dq + comma +
 						" status = " + dq + "alive" + dq + comma +
 						" jobs = jobs + 1" +
