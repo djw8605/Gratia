@@ -222,6 +222,7 @@ select JobUsageRecord.JobName, CETable.facility_name, CEProbes.probename,
         JobUsageRecord.StartTime, JobUsageRecord.EndTime, JobUsageRecord.JobNameDescription 
 from JobUsageRecord, CETable, CEProbes
 where CEProbes.facility_id = CETable.facility_id
+and JobUsageRecord.ProbeName not like 'psacct:%'
 and JobUsageRecord.ProbeName = CEProbes.probename
 and (? &lt;= JobUsageRecord.EndTime and JobUsageRecord.EndTime &lt;= ?)
 and (? = 'All' or JobUsageRecord.ProbeName = ?)

@@ -128,10 +128,16 @@
 select JobUsageRecord.probename, count(JobUsageRecord.dbid)
 from JobUsageRecord
 where (? &lt;= JobUsageRecord.EndTime and JobUsageRecord.EndTime &lt;= ?)
+and ProbeName not like 'psacct:%'
 group by JobUsageRecord.probename
 order by JobUsageRecord.probename</property>
         </oda-data-set>
     </data-sets>
+    <styles>
+        <style name="sans-style1" id="95">
+            <property name="fontFamily">sans-serif</property>
+        </style>
+    </styles>
     <page-setup>
         <simple-master-page name="Simple MasterPage" id="2">
             <property name="showHeaderOnFirst">true</property>
@@ -140,8 +146,9 @@ order by JobUsageRecord.probename</property>
     </page-setup>
     <body>
         <extended-item extensionName="Chart" id="88">
-            <property name="height">250px</property>
-            <property name="width">250px</property>
+            <property name="style">sans-style1</property>
+            <property name="height">480px</property>
+            <property name="width">640px</property>
             <property name="dataSet">JobsCountBy</property>
             <list-property name="paramBindings">
                 <structure>
@@ -395,8 +402,8 @@ order by JobUsageRecord.probename</property>
     <Bounds>
       <Left>0.0</Left>
       <Top>0.0</Top>
-      <Width>187.5</Width>
-      <Height>187.5</Height>
+      <Width>480.0</Width>
+      <Height>360.0</Height>
     </Bounds>
     <Insets>
       <Top>3.0</Top>
@@ -427,7 +434,7 @@ order by JobUsageRecord.probename</property>
     </Background>
     <Visible>true</Visible>
   </Block>
-  <Dimension>Two_Dimensional_With_Depth</Dimension>
+  <Dimension>Two_Dimensional</Dimension>
   <Units>Points</Units>
   <SeriesThickness>10.0</SeriesThickness>
   <GridColumnCount>1</GridColumnCount>
@@ -451,7 +458,7 @@ order by JobUsageRecord.probename</property>
     <Type>Text</Type>
     <Title>
       <Caption>
-        <Value>X-Axis Title</Value>
+        <Value></Value>
         <Font>
           <Size>14.0</Size>
           <Bold>true</Bold>
@@ -586,7 +593,7 @@ order by JobUsageRecord.probename</property>
             <Caption>
               <Value>&lt;undefined></Value>
               <Font>
-                <Size>8.0</Size>
+                <Size>7.0</Size>
                 <Alignment/>
               </Font>
               <Color>
@@ -619,7 +626,7 @@ order by JobUsageRecord.probename</property>
               <Bottom>0.0</Bottom>
               <Right>3.0</Right>
             </Insets>
-            <Visible>false</Visible>
+            <Visible>true</Visible>
           </Label>
           <DataDefinition>
             <Definition>row[&quot;count(JobUsageRecord.dbid)&quot;]</Definition>
@@ -628,6 +635,11 @@ order by JobUsageRecord.probename</property>
           <DataPoint>
             <Components>
               <Type>Orthogonal_Value</Type>
+              <FormatSpecifier xsi:type="attribute:NumberFormatSpecifier">
+                <Prefix></Prefix>
+                <Suffix></Suffix>
+                <FractionDigits>0</FractionDigits>
+              </FormatSpecifier>
             </Components>
             <Separator>, </Separator>
           </DataPoint>
@@ -744,8 +756,15 @@ order by JobUsageRecord.probename</property>
         <Caption>
           <Value>&lt;undefined></Value>
           <Font>
+            <Size>8.0</Size>
             <Alignment/>
           </Font>
+          <Color>
+            <Transparency>255</Transparency>
+            <Red>0</Red>
+            <Green>0</Green>
+            <Blue>0</Blue>
+          </Color>
         </Caption>
         <Background xsi:type="attribute:ColorDefinition">
           <Transparency>0</Transparency>
@@ -771,6 +790,11 @@ order by JobUsageRecord.probename</property>
         </Insets>
         <Visible>true</Visible>
       </Label>
+      <FormatSpecifier xsi:type="attribute:NumberFormatSpecifier">
+        <Prefix></Prefix>
+        <Suffix></Suffix>
+        <FractionDigits>0</FractionDigits>
+      </FormatSpecifier>
       <LabelPosition>Left</LabelPosition>
       <MajorGrid>
         <LineAttributes>
@@ -1197,6 +1221,7 @@ else
         <GroupType>Text</GroupType>
         <AggregateExpression>Sum</AggregateExpression>
       </Grouping>
+      <Sorting>Descending</Sorting>
     </SeriesDefinitions>
     <Orientation>Horizontal</Orientation>
     <LineAttributes>
@@ -1214,8 +1239,9 @@ else
       <Caption>
         <Value>&lt;undefined></Value>
         <Font>
+          <Size>8.0</Size>
           <Alignment/>
-          <Rotation>45.0</Rotation>
+          <Rotation>0.0</Rotation>
         </Font>
         <Color>
           <Transparency>255</Transparency>
@@ -1312,8 +1338,8 @@ else
     <CategoryAxis>true</CategoryAxis>
     <Percent>false</Percent>
   </Axes>
-  <Orientation>Vertical</Orientation>
-  <UnitSpacing>50.0</UnitSpacing>
+  <Orientation>Horizontal</Orientation>
+  <UnitSpacing>100.0</UnitSpacing>
   <Rotation>
     <Angles>
       <XAngle>-20.0</XAngle>
@@ -1326,6 +1352,15 @@ else
 ]]></xml-property>
             <property name="outputFormat">SVG</property>
         </extended-item>
+        <text-data id="94">
+            <property name="style">sans-style1</property>
+            <property name="fontSize">9pt</property>
+            <property name="marginLeft">30pt</property>
+            <property name="marginBottom">0pt</property>
+            <property name="paddingRight">100px</property>
+            <expression name="valueExpr">"Date range: "+ params["Start Date"] + " - " + params["End Date"]</expression>
+            <property name="contentType">html</property>
+        </text-data>
         <data id="93">
             <property name="dataSet">JobsCountBy</property>
             <list-property name="paramBindings">

@@ -37,6 +37,10 @@
 //printWriter.close();]]></method>
     <list-property name="configVars">
         <structure>
+            <property name="name">DatabaseURL</property>
+            <property name="value">jdbc:mysql://fermigrid1.fnal.gov:49151/gratia</property>
+        </structure>
+        <structure>
             <property name="name">DatabaseUser</property>
             <property name="value">gratia</property>
         </structure>
@@ -71,7 +75,7 @@
                     <property name="allowBlank">false</property>
                     <property name="format">Unformatted</property>
                     <property name="controlType">text-box</property>
-                    <property name="defaultValue">jdbc:mysql://fermigrid1.fnal.gov:49151/gratia_rtest</property>
+                    <property name="defaultValue">jdbc:mysql://fermigrid1.fnal.gov:49151/gratia</property>
                 </scalar-parameter>
                 <scalar-parameter name="DatabaseUser" id="83">
                     <property name="hidden">true</property>
@@ -147,7 +151,7 @@
     <data-sources>
         <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="fermigrid1" id="4">
             <property name="odaDriverClass">com.mysql.jdbc.Driver</property>
-            <property name="odaURL">jdbc:mysql://fermigrid1.fnal.gov:49151/gratia_rtest</property>
+            <property name="odaURL">jdbc:mysql://fermigrid1.fnal.gov:49151/gratia</property>
             <property name="odaUser">gratia</property>
             <encrypted-property name="odaPassword">cHJvdG8=</encrypted-property>
         </oda-data-source>
@@ -190,12 +194,18 @@ select CEProbes.probename,
         sum(JobUsageRecord.WallDuration)
 from CETable, CEProbes, JobUsageRecord
 where CEProbes.facility_id = CETable.facility_id
+and JobUsageRecord.ProbeName not like 'psacct:%'
 and JobUsageRecord.ProbeName = CEProbes.probename
 and (? &lt;= EndTime and EndTime &lt;= ?)
 group by date_format(JobUsageRecord.EndTime, ?),CEProbes.probename
 order by JobUsageRecord.EndTime</property>
         </oda-data-set>
     </data-sets>
+    <styles>
+        <style name="sans-style1" id="100">
+            <property name="fontFamily">sans-serif</property>
+        </style>
+    </styles>
     <page-setup>
         <simple-master-page name="Simple MasterPage" id="2">
             <property name="showHeaderOnFirst">true</property>
@@ -204,7 +214,8 @@ order by JobUsageRecord.EndTime</property>
     </page-setup>
     <body>
         <extended-item extensionName="Chart" name="MyChart" id="90">
-            <property name="height">300px</property>
+            <property name="style">sans-style1</property>
+            <property name="height">480px</property>
             <property name="width">800px</property>
             <property name="dataSet">TimeQuery</property>
             <list-property name="paramBindings">
@@ -256,7 +267,7 @@ order by JobUsageRecord.EndTime</property>
       <Visible>true</Visible>
       <Label>
         <Caption>
-          <Value>CPU (Wall Clock) Usage by Probe</Value>
+          <Value>CPU Usage (wall clock hours) by Probe</Value>
           <Font>
             <Size>12.0</Size>
             <Bold>true</Bold>
@@ -464,17 +475,24 @@ order by JobUsageRecord.EndTime</property>
           <Visible>false</Visible>
         </Outline>
         <Insets>
-          <Top>2.0</Top>
+          <Top>0.0</Top>
           <Left>2.0</Left>
-          <Bottom>2.0</Bottom>
+          <Bottom>0.0</Bottom>
           <Right>2.0</Right>
         </Insets>
       </ClientArea>
       <Text>
         <Value>&lt;undefined></Value>
         <Font>
+          <Size>7.0</Size>
           <Alignment/>
         </Font>
+        <Color>
+          <Transparency>255</Transparency>
+          <Red>0</Red>
+          <Green>0</Green>
+          <Blue>0</Blue>
+        </Color>
       </Text>
       <Orientation>Vertical</Orientation>
       <Direction>Top_Bottom</Direction>
@@ -518,7 +536,7 @@ order by JobUsageRecord.EndTime</property>
       <Left>0.0</Left>
       <Top>0.0</Top>
       <Width>600.0</Width>
-      <Height>225.0</Height>
+      <Height>360.0</Height>
     </Bounds>
     <Insets>
       <Top>3.0</Top>
@@ -947,7 +965,7 @@ printWriter.close();
             <Visible>false</Visible>
           </Label>
           <DataDefinition>
-            <Definition>row[&quot;sum(JobUsageRecord.WallDuration)&quot;]</Definition>
+            <Definition>row[&quot;sum(JobUsageRecord.WallDuration)&quot;] / 3600</Definition>
           </DataDefinition>
           <SeriesIdentifier>Cpu Usage</SeriesIdentifier>
           <DataPoint>
@@ -1375,6 +1393,14 @@ MM/dd/yyyy
 ]]></xml-property>
             <property name="outputFormat">SVG</property>
         </extended-item>
+        <text-data id="99">
+            <property name="style">sans-style1</property>
+            <property name="fontSize">9pt</property>
+            <property name="marginLeft">0pt</property>
+            <property name="paddingLeft">100px</property>
+            <expression name="valueExpr">"Date range: "+ params["Start Date"] + " - " + params["End Date"]</expression>
+            <property name="contentType">html</property>
+        </text-data>
         <data id="93">
             <property name="dataSet">TimeQuery</property>
             <list-property name="paramBindings">
