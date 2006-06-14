@@ -23,7 +23,7 @@ copy %root%\reporting\net\sf\gratia\reporting\*.css war
 copy %root%\reporting\net\sf\gratia\reporting\*.class war\WEB-INF\classes\net\sf\gratia\reporting
 copy %root%\reporting\net\sf\gratia\reporting\exceptions\*.class war\WEB-INF\classes\net\sf\gratia\reporting\exceptions
 xcopy /s %root%\reporting\net\sf\gratia\reporting\calendar war\calendar
-xcopy /s %root%\reporting\net\sf\gratia\images war\images
+xcopy /s %root%\reporting\net\sf\gratia\reporting\images\* war\images
 copy %root%\reporting\net\sf\gratia\reporting\web.xml war\WEB-INF
 copy %root%\jars\* war\WEB-INF\lib
 
