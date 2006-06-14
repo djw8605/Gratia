@@ -20,6 +20,10 @@ del %root%\reporting\net\sf\gratia\reporting\*~
 del %root%\reporting\net\sf\gratia\reporting\*#
 del %root%\reporting\net\sf\gratia\reporting\*.class
 
+del %root%\reporting\net\sf\gratia\reporting\exceptions\*~
+del %root%\reporting\net\sf\gratia\reporting\exceptions\*#
+del %root%\reporting\net\sf\gratia\reporting\exceptions\*.class
+
 del %root%\configuration\*~
 del %root%\configuration\*#
 
