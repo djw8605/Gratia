@@ -1,0 +1,30 @@
+#!/bin/sh
+
+if test "x$1" = "x--enable"; then 
+    params=""
+else
+    params="--process-only"
+fi
+
+pattern='spacct*'
+
+gratia_dir=`dirname $0`/..
+datadir=$gratia_dir/var/data
+pslib=$gratia_dir/psacct
+
+# Copy some of the files
+
+mkdir -p $datadir
+chmod og+rwx $datadir
+
+cd /var/adm/acct/nite
+mv $pattern $datadir
+
+cd $gratia_dir
+python $pslib/PSACCTProbe.py $params
+
+# Move the last fermi acct file
+if test "x$1" = "x--enable"; then 
+    _date="`date +%m%d`"
+    mv /var/log/pacct /opt/gratia/var/data/spacct-${_date}
+fi
