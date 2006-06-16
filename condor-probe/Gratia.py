@@ -1,10 +1,20 @@
 import os, sys, time, glob, string, httplib, xml.dom.minidom, socket
+import traceback
 
 class ProbeConfiguration:
     __doc = None
+    __configname = "ProbeConfig"
+    __MeterName = None
+    __DebugLevel = None
+    __LogLevel = None
+    
+    def __init__(self, customConfig = "ProbeConfig"):
+	if os.path.exists(customConfig):
+		self.__configname = customConfig
 
     def loadConfiguration(self):
-        self.__doc = xml.dom.minidom.parse("ProbeConfig")
+	self.__doc = xml.dom.minidom.parse(self.__configname)
+	DebugPrint(0, 'Using config file :' + self.__configname)
 
     def __getConfigAttribute(self, attributeName):
         if self.__doc == None:
@@ -23,14 +33,31 @@ class ProbeConfiguration:
     def get_CollectorService(self):
         return self.__getConfigAttribute('CollectorService')
 
-    def get_MeterName(self):        
-        return self.__getConfigAttribute('MeterName')
+    def setMeterName(self,name):
+        self.__MeterName = name
+        
+    def get_MeterName(self):
+        if (self.__MeterName == None):
+            return self.__getConfigAttribute('MeterName')
+        else:
+            return self.__MeterName
 
     def get_UseJClarens(self):
         return int(self.__getConfigAttribute('UseJClarens'))
 
     def get_DebugLevel(self):
-        return int(self.__getConfigAttribute('DebugLevel'))
+        if (self.__DebugLevel == None):
+            self.__DebugLevel = int(self.__getConfigAttribute('DebugLevel'))
+        return self.__DebugLevel
+
+    def get_LogLevel(self):
+        if (self.__LogLevel == None):
+            val = self.__getConfigAttribute('LogLevel')
+            if val == None or val == "":
+                self.__logLevel = self.get_DebugLevel()
+            else:
+                self.__LogLevel = int(val)
+        return self.__LogLevel
 
     def get_GratiaExtension(self):
         return self.__getConfigAttribute('GratiaExtension')
@@ -44,6 +71,9 @@ class ProbeConfiguration:
     def get_MaxPendingFiles(self):
         return self.__getConfigAttribute('MaxPendingFiles')
 
+    def get_DataFolder(self):
+	return self.__getConfigAttribute('DataFolder')
+
     def get_WorkingFolder(self):
 	return self.__getConfigAttribute('WorkingFolder')
 
@@ -55,6 +85,9 @@ class ProbeConfiguration:
         
     def get_PSACCTBackupFileRepository(self):
         return self.__getConfigAttribute('PSACCTBackupFileRepository')
+
+    def get_PSACCTExceptionsRepository(self):
+        return self.__getConfigAttribute('PSACCTExceptionsRepository')
 
 class Event:
     _xml = ""
@@ -110,14 +143,21 @@ RecordPid = os.getpid()
 RecordId = 0
 Config = ProbeConfiguration()
 
-def Initialize():
+def Initialize(customConfig = "ProbeConfig"):
     "This function initialize the Gratia metering engine"
     "We connect/register with the collector and load"
     "this meter's configuration"
     "We also load the list of record files that have not"
     "yet been send"
+
+    global Config
     if len(BackupDirList) == 0:
-        DebugPrint(0, "Initializing Gratia")
+		# This has to be the first thing done (DebugPrint uses
+		# the information
+        Config = ProbeConfiguration(customConfig)
+        
+        DebugPrint(0, "Initializing Gratia with "+customConfig)
+
         # Need to initialize the list of possible directories
         InitDirList()
 
@@ -126,11 +166,14 @@ def Initialize():
         # object to see if it has been connected yet or not
         global __connection
         global __connected
+        global __connectionError
         __connection = None
         __connected = 0
+        __connectionError = False
     
         # Need to look for left over files
-        SearchOustandingRecord()    
+        SearchOustandingRecord()
+        
 
 ##
 ## encodeXML
@@ -205,10 +248,12 @@ def __disconnect():
 ##
 def __sendUsageXML(meterId, recordXml):
     global __connection
+    global __connectionError
 
     try:
         # Connect to the web service, in case we aren't already connected.  If we are already connected, this call will do nothing
         __connect()
+        __connectionError = False
 
         # Generate a unique Id for this transaction
         transactionId = meterId + TimeToString().replace(":","")
@@ -273,41 +318,102 @@ def __sendUsageXML(meterId, recordXml):
             responseDict = __connection.Collector.collectUsageXml(event)
             response = Response(responseDict["_code"], responseDict["_message"])
     except:
-        DebugPrint(0, 'Failed to send xml to web service:  ', sys.exc_info(), "--", sys.exc_info()[0], "++", sys.exc_info()[1])
-        print 'Failed to send xml to web service:  ', sys.exc_info(), "--", sys.exc_info()[0], "++", sys.exc_info()[1]
+        DebugPrint(0,'Failed to send xml to web service:  ', sys.exc_info(), "--", sys.exc_info()[0], "++", sys.exc_info()[1])
+        # Upon a connection error, we will stop to try to reprocess but will continue to
+        # try sending
+        __connectionError = True
         
         response = Response(1,"Failed to send xml to web service")
 
     return response
 
-def DebugPrint(level, *arg):
-    if (level<Config.get_DebugLevel()):
-        out = ""
-        for val in arg:
-            out = out + str(val)
-        print "Gratia ",out
+LogFileIsWriteable = True;
 
-        try:
-            # Ensure that the 'gratia' folder exists
-            if os.path.exists(Config.get_WorkingFolder()) == 0:
-                os.mkdir(Config.get_WorkingFolder())
+def LogToFile(message):
+    "Write a message to the Gratia log file"
 
-            # Ensure the 'logs' folder exists
-            if os.path.exists(Config.get_LogFolder()) == 0:
-                os.mkdir(Config.get_LogFolder())
+    global LogFileIsWriteable
+    file = None
+    filename = "none"
 
-            filename = time.strftime("%Y-%m-%d") + ".log"
-        
-            # Open/Create a log file for today's date
-	    file = open(Config.get_LogFolder() + filename, 'a')
+    try:
+        # Ensure the 'logs' folder exists
+        if os.path.exists(Config.get_LogFolder()) == 0:
+            Mkdir(Config.get_LogFolder())
 
-            # Append the message to the log file
-            file.write(out + "\n")
-        except:
-            print "Unable to log to file:  ", sys.exc_info(), "--", sys.exc_info()[0], "++", sys.exc_info()[1]
+        filename = time.strftime("%Y-%m-%d") + ".log"
+        filename = os.path.join(Config.get_LogFolder(),filename)
 
+        if os.path.exists(filename) and not os.access(filename,os.W_OK):
+            os.chown(filename, os.getuid(), os.getgid())
+            os.chmod(filename, 0755)
+
+        # Open/Create a log file for today's date
+        file = open(filename, 'a')
+
+        # Append the message to the log file
+        file.write(message + "\n")
+
+        LogFileIsWriteable = True;
+    except:
+        if LogFileIsWriteable:
+            # Print the error message only once
+            print "Gratia: Unable to log to file:  ", filename, " ",  sys.exc_info(), "--", sys.exc_info()[0], "++", sys.exc_info()[1]
+        LogFileIsWriteable = False;
+
+    if file != None:
         # Close the log file
         file.close()
+
+def GenerateOutput(prefix,*arg):
+    out = prefix
+    for val in arg:
+        out = out + str(val)
+    return out
+    
+def DebugPrint(level, *arg):
+    if (level<Config.get_DebugLevel()):
+        out = GenerateOutput("Gratia: ",*arg)
+        print out
+    if level<Config.get_LogLevel():
+        out = GenerateOutput("Gratia: ",*arg)
+        LogToFile(out)
+            
+def Error(*arg):
+    out = GenerateOutput("Error in Gratia probe: ",*arg)
+    print out
+    LogToFile(out)
+
+##
+## Mkdir
+##
+## Author - Trent Mick (other recipes)
+##
+## A more friendly mkdir() than Python's standard os.mkdir().
+## Limitations: it doesn't take the optional 'mode' argument
+## yet.
+##
+## http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/82465
+
+def Mkdir(newdir):
+    """works the way a good mkdir should :)
+        - already exists, silently complete
+        - regular file in the way, raise an exception
+        - parent directory(ies) does not exist, make them as well
+    """
+    if os.path.isdir(newdir):
+        pass
+    elif os.path.isfile(newdir):
+        raise OSError("a file with the same name as the desired " \
+                      "dir, '%s', already exists." % newdir)
+    else:
+        head, tail = os.path.split(newdir)
+        if head and not os.path.isdir(head):
+           Mkdir(head)
+        #print "Mkdir %s" % repr(newdir)
+        if tail:
+            os.mkdir(newdir)
+
 
 def DirListAdd(value):
     "Utility method to add directory to the list of directories"
@@ -320,7 +426,21 @@ def InitDirList():
     "try various tmp directory (/var/tmp, /tmp,"
     "$TMP_DIR, etc.."
 
-    DirListAdd("c:/temp");
+    Mkdir(Config.get_WorkingFolder())
+
+    DirListAdd(Config.get_WorkingFolder())
+    DirListAdd(os.getenv('DATA_DIR',""))
+    DirListAdd("/var/tmp");
+    DirListAdd("/tmp");
+    DirListAdd(os.getenv('TMP_DIR',""))
+    DirListAdd(os.getenv('TMP_WN_DIR ',""))
+    DirListAdd(os.getenv('TMP',""))
+    DirListAdd(os.getenv('TMPDIR',""))
+    DirListAdd(os.getenv('TMP_DIR',""))
+    DirListAdd(os.getenv('TEMP',""))
+    DirListAdd(os.getenv('TEMPDIR',""))
+    DirListAdd(os.getenv('TEMP_DIR',""))
+    DirListAdd(os.environ['HOME'])
     DebugPrint(1,"List of backup directories: ",BackupDirList)
 
 def SearchOustandingRecord():
@@ -328,7 +448,7 @@ def SearchOustandingRecord():
     "any record that has not been sent yet"
 
     for dir in BackupDirList:
-	    path = os.path.join(dir,"gratia");
+	    path = os.path.join(dir,"gratiafiles");
 	    path = os.path.join(path,"*"+"."+Config.get_GratiaExtension());
 	    files = glob.glob(path)
 	    for f in files:
@@ -360,16 +480,16 @@ def OpenNewRecordFile(DirIndex,RecordIndex):
 	    if index <= DirIndex or not os.path.exists(dir):
 		    continue
 	    DebugPrint(3,"Open request: looking at ",dir)
-	    dir = os.path.join(dir,"gratia")
+	    dir = os.path.join(dir,"gratiafiles")
 	    if not os.path.exists(dir):
 		    try:
-			    os.mkdir(dir)
+			    Mkdir(dir)
 		    except:
 			    continue
 	    if not os.path.exists(dir):
 		    continue
 	    if not os.access(dir,os.W_OK): continue
-	    filename = GenerateFilename(Config.get_WorkingFolder(),RecordIndex)
+	    filename = GenerateFilename(dir,RecordIndex)
 	    while os.access(filename,os.F_OK):
 		    RecordIndex = RecordIndex + 1
 		    filename = GenerateFilename(dir,RecordIndex)
@@ -403,70 +523,84 @@ class UsageRecord:
 	    self.Username = "none"
 
     def Description(self,value):
-	    if len(value)>0 : return  "urwg:description=\""+value+"\" "
-	    else : return ""
+        " Helper Function to generate the xml (Do not call directly)"
+        if len(value)>0 : return  "urwg:description=\""+value+"\" "
+        else : return ""
 
     def Metric(self,value):
-	    if len(value)>0 : return  "urwg:metric=\""+value+"\" "
-	    else : return ""
+        " Helper Function to generate the xml (Do not call directly)"
+        if len(value)>0 : return  "urwg:metric=\""+value+"\" "
+        else : return ""
 
     def Unit(self,value):
-	    if len(value)>0 : return  "urwg:unit=\""+value+"\" "
-	    else : return ""
+        " Helper Function to generate the xml (Do not call directly)"
+        if len(value)>0 : return  "urwg:unit=\""+value+"\" "
+        else : return ""
 
     def StorageUnit(self,value):
-	    if len(value)>0 : return  "urwg:storageUnit=\""+value+"\" "
-	    else : return ""
+        " Helper Function to generate the xml (Do not call directly)"
+        if len(value)>0 : return  "urwg:storageUnit=\""+value+"\" "
+        else : return ""
 
     def PhaseUnit(self,value):
-	    if type(value)==str : realvalue = value
-	    else : realvalue = self.Duration(value)
-	    if len(realvalue)>0 : return  "urwg:phaseUnit=\""+realvalue+"\" "
-	    else : return ""
+        " Helper Function to generate the xml (Do not call directly)"
+        if type(value)==str : realvalue = value
+        else : realvalue = self.Duration(value)
+        if len(realvalue)>0 : return  "urwg:phaseUnit=\""+realvalue+"\" "
+        else : return ""
 
     def Type(self,value):
-	    if len(value)>0 : return  "urwg:type=\""+value+"\" "
-	    else : return ""
+        " Helper Function to generate the xml (Do not call directly)"
+        if len(value)>0 : return  "urwg:type=\""+value+"\" "
+        else : return ""
+
+    def UsageType(self,value):
+        " Helper Function to generate the xml (Do not call directly)"
+        if len(value)>0 : return  "urwg:usageType=\""+value+"\" "
+        else : return ""
 
     def Duration(self,value):
-	    seconds = value % 60
-	    value = int( (value - seconds) / 60 )
-	    minutes = value % 60
-	    value = (value - minutes) / 60
-	    hours = value % 24
-	    value = (value - hours) / 24
-	    result = "P"
-	    if value>0: result = result + str(value) + "D"
-	    if (hours>0 or minutes>0 or seconds>0) :
-		    result = result + "T"
-		    if hours>0 : result = result + str(hours)+ "H"
-		    if minutes>0 : result = result + str(minutes)+ "M"
-		    if seconds>0 : result = result + str(seconds)+ "S"
-	    else : result = result + "T0S"
-	    return result
-
+        " Helper Function to generate the xml (Do not call directly)"
+        seconds = value % 60
+        value = int( (value - seconds) / 60 )
+        minutes = value % 60
+        value = (value - minutes) / 60
+        hours = value % 24
+        value = (value - hours) / 24
+        result = "P"
+        if value>0: result = result + str(value) + "D"
+        if (hours>0 or minutes>0 or seconds>0) :
+            result = result + "T"
+            if hours>0 : result = result + str(hours)+ "H"
+            if minutes>0 : result = result + str(minutes)+ "M"
+            if seconds>0 : result = result + str(seconds)+ "S"
+        else : result = result + "T0S"
+        return result
+        
     def AddToList(self,where,what,comment,value):
-	    # First filter out the previous value
-	    where = [x for x in where if x.find("<"+what)!=0]
-	    where.append("<"+what+" "+comment+">"+value+"</"+what+">")
-	    return where
-
+        " Helper Function to generate the xml (Do not call directly)"
+        # First filter out the previous value
+        where = [x for x in where if x.find("<"+what)!=0]
+        where.append("<"+what+" "+comment+">"+value+"</"+what+">")
+        return where
+    
     def AppendToList(self,where,what,comment,value):
-	    where.append("<"+what+" "+comment+">"+value+"</"+what+">")
-	    return where
-
-
+        " Helper Function to generate the xml (Do not call directly)"
+        where.append("<"+what+" "+comment+">"+value+"</"+what+">")
+        return where
+    
+    # Public Interface:
     def LocalJobId(self,value):
-	    self.JobId = self.AddToList(self.JobId,"LocalJobId","",value)
+        self.JobId = self.AddToList(self.JobId,"LocalJobId","",value)
     def GlobalJobId(self,value):
-	    self.JobId = self.AddToList(self.JobId,"GlobalJobId","",value)
+        self.JobId = self.AddToList(self.JobId,"GlobalJobId","",value)
     def ProcessId(self,value):
-	    self.JobId = self.AddToList(self.JobId,"ProcessId","",str(value))
+        self.JobId = self.AddToList(self.JobId,"ProcessId","",str(value))
 
     def GlobalUsername(self,value): 
-            self.UserId = self.AddToList(self.UserId,"GlobalUsername","",value); 
+        self.UserId = self.AddToList(self.UserId,"GlobalUsername","",value); 
     def LocalUserId(self,value):
-	    self.UserId = self.AddToList(self.UserId,"LocalUserId","",value);
+        self.UserId = self.AddToList(self.UserId,"LocalUserId","",value);
     def UserKeyInfo(self,value):
 	    " Example: \
 	      <ds:KeyInfo xmlns:ds=""http://www.w3.org/2000/09/xmldsig#""> \
@@ -494,10 +628,11 @@ class UsageRecord:
             "Register a total cpu duration.  cputype must be either 'user' or 'system'"
 	    if type(value)==str : realvalue = value
 	    else : realvalue = self.Duration(value)
+            if cputype=="sys" : cputype="system"
             if cputype!="user" and cputype!="system" : 
                 description = "(type="+cputype+") "+description
                 cputype = ""
-	    self.RecordData = self.AddToList(self.RecordData, "CpuDuration", self.Type(cputype)+self.Description(description), realvalue)
+	    self.RecordData = self.AppendToList(self.RecordData, "CpuDuration", self.UsageType(cputype)+self.Description(description), realvalue)
     def EndTime(self, value, description = ""):
 	    if type(value)==str : realvalue = value
 	    else : realvalue = TimeToString(time.gmtime(value))
@@ -590,7 +725,8 @@ class UsageRecord:
 
 
     def XmlCreate(self):
-            global RecordId
+	    global RecordId
+	    
 	    self.XmlData.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n")
 	    self.XmlData.append("<JobUsageRecord xmlns=\"http://www.gridforum.org/2003/ur-wg\"\n")
 	    self.XmlData.append("		xmlns:urwg=\"http://www.gridforum.org/2003/ur-wg\"\n")
@@ -649,6 +785,7 @@ def CanProcess():
 #
 def Reprocess():
     responseString = ""
+    Reprocessed = []
 
     # Loop through and try to send any outstanding records
     for failedRecord in OutstandingRecord:
@@ -666,8 +803,12 @@ def Reprocess():
         responseString = responseString + '\nReprocessed ' + failedRecord + ':  ' + response.get_message()
 
         # Determine if the call succeeded, and remove the file if it did
-        #if response.get_code() == 0:
-            #os.remove(failedRecord)
+        if response.get_code() == 0:
+            os.remove(failedRecord)
+            Reprocessed.append(failedRecord)
+
+    for record in Reprocessed:
+        OutstandingRecord.remove(record)
 
     if responseString <> "":
         DebugPrint(0, responseString)
@@ -675,13 +816,20 @@ def Reprocess():
     return responseString
 
 
+WroteTooManyFiles = False
+
 def Send(record):
+    global __connectionError
+    global WroteTooManyFiles
+    
     DebugPrint(0, "***********************************************************")
     DebugPrint(1,"Record: ",record)
     DebugPrint(1,"Username: ", record.Username)
 
     # Check if there are too many pending files
     (canProcess, responseString) = CanProcess()
+    if not canProcess and not WroteTooManyFiles:
+        Error(responseString)
     if canProcess:
 
         # Assign the ProbeName from the config file
@@ -745,19 +893,21 @@ def Send(record):
             DebugPrint(1, 'Response indicates failure, ' + f.name + ' will not be deleted')
             #OutstandingRecord.append(f.name)
             if f.name == "<stdout>":
-	        print "Error: Gratia was un-enable to send the record and was unable to"
-	        print "       find a location to store the xml backup file.  The record"
-    	        print "       will be printed to stdout:"
+	        Error("Gratia was un-enable to send the record and was unable to\n"+
+	              "       find a location to store the xml backup file.  The record\n"+
+    	          "       will be printed to stdout:")
  	        for line in record.XmlData:
 		    f.write(line)
+                responseString = "Fatal Error: Record not send and not cached.  Record will be lost."
 
  	# Attempt to reprocess any outstanding records
- 	Reprocess()
+        if (not __connectionError):
+            Reprocess()
 
         # When we are done sending outstanding records, we need to then disconnect from the web server
         __disconnect()
 
-    print responseString
+    DebugPrint(0, responseString)
     DebugPrint(0, "***********************************************************")
     return responseString
 

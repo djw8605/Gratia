@@ -18,7 +18,7 @@
 #    along with this program; if not, write to the Free Software
 #    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-# $Id: Clarens.py,v 1.1 2006-06-09 16:07:36 glr01 Exp $
+# $Id: Clarens.py,v 1.2 2006-06-16 15:57:37 glr01 Exp $
 
 import xmlrpclib, httplib
 xmlrpc=xmlrpclib

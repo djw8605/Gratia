@@ -2,7 +2,7 @@
 #
 # condor_meter.pl - Prototype for an OSG Accouting 'meter' for Condor
 #       By Ken Schumacher <kschu@fnal.gov> Began 5 Nov 2005
-# $Id: condor_meter.pl,v 1.1 2006-06-09 16:07:36 glr01 Exp $
+# $Id: condor_meter.pl,v 1.2 2006-06-16 15:57:37 glr01 Exp $
 # Full Path: $Source: /var/tmp/move/gratia/condor-probe/condor_meter.pl,v $
 #
 # Revision History:
@@ -25,7 +25,7 @@ use File::Basename;
 
 $progname = "condor_meter.pl";
 $prog_version = "v0.4.0";
-$prog_revision = '$Revision: 1.1 $ ';   # CVS Version number
+$prog_revision = '$Revision: 1.2 $ ';   # CVS Version number
 #$true = 1; $false = 0;
 $verbose = 1;
 
@@ -123,15 +123,19 @@ sub Feed_Gratia {
     #print $py qq/r.AdditionalInfo(\"GlobalUsername\", \"/
     #  . $hash{'User'} . qq/\")\n/;
   }
-  # Philippe asked if I could take
-  #   x509userproxysubject = "/C=CH/O=CERN/OU=GRID/CN=Sami Lehti 5217"
-  # and send them
-  #   r.UserKeyInfo = "CN=Sami Lehti 5217, OU=GRID, O=CERN, C=CH"
+
+  # Sample values for x509userproxysubject:
+  #   "/C=CH/O=CERN/OU=GRID/CN=Sami Lehti 5217"
+  #   "/DC=gov/DC=fnal/O=Fermilab/OU=People/CN=Philippe G. Canal/UID=pcanal"
+
+  # Philippe asked if I could strip the first '/' and change all other
+  # '/' (used as seperators) to ', '  (that's comma and space)
   if ( defined ($hash{'x509userproxysubject'})) {
-    if ($hash{'x509userproxysubject'} =~ 
-	qq%/C=(/w+)/O=(/w+)/OU=(/w+)/CN=(.+)%) {
-      ### I have to test/validate this ###
-      print $py qq%r.UserKeyInfo = "CN=$4, OU=$3, O=$2, C=$1"%;
+    if ($hash{'x509userproxysubject'} =~ m%^/(.*)%) {
+      ($uki = $1) =~ s(/) (, )g;
+      print $py qq/r.UserKeyInfo("$uki")\n/;
+    } else {
+      print $py qq/r.UserKeyInfo("$hash{'x509userproxysubject'}")\n/;
     }
   }
 
@@ -205,7 +209,7 @@ sub Feed_Gratia {
   # 2.11 CpuDuration - "CPU time used, summed over all processes in the job"
   $hash{'SysCpuTotal'} = $hash{'RemoteSysCpu'} + $hash{'LocalSysCpu'};
   print $py qq/r.CpuDuration(int(/ . $hash{'SysCpuTotal'} .
-    qq/), "sys", "Was entered in seconds")\n/;
+    qq/), "system", "Was entered in seconds")\n/;
   $hash{'UserCpuTotal'} = $hash{'RemoteUserCpu'} + $hash{'LocalUserCpu'};
   print $py qq/r.CpuDuration(int(/ . $hash{'UserCpuTotal'} .
     qq/), "user", "Was entered in seconds")\n/;
@@ -557,12 +561,12 @@ sub Process_005 {
 	  ": Cluster_Id $cluster_id had return value: $return_value\n";
       }
     } else {
-      print "Malformed termination record:\n";
-      print "$next_line";
+      warn "Malformed termination record:\n";
+      warn "$next_line";
     }
   } else {
-    print "Event was not a Normal Termination\n";
-    print "$next_line";
+    warn "Event was not a Normal Termination\n";
+    warn "$next_line";
   }
 
   # The next four lines have CPU usage data ------------------------
@@ -637,6 +641,21 @@ sub Process_005 {
   }
 } # End of Subroutine Process_005 --------------------
 
+#------------------------------------------------------------------
+# Subroutine Usage_message
+#   This routine prints the standard usage message.
+#------------------------------------------------------------------
+sub Usage_message {
+  print "$progname version $prog_version ($prog_revision)\n\n";
+  print "USAGE: $0 [-dlrvx] <directoryname|filename> [ filename . . .]\a\n";
+  print "       where -d enable delete of processed log files\n";
+  print "         and -l output a listing of what was done\n";
+  print "         and -r forces reprocessing of pending transmissions\n";
+  print "         and -v causes verbose output\n";
+  print "         and -x enters debug mode\n\n";
+
+  return;
+} # End of Subroutine Usage_message  --------------------
 
 #==================================================================
 #==================================================================
@@ -647,25 +666,28 @@ autoflush STDERR 1; autoflush STDOUT 1;
 # Initialization and Setup.
 use Getopt::Std;
 
-use vars qw/$opt_d $opt_v/;
-$opt_d = $opt_r = $opt_v = $opt_x = 0;
+#use vars qw/$opt_d $opt_v/;
+$opt_d = $opt_l = $opt_r = $opt_v = $opt_x = 0;
 
 # Get command line arguments
-unless (getopts('drvx')) {
-  print "$progname version $prog_version ($prog_revision)\n\n";
-  print "USAGE: $0 filename [ filename . . .]\n";
-    print "USAGE: $0 [-dv] filename [ filename . . .]\a\n";
-    print "       where -d enable delete of processed log files\n";
-    print "         and -r forces reprocessing of pending transmissions\n";
-    print "         and -v causes verbose output\n";
-    print "         and -x enters debug mode\n\n";
-    exit 1;
+unless (getopts('dlrvx')) {
+  Usage_message;
+  exit 1;
 }
 
 $delete_flag = ($opt_d == 1);
+$report_results = ($opt_l == 1);
 $reprocess_flag = ($opt_r == 1);
 $verbose = ($opt_v == 1);
 $debug_mode = ($opt_x == 1);
+
+# After we have stripped off switches, there needs to be at least one 
+#   directory or file name passed as an argument
+if (! defined @ARGV) {
+  print STDERR "No directories or filenames supplied.\n\n";
+  Usage_message;
+  exit 1;
+}
 
 if ($verbose) {
   print "$progname version $prog_version ($prog_revision)\n";
@@ -679,34 +701,29 @@ if ($verbose) {
   print "Running in debugging  mode.\n";
 }
 
-# Remove old temporary files (if still there) used for debugging
-foreach $tmp_file ( "/tmp/py.in", "/tmp/py.out" ) {
-  if ( -e $tmp_file ) {
-    unlink $tmp_file
-      or warn "Unable to delete old file: $tmp_file\n";
-  }
-}
-
 #------------------------------------------------------------------
 # Locate and verify the path to the condor_history executable
 use Env qw(CONDOR_LOCATION PATH);  #Import only the Env variables we need
 @path = split(/:/, $PATH);
 $condor_history = '';
 
-if (-x "$CONDOR_LOCATION/bin/condor_history") {
+if ( -x "$CONDOR_LOCATION/bin/condor_history") {
   # This is the most obvious place to look
   $condor_history = "$CONDOR_LOCATION/bin/condor_history";
 } else {
   foreach $path_dir (@path) {
     unless ( $condor_history ) {
-      if (-x "$path_dir/bin/condor_history") {
-	 $condor_history = "$path_dir/bin/condor_history";
+      if (-x "$path_dir/condor_history") {
+	 $condor_history = "$path_dir/condor_history";
       }
     }
   }
 }
 
-unless ( $condor_history ) { die "condor_history was not found"; }
+unless ( -x $condor_history ) {
+  warn "The 'condor_history' program was not found.\n";
+  exit 2;
+}
 
 if ($verbose) { print "Condor_history at $condor_history\n"; }
 
@@ -720,7 +737,7 @@ if ($verbose) { print "Condor_history at $condor_history\n"; }
 # Build a list of file names.  Add individual files given as command
 # line arguments or select names from a directory specified.
 
-my @logfiles = ();  $logs_found=0;
+my @logfiles = @processed_logfiles = ();  $logs_found=0;
 foreach $name_arg (@ARGV) {
   if ( -f $name_arg && -s _ ) {
     # This argument is a non-empty plain file
@@ -739,7 +756,21 @@ foreach $name_arg (@ARGV) {
   }
 }
 
-print "Number of log files found: $logs_found\n";
+if ($logs_found == 0) {
+  exit 0;
+} else {
+  if ($verbose) {
+    print "Number of log files found: $logs_found\n";
+  }
+}
+
+# Remove old temporary files (if still there) used for debugging
+foreach $tmp_file ( "/tmp/py.in", "/tmp/py.out" ) {
+  if ( -e $tmp_file ) {
+    unlink $tmp_file
+      or warn "Unable to delete old file: $tmp_file\n";
+  }
+}
 
 #------------------------------------------------------------------
 # Open the pipe to the Gratia meter library process
@@ -747,10 +778,10 @@ $py = new FileHandle;
 if ($debug_mode) {
   $py->open(" > /tmp/py.in ");
 } else {
-  $py->open("| tee /tmp/py.in | python >/tmp/py.out 2>&1");
+  $py->open("| tee /tmp/py.in | python -u >/tmp/py.out 2>&1");
   # $py->open("| python ");
 }
-autoflush $py;
+autoflush $py 1;
 $count_submit = 0;
 
 print $py "import Gratia\n";
@@ -778,12 +809,13 @@ foreach $logfile (@logfiles) {
   open(LOGF, $logfile)
     or die "Unable to open logfile: $logfile\n";
   if ($verbose) { print "Processing file: $logfile\n"; }
+  $logfile_errors = 0;
 
   # Get the first record to test format of the file
   if (defined ( $record_in = <LOGF> )) {
     # Clear the variables for each new event processed
-    %condor_data_hash = ();  $logfile_errors = 0;
-    %logfile_hash = ();  @logfile_clusterids = ();
+    %condor_data_hash = ();
+    #%logfile_hash = ();  @logfile_clusterids = ();
 
     if ($record_in =~ /\<c\>/) {
       #if ($debug_mode) { print "Processing as an XML format logfile.\n" }
@@ -833,15 +865,15 @@ foreach $logfile (@logfiles) {
 	    # Process the events that report CPU usage
 	    if ($event_hash{'EventTypeNumber'} == 0) { # Job submitted
 	      # SubmitEvent: has Std and a SubmitHost IP
-	      if (%condor_data_hash = 
-		      Query_Condor_History($event_hash{'ClusterId'})) {
-		push @logfile_clusterids, $event_hash{'ClusterId'};
-	      } else {
-		warn "No Condor History found - Logfile: " . 
-		  basename($logfile) . " ClusterId: $event_hash{'Cluster'}\n";
-		#Not sure if this case should be considered "fatal"
-		$logfile_errors++; # An error means we won't delete this log file
-	      }
+	      #if (%condor_data_hash = 
+	      #	      Query_Condor_History($event_hash{'ClusterId'})) {
+	      #	push @logfile_clusterids, $event_hash{'ClusterId'};
+	      #} else {
+	      #	warn "No Condor History found - Logfile: " . 
+	      #	  basename($logfile) . " ClusterId: $event_hash{'Cluster'}\n";
+	      #	#Not sure if this case should be considered "fatal"
+	      #	$logfile_errors++; # An error means we won't delete this log file
+	      #}
 	    } elsif ($event_hash{'EventTypeNumber'} == 1) { # Job began exectuting
 	      # ExecuteEvent: has Std and an ExecuteHost IP
 	    } elsif ($event_hash{'EventTypeNumber'} == 4) { # Job was Evicted
@@ -943,19 +975,31 @@ foreach $logfile (@logfiles) {
   }
   close(LOGF);
 
-  if ($delete_flag && ($logfile_errors != 0)) {
-    unlink ($logfile);
-  }
-} # End of the 'foreach $logfile' loop.
+  if ($delete_flag) {
+    if ($logfile_errors == 0) {
+      push @processed_logfiles, $logfile;
+    } else {
+      warn "Logfile ($logfile) was not removed due to errors ($logfile_errors)\n";
+    }
+  } # End of the 'foreach $logfile' loop.
+}
 
 # Close Python pipe to Gratia.py
 $py->close;
+
+# Now we have closed the Python pipe, I can delete the log files that
+#    were just processed.
+if ($delete_flag) {
+  foreach $plog (@processed_logfiles) {
+      unlink ($plog) or warn "Unable to remove logfile ($plog)\n"
+    }
+}
 
 #------------------------------------------------------------------
 # Wrap up and report results
 
 $count_total = $count_orig + $count_xml;
-if ($count_total > 1) {
+if (($count_total > 1) && ($verbose || $report_results)) {
   print "Condor probe is done processing log files.\n";
   print "  Number of original format files: $count_orig\n"  if ($count_orig);
   print "         # of original 004 events: $count_orig_004\n"  if ($count_orig_004);
@@ -982,6 +1026,24 @@ exit 0;
 #==================================================================
 # CVS Log
 # $Log: not supported by cvs2svn $
+# Revision 1.14  2006/05/03 18:32:08  kschu
+# Generates no output unless there is an error
+#
+# Revision 1.13  2006/04/27 21:49:37  pcanal
+# support 2 durations
+#
+# Revision 1.12  2006/04/21 15:49:19  kschu
+# There is now no output, unless there is a problem, or you use the -v flag
+#
+# Revision 1.11  2006/04/20 15:33:41  kschu
+# Corrected syntax error
+#
+# Revision 1.10  2006/04/19 21:59:05  kschu
+# Removes log files after closing Python pipe
+#
+# Revision 1.9  2006/04/19 16:50:04  kschu
+# Code in place and tested to remove logs after submitting to Gratia
+#
 # Revision 1.8  2006/04/17 22:23:50  kschu
 # Added command line option to delete log files after processing.
 #
