@@ -64,7 +64,10 @@ mkdir tarball\var\tmp
 echo xxx > tarball\var\tmp\ignoreme
 
 copy %root%\configuration\* tarball\tomcat\v55\gratia
-copy %root%\configuration-release\* tarball\tomcat\v55\gratia
+del tarball\tomcat\v55\gratia\local.*
+del tarball\tomcat\v55\gratia\psg3.*
+del tarball\tomcat\v55\gratia\release.*
+copy %root%\configuration\release.service-configuration.properties tarball\tomcat\v55\gratia\service-configuration.properties
 
 copy %root%\target\gratia-services.war tarball\gratia\gratia_services
 copy %root%\target\gratia-servlets.war tarball\gratia\gratia_services
