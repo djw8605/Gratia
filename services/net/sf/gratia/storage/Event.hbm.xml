@@ -1,0 +1,62 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+    
+<hibernate-mapping schema="gratia">
+ 
+    <class 
+        name="net.sf.gratia.eventbus.Event" 
+        table="EVENTS">
+        
+        <id name="id" type="string" >
+            <column 
+                 name="EVENT_ID"
+                 sql-type="char(32)"/>
+            <generator class="uuid.hex"/>
+        </id>
+        
+        <discriminator
+            column="TYPE">
+        </discriminator>
+        
+        <!--  <property 
+            name="type" 
+            column="TYPE"
+            type="string"
+            not-null="true"/> -->
+            
+        <property 
+            name="timestamp" 
+            column="TIMESTAMP"
+            type ="date"
+        
+            not-null="true"/>
+        
+        <property 
+            name="source"
+            column="SOURCE"
+            not-null="true"/>
+            
+        <property 
+            name="serviceId"
+            column="SERVICE_ID"
+            type="string"
+            not-null="true"/>
+            
+        <property 
+            name="data"
+            column="DATA"
+            type="string"
+            length="255"/> 
+        
+        <!-- subclass 
+            name="net.sf.gratia.core.meter.ProbeEvent"
+            discriminator-value="net.sf.gratia.core.meter.ProbeEvent">
+        </subclass -->
+              
+    </class>
+ 
+ 
+</hibernate-mapping>
