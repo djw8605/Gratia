@@ -85,12 +85,12 @@ public class CollectorService implements ServletContextListener
 								xml.append("password=" + dq + p.getProperty("service.mysql.password") + dq + "\n");
 								xml.append("/>" + "\n");
 								xml.append("<PathConfig" + "\n");
-								xml.append("reportsFolder=" + dq + catalinaHome + "/webapps/reports/" + dq + "\n");
+								xml.append("reportsFolder=" + dq + catalinaHome + "/webapps/GratiaReports/" + dq + "\n");
 								xml.append("engineHome=" + dq + catalinaHome + "/webapps/Birt/" + dq + "\n");
 								xml.append("webappHome=" + dq + catalinaHome + "/webapps/GratiaReporting/" + dq + "\n");
 								xml.append("/>" + "\n");
 								xml.append("</ReportingConfig>" + "\n");
-								xp.save(catalinaHome + "/webapps/Configurator/ReportingConfig.xml",
+								xp.save(catalinaHome + "/webapps/GratiaReportConfiguration/ReportingConfig.xml",
 												xml.toString());
 
 								//

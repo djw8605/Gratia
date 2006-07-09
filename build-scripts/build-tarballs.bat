@@ -38,8 +38,8 @@ echo xxx > tarball\var\logs\ignoreme
 mkdir tarball\var\tmp
 echo xxx > tarball\var\tmp\ignoreme
 
-copy %root%\target\Configurator.war tarball\gratia\gratia_reporting
-copy %root%\target\reports.war tarball\gratia\gratia_reporting
+copy %root%\target\GratiaReportConfiguration.war tarball\gratia\gratia_reporting
+copy %root%\target\GratiaReports.war tarball\gratia\gratia_reporting
 copy %root%\target\GratiaReporting.war tarball\gratia\gratia_reporting
 cd tarball
 tar -cvf ..\gratia_reporting_v0.1.tar ./gratia ./var

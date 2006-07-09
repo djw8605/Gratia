@@ -4,9 +4,9 @@ del %root%\services\net\sf\gratia\services\*~
 del %root%\services\net\sf\gratia\services\*#
 del %root%\services\net\sf\gratia\services\*.class
 
-del %root%\storage\net\sf\gratia\storage\*~
-del %root%\storage\net\sf\gratia\storage\*#
-del %root%\storage\net\sf\gratia\storage\*.class
+del %root%\services\net\sf\gratia\storage\*~
+del %root%\services\net\sf\gratia\storage\*#
+del %root%\services\net\sf\gratia\storage\*.class
 
 del %root%\soap\net\sf\gratia\soap\*~
 del %root%\soap\net\sf\gratia\soap\*#
@@ -16,13 +16,13 @@ del %root%\servlets\net\sf\gratia\servlets\*~
 del %root%\servlets\net\sf\gratia\servlets\*#
 del %root%\servlets\net\sf\gratia\servlets\*.class
 
-del %root%\reporting\net\sf\gratia\reporting\*~
-del %root%\reporting\net\sf\gratia\reporting\*#
-del %root%\reporting\net\sf\gratia\reporting\*.class
+del %base%GratiaReporting\src\net\sf\gratia\reporting\*~
+del %base%GratiaReporting\src\net\sf\gratia\reporting\*#
+del %base%GratiaReporting\src\net\sf\gratia\reporting\*.class
 
-del %root%\reporting\net\sf\gratia\reporting\exceptions\*~
-del %root%\reporting\net\sf\gratia\reporting\exceptions\*#
-del %root%\reporting\net\sf\gratia\reporting\exceptions\*.class
+del %base%GratiaReporting\src\net\sf\gratia\reporting\exceptions\*~
+del %base%GratiaReporting\src\net\sf\gratia\reporting\exceptions\*#
+del %base%GratiaReporting\src\net\sf\gratia\reporting\exceptions\*.class
 
 del %root%\configuration\*~
 del %root%\configuration\*#

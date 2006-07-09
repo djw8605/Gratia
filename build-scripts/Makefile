@@ -1,18 +1,19 @@
+base=../../
 root=../
 services=${root}services
-reports=${root}reports
-reporting=${root}reporting
+reports=${base}GratiaReports
+reporting=${base}GratiaReporting
 servlets=${root}servlets
 soap=${root}soap
 jars=${root}jars
-classpath=.:${root}services:${root}servlets:${root}soap:${root}reporting
+classpath=.:${root}services:${root}servlets:${root}soap:${base}GratiaReporting/src
 
 clean:
-	find ${root} -name "*class" -exec rm -f {} \;
-	find ${root} -name "*~" -exec rm -f {} \;
-	find ${root} -name "*#" -exec rm -f {} \;
-	rm -f -r ${root}/target
-	mkdir ${root}/target
+	find ${base} -name "*class" -exec rm -f {} \;
+	find ${base} -name "*~" -exec rm -f {} \;
+	find ${base} -name "*#" -exec rm -f {} \;
+	rm -f -r ${root}target
+	mkdir ${root}target
 
 services:
 	rm -f -r war
@@ -109,17 +110,17 @@ reporting:
 	mkdir war/WEB-INF/classes/net/sf/gratia/reporting
 	mkdir war/WEB-INF/classes/net/sf/gratia/reporting/exceptions
 	mkdir war/WEB-INF/lib
-	javac -cp ${classpath} -extdirs ${jars} ../reporting/net/sf/gratia/reporting/*.java
-	javac -cp ${classpath} -extdirs ${jars} ../reporting/net/sf/gratia/reporting/exceptions/*.java
-	cp ../reporting/net/sf/gratia/reporting/*.jsp war
-	cp ../reporting/net/sf/gratia/reporting/*.css war
-	cp ../reporting/net/sf/gratia/reporting/*.class war/WEB-INF/classes/net/sf/gratia/reporting
-	cp ../reporting/net/sf/gratia/reporting/exceptions/*.class war/WEB-INF/classes/net/sf/gratia/reporting/exceptions
-	cp -R ../reporting/net/sf/gratia/reporting/calendar war/calendar
-	cp -R ../reporting/net/sf/gratia/reporting/images/* war/images
-	cp ../reporting/net/sf/gratia/reporting/web.xml war/WEB-INF
+	javac -cp ${classpath} -extdirs ${jars} ${base}GratiaReporting/src/net/sf/gratia/reporting/*.java
+	javac -cp ${classpath} -extdirs ${jars} ${base}GratiaReporting/src/net/sf/gratia/reporting/exceptions/*.java
+	cp ${base}GratiaReporting/WebContent/*.jsp war
+	cp ${base}GratiaReporting/WebContent/*.css war
+	cp ${base}GratiaReporting/src/net/sf/gratia/reporting/*.class war/WEB-INF/classes/net/sf/gratia/reporting
+	cp ${base}GratiaReporting/src/net/sf/gratia/reporting/exceptions/*.class war/WEB-INF/classes/net/sf/gratia/reporting/exceptions
+	cp -R ${base}GratiaReporting/WebContent/calendar/* war/calendar
+	cp -R ${base}GratiaReporting/WebContent/images/* war/images
+	cp ${base}GratiaReporting/src/net/sf/gratia/reporting/web.xml war/WEB-INF
 	cp ../jars/*.jar war/WEB-INF/lib
-	jar -cfM ../target/GratiaReporting.war -C war .
+	jar -cvfM ../target/GratiaReporting.war -C war .
 	rm -f -r war
 
 reports:
@@ -127,23 +128,23 @@ reports:
 	mkdir war
 	mkdir war/images
 	mkdir war/WEB-INF
-	cp ../reports/*design war
-	cp ../reports/images/*.gif war/images
-	cp ../reports/web.xml war/WEB-INF
-	jar -cf ../target/reports.war -C war .
+	cp ${base}GratiaReports/WebContent/*design war
+	cp ${base}GratiaReports/WebContent/images/*.gif war/images
+	cp ${base}GratiaReports/src/web.xml war/WEB-INF
+	jar -cvf ../target/GratiaReports.war -C war .
 	rm -f -r war
 
-configurator:
+report-configuration:
 	rm -f -r war
 	mkdir war
 	mkdir war/WEB-INF
-	cp ../configurator/Reporting* war
-	cp ../configurator/User* war
-	cp ../configurator/web.xml war/WEB-INF
-	jar -cf ../target/Configurator.war -C war .
+	cp ${base}/GratiaReportConfiguration/WebContent/Reporting* war
+	cp ${base}GratiaReportConfiguration/WebContent/User* war
+	cp ${base}GratiaReportConfiguration/src/web.xml war/WEB-INF
+	jar -cvf ../target/GratiaReportConfiguration.war -C war .
 	rm -f -r war
 
-release: services servlets soap reporting reports configurator
+release: services servlets soap reporting reports report-configuration
 	rm -f -r tarball
 	#
 	# create condor tarball
@@ -168,8 +169,8 @@ release: services servlets soap reporting reports configurator
 	mkdir tarball/var/data
 	mkdir tarball/var/logs
 	mkdir tarball/var/tmp
-	cp ../target/Configurator.war tarball/gratia/gratia_reporting
-	cp ../target/reports.war tarball/gratia/gratia_reporting
+	cp ../target/GratiaReportConfiguration.war tarball/gratia/gratia_reporting
+	cp ../target/GratiaReports.war tarball/gratia/gratia_reporting
 	cp ../target/GratiaReporting.war tarball/gratia/gratia_reporting
 	tar -cvf ../target/gratia_reporting_v0.1.tar -C tarball .
 	rm -f -r tarball
