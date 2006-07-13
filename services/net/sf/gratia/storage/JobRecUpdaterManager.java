@@ -204,11 +204,11 @@ public class JobRecUpdaterManager implements JobUsageRecordUpdater {
 		VONameUpdater vopatch = new VONameUpdater();
 		vopatch.LoadFiles(Configuration.getConfigurationPath());
 
+                Updaters.add(vopatch);
 		Updaters.add(new CheckStartTime());
 		Updaters.add(new CheckEndTime());
 		Updaters.add(new ExtractKeyInfoContent());
 
-		PrependUpdater(vopatch);
 	}
 	
 	public JobUsageRecordUpdater AddUpdater(JobUsageRecordUpdater upd) 

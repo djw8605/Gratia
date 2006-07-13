@@ -88,7 +88,11 @@ public class UsageRecordLoader
 												{
 														SetMachineName(job,sub);
 												} 
-										else if (sub.getName().equalsIgnoreCase("Host"))
+                                        else if (sub.getName().equalsIgnoreCase("SiteName"))
+                                                {
+                                                        SetSiteName(job,sub);
+                                                } 
+                                        else if (sub.getName().equalsIgnoreCase("Host"))
 												{
 														SetHost(job,sub);
 												} 
@@ -524,6 +528,29 @@ public class UsageRecordLoader
 						}
         el.setValue(element.getText());
         job.setMachineName(el);
+    }
+
+    public static void SetSiteName(JobUsageRecord job, Element element)
+        throws Exception
+    {
+        StringElement el = job.getSiteName();
+        if (el != null /* job identity already set */)
+        {
+            Utils.GratiaError("SetSiteName","parsing",
+                " found a second SiteName field in the xml file",false);
+            return;
+        }
+        el = new StringElement();
+        for (Iterator i = element.attributeIterator(); i.hasNext();)
+        {
+            Attribute a = (Attribute) i.next();
+            if (a.getName().equalsIgnoreCase("description"))
+            {
+                el.setDescription(a.getValue());
+            }
+        }
+        el.setValue(element.getText());
+        job.setSiteName(el);
     }
 
     public static void SetHost(JobUsageRecord job, Element element)

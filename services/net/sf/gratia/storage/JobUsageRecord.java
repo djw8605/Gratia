@@ -37,6 +37,7 @@ public class JobUsageRecord {
     private DateElement StartTime;
     private DateElement EndTime;
     private StringElement MachineName;
+    private StringElement SiteName;
     private StringElement SubmitHost;
     private StringElement Queue;
     private StringElement ProjectName;
@@ -94,6 +95,7 @@ public class JobUsageRecord {
         if (StartTime != null) output = output + " StartTime: " + StartTime;
         if (EndTime != null) output = output + " EndTime: " + EndTime;
         if (MachineName != null) output = output + " MachineName: " + MachineName;
+        if (SiteName != null) output = output + " SiteName: " + SiteName;
         if (SubmitHost != null) output = output + " SubmitHost: " + SubmitHost;
         if (Queue != null) output = output + " Queue: " + Queue;
         if (ProjectName != null) output = output + " ProjectName: " + ProjectName;
@@ -138,6 +140,7 @@ public class JobUsageRecord {
         if (StartTime != null)         output = output + StartTime.asXml("StartTime");
         if (EndTime != null)           output = output + EndTime.asXml("EndTime");
         if (MachineName != null)       output = output + MachineName.asXml("MachineName");
+        if (SiteName != null)          output = output + SiteName.asXml("SiteName");
         if (SubmitHost != null)        output = output + SubmitHost.asXml("SubmitHost");
         if (Queue != null)             output = output + Queue.asXml("Queue");
         if (ProjectName != null)       output = output + ProjectName.asXml("ProjectName");
@@ -301,7 +304,18 @@ public class JobUsageRecord {
         return MachineName;
     }
 
-    public void setSubmitHost(StringElement SubmitHost) {
+    public void setSiteName(StringElement SiteName) 
+    {
+        this.SiteName = SiteName;
+    }
+
+    public StringElement getSiteName() 
+    {
+        return SiteName;
+    }
+
+    public void setSubmitHost(StringElement SubmitHost) 
+    {
         this.SubmitHost = SubmitHost;
     }
 
