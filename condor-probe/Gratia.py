@@ -5,6 +5,7 @@ class ProbeConfiguration:
     __doc = None
     __configname = "ProbeConfig"
     __MeterName = None
+    __SiteName = None
     __DebugLevel = None
     __LogLevel = None
     
@@ -41,6 +42,18 @@ class ProbeConfiguration:
             return self.__getConfigAttribute('MeterName')
         else:
             return self.__MeterName
+
+    def setSiteName(self,name):
+        self.__SiteName = name
+        
+    def get_SiteName(self):
+        if (self.__SiteName == None):
+            val = self.__getConfigAttribute('SiteName')
+            if val == None or val == "":
+                self.__SiteName =  "generic Site"
+            else:
+                self.__SiteName = val
+        return self.__SiteName
 
     def get_UseJClarens(self):
         return int(self.__getConfigAttribute('UseJClarens'))
@@ -514,6 +527,11 @@ class UsageRecord:
     RecordData = []
     JobId = []
     UserId = []
+    __ProbeName = ""
+    __ProbeNameDescription = ""
+    __SiteName = ""
+    __SiteNameDescription = ""
+
     def __init__(self):
 	    DebugPrint(0,"Creating a usage Record "+TimeToString())
 	    self.XmlData = []
@@ -521,6 +539,8 @@ class UsageRecord:
 	    self.JobId = []
 	    self.UserId = []
 	    self.Username = "none"
+            self.__ProbeName = Config.get_MeterName()
+            self.__SiteName = Config.get_SiteName()
 
     def Description(self,value):
         " Helper Function to generate the xml (Do not call directly)"
@@ -717,16 +737,35 @@ class UsageRecord:
     def Resource(self,description,value) :
 	    self.AppendToList(self.RecordData, "Resource", self.Description(description), str(value))
 
-    def ProbeName(self, value, description = "") :
-        self.RecordData = self.AddToList(self.RecordData, "ProbeName", self.Description(description), value)
-
     def AdditionalInfo(self,description,value) :
 	    self.Resource(description,value)
 
+    # The following usually comes from the Configuration file
+
+    def ProbeNameXml(self, value, description = "") :
+        self.RecordData = self.AddToList(self.RecordData, "ProbeName", self.Description(description), value)
+
+    def ProbeName(self, value, description = "") :
+        self.__ProbeName = value;
+        self.__ProbeNameDescription = description
+
+    def SiteNameXml(self, value, description = "") :
+        " Indicates which site the service accounted for belong to"
+        self.RecordData = self.AddToList(self.RecordData, "SiteName", self.Description(description), value)
+
+    def SiteName(self, value, description = "") :
+        self.__SiteName = value;
+        self.__SiteNameDescription = description
+
+    def XmlAddMembers(self):
+            self.ProbeNameXml( self.__ProbeName, self.__ProbeNameDescription )
+            self.SiteNameXml( self.__SiteName, self.__SiteNameDescription )
 
     def XmlCreate(self):
 	    global RecordId
 	    
+            self.XmlAddMembers();
+
 	    self.XmlData.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n")
 	    self.XmlData.append("<JobUsageRecord xmlns=\"http://www.gridforum.org/2003/ur-wg\"\n")
 	    self.XmlData.append("		xmlns:urwg=\"http://www.gridforum.org/2003/ur-wg\"\n")
@@ -831,9 +870,6 @@ def Send(record):
     if not canProcess and not WroteTooManyFiles:
         Error(responseString)
     if canProcess:
-
-        # Assign the ProbeName from the config file
-        record.ProbeName(Config.get_MeterName())
 
         # Assemble the record into xml
         record.XmlCreate()

@@ -3,6 +3,7 @@
     SOAPHost="cd-psg2.fnal.gov:8880" 
     CollectorService="/GratiaServices/services/CollectorImpl" 
     MeterName="generic" 
+    SiteName="Generic Site"
     UseJClarens="0" 
     LogLevel="2"
     DebugLevel="1" 
