@@ -15,7 +15,7 @@
 
 <class name="CEProbes" table="CEProbes" node="CEProbes">
 			 <id name="probeid" column="probeid" type="int">
-					 <generator class="assigned"/>
+					 <generator class="native"/>
 			 </id>
 			 <property name="_facility_id" column="facility_id" type="int"/>
 			 <property name="probename" column="probename"/>
@@ -299,7 +299,7 @@
    </component>
 
 
-
+	 <property name="SiteName" column="SiteName" type="string" />
    <property name="ExtraXml" />
    <property name="RawXml" type="text" />
 </class>
