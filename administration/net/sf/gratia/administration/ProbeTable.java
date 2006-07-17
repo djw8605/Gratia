@@ -176,7 +176,7 @@ public class ProbeTable extends HttpServlet
 
 				try
 						{
-								command = "select facility_id,facility_name from cetable";
+								command = "select facility_id,facility_name from CETable";
 								statement = connection.prepareStatement(command);
 								resultSet = statement.executeQuery(command);
 
