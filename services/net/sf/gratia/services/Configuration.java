@@ -50,26 +50,6 @@ public class Configuration
 				return p;
 		}
 
-		public static Properties getCEProbeProperties()
-		{
-				Properties p = new Properties();
-				try
-						{
-								p.load(new FileInputStream(new File(getConfigurationPath() + "/" + "ceprobe-configuration.properties")));
-						}
-				catch (Exception e)
-						{
-								System.out.println("Error Loading: " + getConfigurationPath() + "/" + "ceprobe-configuration.properties");
-								e.printStackTrace();
-						}
-				return p;
-		}
-
-		public static void saveCEProbeProperties(String string)
-		{
-				xp.save(getConfigurationPath() + "/" + "ceprobe-configuration.properties",string);
-		}
-
 		public static String getAccountingTablePath()
 		{
 				return getConfigurationPath() + "/" + "accounting-table";

@@ -125,6 +125,7 @@ public class ListenerThread extends Thread
 				QueueSession qs = null;
 				QueueReceiver qrec = null;
 				Message msg;
+				NewProbeUpdate newProbeUpdate = new NewProbeUpdate();
 
 				Logging.info("ListenerThread: Starting JMS: " + ident);
 				try
@@ -184,6 +185,7 @@ public class ListenerThread extends Thread
 																						}
 																				else
 																						{
+																								newProbeUpdate.check(current);
 																								updater.Update(current);
 																								if (rawxml != null)
 																										current.setRawXml(rawxml);

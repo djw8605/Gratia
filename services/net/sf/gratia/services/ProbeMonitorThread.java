@@ -26,89 +26,6 @@ public class ProbeMonitorThread extends Thread
 		public ProbeMonitorThread(SessionFactory factory)
 		{
 				this.factory = factory;
-				loadProperties();
-				deleteTable();
-				loadTable();
-		}
-
-		public void loadProperties()
-		{
-				p = Configuration.getCEProbeProperties();
-		}
-
-    public void deleteTable()
-    {
-				Properties p = Configuration.getProperties();
-
-				try
-						{
-								String driver = p.getProperty("service.mysql.driver");
-								String url = p.getProperty("service.mysql.url");
-								String user = p.getProperty("service.mysql.user");
-								String password = p.getProperty("service.mysql.password");
-								Class.forName(driver);
-								Connection connection = DriverManager.getConnection(url,user,password);
-								String sql = "delete from CEProbes";
-								Statement statement = connection.createStatement();
-								statement.execute(sql);
-								statement.close();
-						}
-				catch (Exception e)
-						{
-								e.printStackTrace();
-						}
-    }
-
-		public void loadTable()
-		{
-				int i = 0;
-				CEProbes record;
-				TimeZone.setDefault(TimeZone.getTimeZone("GMT"));
-
-				for (i = 0; i < 500; i++)
-						{
-								String probename = p.getProperty("probe.probename." + i);
-								if (probename == null)
-										continue;
-								int probeid = Integer.parseInt(p.getProperty("probe.probeid." + i));
-								int facilityid = Integer.parseInt(p.getProperty("probe.facilityid." + i));
-								int active = Integer.parseInt(p.getProperty("probe.active." + i));
-								int reporthh = Integer.parseInt(p.getProperty("probe.reporthh." + i));
-								int reportmm = Integer.parseInt(p.getProperty("probe.reportmm." + i));
-								int jobs = 0;
-								if (p.getProperty("probe.jobs." + i) != null)
-										jobs = Integer.parseInt(p.getProperty("probe.jobs." + i));
-								record = new CEProbes();
-								record.setprobename(probename);
-								record.setprobeid(probeid);
-								record.set_facility_id(facilityid);
-								record.setactive(active);
-								record.setreporthh(reporthh);
-								record.setreportmm(reportmm);
-								record.setstatus("");
-								record.setjobs(jobs);
-								DateElement current = new DateElement();
-								java.util.Date time = new java.util.Date();
-								current.setValue(time);
-								record.setcurrenttime(current);
-								
-								jobtable.put(probename,new Integer(jobs));
-
-								try
-										{
-												session = factory.openSession();
-												tx = session.beginTransaction();
-												session.save(record);
-												tx.commit();
-												session.close();
-												Logging.info("ProbeMonitorThread: Added: " + record);
-										}
-								catch (Exception e)
-										{
-												Logging.warning("ProbeMonitorThread: Error Adding: " + record);
-												Logging.warning(xp.parseException(e));
-										}
-						}
 		}
 
 		public void run()
@@ -150,7 +67,6 @@ public class ProbeMonitorThread extends Thread
 				String comma = ",";
 
 				int irecords = 0;
-				StringBuffer buffer = new StringBuffer();
 
 				try
 						{
@@ -180,15 +96,6 @@ public class ProbeMonitorThread extends Thread
 												long current = resultSet.getTimestamp("currenttime").getTime();
 
 												int active = resultSet.getInt("active");
-
-												buffer.append("probe.probeid." + irecords + "="  + resultSet.getInt("probeid") + "\n");
-												buffer.append("probe.facilityid." + irecords + "=" + resultSet.getInt("facility_id") + "\n");
-												buffer.append("probe.probename." + irecords + "=" + probename + "\n");
-												buffer.append("probe.active." + irecords + "=" + resultSet.getInt("active") + "\n");
-												buffer.append("probe.reporthh." + irecords + "=" + resultSet.getInt("reporthh") + "\n");
-												buffer.append("probe.reportmm." + irecords + "=" + resultSet.getInt("reportmm") + "\n");
-												buffer.append("probe.jobs." + irecords + "=" + resultSet.getInt("jobs") + "\n");
-												buffer.append("\n");
 
 												irecords++;
 
@@ -276,7 +183,6 @@ public class ProbeMonitorThread extends Thread
 								Logging.warning("ProbeMonitorThread: Error During Scan");
 								Logging.warning(xp.parseException(e));
 						}
-				Configuration.saveCEProbeProperties(buffer.toString());
 		}
 
 }

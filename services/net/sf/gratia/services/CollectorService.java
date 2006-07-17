@@ -18,6 +18,8 @@ import javax.servlet.*;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 
+import java.sql.*;
+
 public class CollectorService implements ServletContextListener
 {
 		public String rmibind;
@@ -68,31 +70,6 @@ public class CollectorService implements ServletContextListener
 								rmibind = p.getProperty("service.rmi.rmibind");
 								service = p.getProperty("service.rmi.service");
 								
-								//
-								// create a dummy ReportingConfig.xml for birt
-								//
-								
-								String dq = "\"";
-								xp = new XP();
-								StringBuffer xml = new StringBuffer();
-								catalinaHome = System.getProperty("catalina.home");
-								catalinaHome = xp.replaceAll(catalinaHome,"\\","/");
-
-								xml.append("<ReportingConfig>" + "\n");
-								xml.append("<DataSourceConfig" + "\n");
-								xml.append("url=" + dq + p.getProperty("service.mysql.url") + dq + "\n");
-								xml.append("user=" + dq + p.getProperty("service.mysql.user") + dq + "\n");
-								xml.append("password=" + dq + p.getProperty("service.mysql.password") + dq + "\n");
-								xml.append("/>" + "\n");
-								xml.append("<PathConfig" + "\n");
-								xml.append("reportsFolder=" + dq + catalinaHome + "/webapps/GratiaReports/" + dq + "\n");
-								xml.append("engineHome=" + dq + catalinaHome + "/webapps/Birt/" + dq + "\n");
-								xml.append("webappHome=" + dq + catalinaHome + "/webapps/GratiaReporting/" + dq + "\n");
-								xml.append("/>" + "\n");
-								xml.append("</ReportingConfig>" + "\n");
-								xp.save(catalinaHome + "/webapps/GratiaReportConfiguration/ReportingConfig.xml",
-												xml.toString());
-
 								//
 								// set default timezone
 								//
@@ -151,8 +128,10 @@ public class CollectorService implements ServletContextListener
 								queue2.setFreeReading();
 								queue2.setFreeWriting();
 
-								javax.jms.ConnectionFactory cf = TcpConnectionFactory.create("localhost", 16010);
-								javax.jms.QueueConnectionFactory qcf = QueueTcpConnectionFactory.create("localhost", 16010);
+								int jmsport = Integer.parseInt(p.getProperty("service.jms.port"));
+
+								javax.jms.ConnectionFactory cf = TcpConnectionFactory.create("localhost", jmsport);
+								javax.jms.QueueConnectionFactory qcf = QueueTcpConnectionFactory.create("localhost", jmsport);
 								
 								//
 								// start database
@@ -178,6 +157,12 @@ public class CollectorService implements ServletContextListener
 										{
 												databaseError.printStackTrace();
 										}
+
+								//
+								// zap database
+								//
+
+								zapDatabase();
 
 								//
 								// poke in rmi
@@ -236,9 +221,64 @@ public class CollectorService implements ServletContextListener
 								e.printStackTrace();
 						}
 
+				//
+				// wait 1 minute to create new report config for birt (giving tomcat time to deploy the war)
+				//
+
+				(new ReportSetup()).start();
+
 				master = new Master();
 				master.setDaemon(true);
 				master.start();
+		}
+
+		public void zapDatabase()
+		{
+				String dq = "\"";
+				XP xp = new XP();
+
+				Properties p = net.sf.gratia.services.Configuration.getProperties();
+
+				String driver = p.getProperty("service.mysql.driver");
+				String url = p.getProperty("service.mysql.url");
+				String user = p.getProperty("service.mysql.user");
+				String password = p.getProperty("service.mysql.password");
+	
+				java.sql.Connection connection;
+				Statement statement;
+				ResultSet resultSet;
+
+				try
+						{
+								Class.forName(driver);
+								connection = (java.sql.Connection) DriverManager.getConnection(url,user,password);
+						}
+				catch (Exception e)
+						{
+								Logging.warning("CollectorService: Error During zapDatabase: " + e);
+								Logging.warning(xp.parseException(e));
+								return;
+						}
+
+				String commands[] = 
+						{
+								"alter table CETable add unique index index02(facility_name)",
+								"alter table CEProbes add unique index index02(probename)",
+								"insert into CETable(facility_name) values(" + dq + "Unknown" + dq + ")",
+								"alter table JobUsageRecord add index index02(EndTime)",
+								"alter table JobUsageRecord add index index03(ProbeName)"
+						};
+
+				for (int i = 0; i < commands.length; i++)
+						try
+								{
+										statement = connection.createStatement();
+										statement.executeUpdate(commands[i]);
+								}
+						catch (Exception ignore)
+								{
+								}
+
 		}
 
 		public void contextDestroyed(ServletContextEvent sce)
@@ -248,6 +288,51 @@ public class CollectorService implements ServletContextListener
 				Logging.info("");
 				System.exit(0);
 		}
+
+
+		public class ReportSetup extends Thread
+		{
+				public ReportSetup()
+				{
+				}
+
+				public void run()
+				{
+						try
+								{
+										Thread.sleep(60 * 1000);
+								}
+						catch (Exception ignore)
+								{
+								}
+						//
+						// create a dummy ReportingConfig.xml for birt
+						//
+				
+						String dq = "\"";
+						XP xp = new XP();
+						StringBuffer xml = new StringBuffer();
+						String catalinaHome = System.getProperty("catalina.home");
+						catalinaHome = xp.replaceAll(catalinaHome,"\\","/");
+
+						xml.append("<ReportingConfig>" + "\n");
+						xml.append("<DataSourceConfig" + "\n");
+						xml.append("url=" + dq + p.getProperty("service.mysql.url") + dq + "\n");
+						xml.append("user=" + dq + p.getProperty("service.mysql.user") + dq + "\n");
+						xml.append("password=" + dq + p.getProperty("service.mysql.password") + dq + "\n");
+						xml.append("/>" + "\n");
+						xml.append("<PathConfig" + "\n");
+						xml.append("reportsFolder=" + dq + catalinaHome + "/webapps/GratiaReports/" + dq + "\n");
+						xml.append("engineHome=" + dq + catalinaHome + "/webapps/Birt/" + dq + "\n");
+						xml.append("webappHome=" + dq + catalinaHome + "/webapps/GratiaReporting/" + dq + "\n");
+						xml.append("/>" + "\n");
+						xml.append("</ReportingConfig>" + "\n");
+						xp.save(catalinaHome + "/webapps/GratiaReportConfiguration/ReportingConfig.xml",
+										xml.toString());
+						System.out.println("ReportConfig updated");
+				}
+		}
+
 
 		//
 		// testing
