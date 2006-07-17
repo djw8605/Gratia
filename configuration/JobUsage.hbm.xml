@@ -177,6 +177,10 @@
        <property name="Value" column="MachineName" />
        <property name="Description" column="MachineNameDescription" />
    </component>
+   <component name="SiteName" class="StringElement" insert="true">
+       <property name="Value" column="SiteName" />
+       <property name="Description" column="SiteNameDescription" />
+   </component>
    <component name="SubmitHost" class="StringElement" insert="true">
        <property name="Value" column="SubmitHost" />
        <property name="Description" column="SubmitHostDescription" />
@@ -299,7 +303,6 @@
    </component>
 
 
-	 <property name="SiteName" column="SiteName" type="string" />
    <property name="ExtraXml" />
    <property name="RawXml" type="text" />
 </class>
