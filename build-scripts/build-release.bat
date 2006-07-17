@@ -6,4 +6,5 @@ call build-servlets.bat
 call build-reporting.bat
 call build-reports.bat
 call build-configurator.bat
+call build-administration.bat
 call build-tarballs.bat

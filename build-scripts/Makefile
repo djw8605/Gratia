@@ -5,8 +5,9 @@ reports=${base}GratiaReports
 reporting=${base}GratiaReporting
 servlets=${root}servlets
 soap=${root}soap
+administration=${root}administration
 jars=${root}jars
-classpath=.:${root}services:${root}servlets:${root}soap:${base}GratiaReporting/src
+classpath=.:${root}services:${root}servlets:${root}soap:${root}administration:${base}GratiaReporting/src
 
 clean:
 	find ${base} -name "*class" -exec rm -f {} \;
@@ -97,6 +98,33 @@ soap: services
 	jar -cfM ../target/GratiaServices.war -C war .
 	rm -f -r war
 
+administration: services
+	rm -f -r war
+	mkdir war
+	mkdir war/meta-inf
+	mkdir war/WEB-INF
+	mkdir war/WEB-INF/classes
+	mkdir war/WEB-INF/classes/net
+	mkdir war/WEB-INF/classes/net/sf
+	mkdir war/WEB-INF/classes/net/sf/gratia
+	mkdir war/WEB-INF/classes/net/sf/gratia/services
+	mkdir war/WEB-INF/classes/net/sf/gratia/administration
+	mkdir war/WEB-INF/lib
+	javac -cp ${classpath} -extdirs ${jars} ../administration/net/sf/gratia/administration/*.java
+	cp ${administration}/net/sf/gratia/administration/*.class war/WEB-INF/classes/net/sf/gratia/administration
+	cp ../services/net/sf/gratia/services/Logging.class war/WEB-INF/classes/net/sf/gratia/services
+	cp ../services/net/sf/gratia/services/Configuration.class war/WEB-INF/classes/net/sf/gratia/services
+	cp ../services/net/sf/gratia/services/*Skel.class war/WEB-INF/classes/net/sf/gratia/services
+	cp ../services/net/sf/gratia/services/*Stub.class war/WEB-INF/classes/net/sf/gratia/services
+	cp ../services/net/sf/gratia/services/X*.class war/WEB-INF/classes/net/sf/gratia/services
+	cp ../services/net/sf/gratia/services/JMS*.class war/WEB-INF/classes/net/sf/gratia/services
+	cp ../administration/net/sf/gratia/administration/web.xml war/WEB-INF/web.xml
+	cp ../administration/net/sf/gratia/administration/*.html war
+	cp ../administration/net/sf/gratia/administration/*.jsp war
+	cp ../administration/net/sf/gratia/administration/images/*.gif war/images
+	jar -cfM ../target/gratia-administration.war -C war .
+	rm -f -r war
+
 reporting:
 	rm -f -r war
 	mkdir war
@@ -144,7 +172,7 @@ report-configuration:
 	jar -cvf ../target/GratiaReportConfiguration.war -C war .
 	rm -f -r war
 
-release: services servlets soap reporting reports report-configuration
+release: services servlets soap reporting reports report-configuration administration
 	rm -f -r tarball
 	#
 	# create condor tarball
@@ -195,5 +223,6 @@ release: services servlets soap reporting reports report-configuration
 	cp ../target/gratia-services.war tarball/gratia/gratia_services
 	cp ../target/gratia-servlets.war tarball/gratia/gratia_services
 	cp ../target/GratiaServices.war tarball/gratia/gratia_services
+	cp ../target/gratia-administration.war tarball/gratia/gratia_services
 	tar -cvf ../target/gratia_services_v0.2.tar -C tarball .
 	rm -f -r tarball

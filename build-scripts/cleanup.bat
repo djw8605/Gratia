@@ -24,6 +24,10 @@ del %base%GratiaReporting\src\net\sf\gratia\reporting\exceptions\*~
 del %base%GratiaReporting\src\net\sf\gratia\reporting\exceptions\*#
 del %base%GratiaReporting\src\net\sf\gratia\reporting\exceptions\*.class
 
+del %root%\administration\net\sf\gratia\administration\*~
+del %root%\administration\net\sf\gratia\administration\*#
+del %root%\administration\net\sf\gratia\administration\*.class
+
 del %root%\configuration\*~
 del %root%\configuration\*#
 

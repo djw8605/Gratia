@@ -7,6 +7,7 @@ call build-servlets.bat
 call build-reporting.bat
 call build-reports.bat
 call build-configurator.bat
+call build-administration.bat
 mkdir %catalina_home%\gratia
 copy %root%\configuration\* %catalina_home%\gratia
 del %catalina_home%\gratia\local.*
