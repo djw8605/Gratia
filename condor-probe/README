@@ -81,7 +81,7 @@ MAILTO=root  3,13,23,33,43,53 * * * *  $VDT_LOCATION/gratia/gratia_probes/condor
 	  directory, as this environment variable will be unknown to cron.
 	  
 4. Globus script patches:
-	o Under the directory $VDT_LOCATION/gratia/gratia_probes/condor_mods there 
+	o Under the directory $VDT_LOCATION/gratia/gratia_probes/gram_mods there 
 	  are two files that contain for your information the changes to the 
 	  Globus script (in the form of diff between the patched files and 
 	  the ones currently distributed with OSG 0.3.6 / VDT 1.3.10). 
