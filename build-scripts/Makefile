@@ -1,3 +1,6 @@
+
+PLATFORM := $(shell uname)
+
 base=../../
 root=../
 services=${root}services
@@ -7,7 +10,11 @@ servlets=${root}servlets
 soap=${root}soap
 administration=${root}administration
 jars=${root}jars
+ifeq ($(filter CYGWIN%,$(PLATFORM)),)
 classpath=.:${root}services:${root}servlets:${root}soap:${root}administration:${base}GratiaReporting/src
+else
+classpath=.\;${root}services\;${root}servlets\;${root}soap\;${root}administration\;${base}GratiaReporting/src
+endif
 
 clean:
 	find ${base} -name "*class" -exec rm -f {} \;
