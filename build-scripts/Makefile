@@ -1,8 +1,8 @@
 
 PLATFORM := $(shell uname)
 
-condor_probe_version=v0.2
-psacct_probe_version=v0.2
+condor_probe_version=v0.7
+psacct_probe_version=v0.7
 
 base=../../
 root=../
@@ -189,19 +189,6 @@ report-configuration:
 release: services servlets soap reporting reports report-configuration administration
 	rm -f -r tarball
 	#
-	# create condor tarball
-	#
-	mkdir tarball
-	mkdir tarball/gratia
-	mkdir tarball/gratia/gratia_probes
-	mkdir tarball/var
-	mkdir tarball/var/data
-	mkdir tarball/var/logs
-	mkdir tarball/var/tmp
-	cp ../condor-probe/Cl* ../condor-probe/c* ../condor-probe/G* ../condor-probe/s* tarball/gratia/gratia_probes
-	tar -cvf ../target/gratia_probe_v0.2.tar -C tarball .
-	rm -f -r tarball
-	#
 	# create reporting tarball
 	#
 	mkdir tarball
@@ -247,6 +234,7 @@ dirs:
 	mkdir -p $(tarballdir)/gratia/var/data/
 	mkdir -p $(tarballdir)/gratia/var/logs/
 	mkdir -p $(tarballdir)/gratia/var/tmp/
+	chmod -R og+rw $(tarballdir)/gratia/var/
 
 condordirs: dirs
 	mkdir -p $(tarballdir)/gratia/condor-probe/
@@ -267,7 +255,8 @@ condorfiles: condordirs
 	cp $(root)/condor-probe/gram_mods/managedfork.pm.diff $(tarballdir)/gratia/condor-probe/gram_mods
 
 psacctfiles: psacctdirs
-	chmod u+x $(root)/psacct/gratia-psacct $(root)/psacct/*sh $(root)/psacct/PSACCTProbe.py (root)/psacct/facct-catchup
+	chmod uog+x $(root)/psacct/gratia-psacct 
+	chmod u+x $(root)/psacct/*sh $(root)/psacct/PSACCTProbe.py $(root)/psacct/facct-catchup
 	cp $(root)/psacct/psacct_probe.cron.sh $(tarballdir)/gratia/psacct
 	cp $(root)/psacct/facct-turnoff.sh $(tarballdir)/gratia/psacct
 	cp $(root)/psacct/PSACCTProbe.py $(tarballdir)/gratia/psacct
