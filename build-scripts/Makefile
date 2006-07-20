@@ -1,27 +1,34 @@
 
 PLATFORM := $(shell uname)
 
+condor_probe_version=v0.2
+psacct_probe_version=v0.2
+
 base=../../
 root=../
-services=${root}services
+tarballdir=tarball
+services=$(root)services
 reports=${base}GratiaReports
 reporting=${base}GratiaReporting
-servlets=${root}servlets
-soap=${root}soap
-administration=${root}administration
-jars=${root}jars
+servlets=$(root)servlets
+soap=$(root)soap
+administration=$(root)administration
+jars=$(root)jars
 ifeq ($(filter CYGWIN%,$(PLATFORM)),)
-classpath=.:${root}services:${root}servlets:${root}soap:${root}administration:${base}GratiaReporting/src
+tarowner=--owner=root --group=root
+classpath=.:$(root)services:$(root)servlets:$(root)soap:$(root)administration:${base}GratiaReporting/src
 else
-classpath=.\;${root}services\;${root}servlets\;${root}soap\;${root}administration\;${base}GratiaReporting/src
+warn := $(shell echo "Building the tar file on cygwin will result in incorrect ownership" 1>&2 )
+tarowner=
+classpath=.\;$(root)services\;$(root)servlets\;$(root)soap\;$(root)administration\;${base}GratiaReporting/src
 endif
 
 clean:
 	find ${base} -name "*class" -exec rm -f {} \;
 	find ${base} -name "*~" -exec rm -f {} \;
 	find ${base} -name "*#" -exec rm -f {} \;
-	rm -f -r ${root}target
-	mkdir ${root}target
+	rm -f -r $(root)target
+	mkdir $(root)target
 
 services:
 	rm -f -r war
@@ -36,14 +43,14 @@ services:
 	mkdir war/WEB-INF/classes/net/sf/gratia/storage
 	mkdir war/WEB-INF/lib
 	rm -f -r net
-	javac -cp ${classpath} -extdirs ${jars} ../services/net/sf/gratia/services/*.java
-	javac -cp ${classpath} -extdirs ${jars} ../services/net/sf/gratia/storage/*.java
+	javac -cp ${classpath} -extdirs $(jars) ../services/net/sf/gratia/services/*.java
+	javac -cp ${classpath} -extdirs $(jars) ../services/net/sf/gratia/storage/*.java
 	rmic -vcompat -classpath ${classpath} -d . net.sf.gratia.services.JMSProxyImpl
 	cp net/sf/gratia/services/* ../services/net/sf/gratia/services
 	rm -f -r net
 	cp ${services}/net/sf/gratia/services/*.class war/WEB-INF/classes/net/sf/gratia/services
 	cp ${services}/net/sf/gratia/storage/*.class war/WEB-INF/classes/net/sf/gratia/storage
-	cp ${jars}/*.jar war/WEB-INF/lib
+	cp $(jars)/*.jar war/WEB-INF/lib
 	rm -f  war/WEB-INF/lib/serv*
 	cp ${services}/net/sf/gratia/services/web.xml war/WEB-INF/web.xml
 	jar -cfM ../target/gratia-services.war -C war .
@@ -61,7 +68,7 @@ servlets:	services
 	mkdir war/WEB-INF/classes/net/sf/gratia/services
 	mkdir war/WEB-INF/classes/net/sf/gratia/servlets
 	mkdir war/WEB-INF/lib
-	javac -cp ${classpath} -extdirs ${jars} ../servlets/net/sf/gratia/servlets/*.java
+	javac -cp ${classpath} -extdirs $(jars) ../servlets/net/sf/gratia/servlets/*.java
 	cp ${servlets}/net/sf/gratia/servlets/*.class war/WEB-INF/classes/net/sf/gratia/servlets
 	cp ../services/net/sf/gratia/services/Logging.class war/WEB-INF/classes/net/sf/gratia/services
 	cp ../services/net/sf/gratia/services/Configuration.class war/WEB-INF/classes/net/sf/gratia/services
@@ -86,7 +93,7 @@ soap: services
 	mkdir war/WEB-INF/classes/net/sf/gratia/soap
 	mkdir war/WEB-INF/lib
 	mkdir war/wsdl
-	javac -cp ${classpath} -extdirs ${jars} ../soap/net/sf/gratia/soap/*.java
+	javac -cp ${classpath} -extdirs $(jars) ../soap/net/sf/gratia/soap/*.java
 	cp ${soap}/net/sf/gratia/soap/*.class war/WEB-INF/classes/net/sf/gratia/soap
 	cp ../services/net/sf/gratia/services/Logging.class war/WEB-INF/classes/net/sf/gratia/services
 	cp ../services/net/sf/gratia/services/Configuration.class war/WEB-INF/classes/net/sf/gratia/services
@@ -117,7 +124,7 @@ administration: services
 	mkdir war/WEB-INF/classes/net/sf/gratia/services
 	mkdir war/WEB-INF/classes/net/sf/gratia/administration
 	mkdir war/WEB-INF/lib
-	javac -cp ${classpath} -extdirs ${jars} ../administration/net/sf/gratia/administration/*.java
+	javac -cp ${classpath} -extdirs $(jars) ../administration/net/sf/gratia/administration/*.java
 	cp ${administration}/net/sf/gratia/administration/*.class war/WEB-INF/classes/net/sf/gratia/administration
 	cp ../services/net/sf/gratia/services/Logging.class war/WEB-INF/classes/net/sf/gratia/services
 	cp ../services/net/sf/gratia/services/Configuration.class war/WEB-INF/classes/net/sf/gratia/services
@@ -145,8 +152,8 @@ reporting:
 	mkdir war/WEB-INF/classes/net/sf/gratia/reporting
 	mkdir war/WEB-INF/classes/net/sf/gratia/reporting/exceptions
 	mkdir war/WEB-INF/lib
-	javac -cp ${classpath} -extdirs ${jars} ${base}GratiaReporting/src/net/sf/gratia/reporting/*.java
-	javac -cp ${classpath} -extdirs ${jars} ${base}GratiaReporting/src/net/sf/gratia/reporting/exceptions/*.java
+	javac -cp ${classpath} -extdirs $(jars) ${base}GratiaReporting/src/net/sf/gratia/reporting/*.java
+	javac -cp ${classpath} -extdirs $(jars) ${base}GratiaReporting/src/net/sf/gratia/reporting/exceptions/*.java
 	cp ${base}GratiaReporting/WebContent/*.jsp war
 	cp ${base}GratiaReporting/WebContent/*.css war
 	cp ${base}GratiaReporting/src/net/sf/gratia/reporting/*.class war/WEB-INF/classes/net/sf/gratia/reporting
@@ -233,3 +240,49 @@ release: services servlets soap reporting reports report-configuration administr
 	cp ../target/gratia-administration.war tarball/gratia/gratia_services
 	tar -cvf ../target/gratia_services_v0.2.tar -C tarball .
 	rm -f -r tarball
+
+dirs:
+	mkdir -p $(tarballdir)/gratia/
+	mkdir -p $(tarballdir)/gratia/var/
+	mkdir -p $(tarballdir)/gratia/var/data/
+	mkdir -p $(tarballdir)/gratia/var/logs/
+	mkdir -p $(tarballdir)/gratia/var/tmp/
+
+condordirs: dirs
+	mkdir -p $(tarballdir)/gratia/condor-probe/
+	mkdir -p $(tarballdir)/gratia/condor-probe/gram_mods/
+
+psacctdirs: dirs
+	mkdir -p $(tarballdir)/gratia/psacct/
+
+condorfiles: condordirs
+	cp $(root)/condor-probe/Clarens.py $(tarballdir)/gratia/condor-probe
+	cp $(root)/condor-probe/Gratia.py $(tarballdir)/gratia/condor-probeGratia.py
+	cp $(root)/condor-probe/condor_meter.pl $(tarballdir)/gratia/condor-probecondor_meter.pl
+	cp $(root)/condor-probe/ProbeConfigTemplate $(tarballdir)/gratia/condor-probeProbeConfigTemplate
+	cp $(root)/condor-probe/README $(tarballdir)/gratia/condor-probeREADME
+	cp $(root)/condor-probe/condor_meter.cron.sh $(tarballdir)/gratia/condor-probecondor_meter.cron.sh
+	cp $(root)/condor-probe/gram_mods/condor.pm.diff $(tarballdir)/gratia/condor-probe/gram_mods/condor.pm.diff
+	cp $(root)/condor-probe/gram_mods/managedfork.pm.diff $(tarballdir)/gratia/condor-probe/managedfork.pm.diff
+
+psacctfiles: psacctdirs
+	cp $(root)/psacct/psacct_probe.cron.sh $(tarballdir)/gratia/psacct
+	cp $(root)/psacct/facct-turnoff.sh $(tarballdir)/gratia/psacct
+	cp $(root)/psacct/PSACCTProbe.py $(tarballdir)/gratia/psacct
+	cp $(root)/psacct/PSACCTProbeLib.py $(tarballdir)/gratia/psacct
+	cp $(root)/psacct/facct-catchup $(tarballdir)/gratia/psacct
+	cp $(root)/psacct/gratia-psacct $(tarballdir)/gratia/psacct
+	cp $(root)/condor-probe/ProbeConfigTemplate $(tarballdir)/gratia/psacct
+	cp $(root)/condor-probe/Gratia.py $(tarballdir)/gratia/psacct
+
+$(root)/target/gratia_probe_$(condor_probe_version).tar: condorfiles
+	tar $(tarowner) -cvf $(root)/target/gratia_probe_$(condor_probe_version).tar -C tarball .
+	#rm -f -r tarball
+
+$(root)/target/psacct_probe_$(psacct_probe_version).tar: psacctfiles
+	tar $(tarowner) -cvf $(root)/target/psacct_probe_$(psacct_probe_version).tar -C tarball .
+	#rm -f -r tarball
+
+condor_probe_tar: $(root)/target/gratia_probe_$(condor_probe_version).tar
+
+psacct_probe.tar: $(root)/target/psacct_probe_$(psacct_probe_version).tar
