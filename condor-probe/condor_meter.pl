@@ -2,7 +2,7 @@
 #
 # condor_meter.pl - Prototype for an OSG Accouting 'meter' for Condor
 #       By Ken Schumacher <kschu@fnal.gov> Began 5 Nov 2005
-# $Id: condor_meter.pl,v 1.3 2006-07-20 14:38:53 pcanal Exp $
+# $Id: condor_meter.pl,v 1.4 2006-07-20 14:41:48 pcanal Exp $
 # Full Path: $Source: /var/tmp/move/gratia/condor-probe/condor_meter.pl,v $
 #
 # Revision History:
@@ -25,7 +25,7 @@ use File::Basename;
 
 $progname = "condor_meter.pl";
 $prog_version = "v0.4.0";
-$prog_revision = '$Revision: 1.3 $ ';   # CVS Version number
+$prog_revision = '$Revision: 1.4 $ ';   # CVS Version number
 #$true = 1; $false = 0;
 $verbose = 1;
 
@@ -1026,6 +1026,9 @@ exit 0;
 #==================================================================
 # CVS Log
 # $Log: not supported by cvs2svn $
+# Revision 1.3  2006/07/20 14:38:53  pcanal
+# change permisssion
+#
 # Revision 1.2  2006/06/16 15:57:37  glr01
 # glr: reset condor-probe to contents from gratia-proto
 #

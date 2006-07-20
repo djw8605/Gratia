@@ -3,7 +3,7 @@
 # condor_meter.cron.sh - Shell script used with cron to parse Condor log 
 #   files for OSG accounting data collection.
 #      By Ken Schumacher <kschu@fnal.gov>  Began 5 April 2006
-# $Id: condor_meter.cron.sh,v 1.3 2006-07-20 14:38:53 pcanal Exp $
+# $Id: condor_meter.cron.sh,v 1.4 2006-07-20 14:41:48 pcanal Exp $
 # Full Path: $Source: /var/tmp/move/gratia/condor-probe/condor_meter.cron.sh,v $
 
 Logger='/usr/bin/logger -s -t condor_meter'
@@ -99,6 +99,9 @@ exit 0
 #==================================================================
 # CVS Log
 # $Log: not supported by cvs2svn $
+# Revision 1.3  2006/07/20 14:38:53  pcanal
+# change permisssion
+#
 # Revision 1.2  2006/06/16 15:57:37  glr01
 # glr: reset condor-probe to contents from gratia-proto
 #
