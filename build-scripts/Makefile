@@ -257,15 +257,17 @@ psacctdirs: dirs
 
 condorfiles: condordirs
 	cp $(root)/condor-probe/Clarens.py $(tarballdir)/gratia/condor-probe
-	cp $(root)/condor-probe/Gratia.py $(tarballdir)/gratia/condor-probeGratia.py
-	cp $(root)/condor-probe/condor_meter.pl $(tarballdir)/gratia/condor-probecondor_meter.pl
-	cp $(root)/condor-probe/ProbeConfigTemplate $(tarballdir)/gratia/condor-probeProbeConfigTemplate
-	cp $(root)/condor-probe/README $(tarballdir)/gratia/condor-probeREADME
-	cp $(root)/condor-probe/condor_meter.cron.sh $(tarballdir)/gratia/condor-probecondor_meter.cron.sh
-	cp $(root)/condor-probe/gram_mods/condor.pm.diff $(tarballdir)/gratia/condor-probe/gram_mods/condor.pm.diff
-	cp $(root)/condor-probe/gram_mods/managedfork.pm.diff $(tarballdir)/gratia/condor-probe/managedfork.pm.diff
+	cp $(root)/condor-probe/Gratia.py $(tarballdir)/gratia/condor-probe
+	chmod ogu+x $(root)/condor-probe/condor_meter.pl $(root)/condor-probe/condor_meter.cron.sh 
+	cp $(root)/condor-probe/condor_meter.cron.sh $(tarballdir)/gratia/condor-probe
+	cp $(root)/condor-probe/condor_meter.pl $(tarballdir)/gratia/condor-probe
+	cp $(root)/condor-probe/ProbeConfigTemplate $(tarballdir)/gratia/condor-probe
+	cp $(root)/condor-probe/README $(tarballdir)/gratia/condor-probe
+	cp $(root)/condor-probe/gram_mods/condor.pm.diff $(tarballdir)/gratia/condor-probe/gram_mods
+	cp $(root)/condor-probe/gram_mods/managedfork.pm.diff $(tarballdir)/gratia/condor-probe/gram_mods
 
 psacctfiles: psacctdirs
+	chmod u+x $(root)/psacct/gratia-psacct $(root)/psacct/*sh $(root)/psacct/PSACCTProbe.py (root)/psacct/facct-catchup
 	cp $(root)/psacct/psacct_probe.cron.sh $(tarballdir)/gratia/psacct
 	cp $(root)/psacct/facct-turnoff.sh $(tarballdir)/gratia/psacct
 	cp $(root)/psacct/PSACCTProbe.py $(tarballdir)/gratia/psacct
