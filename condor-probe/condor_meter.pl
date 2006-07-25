@@ -2,7 +2,7 @@
 #
 # condor_meter.pl - Prototype for an OSG Accouting 'meter' for Condor
 #       By Ken Schumacher <kschu@fnal.gov> Began 5 Nov 2005
-# $Id: condor_meter.pl,v 1.4 2006-07-20 14:41:48 pcanal Exp $
+# $Id: condor_meter.pl,v 1.5 2006-07-25 22:14:51 pcanal Exp $
 # Full Path: $Source: /var/tmp/move/gratia/condor-probe/condor_meter.pl,v $
 #
 # Revision History:
@@ -25,7 +25,7 @@ use File::Basename;
 
 $progname = "condor_meter.pl";
 $prog_version = "v0.4.0";
-$prog_revision = '$Revision: 1.4 $ ';   # CVS Version number
+$prog_revision = '$Revision: 1.5 $ ';   # CVS Version number
 #$true = 1; $false = 0;
 $verbose = 1;
 
@@ -820,6 +820,7 @@ foreach $logfile (@logfiles) {
     if ($record_in =~ /\<c\>/) {
       #if ($debug_mode) { print "Processing as an XML format logfile.\n" }
       $count_xml++;   # This is counting XML log files (not records)
+      my $last_was_c = 0; # To work around a bug in the condor xml generation
 
       $event_hash = {};  $ctag_depth=1;
       # Parse the XML log file
@@ -832,13 +833,22 @@ foreach $logfile (@logfiles) {
 	# better than the GRAM job manager.
 
 	if (/<c>/) { # Open tag --------------------
-	  $ctag_depth++;
+          # allow for more than one open tag in a row (known condor
+          # xml format error).
+
+	  if ($last_was_c != 1) {
+              $ctag_depth++;
+          }
 	  if ($ctag_depth > 1) {
 	    warn "$logfile: Improperly formatted XML records, missing \<c/\>\n";
 	    $logfile_errors++; # An error means we won't delete this log file
 	  }
 	  $event_hash = {};
-	} elsif (/<a n="([^"]+)">/) { # Attribute line --------------------
+          $last_was_c = 1;
+        } else {
+          $last_was_c = 0;
+        }
+        if (/<a n="([^"]+)">/) { # Attribute line --------------------
 	  my $attr = $1;
 
 	  # In the XML version of log files, the Cluster ID was
@@ -1026,6 +1036,9 @@ exit 0;
 #==================================================================
 # CVS Log
 # $Log: not supported by cvs2svn $
+# Revision 1.4  2006/07/20 14:41:48  pcanal
+# permissions
+#
 # Revision 1.3  2006/07/20 14:38:53  pcanal
 # change permisssion
 #
