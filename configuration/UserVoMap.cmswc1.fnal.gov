@@ -62,6 +62,7 @@ auger OTHER_OSG
 patriot OTHER_OSG
 des OTHER_OSG
 miniboone OTHER_OSG
+minboone OTHER_OSG
 cdms OTHER_OSG
 fnal_ast OTHER_OSG
 fnal_thy OTHER_OSG
@@ -261,6 +262,7 @@ cmsphedex CMS_OSG
 cmssoft CMS_OSG
 cmst2admin CMS_OSG
 cmsprod CMS_OSG
+cmsprd CMS_OSG
 dteamprd dteam
 cmsp CMS_OSGrd
 dteam001 dteam
@@ -653,6 +655,7 @@ ciocca CMS_UAF
 cjarvis CMS_UAF
 cjustus CMS_UAF
 clare CMS_UAF
+clazarid CMS_UAF
 claudioc CMS_UAF
 clundst CMS_UAF
 cmironov CMS_UAF
@@ -911,6 +914,7 @@ nagaraj CMS_UAF
 nahn CMS_UAF
 natasha CMS_UAF
 neeti CMS_UAF
+nleioatt CMS_UAF
 neumeist CMS_UAF
 newsom CMS_UAF
 nickw CMS_UAF
