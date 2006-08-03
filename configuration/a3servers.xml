@@ -5,11 +5,11 @@
   <property name="Transaction" value="fr.dyade.aaa.util.NTransaction"/>
 
   <server id="0" name="s0" hostname="localhost">
-    <network domain="D1" port="16301"/>
+    <network domain="D1" port="16100"/>
     <service class="org.objectweb.joram.mom.proxies.ConnectionManager"
              args="root root"/>
     <service class="org.objectweb.joram.mom.proxies.tcp.TcpProxyService"
-             args="16010"/>
+             args="16000"/>
   </server>
 
 </config>
