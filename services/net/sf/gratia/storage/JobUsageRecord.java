@@ -139,8 +139,8 @@ public class JobUsageRecord {
         if (Status != null)            output = output + Status.asXml("Status");
         if (Njobs != null)             output = output + Njobs.asXml("Njobs");
         if (WallDuration != null)      output = output + WallDuration.asXml("WallDuration");
-        if (CpuUserDuration != null)   output = output + CpuUserDuration.asXml("CpuUserDuration","user");
-        if (CpuSystemDuration != null) output = output + CpuSystemDuration.asXml("CpuSystemDuration","system");
+        if (CpuUserDuration != null)   output = output + CpuUserDuration.asXml("CpuDuration","user");
+        if (CpuSystemDuration != null) output = output + CpuSystemDuration.asXml("CpuDuration","system");
         if (NodeCount != null)         output = output + NodeCount.asXml("NodeCount");
         if (Processors != null)        output = output + Processors.asXml("Processors");
         if (StartTime != null)         output = output + StartTime.asXml("StartTime");
