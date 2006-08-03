@@ -553,6 +553,8 @@ class UsageRecord:
     __ProbeNameDescription = ""
     __SiteName = ""
     __SiteNameDescription = ""
+    __Njobs = 1
+    __NjobsDescription = ""
 
     def __init__(self):
         DebugPrint(0,"Creating a usage Record "+TimeToString())
@@ -634,15 +636,19 @@ class UsageRecord:
     # Public Interface:
     def LocalJobId(self,value):
         self.JobId = self.AddToList(self.JobId,"LocalJobId","",value)
+
     def GlobalJobId(self,value):
         self.JobId = self.AddToList(self.JobId,"GlobalJobId","",value)
+
     def ProcessId(self,value):
         self.JobId = self.AddToList(self.JobId,"ProcessId","",str(value))
 
     def GlobalUsername(self,value): 
         self.UserId = self.AddToList(self.UserId,"GlobalUsername","",value); 
+
     def LocalUserId(self,value):
         self.UserId = self.AddToList(self.UserId,"LocalUserId","",value);
+
     def UserKeyInfo(self,value):
         " Example: \
             <ds:KeyInfo xmlns:ds=""http://www.w3.org/2000/09/xmldsig#""> \
@@ -655,10 +661,12 @@ class UsageRecord:
 
     def JobName(self, value, description = ""):
         self.RecordData = self.AddToList(self.RecordData, "JobName", self.Description(description) ,value)
+
     def Charge(self,value, unit = "", formula = "", description = ""):
         if len(formula)>0 : Formula = "formula=\""+formula+"\" "
         else : Formula = ""
         self.RecordData = self.AddToList(self.RecordData,"Charge",self.Description(description)+self.Unit(unit)+Formula , value)
+
     def Status(self,value, description = "") :
         self.RecordData = self.AddToList(self.RecordData, "Status", self.Description(description), str(value))
 
@@ -666,6 +674,7 @@ class UsageRecord:
         if type(value)==str : realvalue = value
         else : realvalue = self.Duration(value)
         self.RecordData = self.AddToList(self.RecordData, "WallDuration", self.Description(description), realvalue)
+
     def CpuDuration(self, value, cputype, description = ""):
         "Register a total cpu duration.  cputype must be either 'user' or 'system'"
         if type(value)==str : realvalue = value
@@ -675,20 +684,24 @@ class UsageRecord:
             description = "(type="+cputype+") "+description
             cputype = ""
             self.RecordData = self.AppendToList(self.RecordData, "CpuDuration", self.UsageType(cputype)+self.Description(description), realvalue)
+
     def EndTime(self, value, description = ""):
         if type(value)==str : realvalue = value
         else : realvalue = TimeToString(time.gmtime(value))
         self.RecordData = self.AddToList(self.RecordData, "EndTime", self.Description(description), realvalue)
+
     def StartTime(self, value, description = ""):
         if type(value)==str : realvalue = value
         else : realvalue = TimeToString(time.gmtime(value))
         self.RecordData = self.AddToList(self.RecordData, "StartTime", self.Description(description), realvalue)
+
     def TimeDuration(self, value, timetype, description = ""):
         " Additional measure of time duration that is relevant to the reported usage "
         " timetype can be one of 'submit','connect','dedicated' (or other) "
         if type(value)==str : realvalue = value
         else : realvalue = self.Duration(value)
         self.AppendToList(self.RecordData, "TimeDuration", self.Type(timetype)+self.Description(description), realvalue)
+
     def TimeInstant(self, value, timetype, description = ""):
         " Additional identified discrete time that is relevant to the reported usage "
         " timetype can be one of 'submit','connect' (or other) "
@@ -698,15 +711,19 @@ class UsageRecord:
 
     def MachineName(self, value, description = "") :
         self.RecordData = self.AddToList(self.RecordData, "MachineName", self.Description(description), value)
+
     def Host(self, value, primary = False, description = "") :
         if primary : pstring = "primary=\"true\" "
         else : pstring = "primary=\"false\" "
         pstring = pstring + self.Description(description)
         self.RecordData = self.AddToList(self.RecordData, "Host", pstring, value)
+
     def SubmitHost(self, value, description = "") :
         self.RecordData = self.AddToList(self.RecordData, "SubmitHost", self.Description(description), value)
+
     def Queue(self, value, description = "") :
         self.RecordData = self.AddToList(self.RecordData, "Queue", self.Description(description), value)
+
     def ProjectName(self, value, description = "") :
         self.RecordData = self.AddToList(self.RecordData, "ProjectName", self.Description(description), value)
 
@@ -716,6 +733,7 @@ class UsageRecord:
         self.AppendToList(self.RecordData, "Network",
           self.StorageUnit(storageUnit)+self.PhaseUnit(phaseUnit)+self.Metric(metric)+self.Description(description),
           str(value))
+
     def Disk(self, value, storageUnit = "", phaseUnit = "", type = "", metric = "total", description = "") :
         " Metric should be one of 'total','average','max','min' "
         " Type can be one of scratch or temp "
@@ -742,6 +760,7 @@ class UsageRecord:
         self.AppendToList(self.RecordData, "NodeCount",
           self.Metric(metric)+self.Description(description),
           str(value))
+
     def Processors(self, value, consumptionRate = 0, metric = "total", description = "") :
         " Metric should be one of 'total','average','max','min' "
         " consumptionRate specifies te consumption rate for the report "
@@ -762,26 +781,30 @@ class UsageRecord:
     def AdditionalInfo(self,description,value) :
         self.Resource(description,value)
 
-    # The following usually comes from the Configuration file
+    # The following are not officially part of the Usage Record format
 
-    def ProbeNameXml(self, value, description = "") :
-        self.RecordData = self.AddToList(self.RecordData, "ProbeName", self.Description(description), value)
+    def Njobs(self, value, description = "") :
+        self.__Njobs = value;
+        self.__NjobsDescription = description
+
+    # The following usually comes from the Configuration file
 
     def ProbeName(self, value, description = "") :
         self.__ProbeName = value;
         self.__ProbeNameDescription = description
 
-    def SiteNameXml(self, value, description = "") :
-        " Indicates which site the service accounted for belong to"
-        self.RecordData = self.AddToList(self.RecordData, "SiteName", self.Description(description), value)
-
     def SiteName(self, value, description = "") :
+        " Indicates which site the service accounted for belong to"
         self.__SiteName = value;
         self.__SiteNameDescription = description
 
+    def GenericAddToList(self, xmlelem, value, description = "") :
+        self.RecordData = self.AddToList(self.RecordData, xmlelem, self.Description(description), value)
+
     def XmlAddMembers(self):
-        self.ProbeNameXml( self.__ProbeName, self.__ProbeNameDescription )
-        self.SiteNameXml( self.__SiteName, self.__SiteNameDescription )
+        self.GenericAddToList( "ProbeName", self.__ProbeName, self.__ProbeNameDescription )
+        self.GenericAddToList( "SiteName", self.__SiteName, self.__SiteNameDescription )
+        self.GenericAddToList( "Njobs", str(self.__Njobs), self.__NjobsDescription )
 
     def XmlCreate(self):
         global RecordId
