@@ -6,6 +6,31 @@
     
 <hibernate-mapping package= "net.sf.gratia.storage">
 
+<class name="Replication" table="Replication" node="Replication">
+			 <id name="replicationid" column="replicationid" type="int">
+					 <generator class="native"/>
+			 </id>
+			 <property name="registered" column="registered" type="int"/>
+			 <property name="running" column="running" type="int"/>
+			 <property name="security" column="security" type="int"/>
+			 <property name="openconnection" column="openconnection"/>
+			 <property name="secureconnection" column="secureconnection"/>
+			 <property name="frequency" column="frequency" type="int"/>
+			 <property name="dbid" column="dbid" type="int"/>
+			 <property name="rowcount" column="rowcount" type="int"/>
+			 <property name="probename" column="probename"/>
+</class>
+
+<class name="Security" table="Security" node="Security">
+			 <id name="securityid" column="securityid" type="int">
+					 <generator class="native"/>
+			 </id>
+			 <property name="source" column="source"/>
+			 <property name="alias" column="alias"/>
+			 <property name="hostpem" column="hostpem" type="text"/>
+			 <property name="state" column="state"/>
+</class>
+
 <class name="CETable" table="CETable" node="CETable">
 			 <id name="_facility_id" column="facility_id" type="int">
 					 <generator class="native"/>

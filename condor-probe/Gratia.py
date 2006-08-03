@@ -8,25 +8,28 @@ class ProbeConfiguration:
     __SiteName = None
     __DebugLevel = None
     __LogLevel = None
-    
+
     def __init__(self, customConfig = "ProbeConfig"):
-	if os.path.exists(customConfig):
-		self.__configname = customConfig
+        if os.path.exists(customConfig):
+            self.__configname = customConfig
 
     def loadConfiguration(self):
-	self.__doc = xml.dom.minidom.parse(self.__configname)
-	DebugPrint(0, 'Using config file :' + self.__configname)
+        self.__doc = xml.dom.minidom.parse(self.__configname)
+        DebugPrint(0, 'Using config file :' + self.__configname)
 
     def __getConfigAttribute(self, attributeName):
         if self.__doc == None:
             self.loadConfiguration()
-        
+
         # TODO:  Check if the ProbeConfiguration node exists
         # TODO:  Check if the requested attribute exists
         return self.__doc.getElementsByTagName('ProbeConfiguration')[0].getAttribute(attributeName)        
-    
-    def get_JClarensHost(self):
-        return self.__getConfigAttribute('JClarensHost')
+
+    def get_SSLHost(self):
+        return self.__getConfigAttribute('SSLHost')
+
+    def get_SSLRegistrationHost(self):
+        return self.__getConfigAttribute('SSLRegistrationHost')
 
     def get_SOAPHost(self):
         return self.__getConfigAttribute('SOAPHost')
@@ -34,9 +37,24 @@ class ProbeConfiguration:
     def get_CollectorService(self):
         return self.__getConfigAttribute('CollectorService')
 
+    def get_SSLCollectorService(self):
+        return self.__getConfigAttribute('SSLCollectorService')
+
+    def get_SSLRegistrationService(self):
+        return self.__getConfigAttribute('SSLRegistrationService')
+
+    def get_SSLProbeName(self):
+        return self.__getConfigAttribute('SSLProbeName')
+
+    def get_SSLCertificateFile(self):
+        return self.__getConfigAttribute('SSLCertificateFile')
+
+    def get_SSLKeyFile(self):
+        return self.__getConfigAttribute('SSLKeyFile')
+
     def setMeterName(self,name):
         self.__MeterName = name
-        
+
     def get_MeterName(self):
         if (self.__MeterName == None):
             return self.__getConfigAttribute('MeterName')
@@ -45,7 +63,7 @@ class ProbeConfiguration:
 
     def setSiteName(self,name):
         self.__SiteName = name
-        
+
     def get_SiteName(self):
         if (self.__SiteName == None):
             val = self.__getConfigAttribute('SiteName')
@@ -55,8 +73,11 @@ class ProbeConfiguration:
                 self.__SiteName = val
         return self.__SiteName
 
-    def get_UseJClarens(self):
-        return int(self.__getConfigAttribute('UseJClarens'))
+    def get_UseSSL(self):
+        return int(self.__getConfigAttribute('UseSSL'))
+
+    def get_UseSSLCertificates(self):
+        return int(self.__getConfigAttribute('UseSSLCertificates'))
 
     def get_DebugLevel(self):
         if (self.__DebugLevel == None):
@@ -85,17 +106,17 @@ class ProbeConfiguration:
         return self.__getConfigAttribute('MaxPendingFiles')
 
     def get_DataFolder(self):
-	return self.__getConfigAttribute('DataFolder')
+        return self.__getConfigAttribute('DataFolder')
 
     def get_WorkingFolder(self):
-	return self.__getConfigAttribute('WorkingFolder')
+        return self.__getConfigAttribute('WorkingFolder')
 
     def get_LogFolder(self):
-	return self.__getConfigAttribute('LogFolder')
+        return self.__getConfigAttribute('LogFolder')
 
     def get_PSACCTFileRepository(self):
         return self.__getConfigAttribute('PSACCTFileRepository')
-        
+
     def get_PSACCTBackupFileRepository(self):
         return self.__getConfigAttribute('PSACCTBackupFileRepository')
 
@@ -168,7 +189,7 @@ def Initialize(customConfig = "ProbeConfig"):
 		# This has to be the first thing done (DebugPrint uses
 		# the information
         Config = ProbeConfiguration(customConfig)
-        
+
         DebugPrint(0, "Initializing Gratia with "+customConfig)
 
         # Need to initialize the list of possible directories
@@ -183,10 +204,10 @@ def Initialize(customConfig = "ProbeConfig"):
         __connection = None
         __connected = 0
         __connectionError = False
-    
+
         # Need to look for left over files
         SearchOustandingRecord()
-        
+
 
 ##
 ## encodeXML
@@ -215,20 +236,22 @@ def __connect():
     global __connected
 
     if __connected == 0:
-        if Config.get_UseJClarens() == 0:
+        if Config.get_UseSSL() == 0:
             __connection = httplib.HTTP(Config.get_SOAPHost())            
             DebugPrint(1, 'Connected via HTTP to:  ' + Config.get_SOAPHost())
+            print "Connected via HTTS to: " + Config.get_SOAPHost()
         else:
-            fullPath = Config.get_JClarensHost() + '/jclarens/xmlrpc'
-            if Config.get_CertificateFile() != '' and Config.get_KeyFile() != '':
-                DebugPrint(1, 'Using Certificate paths specified in config')
-                __connection = __import__('Clarens').client(fullPath, certfile=Config.get_CertificateFile(), keyfile=Config.get_KeyFile())
+            if Config.get_UseSSLCertificates() == 0:
+                __connection = httplib.HTTPSConnection(Config.get_SSLHost(),
+                                                       cert_file = Config.get_CertificateFile(),
+                                                       key_file = Config.get_KeyFile())
             else:
-                DebugPrint(1, 'No certificate paths specified in config, using default')
-                __connection = __import__('Clarens').client(fullPath)
-            DebugPrint(1, 'Connected via JClarens to:  ' + fullPath)
-
-        __connected = 1
+                __connection = httplib.HTTPSConnection(Config.get_SSLHost(),
+                                                       cert_file = Config.get_SSLCertificateFile(),
+                                                       key_file = Config.get_SSLKeyFile())
+            __connection.connect()
+            print "Connected via HTTPS to: " + Config.get_SSLHost()
+    __connected = 1
 
 ##
 ## __disconnect
@@ -242,13 +265,13 @@ def __disconnect():
     global __connected
 
     try:
-        if Config.get_UseJClarens() != 0 and __connected == 1:
+        if Config.get_UseSSL() != 0 and __connected == 1:
             __connection.system.logout()
             __connected = 0
-            DebugPrint(1, 'Disconnected from ' + Config.get_JClarensHost() + '/jclarens/xmlrpc' )
+            DebugPrint(1, 'Disconnected from ' + Config.get_SSLHost() + '/jclarens/xmlrpc' )
     except:
-    	DebugPrint(0, 'Failed to disconnect from ' + Config.get_JClarensHost() + ': ', sys.exc_info(),"--",sys.exc_info()[0],"++",sys.exc_info()[1])
-        
+        DebugPrint(0, 'Failed to disconnect from ' + Config.get_SSLHost() + ': ', sys.exc_info(),"--",sys.exc_info()[0],"++",sys.exc_info()[1])
+
 ##
 ## sendUsageXML
 ##
@@ -272,20 +295,20 @@ def __sendUsageXML(meterId, recordXml):
         transactionId = meterId + TimeToString().replace(":","")
         DebugPrint(1, 'TransactionId:  ' + transactionId)
 
-        if Config.get_UseJClarens() == 0:
+        if Config.get_UseSSL() == 0:
             # Use the following template to call the interface that has the 'Event' object as a paraeter
             soapServiceTemplate = """<soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-              xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-              xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
-              xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/">
-              <soap:Body>
-                <collectUsageXml>
-                  <event xmlns:ns2="http://gratia.sf.net" xsi:type="ns2:event">
-                    <_id >%s</_id>
-                    <_xml>%s</_xml>
-                  </event>
-                </collectUsageXml>
-              </soap:Body>
+                xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
+                xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/">
+                <soap:Body>
+                    <collectUsageXml>
+                        <event xmlns:ns2="http://gratia.sf.net" xsi:type="ns2:event">
+                            <_id >%s</_id>
+                            <_xml>%s</_xml>
+                        </event>
+                    </collectUsageXml>
+                </soap:Body>
             </soap:Envelope>
             """
 
@@ -309,7 +332,7 @@ def __sendUsageXML(meterId, recordXml):
 
             # Get the web service response to the request    
             (status_code, message, reply_headers) = __connection.getreply()
-    
+
             # Read the response attachment to get the actual soap response
             responseString = __connection.getfile().read()
             DebugPrint(2, 'Response:  ' + responseString)
@@ -326,16 +349,15 @@ def __sendUsageXML(meterId, recordXml):
             except:
                 response = Response(1, responseString)
         else:
-            # Call jclarens directly, leaving all of the parsing of parameters and response to it
-            event = Event(transactionId, recordXml)
-            responseDict = __connection.Collector.collectUsageXml(event)
-            response = Response(responseDict["_code"], responseDict["_message"])
+            __connection.request("POST",Config.get_SSLCollectorService(),"command=update&arg1=" + recordXml)
+            responseString = __connection.getresponse().read()
+            response = Response(1,responseString)
     except:
         DebugPrint(0,'Failed to send xml to web service:  ', sys.exc_info(), "--", sys.exc_info()[0], "++", sys.exc_info()[1])
         # Upon a connection error, we will stop to try to reprocess but will continue to
         # try sending
         __connectionError = True
-        
+
         response = Response(1,"Failed to send xml to web service")
 
     return response
@@ -383,7 +405,7 @@ def GenerateOutput(prefix,*arg):
     for val in arg:
         out = out + str(val)
     return out
-    
+
 def DebugPrint(level, *arg):
     if (level<Config.get_DebugLevel()):
         out = GenerateOutput("Gratia: ",*arg)
@@ -391,7 +413,7 @@ def DebugPrint(level, *arg):
     if level<Config.get_LogLevel():
         out = GenerateOutput("Gratia: ",*arg)
         LogToFile(out)
-            
+
 def Error(*arg):
     out = GenerateOutput("Error in Gratia probe: ",*arg)
     print out
@@ -422,8 +444,8 @@ def Mkdir(newdir):
     else:
         head, tail = os.path.split(newdir)
         if head and not os.path.isdir(head):
-           Mkdir(head)
-        #print "Mkdir %s" % repr(newdir)
+            Mkdir(head)
+        print "Mkdir %s" % repr(newdir)
         if tail:
             os.mkdir(newdir)
 
@@ -461,12 +483,12 @@ def SearchOustandingRecord():
     "any record that has not been sent yet"
 
     for dir in BackupDirList:
-	    path = os.path.join(dir,"gratiafiles");
-	    path = os.path.join(path,"*"+"."+Config.get_GratiaExtension());
-	    files = glob.glob(path)
-	    for f in files:
-		    if f not in OutstandingRecord:
-			    OutstandingRecord.append(f)
+        path = os.path.join(dir,"gratiafiles");
+        path = os.path.join(path,"*"+"."+Config.get_GratiaExtension());
+        files = glob.glob(path)
+        for f in files:
+            if f not in OutstandingRecord:
+                OutstandingRecord.append(f)
     DebugPrint(1,"List of Outstanding records: ",OutstandingRecord)
 
 def GenerateFilename(dir,RecordIndex):
@@ -489,30 +511,30 @@ def OpenNewRecordFile(DirIndex,RecordIndex):
     DebugPrint(3,"Open request: ",DirIndex," ",RecordIndex)
     index = 0
     for dir in BackupDirList:
-	    index = index + 1
-	    if index <= DirIndex or not os.path.exists(dir):
-		    continue
-	    DebugPrint(3,"Open request: looking at ",dir)
-	    dir = os.path.join(dir,"gratiafiles")
-	    if not os.path.exists(dir):
-		    try:
-			    Mkdir(dir)
-		    except:
-			    continue
-	    if not os.path.exists(dir):
-		    continue
-	    if not os.access(dir,os.W_OK): continue
-	    filename = GenerateFilename(dir,RecordIndex)
-	    while os.access(filename,os.F_OK):
-		    RecordIndex = RecordIndex + 1
-		    filename = GenerateFilename(dir,RecordIndex)
-	    try:
-		    DebugPrint(1,"Creating file:",filename)
-		    f = open(filename,'w')
-		    DirIndex = index
-		    return(f,DirIndex,RecordIndex)
-	    except:
-		    continue;
+        index = index + 1
+        if index <= DirIndex or not os.path.exists(dir):
+            continue
+        DebugPrint(3,"Open request: looking at ",dir)
+        dir = os.path.join(dir,"gratiafiles")
+        if not os.path.exists(dir):
+            try:
+                Mkdir(dir)
+            except:
+                continue
+        if not os.path.exists(dir):
+            continue
+        if not os.access(dir,os.W_OK): continue
+        filename = GenerateFilename(dir,RecordIndex)
+        while os.access(filename,os.F_OK):
+            RecordIndex = RecordIndex + 1
+            filename = GenerateFilename(dir,RecordIndex)
+        try:
+            DebugPrint(1,"Creating file:",filename)
+            f = open(filename,'w')
+            DirIndex = index
+            return(f,DirIndex,RecordIndex)
+        except:
+            continue;
     f = sys.stdout
     DirIndex = index
     return (f,DirIndex,RecordIndex)
@@ -531,18 +553,16 @@ class UsageRecord:
     __ProbeNameDescription = ""
     __SiteName = ""
     __SiteNameDescription = ""
-    __Njobs = 1
-    __NjobsDescription = ""
 
     def __init__(self):
-	    DebugPrint(0,"Creating a usage Record "+TimeToString())
-	    self.XmlData = []
-	    self.RecordData = []
-	    self.JobId = []
-	    self.UserId = []
-	    self.Username = "none"
-            self.__ProbeName = Config.get_MeterName()
-            self.__SiteName = Config.get_SiteName()
+        DebugPrint(0,"Creating a usage Record "+TimeToString())
+        self.XmlData = []
+        self.RecordData = []
+        self.JobId = []
+        self.UserId = []
+        self.Username = "none"
+        self.__ProbeName = Config.get_MeterName()
+        self.__SiteName = Config.get_SiteName()
 
     def Description(self,value):
         " Helper Function to generate the xml (Do not call directly)"
@@ -598,226 +618,206 @@ class UsageRecord:
             if seconds>0 : result = result + str(seconds)+ "S"
         else : result = result + "T0S"
         return result
-        
+
     def AddToList(self,where,what,comment,value):
         " Helper Function to generate the xml (Do not call directly)"
         # First filter out the previous value
         where = [x for x in where if x.find("<"+what)!=0]
         where.append("<"+what+" "+comment+">"+value+"</"+what+">")
         return where
-    
+
     def AppendToList(self,where,what,comment,value):
         " Helper Function to generate the xml (Do not call directly)"
         where.append("<"+what+" "+comment+">"+value+"</"+what+">")
         return where
-    
+
     # Public Interface:
     def LocalJobId(self,value):
         self.JobId = self.AddToList(self.JobId,"LocalJobId","",value)
-
     def GlobalJobId(self,value):
         self.JobId = self.AddToList(self.JobId,"GlobalJobId","",value)
-
     def ProcessId(self,value):
         self.JobId = self.AddToList(self.JobId,"ProcessId","",str(value))
 
     def GlobalUsername(self,value): 
         self.UserId = self.AddToList(self.UserId,"GlobalUsername","",value); 
-
     def LocalUserId(self,value):
         self.UserId = self.AddToList(self.UserId,"LocalUserId","",value);
-
     def UserKeyInfo(self,value):
-	    " Example: \
-	      <ds:KeyInfo xmlns:ds=""http://www.w3.org/2000/09/xmldsig#""> \
-		  <ds:X509Data> \
-		     <ds:X509SubjectName>CN=john ainsworth, L=MC, OU=Manchester, O=eScience, C=UK</ds:X509SubjectName> \
-		  </ds:X509Data> \
-	      </ds:KeyInfo>"
-	    complete = "\n\t\t<ds:X509Data>\n\t\t<ds:X509SubjectName>"+value+"</ds:X509SubjectName>\n\t\t</ds:X509Data>\n\t"
-	    self.UserId = self.AddToList(self.UserId,"ds:KeyInfo","xmlns:ds=\"http://www.w3.org/2000/09/xmldsig#\" ",complete)
+        " Example: \
+            <ds:KeyInfo xmlns:ds=""http://www.w3.org/2000/09/xmldsig#""> \
+        <ds:X509Data> \
+           <ds:X509SubjectName>CN=john ainsworth, L=MC, OU=Manchester, O=eScience, C=UK</ds:X509SubjectName> \
+        </ds:X509Data> \
+          </ds:KeyInfo>"
+        complete = "\n\t\t<ds:X509Data>\n\t\t<ds:X509SubjectName>"+value+"</ds:X509SubjectName>\n\t\t</ds:X509Data>\n\t"
+        self.UserId = self.AddToList(self.UserId,"ds:KeyInfo","xmlns:ds=\"http://www.w3.org/2000/09/xmldsig#\" ",complete)
 
     def JobName(self, value, description = ""):
-	    self.RecordData = self.AddToList(self.RecordData, "JobName", self.Description(description) ,value)
-
+        self.RecordData = self.AddToList(self.RecordData, "JobName", self.Description(description) ,value)
     def Charge(self,value, unit = "", formula = "", description = ""):
-	    if len(formula)>0 : Formula = "formula=\""+formula+"\" "
-	    else : Formula = ""
-	    self.RecordData = self.AddToList(self.RecordData,"Charge",self.Description(description)+self.Unit(unit)+Formula , value)
-
+        if len(formula)>0 : Formula = "formula=\""+formula+"\" "
+        else : Formula = ""
+        self.RecordData = self.AddToList(self.RecordData,"Charge",self.Description(description)+self.Unit(unit)+Formula , value)
     def Status(self,value, description = "") :
-	    self.RecordData = self.AddToList(self.RecordData, "Status", self.Description(description), str(value))
+        self.RecordData = self.AddToList(self.RecordData, "Status", self.Description(description), str(value))
 
     def WallDuration(self, value, description = ""):
-	    if type(value)==str : realvalue = value
-	    else : realvalue = self.Duration(value)
-	    self.RecordData = self.AddToList(self.RecordData, "WallDuration", self.Description(description), realvalue)
-
+        if type(value)==str : realvalue = value
+        else : realvalue = self.Duration(value)
+        self.RecordData = self.AddToList(self.RecordData, "WallDuration", self.Description(description), realvalue)
     def CpuDuration(self, value, cputype, description = ""):
-            "Register a total cpu duration.  cputype must be either 'user' or 'system'"
-	    if type(value)==str : realvalue = value
-	    else : realvalue = self.Duration(value)
-            if cputype=="sys" : cputype="system"
-            if cputype!="user" and cputype!="system" : 
-                description = "(type="+cputype+") "+description
-                cputype = ""
-	    self.RecordData = self.AppendToList(self.RecordData, "CpuDuration", self.UsageType(cputype)+self.Description(description), realvalue)
+        "Register a total cpu duration.  cputype must be either 'user' or 'system'"
+        if type(value)==str : realvalue = value
+        else : realvalue = self.Duration(value)
+        if cputype=="sys" : cputype="system"
+        if cputype!="user" and cputype!="system" : 
+            description = "(type="+cputype+") "+description
+            cputype = ""
+            self.RecordData = self.AppendToList(self.RecordData, "CpuDuration", self.UsageType(cputype)+self.Description(description), realvalue)
     def EndTime(self, value, description = ""):
-	    if type(value)==str : realvalue = value
-	    else : realvalue = TimeToString(time.gmtime(value))
-	    self.RecordData = self.AddToList(self.RecordData, "EndTime", self.Description(description), realvalue)
-
+        if type(value)==str : realvalue = value
+        else : realvalue = TimeToString(time.gmtime(value))
+        self.RecordData = self.AddToList(self.RecordData, "EndTime", self.Description(description), realvalue)
     def StartTime(self, value, description = ""):
-	    if type(value)==str : realvalue = value
-	    else : realvalue = TimeToString(time.gmtime(value))
-	    self.RecordData = self.AddToList(self.RecordData, "StartTime", self.Description(description), realvalue)
-
+        if type(value)==str : realvalue = value
+        else : realvalue = TimeToString(time.gmtime(value))
+        self.RecordData = self.AddToList(self.RecordData, "StartTime", self.Description(description), realvalue)
     def TimeDuration(self, value, timetype, description = ""):
-	    " Additional measure of time duration that is relevant to the reported usage "
-	    " timetype can be one of 'submit','connect','dedicated' (or other) "
-	    if type(value)==str : realvalue = value
-	    else : realvalue = self.Duration(value)
-	    self.AppendToList(self.RecordData, "TimeDuration", self.Type(timetype)+self.Description(description), realvalue)
-
+        " Additional measure of time duration that is relevant to the reported usage "
+        " timetype can be one of 'submit','connect','dedicated' (or other) "
+        if type(value)==str : realvalue = value
+        else : realvalue = self.Duration(value)
+        self.AppendToList(self.RecordData, "TimeDuration", self.Type(timetype)+self.Description(description), realvalue)
     def TimeInstant(self, value, timetype, description = ""):
-	    " Additional identified discrete time that is relevant to the reported usage "
-	    " timetype can be one of 'submit','connect' (or other) "
-	    if type(value)==str : realvalue = value
-	    else : realvalue = TimeToString(time.gmtime(value))
-	    self.AppendToList(self.RecordData, "TimeInstant", self.Type(timetype)+self.Description(description), realvalue)
+        " Additional identified discrete time that is relevant to the reported usage "
+        " timetype can be one of 'submit','connect' (or other) "
+        if type(value)==str : realvalue = value
+        else : realvalue = TimeToString(time.gmtime(value))
+        self.AppendToList(self.RecordData, "TimeInstant", self.Type(timetype)+self.Description(description), realvalue)
 
     def MachineName(self, value, description = "") :
-	    self.RecordData = self.AddToList(self.RecordData, "MachineName", self.Description(description), value)
-
+        self.RecordData = self.AddToList(self.RecordData, "MachineName", self.Description(description), value)
     def Host(self, value, primary = False, description = "") :
-	    if primary : pstring = "primary=\"true\" "
-	    else : pstring = "primary=\"false\" "
-	    pstring = pstring + self.Description(description)
-	    self.RecordData = self.AddToList(self.RecordData, "Host", pstring, value)
-
+        if primary : pstring = "primary=\"true\" "
+        else : pstring = "primary=\"false\" "
+        pstring = pstring + self.Description(description)
+        self.RecordData = self.AddToList(self.RecordData, "Host", pstring, value)
     def SubmitHost(self, value, description = "") :
-	    self.RecordData = self.AddToList(self.RecordData, "SubmitHost", self.Description(description), value)
-
+        self.RecordData = self.AddToList(self.RecordData, "SubmitHost", self.Description(description), value)
     def Queue(self, value, description = "") :
-	    self.RecordData = self.AddToList(self.RecordData, "Queue", self.Description(description), value)
-
+        self.RecordData = self.AddToList(self.RecordData, "Queue", self.Description(description), value)
     def ProjectName(self, value, description = "") :
-	    self.RecordData = self.AddToList(self.RecordData, "ProjectName", self.Description(description), value)
+        self.RecordData = self.AddToList(self.RecordData, "ProjectName", self.Description(description), value)
 
 
     def Network(self, value, storageUnit = "", phaseUnit = "", metric = "total", description = "") :
-	    " Metric should be one of 'total','average','max','min' "
-	    self.AppendToList(self.RecordData, "Network",
-		    self.StorageUnit(storageUnit)+self.PhaseUnit(phaseUnit)+self.Metric(metric)+self.Description(description),
-		    str(value))
-
+        " Metric should be one of 'total','average','max','min' "
+        self.AppendToList(self.RecordData, "Network",
+          self.StorageUnit(storageUnit)+self.PhaseUnit(phaseUnit)+self.Metric(metric)+self.Description(description),
+          str(value))
     def Disk(self, value, storageUnit = "", phaseUnit = "", type = "", metric = "total", description = "") :
-	    " Metric should be one of 'total','average','max','min' "
-	    " Type can be one of scratch or temp "
-	    self.AppendToList(self.RecordData, "Disk",
-		    self.StorageUnit(storageUnit)+self.PhaseUnit(phaseUnit)+self.Type(type)+self.Metric(metric)+self.Description(description),
-		    str(value))
+        " Metric should be one of 'total','average','max','min' "
+        " Type can be one of scratch or temp "
+        self.AppendToList(self.RecordData, "Disk",
+          self.StorageUnit(storageUnit)+self.PhaseUnit(phaseUnit)+self.Type(type)+self.Metric(metric)+self.Description(description),
+          str(value))
 
     def Memory(self, value, storageUnit = "", phaseUnit = "", type = "", metric = "total", description = "") :
-	    " Metric should be one of 'total','average','max','min' "
-	    " Type can be one of shared, physical, dedicated "
-	    self.AppendToList(self.RecordData, "Memory",
-		    self.StorageUnit(storageUnit)+self.PhaseUnit(phaseUnit)+self.Type(type)+self.Metric(metric)+self.Description(description),
-		    str(value))
+        " Metric should be one of 'total','average','max','min' "
+        " Type can be one of shared, physical, dedicated "
+        self.AppendToList(self.RecordData, "Memory",
+          self.StorageUnit(storageUnit)+self.PhaseUnit(phaseUnit)+self.Type(type)+self.Metric(metric)+self.Description(description),
+          str(value))
 
     def Swap(self, value, storageUnit = "", phaseUnit = "", type = "", metric = "total", description = "") :
-	    " Metric should be one of 'total','average','max','min' "
-	    " Type can be one of shared, physical, dedicated "
-	    self.AppendToList(self.RecordData, "Swap",
-		    self.StorageUnit(storageUnit)+self.PhaseUnit(phaseUnit)+self.Type(type)+self.Metric(metric)+self.Description(description),
-		    str(value))
+        " Metric should be one of 'total','average','max','min' "
+        " Type can be one of shared, physical, dedicated "
+        self.AppendToList(self.RecordData, "Swap",
+          self.StorageUnit(storageUnit)+self.PhaseUnit(phaseUnit)+self.Type(type)+self.Metric(metric)+self.Description(description),
+          str(value))
 
     def NodeCount(self, value, metric = "total", description = "") :
-	    " Metric should be one of 'total','average','max','min' "
-	    self.AppendToList(self.RecordData, "NodeCount",
-		    self.Metric(metric)+self.Description(description),
-		    str(value))
-
+        " Metric should be one of 'total','average','max','min' "
+        self.AppendToList(self.RecordData, "NodeCount",
+          self.Metric(metric)+self.Description(description),
+          str(value))
     def Processors(self, value, consumptionRate = 0, metric = "total", description = "") :
-	    " Metric should be one of 'total','average','max','min' "
-	    " consumptionRate specifies te consumption rate for the report "
-	    " processor usage.  The cinsumption rate is a sclaing factor that "
-	    " indicates the average percentage of utilization. "
-	    if consumptionRate>0 : pstring = "consumptionRate=\""+str(consumptionRate)+"\" "
-	    else : pstring = ""
-	    self.AppendToList(self.RecordData, "Processors",
-		    pstring+self.Metric(metric)+self.Description(description),
-		    str(value))
+        " Metric should be one of 'total','average','max','min' "
+        " consumptionRate specifies te consumption rate for the report "
+        " processor usage.  The cinsumption rate is a sclaing factor that "
+        " indicates the average percentage of utilization. "
+        if consumptionRate>0 : pstring = "consumptionRate=\""+str(consumptionRate)+"\" "
+        else : pstring = ""
+        self.AppendToList(self.RecordData, "Processors",
+          pstring+self.Metric(metric)+self.Description(description),
+          str(value))
     def ServiceLevel(self, value, type, description = ""):
-	    self.AppendToList(self.RecordData, "ServiceLevel", self.Type(type)+self.Description(description), str(value))
+        self.AppendToList(self.RecordData, "ServiceLevel", self.Type(type)+self.Description(description), str(value))
 
 
     def Resource(self,description,value) :
-	    self.AppendToList(self.RecordData, "Resource", self.Description(description), str(value))
+        self.AppendToList(self.RecordData, "Resource", self.Description(description), str(value))
 
     def AdditionalInfo(self,description,value) :
-	    self.Resource(description,value)
-
-    # The following are not officially part of the Usage Record format
-
-    def Njobs(self, value, description = "") :
-        self.__Njobs = value;
-        self.__NjobsDescription = description
+        self.Resource(description,value)
 
     # The following usually comes from the Configuration file
+
+    def ProbeNameXml(self, value, description = "") :
+        self.RecordData = self.AddToList(self.RecordData, "ProbeName", self.Description(description), value)
 
     def ProbeName(self, value, description = "") :
         self.__ProbeName = value;
         self.__ProbeNameDescription = description
 
-    def SiteName(self, value, description = "") :
+    def SiteNameXml(self, value, description = "") :
         " Indicates which site the service accounted for belong to"
+        self.RecordData = self.AddToList(self.RecordData, "SiteName", self.Description(description), value)
+
+    def SiteName(self, value, description = "") :
         self.__SiteName = value;
         self.__SiteNameDescription = description
 
-    def GenericAddToList(self, xmlelem, value, description = "") :
-        self.RecordData = self.AddToList(self.RecordData, xmlelem, self.Description(description), value)
-
     def XmlAddMembers(self):
-            self.GenericAddToList( "ProbeName", self.__ProbeName, self.__ProbeNameDescription )
-            self.GenericAddToList( "SiteName", self.__SiteName, self.__SiteNameDescription )
-            self.GenericAddToList( "Njobs", str(self.__Njobs), self.__NjobsDescription )
+        self.ProbeNameXml( self.__ProbeName, self.__ProbeNameDescription )
+        self.SiteNameXml( self.__SiteName, self.__SiteNameDescription )
 
     def XmlCreate(self):
-	    global RecordId
-	    
-            self.XmlAddMembers();
+        global RecordId
 
-	    self.XmlData.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n")
-	    self.XmlData.append("<JobUsageRecord xmlns=\"http://www.gridforum.org/2003/ur-wg\"\n")
-	    self.XmlData.append("		xmlns:urwg=\"http://www.gridforum.org/2003/ur-wg\"\n")
-	    self.XmlData.append("		xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" \n")
-#               self.XmlData.append("		xsi:schemaLocation=\"http://www.gridforum.org/2003/ur-wg file:/Users/bekah/Documents/GGF/URWG/urwg-schema.09.xsd\">\n")
-	    self.XmlData.append("		xsi:schemaLocation=\"http://www.gridforum.org/2003/ur-wg file:///u:/OSG/urwg-schema.11.xsd\">\n")
+        self.XmlAddMembers();
 
-	    # Add the record indentity
-	    self.XmlData.append("<RecordIdentity urwg:recordId=\""+socket.getfqdn()+":"+str(RecordPid)+"."+str(RecordId)+"\" urwg:createTime=\""+TimeToString(time.gmtime())+"\" />\n");
-            RecordId = RecordId + 1;
+        self.XmlData.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n")
+        self.XmlData.append("<JobUsageRecord xmlns=\"http://www.gridforum.org/2003/ur-wg\"\n")
+        self.XmlData.append("		xmlns:urwg=\"http://www.gridforum.org/2003/ur-wg\"\n")
+        self.XmlData.append("		xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" \n")
+        self.XmlData.append("		xsi:schemaLocation=\"http://www.gridforum.org/2003/ur-wg file:///u:/OSG/urwg-schema.11.xsd\">\n")
 
-	    if len(self.JobId)>0 :
-		    self.XmlData.append("<JobIdentity>\n")
-		    for data in self.JobId:
-			    self.XmlData.append("\t")
-			    self.XmlData.append(data)
-			    self.XmlData.append("\n")
-		    self.XmlData.append("</JobIdentity>\n")
-	    if len(self.UserId)>0 :
-		    self.XmlData.append("<UserIdentity>\n")
-		    for data in self.UserId:
-			    self.XmlData.append("\t")
-			    self.XmlData.append(data)
-			    self.XmlData.append("\n")
-		    self.XmlData.append("</UserIdentity>\n")
-	    for data in self.RecordData:
-		    self.XmlData.append("\t")
-		    self.XmlData.append(data)
-		    self.XmlData.append("\n")
-	    self.XmlData.append("</JobUsageRecord>\n");
+        # Add the record indentity
+        self.XmlData.append("<RecordIdentity urwg:recordId=\""+socket.getfqdn()+":"+
+                            str(RecordPid)+"."+str(RecordId)+"\" urwg:createTime=\""+TimeToString(time.gmtime())+"\" />\n");
+        RecordId = RecordId + 1;
+
+        if len(self.JobId)>0 :
+            self.XmlData.append("<JobIdentity>\n")
+            for data in self.JobId:
+                self.XmlData.append("\t")
+                self.XmlData.append(data)
+                self.XmlData.append("\n")
+            self.XmlData.append("</JobIdentity>\n")
+        if len(self.UserId)>0 :
+            self.XmlData.append("<UserIdentity>\n")
+            for data in self.UserId:
+                self.XmlData.append("\t")
+                self.XmlData.append(data)
+                self.XmlData.append("\n")
+            self.XmlData.append("</UserIdentity>\n")
+        for data in self.RecordData:
+            self.XmlData.append("\t")
+            self.XmlData.append(data)
+            self.XmlData.append("\n")
+        self.XmlData.append("</JobUsageRecord>\n");
 
 def LocalJobId(record,value):
     record.LocalJobId(value);
@@ -882,7 +882,7 @@ WroteTooManyFiles = False
 def Send(record):
     global __connectionError
     global WroteTooManyFiles
-    
+
     DebugPrint(0, "***********************************************************")
     DebugPrint(1,"Record: ",record)
     DebugPrint(1,"Username: ", record.Username)
@@ -895,7 +895,7 @@ def Send(record):
 
         # Assemble the record into xml
         record.XmlCreate()
- 
+
         # Open the back up file
         # fill the back up file
 
@@ -906,66 +906,66 @@ def Send(record):
         f = 0
 
         while not success:
-	    (f,dirIndex,recordIndex) = OpenNewRecordFile(dirIndex,recordIndex)
-	    DebugPrint(1,"Will save in the record in:",f.name)
-	    DebugPrint(3,"DirIndex=",dirIndex," RecordIndex=",recordIndex)
-	    if f.name == "<stdout>":
-		    success = True
-	    else:
-		    try:
-			    for line in record.XmlData:
-				    f.write(line)
-			    f.flush();
-			    if f.tell() > 0:
-				    success = True
-				    DebugPrint(3,"suceeded to fill: ",f.name)
-			    else:
-				    DebugPrint(0,"failed to fill: ",f.name)
-				    if f.name != "<stdout>": os.remove(f.name)
-		    except:
-			    DebugPrint(0,"failed to fill with exception: ",f.name,"--", sys.exc_info(),"--",sys.exc_info()[0],"++",sys.exc_info()[1])
-			    if f.name != "<stdout>": os.remove(f.name)
-  
-        DebugPrint(0, 'Saved record to ' + f.name)
+            (f,dirIndex,recordIndex) = OpenNewRecordFile(dirIndex,recordIndex)
+            DebugPrint(1,"Will save in the record in:",f.name)
+            DebugPrint(3,"DirIndex=",dirIndex," RecordIndex=",recordIndex)
+            if f.name == "<stdout>":
+                success = True
+            else:
+                try:
+                    for line in record.XmlData:
+                        f.write(line)
+                        f.flush();
+                        if f.tell() > 0:
+                            success = True
+                            DebugPrint(3,"suceeded to fill: ",f.name)
+                        else:
+                            DebugPrint(0,"failed to fill: ",f.name)
+                            if f.name != "<stdout>": os.remove(f.name)
+                except:
+                                DebugPrint(0,"failed to fill with exception: ",f.name,"--", sys.exc_info(),"--",sys.exc_info()[0],"++",sys.exc_info()[1])
+                                if f.name != "<stdout>": os.remove(f.name)
 
-        # Currently, the recordXml is in a list format, with each item being a line of xml.  
-        # the collectora web service requires the xml to be sent as a string.  
-        # This logic here turns the xml list into a single xml string.
-        usageXmlString = ""
-        for line in record.XmlData:
-            usageXmlString = usageXmlString + line
-        DebugPrint(3, 'UsageXml:  ' + usageXmlString)
+                                DebugPrint(0, 'Saved record to ' + f.name)
 
-        # Attempt to send the record to the collector
-        response = __sendUsageXML(Config.get_MeterName(), usageXmlString)
-        responseString = response.get_message()
+                                # Currently, the recordXml is in a list format, with each item being a line of xml.  
+                                # the collectora web service requires the xml to be sent as a string.  
+                                # This logic here turns the xml list into a single xml string.
+                                usageXmlString = ""
+                                for line in record.XmlData:
+                                    usageXmlString = usageXmlString + line
+                                    DebugPrint(3, 'UsageXml:  ' + usageXmlString)
 
-        DebugPrint(0, 'Response code:  ' + str(response.get_code()))
-        DebugPrint(0, 'Response message:  ' + response.get_message())
+                                    # Attempt to send the record to the collector
+                                    response = __sendUsageXML(Config.get_MeterName(), usageXmlString)
+                                    responseString = response.get_message()
 
-        # Determine if the call was successful based on the response code.  Currently, 0 = success
-        if response.get_code() == 0:
-            DebugPrint(1, 'Response indicates success, ' + f.name + ' will be deleted')
-            os.remove(f.name)
-        else:
-            DebugPrint(1, 'Response indicates failure, ' + f.name + ' will not be deleted')
+                                    DebugPrint(0, 'Response code:  ' + str(response.get_code()))
+                                    DebugPrint(0, 'Response message:  ' + response.get_message())
+
+                                    # Determine if the call was successful based on the response code.  Currently, 0 = success
+                                    if response.get_code() == 0:
+                                        DebugPrint(1, 'Response indicates success, ' + f.name + ' will be deleted')
+                                        # os.remove(f.name)
+                                    else:
+                                        DebugPrint(1, 'Response indicates failure, ' + f.name + ' will not be deleted')
             #OutstandingRecord.append(f.name)
             if f.name == "<stdout>":
-	        Error("Gratia was un-enable to send the record and was unable to\n"+
-	              "       find a location to store the xml backup file.  The record\n"+
-    	          "       will be printed to stdout:")
- 	        for line in record.XmlData:
-		    f.write(line)
-                responseString = "Fatal Error: Record not send and not cached.  Record will be lost."
+                Error("Gratia was un-enable to send the record and was unable to\n"+
+                      "       find a location to store the xml backup file.  The record\n"+
+                      "       will be printed to stdout:")
+                for line in record.XmlData:
+                    f.write(line)
+                    responseString = "Fatal Error: Record not send and not cached.  Record will be lost."
 
- 	# Attempt to reprocess any outstanding records
-        if (not __connectionError):
-            Reprocess()
+                    # Attempt to reprocess any outstanding records
+                    if (not __connectionError):
+                        Reprocess()
 
-        # When we are done sending outstanding records, we need to then disconnect from the web server
-        __disconnect()
+                        # When we are done sending outstanding records, we need to then disconnect from the web server
+                        __disconnect()
 
-    DebugPrint(0, responseString)
-    DebugPrint(0, "***********************************************************")
-    return responseString
+                        DebugPrint(0, responseString)
+                        DebugPrint(0, "***********************************************************")
+                        return responseString
 
