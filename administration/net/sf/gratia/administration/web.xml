@@ -36,6 +36,18 @@
 				<load-on-startup>1</load-on-startup>
     </servlet>
 
+    <servlet>
+        <servlet-name>SecurityTable</servlet-name>
+        <servlet-class>net.sf.gratia.administration.SecurityTable</servlet-class>
+				<load-on-startup>1</load-on-startup>
+    </servlet>
+
+    <servlet>
+        <servlet-name>ReplicationTable</servlet-name>
+        <servlet-class>net.sf.gratia.administration.ReplicationTable</servlet-class>
+				<load-on-startup>1</load-on-startup>
+    </servlet>
+
     <servlet-mapping>
         <servlet-name>CETable</servlet-name>
 				<url-pattern>/cetable.html</url-pattern>
@@ -44,6 +56,16 @@
     <servlet-mapping>
         <servlet-name>ProbeTable</servlet-name>
         <url-pattern>/probetable.html</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>SecurityTable</servlet-name>
+        <url-pattern>/securitytable.html</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>ReplicationTable</servlet-name>
+        <url-pattern>/replicationtable.html</url-pattern>
     </servlet-mapping>
 
 </web-app>

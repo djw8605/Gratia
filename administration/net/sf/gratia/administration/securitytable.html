@@ -1,0 +1,30 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>Untitled Document</title>
+</head>
+<body>
+<form action="cetable.html" method="post" name="form01" target="_parent" id="form01">
+  <table width="100%" border="1">
+    <tr>
+      <th colspan="4" scope="col">Certificates</th>
+    </tr>
+    <tr>
+      <td width="9%"><label> #type# </label></td>
+      <td width="11%">#state#</td>
+      <td width="33%"><label>
+        <input name="index:#index#" type="hidden" id="index:#index#" value="#index#" />
+        <input name="dbid:#index#" type="hidden" id="dbid:#index#" value="#dbid#" />
+      <label>#alias# </label></td>
+      <td width="47%"><a href="securitytable.html?action=delete&dbid=#dbid#&alias=#alias#">Delete</a>&nbsp;&nbsp; <a href="securitytable.html?action=deploy&dbid=#dbid#&alias=#alias#">Deploy</a>&nbsp;&nbsp; <a href="securitytable.html?action=activate&dbid=#dbid#&alias=#alias#">Activate</a>&nbsp;&nbsp; <a href="securitytable.html?action=deactivate&dbid=#dbid#&alias=#alias#">Deactivate</a>&nbsp;&nbsp; </td>
+    </tr>
+  </table>
+  <table width="100%" border="0">
+    <tr>
+      <th scope="col"> <a href="/gratia-administration/securitytable.html?action=deleteall">Delete All</a> &nbsp;&nbsp; <a href="/gratia-administration/securitytable.html?action=deployall">Deploy All</a> &nbsp;&nbsp; <a href="/gratia-administration/securitytable.html?action=activateall">Activate All</a> &nbsp;&nbsp; <a href="/gratia-administration/securitytable.html?action=deactivateall">Deactivate All</a> </th>
+    </tr>
+  </table>
+</form>
+</body>
+</html>
