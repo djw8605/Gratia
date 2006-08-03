@@ -58,10 +58,11 @@ public class DurationElement implements XmlElement {
         return output;
     }
 
-    public String asXml(String elementName) {
+    public String asXml(String elementName, String default_type) {
         String output = "<"+elementName+" ";
         if (Description != null) output = output + "urwg:description=\"" + Description + "\" ";
         if (Type != null) output = output + "urwg:type=\"" + Type + "\" ";
+        else if (default_type != null) output = output + "urwg:type=\"" + default_type + "\" ";
         output = output + ">";
         try {
             output = output + Utils.DurationToXml(Value);
@@ -71,4 +72,8 @@ public class DurationElement implements XmlElement {
         output = output + "</" + elementName + ">\n"; //FIXME: I need the right format
         return output;
     }
+
+    public String asXml(String elementName) {
+        return asXml(elementName,null);
+    }    
 }

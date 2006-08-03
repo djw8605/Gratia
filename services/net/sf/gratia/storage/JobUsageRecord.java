@@ -139,8 +139,8 @@ public class JobUsageRecord {
         if (Status != null)            output = output + Status.asXml("Status");
         if (Njobs != null)             output = output + Njobs.asXml("Njobs");
         if (WallDuration != null)      output = output + WallDuration.asXml("WallDuration");
-        if (CpuUserDuration != null)   output = output + CpuUserDuration.asXml("CpuUserDuration");
-        if (CpuSystemDuration != null) output = output + CpuSystemDuration.asXml("CpuSystemDuration");
+        if (CpuUserDuration != null)   output = output + CpuUserDuration.asXml("CpuUserDuration","user");
+        if (CpuSystemDuration != null) output = output + CpuSystemDuration.asXml("CpuSystemDuration","system");
         if (NodeCount != null)         output = output + NodeCount.asXml("NodeCount");
         if (Processors != null)        output = output + Processors.asXml("Processors");
         if (StartTime != null)         output = output + StartTime.asXml("StartTime");
@@ -162,8 +162,8 @@ public class JobUsageRecord {
         if (VolumeResource != null)    output = output + listAsXml("VolumeResource", VolumeResource);
         if (ConsumableResource != null)output = output + listAsXml("ConsumableResource", ConsumableResource);
         if (Resource != null)          output = output + listAsXml("Resource", Resource);
-				if (ProbeName != null)         output = output + ProbeName.asXml("ProbeName");
-        // if (ExtraXml != null)         output = output + ExtraXml;
+        if (ProbeName != null)         output = output + ProbeName.asXml("ProbeName");
+        if (ExtraXml != null)          output = output + ExtraXml;
 				output = output + "</JobUsageRecord>" + "\n";
         return output;
     }
