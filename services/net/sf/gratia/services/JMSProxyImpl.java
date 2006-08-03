@@ -105,20 +105,6 @@ public class JMSProxyImpl extends UnicastRemoteObject implements JMSProxy
 				return false;
 		}
 
-		public boolean remoteRequest(String from,String to,String rmi,long dbid) throws RemoteException
-		{
-				DataPump pump = (DataPump) pumps.get(to);
-				if (pump != null)
-						if (pump.isAlive())
-								return false;
-
-				pump = new DataPump(from,to,rmi,dbid,hibernateFactory);
-				pumps.put(to,pump);
-				pump.start();
-				Logging.info("Started DataPump: From: " + from + " To: " + to + " RMI: " + rmi + " DBID: " + dbid);
-				return true;
-		}
-
 		public boolean statusUpdate(String xml) throws RemoteException
 		{
 				try

@@ -16,6 +16,10 @@ del %root%\servlets\net\sf\gratia\servlets\*~
 del %root%\servlets\net\sf\gratia\servlets\*#
 del %root%\servlets\net\sf\gratia\servlets\*.class
 
+del %root%\security\net\sf\gratia\security\*~
+del %root%\security\net\sf\gratia\security\*#
+del %root%\security\net\sf\gratia\security\*.class
+
 del %base%GratiaReporting\src\net\sf\gratia\reporting\*~
 del %base%GratiaReporting\src\net\sf\gratia\reporting\*#
 del %base%GratiaReporting\src\net\sf\gratia\reporting\*.class

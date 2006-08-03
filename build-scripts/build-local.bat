@@ -4,6 +4,7 @@ call build-tomcat.bat
 call build-services.bat
 call build-soap.bat
 call build-servlets.bat
+call build-security.bat
 call build-reporting.bat
 call build-reports.bat
 call build-configurator.bat

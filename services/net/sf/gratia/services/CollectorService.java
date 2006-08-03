@@ -20,6 +20,8 @@ import org.hibernate.cfg.Configuration;
 
 import java.sql.*;
 
+import java.security.*;
+
 public class CollectorService implements ServletContextListener
 {
 		public String rmibind;
@@ -39,15 +41,16 @@ public class CollectorService implements ServletContextListener
 		ListenerThread thread2;
 		ListenerThread thread3;
 		StatusListenerThread statusListenerThread;
+		ReplicationService replicationService;
 
-		ProbeMonitorThread probeMonitorThread;
+		ProbeMonitorService probeMonitorService;
 		RMIService rmiservice;
-		Master master;
 
 		public void contextInitialized(ServletContextEvent sce)
 		{
 				XP xp = new XP();
 				String catalinaHome = "";
+				String configurationPath = "";
 
 				Enumeration iter = System.getProperties().propertyNames();
 				System.out.println("");
@@ -61,6 +64,33 @@ public class CollectorService implements ServletContextListener
 
 				try
 						{
+								//
+								// setup configuration path/https system parameters
+								//
+
+								configurationPath = net.sf.gratia.services.Configuration.getConfigurationPath();
+								System.setProperty("java.protocol.handler.pkgs","com.sun.net.ssl.internal.www.protocol");
+								Security.addProvider(new com.sun.net.ssl.internal.ssl.Provider());
+
+								System.setProperty("javax.net.ssl.trustStore",configurationPath + "/truststore");
+								System.setProperty("javax.net.ssl.trustStorePassword","server");
+
+								System.setProperty("javax.net.ssl.keyStore",configurationPath + "/keystore");
+								System.setProperty("javax.net.ssl.keyStorePassword","server");
+
+								com.sun.net.ssl.HostnameVerifier hv=new com.sun.net.ssl.HostnameVerifier() 
+										{
+												public boolean verify(String urlHostname, String certHostname) 
+												{
+														System.out.println("url host name: " + urlHostname);
+														System.out.println("cert host name: " + certHostname);
+														System.out.println("WARNING: Hostname is not matched for cert.");
+														return true;
+												}
+										};
+
+								com.sun.net.ssl.HttpsURLConnection.setDefaultHostnameVerifier(hv);
+
 								//
 								// get configuration properties
 								//
@@ -202,19 +232,9 @@ public class CollectorService implements ServletContextListener
 								// start probe monitor
 								//
 
-								probeMonitorThread = new ProbeMonitorThread(hibernateFactory);
-								probeMonitorThread.setDaemon(true);
-								probeMonitorThread.start();
-
-								//
-								// start monitoring service
-								//
-
-								if (p.getProperty("service.monitor.start").equals("1"))
-										{
-												AccountingMonitor monitor = new AccountingMonitor();
-												monitor.start();
-										}
+								probeMonitorService = new ProbeMonitorService(hibernateFactory);
+								probeMonitorService.setDaemon(true);
+								probeMonitorService.start();
 						}
 				catch (Exception e)
 						{
@@ -222,14 +242,59 @@ public class CollectorService implements ServletContextListener
 						}
 
 				//
+				// add a server cert if one isn't there
+				//
+
+				{
+						String dq = "\"";
+						String keystore = System.getProperty("catalina.home") + "/gratia/keystore";
+						keystore = xp.replaceAll(keystore,"\\","/");
+						String command1[] =
+								{"keytool",
+								 "-genkey",
+								 "-dname",
+								 "cn=server, ou=Fermi-GridAccounting, o=Fermi, c=US",
+								 "-alias",
+								 "server",
+								 "-keystore",
+								 keystore,
+								 "-keypass",
+								 "server",
+								 "-storepass",
+								 "server"};
+
+						int exitValue1 = Execute.execute(command1);
+
+						String command2[] =
+								{"keytool",
+								 "-selfcert",
+								 "-alias",
+								 "server",
+								 "-keypass",
+								 "server",
+								 "-keystore",
+								 keystore,
+								 "-storepass",
+								 "server"};
+
+						if (exitValue1 == 0)
+								Execute.execute(command2);
+						FlipSSL.flip();
+
+						//
+						// start replication service
+						//
+
+						replicationService = new ReplicationService(hibernateFactory);
+						replicationService.start();
+				}
+
+
+				//
 				// wait 1 minute to create new report config for birt (giving tomcat time to deploy the war)
 				//
 
 				(new ReportSetup()).start();
-
-				master = new Master();
-				master.setDaemon(true);
-				master.start();
 		}
 
 		public void zapDatabase()
@@ -266,17 +331,22 @@ public class CollectorService implements ServletContextListener
 								"alter table CEProbes add unique index index02(probename)",
 								"insert into CETable(facility_name) values(" + dq + "Unknown" + dq + ")",
 								"alter table JobUsageRecord add index index02(EndTime)",
-								"alter table JobUsageRecord add index index03(ProbeName)"
+								"alter table JobUsageRecord add index index03(ProbeName)",
+								"alter table Security add unique index index02(alias)"
 						};
 
 				for (int i = 0; i < commands.length; i++)
 						try
 								{
+										System.out.println("Executing: " + commands[i]);
 										statement = connection.createStatement();
 										statement.executeUpdate(commands[i]);
+										System.out.println("Command: OK: " + commands[i]);
 								}
 						catch (Exception ignore)
 								{
+										System.out.println("Error Executing: " + commands[i]);
+										ignore.printStackTrace();
 								}
 
 		}

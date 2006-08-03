@@ -71,6 +71,7 @@ copy %root%\configuration\release.service-configuration.properties tarball\tomca
 
 copy %root%\target\gratia-services.war tarball\gratia\gratia_services
 copy %root%\target\gratia-servlets.war tarball\gratia\gratia_services
+copy %root%\target\gratia-security.war tarball\gratia\gratia_services
 copy %root%\target\GratiaServices.war tarball\gratia\gratia_services
 
 cd tarball

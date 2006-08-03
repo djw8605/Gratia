@@ -29,15 +29,10 @@ copy net\sf\gratia\services\* %root%\services\net\sf\gratia\services
 
 rmdir /q /s net
 
-copy %root%\services\net\sf\gratia\services\Logging.class war\WEB-INF\classes\net\sf\gratia\services
-copy %root%\services\net\sf\gratia\services\Configuration.class war\WEB-INF\classes\net\sf\gratia\services
-copy %root%\services\net\sf\gratia\services\*Skel.class war\WEB-INF\classes\net\sf\gratia\services
-copy %root%\services\net\sf\gratia\services\*Stub.class war\WEB-INF\classes\net\sf\gratia\services
-copy %root%\services\net\sf\gratia\services\X*.class war\WEB-INF\classes\net\sf\gratia\services
-copy %root%\services\net\sf\gratia\services\JMS*.class war\WEB-INF\classes\net\sf\gratia\services
-
+copy %root%\services\net\sf\gratia\services\*.class war\WEB-INF\classes\net\sf\gratia\services
 copy %root%\administration\net\sf\gratia\administration\*.class war\WEB-INF\classes\net\sf\gratia\administration
 copy %root%\administration\net\sf\gratia\administration\*.html war
+copy %root%\*.html war
 copy %root%\administration\net\sf\gratia\administration\*.jsp war
 copy %root%\administration\net\sf\gratia\administration\images\*.gif war\images
 
@@ -47,3 +42,4 @@ copy %root%\jars\mysql*.jar war\WEB-INF\lib
 jar -cfM  %root%\target\gratia-administration.war -C war .
 
 rmdir /q /s war
+
