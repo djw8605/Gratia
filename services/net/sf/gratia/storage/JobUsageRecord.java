@@ -29,6 +29,7 @@ public class JobUsageRecord {
     private StringElement JobName;
     private FloatElement Charge;
     private StringElement Status;
+    private IntegerElement Njobs;
     private DurationElement WallDuration;
     private DurationElement CpuUserDuration;
     private DurationElement CpuSystemDuration;
@@ -57,6 +58,9 @@ public class JobUsageRecord {
     
     public JobUsageRecord() {
         RecordIdentity = null; // new RecordIdentity();
+        IntegerElement el = new IntegerElement();
+        el.setValue(1);
+        setNjobs(el);
         RawXml = "";
         ExtraXml = "";
     }
@@ -87,6 +91,7 @@ public class JobUsageRecord {
         if (JobName != null) output = output + " JobName: " + JobName;
         if (Charge != null) output = output + " Charge: " + Charge;
         if (Status != null) output = output + " Status: " + Status;
+        if (Njobs != null) output = output + " Njobs: " + Charge;
         if (WallDuration != null) output = output + " WallDuration: " + WallDuration;
         if (CpuUserDuration != null) output = output + " CpuUserDuration: " + CpuUserDuration;
         if (CpuSystemDuration != null) output = output + " CpuSystemDuration: " + CpuSystemDuration;
@@ -132,6 +137,7 @@ public class JobUsageRecord {
         if (JobName != null)           output = output + JobName.asXml("JobName");
         if (Charge != null)            output = output + Charge.asXml("Charge");
         if (Status != null)            output = output + Status.asXml("Status");
+        if (Njobs != null)             output = output + Njobs.asXml("Njobs");
         if (WallDuration != null)      output = output + WallDuration.asXml("WallDuration");
         if (CpuUserDuration != null)   output = output + CpuUserDuration.asXml("CpuUserDuration");
         if (CpuSystemDuration != null) output = output + CpuSystemDuration.asXml("CpuSystemDuration");
@@ -230,6 +236,14 @@ public class JobUsageRecord {
 
     public FloatElement getCharge() {
         return Charge;
+    }
+
+    public void setNjobs(IntegerElement njobs) {
+        this.Njobs = njobs;
+    }
+
+    public IntegerElement getNjobs() {
+        return Njobs;
     }
 
     public void setStatus(StringElement Status) {

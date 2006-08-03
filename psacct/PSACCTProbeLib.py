@@ -204,6 +204,7 @@ class Aggregate:
         usageRecord.Memory(self.Memory / self.Count)
         #usageRecord.Disk(self.Disk / self.Count)
         usageRecord.EndTime(time.mktime(self.EndTime));
+        usageRecord.Njobs(0)
 
         hostdesc = "model='"+sysinfo.Model+"' ncpu="+sysinfo.Ncpu
         #hostdesc = sysinfo.Model

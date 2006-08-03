@@ -159,6 +159,10 @@
        <property name="Metric" column="NodeCountMetric" />
        <property name="Description" column="NodeCountDescription" />
    </component>
+   <component name="Njobs" class="IntegerElement" insert="true">
+       <property name="Value" column="Njobs" />
+       <property name="Description" column="NjobsDescription" />
+   </component>
    <component name="Processors" class="IntegerElement" insert="true">
        <property name="Value" column="Processors" />
        <property name="Metric" column="ProcessorsMetric" />

@@ -23,6 +23,8 @@ if __name__ == '__main__':
         r.Status("4")
         r.Status(4)
 
+        r.Njobs(3,"Aggregation over 10 days")
+
         r.Network(3.5,"Gb",30,"total")
         #r.Disk(3.5,"Gb",13891,"max")
         #r.Memory(650000,"KB","min")

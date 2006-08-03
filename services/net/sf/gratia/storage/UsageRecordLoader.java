@@ -128,6 +128,10 @@ public class UsageRecordLoader
 												{
 														SetNodeCount(job,sub);
 												} 
+										else if (sub.getName().equalsIgnoreCase("Njobs"))
+												{
+														SetNjobs(job,sub);
+												} 
 										else if (sub.getName().equalsIgnoreCase("Processors"))
 												{
 														SetProcessors(job,sub);
@@ -802,7 +806,7 @@ public class UsageRecordLoader
 				throws Exception
     {
         IntegerElement el = job.getNodeCount();
-        if (el != null /* job identity already set */)
+        if (el != null && el.getValue() != 1)
 						{
 								Utils.GratiaError("SetNodeCount","parsing",
 																	" found a second NodeCount field in the xml file",false);
@@ -822,6 +826,32 @@ public class UsageRecordLoader
 						}
         el.setValue((new Long(element.getText())).longValue());
         job.setNodeCount(el);
+    }
+
+    public static void SetNjobs(JobUsageRecord job, Element element)
+				throws Exception
+    {
+        IntegerElement el = job.getNjobs();
+        if (el != null /* job identity already set */)
+						{
+								Utils.GratiaError("SetNjobs","parsing",
+																	" found a second Njobs field in the xml file",false);
+								return;
+						}
+        el = new IntegerElement();
+        for (Iterator i = element.attributeIterator(); i.hasNext();)
+						{
+								Attribute a = (Attribute) i.next();
+								if (a.getName().equalsIgnoreCase("description"))
+										{
+												el.setDescription(a.getValue());
+										} else if (a.getName().equalsIgnoreCase("metric"))
+												{
+														el.setMetric(a.getValue());
+												}
+						}
+        el.setValue((new Long(element.getText())).longValue());
+        job.setNjobs(el);
     }
 
     public static void SetProcessors(JobUsageRecord job, Element element)
