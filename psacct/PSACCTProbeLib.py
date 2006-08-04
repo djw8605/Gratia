@@ -130,7 +130,8 @@ class Aggregate:
     Memory = 0.0
     Count = 0
     #Disk = 0.0
-    EndTime = time.localtime()
+    StartTime = 0
+    EndTime = 0
     Date = time.localtime()
     
     def __init__(self, record):
@@ -144,22 +145,25 @@ class Aggregate:
         self.WallDuration = sysinfo.Seconds(string.atof(data[sysinfo.Indices['Wall']]))
         self.Memory = string.atof(data[sysinfo.Indices['Mem']])
         #Disk = string.atof(data[sysinfo.Indices['Disk']])
-        self.EndTime = time.strptime(data[sysinfo.Indices['End']])  # like Mon May 22 17:16:01 2006
+
+        EndTime_tuple = (time.strptime(data[sysinfo.Indices['End']]))  # like Mon May 22 17:16:01 2006
+        self.EndTime = time.mktime(EndTime_tuple)
+        self.StartTime = self.EndTime - self.WallDuration
 
         self.Username = sysinfo.GetUsername(data[sysinfo.Indices['uid']])
         self.Count = 1
-        
+
         # Reset the hours to midnight.
         self.Date = time.struct_time((
-            self.EndTime.tm_year,
-            self.EndTime.tm_mon,
-            self.EndTime.tm_mday,
-            23, # self.EndTime.tm_hour,
-            59, # self.EndTime.tm_min,
-            59, # self.EndTime.tm_sec,
-            self.EndTime.tm_wday,
-            self.EndTime.tm_yday,
-            self.EndTime.tm_isdst))
+            EndTime_tuple.tm_year,
+            EndTime_tuple.tm_mon,
+            EndTime_tuple.tm_mday,
+            23, # EndTime_tuple.tm_hour,
+            59, # EndTime_tuple.tm_min,
+            59, # EndTime_tuple.tm_sec,
+            EndTime_tuple.tm_wday,
+            EndTime_tuple.tm_yday,
+            EndTime_tuple.tm_isdst))
 
     def Add(self, other):
         # We accumulate an other record into this aggregate.
@@ -172,11 +176,13 @@ class Aggregate:
         self.JobName = "Daily Aggregate"
         self.CpuUserDuration = self.CpuUserDuration + other.CpuUserDuration
         self.CpuSystemDuration = self.CpuSystemDuration + other.CpuSystemDuration
+
         self.WallDuration = self.WallDuration + other.WallDuration
         self.Count = self.Count + 1
         self.Memory = self.Memory + other.Memory
+        if (self.StartTime > other.StartTime):
+           self.StartTime = other.StartTime
         #self.Disk = self.Disk + other.Disk
-        #if time.mktime(other.EndTime) > time.mktime(self.EndTime):
         EndTime = other.EndTime
 
     def Key(self):
@@ -200,10 +206,11 @@ class Aggregate:
         usageRecord.JobName(self.JobName)
         usageRecord.CpuDuration(self.CpuUserDuration, "user")
         usageRecord.CpuDuration(self.CpuSystemDuration, "system")
-        usageRecord.WallDuration(self.WallDuration, "")
         usageRecord.Memory(self.Memory / self.Count)
         #usageRecord.Disk(self.Disk / self.Count)
-        usageRecord.EndTime(time.mktime(self.EndTime));
+        usageRecord.StartTime(self.StartTime)
+        usageRecord.EndTime(self.EndTime)
+        usageRecord.WallDuration(self.EndTime-self.StartTime, "")
         usageRecord.Njobs(0)
 
         hostdesc = "model='"+sysinfo.Model+"' ncpu="+sysinfo.Ncpu
