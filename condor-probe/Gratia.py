@@ -74,7 +74,11 @@ class ProbeConfiguration:
         return self.__SiteName
 
     def get_UseSSL(self):
-        return int(self.__getConfigAttribute('UseSSL'))
+        val = self.__getConfigAttribute('UseSSL')
+        if val == None or val == "":
+           return 0
+        else:
+           return int(val)
 
     def get_UseSSLCertificates(self):
         return int(self.__getConfigAttribute('UseSSLCertificates'))
@@ -541,6 +545,32 @@ def OpenNewRecordFile(DirIndex,RecordIndex):
 
 def TimeToString(t = time.gmtime() ):
     return time.strftime("%Y-%m-%dT%H:%M:%SZ",t)
+
+#
+# Remove old backups
+#
+# Remove any backup older than the request number of days
+#
+# Parameters
+#   nDays - remove file older than 'nDays' (default 31)
+#
+def RemoveOldBackups(self, probeConfig, nDays = 31):
+        logDir = Config.get_LogFolder()
+        cutoff = time.time() - nDays * 24 * 3600
+
+        DebugPrint(1, " Removing Gratia log files older than ", nDays, " days from " , backupDir)
+ 
+        # Get the list of all files in the PSACCT File Backup Repository
+        files = glob.glob(os.path.join(backupDir,"*.log"))
+
+        DebugPrint(3, " Will check the files: ",files)
+        
+        for f in files:
+            if os.path.getmtime(f) < cutoff:
+                DebugPrint(2, "Will remove: " + f)
+                os.remove(f)
+                
+        files = None
 
 class UsageRecord:
     "Base class for the Gratia Usage Record"
