@@ -239,7 +239,6 @@ def __connect():
         if Config.get_UseSSL() == 0:
             __connection = httplib.HTTP(Config.get_SOAPHost())            
             DebugPrint(1, 'Connected via HTTP to:  ' + Config.get_SOAPHost())
-            print "Connected via HTTS to: " + Config.get_SOAPHost()
         else:
             if Config.get_UseSSLCertificates() == 0:
                 __connection = httplib.HTTPSConnection(Config.get_SSLHost(),
@@ -250,8 +249,8 @@ def __connect():
                                                        cert_file = Config.get_SSLCertificateFile(),
                                                        key_file = Config.get_SSLKeyFile())
             __connection.connect()
-            print "Connected via HTTPS to: " + Config.get_SSLHost()
-    __connected = 1
+            DebugPrint(1, "Connected via HTTPS to: " + Config.get_SSLHost())
+        __connected = 1
 
 ##
 ## __disconnect
@@ -683,7 +682,7 @@ class UsageRecord:
         if cputype!="user" and cputype!="system" : 
             description = "(type="+cputype+") "+description
             cputype = ""
-            self.RecordData = self.AppendToList(self.RecordData, "CpuDuration", self.UsageType(cputype)+self.Description(description), realvalue)
+        self.RecordData = self.AppendToList(self.RecordData, "CpuDuration", self.UsageType(cputype)+self.Description(description), realvalue)
 
     def EndTime(self, value, description = ""):
         if type(value)==str : realvalue = value
@@ -771,6 +770,7 @@ class UsageRecord:
         self.AppendToList(self.RecordData, "Processors",
           pstring+self.Metric(metric)+self.Description(description),
           str(value))
+
     def ServiceLevel(self, value, type, description = ""):
         self.AppendToList(self.RecordData, "ServiceLevel", self.Type(type)+self.Description(description), str(value))
 
@@ -929,66 +929,66 @@ def Send(record):
         f = 0
 
         while not success:
-            (f,dirIndex,recordIndex) = OpenNewRecordFile(dirIndex,recordIndex)
-            DebugPrint(1,"Will save in the record in:",f.name)
-            DebugPrint(3,"DirIndex=",dirIndex," RecordIndex=",recordIndex)
-            if f.name == "<stdout>":
-                success = True
-            else:
-                try:
-                    for line in record.XmlData:
-                        f.write(line)
-                        f.flush();
-                        if f.tell() > 0:
-                            success = True
-                            DebugPrint(3,"suceeded to fill: ",f.name)
-                        else:
-                            DebugPrint(0,"failed to fill: ",f.name)
-                            if f.name != "<stdout>": os.remove(f.name)
-                except:
-                                DebugPrint(0,"failed to fill with exception: ",f.name,"--", sys.exc_info(),"--",sys.exc_info()[0],"++",sys.exc_info()[1])
-                                if f.name != "<stdout>": os.remove(f.name)
-
-                                DebugPrint(0, 'Saved record to ' + f.name)
-
-                                # Currently, the recordXml is in a list format, with each item being a line of xml.  
-                                # the collectora web service requires the xml to be sent as a string.  
-                                # This logic here turns the xml list into a single xml string.
-                                usageXmlString = ""
-                                for line in record.XmlData:
-                                    usageXmlString = usageXmlString + line
-                                    DebugPrint(3, 'UsageXml:  ' + usageXmlString)
-
-                                    # Attempt to send the record to the collector
-                                    response = __sendUsageXML(Config.get_MeterName(), usageXmlString)
-                                    responseString = response.get_message()
-
-                                    DebugPrint(0, 'Response code:  ' + str(response.get_code()))
-                                    DebugPrint(0, 'Response message:  ' + response.get_message())
-
-                                    # Determine if the call was successful based on the response code.  Currently, 0 = success
-                                    if response.get_code() == 0:
-                                        DebugPrint(1, 'Response indicates success, ' + f.name + ' will be deleted')
-                                        # os.remove(f.name)
-                                    else:
-                                        DebugPrint(1, 'Response indicates failure, ' + f.name + ' will not be deleted')
-            #OutstandingRecord.append(f.name)
-            if f.name == "<stdout>":
-                Error("Gratia was un-enable to send the record and was unable to\n"+
-                      "       find a location to store the xml backup file.  The record\n"+
-                      "       will be printed to stdout:")
-                for line in record.XmlData:
+           (f,dirIndex,recordIndex) = OpenNewRecordFile(dirIndex,recordIndex)
+           DebugPrint(1,"Will save in the record in:",f.name)
+           DebugPrint(3,"DirIndex=",dirIndex," RecordIndex=",recordIndex)
+           if f.name == "<stdout>":
+              success = True
+           else:
+              try:
+                 for line in record.XmlData:
                     f.write(line)
-                    responseString = "Fatal Error: Record not send and not cached.  Record will be lost."
+                 f.flush();
+                 if f.tell() > 0:
+                    success = True
+                    DebugPrint(3,"suceeded to fill: ",f.name)
+                 else:
+                    DebugPrint(0,"failed to fill: ",f.name)
+                    if f.name != "<stdout>": os.remove(f.name)
+              except:
+                 DebugPrint(0,"failed to fill with exception: ",f.name,"--", sys.exc_info(),"--",sys.exc_info()[0],"++",sys.exc_info()[1])
+                 if f.name != "<stdout>": os.remove(f.name)
 
-                    # Attempt to reprocess any outstanding records
-                    if (not __connectionError):
-                        Reprocess()
+        DebugPrint(0, 'Saved record to ' + f.name)
 
-                        # When we are done sending outstanding records, we need to then disconnect from the web server
-                        __disconnect()
+        # Currently, the recordXml is in a list format, with each item being a line of xml.  
+        # the collectora web service requires the xml to be sent as a string.  
+        # This logic here turns the xml list into a single xml string.
+        usageXmlString = ""
+        for line in record.XmlData:
+           usageXmlString = usageXmlString + line
+        DebugPrint(3, 'UsageXml:  ' + usageXmlString)
 
-                        DebugPrint(0, responseString)
-                        DebugPrint(0, "***********************************************************")
-                        return responseString
+        # Attempt to send the record to the collector
+        response = __sendUsageXML(Config.get_MeterName(), usageXmlString)
+        responseString = response.get_message()
+
+        DebugPrint(0, 'Response code:  ' + str(response.get_code()))
+        DebugPrint(0, 'Response message:  ' + response.get_message())
+
+        # Determine if the call was successful based on the response code.  Currently, 0 = success
+        if response.get_code() == 0:
+           DebugPrint(1, 'Response indicates success, ' + f.name + ' will be deleted')
+           os.remove(f.name)
+        else:
+           DebugPrint(1, 'Response indicates failure, ' + f.name + ' will not be deleted')
+           #OutstandingRecord.append(f.name)
+           if f.name == "<stdout>":
+              Error("Gratia was un-enable to send the record and was unable to\n"+
+                    "       find a location to store the xml backup file.  The record\n"+
+                    "       will be printed to stdout:")
+              for line in record.XmlData:
+                 f.write(line)
+              responseString = "Fatal Error: Record not send and not cached.  Record will be lost."
+
+        # Attempt to reprocess any outstanding records
+        if (not __connectionError):
+           Reprocess()
+
+        # When we are done sending outstanding records, we need to then disconnect from the web server
+        __disconnect()
+
+    DebugPrint(0, responseString)
+    DebugPrint(0, "***********************************************************")
+    return responseString
 
