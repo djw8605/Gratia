@@ -1,30 +1,33 @@
 Installing the Gratia probe client
-Version 0.4
+Version 0.9
 Penelope Constanta
 
-We recommend that the client software be placed in a directory named 
-	o $VDT_LOCATION/gratia_probes
+We recommend that the client software be placed in the directory
+	o $VDT_LOCATION
 	
 1. Unpacking the gratia probe software:
 	o $ cd $VDT_LOCATION
-	o $ cp .../gratia_probes.tar .
-	o $ tar -xvf gratia_probes.tar
+	o $ tar -xvf ...../gratia_probes.tar
 	o The above command will create and populate the following directories: 
                 gratia
-                gratia/gratia_probes
-                gratia/gratia_probes/condor_mods
+                gratia/condor-probe
+                gratia/condor-probe/gram_mods
                 gratia/var/data
                 gratia/var/logs
                 gratia/var/tmp
-	o $ chmod -R 777 gratia/var	
-	  The directories under $VDT_LOCATION/gratia/var need to be writeable 
+	o The directories under $VDT_LOCATION/gratia/var need to be writeable 
 	  by all, since this is the location that various log and work files 
 	  will be copied to or deleted.
+	  So you may have to do:
+	o $ chmod -R 777 gratia/var	
+
 	  
 2. Customize the gratia probe configuration files 
-	o $ cd $VDT_LOCATION/gratia/gratia_probes
+	o $ cd $VDT_LOCATION/gratia/condor-probe
+
 	o Make sure that the condor_meter.cron.sh and condor_meter.pl
-	  $chmod 755 condor_meter.*
+	  are excutable.
+
 	o $ cp ProbeConfigTemplate ProbeConfig
 	o Edit the ProbeConfig file so that the following variables have the 
 	  correct values:
@@ -35,7 +38,14 @@ We recommend that the client software be placed in a directory named
 |MeterName="generic"                     |This value will be entered in the  | 
 |                                        |database to indicate where the     |
 |                                        |record came from.  We recommend a  |
-|                                        |FQDN such as 'fermigrid1.fnal.gov' |
+|                                        |batchsystem:FQDN such as           |
+|                                        |  'condor:fermigrid1.fnal.gov'     |
+|________________________________________|___________________________________|
+|SiteName="Generic Site"                 |This value use in the report to    | 
+|                                        |refer to the site/farm/cluster     |
+|                                        |to which the head node give access.|
+|                                        |This is used in particular in the  |
+|                                        |report.                            |
 |________________________________________|___________________________________|
 |WorkingFolder=                          |A temporary location to put the    |
 |  "MAGIC_VDT_LOCATION/gratia/var/tmp"   |copied files. This location needs  |
@@ -72,7 +82,8 @@ We recommend that the client software be placed in a directory named
    To direct the e-mail that may be output by this script, enter the following 
    crontab entry: 
    
-MAILTO=root  3,13,23,33,43,53 * * * *  $VDT_LOCATION/gratia/gratia_probes/condor_meter.cron.sh
+   MAILTO=root
+   3,13,23,33,43,53 * * * *  $VDT_LOCATION/gratia/condor-probe/condor_meter.cron.sh
    
    Where:
 	o "MAILTO=root" is the destination address that should receive emails
@@ -81,7 +92,7 @@ MAILTO=root  3,13,23,33,43,53 * * * *  $VDT_LOCATION/gratia/gratia_probes/condor
 	  directory, as this environment variable will be unknown to cron.
 	  
 4. Globus script patches:
-	o Under the directory $VDT_LOCATION/gratia/gratia_probes/gram_mods there 
+	o Under the directory $VDT_LOCATION/gratia/condor-probes/gram_mods there 
 	  are two files that contain for your information the changes to the 
 	  Globus script (in the form of diff between the patched files and 
 	  the ones currently distributed with OSG 0.3.6 / VDT 1.3.10). 
