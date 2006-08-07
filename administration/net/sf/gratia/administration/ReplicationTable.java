@@ -409,7 +409,7 @@ public class ReplicationTable extends HttpServlet
 				String command = "";
 				int sflag = 0;
 
-				if (((String) table.get("security:" + index)).equals("Yes"))
+				if (request.getParameter("security:" + index).equals("Yes"))
 						sflag = 1;
 
 				try
