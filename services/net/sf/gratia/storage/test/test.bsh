@@ -46,7 +46,7 @@ print("Database Created");
 // get test data
 //
 
-String[] filenames = xp.getFileList("test-data");
+String[] filenames = xp.getFileList("test-data","xml");
 System.out.println("Files: " + filenames.length);
 JobRecUpdaterManager updater = new JobRecUpdaterManager();
 JobUsageRecordConverter converter = new JobUsageRecordConverter();
