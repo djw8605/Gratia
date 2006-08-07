@@ -379,10 +379,11 @@ public class UsageRecordLoader
 								if (a.getName().equalsIgnoreCase("description"))
 										{
 												el.setDescription(a.getValue());
-										} else if (a.getName().equalsIgnoreCase("usageType"))
-												{
-														usage = a.getValue();
-												}
+										} 
+								else if (a.getName().equalsIgnoreCase("type"))
+										{
+												usage = a.getValue();
+										}
 						}
         // Duration d = new Duration();
         el.setValue(element.getText());
@@ -399,7 +400,8 @@ public class UsageRecordLoader
 												return;
 										}
 								job.setCpuUserDuration(el);
-						} else if (usage.equalsIgnoreCase("system"))
+						} 
+				else if (usage.equalsIgnoreCase("system"))
 								{
 										if (job.getCpuSystemDuration() != null)
 												{
@@ -412,6 +414,50 @@ public class UsageRecordLoader
 												}
 										job.setCpuSystemDuration(el);
 								}
+    }
+
+    public static void SetCpuUserDuration(JobUsageRecord job, Element element)
+				throws Exception
+    {
+        DurationElement el = job.getWallDuration();
+        String usage = "user";
+        el = new DurationElement();
+        for (Iterator i = element.attributeIterator(); i.hasNext();)
+						{
+								Attribute a = (Attribute) i.next();
+								if (a.getName().equalsIgnoreCase("description"))
+										{
+												el.setDescription(a.getValue());
+										} else if (a.getName().equalsIgnoreCase("usageType"))
+												{
+														usage = a.getValue();
+												}
+						}
+        // Duration d = new Duration();
+        el.setValue(element.getText());
+				job.setCpuUserDuration(el);
+    }
+
+    public static void SetCpuSystemDuration(JobUsageRecord job, Element element)
+				throws Exception
+    {
+        DurationElement el = job.getWallDuration();
+        String usage = "system";
+        el = new DurationElement();
+        for (Iterator i = element.attributeIterator(); i.hasNext();)
+						{
+								Attribute a = (Attribute) i.next();
+								if (a.getName().equalsIgnoreCase("description"))
+										{
+												el.setDescription(a.getValue());
+										} else if (a.getName().equalsIgnoreCase("usageType"))
+												{
+														usage = a.getValue();
+												}
+						}
+        // Duration d = new Duration();
+        el.setValue(element.getText());
+				job.setCpuSystemDuration(el);
     }
 
     public static void SetEndTime(JobUsageRecord job, Element element)
