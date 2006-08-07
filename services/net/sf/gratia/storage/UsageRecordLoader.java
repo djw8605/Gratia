@@ -29,153 +29,153 @@ public class UsageRecordLoader
         job.addRawXml(element.asXML());
 
         for (Iterator i = element.attributeIterator(); i.hasNext();)
-						{
-								// Attribute a = (Attribute)
-								i.next();
-								// Skip all attribute of JobUsageRecord for now
-						}
-
+          {
+            // Attribute a = (Attribute)
+            i.next();
+            // Skip all attribute of JobUsageRecord for now
+          }
+        
         for (Iterator i = element.elementIterator(); i.hasNext();)
-						{
-								Element sub = (Element) i.next();
-								// System.out.println("" + sub.GetName())
-								try {
-										if (sub.getName().equalsIgnoreCase("RecordIdentity"))
-												{
-														SetRecordIdentity(job,sub);
-												} 
-										else if (sub.getName().equalsIgnoreCase("JobIdentity"))
-												{
-														SetJobIdentity(job,sub);
-												} 
-										else if (sub.getName().equalsIgnoreCase("UserIdentity"))
-												{
-														SetUserIdentity(job,sub);
-												} 
-										else if (sub.getName().equalsIgnoreCase("JobName"))
-												{
-														SetJobName(job,sub);
-												} 
-										else if (sub.getName().equalsIgnoreCase("Status"))
-												{
-														SetStatus(job,sub);
-												} 
-										else if (sub.getName().equalsIgnoreCase("WallDuration"))
-												{
-														SetWallDuration(job,sub);
-												} 
-										else if (sub.getName().equalsIgnoreCase("CpuDuration"))
-												{
-														SetCpuDuration(job,sub);
-												} 
-										else if (sub.getName().equalsIgnoreCase("EndTime"))
-												{
-														SetEndTime(job,sub);
-												} 
-										else if (sub.getName().equalsIgnoreCase("StartTime"))
-												{
-														SetStartTime(job,sub);
-												} 
-										else if (sub.getName().equalsIgnoreCase("TimeDuration"))
-												{
-														SetTimeDuration(job,sub);
-												} 
-										else if (sub.getName().equalsIgnoreCase("TimeInstant"))
-												{
-														SetTimeInstant(job,sub);
-												} 
-										else if (sub.getName().equalsIgnoreCase("MachineName"))
-												{
-														SetMachineName(job,sub);
-												} 
-                                        else if (sub.getName().equalsIgnoreCase("SiteName"))
-                                                {
-                                                        SetSiteName(job,sub);
-                                                } 
-                                        else if (sub.getName().equalsIgnoreCase("Host"))
-												{
-														SetHost(job,sub);
-												} 
-										else if (sub.getName().equalsIgnoreCase("SubmitHost"))
-												{
-														SetSubmitHost(job,sub);
-												} 
-										else if (sub.getName().equalsIgnoreCase("Queue"))
-												{
-														SetQueue(job,sub);
-												} 
-										else if (sub.getName().equalsIgnoreCase("ProjectName"))
-												{
-														SetProjectName(job,sub);
-												} 
-										else if (sub.getName().equalsIgnoreCase("Network"))
-												{
-														SetNetwork(job,sub);
-												} 
-										else if (sub.getName().equalsIgnoreCase("Disk"))
-												{
-														SetDisk(job,sub);
-												} 
-										else if (sub.getName().equalsIgnoreCase("Memory"))
-												{
-														SetMemory(job,sub);
-												} 
-										else if (sub.getName().equalsIgnoreCase("Swap"))
-												{
-														SetSwap(job,sub);
-												} 
-										else if (sub.getName().equalsIgnoreCase("NodeCount"))
-												{
-														SetNodeCount(job,sub);
-												} 
-										else if (sub.getName().equalsIgnoreCase("Njobs"))
-												{
-														SetNjobs(job,sub);
-												} 
-										else if (sub.getName().equalsIgnoreCase("Processors"))
-												{
-														SetProcessors(job,sub);
-												} 
-										else if (sub.getName().equalsIgnoreCase("ServiceLevel"))
-												{
-														SetServiceLevel(job,sub);
-												} 
-										else if (sub.getName().equalsIgnoreCase("Charge"))
-												{
-														SetCharge(job,sub);
-												} 
-										else if (sub.getName().equalsIgnoreCase("Resource"))
-												{
-														AddResource(job,sub);
-												} 
-										else if (sub.getName().equalsIgnoreCase("PhaseResource"))
-												{
-														AddPhaseResource(job,sub);
-												} 
-										else if (sub.getName().equalsIgnoreCase("VolumeResource"))
-												{
-														AddVolumeResource(job,sub);
-												} 
-										else if (sub.getName().equalsIgnoreCase("ConsumableResource"))
-												{
-														AddConsumableResource(job,sub);
-												}
-										else if (sub.getName()=="ProbeName") {
-												SetProbeName(job,sub);                
-										} 
-										else 
-												{
-														job.addExtraXml(sub.asXML());	            
-												}
-								} catch (Exception e) {
-										// Something went wrong in the parsing.  We do not die, we
-										// continue to try to parse.  The next step in the processing
-										// would need to see what's missing.
-										job.addExtraXml(sub.asXML());
-										Utils.GratiaInfo("Warning: error during the xml parsing of "+job.getRecordId()+" : "+e);
-										e.printStackTrace();
-								}
-						}
+          {
+            Element sub = (Element) i.next();
+            // System.out.println("" + sub.GetName())
+            try {
+              if (sub.getName().equalsIgnoreCase("RecordIdentity"))
+                {
+                  SetRecordIdentity(job,sub);
+                } 
+              else if (sub.getName().equalsIgnoreCase("JobIdentity"))
+                {
+                  SetJobIdentity(job,sub);
+                } 
+              else if (sub.getName().equalsIgnoreCase("UserIdentity"))
+                {
+                  SetUserIdentity(job,sub);
+                } 
+              else if (sub.getName().equalsIgnoreCase("JobName"))
+                {
+                  SetJobName(job,sub);
+                } 
+              else if (sub.getName().equalsIgnoreCase("Status"))
+                {
+                  SetStatus(job,sub);
+                } 
+              else if (sub.getName().equalsIgnoreCase("WallDuration"))
+                {
+                  SetWallDuration(job,sub);
+                } 
+              else if (sub.getName().equalsIgnoreCase("CpuDuration"))
+                {
+                  SetCpuDuration(job,sub);
+                } 
+              else if (sub.getName().equalsIgnoreCase("EndTime"))
+                {
+                  SetEndTime(job,sub);
+                } 
+              else if (sub.getName().equalsIgnoreCase("StartTime"))
+                {
+                  SetStartTime(job,sub);
+                } 
+              else if (sub.getName().equalsIgnoreCase("TimeDuration"))
+                {
+                  SetTimeDuration(job,sub);
+                } 
+              else if (sub.getName().equalsIgnoreCase("TimeInstant"))
+                {
+                  SetTimeInstant(job,sub);
+                } 
+              else if (sub.getName().equalsIgnoreCase("MachineName"))
+                {
+                  SetMachineName(job,sub);
+                } 
+              else if (sub.getName().equalsIgnoreCase("SiteName"))
+                {
+                  SetSiteName(job,sub);
+                } 
+              else if (sub.getName().equalsIgnoreCase("Host"))
+                {
+                  SetHost(job,sub);
+                } 
+              else if (sub.getName().equalsIgnoreCase("SubmitHost"))
+                {
+                  SetSubmitHost(job,sub);
+                } 
+              else if (sub.getName().equalsIgnoreCase("Queue"))
+                {
+                  SetQueue(job,sub);
+                } 
+              else if (sub.getName().equalsIgnoreCase("ProjectName"))
+                {
+                  SetProjectName(job,sub);
+                } 
+              else if (sub.getName().equalsIgnoreCase("Network"))
+                {
+                  SetNetwork(job,sub);
+                } 
+              else if (sub.getName().equalsIgnoreCase("Disk"))
+                {
+                  SetDisk(job,sub);
+                } 
+              else if (sub.getName().equalsIgnoreCase("Memory"))
+                {
+                  SetMemory(job,sub);
+                } 
+              else if (sub.getName().equalsIgnoreCase("Swap"))
+                {
+                  SetSwap(job,sub);
+                } 
+              else if (sub.getName().equalsIgnoreCase("NodeCount"))
+                {
+                  SetNodeCount(job,sub);
+                } 
+              else if (sub.getName().equalsIgnoreCase("Njobs"))
+                {
+                  SetNjobs(job,sub);
+                } 
+              else if (sub.getName().equalsIgnoreCase("Processors"))
+                {
+                  SetProcessors(job,sub);
+                } 
+              else if (sub.getName().equalsIgnoreCase("ServiceLevel"))
+                {
+                  SetServiceLevel(job,sub);
+                } 
+              else if (sub.getName().equalsIgnoreCase("Charge"))
+                {
+                  SetCharge(job,sub);
+                } 
+              else if (sub.getName().equalsIgnoreCase("Resource"))
+                {
+                  AddResource(job,sub);
+                } 
+              else if (sub.getName().equalsIgnoreCase("PhaseResource"))
+                {
+                  AddPhaseResource(job,sub);
+                } 
+              else if (sub.getName().equalsIgnoreCase("VolumeResource"))
+                {
+                  AddVolumeResource(job,sub);
+                } 
+              else if (sub.getName().equalsIgnoreCase("ConsumableResource"))
+                {
+                  AddConsumableResource(job,sub);
+                }
+              else if (sub.getName()=="ProbeName") {
+                SetProbeName(job,sub);                
+              } 
+              else 
+                {
+                  job.addExtraXml(sub.asXML());	            
+                }
+            } catch (Exception e) {
+              // Something went wrong in the parsing.  We do not die, we
+              // continue to try to parse.  The next step in the processing
+              // would need to see what's missing.
+              job.addExtraXml(sub.asXML());
+              Utils.GratiaInfo("Warning: error during the xml parsing of "+job.getRecordId()+" : "+e);
+              e.printStackTrace();
+            }
+          }
         return job;
     }
 
@@ -374,90 +374,54 @@ public class UsageRecordLoader
         String usage = "user";
         el = new DurationElement();
         for (Iterator i = element.attributeIterator(); i.hasNext();)
-						{
-								Attribute a = (Attribute) i.next();
-								if (a.getName().equalsIgnoreCase("description"))
-										{
-												el.setDescription(a.getValue());
-										} 
-								else if (a.getName().equalsIgnoreCase("type"))
-										{
-												usage = a.getValue();
-										}
-						}
-        // Duration d = new Duration();
+          {
+            Attribute a = (Attribute) i.next();
+            if (a.getName().equalsIgnoreCase("description"))
+              {
+                el.setDescription(a.getValue());
+              } 
+            else if (a.getName().equalsIgnoreCase("type") || a.getName().equalsIgnoreCase("usageType"))
+              {
+                usage = a.getValue();
+              }
+          }
         el.setValue(element.getText());
-
+        
         if (usage.equalsIgnoreCase("user"))
-						{
-								if (job.getCpuUserDuration() != null)
-										{
-												Utils.GratiaError(
-																					"SetCpuDuration",
-																					"parsing",
-																					" found a second CpuUserDuration field in the xml file",
-																					false);
-												return;
-										}
-								job.setCpuUserDuration(el);
-						} 
-				else if (usage.equalsIgnoreCase("system"))
-								{
-										if (job.getCpuSystemDuration() != null)
-												{
-														Utils.GratiaError(
-																							"SetCpuDuration",
-																							"parsing",
-																							" found a second CpuSystemDuration field in the xml file",
-																							false);
-														return;
-												}
-										job.setCpuSystemDuration(el);
-								}
-    }
-
-    public static void SetCpuUserDuration(JobUsageRecord job, Element element)
-				throws Exception
-    {
-        DurationElement el = job.getWallDuration();
-        String usage = "user";
-        el = new DurationElement();
-        for (Iterator i = element.attributeIterator(); i.hasNext();)
-						{
-								Attribute a = (Attribute) i.next();
-								if (a.getName().equalsIgnoreCase("description"))
-										{
-												el.setDescription(a.getValue());
-										} else if (a.getName().equalsIgnoreCase("usageType"))
-												{
-														usage = a.getValue();
-												}
-						}
-        // Duration d = new Duration();
-        el.setValue(element.getText());
-				job.setCpuUserDuration(el);
-    }
-
-    public static void SetCpuSystemDuration(JobUsageRecord job, Element element)
-				throws Exception
-    {
-        DurationElement el = job.getWallDuration();
-        String usage = "system";
-        el = new DurationElement();
-        for (Iterator i = element.attributeIterator(); i.hasNext();)
-						{
-								Attribute a = (Attribute) i.next();
-								if (a.getName().equalsIgnoreCase("description"))
-										{
-												el.setDescription(a.getValue());
-										} else if (a.getName().equalsIgnoreCase("usageType"))
-												{
-														usage = a.getValue();
-												}
-						}
-        // Duration d = new Duration();
-        el.setValue(element.getText());
-				job.setCpuSystemDuration(el);
+          {
+            if (job.getCpuUserDuration() != null)
+              {
+                Utils.GratiaError(
+                                  "SetCpuDuration",
+                                  "parsing",
+                                  " found a second CpuUserDuration field in the xml file",
+                                  true);
+                return;
+              }
+            job.setCpuUserDuration(el);
+          } 
+        else if (usage.equalsIgnoreCase("system"))
+          {
+            if (job.getCpuSystemDuration() != null)
+              {
+                Utils.GratiaError(
+                                  "SetCpuDuration",
+                                  "parsing",
+                                  " found a second CpuSystemDuration field in the xml file",
+                                  true);
+                return;
+              }
+            job.setCpuSystemDuration(el);
+          }
+        else 
+          {
+            Utils.GratiaError(
+                              "SetCpuDuration",
+                              "parsing",
+                              " found an unknown usageType "+usage,
+                              true);
+            
+          }
     }
 
     public static void SetEndTime(JobUsageRecord job, Element element)

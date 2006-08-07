@@ -58,11 +58,11 @@ public class DurationElement implements XmlElement {
         return output;
     }
 
-    public String asXml(String elementName, String default_type) {
+    public String asXml(String elementName, String type_name, String duration_type) {
         String output = "<"+elementName+" ";
         if (Description != null) output = output + "urwg:description=\"" + Description + "\" ";
-        if (Type != null) output = output + "urwg:type=\"" + Type + "\" ";
-        else if (default_type != null) output = output + "urwg:type=\"" + default_type + "\" ";
+        if (Type != null) output = output + "urwg:"+type_name+"=\"" + Type + "\" ";
+        else if (duration_type != null) output = output + "urwg:"+type_name+"=\"" + duration_type + "\" ";
         output = output + ">";
         try {
             output = output + Utils.DurationToXml(Value);
@@ -74,6 +74,6 @@ public class DurationElement implements XmlElement {
     }
 
     public String asXml(String elementName) {
-        return asXml(elementName,null);
+        return asXml(elementName,"type",null);
     }    
 }
