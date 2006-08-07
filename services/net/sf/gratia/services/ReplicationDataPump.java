@@ -205,6 +205,14 @@ public class ReplicationDataPump extends Thread
 														}
 												dbid = resultSet.getString("dbid");
 												String xml = getXML(dbid);
+												if (p.getProperty("service.datapump.trace") != null)
+														if (p.getProperty("service.datapump.trace").equals("1"))
+																{
+																		System.out.println("");
+																		System.out.println("dbid: " + dbid);
+																		System.out.println("xml: " + xml);
+																		System.out.println("");
+																}
 												if (security.equals("0"))
 														post = new Post(openconnection + "/gratia-servlets/rmi","update",xml);
 												else
@@ -264,6 +272,11 @@ public class ReplicationDataPump extends Thread
 								for(i = 0; i < result.size(); i++)
 										{
 												JobUsageRecord record = (JobUsageRecord) result.get(i);
+												DurationElement duration = getCpuSystemDuration(dbid);
+												if (duration != null)
+														record.setCpuSystemDuration(duration);
+												if (record.getCpuSystemDuration() == null)
+														System.out.println("dbid: " + dbid + " null cpu system duration");
 												buffer.append(record.asXML());
 										}
 						}
@@ -276,6 +289,38 @@ public class ReplicationDataPump extends Thread
 								session.close();
 						}
 				return buffer.toString();
+		}
+
+		public DurationElement getCpuSystemDuration(String dbid)
+		{
+				String command = "select CpuSystemDuration from JobUsageRecord where dbid = " + dbid;
+				Double value = null;
+
+				try
+						{
+								Statement statement = connection.prepareStatement(command);
+								ResultSet resultSet = statement.executeQuery(command);
+								while(resultSet.next())
+										{
+												value = resultSet.getDouble(1);
+										}
+								resultSet.close();
+								statement.close();
+						}
+				catch (Exception e)
+						{
+								System.out.println("command: " + command);
+								e.printStackTrace();
+								return null;
+						}
+
+				if (value == null)
+						return null;
+
+				DurationElement duration = new DurationElement();
+				duration.setValue(value);
+				duration.setType("system");
+				return duration;
 		}
 
 		public void updateReplicationTable(String dbid)

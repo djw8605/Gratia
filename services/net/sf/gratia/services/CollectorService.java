@@ -46,9 +46,10 @@ public class CollectorService implements ServletContextListener
 		ProbeMonitorService probeMonitorService;
 		RMIService rmiservice;
 
+		XP xp = new XP();
+
 		public void contextInitialized(ServletContextEvent sce)
 		{
-				XP xp = new XP();
 				String catalinaHome = "";
 				String configurationPath = "";
 
@@ -62,40 +63,49 @@ public class CollectorService implements ServletContextListener
 						}
 				System.out.println("");
 
+				p = net.sf.gratia.services.Configuration.getProperties();
+
+				if (p.getProperty("service.use.apache.security").equals("0"))
+						try
+								{
+										//
+										// setup configuration path/https system parameters
+										//
+
+										configurationPath = net.sf.gratia.services.Configuration.getConfigurationPath();
+										System.setProperty("java.protocol.handler.pkgs","com.sun.net.ssl.internal.www.protocol");
+										Security.addProvider(new com.sun.net.ssl.internal.ssl.Provider());
+
+										System.setProperty("javax.net.ssl.trustStore",configurationPath + "/truststore");
+										System.setProperty("javax.net.ssl.trustStorePassword","server");
+
+										System.setProperty("javax.net.ssl.keyStore",configurationPath + "/keystore");
+										System.setProperty("javax.net.ssl.keyStorePassword","server");
+
+										com.sun.net.ssl.HostnameVerifier hv=new com.sun.net.ssl.HostnameVerifier() 
+												{
+														public boolean verify(String urlHostname, String certHostname) 
+														{
+																System.out.println("url host name: " + urlHostname);
+																System.out.println("cert host name: " + certHostname);
+																System.out.println("WARNING: Hostname is not matched for cert.");
+																return true;
+														}
+												};
+
+										com.sun.net.ssl.HttpsURLConnection.setDefaultHostnameVerifier(hv);
+								}
+						catch (Exception e)
+								{
+										e.printStackTrace();
+								}
+
 				try
 						{
-								//
-								// setup configuration path/https system parameters
-								//
-
-								configurationPath = net.sf.gratia.services.Configuration.getConfigurationPath();
-								System.setProperty("java.protocol.handler.pkgs","com.sun.net.ssl.internal.www.protocol");
-								Security.addProvider(new com.sun.net.ssl.internal.ssl.Provider());
-
-								System.setProperty("javax.net.ssl.trustStore",configurationPath + "/truststore");
-								System.setProperty("javax.net.ssl.trustStorePassword","server");
-
-								System.setProperty("javax.net.ssl.keyStore",configurationPath + "/keystore");
-								System.setProperty("javax.net.ssl.keyStorePassword","server");
-
-								com.sun.net.ssl.HostnameVerifier hv=new com.sun.net.ssl.HostnameVerifier() 
-										{
-												public boolean verify(String urlHostname, String certHostname) 
-												{
-														System.out.println("url host name: " + urlHostname);
-														System.out.println("cert host name: " + certHostname);
-														System.out.println("WARNING: Hostname is not matched for cert.");
-														return true;
-												}
-										};
-
-								com.sun.net.ssl.HttpsURLConnection.setDefaultHostnameVerifier(hv);
-
 								//
 								// get configuration properties
 								//
 
-								p = net.sf.gratia.services.Configuration.getProperties();
 								rmilookup = p.getProperty("service.rmi.rmilookup");
 								rmibind = p.getProperty("service.rmi.rmibind");
 								service = p.getProperty("service.rmi.service");
@@ -245,56 +255,104 @@ public class CollectorService implements ServletContextListener
 				// add a server cert if one isn't there
 				//
 
-				{
-						String dq = "\"";
-						String keystore = System.getProperty("catalina.home") + "/gratia/keystore";
-						keystore = xp.replaceAll(keystore,"\\","/");
-						String command1[] =
-								{"keytool",
-								 "-genkey",
-								 "-dname",
-								 "cn=server, ou=Fermi-GridAccounting, o=Fermi, c=US",
-								 "-alias",
-								 "server",
-								 "-keystore",
-								 keystore,
-								 "-keypass",
-								 "server",
-								 "-storepass",
-								 "server"};
+				if (p.getProperty("service.use.apache.securiity").equals("0"))
+						{
+								if ((p.getProperty("service.use.selfgenerated.certs") != null) &&
+										(p.getProperty("service.use.selfgenerated.certs").equals("1")))
+										loadSelfGeneratedCerts();
+								else
+										loadVDTCerts();
+						}
 
-						int exitValue1 = Execute.execute(command1);
+				//
+				// start replication service
+				//
 
-						String command2[] =
-								{"keytool",
-								 "-selfcert",
-								 "-alias",
-								 "server",
-								 "-keypass",
-								 "server",
-								 "-keystore",
-								 keystore,
-								 "-storepass",
-								 "server"};
-
-						if (exitValue1 == 0)
-								Execute.execute(command2);
-						FlipSSL.flip();
-
-						//
-						// start replication service
-						//
-
-						replicationService = new ReplicationService(hibernateFactory);
-						replicationService.start();
-				}
-
+				replicationService = new ReplicationService(hibernateFactory);
+				replicationService.start();
 
 				//
 				// wait 1 minute to create new report config for birt (giving tomcat time to deploy the war)
 				//
 
 				(new ReportSetup()).start();
+		}
+
+
+		public void loadSelfGeneratedCerts()
+		{
+				String dq = "\"";
+				String keystore = System.getProperty("catalina.home") + "/gratia/keystore";
+				keystore = xp.replaceAll(keystore,"\\","/");
+				String command1[] =
+						{"keytool",
+						 "-genkey",
+						 "-dname",
+						 "cn=server, ou=Fermi-GridAccounting, o=Fermi, c=US",
+						 "-alias",
+						 "server",
+						 "-keystore",
+						 keystore,
+						 "-keypass",
+						 "server",
+						 "-storepass",
+						 "server"};
+
+				int exitValue1 = Execute.execute(command1);
+
+				String command2[] =
+						{"keytool",
+						 "-selfcert",
+						 "-alias",
+						 "server",
+						 "-keypass",
+						 "server",
+						 "-keystore",
+						 keystore,
+						 "-storepass",
+						 "server"};
+
+				if (exitValue1 == 0)
+						Execute.execute(command2);
+				FlipSSL.flip();
+		}
+
+		public void loadVDTCerts()
+		{
+				String dq = "\"";
+				String keystore = System.getProperty("catalina.home") + "/gratia/keystore";
+				keystore = xp.replaceAll(keystore,"\\","/");
+				String command1[] =
+						{"keytool",
+						 "-genkey",
+						 "-dname",
+						 "cn=server, ou=Fermi-GridAccounting, o=Fermi, c=US",
+						 "-alias",
+						 "server",
+						 "-keystore",
+						 keystore,
+						 "-keypass",
+						 "server",
+						 "-storepass",
+						 "server"};
+
+				int exitValue1 = Execute.execute(command1);
+
+				String command2[] =
+						{"keytool",
+						 "-selfcert",
+						 "-alias",
+						 "server",
+						 "-keypass",
+						 "server",
+						 "-keystore",
+						 keystore,
+						 "-storepass",
+						 "server"};
+
+				if (exitValue1 == 0)
+						Execute.execute(command2);
+				FlipSSL.flip();
 		}
 
 		public void zapDatabase()
@@ -345,8 +403,6 @@ public class CollectorService implements ServletContextListener
 								}
 						catch (Exception ignore)
 								{
-										System.out.println("Error Executing: " + commands[i]);
-										ignore.printStackTrace();
 								}
 
 		}
