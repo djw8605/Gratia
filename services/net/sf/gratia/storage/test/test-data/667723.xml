@@ -1,0 +1,15 @@
+<JobUsageRecord xmlns="http://www.gridforum.org/2003/ur-wg" xmlns:urwg="http://www.gridforum.org/2003/ur-wg" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.gridforum.org/2003/ur-wg file:///u:/OSG/urwg-schema.11.xsd">
+<RecordIdentity urwg:recordId="cmswn401.fnal.gov:9751.7" urwg:createTime="2006-07-13T04:27:15Z"/>
+<UserIdentity>
+	<LocalUserId>cdffgrid</LocalUserId>
+</UserIdentity>
+	<JobName>Daily Aggregate</JobName>
+	<CpuDuration urwg:usageType="user">PT3H48M6.14S</CpuDuration>
+	<CpuDuration urwg:usageType="system">PT28.04S</CpuDuration>
+	<WallDuration>P2DT11H27M47.2S</WallDuration>
+	<Memory urwg:metric="total">11125.0</Memory>
+	<EndTime>2006-07-12T05:04:24Z</EndTime>
+	<Host primary="true" urwg:description="model='AMD Opteron(tm) Processor 248' ncpu=2">cmswn401.fnal.gov</Host>
+	<MachineName>cmswc1.fnal.gov</MachineName>
+	<ProbeName>psacct:cmswc1.fnal.gov</ProbeName>
+</JobUsageRecord>

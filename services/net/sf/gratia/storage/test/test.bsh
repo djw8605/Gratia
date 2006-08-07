@@ -1,0 +1,91 @@
+import net.sf.gratia.services.*;
+
+import net.sf.gratia.storage.*;
+import org.hibernate.cfg.*;
+import java.sql.*;
+import org.dom4j.*;
+import org.dom4j.io.*;
+import org.apache.derby.jdbc.*;
+
+XP xp = new XP();
+
+String driver = "org.apache.derby.jdbc.EmbeddedDriver";
+String url = "jdbc:derby:derby;create=true";
+String reader = "jdbc:derby:derby";
+String user = "sa";
+String password = "sa";
+
+//
+// create database
+//
+
+Class.forName(driver).newInstance();
+connection = DriverManager.getConnection(url,user,password);
+try
+{
+		DriverManager.getConnection("jdbc:derby:derby;shutdown=true");
+}
+catch (Exception ignore)
+{
+}
+
+//
+// start hibernate/database to create/populate
+//
+
+hibernateConfiguration = new org.hibernate.cfg.Configuration();
+hibernateConfiguration.addFile(new File("JobUsage.hbm.xml"));
+hibernateConfiguration.configure(new File("hibernate.cfg.xml"));
+
+factory = hibernateConfiguration.buildSessionFactory();
+session = factory.openSession();
+
+print("Database Created");
+
+//
+// get test data
+//
+
+String[] filenames = xp.getFileList("test-data");
+System.out.println("Files: " + filenames.length);
+JobRecUpdaterManager updater = new JobRecUpdaterManager();
+JobUsageRecordConverter converter = new JobUsageRecordConverter();
+
+Logging.initialize("logfile","5000","1","OFF");
+
+for (int i = 0; i < filenames.length; i++)
+{
+		System.out.println("Processing: " + filenames[i]);
+		String xml = xp.get(filenames[i]);
+		
+		xp.save("output/record" + i + ".input",xml);
+
+		ArrayList records = converter.convert(xml);
+		for(int j = 0; j < records.size(); j++)
+				{
+						JobUsageRecord current = (JobUsageRecord) records.get(j);
+						current.setRawXml("");
+						updater.Update(current);
+						session.save(current);
+				}
+}
+
+print("");
+print("Database Loaded");
+print("");
+
+//
+// read from database and write back out as xml
+//
+
+String command = "from JobUsageRecord";
+List result = session.createQuery(command).list();
+for(i = 0; i < result.size(); i++)
+{
+		JobUsageRecord record = (JobUsageRecord) result.get(i);
+		xml = record.asXML();
+		xp.save("output/record" + i + ".output",xml);
+		System.out.println("Saved: " + i);
+}
+
+print("done !!");

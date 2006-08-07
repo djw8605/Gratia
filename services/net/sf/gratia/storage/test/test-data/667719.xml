@@ -1,0 +1,15 @@
+<JobUsageRecord xmlns="http://www.gridforum.org/2003/ur-wg" xmlns:urwg="http://www.gridforum.org/2003/ur-wg" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.gridforum.org/2003/ur-wg file:///u:/OSG/urwg-schema.11.xsd">
+<RecordIdentity urwg:recordId="cmswn401.fnal.gov:9751.3" urwg:createTime="2006-07-13T04:27:15Z"/>
+<UserIdentity>
+	<LocalUserId>smmsp</LocalUserId>
+</UserIdentity>
+	<JobName>sendmail         </JobName>
+	<CpuDuration urwg:usageType="user">PT0S</CpuDuration>
+	<CpuDuration urwg:usageType="system">PT0S</CpuDuration>
+	<WallDuration>PT0S</WallDuration>
+	<Memory urwg:metric="total">31272.0</Memory>
+	<EndTime>2006-07-12T05:41:25Z</EndTime>
+	<Host primary="true" urwg:description="model='AMD Opteron(tm) Processor 248' ncpu=2">cmswn401.fnal.gov</Host>
+	<MachineName>cmswc1.fnal.gov</MachineName>
+	<ProbeName>psacct:cmswc1.fnal.gov</ProbeName>
+</JobUsageRecord>
