@@ -70,7 +70,6 @@ public class CETable extends HttpServlet
 						{
 								Class.forName(driver).newInstance();
 								connection = DriverManager.getConnection(url,user,password);
-								System.out.println("Connection Opened");
 						}
 				catch (Exception e)
 						{

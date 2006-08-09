@@ -8,6 +8,10 @@ public class Security
 		private String hostpem;
 		private String state;
 
+		public Security()
+		{
+		}
+
 		public int getsecurityid() 
 		{
 				return securityid;

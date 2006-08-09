@@ -14,6 +14,10 @@ public class CEProbes
 		private String status;
 		private int jobs;
 
+		public CEProbes()
+		{
+		}
+
 		public int get_facility_id() 
 		{
 				return _facility_id;

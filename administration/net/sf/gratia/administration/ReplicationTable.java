@@ -78,7 +78,6 @@ public class ReplicationTable extends HttpServlet
 						{
 								Class.forName(driver).newInstance();
 								connection = DriverManager.getConnection(url,user,password);
-								System.out.println("Connection Opened");
 						}
 				catch (Exception e)
 						{
@@ -198,7 +197,7 @@ public class ReplicationTable extends HttpServlet
 						{
 								command = 
 										"select replicationid,registered,running,security,openconnection,secureconnection," +
-										"frequency,dbid,rowcount,probename from Replication order by openconnection";
+										"frequency,dbid,rowcount,probename from Replication order by replicationid";
 								statement = connection.prepareStatement(command);
 								resultSet = statement.executeQuery(command);
 
@@ -408,9 +407,12 @@ public class ReplicationTable extends HttpServlet
 		{
 				String command = "";
 				int sflag = 0;
+				int rflag = 0;
 
 				if (request.getParameter("security:" + index).equals("Yes"))
 						sflag = 1;
+				if (allreadyRegistered(request.getParameter("openconnection:" + index)))
+						rflag = 1;
 
 				try
 						{
@@ -418,7 +420,7 @@ public class ReplicationTable extends HttpServlet
 										"insert into Replication(openconnection,registered,running,security,probename," +
 										"frequency,dbid,rowcount) values(" + cr +
 										dq + request.getParameter("openconnection:" + index) + dq + comma + cr +
-										"0" + comma + cr +
+										rflag + comma + cr +
 										"0" + comma + cr +
 										sflag + comma + cr +
 										dq + request.getParameter("probename:" + index) + dq + comma + cr +
@@ -436,6 +438,33 @@ public class ReplicationTable extends HttpServlet
 						}
 		}
 
+		public boolean allreadyRegistered(String openconnection)
+		{
+				String command = "select count(*) from Replication where registered = 1 and openconnection = " +
+						dq + openconnection + dq;
+				int count = 0;
+
+				try
+						{
+								Statement statement = connection.prepareStatement(command);
+								ResultSet resultSet = statement.executeQuery(command);
+								while(resultSet.next())
+										{
+												count = resultSet.getInt(1);
+										}
+								resultSet.close();
+								statement.close();
+						}
+				catch (Exception e)
+						{
+								System.out.println("command: " + command);
+								e.printStackTrace();
+						}
+				if (count > 0)
+						return true;
+				return false;
+		}
+
 		public void update(int index)
 		{
 				String command = "";
@@ -450,7 +479,8 @@ public class ReplicationTable extends HttpServlet
 										"update Replication set" + cr +
 										"security = " + sflag + comma + cr +
 										"probename = " + dq + request.getParameter("probename:" + index) + dq + comma + cr +
-										"frequency = " + request.getParameter("frequency:" + index);
+										"frequency = " + request.getParameter("frequency:" + index) + cr +
+										"where replicationid = " + request.getParameter("replicationid:" + index);
 								Statement statement = connection.createStatement();
 								statement.executeUpdate(command);
 								statement.close();

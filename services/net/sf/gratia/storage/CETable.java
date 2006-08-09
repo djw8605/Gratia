@@ -5,6 +5,10 @@ public class CETable
 		private int _facility_id;
 		private String _facility_name;
 	
+		public CETable()
+		{
+		}
+
 		public int get_facility_id() {
 				return _facility_id;
 		}

@@ -48,6 +48,12 @@
 				<load-on-startup>1</load-on-startup>
     </servlet>
 
+    <servlet>
+        <servlet-name>CPUInfo</servlet-name>
+        <servlet-class>net.sf.gratia.administration.CPUInfo</servlet-class>
+				<load-on-startup>1</load-on-startup>
+    </servlet>
+
     <servlet-mapping>
         <servlet-name>CETable</servlet-name>
 				<url-pattern>/cetable.html</url-pattern>
@@ -66,6 +72,11 @@
     <servlet-mapping>
         <servlet-name>ReplicationTable</servlet-name>
         <url-pattern>/replicationtable.html</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>CPUInfo</servlet-name>
+        <url-pattern>/cpuinfo.html</url-pattern>
     </servlet-mapping>
 
 </web-app>

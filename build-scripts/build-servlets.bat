@@ -41,3 +41,9 @@ jar -cfM  %root%\target\gratia-servlets.war -C war .
 
 rmdir /q /s war
 
+#
+# remove later
+#
+
+rmdir /q /s \tomcat\webapps\gratia-servlets
+copy %root%\target\gratia-servlets.war \tomcat\webapps

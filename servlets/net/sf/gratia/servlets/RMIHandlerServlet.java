@@ -68,6 +68,48 @@ public class RMIHandlerServlet extends HttpServlet
 
 								if (command != null)
 										command = command.toLowerCase();
+								else
+										{
+												//
+												// the following is a hack to get around a python post issue
+												//
+												ServletInputStream input = req.getInputStream();
+												byte buffer[] = new byte[4 * 4096];
+												int icount = 0;
+												int istatus = 0;
+												for (icount = 0; icount < buffer.length; icount++)
+														{
+																istatus = input.read(buffer,icount,1);
+																if (istatus == -1)
+																		break;
+														}
+												String body = new String(buffer,0,icount);
+												StringTokenizer st1 = new StringTokenizer(body,"&");
+												while(st1.hasMoreTokens())
+														{
+																String token = st1.nextToken();
+																int index = token.indexOf("=");
+																String key = token.substring(0,index);
+																String value = token.substring(index + 1);
+																key = key.toLowerCase();
+																if (key.equals("command"))
+																		command = value;
+																else if (key.equals("from"))
+																		from = value;
+																else if (key.equals("to"))
+																		to = value;
+																else if (key.equals("rmi"))
+																		rmi = value;
+																else if (key.equals("arg1"))
+																		arg1 = value;
+																else if (key.equals("arg2"))
+																		arg2 = value;
+																else if (key.equals("arg3"))
+																		arg3 = value;
+																else if (key.equals("arg4"))
+																		arg4 = value;
+														}
+										}
 
 								if (arg1 != null)
 										argcount++;

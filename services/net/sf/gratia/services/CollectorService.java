@@ -65,40 +65,41 @@ public class CollectorService implements ServletContextListener
 
 				p = net.sf.gratia.services.Configuration.getProperties();
 
-				if (p.getProperty("service.use.apache.security").equals("0"))
-						try
-								{
-										//
-										// setup configuration path/https system parameters
-										//
+				if (p.getProperty("service.use.security").equals("1"))
+						if (p.getProperty("service.use.apache.security").equals("0"))
+								try
+										{
+												//
+												// setup configuration path/https system parameters
+												//
 
-										configurationPath = net.sf.gratia.services.Configuration.getConfigurationPath();
-										System.setProperty("java.protocol.handler.pkgs","com.sun.net.ssl.internal.www.protocol");
-										Security.addProvider(new com.sun.net.ssl.internal.ssl.Provider());
+												configurationPath = net.sf.gratia.services.Configuration.getConfigurationPath();
+												System.setProperty("java.protocol.handler.pkgs","com.sun.net.ssl.internal.www.protocol");
+												Security.addProvider(new com.sun.net.ssl.internal.ssl.Provider());
 
-										System.setProperty("javax.net.ssl.trustStore",configurationPath + "/truststore");
-										System.setProperty("javax.net.ssl.trustStorePassword","server");
+												System.setProperty("javax.net.ssl.trustStore",configurationPath + "/truststore");
+												System.setProperty("javax.net.ssl.trustStorePassword","server");
 
-										System.setProperty("javax.net.ssl.keyStore",configurationPath + "/keystore");
-										System.setProperty("javax.net.ssl.keyStorePassword","server");
+												System.setProperty("javax.net.ssl.keyStore",configurationPath + "/keystore");
+												System.setProperty("javax.net.ssl.keyStorePassword","server");
 
-										com.sun.net.ssl.HostnameVerifier hv=new com.sun.net.ssl.HostnameVerifier() 
-												{
-														public boolean verify(String urlHostname, String certHostname) 
+												com.sun.net.ssl.HostnameVerifier hv=new com.sun.net.ssl.HostnameVerifier() 
 														{
-																System.out.println("url host name: " + urlHostname);
-																System.out.println("cert host name: " + certHostname);
-																System.out.println("WARNING: Hostname is not matched for cert.");
-																return true;
-														}
-												};
+																public boolean verify(String urlHostname, String certHostname) 
+																{
+																		System.out.println("url host name: " + urlHostname);
+																		System.out.println("cert host name: " + certHostname);
+																		System.out.println("WARNING: Hostname is not matched for cert.");
+																		return true;
+																}
+														};
 
-										com.sun.net.ssl.HttpsURLConnection.setDefaultHostnameVerifier(hv);
-								}
-						catch (Exception e)
-								{
-										e.printStackTrace();
-								}
+												com.sun.net.ssl.HttpsURLConnection.setDefaultHostnameVerifier(hv);
+										}
+								catch (Exception e)
+										{
+												e.printStackTrace();
+										}
 
 				try
 						{
@@ -255,13 +256,14 @@ public class CollectorService implements ServletContextListener
 				// add a server cert if one isn't there
 				//
 
-				if (p.getProperty("service.use.apache.securiity").equals("0"))
-						{
-								if ((p.getProperty("service.use.selfgenerated.certs") != null) &&
-										(p.getProperty("service.use.selfgenerated.certs").equals("1")))
-										loadSelfGeneratedCerts();
-								else
-										loadVDTCerts();
+				if (p.getProperty("service.use.security").equals("1"))
+						if (p.getProperty("service.use.apache.security").equals("0"))
+								{
+										if ((p.getProperty("service.use.selfgenerated.certs") != null) &&
+												(p.getProperty("service.use.selfgenerated.certs").equals("1")))
+												loadSelfGeneratedCerts();
+										else
+												loadVDTCerts();
 						}
 
 				//
@@ -321,37 +323,42 @@ public class CollectorService implements ServletContextListener
 		{
 				String dq = "\"";
 				String keystore = System.getProperty("catalina.home") + "/gratia/keystore";
+				String configurationPath = System.getProperty("catalina.home") + "/gratia/";
 				keystore = xp.replaceAll(keystore,"\\","/");
 				String command1[] =
-						{"keytool",
-						 "-genkey",
-						 "-dname",
-						 "cn=server, ou=Fermi-GridAccounting, o=Fermi, c=US",
-						 "-alias",
-						 "server",
-						 "-keystore",
-						 keystore,
-						 "-keypass",
-						 "server",
-						 "-storepass",
-						 "server"};
+						{
+								"openssl",
+								"pkcs12",
+								"-export",
+								"-out",
+								configurationPath + "server.pkcs12",
+								"-inkey",
+								p.getProperty("service.vdt.key.file"),
+								"-in",
+								p.getProperty("service.vdt.cert.file"),
+								"-passin",
+								"pass:server",
+								"-passout",
+								"pass:server"
+						};
 
 				int exitValue1 = Execute.execute(command1);
 
-				String command2[] =
-						{"keytool",
-						 "-selfcert",
-						 "-alias",
-						 "server",
-						 "-keypass",
-						 "server",
-						 "-keystore",
-						 keystore,
-						 "-storepass",
-						 "server"};
-
 				if (exitValue1 == 0)
-						Execute.execute(command2);
+						{
+								PKCS12Load load = new PKCS12Load();
+								try
+										{
+												load.load(
+																	configurationPath + "server.pkcs12",
+																	keystore
+																	);
+										}
+								catch (Exception e)
+										{
+												e.printStackTrace();
+										}
+						}
 				FlipSSL.flip();
 		}
 
@@ -390,7 +397,9 @@ public class CollectorService implements ServletContextListener
 								"insert into CETable(facility_name) values(" + dq + "Unknown" + dq + ")",
 								"alter table JobUsageRecord add index index02(EndTime)",
 								"alter table JobUsageRecord add index index03(ProbeName)",
-								"alter table Security add unique index index02(alias)"
+								"alter table JobUsageRecord add index index04(HostDescription)",
+								"alter table Security add unique index index02(alias)",
+								"alter table CPUInfo change column NodeName HostDescription varchar(255)"
 						};
 
 				for (int i = 0; i < commands.length; i++)

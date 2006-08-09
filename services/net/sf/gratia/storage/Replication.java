@@ -13,6 +13,10 @@ public class Replication
 		private int rowcount;
 		private String probename;
 
+		public Replication()
+		{
+		}
+
 		public int getreplicationid() 
 		{
 				return replicationid;

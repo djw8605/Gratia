@@ -35,3 +35,10 @@ copy %root%\jars\mysql*.jar war\WEB-INF\lib
 jar -cfM  %root%\target\gratia-security.war -C war .
 
 rmdir /q /s war
+
+#
+# remove later
+#
+
+rmdir /q /s \tomcat\webapps\gratia-security
+copy %root%\target\gratia-security.war \tomcat\webapps

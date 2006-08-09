@@ -328,7 +328,9 @@ public class ReplicationDataPump extends Thread
 				String command = 
 						"update Replication" + cr +
 						" set dbid = " + dbid + comma + cr +
-						" rowcount = rowcount + 1" + cr;
+						" rowcount = rowcount + 1" + cr +
+						" where replicationid = " + replicationid;
+
 				try
 						{
 								Statement statement = connection.createStatement();

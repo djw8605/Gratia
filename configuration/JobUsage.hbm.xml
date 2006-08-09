@@ -6,7 +6,7 @@
     
 <hibernate-mapping package= "net.sf.gratia.storage">
 
-<class name="Replication" table="Replication" node="Replication">
+<class name="Replication" table="Replication" node="Replication" lazy="false">
 			 <id name="replicationid" column="replicationid" type="int">
 					 <generator class="native"/>
 			 </id>
@@ -21,7 +21,7 @@
 			 <property name="probename" column="probename"/>
 </class>
 
-<class name="Security" table="Security" node="Security">
+<class name="Security" table="Security" node="Security" lazy="false">
 			 <id name="securityid" column="securityid" type="int">
 					 <generator class="native"/>
 			 </id>
@@ -31,14 +31,14 @@
 			 <property name="state" column="state"/>
 </class>
 
-<class name="CETable" table="CETable" node="CETable">
+<class name="CETable" table="CETable" node="CETable" lazy="false">
 			 <id name="_facility_id" column="facility_id" type="int">
 					 <generator class="native"/>
 			 </id>
 			 <property name="_facility_name" column="facility_name"/>
 </class>
 
-<class name="CEProbes" table="CEProbes" node="CEProbes">
+<class name="CEProbes" table="CEProbes" node="CEProbes" lazy="false">
 			 <id name="probeid" column="probeid" type="int">
 					 <generator class="native"/>
 			 </id>
@@ -55,7 +55,7 @@
 			 <property name="jobs" column="jobs" type="int"/>
 </class>
 
-<class name="CEProbeStatus" table="CEProbeStatus" node="CEProbeStatus">
+<class name="CEProbeStatus" table="CEProbeStatus" node="CEProbeStatus" lazy="false">
 			 <id name="statusid" column="statusid" type="int">
 					 <generator class="native"/>
 			 </id>
@@ -72,7 +72,7 @@
 
 <class name="CPUInfo"
 	table="CPUInfo"
-	node="CPUInfo">
+	node="CPUInfo" lazy="false">
 	
 	<id name="_id"
 	        column="HostId"
@@ -80,7 +80,7 @@
 	        <generator class="native"/>
     	</id>
     	
-    	<property name="_nodeName" column="NodeName"/>
+    	<property name="_hostDescription" column="HostDescription"/>
 	<property name="_benchmarkScore" column="BenchmarkScore"/>
 	<property name="_CPUCount" column="CPUCount"/>
 	<property name="_OS" column="OS"/>
@@ -90,7 +90,7 @@
 
 <class name="JobUsageRecord"
         table="JobUsageRecord"
-        node="JobUsageRecord">
+        node="JobUsageRecord" lazy="false">
 
     <id name="RecordId"
         column="dbid"

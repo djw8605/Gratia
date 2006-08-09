@@ -17,7 +17,7 @@ import java.sql.*;
 
 import java.util.regex.*;
 
-public class ProbeTable extends HttpServlet 
+public class CPUInfo extends HttpServlet 
 {
 		XP xp = new XP();
 		//
@@ -102,6 +102,11 @@ public class ProbeTable extends HttpServlet
 				this.request = request;
 				this.response = response;
 				table = new Hashtable();
+				if (request.getParameter("action") != null)
+						{
+								if (request.getParameter("action").equals("delete"))
+										delete();
+						}
 				setup();
 				process();
 				response.setContentType("text/html");
@@ -123,12 +128,12 @@ public class ProbeTable extends HttpServlet
 				table = (Hashtable) request.getSession().getAttribute("table");
 				update();
 				closeConnection();
-				response.sendRedirect("probetable.html");
+				response.sendRedirect("cpuinfo.html");
 		}
 
 		public void setup()
 		{
-				html = xp.get(request.getRealPath("/") + "probetable.html");
+				html = xp.get(request.getRealPath("/") + "cpuinfo.html");
 				m = p.matcher(html);
 				while (m.find())
 						{
@@ -151,28 +156,7 @@ public class ProbeTable extends HttpServlet
 
 				try
 						{
-								command = "select facility_id,facility_name from CETable";
-								statement = connection.prepareStatement(command);
-								resultSet = statement.executeQuery(command);
-
-								while(resultSet.next())
-										{
-												String id = resultSet.getString(1);
-												String name = resultSet.getString(2);
-												cetablebyid.put(id,name);
-												cetablebyname.put(name,id);
-										}
-								resultSet.close();
-								statement.close();
-						}
-				catch (Exception e)
-						{
-								e.printStackTrace();
-						}
-
-				try
-						{
-								command = "select probeid,facility_id,probename,active,reporthh,reportmm from CEProbes order by probename";
+								command = "select * from CPUInfo";
 								statement = connection.prepareStatement(command);
 								resultSet = statement.executeQuery(command);
 
@@ -183,30 +167,45 @@ public class ProbeTable extends HttpServlet
 												newrow = xp.replaceAll(newrow,"#index#","" + index);
 												table.put("index:" + index,"" + index);
 
-												newrow = xp.replaceAll(newrow,"#dbid#",resultSet.getString(1));
-												table.put("dbid:" + index,resultSet.getString(1));
+												newrow = xp.replaceAll(newrow,"#hostid#",resultSet.getString("HostId"));
+												table.put("hostid:" + index,resultSet.getString("HostId"));
 
-												{
-														Pattern p = Pattern.compile("<td>.*probename:.*?</td>",Pattern.MULTILINE + Pattern.DOTALL);
-														Matcher m = p.matcher(newrow);
-														m.find();
-														newrow = m.replaceAll("<td><label>" + resultSet.getString(3) + "</label></td>");
-												}
+												String HostDescription = resultSet.getString("HostDescription");
+												if (HostDescription == null)
+														HostDescription = "No Data";
 
-												newrow = xp.replaceAll(newrow,"#reporthh#",resultSet.getString(5));
-												table.put("reporthh:" + index,resultSet.getString(5));
+												newrow = xp.replaceAll(newrow,"#hostdescription#",HostDescription);
+												table.put("HostDescription:" + index,HostDescription);
 
-												newrow = xp.replaceAll(newrow,"#reportmm#",resultSet.getString(6));
-												table.put("reportmm:" + index,resultSet.getString(6));
+												String benchmarkscore = resultSet.getString("BenchmarkScore");
+												if (benchmarkscore == null)
+														benchmarkscore = "No Data";
+												newrow = xp.replaceAll(newrow,"#benchmarkscore#",benchmarkscore);
+												table.put("benchmarkscore:" + index,benchmarkscore);
 
-												String cename = (String) cetablebyid.get(resultSet.getString(2));
-												newrow = celist(index,newrow,cename);
+												String cpucount = resultSet.getString("CPUCount");
+												if (cpucount == null)
+														cpucount = "No Data";
+												newrow = xp.replaceAll(newrow,"#cpucount#",cpucount);
+												table.put("cpucount:" + index,cpucount);
 
-												String yesorno = "Yes";
-												if (resultSet.getString(4).equals("0"))
-														yesorno = "No";
+												String os = resultSet.getString("OS");
+												if (os == null)
+														os = "No Data";
+												newrow = xp.replaceAll(newrow,"#os#",os);
+												table.put("os:" + index,os);
 
-												newrow = activelist(index,newrow,yesorno);
+												String osversion = resultSet.getString("OSVersion");
+												if (osversion == null)
+														osversion = "No Data";
+												newrow = xp.replaceAll(newrow,"#osversion#",osversion);
+												table.put("osversion:" + index,osversion);
+
+												String cputype = resultSet.getString("CPUType");
+												if (cputype == null)
+														cputype = "No Data";
+												newrow = xp.replaceAll(newrow,"#cputype#",cputype);
+												table.put("cputype:" + index,cputype);
 
 												buffer.append(newrow);
 												index++;
@@ -219,82 +218,20 @@ public class ProbeTable extends HttpServlet
 								e.printStackTrace();
 						}
 
-				for (int j = 0; j < 5; j++)
-						{
-								String newrow = new String(row);
-								newrow = xp.replaceAll(newrow,"#index#","" + index);
-								newrow = xp.replace(newrow,"#probename#",newname);
-								newrow = xp.replace(newrow,"#reporthh#","24");
-								newrow = xp.replace(newrow,"#reportmm#","0");
-								newrow = celist(index,newrow,"xxx");
-								table.put("index:" + index,"" + index);
-								table.put("probename:" + index,newname);
-								index++;
-								buffer.append(newrow);
-						}
+				String newrow = new String(row);
+				newrow = xp.replaceAll(newrow,"#index#","" + index);
+				newrow = xp.replace(newrow,"#hostdescription#",newname);
+				newrow = xp.replace(newrow,"#benchmarkscore#","");
+				newrow = xp.replace(newrow,"#cpucount#","");
+				newrow = xp.replace(newrow,"#os#","");
+				newrow = xp.replace(newrow,"#osversion#","");
+				newrow = xp.replace(newrow,"#cputype#","");
+				table.put("index:" + index,"" + index);
+				table.put("hostdescription:" + index,newname);
+
 				html = xp.replace(html,row,buffer.toString());
 		}
 
-		public String celist(int index,String input,String current)
-		{
-				Pattern p = Pattern.compile("<sel.*#cename#.*?</select>",Pattern.MULTILINE + Pattern.DOTALL);
-				Matcher m = p.matcher(input);
-				m.find();
-				String row = m.group();
-
-				p = Pattern.compile("<option.*</option>");
-				m = p.matcher(input);
-				m.find();
-				String option = m.group();
-				StringBuffer buffer = new StringBuffer();
-
-				for (Enumeration x = cetablebyname.keys(); x.hasMoreElements();)
-						{
-								String newoption = new String(option);
-								String name = (String) x.nextElement();
-								newoption = xp.replaceAll(newoption,"#cename#",name);
-								if (name.equals(current))
-										{
-												newoption = xp.replace(newoption,"#selected#","selected=" + dq + "selected" + dq);
-												table.put("cename:" + index,current);
-										}
-								else
-										newoption = xp.replace(newoption,"#selected#","");
-								buffer.append(newoption);
-						}
-
-				String temp = xp.replace(row,option,buffer.toString());
-				String output = xp.replace(input,row,temp);
-				return output;
-		}
-
-		public String activelist(int index,String input,String current)
-		{
-				Pattern p = Pattern.compile("<select name=\"active:.*?</select>",Pattern.MULTILINE + Pattern.DOTALL);
-				Matcher m = p.matcher(input);
-				m.find();
-				String row = m.group();
-				String r = "";
-
-				table.put("active:" + index,current);
-				if (current.equals("Yes"))
-						{
-								r = "<select name=" + dq + "active:" + index + dq + "id=" + dq + "active:" + index + dq + ">" + cr;
-								r = r + "<option value=" + dq + "Yes" + dq + " selected=" + dq + "selected" + dq + ">Yes</option>" + cr;
-								r = r + "<option value=" + dq + "No" + dq + ">No</option>" + cr;
-								r = r + "</select>" + cr;
-						}
-				else
-						{
-								r = "<select name=" + dq + "active:" + index + dq + "id=" + dq + "active:" + index + dq + ">" + cr;
-								r = r + "<option value=" + dq + "No" + dq + " selected=" + dq + "selected" + dq + ">No</option>" + cr;
-								r = r + "<option value=" + dq + "Yes" + dq + ">Yes</option>" + cr;
-								r = r + "</select>" + cr;
-						}
-
-				String output = xp.replace(input,row,r);
-				return output;
-		}
 
 		public void update()
 		{
@@ -322,7 +259,7 @@ public class ProbeTable extends HttpServlet
 								if (oldvalue == null)
 										break;
 
-								key = "probename:" + index;
+								key = "hostdescription:" + index;
 								oldvalue = (String) table.get(key);
 								newvalue = (String) request.getParameter(key);
 
@@ -334,7 +271,7 @@ public class ProbeTable extends HttpServlet
 								if ((oldvalue != null) && (oldvalue.equals(newvalue)))
 										break;
 
-								key = "cename:" + index;
+								key = "benchmarkscore:" + index;
 								oldvalue = (String) table.get(key);
 								newvalue = (String) request.getParameter(key);
 								if (! oldvalue.equals(newvalue))
@@ -343,7 +280,7 @@ public class ProbeTable extends HttpServlet
 												continue;
 										}
 
-								key = "active:" + index;
+								key = "cpucount:" + index;
 								oldvalue = (String) table.get(key);
 								newvalue = (String) request.getParameter(key);
 								if (! oldvalue.equals(newvalue))
@@ -352,7 +289,7 @@ public class ProbeTable extends HttpServlet
 												continue;
 										}
 
-								key = "reporthh:" + index;
+								key = "os:" + index;
 								oldvalue = (String) table.get(key);
 								newvalue = (String) request.getParameter(key);
 								if (! oldvalue.equals(newvalue))
@@ -361,7 +298,16 @@ public class ProbeTable extends HttpServlet
 												continue;
 										}
 
-								key = "reportmm:" + index;
+								key = "osversion:" + index;
+								oldvalue = (String) table.get(key);
+								newvalue = (String) request.getParameter(key);
+								if (! oldvalue.equals(newvalue))
+										{
+												update(index);
+												continue;
+										}
+
+								key = "cputype:" + index;
 								oldvalue = (String) table.get(key);
 								newvalue = (String) request.getParameter(key);
 								if (! oldvalue.equals(newvalue))
@@ -375,31 +321,28 @@ public class ProbeTable extends HttpServlet
 
 		public void update(int index)
 		{
-				String dbid = (String) request.getParameter("dbid:" + index);
-				String cename = (String) request.getParameter("cename:" + index);
-				String ceid = (String) cetablebyname.get(cename);
-				String active = (String) request.getParameter("active:" + index);
-				if (active.equals("Yes"))
-						active = "1";
-				else
-						active = "0";
-				String reporthh = (String) request.getParameter("reporthh:" + index);
-				String reportmm = (String) request.getParameter("reportmm:" + index);
+				String hostid = (String) request.getParameter("hostid:" + index);
+				String HostDescription = (String) request.getParameter("hostdescription:" + index);
+				String benchmarkscore = (String) request.getParameter("benchmarkscore:" + index);
+				String cpucount = (String) request.getParameter("cpucount:" + index);
+				String os = (String) request.getParameter("os:" + index);
+				String osversion = (String) request.getParameter("osversion:" + index);
+				String cputype = (String) request.getParameter("cputype:" + index);
 
 				String command = 
-						"update CEProbes set" + cr +
-						" facility_id = " + ceid + comma + cr +
-						" active = " + active + comma + cr +
-						" reporthh = " + reporthh + comma + cr +
-						" reportmm = " + reportmm + cr +
-						" where probeid = " + dbid;
-
+						"update CPUInfo set" + cr +
+						" HostDescription = " + dq + HostDescription + dq + comma + cr +
+						" BenchmarkScore = " + dq + benchmarkscore + dq + comma + cr +
+						" CPUCount = " + dq + cpucount + dq + comma + cr +
+						" OS = " + dq + os + dq + comma + cr +
+						" OSVersion = " + dq + osversion + dq + comma + cr +
+						" CPUType = " + dq + cputype + dq + cr +
+						" where hostid = " + hostid;
 				try
 						{
 								statement = connection.createStatement();
 								statement.executeUpdate(command);
 								statement.close();
-								// connection.commit();
 						}
 				catch (Exception e)
 						{
@@ -419,27 +362,30 @@ public class ProbeTable extends HttpServlet
 
 		public void insert(int index)
 		{
-				String cename = (String) request.getParameter("cename:" + index);
-				String ceid = (String) cetablebyname.get(cename);
-				String active = (String) request.getParameter("active:" + index);
-				if (active.equals("Yes"))
-						active = "1";
-				else
-						active = "0";
-				String probename = (String) request.getParameter("probename:" + index);
-				String reporthh = (String) request.getParameter("reporthh:" + index);
-				String reportmm = (String) request.getParameter("reportmm:" + index);
+				String HostDescription = (String) request.getParameter("hostdescription:" + index);
+				String benchmarkscore = (String) request.getParameter("benchmarkscore:" + index);
+				String cpucount = (String) request.getParameter("cpucount:" + index);
+				String os = (String) request.getParameter("os:" + index);
+				String osversion = (String) request.getParameter("osversion:" + index);
+				String cputype = (String) request.getParameter("cputype:" + index);
 
 
 				String command = 
-						"insert into CEProbes (facility_id,probename,active,reporthh,reportmm) values(" + 
-						ceid + comma + dq + probename + dq + comma + active + comma + reporthh + comma + reportmm + ")";
+						"insert into CPUInfo" +
+						"(HostDescription,BenchmarkScore,CPUCount,OS,OSVersion,CPUType)" + cr +
+						"values(" + cr +
+						dq + HostDescription + dq + comma + cr +
+						dq + benchmarkscore + dq + comma + cr +
+						dq + cpucount + dq + comma + cr +
+						dq + os + dq + comma + cr +
+						dq + osversion + dq + comma + cr +
+						dq + cputype + dq + ")";
+
 				try
 						{
 								statement = connection.createStatement();
 								statement.executeUpdate(command);
 								statement.close();
-								// connection.commit();
 						}
 				catch (Exception e)
 						{
@@ -457,4 +403,23 @@ public class ProbeTable extends HttpServlet
 										}
 						}
 		}
+
+		void delete()
+		{
+				String command = "";
+
+				try
+						{
+								command = "delete from CPUInfo where hostid = " + request.getParameter("hostid");
+								Statement statement = connection.createStatement();
+								statement.executeUpdate(command);
+								statement.close();
+						}
+				catch (Exception e)
+						{
+								System.out.println("command: " + command);
+								e.printStackTrace();
+						}
+		}
+
 }

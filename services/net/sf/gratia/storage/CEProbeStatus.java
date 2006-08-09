@@ -11,6 +11,10 @@ public class CEProbeStatus
 		private int jobs;
 		private int lostjobs;
 
+		public CEProbeStatus()
+		{
+		}
+
 		public int getstatusid()
 		{
 				return statusid;
