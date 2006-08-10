@@ -634,7 +634,7 @@ class UsageRecord:
 
     def Duration(self,value):
         " Helper Function to generate the xml (Do not call directly)"
-        seconds = value % 60
+        seconds = (int(value*100) % 6000 ) / 100.0
         value = int( (value - seconds) / 60 )
         minutes = value % 60
         value = (value - minutes) / 60
