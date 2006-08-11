@@ -201,7 +201,7 @@ release: services servlets soap reporting reports report-configuration administr
 	cp ../target/GratiaReportConfiguration.war tarball/gratia/gratia_reporting
 	cp ../target/GratiaReports.war tarball/gratia/gratia_reporting
 	cp ../target/GratiaReporting.war tarball/gratia/gratia_reporting
-	tar -cvf ../target/gratia_reporting_v0.1.tar -C tarball .
+	tar $(tarowner) -cvf ../target/gratia_reporting_v0.1.tar -C tarball .
 	rm -f -r tarball
 	#
 	# create services tarball
@@ -217,15 +217,15 @@ release: services servlets soap reporting reports report-configuration administr
 	mkdir tarball/var/logs
 	mkdir tarball/var/tmp
 	cp ../configuration/*gov ../configuration/*xml ../configuration/*properties tarball/tomcat/v55/gratia
-	rm tarball/tomcat/v55/gratia/local.*
-	rm tarball/tomcat/v55/gratia/psg3.*
-	rm tarball/tomcat/v55/gratia/release.*
+	rm -f tarball/tomcat/v55/gratia/local.*
+	rm -f tarball/tomcat/v55/gratia/psg3.*
+	rm -f tarball/tomcat/v55/gratia/release.*
 	cp ../configuration/release.service-configuration.properties tarball/tomcat/v55/gratia/service-configuration.properties
 	cp ../target/gratia-services.war tarball/gratia/gratia_services
 	cp ../target/gratia-servlets.war tarball/gratia/gratia_services
 	cp ../target/GratiaServices.war tarball/gratia/gratia_services
 	cp ../target/gratia-administration.war tarball/gratia/gratia_services
-	tar -cvf ../target/gratia_services_v0.2.tar -C tarball .
+	tar $(tarowner) -cvf ../target/gratia_services_v0.2.tar -C tarball .
 	rm -f -r tarball
 
 define defaultdirs
