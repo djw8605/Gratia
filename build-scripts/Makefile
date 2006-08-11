@@ -186,7 +186,7 @@ report-configuration:
 	jar -cvf ../target/GratiaReportConfiguration.war -C war .
 	rm -f -r war
 
-release: services servlets soap reporting reports report-configuration administration
+release: services servlets soap reporting reports report-configuration administration condor_probe_tar
 	rm -f -r tarball
 	#
 	# create reporting tarball
