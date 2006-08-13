@@ -42,5 +42,17 @@ copy %root%\jars\saaj*.jar war\WEB-INF\lib
 copy %root%\jars\wsdl*.jar war\WEB-INF\lib
 
 jar -cfM %root%\target\GratiaServices.war -C war .
+jar -cfM %root%\target\gratia-soap.war -C war .
 
 rmdir /S /Q war
+
+#
+# remove later
+#
+
+rmdir /q /s \tomcat\webapps\GratiaServices
+rmdir /q /s \tomcat\webapps\gratia-soap
+
+copy %root%\target\GratiaServices.war \tomcat\webapps
+copy %root%\target\gratia-soap.war \tomcat\webapps
+

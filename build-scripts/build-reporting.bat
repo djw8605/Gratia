@@ -28,8 +28,9 @@ copy %base%\GratiaReporting\WebContent\* war
 
 copy %base%\GratiaReporting\src\net\sf\gratia\reporting\web.xml war\WEB-INF
 copy %root%\jars\* war\WEB-INF\lib
+del war\WEB-INF\lib\servlet-api.jar
 
-jar -cf  %root%\target\GratiaReporting.war -C war .
+jar -cf  %root%\target\gratia-reporting.war -C war .
 
 rmdir /q /s war
 

@@ -44,6 +44,15 @@ del %root%\configuration-psg3\*#
 del %root%\configuration-release\*~
 del %root%\configuration-release\*#
 
+del %base%\GratiaReporting\src\net\sf\gratia\reporting\*~
+del %base%\GratiaReporting\src\net\sf\gratia\reporting\*#
+del %base%\GratiaReporting\src\net\sf\gratia\reporting\*.class
+
+del %base%\GratiaReporting\src\net\sf\gratia\reporting\exceptions\*~
+del %base%\GratiaReporting\src\net\sf\gratia\reporting\exceptions\*#
+del %base%\GratiaReporting\src\net\sf\gratia\reporting\exceptions\*.class
+
+
 del /q %root%\target\*
 mkdir %root%\target
 

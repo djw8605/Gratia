@@ -189,6 +189,7 @@ reporting:
 	cp -R ${base}GratiaReporting/WebContent/images/* war/images
 	cp ${base}GratiaReporting/src/net/sf/gratia/reporting/web.xml war/WEB-INF
 	cp ../jars/*.jar war/WEB-INF/lib
+	rm -f war/WEB-INF/lib/servlet-api.jar
 	jar -cvfM ../target/gratia-reporting.war -C war .
 	rm -f -r war
 
