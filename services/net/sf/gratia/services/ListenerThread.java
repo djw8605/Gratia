@@ -182,6 +182,7 @@ public class ListenerThread extends Thread
 																				if (gotDuplicate(current.getJobIdentity(), current.getStartTime(), session) == true)
 																						{
 																								Logging.warning("Duplicate: " + current);
+																								saveDuplicate(current,extraxml);
 																						}
 																				else
 																						{
@@ -191,7 +192,14 @@ public class ListenerThread extends Thread
 																										current.setRawXml(rawxml);
 																								if (extraxml != null)
 																										current.setExtraXml(extraxml);
-																								session.save(current);
+																								try
+																										{
+																												session.save(current);
+																										}
+																								catch (Exception duplicate)
+																										{
+																												saveDuplicate(current,extraxml);
+																										}
 																								itotal++;
 																						}
 																		}
@@ -303,5 +311,22 @@ public class ListenerThread extends Thread
 				//  return it to the caller.
 				return usageRecords;
 		}   
+
+		public void saveDuplicate(JobUsageRecord current,String extraxml)
+		{
+				DupRecord record = new DupRecord();
+
+				record.seteventdate(new java.util.Date());
+				record.setrawxml(current.asXML());
+				record.setextraxml(extraxml);
+				try
+						{
+								session.save(record);
+						}
+				catch (Exception e)
+						{
+								e.printStackTrace();
+						}
+		}
 
 }

@@ -366,6 +366,7 @@ public class CollectorService implements ServletContextListener
 		{
 				String dq = "\"";
 				XP xp = new XP();
+				int i = 0;
 
 				Properties p = net.sf.gratia.services.Configuration.getProperties();
 
@@ -390,7 +391,7 @@ public class CollectorService implements ServletContextListener
 								return;
 						}
 
-				String commands[] = 
+				String commands1[] = 
 						{
 								"alter table CETable add unique index index02(facility_name)",
 								"alter table CEProbes add unique index index02(probename)",
@@ -398,21 +399,64 @@ public class CollectorService implements ServletContextListener
 								"alter table JobUsageRecord add index index02(EndTime)",
 								"alter table JobUsageRecord add index index03(ProbeName)",
 								"alter table JobUsageRecord add index index04(HostDescription)",
+								"alter table JobUsageRecord add index index05(StartTime)",
+								"alter table JobUsageRecord add index index06(GlobalJobid)",
 								"alter table Security add unique index index02(alias)",
 								"alter table CPUInfo change column NodeName HostDescription varchar(255)"
 						};
 
-				for (int i = 0; i < commands.length; i++)
+				for (i = 0; i < commands1.length; i++)
 						try
 								{
-										System.out.println("Executing: " + commands[i]);
+										System.out.println("Executing: " + commands1[i]);
 										statement = connection.createStatement();
-										statement.executeUpdate(commands[i]);
-										System.out.println("Command: OK: " + commands[i]);
+										statement.executeUpdate(commands1[i]);
+										System.out.println("Command: OK: " + commands1[i]);
 								}
-						catch (Exception ignore)
+						catch (Exception e)
 								{
+										System.out.println("Command: Error: " + commands1[i] + " : " + e);
 								}
+
+				String commands2[] = 
+						{
+								"alter table JobUsageRecord add index index07(LocalJobid)",
+								"alter table JobUsageRecord add index index08(Host)",
+								"alter table JobUsageRecord add unique index index09(StartTime,GlobalJobid,LocalJobid,Host)"
+						};
+
+				String commands3[] = 
+						{
+								"alter table JobUsageRecord drop index index09"
+						};
+
+				if (p.getProperty("service.duplicate.check").equals("1"))
+						for (i = 0; i < commands2.length; i++)
+								try
+										{
+												System.out.println("Executing: " + commands2[i]);
+												statement = connection.createStatement();
+												statement.executeUpdate(commands2[i]);
+												System.out.println("Command: OK: " + commands2[i]);
+										}
+								catch (Exception e)
+										{
+												System.out.println("Command: Error: " + commands2[i] + " : " + e);
+										}
+
+				if (p.getProperty("service.duplicate.check").equals("0"))
+						for (i = 0; i < commands3.length; i++)
+								try
+										{
+												System.out.println("Executing: " + commands3[i]);
+												statement = connection.createStatement();
+												statement.executeUpdate(commands3[i]);
+												System.out.println("Command: OK: " + commands3[i]);
+										}
+								catch (Exception e)
+										{
+												System.out.println("Command: Error: " + commands3[i] + " : " + e);
+										}
 
 		}
 
@@ -453,16 +497,16 @@ public class CollectorService implements ServletContextListener
 						xml.append("<ReportingConfig>" + "\n");
 						xml.append("<DataSourceConfig" + "\n");
 						xml.append("url=" + dq + p.getProperty("service.mysql.url") + dq + "\n");
-						xml.append("user=" + dq + p.getProperty("service.mysql.user") + dq + "\n");
-						xml.append("password=" + dq + p.getProperty("service.mysql.password") + dq + "\n");
+						xml.append("user=" + dq + p.getProperty("service.birt.user") + dq + "\n");
+						xml.append("password=" + dq + p.getProperty("service.birt.password") + dq + "\n");
 						xml.append("/>" + "\n");
 						xml.append("<PathConfig" + "\n");
-						xml.append("reportsFolder=" + dq + catalinaHome + "/webapps/GratiaReports/" + dq + "\n");
-						xml.append("engineHome=" + dq + catalinaHome + "/webapps/Birt/" + dq + "\n");
-						xml.append("webappHome=" + dq + catalinaHome + "/webapps/GratiaReporting/" + dq + "\n");
+						xml.append("reportsFolder=" + dq + catalinaHome + "/webapps/gratia-reports/" + dq + "\n");
+						xml.append("engineHome=" + dq + catalinaHome + "/webapps/gratia-birt/" + dq + "\n");
+						xml.append("webappHome=" + dq + catalinaHome + "/webapps/gratia-reporting/" + dq + "\n");
 						xml.append("/>" + "\n");
 						xml.append("</ReportingConfig>" + "\n");
-						xp.save(catalinaHome + "/webapps/GratiaReportConfiguration/ReportingConfig.xml",
+						xp.save(catalinaHome + "/webapps/gratia-report-configuration/ReportingConfig.xml",
 										xml.toString());
 						System.out.println("ReportConfig updated");
 				}

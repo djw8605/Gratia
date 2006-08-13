@@ -195,6 +195,14 @@ public class SecurityServlet extends HttpServlet
 								// otherwise return two error strings
 								//
 
+								if (props.getProperty("service.use.security").equals("0"))
+										{
+												writer.write("error:Security Not Supported");
+												writer.flush();
+												writer.close();
+												return;
+										}
+
 								if ((command.equals("request")) && (argcount == 1))
 										{
 												arg1 = arg1 + ":" + req.getRemoteAddr();

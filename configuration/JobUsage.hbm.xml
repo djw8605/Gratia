@@ -6,6 +6,15 @@
     
 <hibernate-mapping package= "net.sf.gratia.storage">
 
+<class name="DupRecord" table="DupRecord" node="DupRecord" lazy="false">
+			 <id name="dupid" column="dupid" type="int">
+					 <generator class="native"/>
+			 </id>
+			 <property name="eventdate" column="eventdate" type="timestamp"/>
+			 <property name="rawxml" column="rawxml" type="text"/>
+			 <property name="extraxml" column="extraxml" type="text"/>
+</class>
+
 <class name="Replication" table="Replication" node="Replication" lazy="false">
 			 <id name="replicationid" column="replicationid" type="int">
 					 <generator class="native"/>

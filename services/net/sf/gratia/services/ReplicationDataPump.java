@@ -143,6 +143,7 @@ public class ReplicationDataPump extends Thread
 
 				try
 						{
+								System.out.println("ReplicationDataPump: " + replicationid + " Executing Command: " + command);
 								statement = connection.prepareStatement(command);
 								resultSet = statement.executeQuery(command);
 
@@ -177,6 +178,37 @@ public class ReplicationDataPump extends Thread
 				//
 				// create base retrieval
 				//
+				
+				command = "select count(*) from JobUsageRecord" + cr +
+						"where dbid > " + dbid;
+				if (! probename.equals("All"))
+						{
+								command = command + cr;
+								command = command + " and ProbeName = " + dq + probename + dq + cr;
+						}
+				int count = 0;
+				
+				try
+						{
+								statement = connection.prepareStatement(command);
+								resultSet = statement.executeQuery(command);
+								while (resultSet.next())
+										count = resultSet.getInt(1);
+								resultSet.close();
+								statement.close();
+						}
+				catch(Exception e)
+						{
+								System.out.println("Error During Replication");
+								System.out.println("Command: " + command);
+								e.printStackTrace();
+								cleanup();
+								exitflag = true;
+								return;
+						}
+				
+				System.out.println("ReplicationDataPump: " + replicationid + " Executed Command: " + command);
+				System.out.println("ReplicationDataPump: " + replicationid + " Records: " + count);
 
 				command = "select dbid from JobUsageRecord" + cr +
 						"where dbid > " + dbid;
