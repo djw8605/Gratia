@@ -229,6 +229,48 @@ release: services servlets soap reporting reports report-configuration administr
 	cp ../target/gratia-report-configuration.war tarball/gratia/gratia_reporting
 	cp ../target/gratia-reports.war tarball/gratia/gratia_reporting
 	cp ../target/gratia-reporting.war tarball/gratia/gratia_reporting
+	tar $(tarowner) -cvf ../target/gratia_reporting_v0.1.tar -C tarball .
+	rm -f -r tarball
+	#
+	# create services tarball
+	#
+	mkdir tarball
+	mkdir tarball/tomcat
+	mkdir tarball/tomcat/v55
+	mkdir tarball/tomcat/v55/gratia
+	mkdir tarball/gratia
+	mkdir tarball/gratia/gratia_services
+	mkdir tarball/var
+	mkdir tarball/var/data
+	mkdir tarball/var/logs
+	mkdir tarball/var/tmp
+	cp ../configuration/*gov ../configuration/*xml ../configuration/*properties tarball/tomcat/v55/gratia
+	rm -f tarball/tomcat/v55/gratia/local.*
+	rm -f tarball/tomcat/v55/gratia/release.*
+	cp ../configuration/release.service-configuration.properties tarball/tomcat/v55/gratia/service-configuration.properties
+	cp ../target/gratia-services.war tarball/gratia/gratia_services
+	cp ../target/gratia-servlets.war tarball/gratia/gratia_services
+	cp ../target/gratia-soap.war tarball/gratia/gratia_services
+	cp ../target/gratia-administration.war tarball/gratia/gratia_services
+	cp ../target/gratia-security.war tarball/gratia/gratia_services
+	tar $(tarowner) -cvf ../target/gratia_services_v0.2.tar -C tarball .
+	rm -f -r tarball
+
+local: services servlets soap reporting reports report-configuration administration security condor_probe_tar
+	rm -f -r tarball
+	#
+	# create reporting tarball
+	#
+	mkdir tarball
+	mkdir tarball/gratia
+	mkdir tarball/gratia/gratia_reporting
+	mkdir tarball/var
+	mkdir tarball/var/data
+	mkdir tarball/var/logs
+	mkdir tarball/var/tmp
+	cp ../target/gratia-report-configuration.war tarball/gratia/gratia_reporting
+	cp ../target/gratia-reports.war tarball/gratia/gratia_reporting
+	cp ../target/gratia-reporting.war tarball/gratia/gratia_reporting
 	cp ../wars/gratia-birt.war tarball/gratia/gratia_reporting
 	tar $(tarowner) -cvf ../target/gratia_reporting_v0.1.tar -C tarball .
 	rm -f -r tarball
