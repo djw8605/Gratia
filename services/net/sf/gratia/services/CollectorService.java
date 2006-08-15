@@ -479,7 +479,7 @@ public class CollectorService implements ServletContextListener
 				{
 						try
 								{
-										Thread.sleep(60 * 1000);
+										Thread.sleep(30 * 1000);
 								}
 						catch (Exception ignore)
 								{
@@ -501,9 +501,12 @@ public class CollectorService implements ServletContextListener
 						xml.append("password=" + dq + p.getProperty("service.birt.password") + dq + "\n");
 						xml.append("/>" + "\n");
 						xml.append("<PathConfig" + "\n");
-						xml.append("reportsFolder=" + dq + catalinaHome + "/webapps/gratia-reports/" + dq + "\n");
-						xml.append("engineHome=" + dq + catalinaHome + "/webapps/gratia-birt/" + dq + "\n");
-						xml.append("webappHome=" + dq + catalinaHome + "/webapps/gratia-reporting/" + dq + "\n");
+						xml.append("reportsFolder=" + dq + catalinaHome + 
+											 "/webapps/" + p.getProperty("service.birt.reports.folder") + "/" + dq + "\n");
+						xml.append("engineHome=" + dq + catalinaHome + 
+											 "/webapps/" + p.getProperty("service.birt.engine.home") + "/" + dq + "\n");
+						xml.append("webappHome=" + dq + catalinaHome + 
+											 "/webapps/" + p.getProperty("service.birt.webapp.home") + "/" + dq + "\n");
 						xml.append("/>" + "\n");
 						xml.append("</ReportingConfig>" + "\n");
 						xp.save(catalinaHome + "/webapps/gratia-report-configuration/ReportingConfig.xml",
