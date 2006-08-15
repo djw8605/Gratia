@@ -3,6 +3,8 @@ PLATFORM := $(shell uname)
 
 condor_probe_version=v0.9
 psacct_probe_version=v0.9
+gratia_reporting_version=v0.9
+gratia_services_version=v0.9
 
 base=../../
 root=../
@@ -229,7 +231,7 @@ release: services servlets soap reporting reports report-configuration administr
 	cp ../target/gratia-report-configuration.war tarball/gratia/gratia_reporting
 	cp ../target/gratia-reports.war tarball/gratia/gratia_reporting
 	cp ../target/gratia-reporting.war tarball/gratia/gratia_reporting
-	tar $(tarowner) -cvf ../target/gratia_reporting_v0.1.tar -C tarball .
+	tar $(tarowner) -cvf ../target/gratia_reporting_$(gratia_reporting_version).tar -C tarball .
 	rm -f -r tarball
 	#
 	# create services tarball
@@ -253,7 +255,7 @@ release: services servlets soap reporting reports report-configuration administr
 	cp ../target/gratia-soap.war tarball/gratia/gratia_services
 	cp ../target/gratia-administration.war tarball/gratia/gratia_services
 	cp ../target/gratia-security.war tarball/gratia/gratia_services
-	tar $(tarowner) -cvf ../target/gratia_services_v0.2.tar -C tarball .
+	tar $(tarowner) -cvf ../target/gratia_services_$(gratia_services_version).tar -C tarball .
 	rm -f -r tarball
 
 local: services servlets soap reporting reports report-configuration administration security condor_probe_tar
@@ -272,7 +274,7 @@ local: services servlets soap reporting reports report-configuration administrat
 	cp ../target/gratia-reports.war tarball/gratia/gratia_reporting
 	cp ../target/gratia-reporting.war tarball/gratia/gratia_reporting
 	cp ../wars/Birt.war tarball/gratia/gratia_reporting
-	tar $(tarowner) -cvf ../target/gratia_reporting_v0.1.tar -C tarball .
+	tar $(tarowner) -cvf ../target/gratia_reporting__$(gratia_reporting_version).tar -C tarball .
 	rm -f -r tarball
 	#
 	# create services tarball
@@ -297,7 +299,7 @@ local: services servlets soap reporting reports report-configuration administrat
 	cp ../target/gratia-soap.war tarball/gratia/gratia_services
 	cp ../target/gratia-administration.war tarball/gratia/gratia_services
 	cp ../target/gratia-security.war tarball/gratia/gratia_services
-	tar $(tarowner) -cvf ../target/gratia_services_v0.2.tar -C tarball .
+	tar $(tarowner) -cvf ../target/gratia_services_$(gratia_services_version).tar -C tarball .
 	rm -f -r tarball
 
 define defaultdirs
