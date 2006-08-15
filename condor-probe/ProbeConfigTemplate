@@ -10,7 +10,7 @@
     SSLKeyFile="gratia.hostkey.pem"
 
     SOAPHost="cd-psg2.fnal.gov:8880" 
-    CollectorService="/GratiaServices/services/CollectorImpl" 
+    CollectorService="/gratia-soap/services/CollectorImpl" 
 
     MeterName="generic" 
     SiteName="Generic Site"

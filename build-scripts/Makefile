@@ -271,7 +271,7 @@ local: services servlets soap reporting reports report-configuration administrat
 	cp ../target/gratia-report-configuration.war tarball/gratia/gratia_reporting
 	cp ../target/gratia-reports.war tarball/gratia/gratia_reporting
 	cp ../target/gratia-reporting.war tarball/gratia/gratia_reporting
-	cp ../wars/gratia-birt.war tarball/gratia/gratia_reporting
+	cp ../wars/Birt.war tarball/gratia/gratia_reporting
 	tar $(tarowner) -cvf ../target/gratia_reporting_v0.1.tar -C tarball .
 	rm -f -r tarball
 	#

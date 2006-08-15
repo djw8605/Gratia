@@ -34,3 +34,9 @@ jar -cf  %root%\target\gratia-reporting.war -C war .
 
 rmdir /q /s war
 
+#
+# remove later
+#
+
+rmdir /q /s \tomcat\webapps\gratia-reporting
+copy %root%\target\gratia-reporting.war \tomcat\webapps
