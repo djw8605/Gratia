@@ -195,7 +195,7 @@ public class SecurityServlet extends HttpServlet
 								// otherwise return two error strings
 								//
 
-								if (props.getProperty("service.use.security").equals("0"))
+								if (props.getProperty("service.security.level").equals("0"))
 										{
 												writer.write("error:Security Not Supported");
 												writer.flush();

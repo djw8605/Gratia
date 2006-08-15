@@ -65,41 +65,56 @@ public class CollectorService implements ServletContextListener
 
 				p = net.sf.gratia.services.Configuration.getProperties();
 
-				if (p.getProperty("service.use.security").equals("1"))
-						if (p.getProperty("service.use.apache.security").equals("0"))
-								try
-										{
-												//
-												// setup configuration path/https system parameters
-												//
+				System.out.println("");
+				System.out.println("service properties:");
+				System.out.println("");
+				iter = p.propertyNames();
+				while(iter.hasMoreElements())
+						{
+								String key = (String) iter.nextElement();
+								String value = (String) p.getProperty(key);
+								System.out.println("Key: " + key + " value: " + value);
+						}
+				System.out.println("");
+				System.out.println("service.security.level: " + p.getProperty("service.security.level"));
 
-												configurationPath = net.sf.gratia.services.Configuration.getConfigurationPath();
-												System.setProperty("java.protocol.handler.pkgs","com.sun.net.ssl.internal.www.protocol");
-												Security.addProvider(new com.sun.net.ssl.internal.ssl.Provider());
+				if (p.getProperty("service.security.level").equals("1"))
+						try
+								{
+										System.out.println("");
+										System.out.println("Initializing HTTPS Support");
+										System.out.println("");
+										//
+										// setup configuration path/https system parameters
+										//
 
-												System.setProperty("javax.net.ssl.trustStore",configurationPath + "/truststore");
-												System.setProperty("javax.net.ssl.trustStorePassword","server");
+										configurationPath = net.sf.gratia.services.Configuration.getConfigurationPath();
+										System.setProperty("java.protocol.handler.pkgs","com.sun.net.ssl.internal.www.protocol");
+										Security.addProvider(new com.sun.net.ssl.internal.ssl.Provider());
 
-												System.setProperty("javax.net.ssl.keyStore",configurationPath + "/keystore");
-												System.setProperty("javax.net.ssl.keyStorePassword","server");
+										System.setProperty("javax.net.ssl.trustStore",configurationPath + "/truststore");
+										System.setProperty("javax.net.ssl.trustStorePassword","server");
 
-												com.sun.net.ssl.HostnameVerifier hv=new com.sun.net.ssl.HostnameVerifier() 
+										System.setProperty("javax.net.ssl.keyStore",configurationPath + "/keystore");
+										System.setProperty("javax.net.ssl.keyStorePassword","server");
+
+										com.sun.net.ssl.HostnameVerifier hv=new com.sun.net.ssl.HostnameVerifier() 
+												{
+														public boolean verify(String urlHostname, String certHostname) 
 														{
-																public boolean verify(String urlHostname, String certHostname) 
-																{
-																		System.out.println("url host name: " + urlHostname);
-																		System.out.println("cert host name: " + certHostname);
-																		System.out.println("WARNING: Hostname is not matched for cert.");
-																		return true;
-																}
-														};
+																System.out.println("url host name: " + urlHostname);
+																System.out.println("cert host name: " + certHostname);
+																System.out.println("WARNING: Hostname is not matched for cert.");
+																return true;
+														}
+												};
 
-												com.sun.net.ssl.HttpsURLConnection.setDefaultHostnameVerifier(hv);
-										}
-								catch (Exception e)
-										{
-												e.printStackTrace();
-										}
+										com.sun.net.ssl.HttpsURLConnection.setDefaultHostnameVerifier(hv);
+								}
+						catch (Exception e)
+								{
+										e.printStackTrace();
+								}
 
 				try
 						{
@@ -256,15 +271,14 @@ public class CollectorService implements ServletContextListener
 				// add a server cert if one isn't there
 				//
 
-				if (p.getProperty("service.use.security").equals("1"))
-						if (p.getProperty("service.use.apache.security").equals("0"))
+				if (p.getProperty("service.security.level").equals("1"))
 								{
 										if ((p.getProperty("service.use.selfgenerated.certs") != null) &&
 												(p.getProperty("service.use.selfgenerated.certs").equals("1")))
 												loadSelfGeneratedCerts();
 										else
 												loadVDTCerts();
-						}
+								}
 
 				//
 				// start replication service
