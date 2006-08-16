@@ -141,6 +141,7 @@ administration: services
 	cp ../administration/net/sf/gratia/administration/*.jsp war
 	cp ../administration/net/sf/gratia/administration/images/*.gif war/images
 	cp ../*.html war
+	cp $(jars)/mysql*.jar war/WEB-INF/lib
 	jar -cfM ../target/gratia-administration.war -C war .
 	rm -f -r war
 
@@ -165,6 +166,7 @@ security: services
 	cp ../services/net/sf/gratia/services/X*.class war/WEB-INF/classes/net/sf/gratia/services
 	cp ../services/net/sf/gratia/services/JMS*.class war/WEB-INF/classes/net/sf/gratia/services
 	cp ../security/net/sf/gratia/security/web.xml war/WEB-INF/web.xml
+	cp $(jars)/mysql*.jar war/WEB-INF/lib
 	jar -cfM ../target/gratia-security.war -C war .
 	rm -f -r war
 
