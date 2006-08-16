@@ -334,6 +334,8 @@ condorfiles: condordirs
 	cp $(root)/condor-probe/condor_meter.pl $(tarballdir)/condor-tar/gratia/condor-probe
 	cp $(root)/condor-probe/ProbeConfigTemplate $(tarballdir)/condor-tar/gratia/condor-probe
 	cp $(root)/condor-probe/README $(tarballdir)/condor-tar/gratia/condor-probe
+	cp $(root)/condor-probe/samplemeter.pl $(tarballdir)/condor-tar/gratia/condor-probe
+	cp $(root)/condor-probe/samplemeter.py $(tarballdir)/condor-tar/gratia/condor-probe
 	cp $(root)/condor-probe/gram_mods/condor.pm.diff $(tarballdir)/condor-tar/gratia/condor-probe/gram_mods
 	cp $(root)/condor-probe/gram_mods/managedfork.pm.diff $(tarballdir)/condor-tar/gratia/condor-probe/gram_mods
 
