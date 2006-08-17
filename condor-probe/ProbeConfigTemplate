@@ -1,13 +1,15 @@
 <ProbeConfiguration 
     UseSSL="1" 
-    UseSSLCertificates="1"
+
+    UseGratiaCertificates="1"
+
     SSLHost="cd-psg2.fnal.gov:8443" 
     SSLCollectorService="/gratia-servlets/rmi"
     SSLRegistrationHost="cd-psg2.fnal.gov:8880"
     SSLRegistrationService="/gratia-security/security"
-    SSLProbeName="GratiaTestProbe"
-    SSLCertificateFile="gratia.hostcert.pem"
-    SSLKeyFile="gratia.hostkey.pem"
+
+    GratiaCertificateFile="gratia.hostcert.pem"
+    GratiaKeyFile="gratia.hostkey.pem"
 
     SOAPHost="cd-psg2.fnal.gov:8880" 
     CollectorService="/gratia-soap/services/CollectorImpl" 

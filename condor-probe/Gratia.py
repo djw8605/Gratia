@@ -43,14 +43,11 @@ class ProbeConfiguration:
     def get_SSLRegistrationService(self):
         return self.__getConfigAttribute('SSLRegistrationService')
 
-    def get_SSLProbeName(self):
-        return self.__getConfigAttribute('SSLProbeName')
+    def get_GratiaCertificateFile(self):
+        return self.__getConfigAttribute('GratiaCertificateFile')
 
-    def get_SSLCertificateFile(self):
-        return self.__getConfigAttribute('SSLCertificateFile')
-
-    def get_SSLKeyFile(self):
-        return self.__getConfigAttribute('SSLKeyFile')
+    def get_GratiaKeyFile(self):
+        return self.__getConfigAttribute('GratiaKeyFile')
 
     def setMeterName(self,name):
         self.__MeterName = name
@@ -80,8 +77,8 @@ class ProbeConfiguration:
         else:
            return int(val)
 
-    def get_UseSSLCertificates(self):
-        return int(self.__getConfigAttribute('UseSSLCertificates'))
+    def get_UseGratiaCertificates(self):
+        return int(self.__getConfigAttribute('UseGratiaCertificates'))
 
     def get_DebugLevel(self):
         if (self.__DebugLevel == None):
@@ -244,14 +241,14 @@ def __connect():
             __connection = httplib.HTTP(Config.get_SOAPHost())            
             DebugPrint(1, 'Connected via HTTP to:  ' + Config.get_SOAPHost())
         else:
-            if Config.get_UseSSLCertificates() == 0:
+            if Config.get_UseGratiaCertificates() == 0:
                 __connection = httplib.HTTPSConnection(Config.get_SSLHost(),
                                                        cert_file = Config.get_CertificateFile(),
                                                        key_file = Config.get_KeyFile())
             else:
                 __connection = httplib.HTTPSConnection(Config.get_SSLHost(),
-                                                       cert_file = Config.get_SSLCertificateFile(),
-                                                       key_file = Config.get_SSLKeyFile())
+                                                       cert_file = Config.get_GratiaCertificateFile(),
+                                                       key_file = Config.get_GratiaKeyFile())
             __connection.connect()
             DebugPrint(1, "Connected via HTTPS to: " + Config.get_SSLHost())
         __connected = 1

@@ -6,11 +6,11 @@ if __name__ == '__main__':
         Gratia.Initialize()
         registrationhost = Gratia.Config.get_SSLRegistrationHost()
         registrationservice = Gratia.Config.get_SSLRegistrationService()
-        probename = Gratia.Config.get_SSLProbeName()
+        probename = Gratia.Config.get_MeterName()
         #
         # if we are using ssl certs get them from the server
         #
-        if Gratia.Config.get_UseSSLCertificates() == 1:
+        if Gratia.Config.get_UseGratiaCertificates() == 1:
                 print "RequestingCert With: " + registrationhost + " Service: " + registrationservice
                 connection = httplib.HTTPConnection(registrationhost)
                 connection.connect()
@@ -23,10 +23,10 @@ if __name__ == '__main__':
                         print "Error: ",args[1]
                         sys.exit
                 else:
-                        output = open(Gratia.Config.get_SSLCertificateFile(),"w");
+                        output = open(Gratia.Config.get_GratiaCertificateFile(),"w");
                         output.write(args[0]);
                         output.close();
-                        output = open(Gratia.Config.get_SSLKeyFile(),"w");
+                        output = open(Gratia.Config.get_GratiaKeyFile(),"w");
                         output.write(args[1]);
                         output.close();
                         print "Cert/Keyfile Saved"
@@ -34,7 +34,7 @@ if __name__ == '__main__':
         #
         # now - register something
         #
-        if Gratia.Config.get_UseSSLCertificates() == 1:
+        if Gratia.Config.get_UseGratiaCertificates() == 1:
                 print "Registering SSL Certs"
                 command="command=register&arg1=" + probename + "&arg2=Probe&arg3=" + cert
                 connection.request("POST",registrationservice,command)
