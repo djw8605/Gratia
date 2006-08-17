@@ -119,6 +119,7 @@ soap: services
 administration: services
 	rm -f -r war
 	mkdir war
+	mkdir war/images
 	mkdir war/meta-inf
 	mkdir war/WEB-INF
 	mkdir war/WEB-INF/classes
@@ -129,6 +130,7 @@ administration: services
 	mkdir war/WEB-INF/classes/net/sf/gratia/administration
 	mkdir war/WEB-INF/lib
 	javac -cp ${classpath} -extdirs $(jars) ../administration/net/sf/gratia/administration/*.java
+	cp ${administration}/net/sf/gratia/administration/images/*.gif war/images
 	cp ${administration}/net/sf/gratia/administration/*.class war/WEB-INF/classes/net/sf/gratia/administration
 	cp ../services/net/sf/gratia/services/Logging.class war/WEB-INF/classes/net/sf/gratia/services
 	cp ../services/net/sf/gratia/services/Configuration.class war/WEB-INF/classes/net/sf/gratia/services
