@@ -2,6 +2,11 @@
 <RecordIdentity urwg:recordId="cmswn396.fnal.gov:18821.8" urwg:createTime="2006-07-13T04:27:15Z"/>
 <UserIdentity>
 	<LocalUserId>cdffgrid</LocalUserId>
+	<ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#" >
+		<ds:X509Data>
+		<ds:X509SubjectName>CN=john ainsworth, L=MC, OU=Manchester, O=eScience, C=UK</ds:X509SubjectName>
+		</ds:X509Data>
+	</ds:KeyInfo>
 </UserIdentity>
 	<JobName>Daily Aggregate</JobName>
 	<CpuDuration urwg:usageType="user">PT7H57M8.25999999998S</CpuDuration>
