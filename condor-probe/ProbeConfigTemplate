@@ -1,7 +1,7 @@
 <ProbeConfiguration 
-    UseSSL="1" 
+    UseSSL="0" 
 
-    UseGratiaCertificates="1"
+    UseGratiaCertificates="0"
 
     SSLHost="cd-psg2.fnal.gov:8443" 
     SSLCollectorService="/gratia-servlets/rmi"
