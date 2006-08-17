@@ -16,5 +16,6 @@
 	<EndTime>2006-07-12T22:44:08Z</EndTime>
 	<Host primary="true" urwg:description="model='AMD Opteron(tm) Processor 248' ncpu=2">cmswn396.fnal.gov</Host>
 	<MachineName>cmswc1.fnal.gov</MachineName>
+        <Njobs>3</Njobs>
 	<ProbeName>psacct:cmswc1.fnal.gov</ProbeName>
 </JobUsageRecord>

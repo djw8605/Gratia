@@ -91,7 +91,7 @@ public class JobUsageRecord {
         if (JobName != null) output = output + " JobName: " + JobName;
         if (Charge != null) output = output + " Charge: " + Charge;
         if (Status != null) output = output + " Status: " + Status;
-        if (Njobs != null) output = output + " Njobs: " + Charge;
+        if (Njobs != null) output = output + " Njobs: " + Njobs;
         if (WallDuration != null) output = output + " WallDuration: " + WallDuration;
         if (CpuUserDuration != null) output = output + " CpuUserDuration: " + CpuUserDuration;
         if (CpuSystemDuration != null) output = output + " CpuSystemDuration: " + CpuSystemDuration;
@@ -137,7 +137,8 @@ public class JobUsageRecord {
         if (JobName != null)           output = output + JobName.asXml("JobName");
         if (Charge != null)            output = output + Charge.asXml("Charge");
         if (Status != null)            output = output + Status.asXml("Status");
-        if (Njobs != null)             output = output + Njobs.asXml("Njobs");
+        if (Njobs != null 
+            && Njobs.getValue()!=1)    output = output + Njobs.asXml("Njobs");
         if (WallDuration != null)      output = output + WallDuration.asXml("WallDuration");
         if (CpuUserDuration != null)   output = output + CpuUserDuration.asXml("CpuDuration","usageType","user");
         if (CpuSystemDuration != null) output = output + CpuSystemDuration.asXml("CpuDuration","usageType","system");

@@ -853,7 +853,7 @@ public class UsageRecordLoader
             throws Exception
     {
         IntegerElement el = job.getNjobs();
-        if (el != null /* job identity already set */)
+        if (el != null  && el.getValue()!=1 /* job identity already set */)
                   {
                         Utils.GratiaError("SetNjobs","parsing",
                                                    " found a second Njobs field in the xml file",false);

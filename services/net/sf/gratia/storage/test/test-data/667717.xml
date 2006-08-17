@@ -12,4 +12,5 @@
 	<Host primary="true" urwg:description="model='AMD Opteron(tm) Processor 248' ncpu=2">cmswn401.fnal.gov</Host>
 	<MachineName>cmswc1.fnal.gov</MachineName>
 	<ProbeName>psacct:cmswc1.fnal.gov</ProbeName>
+        <NJobs>0</NJobs>
 </JobUsageRecord>
