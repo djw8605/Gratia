@@ -165,7 +165,7 @@ public class UsageRecordLoader
               } 
               else 
                 {
-                  job.addExtraXml(sub.asXML());	            
+                  job.addExtraXml(sub.asXML());               
                 }
             } catch (Exception e) {
               // Something went wrong in the parsing.  We do not die, we
@@ -180,68 +180,70 @@ public class UsageRecordLoader
     }
 
     public static void SetRecordIdentity(JobUsageRecord job, Element element)
-				throws Exception
+            throws Exception
     {
         RecordIdentity id = job.getRecordIdentity();
         if (id != null /* record identity already set */)
-						{
-								Utils.GratiaError("SetRecordIdentity","parsing",
-																	" found a second RecordIdentity field in the xml file",
-																	false);
-								return;
-						}
+                  {
+                        Utils.GratiaError("SetRecordIdentity","parsing",
+                                                   " found a second RecordIdentity field in the xml file",
+                                                   false);
+                        return;
+                  }
         for (Iterator i = element.attributeIterator(); i.hasNext();)
-						{
-								Attribute a = (Attribute) i.next();
-								if (a.getName().equalsIgnoreCase("recordId"))
-										{
-												if (id == null)
-														id = new RecordIdentity();
-												id.setRecordId(a.getValue());
-										} else if (a.getName().equalsIgnoreCase("createTime"))
-												{
-														if (id == null)
-																id = new RecordIdentity();
-														DateElement createTime = new DateElement();
-														createTime.setValue(a.getValue());
-														id.setCreateTime(createTime);
-												}
-						}
+                  {
+                        Attribute a = (Attribute) i.next();
+                        if (a.getName().equalsIgnoreCase("recordId"))
+                              {
+                                    if (id == null)
+                                          id = new RecordIdentity();
+                                    id.setRecordId(a.getValue());
+                              } else if (a.getName().equalsIgnoreCase("createTime"))
+                                    {
+                                          if (id == null)
+                                                id = new RecordIdentity();
+                                          DateElement createTime = new DateElement();
+                                          createTime.setValue(a.getValue());
+                                          id.setCreateTime(createTime);
+                                    }
+                  }
         if (id != null)
             job.setRecordIdentity(id);
     }
 
     public static void SetJobIdentity(JobUsageRecord job, Element element)
-				throws Exception
+            throws Exception
     {
         JobIdentity id = job.getJobIdentity();
         if (id != null /* job identity already set */)
-						{
-								Utils.GratiaError("SetRecordIdentity","parsing",
-																	" found a second JobIdentity field in the xml file",false);
-								return;
-						}
+                  {
+                        Utils.GratiaError("SetRecordIdentity","parsing",
+                                                   " found a second JobIdentity field in the xml file",false);
+                        return;
+                  }
         // No known attributes.
         for (Iterator i = element.elementIterator(); i.hasNext();)
-						{
-								Element sub = (Element) i.next();
-								if (sub.getName().equalsIgnoreCase("GlobalJobId"))
-										{
-												if (id == null)
-														id = new JobIdentity();
-												id.setGlobalJobId(sub.getText());
-										} else if (sub.getName().equalsIgnoreCase("LocalJobId"))
-												{
-														if (id == null)
-																id = new JobIdentity();
-														id.setLocalJobId(sub.getText());
-												} else if (sub.getName().equalsIgnoreCase("ProcessId"))
-														{
-																if (id == null)
-																		id = new JobIdentity();
-																id.addProcessId(sub.getText());
-														}
-						}
+                  {
+                        Element sub = (Element) i.next();
+                        if (sub.getName().equalsIgnoreCase("GlobalJobId"))
+                              {
+                                    if (id == null)
+                                          id = new JobIdentity();
+                                    id.setGlobalJobId(sub.getText());
+                              } 
+                        else if (sub.getName().equalsIgnoreCase("LocalJobId"))
+                              {
+                                    if (id == null)
+                                       id = new JobIdentity();
+                                    id.setLocalJobId(sub.getText());
+                              } 
+                        else if (sub.getName().equalsIgnoreCase("ProcessId"))
+                              {
+                                    if (id == null)
+                                        id = new JobIdentity();
+                                    id.addProcessId(sub.getText());
+                              }
+                  }
         if (id != null)
             job.setJobIdentity(id);
     }
@@ -250,117 +252,126 @@ public class UsageRecordLoader
     {
         KeyInfoType info = new KeyInfoType();
         for (Iterator i = element.attributeIterator(); i.hasNext();)
-						{
-								Attribute a = (Attribute) i.next();
-								if (a.getName().equalsIgnoreCase("Id"))
-										{
-												info.setId(a.getValue());
-										}
-						}
-        info.setContent(element.asXML());
+        {
+           Attribute a = (Attribute) i.next();
+           if (a.getName().equalsIgnoreCase("Id"))
+           {
+              info.setId(a.getValue());
+           }
+        }
+        String keyContent = "";
+        for (Iterator i = element.elementIterator(); i.hasNext();)
+        {
+             Element sub = (Element) i.next();
+             keyContent = keyContent + "\t" + sub.asXML();
+        }
+        info.setContent(keyContent);
         return info;
     }
 
     public static void SetUserIdentity(JobUsageRecord job, Element element)
-				throws Exception
+            throws Exception
     {
         UserIdentity id = job.getUserIdentity();
         if (false /* job identity already set */)
-						{
-								Utils.GratiaError("SetUserIdentity","parsing",
-																	" found a second UserIdentity field in the xml file",false);
-						}
+                  {
+                        Utils.GratiaError("SetUserIdentity","parsing",
+                                                   " found a second UserIdentity field in the xml file",false);
+                  }
         // No known attributes.
         for (Iterator i = element.elementIterator(); i.hasNext();)
-						{
-								Element sub = (Element) i.next();
-								if (sub.getName().equalsIgnoreCase("GlobalUsername"))
-										{
-												if (id == null) id = new UserIdentity();
-												id.setGlobalUsername(sub.getText());
-										} else if (sub.getName().equalsIgnoreCase("LocalUserId"))
-												{
-														if (id == null) id = new UserIdentity();
-														id.setLocalUserId(sub.getText());
-												} else if (sub.getName().equalsIgnoreCase("KeyInfo"))
-														{
-																if (id == null) id = new UserIdentity();
-																id.setKeyInfo(genKeyInfo(sub));
-														} else if (sub.getName().equalsIgnoreCase("VOName"))
-																{
-																		if (id == null) id = new UserIdentity();
-																		id.setVOName(sub.getText());
-																}
-						}
+                  {
+                        Element sub = (Element) i.next();
+                        if (sub.getName().equalsIgnoreCase("GlobalUsername"))
+                              {
+                                    if (id == null) id = new UserIdentity();
+                                    id.setGlobalUsername(sub.getText());
+                              } 
+                        else if (sub.getName().equalsIgnoreCase("LocalUserId"))
+                              {
+                                    if (id == null) id = new UserIdentity();
+                                    id.setLocalUserId(sub.getText());
+                              } 
+                       else if (sub.getName().equalsIgnoreCase("KeyInfo"))
+                              {
+                                    if (id == null) id = new UserIdentity();
+                                    id.setKeyInfo(genKeyInfo(sub));
+                              } 
+                       else if (sub.getName().equalsIgnoreCase("VOName"))
+                              {
+                                    if (id == null) id = new UserIdentity();
+                                    id.setVOName(sub.getText());
+                              }
+                  }
         if (id != null)
             job.setUserIdentity(id);
     }
 
     public static void SetJobName(JobUsageRecord job, Element element)
-				throws Exception
+            throws Exception
     {
         StringElement el = job.getJobName();
         if (el != null /* job identity already set */)
-						{
-								Utils.GratiaError("SetJobName","parsing",
-																	" found a second JobName field in the xml file",false);
-								return;
-						}
+                  {
+                        Utils.GratiaError("SetJobName","parsing",
+                                                   " found a second JobName field in the xml file",false);
+                        return;
+                  }
         el = new StringElement();
         for (Iterator i = element.attributeIterator(); i.hasNext();)
-						{
-								Attribute a = (Attribute) i.next();
-								if (a.getName().equalsIgnoreCase("description"))
-										{
-												el.setDescription(a.getValue());
-										}
-						}
+                  {
+                        Attribute a = (Attribute) i.next();
+                        if (a.getName().equalsIgnoreCase("description"))
+                              {
+                                    el.setDescription(a.getValue());
+                              }
+                  }
         el.setValue(element.getText());
         job.setJobName(el);
     }
 
     public static void SetStatus(JobUsageRecord job, Element element)
-				throws Exception
+            throws Exception
     {
         StringElement el = job.getStatus();
         if (el != null /* job identity already set */)
-						{
-								Utils.GratiaError("SetStatus","parsing",
-																	" found a second Status field in the xml file",false);
-								return;
-						}
+                  {
+                        Utils.GratiaError("SetStatus","parsing",
+                                                   " found a second Status field in the xml file",false);
+                        return;
+                  }
         el = new StringElement();
         for (Iterator i = element.attributeIterator(); i.hasNext();)
-						{
-								Attribute a = (Attribute) i.next();
-								if (a.getName().equalsIgnoreCase("description"))
-										{
-												el.setDescription(a.getValue());
-										}
-						}
+                  {
+                        Attribute a = (Attribute) i.next();
+                        if (a.getName().equalsIgnoreCase("description"))
+                              {
+                                    el.setDescription(a.getValue());
+                              }
+                  }
         el.setValue(element.getText());
         job.setStatus(el);
     }
 
     public static void SetWallDuration(JobUsageRecord job, Element element)
-				throws Exception
+            throws Exception
     {
         DurationElement el = job.getWallDuration();
         if (el != null /* job identity already set */)
-						{
-								Utils.GratiaError("SetWallDuration","parsing",
-																	" found a second WallDuration field in the xml file",false);
-								return;
-						}
+                  {
+                        Utils.GratiaError("SetWallDuration","parsing",
+                                                   " found a second WallDuration field in the xml file",false);
+                        return;
+                  }
         el = new DurationElement();
         for (Iterator i = element.attributeIterator(); i.hasNext();)
-						{
-								Attribute a = (Attribute) i.next();
-								if (a.getName().equalsIgnoreCase("description"))
-										{
-												el.setDescription(a.getValue());
-										}
-						}
+                  {
+                        Attribute a = (Attribute) i.next();
+                        if (a.getName().equalsIgnoreCase("description"))
+                              {
+                                    el.setDescription(a.getValue());
+                              }
+                  }
         // Duration d = new Duration();
 
         el.setValue(element.getText());
@@ -368,7 +379,7 @@ public class UsageRecordLoader
     }
 
     public static void SetCpuDuration(JobUsageRecord job, Element element)
-				throws Exception
+            throws Exception
     {
         DurationElement el = job.getWallDuration();
         String usage = "user";
@@ -425,24 +436,24 @@ public class UsageRecordLoader
     }
 
     public static void SetEndTime(JobUsageRecord job, Element element)
-				throws Exception
+            throws Exception
     {
         DateElement el = job.getEndTime();
         if (el != null /* job identity already set */)
-						{
-								Utils.GratiaError("SetEndTime","parsing",
-																	" found a second EndTime field in the xml file",false);
-								return;
-						}
+                  {
+                        Utils.GratiaError("SetEndTime","parsing",
+                                                   " found a second EndTime field in the xml file",false);
+                        return;
+                  }
         el = new DateElement();
         for (Iterator i = element.attributeIterator(); i.hasNext();)
-						{
-								Attribute a = (Attribute) i.next();
-								if (a.getName().equalsIgnoreCase("description"))
-										{
-												el.setDescription(a.getValue());
-										}
-						}
+                  {
+                        Attribute a = (Attribute) i.next();
+                        if (a.getName().equalsIgnoreCase("description"))
+                              {
+                                    el.setDescription(a.getValue());
+                              }
+                  }
         // Duration d = new Duration();
 
         el.setValue(element.getText());
@@ -450,44 +461,44 @@ public class UsageRecordLoader
     }
 
     public static void SetStartTime(JobUsageRecord job, Element element)
-				throws Exception
+            throws Exception
     {
         DateElement el = job.getStartTime();
         if (el != null /* job identity already set */)
-						{
-								Utils.GratiaError("SetStartTime","parsing",
-																	" found a second StartTime field in the xml file",false);
-								return;
-						}
+                  {
+                        Utils.GratiaError("SetStartTime","parsing",
+                                                   " found a second StartTime field in the xml file",false);
+                        return;
+                  }
         el = new DateElement();
         for (Iterator i = element.attributeIterator(); i.hasNext();)
-						{
-								Attribute a = (Attribute) i.next();
-								if (a.getName().equalsIgnoreCase("description"))
-										{
-												el.setDescription(a.getValue());
-										}
-						}
+                  {
+                        Attribute a = (Attribute) i.next();
+                        if (a.getName().equalsIgnoreCase("description"))
+                              {
+                                    el.setDescription(a.getValue());
+                              }
+                  }
 
         el.setValue(element.getText());
         job.setStartTime(el);
     }
 
     public static void SetTimeDuration(JobUsageRecord job, Element element)
-				throws Exception
+            throws Exception
     {
         DurationElement el = new DurationElement();
         for (Iterator i = element.attributeIterator(); i.hasNext();)
-						{
-								Attribute a = (Attribute) i.next();
-								if (a.getName().equalsIgnoreCase("description"))
-										{
-												el.setDescription(a.getValue());
-										} else if (a.getName().equalsIgnoreCase("type"))
-												{
-														el.setType(a.getValue());
-												}
-						}
+                  {
+                        Attribute a = (Attribute) i.next();
+                        if (a.getName().equalsIgnoreCase("description"))
+                              {
+                                    el.setDescription(a.getValue());
+                              } else if (a.getName().equalsIgnoreCase("type"))
+                                    {
+                                          el.setType(a.getValue());
+                                    }
+                  }
         el.setValue(element.getText());
 
         List l = job.getTimeDuration();
@@ -498,20 +509,20 @@ public class UsageRecordLoader
     }
 
     public static void SetTimeInstant(JobUsageRecord job, Element element)
-				throws Exception
+            throws Exception
     {
         DateElement el = new DateElement();
         for (Iterator i = element.attributeIterator(); i.hasNext();)
-						{
-								Attribute a = (Attribute) i.next();
-								if (a.getName().equalsIgnoreCase("description"))
-										{
-												el.setDescription(a.getValue());
-										} else if (a.getName().equalsIgnoreCase("type"))
-												{
-														el.setType(a.getValue());
-												}
-						}
+                  {
+                        Attribute a = (Attribute) i.next();
+                        if (a.getName().equalsIgnoreCase("description"))
+                              {
+                                    el.setDescription(a.getValue());
+                              } else if (a.getName().equalsIgnoreCase("type"))
+                                    {
+                                          el.setType(a.getValue());
+                                    }
+                  }
         el.setValue(element.getText());
 
         List l = job.getTimeInstant();
@@ -522,24 +533,24 @@ public class UsageRecordLoader
     }
 
     public static void SetMachineName(JobUsageRecord job, Element element)
-				throws Exception
+            throws Exception
     {
         StringElement el = job.getMachineName();
         if (el != null /* job identity already set */)
-						{
-								Utils.GratiaError("SetMachineName","parsing",
-																	" found a second MachineName field in the xml file",false);
-								return;
-						}
+                  {
+                        Utils.GratiaError("SetMachineName","parsing",
+                                                   " found a second MachineName field in the xml file",false);
+                        return;
+                  }
         el = new StringElement();
         for (Iterator i = element.attributeIterator(); i.hasNext();)
-						{
-								Attribute a = (Attribute) i.next();
-								if (a.getName().equalsIgnoreCase("description"))
-										{
-												el.setDescription(a.getValue());
-										}
-						}
+                  {
+                        Attribute a = (Attribute) i.next();
+                        if (a.getName().equalsIgnoreCase("description"))
+                              {
+                                    el.setDescription(a.getValue());
+                              }
+                  }
         el.setValue(element.getText());
         job.setMachineName(el);
     }
@@ -568,31 +579,31 @@ public class UsageRecordLoader
     }
 
     public static void SetHost(JobUsageRecord job, Element element)
-				throws Exception
+            throws Exception
     {
         StringElement el = job.getHost();
         boolean primary = false;
         if (el == null)
-						{
-								el = new StringElement();
-						}
+                  {
+                        el = new StringElement();
+                  }
         for (Iterator i = element.attributeIterator(); i.hasNext();)
-						{
-								Attribute a = (Attribute) i.next();
-								if (a.getName().equalsIgnoreCase("description"))
-										{
-												String desc = el.getDescription();
-												if (desc == null)
-														desc = "";
-												else
-														desc = desc + " ; ";
-												desc = desc + a.getValue();
-												el.setDescription(desc);
-										} else if (a.getName().equalsIgnoreCase("primary"))
-												{
-														primary = (a.getValue().equalsIgnoreCase("true"));
-												}
-						}
+                  {
+                        Attribute a = (Attribute) i.next();
+                        if (a.getName().equalsIgnoreCase("description"))
+                              {
+                                    String desc = el.getDescription();
+                                    if (desc == null)
+                                          desc = "";
+                                    else
+                                          desc = desc + " ; ";
+                                    desc = desc + a.getValue();
+                                    el.setDescription(desc);
+                              } else if (a.getName().equalsIgnoreCase("primary"))
+                                    {
+                                          primary = (a.getValue().equalsIgnoreCase("true"));
+                                    }
+                  }
         String val = el.getValue();
         if (val == null)
             val = "";
@@ -606,73 +617,73 @@ public class UsageRecordLoader
     }
 
     public static void SetSubmitHost(JobUsageRecord job, Element element)
-				throws Exception
+            throws Exception
     {
         StringElement el = job.getSubmitHost();
         if (el != null /* job identity already set */)
-						{
-								Utils.GratiaError("SetSubmitHost","parsing",
-																	" found a second SubmitHost field in the xml file",false);
-								return;
-						}
+                  {
+                        Utils.GratiaError("SetSubmitHost","parsing",
+                                                   " found a second SubmitHost field in the xml file",false);
+                        return;
+                  }
         el = new StringElement();
         for (Iterator i = element.attributeIterator(); i.hasNext();)
-						{
-								Attribute a = (Attribute) i.next();
-								if (a.getName().equalsIgnoreCase("description"))
-										{
-												el.setDescription(a.getValue());
-										}
-						}
+                  {
+                        Attribute a = (Attribute) i.next();
+                        if (a.getName().equalsIgnoreCase("description"))
+                              {
+                                    el.setDescription(a.getValue());
+                              }
+                  }
         el.setValue(element.getText());
         job.setSubmitHost(el);
     }
 
     public static void SetQueue(JobUsageRecord job, Element element)
-				throws Exception
+            throws Exception
     {
         StringElement el = job.getQueue();
         if (el != null /* job identity already set */)
-						{
-								Utils.GratiaError("SetQueue","parsing",
-																	" found a second Queue field in the xml file",false);
-								return;
-						}
+                  {
+                        Utils.GratiaError("SetQueue","parsing",
+                                                   " found a second Queue field in the xml file",false);
+                        return;
+                  }
         el = new StringElement();
         for (Iterator i = element.attributeIterator(); i.hasNext();)
-						{
-								Attribute a = (Attribute) i.next();
-								if (a.getName().equalsIgnoreCase("description"))
-										{
-												el.setDescription(a.getValue());
-										}
-						}
+                  {
+                        Attribute a = (Attribute) i.next();
+                        if (a.getName().equalsIgnoreCase("description"))
+                              {
+                                    el.setDescription(a.getValue());
+                              }
+                  }
         el.setValue(element.getText());
         job.setQueue(el);
     }
 
     public static void SetProjectName(JobUsageRecord job, Element element)
-				throws Exception
+            throws Exception
     {
         StringElement el = job.getProjectName();
         if (el == null)
-						{
-								el = new StringElement();
-						}
+                  {
+                        el = new StringElement();
+                  }
         for (Iterator i = element.attributeIterator(); i.hasNext();)
-						{
-								Attribute a = (Attribute) i.next();
-								if (a.getName().equalsIgnoreCase("description"))
-										{
-												String desc = el.getDescription();
-												if (desc == null)
-														desc = "";
-												else
-														desc = desc + " ; ";
-												desc = desc + a.getValue();
-												el.setDescription(desc);
-										}
-						}
+                  {
+                        Attribute a = (Attribute) i.next();
+                        if (a.getName().equalsIgnoreCase("description"))
+                              {
+                                    String desc = el.getDescription();
+                                    if (desc == null)
+                                          desc = "";
+                                    else
+                                          desc = desc + " ; ";
+                                    desc = desc + a.getValue();
+                                    el.setDescription(desc);
+                              }
+                  }
         String val = el.getValue();
         if (val == null)
             val = "";
@@ -684,27 +695,27 @@ public class UsageRecordLoader
     }
 
     public static void SetNetwork(JobUsageRecord job, Element element)
-				throws Exception
+            throws Exception
     {
         ResourceElement el = new ResourceElement();
         el.setMetrics("total");
         for (Iterator i = element.attributeIterator(); i.hasNext();)
-						{
-								Attribute a = (Attribute) i.next();
-								if (a.getName().equalsIgnoreCase("description"))
-										{
-												el.setDescription(a.getValue());
-										} else if (a.getName().equalsIgnoreCase("metrics"))
-												{
-														el.setMetrics(a.getValue());
-												} else if (a.getName().equalsIgnoreCase("phaseUnit"))
-														{
-																el.setPhaseUnit(a.getValue());
-														} else if (a.getName().equalsIgnoreCase("storageUnit"))
-																{
-																		el.setStorageUnit(a.getValue());
-																}
-						}
+                  {
+                        Attribute a = (Attribute) i.next();
+                        if (a.getName().equalsIgnoreCase("description"))
+                              {
+                                    el.setDescription(a.getValue());
+                              } else if (a.getName().equalsIgnoreCase("metrics"))
+                                    {
+                                          el.setMetrics(a.getValue());
+                                    } else if (a.getName().equalsIgnoreCase("phaseUnit"))
+                                          {
+                                                el.setPhaseUnit(a.getValue());
+                                          } else if (a.getName().equalsIgnoreCase("storageUnit"))
+                                                {
+                                                      el.setStorageUnit(a.getValue());
+                                                }
+                  }
         el.setValue((new Double(element.getText())).doubleValue());
         List l = job.getNetwork();
         if (l == null)
@@ -714,30 +725,30 @@ public class UsageRecordLoader
     }
 
     public static void SetDisk(JobUsageRecord job, Element element)
-				throws Exception
+            throws Exception
     {
         ResourceElement el = new ResourceElement();
         el.setMetrics("total");
         for (Iterator i = element.attributeIterator(); i.hasNext();)
-						{
-								Attribute a = (Attribute) i.next();
-								if (a.getName().equalsIgnoreCase("description"))
-										{
-												el.setDescription(a.getValue());
-										} else if (a.getName().equalsIgnoreCase("metrics"))
-												{
-														el.setMetrics(a.getValue());
-												} else if (a.getName().equalsIgnoreCase("phaseUnit"))
-														{
-																el.setPhaseUnit(a.getValue());
-														} else if (a.getName().equalsIgnoreCase("storageUnit"))
-																{
-																		el.setStorageUnit(a.getValue());
-																} else if (a.getName().equalsIgnoreCase("type"))
-																		{
-																				el.setType(a.getValue());
-																		}
-						}
+                  {
+                        Attribute a = (Attribute) i.next();
+                        if (a.getName().equalsIgnoreCase("description"))
+                              {
+                                    el.setDescription(a.getValue());
+                              } else if (a.getName().equalsIgnoreCase("metrics"))
+                                    {
+                                          el.setMetrics(a.getValue());
+                                    } else if (a.getName().equalsIgnoreCase("phaseUnit"))
+                                          {
+                                                el.setPhaseUnit(a.getValue());
+                                          } else if (a.getName().equalsIgnoreCase("storageUnit"))
+                                                {
+                                                      el.setStorageUnit(a.getValue());
+                                                } else if (a.getName().equalsIgnoreCase("type"))
+                                                      {
+                                                            el.setType(a.getValue());
+                                                      }
+                  }
         el.setValue((new Double(element.getText())).doubleValue());
         List l = job.getDisk();
         if (l == null)
@@ -747,30 +758,30 @@ public class UsageRecordLoader
     }
 
     public static void SetMemory(JobUsageRecord job, Element element)
-				throws Exception
+            throws Exception
     {
         ResourceElement el = new ResourceElement();
         el.setMetrics("total");
         for (Iterator i = element.attributeIterator(); i.hasNext();)
-						{
-								Attribute a = (Attribute) i.next();
-								if (a.getName().equalsIgnoreCase("description"))
-										{
-												el.setDescription(a.getValue());
-										} else if (a.getName().equalsIgnoreCase("metrics"))
-												{
-														el.setMetrics(a.getValue());
-												} else if (a.getName().equalsIgnoreCase("phaseUnit"))
-														{
-																el.setPhaseUnit(a.getValue());
-														} else if (a.getName().equalsIgnoreCase("storageUnit"))
-																{
-																		el.setStorageUnit(a.getValue());
-																} else if (a.getName().equalsIgnoreCase("type"))
-																		{
-																				el.setType(a.getValue());
-																		}
-						}
+                  {
+                        Attribute a = (Attribute) i.next();
+                        if (a.getName().equalsIgnoreCase("description"))
+                              {
+                                    el.setDescription(a.getValue());
+                              } else if (a.getName().equalsIgnoreCase("metrics"))
+                                    {
+                                          el.setMetrics(a.getValue());
+                                    } else if (a.getName().equalsIgnoreCase("phaseUnit"))
+                                          {
+                                                el.setPhaseUnit(a.getValue());
+                                          } else if (a.getName().equalsIgnoreCase("storageUnit"))
+                                                {
+                                                      el.setStorageUnit(a.getValue());
+                                                } else if (a.getName().equalsIgnoreCase("type"))
+                                                      {
+                                                            el.setType(a.getValue());
+                                                      }
+                  }
         el.setValue((new Double(element.getText())).doubleValue());
         List l = job.getMemory();
         if (l == null)
@@ -780,30 +791,30 @@ public class UsageRecordLoader
     }
 
     public static void SetSwap(JobUsageRecord job, Element element)
-				throws Exception
+            throws Exception
     {
         ResourceElement el = new ResourceElement();
         el.setMetrics("total");
         for (Iterator i = element.attributeIterator(); i.hasNext();)
-						{
-								Attribute a = (Attribute) i.next();
-								if (a.getName().equalsIgnoreCase("description"))
-										{
-												el.setDescription(a.getValue());
-										} else if (a.getName().equalsIgnoreCase("metrics"))
-												{
-														el.setMetrics(a.getValue());
-												} else if (a.getName().equalsIgnoreCase("phaseUnit"))
-														{
-																el.setPhaseUnit(a.getValue());
-														} else if (a.getName().equalsIgnoreCase("storageUnit"))
-																{
-																		el.setStorageUnit(a.getValue());
-																} else if (a.getName().equalsIgnoreCase("type"))
-																		{
-																				el.setType(a.getValue());
-																		}
-						}
+                  {
+                        Attribute a = (Attribute) i.next();
+                        if (a.getName().equalsIgnoreCase("description"))
+                              {
+                                    el.setDescription(a.getValue());
+                              } else if (a.getName().equalsIgnoreCase("metrics"))
+                                    {
+                                          el.setMetrics(a.getValue());
+                                    } else if (a.getName().equalsIgnoreCase("phaseUnit"))
+                                          {
+                                                el.setPhaseUnit(a.getValue());
+                                          } else if (a.getName().equalsIgnoreCase("storageUnit"))
+                                                {
+                                                      el.setStorageUnit(a.getValue());
+                                                } else if (a.getName().equalsIgnoreCase("type"))
+                                                      {
+                                                            el.setType(a.getValue());
+                                                      }
+                  }
         el.setValue((new Double(element.getText())).doubleValue());
         List l = job.getSwap();
         if (l == null)
@@ -813,101 +824,101 @@ public class UsageRecordLoader
     }
 
     public static void SetNodeCount(JobUsageRecord job, Element element)
-				throws Exception
+            throws Exception
     {
         IntegerElement el = job.getNodeCount();
         if (el != null && el.getValue() != 1)
-						{
-								Utils.GratiaError("SetNodeCount","parsing",
-																	" found a second NodeCount field in the xml file",false);
-								return;
-						}
+                  {
+                        Utils.GratiaError("SetNodeCount","parsing",
+                                                   " found a second NodeCount field in the xml file",false);
+                        return;
+                  }
         el = new IntegerElement();
         for (Iterator i = element.attributeIterator(); i.hasNext();)
-						{
-								Attribute a = (Attribute) i.next();
-								if (a.getName().equalsIgnoreCase("description"))
-										{
-												el.setDescription(a.getValue());
-										} else if (a.getName().equalsIgnoreCase("metric"))
-												{
-														el.setMetric(a.getValue());
-												}
-						}
+                  {
+                        Attribute a = (Attribute) i.next();
+                        if (a.getName().equalsIgnoreCase("description"))
+                              {
+                                    el.setDescription(a.getValue());
+                              } else if (a.getName().equalsIgnoreCase("metric"))
+                                    {
+                                          el.setMetric(a.getValue());
+                                    }
+                  }
         el.setValue((new Long(element.getText())).longValue());
         job.setNodeCount(el);
     }
 
     public static void SetNjobs(JobUsageRecord job, Element element)
-				throws Exception
+            throws Exception
     {
         IntegerElement el = job.getNjobs();
         if (el != null /* job identity already set */)
-						{
-								Utils.GratiaError("SetNjobs","parsing",
-																	" found a second Njobs field in the xml file",false);
-								return;
-						}
+                  {
+                        Utils.GratiaError("SetNjobs","parsing",
+                                                   " found a second Njobs field in the xml file",false);
+                        return;
+                  }
         el = new IntegerElement();
         for (Iterator i = element.attributeIterator(); i.hasNext();)
-						{
-								Attribute a = (Attribute) i.next();
-								if (a.getName().equalsIgnoreCase("description"))
-										{
-												el.setDescription(a.getValue());
-										} else if (a.getName().equalsIgnoreCase("metric"))
-												{
-														el.setMetric(a.getValue());
-												}
-						}
+                  {
+                        Attribute a = (Attribute) i.next();
+                        if (a.getName().equalsIgnoreCase("description"))
+                              {
+                                    el.setDescription(a.getValue());
+                              } else if (a.getName().equalsIgnoreCase("metric"))
+                                    {
+                                          el.setMetric(a.getValue());
+                                    }
+                  }
         el.setValue((new Long(element.getText())).longValue());
         job.setNjobs(el);
     }
 
     public static void SetProcessors(JobUsageRecord job, Element element)
-				throws Exception
+            throws Exception
     {
         IntegerElement el = job.getProcessors();
         if (el != null /* job identity already set */)
-						{
-								Utils.GratiaError("SetProcessors","parsing",
-																	" found a second Processors field in the xml file",false);
-								return;
-						}
+                  {
+                        Utils.GratiaError("SetProcessors","parsing",
+                                                   " found a second Processors field in the xml file",false);
+                        return;
+                  }
         el = new IntegerElement();
         for (Iterator i = element.attributeIterator(); i.hasNext();)
-						{
-								Attribute a = (Attribute) i.next();
-								if (a.getName().equalsIgnoreCase("description"))
-										{
-												el.setDescription(a.getValue());
-										} else if (a.getName().equalsIgnoreCase("metric"))
-												{
-														el.setMetric(a.getValue());
-												} else if (a.getName().equalsIgnoreCase("consumptionRate"))
-														{
-																el.setConsumptionRate((new Double(a.getValue())).doubleValue());
-														}
-						}
+                  {
+                        Attribute a = (Attribute) i.next();
+                        if (a.getName().equalsIgnoreCase("description"))
+                              {
+                                    el.setDescription(a.getValue());
+                              } else if (a.getName().equalsIgnoreCase("metric"))
+                                    {
+                                          el.setMetric(a.getValue());
+                                    } else if (a.getName().equalsIgnoreCase("consumptionRate"))
+                                          {
+                                                el.setConsumptionRate((new Double(a.getValue())).doubleValue());
+                                          }
+                  }
         el.setValue((new Long(element.getText())).longValue());
         job.setProcessors(el);
     }
 
     public static void SetServiceLevel(JobUsageRecord job, Element element)
-				throws Exception
+            throws Exception
     {
         StringElement el = new StringElement();
         for (Iterator i = element.attributeIterator(); i.hasNext();)
-						{
-								Attribute a = (Attribute) i.next();
-								if (a.getName().equalsIgnoreCase("description"))
-										{
-												el.setDescription(a.getValue());
-										} else if (a.getName().equalsIgnoreCase("type"))
-												{
-														el.setType(a.getValue());
-												}
-						}
+                  {
+                        Attribute a = (Attribute) i.next();
+                        if (a.getName().equalsIgnoreCase("description"))
+                              {
+                                    el.setDescription(a.getValue());
+                              } else if (a.getName().equalsIgnoreCase("type"))
+                                    {
+                                          el.setType(a.getValue());
+                                    }
+                  }
         el.setValue(element.getText());
         List l = job.getServiceLevel();
         if (l == null)
@@ -917,53 +928,53 @@ public class UsageRecordLoader
     }
 
     public static void SetCharge(JobUsageRecord job, Element element)
-				throws Exception
+            throws Exception
     {
         FloatElement el = job.getCharge();
         if (el != null /* job identity already set */)
-						{
-								Utils.GratiaError("SetCharge","parsing",
-																	" found a second Charge field in the xml file",false);
-								return;
-						}
+                  {
+                        Utils.GratiaError("SetCharge","parsing",
+                                                   " found a second Charge field in the xml file",false);
+                        return;
+                  }
         el = new FloatElement();
         for (Iterator i = element.attributeIterator(); i.hasNext();)
-						{
-								Attribute a = (Attribute) i.next();
-								if (a.getName().equalsIgnoreCase("description"))
-										{
-												el.setDescription(a.getValue());
-										} else if (a.getName().equalsIgnoreCase("unit"))
-												{
-														el.setUnit(a.getValue());
-												} else if (a.getName().equalsIgnoreCase("formula"))
-														{
-																el.setFormula(a.getValue());
-														}
-						}
+                  {
+                        Attribute a = (Attribute) i.next();
+                        if (a.getName().equalsIgnoreCase("description"))
+                              {
+                                    el.setDescription(a.getValue());
+                              } else if (a.getName().equalsIgnoreCase("unit"))
+                                    {
+                                          el.setUnit(a.getValue());
+                                    } else if (a.getName().equalsIgnoreCase("formula"))
+                                          {
+                                                el.setFormula(a.getValue());
+                                          }
+                  }
         el.setValue((new Double(element.getText())).doubleValue());
         job.setCharge(el);
     }
 
     public static void AddPhaseResource(JobUsageRecord job, Element element)
-				throws Exception
+            throws Exception
     {
         ResourceElement el = new ResourceElement();
         el.setMetrics("total");
         for (Iterator i = element.attributeIterator(); i.hasNext();)
-						{
-								Attribute a = (Attribute) i.next();
-								if (a.getName().equalsIgnoreCase("description"))
-										{
-												el.setDescription(a.getValue());
-										} else if (a.getName().equalsIgnoreCase("unit"))
-												{
-														el.setUnit(a.getValue());
-												} else if (a.getName().equalsIgnoreCase("phaseUnit"))
-														{
-																el.setPhaseUnit(a.getValue());
-														}
-						}
+                  {
+                        Attribute a = (Attribute) i.next();
+                        if (a.getName().equalsIgnoreCase("description"))
+                              {
+                                    el.setDescription(a.getValue());
+                              } else if (a.getName().equalsIgnoreCase("unit"))
+                                    {
+                                          el.setUnit(a.getValue());
+                                    } else if (a.getName().equalsIgnoreCase("phaseUnit"))
+                                          {
+                                                el.setPhaseUnit(a.getValue());
+                                          }
+                  }
         el.setValue((new Double(element.getText())).doubleValue());
         List l = job.getPhaseResource();
         if (l == null)
@@ -973,23 +984,23 @@ public class UsageRecordLoader
     }
 
     public static void AddVolumeResource(JobUsageRecord job, Element element)
-				throws Exception
+            throws Exception
     {
         ResourceElement el = new ResourceElement();
         for (Iterator i = element.attributeIterator(); i.hasNext();)
-						{
-								Attribute a = (Attribute) i.next();
-								if (a.getName().equalsIgnoreCase("description"))
-										{
-												el.setDescription(a.getValue());
-										} else if (a.getName().equalsIgnoreCase("unit"))
-												{
-														el.setUnit(a.getValue());
-												} else if (a.getName().equalsIgnoreCase("storageUnit"))
-														{
-																el.setStorageUnit(a.getValue());
-														}
-						}
+                  {
+                        Attribute a = (Attribute) i.next();
+                        if (a.getName().equalsIgnoreCase("description"))
+                              {
+                                    el.setDescription(a.getValue());
+                              } else if (a.getName().equalsIgnoreCase("unit"))
+                                    {
+                                          el.setUnit(a.getValue());
+                                    } else if (a.getName().equalsIgnoreCase("storageUnit"))
+                                          {
+                                                el.setStorageUnit(a.getValue());
+                                          }
+                  }
         el.setValue((new Double(element.getText())).doubleValue());
         List l = job.getVolumeResource();
         if (l == null)
@@ -999,20 +1010,20 @@ public class UsageRecordLoader
     }
 
     public static void AddConsumableResource(JobUsageRecord job, Element element)
-				throws Exception
+            throws Exception
     {
         ResourceElement el = new ResourceElement();
         for (Iterator i = element.attributeIterator(); i.hasNext();)
-						{
-								Attribute a = (Attribute) i.next();
-								if (a.getName().equalsIgnoreCase("description"))
-										{
-												el.setDescription(a.getValue());
-										} else if (a.getName().equalsIgnoreCase("unit"))
-												{
-														el.setUnit(a.getValue());
-												}
-						}
+                  {
+                        Attribute a = (Attribute) i.next();
+                        if (a.getName().equalsIgnoreCase("description"))
+                              {
+                                    el.setDescription(a.getValue());
+                              } else if (a.getName().equalsIgnoreCase("unit"))
+                                    {
+                                          el.setUnit(a.getValue());
+                                    }
+                  }
         el.setValue((new Double(element.getText())).doubleValue());
         List l = job.getConsumableResource();
         if (l == null)
@@ -1022,24 +1033,24 @@ public class UsageRecordLoader
     }
 
     public static void AddResource(JobUsageRecord job, Element element)
-				throws Exception
+            throws Exception
     {
         StringElement el = new StringElement();
         for (Iterator i = element.attributeIterator(); i.hasNext();)
-						{
-								Attribute a = (Attribute) i.next();
-								if (a.getName().equals("description"))
-										{
-												el.setDescription(a.getValue());
-												if (a.getValue().equalsIgnoreCase("GlobalUsername")) {
-														UserIdentity id = job.getUserIdentity();
-														if (id == null) id = new UserIdentity();
-														id.setGlobalUsername(element.getText());
-														job.setUserIdentity(id);
-														return;
-												}
-										}
-						}
+                  {
+                        Attribute a = (Attribute) i.next();
+                        if (a.getName().equals("description"))
+                              {
+                                    el.setDescription(a.getValue());
+                                    if (a.getValue().equalsIgnoreCase("GlobalUsername")) {
+                                          UserIdentity id = job.getUserIdentity();
+                                          if (id == null) id = new UserIdentity();
+                                          id.setGlobalUsername(element.getText());
+                                          job.setUserIdentity(id);
+                                          return;
+                                    }
+                              }
+                  }
         el.setValue(element.getText());
         List l = job.getResource();
         if (l == null) l = new java.util.LinkedList();
@@ -1048,8 +1059,8 @@ public class UsageRecordLoader
     }
 
     public static void SetProbeName(JobUsageRecord job, Element element) throws
-				Exception {
-				StringElement el = job.getProbeName();
+            Exception {
+        StringElement el = job.getProbeName();
         if (el == null) {
             el = new StringElement();
         }
