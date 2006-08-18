@@ -55,6 +55,10 @@ public class CETable extends HttpServlet
 
     public void init(ServletConfig config) throws ServletException 
 		{
+    }
+    
+		public void openConnection()
+		{
 				try
 						{
 								Properties p = Configuration.getProperties();
@@ -74,12 +78,24 @@ public class CETable extends HttpServlet
 				catch (Exception e)
 						{
 								e.printStackTrace();
-								return;
 						}
-    }
-    
+		}
+
+		public void closeConnection()
+		{
+				try
+						{
+								connection.close();
+						}
+				catch (Exception e)
+						{
+								e.printStackTrace();
+						}
+		}
+
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
 		{
+				openConnection();
 				this.request = request;
 				this.response = response;
 				table = new Hashtable();
@@ -93,14 +109,17 @@ public class CETable extends HttpServlet
 				writer.write(html);
 				writer.flush();
 				writer.close();
+				closeConnection();
 		}
 
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
 		{
+				openConnection();
 				this.request = request;
 				this.response = response;
 				table = (Hashtable) request.getSession().getAttribute("table");
 				update();
+				closeConnection();
 				response.sendRedirect("cetable.html");
 		}
 

@@ -51,16 +51,21 @@ public class SecurityTable extends HttpServlet
 		String comma = ",";
 		String cr = "\n";
 		Hashtable table = new Hashtable();
+		Properties props;
 
     public void init(ServletConfig config) throws ServletException 
 		{
+    }
+    
+		public void openConnection()
+		{
 				try
 						{
-								Properties p = Configuration.getProperties();
-								driver = p.getProperty("service.mysql.driver");
-								url = p.getProperty("service.mysql.url");
-								user = p.getProperty("service.mysql.user");
-								password = p.getProperty("service.mysql.password");
+								props = Configuration.getProperties();
+								driver = props.getProperty("service.mysql.driver");
+								url = props.getProperty("service.mysql.url");
+								user = props.getProperty("service.mysql.user");
+								password = props.getProperty("service.mysql.password");
 						}
 				catch (Exception ignore)
 						{
@@ -73,12 +78,24 @@ public class SecurityTable extends HttpServlet
 				catch (Exception e)
 						{
 								e.printStackTrace();
-								return;
 						}
-    }
-    
+		}
+
+		public void closeConnection()
+		{
+				try
+						{
+								connection.close();
+						}
+				catch (Exception e)
+						{
+								e.printStackTrace();
+						}
+		}
+
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
 		{
+				openConnection();
 				System.out.println("SecurityTable: doGet");
 				if (request.getParameter("action") != null)
 						doPost(request,response);
@@ -96,15 +113,18 @@ public class SecurityTable extends HttpServlet
 				writer.write(html);
 				writer.flush();
 				writer.close();
+				closeConnection();
 		}
 
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
 		{
+				openConnection();
 				System.out.println("SecurityTable: doPost");
 				this.request = request;
 				this.response = response;
 				table = (Hashtable) request.getSession().getAttribute("table");
 				update();
+				closeConnection();
 				response.sendRedirect("securitytable.html");
 		}
 
