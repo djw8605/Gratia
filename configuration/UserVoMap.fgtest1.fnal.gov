@@ -214,6 +214,10 @@ fnal_thy theory
 farms fermilab-test
 #---- accounts for vo: usatlas ----#
 usatlas1 usatlas
+usatlas2 usatlas
+usatlas3 usatlas
+usatlas4 usatlas
+usatlas5 usatlas
 #---- accounts for vo: LIGO ----#
 ligo LIGO
 #---- accounts for vo: GLOW ----#
@@ -227,3 +231,4 @@ grow grow
 #---- accounts for vo: geant4 ----#
 geant4 geant4
 
+fgtest fermilab-test
