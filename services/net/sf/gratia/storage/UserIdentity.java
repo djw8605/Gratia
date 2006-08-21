@@ -76,11 +76,11 @@ public class UserIdentity {
     }
     public String asXml() {
         String output = "<UserIdentity>\n";
-		if (GlobalUsername != null) output = output + "<GlobalUsername>" + GlobalUsername + "</GlobalUsername>\n";
-		if (LocalUserId != null) output = output + "<LocalUserId>" + LocalUserId + "</LocalUserId>\n";
-		if (KeyInfo != null) output = output + KeyInfo.asXML();
-		if (VOName != null) output = output + "<VOName>" + VOName + "</VOName>\n";
-		if (CommonName != null) output = output + "<CommonName>" + CommonName + "</CommonName>\n";
+		if (GlobalUsername != null) output = output + "\t<GlobalUsername>" + GlobalUsername + "</GlobalUsername>\n";
+		if (LocalUserId != null) output = output + "\t<LocalUserId>" + LocalUserId + "</LocalUserId>\n";
+		if (KeyInfo != null) output = output + "\t" + KeyInfo.asXML();
+		if (VOName != null) output = output + "\t<VOName>" + VOName + "</VOName>\n";
+		if (CommonName != null) output = output + "\t<CommonName>" + CommonName + "</CommonName>\n";
         output = output + "</UserIdentity>\n";
         return output;
     }
