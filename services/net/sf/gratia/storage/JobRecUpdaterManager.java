@@ -82,7 +82,7 @@ public class JobRecUpdaterManager implements JobUsageRecordUpdater {
       public void Update(JobUsageRecord current)
       {
          if (current.getUserIdentity() == null) {
-            return;
+            current.setUserIdentity(new UserIdentity());
          }
          boolean populatedVOFromKeyInfoContent = false;
          boolean populatedUserNameFromKeyInfoContent = false;
