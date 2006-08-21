@@ -1,8 +1,6 @@
 
 PLATFORM := $(shell uname)
 
-condor_probe_version=v0.9
-psacct_probe_version=v0.9
 gratia_reporting_version=v0.9
 gratia_services_version=v0.9
 
@@ -220,7 +218,7 @@ report-configuration:
 	jar -cvf ../target/gratia-report-configuration.war -C war .
 	rm -f -r war
 
-release: services servlets soap reporting reports report-configuration administration security condor_probe_tar
+release: services servlets soap reporting reports report-configuration administration security
 	rm -f -r tarball
 	#
 	# create reporting tarball
@@ -262,7 +260,7 @@ release: services servlets soap reporting reports report-configuration administr
 	tar $(tarowner) -cvf ../target/gratia_services_$(gratia_services_version).tar -C tarball .
 	rm -f -r tarball
 
-local: services servlets soap reporting reports report-configuration administration security condor_probe_tar
+local: services servlets soap reporting reports report-configuration administration security
 	rm -f -r tarball
 	#
 	# create reporting tarball
@@ -314,53 +312,3 @@ define defaultdirs
 	mkdir -p gratia/var/tmp/; \
 	chmod -R og+rw gratia/var/; 
 endef
-
-condordirs:
-	(mkdir -p $(tarballdir); cd $(tarballdir); mkdir -p condor-tar; cd condor-tar; \
-	 $(defaultdirs) \
-	 mkdir -p gratia/condor-probe/ ; \
-	 mkdir -p gratia/condor-probe/gram_mods/ \
-        )
-
-psacctdirs: 
-	(mkdir -p $(tarballdir); cd $(tarballdir); mkdir -p psacct-tar; cd psacct-tar; \
-	 $(defaultdirs) \
-	 mkdir -p gratia/psacct/ \
-        )
-
-condorfiles: condordirs
-	cp $(root)/condor-probe/Clarens.py $(tarballdir)/condor-tar/gratia/condor-probe
-	cp $(root)/condor-probe/Gratia.py $(tarballdir)/condor-tar/gratia/condor-probe
-	chmod ogu+x $(root)/condor-probe/condor_meter.pl $(root)/condor-probe/condor_meter.cron.sh 
-	cp $(root)/condor-probe/condor_meter.cron.sh $(tarballdir)/condor-tar/gratia/condor-probe
-	cp $(root)/condor-probe/condor_meter.pl $(tarballdir)/condor-tar/gratia/condor-probe
-	cp $(root)/condor-probe/ProbeConfigTemplate $(tarballdir)/condor-tar/gratia/condor-probe
-	cp $(root)/condor-probe/README $(tarballdir)/condor-tar/gratia/condor-probe
-	cp $(root)/condor-probe/samplemeter.pl $(tarballdir)/condor-tar/gratia/condor-probe
-	cp $(root)/condor-probe/samplemeter.py $(tarballdir)/condor-tar/gratia/condor-probe
-	cp $(root)/condor-probe/gram_mods/condor.pm.diff $(tarballdir)/condor-tar/gratia/condor-probe/gram_mods
-	cp $(root)/condor-probe/gram_mods/managedfork.pm.diff $(tarballdir)/condor-tar/gratia/condor-probe/gram_mods
-
-psacctfiles: psacctdirs
-	chmod uog+x $(root)/psacct/gratia-psacct 
-	chmod u+x $(root)/psacct/*sh $(root)/psacct/PSACCTProbe.py $(root)/psacct/facct-catchup
-	cp $(root)/psacct/psacct_probe.cron.sh $(tarballdir)/psacct-tar/gratia/psacct
-	cp $(root)/psacct/facct-turnoff.sh $(tarballdir)/psacct-tar/gratia/psacct
-	cp $(root)/psacct/PSACCTProbe.py $(tarballdir)/psacct-tar/gratia/psacct
-	cp $(root)/psacct/PSACCTProbeLib.py $(tarballdir)/psacct-tar/gratia/psacct
-	cp $(root)/psacct/facct-catchup $(tarballdir)/psacct-tar/gratia/psacct
-	cp $(root)/psacct/gratia-psacct $(tarballdir)/psacct-tar/gratia/psacct
-	cp $(root)/condor-probe/ProbeConfigTemplate $(tarballdir)/psacct-tar/gratia/psacct
-	cp $(root)/condor-probe/Gratia.py $(tarballdir)/psacct-tar/gratia/psacct
-
-$(root)/target/gratia_condor_probe_$(condor_probe_version).tar: condorfiles
-	tar $(tarowner) -cvf $(root)/target/gratia_probe_$(condor_probe_version).tar -C tarball/condor-tar .
-	#rm -f -r tarball
-
-$(root)/target/gratia_psacct_probe_$(psacct_probe_version).tar: psacctfiles
-	tar $(tarowner) -cvf $(root)/target/psacct_probe_$(psacct_probe_version).tar -C tarball/psacct-tar .
-	#rm -f -r tarball
-
-condor_probe_tar: $(root)/target/gratia_condor_probe_$(condor_probe_version).tar
-
-psacct_probe_tar: $(root)/target/gratia_psacct_probe_$(psacct_probe_version).tar

@@ -3,8 +3,8 @@
 # condor_meter.cron.sh - Shell script used with cron to parse Condor log 
 #   files for OSG accounting data collection.
 #      By Ken Schumacher <kschu@fnal.gov>  Began 5 April 2006
-# $Id: condor_meter.cron.sh,v 1.4 2006-07-20 14:41:48 pcanal Exp $
-# Full Path: $Source: /var/tmp/move/gratia/condor-probe/condor_meter.cron.sh,v $
+# $Id: condor_meter.cron.sh,v 1.1 2006-08-21 21:10:03 greenc Exp $
+# Full Path: $Source: /var/tmp/move/gratia/probe/condor/condor_meter.cron.sh,v $
 
 Logger='/usr/bin/logger -s -t condor_meter'
 
@@ -59,7 +59,7 @@ if [ ${NCMeter} -eq 0 ]; then
   fi
   
   # We need to locate these files and they must be readable
-  for Needed_File in Gratia.py ProbeConfig
+  for Needed_File in ProbeConfig
   do
     if [ ! -f ${Needed_File} ]; then
       ${Logger} \
@@ -74,6 +74,19 @@ if [ ${NCMeter} -eq 0 ]; then
     ${Logger} "There is no ${CondorLog_Dir} directory"
     exit -4
   fi
+
+  
+  pp_dir=$(cd "$Meter_BinDir/../common"; pwd)
+  if test -n "$PYTHONPATH" ; then
+    if echo "$PYTHONPATH" | grep -e ':$' >/dev/null 2>&1; then
+      PYTHONPATH="${PYTHONPATH}${pp_dir}:"
+    else
+      PYTHONPATH="${PYTHONPATH}:${pp_dir}"
+    fi
+  else
+    PYTHONPATH="${pp_dir}"
+  fi
+  export PYTHONPATH
     
   #echo "Begin processing directory ${CondorLog_Dir}"
   # The '-d' option tells the meter to delete log files after they are
@@ -99,6 +112,9 @@ exit 0
 #==================================================================
 # CVS Log
 # $Log: not supported by cvs2svn $
+# Revision 1.4  2006/07/20 14:41:48  pcanal
+# permissions
+#
 # Revision 1.3  2006/07/20 14:38:53  pcanal
 # change permisssion
 #
