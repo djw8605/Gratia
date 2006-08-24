@@ -1048,6 +1048,12 @@ public class UsageRecordLoader
                                           id.setGlobalUsername(element.getText());
                                           job.setUserIdentity(id);
                                           return;
+                                    } else if (a.getValue().equalsIgnoreCase("UserVOName")) {
+                                          UserIdentity id = job.getUserIdentity();
+                                          if (id == null) id = new UserIdentity();
+                                          id.setVOName(element.getText().trim());
+                                          job.setUserIdentity(id);
+                                          return;
                                     }
                               }
                   }
