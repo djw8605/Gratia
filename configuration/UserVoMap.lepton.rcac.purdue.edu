@@ -3,7 +3,7 @@
 # Next 2 lines with VO names, same order, all lowercase, with case (lines starting with #voi, #VOc)
 #voi cdf fermilab fmri gadu grase ivdgl mis sdss star usatlas uscms ligo dzero dosar des glow grow gridex nanohub geant4 i2u2 mariachi osg
 #VOc CDF FermiLab fMRI GADU GRASE iVDgL MIS SDSS STAR ATLAS CMS LIGO DZERO DOSAR DES GLOW GROW GRIDEX NANOHUB GEANT4 I2U2 MARIACHI OSG
-#cdf cdf
+osgcdf cdf
 #fermilab fermilab
 #fmri fmri
 #gadu gadu
@@ -95,4 +95,7 @@ gridex gridex
 #geant4 geant4
 #i2u2 i2u2
 #mariachi mariachi
-#osg osg
+osg osg
+dzero dzero
+osgglow glow
+nano0 nanohub
