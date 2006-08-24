@@ -33,7 +33,7 @@ public class DateElement implements XmlElement {
         javax.xml.datatype.DatatypeFactory fac = javax.xml.datatype.
                                                  DatatypeFactory.
                                                  newInstance();
-        XMLGregorianCalendar cal = fac.newXMLGregorianCalendar(str);
+        XMLGregorianCalendar cal = fac.newXMLGregorianCalendar(str.trim());
         GregorianCalendar jcal = cal.toGregorianCalendar();
         this.Value = new Date( jcal.getTimeInMillis() );
     }

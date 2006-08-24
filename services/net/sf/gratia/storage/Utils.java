@@ -37,7 +37,8 @@ public class Utils {
                                                  DatatypeFactory.
                                                  newInstance();
         if (str.compareTo("P")==0) return 0;
-        Duration du = fac.newDurationDayTime(str);
+        
+        Duration du = fac.newDurationDayTime(str.trim());
         return du.getTimeInMillis(Calendar.getInstance()) / 1000.0;
     }
 
