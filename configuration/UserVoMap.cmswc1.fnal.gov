@@ -313,9 +313,9 @@ cmsphedex CMS_OSG
 cmssoft CMS_OSG
 cmst2admin CMS_OSG
 cmsprod CMS_OSG
-cmsprd CMS_OSG
+cmsprd CMS_LCG
 dteamprd dteam
-cmsp CMS_OSGrd
+cmsp CMS_OSG
 dteam001 dteam
 dteam002 dteam
 dteam003 dteam
