@@ -1,14 +1,5 @@
 package net.sf.gratia.services;
 
-import javax.jms.MessageListener;
-import javax.jms.TextMessage;
-import javax.jms.Message;
-import javax.jms.QueueConnectionFactory;
-import javax.jms.QueueConnection;
-import javax.jms.QueueSession;
-import javax.jms.QueueReceiver;
-import javax.jms.Queue;
-
 import java.util.ArrayList;
 
 import java.util.Iterator;
@@ -26,24 +17,20 @@ import org.dom4j.io.*;
 import org.hibernate.*;
 import org.hibernate.cfg.*;
 
+import java.sql.*;
+
 public class ListenerThread extends Thread
 {
 		String ident = null;
-		
-		//
-		// jms things
-		//
-
-		QueueConnectionFactory qcf;
-		Queue q;
+		String directory = null;
 
 		//
 		// database parameters
 		//
 
-		org.hibernate.cfg.Configuration cfg;
+		org.hibernate.cfg.Configuration hibernateConfiguration;
 		SessionFactory factory;
-		Session session;
+		org.hibernate.Session session;
 		Transaction tx;
 		JobRecUpdaterManager updater = new JobRecUpdaterManager();
 		int itotal = 0;
@@ -53,14 +40,28 @@ public class ListenerThread extends Thread
 		XP xp = new XP();
 
 		StatusUpdater statusUpdater = new StatusUpdater();
+		NewProbeUpdate newProbeUpdate = new NewProbeUpdate();
 
-		public ListenerThread(String ident,SessionFactory factory,QueueConnectionFactory qcf,Queue q)
+		volatile boolean databaseDown = false;
+
+		public ListenerThread(String ident,String directory,org.hibernate.cfg.Configuration hibernateConfiguration,SessionFactory factory)
 		{
 				this.ident = ident;
+				this.directory = directory;
+				this.hibernateConfiguration = hibernateConfiguration;
 				this.factory = factory;
-				this.qcf = qcf;
-				this.q = q;
 				loadProperties();
+				try
+						{
+								String url = p.getProperty("service.jms.url");
+								System.out.println("");
+								System.out.println("ListenerThread: " + ident + ":" + directory + ": Started");
+								System.out.println("");
+						}
+				catch (Exception e)
+						{
+								e.printStackTrace();
+						}
 		}
 
 		public void loadProperties()
@@ -71,164 +72,264 @@ public class ListenerThread extends Thread
 						duplicateCheck = true;
 				else
 						duplicateCheck = false;
-				Logging.log("CollectorMsgListener: Duplicate Check: " + duplicateCheck);
+				Logging.log("ListenerThread: " + ident + ":Duplicate Check: " + duplicateCheck);
 		}
 
-    public boolean gotDuplicate(JobIdentity jobIdentity, DateElement startTimeElement, Session session)
+    public boolean gotDuplicate(JobUsageRecord record) throws Exception
     {
 				boolean status = false;
     	
 				if (duplicateCheck == false)
 						return false;
 
-				Logging.log("jobIdentity; " + jobIdentity);
-				Logging.log("startTimeElement: " + startTimeElement);
+				JobIdentity jobIdentity = record.getJobIdentity();
+				DateElement startTimeElement = record.getStartTime();
+				
 				if ((jobIdentity == null) || (startTimeElement == null))
 						{
-								Logging.log("Invalid Record:" + "\n" + jobIdentity + "\n");
+								System.out.println("ListenerThread: " + ident + ":Invalid Record:" + "\n" + jobIdentity + "\n");
 								return false;
 						}
-				Logging.log("globalJobId: " + jobIdentity.getGlobalJobId());
-				Logging.log("startTimElement.value: " + startTimeElement.getValue());
 				if ((jobIdentity.getGlobalJobId() == null) || (startTimeElement.getValue() == null))
 						{
-								Logging.log("Invalid Record: " + "\n" + jobIdentity + "\n");
+								System.out.println("ListenerThread: " + ident + ":Invalid Record:" + "\n" + jobIdentity + "\n");
 								return false;
 						}
 
-				String globalJobId = jobIdentity.getGlobalJobId();
+				String globalJobid = jobIdentity.getGlobalJobId();
+				String localJobid = jobIdentity.getLocalJobId();
+				String host = record.getHost().getValue();
+
 				Date startTime = startTimeElement.getValue();
 				SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 					
 				String sql = "SELECT dbid " + 
 						"FROM JobUsageRecord " +
-						"WHERE GlobalJobId = '" + globalJobId + "' " +
-						"AND StartTime = '" + format.format(startTime) + "'";
+						"WHERE GlobalJobId = '" + globalJobid + "' " +
+						" AND StartTime = '" + format.format(startTime) + "'" +
+						" AND LocalJobid = '" + localJobid + "'" +
+						" AND Host = '" + host + "'";
 	    	
+				org.hibernate.Session session2 = factory.openSession();
+				
 				try
 						{
-								if(session.createSQLQuery(sql).list().size() > 0)
+								if(session2.createSQLQuery(sql).list().size() > 0)
 										status = true;
 						}
 				catch (Exception e)
 						{
-								e.printStackTrace();
+								// System.out.println("ListenerThread: " + ident + ":Error During Dup Check");
+								throw e;
 						}
+				finally
+						{
+								try
+										{
+												session2.close();
+										}
+								catch (Exception ignore)
+										{
+										}
+						}
+
 				return status;
     }
 
-		public void run()
-		{
-				String rawxml = null;
-				String extraxml = null;
-				QueueConnection qc = null;
-				QueueSession qs = null;
-				QueueReceiver qrec = null;
-				Message msg;
-				NewProbeUpdate newProbeUpdate = new NewProbeUpdate();
+    public boolean communicationsError(Exception exception)
+    {
+				String source = exception.toString();
+				if (source.length() > 255)
+						source = source.substring(0,255);
 
-				Logging.info("ListenerThread: Starting JMS: " + ident);
+				System.out.println("ListenerThread: " + ident + ":Communications Error Test:" + source);
+
+				if (source.indexOf("hibernate") > 0)
+						return true;
+				if (source.indexOf("StatusUpdater") > 0)
+						return true;
+
 				try
 						{
-								qc = qcf.createQueueConnection();
-								qs = qc.createQueueSession(false,javax.jms.Session.AUTO_ACKNOWLEDGE);
-								qrec = qs.createReceiver(q);
-								qc.start();
-								Logging.info("ListenerThread: JMS Started: " + ident);
+								Thread.sleep(30 * 1000);
+						}
+				catch (Exception ignore)
+						{
+						}
+				try
+						{
+								String driver = p.getProperty("service.mysql.driver");
+								String url = p.getProperty("service.mysql.url");
+								String user = p.getProperty("service.mysql.user");
+								String password = p.getProperty("service.mysql.password");
+								Class.forName(driver);
+								java.sql.Connection connection = null;
+								connection = DriverManager.getConnection(url,user,password);
+								connection.close();
+								System.out.println("ListenerThread: " + ident + ":No Communications Error");
+								return false;
 						}
 				catch (Exception e)
 						{
-								Logging.warning("ListenerThread: Error Starting JMS: " + e);
-								Logging.warning(xp.parseException(e));
-								Logging.warning("ListenerThread: Exiting");
-								return;
+								System.out.println("ListenerThread: " + ident + ":Detected Communications Error");
+								return true;
 						}
+		}
 
-				Logging.info("ListenerThread: Running: " + ident);
-
-				while(true)
+		public void run()
+		{
+				while (true)
 						{
-								try 
+								if (databaseDown)
 										{
-												try
-														{
-																msg = qrec.receive();
-														}
-												catch (Exception shutdown)
-														{
-																Logging.info("ListenerThread: Exiting: " + ident);
-																return;
-														}
-												Logging.info("ListenerThread: Received Message: " + ident);
-												session = factory.openSession();	
-												tx = session.beginTransaction();
-												if (msg instanceof TextMessage) 
-														{
-																String xml = ((TextMessage) msg).getText();
-																rawxml = msg.getStringProperty("rawxml");
-																extraxml = msg.getStringProperty("extraxml");
-																String dbid = msg.getStringProperty("dbid");
-
-																// Logging.debug("ListenerThread: dbid: " + "\n" + dbid + "\n");
-																// Logging.debug("ListenerThread: xml: " + "\n" + xml + "\n");
-																// Logging.debug("ListenerThread: rawxml: " + "\n" + rawxml + "\n");
-
-																ArrayList records = convert(xml);
-												
-																for(int i=0; i < records.size(); i++)
-																		{
-																				JobUsageRecord current = (JobUsageRecord) records.get(i);
-																				statusUpdater.update(current,rawxml);
-																				if (gotDuplicate(current.getJobIdentity(), current.getStartTime(), session) == true)
-																						{
-																								Logging.warning("Duplicate: " + current);
-																								saveDuplicate(current,extraxml);
-																						}
-																				else
-																						{
-																								newProbeUpdate.check(current);
-																								updater.Update(current);
-																								if (rawxml != null)
-																										current.setRawXml(rawxml);
-																								if (extraxml != null)
-																										current.setExtraXml(extraxml);
-																								try
-																										{
-																												session.save(current);
-																										}
-																								catch (Exception duplicate)
-																										{
-																												saveDuplicate(current,extraxml);
-																										}
-																								itotal++;
-																						}
-																		}
-																Logging.log("Total Records: " + itotal);
-														}
+												restartDatabase();
 										}
-								catch (Exception e) 
+								loop();
+								try
 										{
-												e.printStackTrace();
+												Thread.sleep(30 * 1000);
 										}
-								finally
+								catch (Exception ignore)
 										{
-												try
-														{
-																tx.commit();
-														}
-												catch (Exception ignore)
-														{
-														}
-												try
-														{
-																session.close();
-														}
-												catch (Exception ignore)
-														{
-														}
 										}
 						}
 		}
+				
+		public void restartDatabase()
+		{
+				try
+						{
+								factory = hibernateConfiguration.buildSessionFactory();
+								session = factory.openSession();
+								databaseDown = false;
+								statusUpdater = new StatusUpdater();
+								newProbeUpdate = new NewProbeUpdate();
+								System.out.println("ListenerThread: " + ident + ":Restarting");
+						}
+				catch (Exception ignore)
+						{
+						}
+				try
+						{
+								Thread.sleep(30 * 1000);
+						}
+				catch (Exception ignore)
+						{
+						}
+		}
+
+		public void shutdown()
+		{
+				try
+						{
+								try
+										{
+												session.close();
+										}
+								catch (Exception ignore1)
+										{
+										}
+								factory.close();
+								databaseDown = true;
+								System.out.println("ListenerThread: " + ident + ":Shutting Down");
+						}
+				catch (Exception ignore2)
+						{
+						}
+				try
+						{
+								Thread.sleep(30 * 1000);
+						}
+				catch (Exception ignore)
+						{
+						}
+		}
+
+		public void loop()
+		{
+				if (databaseDown)
+						return;
+
+				String files[] = xp.getFileList(directory);
+				
+				if (files.length == 0)
+						return;
+
+				for (int i = 0; i < files.length; i++)
+						{
+								String file = files[i];
+								String xml = xp.get(files[i]);
+								JobUsageRecord current = null;
+
+								System.out.println("ListenerThread: " + ident + ":Processing: " + file);
+
+								try
+										{
+												
+												ArrayList records = convert(xml);
+												
+												for(int j = 0; j < records.size(); j++)
+														{
+																// System.out.println("ListenerThread: " + ident + ":Before Begin Transaction");
+																session = factory.openSession();
+																tx = session.beginTransaction();
+																// System.out.println("ListenerThread: " + ident + ":After Begin Transaction");
+
+																current = (JobUsageRecord) records.get(j);
+																statusUpdater.update(current,xml);
+
+																// System.out.println("ListenerThread: " + ident + ":Before Duplicate Check");
+																boolean gotdup = gotDuplicate(current);
+																// System.out.println("ListenerThread: " + ident + ":After Duplicate Check");
+
+																if (gotdup)
+																		{
+																				// System.out.println("ListenerThread: " + ident + ":Before Save Duplicate");
+																				saveDuplicate(current);
+																				// System.out.println("ListenerThread: " + ident + ":After Save Duplicate");
+																		}
+																else
+																		{
+																				// System.out.println("ListenerThread: " + ident + ":Before New Probe Update");
+																				newProbeUpdate.check(current);
+																				// System.out.println("ListenerThread: " + ident + ":After New Probe Update");
+																				updater.Update(current);
+																				if (xml != null)
+																						current.setRawXml(xml);
+																				// System.out.println("ListenerThread: " + ident + ":Before Hibernate Save");
+																				session.save(current);
+																				// System.out.println("ListenerThread: " + ident + ":After Hibernate Save");
+																		}
+																// System.out.println("ListenerThread: " + ident + ":Before Transaction Commit");
+																tx.commit();
+																session.close();
+														}
+										}
+								catch (Exception exception)
+										{
+												if (communicationsError(exception))
+														{
+																shutdown();
+																return;
+														}
+												System.out.println("");
+												System.out.println("ListenerThread: " + ident + ":Error In Process: " + exception);
+												System.out.println("ListenerThread: " + ident + ":Current: " + current);
+										}
+								// System.out.println("ListenerThread: " + ident + ":After Transaction Commit");
+								try
+										{
+												File temp = new File(file);
+												temp.delete();
+										}
+								catch (Exception ignore)
+										{
+										}
+								itotal++;
+								System.out.println("ListenerThread: " + ident + ":Total Records: " + itotal);
+						}
+		}
+
 
 		public ArrayList convert(String xml) throws Exception 
 		{
@@ -238,6 +339,7 @@ public class ListenerThread extends Thread
 				Element eroot = null;
 
 				// Read the XML into a document for parsing
+
 				try
 						{
 								doc = saxReader.read(new StringReader(xml));  
@@ -312,16 +414,19 @@ public class ListenerThread extends Thread
 				return usageRecords;
 		}   
 
-		public void saveDuplicate(JobUsageRecord current,String extraxml)
+		public void saveDuplicate(JobUsageRecord current)
 		{
 				DupRecord record = new DupRecord();
 
 				record.seteventdate(new java.util.Date());
 				record.setrawxml(current.asXML());
-				record.setextraxml(extraxml);
 				try
 						{
-								session.save(record);
+								org.hibernate.Session session2 = factory.openSession();
+								Transaction tx2 = session2.beginTransaction();
+								session2.save(record);
+								tx2.commit();
+								session2.close();
 						}
 				catch (Exception e)
 						{

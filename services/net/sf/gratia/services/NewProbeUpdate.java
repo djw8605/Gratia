@@ -13,30 +13,42 @@ public class NewProbeUpdate
 		ResultSet resultSet = null;
 		XP xp = new XP();
 
+		String driver = null;
+		String url = null;
+		String user = null;
+		String password = null;
+
 		public NewProbeUpdate()
 		{
 				p = Configuration.getProperties();
 
-				String driver = p.getProperty("service.mysql.driver");
-				String url = p.getProperty("service.mysql.url");
-				String user = p.getProperty("service.mysql.user");
-				String password = p.getProperty("service.mysql.password");
+				driver = p.getProperty("service.mysql.driver");
+				url = p.getProperty("service.mysql.url");
+				user = p.getProperty("service.mysql.user");
+				password = p.getProperty("service.mysql.password");
+				openConnection();
+		}
 
+		public void openConnection()
+		{
 				try
 						{
 								Class.forName(driver);
+								connection = null;
 								connection = (java.sql.Connection) DriverManager.getConnection(url,user,password);
 						}
 				catch (Exception e)
 						{
-								Logging.warning("NewProbeUpdate: Error During init: " + e);
-								Logging.warning(xp.parseException(e));
-								return;
 						}
 		}
 
-		public void check(JobUsageRecord record)
+		public void check(JobUsageRecord record) throws Exception
 		{
+				if (connection == null)
+						openConnection();
+				if (connection == null)
+						throw new Exception("NewProbeUpdate: No Connection");
+
 				StringElement site = record.getSiteName();
 				StringElement probe = record.getProbeName();
 				String sitename = "Unknown";
@@ -70,6 +82,7 @@ public class NewProbeUpdate
 								//
 								// otherwise get facilityid for sitename
 								//
+
 								command = "select facility_id from CETable where facility_name = " + dq + sitename + dq;
 								statement = connection.prepareStatement(command);
 								resultSet  = statement.executeQuery(command);
@@ -110,9 +123,12 @@ public class NewProbeUpdate
 						}
 				catch (Exception e)
 						{
-								Logging.warning("NewProbeUpdate: Error During init: " + e);
-								Logging.warning(xp.parseException(e));
+								//
+								// communications error
+								//
+								connection = null;
+								throw new Exception("NewProbeUpdate: No Connection");
 						}
-
 		}
+				
 }

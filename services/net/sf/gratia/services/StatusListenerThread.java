@@ -1,14 +1,5 @@
 package net.sf.gratia.services;
 
-import javax.jms.MessageListener;
-import javax.jms.TextMessage;
-import javax.jms.Message;
-import javax.jms.QueueConnectionFactory;
-import javax.jms.QueueConnection;
-import javax.jms.QueueSession;
-import javax.jms.QueueReceiver;
-import javax.jms.Queue;
-
 import java.util.ArrayList;
 
 import java.util.Iterator;
@@ -25,12 +16,9 @@ import net.sf.gratia.storage.*;
 
 public class StatusListenerThread extends Thread
 {
-		//
-		// jms things
-		//
 
-		QueueConnectionFactory qcf;
-		Queue statusQueue;
+		java.sql.Connection sqlconnection;
+		Statement statement;
 
 		//
 		// database parameters
@@ -39,47 +27,14 @@ public class StatusListenerThread extends Thread
 		Properties p;
 		XP xp = new XP();
 
-		public StatusListenerThread(QueueConnectionFactory qcf,Queue q)
+		public StatusListenerThread()
 		{
-				this.qcf = qcf;
-				this.statusQueue = q;
 				p = Configuration.getProperties();
 		}
 
 
-
 		public void run()
 		{
-				QueueConnection qc = null;
-				QueueSession qs = null;
-				QueueReceiver qrec = null;
-				Message msg;
-
-				Connection connection;
-				Statement statement;
-
-				String dq = "\"";
-				String comma = ",";
-				SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
-				Logging.info("StatusListenerThread: Starting JMS");
-				try
-						{
-								qc = qcf.createQueueConnection();
-								qs = qc.createQueueSession(false,javax.jms.Session.AUTO_ACKNOWLEDGE);
-								qrec = qs.createReceiver(statusQueue);
-								qc.start();
-								Logging.info("StatusListenerThread: JMS Started");
-						}
-				catch (Exception e)
-						{
-								Logging.warning("StatusListenerThread: Error Starting JMS: " + e);
-								Logging.warning(xp.parseException(e));
-								Logging.warning("StatusListenerThread: Exiting");
-								return;
-						}
-
-				Logging.info("StatusListenerThread: Opening Database");
 				try
 						{
 								String driver = p.getProperty("service.mysql.driver");
@@ -87,7 +42,7 @@ public class StatusListenerThread extends Thread
 								String user = p.getProperty("service.mysql.user");
 								String password = p.getProperty("service.mysql.password");
 								Class.forName(driver);
-								connection = DriverManager.getConnection(url,user,password);
+								sqlconnection = DriverManager.getConnection(url,user,password);
 								Logging.info("StatusListenerThread: Database Opened");
 						}
 				catch (Exception e)
@@ -98,68 +53,76 @@ public class StatusListenerThread extends Thread
 								return;
 						}
 
-				Logging.info("StatusListenerThread: Running");
-
-				while(true)
+        Object lock = new Object();
+				
+				try
 						{
-								try
+								synchronized (lock) 
 										{
-												msg = qrec.receive();
-										}
-								catch (Exception shutdown)
-										{
-												Logging.info("StatusListenerThread: Exiting");
-												return;
-										}
-								Logging.info("StatusListenerThread: Received Message");
-
-								String input = "";
-
-								try
-										{
-												input = msg.getStringProperty("xml");
-										}
-								catch (Exception e)
-										{
-												Logging.warning("StatusListenerThread: Error: " + e);
-												Logging.warning(xp.parseException(e));
-												continue;
-										}
-
-								String tokens[] = split(input,":");
-								Logging.info("StatusListerThread: Received: " + input);
-
-								String probename = tokens[0];
-								String status = tokens[1];
-
-								try
-										{
-												statement = connection.createStatement();
-												String command = "update CEProbes set" +
-														" currenttime = timestamp(" + dq + format.format(new java.util.Date()) + dq + ")" + comma +
-														" status = " + dq + status + dq +
-														" where probename = " + dq + probename + dq;
-												statement.execute(command);
-												statement.close();
-												if (tokens.length == 3)
-														if (tokens[1].equals("lost"))
-																{
-																		command = "insert into CEProbeStatus (currenttime,probename,probestatus,jobs,lostjobs) values(" +
-																				"timestamp(" + dq + format.format(new java.util.Date()) + dq + ")" + comma +
-																				dq + probename + dq + comma +
-																				dq + "lost" + dq + comma +
-																				"0" + comma + tokens[2] + ")";
-																		statement = connection.prepareStatement(command);
-																		statement.execute(command);
-																		statement.close();
-																}
-										}
-								catch (Exception e)
-										{
-												Logging.warning("StatusListenerThread: Error: " + e);
-												Logging.warning(xp.parseException(e));
+												lock.wait();
 										}
 						}
+				catch (Exception e)
+						{
+								e.printStackTrace();
+						}
+		}
+
+		public void onMessage()
+		{
+				/*
+				String dq = "\"";
+				String comma = ",";
+				SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+				Logging.info("StatusListenerThread: Received Message");
+
+				String input = "";
+
+				try
+						{
+								input = message.getStringProperty("xml");
+						}
+				catch (Exception e)
+						{
+								Logging.warning("StatusListenerThread: Error: " + e);
+								Logging.warning(xp.parseException(e));
+						}
+
+				String tokens[] = split(input,":");
+				Logging.info("StatusListerThread: Received: " + input);
+
+				String probename = tokens[0];
+				String status = tokens[1];
+
+				try
+						{
+								statement = sqlconnection.createStatement();
+								String command = "update CEProbes set" +
+										" currenttime = timestamp(" + dq + format.format(new java.util.Date()) + dq + ")" + comma +
+										" status = " + dq + status + dq +
+										" where probename = " + dq + probename + dq;
+								statement.execute(command);
+								statement.close();
+								if (tokens.length == 3)
+										if (tokens[1].equals("lost"))
+												{
+														command = "insert into CEProbeStatus (currenttime,probename,probestatus,jobs,lostjobs) values(" +
+																"timestamp(" + dq + format.format(new java.util.Date()) + dq + ")" + comma +
+																dq + probename + dq + comma +
+																dq + "lost" + dq + comma +
+																"0" + comma + tokens[2] + ")";
+														statement = sqlconnection.prepareStatement(command);
+														statement.execute(command);
+														statement.close();
+												}
+						}
+				catch (Exception e)
+						{
+								Logging.warning("StatusListenerThread: Error: " + e);
+								Logging.warning(xp.parseException(e));
+						}
+				*/
 		}
 
 		public String[] split(String input,String sep)

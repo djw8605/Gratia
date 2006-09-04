@@ -4,14 +4,9 @@ import java.util.Properties;
 
 import java.rmi.*;
 import java.io.*;
+import java.net.*;
 import java.util.TimeZone;
 import java.util.Enumeration;
-
-import org.objectweb.joram.client.jms.admin.*;
-import org.objectweb.joram.client.jms.*;
-import org.objectweb.joram.client.jms.tcp.*;
-
-import fr.dyade.aaa.agent.AgentServer;
 
 import javax.servlet.*;
 
@@ -37,9 +32,7 @@ public class CollectorService implements ServletContextListener
 		// various threads
 		//
 
-		ListenerThread thread1;
-		ListenerThread thread2;
-		ListenerThread thread3;
+		ListenerThread threads[];
 		StatusListenerThread statusListenerThread;
 		ReplicationService replicationService;
 
@@ -48,10 +41,14 @@ public class CollectorService implements ServletContextListener
 
 		XP xp = new XP();
 
+		public String configurationPath;
+
+		String queues[] = null;
+
 		public void contextInitialized(ServletContextEvent sce)
 		{
 				String catalinaHome = "";
-				String configurationPath = "";
+				int i = 0;
 
 				Enumeration iter = System.getProperties().propertyNames();
 				System.out.println("");
@@ -78,6 +75,8 @@ public class CollectorService implements ServletContextListener
 				System.out.println("");
 				System.out.println("service.security.level: " + p.getProperty("service.security.level"));
 
+				configurationPath = net.sf.gratia.services.Configuration.getConfigurationPath();
+
 				if (p.getProperty("service.security.level").equals("1"))
 						try
 								{
@@ -87,8 +86,6 @@ public class CollectorService implements ServletContextListener
 										//
 										// setup configuration path/https system parameters
 										//
-
-										configurationPath = net.sf.gratia.services.Configuration.getConfigurationPath();
 										System.setProperty("java.protocol.handler.pkgs","com.sun.net.ssl.internal.www.protocol");
 										Security.addProvider(new com.sun.net.ssl.internal.ssl.Provider());
 
@@ -141,54 +138,17 @@ public class CollectorService implements ServletContextListener
 																	 p.getProperty("service.service.console"),
 																	 p.getProperty("service.service.level"));
 								//
-								// start jms
-								//
-
-								File lock = new File(net.sf.gratia.services.Configuration.getConfigurationPath() + "/s1/lock");
-								if (lock.exists())
-										{
-												Logging.info("CollectorService: Deleting Lock File");
-												lock.delete();
-										}
-
-								System.setProperty(AgentServer.CFG_DIR_PROPERTY,net.sf.gratia.services.Configuration.getConfigurationPath());
-								AgentServer.init((short) 0,net.sf.gratia.services.Configuration.getConfigurationPath() + "/s1",null);
-								AgentServer.start();
-								Thread.sleep(10);
-								Logging.info("CollectorService: JMS Server Started");
-
-								//
 								// start rmi
 								//
 
 								rmiservice = new RMIService();
 								rmiservice.setDaemon(true);
-
 								rmiservice.start();
 								Thread.sleep(10);
+								System.out.println("");
+								System.out.println("CollectorService: RMI Service Started");
+								System.out.println("");
 
-								//
-								// setup topics/q's
-								//
-
-								AdminModule.collocatedConnect("root","root");
-
-								Queue queue1 = (Queue) Queue.create("xml-accounting-queue");
-								Queue queue2 = (Queue) Queue.create("status-queue");
-
-								User user = User.create("anonymous", "anonymous");
-
-								queue1.setFreeReading();
-								queue1.setFreeWriting();
-
-								queue2.setFreeReading();
-								queue2.setFreeWriting();
-
-								int jmsport = Integer.parseInt(p.getProperty("service.jms.port"));
-
-								javax.jms.ConnectionFactory cf = TcpConnectionFactory.create("localhost", jmsport);
-								javax.jms.QueueConnectionFactory qcf = QueueTcpConnectionFactory.create("localhost", jmsport);
-								
 								//
 								// start database
 								//
@@ -207,7 +167,11 @@ public class CollectorService implements ServletContextListener
 												hibernateConfiguration.addProperties(hp);
 
 												hibernateFactory = hibernateConfiguration.buildSessionFactory();
-												Logging.info("Database Opened");
+
+												System.out.println("");
+												System.out.println("CollectorService: Hibernate Services Started");
+												System.out.println("");
+
 										}
 								catch (Exception databaseError)
 										{
@@ -221,38 +185,51 @@ public class CollectorService implements ServletContextListener
 								zapDatabase();
 
 								//
+								// setup queues for message handling
+								//
+
+								int maxthreads = Integer.parseInt(p.getProperty("service.listener.threads"));
+								queues = new String[maxthreads];
+
+								Execute.execute("mkdir " + configurationPath + "/data");
+								for (i = 0; i < maxthreads; i++)
+										{
+												Execute.execute("mkdir " + configurationPath + "/data/thread" + i);
+												queues[i] = configurationPath + "/data/thread" + i;
+												System.out.println("Created Q: " + queues[i]);
+										}
+
+								System.out.println("");
+								System.out.println("CollectorService: JMS Server Started");
+								System.out.println("");
+
+								//
 								// poke in rmi
 								//
 
-								JMSProxyImpl proxy = new JMSProxyImpl(qcf,queue1,queue2,hibernateFactory);
+								JMSProxyImpl proxy = new JMSProxyImpl();
 								Naming.rebind(rmibind + service,proxy);
-								
+								System.out.println("JMSProxy Started");
+
 								//
 								// start msg listener
 								//
 
-								javax.jms.Connection connection = (javax.jms.Connection) cf.createConnection();
-								connection.start();
-								AdminModule.disconnect();
-
-								thread1 = new ListenerThread("Listener 1",hibernateFactory,qcf,queue1);
-								thread1.setPriority(Thread.MAX_PRIORITY);
-								thread1.setDaemon(true);
-								thread1.start();
-
-								thread2 = new ListenerThread("Listener 2",hibernateFactory,qcf,queue1);
-								thread2.setPriority(Thread.MAX_PRIORITY);
-								thread2.setDaemon(true);
-								thread2.start();
-
-								thread3 = new ListenerThread("Listener 3",hibernateFactory,qcf,queue1);
-								thread3.setPriority(Thread.MAX_PRIORITY);
-								thread3.setDaemon(true);
-								thread3.start();
+								threads = new ListenerThread[maxthreads];
+								for (i = 0; i < maxthreads; i++)
+										{
+												threads[i] = new ListenerThread("ListenerThread: " + i,queues[i],hibernateConfiguration,hibernateFactory);
+												threads[i].setPriority(Thread.MAX_PRIORITY);
+												threads[i].setDaemon(true);
+										}
+								for (i = 0; i < maxthreads; i++)
+										threads[i].start();
 								
-								statusListenerThread = new StatusListenerThread(qcf,queue2);
+								/*
+								statusListenerThread = new StatusListenerThread();
 								statusListenerThread.setDaemon(true);
 								statusListenerThread.start();
+								*/
 
 								//
 								// start probe monitor
@@ -416,7 +393,11 @@ public class CollectorService implements ServletContextListener
 								"alter table JobUsageRecord add index index05(StartTime)",
 								"alter table JobUsageRecord add index index06(GlobalJobid)",
 								"alter table Security add unique index index02(alias)",
-								"alter table CPUInfo change column NodeName HostDescription varchar(255)"
+								"alter table CPUInfo change column NodeName HostDescription varchar(255)",
+								"alter table JobUsageRecord add index index07(LocalJobid)",
+								"alter table JobUsageRecord add index index08(Host)",
+								"alter table JobUsageRecord add index index09(LocalJobid)",
+								"alter table JobUsageRecord add index index10(Host)"
 						};
 
 				for (i = 0; i < commands1.length; i++)
@@ -431,46 +412,6 @@ public class CollectorService implements ServletContextListener
 								{
 										System.out.println("Command: Error: " + commands1[i] + " : " + e);
 								}
-
-				String commands2[] = 
-						{
-								"alter table JobUsageRecord add index index07(LocalJobid)",
-								"alter table JobUsageRecord add index index08(Host)",
-								"alter table JobUsageRecord add unique index index09(StartTime,GlobalJobid,LocalJobid,Host)"
-						};
-
-				String commands3[] = 
-						{
-								"alter table JobUsageRecord drop index index09"
-						};
-
-				if (p.getProperty("service.duplicate.check").equals("1"))
-						for (i = 0; i < commands2.length; i++)
-								try
-										{
-												System.out.println("Executing: " + commands2[i]);
-												statement = connection.createStatement();
-												statement.executeUpdate(commands2[i]);
-												System.out.println("Command: OK: " + commands2[i]);
-										}
-								catch (Exception e)
-										{
-												System.out.println("Command: Error: " + commands2[i] + " : " + e);
-										}
-
-				if (p.getProperty("service.duplicate.check").equals("0"))
-						for (i = 0; i < commands3.length; i++)
-								try
-										{
-												System.out.println("Executing: " + commands3[i]);
-												statement = connection.createStatement();
-												statement.executeUpdate(commands3[i]);
-												System.out.println("Command: OK: " + commands3[i]);
-										}
-								catch (Exception e)
-										{
-												System.out.println("Command: Error: " + commands3[i] + " : " + e);
-										}
 
 		}
 

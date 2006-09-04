@@ -144,14 +144,6 @@ public class RMIHandlerServlet extends HttpServlet
 												else
 														writer.write("Error");
 										}
-								else if ((command.equals("remoteupdate")) && (argcount == 4))
-										{
-												boolean status = proxy.remoteUpdate(from,Integer.parseInt(arg1),arg2,arg3,arg4);
-												if (status)
-														writer.write("OK");
-												else
-														writer.write("Error");
-										}
 								else if ((command.equals("statusupdate")) && (argcount == 2))
 										{
 												if (arg1.equals("status"))

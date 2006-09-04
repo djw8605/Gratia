@@ -42,12 +42,11 @@ public class ReplicationService extends Thread
 				try
 						{
 								Class.forName(driver).newInstance();
+								connection = null;
 								connection = DriverManager.getConnection(url,user,password);
-								Logging.log("ReplicationService: Database Connection Opened");
 						}
 				catch (Exception e)
 						{
-								e.printStackTrace();
 						}
 		}
 
@@ -60,6 +59,21 @@ public class ReplicationService extends Thread
 
 		public void loop()
 		{
+				if (connection == null)
+						openConnection();
+				if (connection == null)
+						{
+								System.out.println("ReplicationService: No Connection: Sleeping");
+								try
+										{
+												Thread.sleep(60 * 1000);
+										}
+								catch (Exception ignore)
+										{
+										}
+								return;
+						}
+
 				command = "select * from Replication";
 				ReplicationDataPump pump = null;
 
@@ -117,7 +131,14 @@ public class ReplicationService extends Thread
 						}
 				catch (Exception e)
 						{
-								e.printStackTrace();
+								try
+										{
+												connection.close();
+										}
+								catch (Exception ignore)
+										{
+										}
+								connection = null;
 						}
 				try
 						{
