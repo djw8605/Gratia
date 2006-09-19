@@ -20,88 +20,97 @@ import net.sf.gratia.services.XP;
  * @author Philippe Canal
  * @version 1.0
  */
-public class Utils {
+public class Utils
+{
 
-    public Utils() {
-    }
+   public Utils()
+   {
+   }
 
-    /**
+   /**
      * StringToDuration
      *
-     * @param str String
-     * @return double
-     */
-    public static double StringToDuration(String str) throws
-            DatatypeConfigurationException {
-        javax.xml.datatype.DatatypeFactory fac = javax.xml.datatype.
-                                                 DatatypeFactory.
-                                                 newInstance();
-        if (str.compareTo("P")==0) return 0;
-        
-        Duration du = fac.newDurationDayTime(str.trim());
-        return du.getTimeInMillis(Calendar.getInstance()) / 1000.0;
-    }
+    * @param str String
+    * @return double
+    */
+   public static double StringToDuration(String str) throws
+			DatatypeConfigurationException
+   {
+      javax.xml.datatype.DatatypeFactory fac = javax.xml.datatype.
+                                     DatatypeFactory.
+                                     newInstance();
+      if (str.compareTo("P") == 0) return 0;
 
-    /**
+      Duration du = fac.newDurationDayTime(str.trim());
+      return du.getTimeInMillis(Calendar.getInstance()) / 1000.0;
+   }
+
+   /**
      * DurationToXml
      *
      * @param str String
-     * @return double
-     */
-    public static String DurationToXml(double val) throws
-            DatatypeConfigurationException {
-        javax.xml.datatype.DatatypeFactory fac = javax.xml.datatype.
-                                                 DatatypeFactory.
-                                                 newInstance();
-        Duration du = fac.newDuration((long)val*1000);
-        String str = du.toString();
-        return str;
-    }
+    * @return double
+    */
+   public static String DurationToXml(double val) throws
+			DatatypeConfigurationException
+   {
+      javax.xml.datatype.DatatypeFactory fac = javax.xml.datatype.
+                               DatatypeFactory.
+                               newInstance();
+      Duration du = fac.newDuration((long)val * 1000);
+      String str = du.toString();
+      return str;
+   }
 
-    /**
+   /**
      * GratiaError
      *
      * @param routine String
      * @param action String
-     * @param message String
-     * @param fatal Boolean
-     * @throws Exception
-     */
-    public static void GratiaError(String routine, String action,
-                                   String message, boolean fatal) throws
-            Exception {
-        String full = "Error in " + routine + " during " + action + ": " +
-                      message;
-        if (fatal)
-            throw (new Exception(full));
-        else
-						Logging.warning(full);
-    }
+    * @param message String
+    * @param fatal Boolean
+    * @throws Exception
+    */
+   public static void GratiaError(String routine, String action,
+                                                   String message, boolean fatal) throws
+			Exception
+   {
+      String full = "Error in " + routine + " during " + action + ": " +
+           message;
+      if (fatal)
+         throw (new Exception(full));
+      else
+         Logging.warning(full);
+   }
 
-    public static void GratiaError(String routine, String action,
-                                   String message) {
-        String full = "Error in " + routine + " during " + action + ": " +
-                      message;
-				Logging.warning(full);
-    }
+   public static void GratiaError(String routine, String action,
+                           String message)
+   {
+      String full = "Error in " + routine + " during " + action + ": " +
+                 message;
+      Logging.warning(full);
+   }
 
-    /**
+   /**
      * GratiaDebug
      *
      * @param msg String
      */
-    public static void GratiaDebug(String msg) {
-				Logging.warning(msg);
-    }
+   public static void GratiaDebug(String msg)
+   {
+      Logging.debug(msg);
+   }
 
-    public static void GratiaInfo(String msg) {
-				Logging.info(msg);
-    }
+   public static void GratiaInfo(String msg)
+   {
+      Logging.info(msg);
+   }
 
-    public static void GratiaError(Exception e) {
-				Logging.warning(e.getMessage());
-				XP xp = new XP();
-				Logging.warning(xp.parseException(e));
-    }
+   public static void GratiaError(Exception e)
+   {
+      Logging.warning(e.getMessage());
+      XP xp = new XP();
+      Logging.warning(xp.parseException(e));
+   }
 
 }
