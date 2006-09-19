@@ -67,6 +67,25 @@ public class JobRecUpdaterManager implements JobUsageRecordUpdater {
       }
    }
 
+   public class CheckCpuDuration implements JobUsageRecordUpdater 
+   {
+      public void Update(JobUsageRecord current) 
+      {
+          // Insure that CpuUserDuration and CpuSystemDuration are either 
+          // both invalid or both initialized.
+          DurationElement el = new DurationElement();
+          el.setValue(0.0);
+          el.setDescription("Default value");
+          if (current.getCpuUserDuration() != null) {
+              if (current.getCpuSystemDuration() == null) {
+                  current.setCpuSystemDuration(el);
+              }
+          } else if (current.getCpuSystemDuration() != null) {
+              current.setCpuUserDuration(el);
+          }
+      }
+   }
+
    /**
     * @author Tim Byrne
     *
@@ -210,6 +229,7 @@ public class JobRecUpdaterManager implements JobUsageRecordUpdater {
                 Updaters.add(vopatch);
       Updaters.add(new CheckStartTime());
       Updaters.add(new CheckEndTime());
+      Updaters.add(new CheckCpuDuration());
       Updaters.add(new ExtractKeyInfoContent());
 
    }
