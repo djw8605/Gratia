@@ -1,0 +1,9 @@
+<JobUsageRecord xmlns="http://www.gridforum.org/2003/ur-wg" xmlns:urwg="http://www.gridforum.org/2003/ur-wg" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.gridforum.org/2003/ur-wg file:///u:/OSG/urwg-schema.11.xsd">
+<RecordIdentity urwg:recordId="CD-95461.dhcp.fnal.gov:5968.1" urwg:createTime="2006-08-21T18:13:49Z"/>
+	<WallDuration>P62DT1H</WallDuration>
+	<StartTime>2006-08-22T05:00:00Z</StartTime>
+	<EndTime>2006-08-23T05:00:00Z</EndTime>
+	<ProbeName>daily:generic</ProbeName>
+	<SiteName>osg-gw-2.t2.ucsd.edu</SiteName>
+	<Njobs>781</Njobs>
+</JobUsageRecord>

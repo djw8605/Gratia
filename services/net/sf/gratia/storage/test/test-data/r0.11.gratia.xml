@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<UsageRecords xmlns="http://www.gridforum.org/2003/ur-wg1"
+		xmlns:urwg="http://www.gridforum.org/2003/ur-wg2"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		>
+  <JobUsageRecord xmlns="http://www.gridforum.org/2003/ur-wg"
+		xmlns:urwg="http://www.gridforum.org/2003/ur-wg"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		>
+<RecordIdentity urwg:recordId="6120" urwg:createTime="2005-12-19T20:27:10Z" />
+<JobIdentity>
+	<LocalJobId >PBS.1234.0</LocalJobId>
+</JobIdentity>
+<UserIdentity>
+	<LocalUserId >cmsuser001</LocalUserId>
+	<GlobalUsername>john ainsworth</GlobalUsername>
+	<ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#" >
+		<ds:X509Data>
+		<ds:X509SubjectName>CN=john ainsworth, L=MC, OU=Manchester, O=eScience, C=UK</ds:X509SubjectName>
+		</ds:X509Data>
+	</ds:KeyInfo>
+</UserIdentity>
+	<JobName urwg:description="this is not a real job name" >cmsreco</JobName>
+	<Charge >1240</Charge>
+	<Status >4</Status>
+	<Network urwg:storageUnit="Gb" urwg:phaseUnit="PT30S" urwg:metric="total" >3</Network>
+	<Disk urwg:storageUnit="Gb" urwg:phaseUnit="PT3H51M31S" urwg:type="max" urwg:metric="total" >3</Disk>
+	<Memory urwg:storageUnit="KB" urwg:phaseUnit="PT1S" urwg:metric="total" >650000</Memory>
+	<Swap urwg:storageUnit="GB" urwg:phaseUnit="PT1M" urwg:metric="total" >1</Swap>
+	<TimeDuration urwg:type="submit" >PT24S</TimeDuration>
+	<TimeInstant urwg:type="submit" >2005-11-02T15:48:39Z</TimeInstant>
+	<ServiceLevel urwg:type="QOS" >BottomFeeder</ServiceLevel>
+	<WallDuration urwg:description="Was entered in seconds" >P1DT2H3M21.2S</WallDuration>
+	<CpuDuration urwg:description="Was entered as text" >PT23H12M1.75S</CpuDuration>
+	<EndTime urwg:description="Was entered in seconds" >2005-11-02T15:49:10Z</EndTime>
+	<StartTime urwg:description="Was entered as text" >2005-11-03T17:52:55Z</StartTime>
+	<MachineName >flxi02.fnal.gov</MachineName>
+	<Host primary="true">flxi02.fnal.gov</Host>
+	<SubmitHost >patlx7.fnal.gov</SubmitHost>
+	<Queue >CepaQueue</Queue>
+	<ProjectName >cms reco</ProjectName>
+	<NodeCount urwg:metric="total" >3</NodeCount>
+	<Processors urwg:metric="total" consumptionRate="0.75">3</Processors>
+	<Resource urwg:description="RemoteWallTime" >94365</Resource>
+	<Resource urwg:description="RemoteCpuTime" >PT23H</Resource>
+</JobUsageRecord>
+
+<JobUsageRecord>
+<RecordIdentity urwg:recordId="7120" urwg:createTime="2005-12-19T20:27:10Z" />
+<JobIdentity>
+	<LocalJobId >PBS.1234.0</LocalJobId>
+</JobIdentity>
+<UserIdentity>
+	<ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#" >
+		<ds:X509Data>
+		<ds:X509SubjectName>CN=john ainsworth, L=MC, OU=Manchester, O=eScience, C=UK</ds:X509SubjectName>
+		</ds:X509Data>
+	</ds:KeyInfo>
+	<LocalUserId >cmsuser002</LocalUserId>
+</UserIdentity>
+	<JobName urwg:description="this is not a real job name" >cmsreco</JobName>
+	<Status >4</Status>
+	<WallDuration urwg:description="Was entered in seconds" >P1DT2H3M21.2S</WallDuration>
+	<CpuDuration urwg:description="Was entered as text" >PT23H12M1.75S</CpuDuration>
+	<EndTime urwg:description="Was entered in seconds" >2005-11-02T15:49:10Z</EndTime>
+	<StartTime urwg:description="Was entered as text" >2005-11-03T17:52:55Z</StartTime>
+	<TimeDuration urwg:type="submit" >PT24S</TimeDuration>
+	<TimeInstant urwg:type="submit" >2005-11-02T15:48:39Z</TimeInstant>
+	<MachineName >flxi02.fnal.gov</MachineName>
+	<Host primary="true" >flxi02.fnal.gov</Host>
+	<SubmitHost >patlx7.fnal.gov</SubmitHost>
+	<Queue >CepaQueue</Queue>
+	<ProjectName >cms reco</ProjectName>
+	<Network urwg:storageUnit="Gb" urwg:phaseUnit="PT30S" urwg:metric="total" >3.5</Network>
+	<Disk urwg:storageUnit="Gb" urwg:phaseUnit="PT3H51M31S" urwg:type="max" urwg:metric="total" >3.5</Disk>
+	<Memory urwg:storageUnit="KB" urwg:phaseUnit="PT1S" urwg:metric="total" >650000</Memory>
+	<Swap urwg:storageUnit="GB" urwg:phaseUnit="PT1M" urwg:metric="total" >1.5</Swap>
+	<NodeCount urwg:metric="total" >3</NodeCount>
+	<Processors consumptionRate="0.75" urwg:metric="total" >3</Processors>
+	<ServiceLevel urwg:type="QOS" >BottomFeeder</ServiceLevel>
+	<Charge >1240</Charge>
+	<Resource urwg:description="RemoteWallTime" >94365</Resource>
+	<Resource urwg:description="RemoteCpuTime" >PT23H</Resource>
+	<Resource urwg:description="GlobalUsername" >john ainsworth</Resource>
+</JobUsageRecord>
+
+</UsageRecords>

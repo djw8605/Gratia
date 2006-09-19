@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<JobUsageRecord xmlns="http://www.gridforum.org/2003/ur-wg"
+		xmlns:urwg="http://www.gridforum.org/2003/ur-wg"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+		xsi:schemaLocation="http://www.gridforum.org/2003/ur-wg file:///u:/OSG/urwg-schema.11.xsd">
+<RecordIdentity urwg:recordId="5593" urwg:createTime="2006-03-08T21:53:10Z" />
+<JobIdentity>
+	<LocalJobId >PBS.1234.0</LocalJobId>
+</JobIdentity>
+<UserIdentity>
+	<LocalUserId >cmsuser000</LocalUserId>
+	<GlobalUsername >john ainsworth</GlobalUsername>
+	<ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#" >
+		<ds:X509Data>
+		<ds:X509SubjectName>CN=john ainsworth, L=MC, OU=Manchester, O=eScience, C=UK</ds:X509SubjectName>
+		</ds:X509Data>
+	</ds:KeyInfo>
+</UserIdentity>
+	<JobName urwg:description="this is not a real job name" >cmsreco</JobName>
+	<Charge >1240</Charge>
+	<Status >4</Status>
+	<Network urwg:storageUnit="Gb" urwg:phaseUnit="PT30S" urwg:metric="total" >3.5</Network>
+	<Disk urwg:storageUnit="Gb" urwg:phaseUnit="PT3H51M31S" urwg:type="max" urwg:metric="total" >3.5</Disk>
+	<Memory urwg:storageUnit="KB" urwg:phaseUnit="PT30S" urwg:metric="total" >650000</Memory>
+	<Swap urwg:storageUnit="GB" urwg:phaseUnit="PT60S" urwg:metric="total" >1.5</Swap>
+	<ServiceLevel urwg:type="QOS" >BottomFeeder</ServiceLevel>
+	<TimeDuration urwg:type="submit" >PT24S</TimeDuration>
+	<TimeInstant urwg:type="submit" >2005-11-02T15:48:39Z</TimeInstant>
+	<WallDuration urwg:description="Was entered in seconds" >P1DT2H3M21.2S</WallDuration>
+	<CpuDuration urwg:description="Was entered as text" >PT23H12M1.75S</CpuDuration>
+	<NodeCount urwg:metric="total" >3</NodeCount>
+	<Processors consumptionRate="0.75" urwg:metric="total" >3</Processors>
+	<StartTime urwg:description="Was entered in seconds" >2005-11-02T15:49:10Z</StartTime>
+	<TimeDuration urwg:type="EndTime" urwg:description="Was entered as text" >PT20S</TimeDuration>
+	<MachineName >flxi02.fnal.gov</MachineName>
+	<SubmitHost >patlx7.fnal.gov</SubmitHost>
+	<Host primary="true" >flxi02.fnal.gov</Host>
+	<Queue >CepaQueue</Queue>
+	<ProjectName >cms reco</ProjectName>
+	<Resource urwg:description="RemoteWallTime" >94365</Resource>
+	<Resource urwg:description="RemoteCpuTime" >PT23H</Resource>
+</JobUsageRecord>
