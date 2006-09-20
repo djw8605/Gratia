@@ -5,9 +5,11 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Date;
 import java.util.Properties;
+import java.util.StringTokenizer;
 import java.text.*;
 
 import java.io.*;
+import java.net.*;
 
 import net.sf.gratia.storage.*;
 
@@ -44,12 +46,19 @@ public class ListenerThread extends Thread
 
 		volatile boolean databaseDown = false;
 
-		public ListenerThread(String ident,String directory,org.hibernate.cfg.Configuration hibernateConfiguration,SessionFactory factory)
+		Object lock;
+
+		public ListenerThread(String ident,
+													String directory,
+													org.hibernate.cfg.Configuration hibernateConfiguration,
+													SessionFactory factory,
+													Object lock)
 		{
 				this.ident = ident;
 				this.directory = directory;
 				this.hibernateConfiguration = hibernateConfiguration;
 				this.factory = factory;
+				this.lock = lock;
 				loadProperties();
 				try
 						{
@@ -258,8 +267,27 @@ public class ListenerThread extends Thread
 				for (int i = 0; i < files.length; i++)
 						{
 								String file = files[i];
-								String xml = xp.get(files[i]);
+								String blob = xp.get(files[i]);
+								String xml = null;
+								String rawxml = null;
+								String extraxml = null;
 								JobUsageRecord current = null;
+
+								//
+								// see if we got a normal update or a replicated one
+								//
+
+								if (blob.startsWith("replication"))
+										{
+												StringTokenizer st = new StringTokenizer(blob,"|");
+												st.nextToken();
+												xml = st.nextToken();
+												rawxml = st.nextToken();
+												if (st.hasMoreTokens())
+														extraxml = st.nextToken();
+										}
+								else
+										xml = blob;
 
 								System.out.println("ListenerThread: " + ident + ":Processing: " + file);
 
@@ -291,11 +319,16 @@ public class ListenerThread extends Thread
 																else
 																		{
 																				// System.out.println("ListenerThread: " + ident + ":Before New Probe Update");
-																				newProbeUpdate.check(current);
+																				synchronized(lock)
+																						{
+																								newProbeUpdate.check(current);
+																						}
 																				// System.out.println("ListenerThread: " + ident + ":After New Probe Update");
 																				updater.Update(current);
-																				if (xml != null)
+																				if (rawxml != null)
 																						current.setRawXml(xml);
+																				if (extraxml != null)
+																						current.setExtraXml(extraxml);
 																				// System.out.println("ListenerThread: " + ident + ":Before Hibernate Save");
 																				session.save(current);
 																				// System.out.println("ListenerThread: " + ident + ":After Hibernate Save");
@@ -303,6 +336,7 @@ public class ListenerThread extends Thread
 																// System.out.println("ListenerThread: " + ident + ":Before Transaction Commit");
 																tx.commit();
 																session.close();
+																// System.out.println("ListenerThread: " + ident + ":After Transaction Commit");
 														}
 										}
 								catch (Exception exception)
@@ -316,7 +350,7 @@ public class ListenerThread extends Thread
 												System.out.println("ListenerThread: " + ident + ":Error In Process: " + exception);
 												System.out.println("ListenerThread: " + ident + ":Current: " + current);
 										}
-								// System.out.println("ListenerThread: " + ident + ":After Transaction Commit");
+								// System.out.println("ListenerThread: " + ident + ":Before File Delete: " + file);
 								try
 										{
 												File temp = new File(file);
@@ -324,7 +358,9 @@ public class ListenerThread extends Thread
 										}
 								catch (Exception ignore)
 										{
+												// System.out.println("ListenerThread: " + ident + ":File Delete Failed: " + file + " Error: " + ignore);
 										}
+								// System.out.println("ListenerThread: " + ident + ":After File Delete: " + file);
 								itotal++;
 								System.out.println("ListenerThread: " + ident + ":Total Records: " + itotal);
 						}
@@ -398,8 +434,8 @@ public class ListenerThread extends Thread
 						} 
 				catch(Exception e) 
 						{
-								Utils.GratiaDebug("Parse error:  " + e.getMessage());
-								throw new Exception("loadURXmlFile saw an error at 2:"+ e);        	
+								System.out.println("ListenerThread: " + ident + ":Parse error:  " + e.getMessage());
+								System.out.println("ListenerThread: " + ident + ":XML:  " + "\n" + xml);
 						}
 				finally
 						{

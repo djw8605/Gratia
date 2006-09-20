@@ -45,35 +45,41 @@ public class CollectorService implements ServletContextListener
 
 		String queues[] = null;
 
+		Object lock = new Object();
+
 		public void contextInitialized(ServletContextEvent sce)
 		{
 				String catalinaHome = "";
 				int i = 0;
 
-				Enumeration iter = System.getProperties().propertyNames();
-				System.out.println("");
-				while(iter.hasMoreElements())
-						{
-								String key = (String) iter.nextElement();
-								String value = (String) System.getProperty(key);
-								System.out.println("Key: " + key + " value: " + value);
-						}
-				System.out.println("");
+				/*
+					Enumeration iter = System.getProperties().propertyNames();
+					System.out.println("");
+					while(iter.hasMoreElements())
+					{
+					String key = (String) iter.nextElement();
+					String value = (String) System.getProperty(key);
+					System.out.println("Key: " + key + " value: " + value);
+					}
+					System.out.println("");
+				*/
 
 				p = net.sf.gratia.services.Configuration.getProperties();
 
-				System.out.println("");
-				System.out.println("service properties:");
-				System.out.println("");
-				iter = p.propertyNames();
-				while(iter.hasMoreElements())
-						{
-								String key = (String) iter.nextElement();
-								String value = (String) p.getProperty(key);
-								System.out.println("Key: " + key + " value: " + value);
-						}
-				System.out.println("");
-				System.out.println("service.security.level: " + p.getProperty("service.security.level"));
+				/*
+					System.out.println("");
+					System.out.println("service properties:");
+					System.out.println("");
+					iter = p.propertyNames();
+					while(iter.hasMoreElements())
+					{
+					String key = (String) iter.nextElement();
+					String value = (String) p.getProperty(key);
+					System.out.println("Key: " + key + " value: " + value);
+					}
+					System.out.println("");
+					System.out.println("service.security.level: " + p.getProperty("service.security.level"));
+				*/
 
 				configurationPath = net.sf.gratia.services.Configuration.getConfigurationPath();
 
@@ -218,7 +224,7 @@ public class CollectorService implements ServletContextListener
 								threads = new ListenerThread[maxthreads];
 								for (i = 0; i < maxthreads; i++)
 										{
-												threads[i] = new ListenerThread("ListenerThread: " + i,queues[i],hibernateConfiguration,hibernateFactory);
+												threads[i] = new ListenerThread("ListenerThread: " + i,queues[i],hibernateConfiguration,hibernateFactory,lock);
 												threads[i].setPriority(Thread.MAX_PRIORITY);
 												threads[i].setDaemon(true);
 										}
@@ -226,9 +232,9 @@ public class CollectorService implements ServletContextListener
 										threads[i].start();
 								
 								/*
-								statusListenerThread = new StatusListenerThread();
-								statusListenerThread.setDaemon(true);
-								statusListenerThread.start();
+									statusListenerThread = new StatusListenerThread();
+									statusListenerThread.setDaemon(true);
+									statusListenerThread.start();
 								*/
 
 								//
@@ -249,13 +255,13 @@ public class CollectorService implements ServletContextListener
 				//
 
 				if (p.getProperty("service.security.level").equals("1"))
-								{
-										if ((p.getProperty("service.use.selfgenerated.certs") != null) &&
-												(p.getProperty("service.use.selfgenerated.certs").equals("1")))
-												loadSelfGeneratedCerts();
-										else
-												loadVDTCerts();
-								}
+						{
+								if ((p.getProperty("service.use.selfgenerated.certs") != null) &&
+										(p.getProperty("service.use.selfgenerated.certs").equals("1")))
+										loadSelfGeneratedCerts();
+								else
+										loadVDTCerts();
+						}
 
 				//
 				// start replication service
@@ -410,7 +416,7 @@ public class CollectorService implements ServletContextListener
 								}
 						catch (Exception e)
 								{
-										System.out.println("Command: Error: " + commands1[i] + " : " + e);
+										// System.out.println("Command: Error: " + commands1[i] + " : " + e);
 								}
 
 		}
@@ -439,6 +445,7 @@ public class CollectorService implements ServletContextListener
 						catch (Exception ignore)
 								{
 								}
+
 						//
 						// create a dummy ReportingConfig.xml for birt
 						//

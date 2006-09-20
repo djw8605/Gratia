@@ -140,7 +140,10 @@ public class Post
 								URLConnection connection = url.openConnection();
 								connection.setDoOutput(true);
 								OutputStreamWriter writer = new OutputStreamWriter(connection.getOutputStream());
-								writer.write(buffer.toString());
+								String temp = buffer.toString();
+								for (int i = 0; i < temp.length(); i++)
+										writer.write(temp,i,1);
+								// writer.write(buffer.toString());
 								writer.flush();
     
 								// Get the response

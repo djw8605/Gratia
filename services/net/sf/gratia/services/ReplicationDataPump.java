@@ -1,11 +1,9 @@
 package net.sf.gratia.services;
 
-import java.rmi.*;
-import java.rmi.server.*;
-import javax.jms.*;
 import java.util.*;
 import java.sql.*;
 import java.io.*;
+import java.net.*;
 
 import org.hibernate.*;
 import net.sf.gratia.storage.*;
@@ -237,6 +235,11 @@ public class ReplicationDataPump extends Thread
 														}
 												dbid = resultSet.getString("dbid");
 												String xml = getXML(dbid);
+												if (xml.length() == 0)
+														{
+																System.out.println("Received Null XML: dbid: " + dbid);
+																continue;
+														}
 												if (p.getProperty("service.datapump.trace") != null)
 														if (p.getProperty("service.datapump.trace").equals("1"))
 																{
@@ -294,6 +297,7 @@ public class ReplicationDataPump extends Thread
 		public String getXML(String dbid)
 		{
 				StringBuffer buffer = new StringBuffer();
+
 				int i = 0;
 
 				try
@@ -309,7 +313,10 @@ public class ReplicationDataPump extends Thread
 														record.setCpuSystemDuration(duration);
 												if (record.getCpuSystemDuration() == null)
 														System.out.println("dbid: " + dbid + " null cpu system duration");
-												buffer.append(record.asXML());
+												buffer.append("replication" + "|");
+												buffer.append(record.asXML() + "|");
+												buffer.append(record.getRawXml() + "|");
+												buffer.append(record.getExtraXml());
 										}
 						}
 				catch (Exception e)
