@@ -1,0 +1,23 @@
+#!/bin/env python
+ 
+import sys
+import PSACCTReport
+
+from PSACCTReport import FromCondor,UseArgs,gOutput,gBegin
+import sys
+
+def main(argv=None):
+    UseArgs(argv)
+
+    argOutput = PSACCTReport.gOutput
+    PSACCTReport.DailySiteReport(PSACCTReport.gBegin,output=argOutput);
+    print
+    PSACCTReport.DailyVOReport(PSACCTReport.gBegin,output=argOutput);
+    print
+    PSACCTReport.DailySiteVOReport(PSACCTReport.gBegin,output=argOutput);
+
+if __name__ == "__main__":
+    sys.exit(main())
+
+
+
