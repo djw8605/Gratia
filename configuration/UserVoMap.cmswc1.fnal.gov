@@ -313,6 +313,7 @@ cmsphedex CMS_OSG
 cmssoft CMS_OSG
 cmst2admin CMS_OSG
 cmsprod CMS_OSG
+cmsroc CMS_OSG
 cmsprd CMS_LCG
 dteamprd dteam
 cmsp CMS_OSG
@@ -699,6 +700,7 @@ chcheng CMS_UAF
 chertok CMS_UAF
 cheung CMS_UAF
 chill CMS_UAF
+chinhan CMS_UAF
 chinchey CMS_UAF
 chiyoung CMS_UAF
 christm CMS_UAF
@@ -827,6 +829,7 @@ hooper CMS_UAF
 hpi CMS_UAF
 huangxt CMS_UAF
 hughes CMS_UAF
+ibloch CMS_UAF
 ichiro CMS_UAF
 ifisk CMS_UAF
 igv CMS_UAF
@@ -1116,6 +1119,7 @@ ulyanov CMS_UAF
 valerieh CMS_UAF
 varganov CMS_UAF
 veelken CMS_UAF
+vergili CMS_UAF
 velev CMS_UAF
 veseli CMS_UAF
 vesna CMS_UAF
@@ -1153,9 +1157,15 @@ yma CMS_UAF
 yongy CMS_UAF
 yschung CMS_UAF
 yujun CMS_UAF
+yumiceva CMS_UAF
 yumi CMS_UAF
 yuyi CMS_UAF
 zalokar CMS_UAF
 zatserkl CMS_UAF
 zeyrek CMS_UAF
 zrwan CMS_UAF
+berryhil CMS_UAF
+luthra CMS_UAF
+cammin CMS_UAF
+bala CMS_UAF
+
