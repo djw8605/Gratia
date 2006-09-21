@@ -11,7 +11,7 @@ import datetime
 import getopt
 import math
 
-gMySQL = "c:/MYSQL/MYSQLS~1.0/bin/mysql"
+gMySQL = "mysql"
 gProbename = "cmslcgce.fnal.gov"
 gLogFileIsWriteable = True;
 

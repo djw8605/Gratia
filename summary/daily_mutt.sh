@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # space separated list of mail recipients
-MAILTO="pcanal@fnal.gov"
+MAILTO="osg-accounting-info@fnal.gov"
 
 if [ "$1" == "--help" ]; then 
 	echo "usage: $0 [--debug] [quoted_string_representing_starting_date (as accepted by date -d)]"
