@@ -2,14 +2,21 @@
 
 # space separated list of mail recipients
 MAILTO="osg-accounting-info@fnal.gov"
+WEBLOC="http://gratia-osg.fnal.gov:8880/gratia-reporting"
 
-if [ "$1" == "--help" ]; then 
-	echo "usage: $0 [--debug] [quoted_string_representing_starting_date (as accepted by date -d)]"
+while test "x$1" != "x"; do
+   if [ "$1" == "--help" ]; then 
+	echo "usage: $0 [--debug] [--mail email] [quoted_string_representing_starting_date (as accepted by date -d)]"
 	exit 1
-elif [ "$1" == "--debug" ]; then
+   elif [ "$1" == "--debug" ]; then
 	debug=x
 	shift
-fi
+   elif [ "$1" == "--mail" ]; then
+	MAILTO=$2
+	shift
+	shift
+   fi
+done
 
 when=$(date -d "${1:-yesterday}" +"%d %B %Y")
 whenarg=$(date -d "${1:-yesterday}" +"%Y/%m/%d")
@@ -23,8 +30,13 @@ REPORTCSV=${WORK_DIR}/report.csv
 
 mkdir $WORK_DIR
 
-./daily --output=text $whenarg > $REPORTTXT 
-./daily --output=csv $whenarg >  $REPORTCSV
+echo "See $WEBLOC for more information" > $REPORTTXT 
+echo >> $REPORTTXT 
+./daily --output=text $whenarg >> $REPORTTXT 
+
+echo "For more information see:,$WEBLOC" > $REPORTCSV
+echo >> $REPORTCSV
+./daily --output=csv $whenarg >>  $REPORTCSV
 
 mutt -a $REPORTCSV -s "$MAIL_MSG" $MAILTO < $REPORTTXT
 
