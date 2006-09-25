@@ -230,8 +230,10 @@ def CondorData():
         return RunQueryAndSplit(select)
 
 def DailySiteData(begin,end):
+        schema = "gratia"
+        
         select = " SELECT CETable.facility_name, COUNT(*), sum(J.WallDuration) " \
-                + " from CETable, CEProbes, JobUsageRecord J " \
+                + " from "+schema+".CETable, "+schema+".CEProbes, "+schema+".JobUsageRecord J " \
                 + " where CEProbes.facility_id = CETable.facility_id and J.ProbeName = CEProbes.probename" \
                 + " and \""+ DateToString(begin) +"\"<EndTime and EndTime<\"" + DateToString(end) + "\"" \
                 + " and J.ProbeName not like \"psacct:%\" " \
@@ -239,8 +241,10 @@ def DailySiteData(begin,end):
         return RunQueryAndSplit(select)
 
 def DailyVOData(begin,end):
+        schema = "gratia"
+            
         select = " SELECT J.VOName, COUNT(*), sum(J.WallDuration) " \
-                + " from CETable, CEProbes, JobUsageRecord J " \
+                + " from "+schema+".CETable, "+schema+".CEProbes, "+schema+".JobUsageRecord J " \
                 + " where CEProbes.facility_id = CETable.facility_id and J.ProbeName = CEProbes.probename" \
                 + " and \""+ DateToString(begin) +"\"<EndTime and EndTime<\"" + DateToString(end) + "\"" \
                 + " and J.ProbeName not like \"psacct:%\" " \
@@ -248,12 +252,24 @@ def DailyVOData(begin,end):
         return RunQueryAndSplit(select)
 
 def DailySiteVOData(begin,end):
+        schema = "gratia"
+        
         select = " SELECT CETable.facility_name, J.VOName, COUNT(*), sum(J.WallDuration) " \
-                + " from CETable, CEProbes, JobUsageRecord J " \
+                + " from "+schema+".CETable, "+schema+".CEProbes, "+schema+".JobUsageRecord J " \
                 + " where CEProbes.facility_id = CETable.facility_id and J.ProbeName = CEProbes.probename" \
                 + " and \""+ DateToString(begin) +"\"<EndTime and EndTime<\"" + DateToString(end) + "\"" \
                 + " and J.ProbeName not like \"psacct:%\" " \
                 + " group by J.VOName, J.ProbeName order by CETable.facility_name "
+        return RunQueryAndSplit(select)
+
+def DailySiteVODataFromDaily(begin,end,select,count):
+        schema = "gratia_osg_daily"
+        
+        select = " SELECT J.SiteName, J.VOName, "+count+", sum(J.WallDuration) " \
+                + " from "+schema+".JobUsageRecord J " \
+                + " where \""+ DateToString(begin) +"\"<EndTime and EndTime<\"" + DateToString(end) + "\"" \
+                + " and ProbeName " + select + "\"daily:goc\" " \
+                + " group by J.VOName, J.SiteName order by J.SiteName, J.VOName "
         return RunQueryAndSplit(select)
 
 def PrintHeader():
@@ -394,7 +410,8 @@ class DailySiteVOReportConf:
         title = "OSG usage summary (midnight to midnight central time) for %s\nincluding all jobs that finished in that time period.\nWall Duration is expressed in hours and rounded to the nearest hour.\nDeltas are the differences with the previous day.\n"
         headers = ("Site","VO","Number of Jobs","Wall Duration","Delta jobs","Delta duration")
         formats = {}
-
+        select = "=="
+        
         def __init__(self):
            self.formats["csv"] = "\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""
            self.formats["text"] = "%25s | %14s | %14s | %13s | %10s | %14s"
@@ -402,12 +419,34 @@ class DailySiteVOReportConf:
         def GetData(self,start,end):
            return DailySiteVOData(start,end)      
 
+class DailySiteVOReportFromDailyConf:
+        title = "OSG usage summary (midnight to midnight central time) for %s\nincluding all jobs that finished in that time period.\nWall Duration is expressed in hours and rounded to the nearest hour.\nDeltas are the differences with the previous day.\nIf the number of jobs stated for a site is always 1\nthen this number is actually the number of summary records sent.\n"
+        headers = ("Site","VO","Number of Jobs","Wall Duration","Delta jobs","Delta duration")
+        formats = {}
+        select = "=="
+        count = "sum(NJobs)"
+
+        def __init__(self, fromGratia, header = False):
+           self.formats["csv"] = "\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""
+           self.formats["text"] = "%25s | %14s | %14s | %13s | %10s | %14s"
+           if (fromGratia) :
+               self.select = "="
+               self.count = "sum(NJobs)"
+           else:
+               self.select = "!="
+               
+           if (not header) :  self.title = ""
+
+        def GetData(self,start,end):
+           return DailySiteVODataFromDaily(start,end,self.select,self.count)
+
 
 def GenericDaily(what, when = datetime.date.today(), output = "text"):
         factor = 3600  # Convert number of seconds to number of hours
 
         if (output != "None") :
-            print what.title % ( DateToString(when,False) )
+            if (what.title != "") :
+                print what.title % ( DateToString(when,False) )
             print what.formats[output] % what.headers
         
         # First get the previous' day information
@@ -485,4 +524,5 @@ def DailyVOReport(when = datetime.date.today(), output = "text"):
  
 def DailySiteVOReport(when = datetime.date.today(), output = "text"):
         return GenericDaily( DailySiteVOReportConf(), when, output)
+ 
  

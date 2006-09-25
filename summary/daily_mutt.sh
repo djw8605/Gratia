@@ -3,6 +3,7 @@
 # space separated list of mail recipients
 MAILTO="osg-accounting-info@fnal.gov"
 WEBLOC="http://gratia-osg.fnal.gov:8880/gratia-reporting"
+SUM_WEBLOC="http://gratia-osg.fnal.gov:8884/gratia-reporting"
 
 while test "x$1" != "x"; do
    if [ "$1" == "--help" ]; then 
@@ -22,11 +23,15 @@ when=$(date -d "${1:-yesterday}" +"%d %B %Y")
 whenarg=$(date -d "${1:-yesterday}" +"%Y/%m/%d")
 
 MAIL_MSG="report for $when"
+SUM_MAIL_MSG="Comparing daily report with Gratia for $when"
 
 # Transfer the file now
 WORK_DIR=workdir.${RANDOM}
 REPORTTXT=${WORK_DIR}/report.txt
 REPORTCSV=${WORK_DIR}/report.csv
+SUM_REPORTTXT=${WORK_DIR}/summary_report.txt
+SUM_REPORTCSV=${WORK_DIR}/summary_report.csv
+
 
 mkdir $WORK_DIR
 
@@ -41,6 +46,16 @@ echo >> $REPORTCSV
 mutt -a $REPORTCSV -s "$MAIL_MSG" $MAILTO < $REPORTTXT
 
 ./gratiaSum.py $whenarg
+
+./dailyFromSummary --output=text $whenarg > $SUM_REPORTTXT 
+echo >> $SUM_REPORTTXT 
+echo "See $SUM_WEBLOC for more information" >> $SUM_REPORTTXT 
+
+./dailyFromSummary --output=csv $whenarg >  $SUM_REPORTCSV
+echo >> $SUM_REPORTCSV
+echo "For more information see:,$SUM_WEBLOC" >> $SUM_REPORTCSV
+
+mutt -a $SUM_REPORTCSV -s "$SUM_MAIL_MSG" $MAILTO < $SUM_REPORTTXT
 
 if [ "$debug" != "x" ]; then 
    rm -rf $WORK_DIR
