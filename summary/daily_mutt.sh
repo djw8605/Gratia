@@ -40,6 +40,8 @@ echo >> $REPORTCSV
 
 mutt -a $REPORTCSV -s "$MAIL_MSG" $MAILTO < $REPORTTXT
 
+./gratiaSum.py $whenarg
+
 if [ "$debug" != "x" ]; then 
    rm -rf $WORK_DIR
 fi
