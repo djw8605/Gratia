@@ -1,3 +1,4 @@
+#!/bin/env python
 
 import Gratia, string, time, sys
 import PSACCTReport
@@ -27,16 +28,15 @@ def SendData(values, dateAsSecondSinceEpoch):
         #r.NodeCount(TotalNumberOfNodeInCluster)
         #r.Processors(TotalNumberOfCpuCoreInCluster)
 
-        print Gratia.Send(r)
+        Gratia.Send(r)
 
 def main(argv=None):
     UseArgs(argv)
 
-    argOutput = PSACCTReport.gOutput
+    argOutput = "None" # PSACCTReport.gOutput
     Gratia.Initialize()
 
     result = PSACCTReport.DailySiteVOReport(PSACCTReport.gBegin,output=argOutput)
-    print result
         
     dateAsSecondSinceEpoch = time.mktime(PSACCTReport.gBegin.timetuple())
  #       else:
@@ -46,7 +46,6 @@ def main(argv=None):
 
     # Read the date and send it to Gratia
     for line in result:
-        print line[0:4]
         SendData( line[0:4], dateAsSecondSinceEpoch)
 
 if __name__ == "__main__":
