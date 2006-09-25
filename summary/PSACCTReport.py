@@ -18,7 +18,7 @@ gLogFileIsWriteable = True;
 gBegin=datetime.date(2006,06,01)
 gEnd=datetime.date(2006,07,01)
 
-gOutput="text" # Type of output (text, csv)
+gOutput="text" # Type of output (text, csv, None)
 
 """
 Having written a bunch of scientific software, I am always amazed
