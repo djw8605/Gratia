@@ -405,9 +405,10 @@ class DailySiteVOReportConf:
 
 def GenericDaily(what, when = datetime.date.today(), output = "text"):
         factor = 3600  # Convert number of seconds to number of hours
-        
-        print what.title % ( DateToString(when,False) )
-        print what.formats[output] % what.headers
+
+        if (output != "None") :
+            print what.title % ( DateToString(when,False) )
+            print what.formats[output] % what.headers
         
         # First get the previous' day information
         totalwall = 0
@@ -463,13 +464,16 @@ def GenericDaily(what, when = datetime.date.today(), output = "text"):
                         values = (site,vo,niceNum(njobs), niceNum(wall),niceNum(njobs-oldnjobs),niceNum(wall-oldwall))
                 else:
                         values = (site,niceNum(njobs), niceNum(wall),niceNum(njobs-oldnjobs),niceNum(wall-oldwall))
-                print what.formats[output] % values
+                if (output != "None") :
+                    print what.formats[output] % values
                 result.append(values)
         (oldnjobs,oldwall) = oldValues["total"]
         if (num_header == 2) :
-               print what.formats[output] % ("All sites", "All VOs", niceNum(totaljobs), niceNum(totalwall), niceNum(totaljobs-oldnjobs), niceNum(totalwall-oldwall))
+                if (output != "None") :
+                    print what.formats[output] % ("All sites", "All VOs", niceNum(totaljobs), niceNum(totalwall), niceNum(totaljobs-oldnjobs), niceNum(totalwall-oldwall))
         else:
-               print what.formats[output] % ("All sites", niceNum(totaljobs), niceNum(totalwall), niceNum(totaljobs-oldnjobs), niceNum(totalwall-oldwall))
+                if (output != "None") :
+                    print what.formats[output] % ("All sites", niceNum(totaljobs), niceNum(totalwall), niceNum(totaljobs-oldnjobs), niceNum(totalwall-oldwall))
         return result
 
         
