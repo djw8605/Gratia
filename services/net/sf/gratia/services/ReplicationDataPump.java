@@ -6,6 +6,7 @@ import java.io.*;
 import java.net.*;
 
 import org.hibernate.*;
+import org.hibernate.cfg.*;
 import net.sf.gratia.storage.*;
 
 public class ReplicationDataPump extends Thread
@@ -31,6 +32,7 @@ public class ReplicationDataPump extends Thread
 
 		SessionFactory factory;
 		org.hibernate.Session session;
+		org.hibernate.cfg.Configuration hibernateConfiguration;
 
 		XP xp = new XP();
 
@@ -43,10 +45,13 @@ public class ReplicationDataPump extends Thread
 		String cr = "\n";
 		String comma = ",";
 
-		public ReplicationDataPump(String replicationid,SessionFactory factory)
+		boolean databaseDown = false;
+
+		public ReplicationDataPump(String replicationid,org.hibernate.cfg.Configuration hibernateConfiguration,SessionFactory factory)
 		{
 				this.factory = factory;
 				this.replicationid = replicationid;
+				this.hibernateConfiguration = hibernateConfiguration;
 				p = Configuration.getProperties();
 				driver = p.getProperty("service.mysql.driver");
 				url = p.getProperty("service.mysql.url");
@@ -124,10 +129,98 @@ public class ReplicationDataPump extends Thread
 				System.out.println("ReplicationDataPump: Exit Requested: " + replicationid);
 		}
 
+    public boolean communicationsError()
+    {
+				try
+						{
+								Thread.sleep(30 * 1000);
+						}
+				catch (Exception ignore)
+						{
+						}
+				try
+						{
+								String driver = p.getProperty("service.mysql.driver");
+								String url = p.getProperty("service.mysql.url");
+								String user = p.getProperty("service.mysql.user");
+								String password = p.getProperty("service.mysql.password");
+								Class.forName(driver);
+								java.sql.Connection connection = null;
+								connection = DriverManager.getConnection(url,user,password);
+								connection.close();
+								System.out.println("ReplicationDataPump: " + replicationid + " :No Communications Error");
+								return false;
+						}
+				catch (Exception e)
+						{
+								System.out.println("ReplicationDataPump: " + replicationid + " :Detected Communications Error");
+								return true;
+						}
+		}
+
+		public void shutdown()
+		{
+				try
+						{
+								try
+										{
+												session.close();
+										}
+								catch (Exception ignore1)
+										{
+										}
+								factory.close();
+								databaseDown = true;
+								System.out.println("ReplicationDataPump: " + replicationid + ":Shutting Down");
+						}
+				catch (Exception ignore2)
+						{
+						}
+				try
+						{
+								Thread.sleep(5 * 60 * 1000);
+						}
+				catch (Exception ignore)
+						{
+						}
+		}
+
+		public void restartDatabase()
+		{
+				try
+						{
+								factory = hibernateConfiguration.buildSessionFactory();
+								session = factory.openSession();
+								databaseDown = false;
+								System.out.println("ReplicationDataPump: " + replicationid + ":Restarting");
+						}
+				catch (Exception ignore)
+						{
+						}
+				try
+						{
+								Thread.sleep(30 * 1000);
+						}
+				catch (Exception ignore)
+						{
+						}
+		}
+
 		public void loop()
 		{
 				if (exitflag)
 						return;
+
+				if (databaseDown)
+						{
+								restartDatabase();
+								if (databaseDown)
+										{
+												System.out.println("ReplicationDataPump: " + replicationid + " :Database Down - Exiting");
+												exitflag = true;
+												return;
+										}
+						}
 
 				command = "select * from Replication where replicationid = " + replicationid;
 
@@ -160,6 +253,13 @@ public class ReplicationDataPump extends Thread
 						}
 				catch (Exception e)
 						{
+								if (communicationsError())
+										{
+												shutdown();
+												cleanup();
+												exitflag = true;
+												return;
+										}
 								System.out.println("command: " + command);
 								e.printStackTrace();
 								cleanup();
@@ -197,6 +297,13 @@ public class ReplicationDataPump extends Thread
 						}
 				catch(Exception e)
 						{
+								if (communicationsError())
+										{
+												shutdown();
+												cleanup();
+												exitflag = true;
+												return;
+										}
 								System.out.println("Error During Replication");
 								System.out.println("Command: " + command);
 								e.printStackTrace();
@@ -272,7 +379,15 @@ public class ReplicationDataPump extends Thread
 						}
 				catch (Exception e)
 						{
-								System.out.println("Error During Replication");
+								if (communicationsError())
+										{
+												System.out.println("ReplicationDataPump: " + replicationid + " :Database Connection Error");
+												cleanup();
+												shutdown();
+												exitflag = true;
+												return;
+										}
+								System.out.println("ReplicationDataPump: Error During Replication");
 								e.printStackTrace();
 								cleanup();
 								exitflag = true;
@@ -294,64 +409,45 @@ public class ReplicationDataPump extends Thread
 						}
 		}
 																								
-		public String getXML(String dbid)
+		public String getXML(String dbid) throws Exception
 		{
 				StringBuffer buffer = new StringBuffer();
 
 				int i = 0;
 
-				try
+				session = factory.openSession();
+				String command = "from JobUsageRecord where dbid = " + dbid;
+				List result = session.createQuery(command).list();
+				for(i = 0; i < result.size(); i++)
 						{
-								session = factory.openSession();
-								String command = "from JobUsageRecord where dbid = " + dbid;
-								List result = session.createQuery(command).list();
-								for(i = 0; i < result.size(); i++)
-										{
-												JobUsageRecord record = (JobUsageRecord) result.get(i);
-												DurationElement duration = getCpuSystemDuration(dbid);
-												if (duration != null)
-														record.setCpuSystemDuration(duration);
-												if (record.getCpuSystemDuration() == null)
-														System.out.println("dbid: " + dbid + " null cpu system duration");
-												buffer.append("replication" + "|");
-												buffer.append(record.asXML() + "|");
-												buffer.append(record.getRawXml() + "|");
-												buffer.append(record.getExtraXml());
-										}
+								JobUsageRecord record = (JobUsageRecord) result.get(i);
+								DurationElement duration = getCpuSystemDuration(dbid);
+								if (duration != null)
+										record.setCpuSystemDuration(duration);
+								if (record.getCpuSystemDuration() == null)
+										System.out.println("dbid: " + dbid + " null cpu system duration");
+								buffer.append("replication" + "|");
+								buffer.append(record.asXML() + "|");
+								buffer.append(record.getRawXml() + "|");
+								buffer.append(record.getExtraXml());
 						}
-				catch (Exception e)
-						{
-								Logging.warning(xp.parseException(e));
-						}
-				finally
-						{
-								session.close();
-						}
+				session.close();
 				return buffer.toString();
 		}
 
-		public DurationElement getCpuSystemDuration(String dbid)
+		public DurationElement getCpuSystemDuration(String dbid) throws Exception
 		{
 				String command = "select CpuSystemDuration from JobUsageRecord where dbid = " + dbid;
 				Double value = null;
 
-				try
+				Statement statement = connection.prepareStatement(command);
+				ResultSet resultSet = statement.executeQuery(command);
+				while(resultSet.next())
 						{
-								Statement statement = connection.prepareStatement(command);
-								ResultSet resultSet = statement.executeQuery(command);
-								while(resultSet.next())
-										{
-												value = resultSet.getDouble(1);
-										}
-								resultSet.close();
-								statement.close();
+								value = resultSet.getDouble(1);
 						}
-				catch (Exception e)
-						{
-								System.out.println("command: " + command);
-								e.printStackTrace();
-								return null;
-						}
+				resultSet.close();
+				statement.close();
 
 				if (value == null)
 						return null;
@@ -362,7 +458,7 @@ public class ReplicationDataPump extends Thread
 				return duration;
 		}
 
-		public void updateReplicationTable(String dbid)
+		public void updateReplicationTable(String dbid) throws Exception
 		{
 				String command = 
 						"update Replication" + cr +
@@ -370,17 +466,9 @@ public class ReplicationDataPump extends Thread
 						" rowcount = rowcount + 1" + cr +
 						" where replicationid = " + replicationid;
 
-				try
-						{
-								Statement statement = connection.createStatement();
-								statement.executeUpdate(command);
-								statement.close();
-						}
-				catch (Exception e)
-						{
-								System.out.println("command: " + command);
-								e.printStackTrace();
-						}
+				Statement statement = connection.createStatement();
+				statement.executeUpdate(command);
+				statement.close();
 		}
 						
 		public String[] split(String input,String sep)

@@ -5,6 +5,7 @@ import java.sql.*;
 import java.io.*;
 
 import org.hibernate.SessionFactory;
+import org.hibernate.cfg.Configuration;
 
 public class ReplicationService extends Thread
 {
@@ -25,11 +26,13 @@ public class ReplicationService extends Thread
 		XP xp = new XP();
 
 		SessionFactory factory;
+		org.hibernate.cfg.Configuration hibernateConfiguration;
 
-		public ReplicationService(SessionFactory factory)
+		public ReplicationService(org.hibernate.cfg.Configuration hibernateConfiguration,SessionFactory factory)
 		{
+				this.hibernateConfiguration = hibernateConfiguration;
 				this.factory = factory;
-				p = Configuration.getProperties();
+				p = net.sf.gratia.services.Configuration.getProperties();
 				driver = p.getProperty("service.mysql.driver");
 				url = p.getProperty("service.mysql.url");
 				user = p.getProperty("service.mysql.user");
@@ -97,7 +100,7 @@ public class ReplicationService extends Thread
 																if ((! pump.isAlive()) && (running.equals("1")))
 																		{
 																				System.out.println("ReplicationService: Starting DataPump: " + replicationid);
-																				pump = new ReplicationDataPump(replicationid,factory);
+																				pump = new ReplicationDataPump(replicationid,hibernateConfiguration,factory);
 																				table.put(replicationid,pump);
 																				pump.start();
 																		}
@@ -108,7 +111,7 @@ public class ReplicationService extends Thread
 																		continue;
 																pump = (ReplicationDataPump) table.get(replicationid);
 																System.out.println("ReplicationService: Starting DataPump: " + replicationid);
-																pump = new ReplicationDataPump(replicationid,factory);
+																pump = new ReplicationDataPump(replicationid,hibernateConfiguration,factory);
 																table.put(replicationid,pump);
 																pump.start();
 														}

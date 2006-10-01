@@ -5,8 +5,9 @@ import java.rmi.server.*;
 import javax.jms.*;
 import java.util.Hashtable;
 import java.util.Properties;
-import java.sql.*;
+import java.util.Date;
 import java.io.*;
+import java.text.*;
 
 public class JMSProxyImpl extends UnicastRemoteObject implements JMSProxy
 {
@@ -22,8 +23,11 @@ public class JMSProxyImpl extends UnicastRemoteObject implements JMSProxy
 		Properties p;
 
 		String queues[] = null;
-		int iq = -1;
+		int iq = 0;
 		XP xp = new XP();
+
+		int irecords = 0;
+
 
 	public JMSProxyImpl() throws RemoteException
 		{
@@ -56,9 +60,22 @@ public class JMSProxyImpl extends UnicastRemoteObject implements JMSProxy
 
 		public boolean update(String xml) throws RemoteException
 		{
-				iq++;
-				if (iq > (queues.length - 1))
-						iq = 0;
+				irecords++;
+
+				if ((irecords % 100) == 0)
+						{
+								iq++;
+								if (iq > (queues.length - 1))
+										iq = 0;
+
+								try
+										{
+												Thread.yield();
+										}
+								catch (Exception ignore)
+										{
+										}
+						}
 
 				try
 						{

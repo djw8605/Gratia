@@ -13,6 +13,9 @@
 			 <property name="eventdate" column="eventdate" type="timestamp"/>
 			 <property name="rawxml" column="rawxml" type="text"/>
 			 <property name="extraxml" column="extraxml" type="text"/>
+			 <property name="source" column="source"/>
+			 <property name="error" column="error"/>
+			 <property name="dbid" column="dbid" type="int"/>
 </class>
 
 <class name="Replication" table="Replication" node="Replication" lazy="false">
@@ -154,10 +157,9 @@
          <property name="Id"
                column="KeyInfoId"
                type="string"/>
-
          <property name="Content"
                column="KeyInfoContent"
-               type="string"/>
+               type="text"/>
       </component>
    </component>
 
@@ -232,7 +234,7 @@
        <property name="Description" column="ProjectNameDescription" />
    </component>
    <component name="Host" class="StringElement" insert="true">
-       <property name="Value" column="Host" />
+       <property name="Value" column="Host" type="text"/>
        <property name="Description" column="HostDescription" />
    </component>
    <bag name="Disk" >
@@ -341,8 +343,10 @@
    </component>
 
 
-   <property name="ExtraXml" />
+   <property name="ExtraXml" type="text"/>
    <property name="RawXml" type="text" />
+	 <property name="ServerDate" column="ServerDate" type="timestamp"/>
+	 <property name="md5" column="md5"/>
 </class>
 
 </hibernate-mapping>

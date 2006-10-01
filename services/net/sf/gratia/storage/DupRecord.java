@@ -8,6 +8,9 @@ public class DupRecord
 		private Date eventdate;
 		private String rawxml;
 		private String extraxml;
+		private String source;
+		private String error;
+		private int dbid;
 
 		public DupRecord()
 		{
@@ -54,5 +57,33 @@ public class DupRecord
 				extraxml = value;
 		}
 
+		public void setsource(String value)
+		{
+				source = value;
+		}
 
+		public String getsource()
+		{
+				return source;
+		}
+
+		public void seterror(String value)
+		{
+				error = value;
+		}
+
+		public String geterror()
+		{
+				return error;
+		}
+
+		public void setdbid(int value)
+		{
+				dbid = value;
+		}
+
+		public int getdbid()
+		{
+				return dbid;
+		}
 }

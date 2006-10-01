@@ -2,7 +2,7 @@ package net.sf.gratia.storage;
 
 import java.util.Iterator;
 import java.util.List;
-
+import java.util.Date;
 
 /**
  * <p>Title: JobUsageRecord </p>
@@ -55,14 +55,18 @@ public class JobUsageRecord {
     private List ConsumableResource;
     private List Resource;
     private StringElement ProbeName;
-    
-    public JobUsageRecord() {
+    private Date ServerDate;
+		private String md5;
+
+    public JobUsageRecord() 
+		{
         RecordIdentity = null; // new RecordIdentity();
         IntegerElement el = new IntegerElement();
         el.setValue(1);
         setNjobs(el);
         RawXml = "";
         ExtraXml = "";
+				ServerDate = new Date();
     }
 
     public String listToString(String name,List l) {
@@ -457,4 +461,23 @@ public class JobUsageRecord {
         return ProbeName;
     }
 
+		public Date getServerDate() 
+		{
+				return ServerDate;
+		}
+
+		public void setServerDate(Date value) 
+		{
+				ServerDate = value;
+		}
+
+		public String getmd5()
+		{
+				return md5;
+		}
+
+		public void setmd5(String value)
+		{
+				md5 = value;
+		}
 }

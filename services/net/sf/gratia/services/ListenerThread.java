@@ -6,6 +6,8 @@ import java.util.Iterator;
 import java.util.Date;
 import java.util.Properties;
 import java.util.StringTokenizer;
+import java.util.List;
+
 import java.text.*;
 
 import java.io.*;
@@ -20,6 +22,8 @@ import org.hibernate.*;
 import org.hibernate.cfg.*;
 
 import java.sql.*;
+
+import java.security.*;
 
 public class ListenerThread extends Thread
 {
@@ -48,6 +52,10 @@ public class ListenerThread extends Thread
 
 		Object lock;
 
+		int dupdbid = 0;
+
+		String historypath = "";
+
 		public ListenerThread(String ident,
 													String directory,
 													org.hibernate.cfg.Configuration hibernateConfiguration,
@@ -71,6 +79,7 @@ public class ListenerThread extends Thread
 						{
 								e.printStackTrace();
 						}
+				historypath = System.getProperties().getProperty("catalina.home") + "/gratia/data/";
 		}
 
 		public void loadProperties()
@@ -84,47 +93,41 @@ public class ListenerThread extends Thread
 				Logging.log("ListenerThread: " + ident + ":Duplicate Check: " + duplicateCheck);
 		}
 
+		public String md5key(String input) throws Exception
+		{
+				MessageDigest md = MessageDigest.getInstance("MD5");
+				md.update(input.getBytes());
+				return HexString.bufferToHex(md.digest());
+		}
+
     public boolean gotDuplicate(JobUsageRecord record) throws Exception
     {
 				boolean status = false;
-    	
+				String dq = "'";
+
 				if (duplicateCheck == false)
 						return false;
 
-				JobIdentity jobIdentity = record.getJobIdentity();
-				DateElement startTimeElement = record.getStartTime();
-				
-				if ((jobIdentity == null) || (startTimeElement == null))
-						{
-								System.out.println("ListenerThread: " + ident + ":Invalid Record:" + "\n" + jobIdentity + "\n");
-								return false;
-						}
-				if ((jobIdentity.getGlobalJobId() == null) || (startTimeElement.getValue() == null))
-						{
-								System.out.println("ListenerThread: " + ident + ":Invalid Record:" + "\n" + jobIdentity + "\n");
-								return false;
-						}
+				RecordIdentity temp = record.getRecordIdentity();
+				record.setRecordIdentity(null);
+				String md5key = md5key(record.asXML());
+				record.setmd5(md5key);
+				record.setRecordIdentity(temp);
 
-				String globalJobid = jobIdentity.getGlobalJobId();
-				String localJobid = jobIdentity.getLocalJobId();
-				String host = record.getHost().getValue();
-
-				Date startTime = startTimeElement.getValue();
-				SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-					
-				String sql = "SELECT dbid " + 
-						"FROM JobUsageRecord " +
-						"WHERE GlobalJobId = '" + globalJobid + "' " +
-						" AND StartTime = '" + format.format(startTime) + "'" +
-						" AND LocalJobid = '" + localJobid + "'" +
-						" AND Host = '" + host + "'";
+				String sql = "SELECT dbid from JobUsageRecord where md5 = " + dq + md5key + dq;
 	    	
 				org.hibernate.Session session2 = factory.openSession();
-				
+				dupdbid = 0;
+
 				try
 						{
-								if(session2.createSQLQuery(sql).list().size() > 0)
-										status = true;
+								List list = session2.createSQLQuery(sql).list();
+								if (list.size() > 0)
+										{
+												status = true;
+												Integer value = (Integer) list.get(0);
+												dupdbid = value.intValue();
+										}
 						}
 				catch (Exception e)
 						{
@@ -153,8 +156,6 @@ public class ListenerThread extends Thread
 
 				System.out.println("ListenerThread: " + ident + ":Communications Error Test:" + source);
 
-				if (source.indexOf("hibernate") > 0)
-						return true;
 				if (source.indexOf("StatusUpdater") > 0)
 						return true;
 
@@ -276,25 +277,88 @@ public class ListenerThread extends Thread
 								//
 								// see if we got a normal update or a replicated one
 								//
+								
+								boolean gotblob = false;
+								boolean gothistory = false;
+								String historydate = null;
 
-								if (blob.startsWith("replication"))
+								try
 										{
-												StringTokenizer st = new StringTokenizer(blob,"|");
-												st.nextToken();
-												xml = st.nextToken();
-												rawxml = st.nextToken();
-												if (st.hasMoreTokens())
-														extraxml = st.nextToken();
+												if (blob.startsWith("replication"))
+														{
+																StringTokenizer st = new StringTokenizer(blob,"|");
+																if (st.hasMoreTokens())
+																		st.nextToken();
+																if (st.hasMoreTokens())
+																		xml = st.nextToken();
+																if (st.hasMoreTokens())
+																		rawxml = st.nextToken();
+																if (st.hasMoreTokens())
+																		extraxml = st.nextToken();
+																gotblob = true;
+														}
+												else if (blob.startsWith("history"))
+														{
+																StringTokenizer st = new StringTokenizer(blob,"|");
+																if (st.hasMoreTokens())
+																		st.nextToken();
+																if (st.hasMoreTokens())
+																		historydate = st.nextToken();
+																if (st.hasMoreTokens())
+																		xml = st.nextToken();
+																gothistory = true;
+														}
+												else
+														xml = blob;
 										}
-								else
-										xml = blob;
+								catch (Exception e)
+										{
+												System.out.println("ListenerThread: " + ident + ":Error:Processing File: " + file);
+												System.out.println("ListenerThread: " + ident + ":Blob: " + blob);
+												try
+														{
+																File temp = new File(file);
+																temp.delete();
+														}
+												catch (Exception ignore)
+														{
+														}
+												continue;
+										}
+
+								if (xml == null)
+										{
+												System.out.println("ListenerThread: " + ident + ":Error:No Data Processing: " + file);
+												try
+														{
+																File temp = new File(file);
+																temp.delete();
+														}
+												catch (Exception ignore)
+														{
+														}
+												continue;
+										}
 
 								System.out.println("ListenerThread: " + ident + ":Processing: " + file);
 
 								try
 										{
+												ArrayList records = new ArrayList();
 												
-												ArrayList records = convert(xml);
+												try
+														{
+																records = convert(xml);
+														}
+												catch (Exception e)
+														{
+																if (gotblob)
+																		saveParse("Replication","Parse",xml);
+																else if (gothistory)
+																		saveParse("History","Parse",xml);
+																else
+																		saveParse("Probe","Parse",xml);
+														}
 												
 												for(int j = 0; j < records.size(); j++)
 														{
@@ -313,7 +377,12 @@ public class ListenerThread extends Thread
 																if (gotdup)
 																		{
 																				// System.out.println("ListenerThread: " + ident + ":Before Save Duplicate");
-																				saveDuplicate(current);
+																				if (gotblob)
+																						saveDuplicate("Replication","Duplicate",dupdbid,current);
+																				else if (gothistory)
+																						;
+																				else
+																						saveDuplicate("Probe","Duplicate",dupdbid,current);
 																				// System.out.println("ListenerThread: " + ident + ":After Save Duplicate");
 																		}
 																else
@@ -330,7 +399,49 @@ public class ListenerThread extends Thread
 																				if (extraxml != null)
 																						current.setExtraXml(extraxml);
 																				// System.out.println("ListenerThread: " + ident + ":Before Hibernate Save");
-																				session.save(current);
+																				try
+																						{
+																								if (gothistory)
+																										{
+																												Date serverDate = new Date(Long.parseLong(historydate));
+																												current.setServerDate(serverDate);
+																										}
+																								session.save(current);
+																								//
+																								// now - save history
+																								//
+																								if (! gothistory)
+																										{
+																												Date serverDate = current.getServerDate();
+																												synchronized(lock)
+																														{
+																																Date now = new Date();
+																																SimpleDateFormat format = new SimpleDateFormat("yyyyMMddkk");
+																																String path = historypath + "history" + format.format(now);
+																																File directory = new File(path);
+																																if (! directory.exists())
+																																		{
+																																				directory.mkdir();
+																																		}
+																																File historyfile = File.createTempFile("history","xml",new File(path));
+																																String filename = historyfile.getPath();
+																																xp.save(filename,"history" + "|" + serverDate.getTime() + "|" + xml);
+																														}
+																										}
+																						}
+																				catch (Exception e)
+																						{
+																								if (! communicationsError(e))
+																										{
+																												if (gotblob)
+																														saveSQL("Replication","SQLError",current);
+																												else
+																														saveSQL("Probe","SQLError",current);
+																										}
+																								else
+																										throw e;
+																						}
+
 																				// System.out.println("ListenerThread: " + ident + ":After Hibernate Save");
 																		}
 																// System.out.println("ListenerThread: " + ident + ":Before Transaction Commit");
@@ -384,6 +495,7 @@ public class ListenerThread extends Thread
 						{
 								Logging.warning(xp.parseException(e));
 								Logging.warning("XML:" + "\n\n" + xml + "\n\n");
+								throw new Exception();
 						}
 				try 
 						{
@@ -450,12 +562,16 @@ public class ListenerThread extends Thread
 				return usageRecords;
 		}   
 
-		public void saveDuplicate(JobUsageRecord current)
+		public void saveDuplicate(String source,String error,int dupdbid,JobUsageRecord current)
 		{
 				DupRecord record = new DupRecord();
 
 				record.seteventdate(new java.util.Date());
 				record.setrawxml(current.asXML());
+				record.setsource(source);
+				record.seterror(error);
+				record.setdbid(dupdbid);
+
 				try
 						{
 								org.hibernate.Session session2 = factory.openSession();
@@ -470,4 +586,49 @@ public class ListenerThread extends Thread
 						}
 		}
 
+		public void saveParse(String source,String error,String xml)
+		{
+				DupRecord record = new DupRecord();
+
+				record.seteventdate(new java.util.Date());
+				record.setrawxml(xml);
+				record.setsource(source);
+				record.seterror(error);
+
+				try
+						{
+								org.hibernate.Session session2 = factory.openSession();
+								Transaction tx2 = session2.beginTransaction();
+								session2.save(record);
+								tx2.commit();
+								session2.close();
+						}
+				catch (Exception e)
+						{
+								e.printStackTrace();
+						}
+		}
+
+		public void saveSQL(String source,String error,JobUsageRecord current)
+		{
+				DupRecord record = new DupRecord();
+
+				record.seteventdate(new java.util.Date());
+				record.setrawxml(current.asXML());
+				record.setsource(source);
+				record.seterror(error);
+
+				try
+						{
+								org.hibernate.Session session2 = factory.openSession();
+								Transaction tx2 = session2.beginTransaction();
+								session2.save(record);
+								tx2.commit();
+								session2.close();
+						}
+				catch (Exception e)
+						{
+								e.printStackTrace();
+						}
+		}
 }

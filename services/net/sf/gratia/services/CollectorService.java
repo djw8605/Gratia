@@ -35,7 +35,7 @@ public class CollectorService implements ServletContextListener
 		ListenerThread threads[];
 		StatusListenerThread statusListenerThread;
 		ReplicationService replicationService;
-
+		RecoveryService recoveryService;
 		ProbeMonitorService probeMonitorService;
 		RMIService rmiservice;
 
@@ -218,6 +218,20 @@ public class CollectorService implements ServletContextListener
 								System.out.println("JMSProxy Started");
 
 								//
+								// start recovery service
+								//
+
+								recoveryService = new RecoveryService();
+								recoveryService.start();
+
+								//
+								// start a thread to recheck recovery directories every 6 hours
+								//
+
+								RecoveryMonitor recoveryMonitor = new RecoveryMonitor();
+								recoveryMonitor.start();
+
+								//
 								// start msg listener
 								//
 
@@ -267,7 +281,7 @@ public class CollectorService implements ServletContextListener
 				// start replication service
 				//
 
-				replicationService = new ReplicationService(hibernateFactory);
+				replicationService = new ReplicationService(hibernateConfiguration,hibernateFactory);
 				replicationService.start();
 
 				//
@@ -398,12 +412,14 @@ public class CollectorService implements ServletContextListener
 								"alter table JobUsageRecord add index index04(HostDescription)",
 								"alter table JobUsageRecord add index index05(StartTime)",
 								"alter table JobUsageRecord add index index06(GlobalJobid)",
-								"alter table Security add unique index index02(alias)",
-								"alter table CPUInfo change column NodeName HostDescription varchar(255)",
 								"alter table JobUsageRecord add index index07(LocalJobid)",
-								"alter table JobUsageRecord add index index08(Host)",
-								"alter table JobUsageRecord add index index09(LocalJobid)",
-								"alter table JobUsageRecord add index index10(Host)"
+								"alter table JobUsageRecord add index index08(Host(255))",
+								"alter table JobUsageRecord drop index index09",
+								"alter table JobUsageRecord drop index index10",
+								"alter table JobUsageRecord add index index11(ServerDate)",
+								"alter table JobUsageRecord add unique index index12(md5)",
+								"alter table Security add unique index index02(alias)",
+								"alter table CPUInfo change column NodeName HostDescription varchar(255)"
 						};
 
 				for (i = 0; i < commands1.length; i++)
@@ -416,7 +432,7 @@ public class CollectorService implements ServletContextListener
 								}
 						catch (Exception e)
 								{
-										// System.out.println("Command: Error: " + commands1[i] + " : " + e);
+										System.out.println("Command: Error: " + commands1[i] + " : " + e);
 								}
 
 		}
@@ -474,6 +490,28 @@ public class CollectorService implements ServletContextListener
 						xp.save(catalinaHome + "/webapps/gratia-report-configuration/ReportingConfig.xml",
 										xml.toString());
 						System.out.println("ReportConfig updated");
+				}
+		}
+
+		public class RecoveryMonitor extends Thread
+		{
+				public RecoveryMonitor()
+				{
+				}
+
+				public void run()
+				{
+						while(true)
+								{
+										try
+												{
+														Thread.sleep(6 * 60 * 60 * 1000);
+														new RecoveryService();
+												}
+										catch (Exception ignore)
+												{
+												}
+								}
 				}
 		}
 
