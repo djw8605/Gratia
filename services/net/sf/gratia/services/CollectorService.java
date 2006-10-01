@@ -10,9 +10,6 @@ import java.util.Enumeration;
 
 import javax.servlet.*;
 
-import org.hibernate.SessionFactory;
-import org.hibernate.cfg.Configuration;
-
 import java.sql.*;
 
 import java.security.*;
@@ -24,9 +21,6 @@ public class CollectorService implements ServletContextListener
 		public String service;
 
 		public Properties p;
-
-		public org.hibernate.cfg.Configuration hibernateConfiguration;
-		public org.hibernate.SessionFactory hibernateFactory;
 
 		//
 		// various threads
@@ -159,30 +153,7 @@ public class CollectorService implements ServletContextListener
 								// start database
 								//
 
-								try
-										{
-												hibernateConfiguration = new org.hibernate.cfg.Configuration();
-												hibernateConfiguration.addFile(new File(net.sf.gratia.services.Configuration.getJobUsagePath()));
-												hibernateConfiguration.configure(new File(net.sf.gratia.services.Configuration.getHibernatePath()));
-
-												Properties hp = new Properties();
-												hp.setProperty("hibernate.connection.driver_class",p.getProperty("service.mysql.driver"));
-												hp.setProperty("hibernate.connection.url",p.getProperty("service.mysql.url"));
-												hp.setProperty("hibernate.connection.username",p.getProperty("service.mysql.user"));
-												hp.setProperty("hibernate.connection.password",p.getProperty("service.mysql.password"));
-												hibernateConfiguration.addProperties(hp);
-
-												hibernateFactory = hibernateConfiguration.buildSessionFactory();
-
-												System.out.println("");
-												System.out.println("CollectorService: Hibernate Services Started");
-												System.out.println("");
-
-										}
-								catch (Exception databaseError)
-										{
-												databaseError.printStackTrace();
-										}
+								HibernateWrapper.start();
 
 								//
 								// zap database
@@ -238,7 +209,7 @@ public class CollectorService implements ServletContextListener
 								threads = new ListenerThread[maxthreads];
 								for (i = 0; i < maxthreads; i++)
 										{
-												threads[i] = new ListenerThread("ListenerThread: " + i,queues[i],hibernateConfiguration,hibernateFactory,lock);
+												threads[i] = new ListenerThread("ListenerThread: " + i,queues[i],lock);
 												threads[i].setPriority(Thread.MAX_PRIORITY);
 												threads[i].setDaemon(true);
 										}
@@ -255,7 +226,7 @@ public class CollectorService implements ServletContextListener
 								// start probe monitor
 								//
 
-								probeMonitorService = new ProbeMonitorService(hibernateFactory);
+								probeMonitorService = new ProbeMonitorService();
 								probeMonitorService.setDaemon(true);
 								probeMonitorService.start();
 						}
@@ -281,7 +252,7 @@ public class CollectorService implements ServletContextListener
 				// start replication service
 				//
 
-				replicationService = new ReplicationService(hibernateConfiguration,hibernateFactory);
+				replicationService = new ReplicationService();
 				replicationService.start();
 
 				//

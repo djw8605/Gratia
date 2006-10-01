@@ -19,7 +19,6 @@ import org.dom4j.*;
 import org.dom4j.io.*;
 
 import org.hibernate.*;
-import org.hibernate.cfg.*;
 
 import java.sql.*;
 
@@ -34,8 +33,6 @@ public class ListenerThread extends Thread
 		// database parameters
 		//
 
-		org.hibernate.cfg.Configuration hibernateConfiguration;
-		SessionFactory factory;
 		org.hibernate.Session session;
 		Transaction tx;
 		JobRecUpdaterManager updater = new JobRecUpdaterManager();
@@ -48,8 +45,6 @@ public class ListenerThread extends Thread
 		StatusUpdater statusUpdater = new StatusUpdater();
 		NewProbeUpdate newProbeUpdate = new NewProbeUpdate();
 
-		volatile boolean databaseDown = false;
-
 		Object lock;
 
 		int dupdbid = 0;
@@ -58,14 +53,10 @@ public class ListenerThread extends Thread
 
 		public ListenerThread(String ident,
 													String directory,
-													org.hibernate.cfg.Configuration hibernateConfiguration,
-													SessionFactory factory,
 													Object lock)
 		{
 				this.ident = ident;
 				this.directory = directory;
-				this.hibernateConfiguration = hibernateConfiguration;
-				this.factory = factory;
 				this.lock = lock;
 				loadProperties();
 				try
@@ -116,7 +107,7 @@ public class ListenerThread extends Thread
 
 				String sql = "SELECT dbid from JobUsageRecord where md5 = " + dq + md5key + dq;
 	    	
-				org.hibernate.Session session2 = factory.openSession();
+				org.hibernate.Session session2 = HibernateWrapper.getSession();
 				dupdbid = 0;
 
 				try
@@ -190,9 +181,21 @@ public class ListenerThread extends Thread
 		{
 				while (true)
 						{
-								if (databaseDown)
+								if (HibernateWrapper.databaseDown)
 										{
-												restartDatabase();
+												HibernateWrapper.start();
+												if (HibernateWrapper.databaseDown)
+														{
+																System.out.println("ListenerThread: " + ident + ":Hibernate Down: Sleeping");
+																try
+																		{
+																				Thread.sleep(30 * 1000);
+																		}
+																catch (Exception ignore)
+																		{
+																		}
+																continue;
+														}
 										}
 								loop();
 								try
@@ -205,59 +208,9 @@ public class ListenerThread extends Thread
 						}
 		}
 				
-		public void restartDatabase()
-		{
-				try
-						{
-								factory = hibernateConfiguration.buildSessionFactory();
-								session = factory.openSession();
-								databaseDown = false;
-								statusUpdater = new StatusUpdater();
-								newProbeUpdate = new NewProbeUpdate();
-								System.out.println("ListenerThread: " + ident + ":Restarting");
-						}
-				catch (Exception ignore)
-						{
-						}
-				try
-						{
-								Thread.sleep(30 * 1000);
-						}
-				catch (Exception ignore)
-						{
-						}
-		}
-
-		public void shutdown()
-		{
-				try
-						{
-								try
-										{
-												session.close();
-										}
-								catch (Exception ignore1)
-										{
-										}
-								factory.close();
-								databaseDown = true;
-								System.out.println("ListenerThread: " + ident + ":Shutting Down");
-						}
-				catch (Exception ignore2)
-						{
-						}
-				try
-						{
-								Thread.sleep(30 * 1000);
-						}
-				catch (Exception ignore)
-						{
-						}
-		}
-
 		public void loop()
 		{
-				if (databaseDown)
+				if (! HibernateWrapper.communicationsCheck())
 						return;
 
 				String files[] = xp.getFileList(directory);
@@ -363,7 +316,7 @@ public class ListenerThread extends Thread
 												for(int j = 0; j < records.size(); j++)
 														{
 																// System.out.println("ListenerThread: " + ident + ":Before Begin Transaction");
-																session = factory.openSession();
+																session = HibernateWrapper.getSession();
 																tx = session.beginTransaction();
 																// System.out.println("ListenerThread: " + ident + ":After Begin Transaction");
 
@@ -431,7 +384,7 @@ public class ListenerThread extends Thread
 																						}
 																				catch (Exception e)
 																						{
-																								if (! communicationsError(e))
+																								if (HibernateWrapper.communicationsCheck())
 																										{
 																												if (gotblob)
 																														saveSQL("Replication","SQLError",current);
@@ -452,9 +405,9 @@ public class ListenerThread extends Thread
 										}
 								catch (Exception exception)
 										{
-												if (communicationsError(exception))
+												if (! HibernateWrapper.communicationsCheck())
 														{
-																shutdown();
+																System.out.println("ListenerThread: " + ident + ":Communications Error:Shutting Down");
 																return;
 														}
 												System.out.println("");
@@ -574,7 +527,7 @@ public class ListenerThread extends Thread
 
 				try
 						{
-								org.hibernate.Session session2 = factory.openSession();
+								org.hibernate.Session session2 = HibernateWrapper.getSession();
 								Transaction tx2 = session2.beginTransaction();
 								session2.save(record);
 								tx2.commit();
@@ -597,7 +550,7 @@ public class ListenerThread extends Thread
 
 				try
 						{
-								org.hibernate.Session session2 = factory.openSession();
+								org.hibernate.Session session2 = HibernateWrapper.getSession();
 								Transaction tx2 = session2.beginTransaction();
 								session2.save(record);
 								tx2.commit();
@@ -620,7 +573,7 @@ public class ListenerThread extends Thread
 
 				try
 						{
-								org.hibernate.Session session2 = factory.openSession();
+								org.hibernate.Session session2 = HibernateWrapper.getSession();
 								Transaction tx2 = session2.beginTransaction();
 								session2.save(record);
 								tx2.commit();

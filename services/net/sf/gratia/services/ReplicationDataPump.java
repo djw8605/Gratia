@@ -6,7 +6,7 @@ import java.io.*;
 import java.net.*;
 
 import org.hibernate.*;
-import org.hibernate.cfg.*;
+
 import net.sf.gratia.storage.*;
 
 public class ReplicationDataPump extends Thread
@@ -30,9 +30,7 @@ public class ReplicationDataPump extends Thread
 
 		int irecords = 0;
 
-		SessionFactory factory;
 		org.hibernate.Session session;
-		org.hibernate.cfg.Configuration hibernateConfiguration;
 
 		XP xp = new XP();
 
@@ -47,11 +45,9 @@ public class ReplicationDataPump extends Thread
 
 		boolean databaseDown = false;
 
-		public ReplicationDataPump(String replicationid,org.hibernate.cfg.Configuration hibernateConfiguration,SessionFactory factory)
+		public ReplicationDataPump(String replicationid)
 		{
-				this.factory = factory;
 				this.replicationid = replicationid;
-				this.hibernateConfiguration = hibernateConfiguration;
 				p = Configuration.getProperties();
 				driver = p.getProperty("service.mysql.driver");
 				url = p.getProperty("service.mysql.url");
@@ -78,6 +74,16 @@ public class ReplicationDataPump extends Thread
 		public void run()
 		{
 				System.out.println("ReplicationDataPump: Started: " + replicationid);
+				if (HibernateWrapper.databaseDown)
+						{
+								HibernateWrapper.start();
+								if (HibernateWrapper.databaseDown)
+										{
+												System.out.println("ReplicationDataPump: Hibernate Down - Exiting: " + replicationid);
+												return;
+										}
+						}
+
 				while(true)
 						{
 								loop();
@@ -129,97 +135,16 @@ public class ReplicationDataPump extends Thread
 				System.out.println("ReplicationDataPump: Exit Requested: " + replicationid);
 		}
 
-    public boolean communicationsError()
-    {
-				try
-						{
-								Thread.sleep(30 * 1000);
-						}
-				catch (Exception ignore)
-						{
-						}
-				try
-						{
-								String driver = p.getProperty("service.mysql.driver");
-								String url = p.getProperty("service.mysql.url");
-								String user = p.getProperty("service.mysql.user");
-								String password = p.getProperty("service.mysql.password");
-								Class.forName(driver);
-								java.sql.Connection connection = null;
-								connection = DriverManager.getConnection(url,user,password);
-								connection.close();
-								System.out.println("ReplicationDataPump: " + replicationid + " :No Communications Error");
-								return false;
-						}
-				catch (Exception e)
-						{
-								System.out.println("ReplicationDataPump: " + replicationid + " :Detected Communications Error");
-								return true;
-						}
-		}
-
-		public void shutdown()
-		{
-				try
-						{
-								try
-										{
-												session.close();
-										}
-								catch (Exception ignore1)
-										{
-										}
-								factory.close();
-								databaseDown = true;
-								System.out.println("ReplicationDataPump: " + replicationid + ":Shutting Down");
-						}
-				catch (Exception ignore2)
-						{
-						}
-				try
-						{
-								Thread.sleep(5 * 60 * 1000);
-						}
-				catch (Exception ignore)
-						{
-						}
-		}
-
-		public void restartDatabase()
-		{
-				try
-						{
-								factory = hibernateConfiguration.buildSessionFactory();
-								session = factory.openSession();
-								databaseDown = false;
-								System.out.println("ReplicationDataPump: " + replicationid + ":Restarting");
-						}
-				catch (Exception ignore)
-						{
-						}
-				try
-						{
-								Thread.sleep(30 * 1000);
-						}
-				catch (Exception ignore)
-						{
-						}
-		}
-
 		public void loop()
 		{
 				if (exitflag)
 						return;
 
-				if (databaseDown)
+				if (! HibernateWrapper.communicationsCheck())
 						{
-								restartDatabase();
-								if (databaseDown)
-										{
-												System.out.println("ReplicationDataPump: " + replicationid + " :Database Down - Exiting");
-												exitflag = true;
-												return;
-										}
+								System.out.println("ReplicationDataPump: " + replicationid + " :Hibernate Down - Exiting");
+								exitflag = true;
+								return;
 						}
 
 				command = "select * from Replication where replicationid = " + replicationid;
@@ -253,9 +178,8 @@ public class ReplicationDataPump extends Thread
 						}
 				catch (Exception e)
 						{
-								if (communicationsError())
+								if (! HibernateWrapper.communicationsCheck())
 										{
-												shutdown();
 												cleanup();
 												exitflag = true;
 												return;
@@ -297,9 +221,8 @@ public class ReplicationDataPump extends Thread
 						}
 				catch(Exception e)
 						{
-								if (communicationsError())
+								if (! HibernateWrapper.communicationsCheck())
 										{
-												shutdown();
 												cleanup();
 												exitflag = true;
 												return;
@@ -379,11 +302,10 @@ public class ReplicationDataPump extends Thread
 						}
 				catch (Exception e)
 						{
-								if (communicationsError())
+								if (! HibernateWrapper.communicationsCheck())
 										{
 												System.out.println("ReplicationDataPump: " + replicationid + " :Database Connection Error");
 												cleanup();
-												shutdown();
 												exitflag = true;
 												return;
 										}
@@ -415,7 +337,7 @@ public class ReplicationDataPump extends Thread
 
 				int i = 0;
 
-				session = factory.openSession();
+				session = HibernateWrapper.getSession();
 				String command = "from JobUsageRecord where dbid = " + dbid;
 				List result = session.createQuery(command).list();
 				for(i = 0; i < result.size(); i++)

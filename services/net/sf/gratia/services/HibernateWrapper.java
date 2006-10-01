@@ -1,0 +1,106 @@
+package net.sf.gratia.services;
+
+import java.util.*;
+import java.io.*;
+import org.hibernate.SessionFactory;
+import org.hibernate.cfg.Configuration;
+
+import java.sql.*;
+import net.sf.gratia.storage.*;
+
+public class HibernateWrapper
+{
+		static Properties p;
+
+		static org.hibernate.cfg.Configuration hibernateConfiguration;
+		static org.hibernate.SessionFactory hibernateFactory;
+		static org.hibernate.Session session;
+
+		public static boolean databaseDown = true;
+
+
+		public static synchronized void start()
+		{
+				p = net.sf.gratia.services.Configuration.getProperties();
+
+				String configurationPath = net.sf.gratia.services.Configuration.getConfigurationPath();
+
+				try
+						{
+								hibernateFactory.close();
+						}
+				catch (Exception ignore)
+						{
+						}
+
+				try
+						{
+								hibernateConfiguration = new org.hibernate.cfg.Configuration();
+								hibernateConfiguration.addFile(new File(net.sf.gratia.services.Configuration.getJobUsagePath()));
+								hibernateConfiguration.configure(new File(net.sf.gratia.services.Configuration.getHibernatePath()));
+								
+								Properties hp = new Properties();
+								hp.setProperty("hibernate.connection.driver_class",p.getProperty("service.mysql.driver"));
+								hp.setProperty("hibernate.connection.url",p.getProperty("service.mysql.url"));
+								hp.setProperty("hibernate.connection.username",p.getProperty("service.mysql.user"));
+								hp.setProperty("hibernate.connection.password",p.getProperty("service.mysql.password"));
+								hibernateConfiguration.addProperties(hp);
+
+								hibernateFactory = hibernateConfiguration.buildSessionFactory();
+
+								System.out.println("");
+								System.out.println("HibernateWrapper: Hibernate Services Started");
+								System.out.println("");
+
+								databaseDown = false;
+						}
+				catch (Exception databaseError)
+						{
+								System.out.println("");
+								System.out.println("HibernateWrapper: Error Starting Hibernate");
+								System.out.println("");
+								databaseDown = true;
+						}
+		}
+
+		public static boolean communicationsCheck()
+		{
+				int i = 0;
+
+				try
+						{
+								session = hibernateFactory.openSession();
+								String command = "from JobUsageRecord where dbid = 1";
+								List result = session.createQuery(command).list();
+								for(i = 0; i < result.size(); i++)
+										{
+												JobUsageRecord record = (JobUsageRecord) result.get(i);
+										}
+								session.close();
+								return true;
+						}
+				catch (Exception e)
+						{
+								databaseDown = true;
+								System.out.println("HibernateWrapper: Database Down");
+								return false;
+						}
+		}
+
+		public static org.hibernate.Session getSession()
+		{
+				int i = 0;
+
+				try
+						{
+								org.hibernate.Session session = hibernateFactory.openSession();
+								return session;
+						}
+				catch (Exception e)
+						{
+								databaseDown = true;
+								System.out.println("HibernateWrapper: Database Down");
+								return null;
+						}
+		}
+}

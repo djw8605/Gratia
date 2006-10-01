@@ -17,15 +17,12 @@ public class ProbeMonitorService extends Thread
 		Properties p;
 		XP xp = new XP();
 
-		SessionFactory factory;
-		Session session;
 		Transaction tx;
 
 		Hashtable jobtable = new Hashtable();
 
-		public ProbeMonitorService(SessionFactory factory)
+		public ProbeMonitorService()
 		{
-				this.factory = factory;
 		}
 
 		public void run()

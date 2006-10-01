@@ -25,13 +25,8 @@ public class ReplicationService extends Thread
 		
 		XP xp = new XP();
 
-		SessionFactory factory;
-		org.hibernate.cfg.Configuration hibernateConfiguration;
-
-		public ReplicationService(org.hibernate.cfg.Configuration hibernateConfiguration,SessionFactory factory)
+		public ReplicationService()
 		{
-				this.hibernateConfiguration = hibernateConfiguration;
-				this.factory = factory;
 				p = net.sf.gratia.services.Configuration.getProperties();
 				driver = p.getProperty("service.mysql.driver");
 				url = p.getProperty("service.mysql.url");
@@ -100,7 +95,7 @@ public class ReplicationService extends Thread
 																if ((! pump.isAlive()) && (running.equals("1")))
 																		{
 																				System.out.println("ReplicationService: Starting DataPump: " + replicationid);
-																				pump = new ReplicationDataPump(replicationid,hibernateConfiguration,factory);
+																				pump = new ReplicationDataPump(replicationid);
 																				table.put(replicationid,pump);
 																				pump.start();
 																		}
@@ -111,7 +106,7 @@ public class ReplicationService extends Thread
 																		continue;
 																pump = (ReplicationDataPump) table.get(replicationid);
 																System.out.println("ReplicationService: Starting DataPump: " + replicationid);
-																pump = new ReplicationDataPump(replicationid,hibernateConfiguration,factory);
+																pump = new ReplicationDataPump(replicationid);
 																table.put(replicationid,pump);
 																pump.start();
 														}
