@@ -125,16 +125,34 @@ public class Status extends HttpServlet
 
 				Integer count1 = null;
 				Integer error1 = null;
+
+				Integer count2 = null;
+				Integer error2 = null;
+
+				Integer count3 = null;
+				Integer error3 = null;
+
+				Integer count4 = null;
+				Integer error4 = null;
+
+				Integer count5 = null;
+				Integer error5 = null;
+
+				Integer count6 = null;
+				Integer error6 = null;
+
 				Integer count24 = null;
 				Integer error24 = null;
+
 				Integer count7 = null;
 				Integer error7 = null;
 				
 				java.util.Date now = new java.util.Date();
 				long decrement = 60 * 60 * 1000;
-				java.util.Date date = new java.util.Date(now.getTime() - decrement);
+				java.util.Date to = new java.util.Date();
+				java.util.Date from = new java.util.Date(to.getTime() - decrement);
 
-				SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd hh24:mm:ss");
+				SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd kk:mm:ss");
 
 				try
 						{
@@ -142,7 +160,9 @@ public class Status extends HttpServlet
 								// previous hour
 								//
 
-								command = "select count(*) from JobUsageRecord where ServerDate > " + dq + format.format(date) + dq;
+								command = "select count(*) from JobUsageRecord where ServerDate > " + dq + format.format(from) + dq +
+										" and ServerDate <= " + dq + format.format(to) + dq;
+								System.out.println("command: " + command);
 								statement = connection.prepareStatement(command);
 								resultSet = statement.executeQuery(command);
 								while(resultSet.next())
@@ -150,7 +170,8 @@ public class Status extends HttpServlet
 								resultSet.close();
 								statement.close();
 
-								command = "select count(*) from DupRecord where EventDate > " + dq + format.format(date) + dq;
+								command = "select count(*) from DupRecord where EventDate > " + dq + format.format(from) + dq +
+										" and EventDate <= " + dq + format.format(to) + dq;
 								statement = connection.prepareStatement(command);
 								resultSet = statement.executeQuery(command);
 								while(resultSet.next())
@@ -159,11 +180,142 @@ public class Status extends HttpServlet
 								statement.close();
 
 								//
+								// hour - 2
+								//
+
+								decrement = 60 * 60 * 1000;
+								to = from;
+								from = new java.util.Date(to.getTime() - decrement);
+
+								command = "select count(*) from JobUsageRecord where ServerDate > " + dq + format.format(from) + dq +
+										" and ServerDate <= " + dq + format.format(to) + dq;
+								System.out.println("command: " + command);
+								statement = connection.prepareStatement(command);
+								resultSet = statement.executeQuery(command);
+								while(resultSet.next())
+										count2 = resultSet.getInt(1);
+								resultSet.close();
+								statement.close();
+
+								command = "select count(*) from DupRecord where EventDate > " + dq + format.format(from) + dq +
+										" and EventDate <= " + dq + format.format(to) + dq;
+								statement = connection.prepareStatement(command);
+								resultSet = statement.executeQuery(command);
+								while(resultSet.next())
+										error2 = resultSet.getInt(1);
+								resultSet.close();
+								statement.close();
+
+								//
+								// hour - 3
+								//
+
+								decrement = 60 * 60 * 1000;
+								to = from;
+								from = new java.util.Date(to.getTime() - decrement);
+
+								command = "select count(*) from JobUsageRecord where ServerDate > " + dq + format.format(from) + dq +
+										" and ServerDate <= " + dq + format.format(to) + dq;
+								statement = connection.prepareStatement(command);
+								resultSet = statement.executeQuery(command);
+								while(resultSet.next())
+										count3 = resultSet.getInt(1);
+								resultSet.close();
+								statement.close();
+
+								command = "select count(*) from DupRecord where EventDate > " + dq + format.format(from) + dq +
+										" and EventDate <= " + dq + format.format(to) + dq;
+								statement = connection.prepareStatement(command);
+								resultSet = statement.executeQuery(command);
+								while(resultSet.next())
+										error3 = resultSet.getInt(1);
+								resultSet.close();
+								statement.close();
+
+								//
+								// previous - 4
+								//
+
+								decrement = 60 * 60 * 1000;
+								to = from;
+								from = new java.util.Date(to.getTime() - decrement);
+
+								command = "select count(*) from JobUsageRecord where ServerDate > " + dq + format.format(from) + dq +
+										" and ServerDate <= " + dq + format.format(to) + dq;
+								statement = connection.prepareStatement(command);
+								resultSet = statement.executeQuery(command);
+								while(resultSet.next())
+										count4 = resultSet.getInt(1);
+								resultSet.close();
+								statement.close();
+
+								command = "select count(*) from DupRecord where EventDate > " + dq + format.format(from) + dq +
+										" and EventDate <= " + dq + format.format(to) + dq;
+								statement = connection.prepareStatement(command);
+								resultSet = statement.executeQuery(command);
+								while(resultSet.next())
+										error4 = resultSet.getInt(1);
+								resultSet.close();
+								statement.close();
+
+								//
+								// previous - 5
+								//
+
+								to = from;
+								decrement = 60 * 60 * 1000;
+								from = new java.util.Date(to.getTime() - decrement);
+
+								command = "select count(*) from JobUsageRecord where ServerDate > " + dq + format.format(from) + dq +
+										" and ServerDate <= " + dq + format.format(to) + dq;
+								statement = connection.prepareStatement(command);
+								resultSet = statement.executeQuery(command);
+								while(resultSet.next())
+										count5 = resultSet.getInt(1);
+								resultSet.close();
+								statement.close();
+
+								command = "select count(*) from DupRecord where EventDate > " + dq + format.format(from) + dq +
+										" and EventDate <= " + dq + format.format(to) + dq;
+								statement = connection.prepareStatement(command);
+								resultSet = statement.executeQuery(command);
+								while(resultSet.next())
+										error5 = resultSet.getInt(1);
+								resultSet.close();
+								statement.close();
+
+								//
+								// previous - 6
+								//
+
+								decrement = 60 * 60 * 1000;
+								to = from;
+								from = new java.util.Date(to.getTime() - decrement);
+
+								command = "select count(*) from JobUsageRecord where ServerDate > " + dq + format.format(from) + dq +
+										" and ServerDate <= " + dq + format.format(to) + dq;
+								statement = connection.prepareStatement(command);
+								resultSet = statement.executeQuery(command);
+								while(resultSet.next())
+										count6 = resultSet.getInt(1);
+								resultSet.close();
+								statement.close();
+
+								command = "select count(*) from DupRecord where EventDate > " + dq + format.format(from) + dq +
+										" and EventDate <= " + dq + format.format(to) + dq;
+								statement = connection.prepareStatement(command);
+								resultSet = statement.executeQuery(command);
+								while(resultSet.next())
+										error6 = resultSet.getInt(1);
+								resultSet.close();
+								statement.close();
+
+								//
 								// previous day
 								//
 
 								decrement = 24 * 60 * 60 * 1000;
-								date = new java.util.Date(now.getTime() - decrement);
+								java.util.Date date = new java.util.Date(now.getTime() - decrement);
 
 								command = "select count(*) from JobUsageRecord where ServerDate > " + dq + format.format(date) + dq;
 								statement = connection.prepareStatement(command);
@@ -211,6 +363,21 @@ public class Status extends HttpServlet
 
 				html = xp.replaceAll(html,"#count1#","" + count1.intValue());
 				html = xp.replaceAll(html,"#error1#","" + error1.intValue());
+
+				html = xp.replaceAll(html,"#count2#","" + count2.intValue());
+				html = xp.replaceAll(html,"#error2#","" + error2.intValue());
+
+				html = xp.replaceAll(html,"#count3#","" + count3.intValue());
+				html = xp.replaceAll(html,"#error3#","" + error3.intValue());
+
+				html = xp.replaceAll(html,"#count4#","" + count4.intValue());
+				html = xp.replaceAll(html,"#error4#","" + error4.intValue());
+
+				html = xp.replaceAll(html,"#count5#","" + count5.intValue());
+				html = xp.replaceAll(html,"#error5#","" + error5.intValue());
+
+				html = xp.replaceAll(html,"#count6#","" + count6.intValue());
+				html = xp.replaceAll(html,"#error6#","" + error6.intValue());
 
 				html = xp.replaceAll(html,"#count24#","" + count24.intValue());
 				html = xp.replaceAll(html,"#error24#","" + error24.intValue());
