@@ -7,12 +7,12 @@ osgcdf cdf
 fermilab fermilab
 #fmri fmri
 #gadu gadu
-#grase grase
+grase grase
 ivdgl ivdgl
 mis mis
 #sdss sdss
 #star star
-usatlas1 usatlas
+#usatlas1 usatlas
 uscms01 uscms
 uscms02 uscms
 uscms03 uscms
@@ -83,7 +83,7 @@ uscms36 cms
 #---- accounts for vo: uscms-grid ----#
 nneumeis uscms
 nneumeis uscms
-#ligo ligo
+ligo ligo
 #sam dzero 
 #samgrid dzero
 #dosar dosar
