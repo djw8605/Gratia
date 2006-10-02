@@ -45,8 +45,6 @@ echo >> $REPORTCSV
 
 mutt -a $REPORTCSV -s "$MAIL_MSG" $MAILTO < $REPORTTXT
 
-./gratiaSum.py $whenarg
-
 ./dailyFromSummary --output=text $whenarg > $SUM_REPORTTXT 
 echo >> $SUM_REPORTTXT 
 echo "See $SUM_WEBLOC for more information" >> $SUM_REPORTTXT 
