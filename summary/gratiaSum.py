@@ -13,7 +13,8 @@ def SendData(values, dateAsSecondSinceEpoch):
         # This function takes the input data passed as a python tuple,
         # create the Gratia record and send it.
 
-        (SiteName, UserVoName, WallHours, Njobs) = values
+        (SiteName, UserVoName, Njobs, WallHours) = values
+	print values
 
         r = Gratia.UsageRecord()
         r.Njobs(toint(Njobs))
@@ -37,7 +38,8 @@ def main(argv=None):
     Gratia.Initialize()
 
     result = PSACCTReport.DailySiteVOReport(PSACCTReport.gBegin,output=argOutput)
-        
+    #print result
+    
     dateAsSecondSinceEpoch = time.mktime(PSACCTReport.gBegin.timetuple())
  #       else:
  #               today = time.localtime()
