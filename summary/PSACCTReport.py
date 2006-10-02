@@ -232,7 +232,7 @@ def CondorData():
 def DailySiteData(begin,end):
         schema = "gratia"
         
-        select = " SELECT CETable.facility_name, COUNT(*), sum(J.WallDuration) " \
+        select = " SELECT CETable.facility_name, sum(NJobs), sum(J.WallDuration) " \
                 + " from "+schema+".CETable, "+schema+".CEProbes, "+schema+".JobUsageRecord J " \
                 + " where CEProbes.facility_id = CETable.facility_id and J.ProbeName = CEProbes.probename" \
                 + " and \""+ DateToString(begin) +"\"<EndTime and EndTime<\"" + DateToString(end) + "\"" \
@@ -243,7 +243,7 @@ def DailySiteData(begin,end):
 def DailyVOData(begin,end):
         schema = "gratia"
             
-        select = " SELECT J.VOName, COUNT(*), sum(J.WallDuration) " \
+        select = " SELECT J.VOName, Sum(NJobs), sum(J.WallDuration) " \
                 + " from "+schema+".CETable, "+schema+".CEProbes, "+schema+".JobUsageRecord J " \
                 + " where CEProbes.facility_id = CETable.facility_id and J.ProbeName = CEProbes.probename" \
                 + " and \""+ DateToString(begin) +"\"<EndTime and EndTime<\"" + DateToString(end) + "\"" \
@@ -254,7 +254,7 @@ def DailyVOData(begin,end):
 def DailySiteVOData(begin,end):
         schema = "gratia"
         
-        select = " SELECT CETable.facility_name, J.VOName, COUNT(*), sum(J.WallDuration) " \
+        select = " SELECT CETable.facility_name, J.VOName, sum(NJobs), sum(J.WallDuration) " \
                 + " from "+schema+".CETable, "+schema+".CEProbes, "+schema+".JobUsageRecord J " \
                 + " where CEProbes.facility_id = CETable.facility_id and J.ProbeName = CEProbes.probename" \
                 + " and \""+ DateToString(begin) +"\"<EndTime and EndTime<\"" + DateToString(end) + "\"" \
