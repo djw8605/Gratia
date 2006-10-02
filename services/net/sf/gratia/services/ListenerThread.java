@@ -348,7 +348,7 @@ public class ListenerThread extends Thread
 																				// System.out.println("ListenerThread: " + ident + ":After New Probe Update");
 																				updater.Update(current);
 																				if (rawxml != null)
-																						current.setRawXml(xml);
+																						current.setRawXml(rawxml);
 																				if (extraxml != null)
 																						current.setExtraXml(extraxml);
 																				// System.out.println("ListenerThread: " + ident + ":Before Hibernate Save");
