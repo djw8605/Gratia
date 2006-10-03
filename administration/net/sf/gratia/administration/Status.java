@@ -384,6 +384,21 @@ public class Status extends HttpServlet
 
 				html = xp.replaceAll(html,"#count7#","" + count7.intValue());
 				html = xp.replaceAll(html,"#error7#","" + error7.intValue());
+
+				String path = System.getProperties().getProperty("catalina.home");
+				path = xp.replaceAll(path,"\\","/");
+
+				String xpath = path + "/gratia/data/thread0";
+				String filelist[] = xp.getFileList(xpath);
+				html = xp.replaceAll(html,"#q0#","" + filelist.length);
+
+				xpath = path + "/gratia/data/thread1";
+				filelist = xp.getFileList(xpath);
+				html = xp.replaceAll(html,"#q1#","" + filelist.length);
+
+				xpath = path + "/gratia/data/thread2";
+				filelist = xp.getFileList(xpath);
+				html = xp.replaceAll(html,"#q2#","" + filelist.length);
 		}
 
 }
