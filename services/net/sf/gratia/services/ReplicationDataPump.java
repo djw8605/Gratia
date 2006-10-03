@@ -74,10 +74,10 @@ public class ReplicationDataPump extends Thread
 		public void run()
 		{
 				System.out.println("ReplicationDataPump: Started: " + replicationid);
-				if (HibernateWrapper.databaseDown)
+				if (! HibernateWrapper.databaseUp())
 						{
 								HibernateWrapper.start();
-								if (HibernateWrapper.databaseDown)
+								if (! HibernateWrapper.databaseUp())
 										{
 												System.out.println("ReplicationDataPump: Hibernate Down - Exiting: " + replicationid);
 												return;
@@ -140,7 +140,7 @@ public class ReplicationDataPump extends Thread
 				if (exitflag)
 						return;
 
-				if (! HibernateWrapper.communicationsCheck())
+				if (! HibernateWrapper.databaseUp())
 						{
 								System.out.println("ReplicationDataPump: " + replicationid + " :Hibernate Down - Exiting");
 								exitflag = true;
@@ -178,7 +178,7 @@ public class ReplicationDataPump extends Thread
 						}
 				catch (Exception e)
 						{
-								if (! HibernateWrapper.communicationsCheck())
+								if (! HibernateWrapper.databaseUp())
 										{
 												cleanup();
 												exitflag = true;
@@ -221,7 +221,7 @@ public class ReplicationDataPump extends Thread
 						}
 				catch(Exception e)
 						{
-								if (! HibernateWrapper.communicationsCheck())
+								if (! HibernateWrapper.databaseUp())
 										{
 												cleanup();
 												exitflag = true;
@@ -302,7 +302,7 @@ public class ReplicationDataPump extends Thread
 						}
 				catch (Exception e)
 						{
-								if (! HibernateWrapper.communicationsCheck())
+								if (! HibernateWrapper.databaseUp())
 										{
 												System.out.println("ReplicationDataPump: " + replicationid + " :Database Connection Error");
 												cleanup();

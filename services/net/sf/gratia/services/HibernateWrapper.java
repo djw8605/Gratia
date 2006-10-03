@@ -21,6 +21,9 @@ public class HibernateWrapper
 
 		public static synchronized void start()
 		{
+				if (systemDatabaseUp())
+						return;
+
 				p = net.sf.gratia.services.Configuration.getProperties();
 
 				String configurationPath = net.sf.gratia.services.Configuration.getConfigurationPath();
@@ -63,13 +66,13 @@ public class HibernateWrapper
 						}
 		}
 
-		public static boolean communicationsCheck()
+		public static boolean systemDatabaseUp()
 		{
 				int i = 0;
 
 				try
 						{
-								session = hibernateFactory.openSession();
+								org.hibernate.Session session = hibernateFactory.openSession();
 								String command = "from JobUsageRecord where dbid = 1";
 								List result = session.createQuery(command).list();
 								for(i = 0; i < result.size(); i++)
@@ -77,17 +80,43 @@ public class HibernateWrapper
 												JobUsageRecord record = (JobUsageRecord) result.get(i);
 										}
 								session.close();
+								databaseDown = false;
 								return true;
 						}
 				catch (Exception e)
 						{
 								databaseDown = true;
-								System.out.println("HibernateWrapper: Database Down");
 								return false;
 						}
 		}
 
-		public static org.hibernate.Session getSession()
+		public static synchronized boolean databaseUp()
+		{
+				int i = 0;
+
+				try
+						{
+								org.hibernate.Session session = hibernateFactory.openSession();
+								String command = "from JobUsageRecord where dbid = 1";
+								List result = session.createQuery(command).list();
+								for(i = 0; i < result.size(); i++)
+										{
+												JobUsageRecord record = (JobUsageRecord) result.get(i);
+										}
+								session.close();
+								databaseDown = false;
+								return true;
+						}
+				catch (Exception e)
+						{
+								databaseDown = true;
+								System.out.println("HibernateWrapper: Database Check: Database Down");
+								e.printStackTrace();
+								return false;
+						}
+		}
+
+		public static synchronized org.hibernate.Session getSession()
 		{
 				int i = 0;
 
@@ -99,7 +128,7 @@ public class HibernateWrapper
 				catch (Exception e)
 						{
 								databaseDown = true;
-								System.out.println("HibernateWrapper: Database Down");
+								System.out.println("HibernateWrapper: Get Session: Database Down");
 								return null;
 						}
 		}

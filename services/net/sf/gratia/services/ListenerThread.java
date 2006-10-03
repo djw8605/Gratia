@@ -139,49 +139,12 @@ public class ListenerThread extends Thread
 				return status;
     }
 
-    public boolean communicationsError(Exception exception)
-    {
-				String source = exception.toString();
-				if (source.length() > 255)
-						source = source.substring(0,255);
-
-				System.out.println("ListenerThread: " + ident + ":Communications Error Test:" + source);
-
-				if (source.indexOf("StatusUpdater") > 0)
-						return true;
-
-				try
-						{
-								Thread.sleep(30 * 1000);
-						}
-				catch (Exception ignore)
-						{
-						}
-				try
-						{
-								String driver = p.getProperty("service.mysql.driver");
-								String url = p.getProperty("service.mysql.url");
-								String user = p.getProperty("service.mysql.user");
-								String password = p.getProperty("service.mysql.password");
-								Class.forName(driver);
-								java.sql.Connection connection = null;
-								connection = DriverManager.getConnection(url,user,password);
-								connection.close();
-								System.out.println("ListenerThread: " + ident + ":No Communications Error");
-								return false;
-						}
-				catch (Exception e)
-						{
-								System.out.println("ListenerThread: " + ident + ":Detected Communications Error");
-								return true;
-						}
-		}
 
 		public void run()
 		{
 				while (true)
 						{
-								if (HibernateWrapper.databaseDown)
+								if (! HibernateWrapper.databaseUp())
 										{
 												HibernateWrapper.start();
 												if (HibernateWrapper.databaseDown)
@@ -210,7 +173,7 @@ public class ListenerThread extends Thread
 				
 		public void loop()
 		{
-				if (! HibernateWrapper.communicationsCheck())
+				if (! HibernateWrapper.databaseUp())
 						return;
 
 				String files[] = xp.getFileList(directory);
@@ -231,7 +194,7 @@ public class ListenerThread extends Thread
 								// see if we got a normal update or a replicated one
 								//
 								
-								boolean gotblob = false;
+								boolean gotreplication = false;
 								boolean gothistory = false;
 								String historydate = null;
 
@@ -248,7 +211,7 @@ public class ListenerThread extends Thread
 																		rawxml = st.nextToken();
 																if (st.hasMoreTokens())
 																		extraxml = st.nextToken();
-																gotblob = true;
+																gotreplication = true;
 														}
 												else if (blob.startsWith("history"))
 														{
@@ -259,6 +222,10 @@ public class ListenerThread extends Thread
 																		historydate = st.nextToken();
 																if (st.hasMoreTokens())
 																		xml = st.nextToken();
+																if (st.hasMoreTokens())
+																		rawxml = st.nextToken();
+																if (st.hasMoreTokens())
+																		extraxml = st.nextToken();
 																gothistory = true;
 														}
 												else
@@ -305,7 +272,7 @@ public class ListenerThread extends Thread
 														}
 												catch (Exception e)
 														{
-																if (gotblob)
+																if (gotreplication)
 																		saveParse("Replication","Parse",xml);
 																else if (gothistory)
 																		saveParse("History","Parse",xml);
@@ -330,7 +297,7 @@ public class ListenerThread extends Thread
 																if (gotdup)
 																		{
 																				// System.out.println("ListenerThread: " + ident + ":Before Save Duplicate");
-																				if (gotblob)
+																				if (gotreplication)
 																						saveDuplicate("Replication","Duplicate",dupdbid,current);
 																				else if (gothistory)
 																						;
@@ -378,15 +345,21 @@ public class ListenerThread extends Thread
 																																		}
 																																File historyfile = File.createTempFile("history","xml",new File(path));
 																																String filename = historyfile.getPath();
-																																xp.save(filename,"history" + "|" + serverDate.getTime() + "|" + xml);
+																																if (gotreplication && (extraxml != null))
+																																		xp.save(filename,"history" + "|" + serverDate.getTime() + 
+																																						"|" + xml + "|" + rawxml + "|" + extraxml);
+																																else if (gotreplication)
+																																		xp.save(filename,"history" + "|" + serverDate.getTime() + "|" + xml + "|" + rawxml);
+																																else
+																																		xp.save(filename,"history" + "|" + serverDate.getTime() + "|" + xml);
 																														}
 																										}
 																						}
 																				catch (Exception e)
 																						{
-																								if (HibernateWrapper.communicationsCheck())
+																								if (HibernateWrapper.databaseUp())
 																										{
-																												if (gotblob)
+																												if (gotreplication)
 																														saveSQL("Replication","SQLError",current);
 																												else
 																														saveSQL("Probe","SQLError",current);
@@ -405,7 +378,7 @@ public class ListenerThread extends Thread
 										}
 								catch (Exception exception)
 										{
-												if (! HibernateWrapper.communicationsCheck())
+												if (! HibernateWrapper.databaseUp())
 														{
 																System.out.println("ListenerThread: " + ident + ":Communications Error:Shutting Down");
 																return;

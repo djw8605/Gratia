@@ -111,17 +111,18 @@ public class RecoveryService extends Thread
 				//
 				// now - screen/delete older directories
 				//
-				for (i = 0; i < vector.size(); i++)
-						{
-								String directory = (String) vector.elementAt(i);
-								if (directory.compareTo(beginningHistory) < 0)
-										{
-												System.out.println("RecoveryService: Deleting Directory: " + directory);
-												deleteDirectory(directory);
-										}
-								else
-										history.add(directory);
-						}
+				if (p.getProperty("replay.all.history").equals("0"))
+						for (i = 0; i < vector.size(); i++)
+								{
+										String directory = (String) vector.elementAt(i);
+										if (directory.compareTo(beginningHistory) < 0)
+												{
+														System.out.println("RecoveryService: Deleting Directory: " + directory);
+														deleteDirectory(directory);
+												}
+										else
+												history.add(directory);
+								}
 		}
 
 		public void getDatabaseDate()
@@ -200,7 +201,22 @@ public class RecoveryService extends Thread
 														}
 												continue;
 										}
-								if (recordDate.after(databaseDate))
+								if (recordDate.after(databaseDate) && p.getProperty("replay.all.history").equals("0"))
+										{
+												post = new Post(connection + "/gratia-servlets/rmi","update",blob);
+												try
+														{
+																irecords++;
+																post.send();
+																System.out.println("RecoveryService: Sent: " + irecords + ":" + filenames[i] + " :Timestamp: " + recordDate);
+														}
+												catch (Exception e)
+														{
+																System.out.println("RecoveryService: Error Sending: " + filenames[i] + " Error: " + e);
+																return;
+														}
+										}
+								else if (p.getProperty("replay.all.history").equals("1"))
 										{
 												post = new Post(connection + "/gratia-servlets/rmi","update",blob);
 												try
@@ -216,6 +232,7 @@ public class RecoveryService extends Thread
 														}
 										}
 								else
+
 										{
 												System.out.println("RecoveryService: Skipping: " + filenames[i] + " :Timestamp: " + recordDate);
 										}
