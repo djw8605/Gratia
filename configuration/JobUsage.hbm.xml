@@ -6,6 +6,14 @@
     
 <hibernate-mapping package= "net.sf.gratia.storage">
 
+<class name="SystemProplist" table="SystemProplist" node="SystemProplist" lazy="false">
+			 <id name="propid" column="propid" type="int">
+					 <generator class="native"/>
+			 </id>
+			 <property name="car" column="car"/>
+			 <property name="cdr" column="cdr"/>
+</class>
+
 <class name="DupRecord" table="DupRecord" node="DupRecord" lazy="false">
 			 <id name="dupid" column="dupid" type="int">
 					 <generator class="native"/>
