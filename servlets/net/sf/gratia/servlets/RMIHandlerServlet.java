@@ -134,14 +134,6 @@ public class RMIHandlerServlet extends HttpServlet
 								// the - connect to rmi
 								//
 
-								if (p.getProperty("service.datapump.trace").equals("1"))
-										{
-												System.out.println("");
-												System.out.println("RMIHandlerServlet: xml:");
-												System.out.println(arg1);
-												System.out.println("");
-										}
-
 								PrintWriter writer = res.getWriter();
 
 								if ((command.equals("update")) && (argcount == 1))
