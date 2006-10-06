@@ -42,14 +42,28 @@ public class ListenerThread extends Thread
 
 		XP xp = new XP();
 
-		StatusUpdater statusUpdater = new StatusUpdater();
-		NewProbeUpdate newProbeUpdate = new NewProbeUpdate();
+		StatusUpdater statusUpdater = null;
+		NewProbeUpdate newProbeUpdate = null;
 
 		Object lock;
 
 		int dupdbid = 0;
 
 		String historypath = "";
+
+		//
+		// various things used in the update loop
+		//
+
+		String file = "";
+		String blob = "";
+		String xml = "";
+		String rawxml = "";
+		String extraxml = "";
+		boolean gotreplication = false;
+		boolean gothistory = false;
+		boolean gotduplicate = false;
+		boolean goterror = false;
 
 		public ListenerThread(String ident,
 													String directory,
@@ -181,21 +195,34 @@ public class ListenerThread extends Thread
 				if (files.length == 0)
 						return;
 
+				statusUpdater = new StatusUpdater();
+				newProbeUpdate = new NewProbeUpdate();
+
 				for (int i = 0; i < files.length; i++)
 						{
-								String file = files[i];
-								String blob = xp.get(files[i]);
-								String xml = null;
-								String rawxml = null;
-								String extraxml = null;
+								file = files[i];
+								blob = xp.get(files[i]);
+								xml = null;
+								rawxml = null;
+								extraxml = null;
+								gotreplication = gothistory = gotduplicate = goterror = false;
+								saveBlob();
+
 								JobUsageRecord current = null;
+
+								//
+								// see if trace requested
+								//
+
+								if (p.getProperty("service.datapump.trace").equals("1"))
+										{
+												System.out.println("ListenerThread: " + ident + ":XML Trace:" + "\n\n" + blob + "\n\n");
+										}
 
 								//
 								// see if we got a normal update or a replicated one
 								//
 								
-								boolean gotreplication = false;
-								boolean gothistory = false;
 								String historydate = null;
 
 								try
@@ -248,7 +275,7 @@ public class ListenerThread extends Thread
 
 								if (xml == null)
 										{
-												System.out.println("ListenerThread: " + ident + ":Error:No Data Processing: " + file);
+												System.out.println("ListenerThread: " + ident + ":Error:No Data To Process: " + file);
 												try
 														{
 																File temp = new File(file);
@@ -272,6 +299,7 @@ public class ListenerThread extends Thread
 														}
 												catch (Exception e)
 														{
+																goterror = true;
 																if (gotreplication)
 																		saveParse("Replication","Parse",xml);
 																else if (gothistory)
@@ -291,11 +319,12 @@ public class ListenerThread extends Thread
 																statusUpdater.update(current,xml);
 
 																// System.out.println("ListenerThread: " + ident + ":Before Duplicate Check");
-																boolean gotdup = gotDuplicate(current);
+																gotduplicate = gotDuplicate(current);
 																// System.out.println("ListenerThread: " + ident + ":After Duplicate Check");
 
-																if (gotdup)
+																if (gotduplicate)
 																		{
+																				goterror = true;
 																				// System.out.println("ListenerThread: " + ident + ":Before Save Duplicate");
 																				if (gotreplication)
 																						saveDuplicate("Replication","Duplicate",dupdbid,current);
@@ -357,6 +386,7 @@ public class ListenerThread extends Thread
 																						}
 																				catch (Exception e)
 																						{
+																								goterror = true;
 																								if (HibernateWrapper.databaseUp())
 																										{
 																												if (gotreplication)
@@ -378,6 +408,7 @@ public class ListenerThread extends Thread
 										}
 								catch (Exception exception)
 										{
+												goterror = true;
 												if (! HibernateWrapper.databaseUp())
 														{
 																System.out.println("ListenerThread: " + ident + ":Communications Error:Shutting Down");
@@ -403,6 +434,29 @@ public class ListenerThread extends Thread
 						}
 		}
 
+		public void saveBlob()
+		{
+				synchronized(lock)
+						{
+								try
+										{
+												Date now = new Date();
+												SimpleDateFormat format = new SimpleDateFormat("yyyyMMddkk");
+												String path = historypath + "old" + format.format(now);
+												File directory = new File(path);
+												if (! directory.exists())
+														{
+																directory.mkdir();
+														}
+												File errorfile = File.createTempFile("old","xml",new File(path));
+												String filename = errorfile.getPath();
+												xp.save(filename,blob);
+										}
+								catch (Exception ignore)
+										{
+										}
+						}
+		}
 
 		public ArrayList convert(String xml) throws Exception 
 		{

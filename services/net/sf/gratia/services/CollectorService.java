@@ -29,7 +29,6 @@ public class CollectorService implements ServletContextListener
 		ListenerThread threads[];
 		StatusListenerThread statusListenerThread;
 		ReplicationService replicationService;
-		RecoveryService recoveryService;
 		ProbeMonitorService probeMonitorService;
 		RMIService rmiservice;
 
@@ -189,18 +188,17 @@ public class CollectorService implements ServletContextListener
 								System.out.println("JMSProxy Started");
 
 								//
-								// start recovery service
+								// whack old history
 								//
 
-								recoveryService = new RecoveryService();
-								recoveryService.start();
+								new HistoryReaper();
 
 								//
-								// start a thread to recheck recovery directories every 6 hours
+								// start a thread to recheck history directories every 6 hours
 								//
 
-								RecoveryMonitor recoveryMonitor = new RecoveryMonitor();
-								recoveryMonitor.start();
+								HistoryMonitor historyMonitor = new HistoryMonitor();
+								historyMonitor.start();
 
 								//
 								// start msg listener
@@ -347,6 +345,7 @@ public class CollectorService implements ServletContextListener
 		public void zapDatabase()
 		{
 				String dq = "\"";
+				String comma = ",";
 				XP xp = new XP();
 				int i = 0;
 
@@ -360,6 +359,9 @@ public class CollectorService implements ServletContextListener
 				java.sql.Connection connection;
 				Statement statement;
 				ResultSet resultSet;
+
+				String gratiaVersion = p.getProperty("gratia.version");
+				String gratiaDatabaseVersion = p.getProperty("gratia.database.version");
 
 				try
 						{
@@ -390,7 +392,13 @@ public class CollectorService implements ServletContextListener
 								"alter table JobUsageRecord add index index11(ServerDate)",
 								"alter table JobUsageRecord add unique index index12(md5)",
 								"alter table Security add unique index index02(alias)",
-								"alter table CPUInfo change column NodeName HostDescription varchar(255)"
+								"alter table CPUInfo change column NodeName HostDescription varchar(255)",
+								//
+								// place older to initialize SystemProplist
+								//
+								"delete from SystemProplist",
+								"insert into SystemProplist(car,cdr) values(" + dq + "gratia.version" + dq + comma + dq + gratiaDatabaseVersion + dq + ")",
+								"insert into SystemProplist(car,cdr) values(" + dq + "gratia.database.version" + dq + comma + dq + gratiaDatabaseVersion + dq + ")"
 						};
 
 				for (i = 0; i < commands1.length; i++)
@@ -464,9 +472,9 @@ public class CollectorService implements ServletContextListener
 				}
 		}
 
-		public class RecoveryMonitor extends Thread
+		public class HistoryMonitor extends Thread
 		{
-				public RecoveryMonitor()
+				public HistoryMonitor()
 				{
 				}
 
@@ -477,7 +485,7 @@ public class CollectorService implements ServletContextListener
 										try
 												{
 														Thread.sleep(6 * 60 * 60 * 1000);
-														new RecoveryService();
+														new HistoryReaper();
 												}
 										catch (Exception ignore)
 												{

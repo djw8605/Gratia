@@ -337,6 +337,8 @@ public class ReplicationDataPump extends Thread
 
 				int i = 0;
 
+				System.out.println("ReplicationDataPump: getXML: dbid: " + dbid);
+
 				session = HibernateWrapper.getSession();
 				String command = "from JobUsageRecord where dbid = " + dbid;
 				List result = session.createQuery(command).list();
