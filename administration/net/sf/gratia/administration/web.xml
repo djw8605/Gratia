@@ -60,6 +60,12 @@
 				<load-on-startup>1</load-on-startup>
     </servlet>
 
+    <servlet>
+        <servlet-name>SystemAdministration</servlet-name>
+        <servlet-class>net.sf.gratia.administration.SystemAdministration</servlet-class>
+				<load-on-startup>1</load-on-startup>
+    </servlet>
+
     <servlet-mapping>
         <servlet-name>CETable</servlet-name>
 				<url-pattern>/cetable.html</url-pattern>
@@ -88,6 +94,11 @@
     <servlet-mapping>
         <servlet-name>Status</servlet-name>
         <url-pattern>/status.html</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>SystemAdministration</servlet-name>
+        <url-pattern>/systemadministration.html</url-pattern>
     </servlet-mapping>
 
 </web-app>
