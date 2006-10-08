@@ -7,6 +7,7 @@ call build-servlets.bat
 call build-security.bat
 call build-reporting.bat
 call build-reports.bat
+call build-summary-reports.bat
 call build-configurator.bat
 call build-administration.bat
 mkdir %catalina_home%\gratia

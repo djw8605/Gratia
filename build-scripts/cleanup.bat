@@ -44,6 +44,9 @@ del %root%\configuration-psg3\*#
 del %root%\configuration-release\*~
 del %root%\configuration-release\*#
 
+del %root%\summary-reports\*~
+del %root%\summary-reports\*#
+
 del %base%\GratiaReporting\src\net\sf\gratia\reporting\*~
 del %base%\GratiaReporting\src\net\sf\gratia\reporting\*#
 del %base%\GratiaReporting\src\net\sf\gratia\reporting\*.class
