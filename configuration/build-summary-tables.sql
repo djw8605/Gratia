@@ -1,8 +1,9 @@
 drop table if exists ProbeSummary, UserProbeSummary, VOProbeSummary;
 
 CREATE TABLE `ProbeSummary` (
-  `Datefield` DATETIME NOT NULL DEFAULT 0,
+  `EndTime` DATETIME NOT NULL DEFAULT 0,
   `ProbeName` VARCHAR(255) NOT NULL DEFAULT '',
+  `SiteName` VARCHAR(255) NOT NULL DEFAULT '',
   `Njobs` INTEGER NOT NULL DEFAULT 0,
   `WallDuration` DOUBLE NOT NULL DEFAULT 0,
   `CpuUserDuration` DOUBLE NOT NULL DEFAULT 0,
@@ -10,7 +11,7 @@ CREATE TABLE `ProbeSummary` (
 );
 
 CREATE TABLE `UserProbeSummary` (
-  `Datefield` DATETIME NOT NULL DEFAULT 0,
+  `EndTime` DATETIME NOT NULL DEFAULT 0,
   `CommonName` VARCHAR(255) NOT NULL DEFAULT '',
   `ProbeName` VARCHAR(255) NOT NULL DEFAULT '',
   `Njobs` INTEGER NOT NULL DEFAULT 0,
@@ -20,7 +21,7 @@ CREATE TABLE `UserProbeSummary` (
 );
 
 CREATE TABLE `VOProbeSummary` (
-  `Datefield` DATETIME NOT NULL DEFAULT 0,
+  `EndTime` DATETIME NOT NULL DEFAULT 0,
   `VOName` VARCHAR(255) NOT NULL DEFAULT '',
   `ProbeName` VARCHAR(255) NOT NULL DEFAULT '',
   `Njobs` INTEGER NOT NULL DEFAULT 0,
@@ -31,8 +32,9 @@ CREATE TABLE `VOProbeSummary` (
 
 insert into ProbeSummary
   (select
-    date(EndTime) as Datefield,
+    date(EndTime) as EndTime,
     ProbeName,
+		SiteName,
     sum(Njobs) as Njobs,
     sum(WallDuration) as WallDuration,
     sum(CpuUserDuration) as CpuUserDuration,
@@ -43,14 +45,14 @@ insert into ProbeSummary
 );
 
 alter table ProbeSummary
-  add index index01(Datefield);
+  add index index01(EndTime);
 
 alter table ProbeSummary
   add index index02(ProbeName);
 
 insert into UserProbeSummary
   (select
-    date(EndTime) as Datefield,
+    date(EndTime) as EndTime,
     CommonName,
     JobUsageRecord.ProbeName,
     sum(Njobs) as Njobs,
@@ -63,7 +65,7 @@ insert into UserProbeSummary
 );
 
 alter table UserProbeSummary
-  add index index01(Datefield);
+  add index index01(EndTime);
 
 alter table UserProbeSummary
   add index index02(CommonName);
@@ -73,7 +75,7 @@ alter table UserProbeSummary
 
 insert into VOProbeSummary
   (select
-    date(EndTime) as Datefield,
+    date(EndTime) as EndTime,
     VOName,
     JobUsageRecord.ProbeName,
     sum(Njobs) as Njobs,
@@ -86,7 +88,7 @@ insert into VOProbeSummary
 );
 
 alter table VOProbeSummary
-  add index index01(Datefield);
+  add index index01(EndTime);
 
 alter table VOProbeSummary
   add index index02(VOName);
@@ -123,9 +125,9 @@ glr:begin
 
 	select count(*) into mycount from ProbeSummary
 		where ProbeSummary.ProbeName = new.ProbeName
-		and ProbeSummary.Datefield = date(new.EndTime);
+		and ProbeSummary.EndTime = date(new.EndTime);
 	if mycount = 0 then
-		insert into ProbeSummary values(date(new.EndTime),new.ProbeName,new.Njobs,new.WallDuration,new.CpuUserDuration,new.CpuSystemDuration);
+		insert into ProbeSummary values(date(new.EndTime),new.ProbeName,new.SiteName,new.Njobs,new.WallDuration,new.CpuUserDuration,new.CpuSystemDuration);
 	elseif mycount > 0 then
 		update ProbeSummary
 			set
@@ -134,7 +136,7 @@ glr:begin
 				ProbeSummary.CpuUserDuration = ProbeSummary.CpuUserDuration + new.CpuUserDuration,
 				ProbeSummary.CpuSystemDuration = ProbeSummary.CpuSystemDuration + new.CpuSystemDuration
 				where ProbeSummary.ProbeName = new.ProbeName
-				and ProbeSummary.Datefield = date(new.EndTime);
+				and ProbeSummary.EndTime = date(new.EndTime);
 	end if;
 
 	--
@@ -145,7 +147,7 @@ glr:begin
 		where 
 		UserProbeSummary.CommonName = new.CommonName
 		and UserProbeSummary.ProbeName = new.ProbeName
-		and UserProbeSummary.Datefield = date(new.EndTime);
+		and UserProbeSummary.EndTime = date(new.EndTime);
 	if mycount = 0 then
 		insert into UserProbeSummary values(date(new.EndTime),new.CommonName,new.ProbeName,new.Njobs,new.WallDuration,new.CpuUserDuration,new.CpuSystemDuration);
 	elseif mycount > 0 then
@@ -158,7 +160,7 @@ glr:begin
 				where 
 				UserProbeSummary.CommonName = new.CommonName
 				and UserProbeSummary.ProbeName = new.ProbeName
-				and UserProbeSummary.Datefield = date(new.EndTime);
+				and UserProbeSummary.EndTime = date(new.EndTime);
 	end if;
 
 	--
@@ -168,7 +170,7 @@ glr:begin
 	select count(*) into mycount from VOProbeSummary
 		where VOProbeSummary.VOName = new.VOName
 		and VOProbeSummary.ProbeName = new.ProbeName
-		and VOProbeSummary.Datefield = date(new.EndTime);
+		and VOProbeSummary.EndTime = date(new.EndTime);
 	if mycount = 0 then
 		insert into VOProbeSummary values(date(new.EndTime),new.VOName,new.ProbeName,new.Njobs,new.WallDuration,new.CpuUserDuration,new.CpuSystemDuration);
 	elseif mycount > 0 then
@@ -181,7 +183,7 @@ glr:begin
 				where 
 				VOProbeSummary.VOName = new.VOName
 				and VOProbeSummary.ProbeName = new.ProbeName
-				and VOProbeSummary.Datefield = date(new.EndTime);
+				and VOProbeSummary.EndTime = date(new.EndTime);
 	end if;
 
 end;
