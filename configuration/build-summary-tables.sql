@@ -99,8 +99,23 @@ drop trigger trigger01;
 delimiter |
 create trigger trigger01 after insert on JobUsageRecord
 for each row
-begin
+glr:begin
 	declare mycount int;
+	--
+	-- basic data checks
+	--
+	if new.Njobs is null then
+		leave glr;
+	end if;
+	if new.WallDuration is null then
+		leave glr;
+	end if;
+	if new.CpuUserDuration is null then
+		leave glr;
+	end if;
+	if new.CpuSystemDuration is null then
+		leave glr;
+	end if;
 
 	--
 	-- ProbeSummary
