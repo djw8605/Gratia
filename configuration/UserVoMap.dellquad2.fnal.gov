@@ -16,6 +16,32 @@ fmri fmri
 cdms cdms
 #---- accounts for vo: lqcd ----#
 lqcd lqcd
+agray lqcd
+amitoj lqcd
+amundson lqcd
+axk lqcd
+brower lqcd
+cdavies lqcd
+cmendes lqcd
+detar lqcd
+djholm lqcd
+genser lqcd
+iallison lqcd
+manobes lqcd
+mdp lqcd
+menscher lqcd
+nal lqcd
+neilsen lqcd
+okamoto lqcd
+osborn lqcd
+qmason lqcd
+seva lqcd
+sg lqcd
+simone lqcd
+spentz lqcd
+trottier lqcd
+vsergeev lqcd
+wingate lqcd
 #---- accounts for vo: auger ----#
 auger auger
 #---- accounts for vo: ilc ----#
@@ -192,33 +218,6 @@ fnal_acc accelerator
 hypercp hypercp
 #---- accounts for vo: ktev ----#
 ktev ktev
-#---- accounts for vo: lqcd ----#
-agray lqcd
-amitoj lqcd
-amundson lqcd
-axk lqcd
-brower lqcd
-cdavies lqcd
-cmendes lqcd
-detar lqcd
-djholm lqcd
-genser lqcd
-iallison lqcd
-manobes lqcd
-mdp lqcd
-menscher lqcd
-nal lqcd
-neilsen lqcd
-okamoto lqcd
-osborn lqcd
-qmason lqcd
-seva lqcd
-sg lqcd
-simone lqcd
-spentz lqcd
-trottier lqcd
-vsergeev lqcd
-wingate lqcd
 #---- accounts for vo: miniboone ----#
 minboone miniboone
 #---- accounts for vo: minos ----#
