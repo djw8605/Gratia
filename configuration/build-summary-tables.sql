@@ -106,6 +106,15 @@ glr:begin
 	--
 	-- basic data checks
 	--
+	if new.ProbeName is null then
+		leave glr;
+	end if;
+	if new.SiteName is null then
+		leave glr;
+	end if;
+	if new.VOName is null then
+		leave glr;
+	end if;
 	if new.Njobs is null then
 		leave glr;
 	end if;
