@@ -147,6 +147,9 @@ public class Status extends HttpServlet
 				Integer count7 = null;
 				Integer error7 = null;
 				
+				Integer totalcount = null;
+				Integer totalerror = null;
+
 				java.util.Date now = new java.util.Date();
 				long decrement = 60 * 60 * 1000;
 				java.util.Date to = new java.util.Date();
@@ -355,6 +358,26 @@ public class Status extends HttpServlet
 										error7 = resultSet.getInt(1);
 								resultSet.close();
 								statement.close();
+
+								//
+								// total
+								//
+
+								command = "select count(*) from JobUsageRecord";
+								statement = connection.prepareStatement(command);
+								resultSet = statement.executeQuery(command);
+								while(resultSet.next())
+										totalcount = resultSet.getInt(1);
+								resultSet.close();
+								statement.close();
+
+								command = "select count(*) from DupRecord";
+								statement = connection.prepareStatement(command);
+								resultSet = statement.executeQuery(command);
+								while(resultSet.next())
+										totalerror = resultSet.getInt(1);
+								resultSet.close();
+								statement.close();
 						}
 				catch (Exception e)
 						{
@@ -384,6 +407,9 @@ public class Status extends HttpServlet
 
 				html = xp.replaceAll(html,"#count7#","" + count7.intValue());
 				html = xp.replaceAll(html,"#error7#","" + error7.intValue());
+
+				html = xp.replaceAll(html,"#totalcount#","" + totalcount.intValue());
+				html = xp.replaceAll(html,"#totalerror#","" + totalerror.intValue());
 
 				String path = System.getProperties().getProperty("catalina.home");
 				path = xp.replaceAll(path,"\\","/");
