@@ -211,17 +211,17 @@
                     <property name="isInput">true</property>
                 </structure>
             </list-property>
-            <property name="queryText">select UserProbeSummary.CommonName as UserName, 
-	sum(UserProbeSummary.WallDuration),
-	sum(UserProbeSummary.CpuUserDuration+UserProbeSummary.CpuSystemDuration),
-	UserProbeSummary.VOName as VOName,
-	UserProbeSummary.SiteName as SiteName
-	from UserProbeSummary
-where (? &lt;= UserProbeSummary.EndTime and UserProbeSummary.EndTime &lt;= ?)
+            <property name="queryText">select JobUsageRecord.CommonName as UserName, 
+	sum(JobUsageRecord.WallDuration),
+	sum(JobUsageRecord.CpuUserDuration+JobUsageRecord.CpuSystemDuration),
+	JobUsageRecord.VOName as VOName,
+	JobUsageRecord.SiteName as SiteName
+	from JobUsageRecord
+where (? &lt;= JobUsageRecord.EndTime and JobUsageRecord.EndTime &lt;= ?)
 and (VOName = ? or (? = 'NoVO' and (VOName like '%' or VOName is null)))
 and (SiteName = ? or (? = 'NoSite' and (SiteName like '%' or SiteName is null)))
-group by UserProbeSummary.CommonName
-order by UserProbeSummary.CommonName</property>
+group by JobUsageRecord.CommonName
+order by JobUsageRecord.CommonName</property>
         </oda-data-set>
         <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="CPUMetricTypes" id="102">
             <property name="dataSource">fermigrid1</property>
@@ -914,9 +914,9 @@ function beforeGeneration( chart, context ){
           </Label>
           <DataDefinition>
             <Definition>if (params[&quot;CPUMetric&quot;] == 'wallclock') {
-	row[&quot;sum(UserProbeSummary.WallDuration)&quot;] / 3600
+	row[&quot;sum(JobUsageRecord.WallDuration)&quot;] / 3600
 }else{
-	row[&quot;sum(UserProbeSummary.CpuUserDuration+UserProbeSummary.CpuSystemDuration)&quot;]/3600
+	row[&quot;sum(JobUsageRecord.CpuUserDuration+JobUsageRecord.CpuSystemDuration)&quot;]/3600
 }</Definition>
           </DataDefinition>
           <SeriesIdentifier>&lt;undefined></SeriesIdentifier>

@@ -218,13 +218,13 @@ order by name</property>
                 </structure>
             </list-property>
             <property name="queryText">
-select ProbeSummary.JobName, CETable.facility_name, CEProbes.probename, 
-        ProbeSummary.StartTime, ProbeSummary.EndTime, ProbeSummary.JobNameDescription 
-from ProbeSummary, CETable, CEProbes
+select JobUsageRecord.JobName, CETable.facility_name, CEProbes.probename, 
+        JobUsageRecord.StartTime, JobUsageRecord.EndTime, JobUsageRecord.JobNameDescription 
+from JobUsageRecord, CETable, CEProbes
 where CEProbes.facility_id = CETable.facility_id
-and ProbeSummary.ProbeName = CEProbes.probename
-and (? &lt;= ProbeSummary.EndTime and ProbeSummary.EndTime &lt;= ?)
-and (? = 'All' or ProbeSummary.ProbeName = ?)
+and JobUsageRecord.ProbeName = CEProbes.probename
+and (? &lt;= JobUsageRecord.EndTime and JobUsageRecord.EndTime &lt;= ?)
+and (? = 'All' or JobUsageRecord.ProbeName = ?)
 and (? = 'All' or CETable.facility_name = ?)</property>
         </oda-data-set>
     </data-sets>
