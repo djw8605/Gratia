@@ -3,7 +3,7 @@ drop table if exists ProbeSummary, UserProbeSummary, VOProbeSummary;
 CREATE TABLE `ProbeSummary` (
   `EndTime` DATETIME NOT NULL DEFAULT 0,
   `ProbeName` VARCHAR(255) NOT NULL DEFAULT '',
-  `SiteName` VARCHAR(255) NOT NULL DEFAULT '',
+  `SiteName` VARCHAR(255) DEFAULT 'Unknown',
   `Njobs` INTEGER NOT NULL DEFAULT 0,
   `WallDuration` DOUBLE NOT NULL DEFAULT 0,
   `CpuUserDuration` DOUBLE NOT NULL DEFAULT 0,
@@ -12,7 +12,7 @@ CREATE TABLE `ProbeSummary` (
 
 CREATE TABLE `UserProbeSummary` (
   `EndTime` DATETIME NOT NULL DEFAULT 0,
-  `CommonName` VARCHAR(255) NOT NULL DEFAULT '',
+  `CommonName` VARCHAR(255) DEFAULT 'Unknown',
   `ProbeName` VARCHAR(255) NOT NULL DEFAULT '',
   `Njobs` INTEGER NOT NULL DEFAULT 0,
   `WallDuration` DOUBLE NOT NULL DEFAULT 0,
@@ -22,7 +22,7 @@ CREATE TABLE `UserProbeSummary` (
 
 CREATE TABLE `VOProbeSummary` (
   `EndTime` DATETIME NOT NULL DEFAULT 0,
-  `VOName` VARCHAR(255) NOT NULL DEFAULT '',
+  `VOName` VARCHAR(255) DEFAULT 'Unknown',
   `ProbeName` VARCHAR(255) NOT NULL DEFAULT '',
   `Njobs` INTEGER NOT NULL DEFAULT 0,
   `WallDuration` DOUBLE NOT NULL DEFAULT 0,
@@ -107,9 +107,6 @@ glr:begin
 	-- basic data checks
 	--
 	if new.ProbeName is null then
-		leave glr;
-	end if;
-	if new.SiteName is null then
 		leave glr;
 	end if;
 	if new.VOName is null then
