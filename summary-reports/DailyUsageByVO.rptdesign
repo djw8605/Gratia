@@ -218,7 +218,7 @@ select VOProbeSummary.VOName,
        sum(VOProbeSummary.WallDuration),
        sum(VOProbeSummary.CpuUserDuration+VOProbeSummary.CpuSystemDuration)
 from VOProbeSummary
-where (? &lt;= EndTime and EndTime &lt;= ?)
+where (date(?) &lt;= EndTime and EndTime &lt;= date(?))
 group by date_format(VOProbeSummary.EndTime, ?),VOProbeSummary.VOName
 order by VOProbeSummary.EndTime</property>
         </oda-data-set>

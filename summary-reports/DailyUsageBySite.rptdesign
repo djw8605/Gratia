@@ -214,7 +214,7 @@ select ProbeSummary.SiteName,
         sum(ProbeSummary.WallDuration),
         sum(ProbeSummary.CpuUserDuration+ProbeSummary.CpuSystemDuration)
          from ProbeSummary
-where ? &lt;= EndTime and EndTime &lt;= ?
+where date(?) &lt;= EndTime and EndTime &lt;= date(?)
 group by date_format(ProbeSummary.EndTime,
 ?),ProbeSummary.SiteName
 order by ProbeSummary.EndTime</property>

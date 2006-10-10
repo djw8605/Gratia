@@ -158,7 +158,7 @@ select ProbeSummary.SiteName,
 	sum(ProbeSummary.WallDuration),
 	sum(ProbeSummary.CpuUserDuration+ProbeSummary.CpuSystemDuration)
 from ProbeSummary
-where (? &lt;= ProbeSummary.EndTime and ProbeSummary.EndTime &lt;= ?)
+where (date(?) &lt;= ProbeSummary.EndTime and ProbeSummary.EndTime &lt;= date(?))
 group by ProbeSummary.SiteName
 order by ProbeSummary.SiteName</property>
         </oda-data-set>

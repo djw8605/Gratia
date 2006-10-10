@@ -170,7 +170,7 @@ from CETable, CEProbes, ProbeSummary
 where (? = 'All' or CETable.facility_name = ?)
 and CEProbes.facility_id = CETable.facility_id
 and ProbeSummary.ProbeName = CEProbes.probename
-and (? &lt;= ProbeSummary.EndTime and ProbeSummary.EndTime &lt;= ?)
+and (date(?) &lt;= ProbeSummary.EndTime and ProbeSummary.EndTime &lt;= date(?))
 group by CEProbes.probename
 order by CEProbes.probename</property>
         </oda-data-set>

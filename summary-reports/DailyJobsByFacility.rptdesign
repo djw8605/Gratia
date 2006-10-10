@@ -198,7 +198,7 @@ select CETable.facility_name,
 from CETable, CEProbes, ProbeSummary
 where CEProbes.facility_id = CETable.facility_id
 and ProbeSummary.ProbeName = CEProbes.probename
-and (? &lt;= endtime and endtime &lt;= ?)
+and (date(?) &lt;= endtime and endtime &lt;= date(?))
 group by date_format(endtime, ?), CETable.facility_name
 order by ProbeSummary.EndTime
 </property>

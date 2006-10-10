@@ -135,7 +135,7 @@
             <property name="queryText">
 select ProbeSummary.probename, sum(ProbeSummary.Njobs)
 from ProbeSummary
-where (? &lt;= ProbeSummary.EndTime and ProbeSummary.EndTime &lt;= ?)
+where (date(?) &lt;= ProbeSummary.EndTime and ProbeSummary.EndTime &lt;= date(?))
 group by ProbeSummary.probename
 order by ProbeSummary.probename</property>
         </oda-data-set>

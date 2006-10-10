@@ -133,7 +133,7 @@ select CETable.facility_name, sum(ProbeSummary.WallDuration)
 from CETable, CEProbes, ProbeSummary
 where CEProbes.facility_id = CETable.facility_id
 and ProbeSummary.ProbeName = CEProbes.probename
-and (? &lt;= EndTime and EndTime &lt;= ?)
+and (date(?) &lt;= EndTime and EndTime &lt;= date(?))
 group by CETable.facility_name
 order by CETable.facility_name</property>
         </oda-data-set>

@@ -266,7 +266,7 @@ else
 from CETable, CEProbes, ProbeSummary
 where CEProbes.facility_id = CETable.facility_id
 and ProbeSummary.ProbeName = CEProbes.probename
-and date_format(ProbeSummary.EndTime, '%m/%d/%Y %T') BETWEEN ? and ?
+and date_format(ProbeSummary.EndTime, '%m/%d/%Y %T') BETWEEN date(?) and date(?)
 group by date_format(ProbeSummary.EndTime, ?), CEProbes.probename
 order by ProbeSummary.EndTime, CEProbes.probename</property>
         </oda-data-set>
