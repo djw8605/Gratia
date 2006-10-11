@@ -65,6 +65,8 @@ public class ListenerThread extends Thread
 		boolean gotduplicate = false;
 		boolean goterror = false;
 
+		boolean stopflag = false;
+
 		public ListenerThread(String ident,
 													String directory,
 													Object lock)
@@ -96,6 +98,13 @@ public class ListenerThread extends Thread
 				else
 						duplicateCheck = false;
 				Logging.log("ListenerThread: " + ident + ":Duplicate Check: " + duplicateCheck);
+		}	
+
+
+		public void stopRequest()
+		{
+				stopflag = true;
+				System.out.println("ListenerThread: " + ident + ":Stop Requested");
 		}
 
 		public String md5key(String input) throws Exception
@@ -158,6 +167,12 @@ public class ListenerThread extends Thread
 		{
 				while (true)
 						{
+								if (stopflag)
+										{
+												System.out.println("ListenerThread: " + ident + ":Exiting");
+												return;
+										}
+
 								if (! HibernateWrapper.databaseUp())
 										{
 												HibernateWrapper.start();
@@ -174,7 +189,17 @@ public class ListenerThread extends Thread
 																continue;
 														}
 										}
+								if (stopflag)
+										{
+												System.out.println("ListenerThread: " + ident + ":Exiting");
+												return;
+										}
 								loop();
+								if (stopflag)
+										{
+												System.out.println("ListenerThread: " + ident + ":Exiting");
+												return;
+										}
 								try
 										{
 												Thread.sleep(30 * 1000);
@@ -200,6 +225,12 @@ public class ListenerThread extends Thread
 
 				for (int i = 0; i < files.length; i++)
 						{
+								if (stopflag)
+										{
+												System.out.println("ListenerThread: " + ident + ":Exiting");
+												return;
+										}
+
 								file = files[i];
 								blob = xp.get(files[i]);
 								xml = null;

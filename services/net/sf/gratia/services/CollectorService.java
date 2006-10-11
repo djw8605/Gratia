@@ -183,7 +183,7 @@ public class CollectorService implements ServletContextListener
 								// poke in rmi
 								//
 
-								JMSProxyImpl proxy = new JMSProxyImpl();
+								JMSProxyImpl proxy = new JMSProxyImpl(this);
 								Naming.rebind(rmibind + service,proxy);
 								System.out.println("JMSProxy Started");
 
@@ -260,6 +260,50 @@ public class CollectorService implements ServletContextListener
 				(new ReportSetup()).start();
 		}
 
+
+		public void stopDatabaseUpdateThreads()
+		{
+				int i;
+				int maxthreads = Integer.parseInt(p.getProperty("service.listener.threads"));
+				for (i = 0; i < maxthreads; i++)
+						{
+								threads[i].stopRequest();
+						}
+				try
+						{
+								Thread.sleep(60 * 1000);
+						}
+				catch (Exception ignore)
+						{
+						}
+		}
+
+		public void startDatabaseUpdateThreads()
+		{
+				int i;
+				int maxthreads = Integer.parseInt(p.getProperty("service.listener.threads"));
+				threads = new ListenerThread[maxthreads];
+				for (i = 0; i < maxthreads; i++)
+						{
+								threads[i] = new ListenerThread("ListenerThread: " + i,queues[i],lock);
+								threads[i].setPriority(Thread.MAX_PRIORITY);
+								threads[i].setDaemon(true);
+						}
+				for (i = 0; i < maxthreads; i++)
+						threads[i].start();
+
+		}
+
+		public boolean databaseUpdateThreadsActive()
+		{
+				int i;
+				int maxthreads = Integer.parseInt(p.getProperty("service.listener.threads"));
+
+				for (i = 0; i < maxthreads; i++)
+						if (threads[i].isAlive())
+								return true;
+				return false;
+		}
 
 		public void loadSelfGeneratedCerts()
 		{

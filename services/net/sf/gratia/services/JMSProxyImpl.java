@@ -28,10 +28,14 @@ public class JMSProxyImpl extends UnicastRemoteObject implements JMSProxy
 
 		int irecords = 0;
 
+		CollectorService collectorService = null;
 
-	public JMSProxyImpl() throws RemoteException
+	public JMSProxyImpl(CollectorService collectorService) throws RemoteException
 		{
 				super();
+
+				this.collectorService = collectorService;
+
 				loadProperties();
 
 				int maxthreads = Integer.parseInt(p.getProperty("service.listener.threads"));
@@ -95,21 +99,37 @@ public class JMSProxyImpl extends UnicastRemoteObject implements JMSProxy
 		public boolean statusUpdate(String xml) throws RemoteException
 		{
 				/*
-				try
-						{
-								TextMessage message = jmssession.createTextMessage();
-								message.setStringProperty("xml",xml);
-								producer.send(message);
-								jmssession.commit();
-								// checkQueue();
-								return true;
-						}
-				catch (Exception e)
-						{
-								e.printStackTrace();
-						}
+					try
+					{
+					TextMessage message = jmssession.createTextMessage();
+					message.setStringProperty("xml",xml);
+					producer.send(message);
+					jmssession.commit();
+					// checkQueue();
+					return true;
+					}
+					catch (Exception e)
+					{
+					e.printStackTrace();
+					}
 				*/
 
 				return false;
 		}
+
+		public void stopDatabaseUpdateThreads() throws RemoteException
+		{
+				collectorService.stopDatabaseUpdateThreads();
+		}
+
+		public void startDatabaseUpdateThreads() throws RemoteException
+		{
+				collectorService.startDatabaseUpdateThreads();
+		}
+
+		public boolean databaseUpdateThreadsActive() throws RemoteException
+		{
+				return collectorService.databaseUpdateThreadsActive();
+		}
 }
+
