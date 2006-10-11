@@ -19,6 +19,8 @@ import java.sql.*;
 import java.util.regex.*;
 import java.text.*;
 
+import java.rmi.*;
+
 public class SystemAdministration extends HttpServlet 
 {
 		XP xp = new XP();
@@ -45,6 +47,7 @@ public class SystemAdministration extends HttpServlet
 		HttpServletResponse response;
 		boolean initialized = false;
 		Properties props;
+		Properties p;
 		String message = null;
 		//
 		// support
@@ -52,6 +55,8 @@ public class SystemAdministration extends HttpServlet
 		String dq = "\"";
 		String comma = ",";
 		String cr = "\n";
+
+		public JMSProxy proxy = null;
 
 		//
 		// statics for recovery thread
@@ -64,12 +69,23 @@ public class SystemAdministration extends HttpServlet
 		public static long errors = 0;
 		public static boolean replayall = false;
 
-    public void init(ServletConfig config) throws ServletException 
+    public void initialize()
 		{
+				p = net.sf.gratia.services.Configuration.getProperties();
+				try
+						{
+								proxy = (JMSProxy) Naming.lookup(p.getProperty("service.rmi.rmilookup") +
+																								 p.getProperty("service.rmi.service"));
+						}
+				catch (Exception e)
+						{
+								Logging.warning(xp.parseException(e));
+						}
     }
     
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
 		{
+				initialize();
 				this.request = request;
 				this.response = response;
 				if (request.getParameter("action") != null)
@@ -78,6 +94,10 @@ public class SystemAdministration extends HttpServlet
 										replay();
 								else if (request.getParameter("action").equals("replayAll"))
 										replayAll();
+								else if (request.getParameter("action").equals("stopDatabaseUpdateThreads"))
+										stopDatabaseUpdateThreads();
+								else if (request.getParameter("action").equals("startDatabaseUpdateThreads"))
+										startDatabaseUpdateThreads();
 						}
 				setup();
 				process();
@@ -97,9 +117,25 @@ public class SystemAdministration extends HttpServlet
 
 		public void process()
 		{
+				String status = "Active";
+
 				html = xp.replaceAll(html,"#status#",SystemAdministration.status);
 				html = xp.replaceAll(html,"#processed#","" + SystemAdministration.processed);
 				html = xp.replaceAll(html,"#skipped#","" + SystemAdministration.skipped);
+
+				try
+						{
+								boolean flag = proxy.databaseUpdateThreadsActive();
+								if (flag)
+										status = "Alive";
+								else
+										status = "Stopped";
+						}
+				catch (Exception e)
+						{
+								e.printStackTrace();
+						}
+				html = xp.replaceAll(html,"#threadstatus#",status);
 		}
 
 		public void replay()
@@ -126,6 +162,30 @@ public class SystemAdministration extends HttpServlet
 				SystemAdministration.replayall = true;
 				SystemAdministration.recoveryService = new RecoveryService();
 				SystemAdministration.recoveryService.start();
+		}
+
+		public void stopDatabaseUpdateThreads()
+		{
+				try
+						{
+								proxy.stopDatabaseUpdateThreads();
+						}
+				catch (Exception e)
+						{
+								e.printStackTrace();
+						}
+		}
+
+		public void startDatabaseUpdateThreads()
+		{
+				try
+						{
+								proxy.startDatabaseUpdateThreads();
+						}
+				catch (Exception e)
+						{
+								e.printStackTrace();
+						}
 		}
 
 		public class RecoveryService extends Thread
