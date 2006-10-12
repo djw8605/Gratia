@@ -2,18 +2,25 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
-<title>Untitled Document</title>
+<title>Gratia Accounting</title>
+<style type="text/css">
+<!--
+.style1 {color: #000000}
+.style2 {color: #CC6600}
+-->
+</style>
 </head>
 <body>
+<h1 align="center" class="style2">Gratia Administration </h1>
 <h3 align="center">Probe Table Administration</h3>
 <form id="form1" name="form1" method="post" action="probetable.html">
   <table width="100%" border="1">
     <tr>
-      <th width="16%" bgcolor="#999999" scope="col">Probe Name </th>
+      <th width="20%" bgcolor="#999999" scope="col">Probe Name </th>
       <th width="20%" bgcolor="#999999" scope="col">CE Name </th>
-      <th width="14%" bgcolor="#999999" scope="col">Active?</th>
-      <th width="19%" bgcolor="#999999" scope="col">Check Every XX Hours </th>
-      <th width="31%" bgcolor="#999999" scope="col">Check Every XX Minutes </th>
+      <th width="20%" bgcolor="#999999" scope="col">Active?</th>
+      <th width="20%" bgcolor="#999999" scope="col">Check Every XX Hours </th>
+      <th width="20%" bgcolor="#999999" scope="col">Check Every XX Minutes </th>
     </tr>
     <tr>
       <td><input name="probename:#index#" type="text" value="#probename#" size="32" />
@@ -43,18 +50,15 @@
       </td>
     </tr>
     <tr>
-      <td>&nbsp;</td>
-      <td>&nbsp;</td>
-      <td valign="middle"><label></label>
+      <td colspan="5"><label></label>
         <div align="center">
           <label>
           <input name="Apply" type="submit" id="Apply" value="Apply" />
           </label>
-        </div></td>
-      <td>&nbsp;</td>
-      <td>&nbsp;</td>
+      </div></td>
     </tr>
   </table>
 </form>
 </body>
 </html>
+
