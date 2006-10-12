@@ -1,8 +1,8 @@
 
 PLATFORM := $(shell uname)
 
-gratia_reporting_version=v0.9
-gratia_services_version=v0.9
+gratia_reporting_version=v0.10
+gratia_services_version=v0.10
 
 base=../../
 root=../
@@ -130,12 +130,7 @@ administration: services
 	javac -cp ${classpath} -extdirs $(jars) ../administration/net/sf/gratia/administration/*.java
 	cp ${administration}/net/sf/gratia/administration/images/*.gif war/images
 	cp ${administration}/net/sf/gratia/administration/*.class war/WEB-INF/classes/net/sf/gratia/administration
-	cp ../services/net/sf/gratia/services/Logging.class war/WEB-INF/classes/net/sf/gratia/services
-	cp ../services/net/sf/gratia/services/Configuration.class war/WEB-INF/classes/net/sf/gratia/services
-	cp ../services/net/sf/gratia/services/*Skel.class war/WEB-INF/classes/net/sf/gratia/services
-	cp ../services/net/sf/gratia/services/*Stub.class war/WEB-INF/classes/net/sf/gratia/services
-	cp ../services/net/sf/gratia/services/X*.class war/WEB-INF/classes/net/sf/gratia/services
-	cp ../services/net/sf/gratia/services/JMS*.class war/WEB-INF/classes/net/sf/gratia/services
+	cp ../services/net/sf/gratia/services/*.class war/WEB-INF/classes/net/sf/gratia/services
 	cp ../administration/net/sf/gratia/administration/web.xml war/WEB-INF/web.xml
 	cp ../administration/net/sf/gratia/administration/*.html war
 	cp ../administration/net/sf/gratia/administration/*.jsp war
@@ -218,7 +213,7 @@ report-configuration:
 	jar -cvf ../target/gratia-report-configuration.war -C war .
 	rm -f -r war
 
-release: services servlets soap reporting reports report-configuration administration security
+release: clean services servlets soap reporting reports report-configuration administration security
 	rm -f -r tarball
 	#
 	# create reporting tarball
