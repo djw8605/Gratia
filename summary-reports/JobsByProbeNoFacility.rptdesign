@@ -133,11 +133,8 @@
                 </structure>
             </list-property>
             <property name="queryText">
-select ProbeSummary.probename, sum(ProbeSummary.Njobs)
-from ProbeSummary
-where (date(?) &lt;= ProbeSummary.EndTime and ProbeSummary.EndTime &lt;= date(?))
-group by ProbeSummary.probename
-order by ProbeSummary.probename</property>
+call JobsByProbeNoFacility(?,?)
+</property>
         </oda-data-set>
     </data-sets>
     <styles>
@@ -636,7 +633,7 @@ order by ProbeSummary.probename</property>
             <Visible>true</Visible>
           </Label>
           <DataDefinition>
-            <Definition>row[&quot;sum(ProbeSummary.Njobs)&quot;]</Definition>
+            <Definition>row[&quot;Njobs&quot;]</Definition>
           </DataDefinition>
           <SeriesIdentifier>Probe Name</SeriesIdentifier>
           <DataPoint>

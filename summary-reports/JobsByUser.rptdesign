@@ -133,11 +133,8 @@
                 </structure>
             </list-property>
             <property name="queryText">
-select UserProbeSummary.CommonName as UserName, sum(UserProbeSummary.Njobs)
-from UserProbeSummary
-where (date(?) &lt;= UserProbeSummary.EndTime and UserProbeSummary.EndTime &lt;= date(?))
-group by UserProbeSummary.CommonName
-order by UserProbeSummary.CommonName</property>
+call JobsByUser(?,?)
+</property>
         </oda-data-set>
     </data-sets>
     <styles>

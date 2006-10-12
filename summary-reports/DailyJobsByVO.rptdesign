@@ -188,13 +188,8 @@
                 </structure>
             </list-property>
             <property name="queryText">
-select VOProbeSummary.VOName, 
-       VOProbeSummary.EndTime as endtime, 
-       sum(VOProbeSummary.Njobs)
-from VOProbeSummary
-where (date(?) &lt;= EndTime and EndTime &lt;= date(?))
-group by date_format(VOProbeSummary.EndTime, ?),VOProbeSummary.VOName
-order by VOProbeSummary.EndTime</property>
+call DailyJobsByVO(?,?,?)
+</property>
         </oda-data-set>
     </data-sets>
     <styles>
@@ -963,7 +958,7 @@ printWriter.close();
             <Visible>false</Visible>
           </Label>
           <DataDefinition>
-            <Definition>row[&quot;sum(VOProbeSummary.Njobs)&quot;]</Definition>
+            <Definition>row[&quot;Njobs&quot;]</Definition>
           </DataDefinition>
           <SeriesIdentifier>Job Count</SeriesIdentifier>
           <DataPoint>

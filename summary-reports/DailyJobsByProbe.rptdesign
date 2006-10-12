@@ -192,15 +192,7 @@
                 </structure>
             </list-property>
             <property name="queryText">
-select CEProbes.probename,
-       ProbeSummary.EndTime as endtime, 
-       sum(ProbeSummary.Njobs)
-from CETable, CEProbes, ProbeSummary
-where CEProbes.facility_id = CETable.facility_id
-and ProbeSummary.ProbeName = CEProbes.probename
-and (date(?) &lt;= endtime and endtime &lt;= date(?))
-group by date_format(endtime, ?), CEProbes.probename
-order by ProbeSummary.EndTime
+call DailyJobsByProbe(?,?,?)
 </property>
         </oda-data-set>
     </data-sets>
@@ -881,7 +873,7 @@ printWriter.close();
       <TitlePosition>Left</TitlePosition>
       <SeriesDefinitions>
         <Query>
-          <Definition>row[&quot;probename&quot;]</Definition>
+          <Definition>row[&quot;ProbeName&quot;]</Definition>
         </Query>
         <SeriesPalette>
           <Entries xsi:type="attribute:ColorDefinition">
@@ -968,7 +960,7 @@ printWriter.close();
             <Visible>false</Visible>
           </Label>
           <DataDefinition>
-            <Definition>row[&quot;sum(ProbeSummary.Njobs)&quot;]</Definition>
+            <Definition>row[&quot;Njobs&quot;]</Definition>
           </DataDefinition>
           <SeriesIdentifier>Job Count</SeriesIdentifier>
           <DataPoint>

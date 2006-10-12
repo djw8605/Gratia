@@ -129,13 +129,8 @@
                 </structure>
             </list-property>
             <property name="queryText">
-select CETable.facility_name, sum(ProbeSummary.WallDuration)
-from CETable, CEProbes, ProbeSummary
-where CEProbes.facility_id = CETable.facility_id
-and ProbeSummary.ProbeName = CEProbes.probename
-and (date(?) &lt;= EndTime and EndTime &lt;= date(?))
-group by CETable.facility_name
-order by CETable.facility_name</property>
+call UsageByFacility(?,?)
+</property>
         </oda-data-set>
     </data-sets>
     <styles>
@@ -637,7 +632,7 @@ order by CETable.facility_name</property>
             <Visible>true</Visible>
           </Label>
           <DataDefinition>
-            <Definition>row[&quot;sum(ProbeSummary.WallDuration)&quot;] / 3600</Definition>
+            <Definition>row[&quot;WallDuration&quot;] / 3600</Definition>
           </DataDefinition>
           <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
           <DataPoint>

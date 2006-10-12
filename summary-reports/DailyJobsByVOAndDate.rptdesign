@@ -291,11 +291,9 @@ else
                     <property name="isInput">true</property>
                 </structure>
             </list-property>
-            <property name="queryText">select VOProbeSummary.VOName, date_format(VOProbeSummary.EndTime, ?) as endtime, sum(VOProbeSummary.Njobs)
-from VOProbeSummary
-where date_format(VOProbeSummary.EndTime, '%m/%d/%Y %T') BETWEEN date(?) and date(?)
-group by date_format(VOProbeSummary.EndTime, ?), VOProbeSummary.VOName
-order by VOProbeSummary.EndTime, VOProbeSummary.VOName</property>
+            <property name="queryText">
+call DailyJobsByVOAndDate(?,?,?)
+</property>
         </oda-data-set>
     </data-sets>
     <styles>

@@ -133,11 +133,7 @@
                 </structure>
             </list-property>
             <property name="queryText">
-select ProbeSummary.SiteName, sum(ProbeSummary.Njobs)
-from ProbeSummary
-where (date(?) &lt;= ProbeSummary.EndTime and ProbeSummary.EndTime &lt;= date(?))
-group by ProbeSummary.SiteName
-order by ProbeSummary.SiteName
+call JobsBySite(?,?)
 </property>
         </oda-data-set>
     </data-sets>

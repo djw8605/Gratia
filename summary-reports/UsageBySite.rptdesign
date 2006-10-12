@@ -154,13 +154,8 @@
                 </structure>
             </list-property>
             <property name="queryText">
-select ProbeSummary.SiteName, 
-	sum(ProbeSummary.WallDuration),
-	sum(ProbeSummary.CpuUserDuration+ProbeSummary.CpuSystemDuration)
-from ProbeSummary
-where (date(?) &lt;= ProbeSummary.EndTime and ProbeSummary.EndTime &lt;= date(?))
-group by ProbeSummary.SiteName
-order by ProbeSummary.SiteName</property>
+call UsageBySite(?,?)
+</property>
         </oda-data-set>
         <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="CPUMetricTypes" id="102">
             <property name="dataSource">fermigrid1</property>

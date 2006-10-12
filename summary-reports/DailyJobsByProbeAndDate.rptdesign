@@ -291,13 +291,9 @@ else
                     <property name="isInput">true</property>
                 </structure>
             </list-property>
-            <property name="queryText">select CEProbes.probename, date_format(ProbeSummary.EndTime, ?), sum(ProbeSummary.Njobs)
-from CETable, CEProbes, ProbeSummary
-where CEProbes.facility_id = CETable.facility_id
-and ProbeSummary.ProbeName = CEProbes.probename
-and date_format(ProbeSummary.EndTime, '%m/%d/%Y %T') BETWEEN date(?) and date(?)
-group by date_format(ProbeSummary.EndTime, ?), CEProbes.probename
-order by ProbeSummary.EndTime, CEProbes.probename</property>
+            <property name="queryText">
+call DailyJobsByProbeAndDate(?,?,?)
+</property>
         </oda-data-set>
     </data-sets>
     <styles>
