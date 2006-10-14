@@ -6,6 +6,13 @@
     
 <hibernate-mapping package= "net.sf.gratia.storage">
 
+<class name="CPUMetricTypes" table="CPUMetricTypes" node="CPUMetricTypes" lazy="false">
+			 <id name="id" column="id" type="int">
+					 <generator class="native"/>
+			 </id>
+			 <property name="CPUMetricType" column="CPUMetricType"/>
+</class>
+
 <class name="SystemProplist" table="SystemProplist" node="SystemProplist" lazy="false">
 			 <id name="propid" column="propid" type="int">
 					 <generator class="native"/>
