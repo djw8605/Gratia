@@ -45,34 +45,30 @@ public class CollectorService implements ServletContextListener
 				String catalinaHome = "";
 				int i = 0;
 
-				/*
-					Enumeration iter = System.getProperties().propertyNames();
-					System.out.println("");
-					while(iter.hasMoreElements())
-					{
-					String key = (String) iter.nextElement();
-					String value = (String) System.getProperty(key);
-					System.out.println("Key: " + key + " value: " + value);
-					}
-					System.out.println("");
-				*/
+				Enumeration iter = System.getProperties().propertyNames();
+				System.out.println("");
+				while(iter.hasMoreElements())
+						{
+								String key = (String) iter.nextElement();
+								String value = (String) System.getProperty(key);
+								System.out.println("Key: " + key + " value: " + value);
+						}
+				System.out.println("");
 
 				p = net.sf.gratia.services.Configuration.getProperties();
 
-				/*
-					System.out.println("");
-					System.out.println("service properties:");
-					System.out.println("");
-					iter = p.propertyNames();
-					while(iter.hasMoreElements())
-					{
-					String key = (String) iter.nextElement();
-					String value = (String) p.getProperty(key);
-					System.out.println("Key: " + key + " value: " + value);
-					}
-					System.out.println("");
-					System.out.println("service.security.level: " + p.getProperty("service.security.level"));
-				*/
+				System.out.println("");
+				System.out.println("service properties:");
+				System.out.println("");
+				iter = p.propertyNames();
+				while(iter.hasMoreElements())
+						{
+								String key = (String) iter.nextElement();
+								String value = (String) p.getProperty(key);
+								System.out.println("Key: " + key + " value: " + value);
+						}
+				System.out.println("");
+				System.out.println("service.security.level: " + p.getProperty("service.security.level"));
 
 				configurationPath = net.sf.gratia.services.Configuration.getConfigurationPath();
 
