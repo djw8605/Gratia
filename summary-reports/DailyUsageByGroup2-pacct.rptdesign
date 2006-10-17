@@ -25,7 +25,7 @@
         </structure>
     </list-property>
     <method name="initialize"><![CDATA[//importPackage(Packages.java.io); 
-//fos = new java.io.FileOutputStream("c:\\temp2.txt", true); 
+//fos = new java.io.FileOutputStream("/tmp/glr.txt", true); 
 //printWriter = new java.io.PrintWriter(fos); 
 
 //printWriter.println("2.Start Date After:  " + params["Start Date"]);
@@ -605,7 +605,7 @@ function beforeGeneration( chart, context ){
 	val = rep.getParameterValue(&quot;TimeAxisPattern&quot;);
 
 	if(val != null) {
-                fos = new java.io.FileOutputStream(&quot;c:\\temp2.txt&quot;, true); 
+                fos = new java.io.FileOutputStream(&quot;/tmp/glr.txt&quot;, true); 
                 printWriter = new java.io.PrintWriter(fos); 
 
                 axes = chart.getAxes().get(0);
