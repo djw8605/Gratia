@@ -125,37 +125,38 @@ public class JobRecUpdaterManager implements JobUsageRecordUpdater {
                try
                {
                   SAXReader saxReader = new SAXReader();        
-                    Document doc = null;
-                    doc = saxReader.read( new InputSource(new StringReader(keyInfoContent)));  
+                  Document doc = null;
+                  doc = saxReader.read( new InputSource(new StringReader(keyInfoContent)));  
                     
-                    // Try to xpath to the 'ds:X509SubjectName' node
-                    java.util.List subjectNames = doc.selectNodes("//ds:X509SubjectName");
+                  // Try to xpath to the 'ds:X509SubjectName' node
+                  java.util.List subjectNames = doc.selectNodes("//ds:X509SubjectName");
                     
-                    // Check that the xpath returned a node
-                    if(subjectNames.size() > 0)
-                    {
-                       String[] subjectNameFields = ((Element)subjectNames.get(0)).getText().split(",");
+                  // Check that the xpath returned a node
+                  if(subjectNames.size() > 0)
+                  {
+                     String[] subjectNameFields = ((Element)subjectNames.get(0)).getText().split("[,/]");
                        
-                       for(int i=0; i<subjectNameFields.length; i++)
-                       {
-                          String fieldValue=subjectNameFields[i].toLowerCase().trim();
+                     for(int i=0; i<subjectNameFields.length; i++)
+                     {
+                        String caseFieldValue=subjectNameFields[i].trim();
+                        String fieldValue=subjectNameFields[i].toLowerCase().trim();
                           
-                          if(fieldValue.startsWith("o=") && VO.equals("Unknown"))
-                          {
-                             VO = fieldValue.substring(2);
-                             populatedVOFromKeyInfoContent = true;
-                             Utils.GratiaDebug("Extracted a VO from X509SubjectNameNode:  " + VO);
-                          }
-                          else 
-                          if(fieldValue.startsWith("cn="))
-                          {
-                             userName = fieldValue.substring(3);
-                             populatedUserNameFromKeyInfoContent = true;
-                             Utils.GratiaDebug("Extracted a Username from X509SubjectNameNode:  " + userName);
-                          }
-                       }      
+                        if(fieldValue.startsWith("o=") && VO.equals("Unknown"))
+                        {
+                           VO = fieldValue.substring(2);
+                           populatedVOFromKeyInfoContent = true;
+                           Utils.GratiaDebug("Extracted a VO from X509SubjectNameNode:  " + VO);
+                        }
+                        else 
+                        if(fieldValue.startsWith("cn="))
+                        {
+                           userName = caseFieldValue.substring(3);
+                           populatedUserNameFromKeyInfoContent = true;
+                           Utils.GratiaDebug("Extracted a Username from X509SubjectNameNode:  " + userName);
+                        }
+                     }      
                        
-                       if(populatedVOFromKeyInfoContent == false)
+                     if(populatedVOFromKeyInfoContent == false)
                      {
                         Utils.GratiaDebug("'o=' was not found in key info content.  Defaulting VO Name to " + VO);
                      }                      
