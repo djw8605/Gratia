@@ -438,7 +438,11 @@ public class CollectorService implements ServletContextListener
 								//
 								"delete from SystemProplist",
 								"insert into SystemProplist(car,cdr) values(" + dq + "gratia.version" + dq + comma + dq + gratiaDatabaseVersion + dq + ")",
-								"insert into SystemProplist(car,cdr) values(" + dq + "gratia.database.version" + dq + comma + dq + gratiaDatabaseVersion + dq + ")"
+								"insert into SystemProplist(car,cdr) values(" + dq + "gratia.database.version" + dq + comma + dq + gratiaDatabaseVersion + dq + ")",
+								"delete from CPUMetricTypes",
+								"insert into CPUMetricTypes(CPUMetricType) values(" + dq + "wallclock" + dq + ")",
+								"insert into CPUMetricTypes(CPUMetricType) values(" + dq + "process" + dq + ")"
+
 						};
 
 				for (i = 0; i < commands1.length; i++)
