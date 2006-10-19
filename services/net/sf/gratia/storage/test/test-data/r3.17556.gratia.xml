@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<JobUsageRecord xmlns="http://www.gridforum.org/2003/ur-wg"
+		xmlns:urwg="http://www.gridforum.org/2003/ur-wg"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+		xsi:schemaLocation="http://www.gridforum.org/2003/ur-wg file:///u:/OSG/urwg-schema.11.xsd">
+<RecordIdentity urwg:recordId="ouhep4.nhn.ou.edu:17556.3" urwg:createTime="2006-10-03T21:21:18Z" />
+<UserIdentity>
+	<VOName >DOSAR</VOName>
+</UserIdentity>
+	<WallDuration >P1DT20H42M</WallDuration>
+	<StartTime >2006-10-02T05:00:00Z</StartTime>
+	<EndTime >2006-10-03T05:00:00Z</EndTime>
+	<ProbeName >daily:OUHEP</ProbeName>
+	<SiteName >OUHEP</SiteName>
+	<Njobs >1</Njobs>
+</JobUsageRecord>
