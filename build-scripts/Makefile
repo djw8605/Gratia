@@ -133,6 +133,7 @@ administration: services
 	cp ../services/net/sf/gratia/services/*.class war/WEB-INF/classes/net/sf/gratia/services
 	cp ../administration/net/sf/gratia/administration/web.xml war/WEB-INF/web.xml
 	cp ../administration/net/sf/gratia/administration/*.html war
+	cp ../administration/net/sf/gratia/administration/*.css war
 	cp ../administration/net/sf/gratia/administration/*.jsp war
 	cp ../administration/net/sf/gratia/administration/images/*.gif war/images
 	cp ../*.html war
