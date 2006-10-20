@@ -188,6 +188,7 @@ public class XP
 								Logging.log("XP: Error Retrieving FileList: " + e);
 								return new String[0];
 						}
+                                if (filelist == null) return new String[0];
 				for (i = 0; i < filelist.length; i++)
 						{
 								try
