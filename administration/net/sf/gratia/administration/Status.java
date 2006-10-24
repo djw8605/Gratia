@@ -52,6 +52,8 @@ public class Status extends HttpServlet
 		String dq = "\"";
 		String comma = ",";
 		String cr = "\n";
+		Pattern p = Pattern.compile("<tr class=qsize>.*?</tr>",Pattern.MULTILINE + Pattern.DOTALL);
+		Matcher m = null;
 
     public void init(ServletConfig config) throws ServletException 
 		{
@@ -411,20 +413,25 @@ public class Status extends HttpServlet
 				html = xp.replaceAll(html,"#totalcount#","" + totalcount.intValue());
 				html = xp.replaceAll(html,"#totalerror#","" + totalerror.intValue());
 
+				int maxthreads = Integer.parseInt(props.getProperty("service.listener.threads"));
 				String path = System.getProperties().getProperty("catalina.home");
 				path = xp.replaceAll(path,"\\","/");
 
-				String xpath = path + "/gratia/data/thread0";
-				String filelist[] = xp.getFileList(xpath);
-				html = xp.replaceAll(html,"#q0#","" + filelist.length);
+				m = p.matcher(html);
+				m.find();
+				String row = m.group();
+				StringBuffer buffer = new StringBuffer();
 
-				xpath = path + "/gratia/data/thread1";
-				filelist = xp.getFileList(xpath);
-				html = xp.replaceAll(html,"#q1#","" + filelist.length);
-
-				xpath = path + "/gratia/data/thread2";
-				filelist = xp.getFileList(xpath);
-				html = xp.replaceAll(html,"#q2#","" + filelist.length);
+				for (int i = 0; i < maxthreads; i++)
+						{
+								String newrow = new String(row);
+								String xpath = path + "/gratia/data/thread" + i;
+								String filelist[] = xp.getFileList(xpath);
+								newrow = xp.replaceAll(newrow,"#queue#","Q" + i);
+								newrow = xp.replaceAll(newrow,"#queuesize#","" + filelist.length);
+								buffer.append(newrow);
+						}
+				html = xp.replaceAll(html,row,buffer.toString());
 		}
 
 }
