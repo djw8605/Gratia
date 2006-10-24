@@ -31,6 +31,7 @@ public class CollectorService implements ServletContextListener
 		ReplicationService replicationService;
 		ProbeMonitorService probeMonitorService;
 		RMIService rmiservice;
+		QSizeMonitor qsizeMonitor;;
 
 		XP xp = new XP();
 
@@ -209,7 +210,18 @@ public class CollectorService implements ServletContextListener
 										}
 								for (i = 0; i < maxthreads; i++)
 										threads[i].start();
-								
+
+								//
+								// if requested - start service to monitor input queue sizes
+								//
+
+								if (p.getProperty("monitor.q.size").equals("1"))
+										{
+												System.out.println("CollectorService: Starting QSizeMonitor");
+												qsizeMonitor = new QSizeMonitor();
+												qsizeMonitor.start();
+										}
+
 								/*
 									statusListenerThread = new StatusListenerThread();
 									statusListenerThread.setDaemon(true);
