@@ -1201,13 +1201,13 @@ call JobsByProbeNoFacility(?,?)
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>if (row[&quot;probename&quot;] == null)
+          <Definition>if (row[&quot;ProbeName&quot;] == null)
 
 	&quot;Unknown&quot;
 
 else
 
-	row[&quot;probename&quot;]</Definition>
+	row[&quot;ProbeName&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>Job Count</SeriesIdentifier>
         <DataPoint>
