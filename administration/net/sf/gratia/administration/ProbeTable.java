@@ -14,7 +14,7 @@ import javax.servlet.*;
 import javax.servlet.http.*;
 
 import java.sql.*;
-
+import java.text.*;
 import java.util.regex.*;
 
 public class ProbeTable extends HttpServlet 
@@ -54,6 +54,7 @@ public class ProbeTable extends HttpServlet
 		Hashtable cetablebyid = new Hashtable();
 		Hashtable cetablebyname = new Hashtable();
 		String newname = "<New Probe Name>";
+		Hashtable contact = new Hashtable();
 
     public void init(ServletConfig config) throws ServletException 
 		{
@@ -148,6 +149,27 @@ public class ProbeTable extends HttpServlet
 				buffer = new StringBuffer();
 				cetablebyid = new Hashtable();
 				cetablebyname = new Hashtable();
+				contact = new Hashtable();
+
+				try
+						{
+								command = "select ProbeName,max(ServerDate) from JobUsageRecord group by ProbeName";
+								statement = connection.prepareStatement(command);
+								resultSet = statement.executeQuery(command);
+
+								while(resultSet.next())
+										{
+												String key = resultSet.getString(1);
+												Timestamp timestamp = resultSet.getTimestamp(2);
+												contact.put(key,timestamp);
+										}
+								resultSet.close();
+								statement.close();
+						}
+				catch (Exception e)
+						{
+								e.printStackTrace();
+						}
 
 				try
 						{
@@ -179,6 +201,8 @@ public class ProbeTable extends HttpServlet
 								while(resultSet.next())
 										{
 												String newrow = new String(row);
+												String probename = resultSet.getString(3);
+												Timestamp timestamp = (Timestamp) contact.get(probename);
 
 												newrow = xp.replaceAll(newrow,"#index#","" + index);
 												table.put("index:" + index,"" + index);
@@ -186,12 +210,7 @@ public class ProbeTable extends HttpServlet
 												newrow = xp.replaceAll(newrow,"#dbid#",resultSet.getString(1));
 												table.put("dbid:" + index,resultSet.getString(1));
 
-												{
-														Pattern p = Pattern.compile("<td>.*probename:.*?</td>",Pattern.MULTILINE + Pattern.DOTALL);
-														Matcher m = p.matcher(newrow);
-														m.find();
-														newrow = m.replaceAll("<td><label>" + resultSet.getString(3) + "</label></td>");
-												}
+												newrow = xp.replaceAll(newrow,"#probename#",probename);
 
 												newrow = xp.replaceAll(newrow,"#reporthh#",resultSet.getString(5));
 												table.put("reporthh:" + index,resultSet.getString(5));
@@ -208,6 +227,16 @@ public class ProbeTable extends HttpServlet
 
 												newrow = activelist(index,newrow,yesorno);
 
+												if (timestamp != null)
+														{
+																SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+																newrow = xp.replaceAll(newrow,"#lastcontact#",format.format(timestamp));
+														}
+												else
+														{
+																newrow = xp.replaceAll(newrow,"#lastcontact#","Never");
+														}
+
 												buffer.append(newrow);
 												index++;
 										}
@@ -222,6 +251,7 @@ public class ProbeTable extends HttpServlet
 				for (int j = 0; j < 5; j++)
 						{
 								String newrow = new String(row);
+								newrow = xp.replaceAll(newrow,"#lastcontact#","");
 								newrow = xp.replaceAll(newrow,"#index#","" + index);
 								newrow = xp.replace(newrow,"#probename#",newname);
 								newrow = xp.replace(newrow,"#reporthh#","24");
