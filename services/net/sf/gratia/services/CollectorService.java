@@ -443,6 +443,7 @@ public class CollectorService implements ServletContextListener
 								"alter table JobUsageRecord drop index index10",
 								"alter table JobUsageRecord add index index11(ServerDate)",
 								"alter table JobUsageRecord add unique index index12(md5)",
+								"alter table JobUsageRecord add index index13(ServerDate)",
 								"alter table Security add unique index index02(alias)",
 								"alter table CPUInfo change column NodeName HostDescription varchar(255)",
 								//
