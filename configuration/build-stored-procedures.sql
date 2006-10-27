@@ -493,7 +493,7 @@ end
 |
 -- call JobsByUser('2006-10-01 00:00:00','2006-10-03 00:00:00')
 |
-drop procedure JobsByUser
+drop procedure JobsByVO
 |
 create procedure JobsByVO (fromdate varchar(255),todate varchar(255))
 begin
