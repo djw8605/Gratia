@@ -383,52 +383,82 @@ def FromCondor():
         print "Date : " + gBegin.strftime("%m/%Y") + " (" + str(days )+ " days)"
 
 class DailySiteReportConf:
-        title = "OSG usage summary (midnight to midnight central time) for %s\nincluding all jobs that finished in that time period.\nWall Duration is expressed in hours and rounded to the nearest hour.\nDeltas are the differences with the previous day.\n"
+        title = "OSG usage summary (midnight to midnight central time) for %s\nincluding all jobs that finished in that time period.\nWall Duration is expressed in hours and rounded to the nearest hour.\nWall Duration is the duration between the instant the job start running and the instant the job ends its execution.\nDeltas are the differences with the previous day.\n"
+        headline = "For all jobs finished on %s (Central Time)"
         headers = ("Site","Number of Jobs","Wall Duration","Delta jobs","Delta duration")
         formats = {}
+        lines = {}
+        col1 = "All sites"
 
-        def __init__(self):
-           self.formats["csv"] = "\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""
-           self.formats["text"] = "%25s | %14s | %13s | %10s | %14s"
+        def __init__(self, header = False):
+           self.formats["csv"] = ",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""
+           self.formats["text"] = "| %-18s | %14s | %13s | %10s | %14s"
+           self.lines["csv"] = ""
+           self.lines["text"] = "----------------------------------------------------------------------------------------"
+
+           if (not header) :  self.title = ""
+
 
         def GetData(self,start,end):
            return DailySiteData(start,end)      
 
 class DailyVOReportConf:
-        title = "OSG usage summary (midnight to midnight central time) for %s\nincluding all jobs that finished in that time period.\nWall Duration is expressed in hours and rounded to the nearest hour.\nDeltas are the differences with the previous day.\n"
+        title = "OSG usage summary (midnight to midnight central time) for %s\nincluding all jobs that finished in that time period.\nWall Duration is expressed in hours and rounded to the nearest hour.\nWall Duration is the duration between the instant the job start running and the instant the job ends its execution.\nDeltas are the differences with the previous day.\n"
+        headline = "For all jobs finished on %s (Central Time)"
         headers = ("VO","Number of Jobs","Wall Duration","Delta jobs","Delta duration")
         formats = {}
+        lines = {}
+        col1 = "All VOs"
 
-        def __init__(self):
-           self.formats["csv"] = "%s,\"%s\",\"%s\",\"%s\",\"%s\""
-           self.formats["text"] = "%25s | %14s | %13s | %10s | %14s"
+        def __init__(self, header = False):
+           self.formats["csv"] = ",%s,\"%s\",\"%s\",\"%s\",\"%s\""
+           self.formats["text"] = "| %-18s | %14s | %13s | %10s | %14s"
+           self.lines["csv"] = ""
+           self.lines["text"] = "----------------------------------------------------------------------------------------"
+
+           if (not header) :  self.title = ""
 
         def GetData(self,start,end):
            return DailyVOData(start,end)      
 
 class DailySiteVOReportConf:
-        title = "OSG usage summary (midnight to midnight central time) for %s\nincluding all jobs that finished in that time period.\nWall Duration is expressed in hours and rounded to the nearest hour.\nDeltas are the differences with the previous day.\n"
+        title = "OSG usage summary (midnight to midnight central time) for %s\nincluding all jobs that finished in that time period.\nWall Duration is expressed in hours and rounded to the nearest hour.\nWall Duration is the duration between the instant the job start running and the instant the job ends its execution.\nDeltas are the differences with the previous day.\n"
+        headline = "For all jobs finished on %s (Central Time)"
         headers = ("Site","VO","Number of Jobs","Wall Duration","Delta jobs","Delta duration")
         formats = {}
+        lines = {}
         select = "=="
+        col1 = "All sites"
+        col2 = "All VOs"
         
-        def __init__(self):
-           self.formats["csv"] = "\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""
-           self.formats["text"] = "%25s | %14s | %14s | %13s | %10s | %14s"
+        def __init__(self, header = False):
+           self.formats["csv"] = ",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""
+           self.formats["text"] = "| %-18s | %-14s | %14s | %13s | %10s | %14s"
+           self.lines["csv"] = ""
+           self.lines["text"] = "---------------------------------------------------------------------------------------------------------"
+
+           if (not header) :  self.title = ""
 
         def GetData(self,start,end):
            return DailySiteVOData(start,end)      
 
 class DailySiteVOReportFromDailyConf:
-        title = "OSG usage summary (midnight to midnight central time) for %s\nincluding all jobs that finished in that time period.\nWall Duration is expressed in hours and rounded to the nearest hour.\nDeltas are the differences with the previous day.\nIf the number of jobs stated for a site is always 1\nthen this number is actually the number of summary records sent.\n"
+        title = "OSG usage summary (midnight to midnight central time) for %s\nincluding all jobs that finished in that time period.\nWall Duration is expressed in hours and rounded to the nearest hour.\nWall Duration is the duration between the instant the job start running and the instant the job ends its execution.\nDeltas are the differences with the previous day.\nIf the number of jobs stated for a site is always 1\nthen this number is actually the number of summary records sent.\n"
+        headline = "For all jobs finished on %s (Central Time)"
         headers = ("Site","VO","Number of Jobs","Wall Duration","Delta jobs","Delta duration")
         formats = {}
+        lines = {}
         select = "=="
         count = "sum(NJobs)"
+        col1 = "All sites"
+        col2 = "All VOs"
 
         def __init__(self, fromGratia, header = False):
-           self.formats["csv"] = "\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""
-           self.formats["text"] = "%25s | %14s | %14s | %13s | %10s | %14s"
+           self.formats["csv"] = ",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""
+           self.formats["text"] = " | %-18s | %-9s | %14s | %13s | %10s | %14s"
+           self.lines["csv"] = ""
+           self.lines["text"] = "-----------------------------------------------------------------------------------------------------"
+
            if (fromGratia) :
                self.select = "="
                self.count = "sum(NJobs)"
@@ -447,7 +477,11 @@ def GenericDaily(what, when = datetime.date.today(), output = "text"):
         if (output != "None") :
             if (what.title != "") :
                 print what.title % ( DateToString(when,False) )
-            print what.formats[output] % what.headers
+            if (what.headline != "") :
+                print what.headline % (DateToString(when,False))
+            print what.lines[output]
+            print "    ", what.formats[output] % what.headers
+            print what.lines[output]
         
         # First get the previous' day information
         totalwall = 0
@@ -482,7 +516,9 @@ def GenericDaily(what, when = datetime.date.today(), output = "text"):
         end = start + datetime.timedelta(days=1)
         lines = what.GetData(start,end)
         num_header = 1;
+        index = 0
         for i in range (1,len(lines)):
+                index = index + 1;
                 val = lines[i].split('\t')
                 site = val[0]
                 key = site
@@ -504,25 +540,27 @@ def GenericDaily(what, when = datetime.date.today(), output = "text"):
                 else:
                         values = (site,niceNum(njobs), niceNum(wall),niceNum(njobs-oldnjobs),niceNum(wall-oldwall))
                 if (output != "None") :
-                    print what.formats[output] % values
+                    print "%3d " %(index), what.formats[output] % values
                 result.append(values)
         (oldnjobs,oldwall) = oldValues["total"]
+        print what.lines[output]
         if (num_header == 2) :
                 if (output != "None") :
-                    print what.formats[output] % ("All sites", "All VOs", niceNum(totaljobs), niceNum(totalwall), niceNum(totaljobs-oldnjobs), niceNum(totalwall-oldwall))
+                    print "    ",what.formats[output] % (what.col1, what.col2, niceNum(totaljobs), niceNum(totalwall), niceNum(totaljobs-oldnjobs), niceNum(totalwall-oldwall))
         else:
                 if (output != "None") :
-                    print what.formats[output] % ("All sites", niceNum(totaljobs), niceNum(totalwall), niceNum(totaljobs-oldnjobs), niceNum(totalwall-oldwall))
+                    print "    ",what.formats[output] % (what.col1, niceNum(totaljobs), niceNum(totalwall), niceNum(totaljobs-oldnjobs), niceNum(totalwall-oldwall))
+        print what.lines[output]
         return result
 
         
-def DailySiteReport(when = datetime.date.today(), output = "text"):
-        return GenericDaily( DailySiteReportConf(), when, output)
+def DailySiteReport(when = datetime.date.today(), output = "text", header = True):
+        return GenericDaily( DailySiteReportConf(header), when, output)
 
-def DailyVOReport(when = datetime.date.today(), output = "text"):
-        return GenericDaily( DailyVOReportConf(), when, output)
+def DailyVOReport(when = datetime.date.today(), output = "text", header = True):
+        return GenericDaily( DailyVOReportConf(header), when, output)
  
-def DailySiteVOReport(when = datetime.date.today(), output = "text"):
-        return GenericDaily( DailySiteVOReportConf(), when, output)
+def DailySiteVOReport(when = datetime.date.today(), output = "text", header = True):
+        return GenericDaily( DailySiteVOReportConf(header), when, output)
  
  

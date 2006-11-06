@@ -12,9 +12,9 @@ def main(argv=None):
     argOutput = PSACCTReport.gOutput
     PSACCTReport.DailySiteReport(PSACCTReport.gBegin,output=argOutput);
     print
-    PSACCTReport.DailyVOReport(PSACCTReport.gBegin,output=argOutput);
+    PSACCTReport.DailyVOReport(PSACCTReport.gBegin,output=argOutput, header = False);
     print
-    PSACCTReport.DailySiteVOReport(PSACCTReport.gBegin,output=argOutput);
+    PSACCTReport.DailySiteVOReport(PSACCTReport.gBegin,output=argOutput, header = False);
 
 if __name__ == "__main__":
     sys.exit(main())
