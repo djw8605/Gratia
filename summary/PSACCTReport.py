@@ -385,16 +385,16 @@ def FromCondor():
 class DailySiteReportConf:
         title = "OSG usage summary (midnight to midnight central time) for %s\nincluding all jobs that finished in that time period.\nWall Duration is expressed in hours and rounded to the nearest hour.\nWall Duration is the duration between the instant the job start running and the instant the job ends its execution.\nDeltas are the differences with the previous day.\n"
         headline = "For all jobs finished on %s (Central Time)"
-        headers = ("Site","Number of Jobs","Wall Duration","Delta jobs","Delta duration")
+        headers = ("Site","# of Jobs","Wall Duration","Delta jobs","Delta duration")
         formats = {}
         lines = {}
         col1 = "All sites"
 
         def __init__(self, header = False):
            self.formats["csv"] = ",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""
-           self.formats["text"] = "| %-18s | %14s | %13s | %10s | %14s"
+           self.formats["text"] = "| %-18s | %9s | %13s | %10s | %14s"
            self.lines["csv"] = ""
-           self.lines["text"] = "----------------------------------------------------------------------------------------"
+           self.lines["text"] = "-----------------------------------------------------------------------------------"
 
            if (not header) :  self.title = ""
 
@@ -405,16 +405,16 @@ class DailySiteReportConf:
 class DailyVOReportConf:
         title = "OSG usage summary (midnight to midnight central time) for %s\nincluding all jobs that finished in that time period.\nWall Duration is expressed in hours and rounded to the nearest hour.\nWall Duration is the duration between the instant the job start running and the instant the job ends its execution.\nDeltas are the differences with the previous day.\n"
         headline = "For all jobs finished on %s (Central Time)"
-        headers = ("VO","Number of Jobs","Wall Duration","Delta jobs","Delta duration")
+        headers = ("VO","# of Jobs","Wall Duration","Delta jobs","Delta duration")
         formats = {}
         lines = {}
         col1 = "All VOs"
 
         def __init__(self, header = False):
            self.formats["csv"] = ",%s,\"%s\",\"%s\",\"%s\",\"%s\""
-           self.formats["text"] = "| %-18s | %14s | %13s | %10s | %14s"
+           self.formats["text"] = "| %-18s | %9s | %13s | %10s | %14s"
            self.lines["csv"] = ""
-           self.lines["text"] = "----------------------------------------------------------------------------------------"
+           self.lines["text"] = "-----------------------------------------------------------------------------------"
 
            if (not header) :  self.title = ""
 
@@ -424,7 +424,7 @@ class DailyVOReportConf:
 class DailySiteVOReportConf:
         title = "OSG usage summary (midnight to midnight central time) for %s\nincluding all jobs that finished in that time period.\nWall Duration is expressed in hours and rounded to the nearest hour.\nWall Duration is the duration between the instant the job start running and the instant the job ends its execution.\nDeltas are the differences with the previous day.\n"
         headline = "For all jobs finished on %s (Central Time)"
-        headers = ("Site","VO","Number of Jobs","Wall Duration","Delta jobs","Delta duration")
+        headers = ("Site","VO","# of Jobs","Wall Duration","Delta jobs","Delta duration")
         formats = {}
         lines = {}
         select = "=="
@@ -433,9 +433,9 @@ class DailySiteVOReportConf:
         
         def __init__(self, header = False):
            self.formats["csv"] = ",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""
-           self.formats["text"] = "| %-18s | %-14s | %14s | %13s | %10s | %14s"
+           self.formats["text"] = "| %-18s | %-14s | %9s | %13s | %10s | %14s"
            self.lines["csv"] = ""
-           self.lines["text"] = "---------------------------------------------------------------------------------------------------------"
+           self.lines["text"] = "----------------------------------------------------------------------------------------------------"
 
            if (not header) :  self.title = ""
 
@@ -445,7 +445,7 @@ class DailySiteVOReportConf:
 class DailySiteVOReportFromDailyConf:
         title = "OSG usage summary (midnight to midnight central time) for %s\nincluding all jobs that finished in that time period.\nWall Duration is expressed in hours and rounded to the nearest hour.\nWall Duration is the duration between the instant the job start running and the instant the job ends its execution.\nDeltas are the differences with the previous day.\nIf the number of jobs stated for a site is always 1\nthen this number is actually the number of summary records sent.\n"
         headline = "For all jobs finished on %s (Central Time)"
-        headers = ("Site","VO","Number of Jobs","Wall Duration","Delta jobs","Delta duration")
+        headers = ("Site","VO","# of Jobs","Wall Duration","Delta jobs","Delta duration")
         formats = {}
         lines = {}
         select = "=="
@@ -455,9 +455,9 @@ class DailySiteVOReportFromDailyConf:
 
         def __init__(self, fromGratia, header = False):
            self.formats["csv"] = ",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""
-           self.formats["text"] = " | %-18s | %-9s | %14s | %13s | %10s | %14s"
+           self.formats["text"] = " | %-18s | %-9s | %9s | %13s | %10s | %14s"
            self.lines["csv"] = ""
-           self.lines["text"] = "-----------------------------------------------------------------------------------------------------"
+           self.lines["text"] = "------------------------------------------------------------------------------------------------"
 
            if (fromGratia) :
                self.select = "="
@@ -543,14 +543,13 @@ def GenericDaily(what, when = datetime.date.today(), output = "text"):
                     print "%3d " %(index), what.formats[output] % values
                 result.append(values)
         (oldnjobs,oldwall) = oldValues["total"]
-        print what.lines[output]
-        if (num_header == 2) :
-                if (output != "None") :
+        if (output != "None") :
+                print what.lines[output]
+                if (num_header == 2) :
                     print "    ",what.formats[output] % (what.col1, what.col2, niceNum(totaljobs), niceNum(totalwall), niceNum(totaljobs-oldnjobs), niceNum(totalwall-oldwall))
-        else:
-                if (output != "None") :
+                else:
                     print "    ",what.formats[output] % (what.col1, niceNum(totaljobs), niceNum(totalwall), niceNum(totaljobs-oldnjobs), niceNum(totalwall-oldwall))
-        print what.lines[output]
+                print what.lines[output]
         return result
 
         
