@@ -62,6 +62,7 @@ public class HibernateWrapper
 								System.out.println("");
 								System.out.println("HibernateWrapper: Error Starting Hibernate");
 								System.out.println("");
+								databaseError.printStackTrace();
 								databaseDown = true;
 						}
 		}

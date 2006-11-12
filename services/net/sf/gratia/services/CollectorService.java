@@ -414,6 +414,7 @@ public class CollectorService implements ServletContextListener
 
 				String gratiaVersion = p.getProperty("gratia.version");
 				String gratiaDatabaseVersion = p.getProperty("gratia.database.version");
+				String useReportAuthentication = p.getProperty("use.report.authentication");
 
 				try
 						{
@@ -432,25 +433,41 @@ public class CollectorService implements ServletContextListener
 								"alter table CETable add unique index index02(facility_name)",
 								"alter table CEProbes add unique index index02(probename)",
 								"insert into CETable(facility_name) values(" + dq + "Unknown" + dq + ")",
+								//
+								// the following were added to get rid of unused indexes
+								//
+								"alter table JobUsageRecord drop index index04",
+								"alter table JobUsageRecord drop index index06",
+								"alter table JobUsageRecord drop index index07",
+								//
+								// original index structure
+								//
 								"alter table JobUsageRecord add index index02(EndTime)",
 								"alter table JobUsageRecord add index index03(ProbeName)",
-								"alter table JobUsageRecord add index index04(HostDescription)",
+								// "alter table JobUsageRecord add index index04(HostDescription)",
 								"alter table JobUsageRecord add index index05(StartTime)",
-								"alter table JobUsageRecord add index index06(GlobalJobid)",
-								"alter table JobUsageRecord add index index07(LocalJobid)",
+								// "alter table JobUsageRecord add index index06(GlobalJobid)",
+								// "alter table JobUsageRecord add index index07(LocalJobid)",
 								"alter table JobUsageRecord add index index08(Host(255))",
 								"alter table JobUsageRecord drop index index09",
 								"alter table JobUsageRecord drop index index10",
 								"alter table JobUsageRecord add index index11(ServerDate)",
 								"alter table JobUsageRecord add unique index index12(md5)",
 								"alter table JobUsageRecord add index index13(ServerDate)",
+								//
+								// new indexes for authentication
+								//
+								"alter table JobUsageRecord add index index14(VOName)",
+								"alter table JobUsageRecord add index index15(CommonName)",
+								//
 								"alter table Security add unique index index02(alias)",
 								"alter table CPUInfo change column NodeName HostDescription varchar(255)",
 								//
 								// place older to initialize SystemProplist
 								//
 								"delete from SystemProplist",
-								"insert into SystemProplist(car,cdr) values(" + dq + "gratia.version" + dq + comma + dq + gratiaDatabaseVersion + dq + ")",
+								"insert into SystemProplist(car,cdr) values(" + dq + "use.report.authentication" + dq + comma + dq + useReportAuthentication + dq + ")",
+								"insert into SystemProplist(car,cdr) values(" + dq + "gratia.database.version" + dq + comma + dq + gratiaDatabaseVersion + dq + ")",
 								"insert into SystemProplist(car,cdr) values(" + dq + "gratia.database.version" + dq + comma + dq + gratiaDatabaseVersion + dq + ")",
 								"delete from CPUMetricTypes",
 								"insert into CPUMetricTypes(CPUMetricType) values(" + dq + "wallclock" + dq + ")",

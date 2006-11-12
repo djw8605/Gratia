@@ -13,3 +13,9 @@ copy %base%\GratiaReports\src\web.xml war\WEB-INF
 jar -cf %root%\target\gratia-reports.war -C war .
 
 rmdir /q /s war
+
+#
+# remove
+#
+rmdir /q /s \tomcat\webapps\gratia-reports
+copy %root%\target\gratia-reports.war \tomcat\webapps
