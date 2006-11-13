@@ -639,7 +639,7 @@ begin
 	else
 		set @sql :=
 			concat(
-				'select VOName,date_format(EndTime,?) as endtime,sum(WallDuration) as WallDuration,sum(CpuUserDuration + CpuSystemDuration) as Cpu',
+				'select VOName,EndTime as endtime,sum(WallDuration) as WallDuration,sum(CpuUserDuration + CpuSystemDuration) as Cpu',
 				' from JobUsageRecord',
 				' where',
 				'	EndTime >= ? and EndTime <= ?',
@@ -648,7 +648,7 @@ begin
 				' order by date_format(EndTime,?)');
 		prepare statement from @sql;
 		insert into trace(data) values(concat(userName,':',userRole,':',@sql));
-		execute statement using @myformat,@myfromdate,@mytodate,@myformat,@myformat;
+		execute statement using @myfromdate,@mytodate,@myformat,@myformat;
 		deallocate prepare statement;
 	end if;
 end
@@ -1186,4 +1186,56 @@ end
 -- call UsageBySite('GratiaUser','GratiaUser','2006-10-01 00:00:00','2006-10-10 00:00:00')
 |
 -- call UsageBySite('GratiaUser','GratiaUser','2006-10-01 00:00:00','2006-10-03 00:00:00')
+|
+drop procedure UsageByVO
+|
+create procedure UsageByVO (userName varchar(64),userRole varchar(64),fromdate varchar(64),todate varchar(64))
+begin
+
+	set @myfromdate := fromdate;
+	set @mytodate := todate;
+
+	select SystemProplist.cdr into @usereportauthentication from SystemProplist where SystemProplist.car = 'use.report.authentication';
+	select RolesTable.whereclause into @mywhereclause from RolesTable where RolesTable.role = userRole;
+	select generateWhereClause(userName,userRole,@mywhereclause) into @mywhereclause;
+
+	if userName = 'GratiaGlobalAdmin' or @usereportauthentication = 'false' then
+		if datediff(todate,fromdate) > 6 then
+			select VOName, 
+				sum(WallDuration) as wallduration,
+				sum(CpuUserDuration + CpuSystemDuration) as cpu
+				from VOProbeSummary
+				where EndTime between date(fromdate) and date(enddate)
+				group by VOName
+				order by VOName;
+		else
+			select VOName, 
+				sum(WallDuration) as wallduration,
+				sum(CpuUserDuration + CpuSystemDuration) as cpu
+				from JobUsageRecord
+				where EndTime between date(fromdate) and date(enddate)
+				group by VOName
+				order by VOName;
+		end if;
+	else
+		set @sql :=
+			concat(
+				'select VOName,',
+				' sum(WallDuration) as wallduration,',
+				' sum(CpuUserDuration + CpuSystemDuration) as cpu',
+				' from JobUsageRecord',
+				' where EndTime between date(?) and date(?)',
+				@mywhereclause,
+				' group by VOName',
+				' order by VOName');
+		prepare statement from @sql;
+		insert into trace(data) values(concat(userName,':',userRole,':',@sql));
+		execute statement using @myfromdate,@mytodate;
+		deallocate prepare statement;
+	end if;
+end
+|
+-- call UsageByVO('GratiaUser','GratiaUser','2006-09-01 00:00:00','2006-09-10 00:00:00')
+|
+-- call UsageByVO('GratiaUser','GratiaUser','2006-10-01 00:00:00','2006-10-03 00:00:00')
 |
