@@ -66,7 +66,7 @@ begin
 				@mywhereclause,
 				' group by date_format(JobUsageRecord.EndTime,?),CETable.facility_name',
 				' order by date_format(JobUsageRecord.EndTime,?)');
-		insert into trace(data) values(concat(userName,':',userRole,':',@sql));
+		insert into trace(data) values(concat(userName,':',userRole,':',fromdate,':',todate,':',format,':',@sql));
 		prepare statement from @sql;
 		execute statement using @myfromdate,@mytodate,@myformat,@myformat;
 		-- deallocate prepare statement;
@@ -165,16 +165,16 @@ begin
 	else
 		set @sql :=
 			concat(
-				'select ProbeName,date_format(EndTime,?) as endtime,sum(Njobs) as Njobs',
+				'select ProbeName,EndTime as endtime,sum(Njobs) as Njobs',
 				' from JobUsageRecord',
 				' where',
-				'	EndTime >= ? and EndTime <= ?',
+				'	EndTime >= date(?) and EndTime <= date(?)',
 				@mywhereclause,
 				' group by date_format(EndTime,?),ProbeName',
 				' order by date_format(EndTime,?)');
 		prepare statement from @sql;
-		insert into trace(data) values(@sql);
-		execute statement using @myformat,@myfromdate,@mytodate,@myformat,@myformat;
+		insert into trace(data) values(concat(userName,':',userRole,':',fromdate,':',todate,':',format,':',@sql));
+		execute statement using @myfromdate,@mytodate,@myformat,@myformat;
 		deallocate prepare statement;
 	end if;
 end
@@ -489,7 +489,7 @@ begin
 	else
 		set @sql :=
 			concat(
-				'select ProbeName,date_format(EndTime,?) as endtime,sum(WallDuration) as WallDuration',
+				'select ProbeName,EndTime as endtime,sum(WallDuration) as WallDuration',
 				' from JobUsageRecord',
 				' where',
 				'	EndTime >= ? and EndTime <= ?',
@@ -497,8 +497,8 @@ begin
 				' group by date_format(EndTime,?),ProbeName',
 				' order by date_format(EndTime,?)');
 		prepare statement from @sql;
-		insert into trace(data) values(concat(userName,':',userRole,':',@sql));
-		execute statement using @myformat,@myfromdate,@mytodate,@myformat,@myformat;
+		insert into trace(data) values(concat(userName,':',userRole,':',fromdate,':',todate,':',format,':',@sql));
+		execute statement using @myfromdate,@mytodate,@myformat,@myformat;
 		deallocate prepare statement;
 	end if;
 end
