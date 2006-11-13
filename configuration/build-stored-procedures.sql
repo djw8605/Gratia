@@ -10,10 +10,11 @@ drop function generateWhereClause
 |
 create function generateWhereClause(userName varchar(64),userRole varchar(64),whereClause varchar(255)) returns varchar(255)
 begin
-if userName = 'GratiaGlobalAdmin' or @usereportauthentication = 'false' then		return '';
+	if userName = 'GratiaGlobalAdmin' or @usereportauthentication = 'false' then
+		return '';
 	end if;
-	if userName = 'glr' then
-		return ' and JobUsageRecord.ProbeName like "condor%"';
+	if whereClause = 'Everything' then
+		return 'Everything';
 	end if;
 	return concat(' and ',whereClause,' ');
 end
@@ -31,7 +32,7 @@ begin
 	select RolesTable.whereclause into @mywhereclause from RolesTable where RolesTable.role = userRole;
 	select generateWhereClause(userName,userRole,@mywhereclause) into @mywhereclause;
 
-	if userName = 'GratiaGlobalAdmin' or @usereportauthentication = 'false' then
+	if userName = 'GratiaGlobalAdmin' or @usereportauthentication = 'false' or @mywhereclause = 'Everything' then
 		if datediff(todate,fromdate) > 6 then
 			select CETable.facility_name,ProbeSummary.EndTime as endtime,sum(ProbeSummary.Njobs) as Njobs
 				from CETable,CEProbes,ProbeSummary
@@ -89,7 +90,7 @@ begin
 	select RolesTable.whereclause into @mywhereclause from RolesTable where RolesTable.role = userRole;
 	select generateWhereClause(userName,userRole,@mywhereclause) into @mywhereclause;
 
-	if userName = 'GratiaGlobalAdmin' or @usereportauthentication = 'false' then
+	if userName = 'GratiaGlobalAdmin' or @usereportauthentication = 'false' or @mywhereclause = 'Everything' then
 		if datediff(todate,fromdate) > 6 then
 			select CETable.facility_name,ProbeSummary.EndTime as endtime,sum(ProbeSummary.Njobs) as Njobs
 				from CETable,CEProbes,ProbeSummary
@@ -146,7 +147,7 @@ begin
 	select RolesTable.whereclause into @mywhereclause from RolesTable where RolesTable.role = userRole;
 	select generateWhereClause(userName,userRole,@mywhereclause) into @mywhereclause;
 
-	if userName = 'GratiaGlobalAdmin' or @usereportauthentication = 'false' then
+	if userName = 'GratiaGlobalAdmin' or @usereportauthentication = 'false' or @mywhereclause = 'Everything' then
 		if datediff(todate,fromdate) > 6 then
 			select ProbeName,EndTime as endtime,sum(Njobs) as Njobs
 				from ProbeSummary
@@ -196,7 +197,7 @@ begin
 	select RolesTable.whereclause into @mywhereclause from RolesTable where RolesTable.role = userRole;
 	select generateWhereClause(userName,userRole,@mywhereclause) into @mywhereclause;
 
-	if userName = 'GratiaGlobalAdmin' or @usereportauthentication = 'false' then
+	if userName = 'GratiaGlobalAdmin' or @usereportauthentication = 'false' or @mywhereclause = 'Everything' then
 		if datediff(todate,fromdate) > 6 then
 			select ProbeName,EndTime as endtime,sum(Njobs) as Njobs
 				from ProbeSummary
@@ -246,7 +247,7 @@ begin
 	select RolesTable.whereclause into @mywhereclause from RolesTable where RolesTable.role = userRole;
 	select generateWhereClause(userName,userRole,@mywhereclause) into @mywhereclause;
 
-	if userName = 'GratiaGlobalAdmin' or @usereportauthentication = 'false' then
+	if userName = 'GratiaGlobalAdmin' or @usereportauthentication = 'false' or @mywhereclause = 'Everything' then
 		if datediff(todate,fromdate) > 6 then
 			select VOName, EndTime as endtime,sum(Njobs) as Njobs
 				from VOProbeSummary
@@ -299,7 +300,7 @@ begin
 	select RolesTable.whereclause into @mywhereclause from RolesTable where RolesTable.role = userRole;
 	select generateWhereClause(userName,userRole,@mywhereclause) into @mywhereclause;
 
-	if userName = 'GratiaGlobalAdmin' or @usereportauthentication = 'false' then
+	if userName = 'GratiaGlobalAdmin' or @usereportauthentication = 'false' or @mywhereclause = 'Everything' then
 		if datediff(todate,fromdate) > 6 then
 			select VOName, EndTime as endtime,sum(Njobs) as Njobs
 				from VOProbeSummary
@@ -352,7 +353,7 @@ begin
 	select RolesTable.whereclause into @mywhereclause from RolesTable where RolesTable.role = userRole;
 	select generateWhereClause(userName,userRole,@mywhereclause) into @mywhereclause;
 
-	if userName = 'GratiaGlobalAdmin' or @usereportauthentication = 'false' then
+	if userName = 'GratiaGlobalAdmin' or @usereportauthentication = 'false' or @mywhereclause = 'Everything' then
 		if datediff(todate,fromdate) > 6 then
 			select CETable.facility_name,ProbeSummary.EndTime as endtime,sum(ProbeSummary.WallDuration) as WallDuration
 				from CETable,CEProbes,ProbeSummary
@@ -411,7 +412,7 @@ begin
 	select RolesTable.whereclause into @mywhereclause from RolesTable where RolesTable.role = userRole;
 	select generateWhereClause(userName,userRole,@mywhereclause) into @mywhereclause;
 
-	if userName = 'GratiaGlobalAdmin' or @usereportauthentication = 'false' then
+	if userName = 'GratiaGlobalAdmin' or @usereportauthentication = 'false' or @mywhereclause = 'Everything' then
 		if datediff(todate,fromdate) > 6 then
 			select CETable.facility_name,ProbeSummary.EndTime as endtime,sum(ProbeSummary.WallDuration) as WallDuration
 				from CETable,CEProbes,ProbeSummary
@@ -470,7 +471,7 @@ begin
 	select RolesTable.whereclause into @mywhereclause from RolesTable where RolesTable.role = userRole;
 	select generateWhereClause(userName,userRole,@mywhereclause) into @mywhereclause;
 
-	if userName = 'GratiaGlobalAdmin' or @usereportauthentication = 'false' then
+	if userName = 'GratiaGlobalAdmin' or @usereportauthentication = 'false' or @mywhereclause = 'Everything' then
 		if datediff(todate,fromdate) > 6 then
 			select ProbeName,EndTime as endtime,sum(WallDuration) as WallDuration
 				from ProbeSummary
@@ -520,7 +521,7 @@ begin
 	select RolesTable.whereclause into @mywhereclause from RolesTable where RolesTable.role = userRole;
 	select generateWhereClause(userName,userRole,@mywhereclause) into @mywhereclause;
 
-	if userName = 'GratiaGlobalAdmin' or @usereportauthentication = 'false' then
+	if userName = 'GratiaGlobalAdmin' or @usereportauthentication = 'false' or @mywhereclause = 'Everything' then
 		if datediff(todate,fromdate) > 6 then
 			select ProbeName,EndTime as endtime,sum(WallDuration) as WallDuration
 				from ProbeSummary
@@ -570,7 +571,7 @@ begin
 	select RolesTable.whereclause into @mywhereclause from RolesTable where RolesTable.role = userRole;
 	select generateWhereClause(userName,userRole,@mywhereclause) into @mywhereclause;
 
-	if userName = 'GratiaGlobalAdmin' or @usereportauthentication = 'false' then
+	if userName = 'GratiaGlobalAdmin' or @usereportauthentication = 'false' or @mywhereclause = 'Everything' then
 		if datediff(todate,fromdate) > 6 then
 			select SiteName,EndTime as endtime,sum(WallDuration) as WallDuration,sum(CpuUserDuration + CpuSystemDuration) as Cpu
 				from ProbeSummary
@@ -620,7 +621,7 @@ begin
 	select RolesTable.whereclause into @mywhereclause from RolesTable where RolesTable.role = userRole;
 	select generateWhereClause(userName,userRole,@mywhereclause) into @mywhereclause;
 
-	if userName = 'GratiaGlobalAdmin' or @usereportauthentication = 'false' then
+	if userName = 'GratiaGlobalAdmin' or @usereportauthentication = 'false' or @mywhereclause = 'Everything' then
 		if datediff(todate,fromdate) > 6 then
 			select VOName,EndTime as endtime,sum(WallDuration) as WallDuration,sum(CpuUserDuration + CpuSystemDuration) as Cpu
 				from VOProbeSummary
@@ -670,7 +671,7 @@ begin
 	select RolesTable.whereclause into @mywhereclause from RolesTable where RolesTable.role = userRole;
 	select generateWhereClause(userName,userRole,@mywhereclause) into @mywhereclause;
 
-	if userName = 'GratiaGlobalAdmin' or @usereportauthentication = 'false' then
+	if userName = 'GratiaGlobalAdmin' or @usereportauthentication = 'false' or @mywhereclause = 'Everything' then
 		if datediff(todate,fromdate) > 6 then
 			select VOName,EndTime as endtime,sum(WallDuration) as WallDuration,sum(CpuUserDuration + CpuSystemDuration) as Cpu
 				from VOProbeSummary
@@ -719,7 +720,7 @@ begin
 	select RolesTable.whereclause into @mywhereclause from RolesTable where RolesTable.role = userRole;
 	select generateWhereClause(userName,userRole,@mywhereclause) into @mywhereclause;
 
-	if userName = 'GratiaGlobalAdmin' or @usereportauthentication = 'false' then
+	if userName = 'GratiaGlobalAdmin' or @usereportauthentication = 'false' or @mywhereclause = 'Everything' then
 		if datediff(todate,fromdate) > 6 then
 			select CETable.facility_name,sum(ProbeSummary.Njobs) as Njobs
 				from CETable,CEProbes,ProbeSummary
@@ -777,7 +778,7 @@ begin
 	select RolesTable.whereclause into @mywhereclause from RolesTable where RolesTable.role = userRole;
 	select generateWhereClause(userName,userRole,@mywhereclause) into @mywhereclause;
 
-	if userName = 'GratiaGlobalAdmin' or @usereportauthentication = 'false' then
+	if userName = 'GratiaGlobalAdmin' or @usereportauthentication = 'false' or @mywhereclause = 'Everything' then
 		if datediff(todate,fromdate) > 6 then
 			select CETable.facility_name,sum(ProbeSummary.Njobs) as Njobs
 				from CETable,CEProbes,ProbeSummary
@@ -835,7 +836,7 @@ begin
 	select RolesTable.whereclause into @mywhereclause from RolesTable where RolesTable.role = userRole;
 	select generateWhereClause(userName,userRole,@mywhereclause) into @mywhereclause;
 
-	if userName = 'GratiaGlobalAdmin' or @usereportauthentication = 'false' then
+	if userName = 'GratiaGlobalAdmin' or @usereportauthentication = 'false' or @mywhereclause = 'Everything' then
 		if datediff(todate,fromdate) > 6 then
 			select ProbeName,sum(Njobs) as Njobs
 				from ProbeSummary
@@ -887,7 +888,7 @@ begin
 	select RolesTable.whereclause into @mywhereclause from RolesTable where RolesTable.role = userRole;
 	select generateWhereClause(userName,userRole,@mywhereclause) into @mywhereclause;
 
-	if userName = 'GratiaGlobalAdmin' or @usereportauthentication = 'false' then
+	if userName = 'GratiaGlobalAdmin' or @usereportauthentication = 'false' or @mywhereclause = 'Everything' then
 		if datediff(todate,fromdate) > 6 then
 			select SiteName,sum(Njobs) as Njobs
 				from ProbeSummary
@@ -939,7 +940,7 @@ begin
 	select RolesTable.whereclause into @mywhereclause from RolesTable where RolesTable.role = userRole;
 	select generateWhereClause(userName,userRole,@mywhereclause) into @mywhereclause;
 
-	if userName = 'GratiaGlobalAdmin' or @usereportauthentication = 'false' then
+	if userName = 'GratiaGlobalAdmin' or @usereportauthentication = 'false' or @mywhereclause = 'Everything' then
 		if datediff(todate,fromdate) > 6 then
 			select CommonName as UserName,sum(Njobs) as Njobs
 				from UserProbeSummary
@@ -991,7 +992,7 @@ begin
 	select RolesTable.whereclause into @mywhereclause from RolesTable where RolesTable.role = userRole;
 	select generateWhereClause(userName,userRole,@mywhereclause) into @mywhereclause;
 
-	if userName = 'GratiaGlobalAdmin' or @usereportauthentication = 'false' then
+	if userName = 'GratiaGlobalAdmin' or @usereportauthentication = 'false' or @mywhereclause = 'Everything' then
 		if datediff(todate,fromdate) > 6 then
 			select VOName,sum(Njobs) as Njobs
 				from VOProbeSummary
@@ -1043,7 +1044,7 @@ begin
 	select RolesTable.whereclause into @mywhereclause from RolesTable where RolesTable.role = userRole;
 	select generateWhereClause(userName,userRole,@mywhereclause) into @mywhereclause;
 
-	if userName = 'GratiaGlobalAdmin' or @usereportauthentication = 'false' then
+	if userName = 'GratiaGlobalAdmin' or @usereportauthentication = 'false' or @mywhereclause = 'Everything' then
 		if datediff(todate,fromdate) > 6 then
 			select CETable.facility_name,ProbeSummary.EndTime as endtime,sum(ProbeSummary.WallDuration) as WallDuration
 				from CETable,CEProbes,ProbeSummary
@@ -1101,7 +1102,7 @@ begin
 	select RolesTable.whereclause into @mywhereclause from RolesTable where RolesTable.role = userRole;
 	select generateWhereClause(userName,userRole,@mywhereclause) into @mywhereclause;
 
-	if userName = 'GratiaGlobalAdmin' or @usereportauthentication = 'false' then
+	if userName = 'GratiaGlobalAdmin' or @usereportauthentication = 'false' or @mywhereclause = 'Everything' then
 		if datediff(todate,fromdate) > 6 then
 			select ProbeName,sum(WallDuration) as WallDuration
 				from ProbeSummary
@@ -1150,7 +1151,7 @@ begin
 	select RolesTable.whereclause into @mywhereclause from RolesTable where RolesTable.role = userRole;
 	select generateWhereClause(userName,userRole,@mywhereclause) into @mywhereclause;
 
-	if userName = 'GratiaGlobalAdmin' or @usereportauthentication = 'false' then
+	if userName = 'GratiaGlobalAdmin' or @usereportauthentication = 'false' or @mywhereclause = 'Everything' then
 		if datediff(todate,fromdate) > 6 then
 			select SiteName,sum(WallDuration) as WallDuration
 				from ProbeSummary
@@ -1199,13 +1200,13 @@ begin
 	select RolesTable.whereclause into @mywhereclause from RolesTable where RolesTable.role = userRole;
 	select generateWhereClause(userName,userRole,@mywhereclause) into @mywhereclause;
 
-	if userName = 'GratiaGlobalAdmin' or @usereportauthentication = 'false' then
+	if userName = 'GratiaGlobalAdmin' or @usereportauthentication = 'false' or @mywhereclause = 'Everything' then
 		if datediff(todate,fromdate) > 6 then
 			select VOName, 
 				sum(WallDuration) as wallduration,
 				sum(CpuUserDuration + CpuSystemDuration) as cpu
 				from VOProbeSummary
-				where EndTime between date(fromdate) and date(enddate)
+				where EndTime between date(fromdate) and date(todate)
 				group by VOName
 				order by VOName;
 		else
@@ -1213,7 +1214,7 @@ begin
 				sum(WallDuration) as wallduration,
 				sum(CpuUserDuration + CpuSystemDuration) as cpu
 				from JobUsageRecord
-				where EndTime between date(fromdate) and date(enddate)
+				where EndTime between date(fromdate) and date(todate)
 				group by VOName
 				order by VOName;
 		end if;
