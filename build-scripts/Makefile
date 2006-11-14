@@ -1,8 +1,8 @@
 
 PLATFORM := $(shell uname)
 
-gratia_reporting_version=v0.10
-gratia_services_version=v0.10
+gratia_reporting_version=v0.11
+gratia_services_version=v0.11
 
 base=../../
 root=../
