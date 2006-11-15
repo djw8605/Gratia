@@ -91,7 +91,6 @@ public class ProbeMonitorService extends Thread
 												int jobs = resultSet.getInt("jobs");
 												String status = resultSet.getString("status");
 												long current = resultSet.getTimestamp("currenttime").getTime();
-
 												int active = resultSet.getInt("active");
 
 												irecords++;
@@ -156,6 +155,8 @@ public class ProbeMonitorService extends Thread
 												else
 														{
 																Integer previousJobs = (Integer) jobtable.get(probename);
+																if (previousJobs == null)
+																		previousJobs = new Integer(0);
 																int temp = previousJobs.intValue();
 																int jobdelta = jobs - temp;
 																jobtable.put(probename,new Integer(jobs));
