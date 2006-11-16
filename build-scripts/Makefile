@@ -245,7 +245,7 @@ release: clean services servlets soap reporting reports report-configuration adm
 	mkdir tarball/var/logs
 	mkdir tarball/var/tmp
 	cp ../configuration/*gov ../configuration/*xml ../configuration/*properties tarball/tomcat/v55/gratia
-	cp ../configuration/*sql ../configuration/*bat tarball/tomcat/v55/gratia
+	cp ../configuration/*sql ../configuration/*sh tarball/tomcat/v55/gratia
 	rm -f tarball/tomcat/v55/gratia/local.*
 	rm -f tarball/tomcat/v55/gratia/release.*
 	cp ../configuration/release.service-configuration.properties tarball/tomcat/v55/gratia/service-configuration.properties
@@ -289,7 +289,7 @@ local: services servlets soap reporting reports report-configuration administrat
 	mkdir tarball/var/logs
 	mkdir tarball/var/tmp
 	cp ../configuration/*gov ../configuration/*xml ../configuration/*properties tarball/tomcat/v55/gratia
-	cp ../configuration/*sql ../configuration/*bat tarball/tomcat/v55/gratia	
+	cp ../configuration/*sql ../configuration/*sh tarball/tomcat/v55/gratia	
 	rm -f tarball/tomcat/v55/gratia/local.*
 	rm -f tarball/tomcat/v55/gratia/release.*
 	cp ../configuration/release.service-configuration.properties tarball/tomcat/v55/gratia/service-configuration.properties
