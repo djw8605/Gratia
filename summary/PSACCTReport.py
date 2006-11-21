@@ -5,6 +5,7 @@
 #
 # library to create simple report using the Gratia psacct database
 #
+#@(#)root/base:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.9 2006-11-21 04:06:13 pcanal Exp $
 
 import time
 import datetime
@@ -135,11 +136,18 @@ def SetDate(start,end):
     if len(end) > 0:
         gEnd = datetime.date(*time.strptime(end, "%Y/%m/%d")[0:3]) 
 
+def ProbeWhere():
+    global gProbename
+    if (gProbename != None) :
+        return " and ProbeName=\"" + gProbename + "\""
+    else:
+        return ""
+
 def CommonWhere():
     global gProbeName, gBegin, gEnd
     return " and \"" \
         + DateToString(gBegin) +"\"<EndTime and EndTime<\"" + DateToString(gEnd) + "\"" \
-        + " and ProbeName=\"" + gProbename + "\""
+        + ProbeWhere()
 
 def StringToDate(input):
     return datetime.datetime(*time.strptime(input, "%d/%m/%Y")[0:5])
@@ -322,7 +330,7 @@ def IsUser(voname):
 
 def Weekly():
         global gBegin,gEnd, gProbename
-        gProbename = "psacct:cmswc1.fnal.gov"
+        gProbename = None # "psacct:cmswc1.fnal.gov"
 
         print "Weekly"
         (ncpu,benchtotal) = NumberOfCpus()
