@@ -627,54 +627,54 @@ end
 ||
 drop procedure DailyUsageBySite
 ||
-create procedure DailyUsageBySite (userName varchar(64),userRole varchar(64),fromdate varchar(64),todate varchar(64),format varchar(64))
-begin
-
-	set @myfromdate := fromdate;
-	set @mytodate := todate;
-	set @myformat := format;
-
-	select SystemProplist.cdr into @usereportauthentication from SystemProplist where SystemProplist.car = 'use.report.authentication';
-	select RolesTable.whereclause into @mywhereclause from RolesTable where RolesTable.role = userRole;
-	select generateWhereClause(userName,userRole,@mywhereclause) into @mywhereclause;
-	call parse(userName,@name,@key,@vo);
-
-	set @sql :=
-		concat(
-			'select ProbeName,date_format(EndTime,format) as endtime,sum(WallDuration) as WallDuration,',
-			' sum(CpuUserDuration + CpuSystemDuration) as Cpu',
-			' from JobUsageRecord',
-			' where',
-			'	EndTime >= ? and EndTime <= ?',
-			@mywhereclause,
-			' group by date_format(EndTime,?),ProbeName',
-			' order by date_format(EndTime,?),ProbeName');
-	insert into trace(pname,userkey,user,role,vo,p1,p2,p3,p4,data) 
-		values('DailyUsageBySite',@key,userName,userRole,@vo,@myfromdate,@mytodate,@myformat,@myformat,@sql);
-
-	if userName = 'GratiaGlobalAdmin' or @usereportauthentication = 'false' or @mywhereclause = 'Everything' then
-		if datediff(todate,fromdate) > 6 then
-			select SiteName,EndTime as endtime,sum(WallDuration) as WallDuration,sum(CpuUserDuration + CpuSystemDuration) as Cpu
-				from ProbeSummary
-				where
-					EndTime >= date(fromdate) and EndTime <= date(todate)
-				group by EndTime,ProbeName
-				order by EndTime,ProbeName;
-		else
-			select ProbeName,date_format(EndTime,format) as endtime,sum(WallDuration) as WallDuration,
-				sum(CpuUserDuration + CpuSystemDuration) as Cpu
-				from JobUsageRecord
-				where
-					EndTime >= fromdate and EndTime <= todate
-				group by date_format(EndTime,format),ProbeName
-				order by date_format(EndTime,format),ProbeName;
-		end if;
-	else
-		prepare statement from @sql;
-		execute statement using @myformat,@myfromdate,@mytodate,@myformat,@myformat;
-		deallocate prepare statement;
-	end if;
-end
+-- create procedure DailyUsageBySite (userName varchar(64),userRole varchar(64),fromdate varchar(64),todate varchar(64),format varchar(64))
+-- begin
+-- 
+-- 	set @myfromdate := fromdate;
+-- 	set @mytodate := todate;
+-- 	set @myformat := format;
+-- 
+-- 	select SystemProplist.cdr into @usereportauthentication from SystemProplist where SystemProplist.car = 'use.report.authentication';
+-- 	select RolesTable.whereclause into @mywhereclause from RolesTable where RolesTable.role = userRole;
+-- 	select generateWhereClause(userName,userRole,@mywhereclause) into @mywhereclause;
+-- 	call parse(userName,@name,@key,@vo);
+-- 
+-- 	set @sql :=
+-- 		concat(
+-- 			'select ProbeName,date_format(EndTime,format) as endtime,sum(WallDuration) as WallDuration,',
+-- 			' sum(CpuUserDuration + CpuSystemDuration) as Cpu',
+-- 			' from JobUsageRecord',
+-- 			' where',
+-- 			'	EndTime >= ? and EndTime <= ?',
+-- 			@mywhereclause,
+-- 			' group by date_format(EndTime,?),ProbeName',
+-- 			' order by date_format(EndTime,?),ProbeName');
+-- 	insert into trace(pname,userkey,user,role,vo,p1,p2,p3,p4,data) 
+-- 		values('DailyUsageBySite',@key,userName,userRole,@vo,@myfromdate,@mytodate,@myformat,@myformat,@sql);
+-- 
+-- 	if userName = 'GratiaGlobalAdmin' or @usereportauthentication = 'false' or @mywhereclause = 'Everything' then
+-- 		if datediff(todate,fromdate) > 6 then
+-- 			select SiteName,EndTime as endtime,sum(WallDuration) as WallDuration,sum(CpuUserDuration + CpuSystemDuration) as Cpu
+-- 				from ProbeSummary
+-- 				where
+-- 					EndTime >= date(fromdate) and EndTime <= date(todate)
+-- 				group by EndTime,ProbeName
+-- 				order by EndTime,ProbeName;
+-- 		else
+-- 			select ProbeName,date_format(EndTime,format) as endtime,sum(WallDuration) as WallDuration,
+-- 				sum(CpuUserDuration + CpuSystemDuration) as Cpu
+-- 				from JobUsageRecord
+-- 				where
+-- 					EndTime >= fromdate and EndTime <= todate
+-- 				group by date_format(EndTime,format),ProbeName
+-- 				order by date_format(EndTime,format),ProbeName;
+-- 		end if;
+-- 	else
+-- 		prepare statement from @sql;
+-- 		execute statement using @myformat,@myfromdate,@mytodate,@myformat,@myformat;
+-- 		deallocate prepare statement;
+-- 	end if;
+-- end
 ||
 -- call DailyUsageBySite('GratiaUser','GratiaUser','2006-10-01 00:00:00','2006-10-10 00:00:00','%m/%d/%Y %T')
 ||
@@ -682,52 +682,52 @@ end
 ||
 drop procedure DailyUsageByVO
 ||
-create procedure DailyUsageByVO (userName varchar(64),userRole varchar(64),fromdate varchar(64),todate varchar(64),format varchar(64))
-begin
-
-	set @myfromdate := fromdate;
-	set @mytodate := todate;
-	set @myformat := format;
-
-	select SystemProplist.cdr into @usereportauthentication from SystemProplist where SystemProplist.car = 'use.report.authentication';
-	select RolesTable.whereclause into @mywhereclause from RolesTable where RolesTable.role = userRole;
-	select generateWhereClause(userName,userRole,@mywhereclause) into @mywhereclause;
-	call parse(userName,@name,@key,@vo);
-
-	set @sql :=
-		concat(
-			'select VOName,EndTime as endtime,sum(WallDuration) as WallDuration,sum(CpuUserDuration + CpuSystemDuration) as Cpu',
-			' from JobUsageRecord',
-			' where',
-			'	EndTime >= ? and EndTime <= ?',
-			@mywhereclause,
-			' group by date_format(EndTime,?),VOName',
-			' order by date_format(EndTime,?)');
-	insert into trace(pname,userkey,user,role,vo,p1,p2,p3,p4,data) 
-		values('DailyUsageByVO',@key,userName,userRole,@vo,@myfromdate,@mytodate,@myformat,@myformat,@sql);
-
-	if userName = 'GratiaGlobalAdmin' or @usereportauthentication = 'false' or @mywhereclause = 'Everything' then
-		if datediff(todate,fromdate) > 6 then
-			select VOName,EndTime as endtime,sum(WallDuration) as WallDuration,sum(CpuUserDuration + CpuSystemDuration) as Cpu
-				from VOProbeSummary
-				where
-					EndTime >= date(fromdate) and EndTime <= date(todate)
-				group by EndTime,VOName
-				order by EndTime;
-		else
-			select VOName,date_format(EndTime,format) as endtime,sum(WallDuration) as WallDuration,sum(CpuUserDuration + CpuSystemDuration) as Cpu
-				from JobUsageRecord
-				where
-					EndTime >= fromdate and EndTime <= todate
-				group by date_format(EndTime,format),VOName
-				order by date_format(EndTime,format);
-		end if;
-	else
-		prepare statement from @sql;
-		execute statement using @myfromdate,@mytodate,@myformat,@myformat;
-		deallocate prepare statement;
-	end if;
-end
+-- create procedure DailyUsageByVO (userName varchar(64),userRole varchar(64),fromdate varchar(64),todate varchar(64),format varchar(64))
+-- begin
+-- 
+-- 	set @myfromdate := fromdate;
+-- 	set @mytodate := todate;
+-- 	set @myformat := format;
+-- 
+-- 	select SystemProplist.cdr into @usereportauthentication from SystemProplist where SystemProplist.car = 'use.report.authentication';
+-- 	select RolesTable.whereclause into @mywhereclause from RolesTable where RolesTable.role = userRole;
+-- 	select generateWhereClause(userName,userRole,@mywhereclause) into @mywhereclause;
+-- 	call parse(userName,@name,@key,@vo);
+-- 
+-- 	set @sql :=
+-- 		concat(
+-- 			'select VOName,EndTime as endtime,sum(WallDuration) as WallDuration,sum(CpuUserDuration + CpuSystemDuration) as Cpu',
+-- 			' from JobUsageRecord',
+-- 			' where',
+-- 			'	EndTime >= ? and EndTime <= ?',
+-- 			@mywhereclause,
+-- 			' group by date_format(EndTime,?),VOName',
+-- 			' order by date_format(EndTime,?)');
+-- 	insert into trace(pname,userkey,user,role,vo,p1,p2,p3,p4,data) 
+-- 		values('DailyUsageByVO',@key,userName,userRole,@vo,@myfromdate,@mytodate,@myformat,@myformat,@sql);
+-- 
+-- 	if userName = 'GratiaGlobalAdmin' or @usereportauthentication = 'false' or @mywhereclause = 'Everything' then
+-- 		if datediff(todate,fromdate) > 6 then
+-- 			select VOName,EndTime as endtime,sum(WallDuration) as WallDuration,sum(CpuUserDuration + CpuSystemDuration) as Cpu
+-- 				from VOProbeSummary
+-- 				where
+-- 					EndTime >= date(fromdate) and EndTime <= date(todate)
+-- 				group by EndTime,VOName
+-- 				order by EndTime;
+-- 		else
+-- 			select VOName,date_format(EndTime,format) as endtime,sum(WallDuration) as WallDuration,sum(CpuUserDuration + CpuSystemDuration) as Cpu
+-- 				from JobUsageRecord
+-- 				where
+-- 					EndTime >= fromdate and EndTime <= todate
+-- 				group by date_format(EndTime,format),VOName
+-- 				order by date_format(EndTime,format);
+-- 		end if;
+-- 	else
+-- 		prepare statement from @sql;
+-- 		execute statement using @myfromdate,@mytodate,@myformat,@myformat;
+-- 		deallocate prepare statement;
+-- 	end if;
+-- end
 ||
 -- call DailyUsageByVO('GratiaUser','GratiaUser','2006-10-01 00:00:00','2006-10-10 00:00:00','%m/%d/%Y %T')
 ||
@@ -966,54 +966,54 @@ end
 ||
 drop procedure JobsBySite
 ||
-create procedure JobsBySite (userName varchar(64),userRole varchar(64),fromdate varchar(64),todate varchar(64))
-begin
-
-	set @myfromdate := fromdate;
-	set @mytodate := todate;
-
-	select SystemProplist.cdr into @usereportauthentication from SystemProplist where SystemProplist.car = 'use.report.authentication';
-	select RolesTable.whereclause into @mywhereclause from RolesTable where RolesTable.role = userRole;
-	select generateWhereClause(userName,userRole,@mywhereclause) into @mywhereclause;
-	call parse(userName,@name,@key,@vo);
-
-	set @sql :=
-		concat(
-			'select SiteName,sum(Njobs) as Njobs',
-			' from JobUsageRecord',
-			' where',
-			'	EndTime >= ?',
-			'	and EndTime <= ?',
-			@mywhereclause,
-			' group by SiteName',
-			' order by SiteName');
-	insert into trace(pname,userkey,user,role,vo,p1,p2,data) 
-		values('JobsBySite',@key,userName,userRole,@vo,@myfromdate,@mytodate,@sql);
-
-	if userName = 'GratiaGlobalAdmin' or @usereportauthentication = 'false' or @mywhereclause = 'Everything' then
-		if datediff(todate,fromdate) > 6 then
-			select SiteName,sum(Njobs) as Njobs
-				from ProbeSummary
-				where
-					EndTime >= date(fromdate)
-					and EndTime <= date(todate)
-				group by SiteName
-				order by SiteName;
-		else
-			select SiteName,sum(Njobs) as Njobs
-				from JobUsageRecord
-				where
-					EndTime >= fromdate
-					and EndTime <= todate
-				group by SiteName
-				order by SiteName;
-		end if;
-	else
-		prepare statement from @sql;
-		execute statement using @myfromdate,@mytodate;
-		deallocate prepare statement;
-	end if;
-end
+-- create procedure JobsBySite (userName varchar(64),userRole varchar(64),fromdate varchar(64),todate varchar(64))
+-- begin
+-- 
+-- 	set @myfromdate := fromdate;
+-- 	set @mytodate := todate;
+-- 
+-- 	select SystemProplist.cdr into @usereportauthentication from SystemProplist where SystemProplist.car = 'use.report.authentication';
+-- 	select RolesTable.whereclause into @mywhereclause from RolesTable where RolesTable.role = userRole;
+-- 	select generateWhereClause(userName,userRole,@mywhereclause) into @mywhereclause;
+-- 	call parse(userName,@name,@key,@vo);
+-- 
+-- 	set @sql :=
+-- 		concat(
+-- 			'select SiteName,sum(Njobs) as Njobs',
+-- 			' from JobUsageRecord',
+-- 			' where',
+-- 			'	EndTime >= ?',
+-- 			'	and EndTime <= ?',
+-- 			@mywhereclause,
+-- 			' group by SiteName',
+-- 			' order by SiteName');
+-- 	insert into trace(pname,userkey,user,role,vo,p1,p2,data) 
+-- 		values('JobsBySite',@key,userName,userRole,@vo,@myfromdate,@mytodate,@sql);
+-- 
+-- 	if userName = 'GratiaGlobalAdmin' or @usereportauthentication = 'false' or @mywhereclause = 'Everything' then
+-- 		if datediff(todate,fromdate) > 6 then
+-- 			select SiteName,sum(Njobs) as Njobs
+-- 				from ProbeSummary
+-- 				where
+-- 					EndTime >= date(fromdate)
+-- 					and EndTime <= date(todate)
+-- 				group by SiteName
+-- 				order by SiteName;
+-- 		else
+-- 			select SiteName,sum(Njobs) as Njobs
+-- 				from JobUsageRecord
+-- 				where
+-- 					EndTime >= fromdate
+-- 					and EndTime <= todate
+-- 				group by SiteName
+-- 				order by SiteName;
+-- 		end if;
+-- 	else
+-- 		prepare statement from @sql;
+-- 		execute statement using @myfromdate,@mytodate;
+-- 		deallocate prepare statement;
+-- 	end if;
+-- end
 ||
 -- call JobsBySite('GratiaUser','GratiaUser','2006-10-01 00:00:00','2006-10-10 00:00:00')
 ||
@@ -1021,54 +1021,54 @@ end
 ||
 drop procedure JobsByUser
 ||
-create procedure JobsByUser (userName varchar(64),userRole varchar(64),fromdate varchar(64),todate varchar(64))
-begin
-
-	set @myfromdate := fromdate;
-	set @mytodate := todate;
-
-	select SystemProplist.cdr into @usereportauthentication from SystemProplist where SystemProplist.car = 'use.report.authentication';
-	select RolesTable.whereclause into @mywhereclause from RolesTable where RolesTable.role = userRole;
-	select generateWhereClause(userName,userRole,@mywhereclause) into @mywhereclause;
-	call parse(userName,@name,@key,@vo);
-
-	set @sql :=
-		concat(
-			'select CommonName as UserName,sum(Njobs) as Njobs',
-			' from JobUsageRecord',
-			' where',
-			'	EndTime >= ?',
-			'	and EndTime <= ?',
-			@mywhereclause,
-			' group by CommonName',
-			' order by CommonName');
-	insert into trace(pname,userkey,user,role,vo,p1,p2,data) 
-		values('JobsByUser',@key,userName,userRole,@vo,@myfromdate,@mytodate,@sql);
-
-	if userName = 'GratiaGlobalAdmin' or @usereportauthentication = 'false' or @mywhereclause = 'Everything' then
-		if datediff(todate,fromdate) > 6 then
-			select CommonName as UserName,sum(Njobs) as Njobs
-				from UserProbeSummary
-				where
-					EndTime >= date(fromdate)
-					and EndTime <= date(todate)
-				group by CommonName
-				order by CommonName;
-		else
-			select CommonName as UserName,sum(Njobs) as Njobs
-				from JobUsageRecord
-				where
-					EndTime >= fromdate
-					and EndTime <= todate
-				group by CommonName
-				order by CommonName;
-		end if;
-	else
-		prepare statement from @sql;
-		execute statement using @myfromdate,@mytodate;
-		deallocate prepare statement;
-	end if;
-end
+-- create procedure JobsByUser (userName varchar(64),userRole varchar(64),fromdate varchar(64),todate varchar(64))
+-- begin
+-- 
+-- 	set @myfromdate := fromdate;
+-- 	set @mytodate := todate;
+-- 
+-- 	select SystemProplist.cdr into @usereportauthentication from SystemProplist where SystemProplist.car = 'use.report.authentication';
+-- 	select RolesTable.whereclause into @mywhereclause from RolesTable where RolesTable.role = userRole;
+-- 	select generateWhereClause(userName,userRole,@mywhereclause) into @mywhereclause;
+-- 	call parse(userName,@name,@key,@vo);
+-- 
+-- 	set @sql :=
+-- 		concat(
+-- 			'select CommonName as UserName,sum(Njobs) as Njobs',
+-- 			' from JobUsageRecord',
+-- 			' where',
+-- 			'	EndTime >= ?',
+-- 			'	and EndTime <= ?',
+-- 			@mywhereclause,
+-- 			' group by CommonName',
+-- 			' order by CommonName');
+-- 	insert into trace(pname,userkey,user,role,vo,p1,p2,data) 
+-- 		values('JobsByUser',@key,userName,userRole,@vo,@myfromdate,@mytodate,@sql);
+-- 
+-- 	if userName = 'GratiaGlobalAdmin' or @usereportauthentication = 'false' or @mywhereclause = 'Everything' then
+-- 		if datediff(todate,fromdate) > 6 then
+-- 			select CommonName as UserName,sum(Njobs) as Njobs
+-- 				from UserProbeSummary
+-- 				where
+-- 					EndTime >= date(fromdate)
+-- 					and EndTime <= date(todate)
+-- 				group by CommonName
+-- 				order by CommonName;
+-- 		else
+-- 			select CommonName as UserName,sum(Njobs) as Njobs
+-- 				from JobUsageRecord
+-- 				where
+-- 					EndTime >= fromdate
+-- 					and EndTime <= todate
+-- 				group by CommonName
+-- 				order by CommonName;
+-- 		end if;
+-- 	else
+-- 		prepare statement from @sql;
+-- 		execute statement using @myfromdate,@mytodate;
+-- 		deallocate prepare statement;
+-- 	end if;
+-- end
 ||
 -- call JobsByUser('GratiaUser','GratiaUser','2006-10-01 00:00:00','2006-10-10 00:00:00')
 ||
@@ -1076,54 +1076,54 @@ end
 ||
 drop procedure JobsByVO
 ||
-create procedure JobsByVO (userName varchar(64),userRole varchar(64),fromdate varchar(64),todate varchar(64))
-begin
-
-	set @myfromdate := fromdate;
-	set @mytodate := todate;
-
-	select SystemProplist.cdr into @usereportauthentication from SystemProplist where SystemProplist.car = 'use.report.authentication';
-	select RolesTable.whereclause into @mywhereclause from RolesTable where RolesTable.role = userRole;
-	select generateWhereClause(userName,userRole,@mywhereclause) into @mywhereclause;
-	call parse(userName,@name,@key,@vo);
-
-	set @sql :=
-		concat(
-			'select VOName,sum(Njobs) as Njobs',
-			' from JobUsageRecord',
-			' where',
-			'	EndTime >= ?',
-			'	and EndTime <= ?',
-			@mywhereclause,
-			' group by VOName',
-			' order by VOName');
-	insert into trace(pname,userkey,user,role,vo,p1,p2,data) 
-		values('JobsByVO',@key,userName,userRole,@vo,@myfromdate,@mytodate,@sql);
-
-	if userName = 'GratiaGlobalAdmin' or @usereportauthentication = 'false' or @mywhereclause = 'Everything' then
-		if datediff(todate,fromdate) > 6 then
-			select VOName,sum(Njobs) as Njobs
-				from VOProbeSummary
-				where
-					EndTime >= date(fromdate)
-					and EndTime <= date(todate)
-				group by VOName
-				order by VOName;
-		else
-			select VOName,sum(Njobs) as Njobs
-				from JobUsageRecord
-				where
-					EndTime >= fromdate
-					and EndTime <= todate
-				group by VOName
-				order by VOName;
-		end if;
-	else
-		prepare statement from @sql;
-		execute statement using @myfromdate,@mytodate;
-		deallocate prepare statement;
-	end if;
-end
+-- create procedure JobsByVO (userName varchar(64),userRole varchar(64),fromdate varchar(64),todate varchar(64))
+-- begin
+-- 
+-- 	set @myfromdate := fromdate;
+-- 	set @mytodate := todate;
+-- 
+-- 	select SystemProplist.cdr into @usereportauthentication from SystemProplist where SystemProplist.car = 'use.report.authentication';
+-- 	select RolesTable.whereclause into @mywhereclause from RolesTable where RolesTable.role = userRole;
+-- 	select generateWhereClause(userName,userRole,@mywhereclause) into @mywhereclause;
+-- 	call parse(userName,@name,@key,@vo);
+-- 
+-- 	set @sql :=
+-- 		concat(
+-- 			'select VOName,sum(Njobs) as Njobs',
+-- 			' from JobUsageRecord',
+-- 			' where',
+-- 			'	EndTime >= ?',
+-- 			'	and EndTime <= ?',
+-- 			@mywhereclause,
+-- 			' group by VOName',
+-- 			' order by VOName');
+-- 	insert into trace(pname,userkey,user,role,vo,p1,p2,data) 
+-- 		values('JobsByVO',@key,userName,userRole,@vo,@myfromdate,@mytodate,@sql);
+-- 
+-- 	if userName = 'GratiaGlobalAdmin' or @usereportauthentication = 'false' or @mywhereclause = 'Everything' then
+-- 		if datediff(todate,fromdate) > 6 then
+-- 			select VOName,sum(Njobs) as Njobs
+-- 				from VOProbeSummary
+-- 				where
+-- 					EndTime >= date(fromdate)
+-- 					and EndTime <= date(todate)
+-- 				group by VOName
+-- 				order by VOName;
+-- 		else
+-- 			select VOName,sum(Njobs) as Njobs
+-- 				from JobUsageRecord
+-- 				where
+-- 					EndTime >= fromdate
+-- 					and EndTime <= todate
+-- 				group by VOName
+-- 				order by VOName;
+-- 		end if;
+-- 	else
+-- 		prepare statement from @sql;
+-- 		execute statement using @myfromdate,@mytodate;
+-- 		deallocate prepare statement;
+-- 	end if;
+-- end
 ||
 -- call JobsByVO('GratiaUser','GratiaUser','2006-10-01 00:00:00','2006-10-10 00:00:00')
 ||
@@ -1244,51 +1244,51 @@ end
 ||
 drop procedure UsageBySite
 ||
-create procedure UsageBySite (userName varchar(64),userRole varchar(64),fromdate varchar(64),todate varchar(64))
-begin
-
-	set @myfromdate := fromdate;
-	set @mytodate := todate;
-
-	select SystemProplist.cdr into @usereportauthentication from SystemProplist where SystemProplist.car = 'use.report.authentication';
-	select RolesTable.whereclause into @mywhereclause from RolesTable where RolesTable.role = userRole;
-	select generateWhereClause(userName,userRole,@mywhereclause) into @mywhereclause;
-	call parse(userName,@name,@key,@vo);
-
-	set @sql :=
-		concat(
-			' select SiteName,sum(WallDuration) as WallDuration',
-			' from JobUsageRecord',
-			' where',
-			'	EndTime >= ? and EndTime <= ?',
-			@mywhereclause,
-			' group by SiteName',
-			' order by SiteName');
-	insert into trace(pname,userkey,user,role,vo,p1,p2,data) 
-		values('UsageBySite',@key,userName,userRole,@vo,@myfromdate,@mytodate,@sql);
-
-	if userName = 'GratiaGlobalAdmin' or @usereportauthentication = 'false' or @mywhereclause = 'Everything' then
-		if datediff(todate,fromdate) > 6 then
-			select SiteName,sum(WallDuration) as WallDuration
-				from ProbeSummary
-				where
-					EndTime >= date(fromdate) and EndTime <= date(todate)
-				group by SiteName
-				order by SiteName;
-		else
-			select SiteName,sum(WallDuration) as WallDuration
-				from JobUsageRecord
-				where
-					EndTime >= fromdate and EndTime <= todate
-				group by SiteName
-				order by SiteName;
-		end if;
-	else
-		prepare statement from @sql;
-		execute statement using @myfromdate,@mytodate;
-		deallocate prepare statement;
-	end if;
-end
+-- create procedure UsageBySite (userName varchar(64),userRole varchar(64),fromdate varchar(64),todate varchar(64))
+-- begin
+-- 
+-- 	set @myfromdate := fromdate;
+-- 	set @mytodate := todate;
+-- 
+-- 	select SystemProplist.cdr into @usereportauthentication from SystemProplist where SystemProplist.car = 'use.report.authentication';
+-- 	select RolesTable.whereclause into @mywhereclause from RolesTable where RolesTable.role = userRole;
+-- 	select generateWhereClause(userName,userRole,@mywhereclause) into @mywhereclause;
+-- 	call parse(userName,@name,@key,@vo);
+-- 
+-- 	set @sql :=
+-- 		concat(
+-- 			' select SiteName,sum(WallDuration) as WallDuration',
+-- 			' from JobUsageRecord',
+-- 			' where',
+-- 			'	EndTime >= ? and EndTime <= ?',
+-- 			@mywhereclause,
+-- 			' group by SiteName',
+-- 			' order by SiteName');
+-- 	insert into trace(pname,userkey,user,role,vo,p1,p2,data) 
+-- 		values('UsageBySite',@key,userName,userRole,@vo,@myfromdate,@mytodate,@sql);
+-- 
+-- 	if userName = 'GratiaGlobalAdmin' or @usereportauthentication = 'false' or @mywhereclause = 'Everything' then
+-- 		if datediff(todate,fromdate) > 6 then
+-- 			select SiteName,sum(WallDuration) as WallDuration
+-- 				from ProbeSummary
+-- 				where
+-- 					EndTime >= date(fromdate) and EndTime <= date(todate)
+-- 				group by SiteName
+-- 				order by SiteName;
+-- 		else
+-- 			select SiteName,sum(WallDuration) as WallDuration
+-- 				from JobUsageRecord
+-- 				where
+-- 					EndTime >= fromdate and EndTime <= todate
+-- 				group by SiteName
+-- 				order by SiteName;
+-- 		end if;
+-- 	else
+-- 		prepare statement from @sql;
+-- 		execute statement using @myfromdate,@mytodate;
+-- 		deallocate prepare statement;
+-- 	end if;
+-- end
 ||
 -- call UsageBySite('GratiaUser','GratiaUser','2006-10-01 00:00:00','2006-10-10 00:00:00')
 ||
@@ -1296,54 +1296,54 @@ end
 ||
 drop procedure UsageByVO
 ||
-create procedure UsageByVO (userName varchar(64),userRole varchar(64),fromdate varchar(64),todate varchar(64))
-begin
-
-	set @myfromdate := fromdate;
-	set @mytodate := todate;
-
-	select SystemProplist.cdr into @usereportauthentication from SystemProplist where SystemProplist.car = 'use.report.authentication';
-	select RolesTable.whereclause into @mywhereclause from RolesTable where RolesTable.role = userRole;
-	select generateWhereClause(userName,userRole,@mywhereclause) into @mywhereclause;
-	call parse(userName,@name,@key,@vo);
-
-	set @sql :=
-		concat(
-			'select VOName,',
-			' sum(WallDuration) as wallduration,',
-			' sum(CpuUserDuration + CpuSystemDuration) as cpu',
-			' from JobUsageRecord',
-			' where EndTime between date(?) and date(?)',
-			@mywhereclause,
-			' group by VOName',
-			' order by VOName');
-	insert into trace(pname,userkey,user,role,vo,p1,p2,data) 
-		values('UsageByVO',@key,userName,userRole,@vo,@myfromdate,@mytodate,@sql);
-
-	if userName = 'GratiaGlobalAdmin' or @usereportauthentication = 'false' or @mywhereclause = 'Everything' then
-		if datediff(todate,fromdate) > 6 then
-			select VOName, 
-				sum(WallDuration) as wallduration,
-				sum(CpuUserDuration + CpuSystemDuration) as cpu
-				from VOProbeSummary
-				where EndTime between date(fromdate) and date(todate)
-				group by VOName
-				order by VOName;
-		else
-			select VOName, 
-				sum(WallDuration) as wallduration,
-				sum(CpuUserDuration + CpuSystemDuration) as cpu
-				from JobUsageRecord
-				where EndTime between date(fromdate) and date(todate)
-				group by VOName
-				order by VOName;
-		end if;
-	else
-		prepare statement from @sql;
-		execute statement using @myfromdate,@mytodate;
-		deallocate prepare statement;
-	end if;
-end
+-- create procedure UsageByVO (userName varchar(64),userRole varchar(64),fromdate varchar(64),todate varchar(64))
+-- begin
+-- 
+-- 	set @myfromdate := fromdate;
+-- 	set @mytodate := todate;
+-- 
+-- 	select SystemProplist.cdr into @usereportauthentication from SystemProplist where SystemProplist.car = 'use.report.authentication';
+-- 	select RolesTable.whereclause into @mywhereclause from RolesTable where RolesTable.role = userRole;
+-- 	select generateWhereClause(userName,userRole,@mywhereclause) into @mywhereclause;
+-- 	call parse(userName,@name,@key,@vo);
+-- 
+-- 	set @sql :=
+-- 		concat(
+-- 			'select VOName,',
+-- 			' sum(WallDuration) as wallduration,',
+-- 			' sum(CpuUserDuration + CpuSystemDuration) as cpu',
+-- 			' from JobUsageRecord',
+-- 			' where EndTime between date(?) and date(?)',
+-- 			@mywhereclause,
+-- 			' group by VOName',
+-- 			' order by VOName');
+-- 	insert into trace(pname,userkey,user,role,vo,p1,p2,data) 
+-- 		values('UsageByVO',@key,userName,userRole,@vo,@myfromdate,@mytodate,@sql);
+-- 
+-- 	if userName = 'GratiaGlobalAdmin' or @usereportauthentication = 'false' or @mywhereclause = 'Everything' then
+-- 		if datediff(todate,fromdate) > 6 then
+-- 			select VOName, 
+-- 				sum(WallDuration) as wallduration,
+-- 				sum(CpuUserDuration + CpuSystemDuration) as cpu
+-- 				from VOProbeSummary
+-- 				where EndTime between date(fromdate) and date(todate)
+-- 				group by VOName
+-- 				order by VOName;
+-- 		else
+-- 			select VOName, 
+-- 				sum(WallDuration) as wallduration,
+-- 				sum(CpuUserDuration + CpuSystemDuration) as cpu
+-- 				from JobUsageRecord
+-- 				where EndTime between date(fromdate) and date(todate)
+-- 				group by VOName
+-- 				order by VOName;
+-- 		end if;
+-- 	else
+-- 		prepare statement from @sql;
+-- 		execute statement using @myfromdate,@mytodate;
+-- 		deallocate prepare statement;
+-- 	end if;
+-- end
 ||
 -- call UsageByVO('GratiaUser','GratiaUser','2006-09-01 00:00:00','2006-09-10 00:00:00')
 ||
