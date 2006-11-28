@@ -9,17 +9,20 @@ mkdir war\WEB-INF\classes
 mkdir war\WEB-INF\classes\net
 mkdir war\WEB-INF\classes\net\sf
 mkdir war\WEB-INF\classes\net\sf\gratia
+mkdir war\WEB-INF\classes\net\sf\gratia\services
 mkdir war\WEB-INF\classes\net\sf\gratia\reporting
 mkdir war\WEB-INF\classes\net\sf\gratia\reporting\exceptions
 
 mkdir war\WEB-INF\lib
 
+javac -extdirs %root%\jars %root%\services\net\sf\gratia\services\*.java
 javac -extdirs %root%\jars %base%\GratiaReporting\src\net\sf\gratia\reporting\*.java
 javac -extdirs %root%\jars %base%\GratiaReporting\src\net\sf\gratia\reporting\exceptions\*.java
 
 copy %root%\reporting\net\sf\gratia\reporting\*.jsp war
 copy %root%\reporting\net\sf\gratia\reporting\*.css war
 
+copy %root%\services\net\sf\gratia\services\*.class war\WEB-INF\classes\net\sf\gratia\services
 copy %base%\GratiaReporting\src\net\sf\gratia\reporting\*.class war\WEB-INF\classes\net\sf\gratia\reporting
 copy %base%\GratiaReporting\src\net\sf\gratia\reporting\exceptions\*.class war\WEB-INF\classes\net\sf\gratia\reporting\exceptions
 xcopy /s %base%\GratiaReporting\WebContent\calendar war\calendar
