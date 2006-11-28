@@ -176,11 +176,14 @@ reporting:
 	mkdir war/WEB-INF/classes/net
 	mkdir war/WEB-INF/classes/net/sf
 	mkdir war/WEB-INF/classes/net/sf/gratia
+	mkdir war/WEB-INF/classes/net/sf/gratia/services
 	mkdir war/WEB-INF/classes/net/sf/gratia/reporting
 	mkdir war/WEB-INF/classes/net/sf/gratia/reporting/exceptions
 	mkdir war/WEB-INF/lib
+	javac -cp ${classpath} -extdirs $(jars) ../services/net/sf/gratia/services/*.java
 	javac -cp ${classpath} -extdirs $(jars) ${base}GratiaReporting/src/net/sf/gratia/reporting/*.java
 	javac -cp ${classpath} -extdirs $(jars) ${base}GratiaReporting/src/net/sf/gratia/reporting/exceptions/*.java
+	cp ${services}/net/sf/gratia/services/*.class war/WEB-INF/classes/net/sf/gratia/services
 	cp ${base}GratiaReporting/WebContent/*.jsp war
 	cp ${base}GratiaReporting/WebContent/*.css war
 	cp ${base}GratiaReporting/src/net/sf/gratia/reporting/*.class war/WEB-INF/classes/net/sf/gratia/reporting
