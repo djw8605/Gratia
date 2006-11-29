@@ -5,7 +5,6 @@
 #
 # library to create simple report using the Gratia psacct database
 #
-#@(#)root/base:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.9 2006-11-21 04:06:13 pcanal Exp $
 
 import time
 import datetime
@@ -478,6 +477,10 @@ class DailySiteVOReportFromDailyConf:
         def GetData(self,start,end):
            return DailySiteVODataFromDaily(start,end,self.select,self.count)
 
+def sortedDictValues(adict):
+    items = adict.items()
+    items.sort()
+    return [(key,value) for key, value in items]
 
 def GenericDaily(what, when = datetime.date.today(), output = "text"):
         factor = 3600  # Convert number of seconds to number of hours
@@ -505,6 +508,7 @@ def GenericDaily(what, when = datetime.date.today(), output = "text"):
                 offset = 0
                 site = val[0]
                 key = site
+                vo = ""
                 if (len(val)==4) :
                         vo = val[1]
                         offset = 1
@@ -514,8 +518,8 @@ def GenericDaily(what, when = datetime.date.today(), output = "text"):
                 wall = string.atof( val[offset+2] ) / factor
                 totalwall = totalwall + wall
                 totaljobs = totaljobs + njobs                
-                oldValues[key] = (njobs,wall)
-        oldValues["total"] = (totaljobs, totalwall)
+                oldValues[key] = (njobs,wall,site,vo)
+        oldValues["total"] = (totaljobs, totalwall, "total","")
 
         # Then getting the correct day's information and print it
         totalwall = 0
@@ -525,8 +529,8 @@ def GenericDaily(what, when = datetime.date.today(), output = "text"):
         lines = what.GetData(start,end)
         num_header = 1;
         index = 0
+        printValues = {}
         for i in range (1,len(lines)):
-                index = index + 1;
                 val = lines[i].split('\t')
                 site = val[0]
                 key = site
@@ -538,19 +542,29 @@ def GenericDaily(what, when = datetime.date.today(), output = "text"):
                         key = site + " " + vo
                 (oldnjobs,oldwall) = (0,0)
                 if oldValues.has_key(key):
-                        (oldnjobs,oldwall) = oldValues[key]
+                        (oldnjobs,oldwall,s,v) = oldValues[key]
+                        del oldValues[key]
                 njobs= string.atoi( val[offset+1] )
                 wall = string.atof( val[offset+2] ) / factor
                 totalwall = totalwall + wall
                 totaljobs = totaljobs + njobs
-                if (num_header == 2) :
-                        values = (site,vo,niceNum(njobs), niceNum(wall),niceNum(njobs-oldnjobs),niceNum(wall-oldwall))
-                else:
-                        values = (site,niceNum(njobs), niceNum(wall),niceNum(njobs-oldnjobs),niceNum(wall-oldwall))
-                if (output != "None") :
-                    print "%3d " %(index), what.formats[output] % values
-                result.append(values)
-        (oldnjobs,oldwall) = oldValues["total"]
+                printValues[key] = (njobs,wall,oldnjobs,oldwall,site,vo)
+
+        for key,(oldnjobs,oldwall,site,vo) in oldValues.iteritems():            
+            if (key != "total") :
+                printValues[key] = (0,0,oldnjobs,oldwall,site,vo)
+
+        for key,(njobs,wall,oldnjobs,oldwall,site,vo) in sortedDictValues(printValues):
+            index = index + 1;
+            if (num_header == 2) :
+                     values = (site,vo,niceNum(njobs), niceNum(wall),niceNum(njobs-oldnjobs),niceNum(wall-oldwall))
+            else:
+                     values = (site,niceNum(njobs), niceNum(wall),niceNum(njobs-oldnjobs),niceNum(wall-oldwall))
+            if (output != "None") :
+                     print "%3d " %(index), what.formats[output] % values
+            result.append(values)       
+                
+        (oldnjobs,oldwall,s,v) = oldValues["total"]
         if (output != "None") :
                 print what.lines[output]
                 if (num_header == 2) :
