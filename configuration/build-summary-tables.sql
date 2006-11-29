@@ -1,4 +1,10 @@
-drop table if exists ProbeSummary, UserProbeSummary, VOProbeSummary;
+drop table if exists ProbeSummary, UserProbeSummary, VOProbeSummary, ProbeStatus;
+
+CREATE TABLE `ProbeStatus` (
+  `EndTime` DATETIME NOT NULL DEFAULT 0,
+  `ProbeName` VARCHAR(255) NOT NULL DEFAULT '',
+  `Njobs` INTEGER NOT NULL DEFAULT 0
+);
 
 CREATE TABLE `ProbeSummary` (
   `EndTime` DATETIME NOT NULL DEFAULT 0,
@@ -29,6 +35,21 @@ CREATE TABLE `VOProbeSummary` (
   `CpuUserDuration` DOUBLE NOT NULL DEFAULT 0,
   `CpuSystemDuration` DOUBLE NOT NULL DEFAULT 0
 );
+
+insert into ProbeStatus
+  (select
+    str_to_date(date_format(ServerDate,'%Y-%c-%e %H:00:00'),'%Y-%c-%e %H:00:00') as EndTime,
+    ProbeName,
+    count(*) as Njobs
+    from JobUsageRecord
+    group by ProbeName,str_to_date(date_format(ServerDate,'%Y-%c-%e %H:00:00'),'%Y-%c-%e %H:00:00')
+);
+
+alter table ProbeStatus
+  add index index01(EndTime);
+
+alter table ProbeStatus
+  add index index02(ProbeName);
 
 insert into ProbeSummary
   (select
@@ -127,6 +148,25 @@ glr:begin
 
 	--
 	-- ProbeSummary
+	--
+
+	select count(*) into mycount from ProbeStatus
+		where ProbeStatus.ProbeName = new.ProbeName
+		and ProbeStatus.EndTime = str_to_date(date_format(new.ServerDate,'%Y-%c-%e %H:00:00'),'%Y-%c-%e %H:00:00');
+	if mycount = 0 then
+		insert into ProbeStatus values(
+			str_to_date(date_format(new.ServerDate,'%Y-%c-%e %H:00:00'),'%Y-%c-%e %H:00:00'),
+			new.ProbeName,1);
+	elseif mycount > 0 then
+		update ProbeSummary
+			set
+				ProbeStatus.Njobs = ProbeStatus.Njobs + 1
+				where ProbeStatus.ProbeName = new.ProbeName
+				and ProbeStatus.EndTime = str_to_date(date_format(new.ServerDate,'%Y-%c-%e %H:00:00'),'%Y-%c-%e %H:00:00');
+	end if;
+
+	--
+	-- ProbeStatus
 	--
 
 	select count(*) into mycount from ProbeSummary

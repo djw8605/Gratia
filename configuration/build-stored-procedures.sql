@@ -47,6 +47,7 @@ drop function generateWhereClause
 ||
 create function generateWhereClause(userName varchar(64),userRole varchar(64),whereClause varchar(255)) returns varchar(255)
 begin
+	select SystemProplist.cdr into @usereportauthentication from SystemProplist where SystemProplist.car = 'use.report.authentication';
 	if userName = 'GratiaGlobalAdmin' or @usereportauthentication = 'false' then
 		return '';
 	end if;
@@ -174,8 +175,6 @@ end
 ||
 -- call DailyJobsByFacilityAndDate('GratiaUser','GratiaUser','2006-10-01 00:00:00','2006-10-10 00:00:00','%m/%d/%Y %T')
 ||
--- call DailyJobsByFacilityAndDate('GratiaUser','GratiaUser','2006-10-01 00:00:00','2006-10-03 00:00:00','%m/%d/%Y %T')
-||
 drop procedure DailyJobsByProbe
 ||
 create procedure DailyJobsByProbe (userName varchar(64),userRole varchar(64),fromdate varchar(64),todate varchar(64),format varchar(64))
@@ -228,7 +227,33 @@ end
 ||
 -- call DailyJobsByProbe('GratiaUser','GratiaUser','2006-10-01 00:00:00','2006-10-10 00:00:00','%m/%d/%Y %T')
 ||
--- call DailyJobsByProbe('GratiaUser','GratiaUser','2006-10-01 00:00:00','2006-10-03 00:00:00','%m/%d/%Y %T')
+create procedure ProbeStatus (userName varchar(64),userRole varchar(64),fromdate varchar(64),todate varchar(64),format varchar(64))
+begin
+
+	declare mywhereclause varchar(255);
+	set @myfromdate := fromdate;
+	set @mytodate := todate;
+
+	insert into trace(pname,userkey) values('ProbeStatus','step00');
+	select SystemProplist.cdr into @usereportauthentication from SystemProplist where SystemProplist.car = 'use.report.authentication';
+	select RolesTable.whereclause into @mywhereclause from RolesTable where RolesTable.role = userRole;
+	select generateWhereClause(userName,userRole,@mywhereclause) into @mywhereclause;
+	call parse(userName,@name,@key,@vo);
+
+	insert into trace(pname,userkey,user,role,vo,p1,p2) 
+		values('ProbeStatus',@key,userName,userRole,@vo,fromdate,todate);
+
+	if userName = 'GratiaGlobalAdmin' or @usereportauthentication = 'false' or @mywhereclause = 'Everything' then
+			select ProbeName,EndTime as EndTime,Njobs as Njobs
+				from ProbeStatus
+				where
+					EndTime >= fromdate and EndTime <= todate
+				group by EndTime,ProbeName
+				order by EndTime;
+	end if;
+end
+||
+call ProbeStatus('GratiaGlobalAdmin','GratiaUser','2006-01-01 00:00:00','2006-12-31 00:00:00','ignore');
 ||
 drop procedure DailyJobsByProbeAndDate
 ||
@@ -280,8 +305,6 @@ begin
 end
 ||
 -- call DailyJobsByProbeAndDate('GratiaUser','GratiaUser','2006-10-01 00:00:00','2006-10-10 00:00:00','%m/%d/%Y %T')
-||
--- call DailyJobsByProbeAndDate('GratiaUser','GratiaUser','2006-10-01 00:00:00','2006-10-03 00:00:00','%m/%d/%Y %T')
 ||
 drop procedure DailyJobsByVO
 ||
@@ -337,8 +360,6 @@ end
 ||
 -- call DailyJobsByVO('GratiaUser','GratiaUser','2006-10-01 00:00:00','2006-10-10 00:00:00','%y:%m:%d:%H:%i')
 ||
--- call DailyJobsByVO('GratiaUser','GratiaUser','2006-10-01 00:00:00','2006-10-03 00:00:00','%y:%m:%d:%H:%i')
-||
 drop procedure DailyJobsByVOAndDate
 ||
 create procedure DailyJobsByVOAndDate (userName varchar(64),userRole varchar(64),fromdate varchar(64),todate varchar(64),format varchar(64))
@@ -392,8 +413,6 @@ begin
 end
 ||
 -- call DailyJobsByVOAndDate('GratiaUser','GratiaUser','2006-10-01 00:00:00','2006-10-10 00:00:00','%y:%m:%d:%H:%i')
-||
--- call DailyJobsByVOAndDate('GratiaUser','GratiaUser','2006-10-01 00:00:00','2006-10-03 00:00:00','%y:%m:%d:%H:%i')
 ||
 drop procedure DailyUsageByFacility
 ||
@@ -455,8 +474,6 @@ end
 ||
 -- call DailyUsageByFacility('GratiaUser','GratiaUser','2006-10-01 00:00:00','2006-10-10 00:00:00','%y:%m:%d:%H:%i')
 ||
--- call DailyUsageByFacility('GratiaUser','GratiaUser','2006-10-01 00:00:00','2006-10-03 00:00:00','%y:%m:%d:%H:%i')
-||
 drop procedure DailyUsageByFacilityAndDate
 ||
 create procedure DailyUsageByFacilityAndDate (userName varchar(64),userRole varchar(64),fromdate varchar(64),todate varchar(64),format varchar(64))
@@ -517,8 +534,6 @@ end
 ||
 -- call DailyUsageByFacilityAndDate('GratiaUser','GratiaUser','2006-10-01 00:00:00','2006-10-10 00:00:00','%y:%m:%d:%H:%i')
 ||
--- call DailyUsageByFacilityAndDate('GratiaUser','GratiaUser','2006-10-01 00:00:00','2006-10-03 00:00:00','%y:%m:%d:%H:%i')
-||
 drop procedure DailyUsageByProbe
 ||
 create procedure DailyusageByProbe (userName varchar(64),userRole varchar(64),fromdate varchar(64),todate varchar(64),format varchar(64))
@@ -570,8 +585,6 @@ end
 ||
 -- call DailyUsageByProbe('GratiaUser','GratiaUser','2006-10-01 00:00:00','2006-10-10 00:00:00','%m/%d/%Y %T')
 ||
--- call DailyUsageByProbe('GratiaUser','GratiaUser','2006-10-01 00:00:00','2006-10-03 00:00:00','%m/%d/%Y %T')
-||
 drop procedure DailyUsageByProbeAndDate
 ||
 create procedure DailyUsageByProbeAndDate (userName varchar(64),userRole varchar(64),fromdate varchar(64),todate varchar(64),format varchar(64))
@@ -622,8 +635,6 @@ begin
 end
 ||
 -- call DailyUsageByProbeAndDate('GratiaUser','GratiaUser','2006-10-01 00:00:00','2006-10-10 00:00:00','%m/%d/%Y %T')
-||
--- call DailyUsageByProbeAndDate('GratiaUser','GratiaUser','2006-10-01 00:00:00','2006-10-03 00:00:00','%m/%d/%Y %T')
 ||
 drop procedure DailyUsageBySite
 ||
@@ -678,8 +689,6 @@ drop procedure DailyUsageBySite
 ||
 -- call DailyUsageBySite('GratiaUser','GratiaUser','2006-10-01 00:00:00','2006-10-10 00:00:00','%m/%d/%Y %T')
 ||
--- call DailyUsageBySite('GratiaUser','GratiaUser','2006-10-01 00:00:00','2006-10-03 00:00:00','%m/%d/%Y %T')
-||
 drop procedure DailyUsageByVO
 ||
 -- create procedure DailyUsageByVO (userName varchar(64),userRole varchar(64),fromdate varchar(64),todate varchar(64),format varchar(64))
@@ -730,8 +739,6 @@ drop procedure DailyUsageByVO
 -- end
 ||
 -- call DailyUsageByVO('GratiaUser','GratiaUser','2006-10-01 00:00:00','2006-10-10 00:00:00','%m/%d/%Y %T')
-||
--- call DailyUsageByVO('GratiaUser','GratiaUser','2006-10-01 00:00:00','2006-10-03 00:00:00','%m/%d/%Y %T')
 ||
 drop procedure DailyUsageByVOAndDate
 ||
@@ -785,8 +792,6 @@ end
 ||
 -- call DailyUsageByVOAndDate('GratiaUser','GratiaUser','2006-10-01 00:00:00','2006-10-10 00:00:00','%m/%d/%Y %T')
 ||
--- call DailyUsageByVOAndDate('GratiaUser','GratiaUser','2006-10-01 00:00:00','2006-10-03 00:00:00','%m/%d/%Y %T')
-||
 drop procedure JobsByFacility
 ||
 create procedure JobsByFacility (userName varchar(64),userRole varchar(64),fromdate varchar(64),todate varchar(64))
@@ -846,8 +851,6 @@ end
 ||
 -- call JobsByFacility('GratiaUser','GratiaUser','2006-10-01 00:00:00','2006-10-10 00:00:00')
 ||
--- call JobsByFacility('GratiaUser','GratiaUser','2006-10-01 00:00:00','2006-10-03 00:00:00')
-||
 drop procedure JobsByFacility
 ||
 create procedure JobsByFacility (userName varchar(64),userRole varchar(64),fromdate varchar(64),todate varchar(64))
@@ -906,8 +909,6 @@ begin
 end
 ||
 -- call JobsByFacility('GratiaUser','GratiaUser','2006-10-01 00:00:00','2006-10-10 00:00:00')
-||
--- call JobsByFacility('GratiaUser','GratiaUser','2006-10-01 00:00:00','2006-10-03 00:00:00')
 ||
 drop procedure JobsByProbeNoFacility
 ||
@@ -962,8 +963,6 @@ end
 ||
 -- call JobsByProbeNoFacility('GratiaUser','GratiaUser','2006-10-01 00:00:00','2006-10-10 00:00:00')
 ||
--- call JobsByProbeNoFacility('GratiaUser','GratiaUser','2006-10-01 00:00:00','2006-10-03 00:00:00')
-||
 drop procedure JobsBySite
 ||
 -- create procedure JobsBySite (userName varchar(64),userRole varchar(64),fromdate varchar(64),todate varchar(64))
@@ -1016,8 +1015,6 @@ drop procedure JobsBySite
 -- end
 ||
 -- call JobsBySite('GratiaUser','GratiaUser','2006-10-01 00:00:00','2006-10-10 00:00:00')
-||
--- call JobsBySite('GratiaUser','GratiaUser','2006-10-01 00:00:00','2006-10-03 00:00:00')
 ||
 drop procedure JobsByUser
 ||
@@ -1072,8 +1069,6 @@ drop procedure JobsByUser
 ||
 -- call JobsByUser('GratiaUser','GratiaUser','2006-10-01 00:00:00','2006-10-10 00:00:00')
 ||
--- call JobsByUser('GratiaUser','GratiaUser','2006-10-01 00:00:00','2006-10-03 00:00:00')
-||
 drop procedure JobsByVO
 ||
 -- create procedure JobsByVO (userName varchar(64),userRole varchar(64),fromdate varchar(64),todate varchar(64))
@@ -1126,8 +1121,6 @@ drop procedure JobsByVO
 -- end
 ||
 -- call JobsByVO('GratiaUser','GratiaUser','2006-10-01 00:00:00','2006-10-10 00:00:00')
-||
--- call JobsByVO('GratiaUser','GratiaUser','2006-10-01 00:00:00','2006-10-03 00:00:00')
 ||
 drop procedure UsageByFacility
 ||
@@ -1188,8 +1181,6 @@ end
 ||
 -- call UsageByFacility('GratiaUser','GratiaUser','2006-10-01 00:00:00','2006-10-10 00:00:00')
 ||
--- call UsageByFacility('GratiaUser','GratiaUser','2006-10-01 00:00:00','2006-10-03 00:00:00')
-||
 drop procedure UsageByProbe
 ||
 create procedure UsageByProbe (userName varchar(64),userRole varchar(64),fromdate varchar(64),todate varchar(64))
@@ -1240,8 +1231,6 @@ end
 ||
 -- call UsageByProbe('GratiaUser','GratiaUser','2006-10-01 00:00:00','2006-10-10 00:00:00')
 ||
--- call UsageByProbe('GratiaUser','GratiaUser','2006-10-01 00:00:00','2006-10-03 00:00:00')
-||
 drop procedure UsageBySite
 ||
 -- create procedure UsageBySite (userName varchar(64),userRole varchar(64),fromdate varchar(64),todate varchar(64))
@@ -1291,8 +1280,6 @@ drop procedure UsageBySite
 -- end
 ||
 -- call UsageBySite('GratiaUser','GratiaUser','2006-10-01 00:00:00','2006-10-10 00:00:00')
-||
--- call UsageBySite('GratiaUser','GratiaUser','2006-10-01 00:00:00','2006-10-03 00:00:00')
 ||
 drop procedure UsageByVO
 ||
@@ -1346,6 +1333,4 @@ drop procedure UsageByVO
 -- end
 ||
 -- call UsageByVO('GratiaUser','GratiaUser','2006-09-01 00:00:00','2006-09-10 00:00:00')
-||
--- call UsageByVO('GratiaUser','GratiaUser','2006-10-01 00:00:00','2006-10-03 00:00:00')
 ||
