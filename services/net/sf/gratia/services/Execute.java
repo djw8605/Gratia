@@ -22,7 +22,7 @@ class StreamGobbler extends Thread
 								BufferedReader br = new BufferedReader(isr);
 								String line=null;
 								while ( (line = br.readLine()) != null)
-										System.out.println(type + ">" + line);    
+										Logging.log(type + ">" + line);    
 						} 
 				catch (IOException ioe)
 						{
@@ -39,7 +39,7 @@ public class Execute
 						{       
 
 								Runtime rt = Runtime.getRuntime();
-								System.out.println("Executing: " + cmd); 
+								Logging.log("Executing: " + cmd); 
 								Process proc = rt.exec(cmd);
 								// any error message?
 								StreamGobbler errorGobbler = new StreamGobbler(proc.getErrorStream(), "ERROR");            
@@ -53,7 +53,7 @@ public class Execute
 
 								// any error???
 								int exitValue = proc.waitFor();
-								System.out.println("exitValueue: " + exitValue);
+								Logging.log("exitValueue: " + exitValue);
 								return exitValue;
 						} 
 				catch (Throwable t)
@@ -73,7 +73,7 @@ public class Execute
 						{       
 
 								Runtime rt = Runtime.getRuntime();
-								System.out.println("Executing: " + newcommand); 
+								Logging.log("Executing: " + newcommand); 
 								Process proc = rt.exec(cmd);
 								// any error message?
 								StreamGobbler errorGobbler = new StreamGobbler(proc.getErrorStream(), "ERROR");            
@@ -87,7 +87,7 @@ public class Execute
 
 								// any error???
 								int exitValue = proc.waitFor();
-								System.out.println("exitValueue: " + exitValue);
+								Logging.log("exitValueue: " + exitValue);
 								return exitValue;
 						} 
 				catch (Throwable t)

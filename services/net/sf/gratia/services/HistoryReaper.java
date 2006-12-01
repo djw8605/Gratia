@@ -26,7 +26,7 @@ public class HistoryReaper
 
 		public HistoryReaper()
 		{
-				System.out.println("HistoryReaper: Starting");
+				Logging.log("HistoryReaper: Starting");
 
 				p = net.sf.gratia.services.Configuration.getProperties();
 				driver = p.getProperty("service.mysql.driver");
@@ -69,7 +69,7 @@ public class HistoryReaper
 						{
 								File file = new File(path);
 								file.delete();
-								System.out.println("HistoryReaper: Deleted Directory: " + path + ":Files: " + files.length);
+								Logging.log("HistoryReaper: Deleted Directory: " + path + ":Files: " + files.length);
 						}
 				catch (Exception ignore)
 						{
@@ -82,7 +82,7 @@ public class HistoryReaper
 				Vector vector = new Vector();
 				String path = System.getProperties().getProperty("catalina.home") + "/gratia/data";
 				path = xp.replaceAll(path,"\\","/");
-				System.out.println("HistoryReaper: Path: " + path);
+				Logging.log("HistoryReaper: Path: " + path);
 				String temp[] = xp.getDirectoryList(path);
 				for (i = 0; i < temp.length; i++)
 						{
@@ -90,7 +90,7 @@ public class HistoryReaper
 								if ((directory.indexOf("history") > -1) || (directory.indexOf("old") > -1))
 										vector.add(temp[i]);
 						}
-				System.out.println("HistoryReaper: Directories To Process: " + vector.size());
+				Logging.log("HistoryReaper: Directories To Process: " + vector.size());
 				//
 				// figure out which directories to delete
 				//
@@ -105,7 +105,7 @@ public class HistoryReaper
 				beginning.set(Calendar.MINUTE,0);
 				SimpleDateFormat format = new SimpleDateFormat("yyyyMMddhh");
 				String beginningHistory = path + "/history" + format.format(beginning.getTime());
-				System.out.println("HistoryReaper: First Directory To Process: " + beginningHistory);
+				Logging.log("HistoryReaper: First Directory To Process: " + beginningHistory);
 				//
 				// now - screen/delete older directories
 				//
@@ -114,7 +114,7 @@ public class HistoryReaper
 								String directory = (String) vector.elementAt(i);
 								if (directory.compareTo(beginningHistory) < 0)
 										{
-												System.out.println("HistoryReaper: Deleting Directory: " + directory);
+												Logging.log("HistoryReaper: Deleting Directory: " + directory);
 												deleteDirectory(directory);
 										}
 						}

@@ -56,14 +56,14 @@ public class FlipSSL
 																//
 																// now call
 																//
-																System.out.println("Flipping");
+																Logging.log("Flipping");
 																mbsc.invoke(objectName,"stop",null,null);
 																mbsc.invoke(objectName,"start",null,null);
 																jmxc.close();
 																return true;
 														}
 										}
-								System.out.println("Couldn't Find: " + mbeanName);
+								Logging.log("Couldn't Find: " + mbeanName);
 								jmxc.close();
 								return result;
 						}

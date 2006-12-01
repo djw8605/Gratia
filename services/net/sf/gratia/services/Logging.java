@@ -90,7 +90,7 @@ public class Logging
 								System.out.println("Logger Not Initialized !!");
 								return;
 						}
-				System.out.println(message);
+				Logging.log(message);
 		}
 
 }

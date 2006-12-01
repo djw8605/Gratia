@@ -167,6 +167,6 @@ public class Post
 		{
 				Post post = new Post("http://localhost:8080/gratia/rmi","xxxxxxx");
 				String response = post.send();
-				System.out.println("R: " + response);
+				Logging.log("R: " + response);
 		}
 }

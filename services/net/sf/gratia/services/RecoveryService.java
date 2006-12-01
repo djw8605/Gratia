@@ -30,7 +30,7 @@ public class RecoveryService extends Thread
 
 		public RecoveryService()
 		{
-				System.out.println("RecoveryService: Starting");
+				Logging.log("RecoveryService: Starting");
 
 				p = net.sf.gratia.services.Configuration.getProperties();
 				driver = p.getProperty("service.mysql.driver");
@@ -74,7 +74,7 @@ public class RecoveryService extends Thread
 						{
 								File file = new File(path);
 								file.delete();
-								System.out.println("RecoveryService: Deleted Directory: " + path + ":Files: " + files.length);
+								Logging.log("RecoveryService: Deleted Directory: " + path + ":Files: " + files.length);
 						}
 				catch (Exception ignore)
 						{
@@ -87,12 +87,12 @@ public class RecoveryService extends Thread
 				Vector vector = new Vector();
 				String path = System.getProperties().getProperty("catalina.home") + "/gratia/data";
 				path = xp.replaceAll(path,"\\","/");
-				System.out.println("RecorveryService: Path: " + path);
+				Logging.log("RecorveryService: Path: " + path);
 				String temp[] = xp.getDirectoryList(path);
 				for (i = 0; i < temp.length; i++)
 						if (temp[i].indexOf("history") > -1)
 								vector.add(temp[i]);
-				System.out.println("RecoveryService: Directories To Process: " + vector.size());
+				Logging.log("RecoveryService: Directories To Process: " + vector.size());
 				//
 				// figure out which directories to delete
 				//
@@ -107,7 +107,7 @@ public class RecoveryService extends Thread
 				beginning.set(Calendar.MINUTE,0);
 				SimpleDateFormat format = new SimpleDateFormat("yyyyMMddhh");
 				String beginningHistory = path + "/history" + format.format(beginning.getTime());
-				System.out.println("RecoveryService: First Directory To Process: " + beginningHistory);
+				Logging.log("RecoveryService: First Directory To Process: " + beginningHistory);
 				//
 				// now - screen/delete older directories
 				//
@@ -117,7 +117,7 @@ public class RecoveryService extends Thread
 										String directory = (String) vector.elementAt(i);
 										if (directory.compareTo(beginningHistory) < 0)
 												{
-														System.out.println("RecoveryService: Deleting Directory: " + directory);
+														Logging.log("RecoveryService: Deleting Directory: " + directory);
 														deleteDirectory(directory);
 												}
 										else
@@ -152,20 +152,20 @@ public class RecoveryService extends Thread
 
 				long temp = databaseDate.getTime() - (5 * 60 * 1000);
 				databaseDate = new java.util.Date(temp);
-				System.out.println("RecoveryService: Recovering From: " + databaseDate);
+				Logging.log("RecoveryService: Recovering From: " + databaseDate);
 		}
 
 		public void run()
 		{
 				String directory = "";
-				System.out.println("RecoveryService: Started");
+				Logging.log("RecoveryService: Started");
 				for (int i = 0; i < history.size(); i++)
 						{
 								directory = (String) history.elementAt(i);
-								System.out.println("RecoveryService: Processing Directory: " + directory);
+								Logging.log("RecoveryService: Processing Directory: " + directory);
 								recover(directory);
 						}
-				System.out.println("RecoveryService: Exiting");
+				Logging.log("RecoveryService: Exiting");
 		}
 
 		public void recover(String directory)
@@ -189,8 +189,8 @@ public class RecoveryService extends Thread
 										}
 								catch (Exception e)
 										{
-												System.out.println("RecoveryService: Error:Processing File: " + filenames[i]);
-												System.out.println("RecoveryService: Blob: " + blob);
+												Logging.log("RecoveryService: Error:Processing File: " + filenames[i]);
+												Logging.log("RecoveryService: Blob: " + blob);
 												try
 														{
 																File temp = new File(filenames[i]);
@@ -208,11 +208,11 @@ public class RecoveryService extends Thread
 														{
 																irecords++;
 																post.send();
-																System.out.println("RecoveryService: Sent: " + irecords + ":" + filenames[i] + " :Timestamp: " + recordDate);
+																Logging.log("RecoveryService: Sent: " + irecords + ":" + filenames[i] + " :Timestamp: " + recordDate);
 														}
 												catch (Exception e)
 														{
-																System.out.println("RecoveryService: Error Sending: " + filenames[i] + " Error: " + e);
+																Logging.log("RecoveryService: Error Sending: " + filenames[i] + " Error: " + e);
 																return;
 														}
 										}
@@ -223,18 +223,18 @@ public class RecoveryService extends Thread
 														{
 																irecords++;
 																post.send();
-																System.out.println("RecoveryService: Sent: " + irecords + ":" + filenames[i] + " :Timestamp: " + recordDate);
+																Logging.log("RecoveryService: Sent: " + irecords + ":" + filenames[i] + " :Timestamp: " + recordDate);
 														}
 												catch (Exception e)
 														{
-																System.out.println("RecoveryService: Error Sending: " + filenames[i] + " Error: " + e);
+																Logging.log("RecoveryService: Error Sending: " + filenames[i] + " Error: " + e);
 																return;
 														}
 										}
 								else
 
 										{
-												System.out.println("RecoveryService: Skipping: " + filenames[i] + " :Timestamp: " + recordDate);
+												Logging.log("RecoveryService: Skipping: " + filenames[i] + " :Timestamp: " + recordDate);
 										}
 						}
 		}

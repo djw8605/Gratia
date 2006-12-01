@@ -78,9 +78,9 @@ public class ListenerThread extends Thread
 				try
 						{
 								String url = p.getProperty("service.jms.url");
-								System.out.println("");
-								System.out.println("ListenerThread: " + ident + ":" + directory + ": Started");
-								System.out.println("");
+								Logging.log("");
+								Logging.log("ListenerThread: " + ident + ":" + directory + ": Started");
+								Logging.log("");
 						}
 				catch (Exception e)
 						{
@@ -104,7 +104,7 @@ public class ListenerThread extends Thread
 		public void stopRequest()
 		{
 				stopflag = true;
-				System.out.println("ListenerThread: " + ident + ":Stop Requested");
+				Logging.log("ListenerThread: " + ident + ":Stop Requested");
 		}
 
 		public String md5key(String input) throws Exception
@@ -145,7 +145,7 @@ public class ListenerThread extends Thread
 						}
 				catch (Exception e)
 						{
-								// System.out.println("ListenerThread: " + ident + ":Error During Dup Check");
+								// Logging.log("ListenerThread: " + ident + ":Error During Dup Check");
 								throw e;
 						}
 				finally
@@ -169,7 +169,7 @@ public class ListenerThread extends Thread
 						{
 								if (stopflag)
 										{
-												System.out.println("ListenerThread: " + ident + ":Exiting");
+												Logging.log("ListenerThread: " + ident + ":Exiting");
 												return;
 										}
 
@@ -178,7 +178,7 @@ public class ListenerThread extends Thread
 												HibernateWrapper.start();
 												if (HibernateWrapper.databaseDown)
 														{
-																System.out.println("ListenerThread: " + ident + ":Hibernate Down: Sleeping");
+																Logging.log("ListenerThread: " + ident + ":Hibernate Down: Sleeping");
 																try
 																		{
 																				Thread.sleep(30 * 1000);
@@ -191,13 +191,13 @@ public class ListenerThread extends Thread
 										}
 								if (stopflag)
 										{
-												System.out.println("ListenerThread: " + ident + ":Exiting");
+												Logging.log("ListenerThread: " + ident + ":Exiting");
 												return;
 										}
 								loop();
 								if (stopflag)
 										{
-												System.out.println("ListenerThread: " + ident + ":Exiting");
+												Logging.log("ListenerThread: " + ident + ":Exiting");
 												return;
 										}
 								try
@@ -227,7 +227,7 @@ public class ListenerThread extends Thread
 						{
 								if (stopflag)
 										{
-												System.out.println("ListenerThread: " + ident + ":Exiting");
+												Logging.log("ListenerThread: " + ident + ":Exiting");
 												return;
 										}
 
@@ -247,7 +247,7 @@ public class ListenerThread extends Thread
 
 								if (p.getProperty("service.datapump.trace").equals("1"))
 										{
-												System.out.println("ListenerThread: " + ident + ":XML Trace:" + "\n\n" + blob + "\n\n");
+												Logging.log("ListenerThread: " + ident + ":XML Trace:" + "\n\n" + blob + "\n\n");
 										}
 
 								//
@@ -291,8 +291,8 @@ public class ListenerThread extends Thread
 										}
 								catch (Exception e)
 										{
-												System.out.println("ListenerThread: " + ident + ":Error:Processing File: " + file);
-												System.out.println("ListenerThread: " + ident + ":Blob: " + blob);
+												Logging.log("ListenerThread: " + ident + ":Error:Processing File: " + file);
+												Logging.log("ListenerThread: " + ident + ":Blob: " + blob);
 												try
 														{
 																File temp = new File(file);
@@ -306,7 +306,7 @@ public class ListenerThread extends Thread
 
 								if (xml == null)
 										{
-												System.out.println("ListenerThread: " + ident + ":Error:No Data To Process: " + file);
+												Logging.log("ListenerThread: " + ident + ":Error:No Data To Process: " + file);
 												try
 														{
 																File temp = new File(file);
@@ -318,7 +318,7 @@ public class ListenerThread extends Thread
 												continue;
 										}
 
-								System.out.println("ListenerThread: " + ident + ":Processing: " + file);
+								Logging.log("ListenerThread: " + ident + ":Processing: " + file);
 
 								try
 										{
@@ -341,44 +341,44 @@ public class ListenerThread extends Thread
 												
 												for(int j = 0; j < records.size(); j++)
 														{
-																// System.out.println("ListenerThread: " + ident + ":Before Begin Transaction");
+																// Logging.log("ListenerThread: " + ident + ":Before Begin Transaction");
 																session = HibernateWrapper.getSession();
 																tx = session.beginTransaction();
-																// System.out.println("ListenerThread: " + ident + ":After Begin Transaction");
+																// Logging.log("ListenerThread: " + ident + ":After Begin Transaction");
 
 																current = (JobUsageRecord) records.get(j);
 																statusUpdater.update(current,xml);
 
-																// System.out.println("ListenerThread: " + ident + ":Before Duplicate Check");
+																// Logging.log("ListenerThread: " + ident + ":Before Duplicate Check");
 																gotduplicate = gotDuplicate(current);
-																// System.out.println("ListenerThread: " + ident + ":After Duplicate Check");
+																// Logging.log("ListenerThread: " + ident + ":After Duplicate Check");
 
 																if (gotduplicate)
 																		{
 																				goterror = true;
-																				// System.out.println("ListenerThread: " + ident + ":Before Save Duplicate");
+																				// Logging.log("ListenerThread: " + ident + ":Before Save Duplicate");
 																				if (gotreplication)
 																						saveDuplicate("Replication","Duplicate",dupdbid,current);
 																				else if (gothistory)
 																						;
 																				else
 																						saveDuplicate("Probe","Duplicate",dupdbid,current);
-																				// System.out.println("ListenerThread: " + ident + ":After Save Duplicate");
+																				// Logging.log("ListenerThread: " + ident + ":After Save Duplicate");
 																		}
 																else
 																		{
-																				// System.out.println("ListenerThread: " + ident + ":Before New Probe Update");
+																				// Logging.log("ListenerThread: " + ident + ":Before New Probe Update");
 																				synchronized(lock)
 																						{
 																								newProbeUpdate.check(current);
 																						}
-																				// System.out.println("ListenerThread: " + ident + ":After New Probe Update");
+																				// Logging.log("ListenerThread: " + ident + ":After New Probe Update");
 																				updater.Update(current);
 																				if (rawxml != null)
 																						current.setRawXml(rawxml);
 																				if (extraxml != null)
 																						current.setExtraXml(extraxml);
-																				// System.out.println("ListenerThread: " + ident + ":Before Hibernate Save");
+																				// Logging.log("ListenerThread: " + ident + ":Before Hibernate Save");
 																				try
 																						{
 																								if (gothistory)
@@ -429,12 +429,12 @@ public class ListenerThread extends Thread
 																										throw e;
 																						}
 
-																				// System.out.println("ListenerThread: " + ident + ":After Hibernate Save");
+																				// Logging.log("ListenerThread: " + ident + ":After Hibernate Save");
 																		}
-																// System.out.println("ListenerThread: " + ident + ":Before Transaction Commit");
+																// Logging.log("ListenerThread: " + ident + ":Before Transaction Commit");
 																tx.commit();
 																session.close();
-																// System.out.println("ListenerThread: " + ident + ":After Transaction Commit");
+																// Logging.log("ListenerThread: " + ident + ":After Transaction Commit");
 														}
 										}
 								catch (Exception exception)
@@ -442,14 +442,14 @@ public class ListenerThread extends Thread
 												goterror = true;
 												if (! HibernateWrapper.databaseUp())
 														{
-																System.out.println("ListenerThread: " + ident + ":Communications Error:Shutting Down");
+																Logging.log("ListenerThread: " + ident + ":Communications Error:Shutting Down");
 																return;
 														}
-												System.out.println("");
-												System.out.println("ListenerThread: " + ident + ":Error In Process: " + exception);
-												System.out.println("ListenerThread: " + ident + ":Current: " + current);
+												Logging.log("");
+												Logging.log("ListenerThread: " + ident + ":Error In Process: " + exception);
+												Logging.log("ListenerThread: " + ident + ":Current: " + current);
 										}
-								// System.out.println("ListenerThread: " + ident + ":Before File Delete: " + file);
+								// Logging.log("ListenerThread: " + ident + ":Before File Delete: " + file);
 								try
 										{
 												File temp = new File(file);
@@ -457,11 +457,11 @@ public class ListenerThread extends Thread
 										}
 								catch (Exception ignore)
 										{
-												// System.out.println("ListenerThread: " + ident + ":File Delete Failed: " + file + " Error: " + ignore);
+												// Logging.log("ListenerThread: " + ident + ":File Delete Failed: " + file + " Error: " + ignore);
 										}
-								// System.out.println("ListenerThread: " + ident + ":After File Delete: " + file);
+								// Logging.log("ListenerThread: " + ident + ":After File Delete: " + file);
 								itotal++;
-								System.out.println("ListenerThread: " + ident + ":Total Records: " + itotal);
+								Logging.log("ListenerThread: " + ident + ":Total Records: " + itotal);
 						}
 		}
 
@@ -557,8 +557,8 @@ public class ListenerThread extends Thread
 						} 
 				catch(Exception e) 
 						{
-								System.out.println("ListenerThread: " + ident + ":Parse error:  " + e.getMessage());
-								System.out.println("ListenerThread: " + ident + ":XML:  " + "\n" + xml);
+								Logging.log("ListenerThread: " + ident + ":Parse error:  " + e.getMessage());
+								Logging.log("ListenerThread: " + ident + ":XML:  " + "\n" + xml);
 						}
 				finally
 						{

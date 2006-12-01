@@ -467,12 +467,12 @@ public class XP
 								ObjectInputStream stream = new ObjectInputStream(gstream);
 								result = stream.readObject();
 								stream.close();
-								System.out.println("XP: Returning: " + result);
+								Logging.log("XP: Returning: " + result);
 								return result;
 						}
 				catch (Exception e)
 						{
-								System.out.println("XP: decompress Error: " + e);
+								Logging.log("XP: decompress Error: " + e);
 								return result;
 						}
 		}

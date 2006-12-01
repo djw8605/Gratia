@@ -128,9 +128,9 @@ public class NewProbeUpdate
 								//
 								if (HibernateWrapper.databaseUp())
 										{
-												System.out.println("NewProbeUpdate: Processing Error");
-												System.out.println("NewProbeUpdate: command: " + command);
-												System.out.println("NewProbeUpdate: e: " + e);
+												Logging.log("NewProbeUpdate: Processing Error");
+												Logging.log("NewProbeUpdate: command: " + command);
+												Logging.log("NewProbeUpdate: e: " + e);
 										}
 								connection = null;
 								throw new Exception("NewProbeUpdate: No Connection");

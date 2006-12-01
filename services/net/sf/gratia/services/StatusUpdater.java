@@ -39,7 +39,7 @@ public class StatusUpdater
 						}
 				catch (Exception e)
 						{
-								System.out.println("StatusUpdater: Error During Init: No Connection");
+								Logging.log("StatusUpdater: Error During Init: No Connection");
 						}
 		}
 

@@ -51,17 +51,17 @@ public class HibernateWrapper
 
 								hibernateFactory = hibernateConfiguration.buildSessionFactory();
 
-								System.out.println("");
-								System.out.println("HibernateWrapper: Hibernate Services Started");
-								System.out.println("");
+								Logging.log("");
+								Logging.log("HibernateWrapper: Hibernate Services Started");
+								Logging.log("");
 
 								databaseDown = false;
 						}
 				catch (Exception databaseError)
 						{
-								System.out.println("");
-								System.out.println("HibernateWrapper: Error Starting Hibernate");
-								System.out.println("");
+								Logging.log("");
+								Logging.log("HibernateWrapper: Error Starting Hibernate");
+								Logging.log("");
 								databaseError.printStackTrace();
 								databaseDown = true;
 						}
@@ -111,7 +111,7 @@ public class HibernateWrapper
 				catch (Exception e)
 						{
 								databaseDown = true;
-								System.out.println("HibernateWrapper: Database Check: Database Down");
+								Logging.log("HibernateWrapper: Database Check: Database Down");
 								e.printStackTrace();
 								return false;
 						}
@@ -129,7 +129,7 @@ public class HibernateWrapper
 				catch (Exception e)
 						{
 								databaseDown = true;
-								System.out.println("HibernateWrapper: Get Session: Database Down");
+								Logging.log("HibernateWrapper: Get Session: Database Down");
 								return null;
 						}
 		}

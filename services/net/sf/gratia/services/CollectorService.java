@@ -29,7 +29,6 @@ public class CollectorService implements ServletContextListener
 		ListenerThread threads[];
 		StatusListenerThread statusListenerThread;
 		ReplicationService replicationService;
-		ProbeMonitorService probeMonitorService;
 		RMIService rmiservice;
 		QSizeMonitor qsizeMonitor;;
 
@@ -46,39 +45,48 @@ public class CollectorService implements ServletContextListener
 				String catalinaHome = "";
 				int i = 0;
 
+				//
+				// initialize logging
+				//
+
+				p = net.sf.gratia.services.Configuration.getProperties();
+
+				Logging.initialize(p.getProperty("service.service.logfile"),
+													 p.getProperty("service.service.maxlog"),
+													 p.getProperty("service.service.console"),
+													 p.getProperty("service.service.level"));
+
 				Enumeration iter = System.getProperties().propertyNames();
-				System.out.println("");
+				Logging.log("");
 				while(iter.hasMoreElements())
 						{
 								String key = (String) iter.nextElement();
 								String value = (String) System.getProperty(key);
-								System.out.println("Key: " + key + " value: " + value);
+								Logging.log("Key: " + key + " value: " + value);
 						}
-				System.out.println("");
+				Logging.log("");
 
-				p = net.sf.gratia.services.Configuration.getProperties();
-
-				System.out.println("");
-				System.out.println("service properties:");
-				System.out.println("");
+				Logging.log("");
+				Logging.log("service properties:");
+				Logging.log("");
 				iter = p.propertyNames();
 				while(iter.hasMoreElements())
 						{
 								String key = (String) iter.nextElement();
 								String value = (String) p.getProperty(key);
-								System.out.println("Key: " + key + " value: " + value);
+								Logging.log("Key: " + key + " value: " + value);
 						}
-				System.out.println("");
-				System.out.println("service.security.level: " + p.getProperty("service.security.level"));
+				Logging.log("");
+				Logging.log("service.security.level: " + p.getProperty("service.security.level"));
 
 				configurationPath = net.sf.gratia.services.Configuration.getConfigurationPath();
 
 				if (p.getProperty("service.security.level").equals("1"))
 						try
 								{
-										System.out.println("");
-										System.out.println("Initializing HTTPS Support");
-										System.out.println("");
+										Logging.log("");
+										Logging.log("Initializing HTTPS Support");
+										Logging.log("");
 										//
 										// setup configuration path/https system parameters
 										//
@@ -95,9 +103,9 @@ public class CollectorService implements ServletContextListener
 												{
 														public boolean verify(String urlHostname, String certHostname) 
 														{
-																System.out.println("url host name: " + urlHostname);
-																System.out.println("cert host name: " + certHostname);
-																System.out.println("WARNING: Hostname is not matched for cert.");
+																Logging.log("url host name: " + urlHostname);
+																Logging.log("cert host name: " + certHostname);
+																Logging.log("WARNING: Hostname is not matched for cert.");
 																return true;
 														}
 												};
@@ -126,14 +134,6 @@ public class CollectorService implements ServletContextListener
 								TimeZone.setDefault(TimeZone.getTimeZone("GMT"));
 
 								//
-								// initialize logging
-								//
-
-								Logging.initialize(p.getProperty("service.service.logfile"),
-																	 p.getProperty("service.service.maxlog"),
-																	 p.getProperty("service.service.console"),
-																	 p.getProperty("service.service.level"));
-								//
 								// start rmi
 								//
 
@@ -141,9 +141,9 @@ public class CollectorService implements ServletContextListener
 								rmiservice.setDaemon(true);
 								rmiservice.start();
 								Thread.sleep(10);
-								System.out.println("");
-								System.out.println("CollectorService: RMI Service Started");
-								System.out.println("");
+								Logging.log("");
+								Logging.log("CollectorService: RMI Service Started");
+								Logging.log("");
 
 								//
 								// start database
@@ -169,12 +169,12 @@ public class CollectorService implements ServletContextListener
 										{
 												Execute.execute("mkdir " + configurationPath + "/data/thread" + i);
 												queues[i] = configurationPath + "/data/thread" + i;
-												System.out.println("Created Q: " + queues[i]);
+												Logging.log("Created Q: " + queues[i]);
 										}
 
-								System.out.println("");
-								System.out.println("CollectorService: JMS Server Started");
-								System.out.println("");
+								Logging.log("");
+								Logging.log("CollectorService: JMS Server Started");
+								Logging.log("");
 
 								//
 								// poke in rmi
@@ -182,7 +182,7 @@ public class CollectorService implements ServletContextListener
 
 								JMSProxyImpl proxy = new JMSProxyImpl(this);
 								Naming.rebind(rmibind + service,proxy);
-								System.out.println("JMSProxy Started");
+								Logging.log("JMSProxy Started");
 
 								//
 								// whack old history
@@ -217,7 +217,7 @@ public class CollectorService implements ServletContextListener
 
 								if (p.getProperty("monitor.q.size").equals("1"))
 										{
-												System.out.println("CollectorService: Starting QSizeMonitor");
+												Logging.log("CollectorService: Starting QSizeMonitor");
 												qsizeMonitor = new QSizeMonitor();
 												qsizeMonitor.start();
 										}
@@ -228,13 +228,6 @@ public class CollectorService implements ServletContextListener
 									statusListenerThread.start();
 								*/
 
-								//
-								// start probe monitor
-								//
-
-								probeMonitorService = new ProbeMonitorService();
-								probeMonitorService.setDaemon(true);
-								probeMonitorService.start();
 						}
 				catch (Exception e)
 						{
@@ -478,14 +471,14 @@ public class CollectorService implements ServletContextListener
 				for (i = 0; i < commands1.length; i++)
 						try
 								{
-										System.out.println("Executing: " + commands1[i]);
+										Logging.log("Executing: " + commands1[i]);
 										statement = connection.createStatement();
 										statement.executeUpdate(commands1[i]);
-										System.out.println("Command: OK: " + commands1[i]);
+										Logging.log("Command: OK: " + commands1[i]);
 								}
 						catch (Exception e)
 								{
-										System.out.println("Command: Error: " + commands1[i] + " : " + e);
+										Logging.log("Command: Error: " + commands1[i] + " : " + e);
 								}
 
 		}
@@ -542,7 +535,7 @@ public class CollectorService implements ServletContextListener
 						xml.append("</ReportingConfig>" + "\n");
 						xp.save(catalinaHome + "/webapps/gratia-report-configuration/ReportingConfig.xml",
 										xml.toString());
-						System.out.println("ReportConfig updated");
+						Logging.log("ReportConfig updated");
 				}
 		}
 

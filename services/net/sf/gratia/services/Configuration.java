@@ -44,7 +44,7 @@ public class Configuration
 						}
 				catch (Exception e)
 						{
-								System.out.println("Error Loading: " + getConfigurationPath() + "/" + "service-configuration.properties");
+								Logging.log("Error Loading: " + getConfigurationPath() + "/" + "service-configuration.properties");
 								e.printStackTrace();
 						}
 				return p;

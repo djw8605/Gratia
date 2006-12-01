@@ -62,7 +62,7 @@ public class ReplicationDataPump extends Thread
 						{
 								Class.forName(driver).newInstance();
 								connection = DriverManager.getConnection(url,user,password);
-								System.out.println("ReplicationDataPump: Database Connection Opened: " + replicationid);
+								Logging.log("ReplicationDataPump: Database Connection Opened: " + replicationid);
 						}
 				catch (Exception e)
 						{
@@ -73,13 +73,13 @@ public class ReplicationDataPump extends Thread
 
 		public void run()
 		{
-				System.out.println("ReplicationDataPump: Started: " + replicationid);
+				Logging.log("ReplicationDataPump: Started: " + replicationid);
 				if (! HibernateWrapper.databaseUp())
 						{
 								HibernateWrapper.start();
 								if (! HibernateWrapper.databaseUp())
 										{
-												System.out.println("ReplicationDataPump: Hibernate Down - Exiting: " + replicationid);
+												Logging.log("ReplicationDataPump: Hibernate Down - Exiting: " + replicationid);
 												return;
 										}
 						}
@@ -90,7 +90,7 @@ public class ReplicationDataPump extends Thread
 								if (exitflag)
 										{
 												cleanup();
-												System.out.println("ReplicationDataPump: Stopping/Exiting: " + replicationid);
+												Logging.log("ReplicationDataPump: Stopping/Exiting: " + replicationid);
 												return;
 										}
 						}
@@ -115,7 +115,7 @@ public class ReplicationDataPump extends Thread
 				try
 						{
 								connection.close();
-								System.out.println("ReplicationDataPump: Connection Closed: " + replicationid);
+								Logging.log("ReplicationDataPump: Connection Closed: " + replicationid);
 						}
 				catch (Exception ignore)
 						{
@@ -132,7 +132,7 @@ public class ReplicationDataPump extends Thread
 		public void exit()
 		{
 				exitflag = true;
-				System.out.println("ReplicationDataPump: Exit Requested: " + replicationid);
+				Logging.log("ReplicationDataPump: Exit Requested: " + replicationid);
 		}
 
 		public void loop()
@@ -142,7 +142,7 @@ public class ReplicationDataPump extends Thread
 
 				if (! HibernateWrapper.databaseUp())
 						{
-								System.out.println("ReplicationDataPump: " + replicationid + " :Hibernate Down - Exiting");
+								Logging.log("ReplicationDataPump: " + replicationid + " :Hibernate Down - Exiting");
 								exitflag = true;
 								return;
 						}
@@ -159,7 +159,7 @@ public class ReplicationDataPump extends Thread
 
 				try
 						{
-								System.out.println("ReplicationDataPump: " + replicationid + " Executing Command: " + command);
+								Logging.log("ReplicationDataPump: " + replicationid + " Executing Command: " + command);
 								statement = connection.prepareStatement(command);
 								resultSet = statement.executeQuery(command);
 
@@ -184,7 +184,7 @@ public class ReplicationDataPump extends Thread
 												exitflag = true;
 												return;
 										}
-								System.out.println("command: " + command);
+								Logging.log("command: " + command);
 								e.printStackTrace();
 								cleanup();
 								exitflag = true;
@@ -227,16 +227,16 @@ public class ReplicationDataPump extends Thread
 												exitflag = true;
 												return;
 										}
-								System.out.println("Error During Replication");
-								System.out.println("Command: " + command);
+								Logging.log("Error During Replication");
+								Logging.log("Command: " + command);
 								e.printStackTrace();
 								cleanup();
 								exitflag = true;
 								return;
 						}
 				
-				System.out.println("ReplicationDataPump: " + replicationid + " Executed Command: " + command);
-				System.out.println("ReplicationDataPump: " + replicationid + " Records: " + count);
+				Logging.log("ReplicationDataPump: " + replicationid + " Executed Command: " + command);
+				Logging.log("ReplicationDataPump: " + replicationid + " Records: " + count);
 
 				command = "select dbid from JobUsageRecord" + cr +
 						"where dbid > " + dbid;
@@ -267,27 +267,27 @@ public class ReplicationDataPump extends Thread
 												String xml = getXML(dbid);
 												if (xml.length() == 0)
 														{
-																System.out.println("Received Null XML: dbid: " + dbid);
+																Logging.log("Received Null XML: dbid: " + dbid);
 																continue;
 														}
 												if (p.getProperty("service.datapump.trace") != null)
 														if (p.getProperty("service.datapump.trace").equals("1"))
 																{
-																		System.out.println("");
-																		System.out.println("dbid: " + dbid);
-																		System.out.println("xml: " + xml);
-																		System.out.println("");
+																		Logging.log("");
+																		Logging.log("dbid: " + dbid);
+																		Logging.log("xml: " + xml);
+																		Logging.log("");
 																}
 												if (security.equals("0"))
 														post = new Post(openconnection + "/gratia-servlets/rmi","update",xml);
 												else
 														post = new Post(secureconnection + "/gratia-servlets/rmi","update",xml);
-												System.out.println("ReplicationDataPump: Sending: " + replicationid + ":" + dbid);
+												Logging.log("ReplicationDataPump: Sending: " + replicationid + ":" + dbid);
 												String response = post.send();
 												String[] results = split(response,":");
 												if (! results[0].equals("OK"))
 														{
-																System.out.println("Error During Post: " + response);
+																Logging.log("Error During Post: " + response);
 																cleanup();
 																exitflag = true;
 																return;
@@ -304,12 +304,12 @@ public class ReplicationDataPump extends Thread
 						{
 								if (! HibernateWrapper.databaseUp())
 										{
-												System.out.println("ReplicationDataPump: " + replicationid + " :Database Connection Error");
+												Logging.log("ReplicationDataPump: " + replicationid + " :Database Connection Error");
 												cleanup();
 												exitflag = true;
 												return;
 										}
-								System.out.println("ReplicationDataPump: Error During Replication");
+								Logging.log("ReplicationDataPump: Error During Replication");
 								e.printStackTrace();
 								cleanup();
 								exitflag = true;
@@ -337,7 +337,7 @@ public class ReplicationDataPump extends Thread
 
 				int i = 0;
 
-				System.out.println("ReplicationDataPump: getXML: dbid: " + dbid);
+				Logging.log("ReplicationDataPump: getXML: dbid: " + dbid);
 
 				session = HibernateWrapper.getSession();
 				String command = "from JobUsageRecord where dbid = " + dbid;
@@ -349,7 +349,7 @@ public class ReplicationDataPump extends Thread
 								if (duration != null)
 										record.setCpuSystemDuration(duration);
 								if (record.getCpuSystemDuration() == null)
-										System.out.println("dbid: " + dbid + " null cpu system duration");
+										Logging.log("dbid: " + dbid + " null cpu system duration");
 								buffer.append("replication" + "|");
 								buffer.append(record.asXML() + "|");
 								buffer.append(record.getRawXml() + "|");

@@ -41,7 +41,7 @@ public class QSizeMonitor extends Thread
 
 		public void run()
 		{
-				System.out.println("QSizeMonitor: Started");
+				Logging.log("QSizeMonitor: Started");
 				while (true)
 						{
 								try
@@ -60,7 +60,7 @@ public class QSizeMonitor extends Thread
 				boolean toobig = false;
 				int maxfound = 0;
 
-				System.out.println("QSizeMonitor: Checking");
+				Logging.log("QSizeMonitor: Checking");
 				for (int i = 0; i < maxthreads; i++)
 						{
 								String xpath = path + "/gratia/data/thread" + i;
@@ -72,8 +72,8 @@ public class QSizeMonitor extends Thread
 						}
 				if (toobig && running)
 						{
-								System.out.println("QSizeMonitor: Q Size Exceeded: " + maxfound);
-								System.out.println("QSizeMonitor: Shuttinng Down Input");
+								Logging.log("QSizeMonitor: Q Size Exceeded: " + maxfound);
+								Logging.log("QSizeMonitor: Shuttinng Down Input");
 								turnoff();
 								running = false;
 								return;
@@ -81,7 +81,7 @@ public class QSizeMonitor extends Thread
 				if ((! toobig) && (! running))
 						if (maxfound < (maxqsize / 2))
 								{
-										System.out.println("QSizeMonitor: Restarting Input: " + maxfound);
+										Logging.log("QSizeMonitor: Restarting Input: " + maxfound);
 										turnon();
 										running = true;
 								}

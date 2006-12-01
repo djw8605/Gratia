@@ -50,7 +50,7 @@ public class ReplicationService extends Thread
 
 		public void run()
 		{
-				System.out.println("ReplicationService Started");
+				Logging.log("ReplicationService Started");
 				while (true)
 						loop();
 		}
@@ -61,7 +61,7 @@ public class ReplicationService extends Thread
 						openConnection();
 				if (connection == null)
 						{
-								System.out.println("ReplicationService: No Connection: Sleeping");
+								Logging.log("ReplicationService: No Connection: Sleeping");
 								try
 										{
 												Thread.sleep(60 * 1000);
@@ -94,7 +94,7 @@ public class ReplicationService extends Thread
 																pump = (ReplicationDataPump) table.get(replicationid);
 																if ((! pump.isAlive()) && (running.equals("1")))
 																		{
-																				System.out.println("ReplicationService: Starting DataPump: " + replicationid);
+																				Logging.log("ReplicationService: Starting DataPump: " + replicationid);
 																				pump = new ReplicationDataPump(replicationid);
 																				table.put(replicationid,pump);
 																				pump.start();
@@ -105,7 +105,7 @@ public class ReplicationService extends Thread
 																if (running.equals("0"))
 																		continue;
 																pump = (ReplicationDataPump) table.get(replicationid);
-																System.out.println("ReplicationService: Starting DataPump: " + replicationid);
+																Logging.log("ReplicationService: Starting DataPump: " + replicationid);
 																pump = new ReplicationDataPump(replicationid);
 																table.put(replicationid,pump);
 																pump.start();
@@ -122,7 +122,7 @@ public class ReplicationService extends Thread
 												pump = (ReplicationDataPump) table.get(key);
 												if ((pump != null) && (pump.isAlive()))
 														{
-																System.out.println("ReplicationService: Stopping DataPump: " + key);
+																Logging.log("ReplicationService: Stopping DataPump: " + key);
 																pump.exit();
 														}
 										}
@@ -140,7 +140,7 @@ public class ReplicationService extends Thread
 						}
 				try
 						{
-								System.out.println("ReplicationService: Sleeping");
+								Logging.log("ReplicationService: Sleeping");
 								long wait = Integer.parseInt(p.getProperty("service.replication.wait"));
 								wait = wait * 60 * 1000;
 								Thread.sleep(wait);
