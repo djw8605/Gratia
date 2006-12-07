@@ -9,6 +9,8 @@ public class Logging
 {
 		static Logger logger;
 		static boolean initialized = false;
+		static boolean console = false;
+		static DateFormat format = new SimpleDateFormat("kk:mm:ss");
 
 		public static void initialize(String path,String maxSize,String useConsole,String level)
 		{
@@ -24,7 +26,10 @@ public class Logging
 								logger = Logger.getLogger("gratia");
 								logger.setUseParentHandlers(false);
 								if (useConsole.equals("1"))
-										logger.addHandler(new ConsoleHandler());
+										{
+												logger.addHandler(new ConsoleHandler());
+												console = true;
+										}
 								logger.addHandler(fh);
 								if (level.equals("ALL"))
 										logger.setLevel(Level.ALL);
@@ -61,6 +66,8 @@ public class Logging
 								return;
 						}
 				logger.finest(message);
+				if (console)
+						System.out.println(format.format(new Date()) + ": " + message);
 		}
 
 		public static void info(String message)
@@ -71,6 +78,8 @@ public class Logging
 								return;
 						}
 				logger.info(message);
+				if (console)
+						System.out.println(format.format(new Date()) + ": " + message);
 		}
 
 		public static void warning(String message)
@@ -81,6 +90,8 @@ public class Logging
 								return;
 						}
 				logger.warning(message);
+				if (console)
+						System.out.println(format.format(new Date()) + ": " + message);
 		}
 
 		public static void debug(String message)
@@ -91,6 +102,8 @@ public class Logging
 								return;
 						}
 				Logging.log(message);
+				if (console)
+						System.out.println(format.format(new Date()) + ": " + message);
 		}
 
 }
