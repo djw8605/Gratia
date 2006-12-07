@@ -15,4 +15,5 @@ del %catalina_home%\gratia\local.*
 del %catalina_home%\gratia\release.*
 copy %root%\configuration\local.service-configuration.properties %catalina_home%\gratia\service-configuration.properties
 copy %root%\wars\birt-v20.war %root%\target
+copy %root%\wars\birt-v21.war %root%\target
 copy %root%\target\* %catalina_home%\webapps
