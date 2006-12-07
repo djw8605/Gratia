@@ -153,7 +153,7 @@ public class ProbeTable extends HttpServlet
 
 				try
 						{
-								command = "select ProbeName,max(ServerDate) from JobUsageRecord group by ProbeName";
+								command = "select ProbeName,max(EndTime) from ProbeStatus group by ProbeName";
 								statement = connection.prepareStatement(command);
 								resultSet = statement.executeQuery(command);
 
@@ -212,11 +212,13 @@ public class ProbeTable extends HttpServlet
 
 												newrow = xp.replaceAll(newrow,"#probename#",probename);
 
-												newrow = xp.replaceAll(newrow,"#reporthh#",resultSet.getString(5));
-												table.put("reporthh:" + index,resultSet.getString(5));
-
-												newrow = xp.replaceAll(newrow,"#reportmm#",resultSet.getString(6));
-												table.put("reportmm:" + index,resultSet.getString(6));
+												/*
+													newrow = xp.replaceAll(newrow,"#reporthh#",resultSet.getString(5));
+													table.put("reporthh:" + index,resultSet.getString(5));
+													
+													newrow = xp.replaceAll(newrow,"#reportmm#",resultSet.getString(6));
+													table.put("reportmm:" + index,resultSet.getString(6));
+												*/
 
 												String cename = (String) cetablebyid.get(resultSet.getString(2));
 												newrow = celist(index,newrow,cename);
@@ -227,14 +229,31 @@ public class ProbeTable extends HttpServlet
 
 												newrow = activelist(index,newrow,yesorno);
 
+												boolean usered = true;
+
+												long now = (new java.util.Date()).getTime();
+												long delta = 3 * 24 * 60 * 60 * 1000;
+												long previous = 0;
 												if (timestamp != null)
 														{
-																SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+																previous = timestamp.getTime();
+																if ((previous + delta) > now)
+																		usered = false;
+																if (yesorno.equals("No"))
+																		usered = false;
+														}
+												if (timestamp != null)
+														{
+																SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd kk");
 																newrow = xp.replaceAll(newrow,"#lastcontact#",format.format(timestamp));
+																if (usered == false)
+																		newrow = xp.replaceAll(newrow,"red","black");
 														}
 												else
 														{
 																newrow = xp.replaceAll(newrow,"#lastcontact#","Never");
+																if (usered == false)
+																		newrow = xp.replaceAll(newrow,"red","black");
 														}
 
 												buffer.append(newrow);
@@ -334,13 +353,13 @@ public class ProbeTable extends HttpServlet
 				String newvalue = "";
 
 				/*
-				Enumeration x = request.getParameterNames();
-				while(x.hasMoreElements())
-						{
-								key = (String) x.nextElement();
-								String value = (String) request.getParameter(key);
-								System.out.println("key: " + key + " value: " + value);
-						}
+					Enumeration x = request.getParameterNames();
+					while(x.hasMoreElements())
+					{
+					key = (String) x.nextElement();
+					String value = (String) request.getParameter(key);
+					System.out.println("key: " + key + " value: " + value);
+					}
 				*/
 
 				for (index = 0; index < 1000; index++)
@@ -382,23 +401,25 @@ public class ProbeTable extends HttpServlet
 												continue;
 										}
 
-								key = "reporthh:" + index;
-								oldvalue = (String) table.get(key);
-								newvalue = (String) request.getParameter(key);
-								if (! oldvalue.equals(newvalue))
-										{
-												update(index);
-												continue;
-										}
+								/*
+									key = "reporthh:" + index;
+									oldvalue = (String) table.get(key);
+									newvalue = (String) request.getParameter(key);
+									if (! oldvalue.equals(newvalue))
+									{
+									update(index);
+									continue;
+									}
 
-								key = "reportmm:" + index;
-								oldvalue = (String) table.get(key);
-								newvalue = (String) request.getParameter(key);
-								if (! oldvalue.equals(newvalue))
-										{
-												update(index);
-												continue;
-										}
+									key = "reportmm:" + index;
+									oldvalue = (String) table.get(key);
+									newvalue = (String) request.getParameter(key);
+									if (! oldvalue.equals(newvalue))
+									{
+									update(index);
+									continue;
+									}
+								*/
 
 						}
 		}
@@ -420,8 +441,10 @@ public class ProbeTable extends HttpServlet
 						"update CEProbes set" + cr +
 						" facility_id = " + ceid + comma + cr +
 						" active = " + active + comma + cr +
-						" reporthh = " + reporthh + comma + cr +
-						" reportmm = " + reportmm + cr +
+						/*
+							" reporthh = " + reporthh + comma + cr +
+							" reportmm = " + reportmm + cr +
+						*/
 						" where probeid = " + dbid;
 
 				try
@@ -457,13 +480,21 @@ public class ProbeTable extends HttpServlet
 				else
 						active = "0";
 				String probename = (String) request.getParameter("probename:" + index);
-				String reporthh = (String) request.getParameter("reporthh:" + index);
-				String reportmm = (String) request.getParameter("reportmm:" + index);
 
+				/*
+					String reporthh = (String) request.getParameter("reporthh:" + index);
+					String reportmm = (String) request.getParameter("reportmm:" + index);
+				*/
+
+				/*
+					String command = 
+					"insert into CEProbes (facility_id,probename,active,reporthh,reportmm) values(" + 
+					ceid + comma + dq + probename + dq + comma + active + comma + reporthh + comma + reportmm + ")";
+				*/
 
 				String command = 
-						"insert into CEProbes (facility_id,probename,active,reporthh,reportmm) values(" + 
-						ceid + comma + dq + probename + dq + comma + active + comma + reporthh + comma + reportmm + ")";
+						"insert into CEProbes (facility_id,probename,active) values(" + 
+						ceid + comma + dq + probename + dq + comma + active  + ")";
 				try
 						{
 								statement = connection.createStatement();
