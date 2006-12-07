@@ -1,4 +1,4 @@
-drop table if exists ProbeSummary, UserProbeSummary, VOProbeSummary, ProbeStatus;
+drop table if exists ProbeSummary, UserProbeSummary, VOProbeSummary, ProbeStatus, HostDescriptionProbeSummary;
 
 CREATE TABLE `ProbeStatus` (
   `EndTime` DATETIME NOT NULL DEFAULT 0,
@@ -29,6 +29,16 @@ CREATE TABLE `UserProbeSummary` (
 CREATE TABLE `VOProbeSummary` (
   `EndTime` DATETIME NOT NULL DEFAULT 0,
   `VOName` VARCHAR(255) DEFAULT 'Unknown',
+  `ProbeName` VARCHAR(255) NOT NULL DEFAULT '',
+  `Njobs` INTEGER NOT NULL DEFAULT 0,
+  `WallDuration` DOUBLE NOT NULL DEFAULT 0,
+  `CpuUserDuration` DOUBLE NOT NULL DEFAULT 0,
+  `CpuSystemDuration` DOUBLE NOT NULL DEFAULT 0
+);
+
+CREATE TABLE `HostDescriptionProbeSummary` (
+  `EndTime` DATETIME NOT NULL DEFAULT 0,
+  `HostDescription` VARCHAR(255) DEFAULT 'Unknown',
   `ProbeName` VARCHAR(255) NOT NULL DEFAULT '',
   `Njobs` INTEGER NOT NULL DEFAULT 0,
   `WallDuration` DOUBLE NOT NULL DEFAULT 0,
@@ -117,6 +127,29 @@ alter table VOProbeSummary
 alter table VOProbeSummary
   add index index03(ProbeName);
 
+insert into HostDescriptionProbeSummary
+  (select
+    date(EndTime) as EndTime,
+    HostDescription,
+    JobUsageRecord.ProbeName,
+    sum(Njobs) as Njobs,
+    sum(WallDuration) as WallDuration,
+    sum(CpuUserDuration) as CpuUserDuration,
+    sum(CpuSystemDuration) as CpuSystemDuration
+    from JobUsageRecord
+		where CpuUserDuration is not null
+    group by HostDescription,ProbeName,date(EndTime)
+);
+
+alter table HostDescriptionProbeSummary
+  add index index01(EndTime);
+
+alter table HostDescriptionProbeSummary
+  add index index02(HostDescription);
+
+alter table HostDescriptionProbeSummary
+  add index index03(ProbeName);
+
 drop trigger trigger01;
 
 delimiter |
@@ -147,7 +180,7 @@ glr:begin
 	end if;
 
 	--
-	-- ProbeSummary
+	-- ProbeStatus
 	--
 
 	select count(*) into mycount from ProbeStatus
@@ -158,7 +191,7 @@ glr:begin
 			str_to_date(date_format(new.ServerDate,'%Y-%c-%e %H:00:00'),'%Y-%c-%e %H:00:00'),
 			new.ProbeName,1);
 	elseif mycount > 0 then
-		update ProbeSummary
+		update ProbeStatus
 			set
 				ProbeStatus.Njobs = ProbeStatus.Njobs + 1
 				where ProbeStatus.ProbeName = new.ProbeName
@@ -166,7 +199,7 @@ glr:begin
 	end if;
 
 	--
-	-- ProbeStatus
+	-- ProbeSummary
 	--
 
 	select count(*) into mycount from ProbeSummary
@@ -230,6 +263,29 @@ glr:begin
 				VOProbeSummary.VOName = new.VOName
 				and VOProbeSummary.ProbeName = new.ProbeName
 				and VOProbeSummary.EndTime = date(new.EndTime);
+	end if;
+
+	--
+	-- HostDescriptionProbeSummary
+	--
+
+	select count(*) into mycount from HostDescriptionProbeSummary
+		where HostDescriptionProbeSummary.HostDescription = new.HostDescription
+		and HostDescriptionProbeSummary.ProbeName = new.ProbeName
+		and HostDescriptionProbeSummary.EndTime = date(new.EndTime);
+	if mycount = 0 then
+		insert into HostDescriptionProbeSummary values(date(new.EndTime),new.HostDescription,new.ProbeName,new.Njobs,new.WallDuration,new.CpuUserDuration,new.CpuSystemDuration);
+	elseif mycount > 0 then
+		update HostDescriptionProbeSummary
+			set
+				HostDescriptionProbeSummary.Njobs = HostDescriptionProbeSummary.Njobs + new.Njobs,
+				HostDescriptionProbeSummary.WallDuration = HostDescriptionProbeSummary.WallDuration + new.WallDuration,
+				HostDescriptionProbeSummary.CpuUserDuration = HostDescriptionProbeSummary.CpuUserDuration + new.CpuUserDuration,
+				HostDescriptionProbeSummary.CpuSystemDuration = HostDescriptionProbeSummary.CpuSystemDuration + new.CpuSystemDuration
+				where 
+				HostDescriptionProbeSummary.HostDescription = new.HostDescription
+				and HostDescriptionProbeSummary.ProbeName = new.ProbeName
+				and HostDescriptionProbeSummary.EndTime = date(new.EndTime);
 	end if;
 
 end;
