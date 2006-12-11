@@ -5,7 +5,8 @@
 		xsi:schemaLocation="http://www.gridforum.org/2003/ur-wg file:///u:/OSG/urwg-schema.11.xsd">
 <RecordIdentity urwg:recordId="stitch.oscer.ou.edu:26893.0" urwg:createTime="2006-10-03T21:07:19Z" />
 <UserIdentity>
-	<VOName >DOSAR</VOName>
+	<VOName >dosar</VOName>
+	<ReportableVOName >DOSAR</ReportableVOName>
 </UserIdentity>
 	<WallDuration >P23DT21H17M59.99S</WallDuration>
 	<StartTime >2006-10-02T05:00:00Z</StartTime>

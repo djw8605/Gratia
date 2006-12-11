@@ -302,6 +302,11 @@ public class UsageRecordLoader
                                     if (id == null) id = new UserIdentity();
                                     id.setVOName(sub.getText());
                               }
+                       else if (sub.getName().equalsIgnoreCase("ReportableVOName"))
+                              {
+                                    if (id == null) id = new UserIdentity();
+                                    id.setReportableVOName(sub.getText());
+                              }
                   }
         if (id != null)
             job.setUserIdentity(id);
@@ -1052,6 +1057,12 @@ public class UsageRecordLoader
                                           UserIdentity id = job.getUserIdentity();
                                           if (id == null) id = new UserIdentity();
                                           id.setVOName(element.getText().trim());
+                                          job.setUserIdentity(id);
+                                          return;
+                                    } else if (a.getValue().equalsIgnoreCase("UserReportableVOName")) {
+                                          UserIdentity id = job.getUserIdentity();
+                                          if (id == null) id = new UserIdentity();
+                                          id.setReportableVOName(element.getText().trim());
                                           job.setUserIdentity(id);
                                           return;
                                     }

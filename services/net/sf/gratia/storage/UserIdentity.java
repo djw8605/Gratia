@@ -18,6 +18,7 @@ public class UserIdentity {
 	private String GlobalUsername;
 	private KeyInfoType KeyInfo;
 	private String VOName;
+	private String ReportableVOName;
 	private String CommonName;
 
     public UserIdentity() {
@@ -61,6 +62,16 @@ public class UserIdentity {
 		return VOName;
 	}
 	
+    public void setReportableVOName(String name)
+	{
+		this.ReportableVOName = name;
+	}
+
+	public String getReportableVOName()
+	{
+		return ReportableVOName;
+	}
+	
 	public void setCommonName(String name)
 	{
 		this.CommonName = name;
@@ -80,6 +91,7 @@ public class UserIdentity {
 		if (LocalUserId != null) output = output + "\t<LocalUserId>" + LocalUserId + "</LocalUserId>\n";
 		if (KeyInfo != null) output = output + "\t" + KeyInfo.asXML();
 		if (VOName != null) output = output + "\t<VOName>" + VOName + "</VOName>\n";
+		if (ReportableVOName != null) output = output + "\t<ReportableVOName>" + ReportableVOName + "</ReportableVOName>\n";
 		if (CommonName != null) output = output + "\t<CommonName>" + CommonName + "</CommonName>\n";
         output = output + "</UserIdentity>\n";
         return output;
