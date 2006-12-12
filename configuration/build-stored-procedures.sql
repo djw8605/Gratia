@@ -190,7 +190,7 @@ begin
 	select generateWhereClause(userName,userRole,@mywhereclause) into @mywhereclause;
 	call parse(userName,@name,@key,@vo);
 
-	set @sql :=
+	set @sql =
 		concat(
 			'select ProbeName,EndTime as endtime,sum(Njobs) as Njobs',
 			' from JobUsageRecord',

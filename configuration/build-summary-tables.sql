@@ -1,11 +1,13 @@
-drop table if exists ProbeSummary, UserProbeSummary, VOProbeSummary, ProbeStatus, HostDescriptionProbeSummary;
+delimiter ||
 
+drop table if exists ProbeSummary, UserProbeSummary, VOProbeSummary, ProbeStatus, HostDescriptionProbeSummary;
+||
 CREATE TABLE `ProbeStatus` (
   `EndTime` DATETIME NOT NULL DEFAULT 0,
   `ProbeName` VARCHAR(255) NOT NULL DEFAULT '',
   `Njobs` INTEGER NOT NULL DEFAULT 0
 );
-
+||
 CREATE TABLE `ProbeSummary` (
   `EndTime` DATETIME NOT NULL DEFAULT 0,
   `ProbeName` VARCHAR(255) NOT NULL DEFAULT '',
@@ -15,7 +17,7 @@ CREATE TABLE `ProbeSummary` (
   `CpuUserDuration` DOUBLE NOT NULL DEFAULT 0,
   `CpuSystemDuration` DOUBLE NOT NULL DEFAULT 0
 );
-
+||
 CREATE TABLE `UserProbeSummary` (
   `EndTime` DATETIME NOT NULL DEFAULT 0,
   `CommonName` VARCHAR(255) DEFAULT 'Unknown',
@@ -25,7 +27,7 @@ CREATE TABLE `UserProbeSummary` (
   `CpuUserDuration` DOUBLE NOT NULL DEFAULT 0,
   `CpuSystemDuration` DOUBLE NOT NULL DEFAULT 0
 );
-
+||
 CREATE TABLE `VOProbeSummary` (
   `EndTime` DATETIME NOT NULL DEFAULT 0,
   `VOName` VARCHAR(255) DEFAULT 'Unknown',
@@ -35,7 +37,7 @@ CREATE TABLE `VOProbeSummary` (
   `CpuUserDuration` DOUBLE NOT NULL DEFAULT 0,
   `CpuSystemDuration` DOUBLE NOT NULL DEFAULT 0
 );
-
+||
 CREATE TABLE `HostDescriptionProbeSummary` (
   `EndTime` DATETIME NOT NULL DEFAULT 0,
   `HostDescription` VARCHAR(255) DEFAULT 'Unknown',
@@ -45,7 +47,7 @@ CREATE TABLE `HostDescriptionProbeSummary` (
   `CpuUserDuration` DOUBLE NOT NULL DEFAULT 0,
   `CpuSystemDuration` DOUBLE NOT NULL DEFAULT 0
 );
-
+||
 insert into ProbeStatus
   (select
     str_to_date(date_format(ServerDate,'%Y-%c-%e %H:00:00'),'%Y-%c-%e %H:00:00') as EndTime,
@@ -54,13 +56,13 @@ insert into ProbeStatus
     from JobUsageRecord
     group by ProbeName,str_to_date(date_format(ServerDate,'%Y-%c-%e %H:00:00'),'%Y-%c-%e %H:00:00')
 );
-
+||
 alter table ProbeStatus
   add index index01(EndTime);
-
+||
 alter table ProbeStatus
   add index index02(ProbeName);
-
+||
 insert into ProbeSummary
   (select
     date(EndTime) as EndTime,
@@ -77,10 +79,10 @@ insert into ProbeSummary
 
 alter table ProbeSummary
   add index index01(EndTime);
-
+||
 alter table ProbeSummary
   add index index02(ProbeName);
-
+||
 insert into UserProbeSummary
   (select
     date(EndTime) as EndTime,
@@ -94,16 +96,16 @@ insert into UserProbeSummary
 		where CpuUserDuration is not null
     group by CommonName,ProbeName,date(EndTime)
 );
-
+||
 alter table UserProbeSummary
   add index index01(EndTime);
-
+||
 alter table UserProbeSummary
   add index index02(CommonName);
-
+||
 alter table UserProbeSummary
   add index index03(ProbeName);
-
+||
 insert into VOProbeSummary
   (select
     date(EndTime) as EndTime,
@@ -117,16 +119,16 @@ insert into VOProbeSummary
 		where CpuUserDuration is not null
     group by VOName,ProbeName,date(EndTime)
 );
-
+||
 alter table VOProbeSummary
   add index index01(EndTime);
-
+||
 alter table VOProbeSummary
   add index index02(VOName);
-
+||
 alter table VOProbeSummary
   add index index03(ProbeName);
-
+||
 insert into HostDescriptionProbeSummary
   (select
     date(EndTime) as EndTime,
@@ -140,19 +142,18 @@ insert into HostDescriptionProbeSummary
 		where CpuUserDuration is not null
     group by HostDescription,ProbeName,date(EndTime)
 );
-
+||
 alter table HostDescriptionProbeSummary
   add index index01(EndTime);
-
+||
 alter table HostDescriptionProbeSummary
   add index index02(HostDescription);
-
+||
 alter table HostDescriptionProbeSummary
   add index index03(ProbeName);
-
+||
 drop trigger trigger01;
-
-delimiter |
+||
 create trigger trigger01 after insert on JobUsageRecord
 for each row
 glr:begin
@@ -289,7 +290,10 @@ glr:begin
 	end if;
 
 end;
-|
+||
+show triggers;
+||
+
 
 
 
