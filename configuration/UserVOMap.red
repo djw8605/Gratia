@@ -25,6 +25,7 @@ sdss sdss
 star star
 #---- accounts for vo: uscms ----#
 uscms01 uscms
+cmsprod uscms
 #---- accounts for vo: cms ----#
 #---- accounts for vo: LIGO ----#
 ligo LIGO
