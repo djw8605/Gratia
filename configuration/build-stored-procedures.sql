@@ -211,12 +211,15 @@ begin
 				group by EndTime,ProbeName
 				order by EndTime;
 		else
-			select ProbeName,date_format(EndTime,format) as endtime,sum(Njobs) as Njobs
-				from JobUsageRecord
-				where
-					EndTime >= fromdate and EndTime <= todate
-				group by date_format(EndTime,format),ProbeName
-				order by date_format(EndTime,format);
+			-- select ProbeName,date_format(EndTime,@myformat) as endtime,sum(Njobs) as Njobs
+			-- 	from JobUsageRecord
+			-- 	where
+			--		EndTime >= date(@myfromdate) and EndTime <= date(@mytodate)
+			-- 	group by date_format(EndTime,@myformat),ProbeName
+			--	order by date_format(EndTime,@myformat);
+			prepare statement from @sql;
+			execute statement using @myfromdate,@mytodate,@myformat,@myformat;
+			-- deallocate prepare statement;
 		end if;
 	else
 		prepare statement from @sql;
@@ -226,6 +229,8 @@ begin
 end
 ||
 -- call DailyJobsByProbe('GratiaUser','GratiaUser','2006-10-01 00:00:00','2006-10-10 00:00:00','%m/%d/%Y %T')
+||
+drop procedure ProbeStatus
 ||
 create procedure ProbeStatus (userName varchar(64),userRole varchar(64),fromdate varchar(64),todate varchar(64),format varchar(64))
 begin
