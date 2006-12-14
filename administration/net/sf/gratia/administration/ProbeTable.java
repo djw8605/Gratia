@@ -440,11 +440,7 @@ public class ProbeTable extends HttpServlet
 				String command = 
 						"update CEProbes set" + cr +
 						" facility_id = " + ceid + comma + cr +
-						" active = " + active + comma + cr +
-						/*
-							" reporthh = " + reporthh + comma + cr +
-							" reportmm = " + reportmm + cr +
-						*/
+						" active = " + active + cr +
 						" where probeid = " + dbid;
 
 				try
