@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Written by Eclipse BIRT 2.0 -->
+<report xmlns="http://www.eclipse.org/birt/2005/design" version="3.2.6" id="1">
+    <property name="createdBy">Eclipse BIRT Designer Version 2.0.0 Build &lt;20060123-1141></property>
+    <property name="units">in</property>
+    <page-setup>
+        <simple-master-page name="Simple MasterPage" id="2">
+            <property name="topMargin">1in</property>
+            <property name="rightMargin">1.25in</property>
+        </simple-master-page>
+    </page-setup>
+    <body>
+        <grid id="4">
+            <property name="width">100%</property>
+            <column id="5"/>
+            <row id="12">
+                <property name="fontWeight">bold</property>
+                <property name="textUnderline">underline</property>
+                <cell id="13">
+                    <property name="fontWeight">bold</property>
+                    <property name="textUnderline">underline</property>
+                </cell>
+            </row>
+            <row id="8">
+                <list-property name="highlightRules">
+                    <structure>
+                        <property name="operator">eq</property>
+                        <property name="backgroundColor">#E5E5E5</property>
+                        <expression name="testExpr">row[0] %2</expression>
+                        <expression name="value1">0</expression>
+                    </structure>
+                </list-property>
+                <cell id="9">
+                    <property name="fontWeight">bold</property>
+                    <property name="textUnderline">underline</property>
+                </cell>
+            </row>
+        </grid>
+    </body>
+</report>
