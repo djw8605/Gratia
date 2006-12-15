@@ -205,6 +205,11 @@ public class JobRecUpdaterManager implements JobUsageRecordUpdater {
          } // End check for UserName not populated from KeyInfoContent
          
          // Set the value for the current record's VO and username
+         if (userName.equals("Unknown") && current.getUserIdentity().getGlobalUsername() != null) {
+            if (0>current.getUserIdentity().getGlobalUsername().indexOf("@")) {
+               userName = current.getUserIdentity().getGlobalUsername();
+            }
+         }
          if (userName.equals("Unknown") && !VO.equals("Unknown")) {
             userName = "Generic " + VO + " user";
          }
