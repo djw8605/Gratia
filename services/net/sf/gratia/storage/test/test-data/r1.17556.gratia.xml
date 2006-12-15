@@ -5,6 +5,7 @@
 		xsi:schemaLocation="http://www.gridforum.org/2003/ur-wg file:///u:/OSG/urwg-schema.11.xsd">
 <RecordIdentity urwg:recordId="ouhep4.nhn.ou.edu:17556.1" urwg:createTime="2006-10-03T21:21:18Z" />
 <UserIdentity>
+        <GlobalUserName>Gridex Guru</GlobalUserName>
 	<VOName >GridEx</VOName>
 </UserIdentity>
 	<WallDuration >PT8H41M59.99S</WallDuration>

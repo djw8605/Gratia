@@ -7,6 +7,7 @@
 <UserIdentity>
 	<VOName >dosar</VOName>
 	<ReportableVOName >DOSAR</ReportableVOName>
+	<OtherReportableVOName >DOSAR-extra</OtherReportableVOName>
 </UserIdentity>
 	<WallDuration >P23DT21H17M59.99S</WallDuration>
 	<StartTime >2006-10-02T05:00:00Z</StartTime>
