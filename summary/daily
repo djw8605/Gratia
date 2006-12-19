@@ -3,11 +3,14 @@
 import sys
 import PSACCTReport
 
-from PSACCTReport import FromCondor,UseArgs,gOutput,gBegin
+from PSACCTReport import FromCondor,UseArgs,gOutput,gBegin,CheckDB
 import sys
 
 def main(argv=None):
     UseArgs(argv)
+
+    if not CheckDB() :
+        return 1
 
     argOutput = PSACCTReport.gOutput
     PSACCTReport.DailySiteReport(PSACCTReport.gBegin,output=argOutput);

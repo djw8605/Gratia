@@ -16,14 +16,17 @@ while test "x$1" != "x"; do
 	MAILTO=$2
 	shift
 	shift
+   else 
+        date_arg=$1
+	shift
    fi
 done
 
-when=$(date -d "${1:-yesterday}" +"%d %B %Y")
-whenarg=$(date -d "${1:-yesterday}" +"%Y/%m/%d")
+when=$(date -d "${date_arg:-yesterday}" +"%d %B %Y")
+whenarg=$(date -d "${date_arg:-yesterday}" +"%Y/%m/%d")
 
-MAIL_MSG="report for $when"
-SUM_MAIL_MSG="Comparing daily report with Gratia for $when"
+MAIL_MSG="Report from the job level Gratia db for $when"
+SUM_MAIL_MSG="Report from the daily summary Gratia db for $when"
 
 # Transfer the file now
 WORK_DIR=workdir.${RANDOM}

@@ -10,6 +10,7 @@ import time
 import datetime
 import getopt
 import math
+import re
 
 gMySQL = "mysql"
 gProbename = "cmslcgce.fnal.gov"
@@ -188,12 +189,30 @@ def LogToFile(message):
     if file != None:
         # Close the log file
         file.close()
-        
 
+gMySQLConnectString = " -h gratia-db01.fnal.gov -u reader --port=3320 --password=reader "
+
+def CheckDB():
+        global gMySQL,gMySQLConnectString
+        (status, output) = commands.getstatusoutput( gMySQL + gMySQLConnectString + " gratia -e status "  )
+        if status == 0:
+            msg =  "Status: \n"+output
+            if output.find("ERROR") >= 0 :
+                status = 1
+                msg = "Error in running mysql:\n" + output
+        else:
+            msg = "Error in running mysql:\n" + output
+            
+        if status != 0:
+            LogToFile("Gratia: "+ msg)
+            print msg
+
+        return status == 0
+        
 def RunQuery(select):
         global gMySQL
         LogToFile(select)
-        return commands.getoutput("echo '" + select + "' | " + gMySQL + " -h cd-psg4 -u reader --port=3320 --password=reader gratia " )
+        return commands.getoutput("echo '" + select + "' | " + gMySQL + gMySQLConnectString + " gratia " )
 
 def RunQueryAndSplit(select):
         res = RunQuery(select)
@@ -244,7 +263,7 @@ def DailySiteData(begin,end):
                 + " where CEProbes.facility_id = CETable.facility_id and J.ProbeName = CEProbes.probename" \
                 + " and \""+ DateToString(begin) +"\"<EndTime and EndTime<\"" + DateToString(end) + "\"" \
                 + " and J.ProbeName not like \"psacct:%\" " \
-                + " group by J.ProbeName "
+                + " group by CEProbes.facility_id "
         return RunQueryAndSplit(select)
 
 def DailyVOData(begin,end):
@@ -399,9 +418,9 @@ class DailySiteReportConf:
 
         def __init__(self, header = False):
            self.formats["csv"] = ",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""
-           self.formats["text"] = "| %-18s | %9s | %13s | %10s | %14s"
+           self.formats["text"] = "| %-22s | %9s | %13s | %10s | %14s"
            self.lines["csv"] = ""
-           self.lines["text"] = "-----------------------------------------------------------------------------------"
+           self.lines["text"] = "---------------------------------------------------------------------------------------"
 
            if (not header) :  self.title = ""
 
@@ -440,9 +459,9 @@ class DailySiteVOReportConf:
         
         def __init__(self, header = False):
            self.formats["csv"] = ",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""
-           self.formats["text"] = "| %-18s | %-14s | %9s | %13s | %10s | %14s"
+           self.formats["text"] = "| %-22s | %-14s | %9s | %13s | %10s | %14s"
            self.lines["csv"] = ""
-           self.lines["text"] = "----------------------------------------------------------------------------------------------------"
+           self.lines["text"] = "--------------------------------------------------------------------------------------------------------"
 
            if (not header) :  self.title = ""
 
@@ -462,7 +481,7 @@ class DailySiteVOReportFromDailyConf:
 
         def __init__(self, fromGratia, header = False):
            self.formats["csv"] = ",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""
-           self.formats["text"] = " | %-18s | %-9s | %9s | %13s | %10s | %14s"
+           self.formats["text"] = " | %-22s | %-9s | %9s | %13s | %10s | %14s"
            self.lines["csv"] = ""
            self.lines["text"] = "------------------------------------------------------------------------------------------------"
 
