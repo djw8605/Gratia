@@ -5,6 +5,7 @@
 #
 # library to create simple report using the Gratia psacct database
 #
+#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.12 2006-12-19 20:53:11 pcanal Exp $
 
 import time
 import datetime
@@ -299,7 +300,7 @@ def DailySiteVODataFromDaily(begin,end,select,count):
         return RunQueryAndSplit(select)
 
 def PrintHeader():
-        print "        VO | Wall Hours | Norm Wall | CPU Hours |  Norm CPU | Wall Load| Norm Wall| CPU Load | Norm CPU"
+        print " VO        | Wall Hours | Norm Wall | CPU Hours |  Norm CPU | Wall Load| Norm Wall| CPU Load | Norm CPU |"
 
 class Record:
         voname = ""
@@ -330,7 +331,7 @@ class Record:
                 self.normwallfactor = 100 * self.normwall / fullnormtime
         
         def Print(self):
-                format = "%10s  %11.0f %11.0f %11.0f %11.0f    %6.1f%%    %6.1f%%    %6.1f%%    %6.1f%%  %f" 
+                format = "%-10s |%11.0f |%10.0f |%10.0f |%10.0f |  %6.1f%% |  %6.1f%% |  %6.1f%% |  %6.1f%% | %f" 
                 factor = 0.0
                 if self.cputime != 0 :
                         factor = self.walltime / self.cputime
@@ -382,7 +383,7 @@ def FromCondor():
         # gProbename = "cmsosgce.fnal.gov"
         
         #(ncpu,benchtotal) = NumberOfCpus()
-        ncpu = 1100
+        ncpu = 2182
         benchtotal = ncpu
         days = (gEnd - gBegin).days
         
