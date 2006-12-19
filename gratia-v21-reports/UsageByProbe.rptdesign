@@ -26,28 +26,12 @@
     </list-property>
     <list-property name="configVars">
         <structure>
-            <property name="name">DatabaseURL</property>
-            <property name="value">jdbc:mysql://cd-psg3.fnal.gov:3320/gratia</property>
-        </structure>
-        <structure>
             <property name="name">DatabaseUser</property>
             <property name="value">gratia</property>
         </structure>
         <structure>
             <property name="name">DatabasePassword</property>
             <property name="value">proto</property>
-        </structure>
-        <structure>
-            <property name="name">Start Date</property>
-            <property name="value">2006-08-07</property>
-        </structure>
-        <structure>
-            <property name="name">End Date</property>
-            <property name="value">2006-08-19</property>
-        </structure>
-        <structure>
-            <property name="name">CETable</property>
-            <property name="value">Cmsosgce</property>
         </structure>
     </list-property>
     <parameters>
@@ -59,7 +43,7 @@
                     <property name="dataType">string</property>
                     <property name="allowBlank">false</property>
                     <property name="controlType">text-box</property>
-                    <property name="defaultValue">jdbc:mysql://cd-psg3.fnal.gov:3320/gratia</property>
+                    <property name="defaultValue">jdbc:mysql://cd-psg6.fnal.gov:3320/gratia</property>
                     <structure name="format">
                         <property name="category">Unformatted</property>
                         <property name="pattern">Unformatted</property>
@@ -98,7 +82,7 @@
             <text-property name="promptText">Start Date</text-property>
             <property name="allowBlank">false</property>
             <property name="controlType">text-box</property>
-            <property name="defaultValue">3/1/2006</property>
+            <property name="defaultValue">2006-12-01 00:00:00 GMT</property>
             <structure name="format">
                 <property name="category">Unformatted</property>
                 <property name="pattern">Unformatted</property>
@@ -111,7 +95,7 @@
             <text-property name="promptText">End Date</text-property>
             <property name="allowBlank">false</property>
             <property name="controlType">text-box</property>
-            <property name="defaultValue">12/31/2999</property>
+            <property name="defaultValue">2006-12-15 00:00:00 GMT</property>
             <structure name="format">
                 <property name="category">Unformatted</property>
                 <property name="pattern">Unformatted</property>
@@ -157,13 +141,27 @@
     <data-sources>
         <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="fermigrid1" id="4">
             <property name="odaDriverClass">com.mysql.jdbc.Driver</property>
-            <property name="odaURL">jdbc:mysql://cd-psg3.fnal.gov:3320/gratia</property>
+            <property name="odaURL">jdbc:mysql://cd-psg6.fnal.gov:3320/gratia</property>
             <property name="odaUser">gratia</property>
             <encrypted-property name="odaPassword">cHJvdG8=</encrypted-property>
         </oda-data-source>
     </data-sources>
     <data-sets>
         <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="UsageDrill" id="85">
+            <structure name="cachedMetaData">
+                <list-property name="resultSet">
+                    <structure>
+                        <property name="position">1</property>
+                        <property name="name">probename</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">2</property>
+                        <property name="name">sum(JobUsageRecord.WallDuration)</property>
+                        <property name="dataType">float</property>
+                    </structure>
+                </list-property>
+            </structure>
             <property name="dataSource">fermigrid1</property>
             <list-property name="parameters">
                 <structure>
@@ -206,6 +204,20 @@
                     <property name="isOutput">false</property>
                 </structure>
             </list-property>
+            <list-property name="resultSet">
+                <structure>
+                    <property name="position">1</property>
+                    <property name="name">probename</property>
+                    <property name="nativeName">probename</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">2</property>
+                    <property name="name">sum(JobUsageRecord.WallDuration)</property>
+                    <property name="nativeName">sum(JobUsageRecord.WallDuration)</property>
+                    <property name="dataType">float</property>
+                </structure>
+            </list-property>
             <property name="queryText">
 select CEProbes.probename, sum(JobUsageRecord.WallDuration)
 from CETable, CEProbes, JobUsageRecord
@@ -217,7 +229,24 @@ group by CEProbes.probename
 order by CEProbes.probename</property>
         </oda-data-set>
         <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="AllFacilities" id="89">
+            <structure name="cachedMetaData">
+                <list-property name="resultSet">
+                    <structure>
+                        <property name="position">1</property>
+                        <property name="name">name</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                </list-property>
+            </structure>
             <property name="dataSource">fermigrid1</property>
+            <list-property name="resultSet">
+                <structure>
+                    <property name="position">1</property>
+                    <property name="name">name</property>
+                    <property name="nativeName">name</property>
+                    <property name="dataType">string</property>
+                </structure>
+            </list-property>
             <property name="queryText">select 'All' as name
 from CETable
 union

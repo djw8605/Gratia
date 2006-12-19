@@ -37,24 +37,12 @@
 //printWriter.close();]]></method>
     <list-property name="configVars">
         <structure>
-            <property name="name">DatabaseURL</property>
-            <property name="value">jdbc:mysql://cd-psg3.fnal.gov:3320/gratia</property>
-        </structure>
-        <structure>
             <property name="name">DatabaseUser</property>
             <property name="value">gratia</property>
         </structure>
         <structure>
             <property name="name">DatabasePassword</property>
             <property name="value">proto</property>
-        </structure>
-        <structure>
-            <property name="name">Start Date</property>
-            <property name="value">2006-04-20</property>
-        </structure>
-        <structure>
-            <property name="name">End Date</property>
-            <property name="value">2006-04-22</property>
         </structure>
         <structure>
             <property name="name">GroupByFormat</property>
@@ -74,7 +62,7 @@
                     <property name="dataType">string</property>
                     <property name="allowBlank">false</property>
                     <property name="controlType">text-box</property>
-                    <property name="defaultValue">jdbc:mysql://cd-psg3.fnal.gov:3320/gratia</property>
+                    <property name="defaultValue">jdbc:mysql://cd-psg6.fnal.gov:3320/gratia</property>
                     <structure name="format">
                         <property name="category">Unformatted</property>
                         <property name="pattern">Unformatted</property>
@@ -113,7 +101,7 @@
             <text-property name="promptText">Start Date</text-property>
             <property name="allowBlank">false</property>
             <property name="controlType">text-box</property>
-            <property name="defaultValue">3/1/2006</property>
+            <property name="defaultValue">2006-12-01 00:00:00 GMT</property>
             <structure name="format">
                 <property name="category">Unformatted</property>
                 <property name="pattern">Unformatted</property>
@@ -126,7 +114,7 @@
             <text-property name="promptText">End Date</text-property>
             <property name="allowBlank">false</property>
             <property name="controlType">text-box</property>
-            <property name="defaultValue">12/31/2999</property>
+            <property name="defaultValue">2006-12-15 00:00:00 GMT</property>
             <structure name="format">
                 <property name="category">Unformatted</property>
                 <property name="pattern">Unformatted</property>
@@ -178,7 +166,7 @@
             <property name="concealValue">true</property>
             <property name="allowNull">true</property>
             <property name="controlType">text-box</property>
-            <property name="defaultValue">None</property>
+            <property name="defaultValue">GratiaUser</property>
             <structure name="format">
                 <property name="category">Unformatted</property>
                 <property name="pattern">Unformatted</property>
@@ -191,7 +179,7 @@
             <property name="concealValue">true</property>
             <property name="allowNull">true</property>
             <property name="controlType">text-box</property>
-            <property name="defaultValue">None</property>
+            <property name="defaultValue">GratiaUser</property>
             <structure name="format">
                 <property name="category">Unformatted</property>
                 <property name="pattern">Unformatted</property>
@@ -214,37 +202,61 @@
     <data-sources>
         <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="fermigrid1" id="4">
             <property name="odaDriverClass">com.mysql.jdbc.Driver</property>
-            <property name="odaURL">jdbc:mysql://cd-psg3.fnal.gov:3320/gratia</property>
+            <property name="odaURL">jdbc:mysql://cd-psg6.fnal.gov:3320/gratia</property>
             <property name="odaUser">gratia</property>
             <encrypted-property name="odaPassword">cHJvdG8=</encrypted-property>
         </oda-data-source>
     </data-sources>
     <data-sets>
         <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="TimeQuery" id="94">
+            <structure name="cachedMetaData">
+                <list-property name="resultSet">
+                    <structure>
+                        <property name="position">1</property>
+                        <property name="name">facility_name</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">2</property>
+                        <property name="name">endtime</property>
+                        <property name="dataType">date-time</property>
+                    </structure>
+                    <structure>
+                        <property name="position">3</property>
+                        <property name="name">WallDuration</property>
+                        <property name="dataType">float</property>
+                    </structure>
+                </list-property>
+            </structure>
             <property name="dataSource">fermigrid1</property>
             <list-property name="parameters">
                 <structure>
                     <property name="name">UserName</property>
                     <property name="nativeName">UserName</property>
                     <property name="dataType">string</property>
+                    <property name="nativeDataType">0</property>
                     <property name="position">1</property>
                     <expression name="defaultValue">params["UserName"]</expression>
+                    <property name="isOptional">false</property>
                     <property name="isInput">true</property>
                 </structure>
                 <structure>
                     <property name="name">UserRole</property>
                     <property name="nativeName">UserRole</property>
                     <property name="dataType">string</property>
+                    <property name="nativeDataType">0</property>
                     <property name="position">2</property>
                     <expression name="defaultValue">params["UserRole"]</expression>
+                    <property name="isOptional">false</property>
                     <property name="isInput">true</property>
                 </structure>
                 <structure>
                     <property name="name">StartDate</property>
                     <property name="nativeName">StartDate</property>
                     <property name="dataType">string</property>
+                    <property name="nativeDataType">0</property>
                     <property name="position">3</property>
-                    <expression name="defaultValue">'3/1/2006'</expression>
+                    <expression name="defaultValue">'2006-12-01 00:00:00 GMT'</expression>
                     <property name="isOptional">false</property>
                     <property name="allowNull">true</property>
                     <property name="isInput">true</property>
@@ -254,8 +266,9 @@
                     <property name="name">EndDate</property>
                     <property name="nativeName">EndDate</property>
                     <property name="dataType">string</property>
+                    <property name="nativeDataType">0</property>
                     <property name="position">4</property>
-                    <expression name="defaultValue">'12/31/2999'</expression>
+                    <expression name="defaultValue">'2006-12-15 00:00:00 GMT'</expression>
                     <property name="isOptional">false</property>
                     <property name="allowNull">true</property>
                     <property name="isInput">true</property>
@@ -265,14 +278,112 @@
                     <property name="name">GroupByFormat</property>
                     <property name="nativeName">GroupByFormat</property>
                     <property name="dataType">string</property>
+                    <property name="nativeDataType">0</property>
                     <property name="position">5</property>
                     <expression name="defaultValue">'%M %d,%Y'</expression>
+                    <property name="isOptional">false</property>
                     <property name="isInput">true</property>
+                </structure>
+            </list-property>
+            <list-property name="resultSet">
+                <structure>
+                    <property name="position">1</property>
+                    <property name="name">facility_name</property>
+                    <property name="nativeName">facility_name</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">2</property>
+                    <property name="name">endtime</property>
+                    <property name="nativeName">endtime</property>
+                    <property name="dataType">date-time</property>
+                </structure>
+                <structure>
+                    <property name="position">3</property>
+                    <property name="name">WallDuration</property>
+                    <property name="nativeName">WallDuration</property>
+                    <property name="dataType">float</property>
                 </structure>
             </list-property>
             <property name="queryText">
 call DailyUsageByFacility(?,?,?,?,?)
 </property>
+            <xml-property name="designerValues"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<model:DesignValues xmlns:design="http://www.eclipse.org/datatools/connectivity/oda/design" xmlns:model="http://www.eclipse.org/birt/report/model/adapter/odaModel">
+  <Version>1.0</Version>
+  <design:DataSetParameters>
+    <design:parameterDefinitions>
+      <design:inOutMode>In</design:inOutMode>
+      <design:attributes>
+        <design:name>UserName</design:name>
+        <design:position>1</design:position>
+        <design:nullability>Unknown</design:nullability>
+      </design:attributes>
+      <design:inputAttributes>
+        <design:elementAttributes>
+          <design:defaultScalarValue>JS_EXPR</design:defaultScalarValue>
+          <design:optional>false</design:optional>
+        </design:elementAttributes>
+      </design:inputAttributes>
+    </design:parameterDefinitions>
+    <design:parameterDefinitions>
+      <design:inOutMode>In</design:inOutMode>
+      <design:attributes>
+        <design:name>UserRole</design:name>
+        <design:position>2</design:position>
+        <design:nullability>Unknown</design:nullability>
+      </design:attributes>
+      <design:inputAttributes>
+        <design:elementAttributes>
+          <design:defaultScalarValue>JS_EXPR</design:defaultScalarValue>
+          <design:optional>false</design:optional>
+        </design:elementAttributes>
+      </design:inputAttributes>
+    </design:parameterDefinitions>
+    <design:parameterDefinitions>
+      <design:inOutMode>In</design:inOutMode>
+      <design:attributes>
+        <design:name>StartDate</design:name>
+        <design:position>3</design:position>
+        <design:nullability>Nullable</design:nullability>
+      </design:attributes>
+      <design:inputAttributes>
+        <design:elementAttributes>
+          <design:defaultScalarValue>2006-12-01 00:00:00 GMT</design:defaultScalarValue>
+          <design:optional>false</design:optional>
+        </design:elementAttributes>
+      </design:inputAttributes>
+    </design:parameterDefinitions>
+    <design:parameterDefinitions>
+      <design:inOutMode>In</design:inOutMode>
+      <design:attributes>
+        <design:name>EndDate</design:name>
+        <design:position>4</design:position>
+        <design:nullability>Nullable</design:nullability>
+      </design:attributes>
+      <design:inputAttributes>
+        <design:elementAttributes>
+          <design:defaultScalarValue>2006-12-15 00:00:00 GMT</design:defaultScalarValue>
+          <design:optional>false</design:optional>
+        </design:elementAttributes>
+      </design:inputAttributes>
+    </design:parameterDefinitions>
+    <design:parameterDefinitions>
+      <design:inOutMode>In</design:inOutMode>
+      <design:attributes>
+        <design:name>GroupByFormat</design:name>
+        <design:position>5</design:position>
+        <design:nullability>Unknown</design:nullability>
+      </design:attributes>
+      <design:inputAttributes>
+        <design:elementAttributes>
+          <design:defaultScalarValue>%M %d,%Y</design:defaultScalarValue>
+          <design:optional>false</design:optional>
+        </design:elementAttributes>
+      </design:inputAttributes>
+    </design:parameterDefinitions>
+  </design:DataSetParameters>
+</model:DesignValues>]]></xml-property>
         </oda-data-set>
     </data-sets>
     <styles>
@@ -969,7 +1080,7 @@ printWriter.close();
       <TitlePosition>Left</TitlePosition>
       <SeriesDefinitions>
         <Query>
-          <Definition>row[&quot;facility_name&quot;]</Definition>
+          <Definition></Definition>
         </Query>
         <SeriesPalette>
           <Entries xsi:type="attribute:ColorDefinition">
@@ -1173,6 +1284,7 @@ printWriter.close();
           <GroupType>Text</GroupType>
           <AggregateExpression>Sum</AggregateExpression>
         </Grouping>
+        <Sorting>Ascending</Sorting>
       </SeriesDefinitions>
       <Orientation>Vertical</Orientation>
       <LineAttributes>
