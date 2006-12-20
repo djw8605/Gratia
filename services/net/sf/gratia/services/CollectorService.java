@@ -27,6 +27,7 @@ public class CollectorService implements ServletContextListener
 		//
 
 		ListenerThread threads[];
+		PerformanceThread pthreads[];
 		StatusListenerThread statusListenerThread;
 		ReplicationService replicationService;
 		RMIService rmiservice;
@@ -201,15 +202,46 @@ public class CollectorService implements ServletContextListener
 								// start msg listener
 								//
 
-								threads = new ListenerThread[maxthreads];
-								for (i = 0; i < maxthreads; i++)
+								if (p.getProperty("performance.test") != null)
 										{
-												threads[i] = new ListenerThread("ListenerThread: " + i,queues[i],lock);
-												threads[i].setPriority(Thread.MAX_PRIORITY);
-												threads[i].setDaemon(true);
+												if (p.getProperty("performance.test").equals("false"))
+														{
+																threads = new ListenerThread[maxthreads];
+																for (i = 0; i < maxthreads; i++)
+																		{
+																				threads[i] = new ListenerThread("ListenerThread: " + i,queues[i],lock);
+																				threads[i].setPriority(Thread.MAX_PRIORITY);
+																				threads[i].setDaemon(true);
+																		}
+																for (i = 0; i < maxthreads; i++)
+																		threads[i].start();
+														}
+												else
+														{
+																pthreads = new PerformanceThread[maxthreads];
+																for (i = 0; i < maxthreads; i++)
+																		{
+																				pthreads[i] = new PerformanceThread("PerformanceThread: " + i,queues[i],lock);
+																				pthreads[i].setPriority(Thread.MAX_PRIORITY);
+																				pthreads[i].setDaemon(true);
+																		}
+																for (i = 0; i < maxthreads; i++)
+																		pthreads[i].start();
+														}
 										}
-								for (i = 0; i < maxthreads; i++)
-										threads[i].start();
+								else
+										{
+												threads = new ListenerThread[maxthreads];
+												for (i = 0; i < maxthreads; i++)
+														{
+																threads[i] = new ListenerThread("ListenerThread: " + i,queues[i],lock);
+																threads[i].setPriority(Thread.MAX_PRIORITY);
+																threads[i].setDaemon(true);
+														}
+												for (i = 0; i < maxthreads; i++)
+														threads[i].start();
+										}
+
 
 								//
 								// if requested - start service to monitor input queue sizes
