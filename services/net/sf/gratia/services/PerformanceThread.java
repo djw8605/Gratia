@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.List;
+import java.util.Hashtable;
 
 import java.text.*;
 
@@ -33,6 +34,7 @@ public class PerformanceThread extends Thread
 {
 		String ident = null;
 		String directory = null;
+		Hashtable global;
 
 		//
 		// database parameters
@@ -74,11 +76,14 @@ public class PerformanceThread extends Thread
 
 		public PerformanceThread(String ident,
 														 String directory,
-														 Object lock)
+														 Object lock,
+														 Hashtable global)
 		{
 				this.ident = ident;
 				this.directory = directory;
 				this.lock = lock;
+				this.global = global;
+
 				loadProperties();
 				try
 						{
@@ -230,6 +235,8 @@ public class PerformanceThread extends Thread
 
 				for (int i = 0; i < files.length; i++)
 						{
+								global.put("listener",new java.util.Date());
+
 								if (stopflag)
 										{
 												Logging.log("PerformanceThread: " + ident + ":Exiting");

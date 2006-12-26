@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.List;
+import java.util.Hashtable;
 
 import java.text.*;
 
@@ -28,6 +29,7 @@ public class ListenerThread extends Thread
 {
 		String ident = null;
 		String directory = null;
+		Hashtable global;
 
 		//
 		// database parameters
@@ -69,11 +71,14 @@ public class ListenerThread extends Thread
 
 		public ListenerThread(String ident,
 													String directory,
-													Object lock)
+													Object lock,
+													Hashtable global)
 		{
 				this.ident = ident;
 				this.directory = directory;
 				this.lock = lock;
+				this.global = global;
+
 				loadProperties();
 				try
 						{
@@ -225,6 +230,8 @@ public class ListenerThread extends Thread
 
 				for (int i = 0; i < files.length; i++)
 						{
+								global.put("listener",new java.util.Date());
+
 								if (stopflag)
 										{
 												Logging.log("ListenerThread: " + ident + ":Exiting");

@@ -7,6 +7,7 @@ import java.io.*;
 import java.net.*;
 import java.util.TimeZone;
 import java.util.Enumeration;
+import java.util.Hashtable;
 
 import javax.servlet.*;
 
@@ -32,14 +33,19 @@ public class CollectorService implements ServletContextListener
 		ReplicationService replicationService;
 		RMIService rmiservice;
 		QSizeMonitor qsizeMonitor;;
+		MonitorListenerThread monitorListenerThread;
 
 		XP xp = new XP();
 
 		public String configurationPath;
 
-		String queues[] = null;
+		//
+		// various globals
+		//
 
+		String queues[] = null;
 		Object lock = new Object();
+		Hashtable global = new Hashtable();
 
 		public void contextInitialized(ServletContextEvent sce)
 		{
@@ -209,7 +215,7 @@ public class CollectorService implements ServletContextListener
 																threads = new ListenerThread[maxthreads];
 																for (i = 0; i < maxthreads; i++)
 																		{
-																				threads[i] = new ListenerThread("ListenerThread: " + i,queues[i],lock);
+																				threads[i] = new ListenerThread("ListenerThread: " + i,queues[i],lock,global);
 																				threads[i].setPriority(Thread.MAX_PRIORITY);
 																				threads[i].setDaemon(true);
 																		}
@@ -221,7 +227,7 @@ public class CollectorService implements ServletContextListener
 																pthreads = new PerformanceThread[maxthreads];
 																for (i = 0; i < maxthreads; i++)
 																		{
-																				pthreads[i] = new PerformanceThread("PerformanceThread: " + i,queues[i],lock);
+																				pthreads[i] = new PerformanceThread("PerformanceThread: " + i,queues[i],lock,global);
 																				pthreads[i].setPriority(Thread.MAX_PRIORITY);
 																				pthreads[i].setDaemon(true);
 																		}
@@ -234,7 +240,7 @@ public class CollectorService implements ServletContextListener
 												threads = new ListenerThread[maxthreads];
 												for (i = 0; i < maxthreads; i++)
 														{
-																threads[i] = new ListenerThread("ListenerThread: " + i,queues[i],lock);
+																threads[i] = new ListenerThread("ListenerThread: " + i,queues[i],lock,global);
 																threads[i].setPriority(Thread.MAX_PRIORITY);
 																threads[i].setDaemon(true);
 														}
@@ -242,7 +248,16 @@ public class CollectorService implements ServletContextListener
 														threads[i].start();
 										}
 
-
+								//
+								// if requested - start thread to monitor listener activity
+								//
+								if (p.getProperty("monitor.listener.threads") != null)
+										if (p.getProperty("monitor.listener.threads").equals("true"))
+												{
+														monitorListenerThread = new MonitorListenerThread(global);
+														monitorListenerThread.start();
+														Logging.log("CollectorService: Started MonitorListenerThread");
+												}
 								//
 								// if requested - start service to monitor input queue sizes
 								//
@@ -318,7 +333,7 @@ public class CollectorService implements ServletContextListener
 				threads = new ListenerThread[maxthreads];
 				for (i = 0; i < maxthreads; i++)
 						{
-								threads[i] = new ListenerThread("ListenerThread: " + i,queues[i],lock);
+								threads[i] = new ListenerThread("ListenerThread: " + i,queues[i],lock,global);
 								threads[i].setPriority(Thread.MAX_PRIORITY);
 								threads[i].setDaemon(true);
 						}
