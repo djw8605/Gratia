@@ -64,6 +64,8 @@ public class MonitorListenerThread extends Thread
 
 		public void sendMessage()
 		{
+				String cr = "\n";
+
 				Logging.log("");
 				Logging.log("MonitorListenerThread: Possible Listener Wedge");
 				Logging.log("");
@@ -78,12 +80,25 @@ public class MonitorListenerThread extends Thread
 										}
 								Session session = Session.getDefaultInstance(props, null);
 								MimeMessage message = new MimeMessage(session);
-								message.setText("Possible Listener Error: Wedged");
+								String textMessage = cr +
+										"The MonitorListenerThread has detected a possible problem. There have been" + cr +
+										"no input records processed in the past " + p.getProperty("monitor.listener.wait") +
+										" minutes. Please check the service." + cr;
+								message.setText(textMessage);
 								message.setSubject(p.getProperty("monitor.subject"));
 								Address fromAddress = new InternetAddress(p.getProperty("monitor.from.address"));
 								Address toAddress = new InternetAddress(p.getProperty("monitor.to.address.0"));
 								message.setFrom(fromAddress);
 								message.addRecipient(Message.RecipientType.TO,toAddress);
+								for (int i = 1; i < 100; i++)
+										{
+												String temp = p.getProperty("monitor.to.address." + i);
+												if (temp != null)
+														{
+																Address address = new InternetAddress(temp);
+																message.addRecipient(Message.RecipientType.TO,address);
+														}
+										}
 								Transport transport = session.getTransport("smtp");
 								transport.connect(p.getProperty("monitor.smtp.server"),"glr","lisp01");
 								transport.sendMessage(message, message.getAllRecipients());
