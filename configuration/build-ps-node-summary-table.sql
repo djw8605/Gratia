@@ -70,6 +70,7 @@ begin
 	declare divide int default 0;
 	declare counter int default 0;	
 	declare newdate datetime;
+	declare newutilization double default 0;
 
 	declare numberofdays int default 0;
 
@@ -103,6 +104,7 @@ begin
 
 		set numberofdays = datediff(enddate,startdate);
 		set divide = numberofdays + 1;
+		set newutilization = mycurrentutilization / divide;
 
 		if numberofdays = 0 then
 			call updatenodesummary(
@@ -114,7 +116,7 @@ begin
 			while counter < numberofdays do
 				set newdate = adddate(startdate,counter);
 				call updatenodesummary(
-					date(newdate),node,myvoname,mycurrentutilization / divide,0,
+					date(newdate),node,myvoname,newutilization,0,
 					myhostdescription,mybenchmarkscore,extract(DAY from last_day(newdate)));
 				set counter = counter + 1;
 			end while;
