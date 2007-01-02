@@ -69,6 +69,7 @@ public class MonitorListenerThread extends Thread
 				Logging.log("");
 				Logging.log("MonitorListenerThread: Possible Listener Wedge");
 				Logging.log("");
+				p = Configuration.getProperties();
 				try
 						{
 								Properties props = new Properties();
