@@ -5,8 +5,9 @@ CREATE TABLE NodeSummary (
   EndTime DATETIME NOT NULL DEFAULT 0,
   Node VARCHAR(255) NOT NULL DEFAULT '',
   VOName VARCHAR(255) DEFAULT '',
-	CurrentUtilization DOUBLE NOT NULL DEFAULT 0,
-	MaxUtilization DOUBLE NOT NULL DEFAULT 0,
+	CpuSystemTime int default 0,
+	CpuUserTime int default 0,
+	CpuCount int default 1,
   HostDescription VARCHAR(255) DEFAULT 'Unknown',
   BenchmarkScore int default 0,
 	DaysInMonth int default 0
@@ -24,7 +25,7 @@ alter table NodeSummary
 drop procedure updatenodesummary
 ||
 create procedure updatenodesummary(enddate datetime,mynode varchar(255),myvoname varchar(255),
-	myutilization double,mymaxutilization double,myhostdescription varchar(255),mybenchmarkscore int,mydaysinmonth int)
+	mycpusystemtime int,mycpuusertime int,mycpucount int,myhostdescription varchar(255),mybenchmarkscore int,mydaysinmonth int)
 begin
 	declare mycount int default 0;
 	select count(*) into mycount from NodeSummary
@@ -36,15 +37,18 @@ begin
 			date(enddate),
 			mynode,
 			myvoname,
-			myutilization,
-			mymaxutilization,
+			mycpusystemtime,
+			mycpuusertime,
+			mycpucount,
 			myhostdescription,
 			mybenchmarkscore,
 			mydaysinmonth);
 			insert into trace(user) values('insert');
 	else
 		update NodeSummary
-			set CurrentUtilization = CurrentUtilization + myutilization
+			set 
+				CpuSystemTime = CpuSystemTime + mycpusystemtime,
+				CpuUserTime = CpuUserTime + mycpuusertime
 			where
 				EndTime = enddate
 				and Node = mynode
@@ -62,15 +66,17 @@ begin
 	declare enddate datetime;
 	declare node varchar(255);
 	declare myvoname varchar(255);
-	declare mycpuuserduration double default 0;
-	declare mycpusystemduration double default 0;
-	declare mycurrentutilization double default 0;
+	declare mycpuusertime int default 0;
+	declare mycpusystemtime int default 0;
+	declare mycpucount int default 0;
 	declare myhostdescription varchar(255);
 	declare mybenchmarkscore int default 0;
 	declare divide int default 0;
 	declare counter int default 0;	
 	declare newdate datetime;
-	declare newutilization double default 0;
+
+	declare newcpusystemtime int default 0;
+	declare newcpuusertime int default 0;
 
 	declare numberofdays int default 0;
 
@@ -82,7 +88,7 @@ begin
 
 	myloop: loop
 
-		fetch cur01 into startdate,enddate,node,myvoname,mycpuuserduration,mycpusystemduration,myhostdescription;
+		fetch cur01 into startdate,enddate,node,myvoname,mycpuusertime,mycpusystemtime,myhostdescription;
 
 		insert into trace(pname,userkey) values(node,myvoname);
 
@@ -95,20 +101,19 @@ begin
 			set myvoname = 'Unknown';
 		end if;
 
-		set mycurrentutilization = mycpuuserduration + mycpusystemduration;
-
 		begin
-			select BenchmarkScore into mybenchmarkscore from CPUInfo where myhostdescription = CPUInfo.NodeName;
+			select BenchmarkScore,CPUCount into mybenchmarkscore,mycpucount from CPUInfo where myhostdescription = CPUInfo.NodeName;
 			set done = false;
 		end;
 
 		set numberofdays = datediff(enddate,startdate);
 		set divide = numberofdays + 1;
-		set newutilization = mycurrentutilization / divide;
+		set newcpusystemtime = mycpusystemtime / divide;
+		set newcpuusertime = mycpuusertime / divide;
 
 		if numberofdays = 0 then
 			call updatenodesummary(
-				date(enddate),node,myvoname,mycurrentutilization,0,myhostdescription,
+				date(enddate),node,myvoname,mycpusystemtime,mycpuusertime,mycpucount,myhostdescription,
 				mybenchmarkscore,extract(DAY from last_day(enddate)));
 		end if;
 
@@ -116,7 +121,7 @@ begin
 			while counter < numberofdays do
 				set newdate = adddate(startdate,counter);
 				call updatenodesummary(
-					date(newdate),node,myvoname,newutilization,0,
+					date(newdate),node,myvoname,newcpusystemtime,newcpuusertime,mycpucount,
 					myhostdescription,mybenchmarkscore,extract(DAY from last_day(newdate)));
 				set counter = counter + 1;
 			end while;
@@ -137,15 +142,16 @@ glr:begin
 	declare enddate datetime;
 	declare node varchar(255);
 	declare myvoname varchar(255);
-	declare mycpuuserduration double default 0;
-	declare mycpusystemduration double default 0;
-	declare mycurrentutilization double default 0;
+	declare mycpuusertime int default 0;
+	declare mycpusystemtime int default 0;
+	declare mycpucount int default 0;
 	declare myhostdescription varchar(255);
 	declare mybenchmarkscore int default 0;
 	declare divide int default 0;
 	declare counter int default 0;	
 	declare newdate datetime;
-	declare newutilization double default 0;
+	declare newcpusystemtime int default 0;
+	declare newcpuusertime int default 0;
 	declare numberofdays int default 0;
 
 	--
@@ -287,27 +293,26 @@ glr:begin
 	set enddate = new.EndTime;
 	set node = new.Host;
 	set myvoname = new.VOName;
-	set mycpuuserduration = new.CpuUserDuration;
-	set mycpusystemduration = new.CpuSystemDuration;
+	set mycpuusertime = new.CpuUserDuration;
+	set mycpusystemtime = new.CpuSystemDuration;
 	set myhostdescription = new.HostDescription;
 
 	if myvoname = null then
 		set myvoname = 'Unknown';
 	end if;
 
-	set mycurrentutilization = mycpuuserduration + mycpusystemduration;
-
 	begin
-		select BenchmarkScore into mybenchmarkscore from CPUInfo where myhostdescription = CPUInfo.NodeName;
+		select BenchmarkScore,CPUCount into mybenchmarkscore,mycpucount from CPUInfo where myhostdescription = CPUInfo.NodeName;
 	end;
 
 	set numberofdays = datediff(enddate,startdate);
 	set divide = numberofdays + 1;
-	set newutilization = mycurrentutilization / divide;
+	set newcpusystemtime = mycpusystemtime / divide;
+	set newcpuusertime = mycpuusertime / divide;
 
 	if numberofdays = 0 then
 		call updatenodesummary(
-			date(enddate),node,myvoname,mycurrentutilization,0,myhostdescription,
+			date(enddate),node,myvoname,mycpusystemtime,myspuusertime,mycpucount,myhostdescription,
 			mybenchmarkscore,extract(DAY from last_day(enddate)));
 	end if;
 
@@ -315,7 +320,7 @@ glr:begin
 		while counter < numberofdays do
 			set newdate = adddate(startdate,counter);
 			call updatenodesummary(
-				date(newdate),node,myvoname,newutilization,0,
+				date(newdate),node,myvoname,newcpusystemtime,newcpuusertime,mycpucount,
 				myhostdescription,mybenchmarkscore,extract(DAY from last_day(newdate)));
 			set counter = counter + 1;
 		end while;
@@ -325,5 +330,5 @@ end;
 ||
 delete from trace
 ||
-call buildnodesummary();
+-- call buildnodesummary();
 ||
