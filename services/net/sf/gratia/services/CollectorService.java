@@ -165,6 +165,12 @@ public class CollectorService implements ServletContextListener
 								zapDatabase();
 
 								//
+								// check for stored procedures/triggers
+								//
+
+								checkStoredProcedures();
+								
+								//
 								// setup queues for message handling
 								//
 
@@ -528,6 +534,71 @@ public class CollectorService implements ServletContextListener
 										Logging.log("Command: Error: " + commands1[i] + " : " + e);
 								}
 
+		}
+
+		public void checkStoredProcedures()
+		{
+				String dq = "\"";
+				String comma = ",";
+				XP xp = new XP();
+				int i = 0;
+
+				Properties p = net.sf.gratia.services.Configuration.getProperties();
+
+				String driver = p.getProperty("service.mysql.driver");
+				String url = p.getProperty("service.mysql.url");
+				String user = p.getProperty("service.mysql.user");
+				String password = p.getProperty("service.mysql.password");
+	
+				java.sql.Connection connection;
+				Statement statement;
+				ResultSet resultSet;
+
+				String command = "show triggers";
+				int count = 0;
+
+				try
+						{
+								Class.forName(driver);
+								connection = (java.sql.Connection) DriverManager.getConnection(url,user,password);
+						}
+				catch (Exception e)
+						{
+								Logging.warning("CollectorService: Error During checkStoredProcedures: " + e);
+								Logging.warning(xp.parseException(e));
+								return;
+						}
+
+				try
+						{
+								Logging.log("Executing: " + command);
+								statement = connection.createStatement();
+								resultSet = statement.executeQuery(command);
+								while(resultSet.next())
+										count++;
+								resultSet.close();
+								statement.close();
+						}
+				catch (Exception e)
+						{
+								Logging.log("Command: Error: " + command + " : " + e);
+						}
+
+				if (count == 0)
+						{	
+								Logging.log("CollectorService: Creating Stored Procedures");
+								String home = System.getProperty("catalina.home");
+								home = xp.replaceAll(home,"\\","/");
+								home = home + "/gratia/post-install.sh";
+								String script = xp.get(home);
+								script = xp.replace(script,"CATALINA_HOME",System.getProperty("catalina.home"));
+								xp.save(home,script);
+								Execute.execute(home);
+						}
+				else
+						{
+								Logging.log("CollectorService: Stored Procedures Already Exist");
+						}
 		}
 
 		public void contextDestroyed(ServletContextEvent sce)
