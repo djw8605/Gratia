@@ -274,6 +274,20 @@ gratia: clean services servlets soap reporting reports report-configuration admi
 	tar -cvf ../target/gratia.tar -C tarball .
 	rm -f -r tarball
 
+glr: clean services servlets soap reporting reports report-configuration administration security
+	rm -f -r tarball
+	mkdir tarball
+	cp ../configuration/*gov ../configuration/*xml ../configuration/*properties tarball
+	cp ../configuration/*sql ../configuration/*sh tarball
+	rm -f tarball/local.*
+	rm -f tarball/release.*
+	cp ../configuration/local.service-configuration.properties tarball/service-configuration.properties
+	tar -cvf ../target/gratia.tar -C tarball .
+	rm -f -r tarball
+	rm -f -r ~/Desktop/tomcat/webapps/gratia*
+	cp ../target/*war ~/Desktop/tomcat/webapps
+	cp ../wars/*war ~/Desktop/tomcat/webapps
+
 define defaultdirs
 	mkdir -p gratia/ ; \
 	mkdir -p gratia/var/; \
