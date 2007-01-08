@@ -28,6 +28,7 @@ clean:
 	find ${base} -name "*class" -exec rm -f {} \;
 	find ${base} -name "*~" -exec rm -f {} \;
 	find ${base} -name "*#" -exec rm -f {} \;
+	find ${base} -name "#*" -exec rm -f {} \;
 	rm -f -r $(root)target
 	mkdir $(root)target
 
@@ -261,48 +262,16 @@ release: clean services servlets soap reporting reports report-configuration adm
 	rm -f -r tarball
 
 local: services servlets soap reporting reports report-configuration administration security
+
+gratia: clean services servlets soap reporting reports report-configuration administration security
 	rm -f -r tarball
-	#
-	# create reporting tarball
-	#
 	mkdir tarball
-	mkdir tarball/gratia
-	mkdir tarball/gratia/gratia_reporting
-	mkdir tarball/var
-	mkdir tarball/var/data
-	mkdir tarball/var/logs
-	mkdir tarball/var/tmp
-	cp ../target/gratia-report-configuration.war tarball/gratia/gratia_reporting
-	cp ../target/gratia-reports.war tarball/gratia/gratia_reporting
-	cp ../target/gratia-reporting.war tarball/gratia/gratia_reporting
-	cp ../wars/Birt.war tarball/gratia/gratia_reporting
-	tar $(tarowner) -cvf ../target/gratia_reporting__$(gratia_reporting_version).tar -C tarball .
-	rm -f -r tarball
-	#
-	# create services tarball
-	#
-	mkdir tarball
-	mkdir tarball/tomcat
-	mkdir tarball/tomcat/v55
-	mkdir tarball/tomcat/v55/gratia
-	mkdir tarball/gratia
-	mkdir tarball/gratia/gratia_services
-	mkdir tarball/var
-	mkdir tarball/var/data
-	mkdir tarball/var/logs
-	mkdir tarball/var/tmp
-	cp ../configuration/*gov ../configuration/*xml ../configuration/*properties tarball/tomcat/v55/gratia
-	cp ../configuration/*sql ../configuration/*sh tarball/tomcat/v55/gratia	
-	rm -f tarball/tomcat/v55/gratia/local.*
-	rm -f tarball/tomcat/v55/gratia/release.*
-	cp ../configuration/release.service-configuration.properties tarball/tomcat/v55/gratia/service-configuration.properties
-	cp ../target/gratia-services.war tarball/gratia/gratia_services
-	cp ../target/gratia-servlets.war tarball/gratia/gratia_services
-	cp ../target/GratiaServices.war tarball/gratia/gratia_services
-	cp ../target/gratia-soap.war tarball/gratia/gratia_services
-	cp ../target/gratia-administration.war tarball/gratia/gratia_services
-	cp ../target/gratia-security.war tarball/gratia/gratia_services
-	tar $(tarowner) -cvf ../target/gratia_services_$(gratia_services_version).tar -C tarball .
+	cp ../configuration/*gov ../configuration/*xml ../configuration/*properties tarball
+	cp ../configuration/*sql ../configuration/*sh tarball
+	rm -f tarball/local.*
+	rm -f tarball/release.*
+	cp ../configuration/local.service-configuration.properties tarball/service-configuration.properties
+	tar -cvf ../target/gratia.tar -C tarball .
 	rm -f -r tarball
 
 define defaultdirs
