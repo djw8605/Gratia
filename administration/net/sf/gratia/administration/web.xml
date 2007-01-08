@@ -55,8 +55,20 @@
     </servlet>
 
     <servlet>
+        <servlet-name>Roles</servlet-name>
+        <servlet-class>net.sf.gratia.administration.Roles</servlet-class>
+				<load-on-startup>1</load-on-startup>
+    </servlet>
+
+    <servlet>
         <servlet-name>Status</servlet-name>
         <servlet-class>net.sf.gratia.administration.Status</servlet-class>
+				<load-on-startup>1</load-on-startup>
+    </servlet>
+
+    <servlet>
+        <servlet-name>NgapStatus</servlet-name>
+        <servlet-class>net.sf.gratia.administration.NgapStatus</servlet-class>
 				<load-on-startup>1</load-on-startup>
     </servlet>
 
@@ -99,6 +111,16 @@
     <servlet-mapping>
         <servlet-name>SystemAdministration</servlet-name>
         <url-pattern>/systemadministration.html</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>Roles</servlet-name>
+        <url-pattern>/roles.html</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>NgapStatus</servlet-name>
+        <url-pattern>/ngap-status.html</url-pattern>
     </servlet-mapping>
 
 </web-app>
