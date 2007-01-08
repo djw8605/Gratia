@@ -4,7 +4,7 @@ drop table if exists NodeSummary;
 CREATE TABLE NodeSummary (
   EndTime DATETIME NOT NULL DEFAULT 0,
   Node VARCHAR(255) NOT NULL DEFAULT '',
-  VOName VARCHAR(255) DEFAULT '',
+	ProbeName varchar(255) not null default '',
 	CpuSystemTime int default 0,
 	CpuUserTime int default 0,
 	CpuCount int default 1,
@@ -20,30 +20,28 @@ alter table NodeSummary
   add index index02(Node);
 ||
 alter table NodeSummary
-  add index index03(VOName);
+  add index index03(ProbeName);
 ||
 drop procedure updatenodesummary
 ||
-create procedure updatenodesummary(enddate datetime,mynode varchar(255),myvoname varchar(255),
+create procedure updatenodesummary(enddate datetime,mynode varchar(255),myprobename varchar(255),
 	mycpusystemtime int,mycpuusertime int,mycpucount int,myhostdescription varchar(255),mybenchmarkscore int,mydaysinmonth int)
 begin
 	declare mycount int default 0;
 	select count(*) into mycount from NodeSummary
 		where EndTime = enddate
-		and Node = mynode
-		and VOName = myvoname;
+		and Node = mynode;
 	if mycount = 0 then
 		insert into NodeSummary values(
 			date(enddate),
 			mynode,
-			myvoname,
+			myprobename,
 			mycpusystemtime,
 			mycpuusertime,
 			mycpucount,
 			myhostdescription,
 			mybenchmarkscore,
 			mydaysinmonth);
-			insert into trace(user) values('insert');
 	else
 		update NodeSummary
 			set 
@@ -51,9 +49,7 @@ begin
 				CpuUserTime = CpuUserTime + mycpuusertime
 			where
 				EndTime = enddate
-				and Node = mynode
-				and VOName = myvoname;
-		insert into trace(user) values('update');
+				and Node = mynode;
 	end if;
 end;
 ||
@@ -65,7 +61,7 @@ begin
 	declare startdate datetime;
 	declare enddate datetime;
 	declare node varchar(255);
-	declare myvoname varchar(255);
+	declare myprobename varchar(255);
 	declare mycpuusertime int default 0;
 	declare mycpusystemtime int default 0;
 	declare mycpucount int default 0;
@@ -80,7 +76,7 @@ begin
 
 	declare numberofdays int default 0;
 
-	declare cur01 cursor for select StartTime,EndTime,Host,VOName,CpuUserDuration,CpuSystemDuration,HostDescription
+	declare cur01 cursor for select StartTime,EndTime,Host,ProbeName,CpuUserDuration,CpuSystemDuration,HostDescription
 		from JobUsageRecord;
 	declare continue handler for sqlstate '02000' set done = true;
 
@@ -88,22 +84,22 @@ begin
 
 	myloop: loop
 
-		fetch cur01 into startdate,enddate,node,myvoname,mycpuusertime,mycpusystemtime,myhostdescription;
-
-		insert into trace(pname,userkey) values(node,myvoname);
+		fetch cur01 into startdate,enddate,node,myprobename,mycpuusertime,mycpusystemtime,myhostdescription;
 
 		if done then
 			close cur01;
 			leave myloop;
 		end if;
 
-		if myvoname = null then
-			set myvoname = 'Unknown';
+		if myprobename = null then
+			set myprobename = 'Unknown';
 		end if;
 
 		begin
-			select BenchmarkScore,CPUCount into mybenchmarkscore,mycpucount from CPUInfo where myhostdescription = CPUInfo.NodeName;
-			set done = false;
+				set mycpucount = 0;
+				set mybenchmarkscore = 0;
+				select BenchmarkScore,CPUCount into mybenchmarkscore,mycpucount from CPUInfo where myhostdescription = CPUInfo.NodeName;
+				set done = false;
 		end;
 
 		set numberofdays = datediff(enddate,startdate);
@@ -113,7 +109,7 @@ begin
 
 		if numberofdays = 0 then
 			call updatenodesummary(
-				date(enddate),node,myvoname,mycpusystemtime,mycpuusertime,mycpucount,myhostdescription,
+				date(enddate),node,myprobename,mycpusystemtime,mycpuusertime,mycpucount,myhostdescription,
 				mybenchmarkscore,extract(DAY from last_day(enddate)));
 		end if;
 
@@ -121,7 +117,7 @@ begin
 			while counter < numberofdays do
 				set newdate = adddate(startdate,counter);
 				call updatenodesummary(
-					date(newdate),node,myvoname,newcpusystemtime,newcpuusertime,mycpucount,
+					date(newdate),node,myprobename,newcpusystemtime,newcpuusertime,mycpucount,
 					myhostdescription,mybenchmarkscore,extract(DAY from last_day(newdate)));
 				set counter = counter + 1;
 			end while;
@@ -141,7 +137,7 @@ glr:begin
 	declare startdate datetime;
 	declare enddate datetime;
 	declare node varchar(255);
-	declare myvoname varchar(255);
+	declare myprobename varchar(255);
 	declare mycpuusertime int default 0;
 	declare mycpusystemtime int default 0;
 	declare mycpucount int default 0;
@@ -292,16 +288,18 @@ glr:begin
 	set startdate = new.StartTime;
 	set enddate = new.EndTime;
 	set node = new.Host;
-	set myvoname = new.VOName;
+	set myprobename = new.ProbeName;
 	set mycpuusertime = new.CpuUserDuration;
 	set mycpusystemtime = new.CpuSystemDuration;
 	set myhostdescription = new.HostDescription;
 
-	if myvoname = null then
-		set myvoname = 'Unknown';
+	if myprobename = null then
+		set myprobename = 'Unknown';
 	end if;
 
 	begin
+		set mycpucount = 0;
+		set mybenchmarkscore = 0;
 		select BenchmarkScore,CPUCount into mybenchmarkscore,mycpucount from CPUInfo where myhostdescription = CPUInfo.NodeName;
 	end;
 
@@ -312,7 +310,7 @@ glr:begin
 
 	if numberofdays = 0 then
 		call updatenodesummary(
-			date(enddate),node,myvoname,mycpusystemtime,myspuusertime,mycpucount,myhostdescription,
+			date(enddate),node,myprobename,mycpusystemtime,mycpuusertime,mycpucount,myhostdescription,
 			mybenchmarkscore,extract(DAY from last_day(enddate)));
 	end if;
 
@@ -320,7 +318,7 @@ glr:begin
 		while counter < numberofdays do
 			set newdate = adddate(startdate,counter);
 			call updatenodesummary(
-				date(newdate),node,myvoname,newcpusystemtime,newcpuusertime,mycpucount,
+				date(newdate),node,myprobename,newcpusystemtime,newcpuusertime,mycpucount,
 				myhostdescription,mybenchmarkscore,extract(DAY from last_day(newdate)));
 			set counter = counter + 1;
 		end while;
@@ -330,5 +328,5 @@ end;
 ||
 delete from trace
 ||
--- call buildnodesummary();
+call buildnodesummary();
 ||
