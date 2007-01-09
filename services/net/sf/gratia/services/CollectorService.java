@@ -590,9 +590,6 @@ public class CollectorService implements ServletContextListener
 								String home = System.getProperty("catalina.home");
 								home = xp.replaceAll(home,"\\","/");
 								home = home + "/gratia/post-install.sh";
-								String script = xp.get(home);
-								script = xp.replace(script,"CATALINA_HOME",System.getProperty("catalina.home"));
-								xp.save(home,script);
 								Execute.execute(home);
 						}
 				else
