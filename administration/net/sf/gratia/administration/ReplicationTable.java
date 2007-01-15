@@ -183,7 +183,24 @@ public class ReplicationTable extends HttpServlet
 								vector.add("All");
 
 								while(resultSet.next())
-										vector.add(resultSet.getString(1));
+										vector.add("Probe:" + resultSet.getString(1));
+
+								resultSet.close();
+								statement.close();
+						}
+				catch (Exception e)
+						{
+								e.printStackTrace();
+						}
+
+				try
+						{
+								command = "select distinct(VOName) from JobUsageRecord order by VOName";
+								statement = connection.prepareStatement(command);
+								resultSet = statement.executeQuery(command);
+								
+								while(resultSet.next())
+										vector.add("VO:" + resultSet.getString(1));
 
 								resultSet.close();
 								statement.close();

@@ -184,8 +184,8 @@ public class NgapStatus extends HttpServlet
 								e.printStackTrace();
 						}
 
-				buffer.append("record-count-hour|" + count1 + cr);
-				buffer.append("record-count-24hour|" + count24 + cr);
+				buffer.append("record-count-hour=" + count1 + "|");
+				buffer.append("record-count-24hou=|" + count24 + "|");
 				
 				int maxthreads = Integer.parseInt(props.getProperty("service.listener.threads"));
 				String path = System.getProperties().getProperty("catalina.home");
@@ -195,7 +195,7 @@ public class NgapStatus extends HttpServlet
 						{
 								String xpath = path + "/gratia/data/thread" + i;
 								String filelist[] = xp.getFileList(xpath);
-								buffer.append("queuesize" + i + "|" + filelist.length + cr);
+								buffer.append("queuesize" + i + "=" + filelist.length + "|");
 						}
 		}
 
