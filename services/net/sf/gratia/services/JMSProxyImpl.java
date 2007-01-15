@@ -96,25 +96,13 @@ public class JMSProxyImpl extends UnicastRemoteObject implements JMSProxy
 		}
 
 
-		public boolean statusUpdate(String xml) throws RemoteException
+		public boolean statusUpdate(String status) throws RemoteException
 		{
-				/*
-					try
-					{
-					TextMessage message = jmssession.createTextMessage();
-					message.setStringProperty("xml",xml);
-					producer.send(message);
-					jmssession.commit();
-					// checkQueue();
-					return true;
-					}
-					catch (Exception e)
-					{
-					e.printStackTrace();
-					}
-				*/
-
-				return false;
+				ProbeStatusUpdate update = new ProbeStatusUpdate();
+				
+				// update.update(status);
+				
+				return true;
 		}
 
 		public void stopDatabaseUpdateThreads() throws RemoteException

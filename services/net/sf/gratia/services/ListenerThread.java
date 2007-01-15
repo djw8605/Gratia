@@ -62,6 +62,7 @@ public class ListenerThread extends Thread
 		String xml = "";
 		String rawxml = "";
 		String extraxml = "";
+		String md5key = "";
 		boolean gotreplication = false;
 		boolean gothistory = false;
 		boolean gotduplicate = false;
@@ -167,6 +168,47 @@ public class ListenerThread extends Thread
 				return status;
     }
 
+    public boolean gotDuplicate(String md5key) throws Exception
+    {
+				boolean status = false;
+				String dq = "\"";
+				
+				if (duplicateCheck == false)
+						return false;
+
+				String sql = "SELECT dbid from JobUsageRecord where md5 = " + dq + md5key + dq;
+	    	
+				org.hibernate.Session session2 = HibernateWrapper.getSession();
+				dupdbid = 0;
+
+				try
+						{
+								List list = session2.createSQLQuery(sql).list();
+								if (list.size() > 0)
+										{
+												status = true;
+												Integer value = (Integer) list.get(0);
+												dupdbid = value.intValue();
+										}
+						}
+				catch (Exception e)
+						{
+								// Logging.log("ListenerThread: " + ident + ":Error During Dup Check");
+								throw e;
+						}
+				finally
+						{
+								try
+										{
+												session2.close();
+										}
+								catch (Exception ignore)
+										{
+										}
+						}
+
+				return status;
+    }
 
 		public void run()
 		{
@@ -243,6 +285,7 @@ public class ListenerThread extends Thread
 								xml = null;
 								rawxml = null;
 								extraxml = null;
+								md5key = null;
 								gotreplication = gothistory = gotduplicate = goterror = false;
 								saveBlob();
 
@@ -291,6 +334,19 @@ public class ListenerThread extends Thread
 																		rawxml = st.nextToken();
 																if (st.hasMoreTokens())
 																		extraxml = st.nextToken();
+																gothistory = true;
+														}
+												else if (blob.startsWith("historymd5"))
+														{
+																StringTokenizer st = new StringTokenizer(blob,"|");
+																if (st.hasMoreTokens())
+																		st.nextToken();
+																if (st.hasMoreTokens())
+																		historydate = st.nextToken();
+																if (st.hasMoreTokens())
+																		xml = st.nextToken();
+																if (st.hasMoreTokens())
+																		md5key = st.nextToken();
 																gothistory = true;
 														}
 												else
@@ -357,7 +413,10 @@ public class ListenerThread extends Thread
 																statusUpdater.update(current,xml);
 
 																// Logging.log("ListenerThread: " + ident + ":Before Duplicate Check");
-																gotduplicate = gotDuplicate(current);
+																if (gothistory && (md5key != null))
+																		gotduplicate = gotDuplicate(current.getmd5());
+																else
+																		gotduplicate = gotDuplicate(current);
 																// Logging.log("ListenerThread: " + ident + ":After Duplicate Check");
 
 																if (gotduplicate)
@@ -418,7 +477,7 @@ public class ListenerThread extends Thread
 																																else if (gotreplication)
 																																		xp.save(filename,"history" + "|" + serverDate.getTime() + "|" + xml + "|" + rawxml);
 																																else
-																																		xp.save(filename,"history" + "|" + serverDate.getTime() + "|" + xml);
+																																		xp.save(filename,"historymd5" + "|" + serverDate.getTime() + "|" + xml + "|" + current.getmd5());
 																														}
 																										}
 																						}

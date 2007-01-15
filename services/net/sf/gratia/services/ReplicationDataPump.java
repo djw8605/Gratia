@@ -203,10 +203,21 @@ public class ReplicationDataPump extends Thread
 				
 				command = "select count(*) from JobUsageRecord" + cr +
 						"where dbid > " + dbid;
-				if (! probename.equals("All"))
+				if (probename.startsWith("Probe:"))
 						{
+								probename = xp.replace(probename,"Probe:","");
 								command = command + cr;
 								command = command + " and ProbeName = " + dq + probename + dq + cr;
+						}
+				if (probename.startsWith("VO:"))
+						{
+								probename = xp.replace(probename,"VO:","");
+								command = command + cr;
+								command = command + " and VOName = " + dq + probename + dq + cr;
+						}
+				
+				if (! probename.equals("All"))
+						{
 						}
 				int count = 0;
 				
