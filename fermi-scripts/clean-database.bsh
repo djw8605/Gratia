@@ -1,0 +1,69 @@
+import java.sql.*;
+
+String driver = "oracle.jdbc.driver.OracleDriver";
+String url = "jdbc:oracle:thin:@cd-psg3.fnal.gov:1521:orcl";
+String user = "gratia";
+String password = "proto";
+
+Class.forName(driver).newInstance();
+connection = DriverManager.getConnection(url,user,password);
+
+/*
+	command = "truncate table consumableresource";
+	statement = connection.createStatement();
+	statement.executeUpdate(command);
+
+	command = "truncate table cpuinfo";
+	statement = connection.createStatement();
+	statement.executeUpdate(command);
+
+	command = "truncate table disk";
+	statement = connection.createStatement();
+	statement.executeUpdate(command);
+
+	command = "truncate table memory";
+	statement = connection.createStatement();
+	statement.executeUpdate(command);
+
+	command = "truncate table network";
+	statement = connection.createStatement();
+	statement.executeUpdate(command);
+
+	command = "truncate table phaseresource";
+	statement = connection.createStatement();
+	statement.executeUpdate(command);
+
+	command = "truncate table servicelevel";
+	statement = connection.createStatement();
+	statement.executeUpdate(command);
+
+	command = "truncate table swap";
+	statement = connection.createStatement();
+	statement.executeUpdate(command);
+
+	command = "truncate table timeduration";
+	statement = connection.createStatement();
+	statement.executeUpdate(command);
+
+	command = "truncate table timeinstant";
+	statement = connection.createStatement();
+	statement.executeUpdate(command);
+
+	command = "truncate table volumeresource";
+	statement = connection.createStatement();
+	statement.executeUpdate(command);
+
+	command = "truncate table jobusagerecord";
+	statement = connection.createStatement();
+	statement.executeUpdate(command);
+*/
+
+command = "select count(*) from JobUsageRecord";
+
+statement = connection.prepareStatement(command);
+resultSet = statement.executeQuery(command);
+while (resultSet.next())
+{
+		System.out.println("Count: " + resultSet.getString(1));
+}
+System.out.println("Done");

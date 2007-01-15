@@ -1,0 +1,147 @@
+import java.sql.*;
+
+driver = "com.mysql.jdbc.Driver";
+url = "jdbc:mysql://cd-psg3.fnal.gov:3320/gratia";
+user = "gratia";
+password = "proto";
+irecords = 0;
+imax = 5000;
+
+xp = new XP();
+
+Class.forName(driver).newInstance();
+connection = DriverManager.getConnection(url,user,password);
+
+executeCommand(String command)
+{
+		try
+				{
+						System.out.println("Executing: " + command);
+						statement = connection.createStatement();
+						statement.executeUpdate(command);
+						statement.close();
+						System.out.println("Command: OK: " + command);
+				}
+		catch (Exception e)
+				{
+						System.out.println("Command: Error: " + command + " : " + e);
+				}
+}
+
+command = "drop table NodeTable";
+executeCommand(command);
+command = 
+		"create table NodeTable (" +
+		" Node varchar(255) not null," +
+		" Cluster varchar(255) default 'Unknown'," +
+		" ServiceType varchar(255) default 'Unknown'," +
+		" ProbeName varchar(255) default 'Unknown'," +
+		" VOName varchar(255) default 'Unknown'," +
+		" HostDescription varchar(255) default 'Unknown'" +
+		")";
+executeCommand(command);
+
+String nodelist = xp.get("cms.xml");
+StringTokenizer st1 = new StringTokenizer(nodelist,"\n\r");
+String dq = "\"";
+
+table = new Hashtable();
+clustertable = new Hashtable();
+servicetable = new Hashtable();
+
+cluster = "Unknown";
+servicetype = "Unknown";
+
+while(st1.hasMoreTokens())
+{
+		String line = st1.nextToken();
+		if (line.indexOf("Cluster Name") > -1)
+				{
+						index = line.indexOf(dq);
+						line = line.substring(index + 1);
+						index = line.indexOf(dq);
+						line = line.substring(0,index);
+						cluster = line;
+				}
+		if (line.indexOf("ServiceType Name") > -1)
+				{
+						index = line.indexOf(dq);
+						line = line.substring(index + 1);
+						index = line.indexOf(dq);
+						line = line.substring(0,index);
+						servicetype = line;
+				}
+		if (line.indexOf("Host Name") > -1)
+				{
+						index = line.indexOf(dq);
+						line = line.substring(index + 1);
+						index = line.indexOf(dq);
+						line = line.substring(0,index);
+						table.put(line,line);
+						clustertable.put(line,cluster);
+						servicetable.put(line,servicetype);
+				}
+}
+System.out.println("Nodes1: " + table.size());
+
+	command = "select distinct Host from JobUsageRecord";
+	statement = connection.prepareStatement(command);
+	System.out.println("Executing: " + command);
+	resultSet = statement.executeQuery(command);
+	while(resultSet.next())
+	{
+	host = resultSet.getString("Host");
+	if (host != null)
+			{
+					index = host.indexOf(".");
+					if (index > -1)
+							host = host.substring(0,index);
+					table.put(host,host);
+			}
+	}
+	resultSet.close();
+	statement.close();
+
+System.out.println("Nodes2: " + table.size());
+
+for (Enumeration x = table.keys(); x.hasMoreElements();)
+{
+		node = (String) x.nextElement();
+		probename = "Unknown";
+		hostdescription = "Unknown";
+		voname = "Unknown";
+
+		command = "select * from JobUsageRecord where Host like '#node#%' limit 1";
+		command = xp.replace(command,"#node#",node);
+		statement = connection.prepareStatement(command);
+		System.out.println("Executing: " + command);
+		resultSet = statement.executeQuery(command);
+		while(resultSet.next())
+				{
+						probename = resultSet.getString("ProbeName");
+						voname = resultSet.getString("VOName");
+						hostdescription = resultSet.getString("HostDescription");
+				}
+		if (hostdescription == null)
+				hostdescription = "Unknown";
+		hostdescription = xp.replaceAll(hostdescription,dq,"");
+		hostdescription = xp.replaceAll(hostdescription,"'","");
+
+		resultSet.close();
+		statement.close();
+		command = 
+				"insert into NodeTable(Node,ProbeName,VOName,HostDescription,Cluster,ServiceType) values('#v1#','#v2#','#v3#','#v4#','#v5#','#v6#')";
+		command = xp.replace(command,"#v1#",node);
+		command = xp.replace(command,"#v2#",probename);
+		command = xp.replace(command,"#v3#",voname);
+		command = xp.replace(command,"#v4#",hostdescription);
+		cluster = (String) clustertable.get(node);
+		servicetype = (String) servicetable.get(node);
+		if (cluster == null)
+				cluster = "Unknown";
+		if (servicetype == null)
+				servicetype = "Unknown";
+		command = xp.replace(command,"#v5#",cluster);
+		command = xp.replace(command,"#v6#",servicetype);
+		executeCommand(command);
+}

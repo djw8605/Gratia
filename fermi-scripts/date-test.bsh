@@ -1,0 +1,24 @@
+import java.sql.*;
+
+driver = "com.mysql.jdbc.Driver";
+url = "jdbc:mysql://localhost:3306/test";
+user = "root";
+password = "lisp01";
+
+Class.forName(driver).newInstance();
+connection = DriverManager.getConnection(url,user,password);
+
+// command = "select dbid,RawXml from JobUsageRecord";
+// command = "select dbid,RawXml from JobUsageRecord where MachineName like '%flxi02%' order by dbid";
+command = "select max(serverdate) from JobUsageRecord";
+
+statement = connection.prepareStatement(command);
+resultSet = statement.executeQuery(command);
+while(resultSet.next())
+{
+		print("date: " + resultSet.getDate(1));
+		print("time: " + resultSet.getTimestamp(1));
+}
+print("");
+print("Done !!");
+

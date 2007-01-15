@@ -1,0 +1,68 @@
+import java.sql.*;
+
+driver = "com.mysql.jdbc.Driver";
+url = "jdbc:mysql://cd-psg6.fnal.gov:3320/gratia";
+user = "gratia";
+password = "proto";
+vector = new Vector();
+
+irecords = 0;
+idups = 0;
+
+print("");
+print("Starting");
+
+Class.forName(driver).newInstance();
+connection = DriverManager.getConnection(url,user,password);
+
+execute(command)
+{
+		statement = connection.prepareStatement(command);
+		print("Executing: " + command);
+		statement.executeUpdate();
+}
+
+deleteDuplicates()
+{
+		for (Enumeration x = vector.elements();;x.hasMoreElements())
+				{
+						key = x.nextElement();
+						print("");
+						print("deleteing: " + key);
+						print("");
+						execute("delete from ConsumableResource where dbid = " + key);
+						execute("delete from Disk where dbid = " + key);
+						execute("delete from Memory where dbid = " + key);
+						execute("delete from Network where dbid = " + key);
+						execute("delete from PhaseResource where dbid = " + key);
+						execute("delete from Resource where dbid = " + key);
+						execute("delete from ServiceLevel where dbid = " + key);
+						execute("delete from Swap where dbid = " + key);
+						execute("delete from TimeDuration where dbid = " + key);
+						execute("delete from TimeInstant where dbid = " + key);
+						execute("delete from JobUsageRecord where dbid = " + key);
+				}
+}
+
+command = "select dbid,LocalJobId,RecordId from JobUsageRecord" +
+				"  where date(ServerDate) = '2006-12-26'" +
+				"  group by LocalJobId,RecordId having count(*) > 1";
+
+statement = connection.prepareStatement(command,java.sql.ResultSet.TYPE_FORWARD_ONLY,java.sql.ResultSet.CONCUR_READ_ONLY);
+statement.setFetchSize(Integer.MIN_VALUE);
+resultSet = statement.executeQuery(command);
+while(resultSet.next())
+{
+		irecords++;
+		key = resultSet.getString("dbid");
+		vector.add(key);
+}
+resultSet.close();
+statement.close();
+
+print("dups: " + vector.size());
+
+deleteDuplicates();
+
+print("Done !!");
+

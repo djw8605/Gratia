@@ -1,0 +1,22 @@
+import java.util.*;
+import java.io.*;
+import java.net.*;
+import java.rmi.*;
+import java.security.*;
+
+destination = "http://localhost:8880/gratia-administration/ngap-status.html";
+
+URL url = new URL(destination);
+URLConnection connection = url.openConnection();
+    
+// Get the response
+
+BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+String line;
+received = new StringBuffer();
+
+while ((line = reader.readLine()) != null)
+		received.append(line);
+reader.close();
+
+print("result: " + received.toString());

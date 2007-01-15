@@ -1,0 +1,32 @@
+import java.util.*;
+import java.io.*;
+import java.net.*;
+import java.rmi.*;
+import net.sf.gratia.services.*;
+
+connection = "http://localhost:8880/gratia-servlets/rmi";
+
+start = System.currentTimeMillis();
+
+int i = 0;
+String response;
+
+for (i = 0; i < 10; i++)
+{
+		Post post = new Post(connection,"statusUpdate","status","generic:lost:25");
+		String status = post.send();
+		if (! status.equals("OK"))
+				{
+						print("Error From Post: " + status);
+						return;
+				}
+		Thread.sleep(1000);
+}
+
+stop = System.currentTimeMillis();
+
+print("");
+print("Total Records: " + i);
+print("Elapsed: " + (stop - start));
+print("Done !!");
+

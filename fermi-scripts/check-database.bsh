@@ -1,0 +1,63 @@
+// addClassPath("c:/eclipse/workspace/gratia/services");
+
+import java.sql.*;
+import net.sf.gratia.services.*;
+import net.sf.gratia.storage.*;
+import org.hibernate.cfg.*;
+
+driver = "com.mysql.jdbc.Driver";
+url = "jdbc:mysql://cd-psg4.fnal.gov:3320/gratia";
+user = "gratia";
+password = "proto";
+irecords = 0;
+imax = 5000;
+
+xp = new XP();
+
+Class.forName(driver).newInstance();
+connection = DriverManager.getConnection(url,user,password);
+
+//
+// start hibernate
+//
+
+hc = new org.hibernate.cfg.Configuration();
+hc.addFile(new File("c:/tomcat/gratia/JobUsage.hbm.xml"));
+hc.configure(new File("c:/tomcat/gratia/hibernate.cfg.xml"));
+
+Properties props = new Properties();
+props.setProperty("hibernate.connection.driver_class",driver);
+props.setProperty("hibernate.connection.url",url);
+props.setProperty("hibernate.connection.username",user);
+props.setProperty("hibernate.connection.password",password);
+hc.addProperties(props);
+
+factory = hc.buildSessionFactory();
+session = factory.openSession();
+
+String getXML(String dbid)
+{
+		String command = "from JobUsageRecord where dbid = " + dbid;
+		List result = session.createQuery(command).list();
+		JobUsageRecord record = result.get(0);
+		return record.asXML();
+}
+
+print("Hibernate Started");
+
+command = "select dbid from JobUsageRecord where date(EndTime) = '2006-09-17'";
+statement = connection.prepareStatement(command);
+resultSet = statement.executeQuery(command);
+while(resultSet.next())
+{
+		irecords++;
+		dbid = resultSet.getString(1);
+		xml = getXML(dbid);
+		System.out.println("");
+		System.out.println("dbid: " + dbid);
+		System.out.println("xml: " + xml);
+		System.out.println("");
+}
+print("");
+print("Done !!");
+

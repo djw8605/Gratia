@@ -1,0 +1,170 @@
+import java.sql.*;
+import net.sf.gratia.services.*;
+import net.sf.gratia.storage.*;
+import org.hibernate.cfg.*;
+import org.dom4j.*;
+import org.dom4j.io.*;
+import java.security.*;
+
+driver = "com.mysql.jdbc.Driver";
+url = "jdbc:mysql://cd-psg3.fnal.gov:3320/gratia";
+user = "gratia";
+password = "proto";
+irecords = 0;
+
+xp = new XP();
+
+Class.forName(driver).newInstance();
+connection = DriverManager.getConnection(url,user,password);
+
+//
+// start hibernate
+//
+
+hc = new org.hibernate.cfg.Configuration();
+hc.addFile(new File("c:/tomcat/gratia/JobUsage.hbm.xml"));
+hc.configure(new File("c:/tomcat/gratia/hibernate.cfg.xml"));
+
+Properties props = new Properties();
+props.setProperty("hibernate.connection.driver_class",driver);
+props.setProperty("hibernate.connection.url",url);
+props.setProperty("hibernate.connection.username",user);
+props.setProperty("hibernate.connection.password",password);
+hc.addProperties(props);
+
+factory = hc.buildSessionFactory();
+
+String md5key(String input) throws Exception
+{
+		MessageDigest md = MessageDigest.getInstance("MD5");
+		md.update(input.getBytes());
+		return HexString.bufferToHex(md.digest());
+}
+
+public ArrayList convert(String xml) throws Exception 
+{
+		ArrayList usageRecords = new ArrayList();    	
+		SAXReader saxReader = new SAXReader();        
+		Document doc = null;
+		Element eroot = null;
+
+		// Read the XML into a document for parsing
+
+		try
+				{
+						doc = saxReader.read(new StringReader(xml));  
+				}
+		catch (Exception e)
+				{
+						Logging.warning(xp.parseException(e));
+						Logging.warning("XML:" + "\n\n" + xml + "\n\n");
+						throw new Exception();
+				}
+		try 
+				{
+						eroot = doc.getRootElement();
+
+						JobUsageRecord job = null;
+						UsageRecordLoader load = new UsageRecordLoader();
+
+						if (eroot.getName()=="JobUsageRecord"
+								|| eroot.getName()=="UsageRecord"
+								|| eroot.getName()=="Usage"
+								|| eroot.getName()=="UsageRecordType") 
+								{
+										// The current element is a job usage record node.  Use it to populate a JobUsageRecord object            	
+										job = load.ReadUsageRecord(eroot);
+
+										// Add this populated job usage record to the usage records array list
+										usageRecords.add(job);                
+								} 
+						else if (eroot.getName()!="UsageRecords") 
+								{            	
+										// Unexpected root element
+										throw new Exception("In the xml usage record, the expected root nodes are " + 
+																				"JobUsageRecords, JobUsageRecord, Usage, UsageRecord " + 
+																				"and UsageRecordType.\nHowever we got "+eroot.getName());
+								} 
+						else 
+								{
+										// This is a usage records node
+										// which should contain one to many job usage record nodes so start a loop through its children
+										for (Iterator i = eroot.elementIterator(); i.hasNext(); ) 
+												{
+														Element element = (Element) i.next();
+														if (element.getName() == "JobUsageRecord") 
+																{
+																		//The current element is a job usage record node.  Use it to populate a JobUsageRecord object
+																		job = load.ReadUsageRecord(element);
+																		usageRecords.add(job);
+																} 
+														else 
+																{
+																		// Unexpected element
+																		throw new Exception("Unexpected element: "+element.getName()
+																												+"\n"+element);
+																}
+												}
+								}
+				} 
+		catch(Exception e) 
+				{
+						System.out.println("ListenerThread: " + ident + ":Parse error:  " + e.getMessage());
+						System.out.println("ListenerThread: " + ident + ":XML:  " + "\n" + xml);
+				}
+		finally
+				{
+						// Cleanup object instantiations
+						saxReader = null;
+						doc = null;   
+						eroot = null;
+				}
+
+		// The usage records array list is now populated with all the job usage records found in the given XML file
+		//  return it to the caller.
+		return usageRecords;
+}   
+
+irecords = 0;
+orecords = 0;
+
+void update(String dbid)
+{
+		session = factory.openSession();
+		String command = "from JobUsageRecord where dbid = " + dbid;
+		List result = session.createQuery(command).list();
+		JobUsageRecord record = result.get(0);
+		record.setRecordIdentity(null);
+		md5key = md5key(record.asXML());
+		xml = record.getRawXml();
+		list = convert(xml);
+		record2 = list.get(0);
+		oldkey = record.getUserIdentity().getKeyInfo().getContent();
+		newkey = record2.getUserIdentity().getKeyInfo().getContent();
+		if (newkey.length() > oldkey.length())
+				{
+						orecords++;
+						xp.save("/fermi/gratia-recovery/record" + orecords,md5key + "|" + newkey + "|" + xml);
+						System.out.println("Saved Fix For DBID: " + dbid);
+						System.out.println("oldkey:" + oldkey.length() + ":" + oldkey);
+						System.out.println("newkey:" + newkey.length() + ":" + newkey);
+				}
+		session.close();
+}
+
+print("Hibernate Started");
+
+command = "select dbid from JobUsageRecord where dbid > 318856 and length(KeyInfoContent) > 240";
+statement = connection.prepareStatement(command);
+resultSet = statement.executeQuery(command);
+System.out.println("");
+while(resultSet.next())
+{
+		irecords++;
+		dbid = resultSet.getString(1);
+		System.out.println("<" + irecords + ":" + dbid + ">");
+		update(dbid);
+}
+print("");
+print("Done !!");
+
