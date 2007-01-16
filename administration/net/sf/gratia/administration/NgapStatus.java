@@ -185,7 +185,7 @@ public class NgapStatus extends HttpServlet
 						}
 
 				buffer.append("record-count-hour=" + count1 + "|");
-				buffer.append("record-count-24hou=|" + count24 + "|");
+				buffer.append("record-count-24hour=" + count24 + "|");
 				
 				int maxthreads = Integer.parseInt(props.getProperty("service.listener.threads"));
 				String path = System.getProperties().getProperty("catalina.home");
