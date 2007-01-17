@@ -120,7 +120,7 @@
 
     <servlet-mapping>
         <servlet-name>NgapStatus</servlet-name>
-        <url-pattern>/ngap-status.html</url-pattern>
+        <url-pattern>/monitor-status.html</url-pattern>
     </servlet-mapping>
 
 </web-app>
