@@ -78,8 +78,8 @@ begin
 			' where',
 			' CEProbes.facility_id = CETable.facility_id',
 			' and JobUsageRecord.ProbeName = CEProbes.probename',
-			' and EndTime >= date(?)',
-			' and EndTime <= date(?)',
+			' and EndTime >= ?',
+			' and EndTime <= ?',
 			@mywhereclause,
 			' group by date_format(JobUsageRecord.EndTime,?),CETable.facility_name',
 			' order by date_format(JobUsageRecord.EndTime,?)');
@@ -137,7 +137,7 @@ begin
 			'select ProbeName,EndTime as endtime,sum(Njobs) as Njobs',
 			' from JobUsageRecord',
 			' where',
-			'	EndTime >= date(?) and EndTime <= date(?)',
+			'	EndTime >= ? and EndTime <= ?',
 			@mywhereclause,
 			' group by date_format(EndTime,?),ProbeName',
 			' order by date_format(EndTime,?)');
