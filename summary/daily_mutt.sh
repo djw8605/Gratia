@@ -27,36 +27,60 @@ whenarg=$(date -d "${date_arg:-yesterday}" +"%Y/%m/%d")
 
 MAIL_MSG="Report from the job level Gratia db for $when"
 SUM_MAIL_MSG="Report from the daily summary Gratia db for $when"
+STATUS_MAIL_MSG="Job Success Rate for $when (from the job level Gratia db)"
 
 # Transfer the file now
 WORK_DIR=workdir.${RANDOM}
-REPORTTXT=${WORK_DIR}/report.txt
-REPORTCSV=${WORK_DIR}/report.csv
-SUM_REPORTTXT=${WORK_DIR}/summary_report.txt
-SUM_REPORTCSV=${WORK_DIR}/summary_report.csv
+#REPORTTXT=${WORK_DIR}/report.txt
+#REPORTCSV=${WORK_DIR}/report.csv
+#SUM_REPORTTXT=${WORK_DIR}/summary_report.txt
+#SUM_REPORTCSV=${WORK_DIR}/summary_report.csv
 
 
 mkdir $WORK_DIR
 
-echo "See $WEBLOC for more information" > $REPORTTXT 
-echo >> $REPORTTXT 
-./daily --output=text $whenarg >> $REPORTTXT 
+function sendto {
+    cmd=$1
+    when=$2
+    txtfile=$3.txt
+    csvfile=$3.csv
+    subject="$4"
 
-echo "For more information see:,$WEBLOC" > $REPORTCSV
-echo >> $REPORTCSV
-./daily --output=csv $whenarg >>  $REPORTCSV
+    echo "See $WEBLOC for more information" > $txtfile
+    echo >> $txtfile
+    eval $1 --output=text $when >> $txtfile
 
-mutt -a $REPORTCSV -s "$MAIL_MSG" $MAILTO < $REPORTTXT
+    echo "For more information see:,$WEBLOC" > $csvfile
+    echo >> $csvfile
+    eval $1 --output=csv $when >>  $csvfile
+    
+    mutt -a $csvfile -s "$subject" $MAILTO < $txtfile
+}
 
-./dailyFromSummary --output=text $whenarg > $SUM_REPORTTXT 
-echo >> $SUM_REPORTTXT 
-echo "See $SUM_WEBLOC for more information" >> $SUM_REPORTTXT 
+#echo "See $WEBLOC for more information" > $REPORTTXT 
+#echo >> $REPORTTXT 
+#./daily --output=text $whenarg >> $REPORTTXT 
 
-./dailyFromSummary --output=csv $whenarg >  $SUM_REPORTCSV
-echo >> $SUM_REPORTCSV
-echo "For more information see:,$SUM_WEBLOC" >> $SUM_REPORTCSV
+#echo "For more information see:,$WEBLOC" > $REPORTCSV
+#echo >> $REPORTCSV
+#./daily --output=csv $whenarg >>  $REPORTCSV
 
-mutt -a $SUM_REPORTCSV -s "$SUM_MAIL_MSG" $MAILTO < $SUM_REPORTTXT
+#echo mutt -a $REPORTCSV -s "$MAIL_MSG" $MAILTO < $REPORTTXT
+
+#./dailyFromSummary --output=text $whenarg > $SUM_REPORTTXT 
+#echo >> $SUM_REPORTTXT 
+#echo "See $SUM_WEBLOC for more information" >> $SUM_REPORTTXT 
+
+#./dailyFromSummary --output=csv $whenarg >  $SUM_REPORTCSV
+#echo >> $SUM_REPORTCSV
+#echo "For more information see:,$SUM_WEBLOC" >> $SUM_REPORTCSV
+
+#echo mutt -a $SUM_REPORTCSV -s "$SUM_MAIL_MSG" $MAILTO < $SUM_REPORTTXT
+
+sendto ./daily $whenarg ${WORK_DIR}/report "$MAIL_MSG"
+sendto ./dailyFromSummary $whenarg ${WORK_DIR}/summary_report "$SUM_MAIL_MSG"
+sendto ./dailyStatus  $whenarg ${WORK_DIR}/status_report "$STATUS_MAIL_MSG"
+
 
 if [ "$debug" != "x" ]; then 
    rm -rf $WORK_DIR

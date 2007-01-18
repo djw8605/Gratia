@@ -5,7 +5,7 @@
 #
 # library to create simple report using the Gratia psacct database
 #
-#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.12 2006-12-19 20:53:11 pcanal Exp $
+#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.13 2007-01-18 21:36:36 pcanal Exp $
 
 import time
 import datetime
@@ -299,6 +299,32 @@ def DailySiteVODataFromDaily(begin,end,select,count):
                 + " group by J.VOName, J.SiteName order by J.SiteName, J.VOName "
         return RunQueryAndSplit(select)
 
+def DailySiteJobStatus(begin,end,select = "", count = ""):
+        schema = "gratia"
+
+        select = " SELECT CETable.facility_name ,J.Status,count(*) " \
+                + " from "+schema+".CETable, "+schema+".CEProbes, "+schema+".JobUsageRecord J " \
+                + " where CEProbes.facility_id = CETable.facility_id and J.ProbeName = CEProbes.probename" \
+                + " and \""+ DateToString(begin) +"\"<EndTime and EndTime<\"" + DateToString(end) + "\"" \
+                + select \
+                + " group by J.ProbeName,J.Status " \
+                + " order by CETable.facility_name "
+        return RunQueryAndSplit(select)
+
+def DailySiteJobStatusCondor(begin,end,select = "", count = ""):
+        schema = "gratia"
+
+        select = " SELECT CETable.facility_name ,R.Value,count(*) " \
+                + " from "+schema+".CETable, "+schema+".CEProbes, "+schema+".JobUsageRecord J, "+schema+".Resource R "\
+                + " where CEProbes.facility_id = CETable.facility_id and J.ProbeName = CEProbes.probename" \
+                + " and \""+ DateToString(begin) +"\"<EndTime and EndTime<\"" + DateToString(end) + "\"" \
+                + " and J.dbid = R.dbid and R.Description = \"ExitCode\" " \
+                + " group by J.ProbeName,R.Value " \
+                + " order by CETable.facility_name "
+        return RunQueryAndSplit(select)
+
+# Condor Exit Status
+
 def PrintHeader():
         print " VO        | Wall Hours | Norm Wall | CPU Hours |  Norm CPU | Wall Load| Norm Wall| CPU Load | Norm CPU |"
 
@@ -409,6 +435,32 @@ def FromCondor():
         print "# of CPUS : ",ncpu
         print "Date : " + gBegin.strftime("%m/%Y") + " (" + str(days )+ " days)"
 
+class DailySiteJobStatusConf:
+    title = "Summary of the job exit status (midnight to midnight central time) for %s\nincluding all jobs that finished in that time period.\n\nFor Condor the value used is taken from 'ExitCode' and NOT from 'Exit Status'\n"
+    headline = "For all jobs finished on %s (Central Time)"
+    headers = ("Site","Success Rate","Success","Failed","Total")
+    formats = {}
+    lines = {}
+    col1 = "All sites"
+    CondorSpecial = False
+
+    def __init__(self, header = False, CondorSpecial = True):
+           self.formats["csv"] = ",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""
+           self.formats["text"] = "| %-22s | %12s | %10s | %10s | %10s "
+           self.lines["csv"] = ""
+           self.lines["text"] = "---------------------------------------------------------------------------------------"
+
+           if (not header) :  self.title = ""
+           self.CondorSpecial = CondorSpecial
+
+
+    def GetData(self,start,end):
+       if self.CondorSpecial:
+           return DailySiteJobStatus(start,end,select=" and J.StatusDescription != \"Condor Exit Status\" ")+DailySiteJobStatusCondor(start,end)
+       else:
+           return DailySiteJobStatus(start,end)
+    
+  
 class DailySiteReportConf:
         title = "OSG usage summary (midnight to midnight central time) for %s\nincluding all jobs that finished in that time period.\nWall Duration is expressed in hours and rounded to the nearest hour.\nWall Duration is the duration between the instant the job start running and the instant the job ends its execution.\nDeltas are the differences with the previous day.\n"
         headline = "For all jobs finished on %s (Central Time)"
@@ -502,6 +554,86 @@ def sortedDictValues(adict):
     items.sort()
     return [(key,value) for key, value in items]
 
+def GenericDailyStatus(what, when = datetime.date.today(), output = "text"):
+
+        if (output != "None") :
+            if (what.title != "") :
+                print what.title % ( DateToString(when,False) )
+            if (what.headline != "") :
+                print what.headline % (DateToString(when,False))
+            print what.lines[output]
+            print "    ", what.formats[output] % what.headers
+            print what.lines[output]
+        
+        # First get the previous' day information
+        start = when  + datetime.timedelta(days=-1)
+        end = start + datetime.timedelta(days=1)
+        lines = what.GetData(start,end)
+
+        result = []
+        index = 0
+
+        all_values = {}
+        sum_values = {}
+        
+        for i in range (1,len(lines)):
+                val = lines[i].split('\t')
+
+                if (val[2] == "count(*)"):
+                    continue
+
+                site = val[0]
+                status = val[1]
+                count = string.atoi(val[2])
+
+                key = site + " has status " + status
+
+                if all_values.has_key(key):
+                    (a,b,oldvalue) = all_values[key]
+                    oldvalue = oldvalue + count
+                    all_values[key] = (a,b,oldvalue)
+                else:
+                    all_values[key] = (site,status,count)
+
+                key = site
+                (tmp, success, failed ) = ("",0,0)
+                if sum_values.has_key(key) :
+                    (tmp, success, failed ) = sum_values[key]
+                if status == "0" :
+                    success = success + count
+                else:
+                    failed = failed + count
+                sum_values[key] = (site, success, failed)
+                
+##        for key,(site,status,count) in sortedDictValues(all_values):
+##            index = index + 1;
+##            values = (site,status,count)
+##            if (output != "None") :
+##                     print "%3d " %(index), what.formats[output] % values
+##            result.append(values)
+
+        totaljobs = 0
+        totalsuccess = 0
+        totalfailed = 0
+        for key,(site,success,failed) in sortedDictValues(sum_values):
+            index = index + 1;
+            total = success+failed
+            values = (site,str((success*100/total))+" %",success,failed,total)
+            totaljobs = totaljobs + total
+            totalsuccess = totalsuccess + success
+            totalfailed = totalfailed + failed
+            if (output != "None") :
+                     print "%3d " %(index), what.formats[output] % values
+            result.append(values)
+
+        if (output != "None") :
+                print what.lines[output]
+                print "    ", what.formats[output] % ( what.col1, str(totalsuccess*100/totaljobs) + " %", totalsuccess,totalfailed,totaljobs)
+                print what.lines[output]
+
+        return result
+            
+        
 def GenericDaily(what, when = datetime.date.today(), output = "text"):
         factor = 3600  # Convert number of seconds to number of hours
 

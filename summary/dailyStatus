@@ -1,0 +1,25 @@
+#!/bin/env python
+ 
+import sys
+import PSACCTReport
+
+from PSACCTReport import FromCondor,UseArgs,gOutput,gBegin,CheckDB
+import sys
+
+def main(argv=None):
+    UseArgs(argv)
+
+    if not CheckDB() :
+        return 1
+
+    argOutput = PSACCTReport.gOutput
+    PSACCTReport.GenericDailyStatus( PSACCTReport.DailySiteJobStatusConf(header=True),PSACCTReport.gBegin,output=argOutput )
+    print
+    #PSACCTReport.GenericDailyStatus( PSACCTReport.DailySiteJobStatusConf(header=True,CondorSpecial=False),PSACCTReport.gBegin,output=argOutput )
+    #print
+
+if __name__ == "__main__":
+    sys.exit(main())
+
+
+
