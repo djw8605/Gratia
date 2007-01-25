@@ -75,9 +75,10 @@ begin
 	declare newcpuusertime int default 0;
 
 	declare numberofdays int default 0;
+	declare imax int default 0;
 
 	declare cur01 cursor for select StartTime,EndTime,Host,ProbeName,CpuUserDuration,CpuSystemDuration,HostDescription
-		from JobUsageRecord;
+		from JobUsageRecord order by ProbeName,StartTime,EndTime;
 	declare continue handler for sqlstate '02000' set done = true;
 
 	open cur01;
@@ -114,7 +115,9 @@ begin
 		end if;
 
 		if numberofdays > 0 then
-			while counter < numberofdays do
+			set imax = numberofdays + 1;
+			set counter = 0;
+			while counter < imax do
 				set newdate = adddate(startdate,counter);
 				call updatenodesummary(
 					date(newdate),node,myprobename,newcpusystemtime,newcpuusertime,mycpucount,
@@ -149,6 +152,7 @@ glr:begin
 	declare newcpusystemtime int default 0;
 	declare newcpuusertime int default 0;
 	declare numberofdays int default 0;
+	declare imax int default 0;
 
 	--
 	-- basic data checks
@@ -315,7 +319,9 @@ glr:begin
 	end if;
 
 	if numberofdays > 0 then
-		while counter < numberofdays do
+		set imax = numberofdays + 1;
+		set counter = 0;
+		while counter < imax do
 			set newdate = adddate(startdate,counter);
 			call updatenodesummary(
 				date(newdate),node,myprobename,newcpusystemtime,newcpuusertime,mycpucount,
