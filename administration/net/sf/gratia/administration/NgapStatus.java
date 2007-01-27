@@ -95,12 +95,22 @@ public class NgapStatus extends HttpServlet
 
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
 		{
+				String probename = null;
+				String host = null;
+				
 				openConnection();
 
 				this.request = request;
 				this.response = response;
+				probename = request.getParameter("probename");
+				host = request.getParameter("host");
 				buffer = new StringBuffer();
-				process();
+				if (probename != null)
+						processProbe(probename);
+				else if (host != null)
+						processHost(host);
+				else
+						process();
 				response.setContentType("text/html");
 				response.setHeader("Cache-Control", "no-cache"); // HTTP 1.1
 				response.setHeader("Pragma", "no-cache"); // HTTP 1.0
@@ -109,6 +119,70 @@ public class NgapStatus extends HttpServlet
 				writer.flush();
 				writer.close();
 				closeConnection();
+		}
+
+		public void processProbe(String probename)
+		{
+				String command = "";
+				String dq = "'";
+				java.util.Date date = null;
+				
+				SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd kk:mm:ss");
+
+				try
+						{
+								//
+								// return time stamp of last probe contact
+								//
+								command = "select max(ServerDate) from JobUsageRecord where ProbeName = " + dq + probename + dq;
+								System.out.println("command: " + command);
+								statement = connection.prepareStatement(command);
+								resultSet = statement.executeQuery(command);
+								while(resultSet.next())
+										date = resultSet.getDate(1);
+								resultSet.close();
+								statement.close();
+								if (date == null)
+										buffer.append("last-contact=never");
+								else
+										buffer.append("last-contact=" + format.format(date));
+						}
+				catch (Exception e)
+						{
+								e.printStackTrace();
+						}
+		}
+
+		public void processHost(String host)
+		{
+				String command = "";
+				String dq = "'";
+				java.util.Date date = null;
+				
+				SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd kk:mm:ss");
+
+				try
+						{
+								//
+								// return time stamp of last host contact
+								//
+								command = "select max(ServerDate) from JobUsageRecord where Host = " + dq + host + dq;
+								System.out.println("command: " + command);
+								statement = connection.prepareStatement(command);
+								resultSet = statement.executeQuery(command);
+								while(resultSet.next())
+										date = resultSet.getDate(1);
+								resultSet.close();
+								statement.close();
+								if (date == null)
+										buffer.append("last-contact=never");
+								else
+										buffer.append("last-contact=" + format.format(date));
+						}
+				catch (Exception e)
+						{
+								e.printStackTrace();
+						}
 		}
 
 		public void process()
