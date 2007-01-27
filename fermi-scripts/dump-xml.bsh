@@ -5,13 +5,13 @@ url = "jdbc:mysql://cd-psg6.fnal.gov:3320/gratia";
 user = "gratia";
 password = "proto";
 irecords = 0;
-imax = 10000;
+imax = 5000;
 
 xp = new XP();
 
+print("Starting");
 Class.forName(driver).newInstance();
 connection = DriverManager.getConnection(url,user,password);
-
 command = "select dbid,RawXml from JobUsageRecord where dbid > 2288655";
 // command = "select dbid,RawXml from JobUsageRecord where MachineName like '%flxi02%' order by dbid";
 // command = "select dbid,RawXml from JobUsageRecord where date(EndTime) = '2006-09-18'";
