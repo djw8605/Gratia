@@ -104,8 +104,13 @@ public class HistoryReaper
 				beginning.set(Calendar.SECOND,0);
 				beginning.set(Calendar.MINUTE,0);
 				SimpleDateFormat format = new SimpleDateFormat("yyyyMMddhh");
+
 				String beginningHistory = path + "/history" + format.format(beginning.getTime());
-				Logging.log("HistoryReaper: First Directory To Process: " + beginningHistory);
+				Logging.log("HistoryReaper: First History Directory To Process: " + beginningHistory);
+
+				String beginningOld = path + "/old" + format.format(beginning.getTime());
+				Logging.log("HistoryReaper: First Old Directory To Process: " + beginningOld);
+
 				//
 				// now - screen/delete older directories
 				//
@@ -113,6 +118,11 @@ public class HistoryReaper
 						{
 								String directory = (String) vector.elementAt(i);
 								if (directory.compareTo(beginningHistory) < 0)
+										{
+												Logging.log("HistoryReaper: Deleting Directory: " + directory);
+												deleteDirectory(directory);
+										}
+								if (directory.compareTo(beginningOld) < 0)
 										{
 												Logging.log("HistoryReaper: Deleting Directory: " + directory);
 												deleteDirectory(directory);
