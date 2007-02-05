@@ -25,6 +25,6 @@ storage:
 JobUsage.hbm.xml: ../../../../../../configuration/JobUsage.hbm.xml
 	cp ../../../../../../configuration/JobUsage.hbm.xml .
 
-test:  XP Logging storage
+test:  XP Logging storage JobUsage.hbm.xml
 	rm -rf derby output *logfile*; mkdir output
 	java bsh.Interpreter test.bsh
