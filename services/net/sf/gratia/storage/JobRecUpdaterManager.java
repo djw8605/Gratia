@@ -17,6 +17,40 @@ public class JobRecUpdaterManager implements JobUsageRecordUpdater {
 
    java.util.List Updaters;
    
+   public class CheckResourceType implements JobUsageRecordUpdater 
+   {
+      // Set the ResourceType (if needed) according to the ProbeName (if any).
+
+      public void Update(JobUsageRecord current) 
+      {
+         StringElement type = current.getResourceType();
+         if (type != null) return;
+         
+         if (current.getProbeName() == null) return;
+
+         String probeName = current.getProbeName().getValue();
+         if (probeName == null || probeName.length() == 0) return;
+
+         String[] splits = probeName.toLowerCase().split(":");
+
+         if (splits[0].equals("psacct")) {
+            type = new StringElement();
+            type.setValue("RawCPU");
+         } else if (splits[0].equals("condor")  || splits[0].equals("pbs") ||
+                    splits[0].equals("pbs-lsf") || splits[0].equals("lsf") || 
+                    splits[0].equals("glexec")  || splits[0].equals("daily")) {
+            type = new StringElement();
+            type.setValue("Batch");
+         } else if (splits[0].equals("dcache")) {
+            type = new StringElement();
+            type.setValue("Storage");
+         }
+         if (type != null) {
+            current.setResourceType(type);
+         }
+      }
+   }
+
    public class CheckEndTime implements JobUsageRecordUpdater 
    {
       public void Update(JobUsageRecord current) 
@@ -232,11 +266,12 @@ public class JobRecUpdaterManager implements JobUsageRecordUpdater {
       VONameUpdater vopatch = new VONameUpdater();
       vopatch.LoadFiles(Configuration.getConfigurationPath());
 
-                Updaters.add(vopatch);
+      Updaters.add(vopatch);
       Updaters.add(new CheckStartTime());
       Updaters.add(new CheckEndTime());
       Updaters.add(new CheckCpuDuration());
       Updaters.add(new ExtractKeyInfoContent());
+      Updaters.add(new CheckResourceType());
 
    }
    
