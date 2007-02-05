@@ -1,0 +1,29 @@
+<UsageRecord xmlns="http://www.gridforum.org/2003/ur-wg" xmlns:urwg="http://www.gridforum.org/2003/ur-wg" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.gridforum.org/2003/ur-wg file:///u:/OSG/urwg-schema.11.xsd">
+<urwg:RecordIdentity urwg:createTime="2007-01-05T16:29:56Z" urwg:recordId="lqcd.fnal.gov:228287.lqcd.fnal.gov_1167889211"/>
+<urwg:JobIdentity>
+<urwg:GlobalJobId>lqcd.fnal.gov:228287.lqcd.fnal.gov_1167889211</urwg:GlobalJobId>
+<urwg:LocalJobId>228287.lqcd.fnal.gov</urwg:LocalJobId>
+</urwg:JobIdentity>
+<urwg:UserIdentity>
+   <urwg:LocalUserId>ruthv</urwg:LocalUserId>
+   <urwg:VOName>lqcd</urwg:VOName>
+   <ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#"></ds:KeyInfo>
+   <ReportableVOName>LQCD</ReportableVOName>
+</urwg:UserIdentity>
+<urwg:JobName>make_stag3pt_v12</urwg:JobName>
+<urwg:Status description="exit status">0</urwg:Status>
+<urwg:WallDuration>PT5M16S</urwg:WallDuration>
+<urwg:CpuDuration>PT3S</urwg:CpuDuration>
+<urwg:EndTime>2007-01-04T05:45:29Z</urwg:EndTime>
+<urwg:StartTime>2007-01-04T05:40:11Z</urwg:StartTime>
+<urwg:MachineName description="Server">lqcd.fnal.gov</urwg:MachineName>
+<urwg:Host description="executing host" primary="false">pion1205/0+pion1206/0+pion1207/0+pion1208/0+pion1209/0+pion1210/0+pion1211/0+pion1212/0</urwg:Host>
+<urwg:Queue description="LRMS type: pbs">workq</urwg:Queue>
+<urwg:Memory storageUnit="KB" metric="total">11896</urwg:Memory>
+<urwg:Swap storageUnit="KB" metric="total">36800</urwg:Swap>
+<urwg:Processors metric="total" consumptionRate="0">1</urwg:Processors>
+<urwg:TimeInstant description="LRMS event timestamp">2007-01-03T23:45:29Z</urwg:TimeInstant>
+<urwg:Resource urwg:description="LocalUserGroup">g038</urwg:Resource>
+<ProbeName>pbs-lsf:serendipity.dhcp.fnal.gov</ProbeName>
+<SiteName>Gratia Test Site</SiteName>
+</UsageRecord>
