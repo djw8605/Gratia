@@ -1065,6 +1065,17 @@ public class UsageRecordLoader
                                           id.setReportableVOName(element.getText().trim());
                                           job.setUserIdentity(id);
                                           return;
+                                    } else if (a.getValue().equalsIgnoreCase("ResourceType")) {
+                                          String val = element.getText().trim();
+                                          if (val != null) {
+                                             StringElement rel = job.getResourceType();
+                                             if ( rel == null ) {
+                                                rel = new StringElement();
+                                             } /* else { maybe throw an exception! } */
+                                             rel.setValue(val);
+                                             job.setResourceType(rel);
+                                          }
+                                          return;
                                     }
                               }
                   }

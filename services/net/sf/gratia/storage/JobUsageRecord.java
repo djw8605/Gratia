@@ -25,6 +25,7 @@ public class JobUsageRecord {
     private RecordIdentity RecordIdentity;
     private UserIdentity UserIdentity;  // This should be a list or set of UserIdentity
     private int RecordId;
+    private StringElement ResourceType;
     private JobIdentity JobIdentity;
     private StringElement JobName;
     private FloatElement Charge;
@@ -56,7 +57,7 @@ public class JobUsageRecord {
     private List Resource;
     private StringElement ProbeName;
     private Date ServerDate;
-		private String md5;
+    private String md5;
 
     public JobUsageRecord() 
 		{
@@ -89,6 +90,8 @@ public class JobUsageRecord {
 
     public String toString() {
         String output = "UsageRecord: Db Id: " + RecordId;
+        if (ResourceType != null) output = output + "RecordType: " + ResourceType;
+        if (ProbeName != null) output = output + "ProbeName: " + ProbeName;
         if (RecordIdentity != null) output = output + RecordIdentity;
         if (JobIdentity != null) output = output + JobIdentity;
         if (UserIdentity != null) output = output + " User: " + UserIdentity;
@@ -168,6 +171,7 @@ public class JobUsageRecord {
         if (ConsumableResource != null)output = output + listAsXml("ConsumableResource", ConsumableResource);
         if (Resource != null)          output = output + listAsXml("Resource", Resource);
         if (ProbeName != null)         output = output + ProbeName.asXml("ProbeName");
+        if (ResourceType != null)      output = output + ResourceType.asXml("Resource");
         if (ExtraXml != null)          output = output + ExtraXml;
 				output = output + "</JobUsageRecord>" + "\n";
         return output;
@@ -461,23 +465,33 @@ public class JobUsageRecord {
         return ProbeName;
     }
 
-		public Date getServerDate() 
-		{
-				return ServerDate;
-		}
+    public void setResourceType(StringElement resourceType) {
+        this.ResourceType = resourceType;
+        if (this.ResourceType != null) {
+           this.ResourceType.setDescription("ResourceType");
+        }
+    }
+    public StringElement getResourceType() {
+        return ResourceType;
+    }
 
-		public void setServerDate(Date value) 
-		{
-				ServerDate = value;
-		}
+    public Date getServerDate() 
+    {
+       return ServerDate;
+    }
 
-		public String getmd5()
-		{
-				return md5;
-		}
+    public void setServerDate(Date value) 
+    {
+       ServerDate = value;
+    }
 
-		public void setmd5(String value)
-		{
-				md5 = value;
-		}
+    public String getmd5()
+    {
+       return md5;
+    }
+
+    public void setmd5(String value)
+    {
+       md5 = value;
+    }
 }
