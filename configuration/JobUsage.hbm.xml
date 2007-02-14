@@ -134,6 +134,10 @@
         <generator class="native"/>
     </id>
 
+   <component name="ResourceType" class="StringElement" insert="true">
+       <property name="Value" column="ResourceType" />
+   </component>
+
     <component name="RecordIdentity" class="RecordIdentity" insert="true">
         <property name="recordId"
               column="recordId"
