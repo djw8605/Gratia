@@ -280,6 +280,7 @@ EOF
 end
 ||
 -- call $procedure('GratiaUser','GratiaUser','2006-10-01 00:00:00','2006-10-10 00:00:00','\%y:\%m:\%d:\%H:\%i','Batch')
+||
 EOF
 	}
 	return $procedure_code;
