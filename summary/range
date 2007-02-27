@@ -1,0 +1,39 @@
+#!/bin/env python
+ 
+import sys
+import PSACCTReport
+
+from PSACCTReport import FromCondor,UseArgs,gOutput,gBegin,CheckDB
+import sys
+
+def main(argv=None):
+    UseArgs(argv)
+    print PSACCTReport.gBegin,PSACCTReport.gEnd
+
+    if not CheckDB() :
+        return 1
+
+    argOutput = PSACCTReport.gOutput
+    PSACCTReport.RangeVOReport(PSACCTReport.gBegin,
+                               PSACCTReport.gEnd,
+                               output = argOutput,
+                               header = True,
+                               with_panda = PSACCTReport.gWithPanda);
+    print
+    PSACCTReport.RangeSiteReport(PSACCTReport.gBegin,
+                                 PSACCTReport.gEnd,
+                                 output = argOutput,
+                                 header = False,
+                                 with_panda = PSACCTReport.gWithPanda);
+    print
+    PSACCTReport.RangeSiteVOReport(PSACCTReport.gBegin,
+                                   PSACCTReport.gEnd,
+                                   output = argOutput,
+                                   header = False,
+                                   with_panda = PSACCTReport.gWithPanda);
+
+if __name__ == "__main__":
+    sys.exit(main())
+
+
+
