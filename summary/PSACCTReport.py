@@ -5,7 +5,7 @@
 #
 # library to create simple report using the Gratia psacct database
 #
-#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.14 2007-02-27 17:49:26 greenc Exp $
+#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.15 2007-02-27 18:58:31 pcanal Exp $
 
 import time
 import datetime
@@ -569,8 +569,8 @@ def GenericDailyStatus(what, when = datetime.date.today(), output = "text"):
             print "    ", what.formats[output] % what.headers
             print what.lines[output]
         
-        # First get the previous' day information
-        start = when  + datetime.timedelta(days=-1)
+        # Get the correct day information
+        start = when
         end = start + datetime.timedelta(days=1)
         lines = what.GetData(start,end)
 
