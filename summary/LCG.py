@@ -5,7 +5,7 @@
 #
 # library to transfer the data from Gratia to APEL (WLCG)
 #
-#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: LCG.py,v 1.1 2007-03-02 21:22:09 pcanal Exp $
+#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: LCG.py,v 1.2 2007-03-02 22:03:13 pcanal Exp $
 
 import time
 import datetime
@@ -40,28 +40,27 @@ def UseArgs(argv):
     start = ""
     end = ""
     if len(argv) > len(opts) + 1:
-        start = argv[len(opts)+1]
-        if len(argv) > len(opts) + 2:
-                end =  argv[len(opts)+2]
-        SetDate(start,end)
+        month = argv[len(opts)+1]
+        SetDate(month)
     for o, a in opts:
         if o in ("--output"):
                 gOutput = a
 
-def SetDate(start,end):
+def SetDate(month):
     " Set the start and begin by string"
     global gBegin, gEnd
-    if len(start) > 0:
-        gBegin = datetime.date(*time.strptime(start, "%Y/%m/%d")[0:3]) 
-    if len(end) > 0:
-        gEnd = datetime.date(*time.strptime(end, "%Y/%m/%d")[0:3]) 
+
+    t = time.strptime(month, "%Y/%m")[0:3]
+    gBegin = datetime.date(*t)
+    t = (t[0],t[1]+1,t[2])
+    gEnd = datetime.date(*t)
 
 def StringToDate(input):
     return datetime.datetime(*time.strptime(input, "%d/%m/%Y")[0:5])
 
 def DateToString(input,gmt=True):
     if gmt:
-        return input.strftime("%Y-%m-%d 07:00:00");
+        return input.strftime("%Y-%m-%d 00:00:00");
     else:
         return input.strftime("%Y-%m-%d");
 
@@ -119,22 +118,25 @@ def RunQuery(select):
         LogToFile(select)
         return commands.getoutput("echo '" + select + "' | " + gMySQL + gMySQLConnectString + " -N gratia " )
 
+def RunQueryAndSplit(select):
+        res = RunQuery(select)
+        LogToFile(res)
+        lines = res.split("\n")
+        return lines
+
 def GetQuery(begin,end):
-	return "select CETable.facility_name as ExecutingSite, VOName as LCGUserVO, Sum(NJobs),Sum(CpuUserDuration+CpuSystemDuration)/3600 as SumCPU,Sum(CpuUserDuration+CpuSystemDuration)/3600/"+str(gNormalization)+" as NormSumCPU, Sum(WallDuration)/3600 as SumWCT, Sum(WallDuration)/3600/"+str(gNormalization)+" as NormSumWCT,date_format(min(EndTime),\"%m\") as Month, date_format(min(EndTime),\"%Y\") as Year, date_format(min(EndTime),\"%Y-%m-%d\") as RecordStart,date_format(max(EndTime),\"%Y-%m-%d\") as RecordEnd " \
+	return "select CETable.facility_name as ExecutingSite, VOName as LCGUserVO, Sum(NJobs),Round(Sum(CpuUserDuration+CpuSystemDuration)/3600) as SumCPU,round(Sum(CpuUserDuration+CpuSystemDuration)/3600/"+str(gNormalization)+") as NormSumCPU, Round(Sum(WallDuration)/3600) as SumWCT, Round(Sum(WallDuration)/3600/"+str(gNormalization)+") as NormSumWCT,date_format(min(EndTime),\"%m\") as Month, date_format(min(EndTime),\"%Y\") as Year, date_format(min(EndTime),\"%Y-%m-%d\") as RecordStart,date_format(max(EndTime),\"%Y-%m-%d\") as RecordEnd " \
 	   + " from VOProbeSummary Main, CEProbes, CETable where " \
-	   + "\"" + DateToString(begin) +"\"<EndTime and EndTime<\"" + DateToString(end) + "\"" \
+	   + "\"" + DateToString(begin) +"\"<=EndTime and EndTime<\"" + DateToString(end) + "\"" \
 	   + " and Main.ProbeName = CEProbes.ProbeName and CEProbes.facility_id = CETable.facility_id group by Main.ProbeName, VOName"
 
 def CreateLCGsql(begin,end):
 	
-	lines = RunQuery(GetQuery(begin,end))
-	print lines[1]
-	for i in range (0,3): 
-		# len(lines)):
+	lines = RunQueryAndSplit(GetQuery(begin,end))
+	for i in range (0,len(lines)):
 		val = lines[i].split('\t')
-		print "insert into `SumCPU` VALUES "
-		print val
-		print "\n"
+		output =  "insert into `SumCPU` VALUES " + str(tuple(val)) + ";"
+                print output
 		
 
 def main(argv=None):
