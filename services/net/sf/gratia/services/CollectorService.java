@@ -482,9 +482,9 @@ public class CollectorService implements ServletContextListener
 								//
 								// the following were added to get rid of unused indexes
 								//
-								"alter table JobUsageRecord drop index index04",
-								"alter table JobUsageRecord drop index index06",
-								"alter table JobUsageRecord drop index index07",
+								"alter table JobUsageRecord drop index if exists index04",
+								"alter table JobUsageRecord drop index if exists index06",
+								"alter table JobUsageRecord drop index if exists index07",
 								//
 								// original index structure
 								//
@@ -495,8 +495,8 @@ public class CollectorService implements ServletContextListener
 								// "alter table JobUsageRecord add index index06(GlobalJobid)",
 								// "alter table JobUsageRecord add index index07(LocalJobid)",
 								"alter table JobUsageRecord add index index08(Host(255))",
-								"alter table JobUsageRecord drop index index09",
-								"alter table JobUsageRecord drop index index10",
+								"alter table JobUsageRecord drop index if exists index09",
+								"alter table JobUsageRecord drop index if exists index10",
 								"alter table JobUsageRecord add index index11(ServerDate)",
 								"alter table JobUsageRecord add unique index index12(md5)",
 								"alter table JobUsageRecord add index index13(ServerDate)",
@@ -509,7 +509,11 @@ public class CollectorService implements ServletContextListener
 								"alter table Security add unique index index02(alias)",
 								"alter table CPUInfo change column NodeName HostDescription varchar(255)",
 								//
-								// place older to initialize SystemProplist
+								// New index for ResourceType
+								//
+								"alter table JobUsageRecord add index index16(ResourceType)",
+								//
+								// place holder to initialize SystemProplist
 								//
 								"delete from SystemProplist",
 								"insert into SystemProplist(car,cdr) values(" + dq + "use.report.authentication" + dq + comma + dq + useReportAuthentication + dq + ")",
