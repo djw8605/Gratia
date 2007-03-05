@@ -5,7 +5,7 @@
 #
 # library to transfer the data from Gratia to APEL (WLCG)
 #
-#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: LCG.py,v 1.2 2007-03-02 22:03:13 pcanal Exp $
+#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: LCG.py,v 1.3 2007-03-05 19:48:45 pcanal Exp $
 
 import time
 import datetime
@@ -130,13 +130,34 @@ def GetQuery(begin,end):
 	   + "\"" + DateToString(begin) +"\"<=EndTime and EndTime<\"" + DateToString(end) + "\"" \
 	   + " and Main.ProbeName = CEProbes.ProbeName and CEProbes.facility_id = CETable.facility_id group by Main.ProbeName, VOName"
 
+
+ReportableSites = [
+    # CMS
+    'USCMS-FNAL-WC1-CE',
+    'GLOW' ,
+    'CIT_CMS_T2',
+    'MIT_CMS',
+    'Nebraska Tier 2 Center',
+    'Purdue-Lear'
+    'Purdue-RCAC',
+    'SPRACE',
+    'UCSanDiegoPG',
+    'UFlorida-PG',
+    # ATLAS
+    'UTA_DPCC' 
+    ]
+
+def ReportableSite(sitename):
+    return sitename in ReportableSites
+
 def CreateLCGsql(begin,end):
 	
 	lines = RunQueryAndSplit(GetQuery(begin,end))
 	for i in range (0,len(lines)):
 		val = lines[i].split('\t')
-		output =  "insert into `SumCPU` VALUES " + str(tuple(val)) + ";"
-                print output
+                if (ReportableSite(val[0])):
+                    output =  "insert into `OSG_DATA` VALUES " + str(tuple(val)) + ";"
+                    print output
 		
 
 def main(argv=None):
