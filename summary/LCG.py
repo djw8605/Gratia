@@ -5,7 +5,7 @@
 #
 # library to transfer the data from Gratia to APEL (WLCG)
 #
-#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: LCG.py,v 1.3 2007-03-05 19:48:45 pcanal Exp $
+#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: LCG.py,v 1.4 2007-03-05 20:30:27 pcanal Exp $
 
 import time
 import datetime
@@ -130,6 +130,19 @@ def GetQuery(begin,end):
 	   + "\"" + DateToString(begin) +"\"<=EndTime and EndTime<\"" + DateToString(end) + "\"" \
 	   + " and Main.ProbeName = CEProbes.ProbeName and CEProbes.facility_id = CETable.facility_id group by Main.ProbeName, VOName"
 
+def GetNormQuery(begin,end):
+    return "select sum(score)/count(*) from (SELECT I.BenchmarkScore/1000 as score " + \
+        "FROM gratia_psacct.NodeSummary H, gratia_psacct.CPUInfo I " + \
+        "where " + "\"" + DateToString(begin) +"\"<=EndTime and EndTime<\"" + DateToString(end) + "\"" + \
+        "and ProbeName = \"psacct:USCMS-FNAL-WC1-CE\" " + \
+        "and H.HostDescription = I.NodeName " + \
+        "group by Node) as sub"
+
+def SetNormalization(begin,end):
+    global gNormalization
+    res = RunQueryAndSplit(GetNormQuery(begin,end))
+    gNormalization = string.atof(res[0])
+    
 
 ReportableSites = [
     # CMS
@@ -151,6 +164,8 @@ def ReportableSite(sitename):
     return sitename in ReportableSites
 
 def CreateLCGsql(begin,end):
+
+        SetNormalization(begin,end)
 	
 	lines = RunQueryAndSplit(GetQuery(begin,end))
 	for i in range (0,len(lines)):
