@@ -1,5 +1,5 @@
 delimiter ||
-drop table trace
+drop table if exists trace
 ||
 CREATE TABLE trace (
   eventtime TIMESTAMP NOT NULL,
@@ -20,9 +20,10 @@ CREATE TABLE trace (
   data TEXT
 )
 ||
-drop procedure parse
+drop procedure if exists parse
 ||
-create procedure parse(username varchar(64),out outname varchar(64),out outkey varchar(64),out outvo varchar(64))
+create procedure parse(username varchar(64),out outname varchar(64),
+	out outkey varchar(64),out outvo varchar(64))
 begin
 	set outname = '';
 	set outkey = '';
@@ -40,14 +41,16 @@ begin
 	else
 		set outkey = @username;
 	end if;
-	-- insert into trace(p1,p2,p3,p4) values(username,outname,outkey,outvo);
+	insert into trace(pname,p1,user,userkey,vo) values('parse',username,outname,outkey,outvo);
 end
 ||
-drop function generateWhereClause
+drop function if exists generateWhereClause
 ||
-create function generateWhereClause(userName varchar(64),userRole varchar(64),whereClause varchar(255)) returns varchar(255)
+create function generateWhereClause(userName varchar(64),userRole varchar(64),
+	whereClause varchar(255)) returns varchar(255)
 begin
-	select SystemProplist.cdr into @usereportauthentication from SystemProplist where SystemProplist.car = 'use.report.authentication';
+	select SystemProplist.cdr into @usereportauthentication from SystemProplist
+		where SystemProplist.car = 'use.report.authentication';
 	if userName = 'GratiaGlobalAdmin' or @usereportauthentication = 'false' then
 		return '';
 	end if;
@@ -57,124 +60,25 @@ begin
 	return concat(' and ',whereClause,' ');
 end
 ||
-drop procedure DailyJobsByFacility
+drop function if exists generateResourceTypeClause
 ||
-create procedure DailyJobsByFacility (userName varchar(64),userRole varchar(64),fromdate varchar(64),todate varchar(64),format varchar(64))
+create function generateResourceTypeClause(resourceType varchar(64))
+	returns varchar(255)
 begin
-
-	set @myfromdate := fromdate;
-	set @mytodate := todate;
-	set @myformat := format;
-
-	select SystemProplist.cdr into @usereportauthentication from SystemProplist where SystemProplist.car = 'use.report.authentication';
-	select RolesTable.whereclause into @mywhereclause from RolesTable where RolesTable.role = userRole;
-	select generateWhereClause(userName,userRole,@mywhereclause) into @mywhereclause;
-	call parse(userName,@name,@key,@vo);
-
-	set @sql :=
-		concat(
-			'select CETable.facility_name,JobUsageRecord.EndTime as endtime,sum(JobUsageRecord.Njobs) as Njobs',
-			' from CETable,CEProbes,JobUsageRecord',
-			' where',
-			' CEProbes.facility_id = CETable.facility_id',
-			' and JobUsageRecord.ProbeName = CEProbes.probename',
-			' and EndTime >= ?',
-			' and EndTime <= ?',
-			@mywhereclause,
-			' group by date_format(JobUsageRecord.EndTime,?),CETable.facility_name',
-			' order by date_format(JobUsageRecord.EndTime,?)');
-	insert into trace(pname,userkey,user,role,vo,p1,p2,p3,p4,data) 
-		values('DailyJobsByFacility',@key,userName,userRole,@vo,@myfromdate,@mytodate,@myformat,@myformat,@sql);
-
-	if userName = 'GratiaGlobalAdmin' or @usereportauthentication = 'false' or @mywhereclause = 'Everything' then
-		if datediff(todate,fromdate) > 6 then
-			select CETable.facility_name,ProbeSummary.EndTime as endtime,sum(ProbeSummary.Njobs) as Njobs
-				from CETable,CEProbes,ProbeSummary
-				where
-					CEProbes.facility_id = CETable.facility_id
-					and ProbeSummary.ProbeName = CEProbes.probename
-					and EndTime >= date(fromdate)
-					and EndTime <= date(todate)
-				group by ProbeSummary.EndTime,CETable.facility_name
-				order by ProbeSummary.EndTime;
-		else
-			select CETable.facility_name,JobUsageRecord.EndTime as endtime,sum(JobUsageRecord.Njobs) as Njobs
-				from CETable,CEProbes,JobUsageRecord
-				where
-					CEProbes.facility_id = CETable.facility_id
-					and JobUsageRecord.ProbeName = CEProbes.probename
-					and EndTime >= fromdate
-					and EndTime <= todate
-				group by date_format(JobUsageRecord.EndTime,format),CETable.facility_name
-				order by date_format(JobUsageRecord.EndTime,format);
-		end if;
+	if resourceType = '' or resourceType = NULL then
+		return '';
 	else
-		prepare statement from @sql;
-		execute statement using @myfromdate,@mytodate,@myformat,@myformat;
-		deallocate prepare statement;
+		return concat(
+			' and ResourceType = ''',
+			resourceType,
+			'''');
 	end if;
 end
 ||
--- call DailyJobsByFacility('GratiaUser|1234|Unknown','GratiaUser','2006-09-01 00:00:00','2006-09-15 00:00:00','%y:%m:%d:%H:%i')
+drop procedure if exists ProbeStatus
 ||
-drop procedure DailyJobsByProbe
-||
-create procedure DailyJobsByProbe (userName varchar(64),userRole varchar(64),fromdate varchar(64),todate varchar(64),format varchar(64))
-begin
-
-	declare mywhereclause varchar(255);
-	set @myfromdate := fromdate;
-	set @mytodate := todate;
-	set @myformat := format;
-
-	select SystemProplist.cdr into @usereportauthentication from SystemProplist where SystemProplist.car = 'use.report.authentication';
-	select RolesTable.whereclause into @mywhereclause from RolesTable where RolesTable.role = userRole;
-	select generateWhereClause(userName,userRole,@mywhereclause) into @mywhereclause;
-	call parse(userName,@name,@key,@vo);
-
-	set @sql =
-		concat(
-			'select ProbeName,EndTime as endtime,sum(Njobs) as Njobs',
-			' from JobUsageRecord',
-			' where',
-			'	EndTime >= ? and EndTime <= ?',
-			@mywhereclause,
-			' group by date_format(EndTime,?),ProbeName',
-			' order by date_format(EndTime,?)');
-	insert into trace(pname,userkey,user,role,vo,p1,p2,p3,p4,data) 
-		values('DailyJobsByProbe',@key,userName,userRole,@vo,@myfromdate,@mytodate,@myformat,@myformat,@sql);
-
-	if userName = 'GratiaGlobalAdmin' or @usereportauthentication = 'false' or @mywhereclause = 'Everything' then
-		if datediff(todate,fromdate) > 6 then
-			select ProbeName,EndTime as endtime,sum(Njobs) as Njobs
-				from ProbeSummary
-				where
-					EndTime >= date(fromdate) and EndTime <= date(todate)
-				group by EndTime,ProbeName
-				order by EndTime;
-		else
-			-- select ProbeName,date_format(EndTime,@myformat) as endtime,sum(Njobs) as Njobs
-			-- 	from JobUsageRecord
-			-- 	where
-			--		EndTime >= date(@myfromdate) and EndTime <= date(@mytodate)
-			-- 	group by date_format(EndTime,@myformat),ProbeName
-			--	order by date_format(EndTime,@myformat);
-			prepare statement from @sql;
-			execute statement using @myfromdate,@mytodate,@myformat,@myformat;
-			-- deallocate prepare statement;
-		end if;
-	else
-		prepare statement from @sql;
-		execute statement using @myfromdate,@mytodate,@myformat,@myformat;
-		deallocate prepare statement;
-	end if;
-end
-||
--- call DailyJobsByProbe('GratiaUser','GratiaUser','2006-10-01 00:00:00','2006-10-10 00:00:00','%m/%d/%Y %T')
-||
-drop procedure ProbeStatus
-||
-create procedure ProbeStatus (userName varchar(64),userRole varchar(64),fromdate varchar(64),todate varchar(64),format varchar(64))
+create procedure ProbeStatus (userName varchar(64),userRole varchar(64),
+	fromdate varchar(64),todate varchar(64),format varchar(64))
 begin
 
 	declare mywhereclause varchar(255);
@@ -182,19 +86,22 @@ begin
 	set @mytodate := todate;
 
 	insert into trace(pname,userkey) values('ProbeStatus','step00');
-	select SystemProplist.cdr into @usereportauthentication from SystemProplist where SystemProplist.car = 'use.report.authentication';
-	-- insert into trace(pname,userkey) values('ProbeStatus','step01');
-	select RolesTable.whereclause into @mywhereclause from RolesTable where RolesTable.role = userRole;
+	select SystemProplist.cdr into @usereportauthentication from SystemProplist
+		where SystemProplist.car = 'use.report.authentication';
+	insert into trace(pname,userkey) values('ProbeStatus','step01');
+	select RolesTable.whereclause into @mywhereclause from RolesTable
+		where RolesTable.role = userRole;
 	insert into trace(pname,userkey) values('ProbeStatus','step02');
-	select generateWhereClause(userName,userRole,@mywhereclause) into @mywhereclause;
-	-- insert into trace(pname,userkey) values('ProbeStatus','step03');
+	select generateWhereClause(userName,userRole,@mywhereclause)
+		into @mywhereclause;
+	insert into trace(pname,userkey) values('ProbeStatus','step03');
 	call parse(userName,@name,@key,@vo);
-	-- insert into trace(pname,userkey) values('ProbeStatus','step04');
+	insert into trace(pname,userkey) values('ProbeStatus','step04');
 
-	insert into trace(pname,userkey,user,role,vo,p1,p2) 
+	insert into trace(pname,userkey,user,role,vo,p1,p2)
 		values('ProbeStatus',@key,userName,userRole,@vo,fromdate,todate);
 
-	if userName = 'GratiaGlobalAdmin' or @usereportauthentication = 'false' or @mywhereclause = 'Everything' then
+	if @mywhereclause = '' then
 			insert into trace(pname,userKey) values('ProbeStatus','Got It !!');
 			select ProbeName,EndTime as endtime,Njobs as Njobs
 				from ProbeStatus
@@ -205,451 +112,881 @@ begin
 	end if;
 end
 ||
--- call ProbeStatus('GratiaGlobalAdmin','GratiaUser','2006-01-01 00:00:00','2006-12-31 00:00:00','ignore');
+-- call ProbeStatus('GratiaGlobalAdmin','GratiaUser','2006-01-01 00:00:00','2007-12-31 00:00:00','ignore');
+-- ||
+drop procedure if exists DailyJobsByFacility
 ||
-drop procedure DailyJobsByVO
-||
-create procedure DailyJobsByVO (userName varchar(64),userRole varchar(64),fromdate varchar(64),todate varchar(64),format varchar(64))
+create procedure DailyJobsByFacility (userName varchar(64), userRole varchar(64),
+	fromdate varchar(64), todate varchar(64), format varchar(64),
+	resourceType varchar(64))
 begin
 
-	set @myfromdate := fromdate;
-	set @mytodate := todate;
-	set @myformat := format;
-
-	select SystemProplist.cdr into @usereportauthentication from SystemProplist where SystemProplist.car = 'use.report.authentication';
-	select RolesTable.whereclause into @mywhereclause from RolesTable where RolesTable.role = userRole;
-	select generateWhereClause(userName,userRole,@mywhereclause) into @mywhereclause;
-	call parse(userName,@name,@key,@vo);
-
-	set @sql := 
-		concat(
-			'select VOName,EndTime as endtime,sum(Njobs) as Njobs',
-			' from JobUsageRecord',
-			' where',
-			'	EndTime >= ?',
-			'	and EndTime <= ?',
-			@mywhereclause,
-			' group by date_format(EndTime,?),VOName',
-			' order by EndTime');
-	insert into trace(pname,userkey,user,role,vo,p1,p2,p3,data) 
-		values('DailyJobsByVO',@key,userName,userRole,@vo,@myfromdate,@mytodate,@myformat,@sql);
-
-	if userName = 'GratiaGlobalAdmin' or @usereportauthentication = 'false' or @mywhereclause = 'Everything' then
-		if datediff(todate,fromdate) > 6 then
-			select VOName, EndTime as endtime,sum(Njobs) as Njobs
-				from VOProbeSummary
-				where
-					EndTime >= date(fromdate)
-					and EndTime <= date(todate)
-				group by EndTime,VOName
-				order by EndTime;
-		else
-			select VOName,EndTime as endtime,sum(Njobs) as Njobs
-				from JobUsageRecord
-				where
-					EndTime >= fromdate
-					and EndTime <= todate
-				group by date_format(EndTime,format),VOName
-				order by EndTime;
-		end if;
-	else
-		prepare statement from @sql;
-		execute statement using @myfromdate,@mytodate,@myformat;
-		deallocate prepare statement;
-	end if;
-end
-||
--- call DailyJobsByVO('GratiaUser','GratiaUser','2006-10-01 00:00:00','2006-10-10 00:00:00','%y:%m:%d:%H:%i')
-||
-drop procedure DailyUsageByFacility
-||
-create procedure DailyUsageByFacility (userName varchar(64),userRole varchar(64),fromdate varchar(64),todate varchar(64),format varchar(64))
-begin
-
-	set @myfromdate := fromdate;
-	set @mytodate := todate;
-	set @myformat := format;
-
-	select SystemProplist.cdr into @usereportauthentication from SystemProplist where SystemProplist.car = 'use.report.authentication';
-	select RolesTable.whereclause into @mywhereclause from RolesTable where RolesTable.role = userRole;
-	select generateWhereClause(userName,userRole,@mywhereclause) into @mywhereclause;
+	select generateResourceTypeClause(resourceType) into @myresourceclause;
+	select SystemProplist.cdr into @usereportauthentication from SystemProplist
+	where SystemProplist.car = 'use.report.authentication';
+	select RolesTable.whereclause into @mywhereclause from RolesTable
+		where RolesTable.role = userRole;
+	select generateWhereClause(userName,userRole,@mywhereclause)
+		into @mywhereclause;
 	call parse(userName,@name,@key,@vo);
 
 	set @sql :=
-		concat(
-			'select CETable.facility_name,JobUsageRecord.EndTime as endtime,sum(JobUsageRecord.WallDuration) as WallDuration',
-			' from CETable,CEProbes,JobUsageRecord',
-			' where',
-			'	CEProbes.facility_id = CETable.facility_id',
-			'	and JobUsageRecord.ProbeName = CEProbes.probename',
-			'	and EndTime >= ?',
-			'	and EndTime <= ?',
-			@mywhereclause,
-			' group by date_format(JobUsageRecord.EndTime,?),CETable.facility_name',
-			' order by date_format(JobUsageRecord.EndTime,?)');
-	insert into trace(pname,userkey,user,role,vo,p1,p2,p3,p4,data) 
-		values('DailyJobsByFacility',@key,userName,userRole,@vo,@myfromdate,@mytodate,@myformat,@myformat,@sql);
+           concat_ws('', 'select CETable.facility_name, JobUsageRecord.EndTime as endtime, sum(JobUsageRecord.Njobs) as Njobs',
+                     ' from CETable,CEProbes,JobUsageRecord',
+                     ' where',
+                     ' CEProbes.facility_id = CETable.facility_id and JobUsageRecord.ProbeName = CEProbes.probename and',
+                     ' EndTime >= ''', fromdate, ''''
+                     ' and EndTime <= ''', todate, ''''
+                     ' ', @myresourceclause,
+                     ' ', @mywhereclause
+                     , ' group by date_format(JobUsageRecord.EndTime,''', format, '''), CETable.facility_name'
+                     , ' order by JobUsageRecord.EndTime'
+                    );
 
-	if userName = 'GratiaGlobalAdmin' or @usereportauthentication = 'false' or @mywhereclause = 'Everything' then
-		if datediff(todate,fromdate) > 6 then
-			select CETable.facility_name,ProbeSummary.EndTime as endtime,sum(ProbeSummary.WallDuration) as WallDuration
-				from CETable,CEProbes,ProbeSummary
-				where
-					CEProbes.facility_id = CETable.facility_id
-					and ProbeSummary.ProbeName = CEProbes.probename
-					and EndTime >= date(fromdate)
-					and EndTime <= date(todate)
-				group by ProbeSummary.EndTime,CETable.facility_name
-				order by ProbeSummary.EndTime;
-		else
-			select CETable.facility_name,JobUsageRecord.EndTime as endtime,sum(JobUsageRecord.WallDuration) as WallDuration
-				from CETable,CEProbes,JobUsageRecord
-				where
-					CEProbes.facility_id = CETable.facility_id
-					and JobUsageRecord.ProbeName = CEProbes.probename
-					and EndTime >= fromdate
-					and EndTime <= todate
-				group by date_format(JobUsageRecord.EndTime,format),CETable.facility_name
-				order by date_format(JobUsageRecord.EndTime,format);
-		end if;
-	else
-		prepare statement from @sql;
-		execute statement using @myfromdate,@mytodate,@myformat,@myformat;
-		deallocate prepare statement;
+    if ( @mywhereclause = '' or @mywhereclause is NULL ) and datediff(todate,fromdate) > 6 then
+		-- Use summary table
+		set @sql :=
+           concat_ws('', 'select CETable.facility_name, ProbeSummary.EndTime as endtime, sum(ProbeSummary.Njobs) as Njobs',
+                     ' from CETable,CEProbes,ProbeSummary',
+                     ' where',
+                     ' CEProbes.facility_id = CETable.facility_id and ProbeSummary.ProbeName = CEProbes.probename and',
+                     ' EndTime >= date(''', fromdate, ''')',
+                     ' and EndTime <= date(''', todate, ''')',
+                     ' ', @myresourceclause,
+                     ' ', @mywhereclause
+                     , ' group by date_format(ProbeSummary.EndTime,''', format, '''), CETable.facility_name'
+                     , ' order by ProbeSummary.EndTime'
+                 );
 	end if;
+	insert into trace(pname,userkey,user,role,vo,p1,p2,p3,p4,data)
+		values('DailyJobsByFacility',@key,userName,userRole,@vo,
+		fromdate,todate,format,resourceType,@sql);
+	prepare statement from @sql;
+	execute statement;
+	deallocate prepare statement;
 end
 ||
--- call DailyUsageByFacility('GratiaUser','GratiaUser','2006-10-01 00:00:00','2006-10-10 00:00:00','%y:%m:%d:%H:%i')
+-- call DailyJobsByFacility('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-10 00:00:00','%y:%m:%d','Batch')
+-- ||
+-- call DailyJobsByFacility('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-10 00:00:00','%y:%m:%d','')
+-- ||
+-- call DailyJobsByFacility('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-04 00:00:00','%y:%m:%d','Batch')
+-- ||
+-- call DailyJobsByFacility('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-04 00:00:00','%y:%m:%d','')
+-- ||
+drop procedure if exists DailyJobsByProbe
 ||
-drop procedure DailyUsageByProbe
-||
-create procedure DailyusageByProbe (userName varchar(64),userRole varchar(64),fromdate varchar(64),todate varchar(64),format varchar(64))
+create procedure DailyJobsByProbe (userName varchar(64), userRole varchar(64),
+	fromdate varchar(64), todate varchar(64), format varchar(64),
+	resourceType varchar(64))
 begin
 
-	set @myfromdate := fromdate;
-	set @mytodate := todate;
-	set @myformat := format;
-
-	select SystemProplist.cdr into @usereportauthentication from SystemProplist where SystemProplist.car = 'use.report.authentication';
-	select RolesTable.whereclause into @mywhereclause from RolesTable where RolesTable.role = userRole;
-	select generateWhereClause(userName,userRole,@mywhereclause) into @mywhereclause;
+	select generateResourceTypeClause(resourceType) into @myresourceclause;
+	select SystemProplist.cdr into @usereportauthentication from SystemProplist
+	where SystemProplist.car = 'use.report.authentication';
+	select RolesTable.whereclause into @mywhereclause from RolesTable
+		where RolesTable.role = userRole;
+	select generateWhereClause(userName,userRole,@mywhereclause)
+		into @mywhereclause;
 	call parse(userName,@name,@key,@vo);
 
 	set @sql :=
-		concat(
-			'select ProbeName,EndTime as endtime,sum(WallDuration) as WallDuration',
-			' from JobUsageRecord',
-			' where',
-			'	EndTime >= ? and EndTime <= ?',
-			@mywhereclause,
-			' group by date_format(EndTime,?),ProbeName',
-			' order by date_format(EndTime,?)');
-	insert into trace(pname,userkey,user,role,vo,p1,p2,p3,p4,data) 
-		values('DailyUsageByProbe',@key,userName,userRole,@vo,@myfromdate,@mytodate,@myformat,@myformat,@sql);
+           concat_ws('', 'select ProbeName, JobUsageRecord.EndTime as endtime, sum(JobUsageRecord.Njobs) as Njobs',
+                     ' from JobUsageRecord',
+                     ' where',
+                     ' EndTime >= ''', fromdate, ''''
+                     ' and EndTime <= ''', todate, ''''
+                     ' ', @myresourceclause,
+                     ' ', @mywhereclause
+                     , ' group by date_format(JobUsageRecord.EndTime,''', format, '''), ProbeName'
+                     , ' order by JobUsageRecord.EndTime'
+                    );
 
-	if userName = 'GratiaGlobalAdmin' or @usereportauthentication = 'false' or @mywhereclause = 'Everything' then
-		if datediff(todate,fromdate) > 6 then
-			select ProbeName,EndTime as endtime,sum(WallDuration) as WallDuration
-				from ProbeSummary
-				where
-					EndTime >= date(fromdate) and EndTime <= date(todate)
-				group by EndTime,ProbeName
-				order by EndTime;
-		else
-			select ProbeName,date_format(EndTime,format) as endtime,sum(WallDuration) as WallDuration
-				from JobUsageRecord
-				where
-					EndTime >= fromdate and EndTime <= todate
-				group by date_format(EndTime,format),ProbeName
-				order by date_format(EndTime,format);
-		end if;
-	else
-		prepare statement from @sql;
-		execute statement using @myfromdate,@mytodate,@myformat,@myformat;
-		deallocate prepare statement;
+    if ( @mywhereclause = '' or @mywhereclause is NULL ) and datediff(todate,fromdate) > 6 then
+		-- Use summary table
+		set @sql :=
+           concat_ws('', 'select ProbeName, ProbeSummary.EndTime as endtime, sum(ProbeSummary.Njobs) as Njobs',
+                     ' from ProbeSummary',
+                     ' where',
+                     ' EndTime >= date(''', fromdate, ''')',
+                     ' and EndTime <= date(''', todate, ''')',
+                     ' ', @myresourceclause,
+                     ' ', @mywhereclause
+                     , ' group by date_format(ProbeSummary.EndTime,''', format, '''), ProbeName'
+                     , ' order by ProbeSummary.EndTime'
+                 );
 	end if;
+	insert into trace(pname,userkey,user,role,vo,p1,p2,p3,p4,data)
+		values('DailyJobsByProbe',@key,userName,userRole,@vo,
+		fromdate,todate,format,resourceType,@sql);
+	prepare statement from @sql;
+	execute statement;
+	deallocate prepare statement;
 end
 ||
--- call DailyUsageByProbe('GratiaUser','GratiaUser','2006-10-01 00:00:00','2006-10-10 00:00:00','%m/%d/%Y %T')
+-- call DailyJobsByProbe('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-10 00:00:00','%y:%m:%d','Batch')
+-- ||
+-- call DailyJobsByProbe('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-10 00:00:00','%y:%m:%d','')
+-- ||
+-- call DailyJobsByProbe('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-04 00:00:00','%y:%m:%d','Batch')
+-- ||
+-- call DailyJobsByProbe('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-04 00:00:00','%y:%m:%d','')
+-- ||
+drop procedure if exists DailyJobsByVO
 ||
-drop procedure JobsByFacility
-||
-create procedure JobsByFacility (userName varchar(64),userRole varchar(64),fromdate varchar(64),todate varchar(64))
+create procedure DailyJobsByVO (userName varchar(64), userRole varchar(64),
+	fromdate varchar(64), todate varchar(64), format varchar(64),
+	resourceType varchar(64))
 begin
 
-	set @myfromdate := fromdate;
-	set @mytodate := todate;
-
-	select SystemProplist.cdr into @usereportauthentication from SystemProplist where SystemProplist.car = 'use.report.authentication';
-	select RolesTable.whereclause into @mywhereclause from RolesTable where RolesTable.role = userRole;
-	select generateWhereClause(userName,userRole,@mywhereclause) into @mywhereclause;
+	select generateResourceTypeClause(resourceType) into @myresourceclause;
+	select SystemProplist.cdr into @usereportauthentication from SystemProplist
+	where SystemProplist.car = 'use.report.authentication';
+	select RolesTable.whereclause into @mywhereclause from RolesTable
+		where RolesTable.role = userRole;
+	select generateWhereClause(userName,userRole,@mywhereclause)
+		into @mywhereclause;
 	call parse(userName,@name,@key,@vo);
 
 	set @sql :=
-		concat(
-			'select CETable.facility_name,sum(JobUsageRecord.Njobs) as Njobs',
-			' from CETable,CEProbes,JobUsageRecord',
-			' where',
-			'	CEProbes.facility_id = CETable.facility_id',
-			'	and JobUsageRecord.ProbeName = CEProbes.probename',
-			'	and EndTime >= ?',
-			'	and EndTime <= ?',
-			@mywhereclause,
-			' group by CETable.facility_name',
-			' order by CETable.facility_name');
-	insert into trace(pname,userkey,user,role,vo,p1,p2,data) 
-		values('JobsByFacility',@key,userName,userRole,@vo,@myfromdate,@mytodate,@sql);
+           concat_ws('', 'select JobUsageRecord.VOName,JobUsageRecord.EndTime as endtime,sum(Njobs) as Njobs',
+                     ' from JobUsageRecord',
+                     ' where',
+                     ' EndTime >= ''', fromdate, ''''
+                     ' and EndTime <= ''', todate, ''''
+                     ' ', @myresourceclause,
+                     ' ', @mywhereclause
+                     , ' group by date_format(JobUsageRecord.EndTime,''', format, '''),VOName'
+                     , ' order by JobUsageRecord.EndTime'
+                    );
 
-	if userName = 'GratiaGlobalAdmin' or @usereportauthentication = 'false' or @mywhereclause = 'Everything' then
-		if datediff(todate,fromdate) > 6 then
-			select CETable.facility_name,sum(ProbeSummary.Njobs) as Njobs
-				from CETable,CEProbes,ProbeSummary
-				where
-					CEProbes.facility_id = CETable.facility_id
-					and ProbeSummary.ProbeName = CEProbes.probename
-					and EndTime >= date(fromdate)
-					and EndTime <= date(todate)
-				group by CETable.facility_name
-				order by CETable.facility_name;
-		else
-			select CETable.facility_name,sum(JobUsageRecord.Njobs) as Njobs
-				from CETable,CEProbes,JobUsageRecord
-				where
-					CEProbes.facility_id = CETable.facility_id
-					and JobUsageRecord.ProbeName = CEProbes.probename
-					and EndTime >= fromdate
-					and EndTime <= todate
-				group by CETable.facility_name
-				order by CETable.facility_name;
-		end if;
-	else
-		prepare statement from @sql;
-		execute statement using @myfromdate,@mytodate;
-		deallocate prepare statement;
+    if ( @mywhereclause = '' or @mywhereclause is NULL ) and datediff(todate,fromdate) > 6 then
+		-- Use summary table
+		set @sql :=
+           concat_ws('', 'select VOProbeSummary.VOName,VOProbeSummary.EndTime as endtime,sum(Njobs) as Njobs',
+                     ' from VOProbeSummary',
+                     ' where',
+                     ' EndTime >= date(''', fromdate, ''')',
+                     ' and EndTime <= date(''', todate, ''')',
+                     ' ', @myresourceclause,
+                     ' ', @mywhereclause
+                     , ' group by date_format(VOProbeSummary.EndTime,''', format, '''),VOName'
+                     , ' order by VOProbeSummary.EndTime'
+                 );
 	end if;
+	insert into trace(pname,userkey,user,role,vo,p1,p2,p3,p4,data)
+		values('DailyJobsByVO',@key,userName,userRole,@vo,
+		fromdate,todate,format,resourceType,@sql);
+	prepare statement from @sql;
+	execute statement;
+	deallocate prepare statement;
 end
 ||
--- call JobsByFacility('GratiaUser','GratiaUser','2006-10-01 00:00:00','2006-10-10 00:00:00')
+-- call DailyJobsByVO('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-10 00:00:00','%y:%m:%d','Batch')
+-- ||
+-- call DailyJobsByVO('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-10 00:00:00','%y:%m:%d','')
+-- ||
+-- call DailyJobsByVO('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-04 00:00:00','%y:%m:%d','Batch')
+-- ||
+-- call DailyJobsByVO('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-04 00:00:00','%y:%m:%d','')
+-- ||
+drop procedure if exists DailyUsageByFacility
 ||
-drop procedure JobsByFacility
-||
-create procedure JobsByFacility (userName varchar(64),userRole varchar(64),fromdate varchar(64),todate varchar(64))
+create procedure DailyUsageByFacility (userName varchar(64), userRole varchar(64),
+	fromdate varchar(64), todate varchar(64), format varchar(64),
+	resourceType varchar(64))
 begin
 
-	set @myfromdate := fromdate;
-	set @mytodate := todate;
-
-	select SystemProplist.cdr into @usereportauthentication from SystemProplist where SystemProplist.car = 'use.report.authentication';
-	select RolesTable.whereclause into @mywhereclause from RolesTable where RolesTable.role = userRole;
-	select generateWhereClause(userName,userRole,@mywhereclause) into @mywhereclause;
+	select generateResourceTypeClause(resourceType) into @myresourceclause;
+	select SystemProplist.cdr into @usereportauthentication from SystemProplist
+	where SystemProplist.car = 'use.report.authentication';
+	select RolesTable.whereclause into @mywhereclause from RolesTable
+		where RolesTable.role = userRole;
+	select generateWhereClause(userName,userRole,@mywhereclause)
+		into @mywhereclause;
 	call parse(userName,@name,@key,@vo);
 
 	set @sql :=
-		concat(
-			'select CETable.facility_name,sum(JobUsageRecord.Njobs) as Njobs',
-			' from CETable,CEProbes,JobUsageRecord',
-			' where',
-			'	CEProbes.facility_id = CETable.facility_id',
-			'	and JobUsageRecord.ProbeName = CEProbes.probename',
-			'	and EndTime >= ?',
-			'	and EndTime <= ?',
-			@mywhereclause,
-			' group by CETable.facility_name',
-			' order by CETable.facility_name');
-	insert into trace(pname,userkey,user,role,vo,p1,p2,data) 
-		values('JobsByFacility',@key,userName,userRole,@vo,@myfromdate,@mytodate,@sql);
+           concat_ws('', 'select CETable.facility_name,JobUsageRecord.EndTime as endtime,sum(JobUsageRecord.WallDuration',
+                     ' from CETable,CEProbes,JobUsageRecord',
+                     ' where',
+                     ' CEProbes.facility_id = CETable.facility_id and JobUsageRecord.ProbeName = CEProbes.probename and',
+                     ' EndTime >= ''', fromdate, ''''
+                     ' and EndTime <= ''', todate, ''''
+                     ' ', @myresourceclause,
+                     ' ', @mywhereclause
+                     , ' group by date_format(JobUsageRecord.EndTime,''', format, '''),CETable.facility_name'
+                     , ' order by JobUsageRecord.EndTime'
+                    );
 
-	if userName = 'GratiaGlobalAdmin' or @usereportauthentication = 'false' or @mywhereclause = 'Everything' then
-		if datediff(todate,fromdate) > 6 then
-			select CETable.facility_name,sum(ProbeSummary.Njobs) as Njobs
-				from CETable,CEProbes,ProbeSummary
-				where
-					CEProbes.facility_id = CETable.facility_id
-					and ProbeSummary.ProbeName = CEProbes.probename
-					and EndTime >= date(fromdate)
-					and EndTime <= date(todate)
-				group by CETable.facility_name
-				order by CETable.facility_name;
-		else
-			select CETable.facility_name,sum(JobUsageRecord.Njobs) as Njobs
-				from CETable,CEProbes,JobUsageRecord
-				where
-					CEProbes.facility_id = CETable.facility_id
-					and JobUsageRecord.ProbeName = CEProbes.probename
-					and EndTime >= fromdate
-					and EndTime <= todate
-				group by CETable.facility_name
-				order by CETable.facility_name;
-		end if;
-	else
-		prepare statement from @sql;
-		execute statement using @myfromdate,@mytodate;
-		deallocate prepare statement;
+    if ( @mywhereclause = '' or @mywhereclause is NULL ) and datediff(todate,fromdate) > 6 then
+		-- Use summary table
+		set @sql :=
+           concat_ws('', 'select CETable.facility_name,ProbeSummary.EndTime as endtime,sum(ProbeSummary.WallDuration',
+                     ' from CETable,CEProbes,ProbeSummary',
+                     ' where',
+                     ' CEProbes.facility_id = CETable.facility_id and ProbeSummary.ProbeName = CEProbes.probename and',
+                     ' EndTime >= date(''', fromdate, ''')',
+                     ' and EndTime <= date(''', todate, ''')',
+                     ' ', @myresourceclause,
+                     ' ', @mywhereclause
+                     , ' group by date_format(ProbeSummary.EndTime,''', format, '''),CETable.facility_name'
+                     , ' order by ProbeSummary.EndTime'
+                 );
 	end if;
+	insert into trace(pname,userkey,user,role,vo,p1,p2,p3,p4,data)
+		values('DailyUsageByFacility',@key,userName,userRole,@vo,
+		fromdate,todate,format,resourceType,@sql);
+	prepare statement from @sql;
+	execute statement;
+	deallocate prepare statement;
 end
 ||
--- call JobsByFacility('GratiaUser','GratiaUser','2006-10-01 00:00:00','2006-10-10 00:00:00')
+-- call DailyUsageByFacility('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-10 00:00:00','%y:%m:%d','Batch')
+-- ||
+-- call DailyUsageByFacility('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-10 00:00:00','%y:%m:%d','')
+-- ||
+-- call DailyUsageByFacility('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-04 00:00:00','%y:%m:%d','Batch')
+-- ||
+-- call DailyUsageByFacility('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-04 00:00:00','%y:%m:%d','')
+-- ||
+drop procedure if exists DailyUsageByProbe
 ||
-drop procedure JobsByProbeNoFacility
-||
-create procedure JobsByProbeNoFacility (userName varchar(64),userRole varchar(64),fromdate varchar(64),todate varchar(64))
+create procedure DailyUsageByProbe (userName varchar(64), userRole varchar(64),
+	fromdate varchar(64), todate varchar(64), format varchar(64),
+	resourceType varchar(64))
 begin
 
-	set @myfromdate := fromdate;
-	set @mytodate := todate;
-
-	select SystemProplist.cdr into @usereportauthentication from SystemProplist where SystemProplist.car = 'use.report.authentication';
-	select RolesTable.whereclause into @mywhereclause from RolesTable where RolesTable.role = userRole;
-	select generateWhereClause(userName,userRole,@mywhereclause) into @mywhereclause;
+	select generateResourceTypeClause(resourceType) into @myresourceclause;
+	select SystemProplist.cdr into @usereportauthentication from SystemProplist
+	where SystemProplist.car = 'use.report.authentication';
+	select RolesTable.whereclause into @mywhereclause from RolesTable
+		where RolesTable.role = userRole;
+	select generateWhereClause(userName,userRole,@mywhereclause)
+		into @mywhereclause;
 	call parse(userName,@name,@key,@vo);
 
 	set @sql :=
-		concat(
-			'select ProbeName,sum(Njobs) as Njobs',
-			' from JobUsageRecord',
-			' where',
-			'	EndTime >= ?',
-			'	and EndTime <= ?',
-			@mywhereclause,
-			' group by ProbeName',
-			' order by ProbeName');
-	insert into trace(pname,userkey,user,role,vo,p1,p2,data) 
-		values('JobsByProbeNoFacility',@key,userName,userRole,@vo,@myfromdate,@mytodate,@sql);
+           concat_ws('', 'select JobUsageRecord.ProbeName,JobUsageRecord.EndTime',
+                     ' from JobUsageRecord',
+                     ' where',
+                     ' EndTime >= ''', fromdate, ''''
+                     ' and EndTime <= ''', todate, ''''
+                     ' ', @myresourceclause,
+                     ' ', @mywhereclause
+                     , ' group by date_format(JobUsageRecord.EndTime,''', format, '''),JobUsageRecord.ProbeName'
+                     , ' order by JobUsageRecord.EndTime'
+                    );
 
-	if userName = 'GratiaGlobalAdmin' or @usereportauthentication = 'false' or @mywhereclause = 'Everything' then
-		if datediff(todate,fromdate) > 6 then
-			select ProbeName,sum(Njobs) as Njobs
-				from ProbeSummary
-				where
-					EndTime >= date(fromdate)
-					and EndTime <= date(todate)
-				group by ProbeName
-				order by ProbeName;
-		else
-			select ProbeName,sum(Njobs) as Njobs
-				from JobUsageRecord
-				where
-					EndTime >= fromdate
-					and EndTime <= todate
-				group by ProbeName
-				order by ProbeName;
-		end if;
-	else
-		prepare statement from @sql;
-		execute statement using @myfromdate,@mytodate;
-		deallocate prepare statement;
+    if ( @mywhereclause = '' or @mywhereclause is NULL ) and datediff(todate,fromdate) > 6 then
+		-- Use summary table
+		set @sql :=
+           concat_ws('', 'select ProbeSummary.ProbeName,ProbeSummary.EndTime',
+                     ' from ProbeSummary',
+                     ' where',
+                     ' EndTime >= date(''', fromdate, ''')',
+                     ' and EndTime <= date(''', todate, ''')',
+                     ' ', @myresourceclause,
+                     ' ', @mywhereclause
+                     , ' group by date_format(ProbeSummary.EndTime,''', format, '''),ProbeSummary.ProbeName'
+                     , ' order by ProbeSummary.EndTime'
+                 );
 	end if;
+	insert into trace(pname,userkey,user,role,vo,p1,p2,p3,p4,data)
+		values('DailyUsageByProbe',@key,userName,userRole,@vo,
+		fromdate,todate,format,resourceType,@sql);
+	prepare statement from @sql;
+	execute statement;
+	deallocate prepare statement;
 end
 ||
--- call JobsByProbeNoFacility('GratiaUser','GratiaUser','2006-10-01 00:00:00','2006-10-10 00:00:00')
+-- call DailyUsageByProbe('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-10 00:00:00','%y:%m:%d','Batch')
+-- ||
+-- call DailyUsageByProbe('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-10 00:00:00','%y:%m:%d','')
+-- ||
+-- call DailyUsageByProbe('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-04 00:00:00','%y:%m:%d','Batch')
+-- ||
+-- call DailyUsageByProbe('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-04 00:00:00','%y:%m:%d','')
+-- ||
+drop procedure if exists DailyUsageBySite
 ||
-||
-drop procedure UsageByFacility
-||
-create procedure UsageByFacility (userName varchar(64),userRole varchar(64),fromdate varchar(64),todate varchar(64))
+create procedure DailyUsageBySite (userName varchar(64), userRole varchar(64),
+	fromdate varchar(64), todate varchar(64), format varchar(64),
+	resourceType varchar(64))
 begin
 
-	set @myfromdate := fromdate;
-	set @mytodate := todate;
-
-	select SystemProplist.cdr into @usereportauthentication from SystemProplist where SystemProplist.car = 'use.report.authentication';
-	select RolesTable.whereclause into @mywhereclause from RolesTable where RolesTable.role = userRole;
-	select generateWhereClause(userName,userRole,@mywhereclause) into @mywhereclause;
+	select generateResourceTypeClause(resourceType) into @myresourceclause;
+	select SystemProplist.cdr into @usereportauthentication from SystemProplist
+	where SystemProplist.car = 'use.report.authentication';
+	select RolesTable.whereclause into @mywhereclause from RolesTable
+		where RolesTable.role = userRole;
+	select generateWhereClause(userName,userRole,@mywhereclause)
+		into @mywhereclause;
 	call parse(userName,@name,@key,@vo);
 
 	set @sql :=
-		concat(
-			'select CETable.facility_name,JobUsageRecord.EndTime as endtime,sum(JobUsageRecord.WallDuration) as WallDuration',
-			' from CETable,CEProbes,JobUsageRecord',
-			' where',
-			'	CEProbes.facility_id = CETable.facility_id',
-			'	and JobUsageRecord.ProbeName = CEProbes.probename',
-			'	and EndTime >= ?',
-			'	and EndTime <= ?',
-			@mywhereclause,
-			' group by CETable.facility_name',
-			' order by CETable.facility_name');
-	insert into trace(pname,userkey,user,role,vo,p1,p2,data) 
-		values('UsageByFacility',@key,userName,userRole,@vo,@myfromdate,@mytodate,@sql);
+           concat_ws('', 'select JobUsageRecord.SiteName,JobUsageRecord.EndTime as endtime,sum(JobUsageRecord.WallDuration) as WallDuration,sum(JobUsageRecord.CpuUserDuration + JobUsageRecord.CpuSystemDuration) as Cpu',
+                     ' from JobUsageRecord',
+                     ' where',
+                     ' EndTime >= ''', fromdate, ''''
+                     ' and EndTime <= ''', todate, ''''
+                     ' ', @myresourceclause,
+                     ' ', @mywhereclause
+                     , ' group by JobUsageRecord.ProbeName'
+                     , ' order by JobUsageRecord.ProbeName'
+                    );
 
-	if userName = 'GratiaGlobalAdmin' or @usereportauthentication = 'false' or @mywhereclause = 'Everything' then
-		if datediff(todate,fromdate) > 6 then
-			select CETable.facility_name,ProbeSummary.EndTime as endtime,sum(ProbeSummary.WallDuration) as WallDuration
-				from CETable,CEProbes,ProbeSummary
-				where
-					CEProbes.facility_id = CETable.facility_id
-					and ProbeSummary.ProbeName = CEProbes.probename
-					and EndTime >= date(fromdate)
-					and EndTime <= date(todate)
-				group by CETable.facility_name
-				order by CETable.facility_name;
-		else
-			select CETable.facility_name,JobUsageRecord.EndTime as endtime,sum(JobUsageRecord.WallDuration) as WallDuration
-				from CETable,CEProbes,JobUsageRecord
-				where
-					CEProbes.facility_id = CETable.facility_id
-					and JobUsageRecord.ProbeName = CEProbes.probename
-					and EndTime >= fromdate
-					and EndTime <= todate
-				group by CETable.facility_name
-				order by CETable.facility_name;
-		end if;
-	else
-		prepare statement from @sql;
-		execute statement using @myfromdate,@mytodate;
-		deallocate prepare statement;
+    if ( @mywhereclause = '' or @mywhereclause is NULL ) and datediff(todate,fromdate) > 6 then
+		-- Use summary table
+		set @sql :=
+           concat_ws('', 'select ProbeSummary.SiteName,ProbeSummary.EndTime as endtime,sum(ProbeSummary.WallDuration) as WallDuration,sum(ProbeSummary.CpuUserDuration + ProbeSummary.CpuSystemDuration) as Cpu',
+                     ' from ProbeSummary',
+                     ' where',
+                     ' EndTime >= date(''', fromdate, ''')',
+                     ' and EndTime <= date(''', todate, ''')',
+                     ' ', @myresourceclause,
+                     ' ', @mywhereclause
+                     , ' group by ProbeSummary.ProbeName'
+                     , ' order by ProbeSummary.ProbeName'
+                 );
 	end if;
+	insert into trace(pname,userkey,user,role,vo,p1,p2,p3,p4,data)
+		values('DailyUsageBySite',@key,userName,userRole,@vo,
+		fromdate,todate,format,resourceType,@sql);
+	prepare statement from @sql;
+	execute statement;
+	deallocate prepare statement;
 end
 ||
--- call UsageByFacility('GratiaUser','GratiaUser','2006-10-01 00:00:00','2006-10-10 00:00:00')
+-- call DailyUsageBySite('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-10 00:00:00','%y:%m:%d','Batch')
+-- ||
+-- call DailyUsageBySite('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-10 00:00:00','%y:%m:%d','')
+-- ||
+-- call DailyUsageBySite('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-04 00:00:00','%y:%m:%d','Batch')
+-- ||
+-- call DailyUsageBySite('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-04 00:00:00','%y:%m:%d','')
+-- ||
+drop procedure if exists DailyUsageByVO
 ||
-drop procedure UsageByProbe
-||
-create procedure UsageByProbe (userName varchar(64),userRole varchar(64),fromdate varchar(64),todate varchar(64))
+create procedure DailyUsageByVO (userName varchar(64), userRole varchar(64),
+	fromdate varchar(64), todate varchar(64), format varchar(64),
+	resourceType varchar(64))
 begin
 
-	set @myfromdate := fromdate;
-	set @mytodate := todate;
-
-	select SystemProplist.cdr into @usereportauthentication from SystemProplist where SystemProplist.car = 'use.report.authentication';
-	select RolesTable.whereclause into @mywhereclause from RolesTable where RolesTable.role = userRole;
-	select generateWhereClause(userName,userRole,@mywhereclause) into @mywhereclause;
+	select generateResourceTypeClause(resourceType) into @myresourceclause;
+	select SystemProplist.cdr into @usereportauthentication from SystemProplist
+	where SystemProplist.car = 'use.report.authentication';
+	select RolesTable.whereclause into @mywhereclause from RolesTable
+		where RolesTable.role = userRole;
+	select generateWhereClause(userName,userRole,@mywhereclause)
+		into @mywhereclause;
 	call parse(userName,@name,@key,@vo);
 
 	set @sql :=
-		concat(
-			'select ProbeName,sum(WallDuration) as WallDuration',
-			' from JobUsageRecord',
-			' where',
-			'	EndTime >= ? and EndTime <= ?',
-			@mywhereclause,
-			' group by ProbeName',
-			' order by ProbeName');
-	insert into trace(pname,userkey,user,role,vo,p1,p2,data) 
-		values('UsageByProbe',@key,userName,userRole,@vo,@myfromdate,@mytodate,@sql);
+           concat_ws('', 'select JobUsageRecord.VOName,JobUsageRecord.EndTime as endtime, sum(JobUsageRecord.WallDuration) as WallDuration,sum(JobUsageRecord.CpuUserDuration + JobUsageRecord.CpuSystemDuration) as Cpu',
+                     ' from JobUsageRecord',
+                     ' where',
+                     ' EndTime >= ''', fromdate, ''''
+                     ' and EndTime <= ''', todate, ''''
+                     ' ', @myresourceclause,
+                     ' ', @mywhereclause
+                     , ' group by date_format(JobUsageRecord.EndTime,''', format, ''')'
+                     , ' order by JobUsageRecord.EndTime'
+                    );
 
-	if userName = 'GratiaGlobalAdmin' or @usereportauthentication = 'false' or @mywhereclause = 'Everything' then
-		if datediff(todate,fromdate) > 6 then
-			select ProbeName,sum(WallDuration) as WallDuration
-				from ProbeSummary
-				where
-					EndTime >= date(fromdate) and EndTime <= date(todate)
-				group by ProbeName
-				order by ProbeName;
-		else
-			select ProbeName,sum(WallDuration) as WallDuration
-				from JobUsageRecord
-				where
-					EndTime >= fromdate and EndTime <= todate
-				group by ProbeName
-				order by ProbeName;
-		end if;
-	else
-		prepare statement from @sql;
-		execute statement using @myfromdate,@mytodate;
-		deallocate prepare statement;
+    if ( @mywhereclause = '' or @mywhereclause is NULL ) and datediff(todate,fromdate) > 6 then
+		-- Use summary table
+		set @sql :=
+           concat_ws('', 'select VOProbeSummary.VOName,VOProbeSummary.EndTime as endtime, sum(VOProbeSummary.WallDuration) as WallDuration,sum(VOProbeSummary.CpuUserDuration + VOProbeSummary.CpuSystemDuration) as Cpu',
+                     ' from VOProbeSummary',
+                     ' where',
+                     ' EndTime >= date(''', fromdate, ''')',
+                     ' and EndTime <= date(''', todate, ''')',
+                     ' ', @myresourceclause,
+                     ' ', @mywhereclause
+                     , ' group by date_format(VOProbeSummary.EndTime,''', format, ''')'
+                     , ' order by VOProbeSummary.EndTime'
+                 );
 	end if;
+	insert into trace(pname,userkey,user,role,vo,p1,p2,p3,p4,data)
+		values('DailyUsageByVO',@key,userName,userRole,@vo,
+		fromdate,todate,format,resourceType,@sql);
+	prepare statement from @sql;
+	execute statement;
+	deallocate prepare statement;
 end
 ||
--- call UsageByProbe('GratiaUser','GratiaUser','2006-10-01 00:00:00','2006-10-10 00:00:00')
+-- call DailyUsageByVO('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-10 00:00:00','%y:%m:%d','Batch')
+-- ||
+-- call DailyUsageByVO('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-10 00:00:00','%y:%m:%d','')
+-- ||
+-- call DailyUsageByVO('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-04 00:00:00','%y:%m:%d','Batch')
+-- ||
+-- call DailyUsageByVO('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-04 00:00:00','%y:%m:%d','')
+-- ||
+drop procedure if exists JobsByFacility
 ||
+create procedure JobsByFacility (userName varchar(64), userRole varchar(64),
+	fromdate varchar(64), todate varchar(64), format varchar(64),
+	resourceType varchar(64))
+begin
+
+	select generateResourceTypeClause(resourceType) into @myresourceclause;
+	select SystemProplist.cdr into @usereportauthentication from SystemProplist
+	where SystemProplist.car = 'use.report.authentication';
+	select RolesTable.whereclause into @mywhereclause from RolesTable
+		where RolesTable.role = userRole;
+	select generateWhereClause(userName,userRole,@mywhereclause)
+		into @mywhereclause;
+	call parse(userName,@name,@key,@vo);
+
+	set @sql :=
+           concat_ws('', 'select CETable.facility_name,sum(JobUsageRecord.Njobs) as Njobs',
+                     ' from CETable,CEProbes,JobUsageRecord',
+                     ' where',
+                     ' EndTime >= ''', fromdate, ''''
+                     ' and EndTime <= ''', todate, ''''
+                     ' ', @myresourceclause,
+                     ' ', @mywhereclause
+                     , ' group by CETable.facility_name'
+                     , ' order by CETable.facility_name'
+                    );
+
+    if ( @mywhereclause = '' or @mywhereclause is NULL ) and datediff(todate,fromdate) > 6 then
+		-- Use summary table
+		set @sql :=
+           concat_ws('', 'select CETable.facility_name,sum(ProbeSummary.Njobs) as Njobs',
+                     ' from CETable,CEProbes,ProbeSummary',
+                     ' where',
+                     ' EndTime >= date(''', fromdate, ''')',
+                     ' and EndTime <= date(''', todate, ''')',
+                     ' ', @myresourceclause,
+                     ' ', @mywhereclause
+                     , ' group by CETable.facility_name'
+                     , ' order by CETable.facility_name'
+                 );
+	end if;
+	insert into trace(pname,userkey,user,role,vo,p1,p2,p3,p4,data)
+		values('JobsByFacility',@key,userName,userRole,@vo,
+		fromdate,todate,format,resourceType,@sql);
+	prepare statement from @sql;
+	execute statement;
+	deallocate prepare statement;
+end
+||
+-- call JobsByFacility('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-10 00:00:00','%y:%m:%d:%H:%i','Batch')
+-- ||
+-- call JobsByFacility('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-10 00:00:00','%y:%m:%d:%H:%i','')
+-- ||
+-- call JobsByFacility('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-04 00:00:00','%y:%m:%d:%H:%i','Batch')
+-- ||
+-- call JobsByFacility('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-04 00:00:00','%y:%m:%d:%H:%i','')
+-- ||
+drop procedure if exists JobsByProbeNoFacility
+||
+create procedure JobsByProbeNoFacility (userName varchar(64), userRole varchar(64),
+	fromdate varchar(64), todate varchar(64), format varchar(64),
+	resourceType varchar(64))
+begin
+
+	select generateResourceTypeClause(resourceType) into @myresourceclause;
+	select SystemProplist.cdr into @usereportauthentication from SystemProplist
+	where SystemProplist.car = 'use.report.authentication';
+	select RolesTable.whereclause into @mywhereclause from RolesTable
+		where RolesTable.role = userRole;
+	select generateWhereClause(userName,userRole,@mywhereclause)
+		into @mywhereclause;
+	call parse(userName,@name,@key,@vo);
+
+	set @sql :=
+           concat_ws('', 'select JobUsageRecord.ProbeName,sum(JobUsageRecord.Njobs) as Njobs',
+                     ' from JobUsageRecord',
+                     ' where',
+                     ' EndTime >= ''', fromdate, ''''
+                     ' and EndTime <= ''', todate, ''''
+                     ' ', @myresourceclause,
+                     ' ', @mywhereclause
+                     , ' group by ProbeName'
+                     , ' order by ProbeName'
+                    );
+
+    if ( @mywhereclause = '' or @mywhereclause is NULL ) and datediff(todate,fromdate) > 6 then
+		-- Use summary table
+		set @sql :=
+           concat_ws('', 'select ProbeSummary.ProbeName,sum(ProbeSummary.Njobs) as Njobs',
+                     ' from ProbeSummary',
+                     ' where',
+                     ' EndTime >= date(''', fromdate, ''')',
+                     ' and EndTime <= date(''', todate, ''')',
+                     ' ', @myresourceclause,
+                     ' ', @mywhereclause
+                     , ' group by ProbeName'
+                     , ' order by ProbeName'
+                 );
+	end if;
+	insert into trace(pname,userkey,user,role,vo,p1,p2,p3,p4,data)
+		values('JobsByProbeNoFacility',@key,userName,userRole,@vo,
+		fromdate,todate,format,resourceType,@sql);
+	prepare statement from @sql;
+	execute statement;
+	deallocate prepare statement;
+end
+||
+-- call JobsByProbeNoFacility('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-10 00:00:00','%y:%m:%d:%H:%i','Batch')
+-- ||
+-- call JobsByProbeNoFacility('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-10 00:00:00','%y:%m:%d:%H:%i','')
+-- ||
+-- call JobsByProbeNoFacility('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-04 00:00:00','%y:%m:%d:%H:%i','Batch')
+-- ||
+-- call JobsByProbeNoFacility('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-04 00:00:00','%y:%m:%d:%H:%i','')
+-- ||
+drop procedure if exists JobsBySite
+||
+create procedure JobsBySite (userName varchar(64), userRole varchar(64),
+	fromdate varchar(64), todate varchar(64), format varchar(64),
+	resourceType varchar(64))
+begin
+
+	select generateResourceTypeClause(resourceType) into @myresourceclause;
+	select SystemProplist.cdr into @usereportauthentication from SystemProplist
+	where SystemProplist.car = 'use.report.authentication';
+	select RolesTable.whereclause into @mywhereclause from RolesTable
+		where RolesTable.role = userRole;
+	select generateWhereClause(userName,userRole,@mywhereclause)
+		into @mywhereclause;
+	call parse(userName,@name,@key,@vo);
+
+	set @sql :=
+           concat_ws('', 'select JobUsageRecord.SiteName,sum(JobUsageRecord.Njobs) as Njobs',
+                     ' from JobUsageRecord',
+                     ' where',
+                     ' EndTime >= ''', fromdate, ''''
+                     ' and EndTime <= ''', todate, ''''
+                     ' ', @myresourceclause,
+                     ' ', @mywhereclause
+                     , ' group by JobUsageRecord.SiteName'
+                     , ' order by JobUsageRecord.SiteName'
+                    );
+
+    if ( @mywhereclause = '' or @mywhereclause is NULL ) and datediff(todate,fromdate) > 6 then
+		-- Use summary table
+		set @sql :=
+           concat_ws('', 'select ProbeSummary.SiteName,sum(ProbeSummary.Njobs) as Njobs',
+                     ' from ProbeSummary',
+                     ' where',
+                     ' EndTime >= date(''', fromdate, ''')',
+                     ' and EndTime <= date(''', todate, ''')',
+                     ' ', @myresourceclause,
+                     ' ', @mywhereclause
+                     , ' group by ProbeSummary.SiteName'
+                     , ' order by ProbeSummary.SiteName'
+                 );
+	end if;
+	insert into trace(pname,userkey,user,role,vo,p1,p2,p3,p4,data)
+		values('JobsBySite',@key,userName,userRole,@vo,
+		fromdate,todate,format,resourceType,@sql);
+	prepare statement from @sql;
+	execute statement;
+	deallocate prepare statement;
+end
+||
+-- call JobsBySite('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-10 00:00:00','%y:%m:%d:%H:%i','Batch')
+-- ||
+-- call JobsBySite('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-10 00:00:00','%y:%m:%d:%H:%i','')
+-- ||
+-- call JobsBySite('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-04 00:00:00','%y:%m:%d:%H:%i','Batch')
+-- ||
+-- call JobsBySite('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-04 00:00:00','%y:%m:%d:%H:%i','')
+-- ||
+drop procedure if exists JobsByVO
+||
+create procedure JobsByVO (userName varchar(64), userRole varchar(64),
+	fromdate varchar(64), todate varchar(64), format varchar(64),
+	resourceType varchar(64))
+begin
+
+	select generateResourceTypeClause(resourceType) into @myresourceclause;
+	select SystemProplist.cdr into @usereportauthentication from SystemProplist
+	where SystemProplist.car = 'use.report.authentication';
+	select RolesTable.whereclause into @mywhereclause from RolesTable
+		where RolesTable.role = userRole;
+	select generateWhereClause(userName,userRole,@mywhereclause)
+		into @mywhereclause;
+	call parse(userName,@name,@key,@vo);
+
+	set @sql :=
+           concat_ws('', 'select JobUsageRecord.VOName,sum(JobUsageRecord.Njobs) as Njobs',
+                     ' from JobUsageRecord',
+                     ' where',
+                     ' EndTime >= ''', fromdate, ''''
+                     ' and EndTime <= ''', todate, ''''
+                     ' ', @myresourceclause,
+                     ' ', @mywhereclause
+                     , ' group by JobUsageRecord.VOName'
+                     , ' order by JobUsageRecord.VOName'
+                    );
+
+    if ( @mywhereclause = '' or @mywhereclause is NULL ) and datediff(todate,fromdate) > 6 then
+		-- Use summary table
+		set @sql :=
+           concat_ws('', 'select VOProbeSummary.VOName,sum(VOProbeSummary.Njobs) as Njobs',
+                     ' from VOProbeSummary',
+                     ' where',
+                     ' EndTime >= date(''', fromdate, ''')',
+                     ' and EndTime <= date(''', todate, ''')',
+                     ' ', @myresourceclause,
+                     ' ', @mywhereclause
+                     , ' group by VOProbeSummary.VOName'
+                     , ' order by VOProbeSummary.VOName'
+                 );
+	end if;
+	insert into trace(pname,userkey,user,role,vo,p1,p2,p3,p4,data)
+		values('JobsByVO',@key,userName,userRole,@vo,
+		fromdate,todate,format,resourceType,@sql);
+	prepare statement from @sql;
+	execute statement;
+	deallocate prepare statement;
+end
+||
+-- call JobsByVO('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-10 00:00:00','%y:%m:%d:%H:%i','Batch')
+-- ||
+-- call JobsByVO('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-10 00:00:00','%y:%m:%d:%H:%i','')
+-- ||
+-- call JobsByVO('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-04 00:00:00','%y:%m:%d:%H:%i','Batch')
+-- ||
+-- call JobsByVO('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-04 00:00:00','%y:%m:%d:%H:%i','')
+-- ||
+drop procedure if exists UsageByFacility
+||
+create procedure UsageByFacility (userName varchar(64), userRole varchar(64),
+	fromdate varchar(64), todate varchar(64), format varchar(64),
+	resourceType varchar(64))
+begin
+
+	select generateResourceTypeClause(resourceType) into @myresourceclause;
+	select SystemProplist.cdr into @usereportauthentication from SystemProplist
+	where SystemProplist.car = 'use.report.authentication';
+	select RolesTable.whereclause into @mywhereclause from RolesTable
+		where RolesTable.role = userRole;
+	select generateWhereClause(userName,userRole,@mywhereclause)
+		into @mywhereclause;
+	call parse(userName,@name,@key,@vo);
+
+	set @sql :=
+           concat_ws('', 'select CETable.facility_name,JobUsageRecord.EndTime as endtime,sum(JobUsageRecord.WallDuration) as WallDuration',
+                     ' from CETable,CEProbes,JobUsageRecord',
+                     ' where',
+                     ' CEProbes.facility_id = CETable.facility_id and JobUsageRecord.ProbeName = CEProbes.probename and',
+                     ' EndTime >= ''', fromdate, ''''
+                     ' and EndTime <= ''', todate, ''''
+                     ' ', @myresourceclause,
+                     ' ', @mywhereclause
+                     , ' group by CETable.facility_name'
+                     , ' order by CETable.facility_name'
+                    );
+
+    if ( @mywhereclause = '' or @mywhereclause is NULL ) and datediff(todate,fromdate) > 6 then
+		-- Use summary table
+		set @sql :=
+           concat_ws('', 'select CETable.facility_name,ProbeSummary.EndTime as endtime,sum(ProbeSummary.WallDuration) as WallDuration',
+                     ' from CETable,CEProbes,ProbeSummary',
+                     ' where',
+                     ' CEProbes.facility_id = CETable.facility_id and ProbeSummary.ProbeName = CEProbes.probename and',
+                     ' EndTime >= date(''', fromdate, ''')',
+                     ' and EndTime <= date(''', todate, ''')',
+                     ' ', @myresourceclause,
+                     ' ', @mywhereclause
+                     , ' group by CETable.facility_name'
+                     , ' order by CETable.facility_name'
+                 );
+	end if;
+	insert into trace(pname,userkey,user,role,vo,p1,p2,p3,p4,data)
+		values('UsageByFacility',@key,userName,userRole,@vo,
+		fromdate,todate,format,resourceType,@sql);
+	prepare statement from @sql;
+	execute statement;
+	deallocate prepare statement;
+end
+||
+-- call UsageByFacility('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-10 00:00:00','%y:%m:%d:%H:%i','Batch')
+-- ||
+-- call UsageByFacility('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-10 00:00:00','%y:%m:%d:%H:%i','')
+-- ||
+-- call UsageByFacility('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-04 00:00:00','%y:%m:%d:%H:%i','Batch')
+-- ||
+-- call UsageByFacility('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-04 00:00:00','%y:%m:%d:%H:%i','')
+-- ||
+drop procedure if exists UsageByProbe
+||
+create procedure UsageByProbe (userName varchar(64), userRole varchar(64),
+	fromdate varchar(64), todate varchar(64), format varchar(64),
+	resourceType varchar(64))
+begin
+
+	select generateResourceTypeClause(resourceType) into @myresourceclause;
+	select SystemProplist.cdr into @usereportauthentication from SystemProplist
+	where SystemProplist.car = 'use.report.authentication';
+	select RolesTable.whereclause into @mywhereclause from RolesTable
+		where RolesTable.role = userRole;
+	select generateWhereClause(userName,userRole,@mywhereclause)
+		into @mywhereclause;
+	call parse(userName,@name,@key,@vo);
+
+	set @sql :=
+           concat_ws('', 'select JobUsageRecord.ProbeName,sum(JobUsageRecord.WallDuration) as WallDuration',
+                     ' from JobUsageRecord',
+                     ' where',
+                     ' EndTime >= ''', fromdate, ''''
+                     ' and EndTime <= ''', todate, ''''
+                     ' ', @myresourceclause,
+                     ' ', @mywhereclause
+                     , ' group by JobUsageRecord.ProbeName'
+                     , ' order by JobUsageRecord.ProbeName'
+                    );
+
+    if ( @mywhereclause = '' or @mywhereclause is NULL ) and datediff(todate,fromdate) > 6 then
+		-- Use summary table
+		set @sql :=
+           concat_ws('', 'select ProbeSummary.ProbeName,sum(ProbeSummary.WallDuration) as WallDuration',
+                     ' from ProbeSummary',
+                     ' where',
+                     ' EndTime >= date(''', fromdate, ''')',
+                     ' and EndTime <= date(''', todate, ''')',
+                     ' ', @myresourceclause,
+                     ' ', @mywhereclause
+                     , ' group by ProbeSummary.ProbeName'
+                     , ' order by ProbeSummary.ProbeName'
+                 );
+	end if;
+	insert into trace(pname,userkey,user,role,vo,p1,p2,p3,p4,data)
+		values('UsageByProbe',@key,userName,userRole,@vo,
+		fromdate,todate,format,resourceType,@sql);
+	prepare statement from @sql;
+	execute statement;
+	deallocate prepare statement;
+end
+||
+-- call UsageByProbe('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-10 00:00:00','%y:%m:%d:%H:%i','Batch')
+-- ||
+-- call UsageByProbe('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-10 00:00:00','%y:%m:%d:%H:%i','')
+-- ||
+-- call UsageByProbe('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-04 00:00:00','%y:%m:%d:%H:%i','Batch')
+-- ||
+-- call UsageByProbe('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-04 00:00:00','%y:%m:%d:%H:%i','')
+-- ||
+drop procedure if exists UsageBySite
+||
+create procedure UsageBySite (userName varchar(64), userRole varchar(64),
+	fromdate varchar(64), todate varchar(64), format varchar(64),
+	resourceType varchar(64))
+begin
+
+	select generateResourceTypeClause(resourceType) into @myresourceclause;
+	select SystemProplist.cdr into @usereportauthentication from SystemProplist
+	where SystemProplist.car = 'use.report.authentication';
+	select RolesTable.whereclause into @mywhereclause from RolesTable
+		where RolesTable.role = userRole;
+	select generateWhereClause(userName,userRole,@mywhereclause)
+		into @mywhereclause;
+	call parse(userName,@name,@key,@vo);
+
+	set @sql :=
+           concat_ws('', 'select JobUsageRecord.SiteName,sum(JobUsageRecord.WallDuration) as WallDuration',
+                     ' from JobUsageRecord',
+                     ' where',
+                     ' EndTime >= ''', fromdate, ''''
+                     ' and EndTime <= ''', todate, ''''
+                     ' ', @myresourceclause,
+                     ' ', @mywhereclause
+                     , ' group by JobUsageRecord.SiteName'
+                     , ' order by JobUsageRecord.SiteName'
+                    );
+
+    if ( @mywhereclause = '' or @mywhereclause is NULL ) and datediff(todate,fromdate) > 6 then
+		-- Use summary table
+		set @sql :=
+           concat_ws('', 'select ProbeSummary.SiteName,sum(ProbeSummary.WallDuration) as WallDuration',
+                     ' from ProbeSummary',
+                     ' where',
+                     ' EndTime >= date(''', fromdate, ''')',
+                     ' and EndTime <= date(''', todate, ''')',
+                     ' ', @myresourceclause,
+                     ' ', @mywhereclause
+                     , ' group by ProbeSummary.SiteName'
+                     , ' order by ProbeSummary.SiteName'
+                 );
+	end if;
+	insert into trace(pname,userkey,user,role,vo,p1,p2,p3,p4,data)
+		values('UsageBySite',@key,userName,userRole,@vo,
+		fromdate,todate,format,resourceType,@sql);
+	prepare statement from @sql;
+	execute statement;
+	deallocate prepare statement;
+end
+||
+-- call UsageBySite('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-10 00:00:00','%y:%m:%d:%H:%i','Batch')
+-- ||
+-- call UsageBySite('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-10 00:00:00','%y:%m:%d:%H:%i','')
+-- ||
+-- call UsageBySite('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-04 00:00:00','%y:%m:%d:%H:%i','Batch')
+-- ||
+-- call UsageBySite('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-04 00:00:00','%y:%m:%d:%H:%i','')
+-- ||
+drop procedure if exists UsageByVO
+||
+create procedure UsageByVO (userName varchar(64), userRole varchar(64),
+	fromdate varchar(64), todate varchar(64), format varchar(64),
+	resourceType varchar(64))
+begin
+
+	select generateResourceTypeClause(resourceType) into @myresourceclause;
+	select SystemProplist.cdr into @usereportauthentication from SystemProplist
+	where SystemProplist.car = 'use.report.authentication';
+	select RolesTable.whereclause into @mywhereclause from RolesTable
+		where RolesTable.role = userRole;
+	select generateWhereClause(userName,userRole,@mywhereclause)
+		into @mywhereclause;
+	call parse(userName,@name,@key,@vo);
+
+	set @sql :=
+           concat_ws('', 'select JobUsageRecord.VOName,sum(JobUsageRecord.WallDuration) as WallDuration,sum(JobUsageRecord.CpuUserDuration + JobUsageRecord.CpuSystemDuration) as Cpu',
+                     ' from JobUsageRecord',
+                     ' where',
+                     ' EndTime >= ''', fromdate, ''''
+                     ' and EndTime <= ''', todate, ''''
+                     ' ', @myresourceclause,
+                     ' ', @mywhereclause
+                     , ' group by JobUsageRecord.VOName'
+                     , ' order by JobUsageRecord.VOName'
+                    );
+
+    if ( @mywhereclause = '' or @mywhereclause is NULL ) and datediff(todate,fromdate) > 6 then
+		-- Use summary table
+		set @sql :=
+           concat_ws('', 'select VOProbeSummary.VOName,sum(VOProbeSummary.WallDuration) as WallDuration,sum(VOProbeSummary.CpuUserDuration + VOProbeSummary.CpuSystemDuration) as Cpu',
+                     ' from VOProbeSummary',
+                     ' where',
+                     ' EndTime >= date(''', fromdate, ''')',
+                     ' and EndTime <= date(''', todate, ''')',
+                     ' ', @myresourceclause,
+                     ' ', @mywhereclause
+                     , ' group by VOProbeSummary.VOName'
+                     , ' order by VOProbeSummary.VOName'
+                 );
+	end if;
+	insert into trace(pname,userkey,user,role,vo,p1,p2,p3,p4,data)
+		values('UsageByVO',@key,userName,userRole,@vo,
+		fromdate,todate,format,resourceType,@sql);
+	prepare statement from @sql;
+	execute statement;
+	deallocate prepare statement;
+end
+||
+-- call UsageByVO('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-10 00:00:00','%y:%m:%d:%H:%i','Batch')
+-- ||
+-- call UsageByVO('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-10 00:00:00','%y:%m:%d:%H:%i','')
+-- ||
+-- call UsageByVO('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-04 00:00:00','%y:%m:%d:%H:%i','Batch')
+-- ||
+-- call UsageByVO('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-04 00:00:00','%y:%m:%d:%H:%i','')
+-- ||
