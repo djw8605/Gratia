@@ -29,25 +29,25 @@ my %procedures =
 													group_by => 'ProbeSummary.EndTime, CETable.facility_name',
 													order_by => 'ProbeSummary.EndTime'
 												},
- DailyJobsByProbe => { select_columns => 'ProbeName, ProbeSummary.EndTime as endtime, sum(ProbeSummary.Njobs) as Njobs',
+ DailyJobsByProbe => { select_columns => 'ProbeSummary.ProbeName, ProbeSummary.EndTime as endtime, sum(ProbeSummary.Njobs) as Njobs',
 											 from_tables => 'ProbeSummary',
 											 main_where => '',
-											 group_by => 'ProbeSummary.EndTime, ProbeName',
+											 group_by => 'ProbeSummary.EndTime, ProbeSummary.ProbeName',
 											 order_by => 'ProbeSummary.EndTime'
 										 },
- DailyJobsByVO => { select_columns => 'VOProbeSummary.VOName,VOProbeSummary.EndTime as endtime,sum(Njobs) as Njobs',
+ DailyJobsByVO => { select_columns => 'VOProbeSummary.VOName,VOProbeSummary.EndTime as endtime,sum(VOProbeSummary.Njobs) as Njobs',
 										from_tables => 'VOProbeSummary',
 										main_where => '',
-										group_by => 'VOProbeSummary.EndTime,VOName',
+										group_by => 'VOProbeSummary.EndTime,VOProbeSummary.VOName',
 										order_by => 'VOProbeSummary.EndTime'
 									},
- DailyUsageByFacility => { select_columns => 'CETable.facility_name,ProbeSummary.EndTime as endtime,sum(ProbeSummary.WallDuration',
+ DailyUsageByFacility => { select_columns => 'CETable.facility_name,ProbeSummary.EndTime as endtime,sum(ProbeSummary.WallDuration) as WallDuration',
 													 from_tables => 'CETable,CEProbes,ProbeSummary',
 													 main_where => 'CEProbes.facility_id = CETable.facility_id and ProbeSummary.ProbeName = CEProbes.probename',
 													 group_by => 'ProbeSummary.EndTime,CETable.facility_name',
 													 order_by => 'ProbeSummary.EndTime'
 												 },
- DailyUsageByProbe => { select_columns => 'ProbeSummary.ProbeName,ProbeSummary.EndTime',
+ DailyUsageByProbe => { select_columns => 'ProbeSummary.ProbeName,ProbeSummary.EndTime as endtime,sum(ProbeSummary.WallDuration) as WallDuration',
 												from_tables => 'ProbeSummary',
 												main_where => '',
 												group_by => 'ProbeSummary.EndTime,ProbeSummary.ProbeName',
@@ -55,15 +55,15 @@ my %procedures =
 											},
  JobsByFacility => { select_columns => 'CETable.facility_name,sum(ProbeSummary.Njobs) as Njobs',
 										 from_tables => 'CETable,CEProbes,ProbeSummary',
-										 main_where => '',
+										 main_where => 'CEProbes.facility_id = CETable.facility_id and ProbeSummary.ProbeName = CEProbes.probename',
 										 group_by => 'CETable.facility_name',
 										 order_by => 'CETable.facility_name'
 									 },
  JobsByProbeNoFacility => { select_columns => 'ProbeSummary.ProbeName,sum(ProbeSummary.Njobs) as Njobs',
 														from_tables => 'ProbeSummary',
 														main_where => '',
-														group_by => 'ProbeName',
-														order_by => 'ProbeName'
+														group_by => 'ProbeSummary.ProbeName',
+														order_by => 'ProbeSummary.ProbeName'
 													},
  UsageByFacility => { select_columns => 'CETable.facility_name,ProbeSummary.EndTime as endtime,sum(ProbeSummary.WallDuration) as WallDuration',
 											from_tables => 'CETable,CEProbes,ProbeSummary',
@@ -77,11 +77,11 @@ my %procedures =
 									 group_by => 'ProbeSummary.ProbeName',
 									 order_by => 'ProbeSummary.ProbeName'
 								 },
- DailyUsageBySite => { select_columns => 'ProbeSummary.SiteName,ProbeSummary.EndTime as endtime,sum(ProbeSummary.WallDuration) as WallDuration,sum(ProbeSummary.CpuUserDuration + ProbeSummary.CpuSystemDuration) as Cpu',
+ DailyUsageBySite => { select_columns => 'ProbeSummary.ProbeName,ProbeSummary.EndTime as endtime,sum(ProbeSummary.WallDuration) as WallDuration,sum(ProbeSummary.CpuUserDuration + ProbeSummary.CpuSystemDuration) as Cpu',
 											 from_tables => 'ProbeSummary',
 											 main_where => '',
-											 group_by => 'ProbeSummary.ProbeName',
-											 order_by => 'ProbeSummary.ProbeName'
+											 group_by => 'ProbeSummary.EndTime,ProbeSummary.ProbeName',
+											 order_by => 'ProbeSummary.EndTime,ProbeSummary.ProbeName'
 										 },
  UsageBySite => { select_columns => 'ProbeSummary.SiteName,sum(ProbeSummary.WallDuration) as WallDuration',
 									from_tables => 'ProbeSummary',
@@ -98,7 +98,7 @@ my %procedures =
  DailyUsageByVO => { select_columns => 'VOProbeSummary.VOName,VOProbeSummary.EndTime as endtime, sum(VOProbeSummary.WallDuration) as WallDuration,sum(VOProbeSummary.CpuUserDuration + VOProbeSummary.CpuSystemDuration) as Cpu',
 										 from_tables => 'VOProbeSummary',
 										 main_where => '',
-										 group_by => 'VOProbeSummary.EndTime',
+										 group_by => 'VOProbeSummary.EndTime,VOProbeSummary.VOName',
 										 order_by => 'VOProbeSummary.EndTime'
 									 },
  UsageByVO => { select_columns => 'VOProbeSummary.VOName,sum(VOProbeSummary.WallDuration) as WallDuration,sum(VOProbeSummary.CpuUserDuration + VOProbeSummary.CpuSystemDuration) as Cpu',
