@@ -5,7 +5,7 @@
 #
 # library to transfer the data from Gratia to APEL (WLCG)
 #
-#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: LCG.py,v 1.4 2007-03-05 20:30:27 pcanal Exp $
+#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: LCG.py,v 1.5 2007-03-07 21:59:11 pcanal Exp $
 
 import time
 import datetime
@@ -157,6 +157,9 @@ ReportableSites = [
     'UCSanDiegoPG',
     'UFlorida-PG',
     # ATLAS
+    'BNL_ATLAS_1',
+    'BNL_ATLAS_2',
+    'BNL_PANDA',    
     'UTA_DPCC' 
     ]
 
