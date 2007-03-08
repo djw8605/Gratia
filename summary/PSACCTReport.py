@@ -5,7 +5,7 @@
 #
 # library to create simple report using the Gratia psacct database
 #
-#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.15 2007-02-27 18:58:31 pcanal Exp $
+#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.16 2007-03-08 18:23:23 greenc Exp $
 
 import time
 import datetime
@@ -824,10 +824,11 @@ select J.SiteName, J.VOName, sum(J.NJobs), sum(J.WallDuration)
     
 class RangeVOReportConf:
     title = """\
-OSG usage summary for  %s - %s (midnight UTC - midnight UTC) including all jobs that finished in
-that time period.
-Wall Duration is expressed in hours and rounded to the nearest hour. Wall Duration is the duration
-between the instant the job started running and the instant the job ended its execution.
+OSG usage summary for  %s - %s (midnight UTC - midnight UTC)
+including all jobs that finished in that time period.
+Wall Duration is expressed in hours and rounded to the nearest hour. Wall
+Duration is the duration between the instant the job started running
+and the instant the job ended its execution.
 Deltas are the differences with the previous period."""
     headline = "For all jobs finished between %s and %s (midnight UTC)"
     headers = ("VO","# of Jobs","Wall Duration","Delta jobs","Delta duration")
@@ -848,10 +849,11 @@ Deltas are the differences with the previous period."""
 
 class RangeSiteReportConf:
     title = """\
-OSG usage summary for  %s - %s (midnight UTC - midnight UTC) including all jobs that finished in
-that time period.
-Wall Duration is expressed in hours and rounded to the nearest hour. Wall Duration is the duration
-between the instant the job started running and the instant the job ended its execution.
+OSG usage summary for  %s - %s (midnight UTC - midnight UTC)
+including all jobs that finished in that time period.
+Wall Duration is expressed in hours and rounded to the nearest hour. Wall
+Duration is the duration between the instant the job started running
+and the instant the job ended its execution.
 Deltas are the differences with the previous period."""
     headline = "For all jobs finished between %s and %s (midnight, UTC)"
     headers = ("Site","# of Jobs","Wall Duration","Delta jobs","Delta duration")
@@ -872,10 +874,11 @@ Deltas are the differences with the previous period."""
     
 class RangeSiteVOReportConf:
     title = """\
-OSG usage summary for  %s - %s (midnight UTC - midnight UTC) including all jobs that finished in
-that time period.
-Wall Duration is expressed in hours and rounded to the nearest hour. Wall Duration is the duration
-between the instant the job started running and the instant the job ended its execution.
+OSG usage summary for  %s - %s (midnight UTC - midnight UTC)
+including all jobs that finished in that time period.
+Wall Duration is expressed in hours and rounded to the nearest hour. Wall
+Duration is the duration between the instant the job started running
+and the instant the job ended its execution.
 Deltas are the differences with the previous period."""
     headline = "For all jobs finished between %s and %s (midnight UTC)"
     headers = ("Site", "VO","# of Jobs","Wall Duration","Delta jobs","Delta duration")
