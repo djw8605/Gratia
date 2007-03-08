@@ -8,7 +8,6 @@ import sys
 
 def main(argv=None):
     UseArgs(argv)
-    print PSACCTReport.gBegin,PSACCTReport.gEnd
 
     if not CheckDB() :
         return 1
