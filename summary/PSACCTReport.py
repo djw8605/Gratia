@@ -5,7 +5,7 @@
 #
 # library to create simple report using the Gratia psacct database
 #
-#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.16 2007-03-08 18:23:23 greenc Exp $
+#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.17 2007-03-12 15:09:42 pcanal Exp $
 
 import time
 import datetime
@@ -747,13 +747,13 @@ def RangeVOData(begin, end, with_panda = False):
     schema = "gratia"
     select = """\
 select J.VOName, sum(J.NJobs), sum(J.WallDuration)
-  from """ + schema + """.JobUsageRecord J
+  from """ + schema + """.VOProbeSummary J
   where
     EndTime >= \"""" + DateTimeToString(begin) + """\" and
     EndTime < \"""" + DateTimeToString(end) + """\" and
     J.ProbeName not like \"psacct:%\"
     group by J.VOName
-    order by VOName"""
+    order by VOName;"""
     if with_panda:
         panda_select = """\
 select J.VOName, sum(J.NJobs), sum(J.WallDuration)
@@ -763,7 +763,7 @@ select J.VOName, sum(J.NJobs), sum(J.WallDuration)
     J.SiteName not in (select GT.facility_name from gratia.CETable GT) and
     J.EndTime >= \"""" + DateTimeToString(begin) + """\" and
     J.EndTime < \"""" + DateTimeToString(end) + """\"
-    group by J.VOName"""
+    group by J.VOName;"""
         return RunQueryAndSplit(select) + RunQueryAndSplit(panda_select)
     else:
         return RunQueryAndSplit(select) 
@@ -772,14 +772,14 @@ def RangeSiteData(begin, end, with_panda = False):
     schema = "gratia"
     select = """\
 select T.facility_name, sum(J.NJobs), sum(J.WallDuration)
-  from """ + schema + ".CETable T, " + schema + ".CEProbes P, " + schema + """.JobUsageRecord J
+  from """ + schema + ".CETable T, " + schema + ".CEProbes P, " + schema + """.VOProbeSummary J
   where
     P.facility_id = T.facility_id and
     J.ProbeName = P.probename and
     EndTime >= \"""" + DateTimeToString(begin) + """\" and
     EndTime < \"""" + DateTimeToString(end) + """\" and
     J.ProbeName not like \"psacct:%\"
-    group by P.facility_id"""
+    group by P.facility_id;"""
     if with_panda:
         panda_select = """\
 select J.SiteName, sum(J.NJobs), sum(J.WallDuration)
@@ -789,7 +789,7 @@ select J.SiteName, sum(J.NJobs), sum(J.WallDuration)
     J.SiteName not in (select GT.facility_name from gratia.CETable GT) and
     J.EndTime >= \"""" + DateTimeToString(begin) + """\" and
     J.EndTime < \"""" + DateTimeToString(end) + """\"
-    group by J.SiteName"""
+    group by J.SiteName;"""
         return RunQueryAndSplit(select) + RunQueryAndSplit(panda_select)
     else:
         return RunQueryAndSplit(select)
@@ -798,7 +798,7 @@ def RangeSiteVOData(begin, end, with_panda = False):
     schema = "gratia"
     select = """\
 select T.facility_name, J.VOName, sum(NJobs), sum(J.WallDuration)
-  from """ + schema + ".CETable T, " + schema + ".CEProbes P, " + schema + """.JobUsageRecord J
+  from """ + schema + ".CETable T, " + schema + ".CEProbes P, " + schema + """.VOProbeSummary J
   where
     P.facility_id = T.facility_id and
     J.ProbeName = P.probename and
@@ -806,7 +806,7 @@ select T.facility_name, J.VOName, sum(NJobs), sum(J.WallDuration)
     EndTime < \"""" + DateTimeToString(end) + """\" and
     J.ProbeName not like \"psacct:%\"
     group by T.facility_name,J.VOName
-    order by T.facility_name,J.VOName"""
+    order by T.facility_name,J.VOName;"""
     if with_panda:
         panda_select = """\
 select J.SiteName, J.VOName, sum(J.NJobs), sum(J.WallDuration)
@@ -817,7 +817,7 @@ select J.SiteName, J.VOName, sum(J.NJobs), sum(J.WallDuration)
     J.EndTime >= \"""" + DateTimeToString(begin) + """\" and
     J.EndTime < \"""" + DateTimeToString(end) + """\"
     group by J.SiteName, J.VOName
-    order by J.SiteName, J.VOName"""
+    order by J.SiteName, J.VOName;"""
         return RunQueryAndSplit(select) + RunQueryAndSplit(panda_select)
     else:
         return RunQueryAndSplit(select)
