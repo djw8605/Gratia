@@ -35,6 +35,7 @@ CREATE TABLE `VOProbeSummary` (
 	`EndTime` DATETIME NOT NULL DEFAULT 0,
 	`VOName` VARCHAR(255) DEFAULT 'Unknown',
 	`ProbeName` VARCHAR(255) NOT NULL DEFAULT '',
+	`CommonName` VARCHAR(255) DEFAULT 'Unknown',
 	`ResourceType` VARCHAR(255) DEFAULT 'Unknown',
 	`Njobs` INTEGER NOT NULL DEFAULT 0,
 	`WallDuration` DOUBLE NOT NULL DEFAULT 0,
@@ -124,6 +125,7 @@ insert into VOProbeSummary
 		date(EndTime) as EndTime,
 		VOName,
 		ProbeName,
+		CommonName,
 		ResourceType,
 		sum(Njobs) as Njobs,
 		sum(WallDuration) as WallDuration,
@@ -131,7 +133,7 @@ insert into VOProbeSummary
 		sum(CpuSystemDuration) as CpuSystemDuration
 		from JobUsageRecord
 		where CpuUserDuration is not null
-		group by VOName,ProbeName,ResourceType,date(EndTime)
+		group by VOName,ProbeName,CommonName,ResourceType,date(EndTime)
 );
 ||
 alter table VOProbeSummary
@@ -145,6 +147,9 @@ alter table VOProbeSummary
 ||
 alter table VOProbeSummary
 	add index index04(ResourceType);
+||
+alter table VOProbeSummary
+	add index index05(CommonName);
 ||
 insert into HostDescriptionProbeSummary
 	(select
@@ -279,12 +284,14 @@ glr:begin
 
 	select count(*) into mycount from VOProbeSummary
 		where VOProbeSummary.VOName = new.VOName
+		and VOProbeSummary.CommonName = new.CommonName
 		and VOProbeSummary.ProbeName = new.ProbeName
 		and VOProbeSummary.EndTime = date(new.EndTime)
 		and VOProbeSummary.ResourceType = new.ResourceType;
 	if mycount = 0 then
-		insert into VOProbeSummary values(date(new.EndTime),new.VOName,new.ProbeName,new.ResourceType,
-			new.Njobs,new.WallDuration,new.CpuUserDuration,new.CpuSystemDuration);
+		insert into VOProbeSummary values(date(new.EndTime),new.VOName,new.ProbeName,
+			new.CommonName,new.ResourceType,new.Njobs,new.WallDuration,new.CpuUserDuration,
+			new.CpuSystemDuration);
 	elseif mycount > 0 then
 		update VOProbeSummary
 			set
@@ -295,6 +302,7 @@ glr:begin
 				where 
 				VOProbeSummary.VOName = new.VOName
 				and VOProbeSummary.ProbeName = new.ProbeName
+				and VOProbeSummary.CommonName = new.CommonName
 				and VOProbeSummary.EndTime = date(new.EndTime)
 				and VOProbeSummary.ResourceType = new.ResourceType;
 	end if;

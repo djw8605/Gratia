@@ -21,6 +21,12 @@ my %mysql_options =
  "--port" => 3320
 );
 
+my @default_procedure_argument_list =
+	("userName varchar(64)", "userRole varchar(64)",
+	 "fromdate varchar(64)", "todate varchar(64)",
+	 "format varchar(64)", "resourceType varchar(64)"
+	);
+
 my %procedures =
 (
  DailyJobsByFacility => { select_columns => 'CETable.facility_name, ProbeSummary.EndTime as endtime, sum(ProbeSummary.Njobs) as Njobs',
@@ -113,6 +119,40 @@ my %procedures =
 							 group_by => 'VOProbeSummary.VOName',
 							 order_by => 'VOProbeSummary.VOName'
 						 },
+ JobsByFacilityForVO => { extra_procedure_arguments => [ 'vo varchar(64)' ],
+													extra_test_arguments => [ "'Unknown'" ],
+													select_columns => 'CETable.facility_name, sum(VOProbeSummary.Njobs) as Njobs',
+													from_tables => 'CETable,CEProbes,VOProbeSummary',
+													main_where => 'CEProbes.facility_id = CETable.facility_id and VOProbeSummary.ProbeName = CEProbes.probename and VOProbeSummary.VOName = \'\'\', vo, \'\'\'',
+													group_by => 'CETable.facility_name',
+													order_by => 'CETable.facility_name'
+												},
+ JobsByUserForVOForFacility => { extra_procedure_arguments => [ 'vo varchar(64)',
+																																'facility_name varchar(64)' ],
+																 extra_test_arguments => [ "'Unknown'", "'FNAL_FERMIGRID'" ],
+																 select_columns => 'VOProbeSummary.CommonName as User, sum(VOProbeSummary.Njobs) as Njobs',
+																 from_tables => 'CETable,CEProbes,VOProbeSummary',
+																 main_where => 'CETable.facility_name = \'\'\', facility_name, \'\'\' and CEProbes.facility_id = CETable.facility_id and VOProbeSummary.ProbeName = CEProbes.probename and VOProbeSummary.VOName = \'\'\', vo, \'\'\'',
+																 group_by => 'User',
+																 order_by => 'User'
+															 },
+ UsageByFacilityForVO => { extra_procedure_arguments => [ 'vo varchar(64)' ],
+													 extra_test_arguments => [ "'Unknown'" ],
+													 select_columns => 'CETable.facility_name, sum(VOProbeSummary.WallDuration) as WallDuration,sum(VOProbeSummary.CpuUserDuration + VOProbeSummary.CpuSystemDuration) as Cpu',
+													 from_tables => 'CETable,CEProbes,VOProbeSummary',
+													 main_where => 'CEProbes.facility_id = CETable.facility_id and VOProbeSummary.ProbeName = CEProbes.probename and VOProbeSummary.VOName = \'\'\', vo, \'\'\'',
+													 group_by => 'CETable.facility_name',
+													 order_by => 'CETable.facility_name'
+												 },
+ UsageByUserForVOForFacility => { extra_procedure_arguments => [ 'vo varchar(64)',
+																																 'facility_name varchar(64)' ],
+																	extra_test_arguments => [ "'Unknown'", "'FNAL_FERMIGRID'" ],
+																	select_columns => 'VOProbeSummary.CommonName as User, sum(VOProbeSummary.WallDuration) as WallDuration,sum(VOProbeSummary.CpuUserDuration + VOProbeSummary.CpuSystemDuration) as Cpu',
+																	from_tables => 'CETable,CEProbes,VOProbeSummary',
+																	main_where => 'CETable.facility_name = \'\'\', facility_name, \'\'\' and CEProbes.facility_id = CETable.facility_id and VOProbeSummary.ProbeName = CEProbes.probename and VOProbeSummary.VOName = \'\'\', vo, \'\'\'',
+																	group_by => 'User',
+																	order_by => 'User'
+																},
  newProcedure => { select_columns => '',
 									 from_tables => '',
 									 main_where => '',
@@ -149,7 +189,7 @@ use FileHandle;
 use IPC::Open2;
 sub process_trace_directives {
 	my ($script_ref,$trace_opt) = @_;
-	return if $trace_opt; # trace inserts stay in
+	return if $trace_opt;					# trace inserts stay in
 	my $pid = open2(\*Reader, \*Writer, "cat -u");
 	print Writer $$script_ref;
 	close Writer;
@@ -164,7 +204,7 @@ sub process_trace_directives {
 			$input_buffer = "";
 			next;
 		} elsif (m&(?:;|\|\|)\s*(?:#.*)?$&
-						or m&\b(?:then|else)\s*(?:#.*)?$&i) {
+						 or m&\b(?:then|else)\s*(?:#.*)?$&i) {
 			if (not ($input_buffer =~ m&insert\s*into\s*trace&m)) {
 				$output_buffer = "$output_buffer$input_buffer";
 			}
@@ -205,15 +245,15 @@ sub generate_procedures {
 		my $jobusage_main_where = jobusage($procedures{$procedure}->{main_where});
 		my $jobusage_group_by = jobusage($procedures{$procedure}->{group_by});
 		my $jobusage_order_by = jobusage($procedures{$procedure}->{order_by});
-		$procedure_code = sprintf("%s%s",	$procedure_code, <<"EOF");
-drop procedure if exists $procedure
+		$procedure_code = sprintf("%s\ndrop procedure if exists $procedure
 ||
-create procedure $procedure (userName varchar(64), userRole varchar(64),
-	fromdate varchar(64), todate varchar(64), format varchar(64),
-	resourceType varchar(64))
+create procedure $procedure (%s)
 begin
 
-EOF
+", $procedure_code, join(", ", @default_procedure_argument_list,
+												 (exists $procedures{$procedure}->{extra_procedure_arguments})?
+												 @{$procedures{$procedure}->{extra_procedure_arguments}}:
+												 ()));
 		$procedure_code = sprintf("%s%s", $procedure_code, <<'EOF');
 	select generateResourceTypeClause(resourceType) into @myresourceclause;
 	select SystemProplist.cdr into @usereportauthentication from SystemProplist
@@ -282,14 +322,17 @@ end
 ||
 EOF
 		my $date_format = ($procedure =~ m&daily&i)?'%y:%m:%d':'%y:%m:%d:%H:%i';
+		my $extra_args = (exists $procedures{$procedure}->{extra_test_arguments} and
+										 scalar @{$procedures{$procedure}->{extra_test_arguments}})?
+			sprintf(", %s", join(", ", @{$procedures{$procedure}->{extra_test_arguments}})):'';
 		$procedure_code = sprintf("%s%s",	$procedure_code, <<"EOF");
--- call $procedure('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-10 00:00:00','$date_format','Batch')
+-- call $procedure('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-10 00:00:00','$date_format','Batch'$extra_args)
 -- ||
--- call $procedure('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-10 00:00:00','$date_format','')
+-- call $procedure('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-10 00:00:00','$date_format',''$extra_args)
 -- ||
--- call $procedure('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-04 00:00:00','$date_format','Batch')
+-- call $procedure('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-04 00:00:00','$date_format','Batch'$extra_args)
 -- ||
--- call $procedure('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-04 00:00:00','$date_format','')
+-- call $procedure('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-04 00:00:00','$date_format',''$extra_args)
 -- ||
 EOF
 	}
