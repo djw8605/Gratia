@@ -1213,3 +1213,121 @@ end
 -- ||
 -- call UsageByVO('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-04 00:00:00','%y:%m:%d:%H:%i','')
 -- ||
+
+drop procedure if exists WeeklyJobsByVO
+||
+create procedure WeeklyJobsByVO (userName varchar(64), userRole varchar(64), fromdate varchar(64), todate varchar(64), format varchar(64), resourceType varchar(64), vos varchar(128), voseltype varchar(8))
+begin
+
+	select generateResourceTypeClause(resourceType) into @myresourceclause;
+	select SystemProplist.cdr into @usereportauthentication from SystemProplist
+	where SystemProplist.car = 'use.report.authentication';
+	select RolesTable.whereclause into @mywhereclause from RolesTable
+		where RolesTable.role = userRole;
+	select generateWhereClause(userName,userRole,@mywhereclause)
+		into @mywhereclause;
+	call parse(userName,@name,@key,@vo);
+
+	set @sql :=
+           concat_ws('', 'select JobUsageRecord.VOName,date_format(JobUsageRecord.EndTime, ''', format, ''') as endtime,sum(JobUsageRecord.Njobs) as Njobs',
+                     ' from JobUsageRecord',
+                     ' where',
+                     ' JobUsageRecord.VOName ', voseltype, ' (', vos, ') and',
+                     ' EndTime >= ''', fromdate, ''''
+                     ' and EndTime <= ''', todate, ''''
+                     ' ', @myresourceclause,
+                     ' ', @mywhereclause
+                     , ' group by date_format(JobUsageRecord.EndTime,''', format, '''),JobUsageRecord.VOName'
+                     , ' order by JobUsageRecord.EndTime'
+                    );
+
+    if ( @mywhereclause = '' or @mywhereclause is NULL ) and datediff(todate,fromdate) > 6 then
+		-- Use summary table
+		set @sql :=
+           concat_ws('', 'select VOProbeSummary.VOName,date_format(VOProbeSummary.EndTime, ''', format, ''') as endtime,sum(VOProbeSummary.Njobs) as Njobs',
+                     ' from VOProbeSummary',
+                     ' where',
+                     ' VOProbeSummary.VOName ', voseltype, ' (', vos, ') and',
+                     ' EndTime >= date(''', fromdate, ''')',
+                     ' and EndTime <= date(''', todate, ''')',
+                     ' ', @myresourceclause,
+                     ' ', @mywhereclause
+                     , ' group by date_format(VOProbeSummary.EndTime,''', format, '''),VOProbeSummary.VOName'
+                     , ' order by VOProbeSummary.EndTime'
+                 );
+	end if;
+	insert into trace(pname,userkey,user,role,vo,p1,p2,p3,p4,data)
+		values('WeeklyJobsByVO',@key,userName,userRole,@vo,
+		fromdate,todate,format,resourceType,@sql);
+	prepare statement from @sql;
+	execute statement;
+	deallocate prepare statement;
+end
+||
+-- call WeeklyJobsByVO('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-10 00:00:00','%y:%m:%d:%H:%i','Batch')
+-- ||
+-- call WeeklyJobsByVO('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-10 00:00:00','%y:%m:%d:%H:%i','')
+-- ||
+-- call WeeklyJobsByVO('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-04 00:00:00','%y:%m:%d:%H:%i','Batch')
+-- ||
+-- call WeeklyJobsByVO('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-04 00:00:00','%y:%m:%d:%H:%i','')
+-- ||
+
+drop procedure if exists WeeklyUsageByVO
+||
+create procedure WeeklyUsageByVO (userName varchar(64), userRole varchar(64), fromdate varchar(64), todate varchar(64), format varchar(64), resourceType varchar(64), vos varchar(128), voseltype varchar(8))
+begin
+
+	select generateResourceTypeClause(resourceType) into @myresourceclause;
+	select SystemProplist.cdr into @usereportauthentication from SystemProplist
+	where SystemProplist.car = 'use.report.authentication';
+	select RolesTable.whereclause into @mywhereclause from RolesTable
+		where RolesTable.role = userRole;
+	select generateWhereClause(userName,userRole,@mywhereclause)
+		into @mywhereclause;
+	call parse(userName,@name,@key,@vo);
+
+	set @sql :=
+           concat_ws('', 'select JobUsageRecord.VOName,date_format(JobUsageRecord.EndTime, ''', format, ''') as endtime, sum(JobUsageRecord.WallDuration) as WallDuration,sum(JobUsageRecord.CpuUserDuration + JobUsageRecord.CpuSystemDuration) as Cpu',
+                     ' from JobUsageRecord',
+                     ' where',
+                     ' JobUsageRecord.VOName ', voseltype, ' (', vos, ') and',
+                     ' EndTime >= ''', fromdate, ''''
+                     ' and EndTime <= ''', todate, ''''
+                     ' ', @myresourceclause,
+                     ' ', @mywhereclause
+                     , ' group by date_format(JobUsageRecord.EndTime,''', format, '''),JobUsageRecord.VOName'
+                     , ' order by JobUsageRecord.EndTime'
+                    );
+
+    if ( @mywhereclause = '' or @mywhereclause is NULL ) and datediff(todate,fromdate) > 6 then
+		-- Use summary table
+		set @sql :=
+           concat_ws('', 'select VOProbeSummary.VOName,date_format(VOProbeSummary.EndTime, ''', format, ''') as endtime, sum(VOProbeSummary.WallDuration) as WallDuration,sum(VOProbeSummary.CpuUserDuration + VOProbeSummary.CpuSystemDuration) as Cpu',
+                     ' from VOProbeSummary',
+                     ' where',
+                     ' VOProbeSummary.VOName ', voseltype, ' (', vos, ') and',
+                     ' EndTime >= date(''', fromdate, ''')',
+                     ' and EndTime <= date(''', todate, ''')',
+                     ' ', @myresourceclause,
+                     ' ', @mywhereclause
+                     , ' group by date_format(VOProbeSummary.EndTime,''', format, '''),VOProbeSummary.VOName'
+                     , ' order by VOProbeSummary.EndTime'
+                 );
+	end if;
+	insert into trace(pname,userkey,user,role,vo,p1,p2,p3,p4,data)
+		values('WeeklyUsageByVO',@key,userName,userRole,@vo,
+		fromdate,todate,format,resourceType,@sql);
+	prepare statement from @sql;
+	execute statement;
+	deallocate prepare statement;
+end
+||
+-- call WeeklyUsageByVO('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-10 00:00:00','%y:%m:%d:%H:%i','Batch')
+-- ||
+-- call WeeklyUsageByVO('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-10 00:00:00','%y:%m:%d:%H:%i','')
+-- ||
+-- call WeeklyUsageByVO('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-04 00:00:00','%y:%m:%d:%H:%i','Batch')
+-- ||
+-- call WeeklyUsageByVO('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-04 00:00:00','%y:%m:%d:%H:%i','')
+-- ||
