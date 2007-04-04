@@ -153,6 +153,22 @@ my %procedures =
 																	group_by => 'User',
 																	order_by => 'User'
 																},
+ WeeklyUsageByVO => { extra_procedure_arguments => [ 'vos varchar(128)',
+																										 'voseltype varchar(8)' ],
+											select_columns => 'VOProbeSummary.VOName,date_format(VOProbeSummary.EndTime, \'\'\', format, \'\'\') as endtime, sum(VOProbeSummary.WallDuration) as WallDuration,sum(VOProbeSummary.CpuUserDuration + VOProbeSummary.CpuSystemDuration) as Cpu',
+											from_tables => 'VOProbeSummary',
+											main_where => 'VOProbeSummary.VOName \', voseltype, \' (\', vos, \')',
+											group_by => 'VOProbeSummary.EndTime,VOProbeSummary.VOName',
+											order_by => 'VOProbeSummary.EndTime'
+										},
+ WeeklyJobsByVO => { extra_procedure_arguments => [ 'vos varchar(128)',
+																										'voseltype varchar(8)' ],
+										 select_columns => 'VOProbeSummary.VOName,date_format(VOProbeSummary.EndTime, \'\'\', format, \'\'\') as endtime,sum(VOProbeSummary.Njobs) as Njobs',
+										 from_tables => 'VOProbeSummary',
+										 main_where => 'VOProbeSummary.VOName \', voseltype, \' (\', vos, \')',
+										 group_by => 'VOProbeSummary.EndTime,VOProbeSummary.VOName',
+										 order_by => 'VOProbeSummary.EndTime'
+									 },
  newProcedure => { select_columns => '',
 									 from_tables => '',
 									 main_where => '',
@@ -167,11 +183,16 @@ Getopt::Long::Configure(qw(no_ignore_case bundling require_order));
 
 GetOptions(\%options, "debug|d", , "trace|t", "help|h|\?") or pod2usage(-exitval => 2);
 
+my @procedure_list = ();
+if (scalar @ARGV) {
+	@procedure_list = @ARGV;
+}
+
 $options{debug} = 1;
 # $options{trace} = 1;
 
 if ($options{debug}) {
-	my $sql_script = generate_sql();
+	my $sql_script = generate_sql(@procedure_list);
 	process_trace_directives(\$sql_script,$options{trace});
 	print $sql_script;
 	exit 0;
@@ -222,10 +243,15 @@ sub process_trace_directives {
 }
 
 sub generate_sql {
-	return sprintf("%s%s%s",
-								 generate_sql_boilerplate(),
-								 generate_probe_status_proc(),
-								 generate_procedures());
+	if (scalar @_) {
+		return sprintf("delimiter ||\n%s",
+									 generate_procedures(@_));
+	} else {
+		return sprintf("%s%s%s",
+									 generate_sql_boilerplate(),
+									 generate_probe_status_proc(),
+									 generate_procedures());
+	}
 }
 
 sub jobusage {
@@ -236,7 +262,9 @@ sub jobusage {
 
 sub generate_procedures {
 	my $procedure_code = '';
-	foreach my $procedure (sort keys %procedures) {
+	my @procedure_list = @_;
+	@procedure_list = sort keys %procedures unless (scalar @procedure_list);
+	foreach my $procedure (@procedure_list) {
 		$procedure eq 'newProcedure' and next;
 		$procedures{$procedure}->{main_where} = "$procedures{$procedure}->{main_where} and"
 			if $procedures{$procedure}->{main_where};
