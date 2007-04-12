@@ -1232,7 +1232,7 @@ begin
            concat_ws('', 'select JobUsageRecord.VOName,date_format(JobUsageRecord.EndTime, ''', format, ''') as endtime,sum(JobUsageRecord.Njobs) as Njobs',
                      ' from JobUsageRecord',
                      ' where',
-                     ' JobUsageRecord.VOName ', voseltype, ' (', vos, ') and',
+                     ' JobUsageRecord.VOName ', voseltype, vos, ' and',
                      ' EndTime >= ''', fromdate, ''''
                      ' and EndTime <= ''', todate, ''''
                      ' ', @myresourceclause,
@@ -1247,7 +1247,7 @@ begin
            concat_ws('', 'select VOProbeSummary.VOName,date_format(VOProbeSummary.EndTime, ''', format, ''') as endtime,sum(VOProbeSummary.Njobs) as Njobs',
                      ' from VOProbeSummary',
                      ' where',
-                     ' VOProbeSummary.VOName ', voseltype, ' (', vos, ') and',
+                     ' VOProbeSummary.VOName ', voseltype, vos, ' and',
                      ' EndTime >= date(''', fromdate, ''')',
                      ' and EndTime <= date(''', todate, ''')',
                      ' ', @myresourceclause,
@@ -1291,7 +1291,7 @@ begin
            concat_ws('', 'select JobUsageRecord.VOName,date_format(JobUsageRecord.EndTime, ''', format, ''') as endtime, sum(JobUsageRecord.WallDuration) as WallDuration,sum(JobUsageRecord.CpuUserDuration + JobUsageRecord.CpuSystemDuration) as Cpu',
                      ' from JobUsageRecord',
                      ' where',
-                     ' JobUsageRecord.VOName ', voseltype, ' (', vos, ') and',
+                     ' JobUsageRecord.VOName ', voseltype, vos, ' and',
                      ' EndTime >= ''', fromdate, ''''
                      ' and EndTime <= ''', todate, ''''
                      ' ', @myresourceclause,
@@ -1306,7 +1306,7 @@ begin
            concat_ws('', 'select VOProbeSummary.VOName,date_format(VOProbeSummary.EndTime, ''', format, ''') as endtime, sum(VOProbeSummary.WallDuration) as WallDuration,sum(VOProbeSummary.CpuUserDuration + VOProbeSummary.CpuSystemDuration) as Cpu',
                      ' from VOProbeSummary',
                      ' where',
-                     ' VOProbeSummary.VOName ', voseltype, ' (', vos, ') and',
+                     ' VOProbeSummary.VOName ', voseltype, vos, ' and',
                      ' EndTime >= date(''', fromdate, ''')',
                      ' and EndTime <= date(''', todate, ''')',
                      ' ', @myresourceclause,

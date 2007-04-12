@@ -157,7 +157,7 @@ my %procedures =
 																										 'voseltype varchar(8)' ],
 											select_columns => 'VOProbeSummary.VOName,date_format(VOProbeSummary.EndTime, \'\'\', format, \'\'\') as endtime, sum(VOProbeSummary.WallDuration) as WallDuration,sum(VOProbeSummary.CpuUserDuration + VOProbeSummary.CpuSystemDuration) as Cpu',
 											from_tables => 'VOProbeSummary',
-											main_where => 'VOProbeSummary.VOName \', voseltype, vos,
+											main_where => 'VOProbeSummary.VOName \', voseltype, vos, \'',
 											group_by => 'VOProbeSummary.EndTime,VOProbeSummary.VOName',
 											order_by => 'VOProbeSummary.EndTime'
 										},
@@ -165,7 +165,7 @@ my %procedures =
 																										'voseltype varchar(8)' ],
 										 select_columns => 'VOProbeSummary.VOName,date_format(VOProbeSummary.EndTime, \'\'\', format, \'\'\') as endtime,sum(VOProbeSummary.Njobs) as Njobs',
 										 from_tables => 'VOProbeSummary',
-										 main_where => 'VOProbeSummary.VOName \', voseltype, vos,
+										 main_where => 'VOProbeSummary.VOName \', voseltype, vos, \'',
 										 group_by => 'VOProbeSummary.EndTime,VOProbeSummary.VOName',
 										 order_by => 'VOProbeSummary.EndTime'
 									 },
