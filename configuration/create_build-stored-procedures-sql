@@ -181,7 +181,7 @@ my @databases = qw(gratia gratia_itb gratia_psacct gratia_qcd gratia_osg_daily);
 
 Getopt::Long::Configure(qw(no_ignore_case bundling require_order));
 
-GetOptions(\%options, "debug|d", , "trace|t", "help|h|\?") or pod2usage(-exitval => 2);
+GetOptions(\%options, "debug|d", "trace|t", "help|h|\?") or pod2usage(-exitval => 2);
 
 my @procedure_list = ();
 if (scalar @ARGV) {
@@ -291,10 +291,24 @@ begin
 	select generateWhereClause(userName,userRole,@mywhereclause)
 		into @mywhereclause;
 	call parse(userName,@name,@key,@vo);
-
-	set @sql :=
 EOF
+
+		if (exists $procedures{$procedure}->{extra_procedure_arguments} and
+				grep /voseltype/, @{$procedures{$procedure}->{extra_procedure_arguments}})
+			{
+			$procedure_code = sprintf("%s%s",	$procedure_code, <<'EOF');
+	-- Inelegant kludge to get around trouble .jsp has handling
+	-- arguments with embedded spaces; this will be unnecessary when
+	-- the view code gets rewritten.
+	if voseltype = 'NOT' then
+		voseltype := 'NOT IN';
+	end if;
+EOF
+		 }
+
 		$procedure_code = sprintf("%s%s",	$procedure_code, <<"EOF");
+
+	set \@sql :=
            concat_ws('', 'select $jobusage_select',
                      ' from $jobusage_from_tables',
                      ' where',
