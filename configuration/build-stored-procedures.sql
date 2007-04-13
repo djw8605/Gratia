@@ -1227,6 +1227,12 @@ begin
 	select generateWhereClause(userName,userRole,@mywhereclause)
 		into @mywhereclause;
 	call parse(userName,@name,@key,@vo);
+	-- Inelegant kludge to get around trouble .jsp has handling
+	-- arguments with embedded spaces; this will be unnecessary when
+	-- the view code gets rewritten.
+	if voseltype = 'NOT' then
+		voseltype := 'NOT IN';
+	end if;
 
 	set @sql :=
            concat_ws('', 'select JobUsageRecord.VOName,date_format(JobUsageRecord.EndTime, ''', format, ''') as endtime,sum(JobUsageRecord.Njobs) as Njobs',
@@ -1286,6 +1292,12 @@ begin
 	select generateWhereClause(userName,userRole,@mywhereclause)
 		into @mywhereclause;
 	call parse(userName,@name,@key,@vo);
+	-- Inelegant kludge to get around trouble .jsp has handling
+	-- arguments with embedded spaces; this will be unnecessary when
+	-- the view code gets rewritten.
+	if voseltype = 'NOT' then
+		voseltype := 'NOT IN';
+	end if;
 
 	set @sql :=
            concat_ws('', 'select JobUsageRecord.VOName,date_format(JobUsageRecord.EndTime, ''', format, ''') as endtime, sum(JobUsageRecord.WallDuration) as WallDuration,sum(JobUsageRecord.CpuUserDuration + JobUsageRecord.CpuSystemDuration) as Cpu',
