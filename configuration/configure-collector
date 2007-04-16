@@ -1,0 +1,464 @@
+eval '(exit $?0)' && eval 'exec perl -w -S $0 ${1+"$@"}'
+                  && eval 'exec perl -w -S $0 $argv:q'
+                  if 0;
+
+########################################################################
+########################################################################
+
+use strict;
+
+use Getopt::Long;
+use File::Basename;
+use Pod::Usage;
+
+my %collector_configs =
+	(
+	 gratia => { http_port => 8880,
+							 ssl_port => 8845,
+							 rmi_port => 17000,
+							 jmx_port => 8004,
+							 db_schema => "gratia"
+						 },
+	 test => { http_port => 8885,
+						 ssl_port => 8870,
+						 rmi_port => 22000,
+						 jmx_port => 8050,
+						 db_host => "gratia-vm02.fnal.gov",
+						 db_schema => "gratia-test"
+					 },
+	 itb => { http_port => 8881,
+						ssl_port => 8850,
+						rmi_port => 18000,
+						jmx_port => 8014,
+						db_schema => "gratia_itb"
+					},
+	 ps => { http_port => 8882,
+					 ssl_port => 8855,
+					 rmi_port => 19000,
+					 jmx_port => 8024,
+					 db_schema => "gratia_psacct",
+					 UserConfig => "UserConfig_pacct.html"
+				 },
+	 qcd => { http_port => 8883,
+						ssl_port => 8865,
+						rmi_port => 21000,
+						jmx_port => 8040,
+						db_schema => "gratia_qcd"
+					},
+	 osg => { http_port => 8884,
+						ssl_port => 8860,
+						rmi_port => 20000,
+						jmx_port => 8034,
+						db_schema => "gratia_osg_daily",
+						UserConfig => "UserConfig_osg_daily.html"
+					}
+	);
+
+my @required_attributes =
+	(
+	 'http_port',
+	 'ssl_port',
+	 'rmi_port',
+	 'jmx_port',
+	 'db_schema',
+	 'UserConfig'
+	);
+
+my @required_properties = ();
+
+my %attribute_defaults =
+	(
+	 collector_host => "localhost",
+	 db_port => 3320,
+	 db_host => "gratia-db01.fnal.gov",
+	 UserConfig => "UserConfig_osg.html",
+	 "properties.attributes" =>
+	 { "service.rmi.service" => "/gratia",
+		 "use.report.authentication" => "true",
+		 "service.listener.threads" => 3,
+		 "maintain.history.log" => 14,
+		 "service.mysql.user" => "root",
+		 "service.mysql.password" => "lisp01",
+		 "service.birt.user" => "reader",
+		 "service.birt.password" => "reader",
+		 "monitor.listener.threads" => "true",
+		 "monitor.listener.wait" => 240,
+		 "monitor.smtp.server" => "smtp.fnal.gov",
+		 "monitor.smtp.authentication.required" => "false",
+		 "monitor.smtp.user" => "greenc",
+		 "monitor.smtp.password" => "",
+		 "monitor.from.address" => 'grid-accounting@fnal.gov',
+		 "monitor.to.address.0" => 'pcanal@fnal.gov',
+		 "monitor.to.address.1" => 'greenc@fnal.gov',
+		 "monitor.subject" => \&construct_monitor_message_subject,
+		 "service.rmiservlet.console" => 0,
+		 "service.security.console" => 0
+	 }
+	);
+
+my $tomcat_users_txt = <<'EOF';
+<?xml version='1.0' encoding='utf-8'?>
+<tomcat-users>
+  <role rolename="tomcat"/>
+  <role rolename="role1"/>
+  <role rolename="manager"/>
+  <role rolename="admin"/>
+  <user username="penelope" password="vdt-gratia" fullName="Penelope Constanta" roles="admin,manager"/>
+  <user username="gratia" password="proto" fullName="gratia prototype user" roles="admin,manager"/>
+  <user username="root" password="lisp01" roles="admin,manager"/>
+</tomcat-users>
+EOF
+
+my $init_script_template = <<'EOF';
+#!/bin/bash
+#
+# tomcat-<instance>	Start and stop an instance of the standalone tomcat service.
+#
+# chkconfig: 345 99 50
+# description: Standalone tomcat invocation for the Gratia service
+
+####################################
+# Ensure these variables are set as appropriate
+TOMCAT_MANAGEMENT_PORT=
+TOMCAT_HTTP_PORT=
+TOMCAT_SSL_PORT=
+TOMCAT_PATH_STEM=
+JAVA_HOME=
+# This varies based on the collector purpose: OSG, OSG daily, QCD or PSACCT
+USERCONFIG_FILE_NAME=
+####################################
+
+export JAVA_HOME
+
+# This should be fine as a default
+TOMCAT_INSTANCE_NAME=${0##*/}
+
+########################################################################
+# No User Servicable Parts
+CATALINA_HOME="${TOMCAT_PATH_STEM}/${TOMCAT_INSTANCE_NAME}"; export CATALINA_HOME
+JAVA_OPTS="-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=${TOMCAT_MANAGEMENT_PORT} -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dssl.port=${TOMCAT_SSL_PORT} -Dnet.sf.gratia.reporting.UserConfigFileName=${USERCONFIG_FILE_NAME}"; export JAVA_OPTS
+
+
+if [ "$1" = "start" ] ; then
+  $CATALINA_HOME/bin/catalina.sh start
+elif [ "$1" = "stop" ] ; then
+  $CATALINA_HOME/bin/shutdown.sh
+else
+  echo "Usage: ${TOMCAT_INSTANCE_NAME} [start | stop]"
+  exit 1
+fi
+EOF
+
+my %options = ();
+
+my $default_java_home = "/scratch/java";
+my $default_remote_host = `uname -n`;
+chomp $default_remote_host;
+my $default_prefix = "/scratch";
+
+Getopt::Long::Configure(qw(no_ignore_case bundling require_order));
+
+GetOptions(\%options, "java-home|j=s", "remote-host|r=s",
+					 "prefix|p=s", "help|h|\?") or pod2usage(-exitval => 2);
+
+pod2usage(-exitval => 1, -verbose => 3) if $options{help};
+
+unless (exists $options{"java-home"}) {
+	if (-d $default_java_home) {
+		print STDERR "INFO: using default JAVA_HOME $default_java_home\n";
+		$options{"java-home"} = $default_java_home;
+	} else {
+		print STDERR "ERROR: JAVA_HOME not specified and default \"$default_java_home\" does not exist as a directory\n";
+		pod2usage(-exitval => 1);
+	}
+}
+
+unless (exists $options{"remote-host"}) {
+	print STDERR "INFO: using default remote host name $default_remote_host\n";
+	$options{"remote-host"} = $default_remote_host;
+}
+
+unless (exists $options{prefix}) {
+	if (-d $default_prefix and -w $default_prefix) {
+		print STDERR "INFO: tomcat install prefix not specified, using default $default_prefix\n";
+		$options{prefix} = $default_prefix;
+	} else {
+		print STDERR "ERROR: tomcat install prefix not specified and default \"$default_prefix\"",
+			"\ndoes not exist as a directory or is not writable\"";
+		pod2usage(-exitval => 1);
+	}
+}		
+
+pod2usage(-exitval => 1) unless scalar @ARGV;
+
+my @instance_list = @ARGV;
+
+foreach my $config (@instance_list) {
+	my $config_ref = $collector_configs{$config};
+
+	if (not $config_ref) {
+		print STDERR "WARNING: configuration for specified gratia instance $config not found: ignoring.\n";
+		next;
+	}
+	
+	# attributes.properties container if not previously existing.
+	$config_ref->{"properties.attributes"} = {}
+		unless exists $config_ref->{"properties.attributes"};
+
+	# Standard attribute defaults.
+	foreach my $attribute_key (sort keys %attribute_defaults) {
+		$config_ref->{$attribute_key} = $attribute_defaults{$attribute_key}
+			unless exists $config_ref->{$attribute_key};
+	}
+
+	# Properties attribute defaults.
+	foreach my $properties_key (sort keys %{$attribute_defaults{"properties.attributes"}}) {
+		$config_ref->{"properties.attributes"}->{$properties_key} =
+			$attribute_defaults{"properties.attributes"}->{$properties_key}
+				unless exists $config_ref->{"properties.attributes"}->{$properties_key};
+	}
+
+	# Required attributes
+	my $requirements_error = 0;
+	foreach my $required_attribute (@required_attributes) {
+		unless (exists $config_ref->{$required_attribute}) {
+			print STDERR "Configuration for instance \"$config\" does not have ",
+				"required attribute \"$required_attribute\"\n";
+			$requirements_error = 1;
+		}
+	}
+
+	foreach my $required_attribute (@required_properties) {
+		unless (exists $config_ref->{"properties.attributes"}->{$required_attribute}) {
+			print STDERR "Configuration for instance \"$config\" does not have ",
+				"required properties.attributes entry \"$required_attribute\"\n";
+			$requirements_error = 1;
+		}
+	}
+
+	# Next if failed requirements.
+	next if $requirements_error;
+
+	# Configuration operations.
+	configure_init_file($config, $config_ref);
+	configure_collector_config($config, $config_ref);
+	configure_tomcat_config($config, $config_ref);
+	configure_tomcat_users($config, $config_ref);
+};
+
+1;
+
+sub configure_init_file {
+	my ($instance_name, $collector_config) = @_;
+	my $init_script = "/etc/rc.d/init.d/tomcat-$instance_name";
+	my $init_script_txt = $init_script_template;
+	$init_script_txt =~ s&^(TOMCAT_MANAGEMENT_PORT=).*$&${1}$collector_config->{jmx_port}&m;
+	$init_script_txt =~ s&^(TOMCAT_HTTP_PORT=).*$&${1}$collector_config->{http_port}&m;
+	$init_script_txt =~ s&^(TOMCAT_SSL_PORT=).*$&${1}$collector_config->{ssl_port}&m;
+	$init_script_txt =~ s&^(TOMCAT_PATH_STEM=).*$&${1}"$options{prefix}"&m;
+	$init_script_txt =~ s&^(JAVA_HOME=).*$&${1}"$options{"java-home"}"&m;
+	$init_script_txt =~ s&^(USERCONFIG_FILE_NAME=).*$&${1}"$collector_config->{UserConfig}"&m;
+	open(INIT_SCRIPT, ">$init_script") or die("Unable to open $init_script for writing");
+	print INIT_SCRIPT $init_script_txt;
+	close(INIT_SCRIPT);
+	chmod 0755, $init_script;
+	system("/sbin/chkconfig --add tomcat-$instance_name");
+}
+
+sub configure_collector_config {
+	my ($instance_name, $collector_config) = @_;
+	my $orig_config = "$options{prefix}/tomcat-${instance_name}/gratia/service-configuration.properties";
+	my $config_file = temporary_filename("service-configuration.properties");
+	open(ORIG_CONFIG, "<$orig_config") or die "Unable to open $orig_config for reading";
+	open(REPORTING_CONFIG, ">$config_file") or die "Unable to open $config_file for writing";
+	chmod 0600, $config_file;
+	my %seen_attributes = ();
+	while (<ORIG_CONFIG>) {
+		chomp;
+		# Simple attributes
+		foreach my $config_attribute (sort keys %{$collector_config->{"properties.attributes"}}) {
+			unless (ref($collector_config->{"properties.attributes"}->{$config_attribute}) eq "CODE") {
+				s&^(\Q$config_attribute\E\s*=\s*).*$&${1}$collector_config->{"properties.attributes"}->{$config_attribute}& and $seen_attributes{$config_attribute} = 1;
+			} else {
+				if (m&^\Q$config_attribute\E\s*=\s*.*$&) {
+					my $value=$collector_config->{"properties.attributes"}->{$config_attribute}($instance_name, $collector_config);
+					s&^(\Q$config_attribute\E\s*=\s*).*$&${1}$value&;
+					$seen_attributes{$config_attribute} = 1;
+				}
+			}
+		}
+		# Compound attributes and those using common attributes (eg http_port).
+		s&^(\Qservice.rmi.port\E\s*=\s*).*$&${1}$collector_config->{rmi_port}&;
+		s&^(\Qservice.rmi.rmibind\E\s*=\s*).*$&${1}//$collector_config->{collector_host}:$collector_config->{rmi_port}&;
+		s&^(\Qservice.rmi.rmilookup\E\s*=\s*).*$&${1}rmi://$collector_config->{collector_host}:$collector_config->{rmi_port}&;
+		s&^(\Qservice.open.connection\E\s*=\s*).*$&${1}http://$collector_config->{collector_host}:$collector_config->{http_port}&;
+		s&^(\Qservice.secure.connection\E\s*=\s*).*$&${1}http://$collector_config->{collector_host}:$collector_config->{ssl_port}&;
+		s&^(\Qservice.mysql.url\E\s*=\s*).*$&${1}jdbc:mysql://$collector_config->{db_host}:$collector_config->{db_port}/$collector_config->{db_schema}&;
+		# Special case for monitoring addresses -- dump addresses not wanted from the config:
+		m&^(\Qmonitor.to.address.\E\d+)& and not $collector_config->{"properties.attributes"}->{${1}}
+			and next;
+		print REPORTING_CONFIG "$_\n";
+	}
+	close(ORIG_CONFIG);
+	# Simple attributes which may not already have been in the configuration file (eg monitor.to.address.N)
+	foreach my $config_attribute (sort keys %{$collector_config->{"properties.attributes"}}) {
+		print REPORTING_CONFIG "$config_attribute=",
+			$collector_config->{"properties.attributes"}->{$config_attribute}, "\n"
+			unless $seen_attributes{$config_attribute};
+	}
+	close(REPORTING_CONFIG);
+	system("mv -bv \"$config_file\" \"$orig_config\"");
+}
+
+sub configure_tomcat_config {
+	my ($instance_name, $collector_config) = @_;
+	my $orig_config = "$options{prefix}/tomcat-${instance_name}/conf/server.xml";
+	my $config_file = temporary_filename("server.xml");
+	open(ORIG_CONFIG, "<$orig_config") or die "Unable to open $orig_config for reading";
+	open(REPORTING_CONFIG, ">$config_file") or die "Unable to open $config_file for writing";
+	chmod 0600, $config_file;
+	my %seen_attributes = ();
+	my $line_buffer = "";
+	my $in_comment;
+	my $in_catalina;
+	my $in_connector;
+	while (<ORIG_CONFIG>) {
+		$line_buffer = "${line_buffer}$_";
+		$in_comment = 1 if (m&<!--&);
+		if ($line_buffer =~ m&-->&) {
+			undef $in_comment;
+		}
+		
+		next if $in_comment;
+
+		$line_buffer =~ s&(<Server\s*port\s*=\s*)"[^"]+"&${1}"$collector_config->{jmx_port}"&;
+
+		$line_buffer =~ m&<\s*Service\s*name\s*=\s*"Catalina"\s*>\s*$& and $in_catalina = 1;
+
+		if ($in_catalina and not $in_comment) {
+			$line_buffer =~ m&^\s*<\s*Connector\s*& and $in_connector = 1;
+			if ($in_connector) {
+				next unless $line_buffer =~ m&/\s*>&;
+				undef $in_connector;
+				$line_buffer =~ s&<\s*Connector.*\s*/\s*>(?:\s*$)?&&s;
+			}
+			if ($line_buffer =~ m&^\s*<\s*Engine&) {
+				print REPORTING_CONFIG <<EOF;
+    <!-- Gratia connectors -->
+    <Connector port="$collector_config->{http_port}" maxHttpHeaderSize="8192"
+               maxThreads="150" minSpareThreads="25" maxSpareThreads="75"
+               enableLookups="false" redirectPort="$collector_config->{ssl_port}" acceptCount="100"
+               connectionTimeout="20000" disableUploadTimeout="true" />
+    <Connector port="$collector_config->{ssl_port}" maxHttpHeaderSize="8192"
+               maxThreads="150" minSpareThreads="25" maxSpareThreads="75"
+               enableLookups="false" disableUploadTimeout="true"
+               acceptCount="100" scheme="https" secure="true"
+               clientAuth="false" sslProtocol="TLS" />
+EOF
+			}
+		}
+		
+		print REPORTING_CONFIG "$line_buffer";
+		$line_buffer = "";
+		
+	}
+	close(ORIG_CONFIG);
+	close(REPORTING_CONFIG);
+	system("mv -bv \"$config_file\" \"$orig_config\"");
+}
+
+sub configure_tomcat_users {
+	my ($instance_name, $collector_config) = @_;
+	my $config_file = "$options{prefix}/tomcat-${instance_name}/conf/tomcat-users.xml";
+	open(CONFIG_SCRIPT, ">$config_file") or die("Unable to open $config_file for writing");
+	chmod 0600, $config_file;
+	print CONFIG_SCRIPT $tomcat_users_txt;
+	close(CONFIG_SCRIPT);
+}
+
+sub construct_monitor_message_subject {
+	my ($instance_name, $collector_config) = @_;
+	return
+		sprintf("%s:%s %s Potential listener problem",
+						$options{"remote-host"},
+						$collector_config->{http_port},
+						"tomcat-$instance_name"
+					 );
+}
+
+sub temporary_filename {
+	my $stem = shift;
+	my $tmp_file=`mktemp "\${TMPDIR:/tmp}/${stem}_XXXXXXXXXX\"`;
+	chomp $tmp_file;
+	$tmp_file or die "Unable to create temporary file from stem $stem";
+	return $tmp_file;
+}
+
+__END__
+########################################################################
+# Plain old documentation
+########################################################################
+
+=pod
+
+=head1 NAME
+
+configure-collector: Configure a Gratia / Tomcat instance.
+
+=head1 SYNOPSIS
+
+B<configure-collector> B<-h> | B<--help> | B<-?>
+
+B<configure-collector> [I<global-options>] [--] I<instance>+
+
+I<global-options>: B<-r> I<collector-host-name> | B<--remote-host> I<collector-host-name> |
+                 B<-j> I<JRE-home-dir> | B<--java-home> I<JRE-home-dir> |
+                 B<-p> I<install-path-prefix> | B<--prefix> I<install-path-prefix>
+
+Options marked with B<+> are repeatable and cumulative.
+
+=head1 DESCRIPTION
+
+I<configure-collector> is a tool to configure one or more gratia instances.
+
+I<configure-collector> can only configure instances about which it
+already knows: please look at the B<%collector_configs> associative
+array for details.
+
+=head2 OPTIONS
+
+=over 4
+
+=item B<-r> I<collector-host-name>
+
+=item B<--remote-host> I<collector-host-name>
+
+
+The remote hostname of the collector (eg gratia-osg.fnal.gov).
+
+
+=item B<-j> I<JRE-home-dir>
+
+=item B<--java-home> I<JRE-home-dir>
+
+
+The location of a Java-1.5 runtime.
+
+
+=item B<-p> I<install-path-prefix>
+
+=item B<--prefix> I<install-path-prefix>
+
+
+The directory above the tomcat instance (eg /scratch).
+
+
+=head1 AUTHOR
+
+Chris Green <greenc@fnal.gov>.
+
+=cut
+
+### Local Variables:
+### mode: cperl
+### End
