@@ -206,18 +206,20 @@ if ($options{debug}) {
 
 1;
 
-use FileHandle;
-use IPC::Open2;
 sub process_trace_directives {
 	my ($script_ref,$trace_opt) = @_;
 	return if $trace_opt;					# trace inserts stay in
-	my $pid = open2(\*Reader, \*Writer, "cat -u");
-	print Writer $$script_ref;
-	close Writer;
+	my $tmp_file = `mktemp \${TMPDIR:-/tmp}/create_build.XXXXXXXXXX`;
+	chomp $tmp_file;
+	$tmp_file or die "Unable to get temporary file name";
+	open(TMPFILE, ">$tmp_file") or die "Unable to open temporary file $tmp_file for write";
+	print TMPFILE $$script_ref;
+	close TMPFILE;
+	open(TMPFILE, "<$tmp_file") or die "Unable to open temporary file $tmp_file for read";
 	my $input_buffer = "";
 	my $in_stmt;
 	my $output_buffer;
-	while (<Reader>) {
+	while (<TMPFILE>) {
 		$input_buffer = "$input_buffer$_";
 		chomp;
 		if ((not $in_stmt) and m&^\s*(?:#|--|$)&) {
@@ -236,9 +238,8 @@ sub process_trace_directives {
 			$in_stmt = 1;
 			next;
 		}
-		
 	}
-	close Reader;
+	close TMPFILE;
 	$$script_ref = $output_buffer;
 }
 
