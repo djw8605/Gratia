@@ -1,4 +1,5 @@
 delimiter ||
+
 drop table if exists trace
 ||
 CREATE TABLE trace (
@@ -1271,3 +1272,9 @@ end
 -- ||
 -- call WeeklyUsageByVO('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-04 00:00:00','%y:%m:%d:%H:%i','')
 -- ||
+
+
+-- Local Variables:
+-- mode: sql
+-- eval: (sql-set-product 'mysql)
+-- End:
