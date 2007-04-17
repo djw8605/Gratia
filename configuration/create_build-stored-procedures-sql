@@ -245,13 +245,17 @@ sub process_trace_directives {
 
 sub generate_sql {
 	if (scalar @_) {
-		return sprintf("delimiter ||\n%s",
-									 generate_procedures(@_));
-	} else {
 		return sprintf("%s%s%s",
+									 generate_frontmatter(),
+									 generate_procedures(@_),
+									 generate_endmatter());
+	} else {
+		return sprintf("%s%s%s%s%s",
+									 generate_frontmatter(),
 									 generate_sql_boilerplate(),
 									 generate_probe_status_proc(),
-									 generate_procedures());
+									 generate_procedures(),
+									 generate_endmatter());
 	}
 }
 
@@ -384,7 +388,6 @@ EOF
 
 sub generate_sql_boilerplate {
 	return <<'EOF';
-delimiter ||
 drop table if exists trace
 ||
 CREATE TABLE trace (
@@ -508,7 +511,24 @@ end
 EOF
 }
 
+sub generate_frontmatter {
+return << 'EOF';
+delimiter ||
 
+EOF
+}
+
+sub generate_endmatter {
+return << 'EOF';
+
+
+-- Local Variables:
+-- mode: sql
+-- eval: (sql-set-product 'mysql)
+-- End:
+EOF
+}
+ # Page marker to avoid confusion over Local Variables sections.
 ### Local Variables:
 ### mode: cperl
 ### End:
