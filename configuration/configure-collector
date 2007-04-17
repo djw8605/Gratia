@@ -17,41 +17,48 @@ my %collector_configs =
 							 ssl_port => 8845,
 							 rmi_port => 17000,
 							 jmx_port => 8004,
+							 server_port => 8104,
 							 db_schema => "gratia"
 						 },
-	 test => { http_port => 8885,
-						 ssl_port => 8870,
-						 rmi_port => 22000,
-						 jmx_port => 8050,
-						 db_host => "gratia-vm02.fnal.gov",
-						 db_schema => "gratia-test"
-					 },
+#	 test => { http_port => 8885,
+#						 ssl_port => 8870,
+#						 rmi_port => 22000,
+#						 jmx_port => 8050,
+#						 db_schema => "gratia-test"
+#					 },
 	 itb => { http_port => 8881,
 						ssl_port => 8850,
 						rmi_port => 18000,
 						jmx_port => 8014,
+						server_port => 8114,
 						db_schema => "gratia_itb"
 					},
 	 ps => { http_port => 8882,
 					 ssl_port => 8855,
 					 rmi_port => 19000,
 					 jmx_port => 8024,
+					 server_port => 8124,
 					 db_schema => "gratia_psacct",
-					 UserConfig => "UserConfig_pacct.html"
+					 UserConfig => "UserConfig_pacct.xml"
 				 },
 	 qcd => { http_port => 8883,
 						ssl_port => 8865,
 						rmi_port => 21000,
 						jmx_port => 8040,
+						server_port => 8144,
 						db_schema => "gratia_qcd"
 					},
-	 osg => { http_port => 8884,
-						ssl_port => 8860,
-						rmi_port => 20000,
-						jmx_port => 8034,
-						db_schema => "gratia_osg_daily",
-						UserConfig => "UserConfig_osg_daily.html"
-					}
+	 osg_daily => { http_port => 8884,
+									ssl_port => 8860,
+									rmi_port => 20000,
+									jmx_port => 8034,
+									server_port => 8134,
+									db_schema => "gratia_osg_daily",
+									UserConfig => "UserConfig_osg_daily.xml",
+									"properties.attributes" =>
+									{ "monitor.listener.wait" => 1440
+									}
+								}
 	);
 
 my @required_attributes =
@@ -71,14 +78,14 @@ my %attribute_defaults =
 	 collector_host => "localhost",
 	 db_port => 3320,
 	 db_host => "gratia-db01.fnal.gov",
-	 UserConfig => "UserConfig_osg.html",
+	 UserConfig => "UserConfig_osg.xml",
 	 "properties.attributes" =>
 	 { "service.rmi.service" => "/gratia",
 		 "use.report.authentication" => "true",
 		 "service.listener.threads" => 3,
 		 "maintain.history.log" => 14,
-		 "service.mysql.user" => "root",
-		 "service.mysql.password" => "lisp01",
+		 "service.mysql.user" => "gratia",
+		 "service.mysql.password" => "proto",
 		 "service.birt.user" => "reader",
 		 "service.birt.password" => "reader",
 		 "monitor.listener.threads" => "true",
@@ -136,10 +143,9 @@ TOMCAT_INSTANCE_NAME=${0##*/}
 ########################################################################
 # No User Servicable Parts
 CATALINA_HOME="${TOMCAT_PATH_STEM}/${TOMCAT_INSTANCE_NAME}"; export CATALINA_HOME
-JAVA_OPTS="-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=${TOMCAT_MANAGEMENT_PORT} -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dssl.port=${TOMCAT_SSL_PORT} -Dnet.sf.gratia.reporting.UserConfigFileName=${USERCONFIG_FILE_NAME}"; export JAVA_OPTS
-
 
 if [ "$1" = "start" ] ; then
+  JAVA_OPTS="-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=${TOMCAT_MANAGEMENT_PORT} -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dssl.port=${TOMCAT_SSL_PORT} -Dnet.sf.gratia.reporting.UserConfigFileName=${USERCONFIG_FILE_NAME}"; export JAVA_OPTS
   $CATALINA_HOME/bin/catalina.sh start
 elif [ "$1" = "stop" ] ; then
   $CATALINA_HOME/bin/shutdown.sh
@@ -273,8 +279,24 @@ sub configure_collector_config {
 	open(REPORTING_CONFIG, ">$config_file") or die "Unable to open $config_file for writing";
 	chmod 0600, $config_file;
 	my %seen_attributes = ();
+	my $in_summary_comment;
+	my $spaced_rmi_port = sprintf("%5d", $collector_config->{rmi_port});
+	my $spaced_http_port = sprintf("%5d", $collector_config->{http_port});
+	my $spaced_ssl_port = sprintf("%5d", $collector_config->{ssl_port});
+	my $spaced_jmx_port = sprintf("%5d", $collector_config->{jmx_port});
+	my $spaced_db_port = sprintf("%5d", $collector_config->{db_port});
 	while (<ORIG_CONFIG>) {
 		chomp;
+		# Settings summary comment at top of file.
+		m&^\s*#\s*default ports used by& and $in_summary_comment = 1;
+		if ($in_summary_comment) {
+			m&^\s*[^#]& and undef $in_summary_comment;
+			s&^(\s*#\s)\s*\d*\s*(->\s*rmi)&${1}$spaced_rmi_port ${2}&;
+			s&^(\s*#\s)\s*\d*\s*(->\s*tomcat)&${1}$spaced_http_port ${2}&;
+			s&^(\s*#\s)\s*\d*\s*(->\s*tomcat-ssl)&${1}$spaced_ssl_port ${2}&;
+			s&^(\s*#\s)\s*\d*\s*(->\s*mysql)&${1}$spaced_db_port ${2}&;
+			s&^(\s*#\s)\s*\d*\s*(->\s*tomcat/jmx)&${1}$spaced_jmx_port ${2}&;
+		}
 		# Simple attributes
 		foreach my $config_attribute (sort keys %{$collector_config->{"properties.attributes"}}) {
 			unless (ref($collector_config->{"properties.attributes"}->{$config_attribute}) eq "CODE") {
@@ -323,6 +345,7 @@ sub configure_tomcat_config {
 	my $in_catalina;
 	my $in_connector;
 	while (<ORIG_CONFIG>) {
+		next if m&<!-- Gratia connectors -->&; # Avoid comment build-up, floss regularly.
 		$line_buffer = "${line_buffer}$_";
 		$in_comment = 1 if (m&<!--&);
 		if ($line_buffer =~ m&-->&) {
@@ -331,7 +354,7 @@ sub configure_tomcat_config {
 		
 		next if $in_comment;
 
-		$line_buffer =~ s&(<Server\s*port\s*=\s*)"[^"]+"&${1}"$collector_config->{jmx_port}"&;
+		$line_buffer =~ s&(<Server\s*port\s*=\s*)"[^"]+"&${1}"$collector_config->{server_port}"&;
 
 		$line_buffer =~ m&<\s*Service\s*name\s*=\s*"Catalina"\s*>\s*$& and $in_catalina = 1;
 
@@ -349,10 +372,14 @@ sub configure_tomcat_config {
                maxThreads="150" minSpareThreads="25" maxSpareThreads="75"
                enableLookups="false" redirectPort="$collector_config->{ssl_port}" acceptCount="100"
                connectionTimeout="20000" disableUploadTimeout="true" />
+EOF
+				print REPORTING_CONFIG <<EOF if 0;
     <Connector port="$collector_config->{ssl_port}" maxHttpHeaderSize="8192"
                maxThreads="150" minSpareThreads="25" maxSpareThreads="75"
                enableLookups="false" disableUploadTimeout="true"
                acceptCount="100" scheme="https" secure="true"
+               keystoreFile="$options{prefix}/tomcat-${instance_name}/gratia/keystore" keystorePass="server"
+               truststoreFile="$options{prefix}/tomcat-${instance_name}/gratia/truststore" truststorePass="server"
                clientAuth="false" sslProtocol="TLS" />
 EOF
 			}
