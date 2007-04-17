@@ -5,7 +5,7 @@
 #
 # library to create simple report using the Gratia psacct database
 #
-#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.17 2007-03-12 15:09:42 pcanal Exp $
+#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.18 2007-04-17 20:35:38 pcanal Exp $
 
 import time
 import datetime
@@ -21,6 +21,7 @@ gLogFileIsWriteable = True;
 gBegin = None
 gEnd = None
 gWithPanda = False
+gGroupBy = "Site"
 
 gOutput="text" # Type of output (text, csv, None)
 
@@ -102,13 +103,13 @@ class Usage(Exception):
         self.msg = msg
 
 def UseArgs(argv):
-    global gProbename,gOutput,gWithPanda
+    global gProbename,gOutput,gWithPanda,gGroupBy
 
     if argv is None:
         argv = sys.argv
     try:
         try:
-            opts, args = getopt.getopt(argv[1:], "hm:p:", ["help","month=","probe=","output=","with-panda"])
+            opts, args = getopt.getopt(argv[1:], "hm:p:", ["help","month=","probe=","output=","with-panda","groupby="])
         except getopt.error, msg:
              raise Usage(msg)
         # more code, unchanged
@@ -132,6 +133,8 @@ def UseArgs(argv):
                 gOutput = a
         if o in ("--with-panda"):
             gWithPanda = True
+        if o in ("--groupby"):
+            gGroupBy = a
 
 def SetDate(start,end):
     " Set the start and begin by string"
@@ -290,7 +293,7 @@ def DailySiteVOData(begin,end):
                 + " where CEProbes.facility_id = CETable.facility_id and J.ProbeName = CEProbes.probename" \
                 + " and \""+ DateToString(begin) +"\"<EndTime and EndTime<\"" + DateToString(end) + "\"" \
                 + " and J.ProbeName not like \"psacct:%\" " \
-                + " group by J.VOName, J.ProbeName order by CETable.facility_name "
+                + " group by J.VOName, CEProbes.facility_id order by CETable.facility_name "
         return RunQueryAndSplit(select)
 
 def DailySiteVODataFromDaily(begin,end,select,count):
@@ -303,28 +306,28 @@ def DailySiteVODataFromDaily(begin,end,select,count):
                 + " group by J.VOName, J.SiteName order by J.SiteName, J.VOName "
         return RunQueryAndSplit(select)
 
-def DailySiteJobStatus(begin,end,select = "", count = ""):
+def DailySiteJobStatus(begin,end,select = "", count = "", what = "CETable.facility_name" ):
         schema = "gratia"
 
-        select = " SELECT CETable.facility_name ,J.Status,count(*) " \
+        select = " SELECT " + what + ", J.Status,count(*) " \
                 + " from "+schema+".CETable, "+schema+".CEProbes, "+schema+".JobUsageRecord J " \
                 + " where CEProbes.facility_id = CETable.facility_id and J.ProbeName = CEProbes.probename" \
                 + " and \""+ DateToString(begin) +"\"<EndTime and EndTime<\"" + DateToString(end) + "\"" \
                 + select \
-                + " group by J.ProbeName,J.Status " \
-                + " order by CETable.facility_name "
+                + " group by " + what + ",J.Status " \
+                + " order by " + what 
         return RunQueryAndSplit(select)
 
-def DailySiteJobStatusCondor(begin,end,select = "", count = ""):
+def DailySiteJobStatusCondor(begin,end,select = "", count = "", what = "CETable.facility_name" ):
         schema = "gratia"
 
-        select = " SELECT CETable.facility_name ,R.Value,count(*) " \
+        select = " SELECT "+what+", R.Value,count(*) " \
                 + " from "+schema+".CETable, "+schema+".CEProbes, "+schema+".JobUsageRecord J, "+schema+".Resource R "\
                 + " where CEProbes.facility_id = CETable.facility_id and J.ProbeName = CEProbes.probename" \
                 + " and \""+ DateToString(begin) +"\"<EndTime and EndTime<\"" + DateToString(end) + "\"" \
                 + " and J.dbid = R.dbid and R.Description = \"ExitCode\" " \
-                + " group by J.ProbeName,R.Value " \
-                + " order by CETable.facility_name "
+                + " group by " + what + ",R.Value " \
+                + " order by " + what
         return RunQueryAndSplit(select)
 
 # Condor Exit Status
@@ -447,8 +450,9 @@ class DailySiteJobStatusConf:
     lines = {}
     col1 = "All sites"
     CondorSpecial = False
+    GroupBy = "CETable.facility_name"
 
-    def __init__(self, header = False, CondorSpecial = True):
+    def __init__(self, header = False, CondorSpecial = True, groupby = "Site"):
            self.formats["csv"] = ",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""
            self.formats["text"] = "| %-22s | %12s | %10s | %10s | %10s "
            self.lines["csv"] = ""
@@ -456,13 +460,17 @@ class DailySiteJobStatusConf:
 
            if (not header) :  self.title = ""
            self.CondorSpecial = CondorSpecial
+           if (groupby == "VO"):
+               self.GroupBy = "J.VOName"
+               self.headers = ("VO","Success Rate","Success","Failed","Total")
+               self.col1 = "All VOs"
 
 
     def GetData(self,start,end):
        if self.CondorSpecial:
-           return DailySiteJobStatus(start,end,select=" and J.StatusDescription != \"Condor Exit Status\" ")+DailySiteJobStatusCondor(start,end)
+           return DailySiteJobStatus(start,end,select=" and J.StatusDescription != \"Condor Exit Status\" ",what=self.GroupBy)+DailySiteJobStatusCondor(start,end,what=self.GroupBy)
        else:
-           return DailySiteJobStatus(start,end)
+           return DailySiteJobStatus(start,end,what=self.GroupBy)
     
   
 class DailySiteReportConf:
