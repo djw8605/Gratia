@@ -339,8 +339,8 @@ glr:begin
 
 end;
 ||
-show triggers;
-||
+-- show triggers;
+-- ||
 
 -- Local Variables:
 -- mode: sql
