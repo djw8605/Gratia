@@ -301,7 +301,7 @@ EOF
 	-- arguments with embedded spaces; this will be unnecessary when
 	-- the view code gets rewritten.
 	if voseltype = 'NOT' then
-		voseltype := 'NOT IN';
+		set voseltype := 'NOT IN';
 	end if;
 EOF
 		 }
