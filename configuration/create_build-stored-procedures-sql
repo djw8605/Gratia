@@ -169,6 +169,18 @@ my %procedures =
 										 group_by => 'VOProbeSummary.EndTime,VOProbeSummary.VOName',
 										 order_by => 'VOProbeSummary.EndTime'
 									 },
+ JobsBySiteByVO =>	{ select_columns => 'CETable.facility_name as sitename, sum(VOProbeSummary.Njobs) as Njobs, VOProbeSummary.VOName',
+							from_tables => 'CETable,CEProbes,VOProbeSummary',
+							main_where => 'CEProbes.facility_id = CETable.facility_id and VOProbeSummary.ProbeName = CEProbes.probename',
+							group_by => 'sitename, VOProbeSummary.VOName',
+							order_by => 'sitename, VOProbeSummary.VOName'
+												},
+ UsageBySiteByVO =>	{ select_columns => 'CETable.facility_name as sitename, sum(VOProbeSummary.WallDuration) as WallDuration, sum(VOProbeSummary.CpuUserDuration, VOProbeSummary.VOName',
+							from_tables => 'CETable,CEProbes,VOProbeSummary',
+							main_where => 'CEProbes.facility_id = CETable.facility_id and VOProbeSummary.ProbeName = CEProbes.probename',
+							group_by => 'sitename, VOProbeSummary.VOName',
+							order_by => 'sitename, VOProbeSummary.VOName'
+												}, 
  newProcedure => { select_columns => '',
 									 from_tables => '',
 									 main_where => '',
