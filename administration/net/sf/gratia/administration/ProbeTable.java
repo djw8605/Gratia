@@ -246,15 +246,13 @@ public class ProbeTable extends HttpServlet
 														{
 																SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd kk");
 																newrow = xp.replaceAll(newrow,"#lastcontact#",format.format(timestamp));
-																if (usered == false)
-																		newrow = xp.replaceAll(newrow,"red","black");
 														}
 												else
 														{
 																newrow = xp.replaceAll(newrow,"#lastcontact#","Never");
-																if (usered == false)
-																		newrow = xp.replaceAll(newrow,"red","black");
 														}
+												if (usered == false)
+														newrow = xp.replaceAll(newrow,"class=\"red\"","class=\"black\"");
 
 												buffer.append(newrow);
 												index++;
