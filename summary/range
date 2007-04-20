@@ -13,20 +13,26 @@ def main(argv=None):
         return 1
 
     argOutput = PSACCTReport.gOutput
-    PSACCTReport.RangeVOReport(PSACCTReport.gBegin,
-                               PSACCTReport.gEnd,
-                               output = argOutput,
-                               header = True,
-                               with_panda = PSACCTReport.gWithPanda);
-    print
-    PSACCTReport.RangeSiteReport(PSACCTReport.gBegin,
-                                 PSACCTReport.gEnd,
+    PSACCTReport.RangeSiteReport(range_begin = PSACCTReport.gBegin,
+                                 range_end = PSACCTReport.gEnd,
                                  output = argOutput,
-                                 header = False,
+                                 header = True,
                                  with_panda = PSACCTReport.gWithPanda);
     print
-    PSACCTReport.RangeSiteVOReport(PSACCTReport.gBegin,
-                                   PSACCTReport.gEnd,
+    PSACCTReport.RangeVOReport(range_begin = PSACCTReport.gBegin,
+                               range_end = PSACCTReport.gEnd,
+                               output = argOutput,
+                               header = False,
+                               with_panda = PSACCTReport.gWithPanda);
+    print
+    PSACCTReport.RangeSiteVOReport(range_begin = PSACCTReport.gBegin,
+                                   range_end = PSACCTReport.gEnd,
+                                   output = argOutput,
+                                   header = False,
+                                   with_panda = PSACCTReport.gWithPanda);
+    print
+    PSACCTReport.RangeVOSiteReport(range_begin = PSACCTReport.gBegin,
+                                   range_end = PSACCTReport.gEnd,
                                    output = argOutput,
                                    header = False,
                                    with_panda = PSACCTReport.gWithPanda);
