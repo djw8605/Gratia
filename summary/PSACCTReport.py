@@ -5,7 +5,7 @@
 #
 # library to create simple report using the Gratia psacct database
 #
-#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.18 2007-04-17 20:35:38 pcanal Exp $
+#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.19 2007-04-20 16:07:45 pcanal Exp $
 
 import time
 import datetime
@@ -105,11 +105,15 @@ class Usage(Exception):
 def UseArgs(argv):
     global gProbename,gOutput,gWithPanda,gGroupBy
 
+    monthly = False
+    weekly = False
+    daily = False
+    
     if argv is None:
         argv = sys.argv
     try:
         try:
-            opts, args = getopt.getopt(argv[1:], "hm:p:", ["help","month=","probe=","output=","with-panda","groupby="])
+            opts, args = getopt.getopt(argv[1:], "hm:p:", ["help","monthly","weekly","daily","probe=","output=","with-panda","groupby="])
         except getopt.error, msg:
              raise Usage(msg)
         # more code, unchanged
@@ -117,16 +121,13 @@ def UseArgs(argv):
         print >>sys.stderr, err.msg
         print >>sys.stderr, "for help use --help"
         return 2
-    start = ""
-    end = ""
-    if len(argv) > len(opts) + 1:
-        start = argv[len(opts)+1]
-        if len(argv) > len(opts) + 2:
-                end =  argv[len(opts)+2]
-        SetDate(start,end)
     for o, a in opts:
-        if o in ("-m","--month"):
-                month = a;
+        if o in ("-m","--monthly"):
+                monthly = True;
+        if o in ("-w","--weekly"):
+                weekly = True;                
+        if o in ("-d","--daily"):
+                daily = True;                
         if o in ("-p","--probe"):
                 gProbename = a;
         if o in ("--output"):
@@ -136,6 +137,60 @@ def UseArgs(argv):
         if o in ("--groupby"):
             gGroupBy = a
 
+    start = ""
+    end = ""
+    if len(argv) > len(opts) + 1:
+        start = argv[len(opts)+1]
+        if len(argv) > len(opts) + 2:
+                end =  argv[len(opts)+2]
+        if monthly:
+           if len(end)>0:
+              print >> sys.stderr, "Warning: With --monthly the 2nd date is ignored"
+           SetMonthlyDate(start)
+        elif weekly:
+           if len(end)>0:
+              print >> sys.stderr, "Warning: With --weekly the 2nd date is ignored"
+           SetWeeklyDate(start)
+        elif daily:
+           if len(end)>0:
+              print >> sys.stderr, "Warning: With --daily the 2nd date is ignored"
+           SetDailyDate(start)
+        else:
+           SetDate(start,end)
+
+def AddMonth(fromd, month):
+    newyear = fromd.year
+    newmonth = fromd.month + month
+    while newmonth < 1:
+       newmonth += 12
+       newyear -= 1
+    while newmonth > 12:
+       newmonth -= 12
+       newyear += 1
+    return datetime.date(newyear,newmonth,fromd.day)
+    
+def SetMonthlyDate(start):
+    " Set the start and end date to be the begin and end of the month given in 'start' "
+    global gBegin, gEnd
+    
+    when = datetime.date(*time.strptime(start, "%Y/%m/%d")[0:3])
+    gBegin = datetime.date( when.year, when.month, 1 )
+    gEnd = AddMonth( gBegin, 1 )
+    
+def SetWeeklyDate(end):
+    " Set the start and end date to the week preceding 'end' "
+    global gBegin, gEnd
+
+    gEnd = datetime.date(*time.strptime(end, "%Y/%m/%d")[0:3])
+    gBegin = gEnd - datetime.timedelta(days=7)     
+     
+def SetDailyDate(end):
+    " Set the start and end date to the week preceding 'end' "
+    global gBegin, gEnd
+
+    gEnd = datetime.date(*time.strptime(end, "%Y/%m/%d")[0:3])
+    gBegin = gEnd - datetime.timedelta(days=1)     
+     
 def SetDate(start,end):
     " Set the start and begin by string"
     global gBegin, gEnd
@@ -296,6 +351,17 @@ def DailySiteVOData(begin,end):
                 + " group by J.VOName, CEProbes.facility_id order by CETable.facility_name "
         return RunQueryAndSplit(select)
 
+def DailyVOSiteData(begin,end):
+        schema = "gratia"
+        
+        select = " SELECT J.VOName, CETable.facility_name, sum(NJobs), sum(J.WallDuration) " \
+                + " from "+schema+".CETable, "+schema+".CEProbes, "+schema+".JobUsageRecord J " \
+                + " where CEProbes.facility_id = CETable.facility_id and J.ProbeName = CEProbes.probename" \
+                + " and \""+ DateToString(begin) +"\"<EndTime and EndTime<\"" + DateToString(end) + "\"" \
+                + " and J.ProbeName not like \"psacct:%\" " \
+                + " group by J.VOName, CEProbes.facility_id order by J.VOName, CETable.facility_name "
+        return RunQueryAndSplit(select)
+
 def DailySiteVODataFromDaily(begin,end,select,count):
         schema = "gratia_osg_daily"
         
@@ -304,6 +370,16 @@ def DailySiteVODataFromDaily(begin,end,select,count):
                 + " where \""+ DateToString(begin) +"\"<EndTime and EndTime<\"" + DateToString(end) + "\"" \
                 + " and ProbeName " + select + "\"daily:goc\" " \
                 + " group by J.VOName, J.SiteName order by J.SiteName, J.VOName "
+        return RunQueryAndSplit(select)
+
+def DailyVOSiteDataFromDaily(begin,end,select,count):
+        schema = "gratia_osg_daily"
+        
+        select = " SELECT J.VOName, J.SiteName, "+count+", sum(J.WallDuration) " \
+                + " from "+schema+".JobUsageRecord J " \
+                + " where \""+ DateToString(begin) +"\"<EndTime and EndTime<\"" + DateToString(end) + "\"" \
+                + " and ProbeName " + select + "\"daily:goc\" " \
+                + " group by J.VOName, J.SiteName order by J.VOName, J.SiteName "
         return RunQueryAndSplit(select)
 
 def DailySiteJobStatus(begin,end,select = "", count = "", what = "CETable.facility_name" ):
@@ -533,6 +609,27 @@ class DailySiteVOReportConf:
         def GetData(self,start,end):
            return DailySiteVOData(start,end)      
 
+class DailyVOSiteReportConf:
+        title = "OSG usage summary (midnight to midnight central time) for %s\nincluding all jobs that finished in that time period.\nWall Duration is expressed in hours and rounded to the nearest hour.\nWall Duration is the duration between the instant the job start running and the instant the job ends its execution.\nDeltas are the differences with the previous day.\n"
+        headline = "For all jobs finished on %s (Central Time)"
+        headers = ("VO","Site","# of Jobs","Wall Duration","Delta jobs","Delta duration")
+        formats = {}
+        lines = {}
+        select = "=="
+        col1 = "All sites"
+        col2 = "All VOs"
+        
+        def __init__(self, header = False):
+           self.formats["csv"] = ",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""
+           self.formats["text"] = "| %-14s | %-22s | %9s | %13s | %10s | %14s"
+           self.lines["csv"] = ""
+           self.lines["text"] = "--------------------------------------------------------------------------------------------------------"
+
+           if (not header) :  self.title = ""
+
+        def GetData(self,start,end):
+           return DailyVOSiteData(start,end)      
+
 class DailySiteVOReportFromDailyConf:
         title = "OSG usage summary (midnight to midnight central time) for %s\nincluding all jobs that finished in that time period.\nWall Duration is expressed in hours and rounded to the nearest hour.\nWall Duration is the duration between the instant the job start running and the instant the job ends its execution.\nDeltas are the differences with the previous day.\nIf the number of jobs stated for a site is always 1\nthen this number is actually the number of summary records sent.\n"
         headline = "For all jobs finished on %s (Central Time)"
@@ -560,6 +657,34 @@ class DailySiteVOReportFromDailyConf:
 
         def GetData(self,start,end):
            return DailySiteVODataFromDaily(start,end,self.select,self.count)
+
+class DailyVOSiteReportFromDailyConf:
+        title = "OSG usage summary (midnight to midnight central time) for %s\nincluding all jobs that finished in that time period.\nWall Duration is expressed in hours and rounded to the nearest hour.\nWall Duration is the duration between the instant the job start running and the instant the job ends its execution.\nDeltas are the differences with the previous day.\nIf the number of jobs stated for a site is always 1\nthen this number is actually the number of summary records sent.\n"
+        headline = "For all jobs finished on %s (Central Time)"
+        headers = ("VO","Site","# of Jobs","Wall Duration","Delta jobs","Delta duration")
+        formats = {}
+        lines = {}
+        select = "=="
+        count = "sum(NJobs)"
+        col1 = "All sites"
+        col2 = "All VOs"
+
+        def __init__(self, fromGratia, header = False):
+           self.formats["csv"] = ",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""
+           self.formats["text"] = " | %-9s | %-22s | %9s | %13s | %10s | %14s"
+           self.lines["csv"] = ""
+           self.lines["text"] = "------------------------------------------------------------------------------------------------"
+
+           if (fromGratia) :
+               self.select = "="
+               self.count = "sum(NJobs)"
+           else:
+               self.select = "!="
+               
+           if (not header) :  self.title = ""
+
+        def GetData(self,start,end):
+           return DailyVOSiteDataFromDaily(start,end,self.select,self.count)
 
 def sortedDictValues(adict):
     items = adict.items()
@@ -748,6 +873,9 @@ def DailyVOReport(when = datetime.date.today(), output = "text", header = True):
 def DailySiteVOReport(when = datetime.date.today(), output = "text", header = True):
         return GenericDaily( DailySiteVOReportConf(header), when, output)
 
+def DailyVOSiteReport(when = datetime.date.today(), output = "text", header = True):
+        return GenericDaily( DailyVOSiteReportConf(header), when, output)
+
 def DateTimeToString(input):
     return input.strftime("%Y-%m-%d %H:%M:%S");
 
@@ -830,6 +958,34 @@ select J.SiteName, J.VOName, sum(J.NJobs), sum(J.WallDuration)
     else:
         return RunQueryAndSplit(select)
     
+def RangeVOSiteData(begin, end, with_panda = False):
+    schema = "gratia"
+    select = """\
+select J.VOName, T.facility_name, sum(NJobs), sum(J.WallDuration)
+  from """ + schema + ".CETable T, " + schema + ".CEProbes P, " + schema + """.VOProbeSummary J
+  where
+    P.facility_id = T.facility_id and
+    J.ProbeName = P.probename and
+    EndTime >= \"""" + DateTimeToString(begin) + """\" and
+    EndTime < \"""" + DateTimeToString(end) + """\" and
+    J.ProbeName not like \"psacct:%\"
+    group by T.facility_name,J.VOName
+    order by J.VOName,T.facility_name;"""
+    if with_panda:
+        panda_select = """\
+select J.VOName, J.SiteName, sum(J.NJobs), sum(J.WallDuration)
+  from gratia_osg_daily.JobUsageRecord J
+  where
+    J.ProbeName != \"daily:goc\" and
+    J.SiteName not in (select GT.facility_name from gratia.CETable GT) and
+    J.EndTime >= \"""" + DateTimeToString(begin) + """\" and
+    J.EndTime < \"""" + DateTimeToString(end) + """\"
+    group by J.SiteName, J.VOName
+    order by J.VOName, J.SiteName;"""
+        return RunQueryAndSplit(select) + RunQueryAndSplit(panda_select)
+    else:
+        return RunQueryAndSplit(select)
+
 class RangeVOReportConf:
     title = """\
 OSG usage summary for  %s - %s (midnight UTC - midnight UTC)
@@ -906,6 +1062,32 @@ Deltas are the differences with the previous period."""
     def GetData(self, start,end):
         return RangeSiteVOData(start, end, self.with_panda)      
 
+class RangeVOSiteReportConf:
+    title = """\
+OSG usage summary for  %s - %s (midnight UTC - midnight UTC)
+including all jobs that finished in that time period.
+Wall Duration is expressed in hours and rounded to the nearest hour. Wall
+Duration is the duration between the instant the job started running
+and the instant the job ended its execution.
+Deltas are the differences with the previous period."""
+    headline = "For all jobs finished between %s and %s (midnight UTC)"
+    headers = ("VO", "Site","# of Jobs","Wall Duration","Delta jobs","Delta duration")
+    formats = {}
+    lines = {}
+    col1 = "All VOs"    
+    col2 = "All sites"    
+
+    def __init__(self, header = False, with_panda = False):
+        self.formats["csv"] = ",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""
+        self.formats["text"] = "| %-18s | %-30s | %-9s | %13s | %10s | %14s"
+        self.lines["csv"] = ""
+        self.lines["text"] = "--------------------------------------------------------------------------------------------------------------------"
+        if (not header) :  self.title = ""
+        self.with_panda = with_panda
+
+    def GetData(self, start,end):
+        return RangeVOSiteData(start, end, self.with_panda)      
+
 def GenericRange(what, range_end = datetime.date.today(),
                  range_begin = None,
                  output = "text"):
@@ -946,8 +1128,11 @@ def GenericRange(what, range_end = datetime.date.today(),
         vo = ""
         if (len(val)==4) :
             # Nasty hack to harmonize Panda output
-            if vo != "Unknown": vo = string.lower(val[1])
-            if vo == "atlas": vo = "usatlas"
+            if what.headers[1] == "VO":
+               if vo != "Unknown": vo = string.lower(val[1])
+               if vo == "atlas": vo = "usatlas"
+            else:
+		        vo = val[1]
             offset = 1
             num_header = 2
             key = site + " " + vo
@@ -982,8 +1167,11 @@ def GenericRange(what, range_end = datetime.date.today(),
         offset = 0
         if (len(val)==4) :
             # Nasty hack to harmonize Panda output
-            if vo != "Unknown": vo = string.lower(val[1])
-            if vo == "atlas": vo = "usatlas"
+            if what.headers[1] == "VO":
+	           if vo != "Unknown": vo = string.lower(val[1])
+	           if vo == "atlas": vo = "usatlas"
+            else:
+		        vo = val[1]
             offset = 1
             num_header = 2
             key = site + " " + vo
@@ -1058,6 +1246,16 @@ def RangeSiteVOReport(range_end = datetime.date.today(),
                       header = True,
                       with_panda = False):
     return GenericRange(RangeSiteVOReportConf(header, with_panda),
+                        range_end,
+                        range_begin,
+                        output)
+
+def RangeVOSiteReport(range_end = datetime.date.today(),
+                      range_begin = None,
+                      output = "text",
+                      header = True,
+                      with_panda = False):
+    return GenericRange(RangeVOSiteReportConf(header, with_panda),
                         range_end,
                         range_begin,
                         output)
