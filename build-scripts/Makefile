@@ -267,7 +267,7 @@ local: services servlets soap reporting reports report-configuration administrat
 gratia: clean services servlets soap reporting reports report-configuration administration security
 	rm -f -r tarball
 	mkdir tarball
-	cp ../configuration/*gov ../configuration/*xml ../configuration/*properties tarball
+	cp ../configuration/UserVoMap.* ../configuration/*xml ../configuration/*properties tarball
 	cp ../configuration/*sql ../configuration/*sh tarball
 	rm -f tarball/local.*
 	rm -f tarball/release.*
@@ -280,7 +280,7 @@ gratia: clean services servlets soap reporting reports report-configuration admi
 glr: clean services servlets soap reporting reports report-configuration administration security
 	rm -f -r tarball
 	mkdir tarball
-	cp ../configuration/*gov ../configuration/*xml ../configuration/*properties tarball
+	cp ../configuration/UserVoMap.* ../configuration/*xml ../configuration/*properties tarball
 	cp ../configuration/*sql ../configuration/*sh tarball
 	rm -f tarball/local.*
 	rm -f tarball/release.*
