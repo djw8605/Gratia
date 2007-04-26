@@ -1173,7 +1173,7 @@ begin
 	call parse(userName,@name,@key,@vo);
 
 	set @sql :=
-           concat_ws('', 'select CETable.facility_name as sitename, sum(JobUsageRecord.WallDuration) as WallDuration, sum(JobUsageRecord.CpuUserDuration, JobUsageRecord.VOName',
+           concat_ws('', 'select CETable.facility_name as sitename, sum(JobUsageRecord.WallDuration) as WallDuration, sum(JobUsageRecord.CpuUserDuration + JobUsageRecord.CpuSystemDuration) as Cpu, JobUsageRecord.VOName',
                      ' from CETable,CEProbes,JobUsageRecord',
                      ' where',
                      ' CEProbes.facility_id = CETable.facility_id and JobUsageRecord.ProbeName = CEProbes.probename and',
@@ -1188,7 +1188,7 @@ begin
     if ( @mywhereclause = '' or @mywhereclause is NULL ) and datediff(todate,fromdate) > 6 then
 		-- Use summary table
 		set @sql :=
-           concat_ws('', 'select CETable.facility_name as sitename, sum(VOProbeSummary.WallDuration) as WallDuration, sum(VOProbeSummary.CpuUserDuration, VOProbeSummary.VOName',
+           concat_ws('', 'select CETable.facility_name as sitename, sum(VOProbeSummary.WallDuration) as WallDuration, sum(VOProbeSummary.CpuUserDuration + VOProbeSummary.CpuSystemDuration) as Cpu, VOProbeSummary.VOName',
                      ' from CETable,CEProbes,VOProbeSummary',
                      ' where',
                      ' CEProbes.facility_id = CETable.facility_id and VOProbeSummary.ProbeName = CEProbes.probename and',
