@@ -205,7 +205,6 @@ $options{debug} = 1;
 
 if ($options{debug}) {
 	my $sql_script = generate_sql(@procedure_list);
-	process_trace_directives(\$sql_script,$options{trace});
 	print $sql_script;
 	exit 0;
 } else {
@@ -262,10 +261,15 @@ sub generate_sql {
 									 generate_procedures(@_),
 									 generate_endmatter());
 	} else {
-		return sprintf("%s%s%s%s%s",
-									 generate_frontmatter(),
-									 generate_sql_boilerplate(),
-									 generate_probe_status_proc(),
+		my $infrastructure_sql =
+			sprintf("%s%s%s",
+							generate_frontmatter(),
+							generate_sql_boilerplate(),
+							generate_probe_status_proc());
+		process_trace_directives(\$infrastructure_sql, $options{trace});
+
+		return sprintf("%s%s%s",
+									 $infrastructure_sql,
 									 generate_procedures(),
 									 generate_endmatter());
 	}

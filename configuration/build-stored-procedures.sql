@@ -149,6 +149,9 @@ begin
                      , ' order by ProbeSummary.EndTime'
                  );
 	end if;
+	insert into trace(pname,userkey,user,role,vo,p1,p2,p3,p4,data)
+		values('DailyJobsByFacility',@key,userName,userRole,@vo,
+		fromdate,todate,format,resourceType,@sql);
 	prepare statement from @sql;
 	execute statement;
 	deallocate prepare statement;
@@ -203,6 +206,9 @@ begin
                      , ' order by ProbeSummary.EndTime'
                  );
 	end if;
+	insert into trace(pname,userkey,user,role,vo,p1,p2,p3,p4,data)
+		values('DailyJobsByProbe',@key,userName,userRole,@vo,
+		fromdate,todate,format,resourceType,@sql);
 	prepare statement from @sql;
 	execute statement;
 	deallocate prepare statement;
@@ -257,6 +263,9 @@ begin
                      , ' order by VOProbeSummary.EndTime'
                  );
 	end if;
+	insert into trace(pname,userkey,user,role,vo,p1,p2,p3,p4,data)
+		values('DailyJobsByVO',@key,userName,userRole,@vo,
+		fromdate,todate,format,resourceType,@sql);
 	prepare statement from @sql;
 	execute statement;
 	deallocate prepare statement;
@@ -313,6 +322,9 @@ begin
                      , ' order by ProbeSummary.EndTime'
                  );
 	end if;
+	insert into trace(pname,userkey,user,role,vo,p1,p2,p3,p4,data)
+		values('DailyUsageByFacility',@key,userName,userRole,@vo,
+		fromdate,todate,format,resourceType,@sql);
 	prepare statement from @sql;
 	execute statement;
 	deallocate prepare statement;
@@ -367,6 +379,9 @@ begin
                      , ' order by ProbeSummary.EndTime'
                  );
 	end if;
+	insert into trace(pname,userkey,user,role,vo,p1,p2,p3,p4,data)
+		values('DailyUsageByProbe',@key,userName,userRole,@vo,
+		fromdate,todate,format,resourceType,@sql);
 	prepare statement from @sql;
 	execute statement;
 	deallocate prepare statement;
@@ -421,6 +436,9 @@ begin
                      , ' order by ProbeSummary.EndTime,ProbeSummary.ProbeName'
                  );
 	end if;
+	insert into trace(pname,userkey,user,role,vo,p1,p2,p3,p4,data)
+		values('DailyUsageBySite',@key,userName,userRole,@vo,
+		fromdate,todate,format,resourceType,@sql);
 	prepare statement from @sql;
 	execute statement;
 	deallocate prepare statement;
@@ -475,6 +493,9 @@ begin
                      , ' order by VOProbeSummary.EndTime'
                  );
 	end if;
+	insert into trace(pname,userkey,user,role,vo,p1,p2,p3,p4,data)
+		values('DailyUsageByVO',@key,userName,userRole,@vo,
+		fromdate,todate,format,resourceType,@sql);
 	prepare statement from @sql;
 	execute statement;
 	deallocate prepare statement;
@@ -531,6 +552,9 @@ begin
                      , ' order by CETable.facility_name'
                  );
 	end if;
+	insert into trace(pname,userkey,user,role,vo,p1,p2,p3,p4,data)
+		values('JobsByFacility',@key,userName,userRole,@vo,
+		fromdate,todate,format,resourceType,@sql);
 	prepare statement from @sql;
 	execute statement;
 	deallocate prepare statement;
@@ -587,6 +611,9 @@ begin
                      , ' order by CETable.facility_name'
                  );
 	end if;
+	insert into trace(pname,userkey,user,role,vo,p1,p2,p3,p4,data)
+		values('JobsByFacilityForVO',@key,userName,userRole,@vo,
+		fromdate,todate,format,resourceType,@sql);
 	prepare statement from @sql;
 	execute statement;
 	deallocate prepare statement;
@@ -641,6 +668,9 @@ begin
                      , ' order by ProbeSummary.ProbeName'
                  );
 	end if;
+	insert into trace(pname,userkey,user,role,vo,p1,p2,p3,p4,data)
+		values('JobsByProbeNoFacility',@key,userName,userRole,@vo,
+		fromdate,todate,format,resourceType,@sql);
 	prepare statement from @sql;
 	execute statement;
 	deallocate prepare statement;
@@ -695,6 +725,9 @@ begin
                      , ' order by ProbeSummary.SiteName'
                  );
 	end if;
+	insert into trace(pname,userkey,user,role,vo,p1,p2,p3,p4,data)
+		values('JobsBySite',@key,userName,userRole,@vo,
+		fromdate,todate,format,resourceType,@sql);
 	prepare statement from @sql;
 	execute statement;
 	deallocate prepare statement;
@@ -751,6 +784,9 @@ begin
                      , ' order by sitename, VOProbeSummary.VOName'
                  );
 	end if;
+	insert into trace(pname,userkey,user,role,vo,p1,p2,p3,p4,data)
+		values('JobsBySiteByVO',@key,userName,userRole,@vo,
+		fromdate,todate,format,resourceType,@sql);
 	prepare statement from @sql;
 	execute statement;
 	deallocate prepare statement;
@@ -807,6 +843,9 @@ begin
                      , ' order by User'
                  );
 	end if;
+	insert into trace(pname,userkey,user,role,vo,p1,p2,p3,p4,data)
+		values('JobsByUserForVOForFacility',@key,userName,userRole,@vo,
+		fromdate,todate,format,resourceType,@sql);
 	prepare statement from @sql;
 	execute statement;
 	deallocate prepare statement;
@@ -861,6 +900,9 @@ begin
                      , ' order by VOProbeSummary.VOName'
                  );
 	end if;
+	insert into trace(pname,userkey,user,role,vo,p1,p2,p3,p4,data)
+		values('JobsByVO',@key,userName,userRole,@vo,
+		fromdate,todate,format,resourceType,@sql);
 	prepare statement from @sql;
 	execute statement;
 	deallocate prepare statement;
@@ -917,6 +959,9 @@ begin
                      , ' order by CETable.facility_name'
                  );
 	end if;
+	insert into trace(pname,userkey,user,role,vo,p1,p2,p3,p4,data)
+		values('UsageByFacility',@key,userName,userRole,@vo,
+		fromdate,todate,format,resourceType,@sql);
 	prepare statement from @sql;
 	execute statement;
 	deallocate prepare statement;
@@ -973,6 +1018,9 @@ begin
                      , ' order by CETable.facility_name'
                  );
 	end if;
+	insert into trace(pname,userkey,user,role,vo,p1,p2,p3,p4,data)
+		values('UsageByFacilityForVO',@key,userName,userRole,@vo,
+		fromdate,todate,format,resourceType,@sql);
 	prepare statement from @sql;
 	execute statement;
 	deallocate prepare statement;
@@ -1027,6 +1075,9 @@ begin
                      , ' order by ProbeSummary.ProbeName'
                  );
 	end if;
+	insert into trace(pname,userkey,user,role,vo,p1,p2,p3,p4,data)
+		values('UsageByProbe',@key,userName,userRole,@vo,
+		fromdate,todate,format,resourceType,@sql);
 	prepare statement from @sql;
 	execute statement;
 	deallocate prepare statement;
@@ -1081,6 +1132,9 @@ begin
                      , ' order by ProbeSummary.SiteName'
                  );
 	end if;
+	insert into trace(pname,userkey,user,role,vo,p1,p2,p3,p4,data)
+		values('UsageBySite',@key,userName,userRole,@vo,
+		fromdate,todate,format,resourceType,@sql);
 	prepare statement from @sql;
 	execute statement;
 	deallocate prepare statement;
@@ -1137,6 +1191,9 @@ begin
                      , ' order by sitename, VOProbeSummary.VOName'
                  );
 	end if;
+	insert into trace(pname,userkey,user,role,vo,p1,p2,p3,p4,data)
+		values('UsageBySiteByVO',@key,userName,userRole,@vo,
+		fromdate,todate,format,resourceType,@sql);
 	prepare statement from @sql;
 	execute statement;
 	deallocate prepare statement;
@@ -1193,6 +1250,9 @@ begin
                      , ' order by User'
                  );
 	end if;
+	insert into trace(pname,userkey,user,role,vo,p1,p2,p3,p4,data)
+		values('UsageByUserForVOForFacility',@key,userName,userRole,@vo,
+		fromdate,todate,format,resourceType,@sql);
 	prepare statement from @sql;
 	execute statement;
 	deallocate prepare statement;
@@ -1247,6 +1307,9 @@ begin
                      , ' order by VOProbeSummary.VOName'
                  );
 	end if;
+	insert into trace(pname,userkey,user,role,vo,p1,p2,p3,p4,data)
+		values('UsageByVO',@key,userName,userRole,@vo,
+		fromdate,todate,format,resourceType,@sql);
 	prepare statement from @sql;
 	execute statement;
 	deallocate prepare statement;
@@ -1309,6 +1372,9 @@ begin
                      , ' order by VOProbeSummary.EndTime'
                  );
 	end if;
+	insert into trace(pname,userkey,user,role,vo,p1,p2,p3,p4,data)
+		values('WeeklyJobsByVO',@key,userName,userRole,@vo,
+		fromdate,todate,format,resourceType,@sql);
 	prepare statement from @sql;
 	execute statement;
 	deallocate prepare statement;
@@ -1371,6 +1437,9 @@ begin
                      , ' order by VOProbeSummary.EndTime'
                  );
 	end if;
+	insert into trace(pname,userkey,user,role,vo,p1,p2,p3,p4,data)
+		values('WeeklyUsageByVO',@key,userName,userRole,@vo,
+		fromdate,todate,format,resourceType,@sql);
 	prepare statement from @sql;
 	execute statement;
 	deallocate prepare statement;
