@@ -462,6 +462,65 @@ end
 -- call DailyUsageBySite('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-04 00:00:00','%y:%m:%d','')
 -- ||
 
+drop procedure if exists DailyUsageBySiteByVO
+||
+create procedure DailyUsageBySiteByVO (userName varchar(64), userRole varchar(64), fromdate varchar(64), todate varchar(64), format varchar(64), resourceType varchar(64))
+begin
+
+	select generateResourceTypeClause(resourceType) into @myresourceclause;
+	select SystemProplist.cdr into @usereportauthentication from SystemProplist
+	where SystemProplist.car = 'use.report.authentication';
+	select RolesTable.whereclause into @mywhereclause from RolesTable
+		where RolesTable.role = userRole;
+	select generateWhereClause(userName,userRole,@mywhereclause)
+		into @mywhereclause;
+	call parse(userName,@name,@key,@vo);
+
+	set @sql :=
+           concat_ws('', 'select date_format(JobUsageRecord.EndTime,''', format, ''') as endtime,CETable.facility_name as sitename, sum(JobUsageRecord.WallDuration) as WallDuration, sum(JobUsageRecord.CpuUserDuration + JobUsageRecord.CpuSystemDuration) as Cpu, JobUsageRecord.VOName',
+                     ' from CETable,CEProbes,JobUsageRecord',
+                     ' where',
+                     ' CEProbes.facility_id = CETable.facility_id and JobUsageRecord.ProbeName = CEProbes.probename and',
+                     ' EndTime >= ''', fromdate, ''''
+                     ' and EndTime <= ''', todate, ''''
+                     ' ', @myresourceclause,
+                     ' ', @mywhereclause
+                     , ' group by date_format(date_format(JobUsageRecord.EndTime,''', format, '''),''', format, '''),sitename, JobUsageRecord.VOName'
+                     , ' order by date_format(JobUsageRecord.EndTime,''', format, '''),sitename, JobUsageRecord.VOName'
+                    );
+
+    if ( @mywhereclause = '' or @mywhereclause is NULL ) and datediff(todate,fromdate) > 6 then
+		-- Use summary table
+		set @sql :=
+           concat_ws('', 'select date_format(VOProbeSummary.EndTime,''', format, ''') as endtime,CETable.facility_name as sitename, sum(VOProbeSummary.WallDuration) as WallDuration, sum(VOProbeSummary.CpuUserDuration + VOProbeSummary.CpuSystemDuration) as Cpu, VOProbeSummary.VOName',
+                     ' from CETable,CEProbes,VOProbeSummary',
+                     ' where',
+                     ' CEProbes.facility_id = CETable.facility_id and VOProbeSummary.ProbeName = CEProbes.probename and',
+                     ' EndTime >= date(''', fromdate, ''')',
+                     ' and EndTime <= date(''', todate, ''')',
+                     ' ', @myresourceclause,
+                     ' ', @mywhereclause
+                     , ' group by date_format(date_format(VOProbeSummary.EndTime,''', format, '''),''', format, '''),sitename, VOProbeSummary.VOName'
+                     , ' order by date_format(VOProbeSummary.EndTime,''', format, '''),sitename, VOProbeSummary.VOName'
+                 );
+	end if;
+	insert into trace(pname,userkey,user,role,vo,p1,p2,p3,p4,data)
+		values('DailyUsageBySiteByVO',@key,userName,userRole,@vo,
+		fromdate,todate,format,resourceType,@sql);
+	prepare statement from @sql;
+	execute statement;
+	deallocate prepare statement;
+end
+||
+-- call DailyUsageBySiteByVO('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-10 00:00:00','%y:%m:%d','Batch')
+-- ||
+-- call DailyUsageBySiteByVO('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-10 00:00:00','%y:%m:%d','')
+-- ||
+-- call DailyUsageBySiteByVO('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-04 00:00:00','%y:%m:%d','Batch')
+-- ||
+-- call DailyUsageBySiteByVO('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-04 00:00:00','%y:%m:%d','')
+-- ||
+
 drop procedure if exists DailyUsageByVO
 ||
 create procedure DailyUsageByVO (userName varchar(64), userRole varchar(64), fromdate varchar(64), todate varchar(64), format varchar(64), resourceType varchar(64))
