@@ -1,0 +1,49 @@
+
+Anonymous access
+-----------------
+cvs -d:pserver:anonymous@gratia.cvs.sourceforge.net:/cvsroot/gratia login 
+
+cvs -z3 -d:pserver:anonymous@gratia.cvs.sourceforge.net:/cvsroot/gratia co -P modulename
+
+Update access
+-----------------
+
+
+
+-------------------------------------------------------------
+##CVSROOT=pserver:anonymous@gratia.cvs.sourceforge.net:/cvsroot/gratia
+##CVSROOT=pserver:jgweigand@gratia.cvs.sourceforge.net:/cvsroot/gratia
+
+
+From Philippe (3.5.07):
+In the gratia CVS repository, I update a python script 
+(gratia/summary/LCG.py), that produce the sql statements needed
+for the __monthly__ WLCG update.
+
+To use it:
+	python LCG.py 2007/02 > temp.sql
+
+You can then run this script through mysql.
+
+In the script I added a python variable (ReportableSites)
+that contains the list of site that ought to report to WLCG.
+
+This list contain all the CMS sites (with one wrinkle) and
+one ATLAS site (for now).  The wrinkle for CMS is that we
+don't know yet whether USCMS-FNAL-WC1-CE should report
+as one site or 2 (There is an OSG and a LCG gateway).
+
+- need mysql setup
+
+
+===============================================================
+LCG database
+------------
+Note: has to be done from the db01 machine
+mysql -h goc.grid-support.ac.uk -u OSG -p'xxxxxxxxx' accounting <OSG_DATA_DUMP_February_2007.sql
+
+================================================================
+Making an RPM for VDT
+----------------------
+README in the gratia/probe/build directory
+

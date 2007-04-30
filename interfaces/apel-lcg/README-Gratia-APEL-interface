@@ -1,0 +1,247 @@
+Gratia - APEL/LCG Interface (John Weigand -2/25/2007)
+-----------------------------------------------------
+
+The intent of this whole process is to 
+
+The following files are associated with this interface:
+ lcg.sh
+ lcg-all-dates.sh
+ LCG.py
+ lcg.conf
+ lcg-reportableSites
+ lcg-reportableVOs
+ lcg-db.conf
+ pswd-gratia
+ pswd-lcg
+ cron.sample
+
+#################################
+lcg.sh
+
+The purpose of this shell script is primarily to get access to a mysql
+client.  The mysql being used comes from Fermi UPS.  It assumes UPS is
+available via /fnal/ups/etc/setups.sh.  There is no command line argument to
+override this.  All other command line arguments are passed directly to
+the LCG.py script which collects the data from the gratia database and updates
+the LCG/APEL database.
+
+This script is intended to be run as a daily cron process and should be run
+a couple hours after midnight to insure that most of the previous days
+accounting data has been reported.
+
+5 02 * * *   dir=/home/weigand/gratia/cvs; cd $dir; ./lcg.sh \
+             --config=lcg.conf \
+             --date=current
+             --update
+
+This script will log error messages to stdout so it is important you do not
+redirect stdout/err in the cron entry.  This will insure that someone gets an
+email notification if a failure occurs.
+
+It is also important that you 'cd' to the lcg.sh parent directory if you
+specify relative paths for the various files in the lcg.conf file.
+
+#################################
+lcg-all-dates.sh
+
+This script should not be run in its current form as the date range is
+harcoded.  It is a utility script for easily running the lcg.sh script
+for a set of months.  It should be reviewed ans modified as needed.
+
+
+#################################
+LCG.py
+
+This is the script that does it all.  
+
+In general and briefly, it does the following:
+ 1. Determines a 'nonmalization factor' using a specified probe as the
+    base node.  This value is applied against the CPU and Wall time data 
+    collected.
+    - the probe used is defined by the 'NormalizationProbe' attribute of the 
+      lcg.conf file.  This factor
+ 2. Retrieves the accounting data from the Gratia database for selected
+    OSG sites and VOs for a month.
+    - sites are defined in a file identified by the 'SiteFilterFile'
+      attribute of the lcg.conf file
+    - VOs are defined in a file identified by the 'VOFilterFile'
+      attribute of the lcg.conf file
+ 3. Formats SQL DML INSERT statements to update the OSG_DATA table of
+    the APEL/LCG database.
+    - the table name is defined by the 'LcgTable' attribute of the 
+      lcg-db.conf file
+    - for testing purposes a clone table called OSG_TABLE_TEST can be 
+      set instead.
+    - the SQL DML statements for the last run are placed in a directory
+      defined by the 'LogSqlDir' attribute of the lcg.conf file.
+      The file name is YYYY-MM.sql and contains only the DML from the last
+      update run.
+ 4. Updates the APEL/CLG database
+    - In order to handle site and VO name changes, the SQL DML is set
+      up to DELETE all data for the month/year and then INSERT the new data.
+      This is a simple approach to handling these kinds of changes and works
+      as of 4/25/2007.  It may be this will not hold up over the long run and
+      will have to be re-visited.
+
+Additional functionality:
+  1. The script has been design to do everything EXECPT update the APEL/LCG
+     database unless the --update option is used.  This prevents accidental
+     running of the script especially when testing.
+  2. Log files are creeted in the directory specified by the 'LogSqlDir'
+     attribute of the lcg.conf file.
+     - the format of the log files is YYYY-MM.log
+  3. A file containing the latest SQL DML statements used to update the
+     APEL/LCG database is created in the same directory as the log files.
+     - the format of the sql file is YYYY-MM.sql
+
+Usage:
+  LCG.py(lcg.sh)  --conf=config_file --date=month [--update] [--no-email]
+
+     --conf - specifies the main configuration file to be used
+              which would be the lcg.conf file normally
+
+     --date - specifies the monthly time period to be updated:
+              Valid values:
+                current  - the current month
+                previous - the previous month
+                YYYY/MM  - any year and month
+
+              The 'current' and 'previous' values are to facillitate running
+              this as a cron script.  Generally, we will run a cron
+              entry for the 'previous' month for n days into the current
+              month in order to insure all reporting has been completed.
+
+     The following 2 options are to facillitate testing and to avoid
+     accidental running and updating of the APEL/LCG database and are
+     therefore considered optional:
+
+     --update - this option says to go ahead and update the APEL/LCG database.
+                If this option is NOT specified, then everything is executed
+                EXCEPT the actual updating of the database.  The SQL DML
+                file used to update the database will be created.
+
+     --no-email - this option says to turnoff the sending of email
+                notifications on failures and successful completions.
+
+
+#################################
+lcg.conf
+
+Main configuration file.  
+
+Format: It is a simple name/value pair with whitspece as the delimiter, 
+        2 tokens only.
+        Lines starting with '#' indicate a comment line
+        Empty lines are permitted
+
+  SiteFilterFile....... File with list of sites to be reported 
+                        (lcg-reportableSites)
+  VOFilterFile......... File with list of VOs to be reported 
+                        (lcg-reportableVOs)
+  DBConfFila........... Configuration file for databases 
+                        (lcg-db..conf)
+  LogSqlDir............ Directory for log files and the sql dml update file.
+                        
+ 
+  NormalizationProbe... Probe name to calculate the normalization factor
+  NormalizationPeriod.. Number of periods (months) to use in calculating
+                        the normalization factor.  The period will be a full
+                        3 months when the run is made for any previous
+                        period and from 2-3 months depending on the day the
+                        process is run in a current month.
+  NormalizationDefault. Default value to use if no data is available for the
+                        NormalizationProbe (can occur at beginning of a month
+                        and the NormalizationPeriod is <= 1, 
+                        or if there is a problem with that probe)
+ 
+  EmailNotice.......... It is suggested that this be GRID-ACCOUNTING@fnal.gov  
+                        so a record of all transfer is available without
+                        having access to the machine this runs on.
+
+Note about add/change/delete of entries:  There is a global hash table in 
+LCG.py called 'gFilterParameters' which is used to validate the entries.
+This variable needs to be modifified for any changes.
+
+#################################
+lcg-reportableSites
+
+This provides the list of OSG sites' accounting data to be pushed to the 
+APEL/LCG database.  It is the CETable.facility_name of the Gratia database
+and is the primary grouping.
+
+Format: Only one site name per line
+        Lines starting with '#' indicate a comment line
+        Empty lines are permitted
+
+       
+
+#################################
+lcg-reportableVOs
+
+This provides the list of VOs' accounting data to be pushed to the 
+APEL/LCG database.  It is the VOProbeSummary.VOName of the Gratia database
+and is the secondary grouping.
+
+Format: Only one site name per line
+        Lines starting with '#' indicate a comment line
+        Empty lines are permitted
+
+#################################
+lcg-db.conf
+
+This provides all the necessary parameters for accessing the Gratia and 
+APEL/LCG databases via the mysql client.  The only execption are the passwords
+which are set up in separate files.
+
+Format: It is a simple name/value pair with whitspece as the delimiter,
+        2 tokens only.
+        Lines starting with '#' indicate a comment line
+        Empty lines are permitted
+
+Below are the values used as of 4/25/2007.
+There is an additional table available for testing called OSG_DATA_TEST.
+It is a clone of the OSG_DATA table.
+
+#--- Gratia -----
+GratiaHost gratia-db01.fnal.gov
+GratiaPort 3320
+GratiaUser reader
+GratiaPswd ./pswd-gratia
+GratiaDB   gratia
+
+#--- LCG -----
+LcgHost  goc.grid-support.ac.uk
+LcgPort  3306
+LcgUser  OSG
+LcgPswd  ./pswd-lcg
+LcgDB    accounting
+LcgTable OSG_DATA
+
+Note about add/change/delete of entries:  There is a global hash table in 
+LCG.py called 'gDatabaseParameters' which is used to validate the entries.
+This variable needs to be modifified for any changes.
+
+#################################
+pswd-gratia
+pswd-lcg
+
+These files contain the respective passwords for the gratia and APEL/LCG
+databases.  There are not many options for keeping passwords hidden in MySql
+and rather than use the 'my.conf' file of MySql, the passwords are contained
+here.
+
+These files SHOULD NOT be put into CVS.
+
+The format of the file is:
+[client]
+password="xxxxxx"
+
+The location/file name  is defined in the lcg-db.conf file.  The names do
+not have to be the same as defined here.
+
+#####################################
+cron.sample
+
+Just a sample crontab entry.
+
+

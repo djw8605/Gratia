@@ -1,0 +1,16 @@
+#-------------------------------------------------------------------------
+# Gratia-to-APEL (WLCG) transfer crontab entry
+#-------------------------------------------------------------------------
+#
+# Previous month's transfers
+# For just the 1st n days of the month to insure all have reported
+#-------------------------------------------------------------------------
+0 02 1-15 * *   dir=/home/weigand/gratia/cvs; cd $dir; ./lcg.sh --config=lcg.conf --date=previous --update
+#
+#-------------------------------------------------------------------------
+# Current month's transfers. 
+# Always daily.
+#-------------------------------------------------------------------------
+5 02 * * *   dir=/home/weigand/gratia/cvs; cd $dir; ./lcg.sh --config=lcg.conf --date=current --update
+#
+#-------------------------------------------------------------------------
