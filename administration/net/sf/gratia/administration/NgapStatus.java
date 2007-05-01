@@ -96,6 +96,7 @@ public class NgapStatus extends HttpServlet
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
 		{
 				String probename = null;
+				String sitename = null;
 				String host = null;
 				
 				openConnection();
@@ -103,15 +104,18 @@ public class NgapStatus extends HttpServlet
 				this.request = request;
 				this.response = response;
 				probename = request.getParameter("probename");
+				sitename = request.getParameter("sitename");
 				host = request.getParameter("host");
 				buffer = new StringBuffer();
 				if (probename != null)
 						processProbe(probename);
+				else if (sitename != null)
+						processSite(sitename);
 				else if (host != null)
 						processHost(host);
 				else
 						process();
-				response.setContentType("text/html");
+				response.setContentType("text/plain");
 				response.setHeader("Cache-Control", "no-cache"); // HTTP 1.1
 				response.setHeader("Pragma", "no-cache"); // HTTP 1.0
 				PrintWriter writer = response.getWriter();
@@ -134,7 +138,7 @@ public class NgapStatus extends HttpServlet
 								//
 								// return time stamp of last probe contact
 								//
-								command = "select max(ServerDate) from JobUsageRecord where ProbeName = " + dq + probename + dq;
+								command = "select currenttime from CEProbes where probename = " + dq + probename + dq;
 								System.out.println("command: " + command);
 								statement = connection.prepareStatement(command);
 								resultSet = statement.executeQuery(command);
@@ -143,9 +147,50 @@ public class NgapStatus extends HttpServlet
 								resultSet.close();
 								statement.close();
 								if (date == null)
-										buffer.append("last-contact=never");
+										buffer.append("last-contact=never\n");
 								else
-										buffer.append("last-contact=" + format.format(date));
+										buffer.append("last-contact=" + format.format(date) + "\n");
+						}
+				catch (Exception e)
+						{
+								e.printStackTrace();
+						}
+		}
+
+		public void processSite(String sitename)
+		{
+				String command = "";
+				String dq = "'";
+				java.util.Date date = null;
+				String probename = null;
+				SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd kk:mm:ss");
+
+				try
+						{
+								//
+								// return time stamp of last site contact
+								//
+								command = "select P.currenttime, P.probename from CEProbes P, CETable T where T.facility_name = " + dq + sitename + dq + " and T.facility_id = P.facility_id order by currenttime";
+								System.out.println("command: " + command);
+								statement = connection.prepareStatement(command);
+								resultSet = statement.executeQuery(command);
+								while(resultSet.next()) {
+										date = resultSet.getDate(1);
+										probename = resultSet.getString(2);
+										if (date == null) {
+												if (probename == null) {
+														buffer.append("last-contact=never\n");
+												} else {
+														buffer.append(probename + ": last-contact=never\n");
+												}
+										} else {
+												if (probename == null)
+														probename = "Unknown probe";
+												buffer.append(probename + ": last-contact=" + format.format(date) + "\n");
+										}
+								}
+								resultSet.close();
+								statement.close();
 						}
 				catch (Exception e)
 						{
@@ -175,9 +220,9 @@ public class NgapStatus extends HttpServlet
 								resultSet.close();
 								statement.close();
 								if (date == null)
-										buffer.append("last-contact=never");
+										buffer.append("last-contact=never\n");
 								else
-										buffer.append("last-contact=" + format.format(date));
+										buffer.append("last-contact=" + format.format(date) + "\n");
 						}
 				catch (Exception e)
 						{
