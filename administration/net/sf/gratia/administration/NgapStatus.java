@@ -170,7 +170,7 @@ public class NgapStatus extends HttpServlet
 								//
 								// return time stamp of last site contact
 								//
-								command = "select P.currenttime, P.probename from CEProbes P, CETable T where T.facility_name = " + dq + sitename + dq + " and T.facility_id = P.facility_id order by currenttime desc";
+								command = "select P.currenttime, P.probename from CEProbes P, CETable T where P.active = 1 and T.facility_name = " + dq + sitename + dq + " and T.facility_id = P.facility_id order by currenttime desc";
 								System.out.println("command: " + command);
 								statement = connection.prepareStatement(command);
 								resultSet = statement.executeQuery(command);
