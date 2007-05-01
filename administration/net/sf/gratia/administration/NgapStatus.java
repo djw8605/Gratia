@@ -131,7 +131,7 @@ public class NgapStatus extends HttpServlet
 				String dq = "'";
 				java.util.Date date = null;
 				
-				SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd kk:mm:ss");
+				SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 				try
 						{
@@ -143,7 +143,7 @@ public class NgapStatus extends HttpServlet
 								statement = connection.prepareStatement(command);
 								resultSet = statement.executeQuery(command);
 								while(resultSet.next())
-										date = resultSet.getDate(1);
+										date = resultSet.getTimestamp(1);
 								resultSet.close();
 								statement.close();
 								if (date == null)
@@ -163,19 +163,19 @@ public class NgapStatus extends HttpServlet
 				String dq = "'";
 				java.util.Date date = null;
 				String probename = null;
-				SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd kk:mm:ss");
+				SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 				try
 						{
 								//
 								// return time stamp of last site contact
 								//
-								command = "select P.currenttime, P.probename from CEProbes P, CETable T where T.facility_name = " + dq + sitename + dq + " and T.facility_id = P.facility_id order by currenttime";
+								command = "select P.currenttime, P.probename from CEProbes P, CETable T where T.facility_name = " + dq + sitename + dq + " and T.facility_id = P.facility_id order by currenttime desc";
 								System.out.println("command: " + command);
 								statement = connection.prepareStatement(command);
 								resultSet = statement.executeQuery(command);
 								while(resultSet.next()) {
-										date = resultSet.getDate(1);
+										date = resultSet.getTimestamp(1);
 										probename = resultSet.getString(2);
 										if (date == null) {
 												if (probename == null) {
@@ -204,7 +204,7 @@ public class NgapStatus extends HttpServlet
 				String dq = "'";
 				java.util.Date date = null;
 				
-				SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd kk:mm:ss");
+				SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 				try
 						{
@@ -216,7 +216,7 @@ public class NgapStatus extends HttpServlet
 								statement = connection.prepareStatement(command);
 								resultSet = statement.executeQuery(command);
 								while(resultSet.next())
-										date = resultSet.getDate(1);
+										date = resultSet.getTimestamp(1);
 								resultSet.close();
 								statement.close();
 								if (date == null)
@@ -247,7 +247,7 @@ public class NgapStatus extends HttpServlet
 				java.util.Date to = new java.util.Date();
 				java.util.Date from = new java.util.Date(to.getTime() - decrement);
 
-				SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd kk:mm:ss");
+				SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 				try
 						{
