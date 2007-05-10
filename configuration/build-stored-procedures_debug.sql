@@ -477,7 +477,7 @@ begin
 	call parse(userName,@name,@key,@vo);
 
 	set @sql :=
-           concat_ws('', 'select date_format(JobUsageRecord.EndTime,''', format, ''') as endtime,CETable.facility_name as sitename, sum(JobUsageRecord.WallDuration) as WallDuration, sum(JobUsageRecord.CpuUserDuration + JobUsageRecord.CpuSystemDuration) as Cpu, JobUsageRecord.VOName',
+           concat_ws('', 'select date_format(JobUsageRecord.EndTime,''', format, ''') as endtime,CETable.facility_name as sitename, sum(JobUsageRecord.WallDuration) as WallDuration, sum(JobUsageRecord.CpuUserDuration + JobUsageRecord.CpuSystemDuration) as Cpu, JobUsageRecord.VOName JobUsageRecord.VOName, sum(JobUsageRecord.Njobs) as Njobs',
                      ' from CETable,CEProbes,JobUsageRecord',
                      ' where',
                      ' CEProbes.facility_id = CETable.facility_id and JobUsageRecord.ProbeName = CEProbes.probename and',
@@ -492,7 +492,7 @@ begin
     if ( @mywhereclause = '' or @mywhereclause is NULL ) and datediff(todate,fromdate) > 6 then
 		-- Use summary table
 		set @sql :=
-           concat_ws('', 'select date_format(VOProbeSummary.EndTime,''', format, ''') as endtime,CETable.facility_name as sitename, sum(VOProbeSummary.WallDuration) as WallDuration, sum(VOProbeSummary.CpuUserDuration + VOProbeSummary.CpuSystemDuration) as Cpu, VOProbeSummary.VOName',
+           concat_ws('', 'select date_format(VOProbeSummary.EndTime,''', format, ''') as endtime,CETable.facility_name as sitename, sum(VOProbeSummary.WallDuration) as WallDuration, sum(VOProbeSummary.CpuUserDuration + VOProbeSummary.CpuSystemDuration) as Cpu, VOProbeSummary.VOName VOProbeSummary.VOName, sum(VOProbeSummary.Njobs) as Njobs',
                      ' from CETable,CEProbes,VOProbeSummary',
                      ' where',
                      ' CEProbes.facility_id = CETable.facility_id and VOProbeSummary.ProbeName = CEProbes.probename and',
