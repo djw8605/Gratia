@@ -18,7 +18,8 @@ my %collector_configs =
 							 rmi_port => 17000,
 							 jmx_port => 8004,
 							 server_port => 8104,
-							 db_schema => "gratia"
+							 db_schema => "gratia",
+							 remote_host => "gratia-osg.fnal.gov"
 						 },
 #	 test => { http_port => 8885,
 #						 ssl_port => 8870,
@@ -31,7 +32,8 @@ my %collector_configs =
 						rmi_port => 18000,
 						jmx_port => 8014,
 						server_port => 8114,
-						db_schema => "gratia_itb"
+						db_schema => "gratia_itb",
+						remote_host => "gratia-osg.fnal.gov"
 					},
 	 ps => { http_port => 8882,
 					 ssl_port => 8855,
@@ -39,14 +41,16 @@ my %collector_configs =
 					 jmx_port => 8024,
 					 server_port => 8124,
 					 db_schema => "gratia_psacct",
-					 UserConfig => "UserConfig_pacct.xml"
+					 UserConfig => "UserConfig_pacct.xml",
+					 remote_host => "gratia-fermi.fnal.gov"
 				 },
 	 qcd => { http_port => 8883,
 						ssl_port => 8865,
 						rmi_port => 21000,
 						jmx_port => 8040,
 						server_port => 8144,
-						db_schema => "gratia_qcd"
+						db_schema => "gratia_qcd",
+						remote_host => "gratia-fermi.fnal.gov"
 					},
 	 osg_daily => { http_port => 8884,
 									ssl_port => 8860,
@@ -57,7 +61,8 @@ my %collector_configs =
 									UserConfig => "UserConfig_osg_daily.xml",
 									"properties.attributes" =>
 									{ "monitor.listener.wait" => 1440
-									}
+									},
+									remote_host => "gratia-osg.fnal.gov"
 								}
 	);
 
@@ -179,11 +184,6 @@ unless (exists $options{"java-home"}) {
 	}
 }
 
-unless (exists $options{"remote-host"}) {
-	print STDERR "INFO: using default remote host name $default_remote_host\n";
-	$options{"remote-host"} = $default_remote_host;
-}
-
 unless (exists $options{prefix}) {
 	if (-d $default_prefix and -w $default_prefix) {
 		print STDERR "INFO: tomcat install prefix not specified, using default $default_prefix\n";
@@ -198,6 +198,14 @@ unless (exists $options{prefix}) {
 pod2usage(-exitval => 1) unless scalar @ARGV;
 
 my @instance_list = @ARGV;
+
+
+if (exists $options{"remote-host"}) {
+	print STDERR "INFO: overriding default instance remote hostname with $options{\"remote-host\"}\n";
+} else {
+	print STDERR "INFO: instances without a specified remote hostname will use $default_remote_host\n";
+}
+
 
 foreach my $config (@instance_list) {
 	my $config_ref = $collector_configs{$config};
@@ -405,9 +413,14 @@ sub configure_tomcat_users {
 
 sub construct_monitor_message_subject {
 	my ($instance_name, $collector_config) = @_;
+	my $remote_host = $options{"remote-host"} if defined $options{"remote-host"};
+	$remote_host =
+		(exists $collector_config->{remote_host})?
+			$collector_config->{remote_host}:$default_remote_host
+				unless $remote_host;
 	return
 		sprintf("%s:%s %s Potential listener problem",
-						$options{"remote-host"},
+						$remote_host,
 						$collector_config->{http_port},
 						"tomcat-$instance_name"
 					 );

@@ -272,7 +272,7 @@ gratia: clean services servlets soap reporting reports report-configuration admi
 	rm -f tarball/local.*
 	rm -f tarball/release.*
 	cp ../configuration/local.service-configuration.properties tarball/service-configuration.properties
-	cp ../configuration/configure-* tarball
+	cp ../configuration/configure-* ../configuration/update-gratia-local tarball
 	cp ../configuration/truststore ../configuration/keystore tarball
 	tar -cvf ../target/gratia.tar -C tarball .
 	rm -f -r tarball
