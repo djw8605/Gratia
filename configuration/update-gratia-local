@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 
 # Defaults
 tomcat_root=/scratch
@@ -18,13 +18,16 @@ fi
 
 remote_host=`uname -n`
 
+service tomcat-$instance stop
+sleep 5
+
 # Copy Birt if necessary
 if [[ -f "$tomcat_top/webapps/$birt_war" ]]; then
   # Verify checksum
   official_birt_checksum=`cd "$war_dir"; md5sum "$birt_war"`
 	echo $official_birt_checksum
 	# Checksum local birt war
-	echo $official_birt_checksum | ( cd "$tomcat_root/webapps/" ; md5sum --check --status )
+	echo $official_birt_checksum | ( cd "$tomcat_top/webapps/" ; md5sum --check --status )
 	if (( $? != 0 )); then
     echo "Birt war has changed: obtaining fresh copy"
     echo rm -rf "$tomcat_root/webapps/$birt_war" "$tomcat_root/webapps/${birt_war%.war}"
@@ -33,8 +36,7 @@ if [[ -f "$tomcat_top/webapps/$birt_war" ]]; then
 fi
 
 # Update gratia directory
-rm -rf "$tomcat_top/gratia"
-mkdir "$tomcat_top/gratia"
+mkdir -p "$tomcat_top/gratia"
 tar xf "$target_dir/gratia.tar" -C "$tomcat_top/gratia"
 
 # Update webapps
@@ -60,3 +62,4 @@ done
 -r "$remote_host" \
 $instance
 
+service tomcat-$instance start
