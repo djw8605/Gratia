@@ -21,6 +21,14 @@ my %collector_configs =
 							 db_schema => "gratia",
 							 remote_host => "gratia-osg.fnal.gov"
 						 },
+	 fermi_osg => { http_port => 8880,
+									ssl_port => 8845,
+									rmi_port => 17000,
+									jmx_port => 8004,
+									server_port => 8104,
+									db_schema => "fermi_osg",
+									remote_host => "gratia-fermi.fnal.gov"
+								},
 #	 test => { http_port => 8885,
 #						 ssl_port => 8870,
 #						 rmi_port => 22000,
@@ -35,6 +43,14 @@ my %collector_configs =
 						db_schema => "gratia_itb",
 						remote_host => "gratia-osg.fnal.gov"
 					},
+	 fermi_itb => { http_port => 8881,
+									ssl_port => 8850,
+									rmi_port => 18000,
+									jmx_port => 8014,
+									server_port => 8114,
+									db_schema => "fermi_itb",
+									remote_host => "gratia-fermi.fnal.gov"
+								},
 	 ps => { http_port => 8882,
 					 ssl_port => 8855,
 					 rmi_port => 19000,
@@ -63,7 +79,52 @@ my %collector_configs =
 									{ "monitor.listener.wait" => 1440
 									},
 									remote_host => "gratia-osg.fnal.gov"
+								},
+	 jeffmack => {http_port => 8880,
+								ssl_port => 8845,
+								rmi_port => 17000,
+								jmx_port => 8004,
+								server_port => 8104,
+								db_host => "localhost",
+								db_schema => "gratia_jeffmack",
+								"properties.attributes" =>
+								{
+								 "service.mysql.user" => "gratia-local-adm",
+								 "service.mysql.password" => "gratia-local",
+								 "monitor.listener.wait" => 240,
+								 "monitor.to.address0" => 'jeffmack@fnal.gov'
 								}
+							 },
+	 pcanal => {http_port => 8881,
+								ssl_port => 8850,
+								rmi_port => 18000,
+								jmx_port => 8014,
+								server_port => 8114,
+								db_host => "localhost",
+								db_schema => "gratia_pcanal",
+								"properties.attributes" =>
+								{
+								 "service.mysql.user" => "gratia-local-adm",
+								 "service.mysql.password" => "gratia-local",
+								 "monitor.listener.wait" => 240,
+								 "monitor.to.address0" => 'pcanal@fnal.gov'
+								}
+							 },
+	 greenc => {http_port => 8882,
+								ssl_port => 8855,
+								rmi_port => 19000,
+								jmx_port => 8024,
+								server_port => 8124,
+								db_host => "localhost",
+								db_schema => "gratia_greenc",
+								"properties.attributes" =>
+								{
+								 "service.mysql.user" => "gratia-local-adm",
+								 "service.mysql.password" => "gratia-local",
+								 "monitor.listener.wait" => 240,
+								 "monitor.to.address0" => 'greenc@fnal.gov'
+								}
+							 },
 	);
 
 my @required_attributes =
@@ -220,6 +281,7 @@ foreach my $config (@instance_list) {
 		unless exists $config_ref->{"properties.attributes"};
 
 	# Standard attribute defaults.
+	my $specified_addresses = grep m&monitor\.to\.address&o, keys %{$config_ref->{"properties.attributes"}};
 	foreach my $attribute_key (sort keys %attribute_defaults) {
 		$config_ref->{$attribute_key} = $attribute_defaults{$attribute_key}
 			unless exists $config_ref->{$attribute_key};
@@ -227,6 +289,8 @@ foreach my $config (@instance_list) {
 
 	# Properties attribute defaults.
 	foreach my $properties_key (sort keys %{$attribute_defaults{"properties.attributes"}}) {
+		# Skip all default email addresses if we specified any at all.
+		next if $specified_addresses and $properties_key =~ m&monitor\.to\.address&o;
 		$config_ref->{"properties.attributes"}->{$properties_key} =
 			$attribute_defaults{"properties.attributes"}->{$properties_key}
 				unless exists $config_ref->{"properties.attributes"}->{$properties_key};

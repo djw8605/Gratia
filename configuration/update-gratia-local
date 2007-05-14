@@ -1,8 +1,8 @@
 #!/bin/bash -x
 
 # Defaults
-tomcat_root=/scratch
-java_jre=/scratch/java
+tomcat_root=/data
+java_jre=/data/jre
 birt_war=birt-v20.war
 war_dir=~greenc/gratia/wars
 configuration_dir=~greenc/gratia/configuration
@@ -31,8 +31,10 @@ if [[ -f "$tomcat_top/webapps/$birt_war" ]]; then
 	if (( $? != 0 )); then
     echo "Birt war has changed: obtaining fresh copy"
     echo rm -rf "$tomcat_root/webapps/$birt_war" "$tomcat_root/webapps/${birt_war%.war}"
-    echo cp -p "$tomcat_root/webapps/$birt_war" "$tomcat_root/webapps/"
+    echo cp -p "war_dir/$birt_war" "$tomcat_root/webapps/"
   fi
+else
+   cp -pv "war_dir/$birt_war" "$tomcat_root/webapps/"
 fi
 
 # Update gratia directory
@@ -62,4 +64,4 @@ done
 -r "$remote_host" \
 $instance
 
-service tomcat-$instance start
+# service tomcat-$instance start
