@@ -49,6 +49,7 @@ drop function if exists generateWhereClause
 ||
 create function generateWhereClause(userName varchar(64),userRole varchar(64),
 	whereClause varchar(255)) returns varchar(255)
+READS SQL DATA
 begin
 	select SystemProplist.cdr into @usereportauthentication from SystemProplist
 		where SystemProplist.car = 'use.report.authentication';
@@ -65,6 +66,7 @@ drop function if exists generateResourceTypeClause
 ||
 create function generateResourceTypeClause(resourceType varchar(64))
 	returns varchar(255)
+DETERMINISTIC
 begin
 	if resourceType = '' or resourceType = NULL then
 		return '';
@@ -80,6 +82,7 @@ drop procedure if exists ProbeStatus
 ||
 create procedure ProbeStatus (userName varchar(64),userRole varchar(64),
 	fromdate varchar(64),todate varchar(64),format varchar(64))
+READS SQL DATA
 begin
 
 	declare mywhereclause varchar(255);
@@ -119,6 +122,7 @@ end
 drop procedure if exists DailyJobsByFacility
 ||
 create procedure DailyJobsByFacility (userName varchar(64), userRole varchar(64), fromdate varchar(64), todate varchar(64), format varchar(64), resourceType varchar(64))
+READS SQL DATA
 begin
 
 	select generateResourceTypeClause(resourceType) into @myresourceclause;
@@ -135,8 +139,8 @@ begin
                      ' from CETable,CEProbes,JobUsageRecord',
                      ' where',
                      ' CEProbes.facility_id = CETable.facility_id and JobUsageRecord.ProbeName = CEProbes.probename and',
-                     ' EndTime >= ''', fromdate, ''''
-                     ' and EndTime <= ''', todate, ''''
+                     ' EndTime >= date(''', fromdate, ''')'
+                     ' and EndTime <= date(''', todate, ''')'
                      ' ', @myresourceclause,
                      ' ', @mywhereclause
                      , ' group by date_format(JobUsageRecord.EndTime,''', format, '''), CETable.facility_name'
@@ -178,6 +182,7 @@ end
 drop procedure if exists DailyJobsByProbe
 ||
 create procedure DailyJobsByProbe (userName varchar(64), userRole varchar(64), fromdate varchar(64), todate varchar(64), format varchar(64), resourceType varchar(64))
+READS SQL DATA
 begin
 
 	select generateResourceTypeClause(resourceType) into @myresourceclause;
@@ -193,8 +198,8 @@ begin
            concat_ws('', 'select JobUsageRecord.ProbeName, JobUsageRecord.EndTime as endtime, sum(JobUsageRecord.Njobs) as Njobs',
                      ' from JobUsageRecord',
                      ' where',
-                     ' EndTime >= ''', fromdate, ''''
-                     ' and EndTime <= ''', todate, ''''
+                     ' EndTime >= date(''', fromdate, ''')'
+                     ' and EndTime <= date(''', todate, ''')'
                      ' ', @myresourceclause,
                      ' ', @mywhereclause
                      , ' group by date_format(JobUsageRecord.EndTime,''', format, '''), JobUsageRecord.ProbeName'
@@ -235,6 +240,7 @@ end
 drop procedure if exists DailyJobsByVO
 ||
 create procedure DailyJobsByVO (userName varchar(64), userRole varchar(64), fromdate varchar(64), todate varchar(64), format varchar(64), resourceType varchar(64))
+READS SQL DATA
 begin
 
 	select generateResourceTypeClause(resourceType) into @myresourceclause;
@@ -250,8 +256,8 @@ begin
            concat_ws('', 'select JobUsageRecord.VOName,JobUsageRecord.EndTime as endtime,sum(JobUsageRecord.Njobs) as Njobs',
                      ' from JobUsageRecord',
                      ' where',
-                     ' EndTime >= ''', fromdate, ''''
-                     ' and EndTime <= ''', todate, ''''
+                     ' EndTime >= date(''', fromdate, ''')'
+                     ' and EndTime <= date(''', todate, ''')'
                      ' ', @myresourceclause,
                      ' ', @mywhereclause
                      , ' group by date_format(JobUsageRecord.EndTime,''', format, '''),JobUsageRecord.VOName'
@@ -292,6 +298,7 @@ end
 drop procedure if exists DailyUsageByFacility
 ||
 create procedure DailyUsageByFacility (userName varchar(64), userRole varchar(64), fromdate varchar(64), todate varchar(64), format varchar(64), resourceType varchar(64))
+READS SQL DATA
 begin
 
 	select generateResourceTypeClause(resourceType) into @myresourceclause;
@@ -308,8 +315,8 @@ begin
                      ' from CETable,CEProbes,JobUsageRecord',
                      ' where',
                      ' CEProbes.facility_id = CETable.facility_id and JobUsageRecord.ProbeName = CEProbes.probename and',
-                     ' EndTime >= ''', fromdate, ''''
-                     ' and EndTime <= ''', todate, ''''
+                     ' EndTime >= date(''', fromdate, ''')'
+                     ' and EndTime <= date(''', todate, ''')'
                      ' ', @myresourceclause,
                      ' ', @mywhereclause
                      , ' group by date_format(JobUsageRecord.EndTime,''', format, '''),CETable.facility_name'
@@ -351,6 +358,7 @@ end
 drop procedure if exists DailyUsageByProbe
 ||
 create procedure DailyUsageByProbe (userName varchar(64), userRole varchar(64), fromdate varchar(64), todate varchar(64), format varchar(64), resourceType varchar(64))
+READS SQL DATA
 begin
 
 	select generateResourceTypeClause(resourceType) into @myresourceclause;
@@ -366,8 +374,8 @@ begin
            concat_ws('', 'select JobUsageRecord.ProbeName,JobUsageRecord.EndTime as endtime,sum(JobUsageRecord.WallDuration) as WallDuration',
                      ' from JobUsageRecord',
                      ' where',
-                     ' EndTime >= ''', fromdate, ''''
-                     ' and EndTime <= ''', todate, ''''
+                     ' EndTime >= date(''', fromdate, ''')'
+                     ' and EndTime <= date(''', todate, ''')'
                      ' ', @myresourceclause,
                      ' ', @mywhereclause
                      , ' group by date_format(JobUsageRecord.EndTime,''', format, '''),JobUsageRecord.ProbeName'
@@ -408,6 +416,7 @@ end
 drop procedure if exists DailyUsageBySite
 ||
 create procedure DailyUsageBySite (userName varchar(64), userRole varchar(64), fromdate varchar(64), todate varchar(64), format varchar(64), resourceType varchar(64))
+READS SQL DATA
 begin
 
 	select generateResourceTypeClause(resourceType) into @myresourceclause;
@@ -423,8 +432,8 @@ begin
            concat_ws('', 'select JobUsageRecord.ProbeName,JobUsageRecord.EndTime as endtime,sum(JobUsageRecord.WallDuration) as WallDuration,sum(JobUsageRecord.CpuUserDuration + JobUsageRecord.CpuSystemDuration) as Cpu',
                      ' from JobUsageRecord',
                      ' where',
-                     ' EndTime >= ''', fromdate, ''''
-                     ' and EndTime <= ''', todate, ''''
+                     ' EndTime >= date(''', fromdate, ''')'
+                     ' and EndTime <= date(''', todate, ''')'
                      ' ', @myresourceclause,
                      ' ', @mywhereclause
                      , ' group by date_format(JobUsageRecord.EndTime,''', format, '''),JobUsageRecord.ProbeName'
@@ -465,6 +474,7 @@ end
 drop procedure if exists DailyUsageBySiteByVO
 ||
 create procedure DailyUsageBySiteByVO (userName varchar(64), userRole varchar(64), fromdate varchar(64), todate varchar(64), format varchar(64), resourceType varchar(64))
+READS SQL DATA
 begin
 
 	select generateResourceTypeClause(resourceType) into @myresourceclause;
@@ -481,8 +491,8 @@ begin
                      ' from CETable,CEProbes,JobUsageRecord',
                      ' where',
                      ' CEProbes.facility_id = CETable.facility_id and JobUsageRecord.ProbeName = CEProbes.probename and',
-                     ' EndTime >= ''', fromdate, ''''
-                     ' and EndTime <= ''', todate, ''''
+                     ' EndTime >= date(''', fromdate, ''')'
+                     ' and EndTime <= date(''', todate, ''')'
                      ' ', @myresourceclause,
                      ' ', @mywhereclause
                      , ' group by date_format(date_format(JobUsageRecord.EndTime,''', format, '''),''', format, '''),sitename, JobUsageRecord.VOName'
@@ -524,6 +534,7 @@ end
 drop procedure if exists DailyUsageByVO
 ||
 create procedure DailyUsageByVO (userName varchar(64), userRole varchar(64), fromdate varchar(64), todate varchar(64), format varchar(64), resourceType varchar(64))
+READS SQL DATA
 begin
 
 	select generateResourceTypeClause(resourceType) into @myresourceclause;
@@ -539,8 +550,8 @@ begin
            concat_ws('', 'select JobUsageRecord.VOName,JobUsageRecord.EndTime as endtime, sum(JobUsageRecord.WallDuration) as WallDuration,sum(JobUsageRecord.CpuUserDuration + JobUsageRecord.CpuSystemDuration) as Cpu',
                      ' from JobUsageRecord',
                      ' where',
-                     ' EndTime >= ''', fromdate, ''''
-                     ' and EndTime <= ''', todate, ''''
+                     ' EndTime >= date(''', fromdate, ''')'
+                     ' and EndTime <= date(''', todate, ''')'
                      ' ', @myresourceclause,
                      ' ', @mywhereclause
                      , ' group by date_format(JobUsageRecord.EndTime,''', format, '''),JobUsageRecord.VOName'
@@ -581,6 +592,7 @@ end
 drop procedure if exists JobsByFacility
 ||
 create procedure JobsByFacility (userName varchar(64), userRole varchar(64), fromdate varchar(64), todate varchar(64), format varchar(64), resourceType varchar(64))
+READS SQL DATA
 begin
 
 	select generateResourceTypeClause(resourceType) into @myresourceclause;
@@ -597,8 +609,8 @@ begin
                      ' from CETable,CEProbes,JobUsageRecord',
                      ' where',
                      ' CEProbes.facility_id = CETable.facility_id and JobUsageRecord.ProbeName = CEProbes.probename and',
-                     ' EndTime >= ''', fromdate, ''''
-                     ' and EndTime <= ''', todate, ''''
+                     ' EndTime >= date(''', fromdate, ''')'
+                     ' and EndTime <= date(''', todate, ''')'
                      ' ', @myresourceclause,
                      ' ', @mywhereclause
                      , ' group by CETable.facility_name'
@@ -640,6 +652,7 @@ end
 drop procedure if exists JobsByFacilityForVO
 ||
 create procedure JobsByFacilityForVO (userName varchar(64), userRole varchar(64), fromdate varchar(64), todate varchar(64), format varchar(64), resourceType varchar(64), vo varchar(64))
+READS SQL DATA
 begin
 
 	select generateResourceTypeClause(resourceType) into @myresourceclause;
@@ -656,8 +669,8 @@ begin
                      ' from CETable,CEProbes,JobUsageRecord',
                      ' where',
                      ' CEProbes.facility_id = CETable.facility_id and JobUsageRecord.ProbeName = CEProbes.probename and JobUsageRecord.VOName = ''', vo, ''' and',
-                     ' EndTime >= ''', fromdate, ''''
-                     ' and EndTime <= ''', todate, ''''
+                     ' EndTime >= date(''', fromdate, ''')'
+                     ' and EndTime <= date(''', todate, ''')'
                      ' ', @myresourceclause,
                      ' ', @mywhereclause
                      , ' group by CETable.facility_name'
@@ -699,6 +712,7 @@ end
 drop procedure if exists JobsByProbeNoFacility
 ||
 create procedure JobsByProbeNoFacility (userName varchar(64), userRole varchar(64), fromdate varchar(64), todate varchar(64), format varchar(64), resourceType varchar(64))
+READS SQL DATA
 begin
 
 	select generateResourceTypeClause(resourceType) into @myresourceclause;
@@ -714,8 +728,8 @@ begin
            concat_ws('', 'select JobUsageRecord.ProbeName,sum(JobUsageRecord.Njobs) as Njobs',
                      ' from JobUsageRecord',
                      ' where',
-                     ' EndTime >= ''', fromdate, ''''
-                     ' and EndTime <= ''', todate, ''''
+                     ' EndTime >= date(''', fromdate, ''')'
+                     ' and EndTime <= date(''', todate, ''')'
                      ' ', @myresourceclause,
                      ' ', @mywhereclause
                      , ' group by JobUsageRecord.ProbeName'
@@ -756,6 +770,7 @@ end
 drop procedure if exists JobsBySite
 ||
 create procedure JobsBySite (userName varchar(64), userRole varchar(64), fromdate varchar(64), todate varchar(64), format varchar(64), resourceType varchar(64))
+READS SQL DATA
 begin
 
 	select generateResourceTypeClause(resourceType) into @myresourceclause;
@@ -771,8 +786,8 @@ begin
            concat_ws('', 'select JobUsageRecord.SiteName,sum(JobUsageRecord.Njobs) as Njobs',
                      ' from JobUsageRecord',
                      ' where',
-                     ' EndTime >= ''', fromdate, ''''
-                     ' and EndTime <= ''', todate, ''''
+                     ' EndTime >= date(''', fromdate, ''')'
+                     ' and EndTime <= date(''', todate, ''')'
                      ' ', @myresourceclause,
                      ' ', @mywhereclause
                      , ' group by JobUsageRecord.SiteName'
@@ -813,6 +828,7 @@ end
 drop procedure if exists JobsBySiteByVO
 ||
 create procedure JobsBySiteByVO (userName varchar(64), userRole varchar(64), fromdate varchar(64), todate varchar(64), format varchar(64), resourceType varchar(64))
+READS SQL DATA
 begin
 
 	select generateResourceTypeClause(resourceType) into @myresourceclause;
@@ -829,8 +845,8 @@ begin
                      ' from CETable,CEProbes,JobUsageRecord',
                      ' where',
                      ' CEProbes.facility_id = CETable.facility_id and JobUsageRecord.ProbeName = CEProbes.probename and',
-                     ' EndTime >= ''', fromdate, ''''
-                     ' and EndTime <= ''', todate, ''''
+                     ' EndTime >= date(''', fromdate, ''')'
+                     ' and EndTime <= date(''', todate, ''')'
                      ' ', @myresourceclause,
                      ' ', @mywhereclause
                      , ' group by sitename, JobUsageRecord.VOName'
@@ -872,6 +888,7 @@ end
 drop procedure if exists JobsByUserForVOForFacility
 ||
 create procedure JobsByUserForVOForFacility (userName varchar(64), userRole varchar(64), fromdate varchar(64), todate varchar(64), format varchar(64), resourceType varchar(64), vo varchar(64), facility_name varchar(64))
+READS SQL DATA
 begin
 
 	select generateResourceTypeClause(resourceType) into @myresourceclause;
@@ -888,8 +905,8 @@ begin
                      ' from CETable,CEProbes,JobUsageRecord',
                      ' where',
                      ' CETable.facility_name = ''', facility_name, ''' and CEProbes.facility_id = CETable.facility_id and JobUsageRecord.ProbeName = CEProbes.probename and JobUsageRecord.VOName = ''', vo, ''' and',
-                     ' EndTime >= ''', fromdate, ''''
-                     ' and EndTime <= ''', todate, ''''
+                     ' EndTime >= date(''', fromdate, ''')'
+                     ' and EndTime <= date(''', todate, ''')'
                      ' ', @myresourceclause,
                      ' ', @mywhereclause
                      , ' group by User'
@@ -931,6 +948,7 @@ end
 drop procedure if exists JobsByVO
 ||
 create procedure JobsByVO (userName varchar(64), userRole varchar(64), fromdate varchar(64), todate varchar(64), format varchar(64), resourceType varchar(64))
+READS SQL DATA
 begin
 
 	select generateResourceTypeClause(resourceType) into @myresourceclause;
@@ -946,8 +964,8 @@ begin
            concat_ws('', 'select JobUsageRecord.VOName,sum(JobUsageRecord.Njobs) as Njobs',
                      ' from JobUsageRecord',
                      ' where',
-                     ' EndTime >= ''', fromdate, ''''
-                     ' and EndTime <= ''', todate, ''''
+                     ' EndTime >= date(''', fromdate, ''')'
+                     ' and EndTime <= date(''', todate, ''')'
                      ' ', @myresourceclause,
                      ' ', @mywhereclause
                      , ' group by JobUsageRecord.VOName'
@@ -988,6 +1006,7 @@ end
 drop procedure if exists UsageByFacility
 ||
 create procedure UsageByFacility (userName varchar(64), userRole varchar(64), fromdate varchar(64), todate varchar(64), format varchar(64), resourceType varchar(64))
+READS SQL DATA
 begin
 
 	select generateResourceTypeClause(resourceType) into @myresourceclause;
@@ -1004,8 +1023,8 @@ begin
                      ' from CETable,CEProbes,JobUsageRecord',
                      ' where',
                      ' CEProbes.facility_id = CETable.facility_id and JobUsageRecord.ProbeName = CEProbes.probename and',
-                     ' EndTime >= ''', fromdate, ''''
-                     ' and EndTime <= ''', todate, ''''
+                     ' EndTime >= date(''', fromdate, ''')'
+                     ' and EndTime <= date(''', todate, ''')'
                      ' ', @myresourceclause,
                      ' ', @mywhereclause
                      , ' group by CETable.facility_name'
@@ -1047,6 +1066,7 @@ end
 drop procedure if exists UsageByFacilityForVO
 ||
 create procedure UsageByFacilityForVO (userName varchar(64), userRole varchar(64), fromdate varchar(64), todate varchar(64), format varchar(64), resourceType varchar(64), vo varchar(64))
+READS SQL DATA
 begin
 
 	select generateResourceTypeClause(resourceType) into @myresourceclause;
@@ -1063,8 +1083,8 @@ begin
                      ' from CETable,CEProbes,JobUsageRecord',
                      ' where',
                      ' CEProbes.facility_id = CETable.facility_id and JobUsageRecord.ProbeName = CEProbes.probename and JobUsageRecord.VOName = ''', vo, ''' and',
-                     ' EndTime >= ''', fromdate, ''''
-                     ' and EndTime <= ''', todate, ''''
+                     ' EndTime >= date(''', fromdate, ''')'
+                     ' and EndTime <= date(''', todate, ''')'
                      ' ', @myresourceclause,
                      ' ', @mywhereclause
                      , ' group by CETable.facility_name'
@@ -1106,6 +1126,7 @@ end
 drop procedure if exists UsageByProbe
 ||
 create procedure UsageByProbe (userName varchar(64), userRole varchar(64), fromdate varchar(64), todate varchar(64), format varchar(64), resourceType varchar(64))
+READS SQL DATA
 begin
 
 	select generateResourceTypeClause(resourceType) into @myresourceclause;
@@ -1121,8 +1142,8 @@ begin
            concat_ws('', 'select JobUsageRecord.ProbeName,sum(JobUsageRecord.WallDuration) as WallDuration',
                      ' from JobUsageRecord',
                      ' where',
-                     ' EndTime >= ''', fromdate, ''''
-                     ' and EndTime <= ''', todate, ''''
+                     ' EndTime >= date(''', fromdate, ''')'
+                     ' and EndTime <= date(''', todate, ''')'
                      ' ', @myresourceclause,
                      ' ', @mywhereclause
                      , ' group by JobUsageRecord.ProbeName'
@@ -1163,6 +1184,7 @@ end
 drop procedure if exists UsageBySite
 ||
 create procedure UsageBySite (userName varchar(64), userRole varchar(64), fromdate varchar(64), todate varchar(64), format varchar(64), resourceType varchar(64))
+READS SQL DATA
 begin
 
 	select generateResourceTypeClause(resourceType) into @myresourceclause;
@@ -1178,8 +1200,8 @@ begin
            concat_ws('', 'select JobUsageRecord.SiteName,sum(JobUsageRecord.WallDuration) as WallDuration',
                      ' from JobUsageRecord',
                      ' where',
-                     ' EndTime >= ''', fromdate, ''''
-                     ' and EndTime <= ''', todate, ''''
+                     ' EndTime >= date(''', fromdate, ''')'
+                     ' and EndTime <= date(''', todate, ''')'
                      ' ', @myresourceclause,
                      ' ', @mywhereclause
                      , ' group by JobUsageRecord.SiteName'
@@ -1220,6 +1242,7 @@ end
 drop procedure if exists UsageBySiteByVO
 ||
 create procedure UsageBySiteByVO (userName varchar(64), userRole varchar(64), fromdate varchar(64), todate varchar(64), format varchar(64), resourceType varchar(64))
+READS SQL DATA
 begin
 
 	select generateResourceTypeClause(resourceType) into @myresourceclause;
@@ -1236,8 +1259,8 @@ begin
                      ' from CETable,CEProbes,JobUsageRecord',
                      ' where',
                      ' CEProbes.facility_id = CETable.facility_id and JobUsageRecord.ProbeName = CEProbes.probename and',
-                     ' EndTime >= ''', fromdate, ''''
-                     ' and EndTime <= ''', todate, ''''
+                     ' EndTime >= date(''', fromdate, ''')'
+                     ' and EndTime <= date(''', todate, ''')'
                      ' ', @myresourceclause,
                      ' ', @mywhereclause
                      , ' group by sitename, JobUsageRecord.VOName'
@@ -1279,6 +1302,7 @@ end
 drop procedure if exists UsageByUserForVOForFacility
 ||
 create procedure UsageByUserForVOForFacility (userName varchar(64), userRole varchar(64), fromdate varchar(64), todate varchar(64), format varchar(64), resourceType varchar(64), vo varchar(64), facility_name varchar(64))
+READS SQL DATA
 begin
 
 	select generateResourceTypeClause(resourceType) into @myresourceclause;
@@ -1295,8 +1319,8 @@ begin
                      ' from CETable,CEProbes,JobUsageRecord',
                      ' where',
                      ' CETable.facility_name = ''', facility_name, ''' and CEProbes.facility_id = CETable.facility_id and JobUsageRecord.ProbeName = CEProbes.probename and JobUsageRecord.VOName = ''', vo, ''' and',
-                     ' EndTime >= ''', fromdate, ''''
-                     ' and EndTime <= ''', todate, ''''
+                     ' EndTime >= date(''', fromdate, ''')'
+                     ' and EndTime <= date(''', todate, ''')'
                      ' ', @myresourceclause,
                      ' ', @mywhereclause
                      , ' group by User'
@@ -1338,6 +1362,7 @@ end
 drop procedure if exists UsageByVO
 ||
 create procedure UsageByVO (userName varchar(64), userRole varchar(64), fromdate varchar(64), todate varchar(64), format varchar(64), resourceType varchar(64))
+READS SQL DATA
 begin
 
 	select generateResourceTypeClause(resourceType) into @myresourceclause;
@@ -1353,8 +1378,8 @@ begin
            concat_ws('', 'select JobUsageRecord.VOName,sum(JobUsageRecord.WallDuration) as WallDuration,sum(JobUsageRecord.CpuUserDuration + JobUsageRecord.CpuSystemDuration) as Cpu',
                      ' from JobUsageRecord',
                      ' where',
-                     ' EndTime >= ''', fromdate, ''''
-                     ' and EndTime <= ''', todate, ''''
+                     ' EndTime >= date(''', fromdate, ''')'
+                     ' and EndTime <= date(''', todate, ''')'
                      ' ', @myresourceclause,
                      ' ', @mywhereclause
                      , ' group by JobUsageRecord.VOName'
@@ -1395,6 +1420,7 @@ end
 drop procedure if exists WeeklyJobsByVO
 ||
 create procedure WeeklyJobsByVO (userName varchar(64), userRole varchar(64), fromdate varchar(64), todate varchar(64), format varchar(64), resourceType varchar(64), vos varchar(128), voseltype varchar(8))
+READS SQL DATA
 begin
 
 	select generateResourceTypeClause(resourceType) into @myresourceclause;
@@ -1417,8 +1443,8 @@ begin
                      ' from JobUsageRecord',
                      ' where',
                      ' JobUsageRecord.VOName ', voseltype, vos, ' and',
-                     ' EndTime >= ''', fromdate, ''''
-                     ' and EndTime <= ''', todate, ''''
+                     ' EndTime >= date(''', fromdate, ''')'
+                     ' and EndTime <= date(''', todate, ''')'
                      ' ', @myresourceclause,
                      ' ', @mywhereclause
                      , ' group by date_format(JobUsageRecord.EndTime,''', format, '''),JobUsageRecord.VOName'
@@ -1460,6 +1486,7 @@ end
 drop procedure if exists WeeklyUsageByVO
 ||
 create procedure WeeklyUsageByVO (userName varchar(64), userRole varchar(64), fromdate varchar(64), todate varchar(64), format varchar(64), resourceType varchar(64), vos varchar(128), voseltype varchar(8))
+READS SQL DATA
 begin
 
 	select generateResourceTypeClause(resourceType) into @myresourceclause;
@@ -1482,8 +1509,8 @@ begin
                      ' from JobUsageRecord',
                      ' where',
                      ' JobUsageRecord.VOName ', voseltype, vos, ' and',
-                     ' EndTime >= ''', fromdate, ''''
-                     ' and EndTime <= ''', todate, ''''
+                     ' EndTime >= date(''', fromdate, ''')'
+                     ' and EndTime <= date(''', todate, ''')'
                      ' ', @myresourceclause,
                      ' ', @mywhereclause
                      , ' group by date_format(JobUsageRecord.EndTime,''', format, '''),JobUsageRecord.VOName'
@@ -1520,6 +1547,66 @@ end
 -- call WeeklyUsageByVO('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-04 00:00:00','%y:%m:%d:%H:%i','Batch')
 -- ||
 -- call WeeklyUsageByVO('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-04 00:00:00','%y:%m:%d:%H:%i','')
+-- ||
+
+drop procedure if exists WeeklyUsageByVORanked
+||
+create procedure WeeklyUsageByVORanked (userName varchar(64), userRole varchar(64), fromdate varchar(64), todate varchar(64), format varchar(64), resourceType varchar(64))
+READS SQL DATA
+begin
+
+	select generateResourceTypeClause(resourceType) into @myresourceclause;
+	select SystemProplist.cdr into @usereportauthentication from SystemProplist
+	where SystemProplist.car = 'use.report.authentication';
+	select RolesTable.whereclause into @mywhereclause from RolesTable
+		where RolesTable.role = userRole;
+	select generateWhereClause(userName,userRole,@mywhereclause)
+		into @mywhereclause;
+	call parse(userName,@name,@key,@vo);
+
+	set @sql :=
+           concat_ws('', 'select final_rank,JobUsageRecord.VOName, date_format(JobUsageRecord.EndTime,''', format, '''), sum(JobUsageRecord.WallDuration) as WallDuration, sum(JobUsageRecord.CpuUserDuration + JobUsageRecord.CpuSystemDuration) as Cpu, sum(JobUsageRecord.Njobs) as Njobs',
+                     ' from (SELECT @rank:=@rank+1 as final_rank, VONamex, walldurationx FROM (SELECT @rank:=0 as rank, V.VOName as VONamex, V.EndTime as endtimex, sum(V.WallDuration) as walldurationx FROM JobUsageRecord V WHERE V.EndTime >= Date(''', fromdate, ''') and V.EndTime <= Date(''', todate, ''') group by VONamex order by walldurationx desc) as foox) as foo, JobUsageRecord',
+                     ' where',
+                     ' JobUsageRecord.VOName = VONamex and',
+                     ' EndTime >= date(''', fromdate, ''')'
+                     ' and EndTime <= date(''', todate, ''')'
+                     ' ', @myresourceclause,
+                     ' ', @mywhereclause
+                     , ' group by date_format(date_format(JobUsageRecord.EndTime,''', format, '''),''', format, '''), JobUsageRecord.VOName'
+                     , ' order by final_rank, JobUsageRecord.VOName,date_format(JobUsageRecord.EndTime,''', format, ''')'
+                    );
+
+    if ( @mywhereclause = '' or @mywhereclause is NULL ) and datediff(todate,fromdate) > 6 then
+		-- Use summary table
+		set @sql :=
+           concat_ws('', 'select final_rank,VOProbeSummary.VOName, date_format(VOProbeSummary.EndTime,''', format, '''), sum(VOProbeSummary.WallDuration) as WallDuration, sum(VOProbeSummary.CpuUserDuration + VOProbeSummary.CpuSystemDuration) as Cpu, sum(VOProbeSummary.Njobs) as Njobs',
+                     ' from (SELECT @rank:=@rank+1 as final_rank, VONamex, walldurationx FROM (SELECT @rank:=0 as rank, V.VOName as VONamex, V.EndTime as endtimex, sum(V.WallDuration) as walldurationx FROM VOProbeSummary V WHERE V.EndTime >= Date(''', fromdate, ''') and V.EndTime <= Date(''', todate, ''') group by VONamex order by walldurationx desc) as foox) as foo, VOProbeSummary',
+                     ' where',
+                     ' VOProbeSummary.VOName = VONamex and',
+                     ' EndTime >= date(''', fromdate, ''')',
+                     ' and EndTime <= date(''', todate, ''')',
+                     ' ', @myresourceclause,
+                     ' ', @mywhereclause
+                     , ' group by date_format(date_format(VOProbeSummary.EndTime,''', format, '''),''', format, '''), VOProbeSummary.VOName'
+                     , ' order by final_rank, VOProbeSummary.VOName,date_format(VOProbeSummary.EndTime,''', format, ''')'
+                 );
+	end if;
+	insert into trace(pname,userkey,user,role,vo,p1,p2,p3,p4,data)
+		values('WeeklyUsageByVORanked',@key,userName,userRole,@vo,
+		fromdate,todate,format,resourceType,@sql);
+	prepare statement from @sql;
+	execute statement;
+	deallocate prepare statement;
+end
+||
+-- call WeeklyUsageByVORanked('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-10 00:00:00','%y:%m:%d:%H:%i','Batch')
+-- ||
+-- call WeeklyUsageByVORanked('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-10 00:00:00','%y:%m:%d:%H:%i','')
+-- ||
+-- call WeeklyUsageByVORanked('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-04 00:00:00','%y:%m:%d:%H:%i','Batch')
+-- ||
+-- call WeeklyUsageByVORanked('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-04 00:00:00','%y:%m:%d:%H:%i','')
 -- ||
 
 
