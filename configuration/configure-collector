@@ -89,8 +89,8 @@ my %collector_configs =
 								db_schema => "gratia_jeffmack",
 								"properties.attributes" =>
 								{
-								 "service.mysql.user" => "gratia-local-adm",
-								 "service.mysql.password" => "gratia-local",
+								 "service.mysql.user" => "gratia",
+								 "service.mysql.password" => "proto",
 								 "monitor.listener.wait" => 240,
 								 "monitor.to.address0" => 'jeffmack@fnal.gov'
 								}
@@ -104,8 +104,8 @@ my %collector_configs =
 								db_schema => "gratia_pcanal",
 								"properties.attributes" =>
 								{
-								 "service.mysql.user" => "gratia-local-adm",
-								 "service.mysql.password" => "gratia-local",
+								 "service.mysql.user" => "gratia",
+								 "service.mysql.password" => "proto",
 								 "monitor.listener.wait" => 240,
 								 "monitor.to.address0" => 'pcanal@fnal.gov'
 								}
@@ -119,8 +119,8 @@ my %collector_configs =
 								db_schema => "gratia_greenc",
 								"properties.attributes" =>
 								{
-								 "service.mysql.user" => "gratia-local-adm",
-								 "service.mysql.password" => "gratia-local",
+								 "service.mysql.user" => "gratia",
+								 "service.mysql.password" => "proto",
 								 "monitor.listener.wait" => 240,
 								 "monitor.to.address0" => 'greenc@fnal.gov'
 								}
