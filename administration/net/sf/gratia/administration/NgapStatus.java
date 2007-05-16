@@ -98,16 +98,19 @@ public class NgapStatus extends HttpServlet
 				String probename = null;
 				String sitename = null;
 				String host = null;
-				
+				String allsites = null;
 				openConnection();
 
 				this.request = request;
 				this.response = response;
 				probename = request.getParameter("probename");
 				sitename = request.getParameter("sitename");
+				allsites = request.getParameter("allsites");
 				host = request.getParameter("host");
 				buffer = new StringBuffer();
-				if (probename != null)
+				if (allsites != null)
+						processAllSites();
+				else if (probename != null)
 						processProbe(probename);
 				else if (sitename != null)
 						processSite(sitename);
@@ -196,6 +199,46 @@ public class NgapStatus extends HttpServlet
 						{
 								e.printStackTrace();
 						}
+		}
+
+		public void processAllSites()
+		{
+				String command = "";
+				String site = "";
+				java.util.Date date = null;
+				String probename = null;
+				SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+				try
+						{
+								//
+								// return time stamp of last site contact
+								//
+								command = "select T.facility_name, P.currenttime, P.probename from CEProbes P, CETable T where P.active = 1 and T.facility_id = P.facility_id order by T.facility_name,P.currenttime desc";
+								System.out.println("command: " + command);
+								statement = connection.prepareStatement(command);
+								resultSet = statement.executeQuery(command);
+								while(resultSet.next()) {
+										site = resultSet.getString(1);
+										date = resultSet.getTimestamp(2);
+										probename = resultSet.getString(3);
+										if (probename == null)
+												probename = "Unknown probe";
+										buffer.append(site + "|" + probename + "|");
+										if (date == null) {
+												buffer.append("never\n");
+										} else {
+												buffer.append(format.format(date) + "\n");
+										}
+								}
+								resultSet.close();
+								statement.close();
+						}
+				catch (Exception e)
+						{
+								e.printStackTrace();
+						}
+				
 		}
 
 		public void processHost(String host)
