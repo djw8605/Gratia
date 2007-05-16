@@ -3,17 +3,17 @@
 import sys
 import PSACCTReport
 
-from PSACCTReport import FromCondor,UseArgs,gOutput,gBegin,CheckDB
+from PSACCTReport import FromCondor,UseArgs,gOutput,gBegin,CheckDB,gGroupBy
 import sys
 
 def main(argv=None):
     UseArgs(argv)
-
+ 
     if not CheckDB() :
         return 1
 
     argOutput = PSACCTReport.gOutput
-    PSACCTReport.GenericDailyStatus( PSACCTReport.DailySiteJobStatusConf(header=True),PSACCTReport.gBegin,output=argOutput )
+    PSACCTReport.GenericDailyStatus( PSACCTReport.DailySiteJobStatusConf(header=True,groupby=PSACCTReport.gGroupBy),PSACCTReport.gBegin,output=argOutput )
     print
     #PSACCTReport.GenericDailyStatus( PSACCTReport.DailySiteJobStatusConf(header=True,CondorSpecial=False),PSACCTReport.gBegin,output=argOutput )
     #print

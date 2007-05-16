@@ -59,7 +59,7 @@ function sendto {
     echo >> $csvfile
     eval $1 --output=csv $when >>  $csvfile
     
-    mutt -a $csvfile -s "$subject" $MAILTO < $txtfile
+    mutt -F ./muttrc -a $csvfile -s "$subject" $MAILTO < $txtfile
 }
 
 
