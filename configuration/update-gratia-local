@@ -1,8 +1,8 @@
 #!/bin/bash -x
 
 # Defaults
-tomcat_root=/data
-java_jre=/data/jre
+tomcat_root=/scratch
+java_jre=/scratch/jre
 birt_war=birt-v20.war
 war_dir=~greenc/gratia/wars
 configuration_dir=~greenc/gratia/configuration
