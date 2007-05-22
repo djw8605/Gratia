@@ -155,7 +155,7 @@ my %procedures =
 																},
  WeeklyUsageByVO => { extra_procedure_arguments => [ 'vos varchar(128)',
 																										 'voseltype varchar(8)' ],
-											select_columns => 'VOProbeSummary.VOName,date_format(VOProbeSummary.EndTime, \'\'\', format, \'\'\') as endtime, sum(VOProbeSummary.WallDuration) as WallDuration,sum(VOProbeSummary.CpuUserDuration + VOProbeSummary.CpuSystemDuration) as Cpu',
+											select_columns => 'VOProbeSummary.VOName,date_format(VOProbeSummary.EndTime, \'\'\', format, \'\'\') as endtime, sum(VOProbeSummary.WallDuration) as WallDuration,sum(VOProbeSummary.CpuUserDuration + VOProbeSummary.CpuSystemDuration) as Cpu,sum(VOProbeSummary.Njobs) as Njobs',
 											from_tables => 'VOProbeSummary',
 											main_where => 'VOProbeSummary.VOName \', voseltype, vos, \'',
 											group_by => 'VOProbeSummary.EndTime,VOProbeSummary.VOName',
