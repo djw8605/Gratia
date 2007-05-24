@@ -10,7 +10,6 @@ root=..\..\..\..\..\..\\
 export CLASSPATH=..\..\..\..\..\..\services;..\..\..\..\..\..\jars\antlr-2.7.5.jar;jars\bsh.jar;jars\derby.jar;jars\derbytools.jar;..\..\..\..\..\..\jars\hibernate3.jar;..\..\..\..\..\..\jars\dom4j-1.6.1.jar;..\..\..\..\..\..\jars\commons-logging-1.0.4.jar;..\..\..\..\..\..\jars\commons-collections-2.1.1.jar;..\..\..\..\..\..\jars\cglib-2.1.3.jar;..\..\..\..\..\..\jars\ehcache-1.1.jar;..\..\..\..\..\..\jars\jta.jar;..\..\..\..\..\..\jars\jaxen-1.1-beta-7.jar
 endif
 
-
 all: test
 
 XP:
@@ -25,6 +24,12 @@ storage:
 JobUsage.hbm.xml: ../../../../../../configuration/JobUsage.hbm.xml
 	cp ../../../../../../configuration/JobUsage.hbm.xml .
 
-test:  XP Logging storage JobUsage.hbm.xml
+Gratia.hbm.xml: ../../../../../../configuration/Gratia.hbm.xml
+	cp ../../../../../../configuration/Gratia.hbm.xml .
+
+MetricRecord.hbm.xml: ../../../../../../configuration/MetricRecord.hbm.xml
+	cp ../../../../../../configuration/MetricRecord.hbm.xml .
+
+test:  XP Logging storage JobUsage.hbm.xml MetricRecord.hbm.xml Gratia.hbm.xml
 	rm -rf derby output *logfile*; mkdir output
 	java bsh.Interpreter test.bsh

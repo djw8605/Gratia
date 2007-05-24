@@ -17,7 +17,8 @@ import java.util.Date;
  * @Philippe Canal
  * @version 1.0
  */
-public class JobUsageRecord {
+public class JobUsageRecord implements Record
+{
     private String RawXml;   // Complete Usage Record Xml
     private String ExtraXml; // Xml fragment not used for any of the data members/field
 

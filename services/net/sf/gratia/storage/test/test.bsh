@@ -34,7 +34,9 @@ catch (Exception ignore)
 //
 
 hibernateConfiguration = new org.hibernate.cfg.Configuration();
+hibernateConfiguration.addFile(new File("Gratia.hbm.xml"));
 hibernateConfiguration.addFile(new File("JobUsage.hbm.xml"));
+hibernateConfiguration.addFile(new File("MetricRecord.hbm.xml"));
 hibernateConfiguration.configure(new File("hibernate.cfg.xml"));
 
 factory = hibernateConfiguration.buildSessionFactory();
@@ -48,27 +50,31 @@ print("Database Created");
 
 String[] filenames = xp.getFileList("test-data","xml");
 System.out.println("Files: " + filenames.length);
-JobRecUpdaterManager updater = new JobRecUpdaterManager();
-JobUsageRecordConverter converter = new JobUsageRecordConverter();
+RecordUpdaterManager updater = new RecordUpdaterManager();
+JobUsageRecordUpdater.AddDefaults(updater);
+RecordConverter converter = new RecordConverter();
 
 Logging.initialize("logfile","5000","1","OFF");
 
+int record_idx = 0;
 for (int i = 0; i < filenames.length; i++)
 {
-		System.out.println("Processing: " + filenames[i]);
-		String xml = xp.get(filenames[i]);
+	System.out.println("Processing: " + filenames[i]);
+	String xml = xp.get(filenames[i]);
 		
-		xp.save("output/record" + i + ".input",xml);
+	xp.save("output/record" + record_idx + ".input",xml);
 
-		ArrayList records = converter.convert(xml);
-		for(int j = 0; j < records.size(); j++)
-				{
-						JobUsageRecord current = (JobUsageRecord) records.get(j);
-                                       		System.out.println("ExtraXML: " + current.getExtraXml());
-						current.setRawXml("");
-						updater.Update(current);
-						session.save(current);
-				}
+	ArrayList records = converter.convert(xml);
+	for(int j = 0; j < records.size(); j++)
+			{
+					Record current = (Record) records.get(j);
+               		System.out.println("ExtraXML: " + current.getExtraXml());
+					current.setRawXml("");
+					updater.Update(current);
+					System.out.println("ExtraXML: " + current);
+					session.save(current);
+			}
+	record_idx  = record_idx + records.size();
 }
 
 print("");
@@ -81,12 +87,24 @@ print("");
 
 String command = "from JobUsageRecord";
 List result = session.createQuery(command).list();
-for(i = 0; i < result.size(); i++)
+record_idx = 0;
+for(i = 0; i < result.size(); ++i,++record_idx)
 {
 		JobUsageRecord record = (JobUsageRecord) result.get(i);
 		xml = record.asXML();
-		xp.save("output/record" + i + ".output",xml);
-		System.out.println("Saved: " + i);
+		xp.save("output/record" + record_idx + ".output",xml);
+		System.out.println("Saved: " + record_idx);
 }
+
+String command = "from MetricRecord";
+List result = session.createQuery(command).list();
+for(i = 0; i < result.size(); ++i,++record_idx)
+{
+		Record record = (Record) result.get(i);
+		xml = record.asXML();
+		xp.save("output/record" + record_idx + ".output",xml);
+		System.out.println("Saved: " + record_idx);
+}
+
 
 print("done !!");

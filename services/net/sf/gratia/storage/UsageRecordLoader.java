@@ -4,6 +4,7 @@ import java.util.Iterator;
 import org.dom4j.Attribute;
 import org.dom4j.Element;
 import java.util.List;
+import java.util.ArrayList;
 
 import net.sf.gratia.storage.RecordIdentity;
 import net.sf.gratia.storage.StringElement;
@@ -21,9 +22,52 @@ import net.sf.gratia.storage.StringElement;
  * @author Philippe Canal
  * @version 1.0
  */
-public class UsageRecordLoader
+public class UsageRecordLoader implements RecordLoader
 {
-    public JobUsageRecord ReadUsageRecord(Element element) throws Exception
+   public ArrayList ReadRecords(Element eroot) throws Exception
+   {
+      ArrayList usageRecords = new ArrayList();
+
+      if (eroot.getName() == "JobUsageRecord"
+          || eroot.getName() == "UsageRecord"
+          || eroot.getName() == "Usage"
+          || eroot.getName() == "UsageRecordType")
+      {
+         // The current element is a job usage record node.  Use it to populate a JobUsageRecord object            	
+         Record job = ReadRecord(eroot);
+
+         // Add this populated job usage record to the usage records array list
+         usageRecords.add(job);
+      }
+      else if (eroot.getName() == "UsageRecords")
+      {
+         // This is a usage records node
+         // which should contain one to many job usage record nodes so start a loop through its children
+         for (Iterator i = eroot.elementIterator(); i.hasNext(); )
+         {
+            Element element = (Element)i.next();
+            if (element.getName() == "JobUsageRecord")
+            {
+               //The current element is a job usage record node.  Use it to populate a JobUsageRecord object
+               Record job = ReadRecord(element);
+               usageRecords.add(job);
+            }
+            else
+            {
+               // Unexpected element
+               throw new Exception("Unexpected element: " + element.getName()
+                                   + "\n" + element);
+            }
+         }
+      }
+      if (usageRecords.size() == 0)
+      {
+         return null;
+      }
+      return usageRecords;
+   }
+
+   public Record ReadRecord(Element element) throws Exception
     {
         JobUsageRecord job = new JobUsageRecord();
         job.addRawXml(element.asXML());

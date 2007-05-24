@@ -15,7 +15,7 @@ import java.util.Iterator;
  * @author pcanal
  *
  */
-public class VONameUpdater implements JobUsageRecordUpdater {
+public class VONameUpdater extends JobUsageRecordUpdater {
 
       java.util.Hashtable CEtoMap;
    

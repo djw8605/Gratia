@@ -113,4 +113,12 @@ public class Utils
       Logging.warning(xp.parseException(e));
    }
 
+   public static void GratiaError(Exception e, String extraInfo)
+   {
+      Logging.warning(e.getMessage());
+      XP xp = new XP();
+      Logging.warning(xp.parseException(e));
+      Logging.warning(extraInfo);
+   }
+
 }
