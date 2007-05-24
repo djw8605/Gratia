@@ -25,6 +25,7 @@ public class RecordConverter
       catch (Exception e)
       {
          Utils.GratiaError(e,"XML:" + "\n\n" + xml + "\n\n");
+         throw new Exception("Badly formed xml file");
       }
       try
       {
@@ -43,7 +44,7 @@ public class RecordConverter
             // Unexpected root element
             throw new Exception("In the xml usage record, the expected root nodes are " +
                                 "JobUsageRecords, JobUsageRecord, Usage, UsageRecord " +
-                                "and UsageRecordType.\nHowever we got " + eroot.getName());
+                                "UsageRecordType and MetricRecord.\nHowever we got " + eroot.getName());
          }
 
       }
