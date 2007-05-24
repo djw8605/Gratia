@@ -1,0 +1,60 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+
+<hibernate-mapping package= "net.sf.gratia.storage">
+
+  <class name="MetricRecord"
+         table="MetricRecord"
+         node="MetricRecord" lazy="false">
+
+    <id name="RecordId" column="dbid" type="integer">
+      <generator class="native"/>
+    </id>
+
+    <component name="MetricName" class="StringElement" insert="true">
+      <property name="Value" column="MetricName" />
+    </component>
+
+    <component name="MetricStatus" class="StringElement" insert="true">
+      <property name="Value" column="MetricStatus" />
+    </component>
+
+    <component name="Timestamp" class="DateElement" insert="true">
+      <property name="Value" column="Timestamp" type="timestamp"  />
+    </component>
+
+    <join table="MetricRecord_Meta">
+      <key column="dbid"/>
+
+      <component name="RecordIdentity" class="RecordIdentity" insert="true">
+        <property name="recordId"
+              column="recordId"
+              type="string"/>
+        <component name="CreateTime" class="DateElement" insert="true">
+          <property name="Value" column="CreateTime" type="timestamp"  />
+          <property name="Description" column="CreateTimeDescription" />
+        </component>
+      </component>
+
+      <component name="ProbeName" class="StringElement" insert="true">
+        <property name="Value" column="ProbeName" />
+        <property name="Description" column="ProbeNameDescription" />
+      </component>
+
+      <component name="SiteName" class="StringElement" insert="true">
+        <property name="Value" column="SiteName" />
+        <property name="Description" column="SiteNameDescription" />
+      </component>
+
+      <property name="ServerDate" column="ServerDate" type="timestamp"/>
+      <property name="md5" column="md5"/>
+
+      <property name="ExtraXml" type="text"/>
+      <property name="RawXml" type="text" />
+    </join>
+  </class>
+
+</hibernate-mapping>

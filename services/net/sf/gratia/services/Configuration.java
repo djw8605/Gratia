@@ -25,12 +25,22 @@ public class Configuration
 				return getConfigurationPath() + "/" + "hibernate.cfg.xml";
 		}
 
-		public static String getJobUsagePath()
+		public static String getGratiaHbmPath()
 		{
-				return getConfigurationPath() + "/" + "JobUsage.hbm.xml";
+				return getConfigurationPath() + "/" + "Gratia.hbm.xml";
 		}
 
-		public static String getJMSPath()
+      public static String getJobUsagePath()
+      {
+         return getConfigurationPath() + "/" + "JobUsage.hbm.xml";
+      }
+
+      public static String getMetricRecordPath()
+      {
+         return getConfigurationPath() + "/" + "MetricRecord.hbm.xml";
+      }
+
+      public static String getJMSPath()
 		{
 				return getConfigurationPath() + "/" + "a3servers.xml";
 		}
