@@ -7,6 +7,8 @@ import javax.xml.datatype.DatatypeConfigurationException;
 import net.sf.gratia.services.Logging;
 import net.sf.gratia.services.XP;
 
+import java.security.MessageDigest;
+
 /**
  * <p>Title: Utils</p>
  *
@@ -25,6 +27,20 @@ public class Utils
 
    public Utils()
    {
+   }
+
+
+   /**
+     * md5key
+     *
+     * @param input String containg the xml file
+     * @return the md5 of the xml file
+     */
+   static public String md5key(String input) throws Exception
+   {
+      MessageDigest md = MessageDigest.getInstance("MD5");
+      md.update(input.getBytes());
+      return HexString.bufferToHex(md.digest());
    }
 
    /**
