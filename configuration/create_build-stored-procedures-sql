@@ -29,7 +29,7 @@ my @default_procedure_argument_list =
 
 my %procedures =
 (
- DailyJobsByFacility => { select_columns => 'CETable.facility_name, ProbeSummary.EndTime as endtime, sum(ProbeSummary.Njobs) as Njobs',
+ DailyJobsBySite => { select_columns => 'CETable.facility_name as sitename, ProbeSummary.EndTime as endtime, sum(ProbeSummary.Njobs) as Njobs',
 													from_tables => 'CETable,CEProbes,ProbeSummary',
 													main_where => 'CEProbes.facility_id = CETable.facility_id and ProbeSummary.ProbeName = CEProbes.probename',
 													group_by => 'ProbeSummary.EndTime, CETable.facility_name',
@@ -47,7 +47,7 @@ my %procedures =
 										group_by => 'VOProbeSummary.EndTime,VOProbeSummary.VOName',
 										order_by => 'VOProbeSummary.EndTime'
 									},
- DailyUsageByFacility => { select_columns => 'CETable.facility_name,ProbeSummary.EndTime as endtime,sum(ProbeSummary.WallDuration) as WallDuration',
+ DailyUsageBySite => { select_columns => 'CETable.facility_name as sitename,ProbeSummary.EndTime as endtime,sum(ProbeSummary.WallDuration) as WallDuration',
 													 from_tables => 'CETable,CEProbes,ProbeSummary',
 													 main_where => 'CEProbes.facility_id = CETable.facility_id and ProbeSummary.ProbeName = CEProbes.probename',
 													 group_by => 'ProbeSummary.EndTime,CETable.facility_name',
@@ -59,7 +59,7 @@ my %procedures =
 												group_by => 'ProbeSummary.EndTime,ProbeSummary.ProbeName',
 												order_by => 'ProbeSummary.EndTime'
 											},
- JobsByFacility => { select_columns => 'CETable.facility_name,sum(ProbeSummary.Njobs) as Njobs',
+ JobsBySite => { select_columns => 'CETable.facility_name as sitename,sum(ProbeSummary.Njobs) as Njobs',
 										 from_tables => 'CETable,CEProbes,ProbeSummary',
 										 main_where => 'CEProbes.facility_id = CETable.facility_id and ProbeSummary.ProbeName = CEProbes.probename',
 										 group_by => 'CETable.facility_name',
@@ -71,7 +71,7 @@ my %procedures =
 														group_by => 'ProbeSummary.ProbeName',
 														order_by => 'ProbeSummary.ProbeName'
 													},
- UsageByFacility => { select_columns => 'CETable.facility_name,VOProbeSummary.EndTime as endtime,sum(VOProbeSummary.WallDuration) as WallDuration,sum(VOProbeSummary.CpuUserDuration + VOProbeSummary.CpuSystemDuration) as Cpu',
+ UsageBySite => { select_columns => 'CETable.facility_name as sitename,VOProbeSummary.EndTime as endtime,sum(VOProbeSummary.WallDuration) as WallDuration,sum(VOProbeSummary.CpuUserDuration + VOProbeSummary.CpuSystemDuration) as Cpu',
 											from_tables => 'CETable,CEProbes,VOProbeSummary',
 											main_where => 'CEProbes.facility_id = CETable.facility_id and VOProbeSummary.ProbeName = CEProbes.probename',
 											group_by => 'CETable.facility_name',
@@ -83,24 +83,6 @@ my %procedures =
 									 group_by => 'ProbeSummary.ProbeName',
 									 order_by => 'ProbeSummary.ProbeName'
 								 },
- DailyUsageBySite => { select_columns => 'ProbeSummary.ProbeName,ProbeSummary.EndTime as endtime,sum(ProbeSummary.WallDuration) as WallDuration,sum(ProbeSummary.CpuUserDuration + ProbeSummary.CpuSystemDuration) as Cpu',
-											 from_tables => 'ProbeSummary',
-											 main_where => '',
-											 group_by => 'ProbeSummary.EndTime,ProbeSummary.ProbeName',
-											 order_by => 'ProbeSummary.EndTime,ProbeSummary.ProbeName'
-										 },
- UsageBySite => { select_columns => 'ProbeSummary.SiteName,sum(ProbeSummary.WallDuration) as WallDuration',
-									from_tables => 'ProbeSummary',
-									main_where => '',
-									group_by => 'ProbeSummary.SiteName',
-									order_by => 'ProbeSummary.SiteName'
-								},
- JobsBySite => { select_columns => 'ProbeSummary.SiteName,sum(ProbeSummary.Njobs) as Njobs',
-								 from_tables => 'ProbeSummary',
-								 main_where => '',
-								 group_by => 'ProbeSummary.SiteName',
-								 order_by => 'ProbeSummary.SiteName'
-							 },
  DailyUsageByVO => { select_columns => 'VOProbeSummary.VOName,VOProbeSummary.EndTime as endtime, sum(VOProbeSummary.WallDuration) as WallDuration,sum(VOProbeSummary.CpuUserDuration + VOProbeSummary.CpuSystemDuration) as Cpu',
 										 from_tables => 'VOProbeSummary',
 										 main_where => '',
@@ -119,40 +101,6 @@ my %procedures =
 							 group_by => 'VOProbeSummary.VOName',
 							 order_by => 'VOProbeSummary.VOName'
 						 },
- JobsByFacilityForVO => { extra_procedure_arguments => [ 'vo varchar(64)' ],
-													extra_test_arguments => [ "'Unknown'" ],
-													select_columns => 'CETable.facility_name, sum(VOProbeSummary.Njobs) as Njobs',
-													from_tables => 'CETable,CEProbes,VOProbeSummary',
-													main_where => 'CEProbes.facility_id = CETable.facility_id and VOProbeSummary.ProbeName = CEProbes.probename and VOProbeSummary.VOName = \'\'\', vo, \'\'\'',
-													group_by => 'CETable.facility_name',
-													order_by => 'CETable.facility_name'
-												},
- JobsByUserForVOForFacility => { extra_procedure_arguments => [ 'vo varchar(64)',
-																																'facility_name varchar(64)' ],
-																 extra_test_arguments => [ "'Unknown'", "'FNAL_FERMIGRID'" ],
-																 select_columns => 'VOProbeSummary.CommonName as User, sum(VOProbeSummary.Njobs) as Njobs',
-																 from_tables => 'CETable,CEProbes,VOProbeSummary',
-																 main_where => 'CETable.facility_name = \'\'\', facility_name, \'\'\' and CEProbes.facility_id = CETable.facility_id and VOProbeSummary.ProbeName = CEProbes.probename and VOProbeSummary.VOName = \'\'\', vo, \'\'\'',
-																 group_by => 'User',
-																 order_by => 'User'
-															 },
- UsageByFacilityForVO => { extra_procedure_arguments => [ 'vo varchar(64)' ],
-													 extra_test_arguments => [ "'Unknown'" ],
-													 select_columns => 'CETable.facility_name, sum(VOProbeSummary.WallDuration) as WallDuration,sum(VOProbeSummary.CpuUserDuration + VOProbeSummary.CpuSystemDuration) as Cpu',
-													 from_tables => 'CETable,CEProbes,VOProbeSummary',
-													 main_where => 'CEProbes.facility_id = CETable.facility_id and VOProbeSummary.ProbeName = CEProbes.probename and VOProbeSummary.VOName = \'\'\', vo, \'\'\'',
-													 group_by => 'CETable.facility_name',
-													 order_by => 'CETable.facility_name'
-												 },
- UsageByUserForVOForFacility => { extra_procedure_arguments => [ 'vo varchar(64)',
-																																 'facility_name varchar(64)' ],
-																	extra_test_arguments => [ "'Unknown'", "'FNAL_FERMIGRID'" ],
-																	select_columns => 'VOProbeSummary.CommonName as User, sum(VOProbeSummary.WallDuration) as WallDuration,sum(VOProbeSummary.CpuUserDuration + VOProbeSummary.CpuSystemDuration) as Cpu',
-																	from_tables => 'CETable,CEProbes,VOProbeSummary',
-																	main_where => 'CETable.facility_name = \'\'\', facility_name, \'\'\' and CEProbes.facility_id = CETable.facility_id and VOProbeSummary.ProbeName = CEProbes.probename and VOProbeSummary.VOName = \'\'\', vo, \'\'\'',
-																	group_by => 'User',
-																	order_by => 'User'
-																},
  WeeklyUsageByVO => { extra_procedure_arguments => [ 'vos varchar(128)',
 																										 'voseltype varchar(8)' ],
 											select_columns => 'VOProbeSummary.VOName,date_format(VOProbeSummary.EndTime, \'\'\', format, \'\'\') as endtime, sum(VOProbeSummary.WallDuration) as WallDuration,sum(VOProbeSummary.CpuUserDuration + VOProbeSummary.CpuSystemDuration) as Cpu,sum(VOProbeSummary.Njobs) as Njobs',
