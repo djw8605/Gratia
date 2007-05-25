@@ -56,7 +56,7 @@
     <property name="dbid" column="dbid" type="int"/>
     <property name="rowcount" column="rowcount" type="int"/>
     <property name="probename" column="probename"/>
-    <property name="table" column="table"/>
+    <property name="recordtable" column="recordtable"/>
   </class>
 
   <class name="Security" table="Security" node="Security" lazy="false">

@@ -12,7 +12,7 @@ public class Replication
    private int dbid;
    private int rowcount;
    private String probename;
-   private String table;
+   private String recordtable;
 
    public Replication()
    {
@@ -118,14 +118,14 @@ public class Replication
       probename = value;
    }
 
-   public String gettable()
+   public String getrecordtable()
    {
-      return table;
+      return recordtable;
    }
 
-   public void settable(String value)
+   public void setrecordtable(String value)
    {
-      table = value;
+      recordtable = value;
    }
 
 
