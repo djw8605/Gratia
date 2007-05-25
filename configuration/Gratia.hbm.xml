@@ -40,6 +40,7 @@
     <property name="source" column="source"/>
     <property name="error" column="error"/>
     <property name="dbid" column="dbid" type="int"/>
+    <property name="RecordType" column="RecordType" type="text"/>
   </class>
 
   <class name="Replication" table="Replication" node="Replication" lazy="false">
@@ -55,6 +56,7 @@
     <property name="dbid" column="dbid" type="int"/>
     <property name="rowcount" column="rowcount" type="int"/>
     <property name="probename" column="probename"/>
+    <property name="table" column="table"/>
   </class>
 
   <class name="Security" table="Security" node="Security" lazy="false">
