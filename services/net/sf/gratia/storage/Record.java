@@ -1,4 +1,5 @@
 package net.sf.gratia.storage;
+import java.util.Date;
 
 /**
  * <p>Title: Record </p>
@@ -20,4 +21,14 @@ public interface Record
    public void addExtraXml(String ExtraXml);
    public void setExtraXml(String ExtraXml);
    public String getExtraXml();
+   public String asXML();
+
+   public StringElement getSiteName();
+   public StringElement getProbeName();
+   public Date getServerDate();
+   public void setServerDate(Date value);
+   public String computemd5() throws Exception;
+   public String getmd5();
+   public void setmd5(String md5set);
+
 }

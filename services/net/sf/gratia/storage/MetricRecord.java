@@ -126,6 +126,11 @@ public class MetricRecord implements Record
       return ServerDate;
    }
 
+   public void setServerDate(Date value)
+   {
+      ServerDate = value;
+   }
+
    public void setProbeName(StringElement ProbeName)
    {
       this.ProbeName = ProbeName;
@@ -145,9 +150,14 @@ public class MetricRecord implements Record
       return SiteName;
    }
 
-   public void setServerDate(Date value)
+   public String computemd5() throws Exception
    {
-      ServerDate = value;
+      RecordIdentity temp = getRecordIdentity();
+      setRecordIdentity(null);
+      String md5key = Utils.md5key(asXML());
+      setRecordIdentity(temp);
+
+      return md5key;
    }
 
    public String getmd5()
