@@ -173,7 +173,7 @@ public class ReplicationDataPump extends Thread
             dbid = resultSet.getString("dbid");
             probename = resultSet.getString("probename");
             frequency = resultSet.getString("frequency");
-            table = resulSet.getString("table");
+            table = resultSet.getString("table");
             if (table == null) table = "JobUsageRecord";
          }
          resultSet.close();
@@ -359,11 +359,11 @@ public class ReplicationDataPump extends Thread
       for (i = 0; i < result.size(); i++)
       {
          Record record = (Record)result.get(i);
-         DurationElement duration = getCpuSystemDuration(dbid,table);
-         if (duration != null)
-            record.setCpuSystemDuration(duration);
-         if (record.getCpuSystemDuration() == null)
-            Logging.log("dbid: " + dbid + " null cpu system duration");
+         //DurationElement duration = getCpuSystemDuration(dbid,table);
+         //if (duration != null)
+         //   record.setCpuSystemDuration(duration);
+         //if (record.getCpuSystemDuration() == null)
+         //   Logging.log("dbid: " + dbid + " null cpu system duration");
          buffer.append("replication" + "|");
          buffer.append(record.asXML() + "|");
          buffer.append(record.getRawXml() + "|");
@@ -373,28 +373,28 @@ public class ReplicationDataPump extends Thread
       return buffer.toString();
    }
 
-   public DurationElement getCpuSystemDuration(String dbid, String table) throws Exception
-   {
-      String command = "select CpuSystemDuration from "+table+" where dbid = " + dbid;
-      Double value = null;
+   //public DurationElement getCpuSystemDuration(String dbid, String table) throws Exception
+   //{
+   //   String command = "select CpuSystemDuration from "+table+" where dbid = " + dbid;
+   //   Double value = null;
 
-      Statement statement = connection.prepareStatement(command);
-      ResultSet resultSet = statement.executeQuery(command);
-      while (resultSet.next())
-      {
-         value = resultSet.getDouble(1);
-      }
-      resultSet.close();
-      statement.close();
+   //   Statement statement = connection.prepareStatement(command);
+   //   ResultSet resultSet = statement.executeQuery(command);
+   //   while (resultSet.next())
+   //   {
+   //      value = resultSet.getDouble(1);
+   //   }
+   //   resultSet.close();
+   //   statement.close();
 
-      if (value == null)
-         return null;
+   //   if (value == null)
+   //      return null;
 
-      DurationElement duration = new DurationElement();
-      duration.setValue(value);
-      duration.setType("system");
-      return duration;
-   }
+   //   DurationElement duration = new DurationElement();
+   //   duration.setValue(value);
+   //   duration.setType("system");
+   //   return duration;
+   //}
 
    public void updateReplicationTable(String dbid) throws Exception
    {

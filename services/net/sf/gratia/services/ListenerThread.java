@@ -38,7 +38,6 @@ public class ListenerThread extends Thread
    org.hibernate.Session session;
    Transaction tx;
    RecordUpdaterManager updater = new RecordUpdaterManager();
-   JobUsageRecordUpdater.AddDefaults(updater);
    RecordConverter converter = new RecordConverter();
    int itotal = 0;
    boolean duplicateCheck = false;
@@ -76,7 +75,7 @@ public class ListenerThread extends Thread
                                     String directory,
                                     Object lock,
                                     Hashtable global)
-   {
+   {      
       this.ident = ident;
       this.directory = directory;
       this.lock = lock;
@@ -95,6 +94,8 @@ public class ListenerThread extends Thread
          e.printStackTrace();
       }
       historypath = System.getProperties().getProperty("catalina.home") + "/gratia/data/";
+
+      JobUsageRecordUpdater.AddDefaults(updater);
    }
 
    public void loadProperties()
@@ -115,23 +116,13 @@ public class ListenerThread extends Thread
       Logging.log("ListenerThread: " + ident + ":Stop Requested");
    }
 
-   public String md5key(String input) throws Exception
-   {
-      MessageDigest md = MessageDigest.getInstance("MD5");
-      md.update(input.getBytes());
-      return HexString.bufferToHex(md.digest());
-   }
-
    public boolean gotDuplicate(Record record) throws Exception
    {
       if (duplicateCheck == false)
          return false;
 
-      RecordIdentity temp = record.getRecordIdentity();
-      record.setRecordIdentity(null);
-      String md5key = md5key(record.asXML());
+      String md5key = record.computemd5();
       record.setmd5(md5key);
-      record.setRecordIdentity(temp);
 
       return gotDuplicate(record,md5key);
    }
@@ -144,7 +135,7 @@ public class ListenerThread extends Thread
       boolean status = false;
       String dq = "'";
 
-      String table = current.getClass().Name();
+      String table = current.getClass().getName();
 
       String sql = "SELECT dbid from "+table+" where md5 = " + dq + md5key + dq;
 
@@ -384,7 +375,7 @@ public class ListenerThread extends Thread
 
                // Logging.log("ListenerThread: " + ident + ":Before Duplicate Check");
                if (gothistory && (md5key != null))
-                  gotduplicate = gotDuplicate(current.getmd5());
+                  gotduplicate = gotDuplicate(current,current.getmd5());
                else
                   gotduplicate = gotDuplicate(current);
                // Logging.log("ListenerThread: " + ident + ":After Duplicate Check");
@@ -527,8 +518,10 @@ public class ListenerThread extends Thread
 
    public ArrayList convert(String xml) throws Exception
    {
+      ArrayList records = null;
+
       try {
-         ArrayList records = converter.convert(xml);
+         records = converter.convert(xml);
       }
       catch (Exception e)
       {
@@ -539,7 +532,7 @@ public class ListenerThread extends Thread
 
       // The usage records array list is now populated with all the job usage records found in the given XML file
       //  return it to the caller.
-      return usageRecords;
+      return records;
    }
 
    public void saveDuplicate(String source, String error, int dupdbid, Record current)
