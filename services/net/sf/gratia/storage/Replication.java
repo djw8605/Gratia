@@ -2,119 +2,131 @@ package net.sf.gratia.storage;
 
 public class Replication
 {
-		private int replicationid;
-		private int registered;
-		private int running;
-		private int security;
-		private String openconnection;
-		private String secureconnection;
-		private int frequency;
-		private int dbid;
-		private int rowcount;
-		private String probename;
+   private int replicationid;
+   private int registered;
+   private int running;
+   private int security;
+   private String openconnection;
+   private String secureconnection;
+   private int frequency;
+   private int dbid;
+   private int rowcount;
+   private String probename;
+   private String table;
 
-		public Replication()
-		{
-		}
+   public Replication()
+   {
+   }
 
-		public int getreplicationid() 
-		{
-				return replicationid;
-		}
+   public int getreplicationid()
+   {
+      return replicationid;
+   }
 
-		public void setreplicationid(int value) 
-		{
-				replicationid = value;
-		}
+   public void setreplicationid(int value)
+   {
+      replicationid = value;
+   }
 
-		public int getregistered() 
-		{
-				return registered;
-		}
+   public int getregistered()
+   {
+      return registered;
+   }
 
-		public void setregistered(int value) 
-		{
-				registered = value;
-		}
+   public void setregistered(int value)
+   {
+      registered = value;
+   }
 
-		public int getrunning() 
-		{
-				return running;
-		}
+   public int getrunning()
+   {
+      return running;
+   }
 
-		public void setrunning(int value) 
-		{
-				running = value;
-		}
+   public void setrunning(int value)
+   {
+      running = value;
+   }
 
-		public int getsecurity() 
-		{
-				return security;
-		}
+   public int getsecurity()
+   {
+      return security;
+   }
 
-		public void setsecurity(int value) 
-		{
-				security = value;
-		}
+   public void setsecurity(int value)
+   {
+      security = value;
+   }
 
-		public String getopenconnection() 
-		{
-				return openconnection;
-		}
+   public String getopenconnection()
+   {
+      return openconnection;
+   }
 
-		public void setopenconnection(String value) 
-		{
-				openconnection = value;
-		}
+   public void setopenconnection(String value)
+   {
+      openconnection = value;
+   }
 
-		public String getsecureconnection() 
-		{
-				return secureconnection;
-		}
+   public String getsecureconnection()
+   {
+      return secureconnection;
+   }
 
-		public void setsecureconnection(String value) 
-		{
-				secureconnection = value;
-		}
-	
-		public void setdbid(int value) 
-		{
-				dbid = value;
-		}
+   public void setsecureconnection(String value)
+   {
+      secureconnection = value;
+   }
 
-		public int getdbid() 
-		{
-				return dbid;
-		}
+   public void setdbid(int value)
+   {
+      dbid = value;
+   }
 
-		public void setfrequency(int value) 
-		{
-				frequency = value;
-		}
+   public int getdbid()
+   {
+      return dbid;
+   }
 
-		public int getfrequency() 
-		{
-				return frequency;
-		}
+   public void setfrequency(int value)
+   {
+      frequency = value;
+   }
 
-		public void setrowcount(int value) 
-		{
-				rowcount = value;
-		}
+   public int getfrequency()
+   {
+      return frequency;
+   }
 
-		public int getrowcount() 
-		{
-				return rowcount;
-		}
+   public void setrowcount(int value)
+   {
+      rowcount = value;
+   }
 
-		public String getprobename() 
-		{
-				return probename;
-		}
+   public int getrowcount()
+   {
+      return rowcount;
+   }
 
-		public void setprobename(String value) 
-		{
-				probename = value;
-		}
+   public String getprobename()
+   {
+      return probename;
+   }
+
+   public void setprobename(String value)
+   {
+      probename = value;
+   }
+
+   public String gettable()
+   {
+      return table;
+   }
+
+   public void settable(String value)
+   {
+      table = value;
+   }
+
 
 }
