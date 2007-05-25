@@ -135,7 +135,7 @@ public class ListenerThread extends Thread
       boolean status = false;
       String dq = "'";
 
-      String table = current.getClass().getName();
+      String table = current.getTableName();
 
       String sql = "SELECT dbid from "+table+" where md5 = " + dq + md5key + dq;
 
@@ -544,7 +544,7 @@ public class ListenerThread extends Thread
       record.setsource(source);
       record.seterror(error);
       record.setdbid(dupdbid);
-      record.setRecordType(current.getClass().getName());
+      record.setRecordType(current.getTableName());
 
       try
       {
@@ -591,7 +591,7 @@ public class ListenerThread extends Thread
       record.setrawxml(current.asXML());
       record.setsource(source);
       record.seterror(error);
-      record.setRecordType(current.getClass().getName());
+      record.setRecordType(current.getTableName());
 
       try
       {

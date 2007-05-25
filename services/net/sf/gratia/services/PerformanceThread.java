@@ -131,7 +131,7 @@ public class PerformanceThread extends Thread
       String md5key = record.computemd5();
       record.setmd5(md5key);
 
-      String table = record.getClass().getName();
+      String table = record.getTableName();
       
       String sql = "SELECT dbid from "+table+" where md5 = " + dq + md5key + dq;
 
@@ -579,7 +579,7 @@ public class PerformanceThread extends Thread
       record.setrawxml(current.asXML());
       record.setsource(source);
       record.seterror(error);
-      record.setRecordType(current.getClass().getName());
+      record.setRecordType(current.getTableName());
 
       try
       {

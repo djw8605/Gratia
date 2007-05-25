@@ -184,6 +184,11 @@ public class JobUsageRecord implements Record
       return output;
    }
 
+   public String getTableName()
+   {
+      return "JobUsageRecord";
+   }
+
    public void setRecordIdentity(RecordIdentity n) { RecordIdentity = n; }
    public RecordIdentity getRecordIdentity()
    {

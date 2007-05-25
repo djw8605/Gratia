@@ -75,6 +75,11 @@ public class MetricRecord implements Record
       return output;
    }
 
+   public String getTableName()
+   {
+      return "MetricRecord";
+   }
+
    public void setRecordId(int RecordId)
    {
       this.RecordId = RecordId;

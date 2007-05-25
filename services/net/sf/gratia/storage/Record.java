@@ -31,4 +31,5 @@ public interface Record
    public String getmd5();
    public void setmd5(String md5set);
 
+   public String getTableName();
 }
