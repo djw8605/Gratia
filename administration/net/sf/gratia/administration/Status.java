@@ -21,417 +21,425 @@ import java.text.*;
 
 public class Status extends HttpServlet 
 {
-		XP xp = new XP();
-		//
-		// database related
-		//
-		String driver = "";
-		String url = "";
-		String user = "";
-		String password = "";
-		Connection connection;
-		Statement statement;
-		ResultSet resultSet;
-		//
-		// processing related
-		//
-		String html = "";
-		String row = "";
-		StringBuffer buffer = new StringBuffer();
-		//
-		// globals
-		//
-		HttpServletRequest request;
-		HttpServletResponse response;
-		boolean initialized = false;
-		Properties props;
-		String message = null;
-		//
-		// support
-		//
-		String dq = "\"";
-		String comma = ",";
-		String cr = "\n";
-		Pattern p = Pattern.compile("<tr class=qsize>.*?</tr>",Pattern.MULTILINE + Pattern.DOTALL);
-		Matcher m = null;
+    XP xp = new XP();
+    //
+    // database related
+    //
+    String driver = "";
+    String url = "";
+    String user = "";
+    String password = "";
+    Connection connection;
+    Statement statement;
+    ResultSet resultSet;
+    //
+    // processing related
+    //
+    String html = "";
+    String row = "";
+    StringBuffer buffer = new StringBuffer();
+    //
+    // globals
+    //
+    HttpServletRequest request;
+    HttpServletResponse response;
+    boolean initialized = false;
+    Properties props;
+    String message = null;
+    //
+    // support
+    //
+    String dq = "\"";
+    String comma = ",";
+    String cr = "\n";
+    Pattern p = Pattern.compile("<tr class=qsize>.*?</tr>",Pattern.MULTILINE + Pattern.DOTALL);
+    Matcher m = null;
 
     public void init(ServletConfig config) throws ServletException 
-		{
+    {
     }
     
-		public void openConnection()
-		{
-				try
-						{
-								props = Configuration.getProperties();
-								driver = props.getProperty("service.mysql.driver");
-								url = props.getProperty("service.mysql.url");
-								user = props.getProperty("service.mysql.user");
-								password = props.getProperty("service.mysql.password");
-						}
-				catch (Exception ignore)
-						{
-						}
-				try
-						{
-								Class.forName(driver).newInstance();
-								connection = DriverManager.getConnection(url,user,password);
-						}
-				catch (Exception e)
-						{
-								e.printStackTrace();
-						}
-		}
+    public void openConnection()
+    {
+	try
+	    {
+		props = Configuration.getProperties();
+		driver = props.getProperty("service.mysql.driver");
+		url = props.getProperty("service.mysql.url");
+		user = props.getProperty("service.mysql.user");
+		password = props.getProperty("service.mysql.password");
+	    }
+	catch (Exception ignore)
+	    {
+	    }
+	try
+	    {
+		Class.forName(driver).newInstance();
+		connection = DriverManager.getConnection(url,user,password);
+	    }
+	catch (Exception e)
+	    {
+		e.printStackTrace();
+	    }
+    }
 
-		public void closeConnection()
-		{
-				try
-						{
-								connection.close();
-						}
-				catch (Exception e)
-						{
-								e.printStackTrace();
-						}
-		}
+    public void closeConnection()
+    {
+	try
+	    {
+		connection.close();
+	    }
+	catch (Exception e)
+	    {
+		e.printStackTrace();
+	    }
+    }
 
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
-		{
-				openConnection();
+    {
+	openConnection();
 
-				this.request = request;
-				this.response = response;
-				setup();
-				process();
-				response.setContentType("text/html");
-				response.setHeader("Cache-Control", "no-cache"); // HTTP 1.1
-				response.setHeader("Pragma", "no-cache"); // HTTP 1.0
-				PrintWriter writer = response.getWriter();
-				writer.write(html);
-				writer.flush();
-				writer.close();
-				closeConnection();
-		}
+	this.request = request;
+	this.response = response;
+	setup();
+	process();
+	response.setContentType("text/html");
+	response.setHeader("Cache-Control", "no-cache"); // HTTP 1.1
+	response.setHeader("Pragma", "no-cache"); // HTTP 1.0
+	PrintWriter writer = response.getWriter();
+	writer.write(html);
+	writer.flush();
+	writer.close();
+	closeConnection();
+    }
 
-		public void setup()
-		{
-				html = xp.get(request.getRealPath("/") + "status.html");
-		}
+    public static String DisplayInt(Integer value) 
+    {
+	if (value == null)
+	    return "n/a";
+	else 
+	    return value.toString();
+    }
 
-		public void process()
-		{
-				int index = 0;
-				String command = "";
-				buffer = new StringBuffer();
-				String dq = "'";
+    public void setup()
+    {
+	html = xp.get(request.getRealPath("/") + "status.html");
+    }
 
-				Integer count1 = null;
-				Integer error1 = null;
+    public void process()
+    {
+	int index = 0;
+	String command = "";
+	buffer = new StringBuffer();
+	String dq = "'";
 
-				Integer count2 = null;
-				Integer error2 = null;
+	Integer count1 = null;
+	Integer error1 = null;
 
-				Integer count3 = null;
-				Integer error3 = null;
+	Integer count2 = null;
+	Integer error2 = null;
 
-				Integer count4 = null;
-				Integer error4 = null;
+	Integer count3 = null;
+	Integer error3 = null;
 
-				Integer count5 = null;
-				Integer error5 = null;
+	Integer count4 = null;
+	Integer error4 = null;
 
-				Integer count6 = null;
-				Integer error6 = null;
+	Integer count5 = null;
+	Integer error5 = null;
 
-				Integer count24 = null;
-				Integer error24 = null;
+	Integer count6 = null;
+	Integer error6 = null;
 
-				Integer count7 = null;
-				Integer error7 = null;
+	Integer count24 = null;
+	Integer error24 = null;
+
+	Integer count7 = null;
+	Integer error7 = null;
 				
-				Integer totalcount = null;
-				Integer totalerror = null;
+	Integer totalcount = null;
+	Integer totalerror = null;
 
-				java.util.Date now = new java.util.Date();
-				long decrement = 60 * 60 * 1000;
-				java.util.Date to = new java.util.Date();
-				java.util.Date from = new java.util.Date(to.getTime() - decrement);
+	java.util.Date now = new java.util.Date();
+	long decrement = 60 * 60 * 1000;
+	java.util.Date to = new java.util.Date();
+	java.util.Date from = new java.util.Date(to.getTime() - decrement);
 
-				SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd kk:mm:ss");
+	SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd kk:mm:ss");
 
-				try
-						{
-								//
-								// previous hour
-								//
+	try
+	    {
+		//
+		// previous hour
+		//
 
-								command = "select count(*) from JobUsageRecord where ServerDate > " + dq + format.format(from) + dq +
-										" and ServerDate <= " + dq + format.format(to) + dq;
-								System.out.println("command: " + command);
-								statement = connection.prepareStatement(command);
-								resultSet = statement.executeQuery(command);
-								while(resultSet.next())
-										count1 = resultSet.getInt(1);
-								resultSet.close();
-								statement.close();
+		command = "select count(*) from JobUsageRecord where ServerDate > " + dq + format.format(from) + dq +
+		    " and ServerDate <= " + dq + format.format(to) + dq;
+		System.out.println("command: " + command);
+		statement = connection.prepareStatement(command);
+		resultSet = statement.executeQuery(command);
+		while(resultSet.next())
+		    count1 = resultSet.getInt(1);
+		resultSet.close();
+		statement.close();
 
-								command = "select count(*) from DupRecord where EventDate > " + dq + format.format(from) + dq +
-										" and EventDate <= " + dq + format.format(to) + dq;
-								statement = connection.prepareStatement(command);
-								resultSet = statement.executeQuery(command);
-								while(resultSet.next())
-										error1 = resultSet.getInt(1);
-								resultSet.close();
-								statement.close();
+		command = "select count(*) from DupRecord where EventDate > " + dq + format.format(from) + dq +
+		    " and EventDate <= " + dq + format.format(to) + dq;
+		statement = connection.prepareStatement(command);
+		resultSet = statement.executeQuery(command);
+		while(resultSet.next())
+		    error1 = resultSet.getInt(1);
+		resultSet.close();
+		statement.close();
 
-								//
-								// hour - 2
-								//
+		//
+		// hour - 2
+		//
 
-								decrement = 60 * 60 * 1000;
-								to = from;
-								from = new java.util.Date(to.getTime() - decrement);
+		decrement = 60 * 60 * 1000;
+		to = from;
+		from = new java.util.Date(to.getTime() - decrement);
 
-								command = "select count(*) from JobUsageRecord where ServerDate > " + dq + format.format(from) + dq +
-										" and ServerDate <= " + dq + format.format(to) + dq;
-								System.out.println("command: " + command);
-								statement = connection.prepareStatement(command);
-								resultSet = statement.executeQuery(command);
-								while(resultSet.next())
-										count2 = resultSet.getInt(1);
-								resultSet.close();
-								statement.close();
+		command = "select count(*) from JobUsageRecord where ServerDate > " + dq + format.format(from) + dq +
+		    " and ServerDate <= " + dq + format.format(to) + dq;
+		System.out.println("command: " + command);
+		statement = connection.prepareStatement(command);
+		resultSet = statement.executeQuery(command);
+		while(resultSet.next())
+		    count2 = resultSet.getInt(1);
+		resultSet.close();
+		statement.close();
 
-								command = "select count(*) from DupRecord where EventDate > " + dq + format.format(from) + dq +
-										" and EventDate <= " + dq + format.format(to) + dq;
-								statement = connection.prepareStatement(command);
-								resultSet = statement.executeQuery(command);
-								while(resultSet.next())
-										error2 = resultSet.getInt(1);
-								resultSet.close();
-								statement.close();
+		command = "select count(*) from DupRecord where EventDate > " + dq + format.format(from) + dq +
+		    " and EventDate <= " + dq + format.format(to) + dq;
+		statement = connection.prepareStatement(command);
+		resultSet = statement.executeQuery(command);
+		while(resultSet.next())
+		    error2 = resultSet.getInt(1);
+		resultSet.close();
+		statement.close();
 
-								//
-								// hour - 3
-								//
+		//
+		// hour - 3
+		//
 
-								decrement = 60 * 60 * 1000;
-								to = from;
-								from = new java.util.Date(to.getTime() - decrement);
+		decrement = 60 * 60 * 1000;
+		to = from;
+		from = new java.util.Date(to.getTime() - decrement);
 
-								command = "select count(*) from JobUsageRecord where ServerDate > " + dq + format.format(from) + dq +
-										" and ServerDate <= " + dq + format.format(to) + dq;
-								statement = connection.prepareStatement(command);
-								resultSet = statement.executeQuery(command);
-								while(resultSet.next())
-										count3 = resultSet.getInt(1);
-								resultSet.close();
-								statement.close();
+		command = "select count(*) from JobUsageRecord where ServerDate > " + dq + format.format(from) + dq +
+		    " and ServerDate <= " + dq + format.format(to) + dq;
+		statement = connection.prepareStatement(command);
+		resultSet = statement.executeQuery(command);
+		while(resultSet.next())
+		    count3 = resultSet.getInt(1);
+		resultSet.close();
+		statement.close();
 
-								command = "select count(*) from DupRecord where EventDate > " + dq + format.format(from) + dq +
-										" and EventDate <= " + dq + format.format(to) + dq;
-								statement = connection.prepareStatement(command);
-								resultSet = statement.executeQuery(command);
-								while(resultSet.next())
-										error3 = resultSet.getInt(1);
-								resultSet.close();
-								statement.close();
+		command = "select count(*) from DupRecord where EventDate > " + dq + format.format(from) + dq +
+		    " and EventDate <= " + dq + format.format(to) + dq;
+		statement = connection.prepareStatement(command);
+		resultSet = statement.executeQuery(command);
+		while(resultSet.next())
+		    error3 = resultSet.getInt(1);
+		resultSet.close();
+		statement.close();
 
-								//
-								// previous - 4
-								//
+		//
+		// previous - 4
+		//
 
-								decrement = 60 * 60 * 1000;
-								to = from;
-								from = new java.util.Date(to.getTime() - decrement);
+		decrement = 60 * 60 * 1000;
+		to = from;
+		from = new java.util.Date(to.getTime() - decrement);
 
-								command = "select count(*) from JobUsageRecord where ServerDate > " + dq + format.format(from) + dq +
-										" and ServerDate <= " + dq + format.format(to) + dq;
-								statement = connection.prepareStatement(command);
-								resultSet = statement.executeQuery(command);
-								while(resultSet.next())
-										count4 = resultSet.getInt(1);
-								resultSet.close();
-								statement.close();
+		command = "select count(*) from JobUsageRecord where ServerDate > " + dq + format.format(from) + dq +
+		    " and ServerDate <= " + dq + format.format(to) + dq;
+		statement = connection.prepareStatement(command);
+		resultSet = statement.executeQuery(command);
+		while(resultSet.next())
+		    count4 = resultSet.getInt(1);
+		resultSet.close();
+		statement.close();
 
-								command = "select count(*) from DupRecord where EventDate > " + dq + format.format(from) + dq +
-										" and EventDate <= " + dq + format.format(to) + dq;
-								statement = connection.prepareStatement(command);
-								resultSet = statement.executeQuery(command);
-								while(resultSet.next())
-										error4 = resultSet.getInt(1);
-								resultSet.close();
-								statement.close();
+		command = "select count(*) from DupRecord where EventDate > " + dq + format.format(from) + dq +
+		    " and EventDate <= " + dq + format.format(to) + dq;
+		statement = connection.prepareStatement(command);
+		resultSet = statement.executeQuery(command);
+		while(resultSet.next())
+		    error4 = resultSet.getInt(1);
+		resultSet.close();
+		statement.close();
 
-								//
-								// previous - 5
-								//
+		//
+		// previous - 5
+		//
 
-								to = from;
-								decrement = 60 * 60 * 1000;
-								from = new java.util.Date(to.getTime() - decrement);
+		to = from;
+		decrement = 60 * 60 * 1000;
+		from = new java.util.Date(to.getTime() - decrement);
 
-								command = "select count(*) from JobUsageRecord where ServerDate > " + dq + format.format(from) + dq +
-										" and ServerDate <= " + dq + format.format(to) + dq;
-								statement = connection.prepareStatement(command);
-								resultSet = statement.executeQuery(command);
-								while(resultSet.next())
-										count5 = resultSet.getInt(1);
-								resultSet.close();
-								statement.close();
+		command = "select count(*) from JobUsageRecord where ServerDate > " + dq + format.format(from) + dq +
+		    " and ServerDate <= " + dq + format.format(to) + dq;
+		statement = connection.prepareStatement(command);
+		resultSet = statement.executeQuery(command);
+		while(resultSet.next())
+		    count5 = resultSet.getInt(1);
+		resultSet.close();
+		statement.close();
 
-								command = "select count(*) from DupRecord where EventDate > " + dq + format.format(from) + dq +
-										" and EventDate <= " + dq + format.format(to) + dq;
-								statement = connection.prepareStatement(command);
-								resultSet = statement.executeQuery(command);
-								while(resultSet.next())
-										error5 = resultSet.getInt(1);
-								resultSet.close();
-								statement.close();
+		command = "select count(*) from DupRecord where EventDate > " + dq + format.format(from) + dq +
+		    " and EventDate <= " + dq + format.format(to) + dq;
+		statement = connection.prepareStatement(command);
+		resultSet = statement.executeQuery(command);
+		while(resultSet.next())
+		    error5 = resultSet.getInt(1);
+		resultSet.close();
+		statement.close();
 
-								//
-								// previous - 6
-								//
+		//
+		// previous - 6
+		//
 
-								decrement = 60 * 60 * 1000;
-								to = from;
-								from = new java.util.Date(to.getTime() - decrement);
+		decrement = 60 * 60 * 1000;
+		to = from;
+		from = new java.util.Date(to.getTime() - decrement);
 
-								command = "select count(*) from JobUsageRecord where ServerDate > " + dq + format.format(from) + dq +
-										" and ServerDate <= " + dq + format.format(to) + dq;
-								statement = connection.prepareStatement(command);
-								resultSet = statement.executeQuery(command);
-								while(resultSet.next())
-										count6 = resultSet.getInt(1);
-								resultSet.close();
-								statement.close();
+		command = "select count(*) from JobUsageRecord where ServerDate > " + dq + format.format(from) + dq +
+		    " and ServerDate <= " + dq + format.format(to) + dq;
+		statement = connection.prepareStatement(command);
+		resultSet = statement.executeQuery(command);
+		while(resultSet.next())
+		    count6 = resultSet.getInt(1);
+		resultSet.close();
+		statement.close();
 
-								command = "select count(*) from DupRecord where EventDate > " + dq + format.format(from) + dq +
-										" and EventDate <= " + dq + format.format(to) + dq;
-								statement = connection.prepareStatement(command);
-								resultSet = statement.executeQuery(command);
-								while(resultSet.next())
-										error6 = resultSet.getInt(1);
-								resultSet.close();
-								statement.close();
+		command = "select count(*) from DupRecord where EventDate > " + dq + format.format(from) + dq +
+		    " and EventDate <= " + dq + format.format(to) + dq;
+		statement = connection.prepareStatement(command);
+		resultSet = statement.executeQuery(command);
+		while(resultSet.next())
+		    error6 = resultSet.getInt(1);
+		resultSet.close();
+		statement.close();
 
-								//
-								// previous day
-								//
+		//
+		// previous day
+		//
 
-								decrement = 24 * 60 * 60 * 1000;
-								java.util.Date date = new java.util.Date(now.getTime() - decrement);
+		decrement = 24 * 60 * 60 * 1000;
+		java.util.Date date = new java.util.Date(now.getTime() - decrement);
 
-								command = "select count(*) from JobUsageRecord where ServerDate > " + dq + format.format(date) + dq;
-								statement = connection.prepareStatement(command);
-								resultSet = statement.executeQuery(command);
-								while(resultSet.next())
-										count24 = resultSet.getInt(1);
-								resultSet.close();
-								statement.close();
+		command = "select count(*) from JobUsageRecord where ServerDate > " + dq + format.format(date) + dq;
+		statement = connection.prepareStatement(command);
+		resultSet = statement.executeQuery(command);
+		while(resultSet.next())
+		    count24 = resultSet.getInt(1);
+		resultSet.close();
+		statement.close();
 
-								command = "select count(*) from DupRecord where EventDate > " + dq + format.format(date) + dq;
-								statement = connection.prepareStatement(command);
-								resultSet = statement.executeQuery(command);
-								while(resultSet.next())
-										error24 = resultSet.getInt(1);
-								resultSet.close();
-								statement.close();
+		command = "select count(*) from DupRecord where EventDate > " + dq + format.format(date) + dq;
+		statement = connection.prepareStatement(command);
+		resultSet = statement.executeQuery(command);
+		while(resultSet.next())
+		    error24 = resultSet.getInt(1);
+		resultSet.close();
+		statement.close();
 
-								//
-								// previous 7 days
-								//
+		//
+		// previous 7 days
+		//
 
-								decrement = 7 * 24 * 60 * 60 * 1000;
-								date = new java.util.Date(now.getTime() - decrement);
+		decrement = 7 * 24 * 60 * 60 * 1000;
+		date = new java.util.Date(now.getTime() - decrement);
 
-								command = "select count(*) from JobUsageRecord where ServerDate > " + dq + format.format(date) + dq;
-								statement = connection.prepareStatement(command);
-								resultSet = statement.executeQuery(command);
-								while(resultSet.next())
-										count7 = resultSet.getInt(1);
-								resultSet.close();
-								statement.close();
+		command = "select count(*) from JobUsageRecord where ServerDate > " + dq + format.format(date) + dq;
+		statement = connection.prepareStatement(command);
+		resultSet = statement.executeQuery(command);
+		while(resultSet.next())
+		    count7 = resultSet.getInt(1);
+		resultSet.close();
+		statement.close();
 
-								command = "select count(*) from DupRecord where EventDate > " + dq + format.format(date) + dq;
-								statement = connection.prepareStatement(command);
-								resultSet = statement.executeQuery(command);
-								while(resultSet.next())
-										error7 = resultSet.getInt(1);
-								resultSet.close();
-								statement.close();
+		command = "select count(*) from DupRecord where EventDate > " + dq + format.format(date) + dq;
+		statement = connection.prepareStatement(command);
+		resultSet = statement.executeQuery(command);
+		while(resultSet.next())
+		    error7 = resultSet.getInt(1);
+		resultSet.close();
+		statement.close();
 
-								//
-								// total
-								//
+		//
+		// total
+		//
 
-								command = "select count(*) from JobUsageRecord";
-								statement = connection.prepareStatement(command);
-								resultSet = statement.executeQuery(command);
-								while(resultSet.next())
-										totalcount = resultSet.getInt(1);
-								resultSet.close();
-								statement.close();
+		command = "select count(*) from JobUsageRecord";
+		statement = connection.prepareStatement(command);
+		resultSet = statement.executeQuery(command);
+		while(resultSet.next())
+		    totalcount = resultSet.getInt(1);
+		resultSet.close();
+		statement.close();
 
-								command = "select count(*) from DupRecord";
-								statement = connection.prepareStatement(command);
-								resultSet = statement.executeQuery(command);
-								while(resultSet.next())
-										totalerror = resultSet.getInt(1);
-								resultSet.close();
-								statement.close();
-						}
-				catch (Exception e)
-						{
-								e.printStackTrace();
-						}
+		command = "select count(*) from DupRecord";
+		statement = connection.prepareStatement(command);
+		resultSet = statement.executeQuery(command);
+		while(resultSet.next())
+		    totalerror = resultSet.getInt(1);
+		resultSet.close();
+		statement.close();
+	    }
+	catch (Exception e)
+	    {
+		e.printStackTrace();
+	    }
 
-				html = xp.replaceAll(html,"#count1#","" + count1.intValue());
-				html = xp.replaceAll(html,"#error1#","" + error1.intValue());
+	html = xp.replaceAll(html,"#count1#","" + DisplayInt(count1));
+	html = xp.replaceAll(html,"#error1#","" + DisplayInt(error1));
 
-				html = xp.replaceAll(html,"#count2#","" + count2.intValue());
-				html = xp.replaceAll(html,"#error2#","" + error2.intValue());
+	html = xp.replaceAll(html,"#count2#","" + DisplayInt(count2));
+	html = xp.replaceAll(html,"#error2#","" + DisplayInt(error2));
 
-				html = xp.replaceAll(html,"#count3#","" + count3.intValue());
-				html = xp.replaceAll(html,"#error3#","" + error3.intValue());
+	html = xp.replaceAll(html,"#count3#","" + DisplayInt(count3));
+	html = xp.replaceAll(html,"#error3#","" + DisplayInt(error3));
 
-				html = xp.replaceAll(html,"#count4#","" + count4.intValue());
-				html = xp.replaceAll(html,"#error4#","" + error4.intValue());
+	html = xp.replaceAll(html,"#count4#","" + DisplayInt(count4));
+	html = xp.replaceAll(html,"#error4#","" + DisplayInt(error4));
 
-				html = xp.replaceAll(html,"#count5#","" + count5.intValue());
-				html = xp.replaceAll(html,"#error5#","" + error5.intValue());
+	html = xp.replaceAll(html,"#count5#","" + DisplayInt(count5));
+	html = xp.replaceAll(html,"#error5#","" + DisplayInt(error5));
 
-				html = xp.replaceAll(html,"#count6#","" + count6.intValue());
-				html = xp.replaceAll(html,"#error6#","" + error6.intValue());
+	html = xp.replaceAll(html,"#count6#","" + DisplayInt(count6));
+	html = xp.replaceAll(html,"#error6#","" + DisplayInt(error6));
 
-				html = xp.replaceAll(html,"#count24#","" + count24.intValue());
-				html = xp.replaceAll(html,"#error24#","" + error24.intValue());
+	html = xp.replaceAll(html,"#count24#","" + DisplayInt(count24));
+	html = xp.replaceAll(html,"#error24#","" + DisplayInt(error24));
 
-				html = xp.replaceAll(html,"#count7#","" + count7.intValue());
-				html = xp.replaceAll(html,"#error7#","" + error7.intValue());
+	html = xp.replaceAll(html,"#count7#","" + DisplayInt(count7));
+	html = xp.replaceAll(html,"#error7#","" + DisplayInt(error7));
 
-				html = xp.replaceAll(html,"#totalcount#","" + totalcount.intValue());
-				html = xp.replaceAll(html,"#totalerror#","" + totalerror.intValue());
+	html = xp.replaceAll(html,"#totalcount#","" + DisplayInt(totalcount));
+	html = xp.replaceAll(html,"#totalerror#","" + DisplayInt(totalerror));
 
-				int maxthreads = Integer.parseInt(props.getProperty("service.listener.threads"));
-				String path = System.getProperties().getProperty("catalina.home");
-				path = xp.replaceAll(path,"\\","/");
+	int maxthreads = Integer.parseInt(props.getProperty("service.listener.threads"));
+	String path = System.getProperties().getProperty("catalina.home");
+	path = xp.replaceAll(path,"\\","/");
 
-				m = p.matcher(html);
-				m.find();
-				String row = m.group();
-				StringBuffer buffer = new StringBuffer();
+	m = p.matcher(html);
+	m.find();
+	String row = m.group();
+	StringBuffer buffer = new StringBuffer();
 
-				for (int i = 0; i < maxthreads; i++)
-						{
-								String newrow = new String(row);
-								String xpath = path + "/gratia/data/thread" + i;
-								String filelist[] = xp.getFileList(xpath);
-								newrow = xp.replaceAll(newrow,"#queue#","Q" + i);
-								newrow = xp.replaceAll(newrow,"#queuesize#","" + filelist.length);
-								buffer.append(newrow);
-						}
-				html = xp.replaceAll(html,row,buffer.toString());
-		}
+	for (int i = 0; i < maxthreads; i++)
+	    {
+		String newrow = new String(row);
+		String xpath = path + "/gratia/data/thread" + i;
+		String filelist[] = xp.getFileList(xpath);
+		newrow = xp.replaceAll(newrow,"#queue#","Q" + i);
+		newrow = xp.replaceAll(newrow,"#queuesize#","" + filelist.length);
+		buffer.append(newrow);
+	    }
+	html = xp.replaceAll(html,row,buffer.toString());
+    }
 
 }

@@ -43,7 +43,7 @@
     </servlet>
 
     <servlet>
-        <servlet-name>JobUsageReplicationTable</servlet-name>
+        <servlet-name>replicationtable</servlet-name>
         <servlet-class>net.sf.gratia.administration.ReplicationTable</servlet-class>
 				<load-on-startup>1</load-on-startup>
         <init-param>
@@ -53,7 +53,7 @@
     </servlet>
 
     <servlet>
-        <servlet-name>MetricReplicationTable</servlet-name>
+        <servlet-name>metricreplicationtable</servlet-name>
         <servlet-class>net.sf.gratia.administration.ReplicationTable</servlet-class>
         <load-on-startup>1</load-on-startup>
         <init-param>
@@ -108,12 +108,12 @@
     </servlet-mapping>
 
     <servlet-mapping>
-        <servlet-name>JobUsageReplicationTable</servlet-name>
+        <servlet-name>replicationtable</servlet-name>
         <url-pattern>/replicationtable.html</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>
-        <servlet-name>MetricReplicationTable</servlet-name>
+        <servlet-name>metricreplicationtable</servlet-name>
         <url-pattern>/metricreplicationtable.html</url-pattern>
     </servlet-mapping>
 

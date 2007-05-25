@@ -57,7 +57,10 @@ public class ReplicationTable extends HttpServlet
    Hashtable table = new Hashtable();
    String newname = "<New Entry>";
 
-   // Which Records are we replicating?
+   // Which Servlet/web page is this
+    String Name;
+
+   // Which Records are we replicating
    String RecordTable = "JobUsageRecord";
 
    public void init(ServletConfig config) throws ServletException
@@ -68,6 +71,7 @@ public class ReplicationTable extends HttpServlet
       {
          RecordTable = what;
       }
+      Name = config.getServletName();
    }
 
    public void openConnection()
@@ -157,7 +161,7 @@ public class ReplicationTable extends HttpServlet
       setup();
       update();
       closeConnection();
-      response.sendRedirect("replicationtable.html?action=showmessage");
+      response.sendRedirect(Name+".html?action=showmessage");
    }
 
    public void setup()
@@ -202,28 +206,31 @@ public class ReplicationTable extends HttpServlet
          e.printStackTrace();
       }
 
-      try
-      {
-         command = "select distinct(VOName) from "+RecordTable+" order by VOName";
-         statement = connection.prepareStatement(command);
-         resultSet = statement.executeQuery(command);
+      if (RecordTable == "JobUsageRecord") {
+	  try
+	      {
+		  command = "select distinct(VOName) from "+RecordTable+" order by VOName";
+		  statement = connection.prepareStatement(command);
+		  resultSet = statement.executeQuery(command);
 
-         while (resultSet.next())
-            vector.add("VO:" + resultSet.getString(1));
+		  while (resultSet.next())
+		      vector.add("VO:" + resultSet.getString(1));
 
-         resultSet.close();
-         statement.close();
+		  resultSet.close();
+		  statement.close();
+	      }
+	  catch (Exception e)
+	      {
+		  e.printStackTrace();
+	      }
       }
-      catch (Exception e)
-      {
-         e.printStackTrace();
-      }
-
       try
       {
          command =
                "select replicationid,registered,running,security,openconnection,secureconnection," +
-               "frequency,dbid,rowcount,probename,table from Replication order by replicationid";
+               "frequency,dbid,rowcount,probename,recordtable from Replication " +
+	       " where recordtable = " + dq + RecordTable + dq +
+	       " order by replicationid";
          statement = connection.prepareStatement(command);
          resultSet = statement.executeQuery(command);
 
@@ -234,7 +241,7 @@ public class ReplicationTable extends HttpServlet
             newrow = xp.replaceAll(newrow, "#index#", "" + index);
             table.put("index:" + index, "" + index);
 
-            Pattern p1 = Pattern.compile("<input.*id=openconnection.*?/>", Pattern.MULTILINE + Pattern.DOTALL);
+            Pattern p1 = Pattern.compile("<input\\s*id=openconnection.*?/>", Pattern.MULTILINE + Pattern.DOTALL);
             Matcher m1 = p1.matcher(newrow);
             m1.find();
             String temp = m1.group();
@@ -254,6 +261,8 @@ public class ReplicationTable extends HttpServlet
 
             newrow = xp.replaceAll(newrow, "#replicationid#", resultSet.getString("replicationid"));
             table.put("replicationid:" + index, resultSet.getString("replicationid"));
+
+            newrow = xp.replaceAll(newrow, "#webpagename#", Name);
 
             newrow = xp.replaceAll(newrow, "#frequency#", resultSet.getString("frequency"));
             table.put("frequency:" + index, resultSet.getString("frequency"));
@@ -285,7 +294,6 @@ public class ReplicationTable extends HttpServlet
          Matcher m1 = p1.matcher(newrow);
          m1.find();
          String zap = m1.group();
-
          newrow = xp.replace(newrow, zap, "");
 
          newrow = xp.replaceAll(newrow, "#index#", "" + index);
@@ -304,6 +312,7 @@ public class ReplicationTable extends HttpServlet
          buffer.append(newrow);
       }
 
+      html = xp.replace(html,"#recordtable#",RecordTable);
       html = xp.replace(html, row, buffer.toString());
    }
 
@@ -443,7 +452,7 @@ public class ReplicationTable extends HttpServlet
       {
          command =
                "insert into Replication(openconnection,registered,running,security,probename," +
-               "frequency,dbid,rowcount,table) values(" + cr +
+               "frequency,dbid,rowcount,recordtable) values(" + cr +
                dq + request.getParameter("openconnection:" + index) + dq + comma + cr +
                rflag + comma + cr +
                "0" + comma + cr +
@@ -508,6 +517,7 @@ public class ReplicationTable extends HttpServlet
                "probename = " + dq + request.getParameter("probename:" + index) + dq + comma + cr +
                "frequency = " + request.getParameter("frequency:" + index) + cr +
                "where replicationid = " + request.getParameter("replicationid:" + index);
+         System.out.println("command: " + command);
          Statement statement = connection.createStatement();
          statement.executeUpdate(command);
          statement.close();
@@ -570,10 +580,15 @@ public class ReplicationTable extends HttpServlet
       post.add("arg2", "Replication");
       post.add("arg3", mypem);
       response = post.send();
+      if (!post.success) {
+	  message = post.errorMsg;
+	  return;
+      }
       results = split(response, ":");
       if (!results[0].equals("ok"))
       {
-         System.out.println("Error Registering With Remote Host: " + response);
+	  message = "Error Registering With Remote Host: " + response;
+	  System.out.println(message);
       }
       //
       // get the hosts pem
@@ -595,7 +610,8 @@ public class ReplicationTable extends HttpServlet
       results = split(response, ":");
       if (!results[0].equals("ok"))
       {
-         System.out.println("Error Registering With Myself: " + response);
+         message = ("Error Registering With Myself: " + response);
+	 System.out.println(message);	 
       }
 
       //
@@ -615,6 +631,7 @@ public class ReplicationTable extends HttpServlet
       {
          System.out.println("command: " + command);
          e.printStackTrace();
+         message = "Error registering "+openconnection+" : " + cr + e.toString();
       }
    }
 
@@ -632,8 +649,8 @@ public class ReplicationTable extends HttpServlet
       }
       catch (Exception e)
       {
-         System.out.println("command: " + command);
-         e.printStackTrace();
+	  System.out.println("command: " + command);
+	  e.printStackTrace();
       }
    }
 
@@ -677,8 +694,7 @@ public class ReplicationTable extends HttpServlet
    public void test()
    {
       String command = "select * from Replication where replicationid = " + request.getParameter("replicationid");
-      String openconnection = "";
-      String secureconnection = "";
+      String target = "";
       String security = "";
       String response = "";
 
@@ -688,9 +704,11 @@ public class ReplicationTable extends HttpServlet
          ResultSet resultSet = statement.executeQuery(command);
          while (resultSet.next())
          {
-            openconnection = resultSet.getString("openconnection");
-            secureconnection = resultSet.getString("secureconnection");
             security = resultSet.getString("security");
+	    if (security.equals("0"))
+		target = resultSet.getString("openconnection");
+	    else 
+                target = resultSet.getString("secureconnection");
          }
          resultSet.close();
          statement.close();
@@ -702,24 +720,32 @@ public class ReplicationTable extends HttpServlet
          System.out.println("command: " + command);
          e.printStackTrace();
       }
-      Post post = null;
-      if (security.equals("0"))
-         post = new Post(openconnection + "/gratia-servlets/rmi", "update", "xxx");
-      else
-         post = new Post(secureconnection + "/gratia-servlets/rmi", "update", "xxx");
+      Post post = new Post(target + "/gratia-servlets/rmi", "update", "xxx");
       try
       {
          response = post.send();
       }
       catch (Exception e)
       {
-         message = "Error: " + cr + xp.parseException(e);
+         message = "Error for "+target+" : " + cr + xp.parseException(e);
          return;
       }
-      String[] results = split(response, ":");
-      if (!results[0].equals("OK"))
+      if (!post.success) {
+	  message = "Error for "+target+" : " + post.errorMsg;
+	  return;
+      }
+      try
       {
-         message = "Error: " + response;
+	  String[] results = split(response, ":");
+	  if (!results[0].equals("OK"))
+	      {
+		  message = "Error for "+target+" : " + response;
+		  return;
+	      }
+      } 
+      catch (Exception e)
+      {
+         message = "Error for "+target+" : " + cr + xp.parseException(e);
          return;
       }
       message = "Test Succeeded !!";
