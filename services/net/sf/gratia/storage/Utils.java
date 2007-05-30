@@ -50,7 +50,7 @@ public class Utils
     * @return double
     */
    public static double StringToDuration(String str) throws
-			DatatypeConfigurationException
+                        DatatypeConfigurationException
    {
       javax.xml.datatype.DatatypeFactory fac = javax.xml.datatype.
                                      DatatypeFactory.
@@ -68,7 +68,7 @@ public class Utils
     * @return double
     */
    public static String DurationToXml(double val) throws
-			DatatypeConfigurationException
+                        DatatypeConfigurationException
    {
       javax.xml.datatype.DatatypeFactory fac = javax.xml.datatype.
                                DatatypeFactory.
@@ -89,7 +89,7 @@ public class Utils
     */
    public static void GratiaError(String routine, String action,
                                                    String message, boolean fatal) throws
-			Exception
+                                  Exception
    {
       String full = "Error in " + routine + " during " + action + ": " +
            message;
