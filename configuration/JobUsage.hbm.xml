@@ -20,24 +20,6 @@
        <property name="Value" column="ResourceType" />
    </component>
 
-    <component name="RecordIdentity" class="RecordIdentity" insert="true">
-        <property name="recordId"
-              column="recordId"
-              type="string"/>
-			 <component name="CreateTime" class="DateElement" insert="true">
-									<property name="Value" column="CreateTime" type="timestamp"  />
-									<property name="Description" column="CreateTimeDescription" />
-									</component>
-        <component name="KeyInfo" class="KeyInfoType" insert="true">
-           <property name="Id"
-                 column="RecordKeyInfoId"
-                 type="string"/>
-           <property name="Content"
-                 column="RecordKeyInfoContent"
-                 type="string"/>
-        </component>
-    </component>
-
     <component name="JobIdentity" class="JobIdentity" insert="true">
       <property name="GlobalJobId"
              column="GlobalJobId"
@@ -129,10 +111,6 @@
    <component name="MachineName" class="StringElement" insert="true">
        <property name="Value" column="MachineName" />
        <property name="Description" column="MachineNameDescription" />
-   </component>
-   <component name="SiteName" class="StringElement" insert="true">
-       <property name="Value" column="SiteName" />
-       <property name="Description" column="SiteNameDescription" />
    </component>
    <component name="SubmitHost" class="StringElement" insert="true">
        <property name="Value" column="SubmitHost" />
@@ -250,16 +228,49 @@
           <property name="Description" />
        </composite-element>
    </bag>
-   <component name="ProbeName" class="StringElement" insert="true">
-       <property name="Value" column="ProbeName" />
-       <property name="Description" column="ProbeNameDescription" />
-   </component>
 
+   <join table="JobUsageRecord_Meta">
+      <key column="dbid"/>
 
-   <property name="ExtraXml" type="text"/>
-   <property name="RawXml" type="text" />
-	 <property name="ServerDate" column="ServerDate" type="timestamp"/>
-	 <property name="md5" column="md5"/>
+      <component name="RecordIdentity" class="RecordIdentity" insert="true">
+        <property name="recordId"
+              column="recordId"
+              type="string"/>
+         <component name="CreateTime" class="DateElement" insert="true">
+	    <property name="Value" column="CreateTime" type="timestamp"  />
+            <property name="Description" column="CreateTimeDescription" />
+        </component>
+        <component name="KeyInfo" class="KeyInfoType" insert="true">
+           <property name="Id"
+                 column="RecordKeyInfoId"
+                 type="string"/>
+           <property name="Content"
+                 column="RecordKeyInfoContent"
+                 type="string"/>
+        </component>
+      </component>
+
+     <component name="ProbeName" class="StringElement" insert="true">
+        <property name="Value" column="ProbeName" />
+        <property name="Description" column="ProbeNameDescription" />
+     </component>
+
+     <component name="SiteName" class="StringElement" insert="true">
+        <property name="Value" column="SiteName" />
+        <property name="Description" column="SiteNameDescription" />
+     </component>
+
+     <property name="ServerDate" column="ServerDate" type="timestamp"/>
+     <property name="md5" column="md5"/>
+
+   </join>
+
+   <join table = "JobUsageRecord_Xml">
+      <key column="dbid"/>
+      <property name="ExtraXml" type="text"/>
+      <property name="RawXml" type="text" />
+   </join>
+
 </class>
 
 </hibernate-mapping>
