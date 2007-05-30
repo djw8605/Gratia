@@ -73,10 +73,10 @@ public class HibernateWrapper
    {
       int i = 0;
 
+      String command = "select dbid from JobUsageRecord JUR where JUR.dbid = 1";
       try
       {
          org.hibernate.Session session = hibernateFactory.openSession();
-         String command = "from JobUsageRecord where dbid = 1";
          List result = session.createQuery(command).list();
          for (i = 0; i < result.size(); i++)
          {
@@ -97,10 +97,10 @@ public class HibernateWrapper
    {
       int i = 0;
 
+      String command = "from JobUsageRecord J where J.RecordId = 1";
       try
       {
          org.hibernate.Session session = hibernateFactory.openSession();
-         String command = "from JobUsageRecord where dbid = 1";
          List result = session.createQuery(command).list();
          for (i = 0; i < result.size(); i++)
          {

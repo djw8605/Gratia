@@ -137,7 +137,7 @@ public class ListenerThread extends Thread
 
       String table = current.getTableName();
 
-      String sql = "SELECT dbid from "+table+" where md5 = " + dq + md5key + dq;
+      String sql = "SELECT dbid from "+table+"_Meta"+" where md5 = " + dq + md5key + dq;
 
       org.hibernate.Session session2 = HibernateWrapper.getSession();
       dupdbid = 0;
@@ -373,24 +373,24 @@ public class ListenerThread extends Thread
                current = (Record)records.get(j);
                statusUpdater.update(current, xml);
 
-               // Logging.log("ListenerThread: " + ident + ":Before Duplicate Check");
+               Logging.log("ListenerThread: " + ident + ":Before Duplicate Check");
                if (gothistory && (md5key != null))
                   gotduplicate = gotDuplicate(current,current.getmd5());
                else
                   gotduplicate = gotDuplicate(current);
-               // Logging.log("ListenerThread: " + ident + ":After Duplicate Check");
+               Logging.log("ListenerThread: " + ident + ":After Duplicate Check");
 
                if (gotduplicate)
                {
                   goterror = true;
-                  // Logging.log("ListenerThread: " + ident + ":Before Save Duplicate");
+                  Logging.log("ListenerThread: " + ident + ":Before Save Duplicate");
                   if (gotreplication)
                      saveDuplicate("Replication", "Duplicate", dupdbid, current);
                   else if (gothistory)
                      ;
                   else
                      saveDuplicate("Probe", "Duplicate", dupdbid, current);
-                  // Logging.log("ListenerThread: " + ident + ":After Save Duplicate");
+                  Logging.log("ListenerThread: " + ident + ":After Save Duplicate");
                }
                else
                {
@@ -405,7 +405,7 @@ public class ListenerThread extends Thread
                      current.setRawXml(rawxml);
                   if (extraxml != null)
                      current.setExtraXml(extraxml);
-                  // Logging.log("ListenerThread: " + ident + ":Before Hibernate Save");
+                  Logging.log("ListenerThread: " + ident + ":Before Hibernate Save");
                   try
                   {
                      if (gothistory)
@@ -445,6 +445,7 @@ public class ListenerThread extends Thread
                   catch (Exception e)
                   {
                      goterror = true;
+		     e.printStackTrace();
                      if (HibernateWrapper.databaseUp())
                      {
                         if (gotreplication)

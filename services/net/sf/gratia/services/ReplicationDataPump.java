@@ -204,7 +204,7 @@ public class ReplicationDataPump extends Thread
       // create base retrieval
       //
 
-      command = "select count(*) from "+table+ cr +
+      command = "select count(*) from "+table+" , "+table+"_Meta"+ cr +
             "where dbid > " + dbid;
       if (probename.startsWith("Probe:"))
       {
@@ -252,7 +252,7 @@ public class ReplicationDataPump extends Thread
       Logging.log("ReplicationDataPump: " + replicationid + " Executed Command: " + command);
       Logging.log("ReplicationDataPump: " + replicationid + " Records: " + count);
 
-      command = "select dbid from "+table + cr +
+      command = "select dbid from "+table + "_Meta" + cr +
             "where dbid > " + dbid;
       if (!probename.equals("All"))
       {
@@ -354,7 +354,7 @@ public class ReplicationDataPump extends Thread
       Logging.log("ReplicationDataPump: getXML: dbid: " + dbid);
 
       session = HibernateWrapper.getSession();
-      String command = "from "+table+" where dbid = " + dbid;
+      String command = "from "+table+" where "+table+".dbid = " + dbid;
       List result = session.createQuery(command).list();
       for (i = 0; i < result.size(); i++)
       {

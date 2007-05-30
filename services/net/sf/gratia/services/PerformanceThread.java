@@ -133,7 +133,7 @@ public class PerformanceThread extends Thread
 
       String table = record.getTableName();
       
-      String sql = "SELECT dbid from "+table+" where md5 = " + dq + md5key + dq;
+      String sql = "SELECT dbid from "+table+"_Meta where md5 = " + dq + md5key + dq;
 
       org.hibernate.Session session2 = HibernateWrapper.getSession();
       dupdbid = 0;

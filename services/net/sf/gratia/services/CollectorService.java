@@ -15,6 +15,8 @@ import java.sql.*;
 
 import java.security.*;
 
+import net.sf.gratia.storage.DatabaseMaintenance;
+
 public class CollectorService implements ServletContextListener
 {
    public String rmibind;
@@ -159,6 +161,14 @@ public class CollectorService implements ServletContextListener
          HibernateWrapper.start();
 
          //
+         // Upgrade the database before starting Hibernate
+         // (For example changing a table name or splitting 
+         //  a table);
+         // 
+
+         upgradeDatabase();
+
+         //
          // zap database
          //
 
@@ -177,10 +187,10 @@ public class CollectorService implements ServletContextListener
          int maxthreads = Integer.parseInt(p.getProperty("service.listener.threads"));
          queues = new String[maxthreads];
 
-         Execute.execute("mkdir " + configurationPath + "/data");
+         Execute.execute("mkdir -p " + configurationPath + "/data");
          for (i = 0; i < maxthreads; i++)
          {
-            Execute.execute("mkdir " + configurationPath + "/data/thread" + i);
+            Execute.execute("mkdir -p " + configurationPath + "/data/thread" + i);
             queues[i] = configurationPath + "/data/thread" + i;
             Logging.log("Created Q: " + queues[i]);
          }
@@ -365,32 +375,32 @@ public class CollectorService implements ServletContextListener
       String keystore = System.getProperty("catalina.home") + "/gratia/keystore";
       keystore = xp.replaceAll(keystore, "\\", "/");
       String command1[] =
-						{"keytool",
-						 "-genkey",
-						 "-dname",
-						 "cn=server, ou=Fermi-GridAccounting, o=Fermi, c=US",
-						 "-alias",
-						 "server",
-						 "-keystore",
-						 keystore,
-						 "-keypass",
-						 "server",
-						 "-storepass",
-						 "server"};
+                                                {"keytool",
+                                                 "-genkey",
+                                                 "-dname",
+                                                 "cn=server, ou=Fermi-GridAccounting, o=Fermi, c=US",
+                                                 "-alias",
+                                                 "server",
+                                                 "-keystore",
+                                                 keystore,
+                                                 "-keypass",
+                                                 "server",
+                                                 "-storepass",
+                                                 "server"};
 
       int exitValue1 = Execute.execute(command1);
 
       String command2[] =
-						{"keytool",
-						 "-selfcert",
-						 "-alias",
-						 "server",
-						 "-keypass",
-						 "server",
-						 "-keystore",
-						 keystore,
-						 "-storepass",
-						 "server"};
+                                                {"keytool",
+                                                 "-selfcert",
+                                                 "-alias",
+                                                 "server",
+                                                 "-keypass",
+                                                 "server",
+                                                 "-keystore",
+                                                 keystore,
+                                                 "-storepass",
+                                                 "server"};
 
       if (exitValue1 == 0)
          Execute.execute(command2);
@@ -404,21 +414,21 @@ public class CollectorService implements ServletContextListener
       String configurationPath = System.getProperty("catalina.home") + "/gratia/";
       keystore = xp.replaceAll(keystore, "\\", "/");
       String command1[] =
-						{
-								"openssl",
-								"pkcs12",
-								"-export",
-								"-out",
-								configurationPath + "server.pkcs12",
-								"-inkey",
-								p.getProperty("service.vdt.key.file"),
-								"-in",
-								p.getProperty("service.vdt.cert.file"),
-								"-passin",
-								"pass:server",
-								"-passout",
-								"pass:server"
-						};
+                                                {
+                                                                "openssl",
+                                                                "pkcs12",
+                                                                "-export",
+                                                                "-out",
+                                                                configurationPath + "server.pkcs12",
+                                                                "-inkey",
+                                                                p.getProperty("service.vdt.key.file"),
+                                                                "-in",
+                                                                p.getProperty("service.vdt.cert.file"),
+                                                                "-passin",
+                                                                "pass:server",
+                                                                "-passout",
+                                                                "pass:server"
+                                                };
 
       int exitValue1 = Execute.execute(command1);
 
@@ -440,12 +450,8 @@ public class CollectorService implements ServletContextListener
       FlipSSL.flip();
    }
 
-   public void zapDatabase()
+   public void upgradeDatabase()
    {
-      String dq = "\"";
-      String comma = ",";
-      XP xp = new XP();
-      int i = 0;
 
       Properties p = net.sf.gratia.services.Configuration.getProperties();
 
@@ -455,12 +461,6 @@ public class CollectorService implements ServletContextListener
       String password = p.getProperty("service.mysql.password");
 
       java.sql.Connection connection;
-      Statement statement;
-      ResultSet resultSet;
-
-      String gratiaVersion = p.getProperty("gratia.version");
-      String gratiaDatabaseVersion = p.getProperty("gratia.database.version");
-      String useReportAuthentication = p.getProperty("use.report.authentication");
 
       try
       {
@@ -473,71 +473,41 @@ public class CollectorService implements ServletContextListener
          Logging.warning(xp.parseException(e));
          return;
       }
+  
+      DatabaseMaintenance checker = new DatabaseMaintenance(connection);
+      checker.Upgrade();
 
-      String commands1[] = 
-						{
-								"alter table CETable add unique index index02(facility_name)",
-								"alter table CEProbes add unique index index02(probename)",
-								"insert into CETable(facility_name) values(" + dq + "Unknown" + dq + ")",
-								//
-								// the following were added to get rid of unused indexes
-								//
-								"alter table JobUsageRecord drop index if exists index04",
-								"alter table JobUsageRecord drop index if exists index06",
-								"alter table JobUsageRecord drop index if exists index07",
-								//
-								// original index structure
-								//
-								"alter table JobUsageRecord add index index02(EndTime)",
-								"alter table JobUsageRecord add index index03(ProbeName)",
-								// "alter table JobUsageRecord add index index04(HostDescription)",
-								"alter table JobUsageRecord add index index05(StartTime)",
-								// "alter table JobUsageRecord add index index06(GlobalJobid)",
-								// "alter table JobUsageRecord add index index07(LocalJobid)",
-								"alter table JobUsageRecord add index index08(Host(255))",
-								"alter table JobUsageRecord drop index if exists index09",
-								"alter table JobUsageRecord drop index if exists index10",
-								"alter table JobUsageRecord add index index11(ServerDate)",
-								"alter table JobUsageRecord add unique index index12(md5)",
-								"alter table JobUsageRecord add index index13(ServerDate)",
-								//
-								// new indexes for authentication
-								//
-								"alter table JobUsageRecord add index index14(VOName)",
-								"alter table JobUsageRecord add index index15(CommonName)",
-								//
-								"alter table Security add unique index index02(alias)",
-								"alter table CPUInfo change column NodeName HostDescription varchar(255)",
-								//
-								// New index for ResourceType
-								//
-								"alter table JobUsageRecord add index index16(ResourceType)",
-								//
-								// place holder to initialize SystemProplist
-								//
-								"delete from SystemProplist",
-								"insert into SystemProplist(car,cdr) values(" + dq + "use.report.authentication" + dq + comma + dq + useReportAuthentication + dq + ")",
-								"insert into SystemProplist(car,cdr) values(" + dq + "gratia.database.version" + dq + comma + dq + gratiaDatabaseVersion + dq + ")",
-								"insert into SystemProplist(car,cdr) values(" + dq + "gratia.database.version" + dq + comma + dq + gratiaDatabaseVersion + dq + ")",
-								"delete from CPUMetricTypes",
-								"insert into CPUMetricTypes(CPUMetricType) values(" + dq + "wallclock" + dq + ")",
-								"insert into CPUMetricTypes(CPUMetricType) values(" + dq + "process" + dq + ")"
+   }
 
-						};
+   public void zapDatabase()
+   {
+      XP xp = new XP();
+      int i = 0;
 
-      for (i = 0; i < commands1.length; i++)
-         try
-         {
-            Logging.log("Executing: " + commands1[i]);
-            statement = connection.createStatement();
-            statement.executeUpdate(commands1[i]);
-            Logging.log("Command: OK: " + commands1[i]);
-         }
-         catch (Exception e)
-         {
-            Logging.log("Command: Error: " + commands1[i] + " : " + e);
-         }
+      Properties p = net.sf.gratia.services.Configuration.getProperties();
 
+      String driver = p.getProperty("service.mysql.driver");
+      String url = p.getProperty("service.mysql.url");
+      String user = p.getProperty("service.mysql.user");
+      String password = p.getProperty("service.mysql.password");
+
+      java.sql.Connection connection;
+
+      try
+      {
+         Class.forName(driver);
+         connection = (java.sql.Connection)DriverManager.getConnection(url, user, password);
+      }
+      catch (Exception e)
+      {
+         Logging.warning("CollectorService: Error During zapDatabase: " + e);
+         Logging.warning(xp.parseException(e));
+         return;
+      }
+  
+      DatabaseMaintenance checker = new DatabaseMaintenance(connection);
+      checker.CheckIndices();
+      checker.AddDefaults();
    }
 
    public void checkStoredProcedures()
