@@ -2,8 +2,7 @@ package net.sf.gratia.services;
 
 import java.util.*;
 
-import java.lang.management.*; 
-import javax.management.*; 
+import javax.management.*;
 import javax.management.remote.*;
 
 //
@@ -20,70 +19,57 @@ import javax.management.remote.*;
 // note that this will only work with the 5.x series of tomcat
 //
 
-public class FlipSSL
-{
+public class FlipSSL {
 
-		public static boolean flip()
-		{
-				boolean result = false;
-				
-				if (System.getProperty("com.sun.management.jmxremote.port") == null)
-						return result;
+    public static boolean flip() {
+        boolean result = false;
 
-				String urlstring = "service:jmx:rmi:///jndi/rmi://localhost:xxxx/jmxrmi";
-				String mbeanName = "Catalina:type=Connector,port=xxxx";
+        if (System.getProperty("com.sun.management.jmxremote.port") == null)
+            return result;
 
-				urlstring = urlstring.replace("xxxx",System.getProperty("com.sun.management.jmxremote.port"));
-				mbeanName = mbeanName.replace("xxxx",System.getProperty("ssl.port"));
-				
-				JMXConnector jmxc = null;
+        String urlstring = "service:jmx:rmi:///jndi/rmi://localhost:xxxx/jmxrmi";
+        String mbeanName = "Catalina:type=Connector,port=xxxx";
 
-				try
-						{
-						
-								JMXServiceURL url = new JMXServiceURL(urlstring); 
-								jmxc = JMXConnectorFactory.connect(url,null); 
-								MBeanServerConnection mbsc = jmxc.getMBeanServerConnection(); 
+        urlstring = urlstring.replace("xxxx", System
+                .getProperty("com.sun.management.jmxremote.port"));
+        mbeanName = mbeanName.replace("xxxx", System.getProperty("ssl.port"));
 
-								Set mBeanSet = mbsc.queryMBeans(null, null);
-								Iterator mBeanSetIterator = mBeanSet.iterator();
-								while (mBeanSetIterator.hasNext()) 
-										{
-												ObjectInstance objectInstance = (ObjectInstance) mBeanSetIterator.next();
-												ObjectName objectName = objectInstance.getObjectName();
-												if (objectName.toString().equals(mbeanName))
-														{
-																//
-																// now call
-																//
-																Logging.log("Flipping");
-																mbsc.invoke(objectName,"stop",null,null);
-																mbsc.invoke(objectName,"start",null,null);
-																jmxc.close();
-																return true;
-														}
-										}
-								Logging.log("Couldn't Find: " + mbeanName);
-								jmxc.close();
-								return result;
-						}
-				catch (Exception e)
-						{
-								e.printStackTrace();
-						}
-				finally
-						{
-								try
-										{
-												jmxc.close();
-										}
-								catch (Exception ignore)
-										{
-										}
-								return result;
-						}
-		}
+        JMXConnector jmxc = null;
+
+        try {
+
+            JMXServiceURL url = new JMXServiceURL(urlstring);
+            jmxc = JMXConnectorFactory.connect(url, null);
+            MBeanServerConnection mbsc = jmxc.getMBeanServerConnection();
+
+            Set mBeanSet = mbsc.queryMBeans(null, null);
+            Iterator mBeanSetIterator = mBeanSet.iterator();
+            while (mBeanSetIterator.hasNext()) {
+                ObjectInstance objectInstance = (ObjectInstance) mBeanSetIterator
+                        .next();
+                ObjectName objectName = objectInstance.getObjectName();
+                if (objectName.toString().equals(mbeanName)) {
+                    //
+                    // now call
+                    //
+                    Logging.log("Flipping");
+                    mbsc.invoke(objectName, "stop", null, null);
+                    mbsc.invoke(objectName, "start", null, null);
+                    jmxc.close();
+                    return true;
+                }
+            }
+            Logging.log("Couldn't Find: " + mbeanName);
+            jmxc.close();
+            return result;
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                jmxc.close();
+            } catch (Exception ignore) {
+            }
+            return result;
+        }
+    }
 }
-
-
- 
