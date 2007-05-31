@@ -1,0 +1,55 @@
+import java.sql.*;
+
+driver = "com.mysql.jdbc.Driver";
+url1 = "jdbc:mysql://cd-psg3.fnal.gov:3320/gratia_psacct";
+url2 = "jdbc:mysql://cd-psg3.fnal.gov:3320/gratia";
+user = "gratia";
+password = "proto";
+
+xp = new XP();
+
+Class.forName(driver).newInstance();
+connection1 = DriverManager.getConnection(url1,user,password);
+connection2 = DriverManager.getConnection(url2,user,password);
+
+table1 = new Hashtable();
+table2 = new Hashtable();
+
+command = "select Node from NodeTable where HostDescription != 'Unknown'";
+statement = connection1.prepareStatement(command);
+System.out.println("Executing: " + command);
+resultSet = statement.executeQuery(command);
+while(resultSet.next())
+{
+	node = resultSet.getString("Node");
+	table1.put(node,node);
+}
+resultSet.close();
+statement.close();
+
+print("table1: " + table1.size());
+total = 0;
+
+for (Enumeration x = table1.keys(); x.hasMoreElements();)
+{
+		command = "select count(*) as total,ProbeName,Host from JobUsageRecord where Host like '#v1#%' group by Host";
+		host = (String) x.nextElement();
+		command = xp.replace(command,"#v1#",host);
+		statement = connection2.prepareStatement(command);
+		System.out.println("Executing: " + command);
+		resultSet = statement.executeQuery(command);
+		while(resultSet.next())
+				{
+						ihost = resultSet.getString("Host");
+						itotal = resultSet.getLong("total");
+						iprobe = resultSet.getString("ProbeName");
+						print("host: " + ihost + " probe: " + iprobe + " total: " + itotal);
+						total = total + itotal;
+						table2.put(iprobe,itotal);
+				}
+		resultSet.close();
+		statement.close();
+}
+
+print("total: " + total);
+print(table2);

@@ -1,0 +1,16 @@
+import java.util.*;
+
+import java.lang.management.*; 
+import javax.management.*; 
+import javax.management.remote.*;
+
+String urlstring = "service:jmx:rmi:///jndi/rmi://localhost:8004/jmxrmi";
+String mbeanName = "org.apache.activemq:BrokerName=localhost,Type=Queue,Destination=Q";
+
+JMXConnector jmxc = null;
+
+JMXServiceURL url = new JMXServiceURL(urlstring); 
+jmxc = JMXConnectorFactory.connect(url,null); 
+MBeanServerConnection mbsc = jmxc.getMBeanServerConnection(); 
+
+print(mbsc.getAttribute(new ObjectName(mbeanName),"QueueSize"));

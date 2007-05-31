@@ -1,0 +1,100 @@
+import java.util.*;
+import java.io.*;
+import java.net.*;
+import java.rmi.*;
+import java.security.*;
+
+connection = "http://cd-psg5.fnal.gov:8880/gratia-servlets/rmi";
+
+Object lock = new Object();
+int imax = 100000;
+int maxthreads = 10;
+int irecords = 0;
+
+XP xp = new XP();
+String directory = "/Users/glr/Documents/gratia/";
+String[] files = xp.getFileList(directory);
+String xml = xp.get(files[1]);
+print("file: " + files[1]);
+print("xml: " + xml);
+
+public class Test extends Thread
+{
+		int ithread = 0;
+		String xml = "";
+		
+		public Test(int ithread,String xml)
+		{
+				this.ithread = ithread;
+				this.xml = xml;
+				print("created");
+		}
+
+		public void run()
+		{
+				while(true)
+						{
+								String newxml = new String(xml);
+								synchronized(lock)
+										{
+												if (irecords > imax)
+														{
+																print("Thread:" + ithread + ":Exiting");
+																return;
+														}
+												irecords++;
+												if ((irecords % 1000) == 0)
+														print("irecords: " + irecords);
+												// newxml = xp.replace(newxml,"11123","" + irecords);
+												// newxml = xp.replace(newxml,"44122","" + irecords);
+										}
+								try
+										{
+												Post post = new Post(connection,"update",newxml);
+												String status = post.send();
+												if (! status.equals("OK"))
+														{
+																print("Thread:" + ithread + ":Error From Post: " + status);
+																Thread.sleep(60 * 1000);
+														}
+										}
+								catch (Exception e)
+										{
+												e.printStackTrace();
+												return;
+										}
+						}
+		}
+}		
+
+
+Test[] threads = new Test[maxthreads];
+int i = 0;
+
+for (i = 0; i < maxthreads; i++)
+		threads[i] = new Test(i,xml);
+for (i = 0; i < maxthreads; i++)
+		threads[i].start();
+
+start = System.currentTimeMillis();
+
+boolean check = true;
+
+while(check)
+		{
+				boolean flag = false;
+				for (i = 0; i < maxthreads; i++)
+						if (threads[i].isAlive())
+								flag = true;
+				if (flag)
+						Thread.sleep(10 * 1000);
+				else
+						check = false;
+		}
+
+end = System.currentTimeMillis();
+
+print("records: " + irecords + " elapsed: " + (end - start));
+
+1print("Done !!");
+

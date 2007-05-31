@@ -1,0 +1,89 @@
+import java.sql.*;
+
+driver = "com.mysql.jdbc.Driver";
+url = "jdbc:mysql://cd-psg5.fnal.gov:3320/test";
+user = "gratia";
+password = "proto";
+irecords = 0;
+imax = 500000;
+maxthreads = 20;
+Object lock = new Object();
+
+
+public class Test extends Thread
+{
+		Connection connection;
+		int ithread = 0;
+		
+		public Test(int ithread)
+		{
+				this.ithread = ithread;
+				Class.forName(driver).newInstance();
+				connection = DriverManager.getConnection(url,user,password);
+		}
+		
+		public void run()
+		{
+				String command = "";
+				String dq = "'";
+				
+				while(true)
+						{
+								synchronized(lock)
+										{
+												if (irecords > imax)
+														{
+																print("Thread:" + ithread + ":Exiting");
+																return;
+														}
+												irecords++;
+												if ((irecords % 1000) == 0)
+														print("irecord: " + irecords);
+										}
+								command = 
+										"insert into JobUsageRecord(GlobalJobId,KeyInfoContent,Charge)" +
+										" values(" + dq + "dummy" + dq + "," +
+										dq + "dummy" + dq + "," + 0 + ")";
+								statement = connection.createStatement();
+								try
+										{
+												statement.executeUpdate(command);
+										}
+								catch (Exception e)
+										{
+												print("Error: " + e);
+												print("command: " + command);
+												return;
+										}
+								statement.close();
+						}
+		}
+}
+
+Test[] threads = new Test[maxthreads];
+
+for (int i = 0; i < maxthreads; i++)
+		threads[i] = new Test(i);
+for (int i = 0; i < maxthreads; i++)
+		threads[i].start();
+
+start = System.currentTimeMillis();
+
+boolean check = true;
+
+while(check)
+		{
+				boolean flag = false;
+				for (i = 0; i < maxthreads; i++)
+						if (threads[i].isAlive())
+								flag = true;
+				if (flag)
+						Thread.sleep(10 * 1000);
+				else
+						check = false;
+		}
+
+end = System.currentTimeMillis();
+
+print("records: " + irecords + " elapsed: " + (end - start));
+

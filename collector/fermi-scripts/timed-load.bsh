@@ -1,0 +1,55 @@
+import java.util.*;
+import java.io.*;
+import java.net.*;
+import java.rmi.*;
+import net.sf.gratia.services.*;
+
+connection = "http://localhost:8880/gratia-servlets/rmi";
+
+directory = "/fermi/production-data";
+int imax = 500;
+
+xp = new XP();
+
+
+String[] files = xp.getFileList(directory);
+print("Files: " + files.length);
+print("File[0]: " + files[0]);
+print("");
+
+start = System.currentTimeMillis();
+
+int i = 0;
+String response;
+
+for (i = 0;(i < files.length) && (i < imax) ; i++)
+{
+		xml = xp.get(files[i]);
+		try
+				{
+						Post post = new Post(connection,"update",xml);
+						String status = post.send();
+						if (! status.equals("OK"))
+								{
+										print("Error From Post: " + status);
+										return;
+								}
+				}
+		catch (Exception e)
+				{
+						print("xml: " + xml);
+						e.printStackTrace();
+						return;
+				}
+		if ((i % 25) == 0)
+				System.out.print("<" + i + ">");
+		Thread.sleep(100);
+}
+
+stop = System.currentTimeMillis();
+
+print("");
+print("Total Records: " + i);
+print("Elapsed: " + (stop - start));
+print("Done !!");
+

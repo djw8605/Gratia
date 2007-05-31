@@ -1,0 +1,69 @@
+import java.util.*;
+import java.io.*;
+import java.net.*;
+import java.rmi.*;
+import java.security.*;
+
+// connection = "http://192.168.0.160:8880/gratia-servlets/rmi";
+// connection = "http://cd-psg3.fnal.gov:8891/gratia-servlets/rmi";
+connection = "http://cd-psg2.fnal.gov:8881/gratia-servlets/rmi";
+// connection = "http://cd-psg2.fnal.gov:8884/gratia-servlets/rmi";
+
+com.sun.net.ssl.HostnameVerifier hv=new com.sun.net.ssl.HostnameVerifier() 
+		{
+				public boolean verify(String urlHostname, String certHostname) 
+				{
+						System.out.println("url host name: " + urlHostname);
+						System.out.println("cert host name: " + certHostname);
+						System.out.println("WARNING: Hostname is not matched for cert.");
+						return true;
+				}
+		};
+com.sun.net.ssl.HttpsURLConnection.setDefaultHostnameVerifier(hv);
+
+directory = "/Users/glr/Documents/gratia/";
+int imax = 100;
+
+xp = new XP();
+
+
+String[] files = xp.getFileList(directory);
+print("Files: " + files.length);
+print("File[0]: " + files[0]);
+print("");
+
+start = System.currentTimeMillis();
+
+int i = 0;
+String response;
+
+for (i = 0;(i < files.length) && (i < imax); i++)
+{
+		xml = xp.get(files[i]);
+		try
+				{
+						Post post = new Post(connection,"update",xml);
+						String status = post.send();
+						if (! status.equals("OK"))
+								{
+										print("Error From Post: " + status);
+										Thread.sleep(60 * 1000);
+								}
+				}
+		catch (Exception e)
+				{
+						print("xml: " + xml);
+						e.printStackTrace();
+						return;
+				}
+		if ((i % 10) == 0)
+				System.out.print("<" + i + ">");
+}
+
+stop = System.currentTimeMillis();
+
+print("");
+print("Total Records: " + i);
+print("Elapsed: " + (stop - start));
+print("Done !!");
+

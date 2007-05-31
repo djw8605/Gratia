@@ -1,0 +1,55 @@
+import java.util.*;
+import java.io.*;
+import java.net.*;
+import java.rmi.*;
+import net.sf.gratia.services.*;
+
+connection = "rmi://glribm:17000/gratia";
+
+directory = "/fermi/test-data";
+int imax = 100;
+
+xp = new XP();
+
+
+String[] files = xp.getFileList(directory);
+print("Files: " + files.length);
+print("File[0]: " + files[0]);
+print("");
+
+JMSProxy proxy = (JMSProxy) Naming.lookup(connection);
+
+start = System.currentTimeMillis();
+
+int i = 0;
+String response;
+
+for (i = 0;(i < files.length) && (i < imax); i++)
+{
+		xml = xp.get(files[i]);
+		try
+				{
+						boolean status = proxy.update(xml);
+						if (! status)
+								{
+										print("Error From Proxy");
+										return;
+								}
+				}
+		catch (Exception e)
+				{
+						print("xml: " + xml);
+						e.printStackTrace();
+						return;
+				}
+		if ((i % 25) == 0)
+				System.out.print("<" + i + ">");
+}
+
+stop = System.currentTimeMillis();
+
+print("");
+print("Total Records: " + i);
+print("Elapsed: " + (stop - start));
+print("Done !!");
+

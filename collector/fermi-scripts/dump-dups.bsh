@@ -1,0 +1,31 @@
+import java.sql.*;
+
+driver = "com.mysql.jdbc.Driver";
+url = "jdbc:mysql://cd-psg6.fnal.gov:3320/gratia_itb";
+user = "gratia";
+password = "proto";
+irecords = 0;
+
+xp = new XP();
+
+Class.forName(driver).newInstance();
+connection = DriverManager.getConnection(url,user,password);
+
+command = "select rawxml from DupRecord where error = 'parse'";
+// command = "select dbid,RawXml from JobUsageRecord where MachineName like '%flxi02%' order by dbid";
+// command = "select dbid,RawXml from JobUsageRecord where date(EndTime) = '2006-09-18'";
+
+statement = connection.prepareStatement(command,java.sql.ResultSet.TYPE_FORWARD_ONLY,java.sql.ResultSet.CONCUR_READ_ONLY);
+statement.setFetchSize(Integer.MIN_VALUE);
+resultSet = statement.executeQuery(command);
+while(resultSet.next())
+{
+		irecords++;
+		String rawxml = resultSet.getString("rawxml");
+		xp.save("/Users/glr/Documents/itb/" + irecords + ".xml",rawxml);
+		if ((irecords % 100) == 0)
+				System.out.print("<" + irecords + ">");
+}
+print("total: " + irecords);
+print("Done !!");
+

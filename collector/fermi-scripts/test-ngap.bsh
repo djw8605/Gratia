@@ -1,0 +1,58 @@
+import java.util.*;
+import java.io.*;
+import java.net.*;
+import java.rmi.*;
+import java.security.*;
+
+destination = "http://localhost:8880/gratia-administration/monitor-status.html";
+destination2 = "http://localhost:8880/gratia-administration/monitor-status.html?probename=psacct:cmswc1.fnal.gov";
+destination3 = "http://localhost:8880/gratia-administration/monitor-status.html?host=" + 
+						 URLEncoder.encode("cmswn023.fnal.gov (primary)");
+
+//
+// generic request
+//
+
+URL url = new URL(destination);
+URLConnection connection = url.openConnection();
+BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+String line;
+received = new StringBuffer();
+
+while ((line = reader.readLine()) != null)
+		received.append(line);
+reader.close();
+
+print("result: " + received.toString());
+
+//
+// probe request
+//
+
+URL url = new URL(destination2);
+URLConnection connection = url.openConnection();
+BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+String line;
+received = new StringBuffer();
+
+while ((line = reader.readLine()) != null)
+		received.append(line);
+reader.close();
+
+print("result: " + received.toString());
+
+//
+// host request
+//
+
+URL url = new URL(destination3);
+URLConnection connection = url.openConnection();
+BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+String line;
+received = new StringBuffer();
+
+while ((line = reader.readLine()) != null)
+		received.append(line);
+reader.close();
+
+print("result: " + received.toString());

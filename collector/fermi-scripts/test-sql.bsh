@@ -1,0 +1,26 @@
+import java.sql.*;
+
+driver = "com.mysql.jdbc.Driver";
+url = "jdbc:mysql://cd-psg3.fnal.gov:3320/gratia";
+user = "root";
+password = "lisp01";
+irecords = 0;
+imax = 5000;
+
+xp = new XP();
+
+Class.forName(driver).newInstance();
+connection = DriverManager.getConnection(url,user,password);
+
+command = "show triggers";
+
+statement = connection.prepareStatement(command);
+resultSet = statement.executeQuery(command);
+while(resultSet.next() && (irecords < imax))
+{
+		irecords++;
+		System.out.print("<" + irecords + ">");
+}
+print("");
+print("Done !!");
+

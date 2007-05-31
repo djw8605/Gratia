@@ -1,0 +1,85 @@
+import java.util.*;
+import java.io.*;
+import java.net.*;
+
+host = "localhost";
+port = 17100;
+directory = "/fermi/production-data";
+int imax = 10000;
+
+xp = new XP();
+
+static Socket socket;
+
+String readSocket() throws Exception
+{
+		DataInputStream input = new DataInputStream(socket.getInputStream());
+		byte[] buffer = new byte[4 * 4096];
+		int count = input.read(buffer);
+		String request = new String(buffer,0,count);
+		return request;
+}
+  
+void closeSocket()
+{
+		try
+				{
+						socket.close();
+				}
+		catch (Exception ignore)
+				{
+				}
+}
+
+writeSocket(String message) throws Exception
+{
+		if (message == null)
+				return;
+		DataOutputStream output = new DataOutputStream(socket.getOutputStream());
+		output.write(message.getBytes(),0,message.getBytes().length);
+}
+
+
+String[] files = xp.getFileList(directory);
+print("Files: " + files.length);
+print("File[0]: " + files[0]);
+print("");
+
+start = System.currentTimeMillis();
+
+int i = 0;
+String response;
+
+for (i = 0;(i < files.length) && (i < imax); i++)
+{
+		xml = xp.get(files[i]);
+		try
+				{
+						socket = new Socket(host,port);
+						writeSocket(xml);
+						response = readSocket();
+				}
+		catch (Exception e)
+				{
+						print("xml: " + xml);
+						e.printStackTrace();
+						return;
+				}
+
+		if (! response.equals("OK"))
+				{
+						print("Error: " + response);
+						closeSocket();
+						return;
+				}
+		if ((i % 25) == 0)
+				System.out.print("<" + i + ">");
+}
+
+stop = System.currentTimeMillis();
+
+print("");
+print("Total Records: " + i);
+print("Elapsed: " + (stop - start));
+print("Done !!");
+
