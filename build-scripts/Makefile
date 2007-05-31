@@ -1,41 +1,65 @@
 
-PLATFORM := $(shell uname)
+PLATFORM := ${shell uname}
 
+# tarbal version
 gratia_reporting_version=v0.12.2
 gratia_services_version=v0.12.2
 
-base=../../
-root=../
-tarballdir=tarball
-services=$(root)services
-reports=${base}GratiaReports
-reporting=${base}GratiaReporting
-servlets=$(root)servlets
-soap=$(root)soap
-administration=$(root)administration
-security=$(root)security
-jars=$(root)jars
-ifeq ($(filter CYGWIN%,$(PLATFORM)),)
+# define usefull variables
+base=..
+
+target=${base}/target
+
+# module top location
+collector=${base}/collector
+common=${base}/common
+docs=${base}/docs
+probes=${base}/probe
+reporting=${base}/reporting
+
+# collector modules
+services=${collector}/gratia-services
+servlets=${collector}/gratia-servlets
+soap=${collector}/gratia-soap
+administration=${collector}/gratia-administration
+
+# reporting modules
+reports=${reporting}/gratia-reports
+reportsrc=${reporting}/gratia-reporting
+birtwars=${reporting}/birt-wars
+
+# common modules
+configuration=${common}/configuration
+security=${common}/gratia-security
+util=${common}/gratia-util
+commonLib=${common}/lib
+
+# check where we are as the tar file ownership cannot be set correctely on cygwin
+
+ifeq ($(filter CYGWIN%,${PLATFORM}),)
 tarowner=--owner=root --group=root
-classpath=.:$(root)services:$(root)servlets:$(root)soap:$(root)administration:${base}GratiaReporting/src:$(root)security
+classpath=.:${services}/:${servlets}/:${soap}/:${administration}/:${reportsrc}/src:${security}/:${util}/
 else
-warn := $(shell echo "Building the tar file on cygwin will result in incorrect ownership" 1>&2 )
+warn := ${shell echo "Building the tar file on cygwin will result in incorrect ownership" 1>&2 }
 tarowner=
-classpath=.\;$(root)services\;$(root)servlets\;$(root)soap\;$(root)administration\;${base}GratiaReporting/src;$(root)security
+classpath=.\;${services}\;${servlets}\;${soap}\;${administration}\;${reportsrc}/src;${security}:${util}
 endif
 
+
 clean:
-	find ${base} -name "*class" -exec rm -f {} \;
-	find ${base} -name "*~" -exec rm -f {} \;
-	find ${base} -name "*#" -exec rm -f {} \;
-	find ${base} -name "#*" -exec rm -f {} \;
-	rm -f -r $(root)target
-	mkdir $(root)target
+	find ${base}/ -name "*class" -exec rm -f {} \;
+	find ${base}/ -name "*~" -exec rm -f {} \;
+	find ${base}/ -name "*#" -exec rm -f {} \;
+	find ${base}/ -name "#*" -exec rm -f {} \;
+	rm -f -r ${target}
+	mkdir ${target}
+
+# services will eventually need the util package
 
 services:
 	rm -f -r war
 	mkdir war
-	mkdir war/meta-inf
+	mkdir war/META-INF
 	mkdir war/WEB-INF
 	mkdir war/WEB-INF/classes
 	mkdir war/WEB-INF/classes/net
@@ -45,23 +69,23 @@ services:
 	mkdir war/WEB-INF/classes/net/sf/gratia/storage
 	mkdir war/WEB-INF/lib
 	rm -f -r net
-	javac -cp ${classpath} -extdirs $(jars) ../services/net/sf/gratia/services/*.java
-	javac -cp ${classpath} -extdirs $(jars) ../services/net/sf/gratia/storage/*.java
+	javac -cp ${classpath} -extdirs ${commonLib} ${services}/net/sf/gratia/services/*.java
+	javac -cp ${classpath} -extdirs ${commonLib} ${services}/net/sf/gratia/storage/*.java
 	rmic -vcompat -classpath ${classpath} -d . net.sf.gratia.services.JMSProxyImpl
-	cp net/sf/gratia/services/* ../services/net/sf/gratia/services
+	cp net/sf/gratia/services/* ${services}/net/sf/gratia/services
 	rm -f -r net
 	cp ${services}/net/sf/gratia/services/*.class war/WEB-INF/classes/net/sf/gratia/services
 	cp ${services}/net/sf/gratia/storage/*.class war/WEB-INF/classes/net/sf/gratia/storage
-	cp $(jars)/*.jar war/WEB-INF/lib
+	cp ${commonLib}/*.jar war/WEB-INF/lib
 	rm -f  war/WEB-INF/lib/serv*
 	cp ${services}/net/sf/gratia/services/web.xml war/WEB-INF/web.xml
-	jar -cfM ../target/gratia-services.war -C war .
+	jar -cfM ${target}/gratia-services.war -C war .
 	rm -f -r war
 
-servlets:	services
+servlets: services
 	rm -f -r war
 	mkdir war
-	mkdir war/meta-inf
+	mkdir war/META-INF
 	mkdir war/WEB-INF
 	mkdir war/WEB-INF/classes
 	mkdir war/WEB-INF/classes/net
@@ -70,22 +94,22 @@ servlets:	services
 	mkdir war/WEB-INF/classes/net/sf/gratia/services
 	mkdir war/WEB-INF/classes/net/sf/gratia/servlets
 	mkdir war/WEB-INF/lib
-	javac -cp ${classpath} -extdirs $(jars) ../servlets/net/sf/gratia/servlets/*.java
+	javac -cp ${classpath} -extdirs ${commonLib} ${servlets}/net/sf/gratia/servlets/*.java
 	cp ${servlets}/net/sf/gratia/servlets/*.class war/WEB-INF/classes/net/sf/gratia/servlets
-	cp ../services/net/sf/gratia/services/Logging.class war/WEB-INF/classes/net/sf/gratia/services
-	cp ../services/net/sf/gratia/services/Configuration.class war/WEB-INF/classes/net/sf/gratia/services
-	cp ../services/net/sf/gratia/services/*Skel.class war/WEB-INF/classes/net/sf/gratia/services
-	cp ../services/net/sf/gratia/services/*Stub.class war/WEB-INF/classes/net/sf/gratia/services
-	cp ../services/net/sf/gratia/services/X*.class war/WEB-INF/classes/net/sf/gratia/services
-	cp ../services/net/sf/gratia/services/JMS*.class war/WEB-INF/classes/net/sf/gratia/services
+	cp ${services}/net/sf/gratia/services/Logging.class war/WEB-INF/classes/net/sf/gratia/services
+	cp ${services}/net/sf/gratia/services/Configuration.class war/WEB-INF/classes/net/sf/gratia/services
+	cp ${services}/net/sf/gratia/services/*Skel.class war/WEB-INF/classes/net/sf/gratia/services
+	cp ${services}/net/sf/gratia/services/*Stub.class war/WEB-INF/classes/net/sf/gratia/services
+	cp ${services}/net/sf/gratia/services/X*.class war/WEB-INF/classes/net/sf/gratia/services
+	cp ${services}/net/sf/gratia/services/JMS*.class war/WEB-INF/classes/net/sf/gratia/services
 	cp ${servlets}/net/sf/gratia/servlets/web.xml war/WEB-INF/web.xml
-	jar -cfM ../target/gratia-servlets.war -C war .
+	jar -cfM ${target}/gratia-servlets.war -C war .
 	rm -f -r war
 
 soap: services
 	rm -f -r war
 	mkdir war
-	mkdir war/meta-inf
+	mkdir war/META-INF
 	mkdir war/WEB-INF
 	mkdir war/WEB-INF/classes
 	mkdir war/WEB-INF/classes/net
@@ -95,31 +119,30 @@ soap: services
 	mkdir war/WEB-INF/classes/net/sf/gratia/soap
 	mkdir war/WEB-INF/lib
 	mkdir war/wsdl
-	javac -cp ${classpath} -extdirs $(jars) ../soap/net/sf/gratia/soap/*.java
+	javac -cp ${classpath} -extdirs ${commonLib} ${soap}/net/sf/gratia/soap/*.java
 	cp ${soap}/net/sf/gratia/soap/*.class war/WEB-INF/classes/net/sf/gratia/soap
-	cp ../services/net/sf/gratia/services/Logging.class war/WEB-INF/classes/net/sf/gratia/services
-	cp ../services/net/sf/gratia/services/Configuration.class war/WEB-INF/classes/net/sf/gratia/services
-	cp ../services/net/sf/gratia/services/*Skel.class war/WEB-INF/classes/net/sf/gratia/services
-	cp ../services/net/sf/gratia/services/*Stub.class war/WEB-INF/classes/net/sf/gratia/services
-	cp ../services/net/sf/gratia/services/X*.class war/WEB-INF/classes/net/sf/gratia/services
-	cp ../services/net/sf/gratia/services/JMS*.class war/WEB-INF/classes/net/sf/gratia/services
-	cp ../soap/net/sf/gratia/soap/server-config.wsdd war/WEB-INF/server-config.wsdd
-	cp ../soap/net/sf/gratia/soap/web.xml war/WEB-INF/web.xml
-	cp ../soap/net/sf/gratia/soap/collector.wsdl war/wsdl
-	cp ../jars/axis*.jar war/WEB-INF/lib
-	cp ../jars/commons-dis*.jar war/WEB-INF/lib
-	cp ../jars/jaxrpc*.jar war/WEB-INF/lib
-	cp ../jars/saaj*.jar war/WEB-INF/lib
-	cp ../jars/wsdl*.jar war/WEB-INF/lib
-	jar -cfM ../target/GratiaServices.war -C war .
-	jar -cfM ../target/gratia-soap.war -C war .
+	cp ${services}/net/sf/gratia/services/Logging.class war/WEB-INF/classes/net/sf/gratia/services
+	cp ${services}/net/sf/gratia/services/Configuration.class war/WEB-INF/classes/net/sf/gratia/services
+	cp ${services}/net/sf/gratia/services/*Skel.class war/WEB-INF/classes/net/sf/gratia/services
+	cp ${services}/net/sf/gratia/services/*Stub.class war/WEB-INF/classes/net/sf/gratia/services
+	cp ${services}/net/sf/gratia/services/X*.class war/WEB-INF/classes/net/sf/gratia/services
+	cp ${services}/net/sf/gratia/services/JMS*.class war/WEB-INF/classes/net/sf/gratia/services
+	cp ${soap}/net/sf/gratia/soap/server-config.wsdd war/WEB-INF/server-config.wsdd
+	cp ${soap}/net/sf/gratia/soap/web.xml war/WEB-INF/web.xml
+	cp ${soap}/net/sf/gratia/soap/collector.wsdl war/wsdl
+	cp ${commonLib}/axis*.jar war/WEB-INF/lib
+	cp ${commonLib}/commons-dis*.jar war/WEB-INF/lib
+	cp ${commonLib}/jaxrpc*.jar war/WEB-INF/lib
+	cp ${commonLib}/saaj*.jar war/WEB-INF/lib
+	cp ${commonLib}/wsdl*.jar war/WEB-INF/lib
+	jar -cfM ${target}/gratia-soap.war -C war .
 	rm -f -r war
 
 administration: services
 	rm -f -r war
 	mkdir war
 	mkdir war/images
-	mkdir war/meta-inf
+	mkdir war/META-INF
 	mkdir war/WEB-INF
 	mkdir war/WEB-INF/classes
 	mkdir war/WEB-INF/classes/net
@@ -128,24 +151,24 @@ administration: services
 	mkdir war/WEB-INF/classes/net/sf/gratia/services
 	mkdir war/WEB-INF/classes/net/sf/gratia/administration
 	mkdir war/WEB-INF/lib
-	javac -cp ${classpath} -extdirs $(jars) ../administration/net/sf/gratia/administration/*.java
+	javac -cp ${classpath} -extdirs ${commonLib} ${administration}/net/sf/gratia/administration/*.java
 	cp ${administration}/net/sf/gratia/administration/images/*.gif war/images
 	cp ${administration}/net/sf/gratia/administration/*.class war/WEB-INF/classes/net/sf/gratia/administration
-	cp ../services/net/sf/gratia/services/*.class war/WEB-INF/classes/net/sf/gratia/services
-	cp ../administration/net/sf/gratia/administration/web.xml war/WEB-INF/web.xml
-	cp ../administration/net/sf/gratia/administration/*.html war
-	cp ../administration/net/sf/gratia/administration/*.css war
-	cp ../administration/net/sf/gratia/administration/*.jsp war
-	cp ../administration/net/sf/gratia/administration/images/*.gif war/images
-	cp ../*.html war
-	cp $(jars)/mysql*.jar war/WEB-INF/lib
-	jar -cfM ../target/gratia-administration.war -C war .
+	cp ${services}/net/sf/gratia/services/*.class war/WEB-INF/classes/net/sf/gratia/services
+	cp ${administration}/net/sf/gratia/administration/web.xml war/WEB-INF/web.xml
+	cp ${administration}/net/sf/gratia/administration/*.html war
+	cp ${administration}/net/sf/gratia/administration/*.css war
+	cp ${administration}/net/sf/gratia/administration/*.jsp war
+	cp ${administration}/net/sf/gratia/administration/images/*.gif war/images
+	cp ${docs}/*.html war
+	cp ${commonLib}/mysql*.jar war/WEB-INF/lib
+	jar -cfM ${target}/gratia-administration.war -C war .
 	rm -f -r war
 
 security: services
 	rm -f -r war
 	mkdir war
-	mkdir war/meta-inf
+	mkdir war/META-INF
 	mkdir war/WEB-INF
 	mkdir war/WEB-INF/classes
 	mkdir war/WEB-INF/classes/net
@@ -154,20 +177,39 @@ security: services
 	mkdir war/WEB-INF/classes/net/sf/gratia/services
 	mkdir war/WEB-INF/classes/net/sf/gratia/security
 	mkdir war/WEB-INF/lib
-	javac -cp ${classpath} -extdirs $(jars) ../security/net/sf/gratia/security/*.java
+	javac -cp ${classpath} -extdirs ${commonLib} ${security}/net/sf/gratia/security/*.java
 	cp ${security}/net/sf/gratia/security/*.class war/WEB-INF/classes/net/sf/gratia/security
-	cp ../services/net/sf/gratia/services/Logging.class war/WEB-INF/classes/net/sf/gratia/services
-	cp ../services/net/sf/gratia/services/Configuration.class war/WEB-INF/classes/net/sf/gratia/services
-	cp ../services/net/sf/gratia/services/*Skel.class war/WEB-INF/classes/net/sf/gratia/services
-	cp ../services/net/sf/gratia/services/*Stub.class war/WEB-INF/classes/net/sf/gratia/services
-	cp ../services/net/sf/gratia/services/X*.class war/WEB-INF/classes/net/sf/gratia/services
-	cp ../services/net/sf/gratia/services/JMS*.class war/WEB-INF/classes/net/sf/gratia/services
-	cp ../security/net/sf/gratia/security/web.xml war/WEB-INF/web.xml
-	cp $(jars)/mysql*.jar war/WEB-INF/lib
-	jar -cfM ../target/gratia-security.war -C war .
+	cp ${services}/net/sf/gratia/services/Logging.class war/WEB-INF/classes/net/sf/gratia/services
+	cp ${services}/net/sf/gratia/services/Configuration.class war/WEB-INF/classes/net/sf/gratia/services
+	cp ${services}/net/sf/gratia/services/*Skel.class war/WEB-INF/classes/net/sf/gratia/services
+	cp ${services}/net/sf/gratia/services/*Stub.class war/WEB-INF/classes/net/sf/gratia/services
+	cp ${services}/net/sf/gratia/services/X*.class war/WEB-INF/classes/net/sf/gratia/services
+	cp ${services}/net/sf/gratia/services/JMS*.class war/WEB-INF/classes/net/sf/gratia/services
+	cp ${security}/net/sf/gratia/security/web.xml war/WEB-INF/web.xml
+	cp ${commonLib}/mysql*.jar war/WEB-INF/lib
+	jar -cfM ${target}/gratia-security.war -C war .
 	rm -f -r war
 
-reporting:
+util:
+	rm -f -r war
+	mkdir war
+	mkdir war/META-INF
+	mkdir war/WEB-INF
+	mkdir war/WEB-INF/classes
+	mkdir war/WEB-INF/classes/net
+	mkdir war/WEB-INF/classes/net/sf
+	mkdir war/WEB-INF/classes/net/sf/gratia
+	mkdir war/WEB-INF/classes/net/sf/gratia/util
+	mkdir war/WEB-INF/lib
+	javac -cp ${classpath} -extdirs ${commonLib} ${util}/net/sf/gratia/util/*.java
+	cp ${util}/net/sf/gratia/util/*.class war/WEB-INF/classes/net/sf/gratia/util
+	cp ${commonLib}/*.jar war/WEB-INF/lib
+	rm -f  war/WEB-INF/lib/util*
+# ###	cp ${util}/net/sf/gratia/util/web.xml war/WEB-INF/web.xml
+	jar -cfM ${target}/gratia-util.war -C war .
+	rm -f -r war
+	
+reporting: util
 	rm -f -r war
 	mkdir war
 	mkdir war/calendar
@@ -177,63 +219,65 @@ reporting:
 	mkdir war/WEB-INF/classes/net
 	mkdir war/WEB-INF/classes/net/sf
 	mkdir war/WEB-INF/classes/net/sf/gratia
-	mkdir war/WEB-INF/classes/net/sf/gratia/services
+	mkdir war/WEB-INF/classes/net/sf/gratia/util
 	mkdir war/WEB-INF/classes/net/sf/gratia/reporting
 	mkdir war/WEB-INF/classes/net/sf/gratia/reporting/exceptions
 	mkdir war/WEB-INF/lib
-	javac -cp ${classpath} -extdirs $(jars) ../services/net/sf/gratia/services/*.java
-	javac -cp ${classpath} -extdirs $(jars) ${base}GratiaReporting/src/net/sf/gratia/reporting/*.java
-	javac -cp ${classpath} -extdirs $(jars) ${base}GratiaReporting/src/net/sf/gratia/reporting/exceptions/*.java
-	cp ${services}/net/sf/gratia/services/*.class war/WEB-INF/classes/net/sf/gratia/services
-	cp ${base}GratiaReporting/WebContent/*.jsp war
-	cp ${base}GratiaReporting/WebContent/*.css war
-	cp ${base}GratiaReporting/src/net/sf/gratia/reporting/*.class war/WEB-INF/classes/net/sf/gratia/reporting
-	cp ${base}GratiaReporting/src/net/sf/gratia/reporting/exceptions/*.class war/WEB-INF/classes/net/sf/gratia/reporting/exceptions
-	cp -R ${base}GratiaReporting/WebContent/calendar/* war/calendar
-	cp -R ${base}GratiaReporting/WebContent/images/* war/images
-	cp ${base}GratiaReporting/src/net/sf/gratia/reporting/web.xml war/WEB-INF
-	cp ../jars/*.jar war/WEB-INF/lib
+	javac -cp ${classpath} -extdirs ${commonLib} ${util}/net/sf/gratia/util/*.java
+	javac -cp ${classpath} -extdirs ${commonLib} ${reportsrc}/src/net/sf/gratia/reporting/exceptions/*.java
+	javac -cp ${classpath} -extdirs ${commonLib} ${reportsrc}/src/net/sf/gratia/reporting/*.java
+	cp ${util}/net/sf/gratia/util/*.class war/WEB-INF/classes/net/sf/gratia/util
+	cp ${reportsrc}/WebContent/*.jsp war
+	cp ${reportsrc}/WebContent/*.css war
+	cp ${reportsrc}/src/net/sf/gratia/reporting/*.class war/WEB-INF/classes/net/sf/gratia/reporting
+	cp ${reportsrc}/src/net/sf/gratia/reporting/exceptions/*.class war/WEB-INF/classes/net/sf/gratia/reporting/exceptions
+	cp -R ${reportsrc}/WebContent/calendar/* war/calendar
+	cp -R ${reportsrc}/WebContent/images/* war/images
+	cp ${reportsrc}/src/net/sf/gratia/reporting/web.xml war/WEB-INF
+	cp ${commonLib}/*.jar war/WEB-INF/lib
 	rm -f war/WEB-INF/lib/servlet-api.jar
-	jar -cvfM ../target/gratia-reporting.war -C war .
+	jar -cvfM ${target}/gratia-reporting.war -C war .
 	rm -f -r war
 
 reports:
 	rm -f -r war
 	mkdir war
-	mkdir war/images
+	mkdir war/reports
+	mkdir war/MenuConfig
 	mkdir war/WEB-INF
-	cp ${base}GratiaReports/WebContent/*design war
-	cp ${base}GratiaReports/WebContent/images/*.gif war/images
-	cp ${base}GratiaReports/src/web.xml war/WEB-INF
-	jar -cvf ../target/gratia-reports.war -C war .
+	cp -R ${reports}/WebContent/MenuConfig/* war/MenuConfig
+	cp -R ${reports}/WebContent/reports/*design war/reports
+	cp ${reports}/WebContent/web.xml war/WEB-INF
+	jar -cvf ${target}/gratia-reports.war -C war .
 	rm -f -r war
+	
+local: clean util services servlets soap reporting reports administration security 
 
-report-configuration:
-	rm -f -r war
-	mkdir war
-	mkdir war/WEB-INF
-	cp ${base}/GratiaReportConfiguration/WebContent/Reporting* war
-	cp ${base}GratiaReportConfiguration/WebContent/User* war
-	cp ${base}GratiaReportConfiguration/src/web.xml war/WEB-INF
-	jar -cvf ../target/gratia-report-configuration.war -C war .
-	rm -f -r war
-
-release: clean services servlets soap reporting reports report-configuration administration security
+release: clean util services servlets soap reporting reports administration security
 	rm -f -r tarball
 	#
 	# create reporting tarball
 	#
 	mkdir tarball
+	mkdir tarball/tomcat
+	mkdir tarball/tomcat/v55
+	mkdir tarball/tomcat/v55/gratia
 	mkdir tarball/gratia
 	mkdir tarball/gratia/gratia_reporting
 	mkdir tarball/var
 	mkdir tarball/var/data
 	mkdir tarball/var/logs
 	mkdir tarball/var/tmp
-	cp ../target/gratia-report-configuration.war tarball/gratia/gratia_reporting
-	cp ../target/gratia-reports.war tarball/gratia/gratia_reporting
-	cp ../target/gratia-reporting.war tarball/gratia/gratia_reporting
-	tar $(tarowner) -cvf ../target/gratia_reporting_$(gratia_reporting_version).tar -C tarball .
+	cp ${configuration}/*gov ${configuration}/*xml ${configuration}/*properties tarball/tomcat/v55/gratia
+	cp ${configuration}/*sql ${configuration}/*sh tarball/tomcat/v55/gratia
+	cp ${configuration}/truststore ${configuration}/keystore tarball/tomcat/v55/gratia
+	rm -f tarball/tomcat/v55/gratia/local.*
+	rm -f tarball/tomcat/v55/gratia/release.*
+	cp ${configuration}/release.service-configuration.properties tarball/tomcat/v55/gratia/service-configuration.properties
+	cp ${target}/gratia-reports.war tarball/gratia/gratia_reporting
+	cp ${target}/gratia-reporting.war tarball/gratia/gratia_reporting
+	cp ${target}/gratia-security.war tarball/gratia/gratia_reporting
+	tar ${tarowner} -cvf ${target}/gratia_reporting_${gratia_reporting_version}.tar -C tarball .
 	rm -f -r tarball
 	#
 	# create services tarball
@@ -248,48 +292,46 @@ release: clean services servlets soap reporting reports report-configuration adm
 	mkdir tarball/var/data
 	mkdir tarball/var/logs
 	mkdir tarball/var/tmp
-	cp ../configuration/*gov ../configuration/*xml ../configuration/*properties tarball/tomcat/v55/gratia
-	cp ../configuration/*sql ../configuration/*sh tarball/tomcat/v55/gratia
-	cp ../configuration/truststore ../configuration/keystore tarball/tomcat/v55/gratia
+	cp ${configuration}/*gov ${configuration}/*xml ${configuration}/*properties tarball/tomcat/v55/gratia
+	cp ${configuration}/*sql ${configuration}/*sh tarball/tomcat/v55/gratia
+	cp ${configuration}/truststore ${configuration}/keystore tarball/tomcat/v55/gratia
 	rm -f tarball/tomcat/v55/gratia/local.*
 	rm -f tarball/tomcat/v55/gratia/release.*
-	cp ../configuration/release.service-configuration.properties tarball/tomcat/v55/gratia/service-configuration.properties
-	cp ../target/gratia-services.war tarball/gratia/gratia_services
-	cp ../target/gratia-servlets.war tarball/gratia/gratia_services
-	cp ../target/gratia-soap.war tarball/gratia/gratia_services
-	cp ../target/gratia-administration.war tarball/gratia/gratia_services
-	cp ../target/gratia-security.war tarball/gratia/gratia_services
-	tar $(tarowner) -cvf ../target/gratia_services_$(gratia_services_version).tar -C tarball .
+	cp ${configuration}/release.service-configuration.properties tarball/tomcat/v55/gratia/service-configuration.properties
+	cp ${target}/gratia-services.war tarball/gratia/gratia_services
+	cp ${target}/gratia-servlets.war tarball/gratia/gratia_services
+	cp ${target}/gratia-soap.war tarball/gratia/gratia_services
+	cp ${target}/gratia-administration.war tarball/gratia/gratia_services
+	cp ${target}/gratia-security.war tarball/gratia/gratia_services
+	tar ${tarowner} -cvf ${target}/gratia_services_${gratia_services_version}.tar -C tarball .
 	rm -f -r tarball
 
-local: services servlets soap reporting reports report-configuration administration security
-
-gratia: clean services servlets soap reporting reports report-configuration administration security
+gratia: clean util services servlets soap reporting reports administration security
 	rm -f -r tarball
 	mkdir tarball
-	cp ../configuration/UserVoMap.* ../configuration/*xml ../configuration/*properties tarball
-	cp ../configuration/*sql ../configuration/*sh tarball
+	cp ${configuration}/UserVoMap.* ${configuration}/*xml ${configuration}/*properties tarball
+	cp ${configuration}/*sql ${configuration}/*sh tarball
 	rm -f tarball/local.*
 	rm -f tarball/release.*
-	cp ../configuration/local.service-configuration.properties tarball/service-configuration.properties
-	cp ../configuration/configure-* ../configuration/update-gratia-local tarball
-	cp ../configuration/truststore ../configuration/keystore tarball
-	tar -cvf ../target/gratia.tar -C tarball .
+	cp ${configuration}/local.service-configuration.properties tarball/service-configuration.properties
+	cp ${configuration}/configure-* ${configuration}/update-gratia-local tarball
+	cp ${configuration}/truststore ${configuration}/keystore tarball
+	tar -cvf ${target}/gratia.tar -C tarball .
 	rm -f -r tarball
 
-glr: clean services servlets soap reporting reports report-configuration administration security
+glr: clean util services servlets soap reporting reports administration security
 	rm -f -r tarball
 	mkdir tarball
-	cp ../configuration/UserVoMap.* ../configuration/*xml ../configuration/*properties tarball
-	cp ../configuration/*sql ../configuration/*sh tarball
+	cp ${configuration}/UserVoMap.* ${configuration}/*xml ${configuration}/*properties tarball
+	cp ${configuration}/*sql ${configuration}/*sh tarball
 	rm -f tarball/local.*
 	rm -f tarball/release.*
-	cp ../configuration/local.service-configuration.properties tarball/service-configuration.properties
-	tar -cvf ../target/gratia.tar -C tarball .
+	cp ${configuration}/local.service-configuration.properties tarball/service-configuration.properties
+	tar -cvf ${target}/gratia.tar -C tarball .
 	rm -f -r tarball
 	rm -f -r ~/Desktop/tomcat/webapps/gratia*
-	cp ../target/*war ~/Desktop/tomcat/webapps
-	cp ../wars/*war ~/Desktop/tomcat/webapps
+	cp ${target}/*war ~/Desktop/tomcat/webapps
+	cp ${birtwars}/*war ~/Desktop/tomcat/webapps
 
 define defaultdirs
 	mkdir -p gratia/ ; \
