@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions targetNamespace="http://gratia.sf.net" xmlns:apachesoap="http://xml.apache.org/xml-soap" xmlns:impl="http://gratia.sf.net" xmlns:intf="http://gratia.sf.net" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:wsdlsoap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<!--WSDL created by Apache Axis version: 1.2.1
+Built on Jun 14, 2005 (09:15:57 EDT)-->
+ <wsdl:types>
+  <schema targetNamespace="http://gratia.sf.net" xmlns="http://www.w3.org/2001/XMLSchema">
+   <import namespace="http://schemas.xmlsoap.org/soap/encoding/"/>
+   <complexType name="Event">
+    <sequence>
+     <element name="_id" nillable="true" type="soapenc:string"/>
+     <element name="_xml" nillable="true" type="soapenc:string"/>
+    </sequence>
+   </complexType>
+   <complexType name="Response">
+    <sequence>
+     <element name="_code" type="xsd:int"/>
+     <element name="_message" nillable="true" type="soapenc:string"/>
+    </sequence>
+   </complexType>
+  </schema>
+ </wsdl:types>
+
+   <wsdl:message name="collectUsageXmlResponse">
+
+      <wsdl:part name="collectUsageXmlReturn" type="impl:Response"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="collectUsageXmlRequest">
+
+      <wsdl:part name="in0" type="impl:Event"/>
+
+   </wsdl:message>
+
+   <wsdl:portType name="CollectorImpl">
+
+      <wsdl:operation name="collectUsageXml" parameterOrder="in0">
+
+         <wsdl:input message="impl:collectUsageXmlRequest" name="collectUsageXmlRequest"/>
+
+         <wsdl:output message="impl:collectUsageXmlResponse" name="collectUsageXmlResponse"/>
+
+      </wsdl:operation>
+
+   </wsdl:portType>
+
+   <wsdl:binding name="CollectorImplSoapBinding" type="impl:CollectorImpl">
+
+      <wsdlsoap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+
+      <wsdl:operation name="collectUsageXml">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="collectUsageXmlRequest">
+
+            <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://gratia.sf.net" use="encoded"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="collectUsageXmlResponse">
+
+            <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://gratia.sf.net" use="encoded"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+   </wsdl:binding>
+
+   <wsdl:service name="CollectorImplService">
+
+      <wsdl:port binding="impl:CollectorImplSoapBinding" name="CollectorImpl">
+
+         <wsdlsoap:address location="http://localhost:8080/GratiaServices/services/CollectorImpl"/>
+
+      </wsdl:port>
+
+   </wsdl:service>
+
+</wsdl:definitions>

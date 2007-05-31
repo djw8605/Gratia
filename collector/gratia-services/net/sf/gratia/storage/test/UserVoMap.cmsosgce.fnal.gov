@@ -1,0 +1,228 @@
+#User-VO map
+# #comment line, format of each regular line line: account VO
+# Next 2 lines with VO names, same order, all lowercase, with case (lines starting with #voi, #VOc)
+#voi ivdgl ivdgl osg mis fmri cdms lqcd auger ilc i2u2 cdf cdf cdf cdf des dzero dzero nanohub gadu grase gridex uscms uscms uscms uscms uscms uscms uscms uscms fermilab astro accelerator hypercp ktev miniboone minos nova numi mipp patriot sdss sdss theory fermilab-test usatlas LIGO glow dosar star grow geant4
+#VOc iVDgL iVDgL OSG MIS FMRI CDMS LQCD AUGER ILC I2U2 CDF CDF CDF CDF DES DZERO DZERO NANOHUB GADU GRASE GridEx CMS CMS CMS CMS CMS CMS CMS CMS FERMILAB ASTRO ACCELERATOR HYPERCP KTEV MINIBOONE MINOS NOVA NUMI MIPP PATRIOT SDSS SDSS THEORY FERMILAB-TEST ATLAS LIGO GLOW DOSAR STAR GROW GEANT4
+#---- accounts for vo: ivdglp ----#
+ivdgl ivdgl
+#---- accounts for vo: ivdgl ----#
+#---- accounts for vo: osg ----#
+osg osg
+#---- accounts for vo: mis ----#
+mis mis
+#---- accounts for vo: fmri ----#
+fmri fmri
+#---- accounts for vo: cdms ----#
+cdms cdms
+#---- accounts for vo: lqcd ----#
+lqcd lqcd
+#---- accounts for vo: auger ----#
+auger auger
+#---- accounts for vo: ilc ----#
+ilc ilc
+#---- accounts for vo: i2u2 ----#
+i2u2 i2u2
+#---- accounts for vo: cdf ----#
+cdf cdf
+#---- accounts for vo: cdfdev ----#
+cdfdev cdf
+#---- accounts for vo: cdffgrid ----#
+cdffgrid cdf
+#---- accounts for vo: cdfnam ----#
+cdfnam cdf
+#---- accounts for vo: des ----#
+des des
+#---- accounts for vo: dzerouser ----#
+samgrid dzero
+#---- accounts for vo: dzeroservice ----#
+sam dzero
+#---- accounts for vo: nanohub ----#
+nanohub nanohub
+#---- accounts for vo: gadu ----#
+gadu gadu
+#---- accounts for vo: grase ----#
+grase grase
+#---- accounts for vo: gridex ----#
+gridex gridex
+#---- accounts for vo: cmsfrontier ----#
+cmsfrontier uscms
+#---- accounts for vo: cmst2admin ----#
+cmst2admin uscms
+#---- accounts for vo: cmsphedex ----#
+cmsphedex uscms
+#---- accounts for vo: cmssoft ----#
+cmssoft uscms
+#---- accounts for vo: cmsprod ----#
+cmsprod uscms
+#---- accounts for vo: uscmsuser ----#
+uscms23 uscms
+uscms42 uscms
+uscms24 uscms
+uscms61 uscms
+uscms10 uscms
+uscms146 uscms
+uscms174 uscms
+uscms65 uscms
+uscms144 uscms
+uscms101 uscms
+uscms02 uscms
+uscms141 uscms
+uscms140 uscms
+uscms97 uscms
+uscms66 uscms
+uscms147 uscms
+uscms28 uscms
+uscms104 uscms
+uscms67 uscms
+uscms142 uscms
+uscms160 uscms
+uscms175 uscms
+uscms19 uscms
+uscms169 uscms
+uscms109 uscms
+uscms137 uscms
+uscms112 uscms
+uscms115 uscms
+uscms116 uscms
+uscms149 uscms
+uscms172 uscms
+uscms70 uscms
+uscms29 uscms
+uscms122 uscms
+uscms15 uscms
+uscms143 uscms
+uscms164 uscms
+uscms126 uscms
+uscms127 uscms
+uscms128 uscms
+uscms18 uscms
+uscms157 uscms
+uscms130 uscms
+uscms133 uscms
+uscms72 uscms
+uscms88 uscms
+#---- accounts for vo: cmsuser ----#
+uscms20 uscms
+uscms21 uscms
+uscms36 uscms
+uscms89 uscms
+uscms22 uscms
+uscms25 uscms
+uscms26 uscms
+uscms93 uscms
+uscms91 uscms
+uscms27 uscms
+uscms99 uscms
+uscms63 uscms
+uscms94 uscms
+uscms96 uscms
+uscms95 uscms
+uscms30 uscms
+uscms31 uscms
+uscms32 uscms
+#---- accounts for vo: cmsuser-null ----#
+uscms33 uscms
+uscms34 uscms
+uscms35 uscms
+uscms92 uscms
+uscms37 uscms
+uscms38 uscms
+uscms39 uscms
+uscms40 uscms
+uscms41 uscms
+uscms43 uscms
+uscms44 uscms
+uscms45 uscms
+uscms46 uscms
+uscms47 uscms
+uscms48 uscms
+uscms49 uscms
+uscms50 uscms
+uscms51 uscms
+uscms53 uscms
+uscms90 uscms
+uscms54 uscms
+uscms55 uscms
+uscms56 uscms
+uscms57 uscms
+uscms06 uscms
+uscms58 uscms
+uscms59 uscms
+uscms60 uscms
+uscms07 uscms
+uscms62 uscms
+uscms64 uscms
+uscms106 uscms
+uscms68 uscms
+uscms11 uscms
+uscms98 uscms
+uscms69 uscms
+uscms110 uscms
+uscms113 uscms
+uscms168 uscms
+uscms125 uscms
+uscms71 uscms
+uscms162 uscms
+uscms13 uscms
+uscms17 uscms
+uscms145 uscms
+uscms138 uscms
+uscms73 uscms
+uscms74 uscms
+uscms75 uscms
+uscms76 uscms
+uscms77 uscms
+uscms78 uscms
+uscms79 uscms
+uscms80 uscms
+uscms81 uscms
+uscms82 uscms
+uscms83 uscms
+uscms84 uscms
+uscms85 uscms
+uscms86 uscms
+uscms87 uscms
+#---- accounts for vo: fermilab ----#
+fnalgrid fermilab
+#---- accounts for vo: astro ----#
+fnal_ast astro
+#---- accounts for vo: accelerator ----#
+fnal_acc accelerator
+#---- accounts for vo: hypercp ----#
+hypercp hypercp
+#---- accounts for vo: ktev ----#
+ktev ktev
+#---- accounts for vo: miniboone ----#
+minboone miniboone
+#---- accounts for vo: minos ----#
+minos minos
+#---- accounts for vo: nova ----#
+nova nova
+#---- accounts for vo: numi ----#
+numi numi
+#---- accounts for vo: mipp ----#
+mipp mipp
+#---- accounts for vo: patriot ----#
+patriot patriot
+#---- accounts for vo: sdss ----#
+sdss sdss
+#---- accounts for vo: sdss-spectro ----#
+spectro sdss
+#---- accounts for vo: theory ----#
+fnal_thy theory
+#---- accounts for vo: fermilab-test ----#
+farms fermilab-test
+#---- accounts for vo: usatlas ----#
+usatlas1 usatlas
+#---- accounts for vo: LIGO ----#
+ligo LIGO
+#---- accounts for vo: GLOW ----#
+glow glow
+#---- accounts for vo: dosar-admin ----#
+dosar dosar
+#---- accounts for vo: star ----#
+star star
+#---- accounts for vo: grow ----#
+grow grow
+#---- accounts for vo: geant4 ----#
+geant4 geant4

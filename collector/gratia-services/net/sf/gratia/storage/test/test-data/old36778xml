@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<JobUsageRecord xmlns="http://www.gridforum.org/2003/ur-wg"
+		xmlns:urwg="http://www.gridforum.org/2003/ur-wg"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+		xsi:schemaLocation="http://www.gridforum.org/2003/ur-wg file:///u:/OSG/urwg-schema.11.xsd">
+<RecordIdentity urwg:recordId="fgtest1.fnal.gov:11743.1674" urwg:createTime="2006-10-23T19:19:48Z" />
+<JobIdentity>
+	<GlobalJobId >condor.fgtest1.fnal.gov#1161152148#123810.0</GlobalJobId>
+	<LocalJobId >123810</LocalJobId>
+	<ProcessId >63893</ProcessId>
+</JobIdentity>
+<UserIdentity>
+	<LocalUserId >gridex</LocalUserId>
+	<GlobalUsername >nice-user.gridex@fnal.gov</GlobalUsername>
+	<ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#" >
+		<ds:X509Data>
+		<ds:X509SubjectName>DC=org, DC=doegrids, OU=People, CN=Alan De Smet (Grid Exerciser) 771829</ds:X509SubjectName>
+		</ds:X509Data>
+	</ds:KeyInfo>
+</UserIdentity>
+	<JobName >fgtest1.fnal.gov#1161152148#123810.0</JobName>
+	<Status urwg:description="Condor Exit Status" >0</Status>
+	<WallDuration urwg:description="Was entered in seconds" >PT15M1.0S</WallDuration>
+	<TimeDuration urwg:type="RemoteUserCpu" >PT0S</TimeDuration>
+	<TimeDuration urwg:type="LocalUserCpu" >PT0S</TimeDuration>
+	<TimeDuration urwg:type="RemoteSysCpu" >PT0S</TimeDuration>
+	<TimeDuration urwg:type="LocalSysCpu" >PT0S</TimeDuration>
+	<TimeDuration urwg:type="CumulativeSuspensionTime" >PT0S</TimeDuration>
+	<TimeDuration urwg:type="CommittedTime" >PT0S</TimeDuration>
+	<CpuDuration urwg:usageType="system" urwg:description="Was entered in seconds" >PT0S</CpuDuration>
+	<CpuDuration urwg:usageType="user" urwg:description="Was entered in seconds" >PT0S</CpuDuration>
+	<EndTime urwg:description="Was entered in seconds" >2006-10-18T06:30:54Z</EndTime>
+	<StartTime urwg:description="Was entered in seconds" >2006-10-18T06:15:53Z</StartTime>
+	<MachineName >fgtest1.fnal.gov</MachineName>
+	<SubmitHost >fgtest1.fnal.gov</SubmitHost>
+	<Host primary="true" >fgtest4.fnal.gov</Host>
+	<Queue urwg:description="Condor's JobUniverse field" >5</Queue>
+	<NodeCount urwg:metric="max" >1</NodeCount>
+	<Resource urwg:description="CondorMyType" >Job</Resource>
+	<Resource urwg:description="ExitBySignal" >FALSE</Resource>
+	<Resource urwg:description="ExitCode" >0</Resource>
+	<Resource urwg:description="condor.JobStatus" >4</Resource>
+	<ProbeName >condor:fgtest1.fnal.gov</ProbeName>
+	<SiteName >FNAL_FERMIGRID_TEST</SiteName>
+	<Njobs >1</Njobs>
+</JobUsageRecord>

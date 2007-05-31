@@ -1,0 +1,35 @@
+<UsageRecord xmlns="http://www.gridforum.org/2003/ur-wg"  
+xmlns:urwg="http://www.gridforum.org/2003/ur-wg"  
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"  
+xsi:schemaLocation="http://www.gridforum.org/2003/ur-wg  
+file:///u:/OSG/urwg-schema.11.xsd">
+<urwg:RecordIdentity urwg:createTime="2006-10-04T21:19:59Z"  
+urwg:recordId="dellquad2.fnal.gov:924299.dellquad2.fnal.gov_1074616526"/>
+<urwg:JobIdentity>
+<urwg:GlobalJobId>dellquad2.fnal.gov:924299.dellquad2.fnal.gov_1074616526</urwg:GlobalJobId>
+<urwg:LocalJobId>924299.dellquad2.fnal.gov</urwg:LocalJobId>
+</urwg:JobIdentity>
+<urwg:UserIdentity>
+<urwg:LocalUserId>simone</urwg:LocalUserId>
+<ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#"></ds:KeyInfo>
+</urwg:UserIdentity>
+<urwg:JobName>pQuen</urwg:JobName>
+<urwg:Status description="exit status">0</urwg:Status>
+<urwg:WallDuration>PT3H43M33S</urwg:WallDuration>
+<urwg:CpuDuration>PT4M49S</urwg:CpuDuration>
+<urwg:EndTime>2004-01-20T20:19:01Z</urwg:EndTime>
+<urwg:StartTime>2004-01-20T16:35:26Z</urwg:StartTime>
+<urwg:MachineName  
+description="Server">dellquad2.fnal.gov</urwg:MachineName>
+<urwg:Host description="executing host"  
+primary="false">w416/0+w415/0+w414/0+w413/0</urwg:Host>
+<urwg:Queue description="LRMS type: pbs">workq</urwg:Queue>
+<urwg:Memory storageUnit="KB" metric="total">130840</urwg:Memory>
+<urwg:Swap storageUnit="KB" metric="total">170524</urwg:Swap>
+<urwg:Processors metric="total" consumptionRate="0">4</urwg:Processors>
+<urwg:TimeInstant description="LRMS event  
+timestamp">2004-01-20T15:19:01Z</urwg:TimeInstant>
+<urwg:Resource urwg:description="LocalUserGroup">g038</urwg:Resource>
+<ProbeName>pbs-lsf:lqcd.fnal.gov</ProbeName>
+<SiteName>FNAL_LQCD</SiteName>
+</UsageRecord>

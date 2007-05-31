@@ -1,0 +1,21 @@
+<JobUsageRecord xmlns="http://www.gridforum.org/2003/ur-wg" xmlns:urwg="http://www.gridforum.org/2003/ur-wg" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.gridforum.org/2003/ur-wg file:///u:/OSG/urwg-schema.11.xsd">
+<RecordIdentity urwg:recordId="cmswn396.fnal.gov:18821.8" urwg:createTime="2006-07-13T04:27:15Z"/>
+<UserIdentity>
+	<LocalUserId>cdffgrid</LocalUserId>
+	<ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#" >
+		<ds:X509Data>
+		<ds:X509SubjectName>CN=john ainsworth, L=MC, OU=Manchester, O=eScience, C=UK</ds:X509SubjectName>
+		</ds:X509Data>
+	</ds:KeyInfo>
+</UserIdentity>
+	<JobName>Daily Aggregate</JobName>
+	<CpuDuration urwg:usageType="user">PT7H57M8.25999999998S</CpuDuration>
+	<CpuDuration urwg:usageType="system">PT1M51.01S</CpuDuration>
+	<WallDuration>P2DT1H7M52.1700000041S</WallDuration>
+	<Memory urwg:metric="total">10498.2738175</Memory>
+	<EndTime>2006-07-12T22:44:08Z</EndTime>
+	<Host primary="true" urwg:description="model='AMD Opteron(tm) Processor 248' ncpu=2">cmswn396.fnal.gov</Host>
+	<MachineName>cmswc1.fnal.gov</MachineName>
+        <Njobs>3</Njobs>
+	<ProbeName>psacct:cmswc1.fnal.gov</ProbeName>
+</JobUsageRecord>

@@ -1,0 +1,29 @@
+<UsageRecord xmlns="http://www.gridforum.org/2003/ur-wg" xmlns:urwg="http://www.gridforum.org/2003/ur-wg" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.gridforum.org/2003/ur-wg file:///u:/OSG/urwg-schema.11.xsd">
+<urwg:RecordIdentity urwg:createTime="2006-08-24T02:47:47Z"
+ urwg:recordId="prod-wn-041.pd.infn.it:18416.prod-wn-041.pd.infn.it_1149778569"/>
+<urwg:JobIdentity>
+<urwg:GlobalJobId>prod-wn-041.pd.infn.it:18416.prod-wn-041.pd.infn.it_1149778569</urwg:GlobalJobId>
+<urwg:LocalJobId>18416.prod-wn-041.pd.infn.it</urwg:LocalJobId>
+</urwg:JobIdentity>
+<urwg:UserIdentity>
+<urwg:LocalUserId>dteam004</urwg:LocalUserId>
+<ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#"/>
+</urwg:UserIdentity>
+<urwg:JobName>blahjob_d12616</urwg:JobName>
+<urwg:Status description="exit status">0</urwg:Status>
+<urwg:WallDuration>PT1M6S</urwg:WallDuration>
+<urwg:CpuDuration>PT9S</urwg:CpuDuration>
+<urwg:EndTime>2006-06-08T14:57:15Z</urwg:EndTime>
+<urwg:StartTime>2006-06-08T14:56:09Z</urwg:StartTime>
+<urwg:MachineName description="Server">prod-wn-041.pd.infn.it</urwg:MachineName>
+<urwg:Host description="executing host"
+ primary="false">prod-wn-043.pd.infn.it/0</urwg:Host>
+<urwg:Queue description="LRMS type: pbs">cert</urwg:Queue>
+<urwg:Memory storageUnit="KB"
+ metric="total">0</urwg:Memory>
+<urwg:Swap storageUnit="KB"
+ metric="total">0</urwg:Swap>
+<urwg:TimeInstant description="LRMS event timestamp">2006-06-08T16:57:15Z</urwg:TimeInstant>
+<urwg:Resource urwg:description="LocalUserGroup">dteam</urwg:Resource>
+<urwg:Resource urwg:description="UserVOName">dteam</urwg:Resource>
+</UsageRecord>

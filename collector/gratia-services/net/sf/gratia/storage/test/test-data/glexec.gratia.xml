@@ -1,0 +1,22 @@
+<JobUsageRecord xmlns="http://www.gridforum.org/2003/ur-wg" xmlns:urwg="http://www.gridforum.org/2003/ur-wg" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.gridforum.org/2003/ur-wg file:///u:/OSG/urwg-schema.11.xsd">
+<RecordIdentity urwg:recordId="fnpca.fnal.gov:9928.102" urwg:createTime="2006-10-18T20:37:03Z"/>
+<UserIdentity>
+	<LocalUserId>cdf</LocalUserId>
+	<ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+		<ds:X509Data>
+		<ds:X509SubjectName>/DC=gov/DC=fnal/O=Fermilab/OU=Robots/CN=cdf/CN=Elliot D. Lipeles/USERID=lipeles</ds:X509SubjectName>
+		</ds:X509Data>
+	</ds:KeyInfo>
+	<VOName>cdf</VOName>
+</UserIdentity>
+	<MachineName>fnpcg.fnal.gov</MachineName>
+	<Host primary="false">fnpca.fnal.gov</Host>
+	<WallDuration>PT0S</WallDuration>
+	<CpuDuration urwg:usageType="user">PT0S</CpuDuration>
+	<CpuDuration urwg:usageType="system">PT0S</CpuDuration>
+	<StartTime>2006-10-18T20:36:59Z</StartTime>
+	<EndTime>2006-10-18T20:36:59Z</EndTime>
+	<ProbeName>glexec:fnpca.fnal.gov</ProbeName>
+	<SiteName>fnpcg test cluster</SiteName>
+	<Njobs>1</Njobs>
+</JobUsageRecord>
