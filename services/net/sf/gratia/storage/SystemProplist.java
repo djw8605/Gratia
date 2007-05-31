@@ -1,7 +1,5 @@
 package net.sf.gratia.storage;
 
-import java.util.*;
-
 public class SystemProplist
 {
 		private int propid;

@@ -3,7 +3,6 @@
  */
 package net.sf.gratia.storage;
 
-import java.util.Iterator;
 import java.util.GregorianCalendar;
 
 import java.io.StringReader;

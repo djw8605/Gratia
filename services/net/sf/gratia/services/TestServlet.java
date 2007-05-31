@@ -9,6 +9,8 @@ import javax.naming.*;
 
 public class TestServlet extends HttpServlet {
 
+        static final long serialVersionUID = 1;
+        
 		static
 		{
 				Logging.log("");

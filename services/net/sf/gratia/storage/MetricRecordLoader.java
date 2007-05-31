@@ -3,7 +3,6 @@ package net.sf.gratia.storage;
 import java.util.Iterator;
 import org.dom4j.Attribute;
 import org.dom4j.Element;
-import java.util.List;
 import java.util.ArrayList;
 
 import net.sf.gratia.storage.RecordIdentity;

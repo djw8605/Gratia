@@ -1,7 +1,6 @@
 package net.sf.gratia.storage;
 
 import java.util.Iterator;
-import org.dom4j.Element;
 
 public class RecordUpdaterManager implements RecordUpdater
 {

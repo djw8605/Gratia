@@ -2,10 +2,6 @@ package net.sf.gratia.services;
 
 import java.util.*;
 import java.sql.*;
-import java.io.*;
-import java.net.*;
-
-import org.hibernate.*;
 
 import net.sf.gratia.storage.*;
 

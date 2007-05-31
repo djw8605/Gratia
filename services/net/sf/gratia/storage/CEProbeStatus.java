@@ -1,7 +1,5 @@
 package net.sf.gratia.storage;
 
-import java.util.*;
-
 public class CEProbeStatus
 {
 		private int statusid;

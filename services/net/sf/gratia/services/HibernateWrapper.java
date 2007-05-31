@@ -2,10 +2,7 @@ package net.sf.gratia.services;
 
 import java.util.*;
 import java.io.*;
-import org.hibernate.SessionFactory;
-import org.hibernate.cfg.Configuration;
 
-import java.sql.*;
 import net.sf.gratia.storage.*;
 
 public class HibernateWrapper
@@ -26,7 +23,7 @@ public class HibernateWrapper
 
       p = net.sf.gratia.services.Configuration.getProperties();
 
-      String configurationPath = net.sf.gratia.services.Configuration.getConfigurationPath();
+      // String configurationPath = net.sf.gratia.services.Configuration.getConfigurationPath();
 
       try
       {
@@ -121,8 +118,6 @@ public class HibernateWrapper
 
    public static synchronized org.hibernate.Session getSession()
    {
-      int i = 0;
-
       try
       {
          org.hibernate.Session session = hibernateFactory.openSession();
