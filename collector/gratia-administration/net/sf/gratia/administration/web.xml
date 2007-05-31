@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+  Copyright 2004 The Apache Software Foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<!DOCTYPE web-app
+    PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
+    "http://java.sun.com/dtd/web-app_2_3.dtd">
+<web-app>
+    <display-name>Gratia System Administration</display-name>
+    <description>
+      Gratia System Administration
+    </description>
+
+    <servlet>
+        <servlet-name>CETable</servlet-name>
+        <servlet-class>net.sf.gratia.administration.CETable</servlet-class>
+				<load-on-startup>1</load-on-startup>
+    </servlet>
+
+    <servlet>
+        <servlet-name>ProbeTable</servlet-name>
+        <servlet-class>net.sf.gratia.administration.ProbeTable</servlet-class>
+				<load-on-startup>1</load-on-startup>
+    </servlet>
+
+    <servlet>
+        <servlet-name>SecurityTable</servlet-name>
+        <servlet-class>net.sf.gratia.administration.SecurityTable</servlet-class>
+				<load-on-startup>1</load-on-startup>
+    </servlet>
+
+    <servlet>
+        <servlet-name>replicationtable</servlet-name>
+        <servlet-class>net.sf.gratia.administration.ReplicationTable</servlet-class>
+				<load-on-startup>1</load-on-startup>
+        <init-param>
+            <param-name>RecordType</param-name>
+            <param-value>JobUsageRecord</param-value>
+         </init-param>
+    </servlet>
+
+    <servlet>
+        <servlet-name>metricreplicationtable</servlet-name>
+        <servlet-class>net.sf.gratia.administration.ReplicationTable</servlet-class>
+        <load-on-startup>1</load-on-startup>
+        <init-param>
+           <param-name>RecordType</param-name>
+           <param-value>MetricRecord</param-value>
+         </init-param>
+    </servlet>
+
+    <servlet>
+        <servlet-name>CPUInfo</servlet-name>
+        <servlet-class>net.sf.gratia.administration.CPUInfo</servlet-class>
+				<load-on-startup>1</load-on-startup>
+    </servlet>
+
+    <servlet>
+        <servlet-name>Roles</servlet-name>
+        <servlet-class>net.sf.gratia.administration.Roles</servlet-class>
+				<load-on-startup>1</load-on-startup>
+    </servlet>
+
+    <servlet>
+        <servlet-name>Status</servlet-name>
+        <servlet-class>net.sf.gratia.administration.Status</servlet-class>
+				<load-on-startup>1</load-on-startup>
+    </servlet>
+
+    <servlet>
+        <servlet-name>NgapStatus</servlet-name>
+        <servlet-class>net.sf.gratia.administration.NgapStatus</servlet-class>
+				<load-on-startup>1</load-on-startup>
+    </servlet>
+
+    <servlet>
+        <servlet-name>SystemAdministration</servlet-name>
+        <servlet-class>net.sf.gratia.administration.SystemAdministration</servlet-class>
+				<load-on-startup>1</load-on-startup>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>CETable</servlet-name>
+				<url-pattern>/cetable.html</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>ProbeTable</servlet-name>
+        <url-pattern>/probetable.html</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>SecurityTable</servlet-name>
+        <url-pattern>/securitytable.html</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>replicationtable</servlet-name>
+        <url-pattern>/replicationtable.html</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>metricreplicationtable</servlet-name>
+        <url-pattern>/metricreplicationtable.html</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>CPUInfo</servlet-name>
+        <url-pattern>/cpuinfo.html</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>Status</servlet-name>
+        <url-pattern>/status.html</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>SystemAdministration</servlet-name>
+        <url-pattern>/systemadministration.html</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>Roles</servlet-name>
+        <url-pattern>/roles.html</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>NgapStatus</servlet-name>
+        <url-pattern>/monitor-status.html</url-pattern>
+    </servlet-mapping>
+
+</web-app>

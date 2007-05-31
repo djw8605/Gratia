@@ -1,0 +1,79 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>Gratia Accounting</title>
+<LINK href="stylesheet.css" type="text/css" rel="stylesheet">
+
+</head>
+<body>
+<form id="form1" name="form1" method="post" action="">
+<h1 align="center" class="osgcolor">&nbsp;&nbsp;&nbsp;&nbsp;Gratia Administration&nbsp;&nbsp;&nbsp;&nbsp;</h1>
+  <h3 align="center">#recordtable# Replication Administration </h3>
+  <table width="100%" border="1">
+    <tr>
+      <th width="18%" bgcolor="#999999" scope="col">Remote Host </th>
+      <th width="10%" bgcolor="#999999" scope="col">Registered</th>
+      <th width="10%" bgcolor="#999999" scope="col">Running</th>
+      <th width="8%" bgcolor="#999999" scope="col">Security </th>
+      <th width="22%" bgcolor="#999999" scope="col">Probe Name </th>
+      <th width="9%" bgcolor="#999999" scope="col">Frequency</th>
+      <th width="7%" bgcolor="#999999" scope="col">DBID</th>
+      <th width="8%" bgcolor="#999999" scope="col">Row Count </th>
+      <th width="8%" bgcolor="#999999" scope="col">Options</th>
+    </tr>
+    <tr id=datarow>
+      <td><input type="hidden" name="index:#index#" value="#index#"/>
+        <input type="hidden" name="replicationid:#index#" value="#replicationid#"/>
+        <input id=openconnection name="openconnection:#index#" type="text" value="#openconnection#" size="25" maxlength="50" />
+      </td>
+      <td><label>#registered#</label>
+        &nbsp;</td>
+      <td>#running#</td>
+      <td><label>
+        <select id=security name="security:#index#">
+          <option selected="selected">Yes</option>
+          <option>No</option>
+        </select>
+        </label></td>
+      <td><label>
+        <select id=probename name="probename:#index#" WIDTH="200" STYLE="width: 200px">
+          <option selected="selected">All</option>
+        </select>
+        </label></td>
+      <td><label>
+        <input name="frequency:#index#" type="text" value="#frequency#" size="3" maxlength="2" />
+        </label></td>
+      <td><label>#dbid#</label></td>
+      <td><label>#rowcount#</label></td>
+      <td><table id=optiontable width="100%" border="0">
+          <tr>
+            <td><a href="#webpagename#.html?action=register&replicationid=#replicationid#">Register</a></td>
+          </tr>
+          <tr>
+            <td><a href="#webpagename#.html?action=test&replicationid=#replicationid#">Test</a></td>
+          </tr>
+          <tr>
+            <td><a href="#webpagename#.html?action=activate&replicationid=#replicationid#">Start</a></td>
+          </tr>
+          <tr>
+            <td><a href="#webpagename#.html?action=deactivate&replicationid=#replicationid#">Stop</a></td>
+          </tr>
+          <tr>
+            <td><a href="#webpagename#.html?action=delete&replicationid=#replicationid#">Delete</a></td>
+          </tr>
+        </table></td>
+    </tr>
+    <tr>
+      <td colspan="9"><label>
+        <div align="center">
+          <input type="submit" name="update" value="Update" />
+        </div>
+        </label></td>
+    </tr>
+  </table>
+</form>
+<p id=message class="msg"><pre>#message#</pre></p>
+
+</body>
+</html>

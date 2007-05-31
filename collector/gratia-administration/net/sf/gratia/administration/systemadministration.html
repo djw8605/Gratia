@@ -1,0 +1,72 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>Gratia Accounting</title>
+<LINK href="stylesheet.css" type="text/css" rel="stylesheet">
+
+</head>
+<body>
+<h1 align="center" class="osgcolor">&nbsp;&nbsp;&nbsp;&nbsp;Gratia Administration&nbsp;&nbsp;&nbsp;&nbsp;</h1>
+<h3 align="center">System Administration </h3>
+<form action="probetable.html" method="post" name="form1" target="iframe" id="form1">
+  <table width="100%" border="1">
+    <tr>
+      <th width="30%" bgcolor="#999999" scope="col">Replay</th>
+      <th width="70%" bgcolor="#999999" scope="col">&nbsp;</th>
+    </tr>
+    <tr>
+      <td><strong>Status</strong></td>
+      <td><div align="left"><strong>#status#</strong></div></td>
+    </tr>
+    <tr>
+      <td><strong>Processed</strong></td>
+      <td><div align="right"><strong>#processed#</strong></div></td>
+    </tr>
+    <tr>
+      <td><strong>Skipped</strong></td>
+      <td><div align="right"><strong>#skipped#</strong></div></td>
+    </tr>
+  </table>
+  <p><strong>Disaster Recovery/Replay:</strong></p>
+  <p>The Gratia data collector maintains two sets of transaction logs (both found in $CATALINA_HOME/gratia/data). The first set (directories named &quot;historyYYYYMMDDHH&quot;)  contains a copy of all committed xml files with a timestamp. The second set (directories named &quot;oldYYYYMMDDHH&quot;) contains a copy of everything that Gratia recieved from any source. In the event that you have a system outage and must do a database restore/repair you have two options. The first is to simply replay all history. This will blindly restart at the first history record that Gratia has and attempt to reapply it to the database. In the event that Gratia has seen the record before, it will simply be ignored. This particular option can be triggered by using the following link: </p>
+  <ul>
+    <li>
+      <a href="systemadministration.html?action=replayAll" target="iframe">Replay All History</a>    </li>
+  </ul>
+  <p>The second option for recovery is that Gratia will query the database for the last known update and replay just the history from that timestamp (minus 5 minutes or so) forward. This option is can be triggered by the following: </p>
+  <ul>
+    <li><a href="systemadministration.html?action=replay"target="iframe" >Replay New History</a>  
+      </p>
+    </li>
+  </ul>
+  <p><strong>Notes/Asides:</strong></p>
+  <ul>
+    <li>Neither of the two options will recover &quot;out of band&quot; database changes. As an example, if you manually changed data on the database and subsequently (by accident) deleted the changed records, the replay will only recover the original information. You must rerun you manual changes.</li>
+    <li>The amount of history being maintained is determined by a setting in $CATALINA_HOME/gratia/service-configuration.properties. By default it is 14 days. Gratia will automatically purge information older than that.</li>
+    <li>Finally, you can do a replay while processing new information from probes.  </li>
+  </ul>
+</form>
+<hr size="4" />
+<p><strong>Starting/Stopping Database Update Services:</strong></p>
+<p><strong>Current Status: #threadstatus#</strong></p>
+<blockquote>
+  <p><a href="systemadministration.html?action=stopDatabaseUpdateThreads" target="iframe">Stop Update Services</a> </p>
+  <p><a href="systemadministration.html?action=startDatabaseUpdateThreads" target="iframe">Start Update Services</a></p>
+</blockquote>
+<hr size="4" />
+<p><strong>Creating/Recreating Report Summary Tables:</strong></p>
+<p>Unfortunately, this process cannot be (safely) automated. Specifically what you have to do is:</p>
+<ul>
+  <li>Bring down the tomcat service accessing your Gratia database.</li>
+  <li>In your $CATALINA_HOME/gratia subdirectory you will find a script called build-summary-tables.bat (or build-summary-tables.sh) which will drop/create the various summary tables used by reporting and install an &quot;after insert&quot; trigger on the JobUsageRecord table which will dynamically update the summary tables as new information is received by the Gratia system.</li>
+  <li>The actual SQL that is being executed is in $CATALNA_HOME/gratia/build-summary-tables.sql.</li>
+  <li>Restart your tomcat service. </li>
+</ul>
+<p><strong>Warnings:</strong></p>
+<ul>
+  <li><strong>Be very, very careful if you modify the build-summary-table.sql code. Any errors in this can cause the Gratia data collector to hang. If this happens you must stop the tomcat service and delete the trigger.</strong></li>
+  <li><strong>MySQL does not, repeat does not, backup triggers and stored procedures as part of a mysqldump. If you have to do a restore, you must recreate the trigger. </strong></li>
+</ul>
+</body>
+</html>
