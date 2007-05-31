@@ -211,7 +211,7 @@ public class UsageRecordLoader implements RecordLoader {
                     id = new JobIdentity();
                 id.addProcessId(sub.getText());
             } else {
-                extras = extras + element.asXML();
+                extras = extras + sub.asXML();
             }
         }
         if (id != null)
