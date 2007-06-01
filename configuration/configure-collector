@@ -19,7 +19,8 @@ my %collector_configs =
 							 jmx_port => 8004,
 							 server_port => 8104,
 							 db_schema => "gratia",
-							 remote_host => "gratia-osg.fnal.gov"
+							 remote_host => "gratia-osg.fnal.gov",
+							 heap_size => "512m"
 						 },
 	 fermi_osg => { http_port => 8880,
 									ssl_port => 8845,
@@ -96,35 +97,50 @@ my %collector_configs =
 								}
 							 },
 	 pcanal => {http_port => 8881,
-								ssl_port => 8850,
-								rmi_port => 18000,
-								jmx_port => 8014,
-								server_port => 8114,
-								db_host => "localhost",
-								db_schema => "gratia_pcanal",
-								"properties.attributes" =>
-								{
-								 "service.mysql.user" => "gratia",
-								 "service.mysql.password" => "proto",
-								 "monitor.listener.wait" => 240,
-								 "monitor.to.address0" => 'pcanal@fnal.gov'
-								}
-							 },
+							ssl_port => 8850,
+							rmi_port => 18000,
+							jmx_port => 8014,
+							server_port => 8114,
+							db_host => "localhost",
+							db_schema => "gratia_pcanal",
+							"properties.attributes" =>
+							{
+							 "service.mysql.user" => "gratia",
+							 "service.mysql.password" => "proto",
+							 "monitor.listener.wait" => 240,
+							 "monitor.to.address0" => 'pcanal@fnal.gov'
+							}
+						 },
 	 greenc => {http_port => 8882,
-								ssl_port => 8855,
-								rmi_port => 19000,
-								jmx_port => 8024,
-								server_port => 8124,
-								db_host => "localhost",
-								db_schema => "gratia_greenc",
-								"properties.attributes" =>
-								{
-								 "service.mysql.user" => "gratia",
-								 "service.mysql.password" => "proto",
-								 "monitor.listener.wait" => 240,
-								 "monitor.to.address0" => 'greenc@fnal.gov'
-								}
-							 },
+							ssl_port => 8855,
+							rmi_port => 19000,
+							jmx_port => 8024,
+							server_port => 8124,
+							db_host => "localhost",
+							db_schema => "gratia_greenc",
+							"properties.attributes" =>
+							{
+							 "service.mysql.user" => "gratia",
+							 "service.mysql.password" => "proto",
+							 "monitor.listener.wait" => 240,
+							 "monitor.to.address0" => 'greenc@fnal.gov'
+							}
+						 },
+	 vittone => {http_port => 8883,
+							 ssl_port => 8860,
+							 rmi_port => 20000,
+							 jmx_port => 8034,
+							 server_port => 8134,
+							 db_host => "localhost",
+							 db_schema => "gratia_vittone",
+							 "properties.attributes" =>
+							 {
+								"service.mysql.user" => "gratia",
+								"service.mysql.password" => "proto",
+								"monitor.listener.wait" => 240,
+								"monitor.to.address0" => 'vittone@fnal.gov'
+							 }
+							},
 	);
 
 my @required_attributes =
@@ -141,6 +157,7 @@ my @required_properties = ();
 
 my %attribute_defaults =
 	(
+	 heap_size => "256m",
 	 collector_host => "localhost",
 	 db_port => 3320,
 	 db_host => "gratia-db01.fnal.gov",
@@ -197,21 +214,24 @@ TOMCAT_HTTP_PORT=
 TOMCAT_SSL_PORT=
 TOMCAT_PATH_STEM=
 JAVA_HOME=
+TOMCAT_HEAP_SIZE=
 # This varies based on the collector purpose: OSG, OSG daily, QCD or PSACCT
 USERCONFIG_FILE_NAME=
 ####################################
 
+[[ -z "$TOMCAT_HEAP_SIZE" ]] && TOMCAT_HEAP_SIZE="128m"
+
 export JAVA_HOME
 
 # This should be fine as a default
-TOMCAT_INSTANCE_NAME=${0##*/}
+TOMCAT_INSTANCE_NAME=`basename "$0" | sed -e 's/^.*\(tomcat-.*\)$/\1/'`
 
 ########################################################################
 # No User Servicable Parts
 CATALINA_HOME="${TOMCAT_PATH_STEM}/${TOMCAT_INSTANCE_NAME}"; export CATALINA_HOME
 
 if [ "$1" = "start" ] ; then
-  JAVA_OPTS="-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=${TOMCAT_MANAGEMENT_PORT} -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dssl.port=${TOMCAT_SSL_PORT} -Dnet.sf.gratia.reporting.UserConfigFileName=${USERCONFIG_FILE_NAME}"; export JAVA_OPTS
+  JAVA_OPTS="-Xmx$TOMCAT_HEAP_SIZE -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=${TOMCAT_MANAGEMENT_PORT} -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dssl.port=${TOMCAT_SSL_PORT} -Dnet.sf.gratia.reporting.UserConfigFileName=${USERCONFIG_FILE_NAME}"; export JAVA_OPTS
   $CATALINA_HOME/bin/catalina.sh start
 elif [ "$1" = "stop" ] ; then
   $CATALINA_HOME/bin/shutdown.sh
@@ -231,6 +251,7 @@ my $default_prefix = "/scratch";
 Getopt::Long::Configure(qw(no_ignore_case bundling require_order));
 
 GetOptions(\%options, "java-home|j=s", "remote-host|r=s",
+					 "use-ssl|s",
 					 "prefix|p=s", "help|h|\?") or pod2usage(-exitval => 2);
 
 pod2usage(-exitval => 1, -verbose => 3) if $options{help};
@@ -330,6 +351,7 @@ sub configure_init_file {
 	my ($instance_name, $collector_config) = @_;
 	my $init_script = "/etc/rc.d/init.d/tomcat-$instance_name";
 	my $init_script_txt = $init_script_template;
+	$init_script_txt =~ s&^(TOMCAT_HEAP_SIZE=).*$&${1}$collector_config->{heap_size}&m if $collector_config->{heap_size};
 	$init_script_txt =~ s&^(TOMCAT_MANAGEMENT_PORT=).*$&${1}$collector_config->{jmx_port}&m;
 	$init_script_txt =~ s&^(TOMCAT_HTTP_PORT=).*$&${1}$collector_config->{http_port}&m;
 	$init_script_txt =~ s&^(TOMCAT_SSL_PORT=).*$&${1}$collector_config->{ssl_port}&m;
@@ -445,7 +467,7 @@ sub configure_tomcat_config {
                enableLookups="false" redirectPort="$collector_config->{ssl_port}" acceptCount="100"
                connectionTimeout="20000" disableUploadTimeout="true" />
 EOF
-				print REPORTING_CONFIG <<EOF if 0;
+				print REPORTING_CONFIG <<EOF if $options{"use-ssl"};
     <Connector port="$collector_config->{ssl_port}" maxHttpHeaderSize="8192"
                maxThreads="150" minSpareThreads="25" maxSpareThreads="75"
                enableLookups="false" disableUploadTimeout="true"
@@ -517,7 +539,8 @@ B<configure-collector> [I<global-options>] [--] I<instance>+
 
 I<global-options>: B<-r> I<collector-host-name> | B<--remote-host> I<collector-host-name> |
                  B<-j> I<JRE-home-dir> | B<--java-home> I<JRE-home-dir> |
-                 B<-p> I<install-path-prefix> | B<--prefix> I<install-path-prefix>
+                 B<-p> I<install-path-prefix> | B<--prefix> I<install-path-prefix> |
+                 B<--use-ssl> | B<-s>
 
 Options marked with B<+> are repeatable and cumulative.
 
@@ -556,6 +579,13 @@ The location of a Java-1.5 runtime.
 
 The directory above the tomcat instance (eg /scratch).
 
+
+=item B<-s>
+
+=item B<--use-ssl>
+
+
+Configure tomcat to open the SSL port (default is no).
 
 =head1 AUTHOR
 
