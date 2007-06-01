@@ -1,0 +1,67 @@
+#!/bin/bash -x
+
+# Defaults
+tomcat_root=/scratch
+java_jre=/scratch/jre
+birt_war=birt-v20.war
+war_dir=~greenc/gratia/wars
+configuration_dir=~greenc/gratia/configuration
+target_dir=~greenc/gratia/target
+
+instance=$1
+tomcat_top=$tomcat_root/tomcat-$instance
+
+if ! [[ -d "$tomcat_top" ]]; then
+  echo "Unable to find specified instance $instance" on this node 1>&2
+  exit 1
+fi
+
+remote_host=`uname -n`
+
+service tomcat-$instance stop
+sleep 5
+
+# Copy Birt if necessary
+if [[ -f "$tomcat_top/webapps/$birt_war" ]]; then
+  # Verify checksum
+  official_birt_checksum=`cd "$war_dir"; md5sum "$birt_war"`
+	echo $official_birt_checksum
+	# Checksum local birt war
+	echo $official_birt_checksum | ( cd "$tomcat_top/webapps/" ; md5sum --check --status )
+	if (( $? != 0 )); then
+    echo "Birt war has changed: obtaining fresh copy"
+    echo rm -rf "$tomcat_root/webapps/$birt_war" "$tomcat_root/webapps/${birt_war%.war}"
+    echo cp -p "war_dir/$birt_war" "$tomcat_root/webapps/"
+  fi
+else
+   cp -pv "war_dir/$birt_war" "$tomcat_root/webapps/"
+fi
+
+# Update gratia directory
+mkdir -p "$tomcat_top/gratia"
+tar xf "$target_dir/gratia.tar" -C "$tomcat_top/gratia"
+
+# Update webapps
+# Any updated war files?
+for war in $tomcat_top/webapps/*.war; do
+  if [[ -f "$target_dir/${war##*/}" ]]; then
+    rm -rf "${war%.war}"
+    cp -pv "$target_dir/${war##*/}" "$tomcat_top/webapps/"
+  fi
+done
+
+# Any new war files?
+for war in $target_dir/*.war; do
+  if ! [[ -f "$tomcat_top/webapps/${war##*/}" ]]; then
+    cp -pv "$war" "$tomcat_top/webapps/"
+  fi
+done
+
+# Configure gratia dir
+"$configuration_dir/configure-collector" \
+-p "$tomcat_root" \
+-j "$java_jre" \
+-r "$remote_host" \
+$instance
+
+# service tomcat-$instance start

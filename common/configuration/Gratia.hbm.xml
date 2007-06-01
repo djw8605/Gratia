@@ -1,0 +1,128 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+
+<hibernate-mapping package= "net.sf.gratia.storage">
+
+  <class name="RolesTable" table="RolesTable" node="RolesTable" lazy="false">
+    <id name="roleid" column="roleid" type="int">
+      <generator class="native"/>
+    </id>
+    <property name="role" column="role"/>
+    <property name="subtitle" column="subtitle"/>
+    <property name="whereclause" column="whereclause"/>
+  </class>
+
+  <class name="CPUMetricTypes" table="CPUMetricTypes" node="CPUMetricTypes" lazy="false">
+    <id name="id" column="id" type="int">
+      <generator class="native"/>
+    </id>
+    <property name="CPUMetricType" column="CPUMetricType"/>
+  </class>
+
+  <class name="SystemProplist" table="SystemProplist" node="SystemProplist" lazy="false">
+    <id name="propid" column="propid" type="int">
+      <generator class="native"/>
+    </id>
+    <property name="car" column="car"/>
+    <property name="cdr" column="cdr"/>
+  </class>
+
+  <class name="DupRecord" table="DupRecord" node="DupRecord" lazy="false">
+    <id name="dupid" column="dupid" type="int">
+      <generator class="native"/>
+    </id>
+    <property name="eventdate" column="eventdate" type="timestamp"/>
+    <property name="rawxml" column="rawxml" type="text"/>
+    <property name="extraxml" column="extraxml" type="text"/>
+    <property name="source" column="source"/>
+    <property name="error" column="error"/>
+    <property name="dbid" column="dbid" type="int"/>
+    <property name="RecordType" column="RecordType" type="text"/>
+  </class>
+
+  <class name="Replication" table="Replication" node="Replication" lazy="false">
+    <id name="replicationid" column="replicationid" type="int">
+      <generator class="native"/>
+    </id>
+    <property name="registered" column="registered" type="int"/>
+    <property name="running" column="running" type="int"/>
+    <property name="security" column="security" type="int"/>
+    <property name="openconnection" column="openconnection"/>
+    <property name="secureconnection" column="secureconnection"/>
+    <property name="frequency" column="frequency" type="int"/>
+    <property name="dbid" column="dbid" type="int"/>
+    <property name="rowcount" column="rowcount" type="int"/>
+    <property name="probename" column="probename"/>
+    <property name="recordtable" column="recordtable"/>
+  </class>
+
+  <class name="Security" table="Security" node="Security" lazy="false">
+    <id name="securityid" column="securityid" type="int">
+      <generator class="native"/>
+    </id>
+    <property name="source" column="source"/>
+    <property name="alias" column="alias"/>
+    <property name="hostpem" column="hostpem" type="text"/>
+    <property name="state" column="state"/>
+  </class>
+
+  <class name="CPUInfo"
+	table="CPUInfo"
+	node="CPUInfo" lazy="false">
+
+    <id name="_id"
+            column="HostId"
+            type="int">
+      <generator class="native"/>
+    </id>
+
+    <property name="_hostDescription" column="HostDescription"/>
+    <property name="_benchmarkScore" column="BenchmarkScore"/>
+    <property name="_CPUCount" column="CPUCount"/>
+    <property name="_OS" column="OS"/>
+    <property name="_OSVersion" column="OSVersion"/>
+    <property name="_CPUType" column="CPUType"/>
+  </class>
+
+  <class name="CETable" table="CETable" node="CETable" lazy="false">
+    <id name="_facility_id" column="facility_id" type="int">
+      <generator class="native"/>
+    </id>
+    <property name="_facility_name" column="facility_name"/>
+  </class>
+
+  <class name="CEProbes" table="CEProbes" node="CEProbes" lazy="false">
+    <id name="probeid" column="probeid" type="int">
+      <generator class="native"/>
+    </id>
+    <property name="_facility_id" column="facility_id" type="int"/>
+    <property name="probename" column="probename"/>
+    <property name="active" column="active" type="int"/>
+    <component name="currenttime" class="DateElement" insert="true">
+      <property name="Value" column="currenttime" type="timestamp"  />
+      <property name="Description" column="CurrentTimeDescription" />
+    </component>
+    <property name="reporthh" column="reporthh" type="int"/>
+    <property name="reportmm" column="reportmm" type="int"/>
+    <property name="status" column="status"/>
+    <property name="jobs" column="jobs" type="int"/>
+  </class>
+
+  <class name="CEProbeStatus" table="CEProbeStatus" node="CEProbeStatus" lazy="false">
+    <id name="statusid" column="statusid" type="int">
+      <generator class="native"/>
+    </id>
+    <component name="currenttime" class="DateElement" insert="true">
+      <property name="Value" column="currenttime" type="timestamp"  />
+      <property name="Description" column="CurrentTimeDescription" />
+    </component>
+    <property name="probename" column="probename"/>
+    <property name="probestatus" column="probestatus"/>
+    <property name="jobs" column="jobs" type="int"/>
+    <property name="lostjobs" column="lostjobs" type="int"/>
+  </class>
+
+</hibernate-mapping>
