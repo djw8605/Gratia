@@ -1,0 +1,31 @@
+<UserConfig>
+	<Menu>
+		<MenuGroup name="Dashboards">
+			<MenuItem name="Home" link="dashboard.jsp"/>
+		</MenuGroup>
+		<MenuGroup name="Reports">
+			<MenuItem name="Daily Usage by Site" link="viewer.jsp?__report=[ReportsFolder]DailyUsageBySite-osgdaily.rptdesign,CPUMetric=wallclock"/>
+			<MenuItem name="Usage by Site" link="viewer.jsp?__report=[ReportsFolder]UsageBySite-osgdaily.rptdesign,CPUMetric=wallclock"/>
+			<MenuItem name="Jobs by Site" link="viewer.jsp?__report=[ReportsFolder]JobsBySite-osgdaily.rptdesign"/>
+
+			<MenuItem name="Daily Usage by VO" link="viewer.jsp?__report=[ReportsFolder]DailyUsageByVO-osgdaily.rptdesign,CPUMetric=wallclock"/>
+			<MenuItem name="Usage by VO" link="viewer.jsp?__report=[ReportsFolder]UsageByVO-osgdaily.rptdesign,CPUMetric=wallclock"/>
+			<MenuItem name="Jobs by VO" link="viewer.jsp?__report=[ReportsFolder]JobsByVO-osgdaily.rptdesign"/>
+			
+		</MenuGroup>
+		<MenuGroup name="SQL Queries">
+			<MenuItem name="Custom SQL Report" link="admin.jsp"/>
+			<MenuItem name="Distinct Probe Names" link="admin.jsp?sql=select distinct ProbeName from JobUsageRecord;"/>
+			<MenuItem name="Probes Without Facilities" link="admin.jsp?sql=select distinct ProbeName from JobUsageRecord j where not exists(select ProbeName from CEProbes f where f.probename = j.probename);"/>
+			<MenuItem name="Records Without Dates" link="admin.jsp?sql=select count(*) from JobUsageRecord where starttime is null or endtime is null;"/>
+		</MenuGroup>
+	</Menu>
+	<Dashboard>		
+		<Row>
+			<DashboardItem link="viewer.jsp?__report=[ReportsFolder]JobsBySite-osgdaily.rptdesign&amp;Start+Date=01/01/1990&amp;End+Date=12/31/2999"/>
+		</Row>
+		<Row>	
+			<DashboardItem link="viewer.jsp?__report=[ReportsFolder]JobsByVO-osgdaily.rptdesign&amp;Start+Date=01/01/1990&amp;End+Date=12/31/2999"/>
+		</Row>			
+	</Dashboard>
+</UserConfig>

@@ -1,0 +1,25 @@
+<UserConfig>
+	<Menu>
+		<MenuGroup name="Dashboards">
+			<MenuItem name="Home" link="dashboard.jsp"/>
+		</MenuGroup>
+		<MenuGroup name="Reports">
+			<MenuItem name="Last 12 Months % Usage by Site" link="viewer.jsp?__report=[ReportsFolder]DateSummary2-pacct.rptdesign"/>
+			<MenuItem name="Last 12 Months Usage (SpecINT2000 hours) by Site" link="viewer.jsp?__report=[ReportsFolder]DateSummary1-pacct.rptdesign"/>
+			<MenuItem name="Daily Usage (CPU hours) with Group Detail" link="viewer.jsp?__report=[ReportsFolder]DailyUsageByGroup2-pacct.rptdesign"/>
+			<MenuItem name="Daily Usage (CPU hours) by Group" link="viewer.jsp?__report=[ReportsFolder]DailyUsageByGroup-pacct.rptdesign"/>
+			<MenuItem name="Daily Usage (CPU hours) Total (system and user)" link="viewer.jsp?__report=[ReportsFolder]DailyUsage1-pacct.rptdesign"/>
+		</MenuGroup>
+		<MenuGroup name="SQL Queries">
+			<MenuItem name="Custom SQL Report" link="admin.jsp"/>
+		</MenuGroup>
+	</Menu>
+	<Dashboard>		
+		<Row>
+			<DashboardItem link="viewer.jsp?__report=[ReportsFolder]DailyUsageByGroup2-pacct.rptdesign&amp;FacilityName=USCMS-FNAL-WC1-CE&amp;Start+Date=01/01/1990&amp;End+Date=12/31/2999"/>			
+		</Row>
+		<Row>	
+			<DashboardItem link="viewer.jsp?__report=[ReportsFolder]DailyUsage1-pacct.rptdesign&amp;FacilityName=USCMS-FNAL-WC1-CE&amp;Start+Date=01/01/1990&amp;End+Date=12/31/2999"/>			
+		</Row>			
+	</Dashboard>
+</UserConfig>
