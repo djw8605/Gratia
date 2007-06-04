@@ -365,24 +365,24 @@ public class ListenerThread extends Thread
                current = (Record)records.get(j);
                statusUpdater.update(current, xml);
 
-               Logging.log("ListenerThread: " + ident + ":Before Duplicate Check");
+               //Logging.log("ListenerThread: " + ident + ":Before Duplicate Check");
                if (gothistory && (md5key != null))
                   gotduplicate = gotDuplicate(current,current.getmd5());
                else
                   gotduplicate = gotDuplicate(current);
-               Logging.log("ListenerThread: " + ident + ":After Duplicate Check");
+               //Logging.log("ListenerThread: " + ident + ":After Duplicate Check");
 
                if (gotduplicate)
                {
                   goterror = true;
-                  Logging.log("ListenerThread: " + ident + ":Before Save Duplicate");
+                  //Logging.log("ListenerThread: " + ident + ":Before Save Duplicate");
                   if (gotreplication)
                      saveDuplicate("Replication", "Duplicate", dupdbid, current);
                   else if (gothistory)
                      ;
                   else
                      saveDuplicate("Probe", "Duplicate", dupdbid, current);
-                  Logging.log("ListenerThread: " + ident + ":After Save Duplicate");
+                  //Logging.log("ListenerThread: " + ident + ":After Save Duplicate");
                }
                else
                {
