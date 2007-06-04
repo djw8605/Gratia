@@ -3,8 +3,6 @@ package net.sf.gratia.services;
 import java.util.Properties;
 
 import java.rmi.*;
-import java.io.*;
-import java.net.*;
 import java.util.TimeZone;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -51,7 +49,6 @@ public class CollectorService implements ServletContextListener
 
    public void contextInitialized(ServletContextEvent sce)
    {
-      String catalinaHome = "";
       int i = 0;
 
       //
@@ -373,7 +370,6 @@ public class CollectorService implements ServletContextListener
 
    public void loadSelfGeneratedCerts()
    {
-      String dq = "\"";
       String keystore = System.getProperty("catalina.home") + "/gratia/keystore";
       keystore = xp.replaceAll(keystore, "\\", "/");
       String command1[] =
@@ -411,8 +407,7 @@ public class CollectorService implements ServletContextListener
 
    public void loadVDTCerts()
    {
-      String dq = "\"";
-      String keystore = System.getProperty("catalina.home") + "/gratia/keystore";
+       String keystore = System.getProperty("catalina.home") + "/gratia/keystore";
       String configurationPath = System.getProperty("catalina.home") + "/gratia/";
       keystore = xp.replaceAll(keystore, "\\", "/");
       String command1[] =
@@ -484,7 +479,6 @@ public class CollectorService implements ServletContextListener
    public void zapDatabase()
    {
       XP xp = new XP();
-      int i = 0;
 
       Properties p = net.sf.gratia.services.Configuration.getProperties();
 
@@ -514,10 +508,7 @@ public class CollectorService implements ServletContextListener
 
    public void checkStoredProcedures()
    {
-      String dq = "\"";
-      String comma = ",";
       XP xp = new XP();
-      int i = 0;
 
       Properties p = net.sf.gratia.services.Configuration.getProperties();
 

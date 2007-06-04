@@ -91,8 +91,6 @@ public class XP
 				String filelist[] = null;
 				String results[] = new String[0];
 				int i = 0;
-				int j = 0;
-				int imax = 0;
 				
 				try
 						{
@@ -135,7 +133,6 @@ public class XP
 				String results[] = new String[0];
 				int i = 0;
 				int j = 0;
-				int imax = 0;
 				
 				try
 						{
@@ -507,8 +504,7 @@ public class XP
 						{
 								InputStream input = url.openStream();
 								byte[] buffer = new byte[16 * 4096];
-								int status;
-								while ((status = input.read(buffer,i++,1)) != -1);
+								while ((input.read(buffer,i++,1)) != -1);
 								input.close();
 								return new String(buffer,0,i - 1);
 						}
@@ -1407,10 +1403,10 @@ public class XP
 
 		public long[] append(long arg1[],long arg2)
 		{
-				int i,j;
+				int i;
 				
 				long result[] = new long[arg1.length + 1];
-				for (i = 0,j = 0; i < arg1.length; i++)
+				for (i = 0; i < arg1.length; i++)
 						result[i] = arg1[i];
 				result[result.length - 1] = arg2;
 				return result;
@@ -1723,8 +1719,6 @@ public class XP
 				PrintWriter pw = new PrintWriter(sw);
 				StringBuffer buffer = new StringBuffer();
 				String result = "";
-				String cr = "\n";
-				XP xp = new XP();
 				
 				e.printStackTrace(pw);
 				pw.flush();

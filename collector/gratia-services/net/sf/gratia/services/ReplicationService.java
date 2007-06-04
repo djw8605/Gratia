@@ -2,10 +2,6 @@ package net.sf.gratia.services;
 
 import java.util.*;
 import java.sql.*;
-import java.io.*;
-
-import org.hibernate.SessionFactory;
-import org.hibernate.cfg.Configuration;
 
 public class ReplicationService extends Thread
 {

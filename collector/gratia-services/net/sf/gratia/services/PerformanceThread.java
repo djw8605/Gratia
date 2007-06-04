@@ -2,7 +2,6 @@ package net.sf.gratia.services;
 
 import java.util.ArrayList;
 
-import java.util.Iterator;
 import java.util.Date;
 import java.util.Properties;
 import java.util.StringTokenizer;
@@ -12,18 +11,10 @@ import java.util.Hashtable;
 import java.text.*;
 
 import java.io.*;
-import java.net.*;
 
 import net.sf.gratia.storage.*;
 
-import org.dom4j.*;
-import org.dom4j.io.*;
-
 import org.hibernate.*;
-
-import java.sql.*;
-
-import java.security.*;
 
 //
 // Note - this is a stripped down version of the real listener thread

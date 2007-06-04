@@ -1,18 +1,10 @@
 package net.sf.gratia.services;
 
-import java.util.ArrayList;
-
-import java.util.Iterator;
-import java.util.Date;
 import java.util.Properties;
 import java.util.Vector;
 import java.util.StringTokenizer;
 
-import java.text.*;
-
 import java.sql.*;
-
-import net.sf.gratia.storage.*;
 
 public class StatusListenerThread extends Thread
 {

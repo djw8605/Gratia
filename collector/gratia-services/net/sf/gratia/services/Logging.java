@@ -2,7 +2,6 @@ package net.sf.gratia.services;
 
 import java.util.*;
 import java.text.*;
-import java.io.*;
 import java.util.logging.*;
 
 public class Logging

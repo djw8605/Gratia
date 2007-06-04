@@ -1,7 +1,5 @@
 package net.sf.gratia.services;
 
-import net.sf.gratia.storage.*;
-
 import java.util.*;
 import java.sql.*;
 import java.text.*;

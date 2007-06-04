@@ -2,7 +2,6 @@ package net.sf.gratia.services;
 
 import java.rmi.registry.*;
 import java.util.*;
-import java.io.*;
 
 public class RMIService extends Thread
 {
