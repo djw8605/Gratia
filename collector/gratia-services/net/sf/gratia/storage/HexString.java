@@ -1,7 +1,5 @@
 package net.sf.gratia.storage;
 
-import java.io.*;
-
 public class HexString
 {
 		public static String stringToHex(String s)
