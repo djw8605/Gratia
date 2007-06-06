@@ -38,7 +38,7 @@
     <list-property name="configVars">
         <structure>
             <property name="name">DatabaseURL</property>
-            <property name="value">jdbc:mysql://cd-psg6.fnal.gov:3320/gratia_psacct</property>
+            <property name="value">jdbc:mysql://gratia-db01.fnal.gov:3320/gratia_psacct</property>
         </structure>
         <structure>
             <property name="name">DatabaseUser</property>
@@ -54,7 +54,7 @@
         </structure>
         <structure>
             <property name="name">End Date</property>
-            <property name="value">2007-01-31</property>
+            <property name="value">2007-01-07</property>
         </structure>
         <structure>
             <property name="name">GroupByFormat</property>
@@ -68,8 +68,8 @@
             <property name="name">HighlightDate</property>
         </structure>
         <structure>
-            <property name="name">FacilityName</property>
-            <property name="value">USCMS-FNAL-WC1-CE</property>
+            <property name="name">SiteName</property>
+            <property name="value">FNAL_GPFARM_TEST</property>
         </structure>
     </list-property>
     <parameters>
@@ -82,7 +82,7 @@
                     <property name="allowBlank">false</property>
                     <property name="format">Unformatted</property>
                     <property name="controlType">text-box</property>
-                    <property name="defaultValue">jdbc:mysql://cd-psg6.fnal.gov:3320/gratia_psacct</property>
+                    <property name="defaultValue">jdbc:mysql://gratia-db01.fnal.gov:3320/gratia_psacct</property>
                 </scalar-parameter>
                 <scalar-parameter name="DatabaseUser" id="83">
                     <property name="hidden">true</property>
@@ -154,15 +154,15 @@
             <property name="format">Unformatted</property>
             <property name="controlType">text-box</property>
         </scalar-parameter>
-        <scalar-parameter name="FacilityName" id="101">
+        <scalar-parameter name="SiteName" id="101">
             <property name="valueType">dynamic</property>
             <property name="dataType">string</property>
-            <property name="promptText">Facility Name</property>
+            <property name="promptText">Site Name</property>
             <property name="format">Unformatted</property>
             <property name="controlType">list-box</property>
-            <property name="dataSetName">FacilityNames</property>
-            <expression name="valueExpr">row["facility_name"]</expression>
-            <expression name="labelExpr">row["facility_name"]</expression>
+            <property name="dataSetName">SiteNames</property>
+            <expression name="valueExpr">row["sitename"]</expression>
+            <expression name="labelExpr">row["sitename"]</expression>
             <property name="mustMatch">false</property>
             <property name="fixedOrder">true</property>
             <property name="defaultValue">psacct:cmswc1.fnal.gov</property>
@@ -171,7 +171,7 @@
     <data-sources>
         <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="fermigrid1" id="4">
             <property name="odaDriverClass">com.mysql.jdbc.Driver</property>
-            <property name="odaURL">jdbc:mysql://cd-psg6.fnal.gov:3320/gratia_psacct</property>
+            <property name="odaURL">jdbc:mysql://gratia-db01.fnal.gov:3320/gratia_psacct</property>
             <property name="odaUser">gratia</property>
             <encrypted-property name="odaPassword">cHJvdG8=</encrypted-property>
         </oda-data-source>
@@ -181,7 +181,7 @@
             <property name="dataSource">fermigrid1</property>
             <list-property name="parameters">
                 <structure>
-                    <property name="name">FacilityName</property>
+                    <property name="name">SiteName</property>
                     <property name="dataType">string</property>
                     <property name="position">1</property>
                     <expression name="defaultValue">'psacct:cmswc1.fnal.gov'</expression>
@@ -216,7 +216,7 @@
                 </structure>
             </list-property>
             <property name="queryText">
-select C.facility_name,
+select C.facility_name as sitename,
 sum(J.CpuUserDuration) as usercpu,
 sum(J.CpuSystemDuration) as syscpu, 
        J.EndTime as endtime, 
@@ -233,9 +233,9 @@ and (? &lt;= EndTime and EndTime &lt;= ?)
 group by date_format(J.EndTime, ?)
 order by J.EndTime</property>
         </oda-data-set>
-        <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="FacilityNames" id="106">
+        <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="SiteNames" id="106">
             <property name="dataSource">fermigrid1</property>
-            <property name="queryText">select distinct facility_name from CETable C, CEProbes
+            <property name="queryText">select distinct facility_name as sitename from CETable C, CEProbes
 where C.facility_id = CEProbes.facility_id
  and CEProbes.probename like "psacct%"</property>
         </oda-data-set>
@@ -276,8 +276,8 @@ where C.facility_id = CEProbes.facility_id
                     <expression name="expression">params["GroupByFormat"]</expression>
                 </structure>
                 <structure>
-                    <property name="paramName">FacilityName</property>
-                    <expression name="expression">params["FacilityName"]</expression>
+                    <property name="paramName">SiteName</property>
+                    <expression name="expression">params["SiteName"]</expression>
                 </structure>
             </list-property>
             <xml-property name="xmlRepresentation"><![CDATA[<model:ChartWithAxes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:attribute="http://www.birt.eclipse.org/ChartModelAttribute" xmlns:data="http://www.birt.eclipse.org/ChartModelData" xmlns:layout="http://www.birt.eclipse.org/ChartModelLayout" xmlns:model="http://www.birt.eclipse.org/ChartModel" xmlns:type="http://www.birt.eclipse.org/ChartModelType">
@@ -1046,77 +1046,41 @@ printWriter.close();
               <Type>URL_Redirect</Type>
               <Value xsi:type="attribute:URLValue">
                 <BaseUrl>&lt;structure name=&quot;action&quot;>
-
     &lt;property name=&quot;formatType&quot;>html&lt;/property>
-
     &lt;property name=&quot;linkType&quot;>drill-through&lt;/property>
-
     &lt;property name=&quot;reportName&quot;>DailyUsage1-pacct.rptdesign&lt;/property>
-
     &lt;property name=&quot;targetWindow&quot;>_self&lt;/property>
-
     &lt;list-property name=&quot;paramBindings&quot;>
-
         &lt;structure>
-
             &lt;property name=&quot;paramName&quot;>DatabaseURL&lt;/property>
-
             &lt;expression name=&quot;expression&quot;>params[&quot;DatabaseURL&quot;]&lt;/expression>
-
         &lt;/structure>
-
         &lt;structure>
-
             &lt;property name=&quot;paramName&quot;>DatabaseUser&lt;/property>
-
             &lt;expression name=&quot;expression&quot;>params[&quot;DatabaseUser&quot;]&lt;/expression>
-
         &lt;/structure>
-
         &lt;structure>
-
             &lt;property name=&quot;paramName&quot;>DatabasePassword&lt;/property>
-
             &lt;expression name=&quot;expression&quot;>params[&quot;DatabasePassword&quot;]&lt;/expression>
-
         &lt;/structure>
-
         &lt;structure>
-
             &lt;property name=&quot;paramName&quot;>Start Date&lt;/property>
-
             &lt;expression name=&quot;expression&quot;>params[&quot;Start Date&quot;]&lt;/expression>
-
         &lt;/structure>
-
         &lt;structure>
-
             &lt;property name=&quot;paramName&quot;>End Date&lt;/property>
-
             &lt;expression name=&quot;expression&quot;>params[&quot;End Date&quot;]&lt;/expression>
-
         &lt;/structure>
-
         &lt;structure>
-
             &lt;property name=&quot;paramName&quot;>HighlightDate&lt;/property>
-
             &lt;expression name=&quot;expression&quot;>params[&quot;HighlightDate&quot;]&lt;/expression>
-
         &lt;/structure>
-
         &lt;structure>
-
-            &lt;property name=&quot;paramName&quot;>FacilityName&lt;/property>
-
-            &lt;expression name=&quot;expression&quot;>params[&quot;FacilityName&quot;]&lt;/expression>
-
+            &lt;property name=&quot;paramName&quot;>SiteName&lt;/property>
+            &lt;expression name=&quot;expression&quot;>params[&quot;SiteName&quot;]&lt;/expression>
         &lt;/structure>
-
     &lt;/list-property>
-
 &lt;/structure>
-
 </BaseUrl>
                 <BaseParameterName>SelectedDate</BaseParameterName>
                 <ValueParameterName></ValueParameterName>
@@ -1194,9 +1158,8 @@ printWriter.close();
       </Label>
       <FormatSpecifier xsi:type="attribute:NumberFormatSpecifier">
         <Prefix></Prefix>
-        <Suffix>k</Suffix>
-        <Multiplier>0.0010</Multiplier>
-        <FractionDigits>1</FractionDigits>
+        <Suffix></Suffix>
+        <FractionDigits>0</FractionDigits>
       </FormatSpecifier>
       <LabelPosition>Left</LabelPosition>
       <MajorGrid>
@@ -1419,77 +1382,41 @@ printWriter.close();
               <Type>URL_Redirect</Type>
               <Value xsi:type="attribute:URLValue">
                 <BaseUrl>&lt;structure name=&quot;action&quot;>
-
     &lt;property name=&quot;formatType&quot;>html&lt;/property>
-
     &lt;property name=&quot;linkType&quot;>drill-through&lt;/property>
-
     &lt;property name=&quot;reportName&quot;>DailyUsage1-pacct.rptdesign&lt;/property>
-
     &lt;property name=&quot;targetWindow&quot;>_self&lt;/property>
-
     &lt;list-property name=&quot;paramBindings&quot;>
-
         &lt;structure>
-
             &lt;property name=&quot;paramName&quot;>DatabaseURL&lt;/property>
-
             &lt;expression name=&quot;expression&quot;>params[&quot;DatabaseURL&quot;]&lt;/expression>
-
         &lt;/structure>
-
         &lt;structure>
-
             &lt;property name=&quot;paramName&quot;>DatabaseUser&lt;/property>
-
             &lt;expression name=&quot;expression&quot;>params[&quot;DatabaseUser&quot;]&lt;/expression>
-
         &lt;/structure>
-
         &lt;structure>
-
             &lt;property name=&quot;paramName&quot;>DatabasePassword&lt;/property>
-
             &lt;expression name=&quot;expression&quot;>params[&quot;DatabasePassword&quot;]&lt;/expression>
-
         &lt;/structure>
-
         &lt;structure>
-
             &lt;property name=&quot;paramName&quot;>Start Date&lt;/property>
-
             &lt;expression name=&quot;expression&quot;>params[&quot;Start Date&quot;]&lt;/expression>
-
         &lt;/structure>
-
         &lt;structure>
-
             &lt;property name=&quot;paramName&quot;>End Date&lt;/property>
-
             &lt;expression name=&quot;expression&quot;>params[&quot;End Date&quot;]&lt;/expression>
-
         &lt;/structure>
-
         &lt;structure>
-
             &lt;property name=&quot;paramName&quot;>HighlightDate&lt;/property>
-
             &lt;expression name=&quot;expression&quot;>params[&quot;HighlightDate&quot;]&lt;/expression>
-
         &lt;/structure>
-
         &lt;structure>
-
-            &lt;property name=&quot;paramName&quot;>FacilityName&lt;/property>
-
-            &lt;expression name=&quot;expression&quot;>params[&quot;FacilityName&quot;]&lt;/expression>
-
+            &lt;property name=&quot;paramName&quot;>SiteName&lt;/property>
+            &lt;expression name=&quot;expression&quot;>params[&quot;SiteName&quot;]&lt;/expression>
         &lt;/structure>
-
     &lt;/list-property>
-
 &lt;/structure>
-
 </BaseUrl>
                 <BaseParameterName>SelectedDate</BaseParameterName>
                 <ValueParameterName></ValueParameterName>
@@ -1567,9 +1494,8 @@ printWriter.close();
       </Label>
       <FormatSpecifier xsi:type="attribute:NumberFormatSpecifier">
         <Prefix></Prefix>
-        <Suffix>k</Suffix>
-        <Multiplier>0.0010</Multiplier>
-        <FractionDigits>2</FractionDigits>
+        <Suffix></Suffix>
+        <FractionDigits>1</FractionDigits>
       </FormatSpecifier>
       <LabelPosition>Right</LabelPosition>
       <MajorGrid>
@@ -1871,7 +1797,7 @@ MM/dd/yyyy
             <property name="style">sans-style1</property>
             <property name="fontSize">9pt</property>
             <property name="textAlign">center</property>
-            <expression name="valueExpr">"Site Name = " + params["FacilityName"]</expression>
+            <expression name="valueExpr">"Site Name = " + params["SiteName"]</expression>
             <property name="contentType">html</property>
         </text-data>
         <text-data id="99">
