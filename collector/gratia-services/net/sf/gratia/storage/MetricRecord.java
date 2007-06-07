@@ -22,6 +22,7 @@ public class MetricRecord implements Record
    private RecordIdentity RecordIdentity;
    private StringElement ProbeName;
    private StringElement SiteName;
+   private StringElement Grid;
 
    // Meta Information (not part of the xml file per se).
    private int RecordId;
@@ -151,6 +152,16 @@ public class MetricRecord implements Record
    public StringElement getSiteName()
    {
       return SiteName;
+   }
+
+   public void setGrid(StringElement Grid)
+   {
+      this.Grid = Grid;
+   }
+
+   public StringElement getGrid()
+   {
+      return Grid;
    }
 
    public String computemd5() throws Exception

@@ -56,6 +56,7 @@ public class JobUsageRecord implements Record
    private List VolumeResource;
    private List ConsumableResource;
    private List Resource;
+   private StringElement Grid;
    private StringElement ProbeName;
    private Date ServerDate;
    private String md5;
@@ -98,6 +99,7 @@ public class JobUsageRecord implements Record
       String output = "UsageRecord: Db Id: " + RecordId;
       if (ResourceType != null) output = output + "RecordType: " + ResourceType;
       if (ProbeName != null) output = output + "ProbeName: " + ProbeName;
+      if (Grid != null) output = output + "Grid: " + Grid;
       if (RecordIdentity != null) output = output + RecordIdentity;
       if (JobIdentity != null) output = output + JobIdentity;
       if (UserIdentity != null) output = output + " User: " + UserIdentity;
@@ -178,6 +180,7 @@ public class JobUsageRecord implements Record
       if (ConsumableResource != null) output = output + listAsXml("ConsumableResource", ConsumableResource);
       if (Resource != null) output = output + listAsXml("Resource", Resource);
       if (ProbeName != null) output = output + ProbeName.asXml("ProbeName");
+      if (Grid != null) output = output + Grid.asXml("Grid");
       if (ResourceType != null) output = output + ResourceType.asXml("Resource");
       if (ExtraXml != null) output = output + ExtraXml;
       output = output + "</JobUsageRecord>" + "\n";
@@ -542,6 +545,15 @@ public class JobUsageRecord implements Record
    public StringElement getProbeName()
    {
       return ProbeName;
+   }
+
+   public void setGrid(StringElement Grid)
+   {
+      this.Grid = Grid;
+   }
+   public StringElement getGrid()
+   {
+      return Grid;
    }
 
    public void setResourceType(StringElement resourceType)

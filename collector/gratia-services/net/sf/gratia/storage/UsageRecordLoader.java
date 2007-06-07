@@ -133,6 +133,8 @@ public class UsageRecordLoader implements RecordLoader {
                     AddConsumableResource(job, sub);
                 } else if (sub.getName() == "ProbeName") {
                     SetProbeName(job, sub);
+                } else if (sub.getName() == "Grid") {
+                    SetGrid(job, sub);
                 } else {
                     job.addExtraXml(sub.asXML());
                 }
@@ -972,6 +974,34 @@ public class UsageRecordLoader implements RecordLoader {
         job.setProbeName(el);
     }
 
+    public static void SetGrid(JobUsageRecord job, Element element)
+            throws Exception {
+        StringElement el = job.getGrid();
+        if (el == null) {
+            el = new StringElement();
+        }
+        for (Iterator i = element.attributeIterator(); i.hasNext();) {
+            Attribute a = (Attribute) i.next();
+            if (a.getName() == "description") {
+                String desc = el.getDescription();
+                if (desc == null)
+                    desc = "";
+                else
+                    desc = desc + " ; ";
+                desc = desc + a.getValue();
+                el.setDescription(desc);
+            }
+        }
+        String val = el.getValue();
+        if (val == null)
+            val = "";
+        else
+            val = val + " ; ";
+        val = val + element.getText();
+        el.setValue(val);
+        job.setGrid(el);
+    }
+    
     public UsageRecordLoader() {
     }
 }
