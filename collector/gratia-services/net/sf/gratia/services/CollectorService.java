@@ -151,6 +151,22 @@ public class CollectorService implements ServletContextListener
          Logging.log("CollectorService: RMI Service Started");
          Logging.log("");
 
+         DatabaseMaintenance checker = new DatabaseMaintenance(p);
+
+         //
+         // Check the database version, before starting
+         // hibernate, if the version number is too high
+         // we should not touch it. 
+         //
+         
+         if (checker.IsDbNewer()) {
+             // The database is newer than the currently running code
+             // we should abort since we might enter incorrect data.
+             Logging.warning("CollectorService: The database schema is newer than what is expected by this code.  You need to upgrade this code to a newer version of the Gratia Collector");
+             Logging.warning("CollectorService: The service is NOT started");
+             return;
+         }
+         
          //
          // start database
          //
@@ -158,19 +174,18 @@ public class CollectorService implements ServletContextListener
          HibernateWrapper.start();
 
          //
-         // Upgrade the database before starting Hibernate
-         // (For example changing a table name or splitting 
-         //  a table);
+         // Upgrade the database
          // 
 
-         upgradeDatabase();
+         checker.Upgrade();
 
          //
          // zap database
          //
 
-         zapDatabase();
-
+         checker.CheckIndices();
+         checker.AddDefaults();
+    
          //
          // check for stored procedures/triggers
          //
@@ -447,64 +462,6 @@ public class CollectorService implements ServletContextListener
       FlipSSL.flip();
    }
 
-   public void upgradeDatabase()
-   {
-
-      Properties p = net.sf.gratia.services.Configuration.getProperties();
-
-      String driver = p.getProperty("service.mysql.driver");
-      String url = p.getProperty("service.mysql.url");
-      String user = p.getProperty("service.mysql.user");
-      String password = p.getProperty("service.mysql.password");
-
-      java.sql.Connection connection;
-
-      try
-      {
-         Class.forName(driver);
-         connection = (java.sql.Connection)DriverManager.getConnection(url, user, password);
-      }
-      catch (Exception e)
-      {
-         Logging.warning("CollectorService: Error During zapDatabase: " + e);
-         Logging.warning(xp.parseException(e));
-         return;
-      }
-  
-      DatabaseMaintenance checker = new DatabaseMaintenance(connection);
-      checker.Upgrade();
-
-   }
-
-   public void zapDatabase()
-   {
-      XP xp = new XP();
-
-      Properties p = net.sf.gratia.services.Configuration.getProperties();
-
-      String driver = p.getProperty("service.mysql.driver");
-      String url = p.getProperty("service.mysql.url");
-      String user = p.getProperty("service.mysql.user");
-      String password = p.getProperty("service.mysql.password");
-
-      java.sql.Connection connection;
-
-      try
-      {
-         Class.forName(driver);
-         connection = (java.sql.Connection)DriverManager.getConnection(url, user, password);
-      }
-      catch (Exception e)
-      {
-         Logging.warning("CollectorService: Error During zapDatabase: " + e);
-         Logging.warning(xp.parseException(e));
-         return;
-      }
-  
-      DatabaseMaintenance checker = new DatabaseMaintenance(connection);
-      checker.CheckIndices();
-      checker.AddDefaults();
-   }
 
    public void checkStoredProcedures()
    {

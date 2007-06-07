@@ -1,22 +1,50 @@
 package net.sf.gratia.storage;
 
 import java.sql.*;
+
+import net.sf.gratia.services.XP;
 import net.sf.gratia.services.Logging;
 import java.util.Properties;
 
 public class DatabaseMaintenance {
-    java.sql.Connection connection;
-
     static final String dq = "\"";
 
     static final String comma = ",";
 
     static final int gratiaDatabaseVersion = 4;
 
-    public DatabaseMaintenance(java.sql.Connection con) {
-        connection = con;
-    }
+    java.sql.Connection connection;
+    int liveVersion = 0;
+    XP xp = new XP();
 
+    
+    public DatabaseMaintenance(Properties p) {
+        
+        String driver = p.getProperty("service.mysql.driver");
+        String url = p.getProperty("service.mysql.url");
+        String user = p.getProperty("service.mysql.user");
+        String password = p.getProperty("service.mysql.password");
+
+        try
+        {
+           Class.forName(driver);
+           connection = (java.sql.Connection)DriverManager.getConnection(url, user, password);
+        }
+        catch (Exception e)
+        {
+           Logging.warning("DatabaseMaintenance: Error During connection: " + e);
+           Logging.warning(xp.parseException(e));
+           return;
+        }
+        
+        ReadLiveVersion();
+    }
+    
+    public boolean IsDbNewer()
+    {
+        return (liveVersion > gratiaDatabaseVersion);
+    }
+    
     public void AddIndex(String table, Boolean unique, String name,
             String content) {
         Statement statement;
@@ -182,9 +210,8 @@ public class DatabaseMaintenance {
                     + useReportAuthentication + dq + ")");
         }
     }
-
-    public void Upgrade() {
-        int oldvers = 0;
+    
+    public void ReadLiveVersion() {
 
         Statement statement;
         ResultSet resultSet;
@@ -199,20 +226,31 @@ public class DatabaseMaintenance {
             if (resultSet.next()) {
                 String vers = resultSet.getString(1);
                 if (vers.equals("1.0.0")) {
-                    oldvers = 1;
+                    liveVersion = 1;
                 } else {
                     try {
-                        oldvers = Integer.valueOf(vers).intValue();
+                        liveVersion = Integer.valueOf(vers).intValue();
                     } catch (Exception e) {
-                        oldvers = 1;
+                        liveVersion = 1;
                     }
                 }
             }
             Logging.log("Command: OK: " + check);
         } catch (Exception e) {
             Logging.log("Command: Error: " + check + " : " + e);
-        }
+        }        
+    }
+    
+    public void UpdateDbVersion(int newVersion) {
+        Execute("update SystemProplist set cdr = " + dq + newVersion + dq
+                + " where car = " + dq + "gratia.database.version" + dq);
 
+        liveVersion = newVersion;        
+    }
+
+    public void Upgrade() {
+        int oldvers = liveVersion;
+      
         if (oldvers == 0) {
 
             Execute("insert into SystemProplist(car,cdr) values(" + dq
@@ -231,12 +269,15 @@ public class DatabaseMaintenance {
                 Logging.log("Gratia database upgraded from " + current + " to "
                         + (current + 1));
                 current = current + 1;
+                UpdateDbVersion(current);
             }
             if (current == 2) {
                 // Upgrade to version 3;
                 if (oldvers < 2) {
                     // Then MetricRecord_Meta never contained the Xml fields,
                     // nothing to do.
+                    current = current + 1;
+                    UpdateDbVersion(current);
                 } else {
                     int result = Execute("insert into MetricRecord_Xml(dbid,RawXml,ExtraXml) select dbid,RawXml,ExtraXml from MetricRecord_Meta");
                     if (result > -1) {
@@ -246,6 +287,7 @@ public class DatabaseMaintenance {
                         Logging.log("Gratia database upgraded from " + current
                                 + " to " + (current + 1));
                         current = current + 1;
+                        UpdateDbVersion(current);
                     } else {
                         Logging.log("Gratia database FAILED to upgrade from "
                                 + current + " to " + (current + 1));
@@ -270,14 +312,12 @@ public class DatabaseMaintenance {
                     Logging.log("Gratia database upgraded from " + current
                             + " to " + (current + 1));
                     current = current + 1;
+                    UpdateDbVersion(current);
                 } else {
                     Logging.log("Gratia database FAILED to upgrade from "
                             + current + " to " + (current + 1));
                 }
             }
-
-            Execute("update SystemProplist set cdr = " + dq + current + dq
-                    + " where car = " + dq + "gratia.database.version" + dq);
         }
     }
 }
