@@ -51,8 +51,8 @@ public class ProbeTable extends HttpServlet
 		String comma = ",";
 		String cr = "\n";
 		Hashtable table = new Hashtable();
-		Hashtable cetablebyid = new Hashtable();
-		Hashtable cetablebyname = new Hashtable();
+		Hashtable sitebyid = new Hashtable();
+		Hashtable sitebyname = new Hashtable();
 		String newname = "<New Probe Name>";
 		Hashtable contact = new Hashtable();
 
@@ -147,8 +147,8 @@ public class ProbeTable extends HttpServlet
 				int index = 0;
 				String command = "";
 				buffer = new StringBuffer();
-				cetablebyid = new Hashtable();
-				cetablebyname = new Hashtable();
+				sitebyid = new Hashtable();
+				sitebyname = new Hashtable();
 				contact = new Hashtable();
 
 				try
@@ -173,7 +173,7 @@ public class ProbeTable extends HttpServlet
 
 				try
 						{
-								command = "select facility_id,facility_name from CETable";
+								command = "select facility_id,facility_name from Site";
 								statement = connection.prepareStatement(command);
 								resultSet = statement.executeQuery(command);
 
@@ -181,8 +181,8 @@ public class ProbeTable extends HttpServlet
 										{
 												String id = resultSet.getString(1);
 												String name = resultSet.getString(2);
-												cetablebyid.put(id,name);
-												cetablebyname.put(name,id);
+												sitebyid.put(id,name);
+												sitebyname.put(name,id);
 										}
 								resultSet.close();
 								statement.close();
@@ -220,7 +220,7 @@ public class ProbeTable extends HttpServlet
 													table.put("reportmm:" + index,resultSet.getString(6));
 												*/
 
-												String cename = (String) cetablebyid.get(resultSet.getString(2));
+												String cename = (String) sitebyid.get(resultSet.getString(2));
 												newrow = celist(index,newrow,cename);
 
 												String yesorno = "Yes";
@@ -295,7 +295,7 @@ public class ProbeTable extends HttpServlet
 				String option = m.group();
 				StringBuffer buffer = new StringBuffer();
 
-				for (Enumeration x = cetablebyname.keys(); x.hasMoreElements();)
+				for (Enumeration x = sitebyname.keys(); x.hasMoreElements();)
 						{
 								String newoption = new String(option);
 								String name = (String) x.nextElement();
@@ -426,7 +426,7 @@ public class ProbeTable extends HttpServlet
 		{
 				String dbid = (String) request.getParameter("dbid:" + index);
 				String cename = (String) request.getParameter("cename:" + index);
-				String ceid = (String) cetablebyname.get(cename);
+				String ceid = (String) sitebyname.get(cename);
 				String active = (String) request.getParameter("active:" + index);
 				if (active.equals("Yes"))
 						active = "1";
@@ -467,7 +467,7 @@ public class ProbeTable extends HttpServlet
 		public void insert(int index)
 		{
 				String cename = (String) request.getParameter("cename:" + index);
-				String ceid = (String) cetablebyname.get(cename);
+				String ceid = (String) sitebyname.get(cename);
 				String active = (String) request.getParameter("active:" + index);
 				if (active.equals("Yes"))
 						active = "1";

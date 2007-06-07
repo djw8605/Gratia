@@ -93,7 +93,7 @@ public class NewProbeUpdate
          resultSet.close();
          statement.close();
          //
-         // if facilityid == -1 it doesn't exist - add it to cetable
+         // if facilityid == -1 it doesn't exist - add it to Site table 
          //
          if (facilityid == -1)
          {

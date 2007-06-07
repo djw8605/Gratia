@@ -25,8 +25,8 @@
     </description>
 
     <servlet>
-        <servlet-name>CETable</servlet-name>
-        <servlet-class>net.sf.gratia.administration.CETable</servlet-class>
+        <servlet-name>SiteMgmt</servlet-name>
+        <servlet-class>net.sf.gratia.administration.SiteMgmt</servlet-class>
 				<load-on-startup>1</load-on-startup>
     </servlet>
 
@@ -93,8 +93,8 @@
     </servlet>
 
     <servlet-mapping>
-        <servlet-name>CETable</servlet-name>
-				<url-pattern>/cetable.html</url-pattern>
+        <servlet-name>SiteMgmt</servlet-name>
+        <url-pattern>/site.html</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>

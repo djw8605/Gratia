@@ -51,8 +51,8 @@ public class Roles extends HttpServlet
 		String comma = ",";
 		String cr = "\n";
 		Hashtable table = new Hashtable();
-		Hashtable cetablebyid = new Hashtable();
-		Hashtable cetablebyname = new Hashtable();
+		Hashtable sitebyid = new Hashtable();
+		Hashtable sitebyname = new Hashtable();
 		String newname = "<New Probe Name>";
 
     public void init(ServletConfig config) throws ServletException 

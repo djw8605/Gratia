@@ -51,8 +51,8 @@ public class CPUInfo extends HttpServlet
 		String comma = ",";
 		String cr = "\n";
 		Hashtable table = new Hashtable();
-		Hashtable cetablebyid = new Hashtable();
-		Hashtable cetablebyname = new Hashtable();
+		Hashtable sitebyid = new Hashtable();
+		Hashtable sitebyname = new Hashtable();
 		String newname = "<New Probe Name>";
 
     public void init(ServletConfig config) throws ServletException 
@@ -151,8 +151,8 @@ public class CPUInfo extends HttpServlet
 				int index = 0;
 				String command = "";
 				buffer = new StringBuffer();
-				cetablebyid = new Hashtable();
-				cetablebyname = new Hashtable();
+				sitebyid = new Hashtable();
+				sitebyname = new Hashtable();
 
 				try
 						{
