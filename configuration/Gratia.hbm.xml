@@ -12,7 +12,7 @@
     </id>
     <property name="role" column="role"/>
     <property name="subtitle" column="subtitle"/>
-    <property name="whereclause" column="whereclause"/>
+    <property name="whereClause" column="whereClause"/>
   </class>
 
   <class name="CPUMetricTypes" table="CPUMetricTypes" node="CPUMetricTypes" lazy="false">
