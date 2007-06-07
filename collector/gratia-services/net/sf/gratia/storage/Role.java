@@ -5,7 +5,7 @@ public class Role
 		public int roleid;
 		public String role;
 		public String subtitle;
-		public String whereclause;
+		public String whereClause;
 
 		public Role()
 		{
@@ -41,13 +41,13 @@ public class Role
 				subtitle = value;
 		}
 
-		public String getwhereclause()
+		public String getwhereClause()
 		{
-				return whereclause;
+				return whereClause;
 		}
 
-		public void setwhereclause(String value)
+		public void setwhereClause(String value)
 		{
-				whereclause = value;
+				whereClause = value;
 		}
 }

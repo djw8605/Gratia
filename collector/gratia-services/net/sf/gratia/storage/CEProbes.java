@@ -2,8 +2,8 @@ package net.sf.gratia.storage;
 
 public class CEProbes
 {
+        private int probeid;
 		private int _facility_id;
-		private int probeid;
 		private String probename;
 		private DateElement currenttime;
 		private int active;

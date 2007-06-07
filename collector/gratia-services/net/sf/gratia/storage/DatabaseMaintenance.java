@@ -11,7 +11,7 @@ public class DatabaseMaintenance {
 
     static final String comma = ",";
 
-    static final int gratiaDatabaseVersion = 4;
+    static final int gratiaDatabaseVersion = 5;
 
     java.sql.Connection connection;
     int liveVersion = 0;
@@ -309,13 +309,24 @@ public class DatabaseMaintenance {
                     result = Execute("alter table JobUsageRecord drop column md5, drop column ServerDate, drop column SiteName, drop column SiteNameDescription, drop column ProbeName, drop column ProbeNameDescription, drop column recordId, drop column CreateTime, drop column CreateTimeDescription, drop column RecordKeyInfoId, drop column RecordKeyInfoContent ");
                 }
                 if (result > -1) {
-                    Logging.log("Gratia database upgraded from " + current
-                            + " to " + (current + 1));
+                    Logging.log("Gratia database upgraded from " + current + " to " + (current + 1));
                     current = current + 1;
                     UpdateDbVersion(current);
                 } else {
-                    Logging.log("Gratia database FAILED to upgrade from "
-                            + current + " to " + (current + 1));
+                    Logging.log("Gratia database FAILED to upgrade from " + current + " to " + (current + 1));
+                }
+            }
+            if (current == 4) {
+                int result = Execute("insert into Role(roleid,role,subtitle,whereClause) select roleid,role,subtitle,whereclause from RolesTable");
+                if (result > -1) {
+                    result = Execute("drop table RolesTable;");
+                }
+                if (result > -1) {
+                    Logging.log("Gratia database upgraded from " + current + " to " + (current + 1));
+                    current = current + 1;
+                    UpdateDbVersion(current);
+                } else {
+                    Logging.log("Gratia database FAILED to upgrade from " + current + " to " + (current + 1));
                 }
             }
         }
