@@ -98,7 +98,7 @@ public class DatabaseMaintenance {
 
     public void CheckIndices() {
         AddIndex("Site", true, "index02", "SiteName");
-        AddIndex("CEProbes", true, "index02", "probename");
+        AddIndex("Probe", true, "index02", "probename");
 
         //
         // the following were added to get rid of unused indexes

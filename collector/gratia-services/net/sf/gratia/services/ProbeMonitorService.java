@@ -75,7 +75,7 @@ public class ProbeMonitorService extends Thread
 								return;
 						}
 
-				String command = "select * from CEProbes";
+				String command = "select * from Probe";
 
 				try
 						{

@@ -90,7 +90,7 @@ public class StatusListenerThread extends Thread
 				try
 						{
 								statement = sqlconnection.createStatement();
-								String command = "update CEProbes set" +
+								String command = "update Probe set" +
 										" currenttime = timestamp(" + dq + format.format(new java.util.Date()) + dq + ")" + comma +
 										" status = " + dq + status + dq +
 										" where probename = " + dq + probename + dq;

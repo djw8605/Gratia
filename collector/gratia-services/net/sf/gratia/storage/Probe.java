@@ -1,6 +1,6 @@
 package net.sf.gratia.storage;
 
-public class CEProbes
+public class Probe
 {
         private int probeid;
 		private int siteId;
@@ -12,7 +12,7 @@ public class CEProbes
 		private String status;
 		private int jobs;
 
-		public CEProbes()
+		public Probe()
 		{
 		}
 
@@ -109,7 +109,7 @@ public class CEProbes
 		public String toString() 
 		{
 				String output = 
-						"CEProbes: " + 
+						"Probe: " + 
 						"siteId: " + siteId +
 						" probeid: " + probeid +
 						" probename: " + probename +

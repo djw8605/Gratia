@@ -63,7 +63,7 @@ public class NewProbeUpdate
       //
       // see if the probe exists
       //
-      String command = "select count(*) from CEProbes where probename = " + dq + probename + dq;
+      String command = "select count(*) from Probe where probename = " + dq + probename + dq;
       try
       {
          statement = connection.prepareStatement(command);
@@ -115,7 +115,7 @@ public class NewProbeUpdate
          // now add a new entry to ceprobes with default values
          //
          command =
-               "insert into CEProbes (SiteId,probename,active,reporthh,reportmm) values(" +
+               "insert into Probe (SiteId,probename,active,reporthh,reportmm) values(" +
                facilityid + comma + dq + probename + dq + comma + "1" + comma + "24" + comma + "00" + ")";
          statement = connection.createStatement();
          statement.executeUpdate(command);
