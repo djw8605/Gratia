@@ -66,7 +66,7 @@ public class CertificateHandler
 		public String getSubtitle()
 		{
 				String dq = "'";
-				String command = "select * from RolesTable where role = " + dq + getRole() + dq;
+				String command = "select * from Role where role = " + dq + getRole() + dq;
 				String subtitle = "Test Subtitle";
 				openConnection();
 				try

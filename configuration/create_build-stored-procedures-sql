@@ -268,8 +268,8 @@ begin
 	select generateResourceTypeClause(resourceType) into @myresourceclause;
 	select SystemProplist.cdr into @usereportauthentication from SystemProplist
 	where SystemProplist.car = 'use.report.authentication';
-	select RolesTable.whereclause into @mywhereclause from RolesTable
-		where RolesTable.role = userRole;
+	select Role.whereclause into @mywhereclause from Role
+		where Role.role = userRole;
 	select generateWhereClause(userName,userRole,@mywhereclause)
 		into @mywhereclause;
 	call parse(userName,@name,@key,@vo);
@@ -463,8 +463,8 @@ begin
 	select SystemProplist.cdr into @usereportauthentication from SystemProplist
 		where SystemProplist.car = 'use.report.authentication';
 	insert into trace(pname,userkey) values('ProbeStatus','step01');
-	select RolesTable.whereclause into @mywhereclause from RolesTable
-		where RolesTable.role = userRole;
+	select Role.whereclause into @mywhereclause from Role
+		where Role.role = userRole;
 	insert into trace(pname,userkey) values('ProbeStatus','step02');
 	select generateWhereClause(userName,userRole,@mywhereclause)
 		into @mywhereclause;

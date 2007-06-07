@@ -93,8 +93,8 @@ begin
 	select SystemProplist.cdr into @usereportauthentication from SystemProplist
 		where SystemProplist.car = 'use.report.authentication';
 	insert into trace(pname,userkey) values('ProbeStatus','step01');
-	select RolesTable.whereclause into @mywhereclause from RolesTable
-		where RolesTable.role = userRole;
+	select Role.whereclause into @mywhereclause from Role
+		where Role.role = userRole;
 	insert into trace(pname,userkey) values('ProbeStatus','step02');
 	select generateWhereClause(userName,userRole,@mywhereclause)
 		into @mywhereclause;
@@ -128,8 +128,8 @@ begin
 	select generateResourceTypeClause(resourceType) into @myresourceclause;
 	select SystemProplist.cdr into @usereportauthentication from SystemProplist
 	where SystemProplist.car = 'use.report.authentication';
-	select RolesTable.whereclause into @mywhereclause from RolesTable
-		where RolesTable.role = userRole;
+	select Role.whereclause into @mywhereclause from Role
+		where Role.role = userRole;
 	select generateWhereClause(userName,userRole,@mywhereclause)
 		into @mywhereclause;
 	call parse(userName,@name,@key,@vo);
@@ -186,8 +186,8 @@ begin
 	select generateResourceTypeClause(resourceType) into @myresourceclause;
 	select SystemProplist.cdr into @usereportauthentication from SystemProplist
 	where SystemProplist.car = 'use.report.authentication';
-	select RolesTable.whereclause into @mywhereclause from RolesTable
-		where RolesTable.role = userRole;
+	select Role.whereclause into @mywhereclause from Role
+		where Role.role = userRole;
 	select generateWhereClause(userName,userRole,@mywhereclause)
 		into @mywhereclause;
 	call parse(userName,@name,@key,@vo);
@@ -246,8 +246,8 @@ begin
 	select generateResourceTypeClause(resourceType) into @myresourceclause;
 	select SystemProplist.cdr into @usereportauthentication from SystemProplist
 	where SystemProplist.car = 'use.report.authentication';
-	select RolesTable.whereclause into @mywhereclause from RolesTable
-		where RolesTable.role = userRole;
+	select Role.whereclause into @mywhereclause from Role
+		where Role.role = userRole;
 	select generateWhereClause(userName,userRole,@mywhereclause)
 		into @mywhereclause;
 	call parse(userName,@name,@key,@vo);
@@ -304,8 +304,8 @@ begin
 	select generateResourceTypeClause(resourceType) into @myresourceclause;
 	select SystemProplist.cdr into @usereportauthentication from SystemProplist
 	where SystemProplist.car = 'use.report.authentication';
-	select RolesTable.whereclause into @mywhereclause from RolesTable
-		where RolesTable.role = userRole;
+	select Role.whereclause into @mywhereclause from Role
+		where Role.role = userRole;
 	select generateWhereClause(userName,userRole,@mywhereclause)
 		into @mywhereclause;
 	call parse(userName,@name,@key,@vo);
@@ -362,8 +362,8 @@ begin
 	select generateResourceTypeClause(resourceType) into @myresourceclause;
 	select SystemProplist.cdr into @usereportauthentication from SystemProplist
 	where SystemProplist.car = 'use.report.authentication';
-	select RolesTable.whereclause into @mywhereclause from RolesTable
-		where RolesTable.role = userRole;
+	select Role.whereclause into @mywhereclause from Role
+		where Role.role = userRole;
 	select generateWhereClause(userName,userRole,@mywhereclause)
 		into @mywhereclause;
 	call parse(userName,@name,@key,@vo);
@@ -422,8 +422,8 @@ begin
 	select generateResourceTypeClause(resourceType) into @myresourceclause;
 	select SystemProplist.cdr into @usereportauthentication from SystemProplist
 	where SystemProplist.car = 'use.report.authentication';
-	select RolesTable.whereclause into @mywhereclause from RolesTable
-		where RolesTable.role = userRole;
+	select Role.whereclause into @mywhereclause from Role
+		where Role.role = userRole;
 	select generateWhereClause(userName,userRole,@mywhereclause)
 		into @mywhereclause;
 	call parse(userName,@name,@key,@vo);
@@ -482,8 +482,8 @@ begin
 	select generateResourceTypeClause(resourceType) into @myresourceclause;
 	select SystemProplist.cdr into @usereportauthentication from SystemProplist
 	where SystemProplist.car = 'use.report.authentication';
-	select RolesTable.whereclause into @mywhereclause from RolesTable
-		where RolesTable.role = userRole;
+	select Role.whereclause into @mywhereclause from Role
+		where Role.role = userRole;
 	select generateWhereClause(userName,userRole,@mywhereclause)
 		into @mywhereclause;
 	call parse(userName,@name,@key,@vo);
@@ -540,8 +540,8 @@ begin
 	select generateResourceTypeClause(resourceType) into @myresourceclause;
 	select SystemProplist.cdr into @usereportauthentication from SystemProplist
 	where SystemProplist.car = 'use.report.authentication';
-	select RolesTable.whereclause into @mywhereclause from RolesTable
-		where RolesTable.role = userRole;
+	select Role.whereclause into @mywhereclause from Role
+		where Role.role = userRole;
 	select generateWhereClause(userName,userRole,@mywhereclause)
 		into @mywhereclause;
 	call parse(userName,@name,@key,@vo);
@@ -598,8 +598,8 @@ begin
 	select generateResourceTypeClause(resourceType) into @myresourceclause;
 	select SystemProplist.cdr into @usereportauthentication from SystemProplist
 	where SystemProplist.car = 'use.report.authentication';
-	select RolesTable.whereclause into @mywhereclause from RolesTable
-		where RolesTable.role = userRole;
+	select Role.whereclause into @mywhereclause from Role
+		where Role.role = userRole;
 	select generateWhereClause(userName,userRole,@mywhereclause)
 		into @mywhereclause;
 	call parse(userName,@name,@key,@vo);
@@ -658,8 +658,8 @@ begin
 	select generateResourceTypeClause(resourceType) into @myresourceclause;
 	select SystemProplist.cdr into @usereportauthentication from SystemProplist
 	where SystemProplist.car = 'use.report.authentication';
-	select RolesTable.whereclause into @mywhereclause from RolesTable
-		where RolesTable.role = userRole;
+	select Role.whereclause into @mywhereclause from Role
+		where Role.role = userRole;
 	select generateWhereClause(userName,userRole,@mywhereclause)
 		into @mywhereclause;
 	call parse(userName,@name,@key,@vo);
@@ -718,8 +718,8 @@ begin
 	select generateResourceTypeClause(resourceType) into @myresourceclause;
 	select SystemProplist.cdr into @usereportauthentication from SystemProplist
 	where SystemProplist.car = 'use.report.authentication';
-	select RolesTable.whereclause into @mywhereclause from RolesTable
-		where RolesTable.role = userRole;
+	select Role.whereclause into @mywhereclause from Role
+		where Role.role = userRole;
 	select generateWhereClause(userName,userRole,@mywhereclause)
 		into @mywhereclause;
 	call parse(userName,@name,@key,@vo);
@@ -776,8 +776,8 @@ begin
 	select generateResourceTypeClause(resourceType) into @myresourceclause;
 	select SystemProplist.cdr into @usereportauthentication from SystemProplist
 	where SystemProplist.car = 'use.report.authentication';
-	select RolesTable.whereclause into @mywhereclause from RolesTable
-		where RolesTable.role = userRole;
+	select Role.whereclause into @mywhereclause from Role
+		where Role.role = userRole;
 	select generateWhereClause(userName,userRole,@mywhereclause)
 		into @mywhereclause;
 	call parse(userName,@name,@key,@vo);
@@ -834,8 +834,8 @@ begin
 	select generateResourceTypeClause(resourceType) into @myresourceclause;
 	select SystemProplist.cdr into @usereportauthentication from SystemProplist
 	where SystemProplist.car = 'use.report.authentication';
-	select RolesTable.whereclause into @mywhereclause from RolesTable
-		where RolesTable.role = userRole;
+	select Role.whereclause into @mywhereclause from Role
+		where Role.role = userRole;
 	select generateWhereClause(userName,userRole,@mywhereclause)
 		into @mywhereclause;
 	call parse(userName,@name,@key,@vo);
@@ -894,8 +894,8 @@ begin
 	select generateResourceTypeClause(resourceType) into @myresourceclause;
 	select SystemProplist.cdr into @usereportauthentication from SystemProplist
 	where SystemProplist.car = 'use.report.authentication';
-	select RolesTable.whereclause into @mywhereclause from RolesTable
-		where RolesTable.role = userRole;
+	select Role.whereclause into @mywhereclause from Role
+		where Role.role = userRole;
 	select generateWhereClause(userName,userRole,@mywhereclause)
 		into @mywhereclause;
 	call parse(userName,@name,@key,@vo);
@@ -954,8 +954,8 @@ begin
 	select generateResourceTypeClause(resourceType) into @myresourceclause;
 	select SystemProplist.cdr into @usereportauthentication from SystemProplist
 	where SystemProplist.car = 'use.report.authentication';
-	select RolesTable.whereclause into @mywhereclause from RolesTable
-		where RolesTable.role = userRole;
+	select Role.whereclause into @mywhereclause from Role
+		where Role.role = userRole;
 	select generateWhereClause(userName,userRole,@mywhereclause)
 		into @mywhereclause;
 	call parse(userName,@name,@key,@vo);
@@ -1012,8 +1012,8 @@ begin
 	select generateResourceTypeClause(resourceType) into @myresourceclause;
 	select SystemProplist.cdr into @usereportauthentication from SystemProplist
 	where SystemProplist.car = 'use.report.authentication';
-	select RolesTable.whereclause into @mywhereclause from RolesTable
-		where RolesTable.role = userRole;
+	select Role.whereclause into @mywhereclause from Role
+		where Role.role = userRole;
 	select generateWhereClause(userName,userRole,@mywhereclause)
 		into @mywhereclause;
 	call parse(userName,@name,@key,@vo);
@@ -1078,8 +1078,8 @@ begin
 	select generateResourceTypeClause(resourceType) into @myresourceclause;
 	select SystemProplist.cdr into @usereportauthentication from SystemProplist
 	where SystemProplist.car = 'use.report.authentication';
-	select RolesTable.whereclause into @mywhereclause from RolesTable
-		where RolesTable.role = userRole;
+	select Role.whereclause into @mywhereclause from Role
+		where Role.role = userRole;
 	select generateWhereClause(userName,userRole,@mywhereclause)
 		into @mywhereclause;
 	call parse(userName,@name,@key,@vo);
@@ -1144,14 +1144,14 @@ begin
 	select generateResourceTypeClause(resourceType) into @myresourceclause;
 	select SystemProplist.cdr into @usereportauthentication from SystemProplist
 	where SystemProplist.car = 'use.report.authentication';
-	select RolesTable.whereclause into @mywhereclause from RolesTable
-		where RolesTable.role = userRole;
+	select Role.whereclause into @mywhereclause from Role
+		where Role.role = userRole;
 	select generateWhereClause(userName,userRole,@mywhereclause)
 		into @mywhereclause;
 	call parse(userName,@name,@key,@vo);
 
 	set @sql :=
-           concat_ws('', 'select final_rank,JobUsageRecord.VOName, date_format(JobUsageRecord.EndTime,''', format, '''), sum(JobUsageRecord.WallDuration) as WallDuration, sum(JobUsageRecord.CpuUserDuration + JobUsageRecord.CpuSystemDuration) as Cpu, sum(JobUsageRecord.Njobs) as Njobs',
+           concat_ws('', 'select final_rank,JobUsageRecord.VOName, date_format(JobUsageRecord.EndTime,''', format, ''') as datevalue, sum(JobUsageRecord.WallDuration) as WallDuration, sum(JobUsageRecord.CpuUserDuration + JobUsageRecord.CpuSystemDuration) as Cpu, sum(JobUsageRecord.Njobs) as Njobs',
                      ' from (SELECT @rank:=@rank+1 as final_rank, VONamex, walldurationx FROM (SELECT @rank:=0 as rank, V.VOName as VONamex, V.EndTime as endtimex, sum(V.WallDuration) as walldurationx FROM JobUsageRecord V WHERE V.EndTime >= Date(''', fromdate, ''') and V.EndTime <= Date(''', todate, ''') group by VONamex order by walldurationx desc) as foox) as foo, JobUsageRecord',
                      ' where',
                      ' JobUsageRecord.VOName = VONamex and',
@@ -1159,14 +1159,14 @@ begin
                      ' and EndTime <= date(''', todate, ''')'
                      ' ', @myresourceclause,
                      ' ', @mywhereclause
-                     , ' group by date_format(JobUsageRecord.EndTime,''', format, '''), JobUsageRecord.VOName'
-                     , ' order by final_rank, JobUsageRecord.VOName,date_format(JobUsageRecord.EndTime,''', format, ''')'
+                     , ' group by datevalue, JobUsageRecord.VOName'
+                     , ' order by final_rank, JobUsageRecord.VOName,datevalue'
                     );
 
     if ( @mywhereclause = '' or @mywhereclause is NULL ) and datediff(todate,fromdate) > 6 then
 		-- Use summary table
 		set @sql :=
-           concat_ws('', 'select final_rank,VOProbeSummary.VOName, date_format(VOProbeSummary.EndTime,''', format, '''), sum(VOProbeSummary.WallDuration) as WallDuration, sum(VOProbeSummary.CpuUserDuration + VOProbeSummary.CpuSystemDuration) as Cpu, sum(VOProbeSummary.Njobs) as Njobs',
+           concat_ws('', 'select final_rank,VOProbeSummary.VOName, date_format(VOProbeSummary.EndTime,''', format, ''') as datevalue, sum(VOProbeSummary.WallDuration) as WallDuration, sum(VOProbeSummary.CpuUserDuration + VOProbeSummary.CpuSystemDuration) as Cpu, sum(VOProbeSummary.Njobs) as Njobs',
                      ' from (SELECT @rank:=@rank+1 as final_rank, VONamex, walldurationx FROM (SELECT @rank:=0 as rank, V.VOName as VONamex, V.EndTime as endtimex, sum(V.WallDuration) as walldurationx FROM VOProbeSummary V WHERE V.EndTime >= Date(''', fromdate, ''') and V.EndTime <= Date(''', todate, ''') group by VONamex order by walldurationx desc) as foox) as foo, VOProbeSummary',
                      ' where',
                      ' VOProbeSummary.VOName = VONamex and',
@@ -1174,8 +1174,8 @@ begin
                      ' and EndTime <= date(''', todate, ''')',
                      ' ', @myresourceclause,
                      ' ', @mywhereclause
-                     , ' group by date_format(VOProbeSummary.EndTime,''', format, '''), VOProbeSummary.VOName'
-                     , ' order by final_rank, VOProbeSummary.VOName,date_format(VOProbeSummary.EndTime,''', format, ''')'
+                     , ' group by datevalue, VOProbeSummary.VOName'
+                     , ' order by final_rank, VOProbeSummary.VOName,datevalue'
                  );
 	end if;
 	insert into trace(pname,userkey,user,role,vo,p1,p2,p3,p4,data)
