@@ -1,0 +1,1501 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Written by Eclipse BIRT 2.0 -->
+<report xmlns="http://www.eclipse.org/birt/2005/design" version="3" id="1">
+    <property name="createdBy">Eclipse BIRT Designer Version 2.0.1 Build &lt;20060222-1204></property>
+    <property name="units">in</property>
+    <list-property name="propertyBindings">
+        <structure>
+            <property name="name">odaDriverClass</property>
+            <property name="id">4</property>
+        </structure>
+        <structure>
+            <property name="name">odaURL</property>
+            <property name="id">4</property>
+            <expression name="value">params["DatabaseURL"]</expression>
+        </structure>
+        <structure>
+            <property name="name">odaUser</property>
+            <property name="id">4</property>
+            <expression name="value">params["DatabaseUser"]</expression>
+        </structure>
+        <structure>
+            <property name="name">odaPassword</property>
+            <property name="id">4</property>
+            <expression name="value">params["DatabasePassword"]</expression>
+        </structure>
+    </list-property>
+    <method name="initialize"><![CDATA[//importPackage(Packages.java.io); 
+//fos = new java.io.FileOutputStream("/tmp/glr.txt", true); 
+//printWriter = new java.io.PrintWriter(fos); 
+
+//printWriter.println("Start Date Before:  " + params["Start Date"]);
+//printWriter.println("End Date Before:  " + params["End Date"]);
+//printWriter.flush();
+
+// Converts a date from mm/dd/yyyy hh:mm:ss am where any one of the time fields are missing to
+//  a java date object
+function convertStringToDate(dateToConvert, isStartDate)
+{
+	working = dateToConvert;
+	month = working.substr(0, working.indexOf("/"));
+	working = working.substr(working.indexOf("/") +1);
+	day = working.substr(0, working.indexOf("/"));
+	working = working.substr(working.indexOf("/") +1);
+	year = working.substr(0,4);
+	
+	if(isStartDate == 1)
+	{
+		hour = 0;
+		minute = 0;
+		second = 0;
+	}
+	else
+	{
+		// If it is the end date, make hours 23, minutes and seconds 59
+		hour = 23;
+		minute = 59;
+		second = 59;
+	}
+		
+	if(working.indexOf(" ") > -1)
+	{
+		working = working.substr(working.indexOf(" ") +1);
+		hour = working.substr(0, working.indexOf(":"));
+		working = working.substr(working.indexOf(":") +1);
+		if(working.indexOf(":") > -1)
+		{
+			if(working.substr(0, working.indexOf(":")) != "00")
+				minute = working.substr(0, working.indexOf(":"));
+			working = working.substr(working.indexOf(":"));
+			//second = working.substr(working.indexOf(":") +1);
+		}
+		else
+		{
+			// In the case of 'selected start date', the start date is in the format that we display, so convert accordingly
+			if(working.substr(0, working.indexOf(" ")) != "00")
+				minute = working.substr(0, working.indexOf(" "));
+			//second = 0;
+			working = working.substr(working.indexOf(" ")+1);
+			if(working=="PM")
+				hour = Number(hour) + 12;
+		}
+	}
+	
+	//printWriter.println("convertStringToDate values:  " + month + "/" + day + "/" + year + " " + hour + ":" + minute + ":" + second);
+	return new Date(year, month -1, day - 1, hour, minute, second);
+}
+
+// Converts a java date object to string format with zero padding, as required by the SQL
+function convertDateToString(dateToConvert)
+{
+	month = dateToConvert.getMonth() + 1;
+	if(month < 10)
+		month = "0" + month;
+	day = dateToConvert.getDate() + 1;
+	if(day < 10)
+		day = "0" + day;
+	year = dateToConvert.getFullYear();
+	hour = dateToConvert.getHours();	
+	if(hour < 10)
+		hour = "0" + hour;
+	minute = dateToConvert.getMinutes();
+	if(minute < 10)
+		minute = "0" + minute;
+	second = dateToConvert.getSeconds();
+	if(second < 10)
+		second = "0" + second;
+		
+	return month + "/" + day + "/" + year + " " + hour + ":" + minute + ":" + second;
+}
+
+// Convert start and end date to 'real' date/time values regardless of how they were passed in
+startDate = convertStringToDate(params["Start Date"], 1);
+endDate = convertStringToDate(params["End Date"], 0);
+
+// If start date is after end date, then swap the two
+if(startDate > endDate)
+{
+	origStartDate = startDate;
+	startDate = endDate;
+	endDate = origStartDate;
+}
+
+// Put leading zeroes in the dates and set them back into the parameters (which will be used in the sql query)
+params["Start Date"] = convertDateToString(startDate);
+params["End Date"] = convertDateToString(endDate);
+
+// If there is less than 2 days between start and end date, group by minutes.  Less than 6, group by hours
+if(DateTimeSpan.days(startDate, endDate) < 2)	
+{
+	params["GroupByFormat"] = "%m/%d/%Y %h:%i %p";
+}
+else if(DateTimeSpan.days(startDate, endDate) < 6)	
+{
+	params["GroupByFormat"] = "%m/%d/%Y %h:00 %p";
+}
+else
+{
+	params["GroupByFormat"] = '%m/%d/%Y';
+}
+
+//printWriter.println("Start Date After:  " + params["Start Date"]);
+//printWriter.println("End Date After:  " + params["End Date"]);
+//printWriter.flush();
+
+//printWriter.close();]]></method>
+    <list-property name="configVars">
+        <structure>
+            <property name="name">DatabaseURL</property>
+            <property name="value">jdbc:mysql://cd-psg3.fnal.gov:3320/gratia</property>
+        </structure>
+        <structure>
+            <property name="name">DatabaseUser</property>
+            <property name="value">gratia</property>
+        </structure>
+        <structure>
+            <property name="name">DatabasePassword</property>
+            <property name="value">proto</property>
+        </structure>
+        <structure>
+            <property name="name">Start Date</property>
+            <property name="value">2006-08-01</property>
+        </structure>
+        <structure>
+            <property name="name">End Date</property>
+            <property name="value">2006-08-14</property>
+        </structure>
+        <structure>
+            <property name="name">SelectedStartDate</property>
+        </structure>
+        <structure>
+            <property name="name">GroupByFormat</property>
+            <property name="value">%c/%d/%Y</property>
+        </structure>
+    </list-property>
+    <parameters>
+        <parameter-group name="DatabaseAccess" id="84">
+            <parameters>
+                <scalar-parameter name="DatabaseURL" id="81">
+                    <property name="hidden">true</property>
+                    <property name="valueType">static</property>
+                    <property name="dataType">string</property>
+                    <property name="allowBlank">false</property>
+                    <property name="format">Unformatted</property>
+                    <property name="controlType">text-box</property>
+                    <property name="defaultValue">jdbc:mysql://cd-psg3.fnal.gov:3320/gratia</property>
+                </scalar-parameter>
+                <scalar-parameter name="DatabaseUser" id="83">
+                    <property name="hidden">true</property>
+                    <property name="valueType">static</property>
+                    <property name="dataType">string</property>
+                    <property name="allowBlank">false</property>
+                    <property name="format">Unformatted</property>
+                    <property name="controlType">text-box</property>
+                    <property name="defaultValue">gratia</property>
+                </scalar-parameter>
+                <scalar-parameter name="DatabasePassword" id="82">
+                    <property name="hidden">true</property>
+                    <property name="valueType">static</property>
+                    <property name="dataType">string</property>
+                    <property name="allowBlank">false</property>
+                    <property name="format">Unformatted</property>
+                    <property name="controlType">text-box</property>
+                    <property name="defaultValue">proto</property>
+                </scalar-parameter>
+            </parameters>
+        </parameter-group>
+        <scalar-parameter name="Start Date" id="86">
+            <text-property name="helpText">Only jobs that finished after this date will be included</text-property>
+            <property name="valueType">static</property>
+            <property name="dataType">string</property>
+            <property name="promptText">Start Date</property>
+            <property name="allowBlank">false</property>
+            <property name="format">Unformatted</property>
+            <property name="controlType">text-box</property>
+            <property name="defaultValue">1/1/1990</property>
+        </scalar-parameter>
+        <scalar-parameter name="End Date" id="87">
+            <text-property name="helpText">Only jobs that finished before this date will be included</text-property>
+            <property name="valueType">static</property>
+            <property name="dataType">string</property>
+            <property name="promptText">End Date</property>
+            <property name="allowBlank">false</property>
+            <property name="format">Unformatted</property>
+            <property name="controlType">text-box</property>
+            <property name="defaultValue">12/31/2999</property>
+        </scalar-parameter>
+        <scalar-parameter name="SelectedStartDate" id="91">
+            <property name="hidden">true</property>
+            <property name="valueType">static</property>
+            <property name="dataType">string</property>
+            <property name="allowNull">true</property>
+            <property name="format">Unformatted</property>
+            <property name="controlType">text-box</property>
+        </scalar-parameter>
+        <scalar-parameter name="GroupByFormat" id="95">
+            <property name="hidden">true</property>
+            <property name="valueType">static</property>
+            <property name="dataType">string</property>
+            <property name="concealValue">true</property>
+            <property name="allowBlank">true</property>
+            <property name="allowNull">true</property>
+            <property name="format">Unformatted</property>
+            <property name="controlType">text-box</property>
+            <property name="defaultValue">%c/%d/%Y</property>
+        </scalar-parameter>
+        <scalar-parameter name="UserName" id="102">
+            <property name="hidden">true</property>
+            <property name="valueType">static</property>
+            <property name="dataType">string</property>
+            <property name="concealValue">true</property>
+            <property name="allowNull">true</property>
+            <property name="format">Unformatted</property>
+            <property name="controlType">text-box</property>
+            <property name="defaultValue">None</property>
+        </scalar-parameter>
+        <scalar-parameter name="UserRole" id="103">
+            <property name="hidden">true</property>
+            <property name="valueType">static</property>
+            <property name="dataType">string</property>
+            <property name="concealValue">true</property>
+            <property name="allowNull">true</property>
+            <property name="format">Unformatted</property>
+            <property name="controlType">text-box</property>
+            <property name="defaultValue">None</property>
+        </scalar-parameter>
+        <scalar-parameter name="Subtitle" id="104">
+            <property name="hidden">true</property>
+            <property name="valueType">static</property>
+            <property name="dataType">string</property>
+            <property name="concealValue">true</property>
+            <property name="allowNull">true</property>
+            <property name="format">Unformatted</property>
+            <property name="controlType">text-box</property>
+            <property name="defaultValue">None</property>
+        </scalar-parameter>
+    </parameters>
+    <data-sources>
+        <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="fermigrid1" id="4">
+            <property name="odaDriverClass">com.mysql.jdbc.Driver</property>
+            <property name="odaURL">jdbc:mysql://cd-psg3.fnal.gov:3320/gratia</property>
+            <property name="odaUser">gratia</property>
+            <encrypted-property name="odaPassword">cHJvdG8=</encrypted-property>
+        </oda-data-source>
+    </data-sources>
+    <data-sets>
+        <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="JobCountByCETable" id="94">
+            <property name="dataSource">fermigrid1</property>
+            <list-property name="parameters">
+                <structure>
+                    <property name="name">UserName</property>
+                    <property name="dataType">string</property>
+                    <property name="position">1</property>
+                    <expression name="defaultValue">params["UserName"]</expression>
+                    <property name="isInput">true</property>
+                </structure>
+                <structure>
+                    <property name="name">UserRole</property>
+                    <property name="dataType">string</property>
+                    <property name="position">2</property>
+                    <expression name="defaultValue">params["UserRole"]</expression>
+                    <property name="isInput">true</property>
+                </structure>
+                <structure>
+                    <property name="name">UserRole</property>
+                    <property name="dataType">string</property>
+                    <property name="position">2</property>
+                    <expression name="defaultValue">"None"</expression>
+                    <property name="isInput">true</property>
+                </structure>
+                <structure>
+                    <property name="name">GroupByFormat1</property>
+                    <property name="dataType">string</property>
+                    <property name="position">3</property>
+                    <expression name="defaultValue">'%M %d,%Y %T'</expression>
+                    <property name="isInput">true</property>
+                </structure>
+                <structure>
+                    <property name="name">StartDate</property>
+                    <property name="dataType">string</property>
+                    <property name="position">4</property>
+                    <expression name="defaultValue">'1/1/1990'</expression>
+                    <property name="isOptional">false</property>
+                    <property name="allowNull">true</property>
+                    <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
+                </structure>
+                <structure>
+                    <property name="name">EndDate</property>
+                    <property name="dataType">string</property>
+                    <property name="position">5</property>
+                    <expression name="defaultValue">'12/31/2999'</expression>
+                    <property name="isOptional">false</property>
+                    <property name="allowNull">true</property>
+                    <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
+                </structure>
+                <structure>
+                    <property name="name">GroupByFormat2</property>
+                    <property name="dataType">string</property>
+                    <property name="position">6</property>
+                    <expression name="defaultValue">'%M %d,%Y %T'</expression>
+                    <property name="isInput">true</property>
+                </structure>
+            </list-property>
+            <property name="queryText">
+call DailyJobsByFacilityAndDate(?,?,?,'Batch')
+</property>
+        </oda-data-set>
+    </data-sets>
+    <styles>
+        <style name="sans-style1" id="96">
+            <property name="fontFamily">sans-serif</property>
+        </style>
+    </styles>
+    <page-setup>
+        <simple-master-page name="Simple MasterPage" id="2">
+            <property name="showHeaderOnFirst">true</property>
+            <property name="showFooterOnLast">true</property>
+        </simple-master-page>
+    </page-setup>
+    <body>
+        <extended-item extensionName="Chart" id="90">
+            <property name="style">sans-style1</property>
+            <property name="height">480px</property>
+            <property name="width">640px</property>
+            <property name="dataSet">JobCountByCETable</property>
+            <list-property name="paramBindings">
+                <structure>
+                    <property name="paramName">GroupByFormat1</property>
+                    <expression name="expression">params["GroupByFormat"]</expression>
+                </structure>
+                <structure>
+                    <property name="paramName">StartDate</property>
+                    <expression name="expression">params["Start Date"]</expression>
+                </structure>
+                <structure>
+                    <property name="paramName">EndDate</property>
+                    <expression name="expression">params["End Date"]</expression>
+                </structure>
+                <structure>
+                    <property name="paramName">GroupByFormat2</property>
+                    <expression name="expression">params["GroupByFormat"]</expression>
+                </structure>
+            </list-property>
+            <xml-property name="xmlRepresentation"><![CDATA[<model:ChartWithAxes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:attribute="http://www.birt.eclipse.org/ChartModelAttribute" xmlns:data="http://www.birt.eclipse.org/ChartModelData" xmlns:layout="http://www.birt.eclipse.org/ChartModelLayout" xmlns:model="http://www.birt.eclipse.org/ChartModel" xmlns:type="http://www.birt.eclipse.org/ChartModelType">
+  <Type>Line Chart</Type>
+  <SubType>Overlay</SubType>
+  <Block>
+    <Children xsi:type="layout:TitleBlock">
+      <Bounds>
+        <Left>0.0</Left>
+        <Top>0.0</Top>
+        <Width>0.0</Width>
+        <Height>0.0</Height>
+      </Bounds>
+      <Insets>
+        <Top>3.0</Top>
+        <Left>3.0</Left>
+        <Bottom>3.0</Bottom>
+        <Right>3.0</Right>
+      </Insets>
+      <Row>-1</Row>
+      <Column>-1</Column>
+      <Rowspan>-1</Rowspan>
+      <Columnspan>-1</Columnspan>
+      <Outline>
+        <Style>Solid</Style>
+        <Thickness>1</Thickness>
+        <Color>
+          <Transparency>255</Transparency>
+          <Red>0</Red>
+          <Green>0</Green>
+          <Blue>0</Blue>
+        </Color>
+        <Visible>false</Visible>
+      </Outline>
+      <Visible>true</Visible>
+      <Label>
+        <Caption>
+          <Value>Job Count by Site</Value>
+          <Font>
+            <Size>12.0</Size>
+            <Bold>true</Bold>
+            <Alignment>
+              <horizontalAlignment>Center</horizontalAlignment>
+              <verticalAlignment>Center</verticalAlignment>
+            </Alignment>
+          </Font>
+          <Color>
+            <Transparency>255</Transparency>
+            <Red>0</Red>
+            <Green>0</Green>
+            <Blue>0</Blue>
+          </Color>
+        </Caption>
+        <Background xsi:type="attribute:ColorDefinition">
+          <Transparency>0</Transparency>
+          <Red>255</Red>
+          <Green>255</Green>
+          <Blue>255</Blue>
+        </Background>
+        <Outline>
+          <Style>Solid</Style>
+          <Thickness>1</Thickness>
+          <Color>
+            <Transparency>255</Transparency>
+            <Red>0</Red>
+            <Green>0</Green>
+            <Blue>0</Blue>
+          </Color>
+        </Outline>
+        <Insets>
+          <Top>0.0</Top>
+          <Left>2.0</Left>
+          <Bottom>0.0</Bottom>
+          <Right>3.0</Right>
+        </Insets>
+        <Visible>true</Visible>
+      </Label>
+    </Children>
+    <Children xsi:type="layout:Plot">
+      <Bounds>
+        <Left>0.0</Left>
+        <Top>0.0</Top>
+        <Width>0.0</Width>
+        <Height>0.0</Height>
+      </Bounds>
+      <Insets>
+        <Top>3.0</Top>
+        <Left>3.0</Left>
+        <Bottom>3.0</Bottom>
+        <Right>3.0</Right>
+      </Insets>
+      <Row>-1</Row>
+      <Column>-1</Column>
+      <Rowspan>-1</Rowspan>
+      <Columnspan>-1</Columnspan>
+      <Outline>
+        <Style>Solid</Style>
+        <Thickness>1</Thickness>
+        <Color>
+          <Transparency>255</Transparency>
+          <Red>0</Red>
+          <Green>0</Green>
+          <Blue>0</Blue>
+        </Color>
+        <Visible>false</Visible>
+      </Outline>
+      <Visible>true</Visible>
+      <HorizontalSpacing>5</HorizontalSpacing>
+      <VerticalSpacing>5</VerticalSpacing>
+      <ClientArea>
+        <Background xsi:type="attribute:ColorDefinition">
+          <Transparency>255</Transparency>
+          <Red>255</Red>
+          <Green>255</Green>
+          <Blue>255</Blue>
+        </Background>
+        <Outline>
+          <Style>Solid</Style>
+          <Thickness>0</Thickness>
+          <Color>
+            <Transparency>255</Transparency>
+            <Red>0</Red>
+            <Green>0</Green>
+            <Blue>0</Blue>
+          </Color>
+          <Visible>false</Visible>
+        </Outline>
+        <Insets>
+          <Top>0.0</Top>
+          <Left>0.0</Left>
+          <Bottom>0.0</Bottom>
+          <Right>0.0</Right>
+        </Insets>
+      </ClientArea>
+    </Children>
+    <Children xsi:type="layout:Legend">
+      <Bounds>
+        <Left>0.0</Left>
+        <Top>0.0</Top>
+        <Width>0.0</Width>
+        <Height>0.0</Height>
+      </Bounds>
+      <Insets>
+        <Top>3.0</Top>
+        <Left>3.0</Left>
+        <Bottom>3.0</Bottom>
+        <Right>3.0</Right>
+      </Insets>
+      <Row>-1</Row>
+      <Column>-1</Column>
+      <Rowspan>-1</Rowspan>
+      <Columnspan>-1</Columnspan>
+      <Outline>
+        <Style>Solid</Style>
+        <Thickness>1</Thickness>
+        <Color>
+          <Transparency>255</Transparency>
+          <Red>0</Red>
+          <Green>0</Green>
+          <Blue>0</Blue>
+        </Color>
+        <Visible>false</Visible>
+      </Outline>
+      <Visible>true</Visible>
+      <Triggers>
+        <Condition>onclick</Condition>
+        <Action>
+          <Type>URL_Redirect</Type>
+          <Value xsi:type="attribute:URLValue">
+            <BaseUrl>&lt;structure name=&quot;action&quot;>
+    &lt;property name=&quot;formatType&quot;>html&lt;/property>
+    &lt;property name=&quot;linkType&quot;>drill-through&lt;/property>
+    &lt;property name=&quot;reportName&quot;>DailyJobsByProbe.rptdesign&lt;/property>
+    &lt;property name=&quot;targetWindow&quot;>_self&lt;/property>
+    &lt;list-property name=&quot;paramBindings&quot;>
+        &lt;structure>
+            &lt;property name=&quot;paramName&quot;>DatabaseURL&lt;/property>
+            &lt;expression name=&quot;expression&quot;>params[&quot;DatabaseURL&quot;]&lt;/expression>
+        &lt;/structure>
+        &lt;structure>
+            &lt;property name=&quot;paramName&quot;>DatabaseUser&lt;/property>
+            &lt;expression name=&quot;expression&quot;>params[&quot;DatabaseUser&quot;]&lt;/expression>
+        &lt;/structure>
+        &lt;structure>
+            &lt;property name=&quot;paramName&quot;>DatabasePassword&lt;/property>
+            &lt;expression name=&quot;expression&quot;>params[&quot;DatabasePassword&quot;]&lt;/expression>
+        &lt;/structure>
+        &lt;structure>
+            &lt;property name=&quot;paramName&quot;>Start Date&lt;/property>
+            &lt;expression name=&quot;expression&quot;>params[&quot;Start Date&quot;]&lt;/expression>
+        &lt;/structure>
+        &lt;structure>
+            &lt;property name=&quot;paramName&quot;>End Date&lt;/property>
+            &lt;expression name=&quot;expression&quot;>params[&quot;End Date&quot;]&lt;/expression>
+        &lt;/structure>
+    &lt;/list-property>
+&lt;/structure>
+</BaseUrl>
+            <BaseParameterName></BaseParameterName>
+            <ValueParameterName></ValueParameterName>
+            <SeriesParameterName></SeriesParameterName>
+          </Value>
+        </Action>
+      </Triggers>
+      <ClientArea>
+        <Outline>
+          <Style>Solid</Style>
+          <Thickness>0</Thickness>
+          <Color>
+            <Transparency>255</Transparency>
+            <Red>0</Red>
+            <Green>0</Green>
+            <Blue>0</Blue>
+          </Color>
+          <Visible>false</Visible>
+        </Outline>
+        <Insets>
+          <Top>0.0</Top>
+          <Left>2.0</Left>
+          <Bottom>0.0</Bottom>
+          <Right>2.0</Right>
+        </Insets>
+      </ClientArea>
+      <Text>
+        <Value>&lt;undefined></Value>
+        <Font>
+          <Size>7.0</Size>
+          <Alignment/>
+        </Font>
+        <Color>
+          <Transparency>255</Transparency>
+          <Red>0</Red>
+          <Green>0</Green>
+          <Blue>0</Blue>
+        </Color>
+      </Text>
+      <Orientation>Vertical</Orientation>
+      <Direction>Top_Bottom</Direction>
+      <Position>Right</Position>
+      <ItemType>Series</ItemType>
+      <Title>
+        <Caption>
+          <Value>&lt;undefined></Value>
+          <Font>
+            <Alignment/>
+          </Font>
+        </Caption>
+        <Background xsi:type="attribute:ColorDefinition">
+          <Transparency>0</Transparency>
+          <Red>255</Red>
+          <Green>255</Green>
+          <Blue>255</Blue>
+        </Background>
+        <Outline>
+          <Style>Solid</Style>
+          <Thickness>1</Thickness>
+          <Color>
+            <Transparency>255</Transparency>
+            <Red>0</Red>
+            <Green>0</Green>
+            <Blue>0</Blue>
+          </Color>
+          <Visible>false</Visible>
+        </Outline>
+        <Insets>
+          <Top>0.0</Top>
+          <Left>2.0</Left>
+          <Bottom>0.0</Bottom>
+          <Right>3.0</Right>
+        </Insets>
+        <Visible>false</Visible>
+      </Title>
+      <TitlePosition>Above</TitlePosition>
+    </Children>
+    <Bounds>
+      <Left>0.0</Left>
+      <Top>0.0</Top>
+      <Width>480.0</Width>
+      <Height>360.0</Height>
+    </Bounds>
+    <Insets>
+      <Top>3.0</Top>
+      <Left>3.0</Left>
+      <Bottom>3.0</Bottom>
+      <Right>3.0</Right>
+    </Insets>
+    <Row>-1</Row>
+    <Column>-1</Column>
+    <Rowspan>-1</Rowspan>
+    <Columnspan>-1</Columnspan>
+    <Outline>
+      <Style>Solid</Style>
+      <Thickness>1</Thickness>
+      <Color>
+        <Transparency>255</Transparency>
+        <Red>0</Red>
+        <Green>0</Green>
+        <Blue>0</Blue>
+      </Color>
+      <Visible>false</Visible>
+    </Outline>
+    <Background xsi:type="attribute:ColorDefinition">
+      <Transparency>255</Transparency>
+      <Red>255</Red>
+      <Green>255</Green>
+      <Blue>255</Blue>
+    </Background>
+    <Visible>true</Visible>
+  </Block>
+  <Dimension>Two_Dimensional</Dimension>
+  <Script>/**
+ * The chart script methods provide control on the chart databinding, generation and rendering.
+ *
+ * The methods have been commented in the following code, please uncomment and implement the
+ * ones you need. Note that for simplicity the &quot;after&quot; methods have not be included here.
+ *
+ * This script syntax follows JavaScript specifications, the Java classes that are referred to
+ * in the comments can be accessed as JavaScript classes. 
+ *
+ * Script examples are available in the org.eclipse.birt.chart.examples plugin
+ */
+
+
+/**
+ * Called before populating the series dataset using the DataSetProcessor.
+ * 
+ * @param series
+ *            Series
+ * @param dataSetProcessor
+ *            DataSetProcessor
+ * @param context
+ *            IChartScriptContext
+ */
+//function beforeDataSetFilled( series, dataSetProcessor, context ){}
+
+/**
+ * Called before generation of chart model to GeneratedChartState.
+ * 
+ * @param chart
+ *            Chart Model
+ * @param context
+ *            IChartScriptContext
+ */
+function beforeGeneration( chart, context )
+{	rep = context.getExternalContext().getScriptable();
+	subtitle =rep.getParameterValue(&quot;Subtitle&quot;);
+	chart.getTitle().getLabel().getCaption().setValue('xxx'+ &quot;\n&quot; + subtitle);
+
+}
+
+/**
+ * Called before the chart is rendered.
+ * 
+ * @param gcs
+ *            GeneratedChartState
+ * @param context
+ *            IChartScriptContext
+ */
+//function beforeRendering( gcs, context ){}
+
+/**
+ * Called before drawing each block.
+ * 
+ * @param block
+ *            Block
+ * @param context
+ *            IChartScriptContext
+ */
+//function beforeDrawBlock( block, context ){}
+
+/**
+ * Called before drawing each entry the legend.
+ * 
+ * @param label
+ *            Label
+ * @param context
+ *            IChartScriptContext
+ */
+//function beforeDrawLegendEntry( label, context ){}
+
+/**
+ * Called before rendering Series.
+ * 
+ * @param series
+ *            Series
+ * @param seriesRenderer
+ *            ISeriesRenderer
+ * @param context
+ *            IChartScriptContext
+ */
+//function beforeDrawSeries( series, seriesRenderer, context ){}
+
+/**
+ * Called before rendering the title of a Series.
+ * 
+ * @param series
+ *            Series
+ * @param label
+ *            Label
+ * @param context
+ *            IChartScriptContext
+ */
+//function beforeDrawSeriesTitle( series, label, context ){}
+
+/**
+ * Called before drawing each marker line in an Axis.
+ * 
+ * @param axis
+ *            Axis
+ * @param markerLine
+ *            MarkerLine
+ * @param context
+ *            IChartScriptContext
+ */
+//function beforeDrawMarkerLine( axis, markerLine, context ){}
+
+/**
+ * Called before drawing each marker range in an Axis.
+ * 
+ * @param axis
+ *            Axis
+ * @param markerRange
+ *            MarkerRange
+ * @param context
+ *            IChartScriptContext
+ */
+//function beforeDrawMarkerRange( axis, markerRange, context ){}
+
+/**
+ * Called before drawing each datapoint graphical representation or marker.
+ * 
+ * @param dph
+ *            DataPointHints
+ * @param fill
+ *            Fill
+ * @param context
+ *            IChartScriptContext
+ */
+//function beforeDrawDataPoint( dph, fill, context ){}
+
+/**
+ * Called before rendering the label for each datapoint.
+ * 
+ * @param dph
+ *            DataPointHints
+ * @param label
+ *            Label
+ * @param context
+ *            IChartScriptContext
+ */
+//function beforeDrawDataPointLabel( dph, label, context ){}
+
+/**
+ * Called before rendering curve fitting.
+ * 
+ * @param cf
+ *            CurveFitting
+ * @param context
+ *            IChartScriptContext
+ */
+//function beforeDrawFittingCurve( cf, context ){}
+
+/**
+ * Called before rendering each label on a given Axis.
+ * 
+ * @param axis
+ *            Axis
+ * @param label
+ *            Label
+ * @param context
+ *            IChartScriptContext
+ */
+function beforeDrawAxisLabel( axis, label, context )
+{
+	rep = context.getExternalContext().getScriptable();
+	val = rep.getParameterValue(&quot;SelectedStartDate&quot;);
+	if(val == null)
+		val = &quot;&quot;;
+				
+	if(val.equals(label.getCaption().getValue()))
+		label.getOutline().setVisible(true);
+	else
+		label.getOutline().setVisible(false);
+}
+
+/**
+ * Called before rendering the Title of an Axis.
+ * 
+ * @param axis
+ *            Axis
+ * @param label
+ *            Title Label
+ * @param context
+ *            IChartScriptContext
+ */
+//function beforeDrawAxisTitle( axis, label, context ){}
+</Script>
+  <Units>Points</Units>
+  <SeriesThickness>10.0</SeriesThickness>
+  <SampleData>
+    <BaseSampleData>
+      <DataSetRepresentation>'A','B','C'</DataSetRepresentation>
+    </BaseSampleData>
+    <OrthogonalSampleData>
+      <DataSetRepresentation>5,4,12</DataSetRepresentation>
+      <SeriesDefinitionIndex>0</SeriesDefinitionIndex>
+    </OrthogonalSampleData>
+  </SampleData>
+  <Interactivity>
+    <LegendBehavior>HighlightSerie</LegendBehavior>
+  </Interactivity>
+  <Axes>
+    <Type>Text</Type>
+    <Title>
+      <Caption>
+        <Value>Day</Value>
+        <Font>
+          <Size>14.0</Size>
+          <Bold>true</Bold>
+          <Alignment>
+            <horizontalAlignment>Center</horizontalAlignment>
+            <verticalAlignment>Center</verticalAlignment>
+          </Alignment>
+        </Font>
+      </Caption>
+      <Background xsi:type="attribute:ColorDefinition">
+        <Transparency>0</Transparency>
+        <Red>255</Red>
+        <Green>255</Green>
+        <Blue>255</Blue>
+      </Background>
+      <Outline>
+        <Style>Solid</Style>
+        <Thickness>1</Thickness>
+        <Color>
+          <Transparency>255</Transparency>
+          <Red>0</Red>
+          <Green>0</Green>
+          <Blue>0</Blue>
+        </Color>
+      </Outline>
+      <Insets>
+        <Top>0.0</Top>
+        <Left>2.0</Left>
+        <Bottom>0.0</Bottom>
+        <Right>3.0</Right>
+      </Insets>
+      <Visible>false</Visible>
+    </Title>
+    <TitlePosition>Below</TitlePosition>
+    <AssociatedAxes>
+      <Type>Linear</Type>
+      <Title>
+        <Caption>
+          <Value>Job Count</Value>
+          <Font>
+            <Size>14.0</Size>
+            <Bold>true</Bold>
+            <Alignment>
+              <horizontalAlignment>Center</horizontalAlignment>
+              <verticalAlignment>Center</verticalAlignment>
+            </Alignment>
+            <Rotation>90.0</Rotation>
+          </Font>
+        </Caption>
+        <Background xsi:type="attribute:ColorDefinition">
+          <Transparency>0</Transparency>
+          <Red>255</Red>
+          <Green>255</Green>
+          <Blue>255</Blue>
+        </Background>
+        <Outline>
+          <Style>Solid</Style>
+          <Thickness>1</Thickness>
+          <Color>
+            <Transparency>255</Transparency>
+            <Red>0</Red>
+            <Green>0</Green>
+            <Blue>0</Blue>
+          </Color>
+        </Outline>
+        <Insets>
+          <Top>0.0</Top>
+          <Left>2.0</Left>
+          <Bottom>0.0</Bottom>
+          <Right>3.0</Right>
+        </Insets>
+        <Visible>false</Visible>
+      </Title>
+      <TitlePosition>Left</TitlePosition>
+      <SeriesDefinitions>
+        <Query>
+          <Definition>row[&quot;facility_name&quot;]</Definition>
+        </Query>
+        <SeriesPalette>
+          <Entries xsi:type="attribute:ColorDefinition">
+            <Transparency>255</Transparency>
+            <Red>80</Red>
+            <Green>166</Green>
+            <Blue>218</Blue>
+          </Entries>
+          <Entries xsi:type="attribute:ColorDefinition">
+            <Transparency>255</Transparency>
+            <Red>242</Red>
+            <Green>88</Green>
+            <Blue>106</Blue>
+          </Entries>
+          <Entries xsi:type="attribute:ColorDefinition">
+            <Transparency>255</Transparency>
+            <Red>232</Red>
+            <Green>172</Green>
+            <Blue>57</Blue>
+          </Entries>
+          <Entries xsi:type="attribute:ColorDefinition">
+            <Transparency>255</Transparency>
+            <Red>128</Red>
+            <Green>255</Green>
+            <Blue>128</Blue>
+          </Entries>
+          <Entries xsi:type="attribute:ColorDefinition">
+            <Transparency>255</Transparency>
+            <Red>64</Red>
+            <Green>128</Green>
+            <Blue>128</Blue>
+          </Entries>
+          <Entries xsi:type="attribute:ColorDefinition">
+            <Transparency>255</Transparency>
+            <Red>128</Red>
+            <Green>128</Green>
+            <Blue>192</Blue>
+          </Entries>
+          <Entries xsi:type="attribute:ColorDefinition">
+            <Transparency>255</Transparency>
+            <Red>170</Red>
+            <Green>85</Green>
+            <Blue>85</Blue>
+          </Entries>
+          <Entries xsi:type="attribute:ColorDefinition">
+            <Transparency>255</Transparency>
+            <Red>128</Red>
+            <Green>128</Green>
+            <Blue>0</Blue>
+          </Entries>
+        </SeriesPalette>
+        <Series xsi:type="type:LineSeries">
+          <Visible>true</Visible>
+          <Label>
+            <Caption>
+              <Value>&lt;undefined></Value>
+              <Font>
+                <Alignment/>
+              </Font>
+            </Caption>
+            <Background xsi:type="attribute:ColorDefinition">
+              <Transparency>0</Transparency>
+              <Red>255</Red>
+              <Green>255</Green>
+              <Blue>255</Blue>
+            </Background>
+            <Outline>
+              <Style>Solid</Style>
+              <Thickness>1</Thickness>
+              <Color>
+                <Transparency>255</Transparency>
+                <Red>0</Red>
+                <Green>0</Green>
+                <Blue>0</Blue>
+              </Color>
+              <Visible>false</Visible>
+            </Outline>
+            <Insets>
+              <Top>0.0</Top>
+              <Left>2.0</Left>
+              <Bottom>0.0</Bottom>
+              <Right>3.0</Right>
+            </Insets>
+            <Visible>false</Visible>
+          </Label>
+          <DataDefinition>
+            <Definition>row[&quot;sum(ProbeSummary.Njobs)&quot;]</Definition>
+          </DataDefinition>
+          <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
+          <DataPoint>
+            <Components>
+              <Type>Orthogonal_Value</Type>
+            </Components>
+            <Separator>, </Separator>
+          </DataPoint>
+          <LabelPosition>Above</LabelPosition>
+          <Stacked>false</Stacked>
+          <Triggers>
+            <Condition>onclick</Condition>
+            <Action>
+              <Type>URL_Redirect</Type>
+              <Value xsi:type="attribute:URLValue">
+                <BaseUrl>&lt;structure name=&quot;action&quot;>
+
+    &lt;property name=&quot;formatType&quot;>html&lt;/property>
+
+    &lt;property name=&quot;linkType&quot;>drill-through&lt;/property>
+
+    &lt;property name=&quot;reportName&quot;>DailyJobsByCETable.rptdesign&lt;/property>
+
+    &lt;property name=&quot;targetWindow&quot;>_self&lt;/property>
+
+    &lt;list-property name=&quot;paramBindings&quot;>
+
+        &lt;structure>
+
+            &lt;property name=&quot;paramName&quot;>DatabaseURL&lt;/property>
+
+            &lt;expression name=&quot;expression&quot;>params[&quot;DatabaseURL&quot;]&lt;/expression>
+
+        &lt;/structure>
+
+        &lt;structure>
+
+            &lt;property name=&quot;paramName&quot;>DatabaseUser&lt;/property>
+
+            &lt;expression name=&quot;expression&quot;>params[&quot;DatabaseUser&quot;]&lt;/expression>
+
+        &lt;/structure>
+
+        &lt;structure>
+
+            &lt;property name=&quot;paramName&quot;>DatabasePassword&lt;/property>
+
+            &lt;expression name=&quot;expression&quot;>params[&quot;DatabasePassword&quot;]&lt;/expression>
+
+        &lt;/structure>
+
+        &lt;structure>
+
+            &lt;property name=&quot;paramName&quot;>Start Date&lt;/property>
+
+            &lt;expression name=&quot;expression&quot;>params[&quot;SelectedStartDate&quot;]&lt;/expression>
+
+        &lt;/structure>
+
+    &lt;/list-property>
+
+&lt;/structure>
+
+</BaseUrl>
+                <BaseParameterName>End Date</BaseParameterName>
+                <ValueParameterName></ValueParameterName>
+                <SeriesParameterName></SeriesParameterName>
+              </Value>
+            </Action>
+          </Triggers>
+          <Marker>
+            <Type>Box</Type>
+            <Size>3</Size>
+            <Visible>true</Visible>
+          </Marker>
+          <LineAttributes>
+            <Style>Solid</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>true</Visible>
+          </LineAttributes>
+          <PaletteLineColor>true</PaletteLineColor>
+        </Series>
+        <Grouping>
+          <Enabled>false</Enabled>
+          <GroupingInterval>2</GroupingInterval>
+          <GroupType>Text</GroupType>
+          <AggregateExpression>Sum</AggregateExpression>
+        </Grouping>
+      </SeriesDefinitions>
+      <Orientation>Vertical</Orientation>
+      <LineAttributes>
+        <Style>Solid</Style>
+        <Thickness>1</Thickness>
+        <Color>
+          <Transparency>255</Transparency>
+          <Red>0</Red>
+          <Green>0</Green>
+          <Blue>0</Blue>
+        </Color>
+        <Visible>true</Visible>
+      </LineAttributes>
+      <Label>
+        <Caption>
+          <Value>&lt;undefined></Value>
+          <Font>
+            <Alignment/>
+          </Font>
+        </Caption>
+        <Background xsi:type="attribute:ColorDefinition">
+          <Transparency>0</Transparency>
+          <Red>255</Red>
+          <Green>255</Green>
+          <Blue>255</Blue>
+        </Background>
+        <Outline>
+          <Style>Solid</Style>
+          <Thickness>1</Thickness>
+          <Color>
+            <Transparency>255</Transparency>
+            <Red>0</Red>
+            <Green>0</Green>
+            <Blue>0</Blue>
+          </Color>
+        </Outline>
+        <Insets>
+          <Top>0.0</Top>
+          <Left>2.0</Left>
+          <Bottom>0.0</Bottom>
+          <Right>3.0</Right>
+        </Insets>
+        <Visible>true</Visible>
+      </Label>
+      <LabelPosition>Left</LabelPosition>
+      <MajorGrid>
+        <LineAttributes>
+          <Style>Solid</Style>
+          <Thickness>1</Thickness>
+          <Color>
+            <Transparency>255</Transparency>
+            <Red>196</Red>
+            <Green>196</Green>
+            <Blue>196</Blue>
+          </Color>
+          <Visible>false</Visible>
+        </LineAttributes>
+        <TickStyle>Across</TickStyle>
+        <TickAttributes>
+          <Style>Solid</Style>
+          <Thickness>1</Thickness>
+          <Color>
+            <Transparency>255</Transparency>
+            <Red>196</Red>
+            <Green>196</Green>
+            <Blue>196</Blue>
+          </Color>
+          <Visible>true</Visible>
+        </TickAttributes>
+      </MajorGrid>
+      <MinorGrid>
+        <LineAttributes>
+          <Style>Solid</Style>
+          <Thickness>1</Thickness>
+          <Color>
+            <Transparency>255</Transparency>
+            <Red>225</Red>
+            <Green>225</Green>
+            <Blue>225</Blue>
+          </Color>
+          <Visible>false</Visible>
+        </LineAttributes>
+        <TickStyle>Across</TickStyle>
+        <TickAttributes>
+          <Style>Solid</Style>
+          <Thickness>1</Thickness>
+          <Color>
+            <Transparency>255</Transparency>
+            <Red>225</Red>
+            <Green>225</Green>
+            <Blue>225</Blue>
+          </Color>
+          <Visible>false</Visible>
+        </TickAttributes>
+      </MinorGrid>
+      <Scale>
+        <MinorGridsPerUnit>5</MinorGridsPerUnit>
+      </Scale>
+      <Origin>
+        <Type>Min</Type>
+        <Value xsi:type="data:NumberDataElement">
+          <Value>0.0</Value>
+        </Value>
+      </Origin>
+      <PrimaryAxis>true</PrimaryAxis>
+      <Percent>false</Percent>
+    </AssociatedAxes>
+    <SeriesDefinitions>
+      <Query>
+        <Definition></Definition>
+      </Query>
+      <SeriesPalette>
+        <Entries xsi:type="attribute:ColorDefinition">
+          <Transparency>255</Transparency>
+          <Red>80</Red>
+          <Green>166</Green>
+          <Blue>218</Blue>
+        </Entries>
+        <Entries xsi:type="attribute:ColorDefinition">
+          <Transparency>255</Transparency>
+          <Red>242</Red>
+          <Green>88</Green>
+          <Blue>106</Blue>
+        </Entries>
+        <Entries xsi:type="attribute:ColorDefinition">
+          <Transparency>255</Transparency>
+          <Red>232</Red>
+          <Green>172</Green>
+          <Blue>57</Blue>
+        </Entries>
+        <Entries xsi:type="attribute:ColorDefinition">
+          <Transparency>255</Transparency>
+          <Red>128</Red>
+          <Green>255</Green>
+          <Blue>128</Blue>
+        </Entries>
+        <Entries xsi:type="attribute:ColorDefinition">
+          <Transparency>255</Transparency>
+          <Red>64</Red>
+          <Green>128</Green>
+          <Blue>128</Blue>
+        </Entries>
+        <Entries xsi:type="attribute:ColorDefinition">
+          <Transparency>255</Transparency>
+          <Red>128</Red>
+          <Green>128</Green>
+          <Blue>192</Blue>
+        </Entries>
+        <Entries xsi:type="attribute:ColorDefinition">
+          <Transparency>255</Transparency>
+          <Red>170</Red>
+          <Green>85</Green>
+          <Blue>85</Blue>
+        </Entries>
+        <Entries xsi:type="attribute:ColorDefinition">
+          <Transparency>255</Transparency>
+          <Red>128</Red>
+          <Green>128</Green>
+          <Blue>0</Blue>
+        </Entries>
+      </SeriesPalette>
+      <Series>
+        <Visible>true</Visible>
+        <Label>
+          <Caption>
+            <Value>&lt;undefined></Value>
+            <Font>
+              <Alignment/>
+            </Font>
+          </Caption>
+          <Background xsi:type="attribute:ColorDefinition">
+            <Transparency>0</Transparency>
+            <Red>255</Red>
+            <Green>255</Green>
+            <Blue>255</Blue>
+          </Background>
+          <Outline>
+            <Style>Solid</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>false</Visible>
+          </Outline>
+          <Insets>
+            <Top>0.0</Top>
+            <Left>2.0</Left>
+            <Bottom>0.0</Bottom>
+            <Right>3.0</Right>
+          </Insets>
+          <Visible>false</Visible>
+        </Label>
+        <DataDefinition>
+          <Definition>row[&quot;endtime&quot;]</Definition>
+        </DataDefinition>
+        <SeriesIdentifier>Day</SeriesIdentifier>
+        <DataPoint>
+          <Components>
+            <Type>Orthogonal_Value</Type>
+          </Components>
+          <Separator>, </Separator>
+        </DataPoint>
+        <LabelPosition>Outside</LabelPosition>
+        <Stacked>false</Stacked>
+      </Series>
+      <Grouping>
+        <Enabled>false</Enabled>
+        <GroupingInterval>2</GroupingInterval>
+        <GroupType>Text</GroupType>
+        <AggregateExpression>Sum</AggregateExpression>
+      </Grouping>
+    </SeriesDefinitions>
+    <Orientation>Horizontal</Orientation>
+    <LineAttributes>
+      <Style>Solid</Style>
+      <Thickness>1</Thickness>
+      <Color>
+        <Transparency>255</Transparency>
+        <Red>0</Red>
+        <Green>0</Green>
+        <Blue>0</Blue>
+      </Color>
+      <Visible>true</Visible>
+    </LineAttributes>
+    <Label>
+      <Caption>
+        <Value>&lt;undefined></Value>
+        <Font>
+          <Size>9.0</Size>
+          <Alignment/>
+          <Rotation>48.0</Rotation>
+        </Font>
+        <Color>
+          <Transparency>255</Transparency>
+          <Red>0</Red>
+          <Green>0</Green>
+          <Blue>0</Blue>
+        </Color>
+      </Caption>
+      <Background xsi:type="attribute:ColorDefinition">
+        <Transparency>0</Transparency>
+        <Red>255</Red>
+        <Green>255</Green>
+        <Blue>255</Blue>
+      </Background>
+      <Outline>
+        <Style>Solid</Style>
+        <Thickness>1</Thickness>
+        <Color>
+          <Transparency>255</Transparency>
+          <Red>0</Red>
+          <Green>0</Green>
+          <Blue>0</Blue>
+        </Color>
+      </Outline>
+      <Insets>
+        <Top>0.0</Top>
+        <Left>2.0</Left>
+        <Bottom>0.0</Bottom>
+        <Right>3.0</Right>
+      </Insets>
+      <Visible>true</Visible>
+    </Label>
+    <LabelPosition>Below</LabelPosition>
+    <MajorGrid>
+      <LineAttributes>
+        <Style>Solid</Style>
+        <Thickness>1</Thickness>
+        <Color>
+          <Transparency>255</Transparency>
+          <Red>196</Red>
+          <Green>196</Green>
+          <Blue>196</Blue>
+        </Color>
+        <Visible>false</Visible>
+      </LineAttributes>
+      <TickStyle>Across</TickStyle>
+      <TickAttributes>
+        <Style>Solid</Style>
+        <Thickness>1</Thickness>
+        <Color>
+          <Transparency>255</Transparency>
+          <Red>196</Red>
+          <Green>196</Green>
+          <Blue>196</Blue>
+        </Color>
+        <Visible>true</Visible>
+      </TickAttributes>
+    </MajorGrid>
+    <MinorGrid>
+      <LineAttributes>
+        <Style>Solid</Style>
+        <Thickness>1</Thickness>
+        <Color>
+          <Transparency>255</Transparency>
+          <Red>225</Red>
+          <Green>225</Green>
+          <Blue>225</Blue>
+        </Color>
+        <Visible>false</Visible>
+      </LineAttributes>
+      <TickStyle>Across</TickStyle>
+      <TickAttributes>
+        <Style>Solid</Style>
+        <Thickness>1</Thickness>
+        <Color>
+          <Transparency>255</Transparency>
+          <Red>225</Red>
+          <Green>225</Green>
+          <Blue>225</Blue>
+        </Color>
+        <Visible>false</Visible>
+      </TickAttributes>
+    </MinorGrid>
+    <Scale>
+      <MinorGridsPerUnit>5</MinorGridsPerUnit>
+    </Scale>
+    <Origin>
+      <Type>Min</Type>
+      <Value xsi:type="data:NumberDataElement">
+        <Value>0.0</Value>
+      </Value>
+    </Origin>
+    <PrimaryAxis>true</PrimaryAxis>
+    <CategoryAxis>true</CategoryAxis>
+    <Percent>false</Percent>
+  </Axes>
+  <Orientation>Vertical</Orientation>
+  <Rotation/>
+</model:ChartWithAxes>
+]]></xml-property>
+            <property name="outputFormat">SVG</property>
+        </extended-item>
+        <text-data id="97">
+            <property name="style">sans-style1</property>
+            <property name="fontSize">9pt</property>
+            <property name="textAlign">center</property>
+            <expression name="valueExpr">"Date range: "+ params["Start Date"] + " - " + params["End Date"]</expression>
+            <property name="contentType">html</property>
+        </text-data>
+    </body>
+</report>
