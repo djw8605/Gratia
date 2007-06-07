@@ -348,7 +348,7 @@ public class DatabaseMaintenance {
                         "probeid,facility_id,probename,active,currenttime,CurrentTimeDescription,reporthh,reportmm,status,jobs " +
                         " from CEProbes");
                 if (result > -1) {
-                   //result = Execute("drop table CETable;");
+                   result = Execute("drop table CEProbes;");
                 }
                if (result > -1) {
                     Logging.log("Gratia database upgraded from " + current + " to " + (current + 1));

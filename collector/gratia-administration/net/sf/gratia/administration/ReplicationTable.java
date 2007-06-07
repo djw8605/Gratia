@@ -189,7 +189,7 @@ public class ReplicationTable extends HttpServlet
 
       try
       {
-         command = "select probename from CEProbes order by probename";
+         command = "select probename from Probe order by probename";
          statement = connection.prepareStatement(command);
          resultSet = statement.executeQuery(command);
 

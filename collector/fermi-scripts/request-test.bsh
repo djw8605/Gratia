@@ -33,14 +33,14 @@ command =
 		" order by JobUsageRecord.EndTime";
 */
 command =
-		"select CEProbes.probename," +
+		"select Probe.probename," +
 		"       JobUsageRecord.EndTime as endtime," +
 		"       count(JobUsageRecord.dbid)" +
-		" from Site, CEProbes, JobUsageRecord" +
-		" where CEProbes.siteid = Site.siteid" +
-		" and JobUsageRecord.ProbeName = CEProbes.probename" +
+		" from Site, Probe, JobUsageRecord" +
+		" where Probe.siteid = Site.siteid" +
+		" and JobUsageRecord.ProbeName = Probe.probename" +
 		" and ('2006-06-01 00:00:00 GMT' <= endtime and endtime <= '2006-07-01 23:59:59 GMT')" +
-		" group by date_format(endtime, '%c/%d/%Y'), CEProbes.probename" +
+		" group by date_format(endtime, '%c/%d/%Y'), Probe.probename" +
 		" order by JobUsageRecord.EndTime";
 
 start = System.currentTimeMillis();

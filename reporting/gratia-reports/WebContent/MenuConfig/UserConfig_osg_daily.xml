@@ -16,7 +16,7 @@
 		<MenuGroup name="SQL Queries">
 			<MenuItem name="Custom SQL Report" link="admin.jsp"/>
 			<MenuItem name="Distinct Probe Names" link="admin.jsp?sql=select distinct ProbeName from JobUsageRecord;"/>
-			<MenuItem name="Probes Without Facilities" link="admin.jsp?sql=select distinct ProbeName from JobUsageRecord j where not exists(select ProbeName from CEProbes f where f.probename = j.probename);"/>
+			<MenuItem name="Probes Without Facilities" link="admin.jsp?sql=select distinct ProbeName from JobUsageRecord j where not exists(select ProbeName from Probe f where f.probename = j.probename);"/>
 			<MenuItem name="Records Without Dates" link="admin.jsp?sql=select count(*) from JobUsageRecord where starttime is null or endtime is null;"/>
 		</MenuGroup>
 	</Menu>

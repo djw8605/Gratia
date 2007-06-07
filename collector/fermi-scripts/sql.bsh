@@ -58,9 +58,9 @@ command1 =
 		"select Site.SiteName," +
 		" trunc(JobUsageRecord.EndTime) as endtime," +
 		" sum(JobUsageRecord.Njobs)" +
-		" from Site, CEProbes, JobUsageRecord" +
-		" where CEProbes.siteid = Site.siteid" +
-		" and JobUsageRecord.ProbeName = CEProbes.probename" +
+		" from Site, Probe, JobUsageRecord" +
+		" where Probe.siteid = Site.siteid" +
+		" and JobUsageRecord.ProbeName = Probe.probename" +
 		" and endtime >= to_date('2006-08-05','yyyy-mm-dd')" +
 		" and endtime <= to_date('2006-09-12','yyyy-mm-dd')" +
 		" group by trunc(endtime),Site.SiteName" +
@@ -70,9 +70,9 @@ command2 =
 		"select Site.SiteName," +
 		" JobUsageRecord.EndTime as endtime," +
 		" sum(JobUsageRecord.Njobs)" +
-		" from Site, CEProbes, JobUsageRecord" +
-		" where CEProbes.siteid = Site.siteid" +
-		" and JobUsageRecord.ProbeName = CEProbes.probename" +
+		" from Site, Probe, JobUsageRecord" +
+		" where Probe.siteid = Site.siteid" +
+		" and JobUsageRecord.ProbeName = Probe.probename" +
 		" and ('2006-08-05 00:00:00 GMT' <= endtime and endtime <= '2006-09-12 23:59:59 GMT')" +
 		" group by date_format(endtime, '%c/%d/%Y'), Site.SiteName" +
 		" order by Site.SiteName,JobUsageRecord.EndTime";

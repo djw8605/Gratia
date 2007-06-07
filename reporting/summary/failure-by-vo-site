@@ -21,11 +21,11 @@ cat > "$TMP/failure.sql" <<EOF
   sum(Njobs) as 'FailedJobs',
   X.TotalJobs,
   FORMAT(100.0 * sum(NJobs) / X.TotalJobs, 1) as pcFailed
- from JobUsageRecord J, Site T, CEProbes P,
+ from JobUsageRecord J, Site T, Probe P,
   (select LCASE(XJ.VOName) as XVOName,
      XT.SiteName as XSiteName,
      sum(Njobs) as 'TotalJobs'
-   from JobUsageRecord XJ, Site XT, CEProbes XP
+   from JobUsageRecord XJ, Site XT, Probe XP
    where
      EndTime >= CURDATE() - INTERVAL 1 DAY and
      EndTime < CURDATE() and
@@ -48,11 +48,11 @@ UNION ALL
   sum(Njobs) as 'FailedJobs',
   X.TotalJobs,
   FORMAT(100.0 * sum(NJobs) / X.TotalJobs, 1) as '% Failed'
- from JobUsageRecord J, Site T, CEProbes P,
+ from JobUsageRecord J, Site T, Probe P,
   (select LCASE(XJ.VOName) as XVOName,
      XT.SiteName as XSiteName,
      sum(Njobs) as 'TotalJobs'
-   from JobUsageRecord XJ, Site XT, CEProbes XP
+   from JobUsageRecord XJ, Site XT, Probe XP
    where
      EndTime >= CURDATE() - INTERVAL 1 DAY and
      EndTime < CURDATE() and

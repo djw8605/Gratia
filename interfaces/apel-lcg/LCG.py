@@ -7,7 +7,7 @@
 # library to transfer the data from Gratia to APEL (WLCG)
 #############################################################
 #
-#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: LCG.py,v 1.4 2007-06-07 21:54:36 pcanal Exp $
+#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: LCG.py,v 1.5 2007-06-07 22:21:39 pcanal Exp $
 
 import traceback
 import exceptions
@@ -464,12 +464,12 @@ SELECT Site.SiteName AS ExecutingSite,
                NOW() 
 from 
      Site,
-     CEProbes,
+     Probe,
      VOProbeSummary Main 
 where 
       Site.SiteName in ( %s )
-  and Site.siteid = CEProbes.siteid 
-  and CEProbes.ProbeName  = Main.ProbeName 
+  and Site.siteid = Probe.siteid 
+  and Probe.ProbeName  = Main.ProbeName 
   and Main.VOName in ( %s )
   and "%s" <= Main.EndTime and Main.EndTime < "%s"
 group by ExecutingSite, 

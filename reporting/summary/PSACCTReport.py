@@ -5,7 +5,7 @@
 #
 # library to create simple report using the Gratia psacct database
 #
-#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.4 2007-06-07 21:54:37 pcanal Exp $
+#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.5 2007-06-07 22:21:40 pcanal Exp $
 
 import time
 import datetime
@@ -322,19 +322,19 @@ def DailySiteData(begin,end):
         schema = "gratia"
         
         select = " SELECT Site.SiteName, sum(NJobs), sum(J.WallDuration) " \
-                + " from "+schema+".Site, "+schema+".CEProbes, "+schema+".JobUsageRecord J " \
-                + " where CEProbes.siteid = Site.siteid and J.ProbeName = CEProbes.probename" \
+                + " from "+schema+".Site, "+schema+".Probe, "+schema+".JobUsageRecord J " \
+                + " where Probe.siteid = Site.siteid and J.ProbeName = Probe.probename" \
                 + " and \""+ DateToString(begin) +"\"<EndTime and EndTime<\"" + DateToString(end) + "\"" \
                 + " and J.ProbeName not like \"psacct:%\" " \
-                + " group by CEProbes.siteid "
+                + " group by Probe.siteid "
         return RunQueryAndSplit(select)
 
 def DailyVOData(begin,end):
         schema = "gratia"
             
         select = " SELECT J.VOName, Sum(NJobs), sum(J.WallDuration) " \
-                + " from "+schema+".Site, "+schema+".CEProbes, "+schema+".JobUsageRecord J " \
-                + " where CEProbes.siteid = Site.siteid and J.ProbeName = CEProbes.probename" \
+                + " from "+schema+".Site, "+schema+".Probe, "+schema+".JobUsageRecord J " \
+                + " where Probe.siteid = Site.siteid and J.ProbeName = Probe.probename" \
                 + " and \""+ DateToString(begin) +"\"<EndTime and EndTime<\"" + DateToString(end) + "\"" \
                 + " and J.ProbeName not like \"psacct:%\" " \
                 + " group by J.VOName "
@@ -344,22 +344,22 @@ def DailySiteVOData(begin,end):
         schema = "gratia"
         
         select = " SELECT Site.SiteName, J.VOName, sum(NJobs), sum(J.WallDuration) " \
-                + " from "+schema+".Site, "+schema+".CEProbes, "+schema+".JobUsageRecord J " \
-                + " where CEProbes.siteid = Site.siteid and J.ProbeName = CEProbes.probename" \
+                + " from "+schema+".Site, "+schema+".Probe, "+schema+".JobUsageRecord J " \
+                + " where Probe.siteid = Site.siteid and J.ProbeName = Probe.probename" \
                 + " and \""+ DateToString(begin) +"\"<EndTime and EndTime<\"" + DateToString(end) + "\"" \
                 + " and J.ProbeName not like \"psacct:%\" " \
-                + " group by J.VOName, CEProbes.siteid order by Site.SiteName "
+                + " group by J.VOName, Probe.siteid order by Site.SiteName "
         return RunQueryAndSplit(select)
 
 def DailyVOSiteData(begin,end):
         schema = "gratia"
         
         select = " SELECT J.VOName, Site.SiteName, sum(NJobs), sum(J.WallDuration) " \
-                + " from "+schema+".Site, "+schema+".CEProbes, "+schema+".JobUsageRecord J " \
-                + " where CEProbes.siteid = Site.siteid and J.ProbeName = CEProbes.probename" \
+                + " from "+schema+".Site, "+schema+".Probe, "+schema+".JobUsageRecord J " \
+                + " where Probe.siteid = Site.siteid and J.ProbeName = Probe.probename" \
                 + " and \""+ DateToString(begin) +"\"<EndTime and EndTime<\"" + DateToString(end) + "\"" \
                 + " and J.ProbeName not like \"psacct:%\" " \
-                + " group by J.VOName, CEProbes.siteid order by J.VOName, Site.SiteName "
+                + " group by J.VOName, Probe.siteid order by J.VOName, Site.SiteName "
         return RunQueryAndSplit(select)
 
 def DailySiteVODataFromDaily(begin,end,select,count):
@@ -386,8 +386,8 @@ def DailySiteJobStatus(begin,end,select = "", count = "", what = "Site.SiteName"
         schema = "gratia"
 
         select = " SELECT " + what + ", J.Status,count(*) " \
-                + " from "+schema+".Site, "+schema+".CEProbes, "+schema+".JobUsageRecord J " \
-                + " where CEProbes.siteid = Site.siteid and J.ProbeName = CEProbes.probename" \
+                + " from "+schema+".Site, "+schema+".Probe, "+schema+".JobUsageRecord J " \
+                + " where Probe.siteid = Site.siteid and J.ProbeName = Probe.probename" \
                 + " and \""+ DateToString(begin) +"\"<EndTime and EndTime<\"" + DateToString(end) + "\"" \
                 + select \
                 + " group by " + what + ",J.Status " \
@@ -398,8 +398,8 @@ def DailySiteJobStatusCondor(begin,end,select = "", count = "", what = "Site.Sit
         schema = "gratia"
 
         select = " SELECT "+what+", R.Value,count(*) " \
-                + " from "+schema+".Site, "+schema+".CEProbes, "+schema+".JobUsageRecord J, "+schema+".Resource R "\
-                + " where CEProbes.siteid = Site.siteid and J.ProbeName = CEProbes.probename" \
+                + " from "+schema+".Site, "+schema+".Probe, "+schema+".JobUsageRecord J, "+schema+".Resource R "\
+                + " where Probe.siteid = Site.siteid and J.ProbeName = Probe.probename" \
                 + " and \""+ DateToString(begin) +"\"<EndTime and EndTime<\"" + DateToString(end) + "\"" \
                 + " and J.dbid = R.dbid and R.Description = \"ExitCode\" " \
                 + " group by " + what + ",R.Value " \
@@ -908,7 +908,7 @@ def RangeSiteData(begin, end, with_panda = False):
     schema = "gratia"
     select = """\
 select T.SiteName, sum(J.NJobs), sum(J.WallDuration)
-  from """ + schema + ".Site T, " + schema + ".CEProbes P, " + schema + """.VOProbeSummary J
+  from """ + schema + ".Site T, " + schema + ".Probe P, " + schema + """.VOProbeSummary J
   where
     P.siteid = T.siteid and
     J.ProbeName = P.probename and
@@ -934,7 +934,7 @@ def RangeSiteVOData(begin, end, with_panda = False):
     schema = "gratia"
     select = """\
 select T.SiteName, J.VOName, sum(NJobs), sum(J.WallDuration)
-  from """ + schema + ".Site T, " + schema + ".CEProbes P, " + schema + """.VOProbeSummary J
+  from """ + schema + ".Site T, " + schema + ".Probe P, " + schema + """.VOProbeSummary J
   where
     P.siteid = T.siteid and
     J.ProbeName = P.probename and
@@ -962,7 +962,7 @@ def RangeVOSiteData(begin, end, with_panda = False):
     schema = "gratia"
     select = """\
 select J.VOName, T.SiteName, sum(NJobs), sum(J.WallDuration)
-  from """ + schema + ".Site T, " + schema + ".CEProbes P, " + schema + """.VOProbeSummary J
+  from """ + schema + ".Site T, " + schema + ".Probe P, " + schema + """.VOProbeSummary J
   where
     P.siteid = T.siteid and
     J.ProbeName = P.probename and
