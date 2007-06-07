@@ -83,7 +83,7 @@ public class NewProbeUpdate
          // otherwise get facilityid for sitename
          //
 
-         command = "select facility_id from CETable where facility_name = " + dq + sitename + dq;
+         command = "select facility_id from Site where facility_name = " + dq + sitename + dq;
          statement = connection.prepareStatement(command);
          resultSet = statement.executeQuery(command);
          while (resultSet.next())
@@ -97,11 +97,11 @@ public class NewProbeUpdate
          //
          if (facilityid == -1)
          {
-            command = "insert into CETable(facility_name) values(" + dq + sitename + dq + ")";
+            command = "insert into Site(facility_name) values(" + dq + sitename + dq + ")";
             statement = connection.createStatement();
             statement.executeUpdate(command);
             statement.close();
-            command = "select facility_id from CETable where facility_name = " + dq + sitename + dq;
+            command = "select facility_id from Site where facility_name = " + dq + sitename + dq;
             statement = connection.prepareStatement(command);
             resultSet = statement.executeQuery(command);
             while (resultSet.next())

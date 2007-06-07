@@ -97,7 +97,7 @@ public class DatabaseMaintenance {
     }
 
     public void CheckIndices() {
-        AddIndex("CETable", true, "index02", "facility_name");
+        AddIndex("Site", true, "index02", "facility_name");
         AddIndex("CEProbes", true, "index02", "probename");
 
         //
@@ -158,8 +158,8 @@ public class DatabaseMaintenance {
         Statement statement;
         ResultSet resultSet;
 
-        String check = "select count(*) from CETable where facility_name = 'Unknown'";
-        String cmd = "insert into CETable(facility_name) values(" + dq
+        String check = "select count(*) from Site where facility_name = 'Unknown'";
+        String cmd = "insert into Site(facility_name) values(" + dq
                 + "Unknown" + dq + ")";
 
         try {

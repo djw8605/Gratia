@@ -36,8 +36,8 @@ command =
 		"select CEProbes.probename," +
 		"       JobUsageRecord.EndTime as endtime," +
 		"       count(JobUsageRecord.dbid)" +
-		" from CETable, CEProbes, JobUsageRecord" +
-		" where CEProbes.facility_id = CETable.facility_id" +
+		" from Site, CEProbes, JobUsageRecord" +
+		" where CEProbes.facility_id = Site.facility_id" +
 		" and JobUsageRecord.ProbeName = CEProbes.probename" +
 		" and ('2006-06-01 00:00:00 GMT' <= endtime and endtime <= '2006-07-01 23:59:59 GMT')" +
 		" group by date_format(endtime, '%c/%d/%Y'), CEProbes.probename" +
