@@ -88,17 +88,17 @@
   </class>
 
   <class name="Site" table="Site" node="Site" lazy="false">
-    <id name="_facility_id" column="facility_id" type="int">
+    <id name="siteId" column="SiteId" type="int">
       <generator class="native"/>
     </id>
-    <property name="_facility_name" column="facility_name"/>
+    <property name="siteName" column="SiteName"/>
   </class>
 
   <class name="CEProbes" table="CEProbes" node="CEProbes" lazy="false">
     <id name="probeid" column="probeid" type="int">
       <generator class="native"/>
     </id>
-    <property name="_facility_id" column="facility_id" type="int"/>
+    <property name="siteId" column="SiteId" type="int"/>
     <property name="probename" column="probename"/>
     <property name="active" column="active" type="int"/>
     <component name="currenttime" class="DateElement" insert="true">

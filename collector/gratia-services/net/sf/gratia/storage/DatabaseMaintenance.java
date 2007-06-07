@@ -97,7 +97,7 @@ public class DatabaseMaintenance {
     }
 
     public void CheckIndices() {
-        AddIndex("Site", true, "index02", "facility_name");
+        AddIndex("Site", true, "index02", "SiteName");
         AddIndex("CEProbes", true, "index02", "probename");
 
         //
@@ -158,8 +158,8 @@ public class DatabaseMaintenance {
         Statement statement;
         ResultSet resultSet;
 
-        String check = "select count(*) from Site where facility_name = 'Unknown'";
-        String cmd = "insert into Site(facility_name) values(" + dq
+        String check = "select count(*) from Site where SiteName = 'Unknown'";
+        String cmd = "insert into Site(SiteName) values(" + dq
                 + "Unknown" + dq + ")";
 
         try {

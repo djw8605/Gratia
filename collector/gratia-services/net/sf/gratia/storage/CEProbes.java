@@ -3,7 +3,7 @@ package net.sf.gratia.storage;
 public class CEProbes
 {
         private int probeid;
-		private int _facility_id;
+		private int siteId;
 		private String probename;
 		private DateElement currenttime;
 		private int active;
@@ -16,14 +16,14 @@ public class CEProbes
 		{
 		}
 
-		public int get_facility_id() 
+		public int getsiteId() 
 		{
-				return _facility_id;
+				return siteId;
 		}
 
-		public void set_facility_id(int _facility_id) 
+		public void setsiteId(int siteId) 
 		{
-				this._facility_id = _facility_id;
+				this.siteId = siteId;
 		}
 
 		public int getprobeid() 
@@ -110,7 +110,7 @@ public class CEProbes
 		{
 				String output = 
 						"CEProbes: " + 
-						"_facility_id: " + _facility_id +
+						"siteId: " + siteId +
 						" probeid: " + probeid +
 						" probename: " + probename +
 						" currenttime: " + currenttime +

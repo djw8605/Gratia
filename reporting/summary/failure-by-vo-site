@@ -17,20 +17,20 @@ EOF
 
 cat > "$TMP/failure.sql" <<EOF
 (select LCASE(J.VOName) as LVOName,
-  T.facility_name as LSiteName,
+  T.SiteName as LSiteName,
   sum(Njobs) as 'FailedJobs',
   X.TotalJobs,
   FORMAT(100.0 * sum(NJobs) / X.TotalJobs, 1) as pcFailed
  from JobUsageRecord J, Site T, CEProbes P,
   (select LCASE(XJ.VOName) as XVOName,
-     XT.facility_name as XSiteName,
+     XT.SiteName as XSiteName,
      sum(Njobs) as 'TotalJobs'
    from JobUsageRecord XJ, Site XT, CEProbes XP
    where
      EndTime >= CURDATE() - INTERVAL 1 DAY and
      EndTime < CURDATE() and
      XP.probename = XJ.ProbeName and
-     XT.facility_id = XP.facility_id
+     XT.SiteId = XP.SiteId
    group by XVOName, XSiteName) X
  where
    EndTime >= CURDATE() - INTERVAL 1 DAY and
@@ -38,34 +38,34 @@ cat > "$TMP/failure.sql" <<EOF
 	 J.StatusDescription != "Condor Exit Status" and
    J.Status != 0 and
    P.probename = J.ProbeName and
-   T.facility_id = P.facility_id and
-   T.facility_name = XSiteName and
+   T.SiteId = P.SiteId and
+   T.SiteName = XSiteName and
    LCASE(J.VOName) = XVOName
  group by LVOName, LSiteName)
 UNION ALL
 (select LCASE(J.VOName) as LVOName,
-  T.facility_name as LSiteName,
+  T.SiteName as LSiteName,
   sum(Njobs) as 'FailedJobs',
   X.TotalJobs,
   FORMAT(100.0 * sum(NJobs) / X.TotalJobs, 1) as '% Failed'
  from JobUsageRecord J, Site T, CEProbes P,
   (select LCASE(XJ.VOName) as XVOName,
-     XT.facility_name as XSiteName,
+     XT.SiteName as XSiteName,
      sum(Njobs) as 'TotalJobs'
    from JobUsageRecord XJ, Site XT, CEProbes XP
    where
      EndTime >= CURDATE() - INTERVAL 1 DAY and
      EndTime < CURDATE() and
      XP.probename = XJ.ProbeName and
-     XT.facility_id = XP.facility_id and
+     XT.SiteId = XP.SiteId and
      LCASE(VOName) like 'engage%'
    group by XVOName, XSiteName) X, Resource R
  where
    EndTime >= CURDATE() - INTERVAL 1 DAY and
    EndTime < CURDATE() and
    P.probename = J.ProbeName and
-   T.facility_id = P.facility_id and
-   T.facility_name = XSiteName and
+   T.SiteId = P.SiteId and
+   T.SiteName = XSiteName and
    LCASE(J.VOName) = XVOName and
    R.dbid = J.dbid and
    R.description = 'ExitCode' and

@@ -55,27 +55,27 @@ void test2(String command2)
 //
 
 command1 = 
-		"select Site.facility_name," +
+		"select Site.SiteName," +
 		" trunc(JobUsageRecord.EndTime) as endtime," +
 		" sum(JobUsageRecord.Njobs)" +
 		" from Site, CEProbes, JobUsageRecord" +
-		" where CEProbes.facility_id = Site.facility_id" +
+		" where CEProbes.SiteId = Site.SiteId" +
 		" and JobUsageRecord.ProbeName = CEProbes.probename" +
 		" and endtime >= to_date('2006-08-05','yyyy-mm-dd')" +
 		" and endtime <= to_date('2006-09-12','yyyy-mm-dd')" +
-		" group by trunc(endtime),Site.facility_name" +
-		" order by Site.facility_name,trunc(endtime)";
+		" group by trunc(endtime),Site.SiteName" +
+		" order by Site.SiteName,trunc(endtime)";
 
 command2 = 
-		"select Site.facility_name," +
+		"select Site.SiteName," +
 		" JobUsageRecord.EndTime as endtime," +
 		" sum(JobUsageRecord.Njobs)" +
 		" from Site, CEProbes, JobUsageRecord" +
-		" where CEProbes.facility_id = Site.facility_id" +
+		" where CEProbes.SiteId = Site.SiteId" +
 		" and JobUsageRecord.ProbeName = CEProbes.probename" +
 		" and ('2006-08-05 00:00:00 GMT' <= endtime and endtime <= '2006-09-12 23:59:59 GMT')" +
-		" group by date_format(endtime, '%c/%d/%Y'), Site.facility_name" +
-		" order by Site.facility_name,JobUsageRecord.EndTime";
+		" group by date_format(endtime, '%c/%d/%Y'), Site.SiteName" +
+		" order by Site.SiteName,JobUsageRecord.EndTime";
 
 test1(command1);
 test2(command2);

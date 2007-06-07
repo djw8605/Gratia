@@ -173,7 +173,7 @@ public class ProbeTable extends HttpServlet
 
 				try
 						{
-								command = "select facility_id,facility_name from Site";
+								command = "select SiteId,SiteName from Site";
 								statement = connection.prepareStatement(command);
 								resultSet = statement.executeQuery(command);
 
@@ -194,7 +194,7 @@ public class ProbeTable extends HttpServlet
 
 				try
 						{
-								command = "select probeid,facility_id,probename,active,reporthh,reportmm from CEProbes order by probename";
+								command = "select probeid,SiteId,probename,active,reporthh,reportmm from CEProbes order by probename";
 								statement = connection.prepareStatement(command);
 								resultSet = statement.executeQuery(command);
 
@@ -437,7 +437,7 @@ public class ProbeTable extends HttpServlet
 
 				String command = 
 						"update CEProbes set" + cr +
-						" facility_id = " + ceid + comma + cr +
+						" SiteId = " + ceid + comma + cr +
 						" active = " + active + cr +
 						" where probeid = " + dbid;
 
@@ -482,12 +482,12 @@ public class ProbeTable extends HttpServlet
 
 				/*
 					String command = 
-					"insert into CEProbes (facility_id,probename,active,reporthh,reportmm) values(" + 
+					"insert into CEProbes (SiteId,probename,active,reporthh,reportmm) values(" + 
 					ceid + comma + dq + probename + dq + comma + active + comma + reporthh + comma + reportmm + ")";
 				*/
 
 				String command = 
-						"insert into CEProbes (facility_id,probename,active) values(" + 
+						"insert into CEProbes (SiteId,probename,active) values(" + 
 						ceid + comma + dq + probename + dq + comma + active  + ")";
 				try
 						{
