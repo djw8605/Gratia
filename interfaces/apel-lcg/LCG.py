@@ -7,7 +7,7 @@
 # library to transfer the data from Gratia to APEL (WLCG)
 #############################################################
 #
-#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: LCG.py,v 1.1 2007-04-30 18:24:36 jgweigand Exp $
+#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: LCG.py,v 1.2 2007-06-07 21:03:28 pcanal Exp $
 
 import traceback
 import exceptions
@@ -449,7 +449,7 @@ def GetQuery(sites,vos):
     fmtYear  = "%Y"
     fmtDate  = "%Y-%m-%d"
     query="""\
-SELECT CETable.facility_name AS ExecutingSite, 
+SELECT Site.facility_name AS ExecutingSite, 
                VOName as LCGUserVO, 
                Sum(NJobs), 
                Round(Sum(CpuUserDuration+CpuSystemDuration)/3600) as SumCPU, 
@@ -463,12 +463,12 @@ SELECT CETable.facility_name AS ExecutingSite,
                "%s",
                NOW() 
 from 
-     CETable,
+     Site,
      CEProbes,
      VOProbeSummary Main 
 where 
-      CETable.facility_name in ( %s )
-  and CETable.facility_id = CEProbes.facility_id 
+      Site.facility_name in ( %s )
+  and Site.facility_id = CEProbes.facility_id 
   and CEProbes.ProbeName  = Main.ProbeName 
   and Main.VOName in ( %s )
   and "%s" <= Main.EndTime and Main.EndTime < "%s"

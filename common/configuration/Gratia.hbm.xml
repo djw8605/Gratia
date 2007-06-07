@@ -6,13 +6,13 @@
 
 <hibernate-mapping package= "net.sf.gratia.storage">
 
-  <class name="RolesTable" table="RolesTable" node="RolesTable" lazy="false">
+  <class name="Role" table="Role" node="Role" lazy="false">
     <id name="roleid" column="roleid" type="int">
       <generator class="native"/>
     </id>
     <property name="role" column="role"/>
     <property name="subtitle" column="subtitle"/>
-    <property name="whereclause" column="whereclause"/>
+    <property name="whereClause" column="whereClause"/>
   </class>
 
   <class name="CPUMetricTypes" table="CPUMetricTypes" node="CPUMetricTypes" lazy="false">
@@ -87,7 +87,7 @@
     <property name="_CPUType" column="CPUType"/>
   </class>
 
-  <class name="CETable" table="CETable" node="CETable" lazy="false">
+  <class name="Site" table="Site" node="Site" lazy="false">
     <id name="_facility_id" column="facility_id" type="int">
       <generator class="native"/>
     </id>

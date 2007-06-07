@@ -166,7 +166,7 @@ This variable needs to be modifified for any changes.
 lcg-reportableSites
 
 This provides the list of OSG sites' accounting data to be pushed to the 
-APEL/LCG database.  It is the CETable.facility_name of the Gratia database
+APEL/LCG database.  It is the Site.SiteName of the Gratia database
 and is the primary grouping.
 
 Format: Only one site name per line
