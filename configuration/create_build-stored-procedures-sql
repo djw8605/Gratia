@@ -138,7 +138,7 @@ my %procedures =
  WeeklyUsageByVORanked => { select_columns => 'final_rank,VOProbeSummary.VOName, date_format(VOProbeSummary.EndTime,\'\'\', format, \'\'\'), sum(VOProbeSummary.WallDuration) as WallDuration, sum(VOProbeSummary.CpuUserDuration + VOProbeSummary.CpuSystemDuration) as Cpu, sum(VOProbeSummary.Njobs) as Njobs',
 														from_tables => '(SELECT @rank:=@rank+1 as final_rank, VONamex, walldurationx FROM (SELECT @rank:=0 as rank, V.VOName as VONamex, V.EndTime as endtimex, sum(V.WallDuration) as walldurationx FROM VOProbeSummary V WHERE V.EndTime >= Date(\'\'\', fromdate, \'\'\') and V.EndTime <= Date(\'\'\', todate, \'\'\') group by VONamex order by walldurationx desc) as foox) as foo, VOProbeSummary',
 														main_where => 'VOProbeSummary.VOName = VONamex',
-														group_by => 'date_format(VOProbeSummary.EndTime,\'\'\', format, \'\'\'), VOProbeSummary.VOName',
+														group_by => 'VOProbeSummary.EndTime, VOProbeSummary.VOName',
 														order_by => 'final_rank, VOProbeSummary.VOName,date_format(VOProbeSummary.EndTime,\'\'\', format, \'\'\')'
 													},
  newProcedure => { select_columns => '',
