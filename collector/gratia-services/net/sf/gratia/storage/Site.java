@@ -2,19 +2,19 @@ package net.sf.gratia.storage;
 
 public class Site
 {
-		private int siteId;
+		private int siteid;
 		private String siteName;
 	
 		public Site()
 		{
 		}
 
-		public int getsiteId() {
-				return siteId;
+		public int getsiteid() {
+				return siteid;
 		}
 
-		public void setsiteId(int id) {
-				this.siteId = id;
+		public void setsiteid(int id) {
+				this.siteid = id;
 		}
 
 		public String getsiteName() {
@@ -26,7 +26,7 @@ public class Site
 		}
 	
 		public String toString() {
-				String output = "Site: " + "_facility_id: " + siteId + " _facility_name: " + siteName;
+				String output = "Site: " + "siteid: " + siteid + " SiteName: " + siteName;
         return output;
     }
 }

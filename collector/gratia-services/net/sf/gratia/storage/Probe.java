@@ -3,7 +3,7 @@ package net.sf.gratia.storage;
 public class Probe
 {
         private int probeid;
-		private int siteId;
+		private int siteid;
 		private String probename;
 		private DateElement currenttime;
 		private int active;
@@ -16,14 +16,14 @@ public class Probe
 		{
 		}
 
-		public int getsiteId() 
+		public int getsiteid() 
 		{
-				return siteId;
+				return siteid;
 		}
 
-		public void setsiteId(int siteId) 
+		public void setsiteid(int siteid) 
 		{
-				this.siteId = siteId;
+				this.siteid = siteid;
 		}
 
 		public int getprobeid() 
@@ -110,7 +110,7 @@ public class Probe
 		{
 				String output = 
 						"Probe: " + 
-						"siteId: " + siteId +
+						" siteid: " + siteid +
 						" probeid: " + probeid +
 						" probename: " + probename +
 						" currenttime: " + currenttime +

@@ -196,7 +196,7 @@ begin
            concat_ws('', 'select Site.SiteName as sitename, JobUsageRecord.EndTime as endtime, sum(JobUsageRecord.Njobs) as Njobs',
                      ' from Site,CEProbes,JobUsageRecord',
                      ' where',
-                     ' CEProbes.SiteId = Site.SiteId and JobUsageRecord.ProbeName = CEProbes.probename and',
+                     ' CEProbes.siteid = Site.siteid and JobUsageRecord.ProbeName = CEProbes.probename and',
                      ' EndTime >= date(''', fromdate, ''')'
                      ' and EndTime <= date(''', todate, ''')'
                      ' ', @myresourceclause,
@@ -211,7 +211,7 @@ begin
            concat_ws('', 'select Site.SiteName as sitename, ProbeSummary.EndTime as endtime, sum(ProbeSummary.Njobs) as Njobs',
                      ' from Site,CEProbes,ProbeSummary',
                      ' where',
-                     ' CEProbes.SiteId = Site.SiteId and ProbeSummary.ProbeName = CEProbes.probename and',
+                     ' CEProbes.siteid = Site.siteid and ProbeSummary.ProbeName = CEProbes.probename and',
                      ' EndTime >= date(''', fromdate, ''')',
                      ' and EndTime <= date(''', todate, ''')',
                      ' ', @myresourceclause,
@@ -372,7 +372,7 @@ begin
            concat_ws('', 'select Site.SiteName as sitename,JobUsageRecord.EndTime as endtime,sum(JobUsageRecord.WallDuration) as WallDuration',
                      ' from Site,CEProbes,JobUsageRecord',
                      ' where',
-                     ' CEProbes.SiteId = Site.SiteId and JobUsageRecord.ProbeName = CEProbes.probename and',
+                     ' CEProbes.siteid = Site.siteid and JobUsageRecord.ProbeName = CEProbes.probename and',
                      ' EndTime >= date(''', fromdate, ''')'
                      ' and EndTime <= date(''', todate, ''')'
                      ' ', @myresourceclause,
@@ -387,7 +387,7 @@ begin
            concat_ws('', 'select Site.SiteName as sitename,ProbeSummary.EndTime as endtime,sum(ProbeSummary.WallDuration) as WallDuration',
                      ' from Site,CEProbes,ProbeSummary',
                      ' where',
-                     ' CEProbes.SiteId = Site.SiteId and ProbeSummary.ProbeName = CEProbes.probename and',
+                     ' CEProbes.siteid = Site.siteid and ProbeSummary.ProbeName = CEProbes.probename and',
                      ' EndTime >= date(''', fromdate, ''')',
                      ' and EndTime <= date(''', todate, ''')',
                      ' ', @myresourceclause,
@@ -432,7 +432,7 @@ begin
            concat_ws('', 'select date_format(JobUsageRecord.EndTime,''', format, ''') as endtime,Site.SiteName as sitename, sum(JobUsageRecord.WallDuration) as WallDuration, sum(JobUsageRecord.CpuUserDuration + JobUsageRecord.CpuSystemDuration) as Cpu, JobUsageRecord.VOName, sum(JobUsageRecord.Njobs) as Njobs',
                      ' from Site,CEProbes,JobUsageRecord',
                      ' where',
-                     ' CEProbes.SiteId = Site.SiteId and JobUsageRecord.ProbeName = CEProbes.probename and',
+                     ' CEProbes.siteid = Site.siteid and JobUsageRecord.ProbeName = CEProbes.probename and',
                      ' EndTime >= date(''', fromdate, ''')'
                      ' and EndTime <= date(''', todate, ''')'
                      ' ', @myresourceclause,
@@ -447,7 +447,7 @@ begin
            concat_ws('', 'select date_format(VOProbeSummary.EndTime,''', format, ''') as endtime,Site.SiteName as sitename, sum(VOProbeSummary.WallDuration) as WallDuration, sum(VOProbeSummary.CpuUserDuration + VOProbeSummary.CpuSystemDuration) as Cpu, VOProbeSummary.VOName, sum(VOProbeSummary.Njobs) as Njobs',
                      ' from Site,CEProbes,VOProbeSummary',
                      ' where',
-                     ' CEProbes.SiteId = Site.SiteId and VOProbeSummary.ProbeName = CEProbes.probename and',
+                     ' CEProbes.siteid = Site.siteid and VOProbeSummary.ProbeName = CEProbes.probename and',
                      ' EndTime >= date(''', fromdate, ''')',
                      ' and EndTime <= date(''', todate, ''')',
                      ' ', @myresourceclause,
@@ -608,7 +608,7 @@ begin
            concat_ws('', 'select Site.SiteName as sitename,sum(JobUsageRecord.Njobs) as Njobs',
                      ' from Site,CEProbes,JobUsageRecord',
                      ' where',
-                     ' CEProbes.SiteId = Site.SiteId and JobUsageRecord.ProbeName = CEProbes.probename and',
+                     ' CEProbes.siteid = Site.siteid and JobUsageRecord.ProbeName = CEProbes.probename and',
                      ' EndTime >= date(''', fromdate, ''')'
                      ' and EndTime <= date(''', todate, ''')'
                      ' ', @myresourceclause,
@@ -623,7 +623,7 @@ begin
            concat_ws('', 'select Site.SiteName as sitename,sum(ProbeSummary.Njobs) as Njobs',
                      ' from Site,CEProbes,ProbeSummary',
                      ' where',
-                     ' CEProbes.SiteId = Site.SiteId and ProbeSummary.ProbeName = CEProbes.probename and',
+                     ' CEProbes.siteid = Site.siteid and ProbeSummary.ProbeName = CEProbes.probename and',
                      ' EndTime >= date(''', fromdate, ''')',
                      ' and EndTime <= date(''', todate, ''')',
                      ' ', @myresourceclause,
@@ -668,7 +668,7 @@ begin
            concat_ws('', 'select Site.SiteName as sitename, sum(JobUsageRecord.Njobs) as Njobs, JobUsageRecord.VOName',
                      ' from Site,CEProbes,JobUsageRecord',
                      ' where',
-                     ' CEProbes.SiteId = Site.SiteId and JobUsageRecord.ProbeName = CEProbes.probename and',
+                     ' CEProbes.siteid = Site.siteid and JobUsageRecord.ProbeName = CEProbes.probename and',
                      ' EndTime >= date(''', fromdate, ''')'
                      ' and EndTime <= date(''', todate, ''')'
                      ' ', @myresourceclause,
@@ -683,7 +683,7 @@ begin
            concat_ws('', 'select Site.SiteName as sitename, sum(VOProbeSummary.Njobs) as Njobs, VOProbeSummary.VOName',
                      ' from Site,CEProbes,VOProbeSummary',
                      ' where',
-                     ' CEProbes.SiteId = Site.SiteId and VOProbeSummary.ProbeName = CEProbes.probename and',
+                     ' CEProbes.siteid = Site.siteid and VOProbeSummary.ProbeName = CEProbes.probename and',
                      ' EndTime >= date(''', fromdate, ''')',
                      ' and EndTime <= date(''', todate, ''')',
                      ' ', @myresourceclause,
@@ -844,7 +844,7 @@ begin
            concat_ws('', 'select Site.SiteName as sitename,JobUsageRecord.EndTime as endtime,sum(JobUsageRecord.WallDuration) as WallDuration,sum(JobUsageRecord.CpuUserDuration + JobUsageRecord.CpuSystemDuration) as Cpu',
                      ' from Site,CEProbes,JobUsageRecord',
                      ' where',
-                     ' CEProbes.SiteId = Site.SiteId and JobUsageRecord.ProbeName = CEProbes.probename and',
+                     ' CEProbes.siteid = Site.siteid and JobUsageRecord.ProbeName = CEProbes.probename and',
                      ' EndTime >= date(''', fromdate, ''')'
                      ' and EndTime <= date(''', todate, ''')'
                      ' ', @myresourceclause,
@@ -859,7 +859,7 @@ begin
            concat_ws('', 'select Site.SiteName as sitename,VOProbeSummary.EndTime as endtime,sum(VOProbeSummary.WallDuration) as WallDuration,sum(VOProbeSummary.CpuUserDuration + VOProbeSummary.CpuSystemDuration) as Cpu',
                      ' from Site,CEProbes,VOProbeSummary',
                      ' where',
-                     ' CEProbes.SiteId = Site.SiteId and VOProbeSummary.ProbeName = CEProbes.probename and',
+                     ' CEProbes.siteid = Site.siteid and VOProbeSummary.ProbeName = CEProbes.probename and',
                      ' EndTime >= date(''', fromdate, ''')',
                      ' and EndTime <= date(''', todate, ''')',
                      ' ', @myresourceclause,
@@ -904,7 +904,7 @@ begin
            concat_ws('', 'select Site.SiteName as sitename, sum(JobUsageRecord.WallDuration) as WallDuration, sum(JobUsageRecord.CpuUserDuration + JobUsageRecord.CpuSystemDuration) as Cpu, JobUsageRecord.VOName',
                      ' from Site,CEProbes,JobUsageRecord',
                      ' where',
-                     ' CEProbes.SiteId = Site.SiteId and JobUsageRecord.ProbeName = CEProbes.probename and',
+                     ' CEProbes.siteid = Site.siteid and JobUsageRecord.ProbeName = CEProbes.probename and',
                      ' EndTime >= date(''', fromdate, ''')'
                      ' and EndTime <= date(''', todate, ''')'
                      ' ', @myresourceclause,
@@ -919,7 +919,7 @@ begin
            concat_ws('', 'select Site.SiteName as sitename, sum(VOProbeSummary.WallDuration) as WallDuration, sum(VOProbeSummary.CpuUserDuration + VOProbeSummary.CpuSystemDuration) as Cpu, VOProbeSummary.VOName',
                      ' from Site,CEProbes,VOProbeSummary',
                      ' where',
-                     ' CEProbes.SiteId = Site.SiteId and VOProbeSummary.ProbeName = CEProbes.probename and',
+                     ' CEProbes.siteid = Site.siteid and VOProbeSummary.ProbeName = CEProbes.probename and',
                      ' EndTime >= date(''', fromdate, ''')',
                      ' and EndTime <= date(''', todate, ''')',
                      ' ', @myresourceclause,

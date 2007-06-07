@@ -173,7 +173,7 @@ public class NgapStatus extends HttpServlet
 								//
 								// return time stamp of last site contact
 								//
-								command = "select P.currenttime, P.probename from CEProbes P, Site T where P.active = 1 and T.SiteName = " + dq + sitename + dq + " and T.SiteId = P.SiteId order by currenttime desc";
+								command = "select P.currenttime, P.probename from CEProbes P, Site T where P.active = 1 and T.SiteName = " + dq + sitename + dq + " and T.siteid = P.siteid order by currenttime desc";
 								System.out.println("command: " + command);
 								statement = connection.prepareStatement(command);
 								resultSet = statement.executeQuery(command);
@@ -214,7 +214,7 @@ public class NgapStatus extends HttpServlet
 								//
 								// return time stamp of last site contact
 								//
-								command = "select T.SiteName, P.currenttime, P.probename from CEProbes P, Site T where P.active = 1 and T.SiteId = P.SiteId order by T.SiteName,P.currenttime desc";
+								command = "select T.SiteName, P.currenttime, P.probename from CEProbes P, Site T where P.active = 1 and T.siteid = P.siteid order by T.SiteName,P.currenttime desc";
 								System.out.println("command: " + command);
 								statement = connection.prepareStatement(command);
 								resultSet = statement.executeQuery(command);

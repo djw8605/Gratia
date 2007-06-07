@@ -59,7 +59,7 @@ command1 =
 		" trunc(JobUsageRecord.EndTime) as endtime," +
 		" sum(JobUsageRecord.Njobs)" +
 		" from Site, CEProbes, JobUsageRecord" +
-		" where CEProbes.SiteId = Site.SiteId" +
+		" where CEProbes.siteid = Site.siteid" +
 		" and JobUsageRecord.ProbeName = CEProbes.probename" +
 		" and endtime >= to_date('2006-08-05','yyyy-mm-dd')" +
 		" and endtime <= to_date('2006-09-12','yyyy-mm-dd')" +
@@ -71,7 +71,7 @@ command2 =
 		" JobUsageRecord.EndTime as endtime," +
 		" sum(JobUsageRecord.Njobs)" +
 		" from Site, CEProbes, JobUsageRecord" +
-		" where CEProbes.SiteId = Site.SiteId" +
+		" where CEProbes.siteid = Site.siteid" +
 		" and JobUsageRecord.ProbeName = CEProbes.probename" +
 		" and ('2006-08-05 00:00:00 GMT' <= endtime and endtime <= '2006-09-12 23:59:59 GMT')" +
 		" group by date_format(endtime, '%c/%d/%Y'), Site.SiteName" +

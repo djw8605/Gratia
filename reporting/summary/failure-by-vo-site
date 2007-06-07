@@ -30,7 +30,7 @@ cat > "$TMP/failure.sql" <<EOF
      EndTime >= CURDATE() - INTERVAL 1 DAY and
      EndTime < CURDATE() and
      XP.probename = XJ.ProbeName and
-     XT.SiteId = XP.SiteId
+     XT.siteid = XP.siteid
    group by XVOName, XSiteName) X
  where
    EndTime >= CURDATE() - INTERVAL 1 DAY and
@@ -38,7 +38,7 @@ cat > "$TMP/failure.sql" <<EOF
 	 J.StatusDescription != "Condor Exit Status" and
    J.Status != 0 and
    P.probename = J.ProbeName and
-   T.SiteId = P.SiteId and
+   T.siteid = P.siteid and
    T.SiteName = XSiteName and
    LCASE(J.VOName) = XVOName
  group by LVOName, LSiteName)
@@ -57,14 +57,14 @@ UNION ALL
      EndTime >= CURDATE() - INTERVAL 1 DAY and
      EndTime < CURDATE() and
      XP.probename = XJ.ProbeName and
-     XT.SiteId = XP.SiteId and
+     XT.siteid = XP.siteid and
      LCASE(VOName) like 'engage%'
    group by XVOName, XSiteName) X, Resource R
  where
    EndTime >= CURDATE() - INTERVAL 1 DAY and
    EndTime < CURDATE() and
    P.probename = J.ProbeName and
-   T.SiteId = P.SiteId and
+   T.siteid = P.siteid and
    T.SiteName = XSiteName and
    LCASE(J.VOName) = XVOName and
    R.dbid = J.dbid and

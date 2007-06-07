@@ -330,7 +330,7 @@ public class DatabaseMaintenance {
                 }
             }
             if (current == 5) {
-                int result = Execute("insert into Site(SiteId,SiteName) select facility_id,facility_name  from CETable");
+                int result = Execute("insert into Site(siteid,SiteName) select facility_id,facility_name  from CETable");
                 if (result > -1) {
                    result = Execute("drop table CETable;");
                 }

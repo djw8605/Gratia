@@ -83,7 +83,7 @@ public class NewProbeUpdate
          // otherwise get facilityid for sitename
          //
 
-         command = "select SiteId from Site where SiteName = " + dq + sitename + dq;
+         command = "select siteid from Site where SiteName = " + dq + sitename + dq;
          statement = connection.prepareStatement(command);
          resultSet = statement.executeQuery(command);
          while (resultSet.next())
@@ -101,7 +101,7 @@ public class NewProbeUpdate
             statement = connection.createStatement();
             statement.executeUpdate(command);
             statement.close();
-            command = "select SiteId from Site where SitName = " + dq + sitename + dq;
+            command = "select siteid from Site where SitName = " + dq + sitename + dq;
             statement = connection.prepareStatement(command);
             resultSet = statement.executeQuery(command);
             while (resultSet.next())
@@ -115,7 +115,7 @@ public class NewProbeUpdate
          // now add a new entry to ceprobes with default values
          //
          command =
-               "insert into Probe (SiteId,probename,active,reporthh,reportmm) values(" +
+               "insert into Probe (siteid,probename,active,reporthh,reportmm) values(" +
                facilityid + comma + dq + probename + dq + comma + "1" + comma + "24" + comma + "00" + ")";
          statement = connection.createStatement();
          statement.executeUpdate(command);

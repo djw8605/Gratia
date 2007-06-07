@@ -7,7 +7,7 @@
 # library to transfer the data from Gratia to APEL (WLCG)
 #############################################################
 #
-#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: LCG.py,v 1.3 2007-06-07 21:26:50 pcanal Exp $
+#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: LCG.py,v 1.4 2007-06-07 21:54:36 pcanal Exp $
 
 import traceback
 import exceptions
@@ -468,7 +468,7 @@ from
      VOProbeSummary Main 
 where 
       Site.SiteName in ( %s )
-  and Site.SiteId = CEProbes.SiteId 
+  and Site.siteid = CEProbes.siteid 
   and CEProbes.ProbeName  = Main.ProbeName 
   and Main.VOName in ( %s )
   and "%s" <= Main.EndTime and Main.EndTime < "%s"

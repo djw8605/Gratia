@@ -37,7 +37,7 @@
 		<MenuGroup name="SQL Queries">
 			<MenuItem name="-   Custom SQL Report" link="admin.jsp"/>
 			<MenuItem name="-   Distinct Probe Names" link="admin.jsp?sql=select distinct ProbeName from JobUsageRecord;"/>
-			<MenuItem name="-   Probes With Odd SiteName" link="admin.jsp?sql=select distinct ProbeSummary.ProbeName,Site.SiteName as Gratia_SiteName,ProbeSummary.SiteName as Probe_SiteName from Site,CEProbes,ProbeSummary where ProbeSummary.EndTime>=DATE_ADD(CURDATE(), INTERVAL -1 DAY) and CEProbes.SiteId = Site.SiteId and ProbeSummary.ProbeName = CEProbes.probename and ProbeSummary.SiteName != Site.SiteName;"/>
+			<MenuItem name="-   Probes With Odd SiteName" link="admin.jsp?sql=select distinct ProbeSummary.ProbeName,Site.SiteName as Gratia_SiteName,ProbeSummary.SiteName as Probe_SiteName from Site,CEProbes,ProbeSummary where ProbeSummary.EndTime>=DATE_ADD(CURDATE(), INTERVAL -1 DAY) and CEProbes.siteid = Site.siteid and ProbeSummary.ProbeName = CEProbes.probename and ProbeSummary.SiteName != Site.SiteName;"/>
 			<MenuItem name="-   Records Without Dates" link="admin.jsp?sql=select count(*) from JobUsageRecord where starttime is null or endtime is null;"/>
 		</MenuGroup>
 	</Menu>

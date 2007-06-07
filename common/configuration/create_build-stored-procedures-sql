@@ -31,7 +31,7 @@ my %procedures =
 (
  DailyJobsBySite => { select_columns => 'Site.SiteName as sitename, ProbeSummary.EndTime as endtime, sum(ProbeSummary.Njobs) as Njobs',
 													from_tables => 'Site,CEProbes,ProbeSummary',
-													main_where => 'CEProbes.SiteId = Site.SiteId and ProbeSummary.ProbeName = CEProbes.probename',
+													main_where => 'CEProbes.siteid = Site.siteid and ProbeSummary.ProbeName = CEProbes.probename',
 													group_by => 'ProbeSummary.EndTime, Site.SiteName',
 													order_by => 'ProbeSummary.EndTime'
 												},
@@ -49,7 +49,7 @@ my %procedures =
 									},
  DailyUsageBySite => { select_columns => 'Site.SiteName as sitename,ProbeSummary.EndTime as endtime,sum(ProbeSummary.WallDuration) as WallDuration',
 													 from_tables => 'Site,CEProbes,ProbeSummary',
-													 main_where => 'CEProbes.SiteId = Site.SiteId and ProbeSummary.ProbeName = CEProbes.probename',
+													 main_where => 'CEProbes.siteid = Site.siteid and ProbeSummary.ProbeName = CEProbes.probename',
 													 group_by => 'ProbeSummary.EndTime,Site.SiteName',
 													 order_by => 'ProbeSummary.EndTime'
 												 },
@@ -61,7 +61,7 @@ my %procedures =
 											},
  JobsBySite => { select_columns => 'Site.SiteName as sitename,sum(ProbeSummary.Njobs) as Njobs',
 										 from_tables => 'Site,CEProbes,ProbeSummary',
-										 main_where => 'CEProbes.SiteId = Site.SiteId and ProbeSummary.ProbeName = CEProbes.probename',
+										 main_where => 'CEProbes.siteid = Site.siteid and ProbeSummary.ProbeName = CEProbes.probename',
 										 group_by => 'Site.SiteName',
 										 order_by => 'Site.SiteName'
 									 },
@@ -73,7 +73,7 @@ my %procedures =
 													},
  UsageBySite => { select_columns => 'Site.SiteName as sitename,VOProbeSummary.EndTime as endtime,sum(VOProbeSummary.WallDuration) as WallDuration,sum(VOProbeSummary.CpuUserDuration + VOProbeSummary.CpuSystemDuration) as Cpu',
 											from_tables => 'Site,CEProbes,VOProbeSummary',
-											main_where => 'CEProbes.SiteId = Site.SiteId and VOProbeSummary.ProbeName = CEProbes.probename',
+											main_where => 'CEProbes.siteid = Site.siteid and VOProbeSummary.ProbeName = CEProbes.probename',
 											group_by => 'Site.SiteName',
 											order_by => 'Site.SiteName'
 										},
@@ -119,19 +119,19 @@ my %procedures =
 									 },
  JobsBySiteByVO =>	{ select_columns => 'Site.SiteName as sitename, sum(VOProbeSummary.Njobs) as Njobs, VOProbeSummary.VOName',
 							from_tables => 'Site,CEProbes,VOProbeSummary',
-							main_where => 'CEProbes.SiteId = Site.SiteId and VOProbeSummary.ProbeName = CEProbes.probename',
+							main_where => 'CEProbes.siteid = Site.siteid and VOProbeSummary.ProbeName = CEProbes.probename',
 							group_by => 'sitename, VOProbeSummary.VOName',
 							order_by => 'sitename, VOProbeSummary.VOName'
 												},
  UsageBySiteByVO =>	{ select_columns => 'Site.SiteName as sitename, sum(VOProbeSummary.WallDuration) as WallDuration, sum(VOProbeSummary.CpuUserDuration + VOProbeSummary.CpuSystemDuration) as Cpu, VOProbeSummary.VOName',
 							from_tables => 'Site,CEProbes,VOProbeSummary',
-							main_where => 'CEProbes.SiteId = Site.SiteId and VOProbeSummary.ProbeName = CEProbes.probename',
+							main_where => 'CEProbes.siteid = Site.siteid and VOProbeSummary.ProbeName = CEProbes.probename',
 							group_by => 'sitename, VOProbeSummary.VOName',
 							order_by => 'sitename, VOProbeSummary.VOName'
 												},
  DailyUsageBySiteByVO =>	{ select_columns => 'date_format(VOProbeSummary.EndTime,\'\'\', format, \'\'\') as endtime,Site.SiteName as sitename, sum(VOProbeSummary.WallDuration) as WallDuration, sum(VOProbeSummary.CpuUserDuration + VOProbeSummary.CpuSystemDuration) as Cpu, VOProbeSummary.VOName, sum(VOProbeSummary.Njobs) as Njobs',
 							from_tables => 'Site,CEProbes,VOProbeSummary',
-							main_where => 'CEProbes.SiteId = Site.SiteId and VOProbeSummary.ProbeName = CEProbes.probename',
+							main_where => 'CEProbes.siteid = Site.siteid and VOProbeSummary.ProbeName = CEProbes.probename',
 							group_by => 'date_format(VOProbeSummary.EndTime,\'\'\', format, \'\'\'),sitename, VOProbeSummary.VOName',
 							order_by => 'date_format(VOProbeSummary.EndTime,\'\'\', format, \'\'\'),sitename, VOProbeSummary.VOName'
 												},

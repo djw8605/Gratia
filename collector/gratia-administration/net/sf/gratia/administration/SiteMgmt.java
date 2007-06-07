@@ -212,7 +212,7 @@ public class SiteMgmt extends HttpServlet
 				String command = 
 						"update Site set" + cr +
 						" SiteName = " + dq + (String) request.getParameter("cename:" + index) + dq + cr +
-						" where SiteId = " + request.getParameter("dbid:" + index);
+						" where siteid = " + request.getParameter("dbid:" + index);
 				try
 						{
 								statement = connection.createStatement();
