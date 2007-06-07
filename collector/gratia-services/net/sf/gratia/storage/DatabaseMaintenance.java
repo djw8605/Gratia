@@ -11,7 +11,7 @@ public class DatabaseMaintenance {
 
     static final String comma = ",";
 
-    static final int gratiaDatabaseVersion = 6;
+    static final int gratiaDatabaseVersion = 7;
 
     java.sql.Connection connection;
     int liveVersion = 0;
@@ -335,6 +335,22 @@ public class DatabaseMaintenance {
                    result = Execute("drop table CETable;");
                 }
                 if (result > -1) {
+                    Logging.log("Gratia database upgraded from " + current + " to " + (current + 1));
+                    current = current + 1;
+                    UpdateDbVersion(current);
+                } else {
+                    Logging.log("Gratia database FAILED to upgrade from " + current + " to " + (current + 1));
+                }
+            }
+            if (current == 6) {
+                int result = Execute("insert into Probe(probeid,siteid,probename,active,currenttime,CurrentTimeDescription," +
+                        "reporthh,reportmm,status,jobs) select " +
+                        "probeid,facility_id,probename,active,currenttime,CurrentTimeDescription,reporthh,reportmm,status,jobs " +
+                        " from CEProbes");
+                if (result > -1) {
+                   //result = Execute("drop table CETable;");
+                }
+               if (result > -1) {
                     Logging.log("Gratia database upgraded from " + current + " to " + (current + 1));
                     current = current + 1;
                     UpdateDbVersion(current);
