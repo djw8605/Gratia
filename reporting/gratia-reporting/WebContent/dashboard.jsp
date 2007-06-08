@@ -29,14 +29,14 @@
 	<%
 	// Figure out the row that has the most columns.  This is required to calculate the colSpan for each cell.
 	int maxColumns = 1;
-	for(int i=0; i<userConfiguration.getDashboardRows().size(); i++)
+	for(int i=0; i < userConfiguration.getDashboardRows().size(); i++)
 	{
 		DashboardRow row = (DashboardRow)userConfiguration.getDashboardRows().get(i);
 		if(row.getDashboardItems().size() > maxColumns)
 			maxColumns = row.getDashboardItems().size();
 	}
 		
-	for(int i=0; i<userConfiguration.getDashboardRows().size(); i++)
+	for(int i=0; i < userConfiguration.getDashboardRows().size(); i++)
 	{
 		DashboardRow row = (DashboardRow)userConfiguration.getDashboardRows().get(i);		
 		
@@ -44,7 +44,7 @@
 	%>
 		<tr style="height:600">
 	<%
-		for(int z=0; z<row.getDashboardItems().size(); z++)
+		for(int z=0; z < row.getDashboardItems().size(); z++)
 		{
 			DashboardItem dashboardItem = (DashboardItem)row.getDashboardItems().get(z);
 			int width = 800;

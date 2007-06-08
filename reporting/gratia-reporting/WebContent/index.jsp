@@ -43,7 +43,7 @@
 		<tr>
 			<td valign="top" width=150>
 				<table class=menu>
-			<tr><td><a href="http://opensciencegrid.org/"><img src="./images/osg-logo.gif" alt="OSG Logo" width="174" height="81" border="0"></a></td></tr>
+			<tr><td><a href="http://opensciencegrid.org/"><img src="./images/osg-logo.gif" alt="OSG Logo" width="174" height="81" border="0"></a><hr></td></tr>
 				<%
 				String linkURL = null;
 				String linkNAME = null;
