@@ -82,7 +82,14 @@ var c1 = new CodeThatCalendar(caldef1);
 	// Determine if all report parameters have been provided in the URL
 	// While were at it, build a unique temp file name to store the html generated for the requested report with the specified parameters		
 	boolean promptForParameters = false;
-	String htmlName = requestedReportName;	
+	String htmlName = requestedReportName;
+		
+	// Get only the name without the directory, check if it is windows or unix
+	if (htmlName.lastIndexOf('/') != -1)
+		htmlName = htmlName.substring(htmlName.lastIndexOf('/') + 1);
+	else 
+		htmlName = htmlName.substring(htmlName.lastIndexOf('\\') + 1);
+	
 	for (Iterator paramIterator = reportParameters.iterator(); paramIterator.hasNext();)
 	{
 		IParameterDefnBase param = (IParameterDefnBase) paramIterator.next( );
