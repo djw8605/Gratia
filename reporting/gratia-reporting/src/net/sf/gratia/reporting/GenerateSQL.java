@@ -75,7 +75,7 @@ public class GenerateSQL
 								closeConnection();
 								return sql;
 						}
-				command = "select whereclause from RolesTable where role = " + dq + role + dq;
+				command = "select whereclause from Role where role = " + dq + role + dq;
 				try
 						{
 								statement = connection.prepareStatement(command);
