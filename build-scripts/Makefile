@@ -231,9 +231,9 @@ reporting: util
 	cp ${reportsrc}/WebContent/*.css war
 	cp ${reportsrc}/src/net/sf/gratia/reporting/*.class war/WEB-INF/classes/net/sf/gratia/reporting
 	cp ${reportsrc}/src/net/sf/gratia/reporting/exceptions/*.class war/WEB-INF/classes/net/sf/gratia/reporting/exceptions
-	cp -R ${reportsrc}/WebContent/calendar/* war/calendar
-	cp -R ${reportsrc}/WebContent/images/* war/images
-	cp ${reportsrc}/src/net/sf/gratia/reporting/web.xml war/WEB-INF
+	cp -R ${reportsrc}/WebContent/calendar/*.* war/calendar/
+	cp -R ${reportsrc}/WebContent/images/*.* war/images/
+	cp ${reportsrc}/src/net/sf/gratia/reporting/web.xml war/WEB-INF/web.xml
 	cp ${commonLib}/*.jar war/WEB-INF/lib
 	rm -f war/WEB-INF/lib/servlet-api.jar
 	jar -cvfM ${target}/gratia-reporting.war -C war .
@@ -245,9 +245,10 @@ reports:
 	mkdir war/reports
 	mkdir war/MenuConfig
 	mkdir war/WEB-INF
-	cp -R ${reports}/WebContent/MenuConfig/* war/MenuConfig
-	cp -R ${reports}/WebContent/reports/*design war/reports
-	cp ${reports}/WebContent/web.xml war/WEB-INF
+	mkdir war/META-INF
+	cp -R ${reports}/WebContent/MenuConfig/*.xml war/MenuConfig
+	cp -R ${reports}/WebContent/reports/production/*.* war/reports
+	cp ${reports}/WebContent/web.xml war/WEB-INF/web.xml
 	jar -cvf ${target}/gratia-reports.war -C war .
 	rm -f -r war
 	
@@ -264,10 +265,10 @@ release: clean util services servlets soap reporting reports administration secu
 	mkdir tarball/tomcat/v55/gratia
 	mkdir tarball/gratia
 	mkdir tarball/gratia/gratia_reporting
-	mkdir tarball/var
-	mkdir tarball/var/data
-	mkdir tarball/var/logs
-	mkdir tarball/var/tmp
+#	mkdir tarball/var
+#	mkdir tarball/var/data
+#	mkdir tarball/var/logs
+#	mkdir tarball/var/tmp
 	cp ${configuration}/*gov ${configuration}/*xml ${configuration}/*properties tarball/tomcat/v55/gratia
 	cp ${configuration}/*sql ${configuration}/*sh tarball/tomcat/v55/gratia
 	cp ${configuration}/truststore ${configuration}/keystore tarball/tomcat/v55/gratia
