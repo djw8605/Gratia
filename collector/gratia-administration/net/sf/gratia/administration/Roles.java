@@ -154,7 +154,7 @@ public class Roles extends HttpServlet
 
 				try
 						{
-								command = "select * from RolesTable";
+								command = "select * from Role";
 								statement = connection.prepareStatement(command);
 								resultSet = statement.executeQuery(command);
 
@@ -270,7 +270,7 @@ public class Roles extends HttpServlet
 				String where = (String) request.getParameter("where:" + index);
 
 				String command = 
-						"update RolesTable set" + cr +
+						"update Role set" + cr +
 						" role = " + dq + role + dq + comma + cr +
 						" subtitle = " + dq + subtitle + dq + comma + cr +
 						" whereclause = " + dq + where + dq + cr +
@@ -304,7 +304,7 @@ public class Roles extends HttpServlet
 				String where = (String) request.getParameter("where:" + index);
 
 				String command = 
-						"insert into RolesTable" +
+						"insert into Role" +
 						"(role,subtitle,whereclause)" + cr +
 						"values(" + cr +
 						dq + role + dq + comma + cr +
@@ -340,7 +340,7 @@ public class Roles extends HttpServlet
 
 				try
 						{
-								command = "delete from RolesTable where roleid = " + request.getParameter("roleid");
+								command = "delete from Role where roleid = " + request.getParameter("roleid");
 								Statement statement = connection.createStatement();
 								statement.executeUpdate(command);
 								statement.close();
