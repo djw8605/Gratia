@@ -1,6 +1,6 @@
 package net.sf.gratia.reporting;
 
-import java.io.File;
+import java.io.*;
 import java.lang.System;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -50,13 +50,17 @@ public class UserConfiguration
 
 			if (userConfigFileName == null) 
 			{
-				userConfigFileName = "gratia-reports/MenuConfig/UserConfig_osg.xml";
+				userConfigFileName = "gratia-reports" + File.separator + "MenuConfig" + File.separator + "UserConfig_osg.xml";
 			}
 
 			try
 			{
 					// Open the config file
-				source = new File(request.getRealPath("../") + "/" + userConfigFileName);
+				String catalinaHome = net.sf.gratia.util.Configuration.getCatalinaHome();
+				String menuConfig = catalinaHome + File.separator + "webapps" + File.separator + userConfigFileName;
+				String reportsFolder = reportingConfiguration.getReportsFolder();
+
+				source = new File(menuConfig);
 							
 					// Parse the configuration file
 				doc = saxReader.read(source); 
@@ -75,11 +79,8 @@ public class UserConfiguration
 							Element ndeMenuGroup = (Element) menuGroupIterator.next();
 			        			MenuGroup newMenuGroup = new MenuGroup(getAttributeValue(ndeMenuGroup, "name"));
 			        			for (Iterator menuItemIterator = ndeMenuGroup.elementIterator(); menuItemIterator.hasNext();)
-							{
-								Element ndeMenuItem = (Element) menuItemIterator.next();
-			        							
-								newMenuGroup.getMenuItems().add(new MenuItem(getAttributeValue(ndeMenuItem, "name"), getAttributeValue(ndeMenuItem, "link").replaceAll("\\[ReportsFolder\\]",
-								reportingConfiguration.getReportsFolder()) ));			        			
+							{			        							
+								newMenuGroup.getMenuItems().add(new MenuItem(getAttributeValue(ndeMenuItem, "name"), getAttributeValue(ndeMenuItem, "link").replace("[ReportsFolder]", reportsFolder) ));			        			
 							}
 			        		
 							_menuGroups.add(newMenuGroup);
@@ -95,7 +96,7 @@ public class UserConfiguration
 			        			for (Iterator dashboardItemIterator = ndeRow.elementIterator(); dashboardItemIterator.hasNext();)
 							{
 								Element ndeDashboardItem = (Element) dashboardItemIterator.next();
-			        				newRow.getDashboardItems().add(new DashboardItem(getAttributeValue(ndeDashboardItem, "link").replaceAll("\\[ReportsFolder\\]", reportingConfiguration.getReportsFolder())));			        			
+			        				newRow.getDashboardItems().add(new DashboardItem(getAttributeValue(ndeDashboardItem, "link").replace("[ReportsFolder]", reportsFolder)));			        			
 							}
 							
 							_dashboardRows.add(newRow);

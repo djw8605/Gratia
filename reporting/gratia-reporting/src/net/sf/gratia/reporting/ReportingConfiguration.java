@@ -1,6 +1,6 @@
 package net.sf.gratia.reporting;
 
-import java.io.File;
+import java.io.*;
 import java.util.Iterator;
 import java.util.Properties;
 
@@ -103,11 +103,11 @@ public class ReportingConfiguration
 		   {			
 			try
 			{
-				String catalinaHome = net.sf.gratia.util.Configuration.getCatalinaHome();
+				String catalinaHome = System.getProperty("catalina.home");
 				
-				_reportsFolder = (catalinaHome + "/webapps/" + p.getProperty("service.reporting.reports.folder") + "/");
-				_engineHome = (catalinaHome + "/webapps/" + p.getProperty("service.reporting.engine.home") + "/");
-				_webappHome = (catalinaHome + "/webapps/" + p.getProperty("service.reporting.webapp.home") + "/");		        	
+				_reportsFolder = (catalinaHome + File.separator + "webapps" + File.separator + p.getProperty("service.reporting.reports.folder") + File.separator);
+				_engineHome = (catalinaHome + File.separator + "webapps" + File.separator + p.getProperty("service.reporting.engine.home") + File.separator);
+				_webappHome = (catalinaHome + File.separator + "webapps" + File.separator + p.getProperty("service.reporting.webapp.home") + File.separator);		        	
 			 
 				_databaseURL =  p.getProperty("service.mysql.url");
 				_databaseUser = p.getProperty("service.reporting.user");
@@ -117,6 +117,7 @@ public class ReportingConfiguration
 			    				
 	 // Set a flag indicating the configuration has been loaded, so subsequent calls will not load again
 		   		 _configLoaded = "1";
+
 		   	}
 
 		   	catch(Exception ignore)
