@@ -234,6 +234,7 @@ reporting: util
 	cp -R ${reportsrc}/WebContent/calendar/*.* war/calendar/
 	cp -R ${reportsrc}/WebContent/images/*.* war/images/
 	cp ${reportsrc}/src/net/sf/gratia/reporting/web.xml war/WEB-INF/web.xml
+	cp ${reportsrc}/WebContent/WEB-INF/lib/*.jar war/WEB-INF/lib
 	cp ${commonLib}/*.jar war/WEB-INF/lib
 	rm -f war/WEB-INF/lib/servlet-api.jar
 	jar -cvfM ${target}/gratia-reporting.war -C war .
@@ -248,7 +249,7 @@ reports:
 	mkdir war/META-INF
 	cp -R ${reports}/WebContent/MenuConfig/*.xml war/MenuConfig
 	cp -R ${reports}/WebContent/reports/production/*.* war/reports
-	cp ${reports}/WebContent/web.xml war/WEB-INF/web.xml
+	cp ${reports}/WebContent/WEB-INF/web.xml war/WEB-INF/web.xml
 	jar -cvf ${target}/gratia-reports.war -C war .
 	rm -f -r war
 	
