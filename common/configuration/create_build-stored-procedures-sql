@@ -237,7 +237,7 @@ sub generate_sql {
 
 sub jobusage {
 	my ($clause) = @_;
-	$clause =~ s&\w*?Summary(\.*)&JobUsageRecord$1&g if $clause;
+	$clause =~ s&\w*?Summary(\.*)&JobUsageRecord_Report$1&g if $clause;
 	return $clause;
 }
 

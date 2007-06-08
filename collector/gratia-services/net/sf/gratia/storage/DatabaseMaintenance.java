@@ -248,6 +248,7 @@ public class DatabaseMaintenance {
                 "reportmm,status,jobs from Probe;");
         Execute("DROP VIEW IF EXISTS JobUsageRecord_Report;");
         Execute("CREATE VIEW JobUsageRecord_Report as select "+GetJobUsageRecordColumns()+
+		" ,JobUsageRecord_Meta.ProbeName " +
                 " from JobUsageRecord_Meta,Site,Probe,JobUsageRecord " +
                 " where " +
                 " JobUsageRecord_Meta.ProbeName = Probe.probename and Probe.siteid = Site.siteid" +

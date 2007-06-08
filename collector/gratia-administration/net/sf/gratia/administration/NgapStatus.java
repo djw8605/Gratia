@@ -254,7 +254,7 @@ public class NgapStatus extends HttpServlet
 								//
 								// return time stamp of last host contact
 								//
-								command = "select max(ServerDate) from JobUsageRecord where Host = " + dq + host + dq;
+								command = "select max(ServerDate) from JobUsageRecord,JobUsageRecord_Meta where JobUsageRecord.dbid = JobUsageRecord_Meta.dbid and Host = " + dq + host + dq;
 								System.out.println("command: " + command);
 								statement = connection.prepareStatement(command);
 								resultSet = statement.executeQuery(command);
@@ -298,7 +298,7 @@ public class NgapStatus extends HttpServlet
 								// previous hour
 								//
 
-								command = "select count(*) from JobUsageRecord where ServerDate > " + dq + format.format(from) + dq +
+								command = "select count(*) from JobUsageRecord_Meta where ServerDate > " + dq + format.format(from) + dq +
 										" and ServerDate <= " + dq + format.format(to) + dq;
 								System.out.println("command: " + command);
 								statement = connection.prepareStatement(command);
@@ -324,7 +324,7 @@ public class NgapStatus extends HttpServlet
 								decrement = 24 * 60 * 60 * 1000;
 								java.util.Date date = new java.util.Date(now.getTime() - decrement);
 
-								command = "select count(*) from JobUsageRecord where ServerDate > " + dq + format.format(date) + dq;
+								command = "select count(*) from JobUsageRecord_Meta where ServerDate > " + dq + format.format(date) + dq;
 								statement = connection.prepareStatement(command);
 								resultSet = statement.executeQuery(command);
 								while(resultSet.next())

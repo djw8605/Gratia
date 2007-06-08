@@ -173,7 +173,7 @@ public class Status extends HttpServlet
 		// previous hour
 		//
 
-		command = "select count(*) from JobUsageRecord where ServerDate > " + dq + format.format(from) + dq +
+		command = "select count(*) from JobUsageRecord_Meta where ServerDate > " + dq + format.format(from) + dq +
 		    " and ServerDate <= " + dq + format.format(to) + dq;
 		System.out.println("command: " + command);
 		statement = connection.prepareStatement(command);
@@ -200,7 +200,7 @@ public class Status extends HttpServlet
 		to = from;
 		from = new java.util.Date(to.getTime() - decrement);
 
-		command = "select count(*) from JobUsageRecord where ServerDate > " + dq + format.format(from) + dq +
+		command = "select count(*) from JobUsageRecord_Meta where ServerDate > " + dq + format.format(from) + dq +
 		    " and ServerDate <= " + dq + format.format(to) + dq;
 		System.out.println("command: " + command);
 		statement = connection.prepareStatement(command);
@@ -227,7 +227,7 @@ public class Status extends HttpServlet
 		to = from;
 		from = new java.util.Date(to.getTime() - decrement);
 
-		command = "select count(*) from JobUsageRecord where ServerDate > " + dq + format.format(from) + dq +
+		command = "select count(*) from JobUsageRecord_Meta where ServerDate > " + dq + format.format(from) + dq +
 		    " and ServerDate <= " + dq + format.format(to) + dq;
 		statement = connection.prepareStatement(command);
 		resultSet = statement.executeQuery(command);
@@ -253,7 +253,7 @@ public class Status extends HttpServlet
 		to = from;
 		from = new java.util.Date(to.getTime() - decrement);
 
-		command = "select count(*) from JobUsageRecord where ServerDate > " + dq + format.format(from) + dq +
+		command = "select count(*) from JobUsageRecord_Meta where ServerDate > " + dq + format.format(from) + dq +
 		    " and ServerDate <= " + dq + format.format(to) + dq;
 		statement = connection.prepareStatement(command);
 		resultSet = statement.executeQuery(command);
@@ -279,7 +279,7 @@ public class Status extends HttpServlet
 		decrement = 60 * 60 * 1000;
 		from = new java.util.Date(to.getTime() - decrement);
 
-		command = "select count(*) from JobUsageRecord where ServerDate > " + dq + format.format(from) + dq +
+		command = "select count(*) from JobUsageRecord_Meta where ServerDate > " + dq + format.format(from) + dq +
 		    " and ServerDate <= " + dq + format.format(to) + dq;
 		statement = connection.prepareStatement(command);
 		resultSet = statement.executeQuery(command);
@@ -305,7 +305,7 @@ public class Status extends HttpServlet
 		to = from;
 		from = new java.util.Date(to.getTime() - decrement);
 
-		command = "select count(*) from JobUsageRecord where ServerDate > " + dq + format.format(from) + dq +
+		command = "select count(*) from JobUsageRecord_Meta where ServerDate > " + dq + format.format(from) + dq +
 		    " and ServerDate <= " + dq + format.format(to) + dq;
 		statement = connection.prepareStatement(command);
 		resultSet = statement.executeQuery(command);
@@ -330,7 +330,7 @@ public class Status extends HttpServlet
 		decrement = 24 * 60 * 60 * 1000;
 		java.util.Date date = new java.util.Date(now.getTime() - decrement);
 
-		command = "select count(*) from JobUsageRecord where ServerDate > " + dq + format.format(date) + dq;
+		command = "select count(*) from JobUsageRecord_Meta where ServerDate > " + dq + format.format(date) + dq;
 		statement = connection.prepareStatement(command);
 		resultSet = statement.executeQuery(command);
 		while(resultSet.next())
@@ -353,7 +353,7 @@ public class Status extends HttpServlet
 		decrement = 7 * 24 * 60 * 60 * 1000;
 		date = new java.util.Date(now.getTime() - decrement);
 
-		command = "select count(*) from JobUsageRecord where ServerDate > " + dq + format.format(date) + dq;
+		command = "select count(*) from JobUsageRecord_Meta where ServerDate > " + dq + format.format(date) + dq;
 		statement = connection.prepareStatement(command);
 		resultSet = statement.executeQuery(command);
 		while(resultSet.next())
