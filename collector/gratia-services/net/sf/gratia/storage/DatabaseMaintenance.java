@@ -112,15 +112,14 @@ public class DatabaseMaintenance {
         // original index structure
         //
         AddIndex("JobUsageRecord", false, "index02", "EndTime");
-        AddIndex("JobUsageRecord", false, "index03", "ProbeName");
+         AddIndex("JobUsageRecord_Meta", false, "index03", "ProbeName");
         // AddIndex("JobUsageRecord",false,"index04","HostDescription");
         AddIndex("JobUsageRecord", false, "index05", "StartTime");
         // AddIndex("JobUsageRecord",false,"index06","GlobalJobid");
         // AddIndex("JobUsageRecord",false,"index07","LocalJobid");
         AddIndex("JobUsageRecord", false, "index08", "Host(255)");
-        AddIndex("JobUsageRecord", false, "index11", "ServerDate");
-        AddIndex("JobUsageRecord", true, "index12", "md5");
-        AddIndex("JobUsageRecord", false, "index13", "ServerDate");
+        AddIndex("JobUsageRecord_Meta", true, "index12", "md5");
+        AddIndex("JobUsageRecord_Meta", false, "index13", "ServerDate");
 
         //
         // new indexes for authentication
@@ -180,6 +179,35 @@ public class DatabaseMaintenance {
             Logging.log("Command: Error: " + cmd + " : " + e);
         }
     }
+    
+     public String GetJobUsageRecordColumns() {
+        Statement statement;
+        ResultSet resultSet;
+
+        String cmd = "show columns from JobUsageRecord";
+        String result = "";
+        try {
+            Logging.log("Executing: " + cmd);
+            statement = connection.createStatement();
+            resultSet = statement.executeQuery(cmd);
+            while (resultSet.next()) {
+                String column = resultSet.getString(1);
+                if (column.equals("SiteName")) {
+                    column = "Site.SiteName";
+                } else if (column.equals("Status")) {
+                    column = "JobUsageRecord.Status";
+                } else if (column.equals("dbid")) {
+                    column = "JobUsageRecord_Meta.dbid";
+                }
+                if (result.length()>0) result = result + ",";
+                result = result + column;
+            }
+        } catch (Exception e) {
+            Logging.log("Command: Error: " + cmd + " : " + e);
+        }
+        return result;
+    }
+    
 
     public void CPUMetricDefaults() {
         Execute("delete from CPUMetricTypes");
@@ -209,6 +237,21 @@ public class DatabaseMaintenance {
                     + "use.report.authentication" + dq + comma + dq
                     + useReportAuthentication + dq + ")");
         }
+    }
+    
+    public void AddViews() {
+        Execute("DROP VIEW IF EXISTS CETable;");
+        Execute("CREATE VIEW CETable AS select Site.SiteId AS facility_id,Site.SiteName AS facility_name from Site;");
+        Execute("DROP VIEW IF EXISTS CEProbes;");
+        Execute("CREATE VIEW CEProbes AS select probeid,siteid as facility_id," +
+                "probename,active,currenttime,CurrentTimeDescription,reporthh," +
+                "reportmm,status,jobs from Probe;");
+        Execute("DROP VIEW IF EXISTS JobUsageRecord_Report;");
+        Execute("CREATE VIEW JobUsageRecord_Report as select "+GetJobUsageRecordColumns()+
+                " from JobUsageRecord_Meta,Site,Probe,JobUsageRecord " +
+                " where " +
+                " JobUsageRecord_Meta.ProbeName = Probe.probename and Probe.siteid = Site.siteid" +
+                " and JobUsageRecord_Meta.dbid = JobUsageRecord.dbid;");
     }
     
     public void ReadLiveVersion() {
@@ -295,18 +338,18 @@ public class DatabaseMaintenance {
                 }
             }
             if (current == 3) {
-                int result = Execute("insert into JobUsageRecord_Xml(dbid,RawXml,ExtraXml) select dbid,RawXml,ExtraXml from JobUsageRecord");
+                int result = Execute("insert into JobUsageRecord_Xml(dbid,RawXml,ExtraXml) select dbid,RawXml,ExtraXml from JobUsageRecord;");
                 if (result > -1) {
-                    result = Execute("alter table JobUsageRecord drop column RawXml, drop column ExtraXml");
+                    result = Execute("alter table JobUsageRecord drop column RawXml, drop column ExtraXml;");
                 }
                 if (result > -1) {
                     // move md5, ServerDate, SiteName, SiteNameDescription,
                     // ProbeName, ProbeNameDescription,
                     // recordId,CreateTime.CreateTimeDescription,RecordKeyInfoId,RecordKeyInfoContent
-                    result = Execute("insert into JobUsageRecord_Meta(dbid,md5, ServerDate, SiteName, SiteNameDescription, ProbeName, ProbeNameDescription,recordId,CreateTime,CreateTimeDescription,RecordKeyInfoId,RecordKeyInfoContent) select dbid, md5, ServerDate, SiteName, SiteNameDescription, ProbeName, ProbeNameDescription,recordId,CreateTime,CreateTimeDescription,RecordKeyInfoId,RecordKeyInfoContent from JobUsageRecord");
+                    result = Execute("insert into JobUsageRecord_Meta(dbid,md5, ServerDate, SiteName, SiteNameDescription, ProbeName, ProbeNameDescription,recordId,CreateTime,CreateTimeDescription,RecordKeyInfoId,RecordKeyInfoContent) select dbid, md5, ServerDate, SiteName, SiteNameDescription, ProbeName, ProbeNameDescription,recordId,CreateTime,CreateTimeDescription,RecordKeyInfoId,RecordKeyInfoContent from JobUsageRecord;");
                 }
                 if (result > -1) {
-                    result = Execute("alter table JobUsageRecord drop column md5, drop column ServerDate, drop column SiteName, drop column SiteNameDescription, drop column ProbeName, drop column ProbeNameDescription, drop column recordId, drop column CreateTime, drop column CreateTimeDescription, drop column RecordKeyInfoId, drop column RecordKeyInfoContent ");
+                    result = Execute("alter table JobUsageRecord drop column md5, drop column ServerDate, drop column SiteName, drop column SiteNameDescription, drop column ProbeName, drop column ProbeNameDescription, drop column recordId, drop column CreateTime, drop column CreateTimeDescription, drop column RecordKeyInfoId, drop column RecordKeyInfoContent; ");
                 }
                 if (result > -1) {
                     Logging.log("Gratia database upgraded from " + current + " to " + (current + 1));
