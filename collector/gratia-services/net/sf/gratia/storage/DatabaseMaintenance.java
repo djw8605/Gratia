@@ -292,7 +292,7 @@ public class DatabaseMaintenance {
         liveVersion = newVersion;        
     }
 
-    public void Upgrade() {
+    public boolean Upgrade() {
         int oldvers = liveVersion;
       
         if (oldvers == 0) {
@@ -303,6 +303,8 @@ public class DatabaseMaintenance {
             Logging.log("Gratia database now at version "
                     + gratiaDatabaseVersion);
 
+            return true;
+            
         } else {
             // Do the necessary upgrades if any
 
@@ -402,6 +404,7 @@ public class DatabaseMaintenance {
                     Logging.log("Gratia database FAILED to upgrade from " + current + " to " + (current + 1));
                 }
             }
+            return current == gratiaDatabaseVersion;
         }
     }
 }

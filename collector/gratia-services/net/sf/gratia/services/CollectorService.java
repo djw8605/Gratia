@@ -177,7 +177,12 @@ public class CollectorService implements ServletContextListener
          // Upgrade the database
          // 
 
-         checker.Upgrade();
+         if (!checker.Upgrade()) {
+             // The database has not been upgraded correctly.
+             Logging.warning("CollectorService: The database schema was not upgraded properly.");
+             Logging.warning("CollectorService: Manual corruption required.");
+             return;
+         }
 
          //
          // zap database
