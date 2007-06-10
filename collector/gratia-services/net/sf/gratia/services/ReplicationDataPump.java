@@ -11,6 +11,8 @@ public class ReplicationDataPump extends Thread
    private String url;
    private String user;
    private String password;
+   private boolean trace;
+   private long chunksize;
 
    long dbid;
    Post post;
@@ -50,6 +52,19 @@ public class ReplicationDataPump extends Thread
       user = p.getProperty("service.mysql.user");
       password = p.getProperty("service.mysql.password");
       openConnection();
+      
+      String tmp = p.getProperty("service.datapump.trace");
+      trace = tmp != null && tmp.equals("1");
+      chunksize = 100;
+      tmp = p.getProperty("service.datapump.chunksize");
+      if (tmp != null) {
+         try {
+             chunksize = Long.parseLong(tmp); 
+         } catch (Exception e) {
+             Logging.log("ReplicationDataPump: Parsing error ("+e+") when loading property service.datapump.chunksize with value: " +
+                    tmp + " using default value ("+chunksize+")");             
+         }
+      }
    }
 
    public void openConnection()
@@ -169,7 +184,7 @@ public class ReplicationDataPump extends Thread
             dbid = resultSet.getString("dbid");
             probename = resultSet.getString("probename");
             frequency = resultSet.getString("frequency");
-            table = resultSet.getString("table");
+            table = resultSet.getString("recordtable");
             if (table == null) table = "JobUsageRecord";
          }
          resultSet.close();
@@ -200,8 +215,10 @@ public class ReplicationDataPump extends Thread
       // create base retrieval
       //
 
-      command = "select count(*) from "+table+" , "+table+"_Meta"+ cr +
+      command = "select count(*) from "+table+"_Meta"+ cr +
             "where dbid > " + dbid;
+//      command = "select count(*) from "+table+" , "+table+"_Meta"+ cr +
+//      "where "+table+".dbid > " + dbid + " and " + table + ".dbid = " + table + "_Meta.dbid ";
       if (probename.startsWith("Probe:"))
       {
          probename = xp.replace(probename, "Probe:", "");
@@ -247,9 +264,10 @@ public class ReplicationDataPump extends Thread
 
       Logging.log("ReplicationDataPump: " + replicationid + " Executed Command: " + command);
       Logging.log("ReplicationDataPump: " + replicationid + " Records: " + count);
+      Logging.log("ReplicationDataPump: " + replicationid + " ChunkSize: " + chunksize);
 
       command = "select dbid from "+table + "_Meta" + cr +
-            "where dbid > " + dbid;
+            "where dbid > " + dbid + " limit " + chunksize;
       if (!probename.equals("All"))
       {
          command = command + cr;
@@ -280,14 +298,12 @@ public class ReplicationDataPump extends Thread
                Logging.log("Received Null XML: dbid: " + dbid);
                continue;
             }
-            if (p.getProperty("service.datapump.trace") != null)
-               if (p.getProperty("service.datapump.trace").equals("1"))
-               {
-                  Logging.log("");
-                  Logging.log("dbid: " + dbid);
-                  Logging.log("xml: " + xml);
-                  Logging.log("");
-               }
+            if (trace) {
+                Logging.log("");
+                Logging.log("dbid: " + dbid);
+                Logging.log("xml: " + xml);
+                Logging.log("");
+            }
             if (security.equals("0"))
                post = new Post(openconnection + "/gratia-servlets/rmi", "update", xml);
             else
@@ -350,7 +366,7 @@ public class ReplicationDataPump extends Thread
       Logging.log("ReplicationDataPump: getXML: dbid: " + dbid);
 
       session = HibernateWrapper.getSession();
-      String command = "from "+table+" where "+table+".dbid = " + dbid;
+      String command = "from "+table+" t where t.RecordId = " + dbid;
       List result = session.createQuery(command).list();
       for (i = 0; i < result.size(); i++)
       {
