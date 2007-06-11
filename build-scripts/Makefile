@@ -234,7 +234,6 @@ reporting: util
 	cp -R ${reportsrc}/WebContent/calendar/*.* war/calendar/
 	cp -R ${reportsrc}/WebContent/images/*.* war/images/
 	cp ${reportsrc}/src/net/sf/gratia/reporting/web.xml war/WEB-INF/web.xml
-	cp ${reportsrc}/WebContent/WEB-INF/lib/*.jar war/WEB-INF/lib
 	cp ${commonLib}/*.jar war/WEB-INF/lib
 	rm -f war/WEB-INF/lib/servlet-api.jar
 	jar -cvfM ${target}/gratia-reporting.war -C war .
