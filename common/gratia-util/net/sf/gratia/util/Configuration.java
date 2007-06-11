@@ -16,33 +16,33 @@ public class Configuration
 	public static String getConfigurationPath()
 	{
 		String path = System.getProperty("catalina.home");
-		path = path + File.separator + "gratia";
+		path = path + "/gratia";
 		return path;
 	}
 
 	public static String getHibernatePath()
 	{
-		return getConfigurationPath() + File.separator + "hibernate.cfg.xml";
+		return getConfigurationPath() + File.separatorChar + "hibernate.cfg.xml";
 	}
 
 	public static String getGratiaHbmPath()
 	{
-		return getConfigurationPath() + File.separator + "Gratia.hbm.xml";
+		return getConfigurationPath() + File.separatorChar + "Gratia.hbm.xml";
 	}
 
 	public static String getJobUsagePath()
 	{
-		return getConfigurationPath() + File.separator + "JobUsage.hbm.xml";
+		return getConfigurationPath() + File.separatorChar + "JobUsage.hbm.xml";
 	}
 
 	public static String getMetricRecordPath()
 	{
-		return getConfigurationPath() + File.separator + "MetricRecord.hbm.xml";
+		return getConfigurationPath() + File.separatorChar + "MetricRecord.hbm.xml";
 	}
 
 	public static String getJMSPath()
 	{
-		return getConfigurationPath() + File.separator + "a3servers.xml";
+		return getConfigurationPath() + File.separatorChar + "a3servers.xml";
 	}
 
 	public static Properties getProperties()
@@ -50,11 +50,11 @@ public class Configuration
 		Properties p = new Properties();
 		try
 		{
-			p.load(new FileInputStream(new File(getConfigurationPath() + File.separator + "service-configuration.properties")));
+			p.load(new FileInputStream(new File(getConfigurationPath() + File.separatorChar + "service-configuration.properties")));
 		}
 		catch (Exception e)
 		{
-			Logging.log("Error Loading: " + getConfigurationPath() + File.separator + "service-configuration.properties");
+			Logging.log("Error Loading: " + getConfigurationPath() + File.separatorChar + "service-configuration.properties");
 			e.printStackTrace();
 		}
 		
@@ -63,7 +63,7 @@ public class Configuration
 
 	public static String getAccountingTablePath()
 	{
-		return getConfigurationPath() + File.separator + "accounting-table";
+		return getConfigurationPath() + "/accounting-table";
 	}
 
 	public static synchronized Hashtable getAccountingTable()

@@ -105,9 +105,9 @@ public class ReportingConfiguration
 			{
 				String catalinaHome = System.getProperty("catalina.home");
 				
-				_reportsFolder = (catalinaHome + File.separator + "webapps" + File.separator + p.getProperty("service.reporting.reports.folder") + File.separator);
-				_engineHome = (catalinaHome + File.separator + "webapps" + File.separator + p.getProperty("service.reporting.engine.home") + File.separator);
-				_webappHome = (catalinaHome + File.separator + "webapps" + File.separator + p.getProperty("service.reporting.webapp.home") + File.separator);		        	
+				_reportsFolder = (catalinaHome + File.separatorChar + "webapps" + File.separatorChar + p.getProperty("service.reporting.reports.folder") + File.separatorChar);
+				_engineHome = (catalinaHome + File.separatorChar + "webapps" + File.separatorChar + p.getProperty("service.reporting.engine.home") + File.separatorChar);
+				_webappHome = (catalinaHome + File.separatorChar + "webapps" + File.separatorChar + p.getProperty("service.reporting.webapp.home") + File.separatorChar);		        	
 			 
 				_databaseURL =  p.getProperty("service.mysql.url");
 				_databaseUser = p.getProperty("service.reporting.user");
