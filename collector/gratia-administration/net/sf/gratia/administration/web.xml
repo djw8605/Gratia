@@ -27,13 +27,25 @@
     <servlet>
         <servlet-name>SiteMgmt</servlet-name>
         <servlet-class>net.sf.gratia.administration.SiteMgmt</servlet-class>
-				<load-on-startup>1</load-on-startup>
+	<load-on-startup>1</load-on-startup>
     </servlet>
 
     <servlet>
         <servlet-name>ProbeTable</servlet-name>
         <servlet-class>net.sf.gratia.administration.ProbeTable</servlet-class>
-				<load-on-startup>1</load-on-startup>
+	<load-on-startup>1</load-on-startup>
+    </servlet>
+
+    <servlet>
+        <servlet-name>VOMgmt</servlet-name>
+        <servlet-class>net.sf.gratia.administration.VOMgmt</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+
+    <servlet>
+        <servlet-name>VONameCorrection</servlet-name>
+        <servlet-class>net.sf.gratia.administration.VONameCorrection</servlet-class>
+	<load-on-startup>1</load-on-startup>
     </servlet>
 
     <servlet>
@@ -95,6 +107,16 @@
     <servlet-mapping>
         <servlet-name>SiteMgmt</servlet-name>
         <url-pattern>/site.html</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>VOMgmt</servlet-name>
+        <url-pattern>/vo.html</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>VONameCorrection</servlet-name>
+        <url-pattern>/vonamecorrection.html</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>
