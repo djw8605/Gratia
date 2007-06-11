@@ -95,6 +95,9 @@
   </class>
   
   <class name="VONameCorrection" table="VONameCorrection" node="VONameCorrection" lazy="false">
+     <id name="corrid" column="corrid" type="int">
+        <generator class="native"/>
+     </id>
      <property name="ReportableVOName" column="ReportableVOName"/>
      <property name="VOName" column="VOName"/>
      <property name="VOid" column="VOid" type="int"/>
