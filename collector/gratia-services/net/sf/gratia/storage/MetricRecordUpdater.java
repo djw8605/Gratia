@@ -14,5 +14,5 @@ public abstract class MetricRecordUpdater implements RecordUpdater
       if (rec.getClass() != MetricRecord.class) return;
       Update((MetricRecord)rec);
    }
-   public abstract void Update(JobUsageRecord rec);
+   public abstract void Update(MetricRecord rec);
 }
