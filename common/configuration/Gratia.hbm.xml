@@ -87,6 +87,19 @@
     <property name="_CPUType" column="CPUType"/>
   </class>
 
+  <class name="VO" table="VO" node="VO" lazy="false">
+    <id name="VOid" column="VOid" type="int">
+       <generator class="native"/>
+    </id>
+    <property name="VOName" column="VOName"/>
+  </class>
+  
+  <class name="VONameCorrection" table="VONameCorrection" node="VONameCorrection" lazy="false">
+     <property name="ReportableVOName" column="ReportableVOName"/>
+     <property name="VOName" column="VOName"/>
+     <property name="VOid" column="VOid" type="int"/>
+  </class>
+       
   <class name="Site" table="Site" node="Site" lazy="false">
     <id name="siteid" column="siteid" type="int">
       <generator class="native"/>
