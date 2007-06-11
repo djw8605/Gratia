@@ -3,10 +3,31 @@
 <report xmlns="http://www.eclipse.org/birt/2005/design" version="3" id="1">
     <property name="createdBy">Eclipse BIRT Designer Version 1.0.1 Build &lt;20050815-0740></property>
     <property name="units">in</property>
+    <list-property name="propertyBindings">
+        <structure>
+            <property name="name">odaDriverClass</property>
+            <property name="id">357</property>
+        </structure>
+        <structure>
+            <property name="name">odaURL</property>
+            <property name="id">357</property>
+            <expression name="value">params["DatabaseURL"]</expression>
+        </structure>
+        <structure>
+            <property name="name">odaUser</property>
+            <property name="id">357</property>
+            <expression name="value">params["DatabaseUser"]</expression>
+        </structure>
+        <structure>
+            <property name="name">odaPassword</property>
+            <property name="id">357</property>
+            <expression name="value">params["DatabasePassword"]</expression>
+        </structure>
+    </list-property>
     <list-property name="configVars">
         <structure>
             <property name="name">DatabaseURL</property>
-            <property name="value">jdbc:mysql://gratia-db01.fnal.gov:3320/gratia</property>
+            <property name="value">jdbc:mysql://gratia-db01.fnal.gov:3320/gratia_itb</property>
         </structure>
         <structure>
             <property name="name">DatabaseUser</property>
@@ -18,11 +39,7 @@
         </structure>
         <structure>
             <property name="name">Display Metric</property>
-            <property name="value">process</property>
-        </structure>
-        <structure>
-            <property name="name">GroupByFormat</property>
-            <property name="value">%Y-%U</property>
+            <property name="value">jobcount</property>
         </structure>
         <structure>
             <property name="name">HighlightDate</property>
@@ -836,7 +853,7 @@
                     <property name="allowBlank">false</property>
                     <property name="format">Unformatted</property>
                     <property name="controlType">text-box</property>
-                    <property name="defaultValue">jdbc:mysql://gratia-db01.fnal.gov:3320/gratia</property>
+                    <property name="defaultValue">jdbc:mysql://gratia-db01.fnal.gov:3320/gratia_itb</property>
                 </scalar-parameter>
                 <scalar-parameter name="DatabaseUser" id="83">
                     <property name="hidden">true</property>
@@ -939,7 +956,7 @@
     <data-sources>
         <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="fermigrid1" id="357">
             <property name="odaDriverClass">com.mysql.jdbc.Driver</property>
-            <property name="odaURL">jdbc:mysql://gratia-db01.fnal.gov:3320/gratia</property>
+            <property name="odaURL">jdbc:mysql://gratia-db01.fnal.gov:3320/gratia_itb</property>
             <property name="odaUser">gratia</property>
             <encrypted-property name="odaPassword">cHJvdG8=</encrypted-property>
         </oda-data-source>
@@ -950,33 +967,21 @@
             <property name="cachedRowCount">0</property>
             <list-property name="parameters">
                 <structure>
-                    <property name="name">StartDate</property>
+                    <property name="name">UserName</property>
                     <property name="dataType">string</property>
                     <property name="position">1</property>
-                    <expression name="defaultValue">// Calculate starting month - 6 months ago
-var now = new Date();
-var begdate;
-now.setDate(1);
-var begdate = DateTimeSpan.subDate(now,0,6,0);
-var yearnr = begdate.getYear() + 1900;
-var monthnr = begdate.getMonth()+ 1;
-var yearmon;
-if (monthnr.toString().length > 1){
-	yearnr  + "-" + monthnr + "-01"
-}else{
-	yearnr  + "-0" +  monthnr + "-01"
-}</expression>
+                    <expression name="defaultValue">""</expression>
                     <property name="isInput">true</property>
                 </structure>
                 <structure>
-                    <property name="name">EndDate</property>
+                    <property name="name">UserRole</property>
                     <property name="dataType">string</property>
                     <property name="position">2</property>
-                    <expression name="defaultValue">'2010-12-31'</expression>
+                    <expression name="defaultValue">""</expression>
                     <property name="isInput">true</property>
                 </structure>
                 <structure>
-                    <property name="name">StartDate1</property>
+                    <property name="name">StartDate</property>
                     <property name="dataType">string</property>
                     <property name="position">3</property>
                     <expression name="defaultValue">// Calculate starting month - 6 months ago
@@ -995,29 +1000,21 @@ if (monthnr.toString().length > 1){
                     <property name="isInput">true</property>
                 </structure>
                 <structure>
-                    <property name="name">EndDate1</property>
+                    <property name="name">EndDate</property>
                     <property name="dataType">string</property>
                     <property name="position">4</property>
                     <expression name="defaultValue">'2010-12-31'</expression>
                     <property name="isInput">true</property>
                 </structure>
+                <structure>
+                    <property name="name">GroupByFormat</property>
+                    <property name="dataType">string</property>
+                    <property name="position">5</property>
+                    <expression name="defaultValue">"%Y-%U"</expression>
+                    <property name="isInput">true</property>
+                </structure>
             </list-property>
-            <property name="queryText"> Select final_rank,VOProbeSummary.VOName, 
- date_format(VOProbeSummary.EndTime,'%Y-%U'),
- sum(VOProbeSummary.WallDuration)as WallDuration,
- sum(VOProbeSummary.CpuUserDuration + VOProbeSummary.CpuSystemDuration) as Cpu,
- sum(VOProbeSummary.Njobs) as Njobs
- FROM (SELECT @rank:=@rank+1 as final_rank, VONamex, walldurationx
-	FROM  (SELECT @rank:=0  as rank, V.VOName as VONamex, V.EndTime as endtimex,
-	sum(V.WallDuration) as walldurationx FROM VOProbeSummary V
-	WHERE V.EndTime >= ?
-	and V.EndTime &lt;= ?
-	group by VONamex order by walldurationx desc) as foox) as foo, VOProbeSummary
-WHERE VOProbeSummary.VOName = VONamex
-and VOProbeSummary.EndTime >= ?
-and VOProbeSummary.EndTime &lt;= ?
-Group by date_format(VOProbeSummary.EndTime,'%Y-%U'), VOProbeSummary.VOName
-Order by final_rank, VOProbeSummary.VOName,date_format(VOProbeSummary.EndTime,'%Y-%U')</property>
+            <property name="queryText">call WeeklyUsageByVORanked(?,?,?,?,?,'Batch')</property>
         </oda-data-set>
     </data-sets>
     <styles>
@@ -1051,6 +1048,20 @@ Order by final_rank, VOProbeSummary.VOName,date_format(VOProbeSummary.EndTime,'%
         <table name="table1" id="9">
             <property name="width">100%</property>
             <property name="dataSet">UsageByVORanked</property>
+            <list-property name="paramBindings">
+                <structure>
+                    <property name="paramName">GroupByFormat</property>
+                    <expression name="expression">params["GroupByFormat"]</expression>
+                </structure>
+                <structure>
+                    <property name="paramName">UserName</property>
+                    <expression name="expression">params["UserName"]</expression>
+                </structure>
+                <structure>
+                    <property name="paramName">UserRole</property>
+                    <expression name="expression">params["UserRole"]</expression>
+                </structure>
+            </list-property>
             <column id="30">
                 <property name="width">33.3%</property>
             </column>
@@ -1084,6 +1095,20 @@ Order by final_rank, VOProbeSummary.VOName,date_format(VOProbeSummary.EndTime,'%
                                 <property name="height">600px</property>
                                 <property name="width">800px</property>
                                 <property name="refTemplateParameter">NewTemplateParameterDefinition</property>
+                                <list-property name="paramBindings">
+                                    <structure>
+                                        <property name="paramName">UserName</property>
+                                        <expression name="expression">params["UserName"]</expression>
+                                    </structure>
+                                    <structure>
+                                        <property name="paramName">UserRole</property>
+                                        <expression name="expression">params["UserRole"]</expression>
+                                    </structure>
+                                    <structure>
+                                        <property name="paramName">GroupByFormat</property>
+                                        <expression name="expression">params["GroupByFormat"]</expression>
+                                    </structure>
+                                </list-property>
                                 <xml-property name="xmlRepresentation"><![CDATA[<model:ChartWithAxes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:attribute="http://www.birt.eclipse.org/ChartModelAttribute" xmlns:data="http://www.birt.eclipse.org/ChartModelData" xmlns:layout="http://www.birt.eclipse.org/ChartModelLayout" xmlns:model="http://www.birt.eclipse.org/ChartModel" xmlns:type="http://www.birt.eclipse.org/ChartModelType">
   <Type>Bar Chart</Type>
   <SubType>Stacked</SubType>
@@ -1668,14 +1693,23 @@ function beforeDrawAxisTitle( axis, label, context )
       <SeriesDefinitions>
         <Query>
           <Definition>//Fix use of different casing for some VO's
+
 if(row[&quot;VOName&quot;] == &quot;LIGO&quot;) {
+
 	&quot;ligo&quot;
+
 }
+
 else if(row[&quot;VOName&quot;] == &quot;Engage&quot;){
+
 	&quot;engage&quot;
+
 }
+
 else {
+
 	 row[&quot;VOName&quot;]
+
 }</Definition>
         </Query>
         <SeriesPalette>
@@ -1791,37 +1825,69 @@ else {
               <Type>URL_Redirect</Type>
               <Value xsi:type="attribute:URLValue">
                 <BaseUrl>&lt;structure name=&quot;action&quot;>
+
     &lt;property name=&quot;formatType&quot;>html&lt;/property>
+
     &lt;property name=&quot;linkType&quot;>drill-through&lt;/property>
+
     &lt;property name=&quot;reportName&quot;>UsageByUserForWeek.rptdesign&lt;/property>
+
     &lt;property name=&quot;targetWindow&quot;>_self&lt;/property>
+
     &lt;list-property name=&quot;paramBindings&quot;>
+
         &lt;structure>
+
             &lt;property name=&quot;paramName&quot;>DatabaseURL&lt;/property>
+
             &lt;expression name=&quot;expression&quot;>params[&quot;DatabaseURL&quot;]&lt;/expression>
+
         &lt;/structure>
+
         &lt;structure>
+
             &lt;property name=&quot;paramName&quot;>DatabaseUser&lt;/property>
+
             &lt;expression name=&quot;expression&quot;>params[&quot;DatabaseUser&quot;]&lt;/expression>
+
         &lt;/structure>
+
         &lt;structure>
+
             &lt;property name=&quot;paramName&quot;>DatabasePassword&lt;/property>
+
             &lt;expression name=&quot;expression&quot;>params[&quot;DatabasePassword&quot;]&lt;/expression>
+
         &lt;/structure>
+
         &lt;structure>
+
             &lt;property name=&quot;paramName&quot;>Display Metric&lt;/property>
+
             &lt;expression name=&quot;expression&quot;>params[&quot;Display Metric&quot;]&lt;/expression>
+
         &lt;/structure>
+
         &lt;structure>
+
             &lt;property name=&quot;paramName&quot;>ForSite&lt;/property>
+
             &lt;expression name=&quot;expression&quot;>'AnySite'&lt;/expression>
+
         &lt;/structure>
+
         &lt;structure>
+
             &lt;property name=&quot;paramName&quot;>ForVO&lt;/property>
+
             &lt;expression name=&quot;expression&quot;>'VO'&lt;/expression>
+
         &lt;/structure>
+
     &lt;/list-property>
+
 &lt;/structure>
+
 </BaseUrl>
                 <BaseParameterName>ForWeek</BaseParameterName>
                 <ValueParameterName></ValueParameterName>
@@ -2045,7 +2111,7 @@ else {
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;date_format(VOProbeSummary.EndTime,\'%Y-%U\')&quot;]</Definition>
+          <Definition>row[&quot;datevalue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
