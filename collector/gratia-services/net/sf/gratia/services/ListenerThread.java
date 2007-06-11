@@ -39,6 +39,7 @@ public class ListenerThread extends Thread
 
    StatusUpdater statusUpdater = null;
    NewProbeUpdate newProbeUpdate = null;
+   NewVOUpdate newVOUpdate = null;
 
    Object lock;
 
@@ -222,6 +223,7 @@ public class ListenerThread extends Thread
 
       statusUpdater = new StatusUpdater();
       newProbeUpdate = new NewProbeUpdate();
+      newVOUpdate = new NewVOUpdate();
 
       for (int i = 0; i < files.length; i++)
       {
@@ -390,6 +392,10 @@ public class ListenerThread extends Thread
                   synchronized (lock)
                   {
                      newProbeUpdate.check(current);
+                  }
+                  synchronized (lock)
+                  {
+                     newVOUpdate.check(current);
                   }
                   // Logging.log("ListenerThread: " + ident + ":After New Probe Update");
                   updater.Update(current);
