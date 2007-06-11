@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Written by Eclipse BIRT 2.0 -->
-<report xmlns="http://www.eclipse.org/birt/2005/design" version="3" id="1">
+<report xmlns="http://www.eclipse.org/birt/2005/design" version="3.2.14" id="1">
     <property name="createdBy">Eclipse BIRT Designer Version 2.0.1 Build &lt;20060222-1204></property>
     <property name="units">in</property>
     <list-property name="propertyBindings">
@@ -37,10 +36,6 @@
 //printWriter.close();]]></method>
     <list-property name="configVars">
         <structure>
-            <property name="name">DatabaseURL</property>
-            <property name="value">jdbc:mysql://cd-psg3.fnal.gov:3320/gratia</property>
-        </structure>
-        <structure>
             <property name="name">DatabaseUser</property>
             <property name="value">gratia</property>
         </structure>
@@ -75,28 +70,37 @@
                     <property name="hidden">true</property>
                     <property name="valueType">static</property>
                     <property name="dataType">string</property>
-                    <property name="allowBlank">false</property>
-                    <property name="format">Unformatted</property>
+                    <property name="isRequired">true</property>
                     <property name="controlType">text-box</property>
-                    <property name="defaultValue">jdbc:mysql://cd-psg3.fnal.gov:3320/gratia</property>
+                    <property name="defaultValue">jdbc:mysql://gratia-db01.fnal.gov:3320/gratia</property>
+                    <structure name="format">
+                        <property name="category">Unformatted</property>
+                        <property name="pattern">Unformatted</property>
+                    </structure>
                 </scalar-parameter>
                 <scalar-parameter name="DatabaseUser" id="83">
                     <property name="hidden">true</property>
                     <property name="valueType">static</property>
                     <property name="dataType">string</property>
-                    <property name="allowBlank">false</property>
-                    <property name="format">Unformatted</property>
+                    <property name="isRequired">true</property>
                     <property name="controlType">text-box</property>
                     <property name="defaultValue">gratia</property>
+                    <structure name="format">
+                        <property name="category">Unformatted</property>
+                        <property name="pattern">Unformatted</property>
+                    </structure>
                 </scalar-parameter>
                 <scalar-parameter name="DatabasePassword" id="82">
                     <property name="hidden">true</property>
                     <property name="valueType">static</property>
                     <property name="dataType">string</property>
-                    <property name="allowBlank">false</property>
-                    <property name="format">Unformatted</property>
+                    <property name="isRequired">true</property>
                     <property name="controlType">text-box</property>
                     <property name="defaultValue">proto</property>
+                    <structure name="format">
+                        <property name="category">Unformatted</property>
+                        <property name="pattern">Unformatted</property>
+                    </structure>
                 </scalar-parameter>
             </parameters>
         </parameter-group>
@@ -104,83 +108,121 @@
             <text-property name="helpText">Only jobs that finished after this date will be included</text-property>
             <property name="valueType">static</property>
             <property name="dataType">string</property>
-            <property name="promptText">Start Date</property>
-            <property name="allowBlank">false</property>
-            <property name="format">Unformatted</property>
+            <text-property name="promptText">Start Date</text-property>
+            <property name="isRequired">true</property>
             <property name="controlType">text-box</property>
             <property name="defaultValue">3/1/2006</property>
+            <structure name="format">
+                <property name="category">Unformatted</property>
+                <property name="pattern">Unformatted</property>
+            </structure>
         </scalar-parameter>
         <scalar-parameter name="End Date" id="87">
             <text-property name="helpText">Only jobs that finished before this date will be included</text-property>
             <property name="valueType">static</property>
             <property name="dataType">string</property>
-            <property name="promptText">End Date</property>
-            <property name="allowBlank">false</property>
-            <property name="format">Unformatted</property>
+            <text-property name="promptText">End Date</text-property>
+            <property name="isRequired">true</property>
             <property name="controlType">text-box</property>
             <property name="defaultValue">12/31/2999</property>
+            <structure name="format">
+                <property name="category">Unformatted</property>
+                <property name="pattern">Unformatted</property>
+            </structure>
         </scalar-parameter>
         <scalar-parameter name="GroupByFormat" id="95">
             <property name="hidden">true</property>
             <property name="valueType">static</property>
             <property name="dataType">string</property>
             <property name="concealValue">true</property>
-            <property name="allowBlank">true</property>
-            <property name="allowNull">true</property>
-            <property name="format">Unformatted</property>
+            <property name="isRequired">false</property>
             <property name="controlType">text-box</property>
             <property name="defaultValue">%c/%d/%Y</property>
+            <structure name="format">
+                <property name="category">Unformatted</property>
+                <property name="pattern">Unformatted</property>
+            </structure>
         </scalar-parameter>
         <scalar-parameter name="TimeAxisPattern" id="97">
             <property name="hidden">true</property>
             <property name="valueType">static</property>
             <property name="dataType">string</property>
             <property name="concealValue">true</property>
-            <property name="allowBlank">true</property>
-            <property name="allowNull">true</property>
-            <property name="format">Unformatted</property>
+            <property name="isRequired">false</property>
             <property name="controlType">text-box</property>
             <property name="defaultValue">MM/dd/yyyy</property>
+            <structure name="format">
+                <property name="category">Unformatted</property>
+                <property name="pattern">Unformatted</property>
+            </structure>
         </scalar-parameter>
         <scalar-parameter name="HighlightDate" id="98">
             <property name="hidden">true</property>
             <property name="valueType">static</property>
             <property name="dataType">string</property>
-            <property name="allowNull">true</property>
-            <property name="format">Unformatted</property>
+            <property name="isRequired">false</property>
             <property name="controlType">text-box</property>
+            <structure name="format">
+                <property name="category">Unformatted</property>
+                <property name="pattern">Unformatted</property>
+            </structure>
         </scalar-parameter>
         <scalar-parameter name="UserName" id="102">
             <property name="hidden">true</property>
             <property name="valueType">static</property>
             <property name="dataType">string</property>
             <property name="concealValue">true</property>
-            <property name="allowNull">true</property>
-            <property name="format">Unformatted</property>
+            <property name="isRequired">false</property>
             <property name="controlType">text-box</property>
             <property name="defaultValue">None</property>
+            <structure name="format">
+                <property name="category">Unformatted</property>
+                <property name="pattern">Unformatted</property>
+            </structure>
         </scalar-parameter>
         <scalar-parameter name="UserRole" id="103">
             <property name="hidden">true</property>
             <property name="valueType">static</property>
             <property name="dataType">string</property>
             <property name="concealValue">true</property>
-            <property name="allowNull">true</property>
-            <property name="format">Unformatted</property>
+            <property name="isRequired">false</property>
             <property name="controlType">text-box</property>
             <property name="defaultValue">None</property>
+            <structure name="format">
+                <property name="category">Unformatted</property>
+                <property name="pattern">Unformatted</property>
+            </structure>
         </scalar-parameter>
     </parameters>
     <data-sources>
         <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="fermigrid1" id="4">
             <property name="odaDriverClass">com.mysql.jdbc.Driver</property>
-            <property name="odaURL">jdbc:mysql://cd-psg3.fnal.gov:3320/gratia</property>
+            <property name="odaURL">jdbc:mysql://gratia-db01.fnal.gov:3320/gratia</property>
             <property name="odaUser">gratia</property>
             <encrypted-property name="odaPassword">cHJvdG8=</encrypted-property>
         </oda-data-source>
     </data-sources>
     <data-sets>
         <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="TimeQuery" id="94">
+            <structure name="cachedMetaData">
+                <list-property name="resultSet">
+                    <structure>
+                        <property name="position">1</property>
+                        <property name="name">ProbeName</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">2</property>
+                        <property name="name">endtime</property>
+                        <property name="dataType">date-time</property>
+                    </structure>
+                    <structure>
+                        <property name="position">3</property>
+                        <property name="name">Njobs</property>
+                        <property name="dataType">decimal</property>
+                    </structure>
+                </list-property>
+            </structure>
             <property name="dataSource">fermigrid1</property>
             <list-property name="parameters">
                 <structure>
@@ -225,6 +267,26 @@
                     <property name="isInput">true</property>
                 </structure>
             </list-property>
+            <list-property name="resultSet">
+                <structure>
+                    <property name="position">1</property>
+                    <property name="name">ProbeName</property>
+                    <property name="nativeName">ProbeName</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">2</property>
+                    <property name="name">endtime</property>
+                    <property name="nativeName">endtime</property>
+                    <property name="dataType">date-time</property>
+                </structure>
+                <structure>
+                    <property name="position">3</property>
+                    <property name="name">Njobs</property>
+                    <property name="nativeName">Njobs</property>
+                    <property name="dataType">decimal</property>
+                </structure>
+            </list-property>
             <property name="queryText">
 call DailyJobsByProbe(?,?,?,?,?,'Batch')
 </property>
@@ -243,24 +305,6 @@ call DailyJobsByProbe(?,?,?,?,?,'Batch')
     </page-setup>
     <body>
         <extended-item extensionName="Chart" name="MyChart" id="90">
-            <property name="style">sans-style1</property>
-            <property name="height">480px</property>
-            <property name="width">800px</property>
-            <property name="dataSet">TimeQuery</property>
-            <list-property name="paramBindings">
-                <structure>
-                    <property name="paramName">StartDate</property>
-                    <expression name="expression">params["Start Date"]</expression>
-                </structure>
-                <structure>
-                    <property name="paramName">EndDate</property>
-                    <expression name="expression">params["End Date"]</expression>
-                </structure>
-                <structure>
-                    <property name="paramName">GroupByFormat</property>
-                    <expression name="expression">params["GroupByFormat"]</expression>
-                </structure>
-            </list-property>
             <xml-property name="xmlRepresentation"><![CDATA[<model:ChartWithAxes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:attribute="http://www.birt.eclipse.org/ChartModelAttribute" xmlns:data="http://www.birt.eclipse.org/ChartModelData" xmlns:layout="http://www.birt.eclipse.org/ChartModelLayout" xmlns:model="http://www.birt.eclipse.org/ChartModel" xmlns:type="http://www.birt.eclipse.org/ChartModelType">
   <Type>Line Chart</Type>
   <SubType>Overlay</SubType>
@@ -1052,11 +1096,11 @@ printWriter.close();
               </Value>
             </Action>
           </Triggers>
-          <Marker>
+          <Markers>
             <Type>Box</Type>
             <Size>3</Size>
             <Visible>true</Visible>
-          </Marker>
+          </Markers>
           <LineAttributes>
             <Style>Solid</Style>
             <Thickness>1</Thickness>
@@ -1418,6 +1462,38 @@ MM/dd/yyyy
 </model:ChartWithAxes>
 ]]></xml-property>
             <property name="outputFormat">SVG</property>
+            <property name="dataSet">TimeQuery</property>
+            <property name="height">480px</property>
+            <property name="width">800px</property>
+            <list-property name="paramBindings">
+                <structure>
+                    <property name="paramName">StartDate</property>
+                    <expression name="expression">params["Start Date"]</expression>
+                </structure>
+                <structure>
+                    <property name="paramName">EndDate</property>
+                    <expression name="expression">params["End Date"]</expression>
+                </structure>
+                <structure>
+                    <property name="paramName">GroupByFormat</property>
+                    <expression name="expression">params["GroupByFormat"]</expression>
+                </structure>
+            </list-property>
+            <list-property name="boundDataColumns">
+                <structure>
+                    <property name="name">ProbeName</property>
+                    <expression name="expression">dataSetRow["ProbeName"]</expression>
+                </structure>
+                <structure>
+                    <property name="name">endtime</property>
+                    <expression name="expression">dataSetRow["endtime"]</expression>
+                </structure>
+                <structure>
+                    <property name="name">Njobs</property>
+                    <expression name="expression">dataSetRow["Njobs"]</expression>
+                </structure>
+            </list-property>
+            <property name="style">sans-style1</property>
         </extended-item>
         <text-data id="99">
             <property name="style">sans-style1</property>
