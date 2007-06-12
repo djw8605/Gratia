@@ -67,7 +67,7 @@ public class NewVOUpdate
       //
       // see if the probe exists
       //
-      String command = "select count(*) from VOCorrection where binary voname = " + dq + voname + dq + 
+      String command = "select count(*) from VONameCorrection where voname = binary " + dq + voname + dq + 
                   " and binary reportablevoname = " + reportablevoname;
       try
       {
@@ -111,7 +111,7 @@ public class NewVOUpdate
             resultSet = statement.executeQuery(command);
             while (resultSet.next())
             {
-               facilityid = resultSet.getInt(1);
+               VOid = resultSet.getInt(1);
             }
             resultSet.close();
             statement.close();
