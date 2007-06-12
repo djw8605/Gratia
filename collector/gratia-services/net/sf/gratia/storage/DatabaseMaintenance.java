@@ -2,15 +2,14 @@ package net.sf.gratia.storage;
 
 import java.sql.*;
 
+import net.sf.gratia.services.Execute;
 import net.sf.gratia.services.XP;
 import net.sf.gratia.services.Logging;
 import java.util.Properties;
 
 public class DatabaseMaintenance {
     static final String dq = "\"";
-
     static final String comma = ",";
-
     static final int gratiaDatabaseVersion = 8;
 
     java.sql.Connection connection;
@@ -43,6 +42,16 @@ public class DatabaseMaintenance {
     public boolean IsDbNewer()
     {
         return (liveVersion > gratiaDatabaseVersion);
+    }
+    
+    public boolean InitialCleanup() {
+        // Do check and cleanup that must be done before Hibernate is started.
+        
+        if (liveVersion < 4) Execute("Drop view if exists Role;");
+        if (liveVersion < 5) Execute("Drop view if exists Site;");
+        if (liveVersion < 6) Execute("Drop view if exists Probe;");
+        
+        return true;
     }
     
     public void AddIndex(String table, Boolean unique, String name,
@@ -140,6 +149,43 @@ public class DatabaseMaintenance {
         //
         AddIndex("VONameCorrection",false,"index01","VOName, ReportableVOName");
 
+    }
+
+    public void CheckStoredProcedures()
+    {
+       Statement statement;
+       ResultSet resultSet;
+
+       String command = "show triggers";
+       int count = 0;
+
+       try
+       {
+          Logging.log("Executing: " + command);
+          statement = connection.createStatement();
+          resultSet = statement.executeQuery(command);
+          while (resultSet.next())
+             count++;
+          resultSet.close();
+          statement.close();
+       }
+       catch (Exception e)
+       {
+          Logging.log("Command: Error: " + command + " : " + e);
+       }
+
+       if (count == 0)
+       {
+          Logging.log("CollectorService: Creating Stored Procedures");
+          String home = System.getProperty("catalina.home");
+          home = xp.replaceAll(home, "\\", "/");
+          home = home + "/gratia/post-install.sh";
+          Execute.execute(home);
+       }
+       else
+       {
+          Logging.log("CollectorService: Stored Procedures Already Exist");
+       }
     }
 
     public int Execute(String cmd) {
@@ -253,7 +299,7 @@ public class DatabaseMaintenance {
                 "reportmm,status,jobs from Probe;");
         Execute("DROP VIEW IF EXISTS JobUsageRecord_Report;");
         Execute("CREATE VIEW JobUsageRecord_Report as select "+GetJobUsageRecordColumns()+
-		" ,JobUsageRecord_Meta.ProbeName " +
+		        " ,JobUsageRecord_Meta.ProbeName " +
                 " from JobUsageRecord_Meta,Site,Probe,JobUsageRecord " +
                 " where " +
                 " JobUsageRecord_Meta.ProbeName = Probe.probename and Probe.siteid = Site.siteid" +
