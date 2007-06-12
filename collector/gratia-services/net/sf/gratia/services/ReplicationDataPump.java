@@ -55,7 +55,7 @@ public class ReplicationDataPump extends Thread
       
       String tmp = p.getProperty("service.datapump.trace");
       trace = tmp != null && tmp.equals("1");
-      chunksize = 100;
+      chunksize = 32000;
       tmp = p.getProperty("service.datapump.chunksize");
       if (tmp != null) {
          try {
