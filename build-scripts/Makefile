@@ -56,7 +56,9 @@ clean:
 
 # services will eventually need the util package
 
-services:
+services: ${target}/gratia-services.war
+
+${target}/gratia-services.war:  ${services}/net/sf/gratia/services/*.java  ${services}/net/sf/gratia/storage/*.java ${services}/net/sf/gratia/services/web.xml
 	rm -f -r war
 	mkdir war
 	mkdir war/META-INF
@@ -81,6 +83,7 @@ services:
 	cp ${services}/net/sf/gratia/services/web.xml war/WEB-INF/web.xml
 	jar -cfM ${target}/gratia-services.war -C war .
 	rm -f -r war
+
 
 servlets: services
 	rm -f -r war
@@ -138,7 +141,13 @@ soap: services
 	jar -cfM ${target}/gratia-soap.war -C war .
 	rm -f -r war
 
-administration: services
+administration: services ${target}/gratia-administration.war
+
+${target}/gratia-administration.war: ${administration}/net/sf/gratia/administration/*.java ${administration}/net/sf/gratia/administration/web.xml \
+   ${administration}/net/sf/gratia/administration/web.xml ${administration}/net/sf/gratia/administration/*.html \
+   ${administration}/net/sf/gratia/administration/*.css ${administration}/net/sf/gratia/administration/*.jsp \
+   ${administration}/net/sf/gratia/administration/images/*.gif ${docs}/*.html \
+   ${commonLib}/mysql*.jar
 	rm -f -r war
 	mkdir war
 	mkdir war/images
@@ -208,7 +217,7 @@ util:
 # ###	cp ${util}/net/sf/gratia/util/web.xml war/WEB-INF/web.xml
 	jar -cfM ${target}/gratia-util.war -C war .
 	rm -f -r war
-	
+
 reporting: util
 	rm -f -r war
 	mkdir war
