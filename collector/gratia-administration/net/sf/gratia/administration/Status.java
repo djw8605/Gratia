@@ -165,7 +165,7 @@ public class Status extends HttpServlet
 	java.util.Date to = new java.util.Date();
 	java.util.Date from = new java.util.Date(to.getTime() - decrement);
 
-	SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd kk:mm:ss");
+	SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 	try
 	    {
