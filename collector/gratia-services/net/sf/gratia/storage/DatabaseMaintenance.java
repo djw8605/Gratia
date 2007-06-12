@@ -11,7 +11,7 @@ public class DatabaseMaintenance {
 
     static final String comma = ",";
 
-    static final int gratiaDatabaseVersion = 7;
+    static final int gratiaDatabaseVersion = 8;
 
     java.sql.Connection connection;
     int liveVersion = 0;
@@ -134,6 +134,11 @@ public class DatabaseMaintenance {
         // New index for ResourceType
         //
         AddIndex("JobUsageRecord", false, "index16", "ResourceType");
+        
+        //
+        // Indixes for VONameCorrection
+        //
+        AddIndex("VONameCorrection",false,"index01","VOName, ReportableVOName");
 
     }
 
@@ -403,6 +408,23 @@ public class DatabaseMaintenance {
                 } else {
                     Logging.log("Gratia database FAILED to upgrade from " + current + " to " + (current + 1));
                 }
+            }
+            if (current == 7) {
+                int result = Execute("insert into VONameCorrection(VOName,ReportableVOName) select distinct binary VOName,ReportableVOName from JobUsageRecord");
+                if (result > -1) {
+                    result = Execute("insert into VO(VOName) select distinct VOName from VONameCorrection");
+                }
+                if (result > -1) {
+                    result = Execute("update VONameCorrection,VO set VONameCorrection.VOid=VO.VOid where VONameCorrection.VOName = VO.VOName");
+                }
+                if (result > -1) {
+                    Logging.log("Gratia database upgraded from " + current + " to " + (current + 1));
+                    current = current + 1;
+                    UpdateDbVersion(current);
+                } else {
+                    Logging.log("Gratia database FAILED to upgrade from " + current + " to " + (current + 1));
+                }
+                
             }
             return current == gratiaDatabaseVersion;
         }
