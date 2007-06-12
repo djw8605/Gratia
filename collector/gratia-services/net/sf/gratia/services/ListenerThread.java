@@ -393,12 +393,14 @@ public class ListenerThread extends Thread
                   {
                      newProbeUpdate.check(current);
                   }
+                  // Logging.log("ListenerThread: " + ident + ":After New Probe Update");
+                  updater.Update(current);
+
                   synchronized (lock)
                   {
                      newVOUpdate.check(current);
                   }
-                  // Logging.log("ListenerThread: " + ident + ":After New Probe Update");
-                  updater.Update(current);
+
                   if (rawxml != null)
                      current.setRawXml(rawxml);
                   if (extraxml != null)
