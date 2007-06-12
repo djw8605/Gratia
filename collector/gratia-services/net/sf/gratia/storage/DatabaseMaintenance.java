@@ -204,6 +204,24 @@ public class DatabaseMaintenance {
         return result;
     }
 
+    private int getCount(String cmd) {
+        Statement statement;
+        ResultSet resultSet;
+
+        try {
+            Logging.log("Executing: " + cmd);
+            statement = connection.createStatement();
+            resultSet = statement.executeQuery(cmd);
+            if (resultSet.next()) {
+                return resultSet.getInt(1);
+            }
+            Logging.log("Command: OK: " + cmd);
+        } catch (Exception e) {
+            Logging.log("Command: Error: " + cmd + " : " + e);
+        }
+        return 0;
+    }
+
     public void SiteDefaults() {
         Statement statement;
         ResultSet resultSet;
@@ -267,10 +285,20 @@ public class DatabaseMaintenance {
         Execute("insert into CPUMetricTypes(CPUMetricType) values(" + dq
                 + "process" + dq + ")");
     }
+    
+    public void RoleDefaults() {
+        if (getCount("select count(*) from Role where role='GratiaGlobalAdmin'")==0) {
+           Execute("insert into Role(role,subtitle,whereclause) values('GratiaGlobalAdmin','GratiaGlobalAdmin','')");
+        }
+        if (getCount("select count(*) from Role where role='GratiaUser'")==0) {
+           Execute("insert into Role(role,subtitle,whereclause) values('GratiaUser','GratiaUser','Everything')");
+        }
+    }
 
     public void AddDefaults() {
         SiteDefaults();
         CPUMetricDefaults();
+        RoleDefaults();
 
         //
         // place holder to initialize SystemProplist
