@@ -53,7 +53,7 @@ public class VONameCorrection extends HttpServlet
       Hashtable table = new Hashtable();
       Hashtable vobyid = new Hashtable();
       Hashtable vobyname = new Hashtable();
-      String newname = "<New Probe Name>";
+      String newname = "<New VOName>";
 
     public void init(ServletConfig config) throws ServletException 
       {
@@ -186,10 +186,13 @@ public class VONameCorrection extends HttpServlet
                                     table.put("index:" + index,"" + index);
 
                                     newrow = xp.replaceAll(newrow,"#corrid#",resultSet.getString(1));
-                                    table.put("corrid:" + index,resultSet.getString(3));
+                                    table.put("corrid:" + index,resultSet.getString(1));
 
                                     newrow = xp.replaceAll(newrow,"#voname#",voname);
-                                    newrow = xp.replaceAll(newrow,"#reportablevoname#",reportablevoname);
+                                    if (reportablevoname != null)
+					newrow = xp.replaceAll(newrow,"#reportablevoname#",reportablevoname);
+				    else
+					newrow = xp.replaceAll(newrow,"#reportablevoname#","");
 
                                     String actualname = (String) vobyid.get(resultSet.getString(4));
                                     newrow = volist(index,newrow,actualname);
@@ -212,7 +215,7 @@ public class VONameCorrection extends HttpServlet
                         String newrow = new String(row);
                         newrow = xp.replaceAll(newrow,"#index#","" + index);
                         newrow = xp.replace(newrow,"#voname#",newname);
-                        newrow = xp.replace(newrow,"#reportablevoname#",newname);
+                        newrow = xp.replace(newrow,"#reportablevoname#","");
                         newrow = volist(index,newrow,"xxx");
                         table.put("index:" + index,"" + index);
                         table.put("voname:" + index,newname);
@@ -373,10 +376,15 @@ public class VONameCorrection extends HttpServlet
             String VOid = (String) vobyname.get(actualname);
             String voname = (String) request.getParameter("voname:" + index);
             String reportablevoname = (String) request.getParameter("reportablevoname:" + index);
+	    if (reportablevoname == null || reportablevoname.length()==0) {
+		reportablevoname = "null";
+	    } else {
+		reportablevoname = dq + reportablevoname + dq;
+	    }
 
             String command = 
                   "insert into VONameCorrection (VOid,VOName,ReportableVOName) values(" + 
-                  VOid + comma + dq + voname + dq + comma + dq + reportablevoname + dq + ")";
+                  VOid + comma + dq + voname + dq + comma + reportablevoname + ")";
             try
                   {
                         statement = connection.createStatement();
