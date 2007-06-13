@@ -56,6 +56,7 @@ glr:begin
 	declare n_CpuUserDuration int default 0;
 	declare n_CpuSystemDuration  int default 0;
 	declare n_HostDescription varchar(255);
+	declare n_Host varchar(255);
   declare n_NJobs int;
   declare n_CommonName varchar(255);
   declare n_StartTime datetime;
@@ -68,8 +69,8 @@ glr:begin
 		leave glr;
 	end if;
 
-  select VOName,NJobs,WallDuration,CpuUserDuration,CpuSystemDuration,CommonName,ResourceType,EndTime,StartTime,HostDescription
-             into n_VOName,n_NJobs,n_WallDuration,n_CpuUserDuration,n_CpuSystemDuration,n_CommonName,n_ResourceType,n_EndTime,n_StartTime,n_HostDescription
+  select VOName,NJobs,WallDuration,CpuUserDuration,CpuSystemDuration,CommonName,ResourceType,EndTime,StartTime,HostDescription,Host
+             into n_VOName,n_NJobs,n_WallDuration,n_CpuUserDuration,n_CpuSystemDuration,n_CommonName,n_ResourceType,n_EndTime,n_StartTime,n_HostDescription,n_Host
              from JobUsageRecord
              where JobUsageRecord.dbid = new.dbid;
 
