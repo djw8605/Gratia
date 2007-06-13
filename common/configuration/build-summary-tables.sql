@@ -59,7 +59,7 @@ insert into ProbeStatus
 		str_to_date(date_format(ServerDate,'%Y-%c-%e %H:00:00'),'%Y-%c-%e %H:00:00') as EndTime,
 		ProbeName,
 		count(*) as Njobs
-		from JobUsageRecord
+		from JobUsageRecord_Meta
 		group by ProbeName,str_to_date(date_format(ServerDate,'%Y-%c-%e %H:00:00'),'%Y-%c-%e %H:00:00')
 );
 ||
@@ -79,8 +79,9 @@ insert into ProbeSummary
 		sum(WallDuration) as WallDuration,
 		sum(CpuUserDuration) as CpuUserDuration,
 		sum(CpuSystemDuration) as CpuSystemDuration
-		from JobUsageRecord
+		from JobUsageRecord, JobUsageRecord_Meta
 		where CpuUserDuration is not null
+      and JobUsageRecord.dbid = JobUsageRecord_Meta.dbid
 		group by ProbeName,ResourceType,date(EndTime)
 );
 ||
@@ -103,8 +104,9 @@ insert into UserProbeSummary
 		sum(WallDuration) as WallDuration,
 		sum(CpuUserDuration) as CpuUserDuration,
 		sum(CpuSystemDuration) as CpuSystemDuration
-		from JobUsageRecord
+		from JobUsageRecord, JobUsageRecord_Meta
 		where CpuUserDuration is not null
+      and JobUsageRecord.dbid = JobUsageRecord_Meta.dbid
 		group by CommonName,ProbeName,ResourceType,date(EndTime)
 );
 ||
@@ -131,8 +133,9 @@ insert into VOProbeSummary
 		sum(WallDuration) as WallDuration,
 		sum(CpuUserDuration) as CpuUserDuration,
 		sum(CpuSystemDuration) as CpuSystemDuration
-		from JobUsageRecord
+		from JobUsageRecord, JobUsageRecord_Meta
 		where CpuUserDuration is not null
+      and JobUsageRecord.dbid = JobUsageRecord_Meta.dbid
 		group by VOName,ProbeName,CommonName,ResourceType,date(EndTime)
 );
 ||
@@ -161,8 +164,9 @@ insert into HostDescriptionProbeSummary
 		sum(WallDuration) as WallDuration,
 		sum(CpuUserDuration) as CpuUserDuration,
 		sum(CpuSystemDuration) as CpuSystemDuration
-		from JobUsageRecord
+		from JobUsageRecord, JobUsageRecord_Meta
 		where CpuUserDuration is not null
+      and JobUsageRecord.dbid = JobUsageRecord_Meta.dbid
 		group by HostDescription,ProbeName,ResourceType,date(EndTime)
 );
 ||

@@ -14,6 +14,7 @@ begin
 
 	if mycount > 0 then
 		drop trigger trigger01;
+	end if;
 
 	select count(*) into mycount from information_schema.triggers where
 		trigger_schema = Database()
@@ -22,7 +23,7 @@ begin
 
 	if mycount > 0 then
 		drop trigger trigger02;
-  end if;
+	end if;
 end
 ||
 call conditional_trigger_drop()
@@ -248,7 +249,7 @@ glr:begin
 			set mycpucount = 0;
 			set mybenchmarkscore = 0;
 			select BenchmarkScore,CPUCount into mybenchmarkscore,mycpucount from CPUInfo
-				where myhostdescription = CPUInfo.NodeName;
+				where myhostdescription = CPUInfo.HostDescription;
 		end;
 
 		set numberofdays = datediff(enddate,startdate);
@@ -278,3 +279,8 @@ glr:begin
 	end if;
 
 end;
+
+-- Local Variables:
+-- mode: sql
+-- eval: (sql-set-product 'mysql)
+-- End:

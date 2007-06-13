@@ -26,7 +26,7 @@ alter table NodeSummary
 alter table NodeSummary
 	add index index04(ResourceType);
 ||
-drop procedure updatenodesummary
+drop procedure if exists updatenodesummary 
 ||
 create procedure updatenodesummary(enddate datetime,mynode varchar(255),
 	myprobename varchar(255),myresourcetype varchar(255),
@@ -62,7 +62,7 @@ begin
 	end if;
 end;
 ||
-drop procedure buildnodesummary
+drop procedure if exists buildnodesummary
 ||
 create procedure buildnodesummary()
 begin
@@ -89,7 +89,11 @@ begin
 
 	declare cur01 cursor for select StartTime,EndTime,Host,ProbeName,ResourceType,
 		CpuUserDuration,CpuSystemDuration,HostDescription
-		from JobUsageRecord order by ProbeName,ResourceType,StartTime,EndTime;
+		from JobUsageRecord, JobUsageRecord_Meta
+		where JobUsageRecord.ResourceType = 'RawCPU'
+			and JobUsageRecord.dbid = JobUsageRecord_Meta.dbid
+		order by ProbeName,ResourceType,StartTime,EndTime;
+
 	declare continue handler for sqlstate '02000' set done = true;
 
 	open cur01;
@@ -117,7 +121,7 @@ begin
 				set mybenchmarkscore = 0;
 				select BenchmarkScore,CPUCount into mybenchmarkscore,mycpucount
 					from CPUInfo where
-					myhostdescription = CPUInfo.NodeName;
+					myhostdescription = CPUInfo.HostDescription;
 				set done = false;
 		end;
 
