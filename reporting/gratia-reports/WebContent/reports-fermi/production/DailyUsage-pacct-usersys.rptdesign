@@ -223,9 +223,9 @@ sum(J.CpuSystemDuration) as syscpu,
 
 sum((J.CpuUserDuration+J.CpuSystemDuration)) as cputotal,
 sum((J.CpuUserDuration+J.CpuSystemDuration)*CpuInfo.BenchmarkScore/1000) as normcputotal
-FROM JobUsageRecord J, CPUInfo CpuInfo
+FROM JobUsageRecord_Report J, CPUInfo CpuInfo
 where J.ResourceType = 'Batch'
-and J.HostDescription=CpuInfo.NodeName 
+and J.HostDescription=CpuInfo.HostDescription 
 and J.ProbeName = ?
 and (? &lt;= EndTime and EndTime &lt;= ?)
 group by date_format(J.EndTime, ?)

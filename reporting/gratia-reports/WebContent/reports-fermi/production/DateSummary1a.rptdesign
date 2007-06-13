@@ -128,9 +128,9 @@ J.VOName as voname,
 J.LocalUserID as locuserid,
 sum(J.CpuUserDuration+J.CpuSystemDuration) 
 *C.BenchmarkScore/(3600*1000) as cpunorm
- FROM JobUsageRecord J, CPUInfo C, CEProbes P, CETable CE
+ FROM JobUsageRecord_Report J, CPUInfo C, CEProbes P, CETable CE
 where J.Resource = 'Batch'
-and J.HostDescription = C.NodeName
+and J.HostDescription = C.HostDescription
 and date_format(J.EndTime, "%Y-%m") = ?
 
 and J.ProbeName = P.probename

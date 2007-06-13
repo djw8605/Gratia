@@ -215,15 +215,15 @@
                 </structure>
             </list-property>
             <property name="queryText">
-select JobUsageRecord.VOName, JobUsageRecord.ProbeName,
-       Date(JobUsageRecord.EndTime) as endtime, 
-       sum(JobUsageRecord.CpuUserDuration+JobUsageRecord.CpuSystemDuration)
-from JobUsageRecord
-where JobUsageRecord.ResourceType = 'RawCPU'
-and (? = 'All' or JobUsageRecord.ProbeName =?)
+select JobUsageRecord_Report.VOName, JobUsageRecord_Report.ProbeName,
+       Date(JobUsageRecord_Report.EndTime) as endtime, 
+       sum(JobUsageRecord_Report.CpuUserDuration+JobUsageRecord_Report.CpuSystemDuration)
+from JobUsageRecord_Report
+where JobUsageRecord_Report.ResourceType = 'RawCPU'
+and (? = 'All' or JobUsageRecord_Report.ProbeName =?)
 and (? &lt;= EndTime and EndTime &lt;= ?)
-group by date_format(EndTime, ?), JobUsageRecord.VOName
-order by JobUsageRecord.EndTime</property>
+group by date_format(EndTime, ?), JobUsageRecord_Report.VOName
+order by JobUsageRecord_Report.EndTime</property>
         </oda-data-set>
         <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="ProbeNames" id="102">
             <property name="dataSource">fermigrid1</property>
@@ -953,7 +953,7 @@ printWriter.close();
             <Visible>false</Visible>
           </Label>
           <DataDefinition>
-            <Definition>row[&quot;sum(JobUsageRecord.CpuUserDuration+JobUsageRecord.CpuSystemDuration)&quot;] / 3600</Definition>
+            <Definition>row[&quot;sum(JobUsageRecord_Report.CpuUserDuration+JobUsageRecord_Report.CpuSystemDuration)&quot;] / 3600</Definition>
           </DataDefinition>
           <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
           <DataPoint>

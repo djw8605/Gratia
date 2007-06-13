@@ -112,9 +112,9 @@ date_format(J.EndTime, "%Y-%m") as yearmonth,
 J.VOName as voname,
 sum(J.CpuUserDuration+J.CpuSystemDuration) 
 *C.BenchmarkScore/(3600*1000) as cpunorm
- FROM JobUsageRecord J, CPUInfo C, CETable CE, CEProbes P
+ FROM JobUsageRecord_Report J, CPUInfo C, CETable CE, CEProbes P
 where J.ResourceType = 'RawCPU'
-and J.HostDescription = C.NodeName
+and J.HostDescription = C.HostDescription
 and J.EndTime >= ?
 and J.EndTime &lt; '2010-12-31'
 and J.ProbeName = P.probename

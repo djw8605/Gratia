@@ -223,9 +223,9 @@ sum(J.CpuSystemDuration) as syscpu,
 
 sum((J.CpuUserDuration+J.CpuSystemDuration)) as cputotal,
 sum((J.CpuUserDuration+J.CpuSystemDuration)*CpuInfo.BenchmarkScore/1000) as normcputotal
-FROM JobUsageRecord J, CPUInfo CpuInfo, CETable C, CEProbes P
+FROM JobUsageRecord_Report J, CPUInfo CpuInfo, CETable C, CEProbes P
 where J.ResourceType = 'RawCPU'
-and J.HostDescription=CpuInfo.NodeName 
+and J.HostDescription=CpuInfo.HostDescription 
 and J.ProbeName = P.probename
 and P.facility_id = C.facility_id
 and  C.facility_name = ?
