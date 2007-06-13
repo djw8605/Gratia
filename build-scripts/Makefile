@@ -26,7 +26,7 @@ administration=${collector}/gratia-administration
 # reporting modules
 reports=${reporting}/gratia-reports
 reportsrc=${reporting}/gratia-reporting
-birtwars=${reporting}/birt-wars
+birtwars=${reporting}/birt-wars/birt-v20.war
 
 # common modules
 configuration=${common}/configuration
@@ -281,12 +281,11 @@ release: clean util services servlets soap reporting reports administration secu
 	cp ${configuration}/*gov ${configuration}/*xml ${configuration}/*properties tarball/tomcat/v55/gratia
 	cp ${configuration}/*sql ${configuration}/*sh tarball/tomcat/v55/gratia
 	cp ${configuration}/truststore ${configuration}/keystore tarball/tomcat/v55/gratia
-	rm -f tarball/tomcat/v55/gratia/local.*
-	rm -f tarball/tomcat/v55/gratia/release.*
-	cp ${configuration}/release.service-configuration.properties tarball/tomcat/v55/gratia/service-configuration.properties
+	cp ${configuration}/service-configuration.properties tarball/tomcat/v55/gratia/service-configuration.properties
 	cp ${target}/gratia-reports.war tarball/gratia/gratia_reporting
 	cp ${target}/gratia-reporting.war tarball/gratia/gratia_reporting
 	cp ${target}/gratia-security.war tarball/gratia/gratia_reporting
+	cp ${birtwars} tarball/gratia/gratia_reporting
 	tar ${tarowner} -cvf ${target}/gratia_reporting_${gratia_reporting_version}.tar -C tarball .
 	rm -f -r tarball
 	#
@@ -305,9 +304,7 @@ release: clean util services servlets soap reporting reports administration secu
 	cp ${configuration}/*gov ${configuration}/*xml ${configuration}/*properties tarball/tomcat/v55/gratia
 	cp ${configuration}/*sql ${configuration}/*sh tarball/tomcat/v55/gratia
 	cp ${configuration}/truststore ${configuration}/keystore tarball/tomcat/v55/gratia
-	rm -f tarball/tomcat/v55/gratia/local.*
-	rm -f tarball/tomcat/v55/gratia/release.*
-	cp ${configuration}/release.service-configuration.properties tarball/tomcat/v55/gratia/service-configuration.properties
+	cp ${configuration}/service-configuration.properties tarball/tomcat/v55/gratia/service-configuration.properties
 	cp ${target}/gratia-services.war tarball/gratia/gratia_services
 	cp ${target}/gratia-servlets.war tarball/gratia/gratia_services
 	cp ${target}/gratia-soap.war tarball/gratia/gratia_services
@@ -321,9 +318,7 @@ gratia: clean util services servlets soap reporting reports administration secur
 	mkdir tarball
 	cp ${configuration}/UserVoMap.* ${configuration}/*xml ${configuration}/*properties tarball
 	cp ${configuration}/*sql ${configuration}/*sh tarball
-	rm -f tarball/local.*
-	rm -f tarball/release.*
-	cp ${configuration}/local.service-configuration.properties tarball/service-configuration.properties
+	cp ${configuration}/service-configuration.properties tarball/service-configuration.properties
 	cp ${configuration}/configure-* ${configuration}/update-gratia-local tarball
 	cp ${configuration}/truststore ${configuration}/keystore tarball
 	tar -cvf ${target}/gratia.tar -C tarball .
@@ -334,14 +329,12 @@ glr: clean util services servlets soap reporting reports administration security
 	mkdir tarball
 	cp ${configuration}/UserVoMap.* ${configuration}/*xml ${configuration}/*properties tarball
 	cp ${configuration}/*sql ${configuration}/*sh tarball
-	rm -f tarball/local.*
-	rm -f tarball/release.*
-	cp ${configuration}/local.service-configuration.properties tarball/service-configuration.properties
+	cp ${configuration}/service-configuration.properties tarball/service-configuration.properties
 	tar -cvf ${target}/gratia.tar -C tarball .
 	rm -f -r tarball
 	rm -f -r ~/Desktop/tomcat/webapps/gratia*
 	cp ${target}/*war ~/Desktop/tomcat/webapps
-	cp ${birtwars}/*war ~/Desktop/tomcat/webapps
+	cp ${birtwars} ~/Desktop/tomcat/webapps
 
 define defaultdirs
 	mkdir -p gratia/ ; \
