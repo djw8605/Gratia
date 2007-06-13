@@ -2,10 +2,10 @@
 PLATFORM := ${shell uname}
 
 # tarbal version
-gratia_reporting_version=v0.12.2
-gratia_services_version=v0.12.2
+gratia_reporting_version=v0.24
+gratia_services_version=v0.24
 
-# define usefull variables
+# define useful variables
 base=..
 
 target=${base}/target
@@ -260,7 +260,7 @@ reports:
 	cp ${reports}/WebContent/WEB-INF/web.xml war/WEB-INF/web.xml
 	jar -cvf ${target}/gratia-reports.war -C war .
 	rm -f -r war
-	
+
 local: clean util services servlets soap reporting reports administration security 
 
 release: clean util services servlets soap reporting reports administration security
