@@ -1,6 +1,7 @@
 package net.sf.gratia.services;
 
 import java.util.Properties;
+import java.text.SimpleDateFormat;
 import java.sql.*;
 import net.sf.gratia.storage.*;
 
@@ -12,6 +13,7 @@ public class NewProbeUpdate
    Statement statement = null;
    ResultSet resultSet = null;
    XP xp = new XP();
+   SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
    String driver = null;
    String url = null;
@@ -115,8 +117,16 @@ public class NewProbeUpdate
          // now add a new entry to ceprobes with default values
          //
          command =
-               "insert into Probe (siteid,probename,active,reporthh,reportmm) values(" +
-               facilityid + comma + dq + probename + dq + comma + "1" + comma + "24" + comma + "00" + ")";
+						 "insert into Probe (siteid,probename,active,currenttime,reporthh,reportmm,status,nRecords) values(" +
+						 facilityid + comma + // siteid
+						 dq + probename + dq + comma + // probename
+						 "1" + comma + // active
+						 dq + format.format(new java.util.Date()) + dq + comma + // currenttime
+						 "24" + comma + // reporthh
+						 "00" + comma + // reportmm
+						 dq + "alive" + dq + comma + // status
+						 "1" + // nRecords
+						 ")";
          statement = connection.createStatement();
          statement.executeUpdate(command);
          statement.close();
