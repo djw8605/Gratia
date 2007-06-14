@@ -57,7 +57,7 @@ public class StatusUpdater
       String command = "update Probe set" +
             " currenttime = " + dq + format.format(new java.util.Date()) + dq + comma +
             " status = " + dq + "alive" + dq + comma +
-            " jobs = jobs + 1" +
+            " nRecords = nRecords + 1" +
             " where probename = " + dq + probeName + dq;
 
       try

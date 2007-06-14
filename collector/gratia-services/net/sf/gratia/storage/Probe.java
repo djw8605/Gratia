@@ -10,7 +10,7 @@ public class Probe
 		private int reporthh;
 		private int reportmm;
 		private String status;
-		private int jobs;
+		private int nRecords;
 
 		public Probe()
 		{
@@ -96,14 +96,14 @@ public class Probe
 				return status;
 		}
 
-		public int getjobs()
+		public int getnRecords()
 		{
-				return jobs;
+				return nRecords;
 		}
 
-		public void setjobs(int value)
+		public void setnRecords(int value)
 		{
-				this.jobs = value;
+				this.nRecords = value;
 		}
 
 		public String toString() 
@@ -117,7 +117,8 @@ public class Probe
 						" active: " + active +
 						" reporthh: " + reporthh +
 						" reportmm: " + reportmm +
-						" status: " + status;
+						" status: " + status +
+						" nRecords: " + nRecords;
         return output;
     }
 }

@@ -10,7 +10,7 @@ import java.util.Properties;
 public class DatabaseMaintenance {
     static final String dq = "\"";
     static final String comma = ",";
-    static final int gratiaDatabaseVersion = 8;
+    static final int gratiaDatabaseVersion = 9;
 
     java.sql.Connection connection;
     int liveVersion = 0;
@@ -500,6 +500,19 @@ public class DatabaseMaintenance {
                 }
                 
             }
+						if (current == 8) {
+                int result = Execute("update (select ProbeName,count(*) as nRecords from JobUsageRecord_Meta group by ProbeName) as sums,Probe set Probe.nRecords = sums.nRecords where Probe.ProbeName = sums.ProbeName;");
+                if (result > -1) {
+                    result = Execute("alter table Probe drop column jobs; ");
+                }
+                if (result > -1) {
+                    Logging.log("Gratia database upgraded from " + current + " to " + (current + 1));
+                    current = current + 1;
+                    UpdateDbVersion(current);
+                } else {
+                    Logging.log("Gratia database FAILED to upgrade from " + current + " to " + (current + 1));
+                }
+						}
             return current == gratiaDatabaseVersion;
         }
     }
