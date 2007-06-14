@@ -10,7 +10,7 @@ import java.util.Properties;
 public class DatabaseMaintenance {
     static final String dq = "\"";
     static final String comma = ",";
-    static final int gratiaDatabaseVersion = 9;
+    static final int gratiaDatabaseVersion = 10;
 
     java.sql.Connection connection;
     int liveVersion = 0;
@@ -500,17 +500,17 @@ public class DatabaseMaintenance {
                 }
                 
             }
-						if (current == 8) {
-                int result = Execute("update (select ProbeName,count(*) as nRecords from JobUsageRecord_Meta group by ProbeName) as sums,Probe set Probe.nRecords = sums.nRecords where Probe.ProbeName = sums.ProbeName;");
-                if (result > -1) {
+						if (current == 8 || current == 9) { // Can combine update command into one SQL statement for both versions
+                int result = Execute("update (select ProbeName,count(*) as nRecords,max(ServerDate) as ServerDate from JobUsageRecord_Meta group by ProbeName) as sums,Probe set Probe.nRecords = sums.nRecords, Probe.currenttime = sums.ServerDate, Probe.status = 'alive' where Probe.ProbeName = sums.ProbeName;");
+                if (result > -1 && current == 8) { // Only necessary for DB version 8
                     result = Execute("alter table Probe drop column jobs; ");
                 }
                 if (result > -1) {
-                    Logging.log("Gratia database upgraded from " + current + " to " + (current + 1));
-                    current = current + 1;
+                    Logging.log("Gratia database upgraded from " + current + " to " + 10);
+                    current = 10;
                     UpdateDbVersion(current);
                 } else {
-                    Logging.log("Gratia database FAILED to upgrade from " + current + " to " + (current + 1));
+                    Logging.log("Gratia database FAILED to upgrade from " + current + " to " + 10);
                 }
 						}
             return current == gratiaDatabaseVersion;
