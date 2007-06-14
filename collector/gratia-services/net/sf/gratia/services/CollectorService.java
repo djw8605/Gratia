@@ -194,12 +194,6 @@ public class CollectorService implements ServletContextListener
          checker.CheckIndices();
          checker.AddDefaults();
          checker.AddViews();
-    
-         //
-         // check for stored procedures/triggers
-         //
-
-         checker.CheckStoredProcedures();
 
          //
          // setup queues for message handling
