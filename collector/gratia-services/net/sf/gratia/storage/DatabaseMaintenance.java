@@ -157,7 +157,7 @@ public class DatabaseMaintenance {
 				String home = System.getProperty("catalina.home");
 				home = xp.replaceAll(home, "\\", "" + File.separatorChar);
 				home = home + File.separatorChar + "gratia" + File.separatorChar + "post-install.sh";
-				String chmod_cmd[] = {"chmod", "+x", home};
+				String chmod_cmd[] = {"chmod", "700", home};
         Execute.execute(chmod_cmd); // Mark executable just in case.
 				String post_cmd[] = {home, action};
 				int result = Execute.execute(post_cmd);

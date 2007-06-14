@@ -281,6 +281,7 @@ release: clean util services servlets soap reporting reports administration secu
 #	mkdir tarball/var/tmp
 	cp ${configuration}/*gov ${configuration}/*xml ${configuration}/*properties tarball/tomcat/v55/gratia
 	cp ${configuration}/*sql ${configuration}/*sh tarball/tomcat/v55/gratia
+	chmod 700 tarball/tomcat/v55/gratia/post-install.sh
 	cp ${configuration}/truststore ${configuration}/keystore tarball/tomcat/v55/gratia
 	cp ${configuration}/service-configuration.properties tarball/tomcat/v55/gratia/service-configuration.properties
 	cp ${target}/gratia-reports.war tarball/gratia/gratia_reporting
@@ -319,6 +320,7 @@ gratia: clean util services servlets soap reporting reports administration secur
 	mkdir tarball
 	cp ${configuration}/UserVoMap.* ${configuration}/*xml ${configuration}/*properties tarball
 	cp ${configuration}/*sql ${configuration}/*sh tarball
+	chmod 700 tarball/post-install.sh
 	cp ${configuration}/service-configuration.properties tarball/service-configuration.properties
 	cp ${configuration}/configure-* ${configuration}/update-gratia-local tarball
 	cp ${configuration}/truststore ${configuration}/keystore tarball
@@ -330,6 +332,7 @@ glr: clean util services servlets soap reporting reports administration security
 	mkdir tarball
 	cp ${configuration}/UserVoMap.* ${configuration}/*xml ${configuration}/*properties tarball
 	cp ${configuration}/*sql ${configuration}/*sh tarball
+	chmod 700 tarball/post-install.sh
 	cp ${configuration}/service-configuration.properties tarball/service-configuration.properties
 	tar -cvf ${target}/gratia.tar -C tarball .
 	rm -f -r tarball
