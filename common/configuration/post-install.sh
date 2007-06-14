@@ -1,10 +1,32 @@
+#!/bin/bash
 #
-# Create the mysql gratia summary tables and stored procedures
-# Needs to be executed after Tomcat has started so that the war files are unpacked 
-#	and the hibernate has created the gratia schema tables.
+# Create the mysql gratia summary tables, triggers and stored procedures
+# Called automatically by the services.
 #
 
-mysql -v --force -unbuffered --user=root --password=ROOTPASS  --host=localhost --port=PORT gratia < MAGIC_VDT_LOCATION/tomcat/v55/gratia/build-summary-tables.sql
-mysql -v --force -unbuffered --user=root --password=ROOTPASS  --host=localhost --port=PORT gratia < MAGIC_VDT_LOCATION/tomcat/v55/gratia/build-stored-procedures.sql
-mysql -v --force -unbuffered --user=root --password=ROOTPASS  --host=localhost --port=PORT gratia < MAGIC_VDT_LOCATION/tomcat/v55/gratia/build-trigger.sql
+if (( $# == 0 )); then
+  set -- "stored"
+elif [[ "$*" == *all* ]]; then
+  set -- "stored" "summary" "trigger"
+fi
 
+while [[ -n "$1" ]]; do
+  action="$1"
+  shift
+  case $action in
+			*summary*)
+				proc="build-summary-tables.sql"
+			;;
+			*stored*)
+		    proc="build-stored-procedures.sql"
+			;;
+			*trigger*)
+			  proc="build-trigger.sql"
+			;;
+			*)
+			  echo "Unrecognized action \"$action\"" 1>&2
+        exit 1
+	esac
+
+	mysql -v --force -unbuffered --user=root --password=ROOTPASS  --host=localhost --port=PORT gratia < MAGIC_VDT_LOCATION/tomcat/v55/gratia/${proc}
+done
