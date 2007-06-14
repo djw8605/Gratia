@@ -124,7 +124,7 @@
     <property name="reporthh" column="reporthh" type="int"/>
     <property name="reportmm" column="reportmm" type="int"/>
     <property name="status" column="status"/>
-    <property name="jobs" column="jobs" type="int"/>
+    <property name="nRecords" column="nRecords" type="int"/>
   </class>
 
   <class name="CEProbeStatus" table="CEProbeStatus" node="CEProbeStatus" lazy="false">
