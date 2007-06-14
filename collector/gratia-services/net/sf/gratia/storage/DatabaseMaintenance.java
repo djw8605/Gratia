@@ -6,6 +6,7 @@ import net.sf.gratia.services.Execute;
 import net.sf.gratia.services.XP;
 import net.sf.gratia.services.Logging;
 import java.util.Properties;
+import java.io.File;
 
 public class DatabaseMaintenance {
     static final String dq = "\"";
@@ -151,41 +152,20 @@ public class DatabaseMaintenance {
 
     }
 
-    public void CheckStoredProcedures()
-    {
-       Statement statement;
-       ResultSet resultSet;
-
-       String command = "show triggers";
-       int count = 0;
-
-       try
-       {
-          Logging.log("Executing: " + command);
-          statement = connection.createStatement();
-          resultSet = statement.executeQuery(command);
-          while (resultSet.next())
-             count++;
-          resultSet.close();
-          statement.close();
-       }
-       catch (Exception e)
-       {
-          Logging.log("Command: Error: " + command + " : " + e);
-       }
-
-       if (count == 0)
-       {
-          Logging.log("CollectorService: Creating Stored Procedures");
-          String home = System.getProperty("catalina.home");
-          home = xp.replaceAll(home, "\\", "/");
-          home = home + "/gratia/post-install.sh";
-          Execute.execute(home);
-       }
-       else
-       {
-          Logging.log("CollectorService: Stored Procedures Already Exist");
-       }
+    private int CallPostInstall(String action) {
+				Logging.log("DatabaseMaintenance: calling post-install script for action \"" + action + "\"");
+				String home = System.getProperty("catalina.home");
+				home = xp.replaceAll(home, "\\", "" + File.separatorChar);
+				home = home + File.separatorChar + "gratia" + File.separatorChar + "post-install.sh";
+				String chmod_cmd[] = {"chmod", "+x", home};
+        Execute.execute(chmod_cmd); // Mark executable just in case.
+				String post_cmd[] = {home, action};
+				int result = Execute.execute(post_cmd);
+				if (result == 0) {
+						return result;
+				}	else {
+						return -1;
+				}
     }
 
     public int Execute(String cmd) {
@@ -379,6 +359,9 @@ public class DatabaseMaintenance {
             Execute("insert into SystemProplist(car,cdr) values(" + dq
                     + "gratia.database.version" + dq + comma + dq
                     + gratiaDatabaseVersion + dq + ")");
+
+						CallPostInstall("all"); // Need some DB root-user action
+						
             Logging.log("Gratia database now at version "
                     + gratiaDatabaseVersion);
 
@@ -389,13 +372,28 @@ public class DatabaseMaintenance {
 
             Logging.log("Gratia database at version " + oldvers);
 
+						
             int current = oldvers;
+
+						// Interim solution: update stored procedures on every
+						// startup, 'coz yer never know ...
+
             if (current == 1) {
-                Logging.log("Gratia database upgraded from " + current + " to "
-                        + (current + 1));
-                current = current + 1;
-                UpdateDbVersion(current);
-            }
+								int result = CallPostInstall("all"); // Can't be sure what it was like way back when
+								if (result > -1) {
+										Logging.log("Gratia database upgraded from " + current
+                                + " to " + (current + 1));
+										current = current + 1;
+										UpdateDbVersion(current);
+								} else {
+										Logging.log("Gratia database FAILED to upgrade from "
+                                + current + " to " + (current + 1));
+								}
+            } else {
+								// Interim solution: update stored procedures on every
+								// startup, 'coz yer never know ...
+								CallPostInstall("stored");
+						}
             if (current == 2) {
                 // Upgrade to version 3;
                 if (oldvers < 2) {
@@ -433,6 +431,9 @@ public class DatabaseMaintenance {
                 if (result > -1) {
                     result = Execute("alter table JobUsageRecord drop column md5, drop column ServerDate, drop column SiteName, drop column SiteNameDescription, drop column ProbeName, drop column ProbeNameDescription, drop column recordId, drop column CreateTime, drop column CreateTimeDescription, drop column RecordKeyInfoId, drop column RecordKeyInfoContent; ");
                 }
+								if (result > -1) {
+										result = CallPostInstall("trigger");
+								}
                 if (result > -1) {
                     Logging.log("Gratia database upgraded from " + current + " to " + (current + 1));
                     current = current + 1;
