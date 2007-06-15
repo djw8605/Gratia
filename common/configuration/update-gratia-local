@@ -1,12 +1,74 @@
-#!/bin/bash -x
+#!/bin/bash
+
+source_prefix=~greenc/gratia
+tomcat_root=/scratch
+birt_war=birt-v20.war
+
+function usage() {
+cat 1>&2 <<EOF
+usage: update-gratia-local [-S <source-prefix>] [-j <jre-home>] [-s] \
+                           [-p <prefix>] [-d <db-root-pw>] [-h] [--] <instance>
+
+       -S <source-prefix>
+
+			    Find all sources under <source-prefix>.
+
+       -j <jre-home>
+
+          JRE location.
+
+       -s
+
+          Enable SSL.
+
+       -p <prefix>
+
+			    Instance path prefix (default $tomcat_root).
+
+       -d <db-root-pw>
+
+			    Configure post-install.sh with this DB root password.
+
+EOF
+}
 
 # Defaults
-tomcat_root=/scratch
-java_jre=/scratch/jre
-birt_war=birt-v20.war
-war_dir=~greenc/gratia/wars
-configuration_dir=~greenc/gratia/configuration
-target_dir=~greenc/gratia/target
+while getopts :j:sp:d:hS: OPT; do
+		case $OPT in
+				S)
+				    source_prefix="$OPTARG"
+						;;
+				j)
+						java_jre="$OPTARG"
+						;;
+				s)
+						use_ssl="-s"
+						;;
+				p)
+						tomcat_root="$OPTARG"
+						;;
+				d)
+				    dbp_arg="-d"
+						dbpwd="$OPTARG"
+						;;
+				h)
+						usage
+						exit 1
+						;;
+				*)
+				    usage
+				    exit 1
+		esac
+done
+shift $[ OPTIND - 1 ]
+
+if [[ -n "$tomcat_root" ]] && [[ -z "$java_jre" ]]; then
+  java_jre="${tomcat_root}/jre"
+fi
+
+war_dir=$source_prefix/reporting/birt-wars
+configuration_dir=$source_prefix/common/configuration
+target_dir=$source_prefix/target
 
 instance=$1
 tomcat_top=$tomcat_root/tomcat-$instance
@@ -18,23 +80,24 @@ fi
 
 remote_host=`uname -n`
 
-service tomcat-$instance stop
+service tomcat-$instance stop 2>/dev/null
 sleep 5
 
 # Copy Birt if necessary
 if [[ -f "$tomcat_top/webapps/$birt_war" ]]; then
   # Verify checksum
   official_birt_checksum=`cd "$war_dir"; md5sum "$birt_war"`
-	echo $official_birt_checksum
 	# Checksum local birt war
-	echo $official_birt_checksum | ( cd "$tomcat_top/webapps/" ; md5sum --check --status )
+  ( cd "$war_dir"; md5sum "$birt_war" ) | ( cd "$tomcat_top/webapps/" ; md5sum --check --status )
 	if (( $? != 0 )); then
     echo "Birt war has changed: obtaining fresh copy"
-    echo rm -rf "$tomcat_root/webapps/$birt_war" "$tomcat_root/webapps/${birt_war%.war}"
-    echo cp -p "war_dir/$birt_war" "$tomcat_root/webapps/"
+    rm -rf "$tomcat_top/webapps/$birt_war" "$tomcat_top/webapps/${birt_war%.war}"
+    cp -p "$war_dir/$birt_war" "$tomcat_top/webapps/"
   fi
 else
-   cp -pv "war_dir/$birt_war" "$tomcat_root/webapps/"
+  echo "Birt war $birt_war is missing: obtaining fresh copy"
+	rm -rf "$tomcat_top/webapps/${birt_war%.war}"
+  cp -pv "$war_dir/$birt_war" "$tomcat_top/webapps/"
 fi
 
 # Update gratia directory
@@ -42,6 +105,10 @@ mkdir -p "$tomcat_top/gratia"
 tar xf "$target_dir/gratia.tar" -C "$tomcat_top/gratia"
 
 # Update webapps
+
+# Remove obsolete war files
+( cd "$tomcat_top/webapps/" ; rm -rf GratiaServices{,.war} gratia-report-configuration{,.war} )
+
 # Any updated war files?
 for war in $tomcat_top/webapps/*.war; do
   if [[ -f "$target_dir/${war##*/}" ]]; then
@@ -59,9 +126,11 @@ done
 
 # Configure gratia dir
 "$configuration_dir/configure-collector" \
+$use_ssl \
 -p "$tomcat_root" \
 -j "$java_jre" \
 -r "$remote_host" \
+$dbp_arg "$dbpwd" \
 $instance
 
 # service tomcat-$instance start
