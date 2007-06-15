@@ -28,5 +28,5 @@ while [[ -n "$1" ]]; do
         exit 1
 	esac
 
-	mysql -v --force -unbuffered --user=root --password=ROOTPASS  --host=localhost --port=PORT gratia < MAGIC_VDT_LOCATION/tomcat/v55/gratia/${proc}
+	mysql -B --force -unbuffered --user=root --password=ROOTPASS  --host=localhost --port=PORT gratia < MAGIC_VDT_LOCATION/tomcat/v55/gratia/${proc}
 done
