@@ -36,7 +36,9 @@ public class DatabaseMaintenance {
            Logging.warning(xp.parseException(e));
            return;
         }
-        
+
+				RationalizePropsTable();
+
         ReadLiveVersion();
     }
     
@@ -379,16 +381,10 @@ public class DatabaseMaintenance {
 						// startup, 'coz yer never know ...
 
             if (current == 1) {
-								int result = CallPostInstall("all"); // Can't be sure what it was like way back when
-								if (result > -1) {
-										Logging.log("Gratia database upgraded from " + current
-                                + " to " + (current + 1));
-										current = current + 1;
-										UpdateDbVersion(current);
-								} else {
-										Logging.log("Gratia database FAILED to upgrade from "
-                                + current + " to " + (current + 1));
-								}
+								Logging.log("Gratia database upgraded from " + current
+														+ " to " + (current + 1));
+								current = current + 1;
+								UpdateDbVersion(current);
             } else {
 								// Interim solution: update stored procedures on every
 								// startup, 'coz yer never know ...
@@ -433,6 +429,7 @@ public class DatabaseMaintenance {
                 }
 								if (result > -1) {
 										result = CallPostInstall("trigger");
+										result = CallPostInstall("summary");
 								}
                 if (result > -1) {
                     Logging.log("Gratia database upgraded from " + current + " to " + (current + 1));
@@ -469,8 +466,9 @@ public class DatabaseMaintenance {
                 }
             }
             if (current == 6) {
+								String records_column = FindRecordsColumn();
                 int result = Execute("insert into Probe(probeid,siteid,probename,active,currenttime,CurrentTimeDescription," +
-                        "reporthh,reportmm,status,jobs) select " +
+                        "reporthh,reportmm,status," + records_column + ") select " +
                         "probeid,facility_id,probename,active,currenttime,CurrentTimeDescription,reporthh,reportmm,status,jobs " +
                         " from CEProbes");
                 if (result > -1) {
@@ -504,7 +502,9 @@ public class DatabaseMaintenance {
 						if (current == 8 || current == 9) { // Can combine update command into one SQL statement for both versions
                 int result = Execute("update (select ProbeName,count(*) as nRecords,max(ServerDate) as ServerDate from JobUsageRecord_Meta group by ProbeName) as sums,Probe set Probe.nRecords = sums.nRecords, Probe.currenttime = sums.ServerDate, Probe.status = 'alive' where Probe.ProbeName = sums.ProbeName;");
                 if (result > -1 && current == 8) { // Only necessary for DB version 8
-                    result = Execute("alter table Probe drop column jobs; ");
+										if (FindRecordsColumn() == "jobs") {
+												result = Execute("alter table Probe drop column jobs; ");
+										}
                 }
                 if (result > -1) {
                     Logging.log("Gratia database upgraded from " + current + " to " + 10);
@@ -516,5 +516,51 @@ public class DatabaseMaintenance {
 						}
             return current == gratiaDatabaseVersion;
         }
+    }
+
+		private String FindRecordsColumn() {
+        Statement statement;
+        ResultSet resultSet;
+
+        String cmd = "show columns from Probe";
+        try {
+            Logging.log("Executing: " + cmd);
+            statement = connection.createStatement();
+            resultSet = statement.executeQuery(cmd);
+            while (resultSet.next()) {
+								String column = resultSet.getString(1);
+								if (column.equals("jobs") || column.equals("nRecords")) {
+										return column;
+								}
+						}
+				} catch (Exception e) {
+            Logging.log("Command: Error: " + cmd + " : " + e);
+        }		
+				return "";
+		}
+
+		private void RationalizePropsTable() {
+        Statement statement;
+        ResultSet resultSet;
+
+        String check = "select count(*),min(PropId) from SystemProplist where car = " + dq
+                + "gratia.database.version" + dq;
+
+        try {
+            Logging.log("Executing: " + check);
+            statement = connection.createStatement();
+            resultSet = statement.executeQuery(check);
+            if (resultSet.next()) {
+                int count = resultSet.getInt(1);
+								if (count > 1) {
+										int propid = resultSet.getInt(2);
+										Execute("delete from SystemProplist where car = "
+														+ dq	+ "gratia.database.version" + dq + " and PropId > " + propid);
+								}
+            }
+            Logging.log("Command: OK: " + check);
+        } catch (Exception e) {
+            Logging.log("Command: Error: " + check + " : " + e);
+        }        
     }
 }
