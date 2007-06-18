@@ -3,8 +3,8 @@
 PLATFORM := ${shell uname}
 
 # tarbal version
-gratia_reporting_version=v0.24
-gratia_services_version=v0.24
+gratia_reporting_version=v0.24.1
+gratia_services_version=v0.24.1
 
 # define useful variables
 base=..
@@ -282,6 +282,8 @@ release: clean util services servlets soap reporting reports administration secu
 	cp ${configuration}/*gov ${configuration}/*xml ${configuration}/*properties tarball/tomcat/v55/gratia
 	cp ${configuration}/*sql ${configuration}/*sh tarball/tomcat/v55/gratia
 	chmod 700 tarball/tomcat/v55/gratia/post-install.sh
+	perl -wapi.bak -e 's&CMD_(?:PREAMBLE|PREFIX|SUFFIX)\s*&&g' tarball/tomcat/v55/gratia/post-install.sh
+	rm -f tarball/tomcat/v55/gratia/post-install.sh.bak
 	cp ${configuration}/truststore ${configuration}/keystore tarball/tomcat/v55/gratia
 	cp ${configuration}/service-configuration.properties tarball/tomcat/v55/gratia/service-configuration.properties
 	cp ${target}/gratia-reports.war tarball/gratia/gratia_reporting
@@ -305,6 +307,8 @@ release: clean util services servlets soap reporting reports administration secu
 	mkdir tarball/var/tmp
 	cp ${configuration}/*gov ${configuration}/*xml ${configuration}/*properties tarball/tomcat/v55/gratia
 	cp ${configuration}/*sql ${configuration}/*sh tarball/tomcat/v55/gratia
+	perl -wapi.bak -e 's&CMD_(?:PREAMBLE|PREFIX|SUFFIX)\s*&&g' tarball/tomcat/v55/gratia/post-install.sh
+	rm -f tarball/tomcat/v55/gratia/post-install.sh.bak
 	cp ${configuration}/truststore ${configuration}/keystore tarball/tomcat/v55/gratia
 	cp ${configuration}/service-configuration.properties tarball/tomcat/v55/gratia/service-configuration.properties
 	cp ${target}/gratia-services.war tarball/gratia/gratia_services
