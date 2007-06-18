@@ -76,6 +76,8 @@ my %collector_configs =
 									server_port => 8134,
 									db_schema => "gratia_osg_daily",
 									UserConfig => "UserConfig_osg_daily.xml",
+									PostInstallCmdPreamble => '[[ $action == *"stored"* ]] || continue',
+
 									"properties.attributes" =>
 									{ "monitor.listener.wait" => 1440
 									},
@@ -155,6 +157,9 @@ my %attribute_defaults =
 	 db_host => "gratia-db01.fnal.gov",
 	 UserConfig => "UserConfig_osg.xml",
 	 UserConfigPath => "gratia-reports/MenuConfig/",
+	 PostInstallCmdPreamble => "",
+	 PostInstallCmdPrefix => "ssh -o ConnectionAttempts=1 -o FallBackToRsh=no -o StrictHostKeyChecking=no -o BatchMode=yes gratia\@DB_HOST",
+	 PostInstallCmdSuffix => "",
 
 	 "properties.attributes" =>
 	 { "service.rmi.service" => "/gratia",
@@ -223,7 +228,7 @@ TOMCAT_INSTANCE_NAME=`basename "$0" | sed -e 's/^.*\(tomcat-.*\)$/\1/'`
 ########################################################################
 # No User Servicable Parts
 CATALINA_HOME="${TOMCAT_PATH_STEM}/${TOMCAT_INSTANCE_NAME}"; export CATALINA_HOME
-
+[[ -n "$KRB5CCNAME" ]] && KRB5CCNAME=`echo "$KRB5CCNAME" | sed -e 's/^FILE://'`
 if [ "$1" = "start" ] ; then
   JAVA_OPTS="-Xmx$TOMCAT_HEAP_SIZE -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=${TOMCAT_MANAGEMENT_PORT} -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dssl.port=${TOMCAT_SSL_PORT}"; export JAVA_OPTS
   $CATALINA_HOME/bin/catalina.sh start
@@ -356,12 +361,22 @@ sub configure_post_install {
 	open(ORIG_POST, "<$post_file") or die "Unable to open $post_file for reading";
 	open(NEW_POST, ">$new_post") or die "Unable to open $new_post for writing";
 	chmod 0700, $new_post;
+	$collector_config->{"PostInstallCmdPreamble"} =~
+		s&DB_HOST&$collector_config->{"db_host"}&g
+			if $collector_config->{"PostInstallCmdPrefix"};
+	$collector_config->{"PostInstallCmdPrefix"} =~
+		s&DB_HOST&$collector_config->{"db_host"}&g
+			if $collector_config->{"PostInstallCmdPrefix"};
 	while (<ORIG_POST>) {
 		chomp;
-		s&(^\s*mysql.*?)ROOTPASS(.*$)&$1"$options{"db-root"}"$2&; # DB root password
-		s&(^\s*mysql.*?)PORT(.*$)&$1$collector_config->{db_port}$2&; # DB port
-		s&(^\s*mysql.*?) gratia (.*$)&$1 $collector_config->{db_schema} $2&; # Schema
-		s&(^\s*mysql.*?)MAGIC_VDT_LOCATION/tomcat/v55/(.*$)&$1$options{prefix}/tomcat-${instance_name}/$2&; # Tomcat top dir
+		s&CMD_PREAMBLE&$collector_config->{"PostInstallCmdPreamble"}&;
+		s&(^.*?mysql.*?)CMD_SUFFIX(.*$)&$1$collector_config->{"PostInstallCmdSuffix"}$2&;
+		s&(^.*?mysql.*?)ROOTPASS(.*$)&$1"$options{"db-root"}"$2&; # DB root password
+		s&(^.*?mysql.*?)PORT(.*$)&$1$collector_config->{db_port}$2&; # DB port
+		s&(^.*?mysql.*?) gratia (.*$)&$1 $collector_config->{db_schema} $2&; # Schema
+		s&(^.*?)MAGIC_VDT_LOCATION/tomcat/v55/(.*$)&$1$options{prefix}/tomcat-${instance_name}/$2&; # Tomcat top dir
+		# Extra commands to prefix mysql command (eg ssh, echo);
+		s&^(.*?)CMD_PREFIX(.*$)&$1$collector_config->{"PostInstallCmdPrefix"}$2&;
 		print NEW_POST "$_\n";
 	}
 	close(ORIG_POST);

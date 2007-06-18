@@ -28,5 +28,11 @@ while [[ -n "$1" ]]; do
         exit 1
 	esac
 
-	mysql -B --force --unbuffered --user=root --password=ROOTPASS  --host=localhost --port=PORT gratia < MAGIC_VDT_LOCATION/tomcat/v55/gratia/${proc}
+	CMD_PREAMBLE
+	cat MAGIC_VDT_LOCATION/tomcat/v55/gratia/${proc} | CMD_PREFIX mysql -B --force --unbuffered --user=root --password=ROOTPASS --host=localhost --port=PORT gratia CMD_SUFFIX
+	status=$?
+  if (( $status != 0 )); then
+    echo "ERROR: mysql post-install command failed for action $action" 1>&2
+    exit $status
+  fi
 done
