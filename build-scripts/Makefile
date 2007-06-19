@@ -3,8 +3,8 @@
 PLATFORM := ${shell uname}
 
 # tarbal version
-gratia_reporting_version=v0.24.1
-gratia_services_version=v0.24.1
+gratia_reporting_version=v0.24.2
+gratia_services_version=v0.24.2
 
 # define useful variables
 base=..
@@ -257,7 +257,7 @@ reports:
 	mkdir war/WEB-INF
 	mkdir war/META-INF
 	cp -R ${reports}/WebContent/MenuConfig/*.xml war/MenuConfig
-	cp -R ${reports}/WebContent/reports/production/*.* war/reports
+	cp -R ${reports}/WebContent/*/production/*.rptdesign war/reports
 	cp ${reports}/WebContent/WEB-INF/web.xml war/WEB-INF/web.xml
 	jar -cvf ${target}/gratia-reports.war -C war .
 	rm -f -r war
