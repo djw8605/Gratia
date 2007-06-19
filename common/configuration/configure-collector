@@ -158,7 +158,7 @@ my %attribute_defaults =
 	 UserConfig => "UserConfig_osg.xml",
 	 UserConfigPath => "gratia-reports/MenuConfig/",
 	 PostInstallCmdPreamble => "",
-	 PostInstallCmdPrefix => "ssh -o ConnectionAttempts=1 -o FallBackToRsh=no -o StrictHostKeyChecking=no -o BatchMode=yes gratia\@DB_HOST",
+	 PostInstallCmdPrefix => "",
 	 PostInstallCmdSuffix => "",
 
 	 "properties.attributes" =>
@@ -172,6 +172,7 @@ my %attribute_defaults =
 		 "service.birt.password" => "reader", # old, deprecated
 		 "service.reporting.user" => "reader", # new
 		 "service.reporting.password" => "reader", # new
+		 "service.reporting.engine.home" => "birt-v20", # new reporting engine
 		 "monitor.listener.threads" => "true",
 		 "monitor.listener.wait" => 240,
 		 "monitor.smtp.server" => "smtp.fnal.gov",
@@ -370,6 +371,7 @@ sub configure_post_install {
 	while (<ORIG_POST>) {
 		chomp;
 		s&CMD_PREAMBLE&$collector_config->{"PostInstallCmdPreamble"}&;
+		s&localhost&$collector_config->{"db_host"}&;
 		s&(^.*?mysql.*?)CMD_SUFFIX(.*$)&$1$collector_config->{"PostInstallCmdSuffix"}$2&;
 		s&(^.*?mysql.*?)ROOTPASS(.*$)&$1"$options{"db-root"}"$2&; # DB root password
 		s&(^.*?mysql.*?)PORT(.*$)&$1$collector_config->{db_port}$2&; # DB port
