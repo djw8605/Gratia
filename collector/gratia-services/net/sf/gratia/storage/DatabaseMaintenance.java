@@ -306,7 +306,7 @@ public class DatabaseMaintenance {
         Execute("DROP VIEW IF EXISTS CEProbes;");
         Execute("CREATE VIEW CEProbes AS select probeid,siteid as facility_id," +
                 "probename,active,currenttime,CurrentTimeDescription,reporthh," +
-                "reportmm,status,jobs from Probe;");
+                "reportmm,status," + FindRecordsColumn() + " as jobs from Probe;");
         Execute("DROP VIEW IF EXISTS JobUsageRecord_Report;");
         Execute("CREATE VIEW JobUsageRecord_Report as select "+GetJobUsageRecordColumns()+
 		        " ,JobUsageRecord_Meta.ProbeName " +
