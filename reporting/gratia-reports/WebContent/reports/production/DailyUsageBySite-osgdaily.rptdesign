@@ -220,14 +220,15 @@
                 </structure>
             </list-property>
             <property name="queryText">
-select JobUsageRecord.SiteName, 
+select M.SiteName, 
        Date(JobUsageRecord.EndTime) as endtime, 
         sum(JobUsageRecord.WallDuration),
         sum(JobUsageRecord.CpuUserDuration+JobUsageRecord.CpuSystemDuration)
-         from JobUsageRecord
+         from JobUsageRecord, JobUsageRecord_Meta M
 where EndTime >= ? and  EndTime &lt;= ?
+and JobUsageRecord.dbid = M.dbid
 group by date_format(JobUsageRecord.EndTime,
-?),JobUsageRecord.SiteName
+?),M.SiteName
 order by date_format(JobUsageRecord.EndTime,?)</property>
         </oda-data-set>
         <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="CPUMetricTypes" id="102">

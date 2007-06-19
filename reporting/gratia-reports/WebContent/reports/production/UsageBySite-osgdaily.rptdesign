@@ -138,13 +138,14 @@
                 </structure>
             </list-property>
             <property name="queryText">
-select JobUsageRecord.SiteName, 
+select M.SiteName, 
 	sum(JobUsageRecord.WallDuration),
 	sum(JobUsageRecord.CpuUserDuration+JobUsageRecord.CpuSystemDuration)
-from JobUsageRecord
+from JobUsageRecord, JobUsageRecord_Meta M
 where (? &lt;= JobUsageRecord.EndTime and JobUsageRecord.EndTime &lt;= ?)
-group by JobUsageRecord.SiteName
-order by JobUsageRecord.SiteName</property>
+and JobUsageRecord.dbid = M.dbid
+group by M.SiteName
+order by M.SiteName</property>
         </oda-data-set>
         <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="CPUMetricTypes" id="102">
             <property name="dataSource">fermigrid1</property>

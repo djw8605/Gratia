@@ -133,11 +133,12 @@
                 </structure>
             </list-property>
             <property name="queryText">
-select JobUsageRecord.SiteName, sum(JobUsageRecord.Njobs)
-from JobUsageRecord
+select M.SiteName, sum(JobUsageRecord.Njobs)
+from JobUsageRecord, JobUsageRecord_Meta M
 where (? &lt;= JobUsageRecord.EndTime and JobUsageRecord.EndTime &lt;= ?)
-group by JobUsageRecord.SiteName
-order by JobUsageRecord.SiteName
+and JobUsageRecord.dbid = M.dbid
+group by M.SiteName
+order by M.SiteName
 </property>
         </oda-data-set>
     </data-sets>
