@@ -377,19 +377,12 @@ public class DatabaseMaintenance {
 						
             int current = oldvers;
 
-						// Interim solution: update stored procedures on every
-						// startup, 'coz yer never know ...
-
             if (current == 1) {
 								Logging.log("Gratia database upgraded from " + current
 														+ " to " + (current + 1));
 								current = current + 1;
 								UpdateDbVersion(current);
-            } else {
-								// Interim solution: update stored procedures on every
-								// startup, 'coz yer never know ...
-								CallPostInstall("stored");
-						}
+            }
             if (current == 2) {
                 // Upgrade to version 3;
                 if (oldvers < 2) {
@@ -453,7 +446,7 @@ public class DatabaseMaintenance {
                 }
             }
             if (current == 5) {
-                int result = Execute("insert into Site(siteid,SiteName) select facility_id,facility_name  from CETable");
+                int result = Execute("insert into Site(siteid,SiteName) select facility_id,facility_name from CETable");
                 if (result > -1) {
                    result = Execute("drop table CETable;");
                 }
@@ -482,6 +475,14 @@ public class DatabaseMaintenance {
                     Logging.log("Gratia database FAILED to upgrade from " + current + " to " + (current + 1));
                 }
             }
+						if (current > 6) {
+								int result = CallPostInstall("stored");
+								if (result > -1) {
+                    Logging.log("Gratia database refreshed stored procedures.");
+								} else {
+										Logging.log("Gratia database FAILED to refresh stored procedures.");
+								}
+						}
             if (current == 7) {
                 int result = Execute("insert into VONameCorrection(VOName,ReportableVOName) select distinct binary VOName,ReportableVOName from JobUsageRecord");
                 if (result > -1) {
