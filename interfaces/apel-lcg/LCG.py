@@ -1,14 +1,37 @@
-#############################################################
+########################################################################
 # 
 # Author Philippe Canal, John Weigand
 #
 # LCG 
 #
-# library to transfer the data from Gratia to APEL (WLCG)
-#############################################################
+# Script to transfer the data from Gratia to APEL (WLCG)
+########################################################################
 #
-#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: LCG.py,v 1.5 2007-06-07 22:21:39 pcanal Exp $
-
+#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: LCG.py,v 1.6 2007-06-19 15:18:36 jgweigand Exp $
+#
+#
+########################################################################
+# Changes:
+# 6/19/07 (John Weigand)
+#   Instead of using 1 normalization factor for all sites, the
+#   lcg-reportableSites now contains a normalization factor for 
+#   those sites that have reported on the OSG survey.  Based on that
+#   survey, using a Specint2000 specification, individual normalization
+#   factors have been assigned to reflect the type of hardware those
+#   site's WN clusters are using.  This factor is the 2nd token in that
+#   lcg-reportableSites file.  If no token is present, the normalization
+#   factor used is derived from the probe specified in the lcg.conf file.
+#   This changed required that individual queries of the gratia database
+#   be performed on a site basis since the application of the normalization
+#   factor is applied there.  The query sent to the log file represents the 
+#   first one used in order to reduce the verbage there.  The site and
+#   normalization factor used is displayed there.
+#   - Another item to note is that coincident with this change the
+#     BNL_ATLAS_1 and BNL_ATLAS_2 sites are now being reported as BNL_OSG
+#     at that administrators request.  This was a database change to the
+#     relation of the Site and Probe tables via siteid.
+# 
+########################################################################
 import traceback
 import exceptions
 import time
@@ -19,6 +42,8 @@ import re
 import string
 import smtplib, rfc822  # for email notifications via smtp
 import commands, os, sys, time, string
+
+gSitesWithNoData = []
 
 gFilterParameters = {"SiteFilterFile"       :None,
                      "VOFilterFile"         :None,
@@ -41,6 +66,7 @@ gDatabaseParameters = {"GratiaHost":None,
                        "LcgDB"     :None,
                        "LcgTable"  :None,
                       }
+
 
 
 # ------------------------------------------------------------------
@@ -149,8 +175,11 @@ SQL file... %s
 This is normally run as a cron process.  The log files associated with this 
 process can provide further details.
 
+Sites with no data:
+  %s
+
 %s
-""" % (gProgramName,hostname,username,logfile,sqlfile,message)
+""" % (gProgramName,hostname,username,logfile,sqlfile,gSitesWithNoData,message)
 
 
   try:
@@ -179,10 +208,10 @@ X-Mailer: Python smtplib
   Logit("Email notification being sent to %s" % gFilterParameters["EmailNotice"])
 
 #-----------------------------------------------
-def GetFilters(filename):
-  """ Generic reader for a file of filters. Generally, the sites and VOs
-      to be reported.  The file contains a single entry for each filter
-      value.  The method returns a formated string for use in a SQL
+def GetVOFilters(filename):
+  """ Reader for a file of reportable VOs . 
+      The file contains a single entry for each filter value.  
+      The method returns a formated string for use in a SQL
       'where column_name in ( filters )' structure.
   """
   try:
@@ -201,6 +230,57 @@ def GetFilters(filename):
     filters = filters.rstrip(",")  # need to remove the last comma
     fd.close()
     return filters
+  except IOError, (errno,strerror):
+    raise Exception("IO error(%s): %s (%s)" % (errno,strerror,filename))
+
+#-----------------------------------------------
+def GetSiteFilters(filename):
+  """ Reader for a file of reportable sites. 
+      The file contains 2 tokens: the site name and a normalization factor.  
+      The normalization factor is optional.  If not available, a default
+      normalization factor will be set using the gNormalization value.
+      The method returns a hash table with the key being site and the value
+      the normalization factor to use.
+  """
+  try:
+    #--- verify the gNormalization value has been set --
+    if gNormalization == None:
+      raise Exception("Internal error: something in the logic is screwed up. The gNormalization variable must be set before this method (GetSiteFilters) is called.")
+    #--- process the reportable sites file ---
+    sites = {}
+    fd = open(filename)
+    while 1:
+      filter = fd.readline()
+      if filter == "":   # EOF
+        break
+      filter = filter.strip().strip("\n")
+      if filter.startswith("#"):
+        continue
+      if len(filter) == 0:
+        continue
+      site = filter.split()
+      if sites.has_key(site[0]):
+        raise Exception("System error: duplicate - site (%s) already set" % site[0])
+      factor = 0
+      if len(site) == 1:
+        sites[site[0]] = gNormalization
+      elif len(site) > 1:
+        #-- verify the factor is an integer --
+        try:
+          tmp = int(site[1])
+          factor = float(site[1])/1000
+        except:
+          raise Exception("Error in %s file: 2nd token must be an integer (%s" % (filename,filter))
+        #-- set the factor --
+        sites[site[0]] = factor
+      else:
+        continue
+    #-- end of while loop --
+    fd.close()
+    #-- verify there is at least 1 site --
+    if len(sites) == 0:
+      raise Exception("Error in %s file: there are no sites to process" % filename)
+    return sites
   except IOError, (errno,strerror):
     raise Exception("IO error(%s): %s (%s)" % (errno,strerror,filename))
 
@@ -315,6 +395,8 @@ def GetFileName(prefix):
       filename = "./" + filename
     else:
       filename = gFilterParameters["LogSqlDir"] + "/" + filename
+    if not os.path.exists(gFilterParameters["LogSqlDir"]):
+      os.mkdir(gFilterParameters["LogSqlDir"])
     return filename
 
 #-----------------------------------------------
@@ -438,13 +520,12 @@ def SetNormalizationFactor(query,params):
 
 
 #-----------------------------------------------
-def GetQuery(sites,vos):
+def GetQuery(site,normalizationFactor,vos):
     """ Creates the SQL query DML statement for the Gratia database """
-    Logit("Query:")
     begin,end = SetQueryDates()
     strBegin =  DateToString(begin)
     strEnd   =  DateToString(end)
-    strNormalization = str(gNormalization)
+    strNormalization = str(normalizationFactor)
     fmtMonth = "%m"
     fmtYear  = "%Y"
     fmtDate  = "%Y-%m-%d"
@@ -453,9 +534,9 @@ SELECT Site.SiteName AS ExecutingSite,
                VOName as LCGUserVO, 
                Sum(NJobs), 
                Round(Sum(CpuUserDuration+CpuSystemDuration)/3600) as SumCPU, 
-               Round(Sum(CpuUserDuration+CpuSystemDuration)/3600*%s) as NormSumCPU, 
+               Round((Sum(CpuUserDuration+CpuSystemDuration)/3600)*%s) as NormSumCPU, 
                Round(Sum(WallDuration)/3600) as SumWCT, 
-               Round(Sum(WallDuration)/3600*%s) as NormSumWCT, 
+               Round((Sum(WallDuration)/3600)*%s) as NormSumWCT, 
                date_format(min(EndTime),"%s")       as Month, 
                date_format(min(EndTime),"%s")       as Year, 
                date_format(min(EndTime),"%s") as RecordStart, 
@@ -467,15 +548,14 @@ from
      Probe,
      VOProbeSummary Main 
 where 
-      Site.SiteName in ( %s )
+      Site.SiteName = "%s"
   and Site.siteid = Probe.siteid 
   and Probe.ProbeName  = Main.ProbeName 
   and Main.VOName in ( %s )
   and "%s" <= Main.EndTime and Main.EndTime < "%s"
 group by ExecutingSite, 
          LCGUserVO
-""" % (strNormalization,strNormalization,fmtMonth,fmtYear,fmtDate,fmtDate,strNormalization,sites,vos,strBegin,strEnd)
-    LogToFile(query)
+""" % (strNormalization,strNormalization,fmtMonth,fmtYear,fmtDate,fmtDate,strNormalization,site,vos,strBegin,strEnd)
     return query
 
 #-----------------------------------------------
@@ -555,6 +635,8 @@ def CreateLCGsql(results,filename):
         
   for i in range (0,len(lines)):  
     val = lines[i].split('\t')
+    if len(val) < 13:
+      continue
     output =  "INSERT INTO %s VALUES " % (gDatabaseParameters["LcgTable"]) + str(tuple(val)) + ";"
     file.write(output+"\n")
     LogToFile(output)
@@ -565,6 +647,8 @@ def CreateLCGsql(results,filename):
 #--- MAIN --------------------------------------------
 def main(argv=None):
   global gNormalization
+  global gSitesWithNoData
+  firstTime = 1
 
   #--- get command line arguments  -------------
   try:
@@ -587,23 +671,37 @@ def main(argv=None):
     if gInUpdateMode:
       CheckLcgDBAvailability(gDatabaseParameters)
 
-    #--- get all filters -------------
-    ReportableSites    = GetFilters(gFilterParameters["SiteFilterFile"])
-    ReportableVOs      = GetFilters(gFilterParameters["VOFilterFile"])
-    
-    #--- set the nomralization factor --------------
+    #--- set the default normalization factor --------------
     query = GetNormalizationQuery(gFilterParameters["NormalizationProbe"])
     gNormalization =  SetNormalizationFactor(query,gDatabaseParameters)
 
-    #--- query gratia and create updates --------------
-    query = GetQuery(ReportableSites,ReportableVOs)
-    output = RunGratiaQuery(query,gDatabaseParameters)
+    #--- get all filters -------------
+    ReportableSites    = GetSiteFilters(gFilterParameters["SiteFilterFile"])
+    ReportableVOs      = GetVOFilters(gFilterParameters["VOFilterFile"])
+    
+    #--- query gratia for each site and create updates (appending them ----
+    output = ""
+    sites = ReportableSites.keys()
+    for site in sites:
+      normalizationFactor = ReportableSites[site]
+      query = GetQuery(site, normalizationFactor, ReportableVOs)
+      if firstTime:
+        Logit("Query:")
+        LogToFile(query)
+        firstTime = 0
+      Logit("Site: %s  Normalization Factor: %s" % (site,normalizationFactor)) 
+      results = RunGratiaQuery(query,gDatabaseParameters)
+      if len(results) == 0:
+        gSitesWithNoData.append(site)
+        continue
+      output = output + results + "\n"
 
     #--- update the APEL accounting database ----
+    Logit("Sites with no data: %s" % gSitesWithNoData)
     CreateLCGsql(output,GetFileName("sql"))
     if gInUpdateMode:
       RunLCGUpdate(GetFileName("sql"),gDatabaseParameters)
-      SendEmailNotificationSuccess(query + "\n" + output)
+      SendEmailNotificationSuccess("Sample query:\n" + query + "\n\nResults of all queries:\n" + output)
       Logit("Transfer Completed SUCCESSFULLY from Gratia to APEL")
     else:
       Logit("The --update arg was not specified. No updates attempted.")

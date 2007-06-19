@@ -1,17 +1,47 @@
-#--- CMS ----
-USCMS-FNAL-WC1-CE
+##################################################################
+# This file identifies the set of sets reportable to the APEL-LCG
+# database and the normalization factor to be used in the
+# gratia query.
+#
+# Format:
+#  token 1 - The Site.SiteName
+#  token 2 - The normalization value to be used. This was obtained
+#            from site surveys regarding the hardware used on a
+#            site's clusters and is an estimated value based
+#            on a SPECint2000 specification.  If no value is 
+#            specified, then a value is derived from the
+#            gratia database using the gratia_psacct.ProbeName
+#            specified in lcg.conf file.
+#  This tokens are whitespace seperated.  
+#  Comments - line starting with a # sign
+#  Empty lines are permittted.
+# -----------------------------------------------------------------
+# History:
+#   6/19/07 (John Weigand) - 
+#             The BNL_ATLAS_1 and BNL_ATLAS_2 sites were changed
+#             to be BNL_OSG.  This was done by changing the
+#             relation between the Site and Probe table on siteid.
+#             The old site names are still reflected in the reporting
+#             and all 3 assigned the same normalization factor as
+#             they all feed the same WN cluster. 
+#    
+##################################################################
+#-- Site  ------- SPECint2000
+#
+#--- CMS ----    
+USCMS-FNAL-WC1-CE   1383
 GLOW
 CIT_CMS_T2
-MIT_CMS
-Nebraska
+MIT_CMS              790
+Nebraska            1578
 Purdue-Lear
 Purdue-RCAC
-SPRACE
+SPRACE              1676
 UCSanDiegoPG
-UFlorida-PG
+UFlorida-PG         1602
 #--- ATLAS ----
 UTA-DPCC
-BNL_ATLAS_1
-BNL_ATLAS_2
-BNL_PANDA
-BNL_OSG
+BNL_ATLAS_1         1361
+BNL_ATLAS_2         1361
+BNL_PANDA      
+BNL_OSG             1361

@@ -55,17 +55,24 @@ LCG.py
 This is the script that does it all.  
 
 In general and briefly, it does the following:
- 1. Determines a 'nonmalization factor' using a specified probe as the
+ 1. Determines a default 'nonmalization factor' using a specified probe as the
     base node.  This value is applied against the CPU and Wall time data 
-    collected.
+    collected.  It is only used when a normalization factor for a site 
+    is not specified in the lcg-reportableSites file.
     - the probe used is defined by the 'NormalizationProbe' attribute of the 
-      lcg.conf file.  This factor
+      lcg.conf file. 
  2. Retrieves the accounting data from the Gratia database for selected
     OSG sites and VOs for a month.
     - sites are defined in a file identified by the 'SiteFilterFile'
       attribute of the lcg.conf file
     - VOs are defined in a file identified by the 'VOFilterFile'
       attribute of the lcg.conf file
+    - with the change implemented on 6/19/07 providing for individaul
+      normalization factor by site, instead of a single query being
+      used to retrieve the gratia data, individual queries by site are
+      performed.  In order to reduce the verbage in the log file, only the
+      first query is output to the log file.  The site and normalization
+      factor used is displayed for the other site queries.
  3. Formats SQL DML INSERT statements to update the OSG_DATA table of
     the APEL/LCG database.
     - the table name is defined by the 'LcgTable' attribute of the 
@@ -169,10 +176,29 @@ This provides the list of OSG sites' accounting data to be pushed to the
 APEL/LCG database.  It is the Site.SiteName of the Gratia database
 and is the primary grouping.
 
-Format: Only one site name per line
-        Lines starting with '#' indicate a comment line
-        Empty lines are permitted
+In addition (on 6/19/07), a 2nd toked identifies the normalation factor to 
+be used for the site.  This factor is based on the OSG site surveys using
+a Specint2000 specification which reflects the tyhpe of hardware those
+sites used on their WN clusters.  If no token is present, the normalization
+factor used is derived from the probe specified in the lcg.conf file.
 
+Format: 
+   token 1 - The Site.SiteName
+   token 2 - The normalization value to be used. This was obtained
+             from site surveys regarding the hardware used on a
+             site's clusters and is an estimated value based
+             on a SPECint2000 specification.  If no value is
+             specified, then a value is derived from the
+             gratia database using the gratia_psacct.ProbeName
+             specified in lcg.conf file.
+   This tokens are whitespace seperated.
+   Comments - line starting with a # sign
+   Empty lines are permittted.
+
+Another item to note (also implemented on 6/19/07) is that 
+BNL_ATLAS_1 and BNL_ATLAS_2 sites are now being reported as BNL_OSG
+at that administrators request.  This was a database change to the
+relation of the Site and Probe tables via siteid.
        
 
 #################################
