@@ -20,7 +20,12 @@ my %collector_configs =
 							 server_port => 8104,
 							 db_schema => "gratia",
 							 remote_host => "gratia-osg.fnal.gov",
-							 heap_size => "512m"
+							 heap_size => "512m",
+							 "properties.attributes" =>
+							 {
+								"maintain.history.log" => 7,
+								"monitor.listener.wait" => 60
+							 }
 						 },
 	 fermi_osg => { http_port => 8880,
 									ssl_port => 8845,
@@ -42,7 +47,11 @@ my %collector_configs =
 						jmx_port => 8014,
 						server_port => 8114,
 						db_schema => "gratia_itb",
-						remote_host => "gratia-osg.fnal.gov"
+						remote_host => "gratia-osg.fnal.gov",
+						"properties.attributes" =>
+						{
+						 "monitor.listener.wait" => 60
+						}
 					},
 	 fermi_itb => { http_port => 8881,
 									ssl_port => 8850,
@@ -59,7 +68,9 @@ my %collector_configs =
 					 server_port => 8124,
 					 db_schema => "gratia_psacct",
 					 UserConfig => "UserConfig_pacct.xml",
-					 remote_host => "gratia-fermi.fnal.gov"
+					 remote_host => "gratia-fermi.fnal.gov",
+					 # Add an extra action if we're re-doing summary tables.
+					 PostInstallCmdPreamble => '[[ "$action" == *"summary"* ]] && set -- "$@" ps'
 				 },
 	 qcd => { http_port => 8883,
 						ssl_port => 8865,
@@ -76,7 +87,7 @@ my %collector_configs =
 									server_port => 8134,
 									db_schema => "gratia_osg_daily",
 									UserConfig => "UserConfig_osg_daily.xml",
-									PostInstallCmdPreamble => '[[ $action == *"stored"* ]] || continue',
+									PostInstallCmdPreamble => '[[ "$action" == *"stored"* ]] || continue',
 
 									"properties.attributes" =>
 									{ "monitor.listener.wait" => 1440

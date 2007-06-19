@@ -22,17 +22,24 @@ while [[ -n "$1" ]]; do
 			;;
 			*trigger*)
 			  proc="build-trigger.sql"
+      ;;
+			ps)
+			  proc="build-ps-node-summary-table.sql"
 			;;
 			*)
 			  echo "Unrecognized action \"$action\"" 1>&2
         exit 1
 	esac
 
+	printf "post-install.sh: loading $proc ... "
+
 	CMD_PREAMBLE
 	cat MAGIC_VDT_LOCATION/tomcat/v55/gratia/${proc} | CMD_PREFIX mysql -B --force --unbuffered --user=root --password=ROOTPASS --host=localhost --port=PORT gratia CMD_SUFFIX
 	status=$?
   if (( $status != 0 )); then
-    echo "ERROR: mysql post-install command failed for action $action" 1>&2
+    echo "FAILED with status $status" 1>&2
     exit $status
+  else
+    echo "OK"
   fi
 done
