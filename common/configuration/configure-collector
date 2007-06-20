@@ -356,6 +356,7 @@ foreach my $config (@instance_list) {
 	configure_collector_config($config, $config_ref);
 	configure_tomcat_config($config, $config_ref);
 	configure_tomcat_users($config, $config_ref);
+	configure_log4j_properties($config, $config_ref) if $options{"use-ssl"};
 
 	if (exists $options{"db-root"}) {
 		configure_post_install($config, $config_ref);
@@ -365,6 +366,34 @@ foreach my $config (@instance_list) {
 };
 
 1;
+
+sub configure_log4j_properties {
+	return unless $options{"use-ssl"};
+	my ($instance_name, $collector_config) = @_;
+	my $log4j_prop = ">$options{prefix}/tomcat-${instance_name}/conf/log4j-trustmanager.properties";
+	open(LOG4J_PROP, $log4j_prop) or die "Unable to open $log4j_prop for writing";
+	print LOG4J_PROP <<'EOF';
+log4j.logger.org.glite.security=INFO, fileout
+
+log4j.appender.fileout=org.apache.log4j.RollingFileAppender
+
+# the OUTPUT FILE for the logging messages
+log4j.appender.fileout.File=${catalina.base}/logs/glite-security-trustmanager.log
+
+# define max file size for the debug file
+log4j.appender.fileout.MaxFileSize=100KB
+
+# Keep one backup file
+log4j.appender.fileout.MaxBackupIndex=1
+
+log4j.appender.fileout.layout=org.apache.log4j.PatternLayout
+# define the pattern of the messages
+log4j.appender.fileout.layout.ConversionPattern=%d{ISO8601} %-5p [%t] %c{2} %x - %m%n
+# this also outputs the method name, but is very slow
+#log4j.appender.fileout.layout.ConversionPattern=%d{ISO8601} %-5p [%t] %c{2} %M %x - %m%n
+EOF
+	close(LOG4J_PROP);
+}
 
 sub configure_post_install {
 	my ($instance_name, $collector_config) = @_;
@@ -522,9 +551,14 @@ EOF
                maxThreads="150" minSpareThreads="25" maxSpareThreads="75"
                enableLookups="false" disableUploadTimeout="true"
                acceptCount="100" scheme="https" secure="true"
+               sslKey="/etc/grid-security/hostkey.pem" sslCAFiles="/etc/grid-security/certificates/*.0"
+               sslCertFile="/etc/grid-security/hostcert.pem"
+               crlFiles="/etc/grid-security/certificates/*.r0"
+               sSLImplementation="org.glite.security.trustmanager.tomcat.TMSSLImplementation"
+               log4jConfFile="$options{prefix}/tomcat-${instance_name}/conf/log4j-trustmanager.properties"
                keystoreFile="$options{prefix}/tomcat-${instance_name}/gratia/keystore" keystorePass="server"
                truststoreFile="$options{prefix}/tomcat-${instance_name}/gratia/truststore" truststorePass="server"
-               clientAuth="false" sslProtocol="TLS" />
+               clientAuth="true" sslProtocol="TLS" />
 EOF
 			}
 		}
