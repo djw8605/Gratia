@@ -146,6 +146,19 @@ my %collector_configs =
 								"monitor.to.address0" => 'vittone@fnal.gov'
 							 }
 							},
+	 penelope => {http_port => 8884,
+							 ssl_port => 8865,
+							 rmi_port => 21000,
+							 jmx_port => 8044,
+							 server_port => 8144,
+							 db_host => "localhost",
+							 db_schema => "gratia_penelope",
+							 "properties.attributes" =>
+							 {
+								"monitor.listener.wait" => 240,
+								"monitor.to.address0" => 'penelope@fnal.gov'
+							 }
+							},
 	);
 
 my @required_attributes =
