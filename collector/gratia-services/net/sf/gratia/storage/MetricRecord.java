@@ -34,8 +34,15 @@ public class MetricRecord implements Record
    // Data Content.
 
    private StringElement MetricName;   // The name of the metric. this be of the format <SERVICE>-<METRIC>
-   private StringElement MetricStatus; // A return status code (See https://twiki.cern.ch/twiki/bin/view/LCG/GridMonitoringProbeStandard#Status_and_Performance_Metrics)
+   private StringElement MetricStatus; // A return status code (See https://twiki.cern.ch/twiki/bin/view/LCG/GridMonitoringProbeSpecification#Status_and_Performance_Metrics)
    private DateElement Timestamp;      // The time the metric was gathered
+   private StringElement ServiceType; // The service we are testing
+   private StringElement ServiceUri;   // The hostname/port/service we are testing
+   private StringElement GatheredAt;   // The Monitoring Host that runs probes
+   private StringElement SummaryData;   // Summary of probe output
+   private StringElement DetailsData;   // Details of probe output
+
+
 
    public MetricRecord()
    {
@@ -55,6 +62,11 @@ public class MetricRecord implements Record
       output = output + "metricName: " + MetricName + "\n";
       output = output + "metricType: " + MetricStatus + "\n";
       output = output + "timestamp: " + Timestamp + "\n";
+      output = output + "serviceType: " + ServiceType + "\n";
+      output = output + "serviceUri: " + ServiceUri + "\n";
+      output = output + "gatheredAt: " + GatheredAt + "\n";
+      output = output + "summaryData: " + SummaryData + "\n";
+      output = output + "detailsData: " + DetailsData + "\n";
       return output;
    }
 
@@ -69,7 +81,11 @@ public class MetricRecord implements Record
       if (MetricName != null) output = output + MetricName.asXml("MetricName");
       if (MetricStatus != null) output = output + MetricStatus.asXml("MetricStatus");
       if (Timestamp != null) output = output + Timestamp.asXml("Timestamp");
-
+      if (ServiceType != null) output = output + ServiceType.asXml("ServiceType");
+      if (ServiceUri != null) output = output + ServiceUri.asXml("ServiceUri");
+      if (GatheredAt != null) output = output + GatheredAt.asXml("GatheredAt");
+      if (SummaryData != null) output = output + SummaryData.asXml("SummaryData");
+      if (DetailsData != null) output = output + DetailsData.asXml("DetailsData");
       output = output + ("</MetricRecord>\n");
       return output;
    }
@@ -221,4 +237,53 @@ public class MetricRecord implements Record
       return Timestamp;
    }
 
+   public void setServiceType(StringElement ServiceType)
+   {
+      this.ServiceType = ServiceType;
+   }
+
+   public StringElement getServiceType()
+   {
+      return ServiceType;
+   }
+
+   public void setServiceUri(StringElement ServiceUri)
+   {
+      this.ServiceUri = ServiceUri;
+   }
+
+   public StringElement getServiceUri()
+   {
+      return ServiceUri;
+   }
+
+   public void setGatheredAt(StringElement GatheredAt)
+   {
+      this.GatheredAt = GatheredAt;
+   }
+
+   public StringElement getGatheredAt()
+   {
+      return GatheredAt;
+   }
+
+   public void setSummaryData(StringElement SummaryData)
+   {
+      this.SummaryData = SummaryData;
+   }
+
+   public StringElement getSummaryData()
+   {
+      return SummaryData;
+   }
+
+   public void setDetailsData(StringElement DetailsData)
+   {
+      this.DetailsData = DetailsData;
+   }
+
+   public StringElement getDetailsData()
+   {
+      return DetailsData;
+   }
 }

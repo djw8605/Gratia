@@ -26,6 +26,27 @@
       <property name="Value" column="Timestamp" type="timestamp"  />
     </component>
 
+    <component name="ServiceType" class="StringElement" insert="true">
+      <property name="Value" column="ServiceType" />
+    </component>
+
+    <component name="ServiceUri" class="StringElement" insert="true">
+      <property name="Value" column="ServiceUri" />
+    </component>
+
+    <component name="GatheredAt" class="StringElement" insert="true">
+      <property name="Value" column="GatheredAt" />
+    </component>
+
+    <component name="SummaryData" class="StringElement" insert="true">
+      <property name="Value" column="SummaryData" />
+    </component>
+
+    <component name="DetailsData" class="StringElement" insert="true">
+      <property name="Value" column="DetailsData" />
+    </component>
+
+
     <join table="MetricRecord_Meta">
       <key column="dbid"/>
 
