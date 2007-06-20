@@ -9,9 +9,14 @@ cat 1>&2 <<EOF
 usage: update-gratia-local [-S <source-prefix>] [-j <jre-home>] [-s] \
                            [-p <prefix>] [-d <db-root-pw>] [-h] [--] <instance>
 
+       -c <configure-collector-script>
+
+          Execute <configure-collector-script> instead of
+          <source-prefix>/common/configuration/configure-collector.
+
        -S <source-prefix>
 
-			    Find all sources under <source-prefix>.
+          Find all sources under <source-prefix>.
 
        -j <jre-home>
 
@@ -23,42 +28,44 @@ usage: update-gratia-local [-S <source-prefix>] [-j <jre-home>] [-s] \
 
        -p <prefix>
 
-			    Instance path prefix (default $tomcat_root).
+          Instance path prefix (default $tomcat_root).
 
        -d <db-root-pw>
 
-			    Configure post-install.sh with this DB root password.
+          Configure post-install.sh with this DB root password.
 
 EOF
 }
 
 # Defaults
-while getopts :j:sp:d:hS: OPT; do
-		case $OPT in
-				S)
-				    source_prefix="$OPTARG"
-						;;
-				j)
-						java_jre="$OPTARG"
-						;;
-				s)
-						use_ssl="-s"
-						;;
-				p)
-						tomcat_root="$OPTARG"
-						;;
-				d)
-				    dbp_arg="-d"
-						dbpwd="$OPTARG"
-						;;
-				h)
-						usage
-						exit 1
-						;;
-				*)
-				    usage
-				    exit 1
-		esac
+while getopts :c:j:sp:d:hS: OPT; do
+    case $OPT in
+        c)  configure_script="$OPTARG"
+            ;;
+        S)
+            source_prefix="$OPTARG"
+            ;;
+        j)
+            java_jre="$OPTARG"
+            ;;
+        s)
+            use_ssl="-s"
+            ;;
+        p)
+            tomcat_root="$OPTARG"
+            ;;
+        d)
+            dbp_arg="-d"
+            dbpwd="$OPTARG"
+            ;;
+        h)
+            usage
+            exit 1
+            ;;
+        *)
+            usage
+            exit 1
+    esac
 done
 shift $[ OPTIND - 1 ]
 
@@ -87,16 +94,16 @@ sleep 5
 if [[ -f "$tomcat_top/webapps/$birt_war" ]]; then
   # Verify checksum
   official_birt_checksum=`cd "$war_dir"; md5sum "$birt_war"`
-	# Checksum local birt war
+  # Checksum local birt war
   ( cd "$war_dir"; md5sum "$birt_war" ) | ( cd "$tomcat_top/webapps/" ; md5sum --check --status )
-	if (( $? != 0 )); then
+  if (( $? != 0 )); then
     echo "Birt war has changed: obtaining fresh copy"
     rm -rf "$tomcat_top/webapps/$birt_war" "$tomcat_top/webapps/${birt_war%.war}"
     cp -p "$war_dir/$birt_war" "$tomcat_top/webapps/"
   fi
 else
   echo "Birt war $birt_war is missing: obtaining fresh copy"
-	rm -rf "$tomcat_top/webapps/${birt_war%.war}"
+  rm -rf "$tomcat_top/webapps/${birt_war%.war}"
   cp -pv "$war_dir/$birt_war" "$tomcat_top/webapps/"
 fi
 
@@ -125,7 +132,9 @@ for war in $target_dir/*.war; do
 done
 
 # Configure gratia dir
-"$configuration_dir/configure-collector" \
+[[ -n "$configure_script" ]] || configure_script="$configuration_dir/configure-collector"
+
+"$configure_script" \
 $use_ssl \
 -p "$tomcat_root" \
 -j "$java_jre" \
