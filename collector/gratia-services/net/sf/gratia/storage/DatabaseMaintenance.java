@@ -133,6 +133,11 @@ public class DatabaseMaintenance {
         AddIndex("JobUsageRecord_Meta", true, "index12", "md5");
         AddIndex("JobUsageRecord_Meta", false, "index13", "ServerDate");
 
+        // 
+        // Index on DupRecord
+        //
+        AddIndex("DupRecord",false,"index02","eventdate");
+        
         //
         // new indexes for authentication
         //
