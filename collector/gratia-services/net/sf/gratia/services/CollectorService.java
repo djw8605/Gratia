@@ -180,6 +180,7 @@ public class CollectorService implements ServletContextListener
          // Upgrade the database
          // 
 
+         checker.CheckIndices();
          if (!checker.Upgrade()) {
              // The database has not been upgraded correctly.
              Logging.warning("CollectorService: The database schema was not upgraded properly.");
@@ -191,7 +192,6 @@ public class CollectorService implements ServletContextListener
          // zap database
          //
 
-         checker.CheckIndices();
          checker.AddDefaults();
          checker.AddViews();
 
