@@ -95,6 +95,10 @@ public class MetricRecordLoader implements RecordLoader
             {
                SetDetailsData(job, sub);
             }
+            else if (sub.getName() == "SiteName")
+            {
+               SetSiteName(job, sub);
+            }
             else if (sub.getName() == "ProbeName")
             {
                SetProbeName(job, sub);
