@@ -14,6 +14,9 @@ import java.util.Date;
  *
  * @Philippe Canal
  * @version 1.0
+ *
+ * Updated by Arvind Gopu, Indiana University (http://peart.ucs.indiana.edu)
+ *
  */
 public class MetricRecord implements Record
 {
@@ -29,16 +32,28 @@ public class MetricRecord implements Record
    private String RawXml;   // Complete Usage Record Xml
    private String ExtraXml; // Xml fragment not used for any of the data members/field
    private Date ServerDate;
-   private String md5;
+    private String md5;
 
    // Data Content.
+    
+   // The name of the metric. this be of the format <SERVICE>-<METRIC>
+   private StringElement MetricName;   
 
-   private StringElement MetricName;   // The name of the metric. this be of the format <SERVICE>-<METRIC>
-   private StringElement MetricStatus; // A return status code (See https://twiki.cern.ch/twiki/bin/view/LCG/GridMonitoringProbeSpecification#Status_and_Performance_Metrics)
+   // A return status code (See https://twiki.cern.ch/twiki/bin/view/LCG/
+   //         GridMonitoringProbeSpecification#Status_and_Performance_Metrics)
+   private StringElement MetricStatus; 
+
    private DateElement Timestamp;      // The time the metric was gathered
-   private StringElement ServiceType; // The service we are testing
-   private StringElement ServiceUri;   // The hostname/port/service we are testing
+   private StringElement ServiceType;  // The service we are testing
+
+   // The hostname/port/service we are testing
+   private StringElement ServiceUri;   
    private StringElement GatheredAt;   // The Monitoring Host that runs probes
+
+   // FOR LOCAL PROBES: The Monitoring Host that runs probes AND tests itself. 
+   //  When this is provided, GatheredAt and ServiceUri will NOT be provided
+   private StringElement HostName;    
+
    private StringElement SummaryData;   // Summary of probe output
    private StringElement DetailsData;   // Details of probe output
 
@@ -65,6 +80,7 @@ public class MetricRecord implements Record
       output = output + "serviceType: " + ServiceType + "\n";
       output = output + "serviceUri: " + ServiceUri + "\n";
       output = output + "gatheredAt: " + GatheredAt + "\n";
+      output = output + "hostName: " + HostName + "\n";
       output = output + "summaryData: " + SummaryData + "\n";
       output = output + "detailsData: " + DetailsData + "\n";
       return output;
@@ -84,6 +100,7 @@ public class MetricRecord implements Record
       if (ServiceType != null) output = output + ServiceType.asXml("ServiceType");
       if (ServiceUri != null) output = output + ServiceUri.asXml("ServiceUri");
       if (GatheredAt != null) output = output + GatheredAt.asXml("GatheredAt");
+      if (HostName != null) output = output + HostName.asXml("HostName");
       if (SummaryData != null) output = output + SummaryData.asXml("SummaryData");
       if (DetailsData != null) output = output + DetailsData.asXml("DetailsData");
       output = output + ("</MetricRecord>\n");
@@ -265,6 +282,16 @@ public class MetricRecord implements Record
    public StringElement getGatheredAt()
    {
       return GatheredAt;
+   }
+
+   public void setHostName(StringElement HostName)
+   {
+      this.HostName = HostName;
+   }
+
+   public StringElement getHostName()
+   {
+      return HostName;
    }
 
    public void setSummaryData(StringElement SummaryData)

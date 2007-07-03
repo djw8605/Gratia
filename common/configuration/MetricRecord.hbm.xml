@@ -38,6 +38,10 @@
       <property name="Value" column="GatheredAt" />
     </component>
 
+    <component name="HostName" class="StringElement" insert="true">
+      <property name="Value" column="HostName" />
+    </component>
+
     <component name="SummaryData" class="StringElement" insert="true">
       <property name="Value" column="SummaryData" />
     </component>

@@ -20,6 +20,9 @@ import net.sf.gratia.storage.StringElement;
  *
  * @author Philippe Canal
  * @version 1.0
+ * 
+ * Updated by Arvind Gopu, Indiana University (http://peart.ucs.indiana.edu)
+ *
  */
 public class MetricRecordLoader implements RecordLoader
 {
@@ -86,6 +89,10 @@ public class MetricRecordLoader implements RecordLoader
             else if (sub.getName().equalsIgnoreCase("GatheredAt"))
             {
                SetGatheredAt(job, sub);
+            }
+            else if (sub.getName().equalsIgnoreCase("HostName"))
+            {
+               SetHostName(job, sub);
             }
             else if (sub.getName().equalsIgnoreCase("SummaryData"))
             {
@@ -296,6 +303,29 @@ public class MetricRecordLoader implements RecordLoader
       }
       el.setValue(element.getText());
       job.setGatheredAt(el);
+   }
+
+   public static void SetHostName(MetricRecord job, Element element)
+            throws Exception
+   {
+      StringElement el = job.getHostName();
+      if (el != null /* job identity already set */)
+      {
+         Utils.GratiaError("SetHostName", "parsing",
+                                    " found a second JobName field in the xml file", false);
+         return;
+      }
+      el = new StringElement();
+      for (Iterator i = element.attributeIterator(); i.hasNext(); )
+      {
+         Attribute a = (Attribute)i.next();
+         if (a.getName().equalsIgnoreCase("description"))
+         {
+            el.setDescription(a.getValue());
+         }
+      }
+      el.setValue(element.getText());
+      job.setHostName(el);
    }
 
    public static void SetSummaryData(MetricRecord job, Element element)
