@@ -423,7 +423,8 @@ sub configure_post_install {
 			if $collector_config->{"PostInstallCmdPrefix"};
 	while (<ORIG_POST>) {
 		chomp;
-		s&\${VDT_LOCATION}/mysql5/bin/\E&&; # VDT-specific location.
+		s&\${VDT_LOCATION}/mysql5/bin/&&; # VDT-specific location.
+		s&\${VDT_LOCATION}/tomcat/v55/gratia/&&; # VDT-specific location.
 		s&CMD_PREAMBLE&$collector_config->{"PostInstallCmdPreamble"}&;
 		s&localhost&$collector_config->{"db_host"}&;
 		s&(^.*?mysql.*?)CMD_SUFFIX(.*$)&$1$collector_config->{"PostInstallCmdSuffix"}$2&;
