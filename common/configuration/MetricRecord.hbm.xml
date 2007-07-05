@@ -47,7 +47,7 @@
     </component>
 
     <component name="DetailsData" class="StringElement" insert="true">
-      <property name="Value" column="DetailsData" />
+      <property name="Value" column="DetailsData" type="text" />
     </component>
 
 
