@@ -11,7 +11,7 @@ import java.io.File;
 public class DatabaseMaintenance {
     static final String dq = "\"";
     static final String comma = ",";
-    static final int gratiaDatabaseVersion = 10;
+    static final int gratiaDatabaseVersion = 11;
 
     java.sql.Connection connection;
     int liveVersion = 0;
@@ -362,15 +362,37 @@ public class DatabaseMaintenance {
         int oldvers = liveVersion;
       
         if (oldvers == 0) {
+						Statement statement;
+						ResultSet resultSet;
+						
+						String check = "select count(*),min(PropId) from SystemProplist where car = " + dq
+                + "gratia.database.version" + dq;
 
-            Execute("insert into SystemProplist(car,cdr) values(" + dq
-                    + "gratia.database.version" + dq + comma + dq
-                    + gratiaDatabaseVersion + dq + ")");
+						try {
+								Logging.log("Executing: " + check);
+								statement = connection.createStatement();
+								resultSet = statement.executeQuery(check);
+								if (resultSet.next()) {
+										int count = resultSet.getInt(1);
+										if (count > 0) { // Rare case where version is 0 but this entry exists
+												Execute("update SystemProplist set cdr = " + gratiaDatabaseVersion +
+																" where car = " + dq + "gratia.database.version" + dq);
+										} else { // Normal case: needs new entry
+												Execute("insert into SystemProplist(car,cdr) values(" + dq
+																+ "gratia.database.version" + dq + comma + dq
+																+ gratiaDatabaseVersion + dq + ")");
+										}
+								}
+								Logging.log("Command: OK: " + check);
+						} catch (Exception e) {
+								Logging.log("Command: Error: " + check + " : " + e);
+						}    
+
 
 						CallPostInstall("all"); // Need some DB root-user action
 						
             Logging.log("Gratia database now at version "
-                    + gratiaDatabaseVersion);
+												+ gratiaDatabaseVersion);
 
             return true;
             
@@ -519,6 +541,16 @@ public class DatabaseMaintenance {
                 } else {
                     Logging.log("Gratia database FAILED to upgrade from " + current + " to " + 10);
                 }
+						}
+						if (current == 10) {
+								int result = Execute("ALTER TABLE MetricRecord MODIFY DetailsData TEXT");
+								if (result > -1) {
+                    Logging.log("Gratia database upgraded from " + current + " to " + (current + 1));
+                    current = current + 1;
+                    UpdateDbVersion(current);
+                } else {
+                    Logging.log("Gratia database FAILED to upgrade from " + current + " to " + (current + 1));
+                }	
 						}
             return current == gratiaDatabaseVersion;
         }
