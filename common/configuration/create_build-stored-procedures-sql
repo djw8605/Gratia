@@ -29,118 +29,215 @@ my @default_procedure_argument_list =
 
 my %procedures =
 (
- DailyJobsBySite => { select_columns => 'Site.SiteName as sitename, ProbeSummary.EndTime as endtime, sum(ProbeSummary.Njobs) as Njobs',
-													from_tables => 'Site,Probe,ProbeSummary',
-													main_where => 'Probe.siteid = Site.siteid and ProbeSummary.ProbeName = Probe.probename',
-													group_by => 'ProbeSummary.EndTime, Site.SiteName',
-													order_by => 'ProbeSummary.EndTime'
-												},
- DailyJobsByProbe => { select_columns => 'ProbeSummary.ProbeName, ProbeSummary.EndTime as endtime, sum(ProbeSummary.Njobs) as Njobs',
-											 from_tables => 'ProbeSummary',
-											 main_where => '',
-											 group_by => 'ProbeSummary.EndTime, ProbeSummary.ProbeName',
-											 order_by => 'ProbeSummary.EndTime'
-										 },
- DailyJobsByVO => { select_columns => 'VOProbeSummary.VOName,VOProbeSummary.EndTime as endtime,sum(VOProbeSummary.Njobs) as Njobs',
-										from_tables => 'VOProbeSummary',
-										main_where => '',
-										group_by => 'VOProbeSummary.EndTime,VOProbeSummary.VOName',
-										order_by => 'VOProbeSummary.EndTime'
-									},
- DailyUsageBySite => { select_columns => 'Site.SiteName as sitename,ProbeSummary.EndTime as endtime,sum(ProbeSummary.WallDuration) as WallDuration',
-													 from_tables => 'Site,Probe,ProbeSummary',
-													 main_where => 'Probe.siteid = Site.siteid and ProbeSummary.ProbeName = Probe.probename',
-													 group_by => 'ProbeSummary.EndTime,Site.SiteName',
-													 order_by => 'ProbeSummary.EndTime'
-												 },
- DailyUsageByProbe => { select_columns => 'ProbeSummary.ProbeName,ProbeSummary.EndTime as endtime,sum(ProbeSummary.WallDuration) as WallDuration',
-												from_tables => 'ProbeSummary',
-												main_where => '',
-												group_by => 'ProbeSummary.EndTime,ProbeSummary.ProbeName',
-												order_by => 'ProbeSummary.EndTime'
-											},
- JobsBySite => { select_columns => 'Site.SiteName as sitename,sum(ProbeSummary.Njobs) as Njobs',
-										 from_tables => 'Site,Probe,ProbeSummary',
-										 main_where => 'Probe.siteid = Site.siteid and ProbeSummary.ProbeName = Probe.probename',
-										 group_by => 'Site.SiteName',
-										 order_by => 'Site.SiteName'
-									 },
- JobsByProbeNoFacility => { select_columns => 'ProbeSummary.ProbeName,sum(ProbeSummary.Njobs) as Njobs',
-														from_tables => 'ProbeSummary',
-														main_where => '',
-														group_by => 'ProbeSummary.ProbeName',
-														order_by => 'ProbeSummary.ProbeName'
-													},
- UsageBySite => { select_columns => 'Site.SiteName as sitename,VOProbeSummary.EndTime as endtime,sum(VOProbeSummary.WallDuration) as WallDuration,sum(VOProbeSummary.CpuUserDuration + VOProbeSummary.CpuSystemDuration) as Cpu',
-											from_tables => 'Site,Probe,VOProbeSummary',
-											main_where => 'Probe.siteid = Site.siteid and VOProbeSummary.ProbeName = Probe.probename',
-											group_by => 'Site.SiteName',
-											order_by => 'Site.SiteName'
-										},
- UsageByProbe => { select_columns => 'ProbeSummary.ProbeName,sum(ProbeSummary.WallDuration) as WallDuration',
-									 from_tables => 'ProbeSummary',
-									 main_where => '',
-									 group_by => 'ProbeSummary.ProbeName',
-									 order_by => 'ProbeSummary.ProbeName'
-								 },
- DailyUsageByVO => { select_columns => 'VOProbeSummary.VOName,VOProbeSummary.EndTime as endtime, sum(VOProbeSummary.WallDuration) as WallDuration,sum(VOProbeSummary.CpuUserDuration + VOProbeSummary.CpuSystemDuration) as Cpu',
-										 from_tables => 'VOProbeSummary',
-										 main_where => '',
-										 group_by => 'VOProbeSummary.EndTime,VOProbeSummary.VOName',
-										 order_by => 'VOProbeSummary.EndTime'
-									 },
- UsageByVO => { select_columns => 'VOProbeSummary.VOName,sum(VOProbeSummary.WallDuration) as WallDuration,sum(VOProbeSummary.CpuUserDuration + VOProbeSummary.CpuSystemDuration) as Cpu',
-								from_tables => 'VOProbeSummary',
-								main_where => '',
-								group_by => 'VOProbeSummary.VOName',
-								order_by => 'VOProbeSummary.VOName'
-							},
- JobsByVO => { select_columns => 'VOProbeSummary.VOName,sum(VOProbeSummary.Njobs) as Njobs',
-							 from_tables => 'VOProbeSummary',
-							 main_where => '',
-							 group_by => 'VOProbeSummary.VOName',
-							 order_by => 'VOProbeSummary.VOName'
-						 },
- WeeklyUsageByVO => { extra_procedure_arguments => [ 'vos varchar(128)',
-																										 'voseltype varchar(8)' ],
-											select_columns => 'VOProbeSummary.VOName,date_format(VOProbeSummary.EndTime, \'\'\', format, \'\'\') as endtime, sum(VOProbeSummary.WallDuration) as WallDuration,sum(VOProbeSummary.CpuUserDuration + VOProbeSummary.CpuSystemDuration) as Cpu,sum(VOProbeSummary.Njobs) as Njobs',
-											from_tables => 'VOProbeSummary',
-											main_where => 'VOProbeSummary.VOName \', voseltype, vos, \'',
-											group_by => 'VOProbeSummary.EndTime,VOProbeSummary.VOName',
-											order_by => 'VOProbeSummary.EndTime'
-										},
- WeeklyJobsByVO => { extra_procedure_arguments => [ 'vos varchar(128)',
-																										'voseltype varchar(8)' ],
-										 select_columns => 'VOProbeSummary.VOName,date_format(VOProbeSummary.EndTime, \'\'\', format, \'\'\') as endtime,sum(VOProbeSummary.Njobs) as Njobs',
-										 from_tables => 'VOProbeSummary',
-										 main_where => 'VOProbeSummary.VOName \', voseltype, vos, \'',
-										 group_by => 'VOProbeSummary.EndTime,VOProbeSummary.VOName',
-										 order_by => 'VOProbeSummary.EndTime'
-									 },
- JobsBySiteByVO =>	{ select_columns => 'Site.SiteName as sitename, sum(VOProbeSummary.Njobs) as Njobs, VOProbeSummary.VOName',
-							from_tables => 'Site,Probe,VOProbeSummary',
-							main_where => 'Probe.siteid = Site.siteid and VOProbeSummary.ProbeName = Probe.probename',
-							group_by => 'sitename, VOProbeSummary.VOName',
-							order_by => 'sitename, VOProbeSummary.VOName'
-												},
- UsageBySiteByVO =>	{ select_columns => 'Site.SiteName as sitename, sum(VOProbeSummary.WallDuration) as WallDuration, sum(VOProbeSummary.CpuUserDuration + VOProbeSummary.CpuSystemDuration) as Cpu, VOProbeSummary.VOName',
-							from_tables => 'Site,Probe,VOProbeSummary',
-							main_where => 'Probe.siteid = Site.siteid and VOProbeSummary.ProbeName = Probe.probename',
-							group_by => 'sitename, VOProbeSummary.VOName',
-							order_by => 'sitename, VOProbeSummary.VOName'
-												},
- DailyUsageBySiteByVO =>	{ select_columns => 'date_format(VOProbeSummary.EndTime,\'\'\', format, \'\'\') as endtime,Site.SiteName as sitename, sum(VOProbeSummary.WallDuration) as WallDuration, sum(VOProbeSummary.CpuUserDuration + VOProbeSummary.CpuSystemDuration) as Cpu, VOProbeSummary.VOName, sum(VOProbeSummary.Njobs) as Njobs',
-							from_tables => 'Site,Probe,VOProbeSummary',
-							main_where => 'Probe.siteid = Site.siteid and VOProbeSummary.ProbeName = Probe.probename',
-							group_by => 'date_format(VOProbeSummary.EndTime,\'\'\', format, \'\'\'),sitename, VOProbeSummary.VOName',
-							order_by => 'date_format(VOProbeSummary.EndTime,\'\'\', format, \'\'\'),sitename, VOProbeSummary.VOName'
-												},
- WeeklyUsageByVORanked => { select_columns => 'final_rank,VOProbeSummary.VOName, date_format(VOProbeSummary.EndTime,\'\'\', format, \'\'\') as datevalue, sum(VOProbeSummary.WallDuration) as WallDuration, sum(VOProbeSummary.CpuUserDuration + VOProbeSummary.CpuSystemDuration) as Cpu, sum(VOProbeSummary.Njobs) as Njobs',
-														from_tables => '(SELECT @rank:=@rank+1 as final_rank, VONamex, walldurationx FROM (SELECT @rank:=0 as rank, V.VOName as VONamex, V.EndTime as endtimex, sum(V.WallDuration) as walldurationx FROM VOProbeSummary V WHERE V.EndTime >= Date(\'\'\', fromdate, \'\'\') and V.EndTime <= Date(\'\'\', todate, \'\'\') group by VONamex order by walldurationx desc) as foox) as foo, VOProbeSummary',
-														main_where => 'VOProbeSummary.VOName = VONamex',
-														group_by => 'datevalue, VOProbeSummary.VOName',
-														order_by => 'final_rank, VOProbeSummary.VOName,datevalue'
-													},
+ DailyJobsBySite =>
+ { select_columns => 'Site.SiteName as sitename,
+                      ProbeSummary.EndTime as endtime,
+                      sum(ProbeSummary.Njobs) as Njobs',
+	 from_tables => 'Site,Probe,ProbeSummary',
+	 main_where => 'Probe.siteid = Site.siteid
+              and ProbeSummary.ProbeName = Probe.probename',
+	 group_by => 'ProbeSummary.EndTime, Site.SiteName',
+	 order_by => 'ProbeSummary.EndTime'
+ },
+ DailyJobsByProbe =>
+ { select_columns => 'ProbeSummary.ProbeName,
+                      ProbeSummary.EndTime as endtime,
+                      sum(ProbeSummary.Njobs) as Njobs',
+	 from_tables => 'ProbeSummary',
+	 main_where => '',
+	 group_by => 'ProbeSummary.EndTime, ProbeSummary.ProbeName',
+	 order_by => 'ProbeSummary.EndTime'
+ },
+ DailyJobsByVO =>
+ { select_columns => 'VOProbeSummary.VOName,
+                      VOProbeSummary.EndTime as endtime,
+                      sum(VOProbeSummary.Njobs) as Njobs',
+	 from_tables => 'VOProbeSummary',
+	 main_where => '',
+	 group_by => 'VOProbeSummary.EndTime,
+                VOProbeSummary.VOName',
+	 order_by => 'VOProbeSummary.EndTime'
+ },
+ DailyUsageBySite =>
+ { select_columns => 'Site.SiteName as sitename,
+                      ProbeSummary.EndTime as endtime,
+                      sum(ProbeSummary.WallDuration) as WallDuration',
+	 from_tables => 'Site,Probe,ProbeSummary',
+	 main_where => 'Probe.siteid = Site.siteid
+              and ProbeSummary.ProbeName = Probe.probename',
+	 group_by => 'ProbeSummary.EndTime,Site.SiteName',
+	 order_by => 'ProbeSummary.EndTime'
+ },
+ DailyUsageByProbe =>
+ { select_columns => 'ProbeSummary.ProbeName,
+                      ProbeSummary.EndTime as endtime,
+                      sum(ProbeSummary.WallDuration) as WallDuration',
+	 from_tables => 'ProbeSummary',
+	 main_where => '',
+	 group_by => 'ProbeSummary.EndTime,
+                ProbeSummary.ProbeName',
+	 order_by => 'ProbeSummary.EndTime'
+ },
+ JobsBySite =>
+ { select_columns => 'Site.SiteName as sitename,
+                      sum(ProbeSummary.Njobs) as Njobs',
+	 from_tables => 'Site,Probe,ProbeSummary',
+	 main_where => 'Probe.siteid = Site.siteid
+              and ProbeSummary.ProbeName = Probe.probename',
+	 group_by => 'Site.SiteName',
+	 order_by => 'Site.SiteName'
+ },
+ JobsByProbeNoFacility =>
+ { select_columns => 'ProbeSummary.ProbeName,
+                      sum(ProbeSummary.Njobs) as Njobs',
+	 from_tables => 'ProbeSummary',
+	 main_where => '',
+	 group_by => 'ProbeSummary.ProbeName',
+	 order_by => 'ProbeSummary.ProbeName'
+ },
+ UsageBySite =>
+ { select_columns => 'Site.SiteName as sitename,
+                      VOProbeSummary.EndTime as endtime,
+                      sum(VOProbeSummary.WallDuration) as WallDuration,
+                      sum(VOProbeSummary.CpuUserDuration + VOProbeSummary.CpuSystemDuration) as Cpu',
+	 from_tables => 'Site,Probe,VOProbeSummary',
+	 main_where => 'Probe.siteid = Site.siteid
+              and VOProbeSummary.ProbeName = Probe.probename',
+	 group_by => 'Site.SiteName',
+	 order_by => 'Site.SiteName'
+ },
+ UsageByProbe =>
+ { select_columns => 'ProbeSummary.ProbeName,
+                      sum(ProbeSummary.WallDuration) as WallDuration',
+	 from_tables => 'ProbeSummary',
+	 main_where => '',
+	 group_by => 'ProbeSummary.ProbeName',
+	 order_by => 'ProbeSummary.ProbeName'
+ },
+ DailyUsageByVO =>
+ { select_columns => 'VOProbeSummary.VOName,
+                      VOProbeSummary.EndTime as endtime,
+                      sum(VOProbeSummary.WallDuration) as WallDuration,
+                      sum(VOProbeSummary.CpuUserDuration + VOProbeSummary.CpuSystemDuration) as Cpu',
+	 from_tables => 'VOProbeSummary',
+	 main_where => '',
+	 group_by => 'VOProbeSummary.EndTime,
+                VOProbeSummary.VOName',
+	 order_by => 'VOProbeSummary.EndTime'
+ },
+ UsageByVO =>
+ { select_columns => 'VOProbeSummary.VOName,
+                      sum(VOProbeSummary.WallDuration) as WallDuration,
+                      sum(VOProbeSummary.CpuUserDuration + VOProbeSummary.CpuSystemDuration) as Cpu',
+	 from_tables => 'VOProbeSummary',
+	 main_where => '',
+	 group_by => 'VOProbeSummary.VOName',
+	 order_by => 'VOProbeSummary.VOName'
+ },
+ JobsByVO =>
+ { select_columns => 'VOProbeSummary.VOName,
+                      sum(VOProbeSummary.Njobs) as Njobs',
+	 from_tables => 'VOProbeSummary',
+	 main_where => '',
+	 group_by => 'VOProbeSummary.VOName',
+	 order_by => 'VOProbeSummary.VOName'
+ },
+ WeeklyUsageByVO =>
+ { extra_procedure_arguments => [ 'vos varchar(128)',
+																	'voseltype varchar(8)' ],
+	 select_columns => 'VOProbeSummary.VOName,
+                      date_format(VOProbeSummary.EndTime, \'\'\', format, \'\'\') as endtime,
+                      sum(VOProbeSummary.WallDuration) as WallDuration,
+                      sum(VOProbeSummary.CpuUserDuration + VOProbeSummary.CpuSystemDuration) as Cpu,
+                      sum(VOProbeSummary.Njobs) as Njobs',
+	 from_tables => 'VOProbeSummary',
+	 main_where => 'VOProbeSummary.VOName \', voseltype, vos, \'',
+	 group_by => 'VOProbeSummary.EndTime,
+                VOProbeSummary.VOName',
+	 order_by => 'VOProbeSummary.EndTime'
+ },
+ WeeklyJobsByVO =>
+ { extra_procedure_arguments => [ 'vos varchar(128)',
+																	'voseltype varchar(8)' ],
+	 select_columns => 'VOProbeSummary.VOName,
+                      date_format(VOProbeSummary.EndTime, \'\'\', format, \'\'\') as endtime,
+                      sum(VOProbeSummary.Njobs) as Njobs',
+	 from_tables => 'VOProbeSummary',
+	 main_where => 'VOProbeSummary.VOName \', voseltype, vos, \'',
+	 group_by => 'VOProbeSummary.EndTime,
+                VOProbeSummary.VOName',
+	 order_by => 'VOProbeSummary.EndTime'
+ },
+ JobsBySiteByVO =>	
+ { select_columns => 'Site.SiteName as sitename,
+                      sum(VOProbeSummary.Njobs) as Njobs,
+                      VOProbeSummary.VOName',
+	 from_tables => 'Site,Probe,VOProbeSummary',
+	 main_where => 'Probe.siteid = Site.siteid
+              and VOProbeSummary.ProbeName = Probe.probename',
+	 group_by => 'sitename, VOProbeSummary.VOName',
+	 order_by => 'sitename, VOProbeSummary.VOName'
+ },
+ UsageBySiteByVO =>
+ { select_columns => 'Site.SiteName as sitename,
+                      sum(VOProbeSummary.WallDuration) as WallDuration,
+                      sum(VOProbeSummary.CpuUserDuration + VOProbeSummary.CpuSystemDuration) as Cpu,
+                      VOProbeSummary.VOName',
+	 from_tables => 'Site,Probe,VOProbeSummary',
+	 main_where => 'Probe.siteid = Site.siteid
+              and VOProbeSummary.ProbeName = Probe.probename',
+	 group_by => 'sitename, VOProbeSummary.VOName',
+	 order_by => 'sitename, VOProbeSummary.VOName'
+ },
+ DailyUsageBySiteByVO =>
+ { select_columns => 'date_format(VOProbeSummary.EndTime,\'\'\', format, \'\'\') as endtime,
+                      Site.SiteName as sitename,
+                      sum(VOProbeSummary.WallDuration) as WallDuration,
+                      sum(VOProbeSummary.CpuUserDuration + VOProbeSummary.CpuSystemDuration) as Cpu,
+                      VOProbeSummary.VOName, sum(VOProbeSummary.Njobs) as Njobs',
+	 from_tables => 'Site,Probe,VOProbeSummary',
+	 main_where => 'Probe.siteid = Site.siteid
+              and VOProbeSummary.ProbeName = Probe.probename',
+	 group_by => 'date_format(VOProbeSummary.EndTime,\'\'\', format, \'\'\'),
+                sitename, VOProbeSummary.VOName',
+	 order_by => 'date_format(VOProbeSummary.EndTime,\'\'\', format, \'\'\'),
+                sitename, VOProbeSummary.VOName'
+ },
+ WeeklyUsageByVORanked =>
+ { select_columns => 'final_rank,
+                      VOProbeSummary.VOName,
+                      date_format(VOProbeSummary.EndTime,\'\'\', format, \'\'\') as datevalue,
+                      sum(VOProbeSummary.WallDuration) as WallDuration,
+                      sum(VOProbeSummary.CpuUserDuration + VOProbeSummary.CpuSystemDuration) as Cpu,
+                      sum(VOProbeSummary.Njobs) as Njobs',
+ 	 from_tables => '(SELECT @rank:=@rank+1 as final_rank,
+                    VONamex,
+                    walldurationx
+                    FROM (SELECT @rank:=0 as rank,
+                          V.VOName as VONamex,
+                          V.EndTime as endtimex,
+                          sum(V.WallDuration) as walldurationx
+                          FROM VOProbeSummary V
+                          WHERE V.EndTime >= Date(\'\'\', fromdate, \'\'\')
+                            and V.EndTime <= Date(\'\'\', todate, \'\'\')
+                          GROUP BY VONamex
+                          ORDER BY walldurationx desc) as foox) as foo, VOProbeSummary',
+	 main_where => 'VOProbeSummary.VOName = VONamex',
+	 group_by => 'datevalue, VOProbeSummary.VOName',
+	 order_by => 'final_rank, VOProbeSummary.VOName,datevalue'
+ },
+ DcacheBySource =>
+ { select_columns => 'avg(N.Value/N.PhaseUnit/1024.0/1024.0) as RateInMBPerSecond,
+                      date_format(J.EndTime,\'\'\', format , \'\'\') as Day,
+                      J.SiteName,Resource.value as Source',
+	 from_tables => 'JobUsageRecord J, Network N, Resource R, ',
+	 main_where => 'J.ResourceType = \'Storage\'
+              and J.dbid = N.dbid
+              and J.dbid = Resource.dbid
+              and Resource.Description = \'Source\'',
+	 group_by => 'Day, SiteName',
+	 order_by => 'Day'
+ },
  newProcedure => { select_columns => '',
 									 from_tables => '',
 									 main_where => '',
@@ -247,13 +344,28 @@ sub generate_procedures {
 	@procedure_list = sort keys %procedures unless (scalar @procedure_list);
 	foreach my $procedure (@procedure_list) {
 		$procedure eq 'newProcedure' and next;
+		foreach my $key (keys %{$procedures{$procedure}}) {
+			# Remove extraneous whitespace.
+			$procedures{$procedure}->{$key} =~ s&\s{2,}& &o;
+		}
 		$procedures{$procedure}->{main_where} = "$procedures{$procedure}->{main_where} and"
 			if $procedures{$procedure}->{main_where};
-		my $jobusage_select = jobusage($procedures{$procedure}->{select_columns});
-		my $jobusage_from_tables = jobusage($procedures{$procedure}->{from_tables});
-		my $jobusage_main_where = jobusage($procedures{$procedure}->{main_where});
-		my $jobusage_group_by = jobusage($procedures{$procedure}->{group_by});
-		my $jobusage_order_by = jobusage($procedures{$procedure}->{order_by});
+		my $uses_resource_table = ($procedures{$procedure}->{from_tables} =~ m&\bResource\b&);
+		my $jobusage_select = $uses_resource_table?
+			jobusage($procedures{$procedure}->{select_columns}):
+			$procedures{$procedure}->{select_columns};
+		my $jobusage_from_tables = $uses_resource_table?
+			jobusage($procedures{$procedure}->{from_tables}):
+			$procedures{$procedure}->{from_tables};
+		my $jobusage_main_where = $uses_resource_table?
+			jobusage($procedures{$procedure}->{main_where}):
+			$procedures{$procedure}->{main_where};
+		my $jobusage_group_by = $uses_resource_table?
+			jobusage($procedures{$procedure}->{group_by}):
+			$procedures{$procedure}->{group_by};
+		my $jobusage_order_by = $uses_resource_table?
+			jobusage($procedures{$procedure}->{order_by}):
+			$procedures{$procedure}->{order_by};
 		$procedure_code = sprintf("%s\ndrop procedure if exists $procedure
 ||
 create procedure $procedure (%s)
@@ -309,33 +421,37 @@ EOF
 			if $jobusage_order_by;
 		$procedure_code = "$procedure_code                    );\n\n";
 
-		$procedure_code = sprintf("%s%s", $procedure_code, <<'EOF');
+		unless ($uses_resource_table) {
+			$procedure_code = sprintf("%s%s", $procedure_code, <<'EOF');
     if ( @mywhereclause = '' or @mywhereclause is NULL ) and datediff(todate,fromdate) > 6 then
 		-- Use summary table
 		set @sql :=
 EOF
-		$group_by = $procedures{$procedure}->{group_by};
-		$group_by =~ s/((?:\b[^\.]+\.)?EndTime)/date_format($1,''', format, ''')/g;
-		$procedure_code = sprintf("%s%s",	$procedure_code, <<"EOF");
+			$group_by = $procedures{$procedure}->{group_by};
+			$group_by =~ s/((?:\b[^\.]+\.)?EndTime)/date_format($1,''', format, ''')/g;
+			$procedure_code = sprintf("%s%s",	$procedure_code, <<"EOF");
            concat_ws('', 'select $procedures{$procedure}->{select_columns}',
                      ' from $procedures{$procedure}->{from_tables}',
                      ' where',
 EOF
-		$procedure_code = "$procedure_code                     ' $procedures{$procedure}->{main_where}',\n"
-			if $procedures{$procedure}->{main_where};
-		$procedure_code = sprintf("%s%s",	$procedure_code, <<'EOF');
+			$procedure_code = "$procedure_code                     ' $procedures{$procedure}->{main_where}',\n"
+				if $procedures{$procedure}->{main_where};
+			$procedure_code = sprintf("%s%s",	$procedure_code, <<'EOF');
                      ' EndTime >= date(''', fromdate, ''')',
                      ' and EndTime <= date(''', todate, ''')',
                      ' ', @myresourceclause,
                      ' ', @mywhereclause
 EOF
-		$procedure_code = "${procedure_code}                     , ' group by $group_by'\n"
-			if $group_by;
-		$procedure_code = "${procedure_code}                     , ' order by $procedures{$procedure}->{order_by}'\n"
-			if $procedures{$procedure}->{order_by};
-		$procedure_code = sprintf("%s%s",	$procedure_code, <<"EOF");
+			$procedure_code = "${procedure_code}                     , ' group by $group_by'\n"
+				if $group_by;
+			$procedure_code = "${procedure_code}                     , ' order by $procedures{$procedure}->{order_by}'\n"
+				if $procedures{$procedure}->{order_by};
+			$procedure_code = sprintf("%s%s",	$procedure_code, <<"EOF");
                  );
 	end if;
+EOF
+		}
+		$procedure_code = sprintf("%s%s",	$procedure_code, <<"EOF");
 	insert into trace(pname,userkey,user,role,vo,p1,p2,p3,p4,data)
 		values('$procedure',\@key,userName,userRole,\@vo,
 		fromdate,todate,format,resourceType,\@sql);
