@@ -189,6 +189,20 @@ my %procedures =
 	 group_by => 'sitename, VOProbeSummary.VOName',
 	 order_by => 'sitename, VOProbeSummary.VOName'
  },
+ UsageBySiteByVO1 =>	
+ 	{ extra_procedure_arguments => [ 'forvo varchar(64)', 'forvoname varchar(64)', 'forsite varchar(64)', 'forsitename varchar(64)' ],
+   select_columns => 'CETable.facility_name as sitename,
+					  sum(VOProbeSummary.WallDuration) as WallDuration,
+					  sum(VOProbeSummary.CpuUserDuration + VOProbeSummary.CpuSystemDuration) as Cpu,
+					  sum(VOProbeSummary.Njobs) as Njobs,
+					  VOProbeSummary.VOName',
+	 from_tables => 'CETable,CEProbes,VOProbeSummary',
+	 main_where => 'CEProbes.facility_id = CETable.facility_id and VOProbeSummary.ProbeName = CEProbes.probename
+	 		 and (VOProbeSummary.VOName =\'\'\', forvoname, \'\'\' or (\'\'\', forvo, \'\'\' = \'\'AnyVO\'\' and VOProbeSummary.VOName like \'\'%\'\' ))
+			 and (CETable.facility_name =\'\'\', forsitename, \'\'\' or (\'\'\', forsite, \'\'\' = \'\'AnySite\'\' and CETable.facility_name like \'\'%\'\' ))',
+	 group_by => 'sitename, VOProbeSummary.VOName',
+  	 order_by => 'sitename, VOProbeSummary.VOName'
+ }, 
  DailyUsageBySiteByVO =>
  { select_columns => 'date_format(VOProbeSummary.EndTime,\'\'\', format, \'\'\') as endtime,
                       Site.SiteName as sitename,
