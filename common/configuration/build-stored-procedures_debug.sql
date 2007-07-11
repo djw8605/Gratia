@@ -571,9 +571,9 @@ begin
                       J.SiteName,Resource.value as Source',
                      ' from JobUsageRecord J, Network N, Resource R, ',
                      ' where',
-                     ' J.ResourceType = 'Storage' and J.dbid = N.dbid
+                     ' J.ResourceType = ''Storage'' and J.dbid = N.dbid
               and J.dbid = Resource.dbid
-              and Resource.Description = 'Source' and',
+              and Resource.Description = ''Source'' and',
                      ' EndTime >= date(''', fromdate, ''')'
                      ' and EndTime <= date(''', todate, ''')'
                      ' ', @myresourceclause,
@@ -1089,6 +1089,76 @@ end
 -- call UsageBySiteByVO1('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-04 00:00:00','%y:%m:%d:%H:%i','Batch')
 -- ||
 -- call UsageBySiteByVO1('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-04 00:00:00','%y:%m:%d:%H:%i','')
+-- ||
+
+drop procedure if exists UsageByUser
+||
+create procedure UsageByUser (userName varchar(64), userRole varchar(64), fromdate varchar(64), todate varchar(64), format varchar(64), resourceType varchar(64), forvo varchar(64), forvoname varchar(64), forsite varchar(64), forsitename varchar(64))
+READS SQL DATA
+begin
+
+	select generateResourceTypeClause(resourceType) into @myresourceclause;
+	select SystemProplist.cdr into @usereportauthentication from SystemProplist
+	where SystemProplist.car = 'use.report.authentication';
+	select Role.whereclause into @mywhereclause from Role
+		where Role.role = userRole;
+	select generateWhereClause(userName,userRole,@mywhereclause)
+		into @mywhereclause;
+	call parse(userName,@name,@key,@vo);
+
+	set @sql :=
+           concat_ws('', 'select CETable.facility_name as sitename, sum(VOProbeSummary.WallDuration) as WallDuration,
+					  sum(VOProbeSummary.CpuUserDuration + VOProbeSummary.CpuSystemDuration) as Cpu,
+					  sum(VOProbeSummary.Njobs) as Njobs,
+					  VOProbeSummary.VOName,
+					  VOProbeSummary.CommonName as UserName',
+                     ' from CETable,CEProbes,VOProbeSummary',
+                     ' where',
+                     ' CEProbes.facility_id = CETable.facility_id and VOProbeSummary.ProbeName = CEProbes.probename and (VOProbeSummary.VOName =''', forvoname, ''' or (''', forvo, ''' = ''AnyVO'' and VOProbeSummary.VOName like ''%'' ))
+			 and (CETable.facility_name =''', forsitename, ''' or (''', forsite, ''' = ''AnySite'' and CETable.facility_name like ''%'' )) and',
+                     ' EndTime >= date(''', fromdate, ''')'
+                     ' and EndTime <= date(''', todate, ''')'
+                     ' ', @myresourceclause,
+                     ' ', @mywhereclause
+                     , ' group by UserName, sitename, VOProbeSummary.VOName'
+                     , ' order by UserName, sitename, VOProbeSummary.VOName'
+                    );
+
+    if ( @mywhereclause = '' or @mywhereclause is NULL ) and datediff(todate,fromdate) > 6 then
+		-- Use summary table
+		set @sql :=
+           concat_ws('', 'select CETable.facility_name as sitename, sum(VOProbeSummary.WallDuration) as WallDuration,
+					  sum(VOProbeSummary.CpuUserDuration + VOProbeSummary.CpuSystemDuration) as Cpu,
+					  sum(VOProbeSummary.Njobs) as Njobs,
+					  VOProbeSummary.VOName,
+					  VOProbeSummary.CommonName as UserName',
+                     ' from CETable,CEProbes,VOProbeSummary',
+                     ' where',
+                     ' CEProbes.facility_id = CETable.facility_id and VOProbeSummary.ProbeName = CEProbes.probename and (VOProbeSummary.VOName =''', forvoname, ''' or (''', forvo, ''' = ''AnyVO'' and VOProbeSummary.VOName like ''%'' ))
+			 and (CETable.facility_name =''', forsitename, ''' or (''', forsite, ''' = ''AnySite'' and CETable.facility_name like ''%'' )) and',
+                     ' EndTime >= date(''', fromdate, ''')',
+                     ' and EndTime <= date(''', todate, ''')',
+                     ' ', @myresourceclause,
+                     ' ', @mywhereclause
+                     , ' group by UserName, sitename, VOProbeSummary.VOName'
+                     , ' order by UserName, sitename, VOProbeSummary.VOName'
+                 );
+	end if;
+	insert into trace(pname,userkey,user,role,vo,p1,p2,p3,p4,data)
+		values('UsageByUser',@key,userName,userRole,@vo,
+		fromdate,todate,format,resourceType,@sql);
+	prepare statement from @sql;
+	execute statement;
+	deallocate prepare statement;
+end
+||
+-- call UsageByUser('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-10 00:00:00','%y:%m:%d:%H:%i','Batch')
+-- ||
+-- call UsageByUser('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-10 00:00:00','%y:%m:%d:%H:%i','')
+-- ||
+-- call UsageByUser('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-04 00:00:00','%y:%m:%d:%H:%i','Batch')
+-- ||
+-- call UsageByUser('GratiaUser','GratiaUser','2007-02-01 00:00:00','2007-02-04 00:00:00','%y:%m:%d:%H:%i','')
 -- ||
 
 drop procedure if exists UsageByVO
