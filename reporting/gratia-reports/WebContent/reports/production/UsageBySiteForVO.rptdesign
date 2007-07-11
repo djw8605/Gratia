@@ -26,8 +26,12 @@
     </list-property>
     <list-property name="configVars">
         <structure>
+            <property name="name">CPUMetric</property>
+            <property name="value">process</property>
+        </structure>
+        <structure>
             <property name="name">DatabaseURL</property>
-            <property name="value">jdbc:mysql://gratia-vm02.fnal.gov:3320/gratia_itb</property>
+            <property name="value">jdbc:mysql://gratia-vm02.fnal.gov:3320/gratia_jeffmack</property>
         </structure>
         <structure>
             <property name="name">DatabaseUser</property>
@@ -36,6 +40,22 @@
         <structure>
             <property name="name">DatabasePassword</property>
             <property name="value">proto</property>
+        </structure>
+        <structure>
+            <property name="name">ForVOName</property>
+            <property name="value">gridex</property>
+        </structure>
+        <structure>
+            <property name="name">ForSiteName</property>
+            <property name="value">Generic Site</property>
+        </structure>
+        <structure>
+            <property name="name">ForVO</property>
+            <property name="value">AnyVO</property>
+        </structure>
+        <structure>
+            <property name="name">ForSite</property>
+            <property name="value">AnySite</property>
         </structure>
         <structure>
             <property name="name">Start Date</property>
@@ -58,12 +78,8 @@
             <property name="value">None</property>
         </structure>
         <structure>
-            <property name="name">CPUMetric</property>
-            <property name="value">process</property>
-        </structure>
-        <structure>
-            <property name="name">ForVOName</property>
-            <property name="value">uscms</property>
+            <property name="name">Display Metric</property>
+            <property name="value">jobcount</property>
         </structure>
     </list-property>
     <parameters>
@@ -76,7 +92,7 @@
                     <property name="allowBlank">false</property>
                     <property name="format">Unformatted</property>
                     <property name="controlType">text-box</property>
-                    <property name="defaultValue">jdbc:mysql://gratia-vm02.fnal.gov:3320/gratia_itb</property>
+                    <property name="defaultValue">jdbc:mysql://gratia-vm02.fnal.gov:3320/gratia_jeffmack</property>
                 </scalar-parameter>
                 <scalar-parameter name="DatabaseUser" id="83">
                     <property name="hidden">true</property>
@@ -98,88 +114,143 @@
                 </scalar-parameter>
             </parameters>
         </parameter-group>
-        <scalar-parameter name="Start Date" id="86">
-            <text-property name="helpText">Only jobs that finished after this date will be included</text-property>
-            <property name="valueType">static</property>
-            <property name="dataType">string</property>
-            <property name="promptText">Start Date</property>
-            <property name="allowBlank">false</property>
-            <property name="format">Unformatted</property>
-            <property name="controlType">text-box</property>
-            <property name="defaultValue">2006-03-01</property>
-        </scalar-parameter>
-        <scalar-parameter name="End Date" id="87">
-            <text-property name="helpText">Only jobs that finished before this date will be included</text-property>
-            <property name="valueType">static</property>
-            <property name="dataType">string</property>
-            <property name="promptText">End Date</property>
-            <property name="allowBlank">false</property>
-            <property name="format">Unformatted</property>
-            <property name="controlType">text-box</property>
-            <property name="defaultValue">2999-12-31</property>
-        </scalar-parameter>
-        <scalar-parameter name="UserName" id="102">
-            <property name="hidden">true</property>
-            <property name="valueType">static</property>
-            <property name="dataType">string</property>
-            <property name="concealValue">true</property>
-            <property name="allowNull">true</property>
-            <property name="format">Unformatted</property>
-            <property name="controlType">text-box</property>
-            <property name="defaultValue">None</property>
-        </scalar-parameter>
-        <scalar-parameter name="UserRole" id="103">
-            <property name="hidden">true</property>
-            <property name="valueType">static</property>
-            <property name="dataType">string</property>
-            <property name="concealValue">true</property>
-            <property name="allowNull">true</property>
-            <property name="format">Unformatted</property>
-            <property name="controlType">text-box</property>
-            <property name="defaultValue">None</property>
-        </scalar-parameter>
-        <scalar-parameter name="Subtitle" id="104">
-            <property name="hidden">true</property>
-            <property name="valueType">static</property>
-            <property name="dataType">string</property>
-            <property name="concealValue">true</property>
-            <property name="allowNull">true</property>
-            <property name="format">Unformatted</property>
-            <property name="controlType">text-box</property>
-            <property name="defaultValue">None</property>
-        </scalar-parameter>
-        <scalar-parameter name="CPUMetric" id="101">
-            <property name="hidden">false</property>
-            <text-property name="helpText">Job duration (wallclock) or process time</text-property>
-            <property name="valueType">dynamic</property>
-            <property name="dataType">string</property>
-            <property name="promptText">Enter process or wallclock</property>
-            <property name="allowBlank">true</property>
-            <property name="allowNull">false</property>
-            <property name="format">Unformatted</property>
-            <property name="controlType">list-box</property>
-            <property name="dataSetName">CPUMetricTypes</property>
-            <expression name="valueExpr">row["CPUMetricType"]</expression>
-            <expression name="labelExpr">row["CPUMetricType"]</expression>
-            <property name="mustMatch">false</property>
-            <property name="fixedOrder">true</property>
-            <property name="defaultValue">wallclock</property>
-        </scalar-parameter>
-        <scalar-parameter name="ForVOName" id="106">
-            <property name="hidden">true</property>
-            <property name="valueType">static</property>
-            <property name="dataType">string</property>
-            <property name="promptText">Enter VO Name</property>
-            <property name="allowBlank">false</property>
-            <property name="format">Unformatted</property>
-            <property name="controlType">text-box</property>
-            <property name="defaultValue">uscms</property>
-        </scalar-parameter>
+        <parameter-group name="VOandSite" id="108">
+            <parameters>
+                <scalar-parameter name="ForVOName" id="106">
+                    <property name="hidden">false</property>
+                    <property name="valueType">static</property>
+                    <property name="dataType">string</property>
+                    <property name="promptText">Enter VO Name</property>
+                    <property name="allowBlank">false</property>
+                    <property name="format">Unformatted</property>
+                    <property name="controlType">text-box</property>
+                    <property name="defaultValue">uscms</property>
+                </scalar-parameter>
+                <scalar-parameter name="ForSiteName" id="110">
+                    <property name="hidden">true</property>
+                    <property name="valueType">static</property>
+                    <property name="dataType">string</property>
+                    <property name="promptText">Enter Site name</property>
+                    <property name="allowBlank">false</property>
+                    <property name="format">Unformatted</property>
+                    <property name="controlType">text-box</property>
+                    <property name="defaultValue">Generic Site</property>
+                </scalar-parameter>
+                <scalar-parameter name="ForVO" id="111">
+                    <property name="hidden">true</property>
+                    <property name="valueType">static</property>
+                    <property name="dataType">string</property>
+                    <property name="allowBlank">false</property>
+                    <property name="format">Unformatted</property>
+                    <property name="controlType">text-box</property>
+                    <property name="defaultValue">AnyVO</property>
+                </scalar-parameter>
+                <scalar-parameter name="ForSite" id="112">
+                    <property name="hidden">true</property>
+                    <property name="valueType">static</property>
+                    <property name="dataType">string</property>
+                    <property name="allowBlank">false</property>
+                    <property name="format">Unformatted</property>
+                    <property name="controlType">text-box</property>
+                    <property name="defaultValue">AnySite</property>
+                </scalar-parameter>
+            </parameters>
+        </parameter-group>
+        <parameter-group name="DateRange" id="113">
+            <parameters>
+                <scalar-parameter name="Start Date" id="86">
+                    <text-property name="helpText">Only jobs that finished after this date will be included</text-property>
+                    <property name="valueType">static</property>
+                    <property name="dataType">string</property>
+                    <property name="promptText">Start Date</property>
+                    <property name="allowBlank">false</property>
+                    <property name="format">Unformatted</property>
+                    <property name="controlType">text-box</property>
+                    <property name="defaultValue">2006-03-01</property>
+                </scalar-parameter>
+                <scalar-parameter name="End Date" id="87">
+                    <text-property name="helpText">Only jobs that finished before this date will be included</text-property>
+                    <property name="valueType">static</property>
+                    <property name="dataType">string</property>
+                    <property name="promptText">End Date</property>
+                    <property name="allowBlank">false</property>
+                    <property name="format">Unformatted</property>
+                    <property name="controlType">text-box</property>
+                    <property name="defaultValue">2999-12-31</property>
+                </scalar-parameter>
+            </parameters>
+        </parameter-group>
+        <parameter-group name="UserInfo" id="114">
+            <parameters>
+                <scalar-parameter name="UserName" id="102">
+                    <property name="hidden">true</property>
+                    <property name="valueType">static</property>
+                    <property name="dataType">string</property>
+                    <property name="concealValue">true</property>
+                    <property name="allowNull">true</property>
+                    <property name="format">Unformatted</property>
+                    <property name="controlType">text-box</property>
+                    <property name="defaultValue">None</property>
+                </scalar-parameter>
+                <scalar-parameter name="UserRole" id="103">
+                    <property name="hidden">true</property>
+                    <property name="valueType">static</property>
+                    <property name="dataType">string</property>
+                    <property name="concealValue">true</property>
+                    <property name="allowNull">true</property>
+                    <property name="format">Unformatted</property>
+                    <property name="controlType">text-box</property>
+                    <property name="defaultValue">None</property>
+                </scalar-parameter>
+                <scalar-parameter name="Subtitle" id="104">
+                    <property name="hidden">true</property>
+                    <property name="valueType">static</property>
+                    <property name="dataType">string</property>
+                    <property name="concealValue">true</property>
+                    <property name="allowNull">true</property>
+                    <property name="format">Unformatted</property>
+                    <property name="controlType">text-box</property>
+                    <property name="defaultValue">None</property>
+                </scalar-parameter>
+            </parameters>
+        </parameter-group>
+        <parameter-group name="Metrics" id="115">
+            <parameters>
+                <scalar-parameter name="Display Metric" id="116">
+                    <property name="hidden">false</property>
+                    <text-property name="helpText">Select metric for chart</text-property>
+                    <property name="valueType">static</property>
+                    <property name="dataType">string</property>
+                    <property name="promptText">Select metric for chart</property>
+                    <property name="allowBlank">false</property>
+                    <property name="allowNull">false</property>
+                    <property name="format">Unformatted</property>
+                    <property name="controlType">list-box</property>
+                    <property name="mustMatch">false</property>
+                    <property name="fixedOrder">true</property>
+                    <property name="defaultValue">wallclock</property>
+                    <list-property name="selectionList">
+                        <structure>
+                            <property name="value">wallclock</property>
+                            <property name="label">Wallclock Hours</property>
+                        </structure>
+                        <structure>
+                            <property name="value">process</property>
+                            <property name="label">Process Hours</property>
+                        </structure>
+                        <structure>
+                            <property name="value">jobcount</property>
+                            <property name="label">Job Count</property>
+                        </structure>
+                    </list-property>
+                </scalar-parameter>
+            </parameters>
+        </parameter-group>
     </parameters>
     <data-sources>
         <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="fermigrid1" id="4">
             <property name="odaDriverClass">com.mysql.jdbc.Driver</property>
-            <property name="odaURL">jdbc:mysql://gratia-vm02.fnal.gov:3320/gratia_itb</property>
+            <property name="odaURL">jdbc:mysql://gratia-vm02.fnal.gov:3320/gratia_jeffmack</property>
             <property name="odaUser">gratia</property>
             <encrypted-property name="odaPassword">cHJvdG8=</encrypted-property>
         </oda-data-source>
@@ -222,15 +293,53 @@
                     <property name="isInput">true</property>
                     <property name="isOutput">false</property>
                 </structure>
+                <structure>
+                    <property name="name">GroupByFormat</property>
+                    <property name="dataType">string</property>
+                    <property name="position">5</property>
+                    <expression name="defaultValue">''</expression>
+                    <property name="isInput">true</property>
+                </structure>
+                <structure>
+                    <property name="name">ResourceType</property>
+                    <property name="dataType">string</property>
+                    <property name="position">6</property>
+                    <expression name="defaultValue">'Batch'</expression>
+                    <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
+                </structure>
+                <structure>
+                    <property name="name">ForVO</property>
+                    <property name="dataType">string</property>
+                    <property name="position">7</property>
+                    <expression name="defaultValue">'ForVO'</expression>
+                    <property name="isInput">true</property>
+                </structure>
+                <structure>
+                    <property name="name">ForVOName</property>
+                    <property name="dataType">string</property>
+                    <property name="position">8</property>
+                    <expression name="defaultValue">params["ForVOName"]''</expression>
+                    <property name="isInput">true</property>
+                </structure>
+                <structure>
+                    <property name="name">ForSite</property>
+                    <property name="dataType">string</property>
+                    <property name="position">9</property>
+                    <expression name="defaultValue">'AnySite'</expression>
+                    <property name="isInput">true</property>
+                </structure>
+                <structure>
+                    <property name="name">ForSiteName</property>
+                    <property name="dataType">string</property>
+                    <property name="position">10</property>
+                    <expression name="defaultValue">''</expression>
+                    <property name="isInput">true</property>
+                </structure>
             </list-property>
             <property name="queryText">
-call UsageBySiteByVO(?,?,?,?,'','Batch')
+call UsageBySiteByVO1(?,?,?,?,?,?,?,?,?,?)
 </property>
-        </oda-data-set>
-        <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="CPUMetricTypes" id="105">
-            <property name="dataSource">fermigrid1</property>
-            <property name="queryText">select CPUMetricTypes.CPUMetricType
-from CPUMetricTypes</property>
         </oda-data-set>
     </data-sets>
     <styles>
@@ -258,6 +367,14 @@ from CPUMetricTypes</property>
                 <structure>
                     <property name="paramName">EndDate</property>
                     <expression name="expression">params["End Date"]</expression>
+                </structure>
+                <structure>
+                    <property name="paramName">UserRole</property>
+                    <expression name="expression">params["UserName"]</expression>
+                </structure>
+                <structure>
+                    <property name="paramName">ForVOName</property>
+                    <expression name="expression">params["ForVOName"]</expression>
                 </structure>
             </list-property>
             <xml-property name="xmlRepresentation"><![CDATA[<model:ChartWithAxes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:attribute="http://www.birt.eclipse.org/ChartModelAttribute" xmlns:data="http://www.birt.eclipse.org/ChartModelData" xmlns:layout="http://www.birt.eclipse.org/ChartModelLayout" xmlns:model="http://www.birt.eclipse.org/ChartModel" xmlns:type="http://www.birt.eclipse.org/ChartModelType">
@@ -301,7 +418,7 @@ from CPUMetricTypes</property>
       <Visible>true</Visible>
       <Label>
         <Caption>
-          <Value>CPU Usage (wall clock hours) by Site</Value>
+          <Value>Usage by Site</Value>
           <Font>
             <Size>12.0</Size>
             <Bold>true</Bold>
@@ -570,9 +687,8 @@ from CPUMetricTypes</property>
  */
 function beforeGeneration( chart, context )
 {	rep = context.getExternalContext().getScriptable();
-	val1 =rep.getParameterValue(&quot;CPUMetric&quot;);
 	subtitle =rep.getParameterValue(&quot;Subtitle&quot;);
-	chart.getTitle().getLabel().getCaption().setValue ('CPU Usage by Site ('+ val1 + ' hours)' + &quot;\n&quot; + subtitle);
+	chart.getTitle().getLabel().getCaption().setValue ('CPU Usage by Site' + &quot;\n&quot; + subtitle);
 
 }
 
@@ -710,8 +826,29 @@ function beforeGeneration( chart, context )
  * @param context
  *            IChartScriptContext
  */
-//function beforeDrawAxisTitle( axis, label, context ){}
-</Script>
+function beforeDrawAxisTitle( axis, label, context )
+{
+	rep = context.getExternalContext().getScriptable();
+	val1 =rep.getParameterValue(&quot;Display Metric&quot;);
+	if(!axis.isCategoryAxis())
+	{
+		if(val1==&quot;process&quot;)
+		{
+		label.getCaption().setValue(&quot;Process Hours&quot;);
+		}
+		else if(val1==&quot;wallclock&quot;)
+		{
+		label.getCaption().setValue(&quot;Wallclock Hours&quot;);
+		}
+		else if(val1==&quot;jobcount&quot;)
+		{
+		label.getCaption().setValue(&quot;Job Count&quot;);
+		}
+		else {
+		label.getCaption().setValue(&quot;***undefined metric&quot;);
+		}
+	}
+}</Script>
   <Units>Points</Units>
   <SeriesThickness>10.0</SeriesThickness>
   <GridColumnCount>1</GridColumnCount>
@@ -773,13 +910,13 @@ function beforeGeneration( chart, context )
         <Caption>
           <Value>hours</Value>
           <Font>
-            <Size>10.0</Size>
+            <Size>12.0</Size>
             <Bold>true</Bold>
             <Alignment>
               <horizontalAlignment>Center</horizontalAlignment>
               <verticalAlignment>Center</verticalAlignment>
             </Alignment>
-            <Rotation>90.0</Rotation>
+            <Rotation>0.0</Rotation>
           </Font>
           <Color>
             <Transparency>255</Transparency>
@@ -810,7 +947,7 @@ function beforeGeneration( chart, context )
           <Bottom>0.0</Bottom>
           <Right>3.0</Right>
         </Insets>
-        <Visible>false</Visible>
+        <Visible>true</Visible>
       </Title>
       <TitlePosition>Left</TitlePosition>
       <SeriesDefinitions>
@@ -909,21 +1046,27 @@ function beforeGeneration( chart, context )
             <Visible>true</Visible>
           </Label>
           <DataDefinition>
-            <Definition>if (params[&quot;CPUMetric&quot;] == 'wallclock') {
+            <Definition>if (params[&quot;Display Metric&quot;] == &quot;wallclock&quot;) {
 
+ row[&quot;WallDuration&quot;] / 3600
 
+}
 
-	row[&quot;WallDuration&quot;] / 3600
+else if (params[&quot;Display Metric&quot;]==&quot;process&quot;) {
 
+row[&quot;Cpu&quot;]/3600
 
+}
 
-}else{
+else if (params[&quot;Display Metric&quot;]==&quot;jobcount&quot;){
 
+row[&quot;Njobs&quot;]
 
+}
 
-	row[&quot;Cpu&quot;]/3600
+else {
 
-
+&quot;***Unknown metric***&quot;
 
 }</Definition>
           </DataDefinition>
@@ -948,93 +1091,49 @@ function beforeGeneration( chart, context )
               <Type>URL_Redirect</Type>
               <Value xsi:type="attribute:URLValue">
                 <BaseUrl>&lt;structure name=&quot;action&quot;>
-
     &lt;property name=&quot;formatType&quot;>html&lt;/property>
-
     &lt;property name=&quot;linkType&quot;>drill-through&lt;/property>
-
     &lt;property name=&quot;reportName&quot;>UsageByUser.rptdesign&lt;/property>
-
     &lt;property name=&quot;targetWindow&quot;>_self&lt;/property>
-
     &lt;list-property name=&quot;paramBindings&quot;>
-
         &lt;structure>
-
             &lt;property name=&quot;paramName&quot;>DatabaseURL&lt;/property>
-
             &lt;expression name=&quot;expression&quot;>params[&quot;DatabaseURL&quot;]&lt;/expression>
-
         &lt;/structure>
-
         &lt;structure>
-
             &lt;property name=&quot;paramName&quot;>DatabaseUser&lt;/property>
-
             &lt;expression name=&quot;expression&quot;>params[&quot;DatabaseUser&quot;]&lt;/expression>
-
         &lt;/structure>
-
         &lt;structure>
-
             &lt;property name=&quot;paramName&quot;>DatabasePassword&lt;/property>
-
             &lt;expression name=&quot;expression&quot;>params[&quot;DatabasePassword&quot;]&lt;/expression>
-
         &lt;/structure>
-
         &lt;structure>
-
             &lt;property name=&quot;paramName&quot;>Start Date&lt;/property>
-
             &lt;expression name=&quot;expression&quot;>params[&quot;Start Date&quot;]&lt;/expression>
-
         &lt;/structure>
-
         &lt;structure>
-
             &lt;property name=&quot;paramName&quot;>End Date&lt;/property>
-
             &lt;expression name=&quot;expression&quot;>params[&quot;End Date&quot;]&lt;/expression>
-
         &lt;/structure>
-
         &lt;structure>
-
-            &lt;property name=&quot;paramName&quot;>CPUMetric&lt;/property>
-
-            &lt;expression name=&quot;expression&quot;>params[&quot;CPUMetric&quot;]&lt;/expression>
-
+            &lt;property name=&quot;paramName&quot;>Display Metric&lt;/property>
+            &lt;expression name=&quot;expression&quot;>params[&quot;Display Metric&quot;]&lt;/expression>
         &lt;/structure>
-
         &lt;structure>
-
             &lt;property name=&quot;paramName&quot;>ForVOName&lt;/property>
-
             &lt;expression name=&quot;expression&quot;>params[&quot;ForVOName&quot;]&lt;/expression>
-
         &lt;/structure>
-
         &lt;structure>
-
             &lt;property name=&quot;paramName&quot;>ForVO&lt;/property>
-
-            &lt;expression name=&quot;expression&quot;>&quot;VO&quot;&lt;/expression>
-
+            &lt;expression name=&quot;expression&quot;>&quot;ForVO&quot;&lt;/expression>
         &lt;/structure>
-
         &lt;structure>
-
             &lt;property name=&quot;paramName&quot;>ForSite&lt;/property>
-
-            &lt;expression name=&quot;expression&quot;>&quot;Site&quot;&lt;/expression>
-
+            &lt;expression name=&quot;expression&quot;>&quot;ForSite&quot;&lt;/expression>
         &lt;/structure>
-
     &lt;/list-property>
-
 &lt;/structure>
-
 </BaseUrl>
                 <BaseParameterName>ForSiteName</BaseParameterName>
                 <ValueParameterName></ValueParameterName>
@@ -1405,12 +1504,6 @@ function beforeGeneration( chart, context )
 </model:ChartWithAxes>
 ]]></xml-property>
             <property name="outputFormat">SVG</property>
-            <list-property name="filter">
-                <structure>
-                    <property name="operator">is-true</property>
-                    <expression name="expr">row["VOName"] == params["ForVOName"] || row["VOName"].toUpperCase() ==  params["ForVOName"]</expression>
-                </structure>
-            </list-property>
         </extended-item>
         <text-data id="94">
             <property name="style">sans-style1</property>
