@@ -51,13 +51,15 @@ glr:begin
 	declare imax int default 0;
 
   declare n_VOName varchar(255);
+	declare n_ReportableVOName varchar(255);
+	declare n_VOcorrid int;
 	declare n_ProbeName varchar(255);
 	declare n_ResourceType varchar(255);
 	declare n_WallDuration int default 0;
 	declare n_CpuUserDuration int default 0;
 	declare n_CpuSystemDuration  int default 0;
 	declare n_HostDescription varchar(255);
-	declare n_Host varchar(255);
+	declare n_Host text;
   declare n_NJobs int;
   declare n_CommonName varchar(255);
   declare n_StartTime datetime;
@@ -70,10 +72,15 @@ glr:begin
 		leave glr;
 	end if;
 
-  select VOName,NJobs,WallDuration,CpuUserDuration,CpuSystemDuration,CommonName,ResourceType,EndTime,StartTime,HostDescription,Host
-             into n_VOName,n_NJobs,n_WallDuration,n_CpuUserDuration,n_CpuSystemDuration,n_CommonName,n_ResourceType,n_EndTime,n_StartTime,n_HostDescription,n_Host
-             from JobUsageRecord
-             where JobUsageRecord.dbid = new.dbid;
+  SELECT J.VOName,J.NJobs,J.WallDuration,J.CpuUserDuration,J.CpuSystemDuration,
+         J.CommonName,J.ResourceType,J.EndTime,J.StartTime,J.HostDescription,J.Host,VC.corrid
+             INTO n_VOName,n_NJobs,n_WallDuration,n_CpuUserDuration,n_CpuSystemDuration,
+                  n_CommonName,n_ResourceType,n_EndTime,n_StartTime,n_HostDescription,n_Host,n_VOcorrid
+             FROM JobUsageRecord J, VONameCorrection VC
+             WHERE J.dbid = new.dbid
+               AND J.VOName = binary VC.VOName
+               AND ((J.ReportableVOName = binary VC.ReportableVOName)
+	                  OR ((J.ReportableVOName IS NULL) AND (VC.ReportableVOName IS NULL)));
 
 	if n_VOName is null then
 		leave glr;
@@ -164,32 +171,32 @@ glr:begin
 	end if;
 
 	--
-	-- VOProbeSummary
+	-- VOProbeSummaryData
 	--
 
-	select count(*) into mycount from VOProbeSummary
-		where VOProbeSummary.VOName = n_VOName
-		and VOProbeSummary.CommonName = n_CommonName
-		and VOProbeSummary.ProbeName = new.ProbeName
-		and VOProbeSummary.EndTime = date(n_EndTime)
-		and VOProbeSummary.ResourceType = n_ResourceType;
+	select count(*) into mycount from VOProbeSummaryData VPSD
+		where VPSD.CommonName = n_CommonName
+		 and VPSD.ProbeName = new.ProbeName
+		 and VPSD.EndTime = date(n_EndTime)
+		 and VPSD.ResourceType = n_ResourceType
+     and VPSD.VOcorrid = n_VOcorrid;
 	if mycount = 0 then
-		insert into VOProbeSummary values(date(n_EndTime),n_VOName,new.ProbeName,
+		insert into VOProbeSummaryData values(date(n_EndTime),n_VOcorrid,new.ProbeName,
 			n_CommonName,n_ResourceType,n_Njobs,n_WallDuration,n_CpuUserDuration,
 			n_CpuSystemDuration);
 	elseif mycount > 0 then
-		update VOProbeSummary
+		update VOProbeSummaryData VPSD
 			set
-				VOProbeSummary.Njobs = VOProbeSummary.Njobs + n_Njobs,
-				VOProbeSummary.WallDuration = VOProbeSummary.WallDuration + n_WallDuration,
-				VOProbeSummary.CpuUserDuration = VOProbeSummary.CpuUserDuration + n_CpuUserDuration,
-				VOProbeSummary.CpuSystemDuration = VOProbeSummary.CpuSystemDuration + n_CpuSystemDuration
+				VPSD.Njobs = VPSD.Njobs + n_Njobs,
+				VPSD.WallDuration = VPSD.WallDuration + n_WallDuration,
+				VPSD.CpuUserDuration = VPSD.CpuUserDuration + n_CpuUserDuration,
+				VPSD.CpuSystemDuration = VPSD.CpuSystemDuration + n_CpuSystemDuration
 				where 
-				VOProbeSummary.VOName = n_VOName
-				and VOProbeSummary.ProbeName = new.ProbeName
-				and VOProbeSummary.CommonName = n_CommonName
-				and VOProbeSummary.EndTime = date(n_EndTime)
-				and VOProbeSummary.ResourceType = n_ResourceType;
+				VPSD.VOcorrid = n_VOcorrid
+				and VPSD.ProbeName = new.ProbeName
+				and VPSD.CommonName = n_CommonName
+				and VPSD.EndTime = date(n_EndTime)
+				and VPSD.ResourceType = n_ResourceType;
 	end if;
 
 	--

@@ -91,15 +91,21 @@
     <id name="VOid" column="VOid" type="int">
        <generator class="native"/>
     </id>
-    <property name="VOName" column="VOName" unique="true"/>
+    <property name="VOName" type="string">
+      <column name="VOName" sql-type="varchar(255) binary" unique="true" />
+    </property>
   </class>
   
   <class name="VONameCorrection" table="VONameCorrection" node="VONameCorrection" lazy="false">
      <id name="corrid" column="corrid" type="int">
         <generator class="native"/>
      </id>
-     <property name="VOName" column="VOName"/>
-     <property name="ReportableVOName" column="ReportableVOName"/>
+     <property name="VOName" type="string">
+       <column name="VOName" sql-type="varchar(255) binary" />
+     </property>
+     <property name="ReportableVOName" type="string">
+       <column name="ReportableVOName" sql-type="varchar(255) binary" />
+     </property>
      <property name="VOid" column="VOid" type="int"/>
   </class>
        
