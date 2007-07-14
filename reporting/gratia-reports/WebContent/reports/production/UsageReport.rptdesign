@@ -46,10 +46,6 @@
             <property name="value">2007-07-14</property>
         </structure>
         <structure>
-            <property name="name">ForSiteName</property>
-            <property name="value">Nebraska</property>
-        </structure>
-        <structure>
             <property name="name">ForProbeName</property>
             <property name="value">pbs-lsf:red.unl.edu</property>
         </structure>
@@ -107,7 +103,7 @@
             <property name="defaultValue">12/31/2999</property>
         </scalar-parameter>
         <scalar-parameter name="ForSiteName" id="90">
-            <text-property name="helpText">Select the compute element to show records for</text-property>
+            <text-property name="helpText">Select the site to show records for</text-property>
             <property name="valueType">dynamic</property>
             <property name="dataType">string</property>
             <property name="promptText">Site Name</property>
