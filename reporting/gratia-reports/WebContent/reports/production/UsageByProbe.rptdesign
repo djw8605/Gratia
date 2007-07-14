@@ -27,7 +27,7 @@
     <list-property name="configVars">
         <structure>
             <property name="name">DatabaseURL</property>
-            <property name="value">jdbc:mysql://cd-psg3.fnal.gov:3320/gratia</property>
+            <property name="value">jdbc:mysql://gratia-db01.fnal.gov:3320/gratia</property>
         </structure>
         <structure>
             <property name="name">DatabaseUser</property>
@@ -39,15 +39,15 @@
         </structure>
         <structure>
             <property name="name">Start Date</property>
-            <property name="value">2006-08-07</property>
+            <property name="value">2007-07-14</property>
         </structure>
         <structure>
             <property name="name">End Date</property>
-            <property name="value">2006-08-19</property>
+            <property name="value">2007-07-14</property>
         </structure>
         <structure>
-            <property name="name">CETable</property>
-            <property name="value">Cmsosgce</property>
+            <property name="name">Subtitle</property>
+            <property name="value">None</property>
         </structure>
     </list-property>
     <parameters>
@@ -60,7 +60,7 @@
                     <property name="allowBlank">false</property>
                     <property name="format">Unformatted</property>
                     <property name="controlType">text-box</property>
-                    <property name="defaultValue">jdbc:mysql://cd-psg3.fnal.gov:3320/gratia</property>
+                    <property name="defaultValue">jdbc:mysql://gratia-db01.fnal.gov:3320/gratia</property>
                 </scalar-parameter>
                 <scalar-parameter name="DatabaseUser" id="83">
                     <property name="hidden">true</property>
@@ -102,14 +102,14 @@
             <property name="controlType">text-box</property>
             <property name="defaultValue">12/31/2999</property>
         </scalar-parameter>
-        <scalar-parameter name="CETable" id="90">
-            <text-property name="helpText">Select the facility to show records for</text-property>
+        <scalar-parameter name="ForSiteName" id="90">
+            <text-property name="helpText">Select the site to show records for</text-property>
             <property name="valueType">dynamic</property>
             <property name="dataType">string</property>
-            <property name="promptText">CETable</property>
+            <property name="promptText">Site Name</property>
             <property name="format">Unformatted</property>
             <property name="controlType">list-box</property>
-            <property name="dataSetName">AllFacilities</property>
+            <property name="dataSetName">AllSites</property>
             <expression name="valueExpr">row["name"]</expression>
             <expression name="labelExpr">row["name"]</expression>
             <property name="mustMatch">true</property>
@@ -130,7 +130,7 @@
     <data-sources>
         <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="fermigrid1" id="4">
             <property name="odaDriverClass">com.mysql.jdbc.Driver</property>
-            <property name="odaURL">jdbc:mysql://cd-psg3.fnal.gov:3320/gratia</property>
+            <property name="odaURL">jdbc:mysql://gratia-db01.fnal.gov:3320/gratia</property>
             <property name="odaUser">gratia</property>
             <encrypted-property name="odaPassword">cHJvdG8=</encrypted-property>
         </oda-data-source>
@@ -175,23 +175,23 @@
                     <property name="isOutput">false</property>
                 </structure>
             </list-property>
-            <property name="queryText">
-select CEProbes.probename, sum(JobUsageRecord.WallDuration)
-from CETable, CEProbes, JobUsageRecord
-where (? = 'All' or CETable.facility_name = ?)
-and CEProbes.facility_id = CETable.facility_id
-and JobUsageRecord.ProbeName = CEProbes.probename
-and (? &lt;= JobUsageRecord.EndTime and JobUsageRecord.EndTime &lt;= ?)
-group by CEProbes.probename
-order by CEProbes.probename</property>
+            <property name="queryText">select  sum(JobUsageRecord_Report.WallDuration) as WallDuration, JobUsageRecord_Report.ProbeName as ProbeName       
+from JobUsageRecord_Report,  Site, Probe
+where JobUsageRecord_Report.ProbeName = Probe.probename
+and Probe.siteid = Site.siteid
+and (? = 'All' or Site.sitename = ?)
+and (? &lt;= JobUsageRecord_Report.EndTime and JobUsageRecord_Report.EndTime &lt;= ?)
+group by ProbeName
+order by ProbeName</property>
         </oda-data-set>
-        <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="AllFacilities" id="89">
+        <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="AllSites" id="105">
             <property name="dataSource">fermigrid1</property>
-            <property name="queryText">select 'All' as name
-from CETable
+            <property name="queryText">
+select 'All' as name
+from Site
 union
-select CETable.facility_name as name
-from CETable
+select Site.sitename as name
+from Site
 order by name</property>
         </oda-data-set>
     </data-sets>
@@ -215,11 +215,11 @@ order by name</property>
             <list-property name="paramBindings">
                 <structure>
                     <property name="paramName">CETableAll</property>
-                    <expression name="expression">params["CETable"]</expression>
+                    <expression name="expression">params["ForSiteName"]</expression>
                 </structure>
                 <structure>
                     <property name="paramName">CETable</property>
-                    <expression name="expression">params["CETable"]</expression>
+                    <expression name="expression">params["ForSiteName"]</expression>
                 </structure>
                 <structure>
                     <property name="paramName">StartDate</property>
@@ -872,7 +872,7 @@ function beforeGeneration( chart, context )
             <Visible>true</Visible>
           </Label>
           <DataDefinition>
-            <Definition>row[&quot;sum(JobUsageRecord.WallDuration)&quot;] / 3600</Definition>
+            <Definition>row[&quot;WallDuration&quot;] / 3600</Definition>
           </DataDefinition>
           <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
           <DataPoint>
@@ -1109,7 +1109,7 @@ function beforeGeneration( chart, context )
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;probename&quot;]</Definition>
+          <Definition>row[&quot;ProbeName&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>Job Count</SeriesIdentifier>
         <DataPoint>
@@ -1245,7 +1245,7 @@ function beforeGeneration( chart, context )
             <property name="style">sans-style1</property>
             <property name="fontSize">9pt</property>
             <property name="textAlign">center</property>
-            <expression name="valueExpr">"CE = "+ params["CETable"]</expression>
+            <expression name="valueExpr">"Site = "+ params["ForSiteName"]</expression>
             <property name="contentType">html</property>
         </text-data>
         <text-data id="95">
