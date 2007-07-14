@@ -34,7 +34,7 @@ while [[ -n "$1" ]]; do
 	printf "post-install.sh: loading $proc ... "
 
 	CMD_PREAMBLE
-	cat ${VDT_LOCATION}/tomcat/v55/gratia/${proc} | CMD_PREFIX ${VDT_LOCATION}/mysql5/bin/mysql -B --force --unbuffered --user=root --password=ROOTPASS --host=localhost --port=PORT gratia CMD_SUFFIX
+	cat ${VDT_LOCATION}/tomcat/v55/gratia/${proc} | CMD_PREFIX ${VDT_LOCATION}/mysql5/bin/mysql -B --unbuffered --user=root --password=ROOTPASS --host=localhost --port=PORT gratia CMD_SUFFIX
 	status=$?
   if (( $status != 0 )); then
     echo "FAILED with status $status" 1>&2
