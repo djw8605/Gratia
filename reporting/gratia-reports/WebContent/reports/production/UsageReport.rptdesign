@@ -27,7 +27,7 @@
     <list-property name="configVars">
         <structure>
             <property name="name">DatabaseURL</property>
-            <property name="value">jdbc:mysql://cd-psg3.fnal.gov:3320/gratia</property>
+            <property name="value">jdbc:mysql://gratia-db01.fnal.gov:3320/gratia</property>
         </structure>
         <structure>
             <property name="name">DatabaseUser</property>
@@ -39,19 +39,19 @@
         </structure>
         <structure>
             <property name="name">Start Date</property>
-            <property name="value">3/1/2006</property>
+            <property name="value">2007-07-14</property>
         </structure>
         <structure>
             <property name="name">End Date</property>
-            <property name="value">12/31/2999</property>
+            <property name="value">2007-07-14</property>
         </structure>
         <structure>
-            <property name="name">Compute Element</property>
-            <property name="value">All</property>
+            <property name="name">ForSiteName</property>
+            <property name="value">Nebraska</property>
         </structure>
         <structure>
-            <property name="name">Probe</property>
-            <property name="value">All</property>
+            <property name="name">ForProbeName</property>
+            <property name="value">pbs-lsf:red.unl.edu</property>
         </structure>
     </list-property>
     <parameters>
@@ -64,7 +64,7 @@
                     <property name="allowBlank">false</property>
                     <property name="format">Unformatted</property>
                     <property name="controlType">text-box</property>
-                    <property name="defaultValue">jdbc:mysql://cd-psg3.fnal.gov:3320/gratia</property>
+                    <property name="defaultValue">jdbc:mysql://gratia-db01.fnal.gov:3320/gratia</property>
                 </scalar-parameter>
                 <scalar-parameter name="DatabaseUser" id="83">
                     <property name="hidden">true</property>
@@ -106,21 +106,21 @@
             <property name="controlType">text-box</property>
             <property name="defaultValue">12/31/2999</property>
         </scalar-parameter>
-        <scalar-parameter name="Compute Element" id="90">
+        <scalar-parameter name="ForSiteName" id="90">
             <text-property name="helpText">Select the compute element to show records for</text-property>
             <property name="valueType">dynamic</property>
             <property name="dataType">string</property>
-            <property name="promptText">Compute Element</property>
+            <property name="promptText">Site Name</property>
             <property name="format">Unformatted</property>
             <property name="controlType">list-box</property>
-            <property name="dataSetName">AllFacilities</property>
+            <property name="dataSetName">AllSites</property>
             <expression name="valueExpr">row["name"]</expression>
             <expression name="labelExpr">row["name"]</expression>
             <property name="mustMatch">true</property>
             <property name="fixedOrder">false</property>
             <property name="defaultValue">All</property>
         </scalar-parameter>
-        <scalar-parameter name="Probe" id="92">
+        <scalar-parameter name="ForProbeName" id="92">
             <text-property name="helpText">Select the probe to show records for</text-property>
             <property name="valueType">dynamic</property>
             <property name="dataType">string</property>
@@ -138,20 +138,20 @@
     <data-sources>
         <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="fermigrid1" id="4">
             <property name="odaDriverClass">com.mysql.jdbc.Driver</property>
-            <property name="odaURL">jdbc:mysql://cd-psg3.fnal.gov:3320/gratia</property>
+            <property name="odaURL">jdbc:mysql://gratia-db01.fnal.gov:3320/gratia</property>
             <property name="odaUser">gratia</property>
             <encrypted-property name="odaPassword">cHJvdG8=</encrypted-property>
         </oda-data-source>
     </data-sources>
     <data-sets>
-        <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="AllFacilities" id="89">
+        <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="AllSites" id="89">
             <property name="dataSource">fermigrid1</property>
             <property name="queryText">
 select 'All' as name
-from CETable
+from Site
 union
-select CETable.facility_name as name
-from CETable
+select Site.sitename as name
+from Site
 order by name</property>
         </oda-data-set>
         <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="AllProbes" id="91">
@@ -218,14 +218,14 @@ order by name</property>
                 </structure>
             </list-property>
             <property name="queryText">
-select JobUsageRecord.JobName, CETable.facility_name, CEProbes.probename, 
-        JobUsageRecord.StartTime, JobUsageRecord.EndTime, JobUsageRecord.JobNameDescription 
-from JobUsageRecord, CETable, CEProbes
-where CEProbes.facility_id = CETable.facility_id
-and JobUsageRecord.ProbeName = CEProbes.probename
-and (? &lt;= JobUsageRecord.EndTime and JobUsageRecord.EndTime &lt;= ?)
-and (? = 'All' or JobUsageRecord.ProbeName = ?)
-and (? = 'All' or CETable.facility_name = ?)</property>
+select JobUsageRecord_Report.JobName, Site.SiteName as sitename, JobUsageRecord_Report.ProbeName,
+        JobUsageRecord_Report.StartTime, JobUsageRecord_Report.EndTime, JobUsageRecord_Report.JobNameDescription 
+from JobUsageRecord_Report,  Site, Probe
+where JobUsageRecord_Report.ProbeName = Probe.probename
+and Probe.siteid = Site.siteid
+and (? &lt;= JobUsageRecord_Report.EndTime and JobUsageRecord_Report.EndTime &lt;= ?)
+and (? = 'All' or JobUsageRecord_Report.ProbeName = ?)
+and (? = 'All' or Site.sitename = ?)</property>
         </oda-data-set>
     </data-sets>
     <styles>
@@ -264,19 +264,19 @@ and (? = 'All' or CETable.facility_name = ?)</property>
                 </structure>
                 <structure>
                     <property name="paramName">ProbeAll</property>
-                    <expression name="expression">params["Probe"]</expression>
+                    <expression name="expression">params["ForProbeName"]</expression>
                 </structure>
                 <structure>
                     <property name="paramName">Probe</property>
-                    <expression name="expression">params["Probe"]</expression>
+                    <expression name="expression">params["ForProbeName"]</expression>
                 </structure>
                 <structure>
                     <property name="paramName">CETableAll</property>
-                    <expression name="expression">params["Compute Element"]</expression>
+                    <expression name="expression">params["ForSiteName"]</expression>
                 </structure>
                 <structure>
                     <property name="paramName">CETable</property>
-                    <expression name="expression">params["Compute Element"]</expression>
+                    <expression name="expression">params["ForSiteName"]</expression>
                 </structure>
             </list-property>
             <column id="107"/>
@@ -323,10 +323,10 @@ and (? = 'All' or CETable.facility_name = ?)</property>
                             <property name="fontSize">large</property>
                             <property name="fontWeight">bold</property>
                             <property name="textAlign">center</property>
-                            <expression name="valueExpr">if(params["Compute Element"] == "All")
-	"All Compute Elements"
+                            <expression name="valueExpr">if(params["ForSiteName"] == "All")
+	"All Sites"
 else
-	params["Compute Element"]</expression>
+	params["ForSiteName"]</expression>
                             <property name="contentType">html</property>
                         </text-data>
                     </cell>
@@ -342,10 +342,10 @@ else
                             <property name="fontSize">large</property>
                             <property name="fontWeight">bold</property>
                             <property name="textAlign">center</property>
-                            <expression name="valueExpr">if(params["Probe"] == "All")
+                            <expression name="valueExpr">if(params["ForProbeName"] == "All")
 	"All Probes"
 else
-	params["Probe"]</expression>
+	params["ForProbeName"]</expression>
                             <property name="contentType">html</property>
                         </text-data>
                     </cell>
@@ -355,7 +355,7 @@ else
                 <property name="groupName">Compute Element</property>
                 <property name="interval">none</property>
                 <property name="sortDirection">asc</property>
-                <expression name="keyExpr">row["facility_name"]</expression>
+                <expression name="keyExpr">row["sitename"]</expression>
                 <header>
                     <row id="111">
                         <property name="height">0.26in</property>
@@ -370,7 +370,10 @@ else
                                 <property name="fontSize">large</property>
                                 <property name="fontWeight">bold</property>
                                 <property name="textAlign">center</property>
-                                <expression name="valueExpr">row["facility_name"]</expression>
+                                <expression name="valueExpr">row["sitename"]</expression>
+                            </data>
+                            <data id="182">
+                                <expression name="valueExpr">row["sitename"]</expression>
                             </data>
                         </cell>
                     </row>
@@ -385,7 +388,7 @@ else
                                 <property name="style">sans-style1</property>
                                 <property name="fontFamily">sans-serif</property>
                                 <property name="fontWeight">bold</property>
-                                <expression name="valueExpr">"Total for CE '" + row["facility_name"] + "'"</expression>
+                                <expression name="valueExpr">"Total for Site '" + row["sitename"] + "'"</expression>
                                 <property name="contentType">html</property>
                             </text-data>
                         </cell>
@@ -415,7 +418,7 @@ else
                 <property name="groupName">Probe Name</property>
                 <property name="interval">none</property>
                 <property name="sortDirection">asc</property>
-                <expression name="keyExpr">row["probename"]</expression>
+                <expression name="keyExpr">row["ProbeName"]</expression>
                 <header>
                     <row id="122">
                         <cell id="123">
@@ -428,7 +431,10 @@ else
                                 <property name="fontSize">large</property>
                                 <property name="fontWeight">bold</property>
                                 <property name="textAlign">center</property>
-                                <expression name="valueExpr">row["probename"]</expression>
+                                <expression name="valueExpr">row["ProbeName"]</expression>
+                            </data>
+                            <data id="183">
+                                <expression name="valueExpr">row["ProbeName"]</expression>
                             </data>
                         </cell>
                     </row>
@@ -477,7 +483,7 @@ else
                                 <property name="style">sans-style1</property>
                                 <property name="fontFamily">sans-serif</property>
                                 <property name="fontWeight">bold</property>
-                                <expression name="valueExpr">"Total for Probe '" + row["probename"] + "'"</expression>
+                                <expression name="valueExpr">"Total for Probe '" + row["ProbeName"] + "'"</expression>
                                 <property name="contentType">html</property>
                             </text-data>
                         </cell>
