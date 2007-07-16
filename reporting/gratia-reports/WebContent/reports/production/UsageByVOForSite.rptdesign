@@ -39,11 +39,11 @@
         </structure>
         <structure>
             <property name="name">ForVOName</property>
-            <property name="value">gridex</property>
+            <property name="value">uscms</property>
         </structure>
         <structure>
             <property name="name">ForSiteName</property>
-            <property name="value">FNAL_GPFARM_TEST</property>
+            <property name="value">Generic Site</property>
         </structure>
         <structure>
             <property name="name">ForVO</property>
@@ -55,11 +55,11 @@
         </structure>
         <structure>
             <property name="name">Start Date</property>
-            <property name="value">2007-01-01</property>
+            <property name="value">2006-03-01</property>
         </structure>
         <structure>
             <property name="name">End Date</property>
-            <property name="value">2007-02-01</property>
+            <property name="value">2999-12-31</property>
         </structure>
         <structure>
             <property name="name">UserName</property>
@@ -72,10 +72,6 @@
         <structure>
             <property name="name">Subtitle</property>
             <property name="value">None</property>
-        </structure>
-        <structure>
-            <property name="name">Display Metric</property>
-            <property name="value">jobcount</property>
         </structure>
     </list-property>
     <parameters>
@@ -113,7 +109,7 @@
         <parameter-group name="VOandSite" id="109">
             <parameters>
                 <scalar-parameter name="ForVOName" id="106">
-                    <property name="hidden">false</property>
+                    <property name="hidden">true</property>
                     <property name="valueType">static</property>
                     <property name="dataType">string</property>
                     <property name="promptText">Enter VO Name</property>
@@ -123,7 +119,7 @@
                     <property name="defaultValue">uscms</property>
                 </scalar-parameter>
                 <scalar-parameter name="ForSiteName" id="110">
-                    <property name="hidden">false</property>
+                    <property name="hidden">true</property>
                     <property name="valueType">static</property>
                     <property name="dataType">string</property>
                     <property name="promptText">Enter Site name</property>
@@ -155,6 +151,7 @@
         <parameter-group name="DateRange" id="113">
             <parameters>
                 <scalar-parameter name="Start Date" id="86">
+                    <property name="hidden">true</property>
                     <text-property name="helpText">Only jobs that finished after this date will be included</text-property>
                     <property name="valueType">static</property>
                     <property name="dataType">string</property>
@@ -165,6 +162,7 @@
                     <property name="defaultValue">2006-03-01</property>
                 </scalar-parameter>
                 <scalar-parameter name="End Date" id="87">
+                    <property name="hidden">true</property>
                     <text-property name="helpText">Only jobs that finished before this date will be included</text-property>
                     <property name="valueType">static</property>
                     <property name="dataType">string</property>
@@ -213,7 +211,7 @@
         <parameter-group name="Metrics" id="116">
             <parameters>
                 <scalar-parameter name="Display Metric" id="117">
-                    <property name="hidden">false</property>
+                    <property name="hidden">true</property>
                     <text-property name="helpText">Select metric for chart</text-property>
                     <property name="valueType">static</property>
                     <property name="dataType">string</property>
@@ -1067,25 +1065,47 @@ function beforeDrawAxisTitle( axis, label, context )
           <DataDefinition>
             <Definition>if (params[&quot;Display Metric&quot;] == &quot;wallclock&quot;) {
 
+
+
  row[&quot;WallDuration&quot;] / 3600
 
+
+
 }
+
+
 
 else if (params[&quot;Display Metric&quot;]==&quot;process&quot;) {
 
+
+
 row[&quot;Cpu&quot;]/3600
 
+
+
 }
+
+
 
 else if (params[&quot;Display Metric&quot;]==&quot;jobcount&quot;){
 
+
+
 row[&quot;Njobs&quot;]
+
+
 
 }
 
+
+
 else {
 
+
+
 &quot;***Unknown metric***&quot;
+
+
 
 }</Definition>
           </DataDefinition>
@@ -1120,49 +1140,93 @@ else {
               <Type>URL_Redirect</Type>
               <Value xsi:type="attribute:URLValue">
                 <BaseUrl>&lt;structure name=&quot;action&quot;>
+
     &lt;property name=&quot;formatType&quot;>html&lt;/property>
+
     &lt;property name=&quot;linkType&quot;>drill-through&lt;/property>
+
     &lt;property name=&quot;reportName&quot;>UsageByUser.rptdesign&lt;/property>
+
     &lt;property name=&quot;targetWindow&quot;>_self&lt;/property>
+
     &lt;list-property name=&quot;paramBindings&quot;>
+
         &lt;structure>
+
             &lt;property name=&quot;paramName&quot;>DatabaseURL&lt;/property>
+
             &lt;expression name=&quot;expression&quot;>params[&quot;DatabaseURL&quot;]&lt;/expression>
+
         &lt;/structure>
+
         &lt;structure>
+
             &lt;property name=&quot;paramName&quot;>DatabaseUser&lt;/property>
+
             &lt;expression name=&quot;expression&quot;>params[&quot;DatabaseUser&quot;]&lt;/expression>
+
         &lt;/structure>
+
         &lt;structure>
+
             &lt;property name=&quot;paramName&quot;>DatabasePassword&lt;/property>
+
             &lt;expression name=&quot;expression&quot;>params[&quot;DatabasePassword&quot;]&lt;/expression>
+
         &lt;/structure>
+
         &lt;structure>
+
             &lt;property name=&quot;paramName&quot;>Start Date&lt;/property>
+
             &lt;expression name=&quot;expression&quot;>params[&quot;Start Date&quot;]&lt;/expression>
+
         &lt;/structure>
+
         &lt;structure>
+
             &lt;property name=&quot;paramName&quot;>End Date&lt;/property>
+
             &lt;expression name=&quot;expression&quot;>params[&quot;End Date&quot;]&lt;/expression>
+
         &lt;/structure>
+
         &lt;structure>
+
             &lt;property name=&quot;paramName&quot;>Display Metric&lt;/property>
+
             &lt;expression name=&quot;expression&quot;>params[&quot;Display Metric&quot;]&lt;/expression>
+
         &lt;/structure>
+
         &lt;structure>
+
             &lt;property name=&quot;paramName&quot;>ForVO&lt;/property>
+
             &lt;expression name=&quot;expression&quot;>'ForVO'&lt;/expression>
+
         &lt;/structure>
+
         &lt;structure>
+
             &lt;property name=&quot;paramName&quot;>ForSite&lt;/property>
+
             &lt;expression name=&quot;expression&quot;>'ForSite'&lt;/expression>
+
         &lt;/structure>
+
         &lt;structure>
+
             &lt;property name=&quot;paramName&quot;>ForSiteName&lt;/property>
+
             &lt;expression name=&quot;expression&quot;>params[&quot;ForSiteName&quot;]&lt;/expression>
+
         &lt;/structure>
+
     &lt;/list-property>
+
 &lt;/structure>
+
 </BaseUrl>
                 <BaseParameterName>ForVOName</BaseParameterName>
                 <ValueParameterName></ValueParameterName>

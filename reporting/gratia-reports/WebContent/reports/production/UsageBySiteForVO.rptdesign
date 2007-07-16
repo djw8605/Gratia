@@ -42,10 +42,6 @@
             <property name="value">proto</property>
         </structure>
         <structure>
-            <property name="name">ForVOName</property>
-            <property name="value">gridex</property>
-        </structure>
-        <structure>
             <property name="name">ForSiteName</property>
             <property name="value">Generic Site</property>
         </structure>
@@ -58,14 +54,6 @@
             <property name="value">AnySite</property>
         </structure>
         <structure>
-            <property name="name">Start Date</property>
-            <property name="value">2007-01-01</property>
-        </structure>
-        <structure>
-            <property name="name">End Date</property>
-            <property name="value">2007-02-01</property>
-        </structure>
-        <structure>
             <property name="name">UserName</property>
             <property name="value">None</property>
         </structure>
@@ -76,10 +64,6 @@
         <structure>
             <property name="name">Subtitle</property>
             <property name="value">None</property>
-        </structure>
-        <structure>
-            <property name="name">Display Metric</property>
-            <property name="value">jobcount</property>
         </structure>
     </list-property>
     <parameters>
@@ -117,7 +101,7 @@
         <parameter-group name="VOandSite" id="108">
             <parameters>
                 <scalar-parameter name="ForVOName" id="106">
-                    <property name="hidden">false</property>
+                    <property name="hidden">true</property>
                     <property name="valueType">static</property>
                     <property name="dataType">string</property>
                     <property name="promptText">Enter VO Name</property>
@@ -159,6 +143,7 @@
         <parameter-group name="DateRange" id="113">
             <parameters>
                 <scalar-parameter name="Start Date" id="86">
+                    <property name="hidden">true</property>
                     <text-property name="helpText">Only jobs that finished after this date will be included</text-property>
                     <property name="valueType">static</property>
                     <property name="dataType">string</property>
@@ -169,6 +154,7 @@
                     <property name="defaultValue">2006-03-01</property>
                 </scalar-parameter>
                 <scalar-parameter name="End Date" id="87">
+                    <property name="hidden">true</property>
                     <text-property name="helpText">Only jobs that finished before this date will be included</text-property>
                     <property name="valueType">static</property>
                     <property name="dataType">string</property>
@@ -217,7 +203,7 @@
         <parameter-group name="Metrics" id="115">
             <parameters>
                 <scalar-parameter name="Display Metric" id="116">
-                    <property name="hidden">false</property>
+                    <property name="hidden">true</property>
                     <text-property name="helpText">Select metric for chart</text-property>
                     <property name="valueType">static</property>
                     <property name="dataType">string</property>
@@ -1091,49 +1077,93 @@ else {
               <Type>URL_Redirect</Type>
               <Value xsi:type="attribute:URLValue">
                 <BaseUrl>&lt;structure name=&quot;action&quot;>
+
     &lt;property name=&quot;formatType&quot;>html&lt;/property>
+
     &lt;property name=&quot;linkType&quot;>drill-through&lt;/property>
+
     &lt;property name=&quot;reportName&quot;>UsageByUser.rptdesign&lt;/property>
+
     &lt;property name=&quot;targetWindow&quot;>_self&lt;/property>
+
     &lt;list-property name=&quot;paramBindings&quot;>
+
         &lt;structure>
+
             &lt;property name=&quot;paramName&quot;>DatabaseURL&lt;/property>
+
             &lt;expression name=&quot;expression&quot;>params[&quot;DatabaseURL&quot;]&lt;/expression>
+
         &lt;/structure>
+
         &lt;structure>
+
             &lt;property name=&quot;paramName&quot;>DatabaseUser&lt;/property>
+
             &lt;expression name=&quot;expression&quot;>params[&quot;DatabaseUser&quot;]&lt;/expression>
+
         &lt;/structure>
+
         &lt;structure>
+
             &lt;property name=&quot;paramName&quot;>DatabasePassword&lt;/property>
+
             &lt;expression name=&quot;expression&quot;>params[&quot;DatabasePassword&quot;]&lt;/expression>
+
         &lt;/structure>
+
         &lt;structure>
+
             &lt;property name=&quot;paramName&quot;>Start Date&lt;/property>
+
             &lt;expression name=&quot;expression&quot;>params[&quot;Start Date&quot;]&lt;/expression>
+
         &lt;/structure>
+
         &lt;structure>
+
             &lt;property name=&quot;paramName&quot;>End Date&lt;/property>
+
             &lt;expression name=&quot;expression&quot;>params[&quot;End Date&quot;]&lt;/expression>
+
         &lt;/structure>
+
         &lt;structure>
+
             &lt;property name=&quot;paramName&quot;>Display Metric&lt;/property>
+
             &lt;expression name=&quot;expression&quot;>params[&quot;Display Metric&quot;]&lt;/expression>
+
         &lt;/structure>
+
         &lt;structure>
+
             &lt;property name=&quot;paramName&quot;>ForVOName&lt;/property>
+
             &lt;expression name=&quot;expression&quot;>params[&quot;ForVOName&quot;]&lt;/expression>
+
         &lt;/structure>
+
         &lt;structure>
+
             &lt;property name=&quot;paramName&quot;>ForVO&lt;/property>
+
             &lt;expression name=&quot;expression&quot;>&quot;ForVO&quot;&lt;/expression>
+
         &lt;/structure>
+
         &lt;structure>
+
             &lt;property name=&quot;paramName&quot;>ForSite&lt;/property>
+
             &lt;expression name=&quot;expression&quot;>&quot;ForSite&quot;&lt;/expression>
+
         &lt;/structure>
+
     &lt;/list-property>
+
 &lt;/structure>
+
 </BaseUrl>
                 <BaseParameterName>ForSiteName</BaseParameterName>
                 <ValueParameterName></ValueParameterName>
