@@ -154,7 +154,7 @@ my %procedures =
  { select_columns => 'VOProbeSummary.VOName,
                       sum(VOProbeSummary.Njobs) as Njobs',
 	 from_tables => 'VOProbeSummary',
-	 main_where => '',``````````````````````````
+	 main_where => '',
 	 group_by => 'VOProbeSummary.VOName',
 	 order_by => 'VOProbeSummary.VOName'
  },
