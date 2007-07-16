@@ -926,69 +926,45 @@ function beforeGeneration( chart, context )
               <Type>URL_Redirect</Type>
               <Value xsi:type="attribute:URLValue">
                 <BaseUrl>&lt;structure name=&quot;action&quot;>
-
     &lt;property name=&quot;formatType&quot;>html&lt;/property>
-
     &lt;property name=&quot;linkType&quot;>drill-through&lt;/property>
-
     &lt;property name=&quot;reportName&quot;>UsageByVOForSite.rptdesign&lt;/property>
-
     &lt;property name=&quot;targetWindow&quot;>_self&lt;/property>
-
     &lt;list-property name=&quot;paramBindings&quot;>
-
         &lt;structure>
-
             &lt;property name=&quot;paramName&quot;>DatabaseURL&lt;/property>
-
             &lt;expression name=&quot;expression&quot;>params[&quot;DatabaseURL&quot;]&lt;/expression>
-
         &lt;/structure>
-
         &lt;structure>
-
             &lt;property name=&quot;paramName&quot;>DatabaseUser&lt;/property>
-
             &lt;expression name=&quot;expression&quot;>params[&quot;DatabaseUser&quot;]&lt;/expression>
-
         &lt;/structure>
-
         &lt;structure>
-
             &lt;property name=&quot;paramName&quot;>DatabasePassword&lt;/property>
-
             &lt;expression name=&quot;expression&quot;>params[&quot;DatabasePassword&quot;]&lt;/expression>
-
         &lt;/structure>
-
         &lt;structure>
-
             &lt;property name=&quot;paramName&quot;>Start Date&lt;/property>
-
             &lt;expression name=&quot;expression&quot;>params[&quot;Start Date&quot;]&lt;/expression>
-
         &lt;/structure>
-
         &lt;structure>
-
             &lt;property name=&quot;paramName&quot;>End Date&lt;/property>
-
             &lt;expression name=&quot;expression&quot;>params[&quot;End Date&quot;]&lt;/expression>
-
         &lt;/structure>
-
         &lt;structure>
-
-            &lt;property name=&quot;paramName&quot;>CPUMetric&lt;/property>
-
+            &lt;property name=&quot;paramName&quot;>Display Metric&lt;/property>
             &lt;expression name=&quot;expression&quot;>params[&quot;CPUMetric&quot;]&lt;/expression>
-
         &lt;/structure>
-
+        &lt;structure>
+            &lt;property name=&quot;paramName&quot;>ForVO&lt;/property>
+            &lt;expression name=&quot;expression&quot;>'AnyVO'&lt;/expression>
+        &lt;/structure>
+        &lt;structure>
+            &lt;property name=&quot;paramName&quot;>ForSite&lt;/property>
+            &lt;expression name=&quot;expression&quot;>'ForSite'&lt;/expression>
+        &lt;/structure>
     &lt;/list-property>
-
 &lt;/structure>
-
 </BaseUrl>
                 <BaseParameterName>ForSiteName</BaseParameterName>
                 <ValueParameterName></ValueParameterName>

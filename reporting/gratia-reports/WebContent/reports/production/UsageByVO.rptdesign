@@ -951,8 +951,16 @@ function beforeGeneration( chart, context ){
             &lt;expression name=&quot;expression&quot;>params[&quot;End Date&quot;]&lt;/expression>
         &lt;/structure>
         &lt;structure>
-            &lt;property name=&quot;paramName&quot;>CPUMetric&lt;/property>
+            &lt;property name=&quot;paramName&quot;>Display Metric&lt;/property>
             &lt;expression name=&quot;expression&quot;>params[&quot;CPUMetric&quot;]&lt;/expression>
+        &lt;/structure>
+        &lt;structure>
+            &lt;property name=&quot;paramName&quot;>ForSite&lt;/property>
+            &lt;expression name=&quot;expression&quot;>'AnySite'&lt;/expression>
+        &lt;/structure>
+        &lt;structure>
+            &lt;property name=&quot;paramName&quot;>ForVO&lt;/property>
+            &lt;expression name=&quot;expression&quot;>'ForVO'&lt;/expression>
         &lt;/structure>
     &lt;/list-property>
 &lt;/structure>
