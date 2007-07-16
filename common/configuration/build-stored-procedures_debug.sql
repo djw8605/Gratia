@@ -1039,14 +1039,15 @@ begin
 	call parse(userName,@name,@key,@vo);
 
 	set @sql :=
-           concat_ws('', 'select CETable.facility_name as sitename, sum(VOProbeSummary.WallDuration) as WallDuration,
+           concat_ws('', 'select Site.SiteName as sitename, sum(VOProbeSummary.WallDuration) as WallDuration,
 					  sum(VOProbeSummary.CpuUserDuration + VOProbeSummary.CpuSystemDuration) as Cpu,
 					  sum(VOProbeSummary.Njobs) as Njobs,
 					  VOProbeSummary.VOName',
-                     ' from CETable,CEProbes,VOProbeSummary',
+                     ' from Site,Probe,VOProbeSummary',
                      ' where',
-                     ' CEProbes.facility_id = CETable.facility_id and VOProbeSummary.ProbeName = CEProbes.probename and (VOProbeSummary.VOName =''', forvoname, ''' or (''', forvo, ''' = ''AnyVO'' and VOProbeSummary.VOName like ''%'' ))
-			 and (CETable.facility_name =''', forsitename, ''' or (''', forsite, ''' = ''AnySite'' and CETable.facility_name like ''%'' )) and',
+                     ' Probe.siteid = Site.siteid and VOProbeSummary.ProbeName = Probe.probename 
+	 		 and (VOProbeSummary.VOName =''', forvoname, ''' or (''', forvo, ''' = ''AnyVO'' and VOProbeSummary.VOName like ''%'' ))
+			 and (Site.SiteName =''', forsitename, ''' or (''', forsite, ''' = ''AnySite'' and Site.SiteName like ''%'' )) and',
                      ' EndTime >= date(''', fromdate, ''')'
                      ' and EndTime <= date(''', todate, ''')'
                      ' ', @myresourceclause,
@@ -1058,14 +1059,15 @@ begin
     if ( @mywhereclause = '' or @mywhereclause is NULL ) and datediff(todate,fromdate) > 6 then
 		-- Use summary table
 		set @sql :=
-           concat_ws('', 'select CETable.facility_name as sitename, sum(VOProbeSummary.WallDuration) as WallDuration,
+           concat_ws('', 'select Site.SiteName as sitename, sum(VOProbeSummary.WallDuration) as WallDuration,
 					  sum(VOProbeSummary.CpuUserDuration + VOProbeSummary.CpuSystemDuration) as Cpu,
 					  sum(VOProbeSummary.Njobs) as Njobs,
 					  VOProbeSummary.VOName',
-                     ' from CETable,CEProbes,VOProbeSummary',
+                     ' from Site,Probe,VOProbeSummary',
                      ' where',
-                     ' CEProbes.facility_id = CETable.facility_id and VOProbeSummary.ProbeName = CEProbes.probename and (VOProbeSummary.VOName =''', forvoname, ''' or (''', forvo, ''' = ''AnyVO'' and VOProbeSummary.VOName like ''%'' ))
-			 and (CETable.facility_name =''', forsitename, ''' or (''', forsite, ''' = ''AnySite'' and CETable.facility_name like ''%'' )) and',
+                     ' Probe.siteid = Site.siteid and VOProbeSummary.ProbeName = Probe.probename 
+	 		 and (VOProbeSummary.VOName =''', forvoname, ''' or (''', forvo, ''' = ''AnyVO'' and VOProbeSummary.VOName like ''%'' ))
+			 and (Site.SiteName =''', forsitename, ''' or (''', forsite, ''' = ''AnySite'' and Site.SiteName like ''%'' )) and',
                      ' EndTime >= date(''', fromdate, ''')',
                      ' and EndTime <= date(''', todate, ''')',
                      ' ', @myresourceclause,
@@ -1107,15 +1109,16 @@ begin
 	call parse(userName,@name,@key,@vo);
 
 	set @sql :=
-           concat_ws('', 'select CETable.facility_name as sitename, sum(VOProbeSummary.WallDuration) as WallDuration,
+           concat_ws('', 'select Site.SiteName as sitename, sum(VOProbeSummary.WallDuration) as WallDuration,
 					  sum(VOProbeSummary.CpuUserDuration + VOProbeSummary.CpuSystemDuration) as Cpu,
 					  sum(VOProbeSummary.Njobs) as Njobs,
 					  VOProbeSummary.VOName,
 					  VOProbeSummary.CommonName as UserName',
-                     ' from CETable,CEProbes,VOProbeSummary',
+                     ' from Site,Probe,VOProbeSummary',
                      ' where',
-                     ' CEProbes.facility_id = CETable.facility_id and VOProbeSummary.ProbeName = CEProbes.probename and (VOProbeSummary.VOName =''', forvoname, ''' or (''', forvo, ''' = ''AnyVO'' and VOProbeSummary.VOName like ''%'' ))
-			 and (CETable.facility_name =''', forsitename, ''' or (''', forsite, ''' = ''AnySite'' and CETable.facility_name like ''%'' )) and',
+                     ' Probe.siteid = Site.siteid and VOProbeSummary.ProbeName = Probe.probename
+	 					and (VOProbeSummary.VOName =''', forvoname, ''' or (''', forvo, ''' = ''AnyVO'' and VOProbeSummary.VOName like ''%'' ))
+						and (Site.SiteName =''', forsitename, ''' or (''', forsite, ''' = ''AnySite'' and Site.SiteName like ''%'' )) and',
                      ' EndTime >= date(''', fromdate, ''')'
                      ' and EndTime <= date(''', todate, ''')'
                      ' ', @myresourceclause,
@@ -1127,15 +1130,16 @@ begin
     if ( @mywhereclause = '' or @mywhereclause is NULL ) and datediff(todate,fromdate) > 6 then
 		-- Use summary table
 		set @sql :=
-           concat_ws('', 'select CETable.facility_name as sitename, sum(VOProbeSummary.WallDuration) as WallDuration,
+           concat_ws('', 'select Site.SiteName as sitename, sum(VOProbeSummary.WallDuration) as WallDuration,
 					  sum(VOProbeSummary.CpuUserDuration + VOProbeSummary.CpuSystemDuration) as Cpu,
 					  sum(VOProbeSummary.Njobs) as Njobs,
 					  VOProbeSummary.VOName,
 					  VOProbeSummary.CommonName as UserName',
-                     ' from CETable,CEProbes,VOProbeSummary',
+                     ' from Site,Probe,VOProbeSummary',
                      ' where',
-                     ' CEProbes.facility_id = CETable.facility_id and VOProbeSummary.ProbeName = CEProbes.probename and (VOProbeSummary.VOName =''', forvoname, ''' or (''', forvo, ''' = ''AnyVO'' and VOProbeSummary.VOName like ''%'' ))
-			 and (CETable.facility_name =''', forsitename, ''' or (''', forsite, ''' = ''AnySite'' and CETable.facility_name like ''%'' )) and',
+                     ' Probe.siteid = Site.siteid and VOProbeSummary.ProbeName = Probe.probename
+	 					and (VOProbeSummary.VOName =''', forvoname, ''' or (''', forvo, ''' = ''AnyVO'' and VOProbeSummary.VOName like ''%'' ))
+						and (Site.SiteName =''', forsitename, ''' or (''', forsite, ''' = ''AnySite'' and Site.SiteName like ''%'' )) and',
                      ' EndTime >= date(''', fromdate, ''')',
                      ' and EndTime <= date(''', todate, ''')',
                      ' ', @myresourceclause,
