@@ -11,7 +11,7 @@ import java.io.File;
 public class DatabaseMaintenance {
     static final String dq = "\"";
     static final String comma = ",";
-    static final int gratiaDatabaseVersion = 15;
+    static final int gratiaDatabaseVersion = 16;
 
     java.sql.Connection connection;
     int liveVersion = 0;
@@ -239,7 +239,7 @@ public class DatabaseMaintenance {
         }
     }
     
-     public String GetJobUsageRecordColumns() {
+     private String GetJobUsageRecordColumnsForReportView() {
         Statement statement;
         ResultSet resultSet;
 
@@ -257,7 +257,9 @@ public class DatabaseMaintenance {
                     column = "JobUsageRecord.Status";
                 } else if (column.equals("dbid")) {
                     column = "JobUsageRecord_Meta.dbid";
-                }
+                } else if (column.equals("VOName") || column.equals("ReportableVOName") || column.equals("VOcorrid")) {
+										continue; // Skip these columns
+								}
                 if (result.length()>0) result = result + ",";
                 result = result + column;
             }
@@ -309,19 +311,24 @@ public class DatabaseMaintenance {
     }
     
     public void AddViews() {
-        Execute("DROP VIEW IF EXISTS CETable;");
-        Execute("CREATE VIEW CETable AS select Site.SiteId AS facility_id,Site.SiteName AS facility_name from Site;");
-        Execute("DROP VIEW IF EXISTS CEProbes;");
+        Execute("DROP VIEW IF EXISTS CETable");
+        Execute("CREATE VIEW CETable AS select Site.SiteId AS facility_id,Site.SiteName AS facility_name from Site");
+        Execute("DROP VIEW IF EXISTS CEProbes");
         Execute("CREATE VIEW CEProbes AS select probeid,siteid as facility_id," +
                 "probename,active,currenttime,CurrentTimeDescription,reporthh," +
-                "reportmm,status," + FindRecordsColumn() + " as jobs from Probe;");
-        Execute("DROP VIEW IF EXISTS JobUsageRecord_Report;");
-        Execute("CREATE VIEW JobUsageRecord_Report as select "+GetJobUsageRecordColumns()+
-		        " ,JobUsageRecord_Meta.ProbeName " +
-                " from JobUsageRecord_Meta,Site,Probe,JobUsageRecord " +
+                "reportmm,status," + FindRecordsColumn() + " as jobs from Probe");
+        Execute("DROP VIEW IF EXISTS JobUsageRecord_Report");
+        Execute("CREATE VIEW JobUsageRecord_Report as select " + GetJobUsageRecordColumnsForReportView() +
+								", JobUsageRecord_Meta.ProbeName, JobUsageRecord_Meta.ReportedSiteName, Site.SiteName, VO.VOName" +
+                " from JobUsageRecord_Meta, Site, Probe, JobUsageRecord, VO, VONameCorrection " +
                 " where " +
                 " JobUsageRecord_Meta.ProbeName = Probe.probename and Probe.siteid = Site.siteid" +
-                " and JobUsageRecord_Meta.dbid = JobUsageRecord.dbid;");
+                " and JobUsageRecord_Meta.dbid = JobUsageRecord.dbid" +
+								" and binary JobUsageRecord.VOName = binary VONameCorrection.VOName" + 
+								" and ((binary JobUsageRecord.ReportableVOName = binary VONameCorrection.ReportableVOName) or" + 
+								" ((JobUsageRecord.ReportableVOName is null) and (VONameCorrection.ReportableVOName is null)))" +
+								" and VONameCorrection.void = VO.void" + 
+								" and JobUsageRecord.VOName = VONameCorrection.VOName");
     }
     
     public void ReadLiveVersion() {
@@ -604,15 +611,11 @@ public class DatabaseMaintenance {
                     Logging.log("Gratia database FAILED to upgrade from " + current + " to " + (current + 1));
                 }	
 						}
-						for (;current == 11 || current == 12 || current == 13;) {
-								if (gratiaDatabaseVersion > 13 || (UpgradeSummaryTables() && UpgradeSummaryTrigger())) {
-										// Will Update the version even if we short-circuit the table-rebuild (see current == 14 below)
-										Logging.log("Gratia database upgraded from " + current + " to " + (current + 1));
-										current = current + 1;
-										UpdateDbVersion(current);
-								} else {
-                    Logging.log("Gratia database FAILED to upgrade from " + current + " to " + (current + 1));
-								}
+						if ((current > 10 ) && (current < 14)) { // Never saw the light of day and superseded.
+								int new_version = 14;
+								Logging.log("Gratia database upgraded from " + current + " to " + new_version);
+								current = new_version;
+								UpdateDbVersion(current);
 						}
             if (current == 14) {
                 int result = Execute("delete from VONameCorrection");
@@ -637,17 +640,39 @@ public class DatabaseMaintenance {
                 if (result > -1) {
                     result = Execute("update VONameCorrection,VO set VONameCorrection.VOid=VO.VOid where VONameCorrection.VOName = binary VO.VOName");
                 }
-                if (result > -1 && ForceUpgradeSummaryTables() && UpgradeSummaryTrigger()) {
+                if ((result > -1) && ForceUpgradeSummaryTables() && UpgradeSummaryTrigger()) {
 										// Force update of summary tables even if we've done it already
 										Logging.log("Gratia database upgraded from " + current + " to " + (current + 1));
 										current = current + 1;
 										UpdateDbVersion(current);
 								} else {
-                    Logging.log("Gratia database FAILED to upgrade from " + current + " to " + (current + 1));
+                    Logging.log("Gratia database FAILED to upgrade from " + current +
+																" to " + (current + 1));
 								}
-                
             }
-
+            if (current == 15) {
+                int result = Execute("update JobUsageRecord_Meta set ReportedSiteName = SiteName where SiteName is not null");
+								if (result > -1) {
+										result = Execute("update JobUsageRecord_Meta set ReportedSiteNameDescription = SiteNameDescription where SiteNameDescription is not null");
+								}
+								if (result > -1) {
+										result = Execute("alter table JobUsageRecord_Meta drop column SiteName");
+								}
+								if (result > -1) {
+										result = Execute("alter table JobUsageRecord_Meta drop column SiteNameDescription");
+								}
+								if (result > -1) {
+										result = Execute("alter table ProbeSummary change column SiteName ReportedSiteName varchar(255)");
+								}
+                if ((result > -1) && UpgradeSummaryTrigger()) {
+										Logging.log("Gratia database upgraded from " + current + " to " + (current + 1));
+										current = current + 1;
+										UpdateDbVersion(current);
+								} else {
+                    Logging.log("Gratia database FAILED to upgrade from " + current +
+																" to " + (current + 1));
+								}
+						}
             return current == gratiaDatabaseVersion;
         }
     }
