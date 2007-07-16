@@ -12,7 +12,7 @@ CREATE TABLE `ProbeStatus` (
 CREATE TABLE `ProbeSummary` (
 	`EndTime` DATETIME NOT NULL DEFAULT 0,
 	`ProbeName` VARCHAR(255) NOT NULL DEFAULT '',
-	`SiteName` VARCHAR(255) DEFAULT 'Unknown',
+	`ReportedSiteName` VARCHAR(255) DEFAULT 'Unknown',
 	`ResourceType` VARCHAR(255) DEFAULT 'Unknown',
 	`Njobs` INTEGER NOT NULL DEFAULT 0,
 	`WallDuration` DOUBLE NOT NULL DEFAULT 0,
@@ -88,7 +88,7 @@ insert into ProbeSummary
 	(select
 		date(EndTime) as EndTime,
 		ProbeName,
-		SiteName,
+		ReportedSiteName,
 		ResourceType,
 		sum(Njobs) as Njobs,
 		sum(WallDuration) as WallDuration,

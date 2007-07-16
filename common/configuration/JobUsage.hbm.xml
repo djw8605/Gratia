@@ -256,8 +256,8 @@
      </component>
 
      <component name="SiteName" class="StringElement" insert="true">
-        <property name="Value" column="SiteName" />
-        <property name="Description" column="SiteNameDescription" />
+        <property name="Value" column="ReportedSiteName" />
+        <property name="Description" column="ReportedSiteNameDescription" />
      </component>
 
      <component name="Grid" class="StringElement" insert="true">

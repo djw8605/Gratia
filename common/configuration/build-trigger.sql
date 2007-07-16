@@ -128,7 +128,7 @@ glr:begin
 		and ProbeSummary.EndTime = date(n_EndTime)
 		and ProbeSummary.ResourceType = n_ResourceType;
 	if mycount = 0 then
-		insert into ProbeSummary values(date(n_EndTime),new.ProbeName,new.SiteName,n_ResourceType,
+		insert into ProbeSummary values(date(n_EndTime),new.ProbeName,new.ReportedSiteName,n_ResourceType,
 			n_Njobs,n_WallDuration,n_CpuUserDuration,n_CpuSystemDuration);
 	elseif mycount > 0 then
 		update ProbeSummary
