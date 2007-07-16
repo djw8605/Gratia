@@ -136,16 +136,17 @@ my %procedures =
  },
  UsageByUser =>	
  	{ extra_procedure_arguments => [ 'forvo varchar(64)', 'forvoname varchar(64)', 'forsite varchar(64)', 'forsitename varchar(64)' ],
-   select_columns => 'CETable.facility_name as sitename,
+   select_columns => 'Site.SiteName as sitename,
 					  sum(VOProbeSummary.WallDuration) as WallDuration,
 					  sum(VOProbeSummary.CpuUserDuration + VOProbeSummary.CpuSystemDuration) as Cpu,
 					  sum(VOProbeSummary.Njobs) as Njobs,
 					  VOProbeSummary.VOName,
 					  VOProbeSummary.CommonName as UserName',
-	 from_tables => 'CETable,CEProbes,VOProbeSummary',
-	 main_where => 'CEProbes.facility_id = CETable.facility_id and VOProbeSummary.ProbeName = CEProbes.probename
-	 		 and (VOProbeSummary.VOName =\'\'\', forvoname, \'\'\' or (\'\'\', forvo, \'\'\' = \'\'AnyVO\'\' and VOProbeSummary.VOName like \'\'%\'\' ))
-			 and (CETable.facility_name =\'\'\', forsitename, \'\'\' or (\'\'\', forsite, \'\'\' = \'\'AnySite\'\' and CETable.facility_name like \'\'%\'\' ))',
+	 from_tables => 'Site,Probe,VOProbeSummary',
+	 main_where => 'Probe.siteid = Site.siteid 
+	 					and VOProbeSummary.ProbeName = Probe.probename
+	 					and (VOProbeSummary.VOName =\'\'\', forvoname, \'\'\' or (\'\'\', forvo, \'\'\' = \'\'AnyVO\'\' and VOProbeSummary.VOName like \'\'%\'\' ))
+						and (Site.SiteName =\'\'\', forsitename, \'\'\' or (\'\'\', forsite, \'\'\' = \'\'AnySite\'\' and Site.SiteName like \'\'%\'\' ))',
 	 group_by => 'UserName, sitename, VOProbeSummary.VOName',
   	 order_by => 'UserName, sitename, VOProbeSummary.VOName'
  }, 
