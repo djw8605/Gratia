@@ -559,12 +559,12 @@ begin
 
 	set @sql :=
            concat_ws('', 'select avg(N.Value/N.PhaseUnit/1024.0/1024.0) as RateInMBPerSecond, date_format(J.EndTime,''', format , ''') as DayValue,
-                      J.SiteName,Resource.value as Source',
+                      J.SiteName,R.value as Source',
                      ' from JobUsageRecord_Report J, Network N, Resource R',
                      ' where',
                      ' J.ResourceType = ''Storage'' and J.dbid = N.dbid
-              and J.dbid = Resource.dbid
-              and Resource.Description = ''Source'' and',
+              and J.dbid = R.dbid
+              and R.Description = ''Source'' and',
                      ' EndTime >= date(''', fromdate, ''')'
                      ' and EndTime <= date(''', todate, ''')'
                      ' ', @myresourceclause,
