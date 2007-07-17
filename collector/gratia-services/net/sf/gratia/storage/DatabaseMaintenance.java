@@ -12,9 +12,9 @@ public class DatabaseMaintenance {
     static final String dq = "\"";
     static final String comma = ",";
     static final int gratiaDatabaseVersion = 17;
-		static final int latestDBVersionRequiringStoredProcedureLoad = gratiaDatabaseVersion;
-		static final int latestDBVersionRequiringSummaryTableLoad = 15;
-		static final int latestDBVersionRequiringSummaryTriggerLoad = 17;
+    static final int latestDBVersionRequiringStoredProcedureLoad = gratiaDatabaseVersion;
+    static final int latestDBVersionRequiringSummaryTableLoad = 15;
+    static final int latestDBVersionRequiringSummaryTriggerLoad = 17;
 
     java.sql.Connection connection;
     int liveVersion = 0;
@@ -28,18 +28,18 @@ public class DatabaseMaintenance {
         String password = p.getProperty("service.mysql.password");
 
         try
-        {
-           Class.forName(driver);
-           connection = (java.sql.Connection)DriverManager.getConnection(url, user, password);
-        }
+            {
+                Class.forName(driver);
+                connection = (java.sql.Connection)DriverManager.getConnection(url, user, password);
+            }
         catch (Exception e)
-        {
-           Logging.warning("DatabaseMaintenance: Error During connection: " + e);
-           Logging.warning(xp.parseException(e));
-           return;
-        }
+            {
+                Logging.warning("DatabaseMaintenance: Error During connection: " + e);
+                Logging.warning(xp.parseException(e));
+                return;
+            }
 
-				RationalizePropsTable();
+        RationalizePropsTable();
 
         ReadLiveVersion();
     }
@@ -60,12 +60,12 @@ public class DatabaseMaintenance {
     }
     
     public void AddIndex(String table, Boolean unique, String name,
-            String content) {
+                         String content) {
         Statement statement;
         ResultSet resultSet;
 
         String check = "show index from " + table + " where Key_name = '"
-                + name + "'";
+            + name + "'";
         String cmd = "alter table " + table + " add ";
         if (unique) {
             cmd = cmd + "unique ";
@@ -92,7 +92,7 @@ public class DatabaseMaintenance {
         ResultSet resultSet;
 
         String check = "show index from " + table + " where Key_name = '"
-                + name + "'";
+            + name + "'";
         String cmd = "alter table " + table + " drop index " + name;
         try {
             Logging.log("Executing: " + check);
@@ -126,7 +126,7 @@ public class DatabaseMaintenance {
         // original index structure
         //
         AddIndex("JobUsageRecord", false, "index02", "EndTime");
-         AddIndex("JobUsageRecord_Meta", false, "index03", "ProbeName");
+        AddIndex("JobUsageRecord_Meta", false, "index03", "ProbeName");
         // AddIndex("JobUsageRecord",false,"index04","HostDescription");
         AddIndex("JobUsageRecord", false, "index05", "StartTime");
         // AddIndex("JobUsageRecord",false,"index06","GlobalJobid");
@@ -162,19 +162,19 @@ public class DatabaseMaintenance {
     }
 
     private int CallPostInstall(String action) {
-				Logging.log("DatabaseMaintenance: calling post-install script for action \"" + action + "\"");
-				String home = System.getProperty("catalina.home");
-				home = xp.replaceAll(home, "\\", "" + File.separatorChar);
-				home = home + File.separatorChar + "gratia" + File.separatorChar + "post-install.sh";
-				String chmod_cmd[] = {"chmod", "700", home};
+        Logging.log("DatabaseMaintenance: calling post-install script for action \"" + action + "\"");
+        String home = System.getProperty("catalina.home");
+        home = xp.replaceAll(home, "\\", "" + File.separatorChar);
+        home = home + File.separatorChar + "gratia" + File.separatorChar + "post-install.sh";
+        String chmod_cmd[] = {"chmod", "700", home};
         Execute.execute(chmod_cmd); // Mark executable just in case.
-				String post_cmd[] = {home, action};
-				int result = Execute.execute(post_cmd);
-				if (result == 0) {
-						return result;
-				}	else {
-						return -1;
-				}
+        String post_cmd[] = {home, action};
+        int result = Execute.execute(post_cmd);
+        if (result == 0) {
+            return result;
+        } else {
+            return -1;
+        }
     }
 
     public int Execute(String cmd) {
@@ -217,7 +217,7 @@ public class DatabaseMaintenance {
 
         String check = "select count(*) from Site where SiteName = 'Unknown'";
         String cmd = "insert into Site(SiteName) values(" + dq
-                + "Unknown" + dq + ")";
+            + "Unknown" + dq + ")";
 
         try {
             Logging.log("Executing: " + check);
@@ -238,7 +238,7 @@ public class DatabaseMaintenance {
         }
     }
     
-     private String GetJobUsageRecordColumnsForReportView() {
+    private String GetJobUsageRecordColumnsForReportView() {
         Statement statement;
         ResultSet resultSet;
 
@@ -250,15 +250,18 @@ public class DatabaseMaintenance {
             resultSet = statement.executeQuery(cmd);
             while (resultSet.next()) {
                 String column = resultSet.getString(1);
-                if (column.equals("SiteName")) {
+                if (column.endsWith("Description") &&
+                    (! column.equals("HostDescription"))) {
+                    continue; // Skip these columns
+                } else if (column.equals("SiteName")) {
                     column = "Site.SiteName";
                 } else if (column.equals("Status")) {
                     column = "JobUsageRecord.Status";
                 } else if (column.equals("dbid")) {
                     column = "JobUsageRecord_Meta.dbid";
                 } else if (column.equals("VOName") || column.equals("ReportableVOName") || column.equals("VOcorrid")) {
-										continue; // Skip these columns
-								}
+                    continue; // Skip these columns
+                }
                 if (result.length()>0) result = result + ",";
                 result = result + column;
             }
@@ -279,10 +282,10 @@ public class DatabaseMaintenance {
     
     public void RoleDefaults() {
         if (getCount("select count(*) from Role where role='GratiaGlobalAdmin'")==0) {
-           Execute("insert into Role(role,subtitle,whereclause) values('GratiaGlobalAdmin','GratiaGlobalAdmin','')");
+            Execute("insert into Role(role,subtitle,whereclause) values('GratiaGlobalAdmin','GratiaGlobalAdmin','')");
         }
         if (getCount("select count(*) from Role where role='GratiaUser'")==0) {
-           Execute("insert into Role(role,subtitle,whereclause) values('GratiaUser','GratiaUser','Everything')");
+            Execute("insert into Role(role,subtitle,whereclause) values('GratiaUser','GratiaUser','Everything')");
         }
     }
 
@@ -301,8 +304,8 @@ public class DatabaseMaintenance {
         String useReportAuthentication = p.getProperty("use.report.authentication");
 
         if (0 == Execute("update SystemProplist set cdr = " + dq
-                + useReportAuthentication + dq + " where car = " + dq
-                + "use.report.authentication" + dq)) {
+                         + useReportAuthentication + dq + " where car = " + dq
+                         + "use.report.authentication" + dq)) {
             Execute("insert into SystemProplist(car,cdr) values(" + dq
                     + "use.report.authentication" + dq + comma + dq
                     + useReportAuthentication + dq + ")");
@@ -318,27 +321,27 @@ public class DatabaseMaintenance {
                 "reportmm,status," + FindRecordsColumn() + " as jobs from Probe");
         Execute("DROP VIEW IF EXISTS JobUsageRecord_Report");
         Execute("CREATE VIEW JobUsageRecord_Report as select " + GetJobUsageRecordColumnsForReportView() +
-								", JobUsageRecord_Meta.ProbeName, JobUsageRecord_Meta.ReportedSiteName, Site.SiteName, VO.VOName" +
-								", JobUsageRecord_Meta.ServerDate" +
+                ", JobUsageRecord_Meta.ProbeName, JobUsageRecord_Meta.ReportedSiteName, Site.SiteName, VO.VOName" +
+                ", JobUsageRecord_Meta.ServerDate" +
                 " from JobUsageRecord_Meta, Site, Probe, JobUsageRecord, VO, VONameCorrection " +
                 " where " +
                 " JobUsageRecord_Meta.ProbeName = Probe.probename and Probe.siteid = Site.siteid" +
                 " and JobUsageRecord_Meta.dbid = JobUsageRecord.dbid" +
-								" and binary JobUsageRecord.VOName = binary VONameCorrection.VOName" + 
-								" and ((binary JobUsageRecord.ReportableVOName = binary VONameCorrection.ReportableVOName) or" + 
-								" ((JobUsageRecord.ReportableVOName is null) and (VONameCorrection.ReportableVOName is null)))" +
-								" and VONameCorrection.void = VO.void" + 
-								" and JobUsageRecord.VOName = VONameCorrection.VOName");
+                " and binary JobUsageRecord.VOName = binary VONameCorrection.VOName" + 
+                " and ((binary JobUsageRecord.ReportableVOName = binary VONameCorrection.ReportableVOName) or" + 
+                " ((JobUsageRecord.ReportableVOName is null) and (VONameCorrection.ReportableVOName is null)))" +
+                " and VONameCorrection.void = VO.void" + 
+                " and JobUsageRecord.VOName = VONameCorrection.VOName");
     }
 
-		public int readIntegerDBProperty(String property) {
+    public int readIntegerDBProperty(String property) {
         Statement statement;
         ResultSet resultSet;
 
         String check = "select cdr from SystemProplist where car = " + dq
-						+ property + dq;
+            + property + dq;
 
-				int result = -1;
+        int result = -1;
 
         try {
             Logging.log("Executing: " + check);
@@ -346,14 +349,14 @@ public class DatabaseMaintenance {
             resultSet = statement.executeQuery(check);
             if (resultSet.next()) {
                 String vers = resultSet.getString(1);
-								result = Integer.valueOf(vers).intValue();
-						}						
+                result = Integer.valueOf(vers).intValue();
+            }           
             Logging.log("Command: OK: " + check);
         } catch (Exception e) {
             Logging.log("Command: Error: " + check + " : " + e);
         }
-				return result;
-		}
+        return result;
+    }
     
     public void ReadLiveVersion() {
 
@@ -361,7 +364,7 @@ public class DatabaseMaintenance {
         ResultSet resultSet;
 
         String check = "select cdr from SystemProplist where car = " + dq
-                + "gratia.database.version" + dq;
+            + "gratia.database.version" + dq;
 
         try {
             Logging.log("Executing: " + check);
@@ -385,125 +388,125 @@ public class DatabaseMaintenance {
         }        
     }
 
-		private void UpdateDbProperty(String property, int value) {
-				UpdateDbProperty(property, "" + value);
-		}
+    private void UpdateDbProperty(String property, int value) {
+        UpdateDbProperty(property, "" + value);
+    }
     
- 		private void UpdateDbProperty(String property, String value) {
-				int nRows = getCount("select count(*) from SystemProplist where car = " +
-														 dq + property + dq);
-				if (nRows > 0) {
-						Execute("update SystemProplist set cdr = " + dq + value + dq +
-										" where car = " + dq + property + dq);
-				} else {
-						Execute("insert into SystemProplist(car,cdr) values(" +
-										dq + property + dq + ", " +
-										dq + value + dq + ")");
-				}
-		}
+    private void UpdateDbProperty(String property, String value) {
+        int nRows = getCount("select count(*) from SystemProplist where car = " +
+                             dq + property + dq);
+        if (nRows > 0) {
+            Execute("update SystemProplist set cdr = " + dq + value + dq +
+                    " where car = " + dq + property + dq);
+        } else {
+            Execute("insert into SystemProplist(car,cdr) values(" +
+                    dq + property + dq + ", " +
+                    dq + value + dq + ")");
+        }
+    }
 
     private void UpdateDbVersion(int newVersion) {
-				UpdateDbProperty("gratia.database.version", newVersion);
+        UpdateDbProperty("gratia.database.version", newVersion);
         liveVersion = newVersion;        
     }
 
-		private boolean checkAndUpgradeDbAuxiliaryItems() {
-				if (readIntegerDBProperty("gratia.database.version") != gratiaDatabaseVersion) {
-						Logging.log("INTERNAL ERROR: DatabaseMainentance::checkAndUpgradeDbAuxiliaryItems" +
-												" called with inconsistent DB version");
-						return false;
-				}
+    private boolean checkAndUpgradeDbAuxiliaryItems() {
+        if (readIntegerDBProperty("gratia.database.version") != gratiaDatabaseVersion) {
+            Logging.log("INTERNAL ERROR: DatabaseMainentance::checkAndUpgradeDbAuxiliaryItems" +
+                        " called with inconsistent DB version");
+            return false;
+        }
 
-				// First check summary tables
-				int ver = readIntegerDBProperty("gratia.database.summaryTableVersion");
-				if (ver < latestDBVersionRequiringSummaryTableLoad) {
-						int result = CallPostInstall("summary");
-						if (result > -1) {
-								UpdateDbProperty("gratia.database.summaryTableVersion", gratiaDatabaseVersion);
-								Logging.log("Summary tables updated successfully");
-						} else {
-								Logging.log("FAIL: summary tables NOT updated");
-								return false;
-						}
-				}
+        // First check summary tables
+        int ver = readIntegerDBProperty("gratia.database.summaryTableVersion");
+        if (ver < latestDBVersionRequiringSummaryTableLoad) {
+            int result = CallPostInstall("summary");
+            if (result > -1) {
+                UpdateDbProperty("gratia.database.summaryTableVersion", gratiaDatabaseVersion);
+                Logging.log("Summary tables updated successfully");
+            } else {
+                Logging.log("FAIL: summary tables NOT updated");
+                return false;
+            }
+        }
 
-				// Next check trigger
-				ver = readIntegerDBProperty("gratia.database.summaryTriggerVersion");
-				if (ver < latestDBVersionRequiringSummaryTableLoad) {
-						int result = CallPostInstall("stored");
-						if (result > -1) {
-								UpdateDbProperty("gratia.database.summaryTriggerVersion", gratiaDatabaseVersion);
-								Logging.log("Summary trigger updated successfully");
-						} else {
-								Logging.log("FAIL: summary trigger NOT updated");
-								return false;
-						}
-				}
+        // Next check trigger
+        ver = readIntegerDBProperty("gratia.database.summaryTriggerVersion");
+        if (ver < latestDBVersionRequiringSummaryTableLoad) {
+            int result = CallPostInstall("stored");
+            if (result > -1) {
+                UpdateDbProperty("gratia.database.summaryTriggerVersion", gratiaDatabaseVersion);
+                Logging.log("Summary trigger updated successfully");
+            } else {
+                Logging.log("FAIL: summary trigger NOT updated");
+                return false;
+            }
+        }
 
-				// Finally, check stored procedures
-				ver = readIntegerDBProperty("gratia.database.storedProcedureVersion");
-				if (ver < latestDBVersionRequiringSummaryTableLoad) {
-						int result = CallPostInstall("summary");
-						if (result > -1) {
-								UpdateDbProperty("gratia.database.storedProcedureVersion", gratiaDatabaseVersion);
-								Logging.log("Stored procedures updated successfully");
-						} else {
-								Logging.log("FAIL: stored procedures NOT updated");
-								return false;
-						}
-				}
+        // Finally, check stored procedures
+        ver = readIntegerDBProperty("gratia.database.storedProcedureVersion");
+        if (ver < latestDBVersionRequiringSummaryTableLoad) {
+            int result = CallPostInstall("summary");
+            if (result > -1) {
+                UpdateDbProperty("gratia.database.storedProcedureVersion", gratiaDatabaseVersion);
+                Logging.log("Stored procedures updated successfully");
+            } else {
+                Logging.log("FAIL: stored procedures NOT updated");
+                return false;
+            }
+        }
 
-				return true;
-		}
+        return true;
+    }
 
     public boolean Upgrade() {
         int oldvers = liveVersion;
 
         if (oldvers == 0) {
-						Statement statement;
-						ResultSet resultSet;
-						
-						String check = "select count(*),min(PropId) from SystemProplist where car = " + dq
+            Statement statement;
+            ResultSet resultSet;
+            
+            String check = "select count(*),min(PropId) from SystemProplist where car = " + dq
                 + "gratia.database.version" + dq;
 
-						try {
-								Logging.log("Executing: " + check);
-								statement = connection.createStatement();
-								resultSet = statement.executeQuery(check);
-								if (resultSet.next()) {
-										int count = resultSet.getInt(1);
-										if (count > 0) { // Rare case where version is 0 but this entry exists
-												Execute("update SystemProplist set cdr = " + gratiaDatabaseVersion +
-																" where car = " + dq + "gratia.database.version" + dq);
-										} else { // Normal case: needs new entry
-												Execute("insert into SystemProplist(car,cdr) values(" + dq
-																+ "gratia.database.version" + dq + comma + dq
-																+ gratiaDatabaseVersion + dq + ")");
-										}
-								}
-								Logging.log("Command: OK: " + check);
-						} catch (Exception e) {
-								Logging.log("Command: Error: " + check + " : " + e);
-						}    
+            try {
+                Logging.log("Executing: " + check);
+                statement = connection.createStatement();
+                resultSet = statement.executeQuery(check);
+                if (resultSet.next()) {
+                    int count = resultSet.getInt(1);
+                    if (count > 0) { // Rare case where version is 0 but this entry exists
+                        Execute("update SystemProplist set cdr = " + gratiaDatabaseVersion +
+                                " where car = " + dq + "gratia.database.version" + dq);
+                    } else { // Normal case: needs new entry
+                        Execute("insert into SystemProplist(car,cdr) values(" + dq
+                                + "gratia.database.version" + dq + comma + dq
+                                + gratiaDatabaseVersion + dq + ")");
+                    }
+                }
+                Logging.log("Command: OK: " + check);
+            } catch (Exception e) {
+                Logging.log("Command: Error: " + check + " : " + e);
+            }    
 
-						Logging.log("Gratia database now at version "
-												+ gratiaDatabaseVersion);
+            Logging.log("Gratia database now at version "
+                        + gratiaDatabaseVersion);
 
-						return checkAndUpgradeDbAuxiliaryItems();
+            return checkAndUpgradeDbAuxiliaryItems();
             
         } else {
             // Do the necessary upgrades if any
 
             Logging.log("Gratia database at version " + oldvers);
 
-						
+            
             int current = oldvers;
 
             if (current == 1) {
-								Logging.log("Gratia database upgraded from " + current
-														+ " to " + (current + 1));
-								current = current + 1;
-								UpdateDbVersion(current);
+                Logging.log("Gratia database upgraded from " + current
+                            + " to " + (current + 1));
+                current = current + 1;
+                UpdateDbVersion(current);
             }
             if (current == 2) {
                 // Upgrade to version 3;
@@ -519,12 +522,12 @@ public class DatabaseMaintenance {
                     }
                     if (result > -1) {
                         Logging.log("Gratia database upgraded from " + current
-                                + " to " + (current + 1));
+                                    + " to " + (current + 1));
                         current = current + 1;
                         UpdateDbVersion(current);
                     } else {
                         Logging.log("Gratia database FAILED to upgrade from "
-                                + current + " to " + (current + 1));
+                                    + current + " to " + (current + 1));
                     }
                 }
             }
@@ -566,7 +569,7 @@ public class DatabaseMaintenance {
             if (current == 5) {
                 int result = Execute("insert into Site(siteid,SiteName) select facility_id,facility_name from CETable");
                 if (result > -1) {
-                   result = Execute("drop table CETable;");
+                    result = Execute("drop table CETable;");
                 }
                 if (result > -1) {
                     Logging.log("Gratia database upgraded from " + current + " to " + (current + 1));
@@ -577,15 +580,15 @@ public class DatabaseMaintenance {
                 }
             }
             if (current == 6) {
-								String records_column = FindRecordsColumn();
+                String records_column = FindRecordsColumn();
                 int result = Execute("insert into Probe(probeid,siteid,probename,active,currenttime,CurrentTimeDescription," +
-                        "reporthh,reportmm,status," + records_column + ") select " +
-                        "probeid,facility_id,probename,active,currenttime,CurrentTimeDescription,reporthh,reportmm,status,jobs " +
-                        " from CEProbes");
+                                     "reporthh,reportmm,status," + records_column + ") select " +
+                                     "probeid,facility_id,probename,active,currenttime,CurrentTimeDescription,reporthh,reportmm,status,jobs " +
+                                     " from CEProbes");
                 if (result > -1) {
-                   result = Execute("drop table CEProbes;");
+                    result = Execute("drop table CEProbes;");
                 }
-               if (result > -1) {
+                if (result > -1) {
                     Logging.log("Gratia database upgraded from " + current + " to " + (current + 1));
                     current = current + 1;
                     UpdateDbVersion(current);
@@ -609,12 +612,12 @@ public class DatabaseMaintenance {
                     Logging.log("Gratia database FAILED to upgrade from " + current + " to " + (current + 1));
                 }                
             }
-						if (current == 8 || current == 9) { // Can combine update command into one SQL statement for both versions
+            if (current == 8 || current == 9) { // Can combine update command into one SQL statement for both versions
                 int result = Execute("update (select ProbeName,count(*) as nRecords,max(ServerDate) as ServerDate from JobUsageRecord_Meta group by ProbeName) as sums,Probe set Probe.nRecords = sums.nRecords, Probe.currenttime = sums.ServerDate, Probe.status = 'alive' where Probe.ProbeName = sums.ProbeName;");
                 if (result > -1 && current == 8) { // Only necessary for DB version 8
-										if (FindRecordsColumn() == "jobs") {
-												result = Execute("alter table Probe drop column jobs; ");
-										}
+                    if (FindRecordsColumn() == "jobs") {
+                        result = Execute("alter table Probe drop column jobs; ");
+                    }
                 }
                 if (result > -1) {
                     Logging.log("Gratia database upgraded from " + current + " to " + 10);
@@ -623,40 +626,40 @@ public class DatabaseMaintenance {
                 } else {
                     Logging.log("Gratia database FAILED to upgrade from " + current + " to " + 10);
                 }
-						}
-						if (current == 10) {
-								int result = Execute("ALTER TABLE MetricRecord MODIFY DetailsData TEXT");
-								if (result > -1) {
+            }
+            if (current == 10) {
+                int result = Execute("ALTER TABLE MetricRecord MODIFY DetailsData TEXT");
+                if (result > -1) {
                     Logging.log("Gratia database upgraded from " + current + " to " + (current + 1));
                     current = current + 1;
                     UpdateDbVersion(current);
                 } else {
                     Logging.log("Gratia database FAILED to upgrade from " + current + " to " + (current + 1));
-                }	
-						}
-						if ((current > 10 ) && (current < 14)) { // Never saw the light of day and superseded.
-								int new_version = 14;
-								Logging.log("Gratia database upgraded from " + current + " to " + new_version);
-								current = new_version;
-								UpdateDbVersion(current);
-						}
+                } 
+            }
+            if ((current > 10 ) && (current < 14)) { // Never saw the light of day and superseded.
+                int new_version = 14;
+                Logging.log("Gratia database upgraded from " + current + " to " + new_version);
+                current = new_version;
+                UpdateDbVersion(current);
+            }
             if (current == 14) {
                 int result = Execute("delete from VONameCorrection");
-								if (result > -1) {
-										result = Execute("delete from VO");
-								}
-								if (result > -1) {
-										result = Execute("alter table VONameCorrection modify column VOName varchar(255) binary");
-								}
-								if (result > -1) {
-										result = Execute("alter table VONameCorrection modify column ReportableVOName varchar(255) binary");
-								}
-								if (result > -1) {
-										result = Execute("insert into VONameCorrection(VOName,ReportableVOName) select distinct binary VOName,binary ReportableVOName from JobUsageRecord");
-								}
-								if (result > -1) {
-										result = Execute("alter table VO modify column VOName varchar(255) binary");
-								}
+                if (result > -1) {
+                    result = Execute("delete from VO");
+                }
+                if (result > -1) {
+                    result = Execute("alter table VONameCorrection modify column VOName varchar(255) binary");
+                }
+                if (result > -1) {
+                    result = Execute("alter table VONameCorrection modify column ReportableVOName varchar(255) binary");
+                }
+                if (result > -1) {
+                    result = Execute("insert into VONameCorrection(VOName,ReportableVOName) select distinct binary VOName,binary ReportableVOName from JobUsageRecord");
+                }
+                if (result > -1) {
+                    result = Execute("alter table VO modify column VOName varchar(255) binary");
+                }
                 if (result > -1) {
                     result = Execute("insert into VO(VOName) select distinct binary VOName from VONameCorrection");
                 }
@@ -664,54 +667,54 @@ public class DatabaseMaintenance {
                     result = Execute("update VONameCorrection,VO set VONameCorrection.VOid=VO.VOid where VONameCorrection.VOName = binary VO.VOName");
                 }
                 if (result > -1) {
-										Logging.log("Gratia database upgraded from " + current + " to " + (current + 1));
-										current = current + 1;
-										UpdateDbVersion(current);
-								} else {
+                    Logging.log("Gratia database upgraded from " + current + " to " + (current + 1));
+                    current = current + 1;
+                    UpdateDbVersion(current);
+                } else {
                     Logging.log("Gratia database FAILED to upgrade from " + current +
-																" to " + (current + 1));
-								}
+                                " to " + (current + 1));
+                }
             }
             if (current == 15) {
                 int result = Execute("update JobUsageRecord_Meta set ReportedSiteName = SiteName where SiteName is not null");
-								if (result > -1) {
-										result = Execute("update JobUsageRecord_Meta set ReportedSiteNameDescription = SiteNameDescription where SiteNameDescription is not null");
-								}
-								if (result > -1) {
-										result = Execute("alter table JobUsageRecord_Meta drop column SiteName");
-								}
-								if (result > -1) {
-										result = Execute("alter table JobUsageRecord_Meta drop column SiteNameDescription");
-								}
-								if (result > -1) {
-										result = Execute("alter table ProbeSummary change column SiteName ReportedSiteName varchar(255)");
-								}
                 if (result > -1) {
-										Logging.log("Gratia database upgraded from " + current + " to " + (current + 1));
-										current = current + 1;
-										UpdateDbVersion(current);
-								} else {
+                    result = Execute("update JobUsageRecord_Meta set ReportedSiteNameDescription = SiteNameDescription where SiteNameDescription is not null");
+                }
+                if (result > -1) {
+                    result = Execute("alter table JobUsageRecord_Meta drop column SiteName");
+                }
+                if (result > -1) {
+                    result = Execute("alter table JobUsageRecord_Meta drop column SiteNameDescription");
+                }
+                if (result > -1) {
+                    result = Execute("alter table ProbeSummary change column SiteName ReportedSiteName varchar(255)");
+                }
+                if (result > -1) {
+                    Logging.log("Gratia database upgraded from " + current + " to " + (current + 1));
+                    current = current + 1;
+                    UpdateDbVersion(current);
+                } else {
                     Logging.log("Gratia database FAILED to upgrade from " + current +
-																" to " + (current + 1));
-								}
-						}
-						if (current == 16) {
-								int result = Execute("alter table ProbeSummary drop column ReportedSiteName");
-								if (result > -1) {
-										Logging.log("Gratia database upgraded from " + current + " to " + (current + 1));
-										current = current + 1;
-										UpdateDbVersion(current);
-								} else {
+                                " to " + (current + 1));
+                }
+            }
+            if (current == 16) {
+                int result = Execute("alter table ProbeSummary drop column ReportedSiteName");
+                if (result > -1) {
+                    Logging.log("Gratia database upgraded from " + current + " to " + (current + 1));
+                    current = current + 1;
+                    UpdateDbVersion(current);
+                } else {
                     Logging.log("Gratia database FAILED to upgrade from " + current +
-																" to " + (current + 1));
-								}
-						}
+                                " to " + (current + 1));
+                }
+            }
 
             return ((current == gratiaDatabaseVersion) && checkAndUpgradeDbAuxiliaryItems());
         }
     }
 
-		private String FindRecordsColumn() {
+    private String FindRecordsColumn() {
         Statement statement;
         ResultSet resultSet;
 
@@ -721,23 +724,23 @@ public class DatabaseMaintenance {
             statement = connection.createStatement();
             resultSet = statement.executeQuery(cmd);
             while (resultSet.next()) {
-								String column = resultSet.getString(1);
-								if (column.equals("jobs") || column.equals("nRecords")) {
-										return column;
-								}
-						}
-				} catch (Exception e) {
+                String column = resultSet.getString(1);
+                if (column.equals("jobs") || column.equals("nRecords")) {
+                    return column;
+                }
+            }
+        } catch (Exception e) {
             Logging.log("Command: Error: " + cmd + " : " + e);
-        }		
-				return "";
-		}
+        }   
+        return "";
+    }
 
-		private void RationalizePropsTable() {
+    private void RationalizePropsTable() {
         Statement statement;
         ResultSet resultSet;
 
         String check = "select count(*),min(PropId) from SystemProplist where car = " + dq
-                + "gratia.database.version" + dq;
+            + "gratia.database.version" + dq;
 
         try {
             Logging.log("Executing: " + check);
@@ -745,11 +748,11 @@ public class DatabaseMaintenance {
             resultSet = statement.executeQuery(check);
             if (resultSet.next()) {
                 int count = resultSet.getInt(1);
-								if (count > 1) {
-										int propid = resultSet.getInt(2);
-										Execute("delete from SystemProplist where car = "
-														+ dq	+ "gratia.database.version" + dq + " and PropId > " + propid);
-								}
+                if (count > 1) {
+                    int propid = resultSet.getInt(2);
+                    Execute("delete from SystemProplist where car = "
+                            + dq  + "gratia.database.version" + dq + " and PropId > " + propid);
+                }
             }
             Logging.log("Command: OK: " + check);
         } catch (Exception e) {
