@@ -1,8 +1,8 @@
 PLATFORM := ${shell uname}
 
 # tarbal version
-gratia_reporting_version=v0.25.2
-gratia_services_version=v0.25.2
+gratia_reporting_version=v0.25.3
+gratia_services_version=v0.25.3
 
 # define useful variables
 base=..
