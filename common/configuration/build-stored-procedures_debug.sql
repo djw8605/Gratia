@@ -567,9 +567,9 @@ begin
 	call parse(userName,@name,@key,@vo);
 
 	set @sql :=
-           concat_ws('', 'select avg(N.Value/N.PhaseUnit/1024.0/1024.0) as RateInMBPerSecond, date_format(J.EndTime,''', format , ''') as Day,
+           concat_ws('', 'select avg(N.Value/N.PhaseUnit/1024.0/1024.0) as RateInMBPerSecond, date_format(J.EndTime,''', format , ''') as DayValue,
                       J.SiteName,Resource.value as Source',
-                     ' from JobUsageRecord J, Network N, Resource R, ',
+                     ' from JobUsageRecord_Report J, Network N, Resource R',
                      ' where',
                      ' J.ResourceType = ''Storage'' and J.dbid = N.dbid
               and J.dbid = Resource.dbid
@@ -578,8 +578,8 @@ begin
                      ' and EndTime <= date(''', todate, ''')'
                      ' ', @myresourceclause,
                      ' ', @mywhereclause
-                     , ' group by Day, SiteName'
-                     , ' order by Day'
+                     , ' group by DayValue, SiteName'
+                     , ' order by DayValue'
                     );
 
 	insert into trace(pname,userkey,user,role,vo,p1,p2,p3,p4,data)
