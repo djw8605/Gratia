@@ -142,13 +142,13 @@
                 </structure>
             </list-property>
             <property name="queryText">
-select JobUsageRecord.CommonName as UserName, sum(JobUsageRecord.Njobs)
-from JobUsageRecord
-where JobUsageRecord.ResourceType = 'Batch'
-and (? &lt;= JobUsageRecord.EndTime and JobUsageRecord.EndTime &lt;= ?)
-and JobUsageRecord.VOName = ?
-group by JobUsageRecord.CommonName
-order by JobUsageRecord.CommonName</property>
+select CommonName as UserName, sum(Njobs)
+from JobUsageRecord_Report
+where ResourceType = 'Batch'
+and (? &lt;= EndTime and EndTime &lt;= ?)
+and VOName = ?
+group by CommonName
+order by CommonName</property>
         </oda-data-set>
     </data-sets>
     <styles>

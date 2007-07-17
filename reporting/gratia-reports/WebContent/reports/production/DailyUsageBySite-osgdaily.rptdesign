@@ -220,16 +220,15 @@
                 </structure>
             </list-property>
             <property name="queryText">
-select M.SiteName, 
-       Date(JobUsageRecord.EndTime) as endtime, 
-        sum(JobUsageRecord.WallDuration),
-        sum(JobUsageRecord.CpuUserDuration+JobUsageRecord.CpuSystemDuration)
-         from JobUsageRecord, JobUsageRecord_Meta M
+select ReportedSiteName as SiteName, 
+       Date(EndTime) as endtime, 
+        sum(WallDuration),
+        sum(CpuUserDuration+CpuSystemDuration)
+         from JobUsageRecord_Report
 where EndTime >= ? and  EndTime &lt;= ?
-and JobUsageRecord.dbid = M.dbid
-group by date_format(JobUsageRecord.EndTime,
-?),M.SiteName
-order by date_format(JobUsageRecord.EndTime,?)</property>
+group by date_format(EndTime,
+?),SiteName
+order by date_format(EndTime,?)</property>
         </oda-data-set>
         <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="CPUMetricTypes" id="102">
             <property name="dataSource">fermigrid1</property>
@@ -1008,9 +1007,9 @@ printWriter.close();
           </Label>
           <DataDefinition>
             <Definition>if (params[&quot;CPUMetric&quot;] == 'wallclock') {
-	row[&quot;sum(JobUsageRecord.WallDuration)&quot;] / 3600
+	row[&quot;sum(WallDuration)&quot;] / 3600
 }else{
-	row[&quot;sum(JobUsageRecord.CpuUserDuration+JobUsageRecord.CpuSystemDuration)&quot;]/3600
+	row[&quot;sum(CpuUserDuration+CpuSystemDuration)&quot;]/3600
 }</Definition>
           </DataDefinition>
           <SeriesIdentifier>Cpu Usage</SeriesIdentifier>

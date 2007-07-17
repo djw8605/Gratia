@@ -257,7 +257,7 @@ call DailyUsageBySiteByVO(?,?,?,?,?,'Batch')
         </oda-data-set>
         <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="VONames" id="108">
             <property name="dataSource">fermigrid1</property>
-            <property name="queryText">select distinct VOName from VOProbeSummary</property>
+            <property name="queryText">select distinct VOName from VOProbeSummary order by VOName</property>
         </oda-data-set>
     </data-sets>
     <styles>

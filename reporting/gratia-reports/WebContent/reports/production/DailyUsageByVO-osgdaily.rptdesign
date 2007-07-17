@@ -224,7 +224,7 @@ select J.VOName as voname,
        Date(J.EndTime) as endtime, 
        sum(J.WallDuration) as wallduration,
        sum(J.CpuUserDuration+J.CpuSystemDuration)as systemduration
-from JobUsageRecord J
+from JobUsageRecord_Report J
 where (? &lt;= J.EndTime and J.EndTime &lt;= ?)
 group by date_format(J.EndTime, ?),J.VOName
 order by date_format(J.EndTime, ?)</property>

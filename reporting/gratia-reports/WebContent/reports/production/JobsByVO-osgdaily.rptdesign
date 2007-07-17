@@ -111,11 +111,11 @@
                 </structure>
             </list-property>
             <property name="queryText">
-select JobUsageRecord.VOName, sum(JobUsageRecord.Njobs)
-from JobUsageRecord
-where (? &lt;= JobUsageRecord.EndTime and JobUsageRecord.EndTime &lt;= ?)
-group by JobUsageRecord.VOName
-order by JobUsageRecord.VOName</property>
+select VOName, sum(Njobs)
+from JobUsageRecord_Report
+where (? &lt;= EndTime and EndTime &lt;= ?)
+group by VOName
+order by VOName</property>
         </oda-data-set>
     </data-sets>
     <styles>

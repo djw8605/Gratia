@@ -157,7 +157,7 @@
 select J.VOName, 
 	sum(J.WallDuration),
 	sum(J.CpuUserDuration+J.CpuSystemDuration)
-from JobUsageRecord J
+from JobUsageRecord_Report J
 where (? &lt;= J.EndTime and J.EndTime &lt;= ?)
 group by J.VOName
 order by J.VOName</property>

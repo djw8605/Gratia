@@ -257,8 +257,8 @@ call DailyUsageBySiteByVO(?,?,?,?,?,'Batch')
         </oda-data-set>
         <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="SiteNames" id="108">
             <property name="dataSource">fermigrid1</property>
-            <property name="queryText">select facility_name as sitename  
-from CETable, CEProbes where CETable.facility_id - CEProbes.facility_id</property>
+            <property name="queryText">select distinct S.SiteName as sitename  
+from Site S, Probe P where P.siteid = S.siteid order by sitename</property>
         </oda-data-set>
     </data-sets>
     <styles>
