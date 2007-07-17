@@ -216,28 +216,25 @@
                 </structure>
             </list-property>
             <property name="queryText">
-select C.facility_name as sitename,
+select J.SiteName as sitename,
 sum(J.CpuUserDuration) as usercpu,
 sum(J.CpuSystemDuration) as syscpu, 
-       J.EndTime as endtime, 
-
+J.EndTime as endtime, 
 sum((J.CpuUserDuration+J.CpuSystemDuration)) as cputotal,
 sum((J.CpuUserDuration+J.CpuSystemDuration)*CpuInfo.BenchmarkScore/1000) as normcputotal
-FROM JobUsageRecord_Report J, CPUInfo CpuInfo, CETable C, CEProbes P
+FROM JobUsageRecord_Report J, CPUInfo CpuInfo
 where J.ResourceType = 'RawCPU'
 and J.HostDescription=CpuInfo.HostDescription 
-and J.ProbeName = P.probename
-and P.facility_id = C.facility_id
-and  C.facility_name = ?
-and (? &lt;= EndTime and EndTime &lt;= ?)
+and J.SiteName = ?
+and (? &lt;= J.EndTime and J.EndTime &lt;= ?)
 group by date_format(J.EndTime, ?)
 order by J.EndTime</property>
         </oda-data-set>
         <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="SiteNames" id="106">
             <property name="dataSource">fermigrid1</property>
-            <property name="queryText">select distinct facility_name as sitename from CETable C, CEProbes
-where C.facility_id = CEProbes.facility_id
- and CEProbes.probename like "psacct%"</property>
+            <property name="queryText">select distinct SiteName as sitename from Site S, Probe P
+where S.siteid = P.siteid
+ and P..probename like "psacct%"</property>
         </oda-data-set>
     </data-sets>
     <styles>

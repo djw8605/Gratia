@@ -180,9 +180,10 @@
     <data-sets>
         <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="SiteNames" id="109">
             <property name="dataSource">fermigrid1</property>
-            <property name="queryText">select distinct facility_name as sitename from CETable C, CEProbes
-where C.facility_id = CEProbes.facility_id
- and CEProbes.probename like "psacct%"</property>
+            <property name="queryText">select distinct SiteName as sitename from Site S,
+Probe P
+where S.siteid = P.siteid
+ and P.probename like "psacct%"</property>
         </oda-data-set>
         <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="TimeQuery" id="94">
             <property name="dataSource">fermigrid1</property>
@@ -233,14 +234,14 @@ where C.facility_id = CEProbes.facility_id
 select J.VOName as voname,
        Date(J.EndTime) as endtime, 
        sum(J.CpuUserDuration+J.CpuSystemDuration)
-from VOProbeSummary J, CEProbes P, CETable C 
+from VOProbeSummary J, Site S, Probe P
 where J.ResourceType = 'RawCPU'
-and J.ProbeName = P.ProbeName
-and P.facility_id = C.Facility_id
-and C.facility_name = ?
-and (? &lt;= EndTime and EndTime &lt;= ?)
+and J.ProbeName = P.probename
+and S.siteid = P.siteid
+and S.SiteName = ?
+and (? &lt;= J.EndTime and J.EndTime &lt;= ?)
 and J.VOName = ?
-group by date_format(EndTime, ?), J.VOName
+group by date_format(J.EndTime, ?), J.VOName
 order by J.EndTime</property>
         </oda-data-set>
     </data-sets>

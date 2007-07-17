@@ -112,22 +112,22 @@ date_format(J.EndTime, "%Y-%m") as yearmonth,
 J.VOName as voname,
 sum(J.CpuUserDuration+J.CpuSystemDuration) 
 *C.BenchmarkScore/(3600*1000) as cpunorm
- FROM JobUsageRecord_Report J, CPUInfo C, CETable CE, CEProbes P
+ FROM JobUsageRecord_Report J, CPUInfo C, Site S, Probe P
 where J.ResourceType = 'RawCPU'
 and J.HostDescription = C.HostDescription
 and J.EndTime >= ?
 and J.EndTime &lt; '2010-12-31'
 and J.ProbeName = P.probename
-and P.facility_id = CE.facility_id
-and CE.facility_name = ?
+and P.siteid = S.siteid
+and S.SiteName = ?
 group by yearmonth, voname
 order by yearmonth</property>
         </oda-data-set>
         <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="SiteNames" id="106">
             <property name="dataSource">fermigrid1</property>
-            <property name="queryText">select  facility_name as sitename from CETable C, CEProbes
-where C.facility_id = CEProbes.facility_id
- and CEProbes.probename like "psacct%"</property>
+            <property name="queryText">select S.SiteName as sitename from Site S, Probe P
+where S.siteid = P.siteid
+ and P.probename like "psacct%"</property>
         </oda-data-set>
     </data-sets>
     <styles>

@@ -108,7 +108,7 @@ if (monthnr.toString().length > 1){
                     <property name="isInput">true</property>
                 </structure>
             </list-property>
-            <property name="queryText">SELECT C.facility_name as sitename, sum(N.CpuUserTime+ N.CpuSystemTime)/3600*(N.BenchMarkScore/1000)
+            <property name="queryText">SELECT S.SiteName as sitename, sum(N.CpuUserTime+ N.CpuSystemTime)/3600*(N.BenchMarkScore/1000)
 as cpunorm, 
 sum( N.BenchMarkScore /1000 * N.CpuCount*24 ) as cpuavail,
 date_format(N.EndTime, "%Y-%m") as monthyear,
@@ -116,22 +116,22 @@ N.CpuCount as cpucount,
 N.DaysInMonth as daysinmonth,
 N.BenchMarkScore as benchmarkscore,
 N.Node as node
-FROM NodeSummary N, CETable C, CEProbes P
+FROM NodeSummary N, Site S, Probe P
 where N.ResourceType = 'RawCPU'
 and N.EndTime >= ?
 and N.EndTime >= '2006-04-01'
 and N.EndTime &lt; '2012-12-31'
 and N.ProbeName = P.probename
-and P.facility_id = C.facility_id
-and C.Facility_name = ?
+and P.siteid = S.siteid
+and S.SiteName = ?
 group by monthyear
 order by monthyear</property>
         </oda-data-set>
         <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="SiteNames" id="106">
             <property name="dataSource">fermigrid1</property>
-            <property name="queryText">select  facility_name as sitename from CETable C, CEProbes
-where C.facility_id = CEProbes.facility_id
- and CEProbes.probename like "psacct%"</property>
+            <property name="queryText">select S.SiteName as sitename from Site S, Probe P
+where S.siteid = P.siteid
+ and P.probename like "psacct%"</property>
         </oda-data-set>
     </data-sets>
     <styles>

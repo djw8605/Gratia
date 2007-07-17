@@ -215,24 +215,24 @@
                 </structure>
             </list-property>
             <property name="queryText">
-select JobUsageRecord_Report.VOName, JobUsageRecord_Report.ProbeName,
-       Date(JobUsageRecord_Report.EndTime) as endtime, 
-       sum(JobUsageRecord_Report.CpuUserDuration+JobUsageRecord_Report.CpuSystemDuration)
+select VOName, ProbeName,
+       Date(EndTime) as endtime, 
+       sum(CpuUserDuration+CpuSystemDuration)
 from JobUsageRecord_Report
-where JobUsageRecord_Report.ResourceType = 'RawCPU'
-and (? = 'All' or JobUsageRecord_Report.ProbeName =?)
+where ResourceType = 'RawCPU'
+and (? = 'All' or ProbeName =?)
 and (? &lt;= EndTime and EndTime &lt;= ?)
-group by date_format(EndTime, ?), JobUsageRecord_Report.VOName
-order by JobUsageRecord_Report.EndTime</property>
+group by date_format(EndTime, ?), VOName
+order by EndTime</property>
         </oda-data-set>
         <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="ProbeNames" id="102">
             <property name="dataSource">fermigrid1</property>
             <property name="queryText">select 'All' as probename1
-from CEProbes
+from Probe
 union
-select CEProbes.probename as probename1
-from CEProbes
-where CEProbes.probename like 'psacct%'
+select probename as probename1
+from Probe
+where probename like 'psacct%'
 order by probename1
 </property>
         </oda-data-set>
