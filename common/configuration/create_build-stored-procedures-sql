@@ -381,22 +381,22 @@ sub generate_procedures {
 		}
 		$procedures{$procedure}->{main_where} = "$procedures{$procedure}->{main_where} and"
 			if $procedures{$procedure}->{main_where};
-		my $uses_resource_table = ($procedures{$procedure}->{from_tables} =~ m&\bResource\b&);
+		my $uses_resource_table = (($procedures{$procedure}->{from_tables}) =~ m&\bResource\b&);
 		my $jobusage_select = $uses_resource_table?
-			jobusage($procedures{$procedure}->{select_columns}):
-			$procedures{$procedure}->{select_columns};
+			$procedures{$procedure}->{select_columns}:
+			jobusage($procedures{$procedure}->{select_columns});
 		my $jobusage_from_tables = $uses_resource_table?
-			jobusage($procedures{$procedure}->{from_tables}):
-			$procedures{$procedure}->{from_tables};
+			$procedures{$procedure}->{from_tables}:
+			jobusage($procedures{$procedure}->{from_tables});
 		my $jobusage_main_where = $uses_resource_table?
-			jobusage($procedures{$procedure}->{main_where}):
-			$procedures{$procedure}->{main_where};
+			$procedures{$procedure}->{main_where}:
+			jobusage($procedures{$procedure}->{main_where});
 		my $jobusage_group_by = $uses_resource_table?
-			jobusage($procedures{$procedure}->{group_by}):
-			$procedures{$procedure}->{group_by};
+			$procedures{$procedure}->{group_by}:
+			jobusage($procedures{$procedure}->{group_by});
 		my $jobusage_order_by = $uses_resource_table?
-			jobusage($procedures{$procedure}->{order_by}):
-			$procedures{$procedure}->{order_by};
+			$procedures{$procedure}->{order_by}:
+			jobusage($procedures{$procedure}->{order_by});
 		$procedure_code = sprintf("%s\ndrop procedure if exists $procedure
 ||
 create procedure $procedure (%s)

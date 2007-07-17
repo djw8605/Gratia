@@ -126,16 +126,16 @@ begin
 	call parse(userName,@name,@key,@vo);
 
 	set @sql :=
-           concat_ws('', 'select ProbeSummary.ProbeName, ProbeSummary.EndTime as endtime,
-                      sum(ProbeSummary.Njobs) as Njobs',
-                     ' from ProbeSummary',
+           concat_ws('', 'select JobUsageRecord_Report.ProbeName, JobUsageRecord_Report.EndTime as endtime,
+                      sum(JobUsageRecord_Report.Njobs) as Njobs',
+                     ' from JobUsageRecord_Report',
                      ' where',
                      ' EndTime >= date(''', fromdate, ''')'
                      ' and EndTime <= date(''', todate, ''')'
                      ' ', @myresourceclause,
                      ' ', @mywhereclause
-                     , ' group by date_format(ProbeSummary.EndTime,''', format, '''), ProbeSummary.ProbeName'
-                     , ' order by ProbeSummary.EndTime'
+                     , ' group by date_format(JobUsageRecord_Report.EndTime,''', format, '''), JobUsageRecord_Report.ProbeName'
+                     , ' order by JobUsageRecord_Report.EndTime'
                     );
 
     if ( @mywhereclause = '' or @mywhereclause is NULL ) and datediff(todate,fromdate) > 6 then
@@ -186,17 +186,17 @@ begin
 	call parse(userName,@name,@key,@vo);
 
 	set @sql :=
-           concat_ws('', 'select Site.SiteName as sitename, ProbeSummary.EndTime as endtime,
-                      sum(ProbeSummary.Njobs) as Njobs',
-                     ' from Site,Probe,ProbeSummary',
+           concat_ws('', 'select Site.SiteName as sitename, JobUsageRecord_Report.EndTime as endtime,
+                      sum(JobUsageRecord_Report.Njobs) as Njobs',
+                     ' from Site,Probe,JobUsageRecord_Report',
                      ' where',
-                     ' Probe.siteid = Site.siteid and ProbeSummary.ProbeName = Probe.probename and',
+                     ' Probe.siteid = Site.siteid and JobUsageRecord_Report.ProbeName = Probe.probename and',
                      ' EndTime >= date(''', fromdate, ''')'
                      ' and EndTime <= date(''', todate, ''')'
                      ' ', @myresourceclause,
                      ' ', @mywhereclause
-                     , ' group by date_format(ProbeSummary.EndTime,''', format, '''), Site.SiteName'
-                     , ' order by ProbeSummary.EndTime'
+                     , ' group by date_format(JobUsageRecord_Report.EndTime,''', format, '''), Site.SiteName'
+                     , ' order by JobUsageRecord_Report.EndTime'
                     );
 
     if ( @mywhereclause = '' or @mywhereclause is NULL ) and datediff(todate,fromdate) > 6 then
@@ -248,16 +248,16 @@ begin
 	call parse(userName,@name,@key,@vo);
 
 	set @sql :=
-           concat_ws('', 'select VOProbeSummary.VOName, VOProbeSummary.EndTime as endtime,
-                      sum(VOProbeSummary.Njobs) as Njobs',
-                     ' from VOProbeSummary',
+           concat_ws('', 'select JobUsageRecord_Report.VOName, JobUsageRecord_Report.EndTime as endtime,
+                      sum(JobUsageRecord_Report.Njobs) as Njobs',
+                     ' from JobUsageRecord_Report',
                      ' where',
                      ' EndTime >= date(''', fromdate, ''')'
                      ' and EndTime <= date(''', todate, ''')'
                      ' ', @myresourceclause,
                      ' ', @mywhereclause
-                     , ' group by date_format(VOProbeSummary.EndTime,''', format, '''), VOProbeSummary.VOName'
-                     , ' order by VOProbeSummary.EndTime'
+                     , ' group by date_format(JobUsageRecord_Report.EndTime,''', format, '''), JobUsageRecord_Report.VOName'
+                     , ' order by JobUsageRecord_Report.EndTime'
                     );
 
     if ( @mywhereclause = '' or @mywhereclause is NULL ) and datediff(todate,fromdate) > 6 then
@@ -308,16 +308,16 @@ begin
 	call parse(userName,@name,@key,@vo);
 
 	set @sql :=
-           concat_ws('', 'select ProbeSummary.ProbeName, ProbeSummary.EndTime as endtime,
-                      sum(ProbeSummary.WallDuration) as WallDuration',
-                     ' from ProbeSummary',
+           concat_ws('', 'select JobUsageRecord_Report.ProbeName, JobUsageRecord_Report.EndTime as endtime,
+                      sum(JobUsageRecord_Report.WallDuration) as WallDuration',
+                     ' from JobUsageRecord_Report',
                      ' where',
                      ' EndTime >= date(''', fromdate, ''')'
                      ' and EndTime <= date(''', todate, ''')'
                      ' ', @myresourceclause,
                      ' ', @mywhereclause
-                     , ' group by date_format(ProbeSummary.EndTime,''', format, '''), ProbeSummary.ProbeName'
-                     , ' order by ProbeSummary.EndTime'
+                     , ' group by date_format(JobUsageRecord_Report.EndTime,''', format, '''), JobUsageRecord_Report.ProbeName'
+                     , ' order by JobUsageRecord_Report.EndTime'
                     );
 
     if ( @mywhereclause = '' or @mywhereclause is NULL ) and datediff(todate,fromdate) > 6 then
@@ -368,17 +368,17 @@ begin
 	call parse(userName,@name,@key,@vo);
 
 	set @sql :=
-           concat_ws('', 'select Site.SiteName as sitename, ProbeSummary.EndTime as endtime,
-                      sum(ProbeSummary.WallDuration) as WallDuration',
-                     ' from Site,Probe,ProbeSummary',
+           concat_ws('', 'select Site.SiteName as sitename, JobUsageRecord_Report.EndTime as endtime,
+                      sum(JobUsageRecord_Report.WallDuration) as WallDuration',
+                     ' from Site,Probe,JobUsageRecord_Report',
                      ' where',
-                     ' Probe.siteid = Site.siteid and ProbeSummary.ProbeName = Probe.probename and',
+                     ' Probe.siteid = Site.siteid and JobUsageRecord_Report.ProbeName = Probe.probename and',
                      ' EndTime >= date(''', fromdate, ''')'
                      ' and EndTime <= date(''', todate, ''')'
                      ' ', @myresourceclause,
                      ' ', @mywhereclause
-                     , ' group by date_format(ProbeSummary.EndTime,''', format, '''),Site.SiteName'
-                     , ' order by ProbeSummary.EndTime'
+                     , ' group by date_format(JobUsageRecord_Report.EndTime,''', format, '''),Site.SiteName'
+                     , ' order by JobUsageRecord_Report.EndTime'
                     );
 
     if ( @mywhereclause = '' or @mywhereclause is NULL ) and datediff(todate,fromdate) > 6 then
@@ -430,19 +430,19 @@ begin
 	call parse(userName,@name,@key,@vo);
 
 	set @sql :=
-           concat_ws('', 'select date_format(VOProbeSummary.EndTime,''', format, ''') as endtime, Site.SiteName as sitename,
-                      sum(VOProbeSummary.WallDuration) as WallDuration,
-                      sum(VOProbeSummary.CpuUserDuration + VOProbeSummary.CpuSystemDuration) as Cpu,
-                      VOProbeSummary.VOName, sum(VOProbeSummary.Njobs) as Njobs',
-                     ' from Site,Probe,VOProbeSummary',
+           concat_ws('', 'select date_format(JobUsageRecord_Report.EndTime,''', format, ''') as endtime, Site.SiteName as sitename,
+                      sum(JobUsageRecord_Report.WallDuration) as WallDuration,
+                      sum(JobUsageRecord_Report.CpuUserDuration + JobUsageRecord_Report.CpuSystemDuration) as Cpu,
+                      JobUsageRecord_Report.VOName, sum(JobUsageRecord_Report.Njobs) as Njobs',
+                     ' from Site,Probe,JobUsageRecord_Report',
                      ' where',
-                     ' Probe.siteid = Site.siteid and VOProbeSummary.ProbeName = Probe.probename and',
+                     ' Probe.siteid = Site.siteid and JobUsageRecord_Report.ProbeName = Probe.probename and',
                      ' EndTime >= date(''', fromdate, ''')'
                      ' and EndTime <= date(''', todate, ''')'
                      ' ', @myresourceclause,
                      ' ', @mywhereclause
-                     , ' group by date_format(date_format(VOProbeSummary.EndTime,''', format, '''),''', format, '''), sitename, VOProbeSummary.VOName'
-                     , ' order by date_format(VOProbeSummary.EndTime,''', format, '''), sitename, VOProbeSummary.VOName'
+                     , ' group by date_format(date_format(JobUsageRecord_Report.EndTime,''', format, '''),''', format, '''), sitename, JobUsageRecord_Report.VOName'
+                     , ' order by date_format(JobUsageRecord_Report.EndTime,''', format, '''), sitename, JobUsageRecord_Report.VOName'
                     );
 
     if ( @mywhereclause = '' or @mywhereclause is NULL ) and datediff(todate,fromdate) > 6 then
@@ -496,17 +496,17 @@ begin
 	call parse(userName,@name,@key,@vo);
 
 	set @sql :=
-           concat_ws('', 'select VOProbeSummary.VOName, VOProbeSummary.EndTime as endtime,
-                      sum(VOProbeSummary.WallDuration) as WallDuration,
-                      sum(VOProbeSummary.CpuUserDuration + VOProbeSummary.CpuSystemDuration) as Cpu',
-                     ' from VOProbeSummary',
+           concat_ws('', 'select JobUsageRecord_Report.VOName, JobUsageRecord_Report.EndTime as endtime,
+                      sum(JobUsageRecord_Report.WallDuration) as WallDuration,
+                      sum(JobUsageRecord_Report.CpuUserDuration + JobUsageRecord_Report.CpuSystemDuration) as Cpu',
+                     ' from JobUsageRecord_Report',
                      ' where',
                      ' EndTime >= date(''', fromdate, ''')'
                      ' and EndTime <= date(''', todate, ''')'
                      ' ', @myresourceclause,
                      ' ', @mywhereclause
-                     , ' group by date_format(VOProbeSummary.EndTime,''', format, '''), VOProbeSummary.VOName'
-                     , ' order by VOProbeSummary.EndTime'
+                     , ' group by date_format(JobUsageRecord_Report.EndTime,''', format, '''), JobUsageRecord_Report.VOName'
+                     , ' order by JobUsageRecord_Report.EndTime'
                     );
 
     if ( @mywhereclause = '' or @mywhereclause is NULL ) and datediff(todate,fromdate) > 6 then
@@ -606,15 +606,15 @@ begin
 	call parse(userName,@name,@key,@vo);
 
 	set @sql :=
-           concat_ws('', 'select ProbeSummary.ProbeName, sum(ProbeSummary.Njobs) as Njobs',
-                     ' from ProbeSummary',
+           concat_ws('', 'select JobUsageRecord_Report.ProbeName, sum(JobUsageRecord_Report.Njobs) as Njobs',
+                     ' from JobUsageRecord_Report',
                      ' where',
                      ' EndTime >= date(''', fromdate, ''')'
                      ' and EndTime <= date(''', todate, ''')'
                      ' ', @myresourceclause,
                      ' ', @mywhereclause
-                     , ' group by ProbeSummary.ProbeName'
-                     , ' order by ProbeSummary.ProbeName'
+                     , ' group by JobUsageRecord_Report.ProbeName'
+                     , ' order by JobUsageRecord_Report.ProbeName'
                     );
 
     if ( @mywhereclause = '' or @mywhereclause is NULL ) and datediff(todate,fromdate) > 6 then
@@ -664,10 +664,10 @@ begin
 	call parse(userName,@name,@key,@vo);
 
 	set @sql :=
-           concat_ws('', 'select Site.SiteName as sitename, sum(ProbeSummary.Njobs) as Njobs',
-                     ' from Site,Probe,ProbeSummary',
+           concat_ws('', 'select Site.SiteName as sitename, sum(JobUsageRecord_Report.Njobs) as Njobs',
+                     ' from Site,Probe,JobUsageRecord_Report',
                      ' where',
-                     ' Probe.siteid = Site.siteid and ProbeSummary.ProbeName = Probe.probename and',
+                     ' Probe.siteid = Site.siteid and JobUsageRecord_Report.ProbeName = Probe.probename and',
                      ' EndTime >= date(''', fromdate, ''')'
                      ' and EndTime <= date(''', todate, ''')'
                      ' ', @myresourceclause,
@@ -724,17 +724,17 @@ begin
 	call parse(userName,@name,@key,@vo);
 
 	set @sql :=
-           concat_ws('', 'select Site.SiteName as sitename, sum(VOProbeSummary.Njobs) as Njobs,
-                      VOProbeSummary.VOName',
-                     ' from Site,Probe,VOProbeSummary',
+           concat_ws('', 'select Site.SiteName as sitename, sum(JobUsageRecord_Report.Njobs) as Njobs,
+                      JobUsageRecord_Report.VOName',
+                     ' from Site,Probe,JobUsageRecord_Report',
                      ' where',
-                     ' Probe.siteid = Site.siteid and VOProbeSummary.ProbeName = Probe.probename and',
+                     ' Probe.siteid = Site.siteid and JobUsageRecord_Report.ProbeName = Probe.probename and',
                      ' EndTime >= date(''', fromdate, ''')'
                      ' and EndTime <= date(''', todate, ''')'
                      ' ', @myresourceclause,
                      ' ', @mywhereclause
-                     , ' group by sitename, VOProbeSummary.VOName'
-                     , ' order by sitename, VOProbeSummary.VOName'
+                     , ' group by sitename, JobUsageRecord_Report.VOName'
+                     , ' order by sitename, JobUsageRecord_Report.VOName'
                     );
 
     if ( @mywhereclause = '' or @mywhereclause is NULL ) and datediff(todate,fromdate) > 6 then
@@ -786,15 +786,15 @@ begin
 	call parse(userName,@name,@key,@vo);
 
 	set @sql :=
-           concat_ws('', 'select VOProbeSummary.VOName, sum(VOProbeSummary.Njobs) as Njobs',
-                     ' from VOProbeSummary',
+           concat_ws('', 'select JobUsageRecord_Report.VOName, sum(JobUsageRecord_Report.Njobs) as Njobs',
+                     ' from JobUsageRecord_Report',
                      ' where',
                      ' EndTime >= date(''', fromdate, ''')'
                      ' and EndTime <= date(''', todate, ''')'
                      ' ', @myresourceclause,
                      ' ', @mywhereclause
-                     , ' group by VOProbeSummary.VOName'
-                     , ' order by VOProbeSummary.VOName'
+                     , ' group by JobUsageRecord_Report.VOName'
+                     , ' order by JobUsageRecord_Report.VOName'
                     );
 
     if ( @mywhereclause = '' or @mywhereclause is NULL ) and datediff(todate,fromdate) > 6 then
@@ -844,15 +844,15 @@ begin
 	call parse(userName,@name,@key,@vo);
 
 	set @sql :=
-           concat_ws('', 'select ProbeSummary.ProbeName, sum(ProbeSummary.WallDuration) as WallDuration',
-                     ' from ProbeSummary',
+           concat_ws('', 'select JobUsageRecord_Report.ProbeName, sum(JobUsageRecord_Report.WallDuration) as WallDuration',
+                     ' from JobUsageRecord_Report',
                      ' where',
                      ' EndTime >= date(''', fromdate, ''')'
                      ' and EndTime <= date(''', todate, ''')'
                      ' ', @myresourceclause,
                      ' ', @mywhereclause
-                     , ' group by ProbeSummary.ProbeName'
-                     , ' order by ProbeSummary.ProbeName'
+                     , ' group by JobUsageRecord_Report.ProbeName'
+                     , ' order by JobUsageRecord_Report.ProbeName'
                     );
 
     if ( @mywhereclause = '' or @mywhereclause is NULL ) and datediff(todate,fromdate) > 6 then
@@ -902,12 +902,12 @@ begin
 	call parse(userName,@name,@key,@vo);
 
 	set @sql :=
-           concat_ws('', 'select Site.SiteName as sitename, VOProbeSummary.EndTime as endtime,
-                      sum(VOProbeSummary.WallDuration) as WallDuration,
-                      sum(VOProbeSummary.CpuUserDuration + VOProbeSummary.CpuSystemDuration) as Cpu',
-                     ' from Site,Probe,VOProbeSummary',
+           concat_ws('', 'select Site.SiteName as sitename, JobUsageRecord_Report.EndTime as endtime,
+                      sum(JobUsageRecord_Report.WallDuration) as WallDuration,
+                      sum(JobUsageRecord_Report.CpuUserDuration + JobUsageRecord_Report.CpuSystemDuration) as Cpu',
+                     ' from Site,Probe,JobUsageRecord_Report',
                      ' where',
-                     ' Probe.siteid = Site.siteid and VOProbeSummary.ProbeName = Probe.probename and',
+                     ' Probe.siteid = Site.siteid and JobUsageRecord_Report.ProbeName = Probe.probename and',
                      ' EndTime >= date(''', fromdate, ''')'
                      ' and EndTime <= date(''', todate, ''')'
                      ' ', @myresourceclause,
@@ -966,18 +966,18 @@ begin
 	call parse(userName,@name,@key,@vo);
 
 	set @sql :=
-           concat_ws('', 'select Site.SiteName as sitename, sum(VOProbeSummary.WallDuration) as WallDuration,
-                      sum(VOProbeSummary.CpuUserDuration + VOProbeSummary.CpuSystemDuration) as Cpu,
-                      VOProbeSummary.VOName',
-                     ' from Site,Probe,VOProbeSummary',
+           concat_ws('', 'select Site.SiteName as sitename, sum(JobUsageRecord_Report.WallDuration) as WallDuration,
+                      sum(JobUsageRecord_Report.CpuUserDuration + JobUsageRecord_Report.CpuSystemDuration) as Cpu,
+                      JobUsageRecord_Report.VOName',
+                     ' from Site,Probe,JobUsageRecord_Report',
                      ' where',
-                     ' Probe.siteid = Site.siteid and VOProbeSummary.ProbeName = Probe.probename and',
+                     ' Probe.siteid = Site.siteid and JobUsageRecord_Report.ProbeName = Probe.probename and',
                      ' EndTime >= date(''', fromdate, ''')'
                      ' and EndTime <= date(''', todate, ''')'
                      ' ', @myresourceclause,
                      ' ', @mywhereclause
-                     , ' group by sitename, VOProbeSummary.VOName'
-                     , ' order by sitename, VOProbeSummary.VOName'
+                     , ' group by sitename, JobUsageRecord_Report.VOName'
+                     , ' order by sitename, JobUsageRecord_Report.VOName'
                     );
 
     if ( @mywhereclause = '' or @mywhereclause is NULL ) and datediff(todate,fromdate) > 6 then
@@ -1030,21 +1030,21 @@ begin
 	call parse(userName,@name,@key,@vo);
 
 	set @sql :=
-           concat_ws('', 'select Site.SiteName as sitename, sum(VOProbeSummary.WallDuration) as WallDuration,
-					  sum(VOProbeSummary.CpuUserDuration + VOProbeSummary.CpuSystemDuration) as Cpu,
-					  sum(VOProbeSummary.Njobs) as Njobs,
-					  VOProbeSummary.VOName',
-                     ' from Site,Probe,VOProbeSummary',
+           concat_ws('', 'select Site.SiteName as sitename, sum(JobUsageRecord_Report.WallDuration) as WallDuration,
+					  sum(JobUsageRecord_Report.CpuUserDuration + JobUsageRecord_Report.CpuSystemDuration) as Cpu,
+					  sum(JobUsageRecord_Report.Njobs) as Njobs,
+					  JobUsageRecord_Report.VOName',
+                     ' from Site,Probe,JobUsageRecord_Report',
                      ' where',
-                     ' Probe.siteid = Site.siteid and VOProbeSummary.ProbeName = Probe.probename 
-	 		 and (VOProbeSummary.VOName =''', forvoname, ''' or (''', forvo, ''' = ''AnyVO'' and VOProbeSummary.VOName like ''%'' ))
+                     ' Probe.siteid = Site.siteid and JobUsageRecord_Report.ProbeName = Probe.probename 
+	 		 and (JobUsageRecord_Report.VOName =''', forvoname, ''' or (''', forvo, ''' = ''AnyVO'' and JobUsageRecord_Report.VOName like ''%'' ))
 			 and (Site.SiteName =''', forsitename, ''' or (''', forsite, ''' = ''AnySite'' and Site.SiteName like ''%'' )) and',
                      ' EndTime >= date(''', fromdate, ''')'
                      ' and EndTime <= date(''', todate, ''')'
                      ' ', @myresourceclause,
                      ' ', @mywhereclause
-                     , ' group by sitename, VOProbeSummary.VOName'
-                     , ' order by sitename, VOProbeSummary.VOName'
+                     , ' group by sitename, JobUsageRecord_Report.VOName'
+                     , ' order by sitename, JobUsageRecord_Report.VOName'
                     );
 
     if ( @mywhereclause = '' or @mywhereclause is NULL ) and datediff(todate,fromdate) > 6 then
@@ -1100,22 +1100,22 @@ begin
 	call parse(userName,@name,@key,@vo);
 
 	set @sql :=
-           concat_ws('', 'select Site.SiteName as sitename, sum(VOProbeSummary.WallDuration) as WallDuration,
-					  sum(VOProbeSummary.CpuUserDuration + VOProbeSummary.CpuSystemDuration) as Cpu,
-					  sum(VOProbeSummary.Njobs) as Njobs,
-					  VOProbeSummary.VOName,
-					  VOProbeSummary.CommonName as UserName',
-                     ' from Site,Probe,VOProbeSummary',
+           concat_ws('', 'select Site.SiteName as sitename, sum(JobUsageRecord_Report.WallDuration) as WallDuration,
+					  sum(JobUsageRecord_Report.CpuUserDuration + JobUsageRecord_Report.CpuSystemDuration) as Cpu,
+					  sum(JobUsageRecord_Report.Njobs) as Njobs,
+					  JobUsageRecord_Report.VOName,
+					  JobUsageRecord_Report.CommonName as UserName',
+                     ' from Site,Probe,JobUsageRecord_Report',
                      ' where',
-                     ' Probe.siteid = Site.siteid and VOProbeSummary.ProbeName = Probe.probename
-	 					and (VOProbeSummary.VOName =''', forvoname, ''' or (''', forvo, ''' = ''AnyVO'' and VOProbeSummary.VOName like ''%'' ))
+                     ' Probe.siteid = Site.siteid and JobUsageRecord_Report.ProbeName = Probe.probename
+	 					and (JobUsageRecord_Report.VOName =''', forvoname, ''' or (''', forvo, ''' = ''AnyVO'' and JobUsageRecord_Report.VOName like ''%'' ))
 						and (Site.SiteName =''', forsitename, ''' or (''', forsite, ''' = ''AnySite'' and Site.SiteName like ''%'' )) and',
                      ' EndTime >= date(''', fromdate, ''')'
                      ' and EndTime <= date(''', todate, ''')'
                      ' ', @myresourceclause,
                      ' ', @mywhereclause
-                     , ' group by UserName, sitename, VOProbeSummary.VOName'
-                     , ' order by UserName, sitename, VOProbeSummary.VOName'
+                     , ' group by UserName, sitename, JobUsageRecord_Report.VOName'
+                     , ' order by UserName, sitename, JobUsageRecord_Report.VOName'
                     );
 
     if ( @mywhereclause = '' or @mywhereclause is NULL ) and datediff(todate,fromdate) > 6 then
@@ -1172,16 +1172,16 @@ begin
 	call parse(userName,@name,@key,@vo);
 
 	set @sql :=
-           concat_ws('', 'select VOProbeSummary.VOName, sum(VOProbeSummary.WallDuration) as WallDuration,
-                      sum(VOProbeSummary.CpuUserDuration + VOProbeSummary.CpuSystemDuration) as Cpu',
-                     ' from VOProbeSummary',
+           concat_ws('', 'select JobUsageRecord_Report.VOName, sum(JobUsageRecord_Report.WallDuration) as WallDuration,
+                      sum(JobUsageRecord_Report.CpuUserDuration + JobUsageRecord_Report.CpuSystemDuration) as Cpu',
+                     ' from JobUsageRecord_Report',
                      ' where',
                      ' EndTime >= date(''', fromdate, ''')'
                      ' and EndTime <= date(''', todate, ''')'
                      ' ', @myresourceclause,
                      ' ', @mywhereclause
-                     , ' group by VOProbeSummary.VOName'
-                     , ' order by VOProbeSummary.VOName'
+                     , ' group by JobUsageRecord_Report.VOName'
+                     , ' order by JobUsageRecord_Report.VOName'
                     );
 
     if ( @mywhereclause = '' or @mywhereclause is NULL ) and datediff(todate,fromdate) > 6 then
@@ -1238,17 +1238,17 @@ begin
 	end if;
 
 	set @sql :=
-           concat_ws('', 'select VOProbeSummary.VOName, date_format(VOProbeSummary.EndTime, ''', format, ''') as endtime,
-                      sum(VOProbeSummary.Njobs) as Njobs',
-                     ' from VOProbeSummary',
+           concat_ws('', 'select JobUsageRecord_Report.VOName, date_format(JobUsageRecord_Report.EndTime, ''', format, ''') as endtime,
+                      sum(JobUsageRecord_Report.Njobs) as Njobs',
+                     ' from JobUsageRecord_Report',
                      ' where',
-                     ' VOProbeSummary.VOName ', voseltype, vos, ' and',
+                     ' JobUsageRecord_Report.VOName ', voseltype, vos, ' and',
                      ' EndTime >= date(''', fromdate, ''')'
                      ' and EndTime <= date(''', todate, ''')'
                      ' ', @myresourceclause,
                      ' ', @mywhereclause
-                     , ' group by date_format(VOProbeSummary.EndTime,''', format, '''), VOProbeSummary.VOName'
-                     , ' order by VOProbeSummary.EndTime'
+                     , ' group by date_format(JobUsageRecord_Report.EndTime,''', format, '''), JobUsageRecord_Report.VOName'
+                     , ' order by JobUsageRecord_Report.EndTime'
                     );
 
     if ( @mywhereclause = '' or @mywhereclause is NULL ) and datediff(todate,fromdate) > 6 then
@@ -1306,19 +1306,19 @@ begin
 	end if;
 
 	set @sql :=
-           concat_ws('', 'select VOProbeSummary.VOName, date_format(VOProbeSummary.EndTime, ''', format, ''') as endtime,
-                      sum(VOProbeSummary.WallDuration) as WallDuration,
-                      sum(VOProbeSummary.CpuUserDuration + VOProbeSummary.CpuSystemDuration) as Cpu,
-                      sum(VOProbeSummary.Njobs) as Njobs',
-                     ' from VOProbeSummary',
+           concat_ws('', 'select JobUsageRecord_Report.VOName, date_format(JobUsageRecord_Report.EndTime, ''', format, ''') as endtime,
+                      sum(JobUsageRecord_Report.WallDuration) as WallDuration,
+                      sum(JobUsageRecord_Report.CpuUserDuration + JobUsageRecord_Report.CpuSystemDuration) as Cpu,
+                      sum(JobUsageRecord_Report.Njobs) as Njobs',
+                     ' from JobUsageRecord_Report',
                      ' where',
-                     ' VOProbeSummary.VOName ', voseltype, vos, ' and',
+                     ' JobUsageRecord_Report.VOName ', voseltype, vos, ' and',
                      ' EndTime >= date(''', fromdate, ''')'
                      ' and EndTime <= date(''', todate, ''')'
                      ' ', @myresourceclause,
                      ' ', @mywhereclause
-                     , ' group by date_format(VOProbeSummary.EndTime,''', format, '''), VOProbeSummary.VOName'
-                     , ' order by VOProbeSummary.EndTime'
+                     , ' group by date_format(JobUsageRecord_Report.EndTime,''', format, '''), JobUsageRecord_Report.VOName'
+                     , ' order by JobUsageRecord_Report.EndTime'
                     );
 
     if ( @mywhereclause = '' or @mywhereclause is NULL ) and datediff(todate,fromdate) > 6 then
@@ -1372,30 +1372,30 @@ begin
 	call parse(userName,@name,@key,@vo);
 
 	set @sql :=
-           concat_ws('', 'select final_rank, VOProbeSummary.VOName,
-                      date_format(VOProbeSummary.EndTime,''', format, ''') as datevalue,
-                      sum(VOProbeSummary.WallDuration) as WallDuration,
-                      sum(VOProbeSummary.CpuUserDuration + VOProbeSummary.CpuSystemDuration) as Cpu,
-                      sum(VOProbeSummary.Njobs) as Njobs',
+           concat_ws('', 'select final_rank, JobUsageRecord_Report.VOName,
+                      date_format(JobUsageRecord_Report.EndTime,''', format, ''') as datevalue,
+                      sum(JobUsageRecord_Report.WallDuration) as WallDuration,
+                      sum(JobUsageRecord_Report.CpuUserDuration + JobUsageRecord_Report.CpuSystemDuration) as Cpu,
+                      sum(JobUsageRecord_Report.Njobs) as Njobs',
                      ' from (SELECT @rank:=@rank+1 as final_rank, VONamex,
                     walldurationx
                     FROM (SELECT @rank:=0 as rank,
                           V.VOName as VONamex,
                           V.EndTime as endtimex,
                           sum(V.WallDuration) as walldurationx
-                          FROM VOProbeSummary V
+                          FROM JobUsageRecord_Report V
                           WHERE V.EndTime >= Date(''', fromdate, ''')
                             and V.EndTime <= Date(''', todate, ''')
                           GROUP BY VONamex
-                          ORDER BY walldurationx desc) as foox) as foo, VOProbeSummary',
+                          ORDER BY walldurationx desc) as foox) as foo, JobUsageRecord_Report',
                      ' where',
-                     ' VOProbeSummary.VOName = VONamex and',
+                     ' JobUsageRecord_Report.VOName = VONamex and',
                      ' EndTime >= date(''', fromdate, ''')'
                      ' and EndTime <= date(''', todate, ''')'
                      ' ', @myresourceclause,
                      ' ', @mywhereclause
-                     , ' group by datevalue, VOProbeSummary.VOName'
-                     , ' order by final_rank, VOProbeSummary.VOName,datevalue'
+                     , ' group by datevalue, JobUsageRecord_Report.VOName'
+                     , ' order by final_rank, JobUsageRecord_Report.VOName,datevalue'
                     );
 
     if ( @mywhereclause = '' or @mywhereclause is NULL ) and datediff(todate,fromdate) > 6 then
