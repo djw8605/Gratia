@@ -11,10 +11,10 @@ import java.io.File;
 public class DatabaseMaintenance {
     static final String dq = "\"";
     static final String comma = ",";
-    static final int gratiaDatabaseVersion = 17;
+    static final int gratiaDatabaseVersion = 18;
     static final int latestDBVersionRequiringStoredProcedureLoad = gratiaDatabaseVersion;
-    static final int latestDBVersionRequiringSummaryTableLoad = 15;
-    static final int latestDBVersionRequiringSummaryTriggerLoad = 17;
+    static final int latestDBVersionRequiringSummaryTableLoad = 18;
+    static final int latestDBVersionRequiringSummaryTriggerLoad = 18;
 
     java.sql.Connection connection;
     int liveVersion = 0;
@@ -433,7 +433,7 @@ public class DatabaseMaintenance {
         // Next check trigger
         ver = readIntegerDBProperty("gratia.database.summaryTriggerVersion");
         if (ver < latestDBVersionRequiringSummaryTableLoad) {
-            int result = CallPostInstall("stored");
+            int result = CallPostInstall("trigger");
             if (result > -1) {
                 UpdateDbProperty("gratia.database.summaryTriggerVersion", gratiaDatabaseVersion);
                 Logging.log("Summary trigger updated successfully");
@@ -446,7 +446,7 @@ public class DatabaseMaintenance {
         // Finally, check stored procedures
         ver = readIntegerDBProperty("gratia.database.storedProcedureVersion");
         if (ver < latestDBVersionRequiringSummaryTableLoad) {
-            int result = CallPostInstall("summary");
+            int result = CallPostInstall("stored");
             if (result > -1) {
                 UpdateDbProperty("gratia.database.storedProcedureVersion", gratiaDatabaseVersion);
                 Logging.log("Stored procedures updated successfully");
@@ -708,6 +708,12 @@ public class DatabaseMaintenance {
                     Logging.log("Gratia database FAILED to upgrade from " + current +
                                 " to " + (current + 1));
                 }
+            }
+            if (current == 17) {
+                // Auxiliary DB item upgrades only.
+                Logging.log("Gratia database upgraded from " + current + " to " + (current + 1));
+                current = current + 1;
+                UpdateDbVersion(current);
             }
 
             return ((current == gratiaDatabaseVersion) && checkAndUpgradeDbAuxiliaryItems());
