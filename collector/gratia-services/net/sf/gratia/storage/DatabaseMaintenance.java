@@ -251,7 +251,7 @@ public class DatabaseMaintenance {
             while (resultSet.next()) {
                 String column = resultSet.getString(1);
                 if (column.endsWith("Description") &&
-                    (! column.equals("HostDescription"))) {
+                    ! ((column.startsWith("Host")) || (column.startsWith("Status")))) {
                     continue; // Skip these columns
                 } else if (column.equals("SiteName")) {
                     column = "Site.SiteName";
