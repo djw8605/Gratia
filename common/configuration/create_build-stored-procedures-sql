@@ -60,18 +60,22 @@ my %procedures =
  },
  DailyUsageBySite =>
  { select_columns => 'Site.SiteName as sitename,
-                      ProbeSummary.EndTime as endtime,
-                      sum(ProbeSummary.WallDuration) as WallDuration',
-	 from_tables => 'Site,Probe,ProbeSummary',
+                      VOProbeSummary.EndTime as endtime,
+                      sum(VOProbeSummary.WallDuration) as WallDuration,
+					  sum(VOProbeSummary.CpuUserDuration + VOProbeSummary.CpuSystemDuration) as Cpu,
+					  sum(VOProbeSummary.Njobs) as Njobs',
+	 from_tables => 'Site,Probe,VOProbeSummary',
 	 main_where => 'Probe.siteid = Site.siteid
-              and ProbeSummary.ProbeName = Probe.probename',
-	 group_by => 'ProbeSummary.EndTime,Site.SiteName',
-	 order_by => 'ProbeSummary.EndTime'
+              and VOProbeSummary.ProbeName = Probe.probename',
+	 group_by => 'VOProbeSummary.EndTime,Site.SiteName',
+	 order_by => 'VOProbeSummary.EndTime'
  },
  DailyUsageByProbe =>
  { select_columns => 'ProbeSummary.ProbeName,
                       ProbeSummary.EndTime as endtime,
-                      sum(ProbeSummary.WallDuration) as WallDuration',
+                      sum(ProbeSummary.WallDuration) as WallDuration,
+					  sum(ProbeSummary.CpuUserDuration + ProbeSummary.CpuSystemDuration) as Cpu,
+					  sum(ProbeSummary.Njobs) as Njobs',
 	 from_tables => 'ProbeSummary',
 	 main_where => '',
 	 group_by => 'ProbeSummary.EndTime,
@@ -99,7 +103,8 @@ my %procedures =
  { select_columns => 'Site.SiteName as sitename,
                       VOProbeSummary.EndTime as endtime,
                       sum(VOProbeSummary.WallDuration) as WallDuration,
-                      sum(VOProbeSummary.CpuUserDuration + VOProbeSummary.CpuSystemDuration) as Cpu',
+					  sum(VOProbeSummary.CpuUserDuration + VOProbeSummary.CpuSystemDuration) as Cpu,
+					  sum(VOProbeSummary.Njobs) as Njobs',
 	 from_tables => 'Site,Probe,VOProbeSummary',
 	 main_where => 'Probe.siteid = Site.siteid
               and VOProbeSummary.ProbeName = Probe.probename',
@@ -108,7 +113,9 @@ my %procedures =
  },
  UsageByProbe =>
  { select_columns => 'ProbeSummary.ProbeName,
-                      sum(ProbeSummary.WallDuration) as WallDuration',
+                      sum(ProbeSummary.WallDuration) as WallDuration,
+					  sum(ProbeSummary.CpuUserDuration + ProbeSummary.CpuSystemDuration) as Cpu,
+					  sum(ProbeSummary.Njobs) as Njobs',
 	 from_tables => 'ProbeSummary',
 	 main_where => '',
 	 group_by => 'ProbeSummary.ProbeName',
@@ -118,7 +125,8 @@ my %procedures =
  { select_columns => 'VOProbeSummary.VOName,
                       VOProbeSummary.EndTime as endtime,
                       sum(VOProbeSummary.WallDuration) as WallDuration,
-                      sum(VOProbeSummary.CpuUserDuration + VOProbeSummary.CpuSystemDuration) as Cpu',
+					  sum(VOProbeSummary.CpuUserDuration + VOProbeSummary.CpuSystemDuration) as Cpu,
+					  sum(VOProbeSummary.Njobs) as Njobs,'
 	 from_tables => 'VOProbeSummary',
 	 main_where => '',
 	 group_by => 'VOProbeSummary.EndTime,
@@ -128,7 +136,8 @@ my %procedures =
  UsageByVO =>
  { select_columns => 'VOProbeSummary.VOName,
                       sum(VOProbeSummary.WallDuration) as WallDuration,
-                      sum(VOProbeSummary.CpuUserDuration + VOProbeSummary.CpuSystemDuration) as Cpu',
+					  sum(VOProbeSummary.CpuUserDuration + VOProbeSummary.CpuSystemDuration) as Cpu,
+					  sum(VOProbeSummary.Njobs) as Njobs,'
 	 from_tables => 'VOProbeSummary',
 	 main_where => '',
 	 group_by => 'VOProbeSummary.VOName',
@@ -214,7 +223,7 @@ my %procedures =
 					  VOProbeSummary.VOName',
 	 from_tables => 'Site,Probe,VOProbeSummary',
 	 main_where => 'Probe.siteid = Site.siteid 
-              and VOProbeSummary.ProbeName = Probe.probename 
+             and VOProbeSummary.ProbeName = Probe.probename 
 	 		 and (VOProbeSummary.VOName =\'\'\', forvoname, \'\'\' or (\'\'\', forvo, \'\'\' = \'\'AnyVO\'\' and VOProbeSummary.VOName like \'\'%\'\' ))
 			 and (Site.SiteName =\'\'\', forsitename, \'\'\' or (\'\'\', forsite, \'\'\' = \'\'AnySite\'\' and Site.SiteName like \'\'%\'\' ))',
 	 group_by => 'sitename, VOProbeSummary.VOName',
@@ -228,7 +237,9 @@ my %procedures =
                       VOProbeSummary.VOName, sum(VOProbeSummary.Njobs) as Njobs',
 	 from_tables => 'Site,Probe,VOProbeSummary',
 	 main_where => 'Probe.siteid = Site.siteid
-              and VOProbeSummary.ProbeName = Probe.probename',
+             and VOProbeSummary.ProbeName = Probe.probename
+             and (VOProbeSummary.VOName =\'\'\', forvoname, \'\'\' or (\'\'\', forvo, \'\'\' = \'\'AnyVO\'\' and VOProbeSummary.VOName like \'\'%\'\' ))
+			 and (Site.SiteName =\'\'\', forsitename, \'\'\' or (\'\'\', forsite, \'\'\' = \'\'AnySite\'\' and Site.SiteName like \'\'%\'\' ))',
 	 group_by => 'date_format(VOProbeSummary.EndTime,\'\'\', format, \'\'\'),
                 sitename, VOProbeSummary.VOName',
 	 order_by => 'date_format(VOProbeSummary.EndTime,\'\'\', format, \'\'\'),
