@@ -346,6 +346,13 @@ call UsageByUser(?,?,?,?,?,?,?,?,?,?)
         </simple-master-page>
     </page-setup>
     <body>
+        <text-data id="97">
+            <property name="style">san-style1</property>
+            <property name="fontSize">9pt</property>
+            <property name="textAlign">center</property>
+            <expression name="valueExpr">"Date range: "+ params["Start Date"] + " - " + params["End Date"]</expression>
+            <property name="contentType">html</property>
+        </text-data>
         <extended-item extensionName="Chart" id="88">
             <property name="style">san-style1</property>
             <property name="height">600px</property>
@@ -1475,13 +1482,6 @@ else {
 ]]></xml-property>
             <property name="outputFormat">SVG</property>
         </extended-item>
-        <text-data id="97">
-            <property name="style">san-style1</property>
-            <property name="fontSize">9pt</property>
-            <property name="textAlign">center</property>
-            <expression name="valueExpr">"Date range: "+ params["Start Date"] + " - " + params["End Date"]</expression>
-            <property name="contentType">html</property>
-        </text-data>
         <text-data id="107">
             <property name="style">san-style1</property>
             <property name="fontFamily">sans-serif</property>
