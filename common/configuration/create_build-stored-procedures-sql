@@ -207,6 +207,7 @@ my %procedures =
  { select_columns => 'Site.SiteName as sitename,
                       sum(VOProbeSummary.WallDuration) as WallDuration,
                       sum(VOProbeSummary.CpuUserDuration + VOProbeSummary.CpuSystemDuration) as Cpu,
+                      sum(VOProbeSummary.Njobs) as Njobs,
                       VOProbeSummary.VOName',
 	 from_tables => 'Site,Probe,VOProbeSummary',
 	 main_where => 'Probe.siteid = Site.siteid
