@@ -88,9 +88,10 @@ my %collector_configs =
 									db_schema => "gratia_osg_daily",
 									UserConfig => "UserConfig_osg_daily.xml",
 									PostInstallCmdPreamble => '[[ "$action" == *"stored"* ]] || continue',
-
 									"properties.attributes" =>
-									{ "monitor.listener.wait" => 1440
+                  { "monitor.listener.wait" => 1440,
+                    "gratia.database.wantSummaryTable" => 0,
+                    "gratia.database.wantSummaryTrigger" => 0
 									},
 									remote_host => "gratia-osg.fnal.gov"
 								},
@@ -158,7 +159,7 @@ my %collector_configs =
 								"monitor.listener.wait" => 240,
 								"monitor.to.address0" => 'penelope@fnal.gov'
 							 }
-							},
+							}
 	);
 
 my @required_attributes =

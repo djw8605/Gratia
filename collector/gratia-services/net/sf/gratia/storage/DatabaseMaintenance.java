@@ -299,17 +299,13 @@ public class DatabaseMaintenance {
         //
         Properties p = net.sf.gratia.services.Configuration.getProperties();
 
-        // String gratiaVersion = p.getProperty("gratia.version");
-        // Deprecated String gratiaDatabaseVersion = p.getProperty("gratia.database.version");
-        String useReportAuthentication = p.getProperty("use.report.authentication");
-
-        if (0 == Execute("update SystemProplist set cdr = " + dq
-                         + useReportAuthentication + dq + " where car = " + dq
-                         + "use.report.authentication" + dq)) {
-            Execute("insert into SystemProplist(car,cdr) values(" + dq
-                    + "use.report.authentication" + dq + comma + dq
-                    + useReportAuthentication + dq + ")");
-        }
+        UpdateDbProperty("use.report.authentication", p.getProperty("use.report.authentication"));
+        UpdateDbProperty("gratia.database.wantSummaryTable",
+                         p.getProperty("gratia.database.wantSummaryTable"));
+        UpdateDbProperty("gratia.database.wantSummaryTrigger",
+                         p.getProperty("gratia.database.wantSummaryTrigger"));
+        UpdateDbProperty("gratia.database.wantStoredProcedures",
+                         p.getProperty("gratia.database.wantStoredProcedures"));
     }
     
     public void AddViews() {
@@ -418,41 +414,48 @@ public class DatabaseMaintenance {
         }
 
         // First check summary tables
-        int ver = readIntegerDBProperty("gratia.database.summaryTableVersion");
-        if (ver < latestDBVersionRequiringSummaryTableLoad) {
-            int result = CallPostInstall("summary");
-            if (result > -1) {
-                UpdateDbProperty("gratia.database.summaryTableVersion", gratiaDatabaseVersion);
-                Logging.log("Summary tables updated successfully");
-            } else {
-                Logging.log("FAIL: summary tables NOT updated");
-                return false;
+        if (1 == readIntegerDBProperty("gratia.database.wantSummaryTable")) {
+            int ver = readIntegerDBProperty("gratia.database.summaryTableVersion");
+            if (ver < latestDBVersionRequiringSummaryTableLoad) {
+                int result = CallPostInstall("summary");
+                if (result > -1) {
+                    UpdateDbProperty("gratia.database.summaryTableVersion", gratiaDatabaseVersion);
+                    Logging.log("Summary tables updated successfully");
+                } else {
+                    Logging.log("FAIL: summary tables NOT updated");
+                    return false;
+                }
             }
         }
 
         // Next check trigger
-        ver = readIntegerDBProperty("gratia.database.summaryTriggerVersion");
-        if (ver < latestDBVersionRequiringSummaryTableLoad) {
-            int result = CallPostInstall("trigger");
-            if (result > -1) {
-                UpdateDbProperty("gratia.database.summaryTriggerVersion", gratiaDatabaseVersion);
-                Logging.log("Summary trigger updated successfully");
-            } else {
-                Logging.log("FAIL: summary trigger NOT updated");
-                return false;
+        if (1 == readIntegerDBProperty("gratia.database.wantSummaryTrigger")) {
+            int ver = readIntegerDBProperty("gratia.database.summaryTriggerVersion");
+            if (ver < latestDBVersionRequiringSummaryTableLoad) {
+                int result = CallPostInstall("trigger");
+                if (result > -1) {
+                    UpdateDbProperty("gratia.database.summaryTriggerVersion", gratiaDatabaseVersion);
+                    Logging.log("Summary trigger updated successfully");
+                } else {
+                    Logging.log("FAIL: summary trigger NOT updated");
+                    return false;
+                }
             }
         }
 
         // Finally, check stored procedures
-        ver = readIntegerDBProperty("gratia.database.storedProcedureVersion");
-        if (ver < latestDBVersionRequiringSummaryTableLoad) {
-            int result = CallPostInstall("stored");
-            if (result > -1) {
-                UpdateDbProperty("gratia.database.storedProcedureVersion", gratiaDatabaseVersion);
-                Logging.log("Stored procedures updated successfully");
-            } else {
-                Logging.log("FAIL: stored procedures NOT updated");
-                return false;
+        if (1 == readIntegerDBProperty("gratia.database.wantStoredProcedures")) {
+            int ver = readIntegerDBProperty("gratia.database.storedProcedureVersion");
+            if (ver < latestDBVersionRequiringSummaryTableLoad) {
+                int result = CallPostInstall("stored");
+                if (result > -1) {
+                    UpdateDbProperty("gratia.database.storedProcedureVersion",
+                                     gratiaDatabaseVersion);
+                    Logging.log("Stored procedures updated successfully");
+                } else {
+                    Logging.log("FAIL: stored procedures NOT updated");
+                    return false;
+                }
             }
         }
 
@@ -675,6 +678,10 @@ public class DatabaseMaintenance {
                                 " to " + (current + 1));
                 }
             }
+            boolean haveProbeSummaryTable =
+                (1 == getCount("select count(*) from information_schema.tables where " +
+                               "table_schema = Database() and table_name = " +
+                               dq + "ProbeSummary" + dq));
             if (current == 15) {
                 int result = Execute("update JobUsageRecord_Meta set ReportedSiteName = SiteName where SiteName is not null");
                 if (result > -1) {
@@ -686,7 +693,7 @@ public class DatabaseMaintenance {
                 if (result > -1) {
                     result = Execute("alter table JobUsageRecord_Meta drop column SiteNameDescription");
                 }
-                if (result > -1) {
+                if (result > -1 && haveProbeSummaryTable) {
                     result = Execute("alter table ProbeSummary change column SiteName ReportedSiteName varchar(255)");
                 }
                 if (result > -1) {
@@ -699,7 +706,10 @@ public class DatabaseMaintenance {
                 }
             }
             if (current == 16) {
-                int result = Execute("alter table ProbeSummary drop column ReportedSiteName");
+                int result = 0;
+                if (haveProbeSummaryTable) {
+                    result = Execute("alter table ProbeSummary drop column ReportedSiteName");
+                }
                 if (result > -1) {
                     Logging.log("Gratia database upgraded from " + current + " to " + (current + 1));
                     current = current + 1;
