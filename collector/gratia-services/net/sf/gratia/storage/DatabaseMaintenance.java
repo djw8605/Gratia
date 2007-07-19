@@ -688,13 +688,7 @@ public class DatabaseMaintenance {
                     result = Execute("update JobUsageRecord_Meta set ReportedSiteNameDescription = SiteNameDescription where SiteNameDescription is not null");
                 }
                 if (result > -1) {
-                    result = Execute("alter table JobUsageRecord_Meta drop column SiteName");
-                }
-                if (result > -1) {
-                    result = Execute("alter table JobUsageRecord_Meta drop column SiteNameDescription");
-                }
-                if (result > -1 && haveProbeSummaryTable) {
-                    result = Execute("alter table ProbeSummary change column SiteName ReportedSiteName varchar(255)");
+                    result = Execute("alter table JobUsageRecord_Meta drop column SiteName, drop column SiteNameDescription");
                 }
                 if (result > -1) {
                     Logging.log("Gratia database upgraded from " + current + " to " + (current + 1));
@@ -707,8 +701,42 @@ public class DatabaseMaintenance {
             }
             if (current == 16) {
                 int result = 0;
-                if (haveProbeSummaryTable) {
-                    result = Execute("alter table ProbeSummary drop column ReportedSiteName");
+                if (haveProbeSummaryTable &&
+                    (1 == readIntegerDBProperty("gratia.database.wantSummaryTable")) &&
+                    ! (readIntegerDBProperty("gratia.database.summaryTableVersion") <
+                       latestDBVersionRequiringSummaryTableLoad)) {
+                    // Only if we have summary tables but we're not
+                    // going to upgrade them.
+                    try {
+                        // For a short time, DB conversion 15 -> 16 was
+                        // changing the name of a column in ProbeSummary
+                        // from SiteName to ReportedSiteName; since in
+                        // version 17 we decided to drop it, we take the
+                        // name change out of the v16 upgrade and delete
+                        // whichever column we find.
+                        Statement statement;
+                        ResultSet resultSet;
+                        statement = connection.createStatement();
+                        String query = "select COLUMN_NAME from " +
+                            "information_schema.COLUMNS where TABLE_SCHEMA = Database()" +
+                            " and TABLE_NAME = " +
+                            dq + "ProbeSummary" + dq + " and COLUMN_NAME like " +
+                            dq + "%SiteName" + dq;
+                        resultSet = statement.executeQuery(query);
+                        String cmd = "alter table ProbeSummary";
+                        int nresults = 0;
+                        while (resultSet.next()) {
+                            if (nresults > 0) {
+                                cmd += ",";
+                            }
+                            cmd += " drop column " + resultSet.getString(1);
+                            ++nresults;
+                        }
+                        result = Execute(cmd);
+                    }
+                    catch (Exception e) {
+                        result = -1;
+                    }
                 }
                 if (result > -1) {
                     Logging.log("Gratia database upgraded from " + current + " to " + (current + 1));
