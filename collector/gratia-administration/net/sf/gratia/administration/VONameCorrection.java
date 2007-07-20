@@ -5,6 +5,8 @@ import net.sf.gratia.services.*;
 import java.io.*;
 import java.net.*;
 
+import java.util.TreeSet;
+import java.util.Iterator;
 import java.util.StringTokenizer;
 import java.util.Properties;
 import java.util.Hashtable;
@@ -238,19 +240,20 @@ public class VONameCorrection extends HttpServlet
             String option = m.group();
             StringBuffer buffer = new StringBuffer();
 
-            for (Enumeration x = vobyname.keys(); x.hasMoreElements();)
-                  {
-                        String newoption = new String(option);
-                        String name = (String) x.nextElement();
-                        newoption = xp.replaceAll(newoption,"#actualname#",name);
-                        if (name.equals(current))
-                              {
-                                    newoption = xp.replace(newoption,"#selected#","selected=" + dq + "selected" + dq);
-                                    table.put("actualname:" + index,current);
-                              }
-                        else
-                              newoption = xp.replace(newoption,"#selected#","");
-                        buffer.append(newoption);
+            TreeSet names = new TreeSet(vobyname.keySet());
+            for (Iterator x = names.iterator(); x.hasNext();)
+                {
+                      String newoption = new String(option);
+                      String name = (String) x.next();
+                      newoption = xp.replaceAll(newoption,"#actualname#",name);
+                      if (name.equals(current))
+                          {
+                              newoption = xp.replace(newoption,"#selected#","selected=" + dq + "selected" + dq);
+                              table.put("actualname:" + index,current);
+                          }
+                      else
+                          newoption = xp.replace(newoption,"#selected#","");
+                      buffer.append(newoption);
                   }
 
             String temp = xp.replace(row,option,buffer.toString());
