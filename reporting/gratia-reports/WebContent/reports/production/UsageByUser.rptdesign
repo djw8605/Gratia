@@ -800,8 +800,28 @@ function beforeGeneration( chart, context ){
  * @param context
  *            IChartScriptContext
  */
-//function beforeDrawDataPointLabel( dph, label, context ){}
+function beforeDrawDataPointLabel(dph, label, icsc)
+{ 
+/** 
+	* Color change based on value
+	*
+val = dph.getOrthogonalValue( ); 
+clr = label.getCaption( ).getColor( );
+if ( val &lt; -10 ) clr.set( 32, 268, 255 ); 
+else if ( ( val >= -10 ) &amp; ( val &lt;=10 ) ) clr.set( 168, 0, 208 ); 
+else if ( val > 10 ) clr.set( 0, 0, 200 );
+*/
 
+rep = icsc.getExternalContext().getScriptable();
+val1 = rep.getParameterValue(&quot;Display Metric&quot;);
+if(val1 == 'jobcount')
+	{
+	labval = label.getCaption().getValue(); 
+	dotpos = labval.indexOf(&quot;.&quot;); 
+	frmt = label.getCaption().getValue().substring(0,dotpos);
+	label.getCaption().setValue(frmt);
+	};
+}
 /**
  * Called before rendering curve fitting.
  * 
