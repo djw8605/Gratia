@@ -75,7 +75,7 @@
         </structure>
         <structure>
             <property name="name">Display Metric</property>
-            <property name="value">process</property>
+            <property name="value">jobcount</property>
         </structure>
     </list-property>
     <parameters>
@@ -295,11 +295,6 @@
             <property name="queryText">
 		call UsageByVO(?,?,?,?,'','Batch')
 	</property>
-        </oda-data-set>
-        <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="CPUMetricTypes" id="102">
-            <property name="dataSource">fermigrid1</property>
-            <property name="queryText">select CPUMetricTypes.CPUMetricType
-from CPUMetricTypes</property>
         </oda-data-set>
     </data-sets>
     <styles>
@@ -999,16 +994,27 @@ function beforeDrawAxisTitle( axis, label, context )
           </Label>
           <DataDefinition>
             <Definition>if (params[&quot;Display Metric&quot;] == &quot;wallclock&quot;) {
+
  row[&quot;WallDuration&quot;] / 3600
+
 }
+
 else if (params[&quot;Display Metric&quot;]==&quot;process&quot;) {
+
 row[&quot;Cpu&quot;]/3600
+
 }
+
 else if (params[&quot;Display Metric&quot;]==&quot;jobcount&quot;){
+
 row[&quot;Njobs&quot;]
+
 }
+
 else {
+
 &quot;***Unknown metric***&quot;
+
 }</Definition>
           </DataDefinition>
           <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
@@ -1032,45 +1038,85 @@ else {
               <Type>URL_Redirect</Type>
               <Value xsi:type="attribute:URLValue">
                 <BaseUrl>&lt;structure name=&quot;action&quot;>
+
     &lt;property name=&quot;formatType&quot;>html&lt;/property>
+
     &lt;property name=&quot;linkType&quot;>drill-through&lt;/property>
+
     &lt;property name=&quot;reportName&quot;>UsageBySiteForVO.rptdesign&lt;/property>
+
     &lt;property name=&quot;targetWindow&quot;>_self&lt;/property>
+
     &lt;list-property name=&quot;paramBindings&quot;>
+
         &lt;structure>
+
             &lt;property name=&quot;paramName&quot;>DatabaseURL&lt;/property>
+
             &lt;expression name=&quot;expression&quot;>params[&quot;DatabaseURL&quot;]&lt;/expression>
+
         &lt;/structure>
+
         &lt;structure>
+
             &lt;property name=&quot;paramName&quot;>DatabaseUser&lt;/property>
+
             &lt;expression name=&quot;expression&quot;>params[&quot;DatabaseUser&quot;]&lt;/expression>
+
         &lt;/structure>
+
         &lt;structure>
+
             &lt;property name=&quot;paramName&quot;>DatabasePassword&lt;/property>
+
             &lt;expression name=&quot;expression&quot;>params[&quot;DatabasePassword&quot;]&lt;/expression>
+
         &lt;/structure>
+
         &lt;structure>
+
             &lt;property name=&quot;paramName&quot;>Start Date&lt;/property>
+
             &lt;expression name=&quot;expression&quot;>params[&quot;Start Date&quot;]&lt;/expression>
+
         &lt;/structure>
+
         &lt;structure>
+
             &lt;property name=&quot;paramName&quot;>End Date&lt;/property>
+
             &lt;expression name=&quot;expression&quot;>params[&quot;End Date&quot;]&lt;/expression>
+
         &lt;/structure>
+
         &lt;structure>
+
             &lt;property name=&quot;paramName&quot;>Display Metric&lt;/property>
+
             &lt;expression name=&quot;expression&quot;>params[&quot;Display Metric&quot;]&lt;/expression>
+
         &lt;/structure>
+
         &lt;structure>
+
             &lt;property name=&quot;paramName&quot;>ForSite&lt;/property>
+
             &lt;expression name=&quot;expression&quot;>'AnySite'&lt;/expression>
+
         &lt;/structure>
+
         &lt;structure>
+
             &lt;property name=&quot;paramName&quot;>ForVO&lt;/property>
+
             &lt;expression name=&quot;expression&quot;>'ForVO'&lt;/expression>
+
         &lt;/structure>
+
     &lt;/list-property>
+
 &lt;/structure>
+
 </BaseUrl>
                 <BaseParameterName>ForVOName</BaseParameterName>
                 <ValueParameterName></ValueParameterName>
