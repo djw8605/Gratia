@@ -44,6 +44,7 @@ tarowner=
 classpath=.\;${services}\;${servlets}\;${soap}\;${administration}\;${reportsrc}/src;${security}:${util}
 endif
 
+all: gratia
 
 clean:
 	find ${base}/ -name "*class" -exec rm -f {} \;
@@ -55,7 +56,15 @@ clean:
 
 # services will eventually need the util package
 
-services: ${target}/gratia-services.war
+services: ${configuration}/build-stored-procedures.sql \
+${configuration}/build-stored-procedures_debug.sql \
+${target}/gratia-services.war
+
+${configuration}/build-stored-procedures_debug.sql : ${configuration}/create_build-stored-procedures-sql
+	$(<) -dt > $(@)
+
+${configuration}/build-stored-procedures.sql : ${configuration}/create_build-stored-procedures-sql
+	$(<) -d > $(@)
 
 ${target}/gratia-services.war:  ${services}/net/sf/gratia/services/*.java  ${services}/net/sf/gratia/storage/*.java ${services}/net/sf/gratia/services/web.xml
 	rm -f -r war
