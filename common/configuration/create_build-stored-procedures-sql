@@ -253,6 +253,7 @@ my %procedures =
    order_by => 'sitename, VOProbeSummary.VOName'
  },
  DailyUsageBySiteByVO =>
+ 	{ extra_procedure_arguments => [ 'forvo varchar(64)', 'forvoname varchar(64)', 'forsite varchar(64)', 'forsitename varchar(64)' ],
  { select_columns => 'date_format(VOProbeSummary.EndTime,\'\'\', format, \'\'\') as endtime,
                       Site.SiteName as sitename,
                       sum(VOProbeSummary.WallDuration) as WallDuration,
