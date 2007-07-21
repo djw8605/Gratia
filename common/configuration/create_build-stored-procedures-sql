@@ -253,14 +253,17 @@ my %procedures =
    order_by => 'sitename, VOProbeSummary.VOName'
  },
  DailyUsageBySiteByVO =>
- 	{ extra_procedure_arguments => [ 'forvo varchar(64)', 'forvoname varchar(64)', 'forsite varchar(64)', 'forsitename varchar(64)' ],
- { select_columns => 'date_format(VOProbeSummary.EndTime,\'\'\', format, \'\'\') as endtime,
+ 	{ extra_procedure_arguments => [ 'forvo varchar(64)',
+                                   'forvoname varchar(64)',
+                                   'forsite varchar(64)',
+                                   'forsitename varchar(64)' ],
+    select_columns => 'date_format(VOProbeSummary.EndTime,\'\'\', format, \'\'\') as endtime,
                       Site.SiteName as sitename,
                       sum(VOProbeSummary.WallDuration) as WallDuration,
                       sum(VOProbeSummary.CpuUserDuration + VOProbeSummary.CpuSystemDuration) as Cpu,
                       VOProbeSummary.VOName, sum(VOProbeSummary.Njobs) as Njobs',
-   from_tables => 'Site,Probe,VOProbeSummary',
-   main_where => 'Probe.siteid = Site.siteid
+    from_tables => 'Site,Probe,VOProbeSummary',
+    main_where => 'Probe.siteid = Site.siteid
              and VOProbeSummary.ProbeName = Probe.probename
              and (VOProbeSummary.VOName =\'\'\', forvoname, \'\'\' or
                   (\'\'\', forvo, \'\'\' = \'\'AnyVO\'\' and
@@ -268,11 +271,11 @@ my %procedures =
              and (Site.SiteName =\'\'\', forsitename, \'\'\' or
                   (\'\'\', forsite, \'\'\' = \'\'AnySite\'\' and
                    Site.SiteName like \'\'%\'\' ))',
-   group_by => 'date_format(VOProbeSummary.EndTime,\'\'\', format, \'\'\'),
+    group_by => 'date_format(VOProbeSummary.EndTime,\'\'\', format, \'\'\'),
                 sitename, VOProbeSummary.VOName',
-   order_by => 'date_format(VOProbeSummary.EndTime,\'\'\', format, \'\'\'),
+    order_by => 'date_format(VOProbeSummary.EndTime,\'\'\', format, \'\'\'),
                 sitename, VOProbeSummary.VOName'
- },
+  },
  WeeklyUsageByVORanked =>
  { select_columns => 'final_rank,
                       VOProbeSummary.VOName,
