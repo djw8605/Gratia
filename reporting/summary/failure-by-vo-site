@@ -16,57 +16,48 @@ For Condor the value used is taken from 'ExitCode' and NOT from 'Exit Status'
 EOF
 
 cat > "$TMP/failure.sql" <<EOF
-(select LCASE(J.VOName) as LVOName,
-  T.SiteName as LSiteName,
-  sum(Njobs) as 'FailedJobs',
+(select J.VOName as LVOName,
+  J.SiteName as LSiteName,
+  sum(J.Njobs) as 'FailedJobs',
   X.TotalJobs,
-  FORMAT(100.0 * sum(NJobs) / X.TotalJobs, 1) as pcFailed
- from JobUsageRecord J, Site T, Probe P,
-  (select LCASE(XJ.VOName) as XVOName,
-     XT.SiteName as XSiteName,
-     sum(Njobs) as 'TotalJobs'
-   from JobUsageRecord XJ, Site XT, Probe XP
+  FORMAT(100.0 * sum(J.NJobs) / X.TotalJobs, 1) as pcFailed
+ from JobUsageRecord_Report J,
+  (select XJ.VOName as XVOName,
+     XJ.SiteName as XSiteName,
+     sum(XJ.Njobs) as 'TotalJobs'
+   from JobUsageRecord_Report XJ
    where
-     EndTime >= CURDATE() - INTERVAL 1 DAY and
-     EndTime < CURDATE() and
-     XP.probename = XJ.ProbeName and
-     XT.siteid = XP.siteid
+     XJ.EndTime >= CURDATE() - INTERVAL 1 DAY and
+     XJ.EndTime < CURDATE()
    group by XVOName, XSiteName) X
  where
-   EndTime >= CURDATE() - INTERVAL 1 DAY and
-   EndTime < CURDATE() and
+   J.EndTime >= CURDATE() - INTERVAL 1 DAY and
+   J.EndTime < CURDATE() and
 	 J.StatusDescription != "Condor Exit Status" and
    J.Status != 0 and
-   P.probename = J.ProbeName and
-   T.siteid = P.siteid and
-   T.SiteName = XSiteName and
-   LCASE(J.VOName) = XVOName
+   J.SiteName = X.XSiteName and
+   J.VOName = X.XVOName
  group by LVOName, LSiteName)
 UNION ALL
-(select LCASE(J.VOName) as LVOName,
-  T.SiteName as LSiteName,
-  sum(Njobs) as 'FailedJobs',
+(select J.VOName as LVOName,
+  J.SiteName as LSiteName,
+  sum(J.Njobs) as 'FailedJobs',
   X.TotalJobs,
-  FORMAT(100.0 * sum(NJobs) / X.TotalJobs, 1) as '% Failed'
- from JobUsageRecord J, Site T, Probe P,
-  (select LCASE(XJ.VOName) as XVOName,
-     XT.SiteName as XSiteName,
-     sum(Njobs) as 'TotalJobs'
-   from JobUsageRecord XJ, Site XT, Probe XP
+  FORMAT(100.0 * sum(J.NJobs) / X.TotalJobs, 1) as pcFailed
+ from JobUsageRecord_Report J,
+  (select XJ.VOName as XVOName,
+     XJ.SiteName as XSiteName,
+     sum(XJ.Njobs) as 'TotalJobs'
+   from JobUsageRecord_Report XJ
    where
-     EndTime >= CURDATE() - INTERVAL 1 DAY and
-     EndTime < CURDATE() and
-     XP.probename = XJ.ProbeName and
-     XT.siteid = XP.siteid and
-     LCASE(VOName) like 'engage%'
+     XJ.EndTime >= CURDATE() - INTERVAL 1 DAY and
+     XJ.EndTime < CURDATE()
    group by XVOName, XSiteName) X, Resource R
  where
    EndTime >= CURDATE() - INTERVAL 1 DAY and
    EndTime < CURDATE() and
-   P.probename = J.ProbeName and
-   T.siteid = P.siteid and
-   T.SiteName = XSiteName and
-   LCASE(J.VOName) = XVOName and
+   J.SiteName = X.XSiteName and
+   J.VOName = X.XVOName and
    R.dbid = J.dbid and
    R.description = 'ExitCode' and
    R.Value != 0
@@ -95,7 +86,7 @@ chmod +x "$TMP/failure.pl"
 
 "$TMP/failure.pl" "$TMP/failure.txt" > "$TMP/failure.csv"
 
-cat "$TMP/mail.dat" "$TMP/failure.txt" | \
-EMAIL="Gratia Operation <gratia-operation@opensciencegrid.org>" mutt \
--a "$TMP/failure.csv" -s "Job Failure Summary $yesterday - $today" \
-osg-accounting-info@fnal.gov
+cat "$TMP/mail.dat" "$TMP/failure.txt" #| \
+#EMAIL="Gratia Operation <gratia-operation@opensciencegrid.org>" mutt \
+#-a "$TMP/failure.csv" -s "Job Failure Summary $yesterday - $today" \
+#osg-accounting-info@fnal.gov
