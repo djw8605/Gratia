@@ -86,7 +86,7 @@ chmod +x "$TMP/failure.pl"
 
 "$TMP/failure.pl" "$TMP/failure.txt" > "$TMP/failure.csv"
 
-cat "$TMP/mail.dat" "$TMP/failure.txt" #| \
-#EMAIL="Gratia Operation <gratia-operation@opensciencegrid.org>" mutt \
-#-a "$TMP/failure.csv" -s "Job Failure Summary $yesterday - $today" \
-#osg-accounting-info@fnal.gov
+cat "$TMP/mail.dat" "$TMP/failure.txt" | \
+EMAIL="Gratia Operation <gratia-operation@opensciencegrid.org>" mutt \
+-a "$TMP/failure.csv" -s "Job Failure Summary $yesterday - $today" \
+osg-accounting-info@fnal.gov
