@@ -209,7 +209,8 @@ my %attribute_defaults =
 		 "monitor.to.address.1" => 'greenc@fnal.gov',
 		 "monitor.subject" => \&construct_monitor_message_subject,
 		 "service.rmiservlet.console" => 0,
-		 "service.security.console" => 0
+		 "service.security.console" => 0,
+     "service.listener.threads" => 1
 	 }
 	);
 
