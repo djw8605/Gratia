@@ -160,17 +160,6 @@
                     <property name="controlType">text-box</property>
                     <property name="defaultValue">2006-03-01</property>
                 </scalar-parameter>
-                <scalar-parameter name="End Date" id="87">
-                    <property name="hidden">true</property>
-                    <text-property name="helpText">Only jobs that finished before this date will be included</text-property>
-                    <property name="valueType">static</property>
-                    <property name="dataType">string</property>
-                    <property name="promptText">End Date</property>
-                    <property name="allowBlank">false</property>
-                    <property name="format">Unformatted</property>
-                    <property name="controlType">text-box</property>
-                    <property name="defaultValue">2999-12-31</property>
-                </scalar-parameter>
             </parameters>
         </parameter-group>
         <parameter-group name="UserInfo" id="115">
