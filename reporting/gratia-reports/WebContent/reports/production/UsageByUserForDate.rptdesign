@@ -27,7 +27,7 @@
     <list-property name="configVars">
         <structure>
             <property name="name">DatabaseURL</property>
-            <property name="value">jdbc:mysql://gratia-vm02.fnal.gov:3320/gratia_jeffmack</property>
+            <property name="value">jdbc:mysql://gratia-db01.fnal.gov:3320/gratia_itb</property>
         </structure>
         <structure>
             <property name="name">DatabaseUser</property>
@@ -55,7 +55,7 @@
         </structure>
         <structure>
             <property name="name">Start Date</property>
-            <property name="value">2007-02-01</property>
+            <property name="value">2007-03-12</property>
         </structure>
         <structure>
             <property name="name">UserName</property>
@@ -71,7 +71,7 @@
         </structure>
         <structure>
             <property name="name">Display Metric</property>
-            <property name="value">wallclock</property>
+            <property name="value">jobcount</property>
         </structure>
     </list-property>
     <parameters>
@@ -84,7 +84,7 @@
                     <property name="allowBlank">false</property>
                     <property name="format">Unformatted</property>
                     <property name="controlType">text-box</property>
-                    <property name="defaultValue">jdbc:mysql://gratia-vm02.fnal.gov:3320/gratia_jeffmack</property>
+                    <property name="defaultValue">jdbc:mysql://gratia-db01.fnal.gov:3320/gratia_itb</property>
                 </scalar-parameter>
                 <scalar-parameter name="DatabaseUser" id="83">
                     <property name="hidden">true</property>
@@ -232,7 +232,7 @@
     <data-sources>
         <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="fermigrid1" id="4">
             <property name="odaDriverClass">com.mysql.jdbc.Driver</property>
-            <property name="odaURL">jdbc:mysql://gratia-vm02.fnal.gov:3320/gratia_jeffmack</property>
+            <property name="odaURL">jdbc:mysql://gratia-db01.fnal.gov:3320/gratia_itb</property>
             <property name="odaUser">gratia</property>
             <encrypted-property name="odaPassword">cHJvdG8=</encrypted-property>
         </oda-data-source>
@@ -283,6 +283,7 @@
             <property name="queryText">select Site.SiteName as sitename, VOProbeSummary.CommonName as UserName, 
 	sum(VOProbeSummary.WallDuration) as WallDuration,
 	sum(VOProbeSummary.CpuUserDuration+VOProbeSummary.CpuSystemDuration) as Cpu,
+	sum(VOProbeSummary.Njobs) as Njobs,
 	VOProbeSummary.VOName as voname
 	from VOProbeSummary, Site, Probe
 where VOProbeSummary.ResourceType = 'Batch'
@@ -749,8 +750,8 @@ function beforeGeneration( chart, context ){
  * @param context
  *            IChartScriptContext
  */
-//function beforeDrawDataPointLabel( dph, label, context ){}
-
+ function beforeDrawDataPointLabel(dph, label, icsc)
+{ 
 /**
  * Called before rendering curve fitting.
  * 
@@ -759,6 +760,26 @@ function beforeGeneration( chart, context ){
  * @param context
  *            IChartScriptContext
  */
+/** 
+	* Color change based on value
+	*
+val = dph.getOrthogonalValue( ); 
+clr = label.getCaption( ).getColor( );
+if ( val &lt; -10 ) clr.set( 32, 268, 255 ); 
+else if ( ( val >= -10 ) &amp; ( val &lt;=10 ) ) clr.set( 168, 0, 208 ); 
+else if ( val > 10 ) clr.set( 0, 0, 200 );
+*/
+
+rep = icsc.getExternalContext().getScriptable();
+val1 = rep.getParameterValue(&quot;Display Metric&quot;);
+if(val1 == 'jobcount')
+	{
+	labval = label.getCaption().getValue(); 
+	dotpos = labval.indexOf(&quot;.&quot;); 
+	frmt = label.getCaption().getValue().substring(0,dotpos);
+	label.getCaption().setValue(frmt);
+	};
+}
 //function beforeDrawFittingCurve( cf, context ){}
 
 /**
@@ -1405,7 +1426,7 @@ else {
             <property name="fontFamily">sans-serif</property>
             <property name="fontSize">9pt</property>
             <property name="textAlign">center</property>
-            <expression name="valueExpr">if(params["ForSite"] == 'Site'){
+            <expression name="valueExpr">if(params["ForSite"] == 'ForSite'){
 	"Site = "+ params["ForSiteName"]
 }
 else{
@@ -1418,7 +1439,7 @@ else{
             <property name="fontFamily">sans-serif</property>
             <property name="fontSize">9pt</property>
             <property name="textAlign">center</property>
-            <expression name="valueExpr">if(params["ForVO"] == 'VO'){
+            <expression name="valueExpr">if(params["ForVO"] == 'ForVO'){
 	"VO = "+ params["ForVOName"]
 }
 else{
