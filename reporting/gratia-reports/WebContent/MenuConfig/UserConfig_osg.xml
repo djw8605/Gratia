@@ -28,7 +28,7 @@
 		<MenuGroup name="Reports - by Probe">
 			<MenuItem name="-   Jobs by Probe" link="viewer.jsp?__report=[ReportsFolder]JobsByProbeNoFacility.rptdesign"/>
 			<MenuItem name="-   Daily Jobs by Probe" link="viewer.jsp?__report=[ReportsFolder]DailyUsageByProbe.rptdesign,Display Metric=jobcount"/>
-			<MenuItem name="-   Daily Usage by Probe" link="viewer.jsp?__report=[ReportsFolder]DailyUsageByProbe.rptdesign,Display Metric=jobcount"/>
+			<MenuItem name="-   Daily Usage by Probe" link="viewer.jsp?__report=[ReportsFolder]DailyUsageByProbe.rptdesign,Display Metric=wallclock"/>
 		</MenuGroup>
 		<MenuGroup name="Reports - miscellaneous">
 			<MenuItem name="-   Probe Status" link="viewer.jsp?__report=[ReportsFolder]ProbeStatus.rptdesign"/>
