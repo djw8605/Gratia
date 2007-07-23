@@ -39,11 +39,15 @@
         </structure>
         <structure>
             <property name="name">Start Date</property>
-            <property name="value">2007-07-14</property>
+            <property name="value">2007-07-13</property>
         </structure>
         <structure>
             <property name="name">End Date</property>
             <property name="value">2007-07-14</property>
+        </structure>
+        <structure>
+            <property name="name">ForSiteName</property>
+            <property name="value">All</property>
         </structure>
         <structure>
             <property name="name">ForProbeName</property>
@@ -215,7 +219,8 @@ order by name</property>
             </list-property>
             <property name="queryText">
 select JobUsageRecord_Report.JobName, Site.SiteName as sitename, JobUsageRecord_Report.ProbeName,
-        JobUsageRecord_Report.StartTime, JobUsageRecord_Report.EndTime, JobUsageRecord_Report.JobNameDescription 
+        JobUsageRecord_Report.StartTime, JobUsageRecord_Report.EndTime, JobUsageRecord_Report.Njobs,
+        JobUsageRecord_Report.CpuUserDuration +  JobUsageRecord_Report.CpuSystemDuration as Cpu
 from JobUsageRecord_Report,  Site, Probe
 where JobUsageRecord_Report.ProbeName = Probe.probename
 and Probe.siteid = Site.siteid
@@ -392,11 +397,6 @@ else
                             <property name="borderTopColor">#000000</property>
                             <property name="borderTopStyle">solid</property>
                             <property name="borderTopWidth">thin</property>
-                        </cell>
-                        <cell id="118">
-                            <property name="borderTopColor">#000000</property>
-                            <property name="borderTopStyle">solid</property>
-                            <property name="borderTopWidth">thin</property>
                             <text-data id="173">
                                 <property name="style">sans-style1</property>
                                 <property name="fontFamily">sans-serif</property>
@@ -404,6 +404,20 @@ else
                                 <property name="paddingRight">36pt</property>
                                 <property name="textAlign">right</property>
                                 <expression name="valueExpr">Math.floor(Total.sum(row["CPU Minutes Used"]))</expression>
+                                <property name="contentType">html</property>
+                            </text-data>
+                        </cell>
+                        <cell id="118">
+                            <property name="borderTopColor">#000000</property>
+                            <property name="borderTopStyle">solid</property>
+                            <property name="borderTopWidth">thin</property>
+                            <text-data id="187">
+                                <property name="style">sans-style1</property>
+                                <property name="fontFamily">sans-serif</property>
+                                <property name="fontWeight">bold</property>
+                                <property name="paddingRight">36pt</property>
+                                <property name="textAlign">right</property>
+                                <expression name="valueExpr">Math.floor(Total.sum(row["Njobs"]))</expression>
                                 <property name="contentType">html</property>
                             </text-data>
                         </cell>
@@ -446,17 +460,6 @@ else
                             </text>
                         </cell>
                         <cell id="163">
-                            <text id="166">
-                                <property name="style">sans-style1</property>
-                                <property name="fontFamily">sans-serif</property>
-                                <property name="fontWeight">bold</property>
-                                <property name="textUnderline">underline</property>
-                                <property name="textAlign">left</property>
-                                <property name="contentType">plain</property>
-                                <text-property name="content"><![CDATA[Job Description]]></text-property>
-                            </text>
-                        </cell>
-                        <cell id="164">
                             <text id="167">
                                 <property name="style">sans-style1</property>
                                 <property name="fontFamily">sans-serif</property>
@@ -465,6 +468,17 @@ else
                                 <property name="textAlign">right</property>
                                 <property name="contentType">plain</property>
                                 <text-property name="content"><![CDATA[CPU Minutes Used (Wall Clock)]]></text-property>
+                            </text>
+                        </cell>
+                        <cell id="164">
+                            <text id="166">
+                                <property name="style">sans-style1</property>
+                                <property name="fontFamily">sans-serif</property>
+                                <property name="fontWeight">bold</property>
+                                <property name="textUnderline">underline</property>
+                                <property name="textAlign">right</property>
+                                <property name="contentType">plain</property>
+                                <text-property name="content"><![CDATA[Job Count]]></text-property>
                             </text>
                         </cell>
                     </row>
@@ -487,11 +501,6 @@ else
                             <property name="borderTopColor">#000000</property>
                             <property name="borderTopStyle">solid</property>
                             <property name="borderTopWidth">thin</property>
-                        </cell>
-                        <cell id="129">
-                            <property name="borderTopColor">#000000</property>
-                            <property name="borderTopStyle">solid</property>
-                            <property name="borderTopWidth">thin</property>
                             <text-data id="172">
                                 <property name="style">sans-style1</property>
                                 <property name="fontFamily">sans-serif</property>
@@ -499,6 +508,20 @@ else
                                 <property name="paddingRight">36pt</property>
                                 <property name="textAlign">right</property>
                                 <expression name="valueExpr">Math.floor(Total.sum(row["CPU Minutes Used"]))</expression>
+                                <property name="contentType">html</property>
+                            </text-data>
+                        </cell>
+                        <cell id="129">
+                            <property name="borderTopColor">#000000</property>
+                            <property name="borderTopStyle">solid</property>
+                            <property name="borderTopWidth">thin</property>
+                            <text-data id="186">
+                                <property name="style">sans-style1</property>
+                                <property name="fontFamily">sans-serif</property>
+                                <property name="fontWeight">bold</property>
+                                <property name="paddingRight">36pt</property>
+                                <property name="textAlign">right</property>
+                                <expression name="valueExpr">Math.floor(Total.sum(row["Njobs"]))</expression>
                                 <property name="contentType">html</property>
                             </text-data>
                         </cell>
@@ -515,13 +538,6 @@ else
                         </data>
                     </cell>
                     <cell id="101">
-                        <data id="133">
-                            <property name="style">sans-style1</property>
-                            <property name="fontFamily">sans-serif</property>
-                            <expression name="valueExpr">row["JobNameDescription"]</expression>
-                        </data>
-                    </cell>
-                    <cell id="102">
                         <data id="135">
                             <property name="style">sans-style1</property>
                             <property name="fontFamily">sans-serif</property>
@@ -533,6 +549,7 @@ else
         else  Math.floor( (row["CPU Minutes Used"]) )</expression>
                         </data>
                     </cell>
+                    <cell id="102"/>
                 </row>
             </detail>
             <footer>
@@ -553,11 +570,6 @@ else
                         <property name="borderTopColor">#000000</property>
                         <property name="borderTopStyle">solid</property>
                         <property name="borderTopWidth">medium</property>
-                    </cell>
-                    <cell id="106">
-                        <property name="borderTopColor">#000000</property>
-                        <property name="borderTopStyle">solid</property>
-                        <property name="borderTopWidth">medium</property>
                         <text-data id="174">
                             <property name="style">sans-style1</property>
                             <property name="fontFamily">sans-serif</property>
@@ -565,6 +577,20 @@ else
                             <property name="paddingRight">36pt</property>
                             <property name="textAlign">right</property>
                             <expression name="valueExpr">Math.floor(Total.sum(row["CPU Minutes Used"]))</expression>
+                            <property name="contentType">html</property>
+                        </text-data>
+                    </cell>
+                    <cell id="106">
+                        <property name="borderTopColor">#000000</property>
+                        <property name="borderTopStyle">solid</property>
+                        <property name="borderTopWidth">medium</property>
+                        <text-data id="188">
+                            <property name="style">sans-style1</property>
+                            <property name="fontFamily">sans-serif</property>
+                            <property name="fontWeight">bold</property>
+                            <property name="paddingRight">36pt</property>
+                            <property name="textAlign">right</property>
+                            <expression name="valueExpr">Math.floor(Total.sum(row["Njobs"]))</expression>
                             <property name="contentType">html</property>
                         </text-data>
                     </cell>
