@@ -58,10 +58,6 @@
             <property name="value">2007-02-01</property>
         </structure>
         <structure>
-            <property name="name">End Date</property>
-            <property name="value">2999-12-31</property>
-        </structure>
-        <structure>
             <property name="name">UserName</property>
             <property name="value">None</property>
         </structure>
@@ -165,6 +161,7 @@
                     <property name="defaultValue">2006-03-01</property>
                 </scalar-parameter>
                 <scalar-parameter name="End Date" id="87">
+                    <property name="hidden">true</property>
                     <text-property name="helpText">Only jobs that finished before this date will be included</text-property>
                     <property name="valueType">static</property>
                     <property name="dataType">string</property>
@@ -321,13 +318,6 @@ order by VOProbeSummary.CommonName,sitename,VOProbeSummary.VOName</property>
         </simple-master-page>
     </page-setup>
     <body>
-        <text-data id="97">
-            <property name="style">san-style1</property>
-            <property name="fontSize">9pt</property>
-            <property name="textAlign">center</property>
-            <expression name="valueExpr">"Date: "+params["Start Date"].substring(0,10)</expression>
-            <property name="contentType">html</property>
-        </text-data>
         <extended-item extensionName="Chart" id="88">
             <property name="style">san-style1</property>
             <property name="height">600px</property>
@@ -1414,6 +1404,13 @@ else {
 ]]></xml-property>
             <property name="outputFormat">SVG</property>
         </extended-item>
+        <text-data id="97">
+            <property name="style">san-style1</property>
+            <property name="fontSize">9pt</property>
+            <property name="textAlign">center</property>
+            <expression name="valueExpr">"Date: "+params["Start Date"].substring(0,10)</expression>
+            <property name="contentType">html</property>
+        </text-data>
         <text-data id="107">
             <property name="style">san-style1</property>
             <property name="fontFamily">sans-serif</property>
