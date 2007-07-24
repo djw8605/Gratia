@@ -68,14 +68,6 @@
             <property name="value">FNAL_GPFARM_TEST</property>
         </structure>
         <structure>
-            <property name="name">ForVO</property>
-            <property name="value">ForVO</property>
-        </structure>
-        <structure>
-            <property name="name">ForSite</property>
-            <property name="value">AnySite</property>
-        </structure>
-        <structure>
             <property name="name">Start Date</property>
             <property name="value">2007-01-01</property>
         </structure>
@@ -200,7 +192,7 @@
                     <property name="allowBlank">false</property>
                     <property name="format">Unformatted</property>
                     <property name="controlType">text-box</property>
-                    <property name="defaultValue">ForVO</property>
+                    <property name="defaultValue">AnyVO</property>
                 </scalar-parameter>
                 <scalar-parameter name="ForSite" id="116">
                     <property name="hidden">true</property>
@@ -209,7 +201,7 @@
                     <property name="allowBlank">false</property>
                     <property name="format">Unformatted</property>
                     <property name="controlType">text-box</property>
-                    <property name="defaultValue">AnySite</property>
+                    <property name="defaultValue">ForSite</property>
                 </scalar-parameter>
             </parameters>
         </parameter-group>
@@ -1236,11 +1228,11 @@ else {
         &lt;/structure>
         &lt;structure>
             &lt;property name=&quot;paramName&quot;>ForVO&lt;/property>
-            &lt;expression name=&quot;expression&quot;>&quot;VO&quot;&lt;/expression>
+            &lt;expression name=&quot;expression&quot;>&quot;ForVO&quot;&lt;/expression>
         &lt;/structure>
         &lt;structure>
             &lt;property name=&quot;paramName&quot;>ForSite&lt;/property>
-            &lt;expression name=&quot;expression&quot;>&quot;Site&quot;&lt;/expression>
+            &lt;expression name=&quot;expression&quot;>&quot;ForSite&quot;&lt;/expression>
         &lt;/structure>
         &lt;structure>
             &lt;property name=&quot;paramName&quot;>Display Metric&lt;/property>

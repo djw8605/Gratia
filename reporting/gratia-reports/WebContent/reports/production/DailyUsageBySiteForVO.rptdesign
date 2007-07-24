@@ -1225,41 +1225,77 @@ else {
               <Type>URL_Redirect</Type>
               <Value xsi:type="attribute:URLValue">
                 <BaseUrl>&lt;structure name=&quot;action&quot;>
+
     &lt;property name=&quot;formatType&quot;>html&lt;/property>
+
     &lt;property name=&quot;linkType&quot;>drill-through&lt;/property>
+
     &lt;property name=&quot;reportName&quot;>UsageByUserForDate.rptdesign&lt;/property>
+
     &lt;property name=&quot;targetWindow&quot;>_self&lt;/property>
+
     &lt;list-property name=&quot;paramBindings&quot;>
+
         &lt;structure>
+
             &lt;property name=&quot;paramName&quot;>DatabaseURL&lt;/property>
+
             &lt;expression name=&quot;expression&quot;>params[&quot;DatabaseURL&quot;]&lt;/expression>
+
         &lt;/structure>
+
         &lt;structure>
+
             &lt;property name=&quot;paramName&quot;>DatabaseUser&lt;/property>
+
             &lt;expression name=&quot;expression&quot;>params[&quot;DatabaseUser&quot;]&lt;/expression>
+
         &lt;/structure>
+
         &lt;structure>
+
             &lt;property name=&quot;paramName&quot;>DatabasePassword&lt;/property>
+
             &lt;expression name=&quot;expression&quot;>params[&quot;DatabasePassword&quot;]&lt;/expression>
+
         &lt;/structure>
+
         &lt;structure>
+
             &lt;property name=&quot;paramName&quot;>ForVOName&lt;/property>
+
             &lt;expression name=&quot;expression&quot;>params[&quot;ForVOName&quot;]&lt;/expression>
+
         &lt;/structure>
+
         &lt;structure>
+
             &lt;property name=&quot;paramName&quot;>ForVO&lt;/property>
-            &lt;expression name=&quot;expression&quot;>&quot;VO&quot;&lt;/expression>
+
+            &lt;expression name=&quot;expression&quot;>&quot;ForVO&quot;&lt;/expression>
+
         &lt;/structure>
+
         &lt;structure>
+
             &lt;property name=&quot;paramName&quot;>ForSite&lt;/property>
-            &lt;expression name=&quot;expression&quot;>&quot;Site&quot;&lt;/expression>
+
+            &lt;expression name=&quot;expression&quot;>&quot;ForSite&quot;&lt;/expression>
+
         &lt;/structure>
+
         &lt;structure>
+
             &lt;property name=&quot;paramName&quot;>Display Metric&lt;/property>
+
             &lt;expression name=&quot;expression&quot;>params[&quot;Display Metric&quot;]&lt;/expression>
+
         &lt;/structure>
+
     &lt;/list-property>
+
 &lt;/structure>
+
 </BaseUrl>
                 <BaseParameterName>Start Date</BaseParameterName>
                 <ValueParameterName></ValueParameterName>
