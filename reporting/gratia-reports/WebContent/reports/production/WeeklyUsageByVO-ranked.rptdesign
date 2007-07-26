@@ -987,16 +987,16 @@
                     <expression name="defaultValue">// Calculate starting month - 6 months ago
 var now = new Date();
 var begdate;
-now.setDate(1);
+now = new Date();
 var begdate = DateTimeSpan.subDate(now,0,6,0);
 var yearnr = begdate.getYear() + 1900;
 var monthnr = begdate.getMonth()+ 1;
-var yearmon;
-if (monthnr.toString().length > 1){
-	yearnr  + "-" + monthnr + "-01"
-}else{
-	yearnr  + "-0" +  monthnr + "-01"
-}</expression>
+var daynr = begdate.getDate();
+if (monthnr.toString().length &lt; 2){	monthnr ="0" + monthnr;}
+if (daynr.toString().length &lt; 2){daynr ="0" +daynr;}
+// Force day  to 1
+daynr = "01";
+yearnr + "-" + monthnr + "-" + daynr;</expression>
                     <property name="isInput">true</property>
                 </structure>
                 <structure>
