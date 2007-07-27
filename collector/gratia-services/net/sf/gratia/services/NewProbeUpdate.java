@@ -103,7 +103,7 @@ public class NewProbeUpdate
             statement = connection.createStatement();
             statement.executeUpdate(command);
             statement.close();
-            command = "select siteid from Site where SitName = " + dq + sitename + dq;
+            command = "select siteid from Site where SiteName = " + dq + sitename + dq;
             statement = connection.prepareStatement(command);
             resultSet = statement.executeQuery(command);
             while (resultSet.next())
@@ -117,16 +117,16 @@ public class NewProbeUpdate
          // now add a new entry to ceprobes with default values
          //
          command =
-						 "insert into Probe (siteid,probename,active,currenttime,reporthh,reportmm,status,nRecords) values(" +
-						 facilityid + comma + // siteid
-						 dq + probename + dq + comma + // probename
-						 "1" + comma + // active
-						 dq + format.format(new java.util.Date()) + dq + comma + // currenttime
-						 "24" + comma + // reporthh
-						 "00" + comma + // reportmm
-						 dq + "alive" + dq + comma + // status
-						 "1" + // nRecords
-						 ")";
+	     "insert into Probe (siteid,probename,active,currenttime,reporthh,reportmm,status,nRecords) values(" +
+	     facilityid + comma + // siteid
+	     dq + probename + dq + comma + // probename
+	     "1" + comma + // active
+	     dq + format.format(new java.util.Date()) + dq + comma + // currenttime
+	     "24" + comma + // reporthh
+	     "00" + comma + // reportmm
+	     dq + "alive" + dq + comma + // status
+	     "1" + // nRecords
+	     ")";
          statement = connection.createStatement();
          statement.executeUpdate(command);
          statement.close();
