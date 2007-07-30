@@ -9,6 +9,7 @@
 			<MenuItem name="-   Daily Jobs by Site for VO" link="viewer.jsp?__report=[ReportsFolder]DailyUsageBySiteForVO.rptdesign,Display Metric=jobcount"/>
 			<MenuItem name="-   Usage by VO" link="viewer.jsp?__report=[ReportsFolder]UsageByVO.rptdesign,Display Metric=wallclock"/>
 			<MenuItem name="-   Daily Usage by VO" link="viewer.jsp?__report=[ReportsFolder]DailyUsageByVO.rptdesign,Display Metric=wallclock"/>
+			<MenuItem name="-   Daily Usage by VO and User" link="viewer.jsp?__report=[ReportsFolder]UsageByVOByDate-rank.rptdesign,Display Metric=wallclock"/>
 			<MenuItem name="-   Daily Usage by Site for VO" link="viewer.jsp?__report=[ReportsFolder]DailyUsageBySiteForVO.rptdesign,Display Metric=wallclock"/>
 		</MenuGroup>
 		<MenuGroup name="Reports - VO Views - Weekly History">
