@@ -293,7 +293,10 @@ public class DatabaseMaintenance {
         SiteDefaults();
         CPUMetricDefaults();
         RoleDefaults();
+        PropertyDefaults();
+    }
 
+    private void PropertyDefaults() {
         //
         // place holder to initialize SystemProplist
         //
@@ -359,6 +362,12 @@ public class DatabaseMaintenance {
         Statement statement;
         ResultSet resultSet;
 
+        if ( 1 != getCount("select count(*) from information_schema.tables where " +
+                           "table_schema = Database() and table_name = " +
+                           dq + "SystemProplist" + dq) ) {
+            return;
+        } // No SystemProplist table yet
+
         String check = "select cdr from SystemProplist where car = " + dq
             + "gratia.database.version" + dq;
 
@@ -414,7 +423,9 @@ public class DatabaseMaintenance {
         }
 
         // First check summary tables
-        if (1 == readIntegerDBProperty("gratia.database.wantSummaryTable")) {
+        int wanted = readIntegerDBProperty("gratia.database.wantSummaryTable");
+        Logging.log("gratia.database.wantSummaryTable = " + wanted);
+        if (1 == wanted) {
             int ver = readIntegerDBProperty("gratia.database.summaryTableVersion");
             if (ver < latestDBVersionRequiringSummaryTableLoad) {
                 int result = CallPostInstall("summary");
@@ -429,7 +440,9 @@ public class DatabaseMaintenance {
         }
 
         // Next check trigger
-        if (1 == readIntegerDBProperty("gratia.database.wantSummaryTrigger")) {
+        wanted = readIntegerDBProperty("gratia.database.wantSummaryTrigger");
+        Logging.log("gratia.database.wantSummaryTrigger = " + wanted);
+        if (1 == wanted) {
             int ver = readIntegerDBProperty("gratia.database.summaryTriggerVersion");
             if (ver < latestDBVersionRequiringSummaryTableLoad) {
                 int result = CallPostInstall("trigger");
@@ -444,7 +457,9 @@ public class DatabaseMaintenance {
         }
 
         // Finally, check stored procedures
-        if (1 == readIntegerDBProperty("gratia.database.wantStoredProcedures")) {
+        wanted = readIntegerDBProperty("gratia.database.wantStoredProcedures");
+        Logging.log("gratia.database.wantStoredProcedures = " + wanted);
+        if (1 == wanted) {
             int ver = readIntegerDBProperty("gratia.database.storedProcedureVersion");
             if (ver < latestDBVersionRequiringSummaryTableLoad) {
                 int result = CallPostInstall("stored");
@@ -463,6 +478,7 @@ public class DatabaseMaintenance {
     }
 
     public boolean Upgrade() {
+        PropertyDefaults(); // Make sure we have the values in SystemProplist
         int oldvers = liveVersion;
 
         if (oldvers == 0) {
@@ -782,6 +798,12 @@ public class DatabaseMaintenance {
     private void RationalizePropsTable() {
         Statement statement;
         ResultSet resultSet;
+
+        if ( 1 != getCount("select count(*) from information_schema.tables where " +
+                           "table_schema = Database() and table_name = " +
+                           dq + "SystemProplist" + dq) ) {
+            return;
+        } // No SystemProplist table yet
 
         String check = "select count(*),min(PropId) from SystemProplist where car = " + dq
             + "gratia.database.version" + dq;
