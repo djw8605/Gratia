@@ -57,7 +57,7 @@ public class NewVOUpdate
 
       StringElement site = record.getSiteName();
       String voname = record.getUserIdentity().getVOName();
-      String reportablevoname = record.getUserIdentity().getVOName();
+      String reportablevoname = record.getUserIdentity().getReportableVOName();
       if (reportablevoname == null) reportablevoname = "null";
       else reportablevoname = dq + reportablevoname + dq;
       
