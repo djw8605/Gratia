@@ -204,7 +204,9 @@ glr:begin
 	--
 
 	select count(*) into mycount from HostDescriptionProbeSummary
-		where HostDescriptionProbeSummary.HostDescription = n_HostDescription
+		where ((HostDescriptionProbeSummary.HostDescription = n_HostDescription) or
+           (HostDescriptionProbeSummary.HostDescription is null and
+            n_HostDescription is null))
 		and HostDescriptionProbeSummary.ProbeName = new.ProbeName
 		and HostDescriptionProbeSummary.EndTime = date(n_EndTime)
 		and HostDescriptionProbeSummary.ResourceType = n_ResourceType;
@@ -222,8 +224,9 @@ glr:begin
 					HostDescriptionProbeSummary.CpuUserDuration + n_CpuUserDuration,
 				HostDescriptionProbeSummary.CpuSystemDuration =
 					HostDescriptionProbeSummary.CpuSystemDuration + n_CpuSystemDuration
-				where 
-				HostDescriptionProbeSummary.HostDescription = n_HostDescription
+				where ((HostDescriptionProbeSummary.HostDescription = n_HostDescription) or
+               (HostDescriptionProbeSummary.HostDescription is null and
+                n_HostDescription is null))
 				and HostDescriptionProbeSummary.ProbeName = new.ProbeName
 				and HostDescriptionProbeSummary.EndTime = date(n_EndTime)
 				and HostDescriptionProbeSummary.ResourceType = n_ResourceType;
