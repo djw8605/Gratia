@@ -58,17 +58,22 @@ public class NewVOUpdate
       StringElement site = record.getSiteName();
       String voname = record.getUserIdentity().getVOName();
       String reportablevoname = record.getUserIdentity().getReportableVOName();
-      if (reportablevoname == null) reportablevoname = "null";
-      else reportablevoname = dq + reportablevoname + dq;
-      
+      String comparisonString;
+      if (reportablevoname == null) {
+          comparisonString = "is null";
+      } else {
+          comparisonString = "= " + dq + reportablevoname + dq;
+          reportablevoname = dq + reportablevoname + dq;
+      }
       int icount = 0;
       int VOid = -1;
 
       //
       // see if the probe exists
       //
-      String command = "select count(*) from VONameCorrection where voname = binary " + dq + voname + dq + 
-                  " and binary reportablevoname = " + reportablevoname;
+      String command = "select count(*) from VONameCorrection where" +
+          " binary voname = binary " + dq + voname + dq + 
+          " and binary reportablevoname " + comparisonString;
       try
       {
          statement = connection.prepareStatement(command);
