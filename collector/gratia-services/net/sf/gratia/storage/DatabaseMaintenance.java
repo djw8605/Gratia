@@ -11,10 +11,10 @@ import java.io.File;
 public class DatabaseMaintenance {
     static final String dq = "\"";
     static final String comma = ",";
-    static final int gratiaDatabaseVersion = 18;
+    static final int gratiaDatabaseVersion = 19;
     static final int latestDBVersionRequiringStoredProcedureLoad = gratiaDatabaseVersion;
-    static final int latestDBVersionRequiringSummaryTableLoad = 18;
-    static final int latestDBVersionRequiringSummaryTriggerLoad = 18;
+    static final int latestDBVersionRequiringSummaryTableLoad = 19;
+    static final int latestDBVersionRequiringSummaryTriggerLoad = 19;
 
     java.sql.Connection connection;
     int liveVersion = 0;
@@ -769,7 +769,49 @@ public class DatabaseMaintenance {
                 current = current + 1;
                 UpdateDbVersion(current);
             }
-
+            if (current == 18) {
+                // Correct problem with VONameCorrection
+                int result = -1;
+                Statement statement;
+                ResultSet resultSet;
+                String command =
+                    "select min(corrid) as mc,VOName,ReportableVOName " +
+                    "from VONameCorrection group by binary VOName, " +
+                    "binary ReportableVOName order by mc";
+                try {
+                    Logging.log("Executing: " + command);
+                    statement = connection.createStatement();
+                    resultSet = statement.executeQuery(command);
+                    if (result > -1 && resultSet.next()) {
+                        int minCorrID = resultSet.getInt(1);
+                        String VOName = resultSet.getString(2);
+                        String ReportableVOName = resultSet.getString(3);
+                        if (ReportableVOName == null) {
+                            result =
+                                Execute("delete from VONameCorrection where binary VOName = binary " +
+                                        dq + VOName + dq + " and ReportableVOName is null " +
+                                        "and corrid > " + minCorrID);
+                        } else {
+                            result =
+                                Execute("delete from VONameCorrection where binary VOName = binary " +
+                                        dq + VOName + dq + " and binary ReportableVOName = binary " +
+                                        dq + ReportableVOName + dq + " and corrid > " + minCorrID);
+                        }
+                    }
+                }
+                catch (Exception e) {
+                     Logging.log("Command: Error: " + command + " : " + e);
+                     result = -1;
+                }
+                if (result > -1) {
+                    Logging.log("Gratia database upgraded from " + current + " to " + (current + 1));
+                    current = current + 1;
+                    UpdateDbVersion(current);
+                } else {
+                    Logging.log("Gratia database FAILED to upgrade from " + current +
+                                " to " + (current + 1));
+                }
+            }
             return ((current == gratiaDatabaseVersion) && checkAndUpgradeDbAuxiliaryItems());
         }
     }
