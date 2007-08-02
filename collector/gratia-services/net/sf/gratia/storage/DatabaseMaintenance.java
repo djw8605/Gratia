@@ -771,7 +771,7 @@ public class DatabaseMaintenance {
             }
             if (current == 18) {
                 // Correct problem with VONameCorrection
-                int result = -1;
+                int result = 0;
                 Statement statement;
                 ResultSet resultSet;
                 String command =
@@ -782,7 +782,7 @@ public class DatabaseMaintenance {
                     Logging.log("Executing: " + command);
                     statement = connection.createStatement();
                     resultSet = statement.executeQuery(command);
-                    if (result > -1 && resultSet.next()) {
+                    while (result > -1 && resultSet.next()) {
                         int minCorrID = resultSet.getInt(1);
                         String VOName = resultSet.getString(2);
                         String ReportableVOName = resultSet.getString(3);
