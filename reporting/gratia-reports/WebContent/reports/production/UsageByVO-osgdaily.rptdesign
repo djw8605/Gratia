@@ -26,10 +26,6 @@
     </list-property>
     <list-property name="configVars">
         <structure>
-            <property name="name">DatabaseURL</property>
-            <property name="value">jdbc:mysql://cd-psg6.fnal.gov:3320/gratia_osg_daily</property>
-        </structure>
-        <structure>
             <property name="name">DatabaseUser</property>
             <property name="value">gratia</property>
         </structure>
@@ -45,10 +41,6 @@
             <property name="name">End Date</property>
             <property name="value">2007-01-31</property>
         </structure>
-        <structure>
-            <property name="name">CPUMetric</property>
-            <property name="value">wallclock</property>
-        </structure>
     </list-property>
     <parameters>
         <parameter-group name="DatabaseAccess" id="84">
@@ -60,7 +52,7 @@
                     <property name="allowBlank">false</property>
                     <property name="format">Unformatted</property>
                     <property name="controlType">text-box</property>
-                    <property name="defaultValue">jdbc:mysql://cd-psg6.fnal.gov:3320/gratia_osg_daily</property>
+                    <property name="defaultValue">jdbc:mysql://gratia-db01.fnal.gov:3320/gratia_osg_daily</property>
                 </scalar-parameter>
                 <scalar-parameter name="DatabaseUser" id="83">
                     <property name="hidden">true</property>
@@ -123,7 +115,7 @@
     <data-sources>
         <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="fermigrid1" id="4">
             <property name="odaDriverClass">com.mysql.jdbc.Driver</property>
-            <property name="odaURL">jdbc:mysql://cd-psg6.fnal.gov:3320/gratia_osg_daily</property>
+            <property name="odaURL">jdbc:mysql://gratia-db01.fnal.gov:3320/gratia_osg_daily</property>
             <property name="odaUser">gratia</property>
             <encrypted-property name="odaPassword">cHJvdG8=</encrypted-property>
         </oda-data-source>
@@ -136,7 +128,7 @@
                     <property name="name">StartDate</property>
                     <property name="dataType">string</property>
                     <property name="position">1</property>
-                    <expression name="defaultValue">'3/1/2006'</expression>
+                    <expression name="defaultValue">'2007-01-01'</expression>
                     <property name="isOptional">false</property>
                     <property name="allowNull">true</property>
                     <property name="isInput">true</property>
@@ -146,7 +138,7 @@
                     <property name="name">EndDate</property>
                     <property name="dataType">string</property>
                     <property name="position">2</property>
-                    <expression name="defaultValue">'12/31/2999'</expression>
+                    <expression name="defaultValue">'2007-02-01'</expression>
                     <property name="isOptional">false</property>
                     <property name="allowNull">true</property>
                     <property name="isInput">true</property>
@@ -880,7 +872,7 @@ function beforeGeneration( chart, context ){
                 <BaseUrl>&lt;structure name=&quot;action&quot;>
     &lt;property name=&quot;formatType&quot;>html&lt;/property>
     &lt;property name=&quot;linkType&quot;>drill-through&lt;/property>
-    &lt;property name=&quot;reportName&quot;>UsageByUser.rptdesign&lt;/property>
+    &lt;property name=&quot;reportName&quot;>UsageByUser-osgdaily.rptdesign&lt;/property>
     &lt;property name=&quot;targetWindow&quot;>_self&lt;/property>
     &lt;list-property name=&quot;paramBindings&quot;>
         &lt;structure>
@@ -896,6 +888,18 @@ function beforeGeneration( chart, context ){
             &lt;expression name=&quot;expression&quot;>params[&quot;DatabasePassword&quot;]&lt;/expression>
         &lt;/structure>
         &lt;structure>
+            &lt;property name=&quot;paramName&quot;>ForSiteName&lt;/property>
+            &lt;expression name=&quot;expression&quot;>'xxx'&lt;/expression>
+        &lt;/structure>
+        &lt;structure>
+            &lt;property name=&quot;paramName&quot;>ForSite&lt;/property>
+            &lt;expression name=&quot;expression&quot;>'AnySite'&lt;/expression>
+        &lt;/structure>
+        &lt;structure>
+            &lt;property name=&quot;paramName&quot;>ForVO&lt;/property>
+            &lt;expression name=&quot;expression&quot;>'ForVO'&lt;/expression>
+        &lt;/structure>
+        &lt;structure>
             &lt;property name=&quot;paramName&quot;>Start Date&lt;/property>
             &lt;expression name=&quot;expression&quot;>params[&quot;Start Date&quot;]&lt;/expression>
         &lt;/structure>
@@ -904,21 +908,13 @@ function beforeGeneration( chart, context ){
             &lt;expression name=&quot;expression&quot;>params[&quot;End Date&quot;]&lt;/expression>
         &lt;/structure>
         &lt;structure>
-            &lt;property name=&quot;paramName&quot;>CPUMetric&lt;/property>
+            &lt;property name=&quot;paramName&quot;>Display Metric&lt;/property>
             &lt;expression name=&quot;expression&quot;>params[&quot;CPUMetric&quot;]&lt;/expression>
-        &lt;/structure>
-        &lt;structure>
-            &lt;property name=&quot;paramName&quot;>ForVO&lt;/property>
-            &lt;expression name=&quot;expression&quot;>'VO'&lt;/expression>
-        &lt;/structure>
-        &lt;structure>
-            &lt;property name=&quot;paramName&quot;>ForSite&lt;/property>
-            &lt;expression name=&quot;expression&quot;>'NoSite'&lt;/expression>
         &lt;/structure>
     &lt;/list-property>
 &lt;/structure>
 </BaseUrl>
-                <BaseParameterName>VOName</BaseParameterName>
+                <BaseParameterName>ForVOName</BaseParameterName>
                 <ValueParameterName></ValueParameterName>
                 <SeriesParameterName></SeriesParameterName>
               </Value>
