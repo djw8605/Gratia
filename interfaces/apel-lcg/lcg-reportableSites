@@ -17,6 +17,14 @@
 #  Empty lines are permittted.
 # -----------------------------------------------------------------
 # History:
+#   8/07/07 (John Weigand) 
+#             Removed UCSanDiegoPG.
+#             Added HEPGRID_UERJ,UCSDT2,UCSDT2-B.
+#             These are the same WN clusters as the UCSanDiegoPG
+#             for which there was no nomralization factor. So they
+#             will take the default one.
+#             This change was made at the request of Burt Holzman
+#             and satifies the GOC ticket #1714.
 #   6/19/07 (John Weigand) - 
 #             The BNL_ATLAS_1 and BNL_ATLAS_2 sites were changed
 #             to be BNL_OSG.  This was done by changing the
@@ -32,12 +40,14 @@
 USCMS-FNAL-WC1-CE   
 GLOW
 CIT_CMS_T2
+HEPGRID_UERJ
 MIT_CMS              790
 Nebraska            1578
 Purdue-Lear
 Purdue-RCAC
 SPRACE              1676
-UCSanDiegoPG
+UCSDT2
+UCSDT2-B
 UFlorida-PG         1602
 #--- ATLAS ----
 UTA-DPCC
