@@ -238,7 +238,7 @@
         </oda-data-source>
     </data-sources>
     <data-sets>
-        <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="UsageBy" id="85">
+        <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="UsageByxxx" id="85">
             <property name="dataSource">fermigrid1</property>
             <list-property name="parameters">
                 <structure>
@@ -289,7 +289,7 @@
 where VOProbeSummary.ResourceType = 'Batch'
 and Probe.siteid = Site.siteid 
 and VOProbeSummary.ProbeName = Probe.probename
-and date_format(VOProbeSummary.EndTime, '%Y-%m-%d') = date_format(?, '%Y-%m-%d') 
+and VOProbeSummary.EndTime = Date(?)
 and (VOProbeSummary.VOName = ? or (? = 'AnyVO' and VOProbeSummary.VOName like '%'))
 and (Site.SiteName = ? or (? = 'AnySite' and Site.SiteName like '%'))
 group by VOProbeSummary.CommonName,sitename,VOProbeSummary.VOName
@@ -312,7 +312,7 @@ order by VOProbeSummary.CommonName,sitename,VOProbeSummary.VOName</property>
             <property name="style">san-style1</property>
             <property name="height">600px</property>
             <property name="width">640px</property>
-            <property name="dataSet">UsageBy</property>
+            <property name="dataSet">UsageByxxx</property>
             <list-property name="paramBindings">
                 <structure>
                     <property name="paramName">StartDate</property>
