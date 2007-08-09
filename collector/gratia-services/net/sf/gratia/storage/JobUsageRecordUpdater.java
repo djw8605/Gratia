@@ -36,14 +36,21 @@ public abstract class JobUsageRecordUpdater implements RecordUpdater
       {
 
          StringElement type = current.getResourceType();
-         if (type != null) return;
-
          if (current.getProbeName() == null) return;
 
          String probeName = current.getProbeName().getValue();
          if (probeName == null || probeName.length() == 0) return;
 
          String[] splits = probeName.toLowerCase().split(":");
+
+         if (type != null)
+         {
+            if (splits[0].equals("glexec"))
+            {
+               type.setValue("Glexec");
+            }
+            return;
+         }
 
          if (splits[0].equals("psacct"))
          {
@@ -52,10 +59,15 @@ public abstract class JobUsageRecordUpdater implements RecordUpdater
          }
          else if (splits[0].equals("condor") || splits[0].equals("pbs") ||
                     splits[0].equals("pbs-lsf") || splits[0].equals("lsf") ||
-                    splits[0].equals("glexec") || splits[0].equals("daily"))
+                    splits[0].equals("daily"))
          {
             type = new StringElement();
             type.setValue("Batch");
+         }
+         else if (splits[0].equals("glexec"))
+         {
+            type = new StringElement();
+            type.setValue("Glexec");
          }
          else if (splits[0].equals("dcache"))
          {
