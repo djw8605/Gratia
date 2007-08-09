@@ -11,7 +11,7 @@ import java.io.File;
 public class DatabaseMaintenance {
     static final String dq = "\"";
     static final String comma = ",";
-    static final int gratiaDatabaseVersion = 19;
+    static final int gratiaDatabaseVersion = 20;
     static final int latestDBVersionRequiringStoredProcedureLoad = gratiaDatabaseVersion;
     static final int latestDBVersionRequiringSummaryTableLoad = 19;
     static final int latestDBVersionRequiringSummaryTriggerLoad = 19;
@@ -811,6 +811,12 @@ public class DatabaseMaintenance {
                     Logging.log("Gratia database FAILED to upgrade from " + current +
                                 " to " + (current + 1));
                 }
+            }
+            if (current == 19) {
+                // Auxiliary DB item upgrades only.
+                Logging.log("Gratia database upgraded from " + current + " to " + (current + 1));
+                current = current + 1;
+                UpdateDbVersion(current);
             }
             return ((current == gratiaDatabaseVersion) && checkAndUpgradeDbAuxiliaryItems());
         }
