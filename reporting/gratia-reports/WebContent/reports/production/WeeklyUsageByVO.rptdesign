@@ -1082,7 +1082,7 @@ else {
         &lt;/structure>
         &lt;structure>
             &lt;property name=&quot;paramName&quot;>ForVO&lt;/property>
-            &lt;expression name=&quot;expression&quot;>&quot;VO&quot;&lt;/expression>
+            &lt;expression name=&quot;expression&quot;>&quot;ForVO&quot;&lt;/expression>
         &lt;/structure>
         &lt;structure>
             &lt;property name=&quot;paramName&quot;>ForSite&lt;/property>
