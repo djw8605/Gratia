@@ -439,7 +439,7 @@ order by VOProbeSummary.CommonName</property>
         </Color>
         <Visible>false</Visible>
       </Outline>
-      <Visible>false</Visible>
+      <Visible>true</Visible>
       <ClientArea>
         <Outline>
           <Style>Solid</Style>
@@ -474,11 +474,11 @@ order by VOProbeSummary.CommonName</property>
       </Text>
       <Orientation>Vertical</Orientation>
       <Direction>Top_Bottom</Direction>
-      <Position>Below</Position>
+      <Position>Right</Position>
       <ItemType>Series</ItemType>
       <Title>
         <Caption>
-          <Value>&lt;undefined></Value>
+          <Value>Sites or VO's</Value>
           <Font>
             <Alignment/>
           </Font>
@@ -506,7 +506,7 @@ order by VOProbeSummary.CommonName</property>
           <Bottom>0.0</Bottom>
           <Right>3.0</Right>
         </Insets>
-        <Visible>false</Visible>
+        <Visible>true</Visible>
       </Title>
       <TitlePosition>Above</TitlePosition>
     </Children>
@@ -846,7 +846,15 @@ function beforeDrawAxisTitle( axis, label, context )
       <TitlePosition>Left</TitlePosition>
       <SeriesDefinitions>
         <Query>
-          <Definition></Definition>
+          <Definition>if (params[&quot;ForSite&quot;] == &quot;AnySite&quot;) {
+row[&quot;sitename&quot;]
+}
+else if (params[&quot;ForVO&quot;] == &quot;AnyVO&quot;){
+row[&quot;voname&quot;]
+}
+else{
+&quot;&quot;
+}</Definition>
         </Query>
         <SeriesPalette>
           <Entries xsi:type="attribute:ColorDefinition">
