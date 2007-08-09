@@ -206,23 +206,24 @@ public class ReplicationTable extends HttpServlet
          e.printStackTrace();
       }
 
-      if (RecordTable == "JobUsageRecord") {
-	  try
-	      {
-		  command = "select distinct(VOName) from "+RecordTable+" order by VOName";
-		  statement = connection.prepareStatement(command);
-		  resultSet = statement.executeQuery(command);
+      if (RecordTable.equals("JobUsageRecord")) {
+          try
+              {
+                  command = "select distinct(V.VOName) from VO V, VONameCorrection C " +
+                      "where V.void = C.void order by V.VOName";
+                  statement = connection.prepareStatement(command);
+                  resultSet = statement.executeQuery(command);
 
-		  while (resultSet.next())
-		      vector.add("VO:" + resultSet.getString(1));
+                  while (resultSet.next())
+                      vector.add("VO:" + resultSet.getString(1));
 
-		  resultSet.close();
-		  statement.close();
-	      }
-	  catch (Exception e)
-	      {
-		  e.printStackTrace();
-	      }
+                  resultSet.close();
+                  statement.close();
+              }
+          catch (Exception e)
+              {
+                  e.printStackTrace();
+              }
       }
       try
       {
@@ -429,8 +430,8 @@ public class ReplicationTable extends HttpServlet
          newvalue = (String)request.getParameter(key);
          if (!oldvalue.equals(newvalue))
          {
-            update(index);
-            continue;
+             update(index, true); // Reset dbid and rowcount
+             continue;
          }
 
       }
@@ -501,7 +502,11 @@ public class ReplicationTable extends HttpServlet
       return false;
    }
 
-   public void update(int index)
+    public void update(int index) {
+        update(index, false);
+    }
+
+    public void update(int index, boolean reset)
    {
       String command = "";
       int sflag = 0;
@@ -511,16 +516,19 @@ public class ReplicationTable extends HttpServlet
 
       try
       {
-         command =
-               "update Replication set" + cr +
-               "security = " + sflag + comma + cr +
-               "probename = " + dq + request.getParameter("probename:" + index) + dq + comma + cr +
-               "frequency = " + request.getParameter("frequency:" + index) + cr +
-               "where replicationid = " + request.getParameter("replicationid:" + index);
-         System.out.println("command: " + command);
-         Statement statement = connection.createStatement();
-         statement.executeUpdate(command);
-         statement.close();
+          command =
+              "update Replication set" + cr +
+              "security = " + sflag + comma + cr +
+              "probename = " + dq + request.getParameter("probename:" + index) + dq + comma + cr +
+              "frequency = " + request.getParameter("frequency:" + index);
+          if (reset) {
+              command += comma + cr + "dbid = 0" + comma + cr + "rowcount = 0";
+          }
+          command += cr + "where replicationid = " + request.getParameter("replicationid:" + index);
+          System.out.println("command: " + command);
+          Statement statement = connection.createStatement();
+          statement.executeUpdate(command);
+          statement.close();
       }
       catch (Exception e)
       {
