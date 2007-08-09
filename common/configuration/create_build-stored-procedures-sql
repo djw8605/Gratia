@@ -279,7 +279,7 @@ my %procedures =
  WeeklyUsageBySiteRanked =>
  { select_columns => 'final_rank,
                       VOProbeSummary.VOName,
-                      Site.SiteName as sitename
+                      Site.SiteName as sitename,
                       date_format(VOProbeSummary.EndTime,\'\'\', format, \'\'\') as datevalue,
                       sum(VOProbeSummary.WallDuration) as WallDuration,
                       sum(VOProbeSummary.CpuUserDuration +
