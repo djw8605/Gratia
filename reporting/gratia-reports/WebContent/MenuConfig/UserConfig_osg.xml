@@ -5,11 +5,10 @@
 		</MenuGroup>
 		<MenuGroup name="Reports - VO Views">
 			<MenuItem name="-   Jobs by VO" link="viewer.jsp?__report=[ReportsFolder]UsageByVO.rptdesign,Display Metric=jobcount"/>
-			<MenuItem name="-   Daily Jobs by VO" link="viewer.jsp?__report=[ReportsFolder]DailyUsageByVO.rptdesign,Display Metric=jobcount"/>
+			<MenuItem name="-   Daily Jobs by VO" link="viewer.jsp?__report=[ReportsFolder]UsageByVOByDate-ranked.rptdesign,Display Metric=jobcount"/>
 			<MenuItem name="-   Daily Jobs by Site for VO" link="viewer.jsp?__report=[ReportsFolder]DailyUsageBySiteForVO.rptdesign,Display Metric=jobcount"/>
 			<MenuItem name="-   Usage by VO" link="viewer.jsp?__report=[ReportsFolder]UsageByVO.rptdesign,Display Metric=wallclock"/>
-			<MenuItem name="-   Daily Usage by VO" link="viewer.jsp?__report=[ReportsFolder]DailyUsageByVO.rptdesign,Display Metric=wallclock"/>
-			<MenuItem name="-   Daily Usage by VO and User" link="viewer.jsp?__report=[ReportsFolder]UsageByVOByDate-rank.rptdesign,Display Metric=wallclock"/>
+			<MenuItem name="-   Daily Usage by VO" link="viewer.jsp?__report=[ReportsFolder]UsageByVOByDate-ranked.rptdesign,Display Metric=wallclock"/>
 			<MenuItem name="-   Daily Usage by Site for VO" link="viewer.jsp?__report=[ReportsFolder]DailyUsageBySiteForVO.rptdesign,Display Metric=wallclock"/>
 		</MenuGroup>
 		<MenuGroup name="Reports - VO Views - Weekly History">
@@ -20,10 +19,10 @@
 		</MenuGroup>
 		<MenuGroup name="Reports - Site Views">
 			<MenuItem name="-   Jobs by Site" link="viewer.jsp?__report=[ReportsFolder]UsageBySite.rptdesign,Display Metric=jobcount"/>
-			<MenuItem name="-   Daily Jobs by Site" link="viewer.jsp?__report=[ReportsFolder]DailyUsageBySite.rptdesign,Display Metric=jobcount"/>
+			<MenuItem name="-   Daily Jobs by Site" link="viewer.jsp?__report=[ReportsFolder]UsageBySiteByDate-ranked.rptdesign,Display Metric=jobcount"/>
 			<MenuItem name="-   Daily Jobs by VO for Site" link="viewer.jsp?__report=[ReportsFolder]DailyUsageByVOForSite.rptdesign,Display Metric=jobcount"/>
 			<MenuItem name="-   Usage by Site" link="viewer.jsp?__report=[ReportsFolder]UsageBySite.rptdesign,Display Metric=wallclock"/>
-			<MenuItem name="-   Daily Usage by Site" link="viewer.jsp?__report=[ReportsFolder]DailyUsageBySite.rptdesign,Display Metric=wallclock"/>
+			<MenuItem name="-   Daily Usage by Site" link="viewer.jsp?__report=[ReportsFolder]UsageBySiteByDate-ranked.rptdesign,Display Metric=wallclock"/>
 			<MenuItem name="-   Daily Usage by VO for Site" link="viewer.jsp?__report=[ReportsFolder]DailyUsageByVOForSite.rptdesign,Display Metric=wallclock"/>
 		</MenuGroup>
 		<MenuGroup name="Reports - by Probe">
