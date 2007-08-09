@@ -134,7 +134,7 @@ ul
 <h1 align=center style='text-align:center'>Replication How To</h1>
 
 <p>Gratia has the ability to replicate <span class=GramE>it&#8217;s</span>
-database contents (actually, the <span class=SpellE>JobUsageRecords</span>) to
+database contents (actually, the XML records) to
 another instance of gratia running &#8220;out there somewhere&#8221;. This
 service can be found on the gratia-administration dashboard. Assuming your
 database is the source, and our database at Fermi is the target:</p>
@@ -151,13 +151,14 @@ tab-stops:list .5in'><![if !supportLists]><span style='font-family:Symbol;
 mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol'><span
 style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span></span><![endif]>You add an entry to our &#8220;open&#8221;
-connection &#8211; e.g. &#8211; <a href="http://fermilab:8080/">http://fermilab:8080</a></p>
+connection &#8211; e.g. &#8211; <a href="http://gratia.opensciencegrid.org:8880/gratia-reporting/">
+http://gratia.opensciencegrid.org:8880</a></p>
 
 <p style='margin-left:.5in;text-indent:-.25in;mso-list:l0 level1 lfo1;
 tab-stops:list .5in'><![if !supportLists]><span style='font-family:Symbol;
 mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol'><span
 style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span></span><![endif]>You select which probes you want to replicate to
+</span></span></span><![endif]>You select which probes (or VOs, or Grid designations) you want to replicate to
 our system.</p>
 
 <p style='margin-left:.5in;text-indent:-.25in;mso-list:l0 level1 lfo1;
@@ -182,7 +183,7 @@ mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol'><span
 style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span></span><![endif]>You can test the connection by using the &#8220;Test&#8221;
 link. Your server will send a dummy transaction to our machine at Fermi and let
-you know whether or not the connection was made. If it reports and error, you
+you know whether or not the connection was made. If it reports an error, you
 should contact the target gratia administrator for support.</p>
 
 <p style='margin-left:.5in;text-indent:-.25in;mso-list:l0 level1 lfo1;
@@ -190,7 +191,7 @@ tab-stops:list .5in'><![if !supportLists]><span style='font-family:Symbol;
 mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol'><span
 style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span></span><![endif]>Finally, start the replication process by using
-the &#8220;Start&#8221; link. Replication should start within a minute or so.
+the &#8220;Start&#8221; link; replication should start within a minute or so.
 You can stop the process with the &#8220;Stop&#8221; link (which will also take
 a minute or so).</p>
 

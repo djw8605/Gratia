@@ -37,7 +37,7 @@ public class ReplicationTable extends HttpServlet
    String html = "";
    String row = "";
 
-   Pattern p = Pattern.compile("<tr id=datarow>.*#index#.*?</table>.*?</tr>", Pattern.MULTILINE + Pattern.DOTALL);
+   Pattern p = Pattern.compile("<tr id=\"datarow.*?>.*#index#.*?</table>.*?</tr>", Pattern.MULTILINE + Pattern.DOTALL);
    Matcher m = null;
    StringBuffer buffer = new StringBuffer();
    //
@@ -126,6 +126,8 @@ public class ReplicationTable extends HttpServlet
             activate();
          else if (request.getParameter("action").equals("deactivate"))
             deactivate();
+         else if (request.getParameter("action").equals("reset"))
+            reset();
          else if (request.getParameter("action").equals("delete"))
             delete();
          else if (request.getParameter("action").equals("test"))
@@ -225,6 +227,25 @@ public class ReplicationTable extends HttpServlet
                   e.printStackTrace();
               }
       }
+      try {
+          command = "select distinct(Grid) from " + RecordTable + "_Meta order by Grid";
+          statement = connection.prepareStatement(command);
+          resultSet = statement.executeQuery(command);
+          
+          while (resultSet.next()) {
+              String grid = resultSet.getString(1);
+              if (resultSet.wasNull()) {
+                  grid = "<null>";
+              }
+              vector.add("Grid:" + grid);
+          }
+          
+          resultSet.close();
+          statement.close();
+      }
+      catch (Exception e) {
+              e.printStackTrace();
+      }
       try
       {
          command =
@@ -242,7 +263,7 @@ public class ReplicationTable extends HttpServlet
             newrow = xp.replaceAll(newrow, "#index#", "" + index);
             table.put("index:" + index, "" + index);
 
-            Pattern p1 = Pattern.compile("<input\\s*id=openconnection.*?/>", Pattern.MULTILINE + Pattern.DOTALL);
+            Pattern p1 = Pattern.compile("<input\\s*id=\"openconnection.*?/>", Pattern.MULTILINE + Pattern.DOTALL);
             Matcher m1 = p1.matcher(newrow);
             m1.find();
             String temp = m1.group();
@@ -271,9 +292,9 @@ public class ReplicationTable extends HttpServlet
             newrow = xp.replaceAll(newrow, "#dbid#", resultSet.getString("dbid"));
             newrow = xp.replaceAll(newrow, "#rowcount#", resultSet.getString("rowcount"));
 
-            String usesecurity = "Yes";
-            if (resultSet.getString("security").equals("0"))
-               usesecurity = "No";
+            String usesecurity = "No";
+            if (resultSet.getString("security").equals("1"))
+               usesecurity = "Yes";
             newrow = securitylist(index, newrow, usesecurity);
 
             newrow = probelist(index, newrow, resultSet.getString("probename"), vector);
@@ -291,7 +312,7 @@ public class ReplicationTable extends HttpServlet
       {
          String newrow = new String(row);
 
-         Pattern p1 = Pattern.compile("<table id=optiontable.*?</table>", Pattern.MULTILINE + Pattern.DOTALL);
+         Pattern p1 = Pattern.compile("<table id=\"optiontable.*?</table>", Pattern.MULTILINE + Pattern.DOTALL);
          Matcher m1 = p1.matcher(newrow);
          m1.find();
          String zap = m1.group();
@@ -306,7 +327,7 @@ public class ReplicationTable extends HttpServlet
          newrow = xp.replace(newrow, "#registered#", "N");
          newrow = xp.replace(newrow, "#running#", "N");
          newrow = probelist(index, newrow, "xxx", vector);
-         newrow = securitylist(index, newrow, "Yes");
+         newrow = securitylist(index, newrow, "No");
          table.put("index:" + index, "" + index);
          table.put("openconnection:" + index, newname);
          index++;
@@ -319,7 +340,7 @@ public class ReplicationTable extends HttpServlet
 
    public String probelist(int index, String input, String current, Vector names)
    {
-      Pattern p1 = Pattern.compile("<select id=probename.*probename:.*?</select>", Pattern.MULTILINE + Pattern.DOTALL);
+      Pattern p1 = Pattern.compile("<select id=\"probename.*probename:.*?</select>", Pattern.MULTILINE + Pattern.DOTALL);
       Matcher m1 = p1.matcher(input);
       m1.find();
       String row = m1.group();
@@ -334,14 +355,15 @@ public class ReplicationTable extends HttpServlet
       for (Enumeration x = names.elements(); x.hasMoreElements(); )
       {
          String name = (String)x.nextElement();
-
+         String printableName = name.replaceAll("<", "&lt;");
+         printableName = printableName.replaceAll(">", "&gt;");
          if (name.equals(current))
          {
-            buffer.append("<option selected=" + dq + "selected" + dq + ">" + name + "</option>" + cr);
+            buffer.append("<option selected=" + dq + "selected" + dq + ">" + printableName + "</option>" + cr);
             table.put("probename:" + index, current);
          }
          else
-            buffer.append("<option>" + name + "</option>" + cr);
+            buffer.append("<option>" + printableName + "</option>" + cr);
       }
 
       String temp = xp.replace(row, option, buffer.toString());
@@ -351,7 +373,7 @@ public class ReplicationTable extends HttpServlet
 
    public String securitylist(int index, String input, String current)
    {
-      Pattern p = Pattern.compile("<select id=security.*security:.*?</select>", Pattern.MULTILINE + Pattern.DOTALL);
+      Pattern p = Pattern.compile("<select id=\"security.*security:.*?</select>", Pattern.MULTILINE + Pattern.DOTALL);
       Matcher m = p.matcher(input);
       m.find();
       String row = m.group();
@@ -661,6 +683,24 @@ public class ReplicationTable extends HttpServlet
 	  e.printStackTrace();
       }
    }
+
+    void reset() {
+        String command = "";
+
+        try
+            {
+                command = "update Replication set dbid = 0, rowcount = 0" +
+                    " where replicationid = " + request.getParameter("replicationid");
+                Statement statement = connection.createStatement();
+                statement.executeUpdate(command);
+                statement.close();
+            }
+        catch (Exception e)
+            {
+                System.out.println("command: " + command);
+                e.printStackTrace();
+            }
+    }
 
    void deactivate()
    {

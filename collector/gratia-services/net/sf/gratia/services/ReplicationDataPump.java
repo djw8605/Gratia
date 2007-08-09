@@ -236,6 +236,14 @@ public class ReplicationDataPump extends Thread
         } else if (probename.startsWith("Probe:")) {
             probename = xp.replace(probename, "Probe:", "");
             where += " AND M.ProbeName = " + dq + probename + dq;
+        } else if (probename.startsWith("Grid:")) {
+            probename = xp.replace(probename, "Grid:", "");
+            where += " AND M.Grid";
+            if (probename.equals("<null>")) {
+                where += " IS NULL";
+            } else {
+                where += " = " + dq + probename + dq;
+            }
         }
 
         command = "SELECT count(*) FROM " + tables + cr + "  WHERE " + where;
