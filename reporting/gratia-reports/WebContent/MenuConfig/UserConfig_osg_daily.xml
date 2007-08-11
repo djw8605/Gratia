@@ -4,11 +4,11 @@
 			<MenuItem name="Home" link="dashboard.jsp"/>
 		</MenuGroup>
 		<MenuGroup name="Reports">
-			<MenuItem name="Daily Usage by Site" link="viewer.jsp?__report=[ReportsFolder]DailyUsageBySite-osgdaily.rptdesign,CPUMetric=wallclock"/>
+			<MenuItem name="Daily Usage by Site" link="viewer.jsp?__report=[ReportsFolder]UsageBySiteByDate-ranked-osgdaily.rptdesign,CPUMetric=wallclock"/>
 			<MenuItem name="Usage by Site" link="viewer.jsp?__report=[ReportsFolder]UsageBySite-osgdaily.rptdesign,CPUMetric=wallclock"/>
 			<MenuItem name="Jobs by Site" link="viewer.jsp?__report=[ReportsFolder]JobsBySite-osgdaily.rptdesign"/>
 
-			<MenuItem name="Daily Usage by VO" link="viewer.jsp?__report=[ReportsFolder]DailyUsageByVO-osgdaily.rptdesign,CPUMetric=wallclock"/>
+			<MenuItem name="Daily Usage by VO" link="viewer.jsp?__report=[ReportsFolder]UsageByVOByDate-ranked-osgdaily.rptdesign,CPUMetric=wallclock"/>
 			<MenuItem name="Usage by VO" link="viewer.jsp?__report=[ReportsFolder]UsageByVO-osgdaily.rptdesign,CPUMetric=wallclock"/>
 			<MenuItem name="Jobs by VO" link="viewer.jsp?__report=[ReportsFolder]JobsByVO-osgdaily.rptdesign"/>
 			
