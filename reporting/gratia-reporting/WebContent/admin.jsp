@@ -228,7 +228,7 @@
 		}
 	}
 %>
-	<table width=100% height=100%>		
+	<table width="100%" height="100%">		
 		<tr>
 			<td>
 				Enter in a SQL statement below and click 'Execute' to see the results.
@@ -244,7 +244,7 @@
 				<input class=button type=submit value=Execute> 
 			</td>
 		</tr>
-		<tr height=100%>
+		<tr height="100%">
 			<td>
 			   <div align="center"><input type="button" value="Download Report Data - CSV Format"
 			   onClick="window.open('downloadFile.jsp?csvFile=<%=csvFileName %>', 'Gratia');"></div>

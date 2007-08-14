@@ -25,7 +25,7 @@
 	UserConfiguration userConfiguration =  (UserConfiguration)session.getAttribute("userConfiguration"); 
 %>	
 	
-	<table style="height: 100%" width=100%>
+	<table style="height: 100%" width="100%">
 	<%
 	// Figure out the row that has the most columns.  This is required to calculate the colSpan for each cell.
 	int maxColumns = 1;

@@ -39,7 +39,7 @@
 	}
 %>
 	
-	<table width=100% style="height: 95%">
+	<table width="100%" style="height: 95%">
 		<tr>
 			<td valign="top" width=150>
 				<table class=menu>
@@ -89,14 +89,14 @@
 					<td class=menuGroup><hr>Commands</td>
 					</tr>
 					<tr>
-						<td><a class=menuItem href="logout.jsp">Logout<br /></td>
+						<td><a class=menuItem href="logout.jsp">Logout</a><br /></td>
 					</tr>
 				</table>
 			</td>
 			<td width=1 bgcolor="black">
 			</td>
 			<td valign="top">
-			<table width=100% style="height: 90%">
+			<table width="100%" style="height: 90%">
 			<tr> 
 			<td valign="top">
 <!--
