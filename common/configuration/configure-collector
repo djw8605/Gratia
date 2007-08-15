@@ -20,7 +20,8 @@ my %collector_configs =
 							 server_port => 8104,
 							 db_schema => "gratia",
 							 remote_host => "gratia-osg.fnal.gov",
-							 heap_size => "512m",
+               max_perm_size => "256m",
+							 max_heap_size => "1024m",
 							 "properties.attributes" =>
 							 {
 								"maintain.history.log" => 7,
@@ -176,7 +177,7 @@ my @required_properties = ();
 
 my %attribute_defaults =
 	(
-	 heap_size => "256m",
+	 max_heap_size => "256m",
 	 collector_host => "localhost",
 	 db_port => 3320,
 	 db_host => "gratia-db01.fnal.gov",
@@ -242,11 +243,7 @@ TOMCAT_HTTP_PORT=
 TOMCAT_SSL_PORT=
 TOMCAT_PATH_STEM=
 JAVA_HOME=
-TOMCAT_HEAP_SIZE=
 ####################################
-
-[[ -z "$TOMCAT_HEAP_SIZE" ]] && TOMCAT_HEAP_SIZE="128m"
-
 export JAVA_HOME
 
 # This should be fine as a default
@@ -257,7 +254,7 @@ TOMCAT_INSTANCE_NAME=`basename "$0" | sed -e 's/^.*\(tomcat-.*\)$/\1/'`
 CATALINA_HOME="${TOMCAT_PATH_STEM}/${TOMCAT_INSTANCE_NAME}"; export CATALINA_HOME
 [[ -n "$KRB5CCNAME" ]] && KRB5CCNAME=`echo "$KRB5CCNAME" | sed -e 's/^FILE://'`
 if [ "$1" = "start" ] ; then
-  JAVA_OPTS="-Xmx$TOMCAT_HEAP_SIZE -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=${TOMCAT_MANAGEMENT_PORT} -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dssl.port=${TOMCAT_SSL_PORT}"; export JAVA_OPTS
+  JAVA_OPTS="-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=${TOMCAT_MANAGEMENT_PORT} -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dssl.port=${TOMCAT_SSL_PORT}"; export JAVA_OPTS
   $CATALINA_HOME/bin/catalina.sh start
 elif [ "$1" = "stop" ] ; then
   $CATALINA_HOME/bin/shutdown.sh
@@ -447,7 +444,10 @@ sub configure_init_file {
 	my ($instance_name, $collector_config) = @_;
 	my $init_script = "/etc/rc.d/init.d/tomcat-$instance_name";
 	my $init_script_txt = $init_script_template;
-	$init_script_txt =~ s&^(TOMCAT_HEAP_SIZE=).*$&${1}$collector_config->{heap_size}&m if $collector_config->{heap_size};
+	$init_script_txt =~ s&^(\s*JAVA_OPTS\s*=\s*".*?)"&${1} -Xmx$collector_config->{max_heap_size}"&m if $collector_config->{max_heap_size};
+	$init_script_txt =~ s&^(\s*JAVA_OPTS\s*=\s*".*?)"&${1} -Xms$collector_config->{initial_heap_size}"&m if $collector_config->{inital_heap_size};
+	$init_script_txt =~ s&^(\s*JAVA_OPTS\s*=\s*".*?)"&${1} -XX:MaxPermSize=$collector_config->{max_perm_size}"&m if $collector_config->{max_perm_size};
+	$init_script_txt =~ s&^(\s*JAVA_OPTS\s*=\s*".*?)"&${1} -XX:PermSize=$collector_config->{initial_perm_size}"&m if $collector_config->{initial_perm_size};
 	$init_script_txt =~ s&^(TOMCAT_MANAGEMENT_PORT=).*$&${1}$collector_config->{jmx_port}&m;
 	$init_script_txt =~ s&^(TOMCAT_HTTP_PORT=).*$&${1}$collector_config->{http_port}&m;
 	$init_script_txt =~ s&^(TOMCAT_SSL_PORT=).*$&${1}$collector_config->{ssl_port}&m;
