@@ -26,12 +26,28 @@
     </list-property>
     <list-property name="configVars">
         <structure>
+            <property name="name">DatabaseURL</property>
+            <property name="value">jdbc:mysql://gratia-db01.fnal.gov:3320/gratia_osg_daily</property>
+        </structure>
+        <structure>
             <property name="name">DatabaseUser</property>
             <property name="value">gratia</property>
         </structure>
         <structure>
             <property name="name">DatabasePassword</property>
             <property name="value">proto</property>
+        </structure>
+        <structure>
+            <property name="name">Start Date</property>
+            <property name="value">2007-08-01</property>
+        </structure>
+        <structure>
+            <property name="name">End Date</property>
+            <property name="value">2007-08-15</property>
+        </structure>
+        <structure>
+            <property name="name">CPUMetric</property>
+            <property name="value">wallclock</property>
         </structure>
     </list-property>
     <parameters>
@@ -143,8 +159,8 @@ select ReportedSiteName as SiteName,
 	sum(CpuUserDuration+CpuSystemDuration)
 from JobUsageRecord_Report
 where (? &lt;= EndTime and EndTime &lt;= ?)
-group by SiteName
-order by SiteName</property>
+group by ReportedSiteName
+order by ReportedSiteName</property>
         </oda-data-set>
         <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="CPUMetricTypes" id="102">
             <property name="dataSource">fermigrid1</property>
@@ -164,9 +180,16 @@ from CPUMetricTypes</property>
         </simple-master-page>
     </page-setup>
     <body>
+        <text-data id="94">
+            <property name="style">sans-style1</property>
+            <property name="fontSize">9pt</property>
+            <property name="textAlign">center</property>
+            <expression name="valueExpr">"Date range: "+ params["Start Date"] + " - " + params["End Date"]</expression>
+            <property name="contentType">html</property>
+        </text-data>
         <extended-item extensionName="Chart" id="88">
             <property name="style">sans-style1</property>
-            <property name="height">520px</property>
+            <property name="height">1000px</property>
             <property name="width">640px</property>
             <property name="dataSet">UsageBy</property>
             <list-property name="paramBindings">
@@ -422,7 +445,7 @@ from CPUMetricTypes</property>
       <Left>0.0</Left>
       <Top>0.0</Top>
       <Width>480.0</Width>
-      <Height>390.0</Height>
+      <Height>750.0</Height>
     </Bounds>
     <Insets>
       <Top>3.0</Top>
@@ -829,9 +852,13 @@ function beforeGeneration( chart, context ){
           </Label>
           <DataDefinition>
             <Definition>if (params[&quot;CPUMetric&quot;] == 'wallclock') {
+
 	row[&quot;sum(WallDuration)&quot;] / 3600
+
 	}else{
+
 	row[&quot;sum(CpuUserDuration+CpuSystemDuration)&quot;]/3600
+
 }</Definition>
           </DataDefinition>
           <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
@@ -849,72 +876,6 @@ function beforeGeneration( chart, context ){
           </DataPoint>
           <LabelPosition>Outside</LabelPosition>
           <Stacked>false</Stacked>
-          <Triggers>
-            <Condition>onmouseover</Condition>
-            <Action>
-              <Type>Show_Tooltip</Type>
-              <Value xsi:type="attribute:TooltipValue">
-                <Text></Text>
-                <Delay>200</Delay>
-              </Value>
-            </Action>
-          </Triggers>
-          <Triggers>
-            <Condition>onclick</Condition>
-            <Action>
-              <Type>URL_Redirect</Type>
-              <Value xsi:type="attribute:URLValue">
-                <BaseUrl>&lt;structure name=&quot;action&quot;>
-    &lt;property name=&quot;formatType&quot;>html&lt;/property>
-    &lt;property name=&quot;linkType&quot;>drill-through&lt;/property>
-    &lt;property name=&quot;reportName&quot;>UsageByUser-osgdaily.rptdesign&lt;/property>
-    &lt;property name=&quot;targetWindow&quot;>_self&lt;/property>
-    &lt;list-property name=&quot;paramBindings&quot;>
-        &lt;structure>
-            &lt;property name=&quot;paramName&quot;>DatabaseURL&lt;/property>
-            &lt;expression name=&quot;expression&quot;>params[&quot;DatabaseURL&quot;]&lt;/expression>
-        &lt;/structure>
-        &lt;structure>
-            &lt;property name=&quot;paramName&quot;>DatabaseUser&lt;/property>
-            &lt;expression name=&quot;expression&quot;>params[&quot;DatabaseUser&quot;]&lt;/expression>
-        &lt;/structure>
-        &lt;structure>
-            &lt;property name=&quot;paramName&quot;>DatabasePassword&lt;/property>
-            &lt;expression name=&quot;expression&quot;>params[&quot;DatabasePassword&quot;]&lt;/expression>
-        &lt;/structure>
-        &lt;structure>
-            &lt;property name=&quot;paramName&quot;>ForVOName&lt;/property>
-            &lt;expression name=&quot;expression&quot;>'xxx'&lt;/expression>
-        &lt;/structure>
-        &lt;structure>
-            &lt;property name=&quot;paramName&quot;>ForVO&lt;/property>
-            &lt;expression name=&quot;expression&quot;>'AnyVO'&lt;/expression>
-        &lt;/structure>
-        &lt;structure>
-            &lt;property name=&quot;paramName&quot;>ForSite&lt;/property>
-            &lt;expression name=&quot;expression&quot;>'ForSite'&lt;/expression>
-        &lt;/structure>
-        &lt;structure>
-            &lt;property name=&quot;paramName&quot;>Start Date&lt;/property>
-            &lt;expression name=&quot;expression&quot;>params[&quot;Start Date&quot;]&lt;/expression>
-        &lt;/structure>
-        &lt;structure>
-            &lt;property name=&quot;paramName&quot;>End Date&lt;/property>
-            &lt;expression name=&quot;expression&quot;>params[&quot;End Date&quot;]&lt;/expression>
-        &lt;/structure>
-        &lt;structure>
-            &lt;property name=&quot;paramName&quot;>Display Metric&lt;/property>
-            &lt;expression name=&quot;expression&quot;>params[&quot;CPUMetric&quot;]&lt;/expression>
-        &lt;/structure>
-    &lt;/list-property>
-&lt;/structure>
-</BaseUrl>
-                <BaseParameterName>ForSiteName</BaseParameterName>
-                <ValueParameterName></ValueParameterName>
-                <SeriesParameterName></SeriesParameterName>
-              </Value>
-            </Action>
-          </Triggers>
           <Riser>Rectangle</Riser>
         </Series>
         <Grouping>
@@ -1275,12 +1236,5 @@ function beforeGeneration( chart, context ){
 ]]></xml-property>
             <property name="outputFormat">SVG</property>
         </extended-item>
-        <text-data id="94">
-            <property name="style">sans-style1</property>
-            <property name="fontSize">9pt</property>
-            <property name="textAlign">center</property>
-            <expression name="valueExpr">"Date range: "+ params["Start Date"] + " - " + params["End Date"]</expression>
-            <property name="contentType">html</property>
-        </text-data>
     </body>
 </report>
