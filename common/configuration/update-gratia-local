@@ -85,8 +85,6 @@ if ! [[ -d "$tomcat_top" ]]; then
   exit 1
 fi
 
-remote_host=`uname -n`
-
 service tomcat-$instance stop 2>/dev/null
 sleep 5
 
@@ -138,7 +136,6 @@ done
 $use_ssl \
 -p "$tomcat_root" \
 -j "$java_jre" \
--r "$remote_host" \
 $dbp_arg "$dbpwd" \
 $instance
 

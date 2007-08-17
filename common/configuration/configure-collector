@@ -19,7 +19,7 @@ my %collector_configs =
 							 jmx_port => 8004,
 							 server_port => 8104,
 							 db_schema => "gratia",
-							 remote_host => "gratia-osg.fnal.gov",
+							 remote_host => "gratia.opensciencegrid.org",
                max_perm_size => "256m",
 							 max_heap_size => "1024m",
 							 "properties.attributes" =>
@@ -48,7 +48,7 @@ my %collector_configs =
 						jmx_port => 8014,
 						server_port => 8114,
 						db_schema => "gratia_itb",
-						remote_host => "gratia-osg.fnal.gov",
+						remote_host => "gratia.opensciencegrid.org",
 						"properties.attributes" =>
 						{
 						 "monitor.listener.wait" => 60
@@ -94,7 +94,7 @@ my %collector_configs =
                     "gratia.database.wantSummaryTable" => 0,
                     "gratia.database.wantSummaryTrigger" => 0
 									},
-									remote_host => "gratia-osg.fnal.gov"
+									remote_host => "gratia.opensciencegrid.org"
 								},
 	 jeffmack => {http_port => 8880,
 								ssl_port => 8845,
@@ -305,13 +305,6 @@ unless (exists $options{prefix}) {
 pod2usage(-exitval => 1) unless scalar @ARGV;
 
 my @instance_list = @ARGV;
-
-
-if (exists $options{"remote-host"}) {
-	print STDERR "INFO: overriding default instance remote hostname with $options{\"remote-host\"}\n";
-} else {
-	print STDERR "INFO: instances without a specified remote hostname will use $default_remote_host\n";
-}
 
 
 foreach my $config (@instance_list) {
@@ -600,17 +593,24 @@ sub configure_tomcat_users {
 
 sub construct_monitor_message_subject {
 	my ($instance_name, $collector_config) = @_;
-	my $remote_host = $options{"remote-host"} if defined $options{"remote-host"};
-	$remote_host =
-		(exists $collector_config->{remote_host})?
-			$collector_config->{remote_host}:$default_remote_host
-				unless $remote_host;
-	return
-		sprintf("%s:%s %s Potential listener problem",
-						$remote_host,
-						$collector_config->{http_port},
-						"tomcat-$instance_name"
-					 );
+  my $remote_host;
+  if ($options{"remote-host"}) {
+    print STDERR "INFO: overriding instance-specified remote hostname with command-line-specified $options{\"remote-host\"}\n";
+    $remote_host = $options{"remote-host"};
+  } elsif ($collector_config->{remote_host}) {
+    print STDERR "INFO: using instance-specified remote hostname ",
+      $collector_config->{remote_host}, "\n";
+    $remote_host = $collector_config->{remote_host};
+  } else {
+    print STDERR "INFO: using default remote hostname $default_remote_host";
+    $remote_host = $default_remote_host;
+  }
+
+	return sprintf("%s:%s %s Potential listener problem",
+                 $remote_host,
+                 $collector_config->{http_port},
+                 "tomcat-$instance_name"
+                );
 }
 
 sub temporary_filename {
