@@ -190,7 +190,7 @@ public class ProbeTable extends HttpServlet
         html = html.replaceFirst("#activeFilter#", activeFilter);
         try
             {
-                command = "select ProbeName,max(EndTime) from ProbeStatus group by ProbeName order by ProbeName";
+                command = "select probename,currenttime from Probe";
                 statement = connection.prepareStatement(command);
                 resultSet = statement.executeQuery(command);
 
@@ -232,7 +232,7 @@ public class ProbeTable extends HttpServlet
 
         try
             {
-                command = "select probeid,siteid,probename,active,reporthh,reportmm from Probe";
+                command = "select probeid,siteid,probename,active,reporthh,reportmm,nRecords from Probe";
                 if (activeFlag == 1) {
                     command += " where active = 1";
                 } else if (activeFlag == -1) {
@@ -256,6 +256,7 @@ public class ProbeTable extends HttpServlet
                         table.put("dbid:" + index,resultSet.getString(1));
 
                         newrow = xp.replaceAll(newrow,"#probename#",probename);
+                        newrow = xp.replaceAll(newrow, "#nRecords#", resultSet.getString(7));
 
                         /*
                           newrow = xp.replaceAll(newrow,"#reporthh#",resultSet.getString(5));
@@ -355,6 +356,7 @@ public class ProbeTable extends HttpServlet
                 newrow = xp.replace(newrow,"#probename#",newname);
                 newrow = xp.replace(newrow,"#reporthh#","24");
                 newrow = xp.replace(newrow,"#reportmm#","0");
+                newrow = xp.replaceAll(newrow, "#nRecords#", "0");
                 newrow = celist(index,newrow,"xxx");
                 table.put("index:" + index,"" + index);
                 table.put("probename:" + index,newname);
