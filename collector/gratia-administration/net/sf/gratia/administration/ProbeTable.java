@@ -238,7 +238,7 @@ public class ProbeTable extends HttpServlet
                         table.put("dbid:" + index,resultSet.getString(1));
 
                         newrow = xp.replaceAll(newrow,"#probename#",probename);
-                        newrow = xp.replaceAll(newrow, "#nRecords#", resultSet.getString(7));
+                        newrow = xp.replaceAll(newrow, "#nRecords#", nRecords);
 
                         /*
                           newrow = xp.replaceAll(newrow,"#reporthh#",resultSet.getString(5));
