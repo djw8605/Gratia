@@ -225,6 +225,10 @@ public class ProbeTable extends HttpServlet
                         String newrow = new String(row);
                         String probename = resultSet.getString(3);
                         String siteid = resultSet.getString(2);
+                        String nRecords = resultSet.getString(7);
+                        if (nRecords == null) {
+                            nRecords = "0";
+                        }
                         Timestamp timestamp = resultSet.getTimestamp(8);
 
                         newrow = xp.replaceAll(newrow,"#index#","" + index);
