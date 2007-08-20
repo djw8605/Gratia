@@ -280,7 +280,7 @@ public class ProbeTable extends HttpServlet
                             }
                         if (timestamp != null)
                             {
-                                SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd kk:mm:ss");
+                                SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                                 newrow = xp.replaceAll(newrow,"#lastcontact#",format.format(timestamp));
                             }
                         else
