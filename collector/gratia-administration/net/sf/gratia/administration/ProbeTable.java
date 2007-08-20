@@ -56,7 +56,6 @@ public class ProbeTable extends HttpServlet
     Hashtable sitebyid = new Hashtable();
     Hashtable sitebyname = new Hashtable();
     String newname = "<New Probe Name>";
-    Hashtable contact = new Hashtable();
     TreeSet siteList = new TreeSet();
 
     public void init(ServletConfig config) throws ServletException 
@@ -170,7 +169,6 @@ public class ProbeTable extends HttpServlet
         buffer = new StringBuffer();
         sitebyid = new Hashtable();
         sitebyname = new Hashtable();
-        contact = new Hashtable();
         int activeFlag = 0;
 
         String activeFilter = (String) request.getParameter("activeFilter");
@@ -188,26 +186,6 @@ public class ProbeTable extends HttpServlet
             }
         }
         html = html.replaceFirst("#activeFilter#", activeFilter);
-        try
-            {
-                command = "select probename,currenttime from Probe";
-                statement = connection.prepareStatement(command);
-                resultSet = statement.executeQuery(command);
-
-                while(resultSet.next())
-                    {
-                        String key = resultSet.getString(1);
-                        Timestamp timestamp = resultSet.getTimestamp(2);
-                        contact.put(key,timestamp);
-                    }
-                resultSet.close();
-                statement.close();
-            }
-        catch (Exception e)
-            {
-                e.printStackTrace();
-            }
-
         try
             {
                 command = "select siteid,SiteName from Site order by SiteName";
@@ -232,7 +210,7 @@ public class ProbeTable extends HttpServlet
 
         try
             {
-                command = "select probeid,siteid,probename,active,reporthh,reportmm,nRecords from Probe";
+                command = "select probeid,siteid,probename,active,reporthh,reportmm,nRecords,currenttime from Probe";
                 if (activeFlag == 1) {
                     command += " where active = 1";
                 } else if (activeFlag == -1) {
@@ -247,7 +225,7 @@ public class ProbeTable extends HttpServlet
                         String newrow = new String(row);
                         String probename = resultSet.getString(3);
                         String siteid = resultSet.getString(2);
-                        Timestamp timestamp = (Timestamp) contact.get(probename);
+                        Timestamp timestamp = resultSet.getTimestamp(8);
 
                         newrow = xp.replaceAll(newrow,"#index#","" + index);
                         table.put("index:" + index,"" + index);
@@ -298,7 +276,7 @@ public class ProbeTable extends HttpServlet
                             }
                         if (timestamp != null)
                             {
-                                SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd kk");
+                                SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd kk:mm:ss");
                                 newrow = xp.replaceAll(newrow,"#lastcontact#",format.format(timestamp));
                             }
                         else
