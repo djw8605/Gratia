@@ -1,0 +1,439 @@
+#!/usr/bin/env perl
+#           redirex: Redirect requests to a new Web server
+#            by John Walker  --  http://www.fourmilab.ch/
+#                             March 1998
+#
+#   	    Upsated to Perl 5 syntax and strict mode by Luke Bakken
+#   	    in July 2004.
+#
+#         Modified by Chris Green in 2007 for local use specific to the Gratia system.
+#
+#   Usage: redirex [ -p port ] [ -c configfile ] &
+#   Sample invocations: 
+#       redirex -p 3000 -c redirex.conf & # start on port 3000 and read redirex.conf
+#       redirex -c redirex.conf &         # start on the default port use redirex.conf
+#       redirex &                         # start on the default port specified by the
+#                                           configuration named by the variable
+#                                           $defaultConfigFile (see the source).
+#
+#   Redirex is derived from "mhttpd"--a small HTTP server written in Perl
+#   Credits for mhttpd are as follows:
+#
+#               Author: Jerry LeVan (levan@eagle.eku.edu)
+#               Date:   March 25, 1996
+#               Ver:    0.1
+#               Env:    Perl 5.002
+#
+#               Note:   This program was directly inspired by Bob Diertens simple
+#                       cgi "Get" server for executables( aka bobd ). 
+#                       Bob's Address: <bobd@fwi.uva.nl> URL: http://www.fwi.uva.nl/~bobd/ 
+#                       Another source of inspiration was Pratap Pereira's phttpd, Prataps
+#                       address http://eewww.eng.ohio-state.edu/~pereira". I have shamelessly
+#                       "borrowed" code from these two programs. They are entirely blameless
+#                       for any flaws in this code.
+#               WARNING:
+#                     I take no responsibility for any problems arising from the use
+#                     of this code. I have taken all of the steps that I know of to
+#                     ensure the reliability and security of the data that this program
+#                     can access, regretably there are many more persons that are much
+#                     more clever than I prowling the Net. If you find a security hole
+#                     please tell me, and I would greatly appreciate any hole plugging
+#                     infomation that you can provide.
+#   Redirex is a much simpler application than mhttpd, so much of the
+#   code in the original program has been deleted in creating this
+#   single-purpose redirector.  Naturally, any errors and omissions
+#   in this program are entirely the responsibility of John Walker,
+#   who hacked it into existence.
+
+require 5.6.0;
+use strict;
+use warnings;
+
+use Getopt::Std;
+use POSIX qw(:sys_wait_h :errno_h);
+use Socket qw(:DEFAULT :crlf);
+
+#######################################################################################
+#	    	    	    	    	Configuration	    	    	    	    	  #
+#	    	    	    	    	    	    	    	    	    	    	  #
+#	    All of the following settings can be overridden by the configuration file	  #
+#######################################################################################
+
+#   Default port to listen to. If the -p switch is used
+#   to specify another port, this value will not be used.
+
+our $defaultport = 9080;        # For testing
+# our $defaultport = 80;	    	    # Standard HTTP port (must be super-user to bind)
+
+#   Default IP address to bind to.  If you wish to listen to
+#   all IP addresses, set this to '0.0.0.0'.
+
+our $IPlisten = '0.0.0.0';
+
+#   New server URL prefix for redirection destination
+
+our $newServer = 'http://www_newserver.yoursite.net';
+
+#   URL and description of home page for new server
+
+our $newHomePage = "$newServer/";
+our $newHomePageDescription = 'New server home page';
+
+#   Log file path name
+
+our $logfile;
+if ($^O eq 'MSWin32') {
+	$logfile = 'c:/tmp/redirex.log';
+} else {
+	$logfile = '/tmp/redirex.log';
+}
+
+#   If $DOredirect == 1 requests will be hard-redirected with a
+#   301 status code.  If zero, the reply will be a normal 200
+#   status document which informs the user of the redirection
+#   but doesn't request the browser to divert there.
+
+our $DOredirect = 0;
+
+#   If $No_cache == 1, responses will include header items
+#   which suppress proxy server and browser caching of the
+#   the returned document.  This is handy for testing, since
+#   some browsers will otherwise cache a redirect and not see
+#   an error document returned by $DOredirect = 0 subsequently.
+#   In the interest of efficiency, you should set $No_cache = 0
+#   when you put Redirex into production.
+
+our $No_cache = 0;
+    
+#   If $RedirectAllToNewHome == 1, all requests will be redirected to
+#   the new server home page regardless of initial requested URL.
+
+our $RedirectAllToNewHome = 0;
+
+#   If $Daemon == 1, fork into the background.
+
+our $Daemon = 0;
+
+#######################################################################################
+#	    	      You shouldn't have to change anything after this line 	    	  #
+#######################################################################################
+
+my $program = 'redirex';
+my $version = '2.0CG';
+
+use vars qw($script_top_dir);
+
+use File::Basename;
+
+BEGIN {
+	# Make a spirited attempt to find where our libraries, etc are.
+	if (-l $0) {
+		$script_top_dir = dirname(readlink($0));
+	} else {
+		$script_top_dir = dirname $0;
+	}
+	chomp $script_top_dir;
+}
+
+# Add best guess for local library files.
+use lib glob "$script_top_dir/lib";
+
+# Allow fork to daemon
+use Proc::Daemon;
+
+#   If the following variable is defined and the -c option is
+#   not used, then $defaultConfigFile will be used.
+
+my $defaultConfigFile = "$program.conf";
+
+my %opt;
+getopt('pcP', \%opt);
+my $port = $opt{p} if defined $opt{p};
+my $pidfile = $opt{P} if defined $opt{P};
+
+$opt{c} = $defaultConfigFile if defined($defaultConfigFile) && !defined($opt{c});
+print("No Configuration file specified!\n"), exit(1) unless defined $opt{c};
+#print(STDERR "Loading configuration ", $opt{c}, "\n");
+require "$opt{c}";              # Include configuration file
+#print(STDERR "New server: $newServer\nHome page: $newHomePage\nDescription: $newHomePageDescription\n");
+
+fork_to_daemon() if $Daemon;
+
+if (open(PIDFILE, ">$pidfile")) {
+  print PIDFILE "$$";
+  close(PIDFILE);
+}
+
+my $logitem = '';
+open(LOG, ">>$logfile") || die "Can't open log file: $!";
+#   Set log file unbuffered
+select(LOG); $| = 1; select(STDOUT);
+
+$port = $defaultport unless defined $port;
+
+# my $login = getlogin || (getpwuid($<))[0] || "Intruder!"; 
+# $0 = "$0";  # new name for the "ps" program
+
+# Set up SIG vector
+
+$SIG{'CHLD'} = \&reaper;
+$SIG{'KILL'} = \&SigHandler;
+$SIG{'INT'}  = \&SigHandler;
+$SIG{'TERM'} = \&SigHandler;
+$SIG{'QUIT'} = \&SigHandler;
+$SIG{'HUP'}  = \&SigHandler;
+
+# Initialise port
+
+my @ipcomp = split(/\./, $IPlisten);
+my $justListen = 'S n C4 x8';
+my $sockaddr = 'S n a4 x8';
+my ($name, $aliases, $proto) = getprotobyname('tcp');
+my $thisport = pack($justListen, AF_INET, $port, @ipcomp);
+
+my $S;
+socket($S, PF_INET, SOCK_STREAM, $proto)
+  || die "can't create $name $proto socket: $!\n";
+setsockopt($S, SOL_SOCKET, SO_REUSEADDR, pack('i', 1))
+  || die "can't setsockopt: $!\n";
+bind($S, $thisport)		|| die "can't bind socket: $!\n";
+listen($S, 5)			|| die "can't listen to socket: $!\n";
+
+logInfo("Starting $program $version on port $port");
+
+# Answer if someone knocks on the port.
+
+my $requestingHost = '';
+for (;;) {
+	my $NS;
+	if (!accept($NS, $S)) {
+    if ($! == EINTR || $! == ECHILD || $! == EPROTOTYPE) {
+      next;
+    }
+    logInfo("Accept Failure, shutting down $program, error: $!");
+    exit(1);
+	}
+	my $child;
+	if (($child = fork()) == 0) {
+    # This is the child process
+    # Get the method and command
+    my ($method, $command) = SetupCommand($NS); 
+
+    if ($method eq 'GET' || $method eq 'POST') {
+      SendRedirect($NS, $command, 1);
+    } elsif ($method eq 'HEAD') {
+      SendRedirect($NS, $command, 0);
+    } else {
+      ErrorMessage($NS, 400, "Bad Request.");
+    }
+    exit(0);
+	} else {
+    close($NS);
+	}
+}
+
+# Grab a line without using buffered input... Important for
+# POST methods since they have to read the stream.
+    
+sub rd_readline {
+	my $fd = shift;
+	my $ch;
+	my $string = '';
+
+	alarm(120);                   # prevent deadly spin if other end goes away
+	for (;;) {
+    if (sysread($fd,$ch,1)) {   # returns undef or 1
+      $string .= $ch unless $ch eq "\r"; # skip <cr>
+      last if $ch eq "\n";
+    }
+	}
+	alarm(0);                     # clear alarm
+	return $string;
+}
+
+# Sets many global variables, processes prologue from client
+# and returns $method and $command to main loop.
+
+sub SetupCommand {
+	my $sock = shift;
+	my $inp;
+	my ($method, $command);
+	my ($rem_ip_addr, $radr);
+
+	#   Get first line from client
+	$inp = rd_readline($sock);
+	$inp =~ s/\s+$//;
+
+	$inp =~ /^([A-Z]*) \/(.*) (\w*)\/(\d*\.\d*)/;
+	# We should check if the match failed!
+
+	$method = $1;
+	my $commandline = $2;
+	my $protocol = $3;
+	my $protocol_version = $4;
+
+	$command = $commandline;
+	$rem_ip_addr = (unpack($sockaddr, getpeername($sock)))[2];
+	$radr = join(".", unpack("C4", $rem_ip_addr));
+	$logitem = timestamp();
+	$logitem = "$radr - - $logitem \"$inp\"";
+
+	$requestingHost = '';
+	for (;;) {                    # read until we get a blank line
+    my $string = rd_readline($sock);
+    $string =~ s/\s+$//;
+    last if $string eq "";
+    if ($string =~ /Host:/i) {
+      $requestingHost = (split(" ", $string))[1];
+    }
+	}
+	return ($method, $command);
+}
+
+# Print an error message to the client
+
+sub ErrorMessage {
+	my ($fd, $error, $message) = @_;
+
+	print($fd  "HTTP/1.0 501 Not Implemented\r\n");
+	print($fd  "Content-type: text/html\r\n\r\n");
+	print($fd "<html>\n<head>\n<title>Error Message</title>\n</head>\n<body>\n");
+	print($fd "<h1>Error($error</h1>\n");
+	print($fd "<hr>\n");
+	print($fd "$message\n");
+	print($fd "<hr>\n</body>\n</html>\n");
+	close($fd);
+	print(LOG "$logitem 501 512\n");
+}
+
+#   Send redirect document including remapped request to user.
+
+sub SendRedirect {
+	my ($fd, $url, $body) = @_;
+  my $newurl = $url;
+  if ($RedirectAllToNewHome) {
+    $newurl = $newHomePage;
+    $newurl =~ s&\Q$newServer\E/&&;
+  }
+
+
+	my ($uu, $listat);
+  #print(STDERR "New server: $newServer\nHome page: $newHomePage\nDescription: $newHomePageDescription\n");
+
+	if ($DOredirect) {
+    print($fd "HTTP/1.0 301 Moved Permanently\r\n");
+    print($fd "Location: $newServer/$newurl\r\n");
+    if ($No_cache) {
+      print($fd "Cache-control: no-cache\r\n");
+      print($fd "Pragma: no-cache\r\n");
+    }
+    $listat = 301;
+	} else {
+    print($fd "HTTP/1.0 200 OK\r\n");
+    if ($No_cache) {
+      print($fd "Cache-control: no-cache\r\n");
+      print($fd "Pragma: no-cache\r\n");
+    }
+    $listat = 200;
+	}
+	print($fd  "Content-type: text/html\r\n\r\n");
+	if ($body) {
+    print($fd "<html>\n<head>\n<title>Incorrect Server Specified</title>\n</head>\n<body>\n");
+    print($fd "<h1>Incorrect Server Specified</h1>");
+    print($fd "<hr>\n");
+    print($fd "The document you requested:<p>\n");
+    $uu = '';
+    if ($requestingHost ne '') {
+      $uu = "http://$requestingHost";
+    }
+    print($fd "<center>$uu/$url</center><p>\n");
+    print($fd "is not on this server. Please see\n");
+    print($fd "<p>\n");
+    print($fd "<center><a href=\"$newServer/$newurl\">$newServer/$newurl</a></center><p>\n");
+    print($fd "for more information.<p>Thank you.\n");
+    print($fd "<h3><a href=\"$newHomePage\">$newHomePageDescription</a></h3>\n");
+    print($fd "<p>\n<hr>\n</body>\n</html>\n");
+	}
+	close($fd);
+	print(LOG "$logitem $listat 512\n");
+}
+
+#   Generate a time stamp in NCSA common log file format
+
+sub timestamp {
+	my $t = time();
+	my @months = ( "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                 "Jul", "Aug", "Sep", "Oct", "Nov", "Dec");
+	my ($sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst) = localtime($t);
+	my ($umin, $uhour) = (gmtime($t))[1..2];
+	my ($dt, $dts);
+
+	$dt = (($hour * 60) + $min) - (($uhour * 60) + $umin);
+	while ($dt >= 24 * 60) {
+    $dt -= 24 * 60;
+	}
+	while ($dt <= -24 * 60) {
+    $dt += 24 * 60;
+	}
+
+	if ($dt < 0) {
+    $dt = -$dt;
+    $dts = '-';
+	} else {
+    $dts = '+';
+	}
+	$dt = $dts . sprintf("%02d%02d", int($dt / 60), $dt % 60);
+	sprintf("[%02u/%s/%04u:%02u:%02u:%02u %+05d]",$mday, $months[$mon], $year + 1900,
+          $hour, $min, $sec, $dt);
+}
+
+#   Add an INFO item to the log
+
+sub logInfo {
+	my $msg = shift;
+	my ($ip_addr, $sadr, $infoitem);
+
+	$ip_addr = (unpack($sockaddr, getsockname($S)))[2];
+	$sadr = join(".", unpack("C4", $ip_addr));
+
+	#   If $IPlisten is 0.0.0.0, and hence we're listening on
+	#   any port, attempt to obtain the primary IP address of the
+	#   host on which we're running and use that for the
+	#   informational log entry.
+
+	if ($sadr =~ m/^0\./) {
+    my @ip_adds;
+
+    $sadr = `hostname`;
+    $sadr =~ s/\s+$//;
+    @ip_adds = (gethostbyname($sadr))[4];
+    $ip_addr = $ip_adds[0];
+    $sadr = join(".", unpack("C4", $ip_addr));
+	}
+	$infoitem = timestamp();
+	$infoitem = "$sadr - - $infoitem \"INFO $program: $msg\" 204 0\n";
+	print(STDERR $infoitem);
+	print(LOG $infoitem);
+}
+
+#   Interrupt handler for shutting down
+
+sub SigHandler {
+	my $sig = shift;
+	logInfo("Caught signal SIG$sig, $program shutting down.");
+	exit(1);
+}
+
+#   Reap child processes
+
+sub reaper {
+	while (1) {
+    my $pid = waitpid(-1, WNOHANG);
+    last if ($pid < 1);
+	}
+	$SIG{'CHLD'} = \&reaper;      # Reset child process reaper
+}
+
+sub fork_to_daemon {
+  Proc::Daemon::Init();
+}

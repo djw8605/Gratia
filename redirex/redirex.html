@@ -1,0 +1,369 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<html version="-//W3C//DTD HTML 3.2 Final//EN">
+<head>
+<title>Redirex: Redirect HTTP requests to new Web server</title>
+<style type="text/css">
+    DIV.bodycopy {
+        margin-left: 15%;
+        margin-right: 10%
+    }
+</style>
+<meta name="keywords" content="redirex, redirect, web, server, perl, fourmilab, walker, john">
+<meta name="description" content="Redirex: Redirect HTTP requests to new Web server">
+<meta name="author" content="John Walker">
+<meta name="robots" content="index">
+</head>
+
+<body bgcolor="#FFFFFF">
+<div class="bodycopy">
+<center>
+<h1><font color="#FF7000"><img src="redirex.png" width="382" height="72" alt="Redirex"></font></h1>
+<h2>Redirect HTTP Requests to New Web Server</h2>
+</center>
+
+<hr>
+
+<h2>Introduction</h2>
+
+There are few better ways to appreciate the breadth of the Web and the depth
+of its content as to move a Web server from one machine to another
+with a different IP address.  Whatever the reason
+motivating the change, you'll quickly discover that requests continue to rain
+onto the obsolete server, diminishing ever so slowly only as other
+webmasters discover and correct broken links to your site, and search
+engines eventually discover the change and re-index your site at its new
+location.  <b>Redirex</b> is a utility which can smooth the transition
+of a Web site from one server to another, both for users of the site
+and its administrators.  Redirex is a <a href="http://www.perl.org/">Perl</a>
+program which receives
+requests at the address of the old server and responds with HTTP
+"redirect" (301 status code) replies indicating the new server's name.
+
+<h2>Installation and Configuration</h2>
+
+To install and configure Redirex, perform the following steps.
+
+<p>
+<ol>
+<li>    Download the Redirex source archive and extract its contents
+        into a new directory.  The archive contains <tt>redirex</tt>,
+        the main Perl script and <tt>redirex.conf</tt>, its configuration
+        file.
+<p>
+<li>    Edit <tt>redirex.conf</tt> and set the configuration
+        variables appropriately for your application.  The
+        configuration variables are discussed in detail below.
+<p>
+<li>    (Optional)  Test Redirex by running it on a user port
+        (for example, 9080), then accessing it from your Web
+        browser with a URL like: "http://my.hostname.net:9080/whatever.html".
+        Verify that the request was redirected as specified
+        by the configuration file.
+<p>
+<li>    Install Redirex on the old server, configured to listen
+        to the port (usually 80) on which that server used to accept
+        HTTP requests.  If the old server no longer exists,
+        configure a different machine to respond to the old
+        server's IP address, perhaps using "IP aliases" or
+        "logical interfaces" to make an existing machine
+        respond to the old server's address.  This is
+        discussed in more detail below in the "Virtual
+        Host Setup" section.
+<p>
+<li>    Verify that Redirex is correctly redirecting requests
+        to the old server and writing log items to the
+        configured file.
+</ol>
+
+<h3>Command Line Options</h3>
+
+Usually Redirex is run with no options on the command line;
+in this case it obtains all its configuration parameters
+from the default configuration file, <tt>redirex.conf</tt>.
+You can specify a different configuration file or cause
+Redirex to listen for HTTP requests on a different port
+by specifying the following options.
+
+<p>
+<dl compact>
+<dt><b>-c</b> <em>conffile</em>
+<dd>    Redirex will read its configuration parameters from the
+        specified <em>conffile</em> instead of the default,
+        <tt>redirex.conf</tt>.  This is handy if you wish to
+        run several copies of Redirex to field requests for
+        multiple servers; each copy can be started
+        with a configuration file corresponding to the
+        server it is to redirect.
+<p>
+<dt><b>-p</b> <em>port</em>
+<dd>    Redirex will listen on the specified <em>port</em>
+        instead of the port given in the configuration file.
+        This permits testing Redirex with ports above
+        1024 which don't require root (superuser) privilege
+        without the need to edit the configuration file.
+</dl>
+
+<h3>Configuration File Variables</h3>
+
+The following variables are defined in the configuration
+file.  By default, the configuration is read from
+<tt>redirex.conf</tt>, but you can specify a different
+configuration file with the <b>-c</b> option on the
+command line.  The configuration file is a Perl
+program in its own right; specifications in the file must
+conform to valid Perl syntax.
+
+<blockquote>
+<dl>
+<dt><b>$defaultport</b>
+<dd>This specifies the port number on which to listen for HTTP
+    requests.  The standard port for HTTP requests is 80.  Note
+    that to bind to any port with a number less than 1024, Redirex
+    must be run with root (super-user) privilege; for testing use
+    a port accessible to regular users (for example 9080), and
+    specify that port in URLs to exercise Redirex.  After you're
+    sure everything is working correctly, change the port number
+    to the standard 80 and run Redirex as super-user.
+    If the <b>-p</b> command line option is specified,
+    this value will not be used.
+
+<p>
+<dt><b>$IPlisten</b>
+<dd>This variable specifies which IP address to listen to,
+    in dotted decimal notation, for example '192.168.37.252'.  If you
+    wish to listen to all IP addresses, set this to '0.0.0.0'.  Note
+    that if you specify a value of '0.0.0.0', Redirex will intercept
+    <em>all</em> requests on the configured port for all IP addresses
+    on which the system running it listens.  If the machine running
+    Redirex also acts as a Web server, you'll have to specify the
+    explicit IP address on which Redirex will listen.  If you need to
+    run two or more copies of Redirex on a machine which is also a Web
+    server, you'll need to prepare a separate configuration file for
+    each server you're redirecting and start one copy Redirex for
+    each, specifying the configuration file with the <b>-c</b> command
+    line option.
+
+<p>
+<dt><b>$newServer</b>
+<dd>This variable gives the URL prefix consisting of the protocol,
+    host name, and (optionally) port number of the new server to which
+    requests are being redirected.  Redirex assumes the new server
+    has the same content (or a superset thereof) and directory structure
+    as the server it is redirecting; the file name portion of the
+    URL is simply appended to the $newServer string.  For example,
+    suppose Redirex is intercepting requests to port 80 at IP
+    address 192.168.133.12, host name <tt>gnarly.oldsite.net</tt>
+    and $newServer is set to <tt>'spiffy.newsite.net'</tt>.  Then the
+    URL request "http://gnarly.oldsite.net/info/catalogue.html"
+    will be redirected to "http://spiffy.newsite.net/info/catalogue.html".
+
+<p>
+<dt><b>$newHomePage</b> and <b>$newHomePageDescription</b>
+<dd>HTTP redirection should be transparent to the user,
+    simply replacing the requested URL with the new destination.
+    Since some browsers may not correctly support
+    redirection, the HTTP standard recommends that redirection
+    messages sent in response to GET and POST requests (but not HEAD)
+    include descriptive text and a hyperlink to the new destination
+    URL. That way, if the browser fails to perform the redirection,
+    the user can simply click on the link to access the new location.
+    When generating this message, Redirex includes a link to
+    the URL specified by $newHomePage with descriptive text
+    $newHomePageDescription.  This should point to the home page
+    of the new destination server.  If the redirection should
+    fail due to changes in the directory structure from that
+    of the old server, the user can use this link to find the
+    home page of the new server.
+
+<p>
+<dt><b>$logfile</b>
+<dd>Redirex logs all requests it redirects in the named
+    $logfile, which should be specified as an
+    absolute path name.  Log items are appended to the
+    file, written in the "Common logfile
+    format" used by most present-day Web servers.
+    To avoid many time-consuming domain name lookups,
+    numeric IP addresses are used in the log file
+    instead of host names.  If you require host names,
+    process the Redirex file with the <tt>logresolve</tt>
+    program included with the <a href="http://www.apache.org/" target="_blank">Apache
+    HTTP Server</a> or the <a href="../logtail/">Logtail</a>
+    program available at this site.  Redirected requests show
+    the redirection status code of 301.  The length of
+    the reply is always 512, a reasonable approximation of the
+    length of the redirection document.
+
+<p>
+<dt><b>$DOredirect</b>
+<dd>If $DOredirect is set to 1, requests will be hard-redirected with a
+    301 status code.  If zero, the reply will be a normal 200
+    status document which informs the user of the redirection
+    but doesn't request the browser to automatically divert there.
+    Requests processed with $DOredirect set to 0 appear in the log
+    file with a status of 200.
+
+<p>
+<dt><b>$No_cache</b>
+<dd>If $No_cache is set 1, responses will include header items which
+    suppress proxy server and browser caching of the the returned
+    document.  This is handy for testing, since some browsers will
+    otherwise cache a redirect and not display the document returned
+    should $DOredirect be subsequently set to 0. In the interest of
+    efficiency, you should set $No_cache&nbsp;=&nbsp;0 when you put
+    Redirex into production.
+
+</dl>
+</blockquote>
+
+<h2>Virtual Host Setup</h2>
+
+If you can't afford to dedicate a computer to impersonate the
+server from which you're redirecting, you'll need to configure an
+existing host on your network to respond to the old server's
+IP address(es).  (Dedicating a computer to running Redirex 
+is not necessarily absurd; Redirex requires minimal system
+resources, and many sites have one or more retired
+PCs which are perfectly adequate to run Redirex under a
+system such as <a href="http://www.linux.org/" target="_blank">Linux</a>.)
+
+<p>
+
+Traditionally, Unix systems associated a unique IP address
+with each network interface; the only way to cause a host
+to listen to multiple IP addresses was to equip it with as
+many hardware interfaces as addresses.  Obviously, in cases
+where a single server hosts a large number of Web sites,
+this requirement was untenable--a large Internet Service
+Provider might require thousands of network interfaces
+to support all of their customers' IP addresses.  Most
+modern Unix systems provide a mechanism which permits
+receiving packets for multiple IP addresses on a single
+hardware interface.  Unfortunately, each different version
+of Unix seems to have invented its own mechanism for
+accomplishing this.  To figure out how to configure virtual
+hosts on your server, a good place to start is the
+system's manual page for the <tt><b>ifconfig</b></tt> command.
+
+<p>
+
+Once you've managed to configure your server to listen on the the old
+server's IP address, you need to make sure there's no conflict between
+Redirex and any Web server running on the same machine.  Many Web
+servers, including <a href="http://www.apache.org/" target="_blank">Apache</a>, listen
+by default to Port 80 on all IP addresses received by the host.  Thus,
+if you start the Web server first, Redirex will fail because the
+address it wishes to listen on has already been assigned to the Web
+server.  To get around this problem, you must configure the Web server
+to respond only to the IP address(es) it is intended to serve (use
+"Listen" directives with Apache), then configure Redirex with the
+$IPlisten variable set to the address it is to redirect.  If you need
+to redirect more than one IP address, run a separate copy of Redirex
+for each, using the <b>-c</b> command line option to specify separate
+configuration files for each server.
+
+<h2><a href="redirex.tar.gz"><img src="/images/icons/file.gif"
+    alt="" align="middle" width="40" height="40"></a> <a href="redirex.tar.gz">Download
+    redirex.tar.gz</a> (gzipped TAR archive)</h2>
+
+<h2>Copying and Support Information</h2>
+
+<p>
+<blockquote>
+     This software is in the public domain.  Permission to use, copy,
+     modify, and distribute this software and its documentation for
+     any purpose and without fee is hereby granted, without any
+     conditions or restrictions.  This software is provided "as is"
+     without express or implied warranty.
+</blockquote>
+
+<p>
+
+<font size="+1" color="#FF0000"><b>Absolutely no support or assistance of any kind whatsoever is
+available for Redirex--you are entirely on your own.</b></font>
+As should be evident from reading this document, while Redirex is
+a small, simple program, the many varieties of Unix in use on
+Web servers makes it impossible to provide a cookbook installation
+procedure.  Getting Redirex to work requires system administration
+skills comparable to those needed to install a Web server; if
+you don't understand terms such as "IP address", "DNS", "ifconfig",
+"netstat", "Perl", etc. you probably won't get very far with Redirex.
+
+<h2>Bugs, Features, and Gotchas</h2>
+
+Redirex is a Perl script.  In order to use it, you need Perl
+5.6 or later.  If you need to use Redirex with an earlier version
+of Perl, download
+<a href="prior-releases/1.1/">Version 1.1</a>,
+which is compatible with Perl 4.036 or later.  Version 1.1 requires
+you to manually configure socket creation parameters, as these are
+not included in the Perl library in these older versions.
+
+<p>
+
+Redirex has been tested only under various flavours of the
+Unix operating system.  In order for it to work on other
+systems (for example, OS/2 or Windows NT), the implementation
+of Perl used to run it must include Unix-compatible networking,
+fork, and signal facilities.
+
+<p>
+
+Redirex assumes the directory structure and file names on the
+new server are identical to those on the machine being
+redirected.  If you need more complex file name rewriting,
+you're going to have to add it yourself.  (For complicated
+redirection, you're probably better off installing
+the <a href="http://www.apache.org/" target="_blank">Apache HTTP server</a>,
+which includes extensive URL transformation and redirection
+support.  Redirex was written to permit simple redirection
+without the need to install such a relatively large and
+complicated package.)
+
+<p>
+
+If you're running Redirex on a machine with limited disc space or a
+stripped-down configuration (for example, a firewall host), note that
+you don't have to fully install Perl on the machine in order to run
+Redirex.  It's sufficient to copy an executable of the Perl
+interpreter and the few modules it requires into the directory with
+Redirex and start it with "<tt>./perl redirex</tt>".
+
+<p>
+
+Transfer lengths written in the log file do not represent the
+actual byte count; they're always 512.
+
+<p>
+
+The only way to cause Redirex to transfer its log to a new file
+is to kill Redirex, rename the log file, and then restart the
+program.
+
+<h2>Acknowledgements</h2>
+
+Redirex is derived from <tt>mhttpd</tt>--a small HTTP server written
+in Perl by
+<a href="http://homepage.mac.com/levanj/" target="_blank">Jerry LeVan</a>,
+which in turn was inspired by
+<a href="http://www.science.uva.nl/~bobd/" target="_blank">Bob Diertens</a>'
+simple CGI
+"Get" server for executables and Pratap Pereira's <tt>phttpd</tt>.
+Redirex is a much simpler application than <tt>mhttpd</tt>, so much
+of the code in the original program has been deleted in creating this
+single-purpose redirector.  Luke Bakken ported the original Perl 4
+code to Perl 5 syntax in "strict" mode. Naturally, any errors and
+omissions in this program are entirely my own responsibility.
+
+<h4><a href="/">Fourmilab Home Page</a></h4>
+
+<p>
+<hr>
+<p>
+<address>
+by <a href="/">John Walker</a><br>
+July 16th, 2004
+</address>
+</div>
+
+</body>
+</html>

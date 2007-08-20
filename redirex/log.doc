@@ -1,0 +1,51 @@
+
+                            R E D I R E X
+                           Development Log
+
+23 March 1998
+
+Initial release, version 1.0.
+
+13 April 1998
+
+Added code to ignore EPROTO errors (errno code 71 on System V) in the
+accept() call.  Redirex was dying two or three times a week with these
+on the live redirector machine.
+
+20 April 1998
+
+Update release, version 1.1.
+
+2 July 2004
+
+Integrated new version developed by Luke Bakken, which updates
+to Perl 5 syntax and compiles in "use strict" mode.  Version
+number changed to 2.0.
+
+14 July 2004
+
+Restored configuration file mechanism, which had been removed
+in the Perl 5 modifications (probably because setting variables
+inside the configuration file requires declaring them as "our",
+not "my").
+
+15 July 2004
+
+Added a $No_cache configuration variable which, if set to zero,
+includes:
+    Cache-control: no-cache
+    Pragma: no-cache
+in the response document header.  This keeps browsers from
+caching a redirect, which can be awfully confusing when you're
+changing things while testing.
+
+Added a:
+    require 5.6.0;
+statement, as the program has been determined empirically
+not to work on Perl 5.003 (at least on the SGI, which is only
+place I still have a copy of it).
+
+17 July 2004
+
+Cleaned up Makefile, HTML documentation, and made a new logo image
+compatible with a white page background.

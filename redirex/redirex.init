@@ -1,0 +1,83 @@
+#!/bin/bash
+#
+# redirex        Startup script for the Redirex redirection engine.
+#
+# chkconfig: 345 85 15
+# description: Redirex is a super-lightweight webserver solely for use
+#              as a redirection engine; see 
+#              http://www.fourmilab.ch/webtools/redirex/
+# processname: redirex
+# config: /data/redirex/redirex.conf
+# pidfile: /var/run/redirex.pid
+
+# Source function library.
+. /etc/rc.d/init.d/functions
+
+REDIREX_DIR=/data/redirex
+
+redirex=${REDIREX_DIR}/redirex
+redirex_conf=${REDIREX_DIR}/redirex.conf
+prog=redirex
+pidfile=${PIDFILE-/var/run/redirex.pid}
+lockfile=${LOCKFILE-/var/lock/subsys/redirex}
+RETVAL=0
+
+start() {
+  echo -n $"Starting $prog: "
+  daemon $redirex -c "${redirex_conf}" -P "${pidfile}"
+  RETVAL=$?
+  echo
+  [ $RETVAL = 0 ] && touch ${lockfile}
+  return $RETVAL
+}
+
+stop() {
+	echo -n $"Stopping $prog: "
+	killproc -d 10 $redirex
+	RETVAL=$?
+	echo
+	[ $RETVAL = 0 ] && rm -f ${lockfile} ${pidfile}
+}
+
+# See how we were called.
+case "$1" in
+  start)
+	start
+	;;
+  stop)
+	stop
+	;;
+  status)
+  if [ -f "$pidfile" ]; then
+    read pid < "$pidfile"
+    if [[ `ps -p "$pid" -o args= 2>/dev/null` == *"$pidfile" ]]; then
+      echo $"${prog} (pid $pid) is running..."
+      RETVAL=0
+    else
+      echo $"${prog} dead but pid file exists"
+      RETVAL=1
+    fi
+  elif [ -f /var/lock/subsys/${base} ]; then
+		echo $"${prog} dead but subsys locked"
+    RETVAL=2
+  else
+    echo $"${prog} is stopped"
+    RETVAL=3
+  fi
+	;;
+  restart)
+	stop
+	start
+	;;
+  condrestart)
+	if [ -f ${pidfile} ] ; then
+		stop
+		start
+	fi
+	;;
+  *)
+	echo $"Usage: $prog {start|stop|restart|condrestart|status}"
+	exit 1
+esac
+
+exit $RETVAL
