@@ -271,7 +271,7 @@ my %procedures =
              and (Site.SiteName =\'\'\', forsitename, \'\'\' or
                   (\'\'\', forsite, \'\'\' = \'\'AnySite\'\' and
                    Site.SiteName like \'\'%\'\' ))',
-    group_by => 'date_format(VOProbeSummary.EndTime,\'\'\', format, \'\'\'),
+    group_by => 'VOProbeSummary.EndTime,
                 sitename, VOProbeSummary.VOName',
     order_by => 'date_format(VOProbeSummary.EndTime,\'\'\', format, \'\'\'),
                 sitename, VOProbeSummary.VOName'
