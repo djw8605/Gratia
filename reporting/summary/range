@@ -13,6 +13,13 @@ def main(argv=None):
         return 1
 
     argOutput = PSACCTReport.gOutput
+
+    PSACCTReport.RangeSummup(range_begin = PSACCTReport.gBegin,
+                             range_end = PSACCTReport.gEnd ,
+                             output=argOutput);
+    print
+
+    
     PSACCTReport.RangeSiteReport(range_begin = PSACCTReport.gBegin,
                                  range_end = PSACCTReport.gEnd,
                                  output = argOutput,
