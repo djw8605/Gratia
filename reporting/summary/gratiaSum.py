@@ -14,7 +14,6 @@ def SendData(values, dateAsSecondSinceEpoch):
         # create the Gratia record and send it.
 
         (SiteName, UserVoName, Njobs, WallHours) = values
-	print values
 
         r = Gratia.UsageRecord()
         r.Njobs(toint(Njobs))
