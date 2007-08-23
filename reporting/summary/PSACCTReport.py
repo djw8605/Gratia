@@ -5,7 +5,7 @@
 #
 # library to create simple report using the Gratia psacct database
 #
-#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.6 2007-08-07 15:04:40 pcanal Exp $
+#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.7 2007-08-23 14:51:06 pcanal Exp $
 
 import time
 import datetime
@@ -299,6 +299,13 @@ def NumberOfCpus():
         benchtotal = string.atof(values.split("\t")[1]) 
         return (ncpu,benchtotal);
 
+def GetListOfOSGSites():
+        cmd = "wget -O  - 'http://vors.grid.iu.edu/cgi-bin/tindex.cgi?grid=1' 2>&1  | grep ',compute,' | cut -f2 -d,"
+        #print "Will execute: " + cmd;
+        allSites = commands.getoutput(cmd).split("\n");
+        #print allSites;
+        return allSites;
+
 def WeeklyData():
         schema = "gratia_psacct";
         select = " SELECT J.VOName, sum((J.CpuUserDuration+J.CpuSystemDuration)) as cputime, " + \
@@ -365,24 +372,24 @@ def DailyVOSiteData(begin,end):
 def DailySiteVODataFromDaily(begin,end,select,count):
         schema = "gratia_osg_daily"
         
-        select = " SELECT M.SiteName, J.VOName, "+count+", sum(J.WallDuration) " \
+        select = " SELECT M.ReportedSiteName, J.VOName, "+count+", sum(J.WallDuration) " \
                 + " from "+schema+".JobUsageRecord J," + schema +".JobUsageRecord_Meta M " \
                 + " where \""+ DateToString(begin) +"\"<EndTime and EndTime<\"" + DateToString(end) + "\"" \
                 + " and M.dbid = J.dbid " \
                 + " and ProbeName " + select + "\"daily:goc\" " \
-                + " group by J.VOName, M.SiteName order by M.SiteName, J.VOName "
+                + " group by J.VOName, M.ReportedSiteName order by M.ReportedSiteName, J.VOName "
         return RunQueryAndSplit(select)
 
 def DailyVOSiteDataFromDaily(begin,end,select,count):
         schema = "gratia_osg_daily"
         
-        select = " SELECT J.VOName, M.SiteName, "+count+", sum(J.WallDuration) " \
+        select = " SELECT J.VOName, M.ReportedSiteName, "+count+", sum(J.WallDuration) " \
                 + " from "+schema+".JobUsageRecord J," \
                 + schema + ".JobUsagRecord_Meta M " \
                 + " where \""+ DateToString(begin) +"\"<EndTime and EndTime<\"" + DateToString(end) + "\"" \
                 + " and M.dbid = J.dbid " \
                 + " and ProbeName " + select + "\"daily:goc\" " \
-                + " group by J.VOName, M.SiteName order by J.VOName, M.SiteName "
+                + " group by J.VOName, M.ReportedSiteName order by J.VOName, M.ReportedSiteName "
         return RunQueryAndSplit(select)
 
 def DailySiteJobStatus(begin,end,select = "", count = "", what = "Site.SiteName" ):
@@ -807,7 +814,10 @@ def GenericDaily(what, when = datetime.date.today(), output = "text"):
                         num_header = 2
                         key = site + " " + vo
                 njobs= string.atoi( val[offset+1] )
-                wall = string.atof( val[offset+2] ) / factor
+                if val[offset+2] == "NULL":
+                   wall = 0
+                else:
+                   wall = string.atof( val[offset+2] ) / factor
                 totalwall = totalwall + wall
                 totaljobs = totaljobs + njobs                
                 oldValues[key] = (njobs,wall,site,vo)
@@ -837,7 +847,10 @@ def GenericDaily(what, when = datetime.date.today(), output = "text"):
                         (oldnjobs,oldwall,s,v) = oldValues[key]
                         del oldValues[key]
                 njobs= string.atoi( val[offset+1] )
-                wall = string.atof( val[offset+2] ) / factor
+                if val[offset+2] == "NULL":
+                   wall = 0
+                else:
+                   wall = string.atof( val[offset+2] ) / factor
                 totalwall = totalwall + wall
                 totaljobs = totaljobs + njobs
                 printValues[key] = (njobs,wall,oldnjobs,oldwall,site,vo)
@@ -952,11 +965,11 @@ select J.SiteName, J.VOName, sum(J.NJobs), sum(J.WallDuration)
   from gratia_osg_daily.JobUsageRecord_Report J
   where
     J.ProbeName != \"daily:goc\" and
-    J.SiteName not in (select GT.SiteName from gratia.Site GT) and
+    J.ReportedSiteName not in (select GT.SiteName from gratia.Site GT) and
     J.EndTime >= \"""" + DateTimeToString(begin) + """\" and
     J.EndTime < \"""" + DateTimeToString(end) + """\"
-    group by J.SiteName, J.VOName
-    order by J.SiteName, J.VOName;"""
+    group by J.ReportedSiteName, J.VOName
+    order by J.ReportedSiteName, J.VOName;"""
         return RunQueryAndSplit(select) + RunQueryAndSplit(panda_select)
     else:
         return RunQueryAndSplit(select)
@@ -1262,3 +1275,115 @@ def RangeVOSiteReport(range_end = datetime.date.today(),
                         range_end,
                         range_begin,
                         output)
+
+def GetLisOfReportingSites(begin,end):
+    schema = "gratia.";
+
+    select = """\
+select distinct SiteName from """+schema+"""JobUsageRecord_Report where 
+            EndTime >= \"""" + DateToString(begin) + """\" and
+            EndTime < \"""" + DateToString(end) + """\"
+            order by SiteName
+            """
+    #print "Query = " + select;
+
+    return RunQueryAndSplit(select);
+
+def GetTotals(begin,end):
+    schema = "gratia.";
+
+    select = """\
+select sum(Njobs),sum(WallDuration),sum(CpuUserDuration+CpuSystemDuration)/sum(WallDuration) from """+schema+"""JobUsageRecord_Report where 
+            EndTime >= \"""" + DateToString(begin) + """\" and
+            EndTime < \"""" + DateToString(end) + """\"
+            """
+    #print "Query = " + select;
+
+    return RunQueryAndSplit(select)[0].split('\t');
+    
+def prettyInt(n):
+    return str(n)
+
+def prettyList(l):
+    if (len(l)==0): return "None"
+    
+    result = ""
+    lastname = l.pop()
+    for name in l:
+        result = result + name + ", "
+    result = result + lastname
+    return result
+
+def RangeSummup(range_end = datetime.date.today(),
+                range_begin = None,
+                output = "text",
+                header = True):
+
+    if not range_end:
+        if not range_begin:
+            range_end = datetime.date.today()
+        else:
+            range_end = range_begin + datetime.timedelta(days=+1)
+    if not range_begin:
+        range_begin = range_end + datetime.timedelta(days=-1)
+#    else:
+#        range_begin = datetime.date(*time.strptime(range_begin, "%Y/%m/%d")[0:3])
+    timediff = range_end - range_begin
+
+    allSites = GetListOfOSGSites();
+    # Call it twice to avoid a 'bug' in wget where on of the row is missing the first few characters.
+    allSites = GetListOfOSGSites();
+ 
+    exceptionSites = ['BNL_ATLAS_1', 'BNL_ATLAS_2','USCMS-FNAL-WC1-CE2','BNL_LOCAL', 'BNL_OSG', 'BNL_PANDA', 'FNAL_CDFOSG_1', 'FNAL_CDFOSG_2', 'FNAL_DZEROOSG_1', 'FNAL_DZEROOSG_2']
+
+
+    allSites = [name for name in allSites if name not in exceptionSites]
+    reportingSites = GetLisOfReportingSites(range_begin,range_end);
+    missingSites = [name for name in allSites if name not in reportingSites]
+    extraSites = [name for name in reportingSites if name not in allSites]
+    knownExtras = [name for name in extraSites if name in exceptionSites]
+    extraSites = [name for name in extraSites if name not in exceptionSites]
+
+    #print allSites
+    #print reportingSites
+    #print missingSites
+    #print extraSites
+    print "As of "+DateToString(datetime.date.today(),False) +", there are "+prettyInt(len(allSites))+" registered OSG sites"
+
+    print "\nBetween %s - %s (midnight - midnight central time):\n" % ( DateToString(range_begin,False),
+                                                                        DateToString(range_end,False) )
+    n = len(reportingSites)
+    print prettyInt(n)+" sites reported\n"
+
+    [njobs,wallduration,div] = GetTotals(range_begin,range_end)
+    njobs = string.atoi(njobs);
+    wallduration = string.atof(wallduration)
+    div = string.atof(div)
+    
+    print "Total number of jobs: "+prettyInt(njobs)
+    print "Total wall duration: "+niceNum( wallduration / 3600, 1 )+ " hours"
+    print "Total cpu / wall duration: "+niceNum(div,0.01)
+    
+    n = len(reportingSites)-len(extraSites)-len(knownExtras)
+    print prettyInt(n)+" registered sites reported ("+niceNum(n*100/len(allSites),1)+"% of OSG Sites)"
+
+    n = len(missingSites);
+    print prettyInt(n)+" registered sites have NOT reported ("+niceNum(n*100/len(allSites),1)+"% of OSG Sites)"
+
+    print
+    
+    n = len(extraSites);
+    print prettyInt(n)+" non-sanctioned non-registered sites reported (might indicate a discrepancy between VORS and Gratia)"
+
+    n = len(knownExtras);
+    print prettyInt(n)+" sanctioned non-registered sites reported"
+
+    #print "\nThe reporting sites are:\n"+prettyList(reportingSites)
+    #print "\nThe registered sites are:\n"+prettyList(allSites)
+    
+    print "\nThe non reporting sites are: \n"+prettyList(missingSites);
+    print "\nThe sanctioned non registered sites are: \n"+prettyList(knownExtras)
+    print "\nThe non registered sites are: \n"+prettyList(extraSites)
+    print "\n"
+    return missingSites
+
