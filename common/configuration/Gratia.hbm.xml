@@ -120,7 +120,7 @@
     <id name="probeid" column="probeid" type="int">
       <generator class="native"/>
     </id>
-    <property name="siteid" column="siteid" type="int"/>
+    <many-to-one name="site" column="siteid" not-null="true"/>
     <property name="probename" column="probename"/>
     <property name="active" column="active" type="int"/>
     <component name="currenttime" class="DateElement" insert="true">
@@ -129,8 +129,73 @@
     </component>
     <property name="reporthh" column="reporthh" type="int"/>
     <property name="reportmm" column="reportmm" type="int"/>
-    <property name="status" column="status"/>
-    <property name="nRecords" column="nRecords" type="int"/>
+    <property name="status"/>
+    <property name="nRecords"/>
+    <property name="nDuplicates"/>
+    <property name="nConnections"/>
+  </class>
+
+  <class name="ProbeDetails"  table="ProbeDetails"
+         node="ProbeDetails" lazy="false">
+
+    <id name="RecordId" column="dbid" type="integer">
+        <generator class="native"/>
+    </id>
+
+    <set name="Software" table="ProbeSoftware">
+       <key column="dbid"/>
+       <many-to-many column="softid" class="Software"/>
+    </set>
+
+    <join table="ProbeDetails_Meta">
+      <key column="dbid"/>
+
+      <component name="RecordIdentity" class="RecordIdentity" insert="true">
+        <property name="recordId"
+              column="recordId"
+              type="string"/>
+        <component name="CreateTime" class="DateElement" insert="true">
+            <property name="Value" column="CreateTime" type="timestamp"  />
+            <property name="Description" column="CreateTimeDescription" />
+        </component>
+      </component>
+
+      <component name="ProbeName" class="StringElement" insert="true">
+        <property name="Value" column="ProbeName" />
+        <property name="Description" column="ProbeNameDescription" />
+      </component>
+
+      <many-to-one name="Probe" class="Probe" column="probeid"/>
+
+      <component name="SiteName" class="StringElement" insert="true">
+        <property name="Value" column="SiteName" />
+        <property name="Description" column="SiteNameDescription" />
+      </component>
+
+      <component name="Grid" class="StringElement" insert="true"> 
+        <property name="Value" column="Grid" /> 
+      </component> 
+
+      <property name="ServerDate" column="ServerDate" type="timestamp"/>
+      <property name="md5" column="md5"/>
+    </join>
+
+    <join table="ProbeDetails_Xml">
+      <key column="dbid"/>
+      <property name="ExtraXml" type="text"/>
+      <property name="RawXml" type="text" />
+    </join>
+
+  </class>
+
+  <class name="Software" table="Software" node="Software">
+    <id name="softid" column="dbid" type="integer">
+        <generator class="native"/>
+    </id>
+    <property name="Type"/>
+    <property name="Name"/>
+    <property name="Version"/>
+    <property name="md5"/>
   </class>
 
   <class name="CEProbeStatus" table="CEProbeStatus" node="CEProbeStatus" lazy="false">
