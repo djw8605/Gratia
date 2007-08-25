@@ -38,7 +38,6 @@ public class ListenerThread extends Thread
    XP xp = new XP();
 
    StatusUpdater statusUpdater = null;
-   NewProbeUpdate newProbeUpdate = null;
    NewVOUpdate newVOUpdate = null;
 
    Object lock;
@@ -147,7 +146,8 @@ public class ListenerThread extends Thread
       }
       catch (Exception e)
       {
-         // Logging.log("ListenerThread: " + ident + ":Error During Dup Check");
+         Logging.log("ListenerThread: " + ident + ":Error During Dup Check: "+sql);
+         
          throw e;
       }
       finally
@@ -222,7 +222,6 @@ public class ListenerThread extends Thread
          return;
 
       statusUpdater = new StatusUpdater();
-      newProbeUpdate = new NewProbeUpdate();
       newVOUpdate = new NewVOUpdate();
 
       for (int i = 0; i < files.length; i++)
@@ -365,7 +364,9 @@ public class ListenerThread extends Thread
                // Logging.log("ListenerThread: " + ident + ":After Begin Transaction");
 
                current = (Record)records.get(j);
-               statusUpdater.update(current, xml);
+
+               Probe probe = statusUpdater.update(session, current, xml);
+               current.setProbe(probe);
 
                //Logging.log("ListenerThread: " + ident + ":Before Duplicate Check");
                if (gothistory && (md5key != null))
@@ -376,29 +377,39 @@ public class ListenerThread extends Thread
 
                if (gotduplicate)
                {
-                  goterror = true;
-                  //Logging.log("ListenerThread: " + ident + ":Before Save Duplicate");
-                  if (gotreplication)
-                     saveDuplicate("Replication", "Duplicate", dupdbid, current);
-                  else if (gothistory)
-                     ;
-                  else
-                     saveDuplicate("Probe", "Duplicate", dupdbid, current);
-                  //Logging.log("ListenerThread: " + ident + ":After Save Duplicate");
+                  // setDuplicate will increase the count (nRecords,nConnections,nDuplicates) for the probe
+                  // and will return true if the duplicate needs to be recorded as a potential error.
+                  if (current.setDuplicate(true)) {
+                      goterror = true;
+                      //Logging.log("ListenerThread: " + ident + ":Before Save Duplicate");
+                      if (gotreplication) {
+                          saveDuplicate("Replication", "Duplicate", dupdbid, current);
+                      } else if (gothistory) {
+                          // If we are reprocessing the history date, we should not
+                          // be recording the possible duplicates.
+                          ;
+                      } else {
+                          saveDuplicate("Probe", "Duplicate", dupdbid, current);
+                      }
+                      //Logging.log("ListenerThread: " + ident + ":After Save Duplicate");
+                  }
                }
                else
                {
                   // Logging.log("ListenerThread: " + ident + ":Before New Probe Update");
-                  synchronized (lock)
-                  {
-                     newProbeUpdate.check(current);
-                  }
+                  // setDuplicate will increase the count (nRecords,nConnections,nDuplicates) for the probe
+                  current.setDuplicate(false);
+
                   // Logging.log("ListenerThread: " + ident + ":After New Probe Update");
                   updater.Update(current);
 
                   synchronized (lock)
                   {
                      newVOUpdate.check(current);
+                  }
+                  synchronized (lock)
+                  {
+                     current.AttachContent(session);
                   }
 
                   if (rawxml != null)
@@ -460,6 +471,7 @@ public class ListenerThread extends Thread
                   // Logging.log("ListenerThread: " + ident + ":After Hibernate Save");
                }
                // Logging.log("ListenerThread: " + ident + ":Before Transaction Commit");
+               session.flush();
                tx.commit();
                session.close();
                // Logging.log("ListenerThread: " + ident + ":After Transaction Commit");
@@ -475,6 +487,7 @@ public class ListenerThread extends Thread
             }
             Logging.log("");
             Logging.log("ListenerThread: " + ident + ":Error In Process: " + exception);
+            Logging.log("ListenerThread: " + ident + ":Error In Process: " + exception.getStackTrace());
             Logging.log("ListenerThread: " + ident + ":Current: " + current);
          }
          // Logging.log("ListenerThread: " + ident + ":Before File Delete: " + file);

@@ -42,7 +42,6 @@ public class PerformanceThread extends Thread
    XP xp = new XP();
 
    StatusUpdater statusUpdater = null;
-   NewProbeUpdate newProbeUpdate = null;
 
    Object lock;
 
@@ -217,7 +216,6 @@ public class PerformanceThread extends Thread
          return;
 
       statusUpdater = new StatusUpdater();
-      newProbeUpdate = new NewProbeUpdate();
 
       for (int i = 0; i < files.length; i++)
       {
@@ -347,7 +345,8 @@ public class PerformanceThread extends Thread
 
 
                current = (Record)records.get(j);
-               statusUpdater.update(current, xml);
+               Probe probe = statusUpdater.update(session,current, xml);
+               current.setProbe(probe);
 
                // Logging.log("PerformanceThread: " + ident + ":Before Duplicate Check");
                gotduplicate = gotDuplicate(current);
@@ -355,27 +354,33 @@ public class PerformanceThread extends Thread
 
                if (gotduplicate)
                {
-                  goterror = true;
-                  // Logging.log("PerformanceThread: " + ident + ":Before Save Duplicate");
-                  if (gotreplication)
-                     saveDuplicate("Replication", "Duplicate", dupdbid, current);
-                  else if (gothistory)
-                     ;
-                  else
-                     saveDuplicate("Probe", "Duplicate", dupdbid, current);
-                  // Logging.log("PerformanceThread: " + ident + ":After Save Duplicate");
+                  // setDuplicate will increase the count (nRecords,nConnections,nDuplicates) for the probe
+                  // and will return true if the duplicate needs to be recorded as a potential error.
+                  if (current.setDuplicate(true)) {
+                      goterror = true;
+                      // Logging.log("PerformanceThread: " + ident + ":Before Save Duplicate");
+                      if (gotreplication)
+                          saveDuplicate("Replication", "Duplicate", dupdbid, current);
+                      else if (gothistory)
+                          ;
+                      else
+                          saveDuplicate("Probe", "Duplicate", dupdbid, current);
+                      // Logging.log("PerformanceThread: " + ident + ":After Save Duplicate");
+                  }
                }
                else
                {
+                  // Logging.log("ListenerThread: " + ident + ":Before New Probe Update");
+                  // setDuplicate will increase the count (nRecords,nConnections,nDuplicates) for the probe
+                  current.setDuplicate(false);
+
                   // Logging.log("PerformanceThread: " + ident + ":Before New Probe Update");
-                  /*
-                     synchronized(lock)
-                     {
-                     newProbeUpdate.check(current);
-                     }
-                  */
                   // Logging.log("PerformanceThread: " + ident + ":After New Probe Update");
                   updater.Update(current);
+                  synchronized (lock)
+                  {
+                      current.AttachContent(session);
+                  }
                   if (rawxml != null)
                      current.setRawXml(rawxml);
                   if (extraxml != null)
@@ -438,6 +443,7 @@ public class PerformanceThread extends Thread
                   // Logging.log("PerformanceThread: " + ident + ":After Hibernate Save");
                }
                // Logging.log("PerformanceThread: " + ident + ":Before Transaction Commit");
+               session.flush();
                tx.commit();
                session.close();
                // Logging.log("PerformanceThread: " + ident + ":After Transaction Commit");
