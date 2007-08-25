@@ -31,5 +31,10 @@ public interface Record
    public String getmd5();
    public void setmd5(String md5set);
 
+   public void setProbe(Probe p);
+   public boolean setDuplicate(boolean b);
+
    public String getTableName();
+
+   public void AttachContent( org.hibernate.Session session ) throws Exception;
 }

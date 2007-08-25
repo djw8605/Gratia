@@ -19,6 +19,9 @@ import java.util.Date;
  */
 public class JobUsageRecord implements Record
 {
+   // Calculated information (not directly in the xml file)
+   private Probe Probe;
+
    private String RawXml;   // Complete Usage Record Xml
    private String ExtraXml; // Xml fragment not used for any of the data members/field
 
@@ -187,6 +190,11 @@ public class JobUsageRecord implements Record
       return output;
    }
 
+   public void AttachContent( org.hibernate.Session session ) throws Exception
+   {
+
+   }
+    
    public String getTableName()
    {
       return "JobUsageRecord";
@@ -536,6 +544,20 @@ public class JobUsageRecord implements Record
    public List getResource()
    {
       return Resource;
+   }
+
+   public Probe getProbe() { return Probe; }
+   public void setProbe(Probe p) { this.Probe = p; }
+   public boolean setDuplicate(boolean b) 
+   {
+       // setDuplicate will increase the count (nRecords,nConnections,nDuplicates) for the probe
+       // and will return true if the duplicate needs to be recorded as a potential error.
+       if (b) {
+           this.Probe.setnDuplicates( this.Probe.getnDuplicates() + 1 );
+       } else {
+           this.Probe.setnRecords( this.Probe.getnRecords() + 1 );
+       }
+       return b;
    }
 
    public void setProbeName(StringElement ProbeName)

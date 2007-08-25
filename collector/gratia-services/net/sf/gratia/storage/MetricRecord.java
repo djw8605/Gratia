@@ -5,7 +5,7 @@ import java.util.Date;
 /**
  * <p>Title: MetricRecord </p>
  *
- * <p>Description: MetrciRecord is Gratia's in-memory representation of a metric datum 
+ * <p>Description: MetricRecord is Gratia's in-memory representation of a metric datum 
  * See https://twiki.cern.ch/twiki/bin/view/LCG/GridMonitoringProbeStandard
  *
  * <p>Copyright: Copyright (c) 2005</p>
@@ -27,12 +27,15 @@ public class MetricRecord implements Record
    private StringElement SiteName;
    private StringElement Grid;
 
+   // Calculated information (not directly in the xml file)
+   private Probe Probe;
+
    // Meta Information (not part of the xml file per se).
    private int RecordId;
    private String RawXml;   // Complete Usage Record Xml
    private String ExtraXml; // Xml fragment not used for any of the data members/field
    private Date ServerDate;
-    private String md5;
+   private String md5;
 
    // Data Content.
     
@@ -107,6 +110,11 @@ public class MetricRecord implements Record
       return output;
    }
 
+   public void AttachContent( org.hibernate.Session session ) throws Exception
+   {
+
+   }
+
    public String getTableName()
    {
       return "MetricRecord";
@@ -166,6 +174,20 @@ public class MetricRecord implements Record
    public void setServerDate(Date value)
    {
       ServerDate = value;
+   }
+
+   public Probe getProbe() { return Probe; }
+   public void setProbe(Probe p) { this.Probe = p; }
+   public boolean setDuplicate(boolean b) 
+   {
+       // setDuplicate will increase the count (nRecords,nConnections,nDuplicates) for the probe
+       // and will return true if the duplicate needs to be recorded as a potential error.
+       if (b) {
+           this.Probe.setnDuplicates( this.Probe.getnDuplicates() + 1 );
+       } else {
+           this.Probe.setnRecords( this.Probe.getnRecords() + 1 );
+       }
+       return b;
    }
 
    public void setProbeName(StringElement ProbeName)
