@@ -69,6 +69,8 @@
         <property name="Description" column="ProbeNameDescription" />
       </component>
 
+      <many-to-one name="Probe" class="Probe" column="probeid"/>
+
       <component name="SiteName" class="StringElement" insert="true">
         <property name="Value" column="SiteName" />
         <property name="Description" column="SiteNameDescription" />
