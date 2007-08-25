@@ -97,6 +97,7 @@ public class HibernateWrapper
       String command = "from JobUsageRecord J where J.RecordId = 1";
       try
       {
+         Logging.log("HibernateWrapper: Database Check");
          org.hibernate.Session session = hibernateFactory.openSession();
          List result = session.createQuery(command).list();
          for (i = 0; i < result.size(); i++)
@@ -105,6 +106,7 @@ public class HibernateWrapper
          }
          session.close();
          databaseDown = false;
+         Logging.log("HibernateWrapper: Database Check. Database Up.");
          return true;
       }
       catch (Exception e)
