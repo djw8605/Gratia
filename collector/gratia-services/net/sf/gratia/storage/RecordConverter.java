@@ -33,6 +33,7 @@ public class RecordConverter
 
          UsageRecordLoader load = new UsageRecordLoader();
          MetricRecordLoader mload = new MetricRecordLoader();
+         ProbeDetailsLoader hload = new ProbeDetailsLoader();
 
          usageRecords = load.ReadRecords(eroot);
          if (usageRecords == null)
@@ -41,12 +42,15 @@ public class RecordConverter
          }
          if (usageRecords == null)
          {
+             usageRecords = hload.ReadRecords(eroot);
+         }
+         if (usageRecords == null)
+         {
             // Unexpected root element
             throw new Exception("In the xml usage record, the expected root nodes are " +
                                 "JobUsageRecords, JobUsageRecord, Usage, UsageRecord " +
                                 "UsageRecordType and MetricRecord.\nHowever we got " + eroot.getName());
          }
-
       }
       catch (Exception e)
       {
