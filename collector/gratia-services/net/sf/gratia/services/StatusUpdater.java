@@ -8,6 +8,9 @@ import java.text.*;
 
 public class StatusUpdater
 {
+
+   private final static String dq = "\"";
+
    Properties p;
    XP xp = new XP();
    Connection connection;
@@ -43,7 +46,31 @@ public class StatusUpdater
       }
    }
 
-   public void update(Record record, String rawxml) throws Exception
+    public Site getSite(org.hibernate.Session session, String sitename) throws Exception
+    {
+        Site site = null;
+        String command = "from Site where SiteName = ?";
+        
+        List result = session.createQuery(command).setString(0,sitename).list();
+        
+        if (result.size() == 0) {
+            site = new Site(sitename);
+            
+            session.save(site);
+
+        } else if (result.size() == 1) {
+            site = (Site) result.get(0);
+
+        } else {
+            // Humm there is more than one probe with the same name!
+            // We have a problem.
+            throw new Exception("getSite got more than one sites ("+result.size()+" with the name "+sitename);
+        }
+
+        return site;
+   }
+
+   public Probe update(org.hibernate.Session session, Record record, String rawxml) throws Exception
    {
       if (connection == null)
          openConnection();
@@ -51,32 +78,44 @@ public class StatusUpdater
          throw new Exception("StatusUpdater: No Connection: CommunicationsException");
 
       String probeName = record.getProbeName().getValue();
-      String dq = "\"";
       String comma = ",";
 
-      String command = "update Probe set" +
-            " currenttime = " + dq + format.format(new java.util.Date()) + dq + comma +
-            " status = " + dq + "alive" + dq + comma +
-            " nRecords = nRecords + 1" +
-            " where probename = " + dq + probeName + dq;
+      String command = "from Probe where probename = ?"; 
+      
+      Probe probe = null;
+      Site site = null;
+      {
+          // org.hibernate.Session session =  HibernateWrapper.getSession();
+          List result = session.createQuery(command).setString(0,probeName).list();
 
-      try
-      {
-         statement = connection.createStatement();
-         statement.execute(command);
-         statement.close();
+          int record_idx = 0;
+          if (result.size() == 0) {
+              // We need a new Probe object
+              probe = new Probe(probeName);
+              site = getSite(session, record.getSiteName().getValue());
+              probe.setsite(site);
+              probe.setactive(1);
+
+              session.save(probe);
+              
+          } else if (result.size() == 1) {
+              probe = (Probe)result.get(0);
+          } else {
+              // Humm there is more than one probe with the same name!
+              // We have a problem.
+              throw new Exception("We got more than one probe ("+result.size()+" with the name "+probeName);
+          }
+          DateElement date = new DateElement();
+          date.setValue( new java.util.Date() );
+
+          probe.setcurrenttime(date);
+          probe.setstatus("alive");
+          // probe.setnRecords( probe.getnRecords() + 1 );
+
+          Logging.log("StatusUpdater: will save/update "+probe.getprobename()+" n="+probe.getnRecords());
+
+          //          session.flush();
       }
-      catch (Exception e)
-      {
-         try
-         {
-            connection.close();
-         }
-         catch (Exception ignore)
-         {
-         }
-         connection = null;
-         throw new Exception("StatusUpdater: No Connection: CommunicationsException");
-      }
+      return probe;
    }
 }
