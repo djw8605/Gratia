@@ -962,7 +962,7 @@
         </oda-data-source>
     </data-sources>
     <data-sets>
-        <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="UsageByVORanked" id="358">
+        <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="UsageByVORanked1" id="358">
             <property name="dataSource">fermigrid1</property>
             <property name="cachedRowCount">0</property>
             <list-property name="parameters">
@@ -1047,7 +1047,7 @@ yearnr + "-" + monthnr + "-" + daynr;</expression>
         </grid>
         <table name="table1" id="9">
             <property name="width">100%</property>
-            <property name="dataSet">UsageByVORanked</property>
+            <property name="dataSet">UsageByVORanked1</property>
             <list-property name="paramBindings">
                 <structure>
                     <property name="paramName">GroupByFormat</property>
