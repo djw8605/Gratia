@@ -225,6 +225,30 @@
                 </structure>
             </list-property>
         </scalar-parameter>
+        <scalar-parameter name="Start Date" id="86">
+            <property name="hidden">true</property>
+            <text-property name="helpText">Only jobs that finished after this date will be included</text-property>
+            <property name="valueType">static</property>
+            <property name="dataType">string</property>
+            <property name="promptText">Start Date</property>
+            <property name="allowBlank">true</property>
+            <property name="allowNull">true</property>
+            <property name="format">Unformatted</property>
+            <property name="controlType">text-box</property>
+            <property name="defaultValue">2007-01-01</property>
+        </scalar-parameter>
+        <scalar-parameter name="End Date" id="87">
+            <property name="hidden">true</property>
+            <text-property name="helpText">Only jobs that finished before this date will be included</text-property>
+            <property name="valueType">static</property>
+            <property name="dataType">string</property>
+            <property name="promptText">End Date</property>
+            <property name="allowBlank">true</property>
+            <property name="allowNull">true</property>
+            <property name="format">Unformatted</property>
+            <property name="controlType">text-box</property>
+            <property name="defaultValue">2007-02-01</property>
+        </scalar-parameter>
     </parameters>
     <data-sources>
         <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="fermigrid1" id="4">
