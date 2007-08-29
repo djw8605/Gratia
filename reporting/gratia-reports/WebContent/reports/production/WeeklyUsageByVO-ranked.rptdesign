@@ -952,6 +952,30 @@
             <property name="controlType">text-box</property>
             <property name="defaultValue">None</property>
         </scalar-parameter>
+        <scalar-parameter name="Start Date" id="86">
+            <property name="hidden">true</property>
+            <text-property name="helpText">Only jobs that finished after this date will be included</text-property>
+            <property name="valueType">static</property>
+            <property name="dataType">string</property>
+            <property name="promptText">Start Date</property>
+            <property name="allowBlank">true</property>
+            <property name="allowNull">true</property>
+            <property name="format">Unformatted</property>
+            <property name="controlType">text-box</property>
+            <property name="defaultValue">2007-01-01</property>
+        </scalar-parameter>
+        <scalar-parameter name="End Date" id="87">
+            <property name="hidden">true</property>
+            <text-property name="helpText">Only jobs that finished before this date will be included</text-property>
+            <property name="valueType">static</property>
+            <property name="dataType">string</property>
+            <property name="promptText">End Date</property>
+            <property name="allowBlank">true</property>
+            <property name="allowNull">true</property>
+            <property name="format">Unformatted</property>
+            <property name="controlType">text-box</property>
+            <property name="defaultValue">2007-02-01</property>
+        </scalar-parameter>
     </parameters>
     <data-sources>
         <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="fermigrid1" id="357">
@@ -962,7 +986,7 @@
         </oda-data-source>
     </data-sources>
     <data-sets>
-        <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="UsageByVORanked1" id="358">
+        <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="UsageByVORanked" id="358">
             <property name="dataSource">fermigrid1</property>
             <property name="cachedRowCount">0</property>
             <list-property name="parameters">
@@ -1047,12 +1071,8 @@ yearnr + "-" + monthnr + "-" + daynr;</expression>
         </grid>
         <table name="table1" id="9">
             <property name="width">100%</property>
-            <property name="dataSet">UsageByVORanked1</property>
+            <property name="dataSet">UsageByVORanked</property>
             <list-property name="paramBindings">
-                <structure>
-                    <property name="paramName">GroupByFormat</property>
-                    <expression name="expression">params["GroupByFormat"]</expression>
-                </structure>
                 <structure>
                     <property name="paramName">UserName</property>
                     <expression name="expression">params["UserName"]</expression>
