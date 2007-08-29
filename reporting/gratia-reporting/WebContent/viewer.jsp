@@ -458,6 +458,7 @@ var c1 = new CodeThatCalendar(caldef1);
    			    	if (el==null) el = ra.findDataSet("UsageDrill");
    			    	if (el==null) el = ra.findDataSet("UsageByVORanked");
    			    	if (el==null) el = ra.findDataSet("UsageBySiteRanked");
+   			    	if (el==null) el = ra.findDataSet("6MonthHistory");
    			    	if (el==null) el = ra.findDataSet("JobsCountBy");
    			    	if (el==null) el = ra.findDataSet("JobsCountByWhere");
    			    	if (el==null) el = ra.findDataSet("UsageDrill");
