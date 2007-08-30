@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Written by Eclipse BIRT 2.0 -->
-<report xmlns="http://www.eclipse.org/birt/2005/design" version="3" id="1">
+<report xmlns="http://www.eclipse.org/birt/2005/design" version="3.2.14" id="1">
     <property name="createdBy">Eclipse BIRT Designer Version 2.0.1 Build &lt;20060222-1204></property>
     <property name="units">in</property>
     <list-property name="propertyBindings">
@@ -49,10 +48,6 @@
             <property name="value">proto</property>
         </structure>
         <structure>
-            <property name="name">GroupByFormat</property>
-            <property name="value">%Y-%U</property>
-        </structure>
-        <structure>
             <property name="name">HighlightDate</property>
         </structure>
         <structure>
@@ -68,24 +63,16 @@
             <property name="value">None</property>
         </structure>
         <structure>
-            <property name="name">VOs</property>
-            <property name="value">('ATLAS','usatlas')</property>
-        </structure>
-        <structure>
             <property name="name">Selection Type</property>
             <property name="value">IN</property>
         </structure>
         <structure>
-            <property name="name">Display Metric</property>
-            <property name="value">wallclock</property>
-        </structure>
-        <structure>
             <property name="name">Start Date</property>
-            <property name="value">2007-01-01</property>
+            <property name="value">2007--07-01</property>
         </structure>
         <structure>
             <property name="name">End Date</property>
-            <property name="value">2007-08-31</property>
+            <property name="value">2007-08-01</property>
         </structure>
     </list-property>
     <parameters>
@@ -95,28 +82,37 @@
                     <property name="hidden">true</property>
                     <property name="valueType">static</property>
                     <property name="dataType">string</property>
-                    <property name="allowBlank">false</property>
-                    <property name="format">Unformatted</property>
+                    <property name="isRequired">true</property>
                     <property name="controlType">text-box</property>
                     <property name="defaultValue">jdbc:mysql://gratia-db01.fnal.gov:3320/gratia_osg_daily</property>
+                    <structure name="format">
+                        <property name="category">Unformatted</property>
+                        <property name="pattern">Unformatted</property>
+                    </structure>
                 </scalar-parameter>
                 <scalar-parameter name="DatabaseUser" id="83">
                     <property name="hidden">true</property>
                     <property name="valueType">static</property>
                     <property name="dataType">string</property>
-                    <property name="allowBlank">false</property>
-                    <property name="format">Unformatted</property>
+                    <property name="isRequired">true</property>
                     <property name="controlType">text-box</property>
                     <property name="defaultValue">gratia</property>
+                    <structure name="format">
+                        <property name="category">Unformatted</property>
+                        <property name="pattern">Unformatted</property>
+                    </structure>
                 </scalar-parameter>
                 <scalar-parameter name="DatabasePassword" id="82">
                     <property name="hidden">true</property>
                     <property name="valueType">static</property>
                     <property name="dataType">string</property>
-                    <property name="allowBlank">false</property>
-                    <property name="format">Unformatted</property>
+                    <property name="isRequired">true</property>
                     <property name="controlType">text-box</property>
                     <property name="defaultValue">proto</property>
+                    <structure name="format">
+                        <property name="category">Unformatted</property>
+                        <property name="pattern">Unformatted</property>
+                    </structure>
                 </scalar-parameter>
             </parameters>
         </parameter-group>
@@ -125,75 +121,107 @@
             <property name="valueType">static</property>
             <property name="dataType">string</property>
             <property name="concealValue">false</property>
-            <property name="allowBlank">false</property>
-            <property name="allowNull">false</property>
-            <property name="format">Unformatted</property>
+            <property name="isRequired">true</property>
             <property name="controlType">text-box</property>
-            <property name="defaultValue">%Y-%M</property>
+            <property name="defaultValue">%Y-%m-%d</property>
+            <structure name="format">
+                <property name="category">Unformatted</property>
+                <property name="pattern">Unformatted</property>
+            </structure>
         </scalar-parameter>
         <scalar-parameter name="HighlightDate" id="98">
             <property name="hidden">true</property>
             <property name="valueType">static</property>
             <property name="dataType">string</property>
-            <property name="allowNull">true</property>
-            <property name="format">Unformatted</property>
+            <property name="isRequired">false</property>
             <property name="controlType">text-box</property>
+            <structure name="format">
+                <property name="category">Unformatted</property>
+                <property name="pattern">Unformatted</property>
+            </structure>
         </scalar-parameter>
         <scalar-parameter name="UserName" id="104">
             <property name="hidden">true</property>
             <property name="valueType">static</property>
             <property name="dataType">string</property>
             <property name="concealValue">true</property>
-            <property name="allowNull">true</property>
-            <property name="format">Unformatted</property>
+            <property name="isRequired">false</property>
             <property name="controlType">text-box</property>
             <property name="defaultValue">None</property>
+            <structure name="format">
+                <property name="category">Unformatted</property>
+                <property name="pattern">Unformatted</property>
+            </structure>
         </scalar-parameter>
         <scalar-parameter name="UserRole" id="103">
             <property name="hidden">true</property>
             <property name="valueType">static</property>
             <property name="dataType">string</property>
             <property name="concealValue">true</property>
-            <property name="allowNull">true</property>
-            <property name="format">Unformatted</property>
+            <property name="isRequired">false</property>
             <property name="controlType">text-box</property>
             <property name="defaultValue">None</property>
+            <structure name="format">
+                <property name="category">Unformatted</property>
+                <property name="pattern">Unformatted</property>
+            </structure>
         </scalar-parameter>
         <scalar-parameter name="Subtitle" id="105">
             <property name="hidden">true</property>
             <property name="valueType">static</property>
             <property name="dataType">string</property>
             <property name="concealValue">true</property>
-            <property name="allowNull">true</property>
-            <property name="format">Unformatted</property>
+            <property name="isRequired">false</property>
             <property name="controlType">text-box</property>
             <property name="defaultValue">None</property>
+            <structure name="format">
+                <property name="category">Unformatted</property>
+                <property name="pattern">Unformatted</property>
+            </structure>
         </scalar-parameter>
         <scalar-parameter name="VOs" id="106">
             <text-property name="helpText">List of VO's to include/exclude in chart.</text-property>
             <property name="valueType">dynamic</property>
             <property name="dataType">string</property>
-            <property name="format">Unformatted</property>
             <property name="controlType">list-box</property>
             <property name="dataSetName">VOList</property>
-            <expression name="valueExpr">row["vos"]</expression>
-            <expression name="labelExpr">row["voname"]</expression>
-            <property name="mustMatch">false</property>
+            <expression name="valueExpr">dataSetRow["vos"]</expression>
+            <expression name="labelExpr">dataSetRow["voname"]</expression>
+            <property name="mustMatch">true</property>
             <property name="fixedOrder">false</property>
-            <property name="defaultValue">('cms','cdf','d0sar','dzero','usatlas','uscms','uscmspool')</property>
+            <property name="defaultValue">('ATLAS','atlas','usatlas')</property>
+            <property name="distinct">true</property>
+            <property name="sortBy">label</property>
+            <property name="sortDirection">asc</property>
+            <structure name="format">
+                <property name="category">Unformatted</property>
+                <property name="pattern">Unformatted</property>
+            </structure>
+            <list-property name="boundDataColumns">
+                <structure>
+                    <property name="name">vos</property>
+                    <expression name="expression">dataSetRow["vos"]</expression>
+                </structure>
+                <structure>
+                    <property name="name">voname</property>
+                    <expression name="expression">dataSetRow["voname"]</expression>
+                </structure>
+            </list-property>
         </scalar-parameter>
         <scalar-parameter name="Selection Type" id="107">
             <text-property name="helpText">Include or exclude VO's in list.</text-property>
             <property name="valueType">static</property>
             <property name="dataType">string</property>
-            <property name="promptText">Enter type of VO selection</property>
-            <property name="allowBlank">false</property>
-            <property name="allowNull">false</property>
-            <property name="format">Unformatted</property>
+            <text-property name="promptText">Enter type of VO selection</text-property>
+            <property name="isRequired">true</property>
             <property name="controlType">list-box</property>
-            <property name="mustMatch">false</property>
+            <property name="mustMatch">true</property>
             <property name="fixedOrder">true</property>
             <property name="defaultValue">IN</property>
+            <structure name="format">
+                <property name="category">Unformatted</property>
+                <property name="pattern">Unformatted</property>
+            </structure>
             <list-property name="selectionList">
                 <structure>
                     <property name="value">IN</property>
@@ -210,14 +238,17 @@
             <text-property name="helpText">Select metric for chart</text-property>
             <property name="valueType">static</property>
             <property name="dataType">string</property>
-            <property name="promptText">Select metric for chart</property>
-            <property name="allowBlank">false</property>
-            <property name="allowNull">false</property>
-            <property name="format">Unformatted</property>
+            <text-property name="promptText">Select metric for chart</text-property>
+            <property name="isRequired">true</property>
             <property name="controlType">list-box</property>
-            <property name="mustMatch">false</property>
+            <property name="mustMatch">true</property>
             <property name="fixedOrder">true</property>
             <property name="defaultValue">wallclock</property>
+            <property name="distinct">false</property>
+            <structure name="format">
+                <property name="category">Unformatted</property>
+                <property name="pattern">Unformatted</property>
+            </structure>
             <list-property name="selectionList">
                 <structure>
                     <property name="value">wallclock</property>
@@ -238,22 +269,66 @@
             <text-property name="helpText">Only jobs that finished after this date will be included</text-property>
             <property name="valueType">static</property>
             <property name="dataType">string</property>
-            <property name="promptText">Start Date</property>
-            <property name="allowBlank">false</property>
-            <property name="format">Unformatted</property>
+            <text-property name="promptText">Start Date</text-property>
+            <property name="isRequired">true</property>
             <property name="controlType">text-box</property>
             <property name="defaultValue">2007-01-01</property>
+            <structure name="format">
+                <property name="category">Unformatted</property>
+                <property name="pattern">Unformatted</property>
+            </structure>
         </scalar-parameter>
         <scalar-parameter name="End Date" id="87">
             <property name="hidden">false</property>
             <text-property name="helpText">Only jobs that finished before this date will be included</text-property>
             <property name="valueType">static</property>
             <property name="dataType">string</property>
-            <property name="promptText">End Date</property>
-            <property name="allowBlank">false</property>
-            <property name="format">Unformatted</property>
+            <text-property name="promptText">End Date</text-property>
+            <property name="isRequired">true</property>
             <property name="controlType">text-box</property>
             <property name="defaultValue">2007-02-01</property>
+            <structure name="format">
+                <property name="category">Unformatted</property>
+                <property name="pattern">Unformatted</property>
+            </structure>
+        </scalar-parameter>
+        <scalar-parameter name="Sites" id="113">
+            <property name="valueType">static</property>
+            <property name="dataType">string</property>
+            <property name="controlType">list-box</property>
+            <property name="mustMatch">true</property>
+            <property name="fixedOrder">true</property>
+            <property name="defaultValue">('ANALY_BNL_ATLAS_1','ANALY_LONG_BNL_ATLAS','BNL_ATLAS_1','BNL_PANDA')</property>
+            <property name="distinct">false</property>
+            <structure name="format">
+                <property name="category">Unformatted</property>
+            </structure>
+            <list-property name="selectionList">
+                <structure>
+                    <property name="value">('ANALY_BNL_ATLAS_1','ANALY_LONG_BNL_ATLAS','BNL_ATLAS_1','BNL_PANDA')</property>
+                    <property name="label">BNL - ATLAS</property>
+                </structure>
+                <structure>
+                    <property name="value">('UTA-DPCC','UTA_DPCC')</property>
+                    <property name="label">UTA</property>
+                </structure>
+                <structure>
+                    <property name="value">('MWT2_UC')</property>
+                    <property name="label">MWT2_UC</property>
+                </structure>
+                <structure>
+                    <property name="value">('OU_OSCER_ATLAS')</property>
+                    <property name="label">OU_OSCER_ATLAS</property>
+                </structure>
+                <structure>
+                    <property name="value">('OU_OCHEP_SWT2')</property>
+                    <property name="label">OU_OCHEP_SWT2</property>
+                </structure>
+                <structure>
+                    <property name="value">('UTA_SWT2')</property>
+                    <property name="label">UTA_SWT2</property>
+                </structure>
+            </list-property>
         </scalar-parameter>
     </parameters>
     <data-sources>
@@ -266,6 +341,67 @@
     </data-sources>
     <data-sets>
         <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="UsageHistory" id="94">
+            <list-property name="computedColumns">
+                <structure>
+                    <property name="name">datesite</property>
+                    <expression name="expression">row["endtime"] + ' - ' + row["sitename"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">sitename_remapped</property>
+                    <expression name="expression">if(row["sitename"] == 'OU_OSCER_ATLAS' || 
+row["sitename"] == 'OU_OCHEP_SWT2'){
+'OU'}else{
+row["sitename"]
+}</expression>
+                    <property name="dataType">string</property>
+                </structure>
+            </list-property>
+            <structure name="cachedMetaData">
+                <list-property name="resultSet">
+                    <structure>
+                        <property name="position">1</property>
+                        <property name="name">endtime</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">2</property>
+                        <property name="name">WallDuration</property>
+                        <property name="dataType">float</property>
+                    </structure>
+                    <structure>
+                        <property name="position">3</property>
+                        <property name="name">Cpu</property>
+                        <property name="dataType">float</property>
+                    </structure>
+                    <structure>
+                        <property name="position">4</property>
+                        <property name="name">Njobs</property>
+                        <property name="dataType">decimal</property>
+                    </structure>
+                    <structure>
+                        <property name="position">5</property>
+                        <property name="name">sitename</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">6</property>
+                        <property name="name">probename</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">7</property>
+                        <property name="name">datesite</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">8</property>
+                        <property name="name">sitename_remapped</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                </list-property>
+            </structure>
+            <property name="rowFetchLimit">10000</property>
             <property name="dataSource">fermigrid1</property>
             <list-property name="parameters">
                 <structure>
@@ -284,6 +420,7 @@
                 </structure>
                 <structure>
                     <property name="name">StartDate</property>
+                    <property name="paramName">Start Date</property>
                     <property name="dataType">string</property>
                     <property name="position">3</property>
                     <expression name="defaultValue">'2007-01-01'</expression>
@@ -294,6 +431,7 @@
                 </structure>
                 <structure>
                     <property name="name">EndDate</property>
+                    <property name="paramName">End Date</property>
                     <property name="dataType">string</property>
                     <property name="position">4</property>
                     <expression name="defaultValue">'2007-02-01'</expression>
@@ -304,51 +442,126 @@
                 </structure>
                 <structure>
                     <property name="name">GroupByFormat</property>
+                    <property name="paramName">GroupByFormat</property>
                     <property name="dataType">string</property>
                     <property name="position">5</property>
-                    <expression name="defaultValue">'%Y-%U'</expression>
+                    <expression name="defaultValue">"%Y-%U"</expression>
                     <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
                 </structure>
                 <structure>
                     <property name="name">VOselect</property>
+                    <property name="paramName">VOs</property>
                     <property name="dataType">string</property>
                     <property name="position">6</property>
                     <expression name="defaultValue">' 'cdf ' '</expression>
                     <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
                 </structure>
                 <structure>
                     <property name="name">VOSelType</property>
+                    <property name="paramName">Selection Type</property>
                     <property name="dataType">string</property>
                     <property name="position">7</property>
                     <expression name="defaultValue">'IN'</expression>
                     <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
+                </structure>
+                <structure>
+                    <property name="name">Sites</property>
+                    <property name="paramName">Sites</property>
+                    <property name="dataType">string</property>
+                    <property name="position">8</property>
+                    <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
                 </structure>
             </list-property>
-            <list-property name="computedColumns">
+            <list-property name="resultSet">
                 <structure>
-                    <property name="name">datesite</property>
-                    <expression name="expression">row["endtime"] + ' - ' + row["sitename"]</expression>
+                    <property name="position">1</property>
+                    <property name="name">endtime</property>
+                    <property name="nativeName">endtime</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">2</property>
+                    <property name="name">WallDuration</property>
+                    <property name="nativeName">WallDuration</property>
+                    <property name="dataType">float</property>
+                </structure>
+                <structure>
+                    <property name="position">3</property>
+                    <property name="name">Cpu</property>
+                    <property name="nativeName">Cpu</property>
+                    <property name="dataType">float</property>
+                </structure>
+                <structure>
+                    <property name="position">4</property>
+                    <property name="name">Njobs</property>
+                    <property name="nativeName">Njobs</property>
+                    <property name="dataType">decimal</property>
+                </structure>
+                <structure>
+                    <property name="position">5</property>
+                    <property name="name">sitename</property>
+                    <property name="nativeName">sitename</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">6</property>
+                    <property name="name">probename</property>
+                    <property name="nativeName">probename</property>
                     <property name="dataType">string</property>
                 </structure>
             </list-property>
             <property name="queryText">
-call UsageByDateForVO(?,?,?,?,?,'Batch',?,?)
+call UsageByDateForVO(?,?,?,?,?,'Batch',?,?,?)
 </property>
         </oda-data-set>
         <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="VOList" id="110">
+            <structure name="cachedMetaData">
+                <list-property name="resultSet">
+                    <structure>
+                        <property name="position">1</property>
+                        <property name="name">voname</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">2</property>
+                        <property name="name">vos</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                </list-property>
+            </structure>
             <property name="dataSource">fermigrid1</property>
+            <list-property name="resultSet">
+                <structure>
+                    <property name="position">1</property>
+                    <property name="name">voname</property>
+                    <property name="nativeName">voname</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                </structure>
+                <structure>
+                    <property name="position">2</property>
+                    <property name="name">vos</property>
+                    <property name="nativeName">vos</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                </structure>
+            </list-property>
             <property name="queryText">select ' cdf,d0sar,dzero,usatlas,cms,uscms,uscmspool' as voname, concat("('",'cdf',"','",'d0sar',"','",'dzero',"','",'usatlas',"','",'cms',"','",'uscms',"','",'uscmspool'"')") as vos
 from VO
-union
+union 
 select ' cdf,d0sar,dzero' as voname, concat("('",'cdf',"','",'d0sar',"','",'dzero'"')") as vos
 from VO
-union
-select ' atlas' as voname, concat("('",'ATLAS',"','",'usatlas',"')") as vos
+union 
+select ' atlasx' as voname, concat("('",'ATLAS',"','",'atlas',"','",'usatlas',"')") as vos
 from VO
-union
+union 
 select '  none' as voname, concat("('",'none',"')") as vos
 from VO
-union
+union all
 select VO.VOName as voname, concat("('",VO.VOName, "')") as vos
 from VO
 order by voname</property>
@@ -366,6 +579,13 @@ order by voname</property>
         </simple-master-page>
     </page-setup>
     <body>
+        <text-data id="114">
+            <property name="style">sans-style1</property>
+            <property name="fontSize">9pt</property>
+            <property name="textAlign">center</property>
+            <expression name="valueExpr">"Sites selected: " + params["Sites"]</expression>
+            <property name="contentType">html</property>
+        </text-data>
         <text-data id="109">
             <property name="style">sans-style1</property>
             <property name="fontFamily">sans-serif</property>
@@ -374,33 +594,15 @@ order by voname</property>
             <expression name="valueExpr">if(params["Selection Type"] == "IN"){"VO\'s selected:  " + params["VOs"]}else{"VO\'s excluded:  " + params["VOs"]}</expression>
             <property name="contentType">html</property>
         </text-data>
-        <extended-item extensionName="Chart" name="MyChart" id="90">
+        <text-data id="112">
             <property name="style">sans-style1</property>
-            <property name="height">1000px</property>
-            <property name="width">800px</property>
-            <property name="dataSet">UsageHistory</property>
-            <list-property name="paramBindings">
-                <structure>
-                    <property name="paramName">VOselect</property>
-                    <expression name="expression">params["VOs"]</expression>
-                </structure>
-                <structure>
-                    <property name="paramName">VOSelType</property>
-                    <expression name="expression">params["Selection Type"]</expression>
-                </structure>
-                <structure>
-                    <property name="paramName">StartDate</property>
-                    <expression name="expression">params["Start Date"]</expression>
-                </structure>
-                <structure>
-                    <property name="paramName">EndDate</property>
-                    <expression name="expression">params["End Date"]</expression>
-                </structure>
-                <structure>
-                    <property name="paramName">GroupByFormat</property>
-                    <expression name="expression">params["GroupByFormat"]</expression>
-                </structure>
-            </list-property>
+            <property name="fontSize">9pt</property>
+            <property name="marginTop">0pt</property>
+            <property name="textAlign">center</property>
+            <expression name="valueExpr">"Date range: " + params["Start Date"] + " - " + params["End Date"]</expression>
+            <property name="contentType">html</property>
+        </text-data>
+        <extended-item extensionName="Chart" name="MyChart" id="90">
             <xml-property name="xmlRepresentation"><![CDATA[<model:ChartWithAxes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:attribute="http://www.birt.eclipse.org/ChartModelAttribute" xmlns:data="http://www.birt.eclipse.org/ChartModelData" xmlns:layout="http://www.birt.eclipse.org/ChartModelLayout" xmlns:model="http://www.birt.eclipse.org/ChartModel" xmlns:type="http://www.birt.eclipse.org/ChartModelType">
   <Type>Bar Chart</Type>
   <SubType>Side-by-side</SubType>
@@ -597,6 +799,17 @@ order by voname</property>
       </Text>
       <Orientation>Vertical</Orientation>
       <Direction>Top_Bottom</Direction>
+      <Separator>
+        <Style>Solid</Style>
+        <Thickness>1</Thickness>
+        <Color>
+          <Transparency>255</Transparency>
+          <Red>0</Red>
+          <Green>0</Green>
+          <Blue>0</Blue>
+        </Color>
+        <Visible>true</Visible>
+      </Separator>
       <Position>Right</Position>
       <ItemType>Series</ItemType>
       <Title>
@@ -885,6 +1098,28 @@ function beforeDrawAxisTitle( axis, label, context )
 		label.getCaption().setValue(&quot;***undefined metric&quot;);
 		}
 	}
+}
+/**
+ * Called before rendering the label for each datapoint.
+ * 
+ * @param dph
+ *            DataPointHints
+ * @param label
+ *            Label
+ * @param icsc
+ *            IChartScriptContext
+ */
+
+function beforeDrawDataPointLabel(dph, label, icsc){
+rep = icsc.getExternalContext().getScriptable();
+val1 = rep.getParameterValue(&quot;Display Metric&quot;);
+//if(val1 == 'jobcount')
+//	{
+//	labval = label.getCaption().getValue(); 
+//	dotpos = labval.indexOf(&quot;.&quot;); 
+//	frmt = label.getCaption().getValue().substring(0,dotpos);
+//	label.getCaption().setValue(frmt);
+//	};
 }</Script>
   <Units>Points</Units>
   <SeriesThickness>10.0</SeriesThickness>
@@ -893,7 +1128,7 @@ function beforeDrawAxisTitle( axis, label, context )
       <DataSetRepresentation>'A','B','C'</DataSetRepresentation>
     </BaseSampleData>
     <OrthogonalSampleData>
-      <DataSetRepresentation>5.0,4.0,12.0</DataSetRepresentation>
+      <DataSetRepresentation>5,4,12</DataSetRepresentation>
       <SeriesDefinitionIndex>0</SeriesDefinitionIndex>
     </OrthogonalSampleData>
   </SampleData>
@@ -904,7 +1139,7 @@ function beforeDrawAxisTitle( axis, label, context )
     <Type>Text</Type>
     <Title>
       <Caption>
-        <Value>Site Name</Value>
+        <Value></Value>
         <Font>
           <Size>12.0</Size>
           <Bold>true</Bold>
@@ -912,7 +1147,7 @@ function beforeDrawAxisTitle( axis, label, context )
             <horizontalAlignment>Center</horizontalAlignment>
             <verticalAlignment>Center</verticalAlignment>
           </Alignment>
-          <Rotation>90.0</Rotation>
+          <Rotation>0.0</Rotation>
         </Font>
         <Color>
           <Transparency>255</Transparency>
@@ -958,7 +1193,7 @@ function beforeDrawAxisTitle( axis, label, context )
               <horizontalAlignment>Center</horizontalAlignment>
               <verticalAlignment>Center</verticalAlignment>
             </Alignment>
-            <Rotation>0.0</Rotation>
+            <Rotation>90.0</Rotation>
           </Font>
           <Color>
             <Transparency>255</Transparency>
@@ -1078,27 +1313,24 @@ function beforeDrawAxisTitle( axis, label, context )
               <Bottom>0.0</Bottom>
               <Right>3.0</Right>
             </Insets>
-            <Visible>false</Visible>
+            <Visible>true</Visible>
           </Label>
           <DataDefinition>
-            <Definition>if (params[&quot;Display Metric&quot;] == &quot;wallclock&quot;) {
- row[&quot;WallDuration&quot;] / 3600
-}
-else if (params[&quot;Display Metric&quot;]==&quot;process&quot;) {
-row[&quot;Cpu&quot;]/3600
-}
-else if (params[&quot;Display Metric&quot;]==&quot;jobcount&quot;){
-row[&quot;Njobs&quot;]
-}
-else {
-&quot;***Unknown metric***&quot;
+            <Definition>if (params[&quot;Display Metric&quot;] == &quot;wallclock&quot;) {&#xD;
+ row[&quot;WallDuration&quot;] / 3600&#xD;
+}&#xD;
+else if (params[&quot;Display Metric&quot;]==&quot;process&quot;) {&#xD;
+row[&quot;Cpu&quot;]/3600&#xD;
+}&#xD;
+else if (params[&quot;Display Metric&quot;]==&quot;jobcount&quot;){&#xD;
+row[&quot;Njobs&quot;]&#xD;
+}&#xD;
+else {&#xD;
+&quot;***Unknown metric***&quot;&#xD;
 }</Definition>
           </DataDefinition>
           <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
           <DataPoint>
-            <Components>
-              <Type>Orthogonal_Value</Type>
-            </Components>
             <Separator>, </Separator>
           </DataPoint>
           <LabelPosition>Outside</LabelPosition>
@@ -1193,6 +1425,7 @@ else {
           <GroupType>Text</GroupType>
           <AggregateExpression>Sum</AggregateExpression>
         </Grouping>
+        <Sorting>Ascending</Sorting>
       </SeriesDefinitions>
       <Orientation>Vertical</Orientation>
       <LineAttributes>
@@ -1394,7 +1627,1088 @@ else {
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datesite&quot;]</Definition>
+          <Definition>row[&quot;endtime&quot;]</Definition>
+        </DataDefinition>
+        <SeriesIdentifier>Day</SeriesIdentifier>
+        <DataPoint>
+          <Components>
+            <Type>Orthogonal_Value</Type>
+          </Components>
+          <Separator>, </Separator>
+        </DataPoint>
+        <LabelPosition>Outside</LabelPosition>
+        <Stacked>false</Stacked>
+      </Series>
+      <Series>
+        <Visible>true</Visible>
+        <Label>
+          <Caption>
+            <Value>&lt;undefined></Value>
+            <Font>
+              <Alignment/>
+            </Font>
+          </Caption>
+          <Background xsi:type="attribute:ColorDefinition">
+            <Transparency>0</Transparency>
+            <Red>255</Red>
+            <Green>255</Green>
+            <Blue>255</Blue>
+          </Background>
+          <Outline>
+            <Style>Solid</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>false</Visible>
+          </Outline>
+          <Insets>
+            <Top>0.0</Top>
+            <Left>2.0</Left>
+            <Bottom>0.0</Bottom>
+            <Right>3.0</Right>
+          </Insets>
+          <Visible>false</Visible>
+        </Label>
+        <DataDefinition>
+          <Definition>row[&quot;sitename_remapped&quot;]</Definition>
+        </DataDefinition>
+        <SeriesIdentifier>Day</SeriesIdentifier>
+        <DataPoint>
+          <Components>
+            <Type>Orthogonal_Value</Type>
+          </Components>
+          <Separator>, </Separator>
+        </DataPoint>
+        <LabelPosition>Outside</LabelPosition>
+        <Stacked>false</Stacked>
+      </Series>
+      <Series>
+        <Visible>true</Visible>
+        <Label>
+          <Caption>
+            <Value>&lt;undefined></Value>
+            <Font>
+              <Alignment/>
+            </Font>
+          </Caption>
+          <Background xsi:type="attribute:ColorDefinition">
+            <Transparency>0</Transparency>
+            <Red>255</Red>
+            <Green>255</Green>
+            <Blue>255</Blue>
+          </Background>
+          <Outline>
+            <Style>Solid</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>false</Visible>
+          </Outline>
+          <Insets>
+            <Top>0.0</Top>
+            <Left>2.0</Left>
+            <Bottom>0.0</Bottom>
+            <Right>3.0</Right>
+          </Insets>
+          <Visible>false</Visible>
+        </Label>
+        <DataDefinition>
+          <Definition>row[&quot;sitename_remapped&quot;]</Definition>
+        </DataDefinition>
+        <SeriesIdentifier>Day</SeriesIdentifier>
+        <DataPoint>
+          <Components>
+            <Type>Orthogonal_Value</Type>
+          </Components>
+          <Separator>, </Separator>
+        </DataPoint>
+        <LabelPosition>Outside</LabelPosition>
+        <Stacked>false</Stacked>
+      </Series>
+      <Series>
+        <Visible>true</Visible>
+        <Label>
+          <Caption>
+            <Value>&lt;undefined></Value>
+            <Font>
+              <Alignment/>
+            </Font>
+          </Caption>
+          <Background xsi:type="attribute:ColorDefinition">
+            <Transparency>0</Transparency>
+            <Red>255</Red>
+            <Green>255</Green>
+            <Blue>255</Blue>
+          </Background>
+          <Outline>
+            <Style>Solid</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>false</Visible>
+          </Outline>
+          <Insets>
+            <Top>0.0</Top>
+            <Left>2.0</Left>
+            <Bottom>0.0</Bottom>
+            <Right>3.0</Right>
+          </Insets>
+          <Visible>false</Visible>
+        </Label>
+        <DataDefinition>
+          <Definition>row[&quot;sitename_remapped&quot;]</Definition>
+        </DataDefinition>
+        <SeriesIdentifier>Day</SeriesIdentifier>
+        <DataPoint>
+          <Components>
+            <Type>Orthogonal_Value</Type>
+          </Components>
+          <Separator>, </Separator>
+        </DataPoint>
+        <LabelPosition>Outside</LabelPosition>
+        <Stacked>false</Stacked>
+      </Series>
+      <Series>
+        <Visible>true</Visible>
+        <Label>
+          <Caption>
+            <Value>&lt;undefined></Value>
+            <Font>
+              <Alignment/>
+            </Font>
+          </Caption>
+          <Background xsi:type="attribute:ColorDefinition">
+            <Transparency>0</Transparency>
+            <Red>255</Red>
+            <Green>255</Green>
+            <Blue>255</Blue>
+          </Background>
+          <Outline>
+            <Style>Solid</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>false</Visible>
+          </Outline>
+          <Insets>
+            <Top>0.0</Top>
+            <Left>2.0</Left>
+            <Bottom>0.0</Bottom>
+            <Right>3.0</Right>
+          </Insets>
+          <Visible>false</Visible>
+        </Label>
+        <DataDefinition>
+          <Definition>row[&quot;sitename_remapped&quot;]</Definition>
+        </DataDefinition>
+        <SeriesIdentifier>Day</SeriesIdentifier>
+        <DataPoint>
+          <Components>
+            <Type>Orthogonal_Value</Type>
+          </Components>
+          <Separator>, </Separator>
+        </DataPoint>
+        <LabelPosition>Outside</LabelPosition>
+        <Stacked>false</Stacked>
+      </Series>
+      <Series>
+        <Visible>true</Visible>
+        <Label>
+          <Caption>
+            <Value>&lt;undefined></Value>
+            <Font>
+              <Alignment/>
+            </Font>
+          </Caption>
+          <Background xsi:type="attribute:ColorDefinition">
+            <Transparency>0</Transparency>
+            <Red>255</Red>
+            <Green>255</Green>
+            <Blue>255</Blue>
+          </Background>
+          <Outline>
+            <Style>Solid</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>false</Visible>
+          </Outline>
+          <Insets>
+            <Top>0.0</Top>
+            <Left>2.0</Left>
+            <Bottom>0.0</Bottom>
+            <Right>3.0</Right>
+          </Insets>
+          <Visible>false</Visible>
+        </Label>
+        <DataDefinition>
+          <Definition>row[&quot;sitename_remapped&quot;]</Definition>
+        </DataDefinition>
+        <SeriesIdentifier>Day</SeriesIdentifier>
+        <DataPoint>
+          <Components>
+            <Type>Orthogonal_Value</Type>
+          </Components>
+          <Separator>, </Separator>
+        </DataPoint>
+        <LabelPosition>Outside</LabelPosition>
+        <Stacked>false</Stacked>
+      </Series>
+      <Series>
+        <Visible>true</Visible>
+        <Label>
+          <Caption>
+            <Value>&lt;undefined></Value>
+            <Font>
+              <Alignment/>
+            </Font>
+          </Caption>
+          <Background xsi:type="attribute:ColorDefinition">
+            <Transparency>0</Transparency>
+            <Red>255</Red>
+            <Green>255</Green>
+            <Blue>255</Blue>
+          </Background>
+          <Outline>
+            <Style>Solid</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>false</Visible>
+          </Outline>
+          <Insets>
+            <Top>0.0</Top>
+            <Left>2.0</Left>
+            <Bottom>0.0</Bottom>
+            <Right>3.0</Right>
+          </Insets>
+          <Visible>false</Visible>
+        </Label>
+        <DataDefinition>
+          <Definition>row[&quot;sitename&quot;]</Definition>
+        </DataDefinition>
+        <SeriesIdentifier>Day</SeriesIdentifier>
+        <DataPoint>
+          <Components>
+            <Type>Orthogonal_Value</Type>
+          </Components>
+          <Separator>, </Separator>
+        </DataPoint>
+        <LabelPosition>Outside</LabelPosition>
+        <Stacked>false</Stacked>
+      </Series>
+      <Series>
+        <Visible>true</Visible>
+        <Label>
+          <Caption>
+            <Value>&lt;undefined></Value>
+            <Font>
+              <Alignment/>
+            </Font>
+          </Caption>
+          <Background xsi:type="attribute:ColorDefinition">
+            <Transparency>0</Transparency>
+            <Red>255</Red>
+            <Green>255</Green>
+            <Blue>255</Blue>
+          </Background>
+          <Outline>
+            <Style>Solid</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>false</Visible>
+          </Outline>
+          <Insets>
+            <Top>0.0</Top>
+            <Left>2.0</Left>
+            <Bottom>0.0</Bottom>
+            <Right>3.0</Right>
+          </Insets>
+          <Visible>false</Visible>
+        </Label>
+        <DataDefinition>
+          <Definition>row[&quot;sitename&quot;]</Definition>
+        </DataDefinition>
+        <SeriesIdentifier>Day</SeriesIdentifier>
+        <DataPoint>
+          <Components>
+            <Type>Orthogonal_Value</Type>
+          </Components>
+          <Separator>, </Separator>
+        </DataPoint>
+        <LabelPosition>Outside</LabelPosition>
+        <Stacked>false</Stacked>
+      </Series>
+      <Series>
+        <Visible>true</Visible>
+        <Label>
+          <Caption>
+            <Value>&lt;undefined></Value>
+            <Font>
+              <Alignment/>
+            </Font>
+          </Caption>
+          <Background xsi:type="attribute:ColorDefinition">
+            <Transparency>0</Transparency>
+            <Red>255</Red>
+            <Green>255</Green>
+            <Blue>255</Blue>
+          </Background>
+          <Outline>
+            <Style>Solid</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>false</Visible>
+          </Outline>
+          <Insets>
+            <Top>0.0</Top>
+            <Left>2.0</Left>
+            <Bottom>0.0</Bottom>
+            <Right>3.0</Right>
+          </Insets>
+          <Visible>false</Visible>
+        </Label>
+        <DataDefinition>
+          <Definition>row[&quot;sitename&quot;]</Definition>
+        </DataDefinition>
+        <SeriesIdentifier>Day</SeriesIdentifier>
+        <DataPoint>
+          <Components>
+            <Type>Orthogonal_Value</Type>
+          </Components>
+          <Separator>, </Separator>
+        </DataPoint>
+        <LabelPosition>Outside</LabelPosition>
+        <Stacked>false</Stacked>
+      </Series>
+      <Series>
+        <Visible>true</Visible>
+        <Label>
+          <Caption>
+            <Value>&lt;undefined></Value>
+            <Font>
+              <Alignment/>
+            </Font>
+          </Caption>
+          <Background xsi:type="attribute:ColorDefinition">
+            <Transparency>0</Transparency>
+            <Red>255</Red>
+            <Green>255</Green>
+            <Blue>255</Blue>
+          </Background>
+          <Outline>
+            <Style>Solid</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>false</Visible>
+          </Outline>
+          <Insets>
+            <Top>0.0</Top>
+            <Left>2.0</Left>
+            <Bottom>0.0</Bottom>
+            <Right>3.0</Right>
+          </Insets>
+          <Visible>false</Visible>
+        </Label>
+        <DataDefinition>
+          <Definition>row[&quot;sitename&quot;]</Definition>
+        </DataDefinition>
+        <SeriesIdentifier>Day</SeriesIdentifier>
+        <DataPoint>
+          <Components>
+            <Type>Orthogonal_Value</Type>
+          </Components>
+          <Separator>, </Separator>
+        </DataPoint>
+        <LabelPosition>Outside</LabelPosition>
+        <Stacked>false</Stacked>
+      </Series>
+      <Series>
+        <Visible>true</Visible>
+        <Label>
+          <Caption>
+            <Value>&lt;undefined></Value>
+            <Font>
+              <Alignment/>
+            </Font>
+          </Caption>
+          <Background xsi:type="attribute:ColorDefinition">
+            <Transparency>0</Transparency>
+            <Red>255</Red>
+            <Green>255</Green>
+            <Blue>255</Blue>
+          </Background>
+          <Outline>
+            <Style>Solid</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>false</Visible>
+          </Outline>
+          <Insets>
+            <Top>0.0</Top>
+            <Left>2.0</Left>
+            <Bottom>0.0</Bottom>
+            <Right>3.0</Right>
+          </Insets>
+          <Visible>false</Visible>
+        </Label>
+        <DataDefinition>
+          <Definition>row[&quot;sitename&quot;]</Definition>
+        </DataDefinition>
+        <SeriesIdentifier>Day</SeriesIdentifier>
+        <DataPoint>
+          <Components>
+            <Type>Orthogonal_Value</Type>
+          </Components>
+          <Separator>, </Separator>
+        </DataPoint>
+        <LabelPosition>Outside</LabelPosition>
+        <Stacked>false</Stacked>
+      </Series>
+      <Series>
+        <Visible>true</Visible>
+        <Label>
+          <Caption>
+            <Value>&lt;undefined></Value>
+            <Font>
+              <Alignment/>
+            </Font>
+          </Caption>
+          <Background xsi:type="attribute:ColorDefinition">
+            <Transparency>0</Transparency>
+            <Red>255</Red>
+            <Green>255</Green>
+            <Blue>255</Blue>
+          </Background>
+          <Outline>
+            <Style>Solid</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>false</Visible>
+          </Outline>
+          <Insets>
+            <Top>0.0</Top>
+            <Left>2.0</Left>
+            <Bottom>0.0</Bottom>
+            <Right>3.0</Right>
+          </Insets>
+          <Visible>false</Visible>
+        </Label>
+        <DataDefinition>
+          <Definition>row[&quot;sitename&quot;]</Definition>
+        </DataDefinition>
+        <SeriesIdentifier>Day</SeriesIdentifier>
+        <DataPoint>
+          <Components>
+            <Type>Orthogonal_Value</Type>
+          </Components>
+          <Separator>, </Separator>
+        </DataPoint>
+        <LabelPosition>Outside</LabelPosition>
+        <Stacked>false</Stacked>
+      </Series>
+      <Series>
+        <Visible>true</Visible>
+        <Label>
+          <Caption>
+            <Value>&lt;undefined></Value>
+            <Font>
+              <Alignment/>
+            </Font>
+          </Caption>
+          <Background xsi:type="attribute:ColorDefinition">
+            <Transparency>0</Transparency>
+            <Red>255</Red>
+            <Green>255</Green>
+            <Blue>255</Blue>
+          </Background>
+          <Outline>
+            <Style>Solid</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>false</Visible>
+          </Outline>
+          <Insets>
+            <Top>0.0</Top>
+            <Left>2.0</Left>
+            <Bottom>0.0</Bottom>
+            <Right>3.0</Right>
+          </Insets>
+          <Visible>false</Visible>
+        </Label>
+        <DataDefinition>
+          <Definition>row[&quot;sitename&quot;]</Definition>
+        </DataDefinition>
+        <SeriesIdentifier>Day</SeriesIdentifier>
+        <DataPoint>
+          <Components>
+            <Type>Orthogonal_Value</Type>
+          </Components>
+          <Separator>, </Separator>
+        </DataPoint>
+        <LabelPosition>Outside</LabelPosition>
+        <Stacked>false</Stacked>
+      </Series>
+      <Series>
+        <Visible>true</Visible>
+        <Label>
+          <Caption>
+            <Value>&lt;undefined></Value>
+            <Font>
+              <Alignment/>
+            </Font>
+          </Caption>
+          <Background xsi:type="attribute:ColorDefinition">
+            <Transparency>0</Transparency>
+            <Red>255</Red>
+            <Green>255</Green>
+            <Blue>255</Blue>
+          </Background>
+          <Outline>
+            <Style>Solid</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>false</Visible>
+          </Outline>
+          <Insets>
+            <Top>0.0</Top>
+            <Left>2.0</Left>
+            <Bottom>0.0</Bottom>
+            <Right>3.0</Right>
+          </Insets>
+          <Visible>false</Visible>
+        </Label>
+        <DataDefinition>
+          <Definition>row[&quot;sitename&quot;]</Definition>
+        </DataDefinition>
+        <SeriesIdentifier>Day</SeriesIdentifier>
+        <DataPoint>
+          <Components>
+            <Type>Orthogonal_Value</Type>
+          </Components>
+          <Separator>, </Separator>
+        </DataPoint>
+        <LabelPosition>Outside</LabelPosition>
+        <Stacked>false</Stacked>
+      </Series>
+      <Series>
+        <Visible>true</Visible>
+        <Label>
+          <Caption>
+            <Value>&lt;undefined></Value>
+            <Font>
+              <Alignment/>
+            </Font>
+          </Caption>
+          <Background xsi:type="attribute:ColorDefinition">
+            <Transparency>0</Transparency>
+            <Red>255</Red>
+            <Green>255</Green>
+            <Blue>255</Blue>
+          </Background>
+          <Outline>
+            <Style>Solid</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>false</Visible>
+          </Outline>
+          <Insets>
+            <Top>0.0</Top>
+            <Left>2.0</Left>
+            <Bottom>0.0</Bottom>
+            <Right>3.0</Right>
+          </Insets>
+          <Visible>false</Visible>
+        </Label>
+        <DataDefinition>
+          <Definition>row[&quot;sitename&quot;]</Definition>
+        </DataDefinition>
+        <SeriesIdentifier>Day</SeriesIdentifier>
+        <DataPoint>
+          <Components>
+            <Type>Orthogonal_Value</Type>
+          </Components>
+          <Separator>, </Separator>
+        </DataPoint>
+        <LabelPosition>Outside</LabelPosition>
+        <Stacked>false</Stacked>
+      </Series>
+      <Series>
+        <Visible>true</Visible>
+        <Label>
+          <Caption>
+            <Value>&lt;undefined></Value>
+            <Font>
+              <Alignment/>
+            </Font>
+          </Caption>
+          <Background xsi:type="attribute:ColorDefinition">
+            <Transparency>0</Transparency>
+            <Red>255</Red>
+            <Green>255</Green>
+            <Blue>255</Blue>
+          </Background>
+          <Outline>
+            <Style>Solid</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>false</Visible>
+          </Outline>
+          <Insets>
+            <Top>0.0</Top>
+            <Left>2.0</Left>
+            <Bottom>0.0</Bottom>
+            <Right>3.0</Right>
+          </Insets>
+          <Visible>false</Visible>
+        </Label>
+        <DataDefinition>
+          <Definition>row[&quot;sitename&quot;]</Definition>
+        </DataDefinition>
+        <SeriesIdentifier>Day</SeriesIdentifier>
+        <DataPoint>
+          <Components>
+            <Type>Orthogonal_Value</Type>
+          </Components>
+          <Separator>, </Separator>
+        </DataPoint>
+        <LabelPosition>Outside</LabelPosition>
+        <Stacked>false</Stacked>
+      </Series>
+      <Series>
+        <Visible>true</Visible>
+        <Label>
+          <Caption>
+            <Value>&lt;undefined></Value>
+            <Font>
+              <Alignment/>
+            </Font>
+          </Caption>
+          <Background xsi:type="attribute:ColorDefinition">
+            <Transparency>0</Transparency>
+            <Red>255</Red>
+            <Green>255</Green>
+            <Blue>255</Blue>
+          </Background>
+          <Outline>
+            <Style>Solid</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>false</Visible>
+          </Outline>
+          <Insets>
+            <Top>0.0</Top>
+            <Left>2.0</Left>
+            <Bottom>0.0</Bottom>
+            <Right>3.0</Right>
+          </Insets>
+          <Visible>false</Visible>
+        </Label>
+        <DataDefinition>
+          <Definition>row[&quot;sitename&quot;]</Definition>
+        </DataDefinition>
+        <SeriesIdentifier>Day</SeriesIdentifier>
+        <DataPoint>
+          <Components>
+            <Type>Orthogonal_Value</Type>
+          </Components>
+          <Separator>, </Separator>
+        </DataPoint>
+        <LabelPosition>Outside</LabelPosition>
+        <Stacked>false</Stacked>
+      </Series>
+      <Series>
+        <Visible>true</Visible>
+        <Label>
+          <Caption>
+            <Value>&lt;undefined></Value>
+            <Font>
+              <Alignment/>
+            </Font>
+          </Caption>
+          <Background xsi:type="attribute:ColorDefinition">
+            <Transparency>0</Transparency>
+            <Red>255</Red>
+            <Green>255</Green>
+            <Blue>255</Blue>
+          </Background>
+          <Outline>
+            <Style>Solid</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>false</Visible>
+          </Outline>
+          <Insets>
+            <Top>0.0</Top>
+            <Left>2.0</Left>
+            <Bottom>0.0</Bottom>
+            <Right>3.0</Right>
+          </Insets>
+          <Visible>false</Visible>
+        </Label>
+        <DataDefinition>
+          <Definition>row[&quot;sitename&quot;]</Definition>
+        </DataDefinition>
+        <SeriesIdentifier>Day</SeriesIdentifier>
+        <DataPoint>
+          <Components>
+            <Type>Orthogonal_Value</Type>
+          </Components>
+          <Separator>, </Separator>
+        </DataPoint>
+        <LabelPosition>Outside</LabelPosition>
+        <Stacked>false</Stacked>
+      </Series>
+      <Series>
+        <Visible>true</Visible>
+        <Label>
+          <Caption>
+            <Value>&lt;undefined></Value>
+            <Font>
+              <Alignment/>
+            </Font>
+          </Caption>
+          <Background xsi:type="attribute:ColorDefinition">
+            <Transparency>0</Transparency>
+            <Red>255</Red>
+            <Green>255</Green>
+            <Blue>255</Blue>
+          </Background>
+          <Outline>
+            <Style>Solid</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>false</Visible>
+          </Outline>
+          <Insets>
+            <Top>0.0</Top>
+            <Left>2.0</Left>
+            <Bottom>0.0</Bottom>
+            <Right>3.0</Right>
+          </Insets>
+          <Visible>false</Visible>
+        </Label>
+        <DataDefinition>
+          <Definition>row[&quot;sitename&quot;]</Definition>
+        </DataDefinition>
+        <SeriesIdentifier>Day</SeriesIdentifier>
+        <DataPoint>
+          <Components>
+            <Type>Orthogonal_Value</Type>
+          </Components>
+          <Separator>, </Separator>
+        </DataPoint>
+        <LabelPosition>Outside</LabelPosition>
+        <Stacked>false</Stacked>
+      </Series>
+      <Series>
+        <Visible>true</Visible>
+        <Label>
+          <Caption>
+            <Value>&lt;undefined></Value>
+            <Font>
+              <Alignment/>
+            </Font>
+          </Caption>
+          <Background xsi:type="attribute:ColorDefinition">
+            <Transparency>0</Transparency>
+            <Red>255</Red>
+            <Green>255</Green>
+            <Blue>255</Blue>
+          </Background>
+          <Outline>
+            <Style>Solid</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>false</Visible>
+          </Outline>
+          <Insets>
+            <Top>0.0</Top>
+            <Left>2.0</Left>
+            <Bottom>0.0</Bottom>
+            <Right>3.0</Right>
+          </Insets>
+          <Visible>false</Visible>
+        </Label>
+        <DataDefinition>
+          <Definition>row[&quot;endtime&quot;]</Definition>
+        </DataDefinition>
+        <SeriesIdentifier>Day</SeriesIdentifier>
+        <DataPoint>
+          <Components>
+            <Type>Orthogonal_Value</Type>
+          </Components>
+          <Separator>, </Separator>
+        </DataPoint>
+        <LabelPosition>Outside</LabelPosition>
+        <Stacked>false</Stacked>
+      </Series>
+      <Series>
+        <Visible>true</Visible>
+        <Label>
+          <Caption>
+            <Value>&lt;undefined></Value>
+            <Font>
+              <Alignment/>
+            </Font>
+          </Caption>
+          <Background xsi:type="attribute:ColorDefinition">
+            <Transparency>0</Transparency>
+            <Red>255</Red>
+            <Green>255</Green>
+            <Blue>255</Blue>
+          </Background>
+          <Outline>
+            <Style>Solid</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>false</Visible>
+          </Outline>
+          <Insets>
+            <Top>0.0</Top>
+            <Left>2.0</Left>
+            <Bottom>0.0</Bottom>
+            <Right>3.0</Right>
+          </Insets>
+          <Visible>false</Visible>
+        </Label>
+        <DataDefinition>
+          <Definition>row[&quot;endtime&quot;]</Definition>
+        </DataDefinition>
+        <SeriesIdentifier>Day</SeriesIdentifier>
+        <DataPoint>
+          <Components>
+            <Type>Orthogonal_Value</Type>
+          </Components>
+          <Separator>, </Separator>
+        </DataPoint>
+        <LabelPosition>Outside</LabelPosition>
+        <Stacked>false</Stacked>
+      </Series>
+      <Series>
+        <Visible>true</Visible>
+        <Label>
+          <Caption>
+            <Value>&lt;undefined></Value>
+            <Font>
+              <Alignment/>
+            </Font>
+          </Caption>
+          <Background xsi:type="attribute:ColorDefinition">
+            <Transparency>0</Transparency>
+            <Red>255</Red>
+            <Green>255</Green>
+            <Blue>255</Blue>
+          </Background>
+          <Outline>
+            <Style>Solid</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>false</Visible>
+          </Outline>
+          <Insets>
+            <Top>0.0</Top>
+            <Left>2.0</Left>
+            <Bottom>0.0</Bottom>
+            <Right>3.0</Right>
+          </Insets>
+          <Visible>false</Visible>
+        </Label>
+        <DataDefinition>
+          <Definition>row[&quot;endtime&quot;]</Definition>
+        </DataDefinition>
+        <SeriesIdentifier>Day</SeriesIdentifier>
+        <DataPoint>
+          <Components>
+            <Type>Orthogonal_Value</Type>
+          </Components>
+          <Separator>, </Separator>
+        </DataPoint>
+        <LabelPosition>Outside</LabelPosition>
+        <Stacked>false</Stacked>
+      </Series>
+      <Series>
+        <Visible>true</Visible>
+        <Label>
+          <Caption>
+            <Value>&lt;undefined></Value>
+            <Font>
+              <Alignment/>
+            </Font>
+          </Caption>
+          <Background xsi:type="attribute:ColorDefinition">
+            <Transparency>0</Transparency>
+            <Red>255</Red>
+            <Green>255</Green>
+            <Blue>255</Blue>
+          </Background>
+          <Outline>
+            <Style>Solid</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>false</Visible>
+          </Outline>
+          <Insets>
+            <Top>0.0</Top>
+            <Left>2.0</Left>
+            <Bottom>0.0</Bottom>
+            <Right>3.0</Right>
+          </Insets>
+          <Visible>false</Visible>
+        </Label>
+        <DataDefinition>
+          <Definition>row[&quot;endtime&quot;]</Definition>
+        </DataDefinition>
+        <SeriesIdentifier>Day</SeriesIdentifier>
+        <DataPoint>
+          <Components>
+            <Type>Orthogonal_Value</Type>
+          </Components>
+          <Separator>, </Separator>
+        </DataPoint>
+        <LabelPosition>Outside</LabelPosition>
+        <Stacked>false</Stacked>
+      </Series>
+      <Series>
+        <Visible>true</Visible>
+        <Label>
+          <Caption>
+            <Value>&lt;undefined></Value>
+            <Font>
+              <Alignment/>
+            </Font>
+          </Caption>
+          <Background xsi:type="attribute:ColorDefinition">
+            <Transparency>0</Transparency>
+            <Red>255</Red>
+            <Green>255</Green>
+            <Blue>255</Blue>
+          </Background>
+          <Outline>
+            <Style>Solid</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>false</Visible>
+          </Outline>
+          <Insets>
+            <Top>0.0</Top>
+            <Left>2.0</Left>
+            <Bottom>0.0</Bottom>
+            <Right>3.0</Right>
+          </Insets>
+          <Visible>false</Visible>
+        </Label>
+        <DataDefinition>
+          <Definition>row[&quot;endtime&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>Day</SeriesIdentifier>
         <DataPoint>
@@ -1407,13 +2721,13 @@ else {
         <Stacked>false</Stacked>
       </Series>
       <Grouping>
-        <Enabled>false</Enabled>
+        <Enabled>true</Enabled>
         <GroupingUnit>Weeks</GroupingUnit>
-        <GroupingInterval>1</GroupingInterval>
-        <GroupType>DateTime</GroupType>
+        <GroupingInterval>0</GroupingInterval>
+        <GroupType>Text</GroupType>
         <AggregateExpression>Sum</AggregateExpression>
       </Grouping>
-      <Sorting>Descending</Sorting>
+      <Sorting>Ascending</Sorting>
     </SeriesDefinitions>
     <Orientation>Horizontal</Orientation>
     <LineAttributes>
@@ -1433,7 +2747,7 @@ else {
         <Font>
           <Size>7.0</Size>
           <Alignment/>
-          <Rotation>0.0</Rotation>
+          <Rotation>90.0</Rotation>
         </Font>
         <Color>
           <Transparency>255</Transparency>
@@ -1530,7 +2844,7 @@ else {
     <CategoryAxis>true</CategoryAxis>
     <Percent>false</Percent>
   </Axes>
-  <Orientation>Horizontal</Orientation>
+  <Orientation>Vertical</Orientation>
   <Rotation/>
 </model:ChartWithAxes>
 ]]></xml-property>
@@ -1541,6 +2855,65 @@ else {
                     <expression name="expr">row["probename"] == 'daily:goc' ||  row["probename"] == 'daily:Panda'</expression>
                 </structure>
             </list-property>
+            <property name="marginTop">0pt</property>
+            <property name="canShrink">false</property>
+            <property name="dataSet">UsageHistory</property>
+            <property name="height">1000px</property>
+            <property name="width">800px</property>
+            <list-property name="paramBindings">
+                <structure>
+                    <property name="paramName">VOselect</property>
+                    <expression name="expression">params["VOs"]</expression>
+                </structure>
+                <structure>
+                    <property name="paramName">VOSelType</property>
+                    <expression name="expression">params["Selection Type"]</expression>
+                </structure>
+                <structure>
+                    <property name="paramName">StartDate</property>
+                    <expression name="expression">params["Start Date"]</expression>
+                </structure>
+                <structure>
+                    <property name="paramName">EndDate</property>
+                    <expression name="expression">params["End Date"]</expression>
+                </structure>
+                <structure>
+                    <property name="paramName">GroupByFormat</property>
+                    <expression name="expression">params["GroupByFormat"]</expression>
+                </structure>
+            </list-property>
+            <list-property name="boundDataColumns">
+                <structure>
+                    <property name="name">probename</property>
+                    <expression name="expression">dataSetRow["probename"]</expression>
+                </structure>
+                <structure>
+                    <property name="name">sitename</property>
+                    <expression name="expression">dataSetRow["sitename"]</expression>
+                </structure>
+                <structure>
+                    <property name="name">sitename_remapped</property>
+                    <expression name="expression">dataSetRow["sitename_remapped"]</expression>
+                </structure>
+                <structure>
+                    <property name="name">WallDuration</property>
+                    <expression name="expression">dataSetRow["WallDuration"]</expression>
+                </structure>
+                <structure>
+                    <property name="name">Cpu</property>
+                    <expression name="expression">dataSetRow["Cpu"]</expression>
+                </structure>
+                <structure>
+                    <property name="name">Njobs</property>
+                    <expression name="expression">dataSetRow["Njobs"]</expression>
+                </structure>
+                <structure>
+                    <property name="name">endtime</property>
+                    <expression name="expression">dataSetRow["endtime"]</expression>
+                    <property name="dataType">any</property>
+                </structure>
+            </list-property>
+            <property name="style">sans-style1</property>
         </extended-item>
     </body>
 </report>
