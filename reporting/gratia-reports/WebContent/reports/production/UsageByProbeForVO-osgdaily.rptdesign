@@ -306,7 +306,7 @@
             <list-property name="selectionList">
                 <structure>
                     <property name="value">('ANALY_BNL_ATLAS_1','ANALY_LONG_BNL_ATLAS','BNL_ATLAS_1','BNL_PANDA')</property>
-                    <property name="label">BNL - ATLAS</property>
+                    <property name="label">BNL-ATLAS</property>
                 </structure>
                 <structure>
                     <property name="value">('UTA-DPCC','UTA_DPCC')</property>
@@ -515,7 +515,7 @@ row["sitename"]
                 </structure>
             </list-property>
             <property name="queryText">
-call UsageByDateForVO(?,?,?,?,?,'Batch',?,?,?)
+call UsageByProbeForVOForSite(?,?,?,?,?,'Batch',?,?,?)
 </property>
         </oda-data-set>
         <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="VOList" id="110">
@@ -1411,6 +1411,52 @@ else {&#xD;
               </Value>
             </Action>
           </Triggers>
+          <CurveFitting>
+            <LineAttributes>
+              <Style>Solid</Style>
+              <Thickness>1</Thickness>
+              <Color>
+                <Transparency>255</Transparency>
+                <Red>0</Red>
+                <Green>0</Green>
+                <Blue>0</Blue>
+              </Color>
+              <Visible>true</Visible>
+            </LineAttributes>
+            <Label>
+              <Caption>
+                <Value></Value>
+                <Font>
+                  <Alignment/>
+                </Font>
+              </Caption>
+              <Background xsi:type="attribute:ColorDefinition">
+                <Transparency>0</Transparency>
+                <Red>255</Red>
+                <Green>255</Green>
+                <Blue>255</Blue>
+              </Background>
+              <Outline>
+                <Style>Solid</Style>
+                <Thickness>1</Thickness>
+                <Color>
+                  <Transparency>255</Transparency>
+                  <Red>0</Red>
+                  <Green>0</Green>
+                  <Blue>0</Blue>
+                </Color>
+                <Visible>false</Visible>
+              </Outline>
+              <Insets>
+                <Top>0.0</Top>
+                <Left>2.0</Left>
+                <Bottom>0.0</Bottom>
+                <Right>3.0</Right>
+              </Insets>
+              <Visible>false</Visible>
+            </Label>
+            <LabelAnchor>North</LabelAnchor>
+          </CurveFitting>
           <Riser>Rectangle</Riser>
           <RiserOutline>
             <Transparency>255</Transparency>
@@ -2747,7 +2793,7 @@ else {&#xD;
         <Font>
           <Size>7.0</Size>
           <Alignment/>
-          <Rotation>90.0</Rotation>
+          <Rotation>45.0</Rotation>
         </Font>
         <Color>
           <Transparency>255</Transparency>
@@ -2915,5 +2961,24 @@ else {&#xD;
             </list-property>
             <property name="style">sans-style1</property>
         </extended-item>
+        <text-data id="115">
+            <property name="style">sans-style1</property>
+            <property name="fontSize">8pt</property>
+            <property name="borderBottomColor">#000000</property>
+            <property name="borderBottomStyle">solid</property>
+            <property name="borderBottomWidth">thin</property>
+            <property name="borderLeftColor">#000000</property>
+            <property name="borderLeftStyle">solid</property>
+            <property name="borderLeftWidth">thin</property>
+            <property name="borderRightColor">#000000</property>
+            <property name="borderRightStyle">solid</property>
+            <property name="borderRightWidth">thin</property>
+            <property name="borderTopColor">#000000</property>
+            <property name="borderTopStyle">solid</property>
+            <property name="borderTopWidth">thin</property>
+            <property name="textAlign">left</property>
+            <expression name="valueExpr">"BNL_PANDA counts all the /'pilot/' jobs that provide the wrapper script to run the real Panda jobs on ANALY _BNL_ATLAS_1, ANALY_LONG_BNL_ATLAS and BNL_ATLAS_1. It also counts the jobs that exited quickly on the worker node without picking up real Panda jobs. Therefore ANALY _BNL_ATLAS_1, ANALY_LONG_BNL_ATLAS and BNL_ATLAS_1 should report less jobs than from BNL_Panda but report Walltime/CPU relatively close to that reported by BNL_PANDA."</expression>
+            <property name="contentType">html</property>
+        </text-data>
     </body>
 </report>
