@@ -49,10 +49,6 @@
             <property name="value">proto</property>
         </structure>
         <structure>
-            <property name="name">GroupByFormat</property>
-            <property name="value">%Y-%M-%d</property>
-        </structure>
-        <structure>
             <property name="name">HighlightDate</property>
         </structure>
         <structure>
@@ -125,7 +121,7 @@
             </parameters>
         </parameter-group>
         <scalar-parameter name="GroupByFormat" id="95">
-            <property name="hidden">false</property>
+            <property name="hidden">true</property>
             <property name="valueType">static</property>
             <property name="dataType">string</property>
             <property name="concealValue">false</property>
@@ -304,7 +300,7 @@
         </oda-data-source>
     </data-sources>
     <data-sets>
-        <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="UsageHistory" id="94">
+        <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="UsageBy" id="94">
             <property name="dataSource">fermigrid1</property>
             <list-property name="parameters">
                 <structure>
@@ -431,7 +427,7 @@ order by voname</property>
             <property name="style">sans-style1</property>
             <property name="height">600px</property>
             <property name="width">800px</property>
-            <property name="dataSet">UsageHistory</property>
+            <property name="dataSet">UsageBy</property>
             <list-property name="paramBindings">
                 <structure>
                     <property name="paramName">VOselect</property>
@@ -456,6 +452,14 @@ order by voname</property>
                 <structure>
                     <property name="paramName">Sites</property>
                     <expression name="expression">params["Sites"]</expression>
+                </structure>
+                <structure>
+                    <property name="paramName">UserName</property>
+                    <expression name="expression">params["UserName"]</expression>
+                </structure>
+                <structure>
+                    <property name="paramName">UserRole</property>
+                    <expression name="expression">params["UserRole"]</expression>
                 </structure>
             </list-property>
             <xml-property name="xmlRepresentation"><![CDATA[<model:ChartWithAxes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:attribute="http://www.birt.eclipse.org/ChartModelAttribute" xmlns:data="http://www.birt.eclipse.org/ChartModelData" xmlns:layout="http://www.birt.eclipse.org/ChartModelLayout" xmlns:model="http://www.birt.eclipse.org/ChartModel" xmlns:type="http://www.birt.eclipse.org/ChartModelType">
