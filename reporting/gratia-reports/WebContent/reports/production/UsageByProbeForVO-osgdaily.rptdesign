@@ -556,7 +556,7 @@ union
 select ' cdf,d0sar,dzero' as voname, concat("('",'cdf',"','",'d0sar',"','",'dzero'"')") as vos
 from VO
 union 
-select ' atlasx' as voname, concat("('",'ATLAS',"','",'atlas',"','",'usatlas',"')") as vos
+select ' atlas, usatlasx' as voname, concat("('",'ATLAS',"','",'atlas',"','",'usatlas',"')") as vos
 from VO
 union 
 select '  none' as voname, concat("('",'none',"')") as vos
@@ -850,7 +850,7 @@ order by voname</property>
       <Left>0.0</Left>
       <Top>0.0</Top>
       <Width>600.0</Width>
-      <Height>750.0</Height>
+      <Height>600.0</Height>
     </Bounds>
     <Insets>
       <Top>3.0</Top>
@@ -2904,7 +2904,7 @@ else {&#xD;
             <property name="marginTop">0pt</property>
             <property name="canShrink">false</property>
             <property name="dataSet">UsageHistory</property>
-            <property name="height">1000px</property>
+            <property name="height">800px</property>
             <property name="width">800px</property>
             <list-property name="paramBindings">
                 <structure>
@@ -2977,7 +2977,10 @@ else {&#xD;
             <property name="borderTopStyle">solid</property>
             <property name="borderTopWidth">thin</property>
             <property name="textAlign">left</property>
-            <expression name="valueExpr">"BNL_PANDA counts all the /'pilot/' jobs that provide the wrapper script to run the real Panda jobs on ANALY _BNL_ATLAS_1, ANALY_LONG_BNL_ATLAS and BNL_ATLAS_1. It also counts the jobs that exited quickly on the worker node without picking up real Panda jobs. Therefore ANALY _BNL_ATLAS_1, ANALY_LONG_BNL_ATLAS and BNL_ATLAS_1 should report less jobs than from BNL_Panda but report Walltime/CPU relatively close to that reported by BNL_PANDA."</expression>
+            <expression name="valueExpr">if(params["Sites"] == "('ANALY_BNL_ATLAS_1','ANALY_LONG_BNL_ATLAS','BNL_ATLAS_1','BNL_PANDA')")
+{"BNL_PANDA counts all the 'pilot' jobs that provide the wrapper script to run the real Panda jobs on ANALY _BNL_ATLAS_1, ANALY_LONG_BNL_ATLAS and BNL_ATLAS_1. It also counts the jobs that exited quickly on the worker node without picking up real Panda jobs. Therefore ANALY _BNL_ATLAS_1, ANALY_LONG_BNL_ATLAS and BNL_ATLAS_1 should report less jobs than from BNL_Panda but report Walltime/CPU relatively close to that reported by BNL_PANDA."
+}else{
+}</expression>
             <property name="contentType">html</property>
         </text-data>
     </body>
