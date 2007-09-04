@@ -195,31 +195,39 @@ public class ListenerThread extends Thread
             Logging.log("ListenerThread: " + ident + ":Exiting");
             return;
          }
-         loop();
+         int nfiles = loop();
          if (stopflag)
          {
             Logging.log("ListenerThread: " + ident + ":Exiting");
             return;
          }
-         try
-         {
-            Thread.sleep(30 * 1000);
-         }
-         catch (Exception ignore)
-         {
+         if (nfiles==0) {
+             // Sleep only if there is no file waiting.
+             try
+                 {
+                     Thread.sleep(30 * 1000);
+                 }
+             catch (Exception ignore)
+                 {
+                 }
          }
       }
    }
 
-   public void loop()
+   public int loop()
    {
+      // Return the number of files seen.
+      // or 0 in the case of error.
+
       if (!HibernateWrapper.databaseUp())
-         return;
+         return 0;
 
       String files[] = xp.getFileList(directory);
 
-      if (files.length == 0)
-         return;
+      int nfiles = files.length;
+
+      if (nfiles == 0)
+         return 0;
 
       statusUpdater = new StatusUpdater();
       newVOUpdate = new NewVOUpdate();
@@ -231,7 +239,7 @@ public class ListenerThread extends Thread
          if (stopflag)
          {
             Logging.log("ListenerThread: " + ident + ":Exiting");
-            return;
+            return nfiles;
          }
 
          file = files[i];
@@ -483,7 +491,7 @@ public class ListenerThread extends Thread
             if (!HibernateWrapper.databaseUp())
             {
                Logging.log("ListenerThread: " + ident + ":Communications Error:Shutting Down");
-               return;
+               return 0; 
             }
             Logging.log("");
             Logging.log("ListenerThread: " + ident + ":Error In Process: " + exception);
@@ -503,8 +511,10 @@ public class ListenerThread extends Thread
          // Logging.log("ListenerThread: " + ident + ":After File Delete: " + file);
          itotal++;
          Logging.log("ListenerThread: " + ident + ":Total Records: " + itotal);
+
       }
-   }
+      return nfiles; 
+  }
 
    public void saveBlob()
    {
