@@ -11,7 +11,7 @@ import java.io.File;
 public class DatabaseMaintenance {
     static final String dq = "\"";
     static final String comma = ",";
-    static final int gratiaDatabaseVersion = 20;
+    static final int gratiaDatabaseVersion = 21;
     static final int latestDBVersionRequiringStoredProcedureLoad = gratiaDatabaseVersion;
     static final int latestDBVersionRequiringSummaryTableLoad = 19;
     static final int latestDBVersionRequiringSummaryTriggerLoad = 19;
@@ -817,6 +817,26 @@ public class DatabaseMaintenance {
                 Logging.log("Gratia database upgraded from " + current + " to " + (current + 1));
                 current = current + 1;
                 UpdateDbVersion(current);
+            }
+            if (current == 20) {
+                int result = Execute("update Probe set nConnections = 0, nDuplicates = 0");
+                if (result > -1) {
+                    result = Execute("update JobUsageRecord_Meta, Probe set JobUsageRecord_Meta.probeid = Probe.probeid where JobUsageRecord_Meta.probename = Probe.probename");
+                }
+                if (result > -1) {
+                    result = Execute("update MetricRecord_Meta, Probe set MetricRecord_Meta.probeid = Probe.probeid where MetricRecord_Meta.probename = Probe.probename");
+                }
+                if (result > -1) {
+                    result = Execute("update ProbeDetails_Meta, Probe set ProbeDetails_Meta.probeid = Probe.probeid where ProbeDetails_Meta.probename = Probe.probename");
+                } 
+                if (result > -1) {
+                    Logging.log("Gratia database upgraded from " + current + " to " + (current + 1));
+                    current = current + 1;
+                    UpdateDbVersion(current);
+                } else {
+                    Logging.log("Gratia database FAILED to upgrade from " + current +
+                                " to " + (current + 1));
+                }
             }
             return ((current == gratiaDatabaseVersion) && checkAndUpgradeDbAuxiliaryItems());
         }
