@@ -78,7 +78,7 @@ public class Collector
 						try
 								{
 								
-										status = proxy.statusUpdate(xml);
+										status = proxy.handshake(xml);
 										if (! status)
 												{
 														response.set_code(1);

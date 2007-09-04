@@ -148,7 +148,7 @@ public class RMIHandlerServlet extends HttpServlet
 										{
 												if (arg1.equals("status"))
 														{
-																boolean status = proxy.statusUpdate(arg2);
+																boolean status = proxy.handshake(arg2);
 																if (status)
 																		writer.write("OK");
 																else
