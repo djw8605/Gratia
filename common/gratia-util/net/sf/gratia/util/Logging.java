@@ -65,7 +65,7 @@ public class Logging
 								System.out.println("Logger Not Initialized !!");
 								return;
 						}
-				logger.finest(message);
+				logger.fine(message);
 				if (console)
 						System.out.println(format.format(new Date()) + ": " + message);
 		}
@@ -101,7 +101,7 @@ public class Logging
 								System.out.println("Logger Not Initialized !!");
 								return;
 						}
-				Logging.log(message);
+				logger.finest(message);
 				if (console)
 						System.out.println(format.format(new Date()) + ": " + message);
 		}
