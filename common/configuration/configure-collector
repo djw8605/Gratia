@@ -13,6 +13,23 @@ use Pod::Usage;
 
 my %collector_configs =
 	(
+   itb_innodb => { http_port => 8880,
+                   ssl_port => 8845,
+                   rmi_port => 17000,
+                   jmx_port => 8004,
+                   server_port => 8104,
+                   db_host => "flxd01.fnal.gov",
+                   db_port => 3338,
+                   db_schema => "gratia_itb",
+                   remote_host => "gratia01.fnal.gov",
+                   "properties.attributes" =>
+                   {
+                    "maintain.history.log" => 7,
+                    "monitor.listener.wait" => 2880,
+                    "service.rmiservlet.level" => "FINEST",
+                    "monitor.to.address0" => 'greenc@fnal.gov'
+                   }
+                 },
 	 gratia => { http_port => 8880,
 							 ssl_port => 8845,
 							 rmi_port => 17000,
@@ -34,7 +51,11 @@ my %collector_configs =
 									jmx_port => 8004,
 									server_port => 8104,
 									db_schema => "fermi_osg",
-									remote_host => "gratia-fermi.fnal.gov"
+									remote_host => "gratia-fermi.fnal.gov",
+                  "properties.attributes" =>
+                  {
+                   "monitor.listener.wait" => 1440
+                  }
 								},
 #	 test => { http_port => 8885,
 #						 ssl_port => 8870,
@@ -60,7 +81,11 @@ my %collector_configs =
 									jmx_port => 8014,
 									server_port => 8114,
 									db_schema => "fermi_itb",
-									remote_host => "gratia-fermi.fnal.gov"
+									remote_host => "gratia-fermi.fnal.gov",
+                  "properties.attributes" =>
+                  {
+                   "monitor.listener.wait" => 1440
+                  }
 								},
 	 ps => { http_port => 8882,
 					 ssl_port => 8855,
@@ -132,6 +157,7 @@ my %collector_configs =
 							"properties.attributes" =>
 							{
 							 "monitor.listener.wait" => 240,
+               "service.rmiservlet.level" => "FINEST",
 							 "monitor.to.address0" => 'greenc@fnal.gov'
 							}
 						 },
