@@ -76,6 +76,7 @@ public class MetricRecord implements Record
       if (RecordIdentity != null) output = output + RecordIdentity + "\n";
       if (SiteName != null) output = output + " SiteName: " + SiteName + "\n";
       if (ProbeName != null) output = output + "ProbeName: " + ProbeName + "\n";
+      if (Grid != null) output = output + "Grid: " + Grid + "\n";
 
       output = output + "metricName: " + MetricName + "\n";
       output = output + "metricType: " + MetricStatus + "\n";
@@ -96,6 +97,7 @@ public class MetricRecord implements Record
       if (RecordIdentity != null) output = output + RecordIdentity.asXml();
       if (ProbeName != null) output = output + ProbeName.asXml("ProbeName");
       if (SiteName != null) output = output + SiteName.asXml("SiteName");
+      if (Grid != null) output = output + Grid.asXml("Grid");
 
       if (MetricName != null) output = output + MetricName.asXml("MetricName");
       if (MetricStatus != null) output = output + MetricStatus.asXml("MetricStatus");
