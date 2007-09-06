@@ -191,7 +191,7 @@ public class ReplicationTable extends HttpServlet
 
       try
       {
-         command = "select probename from Probe order by probename";
+         command = "select distinct ProbeName from " + RecordTable + "_Meta order by ProbeName";
          statement = connection.prepareStatement(command);
          resultSet = statement.executeQuery(command);
 
