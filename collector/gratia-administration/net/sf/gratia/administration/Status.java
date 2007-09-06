@@ -8,6 +8,9 @@ import java.net.*;
 import java.util.StringTokenizer;
 import java.util.Properties;
 import java.util.Hashtable;
+import java.util.HashMap;
+import java.util.TreeSet;
+import java.util.Iterator;
 import java.util.Enumeration;
 import java.util.Vector;
 
@@ -18,9 +21,9 @@ import java.sql.*;
 
 import java.util.regex.*;
 import java.text.*;
+import java.lang.Math;
 
-public class Status extends HttpServlet 
-{
+public class Status extends HttpServlet {
     XP xp = new XP();
     //
     // database related
@@ -36,8 +39,30 @@ public class Status extends HttpServlet
     // processing related
     //
     String html = "";
+    String tableHeader = "";
+    String tableSection = "";
     String row = "";
     StringBuffer buffer = new StringBuffer();
+    static Pattern colgroupDefn =
+        Pattern.compile("^\\s*<colgroup class=\"tablespan\".*?/>\\s*?\n",
+                        Pattern.MULTILINE + Pattern.DOTALL);
+    static Pattern colgroupHdr =
+        Pattern.compile("^\\s*<th\\s+.*?#RecordType#</th>\\s*?\n",
+                        Pattern.MULTILINE);
+    static Pattern tableHead2 =
+        Pattern.compile("^(\\s*<tr class=\"tablehead2\">\\s*?\n)" +
+                        "(.*?<th.*?\n)(\\s*</tr>\n)",
+                        Pattern.MULTILINE + Pattern.DOTALL);
+    static Pattern timeIntervalRow =
+        Pattern.compile("^(\\s*<tr class=\"timeintervalrow\">\\s*?\n)" +
+                        "(.*?<td.*?#timeinterval#.*?</td>\\s*?\n)" +
+                        "(.*?<td.*?#tabledatum#.*?</td>\\s*?\n)(\\s*</tr>\n)",
+                        Pattern.MULTILINE + Pattern.DOTALL);
+    static Pattern qsizeblock =
+        Pattern.compile("<tr class=\"qsize\">.*?</tr>",
+                        Pattern.MULTILINE + Pattern.DOTALL);
+
+
     //
     // globals
     //
@@ -46,14 +71,71 @@ public class Status extends HttpServlet
     boolean initialized = false;
     Properties props;
     String message = null;
+    int nHoursBack = 6;
+    String color_a = "#ffffff";
+    String color_b = "#cccccc";
+    
     //
     // support
     //
     String dq = "\"";
     String comma = ",";
     String cr = "\n";
-    Pattern p = Pattern.compile("<tr class=qsize>.*?</tr>",Pattern.MULTILINE + Pattern.DOTALL);
-    Matcher m = null;
+
+    //
+    // matching
+    //
+
+
+    class TableStatusInfo {
+        int nRecords = 0;
+        int nDups = 0;
+        int nSQLErrors = 0;
+        int nParse = 0;
+        int nOther = 0;
+
+        public TableStatusInfo(int nRecords) {
+            this.nRecords = nRecords;
+        }
+        public TableStatusInfo(int nRecords, int nDups, int nSQLErrors, int nParse, int nOther) {
+            this.nRecords = nRecords;
+            this.nDups = nDups;
+            this.nSQLErrors = nSQLErrors;
+            this.nParse = nParse;
+            this.nOther = nOther;
+        }
+        public int nRecords() {
+            return this.nRecords;
+        }
+        public int nDups() {
+            return this.nDups;
+        }
+        public int nSQLErrors() {
+            return this.nSQLErrors;
+        }
+        public int nParse() {
+            return this.nParse;
+        }
+        public int nOther() {
+            return this.nOther;
+        }
+        public void nRecords(int in) {
+            this.nRecords = in;
+        }
+        public void nDups(int in) {
+            this.nDups = in;
+        }
+        public void nSQLErrors(int in) {
+            this.nSQLErrors = in;
+        }
+        public void nParse(int in) {
+            this.nParse = in;
+        }
+        public void nOther(int in) {
+            this.nOther = in;
+        }
+
+    }
 
     public void init(ServletConfig config) throws ServletException 
     {
@@ -61,385 +143,394 @@ public class Status extends HttpServlet
     
     public void openConnection()
     {
-	try
-	    {
-		props = Configuration.getProperties();
-		driver = props.getProperty("service.mysql.driver");
-		url = props.getProperty("service.mysql.url");
-		user = props.getProperty("service.mysql.user");
-		password = props.getProperty("service.mysql.password");
-	    }
-	catch (Exception ignore)
-	    {
-	    }
-	try
-	    {
-		Class.forName(driver).newInstance();
-		connection = DriverManager.getConnection(url,user,password);
-	    }
-	catch (Exception e)
-	    {
-		e.printStackTrace();
-	    }
+        try {
+            props = Configuration.getProperties();
+            driver = props.getProperty("service.mysql.driver");
+            url = props.getProperty("service.mysql.url");
+            user = props.getProperty("service.mysql.user");
+            password = props.getProperty("service.mysql.password");
+        }
+        catch (Exception ignore) {
+        }
+        try {
+            Class.forName(driver).newInstance();
+            connection = DriverManager.getConnection(url,user,password);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
-    public void closeConnection()
-    {
-	try
-	    {
-		connection.close();
-	    }
-	catch (Exception e)
-	    {
-		e.printStackTrace();
-	    }
+    public void closeConnection() {
+        try {
+            connection.close();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
-    public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
-    {
-	openConnection();
+    public void doGet(HttpServletRequest request, HttpServletResponse response)
+        throws ServletException, IOException {
+        openConnection();
 
-	this.request = request;
-	this.response = response;
-	setup();
-	process();
-	response.setContentType("text/html");
-	response.setHeader("Cache-Control", "no-cache"); // HTTP 1.1
-	response.setHeader("Pragma", "no-cache"); // HTTP 1.0
-	PrintWriter writer = response.getWriter();
-	writer.write(html);
-	writer.flush();
-	writer.close();
-	closeConnection();
+        this.request = request;
+        this.response = response;
+        setup();
+        process();
+        response.setContentType("text/html");
+        response.setHeader("Cache-Control", "no-cache"); // HTTP 1.1
+        response.setHeader("Pragma", "no-cache"); // HTTP 1.0
+        PrintWriter writer = response.getWriter();
+        writer.write(html);
+        writer.flush();
+        writer.close();
+        closeConnection();
     }
 
-    public static String DisplayInt(Integer value) 
-    {
-	if (value == null)
-	    return "n/a";
-	else 
-	    return value.toString();
+    public static String DisplayInt(Integer value) {
+        if (value == null)
+            return "n/a";
+        else 
+            return value.toString();
     }
 
-    public void setup()
-    {
-	html = xp.get(request.getRealPath("/") + "status.html");
+    public void setup() {
+        html = xp.get(request.getRealPath("/") + "status.html");
     }
 
-    public void process()
-    {
-	int index = 0;
-	String command = "";
-	buffer = new StringBuffer();
-	String dq = "'";
+    public void process() {
+        HashMap<String, HashMap<Integer, TableStatusInfo> > tableInfo = new
+            HashMap<String, HashMap<Integer, TableStatusInfo> >(5);
 
-	Integer count1 = null;
-	Integer error1 = null;
+        Matcher m = null;
 
-	Integer count2 = null;
-	Integer error2 = null;
+        
+        int index = 0;
+        String command = "";
+        buffer = new StringBuffer();
+        String dq = "'";
 
-	Integer count3 = null;
-	Integer error3 = null;
+        try {
+            // Get list of _Meta tables in this database
+            command = "select table_name from information_schema.tables " +
+                "where table_schema = Database() and table_name like '%_Meta'" +
+                " order by table_name;";
+            Logging.log("command: " + command);
+            statement = connection.prepareStatement(command);
+            resultSet = statement.executeQuery(command);
+            while(resultSet.next()) {
+                String table_name = resultSet.getString(1);
+                if (table_name.equals("ProbeDetails_Meta")) continue; // Not interested
+                int end_index = table_name.lastIndexOf("_Meta");
+                tableInfo.put(table_name.substring(0,end_index),
+                              new HashMap<Integer, TableStatusInfo>(27));
+            }
+            resultSet.close();
+            statement.close();
 
-	Integer count4 = null;
-	Integer error4 = null;
+            // Now for each table, get record information followed by
+            // error info
+            TreeSet keySet = new TreeSet(tableInfo.keySet());
+            int hourly_time_limit = Math.max(nHoursBack, 24);
+            for (Iterator x = keySet.iterator(); x.hasNext();) {
+                String table_name = (String) x.next();
+                HashMap<Integer, TableStatusInfo> thisTableInfo = tableInfo.get(table_name);
+                TableStatusInfo dayTableStatus = new TableStatusInfo(0);
+                thisTableInfo.put(nHoursBack, dayTableStatus);
+                ////////////////////////////////////
+                // For each of last 24 hours
+                ////////////////////////////////////
+                
+                // nRecords
+                command = "select timestampdiff(HOUR, M.ServerDate, " +
+                    "UTC_TIMESTAMP()) as period, count(*) from " + 
+                    table_name + "_Meta M " +
+                    "where M.ServerDate > (UTC_TIMESTAMP() - INTERVAL " + hourly_time_limit + " HOUR) " +
+                    "group by period " +
+                    "order by period;";
+                Logging.log("command: " + command);
+                statement = connection.prepareStatement(command);
+                resultSet = statement.executeQuery(command);
+                while (resultSet.next()) {
+                    int time_index = resultSet.getInt(1);
+                    int count = resultSet.getInt(2);
+                    if (time_index < nHoursBack) { // Don't record if we're not interested
+                        thisTableInfo.put(time_index,
+                                          new TableStatusInfo(count));
+                    }
+                    dayTableStatus.nRecords(dayTableStatus.nRecords() + count);
+                }
+                resultSet.close();
+                statement.close();
 
-	Integer count5 = null;
-	Integer error5 = null;
+                // Error info
+                command = "select timestampdiff(HOUR, D.eventdate, " +
+                    "UTC_TIMESTAMP()) as period, error, count(*) from DupRecord D " + 
+                    "where D.eventdate > (UTC_TIMESTAMP() - INTERVAL " + hourly_time_limit + " HOUR) " +
+                    "and D.RecordType = " + dq + table_name + dq +
+                    " group by period, error " +
+                    "order by period";
+                Logging.log("command: " + command);
+                statement = connection.prepareStatement(command);
+                resultSet = statement.executeQuery(command);
+                while (resultSet.next()) {
+                    int time_index = resultSet.getInt(1);
+                    TableStatusInfo tableStatus = 
+                        thisTableInfo.get(time_index);
+                    if (tableStatus == null) {
+                        tableStatus = new TableStatusInfo(0);
+                        if (time_index < nHoursBack) { // Don't record if we're not interested
+                            thisTableInfo.put(time_index, tableStatus);
+                        }
+                    }
+                    String errorType = resultSet.getString(2);
+                    int count = resultSet.getInt(3);
+                    if (errorType.equals("Duplicate")) {
+                        tableStatus.nDups(count);
+                        dayTableStatus.nDups(dayTableStatus.nDups() + count);
+                    } else if (errorType.equals("Parse")) {
+                        tableStatus.nParse(count);
+                        dayTableStatus.nParse(dayTableStatus.nParse() + count);
+                    } else if (errorType.equals("SQLError")) {
+                        tableStatus.nSQLErrors(count);
+                        dayTableStatus.nSQLErrors(dayTableStatus.nSQLErrors() + count);
+                    } else {
+                        tableStatus.nOther(tableStatus.nOther() + count);
+                        dayTableStatus.nOther(dayTableStatus.nOther() + count);
+                    }
+                }
+                resultSet.close();
+                statement.close();
 
-	Integer count6 = null;
-	Integer error6 = null;
+                ////////////////////////////////////
+                // Total for last 7 days
+                ////////////////////////////////////
+                command = "select count(*) from " + table_name + "_Meta M " +
+                    "where M.ServerDate > (UTC_TIMESTAMP() - interval 1 week);";
+                Logging.log("command: " + command);
+                statement = connection.prepareStatement(command);
+                resultSet = statement.executeQuery(command);
 
-	Integer count24 = null;
-	Integer error24 = null;
+                TableStatusInfo weekTableStatus = new TableStatusInfo(0);
+                thisTableInfo.put(nHoursBack + 1, weekTableStatus);
+                if (resultSet.next()) {
+                    weekTableStatus.nRecords(resultSet.getInt(1));
+                }
+                resultSet.close();
+                statement.close();
+                command = "select count(*), error from DupRecord D " +
+                    "where D.eventdate > (UTC_TIMESTAMP() - interval 1 week) " +
+                    "and D.RecordType = " + dq + table_name + dq +
+                    " group by error " +
+                    "order by error";
+                Logging.log("command: " + command);
+                statement = connection.prepareStatement(command);
+                resultSet = statement.executeQuery(command);
+                while (resultSet.next()) {
+                    int count = resultSet.getInt(1);
+                    String errorType = resultSet.getString(2);
+                    if (errorType.equals("Duplicate")) {
+                        weekTableStatus.nDups(count);
+                    } else if (errorType.equals("Parse")) {
+                        weekTableStatus.nParse(count);
+                    } else if (errorType.equals("SQLError")) {
+                        weekTableStatus.nSQLErrors(count);
+                    } else {
+                        weekTableStatus.nOther(weekTableStatus.nOther() + count);
+                    }
+                }
+                resultSet.close();
+                statement.close();
 
-	Integer count7 = null;
-	Integer error7 = null;
-				
-	Integer totalcount = null;
-	Integer totalerror = null;
+                ////////////////////////////////////
+                // Totals for all time
+                ////////////////////////////////////
+                command = "select count(*) from " + table_name + "_Meta M;";
+                Logging.log("command: " + command);
+                statement = connection.prepareStatement(command);
+                resultSet = statement.executeQuery(command);
 
-	java.util.Date now = new java.util.Date();
-	long decrement = 60 * 60 * 1000;
-	java.util.Date to = new java.util.Date();
-	java.util.Date from = new java.util.Date(to.getTime() - decrement);
+                TableStatusInfo totalTableStatus = new TableStatusInfo(0);
+                thisTableInfo.put(nHoursBack + 2, totalTableStatus);
+                if (resultSet.next()) {
+                    totalTableStatus.nRecords(resultSet.getInt(1));
+                }
+                resultSet.close();
+                statement.close();
+                command = "select count(*), error from DupRecord D " +
+                    "where D.RecordType = " + dq + table_name + dq +
+                    " group by error " +
+                    "order by error";
+                Logging.log("command: " + command);
+                statement = connection.prepareStatement(command);
+                resultSet = statement.executeQuery(command);
+                while (resultSet.next()) {
+                    int count = resultSet.getInt(1);
+                    String errorType = resultSet.getString(2);
+                    if (errorType.equals("Duplicate")) {
+                        totalTableStatus.nDups(count);
+                    } else if (errorType.equals("Parse")) {
+                        totalTableStatus.nParse(count);
+                    } else if (errorType.equals("SQLError")) {
+                        totalTableStatus.nSQLErrors(count);
+                    } else {
+                        totalTableStatus.nOther(totalTableStatus.nOther() + count);
+                    }
+                }
+                resultSet.close();
+                statement.close();
+            }
 
-	SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            int maxthreads = Integer.parseInt(props.getProperty("service.listener.threads"));
+            String path = System.getProperties().getProperty("catalina.home");
+            path = xp.replaceAll(path,"\\","/");
 
-	try
-	    {
-		//
-		// previous hour
-		//
+            ////////////////////////////////////
+            // Fill in the table
+            ////////////////////////////////////
 
-		command = "select count(*) from JobUsageRecord_Meta where ServerDate > " + dq + format.format(from) + dq +
-		    " and ServerDate <= " + dq + format.format(to) + dq;
-		System.out.println("command: " + command);
-		statement = connection.prepareStatement(command);
-		resultSet = statement.executeQuery(command);
-		while(resultSet.next())
-		    count1 = resultSet.getInt(1);
-		resultSet.close();
-		statement.close();
+            //////////
+            // Define the right number of column groups
+            //////////
+            m = colgroupDefn.matcher(html);
 
-		command = "select count(*) from DupRecord where EventDate > " + dq + format.format(from) + dq +
-		    " and EventDate <= " + dq + format.format(to) + dq;
-		statement = connection.prepareStatement(command);
-		resultSet = statement.executeQuery(command);
-		while(resultSet.next())
-		    error1 = resultSet.getInt(1);
-		resultSet.close();
-		statement.close();
+            int nTables = tableInfo.size();
+            String nTablesFullGroupString = "";
+            for (int i = 0; i < nTables; ++i) {
+                nTablesFullGroupString += "$0";
+            }
+            html = m.replaceFirst(nTablesFullGroupString);
+            Logging.debug("Matched " + m.group());
 
-		//
-		// hour - 2
-		//
+            //////////
+            // Construct the table head, first line
+            //////////
+            m = colgroupHdr.matcher(html);
+            html = m.replaceFirst(nTablesFullGroupString);
+            for (Iterator x = keySet.iterator(); x.hasNext();) {
+                String table_name = (String) x.next();
+                html = html.replaceFirst("#RecordType#", table_name);
+                Logging.debug("Matched " + m.group());
+            }
 
-		decrement = 60 * 60 * 1000;
-		to = from;
-		from = new java.util.Date(to.getTime() - decrement);
+            //////////
+            // Construct the table head, second line
+            //////////
+            m = tableHead2.matcher(html);
+            String tableHead2RepString = "$1";
+            for (int i = 0; i < nTables; ++i) {
+                tableHead2RepString += "$2";
+            }
+            tableHead2RepString += "$3";
+            html = m.replaceFirst(tableHead2RepString);
+            Logging.debug("Matched " + m.group());
 
-		command = "select count(*) from JobUsageRecord_Meta where ServerDate > " + dq + format.format(from) + dq +
-		    " and ServerDate <= " + dq + format.format(to) + dq;
-		System.out.println("command: " + command);
-		statement = connection.prepareStatement(command);
-		resultSet = statement.executeQuery(command);
-		while(resultSet.next())
-		    count2 = resultSet.getInt(1);
-		resultSet.close();
-		statement.close();
+            //////////
+            // Construct the body of the table
+            //////////
 
-		command = "select count(*) from DupRecord where EventDate > " + dq + format.format(from) + dq +
-		    " and EventDate <= " + dq + format.format(to) + dq;
-		statement = connection.prepareStatement(command);
-		resultSet = statement.executeQuery(command);
-		while(resultSet.next())
-		    error2 = resultSet.getInt(1);
-		resultSet.close();
-		statement.close();
+            // Construct the replace string
+            
+            int nPeriods = nHoursBack + 3;
 
-		//
-		// hour - 3
-		//
+            String rowReplaceString = "$1$2";
+            for (int i = 0; i < nTables * 5; ++i) {
+                rowReplaceString += "$3";
+            }
+            rowReplaceString += "$4";
 
-		decrement = 60 * 60 * 1000;
-		to = from;
-		from = new java.util.Date(to.getTime() - decrement);
+            m = timeIntervalRow.matcher(html);
+            m.find();
+            String matchedRow = m.group();
+            Logging.debug("Matched " + m.group());
+            m.reset(m.group());
+            String fullRow = m.replaceFirst(rowReplaceString);
+            Logging.debug("Matched " + m.group());
+            Logging.debug("New row:\n" + fullRow);
 
-		command = "select count(*) from JobUsageRecord_Meta where ServerDate > " + dq + format.format(from) + dq +
-		    " and ServerDate <= " + dq + format.format(to) + dq;
-		statement = connection.prepareStatement(command);
-		resultSet = statement.executeQuery(command);
-		while(resultSet.next())
-		    count3 = resultSet.getInt(1);
-		resultSet.close();
-		statement.close();
+            // Loop over tables
+            rowReplaceString = "";
+            for (Integer period_index = 0; period_index < nPeriods; ++period_index) {
+                String newRow = fullRow;
+                String period_label = null;
+                if (period_index < nHoursBack) {
+                    period_label = "< " + period_index.toString() + " hour";
+                    if (period_index != 1) period_label += "s";
+                    period_label += " ago";
+                } else if (period_index == nHoursBack) {
+                    period_label = "Previous day";
+                } else if (period_index == nHoursBack + 1) {
+                    period_label = "Previous week";
+                } else if (period_index == nHoursBack + 2) {
+                    period_label = "All time total";
+                } else {
+                    Logging.warning("Unrecognized period index: " + period_index);
+                }
+                newRow = newRow.replaceFirst("#timeinterval#", period_label);
+                newRow = newRow.replaceFirst("#bgcolor#", color_b);
+                int table_count = 0;
+                for (Iterator x = keySet.iterator(); x.hasNext(); ++table_count) {
+                    String table_name = (String) x.next();
+                    HashMap<Integer, TableStatusInfo> thisTableInfo = tableInfo.get(table_name);
+                    TableStatusInfo tableStatus = 
+                        thisTableInfo.get(period_index);
+                    if (tableStatus == null) {
+                        for (int i = 0; i < 5; ++i) {
+                            if ((table_count % 2) == 0) {
+                                newRow = newRow.replaceFirst("#bgcolor#", color_a);
+                            } else {
+                                newRow = newRow.replaceFirst("#bgcolor#", color_b);
+                            }
+                            newRow = newRow.replaceFirst("#tabledatum#", "0");
+                        }
+                    } else {
+                        for (int i = 0; i < 5; ++i) {
+                            if ((table_count % 2) == 0) {
+                                newRow = newRow.replaceFirst("#bgcolor#", color_a);
+                            } else {
+                                newRow = newRow.replaceFirst("#bgcolor#", color_b);
+                            }
+                        }
+                        newRow = newRow.replaceFirst("#tabledatum#",
+                                                     ((Integer) tableStatus.nRecords()).toString());
+                        newRow = newRow.replaceFirst("#tabledatum#",
+                                                     ((Integer) tableStatus.nDups()).toString());
+                        newRow = newRow.replaceFirst("#tabledatum#",
+                                                     ((Integer) tableStatus.nParse()).toString());
+                        newRow = newRow.replaceFirst("#tabledatum#",
+                                                     ((Integer) tableStatus.nSQLErrors()).toString());
+                        newRow = newRow.replaceFirst("#tabledatum#",
+                                                     ((Integer) tableStatus.nOther()).toString());
+                    }
+                }
+                rowReplaceString += newRow;
+            }
 
-		command = "select count(*) from DupRecord where EventDate > " + dq + format.format(from) + dq +
-		    " and EventDate <= " + dq + format.format(to) + dq;
-		statement = connection.prepareStatement(command);
-		resultSet = statement.executeQuery(command);
-		while(resultSet.next())
-		    error3 = resultSet.getInt(1);
-		resultSet.close();
-		statement.close();
+            html = html.replaceFirst(matchedRow, rowReplaceString);
 
-		//
-		// previous - 4
-		//
+            ////////////////////////////////////
+            // Fill in the thread information.
+            ////////////////////////////////////
 
-		decrement = 60 * 60 * 1000;
-		to = from;
-		from = new java.util.Date(to.getTime() - decrement);
+            m = qsizeblock.matcher(html);
+            m.find();
+            row = m.group();
+            buffer = new StringBuffer();
 
-		command = "select count(*) from JobUsageRecord_Meta where ServerDate > " + dq + format.format(from) + dq +
-		    " and ServerDate <= " + dq + format.format(to) + dq;
-		statement = connection.prepareStatement(command);
-		resultSet = statement.executeQuery(command);
-		while(resultSet.next())
-		    count4 = resultSet.getInt(1);
-		resultSet.close();
-		statement.close();
-
-		command = "select count(*) from DupRecord where EventDate > " + dq + format.format(from) + dq +
-		    " and EventDate <= " + dq + format.format(to) + dq;
-		statement = connection.prepareStatement(command);
-		resultSet = statement.executeQuery(command);
-		while(resultSet.next())
-		    error4 = resultSet.getInt(1);
-		resultSet.close();
-		statement.close();
-
-		//
-		// previous - 5
-		//
-
-		to = from;
-		decrement = 60 * 60 * 1000;
-		from = new java.util.Date(to.getTime() - decrement);
-
-		command = "select count(*) from JobUsageRecord_Meta where ServerDate > " + dq + format.format(from) + dq +
-		    " and ServerDate <= " + dq + format.format(to) + dq;
-		statement = connection.prepareStatement(command);
-		resultSet = statement.executeQuery(command);
-		while(resultSet.next())
-		    count5 = resultSet.getInt(1);
-		resultSet.close();
-		statement.close();
-
-		command = "select count(*) from DupRecord where EventDate > " + dq + format.format(from) + dq +
-		    " and EventDate <= " + dq + format.format(to) + dq;
-		statement = connection.prepareStatement(command);
-		resultSet = statement.executeQuery(command);
-		while(resultSet.next())
-		    error5 = resultSet.getInt(1);
-		resultSet.close();
-		statement.close();
-
-		//
-		// previous - 6
-		//
-
-		decrement = 60 * 60 * 1000;
-		to = from;
-		from = new java.util.Date(to.getTime() - decrement);
-
-		command = "select count(*) from JobUsageRecord_Meta where ServerDate > " + dq + format.format(from) + dq +
-		    " and ServerDate <= " + dq + format.format(to) + dq;
-		statement = connection.prepareStatement(command);
-		resultSet = statement.executeQuery(command);
-		while(resultSet.next())
-		    count6 = resultSet.getInt(1);
-		resultSet.close();
-		statement.close();
-
-		command = "select count(*) from DupRecord where EventDate > " + dq + format.format(from) + dq +
-		    " and EventDate <= " + dq + format.format(to) + dq;
-		statement = connection.prepareStatement(command);
-		resultSet = statement.executeQuery(command);
-		while(resultSet.next())
-		    error6 = resultSet.getInt(1);
-		resultSet.close();
-		statement.close();
-
-		//
-		// previous day
-		//
-
-		decrement = 24 * 60 * 60 * 1000;
-		java.util.Date date = new java.util.Date(now.getTime() - decrement);
-
-		command = "select count(*) from JobUsageRecord_Meta where ServerDate > " + dq + format.format(date) + dq;
-		statement = connection.prepareStatement(command);
-		resultSet = statement.executeQuery(command);
-		while(resultSet.next())
-		    count24 = resultSet.getInt(1);
-		resultSet.close();
-		statement.close();
-
-		command = "select count(*) from DupRecord where EventDate > " + dq + format.format(date) + dq;
-		statement = connection.prepareStatement(command);
-		resultSet = statement.executeQuery(command);
-		while(resultSet.next())
-		    error24 = resultSet.getInt(1);
-		resultSet.close();
-		statement.close();
-
-		//
-		// previous 7 days
-		//
-
-		decrement = 7 * 24 * 60 * 60 * 1000;
-		date = new java.util.Date(now.getTime() - decrement);
-
-		command = "select count(*) from JobUsageRecord_Meta where ServerDate > " + dq + format.format(date) + dq;
-		statement = connection.prepareStatement(command);
-		resultSet = statement.executeQuery(command);
-		while(resultSet.next())
-		    count7 = resultSet.getInt(1);
-		resultSet.close();
-		statement.close();
-
-		command = "select count(*) from DupRecord where EventDate > " + dq + format.format(date) + dq;
-		statement = connection.prepareStatement(command);
-		resultSet = statement.executeQuery(command);
-		while(resultSet.next())
-		    error7 = resultSet.getInt(1);
-		resultSet.close();
-		statement.close();
-
-		//
-		// total
-		//
-
-		command = "select count(*) from JobUsageRecord";
-		statement = connection.prepareStatement(command);
-		resultSet = statement.executeQuery(command);
-		while(resultSet.next())
-		    totalcount = resultSet.getInt(1);
-		resultSet.close();
-		statement.close();
-
-		command = "select count(*) from DupRecord";
-		statement = connection.prepareStatement(command);
-		resultSet = statement.executeQuery(command);
-		while(resultSet.next())
-		    totalerror = resultSet.getInt(1);
-		resultSet.close();
-		statement.close();
-	    }
-	catch (Exception e)
-	    {
-		e.printStackTrace();
-	    }
-
-	html = xp.replaceAll(html,"#count1#","" + DisplayInt(count1));
-	html = xp.replaceAll(html,"#error1#","" + DisplayInt(error1));
-
-	html = xp.replaceAll(html,"#count2#","" + DisplayInt(count2));
-	html = xp.replaceAll(html,"#error2#","" + DisplayInt(error2));
-
-	html = xp.replaceAll(html,"#count3#","" + DisplayInt(count3));
-	html = xp.replaceAll(html,"#error3#","" + DisplayInt(error3));
-
-	html = xp.replaceAll(html,"#count4#","" + DisplayInt(count4));
-	html = xp.replaceAll(html,"#error4#","" + DisplayInt(error4));
-
-	html = xp.replaceAll(html,"#count5#","" + DisplayInt(count5));
-	html = xp.replaceAll(html,"#error5#","" + DisplayInt(error5));
-
-	html = xp.replaceAll(html,"#count6#","" + DisplayInt(count6));
-	html = xp.replaceAll(html,"#error6#","" + DisplayInt(error6));
-
-	html = xp.replaceAll(html,"#count24#","" + DisplayInt(count24));
-	html = xp.replaceAll(html,"#error24#","" + DisplayInt(error24));
-
-	html = xp.replaceAll(html,"#count7#","" + DisplayInt(count7));
-	html = xp.replaceAll(html,"#error7#","" + DisplayInt(error7));
-
-	html = xp.replaceAll(html,"#totalcount#","" + DisplayInt(totalcount));
-	html = xp.replaceAll(html,"#totalerror#","" + DisplayInt(totalerror));
-
-	int maxthreads = Integer.parseInt(props.getProperty("service.listener.threads"));
-	String path = System.getProperties().getProperty("catalina.home");
-	path = xp.replaceAll(path,"\\","/");
-
-	m = p.matcher(html);
-	m.find();
-	String row = m.group();
-	StringBuffer buffer = new StringBuffer();
-
-	for (int i = 0; i < maxthreads; i++)
-	    {
-		String newrow = new String(row);
-		String xpath = path + "/gratia/data/thread" + i;
-		String filelist[] = xp.getFileList(xpath);
-		newrow = xp.replaceAll(newrow,"#queue#","Q" + i);
-		newrow = xp.replaceAll(newrow,"#queuesize#","" + filelist.length);
-		buffer.append(newrow);
-	    }
-	html = xp.replaceAll(html,row,buffer.toString());
+            for (int i = 0; i < maxthreads; i++)
+                {
+                    String newrow = new String(row);
+                    String xpath = path + "/gratia/data/thread" + i;
+                    String filelist[] = xp.getFileList(xpath);
+                    newrow = xp.replaceAll(newrow,"#queue#","Q" + i);
+                    newrow = xp.replaceAll(newrow,"#queuesize#","" + filelist.length);
+                    buffer.append(newrow);
+                }
+            html = xp.replaceAll(html,row,buffer.toString());
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
     }
-
 }
