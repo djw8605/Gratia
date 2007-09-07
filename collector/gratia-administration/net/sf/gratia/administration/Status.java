@@ -43,6 +43,8 @@ public class Status extends HttpServlet {
     String tableSection = "";
     String row = "";
     StringBuffer buffer = new StringBuffer();
+    static Pattern yesMatcher =
+        Pattern.compile("^[YyTt1]");
     static Pattern colgroupDefn =
         Pattern.compile("^\\s*<colgroup class=\"tablespan\".*?/>\\s*?\n",
                         Pattern.MULTILINE + Pattern.DOTALL);
@@ -61,7 +63,7 @@ public class Status extends HttpServlet {
     static Pattern qsizeblock =
         Pattern.compile("<tr class=\"qsize\">.*?</tr>",
                         Pattern.MULTILINE + Pattern.DOTALL);
-
+    boolean detailedDisplay = false;
 
     //
     // globals
@@ -173,9 +175,17 @@ public class Status extends HttpServlet {
     public void doGet(HttpServletRequest request, HttpServletResponse response)
         throws ServletException, IOException {
         openConnection();
-
         this.request = request;
         this.response = response;
+        String wantDetails = request.getParameter("wantDetails");
+        Logging.debug("Got parameter wantDetails=" + wantDetails);
+        if (wantDetails != null) {
+            if (yesMatcher.matcher(wantDetails).matches()) {
+                detailedDisplay = true;
+            } else {
+                detailedDisplay = false;
+            }
+        }
         setup();
         process();
         response.setContentType("text/html");
@@ -205,12 +215,16 @@ public class Status extends HttpServlet {
 
         Matcher m = null;
 
-        
         int index = 0;
         String command = "";
         buffer = new StringBuffer();
         String dq = "'";
 
+        int nPeriods = nHoursBack + 3;
+        Integer nDataCols = 5;
+        if (!detailedDisplay) nDataCols = 2;
+        html = html.replaceAll("#nDcols#", nDataCols.toString());
+            
         try {
             // Get list of _Meta tables in this database
             command = "select table_name from information_schema.tables " +
@@ -223,8 +237,17 @@ public class Status extends HttpServlet {
                 String table_name = resultSet.getString(1);
                 if (table_name.equals("ProbeDetails_Meta")) continue; // Not interested
                 int end_index = table_name.lastIndexOf("_Meta");
-                tableInfo.put(table_name.substring(0,end_index),
-                              new HashMap<Integer, TableStatusInfo>(27));
+                String base_table = table_name.substring(0,end_index);
+                // Only display table if we have any records
+                command = "select * from " + base_table + " limit 1";
+                Statement tableUseCheck = connection.prepareStatement(command);
+                ResultSet tableUseResult = tableUseCheck.executeQuery(command);
+                if (tableUseResult.next()) {
+                    tableInfo.put(base_table,
+                                  new HashMap<Integer, TableStatusInfo>(nPeriods));
+                }
+                tableUseResult.close();
+                tableUseCheck.close();
             }
             resultSet.close();
             statement.close();
@@ -418,9 +441,16 @@ public class Status extends HttpServlet {
             // Construct the table head, second line
             //////////
             m = tableHead2.matcher(html);
+            m.find();
             String tableHead2RepString = "$1";
+            String columnHead = m.group(2);
             for (int i = 0; i < nTables; ++i) {
-                tableHead2RepString += "$2";
+                tableHead2RepString += columnHead.replaceFirst("#datumHeader#", "Records");
+                tableHead2RepString += columnHead.replaceFirst("#datumHeader#", "Duplicates");
+                if (! detailedDisplay) continue; // Less info and clutter
+                tableHead2RepString += columnHead.replaceFirst("#datumHeader#", "Parse errors");
+                tableHead2RepString += columnHead.replaceFirst("#datumHeader#", "SQL errors");
+                tableHead2RepString += columnHead.replaceFirst("#datumHeader#", "Other errors");
             }
             tableHead2RepString += "$3";
             html = m.replaceFirst(tableHead2RepString);
@@ -431,11 +461,8 @@ public class Status extends HttpServlet {
             //////////
 
             // Construct the replace string
-            
-            int nPeriods = nHoursBack + 3;
-
             String rowReplaceString = "$1$2";
-            for (int i = 0; i < nTables * 5; ++i) {
+            for (int i = 0; i < nTables * nDataCols; ++i) {
                 rowReplaceString += "$3";
             }
             rowReplaceString += "$4";
@@ -451,11 +478,11 @@ public class Status extends HttpServlet {
 
             // Loop over tables
             rowReplaceString = "";
-            for (Integer period_index = 0; period_index < nPeriods; ++period_index) {
+            for (int period_index = 0; period_index < nPeriods; ++period_index) {
                 String newRow = fullRow;
                 String period_label = null;
                 if (period_index < nHoursBack) {
-                    period_label = "< " + period_index.toString() + " hour";
+                    period_label = "< " + ((Integer)(period_index + 1)).toString() + " hour";
                     if (period_index != 1) period_label += "s";
                     period_label += " ago";
                 } else if (period_index == nHoursBack) {
@@ -476,7 +503,7 @@ public class Status extends HttpServlet {
                     TableStatusInfo tableStatus = 
                         thisTableInfo.get(period_index);
                     if (tableStatus == null) {
-                        for (int i = 0; i < 5; ++i) {
+                        for (int i = 0; i < nDataCols; ++i) {
                             if ((table_count % 2) == 0) {
                                 newRow = newRow.replaceFirst("#bgcolor#", color_a);
                             } else {
@@ -485,7 +512,7 @@ public class Status extends HttpServlet {
                             newRow = newRow.replaceFirst("#tabledatum#", "0");
                         }
                     } else {
-                        for (int i = 0; i < 5; ++i) {
+                        for (int i = 0; i < nDataCols; ++i) {
                             if ((table_count % 2) == 0) {
                                 newRow = newRow.replaceFirst("#bgcolor#", color_a);
                             } else {
@@ -496,12 +523,14 @@ public class Status extends HttpServlet {
                                                      ((Integer) tableStatus.nRecords()).toString());
                         newRow = newRow.replaceFirst("#tabledatum#",
                                                      ((Integer) tableStatus.nDups()).toString());
-                        newRow = newRow.replaceFirst("#tabledatum#",
-                                                     ((Integer) tableStatus.nParse()).toString());
-                        newRow = newRow.replaceFirst("#tabledatum#",
-                                                     ((Integer) tableStatus.nSQLErrors()).toString());
-                        newRow = newRow.replaceFirst("#tabledatum#",
-                                                     ((Integer) tableStatus.nOther()).toString());
+                        if (detailedDisplay) {
+                            newRow = newRow.replaceFirst("#tabledatum#",
+                                                         ((Integer) tableStatus.nParse()).toString());
+                            newRow = newRow.replaceFirst("#tabledatum#",
+                                                         ((Integer) tableStatus.nSQLErrors()).toString());
+                            newRow = newRow.replaceFirst("#tabledatum#",
+                                                         ((Integer) tableStatus.nOther()).toString());
+                        }
                     }
                 }
                 rowReplaceString += newRow;
