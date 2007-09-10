@@ -328,9 +328,11 @@ my %procedures =
    group_by => 'datevalue, VOProbeSummary.VOName',
    order_by => 'final_rank, VOProbeSummary.VOName,datevalue'
  },
- DcacheBySource =>
- { select_columns => 'avg(N.Value/N.PhaseUnit/1024.0/1024.0) as RateInMBPerSecond,
-                      date_format(J.EndTime,\'\'\', format , \'\'\') as DayValue,
+  DcacheBySource =>
+ { select_columns => 'avg(N.Value/N.PhaseUnit/1024.0/1024.0) as
+RateInMBPerSecond,
+                      date_format(J.EndTime,\'\'\', format , \'\'\') as
+DayValue,
                       J.SiteName,R.value as Source',
    from_tables => 'JobUsageRecord_Report J, Network N, Resource R',
    main_where => 'J.ResourceType = \'\'Storage\'\'
@@ -338,6 +340,34 @@ my %procedures =
               and J.dbid = R.dbid
               and R.Description = \'\'Source\'\'',
    group_by => 'DayValue, SiteName',
+   order_by => 'DayValue'
+ },
+ DcacheBySourceAndSite =>
+ { select_columns => 'avg(N.Value/N.PhaseUnit/1024.0/1024.0) as
+RateInMBPerSecond,
+                      date_format(J.EndTime,\'\'\', format , \'\'\') as
+DayValue,
+                      J.SiteName,J.VOName,R.value as Source',
+   from_tables => 'JobUsageRecord_Report J, Network N, Resource R',
+   main_where => 'J.ResourceType = \'\'Storage\'\'
+              and J.dbid = N.dbid
+              and J.dbid = R.dbid
+              and R.Description = \'\'Source\'\'',
+   group_by => 'DayValue, VOName',
+   order_by => 'DayValue'
+ },
+ DcacheBySourceSiteAndUser =>
+ { select_columns => 'avg(N.Value/N.PhaseUnit/1024.0/1024.0) as
+RateInMBPerSecond,
+                      date_format(J.EndTime,\'\'\', format , \'\'\') as
+DayValue,
+                      J.SiteName,J.VOName,J.GlobalUsername,J.LocalUserId,R.value as Source',
+   from_tables => 'JobUsageRecord_Report J, Network N, Resource R',
+   main_where => 'J.ResourceType = \'\'Storage\'\'
+              and J.dbid = N.dbid
+              and J.dbid = R.dbid
+              and R.Description = \'\'Source\'\'',
+   group_by => 'DayValue, GlobalUsername',
    order_by => 'DayValue'
  },
  newProcedure => { select_columns => '',
