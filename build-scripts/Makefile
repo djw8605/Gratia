@@ -3,7 +3,7 @@ PLATFORM := ${shell uname}
 # tarbal version
 version_default = v0.26.6
 
-gratia_reporting_version := $(shell echo '$$Name: not supported by cvs2svn $$' | sed -e 's/^\$$Name: not supported by cvs2svn $$/\1/')
+gratia_reporting_version := $(shell echo '$$Name: not supported by cvs2svn $$' | sed -e 's/^\$$\Name:  $$/\1/')
 gratia_services_version = $(gratia_reporting_version)
 
 ifneq (,$(findstring $$Name,$(gratia_reporting_version)))
