@@ -11,9 +11,10 @@ import java.io.File;
 public class DatabaseMaintenance {
     static final String dq = "\"";
     static final String comma = ",";
-    static final int gratiaDatabaseVersion = 21;
+    static final int gratiaDatabaseVersion = 22;
     static final int latestDBVersionRequiringStoredProcedureLoad = gratiaDatabaseVersion;
     static final int latestDBVersionRequiringSummaryTableLoad = 19;
+    static final int latestDBVersionRequiringSummaryViewLoad = 22;
     static final int latestDBVersionRequiringSummaryTriggerLoad = 19;
 
     java.sql.Connection connection;
@@ -436,6 +437,15 @@ public class DatabaseMaintenance {
                     Logging.log("FAIL: summary tables NOT updated");
                     return false;
                 }
+            } else if (ver < latestDBVersionRequiringSummaryViewLoad) {
+                int result = CallPostInstall("summary_view");
+                if (result > -1) {
+                    UpdateDbProperty("gratia.database.summaryTableVersion", gratiaDatabaseVersion);
+                    Logging.log("Summary view updated successfully");
+                } else {
+                    Logging.log("FAIL: summary view NOT updated");
+                    return false;
+                }
             }
         }
 
@@ -837,6 +847,12 @@ public class DatabaseMaintenance {
                     Logging.log("Gratia database FAILED to upgrade from " + current +
                                 " to " + (current + 1));
                 }
+            }
+            if (current == 21) {
+                // Auxiliary DB item upgrades only.
+                Logging.log("Gratia database upgraded from " + current + " to " + (current + 1));
+                current = current + 1;
+                UpdateDbVersion(current);
             }
             return ((current == gratiaDatabaseVersion) && checkAndUpgradeDbAuxiliaryItems());
         }
