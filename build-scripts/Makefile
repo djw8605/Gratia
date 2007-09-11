@@ -10,9 +10,6 @@ ifneq (,$(findstring $$Name,$(gratia_reporting_version)))
   override gratia_reporting_version := $(version_default)
 endif
 
-$(shell echo '$(gratia_services_version)' 1>&2)
-$(shell echo '$(gratia_reporting_version)' 1>&2)
-
 # define useful variables
 base=..
 
