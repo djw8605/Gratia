@@ -1,8 +1,17 @@
 PLATFORM := ${shell uname}
 
 # tarbal version
-gratia_reporting_version=v0.26.6
-gratia_services_version=v0.26.6
+version_default = v0.26.6
+
+gratia_reporting_version := $(shell echo '$$Name: not supported by cvs2svn $(version_default) $$' | sed -e 's/^\$$Name: not supported by cvs2svn $$/\1/')
+gratia_services_version = $(gratia_reporting_version)
+
+ifneq (,$(findstring $$Name,$(gratia_reporting_version)))
+  override gratia_reporting_version := $(version_default)
+endif
+
+$(shell echo '$(gratia_services_version)' 1>&2)
+$(shell echo '$(gratia_reporting_version)' 1>&2)
 
 # define useful variables
 base=..
