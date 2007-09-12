@@ -254,8 +254,8 @@ reporting: util
 	cp ${reportsrc}/WebContent/*.css war
 	cp ${reportsrc}/src/net/sf/gratia/reporting/*.class war/WEB-INF/classes/net/sf/gratia/reporting
 	cp ${reportsrc}/src/net/sf/gratia/reporting/exceptions/*.class war/WEB-INF/classes/net/sf/gratia/reporting/exceptions
-	cp -R ${reportsrc}/WebContent/calendar/*.* war/calendar/
-	cp -R ${reportsrc}/WebContent/images/*.* war/images/
+	cp -R ${reportsrc}/WebContent/calendar war/
+	cp -R ${reportsrc}/WebContent/images/* war/images/
 	cp ${reportsrc}/src/net/sf/gratia/reporting/web.xml war/WEB-INF/web.xml
 	cp ${commonLib}/*.jar war/WEB-INF/lib
 	rm -f war/WEB-INF/lib/servlet-api.jar
