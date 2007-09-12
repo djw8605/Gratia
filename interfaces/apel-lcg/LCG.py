@@ -7,7 +7,7 @@
 # Script to transfer the data from Gratia to APEL (WLCG)
 ########################################################################
 #
-#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: LCG.py,v 1.6 2007-06-19 15:18:36 jgweigand Exp $
+#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: LCG.py,v 1.7 2007-09-12 18:08:47 jgweigand Exp $
 #
 #
 ########################################################################
@@ -30,6 +30,9 @@
 #     BNL_ATLAS_1 and BNL_ATLAS_2 sites are now being reported as BNL_OSG
 #     at that administrators request.  This was a database change to the
 #     relation of the Site and Probe tables via siteid.
+#
+# 9/12/07 (John Weigand)
+#   Fixed a problem when an empty set is returned from the query.
 # 
 ########################################################################
 import traceback
@@ -508,7 +511,7 @@ AS sub;""" % (strBegin,strEnd,normalizationProbe)
 def SetNormalizationFactor(query,params):
     """ Sets the normalization factor applied to all data."""
     results = RunGratiaQuery(query,params)
-    if results == None:
+    if results == "":
       Logit("WARNING: no data return from query")
       normalizationFactor = gFilterParameters["NormalizationDefault"]
       Logit("WARNING: Using default normalization factor")
@@ -603,8 +606,10 @@ def EvaluateMySqlResults((status,output)):
     raise Exception("Status (non-zero rc): rc=%d - %s " % (status,output))
 
   if output == "NULL": 
+    LogToFile("... empty results set")
     output = ""
-  LogToFile(output)
+  else:
+    LogToFile(output)
   return output
 
 #-----------------------------------------------
