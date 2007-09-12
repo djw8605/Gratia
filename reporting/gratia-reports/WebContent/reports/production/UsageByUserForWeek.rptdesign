@@ -582,7 +582,7 @@ order by VOProbeSummary.CommonName</property>
 function beforeGeneration( chart, context ){
 	rep = context.getExternalContext().getScriptable();
 	subtitle =rep.getParameterValue(&quot;Subtitle&quot;);
-	chart.getTitle().getLabel().getCaption().setValue('CPU Usage By User ('+ val1 + ' hours)' + &quot;\n&quot; + subtitle);
+	chart.getTitle().getLabel().getCaption().setValue('CPU Usage By User' + '\n' + subtitle);
 }	
 
 /**
@@ -847,13 +847,21 @@ function beforeDrawAxisTitle( axis, label, context )
       <SeriesDefinitions>
         <Query>
           <Definition>if (params[&quot;ForSite&quot;] == &quot;AnySite&quot;) {
+
 row[&quot;sitename&quot;]
+
 }
+
 else if (params[&quot;ForVO&quot;] == &quot;AnyVO&quot;){
+
 row[&quot;voname&quot;]
+
 }
+
 else{
+
 &quot;&quot;
+
 }</Definition>
         </Query>
         <SeriesPalette>
