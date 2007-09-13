@@ -12,6 +12,8 @@
 			<MenuItem name="Usage by VO" link="viewer.jsp?__report=[ReportsFolder]UsageByVO-osgdaily.rptdesign,CPUMetric=wallclock"/>
 			<MenuItem name="Jobs by VO" link="viewer.jsp?__report=[ReportsFolder]JobsByVO-osgdaily.rptdesign"/>
 			
+			<MenuItem name="Panda and goc Probe Comparison" link="viewer.jsp?__report=[ReportsFolder]UsageByDateByProbeForVO-osgdaily.rptdesign"/>
+			
 		</MenuGroup>
 		<MenuGroup name="SQL Queries">
 			<MenuItem name="Custom SQL Report" link="admin.jsp"/>
