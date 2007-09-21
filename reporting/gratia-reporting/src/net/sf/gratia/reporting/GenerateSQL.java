@@ -99,8 +99,8 @@ public class GenerateSQL
             //
             // only regenerate for role GratiaGlobalAdmin or policy Everything
             //
-            if ((! role.equals("GratiaGlobalAdmin")) && (! policy.equals("Everything")))
-                  return sql;
+          //  if ((! role.equals("GratiaGlobalAdmin")) && (! policy.equals("Everything")))
+            //      return sql;
 
 	    //System.err.println("Pass policy check");
 
@@ -135,8 +135,8 @@ public class GenerateSQL
                         Properties p = Configuration.getProperties();
                         driver = p.getProperty("service.mysql.driver");
                         url = p.getProperty("service.mysql.url");
-                        user = p.getProperty("service.mysql.user");
-                        password = p.getProperty("service.mysql.password");
+                        user = p.getProperty("service.reporting.user");
+                        password = p.getProperty("service.reporting.password");
                   }
             catch (Exception ignore)
                   {
