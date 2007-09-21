@@ -1,24 +1,13 @@
 package net.sf.gratia.reporting;
 
 import java.io.*;
-import java.util.Iterator;
 import java.util.Properties;
-
-//import java.util.logging.Level;
-
-import org.dom4j.Document;
-import org.dom4j.DocumentException;
-import org.dom4j.Element;
-import org.dom4j.io.SAXReader;
-//import org.eclipse.birt.report.engine.api.EngineConfig;
-//import org.eclipse.birt.report.engine.api.ReportEngine;
-//import org.eclipse.birt.report.model.api.DesignEngine;
-//import org.eclipse.birt.report.model.api.SessionHandle;
-
-import net.sf.gratia.reporting.exceptions.InvalidConfigurationException;
+import javax.servlet.http.HttpServletRequest;
 
 public class ReportingConfiguration 
 {
+	HttpServletRequest request = null;
+	Properties p = net.sf.gratia.util.Configuration.getProperties();
 	private String _configLoaded = null;
 	private String _reportsFolder = null;
 	private String _engineHome = null;
@@ -27,12 +16,8 @@ public class ReportingConfiguration
 	private String _databaseUser = null;
 	private String _databasePassword = null;
 	private String _reportsMenuConfig = null;
-
-
-	//private static EngineConfig _reportEngineConfig = null;
-	//private static ReportEngine _reportEngine = null;
-	
-	//private static SessionHandle _designSession = null;
+	private String _logsHome = null;
+	private String _csvHome = null;
 	
 	public String getDatabasePassword() {
 		return _databasePassword;
@@ -60,42 +45,23 @@ public class ReportingConfiguration
 
 	public String getReportsMenuConfig() {
 		return _reportsMenuConfig;
-	}		
-	
-	/*
-	public static EngineConfig getReportEngineConfig() {
-		if(_reportEngineConfig == null)
-		{
-			_reportEngineConfig = new EngineConfig();
-			_reportEngineConfig.setEngineHome( getEngineHome() );
-			_reportEngineConfig.setLogConfig("", Level.SEVERE);
-		}
-		
-		return _reportEngineConfig;
-	}	
-	
-	public static ReportEngine getReportEngine() {
-		if(_reportEngine == null)
-		{
-			_reportEngine = new ReportEngine(getReportEngineConfig());		    
-		}
-		
-		return _reportEngine;
-	}	
-	
-	public static SessionHandle getDesignSession() {
-		if(_designSession == null)
-		{
-			_designSession = DesignEngine.newSession( null );
-		}
-		
-		return _designSession;
 	}
-	*/
+	
+	public String getConfigLoaded() {
+		return _configLoaded;
+	}
+	
+	public String getLogsHome() {
+		return _logsHome;
+	}
+	
+	public String getCsvHome() {
+		return _csvHome;
+	}
 	
 	public void loadReportingConfiguration(javax.servlet.http.HttpServletRequest request)
 	{		
-		
+		this.request = request;
 		Properties p = net.sf.gratia.util.Configuration.getProperties();
 
 		// The special key 'configLoaded' is set when the configuration has been already loaded
@@ -103,27 +69,28 @@ public class ReportingConfiguration
 		   {			
 			try
 			{
-				String catalinaHome = System.getProperty("catalina.home");
+				String webappsHome =  System.getProperty("catalina.home") + File.separatorChar+ "webapps" + File.separatorChar;
 				
-				_reportsFolder = (catalinaHome + File.separatorChar + "webapps" + File.separatorChar + p.getProperty("service.reporting.reports.folder") + File.separatorChar);
-				_engineHome = (catalinaHome + File.separatorChar + "webapps" + File.separatorChar + p.getProperty("service.reporting.engine.home") + File.separatorChar);
-				_webappHome = (catalinaHome + File.separatorChar + "webapps" + File.separatorChar + p.getProperty("service.reporting.webapp.home") + File.separatorChar);		        	
-			 
+				_reportsFolder     = (webappsHome + p.getProperty("service.reporting.reports.folder").replace("/", File.separator) + File.separatorChar);
+				_reportsMenuConfig = (webappsHome + p.getProperty("service.reporting.menuconfig").replace("/", File.separator));
+				_engineHome        = (webappsHome + p.getProperty("service.reporting.engine.home") + File.separatorChar);
+				_webappHome        = (webappsHome + p.getProperty("service.reporting.webapp.home") + File.separatorChar);
+				_logsHome          = (webappsHome + "birt_logs" + File.separatorChar);	
+				_csvHome           = (webappsHome + "birt_csv_temp" + File.separatorChar);
+				
 				_databaseURL =  p.getProperty("service.mysql.url");
 				_databaseUser = p.getProperty("service.reporting.user");
 				_databasePassword = p.getProperty("service.reporting.password");
-				_reportsMenuConfig = p.getProperty("service.reporting.menuconfig");			        	       	
-		   
-			    				
+		   	
 	 // Set a flag indicating the configuration has been loaded, so subsequent calls will not load again
 		   		 _configLoaded = "1";
 
-		   	}
-
-		   	catch(Exception ignore)
-			{
+		   	} catch (Exception e) {
+				e.printStackTrace();
 			}
 		   }		
 	}
+
 	
 }
+
