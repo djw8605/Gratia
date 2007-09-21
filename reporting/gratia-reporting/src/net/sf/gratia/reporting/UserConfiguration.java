@@ -37,27 +37,27 @@ public class UserConfiguration
 			SAXReader saxReader = new SAXReader();        
 			Document doc = null;    
 			File source = null;
-			String userConfigFileName = null;
+			String menuConfig = null;
 
 			try 
 			{
-				userConfigFileName = reportingConfiguration.getReportsMenuConfig();
+				menuConfig = reportingConfiguration.getReportsMenuConfig();
 			}
 			catch (SecurityException exSec) 
 			{
 				// Continue if we get an exception here
 			}
 
-			if (userConfigFileName == null) 
+			if (menuConfig == null) 
 			{
-				userConfigFileName = "gratia-reports" + File.separatorChar + "MenuConfig" + File.separatorChar + "UserConfig_osg.xml";
+				String catalinaHome =  System.getProperty("catalina.home") + File.separatorChar;
+				menuConfig = (catalinaHome + "webapps" + File.separatorChar + "gratia-reports" + "MenuConfig"+ File.separator + "UserConfig_osg.xml");
 			}
 
 			try
 			{
 					// Open the config file
-				String catalinaHome = net.sf.gratia.util.Configuration.getCatalinaHome();
-				String menuConfig = catalinaHome + File.separatorChar + "webapps" + File.separatorChar + userConfigFileName;
+				
 				String reportsFolder = reportingConfiguration.getReportsFolder();
 
 				source = new File(menuConfig);
@@ -81,7 +81,7 @@ public class UserConfiguration
 			        			for (Iterator menuItemIterator = ndeMenuGroup.elementIterator(); menuItemIterator.hasNext();)
 							{
 								Element ndeMenuItem = (Element) menuItemIterator.next();			        							
-								newMenuGroup.getMenuItems().add(new MenuItem(getAttributeValue(ndeMenuItem, "name"), getAttributeValue(ndeMenuItem, "link").replaceAll("\\[ReportsFolder\\]", reportsFolder) ));			        			
+								newMenuGroup.getMenuItems().add(new MenuItem(getAttributeValue(ndeMenuItem, "name"), getAttributeValue(ndeMenuItem, "link").replace("\\[ReportsFolder\\]", reportsFolder))); //replaceAll("\\[ReportsFolder\\]", reportsFolder) ));			        			
 							}
 			        		
 							_menuGroups.add(newMenuGroup);
@@ -97,7 +97,7 @@ public class UserConfiguration
 			        			for (Iterator dashboardItemIterator = ndeRow.elementIterator(); dashboardItemIterator.hasNext();)
 							{
 								Element ndeDashboardItem = (Element) dashboardItemIterator.next();
-			        				newRow.getDashboardItems().add(new DashboardItem(getAttributeValue(ndeDashboardItem, "link").replaceAll("\\[ReportsFolder\\]", reportsFolder)));			        			
+			        				newRow.getDashboardItems().add(new DashboardItem(getAttributeValue(ndeDashboardItem, "link").replace("\\[ReportsFolder\\]", reportsFolder))); //replaceAll("\\[ReportsFolder\\]", reportsFolder)));			        			
 							}
 							
 							_dashboardRows.add(newRow);
