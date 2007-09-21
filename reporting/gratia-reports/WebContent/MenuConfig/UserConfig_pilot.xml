@@ -1,0 +1,50 @@
+<UserConfig>
+	<Menu>
+		<MenuGroup name="Dashboards">
+			<MenuItem name="Featured Reports" link="dashboard.jsp"/>
+		</MenuGroup>
+		<MenuGroup name="Reports - VO Views">
+			<MenuItem name="-   Usage Metrics - For VO(s)" link="GratiaParameterInput.jsp?report=WeeklyUsageByVO.rptdesign"/>
+			<MenuItem name="-   Jobs by VO" link="viewer.jsp?__report=[ReportsFolder]JobsByVO.rptdesign"/>
+			<MenuItem name="-   Daily Jobs by VO" link="viewer.jsp?__report=[ReportsFolder]DailyJobsByVO.rptdesign"/>
+			<MenuItem name="-   Daily Jobs by Site for VO" link="viewer.jsp?__report=[ReportsFolder]DailyJobsBySiteForVO.rptdesign"/>
+			<MenuItem name="-   Usage by VO" link="viewer.jsp?__report=[ReportsFolder]UsageByVO.rptdesign&amp;CPUMetric=wallclock"/>
+			<MenuItem name="-   Daily Usage by VO" link="viewer.jsp?__report=[ReportsFolder]DailyUsageByVO.rptdesign,Display Metric=wallclock"/>
+			<MenuItem name="-   Daily Usage by Site for VO" link="viewer.jsp?__report=[ReportsFolder]DailyUsageBySiteForVO.rptdesign,CPUMetric=wallclock"/>
+		</MenuGroup>
+		<MenuGroup name="Reports - VO Views - Weekly History">
+			<MenuItem name="-   Wall Time Usage By VO" link="viewer.jsp?__report=[ReportsFolder]WeeklyUsageByVO-ranked.rptdesign,Display Metric=wallclock"/>
+			<MenuItem name="-   CPU Usage By VO" link="viewer.jsp?__report=[ReportsFolder]WeeklyUsageByVO-ranked.rptdesign,Display Metric=process"/>
+			<MenuItem name="-   Jobs By VO" link="viewer.jsp?__report=[ReportsFolder]WeeklyUsageByVO-ranked.rptdesign,Display Metric=jobcount"/>
+			<MenuItem name="-   Usage Metrics - For VO(s)" link="viewer.jsp?__report=[ReportsFolder]WeeklyUsageByVO.rptdesign"/>
+		</MenuGroup>
+		<MenuGroup name="Reports - Site Views">
+			<MenuItem name="-   Jobs by Site" link="viewer.jsp?__report=[ReportsFolder]JobsBySite.rptdesign"/>
+			<MenuItem name="-   Daily Jobs by Site" link="viewer.jsp?__report=[ReportsFolder]DailyJobsBySite.rptdesign"/>
+			<MenuItem name="-   Daily Jobs by VO for Site" link="viewer.jsp?__report=[ReportsFolder]DailyJobsByVOForSite.rptdesign"/>
+			<MenuItem name="-   Usage by Site" link="viewer.jsp?__report=[ReportsFolder]UsageBySite.rptdesign,CPUMetric=wallclock"/>
+			<MenuItem name="-   Daily Usage by Site" link="viewer.jsp?__report=[ReportsFolder]DailyUsageBySite.rptdesign,CPUMetric=wallclock"/>
+			<MenuItem name="-   Daily Usage by VO for Site" link="viewer.jsp?__report=[ReportsFolder]DailyUsageByVOForSite.rptdesign,CPUMetric=wallclock"/>
+		</MenuGroup>
+		<MenuGroup name="Reports - by Probe">
+			<MenuItem name="-   Jobs by Probe" link="viewer.jsp?__report=[ReportsFolder]JobsByProbeNoFacility.rptdesign"/>
+			<MenuItem name="-   Daily Jobs by Probe" link="viewer.jsp?__report=[ReportsFolder]DailyJobsByProbe.rptdesign"/>
+			<MenuItem name="-   Daily Usage by Probe" link="viewer.jsp?__report=[ReportsFolder]DailyUsageByProbe.rptdesign,CPUMetric=wallclock"/>
+		</MenuGroup>
+		<MenuGroup name="Reports - miscellaneous">
+			<MenuItem name="-   Probe Status" link="viewer.jsp?__report=[ReportsFolder]ProbeStatus.rptdesign"/>
+			<MenuItem name="-   Usage Report" link="viewer.jsp?__report=[ReportsFolder]UsageReport.rptdesign"/>
+		</MenuGroup>
+		<MenuGroup name="SQL Queries">
+			<MenuItem name="-   Custom SQL Report" link="admin.jsp"/>
+			<MenuItem name="-   Distinct Probe Names" link="admin.jsp?sql=select distinct ProbeName from JobUsageRecord_Meta;"/>
+			<MenuItem name="-   Probes With Odd SiteName" link="admin.jsp?sql=select distinct P.ProbeName,S.SiteName as Gratia_SiteName,P.SiteName as Probe_SiteName from Site S,Probe,ProbeSummary P where P.EndTime>=DATE_ADD(CURDATE(), INTERVAL -1 DAY) and Probe.siteid = S.siteid and P.ProbeName = Probe.probename and P.SiteName != S.SiteName;"/>
+			<MenuItem name="-   Records Without Dates" link="admin.jsp?sql=select count(*) from JobUsageRecord where starttime is null or endtime is null;"/>
+		</MenuGroup>
+	</Menu>
+	<Dashboard>		
+		<Row>	
+			<DashboardItem link="viewer.jsp?__report=[ReportsFolder]UsageBySite.rptdesign&amp;Start+Date=01/01/1990&amp;End+Date=12/31/2999&amp;CPUMetric=wallclock"/>			
+		</Row>			
+	</Dashboard>
+</UserConfig>
