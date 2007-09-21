@@ -23,26 +23,8 @@
             <expression name="value">params["DatabasePassword"]</expression>
         </structure>
     </list-property>
-    <method name="initialize"><![CDATA[//importPackage(Packages.java.io); 
-//fos = new java.io.FileOutputStream("/tmp/glr2.txt", true); 
-//printWriter = new java.io.PrintWriter(fos); 
-
-//printWriter.println("2.Start Date After:  " + params["Start Date"]);
-//printWriter.println("2.End Date After:  " + params["End Date"]);
-//printWriter.println("2.Format After:  " + params["GroupByFormat"]);
-//printWriter.println("2.TimeAxisPattern: " + params["TimeAxisPattern"]);
-//printWriter.flush();
-
-//printWriter.close();]]></method>
+    <property name="eventHandlerClass">net.sf.gratia.reporting.GratiaBirtReportEH</property>
     <list-property name="configVars">
-        <structure>
-            <property name="name">DatabaseUser</property>
-            <property name="value">gratia</property>
-        </structure>
-        <structure>
-            <property name="name">DatabasePassword</property>
-            <property name="value">proto</property>
-        </structure>
         <structure>
             <property name="name">GroupByFormat</property>
             <property name="value">%Y-%U</property>
@@ -61,18 +43,6 @@
         <structure>
             <property name="name">Subtitle</property>
             <property name="value">None</property>
-        </structure>
-        <structure>
-            <property name="name">VOs</property>
-            <property name="value">('none')</property>
-        </structure>
-        <structure>
-            <property name="name">Selection Type</property>
-            <property name="value">NOT</property>
-        </structure>
-        <structure>
-            <property name="name">Display Metric</property>
-            <property name="value">wallclock</property>
         </structure>
     </list-property>
     <parameters>
@@ -96,7 +66,7 @@
                     <property name="dataType">string</property>
                     <property name="isRequired">true</property>
                     <property name="controlType">text-box</property>
-                    <property name="defaultValue">gratia</property>
+                    <property name="defaultValue">reader</property>
                     <structure name="format">
                         <property name="category">Unformatted</property>
                         <property name="pattern">Unformatted</property>
@@ -108,7 +78,7 @@
                     <property name="dataType">string</property>
                     <property name="isRequired">true</property>
                     <property name="controlType">text-box</property>
-                    <property name="defaultValue">proto</property>
+                    <property name="defaultValue">reader</property>
                     <structure name="format">
                         <property name="category">Unformatted</property>
                         <property name="pattern">Unformatted</property>
@@ -181,18 +151,12 @@
         </scalar-parameter>
         <scalar-parameter name="VOs" id="106">
             <text-property name="helpText">List of VO's to include/exclude in chart.</text-property>
-            <property name="valueType">dynamic</property>
+            <property name="valueType">static</property>
             <property name="dataType">string</property>
-            <property name="controlType">list-box</property>
-            <property name="dataSetName">VOList</property>
-            <expression name="valueExpr">row["vos"]</expression>
-            <expression name="labelExpr">row["voname"]</expression>
-            <property name="mustMatch">true</property>
-            <property name="fixedOrder">false</property>
+            <property name="controlType">text-box</property>
             <property name="defaultValue">('cms','cdf','d0sar','dzero','usatlas','uscms','uscmspool')</property>
             <structure name="format">
                 <property name="category">Unformatted</property>
-                <property name="pattern">Unformatted</property>
             </structure>
             <list-property name="boundDataColumns">
                 <structure>
@@ -205,7 +169,7 @@
                 </structure>
             </list-property>
         </scalar-parameter>
-        <scalar-parameter name="Selection Type" id="107">
+        <scalar-parameter name="SelectionType" id="107">
             <text-property name="helpText">Include or exclude VO's in list.</text-property>
             <property name="valueType">static</property>
             <property name="dataType">string</property>
@@ -215,6 +179,7 @@
             <property name="mustMatch">true</property>
             <property name="fixedOrder">true</property>
             <property name="defaultValue">IN</property>
+            <property name="distinct">false</property>
             <structure name="format">
                 <property name="category">Unformatted</property>
                 <property name="pattern">Unformatted</property>
@@ -230,7 +195,7 @@
                 </structure>
             </list-property>
         </scalar-parameter>
-        <scalar-parameter name="Display Metric" id="111">
+        <scalar-parameter name="DisplayMetric" id="111">
             <property name="hidden">false</property>
             <text-property name="helpText">Select metric for chart</text-property>
             <property name="valueType">static</property>
@@ -260,17 +225,39 @@
                 </structure>
             </list-property>
         </scalar-parameter>
+        <scalar-parameter name="TraceTableKey" id="112">
+            <property name="hidden">true</property>
+            <property name="valueType">static</property>
+            <property name="dataType">string</property>
+            <property name="controlType">text-box</property>
+            <property name="defaultValue">None</property>
+            <structure name="format">
+                <property name="category">Unformatted</property>
+            </structure>
+        </scalar-parameter>
+        <scalar-parameter name="ReportURL" id="113">
+            <property name="hidden">true</property>
+            <property name="valueType">static</property>
+            <property name="dataType">string</property>
+            <property name="isRequired">false</property>
+            <property name="controlType">text-box</property>
+            <property name="defaultValue">http://gratia-osg.fnal.gov:8880/gratia-reporting</property>
+            <structure name="format">
+                <property name="category">Unformatted</property>
+            </structure>
+        </scalar-parameter>
     </parameters>
     <data-sources>
         <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="fermigrid1" id="4">
             <property name="odaDriverClass">com.mysql.jdbc.Driver</property>
             <property name="odaURL">jdbc:mysql://gratia-db01.fnal.gov:3320/gratia_itb</property>
-            <property name="odaUser">gratia</property>
-            <encrypted-property name="odaPassword">cHJvdG8=</encrypted-property>
+            <property name="odaUser">reader</property>
+            <encrypted-property name="odaPassword">cmVhZGVy</encrypted-property>
         </oda-data-source>
     </data-sources>
     <data-sets>
         <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="6MonthHistory" id="94">
+            <structure name="cachedMetaData"/>
             <property name="dataSource">fermigrid1</property>
             <list-property name="parameters">
                 <structure>
@@ -848,16 +835,16 @@ function beforeGeneration( chart, context )
 function beforeDrawAxisLabel( axis, label, context )
 {
       
-fos = new java.io.FileOutputStream(&quot;/tmp/glr2.txt&quot;, true); 
-printWriter = new java.io.PrintWriter(fos); 
+//fos = new java.io.FileOutputStream(&quot;/tmp/glr2.txt&quot;, true); 
+//printWriter = new java.io.PrintWriter(fos); 
 
 	rep = context.getExternalContext().getScriptable();
 	val = rep.getParameterValue(&quot;HighlightDate&quot;);
 
-printWriter.println(&quot;3.Hightlight: &quot;+val);
-printWriter.println(&quot;3.label:      &quot;+label.getCaption().getValue());
-printWriter.flush();
-printWriter.close();
+//printWriter.println(&quot;3.Hightlight: &quot;+val);
+//printWriter.println(&quot;3.label:      &quot;+label.getCaption().getValue());
+//printWriter.flush();
+//printWriter.close();
 	if(val == null)
 		val = &quot;&quot;;
 
@@ -880,7 +867,7 @@ printWriter.close();
 function beforeDrawAxisTitle( axis, label, context )
 {
 	rep = context.getExternalContext().getScriptable();
-	val1 =rep.getParameterValue(&quot;Display Metric&quot;);
+	val1 =rep.getParameterValue(&quot;DisplayMetric&quot;);
 	if(!axis.isCategoryAxis())
 	{
 		if(val1==&quot;process&quot;)
@@ -1088,13 +1075,13 @@ function beforeDrawAxisTitle( axis, label, context )
             <Visible>false</Visible>
           </Label>
           <DataDefinition>
-            <Definition>if (params[&quot;Display Metric&quot;] == &quot;wallclock&quot;) {&#xD;
+            <Definition>if (params[&quot;DisplayMetric&quot;] == &quot;wallclock&quot;) {&#xD;
  row[&quot;WallDuration&quot;] / 3600&#xD;
 }&#xD;
-else if (params[&quot;Display Metric&quot;]==&quot;process&quot;) {&#xD;
+else if (params[&quot;DisplayMetric&quot;]==&quot;process&quot;) {&#xD;
 row[&quot;Cpu&quot;]/3600&#xD;
 }&#xD;
-else if (params[&quot;Display Metric&quot;]==&quot;jobcount&quot;){&#xD;
+else if (params[&quot;DisplayMetric&quot;]==&quot;jobcount&quot;){&#xD;
 row[&quot;Njobs&quot;]&#xD;
 }&#xD;
 else {&#xD;
@@ -1108,7 +1095,7 @@ else {&#xD;
             </Components>
             <Separator>, </Separator>
           </DataPoint>
-          <LabelPosition>Outside</LabelPosition>
+          <LabelPosition>Inside</LabelPosition>
           <Stacked>true</Stacked>
           <Triggers>
             <Condition>onclick</Condition>
@@ -1120,19 +1107,8 @@ else {&#xD;
     &lt;property name=&quot;linkType&quot;>drill-through&lt;/property>
     &lt;property name=&quot;reportName&quot;>UsageByUserForWeek.rptdesign&lt;/property>
     &lt;property name=&quot;targetWindow&quot;>_self&lt;/property>
+    &lt;property name=&quot;targetFileType&quot;>report-design&lt;/property>
     &lt;list-property name=&quot;paramBindings&quot;>
-        &lt;structure>
-            &lt;property name=&quot;paramName&quot;>DatabaseURL&lt;/property>
-            &lt;expression name=&quot;expression&quot;>params[&quot;DatabaseURL&quot;]&lt;/expression>
-        &lt;/structure>
-        &lt;structure>
-            &lt;property name=&quot;paramName&quot;>DatabaseUser&lt;/property>
-            &lt;expression name=&quot;expression&quot;>params[&quot;DatabaseUser&quot;]&lt;/expression>
-        &lt;/structure>
-        &lt;structure>
-            &lt;property name=&quot;paramName&quot;>DatabasePassword&lt;/property>
-            &lt;expression name=&quot;expression&quot;>params[&quot;DatabasePassword&quot;]&lt;/expression>
-        &lt;/structure>
         &lt;structure>
             &lt;property name=&quot;paramName&quot;>ForVO&lt;/property>
             &lt;expression name=&quot;expression&quot;>&quot;VO&quot;&lt;/expression>
@@ -1142,8 +1118,8 @@ else {&#xD;
             &lt;expression name=&quot;expression&quot;>&quot;AnySite&quot;&lt;/expression>
         &lt;/structure>
         &lt;structure>
-            &lt;property name=&quot;paramName&quot;>Display Metric&lt;/property>
-            &lt;expression name=&quot;expression&quot;>params[&quot;Display Metric&quot;]&lt;/expression>
+            &lt;property name=&quot;paramName&quot;>DisplayMetric&lt;/property>
+            &lt;expression name=&quot;expression&quot;>params[&quot;DisplayMetric&quot;]&lt;/expression>
         &lt;/structure>
     &lt;/list-property>
 &lt;/structure>
@@ -1510,6 +1486,27 @@ else {&#xD;
 </model:ChartWithAxes>
 ]]></xml-property>
             <property name="outputFormat">SVG</property>
+            <structure name="action">
+                <property name="targetWindow">_self</property>
+                <property name="linkType">drill-through</property>
+                <property name="formatType">html</property>
+                <property name="targetFileType">report-design</property>
+                <property name="reportName">UsageByUserForWeek.rptdesign</property>
+                <list-property name="paramBindings">
+                    <structure>
+                        <property name="paramName">ForVO</property>
+                        <expression name="expression">"VO"</expression>
+                    </structure>
+                    <structure>
+                        <property name="paramName">ForSite</property>
+                        <expression name="expression">"AnySite"</expression>
+                    </structure>
+                    <structure>
+                        <property name="paramName">DisplayMetric</property>
+                        <expression name="expression">params["DisplayMetric"]</expression>
+                    </structure>
+                </list-property>
+            </structure>
             <property name="dataSet">6MonthHistory</property>
             <property name="height">600px</property>
             <property name="width">800px</property>
@@ -1520,7 +1517,7 @@ else {&#xD;
                 </structure>
                 <structure>
                     <property name="paramName">VOSelType</property>
-                    <expression name="expression">params["Selection Type"]</expression>
+                    <expression name="expression">params["SelectionType"]</expression>
                 </structure>
             </list-property>
             <list-property name="boundDataColumns">
@@ -1552,8 +1549,26 @@ else {&#xD;
             <property name="fontFamily">sans-serif</property>
             <property name="fontSize">9pt</property>
             <property name="textAlign">center</property>
-            <expression name="valueExpr">if(params["Selection Type"] == "IN"){"VO\'s selected:  " + params["VOs"]}else{"VO\'s excluded:  " + params["VOs"]}</expression>
+            <expression name="valueExpr">if(params["SelectionType"] == "IN"){"VO\'s selected:  " + params["VOs"]}else{"VO\'s excluded:  " + params["VOs"]}</expression>
             <property name="contentType">html</property>
         </text-data>
+        <text-data id="114">
+            <expression name="valueExpr">"Retrieve report URL: "+ params["ReportURL"]</expression>
+            <property name="contentType">html</property>
+        </text-data>
+        <label id="108">
+            <property name="style">sans-style1</property>
+            <property name="fontSize">12pt</property>
+            <property name="fontWeight">bold</property>
+            <property name="marginTop">0pt</property>
+            <property name="marginBottom">20px</property>
+            <property name="paddingTop">1pt</property>
+            <text-property name="text">Show Query</text-property>
+            <structure name="action">
+                <property name="linkType">hyperlink</property>
+                <expression name="uri">"../showQuery.jsp?TraceTableKey="+params["TraceTableKey"]</expression>
+                <property name="targetWindow">_self</property>
+            </structure>
+        </label>
     </body>
 </report>
