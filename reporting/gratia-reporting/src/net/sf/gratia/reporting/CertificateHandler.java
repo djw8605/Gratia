@@ -2,8 +2,6 @@ package net.sf.gratia.reporting;
 
 import java.io.*;
 import java.util.*;
-import java.text.*;
-import javax.servlet.*;
 import javax.servlet.http.*;
 import java.security.cert.*;
 
@@ -33,7 +31,7 @@ public class CertificateHandler
 		public CertificateHandler(HttpServletRequest request)
 		{
 				this.request = request;
-				certs = (X509Certificate[]) request.getAttribute("javax.servlet.request.X509Certificate");
+				certs = null;  //(X509Certificate[]) request.getAttribute("javax.servlet.request.X509Certificate");
 		}
 
 		public String getName()
@@ -67,7 +65,7 @@ public class CertificateHandler
 		{
 				String dq = "'";
 				String command = "select * from Role where role = " + dq + getRole() + dq;
-				String subtitle = "Test Subtitle";
+				String subtitle = "A Subtitle";
 				openConnection();
 				try
 						{
