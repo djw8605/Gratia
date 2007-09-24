@@ -10,13 +10,16 @@ public class Configuration
 
 	public static String getCatalinaHome()
 	{
-		return System.getProperty("catalina.home");
+		String path = "";
+		path = System.getProperty("catalina.home") + File.separatorChar;
+		return path;
 	}
+		
 
 	public static String getConfigurationPath()
 	{
-		String path = System.getProperty("catalina.home");
-		path = path + "/gratia";
+		String path = "";		
+		path = System.getProperty("catalina.home") + File.separatorChar + "gratia";				
 		return path;
 	}
 
@@ -63,7 +66,7 @@ public class Configuration
 
 	public static String getAccountingTablePath()
 	{
-		return getConfigurationPath() + "/accounting-table";
+		return getConfigurationPath() + File.separatorChar + "accounting-table";
 	}
 
 	public static synchronized Hashtable getAccountingTable()
