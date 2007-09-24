@@ -15,7 +15,7 @@
 	String link = request.getParameter("link");
 	String param1 = null;
 	if(link == null)
-		link="dashboard.jsp";
+		link="GratiaParameterInput.jsp?report=WeeklyUsageByVO.rptdesign&reportTitle=Usage%20Metrics%20-%20For%20VO(s)";
 	else {		
 		StringBuffer sb = new StringBuffer(link.length());
 		char c;
