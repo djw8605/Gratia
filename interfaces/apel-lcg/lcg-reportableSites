@@ -50,6 +50,10 @@
 #             they all feed the same WN cluster. 
 #   9/12/07 (John Weigand) - 
 #             Added SLAC_PROD.
+#   9/20/07 (John Weigand) - 
+#             Replaced SLAC_PROD with PROD_SLAC. 
+#             There has been confusion over which it is and may have been
+#             done incorrectly on 9/12/2007.
 #    
 ##################################################################
 #-- Site  ------- SPECint2000
@@ -78,7 +82,7 @@ BU_ATLAS_Tier2o
 IU_ATLAS_Tier2
 MWT2_IU
 MWT2_UC
-SLAC_PROD
+PROD_SLAC
 SLACXRD
 OU_OCHEP_SWT2
 OU_OSCER_ATLAS
