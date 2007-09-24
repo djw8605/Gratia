@@ -274,6 +274,28 @@ reports:
 	cp ${reports}/WebContent/WEB-INF/web.xml war/WEB-INF/web.xml
 	jar -cvf ${target}/gratia-reports.war -C war .
 	rm -f -r war
+	
+birt-reporting: 
+	rm -f -r jar-lib
+	mkdir jar-lib
+	mkdir jar-lib/WEB-INF
+	mkdir jar-lib/WEB-INF/tlds
+	mkdir jar-lib/net
+	mkdir jar-lib/net/sf
+	mkdir jar-lib/net/sf/gratia
+	mkdir jar-lib/net/sf/gratia/util
+	mkdir jar-lib/net/sf/gratia/reporting
+	mkdir jar-lib/net/sf/gratia/reporting/exceptions
+	javac -cp ${classpath} -extdirs ${commonLib} ${util}/net/sf/gratia/util/*.java
+	javac -cp ${classpath} -extdirs ${commonLib} ${reportsrc}/src/net/sf/gratia/reporting/exceptions/*.java
+	javac -cp ${classpath} -extdirs ${commonLib} ${reportsrc}/src/net/sf/gratia/reporting/*.java
+	cp ${util}/net/sf/gratia/util/*.class jar-lib/net/sf/gratia/util
+	cp ${reportsrc}/WebContent/WEB-INF/tlds/*.tld jar-lib/WEB-INF/tlds
+	cp ${reportsrc}/src/net/sf/gratia/reporting/*.class jar-lib/net/sf/gratia/reporting
+	cp ${reportsrc}/src/net/sf/gratia/reporting/exceptions/*.class jar-lib/net/sf/gratia/reporting/exceptions
+	jar -cvfM ${target}/gratiaReporting.jar -C jar-lib .
+	rm -f -r jar-lib
+
 
 local: clean util services servlets soap reporting reports administration security 
 
