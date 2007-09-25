@@ -1,28 +1,12 @@
-/**
- * 
- */
 package net.sf.gratia.reporting;
 
 import org.eclipse.birt.report.engine.api.script.eventadapter.ReportEventAdapter;
-//import net.sf.gratia.reporting.BirtEventFormatter;
-
-//import java.io.File;
-//import java.io.FileInputStream;
-//import java.util.Properties;
-//import java.io.File;
-//import java.util.logging.ConsoleHandler;
-//import java.util.logging.FileHandler;
-//import java.util.logging.Handler;
-//import java.util.logging.Logger;
-//import java.util.*;
-
 import javax.servlet.http.HttpServletRequest;
-
 import org.eclipse.birt.report.engine.api.script.IReportContext;
 import org.eclipse.birt.report.engine.api.script.element.IReportDesign;
-
 //import net.sf.gratia.reporting.ReportingConfiguration;
 //import net.sf.gratia.util.Logging;
+
 /**
  * @author penelope
  *
@@ -46,7 +30,10 @@ public class GratiaBirtReportEH extends ReportEventAdapter {
 	public void initialize(IReportContext inReport) {
 	
 	   try {
-
+		    //  Debugging ...
+			// BufferedWriter out = new BufferedWriter(new FileWriter("./GratiaBirtEH.log", true));
+	        // out.write("\n+++++++++ INTIALIZE REPORT PARAMETERS ++++++++++++++++\n");
+	
 		HttpServletRequest request = (HttpServletRequest) inReport.getHttpServletRequest();
 				
 		ReportingConfiguration reportingConfig = new ReportingConfiguration();
@@ -80,6 +67,17 @@ public class GratiaBirtReportEH extends ReportEventAdapter {
 		inReport.setParameterValue("UserRole", userRole);
 		inReport.setParameterValue("Subtitle", subtitle);
 		inReport.setParameterValue("TraceTableKey", userKey);
+		
+		// out.write("\tParameters are set\n");
+		// out.write("\tDatabaseURL= " + inReport.getParameterValue("DatabaseURL")+"\n");
+		// out.write("\tDatabasePassword= " + inReport.getParameterValue("DatabasePassword")+"\n");
+		// out.write("\tDatabaseUser= " + inReport.getParameterValue("DatabaseUser")+"\n");
+		// out.write("\tUserName= " + inReport.getParameterValue("UserName")+"\n");
+		// out.write("\tUserRole= " + inReport.getParameterValue("UserRole")+"\n");
+		// out.write("\tSubtitle= " + inReport.getParameterValue("Subtitle")+"\n");
+		// out.write("\tTraceTableKey= " + inReport.getParameterValue("TraceTableKey")+"\n");
+	        
+		// out.close();
 		
 	   } catch (Exception e) {
 			e.printStackTrace();
