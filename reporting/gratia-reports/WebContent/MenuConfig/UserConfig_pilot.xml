@@ -4,7 +4,7 @@
 			<MenuItem name="Featured Reports" link="dashboard.jsp"/>
 		</MenuGroup>
 		<MenuGroup name="Reports - VO Views">
-			<MenuItem name="-   Usage Metrics - For VO(s)" link="GratiaParameterInput.jsp?report=WeeklyUsageByVO.rptdesign"/>
+			<MenuItem name="-   Usage Metrics - For VO(s)" link="GratiaParameterInput.jsp?report=[ReportsFolder]WeeklyUsageByVO.rptdesign"/>
 			<MenuItem name="-   Jobs by VO" link="viewer.jsp?__report=[ReportsFolder]JobsByVO.rptdesign"/>
 			<MenuItem name="-   Daily Jobs by VO" link="viewer.jsp?__report=[ReportsFolder]DailyJobsByVO.rptdesign"/>
 			<MenuItem name="-   Daily Jobs by Site for VO" link="viewer.jsp?__report=[ReportsFolder]DailyJobsBySiteForVO.rptdesign"/>
