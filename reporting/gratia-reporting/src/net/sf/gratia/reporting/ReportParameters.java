@@ -122,7 +122,7 @@ public class ReportParameters
 		} // try
 		catch(DocumentException exDoc)
 		{
-			throw new InvalidConfigurationException("Unable to parse User configuration ", exDoc);
+			throw new InvalidConfigurationException("Unable to parse Report design file ", exDoc);
 		}
 		finally
 		{
