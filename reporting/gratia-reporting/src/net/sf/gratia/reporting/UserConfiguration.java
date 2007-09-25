@@ -53,9 +53,9 @@ public class UserConfiguration
 				String catalinaHome =  System.getProperty("catalina.home") + File.separatorChar;
 				menuConfig = (catalinaHome + "webapps" + File.separatorChar + "gratia-reports" + "MenuConfig"+ File.separator + "UserConfig_osg.xml");
 			}
-
-			try
-			{
+			
+			try 
+			{	
 					// Open the config file
 				
 				String reportsFolder = reportingConfiguration.getReportsFolder();
@@ -80,10 +80,11 @@ public class UserConfiguration
 			        			MenuGroup newMenuGroup = new MenuGroup(getAttributeValue(ndeMenuGroup, "name"));
 			        			for (Iterator menuItemIterator = ndeMenuGroup.elementIterator(); menuItemIterator.hasNext();)
 							{
-								Element ndeMenuItem = (Element) menuItemIterator.next();			        							
-								newMenuGroup.getMenuItems().add(new MenuItem(getAttributeValue(ndeMenuItem, "name"), getAttributeValue(ndeMenuItem, "link").replace("\\[ReportsFolder\\]", reportsFolder))); //replaceAll("\\[ReportsFolder\\]", reportsFolder) ));			        			
+								Element ndeMenuItem = (Element) menuItemIterator.next();
+								String link = getAttributeValue(ndeMenuItem, "link").replace("[ReportsFolder]", reportsFolder);	//replaceAll("\\[ReportsFolder\\]", reportsFolder) ));		        							
+								newMenuGroup.getMenuItems().add(new MenuItem(getAttributeValue(ndeMenuItem, "name"), link)); 
 							}
-			        		
+			        			
 							_menuGroups.add(newMenuGroup);
 						}
 					}
@@ -97,7 +98,8 @@ public class UserConfiguration
 			        			for (Iterator dashboardItemIterator = ndeRow.elementIterator(); dashboardItemIterator.hasNext();)
 							{
 								Element ndeDashboardItem = (Element) dashboardItemIterator.next();
-			        				newRow.getDashboardItems().add(new DashboardItem(getAttributeValue(ndeDashboardItem, "link").replace("\\[ReportsFolder\\]", reportsFolder))); //replaceAll("\\[ReportsFolder\\]", reportsFolder)));			        			
+								String link = getAttributeValue(ndeDashboardItem, "link").replace("[ReportsFolder]", reportsFolder);	//replaceAll("\\[ReportsFolder\\]", reportsFolder) ));		        							
+			        			newRow.getDashboardItems().add(new DashboardItem(link)); //replaceAll("\\[ReportsFolder\\]", reportsFolder)));
 							}
 							
 							_dashboardRows.add(newRow);
@@ -109,6 +111,7 @@ public class UserConfiguration
 			    				
 		// Set a flag indicating the configuration has been loaded, so subsequent calls will not load again
 				_configLoaded = "1";
+
 			} // try
 			catch(DocumentException exDoc)
 			{
