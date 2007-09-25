@@ -80,7 +80,7 @@ String report =request.getParameter("report");
 	}
 
 
-String requestedReportNameAndPath = "C:\\Apache Software Foundation\\Tomcat 5.5\\webapps\\birt-v22\\"+request.getParameter("report");
+String requestedReportNameAndPath = request.getParameter("report");
 String pageID = "" + System.currentTimeMillis();
 
 // Load the report parameters
