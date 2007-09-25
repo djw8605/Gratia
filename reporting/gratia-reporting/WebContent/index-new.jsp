@@ -11,11 +11,16 @@
 <body>
 <jsp:include page="common.jsp" />
 <%
+
+	// Get the reporting configuration setting
+	ReportingConfiguration reportingConfiguration = (ReportingConfiguration)session.getAttribute("reportingConfiguration");
+	String reportsFolder = reportingConfiguration.getReportsFolder();
+	
 	UserConfiguration userConfiguration = (UserConfiguration)session.getAttribute("userConfiguration"); 
 	String link = request.getParameter("link");
 	String param1 = null;
 	if(link == null)
-		link="GratiaParameterInput.jsp?report=WeeklyUsageByVO.rptdesign&reportTitle=Usage%20Metrics%20-%20For%20VO(s)";
+		link="GratiaParameterInput.jsp?report="+reportsFolder+"WeeklyUsageByVO.rptdesign&reportTitle=Usage%20Metrics%20-%20For%20VO(s)";
 	else {		
 		StringBuffer sb = new StringBuffer(link.length());
 		char c;
@@ -79,7 +84,7 @@
 				%>
 					<tr >
      					<td>
-     						<a class=menuItem href="index-new.jsp?link=<%=linkURL %>"><%=linkNAME %></a>
+     						<a class=menuItem href="index.jsp?link=<%=linkURL %>"><%=linkNAME %></a>
      					</td>
                     </tr>
 				<%
