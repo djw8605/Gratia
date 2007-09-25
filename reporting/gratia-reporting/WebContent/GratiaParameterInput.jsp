@@ -39,7 +39,6 @@ var c1 = new CodeThatCalendar(caldef1);
 function addVO (form) {
 /* Construct the VOs string from the selection */  
         form.VOs.value = "(";
-        form.ReportURL.value = form.BaseURL.value;
 		
 	for(var i = 0; i < form.myVOs.options.length; i++)
 		if (form.myVOs.options[i].selected)
@@ -48,9 +47,6 @@ function addVO (form) {
 		   else
                 	form.VOs.value += "'"+ form.myVOs.options[i].value + "'";
         form.VOs.value += ")";
-        form.ReportURL.value += "&VOs=" + form.VOs.value; 
-        form.ReportURL.value += "&StartDate=" + form.StartDate.value;
-        form.ReportURL.value += "&EndDate=" + form.EndDate.value;
     }
 
 function getURL (form) {
