@@ -290,7 +290,6 @@ birt-reporting:
 	javac -cp ${classpath} -extdirs ${commonLib} ${reportsrc}/src/net/sf/gratia/reporting/exceptions/*.java
 	javac -cp ${classpath} -extdirs ${commonLib} ${reportsrc}/src/net/sf/gratia/reporting/*.java
 	cp ${util}/net/sf/gratia/util/*.class jar-lib/net/sf/gratia/util
-	cp ${reportsrc}/WebContent/WEB-INF/tlds/*.tld jar-lib/WEB-INF/tlds
 	cp ${reportsrc}/src/net/sf/gratia/reporting/*.class jar-lib/net/sf/gratia/reporting
 	cp ${reportsrc}/src/net/sf/gratia/reporting/exceptions/*.class jar-lib/net/sf/gratia/reporting/exceptions
 	jar -cvfM ${target}/gratiaReporting.jar -C jar-lib .
