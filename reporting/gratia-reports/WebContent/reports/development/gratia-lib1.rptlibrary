@@ -40,24 +40,12 @@
             <property name="value">AnySite</property>
         </structure>
         <structure>
-            <property name="name">Start Date</property>
-            <property name="value">2006-01-01</property>
-        </structure>
-        <structure>
-            <property name="name">End Date</property>
-            <property name="value">2007-02-01</property>
-        </structure>
-        <structure>
             <property name="name">UserName</property>
             <property name="value">None</property>
         </structure>
         <structure>
             <property name="name">UserRole</property>
             <property name="value">None</property>
-        </structure>
-        <structure>
-            <property name="name">Display Metric</property>
-            <property name="value">process</property>
         </structure>
     </list-property>
     <parameters>
@@ -244,7 +232,7 @@
                         </structure>
                     </list-property>
                 </scalar-parameter>
-                <scalar-parameter name="Selection Type" id="366">
+                <scalar-parameter name="SelectionType" id="366">
                     <text-property name="helpText">Include or exclude VO's in list.</text-property>
                     <property name="valueType">static</property>
                     <property name="dataType">string</property>
@@ -273,7 +261,7 @@
         </parameter-group>
         <parameter-group name="DateRange" id="17">
             <parameters>
-                <scalar-parameter name="Start Date" id="18">
+                <scalar-parameter name="StartDate" id="18">
                     <property name="hidden">false</property>
                     <text-property name="helpText">Only jobs that finished after this date will be included</text-property>
                     <property name="valueType">static</property>
@@ -287,7 +275,7 @@
                         <property name="pattern">Unformatted</property>
                     </structure>
                 </scalar-parameter>
-                <scalar-parameter name="End Date" id="19">
+                <scalar-parameter name="EndDate" id="19">
                     <property name="hidden">false</property>
                     <text-property name="helpText">Only jobs that finished before this date will be included</text-property>
                     <property name="valueType">static</property>
@@ -335,7 +323,7 @@
         </parameter-group>
         <parameter-group name="Metrics" id="24">
             <parameters>
-                <scalar-parameter name="Display Metric" id="25">
+                <scalar-parameter name="DisplayMetric" id="25">
                     <property name="hidden">false</property>
                     <text-property name="helpText">Select metric for chart</text-property>
                     <property name="valueType">static</property>
@@ -367,14 +355,6 @@
                 </scalar-parameter>
             </parameters>
         </parameter-group>
-        <scalar-parameter name="NewParameter" id="363">
-            <property name="valueType">static</property>
-            <property name="dataType">string</property>
-            <property name="controlType">text-box</property>
-            <structure name="format">
-                <property name="category">Unformatted</property>
-            </structure>
-        </scalar-parameter>
     </parameters>
     <data-sources>
         <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="gratia-db01" id="26">
