@@ -355,6 +355,16 @@
                 </scalar-parameter>
             </parameters>
         </parameter-group>
+        <scalar-parameter name="TraceTableKey" id="387">
+            <property name="hidden">true</property>
+            <property name="valueType">static</property>
+            <property name="dataType">string</property>
+            <property name="concealValue">true</property>
+            <property name="controlType">text-box</property>
+            <structure name="format">
+                <property name="category">Unformatted</property>
+            </structure>
+        </scalar-parameter>
     </parameters>
     <data-sources>
         <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="gratia-db01" id="26">
