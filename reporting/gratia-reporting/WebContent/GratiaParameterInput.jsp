@@ -145,6 +145,7 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 	String helpText = null;
 	String promptText  = null;
 	String defaultValue  = null;
+	String inputValue = null;
 	Boolean hasSelectionOptions = false;
 	Boolean hidden = false;
 	
@@ -179,6 +180,13 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 			helpText = promptText;
 		if (defaultValue == null)
 			defaultValue = "";
+
+		// check if a value has been passed for this parameter in the URL.
+		// If so then make it the default value for this parameter.
+		// If the parameters are Start/EndDate do not use the given default value.
+		inputValue = request.getParameter(paramName);
+		if (inputValue != null) 
+				defaultValue = inputValue;
 			
 	// Set the start and end date
 		if(paramName.equals("StartDate"))
