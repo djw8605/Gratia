@@ -26,10 +26,6 @@
     </list-property>
     <list-property name="configVars">
         <structure>
-            <property name="name">DatabaseURL</property>
-            <property name="value">jdbc:mysql://gratia-db01.fnal.gov:3320/gratia_itb</property>
-        </structure>
-        <structure>
             <property name="name">DatabaseUser</property>
             <property name="value">gratia</property>
         </structure>
@@ -55,6 +51,18 @@
         <structure>
             <property name="name">Subtitle</property>
             <property name="value">None</property>
+        </structure>
+        <structure>
+            <property name="name">TimeAxisPattern</property>
+            <property name="value">MM/dd/yyyy</property>
+        </structure>
+        <structure>
+            <property name="name">Start Date</property>
+            <property name="value">2007-01-01</property>
+        </structure>
+        <structure>
+            <property name="name">End Date</property>
+            <property name="value">2007-02-01</property>
         </structure>
     </list-property>
     <template-parameter-definitions>
@@ -853,7 +861,7 @@
                     <property name="allowBlank">false</property>
                     <property name="format">Unformatted</property>
                     <property name="controlType">text-box</property>
-                    <property name="defaultValue">jdbc:mysql://gratia-db01.fnal.gov:3320/gratia_itb</property>
+                    <property name="defaultValue">jdbc:mysql://gratia-vm02.fnal.gov:3320/gratia_jeffmack</property>
                 </scalar-parameter>
                 <scalar-parameter name="DatabaseUser" id="83">
                     <property name="hidden">true</property>
@@ -912,7 +920,7 @@
             <property name="allowNull">true</property>
             <property name="format">Unformatted</property>
             <property name="controlType">text-box</property>
-            <property name="defaultValue">%Y-%U</property>
+            <property name="defaultValue">%Y-%m-%d</property>
         </scalar-parameter>
         <scalar-parameter name="HighlightDate" id="98">
             <property name="hidden">true</property>
@@ -952,26 +960,35 @@
             <property name="controlType">text-box</property>
             <property name="defaultValue">None</property>
         </scalar-parameter>
-        <scalar-parameter name="Start Date" id="86">
+        <scalar-parameter name="TimeAxisPattern" id="97">
             <property name="hidden">true</property>
+            <property name="valueType">static</property>
+            <property name="dataType">string</property>
+            <property name="concealValue">true</property>
+            <property name="allowBlank">true</property>
+            <property name="allowNull">true</property>
+            <property name="format">Unformatted</property>
+            <property name="controlType">text-box</property>
+            <property name="defaultValue">MM/dd/yyyy</property>
+        </scalar-parameter>
+        <scalar-parameter name="Start Date" id="86">
+            <property name="hidden">false</property>
             <text-property name="helpText">Only jobs that finished after this date will be included</text-property>
             <property name="valueType">static</property>
             <property name="dataType">string</property>
             <property name="promptText">Start Date</property>
-            <property name="allowBlank">true</property>
-            <property name="allowNull">true</property>
+            <property name="allowBlank">false</property>
             <property name="format">Unformatted</property>
             <property name="controlType">text-box</property>
             <property name="defaultValue">2007-01-01</property>
         </scalar-parameter>
         <scalar-parameter name="End Date" id="87">
-            <property name="hidden">true</property>
+            <property name="hidden">false</property>
             <text-property name="helpText">Only jobs that finished before this date will be included</text-property>
             <property name="valueType">static</property>
             <property name="dataType">string</property>
             <property name="promptText">End Date</property>
-            <property name="allowBlank">true</property>
-            <property name="allowNull">true</property>
+            <property name="allowBlank">false</property>
             <property name="format">Unformatted</property>
             <property name="controlType">text-box</property>
             <property name="defaultValue">2007-02-01</property>
@@ -980,13 +997,13 @@
     <data-sources>
         <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="fermigrid1" id="357">
             <property name="odaDriverClass">com.mysql.jdbc.Driver</property>
-            <property name="odaURL">jdbc:mysql://gratia-db01.fnal.gov:3320/gratia_itb</property>
+            <property name="odaURL">jdbc:mysql://gratia-vm02.fnal.gov:3320/gratia_jeffmack</property>
             <property name="odaUser">gratia</property>
             <encrypted-property name="odaPassword">cHJvdG8=</encrypted-property>
         </oda-data-source>
     </data-sources>
     <data-sets>
-        <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="UsageByVORanked" id="358">
+        <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="UsageBySiteRanked" id="358">
             <property name="dataSource">fermigrid1</property>
             <property name="cachedRowCount">0</property>
             <list-property name="parameters">
@@ -1008,19 +1025,7 @@
                     <property name="name">StartDate</property>
                     <property name="dataType">string</property>
                     <property name="position">3</property>
-                    <expression name="defaultValue">// Calculate starting month - 6 months ago
-var now = new Date();
-var begdate;
-now = new Date();
-var begdate = DateTimeSpan.subDate(now,0,6,0);
-var yearnr = begdate.getYear() + 1900;
-var monthnr = begdate.getMonth()+ 1;
-var daynr = begdate.getDate();
-if (monthnr.toString().length &lt; 2){	monthnr ="0" + monthnr;}
-if (daynr.toString().length &lt; 2){daynr ="0" +daynr;}
-// Force day  to 1
-daynr = "01";
-yearnr + "-" + monthnr + "-" + daynr;</expression>
+                    <expression name="defaultValue">'2007-01-01'</expression>
                     <property name="isInput">true</property>
                 </structure>
                 <structure>
@@ -1034,11 +1039,11 @@ yearnr + "-" + monthnr + "-" + daynr;</expression>
                     <property name="name">GroupByFormat</property>
                     <property name="dataType">string</property>
                     <property name="position">5</property>
-                    <expression name="defaultValue">"%Y-%U"</expression>
+                    <expression name="defaultValue">"%Y-%m-%d"</expression>
                     <property name="isInput">true</property>
                 </structure>
             </list-property>
-            <property name="queryText">call WeeklyUsageByVORanked(?,?,?,?,?,'Batch')</property>
+            <property name="queryText">call WeeklyUsageBySiteRanked(?,?,?,?,?,'Batch')</property>
         </oda-data-set>
     </data-sets>
     <styles>
@@ -1071,7 +1076,7 @@ yearnr + "-" + monthnr + "-" + daynr;</expression>
         </grid>
         <table name="table1" id="9">
             <property name="width">100%</property>
-            <property name="dataSet">UsageByVORanked</property>
+            <property name="dataSet">UsageBySiteRanked</property>
             <list-property name="paramBindings">
                 <structure>
                     <property name="paramName">UserName</property>
@@ -1080,6 +1085,14 @@ yearnr + "-" + monthnr + "-" + daynr;</expression>
                 <structure>
                     <property name="paramName">UserRole</property>
                     <expression name="expression">params["UserRole"]</expression>
+                </structure>
+                <structure>
+                    <property name="paramName">StartDate</property>
+                    <expression name="expression">params["Start Date"]</expression>
+                </structure>
+                <structure>
+                    <property name="paramName">EndDate</property>
+                    <expression name="expression">params["End Date"]</expression>
                 </structure>
             </list-property>
             <column id="30">
@@ -1115,20 +1128,6 @@ yearnr + "-" + monthnr + "-" + daynr;</expression>
                                 <property name="height">600px</property>
                                 <property name="width">800px</property>
                                 <property name="refTemplateParameter">NewTemplateParameterDefinition</property>
-                                <list-property name="paramBindings">
-                                    <structure>
-                                        <property name="paramName">UserName</property>
-                                        <expression name="expression">params["UserName"]</expression>
-                                    </structure>
-                                    <structure>
-                                        <property name="paramName">UserRole</property>
-                                        <expression name="expression">params["UserRole"]</expression>
-                                    </structure>
-                                    <structure>
-                                        <property name="paramName">GroupByFormat</property>
-                                        <expression name="expression">params["GroupByFormat"]</expression>
-                                    </structure>
-                                </list-property>
                                 <xml-property name="xmlRepresentation"><![CDATA[<model:ChartWithAxes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:attribute="http://www.birt.eclipse.org/ChartModelAttribute" xmlns:data="http://www.birt.eclipse.org/ChartModelData" xmlns:layout="http://www.birt.eclipse.org/ChartModelLayout" xmlns:model="http://www.birt.eclipse.org/ChartModel" xmlns:type="http://www.birt.eclipse.org/ChartModelType">
   <Type>Bar Chart</Type>
   <SubType>Stacked</SubType>
@@ -1170,7 +1169,7 @@ yearnr + "-" + monthnr + "-" + daynr;</expression>
       <Visible>true</Visible>
       <Label>
         <Caption>
-          <Value>Usage by VO </Value>
+          <Value>Usage by Site </Value>
           <Font>
             <Size>14.0</Size>
             <Bold>true</Bold>
@@ -1412,204 +1411,461 @@ yearnr + "-" + monthnr + "-" + daynr;</expression>
   </Block>
   <Dimension>Two_Dimensional</Dimension>
   <Script>/**
+
  * The chart script methods provide control on the chart databinding, generation and rendering.
+
  *
+
  * The methods have been commented in the following code, please uncomment and implement the
+
  * ones you need. Note that for simplicity the &quot;after&quot; methods have not be included here.
+
  *
+
  * This script syntax follows JavaScript specifications, the Java classes that are referred to
+
  * in the comments can be accessed as JavaScript classes. 
+
  *
+
  * Script examples are available in the org.eclipse.birt.chart.examples plugin
+
  */
+
+
+
 
 
 /**
+
  * Called before populating the series dataset using the DataSetProcessor.
+
  * 
+
  * @param series
+
  *            Series
+
  * @param dataSetProcessor
+
  *            DataSetProcessor
+
  * @param context
+
  *            IChartScriptContext
+
  */
+
 //function beforeDataSetFilled( series, dataSetProcessor, context ){}
 
-/**
- * Called before generation of chart model to GeneratedChartState.
- * 
- * @param chart
- *            Chart Model
- * @param context
- *            IChartScriptContext
- */
-//function beforeGeneration( chart, context ){}
+
 
 /**
- * Called before the chart is rendered.
+
+ * Called before generation of chart model to GeneratedChartState.
+
  * 
- * @param gcs
- *            GeneratedChartState
+
+ * @param chart
+
+ *            Chart Model
+
  * @param context
+
  *            IChartScriptContext
+
  */
- function beforeGeneration( chart, context )
-{	rep = context.getExternalContext().getScriptable();
+
+function beforeGeneration( chart, context ){
+
+	rep = context.getExternalContext().getScriptable();
+
+	val = rep.getParameterValue(&quot;TimeAxisPattern&quot;);
+
 	subtitle =rep.getParameterValue(&quot;Subtitle&quot;);
-	chart.getTitle().getLabel().getCaption().setValue (&quot;Usage by VO&quot; +  &quot;\n&quot; + subtitle);
+
+	chart.getTitle().getLabel().getCaption().setValue('Usage By Site'+ &quot;\n&quot; + subtitle);
+
+
+
+	if(val != null) {
+
+                fos = new java.io.FileOutputStream(&quot;/tmp/glr.txt&quot;, true); 
+
+                printWriter = new java.io.PrintWriter(fos); 
+
+
+
+                axes = chart.getAxes().get(0);
+
+                formatSpec = axes.getFormatSpecifier();
+
+                formatSpec.setPattern(val);
+
+                printWriter.println(&quot;4.&quot;+val+&quot; &quot;+axes.getFormatSpecifier());
+
+                printWriter.close();
+
+        }       
 
 }
+
+
+
+/**
+
+ * Called before the chart is rendered.
+
+ * 
+
+ * @param gcs
+
+ *            GeneratedChartState
+
+ * @param context
+
+ *            IChartScriptContext
+
+ */
 
 //function beforeRendering( gcs, context ){}
 
+
+
 /**
+
  * Called before drawing each block.
+
  * 
+
  * @param block
+
  *            Block
+
  * @param context
+
  *            IChartScriptContext
+
  */
+
 //function beforeDrawBlock( block, context ){}
 
+
+
 /**
+
  * Called before drawing each entry the legend.
+
  * 
+
  * @param label
+
  *            Label
+
  * @param context
+
  *            IChartScriptContext
+
  */
+
 //function beforeDrawLegendEntry( label, context ){}
 
+
+
 /**
+
  * Called before rendering Series.
+
  * 
+
  * @param series
+
  *            Series
+
  * @param seriesRenderer
+
  *            ISeriesRenderer
+
  * @param context
+
  *            IChartScriptContext
+
  */
+
 //function beforeDrawSeries( series, seriesRenderer, context ){}
 
+
+
 /**
+
  * Called before rendering the title of a Series.
+
  * 
+
  * @param series
+
  *            Series
+
  * @param label
+
  *            Label
+
  * @param context
+
  *            IChartScriptContext
+
  */
+
 //function beforeDrawSeriesTitle( series, label, context ){}
 
+
+
 /**
+
  * Called before drawing each marker line in an Axis.
+
  * 
+
  * @param axis
+
  *            Axis
+
  * @param markerLine
+
  *            MarkerLine
+
  * @param context
+
  *            IChartScriptContext
+
  */
+
 //function beforeDrawMarkerLine( axis, markerLine, context ){}
 
+
+
 /**
+
  * Called before drawing each marker range in an Axis.
+
  * 
+
  * @param axis
+
  *            Axis
+
  * @param markerRange
+
  *            MarkerRange
+
  * @param context
+
  *            IChartScriptContext
+
  */
+
 //function beforeDrawMarkerRange( axis, markerRange, context ){}
 
+
+
 /**
+
  * Called before drawing each datapoint graphical representation or marker.
+
  * 
+
  * @param dph
+
  *            DataPointHints
+
  * @param fill
+
  *            Fill
+
  * @param context
+
  *            IChartScriptContext
+
  */
+
 //function beforeDrawDataPoint( dph, fill, context ){}
 
+
+
 /**
+
  * Called before rendering the label for each datapoint.
+
  * 
+
  * @param dph
+
  *            DataPointHints
+
  * @param label
+
  *            Label
+
  * @param context
+
  *            IChartScriptContext
+
  */
+
 //function beforeDrawDataPointLabel( dph, label, context ){}
 
+
+
 /**
+
  * Called before rendering curve fitting.
+
  * 
+
  * @param cf
+
  *            CurveFitting
+
  * @param context
+
  *            IChartScriptContext
+
  */
+
 //function beforeDrawFittingCurve( cf, context ){}
 
-/**
- * Called before rendering each label on a given Axis.
- * 
- * @param axis
- *            Axis
- * @param label
- *            Label
- * @param context
- *            IChartScriptContext
- */
-//function beforeDrawAxisLabel( axis, label, context ){}
+
 
 /**
- * Called before rendering the Title of an Axis.
+
+ * Called before rendering each label on a given Axis.
+
  * 
+
  * @param axis
+
  *            Axis
+
  * @param label
- *            Title Label
+
+ *            Label
+
  * @param context
+
  *            IChartScriptContext
+
  */
-function beforeDrawAxisTitle( axis, label, context )
+
+function beforeDrawAxisLabel( axis, label, context )
+
 {
+
+      
+
+fos = new java.io.FileOutputStream(&quot;/tmp/glr.txt&quot;, true); 
+
+printWriter = new java.io.PrintWriter(fos); 
+
+
+
 	rep = context.getExternalContext().getScriptable();
-	val1 =rep.getParameterValue(&quot;Display Metric&quot;);
-	if(!axis.isCategoryAxis())
-	{
-		if(val1==&quot;process&quot;)
-		{
-		label.getCaption().setValue(&quot;Process Hours&quot;);
-		}
-		else if(val1==&quot;wallclock&quot;)
-		{
-		label.getCaption().setValue(&quot;Wallclock Hours&quot;);
-		}
-		else if(val1==&quot;jobcount&quot;)
-		{
-		label.getCaption().setValue(&quot;Job Count&quot;);
-		}
-		else {
-		label.getCaption().setValue(&quot;***undefined metric&quot;);
-		}
-	}
+
+	val = rep.getParameterValue(&quot;HighlightDate&quot;);
+
+
+
+printWriter.println(&quot;3.Hightlight: &quot;+val);
+
+printWriter.println(&quot;3.label:      &quot;+label.getCaption().getValue());
+
+printWriter.flush();
+
+printWriter.close();
+
+	if(val == null)
+
+		val = &quot;&quot;;
+
+
+
+	if(val.equals(label.getCaption().getValue()))
+
+		label.getOutline().setVisible(true);
+
+	else
+
+		label.getOutline().setVisible(false);
+
 }
+
+
+
+/**
+
+ * Called before rendering the Title of an Axis.
+
+ * 
+
+ * @param axis
+
+ *            Axis
+
+ * @param label
+
+ *            Title Label
+
+ * @param context
+
+ *            IChartScriptContext
+
+ */
+
+function beforeDrawAxisTitle( axis, label, context )
+
+{
+
+	rep = context.getExternalContext().getScriptable();
+
+	val1 =rep.getParameterValue(&quot;Display Metric&quot;);
+
+	if(!axis.isCategoryAxis())
+
+	{
+
+		if(val1==&quot;process&quot;)
+
+		{
+
+		label.getCaption().setValue(&quot;Process Hours&quot;);
+
+		}
+
+		else if(val1==&quot;wallclock&quot;)
+
+		{
+
+		label.getCaption().setValue(&quot;Wallclock Hours&quot;);
+
+		}
+
+		else if(val1==&quot;jobcount&quot;)
+
+		{
+
+		label.getCaption().setValue(&quot;Job Count&quot;);
+
+		}
+
+		else {
+
+		label.getCaption().setValue(&quot;***undefined metric&quot;);
+
+		}
+
+	}
+
+}
+
 </Script>
   <Units>Points</Units>
   <SeriesThickness>10.0</SeriesThickness>
@@ -1712,25 +1968,7 @@ function beforeDrawAxisTitle( axis, label, context )
       <TitlePosition>Left</TitlePosition>
       <SeriesDefinitions>
         <Query>
-          <Definition>//Fix use of different casing for some VO's
-
-if(row[&quot;VOName&quot;] == &quot;LIGO&quot;) {
-
-	&quot;ligo&quot;
-
-}
-
-else if(row[&quot;VOName&quot;] == &quot;Engage&quot;){
-
-	&quot;engage&quot;
-
-}
-
-else {
-
-	 row[&quot;VOName&quot;]
-
-}</Definition>
+          <Definition>row[&quot;sitename&quot;]</Definition>
         </Query>
         <SeriesPalette>
           <Entries xsi:type="attribute:ColorDefinition">
@@ -1845,41 +2083,81 @@ else {
               <Type>URL_Redirect</Type>
               <Value xsi:type="attribute:URLValue">
                 <BaseUrl>&lt;structure name=&quot;action&quot;>
+
     &lt;property name=&quot;formatType&quot;>html&lt;/property>
+
     &lt;property name=&quot;linkType&quot;>drill-through&lt;/property>
-    &lt;property name=&quot;reportName&quot;>UsageByUserForWeek.rptdesign&lt;/property>
+
+    &lt;property name=&quot;reportName&quot;>UsageByUserForDate1.rptdesign&lt;/property>
+
     &lt;property name=&quot;targetWindow&quot;>_self&lt;/property>
+
     &lt;list-property name=&quot;paramBindings&quot;>
+
         &lt;structure>
+
             &lt;property name=&quot;paramName&quot;>DatabaseURL&lt;/property>
+
             &lt;expression name=&quot;expression&quot;>params[&quot;DatabaseURL&quot;]&lt;/expression>
+
         &lt;/structure>
+
         &lt;structure>
+
             &lt;property name=&quot;paramName&quot;>DatabaseUser&lt;/property>
-            &lt;expression name=&quot;expression&quot;>params[&quot;DatabaseUser&quot;]&lt;/expression>
+
+            &lt;expression name=&quot;expression&quot;>params[&quot;UserName&quot;]&lt;/expression>
+
         &lt;/structure>
+
         &lt;structure>
+
             &lt;property name=&quot;paramName&quot;>DatabasePassword&lt;/property>
+
             &lt;expression name=&quot;expression&quot;>params[&quot;DatabasePassword&quot;]&lt;/expression>
+
         &lt;/structure>
+
         &lt;structure>
-            &lt;property name=&quot;paramName&quot;>Display Metric&lt;/property>
-            &lt;expression name=&quot;expression&quot;>params[&quot;Display Metric&quot;]&lt;/expression>
-        &lt;/structure>
-        &lt;structure>
-            &lt;property name=&quot;paramName&quot;>ForSite&lt;/property>
-            &lt;expression name=&quot;expression&quot;>'AnySite'&lt;/expression>
-        &lt;/structure>
-        &lt;structure>
+
             &lt;property name=&quot;paramName&quot;>ForVO&lt;/property>
-            &lt;expression name=&quot;expression&quot;>'ForVO'&lt;/expression>
+
+            &lt;expression name=&quot;expression&quot;>'AnyVO'&lt;/expression>
+
         &lt;/structure>
+
+        &lt;structure>
+
+            &lt;property name=&quot;paramName&quot;>ForVOName&lt;/property>
+
+            &lt;expression name=&quot;expression&quot;>'xxx'&lt;/expression>
+
+        &lt;/structure>
+
+        &lt;structure>
+
+            &lt;property name=&quot;paramName&quot;>ForSite&lt;/property>
+
+            &lt;expression name=&quot;expression&quot;>'ForSite'&lt;/expression>
+
+        &lt;/structure>
+
+        &lt;structure>
+
+            &lt;property name=&quot;paramName&quot;>Display Metric&lt;/property>
+
+            &lt;expression name=&quot;expression&quot;>params[&quot;Display Metric&quot;]&lt;/expression>
+
+        &lt;/structure>
+
     &lt;/list-property>
+
 &lt;/structure>
+
 </BaseUrl>
-                <BaseParameterName>ForWeek</BaseParameterName>
+                <BaseParameterName>Start Date</BaseParameterName>
                 <ValueParameterName></ValueParameterName>
-                <SeriesParameterName>ForVOName</SeriesParameterName>
+                <SeriesParameterName>ForSiteName</SeriesParameterName>
               </Value>
             </Action>
           </Triggers>
@@ -2169,6 +2447,9 @@ else {
       </Insets>
       <Visible>true</Visible>
     </Label>
+    <FormatSpecifier xsi:type="attribute:JavaDateFormatSpecifier">
+      <Pattern>MM/dd/yyyy</Pattern>
+    </FormatSpecifier>
     <LabelPosition>Below</LabelPosition>
     <MajorGrid>
       <LineAttributes>

@@ -238,7 +238,7 @@
         </oda-data-source>
     </data-sources>
     <data-sets>
-        <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="UsageBy" id="85">
+        <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="UsageByxxx" id="85">
             <property name="dataSource">fermigrid1</property>
             <list-property name="parameters">
                 <structure>
@@ -289,7 +289,7 @@
 where VOProbeSummary.ResourceType = 'Batch'
 and Probe.siteid = Site.siteid 
 and VOProbeSummary.ProbeName = Probe.probename
-and date_format(VOProbeSummary.EndTime, '%Y-%m-%d') = date_format(?, '%Y-%m-%d') 
+and VOProbeSummary.EndTime = Date(?)
 and (VOProbeSummary.VOName = ? or (? = 'AnyVO' and VOProbeSummary.VOName like '%'))
 and (Site.SiteName = ? or (? = 'AnySite' and Site.SiteName like '%'))
 group by VOProbeSummary.CommonName,sitename,VOProbeSummary.VOName
@@ -312,7 +312,7 @@ order by VOProbeSummary.CommonName,sitename,VOProbeSummary.VOName</property>
             <property name="style">san-style1</property>
             <property name="height">600px</property>
             <property name="width">640px</property>
-            <property name="dataSet">UsageBy</property>
+            <property name="dataSet">UsageByxxx</property>
             <list-property name="paramBindings">
                 <structure>
                     <property name="paramName">StartDate</property>
@@ -542,7 +542,7 @@ order by VOProbeSummary.CommonName,sitename,VOProbeSummary.VOName</property>
       <ItemType>Series</ItemType>
       <Title>
         <Caption>
-          <Value>Sites</Value>
+          <Value>Sites or VO's</Value>
           <Font>
             <Alignment/>
           </Font>
@@ -930,7 +930,15 @@ function beforeDrawAxisTitle( axis, label, context )
       <TitlePosition>Left</TitlePosition>
       <SeriesDefinitions>
         <Query>
-          <Definition>row[&quot;sitename&quot;]</Definition>
+          <Definition>if (params[&quot;ForSite&quot;] == &quot;AnySite&quot;) {
+row[&quot;sitename&quot;]
+}
+else if (params[&quot;ForVO&quot;] == &quot;AnyVO&quot;){
+row[&quot;voname&quot;]
+}
+else{
+&quot;&quot;
+}</Definition>
         </Query>
         <SeriesPalette>
           <Entries xsi:type="attribute:ColorDefinition">
@@ -1054,90 +1062,6 @@ else {
           </DataPoint>
           <LabelPosition>Inside</LabelPosition>
           <Stacked>true</Stacked>
-          <Triggers>
-            <Condition>onclick</Condition>
-            <Action>
-              <Type>URL_Redirect</Type>
-              <Value xsi:type="attribute:URLValue">
-                <BaseUrl>&lt;structure name=&quot;action&quot;>
-
-    &lt;property name=&quot;formatType&quot;>html&lt;/property>
-
-    &lt;property name=&quot;linkType&quot;>drill-through&lt;/property>
-
-    &lt;property name=&quot;reportName&quot;>UsageByUserForDate1.rptdesign&lt;/property>
-
-    &lt;property name=&quot;targetWindow&quot;>_blank&lt;/property>
-
-    &lt;list-property name=&quot;paramBindings&quot;>
-
-        &lt;structure>
-
-            &lt;property name=&quot;paramName&quot;>DatabaseURL&lt;/property>
-
-            &lt;expression name=&quot;expression&quot;>params[&quot;DatabaseURL&quot;]&lt;/expression>
-
-        &lt;/structure>
-
-        &lt;structure>
-
-            &lt;property name=&quot;paramName&quot;>DatabaseUser&lt;/property>
-
-            &lt;expression name=&quot;expression&quot;>params[&quot;DatabaseUser&quot;]&lt;/expression>
-
-        &lt;/structure>
-
-        &lt;structure>
-
-            &lt;property name=&quot;paramName&quot;>DatabasePassword&lt;/property>
-
-            &lt;expression name=&quot;expression&quot;>params[&quot;DatabasePassword&quot;]&lt;/expression>
-
-        &lt;/structure>
-
-        &lt;structure>
-
-            &lt;property name=&quot;paramName&quot;>ForVO&lt;/property>
-
-            &lt;expression name=&quot;expression&quot;>'ForVO'&lt;/expression>
-
-        &lt;/structure>
-
-        &lt;structure>
-
-            &lt;property name=&quot;paramName&quot;>ForSite&lt;/property>
-
-            &lt;expression name=&quot;expression&quot;>'AnySite'&lt;/expression>
-
-        &lt;/structure>
-
-        &lt;structure>
-
-            &lt;property name=&quot;paramName&quot;>Start Date&lt;/property>
-
-            &lt;expression name=&quot;expression&quot;>params[&quot;Start Date&quot;]&lt;/expression>
-
-        &lt;/structure>
-
-        &lt;structure>
-
-            &lt;property name=&quot;paramName&quot;>Display Metric&lt;/property>
-
-            &lt;expression name=&quot;expression&quot;>params[&quot;Display Metric&quot;]&lt;/expression>
-
-        &lt;/structure>
-
-    &lt;/list-property>
-
-&lt;/structure>
-
-</BaseUrl>
-                <BaseParameterName>Start Date</BaseParameterName>
-                <ValueParameterName></ValueParameterName>
-                <SeriesParameterName>VOName</SeriesParameterName>
-              </Value>
-            </Action>
-          </Triggers>
           <Riser>Rectangle</Riser>
         </Series>
         <Grouping>

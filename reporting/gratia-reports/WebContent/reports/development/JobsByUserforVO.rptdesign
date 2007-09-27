@@ -26,10 +26,6 @@
     </list-property>
     <list-property name="configVars">
         <structure>
-            <property name="name">DatabaseURL</property>
-            <property name="value">jdbc:mysql://gratia-db01.fnal.gov:3320/gratia_osg_daily</property>
-        </structure>
-        <structure>
             <property name="name">DatabaseUser</property>
             <property name="value">gratia</property>
         </structure>
@@ -39,15 +35,11 @@
         </structure>
         <structure>
             <property name="name">Start Date</property>
-            <property name="value">2007-08-15</property>
+            <property name="value">3/1/2006</property>
         </structure>
         <structure>
             <property name="name">End Date</property>
-            <property name="value">2007-08-16</property>
-        </structure>
-        <structure>
-            <property name="name">CPUMetric</property>
-            <property name="value">wallclock</property>
+            <property name="value">12/31/2999</property>
         </structure>
     </list-property>
     <parameters>
@@ -60,7 +52,7 @@
                     <property name="allowBlank">false</property>
                     <property name="format">Unformatted</property>
                     <property name="controlType">text-box</property>
-                    <property name="defaultValue">jdbc:mysql://gratia-db01.fnal.gov:3320/gratia_osg_daily</property>
+                    <property name="defaultValue">jdbc:mysql://cd-psg6.fnal.gov:3320/gratia</property>
                 </scalar-parameter>
                 <scalar-parameter name="DatabaseUser" id="83">
                     <property name="hidden">true</property>
@@ -90,7 +82,7 @@
             <property name="allowBlank">false</property>
             <property name="format">Unformatted</property>
             <property name="controlType">text-box</property>
-            <property name="defaultValue">2007-01-01</property>
+            <property name="defaultValue">3/1/2006</property>
         </scalar-parameter>
         <scalar-parameter name="End Date" id="87">
             <text-property name="helpText">Only jobs that finished before this date will be included</text-property>
@@ -100,43 +92,32 @@
             <property name="allowBlank">false</property>
             <property name="format">Unformatted</property>
             <property name="controlType">text-box</property>
-            <property name="defaultValue">2007-01-31</property>
+            <property name="defaultValue">12/31/2999</property>
         </scalar-parameter>
-        <scalar-parameter name="CPUMetric" id="101">
-            <property name="hidden">false</property>
-            <text-property name="helpText">Job duration (wallclock) or process time</text-property>
-            <property name="valueType">dynamic</property>
+        <scalar-parameter name="VOName" id="98">
+            <property name="valueType">static</property>
             <property name="dataType">string</property>
-            <property name="promptText">Enter process or wallclock</property>
-            <property name="allowBlank">true</property>
-            <property name="allowNull">false</property>
             <property name="format">Unformatted</property>
-            <property name="controlType">list-box</property>
-            <property name="dataSetName">CPUMetricTypes</property>
-            <expression name="valueExpr">row["CPUMetricType"]</expression>
-            <expression name="labelExpr">row["CPUMetricType"]</expression>
-            <property name="mustMatch">false</property>
-            <property name="fixedOrder">true</property>
-            <property name="defaultValue">wallclock</property>
+            <property name="controlType">text-box</property>
         </scalar-parameter>
     </parameters>
     <data-sources>
         <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="fermigrid1" id="4">
             <property name="odaDriverClass">com.mysql.jdbc.Driver</property>
-            <property name="odaURL">jdbc:mysql://gratia-db01.fnal.gov:3320/gratia_osg_daily</property>
+            <property name="odaURL">jdbc:mysql://cd-psg6.fnal.gov:3320/gratia</property>
             <property name="odaUser">gratia</property>
             <encrypted-property name="odaPassword">cHJvdG8=</encrypted-property>
         </oda-data-source>
     </data-sources>
     <data-sets>
-        <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="UsageBy" id="85">
+        <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="JobsCountByWhere" id="85">
             <property name="dataSource">fermigrid1</property>
             <list-property name="parameters">
                 <structure>
                     <property name="name">StartDate</property>
                     <property name="dataType">string</property>
                     <property name="position">1</property>
-                    <expression name="defaultValue">'2007-01-01'</expression>
+                    <expression name="defaultValue">'3/1/2006'</expression>
                     <property name="isOptional">false</property>
                     <property name="allowNull">true</property>
                     <property name="isInput">true</property>
@@ -146,30 +127,32 @@
                     <property name="name">EndDate</property>
                     <property name="dataType">string</property>
                     <property name="position">2</property>
-                    <expression name="defaultValue">'2007-02-01'</expression>
+                    <expression name="defaultValue">'12/31/2999'</expression>
                     <property name="isOptional">false</property>
                     <property name="allowNull">true</property>
                     <property name="isInput">true</property>
                     <property name="isOutput">false</property>
                 </structure>
+                <structure>
+                    <property name="name">VOName</property>
+                    <property name="dataType">string</property>
+                    <property name="position">3</property>
+                    <expression name="defaultValue">""</expression>
+                    <property name="isInput">true</property>
+                </structure>
             </list-property>
             <property name="queryText">
-select ReportedSiteName as SiteName,
-	sum(WallDuration),
-	sum(CpuUserDuration+CpuSystemDuration)
+select CommonName as UserName, sum(Njobs)
 from JobUsageRecord_Report
-where (? &lt;= EndTime and EndTime &lt;= ?)
-group by ReportedSiteName
-order by ReportedSiteName</property>
-        </oda-data-set>
-        <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="CPUMetricTypes" id="102">
-            <property name="dataSource">fermigrid1</property>
-            <property name="queryText">select CPUMetricTypes.CPUMetricType
-from CPUMetricTypes</property>
+where ResourceType = 'Batch'
+and (? &lt;= EndTime and EndTime &lt;= ?)
+and VOName = ?
+group by CommonName
+order by CommonName</property>
         </oda-data-set>
     </data-sets>
     <styles>
-        <style name="sans-style1" id="95">
+        <style name="sans-style1" id="96">
             <property name="fontFamily">sans-serif</property>
         </style>
     </styles>
@@ -180,18 +163,11 @@ from CPUMetricTypes</property>
         </simple-master-page>
     </page-setup>
     <body>
-        <text-data id="94">
-            <property name="style">sans-style1</property>
-            <property name="fontSize">9pt</property>
-            <property name="textAlign">center</property>
-            <expression name="valueExpr">"Date range: "+ params["Start Date"] + " - " + params["End Date"]</expression>
-            <property name="contentType">html</property>
-        </text-data>
         <extended-item extensionName="Chart" id="88">
             <property name="style">sans-style1</property>
-            <property name="height">1600px</property>
+            <property name="height">480px</property>
             <property name="width">640px</property>
-            <property name="dataSet">UsageBy</property>
+            <property name="dataSet">JobsCountByWhere</property>
             <list-property name="paramBindings">
                 <structure>
                     <property name="paramName">StartDate</property>
@@ -200,6 +176,10 @@ from CPUMetricTypes</property>
                 <structure>
                     <property name="paramName">EndDate</property>
                     <expression name="expression">params["End Date"]</expression>
+                </structure>
+                <structure>
+                    <property name="paramName">VOName</property>
+                    <expression name="expression">params["VOName"]</expression>
                 </structure>
             </list-property>
             <xml-property name="xmlRepresentation"><![CDATA[<model:ChartWithAxes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:attribute="http://www.birt.eclipse.org/ChartModelAttribute" xmlns:data="http://www.birt.eclipse.org/ChartModelData" xmlns:layout="http://www.birt.eclipse.org/ChartModelLayout" xmlns:model="http://www.birt.eclipse.org/ChartModel" xmlns:type="http://www.birt.eclipse.org/ChartModelType">
@@ -243,7 +223,7 @@ from CPUMetricTypes</property>
       <Visible>true</Visible>
       <Label>
         <Caption>
-          <Value>CPU Usage by Site</Value>
+          <Value>Job Count by User</Value>
           <Font>
             <Size>12.0</Size>
             <Bold>true</Bold>
@@ -445,7 +425,7 @@ from CPUMetricTypes</property>
       <Left>0.0</Left>
       <Top>0.0</Top>
       <Width>480.0</Width>
-      <Height>1200.0</Height>
+      <Height>360.0</Height>
     </Bounds>
     <Insets>
       <Top>3.0</Top>
@@ -477,183 +457,6 @@ from CPUMetricTypes</property>
     <Visible>true</Visible>
   </Block>
   <Dimension>Two_Dimensional</Dimension>
-  <Script>/**
- * The chart script methods provide control on the chart databinding, generation and rendering.
- *
- * The methods have been commented in the following code, please uncomment and implement the
- * ones you need. Note that for simplicity the &quot;after&quot; methods have not be included here.
- *
- * This script syntax follows JavaScript specifications, the Java classes that are referred to
- * in the comments can be accessed as JavaScript classes. 
- *
- * Script examples are available in the org.eclipse.birt.chart.examples plugin
- */
-
-
-/**
- * Called before populating the series dataset using the DataSetProcessor.
- * 
- * @param series
- *            Series
- * @param dataSetProcessor
- *            DataSetProcessor
- * @param context
- *            IChartScriptContext
- */
-//function beforeDataSetFilled( series, dataSetProcessor, context ){}
-
-/**
- * Called before generation of chart model to GeneratedChartState.
- * 
- * @param chart
- *            Chart Model
- * @param context
- *            IChartScriptContext
- */
-function beforeGeneration( chart, context ){
-	rep = context.getExternalContext().getScriptable();
-	val1 =rep.getParameterValue(&quot;CPUMetric&quot;);
-	chart.getTitle().getLabel().getCaption().setValue('CPU Usage by Site ('+ val1 + ' hours)');
-}	
-
-/**
- * Called before the chart is rendered.
- * 
- * @param gcs
- *            GeneratedChartState
- * @param context
- *            IChartScriptContext
- */
- 	
- 
-//function beforeRendering( gcs, context ){}
-
-/**
- * Called before drawing each block.
- * 
- * @param block
- *            Block
- * @param context
- *            IChartScriptContext
- */
-//function beforeDrawBlock( block, context ){}
-
-/**
- * Called before drawing each entry the legend.
- * 
- * @param label
- *            Label
- * @param context
- *            IChartScriptContext
- */
-//function beforeDrawLegendEntry( label, context ){}
-
-/**
- * Called before rendering Series.
- * 
- * @param series
- *            Series
- * @param seriesRenderer
- *            ISeriesRenderer
- * @param context
- *            IChartScriptContext
- */
-//function beforeDrawSeries( series, seriesRenderer, context ){}
-
-/**
- * Called before rendering the title of a Series.
- * 
- * @param series
- *            Series
- * @param label
- *            Label
- * @param context
- *            IChartScriptContext
- */
-//function beforeDrawSeriesTitle( series, label, context ){}
-
-/**
- * Called before drawing each marker line in an Axis.
- * 
- * @param axis
- *            Axis
- * @param markerLine
- *            MarkerLine
- * @param context
- *            IChartScriptContext
- */
-//function beforeDrawMarkerLine( axis, markerLine, context ){}
-
-/**
- * Called before drawing each marker range in an Axis.
- * 
- * @param axis
- *            Axis
- * @param markerRange
- *            MarkerRange
- * @param context
- *            IChartScriptContext
- */
-//function beforeDrawMarkerRange( axis, markerRange, context ){}
-
-/**
- * Called before drawing each datapoint graphical representation or marker.
- * 
- * @param dph
- *            DataPointHints
- * @param fill
- *            Fill
- * @param context
- *            IChartScriptContext
- */
-//function beforeDrawDataPoint( dph, fill, context ){}
-
-/**
- * Called before rendering the label for each datapoint.
- * 
- * @param dph
- *            DataPointHints
- * @param label
- *            Label
- * @param context
- *            IChartScriptContext
- */
-//function beforeDrawDataPointLabel( dph, label, context ){}
-
-/**
- * Called before rendering curve fitting.
- * 
- * @param cf
- *            CurveFitting
- * @param context
- *            IChartScriptContext
- */
-//function beforeDrawFittingCurve( cf, context ){}
-
-/**
- * Called before rendering each label on a given Axis.
- * 
- * @param axis
- *            Axis
- * @param label
- *            Label
- * @param context
- *            IChartScriptContext
- */
-//function beforeDrawAxisLabel( axis, label, context ){}
-
-/**
- * Called before rendering the Title of an Axis.
- * 
- * @param axis
- *            Axis
- * @param label
- *            Title Label
- * @param context
- *            IChartScriptContext
- */
-//function beforeDrawAxisTitle( axis, label, context ){}
-</Script>
   <Units>Points</Units>
   <SeriesThickness>10.0</SeriesThickness>
   <GridColumnCount>1</GridColumnCount>
@@ -713,22 +516,16 @@ function beforeGeneration( chart, context ){
       <Type>Linear</Type>
       <Title>
         <Caption>
-          <Value>hours</Value>
+          <Value>Y-Axis Title</Value>
           <Font>
-            <Size>10.0</Size>
-            <Bold>false</Bold>
+            <Size>14.0</Size>
+            <Bold>true</Bold>
             <Alignment>
               <horizontalAlignment>Center</horizontalAlignment>
               <verticalAlignment>Center</verticalAlignment>
             </Alignment>
-            <Rotation>-1.0</Rotation>
+            <Rotation>90.0</Rotation>
           </Font>
-          <Color>
-            <Transparency>255</Transparency>
-            <Red>0</Red>
-            <Green>0</Green>
-            <Blue>0</Blue>
-          </Color>
         </Caption>
         <Background xsi:type="attribute:ColorDefinition">
           <Transparency>0</Transparency>
@@ -815,7 +612,7 @@ function beforeGeneration( chart, context ){
             <Caption>
               <Value>&lt;undefined></Value>
               <Font>
-                <Size>7.0</Size>
+                <Size>8.0</Size>
                 <Alignment/>
               </Font>
               <Color>
@@ -845,21 +642,13 @@ function beforeGeneration( chart, context ){
             <Insets>
               <Top>0.0</Top>
               <Left>2.0</Left>
-              <Bottom>3.0</Bottom>
+              <Bottom>0.0</Bottom>
               <Right>3.0</Right>
             </Insets>
             <Visible>true</Visible>
           </Label>
           <DataDefinition>
-            <Definition>if (params[&quot;CPUMetric&quot;] == 'wallclock') {
-
-	row[&quot;sum(WallDuration)&quot;] / 3600
-
-	}else{
-
-	row[&quot;sum(CpuUserDuration+CpuSystemDuration)&quot;]/3600
-
-}</Definition>
+            <Definition>row[&quot;sum(JobUsageRecord.Njobs)&quot;]</Definition>
           </DataDefinition>
           <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
           <DataPoint>
@@ -867,15 +656,24 @@ function beforeGeneration( chart, context ){
               <Type>Orthogonal_Value</Type>
               <FormatSpecifier xsi:type="attribute:NumberFormatSpecifier">
                 <Prefix></Prefix>
-                <Suffix>k</Suffix>
-                <Multiplier>0.0010</Multiplier>
-                <FractionDigits>1</FractionDigits>
+                <Suffix></Suffix>
+                <FractionDigits>0</FractionDigits>
               </FormatSpecifier>
             </Components>
             <Separator>, </Separator>
           </DataPoint>
           <LabelPosition>Outside</LabelPosition>
           <Stacked>false</Stacked>
+          <Triggers>
+            <Condition>onmouseover</Condition>
+            <Action>
+              <Type>Show_Tooltip</Type>
+              <Value xsi:type="attribute:TooltipValue">
+                <Text></Text>
+                <Delay>200</Delay>
+              </Value>
+            </Action>
+          </Triggers>
           <Riser>Rectangle</Riser>
         </Series>
         <Grouping>
@@ -903,7 +701,6 @@ function beforeGeneration( chart, context ){
           <Font>
             <Size>9.0</Size>
             <Alignment/>
-            <Rotation>0.0</Rotation>
           </Font>
           <Color>
             <Transparency>255</Transparency>
@@ -938,9 +735,8 @@ function beforeGeneration( chart, context ){
       </Label>
       <FormatSpecifier xsi:type="attribute:NumberFormatSpecifier">
         <Prefix></Prefix>
-        <Suffix>k</Suffix>
-        <Multiplier>0.0010</Multiplier>
-        <FractionDigits>0</FractionDigits>
+        <Suffix></Suffix>
+        <FractionDigits>2</FractionDigits>
       </FormatSpecifier>
       <LabelPosition>Left</LabelPosition>
       <MajorGrid>
@@ -1094,9 +890,9 @@ function beforeGeneration( chart, context ){
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;SiteName&quot;]</Definition>
+          <Definition>row[&quot;UserName&quot;]</Definition>
         </DataDefinition>
-        <SeriesIdentifier>Usage</SeriesIdentifier>
+        <SeriesIdentifier>Job Count</SeriesIdentifier>
         <DataPoint>
           <Components>
             <Type>Orthogonal_Value</Type>
@@ -1133,7 +929,6 @@ function beforeGeneration( chart, context ){
           <Name>SansSerif</Name>
           <Size>8.0</Size>
           <Alignment/>
-          <Rotation>0.0</Rotation>
         </Font>
         <Color>
           <Transparency>255</Transparency>
@@ -1236,5 +1031,19 @@ function beforeGeneration( chart, context ){
 ]]></xml-property>
             <property name="outputFormat">SVG</property>
         </extended-item>
+        <text-data id="97">
+            <property name="style">sans-style1</property>
+            <property name="fontSize">9pt</property>
+            <property name="textAlign">center</property>
+            <expression name="valueExpr">"Date range: "+ params["Start Date"] + " - " + params["End Date"]</expression>
+            <property name="contentType">html</property>
+        </text-data>
+        <text-data id="99">
+            <property name="style">sans-style1</property>
+            <property name="fontSize">9pt</property>
+            <property name="textAlign">center</property>
+            <expression name="valueExpr">"VO:  " + params["VOName"]</expression>
+            <property name="contentType">html</property>
+        </text-data>
     </body>
 </report>

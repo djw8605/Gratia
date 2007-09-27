@@ -24,10 +24,129 @@
             <expression name="value">params["DatabasePassword"]</expression>
         </structure>
     </list-property>
+    <method name="initialize"><![CDATA[//importPackage(Packages.java.io); 
+//fos = new java.io.FileOutputStream("glr.txt", true); 
+//printWriter = new java.io.PrintWriter(fos); 
+
+//printWriter.println("Start Date Before:  " + params["Start Date"]);
+//printWriter.println("End Date Before:  " + params["End Date"]);
+//printWriter.flush();
+
+// Converts a date from mm/dd/yyyy hh:mm:ss am where any one of the time fields are missing to
+//  a java date object
+function convertStringToDate(dateToConvert, isStartDate)
+{
+	working = dateToConvert;
+	month = working.substr(0, working.indexOf("/"));
+	working = working.substr(working.indexOf("/") +1);
+	day = working.substr(0, working.indexOf("/"));
+	working = working.substr(working.indexOf("/") +1);
+	year = working.substr(0,4);
+	
+	if(isStartDate == 1)
+	{
+		hour = 0;
+		minute = 0;
+		second = 0;
+	}
+	else
+	{
+		// If it is the end date, make hours 23, minutes and seconds 59
+		hour = 23;
+		minute = 59;
+		second = 59;
+	}
+		
+	if(working.indexOf(" ") > -1)
+	{
+		working = working.substr(working.indexOf(" ") +1);
+		hour = working.substr(0, working.indexOf(":"));
+		working = working.substr(working.indexOf(":") +1);
+		if(working.indexOf(":") > -1)
+		{
+			if(working.substr(0, working.indexOf(":")) != "00")
+				minute = working.substr(0, working.indexOf(":"));
+			working = working.substr(working.indexOf(":"));
+			//second = working.substr(working.indexOf(":") +1);
+		}
+		else
+		{
+			// In the case of 'selected start date', the start date is in the format that we display, so convert accordingly
+			if(working.substr(0, working.indexOf(" ")) != "00")
+				minute = working.substr(0, working.indexOf(" "));
+			//second = 0;
+			working = working.substr(working.indexOf(" ")+1);
+			if(working=="PM")
+				hour = Number(hour) + 12;
+		}
+	}
+	
+	//printWriter.println("convertStringToDate values:  " + month + "/" + day + "/" + year + " " + hour + ":" + minute + ":" + second);
+	return new Date(year, month -1, day - 1, hour, minute, second);
+}
+
+// Converts a java date object to string format with zero padding, as required by the SQL
+function convertDateToString(dateToConvert)
+{
+	month = dateToConvert.getMonth() + 1;
+	if(month < 10)
+		month = "0" + month;
+	day = dateToConvert.getDate() + 1;
+	if(day < 10)
+		day = "0" + day;
+	year = dateToConvert.getFullYear();
+	hour = dateToConvert.getHours();	
+	if(hour < 10)
+		hour = "0" + hour;
+	minute = dateToConvert.getMinutes();
+	if(minute < 10)
+		minute = "0" + minute;
+	second = dateToConvert.getSeconds();
+	if(second < 10)
+		second = "0" + second;
+		
+	return month + "/" + day + "/" + year + " " + hour + ":" + minute + ":" + second;
+}
+
+// Convert start and end date to 'real' date/time values regardless of how they were passed in
+startDate = convertStringToDate(params["Start Date"], 1);
+endDate = convertStringToDate(params["End Date"], 0);
+
+// If start date is after end date, then swap the two
+if(startDate > endDate)
+{
+	origStartDate = startDate;
+	startDate = endDate;
+	endDate = origStartDate;
+}
+
+// Put leading zeroes in the dates and set them back into the parameters (which will be used in the sql query)
+params["Start Date"] = convertDateToString(startDate);
+params["End Date"] = convertDateToString(endDate);
+
+// If there is less than 2 days between start and end date, group by minutes.  Less than 6, group by hours
+if(DateTimeSpan.days(startDate, endDate) < 2)	
+{
+	params["GroupByFormat"] = "%m/%d/%Y %h:%i %p";
+}
+else if(DateTimeSpan.days(startDate, endDate) < 6)	
+{
+	params["GroupByFormat"] = "%m/%d/%Y %h:00 %p";
+}
+else
+{
+	params["GroupByFormat"] = '%m/%d/%Y';
+}
+
+//printWriter.println("Start Date After:  " + params["Start Date"]);
+//printWriter.println("End Date After:  " + params["End Date"]);
+//printWriter.flush();
+
+//printWriter.close();]]></method>
     <list-property name="configVars">
         <structure>
             <property name="name">DatabaseURL</property>
-            <property name="value">jdbc:mysql://gratia-db01.fnal.gov:3320/gratia_osg_daily</property>
+            <property name="value">jdbc:mysql://cd-psg3.fnal.gov:3320/gratia</property>
         </structure>
         <structure>
             <property name="name">DatabaseUser</property>
@@ -39,15 +158,18 @@
         </structure>
         <structure>
             <property name="name">Start Date</property>
-            <property name="value">2007-08-15</property>
+            <property name="value">2006-08-01</property>
         </structure>
         <structure>
             <property name="name">End Date</property>
-            <property name="value">2007-08-16</property>
+            <property name="value">2006-08-14</property>
         </structure>
         <structure>
-            <property name="name">CPUMetric</property>
-            <property name="value">wallclock</property>
+            <property name="name">SelectedStartDate</property>
+        </structure>
+        <structure>
+            <property name="name">GroupByFormat</property>
+            <property name="value">%c/%d/%Y</property>
         </structure>
     </list-property>
     <parameters>
@@ -60,7 +182,7 @@
                     <property name="allowBlank">false</property>
                     <property name="format">Unformatted</property>
                     <property name="controlType">text-box</property>
-                    <property name="defaultValue">jdbc:mysql://gratia-db01.fnal.gov:3320/gratia_osg_daily</property>
+                    <property name="defaultValue">jdbc:mysql://cd-psg3.fnal.gov:3320/gratia</property>
                 </scalar-parameter>
                 <scalar-parameter name="DatabaseUser" id="83">
                     <property name="hidden">true</property>
@@ -90,7 +212,7 @@
             <property name="allowBlank">false</property>
             <property name="format">Unformatted</property>
             <property name="controlType">text-box</property>
-            <property name="defaultValue">2007-01-01</property>
+            <property name="defaultValue">1/1/1990</property>
         </scalar-parameter>
         <scalar-parameter name="End Date" id="87">
             <text-property name="helpText">Only jobs that finished before this date will be included</text-property>
@@ -100,43 +222,52 @@
             <property name="allowBlank">false</property>
             <property name="format">Unformatted</property>
             <property name="controlType">text-box</property>
-            <property name="defaultValue">2007-01-31</property>
+            <property name="defaultValue">12/31/2999</property>
         </scalar-parameter>
-        <scalar-parameter name="CPUMetric" id="101">
-            <property name="hidden">false</property>
-            <text-property name="helpText">Job duration (wallclock) or process time</text-property>
-            <property name="valueType">dynamic</property>
+        <scalar-parameter name="SelectedStartDate" id="91">
+            <property name="hidden">true</property>
+            <property name="valueType">static</property>
             <property name="dataType">string</property>
-            <property name="promptText">Enter process or wallclock</property>
-            <property name="allowBlank">true</property>
-            <property name="allowNull">false</property>
+            <property name="allowNull">true</property>
             <property name="format">Unformatted</property>
-            <property name="controlType">list-box</property>
-            <property name="dataSetName">CPUMetricTypes</property>
-            <expression name="valueExpr">row["CPUMetricType"]</expression>
-            <expression name="labelExpr">row["CPUMetricType"]</expression>
-            <property name="mustMatch">false</property>
-            <property name="fixedOrder">true</property>
-            <property name="defaultValue">wallclock</property>
+            <property name="controlType">text-box</property>
+        </scalar-parameter>
+        <scalar-parameter name="GroupByFormat" id="94">
+            <property name="hidden">true</property>
+            <property name="valueType">static</property>
+            <property name="dataType">string</property>
+            <property name="concealValue">true</property>
+            <property name="allowBlank">true</property>
+            <property name="allowNull">true</property>
+            <property name="format">Unformatted</property>
+            <property name="controlType">text-box</property>
+            <property name="defaultValue">%c/%d/%Y</property>
         </scalar-parameter>
     </parameters>
     <data-sources>
         <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="fermigrid1" id="4">
             <property name="odaDriverClass">com.mysql.jdbc.Driver</property>
-            <property name="odaURL">jdbc:mysql://gratia-db01.fnal.gov:3320/gratia_osg_daily</property>
+            <property name="odaURL">jdbc:mysql://cd-psg3.fnal.gov:3320/gratia</property>
             <property name="odaUser">gratia</property>
             <encrypted-property name="odaPassword">cHJvdG8=</encrypted-property>
         </oda-data-source>
     </data-sources>
     <data-sets>
-        <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="UsageBy" id="85">
+        <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="JobCountByCETable" id="85">
             <property name="dataSource">fermigrid1</property>
             <list-property name="parameters">
                 <structure>
-                    <property name="name">StartDate</property>
+                    <property name="name">GroupByFormat1</property>
                     <property name="dataType">string</property>
                     <property name="position">1</property>
-                    <expression name="defaultValue">'2007-01-01'</expression>
+                    <expression name="defaultValue">'%m/%d/%Y'</expression>
+                    <property name="isInput">true</property>
+                </structure>
+                <structure>
+                    <property name="name">StartDate</property>
+                    <property name="dataType">string</property>
+                    <property name="position">2</property>
+                    <expression name="defaultValue">'1/1/1990'</expression>
                     <property name="isOptional">false</property>
                     <property name="allowNull">true</property>
                     <property name="isInput">true</property>
@@ -145,27 +276,24 @@
                 <structure>
                     <property name="name">EndDate</property>
                     <property name="dataType">string</property>
-                    <property name="position">2</property>
-                    <expression name="defaultValue">'2007-02-01'</expression>
+                    <property name="position">3</property>
+                    <expression name="defaultValue">'12/31/2999'</expression>
                     <property name="isOptional">false</property>
                     <property name="allowNull">true</property>
                     <property name="isInput">true</property>
                     <property name="isOutput">false</property>
                 </structure>
+                <structure>
+                    <property name="name">GroupByFormat2</property>
+                    <property name="dataType">string</property>
+                    <property name="position">4</property>
+                    <expression name="defaultValue">'%m/%d/%Y'</expression>
+                    <property name="isInput">true</property>
+                </structure>
             </list-property>
             <property name="queryText">
-select ReportedSiteName as SiteName,
-	sum(WallDuration),
-	sum(CpuUserDuration+CpuSystemDuration)
-from JobUsageRecord_Report
-where (? &lt;= EndTime and EndTime &lt;= ?)
-group by ReportedSiteName
-order by ReportedSiteName</property>
-        </oda-data-set>
-        <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="CPUMetricTypes" id="102">
-            <property name="dataSource">fermigrid1</property>
-            <property name="queryText">select CPUMetricTypes.CPUMetricType
-from CPUMetricTypes</property>
+call DailyJobsByProbeAndDate(?,?,?,'Batch')
+</property>
         </oda-data-set>
     </data-sets>
     <styles>
@@ -180,19 +308,16 @@ from CPUMetricTypes</property>
         </simple-master-page>
     </page-setup>
     <body>
-        <text-data id="94">
+        <extended-item extensionName="Chart" id="90">
             <property name="style">sans-style1</property>
-            <property name="fontSize">9pt</property>
-            <property name="textAlign">center</property>
-            <expression name="valueExpr">"Date range: "+ params["Start Date"] + " - " + params["End Date"]</expression>
-            <property name="contentType">html</property>
-        </text-data>
-        <extended-item extensionName="Chart" id="88">
-            <property name="style">sans-style1</property>
-            <property name="height">1600px</property>
-            <property name="width">640px</property>
-            <property name="dataSet">UsageBy</property>
+            <property name="height">480px</property>
+            <property name="width">800px</property>
+            <property name="dataSet">JobCountByCETable</property>
             <list-property name="paramBindings">
+                <structure>
+                    <property name="paramName">GroupByFormat1</property>
+                    <expression name="expression">params["GroupByFormat"]</expression>
+                </structure>
                 <structure>
                     <property name="paramName">StartDate</property>
                     <expression name="expression">params["Start Date"]</expression>
@@ -201,16 +326,14 @@ from CPUMetricTypes</property>
                     <property name="paramName">EndDate</property>
                     <expression name="expression">params["End Date"]</expression>
                 </structure>
+                <structure>
+                    <property name="paramName">GroupByFormat2</property>
+                    <expression name="expression">params["GroupByFormat"]</expression>
+                </structure>
             </list-property>
             <xml-property name="xmlRepresentation"><![CDATA[<model:ChartWithAxes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:attribute="http://www.birt.eclipse.org/ChartModelAttribute" xmlns:data="http://www.birt.eclipse.org/ChartModelData" xmlns:layout="http://www.birt.eclipse.org/ChartModelLayout" xmlns:model="http://www.birt.eclipse.org/ChartModel" xmlns:type="http://www.birt.eclipse.org/ChartModelType">
-  <Type>Bar Chart</Type>
-  <SubType>Side-by-side</SubType>
-  <Description>
-    <Value></Value>
-    <Font>
-      <Alignment/>
-    </Font>
-  </Description>
+  <Type>Line Chart</Type>
+  <SubType>Overlay</SubType>
   <Block>
     <Children xsi:type="layout:TitleBlock">
       <Bounds>
@@ -243,7 +366,7 @@ from CPUMetricTypes</property>
       <Visible>true</Visible>
       <Label>
         <Caption>
-          <Value>CPU Usage by Site</Value>
+          <Value>Job Count by Probe</Value>
           <Font>
             <Size>12.0</Size>
             <Bold>true</Bold>
@@ -348,12 +471,11 @@ from CPUMetricTypes</property>
         <Width>0.0</Width>
         <Height>0.0</Height>
       </Bounds>
-      <Stretch>Horizontal</Stretch>
       <Insets>
-        <Top>1.0</Top>
-        <Left>1.0</Left>
-        <Bottom>1.0</Bottom>
-        <Right>1.0</Right>
+        <Top>3.0</Top>
+        <Left>3.0</Left>
+        <Bottom>3.0</Bottom>
+        <Right>3.0</Right>
       </Insets>
       <Row>-1</Row>
       <Column>-1</Column>
@@ -370,7 +492,7 @@ from CPUMetricTypes</property>
         </Color>
         <Visible>false</Visible>
       </Outline>
-      <Visible>false</Visible>
+      <Visible>true</Visible>
       <ClientArea>
         <Outline>
           <Style>Solid</Style>
@@ -384,16 +506,16 @@ from CPUMetricTypes</property>
           <Visible>false</Visible>
         </Outline>
         <Insets>
-          <Top>2.0</Top>
+          <Top>0.0</Top>
           <Left>2.0</Left>
-          <Bottom>2.0</Bottom>
+          <Bottom>0.0</Bottom>
           <Right>2.0</Right>
         </Insets>
       </ClientArea>
       <Text>
         <Value>&lt;undefined></Value>
         <Font>
-          <Size>8.0</Size>
+          <Size>7.0</Size>
           <Alignment/>
         </Font>
         <Color>
@@ -405,7 +527,7 @@ from CPUMetricTypes</property>
       </Text>
       <Orientation>Vertical</Orientation>
       <Direction>Top_Bottom</Direction>
-      <Position>Below</Position>
+      <Position>Right</Position>
       <ItemType>Series</ItemType>
       <Title>
         <Caption>
@@ -444,8 +566,8 @@ from CPUMetricTypes</property>
     <Bounds>
       <Left>0.0</Left>
       <Top>0.0</Top>
-      <Width>480.0</Width>
-      <Height>1200.0</Height>
+      <Width>600.0</Width>
+      <Height>360.0</Height>
     </Bounds>
     <Insets>
       <Top>3.0</Top>
@@ -510,11 +632,12 @@ from CPUMetricTypes</property>
  * @param context
  *            IChartScriptContext
  */
-function beforeGeneration( chart, context ){
-	rep = context.getExternalContext().getScriptable();
-	val1 =rep.getParameterValue(&quot;CPUMetric&quot;);
-	chart.getTitle().getLabel().getCaption().setValue('CPU Usage by Site ('+ val1 + ' hours)');
-}	
+function beforeGeneration( chart, context )
+{	rep = context.getExternalContext().getScriptable();
+	subtitle =rep.getParameterValue(&quot;Subtitle&quot;);
+	chart.getTitle().getLabel().getCaption().setValue('xxx'+ &quot;\n&quot; + subtitle);
+
+}
 
 /**
  * Called before the chart is rendered.
@@ -524,8 +647,6 @@ function beforeGeneration( chart, context ){
  * @param context
  *            IChartScriptContext
  */
- 	
- 
 //function beforeRendering( gcs, context ){}
 
 /**
@@ -640,7 +761,18 @@ function beforeGeneration( chart, context ){
  * @param context
  *            IChartScriptContext
  */
-//function beforeDrawAxisLabel( axis, label, context ){}
+function beforeDrawAxisLabel( axis, label, context )
+{
+	rep = context.getExternalContext().getScriptable();
+	val = rep.getParameterValue(&quot;SelectedStartDate&quot;);
+	if(val == null)
+		val = &quot;&quot;;
+				
+	if(val.equals(label.getCaption().getValue()))
+		label.getOutline().setVisible(true);
+	else
+		label.getOutline().setVisible(false);
+}
 
 /**
  * Called before rendering the Title of an Axis.
@@ -656,7 +788,6 @@ function beforeGeneration( chart, context ){
 </Script>
   <Units>Points</Units>
   <SeriesThickness>10.0</SeriesThickness>
-  <GridColumnCount>1</GridColumnCount>
   <SampleData>
     <BaseSampleData>
       <DataSetRepresentation>'A','B','C'</DataSetRepresentation>
@@ -667,14 +798,13 @@ function beforeGeneration( chart, context ){
     </OrthogonalSampleData>
   </SampleData>
   <Interactivity>
-    <Enable>true</Enable>
     <LegendBehavior>HighlightSerie</LegendBehavior>
   </Interactivity>
   <Axes>
     <Type>Text</Type>
     <Title>
       <Caption>
-        <Value>X-Axis Title</Value>
+        <Value>Day</Value>
         <Font>
           <Size>14.0</Size>
           <Bold>true</Bold>
@@ -713,22 +843,16 @@ function beforeGeneration( chart, context ){
       <Type>Linear</Type>
       <Title>
         <Caption>
-          <Value>hours</Value>
+          <Value>Job Count</Value>
           <Font>
-            <Size>10.0</Size>
-            <Bold>false</Bold>
+            <Size>14.0</Size>
+            <Bold>true</Bold>
             <Alignment>
               <horizontalAlignment>Center</horizontalAlignment>
               <verticalAlignment>Center</verticalAlignment>
             </Alignment>
-            <Rotation>-1.0</Rotation>
+            <Rotation>90.0</Rotation>
           </Font>
-          <Color>
-            <Transparency>255</Transparency>
-            <Red>0</Red>
-            <Green>0</Green>
-            <Blue>0</Blue>
-          </Color>
         </Caption>
         <Background xsi:type="attribute:ColorDefinition">
           <Transparency>0</Transparency>
@@ -757,7 +881,7 @@ function beforeGeneration( chart, context ){
       <TitlePosition>Left</TitlePosition>
       <SeriesDefinitions>
         <Query>
-          <Definition></Definition>
+          <Definition>row[&quot;probename&quot;]</Definition>
         </Query>
         <SeriesPalette>
           <Entries xsi:type="attribute:ColorDefinition">
@@ -809,21 +933,14 @@ function beforeGeneration( chart, context ){
             <Blue>0</Blue>
           </Entries>
         </SeriesPalette>
-        <Series xsi:type="type:BarSeries">
+        <Series xsi:type="type:LineSeries">
           <Visible>true</Visible>
           <Label>
             <Caption>
               <Value>&lt;undefined></Value>
               <Font>
-                <Size>7.0</Size>
                 <Alignment/>
               </Font>
-              <Color>
-                <Transparency>255</Transparency>
-                <Red>0</Red>
-                <Green>0</Green>
-                <Blue>0</Blue>
-              </Color>
             </Caption>
             <Background xsi:type="attribute:ColorDefinition">
               <Transparency>0</Transparency>
@@ -845,38 +962,100 @@ function beforeGeneration( chart, context ){
             <Insets>
               <Top>0.0</Top>
               <Left>2.0</Left>
-              <Bottom>3.0</Bottom>
+              <Bottom>0.0</Bottom>
               <Right>3.0</Right>
             </Insets>
-            <Visible>true</Visible>
+            <Visible>false</Visible>
           </Label>
           <DataDefinition>
-            <Definition>if (params[&quot;CPUMetric&quot;] == 'wallclock') {
-
-	row[&quot;sum(WallDuration)&quot;] / 3600
-
-	}else{
-
-	row[&quot;sum(CpuUserDuration+CpuSystemDuration)&quot;]/3600
-
-}</Definition>
+            <Definition>row[&quot;sum(ProbeSummary.Njobs)&quot;]</Definition>
           </DataDefinition>
-          <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
+          <SeriesIdentifier>Job Count</SeriesIdentifier>
           <DataPoint>
             <Components>
               <Type>Orthogonal_Value</Type>
-              <FormatSpecifier xsi:type="attribute:NumberFormatSpecifier">
-                <Prefix></Prefix>
-                <Suffix>k</Suffix>
-                <Multiplier>0.0010</Multiplier>
-                <FractionDigits>1</FractionDigits>
-              </FormatSpecifier>
             </Components>
             <Separator>, </Separator>
           </DataPoint>
-          <LabelPosition>Outside</LabelPosition>
+          <LabelPosition>Above</LabelPosition>
           <Stacked>false</Stacked>
-          <Riser>Rectangle</Riser>
+          <Triggers>
+            <Condition>onclick</Condition>
+            <Action>
+              <Type>URL_Redirect</Type>
+              <Value xsi:type="attribute:URLValue">
+                <BaseUrl>&lt;structure name=&quot;action&quot;>
+
+    &lt;property name=&quot;formatType&quot;>html&lt;/property>
+
+    &lt;property name=&quot;linkType&quot;>drill-through&lt;/property>
+
+    &lt;property name=&quot;reportName&quot;>DailyJobsByProbe.rptdesign&lt;/property>
+
+    &lt;property name=&quot;targetWindow&quot;>_self&lt;/property>
+
+    &lt;list-property name=&quot;paramBindings&quot;>
+
+        &lt;structure>
+
+            &lt;property name=&quot;paramName&quot;>DatabaseURL&lt;/property>
+
+            &lt;expression name=&quot;expression&quot;>params[&quot;DatabaseURL&quot;]&lt;/expression>
+
+        &lt;/structure>
+
+        &lt;structure>
+
+            &lt;property name=&quot;paramName&quot;>DatabaseUser&lt;/property>
+
+            &lt;expression name=&quot;expression&quot;>params[&quot;DatabaseUser&quot;]&lt;/expression>
+
+        &lt;/structure>
+
+        &lt;structure>
+
+            &lt;property name=&quot;paramName&quot;>DatabasePassword&lt;/property>
+
+            &lt;expression name=&quot;expression&quot;>params[&quot;DatabasePassword&quot;]&lt;/expression>
+
+        &lt;/structure>
+
+        &lt;structure>
+
+            &lt;property name=&quot;paramName&quot;>Start Date&lt;/property>
+
+            &lt;expression name=&quot;expression&quot;>params[&quot;SelectedStartDate&quot;]&lt;/expression>
+
+        &lt;/structure>
+
+    &lt;/list-property>
+
+&lt;/structure>
+
+</BaseUrl>
+                <BaseParameterName>End Date</BaseParameterName>
+                <ValueParameterName></ValueParameterName>
+                <SeriesParameterName></SeriesParameterName>
+              </Value>
+            </Action>
+          </Triggers>
+          <Marker>
+            <Type>Box</Type>
+            <Size>3</Size>
+            <Visible>true</Visible>
+          </Marker>
+          <LineAttributes>
+            <Style>Solid</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>true</Visible>
+          </LineAttributes>
+          <PaletteLineColor>true</PaletteLineColor>
         </Series>
         <Grouping>
           <Enabled>false</Enabled>
@@ -901,16 +1080,8 @@ function beforeGeneration( chart, context ){
         <Caption>
           <Value>&lt;undefined></Value>
           <Font>
-            <Size>9.0</Size>
             <Alignment/>
-            <Rotation>0.0</Rotation>
           </Font>
-          <Color>
-            <Transparency>255</Transparency>
-            <Red>0</Red>
-            <Green>0</Green>
-            <Blue>0</Blue>
-          </Color>
         </Caption>
         <Background xsi:type="attribute:ColorDefinition">
           <Transparency>0</Transparency>
@@ -936,12 +1107,6 @@ function beforeGeneration( chart, context ){
         </Insets>
         <Visible>true</Visible>
       </Label>
-      <FormatSpecifier xsi:type="attribute:NumberFormatSpecifier">
-        <Prefix></Prefix>
-        <Suffix>k</Suffix>
-        <Multiplier>0.0010</Multiplier>
-        <FractionDigits>0</FractionDigits>
-      </FormatSpecifier>
       <LabelPosition>Left</LabelPosition>
       <MajorGrid>
         <LineAttributes>
@@ -1094,9 +1259,9 @@ function beforeGeneration( chart, context ){
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;SiteName&quot;]</Definition>
+          <Definition>row[&quot;date_format(ProbeSummary.EndTime, ?)&quot;]</Definition>
         </DataDefinition>
-        <SeriesIdentifier>Usage</SeriesIdentifier>
+        <SeriesIdentifier>Day</SeriesIdentifier>
         <DataPoint>
           <Components>
             <Type>Orthogonal_Value</Type>
@@ -1112,7 +1277,6 @@ function beforeGeneration( chart, context ){
         <GroupType>Text</GroupType>
         <AggregateExpression>Sum</AggregateExpression>
       </Grouping>
-      <Sorting>Descending</Sorting>
     </SeriesDefinitions>
     <Orientation>Horizontal</Orientation>
     <LineAttributes>
@@ -1130,10 +1294,9 @@ function beforeGeneration( chart, context ){
       <Caption>
         <Value>&lt;undefined></Value>
         <Font>
-          <Name>SansSerif</Name>
-          <Size>8.0</Size>
+          <Size>9.0</Size>
           <Alignment/>
-          <Rotation>0.0</Rotation>
+          <Rotation>48.0</Rotation>
         </Font>
         <Color>
           <Transparency>255</Transparency>
@@ -1230,11 +1393,18 @@ function beforeGeneration( chart, context ){
     <CategoryAxis>true</CategoryAxis>
     <Percent>false</Percent>
   </Axes>
-  <Orientation>Horizontal</Orientation>
+  <Orientation>Vertical</Orientation>
   <Rotation/>
 </model:ChartWithAxes>
 ]]></xml-property>
             <property name="outputFormat">SVG</property>
         </extended-item>
+        <text-data id="96">
+            <property name="style">sans-style1</property>
+            <property name="fontSize">9pt</property>
+            <property name="textAlign">center</property>
+            <expression name="valueExpr">"Date range: "+ params["Start Date"] + " - " + params["End Date"]</expression>
+            <property name="contentType">html</property>
+        </text-data>
     </body>
 </report>
