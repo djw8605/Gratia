@@ -48,15 +48,33 @@ function addVO (form) {
                 	form.VOs.value += "'"+ form.myVOs.options[i].value + "'";
         form.VOs.value += ")";
     }
+    
 
-function getURL (form) {
-       
-       form.ReportURL.value = form.BaseURL.value;
-	
-       form.ReportURL.value += "&VOs=" + form.VOs.value; 
-       form.ReportURL.value += "&StartDate=" + form.StartDate.value;
-       form.ReportURL.value += "&EndDate=" + form.EndDate.value;
-    }
+function getURL ()
+{
+   var x=document.getElementsByTagName('form')[0]
+   var url = "";
+
+for (var i=0;i<x.length;i++)
+{
+  if (x.elements[i].name == "BaseURL" )
+     url = x.elements[i].value
+ }
+ 
+for (var i=0;i<x.length;i++)
+  {
+  name = x.elements[i].name
+  value = x.elements[i].value
+  if (name != "myVOs" && name != "submitButton" && name != "BaseURL"  && name != "gratiaURL" )
+  {
+  	url += "&" + name + "=" + value;
+  }
+  }
+  x.gratiaURL.value = url;
+  	// document.write(url);
+  	// document.write("<br />");
+  
+}    
 
 //-->
 </script>
@@ -95,20 +113,20 @@ String End = format.format(now);
 now = new Date(now.getTime() - (7 * 24 * 60 * 60 * 1000));
 String Start = format.format(now);
 
-String url = request.getRequestURL().toString();
-url=url.substring(0, url.lastIndexOf("/")) + "/frameset?__report="+report;
+String initUrl = request.getRequestURL().toString();
+initUrl=initUrl.substring(0, initUrl.lastIndexOf("/")) + "/frameset?__report="+report;
 
 // Get the reporting configuration setting
 ReportingConfiguration reportingConfiguration = (ReportingConfiguration)session.getAttribute("reportingConfiguration");
 	
 %>
 
-<!-- START: Debugging messages 
 
+<!-- START: Debugging messages 
 <hr>
 ****** DEBUGGING ***** <br>
+BASE URL = <%=initUrl %> <br>
 Report = <%= report %><br>
-BASE URL = <%=url %> <br>
 Datadase URL = <%=reportingConfiguration.getDatabaseURL() %> <br> 
 Datadase user = <%=reportingConfiguration.getDatabaseUser() %> <br> 
 Datadase password = <%=reportingConfiguration.getDatabasePassword() %> <br> 
@@ -119,10 +137,9 @@ ReportsMenuConfig = <%=reportingConfiguration.getReportsMenuConfig() %> <br>
 LogsHome = <%=reportingConfiguration.getLogsHome() %> <br>
 CsvHome = <%=reportingConfiguration.getCsvHome() %> <br>
 ConfigLoaded = <%=reportingConfiguration.getConfigLoaded() %> <br>
-Report URL Initial value = <%=url%> <br>
 <hr>
 
-END: Debugging messages -->
+ END: Debugging messages -->
 
 
 <%
@@ -135,9 +152,17 @@ String selectValue = null;
 
 <birt:parameterPage id="<%=pageID %>" name="parameterInput" reportDesign="<%= report %>" isCustom="true" title="">
 
-<table>	
-<input type=hidden name="BaseURL" Value = <%=url %>>
+<table>
+<input type=hidden id="baseURL" name="BaseURL" Value = "<%=initUrl %>">
+	<tr>
+	<td><label class=paramName>URL to retrieve<br> this report: </label></td>
+	<td> 
+		<textarea rows="3" cols="50" id="gratiaURL" name="gratiaURL" readonly> <%=initUrl %> </textarea>
+	</td>
+	</tr>
+
 <%
+
 for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 {
 	ParameterGroup paramGroup = (ParameterGroup)reportParameters.getParamGroups().get(i);
@@ -200,7 +225,7 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 		 	<tr>
 			   <td><label class=paramName><%=promptText %></label><br> <font size=-1><%=helpText%></font></td>
 			   <td>
-			   <select class=paramSelect id="<%=paramName%>" name="<%=paramName%>" >
+			   <select class=paramSelect id="<%=paramName%>" name="<%=paramName%>"  onchange="getURL()" >
 			<%
 			for(int s=0; s < paramGroup.getParameterListSelection().size(); s++)
 			{
@@ -227,7 +252,7 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 			   <td><label class=paramName><%=promptText %></label></td>
 			   <td>
 			   <input type="text" id="<%=paramName %>" name="<%=paramName %>" value="<%=defaultValue %>" >
-			   	<BUTTON name="cal1" value="cal1" type="button" class=button onclick="c1.popup('<%=paramName %>');" >
+			   	<BUTTON name="cal1" value="cal1" type="button" class=button onchange="getURL()" onclick="c1.popup('<%=paramName %>');" >
     				<IMG SRC="./calendar/img/cal.gif" ALT="test"></BUTTON>
 			   </td>
 			</tr>
@@ -239,7 +264,7 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 			<tr>
 			   <td valign="top"><label class=paramName> Select one or more VOs:</label></td>
 			   <td> 
-				<SELECT multiple size="10" id="myVOs" name="myVOs" onChange="addVO(this.form)" >
+				<SELECT multiple size="10" id="myVOs" name="myVOs" onChange="addVO(this.form); getURL();" >
 						
 	<%		
 			// define the sql string to get the list of VOs that the user can selct from
@@ -332,7 +357,7 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 			</td>
 		</tr>
 		<tr>
-		   <td> Selected VOs:</td><td><input id="VOs" type="text"  name="<%=paramName%>" Value = "<%=SelectedVOs %>" readonly size="60" ></td>
+		   <td> Selected VOs:</td><td><input id="VOs" type="text"  name="<%=paramName%>" Value = "<%=SelectedVOs %>" readonly size="60"  onchange="getURL()" ></td>
 		</tr>
 		<%
 		}			
@@ -352,11 +377,39 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 %>
 	<tr>
 	   <td colspan=3>
-		<input class=button type=submit name=submitButton value=Submit>
+		<input class=button type=submit name=submitButton value=Submit >
 	   </td>
 	</tr>
 </table>
 
+<p>
+<script type="text/javascript">
+
+// load initial url
+   var x=document.getElementsByTagName('form')[0]
+   var url = "";
+
+for (var i=0;i<x.length;i++)
+{
+  if (x.elements[i].name == "BaseURL" )
+     url = x.elements[i].value
+ }
+ 
+for (var i=0;i<x.length;i++)
+  {
+  name = x.elements[i].name
+  value = x.elements[i].value
+  if (name != "myVOs" && name != "submitButton" && name != "BaseURL"  && name != "gratiaURL" )
+  {
+  	url += "&" + name + "=" + value;
+  }
+  }
+  x.gratiaURL.value = url;
+  
+</script>
+</p>    
+
 </birt:parameterPage>
+
 </body>
 </html>
