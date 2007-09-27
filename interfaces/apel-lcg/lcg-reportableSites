@@ -54,6 +54,8 @@
 #             Replaced SLAC_PROD with PROD_SLAC. 
 #             There has been confusion over which it is and may have been
 #             done incorrectly on 9/12/2007.
+#   9/27/07 (John Weigand) - 
+#             Updated Normalization factor for AGLT2 (2100)
 #    
 ##################################################################
 #-- Site  ------- SPECint2000
@@ -72,7 +74,7 @@ UCSDT2
 UCSDT2-B
 UFlorida-PG         1602
 #--- ATLAS ----
-AGLT2
+AGLT2               2100
 BNL_ATLAS_1         1361
 BNL_ATLAS_2         1361
 BNL_PANDA      
