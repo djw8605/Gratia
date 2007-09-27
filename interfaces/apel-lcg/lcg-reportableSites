@@ -56,6 +56,7 @@
 #             done incorrectly on 9/12/2007.
 #   9/27/07 (John Weigand) - 
 #             Updated Normalization factor for AGLT2 (2100)
+#             Updated Normalization factor for PROD_SLAC (1757)
 #    
 ##################################################################
 #-- Site  ------- SPECint2000
@@ -84,7 +85,7 @@ BU_ATLAS_Tier2o
 IU_ATLAS_Tier2
 MWT2_IU
 MWT2_UC
-PROD_SLAC
+PROD_SLAC           1757
 SLACXRD
 OU_OCHEP_SWT2
 OU_OSCER_ATLAS
