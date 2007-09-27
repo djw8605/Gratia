@@ -10,7 +10,10 @@ import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 
 import net.sf.gratia.reporting.exceptions.InvalidConfigurationException;
-
+//
+// Does not Handle combo box parameters that use a query to obtain the values.
+// It handles only "scalar-parameter" both in or outside parameter groups
+//
 public class ReportParameters
 {
 	private ArrayList _paramGroups = null; 
@@ -53,7 +56,7 @@ public class ReportParameters
 					   Element pType = (Element) pIterator.next();
 					   String paramType = pType.getName().trim();
 
-			// TO DO: if this is a parameter-group, then the parameters are in deeper levels. Ignore for the time being...
+			// Need to go on level deep if parameters are grouped in sets.
 					   if (paramType == "parameter-group")
 					   {
 					      for (Iterator gIterator = pType.elementIterator(); gIterator.hasNext();)
@@ -64,15 +67,51 @@ public class ReportParameters
 					            Element ggroupType = (Element) ggIter.next();
 					            String ggType = ggroupType.getName();
 					            String ggName = ggroupType.getText();
-					            String gparamName = ggroupType.attribute("name").getValue();
-
+					            String paramName = ggroupType.attribute("name").getValue();					            
+					  
 					            if  (ggType == "scalar-parameter")
 					            {
-					              // do the rest ....
-					            }
-					         }
-					      }
-					   }
+						        	  ParameterGroup newParameterGroup = new ParameterGroup(paramName);
+
+						 		      for (Iterator sIterator = ggroupType.elementIterator(); sIterator.hasNext();)
+						 		      {
+						 				Element scalar = (Element) sIterator.next();
+						 				String propertyName = scalar.attribute("name").getValue().trim();
+						 				String propertyValue = scalar.getText().trim();
+
+										newParameterGroup.getParameterProperties().add(new ParameterProperty(propertyName, propertyValue));
+						 				if (propertyName.indexOf("selectionList") > -1 )
+						 				{
+						 		  		   for (Iterator structIter = scalar.elementIterator(); structIter.hasNext();)
+						 		  		   {
+											String value = "";
+											String label = "";
+											Element structure = (Element) structIter.next();
+											for (Iterator listIter = structure.elementIterator(); listIter.hasNext();)
+											{
+						 		  	      	   Element listElement = (Element) listIter.next();
+						 		  	      	   String listName = listElement.getName();
+						 		  	      	   String listPropertyName = listElement.attribute("name").getValue().trim();
+						 		  	      	   String listValue = listElement.getText();
+						 		  	      	   if (listPropertyName.indexOf("value") > -1)
+						 		  	      	   {
+												   value = listValue;
+										  	   }
+										  	   else if (listPropertyName.indexOf("label") > -1)
+										  	   {
+													label = listValue;
+								   		 	   }
+						 		  	    	 }
+											 newParameterGroup.getParameterListSelection().add(new ParameterListSelection(label, value));
+						 		  		   } // "for (Iterator listIter..."
+						 		  	     } // if selectionList
+						 		       } // "for (Iterator sIterator"
+
+					 				  _paramGroups.add(newParameterGroup);
+					            } // "scalar-parameter"
+					         } // "for (Iterator ggIter..."
+					      } // "for (Iterator gIterator..."
+					   } // if "parameter-group"
 
 					   String paramName = pType.attribute("name").getValue(); //PARAMETER NAME
 
@@ -122,7 +161,7 @@ public class ReportParameters
 		} // try
 		catch(DocumentException exDoc)
 		{
-			throw new InvalidConfigurationException("Unable to parse Report design file ", exDoc);
+			throw new InvalidConfigurationException("Unable to parse Report design file  ", exDoc);
 		}
 		finally
 		{
