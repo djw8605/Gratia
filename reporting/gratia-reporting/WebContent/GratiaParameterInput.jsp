@@ -65,12 +65,12 @@ for (var i=0;i<x.length;i++)
   {
   name = x.elements[i].name
   value = x.elements[i].value
-  if (name != "myVOs" && name != "submitButton" && name != "BaseURL"  && name != "gratiaURL" )
+  if (name != "myVOs" && name != "submitButton" && name != "BaseURL"  && name != "ReportURL" )
   {
   	url += "&" + name + "=" + value;
   }
   }
-  x.gratiaURL.value = url;
+  x.ReportURL.value = url;
   	// document.write(url);
   	// document.write("<br />");
   
@@ -154,12 +154,7 @@ String selectValue = null;
 
 <table>
 <input type=hidden id="baseURL" name="BaseURL" Value = "<%=initUrl %>">
-	<tr>
-	<td><label class=paramName>URL to retrieve<br> this report: </label></td>
-	<td> 
-		<textarea rows="3" cols="50" id="gratiaURL" name="gratiaURL" readonly> <%=initUrl %> </textarea>
-	</td>
-	</tr>
+<input type=hidden id="ReportURL" name="ReportURL" Value="<%=initUrl %>">
 
 <%
 
@@ -399,12 +394,12 @@ for (var i=0;i<x.length;i++)
   {
   name = x.elements[i].name
   value = x.elements[i].value
-  if (name != "myVOs" && name != "submitButton" && name != "BaseURL"  && name != "gratiaURL" )
+  if (name != "myVOs" && name != "submitButton" && name != "BaseURL" && name != "ReportURL" )
   {
   	url += "&" + name + "=" + value;
   }
   }
-  x.gratiaURL.value = url;
+  x.ReportURL.value = url;
   
 </script>
 </p>    
