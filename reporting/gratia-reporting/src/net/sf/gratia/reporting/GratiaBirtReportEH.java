@@ -66,7 +66,6 @@ public class GratiaBirtReportEH extends ReportEventAdapter {
 		inReport.setParameterValue("UserName", userName);
 		inReport.setParameterValue("UserRole", userRole);
 		inReport.setParameterValue("Subtitle", subtitle);
-		inReport.setParameterValue("TraceTableKey", userKey);
 		
 		// out.write("\tParameters are set\n");
 		// out.write("\tDatabaseURL= " + inReport.getParameterValue("DatabaseURL")+"\n");
@@ -75,7 +74,6 @@ public class GratiaBirtReportEH extends ReportEventAdapter {
 		// out.write("\tUserName= " + inReport.getParameterValue("UserName")+"\n");
 		// out.write("\tUserRole= " + inReport.getParameterValue("UserRole")+"\n");
 		// out.write("\tSubtitle= " + inReport.getParameterValue("Subtitle")+"\n");
-		// out.write("\tTraceTableKey= " + inReport.getParameterValue("TraceTableKey")+"\n");
 	        
 		// out.close();
 		
