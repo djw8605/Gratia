@@ -225,16 +225,6 @@
                 </structure>
             </list-property>
         </scalar-parameter>
-        <scalar-parameter name="TraceTableKey" id="112">
-            <property name="hidden">true</property>
-            <property name="valueType">static</property>
-            <property name="dataType">string</property>
-            <property name="controlType">text-box</property>
-            <property name="defaultValue">None</property>
-            <structure name="format">
-                <property name="category">Unformatted</property>
-            </structure>
-        </scalar-parameter>
         <scalar-parameter name="ReportURL" id="113">
             <property name="hidden">true</property>
             <property name="valueType">static</property>
@@ -1553,7 +1543,9 @@ else {&#xD;
             <property name="contentType">html</property>
         </text-data>
         <text-data id="114">
-            <expression name="valueExpr">"Retrieve report URL: "+ params["ReportURL"]</expression>
+            <property name="marginTop">0pt</property>
+            <expression name="valueExpr">"Retrieve report URL:   "
++ params["ReportURL"]</expression>
             <property name="contentType">html</property>
         </text-data>
         <label id="108">
@@ -1566,7 +1558,7 @@ else {&#xD;
             <text-property name="text">Show Query</text-property>
             <structure name="action">
                 <property name="linkType">hyperlink</property>
-                <expression name="uri">"../showQuery.jsp?TraceTableKey="+params["TraceTableKey"]</expression>
+                <expression name="uri">"../showQuery.jsp?TraceTableKey="+params["UserName"].split("|")[1]</expression>
                 <property name="targetWindow">_self</property>
             </structure>
         </label>
