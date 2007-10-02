@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Written by Eclipse BIRT 2.0 -->
-<report xmlns="http://www.eclipse.org/birt/2005/design" version="3" id="1">
+<report xmlns="http://www.eclipse.org/birt/2005/design" version="3.2.14" id="1">
     <property name="createdBy">Eclipse BIRT Designer Version 1.0.1 Build &lt;20050815-0740></property>
     <property name="units">in</property>
     <list-property name="propertyBindings">
@@ -25,10 +24,6 @@
         </structure>
     </list-property>
     <list-property name="configVars">
-        <structure>
-            <property name="name">DatabaseURL</property>
-            <property name="value">jdbc:mysql://gratia-db01.fnal.gov:3320/gratia_itb</property>
-        </structure>
         <structure>
             <property name="name">DatabaseUser</property>
             <property name="value">gratia</property>
@@ -63,8 +58,6 @@
             <text-property name="description">Double click to edit chart properties</text-property>
             <default>
                 <extended-item extensionName="Chart" id="35">
-                    <property name="height">1.51in</property>
-                    <property name="width">4.447in</property>
                     <xml-property name="xmlRepresentation"><![CDATA[<model:ChartWithAxes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:attribute="http://www.birt.eclipse.org/ChartModelAttribute" xmlns:data="http://www.birt.eclipse.org/ChartModelData" xmlns:layout="http://www.birt.eclipse.org/ChartModelLayout" xmlns:model="http://www.birt.eclipse.org/ChartModel" xmlns:type="http://www.birt.eclipse.org/ChartModelType">
   <Type>Bar Chart</Type>
   <SubType>Side-by-side</SubType>
@@ -837,8 +830,11 @@
   </Axes>
   <Orientation>Vertical</Orientation>
   <Rotation/>
-</model:ChartWithAxes>]]></xml-property>
+</model:ChartWithAxes>
+]]></xml-property>
                     <property name="outputFormat">SVG</property>
+                    <property name="height">1.51in</property>
+                    <property name="width">4.447in</property>
                 </extended-item>
             </default>
         </template-parameter-definition>
@@ -850,28 +846,37 @@
                     <property name="hidden">true</property>
                     <property name="valueType">static</property>
                     <property name="dataType">string</property>
-                    <property name="allowBlank">false</property>
-                    <property name="format">Unformatted</property>
+                    <property name="isRequired">true</property>
                     <property name="controlType">text-box</property>
-                    <property name="defaultValue">jdbc:mysql://gratia-db01.fnal.gov:3320/gratia_itb</property>
+                    <property name="defaultValue">jdbc:mysql://gratia-vm02.fnal.gov:3320/gratia_jeffmack</property>
+                    <structure name="format">
+                        <property name="category">Unformatted</property>
+                        <property name="pattern">Unformatted</property>
+                    </structure>
                 </scalar-parameter>
                 <scalar-parameter name="DatabaseUser" id="83">
                     <property name="hidden">true</property>
                     <property name="valueType">static</property>
                     <property name="dataType">string</property>
-                    <property name="allowBlank">false</property>
-                    <property name="format">Unformatted</property>
+                    <property name="isRequired">true</property>
                     <property name="controlType">text-box</property>
                     <property name="defaultValue">gratia</property>
+                    <structure name="format">
+                        <property name="category">Unformatted</property>
+                        <property name="pattern">Unformatted</property>
+                    </structure>
                 </scalar-parameter>
                 <scalar-parameter name="DatabasePassword" id="82">
                     <property name="hidden">true</property>
                     <property name="valueType">static</property>
                     <property name="dataType">string</property>
-                    <property name="allowBlank">false</property>
-                    <property name="format">Unformatted</property>
+                    <property name="isRequired">true</property>
                     <property name="controlType">text-box</property>
                     <property name="defaultValue">proto</property>
+                    <structure name="format">
+                        <property name="category">Unformatted</property>
+                        <property name="pattern">Unformatted</property>
+                    </structure>
                 </scalar-parameter>
             </parameters>
         </parameter-group>
@@ -880,14 +885,16 @@
             <text-property name="helpText">Select metric for chart</text-property>
             <property name="valueType">static</property>
             <property name="dataType">string</property>
-            <property name="promptText">Select metric for chart</property>
-            <property name="allowBlank">false</property>
-            <property name="allowNull">false</property>
-            <property name="format">Unformatted</property>
+            <text-property name="promptText">Select metric for chart</text-property>
+            <property name="isRequired">true</property>
             <property name="controlType">list-box</property>
-            <property name="mustMatch">false</property>
+            <property name="mustMatch">true</property>
             <property name="fixedOrder">true</property>
             <property name="defaultValue">wallclock</property>
+            <structure name="format">
+                <property name="category">Unformatted</property>
+                <property name="pattern">Unformatted</property>
+            </structure>
             <list-property name="selectionList">
                 <structure>
                     <property name="value">wallclock</property>
@@ -908,87 +915,139 @@
             <property name="valueType">static</property>
             <property name="dataType">string</property>
             <property name="concealValue">true</property>
-            <property name="allowBlank">true</property>
-            <property name="allowNull">true</property>
-            <property name="format">Unformatted</property>
+            <property name="isRequired">false</property>
             <property name="controlType">text-box</property>
             <property name="defaultValue">%Y-%U</property>
+            <structure name="format">
+                <property name="category">Unformatted</property>
+                <property name="pattern">Unformatted</property>
+            </structure>
         </scalar-parameter>
         <scalar-parameter name="HighlightDate" id="98">
             <property name="hidden">true</property>
             <property name="valueType">static</property>
             <property name="dataType">string</property>
-            <property name="allowNull">true</property>
-            <property name="format">Unformatted</property>
+            <property name="isRequired">false</property>
             <property name="controlType">text-box</property>
+            <structure name="format">
+                <property name="category">Unformatted</property>
+                <property name="pattern">Unformatted</property>
+            </structure>
         </scalar-parameter>
         <scalar-parameter name="UserName" id="104">
             <property name="hidden">true</property>
             <property name="valueType">static</property>
             <property name="dataType">string</property>
             <property name="concealValue">true</property>
-            <property name="allowNull">true</property>
-            <property name="format">Unformatted</property>
+            <property name="isRequired">false</property>
             <property name="controlType">text-box</property>
             <property name="defaultValue">None</property>
+            <structure name="format">
+                <property name="category">Unformatted</property>
+                <property name="pattern">Unformatted</property>
+            </structure>
         </scalar-parameter>
         <scalar-parameter name="UserRole" id="103">
             <property name="hidden">true</property>
             <property name="valueType">static</property>
             <property name="dataType">string</property>
             <property name="concealValue">true</property>
-            <property name="allowNull">true</property>
-            <property name="format">Unformatted</property>
+            <property name="isRequired">false</property>
             <property name="controlType">text-box</property>
             <property name="defaultValue">None</property>
+            <structure name="format">
+                <property name="category">Unformatted</property>
+                <property name="pattern">Unformatted</property>
+            </structure>
         </scalar-parameter>
         <scalar-parameter name="Subtitle" id="105">
             <property name="hidden">true</property>
             <property name="valueType">static</property>
             <property name="dataType">string</property>
             <property name="concealValue">true</property>
-            <property name="allowNull">true</property>
-            <property name="format">Unformatted</property>
+            <property name="isRequired">false</property>
             <property name="controlType">text-box</property>
             <property name="defaultValue">None</property>
+            <structure name="format">
+                <property name="category">Unformatted</property>
+                <property name="pattern">Unformatted</property>
+            </structure>
         </scalar-parameter>
         <scalar-parameter name="Start Date" id="86">
             <property name="hidden">true</property>
             <text-property name="helpText">Only jobs that finished after this date will be included</text-property>
             <property name="valueType">static</property>
             <property name="dataType">string</property>
-            <property name="promptText">Start Date</property>
-            <property name="allowBlank">true</property>
-            <property name="allowNull">true</property>
-            <property name="format">Unformatted</property>
+            <text-property name="promptText">Start Date</text-property>
+            <property name="isRequired">false</property>
             <property name="controlType">text-box</property>
             <property name="defaultValue">2007-01-01</property>
+            <structure name="format">
+                <property name="category">Unformatted</property>
+                <property name="pattern">Unformatted</property>
+            </structure>
         </scalar-parameter>
         <scalar-parameter name="End Date" id="87">
             <property name="hidden">true</property>
             <text-property name="helpText">Only jobs that finished before this date will be included</text-property>
             <property name="valueType">static</property>
             <property name="dataType">string</property>
-            <property name="promptText">End Date</property>
-            <property name="allowBlank">true</property>
-            <property name="allowNull">true</property>
-            <property name="format">Unformatted</property>
+            <text-property name="promptText">End Date</text-property>
+            <property name="isRequired">false</property>
             <property name="controlType">text-box</property>
             <property name="defaultValue">2007-02-01</property>
+            <structure name="format">
+                <property name="category">Unformatted</property>
+                <property name="pattern">Unformatted</property>
+            </structure>
         </scalar-parameter>
     </parameters>
     <data-sources>
         <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="fermigrid1" id="357">
             <property name="odaDriverClass">com.mysql.jdbc.Driver</property>
-            <property name="odaURL">jdbc:mysql://gratia-db01.fnal.gov:3320/gratia_itb</property>
+            <property name="odaURL">jdbc:mysql://gratia-vm02.fnal.gov:3320/gratia_jeffmack</property>
             <property name="odaUser">gratia</property>
             <encrypted-property name="odaPassword">cHJvdG8=</encrypted-property>
         </oda-data-source>
     </data-sources>
     <data-sets>
         <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="UsageByVORanked" id="358">
+            <structure name="cachedMetaData">
+                <list-property name="resultSet">
+                    <structure>
+                        <property name="position">1</property>
+                        <property name="name">final_rank</property>
+                        <property name="dataType">float</property>
+                    </structure>
+                    <structure>
+                        <property name="position">2</property>
+                        <property name="name">VOName</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">3</property>
+                        <property name="name">datevalue</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">4</property>
+                        <property name="name">WallDuration</property>
+                        <property name="dataType">float</property>
+                    </structure>
+                    <structure>
+                        <property name="position">5</property>
+                        <property name="name">Cpu</property>
+                        <property name="dataType">float</property>
+                    </structure>
+                    <structure>
+                        <property name="position">6</property>
+                        <property name="name">Njobs</property>
+                        <property name="dataType">decimal</property>
+                    </structure>
+                </list-property>
+            </structure>
             <property name="dataSource">fermigrid1</property>
-            <property name="cachedRowCount">0</property>
+            <property name="dataSetRowLimit">0</property>
             <list-property name="parameters">
                 <structure>
                     <property name="name">UserName</property>
@@ -1038,6 +1097,44 @@ yearnr + "-" + monthnr + "-" + daynr;</expression>
                     <property name="isInput">true</property>
                 </structure>
             </list-property>
+            <list-property name="resultSet">
+                <structure>
+                    <property name="position">1</property>
+                    <property name="name">final_rank</property>
+                    <property name="nativeName">final_rank</property>
+                    <property name="dataType">float</property>
+                </structure>
+                <structure>
+                    <property name="position">2</property>
+                    <property name="name">VOName</property>
+                    <property name="nativeName">VOName</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">3</property>
+                    <property name="name">datevalue</property>
+                    <property name="nativeName">datevalue</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">4</property>
+                    <property name="name">WallDuration</property>
+                    <property name="nativeName">WallDuration</property>
+                    <property name="dataType">float</property>
+                </structure>
+                <structure>
+                    <property name="position">5</property>
+                    <property name="name">Cpu</property>
+                    <property name="nativeName">Cpu</property>
+                    <property name="dataType">float</property>
+                </structure>
+                <structure>
+                    <property name="position">6</property>
+                    <property name="name">Njobs</property>
+                    <property name="nativeName">Njobs</property>
+                    <property name="dataType">decimal</property>
+                </structure>
+            </list-property>
             <property name="queryText">call WeeklyUsageByVORanked(?,?,?,?,?,'Batch')</property>
         </oda-data-set>
     </data-sets>
@@ -1063,7 +1160,6 @@ yearnr + "-" + monthnr + "-" + daynr;</expression>
             <column id="5"/>
             <row id="6">
                 <property name="height">0.322in</property>
-                <property name="verticalAlign">text-bottom</property>
                 <cell id="7">
                     <property name="verticalAlign">top</property>
                 </cell>
@@ -1080,6 +1176,12 @@ yearnr + "-" + monthnr + "-" + daynr;</expression>
                 <structure>
                     <property name="paramName">UserRole</property>
                     <expression name="expression">params["UserRole"]</expression>
+                </structure>
+            </list-property>
+            <list-property name="boundDataColumns">
+                <structure>
+                    <property name="name">final_rank</property>
+                    <expression name="expression">dataSetRow["final_rank"]</expression>
                 </structure>
             </list-property>
             <column id="30">
@@ -1110,25 +1212,7 @@ yearnr + "-" + monthnr + "-" + daynr;</expression>
                             <property name="colSpan">3</property>
                             <property name="rowSpan">1</property>
                             <property name="textAlign">center</property>
-                            <extended-item extensionName="Chart" id="361">
-                                <property name="style">sans-style1</property>
-                                <property name="height">600px</property>
-                                <property name="width">800px</property>
-                                <property name="refTemplateParameter">NewTemplateParameterDefinition</property>
-                                <list-property name="paramBindings">
-                                    <structure>
-                                        <property name="paramName">UserName</property>
-                                        <expression name="expression">params["UserName"]</expression>
-                                    </structure>
-                                    <structure>
-                                        <property name="paramName">UserRole</property>
-                                        <expression name="expression">params["UserRole"]</expression>
-                                    </structure>
-                                    <structure>
-                                        <property name="paramName">GroupByFormat</property>
-                                        <expression name="expression">params["GroupByFormat"]</expression>
-                                    </structure>
-                                </list-property>
+                            <extended-item extensionName="Chart" name="NewChart" id="361">
                                 <xml-property name="xmlRepresentation"><![CDATA[<model:ChartWithAxes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:attribute="http://www.birt.eclipse.org/ChartModelAttribute" xmlns:data="http://www.birt.eclipse.org/ChartModelData" xmlns:layout="http://www.birt.eclipse.org/ChartModelLayout" xmlns:model="http://www.birt.eclipse.org/ChartModel" xmlns:type="http://www.birt.eclipse.org/ChartModelType">
   <Type>Bar Chart</Type>
   <SubType>Stacked</SubType>
@@ -1712,25 +1796,7 @@ function beforeDrawAxisTitle( axis, label, context )
       <TitlePosition>Left</TitlePosition>
       <SeriesDefinitions>
         <Query>
-          <Definition>//Fix use of different casing for some VO's
-
-if(row[&quot;VOName&quot;] == &quot;LIGO&quot;) {
-
-	&quot;ligo&quot;
-
-}
-
-else if(row[&quot;VOName&quot;] == &quot;Engage&quot;){
-
-	&quot;engage&quot;
-
-}
-
-else {
-
-	 row[&quot;VOName&quot;]
-
-}</Definition>
+          <Definition>row[&quot;VOName&quot;]</Definition>
         </Query>
         <SeriesPalette>
           <Entries xsi:type="attribute:ColorDefinition">
@@ -1817,18 +1883,7 @@ else {
             <Visible>false</Visible>
           </Label>
           <DataDefinition>
-            <Definition>if (params[&quot;Display Metric&quot;] == &quot;wallclock&quot;) {
- row[&quot;WallDuration&quot;] / 3600
-}
-else if (params[&quot;Display Metric&quot;]==&quot;process&quot;) {
-row[&quot;Cpu&quot;]/3600
-}
-else if (params[&quot;Display Metric&quot;]==&quot;jobcount&quot;){
-row[&quot;Njobs&quot;]
-}
-else {
-&quot;***Unknown metric***&quot;
-}</Definition>
+            <Definition>row[&quot;Njobs&quot;]</Definition>
           </DataDefinition>
           <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
           <DataPoint>
@@ -2238,6 +2293,46 @@ else {
 </model:ChartWithAxes>
 ]]></xml-property>
                                 <property name="outputFormat">SVG</property>
+                                <property name="height">600px</property>
+                                <property name="width">800px</property>
+                                <list-property name="paramBindings">
+                                    <structure>
+                                        <property name="paramName">UserName</property>
+                                        <expression name="expression">params["UserName"]</expression>
+                                    </structure>
+                                    <structure>
+                                        <property name="paramName">UserRole</property>
+                                        <expression name="expression">params["UserRole"]</expression>
+                                    </structure>
+                                    <structure>
+                                        <property name="paramName">GroupByFormat</property>
+                                        <expression name="expression">params["GroupByFormat"]</expression>
+                                    </structure>
+                                </list-property>
+                                <property name="refTemplateParameter">NewTemplateParameterDefinition</property>
+                                <list-property name="boundDataColumns">
+                                    <structure>
+                                        <property name="name">VOName</property>
+                                        <expression name="expression">dataSetRow["VOName"]</expression>
+                                    </structure>
+                                    <structure>
+                                        <property name="name">datevalue</property>
+                                        <expression name="expression">dataSetRow["datevalue"]</expression>
+                                    </structure>
+                                    <structure>
+                                        <property name="name">WallDuration</property>
+                                        <expression name="expression">dataSetRow["WallDuration"]</expression>
+                                    </structure>
+                                    <structure>
+                                        <property name="name">Cpu</property>
+                                        <expression name="expression">dataSetRow["Cpu"]</expression>
+                                    </structure>
+                                    <structure>
+                                        <property name="name">Njobs</property>
+                                        <expression name="expression">dataSetRow["Njobs"]</expression>
+                                    </structure>
+                                </list-property>
+                                <property name="style">sans-style1</property>
                             </extended-item>
                         </cell>
                     </row>
