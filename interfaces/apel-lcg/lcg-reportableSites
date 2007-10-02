@@ -57,6 +57,11 @@
 #   9/27/07 (John Weigand) - 
 #             Updated Normalization factor for AGLT2 (2100)
 #             Updated Normalization factor for PROD_SLAC (1757)
+#   10/02/07 (John Weigand) - 
+#             Updated Normalization factor for BNL_ATLAS_Tier2  (1294)
+#             Updated Normalization factor for BNL_ATLAS_Tier2o (1645)
+#             Also adjusted  BNL_ATLAS_1, BNL_ATLAS_2, BNL_OSG  (1351)
+#              - appeared to be an error in the calulation
 #    
 ##################################################################
 #-- Site  ------- SPECint2000
@@ -76,12 +81,12 @@ UCSDT2-B
 UFlorida-PG         1602
 #--- ATLAS ----
 AGLT2               2100
-BNL_ATLAS_1         1361
-BNL_ATLAS_2         1361
+BNL_ATLAS_1         1351
+BNL_ATLAS_2         1351
 BNL_PANDA      
-BNL_OSG             1361
-BU_ATLAS_Tier2
-BU_ATLAS_Tier2o
+BNL_OSG             1351
+BU_ATLAS_Tier2      1294
+BU_ATLAS_Tier2o     1645
 IU_ATLAS_Tier2
 MWT2_IU
 MWT2_UC
