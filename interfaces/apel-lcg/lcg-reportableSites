@@ -74,6 +74,7 @@
 #             Added new atlas site IU_OSG with Normalization factor (2099)
 #             Corrected Normalization factor for BNL_ATLAS_Tier2  (1123)
 #             Corrected Normalization factor for BNL_ATLAS_Tier2o (1624)
+#             Corrected Normalization factor for IU_OSG (1678)
 #    
 ##################################################################
 #-- Site  ------- SPECint2000
@@ -100,7 +101,7 @@ BNL_OSG             1351
 BU_ATLAS_Tier2      1123
 BU_ATLAS_Tier2o     1624
 IU_ATLAS_Tier2       921
-IU_OSG              2099
+IU_OSG              1678
 MWT2_IU             1787
 MWT2_UC             1787
 PROD_SLAC           1757
