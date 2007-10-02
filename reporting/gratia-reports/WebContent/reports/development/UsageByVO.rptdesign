@@ -236,7 +236,6 @@
             </parameters>
         </parameter-group>
         <parameter-group name="DateRange" id="118" extends="gratia-lib1.DateRange"/>
-        <scalar-parameter name="TraceTableKey" id="119" extends="gratia-lib1.TraceTableKey"/>
     </parameters>
     <data-sources>
         <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="fermigrid1" id="4">
