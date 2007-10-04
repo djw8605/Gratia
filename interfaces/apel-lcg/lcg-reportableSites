@@ -77,6 +77,7 @@
 #             Corrected Normalization factor for IU_OSG (1678)
 #   10/03/07 (John Weigand) - 
 #             Removed SLACXRD. Name known only to Panda.
+#             Updated Normalization factor for BNL_PANDA        (1351)
 #    
 ##################################################################
 #-- Site  ------- SPECint2000
@@ -98,7 +99,7 @@ UFlorida-PG         1602
 AGLT2               2100
 BNL_ATLAS_1         1351
 BNL_ATLAS_2         1351
-BNL_PANDA      
+BNL_PANDA           1351 
 BNL_OSG             1351
 BU_ATLAS_Tier2      1123
 BU_ATLAS_Tier2o     1624
