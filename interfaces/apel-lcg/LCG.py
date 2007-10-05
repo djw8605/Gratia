@@ -7,7 +7,7 @@
 # Script to transfer the data from Gratia to APEL (WLCG)
 ########################################################################
 #
-#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: LCG.py,v 1.7 2007-09-12 18:08:47 jgweigand Exp $
+#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: LCG.py,v 1.8 2007-10-05 12:35:06 jgweigand Exp $
 #
 #
 ########################################################################
@@ -47,6 +47,8 @@ import smtplib, rfc822  # for email notifications via smtp
 import commands, os, sys, time, string
 
 gSitesWithNoData = []
+gSitesWithNoUnknowns = []
+gKnownVOs = {}
 
 gFilterParameters = {"SiteFilterFile"       :None,
                      "VOFilterFile"         :None,
@@ -181,8 +183,11 @@ process can provide further details.
 Sites with no data:
   %s
 
+Sites with no unknown atlas VOs:
+  %s
+
 %s
-""" % (gProgramName,hostname,username,logfile,sqlfile,gSitesWithNoData,message)
+	""" % (gProgramName,hostname,username,logfile,sqlfile,gSitesWithNoData,gSitesWithNoUnknowns,message)
 
 
   try:
@@ -521,7 +526,6 @@ def SetNormalizationFactor(query,params):
     Logit("Normalization factor: %s" % normalizationFactor)
     return normalizationFactor
 
-
 #-----------------------------------------------
 def GetQuery(site,normalizationFactor,vos):
     """ Creates the SQL query DML statement for the Gratia database """
@@ -560,6 +564,52 @@ group by ExecutingSite,
          LCGUserVO
 """ % (strNormalization,strNormalization,fmtMonth,fmtYear,fmtDate,fmtDate,strNormalization,site,vos,strBegin,strEnd)
     return query
+
+#-----------------------------------------------
+def GetQueryAtlasUnknowns(site,normalizationFactor,vos):
+    """ Creates the SQL query DML statement for the Gratia database 
+        This is special to pick up those with an 'Unknown VO' for atlas.
+    """
+    begin,end = SetQueryDates()
+    strBegin =  DateToString(begin)
+    strEnd   =  DateToString(end)
+    strNormalization = str(normalizationFactor)
+    fmtMonth = "%m"
+    fmtYear  = "%Y"
+    fmtDate  = "%Y-%m-%d"
+    percent  = "%"
+    query="""\
+SELECT Site.SiteName AS ExecutingSite, 
+               "us%s" as LCGUserVO, 
+               Sum(R.NJobs), 
+               Round(Sum(R.CpuUserDuration+R.CpuSystemDuration)/3600) as SumCPU, 
+               Round((Sum(R.CpuUserDuration+R.CpuSystemDuration)/3600)*%s) as NormSumCPU, 
+               Round(Sum(R.WallDuration)/3600) as SumWCT, 
+               Round((Sum(R.WallDuration)/3600)*%s) as NormSumWCT, 
+               date_format(min(R.EndTime),"%s")       as Month, 
+               date_format(min(R.EndTime),"%s")       as Year, 
+               date_format(min(R.EndTime),"%s") as RecordStart, 
+               date_format(max(R.EndTime),"%s") as RecordEnd, 
+               "%s",
+               NOW() 
+from 
+     Site,
+     Probe,
+     JobUsageRecord_Meta M,
+     JobUsageRecord R
+where 
+      Site.SiteName = "%s"
+  and Site.siteid   = Probe.siteid 
+  and Probe.ProbeName  = M.ProbeName 
+  and M.dbid           = R.dbid
+  and R.VOName = "Unknown"
+  and "%s" <= R.EndTime and R.EndTime < "%s"
+  and R.LocalUserid like "%s%s%s"  
+group by ExecutingSite, 
+         LCGUserVO
+""" % (vos,strNormalization,strNormalization,fmtMonth,fmtYear,fmtDate,fmtDate,strNormalization,site,strBegin,strEnd,percent,vos,percent)
+    return query
+
 
 #-----------------------------------------------
 def RunGratiaQuery(select,params):
@@ -645,6 +695,62 @@ def CreateLCGsql(results,filename):
     output =  "INSERT INTO %s VALUES " % (gDatabaseParameters["LcgTable"]) + str(tuple(val)) + ";"
     file.write(output+"\n")
     LogToFile(output)
+    gKnownVOs[val[0] +'/'+val[1]] ="1"
+        
+  file.write("commit;\n")
+  file.close()
+
+#-----------------------------------------------
+def CreateLCGsqlUnknownUpdates(results,filename):
+  """ Creates the SQL DML to update the LCG database.
+
+      This update will actually be a sql dml 'UPDATE' which
+      is different from the  'INSERT's done for normal queries.
+      This will allow us to add the results to that has already been 
+      added.  This will cause the RecordStart and RecordEnd dates to
+      likely not be accurate.
+
+      We are also maintaining the latest sql update dml in a file
+      called YYYY-MM.sql.
+  """ 
+  Logit("Creating update sql DML for the LCG database for Unknown atlas VOs:") 
+
+  if len(results) == 0:
+    raise Exception("No updates to apply")
+
+  file = open(filename, 'a')
+  lines = results.split("\n")
+
+  file.write("set autocommit=0;\n")
+
+  dates = gDateFilter.split("/")  # YYYY/MM format
+        
+  for i in range (0,len(lines)):  
+    val = lines[i].split('\t')
+    if len(val) < 13:
+      continue
+    if gKnownVOs.has_key(val[0] +'/'+val[1]):
+      output =  "UPDATE %s SET " % (gDatabaseParameters["LcgTable"])
+      output =  output + " NJobs=Njobs+%s, "            % (int(val[2]))
+      output =  output + " SumCPU=SumCPU+%s, "          % (int(val[3]))
+      output =  output + " NormSumCPU=NormSumCPU+%s, "  % (int(val[4]))
+      output =  output + " SumWCT=SumWCT+%s, "          % (int(val[5]))
+      output =  output + " NormSumWCT=NormSumWCT+%s, "  % (int(val[6]))
+      output =  output + " Month=%s, "                  % (int(val[7]))
+      output =  output + " YEAR=%s, "                   % (int(val[8]))
+      output =  output + " RecordStart='%s', "            % (val[9])
+      output =  output + " RecordEnd='%s', "              % (val[10])
+      output =  output + " NormFactor=%s,"              % (val[11])
+      output =  output + " MeasurementDate = '%s'  "    % (val[12])
+      output =  output + " WHERE ExecutingSite = '%s' " % (val[0])
+      output =  output + "   AND LCGUserVO = '%s' " % (val[1])
+      output =  output + "   AND Month = %s " % (val[7])
+      output =  output + "   AND Year  = %s " % (val[8])
+      output =  output + ";"
+    else:
+      output =  "INSERT INTO %s VALUES " % (gDatabaseParameters["LcgTable"]) + str(tuple(val)) + ";"
+    file.write(output+"\n")
+    LogToFile(output)
                 
   file.write("commit;\n")
   file.close()
@@ -653,6 +759,7 @@ def CreateLCGsql(results,filename):
 def main(argv=None):
   global gNormalization
   global gSitesWithNoData
+  global gSitesWithNoUnknowns
   firstTime = 1
 
   #--- get command line arguments  -------------
@@ -701,9 +808,30 @@ def main(argv=None):
         continue
       output = output + results + "\n"
 
+    ##### UNKNOWNS#########
+    #--- query gratia for Unknown VOs and create updates (appending them ----
+    unknowns = ""
+    firstTime = 1
+    sites = ReportableSites.keys()
+    for site in sites:
+      normalizationFactor = ReportableSites[site]
+      query = GetQueryAtlasUnknowns(site,normalizationFactor,"atlas")
+      if firstTime:
+        Logit("Query:")
+        LogToFile(query)
+        firstTime = 0
+      Logit("Site (Unknown atlas VO): %s  Normalization Factor: %s" % (site,normalizationFactor)) 
+      results = RunGratiaQuery(query,gDatabaseParameters)
+      if len(results) == 0:
+        gSitesWithNoUnknowns.append(site)
+        continue
+      unknowns = unknowns + results + "\n"
+
     #--- update the APEL accounting database ----
     Logit("Sites with no data: %s" % gSitesWithNoData)
+    Logit("Sites with no atlas unknown VOs: %s" % gSitesWithNoUnknowns)
     CreateLCGsql(output,GetFileName("sql"))
+    CreateLCGsqlUnknownUpdates(unknowns,GetFileName("sql"))
     if gInUpdateMode:
       RunLCGUpdate(GetFileName("sql"),gDatabaseParameters)
       SendEmailNotificationSuccess("Sample query:\n" + query + "\n\nResults of all queries:\n" + output)
@@ -723,3 +851,4 @@ def main(argv=None):
 
 if __name__ == "__main__":
     sys.exit(main())
+
