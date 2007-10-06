@@ -126,30 +126,6 @@
                         <property name="pattern">Unformatted</property>
                     </structure>
                 </scalar-parameter>
-                <scalar-parameter name="Title" id="362">
-                    <property name="hidden">true</property>
-                    <property name="valueType">static</property>
-                    <property name="dataType">string</property>
-                    <property name="isRequired">false</property>
-                    <property name="controlType">text-box</property>
-                    <property name="defaultValue"></property>
-                    <structure name="format">
-                        <property name="category">Unformatted</property>
-                    </structure>
-                </scalar-parameter>
-                <scalar-parameter name="Subtitle" id="23">
-                    <property name="hidden">true</property>
-                    <property name="valueType">static</property>
-                    <property name="dataType">string</property>
-                    <property name="concealValue">false</property>
-                    <property name="isRequired">false</property>
-                    <property name="controlType">text-box</property>
-                    <property name="defaultValue"></property>
-                    <structure name="format">
-                        <property name="category">Unformatted</property>
-                        <property name="pattern">Unformatted</property>
-                    </structure>
-                </scalar-parameter>
             </parameters>
         </parameter-group>
         <parameter-group name="VOandSite" id="12">
@@ -350,6 +326,45 @@
                             <property name="label">Job Count</property>
                         </structure>
                     </list-property>
+                </scalar-parameter>
+            </parameters>
+        </parameter-group>
+        <parameter-group name="ReportInfo" id="388">
+            <parameters>
+                <scalar-parameter name="Title" id="362">
+                    <property name="hidden">true</property>
+                    <property name="valueType">static</property>
+                    <property name="dataType">string</property>
+                    <property name="isRequired">false</property>
+                    <property name="controlType">text-box</property>
+                    <property name="defaultValue"></property>
+                    <structure name="format">
+                        <property name="category">Unformatted</property>
+                    </structure>
+                </scalar-parameter>
+                <scalar-parameter name="Subtitle" id="23">
+                    <property name="hidden">true</property>
+                    <property name="valueType">static</property>
+                    <property name="dataType">string</property>
+                    <property name="concealValue">false</property>
+                    <property name="isRequired">false</property>
+                    <property name="controlType">text-box</property>
+                    <property name="defaultValue"></property>
+                    <structure name="format">
+                        <property name="category">Unformatted</property>
+                        <property name="pattern">Unformatted</property>
+                    </structure>
+                </scalar-parameter>
+                <scalar-parameter name="ReportURL" id="389">
+                    <property name="hidden">true</property>
+                    <property name="valueType">static</property>
+                    <property name="dataType">string</property>
+                    <property name="isRequired">false</property>
+                    <property name="controlType">text-box</property>
+                    <property name="defaultValue">ReportURL</property>
+                    <structure name="format">
+                        <property name="category">Unformatted</property>
+                    </structure>
                 </scalar-parameter>
             </parameters>
         </parameter-group>
