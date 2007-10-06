@@ -1,8 +1,4 @@
-table.menu
-{
-	cellspacing:0;
-	cellpadding:0;
-}
+
 .menuGroup
 {
 	overflow: hidden;
@@ -15,7 +11,7 @@ table.menu
 }
 a.menuItem
 {
-	cursor: hand;
+	cursor: pointer;
 	overflow: hidden;
 	color: #e07630;
 	text-indent: 10px;
