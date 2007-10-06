@@ -1,19 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
     pageEncoding="ISO-8859-1"
-    import="org.eclipse.birt.report.engine.api.*"
-    import="org.eclipse.birt.core.framework.*"
-    import="org.eclipse.birt.report.model.*"
-    import="javax.servlet.*"
-    import="java.util.HashMap"
-    import="java.util.Map"
-    import="java.util.Collection"
-    import="java.util.Collections"
-    import="java.util.Iterator"
     import="java.util.Date"
-    import="java.util.logging.Level"
     import="java.text.SimpleDateFormat"
-    import="java.io.File"
-    import="java.io.FileOutputStream"
     import="net.sf.gratia.reporting.*"
     import="java.sql.*"
     import="java.io.*"
@@ -35,18 +23,23 @@
 	
 var c1 = new CodeThatCalendar(caldef1);
 
-function addVO (form) {
+function addVO (form) 
+{
 /* Construct the VOs string from the selection */  
-        form.VOs.value = "(";
+	form.VOs.value = "(";
 		
 	for(var i = 0; i < form.myVOs.options.length; i++)
+	{
 		if (form.myVOs.options[i].selected)
-		   if (form.VOs.value != "(") 
-		   	form.VOs.value += "," + "'"+ form.myVOs.options[i].value + "'";
-		   else
-                	form.VOs.value += "'"+ form.myVOs.options[i].value + "'";
-        form.VOs.value += ")";
-    }
+		{
+			if (form.VOs.value != "(") 
+				form.VOs.value += "," + "'"+ form.myVOs.options[i].value + "'";
+			else
+				form.VOs.value += "'"+ form.myVOs.options[i].value + "'";
+		}
+	}
+ 	form.VOs.value += ")";
+}
     
 
 function getURL ()
@@ -54,26 +47,26 @@ function getURL ()
    var x=document.getElementsByTagName('form')[0]
    var url = "";
 
-for (var i=0;i<x.length;i++)
-{
-  if (x.elements[i].name == "BaseURL" )
-     url = x.elements[i].value
- }
+	for (var i=0;i<x.length;i++)
+	{
+  		if (x.elements[i].name == "BaseURL" )
+     		url = x.elements[i].value;
+ 	}
  
-for (var i=0;i<x.length;i++)
-  {
-  name = x.elements[i].name
-  value = x.elements[i].value
-  if (name != "myVOs" && name != "submitButton" && name != "BaseURL"  && name != "ReportURL" )
-  {
-  	url += "&" + name + "=" + value;
-  }
-  }
-  x.ReportURL.value = url;
+	for (var i=0;i<x.length;i++)
+	{
+		name = x.elements[i].name;
+		value = x.elements[i].value;
+		if (name != "myVOs" && name != "submitButton" && name != "BaseURL"  && name != "ReportURL" )
+		{
+			url += "&" + name + "=" + value;
+		}
+	}
+	x.ReportURL.value = url;
   	// document.write(url);
   	// document.write("<br />");
-  
-}    
+}
+    
 </script>
 
 
@@ -378,25 +371,25 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 <script type="text/javascript">
 
 // load initial url
-   var x=document.getElementsByTagName('form')[0]
+   var x=document.getElementsByTagName('form')[0];
    var url = "";
 
-for (var i=0;i<x.length;i++)
-{
-  if (x.elements[i].name == "BaseURL" )
-     url = x.elements[i].value
- }
+	for (var i=0;i<x.length;i++)
+	{
+  		if (x.elements[i].name == "BaseURL" )
+     		url = x.elements[i].value;
+	}
  
-for (var i=0;i<x.length;i++)
-  {
-  name = x.elements[i].name
-  value = x.elements[i].value
-  if (name != "myVOs" && name != "submitButton" && name != "BaseURL" && name != "ReportURL" )
-  {
-  	url += "&" + name + "=" + value;
-  }
-  }
-  x.ReportURL.value = url;
+	for (var i=0;i<x.length;i++)
+	{
+		name = x.elements[i].name;
+		value = x.elements[i].value;
+		if (name != "myVOs" && name != "submitButton" && name != "BaseURL" && name != "ReportURL" )
+		{
+			url += "&" + name + "=" + value;
+		}
+	}
+	x.ReportURL.value = url;
 
 </script>
 </p>    
