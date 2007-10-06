@@ -32,7 +32,6 @@
 <script type="text/javascript" src="calendar/calendardef.js"></script>
 <script type="text/javascript" src="calendar/calendarstd.js"></script>
 <script type="text/javascript">
-<!-- hide script
 	
 var c1 = new CodeThatCalendar(caldef1);
 
@@ -75,7 +74,6 @@ for (var i=0;i<x.length;i++)
   	// document.write("<br />");
   
 }    
-end of hide script -->
 </script>
 
 
@@ -245,8 +243,8 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 			<tr>
 			   <td><label class=paramName><%=promptText %></label></td>
 			   <td>
-			   <input type="text" id="<%=paramName %>" name="<%=paramName %>" value="<%=defaultValue %>" >
-			   	<BUTTON name="cal1" value="cal1" type="button" class=button onchange="getURL()" onclick="c1.popup('<%=paramName %>');" >
+			   <input type="text" id="<%=paramName %>" name="<%=paramName %>" value="<%=defaultValue %>"  onchange="getURL();" >
+			   	<BUTTON name="cal1" value="cal1" type="button" class=button onclick="c1.popup('<%=paramName %>');" >
     				<IMG SRC="./calendar/img/cal.gif" ALT="test"></BUTTON>
 			   </td>
 			</tr>
@@ -378,7 +376,6 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 
 <p>
 <script type="text/javascript">
-<!--
 
 // load initial url
    var x=document.getElementsByTagName('form')[0]
@@ -400,7 +397,7 @@ for (var i=0;i<x.length;i++)
   }
   }
   x.ReportURL.value = url;
--->
+
 </script>
 </p>    
 
