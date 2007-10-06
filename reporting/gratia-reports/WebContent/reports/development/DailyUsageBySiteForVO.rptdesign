@@ -27,13 +27,20 @@
 //fos = new java.io.FileOutputStream("/tmp/glr.txt", true); 
 //printWriter = new java.io.PrintWriter(fos); 
 
-//printWriter.println("2.Start Date After:  " + params["Start Date"]);
-//printWriter.println("2.End Date After:  " + params["End Date"]);
+//printWriter.println("2.StartDate After:  " + params["StartDate"]);
+//printWriter.println("2.EndDate After:  " + params["EndDate"]);
 //printWriter.println("2.Format After:  " + params["GroupByFormat"]);
 //printWriter.println("2.TimeAxisPattern: " + params["TimeAxisPattern"]);
 //printWriter.flush();
 
 //printWriter.close();]]></method>
+    <property name="eventHandlerClass">net.sf.gratia.reporting.GratiaBirtReportEH</property>
+    <list-property name="libraries">
+        <structure>
+            <property name="fileName">gratia-lib1.rptlibrary</property>
+            <property name="namespace">gratia-lib1</property>
+        </structure>
+    </list-property>
     <list-property name="configVars">
         <structure>
             <property name="name">DatabaseURL</property>
@@ -59,28 +66,12 @@
             <property name="name">HighlightDate</property>
         </structure>
         <structure>
-            <property name="name">ForVOName</property>
-            <property name="value">gridex</property>
-        </structure>
-        <structure>
             <property name="name">ForSiteName</property>
             <property name="value">Generic Site</property>
         </structure>
         <structure>
-            <property name="name">ForVO</property>
-            <property name="value">ForVO</property>
-        </structure>
-        <structure>
             <property name="name">ForSite</property>
             <property name="value">AnySite</property>
-        </structure>
-        <structure>
-            <property name="name">Start Date</property>
-            <property name="value">2006-01-01</property>
-        </structure>
-        <structure>
-            <property name="name">End Date</property>
-            <property name="value">2007-04-01</property>
         </structure>
         <structure>
             <property name="name">UserName</property>
@@ -93,10 +84,6 @@
         <structure>
             <property name="name">Subtitle</property>
             <property name="value">None</property>
-        </structure>
-        <structure>
-            <property name="name">Display Metric</property>
-            <property name="value">wallclock</property>
         </structure>
     </list-property>
     <parameters>
@@ -196,6 +183,7 @@
                     <property name="mustMatch">true</property>
                     <property name="fixedOrder">true</property>
                     <property name="defaultValue">fermilab</property>
+                    <property name="distinct">false</property>
                     <structure name="format">
                         <property name="category">Unformatted</property>
                         <property name="pattern">Unformatted</property>
@@ -226,7 +214,7 @@
                     <property name="dataType">string</property>
                     <property name="isRequired">true</property>
                     <property name="controlType">text-box</property>
-                    <property name="defaultValue">ForVO</property>
+                    <property name="defaultValue">AnyVO</property>
                     <structure name="format">
                         <property name="category">Unformatted</property>
                         <property name="pattern">Unformatted</property>
@@ -248,12 +236,12 @@
         </parameter-group>
         <parameter-group name="DateRange" id="117">
             <parameters>
-                <scalar-parameter name="Start Date" id="86">
+                <scalar-parameter name="StartDate" id="86">
                     <property name="hidden">false</property>
                     <text-property name="helpText">Only jobs that finished after this date will be included</text-property>
                     <property name="valueType">static</property>
                     <property name="dataType">string</property>
-                    <text-property name="promptText">Start Date</text-property>
+                    <text-property name="promptText">StartDate</text-property>
                     <property name="isRequired">true</property>
                     <property name="controlType">text-box</property>
                     <property name="defaultValue">2007-01-01</property>
@@ -262,12 +250,12 @@
                         <property name="pattern">Unformatted</property>
                     </structure>
                 </scalar-parameter>
-                <scalar-parameter name="End Date" id="87">
+                <scalar-parameter name="EndDate" id="87">
                     <property name="hidden">false</property>
                     <text-property name="helpText">Only jobs that finished before this date will be included</text-property>
                     <property name="valueType">static</property>
                     <property name="dataType">string</property>
-                    <text-property name="promptText">End Date</text-property>
+                    <text-property name="promptText">EndDate</text-property>
                     <property name="isRequired">true</property>
                     <property name="controlType">text-box</property>
                     <property name="defaultValue">2007-02-01</property>
@@ -323,7 +311,7 @@
         </parameter-group>
         <parameter-group name="Metrics" id="119">
             <parameters>
-                <scalar-parameter name="Display Metric" id="120">
+                <scalar-parameter name="DisplayMetric" id="120">
                     <property name="hidden">false</property>
                     <text-property name="helpText">Select metric for chart</text-property>
                     <property name="valueType">static</property>
@@ -355,6 +343,8 @@
                 </scalar-parameter>
             </parameters>
         </parameter-group>
+        <parameter-group name="ReportInfo" id="126" extends="gratia-lib1.ReportInfo"/>
+        <parameter-group name="ReportInfo1" id="390" extends="gratia-lib1.ReportInfo"/>
     </parameters>
     <data-sources>
         <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="fermigrid1" id="4">
@@ -420,7 +410,7 @@
                     <property name="name">StartDate</property>
                     <property name="dataType">string</property>
                     <property name="position">3</property>
-                    <expression name="defaultValue">'3/1/2006'</expression>
+                    <expression name="defaultValue">'2007-01-01'</expression>
                     <property name="isOptional">false</property>
                     <property name="allowNull">true</property>
                     <property name="isInput">true</property>
@@ -430,7 +420,7 @@
                     <property name="name">EndDate</property>
                     <property name="dataType">string</property>
                     <property name="position">4</property>
-                    <expression name="defaultValue">'12/31/2999'</expression>
+                    <expression name="defaultValue">'2007-02-01'</expression>
                     <property name="isOptional">false</property>
                     <property name="allowNull">true</property>
                     <property name="isInput">true</property>
@@ -447,8 +437,9 @@
                     <property name="name">ForVOName</property>
                     <property name="dataType">string</property>
                     <property name="position">6</property>
-                    <expression name="defaultValue">''</expression>
+                    <expression name="defaultValue">'fermilab'</expression>
                     <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
                 </structure>
             </list-property>
             <list-property name="resultSet">
@@ -490,7 +481,7 @@
                 </structure>
             </list-property>
             <property name="queryText">
-call DailyUsageBySiteByVO(?,?,?,?,?,'Batch','ForVO',?,'AnySite','')
+call DailyUsageBySiteByVO(?,?,?,?,?,'Batch','ForVO',?,'AnySite','SiteName')
 </property>
         </oda-data-set>
         <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="VONames" id="108">
@@ -733,17 +724,17 @@ call DailyUsageBySiteByVO(?,?,?,?,?,'Batch','ForVO',?,'AnySite','')
 
         &lt;structure>
 
-            &lt;property name=&quot;paramName&quot;>Start Date&lt;/property>
+            &lt;property name=&quot;paramName&quot;>StartDate&lt;/property>
 
-            &lt;expression name=&quot;expression&quot;>params[&quot;Start Date&quot;]&lt;/expression>
+            &lt;expression name=&quot;expression&quot;>params[&quot;StartDate&quot;]&lt;/expression>
 
         &lt;/structure>
 
         &lt;structure>
 
-            &lt;property name=&quot;paramName&quot;>End Date&lt;/property>
+            &lt;property name=&quot;paramName&quot;>EndDate&lt;/property>
 
-            &lt;expression name=&quot;expression&quot;>params[&quot;End Date&quot;]&lt;/expression>
+            &lt;expression name=&quot;expression&quot;>params[&quot;EndDate&quot;]&lt;/expression>
 
         &lt;/structure>
 
@@ -1091,7 +1082,7 @@ printWriter.close();
 function beforeDrawAxisTitle( axis, label, context )
 {
 	rep = context.getExternalContext().getScriptable();
-	val1 =rep.getParameterValue(&quot;Display Metric&quot;);
+	val1 =rep.getParameterValue(&quot;DisplayMetric&quot;);
 	if(!axis.isCategoryAxis())
 	{
 		if(val1==&quot;process&quot;)
@@ -1307,7 +1298,18 @@ function beforeDrawAxisTitle( axis, label, context )
             <Visible>false</Visible>
           </Label>
           <DataDefinition>
-            <Definition>row[&quot;Njobs&quot;]</Definition>
+            <Definition>if (params[&quot;DisplayMetric&quot;] == &quot;wallclock&quot;) {&#xD;
+ row[&quot;WallDuration&quot;] / 3600&#xD;
+}&#xD;
+else if (params[&quot;DisplayMetric&quot;]==&quot;process&quot;) {&#xD;
+row[&quot;Cpu&quot;]/3600&#xD;
+}&#xD;
+else if (params[&quot;DisplayMetric&quot;]==&quot;jobcount&quot;){&#xD;
+row[&quot;Njobs&quot;]&#xD;
+}&#xD;
+else {&#xD;
+&quot;***Unknown metric***&quot;&#xD;
+}</Definition>
           </DataDefinition>
           <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
           <DataPoint>
@@ -1316,7 +1318,7 @@ function beforeDrawAxisTitle( axis, label, context )
             </Components>
             <Separator>, </Separator>
           </DataPoint>
-          <LabelPosition>Outside</LabelPosition>
+          <LabelPosition>Inside</LabelPosition>
           <Stacked>true</Stacked>
           <Triggers>
             <Condition>onclick</Condition>
@@ -1385,9 +1387,9 @@ function beforeDrawAxisTitle( axis, label, context )
 
         &lt;structure>
 
-            &lt;property name=&quot;paramName&quot;>Display Metric&lt;/property>
+            &lt;property name=&quot;paramName&quot;>DisplayMetric&lt;/property>
 
-            &lt;expression name=&quot;expression&quot;>params[&quot;Display Metric&quot;]&lt;/expression>
+            &lt;expression name=&quot;expression&quot;>params[&quot;DisplayMetric&quot;]&lt;/expression>
 
         &lt;/structure>
 
@@ -1396,7 +1398,7 @@ function beforeDrawAxisTitle( axis, label, context )
 &lt;/structure>
 
 </BaseUrl>
-                <BaseParameterName>Start Date</BaseParameterName>
+                <BaseParameterName>StartDate</BaseParameterName>
                 <ValueParameterName></ValueParameterName>
                 <SeriesParameterName>ForSiteName</SeriesParameterName>
               </Value>
@@ -1416,6 +1418,7 @@ function beforeDrawAxisTitle( axis, label, context )
           <GroupType>Text</GroupType>
           <AggregateExpression>Sum</AggregateExpression>
         </Grouping>
+        <Sorting>Ascending</Sorting>
       </SeriesDefinitions>
       <Orientation>Vertical</Orientation>
       <LineAttributes>
@@ -1758,17 +1761,53 @@ MM/dd/yyyy
 </model:ChartWithAxes>
 ]]></xml-property>
             <property name="outputFormat">SVG</property>
+            <structure name="action">
+                <property name="targetWindow">_self</property>
+                <property name="linkType">drill-through</property>
+                <property name="formatType">html</property>
+                <property name="reportName">UsageByUserForDate.rptdesign</property>
+                <list-property name="paramBindings">
+                    <structure>
+                        <property name="paramName">DatabaseURL</property>
+                        <expression name="expression">params["DatabaseURL"]</expression>
+                    </structure>
+                    <structure>
+                        <property name="paramName">DatabaseUser</property>
+                        <expression name="expression">params["DatabaseUser"]</expression>
+                    </structure>
+                    <structure>
+                        <property name="paramName">DatabasePassword</property>
+                        <expression name="expression">params["DatabasePassword"]</expression>
+                    </structure>
+                    <structure>
+                        <property name="paramName">ForVOName</property>
+                        <expression name="expression">params["ForVOName"]</expression>
+                    </structure>
+                    <structure>
+                        <property name="paramName">ForVO</property>
+                        <expression name="expression">"ForVO"</expression>
+                    </structure>
+                    <structure>
+                        <property name="paramName">ForSite</property>
+                        <expression name="expression">"ForSite"</expression>
+                    </structure>
+                    <structure>
+                        <property name="paramName">DisplayMetric</property>
+                        <expression name="expression">params["DisplayMetric"]</expression>
+                    </structure>
+                </list-property>
+            </structure>
             <property name="dataSet">TimeQuery</property>
             <property name="height">480px</property>
             <property name="width">800px</property>
             <list-property name="paramBindings">
                 <structure>
                     <property name="paramName">StartDate</property>
-                    <expression name="expression">params["Start Date"]</expression>
+                    <expression name="expression">params["StartDate"]</expression>
                 </structure>
                 <structure>
                     <property name="paramName">EndDate</property>
-                    <expression name="expression">params["End Date"]</expression>
+                    <expression name="expression">params["EndDate"]</expression>
                 </structure>
                 <structure>
                     <property name="paramName">ForVOName</property>
@@ -1793,8 +1832,14 @@ MM/dd/yyyy
                     <expression name="expression">dataSetRow["Cpu"]</expression>
                 </structure>
                 <structure>
+                    <property name="name">VOName</property>
+                    <expression name="expression">dataSetRow["VOName"]</expression>
+                    <property name="dataType">any</property>
+                </structure>
+                <structure>
                     <property name="name">Njobs</property>
                     <expression name="expression">dataSetRow["Njobs"]</expression>
+                    <property name="dataType">any</property>
                 </structure>
             </list-property>
             <property name="style">sans-style1</property>
@@ -1803,7 +1848,7 @@ MM/dd/yyyy
             <property name="style">sans-style1</property>
             <property name="fontSize">9pt</property>
             <property name="textAlign">center</property>
-            <expression name="valueExpr">"Date range: "+ params["Start Date"] + " - " + params["End Date"]</expression>
+            <expression name="valueExpr">"Date range: "+ params["StartDate"] + " - " + params["EndDate"]</expression>
             <property name="contentType">html</property>
         </text-data>
         <text-data id="107">
@@ -1813,5 +1858,10 @@ MM/dd/yyyy
             <expression name="valueExpr">"VO Name: "+ params["ForVOName"]</expression>
             <property name="contentType">html</property>
         </text-data>
+        <text-data name="ReportURL" id="394" extends="gratia-lib1.ReportURL">
+            <expression name="valueExpr">"Retrieve report URL:   "
++ params["ReportURL"]</expression>
+        </text-data>
+        <label name="ShowQuery" id="395" extends="gratia-lib1.ShowQuery"/>
     </body>
 </report>
