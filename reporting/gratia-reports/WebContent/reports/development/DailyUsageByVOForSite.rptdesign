@@ -27,13 +27,19 @@
 //fos = new java.io.FileOutputStream("/tmp/glr.txt", true); 
 //printWriter = new java.io.PrintWriter(fos); 
 
-//printWriter.println("2.Start Date After:  " + params["Start Date"]);
-//printWriter.println("2.End Date After:  " + params["End Date"]);
+//printWriter.println("2.StartDate After:  " + params["StartDate"]);
+//printWriter.println("2.EndDate After:  " + params["EndDate"]);
 //printWriter.println("2.Format After:  " + params["GroupByFormat"]);
 //printWriter.println("2.TimeAxisPattern: " + params["TimeAxisPattern"]);
 //printWriter.flush();
 
 //printWriter.close();]]></method>
+    <list-property name="libraries">
+        <structure>
+            <property name="fileName">gratia-lib1.rptlibrary</property>
+            <property name="namespace">gratia-lib1</property>
+        </structure>
+    </list-property>
     <list-property name="configVars">
         <structure>
             <property name="name">DatabaseURL</property>
@@ -67,11 +73,11 @@
             <property name="value">FNAL_GPFARM_TEST</property>
         </structure>
         <structure>
-            <property name="name">Start Date</property>
+            <property name="name">StartDate</property>
             <property name="value">2007-01-01</property>
         </structure>
         <structure>
-            <property name="name">End Date</property>
+            <property name="name">EndDate</property>
             <property name="value">2007-02-01</property>
         </structure>
         <structure>
@@ -87,7 +93,7 @@
             <property name="value">None</property>
         </structure>
         <structure>
-            <property name="name">Display Metric</property>
+            <property name="name">DisplayMetric</property>
             <property name="value">jobcount</property>
         </structure>
     </list-property>
@@ -240,12 +246,12 @@
         </parameter-group>
         <parameter-group name="DateRange" id="117">
             <parameters>
-                <scalar-parameter name="Start Date" id="86">
+                <scalar-parameter name="StartDate" id="86">
                     <property name="hidden">false</property>
                     <text-property name="helpText">Only jobs that finished after this date will be included</text-property>
                     <property name="valueType">static</property>
                     <property name="dataType">string</property>
-                    <text-property name="promptText">Start Date</text-property>
+                    <text-property name="promptText">StartDate</text-property>
                     <property name="isRequired">true</property>
                     <property name="controlType">text-box</property>
                     <property name="defaultValue">2007-01-01</property>
@@ -254,12 +260,12 @@
                         <property name="pattern">Unformatted</property>
                     </structure>
                 </scalar-parameter>
-                <scalar-parameter name="End Date" id="87">
+                <scalar-parameter name="EndDate" id="87">
                     <property name="hidden">false</property>
                     <text-property name="helpText">Only jobs that finished before this date will be included</text-property>
                     <property name="valueType">static</property>
                     <property name="dataType">string</property>
-                    <text-property name="promptText">End Date</text-property>
+                    <text-property name="promptText">EndDate</text-property>
                     <property name="isRequired">true</property>
                     <property name="controlType">text-box</property>
                     <property name="defaultValue">2007-02-01</property>
@@ -298,24 +304,11 @@
                         <property name="pattern">Unformatted</property>
                     </structure>
                 </scalar-parameter>
-                <scalar-parameter name="Subtitle" id="104">
-                    <property name="hidden">true</property>
-                    <property name="valueType">static</property>
-                    <property name="dataType">string</property>
-                    <property name="concealValue">true</property>
-                    <property name="isRequired">false</property>
-                    <property name="controlType">text-box</property>
-                    <property name="defaultValue">None</property>
-                    <structure name="format">
-                        <property name="category">Unformatted</property>
-                        <property name="pattern">Unformatted</property>
-                    </structure>
-                </scalar-parameter>
             </parameters>
         </parameter-group>
         <parameter-group name="Metrics" id="119">
             <parameters>
-                <scalar-parameter name="Display Metric" id="120">
+                <scalar-parameter name="DisplayMetric" id="120">
                     <property name="hidden">false</property>
                     <text-property name="helpText">Select metric for chart</text-property>
                     <property name="valueType">static</property>
@@ -347,6 +340,7 @@
                 </scalar-parameter>
             </parameters>
         </parameter-group>
+        <parameter-group name="ReportInfo" id="390" extends="gratia-lib1.ReportInfo"/>
     </parameters>
     <data-sources>
         <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="fermigrid1" id="4">
@@ -725,17 +719,17 @@ from Site</property>
 
         &lt;structure>
 
-            &lt;property name=&quot;paramName&quot;>Start Date&lt;/property>
+            &lt;property name=&quot;paramName&quot;>StartDate&lt;/property>
 
-            &lt;expression name=&quot;expression&quot;>params[&quot;Start Date&quot;]&lt;/expression>
+            &lt;expression name=&quot;expression&quot;>params[&quot;StartDate&quot;]&lt;/expression>
 
         &lt;/structure>
 
         &lt;structure>
 
-            &lt;property name=&quot;paramName&quot;>End Date&lt;/property>
+            &lt;property name=&quot;paramName&quot;>EndDate&lt;/property>
 
-            &lt;expression name=&quot;expression&quot;>params[&quot;End Date&quot;]&lt;/expression>
+            &lt;expression name=&quot;expression&quot;>params[&quot;EndDate&quot;]&lt;/expression>
 
         &lt;/structure>
 
@@ -1083,7 +1077,7 @@ printWriter.close();
 function beforeDrawAxisTitle( axis, label, context )
 {
 	rep = context.getExternalContext().getScriptable();
-	val1 =rep.getParameterValue(&quot;Display Metric&quot;);
+	val1 =rep.getParameterValue(&quot;DisplayMetric&quot;);
 	if(!axis.isCategoryAxis())
 	{
 		if(val1==&quot;process&quot;)
@@ -1345,13 +1339,13 @@ function beforeDrawAxisTitle( axis, label, context )
             &lt;expression name=&quot;expression&quot;>&quot;ForSite&quot;&lt;/expression>
         &lt;/structure>
         &lt;structure>
-            &lt;property name=&quot;paramName&quot;>Display Metric&lt;/property>
-            &lt;expression name=&quot;expression&quot;>params[&quot;Display Metric&quot;]&lt;/expression>
+            &lt;property name=&quot;paramName&quot;>DisplayMetric&lt;/property>
+            &lt;expression name=&quot;expression&quot;>params[&quot;DisplayMetric&quot;]&lt;/expression>
         &lt;/structure>
     &lt;/list-property>
 &lt;/structure>
 </BaseUrl>
-                <BaseParameterName>Start Date</BaseParameterName>
+                <BaseParameterName>StartDate</BaseParameterName>
                 <ValueParameterName></ValueParameterName>
                 <SeriesParameterName>ForVOName</SeriesParameterName>
               </Value>
@@ -1719,11 +1713,11 @@ MM/dd/yyyy
             <list-property name="paramBindings">
                 <structure>
                     <property name="paramName">StartDate</property>
-                    <expression name="expression">params["Start Date"]</expression>
+                    <expression name="expression">params["StartDate"]</expression>
                 </structure>
                 <structure>
                     <property name="paramName">EndDate</property>
-                    <expression name="expression">params["End Date"]</expression>
+                    <expression name="expression">params["EndDate"]</expression>
                 </structure>
                 <structure>
                     <property name="paramName">ForSiteName</property>
@@ -1753,12 +1747,13 @@ MM/dd/yyyy
                 </structure>
             </list-property>
             <property name="style">sans-style1</property>
+            <property name="eventHandlerClass">net.sf.gratia.reporting.GratiaBirtReportEH</property>
         </extended-item>
         <text-data id="99">
             <property name="style">sans-style1</property>
             <property name="fontSize">9pt</property>
             <property name="textAlign">center</property>
-            <expression name="valueExpr">"Date range: "+ params["Start Date"] + " - " + params["End Date"]</expression>
+            <expression name="valueExpr">"Date range: "+ params["StartDate"] + " - " + params["EndDate"]</expression>
             <property name="contentType">html</property>
         </text-data>
         <text-data id="107">
@@ -1768,5 +1763,7 @@ MM/dd/yyyy
             <expression name="valueExpr">"Site Name: "+ params["ForSiteName"]</expression>
             <property name="contentType">html</property>
         </text-data>
+        <text-data name="ReportURL" id="392" extends="gratia-lib1.ReportURL"/>
+        <label name="ShowQuery" id="393" extends="gratia-lib1.ShowQuery"/>
     </body>
 </report>
