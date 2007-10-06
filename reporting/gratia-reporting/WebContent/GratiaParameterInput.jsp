@@ -29,10 +29,10 @@
 <LINK href="stylesheet.css" type="text/css" rel="stylesheet">
 <title>Gratia Reporting: Parameter Entry</title>
 
-<script language="javascript" src="calendar/calendardef.js"></script>
-<script language="javascript" src="calendar/calendarstd.js"></script>
-<script language="javascript">
-<!--
+<script type="text/javascript" src="calendar/calendardef.js"></script>
+<script type="text/javascript" src="calendar/calendarstd.js"></script>
+<script type="text/javascript">
+<!-- hide script
 	
 var c1 = new CodeThatCalendar(caldef1);
 
@@ -75,8 +75,7 @@ for (var i=0;i<x.length;i++)
   	// document.write("<br />");
   
 }    
-
-//-->
+end of hide script -->
 </script>
 
 
@@ -84,7 +83,6 @@ for (var i=0;i<x.length;i++)
 <body>
 
 	<jsp:include page="common.jsp" />
-	
 
 <%
 // get the parameters passed
@@ -152,10 +150,11 @@ String selectValue = null;
 
 <birt:parameterPage id="<%=pageID %>" name="parameterInput" reportDesign="<%= report %>" isCustom="true" title="">
 
-<table>
+
 <input type=hidden id="baseURL" name="BaseURL" Value = "<%=initUrl %>">
 <input type=hidden id="ReportURL" name="ReportURL" Value="<%=initUrl %>">
 
+<table>
 <%
 
 for(int i=0; i < reportParameters.getParamGroups().size(); i++)
@@ -379,6 +378,7 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 
 <p>
 <script type="text/javascript">
+<!--
 
 // load initial url
    var x=document.getElementsByTagName('form')[0]
@@ -400,7 +400,7 @@ for (var i=0;i<x.length;i++)
   }
   }
   x.ReportURL.value = url;
-  
+-->
 </script>
 </p>    
 
