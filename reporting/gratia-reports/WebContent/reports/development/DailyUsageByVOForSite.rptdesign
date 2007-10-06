@@ -34,6 +34,7 @@
 //printWriter.flush();
 
 //printWriter.close();]]></method>
+    <property name="eventHandlerClass">net.sf.gratia.reporting.GratiaBirtReportEH</property>
     <list-property name="libraries">
         <structure>
             <property name="fileName">gratia-lib1.rptlibrary</property>
@@ -1853,7 +1854,6 @@ MM/dd/yyyy
                 </structure>
             </list-property>
             <property name="style">sans-style1</property>
-            <property name="eventHandlerClass">net.sf.gratia.reporting.GratiaBirtReportEH</property>
         </extended-item>
         <text-data id="99">
             <property name="style">sans-style1</property>
