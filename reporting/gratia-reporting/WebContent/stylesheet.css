@@ -27,6 +27,12 @@ a.menuItem:hover
 	color: #FFFFFF; 
 	background-color: #e07630;
 }
+a.menuItem:focus
+{
+	border: solid 1px #e07630;
+	color: #FFFFFF; 
+	background-color: #e07630;
+}
 .osgcolor {
 	color: #e07630;
 	text-decoration: underline;
