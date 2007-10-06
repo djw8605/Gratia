@@ -1,6 +1,6 @@
 var caldef1 = {
 	firstday:0,
-	dtype:'MM/dd/yyyy',
+	dtype:'yyyy-MM-dd',
 	width:250,
 	windoww:300,
 	windowh:200,
@@ -21,10 +21,10 @@ var caldef1 = {
 	headerstyle: {
 		type:'buttons',
 		css:'clsDayName',
-		imgnextm:'img/forward.jpg',
-		imgprevm:'img/back.jpg',
-		imgnexty:'img/forward.jpg',
-		imgprevy:'img/back.jpg'
+		imgnextm:'img/next.gif',
+		imgprevm:'img/prev.gif',
+		imgnexty:'img/next_year.gif',
+		imgprevy:'img/prev_year.gif'
 	},
 	monthnames :["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
 	daynames : ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"],
