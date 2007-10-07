@@ -21,7 +21,7 @@
 <script type="text/javascript" src="calendar/calendarstd.js"></script>
 <script type="text/javascript">
 	
-var c1 = new CodeThatCalendar(caldef1);
+  var c1 = new CodeThatCalendar(caldef1);
 
   function addVO (form) 
   {
@@ -41,8 +41,8 @@ var c1 = new CodeThatCalendar(caldef1);
  	form.VOs.value += ")";
   }
    
-   function addVO2 (form) 
-   {
+  function addVO2 (form) 
+  {
    /* Construct the VOs string from the selection */  
    	form.VOs.value = "";
    		
@@ -51,7 +51,7 @@ var c1 = new CodeThatCalendar(caldef1);
    		if (form.myVOs.options[i].selected)
    		{
    			if (form.VOs.value != "") 
-   				form.VOs.value += " " + form.myVOs.options[i].value;
+   				form.VOs.value += ";" + form.myVOs.options[i].value;
    			else
    				form.VOs.value += form.myVOs.options[i].value;
    		}
@@ -60,8 +60,8 @@ var c1 = new CodeThatCalendar(caldef1);
 
   function getURL ()
   {
-   var x=document.getElementsByTagName('form')[0]
-   var url = "";
+	var x=document.getElementsByTagName('form')[0]
+	var url = "";
 
 	for (var i=0;i<x.length;i++)
 	{
@@ -78,7 +78,9 @@ var c1 = new CodeThatCalendar(caldef1);
 			url += "&" + name + "=" + value;
 		}
 	}
+	// replace all spaces --> %20 and ":" --> %7C
 	url = url.replace(/ /g, "%20");
+	url = url.replace(/;/g, "%3B");
 	x.ReportURL.value = url;
   	// document.write(url);
   	// document.write("<br />");
@@ -309,9 +311,9 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 							selected="selected";
 							
 							if (SelectedVOs != "") 
-								SelectedVOs += " " + VOName;
+								SelectedVOs += ";" + VOName;
 							else
-                						SelectedVOs += VOName;
+								SelectedVOs += VOName;
 						}
 						%> <OPTION value="<%=VOName %>" <%=selected %>><%=VOName %></OPTION> <%
 					}
@@ -406,6 +408,9 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 			url += "&" + name + "=" + value;
 		}
 	}
+	// replace all spaces --> %20 and ";" --> %3B
+	url = url.replace(/ /g, "%20");
+	url = url.replace(/;/g, "%3B");
 	x.ReportURL.value = url;
 
 </script>
