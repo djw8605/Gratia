@@ -4,6 +4,7 @@ import org.eclipse.birt.report.engine.api.script.eventadapter.ReportEventAdapter
 import javax.servlet.http.HttpServletRequest;
 import org.eclipse.birt.report.engine.api.script.IReportContext;
 import org.eclipse.birt.report.engine.api.script.element.IReportDesign;
+//import java.io.*;
 //import net.sf.gratia.reporting.ReportingConfiguration;
 //import net.sf.gratia.util.Logging;
 
@@ -21,7 +22,38 @@ public class GratiaBirtReportEH extends ReportEventAdapter {
 	}
 
 	public void beforeFactory(IReportDesign design, IReportContext rc) {
+		try 
+		{
+			//  Debugging ...
+			// BufferedWriter out = new BufferedWriter(new FileWriter("./GratiaBirtEH.log", true));
+			// out.write("\n+++++++++ before factory ++++++++++++++++\n");
+			// out.flush();
 
+			Object inVOsObj = rc.getParameterValue("VOs");
+	        if (inVOsObj != null)
+	        {
+	        	String inVOs = inVOsObj.toString();
+	        	// out.write("VOs = " + inVOs +"\n");
+	        	// out.flush();
+		        
+	        	String[] words = inVOs.split (" ");
+	        	String outVOs = "(";
+	        	for (int i=0; i < words.length; i++)
+	        	{
+	        		if (outVOs != "(") 
+	        			outVOs += "," + "'"+ words[i] + "'";
+	        		else
+	        			outVOs += "'"+ words[i] + "'";
+	        	}
+	    	
+	        outVOs += ")";
+	        rc.setParameterValue("VOs", outVOs); 
+	        }
+	        // out.close();
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		 }
 	}
 
 	public void beforeRender(IReportContext rc) {
