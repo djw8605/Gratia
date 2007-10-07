@@ -1538,7 +1538,7 @@ else {&#xD;
             <property name="style">sans-style1</property>
             <property name="fontFamily">sans-serif</property>
             <property name="fontSize">9pt</property>
-            <property name="textAlign">center</property>
+            <property name="textAlign">left</property>
             <expression name="valueExpr">if(params["SelectionType"] == "IN"){"VO\'s selected:  " + params["VOs"]}else{"VO\'s excluded:  " + params["VOs"]}</expression>
             <property name="contentType">html</property>
         </text-data>
