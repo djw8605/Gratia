@@ -105,7 +105,7 @@ String report =request.getParameter("report");
 
 
 String requestedReportNameAndPath = request.getParameter("report");
-String pageID = "" + System.currentTimeMillis();
+String pageID = "gratiaReporting";
 
 // Load the report parameters
 
