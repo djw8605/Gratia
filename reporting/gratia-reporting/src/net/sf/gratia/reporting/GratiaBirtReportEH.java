@@ -26,7 +26,7 @@ public class GratiaBirtReportEH extends ReportEventAdapter {
 		{
 			//  Debugging ...
 			// BufferedWriter out = new BufferedWriter(new FileWriter("./GratiaBirtEH.log", true));
-			// out.write("\n+++++++++ before factory ++++++++++++++++\n");
+			//out.write("\n+++++++++ before factory ++++++++++++++++\n");
 			// out.flush();
 
 			Object inVOsObj = rc.getParameterValue("VOs");
@@ -36,7 +36,7 @@ public class GratiaBirtReportEH extends ReportEventAdapter {
 	        	// out.write("VOs = " + inVOs +"\n");
 	        	// out.flush();
 		        
-	        	String[] words = inVOs.split (" ");
+	        	String[] words = inVOs.split (";");
 	        	String outVOs = "(";
 	        	for (int i=0; i < words.length; i++)
 	        	{
