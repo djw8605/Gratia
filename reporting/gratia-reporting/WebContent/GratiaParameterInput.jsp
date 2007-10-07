@@ -23,8 +23,8 @@
 	
 var c1 = new CodeThatCalendar(caldef1);
 
-function addVO (form) 
-{
+  function addVO (form) 
+  {
 /* Construct the VOs string from the selection */  
 	form.VOs.value = "(";
 		
@@ -39,11 +39,27 @@ function addVO (form)
 		}
 	}
  	form.VOs.value += ")";
-}
-    
+  }
+   
+   function addVO2 (form) 
+   {
+   /* Construct the VOs string from the selection */  
+   	form.VOs.value = "";
+   		
+   	for(var i = 0; i < form.myVOs.options.length; i++)
+   	{
+   		if (form.myVOs.options[i].selected)
+   		{
+   			if (form.VOs.value != "") 
+   				form.VOs.value += " " + form.myVOs.options[i].value;
+   			else
+   				form.VOs.value += form.myVOs.options[i].value;
+   		}
+   	}
+  }
 
-function getURL ()
-{
+  function getURL ()
+  {
    var x=document.getElementsByTagName('form')[0]
    var url = "";
 
@@ -62,10 +78,11 @@ function getURL ()
 			url += "&" + name + "=" + value;
 		}
 	}
+	url = url.replace(/ /g, "%20");
 	x.ReportURL.value = url;
   	// document.write(url);
   	// document.write("<br />");
-}
+  }
     
 </script>
 
@@ -249,7 +266,7 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 			<tr>
 			   <td valign="top"><label class=paramName> Select one or more VOs:</label></td>
 			   <td> 
-				<SELECT multiple size="10" id="myVOs" name="myVOs" onChange="addVO(this.form); getURL();" >
+				<SELECT multiple size="10" id="myVOs" name="myVOs" onChange="addVO2(this.form); getURL();" >
 						
 	<%		
 			// define the sql string to get the list of VOs that the user can selct from
@@ -261,7 +278,7 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 			Statement statement = null;
 			ResultSet results = null;
 			String VOName = "";
-			String SelectedVOs = "(";					 
+			String SelectedVOs = "";					 
 						
 			try {
 				Class.forName("com.mysql.jdbc.Driver").newInstance();
@@ -291,18 +308,18 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 						{
 							selected="selected";
 							
-							if (SelectedVOs != "(") 
-								SelectedVOs += "," + "'"+ VOName + "'";
+							if (SelectedVOs != "") 
+								SelectedVOs += " " + VOName;
 							else
-                						SelectedVOs += "'"+ VOName + "'";
+                						SelectedVOs += VOName;
 						}
 						%> <OPTION value="<%=VOName %>" <%=selected %>><%=VOName %></OPTION> <%
 					}
 				}
-				if ( SelectedVOs == "(") 
-					SelectedVOs ="";
-				else 
-					SelectedVOs += ")";
+				//if ( SelectedVOs == "(") 
+				//	SelectedVOs ="";
+				//else 
+				//	SelectedVOs += ")";
 					
 			}catch(SQLException exception){
 				out.println("<!--");
