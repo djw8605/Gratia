@@ -24,6 +24,12 @@
         </structure>
     </list-property>
     <property name="eventHandlerClass">net.sf.gratia.reporting.GratiaBirtReportEH</property>
+    <list-property name="libraries">
+        <structure>
+            <property name="fileName">gratia-lib1.rptlibrary</property>
+            <property name="namespace">gratia-lib1</property>
+        </structure>
+    </list-property>
     <list-property name="configVars">
         <structure>
             <property name="name">GroupByFormat</property>
@@ -1542,31 +1548,8 @@ else {&#xD;
             <expression name="valueExpr">if(params["SelectionType"] == "IN"){"VO\'s selected:  " + params["VOs"]}else{"VO\'s excluded:  " + params["VOs"]}</expression>
             <property name="contentType">html</property>
         </text-data>
-        <label id="116">
-            <property name="fontFamily">sans-serif</property>
-            <property name="fontSize">12pt</property>
-            <property name="fontWeight">bold</property>
-            <text-property name="text">Retrieve Report URL</text-property>
-            <structure name="action">
-                <property name="linkType">hyperlink</property>
-                <expression name="uri">params["ReportURL"]</expression>
-                <property name="targetWindow">_blank</property>
-            </structure>
-        </label>
-        <label id="108">
-            <property name="style">sans-style1</property>
-            <property name="fontSize">12pt</property>
-            <property name="fontWeight">bold</property>
-            <property name="marginTop">0pt</property>
-            <property name="marginBottom">20px</property>
-            <property name="paddingTop">1pt</property>
-            <text-property name="text">Show Query</text-property>
-            <structure name="action">
-                <property name="linkType">hyperlink</property>
-                <expression name="uri">"../showQuery.jsp?TraceTableKey="+params["UserName"].split("|")[1]</expression>
-                <property name="targetWindow">_self</property>
-            </structure>
-        </label>
+        <label name="ReportURL" id="117" extends="gratia-lib1.ReportURL"/>
+        <label name="ShowQuery" id="118" extends="gratia-lib1.ShowQuery"/>
     </body>
     <list-property name="images">
         <structure>
