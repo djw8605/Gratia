@@ -361,7 +361,6 @@
                     <property name="dataType">string</property>
                     <property name="isRequired">false</property>
                     <property name="controlType">text-box</property>
-                    <property name="defaultValue">ReportURL</property>
                     <structure name="format">
                         <property name="category">Unformatted</property>
                     </structure>
@@ -6506,13 +6505,6 @@ else {&#xD;
             </list-property>
             <property name="style">sans-style1</property>
         </extended-item>
-        <text-data name="ReportURL" id="121">
-            <property name="style">sans-style1</property>
-            <property name="marginTop">0pt</property>
-            <expression name="valueExpr">"Retrieve report URL:   "
-+ params["ReportURL"]</expression>
-            <property name="contentType">html</property>
-        </text-data>
         <label name="ShowQuery" id="122">
             <property name="style">sans-style1</property>
             <property name="fontSize">12pt</property>
@@ -6525,6 +6517,18 @@ else {&#xD;
                 <property name="linkType">hyperlink</property>
                 <expression name="uri">"../showQuery.jsp?TraceTableKey="+params["UserName"].split("|")[1]</expression>
                 <property name="targetWindow">_self</property>
+            </structure>
+        </label>
+        <label name="ReportURL" id="116">
+            <property name="style">sans-style1</property>
+            <property name="fontFamily">sans-serif</property>
+            <property name="fontSize">12pt</property>
+            <property name="fontWeight">bold</property>
+            <text-property name="text">Retrieve Report URL</text-property>
+            <structure name="action">
+                <property name="linkType">hyperlink</property>
+                <expression name="uri">params["ReportURL"]</expression>
+                <property name="targetWindow">_blank</property>
             </structure>
         </label>
     </components>
