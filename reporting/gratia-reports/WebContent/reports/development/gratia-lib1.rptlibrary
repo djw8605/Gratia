@@ -6554,11 +6554,20 @@ else {&#xD;
             </structure>
         </image>
         <image name="ShowQuery-Button" id="391">
+            <property name="style">sans-style1</property>
+            <property name="marginTop">0pt</property>
+            <property name="marginBottom">0pt</property>
+            <property name="marginRight">0pt</property>
+            <property name="paddingTop">0pt</property>
+            <property name="paddingLeft">0pt</property>
+            <property name="paddingBottom">0pt</property>
+            <property name="paddingRight">0pt</property>
             <property name="source">embed</property>
             <property name="imageName">ShowQuery.gif</property>
+            <text-property name="altText">Show Query</text-property>
             <structure name="action">
                 <property name="linkType">hyperlink</property>
-                <expression name="uri">../showQuery.jsp?TraceTableKey="+params["UserName"].split("|")[1]</expression>
+                <expression name="uri">"../showQuery.jsp?TraceTableKey="+params["UserName"].split("|")[1]</expression>
                 <property name="targetWindow">_self</property>
             </structure>
         </image>
