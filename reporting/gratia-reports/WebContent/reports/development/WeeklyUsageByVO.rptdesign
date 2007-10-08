@@ -1538,16 +1538,21 @@ else {&#xD;
             <property name="style">sans-style1</property>
             <property name="fontFamily">sans-serif</property>
             <property name="fontSize">9pt</property>
-            <property name="textAlign">left</property>
+            <property name="textAlign">center</property>
             <expression name="valueExpr">if(params["SelectionType"] == "IN"){"VO\'s selected:  " + params["VOs"]}else{"VO\'s excluded:  " + params["VOs"]}</expression>
             <property name="contentType">html</property>
         </text-data>
-        <text-data id="114">
-            <property name="marginTop">0pt</property>
-            <expression name="valueExpr">"Retrieve report URL:   "
-+ params["ReportURL"]</expression>
-            <property name="contentType">html</property>
-        </text-data>
+        <label id="116">
+            <property name="fontFamily">sans-serif</property>
+            <property name="fontSize">12pt</property>
+            <property name="fontWeight">bold</property>
+            <text-property name="text">Retrieve Report URL</text-property>
+            <structure name="action">
+                <property name="linkType">hyperlink</property>
+                <expression name="uri">params["ReportURL"]</expression>
+                <property name="targetWindow">_blank</property>
+            </structure>
+        </label>
         <label id="108">
             <property name="style">sans-style1</property>
             <property name="fontSize">12pt</property>
@@ -1563,4 +1568,15 @@ else {&#xD;
             </structure>
         </label>
     </body>
+    <list-property name="images">
+        <structure>
+            <property name="name">www.gif</property>
+            <property name="data">
+                R0lGODlhGAALAMQAAAAAAP///8XP39Xc6CtSinWOs4KZupirxrnG2fT2+TxhlE5vnWOAqaq60OPo7/Dz
+                9+7x9QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACwAAAAAGAALAAAF
+                Z2AQDAxhnmiqGIkYCMoxuHQdQMKytIEyBwSg8AQkOFyFQ6ChFAWfQmdgcQwkFI9CdciVRgMGAYMGfQaL
+                Z9EBoXWVv+d0mOl2GKHe9OKRWPy6RCdVBk0IBDI2iQ9iOy5iKZAoCgUQIiEAOw==
+            </property>
+        </structure>
+    </list-property>
 </report>
