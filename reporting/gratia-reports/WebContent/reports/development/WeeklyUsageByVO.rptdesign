@@ -1548,8 +1548,8 @@ else {&#xD;
             <expression name="valueExpr">if(params["SelectionType"] == "IN"){"VO\'s selected:  " + params["VOs"]}else{"VO\'s excluded:  " + params["VOs"]}</expression>
             <property name="contentType">html</property>
         </text-data>
-        <label name="ReportURL" id="117" extends="gratia-lib1.ReportURL"/>
-        <label name="ShowQuery" id="118" extends="gratia-lib1.ShowQuery"/>
+        <image name="ReportURL-button" id="119" extends="gratia-lib1.ReportURL-button"/>
+        <image name="ShowQuery-button" id="120" extends="gratia-lib1.ShowQuery-button"/>
     </body>
     <list-property name="images">
         <structure>
