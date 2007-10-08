@@ -361,6 +361,7 @@
                     <property name="dataType">string</property>
                     <property name="isRequired">false</property>
                     <property name="controlType">text-box</property>
+                    <property name="defaultValue"></property>
                     <structure name="format">
                         <property name="category">Unformatted</property>
                     </structure>
@@ -6524,6 +6525,12 @@ else {&#xD;
             <property name="fontFamily">sans-serif</property>
             <property name="fontSize">12pt</property>
             <property name="fontWeight">bold</property>
+            <list-property name="visibility">
+                <structure>
+                    <property name="format">all</property>
+                    <expression name="valueExpr">params["ReportURL"]==""</expression>
+                </structure>
+            </list-property>
             <text-property name="text">Retrieve Report URL</text-property>
             <structure name="action">
                 <property name="linkType">hyperlink</property>
