@@ -73,7 +73,7 @@
 	{
 		name = x.elements[i].name;
 		value = x.elements[i].value;
-		if (name != "myVOs" && name != "submitButton" && name != "BaseURL"  && name != "ReportURL" )
+		if (name != "myVOs" && name != "submitButton" && name != "BaseURL" )
 		{
 			url += "&" + name + "=" + value;
 		}
@@ -403,7 +403,7 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 	{
 		name = x.elements[i].name;
 		value = x.elements[i].value;
-		if (name != "myVOs" && name != "submitButton" && name != "BaseURL" && name != "ReportURL" )
+		if (name != "myVOs" && name != "submitButton" && name != "BaseURL" )
 		{
 			url += "&" + name + "=" + value;
 		}
