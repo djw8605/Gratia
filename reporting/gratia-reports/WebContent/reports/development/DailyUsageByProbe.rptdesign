@@ -1777,7 +1777,9 @@ MM/dd/yyyy
             <expression name="valueExpr">"Date range: "+ params["StartDate"] + " - " + params["EndDate"]</expression>
             <property name="contentType">html</property>
         </text-data>
-        <image name="ReportURL-button" id="391" extends="gratia-lib1.ReportURL-button"/>
-        <image name="ShowQuery-button" id="392" extends="gratia-lib1.ShowQuery-button"/>
+        <image name="ReportURL-Button" id="393" extends="gratia-lib1.ReportURL-Button"/>
+        <image name="ShowQuery-Button" id="394" extends="gratia-lib1.ShowQuery-Button">
+            <property name="fontSize">medium</property>
+        </image>
     </body>
 </report>
