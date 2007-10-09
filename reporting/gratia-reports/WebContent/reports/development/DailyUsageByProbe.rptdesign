@@ -872,14 +872,9 @@ function beforeGeneration( chart, context ){
 
 
 	if(val != null) {
-                fos = new java.io.FileOutputStream(&quot;/tmp/glr.txt&quot;, true); 
-                printWriter = new java.io.PrintWriter(fos); 
-
                 axes = chart.getAxes().get(0);
                 formatSpec = axes.getFormatSpecifier();
                 formatSpec.setPattern(val);
-                printWriter.println(&quot;4.&quot;+val+&quot; &quot;+axes.getFormatSpecifier());
-                printWriter.close();
         }       
 }
 
@@ -1007,17 +1002,9 @@ function beforeGeneration( chart, context ){
  */
 function beforeDrawAxisLabel( axis, label, context )
 {
-      
-fos = new java.io.FileOutputStream(&quot;/tmp/glr.txt&quot;, true); 
-printWriter = new java.io.PrintWriter(fos); 
-
 	rep = context.getExternalContext().getScriptable();
 	val = rep.getParameterValue(&quot;HighlightDate&quot;);
 
-printWriter.println(&quot;3.Hightlight: &quot;+val);
-printWriter.println(&quot;3.label:      &quot;+label.getCaption().getValue());
-printWriter.flush();
-printWriter.close();
 	if(val == null)
 		val = &quot;&quot;;
 
@@ -1059,8 +1046,7 @@ function beforeDrawAxisTitle( axis, label, context )
 		label.getCaption().setValue(&quot;***undefined metric&quot;);
 		}
 	}
-}
-</Script>
+}</Script>
   <Units>Points</Units>
   <SeriesThickness>10.0</SeriesThickness>
   <SampleData>
