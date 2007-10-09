@@ -475,6 +475,7 @@ call DailyUsageByProbe(?,?,?,?,?,'Batch')
         <style name="sans-style1" id="100">
             <property name="fontFamily">sans-serif</property>
         </style>
+        <style name="button" id="395"/>
     </styles>
     <page-setup>
         <simple-master-page name="Simple MasterPage" id="2">
@@ -1763,9 +1764,7 @@ MM/dd/yyyy
             <expression name="valueExpr">"Date range: "+ params["StartDate"] + " - " + params["EndDate"]</expression>
             <property name="contentType">html</property>
         </text-data>
-        <image name="ReportURL-Button" id="393" extends="gratia-lib1.ReportURL-Button"/>
-        <image name="ShowQuery-Button" id="394" extends="gratia-lib1.ShowQuery-Button">
-            <property name="fontSize">medium</property>
-        </image>
+        <label name="ReportURL" id="396" extends="gratia-lib1.ReportURL"/>
+        <label name="ShowQuery" id="397" extends="gratia-lib1.ShowQuery"/>
     </body>
 </report>

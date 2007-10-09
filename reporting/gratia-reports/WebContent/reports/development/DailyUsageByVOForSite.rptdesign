@@ -1869,7 +1869,7 @@ MM/dd/yyyy
             <expression name="valueExpr">"Site Name: "+ params["ForSiteName"]</expression>
             <property name="contentType">html</property>
         </text-data>
-        <text-data name="ReportURL" id="392" extends="gratia-lib1.ReportURL"/>
-        <label name="ShowQuery" id="393" extends="gratia-lib1.ShowQuery"/>
+        <label name="ReportURL" id="394" extends="gratia-lib1.ReportURL"/>
+        <label name="ShowQuery" id="396" extends="gratia-lib1.ShowQuery"/>
     </body>
 </report>

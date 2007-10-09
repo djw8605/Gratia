@@ -23,6 +23,13 @@
             <expression name="value">params["DatabasePassword"]</expression>
         </structure>
     </list-property>
+    <property name="eventHandlerClass">net.sf.gratia.reporting.GratiaBirtReportEH</property>
+    <list-property name="libraries">
+        <structure>
+            <property name="fileName">gratia-lib1.rptlibrary</property>
+            <property name="namespace">gratia-lib1</property>
+        </structure>
+    </list-property>
     <list-property name="configVars">
         <structure>
             <property name="name">DatabaseUser</property>
@@ -33,7 +40,7 @@
             <property name="value">proto</property>
         </structure>
         <structure>
-            <property name="name">Display Metric</property>
+            <property name="name">DisplayMetric</property>
             <property name="value">jobcount</property>
         </structure>
         <structure>
@@ -56,11 +63,11 @@
             <property name="value">MM/dd/yyyy</property>
         </structure>
         <structure>
-            <property name="name">Start Date</property>
+            <property name="name">StartDate</property>
             <property name="value">2007-01-01</property>
         </structure>
         <structure>
-            <property name="name">End Date</property>
+            <property name="name">EndDate</property>
             <property name="value">2007-02-01</property>
         </structure>
     </list-property>
@@ -892,7 +899,7 @@
                 </scalar-parameter>
             </parameters>
         </parameter-group>
-        <scalar-parameter name="Display Metric" id="101">
+        <scalar-parameter name="DisplayMetric" id="101">
             <property name="hidden">false</property>
             <text-property name="helpText">Select metric for chart</text-property>
             <property name="valueType">static</property>
@@ -998,12 +1005,12 @@
                 <property name="pattern">Unformatted</property>
             </structure>
         </scalar-parameter>
-        <scalar-parameter name="Start Date" id="86">
+        <scalar-parameter name="StartDate" id="86">
             <property name="hidden">false</property>
             <text-property name="helpText">Only jobs that finished after this date will be included</text-property>
             <property name="valueType">static</property>
             <property name="dataType">string</property>
-            <text-property name="promptText">Start Date</text-property>
+            <text-property name="promptText">StartDate</text-property>
             <property name="isRequired">true</property>
             <property name="controlType">text-box</property>
             <property name="defaultValue">2007-01-01</property>
@@ -1012,12 +1019,12 @@
                 <property name="pattern">Unformatted</property>
             </structure>
         </scalar-parameter>
-        <scalar-parameter name="End Date" id="87">
+        <scalar-parameter name="EndDate" id="87">
             <property name="hidden">false</property>
             <text-property name="helpText">Only jobs that finished before this date will be included</text-property>
             <property name="valueType">static</property>
             <property name="dataType">string</property>
-            <text-property name="promptText">End Date</text-property>
+            <text-property name="promptText">EndDate</text-property>
             <property name="isRequired">true</property>
             <property name="controlType">text-box</property>
             <property name="defaultValue">2007-02-01</property>
@@ -1026,6 +1033,7 @@
                 <property name="pattern">Unformatted</property>
             </structure>
         </scalar-parameter>
+        <parameter-group name="ReportInfo" id="365" extends="gratia-lib1.ReportInfo"/>
     </parameters>
     <data-sources>
         <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="fermigrid1" id="357">
@@ -1192,11 +1200,11 @@
                 </structure>
                 <structure>
                     <property name="paramName">StartDate</property>
-                    <expression name="expression">params["Start Date"]</expression>
+                    <expression name="expression">params["StartDate"]</expression>
                 </structure>
                 <structure>
                     <property name="paramName">EndDate</property>
-                    <expression name="expression">params["End Date"]</expression>
+                    <expression name="expression">params["EndDate"]</expression>
                 </structure>
             </list-property>
             <list-property name="boundDataColumns">
@@ -1932,7 +1940,7 @@ function beforeDrawAxisTitle( axis, label, context )
 
 	rep = context.getExternalContext().getScriptable();
 
-	val1 =rep.getParameterValue(&quot;Display Metric&quot;);
+	val1 =rep.getParameterValue(&quot;DisplayMetric&quot;);
 
 	if(!axis.isCategoryAxis())
 
@@ -2208,13 +2216,13 @@ function beforeDrawAxisTitle( axis, label, context )
             &lt;expression name=&quot;expression&quot;>'AnySite'&lt;/expression>
         &lt;/structure>
         &lt;structure>
-            &lt;property name=&quot;paramName&quot;>Display Metric&lt;/property>
-            &lt;expression name=&quot;expression&quot;>params[&quot;Display Metric&quot;]&lt;/expression>
+            &lt;property name=&quot;paramName&quot;>DisplayMetric&lt;/property>
+            &lt;expression name=&quot;expression&quot;>params[&quot;DisplayMetric&quot;]&lt;/expression>
         &lt;/structure>
     &lt;/list-property>
 &lt;/structure>
 </BaseUrl>
-                <BaseParameterName>Start Date</BaseParameterName>
+                <BaseParameterName>StartDate</BaseParameterName>
                 <ValueParameterName></ValueParameterName>
                 <SeriesParameterName>ForVOName</SeriesParameterName>
               </Value>
@@ -2632,5 +2640,7 @@ function beforeDrawAxisTitle( axis, label, context )
                 </row>
             </footer>
         </table>
+        <label name="ReportURL" id="363" extends="gratia-lib1.ReportURL"/>
+        <label name="ShowQuery" id="364" extends="gratia-lib1.ShowQuery"/>
     </body>
 </report>

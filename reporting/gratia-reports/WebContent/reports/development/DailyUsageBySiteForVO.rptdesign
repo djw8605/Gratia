@@ -1844,10 +1844,7 @@ MM/dd/yyyy
             <expression name="valueExpr">"VO Name: "+ params["ForVOName"]</expression>
             <property name="contentType">html</property>
         </text-data>
-        <text-data name="ReportURL" id="394" extends="gratia-lib1.ReportURL">
-            <expression name="valueExpr">"Retrieve report URL:   "
-+ params["ReportURL"]</expression>
-        </text-data>
-        <label name="ShowQuery" id="395" extends="gratia-lib1.ShowQuery"/>
+        <label name="ReportURL" id="404" extends="gratia-lib1.ReportURL"/>
+        <label name="ShowQuery" id="402" extends="gratia-lib1.ShowQuery"/>
     </body>
 </report>

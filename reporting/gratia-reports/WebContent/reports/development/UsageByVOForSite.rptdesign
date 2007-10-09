@@ -23,6 +23,13 @@
             <expression name="value">params["DatabasePassword"]</expression>
         </structure>
     </list-property>
+    <property name="eventHandlerClass">net.sf.gratia.reporting.GratiaBirtReportEH</property>
+    <list-property name="libraries">
+        <structure>
+            <property name="fileName">gratia-lib1.rptlibrary</property>
+            <property name="namespace">gratia-lib1</property>
+        </structure>
+    </list-property>
     <list-property name="configVars">
         <structure>
             <property name="name">DatabaseURL</property>
@@ -53,11 +60,11 @@
             <property name="value">AnySite</property>
         </structure>
         <structure>
-            <property name="name">Start Date</property>
+            <property name="name">StartDate</property>
             <property name="value">2006-03-01</property>
         </structure>
         <structure>
-            <property name="name">End Date</property>
+            <property name="name">EndDate</property>
             <property name="value">2999-12-31</property>
         </structure>
         <structure>
@@ -170,12 +177,12 @@
         </parameter-group>
         <parameter-group name="DateRange" id="113">
             <parameters>
-                <scalar-parameter name="Start Date" id="86">
+                <scalar-parameter name="StartDate" id="86">
                     <property name="hidden">true</property>
                     <text-property name="helpText">Only jobs that finished after this date will be included</text-property>
                     <property name="valueType">static</property>
                     <property name="dataType">string</property>
-                    <text-property name="promptText">Start Date</text-property>
+                    <text-property name="promptText">StartDate</text-property>
                     <property name="isRequired">true</property>
                     <property name="controlType">text-box</property>
                     <property name="defaultValue">2006-03-01</property>
@@ -184,12 +191,12 @@
                         <property name="pattern">Unformatted</property>
                     </structure>
                 </scalar-parameter>
-                <scalar-parameter name="End Date" id="87">
+                <scalar-parameter name="EndDate" id="87">
                     <property name="hidden">true</property>
                     <text-property name="helpText">Only jobs that finished before this date will be included</text-property>
                     <property name="valueType">static</property>
                     <property name="dataType">string</property>
-                    <text-property name="promptText">End Date</text-property>
+                    <text-property name="promptText">EndDate</text-property>
                     <property name="isRequired">true</property>
                     <property name="controlType">text-box</property>
                     <property name="defaultValue">2999-12-31</property>
@@ -228,24 +235,11 @@
                         <property name="pattern">Unformatted</property>
                     </structure>
                 </scalar-parameter>
-                <scalar-parameter name="Subtitle" id="104">
-                    <property name="hidden">true</property>
-                    <property name="valueType">static</property>
-                    <property name="dataType">string</property>
-                    <property name="concealValue">true</property>
-                    <property name="isRequired">false</property>
-                    <property name="controlType">text-box</property>
-                    <property name="defaultValue">None</property>
-                    <structure name="format">
-                        <property name="category">Unformatted</property>
-                        <property name="pattern">Unformatted</property>
-                    </structure>
-                </scalar-parameter>
             </parameters>
         </parameter-group>
         <parameter-group name="Metrics" id="116">
             <parameters>
-                <scalar-parameter name="Display Metric" id="117">
+                <scalar-parameter name="DisplayMetric" id="117">
                     <property name="hidden">true</property>
                     <text-property name="helpText">Select metric for chart</text-property>
                     <property name="valueType">static</property>
@@ -278,6 +272,7 @@
                 </scalar-parameter>
             </parameters>
         </parameter-group>
+        <parameter-group name="ReportInfo" id="118" extends="gratia-lib1.ReportInfo"/>
     </parameters>
     <data-sources>
         <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="fermigrid1" id="4">
@@ -912,7 +907,7 @@ function beforeGeneration( chart, context ){
 function beforeDrawAxisTitle( axis, label, context )
 {
 	rep = context.getExternalContext().getScriptable();
-	val1 =rep.getParameterValue(&quot;Display Metric&quot;);
+	val1 =rep.getParameterValue(&quot;DisplayMetric&quot;);
 	if(!axis.isCategoryAxis())
 	{
 		if(val1==&quot;process&quot;)
@@ -1129,7 +1124,18 @@ function beforeDrawAxisTitle( axis, label, context )
             <Visible>true</Visible>
           </Label>
           <DataDefinition>
-            <Definition>row[&quot;Njobs&quot;]</Definition>
+            <Definition>if (params[&quot;DisplayMetric&quot;] == &quot;wallclock&quot;) {&#xD;
+ row[&quot;WallDuration&quot;] / 3600&#xD;
+}&#xD;
+else if (params[&quot;DisplayMetric&quot;]==&quot;process&quot;) {&#xD;
+row[&quot;Cpu&quot;]/3600&#xD;
+}&#xD;
+else if (params[&quot;DisplayMetric&quot;]==&quot;jobcount&quot;){&#xD;
+row[&quot;Njobs&quot;]&#xD;
+}&#xD;
+else {&#xD;
+&quot;***Unknown metric***&quot;&#xD;
+}</Definition>
           </DataDefinition>
           <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
           <DataPoint>
@@ -1199,25 +1205,25 @@ function beforeDrawAxisTitle( axis, label, context )
 
         &lt;structure>
 
-            &lt;property name=&quot;paramName&quot;>Start Date&lt;/property>
+            &lt;property name=&quot;paramName&quot;>StartDate&lt;/property>
 
-            &lt;expression name=&quot;expression&quot;>params[&quot;Start Date&quot;]&lt;/expression>
-
-        &lt;/structure>
-
-        &lt;structure>
-
-            &lt;property name=&quot;paramName&quot;>End Date&lt;/property>
-
-            &lt;expression name=&quot;expression&quot;>params[&quot;End Date&quot;]&lt;/expression>
+            &lt;expression name=&quot;expression&quot;>params[&quot;StartDate&quot;]&lt;/expression>
 
         &lt;/structure>
 
         &lt;structure>
 
-            &lt;property name=&quot;paramName&quot;>Display Metric&lt;/property>
+            &lt;property name=&quot;paramName&quot;>EndDate&lt;/property>
 
-            &lt;expression name=&quot;expression&quot;>params[&quot;Display Metric&quot;]&lt;/expression>
+            &lt;expression name=&quot;expression&quot;>params[&quot;EndDate&quot;]&lt;/expression>
+
+        &lt;/structure>
+
+        &lt;structure>
+
+            &lt;property name=&quot;paramName&quot;>DisplayMetric&lt;/property>
+
+            &lt;expression name=&quot;expression&quot;>params[&quot;DisplayMetric&quot;]&lt;/expression>
 
         &lt;/structure>
 
@@ -1675,6 +1681,288 @@ function beforeDrawAxisTitle( axis, label, context )
         <LabelPosition>Outside</LabelPosition>
         <Stacked>false</Stacked>
       </Series>
+      <Series>
+        <Visible>true</Visible>
+        <Label>
+          <Caption>
+            <Value>&lt;undefined></Value>
+            <Font>
+              <Alignment/>
+            </Font>
+          </Caption>
+          <Background xsi:type="attribute:ColorDefinition">
+            <Transparency>0</Transparency>
+            <Red>255</Red>
+            <Green>255</Green>
+            <Blue>255</Blue>
+          </Background>
+          <Outline>
+            <Style>Solid</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>false</Visible>
+          </Outline>
+          <Insets>
+            <Top>0.0</Top>
+            <Left>2.0</Left>
+            <Bottom>0.0</Bottom>
+            <Right>3.0</Right>
+          </Insets>
+          <Visible>false</Visible>
+        </Label>
+        <DataDefinition>
+          <Definition>row[&quot;VOName&quot;]</Definition>
+        </DataDefinition>
+        <SeriesIdentifier>Usage</SeriesIdentifier>
+        <DataPoint>
+          <Components>
+            <Type>Orthogonal_Value</Type>
+          </Components>
+          <Separator>, </Separator>
+        </DataPoint>
+        <LabelPosition>Outside</LabelPosition>
+        <Stacked>false</Stacked>
+      </Series>
+      <Series>
+        <Visible>true</Visible>
+        <Label>
+          <Caption>
+            <Value>&lt;undefined></Value>
+            <Font>
+              <Alignment/>
+            </Font>
+          </Caption>
+          <Background xsi:type="attribute:ColorDefinition">
+            <Transparency>0</Transparency>
+            <Red>255</Red>
+            <Green>255</Green>
+            <Blue>255</Blue>
+          </Background>
+          <Outline>
+            <Style>Solid</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>false</Visible>
+          </Outline>
+          <Insets>
+            <Top>0.0</Top>
+            <Left>2.0</Left>
+            <Bottom>0.0</Bottom>
+            <Right>3.0</Right>
+          </Insets>
+          <Visible>false</Visible>
+        </Label>
+        <DataDefinition>
+          <Definition>row[&quot;VOName&quot;]</Definition>
+        </DataDefinition>
+        <SeriesIdentifier>Usage</SeriesIdentifier>
+        <DataPoint>
+          <Components>
+            <Type>Orthogonal_Value</Type>
+          </Components>
+          <Separator>, </Separator>
+        </DataPoint>
+        <LabelPosition>Outside</LabelPosition>
+        <Stacked>false</Stacked>
+      </Series>
+      <Series>
+        <Visible>true</Visible>
+        <Label>
+          <Caption>
+            <Value>&lt;undefined></Value>
+            <Font>
+              <Alignment/>
+            </Font>
+          </Caption>
+          <Background xsi:type="attribute:ColorDefinition">
+            <Transparency>0</Transparency>
+            <Red>255</Red>
+            <Green>255</Green>
+            <Blue>255</Blue>
+          </Background>
+          <Outline>
+            <Style>Solid</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>false</Visible>
+          </Outline>
+          <Insets>
+            <Top>0.0</Top>
+            <Left>2.0</Left>
+            <Bottom>0.0</Bottom>
+            <Right>3.0</Right>
+          </Insets>
+          <Visible>false</Visible>
+        </Label>
+        <DataDefinition>
+          <Definition>row[&quot;VOName&quot;]</Definition>
+        </DataDefinition>
+        <SeriesIdentifier>Usage</SeriesIdentifier>
+        <DataPoint>
+          <Components>
+            <Type>Orthogonal_Value</Type>
+          </Components>
+          <Separator>, </Separator>
+        </DataPoint>
+        <LabelPosition>Outside</LabelPosition>
+        <Stacked>false</Stacked>
+      </Series>
+      <Series>
+        <Visible>true</Visible>
+        <Label>
+          <Caption>
+            <Value>&lt;undefined></Value>
+            <Font>
+              <Alignment/>
+            </Font>
+          </Caption>
+          <Background xsi:type="attribute:ColorDefinition">
+            <Transparency>0</Transparency>
+            <Red>255</Red>
+            <Green>255</Green>
+            <Blue>255</Blue>
+          </Background>
+          <Outline>
+            <Style>Solid</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>false</Visible>
+          </Outline>
+          <Insets>
+            <Top>0.0</Top>
+            <Left>2.0</Left>
+            <Bottom>0.0</Bottom>
+            <Right>3.0</Right>
+          </Insets>
+          <Visible>false</Visible>
+        </Label>
+        <DataDefinition>
+          <Definition>row[&quot;VOName&quot;]</Definition>
+        </DataDefinition>
+        <SeriesIdentifier>Usage</SeriesIdentifier>
+        <DataPoint>
+          <Components>
+            <Type>Orthogonal_Value</Type>
+          </Components>
+          <Separator>, </Separator>
+        </DataPoint>
+        <LabelPosition>Outside</LabelPosition>
+        <Stacked>false</Stacked>
+      </Series>
+      <Series>
+        <Visible>true</Visible>
+        <Label>
+          <Caption>
+            <Value>&lt;undefined></Value>
+            <Font>
+              <Alignment/>
+            </Font>
+          </Caption>
+          <Background xsi:type="attribute:ColorDefinition">
+            <Transparency>0</Transparency>
+            <Red>255</Red>
+            <Green>255</Green>
+            <Blue>255</Blue>
+          </Background>
+          <Outline>
+            <Style>Solid</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>false</Visible>
+          </Outline>
+          <Insets>
+            <Top>0.0</Top>
+            <Left>2.0</Left>
+            <Bottom>0.0</Bottom>
+            <Right>3.0</Right>
+          </Insets>
+          <Visible>false</Visible>
+        </Label>
+        <DataDefinition>
+          <Definition>row[&quot;VOName&quot;]</Definition>
+        </DataDefinition>
+        <SeriesIdentifier>Usage</SeriesIdentifier>
+        <DataPoint>
+          <Components>
+            <Type>Orthogonal_Value</Type>
+          </Components>
+          <Separator>, </Separator>
+        </DataPoint>
+        <LabelPosition>Outside</LabelPosition>
+        <Stacked>false</Stacked>
+      </Series>
+      <Series>
+        <Visible>true</Visible>
+        <Label>
+          <Caption>
+            <Value>&lt;undefined></Value>
+            <Font>
+              <Alignment/>
+            </Font>
+          </Caption>
+          <Background xsi:type="attribute:ColorDefinition">
+            <Transparency>0</Transparency>
+            <Red>255</Red>
+            <Green>255</Green>
+            <Blue>255</Blue>
+          </Background>
+          <Outline>
+            <Style>Solid</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>false</Visible>
+          </Outline>
+          <Insets>
+            <Top>0.0</Top>
+            <Left>2.0</Left>
+            <Bottom>0.0</Bottom>
+            <Right>3.0</Right>
+          </Insets>
+          <Visible>false</Visible>
+        </Label>
+        <DataDefinition>
+          <Definition>row[&quot;VOName&quot;]</Definition>
+        </DataDefinition>
+        <SeriesIdentifier>Usage</SeriesIdentifier>
+        <DataPoint>
+          <Components>
+            <Type>Orthogonal_Value</Type>
+          </Components>
+          <Separator>, </Separator>
+        </DataPoint>
+        <LabelPosition>Outside</LabelPosition>
+        <Stacked>false</Stacked>
+      </Series>
       <Grouping>
         <Enabled>false</Enabled>
         <GroupingInterval>2</GroupingInterval>
@@ -1804,77 +2092,34 @@ function beforeDrawAxisTitle( axis, label, context )
 </model:ChartWithAxes>
 ]]></xml-property>
             <property name="outputFormat">SVG</property>
-            <list-property name="filter">
-                <structure>
-                    <expression name="expr">params["ForSiteName"]</expression>
-                    <expression name="value1">row["sitename"]</expression>
-                </structure>
-            </list-property>
             <property name="dataSet">UsageBy</property>
             <property name="height">480px</property>
             <property name="width">640px</property>
-            <list-property name="paramBindings">
-                <structure>
-                    <property name="paramName">StartDate</property>
-                    <expression name="expression">params["Start Date"]</expression>
-                </structure>
-                <structure>
-                    <property name="paramName">EndDate</property>
-                    <expression name="expression">params["End Date"]</expression>
-                </structure>
-                <structure>
-                    <property name="paramName">UserName</property>
-                    <expression name="expression">params["UserName"]</expression>
-                </structure>
-                <structure>
-                    <property name="paramName">UserRole</property>
-                    <expression name="expression">params["UserRole"]</expression>
-                </structure>
-                <structure>
-                    <property name="paramName">ForVOName</property>
-                    <expression name="expression">params["ForVOName"]</expression>
-                </structure>
-                <structure>
-                    <property name="paramName">ForVO</property>
-                    <expression name="expression">params["ForVO"]</expression>
-                </structure>
-                <structure>
-                    <property name="paramName">ResourceType</property>
-                    <expression name="expression">'Batch'</expression>
-                </structure>
-                <structure>
-                    <property name="paramName">GroupByFormat</property>
-                    <expression name="expression">''</expression>
-                </structure>
-                <structure>
-                    <property name="paramName">ForSite</property>
-                    <expression name="expression">params["ForSite"]</expression>
-                </structure>
-                <structure>
-                    <property name="paramName">ForSiteName</property>
-                    <expression name="expression">params["ForSiteName"]</expression>
-                </structure>
-            </list-property>
             <list-property name="boundDataColumns">
                 <structure>
                     <property name="name">sitename</property>
                     <expression name="expression">dataSetRow["sitename"]</expression>
-                </structure>
-                <structure>
-                    <property name="name">VOName</property>
-                    <expression name="expression">dataSetRow["VOName"]</expression>
+                    <property name="dataType">string</property>
                 </structure>
                 <structure>
                     <property name="name">WallDuration</property>
                     <expression name="expression">dataSetRow["WallDuration"]</expression>
+                    <property name="dataType">float</property>
                 </structure>
                 <structure>
                     <property name="name">Cpu</property>
                     <expression name="expression">dataSetRow["Cpu"]</expression>
+                    <property name="dataType">float</property>
                 </structure>
                 <structure>
                     <property name="name">Njobs</property>
                     <expression name="expression">dataSetRow["Njobs"]</expression>
+                    <property name="dataType">decimal</property>
+                </structure>
+                <structure>
+                    <property name="name">VOName</property>
+                    <expression name="expression">dataSetRow["VOName"]</expression>
+                    <property name="dataType">string</property>
                 </structure>
             </list-property>
             <property name="style">sans-style1</property>
@@ -1883,7 +2128,7 @@ function beforeDrawAxisTitle( axis, label, context )
             <property name="style">sans-style1</property>
             <property name="fontSize">9pt</property>
             <property name="textAlign">center</property>
-            <expression name="valueExpr">"Date range: "+ params["Start Date"] + " - " + params["End Date"]</expression>
+            <expression name="valueExpr">"Date range: "+ params["StartDate"] + " - " + params["EndDate"]</expression>
             <property name="contentType">html</property>
         </text-data>
         <text-data id="107">
@@ -1893,5 +2138,7 @@ function beforeDrawAxisTitle( axis, label, context )
             <expression name="valueExpr">'Site Name:  ' + params["ForSiteName"]</expression>
             <property name="contentType">html</property>
         </text-data>
+        <label name="ReportURL" id="390" extends="gratia-lib1.ReportURL"/>
+        <label name="ShowQuery" id="391" extends="gratia-lib1.ShowQuery"/>
     </body>
 </report>

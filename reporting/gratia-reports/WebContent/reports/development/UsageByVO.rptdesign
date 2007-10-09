@@ -187,19 +187,6 @@
                         <property name="pattern">Unformatted</property>
                     </structure>
                 </scalar-parameter>
-                <scalar-parameter name="Subtitle" id="104">
-                    <property name="hidden">true</property>
-                    <property name="valueType">static</property>
-                    <property name="dataType">string</property>
-                    <property name="concealValue">true</property>
-                    <property name="isRequired">false</property>
-                    <property name="controlType">text-box</property>
-                    <property name="defaultValue">None</property>
-                    <structure name="format">
-                        <property name="category">Unformatted</property>
-                        <property name="pattern">Unformatted</property>
-                    </structure>
-                </scalar-parameter>
             </parameters>
         </parameter-group>
         <parameter-group name="Metrics" id="116">
@@ -237,6 +224,7 @@
             </parameters>
         </parameter-group>
         <parameter-group name="DateRange" id="118" extends="gratia-lib1.DateRange"/>
+        <parameter-group name="ReportInfo" id="119" extends="gratia-lib1.ReportInfo"/>
     </parameters>
     <data-sources>
         <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="fermigrid1" id="4">
@@ -1087,15 +1075,15 @@ else {&#xD;
             &lt;expression name=&quot;expression&quot;>params[&quot;DatabasePassword&quot;]&lt;/expression>
         &lt;/structure>
         &lt;structure>
-            &lt;property name=&quot;paramName&quot;>Start Date&lt;/property>
+            &lt;property name=&quot;paramName&quot;>StartDate&lt;/property>
             &lt;expression name=&quot;expression&quot;>params[&quot;StartDate&quot;]&lt;/expression>
         &lt;/structure>
         &lt;structure>
-            &lt;property name=&quot;paramName&quot;>End Date&lt;/property>
+            &lt;property name=&quot;paramName&quot;>EndDate&lt;/property>
             &lt;expression name=&quot;expression&quot;>params[&quot;EndDate&quot;]&lt;/expression>
         &lt;/structure>
         &lt;structure>
-            &lt;property name=&quot;paramName&quot;>Display Metric&lt;/property>
+            &lt;property name=&quot;paramName&quot;>DisplayMetric&lt;/property>
             &lt;expression name=&quot;expression&quot;>params[&quot;DisplayMetric&quot;]&lt;/expression>
         &lt;/structure>
         &lt;structure>
@@ -1589,15 +1577,15 @@ else {&#xD;
                         <expression name="expression">params["DatabasePassword"]</expression>
                     </structure>
                     <structure>
-                        <property name="paramName">Start Date</property>
+                        <property name="paramName">StartDate</property>
                         <expression name="expression">params["StartDate"]</expression>
                     </structure>
                     <structure>
-                        <property name="paramName">End Date</property>
+                        <property name="paramName">EndDate</property>
                         <expression name="expression">params["EndDate"]</expression>
                     </structure>
                     <structure>
-                        <property name="paramName">Display Metric</property>
+                        <property name="paramName">DisplayMetric</property>
                         <expression name="expression">params["DisplayMetric"]</expression>
                     </structure>
                     <structure>
@@ -1650,5 +1638,7 @@ else {&#xD;
             <expression name="valueExpr">"Date range: "+ params["StartDate"] + " - " + params["EndDate"]</expression>
             <property name="contentType">html</property>
         </text-data>
+        <label name="ReportURL" id="390" extends="gratia-lib1.ReportURL"/>
+        <label name="ShowQuery" id="391" extends="gratia-lib1.ShowQuery"/>
     </body>
 </report>

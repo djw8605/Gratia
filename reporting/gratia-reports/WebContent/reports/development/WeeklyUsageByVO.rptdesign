@@ -46,10 +46,6 @@
             <property name="name">UserRole</property>
             <property name="value">None</property>
         </structure>
-        <structure>
-            <property name="name">Subtitle</property>
-            <property name="value">None</property>
-        </structure>
     </list-property>
     <parameters>
         <parameter-group name="DatabaseAccess" id="84">
@@ -142,19 +138,6 @@
                 <property name="pattern">Unformatted</property>
             </structure>
         </scalar-parameter>
-        <scalar-parameter name="Subtitle" id="105">
-            <property name="hidden">true</property>
-            <property name="valueType">static</property>
-            <property name="dataType">string</property>
-            <property name="concealValue">true</property>
-            <property name="isRequired">false</property>
-            <property name="controlType">text-box</property>
-            <property name="defaultValue">None</property>
-            <structure name="format">
-                <property name="category">Unformatted</property>
-                <property name="pattern">Unformatted</property>
-            </structure>
-        </scalar-parameter>
         <scalar-parameter name="VOs" id="106">
             <text-property name="helpText">List of VO's to include/exclude in chart.</text-property>
             <property name="valueType">static</property>
@@ -231,17 +214,7 @@
                 </structure>
             </list-property>
         </scalar-parameter>
-        <scalar-parameter name="ReportURL" id="113">
-            <property name="hidden">true</property>
-            <property name="valueType">static</property>
-            <property name="dataType">string</property>
-            <property name="isRequired">false</property>
-            <property name="controlType">text-box</property>
-            <property name="defaultValue">http://gratia-osg.fnal.gov:8880/gratia-reporting</property>
-            <structure name="format">
-                <property name="category">Unformatted</property>
-            </structure>
-        </scalar-parameter>
+        <parameter-group name="ReportInfo" id="125" extends="gratia-lib1.ReportInfo"/>
     </parameters>
     <data-sources>
         <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="fermigrid1" id="4">
@@ -1548,19 +1521,8 @@ else {&#xD;
             <expression name="valueExpr">if(params["SelectionType"] == "IN"){"VO\'s selected:  " + params["VOs"]}else{"VO\'s excluded:  " + params["VOs"]}</expression>
             <property name="contentType">html</property>
         </text-data>
-        <image name="ReportURL-Button" id="121" extends="gratia-lib1.ReportURL-Button">
-            <property name="source">embed</property>
-            <property name="imageName">ReportURL.gif</property>
-        </image>
-        <image name="ShowQuery-Button" id="122" extends="gratia-lib1.ShowQuery-Button">
-            <property name="source">embed</property>
-            <property name="imageName">ShowQuery.gif</property>
-            <structure name="action">
-                <property name="linkType">hyperlink</property>
-                <expression name="uri">"../showQuery.jsp?TraceTableKey="+params["UserName"].split("|")[1]</expression>
-                <property name="targetWindow">_self</property>
-            </structure>
-        </image>
+        <label name="ReportURL" id="123" extends="gratia-lib1.ReportURL"/>
+        <label name="ShowQuery" id="124" extends="gratia-lib1.ShowQuery"/>
     </body>
     <list-property name="images">
         <structure>

@@ -23,6 +23,13 @@
             <expression name="value">params["DatabasePassword"]</expression>
         </structure>
     </list-property>
+    <property name="eventHandlerClass">net.sf.gratia.reporting.GratiaBirtReportEH</property>
+    <list-property name="libraries">
+        <structure>
+            <property name="fileName">gratia-lib1.rptlibrary</property>
+            <property name="namespace">gratia-lib1</property>
+        </structure>
+    </list-property>
     <list-property name="configVars">
         <structure>
             <property name="name">DatabaseUser</property>
@@ -33,7 +40,7 @@
             <property name="value">proto</property>
         </structure>
         <structure>
-            <property name="name">Display Metric</property>
+            <property name="name">DisplayMetric</property>
             <property name="value">jobcount</property>
         </structure>
         <structure>
@@ -45,10 +52,6 @@
         </structure>
         <structure>
             <property name="name">UserRole</property>
-            <property name="value">None</property>
-        </structure>
-        <structure>
-            <property name="name">Subtitle</property>
             <property name="value">None</property>
         </structure>
     </list-property>
@@ -880,7 +883,7 @@
                 </scalar-parameter>
             </parameters>
         </parameter-group>
-        <scalar-parameter name="Display Metric" id="101">
+        <scalar-parameter name="DisplayMetric" id="101">
             <property name="hidden">false</property>
             <text-property name="helpText">Select metric for chart</text-property>
             <property name="valueType">static</property>
@@ -960,25 +963,12 @@
                 <property name="pattern">Unformatted</property>
             </structure>
         </scalar-parameter>
-        <scalar-parameter name="Subtitle" id="105">
-            <property name="hidden">true</property>
-            <property name="valueType">static</property>
-            <property name="dataType">string</property>
-            <property name="concealValue">true</property>
-            <property name="isRequired">false</property>
-            <property name="controlType">text-box</property>
-            <property name="defaultValue">None</property>
-            <structure name="format">
-                <property name="category">Unformatted</property>
-                <property name="pattern">Unformatted</property>
-            </structure>
-        </scalar-parameter>
-        <scalar-parameter name="Start Date" id="86">
+        <scalar-parameter name="StartDate" id="86">
             <property name="hidden">true</property>
             <text-property name="helpText">Only jobs that finished after this date will be included</text-property>
             <property name="valueType">static</property>
             <property name="dataType">string</property>
-            <text-property name="promptText">Start Date</text-property>
+            <text-property name="promptText">StartDate</text-property>
             <property name="isRequired">false</property>
             <property name="controlType">text-box</property>
             <property name="defaultValue">2007-01-01</property>
@@ -987,12 +977,12 @@
                 <property name="pattern">Unformatted</property>
             </structure>
         </scalar-parameter>
-        <scalar-parameter name="End Date" id="87">
+        <scalar-parameter name="EndDate" id="87">
             <property name="hidden">true</property>
             <text-property name="helpText">Only jobs that finished before this date will be included</text-property>
             <property name="valueType">static</property>
             <property name="dataType">string</property>
-            <text-property name="promptText">End Date</text-property>
+            <text-property name="promptText">EndDate</text-property>
             <property name="isRequired">false</property>
             <property name="controlType">text-box</property>
             <property name="defaultValue">2007-02-01</property>
@@ -1001,6 +991,7 @@
                 <property name="pattern">Unformatted</property>
             </structure>
         </scalar-parameter>
+        <parameter-group name="ReportInfo" id="363" extends="gratia-lib1.ReportInfo"/>
     </parameters>
     <data-sources>
         <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="fermigrid1" id="357">
@@ -1674,7 +1665,7 @@ yearnr + "-" + monthnr + "-" + daynr;</expression>
 function beforeDrawAxisTitle( axis, label, context )
 {
 	rep = context.getExternalContext().getScriptable();
-	val1 =rep.getParameterValue(&quot;Display Metric&quot;);
+	val1 =rep.getParameterValue(&quot;DisplayMetric&quot;);
 	if(!axis.isCategoryAxis())
 	{
 		if(val1==&quot;process&quot;)
@@ -1883,7 +1874,18 @@ function beforeDrawAxisTitle( axis, label, context )
             <Visible>false</Visible>
           </Label>
           <DataDefinition>
-            <Definition>row[&quot;Njobs&quot;]</Definition>
+            <Definition>if (params[&quot;DisplayMetric&quot;] == &quot;wallclock&quot;) {&#xD;
+ row[&quot;WallDuration&quot;] / 3600&#xD;
+}&#xD;
+else if (params[&quot;DisplayMetric&quot;]==&quot;process&quot;) {&#xD;
+row[&quot;Cpu&quot;]/3600&#xD;
+}&#xD;
+else if (params[&quot;DisplayMetric&quot;]==&quot;jobcount&quot;){&#xD;
+row[&quot;Njobs&quot;]&#xD;
+}&#xD;
+else {&#xD;
+&quot;***Unknown metric***&quot;&#xD;
+}</Definition>
           </DataDefinition>
           <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
           <DataPoint>
@@ -1918,8 +1920,8 @@ function beforeDrawAxisTitle( axis, label, context )
             &lt;expression name=&quot;expression&quot;>params[&quot;DatabasePassword&quot;]&lt;/expression>
         &lt;/structure>
         &lt;structure>
-            &lt;property name=&quot;paramName&quot;>Display Metric&lt;/property>
-            &lt;expression name=&quot;expression&quot;>params[&quot;Display Metric&quot;]&lt;/expression>
+            &lt;property name=&quot;paramName&quot;>DisplayMetric&lt;/property>
+            &lt;expression name=&quot;expression&quot;>params[&quot;DisplayMetric&quot;]&lt;/expression>
         &lt;/structure>
         &lt;structure>
             &lt;property name=&quot;paramName&quot;>ForSite&lt;/property>
@@ -1946,6 +1948,7 @@ function beforeDrawAxisTitle( axis, label, context )
           <GroupType>Text</GroupType>
           <AggregateExpression>Sum</AggregateExpression>
         </Grouping>
+        <Sorting>Ascending</Sorting>
       </SeriesDefinitions>
       <Orientation>Vertical</Orientation>
       <LineAttributes>
@@ -2361,5 +2364,7 @@ function beforeDrawAxisTitle( axis, label, context )
                 </row>
             </footer>
         </table>
+        <label name="ReportURL" id="390" extends="gratia-lib1.ReportURL"/>
+        <label name="ShowQuery" id="391" extends="gratia-lib1.ShowQuery"/>
     </body>
 </report>

@@ -23,6 +23,7 @@
             <expression name="value">params["DatabasePassword"]</expression>
         </structure>
     </list-property>
+    <property name="eventHandlerClass">net.sf.gratia.reporting.GratiaBirtReportEH</property>
     <list-property name="configVars">
         <structure>
             <property name="name">DatabaseURL</property>
@@ -49,11 +50,11 @@
             <property name="value">AnySite</property>
         </structure>
         <structure>
-            <property name="name">Start Date</property>
+            <property name="name">StartDate</property>
             <property name="value">2007-01-01</property>
         </structure>
         <structure>
-            <property name="name">End Date</property>
+            <property name="name">EndDate</property>
             <property name="value">2007-02-01</property>
         </structure>
         <structure>
@@ -69,7 +70,7 @@
             <property name="value">None</property>
         </structure>
         <structure>
-            <property name="name">Display Metric</property>
+            <property name="name">DisplayMetric</property>
             <property name="value">jobcount</property>
         </structure>
     </list-property>
@@ -170,11 +171,11 @@
         </parameter-group>
         <parameter-group name="DateRange" id="114">
             <parameters>
-                <scalar-parameter name="Start Date" id="86">
+                <scalar-parameter name="StartDate" id="86">
                     <text-property name="helpText">Only jobs that finished after this date will be included</text-property>
                     <property name="valueType">static</property>
                     <property name="dataType">string</property>
-                    <text-property name="promptText">Start Date</text-property>
+                    <text-property name="promptText">StartDate</text-property>
                     <property name="isRequired">true</property>
                     <property name="controlType">text-box</property>
                     <property name="defaultValue">2006-03-01</property>
@@ -183,11 +184,11 @@
                         <property name="pattern">Unformatted</property>
                     </structure>
                 </scalar-parameter>
-                <scalar-parameter name="End Date" id="87">
+                <scalar-parameter name="EndDate" id="87">
                     <text-property name="helpText">Only jobs that finished before this date will be included</text-property>
                     <property name="valueType">static</property>
                     <property name="dataType">string</property>
-                    <text-property name="promptText">End Date</text-property>
+                    <text-property name="promptText">EndDate</text-property>
                     <property name="isRequired">true</property>
                     <property name="controlType">text-box</property>
                     <property name="defaultValue">2999-12-31</property>
@@ -243,7 +244,7 @@
         </parameter-group>
         <parameter-group name="Metrics" id="117">
             <parameters>
-                <scalar-parameter name="Display Metric" id="118">
+                <scalar-parameter name="DisplayMetric" id="118">
                     <property name="hidden">false</property>
                     <text-property name="helpText">Select metric for chart</text-property>
                     <property name="valueType">static</property>
@@ -812,7 +813,7 @@ else if ( val > 10 ) clr.set( 0, 0, 200 );
 */
 
 rep = icsc.getExternalContext().getScriptable();
-val1 = rep.getParameterValue(&quot;Display Metric&quot;);
+val1 = rep.getParameterValue(&quot;DisplayMetric&quot;);
 if(val1 == 'jobcount')
 	{
 	labval = label.getCaption().getValue(); 
@@ -856,7 +857,7 @@ if(val1 == 'jobcount')
 function beforeDrawAxisTitle( axis, label, context )
 {
 	rep = context.getExternalContext().getScriptable();
-	val1 =rep.getParameterValue(&quot;Display Metric&quot;);
+	val1 =rep.getParameterValue(&quot;DisplayMetric&quot;);
 	if(!axis.isCategoryAxis())
 	{
 		if(val1==&quot;process&quot;)
@@ -1073,7 +1074,18 @@ function beforeDrawAxisTitle( axis, label, context )
             <Visible>true</Visible>
           </Label>
           <DataDefinition>
-            <Definition>row[&quot;Njobs&quot;]</Definition>
+            <Definition>if (params[&quot;DisplayMetric&quot;] == &quot;wallclock&quot;) {&#xD;
+ row[&quot;WallDuration&quot;] / 3600&#xD;
+}&#xD;
+else if (params[&quot;DisplayMetric&quot;]==&quot;process&quot;) {&#xD;
+row[&quot;Cpu&quot;]/3600&#xD;
+}&#xD;
+else if (params[&quot;DisplayMetric&quot;]==&quot;jobcount&quot;){&#xD;
+row[&quot;Njobs&quot;]&#xD;
+}&#xD;
+else {&#xD;
+&quot;***Unknown metric***&quot;&#xD;
+}</Definition>
           </DataDefinition>
           <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
           <DataPoint>
@@ -1107,6 +1119,7 @@ function beforeDrawAxisTitle( axis, label, context )
           <GroupType>Text</GroupType>
           <AggregateExpression>Sum</AggregateExpression>
         </Grouping>
+        <Sorting>Ascending</Sorting>
       </SeriesDefinitions>
       <Orientation>Vertical</Orientation>
       <LineAttributes>
@@ -1463,11 +1476,11 @@ function beforeDrawAxisTitle( axis, label, context )
                 </structure>
                 <structure>
                     <property name="paramName">StartDate</property>
-                    <expression name="expression">params["Start Date"]</expression>
+                    <expression name="expression">params["StartDate"]</expression>
                 </structure>
                 <structure>
                     <property name="paramName">EndDate</property>
-                    <expression name="expression">params["End Date"]</expression>
+                    <expression name="expression">params["EndDate"]</expression>
                 </structure>
                 <structure>
                     <property name="paramName">ForVO</property>
@@ -1510,7 +1523,7 @@ function beforeDrawAxisTitle( axis, label, context )
             <property name="style">san-style1</property>
             <property name="fontSize">9pt</property>
             <property name="textAlign">center</property>
-            <expression name="valueExpr">"Date range: "+ params["Start Date"] + " - " + params["End Date"]</expression>
+            <expression name="valueExpr">"Date range: "+ params["StartDate"] + " - " + params["EndDate"]</expression>
             <property name="contentType">html</property>
         </text-data>
         <text-data id="107">

@@ -24,6 +24,12 @@
         </structure>
     </list-property>
     <property name="eventHandlerClass">net.sf.gratia.reporting.GratiaBirtReportEH</property>
+    <list-property name="libraries">
+        <structure>
+            <property name="fileName">gratia-lib1.rptlibrary</property>
+            <property name="namespace">gratia-lib1</property>
+        </structure>
+    </list-property>
     <list-property name="configVars">
         <structure>
             <property name="name">DatabaseUser</property>
@@ -37,10 +43,6 @@
             <property name="name">ForSite</property>
             <property name="value">AnySite</property>
         </structure>
-        <structure>
-            <property name="name">Subtitle</property>
-            <property name="value">None</property>
-        </structure>
     </list-property>
     <parameters>
         <parameter-group name="DatabaseAccess" id="84">
@@ -51,7 +53,7 @@
                     <property name="dataType">string</property>
                     <property name="isRequired">true</property>
                     <property name="controlType">text-box</property>
-                    <property name="defaultValue">jdbc:mysql://gratia-db01.fnal.gov:3320/gratia_itb</property>
+                    <property name="defaultValue">jdbc:mysql://gratia-vm02.fnal.gov:3320/gratia_jeffmack</property>
                     <structure name="format">
                         <property name="category">Unformatted</property>
                         <property name="pattern">Unformatted</property>
@@ -88,7 +90,7 @@
             <text-property name="helpText">Only jobs that finished after this date will be included</text-property>
             <property name="valueType">static</property>
             <property name="dataType">string</property>
-            <text-property name="promptText">Start Date</text-property>
+            <text-property name="promptText">StartDate</text-property>
             <property name="isRequired">true</property>
             <property name="controlType">text-box</property>
             <structure name="format">
@@ -128,7 +130,7 @@
             <property name="dataType">string</property>
             <property name="isRequired">true</property>
             <property name="controlType">text-box</property>
-            <property name="defaultValue">VO</property>
+            <property name="defaultValue">AnyVO</property>
             <structure name="format">
                 <property name="category">Unformatted</property>
                 <property name="pattern">Unformatted</property>
@@ -146,18 +148,7 @@
                 <property name="pattern">Unformatted</property>
             </structure>
         </scalar-parameter>
-        <scalar-parameter name="Subtitle" id="108">
-            <property name="hidden">true</property>
-            <property name="valueType">static</property>
-            <property name="dataType">string</property>
-            <property name="controlType">text-box</property>
-            <property name="defaultValue">None</property>
-            <structure name="format">
-                <property name="category">Unformatted</property>
-                <property name="pattern">Unformatted</property>
-            </structure>
-        </scalar-parameter>
-        <scalar-parameter name="Display Metric" id="110">
+        <scalar-parameter name="DisplayMetric" id="110">
             <property name="hidden">true</property>
             <text-property name="helpText">Select metric for chart</text-property>
             <property name="valueType">static</property>
@@ -207,21 +198,12 @@
                 <property name="category">Unformatted</property>
             </structure>
         </scalar-parameter>
-        <scalar-parameter name="TraceTableKey" id="113">
-            <property name="hidden">true</property>
-            <property name="valueType">static</property>
-            <property name="dataType">string</property>
-            <property name="controlType">text-box</property>
-            <property name="defaultValue">None</property>
-            <structure name="format">
-                <property name="category">Unformatted</property>
-            </structure>
-        </scalar-parameter>
+        <parameter-group name="ReportInfo" id="113" extends="gratia-lib1.ReportInfo"/>
     </parameters>
     <data-sources>
         <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="fermigrid1" id="4">
             <property name="odaDriverClass">com.mysql.jdbc.Driver</property>
-            <property name="odaURL">jdbc:mysql://gratia-db01.fnal.gov:3320/gratia_itb</property>
+            <property name="odaURL">jdbc:mysql://gratia-vm02.fnal.gov:3320/gratia_jeffmack</property>
             <property name="odaUser">gratia</property>
             <encrypted-property name="odaPassword">cHJvdG8=</encrypted-property>
         </oda-data-source>
@@ -268,7 +250,7 @@
                     <property name="name">StartDate</property>
                     <property name="dataType">string</property>
                     <property name="position">1</property>
-                    <expression name="defaultValue">'2007-12'</expression>
+                    <expression name="defaultValue">'2007-00'</expression>
                     <property name="isOptional">false</property>
                     <property name="allowNull">true</property>
                     <property name="isInput">true</property>
@@ -285,8 +267,9 @@
                     <property name="name">ForVO</property>
                     <property name="dataType">string</property>
                     <property name="position">3</property>
-                    <expression name="defaultValue">'NoVO'</expression>
+                    <expression name="defaultValue">'AnyVO'</expression>
                     <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
                 </structure>
                 <structure>
                     <property name="name">SiteName</property>
@@ -299,8 +282,9 @@
                     <property name="name">ForSite</property>
                     <property name="dataType">string</property>
                     <property name="position">5</property>
-                    <expression name="defaultValue">'NoSite'</expression>
+                    <expression name="defaultValue">'AnySite'</expression>
                     <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
                 </structure>
             </list-property>
             <list-property name="resultSet">
@@ -837,7 +821,7 @@ function beforeGeneration( chart, context ){
 function beforeDrawAxisTitle( axis, label, context )
 {
 	rep = context.getExternalContext().getScriptable();
-	val1 =rep.getParameterValue(&quot;Display Metric&quot;);
+	val1 =rep.getParameterValue(&quot;DisplayMetric&quot;);
 	if(!axis.isCategoryAxis())
 	{
 		if(val1==&quot;process&quot;)
@@ -1054,13 +1038,13 @@ function beforeDrawAxisTitle( axis, label, context )
             <Visible>true</Visible>
           </Label>
           <DataDefinition>
-            <Definition>if (params[&quot;Display Metric&quot;] == &quot;wallclock&quot;) {&#xD;
+            <Definition>if (params[&quot;DisplayMetric&quot;] == &quot;wallclock&quot;) {&#xD;
  row[&quot;WallDuration&quot;] / 3600&#xD;
 }&#xD;
-else if (params[&quot;Display Metric&quot;]==&quot;process&quot;) {&#xD;
+else if (params[&quot;DisplayMetric&quot;]==&quot;process&quot;) {&#xD;
 row[&quot;Cpu&quot;]/3600&#xD;
 }&#xD;
-else if (params[&quot;Display Metric&quot;]==&quot;jobcount&quot;){&#xD;
+else if (params[&quot;DisplayMetric&quot;]==&quot;jobcount&quot;){&#xD;
 row[&quot;Njobs&quot;]&#xD;
 }&#xD;
 else {&#xD;
@@ -1435,44 +1419,36 @@ else {&#xD;
             <property name="dataSet">UsageForWeek</property>
             <property name="height">800px</property>
             <property name="width">640px</property>
-            <list-property name="paramBindings">
-                <structure>
-                    <property name="paramName">VOName</property>
-                    <expression name="expression">params["ForVOName"]</expression>
-                </structure>
-                <structure>
-                    <property name="paramName">SiteName</property>
-                    <expression name="expression">params["ForSiteName"]</expression>
-                </structure>
-                <structure>
-                    <property name="paramName">ForVO</property>
-                    <expression name="expression">params["ForVO"]</expression>
-                </structure>
-                <structure>
-                    <property name="paramName">ForSite</property>
-                    <expression name="expression">params["ForSite"]</expression>
-                </structure>
-                <structure>
-                    <property name="paramName">StartDate</property>
-                    <expression name="expression">params["ForWeek"]</expression>
-                </structure>
-            </list-property>
             <list-property name="boundDataColumns">
+                <structure>
+                    <property name="name">sitename</property>
+                    <expression name="expression">dataSetRow["sitename"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
                 <structure>
                     <property name="name">UserName</property>
                     <expression name="expression">dataSetRow["UserName"]</expression>
+                    <property name="dataType">string</property>
                 </structure>
                 <structure>
                     <property name="name">WallDuration</property>
                     <expression name="expression">dataSetRow["WallDuration"]</expression>
+                    <property name="dataType">float</property>
                 </structure>
                 <structure>
                     <property name="name">Cpu</property>
                     <expression name="expression">dataSetRow["Cpu"]</expression>
+                    <property name="dataType">float</property>
                 </structure>
                 <structure>
                     <property name="name">Njobs</property>
                     <expression name="expression">dataSetRow["Njobs"]</expression>
+                    <property name="dataType">decimal</property>
+                </structure>
+                <structure>
+                    <property name="name">voname</property>
+                    <expression name="expression">dataSetRow["voname"]</expression>
+                    <property name="dataType">string</property>
                 </structure>
             </list-property>
             <property name="style">san-style1</property>
@@ -1510,5 +1486,7 @@ else{
 }</expression>
             <property name="contentType">html</property>
         </text-data>
+        <label name="ReportURL" id="390" extends="gratia-lib1.ReportURL"/>
+        <label name="ShowQuery" id="391" extends="gratia-lib1.ShowQuery"/>
     </body>
 </report>

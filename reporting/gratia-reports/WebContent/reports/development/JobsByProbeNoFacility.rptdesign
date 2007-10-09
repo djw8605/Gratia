@@ -490,7 +490,7 @@ call JobsByProbeNoFacility(?,?,?,?,'','Batch')
       <Left>0.0</Left>
       <Top>0.0</Top>
       <Width>480.0</Width>
-      <Height>130.0</Height>
+      <Height>129.75</Height>
     </Bounds>
     <Insets>
       <Top>3.0</Top>
@@ -1643,7 +1643,7 @@ function beforeGeneration( chart, context )
             <expression name="valueExpr">"Date range: "+ params["StartDate"] + " - " + params["EndDate"]</expression>
             <property name="contentType">html</property>
         </text-data>
-        <text-data name="ReportURL" id="390" extends="gratia-lib1.ReportURL"/>
+        <label name="ReportURL" id="390" extends="gratia-lib1.ReportURL"/>
         <label name="ShowQuery" id="391" extends="gratia-lib1.ShowQuery"/>
     </body>
 </report>

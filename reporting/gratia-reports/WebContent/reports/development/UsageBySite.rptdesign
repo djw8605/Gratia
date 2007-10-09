@@ -1662,7 +1662,7 @@ else {&#xD;
             <expression name="valueExpr">"Date range: "+ params["StartDate"] + " - " + params["EndDate"]</expression>
             <property name="contentType">html</property>
         </text-data>
-        <label name="ReportURL" id="390" extends="gratia-lib1.ReportURL"/>
-        <label name="ShowQuery" id="118" extends="gratia-lib1.ShowQuery"/>
+        <label name="ReportURL" id="391" extends="gratia-lib1.ReportURL"/>
+        <label name="ShowQuery" id="392" extends="gratia-lib1.ShowQuery"/>
     </body>
 </report>
