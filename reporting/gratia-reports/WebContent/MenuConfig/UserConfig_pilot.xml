@@ -3,6 +3,9 @@
 		<MenuGroup name="Dashboards">
 			<MenuItem name="Featured Reports" link="dashboard.jsp"/>
 		</MenuGroup>
+		<MenuGroup name="DCache">
+			<MenuItem name="-   Dcache Report" link="GratiaParameterInput.jsp?report=[ReportsFolder]DcacheBySource.rptdesign"/>
+		</MenuGroup>
 		<MenuGroup name="Reports - VO Views">
 			<MenuItem name="-   Jobs by VO" link="GratiaParameterInput.jsp?report=[ReportsFolder]UsageByVO.rptdesign&amp;DisplayMetric=jobcount"/>
 			<MenuItem name="-   Daily Jobs by VO" link="GratiaParameterInput.jsp?report=[ReportsFolder]UsageByVOByDate-ranked.rptdesign&amp;DisplayMetric=jobcount"/>
