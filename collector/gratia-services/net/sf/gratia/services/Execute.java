@@ -78,7 +78,7 @@ public class Execute {
 
             // any error???
             int exitValue = proc.waitFor();
-            Logging.log("exitValueue: " + exitValue);
+            Logging.log("exitValue: " + exitValue);
             return exitValue;
         } catch (Throwable t) {
             t.printStackTrace();
