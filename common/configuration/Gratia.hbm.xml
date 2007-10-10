@@ -40,7 +40,7 @@
     <property name="source" column="source"/>
     <property name="error" column="error"/>
     <property name="dbid" column="dbid" type="int"/>
-    <property name="RecordType" column="RecordType" type="text"/>
+    <property name="RecordType" column="RecordType"/>
   </class>
 
   <class name="Replication" table="Replication" node="Replication" lazy="false">
