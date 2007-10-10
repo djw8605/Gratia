@@ -186,6 +186,15 @@ public class Status extends HttpServlet {
                 detailedDisplay = false;
             }
         }
+        String lastHours = request.getParameter("lastHours");
+        Logging.debug("Got parameter lastHours=" + lastHours);
+        if ((lastHours != null) && (lastHours != "")) {
+            try {
+                nHoursBack = Integer.parseInt(lastHours);
+            }
+            catch (NumberFormatException e) {
+            }
+        }
         setup();
         process();
         response.setContentType("text/html");
@@ -226,6 +235,8 @@ public class Status extends HttpServlet {
         html = html.replaceAll("#nDcols#", nDataCols.toString());
             
         try {
+            // Start transaction so numbers are consistent.
+            connection.setAutoCommit(false);
             // Get list of _Meta tables in this database
             command = "select table_name from information_schema.tables " +
                 "where table_schema = Database() and table_name like '%_Meta'" +
@@ -345,8 +356,7 @@ public class Status extends HttpServlet {
                 command = "select count(*), error from DupRecord D " +
                     "where D.eventdate > (UTC_TIMESTAMP() - interval 1 week) " +
                     "and D.RecordType = " + dq + table_name + dq +
-                    " group by error " +
-                    "order by error";
+                    " group by error ";
                 Logging.log("command: " + command);
                 statement = connection.prepareStatement(command);
                 resultSet = statement.executeQuery(command);
@@ -369,7 +379,8 @@ public class Status extends HttpServlet {
                 ////////////////////////////////////
                 // Totals for all time
                 ////////////////////////////////////
-                command = "select count(*) from " + table_name + "_Meta M;";
+                command = "select nRecords from TableStatistics where RecordType = '" +
+                    table_name + "'";
                 Logging.log("command: " + command);
                 statement = connection.prepareStatement(command);
                 resultSet = statement.executeQuery(command);
@@ -383,8 +394,7 @@ public class Status extends HttpServlet {
                 statement.close();
                 command = "select count(*), error from DupRecord D " +
                     "where D.RecordType = " + dq + table_name + dq +
-                    " group by error " +
-                    "order by error";
+                    " group by error ";
                 Logging.log("command: " + command);
                 statement = connection.prepareStatement(command);
                 resultSet = statement.executeQuery(command);
@@ -405,6 +415,12 @@ public class Status extends HttpServlet {
                 statement.close();
             }
 
+            try {
+                connection.commit();
+                connection.setAutoCommit(true);
+            }
+            catch (exception e) { // Ignore if we don't support exceptions
+            }
             int maxthreads = Integer.parseInt(props.getProperty("service.listener.threads"));
             String path = System.getProperties().getProperty("catalina.home");
             path = xp.replaceAll(path,"\\","/");
