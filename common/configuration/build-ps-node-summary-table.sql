@@ -12,7 +12,7 @@ CREATE TABLE NodeSummary (
 	HostDescription VARCHAR(255) DEFAULT 'Unknown',
 	BenchmarkScore int default 0,
 	DaysInMonth int default 0
-);
+) ENGINE='innodb';
 ||
 alter table NodeSummary
 	add index index01(EndTime);
