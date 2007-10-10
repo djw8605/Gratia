@@ -21,10 +21,10 @@
 <script type="text/javascript" src="calendar/calendarstd.js"></script>
 <script type="text/javascript">
 	
-  var c1 = new CodeThatCalendar(caldef1);
+var c1 = new CodeThatCalendar(caldef1);
 
-  function addVO (form) 
-  {
+function addVO (form) 
+{
 /* Construct the VOs string from the selection */  
 	form.VOs.value = "(";
 		
@@ -39,10 +39,10 @@
 		}
 	}
  	form.VOs.value += ")";
-  }
+}
    
-  function addVO2 (form) 
-  {
+   function addVO2 (form) 
+   {
    /* Construct the VOs string from the selection */  
    	form.VOs.value = "";
    		
@@ -56,12 +56,12 @@
    				form.VOs.value += form.myVOs.options[i].value;
    		}
    	}
-  }
+}
 
-  function getURL ()
-  {
-	var x=document.getElementsByTagName('form')[0]
-	var url = "";
+function getURL ()
+{
+   var x=document.getElementsByTagName('form')[0]
+   var url = "";
 
 	for (var i=0;i<x.length;i++)
 	{
@@ -73,7 +73,7 @@
 	{
 		name = x.elements[i].name;
 		value = x.elements[i].value;
-		if (name != "myVOs" && name != "submitButton" && name != "BaseURL" )
+		if (name != "myVOs" && name != "submitButton" && name != "BaseURL"  && name != "ReportURL" )
 		{
 			url += "&" + name + "=" + value;
 		}
@@ -84,7 +84,7 @@
 	x.ReportURL.value = url;
   	// document.write(url);
   	// document.write("<br />");
-  }
+}
     
 </script>
 
@@ -205,8 +205,8 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 	{
 		if (promptText == null)
 			promptText = paramName;
-		if (helpText == null)
-			helpText = promptText;
+		if (helpText == null || helpText.indexOf(promptText) > -1)
+			helpText = "";
 		if (defaultValue == null)
 			defaultValue = "";
 
@@ -223,33 +223,8 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 		if (paramName.equals("EndDate"))
 			defaultValue = End;
 
-     		if (hasSelectionOptions)
-		{
-			%>
-		 	<tr>
-			   <td><label class=paramName><%=promptText %></label><br> <font size=-1><%=helpText%></font></td>
-			   <td>
-			   <select class=paramSelect id="<%=paramName%>" name="<%=paramName%>"  onchange="getURL()" >
-			<%
-			for(int s=0; s < paramGroup.getParameterListSelection().size(); s++)
-			{
-				ParameterListSelection paramListSelection = (ParameterListSelection)paramGroup.getParameterListSelection().get(s);
-						
-				selectName = paramListSelection.getSelectionName();				
-				selectValue = paramListSelection.getSelectionValue();
-				String selected = "";
-				if(selectValue.equals(defaultValue))
-					selected="selected";
-%>
-				<option value=<%=selectValue %> <%=selected %>><%=selectName %></option>
-<%							
-			}
-%>
-			   </select>
-			   </td>
-			</tr>			
-<%     		
-		}else if(paramName.indexOf("Date") > -1)
+     		
+		if(paramName.indexOf("Date") > -1)
 		{
 %>
 			<tr>
@@ -364,7 +339,129 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 		   <td> Selected VOs:</td><td><input id="VOs" type="text"  name="<%=paramName%>" Value = "<%=SelectedVOs %>" readonly size="60"  onchange="getURL()" ></td>
 		</tr>
 		<%
-		}			
+		}
+		else if (paramName.indexOf("ForVOName") > -1)
+		{
+	%>
+			<tr>
+			   <td valign="top"><label class=paramName><%=promptText%></label></td>
+			   <td> 
+				<SELECT size="10" id="ForVOName" name="ForVOName" onChange="getURL();" >
+						
+	<%		
+			// define the sql string to get the list of VOs that the user can selct from
+			String sql = "select distinct (VO.VOName) from VO, VONameCorrection where VO.VOid = VONameCorrection.VOid order by VO.VOName";
+			
+			// Execute the sql statement to get the vos
+			
+			Connection con = null;
+			Statement statement = null;
+			ResultSet results = null;
+			String VOName = "";
+			String SelectedVOs = "";					 
+						
+			try {
+				Class.forName("com.mysql.jdbc.Driver").newInstance();
+			} catch (ClassNotFoundException ce){
+				out.println(ce);			
+			}
+			
+			try{						
+				con = DriverManager.getConnection(reportingConfiguration.getDatabaseURL(), reportingConfiguration.getDatabaseUser(), reportingConfiguration.getDatabasePassword());
+				statement = con.createStatement();
+				results = statement.executeQuery(sql);	
+
+			// Loop through the SQL results to add a row for each record, we have only one column that contains the VOName
+						
+				while(results.next())
+				{								
+				// Get the value for this column from the recordset, ommitting nulls
+						
+					Object value = results.getObject(1);
+							
+					if (value != null) 
+					{								
+						VOName = value.toString();
+													
+						String selected = "";
+						if(defaultValue.indexOf(VOName) > -1)
+						{
+							selected="selected";
+							
+							if (SelectedVOs != "") 
+								SelectedVOs += ";" + VOName;
+							else
+								SelectedVOs += VOName;
+						}
+						%> <OPTION value="<%=VOName %>" <%=selected %>><%=VOName %></OPTION> <%
+					}
+				}
+					
+			}catch(SQLException exception){
+				out.println("<!--");
+				StringWriter sw = new StringWriter();
+				PrintWriter pw = new PrintWriter(sw);
+				exception.printStackTrace(pw);
+				out.print(sw);
+				sw.close();
+				pw.close();
+				out.println("-->");
+			}
+			finally
+			{
+				try
+				{
+					con.close();
+				}
+				catch(Exception ex) {}		
+				try
+				{
+					statement.close();
+				}
+				catch(Exception ex) {}		
+				try
+				{
+					results.close();
+				}
+				catch(Exception ex) {}	
+	
+				results = null;
+				statement = null;
+				con = null;
+			}
+				
+			%>
+			   </SELECT>
+			</td>
+		</tr>
+		<%
+		}
+		else if (hasSelectionOptions)
+				{
+					%>
+				 	<tr>
+					   <td><label class=paramName><%=promptText %></label><br> <font size=-1><%=helpText%></font></td>
+					   <td>
+					   <select class=paramSelect id="<%=paramName%>" name="<%=paramName%>"  onchange="getURL()" >
+					<%
+					for(int s=0; s < paramGroup.getParameterListSelection().size(); s++)
+					{
+						ParameterListSelection paramListSelection = (ParameterListSelection)paramGroup.getParameterListSelection().get(s);
+								
+						selectName = paramListSelection.getSelectionName();				
+						selectValue = paramListSelection.getSelectionValue();
+						String selected = "";
+						if(selectValue.equals(defaultValue))
+							selected="selected";
+		%>
+						<option value=<%=selectValue %> <%=selected %>><%=selectName %></option>
+		<%							
+					}
+		%>
+					   </select>
+					   </td>
+					</tr>			
+<%     		}
 		else
 		{
 		%>
@@ -403,7 +500,7 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 	{
 		name = x.elements[i].name;
 		value = x.elements[i].value;
-		if (name != "myVOs" && name != "submitButton" && name != "BaseURL" )
+		if (name != "myVOs" && name != "submitButton" && name != "BaseURL" && name != "ReportURL" )
 		{
 			url += "&" + name + "=" + value;
 		}
