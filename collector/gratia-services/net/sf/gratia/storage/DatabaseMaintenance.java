@@ -1,25 +1,32 @@
 package net.sf.gratia.storage;
 
 import java.sql.*;
-
 import net.sf.gratia.services.Execute;
 import net.sf.gratia.services.XP;
 import net.sf.gratia.services.Logging;
 import java.util.Properties;
 import java.io.File;
+import java.lang.System;
+import java.lang.Long;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.text.NumberFormat;
+import java.text.DecimalFormat;
 
 public class DatabaseMaintenance {
     static final String dq = "\"";
     static final String comma = ",";
-    static final int gratiaDatabaseVersion = 22;
+    static final int gratiaDatabaseVersion = 25;
     static final int latestDBVersionRequiringStoredProcedureLoad = gratiaDatabaseVersion;
     static final int latestDBVersionRequiringSummaryTableLoad = 19;
     static final int latestDBVersionRequiringSummaryViewLoad = 22;
     static final int latestDBVersionRequiringSummaryTriggerLoad = 19;
+    static final int latestDBVersionRequiringTableStatisticsRefresh = 25;
 
     java.sql.Connection connection;
     int liveVersion = 0;
     XP xp = new XP();
+    boolean isInnoDB = false;
 
     public DatabaseMaintenance(Properties p) {
         
@@ -56,7 +63,18 @@ public class DatabaseMaintenance {
         if (liveVersion < 4) Execute("Drop view if exists Role;");
         if (liveVersion < 5) Execute("Drop view if exists Site;");
         if (liveVersion < 6) Execute("Drop view if exists Probe;");
+
+        String hibernate_cfg = System.getProperty("catalina.home");
+        hibernate_cfg = xp.replaceAll(hibernate_cfg, "\\", "" + File.separatorChar);
+        hibernate_cfg = hibernate_cfg + File.separatorChar + "gratia" + File.separatorChar + "hibernate.cfg.xml";
+
+        String grep_cmd[] = {"grep", "-e", "org\\.hibernate\\.dialect\\.MySQLInnoDBDialect", hibernate_cfg};
         
+        int result = Execute.execute(grep_cmd);
+        if (result == 0) {
+            isInnoDB = true;
+            return CheckAndConvertTables();
+        }
         return true;
     }
     
@@ -83,6 +101,9 @@ public class DatabaseMaintenance {
                 statement.executeUpdate(cmd);
                 Logging.log("Command: OK: " + cmd);
             }
+            resultSet.close();
+            statement.close();
+
         } catch (Exception e) {
             Logging.log("Command: Error: " + cmd + " : " + e);
         }
@@ -106,6 +127,8 @@ public class DatabaseMaintenance {
                 statement.executeUpdate(cmd);
                 Logging.log("Command: OK: " + cmd);
             }
+            resultSet.close();
+            statement.close();
         } catch (Exception e) {
             Logging.log("Command: Error: " + cmd + " : " + e);
         }
@@ -140,7 +163,12 @@ public class DatabaseMaintenance {
         // Index on DupRecord
         //
         AddIndex("DupRecord",false,"index02","eventdate");
-        
+        if ((liveVersion == 0) || (liveVersion >= 24)) { // Only if we have the correct table format.
+            AddIndex("DupRecord",false,"index03","RecordType");
+            AddIndex("DupRecord",false,"index04","source");
+            AddIndex("DupRecord",false,"index05","error");
+        }
+
         //
         // new indexes for authentication
         //
@@ -164,12 +192,12 @@ public class DatabaseMaintenance {
 
     private int CallPostInstall(String action) {
         Logging.log("DatabaseMaintenance: calling post-install script for action \"" + action + "\"");
-        String home = System.getProperty("catalina.home");
-        home = xp.replaceAll(home, "\\", "" + File.separatorChar);
-        home = home + File.separatorChar + "gratia" + File.separatorChar + "post-install.sh";
-        String chmod_cmd[] = {"chmod", "700", home};
+        String post_install = System.getProperty("catalina.home");
+        post_install = xp.replaceAll(post_install, "\\", "" + File.separatorChar);
+        post_install = post_install + File.separatorChar + "gratia" + File.separatorChar + "post-install.sh";
+        String chmod_cmd[] = {"chmod", "700", post_install};
         Execute.execute(chmod_cmd); // Mark executable just in case.
-        String post_cmd[] = {home, action};
+        String post_cmd[] = {post_install, action};
         int result = Execute.execute(post_cmd);
         if (result == 0) {
             return result;
@@ -438,7 +466,7 @@ public class DatabaseMaintenance {
                     return false;
                 }
             } else if (ver < latestDBVersionRequiringSummaryViewLoad) {
-                int result = CallPostInstall("summary_view");
+                int result = CallPostInstall("summary-view");
                 if (result > -1) {
                     UpdateDbProperty("gratia.database.summaryTableVersion", gratiaDatabaseVersion);
                     Logging.log("Summary view updated successfully");
@@ -454,7 +482,7 @@ public class DatabaseMaintenance {
         Logging.log("gratia.database.wantSummaryTrigger = " + wanted);
         if (1 == wanted) {
             int ver = readIntegerDBProperty("gratia.database.summaryTriggerVersion");
-            if (ver < latestDBVersionRequiringSummaryTableLoad) {
+            if (ver < latestDBVersionRequiringSummaryTriggerLoad) {
                 int result = CallPostInstall("trigger");
                 if (result > -1) {
                     UpdateDbProperty("gratia.database.summaryTriggerVersion", gratiaDatabaseVersion);
@@ -466,12 +494,12 @@ public class DatabaseMaintenance {
             }
         }
 
-        // Finally, check stored procedures
+        // Check stored procedures
         wanted = readIntegerDBProperty("gratia.database.wantStoredProcedures");
         Logging.log("gratia.database.wantStoredProcedures = " + wanted);
         if (1 == wanted) {
             int ver = readIntegerDBProperty("gratia.database.storedProcedureVersion");
-            if (ver < latestDBVersionRequiringSummaryTableLoad) {
+            if (ver < latestDBVersionRequiringStoredProcedureLoad) {
                 int result = CallPostInstall("stored");
                 if (result > -1) {
                     UpdateDbProperty("gratia.database.storedProcedureVersion",
@@ -484,6 +512,21 @@ public class DatabaseMaintenance {
             }
         }
 
+        // Check TableStatistics
+        {
+            int ver = readIntegerDBProperty("gratia.database.TableStatisticsVersion");
+            if (ver < latestDBVersionRequiringTableStatisticsRefresh) {
+                int result = RefreshTableStatistics();
+                if (result > -1) {
+                    UpdateDbProperty("gratia.database.TableStatisticsVersion",
+                                     gratiaDatabaseVersion);
+                    Logging.log("Table statistics updated successfully");
+                } else {
+                    Logging.log("FAIL: table statistics NOT updated");
+                    return false;
+                }
+            }
+        }                
         return true;
     }
 
@@ -854,6 +897,31 @@ public class DatabaseMaintenance {
                 current = current + 1;
                 UpdateDbVersion(current);
             }
+            if (current == 22) {
+                // Auxiliary DB item upgrades only.
+                Logging.log("Gratia database upgraded from " + current + " to " + (current + 1));
+                current = current + 1;
+                UpdateDbVersion(current);
+            }
+            if (current == 23) {
+                int result = Execute("alter table DupRecord modify column RecordType varchar(255) binary");
+                if (result > -1) {
+                    int tmp = current;
+                    current = current + 1;
+                    UpdateDbVersion(current);
+                    CheckIndices(); // Call again to update the DupRecord indexes.
+                    Logging.log("Gratia database upgraded from " + tmp + " to " + current);
+                } else {
+                    Logging.log("Gratia database FAILED to upgrade from " + current +
+                                " to " + (current + 1));
+                }
+            }
+            if (current == 24) {
+                // Auxiliary DB item upgrades only.
+                Logging.log("Gratia database upgraded from " + current + " to " + (current + 1));
+                current = current + 1;
+                UpdateDbVersion(current);
+            }
             return ((current == gratiaDatabaseVersion) && checkAndUpgradeDbAuxiliaryItems());
         }
     }
@@ -909,4 +977,134 @@ public class DatabaseMaintenance {
             Logging.log("Command: Error: " + check + " : " + e);
         }        
     }
+
+    private int RefreshTableStatistics() {
+        int result = Execute("DROP TABLE IF EXISTS TableStatistics");
+        if (result > -1) {
+            String command = "CREATE TABLE TableStatistics(" +
+                "RecordType VARCHAR(255) NOT NULL PRIMARY KEY," +
+                "nRecords INTEGER DEFAULT 0)";
+
+            if (isInnoDB) {
+                command += " ENGINE = 'innodb'";
+            }
+                             
+            result = Execute(command);
+            //
+            Statement statement;
+            ResultSet resultSet;
+            String command = "select table_name from information_schema.tables " +
+                "where table_schema = Database() and table_name like '%_Meta'" +
+                " order by table_name;";
+            try {
+                statement = connection.prepareStatement(command);
+                resultSet = statement.executeQuery(command);
+                HashSet tableList = new HashSet<String>();
+                while ((result > -1) && resultSet.next()) {
+                    String table_name = resultSet.getString(1);
+                    int end_index = table_name.lastIndexOf("_Meta");
+                    String base_table = table_name.substring(0,end_index);
+                    tableList.add(base_table);
+                }
+                resultSet.close();
+                statement.close();
+        
+                tableList.add("DupRecord");
+                for (Iterator x = tableList.iterator(); (result > -1) && x.hasNext();) {
+                    String table_name = (String) x.next();
+                    result = Execute("insert into TableStatistics(RecordType,nRecords)" +
+                                     " select '" + table_name +
+                                     "', count(*) from " + table_name);
+                    if (result > -1) {
+                        result = CallPostInstall("countTrigger" + table_name);
+                    }
+                }
+            }
+            catch (Exception e) {
+                result = -1;
+            }
+        }
+        return result;
+    }
+
+    private boolean CheckAndConvertTables() {
+        // Obtain a list of all the tables and check their table type.
+        Statement statement;
+        ResultSet resultSet;
+
+        String get_convert_list = "select table_name, data_length, index_length\n" +
+            "  from information_schema.tables\n" +
+            "  where table_schema = Database()\n" +
+            "    and table_type = 'BASE TABLE'\n" +
+            "    and engine = 'MyISAM'\n" +
+            "  order by index_length, data_length";
+        try {
+            Logging.log("Executing: " + get_convert_list);
+            statement = connection.createStatement();
+            resultSet = statement.executeQuery(get_convert_list);
+            while (resultSet.next()) {
+                String tableName = resultSet.getString(1);
+                Integer dataLength = resultSet.getInt(2);
+                Integer indexLength = resultSet.getInt(3);
+                Logging.log("Converting table " + tableName +
+                            " (data_length = " + prettySize(dataLength) +
+                            ", indexLength = " + prettySize(indexLength));
+                long startTime = System.currentTimeMillis();
+                int result;
+                try {
+                    result = Execute("alter table `" + tableName + "` engine innodb");
+                } catch (Exception e) {
+                    result = -1;
+                }
+                long timeTaken = System.currentTimeMillis() - startTime;
+                NumberFormat form = NumberFormat.getInstance();
+                if (form instanceof DecimalFormat) {
+                    ((DecimalFormat) form).setMinimumIntegerDigits(1);
+                    ((DecimalFormat) form).setMinimumFractionDigits(2);
+                    ((DecimalFormat) form).setMaximumFractionDigits(2);
+                    ((DecimalFormat) form).setDecimalSeparatorAlwaysShown(true);
+                }
+
+                String tTString = Long.valueOf(timeTaken / 3600000).toString() + ":" +
+                    Long.valueOf(timeTaken / 60000).toString() + ":" +
+                    form.format(Long.valueOf(timeTaken % 60000) / 1000.0);
+                if (result > -1) {
+                    Logging.log("Table " + tableName +
+                                " converted to INNODB in " + tTString);
+                } else {
+                    Logging.warning("Table " + tableName +
+                                    " FAILED conversion to INNODB after " + tTString);
+                    return false;
+                }
+            }
+            resultSet.close();
+            statement.close();
+            Logging.log("Table conversion to INNODB complete");
+        } catch (Exception e) {
+            Logging.log("Command: Error: " + get_convert_list + " : " + e);
+            return false;
+        }
+        return true;
+    }
+    
+    private String prettySize(Integer number) {
+        return prettySize(number, 1100);
+    }
+
+    private String prettySize(Integer number, Integer threshold) {
+        String suffices[] = {"B", "KiB", "MiB", "GiB", "TiB"};
+        int suffix_counter = 0;
+        Double size = new Double(number);
+        NumberFormat form = NumberFormat.getInstance();
+        if (form instanceof DecimalFormat) {
+            ((DecimalFormat) form).setMinimumIntegerDigits(1);
+            ((DecimalFormat) form).setMaximumFractionDigits(2);
+        }
+        while ((size > threshold) && (suffix_counter < suffices.length)) {
+            size /= 1024;
+            ++suffix_counter;
+        }
+        return form.format(size) + suffices[suffix_counter];
+    }
+
 }
