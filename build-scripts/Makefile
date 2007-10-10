@@ -57,6 +57,7 @@ clean:
 	find ${base}/ -name "*~" -exec rm -f {} \;
 	find ${base}/ -name "*#" -exec rm -f {} \;
 	find ${base}/ -name "#*" -exec rm -f {} \;
+	rm -f ${configuration}/build-stored-procedures.sql ${configuration}/build-stored-procedures_debug.sql
 	rm -f -r ${target}
 	mkdir ${target}
 
@@ -274,7 +275,7 @@ reports:
 	cp ${reports}/WebContent/WEB-INF/web.xml war/WEB-INF/web.xml
 	jar -cvf ${target}/gratia-reports.war -C war .
 	rm -f -r war
-	
+
 birt-reporting: 
 	rm -f -r jar-lib
 	mkdir jar-lib
