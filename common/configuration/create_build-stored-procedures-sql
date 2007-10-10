@@ -8,6 +8,14 @@ use Getopt::Long;
 use File::Basename;
 use Pod::Usage;
 
+my $script_dir;
+if (-l $0) {
+  $script_dir = dirname(readlink($0));
+} else {
+  $script_dir = dirname $0;
+}
+
+
 my %options = ();
 
 my %mysql_options =
@@ -21,7 +29,7 @@ my %mysql_options =
  "--port" => 3320
 );
 
-my @default_procedure_argument_list =
+my @default_procedure_arguments =
   ("userName varchar(64)", "userRole varchar(64)",
    "fromdate varchar(64)", "todate varchar(64)",
    "format varchar(64)", "resourceType varchar(64)"
@@ -150,10 +158,11 @@ my %procedures =
    order_by => 'VOProbeSummary.VOName'
  },
  UsageByUser =>
- { extra_procedure_arguments => [ 'forvo varchar(64)',
-                                  'forvoname varchar(64)',
-                                  'forsite varchar(64)',
-                                  'forsitename varchar(64)' ],
+ { procedure_arguments => [ @default_procedure_arguments,
+                            'forvo varchar(64)',
+                            'forvoname varchar(64)',
+                            'forsite varchar(64)',
+                            'forsitename varchar(64)' ],
    select_columns => 'Site.SiteName as sitename,
             sum(VOProbeSummary.WallDuration) as WallDuration,
             sum(VOProbeSummary.CpuUserDuration + VOProbeSummary.CpuSystemDuration) as Cpu,
@@ -181,8 +190,9 @@ my %procedures =
    order_by => 'VOProbeSummary.VOName'
  },
  WeeklyUsageByVO =>
- { extra_procedure_arguments => [ 'vos varchar(128)',
-                                  'voseltype varchar(8)' ],
+ { procedure_arguments => [ @default_procedure_arguments,
+                            'vos varchar(128)',
+                            'voseltype varchar(8)' ],
    select_columns => 'VOProbeSummary.VOName,
                       date_format(VOProbeSummary.EndTime, \'\'\', format, \'\'\') as endtime,
                       sum(VOProbeSummary.WallDuration) as WallDuration,
@@ -196,8 +206,9 @@ my %procedures =
    order_by => 'VOProbeSummary.EndTime'
  },
  WeeklyJobsByVO =>
- { extra_procedure_arguments => [ 'vos varchar(128)',
-                                  'voseltype varchar(8)' ],
+ { procedure_arguments => [ @default_procedure_arguments,
+                            'vos varchar(128)',
+                            'voseltype varchar(8)' ],
    select_columns => 'VOProbeSummary.VOName,
                       date_format(VOProbeSummary.EndTime, \'\'\', format, \'\'\') as endtime,
                       sum(VOProbeSummary.Njobs) as Njobs',
@@ -230,10 +241,11 @@ my %procedures =
    order_by => 'sitename, VOProbeSummary.VOName'
  },
  UsageBySiteByVO1 =>
- { extra_procedure_arguments => [ 'forvo varchar(64)',
-                                  'forvoname varchar(64)',
-                                  'forsite varchar(64)',
-                                  'forsitename varchar(64)' ],
+ { procedure_arguments => [ @default_procedure_arguments,
+                            'forvo varchar(64)',
+                            'forvoname varchar(64)',
+                            'forsite varchar(64)',
+                            'forsitename varchar(64)' ],
    select_columns => 'Site.SiteName as sitename,
             sum(VOProbeSummary.WallDuration) as WallDuration,
             sum(VOProbeSummary.CpuUserDuration +
@@ -253,10 +265,11 @@ my %procedures =
    order_by => 'sitename, VOProbeSummary.VOName'
  },
  DailyUsageBySiteByVO =>
- 	{ extra_procedure_arguments => [ 'forvo varchar(64)',
-                                   'forvoname varchar(64)',
-                                   'forsite varchar(64)',
-                                   'forsitename varchar(64)' ],
+ 	{ procedure_arguments => [ @default_procedure_arguments,
+                             'forvo varchar(64)',
+                             'forvoname varchar(64)',
+                             'forsite varchar(64)',
+                             'forsitename varchar(64)' ],
     select_columns => 'date_format(VOProbeSummary.EndTime,\'\'\', format, \'\'\') as endtime,
                       Site.SiteName as sitename,
                       sum(VOProbeSummary.WallDuration) as WallDuration,
@@ -297,7 +310,8 @@ my %procedures =
                             and V.EndTime >= Date(\'\'\', fromdate, \'\'\')
                             and V.EndTime <= Date(\'\'\', todate, \'\'\')
                           GROUP BY sitenamex
-                          ORDER BY walldurationx desc) as foox) as foo, VOProbeSummary, Site, Probe',
+                          ORDER BY walldurationx desc) as foox) as foo,
+                                   VOProbeSummary, Site, Probe',
    main_where => 'VOProbeSummary.ProbeName = Probe.probename
    					and Probe.siteid = Site.siteid 
    					and Site.SiteName = sitenamex',
@@ -330,9 +344,9 @@ my %procedures =
  },
   DcacheBySource =>
  { select_columns => 'avg(N.Value/N.PhaseUnit/1024.0/1024.0) as
-RateInMBPerSecond,
+                      RateInMBPerSecond,
                       date_format(J.EndTime,\'\'\', format , \'\'\') as
-DayValue,
+                      DayValue,
                       J.SiteName,R.value as Source',
    from_tables => 'JobUsageRecord_Report J, Network N, Resource R',
    main_where => 'J.ResourceType = \'\'Storage\'\'
@@ -343,30 +357,39 @@ DayValue,
    order_by => 'DayValue'
  },
  DcacheBySourceAndSite =>
- { select_columns => 'avg(N.Value/N.PhaseUnit/1024.0/1024.0) as
-RateInMBPerSecond,
+ { procedure_arguments => [ @default_procedure_arguments,
+                            'siteName varchar(64)' ],
+   select_columns => 'avg(N.Value/N.PhaseUnit/1024.0/1024.0) as
+                      RateInMBPerSecond,
                       date_format(J.EndTime,\'\'\', format , \'\'\') as
-DayValue,
+                      DayValue,
                       J.SiteName,J.VOName,R.value as Source',
    from_tables => 'JobUsageRecord_Report J, Network N, Resource R',
    main_where => 'J.ResourceType = \'\'Storage\'\'
               and J.dbid = N.dbid
               and J.dbid = R.dbid
-              and R.Description = \'\'Source\'\'',
+              and R.Description = \'\'Source\'\'
+              and J.SiteName = \'\'\', siteName, \'\'\'',
    group_by => 'DayValue, VOName',
    order_by => 'DayValue'
  },
  DcacheBySourceSiteAndUser =>
- { select_columns => 'avg(N.Value/N.PhaseUnit/1024.0/1024.0) as
-RateInMBPerSecond,
+ { procedure_arguments => [ @default_procedure_arguments,
+                            'siteName varchar(64)',
+                            'VOName varchar(64)' ],
+   select_columns => 'avg(N.Value/N.PhaseUnit/1024.0/1024.0) as
+                      RateInMBPerSecond,
                       date_format(J.EndTime,\'\'\', format , \'\'\') as
-DayValue,
-                      J.SiteName,J.VOName,J.GlobalUsername,J.LocalUserId,R.value as Source',
+                      DayValue,
+                      J.SiteName,J.VOName,J.GlobalUsername,J.LocalUserId,
+                      R.value as Source',
    from_tables => 'JobUsageRecord_Report J, Network N, Resource R',
    main_where => 'J.ResourceType = \'\'Storage\'\'
               and J.dbid = N.dbid
               and J.dbid = R.dbid
-              and R.Description = \'\'Source\'\'',
+              and R.Description = \'\'Source\'\'
+              and J.SiteName = \'\'\', siteName, \'\'\'
+              and J.VOName = \'\'\', VOName, \'\'\'',
    group_by => 'DayValue, GlobalUsername',
    order_by => 'DayValue'
  },
@@ -476,6 +499,8 @@ sub generate_procedures {
   @procedure_list = sort keys %procedures unless (scalar @procedure_list);
   foreach my $procedure (@procedure_list) {
     $procedure eq 'newProcedure' and next;
+    $procedures{$procedure}->{procedure_arguments} = [ @default_procedure_arguments ]
+      unless exists $procedures{$procedure}->{procedure_arguments};
     foreach my $key (keys %{$procedures{$procedure}}) {
       # Remove extraneous whitespace.
       $procedures{$procedure}->{$key} =~ s&\s{2,}& &o;
@@ -504,10 +529,7 @@ create procedure $procedure (%s)
 READS SQL DATA
 begin
 
-", $procedure_code, join(", ", @default_procedure_argument_list,
-                         (exists $procedures{$procedure}->{extra_procedure_arguments})?
-                         @{$procedures{$procedure}->{extra_procedure_arguments}}:
-                         ()));
+", $procedure_code, join(", ",@{$procedures{$procedure}->{procedure_arguments}}));
     $procedure_code = sprintf("%s%s", $procedure_code, <<'EOF');
   select generateResourceTypeClause(resourceType) into @myresourceclause;
   select SystemProplist.cdr into @usereportauthentication from SystemProplist
@@ -519,8 +541,8 @@ begin
   call parse(userName,@name,@key,@vo);
 EOF
 
-    if (exists $procedures{$procedure}->{extra_procedure_arguments} and
-        grep /voseltype/, @{$procedures{$procedure}->{extra_procedure_arguments}})
+    if (exists $procedures{$procedure}->{procedure_arguments} and
+        grep /^voseltype\b/o, @{$procedures{$procedure}->{procedure_arguments}})
       {
       $procedure_code = sprintf("%s%s", $procedure_code, <<'EOF');
   -- Inelegant kludge to get around trouble .jsp has handling
@@ -540,9 +562,14 @@ EOF
                      ' where',
 EOF
     $procedure_code = "$procedure_code                     ' $jobusage_main_where',\n" if $jobusage_main_where;
-    $procedure_code = sprintf("%s%s", $procedure_code, <<'EOF');
+    if ((grep /^fromdate\b/o, @{$procedures{$procedure}->{procedure_arguments}}) and
+        (grep /^todate\b/o, @{$procedures{$procedure}->{procedure_arguments}})) {
+      $procedure_code = sprintf("%s%s", $procedure_code, <<'EOF');
                      ' EndTime >= date(''', fromdate, ''')'
                      ' and EndTime <= date(''', todate, ''')'
+EOF
+    }
+    $procedure_code = sprintf("%s%s", $procedure_code, <<'EOF');
                      ' ', @myresourceclause,
                      ' ', @mywhereclause
 EOF
@@ -612,7 +639,11 @@ EOF
 }
 
 sub generate_sql_boilerplate {
-  return <<'EOF';
+  my $engine_text = "";
+  if (system("grep -e 'org\\.hibernate\\.dialect\\.MySQLInnoDBDialect' \"$script_dir/hibernate.cfg.xml\" >/dev/null 2>&1") == 0) {
+    $engine_text = "ENGINE='innodb'";
+  }
+  my $result = <<"EOF";
 drop table if exists trace
 ||
 CREATE TABLE trace (
@@ -632,8 +663,10 @@ CREATE TABLE trace (
   p8 varchar(64),
   p9 varchar(64),
   data TEXT
-)
+) ${engine_text}
 ||
+EOF
+  return sprintf("%s%s", $result, <<'EOF');
 drop procedure if exists parse
 ||
 create procedure parse(username varchar(64),out outname varchar(64),
@@ -741,6 +774,8 @@ EOF
 
 sub generate_frontmatter {
 return << 'EOF';
+-- Allow gratia user to view stored procedures via query browser.
+GRANT SELECT ON mysql.proc TO gratia;
 delimiter ||
 
 EOF
