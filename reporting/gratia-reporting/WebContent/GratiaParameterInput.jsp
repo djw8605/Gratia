@@ -96,23 +96,24 @@ function getURL ()
 
 <%
 // get the parameters passed
-String report =request.getParameter("report");
-	String myReportTitle = request.getParameter("reportTitle");
-	if (myReportTitle != null)
+	String ReportTitle = request.getParameter("reportTitle");
+	if (ReportTitle != null)
    	{
 %>
 <div align="left" class="reportTitle"><%=myReportTitle%></div><br>
 <%
+	}else
+	{
+		ReportTitle = "";
 	}
 
-
-String requestedReportNameAndPath = request.getParameter("report");
+String report = request.getParameter("report");
 String pageID = "gratiaReporting";
 
 // Load the report parameters
 
 ReportParameters reportParameters = new ReportParameters();
-reportParameters.loadReportParameters(requestedReportNameAndPath);
+reportParameters.loadReportParameters(report);
 
 // Define current date (End date) and a week ago (Start Date)
 Date now = new Date();
@@ -163,6 +164,7 @@ String selectValue = null;
 
 <input type=hidden id="baseURL" name="BaseURL" Value = "<%=initUrl %>">
 <input type=hidden id="ReportURL" name="ReportURL" Value="<%=initUrl %>">
+<input type=hidden id="ReportTitle" name="ReportTitle" Value="<%=ReportTitle %>">
 
 <table>
 <%
