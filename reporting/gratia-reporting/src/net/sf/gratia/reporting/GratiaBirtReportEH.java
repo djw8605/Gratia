@@ -25,10 +25,11 @@ public class GratiaBirtReportEH extends ReportEventAdapter {
 		try 
 		{
 			//  Debugging ...
-			// BufferedWriter out = new BufferedWriter(new FileWriter("./GratiaBirtEH.log", true));
+			//BufferedWriter out = new BufferedWriter(new FileWriter("./GratiaBirtEH.log", true));
 			//out.write("\n+++++++++ before factory ++++++++++++++++\n");
-			// out.flush();
-
+			//out.flush();
+			
+			// Check if there is a VOs parameter. If so, format it for SQL input
 			Object inVOsObj = rc.getParameterValue("VOs");
 	        if (inVOsObj != null)
 	        {
@@ -49,7 +50,28 @@ public class GratiaBirtReportEH extends ReportEventAdapter {
 	        outVOs += ")";
 	        rc.setParameterValue("VOs", outVOs); 
 	        }
-	        // out.close();
+	        
+	        // Check if there is the parameter "ReportURL" is blank. 
+	        // If so set it to the called URL  
+
+			Object inReportURLObj = rc.getParameterValue("ReportURL");
+			
+			if (inReportURLObj != null)
+			{
+				String inReportURL = inReportURLObj.toString();
+				//out.write("Object is not null= " + inReportURL + "\n");
+				//out.flush();
+				if (inReportURL.length() == 0 || inReportURL == "")
+				{
+					HttpServletRequest request = (HttpServletRequest) rc.getHttpServletRequest();
+					String outReportURL = request.getRequestURL().toString() + "?" + request.getQueryString();
+					//out.write("OUTPUT URL = " + outReportURL);
+					//out.flush();
+					
+					rc.setParameterValue("ReportURL", outReportURL); 
+				}
+			}
+	        //out.close();
 		}
 		catch (Exception e) {
 			e.printStackTrace();
