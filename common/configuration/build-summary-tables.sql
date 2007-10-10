@@ -1,13 +1,11 @@
 drop table if exists ProbeSummary, UserProbeSummary, VOProbeSummary, VOProbeSummaryData,
 	ProbeStatus, HostDescriptionProbeSummary;
 
-drop view if exists VOProbeSummary;
-
 CREATE TABLE `ProbeStatus` (
 	`EndTime` DATETIME NOT NULL DEFAULT 0,
 	`ProbeName` VARCHAR(255) NOT NULL DEFAULT '',
 	`Njobs` INTEGER NOT NULL DEFAULT 0
-);
+) ENGINE = 'innodb';
 
 CREATE TABLE `ProbeSummary` (
 	`EndTime` DATETIME NOT NULL DEFAULT 0,
@@ -17,7 +15,7 @@ CREATE TABLE `ProbeSummary` (
 	`WallDuration` DOUBLE NOT NULL DEFAULT 0,
 	`CpuUserDuration` DOUBLE NOT NULL DEFAULT 0,
 	`CpuSystemDuration` DOUBLE NOT NULL DEFAULT 0
-);
+) ENGINE = 'innodb';
 
 CREATE TABLE `UserProbeSummary` (
 	`EndTime` DATETIME NOT NULL DEFAULT 0,
@@ -28,7 +26,7 @@ CREATE TABLE `UserProbeSummary` (
 	`WallDuration` DOUBLE NOT NULL DEFAULT 0,
 	`CpuUserDuration` DOUBLE NOT NULL DEFAULT 0,
 	`CpuSystemDuration` DOUBLE NOT NULL DEFAULT 0
-);
+) ENGINE = 'innodb';
 
 CREATE TABLE `VOProbeSummaryData` (
 	`EndTime` DATETIME NOT NULL DEFAULT 0,
@@ -40,22 +38,7 @@ CREATE TABLE `VOProbeSummaryData` (
 	`WallDuration` DOUBLE NOT NULL DEFAULT 0,
 	`CpuUserDuration` DOUBLE NOT NULL DEFAULT 0,
 	`CpuSystemDuration` DOUBLE NOT NULL DEFAULT 0
-);
-
-CREATE VIEW `VOProbeSummary` AS
-  SELECT VPSD.EndTime AS EndTime,
-         VO.VOName AS VOName,
-         VPSD.ProbeName AS ProbeName,
-         VPSD.CommonName AS CommonName,
-         VPSD.ResourceType AS ResourceType,
-         SUM(VPSD.Njobs) AS Njobs,
-         SUM(VPSD.WallDuration) AS WallDuration,
-         SUM(VPSD.CpuUserDuration) AS CpuUserDuration,
-         SUM(VPSD.CpuSystemDuration) AS CpuSystemDuration
-  FROM VOProbeSummaryData VPSD, VO, VONameCorrection VC
-  WHERE VPSD.VOcorrid = VC.corrid
-    AND VC.VOid = VO.VOid
-  GROUP BY EndTime, VOName, ProbeName, CommonName, ResourceType;
+) ENGINE = 'innodb';
 
 CREATE TABLE `HostDescriptionProbeSummary` (
 	`EndTime` DATETIME NOT NULL DEFAULT 0,
@@ -66,7 +49,7 @@ CREATE TABLE `HostDescriptionProbeSummary` (
 	`WallDuration` DOUBLE NOT NULL DEFAULT 0,
 	`CpuUserDuration` DOUBLE NOT NULL DEFAULT 0,
 	`CpuSystemDuration` DOUBLE NOT NULL DEFAULT 0
-);
+) ENGINE = 'innodb';
 
 insert into ProbeStatus
 	(select
