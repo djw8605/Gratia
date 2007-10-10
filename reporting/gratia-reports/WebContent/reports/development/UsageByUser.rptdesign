@@ -695,7 +695,6 @@ call UsageByUser(?,?,?,?,?,?,?,?,?,?)
  */
 function beforeGeneration( chart, context ){
 	rep = context.getExternalContext().getScriptable();
-	rep = context.getExternalContext().getScriptable();
 	subtitle =rep.getParameterValue(&quot;Subtitle&quot;);
 	chart.getTitle().getLabel().getCaption().setValue('Usage By User' + &quot;\n&quot; + subtitle);
 }	
@@ -818,8 +817,11 @@ if(val1 == 'jobcount')
 	{
 	labval = label.getCaption().getValue(); 
 	dotpos = labval.indexOf(&quot;.&quot;); 
-	frmt = label.getCaption().getValue().substring(0,dotpos);
-	label.getCaption().setValue(frmt);
+	if(dotpos > 0)
+		{ 
+		frmt = label.getCaption().getValue().substring(0,dotpos);
+		label.getCaption().setValue(frmt)
+		};
 	};
 }
 /**
