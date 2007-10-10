@@ -23,17 +23,6 @@
             <expression name="value">params["DatabasePassword"]</expression>
         </structure>
     </list-property>
-    <method name="initialize"><![CDATA[//importPackage(Packages.java.io); 
-//fos = new java.io.FileOutputStream("/tmp/glr.txt", true); 
-//printWriter = new java.io.PrintWriter(fos); 
-
-//printWriter.println("2.StartDate After:  " + params["StartDate"]);
-//printWriter.println("2.EndDate After:  " + params["EndDate"]);
-//printWriter.println("2.Format After:  " + params["GroupByFormat"]);
-//printWriter.println("2.TimeAxisPattern: " + params["TimeAxisPattern"]);
-//printWriter.flush();
-
-//printWriter.close();]]></method>
     <property name="eventHandlerClass">net.sf.gratia.reporting.GratiaBirtReportEH</property>
     <list-property name="libraries">
         <structure>
