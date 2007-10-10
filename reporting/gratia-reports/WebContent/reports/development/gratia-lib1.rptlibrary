@@ -331,7 +331,7 @@
         </parameter-group>
         <parameter-group name="ReportInfo" id="388">
             <parameters>
-                <scalar-parameter name="Title" id="362">
+                <scalar-parameter name="ReportTitle" id="362">
                     <property name="hidden">true</property>
                     <property name="valueType">static</property>
                     <property name="dataType">string</property>
@@ -342,7 +342,7 @@
                         <property name="category">Unformatted</property>
                     </structure>
                 </scalar-parameter>
-                <scalar-parameter name="Subtitle" id="23">
+                <scalar-parameter name="ReportSubtitle" id="23">
                     <property name="hidden">true</property>
                     <property name="valueType">static</property>
                     <property name="dataType">string</property>
