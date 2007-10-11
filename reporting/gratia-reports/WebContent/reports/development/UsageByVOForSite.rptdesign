@@ -1978,8 +1978,8 @@ else {&#xD;
         <Stacked>false</Stacked>
       </Series>
       <Grouping>
-        <Enabled>false</Enabled>
-        <GroupingInterval>2</GroupingInterval>
+        <Enabled>true</Enabled>
+        <GroupingInterval>1</GroupingInterval>
         <GroupType>Text</GroupType>
         <AggregateExpression>Sum</AggregateExpression>
       </Grouping>
@@ -2106,6 +2106,50 @@ else {&#xD;
 </model:ChartWithAxes>
 ]]></xml-property>
             <property name="outputFormat">SVG</property>
+            <structure name="action">
+                <property name="targetWindow">_self</property>
+                <property name="linkType">drill-through</property>
+                <property name="formatType">html</property>
+                <property name="reportName">UsageByUser.rptdesign</property>
+                <list-property name="paramBindings">
+                    <structure>
+                        <property name="paramName">DatabaseURL</property>
+                        <expression name="expression">params["DatabaseURL"]</expression>
+                    </structure>
+                    <structure>
+                        <property name="paramName">DatabaseUser</property>
+                        <expression name="expression">params["DatabaseUser"]</expression>
+                    </structure>
+                    <structure>
+                        <property name="paramName">DatabasePassword</property>
+                        <expression name="expression">params["DatabasePassword"]</expression>
+                    </structure>
+                    <structure>
+                        <property name="paramName">StartDate</property>
+                        <expression name="expression">params["StartDate"]</expression>
+                    </structure>
+                    <structure>
+                        <property name="paramName">EndDate</property>
+                        <expression name="expression">params["EndDate"]</expression>
+                    </structure>
+                    <structure>
+                        <property name="paramName">DisplayMetric</property>
+                        <expression name="expression">params["DisplayMetric"]</expression>
+                    </structure>
+                    <structure>
+                        <property name="paramName">ForVO</property>
+                        <expression name="expression">'ForVO'</expression>
+                    </structure>
+                    <structure>
+                        <property name="paramName">ForSite</property>
+                        <expression name="expression">'ForSite'</expression>
+                    </structure>
+                    <structure>
+                        <property name="paramName">ForSiteName</property>
+                        <expression name="expression">params["ForSiteName"]</expression>
+                    </structure>
+                </list-property>
+            </structure>
             <property name="dataSet">UsageBy</property>
             <property name="height">480px</property>
             <property name="width">640px</property>
