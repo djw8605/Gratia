@@ -46,7 +46,7 @@
 	</Menu>
 	<Dashboard>		
 		<Row>	
-			<DashboardItem link="GratiaParameterInput.jsp?report=[ReportsFolder]UsageBySite.rptdesign&amp;StartDate=01/01/1990&amp;EndDate=12/31/2999&amp;DisplayMetric=wallclock"/>			
+			<DashboardItem link="[ReportsFolder]UsageBySite.rptdesign&amp;StartDate&amp;EndDate&amp;DisplayMetric=wallclock"/>			
 		</Row>			
 	</Dashboard>
 </UserConfig>
