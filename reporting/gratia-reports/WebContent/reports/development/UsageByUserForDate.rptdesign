@@ -861,8 +861,11 @@ if(val1 == 'jobcount')
 	{
 	labval = label.getCaption().getValue(); 
 	dotpos = labval.indexOf(&quot;.&quot;); 
-	frmt = label.getCaption().getValue().substring(0,dotpos);
-	label.getCaption().setValue(frmt);
+	if(dotpos > 0)
+		{ 
+		frmt = label.getCaption().getValue().substring(0,dotpos);
+		label.getCaption().setValue(frmt)
+		};
 	};
 }
 //function beforeDrawFittingCurve( cf, context ){}
