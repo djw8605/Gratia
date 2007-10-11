@@ -100,7 +100,7 @@ function getURL ()
 	if (ReportTitle != null)
    	{
 %>
-<div align="left" class="reportTitle"><%=myReportTitle%></div><br>
+<div align="left" class="reportTitle"><%=ReportTitle%></div><br>
 <%
 	}else
 	{
@@ -230,7 +230,7 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 		{
 %>
 			<tr>
-			   <td><label class=paramName><%=promptText %></label></td>
+			   <td><label class=paramName><%=promptText %></label><br> <font size=-1><%=helpText%></font></td>
 			   <td>
 			   <input type="text" id="<%=paramName %>" name="<%=paramName %>" value="<%=defaultValue %>"  onchange="getURL();" >
 			   	<BUTTON name="cal1" value="cal1" type="button" class=button onclick="c1.popup('<%=paramName %>');" >
@@ -243,7 +243,7 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 		{
 	%>
 			<tr>
-			   <td valign="top"><label class=paramName> Select one or more VOs:</label></td>
+			   <td valign="top"><label class=paramName> Select one or more VOs:</label><br> <font size=-1><%=helpText%></font></td>
 			   <td> 
 				<SELECT multiple size="10" id="myVOs" name="myVOs" onChange="addVO2(this.form); getURL();" >
 						
@@ -346,7 +346,7 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 		{
 	%>
 			<tr>
-			   <td valign="top"><label class=paramName><%=promptText%></label></td>
+			   <td valign="top"><label class=paramName><%=promptText%></label><br> <font size=-1><%=helpText%></font></td>
 			   <td> 
 				<SELECT size="10" id="ForVOName" name="ForVOName" onChange="getURL();" >
 						
@@ -438,6 +438,198 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 		</tr>
 		<%
 		}
+		else if (paramName.indexOf("ForSiteName") > -1)
+		{
+	%>
+			<tr>
+			   <td valign="top"><label class=paramName><%=promptText%></label><br> <font size=-1><%=helpText%></font></td>
+			   <td> 
+				<SELECT size="10" id="ForSiteName" name="ForSiteName" onChange="getURL();" >
+						
+	<%		
+			// define the sql string to get the list of VOs that the user can selct from
+			String sql = "select Site.SiteName as sitename from Site";
+			
+			// Execute the sql statement to get the vos
+			
+			Connection con = null;
+			Statement statement = null;
+			ResultSet results = null;
+			String SiteName = "";
+			String SelectedSite = "";					 
+						
+			try {
+				Class.forName("com.mysql.jdbc.Driver").newInstance();
+			} catch (ClassNotFoundException ce){
+				out.println(ce);			
+			}
+			
+			try{						
+				con = DriverManager.getConnection(reportingConfiguration.getDatabaseURL(), reportingConfiguration.getDatabaseUser(), reportingConfiguration.getDatabasePassword());
+				statement = con.createStatement();
+				results = statement.executeQuery(sql);	
+
+			// Loop through the SQL results to add a row for each record, we have only one column that contains the VOName
+						
+				while(results.next())
+				{								
+				// Get the value for this column from the recordset, ommitting nulls
+						
+					Object value = results.getObject(1);
+							
+					if (value != null) 
+					{								
+						SiteName = value.toString();
+													
+						String selected = "";
+						if(defaultValue.indexOf(SiteName) > -1)
+						{
+							selected="selected";
+							
+							if (SelectedSite != "") 
+								SelectedSite += ";" + SiteName;
+							else
+								SelectedSite += SiteName;
+						}
+						%> <OPTION value="<%=SiteName %>" <%=selected %>><%=SiteName %></OPTION> <%
+					}
+				}
+					
+			}catch(SQLException exception){
+				out.println("<!--");
+				StringWriter sw = new StringWriter();
+				PrintWriter pw = new PrintWriter(sw);
+				exception.printStackTrace(pw);
+				out.print(sw);
+				sw.close();
+				pw.close();
+				out.println("-->");
+			}
+			finally
+			{
+				try
+				{
+					con.close();
+				}
+				catch(Exception ex) {}		
+				try
+				{
+					statement.close();
+				}
+				catch(Exception ex) {}		
+				try
+				{
+					results.close();
+				}
+				catch(Exception ex) {}	
+	
+				results = null;
+				statement = null;
+				con = null;
+			}
+				
+			%>
+			   </SELECT>
+			</td>
+		</tr>
+		<%
+		}
+		else if (paramName.indexOf("ForProbeName") > -1)
+		{
+	%>
+			<tr>
+			   <td valign="top"><label class=paramName><%=promptText%></label><br> <font size=-1><%=helpText%></font></td>
+			   <td> 
+				<SELECT size="10" id="ForProbeName" name="ForProbeName" onChange="getURL();" >
+						
+	<%		
+			// define the sql string to get the list of VOs that the user can selct from
+			String sql = "select Site.SiteName as sitename from Site";
+			
+			// Execute the sql statement to get the vos
+			
+			Connection con = null;
+			Statement statement = null;
+			ResultSet results = null;
+			String ProbeName = "";
+			String SelectedProbe = "";					 
+						
+			try {
+				Class.forName("com.mysql.jdbc.Driver").newInstance();
+			} catch (ClassNotFoundException ce){
+				out.println(ce);			
+			}
+			
+			try{						
+				con = DriverManager.getConnection(reportingConfiguration.getDatabaseURL(), reportingConfiguration.getDatabaseUser(), reportingConfiguration.getDatabasePassword());
+				statement = con.createStatement();
+				results = statement.executeQuery(sql);	
+
+			// Loop through the SQL results to add a row for each record, we have only one column that contains the VOName
+						
+				while(results.next())
+				{								
+				// Get the value for this column from the recordset, ommitting nulls
+						
+					Object value = results.getObject(1);
+							
+					if (value != null) 
+					{								
+						ProbeName = value.toString();
+													
+						String selected = "";
+						if(defaultValue.indexOf(ProbeName) > -1)
+						{
+							selected="selected";
+							
+							if (SelectedProbe != "") 
+								SelectedProbe += ";" + ProbeName;
+							else
+								SelectedProbe += ProbeName;
+						}
+						%> <OPTION value="<%=ProbeName %>" <%=selected %>><%=ProbeName %></OPTION> <%
+					}
+				}
+					
+			}catch(SQLException exception){
+				out.println("<!--");
+				StringWriter sw = new StringWriter();
+				PrintWriter pw = new PrintWriter(sw);
+				exception.printStackTrace(pw);
+				out.print(sw);
+				sw.close();
+				pw.close();
+				out.println("-->");
+			}
+			finally
+			{
+				try
+				{
+					con.close();
+				}
+				catch(Exception ex) {}		
+				try
+				{
+					statement.close();
+				}
+				catch(Exception ex) {}		
+				try
+				{
+					results.close();
+				}
+				catch(Exception ex) {}	
+	
+				results = null;
+				statement = null;
+				con = null;
+			}
+				
+			%>
+			   </SELECT>
+			</td>
+		</tr>
+		<%
+		}
 		else if (hasSelectionOptions)
 				{
 					%>
@@ -468,7 +660,7 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 		{
 		%>
 		    <tr>
-			<td><label class=paramName><%=promptText %></label></td>
+			<td><label class=paramName><%=promptText %></label><br> <font size=-1><%=helpText%></font></td>
 			<td>
 				<input id="<%=paramName%>" type="text" name="<%=paramName %>" value="<%=defaultValue %>" >
 			</td>
