@@ -544,7 +544,7 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 						
 	<%		
 			// define the sql string to get the list of VOs that the user can selct from
-			String sql = "select Site.SiteName as sitename from Site";
+			String sql = "select 'All' as name from CEProbes union select CEProbes.probename as name from CEProbes order by name";
 			
 			// Execute the sql statement to get the vos
 			
