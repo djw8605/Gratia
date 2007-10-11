@@ -40,10 +40,6 @@
             <property name="value">proto</property>
         </structure>
         <structure>
-            <property name="name">ForVOName</property>
-            <property name="value">fermilab</property>
-        </structure>
-        <structure>
             <property name="name">ForSiteName</property>
             <property name="value">Generic Site</property>
         </structure>
@@ -112,7 +108,7 @@
         <parameter-group name="VOandSite" id="108">
             <parameters>
                 <scalar-parameter name="ForVOName" id="106">
-                    <property name="hidden">false</property>
+                    <property name="hidden">true</property>
                     <property name="valueType">static</property>
                     <property name="dataType">string</property>
                     <text-property name="promptText">Enter VO Name</text-property>
@@ -166,6 +162,7 @@
         <parameter-group name="DateRange" id="114">
             <parameters>
                 <scalar-parameter name="StartDate" id="86">
+                    <property name="hidden">true</property>
                     <text-property name="helpText">Only jobs that finished after this date will be included</text-property>
                     <property name="valueType">static</property>
                     <property name="dataType">string</property>
@@ -213,7 +210,7 @@
         <parameter-group name="Metrics" id="117">
             <parameters>
                 <scalar-parameter name="DisplayMetric" id="118">
-                    <property name="hidden">false</property>
+                    <property name="hidden">true</property>
                     <text-property name="helpText">Select metric for chart</text-property>
                     <property name="valueType">static</property>
                     <property name="dataType">string</property>
@@ -223,6 +220,7 @@
                     <property name="mustMatch">true</property>
                     <property name="fixedOrder">true</property>
                     <property name="defaultValue">wallclock</property>
+                    <property name="distinct">false</property>
                     <structure name="format">
                         <property name="category">Unformatted</property>
                         <property name="pattern">Unformatted</property>
