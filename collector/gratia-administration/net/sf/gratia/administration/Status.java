@@ -419,7 +419,7 @@ public class Status extends HttpServlet {
                 connection.commit();
                 connection.setAutoCommit(true);
             }
-            catch (exception e) { // Ignore if we don't support exceptions
+            catch (Exception e) { // Ignore if we don't support exceptions
             }
             int maxthreads = Integer.parseInt(props.getProperty("service.listener.threads"));
             String path = System.getProperties().getProperty("catalina.home");

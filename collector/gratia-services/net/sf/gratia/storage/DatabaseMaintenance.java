@@ -993,7 +993,7 @@ public class DatabaseMaintenance {
             //
             Statement statement;
             ResultSet resultSet;
-            String command = "select table_name from information_schema.tables " +
+            command = "select table_name from information_schema.tables " +
                 "where table_schema = Database() and table_name like '%_Meta'" +
                 " order by table_name;";
             try {
