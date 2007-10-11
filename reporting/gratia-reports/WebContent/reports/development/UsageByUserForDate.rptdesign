@@ -44,10 +44,6 @@
             <property name="value">proto</property>
         </structure>
         <structure>
-            <property name="name">ForVOName</property>
-            <property name="value">fermilab</property>
-        </structure>
-        <structure>
             <property name="name">ForSiteName</property>
             <property name="value">Generic Site</property>
         </structure>
@@ -124,7 +120,7 @@
         <parameter-group name="VOandSite" id="108">
             <parameters>
                 <scalar-parameter name="ForVOName" id="106">
-                    <property name="hidden">false</property>
+                    <property name="hidden">true</property>
                     <property name="valueType">static</property>
                     <property name="dataType">string</property>
                     <text-property name="promptText">Enter VO Name</text-property>
