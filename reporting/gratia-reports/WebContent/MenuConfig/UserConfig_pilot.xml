@@ -1,7 +1,7 @@
 <UserConfig>
 	<Menu>
 		<MenuGroup name="Dashboards">
-			<MenuItem name="Featured Reports" link="dashboard.jsp"/>
+			<MenuItem name="Featured Reports" link="featuredReport.jsp"/>
 		</MenuGroup>
 		<MenuGroup name="DCache">
 			<MenuItem name="-   Dcache Report" link="GratiaParameterInput.jsp?report=[ReportsFolder]DcacheBySource.rptdesign"/>
