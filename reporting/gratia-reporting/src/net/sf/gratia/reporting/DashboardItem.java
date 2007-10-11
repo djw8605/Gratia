@@ -15,15 +15,16 @@ public class DashboardItem
 		public String getLink()
 		{
 				//
-				// glr: replace date stamps
+				// replace Empty date parameters
 				//
-				SimpleDateFormat format = new SimpleDateFormat("MM/dd/yyyy");
+				SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
 				Date to = new Date();
+				String endDate = "EndDate=" + format.format(to);
 				Date from = new Date(to.getTime() - (7 * 24 * 60 * 60 * 1000));
-				System.out.println("link: " + _link);
-				String newlink = _link.replaceAll("01/01/1990",format.format(from));
-				newlink = newlink.replaceAll("12/31/2999",format.format(to));
-				System.out.println("newlink: " + newlink);
+				String startDate = "StartDate=" + format.format(from);
+				String newlink = _link.replace("StartDate",startDate);
+				newlink = newlink.replaceAll("EndDate",endDate);
+				
 				return newlink;
 		}
 }
