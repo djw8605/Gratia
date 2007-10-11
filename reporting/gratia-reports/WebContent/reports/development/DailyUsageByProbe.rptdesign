@@ -509,7 +509,7 @@ call DailyUsageByProbe(?,?,?,?,?,'Batch')
       <Visible>true</Visible>
       <Label>
         <Caption>
-          <Value>Usage by Probe</Value>
+          <Value></Value>
           <Font>
             <Size>12.0</Size>
             <Bold>true</Bold>
@@ -738,6 +738,17 @@ call DailyUsageByProbe(?,?,?,?,?,'Batch')
       </Text>
       <Orientation>Vertical</Orientation>
       <Direction>Top_Bottom</Direction>
+      <Separator>
+        <Style>Solid</Style>
+        <Thickness>1</Thickness>
+        <Color>
+          <Transparency>255</Transparency>
+          <Red>0</Red>
+          <Green>0</Green>
+          <Blue>0</Blue>
+        </Color>
+        <Visible>true</Visible>
+      </Separator>
       <Position>Right</Position>
       <ItemType>Series</ItemType>
       <Title>
@@ -856,10 +867,9 @@ call DailyUsageByProbe(?,?,?,?,?,'Batch')
 function beforeGeneration( chart, context ){
 	rep = context.getExternalContext().getScriptable();
 	val = rep.getParameterValue(&quot;TimeAxisPattern&quot;);
-	rep = context.getExternalContext().getScriptable();
-	subtitle =rep.getParameterValue(&quot;Subtitle&quot;);
-	chart.getTitle().getLabel().getCaption().setValue('Usage By Probe'+ &quot;\n&quot; + subtitle);
-
+	rep_title =rep.getParameterValue(&quot;ReportTitle&quot;);
+	rep_subtitle =rep.getParameterValue(&quot;ReportSubtitle&quot;);
+	chart.getTitle().getLabel().getCaption().setValue(rep_title + &quot;\n&quot; + rep_subtitle);
 
 	if(val != null) {
                 axes = chart.getAxes().get(0);

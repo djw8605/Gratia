@@ -23,6 +23,12 @@
             <expression name="value">params["DatabasePassword"]</expression>
         </structure>
     </list-property>
+    <list-property name="libraries">
+        <structure>
+            <property name="fileName">gratia-lib1.rptlibrary</property>
+            <property name="namespace">gratia-lib1</property>
+        </structure>
+    </list-property>
     <list-property name="configVars">
         <structure>
             <property name="name">DatabaseUser</property>
@@ -33,11 +39,11 @@
             <property name="value">proto</property>
         </structure>
         <structure>
-            <property name="name">Start Date</property>
+            <property name="name">StartDate</property>
             <property name="value">2007-07-13</property>
         </structure>
         <structure>
-            <property name="name">End Date</property>
+            <property name="name">EndDate</property>
             <property name="value">2007-07-14</property>
         </structure>
         <structure>
@@ -90,11 +96,11 @@
                 </scalar-parameter>
             </parameters>
         </parameter-group>
-        <scalar-parameter name="Start Date" id="86">
+        <scalar-parameter name="StartDate" id="86">
             <text-property name="helpText">Only jobs that finished after this date will be included</text-property>
             <property name="valueType">static</property>
             <property name="dataType">string</property>
-            <text-property name="promptText">Start Date</text-property>
+            <text-property name="promptText">StartDate</text-property>
             <property name="isRequired">true</property>
             <property name="controlType">text-box</property>
             <property name="defaultValue">3/1/2006</property>
@@ -103,11 +109,11 @@
                 <property name="pattern">Unformatted</property>
             </structure>
         </scalar-parameter>
-        <scalar-parameter name="End Date" id="87">
+        <scalar-parameter name="EndDate" id="87">
             <text-property name="helpText">Only jobs that finished before this date will be included</text-property>
             <property name="valueType">static</property>
             <property name="dataType">string</property>
-            <text-property name="promptText">End Date</text-property>
+            <text-property name="promptText">EndDate</text-property>
             <property name="isRequired">true</property>
             <property name="controlType">text-box</property>
             <property name="defaultValue">12/31/2999</property>
@@ -162,6 +168,7 @@
                 </structure>
             </list-property>
         </scalar-parameter>
+        <parameter-group name="ReportInfo" id="189" extends="gratia-lib1.ReportInfo"/>
     </parameters>
     <data-sources>
         <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="fermigrid1" id="4">
@@ -407,11 +414,11 @@ and (? = 'All' or Site.sitename = ?)</property>
             <list-property name="paramBindings">
                 <structure>
                     <property name="paramName">StartDate</property>
-                    <expression name="expression">params["Start Date"]</expression>
+                    <expression name="expression">params["StartDate"]</expression>
                 </structure>
                 <structure>
                     <property name="paramName">EndDate</property>
-                    <expression name="expression">params["End Date"]</expression>
+                    <expression name="expression">params["EndDate"]</expression>
                 </structure>
                 <structure>
                     <property name="paramName">ProbeAll</property>
@@ -468,15 +475,14 @@ and (? = 'All' or Site.sitename = ?)</property>
                     <cell id="96">
                         <property name="colSpan">3</property>
                         <property name="rowSpan">1</property>
-                        <text id="156">
+                        <text-data id="390">
                             <property name="style">sans-style1</property>
-                            <property name="fontFamily">sans-serif</property>
-                            <property name="fontSize">x-large</property>
+                            <property name="fontSize">larger</property>
                             <property name="fontWeight">bold</property>
                             <property name="textAlign">center</property>
-                            <property name="contentType">plain</property>
-                            <text-property name="content"><![CDATA[Usage Report]]></text-property>
-                        </text>
+                            <expression name="valueExpr">params["ReportTitle"] + "\n" + params["ReportSubtitle"]</expression>
+                            <property name="contentType">html</property>
+                        </text-data>
                     </cell>
                 </row>
                 <row id="148">
@@ -489,7 +495,7 @@ and (? = 'All' or Site.sitename = ?)</property>
                             <property name="fontSize">large</property>
                             <property name="fontWeight">bold</property>
                             <property name="textAlign">center</property>
-                            <expression name="valueExpr">params["Start Date"] + " - " + params["End Date"]</expression>
+                            <expression name="valueExpr">params["StartDate"] + " - " + params["EndDate"]</expression>
                             <property name="contentType">html</property>
                         </text-data>
                     </cell>

@@ -881,8 +881,9 @@ function beforeGeneration( chart, context ){
 	rep = context.getExternalContext().getScriptable();
 	val = rep.getParameterValue(&quot;TimeAxisPattern&quot;);
 	rep = context.getExternalContext().getScriptable();
-	subtitle =rep.getParameterValue(&quot;Subtitle&quot;);
-	chart.getTitle().getLabel().getCaption().setValue('Usage By Site For VO'+ &quot;\n&quot; + subtitle);
+	rep_title = rep.getParameterValue(&quot;ReportTitle&quot;);
+	rep_subtitle = rep.getParameterValue(&quot;ReportSubtitle&quot;);
+	chart.getTitle().getLabel().getCaption().setValue(rep_title + &quot;\n&quot; + rep_subtitle);
 
 	if(val != null) {
                 axes = chart.getAxes().get(0);

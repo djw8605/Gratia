@@ -490,7 +490,7 @@ call JobsByProbeNoFacility(?,?,?,?,'','Batch')
       <Left>0.0</Left>
       <Top>0.0</Top>
       <Width>480.0</Width>
-      <Height>129.75</Height>
+      <Height>130.0</Height>
     </Bounds>
     <Insets>
       <Top>3.0</Top>
@@ -557,8 +557,9 @@ call JobsByProbeNoFacility(?,?,?,?,'','Batch')
  */
 function beforeGeneration( chart, context )
 {	rep = context.getExternalContext().getScriptable();
-	subtitle =rep.getParameterValue(&quot;Subtitle&quot;);
-	chart.getTitle().getLabel().getCaption().setValue('Job Count By Probe'+ &quot;\n&quot; + subtitle);
+		rep_title = rep.getParameterValue(&quot;ReportTitle&quot;);
+	rep_subtitle = rep.getParameterValue(&quot;ReportSubtitle&quot;);
+	chart.getTitle().getLabel().getCaption().setValue(rep_title + &quot;\n&quot; + rep_subtitle);
 
 }
 
@@ -696,8 +697,7 @@ function beforeGeneration( chart, context )
  * @param context
  *            IChartScriptContext
  */
-//function beforeDrawAxisTitle( axis, label, context ){}
-</Script>
+//function beforeDrawAxisTitle( axis, label, context ){}</Script>
   <Units>Points</Units>
   <SeriesThickness>10.0</SeriesThickness>
   <GridColumnCount>1</GridColumnCount>

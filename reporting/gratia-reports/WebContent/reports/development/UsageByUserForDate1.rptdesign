@@ -403,6 +403,13 @@ order by VOProbeSummary.CommonName,sitename,VOProbeSummary.VOName</property>
         </simple-master-page>
     </page-setup>
     <body>
+        <text-data id="97">
+            <property name="style">san-style1</property>
+            <property name="fontSize">9pt</property>
+            <property name="textAlign">center</property>
+            <expression name="valueExpr">"Date: "+params["StartDate"].substring(0,10)</expression>
+            <property name="contentType">html</property>
+        </text-data>
         <extended-item extensionName="Chart" name="NewChart" id="88">
             <xml-property name="xmlRepresentation"><![CDATA[<model:ChartWithAxes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:attribute="http://www.birt.eclipse.org/ChartModelAttribute" xmlns:data="http://www.birt.eclipse.org/ChartModelData" xmlns:layout="http://www.birt.eclipse.org/ChartModelLayout" xmlns:model="http://www.birt.eclipse.org/ChartModel" xmlns:type="http://www.birt.eclipse.org/ChartModelType">
   <Type>Bar Chart</Type>
@@ -714,8 +721,10 @@ order by VOProbeSummary.CommonName,sitename,VOProbeSummary.VOName</property>
  */
 function beforeGeneration( chart, context ){
 	rep = context.getExternalContext().getScriptable();
-	subtitle =rep.getParameterValue(&quot;Subtitle&quot;);
-	chart.getTitle().getLabel().getCaption().setValue('Usage By User' + &quot;\n&quot; + subtitle);
+	rep_title = rep.getParameterValue(&quot;ReportTitle&quot;);
+	rep_subtitle = rep.getParameterValue(&quot;ReportSubtitle&quot;);
+	chart.getTitle().getLabel().getCaption().setValue(rep_title + &quot;\n&quot; + rep_subtitle);
+
 }	
 
 /**
@@ -1659,13 +1668,6 @@ else {&#xD;
             </list-property>
             <property name="style">san-style1</property>
         </extended-item>
-        <text-data id="97">
-            <property name="style">san-style1</property>
-            <property name="fontSize">9pt</property>
-            <property name="textAlign">center</property>
-            <expression name="valueExpr">"Date: "+params["StartDate"].substring(0,10)</expression>
-            <property name="contentType">html</property>
-        </text-data>
         <text-data id="107">
             <property name="style">san-style1</property>
             <property name="fontFamily">sans-serif</property>
