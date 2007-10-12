@@ -31,6 +31,24 @@ my %collector_configs =
                     "service.listener.threads" => 10
                    }
                  },
+   itb_control => { http_port => 8881,
+                    ssl_port => 8850,
+                    rmi_port => 18000,
+                    jmx_port => 8014,
+                    server_port => 8114,
+                    db_host => "gratia07.fnal.gov",
+                    db_port => 3320,
+                    db_schema => "gratia_itb",
+                    remote_host => "gratia01.fnal.gov",
+                    "properties.attributes" =>
+                    {
+                     "maintain.history.log" => 7,
+                     "monitor.listener.wait" => 2880,
+                     "service.rmiservlet.level" => "FINEST",
+                     "monitor.to.address0" => 'greenc@fnal.gov',
+                     "service.listener.threads" => 10
+                    }
+                  },
 	 gratia => { http_port => 8880,
 							 ssl_port => 8845,
 							 rmi_port => 17000,
