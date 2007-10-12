@@ -1,0 +1,60 @@
+eval '(exit $?0)' && eval 'exec perl -w -S $0 ${1+"$@"}'
+                  && eval 'exec perl -w -S $0 $argv:q'
+                  if 0;
+
+########################################################################
+########################################################################
+use strict;
+
+my %table_info =
+  ( table_name => "",
+    data_length => "",
+    index_length => "",
+    time_taken => "" );
+
+print "\"Table\",\"Data Length\",\"Index Length\",\"Time Taken\"\n";
+
+while (<>) {
+  if (m&^FINE: Converting table (.*) \(data_length = ([\d\.,]+[A-Za-z]+), (?:indexLength|index_length) = ([\d\.,]+[A-Za-z]+)&) {
+    %table_info = ( table_name => $1, data_length => $2, index_length => $3, time_taken => "" );
+  }
+  if (m&^FINE: Table $table_info{table_name} converted to INNODB in (.*)&) {
+    $table_info{time_taken} = $1;
+    print "\"$table_info{table_name}\",",
+      unpretty_size($table_info{data_length}), ",",
+        unpretty_size($table_info{index_length}), ",",
+          fix_time($table_info{time_taken}), "\n";
+  }
+}
+
+sub unpretty_size {
+  my ($number) = @_;
+  my ($num, $unit) = ($number =~ m&([\d\.,]+)\s*([A-Za-z]+)&);
+  $num =~ s/,//g;
+  my $multiplier = 1;
+  if ($unit eq 'TiB') {
+    $multiplier = 1024 * 1024 * 1024 * 1024;
+  } elsif ($unit eq 'GiB') {
+    $multiplier = 1024 * 1024 * 1024;
+  } elsif ($unit eq 'MiB') {
+    $multiplier = 1024 * 1024;
+  } elsif ($unit eq 'KiB') {
+    $multiplier = 1024;
+  }
+  return ceil($num * $multiplier);
+}
+
+sub ceil {
+  my $num = shift;
+  return ($num > int($num))?int($num + 1):int($num);
+}
+
+sub fix_time {
+  my $time = shift;
+  my ($h,$m,$s) = split(':', $time);
+  return sprintf("%d:%d:%s", $h, $m % 60, $s);
+}
+
+### Local Variables:
+### mode: cperl
+### End:
