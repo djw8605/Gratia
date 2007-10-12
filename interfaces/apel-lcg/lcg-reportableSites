@@ -78,6 +78,8 @@
 #   10/03/07 (John Weigand) - 
 #             Removed SLACXRD. Name known only to Panda.
 #             Updated Normalization factor for BNL_PANDA        (1351)
+#   10/12/07 (John Weigand) - 
+#             Updated Normalization factor for UTA_DPCC         (915)
 #    
 ##################################################################
 #-- Site  ------- SPECint2000
@@ -112,5 +114,5 @@ OU_OCHEP_SWT2       1543
 OU_OSCER_ATLAS      1543
 UC_Teraport         1412
 UC_ATLAS_MWT2       1169
-UTA_DPCC
+UTA_DPCC             915
 UTA_SWT2            1543
