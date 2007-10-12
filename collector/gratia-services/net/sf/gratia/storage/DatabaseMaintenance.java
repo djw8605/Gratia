@@ -1044,11 +1044,11 @@ public class DatabaseMaintenance {
             resultSet = statement.executeQuery(get_convert_list);
             while (resultSet.next()) {
                 String tableName = resultSet.getString(1);
-                Integer dataLength = resultSet.getInt(2);
-                Integer indexLength = resultSet.getInt(3);
+                Long dataLength = resultSet.getLong(2);
+                Long indexLength = resultSet.getLong(3);
                 Logging.log("Converting table " + tableName +
                             " (data_length = " + prettySize(dataLength) +
-                            ", indexLength = " + prettySize(indexLength));
+                            ", index_length = " + prettySize(indexLength) + ")");
                 long startTime = System.currentTimeMillis();
                 int result;
                 try {
@@ -1066,7 +1066,7 @@ public class DatabaseMaintenance {
                 }
 
                 String tTString = Long.valueOf(timeTaken / 3600000).toString() + ":" +
-                    Long.valueOf(timeTaken / 60000).toString() + ":" +
+                    Long.valueOf((timeTaken % 3600000)/ 60000).toString() + ":" +
                     form.format(Long.valueOf(timeTaken % 60000) / 1000.0);
                 if (result > -1) {
                     Logging.log("Table " + tableName +
@@ -1087,11 +1087,11 @@ public class DatabaseMaintenance {
         return true;
     }
     
-    private String prettySize(Integer number) {
+    private String prettySize(Long number) {
         return prettySize(number, 1100);
     }
 
-    private String prettySize(Integer number, Integer threshold) {
+    private String prettySize(Long number, Integer threshold) {
         String suffices[] = {"B", "KiB", "MiB", "GiB", "TiB"};
         int suffix_counter = 0;
         Double size = new Double(number);
