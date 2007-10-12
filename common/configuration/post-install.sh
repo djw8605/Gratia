@@ -21,7 +21,7 @@ function preprocess_proc() {
             echo "Unable to create temporary file \"$TMP.preprocess.XXXXXXXXXX\"" 1>&2
             exit 1
         fi
-        sed -e 's/ ENGINE='"'"'innodb'"'"'/g' "$proc" > "$TPROC"
+        sed -e 's/ ENGINE='"'"'innodb'"'"'//g' "$proc" > "$TPROC"
         proc="$TPROC"
      fi
 }
@@ -30,12 +30,25 @@ function preprocess_proc() {
 # exists" syntax.
 function prepareCountTrigger() {
   local table_name=${1##countTrigger}
-  cat > "${TMP}.countTrigger.${table_name}" <<EOF
+  TPROC="${TMP}.countTrigger.${table_name}"
+  cat > "${TPROC}" <<EOF
 delimiter ||
 drop procedure if exists conditional_trigger_drop;
 create procedure conditional_trigger_drop()
 begin
   declare mycount int;
+
+-- Old trigger
+  select count(*) into mycount from information_schema.triggers where
+    trigger_schema = Database()
+    and event_object_table = 'JobUsageRecord'
+    and trigger_name = 'trigger01';
+
+  if mycount > 0 then
+    drop trigger trigger01;
+  end if;
+
+-- Previous increment trigger
   select count(*) into mycount from information_schema.triggers where
     trigger_schema = Database()
     and event_object_table = '${table_name}'
@@ -45,6 +58,7 @@ begin
     drop trigger countInc${table_name};
   end if;
 
+-- Previous decrement trigger
   select count(*) into mycount from information_schema.triggers where
     trigger_schema = Database()
     and event_object_table = '${table_name}'
@@ -70,7 +84,7 @@ f:begin
 end
 EOF
 
-  proc=$TMP
+  proc=$TPROC
 }
 
 if (( $# == 0 )); then
