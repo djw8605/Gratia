@@ -774,7 +774,6 @@ function beforeGeneration( chart, context ){
  *            IChartScriptContext
  */
 //function beforeDrawDataPoint( dph, fill, context ){}
-
 /**
  * Called before rendering the label for each datapoint.
  * 
@@ -785,8 +784,7 @@ function beforeGeneration( chart, context ){
  * @param context
  *            IChartScriptContext
  */
-//function beforeDrawDataPointLabel( dph, label, context ){}
-
+function beforeDrawDataPointLabel( dph, label, context ){
 /**
  * Called before rendering curve fitting.
  * 
@@ -795,6 +793,19 @@ function beforeGeneration( chart, context ){
  * @param context
  *            IChartScriptContext
  */
+  rep = context.getExternalContext().getScriptable();
+val1 = rep.getParameterValue(&quot;DisplayMetric&quot;);
+if(val1 == 'jobcount')
+	{
+	labval = label.getCaption().getValue(); 
+	dotpos = labval.indexOf(&quot;.&quot;);
+	if(dotpos > 0)
+		{ 
+		frmt = label.getCaption().getValue().substring(0,dotpos);
+		label.getCaption().setValue(frmt)
+		};
+	};
+}
 //function beforeDrawFittingCurve( cf, context ){}
 
 /**
@@ -1420,6 +1431,23 @@ else {&#xD;
             <property name="dataSet">UsageForWeek</property>
             <property name="height">800px</property>
             <property name="width">640px</property>
+            <list-property name="paramBindings">
+                <structure>
+                    <property name="paramName">StartDate</property>
+                    <expression name="expression">params["ForWeek"]</expression>
+                </structure>
+                <structure>
+                    <property name="paramName">VOName</property>
+                    <expression name="expression">params["ForVOName"]</expression>
+                </structure>
+                <structure>
+                    <property name="paramName">ForVO</property>
+                    <expression name="expression">'ForVO'</expression>
+                </structure>
+                <structure>
+                    <property name="paramName">SiteName</property>
+                </structure>
+            </list-property>
             <list-property name="boundDataColumns">
                 <structure>
                     <property name="name">sitename</property>
