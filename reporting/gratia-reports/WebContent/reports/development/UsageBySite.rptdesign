@@ -1137,15 +1137,15 @@ else {&#xD;
             &lt;expression name=&quot;expression&quot;>params[&quot;DatabasePassword&quot;]&lt;/expression>
         &lt;/structure>
         &lt;structure>
-            &lt;property name=&quot;paramName&quot;>Start Date&lt;/property>
+            &lt;property name=&quot;paramName&quot;>StartDate&lt;/property>
             &lt;expression name=&quot;expression&quot;>params[&quot;StartDate&quot;]&lt;/expression>
         &lt;/structure>
         &lt;structure>
-            &lt;property name=&quot;paramName&quot;>End Date&lt;/property>
+            &lt;property name=&quot;paramName&quot;>EndDate&lt;/property>
             &lt;expression name=&quot;expression&quot;>params[&quot;EndDate&quot;]&lt;/expression>
         &lt;/structure>
         &lt;structure>
-            &lt;property name=&quot;paramName&quot;>Display Metric&lt;/property>
+            &lt;property name=&quot;paramName&quot;>DisplayMetric&lt;/property>
             &lt;expression name=&quot;expression&quot;>params[&quot;DisplayMetric&quot;]&lt;/expression>
         &lt;/structure>
         &lt;structure>
@@ -1596,15 +1596,15 @@ else {&#xD;
                         <expression name="expression">params["DatabasePassword"]</expression>
                     </structure>
                     <structure>
-                        <property name="paramName">Start Date</property>
+                        <property name="paramName">StartDate</property>
                         <expression name="expression">params["StartDate"]</expression>
                     </structure>
                     <structure>
-                        <property name="paramName">End Date</property>
+                        <property name="paramName">EndDate</property>
                         <expression name="expression">params["EndDate"]</expression>
                     </structure>
                     <structure>
-                        <property name="paramName">Display Metric</property>
+                        <property name="paramName">DisplayMetric</property>
                         <expression name="expression">params["DisplayMetric"]</expression>
                     </structure>
                     <structure>

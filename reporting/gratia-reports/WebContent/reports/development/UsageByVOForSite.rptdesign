@@ -2153,6 +2153,27 @@ else {&#xD;
             <property name="dataSet">UsageBy</property>
             <property name="height">480px</property>
             <property name="width">640px</property>
+            <list-property name="paramBindings">
+                <structure>
+                    <property name="paramName">StartDate</property>
+                    <expression name="expression">params["StartDate"]</expression>
+                </structure>
+                <structure>
+                    <property name="paramName">EndDate</property>
+                    <expression name="expression">params["EndDate"]</expression>
+                </structure>
+                <structure>
+                    <property name="paramName">ForSite</property>
+                    <expression name="expression">'ForSIte'</expression>
+                </structure>
+                <structure>
+                    <property name="paramName">ForSiteName</property>
+                    <expression name="expression">params["ForSiteName"]</expression>
+                </structure>
+                <structure>
+                    <property name="paramName">ForVOName</property>
+                </structure>
+            </list-property>
             <list-property name="boundDataColumns">
                 <structure>
                     <property name="name">sitename</property>
