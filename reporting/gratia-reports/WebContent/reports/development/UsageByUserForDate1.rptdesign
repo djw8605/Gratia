@@ -23,6 +23,7 @@
             <expression name="value">params["DatabasePassword"]</expression>
         </structure>
     </list-property>
+    <property name="eventHandlerClass">net.sf.gratia.reporting.GratiaBirtReportEH</property>
     <list-property name="libraries">
         <structure>
             <property name="fileName">gratia-lib1.rptlibrary</property>
@@ -37,6 +38,18 @@
         <structure>
             <property name="name">DatabasePassword</property>
             <property name="value">proto</property>
+        </structure>
+        <structure>
+            <property name="name">ForSiteName</property>
+            <property name="value">Generic Site</property>
+        </structure>
+        <structure>
+            <property name="name">ForVO</property>
+            <property name="value">AnyVO</property>
+        </structure>
+        <structure>
+            <property name="name">ForSite</property>
+            <property name="value">AnySite</property>
         </structure>
         <structure>
             <property name="name">UserName</property>
@@ -101,7 +114,7 @@
                     <text-property name="promptText">Enter VO Name</text-property>
                     <property name="isRequired">true</property>
                     <property name="controlType">text-box</property>
-                    <property name="defaultValue">fermilab</property>
+                    <property name="defaultValue">gridex</property>
                     <structure name="format">
                         <property name="category">Unformatted</property>
                         <property name="pattern">Unformatted</property>
@@ -197,7 +210,7 @@
         <parameter-group name="Metrics" id="117">
             <parameters>
                 <scalar-parameter name="DisplayMetric" id="118">
-                    <property name="hidden">false</property>
+                    <property name="hidden">true</property>
                     <text-property name="helpText">Select metric for chart</text-property>
                     <property name="valueType">static</property>
                     <property name="dataType">string</property>
@@ -281,7 +294,7 @@
                     <property name="name">StartDate</property>
                     <property name="dataType">string</property>
                     <property name="position">1</property>
-                    <expression name="defaultValue">'2007-01-03'</expression>
+                    <expression name="defaultValue">'2007-01-01'</expression>
                     <property name="isOptional">false</property>
                     <property name="allowNull">true</property>
                     <property name="isInput">true</property>
@@ -369,7 +382,7 @@
 where VOProbeSummary.ResourceType = 'Batch'
 and Probe.siteid = Site.siteid 
 and VOProbeSummary.ProbeName = Probe.probename
-and Date(VOProbeSummary.EndTime) = Date(?)
+and VOProbeSummary.EndTime = Date(?)
 and (VOProbeSummary.VOName = ? or (? = 'AnyVO' and VOProbeSummary.VOName like '%'))
 and (Site.SiteName = ? or (? = 'AnySite' and Site.SiteName like '%'))
 group by VOProbeSummary.CommonName,sitename,VOProbeSummary.VOName
@@ -1473,194 +1486,6 @@ else {&#xD;
         <LabelPosition>Outside</LabelPosition>
         <Stacked>false</Stacked>
       </Series>
-      <Series>
-        <Visible>true</Visible>
-        <Label>
-          <Caption>
-            <Value>&lt;undefined></Value>
-            <Font>
-              <Alignment/>
-            </Font>
-          </Caption>
-          <Background xsi:type="attribute:ColorDefinition">
-            <Transparency>0</Transparency>
-            <Red>255</Red>
-            <Green>255</Green>
-            <Blue>255</Blue>
-          </Background>
-          <Outline>
-            <Style>Solid</Style>
-            <Thickness>1</Thickness>
-            <Color>
-              <Transparency>255</Transparency>
-              <Red>0</Red>
-              <Green>0</Green>
-              <Blue>0</Blue>
-            </Color>
-            <Visible>false</Visible>
-          </Outline>
-          <Insets>
-            <Top>0.0</Top>
-            <Left>2.0</Left>
-            <Bottom>0.0</Bottom>
-            <Right>3.0</Right>
-          </Insets>
-          <Visible>false</Visible>
-        </Label>
-        <DataDefinition>
-          <Definition>row[&quot;UserName&quot;]</Definition>
-        </DataDefinition>
-        <SeriesIdentifier>Usage</SeriesIdentifier>
-        <DataPoint>
-          <Components>
-            <Type>Orthogonal_Value</Type>
-          </Components>
-          <Separator>, </Separator>
-        </DataPoint>
-        <LabelPosition>Outside</LabelPosition>
-        <Stacked>false</Stacked>
-      </Series>
-      <Series>
-        <Visible>true</Visible>
-        <Label>
-          <Caption>
-            <Value>&lt;undefined></Value>
-            <Font>
-              <Alignment/>
-            </Font>
-          </Caption>
-          <Background xsi:type="attribute:ColorDefinition">
-            <Transparency>0</Transparency>
-            <Red>255</Red>
-            <Green>255</Green>
-            <Blue>255</Blue>
-          </Background>
-          <Outline>
-            <Style>Solid</Style>
-            <Thickness>1</Thickness>
-            <Color>
-              <Transparency>255</Transparency>
-              <Red>0</Red>
-              <Green>0</Green>
-              <Blue>0</Blue>
-            </Color>
-            <Visible>false</Visible>
-          </Outline>
-          <Insets>
-            <Top>0.0</Top>
-            <Left>2.0</Left>
-            <Bottom>0.0</Bottom>
-            <Right>3.0</Right>
-          </Insets>
-          <Visible>false</Visible>
-        </Label>
-        <DataDefinition>
-          <Definition>row[&quot;UserName&quot;]</Definition>
-        </DataDefinition>
-        <SeriesIdentifier>Usage</SeriesIdentifier>
-        <DataPoint>
-          <Components>
-            <Type>Orthogonal_Value</Type>
-          </Components>
-          <Separator>, </Separator>
-        </DataPoint>
-        <LabelPosition>Outside</LabelPosition>
-        <Stacked>false</Stacked>
-      </Series>
-      <Series>
-        <Visible>true</Visible>
-        <Label>
-          <Caption>
-            <Value>&lt;undefined></Value>
-            <Font>
-              <Alignment/>
-            </Font>
-          </Caption>
-          <Background xsi:type="attribute:ColorDefinition">
-            <Transparency>0</Transparency>
-            <Red>255</Red>
-            <Green>255</Green>
-            <Blue>255</Blue>
-          </Background>
-          <Outline>
-            <Style>Solid</Style>
-            <Thickness>1</Thickness>
-            <Color>
-              <Transparency>255</Transparency>
-              <Red>0</Red>
-              <Green>0</Green>
-              <Blue>0</Blue>
-            </Color>
-            <Visible>false</Visible>
-          </Outline>
-          <Insets>
-            <Top>0.0</Top>
-            <Left>2.0</Left>
-            <Bottom>0.0</Bottom>
-            <Right>3.0</Right>
-          </Insets>
-          <Visible>false</Visible>
-        </Label>
-        <DataDefinition>
-          <Definition>row[&quot;UserName&quot;]</Definition>
-        </DataDefinition>
-        <SeriesIdentifier>Usage</SeriesIdentifier>
-        <DataPoint>
-          <Components>
-            <Type>Orthogonal_Value</Type>
-          </Components>
-          <Separator>, </Separator>
-        </DataPoint>
-        <LabelPosition>Outside</LabelPosition>
-        <Stacked>false</Stacked>
-      </Series>
-      <Series>
-        <Visible>true</Visible>
-        <Label>
-          <Caption>
-            <Value>&lt;undefined></Value>
-            <Font>
-              <Alignment/>
-            </Font>
-          </Caption>
-          <Background xsi:type="attribute:ColorDefinition">
-            <Transparency>0</Transparency>
-            <Red>255</Red>
-            <Green>255</Green>
-            <Blue>255</Blue>
-          </Background>
-          <Outline>
-            <Style>Solid</Style>
-            <Thickness>1</Thickness>
-            <Color>
-              <Transparency>255</Transparency>
-              <Red>0</Red>
-              <Green>0</Green>
-              <Blue>0</Blue>
-            </Color>
-            <Visible>false</Visible>
-          </Outline>
-          <Insets>
-            <Top>0.0</Top>
-            <Left>2.0</Left>
-            <Bottom>0.0</Bottom>
-            <Right>3.0</Right>
-          </Insets>
-          <Visible>false</Visible>
-        </Label>
-        <DataDefinition>
-          <Definition>row[&quot;UserName&quot;]</Definition>
-        </DataDefinition>
-        <SeriesIdentifier>Usage</SeriesIdentifier>
-        <DataPoint>
-          <Components>
-            <Type>Orthogonal_Value</Type>
-          </Components>
-          <Separator>, </Separator>
-        </DataPoint>
-        <LabelPosition>Outside</LabelPosition>
-        <Stacked>false</Stacked>
-      </Series>
       <Grouping>
         <Enabled>false</Enabled>
         <GroupingInterval>2</GroupingInterval>
@@ -1800,41 +1625,46 @@ else {&#xD;
                     <property name="paramName">ForVOName</property>
                     <expression name="expression">params["ForVOName"]</expression>
                 </structure>
+                <structure>
+                    <property name="paramName">ForVO</property>
+                    <expression name="expression">params["ForVO"]</expression>
+                </structure>
+                <structure>
+                    <property name="paramName">ForSiteName</property>
+                    <expression name="expression">params["ForSiteName"]</expression>
+                </structure>
+                <structure>
+                    <property name="paramName">ForSite</property>
+                    <expression name="expression">params["ForSite"]</expression>
+                </structure>
             </list-property>
             <list-property name="boundDataColumns">
                 <structure>
                     <property name="name">sitename</property>
                     <expression name="expression">dataSetRow["sitename"]</expression>
-                    <property name="dataType">string</property>
-                </structure>
-                <structure>
-                    <property name="name">UserName</property>
-                    <expression name="expression">dataSetRow["UserName"]</expression>
-                    <property name="dataType">string</property>
-                </structure>
-                <structure>
-                    <property name="name">WallDuration</property>
-                    <expression name="expression">dataSetRow["WallDuration"]</expression>
-                    <property name="dataType">float</property>
-                </structure>
-                <structure>
-                    <property name="name">Cpu</property>
-                    <expression name="expression">dataSetRow["Cpu"]</expression>
-                    <property name="dataType">float</property>
-                </structure>
-                <structure>
-                    <property name="name">Njobs</property>
-                    <expression name="expression">dataSetRow["Njobs"]</expression>
-                    <property name="dataType">decimal</property>
                 </structure>
                 <structure>
                     <property name="name">voname</property>
                     <expression name="expression">dataSetRow["voname"]</expression>
-                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">UserName</property>
+                    <expression name="expression">dataSetRow["UserName"]</expression>
+                </structure>
+                <structure>
+                    <property name="name">WallDuration</property>
+                    <expression name="expression">dataSetRow["WallDuration"]</expression>
+                </structure>
+                <structure>
+                    <property name="name">Cpu</property>
+                    <expression name="expression">dataSetRow["Cpu"]</expression>
+                </structure>
+                <structure>
+                    <property name="name">Njobs</property>
+                    <expression name="expression">dataSetRow["Njobs"]</expression>
                 </structure>
             </list-property>
             <property name="style">san-style1</property>
-            <property name="eventHandlerClass">net.sf.gratia.reporting.GratiaBirtReportEH</property>
         </extended-item>
         <text-data id="107">
             <property name="style">san-style1</property>
