@@ -1181,6 +1181,13 @@
                 <property name="height">0.322in</property>
                 <cell id="7">
                     <property name="verticalAlign">top</property>
+                    <text-data id="94">
+                        <property name="style">sans-style1</property>
+                        <property name="fontSize">9pt</property>
+                        <property name="textAlign">center</property>
+                        <expression name="valueExpr">"Date range: "+ params["StartDate"] + " - " + params["EndDate"]</expression>
+                        <property name="contentType">html</property>
+                    </text-data>
                 </cell>
             </row>
         </grid>

@@ -499,6 +499,20 @@ call DailyUsageBySiteByVO(?,?,?,?,?,'Batch','ForVO',?,'AnySite','')
         </simple-master-page>
     </page-setup>
     <body>
+        <text-data id="99">
+            <property name="style">sans-style1</property>
+            <property name="fontSize">9pt</property>
+            <property name="textAlign">center</property>
+            <expression name="valueExpr">"Date range: "+ params["StartDate"] + " - " + params["EndDate"]</expression>
+            <property name="contentType">html</property>
+        </text-data>
+        <text-data id="107">
+            <property name="style">sans-style1</property>
+            <property name="fontSize">9pt</property>
+            <property name="textAlign">center</property>
+            <expression name="valueExpr">"VO Name: "+ params["ForVOName"]</expression>
+            <property name="contentType">html</property>
+        </text-data>
         <extended-item extensionName="Chart" name="MyChart" id="90">
             <xml-property name="xmlRepresentation"><![CDATA[<model:ChartWithAxes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:attribute="http://www.birt.eclipse.org/ChartModelAttribute" xmlns:data="http://www.birt.eclipse.org/ChartModelData" xmlns:layout="http://www.birt.eclipse.org/ChartModelLayout" xmlns:model="http://www.birt.eclipse.org/ChartModel" xmlns:type="http://www.birt.eclipse.org/ChartModelType">
   <Type>Bar Chart</Type>
@@ -2150,20 +2164,6 @@ MM/dd/yyyy
             </list-property>
             <property name="style">sans-style1</property>
         </extended-item>
-        <text-data id="99">
-            <property name="style">sans-style1</property>
-            <property name="fontSize">9pt</property>
-            <property name="textAlign">center</property>
-            <expression name="valueExpr">"Date range: "+ params["StartDate"] + " - " + params["EndDate"]</expression>
-            <property name="contentType">html</property>
-        </text-data>
-        <text-data id="107">
-            <property name="style">sans-style1</property>
-            <property name="fontSize">9pt</property>
-            <property name="textAlign">center</property>
-            <expression name="valueExpr">"VO Name: "+ params["ForVOName"]</expression>
-            <property name="contentType">html</property>
-        </text-data>
         <label name="ReportURL" id="392" extends="gratia-lib1.ReportURL"/>
         <label name="ShowQuery" id="393" extends="gratia-lib1.ShowQuery"/>
     </body>

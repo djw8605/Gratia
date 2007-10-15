@@ -490,7 +490,7 @@ call JobsByProbeNoFacility(?,?,?,?,'','Batch')
       <Left>0.0</Left>
       <Top>0.0</Top>
       <Width>480.0</Width>
-      <Height>130.0</Height>
+      <Height>360.0</Height>
     </Bounds>
     <Insets>
       <Top>3.0</Top>
@@ -1597,7 +1597,7 @@ function beforeGeneration( chart, context )
     <Percent>false</Percent>
   </Axes>
   <Orientation>Horizontal</Orientation>
-  <UnitSpacing>100.0</UnitSpacing>
+  <UnitSpacing>30.0</UnitSpacing>
   <Rotation>
     <Angles>
       <XAngle>-20.0</XAngle>
@@ -1610,7 +1610,7 @@ function beforeGeneration( chart, context )
 ]]></xml-property>
             <property name="outputFormat">SVG</property>
             <property name="dataSet">JobsCountBy</property>
-            <property name="height">130pt</property>
+            <property name="height">480px</property>
             <property name="width">640px</property>
             <list-property name="paramBindings">
                 <structure>
