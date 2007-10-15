@@ -55,10 +55,6 @@
             <property name="value">AnySite</property>
         </structure>
         <structure>
-            <property name="name">Start Date</property>
-            <property name="value">2007-03-12</property>
-        </structure>
-        <structure>
             <property name="name">UserName</property>
             <property name="value">None</property>
         </structure>
@@ -69,10 +65,6 @@
         <structure>
             <property name="name">Subtitle</property>
             <property name="value">None</property>
-        </structure>
-        <structure>
-            <property name="name">Display Metric</property>
-            <property name="value">jobcount</property>
         </structure>
     </list-property>
     <parameters>
@@ -172,7 +164,7 @@
         </parameter-group>
         <parameter-group name="DateRange" id="114">
             <parameters>
-                <scalar-parameter name="Start Date" id="86">
+                <scalar-parameter name="StartDate" id="86">
                     <text-property name="helpText">Only jobs that finished after this date will be included</text-property>
                     <property name="valueType">static</property>
                     <property name="dataType">string</property>
@@ -215,24 +207,11 @@
                         <property name="pattern">Unformatted</property>
                     </structure>
                 </scalar-parameter>
-                <scalar-parameter name="Subtitle" id="104">
-                    <property name="hidden">true</property>
-                    <property name="valueType">static</property>
-                    <property name="dataType">string</property>
-                    <property name="concealValue">true</property>
-                    <property name="isRequired">false</property>
-                    <property name="controlType">text-box</property>
-                    <property name="defaultValue">None</property>
-                    <structure name="format">
-                        <property name="category">Unformatted</property>
-                        <property name="pattern">Unformatted</property>
-                    </structure>
-                </scalar-parameter>
             </parameters>
         </parameter-group>
         <parameter-group name="Metrics" id="117">
             <parameters>
-                <scalar-parameter name="Display Metric" id="118">
+                <scalar-parameter name="DisplayMetric" id="118">
                     <property name="hidden">false</property>
                     <text-property name="helpText">Select metric for chart</text-property>
                     <property name="valueType">static</property>
@@ -866,7 +845,7 @@ else if ( val > 10 ) clr.set( 0, 0, 200 );
 */
 
 rep = icsc.getExternalContext().getScriptable();
-val1 = rep.getParameterValue(&quot;Display Metric&quot;);
+val1 = rep.getParameterValue(&quot;DisplayMetric&quot;);
 if(val1 == 'jobcount')
 	{
 	labval = label.getCaption().getValue(); 
@@ -905,7 +884,7 @@ if(val1 == 'jobcount')
 function beforeDrawAxisTitle( axis, label, context )
 {
 	rep = context.getExternalContext().getScriptable();
-	val1 =rep.getParameterValue(&quot;Display Metric&quot;);
+	val1 =rep.getParameterValue(&quot;DisplayMetric&quot;);
 	if(!axis.isCategoryAxis())
 	{
 		if(val1==&quot;process&quot;)
