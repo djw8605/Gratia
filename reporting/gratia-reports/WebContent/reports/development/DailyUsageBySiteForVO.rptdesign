@@ -23,7 +23,6 @@
             <expression name="value">params["DatabasePassword"]</expression>
         </structure>
     </list-property>
-    <property name="eventHandlerClass">net.sf.gratia.reporting.GratiaBirtReportEH</property>
     <list-property name="libraries">
         <structure>
             <property name="fileName">gratia-lib1.rptlibrary</property>
@@ -799,16 +798,6 @@ call DailyUsageBySiteByVO(?,?,?,?,?,'Batch','ForVO',?,'AnySite','')
       <Blue>255</Blue>
     </Background>
     <Visible>true</Visible>
-    <Triggers>
-      <Condition>onmouseover</Condition>
-      <Action>
-        <Type>Show_Tooltip</Type>
-        <Value xsi:type="attribute:TooltipValue">
-          <Text>Click on bar segment to display usage by users for this day.</Text>
-          <Delay>200</Delay>
-        </Value>
-      </Action>
-    </Triggers>
   </Block>
   <Dimension>Two_Dimensional</Dimension>
   <Script>/**
