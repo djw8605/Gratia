@@ -1209,7 +1209,7 @@ else {&#xD;
         &lt;/structure>
         &lt;structure>
             &lt;property name=&quot;paramName&quot;>ReportTitle&lt;/property>
-            &lt;expression name=&quot;expression&quot;>params[&quot;ReportTitle&quot;] + ' - ' + 'drill-through'&lt;/expression>
+            &lt;expression name=&quot;expression&quot;>params[&quot;ReportTitle&quot;]&lt;/expression>
         &lt;/structure>
         &lt;structure>
             &lt;property name=&quot;paramName&quot;>ReportSubtitle&lt;/property>
@@ -1648,6 +1648,53 @@ else {&#xD;
         <LabelPosition>Outside</LabelPosition>
         <Stacked>false</Stacked>
       </Series>
+      <Series>
+        <Visible>true</Visible>
+        <Label>
+          <Caption>
+            <Value>&lt;undefined></Value>
+            <Font>
+              <Alignment/>
+            </Font>
+          </Caption>
+          <Background xsi:type="attribute:ColorDefinition">
+            <Transparency>0</Transparency>
+            <Red>255</Red>
+            <Green>255</Green>
+            <Blue>255</Blue>
+          </Background>
+          <Outline>
+            <Style>Solid</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>false</Visible>
+          </Outline>
+          <Insets>
+            <Top>0.0</Top>
+            <Left>2.0</Left>
+            <Bottom>0.0</Bottom>
+            <Right>3.0</Right>
+          </Insets>
+          <Visible>false</Visible>
+        </Label>
+        <DataDefinition>
+          <Definition>row[&quot;sitename&quot;]</Definition>
+        </DataDefinition>
+        <SeriesIdentifier>Usage</SeriesIdentifier>
+        <DataPoint>
+          <Components>
+            <Type>Orthogonal_Value</Type>
+          </Components>
+          <Separator>, </Separator>
+        </DataPoint>
+        <LabelPosition>Outside</LabelPosition>
+        <Stacked>false</Stacked>
+      </Series>
       <Grouping>
         <Enabled>false</Enabled>
         <GroupingInterval>2</GroupingInterval>
@@ -1821,7 +1868,7 @@ else {&#xD;
                     </structure>
                     <structure>
                         <property name="paramName">ReportTitle</property>
-                        <expression name="expression">params["ReportTitle"] + ' - ' + 'drill-through'</expression>
+                        <expression name="expression">params["ReportTitle"]</expression>
                     </structure>
                     <structure>
                         <property name="paramName">ReportSubtitle</property>
