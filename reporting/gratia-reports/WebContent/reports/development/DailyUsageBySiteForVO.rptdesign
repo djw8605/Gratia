@@ -32,6 +32,10 @@
     </list-property>
     <list-property name="configVars">
         <structure>
+            <property name="name">DatabaseURL</property>
+            <property name="value">jdbc:mysql://gratia-vm02.fnal.gov:3320/gratia_jeffmack</property>
+        </structure>
+        <structure>
             <property name="name">DatabaseUser</property>
             <property name="value">gratia</property>
         </structure>
@@ -51,8 +55,16 @@
             <property name="name">HighlightDate</property>
         </structure>
         <structure>
+            <property name="name">ForVOName</property>
+            <property name="value">gridex</property>
+        </structure>
+        <structure>
             <property name="name">ForSiteName</property>
             <property name="value">Generic Site</property>
+        </structure>
+        <structure>
+            <property name="name">ForVO</property>
+            <property name="value">ForVO</property>
         </structure>
         <structure>
             <property name="name">ForSite</property>
@@ -80,7 +92,7 @@
                     <property name="dataType">string</property>
                     <property name="isRequired">true</property>
                     <property name="controlType">text-box</property>
-                    <property name="defaultValue">jdbc:mysql://gratia-db01.fnal.gov:3320/gratia_itb</property>
+                    <property name="defaultValue">jdbc:mysql://gratia-vm02.fnal.gov:3320/gratia_jeffmack</property>
                     <structure name="format">
                         <property name="category">Unformatted</property>
                         <property name="pattern">Unformatted</property>
@@ -168,7 +180,6 @@
                     <property name="mustMatch">true</property>
                     <property name="fixedOrder">true</property>
                     <property name="defaultValue">fermilab</property>
-                    <property name="distinct">false</property>
                     <structure name="format">
                         <property name="category">Unformatted</property>
                         <property name="pattern">Unformatted</property>
@@ -199,7 +210,7 @@
                     <property name="dataType">string</property>
                     <property name="isRequired">true</property>
                     <property name="controlType">text-box</property>
-                    <property name="defaultValue">AnyVO</property>
+                    <property name="defaultValue">ForVO</property>
                     <structure name="format">
                         <property name="category">Unformatted</property>
                         <property name="pattern">Unformatted</property>
@@ -226,7 +237,7 @@
                     <text-property name="helpText">Only jobs that finished after this date will be included</text-property>
                     <property name="valueType">static</property>
                     <property name="dataType">string</property>
-                    <text-property name="promptText">StartDate</text-property>
+                    <text-property name="promptText">Start Date</text-property>
                     <property name="isRequired">true</property>
                     <property name="controlType">text-box</property>
                     <property name="defaultValue">2007-01-01</property>
@@ -240,7 +251,7 @@
                     <text-property name="helpText">Only jobs that finished before this date will be included</text-property>
                     <property name="valueType">static</property>
                     <property name="dataType">string</property>
-                    <text-property name="promptText">EndDate</text-property>
+                    <text-property name="promptText">End Date</text-property>
                     <property name="isRequired">true</property>
                     <property name="controlType">text-box</property>
                     <property name="defaultValue">2007-02-01</property>
@@ -315,7 +326,7 @@
                 </scalar-parameter>
             </parameters>
         </parameter-group>
-        <parameter-group name="ReportInfo" id="399" extends="gratia-lib1.ReportInfo"/>
+        <parameter-group name="ReportInfo" id="121" extends="gratia-lib1.ReportInfo"/>
     </parameters>
     <data-sources>
         <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="fermigrid1" id="4">
@@ -381,7 +392,7 @@
                     <property name="name">StartDate</property>
                     <property name="dataType">string</property>
                     <property name="position">3</property>
-                    <expression name="defaultValue">'2007-01-01'</expression>
+                    <expression name="defaultValue">'3/1/2006'</expression>
                     <property name="isOptional">false</property>
                     <property name="allowNull">true</property>
                     <property name="isInput">true</property>
@@ -391,7 +402,7 @@
                     <property name="name">EndDate</property>
                     <property name="dataType">string</property>
                     <property name="position">4</property>
-                    <expression name="defaultValue">'2007-02-01'</expression>
+                    <expression name="defaultValue">'12/31/2999'</expression>
                     <property name="isOptional">false</property>
                     <property name="allowNull">true</property>
                     <property name="isInput">true</property>
@@ -408,9 +419,8 @@
                     <property name="name">ForVOName</property>
                     <property name="dataType">string</property>
                     <property name="position">6</property>
-                    <expression name="defaultValue">'fermilab'</expression>
+                    <expression name="defaultValue">''</expression>
                     <property name="isInput">true</property>
-                    <property name="isOutput">false</property>
                 </structure>
             </list-property>
             <list-property name="resultSet">
@@ -452,7 +462,7 @@
                 </structure>
             </list-property>
             <property name="queryText">
-call DailyUsageBySiteByVO(?,?,?,?,?,'Batch','ForVO',?,'AnySite','SiteName')
+call DailyUsageBySiteByVO(?,?,?,?,?,'Batch','ForVO',?,'AnySite','')
 </property>
         </oda-data-set>
         <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="VONames" id="108">
@@ -652,74 +662,6 @@ call DailyUsageBySiteByVO(?,?,?,?,?,'Batch','ForVO',?,'AnySite','SiteName')
         <Visible>false</Visible>
       </Outline>
       <Visible>true</Visible>
-      <Triggers>
-        <Condition>onclick</Condition>
-        <Action>
-          <Type>URL_Redirect</Type>
-          <Value xsi:type="attribute:URLValue">
-            <BaseUrl>&lt;structure name=&quot;action&quot;>
-
-    &lt;property name=&quot;formatType&quot;>html&lt;/property>
-
-    &lt;property name=&quot;linkType&quot;>drill-through&lt;/property>
-
-    &lt;property name=&quot;reportName&quot;>DailyJobsByProbe.rptdesign&lt;/property>
-
-    &lt;property name=&quot;targetWindow&quot;>_self&lt;/property>
-
-    &lt;list-property name=&quot;paramBindings&quot;>
-
-        &lt;structure>
-
-            &lt;property name=&quot;paramName&quot;>DatabaseURL&lt;/property>
-
-            &lt;expression name=&quot;expression&quot;>params[&quot;DatabaseURL&quot;]&lt;/expression>
-
-        &lt;/structure>
-
-        &lt;structure>
-
-            &lt;property name=&quot;paramName&quot;>DatabaseUser&lt;/property>
-
-            &lt;expression name=&quot;expression&quot;>params[&quot;DatabaseUser&quot;]&lt;/expression>
-
-        &lt;/structure>
-
-        &lt;structure>
-
-            &lt;property name=&quot;paramName&quot;>DatabasePassword&lt;/property>
-
-            &lt;expression name=&quot;expression&quot;>params[&quot;DatabasePassword&quot;]&lt;/expression>
-
-        &lt;/structure>
-
-        &lt;structure>
-
-            &lt;property name=&quot;paramName&quot;>StartDate&lt;/property>
-
-            &lt;expression name=&quot;expression&quot;>params[&quot;StartDate&quot;]&lt;/expression>
-
-        &lt;/structure>
-
-        &lt;structure>
-
-            &lt;property name=&quot;paramName&quot;>EndDate&lt;/property>
-
-            &lt;expression name=&quot;expression&quot;>params[&quot;EndDate&quot;]&lt;/expression>
-
-        &lt;/structure>
-
-    &lt;/list-property>
-
-&lt;/structure>
-
-</BaseUrl>
-            <BaseParameterName></BaseParameterName>
-            <ValueParameterName></ValueParameterName>
-            <SeriesParameterName></SeriesParameterName>
-          </Value>
-        </Action>
-      </Triggers>
       <ClientArea>
         <Outline>
           <Style>Solid</Style>
@@ -900,7 +842,7 @@ function beforeGeneration( chart, context ){
                 axes = chart.getAxes().get(0);
                 formatSpec = axes.getFormatSpecifier();
                 formatSpec.setPattern(val);
-                     }       
+        }       
 }
 
 /**
@@ -1027,7 +969,6 @@ function beforeGeneration( chart, context ){
  */
 function beforeDrawAxisLabel( axis, label, context )
 {
-      
 	rep = context.getExternalContext().getScriptable();
 	val = rep.getParameterValue(&quot;HighlightDate&quot;);
 
@@ -1287,7 +1228,7 @@ else {&#xD;
             </Components>
             <Separator>, </Separator>
           </DataPoint>
-          <LabelPosition>Inside</LabelPosition>
+          <LabelPosition>Outside</LabelPosition>
           <Stacked>true</Stacked>
           <Triggers>
             <Condition>onclick</Condition>
@@ -1326,16 +1267,8 @@ else {&#xD;
             &lt;expression name=&quot;expression&quot;>&quot;ForSite&quot;&lt;/expression>
         &lt;/structure>
         &lt;structure>
-            &lt;property name=&quot;paramName&quot;>DisplayMetric&lt;/property>
+            &lt;property name=&quot;paramName&quot;>Display Metric&lt;/property>
             &lt;expression name=&quot;expression&quot;>params[&quot;DisplayMetric&quot;]&lt;/expression>
-        &lt;/structure>
-        &lt;structure>
-            &lt;property name=&quot;paramName&quot;>ReportTitle&lt;/property>
-            &lt;expression name=&quot;expression&quot;>params[&quot;ReportTitle&quot;] + ' - ' +  'drillthrough'&lt;/expression>
-        &lt;/structure>
-        &lt;structure>
-            &lt;property name=&quot;paramName&quot;>ReportSubtitle&lt;/property>
-            &lt;expression name=&quot;expression&quot;>params[&quot;ReportSubtitle&quot;]&lt;/expression>
         &lt;/structure>
     &lt;/list-property>
 &lt;/structure>
@@ -1569,6 +1502,429 @@ else {&#xD;
         <LabelPosition>Outside</LabelPosition>
         <Stacked>false</Stacked>
       </Series>
+      <Series>
+        <Visible>true</Visible>
+        <Label>
+          <Caption>
+            <Value>&lt;undefined></Value>
+            <Font>
+              <Alignment/>
+            </Font>
+          </Caption>
+          <Background xsi:type="attribute:ColorDefinition">
+            <Transparency>0</Transparency>
+            <Red>255</Red>
+            <Green>255</Green>
+            <Blue>255</Blue>
+          </Background>
+          <Outline>
+            <Style>Solid</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>false</Visible>
+          </Outline>
+          <Insets>
+            <Top>0.0</Top>
+            <Left>2.0</Left>
+            <Bottom>0.0</Bottom>
+            <Right>3.0</Right>
+          </Insets>
+          <Visible>false</Visible>
+        </Label>
+        <DataDefinition>
+          <Definition>row[&quot;endtime&quot;]</Definition>
+        </DataDefinition>
+        <SeriesIdentifier>Day</SeriesIdentifier>
+        <DataPoint>
+          <Components>
+            <Type>Orthogonal_Value</Type>
+          </Components>
+          <Separator>, </Separator>
+        </DataPoint>
+        <LabelPosition>Outside</LabelPosition>
+        <Stacked>false</Stacked>
+      </Series>
+      <Series>
+        <Visible>true</Visible>
+        <Label>
+          <Caption>
+            <Value>&lt;undefined></Value>
+            <Font>
+              <Alignment/>
+            </Font>
+          </Caption>
+          <Background xsi:type="attribute:ColorDefinition">
+            <Transparency>0</Transparency>
+            <Red>255</Red>
+            <Green>255</Green>
+            <Blue>255</Blue>
+          </Background>
+          <Outline>
+            <Style>Solid</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>false</Visible>
+          </Outline>
+          <Insets>
+            <Top>0.0</Top>
+            <Left>2.0</Left>
+            <Bottom>0.0</Bottom>
+            <Right>3.0</Right>
+          </Insets>
+          <Visible>false</Visible>
+        </Label>
+        <DataDefinition>
+          <Definition>row[&quot;endtime&quot;]</Definition>
+        </DataDefinition>
+        <SeriesIdentifier>Day</SeriesIdentifier>
+        <DataPoint>
+          <Components>
+            <Type>Orthogonal_Value</Type>
+          </Components>
+          <Separator>, </Separator>
+        </DataPoint>
+        <LabelPosition>Outside</LabelPosition>
+        <Stacked>false</Stacked>
+      </Series>
+      <Series>
+        <Visible>true</Visible>
+        <Label>
+          <Caption>
+            <Value>&lt;undefined></Value>
+            <Font>
+              <Alignment/>
+            </Font>
+          </Caption>
+          <Background xsi:type="attribute:ColorDefinition">
+            <Transparency>0</Transparency>
+            <Red>255</Red>
+            <Green>255</Green>
+            <Blue>255</Blue>
+          </Background>
+          <Outline>
+            <Style>Solid</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>false</Visible>
+          </Outline>
+          <Insets>
+            <Top>0.0</Top>
+            <Left>2.0</Left>
+            <Bottom>0.0</Bottom>
+            <Right>3.0</Right>
+          </Insets>
+          <Visible>false</Visible>
+        </Label>
+        <DataDefinition>
+          <Definition>row[&quot;endtime&quot;]</Definition>
+        </DataDefinition>
+        <SeriesIdentifier>Day</SeriesIdentifier>
+        <DataPoint>
+          <Components>
+            <Type>Orthogonal_Value</Type>
+          </Components>
+          <Separator>, </Separator>
+        </DataPoint>
+        <LabelPosition>Outside</LabelPosition>
+        <Stacked>false</Stacked>
+      </Series>
+      <Series>
+        <Visible>true</Visible>
+        <Label>
+          <Caption>
+            <Value>&lt;undefined></Value>
+            <Font>
+              <Alignment/>
+            </Font>
+          </Caption>
+          <Background xsi:type="attribute:ColorDefinition">
+            <Transparency>0</Transparency>
+            <Red>255</Red>
+            <Green>255</Green>
+            <Blue>255</Blue>
+          </Background>
+          <Outline>
+            <Style>Solid</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>false</Visible>
+          </Outline>
+          <Insets>
+            <Top>0.0</Top>
+            <Left>2.0</Left>
+            <Bottom>0.0</Bottom>
+            <Right>3.0</Right>
+          </Insets>
+          <Visible>false</Visible>
+        </Label>
+        <DataDefinition>
+          <Definition>row[&quot;endtime&quot;]</Definition>
+        </DataDefinition>
+        <SeriesIdentifier>Day</SeriesIdentifier>
+        <DataPoint>
+          <Components>
+            <Type>Orthogonal_Value</Type>
+          </Components>
+          <Separator>, </Separator>
+        </DataPoint>
+        <LabelPosition>Outside</LabelPosition>
+        <Stacked>false</Stacked>
+      </Series>
+      <Series>
+        <Visible>true</Visible>
+        <Label>
+          <Caption>
+            <Value>&lt;undefined></Value>
+            <Font>
+              <Alignment/>
+            </Font>
+          </Caption>
+          <Background xsi:type="attribute:ColorDefinition">
+            <Transparency>0</Transparency>
+            <Red>255</Red>
+            <Green>255</Green>
+            <Blue>255</Blue>
+          </Background>
+          <Outline>
+            <Style>Solid</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>false</Visible>
+          </Outline>
+          <Insets>
+            <Top>0.0</Top>
+            <Left>2.0</Left>
+            <Bottom>0.0</Bottom>
+            <Right>3.0</Right>
+          </Insets>
+          <Visible>false</Visible>
+        </Label>
+        <DataDefinition>
+          <Definition>row[&quot;endtime&quot;]</Definition>
+        </DataDefinition>
+        <SeriesIdentifier>Day</SeriesIdentifier>
+        <DataPoint>
+          <Components>
+            <Type>Orthogonal_Value</Type>
+          </Components>
+          <Separator>, </Separator>
+        </DataPoint>
+        <LabelPosition>Outside</LabelPosition>
+        <Stacked>false</Stacked>
+      </Series>
+      <Series>
+        <Visible>true</Visible>
+        <Label>
+          <Caption>
+            <Value>&lt;undefined></Value>
+            <Font>
+              <Alignment/>
+            </Font>
+          </Caption>
+          <Background xsi:type="attribute:ColorDefinition">
+            <Transparency>0</Transparency>
+            <Red>255</Red>
+            <Green>255</Green>
+            <Blue>255</Blue>
+          </Background>
+          <Outline>
+            <Style>Solid</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>false</Visible>
+          </Outline>
+          <Insets>
+            <Top>0.0</Top>
+            <Left>2.0</Left>
+            <Bottom>0.0</Bottom>
+            <Right>3.0</Right>
+          </Insets>
+          <Visible>false</Visible>
+        </Label>
+        <DataDefinition>
+          <Definition>row[&quot;endtime&quot;]</Definition>
+        </DataDefinition>
+        <SeriesIdentifier>Day</SeriesIdentifier>
+        <DataPoint>
+          <Components>
+            <Type>Orthogonal_Value</Type>
+          </Components>
+          <Separator>, </Separator>
+        </DataPoint>
+        <LabelPosition>Outside</LabelPosition>
+        <Stacked>false</Stacked>
+      </Series>
+      <Series>
+        <Visible>true</Visible>
+        <Label>
+          <Caption>
+            <Value>&lt;undefined></Value>
+            <Font>
+              <Alignment/>
+            </Font>
+          </Caption>
+          <Background xsi:type="attribute:ColorDefinition">
+            <Transparency>0</Transparency>
+            <Red>255</Red>
+            <Green>255</Green>
+            <Blue>255</Blue>
+          </Background>
+          <Outline>
+            <Style>Solid</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>false</Visible>
+          </Outline>
+          <Insets>
+            <Top>0.0</Top>
+            <Left>2.0</Left>
+            <Bottom>0.0</Bottom>
+            <Right>3.0</Right>
+          </Insets>
+          <Visible>false</Visible>
+        </Label>
+        <DataDefinition>
+          <Definition>row[&quot;endtime&quot;]</Definition>
+        </DataDefinition>
+        <SeriesIdentifier>Day</SeriesIdentifier>
+        <DataPoint>
+          <Components>
+            <Type>Orthogonal_Value</Type>
+          </Components>
+          <Separator>, </Separator>
+        </DataPoint>
+        <LabelPosition>Outside</LabelPosition>
+        <Stacked>false</Stacked>
+      </Series>
+      <Series>
+        <Visible>true</Visible>
+        <Label>
+          <Caption>
+            <Value>&lt;undefined></Value>
+            <Font>
+              <Alignment/>
+            </Font>
+          </Caption>
+          <Background xsi:type="attribute:ColorDefinition">
+            <Transparency>0</Transparency>
+            <Red>255</Red>
+            <Green>255</Green>
+            <Blue>255</Blue>
+          </Background>
+          <Outline>
+            <Style>Solid</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>false</Visible>
+          </Outline>
+          <Insets>
+            <Top>0.0</Top>
+            <Left>2.0</Left>
+            <Bottom>0.0</Bottom>
+            <Right>3.0</Right>
+          </Insets>
+          <Visible>false</Visible>
+        </Label>
+        <DataDefinition>
+          <Definition>row[&quot;endtime&quot;]</Definition>
+        </DataDefinition>
+        <SeriesIdentifier>Day</SeriesIdentifier>
+        <DataPoint>
+          <Components>
+            <Type>Orthogonal_Value</Type>
+          </Components>
+          <Separator>, </Separator>
+        </DataPoint>
+        <LabelPosition>Outside</LabelPosition>
+        <Stacked>false</Stacked>
+      </Series>
+      <Series>
+        <Visible>true</Visible>
+        <Label>
+          <Caption>
+            <Value>&lt;undefined></Value>
+            <Font>
+              <Alignment/>
+            </Font>
+          </Caption>
+          <Background xsi:type="attribute:ColorDefinition">
+            <Transparency>0</Transparency>
+            <Red>255</Red>
+            <Green>255</Green>
+            <Blue>255</Blue>
+          </Background>
+          <Outline>
+            <Style>Solid</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>false</Visible>
+          </Outline>
+          <Insets>
+            <Top>0.0</Top>
+            <Left>2.0</Left>
+            <Bottom>0.0</Bottom>
+            <Right>3.0</Right>
+          </Insets>
+          <Visible>false</Visible>
+        </Label>
+        <DataDefinition>
+          <Definition>row[&quot;endtime&quot;]</Definition>
+        </DataDefinition>
+        <SeriesIdentifier>Day</SeriesIdentifier>
+        <DataPoint>
+          <Components>
+            <Type>Orthogonal_Value</Type>
+          </Components>
+          <Separator>, </Separator>
+        </DataPoint>
+        <LabelPosition>Outside</LabelPosition>
+        <Stacked>false</Stacked>
+      </Series>
       <Grouping>
         <Enabled>false</Enabled>
         <GroupingUnit>Days</GroupingUnit>
@@ -1735,16 +2091,8 @@ MM/dd/yyyy
                         <expression name="expression">"ForSite"</expression>
                     </structure>
                     <structure>
-                        <property name="paramName">DisplayMetric</property>
+                        <property name="paramName">Display Metric</property>
                         <expression name="expression">params["DisplayMetric"]</expression>
-                    </structure>
-                    <structure>
-                        <property name="paramName">ReportTitle</property>
-                        <expression name="expression">params["ReportTitle"] + ' - ' +  'drillthrough'</expression>
-                    </structure>
-                    <structure>
-                        <property name="paramName">ReportSubtitle</property>
-                        <expression name="expression">params["ReportSubtitle"]</expression>
                     </structure>
                 </list-property>
             </structure>
@@ -1763,6 +2111,14 @@ MM/dd/yyyy
                 <structure>
                     <property name="paramName">ForVOName</property>
                     <expression name="expression">params["ForVOName"]</expression>
+                </structure>
+                <structure>
+                    <property name="paramName">UserName</property>
+                    <expression name="expression">params["UserName"]</expression>
+                </structure>
+                <structure>
+                    <property name="paramName">UserRole</property>
+                    <expression name="expression">params["UserRole"]</expression>
                 </structure>
             </list-property>
             <list-property name="boundDataColumns">
@@ -1783,13 +2139,12 @@ MM/dd/yyyy
                     <expression name="expression">dataSetRow["Cpu"]</expression>
                 </structure>
                 <structure>
-                    <property name="name">VOName</property>
-                    <expression name="expression">dataSetRow["VOName"]</expression>
-                    <property name="dataType">any</property>
-                </structure>
-                <structure>
                     <property name="name">Njobs</property>
                     <expression name="expression">dataSetRow["Njobs"]</expression>
+                </structure>
+                <structure>
+                    <property name="name">VOName</property>
+                    <expression name="expression">dataSetRow["VOName"]</expression>
                     <property name="dataType">any</property>
                 </structure>
             </list-property>
@@ -1809,7 +2164,7 @@ MM/dd/yyyy
             <expression name="valueExpr">"VO Name: "+ params["ForVOName"]</expression>
             <property name="contentType">html</property>
         </text-data>
-        <label name="ReportURL" id="404" extends="gratia-lib1.ReportURL"/>
-        <label name="ShowQuery" id="402" extends="gratia-lib1.ShowQuery"/>
+        <label name="ReportURL" id="392" extends="gratia-lib1.ReportURL"/>
+        <label name="ShowQuery" id="393" extends="gratia-lib1.ShowQuery"/>
     </body>
 </report>
