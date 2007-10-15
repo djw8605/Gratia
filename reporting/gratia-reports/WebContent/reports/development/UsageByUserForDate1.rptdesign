@@ -385,8 +385,8 @@ and VOProbeSummary.ProbeName = Probe.probename
 and VOProbeSummary.EndTime = Date(?)
 and (VOProbeSummary.VOName = ? or (? = 'AnyVO' and VOProbeSummary.VOName like '%'))
 and (Site.SiteName = ? or (? = 'AnySite' and Site.SiteName like '%'))
-group by VOProbeSummary.CommonName,VOProbeSummary.VOName
-order by VOProbeSummary.CommonName,VOProbeSummary.VOName</property>
+group by VOProbeSummary.CommonName,sitename,VOProbeSummary.VOName
+order by VOProbeSummary.CommonName,sitename,VOProbeSummary.VOName</property>
         </oda-data-set>
     </data-sets>
     <styles>
@@ -1034,7 +1034,15 @@ function beforeDrawAxisTitle( axis, label, context )
       <TitlePosition>Left</TitlePosition>
       <SeriesDefinitions>
         <Query>
-          <Definition>row[&quot;voname&quot;]</Definition>
+          <Definition>if (params[&quot;ForSite&quot;] == &quot;AnySite&quot;) {&#xD;
+row[&quot;sitename&quot;]&#xD;
+}&#xD;
+else if (params[&quot;ForVO&quot;] == &quot;AnyVO&quot;){&#xD;
+row[&quot;voname&quot;]&#xD;
+}&#xD;
+else{&#xD;
+&quot;&quot;&#xD;
+}</Definition>
         </Query>
         <SeriesPalette>
           <Entries xsi:type="attribute:ColorDefinition">
@@ -1324,6 +1332,100 @@ else {&#xD;
           <Blue>0</Blue>
         </Entries>
       </SeriesPalette>
+      <Series>
+        <Visible>true</Visible>
+        <Label>
+          <Caption>
+            <Value>&lt;undefined></Value>
+            <Font>
+              <Alignment/>
+            </Font>
+          </Caption>
+          <Background xsi:type="attribute:ColorDefinition">
+            <Transparency>0</Transparency>
+            <Red>255</Red>
+            <Green>255</Green>
+            <Blue>255</Blue>
+          </Background>
+          <Outline>
+            <Style>Solid</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>false</Visible>
+          </Outline>
+          <Insets>
+            <Top>0.0</Top>
+            <Left>2.0</Left>
+            <Bottom>0.0</Bottom>
+            <Right>3.0</Right>
+          </Insets>
+          <Visible>false</Visible>
+        </Label>
+        <DataDefinition>
+          <Definition>row[&quot;UserName&quot;]</Definition>
+        </DataDefinition>
+        <SeriesIdentifier>Usage</SeriesIdentifier>
+        <DataPoint>
+          <Components>
+            <Type>Orthogonal_Value</Type>
+          </Components>
+          <Separator>, </Separator>
+        </DataPoint>
+        <LabelPosition>Outside</LabelPosition>
+        <Stacked>false</Stacked>
+      </Series>
+      <Series>
+        <Visible>true</Visible>
+        <Label>
+          <Caption>
+            <Value>&lt;undefined></Value>
+            <Font>
+              <Alignment/>
+            </Font>
+          </Caption>
+          <Background xsi:type="attribute:ColorDefinition">
+            <Transparency>0</Transparency>
+            <Red>255</Red>
+            <Green>255</Green>
+            <Blue>255</Blue>
+          </Background>
+          <Outline>
+            <Style>Solid</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>false</Visible>
+          </Outline>
+          <Insets>
+            <Top>0.0</Top>
+            <Left>2.0</Left>
+            <Bottom>0.0</Bottom>
+            <Right>3.0</Right>
+          </Insets>
+          <Visible>false</Visible>
+        </Label>
+        <DataDefinition>
+          <Definition>row[&quot;UserName&quot;]</Definition>
+        </DataDefinition>
+        <SeriesIdentifier>Usage</SeriesIdentifier>
+        <DataPoint>
+          <Components>
+            <Type>Orthogonal_Value</Type>
+          </Components>
+          <Separator>, </Separator>
+        </DataPoint>
+        <LabelPosition>Outside</LabelPosition>
+        <Stacked>false</Stacked>
+      </Series>
       <Series>
         <Visible>true</Visible>
         <Label>

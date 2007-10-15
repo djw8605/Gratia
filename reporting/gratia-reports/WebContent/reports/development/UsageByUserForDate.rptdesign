@@ -172,7 +172,7 @@
                     <text-property name="promptText">Start Date</text-property>
                     <property name="isRequired">true</property>
                     <property name="controlType">text-box</property>
-                    <property name="defaultValue">2006-03-01</property>
+                    <property name="defaultValue">2007-01-01</property>
                     <structure name="format">
                         <property name="category">Unformatted</property>
                         <property name="pattern">Unformatted</property>
@@ -307,29 +307,33 @@
                     <property name="name">VOName</property>
                     <property name="dataType">string</property>
                     <property name="position">2</property>
-                    <expression name="defaultValue">'xxx'</expression>
+                    <expression name="defaultValue">'gridex'</expression>
                     <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
                 </structure>
                 <structure>
                     <property name="name">ForVO</property>
                     <property name="dataType">string</property>
                     <property name="position">3</property>
-                    <expression name="defaultValue">'NoVO'</expression>
+                    <expression name="defaultValue">'ForVO'</expression>
                     <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
                 </structure>
                 <structure>
                     <property name="name">SiteName</property>
                     <property name="dataType">string</property>
                     <property name="position">4</property>
-                    <expression name="defaultValue">'xxx'</expression>
+                    <expression name="defaultValue">'FNAL_GPFARM_TEST'</expression>
                     <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
                 </structure>
                 <structure>
                     <property name="name">ForSite</property>
                     <property name="dataType">string</property>
                     <property name="position">5</property>
-                    <expression name="defaultValue">'NoSite'</expression>
+                    <expression name="defaultValue">'ForSite'</expression>
                     <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
                 </structure>
             </list-property>
             <list-property name="resultSet">
@@ -388,8 +392,8 @@ and VOProbeSummary.ProbeName = Probe.probename
 and date_format(VOProbeSummary.EndTime, '%Y-%m-%d') = date_format(?, '%Y-%m-%d') 
 and (VOProbeSummary.VOName = ? or (? = 'AnyVO' and VOProbeSummary.VOName like '%'))
 and (Site.SiteName = ? or (? = 'AnySite' and Site.SiteName like '%'))
-group by VOProbeSummary.CommonName,sitename
-order by VOProbeSummary.CommonName,sitename</property>
+group by VOProbeSummary.CommonName
+order by VOProbeSummary.CommonName</property>
         </oda-data-set>
     </data-sets>
     <styles>

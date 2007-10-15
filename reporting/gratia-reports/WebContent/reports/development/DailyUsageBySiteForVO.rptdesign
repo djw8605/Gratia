@@ -1242,7 +1242,7 @@ else {&#xD;
                 <BaseUrl>&lt;structure name=&quot;action&quot;>
     &lt;property name=&quot;formatType&quot;>html&lt;/property>
     &lt;property name=&quot;linkType&quot;>drill-through&lt;/property>
-    &lt;property name=&quot;reportName&quot;>UsageByUserForDate1.rptdesign&lt;/property>
+    &lt;property name=&quot;reportName&quot;>UsageByUserForDate.rptdesign&lt;/property>
     &lt;property name=&quot;targetWindow&quot;>_self&lt;/property>
     &lt;property name=&quot;targetFileType&quot;>report-design&lt;/property>
     &lt;list-property name=&quot;paramBindings&quot;>
@@ -1269,10 +1269,6 @@ else {&#xD;
         &lt;structure>
             &lt;property name=&quot;paramName&quot;>ForSite&lt;/property>
             &lt;expression name=&quot;expression&quot;>'ForSite'&lt;/expression>
-        &lt;/structure>
-        &lt;structure>
-            &lt;property name=&quot;paramName&quot;>StartDate&lt;/property>
-            &lt;expression name=&quot;expression&quot;>params[&quot;StartDate&quot;]&lt;/expression>
         &lt;/structure>
         &lt;structure>
             &lt;property name=&quot;paramName&quot;>ReportTitle&lt;/property>
@@ -2080,7 +2076,7 @@ MM/dd/yyyy
                 <property name="linkType">drill-through</property>
                 <property name="formatType">html</property>
                 <property name="targetFileType">report-design</property>
-                <property name="reportName">UsageByUserForDate1.rptdesign</property>
+                <property name="reportName">UsageByUserForDate.rptdesign</property>
                 <list-property name="paramBindings">
                     <structure>
                         <property name="paramName">DatabaseURL</property>
@@ -2105,10 +2101,6 @@ MM/dd/yyyy
                     <structure>
                         <property name="paramName">ForSite</property>
                         <expression name="expression">'ForSite'</expression>
-                    </structure>
-                    <structure>
-                        <property name="paramName">StartDate</property>
-                        <expression name="expression">params["StartDate"]</expression>
                     </structure>
                     <structure>
                         <property name="paramName">ReportTitle</property>
