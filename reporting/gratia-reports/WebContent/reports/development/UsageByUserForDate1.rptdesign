@@ -386,7 +386,7 @@ and VOProbeSummary.EndTime = Date(?)
 and (VOProbeSummary.VOName = ? or (? = 'AnyVO' and VOProbeSummary.VOName like '%'))
 and (Site.SiteName = ? or (? = 'AnySite' and Site.SiteName like '%'))
 group by VOProbeSummary.CommonName,VOProbeSummary.VOName
-order by VOProbeSummary.CommonName,sitename,VOProbeSummary.VOName</property>
+order by VOProbeSummary.CommonName,VOProbeSummary.VOName</property>
         </oda-data-set>
     </data-sets>
     <styles>
