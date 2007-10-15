@@ -30,6 +30,7 @@ public class TestServlet extends HttpServlet {
 				while(e.hasMoreElements())
 						{
 								String key = (String) e.nextElement();
+                if (key.endsWith(".password")) continue;
 								String value = (String) System.getProperty(key);
 								Logging.log("Key: " + key + " value: " + value);
 						}

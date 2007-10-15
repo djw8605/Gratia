@@ -67,6 +67,7 @@ public class CollectorService implements ServletContextListener
       while (iter.hasMoreElements())
       {
          String key = (String)iter.nextElement();
+         if (key.endsWith(".password")) continue;
          String value = (String)System.getProperty(key);
          Logging.log("Key: " + key + " value: " + value);
       }
@@ -79,6 +80,7 @@ public class CollectorService implements ServletContextListener
       while (iter.hasMoreElements())
       {
          String key = (String)iter.nextElement();
+         if (key.endsWith(".password")) continue;
          String value = (String)p.getProperty(key);
          Logging.log("Key: " + key + " value: " + value);
       }
