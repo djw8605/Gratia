@@ -2170,6 +2170,14 @@ else {&#xD;
             &lt;property name=&quot;paramName&quot;>Display Metric&lt;/property>
             &lt;expression name=&quot;expression&quot;>params[&quot;DisplayMetric&quot;]&lt;/expression>
         &lt;/structure>
+        &lt;structure>
+            &lt;property name=&quot;paramName&quot;>ReportTitle&lt;/property>
+            &lt;expression name=&quot;expression&quot;>params[&quot;ReportTitle&quot;] + ' - ' + 'drill-through'&lt;/expression>
+        &lt;/structure>
+        &lt;structure>
+            &lt;property name=&quot;paramName&quot;>ReportSubtitle&lt;/property>
+            &lt;expression name=&quot;expression&quot;>params[&quot;ReportSubtitle&quot;]&lt;/expression>
+        &lt;/structure>
     &lt;/list-property>
 &lt;/structure>
 </BaseUrl>
@@ -2572,6 +2580,14 @@ else {&#xD;
                                         <structure>
                                             <property name="paramName">Display Metric</property>
                                             <expression name="expression">params["DisplayMetric"]</expression>
+                                        </structure>
+                                        <structure>
+                                            <property name="paramName">ReportTitle</property>
+                                            <expression name="expression">params["ReportTitle"] + ' - ' + 'drill-through'</expression>
+                                        </structure>
+                                        <structure>
+                                            <property name="paramName">ReportSubtitle</property>
+                                            <expression name="expression">params["ReportSubtitle"]</expression>
                                         </structure>
                                     </list-property>
                                 </structure>

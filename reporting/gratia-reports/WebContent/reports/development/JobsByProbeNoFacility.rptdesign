@@ -924,71 +924,48 @@ function beforeGeneration( chart, context )
               <Type>URL_Redirect</Type>
               <Value xsi:type="attribute:URLValue">
                 <BaseUrl>&lt;structure name=&quot;action&quot;>
-
     &lt;property name=&quot;formatType&quot;>html&lt;/property>
-
     &lt;property name=&quot;linkType&quot;>drill-through&lt;/property>
-
     &lt;property name=&quot;reportName&quot;>UsageReport.rptdesign&lt;/property>
-
     &lt;property name=&quot;targetWindow&quot;>_blank&lt;/property>
-
+    &lt;property name=&quot;targetFileType&quot;>report-design&lt;/property>
     &lt;list-property name=&quot;paramBindings&quot;>
-
         &lt;structure>
-
             &lt;property name=&quot;paramName&quot;>DatabaseURL&lt;/property>
-
             &lt;expression name=&quot;expression&quot;>params[&quot;DatabaseURL&quot;]&lt;/expression>
-
         &lt;/structure>
-
         &lt;structure>
-
             &lt;property name=&quot;paramName&quot;>DatabaseUser&lt;/property>
-
             &lt;expression name=&quot;expression&quot;>params[&quot;DatabaseUser&quot;]&lt;/expression>
-
         &lt;/structure>
-
         &lt;structure>
-
             &lt;property name=&quot;paramName&quot;>DatabasePassword&lt;/property>
-
             &lt;expression name=&quot;expression&quot;>params[&quot;DatabasePassword&quot;]&lt;/expression>
-
         &lt;/structure>
-
         &lt;structure>
-
             &lt;property name=&quot;paramName&quot;>StartDate&lt;/property>
-
             &lt;expression name=&quot;expression&quot;>params[&quot;StartDate&quot;]&lt;/expression>
-
         &lt;/structure>
-
         &lt;structure>
-
             &lt;property name=&quot;paramName&quot;>EndDate&lt;/property>
-
             &lt;expression name=&quot;expression&quot;>params[&quot;EndDate&quot;]&lt;/expression>
-
         &lt;/structure>
-
         &lt;structure>
-
-            &lt;property name=&quot;paramName&quot;>Compute Element&lt;/property>
-
+            &lt;property name=&quot;paramName&quot;>ForSiteName&lt;/property>
             &lt;expression name=&quot;expression&quot;>'All'&lt;/expression>
-
         &lt;/structure>
-
+        &lt;structure>
+            &lt;property name=&quot;paramName&quot;>ReportTitle&lt;/property>
+            &lt;expression name=&quot;expression&quot;>params[&quot;ReportTitle&quot;] + ' - ' + 'drill-through'&lt;/expression>
+        &lt;/structure>
+        &lt;structure>
+            &lt;property name=&quot;paramName&quot;>ReportSubtitle&lt;/property>
+            &lt;expression name=&quot;expression&quot;>params[&quot;ReportSubtitle&quot;]&lt;/expression>
+        &lt;/structure>
     &lt;/list-property>
-
 &lt;/structure>
-
 </BaseUrl>
-                <BaseParameterName>Probe</BaseParameterName>
+                <BaseParameterName>ForProbeName</BaseParameterName>
                 <ValueParameterName></ValueParameterName>
                 <SeriesParameterName></SeriesParameterName>
               </Value>
@@ -1609,6 +1586,47 @@ function beforeGeneration( chart, context )
 </model:ChartWithAxes>
 ]]></xml-property>
             <property name="outputFormat">SVG</property>
+            <structure name="action">
+                <property name="targetWindow">_blank</property>
+                <property name="linkType">drill-through</property>
+                <property name="formatType">html</property>
+                <property name="targetFileType">report-design</property>
+                <property name="reportName">UsageReport.rptdesign</property>
+                <list-property name="paramBindings">
+                    <structure>
+                        <property name="paramName">DatabaseURL</property>
+                        <expression name="expression">params["DatabaseURL"]</expression>
+                    </structure>
+                    <structure>
+                        <property name="paramName">DatabaseUser</property>
+                        <expression name="expression">params["DatabaseUser"]</expression>
+                    </structure>
+                    <structure>
+                        <property name="paramName">DatabasePassword</property>
+                        <expression name="expression">params["DatabasePassword"]</expression>
+                    </structure>
+                    <structure>
+                        <property name="paramName">StartDate</property>
+                        <expression name="expression">params["StartDate"]</expression>
+                    </structure>
+                    <structure>
+                        <property name="paramName">EndDate</property>
+                        <expression name="expression">params["EndDate"]</expression>
+                    </structure>
+                    <structure>
+                        <property name="paramName">ForSiteName</property>
+                        <expression name="expression">'All'</expression>
+                    </structure>
+                    <structure>
+                        <property name="paramName">ReportTitle</property>
+                        <expression name="expression">params["ReportTitle"] + ' - ' + 'drill-through'</expression>
+                    </structure>
+                    <structure>
+                        <property name="paramName">ReportSubtitle</property>
+                        <expression name="expression">params["ReportSubtitle"]</expression>
+                    </structure>
+                </list-property>
+            </structure>
             <property name="dataSet">JobsCountBy</property>
             <property name="height">480px</property>
             <property name="width">640px</property>

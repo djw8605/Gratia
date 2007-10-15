@@ -1414,6 +1414,17 @@ yearnr + "-" + monthnr + "-" + daynr;</expression>
       </Text>
       <Orientation>Horizontal</Orientation>
       <Direction>Top_Bottom</Direction>
+      <Separator>
+        <Style>Solid</Style>
+        <Thickness>1</Thickness>
+        <Color>
+          <Transparency>255</Transparency>
+          <Red>0</Red>
+          <Green>0</Green>
+          <Blue>0</Blue>
+        </Color>
+        <Visible>true</Visible>
+      </Separator>
       <Position>Below</Position>
       <ItemType>Series</ItemType>
       <Title>
@@ -1907,6 +1918,7 @@ else {&#xD;
     &lt;property name=&quot;linkType&quot;>drill-through&lt;/property>
     &lt;property name=&quot;reportName&quot;>UsageByUserForWeek.rptdesign&lt;/property>
     &lt;property name=&quot;targetWindow&quot;>_self&lt;/property>
+    &lt;property name=&quot;targetFileType&quot;>report-design&lt;/property>
     &lt;list-property name=&quot;paramBindings&quot;>
         &lt;structure>
             &lt;property name=&quot;paramName&quot;>DatabaseURL&lt;/property>
@@ -1931,6 +1943,14 @@ else {&#xD;
         &lt;structure>
             &lt;property name=&quot;paramName&quot;>ForVO&lt;/property>
             &lt;expression name=&quot;expression&quot;>'ForVO'&lt;/expression>
+        &lt;/structure>
+        &lt;structure>
+            &lt;property name=&quot;paramName&quot;>ReportTitle&lt;/property>
+            &lt;expression name=&quot;expression&quot;>params[&quot;ReportTitle&quot;] + ' - ' + 'drill-through'&lt;/expression>
+        &lt;/structure>
+        &lt;structure>
+            &lt;property name=&quot;paramName&quot;>ReportSubtitle&lt;/property>
+            &lt;expression name=&quot;expression&quot;>params[&quot;ReportSubtitle&quot;]&lt;/expression>
         &lt;/structure>
     &lt;/list-property>
 &lt;/structure>
@@ -2297,6 +2317,47 @@ else {&#xD;
 </model:ChartWithAxes>
 ]]></xml-property>
                                 <property name="outputFormat">SVG</property>
+                                <structure name="action">
+                                    <property name="targetWindow">_self</property>
+                                    <property name="linkType">drill-through</property>
+                                    <property name="formatType">html</property>
+                                    <property name="targetFileType">report-design</property>
+                                    <property name="reportName">UsageByUserForWeek.rptdesign</property>
+                                    <list-property name="paramBindings">
+                                        <structure>
+                                            <property name="paramName">DatabaseURL</property>
+                                            <expression name="expression">params["DatabaseURL"]</expression>
+                                        </structure>
+                                        <structure>
+                                            <property name="paramName">DatabaseUser</property>
+                                            <expression name="expression">params["DatabaseUser"]</expression>
+                                        </structure>
+                                        <structure>
+                                            <property name="paramName">DatabasePassword</property>
+                                            <expression name="expression">params["DatabasePassword"]</expression>
+                                        </structure>
+                                        <structure>
+                                            <property name="paramName">DisplayMetric</property>
+                                            <expression name="expression">params["DisplayMetric"]</expression>
+                                        </structure>
+                                        <structure>
+                                            <property name="paramName">ForSite</property>
+                                            <expression name="expression">'AnySite'</expression>
+                                        </structure>
+                                        <structure>
+                                            <property name="paramName">ForVO</property>
+                                            <expression name="expression">'ForVO'</expression>
+                                        </structure>
+                                        <structure>
+                                            <property name="paramName">ReportTitle</property>
+                                            <expression name="expression">params["ReportTitle"] + ' - ' + 'drill-through'</expression>
+                                        </structure>
+                                        <structure>
+                                            <property name="paramName">ReportSubtitle</property>
+                                            <expression name="expression">params["ReportSubtitle"]</expression>
+                                        </structure>
+                                    </list-property>
+                                </structure>
                                 <property name="height">600px</property>
                                 <property name="width">800px</property>
                                 <list-property name="paramBindings">
