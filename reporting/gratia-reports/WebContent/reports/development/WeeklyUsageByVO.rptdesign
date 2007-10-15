@@ -1078,7 +1078,7 @@ else {&#xD;
     &lt;list-property name=&quot;paramBindings&quot;>
         &lt;structure>
             &lt;property name=&quot;paramName&quot;>ForVO&lt;/property>
-            &lt;expression name=&quot;expression&quot;>&quot;VO&quot;&lt;/expression>
+            &lt;expression name=&quot;expression&quot;>&quot;ForVO&quot;&lt;/expression>
         &lt;/structure>
         &lt;structure>
             &lt;property name=&quot;paramName&quot;>ForSite&lt;/property>
@@ -1462,7 +1462,7 @@ else {&#xD;
                 <list-property name="paramBindings">
                     <structure>
                         <property name="paramName">ForVO</property>
-                        <expression name="expression">"VO"</expression>
+                        <expression name="expression">"ForVO"</expression>
                     </structure>
                     <structure>
                         <property name="paramName">ForSite</property>
