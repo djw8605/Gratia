@@ -2156,7 +2156,7 @@ else {&#xD;
         &lt;/structure>
         &lt;structure>
             &lt;property name=&quot;paramName&quot;>DatabaseUser&lt;/property>
-            &lt;expression name=&quot;expression&quot;>params[&quot;UserName&quot;]&lt;/expression>
+            &lt;expression name=&quot;expression&quot;>params[&quot;DatabaseUser&quot;]&lt;/expression>
         &lt;/structure>
         &lt;structure>
             &lt;property name=&quot;paramName&quot;>DatabasePassword&lt;/property>
@@ -2567,7 +2567,7 @@ else {&#xD;
                                         </structure>
                                         <structure>
                                             <property name="paramName">DatabaseUser</property>
-                                            <expression name="expression">params["UserName"]</expression>
+                                            <expression name="expression">params["DatabaseUser"]</expression>
                                         </structure>
                                         <structure>
                                             <property name="paramName">DatabasePassword</property>
