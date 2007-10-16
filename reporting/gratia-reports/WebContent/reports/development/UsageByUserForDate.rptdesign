@@ -1132,6 +1132,9 @@ rep = icsc.getExternalContext().getScriptable();
         </TickAttributes>
       </MinorGrid>
       <Scale>
+        <Min xsi:type="data:NumberDataElement">
+          <Value>0.0</Value>
+        </Min>
         <MinorGridsPerUnit>5</MinorGridsPerUnit>
       </Scale>
       <Origin>
