@@ -23,7 +23,6 @@
             <expression name="value">params["DatabasePassword"]</expression>
         </structure>
     </list-property>
-    <property name="eventHandlerClass">net.sf.gratia.reporting.GratiaBirtReportEH</property>
     <list-property name="libraries">
         <structure>
             <property name="fileName">gratia-lib1.rptlibrary</property>
@@ -615,6 +614,17 @@ else{
       </Text>
       <Orientation>Vertical</Orientation>
       <Direction>Top_Bottom</Direction>
+      <Separator>
+        <Style>Solid</Style>
+        <Thickness>1</Thickness>
+        <Color>
+          <Transparency>255</Transparency>
+          <Red>0</Red>
+          <Green>0</Green>
+          <Blue>0</Blue>
+        </Color>
+        <Visible>true</Visible>
+      </Separator>
       <Position>Below</Position>
       <ItemType>Series</ItemType>
       <Title>
@@ -1479,7 +1489,7 @@ else {&#xD;
       <MinorGridsPerUnit>5</MinorGridsPerUnit>
     </Scale>
     <Origin>
-      <Type>Min</Type>
+      <Type>Value</Type>
       <Value xsi:type="data:NumberDataElement">
         <Value>0.0</Value>
       </Value>
