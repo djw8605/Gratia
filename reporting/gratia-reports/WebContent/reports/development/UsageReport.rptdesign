@@ -409,6 +409,8 @@ and (? = 'All' or Site.sitename = ?)</property>
         </simple-master-page>
     </page-setup>
     <body>
+        <label name="ReportURL" id="392" extends="gratia-lib1.ReportURL"/>
+        <label name="ShowQuery" id="391" extends="gratia-lib1.ShowQuery"/>
         <table id="94">
             <property name="width">100%</property>
             <property name="dataSet">UsageData</property>
