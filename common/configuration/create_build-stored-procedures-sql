@@ -183,11 +183,11 @@ my %procedures =
  },
  UsageByUserForDate =>
  { procedure_arguments => [ 'userName varchar(64)',
- 							'userRole varchar(64)',
-   							'fordate varchar(64)',
-   							'fordate1 varchar(64)',
-   							'format varchar(64)', 
-   							'resourceType varchar(64)',
+                            'userRole varchar(64)',
+                            'fordate varchar(64)',
+                            'fordate1 varchar(64)',
+                            'format varchar(64)',
+                            'resourceType varchar(64)',
                             'forvo varchar(8)',
                             'forvoname varchar(128)',
                             'forsite varchar(8)',
@@ -213,11 +213,11 @@ my %procedures =
  },
    UsageByUserByVOBySiteForDate =>
  { procedure_arguments => [ 'userName varchar(64)',
- 							'userRole varchar(64)',
-   							'fordate varchar(64)',
-   							'fordate1 varchar(64)',
-   							'format varchar(64)', 
-   							'resourceType varchar(64)',
+                            'userRole varchar(64)',
+                            'fordate varchar(64)',
+                            'fordate1 varchar(64)',
+                            'format varchar(64)',
+                            'resourceType varchar(64)',
                             'forvo varchar(8)',
                             'forvoname varchar(128)',
                             'forsite varchar(8)',
@@ -243,11 +243,11 @@ my %procedures =
  },
  UsageByUserByVOBySiteForWeek =>
  { procedure_arguments => [ 'userName varchar(64)',
- 							'userRole varchar(64)',
-   							'fordate varchar(64)',
-   							'fordate1 varchar(64)',
-   							'format varchar(64)', 
-   							'resourceType varchar(64)',
+                            'userRole varchar(64)',
+                            'fordate varchar(64)',
+                            'fordate1 varchar(64)',
+                            'format varchar(64)',
+                            'resourceType varchar(64)',
                             'forvo varchar(8)',
                             'forvoname varchar(128)',
                             'forsite varchar(8)',
@@ -644,35 +644,58 @@ EOF
 EOF
      }
 
-    $procedure_code = sprintf("%s%s", $procedure_code, <<"EOF");
+    # JobUsage SQL
+    my $jobusage_sql = <<"EOF";
 
   set \@sql :=
            concat_ws('', 'select $jobusage_select',
                      ' from $jobusage_from_tables',
                      ' where',
 EOF
-    $procedure_code = "$procedure_code                     ' $jobusage_main_where',\n" if $jobusage_main_where;
-    if ((grep /^fromdate\b/o, @{$procedures{$procedure}->{procedure_arguments}}) and
-        (grep /^todate\b/o, @{$procedures{$procedure}->{procedure_arguments}})) {
-      $procedure_code = sprintf("%s%s", $procedure_code, <<'EOF');
+    $jobusage_sql = "$jobusage_sql                     ' $jobusage_main_where',\n" if $jobusage_main_where;
+    my $has_fromdate_todate =
+      (grep /^fromdate\b/o, @{$procedures{$procedure}->{procedure_arguments}}) and
+        (grep /^todate\b/o, @{$procedures{$procedure}->{procedure_arguments}});
+    if ($has_fromdate_todate) {
+      $jobusage_sql = sprintf("%s%s", $jobusage_sql, <<'EOF');
                      ' EndTime >= date(''', fromdate, ''')'
                      ' and EndTime <= date(''', todate, ''')'
 EOF
     }
-    $procedure_code = sprintf("%s%s", $procedure_code, <<'EOF');
+    $jobusage_sql = sprintf("%s%s", $jobusage_sql, <<'EOF');
                      ' ', @myresourceclause,
                      ' ', @mywhereclause
 EOF
     my $group_by = $jobusage_group_by;
     $group_by =~ s/((?:\b[^\.]+\.)?EndTime)/date_format($1,''', format, ''')/g;
-    $procedure_code = "$procedure_code                     , ' group by $group_by'\n" if $group_by;
-    $procedure_code = "$procedure_code                     , ' order by $jobusage_order_by'\n"
+    $jobusage_sql = "$jobusage_sql                     , ' group by $group_by'\n" if $group_by;
+    $jobusage_sql = "$jobusage_sql                     , ' order by $jobusage_order_by'\n"
       if $jobusage_order_by;
-    $procedure_code = "$procedure_code                    );\n\n";
+    $jobusage_sql = "$jobusage_sql                    );\n\n";
 
-    unless ($uses_resource_table) {
+    # if $uses_resource_table, JobUsageRecord only
+    #
+    # if not $has_fromdate_todate, summary table only
+    if ($uses_resource_table) {
+      $procedure_code = sprintf("%s%s", $procedure_code, "  -- INFO: Uses Resource table\n");
+    } elsif (not $has_fromdate_todate) {
+      $procedure_code = sprintf("%s%s", $procedure_code, "  -- INFO: Uses summary tables only\n");
+    }
+    if ($has_fromdate_todate and not $uses_resource_table) {
       $procedure_code = sprintf("%s%s", $procedure_code, <<'EOF');
-    if ( @mywhereclause = '' or @mywhereclause is NULL ) and datediff(todate,fromdate) > 6 then
+  if ( @mywhereclause = '' or @mywhereclause is NULL ) and datediff(todate,fromdate) > 6 then
+EOF
+    }
+    if ($uses_resource_table or $has_fromdate_todate) {
+      $procedure_code="$procedure_code$jobusage_sql"
+    }
+    if ($has_fromdate_todate and not $uses_resource_table) {
+      $procedure_code = sprintf("%s%s", $procedure_code, <<'EOF');
+  else
+EOF
+    }
+    if (not $uses_resource_table) {
+      $procedure_code = sprintf("%s%s", $procedure_code, <<'EOF');
     -- Use summary table
     set @sql :=
 EOF
@@ -697,6 +720,10 @@ EOF
         if $procedures{$procedure}->{order_by};
       $procedure_code = sprintf("%s%s", $procedure_code, <<"EOF");
                  );
+EOF
+    }
+    if ($has_fromdate_todate and not $uses_resource_table) {
+      $procedure_code = sprintf("%s%s", $procedure_code, <<'EOF');
   end if;
 EOF
     }
