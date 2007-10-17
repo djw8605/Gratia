@@ -708,9 +708,13 @@ EOF
 EOF
       $procedure_code = "$procedure_code                     ' $procedures{$procedure}->{main_where}',\n"
         if $procedures{$procedure}->{main_where};
-      $procedure_code = sprintf("%s%s", $procedure_code, <<'EOF');
+      if ($has_fromdate_todate) {
+        $procedure_code = sprintf("%s%s", $procedure_code, <<'EOF');
                      ' EndTime >= date(''', fromdate, ''')',
                      ' and EndTime <= date(''', todate, ''')',
+EOF
+      }
+      $procedure_code = sprintf("%s%s", $procedure_code, <<'EOF');
                      ' ', @myresourceclause,
                      ' ', @mywhereclause
 EOF
@@ -727,10 +731,14 @@ EOF
   end if;
 EOF
     }
+    my $trace_fromdate_todate_text = "'',''";
+    if ($has_fromdate_todate) {
+      $trace_fromdate_todate_text = "fromdate,todate";
+    }
     $procedure_code = sprintf("%s%s", $procedure_code, <<"EOF");
   insert into trace(pname,userkey,user,role,vo,p1,p2,p3,p4,data)
     values('$procedure',\@key,userName,userRole,\@vo,
-    fromdate,todate,format,resourceType,\@sql);
+    $trace_fromdate_todate_text,format,resourceType,\@sql);
   prepare statement from \@sql;
   execute statement;
   deallocate prepare statement;
