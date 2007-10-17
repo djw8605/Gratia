@@ -1124,25 +1124,26 @@ else {&#xD;
             <Action>
               <Type>Show_Tooltip</Type>
               <Value xsi:type="attribute:TooltipValue">
-                <Text>if (params[&quot;DisplayMetric&quot;] == &quot;wallclock&quot;) {&#xD;
+                <Text>var sitename = row[&quot;sitename&quot;]&#xD;
+if (params[&quot;DisplayMetric&quot;] == &quot;wallclock&quot;) {&#xD;
 	var labval = String(row[&quot;WallDuration&quot;] / 3600);&#xD;
 	var dotpos = labval.indexOf(&quot;.&quot;,0); &#xD;
 	if(dotpos > 0)&#xD;
 	{ &#xD;
 	labval = labval.substring(0,dotpos+2)&#xD;
 	};&#xD;
-  &#xD;
- &quot;Wallclock Hours: &quot; + labval&#xD;
+   var metric = &quot;Wallclock Hours: &quot; + labval&#xD;
 }&#xD;
 else if (params[&quot;DisplayMetric&quot;]==&quot;process&quot;) {&#xD;
-&quot;Process Hours: &quot; + row[&quot;Cpu&quot;]/3600&#xD;
+var metric = &quot;Process Hours: &quot; + row[&quot;Cpu&quot;]/3600&#xD;
 }&#xD;
 else if (params[&quot;DisplayMetric&quot;]==&quot;jobcount&quot;){&#xD;
-&quot;Jobs: &quot; + row[&quot;Njobs&quot;]&#xD;
+var metric = &quot;Jobs: &quot; + row[&quot;Njobs&quot;]&#xD;
 }&#xD;
 else {&#xD;
 &quot;***Unknown metric***&quot;&#xD;
-}</Text>
+}&#xD;
+&quot;Site: &quot; + sitename + &quot;\n&quot; + metric</Text>
                 <Delay>200</Delay>
               </Value>
             </Action>

@@ -23,7 +23,6 @@
             <expression name="value">params["DatabasePassword"]</expression>
         </structure>
     </list-property>
-    <property name="eventHandlerClass">net.sf.gratia.reporting.GratiaBirtReportEH</property>
     <list-property name="libraries">
         <structure>
             <property name="fileName">gratia-lib1.rptlibrary</property>
@@ -1102,6 +1101,35 @@ else {&#xD;
                 <BaseParameterName>ForWeek</BaseParameterName>
                 <ValueParameterName></ValueParameterName>
                 <SeriesParameterName>ForVOName</SeriesParameterName>
+              </Value>
+            </Action>
+          </Triggers>
+          <Triggers>
+            <Condition>onmouseover</Condition>
+            <Action>
+              <Type>Show_Tooltip</Type>
+              <Value xsi:type="attribute:TooltipValue">
+                <Text>var voname = row[&quot;VOName&quot;]&#xD;
+if (params[&quot;DisplayMetric&quot;] == &quot;wallclock&quot;) {&#xD;
+	var labval = String(row[&quot;WallDuration&quot;] / 3600);&#xD;
+	var dotpos = labval.indexOf(&quot;.&quot;,0); &#xD;
+	if(dotpos > 0)&#xD;
+	{ &#xD;
+	labval = labval.substring(0,dotpos+2)&#xD;
+	};&#xD;
+   var metric = &quot;Wallclock Hours: &quot; + labval&#xD;
+}&#xD;
+else if (params[&quot;DisplayMetric&quot;]==&quot;process&quot;) {&#xD;
+var metric = &quot;Process Hours: &quot; + row[&quot;Cpu&quot;]/3600&#xD;
+}&#xD;
+else if (params[&quot;DisplayMetric&quot;]==&quot;jobcount&quot;){&#xD;
+var metric = &quot;Jobs: &quot; + row[&quot;Njobs&quot;]&#xD;
+}&#xD;
+else {&#xD;
+&quot;***Unknown metric***&quot;&#xD;
+}&#xD;
+&quot;VOName: &quot; + voname + &quot;\n&quot; + metric</Text>
+                <Delay>200</Delay>
               </Value>
             </Action>
           </Triggers>
