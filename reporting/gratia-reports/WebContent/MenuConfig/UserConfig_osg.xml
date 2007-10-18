@@ -1,54 +1,52 @@
 <UserConfig>
 	<Menu>
 		<MenuGroup name="Dashboards">
-			<MenuItem name="Featured Reports" link="dashboard.jsp"/>
+			<MenuItem name="Featured Reports" link="featuredReport.jsp"/>
+		</MenuGroup>
+		<MenuGroup name="DCache">
+			<MenuItem name="-   Dcache Report" link="GratiaParameterInput.jsp?report=[ReportsFolder]DcacheBySource.rptdesign"/>
 		</MenuGroup>
 		<MenuGroup name="Reports - VO Views">
-			<MenuItem name="-   Jobs by VO" link="viewer.jsp?__report=[ReportsFolder]UsageByVO.rptdesign,Display Metric=jobcount"/>
-			<MenuItem name="-   Daily Jobs by VO" link="viewer.jsp?__report=[ReportsFolder]UsageByVOByDate-ranked.rptdesign,Display Metric=jobcount"/>
-			<MenuItem name="-   Daily Jobs by Site for VO" link="viewer.jsp?__report=[ReportsFolder]DailyUsageBySiteForVO.rptdesign,Display Metric=jobcount"/>
-			<MenuItem name="-   Usage by VO" link="viewer.jsp?__report=[ReportsFolder]UsageByVO.rptdesign,Display Metric=wallclock"/>
-			<MenuItem name="-   Daily Usage by VO" link="viewer.jsp?__report=[ReportsFolder]UsageByVOByDate-ranked.rptdesign,Display Metric=wallclock"/>
-			<MenuItem name="-   Daily Usage by Site for VO" link="viewer.jsp?__report=[ReportsFolder]DailyUsageBySiteForVO.rptdesign,Display Metric=wallclock"/>
+			<MenuItem name="-   Jobs by VO" link="GratiaParameterInput.jsp?report=[ReportsFolder]UsageByVO.rptdesign&amp;DisplayMetric=jobcount"/>
+			<MenuItem name="-   Daily Jobs by VO" link="GratiaParameterInput.jsp?report=[ReportsFolder]UsageByVOByDate-ranked.rptdesign&amp;DisplayMetric=jobcount"/>
+			<MenuItem name="-   Daily Jobs by Site for VO" link="GratiaParameterInput.jsp?report=[ReportsFolder]DailyUsageBySiteForVO.rptdesign&amp;DisplayMetric=jobcount"/>
+			<MenuItem name="-   Usage by VO" link="GratiaParameterInput.jsp?report=[ReportsFolder]UsageByVO.rptdesign&amp;DisplayMetric=wallclock"/>
+			<MenuItem name="-   Daily Usage by VO" link="GratiaParameterInput.jsp?report=[ReportsFolder]UsageByVOByDate-ranked.rptdesign&amp;DisplayMetric=wallclock"/>
+			<MenuItem name="-   Daily Usage by Site for VO" link="GratiaParameterInput.jsp?report=[ReportsFolder]DailyUsageBySiteForVO.rptdesign&amp;DisplayMetric=wallclock"/>
 		</MenuGroup>
 		<MenuGroup name="Reports - VO Views - Weekly History">
-			<MenuItem name="-   Wall Time Usage By VO" link="viewer.jsp?__report=[ReportsFolder]WeeklyUsageByVO-ranked.rptdesign,Display Metric=wallclock"/>
-			<MenuItem name="-   CPU Usage By VO" link="viewer.jsp?__report=[ReportsFolder]WeeklyUsageByVO-ranked.rptdesign,Display Metric=process"/>
-			<MenuItem name="-   Jobs By VO" link="viewer.jsp?__report=[ReportsFolder]WeeklyUsageByVO-ranked.rptdesign,Display Metric=jobcount"/>
-			<MenuItem name="-   Usage Metrics - For VO(s)" link="viewer.jsp?__report=[ReportsFolder]WeeklyUsageByVO.rptdesign"/>
+			<MenuItem name="-   Wall Time Usage By VO" link="GratiaParameterInput.jsp?report=[ReportsFolder]WeeklyUsageByVO-ranked.rptdesign&amp;DisplayMetric=wallclock"/>
+			<MenuItem name="-   CPU Usage By VO" link="GratiaParameterInput.jsp?report=[ReportsFolder]WeeklyUsageByVO-ranked.rptdesign&amp;DisplayMetric=process"/>
+			<MenuItem name="-   Jobs By VO" link="GratiaParameterInput.jsp?report=[ReportsFolder]WeeklyUsageByVO-ranked.rptdesign&amp;DisplayMetric=jobcount"/>
+			<MenuItem name="-   Usage Metrics - For VO(s)" link="GratiaParameterInput.jsp?report=[ReportsFolder]WeeklyUsageByVO.rptdesign"/>
 		</MenuGroup>
 		<MenuGroup name="Reports - Site Views">
-			<MenuItem name="-   Jobs by Site" link="viewer.jsp?__report=[ReportsFolder]UsageBySite.rptdesign,Display Metric=jobcount"/>
-			<MenuItem name="-   Daily Jobs by Site" link="viewer.jsp?__report=[ReportsFolder]UsageBySiteByDate-ranked.rptdesign,Display Metric=jobcount"/>
-			<MenuItem name="-   Daily Jobs by VO for Site" link="viewer.jsp?__report=[ReportsFolder]DailyUsageByVOForSite.rptdesign,Display Metric=jobcount"/>
-			<MenuItem name="-   Usage by Site" link="viewer.jsp?__report=[ReportsFolder]UsageBySite.rptdesign,Display Metric=wallclock"/>
-			<MenuItem name="-   Daily Usage by Site" link="viewer.jsp?__report=[ReportsFolder]UsageBySiteByDate-ranked.rptdesign,Display Metric=wallclock"/>
-			<MenuItem name="-   Daily Usage by VO for Site" link="viewer.jsp?__report=[ReportsFolder]DailyUsageByVOForSite.rptdesign,Display Metric=wallclock"/>
+			<MenuItem name="-   Jobs by Site" link="GratiaParameterInput.jsp?report=[ReportsFolder]UsageBySite.rptdesign&amp;DisplayMetric=jobcount"/>
+			<MenuItem name="-   Daily Jobs by Site" link="GratiaParameterInput.jsp?report=[ReportsFolder]UsageBySiteByDate-ranked.rptdesign&amp;DisplayMetric=jobcount"/>
+			<MenuItem name="-   Daily Jobs by VO for Site" link="GratiaParameterInput.jsp?report=[ReportsFolder]DailyUsageByVOForSite.rptdesign&amp;DisplayMetric=jobcount"/>
+			<MenuItem name="-   Usage by Site" link="GratiaParameterInput.jsp?report=[ReportsFolder]UsageBySite.rptdesign&amp;DisplayMetric=wallclock"/>
+			<MenuItem name="-   Daily Usage by Site" link="GratiaParameterInput.jsp?report=[ReportsFolder]UsageBySiteByDate-ranked.rptdesign&amp;DisplayMetric=wallclock"/>
+			<MenuItem name="-   Daily Usage by VO for Site" link="GratiaParameterInput.jsp?report=[ReportsFolder]DailyUsageByVOForSite.rptdesign&amp;DisplayMetric=wallclock"/>
 		</MenuGroup>
 		<MenuGroup name="Reports - by Probe">
-			<MenuItem name="-   Jobs by Probe" link="viewer.jsp?__report=[ReportsFolder]JobsByProbeNoFacility.rptdesign"/>
-			<MenuItem name="-   Daily Jobs by Probe" link="viewer.jsp?__report=[ReportsFolder]DailyUsageByProbe.rptdesign,Display Metric=jobcount"/>
-			<MenuItem name="-   Daily Usage by Probe" link="viewer.jsp?__report=[ReportsFolder]DailyUsageByProbe.rptdesign,Display Metric=wallclock"/>
+			<MenuItem name="-   Jobs by Probe" link="GratiaParameterInput.jsp?report=[ReportsFolder]JobsByProbeNoFacility.rptdesign"/>
+			<MenuItem name="-   Daily Jobs by Probe" link="GratiaParameterInput.jsp?report=[ReportsFolder]DailyUsageByProbe.rptdesign&amp;DisplayMetric=jobcount"/>
+			<MenuItem name="-   Daily Usage by Probe" link="GratiaParameterInput.jsp?report=[ReportsFolder]DailyUsageByProbe.rptdesign&amp;DisplayMetric=wallclock"/>
 		</MenuGroup>
 		<MenuGroup name="Reports - miscellaneous">
-			<MenuItem name="-   Probe Status" link="viewer.jsp?__report=[ReportsFolder]ProbeStatus.rptdesign"/>
-			<MenuItem name="-   Usage Report" link="viewer.jsp?__report=[ReportsFolder]UsageReport.rptdesign"/>
+			<MenuItem name="-   Probe Status" link="GratiaParameterInput.jsp?report=[ReportsFolder]ProbeStatus.rptdesign"/>
+			<MenuItem name="-   Usage Report" link="GratiaParameterInput.jsp?report=[ReportsFolder]UsageReport.rptdesign"/>
 		</MenuGroup>
 		<MenuGroup name="SQL Queries">
-			<MenuItem name="-   Custom SQL Report" link="admin.jsp"/>
-			<MenuItem name="-   Distinct Probe Names"
-                link="admin.jsp?sql=select distinct ProbeName from JobUsageRecord_Meta;"/>
-			<MenuItem name="-   Probes With Odd SiteName"
-                link="admin.jsp?sql=select distinct ProbeName, SiteName as Gratia_SiteName, ReportedSiteName as Probe_SiteName  from JobUsageRecord_Report  where ServerDate >= DATE_ADD(CURDATE(), INTERVAL -1 DAY) and SiteName != ReportedSiteName order by ProbeName;"/>
-			<MenuItem name="-   Records Without Dates"
-                link="admin.jsp?sql=select count(*) from JobUsageRecord where starttime is null or endtime is null;"/>
-      <MenuItem name="-   Probe / Local UID combinations corresponding to Unknown VO in the last week"
-                link="admin.jsp?sql=select M.ProbeName, R.LocalUserId, count(*) from JobUsageRecord R, JobUsageRecord_Meta M where (M.CreateTime > (UTC_TIMESTAMP() - INTERVAL 1 WEEK)) and M.dbid = R.dbid and R.VOName = 'Unknown' group by ProbeName, R.LocalUserId order by ProbeName, R.LocalUserId;"/>
+			<MenuItem name="-   Custom SQL Report" link="showQuery.jsp"/>
+			<MenuItem name="-   Distinct Probe Names" link="showQuery.jsp?sql=select distinct ProbeName from JobUsageRecord_Meta;"/>
+			<MenuItem name="-   Probes With Odd SiteName" link="showQuery.jsp?sql=select distinct ProbeName, SiteName as Gratia_SiteName, ReportedSiteName as Probe_SiteName  from JobUsageRecord_Report  where ServerDate >= DATE_ADD(CURDATE(), INTERVAL -1 DAY) and SiteName != ReportedSiteName order by ProbeName;"/>
+			<MenuItem name="-   Records Without Dates" link="showQuery.jsp?sql=select count(*) from JobUsageRecord where starttime is null or endtime is null;"/>
 		</MenuGroup>
 	</Menu>
 	<Dashboard>		
 		<Row>	
-			<DashboardItem link="viewer.jsp?__report=[ReportsFolder]UsageBySite.rptdesign&amp;Start+Date=01/01/1990&amp;End+Date=12/31/2999&amp;Display Metric=wallclock"/>			
+			<DashboardItem link="[ReportsFolder]UsageBySite.rptdesign&amp;StartDate&amp;EndDate&amp;DisplayMetric=wallclock"/>			
 		</Row>			
 	</Dashboard>
 </UserConfig>
