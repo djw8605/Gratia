@@ -38,7 +38,7 @@
 			<MenuItem name="-   Usage Report" link="GratiaParameterInput.jsp?report=[ReportsFolder]UsageReport.rptdesign"/>
 		</MenuGroup>
 		<MenuGroup name="SQL Queries">
-			<MenuItem name="-   Custom SQL Report" link="admin.jsp"/>
+			<MenuItem name="-   Custom SQL Report" link="showQuery.jsp"/>
 			<MenuItem name="-   Distinct Probe Names" link="showQuery.jsp?sql=select distinct ProbeName from JobUsageRecord_Meta;"/>
 			<MenuItem name="-   Probes With Odd SiteName" link="showQuery.jsp?sql=select distinct ProbeName, SiteName as Gratia_SiteName, ReportedSiteName as Probe_SiteName  from JobUsageRecord_Report  where ServerDate >= DATE_ADD(CURDATE(), INTERVAL -1 DAY) and SiteName != ReportedSiteName order by ProbeName;"/>
 			<MenuItem name="-   Records Without Dates" link="showQuery.jsp?sql=select count(*) from JobUsageRecord where starttime is null or endtime is null;"/>
