@@ -181,6 +181,27 @@ my %procedures =
    group_by => 'UserName, sitename, VOProbeSummary.VOName',
    order_by => 'UserName, sitename, VOProbeSummary.VOName'
  },
+  UsageReport =>
+ { procedure_arguments => [ 'userName varchar(64)',
+                            'userRole varchar(64)',
+                            'begdatetime varchar(64)',
+                            'enddatetime varchar(64)',
+                            'resourceType varchar(64)',
+                            'forprobe varchar(128)',
+                            'forsite varchar(128)' ],
+   select_columns => 'Site.SiteName as sitename,
+            sum(JobUsageRecord_Report.WallDuration) as WallDuration,
+            sum(JobUsageRecord_Report.CpuUserDuration + JobUsageRecord_Report.CpuSystemDuration) as Cpu,
+            sum(JobUsageRecord_Report.Njobs) as Njobs,
+            JobUsageRecord_Report.VOName as voname,
+            JobUsageRecord_Report.CommonName as UserName',
+   from_tables => 'JobUsageRecord_Report,  Site, Probe',
+   main_where => 'Probe.siteid = Site.siteid
+			and JobUsageRecord_Report.ProbeName = Probe.probename
+			and (begdatetime <= JobUsageRecord_Report.EndTime and JobUsageRecord_Report <= enddatetime)
+			and (\'\'\', forprobe, \'\'\' = \'\'All\'\' or  JobUsageRecord_Report.ProbeName = \'\'\', forprobe, \'\'\')
+			and (\'\'\', forsite, \'\'\'  = \'\'All\'\' or  Site.SiteName = \'\'\', forsite, \'\'\')' 
+ },
  UsageByUserForDate =>
  { procedure_arguments => [ 'userName varchar(64)',
                             'userRole varchar(64)',
