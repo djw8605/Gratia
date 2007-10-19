@@ -16,6 +16,7 @@ import java.util.Date;
  * @version 1.0
  *
  * Updated by Arvind Gopu, Indiana University (http://peart.ucs.indiana.edu)
+ * More Updates by Arvind Gopu 2007-10-19
  *
  */
 public class MetricRecord implements Record
@@ -42,6 +43,7 @@ public class MetricRecord implements Record
    // The name of the metric. this be of the format <SERVICE>-<METRIC>
    private StringElement MetricName;   
 
+   private StringElement MetricType; // Type of metric:status/peformance
    // A return status code (See https://twiki.cern.ch/twiki/bin/view/LCG/
    //         GridMonitoringProbeSpecification#Status_and_Performance_Metrics)
    private StringElement MetricStatus; 
@@ -49,17 +51,24 @@ public class MetricRecord implements Record
    private DateElement Timestamp;      // The time the metric was gathered
    private StringElement ServiceType;  // The service we are testing
 
+   // For NON-LOCAL PROBES: Majority of the probes are in this category
    // The hostname/port/service we are testing
    private StringElement ServiceUri;   
    private StringElement GatheredAt;   // The Monitoring Host that runs probes
 
+   private StringElement SummaryData;   // Summary of probe output
+
+   private StringElement DetailsData;   // Details of Status probe output
+   private StringElement PerformanceData;// Details of Performance probe output
+
+   private StringElement VOName;     // Details of VO for the proxy 
+
+   private IntegerElement SamUploadFlag;// Details of External (SAM) 
+                                        //      Upload Status
+
    // FOR LOCAL PROBES: The Monitoring Host that runs probes AND tests itself. 
    //  When this is provided, GatheredAt and ServiceUri will NOT be provided
    private StringElement HostName;    
-
-   private StringElement SummaryData;   // Summary of probe output
-   private StringElement DetailsData;   // Details of probe output
-
 
 
    public MetricRecord()
@@ -76,17 +85,20 @@ public class MetricRecord implements Record
       if (RecordIdentity != null) output = output + RecordIdentity + "\n";
       if (SiteName != null) output = output + " SiteName: " + SiteName + "\n";
       if (ProbeName != null) output = output + "ProbeName: " + ProbeName + "\n";
-      if (Grid != null) output = output + "Grid: " + Grid + "\n";
 
       output = output + "metricName: " + MetricName + "\n";
-      output = output + "metricType: " + MetricStatus + "\n";
+      output = output + "metricType: " + MetricType + "\n";
+      output = output + "metricStatus: " + MetricStatus + "\n";
       output = output + "timestamp: " + Timestamp + "\n";
       output = output + "serviceType: " + ServiceType + "\n";
       output = output + "serviceUri: " + ServiceUri + "\n";
       output = output + "gatheredAt: " + GatheredAt + "\n";
-      output = output + "hostName: " + HostName + "\n";
       output = output + "summaryData: " + SummaryData + "\n";
       output = output + "detailsData: " + DetailsData + "\n";
+      output = output + "performanceData: " + PerformanceData + "\n";
+      output = output + "voName: " + VOName + "\n";
+      output = output + "samUploadFlag: " + SamUploadFlag + "\n";
+      output = output + "hostName: " + HostName + "\n";
       return output;
    }
 
@@ -97,17 +109,20 @@ public class MetricRecord implements Record
       if (RecordIdentity != null) output = output + RecordIdentity.asXml();
       if (ProbeName != null) output = output + ProbeName.asXml("ProbeName");
       if (SiteName != null) output = output + SiteName.asXml("SiteName");
-      if (Grid != null) output = output + Grid.asXml("Grid");
 
       if (MetricName != null) output = output + MetricName.asXml("MetricName");
+      if (MetricType != null) output = output + MetricType.asXml("MetricType");
       if (MetricStatus != null) output = output + MetricStatus.asXml("MetricStatus");
       if (Timestamp != null) output = output + Timestamp.asXml("Timestamp");
       if (ServiceType != null) output = output + ServiceType.asXml("ServiceType");
       if (ServiceUri != null) output = output + ServiceUri.asXml("ServiceUri");
       if (GatheredAt != null) output = output + GatheredAt.asXml("GatheredAt");
-      if (HostName != null) output = output + HostName.asXml("HostName");
       if (SummaryData != null) output = output + SummaryData.asXml("SummaryData");
       if (DetailsData != null) output = output + DetailsData.asXml("DetailsData");
+      if (PerformanceData != null) output = output + PerformanceData.asXml("PerformanceData");
+      if (VOName != null) output = output + VOName.asXml("VOName");
+      if (SamUploadFlag != null) output = output + SamUploadFlag.asXml("SamUploadFlag");
+      if (HostName != null) output = output + HostName.asXml("HostName");
       output = output + ("</MetricRecord>\n");
       return output;
    }
@@ -245,9 +260,6 @@ public class MetricRecord implements Record
 
 
 
-
-
-
    public void setMetricName(StringElement MetricName)
    {
       this.MetricName = MetricName;
@@ -256,6 +268,16 @@ public class MetricRecord implements Record
    public StringElement getMetricName()
    {
       return MetricName;
+   }
+
+   public void setMetricType(StringElement MetricType)
+   {
+      this.MetricType = MetricType;
+   }
+
+   public StringElement getMetricType()
+   {
+      return MetricType;
    }
 
    public void setMetricStatus(StringElement MetricStatus)
@@ -308,16 +330,6 @@ public class MetricRecord implements Record
       return GatheredAt;
    }
 
-   public void setHostName(StringElement HostName)
-   {
-      this.HostName = HostName;
-   }
-
-   public StringElement getHostName()
-   {
-      return HostName;
-   }
-
    public void setSummaryData(StringElement SummaryData)
    {
       this.SummaryData = SummaryData;
@@ -336,5 +348,45 @@ public class MetricRecord implements Record
    public StringElement getDetailsData()
    {
       return DetailsData;
+   }
+
+   public void setPerformanceData(StringElement PerformanceData)
+   {
+      this.DetailsData = PerformanceData;
+   }
+
+   public StringElement getPerformanceData()
+   {
+      return PerformanceData;
+   }
+
+   public void setVOName(StringElement VOName)
+   {
+      this.VOName = VOName;
+   }
+
+   public StringElement getVOName()
+   {
+      return VOName;
+   }
+
+   public void setSamUploadFlag(IntegerElement SamUploadFlag)
+   {
+      this.SamUploadFlag = SamUploadFlag;
+   }
+
+   public IntegerElement getSamUploadFlag()
+   {
+      return SamUploadFlag;
+   }
+
+   public void setHostName(StringElement HostName)
+   {
+      this.HostName = HostName;
+   }
+
+   public StringElement getHostName()
+   {
+      return HostName;
    }
 }

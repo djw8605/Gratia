@@ -22,8 +22,10 @@ import net.sf.gratia.storage.StringElement;
  * @version 1.0
  * 
  * Updated by Arvind Gopu, Indiana University (http://peart.ucs.indiana.edu)
- *
+ * More Updates by Arvind Gopu 2007-10-19
+ * 
  */
+
 public class MetricRecordLoader implements RecordLoader
 {
    public ArrayList ReadRecords(Element eroot) throws Exception
@@ -70,6 +72,10 @@ public class MetricRecordLoader implements RecordLoader
             {
                SetMetricName(job, sub);
             }
+            else if (sub.getName().equalsIgnoreCase("MetricType"))
+            {
+               SetMetricType(job, sub);
+            }
             else if (sub.getName().equalsIgnoreCase("MetricStatus"))
             {
                SetMetricStatus(job, sub);
@@ -90,10 +96,6 @@ public class MetricRecordLoader implements RecordLoader
             {
                SetGatheredAt(job, sub);
             }
-            else if (sub.getName().equalsIgnoreCase("HostName"))
-            {
-               SetHostName(job, sub);
-            }
             else if (sub.getName().equalsIgnoreCase("SummaryData"))
             {
                SetSummaryData(job, sub);
@@ -101,6 +103,22 @@ public class MetricRecordLoader implements RecordLoader
             else if (sub.getName().equalsIgnoreCase("DetailsData"))
             {
                SetDetailsData(job, sub);
+            }
+            else if (sub.getName().equalsIgnoreCase("PerformanceData"))
+            {
+               SetPerformanceData(job, sub);
+            }
+            else if (sub.getName().equalsIgnoreCase("VOName"))
+            {
+               SetVOName(job, sub);
+            }
+            else if (sub.getName().equalsIgnoreCase("SamUploadFlag"))
+            {
+               SetSamUploadFlag(job, sub);
+            }
+            else if (sub.getName().equalsIgnoreCase("HostName"))
+            {
+               SetHostName(job, sub);
             }
             else if (sub.getName() == "SiteName")
             {
@@ -186,6 +204,29 @@ public class MetricRecordLoader implements RecordLoader
       }
       el.setValue(element.getText());
       job.setMetricName(el);
+   }
+
+   public static void SetMetricType(MetricRecord job, Element element)
+            throws Exception
+   {
+      StringElement el = job.getMetricType();
+      if (el != null /* job identity already set */)
+      {
+         Utils.GratiaError("SetMetricType", "parsing",
+                                    " found a second JobType field in the xml file", false);
+         return;
+      }
+      el = new StringElement();
+      for (Iterator i = element.attributeIterator(); i.hasNext(); )
+      {
+         Attribute a = (Attribute)i.next();
+         if (a.getName().equalsIgnoreCase("description"))
+         {
+            el.setDescription(a.getValue());
+         }
+      }
+      el.setValue(element.getText());
+      job.setMetricType(el);
    }
 
    public static void SetMetricStatus(MetricRecord job, Element element)
@@ -305,29 +346,6 @@ public class MetricRecordLoader implements RecordLoader
       job.setGatheredAt(el);
    }
 
-   public static void SetHostName(MetricRecord job, Element element)
-            throws Exception
-   {
-      StringElement el = job.getHostName();
-      if (el != null /* job identity already set */)
-      {
-         Utils.GratiaError("SetHostName", "parsing",
-                                    " found a second JobName field in the xml file", false);
-         return;
-      }
-      el = new StringElement();
-      for (Iterator i = element.attributeIterator(); i.hasNext(); )
-      {
-         Attribute a = (Attribute)i.next();
-         if (a.getName().equalsIgnoreCase("description"))
-         {
-            el.setDescription(a.getValue());
-         }
-      }
-      el.setValue(element.getText());
-      job.setHostName(el);
-   }
-
    public static void SetSummaryData(MetricRecord job, Element element)
             throws Exception
    {
@@ -372,6 +390,98 @@ public class MetricRecordLoader implements RecordLoader
       }
       el.setValue(element.getText());
       job.setDetailsData(el);
+   }
+
+   public static void SetPerformanceData(MetricRecord job, Element element)
+            throws Exception
+   {
+      StringElement el = job.getPerformanceData();
+      if (el != null /* Performance Data already set */)
+      {
+         Utils.GratiaError("SetPerformanceData", "parsing",
+                                    " found a second PerformanceData field in the xml file", false);
+         return;
+      }
+      el = new StringElement();
+      for (Iterator i = element.attributeIterator(); i.hasNext(); )
+      {
+         Attribute a = (Attribute)i.next();
+         if (a.getName().equalsIgnoreCase("description"))
+         {
+            el.setDescription(a.getValue());
+         }
+      }
+      el.setValue(element.getText());
+      job.setPerformanceData(el);
+   }
+
+   public static void SetVOName(MetricRecord job, Element element)
+            throws Exception
+   {
+      StringElement el = job.getVOName();
+      if (el != null /* Vo name already set */)
+      {
+         Utils.GratiaError("SetVOName", "parsing",
+                                    " found a second VOName field in the xml file", false);
+         return;
+      }
+      el = new StringElement();
+      for (Iterator i = element.attributeIterator(); i.hasNext(); )
+      {
+         Attribute a = (Attribute)i.next();
+         if (a.getName().equalsIgnoreCase("description"))
+         {
+            el.setDescription(a.getValue());
+         }
+      }
+      el.setValue(element.getText());
+      job.setVOName(el);
+   }
+
+   public static void SetSamUploadFlag(MetricRecord job, Element element)
+            throws Exception
+   {
+      IntegerElement el = job.getSamUploadFlag();
+      if (el != null /* SamUploadFlag already set */)
+      {
+         Utils.GratiaError("SetSamUploadFlag", "parsing",
+                                    " found a second SamUploadFlag field in the xml file", false);
+         return;
+      }
+      el = new IntegerElement();
+      for (Iterator i = element.attributeIterator(); i.hasNext(); )
+      {
+         Attribute a = (Attribute)i.next();
+         if (a.getName().equalsIgnoreCase("description"))
+         {
+            el.setDescription(a.getValue());
+         }
+      }
+      el.setValue((new Long(element.getText())).longValue());
+      job.setSamUploadFlag(el);
+   }
+
+   public static void SetHostName(MetricRecord job, Element element)
+            throws Exception
+   {
+      StringElement el = job.getHostName();
+      if (el != null /* job identity already set */)
+      {
+         Utils.GratiaError("SetHostName", "parsing",
+                                    " found a second JobName field in the xml file", false);
+         return;
+      }
+      el = new StringElement();
+      for (Iterator i = element.attributeIterator(); i.hasNext(); )
+      {
+         Attribute a = (Attribute)i.next();
+         if (a.getName().equalsIgnoreCase("description"))
+         {
+            el.setDescription(a.getValue());
+         }
+      }
+      el.setValue(element.getText());
+      job.setHostName(el);
    }
 
    public static void SetSiteName(MetricRecord job, Element element)
