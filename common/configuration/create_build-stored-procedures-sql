@@ -688,7 +688,7 @@ EOF
                      ' ', @mywhereclause
 EOF
     my $group_by = $jobusage_group_by;
-    $group_by =~ s/((?:\b[^\.]+\.)?EndTime)/date_format($1,''', format, ''')/g
+    $group_by =~ s/((?:\b[^\. ,\(]+\.)?EndTime)/date_format($1,''', format, ''')/g
       if $group_by;
     $jobusage_sql = "$jobusage_sql                     , ' group by $group_by'\n"
       if $group_by;
@@ -723,7 +723,7 @@ EOF
     set @sql :=
 EOF
       $group_by = $procedures{$procedure}->{group_by};
-      $group_by =~ s/((?:\b[^\.]+\.)?EndTime)/date_format($1,''', format, ''')/g
+      $group_by =~ s/((?:\b[^\. ,\(]+\.)?EndTime)/date_format($1,''', format, ''')/g
         if $group_by;
       $procedure_code = sprintf("%s%s", $procedure_code, <<"EOF");
            concat_ws('', 'select $procedures{$procedure}->{select_columns}',
