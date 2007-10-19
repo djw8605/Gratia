@@ -281,7 +281,7 @@ my %procedures =
             VOProbeSummary.CommonName as UserName',
    from_tables => 'Site,Probe,VOProbeSummary',
    main_where => 'Probe.siteid = Site.siteid
-   			  and date_format(VOProbeSummary.EndTime,\'\'\',format,\'\'\') = date_format(\'\'\', fordate,\'\'\',\'\'\',format,\'\'\')
+   			  and date_format(VOProbeSummary.EndTime,\'\'\',format,\'\'\') = , fordate,
               and VOProbeSummary.ProbeName = Probe.probename
               and (VOProbeSummary.VOName =\'\'\', forvoname, \'\'\' or
                    (\'\'\', forvo, \'\'\' = \'\'AnyVO\'\' and
