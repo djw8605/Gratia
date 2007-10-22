@@ -315,7 +315,7 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 			</td>
 		</tr>
 		<tr>
-		   <td> Selected VOs:</td><td><input id="VOs" type="text"  name="<%=paramName%>" Value = "<%=SelectedVOs %>" readonly size="60"  onchange="getURL()" ></td>
+		   <td><em><label class=paramName> Selected VOs:</label></em></td><td><input id="VOs" type="text"  name="<%=paramName%>" Value = "<%=SelectedVOs %>" readonly size="60"  onchange="getURL()" ></td>
 		</tr>
 		<%
 		}
