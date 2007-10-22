@@ -20,7 +20,7 @@
 	String link = request.getParameter("link");
 	String param1 = null;
 	if(link == null)
-		link="GratiaParameterInput.jsp?report="+reportsFolder+"WeeklyUsageByVO.rptdesign&reportTitle=Usage%20Metrics%20-%20For%20VO(s)";
+		link="featuredReport.jsp";
 	else {		
 		StringBuffer sb = new StringBuffer(link.length());
 		char c;
