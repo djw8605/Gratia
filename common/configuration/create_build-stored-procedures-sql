@@ -182,11 +182,7 @@ my %procedures =
    order_by => 'UserName, sitename, VOProbeSummary.VOName'
  },
   UsageReport =>
- { procedure_arguments => [ 'userName varchar(64)',
-                            'userRole varchar(64)',
-                            'begdatetime varchar(64)',
-                            'enddatetime varchar(64)',
-                            'resourceType varchar(64)',
+ { procedure_arguments => [ @default_procedure_arguments,
                             'forprobe varchar(128)',
                             'forsite varchar(128)' ],
    select_columns => 'Site.SiteName as sitename,
