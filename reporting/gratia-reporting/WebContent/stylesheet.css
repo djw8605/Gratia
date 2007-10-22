@@ -9,11 +9,11 @@ table.menu
 .menuGroup
 {
 	overflow: hidden;
-	width: 175px;
+	width: 200em;
         font-family: Verdana, Arial, sans-serif;
         font-weight: bold;
         color: #462300;
-        font-size: 11px;
+        font-size: 11em;
 	text-align: left;
 }
 a.menuItem
@@ -21,11 +21,11 @@ a.menuItem
 	cursor: pointer;
 	overflow: hidden;
 	color: #e07630;
-	text-indent: 10px;
+	text-indent: 10em;
 	text-align: left;
 	font-weight: bold;
 	font-family: Verdana, Arial, sans-serif;
-	font-size: 10px; 
+	font-size: 10em; 
 	text-decoration: none;
 }
 a.menuItem:hover
@@ -51,21 +51,21 @@ a.menuItem:active
 	text-decoration: underline;
 	font-weight: bold;
 	font-family: Verdana, Arial, sans-serif;
-	font-size: 24px; 
+	font-size: 24em; 
 } 
 
 .reportTitle {
 	text-decoration: underline;
 	font-weight: bold;
 	font-family: Verdana, Arial, sans-serif;
-	font-size: 18px; 
+	font-size: 18em; 
 } 
 
 .menufields {
         font-family: Verdana, Arial, sans-serif;
 	font-weight: bold;
         color: #462300;
-	font-size: 12px; 
+	font-size: 12em; 
 }
 
 .paramSelect
