@@ -8,13 +8,19 @@
 <LINK href="stylesheet.css" type="text/css" rel="stylesheet">
 <title>Gratia Accounting</title>
 </head>
+<body>
 <jsp:include page="common.jsp" />
 <%
+
+	// Get the reporting configuration setting
+	ReportingConfiguration reportingConfiguration = (ReportingConfiguration)session.getAttribute("reportingConfiguration");
+	String reportsFolder = reportingConfiguration.getReportsFolder();
+	
 	UserConfiguration userConfiguration = (UserConfiguration)session.getAttribute("userConfiguration"); 
 	String link = request.getParameter("link");
 	String param1 = null;
 	if(link == null)
-		link="dashboard.jsp";
+		link="featuredReport.jsp";
 	else {		
 		StringBuffer sb = new StringBuffer(link.length());
 		char c;
@@ -39,9 +45,9 @@
 	}
 %>
 	
-	<table width="100%" style="height: 95%">
+	<table width=100% style="height: 95%">
 		<tr>
-			<td valign="top" width=150>
+			<td valign="top" width=200>
 				<table class=menu>
 			<tr><td><a href="http://opensciencegrid.org/"><img src="./images/osg-logo.gif" alt="OSG Logo" width="174" height="81" border="0"></a><hr></td></tr>
 				<%
@@ -63,18 +69,20 @@
 						MenuItem menuItem = (MenuItem)menuGroup.getMenuItems().get(z);
 						int rowHeight = ((menuItem.getName().length()/30) + 1) * 20;
 						
-// Add the "name" of the report (__title=) on the created link for display purposes
+// Add the "name" of the report (title=) on the created link for display purposes
 // Make sure that if this is the first argument to include "?"
 // Eliminate the starting "-" and any blank spaces in the string
 
 						linkNAME = menuItem.getName();
 						if (menuItem.getLink().indexOf("?") > -1) 
 						{
-						   linkURL = menuItem.getLink() + ",__title=" + linkNAME.replaceFirst("-", "").trim();
+						   linkURL = menuItem.getLink() + ",reportTitle=" + linkNAME.replaceFirst("-", "").trim();
 						}else
 						{
-						   linkURL = menuItem.getLink() + "?__title=" + linkNAME.replaceFirst("-", "").trim();
+						   linkURL = menuItem.getLink() + "?reportTitle=" + linkNAME.replaceFirst("-", "").trim();
 						}
+						linkURL = linkURL.replace(" ", "%20");
+						linkURL = linkURL.replace("&", "&amp;");
 				%>
 					<tr >
      					<td>
@@ -96,7 +104,7 @@
 			<td width=1 bgcolor="black">
 			</td>
 			<td valign="top">
-			<table width="100%" style="height: 90%">
+			<table width=100% style="height: 90%">
 			<tr> 
 			<td valign="top">
 <!--
@@ -126,9 +134,6 @@ if(browserType != null ){
 <%
 	}
    }
-   
-
-
  %>
 			<!-- jsp:include page="<%=link %>" / -->
 			</td> </tr> </table>
