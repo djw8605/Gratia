@@ -867,7 +867,7 @@
                     <property name="dataType">string</property>
                     <property name="isRequired">true</property>
                     <property name="controlType">text-box</property>
-                    <property name="defaultValue">jdbc:mysql://gratia-vm02.fnal.gov:3320/gratia_jeffmack</property>
+                    <property name="defaultValue">jdbc:mysql://gratia-db01.fnal.gov:3320/gratia</property>
                     <structure name="format">
                         <property name="category">Unformatted</property>
                         <property name="pattern">Unformatted</property>
@@ -1038,7 +1038,7 @@
     <data-sources>
         <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="fermigrid1" id="357">
             <property name="odaDriverClass">com.mysql.jdbc.Driver</property>
-            <property name="odaURL">jdbc:mysql://gratia-vm02.fnal.gov:3320/gratia_jeffmack</property>
+            <property name="odaURL">jdbc:mysql://gratia-db01.fnal.gov:3320/gratia</property>
             <property name="odaUser">gratia</property>
             <encrypted-property name="odaPassword">cHJvdG8=</encrypted-property>
         </oda-data-source>
@@ -1395,6 +1395,7 @@
         <Width>0.0</Width>
         <Height>0.0</Height>
       </Bounds>
+      <Anchor>West</Anchor>
       <Stretch>Both</Stretch>
       <Insets>
         <Top>2.0</Top>
@@ -1457,7 +1458,7 @@
           <Blue>0</Blue>
         </Color>
       </Text>
-      <Orientation>Horizontal</Orientation>
+      <Orientation>Vertical</Orientation>
       <Direction>Top_Bottom</Direction>
       <Separator>
         <Style>Solid</Style>
@@ -1470,7 +1471,7 @@
         </Color>
         <Visible>true</Visible>
       </Separator>
-      <Position>Below</Position>
+      <Position>Right</Position>
       <ItemType>Series</ItemType>
       <Title>
         <Caption>
@@ -1505,6 +1506,7 @@
         <Visible>false</Visible>
       </Title>
       <TitlePosition>Above</TitlePosition>
+      <WrappingSize>0.0</WrappingSize>
     </Children>
     <Bounds>
       <Left>0.0</Left>
