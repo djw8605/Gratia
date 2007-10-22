@@ -122,36 +122,13 @@ String End = format.format(now);
 now = new Date(now.getTime() - (7 * 24 * 60 * 60 * 1000));
 String Start = format.format(now);
 
+// Initialize ReportURL
 String initUrl = request.getRequestURL().toString();
-initUrl=initUrl.substring(0, initUrl.lastIndexOf("/")) + "/frameset?__report="+report;
+initUrl=initUrl.substring(0, initUrl.lastIndexOf("/")) + "/checkDateParameters.jsp?__report="+report;
 
 // Get the reporting configuration setting
 ReportingConfiguration reportingConfiguration = (ReportingConfiguration)session.getAttribute("reportingConfiguration");
-	
-%>
 
-
-<!-- START: Debugging messages 
-<hr>
-****** DEBUGGING ***** <br>
-BASE URL = <%=initUrl %> <br>
-Report = <%= report %><br>
-Datadase URL = <%=reportingConfiguration.getDatabaseURL() %> <br> 
-Datadase user = <%=reportingConfiguration.getDatabaseUser() %> <br> 
-Datadase password = <%=reportingConfiguration.getDatabasePassword() %> <br> 
-EngineHome = <%=reportingConfiguration.getEngineHome() %> <br>
-ReportsFolder = <%=reportingConfiguration.getReportsFolder() %> <br>
-WebappHome = <%=reportingConfiguration.getWebappHome() %> <br>
-ReportsMenuConfig = <%=reportingConfiguration.getReportsMenuConfig() %> <br>
-LogsHome = <%=reportingConfiguration.getLogsHome() %> <br>
-CsvHome = <%=reportingConfiguration.getCsvHome() %> <br>
-ConfigLoaded = <%=reportingConfiguration.getConfigLoaded() %> <br>
-<hr>
-
- END: Debugging messages -->
-
-
-<%
 String paramName = null;
 String propertyName = null;
 String propertyValue = null;
