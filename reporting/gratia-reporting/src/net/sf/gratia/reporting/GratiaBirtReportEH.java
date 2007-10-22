@@ -5,6 +5,8 @@ import javax.servlet.http.HttpServletRequest;
 import org.eclipse.birt.report.engine.api.script.IReportContext;
 import org.eclipse.birt.report.engine.api.script.element.IReportDesign;
 //import java.io.*;
+//import java.text.SimpleDateFormat;
+//import java.util.Date;
 //import net.sf.gratia.reporting.ReportingConfiguration;
 //import net.sf.gratia.util.Logging;
 
@@ -25,9 +27,12 @@ public class GratiaBirtReportEH extends ReportEventAdapter {
 		try 
 		{
 			//  Debugging ...
-			//BufferedWriter out = new BufferedWriter(new FileWriter("./GratiaBirtEH.log", true));
-			//out.write("\n+++++++++ before factory ++++++++++++++++\n");
-			//out.flush();
+			// BufferedWriter out = new BufferedWriter(new FileWriter("./GratiaBirtEH.log", true));
+			// out.write("\n+++++++++ before factory ++++++++++++++++\n");
+			// out.flush();
+
+			HttpServletRequest request = (HttpServletRequest) rc.getHttpServletRequest();
+			String outReportURL = request.getRequestURL().toString().replace("frameset", "checkDateParameters.jsp") + "?" + request.getQueryString();
 			
 			// Check if there is a VOs parameter. If so, format it for SQL input
 			Object inVOsObj = rc.getParameterValue("VOs");
@@ -63,15 +68,14 @@ public class GratiaBirtReportEH extends ReportEventAdapter {
 				//out.flush();
 				if (inReportURL.length() == 0 || inReportURL == "")
 				{
-					HttpServletRequest request = (HttpServletRequest) rc.getHttpServletRequest();
-					String outReportURL = request.getRequestURL().toString() + "?" + request.getQueryString();
 					//out.write("OUTPUT URL = " + outReportURL);
 					//out.flush();
 					
 					rc.setParameterValue("ReportURL", outReportURL); 
 				}
 			}
-	        //out.close();
+			
+	        // out.close();
 		}
 		catch (Exception e) {
 			e.printStackTrace();
@@ -89,7 +93,7 @@ public class GratiaBirtReportEH extends ReportEventAdapter {
 	        // out.write("\n+++++++++ INTIALIZE REPORT PARAMETERS ++++++++++++++++\n");
 	
 		HttpServletRequest request = (HttpServletRequest) inReport.getHttpServletRequest();
-				
+		
 		ReportingConfiguration reportingConfig = new ReportingConfiguration();
 		reportingConfig.loadReportingConfiguration(request);
 		
@@ -100,7 +104,7 @@ public class GratiaBirtReportEH extends ReportEventAdapter {
 		//*certificateHandler.dump();
 		String userName = "GratiaUser"; //*certificateHandler.getName();
 		String userRole = "GratiaUser"; //*certificateHandler.getRole();
-		String subtitle = "A Subtitle"; //*certificateHandler.getSubtitle();
+		//String subtitle = "A Subtitle"; //*certificateHandler.getSubtitle();
 		String VO = "Unknown"; //*certificateHandler.getVO();
 		
 		String userKey = "" + System.currentTimeMillis();
