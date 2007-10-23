@@ -1,7 +1,7 @@
 PLATFORM := ${shell uname}
 
 # tarbal version
-version_default = v0.26.6
+version_default = v0.28
 
 gratia_reporting_version := $(shell echo '$$Name: not supported by cvs2svn $$' | sed -e 's/^\$$\Name: \(v[^ ]*\) \$$/\1/' -e 's/-/./g')
 gratia_services_version = $(gratia_reporting_version)
@@ -95,7 +95,9 @@ ${configuration}/build-stored-procedures.sql : ${configuration}/create_build-sto
 	# --- Target: ${configuration}/build-stored-procedures.sql COMPLETED ---
 
 #-------------------------------------------------------------
-${target}/gratia-services.war:  ${services}/net/sf/gratia/services/*.java  ${services}/net/sf/gratia/storage/*.java ${services}/net/sf/gratia/services/web.xml
+${target}/gratia-services.war:  ${services}/net/sf/gratia/services/*.java  \
+                                ${services}/net/sf/gratia/storage/*.java \
+                                ${services}/net/sf/gratia/services/web.xml
 	#------------------------------------
 	# --- Target: gratia-services.war ---
 	#------------------------------------
@@ -180,11 +182,14 @@ administration: services ${target}/gratia-administration.war
 	# --- Target: administration COMPLETED  ---
 
 #------------------------------------------------------------------
-${target}/gratia-administration.war: ${administration}/net/sf/gratia/administration/*.java ${administration}/net/sf/gratia/administration/web.xml \
-   ${administration}/net/sf/gratia/administration/web.xml ${administration}/net/sf/gratia/administration/*.html \
-   ${administration}/net/sf/gratia/administration/*.css ${administration}/net/sf/gratia/administration/*.jsp \
-   ${administration}/net/sf/gratia/administration/images/*.gif ${docs}/*.html \
-   ${commonLib}/mysql*.jar
+${target}/gratia-administration.war: ${administration}/net/sf/gratia/administration/*.java \
+                                     ${administration}/net/sf/gratia/administration/web.xml \
+                                     ${administration}/net/sf/gratia/administration/*.html \
+                                     ${administration}/net/sf/gratia/administration/*.css \
+                                     ${administration}/net/sf/gratia/administration/*.jsp \
+                                     ${administration}/net/sf/gratia/administration/images/*.gif \
+                                     ${docs}/*.html \
+                                     ${commonLib}/mysql*.jar
 	#----------------------------------------------------
 	# --- Target: ${target}/gratia-administration.war ---
 	#----------------------------------------------------
@@ -398,28 +403,11 @@ gratia: clean util services servlets soap reporting reports administration secur
 	# --- Target: gratia COMPLETED ---
 
 #-------------------------------------------------------------
-glr: clean util services servlets soap reporting reports administration security
-	# --------------------
-	# --- Target: glr  ---
-	# --------------------
-	rm -f -r tarball
-	mkdir tarball
-	cp ${configuration}/UserVoMap.* ${configuration}/*xml ${configuration}/*properties tarball
-	cp ${configuration}/*sql ${configuration}/*sh tarball
-	chmod 700 tarball/post-install.sh
-	cp ${configuration}/service-configuration.properties tarball/service-configuration.properties
-	tar -cvf ${target}/gratia.tar -C tarball .
-	rm -f -r tarball
-	rm -f -r ~/Desktop/tomcat/webapps/gratia*
-	cp ${target}/*war ~/Desktop/tomcat/webapps
-	cp ${birtwars} ~/Desktop/tomcat/webapps
-	# --- Target: glr COMPLETED ---
-
-#-------------------------------------------------------------
 define defaultdirs
 	mkdir -p gratia/ ; \
 	mkdir -p gratia/var/; \
 	mkdir -p gratia/var/data/; \
+	mkdir -p gratia/var/lock/; \
 	mkdir -p gratia/var/logs/; \
 	mkdir -p gratia/var/tmp/; \
 	chmod -R og+rw gratia/var/; 
