@@ -321,7 +321,7 @@ my %procedures =
                             'vos varchar(128)',
                             'voseltype varchar(8)' ],
    select_columns => 'VOProbeSummary.VOName,
-                      date_format(VOProbeSummary., \'\'\', format, \'\'\') as endtime,
+                      date_format(VOProbeSummary.EndTime, \'\'\', format, \'\'\') as endtime,
                       sum(VOProbeSummary.Njobs) as Njobs',
    from_tables => 'VOProbeSummary',
    main_where => 'VOProbeSummary.VOName \', voseltype, vos, \'',
