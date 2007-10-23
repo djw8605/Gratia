@@ -82,7 +82,8 @@
 						   linkURL = menuItem.getLink() + "?reportTitle=" + linkNAME.replaceFirst("-", "").trim();
 						}
 						linkURL = linkURL.replace(" ", "%20");
-						linkURL = linkURL.replace("&", "&amp;");
+						linkURL = linkURL.replace("&", ",");
+						linkURL = linkURL.replace("&amp;", ",");
 				%>
 					<tr >
      					<td>
