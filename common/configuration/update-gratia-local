@@ -2,7 +2,6 @@
 
 source_prefix=~greenc/gratia
 tomcat_root=/data
-birt_war=birt-v20.war
 
 function usage() {
 cat 1>&2 <<EOF
@@ -73,7 +72,6 @@ if [[ -n "$tomcat_root" ]] && [[ -z "$java_jre" ]]; then
   java_jre="${tomcat_root}/jre"
 fi
 
-war_dir=$source_prefix/reporting/birt-wars
 configuration_dir=$source_prefix/common/configuration
 target_dir=$source_prefix/target
 
@@ -88,23 +86,6 @@ fi
 service tomcat-$instance stop 2>/dev/null
 sleep 5
 
-# Copy Birt if necessary
-if [[ -f "$tomcat_top/webapps/$birt_war" ]]; then
-  # Verify checksum
-  official_birt_checksum=`cd "$war_dir"; md5sum "$birt_war"`
-  # Checksum local birt war
-  ( cd "$war_dir"; md5sum "$birt_war" ) | ( cd "$tomcat_top/webapps/" ; md5sum --check --status )
-  if (( $? != 0 )); then
-    echo "Birt war has changed: obtaining fresh copy"
-    rm -rf "$tomcat_top/webapps/$birt_war" "$tomcat_top/webapps/${birt_war%.war}"
-    cp -p "$war_dir/$birt_war" "$tomcat_top/webapps/"
-  fi
-else
-  echo "Birt war $birt_war is missing: obtaining fresh copy"
-  rm -rf "$tomcat_top/webapps/${birt_war%.war}"
-  cp -pv "$war_dir/$birt_war" "$tomcat_top/webapps/"
-fi
-
 # Update gratia directory
 mkdir -p "$tomcat_top/gratia"
 tar xf "$target_dir/gratia.tar" -C "$tomcat_top/gratia"
@@ -112,7 +93,11 @@ tar xf "$target_dir/gratia.tar" -C "$tomcat_top/gratia"
 # Update webapps
 
 # Remove obsolete war files
-( cd "$tomcat_top/webapps/" ; rm -rf GratiaServices{,.war} gratia-report-configuration{,.war} )
+( cd "$tomcat_top/webapps/" ; \
+  rm -rf GratiaServices{,.war} \
+         gratia-report-configuration{,.war} \
+         birt-*{,.war} \
+)
 
 # Any updated war files?
 for war in $tomcat_top/webapps/*.war; do
