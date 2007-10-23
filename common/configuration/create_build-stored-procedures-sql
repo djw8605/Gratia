@@ -188,6 +188,8 @@ my %procedures =
                             'forprobe varchar(128)',
                             'forsite varchar(128)' ],
    select_columns => 'Site.SiteName as sitename,
+   			JobUsageRecord_Report.JobName,
+   			JobUsageRecord_Report.ProbeName,
             JobUsageRecord_Report.WallDuration as WallDuration,
             JobUsageRecord_Report.CpuUserDuration + JobUsageRecord_Report.CpuSystemDuration as Cpu,
             JobUsageRecord_Report.Njobs as Njobs,
