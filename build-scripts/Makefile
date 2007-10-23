@@ -76,14 +76,23 @@ clean:
 services: ${configuration}/build-stored-procedures.sql \
 ${configuration}/build-stored-procedures_debug.sql \
 ${target}/gratia-services.war
+	# --- Target: services COMPLETED ---
 
 #-------------------------------------------------------------
 ${configuration}/build-stored-procedures_debug.sql : ${configuration}/create_build-stored-procedures-sql
+	#-------------------------------------------------------------------
+	# --- Target: ${configuration}/build-stored-procedures_debug.sql ---
+	#-------------------------------------------------------------------
 	$(<) -dt > $(@)
+	# --- Target: ${configuration}/build-stored-procedures_debug.sql COMPLETED ---
 
 #-------------------------------------------------------------
 ${configuration}/build-stored-procedures.sql : ${configuration}/create_build-stored-procedures-sql
+	#-------------------------------------------------------------
+	# --- Target: ${configuration}/build-stored-procedures.sql ---
+	#-------------------------------------------------------------
 	$(<) -d > $(@)
+	# --- Target: ${configuration}/build-stored-procedures.sql COMPLETED ---
 
 #-------------------------------------------------------------
 ${target}/gratia-services.war:  ${services}/net/sf/gratia/services/*.java  ${services}/net/sf/gratia/storage/*.java ${services}/net/sf/gratia/services/web.xml
@@ -326,7 +335,7 @@ local: clean util services servlets soap reporting reports administration securi
 	# --- Target: local COMPLETED ---
 #---------------------------------------------------------------
 
-release: clean util services servlets soap reporting reports administration security
+release: gratia
 	# --------------------------------
 	# --- Target: release          ---
 	# --- create reporting tarball ---
@@ -334,9 +343,6 @@ release: clean util services servlets soap reporting reports administration secu
 	rm   -rf tarball
 	mkdir -p tarball/tomcat/v55/gratia
 	mkdir -p tarball/gratia/gratia_reporting
-#	mkdir -p tarball/var/data
-#	mkdir -p tarball/var/logs
-#	mkdir -p tarball/var/tmp
 	cp ${configuration}/*gov ${configuration}/*xml ${configuration}/*properties tarball/tomcat/v55/gratia
 	cp ${configuration}/*sql ${configuration}/*sh tarball/tomcat/v55/gratia
 	chmod 700 tarball/tomcat/v55/gratia/post-install.sh
@@ -347,23 +353,18 @@ release: clean util services servlets soap reporting reports administration secu
 	cp ${target}/gratia-reports.war tarball/gratia/gratia_reporting
 	cp ${target}/gratia-reporting.war tarball/gratia/gratia_reporting
 	cp ${target}/gratia-security.war tarball/gratia/gratia_reporting
-	cp ${birtwars} tarball/gratia/gratia_reporting
 	tar ${tarowner} -cvf ${target}/gratia_reporting_${gratia_reporting_version}.tar -C tarball .
-	rm -f -r tarball
+	rm -rf tarball
 	# -------------------------------
 	# --- Target: release         ---
 	# --- create services tarball ---
 	# -------------------------------
-	mkdir tarball
-	mkdir tarball/tomcat
-	mkdir tarball/tomcat/v55
-	mkdir tarball/tomcat/v55/gratia
-	mkdir tarball/gratia
-	mkdir tarball/gratia/gratia_services
-	mkdir tarball/var
-	mkdir tarball/var/data
-	mkdir tarball/var/logs
-	mkdir tarball/var/tmp
+	rm -rf tarball
+	mkdir -p tarball/tomcat/v55/gratia
+	mkdir -p tarball/gratia/gratia_services
+	mkdir -p tarball/var/data
+	mkdir -p tarball/var/logs
+	mkdir -p tarball/var/tmp
 	cp ${configuration}/*gov ${configuration}/*xml ${configuration}/*properties tarball/tomcat/v55/gratia
 	cp ${configuration}/*sql ${configuration}/*sh tarball/tomcat/v55/gratia
 	perl -wapi.bak -e 's&CMD_(?:PREAMBLE|PREFIX|SUFFIX)&&g' tarball/tomcat/v55/gratia/post-install.sh
