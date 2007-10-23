@@ -23,7 +23,6 @@
             <expression name="value">params["DatabasePassword"]</expression>
         </structure>
     </list-property>
-    <property name="eventHandlerClass">net.sf.gratia.reporting.GratiaBirtReportEH</property>
     <list-property name="libraries">
         <structure>
             <property name="fileName">gratia-lib1.rptlibrary</property>
@@ -53,7 +52,7 @@
                     <property name="dataType">string</property>
                     <property name="isRequired">true</property>
                     <property name="controlType">text-box</property>
-                    <property name="defaultValue">jdbc:mysql://gratia-db01.fnal.gov:3320/gratia_itb</property>
+                    <property name="defaultValue">jdbc:mysql://gratia-vm02.fnal.gov:3320/gratia_jeffmack</property>
                     <structure name="format">
                         <property name="category">Unformatted</property>
                         <property name="pattern">Unformatted</property>
@@ -86,20 +85,21 @@
             </parameters>
         </parameter-group>
         <scalar-parameter name="ForWeek" id="86">
-            <property name="hidden">false</property>
+            <property name="hidden">true</property>
             <text-property name="helpText">Only jobs that finished after this date will be included</text-property>
             <property name="valueType">static</property>
             <property name="dataType">string</property>
             <text-property name="promptText">StartDate</text-property>
             <property name="isRequired">true</property>
             <property name="controlType">text-box</property>
+            <property name="defaultValue">2007-00</property>
             <structure name="format">
                 <property name="category">Unformatted</property>
                 <property name="pattern">Unformatted</property>
             </structure>
         </scalar-parameter>
         <scalar-parameter name="ForVOName" id="103">
-            <property name="hidden">false</property>
+            <property name="hidden">true</property>
             <property name="valueType">static</property>
             <property name="dataType">string</property>
             <text-property name="promptText">Enter VO name</text-property>
@@ -125,7 +125,7 @@
             </structure>
         </scalar-parameter>
         <scalar-parameter name="ForVO" id="105">
-            <property name="hidden">false</property>
+            <property name="hidden">true</property>
             <property name="valueType">static</property>
             <property name="dataType">string</property>
             <property name="isRequired">true</property>
@@ -159,6 +159,7 @@
             <property name="mustMatch">true</property>
             <property name="fixedOrder">true</property>
             <property name="defaultValue">wallclock</property>
+            <property name="distinct">false</property>
             <structure name="format">
                 <property name="category">Unformatted</property>
                 <property name="pattern">Unformatted</property>
@@ -203,7 +204,7 @@
     <data-sources>
         <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="fermigrid1" id="4">
             <property name="odaDriverClass">com.mysql.jdbc.Driver</property>
-            <property name="odaURL">jdbc:mysql://gratia-db01.fnal.gov:3320/gratia_itb</property>
+            <property name="odaURL">jdbc:mysql://gratia-vm02.fnal.gov:3320/gratia_jeffmack</property>
             <property name="odaUser">gratia</property>
             <encrypted-property name="odaPassword">cHJvdG8=</encrypted-property>
         </oda-data-source>
@@ -219,27 +220,27 @@
                     </structure>
                     <structure>
                         <property name="position">2</property>
-                        <property name="name">UserName</property>
-                        <property name="dataType">string</property>
-                    </structure>
-                    <structure>
-                        <property name="position">3</property>
                         <property name="name">WallDuration</property>
                         <property name="dataType">float</property>
                     </structure>
                     <structure>
-                        <property name="position">4</property>
+                        <property name="position">3</property>
                         <property name="name">Cpu</property>
                         <property name="dataType">float</property>
                     </structure>
                     <structure>
-                        <property name="position">5</property>
+                        <property name="position">4</property>
                         <property name="name">Njobs</property>
                         <property name="dataType">decimal</property>
                     </structure>
                     <structure>
-                        <property name="position">6</property>
+                        <property name="position">5</property>
                         <property name="name">voname</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">6</property>
+                        <property name="name">UserName</property>
                         <property name="dataType">string</property>
                     </structure>
                 </list-property>
@@ -257,34 +258,34 @@
                     <property name="isOutput">false</property>
                 </structure>
                 <structure>
-                    <property name="name">VOName</property>
-                    <property name="dataType">string</property>
-                    <property name="position">2</property>
-                    <expression name="defaultValue">'xxx'</expression>
-                    <property name="isInput">true</property>
-                </structure>
-                <structure>
                     <property name="name">ForVO</property>
                     <property name="dataType">string</property>
-                    <property name="position">3</property>
+                    <property name="position">2</property>
                     <expression name="defaultValue">'AnyVO'</expression>
                     <property name="isInput">true</property>
                     <property name="isOutput">false</property>
                 </structure>
                 <structure>
-                    <property name="name">SiteName</property>
+                    <property name="name">VOName</property>
                     <property name="dataType">string</property>
-                    <property name="position">4</property>
+                    <property name="position">3</property>
                     <expression name="defaultValue">'xxx'</expression>
                     <property name="isInput">true</property>
                 </structure>
                 <structure>
                     <property name="name">ForSite</property>
                     <property name="dataType">string</property>
-                    <property name="position">5</property>
+                    <property name="position">4</property>
                     <expression name="defaultValue">'AnySite'</expression>
                     <property name="isInput">true</property>
                     <property name="isOutput">false</property>
+                </structure>
+                <structure>
+                    <property name="name">SiteName</property>
+                    <property name="dataType">string</property>
+                    <property name="position">5</property>
+                    <expression name="defaultValue">'xxx'</expression>
+                    <property name="isInput">true</property>
                 </structure>
             </list-property>
             <list-property name="resultSet">
@@ -293,57 +294,39 @@
                     <property name="name">sitename</property>
                     <property name="nativeName">sitename</property>
                     <property name="dataType">string</property>
-                    <property name="nativeDataType">12</property>
                 </structure>
                 <structure>
                     <property name="position">2</property>
-                    <property name="name">UserName</property>
-                    <property name="nativeName">UserName</property>
-                    <property name="dataType">string</property>
-                    <property name="nativeDataType">12</property>
-                </structure>
-                <structure>
-                    <property name="position">3</property>
                     <property name="name">WallDuration</property>
                     <property name="nativeName">WallDuration</property>
                     <property name="dataType">float</property>
-                    <property name="nativeDataType">8</property>
                 </structure>
                 <structure>
-                    <property name="position">4</property>
+                    <property name="position">3</property>
                     <property name="name">Cpu</property>
                     <property name="nativeName">Cpu</property>
                     <property name="dataType">float</property>
-                    <property name="nativeDataType">8</property>
                 </structure>
                 <structure>
-                    <property name="position">5</property>
+                    <property name="position">4</property>
                     <property name="name">Njobs</property>
                     <property name="nativeName">Njobs</property>
                     <property name="dataType">decimal</property>
-                    <property name="nativeDataType">3</property>
                 </structure>
                 <structure>
-                    <property name="position">6</property>
+                    <property name="position">5</property>
                     <property name="name">voname</property>
                     <property name="nativeName">voname</property>
                     <property name="dataType">string</property>
-                    <property name="nativeDataType">12</property>
+                </structure>
+                <structure>
+                    <property name="position">6</property>
+                    <property name="name">UserName</property>
+                    <property name="nativeName">UserName</property>
+                    <property name="dataType">string</property>
                 </structure>
             </list-property>
-            <property name="queryText">select Site.SiteName as sitename,VOProbeSummary.CommonName as UserName, 
-	sum(VOProbeSummary.WallDuration) as WallDuration,
-	sum(VOProbeSummary.CpuUserDuration+VOProbeSummary.CpuSystemDuration) as Cpu,
-	sum(VOProbeSummary.Njobs) as Njobs,
-	VOProbeSummary.VOName as voname
-	from Site, Probe, VOProbeSummary
-where VOProbeSummary.ResourceType = 'Batch'
-and Probe.siteid = Site.siteid and VOProbeSummary.ProbeName = Probe.probename
-and date_format(VOProbeSummary.EndTime, '%Y-%U') = ?
-and (VOProbeSummary.VOName = ? or (? = 'AnyVO' and VOProbeSummary.VOName like '%' ))
-and (Site.SiteName = ? or (? = 'AnySite' and Site.SiteName like '%' ))
-group by VOProbeSummary.CommonName,VOProbeSummary.VOName, sitename, date_format(VOProbeSummary.EndTime, '%Y-%U')
-order by VOProbeSummary.CommonName</property>
+            <property name="queryText">call usagebyuserbyvobysiteforweek('none','none',?,'xx','%Y-%U','Batch',?,?,?,?)</property>
         </oda-data-set>
     </data-sets>
     <styles>
@@ -1517,10 +1500,15 @@ else {&#xD;
                 </structure>
                 <structure>
                     <property name="paramName">ForVO</property>
-                    <expression name="expression">'ForVO'</expression>
+                    <expression name="expression">params["ForVO"]</expression>
                 </structure>
                 <structure>
                     <property name="paramName">SiteName</property>
+                    <expression name="expression">params["ForSiteName"]</expression>
+                </structure>
+                <structure>
+                    <property name="paramName">ForSite</property>
+                    <expression name="expression">params["ForSite"]</expression>
                 </structure>
             </list-property>
             <list-property name="boundDataColumns">
