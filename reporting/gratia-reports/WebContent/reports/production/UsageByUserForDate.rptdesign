@@ -291,9 +291,25 @@
             <property name="dataSource">fermigrid1</property>
             <list-property name="parameters">
                 <structure>
+                    <property name="name">UserName</property>
+                    <property name="dataType">any</property>
+                    <property name="position">1</property>
+                    <expression name="defaultValue">'none'</expression>
+                    <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
+                </structure>
+                <structure>
+                    <property name="name">UserRole</property>
+                    <property name="dataType">any</property>
+                    <property name="position">2</property>
+                    <expression name="defaultValue">'none'</expression>
+                    <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
+                </structure>
+                <structure>
                     <property name="name">StartDate</property>
                     <property name="dataType">string</property>
-                    <property name="position">1</property>
+                    <property name="position">3</property>
                     <expression name="defaultValue">'2007-01-01'</expression>
                     <property name="isOptional">false</property>
                     <property name="allowNull">true</property>
@@ -303,7 +319,7 @@
                 <structure>
                     <property name="name">ForVO</property>
                     <property name="dataType">string</property>
-                    <property name="position">2</property>
+                    <property name="position">4</property>
                     <expression name="defaultValue">'ForVO'</expression>
                     <property name="isInput">true</property>
                     <property name="isOutput">false</property>
@@ -311,7 +327,7 @@
                 <structure>
                     <property name="name">VOName</property>
                     <property name="dataType">string</property>
-                    <property name="position">3</property>
+                    <property name="position">5</property>
                     <expression name="defaultValue">'gridex'</expression>
                     <property name="isInput">true</property>
                     <property name="isOutput">false</property>
@@ -319,7 +335,7 @@
                 <structure>
                     <property name="name">ForSite</property>
                     <property name="dataType">string</property>
-                    <property name="position">4</property>
+                    <property name="position">6</property>
                     <expression name="defaultValue">'ForSite'</expression>
                     <property name="isInput">true</property>
                     <property name="isOutput">false</property>
@@ -327,7 +343,7 @@
                 <structure>
                     <property name="name">SiteName</property>
                     <property name="dataType">string</property>
-                    <property name="position">5</property>
+                    <property name="position">7</property>
                     <expression name="defaultValue">'FNAL_GPFARM_TEST'</expression>
                     <property name="isInput">true</property>
                     <property name="isOutput">false</property>
@@ -371,7 +387,7 @@
                     <property name="dataType">string</property>
                 </structure>
             </list-property>
-            <property name="queryText">Call UsageByUserForDate('none','none',?,'x','%Y-%m-%d','Batch',?,?,?,?)</property>
+            <property name="queryText">Call UsageByUserForDate(?,?,?,'x','%Y-%m-%d','Batch',?,?,?,?)</property>
         </oda-data-set>
     </data-sets>
     <styles>
@@ -1892,6 +1908,14 @@ rep = icsc.getExternalContext().getScriptable();
                 <structure>
                     <property name="paramName">ForSite</property>
                     <expression name="expression">params["ForSite"]</expression>
+                </structure>
+                <structure>
+                    <property name="paramName">UserName</property>
+                    <expression name="expression">params["UserName"]</expression>
+                </structure>
+                <structure>
+                    <property name="paramName">UserRole</property>
+                    <expression name="expression">params["UserRole"]</expression>
                 </structure>
             </list-property>
             <list-property name="boundDataColumns">
