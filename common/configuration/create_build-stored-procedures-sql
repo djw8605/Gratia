@@ -684,12 +684,21 @@ EOF
                      ' from $jobusage_from_tables',
                      ' where',
 EOF
-    $jobusage_sql = "$jobusage_sql                     ' $jobusage_main_where',\n" if $jobusage_main_where;
+    $jobusage_sql = <<EOF if $jobusage_main_where;
+$jobusage_sql                     ' $jobusage_main_where',
+                     ' and ',
+EOF
+    $jobusage_sql = sprintf("%s%s", $jobusage_sql, <<'EOF');
+                     '     JobUsageRecord_Report.WallDuration is not null',
+                     ' and JobUsageRecord_Report.CpuUserDuration is not null',
+                     ' and JobUsageRecord_Report.CpuSystemDuration is not null',
+EOF
     my $has_fromdate_todate =
       (grep /^fromdate\b/o, @{$procedures{$procedure}->{procedure_arguments}}) and
         (grep /^todate\b/o, @{$procedures{$procedure}->{procedure_arguments}});
     if ($has_fromdate_todate) {
-      $jobusage_sql = sprintf("%s%s%s", $jobusage_sql, $jobusage_main_where?"\n                     ' and',\n":"", <<'EOF');
+      $jobusage_sql = sprintf("%s%s", $jobusage_sql, <<'EOF');
+                     ' and',
                      ' Date(EndTime) >= date(''', fromdate, ''')',
                      ' and Date(EndTime) <= date(''', todate, ''')',
 EOF
