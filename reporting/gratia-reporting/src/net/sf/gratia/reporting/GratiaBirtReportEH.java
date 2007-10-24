@@ -4,7 +4,7 @@ import org.eclipse.birt.report.engine.api.script.eventadapter.ReportEventAdapter
 import javax.servlet.http.HttpServletRequest;
 import org.eclipse.birt.report.engine.api.script.IReportContext;
 import org.eclipse.birt.report.engine.api.script.element.IReportDesign;
-//import java.io.*;
+import java.io.*;
 //import java.text.SimpleDateFormat;
 //import java.util.Date;
 //import net.sf.gratia.reporting.ReportingConfiguration;
@@ -88,11 +88,16 @@ public class GratiaBirtReportEH extends ReportEventAdapter {
 	public void initialize(IReportContext inReport) {
 	
 	   try {
-		    //  Debugging ...
-			// BufferedWriter out = new BufferedWriter(new FileWriter("./GratiaBirtEH.log", true));
-	        // out.write("\n+++++++++ INTIALIZE REPORT PARAMETERS ++++++++++++++++\n");
 	
 		HttpServletRequest request = (HttpServletRequest) inReport.getHttpServletRequest();
+		String ReportURL = request.getRequestURL().toString() + "?" + request.getQueryString();
+		
+		//  Debugging -- Start 1 of 2
+		// String gratiaEHLog =  System.getProperty("catalina.home") + File.separatorChar+ "webapps" + File.separatorChar + "GratiaBirtEH.log";
+		// BufferedWriter out = new BufferedWriter(new FileWriter(gratiaEHLog, true));
+	    // out.write("\n+++++++++ EH: INTIALIZE REPORT PARAMETERS ++++++++++++++++\n");
+		// out.write("ReportURL = " + ReportURL + "\n");
+		// Debugging -- End 1 of 2
 		
 		ReportingConfiguration reportingConfig = new ReportingConfiguration();
 		reportingConfig.loadReportingConfiguration(request);
@@ -125,15 +130,16 @@ public class GratiaBirtReportEH extends ReportEventAdapter {
 		inReport.setParameterValue("UserRole", userRole);
 		// inReport.setParameterValue("ReportSubtitle", subtitle);
 		
+		//  Debugging -- Start 2 of 2
 		// out.write("\tParameters are set\n");
 		// out.write("\tDatabaseURL= " + inReport.getParameterValue("DatabaseURL")+"\n");
 		// out.write("\tDatabasePassword= " + inReport.getParameterValue("DatabasePassword")+"\n");
 		// out.write("\tDatabaseUser= " + inReport.getParameterValue("DatabaseUser")+"\n");
 		// out.write("\tUserName= " + inReport.getParameterValue("UserName")+"\n");
 		// out.write("\tUserRole= " + inReport.getParameterValue("UserRole")+"\n");
-		// out.write("\tSubtitle= " + inReport.getParameterValue("Subtitle")+"\n");
 	        
 		// out.close();
+		//  Debugging -- End 2 of 2
 		
 	   } catch (Exception e) {
 			e.printStackTrace();
