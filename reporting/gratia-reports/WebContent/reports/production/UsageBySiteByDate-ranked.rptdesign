@@ -2173,10 +2173,6 @@ else {&#xD;
             &lt;expression name=&quot;expression&quot;>params[&quot;DisplayMetric&quot;]&lt;/expression>
         &lt;/structure>
         &lt;structure>
-            &lt;property name=&quot;paramName&quot;>StartDate&lt;/property>
-            &lt;expression name=&quot;expression&quot;>params[&quot;StartDate&quot;]&lt;/expression>
-        &lt;/structure>
-        &lt;structure>
             &lt;property name=&quot;paramName&quot;>ReportTitle&lt;/property>
             &lt;expression name=&quot;expression&quot;>params[&quot;ReportTitle&quot;] + ' - ' + 'drill-through'&lt;/expression>
         &lt;/structure>
@@ -2618,10 +2614,6 @@ var metric = &quot;***Unknown metric***&quot;&#xD;
                                         <structure>
                                             <property name="paramName">DisplayMetric</property>
                                             <expression name="expression">params["DisplayMetric"]</expression>
-                                        </structure>
-                                        <structure>
-                                            <property name="paramName">StartDate</property>
-                                            <expression name="expression">params["StartDate"]</expression>
                                         </structure>
                                         <structure>
                                             <property name="paramName">ReportTitle</property>
