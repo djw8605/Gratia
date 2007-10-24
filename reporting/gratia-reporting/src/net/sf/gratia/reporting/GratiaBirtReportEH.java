@@ -25,22 +25,28 @@ public class GratiaBirtReportEH extends ReportEventAdapter {
 
 	public void beforeFactory(IReportDesign design, IReportContext rc) {
 		try 
-		{
-			//  Debugging ...
-			// BufferedWriter out = new BufferedWriter(new FileWriter("./GratiaBirtEH.log", true));
-			// out.write("\n+++++++++ before factory ++++++++++++++++\n");
-			// out.flush();
-
+		{			
 			HttpServletRequest request = (HttpServletRequest) rc.getHttpServletRequest();
 			String outReportURL = request.getRequestURL().toString().replace("frameset", "checkDateParameters.jsp") + "?" + request.getQueryString();
+
+			//  Debugging -- Start 1 of 5
+			// String gratiaEHLog =  System.getProperty("catalina.home") + File.separatorChar+ "webapps" + File.separatorChar + "GratiaBirtEH.log";
+			// BufferedWriter out = new BufferedWriter(new FileWriter(gratiaEHLog, true));
+		    // out.write("\n+++++++++ EH: BEFORE FACTORY ++++++++++++++++\n");
+			// out.write("ReportURL = " + ReportURL + "\n");
+			// out.flush();
+			//  Debugging -- End 1 of 5
 			
 			// Check if there is a VOs parameter. If so, format it for SQL input
 			Object inVOsObj = rc.getParameterValue("VOs");
 	        if (inVOsObj != null)
 	        {
 	        	String inVOs = inVOsObj.toString();
+	        	
+				//   Debugging -- Start 2 of 5
 	        	// out.write("VOs = " + inVOs +"\n");
 	        	// out.flush();
+				//  Debugging -- End 2 of 5
 		        
 	        	String[] words = inVOs.split (";");
 	        	String outVOs = "(";
@@ -64,18 +70,26 @@ public class GratiaBirtReportEH extends ReportEventAdapter {
 			if (inReportURLObj != null)
 			{
 				String inReportURL = inReportURLObj.toString();
+				
+				//  Debugging -- Start 3 of 5
 				//out.write("Object is not null= " + inReportURL + "\n");
 				//out.flush();
+				//  Debugging -- End 3 of 5
+				
 				if (inReportURL.length() == 0 || inReportURL == "")
 				{
+					//  Debugging -- Start 4 of 5
 					//out.write("OUTPUT URL = " + outReportURL);
 					//out.flush();
+					//  Debugging -- End 4 of 5
 					
 					rc.setParameterValue("ReportURL", outReportURL); 
 				}
 			}
-			
+
+			//  Debugging -- Start 5 of 5
 	        // out.close();
+			//  Debugging -- End 5 of 5
 		}
 		catch (Exception e) {
 			e.printStackTrace();
@@ -97,7 +111,8 @@ public class GratiaBirtReportEH extends ReportEventAdapter {
 		// BufferedWriter out = new BufferedWriter(new FileWriter(gratiaEHLog, true));
 	    // out.write("\n+++++++++ EH: INTIALIZE REPORT PARAMETERS ++++++++++++++++\n");
 		// out.write("ReportURL = " + ReportURL + "\n");
-		// Debugging -- End 1 of 2
+    	// out.flush();
+		//  Debugging -- End 1 of 2
 		
 		ReportingConfiguration reportingConfig = new ReportingConfiguration();
 		reportingConfig.loadReportingConfiguration(request);
@@ -137,6 +152,7 @@ public class GratiaBirtReportEH extends ReportEventAdapter {
 		// out.write("\tDatabaseUser= " + inReport.getParameterValue("DatabaseUser")+"\n");
 		// out.write("\tUserName= " + inReport.getParameterValue("UserName")+"\n");
 		// out.write("\tUserRole= " + inReport.getParameterValue("UserRole")+"\n");
+    	// out.flush();
 	        
 		// out.close();
 		//  Debugging -- End 2 of 2
