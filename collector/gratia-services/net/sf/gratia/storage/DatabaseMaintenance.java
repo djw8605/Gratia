@@ -16,7 +16,7 @@ import java.text.DecimalFormat;
 public class DatabaseMaintenance {
     static final String dq = "\"";
     static final String comma = ",";
-    static final int gratiaDatabaseVersion = 25;
+    static final int gratiaDatabaseVersion = 26;
     static final int latestDBVersionRequiringStoredProcedureLoad = gratiaDatabaseVersion;
     static final int latestDBVersionRequiringSummaryTableLoad = 19;
     static final int latestDBVersionRequiringSummaryViewLoad = 22;
@@ -351,15 +351,15 @@ public class DatabaseMaintenance {
         Execute("CREATE VIEW JobUsageRecord_Report as select " + GetJobUsageRecordColumnsForReportView() +
                 ", JobUsageRecord_Meta.ProbeName, JobUsageRecord_Meta.ReportedSiteName, Site.SiteName, VO.VOName" +
                 ", JobUsageRecord_Meta.ServerDate" +
-                " from JobUsageRecord_Meta, Site, Probe, JobUsageRecord, VO, VONameCorrection " +
+                " from JobUsageRecord_Meta M, Site S, Probe P, JobUsageRecord R, VO, VONameCorrection VC" +
                 " where " +
-                " JobUsageRecord_Meta.ProbeName = Probe.probename and Probe.siteid = Site.siteid" +
-                " and JobUsageRecord_Meta.dbid = JobUsageRecord.dbid" +
-                " and binary JobUsageRecord.VOName = binary VONameCorrection.VOName" + 
-                " and ((binary JobUsageRecord.ReportableVOName = binary VONameCorrection.ReportableVOName) or" + 
-                " ((JobUsageRecord.ReportableVOName is null) and (VONameCorrection.ReportableVOName is null)))" +
-                " and VONameCorrection.void = VO.void" + 
-                " and JobUsageRecord.VOName = VONameCorrection.VOName");
+                " M.probeid = P.probeid and P.siteid = S.siteid" +
+                " and M.dbid = R.dbid" +
+                " and binary R.VOName = binary VC.VOName" + 
+                " and ((binary R.ReportableVOName = binary VC.ReportableVOName) or" + 
+                " ((R.ReportableVOName is null) and (VC.ReportableVOName is null)))" +
+                " and VC.void = VO.void" + 
+                " and R.VOName = VC.VOName");
     }
 
     public int readIntegerDBProperty(String property) {
@@ -916,10 +916,10 @@ public class DatabaseMaintenance {
                                 " to " + (current + 1));
                 }
             }
-            if (current == 24) {
+            if (current == 24 || current == 25) {
                 // Auxiliary DB item upgrades only.
-                Logging.log("Gratia database upgraded from " + current + " to " + (current + 1));
-                current = current + 1;
+                Logging.log("Gratia database upgraded from " + current + " to 26");
+                current = 26;
                 UpdateDbVersion(current);
             }
             return ((current == gratiaDatabaseVersion) && checkAndUpgradeDbAuxiliaryItems());
