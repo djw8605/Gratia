@@ -23,6 +23,7 @@
             <expression name="value">params["DatabasePassword"]</expression>
         </structure>
     </list-property>
+    <property name="eventHandlerClass">net.sf.gratia.reporting.GratiaBirtReportEH</property>
     <list-property name="libraries">
         <structure>
             <property name="fileName">gratia-lib1.rptlibrary</property>
@@ -2200,7 +2201,6 @@ MM/dd/yyyy
                 </structure>
             </list-property>
             <property name="style">sans-style1</property>
-            <property name="eventHandlerClass">net.sf.gratia.reporting.GratiaBirtReportEH</property>
         </extended-item>
         <label name="ReportURL" id="392" extends="gratia-lib1.ReportURL"/>
         <label name="ShowQuery" id="393" extends="gratia-lib1.ShowQuery"/>
