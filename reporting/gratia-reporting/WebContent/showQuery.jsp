@@ -77,8 +77,8 @@
 		// Execute the SQL so we can get the resulting column names (and check any errors)
 			Class.forName("com.mysql.jdbc.Driver").newInstance();
 			
-			// cnn = DriverManager.getConnection(reportingConfiguration.getDatabaseURL(), reportingConfiguration.getDatabaseUser(), reportingConfiguration.getDatabasePassword());
-			cnn = DriverManager.getConnection("jdbc:mysql://gratia-db01.fnal.gov:3320/gratia_itb", "reader", "reader");
+			cnn = DriverManager.getConnection(reportingConfiguration.getDatabaseURL(), reportingConfiguration.getDatabaseUser(), reportingConfiguration.getDatabasePassword());
+			// cnn = DriverManager.getConnection("jdbc:mysql://gratia-db01.fnal.gov:3320/gratia_itb", "reader", "reader");
 			statement = cnn.createStatement();
 			results = statement.executeQuery(sql);	
 			metadata = results.getMetaData();
