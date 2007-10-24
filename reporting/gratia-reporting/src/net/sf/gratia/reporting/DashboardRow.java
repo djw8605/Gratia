@@ -13,9 +13,9 @@ public class DashboardRow
 	
 		public ArrayList getDashboardItems() 
 		{
-				int i;
-				for (i = 0; i < dashboardItems.size(); i++)
-						System.out.println("dashboard item: " + dashboardItems.get(i));
+        //				int i;
+        //				for (i = 0; i < dashboardItems.size(); i++)
+        //						System.out.println("dashboard item: " + dashboardItems.get(i));
 
 				return dashboardItems;
 		}
