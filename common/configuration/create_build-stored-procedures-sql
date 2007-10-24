@@ -719,7 +719,7 @@ EOF
     }
     if ($has_fromdate_todate and not $uses_resource_table) {
       $procedure_code = sprintf("%s%s", $procedure_code, <<'EOF');
-  if ( @mywhereclause = '' or @mywhereclause is NULL ) and datediff(todate,fromdate) > 6 then
+  if ( @mywhereclause = '' or @mywhereclause is NULL ) and datediff(todate,fromdate) <= 6 then
 EOF
     }
     if ($uses_resource_table or $has_fromdate_todate) {
