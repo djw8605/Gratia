@@ -188,8 +188,8 @@ my %procedures =
                             'forprobe varchar(128)',
                             'forsite varchar(128)' ],
    select_columns => 'Site.SiteName as sitename,
-        JobUsageRecord_Report.JobName,
-        JobUsageRecord_Report.ProbeName,
+            JobUsageRecord_Report.JobName,
+            JobUsageRecord_Report.ProbeName,
             JobUsageRecord_Report.WallDuration as WallDuration,
             JobUsageRecord_Report.CpuUserDuration + JobUsageRecord_Report.CpuSystemDuration as Cpu,
             JobUsageRecord_Report.Njobs as Njobs,
@@ -198,7 +198,7 @@ my %procedures =
    from_tables => 'JobUsageRecord_Report,  Site, Probe',
    main_where => 'Probe.siteid = Site.siteid
       and JobUsageRecord_Report.ProbeName = Probe.probename
-      and (\'\'\', begdatetime, \'\'\' <= JobUsageRecord_Report.EndTime and JobUsageRecord_Report.EndTime <= \'\'\', enddatetime, \'\'\')
+      and (Date(\'\'\', begdatetime, \'\'\') <= Date(JobUsageRecord_Report.EndTime) and Date(JobUsageRecord_Report.EndTime) <= Date(\'\'\', enddatetime, \'\'\'))
       and (\'\'\', forprobe, \'\'\' = \'\'All\'\' or  JobUsageRecord_Report.ProbeName = \'\'\', forprobe, \'\'\')
       and (\'\'\', forsite, \'\'\'  = \'\'All\'\' or  Site.SiteName = \'\'\', forsite, \'\'\')'
  },
@@ -418,13 +418,13 @@ my %procedures =
                           sum(V.WallDuration) as walldurationx
                           FROM VOProbeSummary V, Site S, Probe P
                           WHERE V.ProbeName = P.probename and P.siteid = S.Siteid
-                            and V.EndTime >= Date(\'\'\', fromdate, \'\'\')
-                            and V.EndTime <= Date(\'\'\', todate, \'\'\')
+                            and Date(V.EndTime) >= Date(\'\'\', fromdate, \'\'\')
+                            and Date(V.EndTime) <= Date(\'\'\', todate, \'\'\')
                           GROUP BY sitenamex
                           ORDER BY walldurationx desc) as foox) as foo,
                                    VOProbeSummary, Site, Probe',
    main_where => 'VOProbeSummary.ProbeName = Probe.probename
-            and Probe.siteid = Site.siteid 
+            and Probe.siteid = Site.siteid
             and Site.SiteName = sitenamex',
    group_by => 'datevalue, Site.SiteName',
    order_by => 'final_rank, Site.SiteName,datevalue'
@@ -445,8 +445,8 @@ my %procedures =
                           V.EndTime as endtimex,
                           sum(V.WallDuration) as walldurationx
                           FROM VOProbeSummary V
-                          WHERE V.EndTime >= Date(\'\'\', fromdate, \'\'\')
-                            and V.EndTime <= Date(\'\'\', todate, \'\'\')
+                          WHERE Date(V.EndTime) >= Date(\'\'\', fromdate, \'\'\')
+                            and Date(V.EndTime) <= Date(\'\'\', todate, \'\'\')
                           GROUP BY VONamex
                           ORDER BY walldurationx desc) as foox) as foo, VOProbeSummary',
    main_where => 'VOProbeSummary.VOName = VONamex',
@@ -485,7 +485,7 @@ my %procedures =
               and J.dbid = N.dbid
               and J.dbid = R.dbid
               and R.Description = \'\'Source\'\'
-              and J.EndTime = date(\'\'\', fromdate, \'\'\')
+              and Date(J.EndTime) = date(\'\'\', fromdate, \'\'\')
               and J.SiteName = \'\'\', siteName, \'\'\'',
    group_by => 'VOName',
    order_by => 'DayValue'
@@ -510,7 +510,7 @@ my %procedures =
                   and J.dbid = N.dbid
                   and J.dbid = R.dbid
                   and R.Description = \'\'Source\'\'
-                  and J.EndTime = date(\'\'\', fromdate, \'\'\')
+                  and Date(J.EndTime) = date(\'\'\', fromdate, \'\'\')
                   and J.SiteName = \'\'\', siteName, \'\'\'
                   and J.VOName = \'\'\', voName, \'\'\'',
    group_by => 'GlobalUsername',
@@ -692,8 +692,8 @@ EOF
         (grep /^todate\b/o, @{$procedures{$procedure}->{procedure_arguments}});
     if ($has_fromdate_todate) {
       $jobusage_sql = sprintf("%s%s%s", $jobusage_sql, $jobusage_main_where?"\n                     ' and',\n":"", <<'EOF');
-                     ' EndTime >= date(''', fromdate, ''')',
-                     ' and EndTime <= date(''', todate, ''')',
+                     ' Date(EndTime) >= date(''', fromdate, ''')',
+                     ' and Date(EndTime) <= date(''', todate, ''')',
 EOF
     }
     $jobusage_sql = sprintf("%s%s", $jobusage_sql, <<'EOF');
@@ -749,8 +749,8 @@ EOF
         $procedure_code = sprintf("%s%s%s", $procedure_code,
                                   $procedures{$procedure}->{main_where}?"\n                     ' and',\n":"",
                                   <<'EOF');
-                     ' EndTime >= date(''', fromdate, ''')',
-                     ' and EndTime <= date(''', todate, ''')',
+                     ' Date(EndTime) >= date(''', fromdate, ''')',
+                     ' and Date(EndTime) <= date(''', todate, ''')',
 EOF
       }
       $procedure_code = sprintf("%s%s", $procedure_code, <<'EOF');
@@ -925,7 +925,7 @@ begin
       select ProbeName,EndTime as endtime,Njobs as Njobs
         from ProbeStatus
         where
-          EndTime >= fromdate and EndTime <= todate
+          Date(EndTime) >= fromdate and Date(EndTime) <= todate
         group by EndTime,ProbeName
         order by EndTime;
   end if;
