@@ -188,8 +188,8 @@ my %procedures =
                             'forprobe varchar(128)',
                             'forsite varchar(128)' ],
    select_columns => 'Site.SiteName as sitename,
-   			JobUsageRecord_Report.JobName,
-   			JobUsageRecord_Report.ProbeName,
+        JobUsageRecord_Report.JobName,
+        JobUsageRecord_Report.ProbeName,
             JobUsageRecord_Report.WallDuration as WallDuration,
             JobUsageRecord_Report.CpuUserDuration + JobUsageRecord_Report.CpuSystemDuration as Cpu,
             JobUsageRecord_Report.Njobs as Njobs,
@@ -197,10 +197,10 @@ my %procedures =
             JobUsageRecord_Report.CommonName as UserName',
    from_tables => 'JobUsageRecord_Report,  Site, Probe',
    main_where => 'Probe.siteid = Site.siteid
-			and JobUsageRecord_Report.ProbeName = Probe.probename
-			and (\'\'\', begdatetime, \'\'\' <= JobUsageRecord_Report.EndTime and JobUsageRecord_Report.EndTime <= \'\'\', enddatetime, \'\'\')
-			and (\'\'\', forprobe, \'\'\' = \'\'All\'\' or  JobUsageRecord_Report.ProbeName = \'\'\', forprobe, \'\'\')
-			and (\'\'\', forsite, \'\'\'  = \'\'All\'\' or  Site.SiteName = \'\'\', forsite, \'\'\')'
+      and JobUsageRecord_Report.ProbeName = Probe.probename
+      and (\'\'\', begdatetime, \'\'\' <= JobUsageRecord_Report.EndTime and JobUsageRecord_Report.EndTime <= \'\'\', enddatetime, \'\'\')
+      and (\'\'\', forprobe, \'\'\' = \'\'All\'\' or  JobUsageRecord_Report.ProbeName = \'\'\', forprobe, \'\'\')
+      and (\'\'\', forsite, \'\'\'  = \'\'All\'\' or  Site.SiteName = \'\'\', forsite, \'\'\')'
  },
  UsageByUserForDate =>
  { procedure_arguments => [ 'userName varchar(64)',
@@ -221,7 +221,7 @@ my %procedures =
             VOProbeSummary.CommonName as UserName',
    from_tables => 'Site,Probe,VOProbeSummary',
    main_where => 'Probe.siteid = Site.siteid
-   			  and date_format(VOProbeSummary.EndTime,\'\'\',format,\'\'\') = \'\'\', fordate, \'\'\'
+          and date_format(VOProbeSummary.EndTime,\'\'\',format,\'\'\') = \'\'\', fordate, \'\'\'
               and VOProbeSummary.ProbeName = Probe.probename
               and (VOProbeSummary.VOName =\'\'\', forvoname, \'\'\' or
                    (\'\'\', forvo, \'\'\' = \'\'AnyVO\'\' and
@@ -251,7 +251,7 @@ my %procedures =
             VOProbeSummary.CommonName as UserName',
    from_tables => 'Site,Probe,VOProbeSummary',
    main_where => 'Probe.siteid = Site.siteid
-   			  and date_format(VOProbeSummary.EndTime,\'\'\',format,\'\'\') = \'\'\', fordate, \'\'\'
+          and date_format(VOProbeSummary.EndTime,\'\'\',format,\'\'\') = \'\'\', fordate, \'\'\'
               and VOProbeSummary.ProbeName = Probe.probename
               and (VOProbeSummary.VOName =\'\'\', forvoname, \'\'\' or
                    (\'\'\', forvo, \'\'\' = \'\'AnyVO\'\' and
@@ -281,7 +281,7 @@ my %procedures =
             VOProbeSummary.CommonName as UserName',
    from_tables => 'Site,Probe,VOProbeSummary',
    main_where => 'Probe.siteid = Site.siteid
-   			  and date_format(VOProbeSummary.EndTime,\'\'\',format,\'\'\') = \'\'\',fordate,\'\'\'
+          and date_format(VOProbeSummary.EndTime,\'\'\',format,\'\'\') = \'\'\',fordate,\'\'\'
               and VOProbeSummary.ProbeName = Probe.probename
               and (VOProbeSummary.VOName =\'\'\', forvoname, \'\'\' or
                    (\'\'\', forvo, \'\'\' = \'\'AnyVO\'\' and
@@ -376,7 +376,7 @@ my %procedures =
    order_by => 'sitename, VOProbeSummary.VOName'
  },
  DailyUsageBySiteByVO =>
- 	{ procedure_arguments => [ @default_procedure_arguments,
+  { procedure_arguments => [ @default_procedure_arguments,
                              'forvo varchar(64)',
                              'forvoname varchar(64)',
                              'forsite varchar(64)',
@@ -424,8 +424,8 @@ my %procedures =
                           ORDER BY walldurationx desc) as foox) as foo,
                                    VOProbeSummary, Site, Probe',
    main_where => 'VOProbeSummary.ProbeName = Probe.probename
-   					and Probe.siteid = Site.siteid 
-   					and Site.SiteName = sitenamex',
+            and Probe.siteid = Site.siteid 
+            and Site.SiteName = sitenamex',
    group_by => 'datevalue, Site.SiteName',
    order_by => 'final_rank, Site.SiteName,datevalue'
  },
@@ -468,16 +468,16 @@ my %procedures =
    order_by => 'DayValue'
  },
  DcacheBySourceAndSite =>
- { procedure_arguments => [ 'userName varchar(64)', 
-    						'userRole varchar(64)',
-   				    		'fromdate varchar(64)',
-				    		'siteName varchar(64)', 
-   				    		'format varchar(64)', 
-    						'resourceType varchar(64)'
-                           ],
+ { procedure_arguments => [ 'userName varchar(64)',
+                            'userRole varchar(64)',
+                            'fromdate varchar(64)',
+                            'siteName varchar(64)',
+                            'format varchar(64)',
+                            'resourceType varchar(64)'
+                          ],
    select_columns => 'avg(N.Value/N.PhaseUnit/1024.0/1024.0) as
                       RateInMBPerSecond,
-                      date_format(J.EndTime,\'\’\', format , \'\'\') as
+                      date_format(J.EndTime,\'\'\', format , \'\'\') as
                       DayValue,
                       J.SiteName,J.VOName,R.value as Source',
    from_tables => 'JobUsageRecord_Report J, Network N, Resource R',
@@ -485,34 +485,34 @@ my %procedures =
               and J.dbid = N.dbid
               and J.dbid = R.dbid
               and R.Description = \'\'Source\'\'
-		      and 'J.EndTime = date(''', fromdate, ''')'
+              and J.EndTime = date(\'\'\', fromdate, \'\'\')
               and J.SiteName = \'\'\', siteName, \'\'\'',
    group_by => 'VOName',
    order_by => 'DayValue'
  },
 
  DcacheBySourceSiteAndUser =>
- { procedure_arguments => [ ‘userName varchar(64)’, 
-    						‘userRole varchar(64)’,
-   				   			 ‘fromdate varchar(64)’,
-				  			 'siteName varchar(64)’,
-				  			 ‘voName varchar(64)’, 
-   				   			 ‘format varchar(64)’, 
-    						  ‘resourceType varchar(64)’
-                           ],
+ { procedure_arguments => [ 'userName varchar(64)',
+                            'userRole varchar(64)',
+                            'fromdate varchar(64)',
+                            'siteName varchar(64)',
+                            'voName varchar(64)',
+                            'format varchar(64)',
+                            'resourceType varchar(64)'
+                          ],
    select_columns => 'avg(N.Value/N.PhaseUnit/1024.0/1024.0) as
                       RateInMBPerSecond,
-                      date_format(J.EndTime,\'\’\', format , \'\'\') as
+                      date_format(J.EndTime,\'\'\', format , \'\'\') as
                       DayValue,
                       J.SiteName,J.VOName,J.GlobalUsername, R.value as Source',
    from_tables => 'JobUsageRecord_Report J, Network N, Resource R',
    main_where => 'J.ResourceType = \'\'Storage\'\'
-              	and J.dbid = N.dbid
-              	and J.dbid = R.dbid
-             	and R.Description = \'\'Source\'\'
-		 		and 'J.EndTime = date(''', fromdate, ''')'
-              	and J.SiteName = \'\'\', siteName, \'\'\''
-  				and J.VOName = \'\'\', voName, \'\'\'',
+                  and J.dbid = N.dbid
+                  and J.dbid = R.dbid
+                  and R.Description = \'\'Source\'\'
+                  and J.EndTime = date(\'\'\', fromdate, \'\'\')
+                  and J.SiteName = \'\'\', siteName, \'\'\'
+                  and J.VOName = \'\'\', voName, \'\'\'',
    group_by => 'GlobalUsername',
    order_by => 'DayValue'
  },
