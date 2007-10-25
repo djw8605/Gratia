@@ -516,6 +516,36 @@ order by name</property>
                     <expression name="expression">dataSetRow["UserName"]</expression>
                     <property name="dataType">any</property>
                 </structure>
+                <structure>
+                    <property name="name">Column Binding</property>
+                    <expression name="expression">Total.sum(row["Njobs"])</expression>
+                    <property name="dataType">any</property>
+                </structure>
+                <structure>
+                    <property name="name">Column Binding_1</property>
+                    <expression name="expression">Total.sum(row["CPU Minutes Used"])</expression>
+                    <property name="dataType">any</property>
+                </structure>
+                <structure>
+                    <property name="name">Column Binding_2</property>
+                    <expression name="expression">Total.sum(row["CPU Minutes Used"])</expression>
+                    <property name="dataType">any</property>
+                </structure>
+                <structure>
+                    <property name="name">Column Binding_3</property>
+                    <expression name="expression">Total.sum(row["CPU Minutes Used"])</expression>
+                    <property name="dataType">any</property>
+                </structure>
+                <structure>
+                    <property name="name">Column Binding_4</property>
+                    <expression name="expression">Total.sum(row["Njobs"])</expression>
+                    <property name="dataType">any</property>
+                </structure>
+                <structure>
+                    <property name="name">Grand Total: Jobs</property>
+                    <expression name="expression">Total.sum(row["Njobs"])</expression>
+                    <property name="dataType">any</property>
+                </structure>
             </list-property>
             <column id="107"/>
             <column id="108"/>
@@ -630,28 +660,28 @@ else
                             <property name="borderTopColor">#000000</property>
                             <property name="borderTopStyle">solid</property>
                             <property name="borderTopWidth">thin</property>
-                            <text-data id="173">
+                            <data id="400">
                                 <property name="style">sans-style1</property>
-                                <property name="fontFamily">sans-serif</property>
                                 <property name="fontWeight">bold</property>
-                                <property name="paddingRight">36pt</property>
+                                <structure name="numberFormat">
+                                    <property name="category">Fixed</property>
+                                    <property name="pattern">###0</property>
+                                </structure>
                                 <property name="textAlign">right</property>
-                                <property name="contentType">html</property>
-                            </text-data>
+                                <property name="resultSetColumn">Column Binding_2</property>
+                            </data>
                         </cell>
                         <cell id="118">
+                            <property name="style">sans-style1</property>
+                            <property name="fontWeight">bold</property>
                             <property name="borderTopColor">#000000</property>
                             <property name="borderTopStyle">solid</property>
                             <property name="borderTopWidth">thin</property>
-                            <text-data id="187">
+                            <data id="402">
                                 <property name="style">sans-style1</property>
-                                <property name="fontFamily">sans-serif</property>
-                                <property name="fontWeight">bold</property>
-                                <property name="paddingRight">36pt</property>
                                 <property name="textAlign">right</property>
-                                <expression name="valueExpr">Math.floor(Total.sum(row["Njobs"]))</expression>
-                                <property name="contentType">html</property>
-                            </text-data>
+                                <property name="resultSetColumn">Column Binding_4</property>
+                            </data>
                         </cell>
                     </row>
                 </footer>
@@ -730,28 +760,36 @@ else
                             <property name="borderTopColor">#000000</property>
                             <property name="borderTopStyle">solid</property>
                             <property name="borderTopWidth">thin</property>
-                            <text-data id="172">
+                            <data id="399">
                                 <property name="style">sans-style1</property>
-                                <property name="fontFamily">sans-serif</property>
                                 <property name="fontWeight">bold</property>
-                                <property name="paddingRight">36pt</property>
+                                <structure name="numberFormat">
+                                    <property name="category">Fixed</property>
+                                    <property name="pattern">###0</property>
+                                </structure>
+                                <structure name="stringFormat">
+                                    <property name="category">Custom</property>
+                                    <property name="pattern">#</property>
+                                </structure>
                                 <property name="textAlign">right</property>
-                                <property name="contentType">html</property>
-                            </text-data>
+                                <property name="resultSetColumn">Column Binding_1</property>
+                            </data>
                         </cell>
                         <cell id="129">
                             <property name="borderTopColor">#000000</property>
                             <property name="borderTopStyle">solid</property>
                             <property name="borderTopWidth">thin</property>
-                            <text-data id="186">
+                            <data id="398">
                                 <property name="style">sans-style1</property>
-                                <property name="fontFamily">sans-serif</property>
                                 <property name="fontWeight">bold</property>
-                                <property name="paddingRight">36pt</property>
+                                <property name="paddingTop">1pt</property>
+                                <structure name="numberFormat">
+                                    <property name="category">General Number</property>
+                                    <property name="pattern">General Number</property>
+                                </structure>
                                 <property name="textAlign">right</property>
-                                <expression name="valueExpr">Math.floor(Total.sum(row["Njobs"]))</expression>
-                                <property name="contentType">html</property>
-                            </text-data>
+                                <property name="resultSetColumn">Column Binding</property>
+                            </data>
                         </cell>
                     </row>
                 </footer>
@@ -770,7 +808,15 @@ else
                             <property name="style">sans-style1</property>
                             <property name="fontFamily">sans-serif</property>
                             <property name="color">#000000</property>
+                            <property name="paddingTop">1pt</property>
                             <property name="paddingRight">36pt</property>
+                            <structure name="numberFormat">
+                                <property name="category">Fixed</property>
+                                <property name="pattern">###0</property>
+                            </structure>
+                            <structure name="stringFormat">
+                                <property name="category">Custom</property>
+                            </structure>
                             <property name="textAlign">right</property>
                             <property name="resultSetColumn">if(row["CPU Minutes Used"] *0 > 1000000) 
      Math.floor(  (row["CPU Minutes Used"]) / 1000000 )+ ' M'
@@ -798,28 +844,27 @@ else
                         <property name="borderTopColor">#000000</property>
                         <property name="borderTopStyle">solid</property>
                         <property name="borderTopWidth">medium</property>
-                        <text-data id="174">
+                        <data id="401">
                             <property name="style">sans-style1</property>
-                            <property name="fontFamily">sans-serif</property>
                             <property name="fontWeight">bold</property>
-                            <property name="paddingRight">36pt</property>
+                            <structure name="numberFormat">
+                                <property name="category">Fixed</property>
+                                <property name="pattern">###0</property>
+                            </structure>
                             <property name="textAlign">right</property>
-                            <property name="contentType">html</property>
-                        </text-data>
+                            <property name="resultSetColumn">Column Binding_3</property>
+                        </data>
                     </cell>
                     <cell id="106">
                         <property name="borderTopColor">#000000</property>
                         <property name="borderTopStyle">solid</property>
                         <property name="borderTopWidth">medium</property>
-                        <text-data id="188">
+                        <data id="403">
                             <property name="style">sans-style1</property>
-                            <property name="fontFamily">sans-serif</property>
                             <property name="fontWeight">bold</property>
-                            <property name="paddingRight">36pt</property>
                             <property name="textAlign">right</property>
-                            <expression name="valueExpr">Math.floor(Total.sum(row["Njobs"]))</expression>
-                            <property name="contentType">html</property>
-                        </text-data>
+                            <property name="resultSetColumn">Grand Total: Jobs</property>
+                        </data>
                     </cell>
                 </row>
             </footer>
