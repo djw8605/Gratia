@@ -23,7 +23,6 @@
             <expression name="value">params["DatabasePassword"]</expression>
         </structure>
     </list-property>
-    <property name="eventHandlerClass">net.sf.gratia.reporting.GratiaBirtReportEH</property>
     <list-property name="libraries">
         <structure>
             <property name="fileName">gratia-lib1.rptlibrary</property>
@@ -1393,6 +1392,7 @@
         <Width>0.0</Width>
         <Height>0.0</Height>
       </Bounds>
+      <Anchor>West</Anchor>
       <Stretch>Both</Stretch>
       <Insets>
         <Top>2.0</Top>
@@ -1455,7 +1455,7 @@
           <Blue>0</Blue>
         </Color>
       </Text>
-      <Orientation>Horizontal</Orientation>
+      <Orientation>Vertical</Orientation>
       <Direction>Top_Bottom</Direction>
       <Separator>
         <Style>Solid</Style>
@@ -1468,7 +1468,7 @@
         </Color>
         <Visible>true</Visible>
       </Separator>
-      <Position>Below</Position>
+      <Position>Right</Position>
       <ItemType>Series</ItemType>
       <Title>
         <Caption>
