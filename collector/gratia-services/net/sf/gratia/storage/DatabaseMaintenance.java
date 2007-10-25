@@ -351,15 +351,15 @@ public class DatabaseMaintenance {
         Execute("CREATE VIEW JobUsageRecord_Report as select " + GetJobUsageRecordColumnsForReportView() +
                 ", JobUsageRecord_Meta.ProbeName, JobUsageRecord_Meta.ReportedSiteName, Site.SiteName, VO.VOName" +
                 ", JobUsageRecord_Meta.ServerDate" +
-                " from JobUsageRecord_Meta M, Site S, Probe P, JobUsageRecord R, VO, VONameCorrection VC" +
+                " from JobUsageRecord_Meta, Site, Probe, JobUsageRecord, VO, VONameCorrection" +
                 " where " +
-                " M.probeid = P.probeid and P.siteid = S.siteid" +
-                " and M.dbid = R.dbid" +
-                " and binary R.VOName = binary VC.VOName" + 
-                " and ((binary R.ReportableVOName = binary VC.ReportableVOName) or" + 
-                " ((R.ReportableVOName is null) and (VC.ReportableVOName is null)))" +
-                " and VC.void = VO.void" + 
-                " and R.VOName = VC.VOName");
+                " JobUsageRecord_Meta.probeid = Probe.probeid and Probe.siteid = Site.siteid" +
+                " and JobUsageRecord_Meta.dbid = JobUsageRecord.dbid" +
+                " and binary JobUsageRecord.VOName = binary VONameCorrection.VOName" + 
+                " and ((binary JobUsageRecord.ReportableVOName = binary VONameCorrection.ReportableVOName) or" + 
+                " ((JobUsageRecord.ReportableVOName is null) and (VONameCorrection.ReportableVOName is null)))" +
+                " and VONameCorrection.void = VO.void" + 
+                " and JobUsageRecord.VOName = VONameCorrection.VOName");
     }
 
     public int readIntegerDBProperty(String property) {
