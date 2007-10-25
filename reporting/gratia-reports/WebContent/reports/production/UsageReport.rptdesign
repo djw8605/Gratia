@@ -488,6 +488,7 @@ order by name</property>
                     <expression name="expression">if(row["CPU Minutes Used"] *0 > 1000000) 
      Math.floor(  (row["CPU Minutes Used"]) / 1000000 )+ ' M'
         else  Math.floor( (row["CPU Minutes Used"]) )</expression>
+                    <property name="dataType">integer</property>
                 </structure>
                 <structure>
                     <property name="name">Njobs</property>
@@ -665,7 +666,7 @@ else
                                 <property name="fontWeight">bold</property>
                                 <structure name="numberFormat">
                                     <property name="category">Fixed</property>
-                                    <property name="pattern">###0</property>
+                                    <property name="pattern">###0.0</property>
                                 </structure>
                                 <property name="textAlign">right</property>
                                 <property name="resultSetColumn">Column Binding_2</property>
@@ -765,7 +766,7 @@ else
                                 <property name="fontWeight">bold</property>
                                 <structure name="numberFormat">
                                     <property name="category">Fixed</property>
-                                    <property name="pattern">###0</property>
+                                    <property name="pattern">###0.0</property>
                                 </structure>
                                 <structure name="stringFormat">
                                     <property name="category">Custom</property>
@@ -809,10 +810,10 @@ else
                             <property name="fontFamily">sans-serif</property>
                             <property name="color">#000000</property>
                             <property name="paddingTop">1pt</property>
-                            <property name="paddingRight">36pt</property>
+                            <property name="paddingRight">1pt</property>
                             <structure name="numberFormat">
                                 <property name="category">Fixed</property>
-                                <property name="pattern">###0</property>
+                                <property name="pattern">###0.0</property>
                             </structure>
                             <structure name="stringFormat">
                                 <property name="category">Custom</property>
@@ -849,7 +850,7 @@ else
                             <property name="fontWeight">bold</property>
                             <structure name="numberFormat">
                                 <property name="category">Fixed</property>
-                                <property name="pattern">###0</property>
+                                <property name="pattern">###0.0</property>
                             </structure>
                             <property name="textAlign">right</property>
                             <property name="resultSetColumn">Column Binding_3</property>
