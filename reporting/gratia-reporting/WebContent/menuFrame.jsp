@@ -5,7 +5,8 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<LINK href="stylesheet.css" type="text/css" rel="stylesheet">
+<LINK href="gratiaStyleSheet.css" type="text/css" rel="stylesheet">
+<base target="report">
 <title>Gratia Accounting</title>
 </head>
 <body>
@@ -17,6 +18,7 @@
 	String reportsFolder = reportingConfiguration.getReportsFolder();
 
 %>
+<a href="http://opensciencegrid.org/"><img src="./images/osg-logo.gif" alt="OSG Logo" width="174" height="81" border="0"></a><hr>
 	<%
 	String linkURL = null;
 	String linkNAME = null;
@@ -46,7 +48,7 @@
 			linkURL = linkURL.replace(" ", "%20");
 			linkURL = linkURL.replace("&", "&amp;");
 			%> 
-			<a class=menuItem href="<%=linkURL %>" target="central"><%=linkNAME %></a> <br />
+			<a class=menuItem href="<%=linkURL %>" target="report"><%=linkNAME %></a> <br />
 			<%
 		}
 	}
