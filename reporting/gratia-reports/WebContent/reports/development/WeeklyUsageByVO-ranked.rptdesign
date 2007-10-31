@@ -1136,10 +1136,8 @@ yearnr + "-" + monthnr + "-" + daynr;</expression>
     </styles>
     <page-setup>
         <simple-master-page name="Simple MasterPage" id="2">
-            <property name="type">custom</property>
-            <property name="height">11in</property>
-            <property name="width">12in</property>
-            <property name="pageBreakAfter">auto</property>
+            <property name="type">us-letter</property>
+            <property name="pageBreakAfter">avoid</property>
             <property name="pageBreakBefore">auto</property>
             <property name="pageBreakInside">auto</property>
             <page-footer>
@@ -1206,7 +1204,7 @@ yearnr + "-" + monthnr + "-" + daynr;</expression>
                 <property name="repeatHeader">true</property>
                 <property name="hideDetail">false</property>
                 <property name="pageBreakAfter">always</property>
-                <property name="pageBreakBefore">auto</property>
+                <property name="pageBreakBefore">avoid</property>
                 <property name="pageBreakInside">auto</property>
                 <header>
                     <row id="15">
