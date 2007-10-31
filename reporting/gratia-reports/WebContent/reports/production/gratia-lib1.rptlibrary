@@ -6516,7 +6516,7 @@ else {&#xD;
             <text-property name="text">Show Query</text-property>
             <structure name="action">
                 <property name="linkType">hyperlink</property>
-                <expression name="uri">"../showQuery.jsp?TraceTableKey="+params["UserName"].split("|")[1]</expression>
+                <expression name="uri">"../showQuery.jsp?TraceTableKey="+params["UserName"].split("|")[1]+"&amp;amp;reportTitle="+params["ReportTitle"]</expression>
                 <property name="targetWindow">_self</property>
             </structure>
         </label>
