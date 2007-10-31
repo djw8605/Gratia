@@ -23,17 +23,6 @@
             <expression name="value">params["DatabasePassword"]</expression>
         </structure>
     </list-property>
-    <method name="initialize"><![CDATA[//importPackage(Packages.java.io); 
-//fos = new java.io.FileOutputStream("/tmp/glr2.txt", true); 
-//printWriter = new java.io.PrintWriter(fos); 
-
-//printWriter.println("2.Start Date After:  " + params["Start Date"]);
-//printWriter.println("2.End Date After:  " + params["End Date"]);
-//printWriter.println("2.Format After:  " + params["GroupByFormat"]);
-//printWriter.println("2.TimeAxisPattern: " + params["TimeAxisPattern"]);
-//printWriter.flush();
-
-//printWriter.close();]]></method>
     <list-property name="configVars">
         <structure>
             <property name="name">DatabaseURL</property>
@@ -1044,27 +1033,7 @@ function beforeGeneration( chart, context )
  * @param context
  *            IChartScriptContext
  */
-function beforeDrawAxisLabel( axis, label, context )
-{
-      
-fos = new java.io.FileOutputStream(&quot;/tmp/glr2.txt&quot;, true); 
-printWriter = new java.io.PrintWriter(fos); 
-
-	rep = context.getExternalContext().getScriptable();
-	val = rep.getParameterValue(&quot;HighlightDate&quot;);
-
-printWriter.println(&quot;3.Hightlight: &quot;+val);
-printWriter.println(&quot;3.label:      &quot;+label.getCaption().getValue());
-printWriter.flush();
-printWriter.close();
-	if(val == null)
-		val = &quot;&quot;;
-
-	if(val.equals(label.getCaption().getValue()))
-		label.getOutline().setVisible(true);
-	else
-		label.getOutline().setVisible(false);
-}
+//function beforeDrawAxisLabel( axis, label, context ){}
 
 /**
  * Called before rendering the Title of an Axis.
