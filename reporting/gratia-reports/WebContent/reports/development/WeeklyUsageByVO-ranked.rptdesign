@@ -23,6 +23,7 @@
             <expression name="value">params["DatabasePassword"]</expression>
         </structure>
     </list-property>
+    <property name="eventHandlerClass">net.sf.gratia.reporting.GratiaBirtReportEH</property>
     <list-property name="libraries">
         <structure>
             <property name="fileName">gratia-lib1.rptlibrary</property>
@@ -1135,6 +1136,9 @@ yearnr + "-" + monthnr + "-" + daynr;</expression>
     </styles>
     <page-setup>
         <simple-master-page name="Simple MasterPage" id="2">
+            <property name="type">custom</property>
+            <property name="height">11in</property>
+            <property name="width">12in</property>
             <property name="pageBreakAfter">avoid</property>
             <property name="pageBreakBefore">avoid</property>
             <property name="pageBreakInside">avoid</property>
@@ -2456,53 +2460,54 @@ var metric = &quot;***Unknown metric***&quot;&#xD;
             </detail>
             <footer>
                 <row id="26">
-                    <cell id="27"/>
+                    <cell id="27">
+                        <grid id="408">
+                            <property name="width">100%</property>
+                            <column id="409"/>
+                            <column id="410"/>
+                            <row id="411">
+                                <cell id="412">
+                                    <label name="ReportURL" id="390">
+                                        <property name="fontFamily">sans-serif</property>
+                                        <property name="fontSize">12pt</property>
+                                        <property name="fontWeight">bold</property>
+                                        <list-property name="visibility">
+                                            <structure>
+                                                <property name="format">all</property>
+                                                <expression name="valueExpr">params["ReportURL"]==""</expression>
+                                            </structure>
+                                        </list-property>
+                                        <text-property name="text">Retrieve Report URL</text-property>
+                                        <structure name="action">
+                                            <property name="linkType">hyperlink</property>
+                                            <expression name="uri">params["ReportURL"]</expression>
+                                            <property name="targetWindow">_blank</property>
+                                        </structure>
+                                    </label>
+                                </cell>
+                                <cell id="413">
+                                    <label name="ShowQuery" id="391">
+                                        <property name="style">sans-style1</property>
+                                        <property name="fontSize">12pt</property>
+                                        <property name="fontWeight">bold</property>
+                                        <property name="marginTop">0pt</property>
+                                        <property name="marginBottom">20px</property>
+                                        <property name="paddingTop">1pt</property>
+                                        <text-property name="text">Show Query</text-property>
+                                        <structure name="action">
+                                            <property name="linkType">hyperlink</property>
+                                            <expression name="uri">"../showQuery.jsp?TraceTableKey="+params["UserName"].split("|")[1]</expression>
+                                            <property name="targetWindow">_self</property>
+                                        </structure>
+                                    </label>
+                                </cell>
+                            </row>
+                        </grid>
+                    </cell>
                     <cell id="28"/>
                     <cell id="29"/>
                 </row>
             </footer>
         </table>
-        <grid id="408">
-            <property name="width">100%</property>
-            <column id="409"/>
-            <column id="410"/>
-            <row id="411">
-                <cell id="412">
-                    <label name="ReportURL" id="390">
-                        <property name="fontFamily">sans-serif</property>
-                        <property name="fontSize">12pt</property>
-                        <property name="fontWeight">bold</property>
-                        <list-property name="visibility">
-                            <structure>
-                                <property name="format">all</property>
-                                <expression name="valueExpr">params["ReportURL"]==""</expression>
-                            </structure>
-                        </list-property>
-                        <text-property name="text">Retrieve Report URL</text-property>
-                        <structure name="action">
-                            <property name="linkType">hyperlink</property>
-                            <expression name="uri">params["ReportURL"]</expression>
-                            <property name="targetWindow">_blank</property>
-                        </structure>
-                    </label>
-                </cell>
-                <cell id="413">
-                    <label name="ShowQuery" id="391">
-                        <property name="style">sans-style1</property>
-                        <property name="fontSize">12pt</property>
-                        <property name="fontWeight">bold</property>
-                        <property name="marginTop">0pt</property>
-                        <property name="marginBottom">20px</property>
-                        <property name="paddingTop">1pt</property>
-                        <text-property name="text">Show Query</text-property>
-                        <structure name="action">
-                            <property name="linkType">hyperlink</property>
-                            <expression name="uri">"../showQuery.jsp?TraceTableKey="+params["UserName"].split("|")[1]</expression>
-                            <property name="targetWindow">_self</property>
-                        </structure>
-                    </label>
-                </cell>
-            </row>
-        </grid>
     </body>
 </report>
