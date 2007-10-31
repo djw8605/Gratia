@@ -64,13 +64,13 @@ function getURL ()
    var x=document.getElementsByTagName('form')[0]
    var url = "";
 
-	for (var i=0;i<x.length;i++)
+	for (var i=0; i < x.length; i++)
 	{
   		if (x.elements[i].name == "BaseURL" )
      		url = x.elements[i].value;
  	}
  
-	for (var i=0;i<x.length;i++)
+	for (var i=0; i<x.length; i++)
 	{
 		name = x.elements[i].name;
 		value = x.elements[i].value;
@@ -101,7 +101,7 @@ function getURL ()
 	if (ReportTitle != null)
    	{
 %>
-<div align="left" class="reportTitle"><%=ReportTitle%></div><br>
+<div align="left" class="reportTitle"><%=ReportTitle%></div><br />
 <%
 	}else
 	{
@@ -140,9 +140,9 @@ String selectValue = null;
 <birt:parameterPage id="<%=pageID %>" name="parameterInput" reportDesign="<%= report %>" isCustom="true" title="">
 
 
-<input type=hidden id="baseURL" name="BaseURL" Value = "<%=initUrl %>">
-<input type=hidden id="ReportURL" name="ReportURL" Value="<%=initUrl %>">
-<input type=hidden id="ReportTitle" name="ReportTitle" Value="<%=ReportTitle %>">
+<input type="hidden" id="baseURL" name="BaseURL" Value = "<%=initUrl %>">
+<input type="hidden" id="ReportURL" name="ReportURL" Value="<%=initUrl %>">
+<input type="hidden" id="ReportTitle" name="ReportTitle" Value="<%=ReportTitle %>">
 
 <table>
 <%
@@ -208,10 +208,10 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 		{
 %>
 			<tr>
-			   <td><label class=paramName><%=promptText %></label><br> <font size=-2><%=helpText%></font></td>
+			   <td><label class="paramName"><%=promptText %></label><br> <font size=-2><%=helpText%></font></td>
 			   <td>
 			   <input type="text" id="<%=paramName %>" name="<%=paramName %>" value="<%=defaultValue %>"  onchange="getURL();" >
-			   	<BUTTON name="cal1" value="cal1" type="button" class=button onclick="c1.popup('<%=paramName %>');" >
+			   	<BUTTON name="cal1" value="cal1" type="button" class="button" onclick="c1.popup('<%=paramName %>');" >
     				<IMG SRC="./calendar/img/cal.gif" ALT="test"></BUTTON>
 			   </td>
 			</tr>
@@ -221,7 +221,7 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 		{
 	%>
 			<tr>
-			   <td valign="top"><label class=paramName> Select one or more VOs:</label><br> <font size=-2><%=helpText%></font></td>
+			   <td valign="top"><label class="paramName"> Select one or more VOs:</label><br> <font size=-2><%=helpText%></font></td>
 			   <td> 
 				<SELECT multiple size="10" id="myVOs" name="myVOs" onChange="addVO2(this.form); getURL();" >
 						
@@ -316,7 +316,7 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 			</td>
 		</tr>
 		<tr>
-		   <td><em><label class=paramName> Selected VOs:</label></em></td><td><input id="VOs" type="text"  name="<%=paramName%>" Value = "<%=SelectedVOs %>" readonly size="60"  onchange="getURL()" ></td>
+		   <td><em><label class="paramName"> Selected VOs:</label></em></td><td><input id="VOs" type="text"  name="<%=paramName%>" Value = "<%=SelectedVOs %>" readonly size="60"  onchange="getURL()" ></td>
 		</tr>
 		<%
 		}
@@ -324,7 +324,7 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 		{
 	%>
 			<tr>
-			   <td valign="top"><label class=paramName><%=promptText%></label><br> <font size=-2><%=helpText%></font></td>
+			   <td valign="top"><label class="paramName"><%=promptText%></label><br> <font size=-2><%=helpText%></font></td>
 			   <td> 
 				<SELECT size="10" id="ForVOName" name="ForVOName" onChange="getURL();" >
 						
@@ -420,7 +420,7 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 		{
 	%>
 			<tr>
-			   <td valign="top"><label class=paramName><%=promptText%></label><br> <font size=-2><%=helpText%></font></td>
+			   <td valign="top"><label class="paramName"><%=promptText%></label><br> <font size=-2><%=helpText%></font></td>
 			   <td> 
 				<SELECT size="10" id="ForSiteName" name="ForSiteName" onChange="getURL();" >
 						
@@ -516,7 +516,7 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 		{
 	%>
 			<tr>
-			   <td valign="top"><label class=paramName><%=promptText%></label><br> <font size=-2><%=helpText%></font></td>
+			   <td valign="top"><label class="paramName"><%=promptText%></label><br> <font size=-2><%=helpText%></font></td>
 			   <td> 
 				<SELECT size="10" id="ForProbeName" name="ForProbeName" onChange="getURL();" >
 						
@@ -612,9 +612,9 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 				{
 					%>
 				 	<tr>
-					   <td><label class=paramName><%=promptText %></label><br> <font size=-2><%=helpText%></font></td>
+					   <td><label class="paramName"><%=promptText %></label><br> <font size=-2><%=helpText%></font></td>
 					   <td>
-					   <select class=paramSelect id="<%=paramName%>" name="<%=paramName%>"  onchange="getURL()" >
+					   <select class="paramSelect" id="<%=paramName%>" name="<%=paramName%>"  onchange="getURL()" >
 					<%
 					for(int s=0; s < paramGroup.getParameterListSelection().size(); s++)
 					{
@@ -638,7 +638,7 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 		{
 		%>
 		    <tr>
-			<td><label class=paramName><%=promptText %></label><br> <font size=-2><%=helpText%></font></td>
+			<td><label class="paramName"><%=promptText %></label><br> <font size=-2><%=helpText%></font></td>
 			<td>
 				<input id="<%=paramName%>" type="text" name="<%=paramName %>" value="<%=defaultValue %>" >
 			</td>
@@ -650,7 +650,7 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 %>
 	<tr>
 	   <td colspan=3>
-		<input class=button type=submit name=submitButton value=Submit >
+		<input class="button" type="submit" name="submitButton" value="Submit" >
 	   </td>
 	</tr>
 </table>
@@ -662,7 +662,7 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
    var x=document.getElementsByTagName('form')[0];
    var url = "";
 
-	for (var i=0;i<x.length;i++)
+	for (var i=0; i<x.length; i++)
 	{
   		if (x.elements[i].name == "BaseURL" )
      		url = x.elements[i].value;
