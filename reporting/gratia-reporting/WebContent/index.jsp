@@ -30,25 +30,27 @@
                         if (c=='=' && i>3 && link.substring(i-3,i).equals("sql")) {
                            sqlmode = true;
                         }
-                        if (c==';' && sqlmode) {
+                        if (c==';') {
                            sqlmode = false;
                         }
-                        if (c==',') { 
-                           if (sqlmode) sb.append(',');
-                           else sb.append('&');
-                        } else {
+                        if (c==',' && !sqlmode) { 
+			   	sb.append('&');
+			}
+                        else {
                            sb.append(c);
                         }
 
 		}
 		link = sb.toString();
+		link = link.replace(" ", "%20");
+		link = link.replace("&", "&amp;");
 	}
 %>
 	
-	<table width=100% style="height: 95%">
+	<table width="100%" style="height: 95%">
 		<tr>
-			<td valign="top" width=200>
-				<table class=menu>
+			<td valign="top" width="200">
+				<table class="menu">
 			<tr><td><a href="http://opensciencegrid.org/"><img src="./images/osg-logo.gif" alt="OSG Logo" width="174" height="81" border="0"></a><hr></td></tr>
 				<%
 				String linkURL = null;
@@ -60,7 +62,7 @@
 
 				%>	
 					<tr>
-					<td><hr><label class=menuGroup><%=menuGroup.getName() %></label><td>
+					<td><hr><label class="menuGroup"><%=menuGroup.getName() %></label><td>
 					</tr>
 				<%
 					}
@@ -76,18 +78,18 @@
 						linkNAME = menuItem.getName();
 						if (menuItem.getLink().indexOf("?") > -1) 
 						{
-						   linkURL = menuItem.getLink() + ",reportTitle=" + linkNAME.replaceFirst("-", "").trim();
+						   linkURL = menuItem.getLink() + "&amp;reportTitle=" + linkNAME.replaceFirst("-", "").trim();
 						}else
 						{
 						   linkURL = menuItem.getLink() + "?reportTitle=" + linkNAME.replaceFirst("-", "").trim();
 						}
 						linkURL = linkURL.replace(" ", "%20");
-						linkURL = linkURL.replace("&", ",");
 						linkURL = linkURL.replace("&amp;", ",");
+						linkURL = linkURL.replace("&", ",");
 				%>
 					<tr >
      					<td>
-     						<a class=menuItem href="index.jsp?link=<%=linkURL %>"><%=linkNAME %></a>
+     						<a class="menuItem" href="index.jsp?link=<%=linkURL %>"><%=linkNAME %></a>
      					</td>
                     </tr>
 				<%
@@ -95,17 +97,17 @@
 				}
 				%>															
 					<tr>
-					<td class=menuGroup><hr>Commands</td>
+					<td class="menuGroup"><hr>Commands</td>
 					</tr>
 					<tr>
-						<td><a class=menuItem href="logout.jsp">Logout</a><br /></td>
+						<td><a class="menuItem" href="logout.jsp">Logout</a><br /></td>
 					</tr>
 				</table>
 			</td>
-			<td width=1 bgcolor="black">
+			<td width="1" bgcolor="black">
 			</td>
 			<td valign="top">
-			<table width=100% style="height: 90%">
+			<table width="100%" style="height: 90%">
 			<tr> 
 			<td valign="top">
 <!--
@@ -126,12 +128,12 @@ if(browserType != null ){
 
 
 %>
-                <iframe name="viewPanel"  width="800" height="700" SCROLLING="auto" frameborder=0 src="<%=link %>" > </iframe>
+                <iframe name="viewPanel"  width="800" height="700" SCROLLING="auto" frameborder="0" src="<%=link %>" > </iframe>
 <%
 	}
 	else {
 %>
-                <iframe name="viewPanel"  width="100%" height="100%" SCROLLING="auto" frameborder=0 src="<%=link %>" > </iframe>
+                <iframe name="viewPanel"  width="100%" height="100%" SCROLLING="auto" frameborder="0" src="<%=link %>" > </iframe>
 <%
 	}
    }
