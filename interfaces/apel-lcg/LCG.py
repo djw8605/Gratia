@@ -7,7 +7,7 @@
 # Script to transfer the data from Gratia to APEL (WLCG)
 ########################################################################
 #
-#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: LCG.py,v 1.8 2007-10-05 12:35:06 jgweigand Exp $
+#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: LCG.py,v 1.9 2007-11-02 13:57:43 jgweigand Exp $
 #
 #
 ########################################################################
@@ -47,7 +47,7 @@ import smtplib, rfc822  # for email notifications via smtp
 import commands, os, sys, time, string
 
 gSitesWithNoData = []
-gSitesWithNoUnknowns = []
+gSitesWithUnknowns = []
 gKnownVOs = {}
 
 gFilterParameters = {"SiteFilterFile"       :None,
@@ -183,11 +183,11 @@ process can provide further details.
 Sites with no data:
   %s
 
-Sites with no unknown atlas VOs:
+Sites with unknown Atlas VOs (unix account with 'atlas' in name):
   %s
 
 %s
-	""" % (gProgramName,hostname,username,logfile,sqlfile,gSitesWithNoData,gSitesWithNoUnknowns,message)
+	""" % (gProgramName,hostname,username,logfile,sqlfile,gSitesWithNoData,gSitesWithUnknowns,message)
 
 
   try:
@@ -677,8 +677,8 @@ def CreateLCGsql(results,filename):
   """ 
   Logit("Creating update sql DML for the LCG database:") 
 
-  if len(results) == 0:
-    raise Exception("No updates to apply")
+##  if len(results) == 0:
+##    raise Exception("No updates to apply")
 
   file = open(filename, 'w')
   lines = results.split("\n")
@@ -715,8 +715,8 @@ def CreateLCGsqlUnknownUpdates(results,filename):
   """ 
   Logit("Creating update sql DML for the LCG database for Unknown atlas VOs:") 
 
-  if len(results) == 0:
-    raise Exception("No updates to apply")
+##  if len(results) == 0:
+##    raise Exception("No updates to apply")
 
   file = open(filename, 'a')
   lines = results.split("\n")
@@ -759,7 +759,7 @@ def CreateLCGsqlUnknownUpdates(results,filename):
 def main(argv=None):
   global gNormalization
   global gSitesWithNoData
-  global gSitesWithNoUnknowns
+  global gSitesWithUnknowns
   firstTime = 1
 
   #--- get command line arguments  -------------
@@ -815,26 +815,29 @@ def main(argv=None):
     sites = ReportableSites.keys()
     for site in sites:
       normalizationFactor = ReportableSites[site]
-      query = GetQueryAtlasUnknowns(site,normalizationFactor,"atlas")
+      unknown_query = GetQueryAtlasUnknowns(site,normalizationFactor,"atlas")
       if firstTime:
         Logit("Query:")
-        LogToFile(query)
+        LogToFile(unknown_query)
         firstTime = 0
       Logit("Site (Unknown atlas VO): %s  Normalization Factor: %s" % (site,normalizationFactor)) 
-      results = RunGratiaQuery(query,gDatabaseParameters)
-      if len(results) == 0:
-        gSitesWithNoUnknowns.append(site)
+      unknown_results = RunGratiaQuery(unknown_query,gDatabaseParameters)
+      if len(unknown_results) == 0:
         continue
-      unknowns = unknowns + results + "\n"
+      gSitesWithUnknowns.append(site)
+      unknowns = unknowns + unknown_results + "\n"
 
     #--- update the APEL accounting database ----
     Logit("Sites with no data: %s" % gSitesWithNoData)
-    Logit("Sites with no atlas unknown VOs: %s" % gSitesWithNoUnknowns)
+    Logit("Sites with Atlas unknown VOs: %s" % gSitesWithUnknowns)
+    if len(output) == 0:
+      if len(unknown) == 0:
+        raise Exception("No updates to apply")
     CreateLCGsql(output,GetFileName("sql"))
     CreateLCGsqlUnknownUpdates(unknowns,GetFileName("sql"))
     if gInUpdateMode:
       RunLCGUpdate(GetFileName("sql"),gDatabaseParameters)
-      SendEmailNotificationSuccess("Sample query:\n" + query + "\n\nResults of all queries:\n" + output)
+      SendEmailNotificationSuccess("Sample query:\n" + query + "\n\nResults of all queries:\n" + output + "\n\n#################\nSample Atlas unknown query:\n" + unknown_query + "\n\nResults of all Atlas unknown queries:\n" + unknowns)
       Logit("Transfer Completed SUCCESSFULLY from Gratia to APEL")
     else:
       Logit("The --update arg was not specified. No updates attempted.")
