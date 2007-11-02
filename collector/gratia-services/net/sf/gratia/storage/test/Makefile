@@ -3,32 +3,34 @@ PLATFORM := $(shell uname)
 ifeq ($(filter CYGWIN%,$(PLATFORM)),)
 # Linux
 root=../../../../../../
-export CLASSPATH=../../../../../../services:../../../../../../jars/antlr-2.7.5.jar:jars/bsh.jar:jars/derby.jar:jars/derbytools.jar:../../../../../../jars/hibernate3.jar:../../../../../../jars/dom4j-1.6.1.jar:../../../../../../jars/commons-logging-1.0.4.jar:../../../../../../jars/commons-collections-2.1.1.jar:../../../../../../jars/cglib-2.1.3.jar:../../../../../../jars/ehcache-1.1.jar:../../../../../../jars/jta.jar:../../../../../../jars/jaxen-1.1-beta-7.jar
+jarloc= ../../../../../../../common/lib/
+export CLASSPATH=$(root)/gratia-services:$(jarloc)/jars/antlr-2.7.5.jar:jars/bsh.jar:jars/derby.jar:jars/derbytools.jar:$(jarloc)/hibernate3.jar:$(jarloc)/dom4j-1.6.1.jar:$(jarloc)/commons-logging-1.0.4.jar:$(jarloc)/commons-collections-2.1.1.jar:$(jarloc)/cglib-2.1.3.jar:$(jarloc)/ehcache-1.1.jar:$(jarloc)/jta.jar:$(jarloc)/jaxen-1.1-beta-7.jar:$(jarloc)/asm.jar
 else
 # Cygwin
 root=..\..\..\..\..\..\\
-export CLASSPATH=..\..\..\..\..\..\services;..\..\..\..\..\..\jars\antlr-2.7.5.jar;jars\bsh.jar;jars\derby.jar;jars\derbytools.jar;..\..\..\..\..\..\jars\hibernate3.jar;..\..\..\..\..\..\jars\dom4j-1.6.1.jar;..\..\..\..\..\..\jars\commons-logging-1.0.4.jar;..\..\..\..\..\..\jars\commons-collections-2.1.1.jar;..\..\..\..\..\..\jars\cglib-2.1.3.jar;..\..\..\..\..\..\jars\ehcache-1.1.jar;..\..\..\..\..\..\jars\jta.jar;..\..\..\..\..\..\jars\jaxen-1.1-beta-7.jar
+jarloc=..\..\..\..\..\..\..\common\lib\\
+export CLASSPATH=$(root)\gratia-services;$(jarloc)\antlr-2.7.5.jar;jars\bsh.jar;jars\derby.jar;jars\derbytools.jar;$(jarloc)\hibernate3.jar;$(jarloc)\dom4j-1.6.1.jar;$(jarloc)\commons-logging-1.0.4.jar;$(jarloc)\commons-collections-2.1.1.jar;$(jarloc)\cglib-2.1.3.jar;$(jarloc)\ehcache-1.1.jar;$(jarloc)\jta.jar;$(jarloc)\jaxen-1.1-beta-7.jar;$(jarloc)\asm.jar
 endif
 
 all: test
 
 XP:
-	javac '$(root)services\net\sf\gratia\services\XP.java'
+	javac '..\..\services\XP.java'
 
 Logging:
-	javac '$(root)services\net\sf\gratia\services\Logging.java'
+	javac '..\..\services\Logging.java'
 
 storage:
-	javac '$(root)services\net\sf\gratia\storage\*.java'
+	javac '..\..\storage\*.java'
 
-JobUsage.hbm.xml: ../../../../../../configuration/JobUsage.hbm.xml
-	cp ../../../../../../configuration/JobUsage.hbm.xml .
+JobUsage.hbm.xml: ../../../../../../../common/configuration/JobUsage.hbm.xml
+	cp ../../../../../../../common/configuration/JobUsage.hbm.xml .
 
-Gratia.hbm.xml: ../../../../../../configuration/Gratia.hbm.xml
-	cp ../../../../../../configuration/Gratia.hbm.xml .
+Gratia.hbm.xml: ../../../../../../../common/configuration/Gratia.hbm.xml
+	cp ../../../../../../../common/configuration/Gratia.hbm.xml .
 
-MetricRecord.hbm.xml: ../../../../../../configuration/MetricRecord.hbm.xml
-	cp ../../../../../../configuration/MetricRecord.hbm.xml .
+MetricRecord.hbm.xml: ../../../../../../../common/configuration/MetricRecord.hbm.xml
+	cp ../../../../../../../common/configuration/MetricRecord.hbm.xml .
 
 test:  XP Logging storage JobUsage.hbm.xml MetricRecord.hbm.xml Gratia.hbm.xml
 	rm -rf derby output *logfile*; mkdir output
