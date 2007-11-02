@@ -282,7 +282,7 @@ public class UsageRecordLoader implements RecordLoader {
         if (id != null)
             job.setUserIdentity(id);
         if (extras.length() > 0) {
-            extras = "<UserIdentity(>" + extras + "</UserIdentity(>";
+            extras = "<UserIdentity>" + extras + "</UserIdentity>";
             job.addExtraXml(extras);
         }
     }
