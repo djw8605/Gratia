@@ -275,8 +275,12 @@ public class UsageRecordLoader implements RecordLoader {
                 if (id == null)
                     id = new UserIdentity();
                 id.setReportableVOName(sub.getText());
+            } else if (sub.getName().equalsIgnoreCase("CommonName")) {
+                if (id == null)
+                    id = new UserIdentity();
+                id.setCommonName(sub.getText());
             } else {
-                extras = extras + element.asXML();
+                extras = extras + sub.asXML();
             }
         }
         if (id != null)
