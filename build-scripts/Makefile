@@ -354,7 +354,7 @@ release: gratia
 	perl -wapi.bak -e 's&CMD_(?:PREAMBLE|PREFIX|SUFFIX)&&g' tarball/tomcat/v55/gratia/post-install.sh
 	rm -f tarball/tomcat/v55/gratia/post-install.sh.bak
 	cp ${configuration}/truststore ${configuration}/keystore tarball/tomcat/v55/gratia
-	cp ${configuration}/service-configuration.properties tarball/tomcat/v55/gratia/service-configuration.properties
+	cp ${configuration}/service-configuration.properties tarball/tomcat/v55/gratia/service-configuration.properties && chmod 600 tarball/tomcat/v55/gratia/service-configuration.properties
 	cp ${target}/gratia-reports.war tarball/gratia/gratia_reporting
 	cp ${target}/gratia-reporting.war tarball/gratia/gratia_reporting
 	cp ${target}/gratia-security.war tarball/gratia/gratia_reporting
@@ -375,7 +375,7 @@ release: gratia
 	perl -wapi.bak -e 's&CMD_(?:PREAMBLE|PREFIX|SUFFIX)&&g' tarball/tomcat/v55/gratia/post-install.sh
 	rm -f tarball/tomcat/v55/gratia/post-install.sh.bak
 	cp ${configuration}/truststore ${configuration}/keystore tarball/tomcat/v55/gratia
-	cp ${configuration}/service-configuration.properties tarball/tomcat/v55/gratia/service-configuration.properties
+	cp ${configuration}/service-configuration.properties tarball/tomcat/v55/gratia/service-configuration.properties && chmod 600 tarball/tomcat/v55/gratia/service-configuration.properties
 	cp ${target}/gratia-services.war tarball/gratia/gratia_services
 	cp ${target}/gratia-servlets.war tarball/gratia/gratia_services
 	cp ${target}/gratia-soap.war tarball/gratia/gratia_services
@@ -395,7 +395,7 @@ gratia: clean util services servlets soap reporting reports administration secur
 	cp ${configuration}/UserVoMap.* ${configuration}/*xml ${configuration}/*properties tarball
 	cp ${configuration}/*sql ${configuration}/*sh tarball
 	chmod 700 tarball/post-install.sh
-	cp ${configuration}/service-configuration.properties tarball/service-configuration.properties
+	cp ${configuration}/service-configuration.properties tarball/service-configuration.properties && chmod 600 tarball/service-configuration.properties
 	cp ${configuration}/configure-* ${configuration}/update-gratia-local tarball
 	cp ${configuration}/truststore ${configuration}/keystore tarball
 	tar -cvf ${target}/gratia.tar -C tarball .
