@@ -1193,6 +1193,12 @@ else {&#xD;
         </Insets>
         <Visible>true</Visible>
       </Label>
+      <FormatSpecifier xsi:type="attribute:NumberFormatSpecifier">
+        <Prefix></Prefix>
+        <Suffix>k</Suffix>
+        <Multiplier>0.0010</Multiplier>
+        <FractionDigits>0</FractionDigits>
+      </FormatSpecifier>
       <LabelPosition>Left</LabelPosition>
       <MajorGrid>
         <LineAttributes>
