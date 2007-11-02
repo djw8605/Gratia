@@ -23,7 +23,6 @@
             <expression name="value">params["DatabasePassword"]</expression>
         </structure>
     </list-property>
-    <property name="eventHandlerClass">net.sf.gratia.reporting.GratiaBirtReportEH</property>
     <list-property name="libraries">
         <structure>
             <property name="fileName">gratia-lib1.rptlibrary</property>
@@ -992,6 +991,15 @@
             </structure>
         </scalar-parameter>
         <parameter-group name="ReportInfo" id="363" extends="gratia-lib1.ReportInfo"/>
+        <scalar-parameter name="GroupsOnChart" id="394">
+            <property name="valueType">static</property>
+            <property name="dataType">integer</property>
+            <property name="controlType">text-box</property>
+            <property name="defaultValue">8</property>
+            <structure name="format">
+                <property name="category">Unformatted</property>
+            </structure>
+        </scalar-parameter>
     </parameters>
     <data-sources>
         <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="fermigrid1" id="357">
@@ -1174,6 +1182,12 @@ yearnr + "-" + monthnr + "-" + daynr;</expression>
                     <property name="name">final_rank</property>
                     <expression name="expression">dataSetRow["final_rank"]</expression>
                 </structure>
+                <structure>
+                    <property name="name">ChartNumber</property>
+                    <property name="displayName">ChartNumber</property>
+                    <expression name="expression">(row["final_rank"]-1) / params["GroupsOnChart"]</expression>
+                    <property name="dataType">integer</property>
+                </structure>
             </list-property>
             <column id="30">
                 <property name="width">33.3%</property>
@@ -1193,10 +1207,17 @@ yearnr + "-" + monthnr + "-" + daynr;</expression>
             </header>
             <group id="14">
                 <property name="groupName">Rank</property>
-                <property name="interval">interval</property>
-                <property name="intervalRange">8.0</property>
+                <property name="interval">none</property>
                 <property name="sortDirection">asc</property>
-                <expression name="keyExpr">row["final_rank"]</expression>
+                <expression name="keyExpr">row["ChartNumber"]</expression>
+                <structure name="toc">
+                    <expression name="expressionValue">row["ChartNumber"]</expression>
+                </structure>
+                <property name="repeatHeader">true</property>
+                <property name="hideDetail">false</property>
+                <property name="pageBreakAfter">auto</property>
+                <property name="pageBreakBefore">auto</property>
+                <property name="pageBreakInside">auto</property>
                 <header>
                     <row id="15">
                         <cell id="16">
@@ -2437,6 +2458,9 @@ var metric = &quot;***Unknown metric***&quot;&#xD;
                                 </list-property>
                                 <property name="style">sans-style1</property>
                             </extended-item>
+                            <data id="395">
+                                <property name="resultSetColumn">ChartNumber</property>
+                            </data>
                         </cell>
                     </row>
                 </header>
