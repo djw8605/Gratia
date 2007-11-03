@@ -21,29 +21,30 @@
 	String param1 = null;
 	if(link == null)
 		link="featuredReport.jsp";
-	else {		
+	else 
+	{		
 		StringBuffer sb = new StringBuffer(link.length());
 		char c;
                 boolean sqlmode = false;
-		for(int i = 0; i < link.length(); ++i) {
+		for(int i = 0; i < link.length(); ++i) 
+		{
 			c = link.charAt(i);
-                        if (c=='=' && i>3 && link.substring(i-3,i).equals("sql")) {
-                           sqlmode = true;
-                        }
-                        if (c==';') {
-                           sqlmode = false;
-                        }
-                        if (c==',' && !sqlmode) { 
-			   	sb.append('&');
-			}
-                        else {
-                           sb.append(c);
-                        }
-
-		}
+            
+			if (c=='=' && i>3 && link.substring(i-3,i).equals("sql"))
+            	sqlmode = true;
+                        
+            if (c==';' && sqlmode) 
+            	sqlmode = false;
+                        
+            if (c==',' && !sqlmode) 
+            	sb.append('&');
+            else 
+            	sb.append(c);
+        }
 		link = sb.toString();
-		link = link.replace(" ", "%20");
-		link = link.replace("&", "&amp;");
+		link = link.replace(" ", "%20");		// Escape blank
+		link = link.replace("&amp;", "&");		// Convert "&amp;" to "&"
+		link = link.replace("&", "&amp;");		// Escape "&"
 	}
 %>
 	
@@ -78,14 +79,14 @@
 						linkNAME = menuItem.getName();
 						if (menuItem.getLink().indexOf("?") > -1) 
 						{
-						   linkURL = menuItem.getLink() + "&amp;reportTitle=" + linkNAME.replaceFirst("-", "").trim();
+						   linkURL = menuItem.getLink() + ",ReportTitle=" + linkNAME.replaceFirst("-", "").trim();
 						}else
 						{
-						   linkURL = menuItem.getLink() + "?reportTitle=" + linkNAME.replaceFirst("-", "").trim();
+						   linkURL = menuItem.getLink() + "?ReportTitle=" + linkNAME.replaceFirst("-", "").trim();
 						}
-						linkURL = linkURL.replace(" ", "%20");
-						linkURL = linkURL.replace("&amp;", ",");
-						linkURL = linkURL.replace("&", ",");
+						linkURL = linkURL.replace(" ", "%20");		// Escape blanks
+						linkURL = linkURL.replace("&amp;", ",");	// cannot have &amp; in link string
+						linkURL = linkURL.replace("&", ",");		// cannot have & in link string
 				%>
 					<tr >
      					<td>
@@ -95,12 +96,16 @@
 				<%
 					}
 				}
-				%>															
+				%>
 					<tr>
 					<td class="menuGroup"><hr>Commands</td>
 					</tr>
 					<tr>
 						<td><a class="menuItem" href="logout.jsp">Logout</a><br /></td>
+					</tr>
+					
+					<tr>
+					<td><hr><a target=_blank class="contact" href="http://twiki.grid.iu.edu/twiki/bin/view/Accounting/ContactUs">Contact us</a><br /></td>
 					</tr>
 				</table>
 			</td>
@@ -112,7 +117,7 @@
 			<td valign="top">
 <!--
 			   <div align="center" class="osgcolor">&nbsp;&nbsp;&nbsp;&nbsp;Gratia Reporting&nbsp;&nbsp;&nbsp;&nbsp;</div>
-			   <br> 
+			   <br /> 
 -->
 
 <!-- Find if the browser is either Konquer or Safari. If so then make the width and height of the iframe fixed -->
@@ -128,12 +133,12 @@ if(browserType != null ){
 
 
 %>
-                <iframe name="viewPanel"  width="800" height="700" SCROLLING="auto" frameborder="0" src="<%=link %>" > </iframe>
+                <iframe name="viewPanel"  width="800" height="700" SCROLLING="auto" frameborder=0 src="<%=link %>" > </iframe>
 <%
 	}
 	else {
 %>
-                <iframe name="viewPanel"  width="100%" height="100%" SCROLLING="auto" frameborder="0" src="<%=link %>" > </iframe>
+                <iframe name="viewPanel"  width="100%" height="100%" SCROLLING="auto" frameborder=0 src="<%=link %>" > </iframe>
 <%
 	}
    }
