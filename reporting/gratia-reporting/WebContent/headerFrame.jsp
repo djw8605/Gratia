@@ -9,7 +9,8 @@
 <title>Gratia Accounting</title>
 </head>
 <body>
-	<a href="http://opensciencegrid.org/"><img src="./images/osg-logo.gif" alt="OSG Logo" width="174" height="81" border="0"></a><hr></td></tr>
+
+	<a href="http://opensciencegrid.org/"><img src="./images/osg-logo.gif" alt="OSG Logo" width="174" height="81" border="0"></a><hr>
 
 </body>
 </html>
