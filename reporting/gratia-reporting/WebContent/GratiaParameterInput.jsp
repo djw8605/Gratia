@@ -15,7 +15,6 @@
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 
 <LINK href="stylesheet.css" type="text/css" rel="stylesheet">
-<base target="report">
 <title>Gratia Reporting: Parameter Entry</title>
 
 <script type="text/javascript" src="calendar/calendardef.js"></script>
@@ -42,8 +41,8 @@ function addVO (form)
  	form.VOs.value += ")";
 }
    
-   function addVO2 (form) 
-   {
+function addVO2 (form) 
+{
    /* Construct the VOs string from the selection */  
    	form.VOs.value = "";
    		
@@ -62,28 +61,31 @@ function addVO (form)
 function getURL ()
 {
    var x=document.getElementsByTagName('form')[0]
-   var url = "";
+   var myurl = "";
+   var elnam = "";
+   var elval = "";
 
 	for (var i=0; i < x.length; i++)
 	{
   		if (x.elements[i].name == "BaseURL" )
-     		url = x.elements[i].value;
+     		myurl = x.elements[i].value;
  	}
  
 	for (var i=0; i<x.length; i++)
 	{
-		name = x.elements[i].name;
-		value = x.elements[i].value;
-		if (name != "myVOs" && name != "cal1" && name != "submitButton" && name != "BaseURL"  && name != "ReportURL" )
+		elnam = x.elements[i].name;
+		elval = x.elements[i].value;
+		if (elnam != "myVOs" && elnam != "cal1" && elnam != "submitButton" && elnam != "BaseURL"  && elnam != "ReportURL" )
 		{
-			url += "&" + name + "=" + value;
+			myurl += "&" + elnam + "=" + elval;
 		}
 	}
 	// replace all spaces --> %20 and ":" --> %7C
-	url = url.replace(/ /g, "%20");
-	url = url.replace(/;/g, "%3B");
-	x.ReportURL.value = url;
-  	// document.write(url);
+	myurl = myurl.replace(/ /g, "%20");
+	myurl = myurl.replace(/;/g, "%3B");
+	x.ReportURL.value = myurl;
+	
+  	// document.write(myurl);
   	// document.write("<br />");
 }
     
@@ -93,15 +95,16 @@ function getURL ()
 </head>
 <body>
 
-	<jsp:include page="common.jsp" />
+<script type="text/javascript" src="tooltip/wz_tooltip.js"></script>
+<jsp:include page="common.jsp" />
 
 <%
 // get the parameters passed
-	String ReportTitle = request.getParameter("reportTitle");
+	String ReportTitle = request.getParameter("ReportTitle");
 	if (ReportTitle != null)
    	{
 %>
-<div align="left" class="reportTitle"><%=ReportTitle%></div><br />
+<div class="reportTitle"><%=ReportTitle%></div><br />
 <%
 	}else
 	{
@@ -185,10 +188,12 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 	{
 		if (promptText == null)
 			promptText = paramName;
-		if (helpText == null || helpText.indexOf(promptText) > -1)
+		if (helpText == null)
 			helpText = "";
 		if (defaultValue == null)
 			defaultValue = "";
+		
+		helpText = helpText.replace("'", "\\'"); // Escape "'" so that the tool tip works
 
 		// check if a value has been passed for this parameter in the URL.
 		// If so then make it the default value for this parameter.
@@ -208,22 +213,27 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 		{
 %>
 			<tr>
-			   <td><label class="paramName"><%=promptText %></label><br> <font size=-2><%=helpText%></font></td>
+			   <td align="right"><label class="paramName" onMouseOver="Tip('<%=helpText%>')" ><%=promptText %></label></td>
+			   <td>&nbsp;&nbsp;</td>
 			   <td>
-			   <input type="text" id="<%=paramName %>" name="<%=paramName %>" value="<%=defaultValue %>"  onchange="getURL();" >
-			   	<BUTTON name="cal1" value="cal1" type="button" class="button" onclick="c1.popup('<%=paramName %>');" >
-    				<IMG SRC="./calendar/img/cal.gif" ALT="test"></BUTTON>
+			   <input type="text" id="<%=paramName %>" name="<%=paramName %>" value="<%=defaultValue %>" onMouseOver="Tip('<%=helpText%>')" onchange="getURL();" >
+			   	<BUTTON name="cal1" value="cal1" type="button" class="button" onMouseOver="Tip('<%=helpText%>')" onclick="c1.popup('<%=paramName %>');" >
+    				<IMG SRC="./calendar/img/cal.gif" ALT="<%=helpText%>"></BUTTON>
+    				
 			   </td>
 			</tr>
 	<%							
 		}
 		else if (paramName.indexOf("VOs") > -1)
 		{
+		promptText = "Select one or more VOs";
 	%>
 			<tr>
-			   <td valign="top"><label class="paramName"> Select one or more VOs:</label><br> <font size=-2><%=helpText%></font></td>
+			   <td valign="top" align="right"><label class="paramName" onMouseOver="Tip('<%=helpText%>');" ><%=promptText %></label></td>
+			   
+			   <td>&nbsp;&nbsp;</td>
 			   <td> 
-				<SELECT multiple size="10" id="myVOs" name="myVOs" onChange="addVO2(this.form); getURL();" >
+				<SELECT multiple size="10" id="myVOs" name="myVOs" onMouseOver="Tip('<%=helpText%>');" onChange="addVO2(this.form); getURL();" >
 						
 	<%		
 			// define the sql string to get the list of VOs that the user can selct from
@@ -270,13 +280,9 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 							else
 								SelectedVOs += VOName;
 						}
-						%> <OPTION value="<%=VOName %>" <%=selected %>><%=VOName %></OPTION> <%
+						%> <OPTION value="<%=VOName %>" <%=selected %> ><%=VOName %></OPTION> <%
 					}
 				}
-				//if ( SelectedVOs == "(") 
-				//	SelectedVOs ="";
-				//else 
-				//	SelectedVOs += ")";
 					
 			}catch(SQLException exception){
 				out.println("<!--");
@@ -316,7 +322,10 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 			</td>
 		</tr>
 		<tr>
-		   <td><em><label class="paramName"> Selected VOs:</label></em></td><td><input id="VOs" type="text"  name="<%=paramName%>" Value = "<%=SelectedVOs %>" readonly size="60"  onchange="getURL()" ></td>
+		   <td align="right"><em><label class="paramName" onMouseOver="Tip('Readonly field')">Selected VOs:</label></em></td>
+		   <td>&nbsp;&nbsp;</td>
+		   <td><input id="<%=paramName%>" type="text" size="70" name="<%=paramName%>" Value = "<%=SelectedVOs %>" readonly onMouseOver="Tip('Readonly field', CLICKCLOSE, false)">
+		   </td>
 		</tr>
 		<%
 		}
@@ -324,9 +333,10 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 		{
 	%>
 			<tr>
-			   <td valign="top"><label class="paramName"><%=promptText%></label><br> <font size=-2><%=helpText%></font></td>
+			   <td align="right" valign="top"><label class="paramName" onMouseOver="Tip('<%=helpText%>')" ><%=promptText%></label></td>
+			   <td>&nbsp;&nbsp;</td>
 			   <td> 
-				<SELECT size="10" id="ForVOName" name="ForVOName" onChange="getURL();" >
+				<SELECT size="10" id="ForVOName" name="ForVOName" onChange="getURL();" onMouseOver="Tip('<%=helpText%>')" >
 						
 	<%		
 			// define the sql string to get the list of VOs that the user can selct from
@@ -420,9 +430,10 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 		{
 	%>
 			<tr>
-			   <td valign="top"><label class="paramName"><%=promptText%></label><br> <font size=-2><%=helpText%></font></td>
+			   <td align="right" valign="top"><label class="paramName" onMouseOver="Tip('<%=helpText%>')" ><%=promptText%></label></td>
+			   <td>&nbsp;&nbsp;</td>
 			   <td> 
-				<SELECT size="10" id="ForSiteName" name="ForSiteName" onChange="getURL();" >
+				<SELECT size="10" id="ForSiteName" name="ForSiteName" onChange="getURL();" onMouseOver="Tip('<%=helpText%>')" >
 						
 	<%		
 			// define the sql string to get the list of VOs that the user can selct from
@@ -516,9 +527,10 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 		{
 	%>
 			<tr>
-			   <td valign="top"><label class="paramName"><%=promptText%></label><br> <font size=-2><%=helpText%></font></td>
+			   <td align="right" valign="top"><label class="paramName" onMouseOver="Tip('<%=helpText%>')" ><%=promptText%></label></td>
+			   <td>&nbsp;&nbsp;</td>
 			   <td> 
-				<SELECT size="10" id="ForProbeName" name="ForProbeName" onChange="getURL();" >
+				<SELECT size="10" id="ForProbeName" name="ForProbeName" onChange="getURL();" onMouseOver="Tip('<%=helpText%>')" >
 						
 	<%		
 			// define the sql string to get the list of VOs that the user can selct from
@@ -612,9 +624,10 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 				{
 					%>
 				 	<tr>
-					   <td><label class="paramName"><%=promptText %></label><br> <font size=-2><%=helpText%></font></td>
+					   <td align="right"><label class="paramName" onMouseOver="Tip('<%=helpText%>')" ><%=promptText %></label></td>
+					   <td>&nbsp;&nbsp;</td>
 					   <td>
-					   <select class="paramSelect" id="<%=paramName%>" name="<%=paramName%>"  onchange="getURL()" >
+					   <select class="paramSelect" id="<%=paramName%>" name="<%=paramName%>"  onchange="getURL()" onMouseOver="Tip('<%=helpText%>')" >
 					<%
 					for(int s=0; s < paramGroup.getParameterListSelection().size(); s++)
 					{
@@ -638,9 +651,10 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 		{
 		%>
 		    <tr>
-			<td><label class="paramName"><%=promptText %></label><br> <font size=-2><%=helpText%></font></td>
+			<td align="right"><label class="paramName" onMouseOver="Tip('<%=helpText%>')" ><%=promptText %></label></td>
+			<td>&nbsp;&nbsp;</td>
 			<td>
-				<input id="<%=paramName%>" type="text" name="<%=paramName %>" value="<%=defaultValue %>" >
+				<input id="<%=paramName%>" type="text" name="<%=paramName %>" value="<%=defaultValue %>" onMouseOver="Tip('<%=helpText%>')" >
 			</td>
 		    </tr>
 		<%		  
@@ -660,27 +674,29 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 
 // load initial url
    var x=document.getElementsByTagName('form')[0];
-   var url = "";
+   var outurl = "";
+   var elname = "";
+   var elvalue = "";
 
 	for (var i=0; i<x.length; i++)
 	{
   		if (x.elements[i].name == "BaseURL" )
-     		url = x.elements[i].value;
+     		outurl = x.elements[i].value;
 	}
  
 	for (var i=0;i<x.length;i++)
 	{
-		name = x.elements[i].name;
-		value = x.elements[i].value;
-		if (name != "myVOs" && name != "cal1" && name != "submitButton" && name != "BaseURL" && name != "ReportURL" )
+		elname = x.elements[i].name;
+		elvalue = x.elements[i].value;
+		if (elname != "myVOs" && elname != "cal1" && elname != "submitButton" && elname != "BaseURL" && elname != "ReportURL" )
 		{
-			url += "&" + name + "=" + value;
+			outurl += "&" + elname + "=" + elvalue;
 		}
 	}
 	// replace all spaces --> %20 and ";" --> %3B
-	url = url.replace(/ /g, "%20");
-	url = url.replace(/;/g, "%3B");
-	x.ReportURL.value = url;
+	outurl = outurl.replace(/ /g, "%20");
+	outurl = outurl.replace(/;/g, "%3B");
+	x.ReportURL.value = outurl;
 
 </script>
 </p>    
