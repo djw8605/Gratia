@@ -2,7 +2,8 @@
     pageEncoding="ISO-8859-1"
     import="net.sf.gratia.reporting.*"
     import="java.sql.*"
-    import="java.io.*"%>
+    import="java.io.*"
+ %>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
 <head>
@@ -10,13 +11,26 @@
 <LINK href="stylesheet.css" type="text/css" rel="stylesheet">
 <title>SQL Report</title>
 </head>
-<form>
+<body>
+<form action="">
 	
 <%	
 	ReportingConfiguration reportingConfiguration = (ReportingConfiguration)session.getAttribute("reportingConfiguration");	
 	
 	String viewerPath = null;
 	String csvFileName = null;
+	
+
+	String ReportTitle = request.getParameter("ReportTitle");
+	if (ReportTitle != null)
+   	{
+%>
+<div align="left" class="reportTitle"><%=ReportTitle%></div><br />
+<%
+	}else
+	{
+		ReportTitle = "";
+	}
 	
 	String sql = request.getParameter("sql");
 		
@@ -33,12 +47,14 @@
 		catch (Exception ignore) { }	
 	}
 	
-	
+%>
+
+<table class="query">		
+<%
 	// Get the query from the trace table
 	
 	if(sql == null)
 		sql = "";
-
 
 	if(sql.trim().length() > 0)
 	{
@@ -83,18 +99,17 @@
 			results = statement.executeQuery(sql);	
 			metadata = results.getMetaData();
 			%>
-			<table>		
 			   <tr>
 				<td colspan="<%=metadata.getColumnCount()+1%>">
-					Enter in a SQL statement below and click 'Execute' to see the results.
-					<br>
-					<textarea name="sql" rows=10 cols=80><%=sql %></textarea>
-					<br>
+					<em>Enter bellow a SQL statement and press 'Execute' to see the results.</em>
+					<br />
+					<textarea name="sql" rows=12 cols=85  class="querytxt"><%=sql %></textarea>
+					<br />
 					<input class=button type=submit value=Execute> 
-					<br>
+					<br />
 					 <div align="center"><input type="button" value="Download Report Data - CSV Format"
 						   onClick="window.open('downloadFile.jsp?csvFile=<%=csvFileName %>', 'Gratia');"></div>
-					 <br>
+					 <br />
 				</td>
 			   </tr> 
 			   
@@ -105,7 +120,7 @@
 			%> <tr> <%
 			for(int i=1; i<metadata.getColumnCount()+1; i++)
 			{
-				%> <td align="right"><strong><%=metadata.getColumnName(i) %></strong></td> <%
+				%> <td align="right"><strong><%=metadata.getColumnName(i) %></strong></td> <td>&nbsp;</td> <%
 					
 				// Construct the csv file header line  				
 				if (i<metadata.getColumnCount()){
@@ -140,12 +155,15 @@
 					if (value instanceof Double) {
 						int intvalue = (int)Math.floor(((Double)value).doubleValue());
 						Integer toprint = new Integer(intvalue);
-						cellvalue= toprint.toString();
+						cellvalue= String.format("%,d", toprint); //toprint.toString(); 
+					}
+					else if (value instanceof Integer || value instanceof Long ||value instanceof Short ) {
+						cellvalue= String.format("%,d", value); 
 					}
 					else
 						cellvalue= value.toString();
 						
-					%><td align="right"><%=cellvalue %></td> <%					
+					%><td align="right"><%=cellvalue %></td>  <td>&nbsp;</td> <%					
 					
 					//Construct a csv file line of data				
 					if (i<metadata.getColumnCount()) 
@@ -201,20 +219,20 @@
 	} //end of "if(sql.trim().length() > 0)"
 	else
 	{
-	%>
-		<table>		
+	%>	
 		   <tr>
 			<td>
-				Enter in a SQL statement below and click 'Execute' to see the results.
-				<br>
-				<textarea name="sql" rows=10 cols=80><%=sql %></textarea>
-				<br>
+				<em>Enter bellow a SQL statement and press 'Execute' to see the results.</em>
+				<br />
+				<textarea name="sql" rows=12 cols=85 class="querytxt"><%=sql %></textarea>
+				<br />
 				<input class=button type=submit value=Execute> 
 			</td>
 		  </tr>
 	<%
 	} //end of "if(sql.trim().length() > 0){...} else "
 %>
-	</table>
+</table>
 </form>
+</body>
 </html>
