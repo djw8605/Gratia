@@ -47,7 +47,7 @@
 			if(colSpan > 1)
 				width = width * (colSpan + 1);			
 	%>
-			<td colspan=<%=colSpan %> valign=top>
+			<td colspan="<%=colSpan %>" valign="top">
 			
 			<jsp:forward  page="<%=link %>" /> 
 			
