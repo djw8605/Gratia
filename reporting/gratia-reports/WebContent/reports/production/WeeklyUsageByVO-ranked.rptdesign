@@ -991,14 +991,72 @@
             </structure>
         </scalar-parameter>
         <parameter-group name="ReportInfo" id="363" extends="gratia-lib1.ReportInfo"/>
-        <scalar-parameter name="GroupsOnChart" id="394">
+        <scalar-parameter name="GroupsPerChart" id="394">
+            <text-property name="helpText">Slect number of groups (e.g. VO's or Sites) to be displayed on each chart</text-property>
             <property name="valueType">static</property>
             <property name="dataType">integer</property>
-            <property name="controlType">text-box</property>
-            <property name="defaultValue">8</property>
+            <text-property name="promptText">Select # of Groups Pert Chart</text-property>
+            <property name="controlType">list-box</property>
+            <property name="mustMatch">true</property>
+            <property name="fixedOrder">true</property>
+            <property name="distinct">false</property>
             <structure name="format">
                 <property name="category">Unformatted</property>
             </structure>
+            <list-property name="selectionList">
+                <structure>
+                    <property name="value">100000</property>
+                    <property name="label">All</property>
+                </structure>
+                <structure>
+                    <property name="value">1</property>
+                    <property name="label">1</property>
+                </structure>
+                <structure>
+                    <property name="value">2</property>
+                    <property name="label">2</property>
+                </structure>
+                <structure>
+                    <property name="value">3</property>
+                    <property name="label">3</property>
+                </structure>
+                <structure>
+                    <property name="value">4</property>
+                    <property name="label">4</property>
+                </structure>
+                <structure>
+                    <property name="value">5</property>
+                    <property name="label">5</property>
+                </structure>
+                <structure>
+                    <property name="value">6</property>
+                    <property name="label">6</property>
+                </structure>
+                <structure>
+                    <property name="value">7</property>
+                    <property name="label">7</property>
+                </structure>
+                <structure>
+                    <property name="value">8</property>
+                    <property name="label">8</property>
+                </structure>
+                <structure>
+                    <property name="value">9</property>
+                    <property name="label">9</property>
+                </structure>
+                <structure>
+                    <property name="value">10</property>
+                    <property name="label">10</property>
+                </structure>
+                <structure>
+                    <property name="value">15</property>
+                    <property name="label">15</property>
+                </structure>
+                <structure>
+                    <property name="value">20</property>
+                    <property name="label">20</property>
+                </structure>
+            </list-property>
         </scalar-parameter>
     </parameters>
     <data-sources>
@@ -1185,7 +1243,7 @@ yearnr + "-" + monthnr + "-" + daynr;</expression>
                 <structure>
                     <property name="name">ChartNumber</property>
                     <property name="displayName">ChartNumber</property>
-                    <expression name="expression">(row["final_rank"]-1) / params["GroupsOnChart"]</expression>
+                    <expression name="expression">(row["final_rank"]-1) / params["GroupsPerChart"]</expression>
                     <property name="dataType">integer</property>
                 </structure>
             </list-property>
@@ -2458,9 +2516,6 @@ var metric = &quot;***Unknown metric***&quot;&#xD;
                                 </list-property>
                                 <property name="style">sans-style1</property>
                             </extended-item>
-                            <data id="395">
-                                <property name="resultSetColumn">ChartNumber</property>
-                            </data>
                         </cell>
                     </row>
                 </header>
