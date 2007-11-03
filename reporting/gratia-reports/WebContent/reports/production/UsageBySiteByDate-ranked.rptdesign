@@ -23,7 +23,6 @@
             <expression name="value">params["DatabasePassword"]</expression>
         </structure>
     </list-property>
-    <property name="eventHandlerClass">net.sf.gratia.reporting.GratiaBirtReportEH</property>
     <list-property name="libraries">
         <structure>
             <property name="fileName">gratia-lib1.rptlibrary</property>
@@ -1021,6 +1020,74 @@
             </structure>
         </scalar-parameter>
         <parameter-group name="ReportInfo" id="365" extends="gratia-lib1.ReportInfo"/>
+        <scalar-parameter name="GroupsPerChart" id="394">
+            <text-property name="helpText">Select number of groups (e.g. VO's or Sites) to be displayed on each chart</text-property>
+            <property name="valueType">static</property>
+            <property name="dataType">integer</property>
+            <text-property name="promptText">Select # of Groups Per Chart</text-property>
+            <property name="controlType">list-box</property>
+            <property name="mustMatch">true</property>
+            <property name="fixedOrder">true</property>
+            <property name="defaultValue">8</property>
+            <property name="distinct">false</property>
+            <structure name="format">
+                <property name="category">Unformatted</property>
+            </structure>
+            <list-property name="selectionList">
+                <structure>
+                    <property name="value">10000</property>
+                    <property name="label">All</property>
+                </structure>
+                <structure>
+                    <property name="value">1</property>
+                    <property name="label">1</property>
+                </structure>
+                <structure>
+                    <property name="value">2</property>
+                    <property name="label">2</property>
+                </structure>
+                <structure>
+                    <property name="value">3</property>
+                    <property name="label">3</property>
+                </structure>
+                <structure>
+                    <property name="value">4</property>
+                    <property name="label">4</property>
+                </structure>
+                <structure>
+                    <property name="value">5</property>
+                    <property name="label">5</property>
+                </structure>
+                <structure>
+                    <property name="value">6</property>
+                    <property name="label">6</property>
+                </structure>
+                <structure>
+                    <property name="value">7</property>
+                    <property name="label">7</property>
+                </structure>
+                <structure>
+                    <property name="value">8</property>
+                    <property name="label">8</property>
+                </structure>
+                <structure>
+                    <property name="value">9</property>
+                    <property name="label">9</property>
+                </structure>
+                <structure>
+                    <property name="value">10</property>
+                    <property name="label">10</property>
+                </structure>
+                <structure>
+                    <property name="value">15</property>
+                    <property name="label">15</property>
+                </structure>
+                <structure>
+                    <property name="value">20</property>
+                    <property name="label">20</property>
+                </structure>
+            </list-property>
+        </scalar-parameter>
     </parameters>
     <data-sources>
         <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="fermigrid1" id="357">
@@ -1181,13 +1248,6 @@
                 <property name="height">0.322in</property>
                 <cell id="7">
                     <property name="verticalAlign">top</property>
-                    <text-data id="94">
-                        <property name="style">sans-style1</property>
-                        <property name="fontSize">9pt</property>
-                        <property name="textAlign">center</property>
-                        <expression name="valueExpr">"Date range: "+ params["StartDate"] + " - " + params["EndDate"]</expression>
-                        <property name="contentType">html</property>
-                    </text-data>
                 </cell>
             </row>
         </grid>
@@ -1217,6 +1277,11 @@
                     <property name="name">final_rank</property>
                     <expression name="expression">dataSetRow["final_rank"]</expression>
                 </structure>
+                <structure>
+                    <property name="name">ChartNumber</property>
+                    <expression name="expression">(row["final_rank"]-1) / params["GroupsPerChart"]</expression>
+                    <property name="dataType">integer</property>
+                </structure>
             </list-property>
             <column id="30">
                 <property name="width">33.3%</property>
@@ -1230,16 +1295,31 @@
             <header>
                 <row id="10">
                     <cell id="11"/>
-                    <cell id="12"/>
+                    <cell id="12">
+                        <text-data id="94">
+                            <property name="style">sans-style1</property>
+                            <property name="fontSize">9pt</property>
+                            <property name="textAlign">center</property>
+                            <expression name="valueExpr">"Date range: "+ params["StartDate"] + " - " + params["EndDate"]</expression>
+                            <property name="contentType">html</property>
+                        </text-data>
+                    </cell>
                     <cell id="13"/>
                 </row>
             </header>
             <group id="14">
                 <property name="groupName">Rank</property>
-                <property name="interval">interval</property>
-                <property name="intervalRange">8.0</property>
+                <property name="interval">none</property>
                 <property name="sortDirection">asc</property>
-                <expression name="keyExpr">row["final_rank"]</expression>
+                <expression name="keyExpr">row["ChartNumber"]</expression>
+                <structure name="toc">
+                    <expression name="expressionValue">row["ChartNumber"]</expression>
+                </structure>
+                <property name="repeatHeader">true</property>
+                <property name="hideDetail">false</property>
+                <property name="pageBreakAfter">avoid</property>
+                <property name="pageBreakBefore">always-excluding-first</property>
+                <property name="pageBreakInside">auto</property>
                 <header>
                     <row id="15">
                         <cell id="16">
@@ -1393,7 +1473,7 @@
         <Width>0.0</Width>
         <Height>0.0</Height>
       </Bounds>
-      <Anchor>West</Anchor>
+      <Anchor>North</Anchor>
       <Stretch>Horizontal</Stretch>
       <Insets>
         <Top>2.0</Top>
@@ -2665,6 +2745,42 @@ var metric = &quot;***Unknown metric***&quot;&#xD;
                         <cell id="19">
                             <property name="colSpan">3</property>
                             <property name="rowSpan">1</property>
+                            <label name="ReportURL" id="390">
+                                <property name="fontFamily">sans-serif</property>
+                                <property name="fontSize">12pt</property>
+                                <property name="fontWeight">bold</property>
+                                <property name="paddingTop">1pt</property>
+                                <property name="paddingLeft">20pt</property>
+                                <property name="textAlign">left</property>
+                                <list-property name="visibility">
+                                    <structure>
+                                        <property name="format">all</property>
+                                        <expression name="valueExpr">params["ReportURL"]==""</expression>
+                                    </structure>
+                                </list-property>
+                                <text-property name="text">Retrieve Report URL</text-property>
+                                <structure name="action">
+                                    <property name="linkType">hyperlink</property>
+                                    <expression name="uri">params["ReportURL"]</expression>
+                                    <property name="targetWindow">_blank</property>
+                                </structure>
+                            </label>
+                            <label name="ShowQuery" id="364">
+                                <property name="style">sans-style1</property>
+                                <property name="fontSize">12pt</property>
+                                <property name="fontWeight">bold</property>
+                                <property name="marginTop">0pt</property>
+                                <property name="marginBottom">20px</property>
+                                <property name="paddingTop">1pt</property>
+                                <property name="paddingLeft">20pt</property>
+                                <property name="textAlign">left</property>
+                                <text-property name="text">Show Query</text-property>
+                                <structure name="action">
+                                    <property name="linkType">hyperlink</property>
+                                    <expression name="uri">"../showQuery.jsp?TraceTableKey="+params["UserName"].split("|")[1]</expression>
+                                    <property name="targetWindow">_self</property>
+                                </structure>
+                            </label>
                         </cell>
                     </row>
                 </footer>
@@ -2684,7 +2800,5 @@ var metric = &quot;***Unknown metric***&quot;&#xD;
                 </row>
             </footer>
         </table>
-        <label name="ReportURL" id="390" extends="gratia-lib1.ReportURL"/>
-        <label name="ShowQuery" id="364" extends="gratia-lib1.ShowQuery"/>
     </body>
 </report>
