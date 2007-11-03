@@ -289,6 +289,7 @@ reporting: birt-reporting
 	# --- copy directories paths ---
 	cp -R ${reportsrc}/WebContent/calendar                 war/.
 	cp -R ${reportsrc}/WebContent/images                   war/.
+	cp -R ${reportsrc}/WebContent/tooltip                  war/.
 	# --- copy the web.xml  file ---
 ###	cp ${reportsrc}/src/net/sf/gratia/reporting/web.xml    war/WEB-INF/web.xml
 	jar -cfM ${target}/gratia-reporting.war -C war .
