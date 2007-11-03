@@ -6,7 +6,6 @@ a:link
 body
 {
 	font-family: Verdana, Arial, sans-serif;
-	font-size: 0.60em; 
 }
 label
 {
@@ -39,6 +38,18 @@ a.menuItem
 	font-size: 0.65em; 
 	text-decoration: none;
 }
+a.contact
+{
+	cursor: pointer;
+	overflow: hidden;
+	color: #e07630;
+	text-indent: 0.65em;
+	text-align: left;
+	font-weight: bold;
+	font-family: Verdana, Arial, sans-serif;
+	font-size: 0.7em; 
+	text-decoration: none;
+}
 a.menuItem:hover
 {
 	border: solid 0.01em #e07630;
@@ -66,16 +77,17 @@ a.menuItem:active
 } 
 
 .reportTitle {
-	text-decoration: underline;
-	font-weight: bold;
 	font-family: Verdana, Arial, sans-serif;
-	font-size: 2em; 
+	font-weight: bold;
+	font-size: 1.1em; 
+	text-decoration: underline;
+	text-align: left;
 } 
 
 .menufields {
-        font-family: Verdana, Arial, sans-serif;
+    font-family: Verdana, Arial, sans-serif;
 	font-weight: bold;
-        color: #462300;
+    color: #462300;
 	font-size: 0.75em; 
 }
 
@@ -88,7 +100,24 @@ a.menuItem:active
 }
 .paramHelp
 {
+    font-family: Verdana, Arial, sans-serif;
+	font-size: 0.6em; 
+}
+.txt
+{
+    font-family: Verdana, Arial, sans-serif;
+	font-size: 0.75em; 
 }
 .button
 {
+}
+table.query
+{
+    font-family: Verdana, Arial, sans-serif;
+	font-size: 0.80em; 
+}
+.querytxt
+{
+    font-family: Verdana, Arial, sans-serif;
+	font-size: 0.9em; 
 }
