@@ -993,20 +993,21 @@
         </scalar-parameter>
         <parameter-group name="ReportInfo" id="363" extends="gratia-lib1.ReportInfo"/>
         <scalar-parameter name="GroupsPerChart" id="394">
-            <text-property name="helpText">Slect number of groups (e.g. VO's or Sites) to be displayed on each chart</text-property>
+            <text-property name="helpText">Select number of groups (e.g. VO's or Sites) to be displayed on each chart</text-property>
             <property name="valueType">static</property>
             <property name="dataType">integer</property>
-            <text-property name="promptText">Select # of Groups Pert Chart</text-property>
+            <text-property name="promptText">Select # of Groups Per Chart</text-property>
             <property name="controlType">list-box</property>
             <property name="mustMatch">true</property>
             <property name="fixedOrder">true</property>
+            <property name="defaultValue">8</property>
             <property name="distinct">false</property>
             <structure name="format">
                 <property name="category">Unformatted</property>
             </structure>
             <list-property name="selectionList">
                 <structure>
-                    <property name="value">100000</property>
+                    <property name="value">10000</property>
                     <property name="label">All</property>
                 </structure>
                 <structure>
@@ -1260,7 +1261,16 @@ yearnr + "-" + monthnr + "-" + daynr;</expression>
             <header>
                 <row id="10">
                     <cell id="11"/>
-                    <cell id="12"/>
+                    <cell id="12">
+                        <text-data id="406">
+                            <property name="style">sans-style1</property>
+                            <property name="fontSize">9pt</property>
+                            <property name="fontWeight">normal</property>
+                            <property name="textAlign">center</property>
+                            <expression name="valueExpr">"Last 6 Months"</expression>
+                            <property name="contentType">html</property>
+                        </text-data>
+                    </cell>
                     <cell id="13"/>
                 </row>
             </header>
@@ -1274,8 +1284,8 @@ yearnr + "-" + monthnr + "-" + daynr;</expression>
                 </structure>
                 <property name="repeatHeader">true</property>
                 <property name="hideDetail">false</property>
-                <property name="pageBreakAfter">auto</property>
-                <property name="pageBreakBefore">auto</property>
+                <property name="pageBreakAfter">avoid</property>
+                <property name="pageBreakBefore">always-excluding-first</property>
                 <property name="pageBreakInside">auto</property>
                 <header>
                     <row id="15">
@@ -1430,7 +1440,7 @@ yearnr + "-" + monthnr + "-" + daynr;</expression>
         <Width>0.0</Width>
         <Height>0.0</Height>
       </Bounds>
-      <Anchor>West</Anchor>
+      <Anchor>North</Anchor>
       <Stretch>Both</Stretch>
       <Insets>
         <Top>2.0</Top>
@@ -2525,6 +2535,40 @@ var metric = &quot;***Unknown metric***&quot;&#xD;
                         <cell id="19">
                             <property name="colSpan">3</property>
                             <property name="rowSpan">1</property>
+                            <label name="ReportURL" id="390">
+                                <property name="fontFamily">sans-serif</property>
+                                <property name="fontSize">12pt</property>
+                                <property name="fontWeight">bold</property>
+                                <property name="paddingTop">1pt</property>
+                                <property name="paddingLeft">20pt</property>
+                                <list-property name="visibility">
+                                    <structure>
+                                        <property name="format">all</property>
+                                        <expression name="valueExpr">params["ReportURL"]==""</expression>
+                                    </structure>
+                                </list-property>
+                                <text-property name="text">Retrieve Report URL</text-property>
+                                <structure name="action">
+                                    <property name="linkType">hyperlink</property>
+                                    <expression name="uri">params["ReportURL"]</expression>
+                                    <property name="targetWindow">_blank</property>
+                                </structure>
+                            </label>
+                            <label name="ShowQuery" id="391">
+                                <property name="style">sans-style1</property>
+                                <property name="fontSize">12pt</property>
+                                <property name="fontWeight">bold</property>
+                                <property name="marginTop">0pt</property>
+                                <property name="marginBottom">20px</property>
+                                <property name="paddingTop">1pt</property>
+                                <property name="paddingLeft">20pt</property>
+                                <text-property name="text">Show Query</text-property>
+                                <structure name="action">
+                                    <property name="linkType">hyperlink</property>
+                                    <expression name="uri">"../showQuery.jsp?TraceTableKey="+params["UserName"].split("|")[1]</expression>
+                                    <property name="targetWindow">_self</property>
+                                </structure>
+                            </label>
                         </cell>
                     </row>
                 </footer>
@@ -2544,7 +2588,5 @@ var metric = &quot;***Unknown metric***&quot;&#xD;
                 </row>
             </footer>
         </table>
-        <label name="ReportURL" id="390" extends="gratia-lib1.ReportURL"/>
-        <label name="ShowQuery" id="391" extends="gratia-lib1.ShowQuery"/>
     </body>
 </report>
