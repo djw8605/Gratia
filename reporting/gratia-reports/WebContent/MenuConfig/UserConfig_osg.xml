@@ -38,7 +38,7 @@
 	</Menu>
 	<Dashboard>		
 		<Row>	
-			<DashboardItem link="[ReportsFolder]UsageBySite.rptdesign&amp;StartDate&amp;EndDate&amp;DisplayMetric=wallclock"/>			
+			<DashboardItem link="[ReportsFolder]UsageBySite.rptdesign&amp;StartDate&amp;EndDate&amp;DisplayMetric=wallclock&amp;ReportTitle=Jobs by Site"/>			
 		</Row>			
 	</Dashboard>
 </UserConfig>
