@@ -1,11 +1,12 @@
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
     pageEncoding="ISO-8859-1"
-    import="net.sf.gratia.reporting.*"%>    
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+    import="net.sf.gratia.reporting.*"
+%>    
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional //EN">
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<LINK href="gratiaStyleSheet.css" type="text/css" rel="stylesheet">
+<LINK href="stylesheet.css" type="text/css" rel="stylesheet">
 <base target="report">
 <title>Gratia Accounting</title>
 </head>
@@ -26,7 +27,7 @@
 	{
 		MenuGroup menuGroup = (MenuGroup)userConfiguration.getMenuGroups().get(i);
 		if(i>0){
-	%>	<hr><label class=menuGroup><%=menuGroup.getName() %></label> <br /><%
+	%>	<hr><label class="menuGroup"><%=menuGroup.getName() %></label> <br /><%
 		}
 		for(int z=0; z < menuGroup.getMenuItems().size(); z++)
 		{
@@ -39,21 +40,23 @@
 			linkNAME = menuItem.getName();
 			if (menuItem.getLink().indexOf("?") > -1) 
 			{
-			   linkURL = menuItem.getLink() + "&reportTitle=" + linkNAME.replaceFirst("-", "").trim();
+			   linkURL = menuItem.getLink() + "&ReportTitle=" + linkNAME.replaceFirst("-", "").trim();
 			}else
 			{
-			   linkURL = menuItem.getLink() + "?reportTitle=" + linkNAME.replaceFirst("-", "").trim();
+			   linkURL = menuItem.getLink() + "?ReportTitle=" + linkNAME.replaceFirst("-", "").trim();
 			}
 			
 			linkURL = linkURL.replace(" ", "%20");
+			linkURL = linkURL.replace("&amp;", "&");
 			linkURL = linkURL.replace("&", "&amp;");
 			%> 
-			<a class=menuItem href="<%=linkURL %>" target="report"><%=linkNAME %></a> <br />
+			<a class="menuItem" href="<%=linkURL %>" target="report"><%=linkNAME %></a> <br />
 			<%
 		}
 	}
 	%>	
-	 <div class=menuGroup><hr>Commands</div>
-	 <a class=menuItem href="logout.jsp">Logout</a><br />
+	 <div class="menuGroup"><hr>Commands</div>
+	 <a class="menuItem" href="logout.jsp">Logout</a><br />
+	 <hr><a target=_blank class="contact" href="http://twiki.grid.iu.edu/twiki/bin/view/Accounting/ContactUs">Contact us</a><br />
 </body>
 </html>
