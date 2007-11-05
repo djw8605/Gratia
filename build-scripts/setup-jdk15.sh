@@ -1,6 +1,14 @@
 dropit=~greenc/bin/dropit
 have_dropit=1
 
+function have_dropit {
+  if [[ -n "$have_dropit" ]] && [[ "$have_dropit" == "1" ]]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
 function add_to_path() {
 	[[ -n "$dropit" ]] || dropit=`type -p dropit`
   OPTIND=1 # must reset
