@@ -6,6 +6,9 @@ import java.text.*;
 import java.util.zip.*;
 import java.net.*;
 
+import org.apache.tools.bzip2.*;
+import com.ice.tar.*;
+
 public class XP
 {
 
@@ -480,9 +483,13 @@ public class XP
 
     public String get(String path)
     {
+        return get(new File(path));
+    }
+
+    public String get(File file)
+    {
         try
             {
-                File file = new File(path);
                 FileInputStream input = new FileInputStream(file);
                 byte[] buffer = new byte[(int) file.length()];
                 input.read(buffer,0,(int) file.length());
@@ -492,7 +499,7 @@ public class XP
         catch (Exception e)
             {
                 // Logging.log("File Not Found: " + path + " !!" + "\n");
-                return "File Not Found: " + path + " !!" + "\n";
+                return "File Not Found: " + file.getAbsolutePath() + " !!" + "\n";
             }
     }
   
@@ -555,6 +562,59 @@ public class XP
                 return false;
             }
     }
+
+    public boolean save_bzip2(String path,String contents)
+    {
+        try
+            {
+                File file = new File(path);
+                FileOutputStream fos = new FileOutputStream(file + ".bz2");
+
+                System.err.println("Trying to save "+path+".bz2");
+
+                fos.write(((String)"BZ").getBytes());
+
+                CBZip2OutputStream gzos = new CBZip2OutputStream(fos);
+
+                gzos.write(contents.getBytes());
+
+                gzos.close();
+                return true;
+            }
+        catch (Exception e)
+            {
+                e.printStackTrace();
+                return false;
+            }
+   }
+
+    public boolean save_tar(String tarpath, String path,String contents)
+    {
+        try
+            {
+                File file = new File(tarpath);
+                FileOutputStream fos = new FileOutputStream(file + ".tar",true);
+
+                System.err.println("Trying to save "+path+" inn "+tarpath+".tar");
+
+                TarOutputStream taros = new TarOutputStream(new 
+                                                            BufferedOutputStream(fos));
+
+                TarEntry entry = new TarEntry(path);
+                entry.setSize((contents.getBytes().length));
+                taros.putNextEntry(entry);
+                taros.write(contents.getBytes());
+
+                taros.closeEntry();
+                taros.close();
+                return true;
+            }
+        catch (Exception e)
+            {
+                e.printStackTrace();
+                return false;
+            }
+   }
 
     public boolean append(String path,String contents)
     {
