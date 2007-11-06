@@ -423,7 +423,7 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 </form>
 
 <form name="mySubmitForm" method="post" action=" ">
-	<input class="button" type="submit" name="submitButton" value="Submit" onclick="getAction();">
+	<input class="button" type="submit" name="submitButton" value="Display Report" onclick="getAction();">
 </form>
 
 </body>
