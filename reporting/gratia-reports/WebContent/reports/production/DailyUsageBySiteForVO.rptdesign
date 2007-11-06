@@ -202,6 +202,7 @@
                     <property name="dataType">string</property>
                     <text-property name="promptText">Select VO</text-property>
                     <property name="controlType">text-box</property>
+                    <property name="defaultValue">cms</property>
                     <structure name="format">
                         <property name="category">Unformatted</property>
                     </structure>
