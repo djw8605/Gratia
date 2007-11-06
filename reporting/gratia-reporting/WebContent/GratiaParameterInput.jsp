@@ -41,7 +41,7 @@ function addVO (form)
  	form.VOs.value += ")";
 }
    
-function addVO2 (form) 
+function addVOs (form) 
 {
    /* Construct the VOs string from the selection */  
    	form.VOs.value = "";
@@ -80,7 +80,7 @@ function getURL ()
 			myurl += "&" + elnam + "=" + elval;
 		}
 	}
-	// replace all spaces --> %20 and ":" --> %7C
+	// replace all spaces --> %20 and ";" --> %3B
 	myurl = myurl.replace(/ /g, "%20");
 	myurl = myurl.replace(/;/g, "%3B");
 	x.ReportURL.value = myurl;
@@ -91,8 +91,8 @@ function getURL ()
     
 </script>
 
-
 </head>
+
 <body>
 
 <script type="text/javascript" src="tooltip/wz_tooltip.js"></script>
@@ -100,15 +100,15 @@ function getURL ()
 
 <%
 // get the parameters passed
-	String ReportTitle = request.getParameter("ReportTitle");
-	if (ReportTitle != null)
+	String inTitle = request.getParameter("ReportTitle");
+	if (inTitle != null)
    	{
 %>
-<div class="reportTitle"><%=ReportTitle%></div><br />
+<div class="reportTitle"><%=inTitle%></div><br />
 <%
 	}else
 	{
-		ReportTitle = "";
+		inTitle = "";
 	}
 
 String report = request.getParameter("report");
@@ -145,7 +145,7 @@ String selectValue = null;
 
 <input type="hidden" id="baseURL" name="BaseURL" Value = "<%=initUrl %>">
 <input type="hidden" id="ReportURL" name="ReportURL" Value="<%=initUrl %>">
-<input type="hidden" id="ReportTitle" name="ReportTitle" Value="<%=ReportTitle %>">
+<input type="hidden" id="ReportTitle" name="ReportTitle" Value="<%=inTitle %>">
 
 <table>
 <%
@@ -224,28 +224,50 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 			</tr>
 	<%							
 		}
-		else if (paramName.indexOf("VOs") > -1)
+		else if (paramName.indexOf("VOs") > -1 || paramName.indexOf("ForVOName") > -1 || paramName.indexOf("ForSiteName") > -1 || paramName.indexOf("ForProbeName") > -1 )
 		{
-		promptText = "Select one or more VOs";
+			String selectNameID = paramName;
+			String selectedLabel = "";
+			String selectMultiple = "";
+			String onchangeFunction = "getURL();";
+			String sql = "";
+			
+			if (paramName.indexOf("VOs") > -1 )
+			{
+				selectNameID = "myVOs";
+				promptText = "Select one or more VOs";
+				selectedLabel = "Selected VOs:";
+				selectMultiple = "multiple";
+				onchangeFunction = "addVOs(this.form); getURL();";
+				sql = "select distinct (VO.VOName) from VO, VONameCorrection where VO.VOid = VONameCorrection.VOid order by VO.VOName";
+			}
+			else if (paramName.indexOf("ForVOName") > -1 )
+			{
+				sql = "select distinct (VO.VOName) from VO, VONameCorrection where VO.VOid = VONameCorrection.VOid order by VO.VOName";
+			}
+			else if (paramName.indexOf("ForSiteName") > -1 )
+			{
+				sql = "select Site.SiteName as sitename from Site";
+			}
+			else if (paramName.indexOf("ForProbeName") > -1 )
+			{
+				sql = "select 'All' as name from CEProbes union select CEProbes.probename as name from CEProbes order by name";
+			}
 	%>
 			<tr>
 			   <td valign="top" align="right"><label class="paramName" onMouseOver="Tip('<%=helpText%>');" ><%=promptText %></label></td>
 			   
 			   <td>&nbsp;&nbsp;</td>
 			   <td> 
-				<SELECT multiple size="10" id="myVOs" name="myVOs" onMouseOver="Tip('<%=helpText%>');" onChange="addVO2(this.form); getURL();" >
-						
-	<%		
-			// define the sql string to get the list of VOs that the user can selct from
-			String sql = "select distinct (VO.VOName) from VO, VONameCorrection where VO.VOid = VONameCorrection.VOid order by VO.VOName";
-			
+				<SELECT <%=selectMultiple %> size="10" id="<%=selectNameID %>" name="<%=selectNameID %>" onMouseOver="Tip('<%=helpText%>');" onChange="<%=onchangeFunction %>" >					
+	<%				
 			// Execute the sql statement to get the vos
 			
 			Connection con = null;
 			Statement statement = null;
 			ResultSet results = null;
-			String VOName = "";
-			String SelectedVOs = "";					 
+			String resultValue = "";
+			String selectedItems = "";					 
 						
 			try {
 				Class.forName("com.mysql.jdbc.Driver").newInstance();
@@ -268,19 +290,20 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 							
 					if (value != null) 
 					{								
-						VOName = value.toString();
+						resultValue = value.toString();
 													
 						String selected = "";
-						if(defaultValue.indexOf(VOName) > -1)
+						if(defaultValue.indexOf(resultValue) > -1)
 						{
 							selected="selected";
 							
-							if (SelectedVOs != "") 
-								SelectedVOs += ";" + VOName;
+							if (selectedItems != "") 
+								selectedItems += ";" + resultValue;
 							else
-								SelectedVOs += VOName;
+								selectedItems += resultValue;
 						}
-						%> <OPTION value="<%=VOName %>" <%=selected %> ><%=VOName %></OPTION> <%
+						%> <OPTION value="<%=resultValue %>" <%=selected %> ><%=resultValue %></OPTION> 
+						<%
 					}
 				}
 					
@@ -321,332 +344,46 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 			   </SELECT>
 			</td>
 		</tr>
-		<tr>
-		   <td align="right"><em><label class="paramName" onMouseOver="Tip('Readonly field')">Selected VOs:</label></em></td>
-		   <td>&nbsp;&nbsp;</td>
-		   <td><input id="<%=paramName%>" type="text" size="70" name="<%=paramName%>" Value = "<%=SelectedVOs %>" readonly onMouseOver="Tip('Readonly field', CLICKCLOSE, false)">
-		   </td>
-		</tr>
 		<%
-		}
-		else if (paramName.indexOf("ForVOName") > -1)
-		{
-	%>
+			if (paramName.indexOf("VOs") > -1 )
+			{
+		%>
 			<tr>
-			   <td align="right" valign="top"><label class="paramName" onMouseOver="Tip('<%=helpText%>')" ><%=promptText%></label></td>
-			   <td>&nbsp;&nbsp;</td>
-			   <td> 
-				<SELECT size="10" id="ForVOName" name="ForVOName" onChange="getURL();" onMouseOver="Tip('<%=helpText%>')" >
-						
-	<%		
-			// define the sql string to get the list of VOs that the user can selct from
-			String sql = "select distinct (VO.VOName) from VO, VONameCorrection where VO.VOid = VONameCorrection.VOid order by VO.VOName";
-			
-			// Execute the sql statement to get the vos
-			
-			Connection con = null;
-			Statement statement = null;
-			ResultSet results = null;
-			String VOName = "";
-			String SelectedVOs = "";					 
-						
-			try {
-				Class.forName("com.mysql.jdbc.Driver").newInstance();
-			} catch (ClassNotFoundException ce){
-				out.println(ce);			
-			}
-			
-			try{						
-				con = DriverManager.getConnection(reportingConfiguration.getDatabaseURL(), reportingConfiguration.getDatabaseUser(), reportingConfiguration.getDatabasePassword());
-				statement = con.createStatement();
-				results = statement.executeQuery(sql);	
-
-			// Loop through the SQL results to add a row for each record, we have only one column that contains the VOName
-						
-				while(results.next())
-				{								
-				// Get the value for this column from the recordset, ommitting nulls
-						
-					Object value = results.getObject(1);
-							
-					if (value != null) 
-					{								
-						VOName = value.toString();
-													
-						String selected = "";
-						if(defaultValue.indexOf(VOName) > -1)
-						{
-							selected="selected";
-							
-							if (SelectedVOs != "") 
-								SelectedVOs += ";" + VOName;
-							else
-								SelectedVOs += VOName;
-						}
-						%> <OPTION value="<%=VOName %>" <%=selected %>><%=VOName %></OPTION> <%
-					}
-				}
-					
-			}catch(SQLException exception){
-				out.println("<!--");
-				StringWriter sw = new StringWriter();
-				PrintWriter pw = new PrintWriter(sw);
-				exception.printStackTrace(pw);
-				out.print(sw);
-				sw.close();
-				pw.close();
-				out.println("-->");
-			}
-			finally
-			{
-				try
-				{
-					con.close();
-				}
-				catch(Exception ex) {}		
-				try
-				{
-					statement.close();
-				}
-				catch(Exception ex) {}		
-				try
-				{
-					results.close();
-				}
-				catch(Exception ex) {}	
-	
-				results = null;
-				statement = null;
-				con = null;
-			}
-				
-			%>
-			   </SELECT>
-			</td>
-		</tr>
+			    <td align="right"><em><label class="paramName" onMouseOver="Tip('Readonly field')" ><%=selectedLabel %></label></em></td>
+		   		<td>&nbsp;&nbsp;</td>
+		   		<td><em><input id="<%=paramName%>" type="text" size="70" name="<%=paramName%>" Value = "<%=selectedItems %>" readonly onMouseOver="Tip('Readonly field', CLICKCLOSE, false)"></em>
+		   		</td>
+			</tr>
 		<%
-		}
-		else if (paramName.indexOf("ForSiteName") > -1)
-		{
-	%>
-			<tr>
-			   <td align="right" valign="top"><label class="paramName" onMouseOver="Tip('<%=helpText%>')" ><%=promptText%></label></td>
-			   <td>&nbsp;&nbsp;</td>
-			   <td> 
-				<SELECT size="10" id="ForSiteName" name="ForSiteName" onChange="getURL();" onMouseOver="Tip('<%=helpText%>')" >
-						
-	<%		
-			// define the sql string to get the list of VOs that the user can selct from
-			String sql = "select Site.SiteName as sitename from Site";
-			
-			// Execute the sql statement to get the vos
-			
-			Connection con = null;
-			Statement statement = null;
-			ResultSet results = null;
-			String SiteName = "";
-			String SelectedSite = "";					 
-						
-			try {
-				Class.forName("com.mysql.jdbc.Driver").newInstance();
-			} catch (ClassNotFoundException ce){
-				out.println(ce);			
 			}
-			
-			try{						
-				con = DriverManager.getConnection(reportingConfiguration.getDatabaseURL(), reportingConfiguration.getDatabaseUser(), reportingConfiguration.getDatabasePassword());
-				statement = con.createStatement();
-				results = statement.executeQuery(sql);	
-
-			// Loop through the SQL results to add a row for each record, we have only one column that contains the VOName
-						
-				while(results.next())
-				{								
-				// Get the value for this column from the recordset, ommitting nulls
-						
-					Object value = results.getObject(1);
-							
-					if (value != null) 
-					{								
-						SiteName = value.toString();
-													
-						String selected = "";
-						if(defaultValue.indexOf(SiteName) > -1)
-						{
-							selected="selected";
-							
-							if (SelectedSite != "") 
-								SelectedSite += ";" + SiteName;
-							else
-								SelectedSite += SiteName;
-						}
-						%> <OPTION value="<%=SiteName %>" <%=selected %>><%=SiteName %></OPTION> <%
-					}
-				}
-					
-			}catch(SQLException exception){
-				out.println("<!--");
-				StringWriter sw = new StringWriter();
-				PrintWriter pw = new PrintWriter(sw);
-				exception.printStackTrace(pw);
-				out.print(sw);
-				sw.close();
-				pw.close();
-				out.println("-->");
-			}
-			finally
-			{
-				try
-				{
-					con.close();
-				}
-				catch(Exception ex) {}		
-				try
-				{
-					statement.close();
-				}
-				catch(Exception ex) {}		
-				try
-				{
-					results.close();
-				}
-				catch(Exception ex) {}	
-	
-				results = null;
-				statement = null;
-				con = null;
-			}
-				
-			%>
-			   </SELECT>
-			</td>
-		</tr>
-		<%
-		}
-		else if (paramName.indexOf("ForProbeName") > -1)
-		{
-	%>
-			<tr>
-			   <td align="right" valign="top"><label class="paramName" onMouseOver="Tip('<%=helpText%>')" ><%=promptText%></label></td>
-			   <td>&nbsp;&nbsp;</td>
-			   <td> 
-				<SELECT size="10" id="ForProbeName" name="ForProbeName" onChange="getURL();" onMouseOver="Tip('<%=helpText%>')" >
-						
-	<%		
-			// define the sql string to get the list of VOs that the user can selct from
-			String sql = "select 'All' as name from CEProbes union select CEProbes.probename as name from CEProbes order by name";
-			
-			// Execute the sql statement to get the vos
-			
-			Connection con = null;
-			Statement statement = null;
-			ResultSet results = null;
-			String ProbeName = "";
-			String SelectedProbe = "";					 
-						
-			try {
-				Class.forName("com.mysql.jdbc.Driver").newInstance();
-			} catch (ClassNotFoundException ce){
-				out.println(ce);			
-			}
-			
-			try{						
-				con = DriverManager.getConnection(reportingConfiguration.getDatabaseURL(), reportingConfiguration.getDatabaseUser(), reportingConfiguration.getDatabasePassword());
-				statement = con.createStatement();
-				results = statement.executeQuery(sql);	
-
-			// Loop through the SQL results to add a row for each record, we have only one column that contains the VOName
-						
-				while(results.next())
-				{								
-				// Get the value for this column from the recordset, ommitting nulls
-						
-					Object value = results.getObject(1);
-							
-					if (value != null) 
-					{								
-						ProbeName = value.toString();
-													
-						String selected = "";
-						if(defaultValue.indexOf(ProbeName) > -1)
-						{
-							selected="selected";
-							
-							if (SelectedProbe != "") 
-								SelectedProbe += ";" + ProbeName;
-							else
-								SelectedProbe += ProbeName;
-						}
-						%> <OPTION value="<%=ProbeName %>" <%=selected %>><%=ProbeName %></OPTION> <%
-					}
-				}
-					
-			}catch(SQLException exception){
-				out.println("<!--");
-				StringWriter sw = new StringWriter();
-				PrintWriter pw = new PrintWriter(sw);
-				exception.printStackTrace(pw);
-				out.print(sw);
-				sw.close();
-				pw.close();
-				out.println("-->");
-			}
-			finally
-			{
-				try
-				{
-					con.close();
-				}
-				catch(Exception ex) {}		
-				try
-				{
-					statement.close();
-				}
-				catch(Exception ex) {}		
-				try
-				{
-					results.close();
-				}
-				catch(Exception ex) {}	
-	
-				results = null;
-				statement = null;
-				con = null;
-			}
-				
-			%>
-			   </SELECT>
-			</td>
-		</tr>
-		<%
-		}
+		}		
 		else if (hasSelectionOptions)
+		{
+		%>
+		 	<tr>
+			   <td align="right"><label class="paramName" onMouseOver="Tip('<%=helpText%>')" ><%=promptText %></label></td>
+			   <td>&nbsp;&nbsp;</td>
+			   <td>
+			   <select class="paramSelect" id="<%=paramName%>" name="<%=paramName%>"  onchange="getURL()" onMouseOver="Tip('<%=helpText%>')" >
+				<%
+				for(int s=0; s < paramGroup.getParameterListSelection().size(); s++)
 				{
-					%>
-				 	<tr>
-					   <td align="right"><label class="paramName" onMouseOver="Tip('<%=helpText%>')" ><%=promptText %></label></td>
-					   <td>&nbsp;&nbsp;</td>
-					   <td>
-					   <select class="paramSelect" id="<%=paramName%>" name="<%=paramName%>"  onchange="getURL()" onMouseOver="Tip('<%=helpText%>')" >
-					<%
-					for(int s=0; s < paramGroup.getParameterListSelection().size(); s++)
-					{
-						ParameterListSelection paramListSelection = (ParameterListSelection)paramGroup.getParameterListSelection().get(s);
+					ParameterListSelection paramListSelection = (ParameterListSelection)paramGroup.getParameterListSelection().get(s);
 								
-						selectName = paramListSelection.getSelectionName();				
-						selectValue = paramListSelection.getSelectionValue();
-						String selected = "";
-						if(selectValue.equals(defaultValue))
-							selected="selected";
+					selectName = paramListSelection.getSelectionName();				
+					selectValue = paramListSelection.getSelectionValue();
+					String selected = "";
+					if(selectValue.equals(defaultValue))
+						selected="selected";
 		%>
-						<option value=<%=selectValue %> <%=selected %>><%=selectName %></option>
+					<option value=<%=selectValue %> <%=selected %>><%=selectName %></option>
 		<%							
-					}
+				}
 		%>
-					   </select>
-					   </td>
-					</tr>			
-<%     		}
+				</select>
+				</td>
+			</tr>			
+<%     	}
 		else
 		{
 		%>
@@ -659,7 +396,7 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 		    </tr>
 		<%		  
 		} 
-     	}
+     }
 }
 %>
 	<tr>
@@ -678,7 +415,7 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
    var elname = "";
    var elvalue = "";
 
-	for (var i=0; i<x.length; i++)
+	for (var i=0; i < x.length; i++)
 	{
   		if (x.elements[i].name == "BaseURL" )
      		outurl = x.elements[i].value;
