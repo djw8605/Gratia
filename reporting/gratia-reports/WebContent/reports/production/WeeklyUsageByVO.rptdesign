@@ -23,7 +23,6 @@
             <expression name="value">params["DatabasePassword"]</expression>
         </structure>
     </list-property>
-    <property name="eventHandlerClass">net.sf.gratia.reporting.GratiaBirtReportEH</property>
     <list-property name="libraries">
         <structure>
             <property name="fileName">gratia-lib1.rptlibrary</property>
@@ -138,7 +137,7 @@
                 <property name="pattern">Unformatted</property>
             </structure>
         </scalar-parameter>
-        <scalar-parameter name="VOs" id="106">
+        <scalar-parameter name="SelectVOs" id="106">
             <text-property name="helpText">List of VO's to include/exclude in chart.</text-property>
             <property name="valueType">static</property>
             <property name="dataType">string</property>
@@ -360,11 +359,17 @@ order by voname</property>
     </page-setup>
     <body>
         <text-data id="109">
+            <property name="eventHandlerClass">net.sf.gratia.reporting.GratiaBirtReportEH</property>
             <property name="style">sans-style1</property>
             <property name="fontFamily">sans-serif</property>
             <property name="fontSize">9pt</property>
             <property name="textAlign">center</property>
-            <expression name="valueExpr">if(params["SelectionType"] == "IN"){"VO\'s selected:  " + params["VOs"]}else{"VO\'s excluded:  " + params["VOs"]}</expression>
+            <expression name="valueExpr">var seltype
+	if(params["SelectionType"] == "IN")
+ 		seltype = "selected: " 
+	else
+		seltype = "excluded: "
+"VO\'s "  + seltype + params["SelectVOs"]</expression>
             <property name="contentType">html</property>
         </text-data>
         <extended-item extensionName="Chart" name="MyChart" id="90">
@@ -1534,7 +1539,7 @@ else {&#xD;
             <list-property name="paramBindings">
                 <structure>
                     <property name="paramName">VOselect</property>
-                    <expression name="expression">params["VOs"]</expression>
+                    <expression name="expression">params["SelectVOs"]</expression>
                 </structure>
                 <structure>
                     <property name="paramName">VOSelType</property>
