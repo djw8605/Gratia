@@ -283,7 +283,9 @@ reporting: birt-reporting
 	cp -p ${reportsrc}/WebContent/featuredReport.jsp       war/.
 	cp -p ${reportsrc}/WebContent/GratiaParameterInput.jsp war/.
 	cp -p ${reportsrc}/WebContent/index.jsp                war/.
+	cp -p ${reportsrc}/WebContent/index-frames.jsp         war/.
 	cp -p ${reportsrc}/WebContent/logout.jsp               war/.
+	cp -p ${reportsrc}/WebContent/menuFrame.jsp            war/.
 	cp -p ${reportsrc}/WebContent/showQuery.jsp            war/.
 	cp -p ${reportsrc}/WebContent/stylesheet.css           war/.
 	# --- copy directories paths ---
