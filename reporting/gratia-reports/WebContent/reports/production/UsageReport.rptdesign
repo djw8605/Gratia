@@ -39,22 +39,6 @@
             <property name="name">DatabasePassword</property>
             <property name="value">proto</property>
         </structure>
-        <structure>
-            <property name="name">StartDate</property>
-            <property name="value">2007-07-13</property>
-        </structure>
-        <structure>
-            <property name="name">EndDate</property>
-            <property name="value">2007-07-14</property>
-        </structure>
-        <structure>
-            <property name="name">ForSiteName</property>
-            <property name="value">All</property>
-        </structure>
-        <structure>
-            <property name="name">ForProbeName</property>
-            <property name="value">pbs-lsf:red.unl.edu</property>
-        </structure>
     </list-property>
     <parameters>
         <parameter-group name="DatabaseAccess" id="84">
@@ -104,7 +88,7 @@
             <text-property name="promptText">StartDate</text-property>
             <property name="isRequired">true</property>
             <property name="controlType">text-box</property>
-            <property name="defaultValue">3/1/2006</property>
+            <property name="defaultValue">2007-01-01</property>
             <structure name="format">
                 <property name="category">Unformatted</property>
                 <property name="pattern">Unformatted</property>
@@ -117,27 +101,21 @@
             <text-property name="promptText">EndDate</text-property>
             <property name="isRequired">true</property>
             <property name="controlType">text-box</property>
-            <property name="defaultValue">12/31/2999</property>
+            <property name="defaultValue">2007-02-01</property>
             <structure name="format">
                 <property name="category">Unformatted</property>
                 <property name="pattern">Unformatted</property>
             </structure>
         </scalar-parameter>
-        <scalar-parameter name="ForSiteName" id="90">
-            <text-property name="helpText">Select the site to show records for</text-property>
-            <property name="valueType">dynamic</property>
+        <scalar-parameter name="SelectSiteName" id="90">
+            <text-property name="helpText">Select the site to be reported</text-property>
+            <property name="valueType">static</property>
             <property name="dataType">string</property>
-            <text-property name="promptText">Site Name</text-property>
-            <property name="controlType">list-box</property>
-            <property name="dataSetName">AllSites</property>
-            <expression name="valueExpr">row["name"]</expression>
-            <expression name="labelExpr">row["name"]</expression>
-            <property name="mustMatch">false</property>
-            <property name="fixedOrder">false</property>
+            <text-property name="promptText">Select Site Name</text-property>
+            <property name="controlType">text-box</property>
             <property name="defaultValue">All</property>
             <structure name="format">
                 <property name="category">Unformatted</property>
-                <property name="pattern">Unformatted</property>
             </structure>
             <list-property name="boundDataColumns">
                 <structure>
@@ -146,21 +124,15 @@
                 </structure>
             </list-property>
         </scalar-parameter>
-        <scalar-parameter name="ForProbeName" id="92">
-            <text-property name="helpText">Select the probe to show records for</text-property>
-            <property name="valueType">dynamic</property>
+        <scalar-parameter name="SelectProbeName" id="92">
+            <text-property name="helpText">Select the probe to be reported.</text-property>
+            <property name="valueType">static</property>
             <property name="dataType">string</property>
-            <text-property name="promptText">Probe</text-property>
-            <property name="controlType">list-box</property>
-            <property name="dataSetName">AllProbes</property>
-            <expression name="valueExpr">row["name"]</expression>
-            <expression name="labelExpr">row["name"]</expression>
-            <property name="mustMatch">false</property>
-            <property name="fixedOrder">true</property>
+            <text-property name="promptText">Select Probe</text-property>
+            <property name="controlType">text-box</property>
             <property name="defaultValue">All</property>
             <structure name="format">
                 <property name="category">Unformatted</property>
-                <property name="pattern">Unformatted</property>
             </structure>
             <list-property name="boundDataColumns">
                 <structure>
@@ -457,11 +429,11 @@ order by name</property>
                 </structure>
                 <structure>
                     <property name="paramName">Probe</property>
-                    <expression name="expression">params["ForProbeName"]</expression>
+                    <expression name="expression">params["SelectProbeName"]</expression>
                 </structure>
                 <structure>
                     <property name="paramName">CETable</property>
-                    <expression name="expression">params["ForSiteName"]</expression>
+                    <expression name="expression">params["SelectSiteName"]</expression>
                 </structure>
                 <structure>
                     <property name="paramName">UserName</property>
@@ -591,10 +563,10 @@ order by name</property>
                             <property name="fontSize">large</property>
                             <property name="fontWeight">bold</property>
                             <property name="textAlign">center</property>
-                            <expression name="valueExpr">if(params["ForSiteName"] == "All")
+                            <expression name="valueExpr">if(params["SelectSiteName"] == "All")
 	"All Sites"
 else
-	params["ForSiteName"]</expression>
+	params["SelectSiteName"]</expression>
                             <property name="contentType">html</property>
                         </text-data>
                     </cell>
@@ -610,10 +582,10 @@ else
                             <property name="fontSize">large</property>
                             <property name="fontWeight">bold</property>
                             <property name="textAlign">center</property>
-                            <expression name="valueExpr">if(params["ForProbeName"] == "All")
+                            <expression name="valueExpr">if(params["SelectProbeName"] == "All")
 	"All Probes"
 else
-	params["ForProbeName"]</expression>
+	params["SelectProbeName"]</expression>
                             <property name="contentType">html</property>
                         </text-data>
                     </cell>
