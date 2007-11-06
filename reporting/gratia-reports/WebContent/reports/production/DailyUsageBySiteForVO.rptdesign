@@ -51,10 +51,6 @@
             <property name="name">HighlightDate</property>
         </structure>
         <structure>
-            <property name="name">ForVOName</property>
-            <property name="value">gridex</property>
-        </structure>
-        <structure>
             <property name="name">ForSiteName</property>
             <property name="value">Generic Site</property>
         </structure>
@@ -163,30 +159,6 @@
         </parameter-group>
         <parameter-group name="VOandSite" id="113">
             <parameters>
-                <scalar-parameter name="ForVOName" id="106">
-                    <property name="hidden">false</property>
-                    <property name="valueType">dynamic</property>
-                    <property name="dataType">string</property>
-                    <text-property name="promptText">Enter VO Name</text-property>
-                    <property name="isRequired">true</property>
-                    <property name="controlType">list-box</property>
-                    <property name="dataSetName">VONames</property>
-                    <expression name="valueExpr">row["VOName"]</expression>
-                    <expression name="labelExpr">row["VOName"]</expression>
-                    <property name="mustMatch">true</property>
-                    <property name="fixedOrder">true</property>
-                    <property name="defaultValue">fermilab</property>
-                    <structure name="format">
-                        <property name="category">Unformatted</property>
-                        <property name="pattern">Unformatted</property>
-                    </structure>
-                    <list-property name="boundDataColumns">
-                        <structure>
-                            <property name="name">VOName</property>
-                            <expression name="expression">dataSetRow["VOName"]</expression>
-                        </structure>
-                    </list-property>
-                </scalar-parameter>
                 <scalar-parameter name="ForSiteName" id="114">
                     <property name="hidden">true</property>
                     <property name="valueType">static</property>
@@ -222,6 +194,16 @@
                     <structure name="format">
                         <property name="category">Unformatted</property>
                         <property name="pattern">Unformatted</property>
+                    </structure>
+                </scalar-parameter>
+                <scalar-parameter name="SelectVOName" id="394">
+                    <text-property name="helpText">Select VO to be reported.</text-property>
+                    <property name="valueType">static</property>
+                    <property name="dataType">string</property>
+                    <text-property name="promptText">Select VO</text-property>
+                    <property name="controlType">text-box</property>
+                    <structure name="format">
+                        <property name="category">Unformatted</property>
                     </structure>
                 </scalar-parameter>
             </parameters>
@@ -507,7 +489,7 @@ call DailyUsageBySiteByVO(?,?,?,?,?,'Batch','ForVO',?,'AnySite','')
             <property name="style">sans-style1</property>
             <property name="fontSize">9pt</property>
             <property name="textAlign">center</property>
-            <expression name="valueExpr">"VO Name: "+ params["ForVOName"]</expression>
+            <expression name="valueExpr">"VO Name: "+ params["SelectVOName"]</expression>
             <property name="contentType">html</property>
         </text-data>
         <extended-item extensionName="Chart" name="MyChart" id="90">
@@ -1257,7 +1239,7 @@ else {&#xD;
         &lt;/structure>
         &lt;structure>
             &lt;property name=&quot;paramName&quot;>ForVOName&lt;/property>
-            &lt;expression name=&quot;expression&quot;>params[&quot;ForVOName&quot;]&lt;/expression>
+            &lt;expression name=&quot;expression&quot;>params[&quot;SelectVOName&quot;]&lt;/expression>
         &lt;/structure>
         &lt;structure>
             &lt;property name=&quot;paramName&quot;>ForVO&lt;/property>
@@ -1966,6 +1948,147 @@ var metric = &quot;***Unknown metric***&quot;&#xD;
         <LabelPosition>Outside</LabelPosition>
         <Stacked>false</Stacked>
       </Series>
+      <Series>
+        <Visible>true</Visible>
+        <Label>
+          <Caption>
+            <Value>&lt;undefined></Value>
+            <Font>
+              <Alignment/>
+            </Font>
+          </Caption>
+          <Background xsi:type="attribute:ColorDefinition">
+            <Transparency>0</Transparency>
+            <Red>255</Red>
+            <Green>255</Green>
+            <Blue>255</Blue>
+          </Background>
+          <Outline>
+            <Style>Solid</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>false</Visible>
+          </Outline>
+          <Insets>
+            <Top>0.0</Top>
+            <Left>2.0</Left>
+            <Bottom>0.0</Bottom>
+            <Right>3.0</Right>
+          </Insets>
+          <Visible>false</Visible>
+        </Label>
+        <DataDefinition>
+          <Definition>row[&quot;endtime&quot;]</Definition>
+        </DataDefinition>
+        <SeriesIdentifier>Day</SeriesIdentifier>
+        <DataPoint>
+          <Components>
+            <Type>Orthogonal_Value</Type>
+          </Components>
+          <Separator>, </Separator>
+        </DataPoint>
+        <LabelPosition>Outside</LabelPosition>
+        <Stacked>false</Stacked>
+      </Series>
+      <Series>
+        <Visible>true</Visible>
+        <Label>
+          <Caption>
+            <Value>&lt;undefined></Value>
+            <Font>
+              <Alignment/>
+            </Font>
+          </Caption>
+          <Background xsi:type="attribute:ColorDefinition">
+            <Transparency>0</Transparency>
+            <Red>255</Red>
+            <Green>255</Green>
+            <Blue>255</Blue>
+          </Background>
+          <Outline>
+            <Style>Solid</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>false</Visible>
+          </Outline>
+          <Insets>
+            <Top>0.0</Top>
+            <Left>2.0</Left>
+            <Bottom>0.0</Bottom>
+            <Right>3.0</Right>
+          </Insets>
+          <Visible>false</Visible>
+        </Label>
+        <DataDefinition>
+          <Definition>row[&quot;endtime&quot;]</Definition>
+        </DataDefinition>
+        <SeriesIdentifier>Day</SeriesIdentifier>
+        <DataPoint>
+          <Components>
+            <Type>Orthogonal_Value</Type>
+          </Components>
+          <Separator>, </Separator>
+        </DataPoint>
+        <LabelPosition>Outside</LabelPosition>
+        <Stacked>false</Stacked>
+      </Series>
+      <Series>
+        <Visible>true</Visible>
+        <Label>
+          <Caption>
+            <Value>&lt;undefined></Value>
+            <Font>
+              <Alignment/>
+            </Font>
+          </Caption>
+          <Background xsi:type="attribute:ColorDefinition">
+            <Transparency>0</Transparency>
+            <Red>255</Red>
+            <Green>255</Green>
+            <Blue>255</Blue>
+          </Background>
+          <Outline>
+            <Style>Solid</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>false</Visible>
+          </Outline>
+          <Insets>
+            <Top>0.0</Top>
+            <Left>2.0</Left>
+            <Bottom>0.0</Bottom>
+            <Right>3.0</Right>
+          </Insets>
+          <Visible>false</Visible>
+        </Label>
+        <DataDefinition>
+          <Definition>row[&quot;endtime&quot;]</Definition>
+        </DataDefinition>
+        <SeriesIdentifier>Day</SeriesIdentifier>
+        <DataPoint>
+          <Components>
+            <Type>Orthogonal_Value</Type>
+          </Components>
+          <Separator>, </Separator>
+        </DataPoint>
+        <LabelPosition>Outside</LabelPosition>
+        <Stacked>false</Stacked>
+      </Series>
       <Grouping>
         <Enabled>false</Enabled>
         <GroupingUnit>Days</GroupingUnit>
@@ -2121,7 +2244,7 @@ MM/dd/yyyy
                     </structure>
                     <structure>
                         <property name="paramName">ForVOName</property>
-                        <expression name="expression">params["ForVOName"]</expression>
+                        <expression name="expression">params["SelectVOName"]</expression>
                     </structure>
                     <structure>
                         <property name="paramName">ForVO</property>
@@ -2159,7 +2282,7 @@ MM/dd/yyyy
                 </structure>
                 <structure>
                     <property name="paramName">ForVOName</property>
-                    <expression name="expression">params["ForVOName"]</expression>
+                    <expression name="expression">params["SelectVOName"]</expression>
                 </structure>
                 <structure>
                     <property name="paramName">UserName</property>
