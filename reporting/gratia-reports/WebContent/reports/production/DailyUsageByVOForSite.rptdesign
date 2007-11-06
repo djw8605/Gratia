@@ -32,10 +32,6 @@
     </list-property>
     <list-property name="configVars">
         <structure>
-            <property name="name">DatabaseURL</property>
-            <property name="value">jdbc:mysql://gratia-vm02.fnal.gov:3320/gratia_jeffmack</property>
-        </structure>
-        <structure>
             <property name="name">DatabaseUser</property>
             <property name="value">gratia</property>
         </structure>
@@ -96,7 +92,7 @@
                     <property name="dataType">string</property>
                     <property name="isRequired">true</property>
                     <property name="controlType">text-box</property>
-                    <property name="defaultValue">jdbc:mysql://gratia-vm02.fnal.gov:3320/gratia_jeffmack</property>
+                    <property name="defaultValue">jdbc:mysql://gratia-db01.fnal.gov:3320/gratia</property>
                     <structure name="format">
                         <property name="category">Unformatted</property>
                         <property name="pattern">Unformatted</property>
@@ -184,30 +180,6 @@
                         <property name="pattern">Unformatted</property>
                     </structure>
                 </scalar-parameter>
-                <scalar-parameter name="ForSiteName" id="114">
-                    <property name="hidden">false</property>
-                    <property name="valueType">dynamic</property>
-                    <property name="dataType">string</property>
-                    <text-property name="promptText">Enter Site name</text-property>
-                    <property name="isRequired">true</property>
-                    <property name="controlType">list-box</property>
-                    <property name="dataSetName">SiteNames</property>
-                    <expression name="valueExpr">row["sitename"]</expression>
-                    <expression name="labelExpr">row["sitename"]</expression>
-                    <property name="mustMatch">true</property>
-                    <property name="fixedOrder">true</property>
-                    <property name="defaultValue">Generic Site</property>
-                    <structure name="format">
-                        <property name="category">Unformatted</property>
-                        <property name="pattern">Unformatted</property>
-                    </structure>
-                    <list-property name="boundDataColumns">
-                        <structure>
-                            <property name="name">sitename</property>
-                            <expression name="expression">dataSetRow["sitename"]</expression>
-                        </structure>
-                    </list-property>
-                </scalar-parameter>
                 <scalar-parameter name="ForVO" id="115">
                     <property name="hidden">true</property>
                     <property name="valueType">static</property>
@@ -230,6 +202,17 @@
                     <structure name="format">
                         <property name="category">Unformatted</property>
                         <property name="pattern">Unformatted</property>
+                    </structure>
+                </scalar-parameter>
+                <scalar-parameter name="SelectSiteName" id="397">
+                    <text-property name="helpText">Select Site to be reported.</text-property>
+                    <property name="valueType">static</property>
+                    <property name="dataType">string</property>
+                    <text-property name="promptText">Select Site</text-property>
+                    <property name="controlType">text-box</property>
+                    <property name="defaultValue">FNAL_FERMIGRID</property>
+                    <structure name="format">
+                        <property name="category">Unformatted</property>
                     </structure>
                 </scalar-parameter>
             </parameters>
@@ -335,7 +318,7 @@
     <data-sources>
         <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="fermigrid1" id="4">
             <property name="odaDriverClass">com.mysql.jdbc.Driver</property>
-            <property name="odaURL">jdbc:mysql://gratia-vm02.fnal.gov:3320/gratia_jeffmack</property>
+            <property name="odaURL">jdbc:mysql://gratia-db01.fnal.gov:3320/gratia</property>
             <property name="odaUser">gratia</property>
             <encrypted-property name="odaPassword">cHJvdG8=</encrypted-property>
         </oda-data-source>
@@ -423,8 +406,9 @@
                     <property name="name">ForSiteName</property>
                     <property name="dataType">string</property>
                     <property name="position">6</property>
-                    <expression name="defaultValue">params["ForSiteName"]</expression>
+                    <expression name="defaultValue">""</expression>
                     <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
                 </structure>
             </list-property>
             <list-property name="resultSet">
@@ -514,7 +498,7 @@ from Site</property>
             <property name="style">sans-style1</property>
             <property name="fontSize">9pt</property>
             <property name="textAlign">center</property>
-            <expression name="valueExpr">"Site Name: "+ params["ForSiteName"]</expression>
+            <expression name="valueExpr">"Site Name: "+ params["SelectSiteName"]</expression>
             <property name="contentType">html</property>
         </text-data>
         <extended-item extensionName="Chart" name="MyChart" id="90">
@@ -1266,7 +1250,7 @@ else {&#xD;
         &lt;/structure>
         &lt;structure>
             &lt;property name=&quot;paramName&quot;>ForSiteName&lt;/property>
-            &lt;expression name=&quot;expression&quot;>params[&quot;ForSiteName&quot;]&lt;/expression>
+            &lt;expression name=&quot;expression&quot;>params[&quot;SelectSiteName&quot;]&lt;/expression>
         &lt;/structure>
         &lt;structure>
             &lt;property name=&quot;paramName&quot;>ForVO&lt;/property>
@@ -2304,6 +2288,147 @@ var metric = &quot;***Unknown metric***&quot;&#xD;
         <LabelPosition>Outside</LabelPosition>
         <Stacked>false</Stacked>
       </Series>
+      <Series>
+        <Visible>true</Visible>
+        <Label>
+          <Caption>
+            <Value>&lt;undefined></Value>
+            <Font>
+              <Alignment/>
+            </Font>
+          </Caption>
+          <Background xsi:type="attribute:ColorDefinition">
+            <Transparency>0</Transparency>
+            <Red>255</Red>
+            <Green>255</Green>
+            <Blue>255</Blue>
+          </Background>
+          <Outline>
+            <Style>Solid</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>false</Visible>
+          </Outline>
+          <Insets>
+            <Top>0.0</Top>
+            <Left>2.0</Left>
+            <Bottom>0.0</Bottom>
+            <Right>3.0</Right>
+          </Insets>
+          <Visible>false</Visible>
+        </Label>
+        <DataDefinition>
+          <Definition>row[&quot;endtime&quot;]</Definition>
+        </DataDefinition>
+        <SeriesIdentifier>Day</SeriesIdentifier>
+        <DataPoint>
+          <Components>
+            <Type>Orthogonal_Value</Type>
+          </Components>
+          <Separator>, </Separator>
+        </DataPoint>
+        <LabelPosition>Outside</LabelPosition>
+        <Stacked>false</Stacked>
+      </Series>
+      <Series>
+        <Visible>true</Visible>
+        <Label>
+          <Caption>
+            <Value>&lt;undefined></Value>
+            <Font>
+              <Alignment/>
+            </Font>
+          </Caption>
+          <Background xsi:type="attribute:ColorDefinition">
+            <Transparency>0</Transparency>
+            <Red>255</Red>
+            <Green>255</Green>
+            <Blue>255</Blue>
+          </Background>
+          <Outline>
+            <Style>Solid</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>false</Visible>
+          </Outline>
+          <Insets>
+            <Top>0.0</Top>
+            <Left>2.0</Left>
+            <Bottom>0.0</Bottom>
+            <Right>3.0</Right>
+          </Insets>
+          <Visible>false</Visible>
+        </Label>
+        <DataDefinition>
+          <Definition>row[&quot;endtime&quot;]</Definition>
+        </DataDefinition>
+        <SeriesIdentifier>Day</SeriesIdentifier>
+        <DataPoint>
+          <Components>
+            <Type>Orthogonal_Value</Type>
+          </Components>
+          <Separator>, </Separator>
+        </DataPoint>
+        <LabelPosition>Outside</LabelPosition>
+        <Stacked>false</Stacked>
+      </Series>
+      <Series>
+        <Visible>true</Visible>
+        <Label>
+          <Caption>
+            <Value>&lt;undefined></Value>
+            <Font>
+              <Alignment/>
+            </Font>
+          </Caption>
+          <Background xsi:type="attribute:ColorDefinition">
+            <Transparency>0</Transparency>
+            <Red>255</Red>
+            <Green>255</Green>
+            <Blue>255</Blue>
+          </Background>
+          <Outline>
+            <Style>Solid</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>false</Visible>
+          </Outline>
+          <Insets>
+            <Top>0.0</Top>
+            <Left>2.0</Left>
+            <Bottom>0.0</Bottom>
+            <Right>3.0</Right>
+          </Insets>
+          <Visible>false</Visible>
+        </Label>
+        <DataDefinition>
+          <Definition>row[&quot;endtime&quot;]</Definition>
+        </DataDefinition>
+        <SeriesIdentifier>Day</SeriesIdentifier>
+        <DataPoint>
+          <Components>
+            <Type>Orthogonal_Value</Type>
+          </Components>
+          <Separator>, </Separator>
+        </DataPoint>
+        <LabelPosition>Outside</LabelPosition>
+        <Stacked>false</Stacked>
+      </Series>
       <Grouping>
         <Enabled>false</Enabled>
         <GroupingUnit>Days</GroupingUnit>
@@ -2459,7 +2584,7 @@ MM/dd/yyyy
                     </structure>
                     <structure>
                         <property name="paramName">ForSiteName</property>
-                        <expression name="expression">params["ForSiteName"]</expression>
+                        <expression name="expression">params["SelectSiteName"]</expression>
                     </structure>
                     <structure>
                         <property name="paramName">ForVO</property>
@@ -2497,7 +2622,7 @@ MM/dd/yyyy
                 </structure>
                 <structure>
                     <property name="paramName">ForSiteName</property>
-                    <expression name="expression">params["ForSiteName"]</expression>
+                    <expression name="expression">params["SelectSiteName"]</expression>
                 </structure>
                 <structure>
                     <property name="paramName">UserRole</property>
