@@ -138,9 +138,10 @@
             </structure>
         </scalar-parameter>
         <scalar-parameter name="SelectVOs" id="106">
-            <text-property name="helpText">List of VO's to include/exclude in chart.</text-property>
+            <text-property name="helpText">Select VO's to include/exclude in the report.</text-property>
             <property name="valueType">static</property>
             <property name="dataType">string</property>
+            <text-property name="promptText">Select one or more VOs</text-property>
             <property name="controlType">text-box</property>
             <property name="defaultValue">('cms','cdf','d0sar','dzero','usatlas','uscms','uscmspool')</property>
             <structure name="format">
