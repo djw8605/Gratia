@@ -38,7 +38,7 @@ public class GratiaBirtReportEH extends ReportEventAdapter {
 			//  Debugging -- End 1 of 5
 			
 			// Check if there is a VOs parameter. If so, format it for SQL input
-			Object inVOsObj = rc.getParameterValue("VOs");
+			Object inVOsObj = rc.getParameterValue("SelectVOs");
 	        if (inVOsObj != null)
 	        {
 	        	String inVOs = inVOsObj.toString();
@@ -59,7 +59,7 @@ public class GratiaBirtReportEH extends ReportEventAdapter {
 	        	}
 	    	
 	        outVOs += ")";
-	        rc.setParameterValue("VOs", outVOs); 
+	        rc.setParameterValue("SelectVOs", outVOs); 
 	        }
 	        
 	        // Check if there is the parameter "ReportURL" is blank. 
