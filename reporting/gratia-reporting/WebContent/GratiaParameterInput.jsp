@@ -23,37 +23,19 @@
 	
 var c1 = new CodeThatCalendar(caldef1);
 
-function addVO (form) 
-{
-/* Construct the VOs string from the selection */  
-	form.VOs.value = "(";
-		
-	for(var i = 0; i < form.myVOs.options.length; i++)
-	{
-		if (form.myVOs.options[i].selected)
-		{
-			if (form.VOs.value != "(") 
-				form.VOs.value += "," + "'"+ form.myVOs.options[i].value + "'";
-			else
-				form.VOs.value += "'"+ form.myVOs.options[i].value + "'";
-		}
-	}
- 	form.VOs.value += ")";
-}
-   
 function addVOs (form) 
 {
    /* Construct the VOs string from the selection */  
-   	form.VOs.value = "";
+   	form.SelectVOs.value = "";
    		
    	for(var i = 0; i < form.myVOs.options.length; i++)
    	{
    		if (form.myVOs.options[i].selected)
    		{
-   			if (form.VOs.value != "") 
-   				form.VOs.value += ";" + form.myVOs.options[i].value;
+   			if (form.SelectVOs.value != "") 
+   				form.SelectVOs.value += ";" + form.myVOs.options[i].value;
    			else
-   				form.VOs.value += form.myVOs.options[i].value;
+   				form.SelectVOs.value += form.myVOs.options[i].value;
    		}
    	}
 }
@@ -224,7 +206,7 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 			</tr>
 	<%							
 		}
-		else if (paramName.indexOf("VOs") > -1 || paramName.indexOf("ForVOName") > -1 || paramName.indexOf("ForSiteName") > -1 || paramName.indexOf("ForProbeName") > -1 )
+		else if (paramName.indexOf("Select") > -1 )
 		{
 			String selectNameID = paramName;
 			String selectedLabel = "";
@@ -232,24 +214,23 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 			String onchangeFunction = "getURL();";
 			String sql = "";
 			
-			if (paramName.indexOf("VOs") > -1 )
+			if (paramName.indexOf("SelectVOs") > -1 )
 			{
 				selectNameID = "myVOs";
-				promptText = "Select one or more VOs";
 				selectedLabel = "Selected VOs:";
 				selectMultiple = "multiple";
 				onchangeFunction = "addVOs(this.form); getURL();";
 				sql = "select distinct (VO.VOName) from VO, VONameCorrection where VO.VOid = VONameCorrection.VOid order by VO.VOName";
 			}
-			else if (paramName.indexOf("ForVOName") > -1 )
+			else if (paramName.indexOf("SelectVOName") > -1 )
 			{
 				sql = "select distinct (VO.VOName) from VO, VONameCorrection where VO.VOid = VONameCorrection.VOid order by VO.VOName";
 			}
-			else if (paramName.indexOf("ForSiteName") > -1 )
+			else if (paramName.indexOf("SelectSiteName") > -1 )
 			{
 				sql = "select Site.SiteName as sitename from Site";
 			}
-			else if (paramName.indexOf("ForProbeName") > -1 )
+			else if (paramName.indexOf("SelectProbeName") > -1 )
 			{
 				sql = "select 'All' as name from CEProbes union select CEProbes.probename as name from CEProbes order by name";
 			}
@@ -345,7 +326,7 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 			</td>
 		</tr>
 		<%
-			if (paramName.indexOf("VOs") > -1 )
+			if (paramName.indexOf("SelectVOs") > -1 )
 			{
 		%>
 			<tr>
