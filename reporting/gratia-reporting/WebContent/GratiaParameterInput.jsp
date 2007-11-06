@@ -6,9 +6,7 @@
     import="java.sql.*"
     import="java.io.*"
 %>
-    
-<%@ taglib uri="/WEB-INF/tlds/birt.tld" prefix="birt" %>
-
+ 
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
 <head>
@@ -42,14 +40,14 @@ function addVOs (form)
 
 function getURL ()
 {
-   var x=document.getElementsByTagName('form')[0]
+   var x=document.getElementsByTagName('form')[0];
    var myurl = "";
    var elnam = "";
    var elval = "";
 
 	for (var i=0; i < x.length; i++)
 	{
-  		if (x.elements[i].name == "BaseURL" )
+  		if (x.elements[i].name == "partURL" )
      		myurl = x.elements[i].value;
  	}
  
@@ -57,7 +55,7 @@ function getURL ()
 	{
 		elnam = x.elements[i].name;
 		elval = x.elements[i].value;
-		if (elnam != "myVOs" && elnam != "cal1" && elnam != "submitButton" && elnam != "BaseURL"  && elnam != "ReportURL" )
+		if (elnam != "myVOs" && elnam != "cal1" && elnam != "submitButton" && elnam != "partURL"  && elnam != "ReportURL" )
 		{
 			myurl += "&" + elnam + "=" + elval;
 		}
@@ -70,7 +68,16 @@ function getURL ()
   	// document.write(myurl);
   	// document.write("<br />");
 }
-    
+
+function getAction()
+{
+	var x=document.getElementsByTagName('form')[0];
+	var newAction = x.ReportURL.value;
+	document.mySubmitForm.action = newAction;
+	// document.write(newAction);
+	// document.write("<br />");
+}
+
 </script>
 
 </head>
@@ -122,10 +129,9 @@ String selectName = null;
 String selectValue = null;
 %> 
 
-<birt:parameterPage id="<%=pageID %>" name="parameterInput" reportDesign="<%= report %>" isCustom="true" title="">
+<form action="">
 
-
-<input type="hidden" id="baseURL" name="BaseURL" Value = "<%=initUrl %>">
+<input type="hidden" id="partURL" name="partURL" Value = "<%=initUrl %>">
 <input type="hidden" id="ReportURL" name="ReportURL" Value="<%=initUrl %>">
 <input type="hidden" id="ReportTitle" name="ReportTitle" Value="<%=inTitle %>">
 
@@ -380,11 +386,6 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
      }
 }
 %>
-	<tr>
-	   <td colspan=3>
-		<input class="button" type="submit" name="submitButton" value="Submit" >
-	   </td>
-	</tr>
 </table>
 
 <p>
@@ -398,7 +399,7 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 
 	for (var i=0; i < x.length; i++)
 	{
-  		if (x.elements[i].name == "BaseURL" )
+  		if (x.elements[i].name == "partURL" )
      		outurl = x.elements[i].value;
 	}
  
@@ -406,7 +407,7 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 	{
 		elname = x.elements[i].name;
 		elvalue = x.elements[i].value;
-		if (elname != "myVOs" && elname != "cal1" && elname != "submitButton" && elname != "BaseURL" && elname != "ReportURL" )
+		if (elname != "myVOs" && elname != "cal1" && elname != "submitButton" && elname != "partURL" && elname != "ReportURL" )
 		{
 			outurl += "&" + elname + "=" + elvalue;
 		}
@@ -419,7 +420,11 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 </script>
 </p>    
 
-</birt:parameterPage>
+</form>
+
+<form name="mySubmitForm" method="post" action=" ">
+	<input class="button" type="submit" name="submitButton" value="Submit" onclick="getAction();">
+</form>
 
 </body>
 </html>
