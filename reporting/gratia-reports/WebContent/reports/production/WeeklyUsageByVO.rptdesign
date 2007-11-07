@@ -361,7 +361,6 @@ order by voname</property>
     </page-setup>
     <body>
         <text-data id="109">
-            <property name="eventHandlerClass">net.sf.gratia.reporting.GratiaBirtReportEH</property>
             <property name="style">sans-style1</property>
             <property name="fontFamily">sans-serif</property>
             <property name="fontSize">9pt</property>
