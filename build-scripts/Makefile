@@ -1,7 +1,7 @@
 PLATFORM := ${shell uname}
 
 # tarbal version
-version_default = v0.28
+version_default = v0.29
 
 gratia_reporting_version := $(shell echo '$$Name: not supported by cvs2svn $$' | sed -e 's/^\$$\Name: \(v[^ ]*\) \$$/\1/' -e 's/-/./g')
 gratia_services_version = $(gratia_reporting_version)
@@ -285,7 +285,7 @@ reporting: birt-reporting
 	cp -p ${reportsrc}/WebContent/featuredReport.jsp       war/.
 	cp -p ${reportsrc}/WebContent/GratiaParameterInput.jsp war/.
 	cp -p ${reportsrc}/WebContent/index.jsp                war/.
-	cp -p ${reportsrc}/WebContent/index-frames.jsp         war/.
+	cp -p ${reportsrc}/WebContent/index-frames.html        war/.
 	cp -p ${reportsrc}/WebContent/logout.jsp               war/.
 	cp -p ${reportsrc}/WebContent/menuFrame.jsp            war/.
 	cp -p ${reportsrc}/WebContent/showQuery.jsp            war/.
@@ -350,43 +350,43 @@ release: gratia
 	# --- Target: release          ---
 	# --- create reporting tarball ---
 	# --------------------------------
-	rm   -rf tarball
-	mkdir -p tarball/tomcat/v55/gratia
-	mkdir -p tarball/gratia/gratia_reporting
-	cp ${configuration}/*gov ${configuration}/*xml ${configuration}/*properties tarball/tomcat/v55/gratia
-	cp ${configuration}/*sql ${configuration}/*sh tarball/tomcat/v55/gratia
-	chmod 700 tarball/tomcat/v55/gratia/post-install.sh
-	perl -wapi.bak -e 's&CMD_(?:PREAMBLE|PREFIX|SUFFIX)&&g' tarball/tomcat/v55/gratia/post-install.sh
-	rm -f tarball/tomcat/v55/gratia/post-install.sh.bak
-	cp ${configuration}/truststore ${configuration}/keystore tarball/tomcat/v55/gratia
-	cp ${configuration}/service-configuration.properties tarball/tomcat/v55/gratia/service-configuration.properties && chmod 600 tarball/tomcat/v55/gratia/service-configuration.properties
-	cp ${target}/gratia-reports.war tarball/gratia/gratia_reporting
-	cp ${target}/gratia-reporting.war tarball/gratia/gratia_reporting
-	cp ${target}/gratia-security.war tarball/gratia/gratia_reporting
-	tar ${tarowner} -cvf ${target}/gratia_reporting_${gratia_reporting_version}.tar -C tarball .
+	rm   -rf tarball; \
+	mkdir -p tarball/tomcat/v55/gratia; \
+	mkdir -p tarball/gratia/gratia_reporting; \
+	cp ${configuration}/*gov ${configuration}/*xml ${configuration}/*properties tarball/tomcat/v55/gratia; \
+	cp ${configuration}/*sql ${configuration}/*sh tarball/tomcat/v55/gratia; \
+	chmod 700 tarball/tomcat/v55/gratia/post-install.sh; \
+	perl -wapi.bak -e 's&CMD_(?:PREAMBLE|PREFIX|SUFFIX)&&g' tarball/tomcat/v55/gratia/post-install.sh; \
+	rm -f tarball/tomcat/v55/gratia/post-install.sh.bak; \
+	cp ${configuration}/truststore ${configuration}/keystore tarball/tomcat/v55/gratia; \
+	perl -wape 's&^(\s*gratia\.services\.version\s*=\s*).*$$&$$1${gratia_services_version}&; s&^(\s*gratia\.reporting\.version\s*=\s*).*$$&$$1${gratia_reporting_version}&; ' ${configuration}/service-configuration.properties > tarball/tomcat/v55/gratia/service-configuration.properties && chmod 600 tarball/tomcat/v55/gratia/service-configuration.properties; \
+	cp ${target}/gratia-reports.war tarball/gratia/gratia_reporting; \
+	cp ${target}/gratia-reporting.war tarball/gratia/gratia_reporting; \
+	cp ${target}/gratia-security.war tarball/gratia/gratia_reporting; \
+	tar ${tarowner} -cvf ${target}/gratia_reporting_${gratia_reporting_version}.tar -C tarball .; \
 	rm -rf tarball
 	# -------------------------------
 	# --- Target: release         ---
 	# --- create services tarball ---
 	# -------------------------------
-	rm -rf tarball
-	mkdir -p tarball/tomcat/v55/gratia
-	mkdir -p tarball/gratia/gratia_services
-	mkdir -p tarball/var/data
-	mkdir -p tarball/var/logs
-	mkdir -p tarball/var/tmp
-	cp ${configuration}/*gov ${configuration}/*xml ${configuration}/*properties tarball/tomcat/v55/gratia
-	cp ${configuration}/*sql ${configuration}/*sh tarball/tomcat/v55/gratia
-	perl -wapi.bak -e 's&CMD_(?:PREAMBLE|PREFIX|SUFFIX)&&g' tarball/tomcat/v55/gratia/post-install.sh
-	rm -f tarball/tomcat/v55/gratia/post-install.sh.bak
-	cp ${configuration}/truststore ${configuration}/keystore tarball/tomcat/v55/gratia
-	cp ${configuration}/service-configuration.properties tarball/tomcat/v55/gratia/service-configuration.properties && chmod 600 tarball/tomcat/v55/gratia/service-configuration.properties
-	cp ${target}/gratia-services.war tarball/gratia/gratia_services
-	cp ${target}/gratia-servlets.war tarball/gratia/gratia_services
-	cp ${target}/gratia-soap.war tarball/gratia/gratia_services
-	cp ${target}/gratia-administration.war tarball/gratia/gratia_services
-	cp ${target}/gratia-security.war tarball/gratia/gratia_services
-	tar ${tarowner} -cvf ${target}/gratia_services_${gratia_services_version}.tar -C tarball .
+	rm -rf tarball; \
+	mkdir -p tarball/tomcat/v55/gratia; \
+	mkdir -p tarball/gratia/gratia_services; \
+	mkdir -p tarball/var/data; \
+	mkdir -p tarball/var/logs; \
+	mkdir -p tarball/var/tmp; \
+	cp ${configuration}/*gov ${configuration}/*xml ${configuration}/*properties tarball/tomcat/v55/gratia; \
+	cp ${configuration}/*sql ${configuration}/*sh tarball/tomcat/v55/gratia; \
+	perl -wapi.bak -e 's&CMD_(?:PREAMBLE|PREFIX|SUFFIX)&&g' tarball/tomcat/v55/gratia/post-install.sh; \
+	rm -f tarball/tomcat/v55/gratia/post-install.sh.bak; \
+	cp ${configuration}/truststore ${configuration}/keystore tarball/tomcat/v55/gratia; \
+	perl -wape 's&^(\s*gratia\.services\.version\s*=\s*).*$$&$$1${gratia_services_version}&; s&^(\s*gratia\.reporting\.version\s*=\s*).*$$&$$1${gratia_reporting_version}&; ' ${configuration}/service-configuration.properties > tarball/tomcat/v55/gratia/service-configuration.properties && chmod 600 tarball/tomcat/v55/gratia/service-configuration.properties; \
+	cp ${target}/gratia-services.war tarball/gratia/gratia_services; \
+	cp ${target}/gratia-servlets.war tarball/gratia/gratia_services; \
+	cp ${target}/gratia-soap.war tarball/gratia/gratia_services; \
+	cp ${target}/gratia-administration.war tarball/gratia/gratia_services; \
+	cp ${target}/gratia-security.war tarball/gratia/gratia_services; \
+	tar ${tarowner} -cvf ${target}/gratia_services_${gratia_services_version}.tar -C tarball .; \
 	rm -f -r tarball
 	# --- Target: release COMPLETED ---
 
@@ -395,15 +395,15 @@ gratia: clean util services servlets soap reporting reports administration secur
 	# ------------------------------
 	# --- Target: gratia         ---
 	# ------------------------------
-	rm -f -r tarball
-	mkdir tarball
-	cp ${configuration}/UserVoMap.* ${configuration}/*xml ${configuration}/*properties tarball
-	cp ${configuration}/*sql ${configuration}/*sh tarball
-	chmod 700 tarball/post-install.sh
-	cp ${configuration}/service-configuration.properties tarball/service-configuration.properties && chmod 600 tarball/service-configuration.properties
-	cp ${configuration}/configure-* ${configuration}/update-gratia-local tarball
-	cp ${configuration}/truststore ${configuration}/keystore tarball
-	tar -cvf ${target}/gratia.tar -C tarball .
+	rm -f -r tarball; \
+	mkdir tarball; \
+	cp ${configuration}/UserVoMap.* ${configuration}/*xml ${configuration}/*properties tarball; \
+	cp ${configuration}/*sql ${configuration}/*sh tarball; \
+	chmod 700 tarball/post-install.sh; \
+	perl -wape 's&^(\s*gratia\.services\.version\s*=\s*).*$$&$$1${gratia_services_version}&; s&^(\s*gratia\.reporting\.version\s*=\s*).*$$&$$1${gratia_reporting_version}&; ' ${configuration}/service-configuration.properties > tarball/service-configuration.properties && chmod 600 tarball/service-configuration.properties; \
+	cp ${configuration}/configure-* ${configuration}/update-gratia-local tarball; \
+	cp ${configuration}/truststore ${configuration}/keystore tarball; \
+	tar -cvf ${target}/gratia.tar -C tarball .; \
 	rm -f -r tarball
 	# --- Target: gratia COMPLETED ---
 
