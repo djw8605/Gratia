@@ -189,6 +189,8 @@ ${target}/gratia-administration.war: ${administration}/net/sf/gratia/administrat
                                      ${administration}/net/sf/gratia/administration/*.jsp \
                                      ${administration}/net/sf/gratia/administration/images/*.gif \
                                      ${docs}/*.html \
+                                     ${commonLib)/tar.jar \
+                                     ${commonLib)/bzip2.jar \
                                      ${commonLib}/mysql*.jar
 	#----------------------------------------------------
 	# --- Target: ${target}/gratia-administration.war ---
@@ -209,7 +211,7 @@ ${target}/gratia-administration.war: ${administration}/net/sf/gratia/administrat
 	cp ${administration}/net/sf/gratia/administration/*.jsp war
 	cp ${administration}/net/sf/gratia/administration/images/*.gif war/images
 	cp ${docs}/*.html war
-	cp ${commonLib}/mysql*.jar war/WEB-INF/lib
+	cp ${commonLib}/mysql*.jar ${commonLib}/tar.jar ${commonLib}/bzip2.jar war/WEB-INF/lib
 	jar -cfM ${target}/gratia-administration.war -C war .
 	rm -rf  war
 	# --- Target: ${target}/gratia-administration.war COMPLETED ---
