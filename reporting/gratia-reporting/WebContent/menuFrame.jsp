@@ -7,7 +7,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <LINK href="stylesheet.css" type="text/css" rel="stylesheet">
-<base target="report">
+<base target="paramFrame">
 <title>Gratia Accounting</title>
 </head>
 <body>
@@ -49,8 +49,10 @@
 			linkURL = linkURL.replace(" ", "%20");
 			linkURL = linkURL.replace("&amp;", "&");
 			linkURL = linkURL.replace("&", "&amp;");
+			linkURL = linkURL.replace(">", "%3e");
+			linkURL = linkURL.replace("<", "%3c");
 			%> 
-			<a class="menuItem" href="<%=linkURL %>" target="report"><%=linkNAME %></a> <br />
+			<a class="menuItem" href="<%=linkURL %>" target="paramFrame"><%=linkNAME %></a> <br />
 			<%
 		}
 	}
