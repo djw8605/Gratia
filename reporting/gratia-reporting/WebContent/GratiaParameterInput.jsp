@@ -12,7 +12,8 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 
-<LINK href="stylesheet.css" type="text/css" rel="stylesheet">
+<base target="reportFrame">
+<link href="stylesheet.css" type="text/css" rel="stylesheet">
 <title>Gratia Reporting: Parameter Entry</title>
 
 <script type="text/javascript" src="calendar/calendardef.js"></script>
@@ -88,6 +89,8 @@ function getAction()
 <jsp:include page="common.jsp" />
 
 <%
+String report = request.getParameter("report");
+
 // get the parameters passed
 	String inTitle = request.getParameter("ReportTitle");
 	if (inTitle != null)
@@ -99,9 +102,6 @@ function getAction()
 	{
 		inTitle = "";
 	}
-
-String report = request.getParameter("report");
-String pageID = "gratiaReporting";
 
 // Load the report parameters
 
@@ -117,7 +117,7 @@ String Start = format.format(now);
 
 // Initialize ReportURL
 String initUrl = request.getRequestURL().toString();
-initUrl=initUrl.substring(0, initUrl.lastIndexOf("/")) + "/checkDateParameters.jsp?__report="+report;
+initUrl=initUrl.substring(0, initUrl.lastIndexOf("/")) + "/checkDateParameters.jsp?__report=" + report + "&amp;__title";
 
 // Get the reporting configuration setting
 ReportingConfiguration reportingConfiguration = (ReportingConfiguration)session.getAttribute("reportingConfiguration");
@@ -131,9 +131,9 @@ String selectValue = null;
 
 <form action="">
 
-<input type="hidden" id="partURL" name="partURL" Value = "<%=initUrl %>">
-<input type="hidden" id="ReportURL" name="ReportURL" Value="<%=initUrl %>">
-<input type="hidden" id="ReportTitle" name="ReportTitle" Value="<%=inTitle %>">
+<input type="hidden" id="partURL" name="partURL" value = "<%=initUrl %>">
+<input type="hidden" id="ReportURL" name="ReportURL" value="<%=initUrl %>">
+<input type="hidden" id="ReportTitle" name="ReportTitle" value="<%=inTitle %>">
 
 <table>
 <%
@@ -204,9 +204,9 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 			   <td align="right"><label class="paramName" onMouseOver="Tip('<%=helpText%>')" ><%=promptText %></label></td>
 			   <td>&nbsp;&nbsp;</td>
 			   <td>
-			   <input type="text" id="<%=paramName %>" name="<%=paramName %>" value="<%=defaultValue %>" onMouseOver="Tip('<%=helpText%>')" onchange="getURL();" >
-			   	<BUTTON name="cal1" value="cal1" type="button" class="button" onMouseOver="Tip('<%=helpText%>')" onclick="c1.popup('<%=paramName %>');" >
-    				<IMG SRC="./calendar/img/cal.gif" ALT="<%=helpText%>"></BUTTON>
+			   <input type="text" id="<%=paramName %>" name="<%=paramName %>" value="<%=defaultValue %>" onmouseover="Tip('<%=helpText%>')" onchange="getURL();" >
+			   	<button name="cal1" value="cal1" type="button" class="button" onmouseover="Tip('<%=helpText%>')" onclick="c1.popup('<%=paramName %>');" >
+    				<img src="./calendar/img/cal.gif" alt="<%=helpText%>"></BUTTON>
     				
 			   </td>
 			</tr>
@@ -246,7 +246,7 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 			   
 			   <td>&nbsp;&nbsp;</td>
 			   <td> 
-				<SELECT <%=selectMultiple %> size="10" id="<%=selectNameID %>" name="<%=selectNameID %>" onMouseOver="Tip('<%=helpText%>');" onChange="<%=onchangeFunction %>" >					
+				<select <%=selectMultiple %> size="10" id="<%=selectNameID %>" name="<%=selectNameID %>" onmouseover="Tip('<%=helpText%>');" onchange="<%=onchangeFunction %>" >					
 	<%				
 			// Execute the sql statement to get the vos
 			
@@ -289,7 +289,7 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 							else
 								selectedItems += resultValue;
 						}
-						%> <OPTION value="<%=resultValue %>" <%=selected %> ><%=resultValue %></OPTION> 
+						%> <option value="<%=resultValue %>" <%=selected %> ><%=resultValue %></option> 
 						<%
 					}
 				}
@@ -328,7 +328,7 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 			}
 				
 			%>
-			   </SELECT>
+			   </select>
 			</td>
 		</tr>
 		<%
@@ -336,9 +336,9 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 			{
 		%>
 			<tr>
-			    <td align="right"><em><label class="paramName" onMouseOver="Tip('Readonly field')" ><%=selectedLabel %></label></em></td>
+			    <td align="right"><em><label class="paramName" onmouseover="Tip('Readonly field')" ><%=selectedLabel %></label></em></td>
 		   		<td>&nbsp;&nbsp;</td>
-		   		<td><em><input id="<%=paramName%>" type="text" size="70" name="<%=paramName%>" Value = "<%=selectedItems %>" readonly onMouseOver="Tip('Readonly field', CLICKCLOSE, false)"></em>
+		   		<td><em><input id="<%=paramName%>" type="text" size="70" name="<%=paramName%>" Value = "<%=selectedItems %>" readonly onmouseover="Tip('Readonly field', CLICKCLOSE, false)"></em>
 		   		</td>
 			</tr>
 		<%
@@ -348,10 +348,10 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 		{
 		%>
 		 	<tr>
-			   <td align="right"><label class="paramName" onMouseOver="Tip('<%=helpText%>')" ><%=promptText %></label></td>
+			   <td align="right"><label class="paramName" onmouseover="Tip('<%=helpText%>')" ><%=promptText %></label></td>
 			   <td>&nbsp;&nbsp;</td>
 			   <td>
-			   <select class="paramSelect" id="<%=paramName%>" name="<%=paramName%>"  onchange="getURL()" onMouseOver="Tip('<%=helpText%>')" >
+			   <select class="paramSelect" id="<%=paramName%>" name="<%=paramName%>"  onchange="getURL()" onmouseover="Tip('<%=helpText%>')" >
 				<%
 				for(int s=0; s < paramGroup.getParameterListSelection().size(); s++)
 				{
@@ -375,10 +375,10 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 		{
 		%>
 		    <tr>
-			<td align="right"><label class="paramName" onMouseOver="Tip('<%=helpText%>')" ><%=promptText %></label></td>
+			<td align="right"><label class="paramName" onmouseover="Tip('<%=helpText%>')" ><%=promptText %></label></td>
 			<td>&nbsp;&nbsp;</td>
 			<td>
-				<input id="<%=paramName%>" type="text" name="<%=paramName %>" value="<%=defaultValue %>" onMouseOver="Tip('<%=helpText%>')" >
+				<input id="<%=paramName%>" type="text" name="<%=paramName %>" value="<%=defaultValue %>" onmouseover="Tip('<%=helpText%>')" >
 			</td>
 		    </tr>
 		<%		  
@@ -422,7 +422,7 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 
 </form>
 
-<form name="mySubmitForm" method="post" action=" ">
+<form name="mySubmitForm" method="post" action=" " target="reportFrame">
 	<input class="button" type="submit" name="submitButton" value="Display Report" onclick="getAction();">
 </form>
 
