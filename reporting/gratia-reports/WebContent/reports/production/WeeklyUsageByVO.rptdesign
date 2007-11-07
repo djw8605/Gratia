@@ -367,7 +367,7 @@ order by voname</property>
             <property name="fontSize">9pt</property>
             <property name="textAlign">center</property>
             <expression name="valueExpr">var seltype
-	if(params["SelTYpe"] == "IN")
+	if(params["SelType"] == "IN")
  		seltype = "selected: " 
 	else
 		seltype = "excluded: "
