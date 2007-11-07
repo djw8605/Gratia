@@ -159,7 +159,7 @@
                 </structure>
             </list-property>
         </scalar-parameter>
-        <scalar-parameter name="SelectionType" id="107">
+        <scalar-parameter name="SelType" id="107">
             <text-property name="helpText">Include or exclude VO's in list.</text-property>
             <property name="valueType">static</property>
             <property name="dataType">string</property>
@@ -367,7 +367,7 @@ order by voname</property>
             <property name="fontSize">9pt</property>
             <property name="textAlign">center</property>
             <expression name="valueExpr">var seltype
-	if(params["SelectionType"] == "IN")
+	if(params["SelTYpe"] == "IN")
  		seltype = "selected: " 
 	else
 		seltype = "excluded: "
@@ -1545,7 +1545,7 @@ else {&#xD;
                 </structure>
                 <structure>
                     <property name="paramName">VOSelType</property>
-                    <expression name="expression">params["SelectionType"]</expression>
+                    <expression name="expression">params["SelType"]</expression>
                 </structure>
             </list-property>
             <list-property name="boundDataColumns">
