@@ -5,7 +5,7 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<LINK href="stylesheet.css" type="text/css" rel="stylesheet">
+<link href="stylesheet.css" type="text/css" rel="stylesheet">
 <title>Gratia Accounting</title>
 </head>
 <body>
@@ -45,6 +45,8 @@
 		link = link.replace(" ", "%20");		// Escape blank
 		link = link.replace("&amp;", "&");		// Convert "&amp;" to "&"
 		link = link.replace("&", "&amp;");		// Escape "&"
+		link = link.replace(">", "%3e");
+		link = link.replace("<", "%3c");
 	}
 %>
 	
@@ -87,6 +89,8 @@
 						linkURL = linkURL.replace(" ", "%20");		// Escape blanks
 						linkURL = linkURL.replace("&amp;", ",");	// cannot have &amp; in link string
 						linkURL = linkURL.replace("&", ",");		// cannot have & in link string
+						linkURL = linkURL.replace(">", "%3e");
+						linkURL = linkURL.replace("<", "%3c");
 				%>
 					<tr >
      					<td>
@@ -133,12 +137,12 @@ if(browserType != null ){
 
 
 %>
-                <iframe name="viewPanel"  width="800" height="700" SCROLLING="auto" frameborder=0 src="<%=link %>" > </iframe>
+                <iframe name="viewPanel"  width="800" height="700" scrolling="auto" frameborder=0 src="<%=link %>" > </iframe>
 <%
 	}
 	else {
 %>
-                <iframe name="viewPanel"  width="100%" height="100%" SCROLLING="auto" frameborder=0 src="<%=link %>" > </iframe>
+                <iframe name="viewPanel"  width="100%" height="100%" scrolling="auto" frameborder=0 src="<%=link %>" > </iframe>
 <%
 	}
    }
