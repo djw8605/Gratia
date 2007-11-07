@@ -2,12 +2,12 @@
     pageEncoding="ISO-8859-1"
     import="net.sf.gratia.reporting.*"%>
    
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional">
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<LINK href="stylesheet.css" type="text/css" rel="stylesheet">
-<base target="report">
+<link href="stylesheet.css" type="text/css" rel="stylesheet">
+<base target="reportFrame">
 <title>Gratia Accounting</title>
 </head>
 <body>
@@ -40,9 +40,8 @@
 		{
 			DashboardItem dashboardItem = (DashboardItem)row.getDashboardItems().get(z);
 						
-			String link = request.getRequestURL().toString();
-			//link = link.substring(0, link.lastIndexOf("/")) + "/frameset?__report=" + dashboardItem.getLink();
-			link = "/frameset?__report=" + dashboardItem.getLink();
+			String link = request.getRequestURL().toString();			
+			link = "/frameset?__report=" + dashboardItem.getLink() + "&amp;__title";
 			int width = 800;
 			if(colSpan > 1)
 				width = width * (colSpan + 1);			
