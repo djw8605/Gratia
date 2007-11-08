@@ -80,6 +80,8 @@
 #             Updated Normalization factor for BNL_PANDA        (1351)
 #   10/12/07 (John Weigand) - 
 #             Updated Normalization factor for UTA_DPCC         (915)
+#   11/08/07 (John Weigand) - 
+#             Replaced BNL_PANDA,BNL_OSG,BNL_LOCAL with US-T1-BNL
 #    
 ##################################################################
 #-- Site  ------- SPECint2000
@@ -99,10 +101,6 @@ UCSDT2-B
 UFlorida-PG         1602
 #--- ATLAS ----
 AGLT2               2100
-BNL_ATLAS_1         1351
-BNL_ATLAS_2         1351
-BNL_PANDA           1351 
-BNL_OSG             1351
 BU_ATLAS_Tier2      1123
 BU_ATLAS_Tier2o     1624
 IU_ATLAS_Tier2       921
@@ -114,5 +112,11 @@ OU_OCHEP_SWT2       1543
 OU_OSCER_ATLAS      1543
 UC_Teraport         1412
 UC_ATLAS_MWT2       1169
+US-T1-BNL           1351
 UTA_DPCC             915
 UTA_SWT2            1543
+##-- obsolete --
+##BNL_PANDA           1351 
+##BNL_OSG             1351
+##BNL_ATLAS_1         1351
+##BNL_ATLAS_2         1351
