@@ -110,6 +110,7 @@ a.menuItem:active
 }
 .button
 {
+	font-weight: bold;
 }
 table.query
 {
