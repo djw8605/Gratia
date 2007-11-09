@@ -25,7 +25,7 @@
 	if (ReportTitle != null)
    	{
 %>
-<div align="left" class="reportTitle"><%=ReportTitle%></div><br />
+<div align="left" class="reportTitle"><%= ReportTitle%></div><br />
 <%
 	}else
 	{
@@ -100,15 +100,15 @@
 			metadata = results.getMetaData();
 			%>
 			   <tr>
-				<td colspan="<%=metadata.getColumnCount()+1%>">
+				<td colspan="<%= metadata.getColumnCount()+1%>">
 					<em>Enter bellow a SQL statement and press 'Execute' to see the results.</em>
 					<br />
-					<textarea name="sql" rows=12 cols=85  class="querytxt"><%=sql %></textarea>
+					<textarea name="sql" rows=12 cols=85  class="querytxt"><%= sql %></textarea>
 					<br />
 					<input class=button type=submit value=Execute> 
 					<br />
 					 <div align="center"><input type="button" value="Download Report Data - CSV Format"
-						   onClick="window.open('downloadFile.jsp?csvFile=<%=csvFileName %>', 'Gratia');"></div>
+						   onClick="window.open('downloadFile.jsp?csvFile=<%= csvFileName %>', 'Gratia');"></div>
 					 <br />
 				</td>
 			   </tr> 
@@ -120,7 +120,7 @@
 			%> <tr> <%
 			for(int i=1; i<metadata.getColumnCount()+1; i++)
 			{
-				%> <td align="right"><strong><%=metadata.getColumnName(i) %></strong></td> <td>&nbsp;</td> <%
+				%> <td align="right"><strong><%= metadata.getColumnName(i) %></strong></td> <td>&nbsp;</td> <%
 					
 				// Construct the csv file header line  				
 				if (i<metadata.getColumnCount()){
@@ -163,7 +163,7 @@
 					else
 						cellvalue= value.toString();
 						
-					%><td align="right"><%=cellvalue %></td>  <td>&nbsp;</td> <%					
+					%><td align="right"><%= cellvalue %></td>  <td>&nbsp;</td> <%					
 					
 					//Construct a csv file line of data				
 					if (i<metadata.getColumnCount()) 
@@ -224,7 +224,7 @@
 			<td>
 				<em>Enter bellow a SQL statement and press 'Execute' to see the results.</em>
 				<br />
-				<textarea name="sql" rows=12 cols=85 class="querytxt"><%=sql %></textarea>
+				<textarea name="sql" rows=12 cols=85 class="querytxt"><%= sql %></textarea>
 				<br />
 				<input class=button type=submit value=Execute> 
 			</td>
