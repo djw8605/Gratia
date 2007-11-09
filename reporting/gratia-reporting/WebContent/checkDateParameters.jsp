@@ -97,7 +97,7 @@
 	}
 	 link += params;
 %>
-	<jsp:forward page="<%=link %>"></jsp:forward>
+	<jsp:forward page="<%= link %>"></jsp:forward>
 	
 </body>
 </html>

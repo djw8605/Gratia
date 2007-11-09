@@ -40,15 +40,15 @@
 		{
 			DashboardItem dashboardItem = (DashboardItem)row.getDashboardItems().get(z);
 						
-			String link = request.getRequestURL().toString();			
-			link = "/frameset?__report=" + dashboardItem.getLink() + "&amp;__title";
+			String link = request.getRequestURL().toString();
+			link = "/frameset?__report=" + dashboardItem.getLink() + "&amp;__title=";
 			int width = 800;
 			if(colSpan > 1)
 				width = width * (colSpan + 1);			
 	%>
-			<td colspan="<%=colSpan %>" valign="top">
+			<td colspan="<%= colSpan %>" valign="top">
 			
-			<jsp:forward  page="<%=link %>" /> 
+			<jsp:forward  page="<%= link %>" /> 
 			
 			</td>
 	<%
