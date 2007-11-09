@@ -82,6 +82,8 @@
 #             Updated Normalization factor for UTA_DPCC         (915)
 #   11/08/07 (John Weigand) - 
 #             Replaced BNL_PANDA,BNL_OSG,BNL_LOCAL with US-T1-BNL
+#   11/09/07 (John Weigand) - 
+#             Updated Normalization factor for PROD_SLAC       (1726)
 #    
 ##################################################################
 #-- Site  ------- SPECint2000
@@ -107,7 +109,7 @@ IU_ATLAS_Tier2       921
 IU_OSG              1678
 MWT2_IU             1787
 MWT2_UC             1787
-PROD_SLAC           1757
+PROD_SLAC           1726
 OU_OCHEP_SWT2       1543
 OU_OSCER_ATLAS      1543
 UC_Teraport         1412
