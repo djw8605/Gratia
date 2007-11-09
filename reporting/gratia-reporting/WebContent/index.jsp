@@ -65,7 +65,7 @@
 
 				%>	
 					<tr>
-					<td><hr><label class="menuGroup"><%=menuGroup.getName() %></label><td>
+					<td><hr><label class="menuGroup"><%= menuGroup.getName() %></label><td>
 					</tr>
 				<%
 					}
@@ -94,7 +94,7 @@
 				%>
 					<tr >
      					<td>
-     						<a class="menuItem" href="index.jsp?link=<%=linkURL %>"><%=linkNAME %></a>
+     						<a class="menuItem" href="index.jsp?link=<%= linkURL %>"><%= linkNAME %></a>
      					</td>
                     </tr>
 				<%
@@ -137,17 +137,17 @@ if(browserType != null ){
 
 
 %>
-                <iframe name="viewPanel"  width="800" height="700" scrolling="auto" frameborder=0 src="<%=link %>" > </iframe>
+                <iframe name="viewPanel"  width="800" height="700" scrolling="auto" frameborder=0 src="<%= link %>" > </iframe>
 <%
 	}
 	else {
 %>
-                <iframe name="viewPanel"  width="100%" height="100%" scrolling="auto" frameborder=0 src="<%=link %>" > </iframe>
+                <iframe name="viewPanel"  width="100%" height="100%" scrolling="auto" frameborder=0 src="<%= link %>" > </iframe>
 <%
 	}
    }
  %>
-			<!-- jsp:include page="<%=link %>" / -->
+			<!-- jsp:include page="<%= link %>" / -->
 			</td> </tr> </table>
 			</td>
 		</tr>

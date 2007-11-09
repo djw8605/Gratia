@@ -27,7 +27,7 @@
 	{
 		MenuGroup menuGroup = (MenuGroup)userConfiguration.getMenuGroups().get(i);
 		if(i>0){
-	%>	<hr><label class="menuGroup"><%=menuGroup.getName() %></label> <br /><%
+	%>	<hr><label class="menuGroup"><%= menuGroup.getName() %></label> <br /><%
 		}
 		for(int z=0; z < menuGroup.getMenuItems().size(); z++)
 		{
@@ -52,7 +52,7 @@
 			linkURL = linkURL.replace(">", "%3e");
 			linkURL = linkURL.replace("<", "%3c");
 			%> 
-			<a class="menuItem" href="<%=linkURL %>" target="paramFrame"><%=linkNAME %></a> <br />
+			<a class="menuItem" href="<%= linkURL %>" target="paramFrame"><%= linkNAME %></a> <br />
 			<%
 		}
 	}
