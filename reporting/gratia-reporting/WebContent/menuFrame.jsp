@@ -66,6 +66,6 @@
 	 <div class = "menuGroup"><hr>Commands</div>
 	 <a class = "menuItem" href="logout.jsp">Logout</a><br />
 	 <hr><a target=_blank class="contact" href="http://twiki.grid.iu.edu/twiki/bin/view/Accounting/ContactUs">Contact us</a><br />
-	 <p><div class = "menuVersion">Gratia Reporting Version: <%= reportingVersion %></div><br /></p>
+	 <p class = "menuVersion">Gratia Reporting Version: <%= reportingVersion %></p>
 </body>
 </html>
