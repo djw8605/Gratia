@@ -23,6 +23,7 @@
 	<%
 	String linkURL = null;
 	String linkNAME = null;
+	String targetFrame = "paramFrame";
 	for(int i=0; i < userConfiguration.getMenuGroups().size(); i++)
 	{
 		MenuGroup menuGroup = (MenuGroup)userConfiguration.getMenuGroups().get(i);
@@ -38,6 +39,8 @@
 // Eliminate the starting "-" and any blank spaces in the string
 
 			linkNAME = menuItem.getName();
+			if (linkNAME.indexOf("Featured") > -1)
+				targetFrame = "reportFrame";
 			if (menuItem.getLink().indexOf("?") > -1) 
 			{
 			   linkURL = menuItem.getLink() + "&ReportTitle=" + linkNAME.replaceFirst("-", "").trim();
@@ -52,7 +55,7 @@
 			linkURL = linkURL.replace(">", "%3e");
 			linkURL = linkURL.replace("<", "%3c");
 			%> 
-			<a class="menuItem" href="<%= linkURL %>" target="paramFrame"><%= linkNAME %></a> <br />
+			<a class="menuItem" href="<%= linkURL %>" target="<%= targetFrame %>"><%= linkNAME %></a> <br />
 			<%
 		}
 	}
