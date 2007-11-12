@@ -17,6 +17,7 @@
 	UserConfiguration userConfiguration = (UserConfiguration)session.getAttribute("userConfiguration"); 
 	ReportingConfiguration reportingConfiguration = (ReportingConfiguration)session.getAttribute("reportingConfiguration");
 	String reportsFolder = reportingConfiguration.getReportsFolder();
+	String reportingVersion = reportingConfiguration.getReportingVersion();
 
 %>
 <a href="http://opensciencegrid.org/"><img src="./images/osg-logo.gif" alt="OSG Logo" width="174" height="81" border="0"></a><hr>
@@ -60,8 +61,9 @@
 		}
 	}
 	%>	
-	 <div class="menuGroup"><hr>Commands</div>
-	 <a class="menuItem" href="logout.jsp">Logout</a><br />
+	 <div class = "menuGroup"><hr>Commands</div>
+	 <a class = "menuItem" href="logout.jsp">Logout</a><br />
 	 <hr><a target=_blank class="contact" href="http://twiki.grid.iu.edu/twiki/bin/view/Accounting/ContactUs">Contact us</a><br />
+	 <p><div class = "menuVersion">Gratia Reporting Version: <%= reportingVersion %></div><br /></p>
 </body>
 </html>
