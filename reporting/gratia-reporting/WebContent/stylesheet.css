@@ -103,6 +103,17 @@ a.menuItem:active
     font-family: Verdana, Arial, sans-serif;
 	font-size: 0.6em; 
 }
+
+.menuVersion
+{
+	color: #462300;
+	/* text-indent: 0.65em; */
+	text-align: left;
+	/* font-weight: bold; */
+	font-family: Verdana, Arial, sans-serif;
+	font-size: 0.58em; 
+}
+
 .txt
 {
     font-family: Verdana, Arial, sans-serif;
