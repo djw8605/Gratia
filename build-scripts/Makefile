@@ -32,7 +32,7 @@ administration=${collector}/gratia-administration
 reports=${reporting}/gratia-reports
 reportsrc=${reporting}/gratia-reporting
 birtDir=${reporting}/birt-wars
-birtwarFile=birt-v221.war
+birtwarFile=birt-v220.war
 
 # common modules
 configuration=${common}/configuration
@@ -276,7 +276,7 @@ reporting: birt-reporting
 	cp -p ${target}/gratiaReporting.jar                    war/WEB-INF/lib/.
 	cp -p ${target}/gratiaReporting.jar                    war/scriptlib/.
 	cp -p ${commonLib}/mysql-connector-java-5.0.4-bin.jar  war/WEB-INF/lib/.
-	cp -p ${commonLib}/mysql-connector-java-5.0.4-bin.jar  war/WEB-INF/platform/plugins/org.eclipse.birt.report.data.oda.jdbc_2.2.1.r22x_v20070919/drivers/.
+	cp -p ${commonLib}/mysql-connector-java-5.0.4-bin.jar  war/WEB-INF/platform/plugins/org.eclipse.birt.report.data.oda.jdbc*/drivers/.
 	cp -p ${commonLib}/dom4j-1.6.1.jar                     war/WEB-INF/lib/.
 	# --- copy needed jsp and css files ----
 	cp -p ${reportsrc}/WebContent/checkDateParameters.jsp  war/.
@@ -284,8 +284,7 @@ reporting: birt-reporting
 	cp -p ${reportsrc}/WebContent/downloadFile.jsp         war/.
 	cp -p ${reportsrc}/WebContent/featuredReport.jsp       war/.
 	cp -p ${reportsrc}/WebContent/GratiaParameterInput.jsp war/.
-	cp -p ${reportsrc}/WebContent/index.jsp                war/.
-	cp -p ${reportsrc}/WebContent/index-frames.html        war/.
+	cp -p ${reportsrc}/WebContent/index.html               war/.
 	cp -p ${reportsrc}/WebContent/logout.jsp               war/.
 	cp -p ${reportsrc}/WebContent/menuFrame.jsp            war/.
 	cp -p ${reportsrc}/WebContent/showQuery.jsp            war/.
