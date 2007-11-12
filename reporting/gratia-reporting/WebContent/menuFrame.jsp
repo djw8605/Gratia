@@ -42,6 +42,8 @@
 			linkNAME = menuItem.getName();
 			if (linkNAME.indexOf("Featured") > -1)
 				targetFrame = "reportFrame";
+			else
+				targetFrame = "paramFrame";
 			if (menuItem.getLink().indexOf("?") > -1) 
 			{
 			   linkURL = menuItem.getLink() + "&ReportTitle=" + linkNAME.replaceFirst("-", "").trim();
