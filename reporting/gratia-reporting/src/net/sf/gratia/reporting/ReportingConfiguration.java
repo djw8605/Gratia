@@ -18,6 +18,7 @@ public class ReportingConfiguration
 	private String _reportsMenuConfig = null;
 	private String _logsHome = null;
 	private String _csvHome = null;
+	private String _reportingVersion = null;
 	
 	public String getDatabasePassword() {
 		return _databasePassword;
@@ -59,6 +60,10 @@ public class ReportingConfiguration
 		return _csvHome;
 	}
 	
+	public String getReportingVersion() {
+		return _reportingVersion;
+	}
+	
 	public void loadReportingConfiguration(javax.servlet.http.HttpServletRequest request)
 	{		
 		this.request = request;
@@ -81,6 +86,8 @@ public class ReportingConfiguration
 				_databaseURL =  p.getProperty("service.mysql.url");
 				_databaseUser = p.getProperty("service.reporting.user");
 				_databasePassword = p.getProperty("service.reporting.password");
+
+				_reportingVersion = p.getProperty("gratia.reporting.version");
 		   	
 	 // Set a flag indicating the configuration has been loaded, so subsequent calls will not load again
 		   		 _configLoaded = "1";
