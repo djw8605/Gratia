@@ -16,12 +16,12 @@ import java.text.DecimalFormat;
 public class DatabaseMaintenance {
     static final String dq = "\"";
     static final String comma = ",";
-    static final int gratiaDatabaseVersion = 26;
+    static final int gratiaDatabaseVersion = 27;
     static final int latestDBVersionRequiringStoredProcedureLoad = gratiaDatabaseVersion;
     static final int latestDBVersionRequiringSummaryTableLoad = 19;
     static final int latestDBVersionRequiringSummaryViewLoad = 22;
     static final int latestDBVersionRequiringSummaryTriggerLoad = 19;
-    static final int latestDBVersionRequiringTableStatisticsRefresh = 25;
+    static final int latestDBVersionRequiringTableStatisticsRefresh = 27;
 
     java.sql.Connection connection;
     int liveVersion = 0;
@@ -916,10 +916,10 @@ public class DatabaseMaintenance {
                                 " to " + (current + 1));
                 }
             }
-            if (current == 24 || current == 25) {
+            if (current == 24 || current == 25 | current == 26) {
                 // Auxiliary DB item upgrades only.
                 Logging.log("Gratia database upgraded from " + current + " to 26");
-                current = 26;
+                current = 27;
                 UpdateDbVersion(current);
             }
             return ((current == gratiaDatabaseVersion) && checkAndUpgradeDbAuxiliaryItems());
@@ -982,8 +982,8 @@ public class DatabaseMaintenance {
         int result = Execute("DROP TABLE IF EXISTS TableStatistics");
         if (result > -1) {
             String command = "CREATE TABLE TableStatistics(" +
-                "RecordType VARCHAR(255) NOT NULL PRIMARY KEY," +
-                "nRecords INTEGER DEFAULT 0)";
+                "RecordType VARCHAR(255) NOT NULL," +
+                "nRecords INTEGER DEFAULT 0, Qualifier VARCHAR(255))";
 
             if (isInnoDB) {
                 command += " ENGINE = 'innodb'";
@@ -994,13 +994,12 @@ public class DatabaseMaintenance {
             Statement statement;
             ResultSet resultSet;
             command = "select table_name from information_schema.tables " +
-                "where table_schema = Database() and table_name like '%_Meta'" +
-                " order by table_name;";
+                "where table_schema = Database() and table_name like '%_Meta';";
             try {
                 statement = connection.prepareStatement(command);
                 resultSet = statement.executeQuery(command);
                 HashSet tableList = new HashSet<String>();
-                while ((result > -1) && resultSet.next()) {
+                while (resultSet.next()) {
                     String table_name = resultSet.getString(1);
                     int end_index = table_name.lastIndexOf("_Meta");
                     String base_table = table_name.substring(0,end_index);
@@ -1008,7 +1007,13 @@ public class DatabaseMaintenance {
                 }
                 resultSet.close();
                 statement.close();
-        
+
+                // Put error type information into the TableStatistics record.
+                //
+                result = Execute("update DupRecord set RecordType = 'JobUsageRecord' where RecordType is null");
+                result = Execute("insert into TableStatistics(RecordType,nRecords,Qualifier)" +
+                                 " select RecordType, count(*), error from DupRecord group by RecordType, error;");
+                // Put count(*) information in for all tables.
                 tableList.add("DupRecord");
                 for (Iterator x = tableList.iterator(); (result > -1) && x.hasNext();) {
                     String table_name = (String) x.next();

@@ -31,6 +31,11 @@ function preprocess_proc() {
 function prepareCountTrigger() {
   local table_name=${1##countTrigger}
   TPROC="${TMP}.countTrigger.${table_name}"
+  if [[ "${table_name}" == "DupRecord" ]]; then
+    maybe_increment_error_line="  update TableStatistics set nRecords = nRecords + 1 where RecordType = new.RecordType and Qualifier = new.error;"
+    maybe_decrement_error_line=${maybe_increment_error_line/\+/-}
+    maybe_decrement_error_line=${maybe_decrement_error_line//new/old}
+  fi
   cat > "${TPROC}" <<EOF
 delimiter ||
 drop procedure if exists conditional_trigger_drop;
@@ -74,13 +79,15 @@ call conditional_trigger_drop();
 create trigger countInc${table_name} after insert on ${table_name}
 for each row
 f:begin
-  update TableStatistics set nRecords = nRecords + 1 where RecordType = '${table_name}';
+  update TableStatistics set nRecords = nRecords + 1 where RecordType = '${table_name}' and Qualifier is null;
+${maybe_increment_error_line}
 end
 ||
 create trigger countDec${table_name} after delete on ${table_name}
 for each row
 f:begin
-  update TableStatistics set nRecords = nRecords - 1 where RecordType = '${table_name}';
+  update TableStatistics set nRecords = nRecords - 1 where RecordType = '${table_name}' and Qualifier is null;
+${maybe_decrement_error_line}
 end
 EOF
 

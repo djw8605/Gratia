@@ -380,7 +380,7 @@ public class Status extends HttpServlet {
                 // Totals for all time
                 ////////////////////////////////////
                 command = "select nRecords from TableStatistics where RecordType = '" +
-                    table_name + "'";
+                    table_name + "' and Qualifier is null";
                 Logging.log("command: " + command);
                 statement = connection.prepareStatement(command);
                 resultSet = statement.executeQuery(command);
@@ -392,9 +392,9 @@ public class Status extends HttpServlet {
                 }
                 resultSet.close();
                 statement.close();
-                command = "select count(*), error from DupRecord D " +
-                    "where D.RecordType = " + dq + table_name + dq +
-                    " group by error ";
+                command = "select nRecords, Qualifier from TableStatistics where RecordType = " +
+                    dq + table_name + dq +
+                    " and Qualifier is not null group by Qualifier";
                 Logging.log("command: " + command);
                 statement = connection.prepareStatement(command);
                 resultSet = statement.executeQuery(command);
