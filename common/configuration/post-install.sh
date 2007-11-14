@@ -110,6 +110,11 @@ while [[ -n "$1" ]]; do
         ;;
       stored)
         proc="${script_location}build-stored-procedures.sql"
+        set -- "$@" stored-extra
+        ;;
+      stored-extra)
+        # Hand-tweaked procedure (temporary)
+        proc="${script_location}WeeklyUsageByVORanked.sql"
         ;;
       trigger)
         proc="${script_location}build-trigger.sql"
