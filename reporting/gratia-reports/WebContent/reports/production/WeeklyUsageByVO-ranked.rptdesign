@@ -23,7 +23,6 @@
             <expression name="value">params["DatabasePassword"]</expression>
         </structure>
     </list-property>
-    <property name="eventHandlerClass">net.sf.gratia.reporting.GratiaBirtReportEH</property>
     <list-property name="libraries">
         <structure>
             <property name="fileName">gratia-lib1.rptlibrary</property>
@@ -851,7 +850,7 @@
                     <property name="dataType">string</property>
                     <property name="isRequired">true</property>
                     <property name="controlType">text-box</property>
-                    <property name="defaultValue">jdbc:mysql://gratia-vm02.fnal.gov:3320/gratia_jeffmack</property>
+                    <property name="defaultValue">jdbc:mysql://gratia-db01.fnal.gov:3320/gratia</property>
                     <structure name="format">
                         <property name="category">Unformatted</property>
                         <property name="pattern">Unformatted</property>
@@ -992,7 +991,7 @@
             </structure>
         </scalar-parameter>
         <parameter-group name="ReportInfo" id="363" extends="gratia-lib1.ReportInfo"/>
-        <scalar-parameter name="GroupsPerChart" id="394">
+        <scalar-parameter name="GroupsPerChart" id="397">
             <text-property name="helpText">Select number of groups (e.g. VO's or Sites) to be displayed on each chart</text-property>
             <property name="valueType">static</property>
             <property name="dataType">integer</property>
@@ -1000,16 +999,12 @@
             <property name="controlType">list-box</property>
             <property name="mustMatch">true</property>
             <property name="fixedOrder">true</property>
-            <property name="defaultValue">8</property>
+            <property name="defaultValue">10</property>
             <property name="distinct">false</property>
             <structure name="format">
                 <property name="category">Unformatted</property>
             </structure>
             <list-property name="selectionList">
-                <structure>
-                    <property name="value">10000</property>
-                    <property name="label">All</property>
-                </structure>
                 <structure>
                     <property name="value">1</property>
                     <property name="label">1</property>
@@ -1019,32 +1014,8 @@
                     <property name="label">2</property>
                 </structure>
                 <structure>
-                    <property name="value">3</property>
-                    <property name="label">3</property>
-                </structure>
-                <structure>
-                    <property name="value">4</property>
-                    <property name="label">4</property>
-                </structure>
-                <structure>
                     <property name="value">5</property>
                     <property name="label">5</property>
-                </structure>
-                <structure>
-                    <property name="value">6</property>
-                    <property name="label">6</property>
-                </structure>
-                <structure>
-                    <property name="value">7</property>
-                    <property name="label">7</property>
-                </structure>
-                <structure>
-                    <property name="value">8</property>
-                    <property name="label">8</property>
-                </structure>
-                <structure>
-                    <property name="value">9</property>
-                    <property name="label">9</property>
                 </structure>
                 <structure>
                     <property name="value">10</property>
@@ -1058,19 +1029,38 @@
                     <property name="value">20</property>
                     <property name="label">20</property>
                 </structure>
+                <structure>
+                    <property name="value">25</property>
+                    <property name="label">25</property>
+                </structure>
+                <structure>
+                    <property name="value">100</property>
+                    <property name="label">100</property>
+                </structure>
+                <structure>
+                    <property name="value">1000</property>
+                    <property name="label">ALL</property>
+                </structure>
             </list-property>
         </scalar-parameter>
     </parameters>
     <data-sources>
         <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="fermigrid1" id="357">
             <property name="odaDriverClass">com.mysql.jdbc.Driver</property>
-            <property name="odaURL">jdbc:mysql://gratia-vm02.fnal.gov:3320/gratia_jeffmack</property>
+            <property name="odaURL">jdbc:mysql://gratia-db01.fnal.gov:3320/gratia</property>
             <property name="odaUser">gratia</property>
             <encrypted-property name="odaPassword">cHJvdG8=</encrypted-property>
         </oda-data-source>
     </data-sources>
     <data-sets>
         <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="UsageByVORanked" id="358">
+            <list-property name="computedColumns">
+                <structure>
+                    <property name="name">ChartNr</property>
+                    <expression name="expression">(row["final_rank"]-1) / params["GroupsPerChart"]</expression>
+                    <property name="dataType">integer</property>
+                </structure>
+            </list-property>
             <structure name="cachedMetaData">
                 <list-property name="resultSet">
                     <structure>
@@ -1103,8 +1093,14 @@
                         <property name="name">Njobs</property>
                         <property name="dataType">decimal</property>
                     </structure>
+                    <structure>
+                        <property name="position">7</property>
+                        <property name="name">ChartNr</property>
+                        <property name="dataType">integer</property>
+                    </structure>
                 </list-property>
             </structure>
+            <property name="rowFetchLimit">10000</property>
             <property name="dataSource">fermigrid1</property>
             <property name="dataSetRowLimit">0</property>
             <list-property name="parameters">
@@ -1245,7 +1241,12 @@ yearnr + "-" + monthnr + "-" + daynr;</expression>
                 <structure>
                     <property name="name">ChartNumber</property>
                     <property name="displayName">ChartNumber</property>
-                    <expression name="expression">(row["final_rank"]-1) / params["GroupsPerChart"]</expression>
+                    <expression name="expression">(dataSetRow["final_rank"]-1) / params["GroupsPerChart"]</expression>
+                    <property name="dataType">integer</property>
+                </structure>
+                <structure>
+                    <property name="name">ChartNr</property>
+                    <expression name="expression">dataSetRow["ChartNr"]</expression>
                     <property name="dataType">integer</property>
                 </structure>
             </list-property>
@@ -1261,32 +1262,30 @@ yearnr + "-" + monthnr + "-" + daynr;</expression>
             <header>
                 <row id="10">
                     <cell id="11"/>
-                    <cell id="12">
-                        <text-data id="406">
-                            <property name="style">sans-style1</property>
-                            <property name="fontSize">9pt</property>
-                            <property name="fontWeight">normal</property>
-                            <property name="textAlign">center</property>
-                            <expression name="valueExpr">"Last 6 Months"</expression>
-                            <property name="contentType">html</property>
-                        </text-data>
-                    </cell>
+                    <cell id="12"/>
                     <cell id="13"/>
                 </row>
             </header>
             <group id="14">
                 <property name="groupName">Rank</property>
-                <property name="interval">none</property>
+                <property name="interval">interval</property>
+                <property name="intervalRange">1.0</property>
                 <property name="sortDirection">asc</property>
                 <expression name="keyExpr">row["ChartNumber"]</expression>
                 <structure name="toc">
                     <expression name="expressionValue">row["ChartNumber"]</expression>
                 </structure>
                 <property name="repeatHeader">true</property>
-                <property name="hideDetail">false</property>
+                <property name="hideDetail">true</property>
                 <property name="pageBreakAfter">avoid</property>
                 <property name="pageBreakBefore">always-excluding-first</property>
                 <property name="pageBreakInside">auto</property>
+                <list-property name="sort">
+                    <structure>
+                        <expression name="key">row["final_rank"]</expression>
+                        <property name="direction">asc</property>
+                    </structure>
+                </list-property>
                 <header>
                     <row id="15">
                         <cell id="16">
@@ -2523,6 +2522,11 @@ var metric = &quot;***Unknown metric***&quot;&#xD;
                                     <structure>
                                         <property name="name">Njobs</property>
                                         <expression name="expression">dataSetRow["Njobs"]</expression>
+                                    </structure>
+                                    <structure>
+                                        <property name="name">final_rank</property>
+                                        <expression name="expression">dataSetRow["final_rank"]</expression>
+                                        <property name="dataType">any</property>
                                     </structure>
                                 </list-property>
                                 <property name="style">sans-style1</property>
