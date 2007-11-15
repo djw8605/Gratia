@@ -1076,6 +1076,10 @@
                     <property name="value">25</property>
                     <property name="label">25</property>
                 </structure>
+                <structure>
+                    <property name="value">1000</property>
+                    <property name="label">ALL</property>
+                </structure>
             </list-property>
         </scalar-parameter>
     </parameters>
@@ -1314,14 +1318,15 @@
             </header>
             <group id="14">
                 <property name="groupName">Rank</property>
-                <property name="interval">none</property>
+                <property name="interval">interval</property>
+                <property name="intervalRange">1.0</property>
                 <property name="sortDirection">asc</property>
                 <expression name="keyExpr">row["ChartNumber"]</expression>
                 <structure name="toc">
                     <expression name="expressionValue">row["ChartNumber"]</expression>
                 </structure>
                 <property name="repeatHeader">true</property>
-                <property name="hideDetail">false</property>
+                <property name="hideDetail">true</property>
                 <property name="pageBreakAfter">avoid</property>
                 <property name="pageBreakBefore">always-excluding-first</property>
                 <property name="pageBreakInside">auto</property>
@@ -2164,6 +2169,48 @@ function beforeDrawAxisTitle( axis, label, context )
             <Red>128</Red>
             <Green>128</Green>
             <Blue>0</Blue>
+          </Entries>
+          <Entries xsi:type="attribute:ColorDefinition">
+            <Transparency>255</Transparency>
+            <Red>0</Red>
+            <Green>0</Green>
+            <Blue>0</Blue>
+          </Entries>
+          <Entries xsi:type="attribute:ColorDefinition">
+            <Transparency>255</Transparency>
+            <Red>0</Red>
+            <Green>0</Green>
+            <Blue>254</Blue>
+          </Entries>
+          <Entries xsi:type="attribute:ColorDefinition">
+            <Transparency>255</Transparency>
+            <Red>254</Red>
+            <Green>0</Green>
+            <Blue>254</Blue>
+          </Entries>
+          <Entries xsi:type="attribute:ColorDefinition">
+            <Transparency>255</Transparency>
+            <Red>0</Red>
+            <Green>254</Green>
+            <Blue>254</Blue>
+          </Entries>
+          <Entries xsi:type="attribute:ColorDefinition">
+            <Transparency>255</Transparency>
+            <Red>254</Red>
+            <Green>254</Green>
+            <Blue>0</Blue>
+          </Entries>
+          <Entries xsi:type="attribute:ColorDefinition">
+            <Transparency>255</Transparency>
+            <Red>204</Red>
+            <Green>153</Green>
+            <Blue>254</Blue>
+          </Entries>
+          <Entries xsi:type="attribute:ColorDefinition">
+            <Transparency>255</Transparency>
+            <Red>145</Red>
+            <Green>145</Green>
+            <Blue>145</Blue>
           </Entries>
         </SeriesPalette>
         <Series xsi:type="type:BarSeries">
