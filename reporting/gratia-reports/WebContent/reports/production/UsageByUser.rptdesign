@@ -1148,7 +1148,7 @@ else {&#xD;
             <Action>
               <Type>Show_Tooltip</Type>
               <Value xsi:type="attribute:TooltipValue">
-                <Text></Text>
+                <Text>row[&quot;UserName&quot;]</Text>
                 <Delay>200</Delay>
               </Value>
             </Action>
