@@ -1063,6 +1063,10 @@
                     <property name="value">25</property>
                     <property name="label">25</property>
                 </structure>
+                <structure>
+                    <property name="value">1000</property>
+                    <property name="label">ALL</property>
+                </structure>
             </list-property>
         </scalar-parameter>
     </parameters>
@@ -1143,8 +1147,9 @@
                     <property name="name">EndDate</property>
                     <property name="dataType">string</property>
                     <property name="position">4</property>
-                    <expression name="defaultValue">'2010-12-31'</expression>
+                    <expression name="defaultValue">'2007-01-31'</expression>
                     <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
                 </structure>
                 <structure>
                     <property name="name">GroupByFormat</property>
@@ -1286,14 +1291,15 @@
             </header>
             <group id="14">
                 <property name="groupName">Rank</property>
-                <property name="interval">none</property>
+                <property name="interval">interval</property>
+                <property name="intervalRange">1.0</property>
                 <property name="sortDirection">asc</property>
                 <expression name="keyExpr">row["ChartNumber"]</expression>
                 <structure name="toc">
                     <expression name="expressionValue">row["ChartNumber"]</expression>
                 </structure>
                 <property name="repeatHeader">true</property>
-                <property name="hideDetail">false</property>
+                <property name="hideDetail">true</property>
                 <property name="pageBreakAfter">avoid</property>
                 <property name="pageBreakBefore">always-excluding-first</property>
                 <property name="pageBreakInside">auto</property>
@@ -2130,6 +2136,30 @@ function beforeDrawAxisTitle( axis, label, context )
             <Red>128</Red>
             <Green>128</Green>
             <Blue>0</Blue>
+          </Entries>
+          <Entries xsi:type="attribute:ColorDefinition">
+            <Transparency>255</Transparency>
+            <Red>0</Red>
+            <Green>0</Green>
+            <Blue>0</Blue>
+          </Entries>
+          <Entries xsi:type="attribute:ColorDefinition">
+            <Transparency>255</Transparency>
+            <Red>0</Red>
+            <Green>0</Green>
+            <Blue>254</Blue>
+          </Entries>
+          <Entries xsi:type="attribute:ColorDefinition">
+            <Transparency>255</Transparency>
+            <Red>254</Red>
+            <Green>0</Green>
+            <Blue>254</Blue>
+          </Entries>
+          <Entries xsi:type="attribute:ColorDefinition">
+            <Transparency>255</Transparency>
+            <Red>0</Red>
+            <Green>204</Green>
+            <Blue>254</Blue>
           </Entries>
         </SeriesPalette>
         <Series xsi:type="type:BarSeries">
