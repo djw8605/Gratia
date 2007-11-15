@@ -1021,7 +1021,7 @@
             </structure>
         </scalar-parameter>
         <parameter-group name="ReportInfo" id="365" extends="gratia-lib1.ReportInfo"/>
-        <scalar-parameter name="GroupsPerChart" id="394">
+        <scalar-parameter name="GroupsPerChart" id="397">
             <text-property name="helpText">Select number of groups (e.g. VO's or Sites) to be displayed on each chart</text-property>
             <property name="valueType">static</property>
             <property name="dataType">integer</property>
@@ -1029,16 +1029,12 @@
             <property name="controlType">list-box</property>
             <property name="mustMatch">true</property>
             <property name="fixedOrder">true</property>
-            <property name="defaultValue">8</property>
+            <property name="defaultValue">10</property>
             <property name="distinct">false</property>
             <structure name="format">
                 <property name="category">Unformatted</property>
             </structure>
             <list-property name="selectionList">
-                <structure>
-                    <property name="value">10000</property>
-                    <property name="label">All</property>
-                </structure>
                 <structure>
                     <property name="value">1</property>
                     <property name="label">1</property>
@@ -1048,32 +1044,8 @@
                     <property name="label">2</property>
                 </structure>
                 <structure>
-                    <property name="value">3</property>
-                    <property name="label">3</property>
-                </structure>
-                <structure>
-                    <property name="value">4</property>
-                    <property name="label">4</property>
-                </structure>
-                <structure>
                     <property name="value">5</property>
                     <property name="label">5</property>
-                </structure>
-                <structure>
-                    <property name="value">6</property>
-                    <property name="label">6</property>
-                </structure>
-                <structure>
-                    <property name="value">7</property>
-                    <property name="label">7</property>
-                </structure>
-                <structure>
-                    <property name="value">8</property>
-                    <property name="label">8</property>
-                </structure>
-                <structure>
-                    <property name="value">9</property>
-                    <property name="label">9</property>
                 </structure>
                 <structure>
                     <property name="value">10</property>
@@ -1086,6 +1058,10 @@
                 <structure>
                     <property name="value">20</property>
                     <property name="label">20</property>
+                </structure>
+                <structure>
+                    <property name="value">25</property>
+                    <property name="label">25</property>
                 </structure>
             </list-property>
         </scalar-parameter>
