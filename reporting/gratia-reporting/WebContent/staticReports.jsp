@@ -27,7 +27,10 @@
 		staticFolder = "/" + staticFolder;
 
 	File f = new File(staticFolderPath);
-	String [] fileNames = f.list();
+	String [] fileNames = f.list(
+    		new FilenameFilter(){
+         	   public boolean accept(File dir, String name) {
+             	      return name.endsWith(".pdf"); } });
 	File [] fileObjects = f.listFiles();
 	%>
 	<ul>
