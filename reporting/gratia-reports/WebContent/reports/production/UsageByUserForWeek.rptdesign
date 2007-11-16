@@ -1167,26 +1167,38 @@ else {&#xD;
             <Action>
               <Type>Show_Tooltip</Type>
               <Value xsi:type="attribute:TooltipValue">
-                <Text>var sitename = row[&quot;sitename&quot;]&#xD;
-if (params[&quot;DisplayMetric&quot;] == &quot;wallclock&quot;) {&#xD;
-	var labval = String(row[&quot;WallDuration&quot;] / 3600);&#xD;
-	var dotpos = labval.indexOf(&quot;.&quot;,0); &#xD;
+                <Text>var sitename = row[&quot;SiteName&quot;];&#xD;
+var metricvalue =&quot;&quot;;&#xD;
+var label;&#xD;
+var dotpos;&#xD;
+&#xD;
+if (params[&quot;DisplayMetric&quot;] == &quot;wallclock&quot;) { &#xD;
+	metricvalue = String(row[&quot;WallDuration&quot;] / 3600);&#xD;
+	label = &quot;Wallclock Hours: &quot;;&#xD;
+}&#xD;
+if (params[&quot;DisplayMetric&quot;] == &quot;process&quot;)  {&#xD;
+	metricvalue = String(row[&quot;Cpu&quot;] / 3600);&#xD;
+	label = &quot;Process Hours: &quot;;&#xD;
+} &#xD;
+if (params[&quot;DisplayMetric&quot;] == &quot;jobcount&quot;) {&#xD;
+	metricvalue = String(row[&quot;Njobs&quot;]);&#xD;
+	label = &quot;Jobs: &quot;;&#xD;
+}&#xD;
+var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
 	if(dotpos > 0)&#xD;
 	{ &#xD;
-	labval = labval.substring(0,dotpos+2)&#xD;
-	};&#xD;
-   var metric = &quot;Wallclock Hours: &quot; + labval&#xD;
-}&#xD;
-else if (params[&quot;DisplayMetric&quot;]==&quot;process&quot;) {&#xD;
-var metric = &quot;Process Hours: &quot; + row[&quot;Cpu&quot;]/3600&#xD;
-}&#xD;
-else if (params[&quot;DisplayMetric&quot;]==&quot;jobcount&quot;){&#xD;
-var metric = &quot;Jobs: &quot; + row[&quot;Njobs&quot;]&#xD;
-}&#xD;
-else {&#xD;
-&quot;***Unknown metric***&quot;&#xD;
-}&#xD;
-&quot;Site: &quot; + sitename + &quot;\n&quot; + metric</Text>
+	metricvalue = metricvalue.substring(0,dotpos+2);&#xD;
+	}&#xD;
+&#xD;
+if(params[&quot;ForVO&quot;] == &quot;ForVO&quot;)&#xD;
+	voname = params[&quot;ForVOName&quot;];&#xD;
+if(params[&quot;ForVO&quot;] == &quot;AnyVO&quot;)&#xD;
+	voname = &quot;All VO's&quot;;&#xD;
+if(params[&quot;ForSite&quot;] == &quot;ForSite&quot;)&#xD;
+	sitename = params[&quot;ForSiteName&quot;];&#xD;
+if(params[&quot;ForSite&quot;] == &quot;AnySite&quot;)&#xD;
+	sitename = &quot;All Sites&quot;;&#xD;
+&quot;Site: &quot; + sitename + &quot;\n&quot; + &quot;VOName: &quot; + voname + &quot;\n&quot; + label + metricvalue;</Text>
                 <Delay>200</Delay>
               </Value>
             </Action>

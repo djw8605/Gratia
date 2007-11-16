@@ -1025,7 +1025,7 @@
             <text-property name="helpText">Select number of groups (e.g. VO's or Sites) to be displayed on each chart</text-property>
             <property name="valueType">static</property>
             <property name="dataType">integer</property>
-            <text-property name="promptText">Select # of Groups Per Chart</text-property>
+            <text-property name="promptText">Select # of groups per chart</text-property>
             <property name="controlType">list-box</property>
             <property name="mustMatch">true</property>
             <property name="fixedOrder">true</property>
