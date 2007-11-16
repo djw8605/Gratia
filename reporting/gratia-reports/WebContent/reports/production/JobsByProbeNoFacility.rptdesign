@@ -909,16 +909,6 @@ function beforeGeneration( chart, context )
           <LabelPosition>Outside</LabelPosition>
           <Stacked>false</Stacked>
           <Triggers>
-            <Condition>onmouseover</Condition>
-            <Action>
-              <Type>Show_Tooltip</Type>
-              <Value xsi:type="attribute:TooltipValue">
-                <Text></Text>
-                <Delay>200</Delay>
-              </Value>
-            </Action>
-          </Triggers>
-          <Triggers>
             <Condition>onclick</Condition>
             <Action>
               <Type>URL_Redirect</Type>
