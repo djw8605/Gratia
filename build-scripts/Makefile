@@ -31,6 +31,7 @@ administration=${collector}/gratia-administration
 # reporting modules
 reports=${reporting}/gratia-reports
 reportsrc=${reporting}/gratia-reporting
+staticScript=$(reportsrc)/WebContent/staticReports
 birtDir=${reporting}/birt-wars
 birtwarFile=birt-v220.war
 
@@ -288,6 +289,7 @@ reporting: birt-reporting
 	cp -p ${reportsrc}/WebContent/logout.jsp               war/.
 	cp -p ${reportsrc}/WebContent/menuFrame.jsp            war/.
 	cp -p ${reportsrc}/WebContent/showQuery.jsp            war/.
+	cp -p ${reportsrc}/WebContent/staticReports.jsp        war/.
 	cp -p ${reportsrc}/WebContent/stylesheet.css           war/.
 	# --- copy directories paths ---
 	cp -R ${reportsrc}/WebContent/calendar                 war/.
@@ -352,7 +354,7 @@ release: gratia
 	rm   -rf tarball; \
 	mkdir -p tarball/tomcat/v55/gratia; \
 	mkdir -p tarball/gratia/gratia_reporting; \
-	cp ${configuration}/*gov ${configuration}/*xml ${configuration}/*properties tarball/tomcat/v55/gratia; \
+	cp ${configuration}/*gov ${configuration}/*xml ${configuration}/*properties $(staticScript)/*py tarball/tomcat/v55/gratia; \
 	cp ${configuration}/*sql ${configuration}/*sh tarball/tomcat/v55/gratia; \
 	chmod 700 tarball/tomcat/v55/gratia/post-install.sh; \
 	perl -wapi.bak -e 's&CMD_(?:PREAMBLE|PREFIX|SUFFIX)&&g' tarball/tomcat/v55/gratia/post-install.sh; \
