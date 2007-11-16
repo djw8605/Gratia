@@ -19,6 +19,8 @@ public class ReportingConfiguration
 	private String _logsHome = null;
 	private String _csvHome = null;
 	private String _reportingVersion = null;
+	private String _staticFolder = null;
+	private String _staticFolderPath = null;
 	
 	public String getDatabasePassword() {
 		return _databasePassword;
@@ -64,6 +66,14 @@ public class ReportingConfiguration
 		return _reportingVersion;
 	}
 	
+	public String getStaticFolder() {
+		return _staticFolder;
+	}
+	
+	public String getStaticFolderPath() {
+		return _staticFolderPath;
+	}
+		
 	public void loadReportingConfiguration(javax.servlet.http.HttpServletRequest request)
 	{		
 		this.request = request;
@@ -80,14 +90,21 @@ public class ReportingConfiguration
 				_reportsMenuConfig = (webappsHome + p.getProperty("service.reporting.menuconfig").replace("/", File.separator));
 				_engineHome        = (webappsHome + p.getProperty("service.reporting.engine.home") + File.separatorChar);
 				_webappHome        = (webappsHome + p.getProperty("service.reporting.webapp.home") + File.separatorChar);
+				_staticFolderPath  = (webappsHome + p.getProperty("service.reporting.static.folder") + File.separatorChar);				
+				_staticFolder      = p.getProperty("service.reporting.static.folder");
+				if (_staticFolder.substring(_staticFolder.length()-1, _staticFolder.length()) != "/")
+					_staticFolder = _staticFolder + "/";
+				if (_staticFolder.substring(0, 1) != "/")
+					_staticFolder = "/" + _staticFolder;
 				_logsHome          = (webappsHome + "birt_logs" + File.separatorChar);	
 				_csvHome           = (webappsHome + "birt_csv_temp" + File.separatorChar);
 				
-				_databaseURL =  p.getProperty("service.mysql.url");
-				_databaseUser = p.getProperty("service.reporting.user");
-				_databasePassword = p.getProperty("service.reporting.password");
+				_databaseURL       =  p.getProperty("service.mysql.url");
+				_databaseUser      = p.getProperty("service.reporting.user");
+				_databasePassword  = p.getProperty("service.reporting.password");				
+				_staticFolder      = p.getProperty("service.reporting.static.folder");
 
-				_reportingVersion = p.getProperty("gratia.reporting.version");
+				_reportingVersion  = p.getProperty("gratia.reporting.version");
 		   	
 	 // Set a flag indicating the configuration has been loaded, so subsequent calls will not load again
 		   		 _configLoaded = "1";
