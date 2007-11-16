@@ -1,0 +1,7 @@
+<StaticReports>
+	<ReportGroup name="Group1">
+		<reportItem link="checkDateParameters.jsp?__report=[ReportsFolder]UsageByVOByDate-ranked.rptdesign&amp;__format=pdf&amp;DisplayMetric=wallclock&amp;GroupsPerChart=10&amp;ReportTitle=Usage+by+VO&amp;IntervalDays=30"/>
+		<reportItem link="checkDateParameters.jsp?__report=[ReportsFolder]UsageBySiteByDate-ranked.rptdesign&amp;__format=pdf&amp;DisplayMetric=wallclock&amp;GroupsPerChart=10&amp;ReportTitle=Usage+by+Site&amp;IntervalDays=30"/>
+		<reportItem link="checkDateParameters.jsp?__report=[ReportsFolder]WeeklyUsageByVO-ranked.rptdesign&amp;__format=pdf&amp;ReportTitle=Six+Month+History+Usage+by+VO&amp;GroupsPerChart=10&amp;DisplayMetric=wallclock"/>
+	</ReportGroup>
+</StaticReports>
