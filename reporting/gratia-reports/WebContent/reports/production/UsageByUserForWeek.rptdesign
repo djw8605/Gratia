@@ -1167,7 +1167,8 @@ else {&#xD;
             <Action>
               <Type>Show_Tooltip</Type>
               <Value xsi:type="attribute:TooltipValue">
-                <Text>var sitename = row[&quot;SiteName&quot;];&#xD;
+                <Text>var sitename = row[&quot;sitename&quot;];&#xD;
+var voname = row[&quot;voname&quot;];&#xD;
 var metricvalue =&quot;&quot;;&#xD;
 var label;&#xD;
 var dotpos;&#xD;
@@ -1190,14 +1191,6 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
 	metricvalue = metricvalue.substring(0,dotpos+2);&#xD;
 	}&#xD;
 &#xD;
-if(params[&quot;ForVO&quot;] == &quot;ForVO&quot;)&#xD;
-	voname = params[&quot;ForVOName&quot;];&#xD;
-if(params[&quot;ForVO&quot;] == &quot;AnyVO&quot;)&#xD;
-	voname = &quot;All VO's&quot;;&#xD;
-if(params[&quot;ForSite&quot;] == &quot;ForSite&quot;)&#xD;
-	sitename = params[&quot;ForSiteName&quot;];&#xD;
-if(params[&quot;ForSite&quot;] == &quot;AnySite&quot;)&#xD;
-	sitename = &quot;All Sites&quot;;&#xD;
 &quot;Site: &quot; + sitename + &quot;\n&quot; + &quot;VOName: &quot; + voname + &quot;\n&quot; + label + metricvalue;</Text>
                 <Delay>200</Delay>
               </Value>
