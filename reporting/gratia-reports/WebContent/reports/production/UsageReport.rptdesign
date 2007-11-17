@@ -403,20 +403,14 @@ order by name</property>
         </style>
     </styles>
     <page-setup>
-        <simple-master-page name="Simple MasterPage" id="2">
-            <page-header>
-                <text id="178">
-                    <property name="contentType">html</property>
-                    <text-property name="content"><![CDATA[<value-of>new Date()</value-of>]]></text-property>
-                </text>
-            </page-header>
-        </simple-master-page>
+        <simple-master-page name="Simple MasterPage" id="2"/>
     </page-setup>
     <body>
         <label name="ReportURL" id="392" extends="gratia-lib1.ReportURL"/>
         <label name="ShowQuery" id="391" extends="gratia-lib1.ShowQuery"/>
         <table id="94">
-            <property name="width">100%</property>
+            <property name="height">800px</property>
+            <property name="width">600px</property>
             <property name="dataSet">UsageData</property>
             <list-property name="paramBindings">
                 <structure>
@@ -561,7 +555,8 @@ order by name</property>
                             <property name="style">sans-style1</property>
                             <property name="fontFamily">sans-serif</property>
                             <property name="fontSize">large</property>
-                            <property name="fontWeight">bold</property>
+                            <property name="fontWeight">normal</property>
+                            <property name="paddingTop">1pt</property>
                             <property name="textAlign">center</property>
                             <expression name="valueExpr">if(params["SelectSiteName"] == "All")
 	"All Sites"
@@ -580,7 +575,7 @@ else
                             <property name="style">sans-style1</property>
                             <property name="fontFamily">sans-serif</property>
                             <property name="fontSize">large</property>
-                            <property name="fontWeight">bold</property>
+                            <property name="fontWeight">normal</property>
                             <property name="textAlign">center</property>
                             <expression name="valueExpr">if(params["SelectProbeName"] == "All")
 	"All Probes"
@@ -596,6 +591,11 @@ else
                 <property name="interval">none</property>
                 <property name="sortDirection">asc</property>
                 <expression name="keyExpr">row["sitename"]</expression>
+                <property name="repeatHeader">true</property>
+                <property name="hideDetail">false</property>
+                <property name="pageBreakAfter">auto</property>
+                <property name="pageBreakBefore">auto</property>
+                <property name="pageBreakInside">auto</property>
                 <header>
                     <row id="111">
                         <property name="height">0.26in</property>
@@ -624,6 +624,7 @@ else
                             <text-data id="170">
                                 <property name="style">sans-style1</property>
                                 <property name="fontFamily">sans-serif</property>
+                                <property name="fontSize">small</property>
                                 <property name="fontWeight">bold</property>
                                 <expression name="valueExpr">"Total for Site '" + row["sitename"] + "'"</expression>
                                 <property name="contentType">html</property>
@@ -635,6 +636,7 @@ else
                             <property name="borderTopWidth">thin</property>
                             <data id="400">
                                 <property name="style">sans-style1</property>
+                                <property name="fontSize">small</property>
                                 <property name="fontWeight">bold</property>
                                 <structure name="numberFormat">
                                     <property name="category">Fixed</property>
@@ -652,6 +654,7 @@ else
                             <property name="borderTopWidth">thin</property>
                             <data id="402">
                                 <property name="style">sans-style1</property>
+                                <property name="fontSize">small</property>
                                 <property name="textAlign">right</property>
                                 <property name="resultSetColumn">Column Binding_4</property>
                             </data>
@@ -664,6 +667,11 @@ else
                 <property name="interval">none</property>
                 <property name="sortDirection">asc</property>
                 <expression name="keyExpr">row["ProbeName"]</expression>
+                <property name="repeatHeader">true</property>
+                <property name="hideDetail">false</property>
+                <property name="pageBreakAfter">auto</property>
+                <property name="pageBreakBefore">auto</property>
+                <property name="pageBreakInside">auto</property>
                 <header>
                     <row id="122">
                         <cell id="123">
@@ -685,6 +693,7 @@ else
                             <text id="165">
                                 <property name="style">sans-style1</property>
                                 <property name="fontFamily">sans-serif</property>
+                                <property name="fontSize">small</property>
                                 <property name="fontWeight">bold</property>
                                 <property name="textUnderline">underline</property>
                                 <property name="contentType">plain</property>
@@ -695,6 +704,7 @@ else
                             <text id="167">
                                 <property name="style">sans-style1</property>
                                 <property name="fontFamily">sans-serif</property>
+                                <property name="fontSize">small</property>
                                 <property name="fontWeight">bold</property>
                                 <property name="textUnderline">underline</property>
                                 <property name="textAlign">right</property>
@@ -706,6 +716,7 @@ else
                             <text id="166">
                                 <property name="style">sans-style1</property>
                                 <property name="fontFamily">sans-serif</property>
+                                <property name="fontSize">small</property>
                                 <property name="fontWeight">bold</property>
                                 <property name="textUnderline">underline</property>
                                 <property name="textAlign">right</property>
@@ -735,6 +746,7 @@ else
                             <property name="borderTopWidth">thin</property>
                             <data id="399">
                                 <property name="style">sans-style1</property>
+                                <property name="fontSize">small</property>
                                 <property name="fontWeight">bold</property>
                                 <structure name="numberFormat">
                                     <property name="category">Fixed</property>
@@ -754,6 +766,7 @@ else
                             <property name="borderTopWidth">thin</property>
                             <data id="398">
                                 <property name="style">sans-style1</property>
+                                <property name="fontSize">small</property>
                                 <property name="fontWeight">bold</property>
                                 <property name="paddingTop">1pt</property>
                                 <structure name="numberFormat">
@@ -773,6 +786,7 @@ else
                         <data id="131">
                             <property name="style">sans-style1</property>
                             <property name="fontFamily">sans-serif</property>
+                            <property name="fontSize">small</property>
                             <property name="resultSetColumn">JobName</property>
                         </data>
                     </cell>
@@ -780,6 +794,7 @@ else
                         <data id="135">
                             <property name="style">sans-style1</property>
                             <property name="fontFamily">sans-serif</property>
+                            <property name="fontSize">small</property>
                             <property name="color">#000000</property>
                             <property name="paddingTop">1pt</property>
                             <property name="paddingRight">1pt</property>
