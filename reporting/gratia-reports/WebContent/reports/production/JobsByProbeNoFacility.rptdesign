@@ -917,7 +917,7 @@ function beforeGeneration( chart, context )
     &lt;property name=&quot;formatType&quot;>html&lt;/property>
     &lt;property name=&quot;linkType&quot;>drill-through&lt;/property>
     &lt;property name=&quot;reportName&quot;>UsageReport.rptdesign&lt;/property>
-    &lt;property name=&quot;targetWindow&quot;>_blank&lt;/property>
+    &lt;property name=&quot;targetWindow&quot;>_self&lt;/property>
     &lt;property name=&quot;targetFileType&quot;>report-design&lt;/property>
     &lt;list-property name=&quot;paramBindings&quot;>
         &lt;structure>
@@ -941,7 +941,7 @@ function beforeGeneration( chart, context )
             &lt;expression name=&quot;expression&quot;>params[&quot;EndDate&quot;]&lt;/expression>
         &lt;/structure>
         &lt;structure>
-            &lt;property name=&quot;paramName&quot;>ForSiteName&lt;/property>
+            &lt;property name=&quot;paramName&quot;>SelectSiteName&lt;/property>
             &lt;expression name=&quot;expression&quot;>'All'&lt;/expression>
         &lt;/structure>
         &lt;structure>
@@ -955,7 +955,7 @@ function beforeGeneration( chart, context )
     &lt;/list-property>
 &lt;/structure>
 </BaseUrl>
-                <BaseParameterName>ForProbeName</BaseParameterName>
+                <BaseParameterName>SelectProbeName</BaseParameterName>
                 <ValueParameterName></ValueParameterName>
                 <SeriesParameterName></SeriesParameterName>
               </Value>
@@ -1580,7 +1580,7 @@ function beforeGeneration( chart, context )
 ]]></xml-property>
             <property name="outputFormat">SVG</property>
             <structure name="action">
-                <property name="targetWindow">_blank</property>
+                <property name="targetWindow">_self</property>
                 <property name="linkType">drill-through</property>
                 <property name="formatType">html</property>
                 <property name="targetFileType">report-design</property>
@@ -1607,7 +1607,7 @@ function beforeGeneration( chart, context )
                         <expression name="expression">params["EndDate"]</expression>
                     </structure>
                     <structure>
-                        <property name="paramName">ForSiteName</property>
+                        <property name="paramName">SelectSiteName</property>
                         <expression name="expression">'All'</expression>
                     </structure>
                     <structure>
