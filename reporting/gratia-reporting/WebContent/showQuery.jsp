@@ -8,6 +8,7 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+
 <LINK href="stylesheet.css" type="text/css" rel="stylesheet">
 <title>SQL Report</title>
 </head>
@@ -46,11 +47,7 @@
 			}
 		catch (Exception ignore) { }	
 	}
-	
-%>
 
-<table class="query">		
-<%
 	// Get the query from the trace table
 	
 	if(sql == null)
@@ -99,28 +96,35 @@
 			results = statement.executeQuery(sql);	
 			metadata = results.getMetaData();
 			%>
+			<table class="query">	
 			   <tr>
-				<td colspan="<%= metadata.getColumnCount()+1%>">
-					<em>Enter bellow a SQL statement and press 'Execute' to see the results.</em>
+				<td>
+					<em>Enter bellow a SQL statement and press 'Execute Query' to see the results.</em>
 					<br />
-					<textarea name="sql" rows=12 cols=85  class="querytxt"><%= sql %></textarea>
-					<br />
-					<input class=button type=submit value=Execute> 
-					<br />
-					 <div align="center"><input type="button" value="Download Report Data - CSV Format"
-						   onClick="window.open('downloadFile.jsp?csvFile=<%= csvFileName %>', 'Gratia');"></div>
+					<textarea name="sql" rows="10" cols="85"  class="querytxt"><%= sql %></textarea>
+					</td>
+					<td>
+					<input class= "button" type="submit" value="Execute Query"> <br />
+					<p align="center"><input  class= "button"type="button" value="Download Report Data - CSV Format"
+						   onClick="window.open('downloadFile.jsp?csvFile=<%= csvFileName %>', 'Gratia');"></p>
 					 <br />
 				</td>
 			   </tr> 
+			   </table>
 			   
 		<%			
 			// Add a column to the table for each column in the resultset
 			
 			String csvLine = "";
-			%> <tr> <%
+			%> 
+			<br />
+			<table class="query" frame="hsides">	
+			<tr> 
+			<%
 			for(int i=1; i<metadata.getColumnCount()+1; i++)
 			{
-				%> <td align="right"><strong><%= metadata.getColumnName(i) %></strong></td> <td>&nbsp;</td> <%
+				%> <td align="right"><strong><%= metadata.getColumnName(i) %></strong></td> <td>&nbsp;</td> 
+				<%
 					
 				// Construct the csv file header line  				
 				if (i<metadata.getColumnCount()){
@@ -138,7 +142,6 @@
 			%> </tr> <%
 			
 			// Loop through the SQL results to add a row for each record
-			int rowIndex = 1;
 			String cellvalue = "";
 			while(results.next())
 			{
@@ -166,19 +169,19 @@
 					%><td align="right"><%= cellvalue %></td>  <td>&nbsp;</td> <%					
 					
 					//Construct a csv file line of data				
-					if (i<metadata.getColumnCount()) 
-						{csvLine = csvLine + value + ",";						
+					if (i < metadata.getColumnCount()) 
+						{
+							csvLine = csvLine + value + ",";						
 						}
 					else
-						{ csvLine = csvLine + value;
+						{
+							csvLine = csvLine + value;
 						}
 								
 				} // end of "for(int i=1; i<metadata.getColumnCount()+1; i++)"
-												
-				rowIndex++;
-				
+					
 			// write a new csv line
-				csvOut.write(csvLine+"\n"); 
+				csvOut.write(csvLine + "\n"); 
 				csvLine = "";
 				%> </tr> <%	
 			}// end of "while(results.next())"
@@ -187,7 +190,8 @@
 			csvOut.flush();
 			csvOut.close();
 			csvLine = "";
-			csvOut = null;				
+			csvOut = null;
+			%> 	</table> <%
 		}
 		 catch (Exception ex)
 		{
@@ -216,23 +220,26 @@
 			statement = null;
 			cnn = null;
 		}
-	} //end of "if(sql.trim().length() > 0)"
+	} // end of "if(sql.trim().length() ...)"
 	else
 	{
 	%>	
-		   <tr>
-			<td>
-				<em>Enter bellow a SQL statement and press 'Execute' to see the results.</em>
-				<br />
-				<textarea name="sql" rows=12 cols=85 class="querytxt"><%= sql %></textarea>
-				<br />
-				<input class=button type=submit value=Execute> 
-			</td>
-		  </tr>
+		<table class="query">	
+			<tr>
+				<td>
+					<em>Enter bellow a SQL statement and press 'Execute Query' to see the results.</em>
+					<br />
+					<textarea name="sql" rows="10" cols="85"  class="querytxt"><%= sql %></textarea>
+					</td>
+					<td>
+					<input class= "button" type="submit" value="Execute Query"> <br />
+				</td>
+			</tr> 
+		</table>
 	<%
 	} //end of "if(sql.trim().length() > 0){...} else "
 %>
-</table>
+
 </form>
 </body>
 </html>
