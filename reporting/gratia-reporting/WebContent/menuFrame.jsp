@@ -24,12 +24,14 @@
 	<%
 	String linkURL = null;
 	String linkNAME = null;
+	String groupName = null;
 	String targetFrame = "paramFrame";
 	for(int i=0; i < userConfiguration.getMenuGroups().size(); i++)
 	{
 		MenuGroup menuGroup = (MenuGroup)userConfiguration.getMenuGroups().get(i);
 		if(i>0){
-	%>	<hr><label class="menuGroup"><%= menuGroup.getName() %></label> <br /><%
+			groupName = menuGroup.getName();
+	%>	<hr><label class="menuGroup"><%= groupName %></label> <br /><%
 		}
 		for(int z=0; z < menuGroup.getMenuItems().size(); z++)
 		{
@@ -42,8 +44,11 @@
 			linkNAME = menuItem.getName();
 			if (linkNAME.indexOf("Featured") > -1)
 				targetFrame = "reportFrame";
+			else if (groupName.indexOf("SQL") > -1)
+				targetFrame = "_blank";
 			else
 				targetFrame = "paramFrame";
+			
 			if (menuItem.getLink().indexOf("?") > -1) 
 			{
 			   linkURL = menuItem.getLink() + "&ReportTitle=" + linkNAME.replaceFirst("-", "").trim();
