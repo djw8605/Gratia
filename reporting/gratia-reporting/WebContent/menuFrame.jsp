@@ -9,6 +9,18 @@
 <LINK href="stylesheet.css" type="text/css" rel="stylesheet">
 <base target="paramFrame">
 <title>Gratia Accounting</title>
+
+<script type="text/javascript">
+
+function clearReportFrame() {
+	parent.reportFrame.location = "about:blank"; 
+}
+
+function clearParamFrame() {
+	parent.paramFrame.location = "about:blank"; 
+}
+
+</script>
 </head>
 <body>
 <jsp:include page="common.jsp" />
@@ -26,6 +38,7 @@
 	String linkNAME = null;
 	String groupName = null;
 	String targetFrame = "paramFrame";
+	String clearFrame = "clearReportFrame();";
 	for(int i=0; i < userConfiguration.getMenuGroups().size(); i++)
 	{
 		MenuGroup menuGroup = (MenuGroup)userConfiguration.getMenuGroups().get(i);
@@ -42,12 +55,17 @@
 // Eliminate the starting "-" and any blank spaces in the string
 
 			linkNAME = menuItem.getName();
+			clearFrame = "clearReportFrame();";
 			if (linkNAME.indexOf("Featured") > -1)
+			{	
+				clearFrame = "clearParamFrame();";
 				targetFrame = "reportFrame";
-			else if (groupName.indexOf("SQL") > -1)
-				targetFrame = "_blank";
+			}
 			else
+			{
+				clearFrame = "clearReportFrame();";
 				targetFrame = "paramFrame";
+			}	
 			
 			if (menuItem.getLink().indexOf("?") > -1) 
 			{
@@ -63,16 +81,16 @@
 			linkURL = linkURL.replace(">", "%3e");
 			linkURL = linkURL.replace("<", "%3c");
 			%> 
-			<a class="menuItem" href="<%= linkURL %>" target="<%= targetFrame %>"><%= linkNAME %></a> <br />
+			<a class="menuItem" href="<%= linkURL %>" target="<%= targetFrame %>" onclick="<%= clearFrame %>"><%= linkNAME %></a> <br />
 			<%
 		}
 	}
-	%>		
-	 <div class = "menuGroup"><hr>Static Reports</div>
-	 <a class = "menuItem" href="staticReports.jsp">Static Reports</a><br />
+	%>
+	<hr><label class="menuGroup">Static Reports</label> <br />
+	 <a class = "menuItem" href="staticReports.jsp" onclick="clearReportFrame();">Static Reports</a><br />
 	 
-	 <div class = "menuGroup"><hr>Commands</div>
-	 <a class = "menuItem" href="logout.jsp">Logout</a><br />
+	 <hr><label class = "menuGroup">Commands</label> <br />
+	 <a class = "menuItem" href="logout.jsp" onclick="clearReportFrame();">Logout</a><br />
 	 <hr><a target=_blank class="contact" href="https://twiki.grid.iu.edu/twiki/bin/view/Accounting/ContactUs">Contact us</a><br />
 	 <p class = "menuVersion">Gratia Reporting Version: <%= reportingVersion %></p>
 </body>
