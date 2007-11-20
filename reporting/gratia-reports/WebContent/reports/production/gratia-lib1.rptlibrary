@@ -6517,7 +6517,7 @@ else {&#xD;
             <structure name="action">
                 <property name="linkType">hyperlink</property>
                 <expression name="uri">"../showQuery.jsp?TraceTableKey="+params["UserName"].split("|")[1]+"&amp;ReportTitle="+params["ReportTitle"]</expression>
-                <property name="targetWindow">_blank</property>
+                <property name="targetWindow">paramFrame</property>
             </structure>
         </label>
         <label name="ReportURL" id="116">
@@ -6568,7 +6568,7 @@ else {&#xD;
             <structure name="action">
                 <property name="linkType">hyperlink</property>
                 <expression name="uri">"../showQuery.jsp?TraceTableKey="+params["UserName"].split("|")[1]</expression>
-                <property name="targetWindow">_self</property>
+                <property name="targetWindow">paramFrame</property>
             </structure>
         </image>
     </components>
