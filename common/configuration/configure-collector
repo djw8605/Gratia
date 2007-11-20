@@ -11,6 +11,13 @@ use Getopt::Long;
 use File::Basename;
 use Pod::Usage;
 
+my $gratia_dir;
+if (-l $0) {
+  $gratia_dir = dirname(readlink($0));
+} else {
+  $gratia_dir = dirname $0;
+}
+
 my %collector_configs =
 	(
    itb_innodb => { http_port => 8880,
@@ -26,7 +33,7 @@ my %collector_configs =
                    {
                     "maintain.history.log" => 7,
                     "monitor.listener.wait" => 2880,
-                    "service.rmiservlet.level" => "FINEST",
+                    "service.rmiservlet.level" => "FINE",
                     "monitor.to.address0" => 'greenc@fnal.gov',
                     "service.listener.threads" => 1
                    }
@@ -463,6 +470,7 @@ foreach my $config (@instance_list) {
 	configure_tomcat_config($config, $config_ref);
 	configure_tomcat_users($config, $config_ref);
 	configure_log4j_properties($config, $config_ref) if $options{"use-ssl"};
+  configure_static_report_generation($config, $config_ref);
 
 	if (exists $options{"db-root"}) {
 		configure_post_install($config, $config_ref);
@@ -712,7 +720,8 @@ sub construct_monitor_message_subject {
     print STDERR "INFO: using default remote hostname $default_remote_host";
     $remote_host = $default_remote_host;
   }
-
+  # Propagate back
+  $collector_config->{remote_host} = $remote_host;
 	return sprintf("%s:%s %s Potential listener problem",
                  $remote_host,
                  $collector_config->{http_port},
@@ -726,6 +735,19 @@ sub temporary_filename {
 	chomp $tmp_file;
 	$tmp_file or die "Unable to create temporary file from stem $stem";
 	return $tmp_file;
+}
+
+sub configure_static_report_generation {
+  my ($instance_name, $collector_config) = @_;
+  my $static_report_generator = "$options{prefix}/tomcat-${instance_name}/gratia/staticReports.py";
+  return unless (-x $static_report_generator);
+  my @script_pars = ("$options{prefix}/tomcat-${instance_name}",
+                     sprintf("%s%s:%s/gratia-reporting/",
+                             $options{"use-ssl"}?"https://":"http://",
+                             $collector_config->{remote_host},
+                             $options{"use-ssl"}?$collector_config->{ssl_port}:$collector_config->{http_port}));
+  system(sprintf("VISUAL=${gratia_dir}/safe-replace-crontab CRON_TIMING=\"42 0 * * *\" CRON_CMD=\"'$static_report_generator' %s >/dev/null 2>&1\" crontab -e",
+                 join(" ", map { "'$_'"; } @script_pars)));
 }
 
 __END__
