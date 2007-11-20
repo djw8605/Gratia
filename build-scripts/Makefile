@@ -354,7 +354,8 @@ release: gratia
 	rm   -rf tarball; \
 	mkdir -p tarball/tomcat/v55/gratia; \
 	mkdir -p tarball/gratia/gratia_reporting; \
-	cp ${configuration}/*gov ${configuration}/*xml ${configuration}/*properties $(staticScript)/*py tarball/tomcat/v55/gratia; \
+	cp ${configuration}/*gov ${configuration}/*xml ${configuration}/*properties $(staticScript)/*.py tarball/tomcat/v55/gratia; \
+	chmod 755 tarball/tomcat/v55/gratia/*.py
 	cp ${configuration}/*sql ${configuration}/*sh tarball/tomcat/v55/gratia; \
 	chmod 700 tarball/tomcat/v55/gratia/post-install.sh; \
 	perl -wapi.bak -e 's&CMD_(?:PREAMBLE|PREFIX|SUFFIX)&&g' tarball/tomcat/v55/gratia/post-install.sh; \
@@ -376,7 +377,8 @@ release: gratia
 	mkdir -p tarball/var/data; \
 	mkdir -p tarball/var/logs; \
 	mkdir -p tarball/var/tmp; \
-	cp ${configuration}/*gov ${configuration}/*xml ${configuration}/*properties tarball/tomcat/v55/gratia; \
+	cp ${configuration}/*gov ${configuration}/*xml ${configuration}/*properties  $(staticScript)/*.py tarball/tomcat/v55/gratia; \
+	chmod 755 tarball/tomcat/v55/gratia/*.py
 	cp ${configuration}/*sql ${configuration}/*sh tarball/tomcat/v55/gratia; \
 	perl -wapi.bak -e 's&CMD_(?:PREAMBLE|PREFIX|SUFFIX)&&g' tarball/tomcat/v55/gratia/post-install.sh; \
 	rm -f tarball/tomcat/v55/gratia/post-install.sh.bak; \
@@ -398,8 +400,9 @@ gratia: clean util services servlets soap reporting reports administration secur
 	# ------------------------------
 	rm -f -r tarball; \
 	mkdir tarball; \
-	cp ${configuration}/UserVoMap.* ${configuration}/*xml ${configuration}/*properties tarball; \
+	cp ${configuration}/UserVoMap.* ${configuration}/*xml $(staticScript)/*.py ${configuration}/*properties tarball; \
 	cp ${configuration}/*sql ${configuration}/*sh tarball; \
+	chmod 755 tarball/*.py
 	chmod 700 tarball/post-install.sh; \
 	perl -wape 's&^(\s*gratia\.services\.version\s*=\s*).*$$&$$1${gratia_services_version}&; s&^(\s*gratia\.reporting\.version\s*=\s*).*$$&$$1${gratia_reporting_version}&; ' ${configuration}/service-configuration.properties > tarball/service-configuration.properties && chmod 600 tarball/service-configuration.properties; \
 	cp ${configuration}/configure-* ${configuration}/update-gratia-local tarball; \
