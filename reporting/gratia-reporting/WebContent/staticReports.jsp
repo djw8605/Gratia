@@ -27,20 +27,34 @@
 		staticFolder = "/" + staticFolder;
 
 	File f = new File(staticFolderPath);
-	String [] fileNames = f.list(
+	if (!f.exists()) 
+	{
+		%><p class = "reportItem" >There are no available reports</p>
+		<%		
+	}
+	else
+	{
+		String [] fileNames = f.list(
     		new FilenameFilter(){
          	   public boolean accept(File dir, String name) {
              	      return name.endsWith(".pdf"); } });
-	File [] fileObjects = f.listFiles();
-	%>
-	<ul>
-	<%
-	for (int i = 0; i < fileObjects.length; i++) 
-	{
-		if(!fileObjects[i].isDirectory())
+		File [] fileObjects = f.listFiles();
+		%> <ul> <%
+		if (fileObjects.length == 0)
 		{
-		%><li><a class = "reportItem" target = "reportFrame" href="<%= staticFolder+fileNames[i] %>"><%= fileNames[i] %></a></li>
-		<%
+			%><li><div class = "reportItem" >There are no available reports</div></li>
+			<%		
+		}
+		else
+		{
+			for (int i = 0; i < fileObjects.length; i++) 
+			{
+				if(!fileObjects[i].isDirectory())
+				{
+				%><li><a class = "reportItem" target = "reportFrame" href="<%= staticFolder+fileNames[i] %>"><%= fileNames[i] %></a></li>
+				<%
+				}
+			}
 		}
 	}
 	%>
