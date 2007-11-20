@@ -226,6 +226,7 @@ function clearParamFrame() {
 			%>
 			<script type="text/javascript">
 				parent.reportFrame.document.write('<\/table> <hr>');
+				parent.reportFrame.document.close();
 			</script> <%
 		}
 		 catch (Exception ex)
