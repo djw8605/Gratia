@@ -1,0 +1,41 @@
+eval '(exit $?0)' && eval 'exec perl -w -S $0 ${1+"$@"}'
+                  && eval 'exec perl -w -S $0 $argv:q'
+                  if 0;
+
+########################################################################
+########################################################################
+
+use strict;
+
+my $cron_tmp = $ARGV[0];
+
+exit(1) unless (-e $cron_tmp);
+
+exit(2) unless ($ENV{"CRON_TIMING"} and $ENV{"CRON_CMD"});
+
+my $tmp_out = `mktemp /tmp/cron.safe.XXXXXXXXXX`;
+chomp $tmp_out;
+
+exit unless $tmp_out;
+
+open(TMP_OUT, ">$tmp_out") or exit(3);
+open(CRON_TMP, "$cron_tmp") or exit(3);
+while (<CRON_TMP>) {
+  m&^\s*(?:[^\s]+\s+){5}\Q$ENV{"CRON_CMD"}\E& and next;
+  print TMP_OUT;
+}
+close CRON_TMP;
+
+print TMP_OUT qq&$ENV{"CRON_TIMING"} $ENV{"CRON_CMD"}&, "\n";
+
+close TMP_OUT;
+
+system(qq&mv $tmp_out $cron_tmp&);
+
+1;
+
+__END__
+
+### Local Variables:
+### mode: cperl
+### End:
