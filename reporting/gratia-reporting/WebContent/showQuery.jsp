@@ -119,7 +119,7 @@ function clearParamFrame() {
 					</td>
 					<td>
 					<input class= "button" type="submit" value="Execute Query" onclick="clearReportFrame();"> <br />
-					<p ><input  class= "button" type="button" value="Download Report Data - CSV Format"
+					<p ><input  class= "button" type="button" value="Export Data (csv)"
 						   onClick="window.open('downloadFile.jsp?csvFile=<%= csvFileName %>', 'Gratia');"></p>
 					 <br />
 				</td>
