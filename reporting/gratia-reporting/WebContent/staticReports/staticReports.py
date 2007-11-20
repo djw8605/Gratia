@@ -20,7 +20,7 @@ def showNode(node, reportsFolder, staticFolder, birtURL):
 	        reportsFolder = reportsFolder + '/'
 		urlQuery = attrs.get(attrName).nodeValue
 		i = urlQuery.index(']') + 1
-		s1 = reportName[i:]
+		s1 = urlQuery[i:]
 		i = s1.index('.') + 1
 		reportFile = os.path.join(staticFolder, s1[:i] + 'pdf')
 		## print reportFile		
