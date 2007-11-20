@@ -11,10 +11,23 @@
 
 <LINK href="stylesheet.css" type="text/css" rel="stylesheet">
 <title>SQL Report</title>
+
+<script type="text/javascript">
+
+function clearReportFrame() {
+	parent.reportFrame.location = "about:blank"; 
+}
+
+function clearParamFrame() {
+	parent.paramFrame.location = "about:blank"; 
+}
+
+</script>
+
 </head>
 <body>
+
 <form action="">
-	
 <%	
 	ReportingConfiguration reportingConfiguration = (ReportingConfiguration)session.getAttribute("reportingConfiguration");	
 	
@@ -27,6 +40,7 @@
    	{
 %>
 <div align="left" class="reportTitle"><%= ReportTitle%></div><br />
+<input type="hidden" id="ReportTitle" name="ReportTitle" value="<%= ReportTitle%>">
 <%
 	}else
 	{
@@ -101,11 +115,11 @@
 				<td>
 					<em>Enter bellow a SQL statement and press 'Execute Query' to see the results.</em>
 					<br />
-					<textarea name="sql" rows="10" cols="85"  class="querytxt"><%= sql %></textarea>
+					<textarea name="sql" rows="8" cols="85"  class="querytxt"><%= sql %></textarea>
 					</td>
 					<td>
-					<input class= "button" type="submit" value="Execute Query"> <br />
-					<p align="center"><input  class= "button"type="button" value="Download Report Data - CSV Format"
+					<input class= "button" type="submit" value="Execute Query" onclick="clearReportFrame();"> <br />
+					<p ><input  class= "button" type="button" value="Download Report Data - CSV Format"
 						   onClick="window.open('downloadFile.jsp?csvFile=<%= csvFileName %>', 'Gratia');"></p>
 					 <br />
 				</td>
@@ -116,14 +130,18 @@
 			// Add a column to the table for each column in the resultset
 			
 			String csvLine = "";
-			%> 
-			<br />
-			<table class="query" frame="hsides">	
-			<tr> 
+			%>
+			<script type="text/javascript">
+				parent.reportFrame.document.write('<hr> <table class="query"> <tr>');
+			</script>
+			
 			<%
 			for(int i=1; i<metadata.getColumnCount()+1; i++)
 			{
-				%> <td align="right"><strong><%= metadata.getColumnName(i) %></strong></td> <td>&nbsp;</td> 
+				%> 
+			<script type="text/javascript">
+				parent.reportFrame.document.write('<td align="right"><strong><%= metadata.getColumnName(i) %><\/strong><\/td> <td>&nbsp;<\/td>');				
+			</script>
 				<%
 					
 				// Construct the csv file header line  				
@@ -139,13 +157,20 @@
 			csvOut.write(csvLine+"\n"); 
 			csvLine = "";
 			
-			%> </tr> <%
+			%>
+			<script type="text/javascript">
+				parent.reportFrame.document.write('<\/tr>');
+			</script>
+			<%
 			
 			// Loop through the SQL results to add a row for each record
 			String cellvalue = "";
 			while(results.next())
 			{
-				%> <tr> <%
+				%> 
+			<script type="text/javascript">
+				parent.reportFrame.document.write('<tr>');
+			</script> <%
 							
 				// Loop through each column to add its data to the row cell-by-cell
 				for(int i=1; i<metadata.getColumnCount()+1; i++)
@@ -166,7 +191,11 @@
 					else
 						cellvalue= value.toString();
 						
-					%><td align="right"><%= cellvalue %></td>  <td>&nbsp;</td> <%					
+					%>
+			<script type="text/javascript">
+				parent.reportFrame.document.write('<td align="right"><%= cellvalue %><\/td>  <td>&nbsp;<\/td> ');
+			</script>
+			<%					
 					
 					//Construct a csv file line of data				
 					if (i < metadata.getColumnCount()) 
@@ -183,7 +212,10 @@
 			// write a new csv line
 				csvOut.write(csvLine + "\n"); 
 				csvLine = "";
-				%> </tr> <%	
+				%>
+			<script type="text/javascript">
+				parent.reportFrame.document.write('<\/tr> ');
+			</script>  <%	
 			}// end of "while(results.next())"
 			
 			// Flush all the data to the csv file and close it.
@@ -191,7 +223,10 @@
 			csvOut.close();
 			csvLine = "";
 			csvOut = null;
-			%> 	</table> <%
+			%>
+			<script type="text/javascript">
+				parent.reportFrame.document.write('<\/table> <hr>');
+			</script> <%
 		}
 		 catch (Exception ex)
 		{
@@ -229,10 +264,10 @@
 				<td>
 					<em>Enter bellow a SQL statement and press 'Execute Query' to see the results.</em>
 					<br />
-					<textarea name="sql" rows="10" cols="85"  class="querytxt"><%= sql %></textarea>
+					<textarea name="sql" rows="8" cols="85"  class="querytxt"><%= sql %></textarea>
 					</td>
 					<td>
-					<input class= "button" type="submit" value="Execute Query"> <br />
+					<input class= "button" type="submit" value="Execute Query" onclick="clearReportFrame();"> <br />
 				</td>
 			</tr> 
 		</table>
