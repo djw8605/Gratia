@@ -365,6 +365,7 @@ if [ "$1" = "start" ] ; then
   JAVA_OPTS="-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=${TOMCAT_MANAGEMENT_PORT} -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dssl.port=${TOMCAT_SSL_PORT}"; export JAVA_OPTS
   $CATALINA_HOME/bin/catalina.sh start
 elif [ "$1" = "stop" ] ; then
+  wget -O - -q '^^^STOP_DB_UPDATE_URL^^^' >/dev/null 2>&1
   $CATALINA_HOME/bin/shutdown.sh
 else
   echo "Usage: ${TOMCAT_INSTANCE_NAME} [start | stop]"
@@ -465,8 +466,8 @@ foreach my $config (@instance_list) {
 	next if $requirements_error;
 
 	# Configuration operations.
-	configure_init_file($config, $config_ref);
 	configure_collector_config($config, $config_ref);
+	configure_init_file($config, $config_ref);
 	configure_tomcat_config($config, $config_ref);
 	configure_tomcat_users($config, $config_ref);
 	configure_log4j_properties($config, $config_ref) if $options{"use-ssl"};
@@ -550,6 +551,11 @@ sub configure_post_install {
 
 sub configure_init_file {
 	my ($instance_name, $collector_config) = @_;
+  my $stop_db_update_url =
+    sprintf("%s%s:%s/gratia-administration/systemadministration.html?action=stopDatabaseUpdateThreads",
+            $options{"use-ssl"}?"https://":"http://",
+            $collector_config->{remote_host},
+            $options{"use-ssl"}?$collector_config->{ssl_port}:$collector_config->{http_port});
 	my $init_script = "/etc/rc.d/init.d/tomcat-$instance_name";
 	my $init_script_txt = $init_script_template;
 	$init_script_txt =~ s&^(\s*JAVA_OPTS\s*=\s*".*?)"&${1} -Xmx$collector_config->{max_heap_size}"&m if $collector_config->{max_heap_size};
@@ -561,6 +567,7 @@ sub configure_init_file {
 	$init_script_txt =~ s&^(TOMCAT_SSL_PORT=).*$&${1}$collector_config->{ssl_port}&m;
 	$init_script_txt =~ s&^(TOMCAT_PATH_STEM=).*$&${1}"$options{prefix}"&m;
 	$init_script_txt =~ s&^(JAVA_HOME=).*$&${1}"$options{"java-home"}"&m;
+  $init_script_txt =~ s&\^\^\^STOP_DB_UPDATE_URL\^\^\^&$stop_db_update_url&;
 	open(INIT_SCRIPT, ">$init_script") or die("Unable to open $init_script for writing");
 	print INIT_SCRIPT $init_script_txt;
 	close(INIT_SCRIPT);
