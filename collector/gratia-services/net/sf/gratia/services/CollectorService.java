@@ -12,6 +12,7 @@ import javax.servlet.*;
 import java.sql.*;
 
 import java.security.*;
+import java.lang.Thread.*;
 
 import net.sf.gratia.storage.DatabaseMaintenance;
 
@@ -351,6 +352,9 @@ public class CollectorService implements ServletContextListener
       for (i = 0; i < maxthreads; i++)
       {
          threads[i].stopRequest();
+         if (threads[i].getState() == Thread.State.TIMED_WAITING) {
+             threads[i].interrupt();
+         }
       }
       int unfinished = 0;
       try
