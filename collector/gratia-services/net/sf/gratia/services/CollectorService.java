@@ -352,12 +352,27 @@ public class CollectorService implements ServletContextListener
       {
          threads[i].stopRequest();
       }
+      int unfinished = 0;
       try
       {
-         Thread.sleep(60 * 1000);
+          long delayMillis = 60*1000; // 60 seconds
+          for (i = 0; i < maxthreads; i++) {
+              threads[i].join(delayMillis);                  
+          }
       }
       catch (Exception ignore)
       {
+      }
+      for (i = 0; i < maxthreads; i++) {
+          if (threads[i].isAlive()) {
+              // Timeout occurred; thread has not finished
+              unfinished = unfinished + 1;
+          } else {
+              // Finished
+          }
+      }
+      if (unfinished != 0) {
+          Logging.warning("CollectorService: Some threads ("+unfinished+") have not finished after 60 seconds");
       }
    }
 
