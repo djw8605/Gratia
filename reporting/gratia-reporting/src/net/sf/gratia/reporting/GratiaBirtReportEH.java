@@ -27,6 +27,7 @@ public class GratiaBirtReportEH extends ReportEventAdapter {
 		try 
 		{			
 			HttpServletRequest request = (HttpServletRequest) rc.getHttpServletRequest();
+			
 			String outReportURL = request.getRequestURL().toString().replace("frameset", "checkDateParameters.jsp") + "?" + request.getQueryString();
 
 			//  Debugging -- Start 1 of 5
@@ -102,60 +103,70 @@ public class GratiaBirtReportEH extends ReportEventAdapter {
 	public void initialize(IReportContext inReport) {
 	
 	   try {
-	
-		HttpServletRequest request = (HttpServletRequest) inReport.getHttpServletRequest();
-		String ReportURL = request.getRequestURL().toString() + "?" + request.getQueryString();
+
+			//  Debugging -- Start 1 of 2
+			// String gratiaEHLog =  System.getProperty("catalina.home") + File.separatorChar+ "webapps" + File.separatorChar + "GratiaBirtEH.log";
+			// BufferedWriter out = new BufferedWriter(new FileWriter(gratiaEHLog, true));
+		    // out.write("\n+++++++++ EH: INTIALIZE REPORT PARAMETERS ++++++++++++++++\n");
+	    	// out.flush();
+		   
+		   HttpServletRequest request = (HttpServletRequest) inReport.getHttpServletRequest();
+		   if (request != null)
+		   {
+			   String ReportURL = request.getRequestURL().toString() + "?" + request.getQueryString();
 		
-		//  Debugging -- Start 1 of 2
-		// String gratiaEHLog =  System.getProperty("catalina.home") + File.separatorChar+ "webapps" + File.separatorChar + "GratiaBirtEH.log";
-		// BufferedWriter out = new BufferedWriter(new FileWriter(gratiaEHLog, true));
-	    // out.write("\n+++++++++ EH: INTIALIZE REPORT PARAMETERS ++++++++++++++++\n");
-		// out.write("ReportURL = " + ReportURL + "\n");
-    	// out.flush();
-		//  Debugging -- End 1 of 2
+			   // out.write("ReportURL = " + ReportURL + "\n");
+			   // out.flush();
+			   //  Debugging -- End 1 of 2
 		
-		ReportingConfiguration reportingConfig = new ReportingConfiguration();
-		reportingConfig.loadReportingConfiguration(request);
+			   ReportingConfiguration reportingConfig = new ReportingConfiguration();
+			   reportingConfig.loadReportingConfiguration(request);
 		
-		//*CertificateHandler certificateHandler = new CertificateHandler();
-		//*certificateHandler.loadCertificateHandler(request);
+			   //*CertificateHandler certificateHandler = new CertificateHandler();
+			   //*certificateHandler.loadCertificateHandler(request);
 		
 		
-		//*certificateHandler.dump();
-		String userName = "GratiaUser"; //*certificateHandler.getName();
-		String userRole = "GratiaUser"; //*certificateHandler.getRole();
-		//String subtitle = "A Subtitle"; //*certificateHandler.getSubtitle();
-		String VO = "Unknown"; //*certificateHandler.getVO();
+			   //*certificateHandler.dump();
+			   String userName = "GratiaUser"; //*certificateHandler.getName();
+			   String userRole = "GratiaUser"; //*certificateHandler.getRole();
+			   //String subtitle = "A Subtitle"; //*certificateHandler.getSubtitle();
+			   String VO = "Unknown"; //*certificateHandler.getVO();
 		
-		String userKey = "" + System.currentTimeMillis();
-		userName = userName + "|" + userKey + "|" + VO;
-		String databaseURL =  reportingConfig.getDatabaseURL();
-		String databaseUser = reportingConfig.getDatabaseUser();
-		String databasePassword = reportingConfig.getDatabasePassword();
-		//String reportsMenuConfig = reportingConfig.getReportsMenuConfig();
-		//String reportsFolder = reportingConfig.getReportsFolder();
-		//String varConfigLoaded = reportingConfig.getConfigLoaded();
+			   String userKey = "" + System.currentTimeMillis();
+			   userName = userName + "|" + userKey + "|" + VO;
+			   String databaseURL =  reportingConfig.getDatabaseURL();
+			   String databaseUser = reportingConfig.getDatabaseUser();
+			   String databasePassword = reportingConfig.getDatabasePassword();
+			   //String reportsMenuConfig = reportingConfig.getReportsMenuConfig();
+			   //String reportsFolder = reportingConfig.getReportsFolder();
+			   //String varConfigLoaded = reportingConfig.getConfigLoaded();
 		
-		// set parameter values 
+			   // set parameter values 
 		
-		inReport.setParameterValue("DatabaseURL", databaseURL); 
-		inReport.setParameterValue("DatabasePassword", databasePassword);
-		inReport.setParameterValue("DatabaseUser", databaseUser);
-		inReport.setParameterValue("UserName", userName);
-		inReport.setParameterValue("UserRole", userRole);
-		// inReport.setParameterValue("ReportSubtitle", subtitle);
+			   inReport.setParameterValue("DatabaseURL", databaseURL); 
+			   inReport.setParameterValue("DatabasePassword", databasePassword);
+			   inReport.setParameterValue("DatabaseUser", databaseUser);
+			   inReport.setParameterValue("UserName", userName);
+			   inReport.setParameterValue("UserRole", userRole);
+			   // inReport.setParameterValue("ReportSubtitle", subtitle);
 		
-		//  Debugging -- Start 2 of 2
-		// out.write("\tParameters are set\n");
-		// out.write("\tDatabaseURL= " + inReport.getParameterValue("DatabaseURL")+"\n");
-		// out.write("\tDatabasePassword= " + inReport.getParameterValue("DatabasePassword")+"\n");
-		// out.write("\tDatabaseUser= " + inReport.getParameterValue("DatabaseUser")+"\n");
-		// out.write("\tUserName= " + inReport.getParameterValue("UserName")+"\n");
-		// out.write("\tUserRole= " + inReport.getParameterValue("UserRole")+"\n");
-    	// out.flush();
-	        
-		// out.close();
-		//  Debugging -- End 2 of 2
+			   //  Debugging -- Start 2 of 2
+			   // out.write("\tParameters are set\n");
+			   // out.write("\tDatabaseURL= " + inReport.getParameterValue("DatabaseURL")+"\n");
+			   // out.write("\tDatabasePassword= " + inReport.getParameterValue("DatabasePassword")+"\n");
+			   // out.write("\tDatabaseUser= " + inReport.getParameterValue("DatabaseUser")+"\n");
+			   // out.write("\tUserName= " + inReport.getParameterValue("UserName")+"\n");
+			   // out.write("\tUserRole= " + inReport.getParameterValue("UserRole")+"\n");
+			   // out.flush();
+		   }
+		   else
+		   {
+				// out.write("\tHttpServletRequest is NULL");
+	    		// out.flush();
+		   }    
+	 
+		   // out.close();
+		   //  Debugging -- End 2 of 2
 		
 	   } catch (Exception e) {
 			e.printStackTrace();
