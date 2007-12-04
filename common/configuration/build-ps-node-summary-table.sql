@@ -37,8 +37,20 @@ begin
 	select count(*) into mycount from NodeSummary
 		where EndTime = enddate
 		and Node = mynode
+    and ProbeName = myprobename
 		and ResourceType = myresourcetype;
 	if mycount = 0 then
+--    insert into trace(eventtime,pname, p1, p2, p3, p4, p5, p6, p7, p8, p9, data)
+--     values(date(enddate), 'trigger02', mynode,
+--			myprobename,
+--			myresourcetype,
+--			mycpusystemtime,
+--			mycpuusertime,
+--			mycpucount,
+--			myhostdescription,
+--			mybenchmarkscore,
+--			mydaysinmonth, 'New entry in NodeSummary');
+     
 		insert into NodeSummary values(
 			date(enddate),
 			mynode,
@@ -51,106 +63,118 @@ begin
 			mybenchmarkscore,
 			mydaysinmonth);
 	else
-		update NodeSummary
-			set 
-				CpuSystemTime = CpuSystemTime + mycpusystemtime,
-				CpuUserTime = CpuUserTime + mycpuusertime
-			where
-				EndTime = enddate
-				and Node = mynode
-				and ResourceType = myresourcetype;
-	end if;
+--    insert into trace(eventtime,pname, p1, p2, p3, p4, p5, p6, p7, p8, p9, data)
+--     values(date(enddate), 'trigger02', mynode,
+--			myprobename,
+--			myresourcetype,
+--			mycpusystemtime,
+--			mycpuusertime,
+--			mycpucount,
+--			myhostdescription,
+--      mybenchmarkscore,
+--      mydaysinmonth, 'Updating entry in NodeSummary');
+
+    update NodeSummary
+      set 
+        CpuSystemTime = CpuSystemTime + mycpusystemtime,
+        CpuUserTime = CpuUserTime + mycpuusertime
+      where
+        EndTime = enddate
+        and Node = mynode
+        and ProbeName = myprobename
+        and ResourceType = myresourcetype;
+  end if;
 end;
 ||
 drop procedure if exists buildnodesummary
 ||
 create procedure buildnodesummary()
 begin
-	declare done bool default false;
-	declare startdate datetime;
-	declare enddate datetime;
-	declare node varchar(255);
-	declare myprobename varchar(255);
-	declare myresourcetype varchar(255);
-	declare mycpuusertime int default 0;
-	declare mycpusystemtime int default 0;
-	declare mycpucount int default 0;
-	declare myhostdescription varchar(255);
-	declare mybenchmarkscore int default 0;
-	declare divide int default 0;
-	declare counter int default 0;	
-	declare newdate datetime;
+  declare done bool default false;
+  declare startdate datetime;
+  declare enddate datetime;
+  declare node varchar(255);
+  declare myprobename varchar(255);
+  declare myresourcetype varchar(255);
+  declare mycpuusertime int default 0;
+  declare mycpusystemtime int default 0;
+  declare mycpucount int default 0;
+  declare myhostdescription varchar(255);
+  declare mybenchmarkscore int default 0;
+  declare divide int default 0;
+  declare counter int default 0;  
+  declare newdate datetime;
 
-	declare newcpusystemtime int default 0;
-	declare newcpuusertime int default 0;
+  declare newcpusystemtime int default 0;
+  declare newcpuusertime int default 0;
 
-	declare numberofdays int default 0;
-	declare imax int default 0;
+  declare numberofdays int default 0;
+  declare imax int default 0;
 
-	declare cur01 cursor for select StartTime,EndTime,Host,ProbeName,ResourceType,
-		CpuUserDuration,CpuSystemDuration,HostDescription
-		from JobUsageRecord, JobUsageRecord_Meta
-		where JobUsageRecord.ResourceType = 'RawCPU'
-			and JobUsageRecord.dbid = JobUsageRecord_Meta.dbid
-		order by ProbeName,ResourceType,StartTime,EndTime;
+  declare cur01 cursor for select StartTime,EndTime,Host,ProbeName,ResourceType,
+    sum(CpuUserDuration),sum(CpuSystemDuration),HostDescription
+    from JobUsageRecord R
+    join JobUsageRecord_Meta M on (R.dbid = M.dbid)
+    where ResourceType = 'RawCPU'
+    group by Host,ProbeName,ResourceType,Date(StartTime),Date(EndTime);
 
-	declare continue handler for sqlstate '02000' set done = true;
+  declare continue handler for sqlstate '02000' set done = true;
 
-	open cur01;
+  open cur01;
 
-	myloop: loop
+  myloop: loop
 
-		fetch cur01 into startdate,enddate,node,myprobename,myresourcetype,
-			mycpuusertime,mycpusystemtime,myhostdescription;
+    fetch cur01 into startdate,enddate,node,myprobename,myresourcetype,
+      mycpuusertime,mycpusystemtime,myhostdescription;
 
-		if done then
-			close cur01;
-			leave myloop;
-		end if;
+    if done then
+      close cur01;
+      leave myloop;
+    end if;
 
-		if myprobename = null then
-			set myprobename = 'Unknown';
-		end if;
+    if myprobename = null then
+      set myprobename = 'Unknown';
+    end if;
 
-		if myresourcetype = null then
-			set myresourcetype = 'Unknown';
-		end if;
+    if myresourcetype = null then
+      set myresourcetype = 'Unknown';
+    end if;
 
-		begin
-				set mycpucount = 0;
-				set mybenchmarkscore = 0;
-				select BenchmarkScore,CPUCount into mybenchmarkscore,mycpucount
-					from CPUInfo where
-					myhostdescription = CPUInfo.HostDescription;
-				set done = false;
-		end;
+    begin
+        set mycpucount = 0;
+        set mybenchmarkscore = 0;
+        select BenchmarkScore,CPUCount into mybenchmarkscore,mycpucount
+          from CPUInfo where
+          myhostdescription = CPUInfo.HostDescription;
+        set done = false;
+    end;
 
-		set numberofdays = datediff(enddate,startdate);
-		set divide = numberofdays + 1;
-		set newcpusystemtime = mycpusystemtime / divide;
-		set newcpuusertime = mycpuusertime / divide;
+    set numberofdays = datediff(enddate,startdate);
+    set divide = numberofdays + 1;
+    set newcpusystemtime = mycpusystemtime / divide;
+    set newcpuusertime = mycpuusertime / divide;
 
-		if numberofdays = 0 then
-			call updatenodesummary(
-				date(enddate),node,myprobename,myresourcetype,
-				mycpusystemtime,mycpuusertime,mycpucount,myhostdescription,
-				mybenchmarkscore,extract(DAY from last_day(enddate)));
-		end if;
+    if numberofdays = 0 then
+      call updatenodesummary(
+        date(enddate),node,myprobename,myresourcetype,
+        mycpusystemtime,mycpuusertime,mycpucount,myhostdescription,
+        mybenchmarkscore,extract(DAY from last_day(enddate)));
+    end if;
 
-		if numberofdays > 0 then
-			set imax = numberofdays + 1;
-			set counter = 0;
-			while counter < imax do
-				set newdate = adddate(startdate,counter);
-				call updatenodesummary(
-					date(newdate),node,myprobename,myresourcetype,
-					newcpusystemtime,newcpuusertime,mycpucount,
-					myhostdescription,mybenchmarkscore,extract(DAY from last_day(newdate)));
-				set counter = counter + 1;
-			end while;
-		end if;
+    if numberofdays > 0 then
+      set imax = numberofdays + 1;
+      set counter = 0;
+      while counter < imax do
+        set newdate = adddate(startdate,counter);
+        call updatenodesummary(
+          date(newdate),node,myprobename,myresourcetype,
+          newcpusystemtime,newcpuusertime,mycpucount,
+          myhostdescription,mybenchmarkscore,extract(DAY from last_day(newdate)));
+        set counter = counter + 1;
+      end while;
+    end if;
 
-	end loop;
+  end loop;
 end
 ||
 delete from trace
