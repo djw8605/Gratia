@@ -166,11 +166,11 @@ public class HistoryReaper
       for (i = 0; i < temp.length; i++)
       {
          String directory = temp[i];
-         if (directory.indexOf("history-") > -1) 
+         if (directory.indexOf("history") > -1) 
          {
             history.add(temp[i]);
          }
-         else if (directory.indexOf("old-") > -1)
+         else if (directory.indexOf("old") > -1)
          {
             old.add(temp[i]);
          }
@@ -223,15 +223,17 @@ public class HistoryReaper
       //
       // now - screen/delete older directories
       //
+      String oldhistory = path + "/history2";
+      String oldold = path + "/old2";
       for (i = 0; i < history.size(); i++)
       {
          String directory = (String)history.elementAt(i);
-         if (directory.compareTo(beginningHistory) < 0)
+         if (directory.startsWith(oldhistory) || (directory.compareTo(beginningHistory) < 0))
          {
             Logging.log("HistoryReaper: Deleting Directory: " + directory);
             deleteDirectory(directory);
          }
-         else if (directory.compareTo(cbeginningHistory) < 0)
+         else if (directory.startsWith(oldold) || directory.compareTo(cbeginningHistory) < 0)
          {
             Logging.log("HistoryReaper: Compressing Directory: " + directory);
             compressDirectory(directory);
