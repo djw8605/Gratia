@@ -27,8 +27,11 @@ my %collector_configs =
                    server_port => 8104,
                    db_host => "gratia07.fnal.gov",
                    db_port => 3320,
-                   db_schema => "gratia_itb_innodb",
+                   db_schema => "gratia_ps_diag",
                    remote_host => "gratia01.fnal.gov",
+                   # Add an extra action if we're re-doing summary tables.
+                   PostInstallCmdPreamble => '[[ "$action" == "summary" ]] && set -- "$@" ps',
+                   UserConfig => "UserConfig_pacct.xml",
                    "properties.attributes" =>
                    {
                     "maintain.history.log" => 7,
@@ -144,7 +147,7 @@ my %collector_configs =
 					 UserConfig => "UserConfig_pacct.xml",
 					 remote_host => "gratia-fermi.fnal.gov",
 					 # Add an extra action if we're re-doing summary tables.
-					 PostInstallCmdPreamble => '[[ "$action" == *"summary"* ]] && set -- "$@" ps'
+					 PostInstallCmdPreamble => '[[ "$action" == "summary" ]] && set -- "$@" ps'
 				 },
 	 qcd => { http_port => 8883,
 						ssl_port => 8865,
