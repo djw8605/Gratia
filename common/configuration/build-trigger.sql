@@ -83,18 +83,28 @@ glr:begin
                     OR ((J.ReportableVOName IS NULL) AND (VC.ReportableVOName IS NULL)));
 
   if n_VOName is null then
+    insert into trace(eventtime,pname,p1,data)
+     values (UTC_TIMESTAMP(),'trigger02', new.dbid, 'Trigger failed due to null VOName');
     leave glr;
   end if;
   if n_Njobs is null then
+    insert into trace(eventtime,pname,vo,p1,data)
+     values (UTC_TIMESTAMP(),'trigger02', n_VOName, new.dbid, 'Trigger failed due to null n_Njobs');
     leave glr;
   end if;
   if n_WallDuration is null then
+    insert into trace(eventtime,pname,vo,p1,data)
+     values (UTC_TIMESTAMP(),'trigger02', n_VOName, new.dbid, 'Trigger failed due to null n_WallDuration');
     leave glr;
   end if;
   if n_CpuUserDuration is null then
+    insert into trace(eventtime,pname,vo,p1,data)
+     values (UTC_TIMESTAMP(),'trigger02', n_VOName, new.dbid, 'Trigger failed due to null n_CpuUserDuration');
     leave glr;
   end if;
   if n_CpuSystemDuration is null then
+    insert into trace(eventtime,pname,vo,p1,data)
+     values (UTC_TIMESTAMP(),'trigger02', n_VOName, new.dbid, 'Trigger failed due to null n_CpuSystemDuration');
     leave glr;
   end if;
 
@@ -258,7 +268,8 @@ glr:begin
     begin
       set mycpucount = 0;
       set mybenchmarkscore = 0;
-      select BenchmarkScore,CPUCount into mybenchmarkscore,mycpucount from CPUInfo
+      select BenchmarkScore,CPUCount
+        into mybenchmarkscore,mycpucount from CPUInfo
         where myhostdescription = CPUInfo.HostDescription;
     end;
 
@@ -267,8 +278,11 @@ glr:begin
     set newcpusystemtime = mycpusystemtime / divide;
     set newcpuusertime = mycpuusertime / divide;
 
+--    insert into trace(eventtime,pname,p1,p2,data)
+--     values(UTC_TIMESTAMP(), 'trigger02', new.dbid, numberofdays, 'Calling updatenodesummary');
+
     if numberofdays = 0 then
-      call updatenodesummary(
+        call updatenodesummary(
         date(enddate),node,myprobename,myresourcetype,
         mycpusystemtime,mycpuusertime,mycpucount,myhostdescription,
         mybenchmarkscore,extract(DAY from last_day(enddate)));
@@ -282,7 +296,8 @@ glr:begin
         call updatenodesummary(
           date(newdate),node,myprobename,myresourcetype,
           newcpusystemtime,newcpuusertime,mycpucount,
-          myhostdescription,mybenchmarkscore,extract(DAY from last_day(newdate)));
+          myhostdescription,mybenchmarkscore,
+          extract(DAY from last_day(newdate)));
         set counter = counter + 1;
       end while;
     end if;
