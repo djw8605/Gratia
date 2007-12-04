@@ -66,6 +66,8 @@ function getURL ()
 	myurl = myurl.replace(/;/g, "%3B");
 	x.ReportURL.value = myurl;
 	
+	return myurl;
+	
   	// document.write(myurl);
   	// document.write("<br />");
 }
@@ -89,19 +91,41 @@ function getAction()
 <jsp:include page="common.jsp" />
 
 <%
+// get the parameters passed. Make sure to parse the queryString in case getParameter does not get the parameter
+
+int i1 = -1;
+int i2 = -1;
+
+String wholeParams = request.getQueryString();
+String displayReport = request.getParameter("displayReport");
+
+if (displayReport == null)
+	displayReport = "false";
+
+if (wholeParams.indexOf("displayReport=true") > -1)	
+	displayReport = "true";
+
 String report = request.getParameter("report");
 
-// get the parameters passed
-	String inTitle = request.getParameter("ReportTitle");
-	if (inTitle != null)
-   	{
-%>
-<div class="reportTitle"><%= inTitle%></div><br />
-<%
-	}else
+String inTitle = request.getParameter("ReportTitle");
+if (inTitle == null)
+{	
+	inTitle = "";
+	if (wholeParams.indexOf("ReportTitle") > -1)
 	{
-		inTitle = "";
+		String str = "ReportTitle=";
+		i1 = wholeParams.indexOf("ReportTitle") + str.length();
+		i2 = wholeParams.substring(i1).indexOf("&");
+		if ( i2 == -1)
+			i2 = wholeParams.length();	// last parameter
+		else
+			i2 += i1;
+				
+		inTitle = wholeParams.substring(i1, i2).replace("%20", " ");
 	}
+}
+
+%><div class="reportTitle"><%= inTitle%></div><br /><%
 
 // Load the report parameters
 
@@ -434,5 +458,20 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 </td>
 </tr>
 </table>
+<script type="text/javascript">
+		parent.reportFrame.document.write('<hr color="#CBCB97" size="4" >');
+		parent.reportFrame.document.close();
+</script>
+<%
+// if (displayReport.indexOf("true") > -1)
+// {
+%>
+	 <script type="text/javascript">
+	 	var displayLink = getURL();
+	 	parent.reportFrame.location = displayLink;
+	</script>
+<%
+// }
+%>
 </body>
 </html>
