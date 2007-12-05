@@ -17,11 +17,13 @@
 var currentFramePath = findPath(self);
 
 function clearReportFrame() {
-	parent.reportFrame.location = "about:blank"; 
+	if (currentFramePath != 'top')
+	   parent.reportFrame.location = "about:blank"; 
 }
 
 function clearParamFrame() {
-	parent.paramFrame.location = "about:blank"; 
+	if (currentFramePath != 'top')
+	   parent.paramFrame.location = "about:blank"; 
 }
 
 function findPath(currentFrame) {
@@ -152,7 +154,24 @@ function closeAll () {
 			metadata = results.getMetaData();
 			// for displaying using document.write must replace "'" with "\'" 
 			// and eliminate line feeds, carriage returns and multiple spaces
-			sql = sql.replace("'", "\\'").replace("\n", " ").replace("\r", " ").replace("  ", " ").replace("  ", " ").replace("  ", " ");
+			sql = sql.replace("'", "\\'").replace("\n", " ").replace("\r", " ").trim();
+			
+			StringBuffer sb = new StringBuffer(sql.length());
+			char c;
+			boolean firstBlank = false;
+			for(int i = 0; i < sql.length(); ++i) 
+			{
+				c = sql.charAt(i);
+			            
+				if (c == ' ' && i>1 && (sql.charAt(i-1) != ' '))
+			            	firstBlank = true;
+			        else
+			            	firstBlank = false;			        	
+			       			                        
+				if (c != ' ' || firstBlank) 
+					sb.append(c);
+			}
+			sql = sb.toString();
 			%>
 			<script type="text/javascript">
 				writeTop('<table class="query"> <tr> <td> <em>Enter bellow a SQL statement and press "Execute Query" to see the results.<\/em> <br \/>');
@@ -216,7 +235,7 @@ function closeAll () {
 						Integer toprint = new Integer(intvalue);
 						cellvalue= String.format("%,d", toprint); //toprint.toString(); 
 					}
-					else if (value instanceof Integer || value instanceof Long ||value instanceof Short ) {
+					else if (value instanceof Integer || value instanceof Long ||value instanceof Short) {
 						cellvalue= String.format("%,d", value);
 					}
 					else
