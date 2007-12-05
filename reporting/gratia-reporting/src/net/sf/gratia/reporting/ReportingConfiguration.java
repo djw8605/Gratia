@@ -10,13 +10,10 @@ public class ReportingConfiguration
 	Properties p = net.sf.gratia.util.Configuration.getProperties();
 	private String _configLoaded = null;
 	private String _reportsFolder = null;
-	private String _engineHome = null;
-	private String _webappHome = null;
 	private String _databaseURL = null;
 	private String _databaseUser = null;
 	private String _databasePassword = null;
 	private String _reportsMenuConfig = null;
-	private String _logsHome = null;
 	private String _csvHome = null;
 	private String _reportingVersion = null;
 	private String _staticFolder = null;
@@ -34,16 +31,8 @@ public class ReportingConfiguration
 		return _databaseUser;
 	}
 
-	public String getEngineHome() {
-		return _engineHome;
-	}
-
 	public String getReportsFolder() {
 		return _reportsFolder;
-	}
-
-	public String getWebappHome() {
-		return _webappHome;
 	}
 
 	public String getReportsMenuConfig() {
@@ -53,11 +42,7 @@ public class ReportingConfiguration
 	public String getConfigLoaded() {
 		return _configLoaded;
 	}
-	
-	public String getLogsHome() {
-		return _logsHome;
-	}
-	
+
 	public String getCsvHome() {
 		return _csvHome;
 	}
@@ -88,15 +73,13 @@ public class ReportingConfiguration
 				
 				_reportsFolder     = (webappsHome + p.getProperty("service.reporting.reports.folder").replace("/", File.separator) + File.separatorChar);
 				_reportsMenuConfig = (webappsHome + p.getProperty("service.reporting.menuconfig").replace("/", File.separator));
-				_engineHome        = (webappsHome + p.getProperty("service.reporting.engine.home") + File.separatorChar);
-				_webappHome        = (webappsHome + p.getProperty("service.reporting.webapp.home") + File.separatorChar);
 				_staticFolderPath  = (webappsHome + p.getProperty("service.reporting.static.folder") + File.separatorChar);				
 				_staticFolder      = p.getProperty("service.reporting.static.folder");
 				if (_staticFolder.substring(_staticFolder.length()-1, _staticFolder.length()) != "/")
 					_staticFolder = _staticFolder + "/";
 				if (_staticFolder.substring(0, 1) != "/")
 					_staticFolder = "/" + _staticFolder;
-				_logsHome          = (webappsHome + "birt_logs" + File.separatorChar);	
+				
 				_csvHome           = (webappsHome + "birt_csv_temp" + File.separatorChar);
 				
 				_databaseURL       =  p.getProperty("service.mysql.url");
@@ -115,6 +98,5 @@ public class ReportingConfiguration
 		   }		
 	}
 
-	
 }
 
