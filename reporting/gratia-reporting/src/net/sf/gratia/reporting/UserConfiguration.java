@@ -81,32 +81,15 @@ public class UserConfiguration
 			        			for (Iterator menuItemIterator = ndeMenuGroup.elementIterator(); menuItemIterator.hasNext();)
 							{
 								Element ndeMenuItem = (Element) menuItemIterator.next();
-								String link = getAttributeValue(ndeMenuItem, "link").replace("[ReportsFolder]", reportsFolder);	//replaceAll("\\[ReportsFolder\\]", reportsFolder) ));		        							
-								newMenuGroup.getMenuItems().add(new MenuItem(getAttributeValue(ndeMenuItem, "name"), link)); 
+								String name = getAttributeValue(ndeMenuItem, "name");
+								String display = getAttributeValue(ndeMenuItem, "display");
+								String link = getAttributeValue(ndeMenuItem, "link").replace("[ReportsFolder]", reportsFolder);
+								newMenuGroup.getMenuItems().add(new MenuItem(name, link, display)); 
 							}
 			        			
 							_menuGroups.add(newMenuGroup);
 						}
 					}
-					else if(element.getName().equals("Dashboard"))
-					{
-						_dashboardRows = new ArrayList();
-			        		for (Iterator rowIterator = element.elementIterator(); rowIterator.hasNext();)
-						{
-							Element ndeRow = (Element) rowIterator.next();
-			        			DashboardRow newRow = new DashboardRow();
-			        			for (Iterator dashboardItemIterator = ndeRow.elementIterator(); dashboardItemIterator.hasNext();)
-							{
-								Element ndeDashboardItem = (Element) dashboardItemIterator.next();
-								String link = getAttributeValue(ndeDashboardItem, "link").replace("[ReportsFolder]", reportsFolder);	//replaceAll("\\[ReportsFolder\\]", reportsFolder) ));		        							
-			        			newRow.getDashboardItems().add(new DashboardItem(link)); //replaceAll("\\[ReportsFolder\\]", reportsFolder)));
-							}
-							
-							_dashboardRows.add(newRow);
-						}
-					}
-					else
-						throw new InvalidConfigurationException("Unknown config node named '" + element.getName() + "'");
 				} // Loop through each element in the configuration file under the root element
 			    				
 		// Set a flag indicating the configuration has been loaded, so subsequent calls will not load again
@@ -129,10 +112,11 @@ public class UserConfiguration
 	private String getAttributeValue(Element element, String attributeName)
 		throws InvalidConfigurationException
 	{
+		String attributeValue = "";
 		if(element.attribute(attributeName) == null)
-			throw new InvalidConfigurationException(attributeName + " is a required attribute of " + element.getName() + ", but it was not found.");
-		
-		String attributeValue = element.attribute(attributeName).getValue();
+			attributeValue = "false";
+		else
+			attributeValue = element.attribute(attributeName).getValue();
 				
 		return attributeValue;
 	}
