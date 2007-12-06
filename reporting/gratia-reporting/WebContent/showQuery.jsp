@@ -9,7 +9,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 
-<LINK href="stylesheet.css" type="text/css" rel="stylesheet">
+<link href="stylesheet.css" type="text/css" rel="stylesheet">
 <title>Gratia Accounting</title>
 
 <script type="text/javascript">
@@ -68,7 +68,7 @@ function closeAll () {
 <body>
 
 <script type="text/javascript">
-	writeTop('<LINK href="stylesheet.css" type="text\/css" rel="stylesheet">');
+	writeTop('<link href="stylesheet.css" type="text\/css" rel="stylesheet">');
 	writeTop('<form action="">');
 </script>
 <%
