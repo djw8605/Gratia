@@ -2791,40 +2791,8 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
                         <cell id="19">
                             <property name="colSpan">3</property>
                             <property name="rowSpan">1</property>
-                            <label name="ReportURL" id="363">
-                                <property name="fontFamily">sans-serif</property>
-                                <property name="fontSize">12pt</property>
-                                <property name="fontWeight">bold</property>
-                                <property name="paddingTop">1pt</property>
-                                <property name="paddingLeft">20pt</property>
-                                <list-property name="visibility">
-                                    <structure>
-                                        <property name="format">all</property>
-                                        <expression name="valueExpr">params["ReportURL"]==""</expression>
-                                    </structure>
-                                </list-property>
-                                <text-property name="text">Retrieve Report URL</text-property>
-                                <structure name="action">
-                                    <property name="linkType">hyperlink</property>
-                                    <expression name="uri">params["ReportURL"]</expression>
-                                    <property name="targetWindow">_blank</property>
-                                </structure>
-                            </label>
-                            <label name="ShowQuery" id="364">
-                                <property name="style">sans-style1</property>
-                                <property name="fontSize">12pt</property>
-                                <property name="fontWeight">bold</property>
-                                <property name="marginTop">0pt</property>
-                                <property name="marginBottom">20px</property>
-                                <property name="paddingTop">1pt</property>
-                                <property name="paddingLeft">20pt</property>
-                                <text-property name="text">Show Query</text-property>
-                                <structure name="action">
-                                    <property name="linkType">hyperlink</property>
-                                    <expression name="uri">"../showQuery.jsp?TraceTableKey="+params["UserName"].split("|")[1]</expression>
-                                    <property name="targetWindow">_self</property>
-                                </structure>
-                            </label>
+                            <label name="ShowQuery" id="402" extends="gratia-lib1.ShowQuery"/>
+                            <label name="ReportURL" id="403" extends="gratia-lib1.ReportURL"/>
                         </cell>
                     </row>
                 </footer>
