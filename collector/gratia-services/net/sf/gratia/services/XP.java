@@ -802,21 +802,6 @@ public class XP
         return find(source,key1,key2,key3,0);
     }
 
-    public XSpan findCell(String source,String variable)
-    {
-        return find(source,"<TD",variable,"</TD>");
-    }
-  
-    public XSpan findRow(String source,String variable)
-    {
-        return find(source,"<TR",variable,"</TR>");
-    }
-  
-    public XSpan findOption(String source,String variable)
-    {
-        return find(source,"<OPT",variable,"</OPTION>");
-    }
-  
     public String replace(String source,XSpan location)
     {
         StringBuffer buffer = new StringBuffer(source.length() + location.replace.length());
