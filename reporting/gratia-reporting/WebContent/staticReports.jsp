@@ -10,7 +10,7 @@
 
    <base target="reportFrame">
    <link href="stylesheet.css" type="text/css" rel="stylesheet">
-   <title>Gratia Accounting - Static Reports</title>
+   <title>Gratia Accounting</title>
 </head>
 
 <body>

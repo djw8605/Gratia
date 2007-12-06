@@ -10,7 +10,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 
 <LINK href="stylesheet.css" type="text/css" rel="stylesheet">
-<title>SQL Report</title>
+<title>Gratia Accounting</title>
 
 <script type="text/javascript">
 

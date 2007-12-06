@@ -14,7 +14,7 @@
 
 <base target="reportFrame">
 <link href="stylesheet.css" type="text/css" rel="stylesheet">
-<title>Gratia Reporting: Parameter Entry</title>
+<title>Gratia Reporting</title>
 
 <script type="text/javascript" src="calendar/calendardef.js"></script>
 <script type="text/javascript" src="calendar/calendarstd.js"></script>
