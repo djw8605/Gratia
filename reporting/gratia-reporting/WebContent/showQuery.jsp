@@ -68,6 +68,7 @@ function closeAll () {
 <body>
 
 <script type="text/javascript">
+	writeTop('<LINK href="stylesheet.css" type="text\/css" rel="stylesheet">');
 	writeTop('<form action="">');
 </script>
 <%
@@ -77,19 +78,20 @@ function closeAll () {
 	String csvFileName = null;
 
 
-	String ReportTitle = request.getParameter("ReportTitle");
-	if (ReportTitle != null)
+	String title = request.getParameter("ReportTitle");
+	title = title.replace("'", "\\'").replace("/", "\\/'");
+	
+	if (title != null)
    	{
 %>
-
 <script type="text/javascript">
-	writeTop('<div align="left" class="reportTitle"><%= ReportTitle%><\/div><br \/> <input type="hidden" id="ReportTitle" name="ReportTitle" value="<%= ReportTitle%>">');
+	writeTop('<div class="reportTitle"><%= title %><\/div><br>');
+	writeTop('<input type="hidden" id="ReportTitle" name="ReportTitle" value="<%= title %>">');
 </script>
-
 <%
 	}else
 	{
-		ReportTitle = "";
+		title = "";
 	}
 
 	String sql = request.getParameter("sql");
@@ -154,7 +156,7 @@ function closeAll () {
 			metadata = results.getMetaData();
 			// for displaying using document.write must replace "'" with "\'" 
 			// and eliminate line feeds, carriage returns and multiple spaces
-			sql = sql.replace("'", "\\'").replace("\n", " ").replace("\r", " ").trim();
+			sql = sql.replace("'", "\\'").replace("/", "\\/'").replace("\n", " ").replace("\r", " ").trim();
 			
 			StringBuffer sb = new StringBuffer(sql.length());
 			char c;
@@ -189,7 +191,7 @@ function closeAll () {
 			</script>
 
 			<%
-			for(int i=1; i<metadata.getColumnCount()+1; i++)
+			for(int i = 1; i < metadata.getColumnCount()+1; i++)
 			{
 			%> 
 			<script type="text/javascript">
@@ -197,7 +199,7 @@ function closeAll () {
 			</script>
 			<%		
 				// Construct the csv file header line  				
-				if (i<metadata.getColumnCount()){
+				if (i < metadata.getColumnCount()){
 					csvLine = csvLine + metadata.getColumnName(i) + ",";						
 				}
 				else {
@@ -223,7 +225,7 @@ function closeAll () {
 			</script>
 			<%			
 				// Loop through each column to add its data to the row cell-by-cell
-				for(int i=1; i<metadata.getColumnCount()+1; i++)
+				for(int i = 1; i < metadata.getColumnCount()+1; i++)
 				{
 					// Get the value for this column from the recordset, casting nulls to a valid string value
 					Object value = results.getObject(i);
@@ -254,7 +256,7 @@ function closeAll () {
 					{
 						csvLine = csvLine + value;
 					}
-				} // end of "for(int i=1; i<metadata.getColumnCount()+1; i++)"
+				} // end of "for(int i = 1; i < metadata.getColumnCount()+1; i++)"
 					
 				// write a new csv line
 				csvOut.write(csvLine + "\n"); 
