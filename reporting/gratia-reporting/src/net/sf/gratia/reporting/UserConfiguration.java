@@ -15,15 +15,10 @@ import net.sf.gratia.reporting.exceptions.InvalidConfigurationException;
 public class UserConfiguration 
 {
 	private String _configLoaded = null;
-	private ArrayList _menuGroups = null;
-	private ArrayList _dashboardRows = null;		
+	private ArrayList _menuGroups = null;	
 	
 	public ArrayList getMenuGroups() {
 		return _menuGroups;
-	}
-	
-	public ArrayList getDashboardRows() {
-		return _dashboardRows;
 	}
 	
 	public void loadUserConfiguration(javax.servlet.http.HttpServletRequest request)
