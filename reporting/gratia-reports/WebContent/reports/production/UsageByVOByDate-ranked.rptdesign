@@ -2791,24 +2791,8 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
                         <cell id="19">
                             <property name="colSpan">3</property>
                             <property name="rowSpan">1</property>
-                            <label name="ReportURL" id="403">
-                                <property name="fontFamily">sans-serif</property>
-                                <property name="fontSize">12pt</property>
-                                <property name="fontWeight">bold</property>
-                                <list-property name="visibility">
-                                    <structure>
-                                        <property name="format">all</property>
-                                        <expression name="valueExpr">params["ReportURL"]==""</expression>
-                                    </structure>
-                                </list-property>
-                                <text-property name="text">Retrieve Report URL</text-property>
-                                <structure name="action">
-                                    <property name="linkType">hyperlink</property>
-                                    <expression name="uri">params["ReportURL"]</expression>
-                                    <property name="targetWindow">_blank</property>
-                                </structure>
-                            </label>
-                            <label name="ShowQuery" id="402" extends="gratia-lib1.ShowQuery"/>
+                            <label name="ReportURL" id="408" extends="gratia-lib1.ReportURL"/>
+                            <label name="ShowQuery" id="409" extends="gratia-lib1.ShowQuery"/>
                         </cell>
                     </row>
                 </footer>
