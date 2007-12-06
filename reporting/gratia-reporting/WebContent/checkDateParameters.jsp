@@ -15,7 +15,7 @@
 <body>
 
 <%
-	String params = request.getQueryString();
+	String params = request.getQueryString() + "&amp;__title";
 	
 	String inStart = request.getParameter("StartDate");
 	String inEnd = request.getParameter("EndDate");
