@@ -27,7 +27,7 @@
 	String link = "/frameset?";
 	
 	String inFormat = request.getParameter("__format");
-	if (inFormat != null && inFormat.indexOf("pdf") > -1)
+	if (inFormat != null && inFormat.indexOf("html") == -1)
 		link = "/run?";
 	
 	// Get current date (End date) and a week ago (Start Date)
