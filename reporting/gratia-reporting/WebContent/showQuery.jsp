@@ -119,7 +119,7 @@ function closeAll () {
 		// Using document.write so: 
 		// must replace "'" with "\'" and eliminate line feeds, carriage returns and multiple spaces
 
-		String sql = inSQL.replace("'", "\\'").replace("/", "\\/'").replace("\n", " ").replace("\r", " ").trim();
+		String sql = inSQL.replace("'", "\\'").replace("/", "\\/").replace("\n", " ").replace("\r", " ").trim();
 
 		// Eliminate multiple blanks
 		StringBuffer sb = new StringBuffer(sql.length());
