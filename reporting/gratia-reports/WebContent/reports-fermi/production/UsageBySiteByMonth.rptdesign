@@ -149,11 +149,6 @@
                         <property name="name">availablebenchdays</property>
                         <property name="dataType">decimal</property>
                     </structure>
-                    <structure>
-                        <property name="position">10</property>
-                        <property name="name">halfavailablebenchdays</property>
-                        <property name="dataType">decimal</property>
-                    </structure>
                 </list-property>
             </structure>
             <property name="dataSource">fermigrid1</property>
@@ -253,18 +248,10 @@
                     <property name="dataType">decimal</property>
                     <property name="nativeDataType">3</property>
                 </structure>
-                <structure>
-                    <property name="position">10</property>
-                    <property name="name">halfavailablebenchdays</property>
-                    <property name="nativeName">halfavailablebenchdays</property>
-                    <property name="dataType">decimal</property>
-                    <property name="nativeDataType">3</property>
-                </structure>
             </list-property>
             <property name="queryText">select   S.SiteName,date_format(N.EndTime,'%Y-%m') as datevalue,
 sum(N.CpuSystemTime)*N.BenchmarkScore/1000/86400 as cpusystembenchdays, sum(CpuUserTime)*N.BenchmarkScore/1000/86400 as cpuuserbenchdays,
-count(distinct N.Node), N.BenchmarkScore,N.CpuCount, N.HostDescription, count(distinct N.Node)*N.BenchmarkScore*N.DaysInMonth*N.CpuCount/1000 as availablebenchdays,
-count(distinct N.Node)*N.BenchmarkScore*N.DaysInMonth*N.CpuCount*.5/1000 as halfavailablebenchdays
+count(distinct N.Node), N.BenchmarkScore,N.CpuCount, N.HostDescription, count(distinct N.Node)*N.BenchmarkScore*N.DaysInMonth*N.CpuCount/1000 as availablebenchdays
 from NodeSummary N, Probe P, Site S
 where P.siteid = S.siteid and N.ProbeName = P.ProbeName
 and S.SiteName like ?
@@ -1562,7 +1549,7 @@ function beforeGeneration(chart, icsc)
             <Separator>, </Separator>
           </DataPoint>
           <LabelPosition>Above</LabelPosition>
-          <Stacked>true</Stacked>
+          <Stacked>false</Stacked>
           <Triggers>
             <Condition>onmouseover</Condition>
             <Action>
@@ -1593,9 +1580,9 @@ function beforeGeneration(chart, icsc)
             <Thickness>1</Thickness>
             <Color>
               <Transparency>255</Transparency>
-              <Red>128</Red>
+              <Red>0</Red>
               <Green>0</Green>
-              <Blue>128</Blue>
+              <Blue>0</Blue>
             </Color>
             <Visible>true</Visible>
           </LineAttributes>
@@ -1820,7 +1807,7 @@ function beforeGeneration(chart, icsc)
             <Separator>, </Separator>
           </DataPoint>
           <LabelPosition>Above</LabelPosition>
-          <Stacked>true</Stacked>
+          <Stacked>false</Stacked>
           <Triggers>
             <Condition>onmouseover</Condition>
             <Action>
@@ -1847,7 +1834,7 @@ function beforeGeneration(chart, icsc)
             <Visible>true</Visible>
           </Markers>
           <LineAttributes>
-            <Style>Solid</Style>
+            <Style>Dashed</Style>
             <Thickness>1</Thickness>
             <Color>
               <Transparency>255</Transparency>
