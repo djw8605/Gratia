@@ -82,7 +82,7 @@ public class ReportingConfiguration
 				_staticFolderPath  = (webappsHome + p.getProperty("service.reporting.static.folder") + File.separatorChar);				
 				_staticFolder      = p.getProperty("service.reporting.static.folder");
 
-				if (_staticFolder.charAt(_staticFolder.length()) != '/')
+				if (_staticFolder.charAt(_staticFolder.length()-1) != '/')
 					_staticFolder = _staticFolder + "/";
 				if (_staticFolder.charAt(0) != '/')
 					_staticFolder = "/" + _staticFolder;
