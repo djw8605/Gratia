@@ -21,11 +21,12 @@
 	ReportingConfiguration reportingConfiguration = (ReportingConfiguration)session.getAttribute("reportingConfiguration");
 	String staticFolderPath = reportingConfiguration.getStaticFolderPath();
 	String staticFolder = reportingConfiguration.getStaticFolder();
-	if (staticFolder.substring(staticFolder.length()-1, staticFolder.length()) != "/")
-		staticFolder = staticFolder + "/";
-	if (staticFolder.substring(0, 1) != "/")
-		staticFolder = "/" + staticFolder;
 
+	if (staticFolder.charAt(staticFolder.length()-1) != '/')
+		staticFolder = staticFolder + "/";
+	if (staticFolder.charAt(0) != '/')
+		staticFolder = "/" + _staticFolder;
+	
 	File f = new File(staticFolderPath);
 	if (!f.exists()) 
 	{
