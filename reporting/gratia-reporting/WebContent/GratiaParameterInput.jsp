@@ -467,8 +467,7 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 // {
 %>
 	 <script type="text/javascript">
-	 	var displayLink = getURL();
-	 	parent.reportFrame.location = displayLink;
+	 	parent.reportFrame.location = getURL();
 	</script>
 <%
 // }
