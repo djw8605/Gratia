@@ -28,7 +28,7 @@ public class GratiaBirtReportEH extends ReportEventAdapter {
 		{
 			// Debugging ...
 			// BufferedWriter out = new BufferedWriter(new FileWriter("./GratiaBirtEH.log", true));
-			// out.write("\n+++++++++ BEFOERE FACTORY ++++++++++++++++\n");
+			// out.write("\n+++++++++ BEFORE FACTORY ++++++++++++++++\n");
 			// out.flush();
 
 			HttpServletRequest request = (HttpServletRequest) rc.getHttpServletRequest();
