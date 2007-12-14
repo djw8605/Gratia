@@ -451,7 +451,7 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 </td>
 <td>&nbsp;&nbsp;</td>
 <td valign="top">
-	<input class="button" type="submit" name="submitButton" value="Display Report" onclick="parent.reportFrame.location = getURL();">
+	<input class="button" type="submit" name="submitButton" value="Display Report below" onclick="parent.reportFrame.location = getURL();">
 	<p>
 	<input class="button" type="submit" name="submitButton" value="Display Report in new Window" onclick="window.open(getURL());">
 	</p>
