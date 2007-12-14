@@ -449,12 +449,12 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 </form>
 
 </td>
-<td valign="top" width="200">
-  <center>
-     <form name="mySubmitForm" method="post" action=" " target="reportFrame">
-	    <input class="button" type="submit" name="submitButton" value="Display Report" onclick="getAction();">
-     </form>
-  </center>
+<td>&nbsp;&nbsp;</td>
+<td valign="top">
+	<input class="button" type="submit" name="submitButton" value="Display Report" onclick="parent.reportFrame.location = getURL();">
+	<p>
+	<input class="button" type="submit" name="submitButton" value="Display Report in new Window" onclick="window.open(getURL());">
+	</p>
 </td>
 </tr>
 </table>
