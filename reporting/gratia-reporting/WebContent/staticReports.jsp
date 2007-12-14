@@ -25,7 +25,7 @@
 	if (staticFolder.charAt(staticFolder.length()-1) != '/')
 		staticFolder = staticFolder + "/";
 	if (staticFolder.charAt(0) != '/')
-		staticFolder = "/" + _staticFolder;
+		staticFolder = "/" + staticFolder;
 	
 	File f = new File(staticFolderPath);
 	if (!f.exists()) 
