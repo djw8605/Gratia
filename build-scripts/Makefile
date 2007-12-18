@@ -283,7 +283,7 @@ reporting: birt-reporting
 	cp -p ${reportsrc}/WebContent/checkDateParameters.jsp  war/.
 	cp -p ${reportsrc}/WebContent/common.jsp               war/.
 	cp -p ${reportsrc}/WebContent/downloadFile.jsp         war/.
-	cp -p ${reportsrc}/WebContent/featuredReport.jsp       war/.
+	# cp -p ${reportsrc}/WebContent/featuredReport.jsp       war/.
 	cp -p ${reportsrc}/WebContent/GratiaParameterInput.jsp war/.
 	cp -p ${reportsrc}/WebContent/index.html               war/.
 	cp -p ${reportsrc}/WebContent/logout.jsp               war/.
