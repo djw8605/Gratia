@@ -42,23 +42,23 @@ function clearParamFrame() {
 	String targetFrame = "paramFrame";
 	String clearFrame = "clearParamFrame(); clearReportFrame();";
 	String styleClass = "menuItem";
-	
+
 	for(int i=0; i < userConfiguration.getMenuGroups().size(); i++)
 	{
 		MenuGroup menuGroup = (MenuGroup)userConfiguration.getMenuGroups().get(i);
-		groupName = menuGroup.getName();
+		groupName = menuGroup.getGroup();
 	%>	<hr><label class="menuGroup"><%= groupName %></label> <br /><%
 
 		for(int z=0; z < menuGroup.getMenuItems().size(); z++)
 		{
 			MenuItem menuItem = (MenuItem)menuGroup.getMenuItems().get(z);
-						
+
 // Add the "name" of the report (title=) on the created link for display purposes
 // Make sure that if this is the first argument to include "?"
-// Eliminate the starting "-" and any blank spaces in the string			
-			
+// Eliminate the starting "-" and any blank spaces in the string
+
 			String linkTitle = menuItem.getName();
-			
+
 			linkNAME = "- ";
 			styleClass = "menuItem";
 			displayRep = menuItem.getDisplay();
@@ -69,7 +69,7 @@ function clearParamFrame() {
 			}
 			linkNAME = linkNAME + linkTitle;
 			clearFrame = "clearReportFrame();";
-			
+
 			if (menuItem.getLink().indexOf("?") > -1) 
 			{
 			   linkURL = menuItem.getLink() + "&ReportTitle=" + linkTitle.trim() + "&displayReport=" + displayRep.trim()+ "&amp;__title";
@@ -77,7 +77,7 @@ function clearParamFrame() {
 			{
 			   linkURL = menuItem.getLink() + "?ReportTitle=" + linkTitle.trim() + "&displayReport=" + displayRep.trim()+ "&amp;__title";
 			}
-			
+
 			linkURL = linkURL.replace(" ", "%20");
 			linkURL = linkURL.replace("&amp;", "&");
 			linkURL = linkURL.replace("&", "&amp;");
@@ -97,12 +97,11 @@ function clearParamFrame() {
 	%>
 	<hr><label class="menuGroup">Static Reports</label> <br />
 	 <a class = "menuItem" href="staticReports.jsp" onclick="clearReportFrame();">Static Reports</a><br />
-	 
+
 	 <hr><label class = "menuGroup">Commands</label> <br />
 	 <a class = "menuItem" href="logout.jsp" onclick="clearReportFrame();">Logout</a><br />
 	 <hr><a target=_blank class="contact" href="https://twiki.grid.iu.edu/twiki/bin/view/Accounting/ContactUs">Contact us</a><br />
 	 <p class = "menuVersion">Gratia Reporting Version: <%= reportingVersion %></p>
-	 
 <%
 if (displayLink != null)
 {
@@ -116,6 +115,6 @@ if (displayLink != null)
 <%
 }
 %>
-	 
+
 </body>
 </html>
