@@ -20,5 +20,11 @@
 	}
 	
 
+	StaticReportConfig staticReportConfig = (StaticReportConfig)session.getAttribute("staticReportConfig");
+	if(staticReportConfig == null)
+	{
+		staticReportConfig = new StaticReportConfig();
+		staticReportConfig.loadStaticReportConfig(request);
+		session.setAttribute("staticReportConfig", staticReportConfig);
+	}
 %>
-
