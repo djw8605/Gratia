@@ -5,22 +5,20 @@ import java.util.ArrayList;
 public class MenuGroup 
 {
 	
-	private String _name;
+	private String _group;
 	private ArrayList _menuItems;
 	
-	public MenuGroup(String name)
+	public MenuGroup(String group)
 	{
-		_name = name;
+		_group = group;
 		_menuItems = new ArrayList();
 	}
 	
-	public String getName(){
-		return _name;
+	public String getGroup(){
+		return _group;
 	}
 	
 	public ArrayList getMenuItems() {
 		return _menuItems;
 	}
-	
-	
 }
