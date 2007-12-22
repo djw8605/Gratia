@@ -141,14 +141,19 @@ function closeAll () {
 		sql = sb.toString();
 
 		// Construct the csv file name. Do not open any files at this point
+		// Check if on windows
 		String tempCsvPath = "";
-		if (System.getProperty( "os.name" ).indexOf("Windows") != -1)
-			tempCsvPath = ".\\";
-		else
-			tempCsvPath = reportingConfiguration.getCsvHome();
-
 		String somethingUnique = "" + System.currentTimeMillis();
-		csvFileName = tempCsvPath + "gratia_report_data_" + somethingUnique + ".csv";
+		if (System.getProperty( "os.name" ).indexOf("Windows") != -1)
+		{
+			tempCsvPath = ".\\";
+			csvFileName = "gratia_report_data_" + somethingUnique + ".csv";
+		}
+		else
+		{
+			tempCsvPath = reportingConfiguration.getCsvHome();
+			csvFileName = tempCsvPath + "gratia_report_data_" + somethingUnique + ".csv";
+		}
 
 		%>
 		<script type="text/javascript">
