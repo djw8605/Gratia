@@ -3,6 +3,8 @@
     import="net.sf.gratia.reporting.*"
     import="java.sql.*"
     import="java.io.*"
+    import="java.util.Date"
+    import="java.text.SimpleDateFormat"
 %>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
@@ -80,7 +82,7 @@ function closeAll () {
 
 
 	String title = request.getParameter("ReportTitle");
-	
+
 	if (title != null)
 	{
 		title = title.replace("'", "\\'").replace("/", "\\/'");
@@ -101,7 +103,7 @@ function closeAll () {
 		// Get the query from the trace table
 		String traceTableKey = request.getParameter("TraceTableKey");
 
-		try 
+		try
 		{
 			GenerateSQL generator = new GenerateSQL(inSQL, traceTableKey);
 			inSQL = generator.generate();
@@ -116,7 +118,7 @@ function closeAll () {
 	{
 		// Do not put in the try/catch block the output to the screen - query and buttons
 		// in case of error they will be displayed and the user can correct the query
-		// Using document.write so: 
+		// Using document.write so:
 		// must replace "'" with "\'" and eliminate line feeds, carriage returns and multiple spaces
 
 		String sql = inSQL.replace("'", "\\'").replace("/", "\\/").replace("\n", " ").replace("\r", " ").trim();
@@ -133,7 +135,7 @@ function closeAll () {
 			else
 				firstBlank = false;
 
-			if (c != ' ' || firstBlank) 
+			if (c != ' ' || firstBlank)
 				sb.append(c);
 		}
 		sql = sb.toString();
@@ -141,7 +143,7 @@ function closeAll () {
 		// Construct the csv file name. Do not open any files at this point
 		String tempCsvPath = "";
 		if (System.getProperty( "os.name" ).indexOf("Windows") != -1)
-			tempCsvPath = "";
+			tempCsvPath = ".\\";
 		else
 			tempCsvPath = reportingConfiguration.getCsvHome();
 
@@ -164,13 +166,34 @@ function closeAll () {
 
 		try
 		{
-			// Create, if it does not exist, a temporary directory to hold the csv files. 
-			// TO DO: Keep only last week's files and delete the rest.
+			// Create, if it does not exist, a temporary directory to hold the csv files.
 
 			java.io.File newCsvDir=new java.io.File(tempCsvPath);
 			if (!newCsvDir.exists())
 				newCsvDir.mkdirs();
 			newCsvDir = null;
+
+			// Cleanup old temp csv files. Keep only last 12 hours files
+			File f = new File(tempCsvPath);
+			File [] fileObjects = f.listFiles();	// Get all files in the directory
+			if (fileObjects.length != 0)
+			{
+				for (int j = 0; j < fileObjects.length; j++)
+				{
+					if(!fileObjects[j].isDirectory())
+					{
+						String fileName = fileObjects[j].getName();
+						Date modDate = new Date(fileObjects[j].lastModified());
+						modDate = new Date(modDate.getTime());
+						Date now = new Date();
+						now = new Date(now.getTime() - (12 * 60 * 60 * 1000));
+
+						SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+						if ((fileName.startsWith("gratia_report_data_") && fileName.endsWith(".csv")) && (modDate.before(now) || modDate.equals(now)))
+								fileObjects[j].delete();
+					}
+				}
+			}
 
 			BufferedWriter csvOut = new BufferedWriter(new FileWriter(csvFileName, true));
 
@@ -178,77 +201,64 @@ function closeAll () {
 			Class.forName("com.mysql.jdbc.Driver").newInstance();
 
 			cnn = DriverManager.getConnection(reportingConfiguration.getDatabaseURL(), reportingConfiguration.getDatabaseUser(), reportingConfiguration.getDatabasePassword());
-			// cnn = DriverManager.getConnection("jdbc:mysql://gratia-db01.fnal.gov:3320/gratia_itb", "reader", "reader");
 			statement = cnn.createStatement();
 			results = statement.executeQuery(inSQL);
 			metadata = results.getMetaData();
-			
-			// Get the number of records (rows) in the data). No direct way for this. 
-			// So go to the last row, get the row number and then back to top
-			results.last();
-			int numRows = results.getRow();
-			results.beforeFirst();
-			
+
 			// Get the number of columns
 			int numColumns = metadata.getColumnCount();
 
+			// Loop through the SQL results to add a row for each record
+
 			%>
 			<script type="text/javascript">
-				writeBottom('<table class="query"> <tr> <td align="left" colspan="<%= 2*numColumns + 1 %>"><hr color="#E07630"><strong>Number of records = <%= numRows %><\/strong><\/td><\/tr>');
+				writeBottom('<table class="query"> <tr> <td align="left" colspan="<%= 2*numColumns + 1 %>"><hr color="#FF8330"><\/td><\/tr>');
 			</script>
 			<%
-			if (numRows > 0)
-			{
-				%>
-				<script type="text/javascript">
-					writeBottom('<tr><td align="right"><strong> # <\/strong><\/td>');
-				</script>
-				<%
-			}
-			
-			String csvLine = "";
-			csvOut.write("Number of records = " + numRows + "\n\n");
-			for(int i = 1; i < numColumns + 1; i++)
-			{
-				// Put header row only if there are data
-				if (numRows > 0)
-				{
-					%> 
-					<script type="text/javascript">
-						writeBottom('<td>&nbsp;<\/td> <td align="right"><strong><%= metadata.getColumnName(i) %><\/strong><\/td> ');
-					</script>
-					<%
-				}
-				// Construct the csv file header line
-				if (i < numColumns)
-					csvLine = csvLine + metadata.getColumnName(i) + ",";
-				else 
-					csvLine = csvLine + metadata.getColumnName(i);
-			}
-			if (numRows > 0)
-			{
-				%>
-				<script type="text/javascript">
-					writeBottom('<\/tr>');
-				</script>
-				<%
-			}
-			// write header line to the csv file
-			csvOut.write(csvLine+"\n");
-			csvLine = "";
-
-			// Loop through the SQL results to add a row for each record
 			String cellvalue = "";
-			int r = 1;
+			String csvLine = "";
+			int r = 0;
 			while(results.next())
 			{
+				if (r == 0)
+				{
+					%>
+					<script type="text/javascript">
+						writeBottom('<tr><td align="right"><strong> # <\/strong><\/td>');
+					</script>
+					<%
+					for(int i = 1; i < numColumns + 1; i++)
+					{
+						// Put header row only if there are data
+						%>
+						<script type="text/javascript">
+							writeBottom('<td>&nbsp;<\/td> <td align="right"><strong><%= metadata.getColumnName(i) %><\/strong><\/td> ');
+						</script>
+						<%
+
+						// Construct the csv file header line
+						if (i < numColumns)
+							csvLine = csvLine + metadata.getColumnName(i) + ",";
+						else
+							csvLine = csvLine + metadata.getColumnName(i);
+					}
+					%>
+					<script type="text/javascript">
+						writeBottom('<\/tr>');
+					</script>
+					<%
+
+					csvOut.write(csvLine+"\n");
+					csvLine = "";
+				}
+				r++;
 				%>
 				<script type="text/javascript">
-					writeBottom('<tr><td align="right"><%= r %><\/td>  ');
+					writeBottom('<tr><td align="right"><%= r %><\/td>');
 				</script>
 				<%
 				// Loop through each column to add its data to the row cell-by-cell
-				r++;
+
 				for(int i = 1; i < numColumns + 1; i++)
 				{
 					// Get the value for this column from the recordset, casting nulls to a valid string value
@@ -256,13 +266,13 @@ function closeAll () {
 					if(value == null)
 						cellvalue = "[null]";
 
-					if (value instanceof Double) 
+					if (value instanceof Double)
 					{
 						int intvalue = (int)Math.floor(((Double)value).doubleValue());
 						Integer toprint = new Integer(intvalue);
-						cellvalue= String.format("%,d", toprint); //toprint.toString(); 
+						cellvalue= String.format("%,d", toprint); //toprint.toString();
 					}
-					else if (value instanceof Integer || value instanceof Long ||value instanceof Short) 
+					else if (value instanceof Integer || value instanceof Long ||value instanceof Short)
 						cellvalue= String.format("%,d", value);
 					else
 						cellvalue= value.toString();
@@ -272,12 +282,12 @@ function closeAll () {
 					</script>
 					<%
 					//Construct a csv file line of data
-					if (i < numColumns) 
+					if (i < numColumns)
 						csvLine = csvLine + value + ",";
 					else
 						csvLine = csvLine + value;
 				} // end of "for(int i = 1; i < numColumns + 1; i++)"
-					
+
 				// write a new csv line
 				csvOut.write(csvLine + "\n");
 				csvLine = "";
@@ -295,20 +305,20 @@ function closeAll () {
 			csvOut = null;
 			%>
 			<script type="text/javascript">
-				writeBottom('<tr> <td align="left" colspan="<%= 2*numColumns + 1 %>"><hr color="#E07630"><\/td><\/tr>');
+				writeBottom('<tr> <td align="left" colspan="<%= 2*numColumns + 1 %>"><strong>Number of records = <%= r %><\/strong><hr color="#FF8330"><\/td><\/tr>');
 				writeBottom('<\/table>');
-			</script> 
+			</script>
 			<%
 		}
 		catch (com.mysql.jdbc.exceptions.MySQLSyntaxErrorException ex)
 		{
 			String msg = ex.getMessage();
 			%>
-			<table class="query" border="0"><tr> <td align="left" ><hr color="#E07630"></td></tr>
-			<tr><td><font color="#E07630"> 
+			<table class="query" border="0"><tr> <td align="left" ><hr color="#FF8330"></td></tr>
+			<tr><td><font color="#FF8330">
 				There is an SQL syntax error in the query: <br>
 				&nbsp;&nbsp;&nbsp;&nbsp;<strong><%= msg %></strong> <br>
-			</font></td></tr><tr> <td align="left" ><hr color="#E07630"></td></tr></table>
+			</font></td></tr><tr> <td align="left" ><hr color="#FF8330"></td></tr></table>
 			<script type="text/javascript">
 				if (currentFramePath == 'top')
 					document.close();
@@ -317,20 +327,20 @@ function closeAll () {
 					parent.reportFrame.document.close();
 					parent.paramFrame.document.close();
 				}
-			</script> 
+			</script>
 			<%
 			// DO NOT: throw new Exception(ex);
 		}
-		catch (Exception ex) 
+		catch (Exception ex)
 		{
 			String msg = ex.getMessage();
 			%>
-			<table class="query" border="0"><tr> <td align="left" ><hr color="#E07630"></td></tr>
-			<tr><td><font color="#E07630"> 
+			<table class="query" border="0"><tr> <td align="left" ><hr color="#FF8330"></td></tr>
+			<tr><td><font color="#FF8330">
 				The following error occur while executing the query: <br>
 				&nbsp;&nbsp;&nbsp;&nbsp;<strong><%= msg %></strong> <br>
 				<em><%= ex %> </em>
-			</font></td></tr><tr> <td align="left" ><hr color="#E07630"></td></tr></table>
+			</font></td></tr><tr> <td align="left" ><hr color="#FF8330"></td></tr></table>
 			<script type="text/javascript">
 				if (currentFramePath == 'top')
 					document.close();
@@ -339,11 +349,11 @@ function closeAll () {
 					parent.reportFrame.document.close();
 					parent.paramFrame.document.close();
 				}
-			</script> 
+			</script>
 			<%
 			// DO NOT: throw new Exception(ex);
-		} 
-		finally 
+		}
+		finally
 		{
 			try {
 				cnn.close();
