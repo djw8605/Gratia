@@ -24,7 +24,7 @@ public class GratiaBirtReportEH extends ReportEventAdapter {
 	}
 
 	public void beforeFactory(IReportDesign design, IReportContext rc) {
-		try 
+		try
 		{
 			// Debugging ...
 			// BufferedWriter out = new BufferedWriter(new FileWriter("./GratiaBirtEH.log", true));
@@ -33,7 +33,7 @@ public class GratiaBirtReportEH extends ReportEventAdapter {
 
 			HttpServletRequest request = (HttpServletRequest) rc.getHttpServletRequest();
 			String outReportURL = request.getRequestURL().toString().replace("frameset", "checkDateParameters.jsp") + "?" + request.getQueryString();
-			
+
 			// Check if there is a VOs parameter. If so, format it for SQL input
 			Object inVOsObj = rc.getParameterValue("SelectVOs");
 			if (inVOsObj != null)
@@ -41,22 +41,21 @@ public class GratiaBirtReportEH extends ReportEventAdapter {
 				String inVOs = inVOsObj.toString();
 				// out.write("VOs = " + inVOs +"\n");
 				// out.flush();
-		        
+
 				String[] words = inVOs.split (";");
 				String outVOs = "(";
 				for (int i=0; i < words.length; i++)
 				{
-					if (outVOs != "(") 
+					if (outVOs != "(")
 						outVOs += "," + "'"+ words[i] + "'";
 					else
 						outVOs += "'"+ words[i] + "'";
 				}
 				outVOs += ")";
-				rc.setParameterValue("SelectVOs", outVOs); 
+				rc.setParameterValue("SelectVOs", outVOs);
 			}
 
-			// Check if there is the parameter "ReportURL" is blank. 
-			// If so set it to the called URL  
+			// Set parameter "ReportURL" to the called URL.
 
 			Object inReportURLObj = rc.getParameterValue("ReportURL");
 
@@ -70,7 +69,7 @@ public class GratiaBirtReportEH extends ReportEventAdapter {
 					//out.write("OUTPUT URL = " + outReportURL);
 					//out.flush();
 
-					rc.setParameterValue("ReportURL", outReportURL); 
+					rc.setParameterValue("ReportURL", outReportURL);
 				}
 			}
 
@@ -85,65 +84,68 @@ public class GratiaBirtReportEH extends ReportEventAdapter {
 	}
 
 	public void initialize(IReportContext inReport) {
-	
-	   try {
-		    // Debugging ...
+
+		try
+		{
+			// Debugging ...
 			// BufferedWriter out = new BufferedWriter(new FileWriter("./GratiaBirtEH.log", true));
-	        // out.write("\n+++++++++ INTIALIZE REPORT PARAMETERS ++++++++++++++++\n");
-	
-		HttpServletRequest request = (HttpServletRequest) inReport.getHttpServletRequest();
-		
-		if (request != null)
-		{
-			// DEBUG 
-			// String ReportURL = request.getRequestURL().toString() + "?" + request.getQueryString();
-			// out.write("ReportURL = " + ReportURL + "\n");
-			// out.flush();
-			ReportingConfiguration reportingConfig = new ReportingConfiguration();
-			reportingConfig.loadReportingConfiguration(request);
-		
-			//*CertificateHandler certificateHandler = new CertificateHandler();
-			//*certificateHandler.loadCertificateHandler(request);
-		
-			//*certificateHandler.dump();
-			String userName = "GratiaUser"; //*certificateHandler.getName();
-			String userRole = "GratiaUser"; //*certificateHandler.getRole();
-			//String subtitle = "A Subtitle"; //*certificateHandler.getSubtitle();
-			String VO = "Unknown"; //*certificateHandler.getVO();
+			// out.write("\n+++++++++ INTIALIZE REPORT PARAMETERS ++++++++++++++++\n");
 
-			String userKey = "" + System.currentTimeMillis();
-			userName = userName + "|" + userKey + "|" + VO;
-			String databaseURL =  reportingConfig.getDatabaseURL();
-			String databaseUser = reportingConfig.getDatabaseUser();
-			String databasePassword = reportingConfig.getDatabasePassword();
-			//String reportsMenuConfig = reportingConfig.getReportsMenuConfig();
-			//String reportsFolder = reportingConfig.getReportsFolder();
-			//String varConfigLoaded = reportingConfig.getConfigLoaded();
+			HttpServletRequest request = (HttpServletRequest) inReport.getHttpServletRequest();
 
-			// set parameter values
-			inReport.setParameterValue("DatabaseURL", databaseURL); 
-			inReport.setParameterValue("DatabasePassword", databasePassword);
-			inReport.setParameterValue("DatabaseUser", databaseUser);
-			inReport.setParameterValue("UserName", userName);
-			inReport.setParameterValue("UserRole", userRole);
-			// inReport.setParameterValue("ReportSubtitle", subtitle);
+			if (request != null)
+			{
+				// DEBUG
+				// String ReportURL = request.getRequestURL().toString() + "?" + request.getQueryString();
+				// out.write("ReportURL = " + ReportURL + "\n");
+				// out.flush();
+				ReportingConfiguration reportingConfig = new ReportingConfiguration();
+				reportingConfig.loadReportingConfiguration(request);
 
-			// out.write("\tParameters are set\n");
-			// out.write("\tDatabaseURL= " + inReport.getParameterValue("DatabaseURL")+"\n");
-			// out.write("\tDatabasePassword= " + inReport.getParameterValue("DatabasePassword")+"\n");
-			// out.write("\tDatabaseUser= " + inReport.getParameterValue("DatabaseUser")+"\n");
-			// out.write("\tUserName= " + inReport.getParameterValue("UserName")+"\n");
-			// out.write("\tUserRole= " + inReport.getParameterValue("UserRole")+"\n");
-			// out.write("\tSubtitle= " + inReport.getParameterValue("Subtitle")+"\n"); 
-			// out.close();
+				//*CertificateHandler certificateHandler = new CertificateHandler();
+				//*certificateHandler.loadCertificateHandler(request);
+				//*certificateHandler.dump();
+
+				String userName = "GratiaUser"; //*certificateHandler.getName();
+				String userRole = "GratiaUser"; //*certificateHandler.getRole();
+				String VO = "Unknown"; //*certificateHandler.getVO();
+				//String subtitle = "A Subtitle"; //*certificateHandler.getSubtitle();
+
+				String userKey = "" + System.currentTimeMillis();
+				userName = userName + "|" + userKey + "|" + VO;
+				String databaseURL =  reportingConfig.getDatabaseURL();
+				String databaseUser = reportingConfig.getDatabaseUser();
+				String databasePassword = reportingConfig.getDatabasePassword();
+				//String reportsMenuConfig = reportingConfig.getReportsMenuConfig();
+				//String reportsFolder = reportingConfig.getReportsFolder();
+				//String varConfigLoaded = reportingConfig.getConfigLoaded();
+
+				// set parameter values
+				inReport.setParameterValue("DatabaseURL", databaseURL);
+				inReport.setParameterValue("DatabasePassword", databasePassword);
+				inReport.setParameterValue("DatabaseUser", databaseUser);
+				inReport.setParameterValue("UserName", userName);
+				inReport.setParameterValue("UserRole", userRole);
+				// inReport.setParameterValue("ReportSubtitle", subtitle);
+
+				// out.write("\tParameters are set\n");
+				// out.write("\tDatabaseURL= " + inReport.getParameterValue("DatabaseURL")+"\n");
+				// out.write("\tDatabasePassword= " + inReport.getParameterValue("DatabasePassword")+"\n");
+				// out.write("\tDatabaseUser= " + inReport.getParameterValue("DatabaseUser")+"\n");
+				// out.write("\tUserName= " + inReport.getParameterValue("UserName")+"\n");
+				// out.write("\tUserRole= " + inReport.getParameterValue("UserRole")+"\n");
+				// out.write("\tSubtitle= " + inReport.getParameterValue("Subtitle")+"\n");
+				// out.close();
+			}
+			else
+			{
+				// out.write("\tHttpServletRequest is NULL");
+				// out.flush();
+			}
 		}
-		else
+		catch (Exception e)
 		{
-			// out.write("\tHttpServletRequest is NULL");
-			// out.flush();
-		}    
-	   } catch (Exception e) {
-		   e.printStackTrace();
-	   }
+		e.printStackTrace();
+		}
 	}
 }
