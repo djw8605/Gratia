@@ -1,0 +1,9 @@
+12/26/2007 (John Weigand)
+-------------------------
+The software used to maintain the ERD diagram is called DeZign for 
+Databases Professional Version 4.2.0 from Datanamic Solutions BV.
+  http://www.datanamic.com 
+
+The source file for the various versions are:
+    * Gratia database ERD v030 source (dez): gratia-v030.dez
+    * Gratia database ERD v028 source (dez): gratia-v028.dez 
