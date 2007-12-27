@@ -84,6 +84,15 @@
 #             Replaced BNL_PANDA,BNL_OSG,BNL_LOCAL with US-T1-BNL
 #   11/09/07 (John Weigand) - 
 #             Updated Normalization factor for PROD_SLAC       (1726)
+#   12/20/07 (John Weigand) - 
+#             Replaced US-T1-BNL with BNL_ATLAS_1.  This undoes the 11/8/07
+#             change.  The intent is to allow BNL_ATLAS_1 to appear in the
+#             EGEE OSG view.  Then, in an EGEE Tier1 view translation table,
+#             BNL_ATLAS_1 will translate to US-T1-BNL. In the short term,
+#             both entries will be reflected until changes are made in
+#             the EGEE site association table for the Tier 1 view.
+#             When the changes to the Gratia Site table and EGEE tables
+#             are complete the US-T1-BNL can be removed.
 #    
 ##################################################################
 #-- Site  ------- SPECint2000
@@ -115,10 +124,11 @@ OU_OSCER_ATLAS      1543
 UC_Teraport         1412
 UC_ATLAS_MWT2       1169
 US-T1-BNL           1351
+BNL_ATLAS_1         1351
 UTA_DPCC             915
 UTA_SWT2            1543
 ##-- obsolete --
 ##BNL_PANDA           1351 
 ##BNL_OSG             1351
-##BNL_ATLAS_1         1351
 ##BNL_ATLAS_2         1351
+##US-T1-BNL           1351
