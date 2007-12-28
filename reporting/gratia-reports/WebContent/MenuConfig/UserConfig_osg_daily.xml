@@ -1,33 +1,25 @@
 <UserConfig>
 	<Menu>
-		<MenuGroup name="Dashboards">
-			<MenuItem name="Home" link="dashboard.jsp"/>
-		</MenuGroup>
 		<MenuGroup name="Reports">
-			<MenuItem name="Daily Usage by Site" link="viewer.jsp?__report=[ReportsFolder]UsageBySiteByDate-ranked-osgdaily.rptdesign,CPUMetric=wallclock"/>
-			<MenuItem name="Usage by Site" link="viewer.jsp?__report=[ReportsFolder]UsageBySite-osgdaily.rptdesign,CPUMetric=wallclock"/>
-			<MenuItem name="Jobs by Site" link="viewer.jsp?__report=[ReportsFolder]JobsBySite-osgdaily.rptdesign"/>
-
-			<MenuItem name="Daily Usage by VO" link="viewer.jsp?__report=[ReportsFolder]UsageByVOByDate-ranked-osgdaily.rptdesign,CPUMetric=wallclock"/>
-			<MenuItem name="Usage by VO" link="viewer.jsp?__report=[ReportsFolder]UsageByVO-osgdaily.rptdesign,CPUMetric=wallclock"/>
-			<MenuItem name="Jobs by VO" link="viewer.jsp?__report=[ReportsFolder]JobsByVO-osgdaily.rptdesign"/>
-			
-			<MenuItem name="Panda and goc Probe Comparison" link="viewer.jsp?__report=[ReportsFolder]UsageByDateByProbeForVO-osgdaily.rptdesign"/>
-			
+			<MenuItem name="Daily Usage by Site" link="GratiaParameterInput.jsp?report=[ReportsFolder]UsageBySiteByDate-ranked-osgdaily.rptdesign&amp;CPUMetric=wallclock"/>
+			<MenuItem display="true" name="Usage by Site" link="GratiaParameterInput.jsp?report=[ReportsFolder]UsageBySite-osgdaily.rptdesign&amp;CPUMetric=wallclock"/>
+			<MenuItem name="Jobs by Site" link="GratiaParameterInput.jsp?report=[ReportsFolder]JobsBySite-osgdaily.rptdesign"/>
+			<MenuItem name="Daily Usage by VO" link="GratiaParameterInput.jsp?report=[ReportsFolder]UsageByVOByDate-ranked-osgdaily.rptdesign&amp;CPUMetric=wallclock"/>
+			<MenuItem name="Usage by VO" link="GratiaParameterInput.jsp?report=[ReportsFolder]UsageByVO-osgdaily.rptdesign&amp;CPUMetric=wallclock"/>
+			<MenuItem name="Jobs by VO" link="GratiaParameterInput.jsp?report=[ReportsFolder]JobsByVO-osgdaily.rptdesign"/>
+			<MenuItem name="Panda and goc Probe Comparison" link="GratiaParameterInput.jsp?report=[ReportsFolder]UsageByDateByProbeForVO-osgdaily.rptdesign"/>
 		</MenuGroup>
 		<MenuGroup name="SQL Queries">
-			<MenuItem name="Custom SQL Report" link="admin.jsp"/>
-			<MenuItem name="Distinct Probe Names" link="admin.jsp?sql=select distinct ProbeName from JobUsageRecord_Meta;"/>
-			<MenuItem name="Probes Without Facilities" link="admin.jsp?sql=select distinct ProbeName from JobUsageRecord_Meta M where not exists (select probename from Probe f where M.ProbeName = f.probename);"/>
-			<MenuItem name="Records Without Dates" link="admin.jsp?sql=select count(*) from JobUsageRecord where starttime is null or endtime is null;"/>
+			<MenuItem name="Custom SQL Report" link="showQuery.jsp"/>
+			<MenuItem name="Distinct Probe Names" link="showQuery.jsp?sql=select distinct ProbeName from JobUsageRecord_Meta;"/>
+			<MenuItem name="Probes Without Facilities" link="showQuery.jsp?sql=select distinct ProbeName from JobUsageRecord_Meta M where not exists (select probename from Probe f where M.ProbeName = f.probename);"/>
+			<MenuItem name="Records Without Dates" link="showQuery.jsp?sql=select count(*) from JobUsageRecord where starttime is null or endtime is null;"/>
+		</MenuGroup>
+		<MenuGroup name="Commands">
+			<MenuItem name="Logout" link="logout.jsp"/>
+		</MenuGroup>
+		<MenuGroup name="">
+			<MenuItem name="Contact us" link="https://twiki.grid.iu.edu/twiki/bin/view/Accounting/ContactUs"/> 
 		</MenuGroup>
 	</Menu>
-	<Dashboard>		
-		<Row>
-			<DashboardItem link="viewer.jsp?__report=[ReportsFolder]JobsBySite-osgdaily.rptdesign&amp;Start+Date=01/01/1990&amp;End+Date=12/31/2999"/>
-		</Row>
-		<Row>	
-			<DashboardItem link="viewer.jsp?__report=[ReportsFolder]JobsByVO-osgdaily.rptdesign&amp;Start+Date=01/01/1990&amp;End+Date=12/31/2999"/>
-		</Row>			
-	</Dashboard>
 </UserConfig>
