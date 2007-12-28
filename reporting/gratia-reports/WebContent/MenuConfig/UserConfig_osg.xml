@@ -41,6 +41,5 @@
 		<MenuGroup name="">
 			<MenuItem name="Contact us" link="https://twiki.grid.iu.edu/twiki/bin/view/Accounting/ContactUs"/> 
 		</MenuGroup>
-		
 	</Menu>
 </UserConfig>
