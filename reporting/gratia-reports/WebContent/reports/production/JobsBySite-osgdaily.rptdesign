@@ -35,7 +35,7 @@
         </structure>
         <structure>
             <property name="name">DatabasePassword</property>
-            <property name="value">proto</property>
+            <property name="value">notused</property>
         </structure>
         <structure>
             <property name="name">Start Date</property>
@@ -74,7 +74,7 @@
                     <property name="allowBlank">false</property>
                     <property name="format">Unformatted</property>
                     <property name="controlType">text-box</property>
-                    <property name="defaultValue">proto</property>
+                    <property name="defaultValue">notused</property>
                 </scalar-parameter>
             </parameters>
         </parameter-group>

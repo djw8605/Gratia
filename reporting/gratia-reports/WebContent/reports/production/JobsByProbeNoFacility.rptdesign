@@ -37,7 +37,7 @@
         </structure>
         <structure>
             <property name="name">DatabasePassword</property>
-            <property name="value">proto</property>
+            <property name="value">notused</property>
         </structure>
         <structure>
             <property name="name">StartDate</property>
@@ -81,7 +81,7 @@
                     <property name="dataType">string</property>
                     <property name="isRequired">true</property>
                     <property name="controlType">text-box</property>
-                    <property name="defaultValue">proto</property>
+                    <property name="defaultValue">notused</property>
                     <structure name="format">
                         <property name="category">Unformatted</property>
                         <property name="pattern">Unformatted</property>
