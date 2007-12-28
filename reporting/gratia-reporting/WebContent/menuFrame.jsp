@@ -65,10 +65,15 @@ function clearParamFrame() {
 			if (displayRep.indexOf("true") > -1)
 			{
 				linkNAME = "* ";
-				styleClass = "menuItem";
 			}
 			linkNAME = linkNAME + linkTitle;
 			clearFrame = "clearReportFrame();";
+
+			if (linkNAME.indexOf("Contact us") > -1)
+			{
+				targetFrame = "_blank";
+				styleClass = "contact";
+			}
 
 			if (menuItem.getLink().indexOf("?") > -1) 
 			{
@@ -95,12 +100,6 @@ function clearParamFrame() {
 		}
 	}
 	%>
-	<hr><label class="menuGroup">Static Reports</label> <br />
-	 <a class = "menuItem" href="staticReports.jsp" onclick="clearReportFrame();">Static Reports</a><br />
-
-	 <hr><label class = "menuGroup">Commands</label> <br />
-	 <a class = "menuItem" href="logout.jsp" onclick="clearReportFrame();">Logout</a><br />
-	 <hr><a target=_blank class="contact" href="https://twiki.grid.iu.edu/twiki/bin/view/Accounting/ContactUs">Contact us</a><br />
 	 <p class = "menuVersion">Gratia Reporting Version: <%= reportingVersion %></p>
 <%
 if (displayLink != null)
