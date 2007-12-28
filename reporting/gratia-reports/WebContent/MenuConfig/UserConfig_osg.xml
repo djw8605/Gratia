@@ -32,10 +32,15 @@
 			<MenuItem name="Probes With Odd SiteName" link="showQuery.jsp?sql=select distinct ProbeName, SiteName as Gratia_SiteName, ReportedSiteName as Probe_SiteName  from JobUsageRecord_Report  where ServerDate >= DATE_ADD(CURDATE(), INTERVAL -1 DAY) and SiteName != ReportedSiteName order by ProbeName;"/>
 			<MenuItem name="Records Without Dates" link="showQuery.jsp?sql=select count(*) from JobUsageRecord where starttime is null or endtime is null;"/>
 		</MenuGroup>
+		<MenuGroup name="Static Reports">
+			<MenuItem name="Custom SQL Report" link="staticReports.jsp"/>
+		</MenuGroup>
+		<MenuGroup name="Commands">
+			<MenuItem name="Logout" link="logout.jsp"/>
+		</MenuGroup>
+		<MenuGroup name="">
+			<MenuItem name="Contact us" link="https://twiki.grid.iu.edu/twiki/bin/view/Accounting/ContactUs"/> 
+		</MenuGroup>
+		
 	</Menu>
-	<Dashboard>		
-		<Row>	
-			<DashboardItem link="[ReportsFolder]UsageBySite.rptdesign&amp;StartDate&amp;EndDate&amp;DisplayMetric=wallclock&amp;ReportTitle=Jobs by Site"/>			
-		</Row>			
-	</Dashboard>
 </UserConfig>
