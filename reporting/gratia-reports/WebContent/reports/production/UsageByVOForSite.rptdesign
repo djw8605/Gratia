@@ -1181,18 +1181,6 @@ else {&#xD;
     &lt;property name=&quot;targetFileType&quot;>report-design&lt;/property>
     &lt;list-property name=&quot;paramBindings&quot;>
         &lt;structure>
-            &lt;property name=&quot;paramName&quot;>DatabaseURL&lt;/property>
-            &lt;expression name=&quot;expression&quot;>params[&quot;DatabaseURL&quot;]&lt;/expression>
-        &lt;/structure>
-        &lt;structure>
-            &lt;property name=&quot;paramName&quot;>DatabaseUser&lt;/property>
-            &lt;expression name=&quot;expression&quot;>params[&quot;DatabaseUser&quot;]&lt;/expression>
-        &lt;/structure>
-        &lt;structure>
-            &lt;property name=&quot;paramName&quot;>DatabasePassword&lt;/property>
-            &lt;expression name=&quot;expression&quot;>params[&quot;DatabasePassword&quot;]&lt;/expression>
-        &lt;/structure>
-        &lt;structure>
             &lt;property name=&quot;paramName&quot;>StartDate&lt;/property>
             &lt;expression name=&quot;expression&quot;>params[&quot;StartDate&quot;]&lt;/expression>
         &lt;/structure>
@@ -2120,18 +2108,6 @@ else {&#xD;
                 <property name="targetFileType">report-design</property>
                 <property name="reportName">UsageByUser.rptdesign</property>
                 <list-property name="paramBindings">
-                    <structure>
-                        <property name="paramName">DatabaseURL</property>
-                        <expression name="expression">params["DatabaseURL"]</expression>
-                    </structure>
-                    <structure>
-                        <property name="paramName">DatabaseUser</property>
-                        <expression name="expression">params["DatabaseUser"]</expression>
-                    </structure>
-                    <structure>
-                        <property name="paramName">DatabasePassword</property>
-                        <expression name="expression">params["DatabasePassword"]</expression>
-                    </structure>
                     <structure>
                         <property name="paramName">StartDate</property>
                         <expression name="expression">params["StartDate"]</expression>

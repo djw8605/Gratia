@@ -1218,7 +1218,7 @@ else {&#xD;
             </Components>
             <Separator>, </Separator>
           </DataPoint>
-          <LabelPosition>Outside</LabelPosition>
+          <LabelPosition>Inside</LabelPosition>
           <Stacked>true</Stacked>
           <Triggers>
             <Condition>onclick</Condition>
@@ -1232,18 +1232,6 @@ else {&#xD;
     &lt;property name=&quot;targetWindow&quot;>_self&lt;/property>
     &lt;property name=&quot;targetFileType&quot;>report-design&lt;/property>
     &lt;list-property name=&quot;paramBindings&quot;>
-        &lt;structure>
-            &lt;property name=&quot;paramName&quot;>DatabaseURL&lt;/property>
-            &lt;expression name=&quot;expression&quot;>params[&quot;DatabaseURL&quot;]&lt;/expression>
-        &lt;/structure>
-        &lt;structure>
-            &lt;property name=&quot;paramName&quot;>DatabaseUser&lt;/property>
-            &lt;expression name=&quot;expression&quot;>params[&quot;DatabaseUser&quot;]&lt;/expression>
-        &lt;/structure>
-        &lt;structure>
-            &lt;property name=&quot;paramName&quot;>DatabasePassword&lt;/property>
-            &lt;expression name=&quot;expression&quot;>params[&quot;DatabasePassword&quot;]&lt;/expression>
-        &lt;/structure>
         &lt;structure>
             &lt;property name=&quot;paramName&quot;>ForVOName&lt;/property>
             &lt;expression name=&quot;expression&quot;>params[&quot;SelectVOName&quot;]&lt;/expression>
@@ -2241,18 +2229,6 @@ MM/dd/yyyy
                 <property name="targetFileType">report-design</property>
                 <property name="reportName">UsageByUserForDate.rptdesign</property>
                 <list-property name="paramBindings">
-                    <structure>
-                        <property name="paramName">DatabaseURL</property>
-                        <expression name="expression">params["DatabaseURL"]</expression>
-                    </structure>
-                    <structure>
-                        <property name="paramName">DatabaseUser</property>
-                        <expression name="expression">params["DatabaseUser"]</expression>
-                    </structure>
-                    <structure>
-                        <property name="paramName">DatabasePassword</property>
-                        <expression name="expression">params["DatabasePassword"]</expression>
-                    </structure>
                     <structure>
                         <property name="paramName">ForVOName</property>
                         <expression name="expression">params["SelectVOName"]</expression>
