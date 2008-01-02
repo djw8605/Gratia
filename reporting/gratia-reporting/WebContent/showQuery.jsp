@@ -85,7 +85,7 @@ function closeAll () {
 
 	if (title != null)
 	{
-		title = title.replace("'", "\\'").replace("/", "\\/'");
+		title = title.replace("'", "\\'").replace("/", "\\/");
 		%>
 		<script type="text/javascript">
 			writeTop('<div class="reportTitle"><%= title %><\/div><br>');
@@ -119,7 +119,8 @@ function closeAll () {
 		// Do not put in the try/catch block the output to the screen - query and buttons
 		// in case of error they will be displayed and the user can correct the query
 		// Using document.write so:
-		// must replace "'" with "\'" and eliminate line feeds, carriage returns and multiple spaces
+		// must replace ' -> \' , / -> \/  
+		// and eliminate line feeds, carriage returns and multiple spaces
 
 		String sql = inSQL.replace("'", "\\'").replace("/", "\\/").replace("\n", " ").replace("\r", " ").trim();
 
