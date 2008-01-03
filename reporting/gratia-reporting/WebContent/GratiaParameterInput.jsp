@@ -24,34 +24,34 @@ var c1 = new CodeThatCalendar(caldef1);
 
 function addVOs (form) 
 {
-   /* Construct the VOs string from the selection */  
-   	form.SelectVOs.value = "";
-   		
-   	for(var i = 0; i < form.myVOs.options.length; i++)
-   	{
-   		if (form.myVOs.options[i].selected)
-   		{
-   			if (form.SelectVOs.value != "") 
-   				form.SelectVOs.value += ";" + form.myVOs.options[i].value;
-   			else
-   				form.SelectVOs.value += form.myVOs.options[i].value;
-   		}
-   	}
+	/* Construct the VOs string from the selection */
+	form.SelectVOs.value = "";
+		
+	for(var i = 0; i < form.myVOs.options.length; i++)
+	{
+		if (form.myVOs.options[i].selected)
+		{
+			if (form.SelectVOs.value != "") 
+				form.SelectVOs.value += ";" + form.myVOs.options[i].value;
+			else
+				form.SelectVOs.value += form.myVOs.options[i].value;
+		}
+	}
 }
 
 function getURL ()
 {
-   var x=document.getElementsByTagName('form')[0];
-   var myurl = "";
-   var elnam = "";
-   var elval = "";
+	var x=document.getElementsByTagName('form')[0];
+	var myurl = "";
+	var elnam = "";
+	var elval = "";
 
 	for (var i=0; i < x.length; i++)
 	{
-  		if (x.elements[i].name == "partURL" )
-     		myurl = x.elements[i].value;
- 	}
- 
+		if (x.elements[i].name == "partURL" )
+		myurl = x.elements[i].value;
+	}
+
 	for (var i=0; i<x.length; i++)
 	{
 		elnam = x.elements[i].name;
@@ -68,8 +68,8 @@ function getURL ()
 	
 	return myurl;
 	
-  	// document.write(myurl);
-  	// document.write("<br />");
+	// document.write(myurl);
+	// document.write("<br />");
 }
 
 function getAction()
@@ -222,21 +222,19 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 		if (paramName.equals("EndDate"))
 			defaultValue = End;
 
-     		
 		if(paramName.indexOf("Date") > -1)
 		{
-%>
+			%>
 			<tr>
 			   <td align="right"><label class="paramName" onMouseOver="Tip('<%= helpText%>')" ><%= promptText %></label></td>
 			   <td>&nbsp;&nbsp;</td>
 			   <td>
 			   <input type="text" id="<%= paramName %>" name="<%= paramName %>" value="<%= defaultValue %>" onmouseover="Tip('<%= helpText%>')" onchange="getURL();" >
-			   	<button name="cal1" value="cal1" type="button" class="button" onmouseover="Tip('<%= helpText%>')" onclick="c1.popup('<%= paramName %>');" >
-    				<img src="./calendar/img/cal.gif" alt="<%= helpText%>"></BUTTON>
-    				
+				<button name="cal1" value="cal1" type="button" class="button" onmouseover="Tip('<%= helpText%>')" onclick="c1.popup('<%= paramName %>');" >
+				<img src="./calendar/img/cal.gif" alt="<%= helpText%>"></BUTTON>
 			   </td>
 			</tr>
-	<%							
+			<%
 		}
 		else if (paramName.indexOf("Select") > -1 )
 		{
@@ -260,56 +258,54 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 			}
 			else if (paramName.indexOf("SelectSiteName") > -1 )
 			{
-				sql = "select Site.SiteName as sitename from Site";
+				sql = "select 'All' as sitename from Site union select Site.SiteName as sitename from Site order by sitename";
 			}
 			else if (paramName.indexOf("SelectProbeName") > -1 )
 			{
-				sql = "select 'All' as name from CEProbes union select CEProbes.probename as name from CEProbes order by name";
+				sql = "select 'All' as probename from CEProbes union select CEProbes.probename as probename from CEProbes order by probename";
 			}
-	%>
+			%>
 			<tr>
 			   <td valign="top" align="right"><label class="paramName" onMouseOver="Tip('<%= helpText%>');" ><%= promptText %></label></td>
 			   
 			   <td>&nbsp;&nbsp;</td>
 			   <td> 
 				<select <%= selectMultiple %> size="5" id="<%= selectNameID %>" name="<%= selectNameID %>" onmouseover="Tip('<%= helpText%>');" onchange="<%= onchangeFunction %>" >					
-	<%				
-			// Execute the sql statement to get the vos
-			
+			<%
+
+			// Execute the sql statement
 			Connection con = null;
 			Statement statement = null;
 			ResultSet results = null;
 			String resultValue = "";
-			String selectedItems = "";					 
-						
+			String selectedItems = "";
+
 			try {
 				Class.forName("com.mysql.jdbc.Driver").newInstance();
 			} catch (ClassNotFoundException ce){
-				out.println(ce);			
+				out.println(ce);
 			}
 			
-			try{						
+			try{
 				con = DriverManager.getConnection(reportingConfiguration.getDatabaseURL(), reportingConfiguration.getDatabaseUser(), reportingConfiguration.getDatabasePassword());
 				statement = con.createStatement();
-				results = statement.executeQuery(sql);	
+				results = statement.executeQuery(sql);
 
 			// Loop through the SQL results to add a row for each record, we have only one column that contains the VOName
-						
+
 				while(results.next())
-				{								
+				{
 				// Get the value for this column from the recordset, ommitting nulls
-						
 					Object value = results.getObject(1);
-							
 					if (value != null) 
-					{								
+					{
 						resultValue = value.toString();
-													
+
 						String selected = "";
 						if(defaultValue.indexOf(resultValue) > -1)
 						{
 							selected="selected";
-							
+
 							if (selectedItems != "") 
 								selectedItems += ";" + resultValue;
 							else
@@ -319,7 +315,6 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 						<%
 					}
 				}
-					
 			}catch(SQLException exception){
 				out.println("<!--");
 				StringWriter sw = new StringWriter();
@@ -336,99 +331,98 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 				{
 					con.close();
 				}
-				catch(Exception ex) {}		
+				catch(Exception ex) {}
 				try
 				{
 					statement.close();
 				}
-				catch(Exception ex) {}		
+				catch(Exception ex) {}
 				try
 				{
 					results.close();
 				}
-				catch(Exception ex) {}	
-	
+				catch(Exception ex) {}
+
 				results = null;
 				statement = null;
 				con = null;
 			}
-				
+
 			%>
-			   </select>
-			</td>
-		</tr>
-		<%
+				</select>
+			   </td>
+			</tr>
+			<%
 			if (paramName.indexOf("SelectVOs") > -1 )
 			{
-		%>
-			<tr>
-			    <td align="right"><em><label class="paramName" onmouseover="Tip('Readonly field')" ><%= selectedLabel %></label></em></td>
-		   		<td>&nbsp;&nbsp;</td>
-		   		<td><em><input id="<%= paramName%>" type="text" size="30" name="<%= paramName%>" Value = "<%= selectedItems %>" readonly onmouseover="Tip('Readonly field', CLICKCLOSE, false)"></em>
-		   		</td>
-			</tr>
-		<%
+				%>
+				<tr>
+				   <td align="right"><em><label class="paramName" onmouseover="Tip('Readonly field')" ><%= selectedLabel %></label></em></td>
+				   <td>&nbsp;&nbsp;</td>
+				   <td><em><input id="<%= paramName%>" type="text" size="30" name="<%= paramName%>" Value = "<%= selectedItems %>" readonly onmouseover="Tip('Readonly field', CLICKCLOSE, false)"></em>
+				   </td>
+				</tr>
+				<%
 			}
-		}		
+		}
 		else if (hasSelectionOptions)
 		{
-		%>
-		 	<tr>
+			%>
+			<tr>
 			   <td align="right"><label class="paramName" onmouseover="Tip('<%= helpText%>')" ><%= promptText %></label></td>
 			   <td>&nbsp;&nbsp;</td>
 			   <td>
 			   <select class="paramSelect" id="<%= paramName%>" name="<%= paramName%>"  onchange="getURL()" onmouseover="Tip('<%= helpText%>')" >
+			<%
+			for(int s=0; s < paramGroup.getParameterListSelection().size(); s++)
+			{
+				ParameterListSelection paramListSelection = (ParameterListSelection)paramGroup.getParameterListSelection().get(s);
+
+				selectName = paramListSelection.getSelectionName();
+				selectValue = paramListSelection.getSelectionValue();
+				String selected = "";
+				if(selectValue.equals(defaultValue))
+					selected="selected";
+				%>
+				<option value=<%= selectValue %> <%= selected %>><%= selectName %></option>
 				<%
-				for(int s=0; s < paramGroup.getParameterListSelection().size(); s++)
-				{
-					ParameterListSelection paramListSelection = (ParameterListSelection)paramGroup.getParameterListSelection().get(s);
-								
-					selectName = paramListSelection.getSelectionName();				
-					selectValue = paramListSelection.getSelectionValue();
-					String selected = "";
-					if(selectValue.equals(defaultValue))
-						selected="selected";
-		%>
-					<option value=<%= selectValue %> <%= selected %>><%= selectName %></option>
-		<%							
-				}
-		%>
+			}
+			%>
 				</select>
-				</td>
-			</tr>			
-<%     	}
+			   </td>
+			</tr>
+			<%
+		}
 		else
 		{
-		%>
-		    <tr>
+			%>
+			<tr>
 			<td align="right"><label class="paramName" onmouseover="Tip('<%= helpText%>')" ><%= promptText %></label></td>
 			<td>&nbsp;&nbsp;</td>
-			<td>
-				<input id="<%= paramName%>" type="text" name="<%= paramName %>" value="<%= defaultValue %>" onmouseover="Tip('<%= helpText%>')" >
-			</td>
-		    </tr>
-		<%		  
+			<td><input id="<%= paramName%>" type="text" name="<%= paramName %>" value="<%= defaultValue %>" onmouseover="Tip('<%= helpText%>')" >
+				</td>
+			</tr>
+			<%
 		} 
-     }
+	}
 }
 %>
 </table>
 
-<p>
 <script type="text/javascript">
 
 // load initial url
-   var x=document.getElementsByTagName('form')[0];
-   var outurl = "";
-   var elname = "";
-   var elvalue = "";
+	var x=document.getElementsByTagName('form')[0];
+	var outurl = "";
+	var elname = "";
+	var elvalue = "";
 
 	for (var i=0; i < x.length; i++)
 	{
-  		if (x.elements[i].name == "partURL" )
-     		outurl = x.elements[i].value;
+		if (x.elements[i].name == "partURL" )
+		outurl = x.elements[i].value;
 	}
- 
+
 	for (var i=0;i<x.length;i++)
 	{
 		elname = x.elements[i].name;
@@ -444,7 +438,6 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 	x.ReportURL.value = outurl;
 
 </script>
-</p>    
 
 </form>
 
@@ -466,8 +459,8 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 // if (displayReport.indexOf("true") > -1)
 // {
 %>
-	 <script type="text/javascript">
-	 	parent.reportFrame.location = getURL();
+	<script type="text/javascript">
+		parent.reportFrame.location = getURL();
 	</script>
 <%
 // }
