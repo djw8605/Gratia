@@ -52,7 +52,7 @@
             <text-property name="helpText">Select probe name for report.</text-property>
             <property name="valueType">static</property>
             <property name="dataType">string</property>
-            <text-property name="promptText">Probe Name:</text-property>
+            <text-property name="promptText">Site Name:</text-property>
             <property name="controlType">text-box</property>
             <property name="defaultValue">FNAL_CDFOSG_1</property>
             <structure name="format">
