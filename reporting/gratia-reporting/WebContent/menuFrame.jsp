@@ -32,7 +32,7 @@ function clearParamFrame() {
 	String reportingVersion = reportingConfiguration.getReportingVersion();
 
 %>
-<a href="http://opensciencegrid.org/"><img src="./images/osg-logo.gif" alt="OSG Logo" width="174" height="81" border="0"></a>
+<a href="http://opensciencegrid.org/" target="_blank"><img src="./images/osg-logo.gif" alt="OSG Logo" width="174" height="81" border="0"></a>
 	<%
 	String displayLink = null;
 	String linkURL = null;
