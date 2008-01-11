@@ -9,19 +9,6 @@
             <property name="namespace">gratia-lib1</property>
         </structure>
     </list-property>
-    <list-property name="configVars">
-        <structure>
-            <property name="name">GroupByFormat</property>
-            <property name="value">%c/%d/%Y</property>
-        </structure>
-        <structure>
-            <property name="name">TimeAxisPattern</property>
-            <property name="value">MM/dd/yyyy</property>
-        </structure>
-        <structure>
-            <property name="name">HighlightDate</property>
-        </structure>
-    </list-property>
     <parameters>
         <parameter-group name="DatabaseAccess" id="84">
             <parameters>
@@ -63,95 +50,10 @@
                 </scalar-parameter>
             </parameters>
         </parameter-group>
-        <scalar-parameter name="GroupByFormat" id="95">
-            <property name="hidden">true</property>
-            <property name="valueType">static</property>
-            <property name="dataType">string</property>
-            <property name="concealValue">true</property>
-            <property name="isRequired">false</property>
-            <property name="controlType">text-box</property>
-            <property name="defaultValue">%c/%d/%Y</property>
-            <structure name="format">
-                <property name="category">Unformatted</property>
-                <property name="pattern">Unformatted</property>
-            </structure>
-        </scalar-parameter>
-        <scalar-parameter name="TimeAxisPattern" id="97">
-            <property name="hidden">true</property>
-            <property name="valueType">static</property>
-            <property name="dataType">string</property>
-            <property name="concealValue">true</property>
-            <property name="isRequired">false</property>
-            <property name="controlType">text-box</property>
-            <property name="defaultValue">MM/dd/yyyy</property>
-            <structure name="format">
-                <property name="category">Unformatted</property>
-                <property name="pattern">Unformatted</property>
-            </structure>
-        </scalar-parameter>
-        <scalar-parameter name="HighlightDate" id="98">
-            <property name="hidden">true</property>
-            <property name="valueType">static</property>
-            <property name="dataType">string</property>
-            <property name="isRequired">false</property>
-            <property name="controlType">text-box</property>
-            <structure name="format">
-                <property name="category">Unformatted</property>
-                <property name="pattern">Unformatted</property>
-            </structure>
-        </scalar-parameter>
-        <scalar-parameter name="SelectSiteName" id="101">
-            <property name="valueType">static</property>
-            <property name="dataType">string</property>
-            <text-property name="promptText">Site Name</text-property>
-            <property name="controlType">text-box</property>
-            <property name="defaultValue">FNAL_CDFOSG_1</property>
-            <property name="distinct">false</property>
-            <property name="sortBy">label</property>
-            <property name="sortDirection">asc</property>
-            <structure name="format">
-                <property name="category">Unformatted</property>
-            </structure>
-            <list-property name="boundDataColumns">
-                <structure>
-                    <property name="name">sitename</property>
-                    <expression name="expression">dataSetRow["sitename"]</expression>
-                </structure>
-            </list-property>
-        </scalar-parameter>
-        <parameter-group name="DateRange" id="113">
-            <parameters>
-                <scalar-parameter name="StartDate" id="114">
-                    <property name="hidden">false</property>
-                    <text-property name="helpText">Only jobs that finished after this date will be included</text-property>
-                    <property name="valueType">static</property>
-                    <property name="dataType">string</property>
-                    <text-property name="promptText">Start Date</text-property>
-                    <property name="isRequired">true</property>
-                    <property name="controlType">text-box</property>
-                    <property name="defaultValue">2007-01-01</property>
-                    <structure name="format">
-                        <property name="category">Unformatted</property>
-                        <property name="pattern">Unformatted</property>
-                    </structure>
-                </scalar-parameter>
-                <scalar-parameter name="EndDate" id="115">
-                    <property name="hidden">false</property>
-                    <text-property name="helpText">Only jobs that finished before this date will be included</text-property>
-                    <property name="valueType">static</property>
-                    <property name="dataType">string</property>
-                    <text-property name="promptText">End Date</text-property>
-                    <property name="isRequired">true</property>
-                    <property name="controlType">text-box</property>
-                    <property name="defaultValue">2007-02-01</property>
-                    <structure name="format">
-                        <property name="category">Unformatted</property>
-                        <property name="pattern">Unformatted</property>
-                    </structure>
-                </scalar-parameter>
-            </parameters>
-        </parameter-group>
         <parameter-group name="ReportInfo" id="394" extends="gratia-lib1.ReportInfo"/>
+        <parameter-group name="Formatting" id="397" extends="gratia-lib1.Formatting"/>
+        <parameter-group name="DateRange" id="398" extends="gratia-lib1.DateRange"/>
+        <scalar-parameter name="SelectSiteName" id="401" extends="gratia-lib1.SelectSiteName"/>
     </parameters>
     <data-sources>
         <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="fermigrid1" id="69">
@@ -659,13 +561,11 @@ where S.siteid = P.siteid
 
 function beforeGeneration(chart, icsc)
 {
-
 	rep = icsc.getExternalContext().getScriptable();
 	
 	rep_title = rep.getParameterValue(&quot;ReportTitle&quot;)  ;
 	rep_subtitle = rep.getParameterValue(&quot;ReportSubtitle&quot;);
 	chart.getTitle().getLabel().getCaption().setValue(rep_title + &quot;\n&quot; + rep_subtitle);
-
 }</Script>
   <Units>Points</Units>
   <SeriesThickness>10.0</SeriesThickness>
