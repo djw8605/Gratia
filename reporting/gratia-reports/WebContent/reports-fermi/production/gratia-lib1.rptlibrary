@@ -338,6 +338,7 @@
                     <property name="mustMatch">true</property>
                     <property name="fixedOrder">true</property>
                     <property name="defaultValue">wallclock</property>
+                    <property name="distinct">false</property>
                     <structure name="format">
                         <property name="category">Unformatted</property>
                         <property name="pattern">Unformatted</property>
@@ -352,8 +353,12 @@
                             <property name="label">Process Hours</property>
                         </structure>
                         <structure>
-                            <property name="value">jobcount</property>
-                            <property name="label">Job Count</property>
+                            <property name="value">user</property>
+                            <property name="label">User Hours</property>
+                        </structure>
+                        <structure>
+                            <property name="value">system</property>
+                            <property name="label">System Hours</property>
                         </structure>
                     </list-property>
                 </scalar-parameter>
