@@ -183,16 +183,16 @@
             </list-property>
             <property name="queryText">
 select J.SiteName as sitename,
-sum(J.CpuUserDuration) as CpuUser,
-sum(J.CpuSystemDuration) as CpuSystem, 
-J.EndTime as endtime, 
-sum((J.CpuUserDuration+J.CpuSystemDuration)) as Cpu,
-sum((J.CpuUserDuration+J.CpuSystemDuration)*CpuInfo.BenchmarkScore/1000) as CpuBench
+  sum(J.CpuUserDuration) as CpuUser,
+  sum(J.CpuSystemDuration) as CpuSystem, 
+  J.EndTime as endtime, 
+  sum((J.CpuUserDuration+J.CpuSystemDuration)) as Cpu,
+  sum((J.CpuUserDuration+J.CpuSystemDuration)*CpuInfo.BenchmarkScore/1000) as CpuBench
 FROM JobUsageRecord_Report J, CPUInfo CpuInfo
 where J.ResourceType = 'RawCPU'
-and J.HostDescription=CpuInfo.HostDescription 
-and J.SiteName = ?
-and (? &lt;= J.EndTime and J.EndTime &lt;= ?)
+  and J.HostDescription=CpuInfo.HostDescription 
+  and J.SiteName = ?
+  and (? &lt;= J.EndTime and J.EndTime &lt;= ?)
 group by date_format(J.EndTime, ?)
 order by J.EndTime</property>
         </oda-data-set>
