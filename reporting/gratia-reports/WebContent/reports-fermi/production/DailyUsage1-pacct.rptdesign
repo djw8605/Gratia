@@ -74,12 +74,12 @@
                     </structure>
                     <structure>
                         <property name="position">2</property>
-                        <property name="name">usercpu</property>
+                        <property name="name">CpuUser</property>
                         <property name="dataType">float</property>
                     </structure>
                     <structure>
                         <property name="position">3</property>
-                        <property name="name">syscpu</property>
+                        <property name="name">CpuSystem</property>
                         <property name="dataType">float</property>
                     </structure>
                     <structure>
@@ -89,12 +89,12 @@
                     </structure>
                     <structure>
                         <property name="position">5</property>
-                        <property name="name">cputotal</property>
+                        <property name="name">Cpu</property>
                         <property name="dataType">float</property>
                     </structure>
                     <structure>
                         <property name="position">6</property>
-                        <property name="name">normcputotal</property>
+                        <property name="name">CpuBench</property>
                         <property name="dataType">float</property>
                     </structure>
                 </list-property>
@@ -147,15 +147,15 @@
                 </structure>
                 <structure>
                     <property name="position">2</property>
-                    <property name="name">usercpu</property>
-                    <property name="nativeName">usercpu</property>
+                    <property name="name">CpuUser</property>
+                    <property name="nativeName">CpuUser</property>
                     <property name="dataType">float</property>
                     <property name="nativeDataType">8</property>
                 </structure>
                 <structure>
                     <property name="position">3</property>
-                    <property name="name">syscpu</property>
-                    <property name="nativeName">syscpu</property>
+                    <property name="name">CpuSystem</property>
+                    <property name="nativeName">CpuSystem</property>
                     <property name="dataType">float</property>
                     <property name="nativeDataType">8</property>
                 </structure>
@@ -168,26 +168,26 @@
                 </structure>
                 <structure>
                     <property name="position">5</property>
-                    <property name="name">cputotal</property>
-                    <property name="nativeName">cputotal</property>
+                    <property name="name">Cpu</property>
+                    <property name="nativeName">Cpu</property>
                     <property name="dataType">float</property>
                     <property name="nativeDataType">8</property>
                 </structure>
                 <structure>
                     <property name="position">6</property>
-                    <property name="name">normcputotal</property>
-                    <property name="nativeName">normcputotal</property>
+                    <property name="name">CpuBench</property>
+                    <property name="nativeName">CpuBench</property>
                     <property name="dataType">float</property>
                     <property name="nativeDataType">8</property>
                 </structure>
             </list-property>
             <property name="queryText">
 select J.SiteName as sitename,
-sum(J.CpuUserDuration) as usercpu,
-sum(J.CpuSystemDuration) as syscpu, 
+sum(J.CpuUserDuration) as CpuUser,
+sum(J.CpuSystemDuration) as CpuSystem, 
 J.EndTime as endtime, 
-sum((J.CpuUserDuration+J.CpuSystemDuration)) as cputotal,
-sum((J.CpuUserDuration+J.CpuSystemDuration)*CpuInfo.BenchmarkScore/1000) as normcputotal
+sum((J.CpuUserDuration+J.CpuSystemDuration)) as Cpu,
+sum((J.CpuUserDuration+J.CpuSystemDuration)*CpuInfo.BenchmarkScore/1000) as CpuBench
 FROM JobUsageRecord_Report J, CPUInfo CpuInfo
 where J.ResourceType = 'RawCPU'
 and J.HostDescription=CpuInfo.HostDescription 
@@ -759,7 +759,7 @@ function beforeGeneration(chart, icsc)
             <Visible>false</Visible>
           </Label>
           <DataDefinition>
-            <Definition>row[&quot;usercpu&quot;]</Definition>
+            <Definition>row[&quot;CpuUser&quot;]</Definition>
           </DataDefinition>
           <SeriesIdentifier>User</SeriesIdentifier>
           <DataPoint>
@@ -1048,7 +1048,7 @@ function beforeGeneration(chart, icsc)
             <Visible>false</Visible>
           </Label>
           <DataDefinition>
-            <Definition>row[&quot;syscpu&quot;]</Definition>
+            <Definition>row[&quot;CpuSystem&quot;]</Definition>
           </DataDefinition>
           <SeriesIdentifier>System</SeriesIdentifier>
           <DataPoint>
@@ -1810,13 +1810,13 @@ MM/dd/yyyy
                     <property name="dataType">string</property>
                 </structure>
                 <structure>
-                    <property name="name">usercpu</property>
-                    <expression name="expression">dataSetRow["usercpu"]</expression>
+                    <property name="name">CpuUser</property>
+                    <expression name="expression">dataSetRow["CpuUser"]</expression>
                     <property name="dataType">float</property>
                 </structure>
                 <structure>
-                    <property name="name">syscpu</property>
-                    <expression name="expression">dataSetRow["syscpu"]</expression>
+                    <property name="name">CpuSystem</property>
+                    <expression name="expression">dataSetRow["CpuSystem"]</expression>
                     <property name="dataType">float</property>
                 </structure>
                 <structure>
@@ -1825,19 +1825,18 @@ MM/dd/yyyy
                     <property name="dataType">date-time</property>
                 </structure>
                 <structure>
-                    <property name="name">cputotal</property>
-                    <expression name="expression">dataSetRow["cputotal"]</expression>
+                    <property name="name">Cpu</property>
+                    <expression name="expression">dataSetRow["Cpu"]</expression>
                     <property name="dataType">float</property>
                 </structure>
                 <structure>
-                    <property name="name">normcputotal</property>
-                    <expression name="expression">dataSetRow["normcputotal"]</expression>
+                    <property name="name">CpuBench</property>
+                    <expression name="expression">dataSetRow["CpuBench"]</expression>
                     <property name="dataType">float</property>
                 </structure>
             </list-property>
             <property name="style">sans-style1</property>
         </extended-item>
         <label name="ReportURL" id="395" extends="gratia-lib1.ReportURL"/>
-        <label name="ShowQuery" id="396" extends="gratia-lib1.ShowQuery"/>
     </body>
 </report>
