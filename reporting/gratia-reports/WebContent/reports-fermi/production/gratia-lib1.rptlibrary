@@ -353,11 +353,11 @@
                             <property name="label">Process Hours</property>
                         </structure>
                         <structure>
-                            <property name="value">user</property>
+                            <property name="value">cpuuser</property>
                             <property name="label">User Hours</property>
                         </structure>
                         <structure>
-                            <property name="value">system</property>
+                            <property name="value">cpusystem</property>
                             <property name="label">System Hours</property>
                         </structure>
                     </list-property>
