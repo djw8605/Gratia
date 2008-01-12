@@ -182,19 +182,22 @@
                 </structure>
             </list-property>
             <property name="queryText">
-select J.SiteName as sitename,
-  sum(J.CpuUserDuration) as CpuUser,
-  sum(J.CpuSystemDuration) as CpuSystem, 
-  J.EndTime as endtime, 
-  sum((J.CpuUserDuration+J.CpuSystemDuration)) as Cpu,
-  sum((J.CpuUserDuration+J.CpuSystemDuration)*CpuInfo.BenchmarkScore/1000) as CpuBench
-FROM JobUsageRecord_Report J, CPUInfo CpuInfo
-where J.ResourceType = 'RawCPU'
-  and J.HostDescription=CpuInfo.HostDescription 
-  and J.SiteName = ?
-  and (? &lt;= J.EndTime and J.EndTime &lt;= ?)
-group by date_format(J.EndTime, ?)
-order by J.EndTime</property>
+SELECT S.SiteName as sitename,
+  sum(H.CpuUserDuration) as CpuUser,
+  sum(H.CpuSystemDuration) as CpuSystem, 
+  H.EndTime as endtime, 
+  sum((H.CpuUserDuration+H.CpuSystemDuration)) as Cpu,
+  sum((H.CpuUserDuration+H.CpuSystemDuration)*C.BenchmarkScore/1000) as CpuBench
+FROM HostDescriptionProbeSummary H, Site S, Probe P, CPUInfo C
+WHERE H.ResourceType = 'RawCPU'
+  and H.ProbeName = P.probename
+  and P.siteid = S.siteid
+  and H.ResourceType = 'RawCPU'
+  and H.HostDescription = C.HostDescription 
+  and S.SiteName = ?
+  and (? &lt;= H.EndTime and H.EndTime &lt;= ?)
+GROUP BY date_format(H.EndTime, ?)
+ORDER BY H.EndTime</property>
         </oda-data-set>
         <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="SiteNames" id="106">
             <structure name="cachedMetaData">
