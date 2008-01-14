@@ -1385,5 +1385,8 @@ MM/dd/yyyy
             </list-property>
             <property name="style">sans-style1</property>
         </extended-item>
+        <label name="ReportURL" id="393" extends="gratia-lib1.ReportURL">
+            <property name="eventHandlerClass">net.sf.gratia.reporting.GratiaBirtReportEH</property>
+        </label>
     </body>
 </report>
