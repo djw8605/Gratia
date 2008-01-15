@@ -1248,6 +1248,13 @@ ORDER BY final_rank, VOProbeSummary.VOName,datevalue</property>
                 <row id="10">
                     <cell id="11"/>
                     <cell id="12">
+                        <text-data id="433">
+                            <property name="style">sans-style1</property>
+                            <property name="fontSize">9pt</property>
+                            <property name="textAlign">center</property>
+                            <expression name="valueExpr">'Site: ' + params["SelectSiteName"]</expression>
+                            <property name="contentType">html</property>
+                        </text-data>
                         <text-data id="94">
                             <property name="style">sans-style1</property>
                             <property name="fontSize">9pt</property>
@@ -1853,51 +1860,6 @@ else {&#xD;
           </DataPoint>
           <LabelPosition>Inside</LabelPosition>
           <Stacked>true</Stacked>
-          <Triggers>
-            <Condition>onclick</Condition>
-            <Action>
-              <Type>URL_Redirect</Type>
-              <Value xsi:type="attribute:URLValue">
-                <BaseUrl>&lt;structure name=&quot;action&quot;>
-    &lt;property name=&quot;formatType&quot;>html&lt;/property>
-    &lt;property name=&quot;linkType&quot;>drill-through&lt;/property>
-    &lt;property name=&quot;reportName&quot;>UsageByUserForDate1.rptdesign&lt;/property>
-    &lt;property name=&quot;targetWindow&quot;>_self&lt;/property>
-    &lt;property name=&quot;targetFileType&quot;>report-design&lt;/property>
-    &lt;list-property name=&quot;paramBindings&quot;>
-        &lt;structure>
-            &lt;property name=&quot;paramName&quot;>ForVO&lt;/property>
-            &lt;expression name=&quot;expression&quot;>'ForVO'&lt;/expression>
-        &lt;/structure>
-        &lt;structure>
-            &lt;property name=&quot;paramName&quot;>ForSiteName&lt;/property>
-            &lt;expression name=&quot;expression&quot;>'xxx'&lt;/expression>
-        &lt;/structure>
-        &lt;structure>
-            &lt;property name=&quot;paramName&quot;>ForSite&lt;/property>
-            &lt;expression name=&quot;expression&quot;>'AnySite'&lt;/expression>
-        &lt;/structure>
-        &lt;structure>
-            &lt;property name=&quot;paramName&quot;>DisplayMetric&lt;/property>
-            &lt;expression name=&quot;expression&quot;>params[&quot;DisplayMetric&quot;]&lt;/expression>
-        &lt;/structure>
-        &lt;structure>
-            &lt;property name=&quot;paramName&quot;>ReportTitle&lt;/property>
-            &lt;expression name=&quot;expression&quot;>params[&quot;ReportTitle&quot;] + ' - ' + 'drill-through'&lt;/expression>
-        &lt;/structure>
-        &lt;structure>
-            &lt;property name=&quot;paramName&quot;>ReportSubtitle&lt;/property>
-            &lt;expression name=&quot;expression&quot;>params[&quot;ReportSubtitle&quot;]&lt;/expression>
-        &lt;/structure>
-    &lt;/list-property>
-&lt;/structure>
-</BaseUrl>
-                <BaseParameterName>StartDate</BaseParameterName>
-                <ValueParameterName></ValueParameterName>
-                <SeriesParameterName>ForVOName</SeriesParameterName>
-              </Value>
-            </Action>
-          </Triggers>
           <Triggers>
             <Condition>onmouseover</Condition>
             <Action>
