@@ -350,7 +350,7 @@
                         </structure>
                         <structure>
                             <property name="value">process</property>
-                            <property name="label">Process Hours</property>
+                            <property name="label">Process (User+System) Hours</property>
                         </structure>
                         <structure>
                             <property name="value">cpuuser</property>
