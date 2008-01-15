@@ -1,11 +1,11 @@
 <UserConfig>
 	<Menu>
 		<MenuGroup name="Reports">
-			<MenuItem name="Last 12 Months % Usage by Site" link="GratiaParameterInput.jsp?report=[ReportsFolder]DateSummary2-pacct.rptdesign"/>
-			<MenuItem name="Last 12 Months Usage (SpecINT2000 hours) by Site" link="GratiaParameterInput.jsp?report=[ReportsFolder]DateSummary1-pacct.rptdesign"/>
-			<MenuItem display="true" name="Daily Usage (CPU hours) with Group Detail" link="GratiaParameterInput.jsp?report=[ReportsFolder]DailyUsageByGroup2-pacct.rptdesign"/>
-			<MenuItem name="Daily Usage (CPU hours) by Group" link="GratiaParameterInput.jsp?report=[ReportsFolder]DailyUsageByGroup-pacct.rptdesign"/>
-			<MenuItem name="Daily Usage (CPU hours) Total (system and user)" link="GratiaParameterInput.jsp?report=[ReportsFolder]DailyUsage1-pacct.rptdesign"/>
+			<MenuItem name="% Usage by Site" link="GratiaParameterInput.jsp?report=[ReportsFolder]UsagePctBySiteByMonth-pacct.rptdesign"/>
+			<MenuItem name="Usage By Site" link="GratiaParameterInput.jsp?report=[ReportsFolder]UsageBySiteByMonth-pacct.rptdesign"/>
+			<MenuItem name="Usage by Group for Site - " link="GratiaParameterInput.jsp?report=[ReportsFolder]UsageByGroupByDate-ranked-pacct.rptdesign"/>
+			<MenuItem display="true" name="Daily Usage By Group" link="GratiaParameterInput.jsp?report=[ReportsFolder]DailyUsageByGroup2-pacct.rptdesign"/>
+			<MenuItem name="Daily Usage Total (system and user)" link="GratiaParameterInput.jsp?report=[ReportsFolder]DailyUsage1-pacct.rptdesign"/>
 		</MenuGroup>
 		<MenuGroup name="SQL Queries">
 			<MenuItem name="Custom SQL Report" link="showQuery.jsp"/>
