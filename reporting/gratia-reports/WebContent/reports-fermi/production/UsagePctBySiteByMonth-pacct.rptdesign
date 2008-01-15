@@ -7,90 +7,18 @@
     <text-property name="displayName">Chart &amp; Listing</text-property>
     <property name="iconFile">/templates/chart_listing.gif</property>
     <property name="cheatSheet">org.eclipse.birt.report.designer.ui.cheatsheet.chartlisting</property>
+    <property name="eventHandlerClass">net.sf.gratia.reporting.GratiaBirtReportEH</property>
+    <list-property name="libraries">
+        <structure>
+            <property name="fileName">gratia-lib1.rptlibrary</property>
+            <property name="namespace">gratia-lib1</property>
+        </structure>
+    </list-property>
     <parameters>
-        <parameter-group name="DatabaseAccess" id="84">
-            <parameters>
-                <scalar-parameter name="DatabaseURL" id="81">
-                    <property name="hidden">true</property>
-                    <property name="valueType">static</property>
-                    <property name="dataType">string</property>
-                    <property name="isRequired">true</property>
-                    <property name="controlType">text-box</property>
-                    <property name="defaultValue">jdbc:mysql://gratia-db01.fnal.gov:3320/gratia_psacct</property>
-                    <structure name="format">
-                        <property name="category">Unformatted</property>
-                        <property name="pattern">Unformatted</property>
-                    </structure>
-                </scalar-parameter>
-                <scalar-parameter name="DatabaseUser" id="83">
-                    <property name="hidden">true</property>
-                    <property name="valueType">static</property>
-                    <property name="dataType">string</property>
-                    <property name="isRequired">true</property>
-                    <property name="controlType">text-box</property>
-                    <property name="defaultValue">gratia</property>
-                    <structure name="format">
-                        <property name="category">Unformatted</property>
-                        <property name="pattern">Unformatted</property>
-                    </structure>
-                </scalar-parameter>
-                <scalar-parameter name="DatabasePassword" id="82">
-                    <property name="hidden">true</property>
-                    <property name="valueType">static</property>
-                    <property name="dataType">string</property>
-                    <property name="isRequired">true</property>
-                    <property name="controlType">text-box</property>
-                    <property name="defaultValue">notused</property>
-                    <structure name="format">
-                        <property name="category">Unformatted</property>
-                        <property name="pattern">Unformatted</property>
-                    </structure>
-                </scalar-parameter>
-            </parameters>
-        </parameter-group>
-        <scalar-parameter name="SiteName" id="123">
-            <text-property name="helpText">Select probe name for report.</text-property>
-            <property name="valueType">static</property>
-            <property name="dataType">string</property>
-            <text-property name="promptText">Probe Name:</text-property>
-            <property name="controlType">text-box</property>
-            <property name="defaultValue">FNAL_CDFOSG_1</property>
-            <structure name="format">
-                <property name="category">Unformatted</property>
-            </structure>
-        </scalar-parameter>
-        <parameter-group name="DateRange" id="125">
-            <parameters>
-                <scalar-parameter name="StartDate" id="126">
-                    <property name="hidden">false</property>
-                    <text-property name="helpText">Only jobs that finished after this date will be included</text-property>
-                    <property name="valueType">static</property>
-                    <property name="dataType">string</property>
-                    <text-property name="promptText">Start Date</text-property>
-                    <property name="isRequired">true</property>
-                    <property name="controlType">text-box</property>
-                    <property name="defaultValue">2007-01-01</property>
-                    <structure name="format">
-                        <property name="category">Unformatted</property>
-                        <property name="pattern">Unformatted</property>
-                    </structure>
-                </scalar-parameter>
-                <scalar-parameter name="EndDate" id="127">
-                    <property name="hidden">false</property>
-                    <text-property name="helpText">Only jobs that finished before this date will be included</text-property>
-                    <property name="valueType">static</property>
-                    <property name="dataType">string</property>
-                    <text-property name="promptText">End Date</text-property>
-                    <property name="isRequired">true</property>
-                    <property name="controlType">text-box</property>
-                    <property name="defaultValue">2007-02-01</property>
-                    <structure name="format">
-                        <property name="category">Unformatted</property>
-                        <property name="pattern">Unformatted</property>
-                    </structure>
-                </scalar-parameter>
-            </parameters>
-        </parameter-group>
+        <scalar-parameter name="SelectSiteName" id="218" extends="gratia-lib1.SelectSiteName"/>
+        <parameter-group name="ReportInfo" id="219" extends="gratia-lib1.ReportInfo"/>
+        <parameter-group name="DatabaseAccess" id="390" extends="gratia-lib1.DatabaseAccess"/>
+        <parameter-group name="DateRange" id="394" extends="gratia-lib1.DateRange"/>
     </parameters>
     <data-sources>
         <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="fermigrid1" id="69">
@@ -267,7 +195,7 @@ count(distinct N.Node), N.BenchmarkScore,N.CpuCount, N.HostDescription, count(di
 count(distinct N.Node)*N.BenchmarkScore*N.DaysInMonth*N.CpuCount*.5/1000 as halfavailablebenchdays
 from NodeSummary N, Probe P, Site S
 where P.siteid = S.siteid and N.ProbeName = P.ProbeName
-and S.SiteName like ?
+and S.SiteName = ?
 and date_format(N.EndTime,'%Y-%m') >= ?
 and date_format(N.EndTime,'%Y-%m') &lt;= ?
 
@@ -367,7 +295,7 @@ order by S.SiteName, date_format(N.EndTime,'%Y-%m'), BenchmarkScore
             <list-property name="paramBindings">
                 <structure>
                     <property name="paramName">SiteName</property>
-                    <expression name="expression">params["SiteName"]</expression>
+                    <expression name="expression">params["SelectSiteName"]</expression>
                 </structure>
                 <structure>
                     <property name="paramName">StartDate</property>
@@ -465,7 +393,7 @@ order by S.SiteName, date_format(N.EndTime,'%Y-%m'), BenchmarkScore
                                 <property name="fontSize">medium</property>
                                 <property name="fontWeight">bold</property>
                                 <property name="textUnderline">none</property>
-                                <expression name="valueExpr">'Site: ' + row["SiteName"]</expression>
+                                <expression name="valueExpr">'Site: ' + params["SelectSiteName"]</expression>
                                 <property name="contentType">html</property>
                             </text-data>
                             <extended-item extensionName="Chart" name="NewChart" id="187">
