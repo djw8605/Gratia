@@ -961,7 +961,7 @@
             </structure>
         </scalar-parameter>
         <scalar-parameter name="StartDate" id="86">
-            <property name="hidden">false</property>
+            <property name="hidden">true</property>
             <text-property name="helpText">Only jobs that finished after this date will be included</text-property>
             <property name="valueType">static</property>
             <property name="dataType">string</property>
@@ -975,7 +975,7 @@
             </structure>
         </scalar-parameter>
         <scalar-parameter name="EndDate" id="87">
-            <property name="hidden">false</property>
+            <property name="hidden">true</property>
             <text-property name="helpText">Only jobs that finished before this date will be included</text-property>
             <property name="valueType">static</property>
             <property name="dataType">string</property>
