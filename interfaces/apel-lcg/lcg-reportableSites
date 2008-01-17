@@ -93,6 +93,9 @@
 #             the EGEE site association table for the Tier 1 view.
 #             When the changes to the Gratia Site table and EGEE tables
 #             are complete the US-T1-BNL can be removed.
+#   1/17/08 (John Weigand) -
+#             US-T1-BNL to BNL_ATLAS_1 changes effected. 
+#             Removing US-T1-BNL entry.
 #    
 ##################################################################
 #-- Site  ------- SPECint2000
@@ -123,7 +126,6 @@ OU_OCHEP_SWT2       1543
 OU_OSCER_ATLAS      1543
 UC_Teraport         1412
 UC_ATLAS_MWT2       1169
-US-T1-BNL           1351
 BNL_ATLAS_1         1351
 UTA_DPCC             915
 UTA_SWT2            1543
