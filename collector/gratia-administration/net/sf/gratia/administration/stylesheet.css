@@ -1,33 +1,79 @@
+a:link 
+{
+	text-decoration: none; 
+}
+
+body
+{
+	font-family: Verdana, Arial, sans-serif;
+}
+label
+{
+	font-family: Verdana, Arial, sans-serif;
+	font-size: 0.75em; 
+}
+
 table.menu
 {
-	cellspacing:0;
-	cellpadding:0;
 }
 .menuGroup
 {
 	overflow: hidden;
-	width: 175px;
+	width: 12em;
         font-family: Verdana, Arial, sans-serif;
         font-weight: bold;
         color: #462300;
-        font-size: 11px;
+        font-size: 0.70em;
+	text-align: left;
+}
+.menuText
+{
+	overflow: hidden;
+	width: 12em;
+        font-family: Verdana, Arial, sans-serif;
+        color: #462300;
+        font-size: 0.65em;
 	text-align: left;
 }
 a.menuItem
 {
-	cursor: hand;
+	cursor: pointer;
 	overflow: hidden;
 	color: #e07630;
-	text-indent: 10px;
+	text-indent: 0.65em;
 	text-align: left;
 	font-weight: bold;
 	font-family: Verdana, Arial, sans-serif;
-	font-size: 10px; 
+	font-size: 0.65em; 
+	text-decoration: none;
+}
+a.contact
+{
+	cursor: pointer;
+	overflow: hidden;
+	color: #e07630;
+	text-indent: 0.65em;
+	text-align: left;
+	font-weight: bold;
+	font-family: Verdana, Arial, sans-serif;
+	font-size: 0.7em; 
 	text-decoration: none;
 }
 a.menuItem:hover
 {
-	border: solid 1px #e07630;
+	border: solid 0.01em #e07630;
+	color: #FFFFFF; 
+	background-color: #e07630;
+}
+a.menuItem:focus
+{
+	border: solid 0.01em #e07630;
+	color: #FFFFFF; 
+	background-color: #e07630;
+}
+a.menuItem:active
+{
+	border: solid 0.01em #e07630;
 	color: #FFFFFF; 
 	background-color: #e07630;
 }
@@ -36,14 +82,22 @@ a.menuItem:hover
 	text-decoration: underline;
 	font-weight: bold;
 	font-family: Verdana, Arial, sans-serif;
-	font-size: 24px; 
+	font-size: 1.5em; 
+} 
+
+.reportTitle {
+	font-family: Verdana, Arial, sans-serif;
+	font-weight: bold;
+	font-size: 1.1em; 
+	text-decoration: underline;
+	text-align: left;
 } 
 
 .menufields {
-        font-family: Verdana, Arial, sans-serif;
+    font-family: Verdana, Arial, sans-serif;
 	font-weight: bold;
-        color: #462300;
-	font-size: 12px; 
+    color: #462300;
+	font-size: 0.75em; 
 }
 
 .paramSelect
@@ -55,7 +109,67 @@ a.menuItem:hover
 }
 .paramHelp
 {
+    font-family: Verdana, Arial, sans-serif;
+	font-size: 0.6em; 
+}
+
+.menuVersion
+{
+	color: #462300;
+	/* text-indent: 0.65em; */
+	text-align: left;
+	/* font-weight: bold; */
+	font-family: Verdana, Arial, sans-serif;
+	font-size: 0.58em; 
+}
+
+.txt
+{
+    font-family: Verdana, Arial, sans-serif;
+	font-size: 0.75em; 
 }
 .button
 {
+	font-weight: bold;
+}
+table.query
+{
+    font-family: Verdana, Arial, sans-serif;
+	font-size: 0.80em; 
+}
+.querytxt
+{
+    font-family: Verdana, Arial, sans-serif;
+	font-size: 0.9em; 
+}
+
+a.reportItem
+{
+	cursor: pointer;
+	overflow: hidden;
+	color: #e07630;
+	text-indent: 0.65em;
+	text-align: left;
+	font-weight: bold;
+	font-family: Verdana, Arial, sans-serif;
+	font-size: 0.85em; 
+	text-decoration: none;
+}
+a.reportItem:hover
+{
+	border: solid 0.01em #e07630;
+	color: #FFFFFF; 
+	background-color: #e07630;
+}
+a.reportItem:focus
+{
+	border: solid 0.01em #e07630;
+	color: #FFFFFF; 
+	background-color: #e07630;
+}
+a.reportItem:active
+{
+	border: solid 0.01em #e07630;
+	color: #FFFFFF; 
+	background-color: #e07630;
 }
