@@ -7,6 +7,12 @@
     <text-property name="displayName">Chart &amp; Listing</text-property>
     <property name="iconFile">/templates/chart_listing.gif</property>
     <property name="cheatSheet">org.eclipse.birt.report.designer.ui.cheatsheet.chartlisting</property>
+    <list-property name="libraries">
+        <structure>
+            <property name="fileName">gratia-lib1.rptlibrary</property>
+            <property name="namespace">gratia-lib1</property>
+        </structure>
+    </list-property>
     <parameters>
         <parameter-group name="DatabaseAccess" id="84">
             <parameters>
@@ -48,17 +54,6 @@
                 </scalar-parameter>
             </parameters>
         </parameter-group>
-        <scalar-parameter name="SiteName" id="123">
-            <text-property name="helpText">Select probe name for report.</text-property>
-            <property name="valueType">static</property>
-            <property name="dataType">string</property>
-            <text-property name="promptText">Site Name:</text-property>
-            <property name="controlType">text-box</property>
-            <property name="defaultValue">FNAL_CDFOSG_1</property>
-            <structure name="format">
-                <property name="category">Unformatted</property>
-            </structure>
-        </scalar-parameter>
         <parameter-group name="DateRange" id="125">
             <parameters>
                 <scalar-parameter name="StartDate" id="126">
@@ -91,6 +86,7 @@
                 </scalar-parameter>
             </parameters>
         </parameter-group>
+        <scalar-parameter name="SelectSiteName" id="218" extends="gratia-lib1.SelectSiteName"/>
     </parameters>
     <data-sources>
         <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="fermigrid1" id="69">
@@ -159,7 +155,7 @@
             <property name="dataSource">fermigrid1</property>
             <list-property name="parameters">
                 <structure>
-                    <property name="name">SiteName</property>
+                    <property name="name">SelectSiteName</property>
                     <property name="dataType">any</property>
                     <property name="position">1</property>
                     <expression name="defaultValue">"FNAL_CDFOSG_1"</expression>
@@ -366,8 +362,8 @@ order by S.SiteName, date_format(N.EndTime,'%Y-%m'), BenchmarkScore
             <property name="dataSet">UsageBySiteByMonth</property>
             <list-property name="paramBindings">
                 <structure>
-                    <property name="paramName">SiteName</property>
-                    <expression name="expression">params["SiteName"]</expression>
+                    <property name="paramName">SelectSiteName</property>
+                    <expression name="expression">params["SelectSiteName"]</expression>
                 </structure>
                 <structure>
                     <property name="paramName">StartDate</property>
@@ -460,12 +456,10 @@ order by S.SiteName, date_format(N.EndTime,'%Y-%m'), BenchmarkScore
                             <property name="colSpan">3</property>
                             <property name="rowSpan">1</property>
                             <property name="textAlign">center</property>
-                            <text-data id="217">
+                            <text-data id="219">
                                 <property name="style">sans-style1</property>
-                                <property name="fontSize">medium</property>
-                                <property name="fontWeight">bold</property>
-                                <property name="textUnderline">none</property>
-                                <expression name="valueExpr">'Site: ' + row["SiteName"]</expression>
+                                <property name="fontSize">9pt</property>
+                                <expression name="valueExpr">"Site: " + params["SelectSiteName"]</expression>
                                 <property name="contentType">html</property>
                             </text-data>
                             <extended-item extensionName="Chart" name="NewChart" id="187">
