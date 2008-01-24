@@ -28,7 +28,7 @@ public class ReportParameters
 		SAXReader saxReader = new SAXReader();
 		Document doc = null;
 		File source = null;
-
+		
 		if (report == null || report.length() == 0)
 		{
 			throw new InvalidConfigurationException("A Report name has not been specified");
@@ -36,11 +36,11 @@ public class ReportParameters
 
 		try
 		{
+			
 			// Open the Report file and read the report file
 			source = new File(report);
 			String reportFolder = source.getPath();
 			reportFolder = reportFolder.substring(0, reportFolder.lastIndexOf(File.separatorChar)+1);
-			
 			doc = saxReader.read(source);
 
 			// Iterate through all child elements of root
@@ -66,7 +66,7 @@ public class ReportParameters
 			    {
 				Element element = (Element) i.next();
 			 	String elementName = element.getName();
-			 	
+
 			 	if (elementName == "parameters")
 			 	{
 			 		_paramGroups = new ArrayList();       // we have a parameters grouping
@@ -89,7 +89,7 @@ public class ReportParameters
 					            Element groupType = (Element) ggIter.next();
 					            String gType = groupType.getName();
 					            String gName = groupType.getText();
-					            
+
 					            // Skip parameters in the Database and UserInfo groups - set by the EventHandler
 					            if ((gName.indexOf("Database") > -1) && (gName.indexOf("UserInfo") > -1)) 
 					            	break;
@@ -106,6 +106,7 @@ public class ReportParameters
 				      } // "for (Iterator pIterator ..."
 			 	} // "if (elementName == "parameters")"
 			 } // "for (Iterator i = "
+
 		} // try
 		catch(Exception exDoc)
 		{
@@ -158,31 +159,33 @@ public class ReportParameters
 		    			String paramName = pType.attributeValue("name").trim();
 		    			
 		    	// Get the information only if this is the element we are looking for		
-		    			if (paramName.indexOf(lookForElement) > -1)
+
+		    			if (paramType.indexOf("parameter-group") > -1)
 		    			{
-		    				if (paramType.indexOf("parameter-group") > -1 )
+		    				for (Iterator gIterator = pType.elementIterator(); gIterator.hasNext();)
 		    				{
-		    					for (Iterator gIterator = pType.elementIterator(); gIterator.hasNext();)
+		    					Element groupInfo = (Element) gIterator.next();
+		    					for (Iterator ggIter = groupInfo.elementIterator(); ggIter.hasNext();)
 		    					{
-		    						Element groupInfo = (Element) gIterator.next();
-		    						for (Iterator ggIter = groupInfo.elementIterator(); ggIter.hasNext();)
+		    						Element groupType = (Element) ggIter.next();
+		    						String gType = groupType.getName();
+		    						if  (gType.indexOf("scalar-parameter") > -1 )
 		    						{
-		    							Element groupType = (Element) ggIter.next();
-		    							String gType = groupType.getName();
-		    							if  (gType.indexOf("scalar-parameter") > -1 )
+		    							String scalarName = groupType.attributeValue("name").trim();
+		    							if ((scalarName.indexOf(lookForElement) > -1) || (paramName.indexOf(lookForElement) > -1))
 		    							{
 		    								addParameterInfo(groupType);
-		    							} // "scalar-parameter"
-		    						} // "for (Iterator ggIter..."
-		    					} // "for (Iterator gIterator..."
-		    				}else if (paramType.indexOf("scalar-parameter") > -1 )
-		    				{
-		    					addParameterInfo(pType);
-		    				} // "if (paramType == "scalar-parameter")"
-		    			} 
-		    		 } // "for (Iterator pIterator ..."
+		    							}
+		    						} // "scalar-parameter"
+		    					} // "for (Iterator ggIter..."
+		    				} // "for (Iterator gIterator..."
+		    			}else if ((paramType.indexOf("scalar-parameter") > -1 ) && (paramName.indexOf(lookForElement) > -1))
+		    			{
+		    				addParameterInfo(pType);
+		    			} // "if (paramType == "scalar-parameter")"
+		    		} // "for (Iterator pIterator ..."
 		    	} // "if (elementName == "parameters")"
-		    } // "for (Iterator i = "
+		   } // "for (Iterator i = "
 		} // try
 		catch(Exception exDoc)
 		{
