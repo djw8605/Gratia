@@ -20,9 +20,9 @@
 		</MenuGroup>
 		<MenuGroup name="Reports - miscellaneous">
 			<MenuItem name="Probe Status" link="GratiaParameterInput.jsp?report=[ReportsFolder]ProbeStatus.rptdesign"/>
-			<MenuItem name="Usage Report" link="GratiaParameterInput.jsp?report=[ReportsFolder]UsageReport.rptdesign"/>
 		</MenuGroup>
-		<MenuGroup name="Reports - For 2007 (displays in ~30-60 secs)">
+		<MenuGroup name="Reports - Display in >30 secs">
+<!-- 			<MenuItem name="Usage Report" link="GratiaParameterInput.jsp?report=[ReportsFolder]UsageReport.rptdesign"/> -->
 			<MenuItem name="2007 Usage for All VOs" link="GratiaParameterInput.jsp?report=[ReportsFolder]2007WeeklyUsageByVO-ranked.rptdesign&amp;DisplayMetric=wallclock"/>
 		</MenuGroup>
 		<MenuGroup name="DCache">
@@ -36,7 +36,7 @@
 			<MenuItem name="Records Without Dates" link="showQuery.jsp?sql=select count(*) from JobUsageRecord where starttime is null or endtime is null;"/>
 		</MenuGroup>
 		<MenuGroup name="Static Reports">
-			<MenuItem name="Custom SQL Report" link="staticReports.jsp"/>
+			<MenuItem name="Static Reports (in PDF format)" link="staticReports.jsp"/>
 		</MenuGroup>
 		<MenuGroup name="Commands">
 			<MenuItem name="Logout" link="logout.jsp"/>
