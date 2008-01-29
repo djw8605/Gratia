@@ -454,19 +454,28 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 </td>
 </tr>
 </table>
-<script type="text/javascript">
-		parent.reportFrame.document.write('<hr color="#CBCB97" size="4" >');
-		parent.reportFrame.document.close();
-</script>
 <%
 if (displayReport.indexOf("true") > -1)
 {
 %>
 	<script type="text/javascript">
+		parent.reportFrame.document.close();
 		parent.reportFrame.location = getURL();
 	</script>
 <%
 }
+else
+{
 %>
+	<script type="text/javascript">
+			parent.reportFrame.document.write('<link href="stylesheet.css" type="text\/css" rel="stylesheet">');
+			parent.reportFrame.document.write('<hr color="#CBCB97" size="4" >');
+			parent.reportFrame.document.write('<br><label class="paramName">To see the report, please make the appropriate selections and press one of the "Display Report" buttons<\/label>');
+			parent.reportFrame.document.close();
+	</script>
+<% 
+} 
+%>
+
 </body>
 </html>
