@@ -97,13 +97,13 @@ int i1 = -1;
 int i2 = -1;
 
 String wholeParams = request.getQueryString();
-String displayReport = request.getParameter("displayReport");
+String displayReport = "true"; //request.getParameter("displayReport");
 
-if (displayReport == null)
-	displayReport = "false";
+//if (displayReport == null)
+//	displayReport = "false";
 
-if (wholeParams.indexOf("displayReport=true") > -1)	
-	displayReport = "true";
+//if (wholeParams.indexOf("displayReport=true") > -1)	
+//	displayReport = "true";
 
 String report = request.getParameter("report");
 
@@ -238,9 +238,11 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 		}
 		else if (paramName.indexOf("Select") > -1 )
 		{
+			displayReport = "false";
 			String selectNameID = paramName;
 			String selectedLabel = "";
 			String selectMultiple = "";
+			String selected = "selected";
 			String onchangeFunction = "getURL();";
 			String sql = "";
 			
@@ -249,6 +251,7 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 				selectNameID = "myVOs";
 				selectedLabel = "Selected VOs:";
 				selectMultiple = "multiple";
+				selected = "";
 				onchangeFunction = "addVOs(this.form); getURL();";
 				sql = "select distinct (VO.VOName) from VO, VONameCorrection where VO.VOid = VONameCorrection.VOid order by VO.VOName";
 			}
@@ -258,7 +261,7 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 			}
 			else if (paramName.indexOf("SelectSiteName") > -1 )
 			{
-				sql = "select 'All' as sitename from Site union select Site.SiteName as sitename from Site order by sitename";
+				sql = "select Site.SiteName as sitename from Site order by sitename";
 			}
 			else if (paramName.indexOf("SelectProbeName") > -1 )
 			{
@@ -301,7 +304,6 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 					{
 						resultValue = value.toString();
 
-						String selected = "";
 						if(defaultValue.indexOf(resultValue) > -1)
 						{
 							selected="selected";
@@ -314,6 +316,7 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 						%> <option value="<%= resultValue %>" <%= selected %> ><%= resultValue %></option> 
 						<%
 					}
+					selected="";
 				}
 			}catch(SQLException exception){
 				out.println("<!--");
@@ -456,14 +459,14 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 		parent.reportFrame.document.close();
 </script>
 <%
-// if (displayReport.indexOf("true") > -1)
-// {
+if (displayReport.indexOf("true") > -1)
+{
 %>
 	<script type="text/javascript">
 		parent.reportFrame.location = getURL();
 	</script>
 <%
-// }
+}
 %>
 </body>
 </html>
