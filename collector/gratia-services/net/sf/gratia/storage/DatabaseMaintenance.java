@@ -16,7 +16,7 @@ import java.text.DecimalFormat;
 public class DatabaseMaintenance {
     static final String dq = "\"";
     static final String comma = ",";
-    static final int gratiaDatabaseVersion = 27;
+    static final int gratiaDatabaseVersion = 28;
     static final int latestDBVersionRequiringStoredProcedureLoad = gratiaDatabaseVersion;
     static final int latestDBVersionRequiringSummaryTableLoad = 19;
     static final int latestDBVersionRequiringSummaryViewLoad = 22;
@@ -916,10 +916,10 @@ public class DatabaseMaintenance {
                                 " to " + (current + 1));
                 }
             }
-            if (current == 24 || current == 25 | current == 26) {
+            if (current == 24 || current == 25 || current == 26 || current == 27) {
                 // Auxiliary DB item upgrades only.
-                Logging.log("Gratia database upgraded from " + current + " to 26");
-                current = 27;
+                Logging.log("Gratia database upgraded from " + current + " to 28");
+                current = 28;
                 UpdateDbVersion(current);
             }
             return ((current == gratiaDatabaseVersion) && checkAndUpgradeDbAuxiliaryItems());
