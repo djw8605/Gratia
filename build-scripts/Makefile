@@ -243,21 +243,21 @@ security: services
 	# --- Target: security COMPLETED ---
 
 #------------------------------------------------------------------
-util:
-	# --------------------
-	# --- Target: util ---
-	# --------------------
-	rm -rf   war
-	mkdir -p war/WEB-INF/lib
-	mkdir -p war/WEB-INF/classes/net/sf/gratia/util
-	javac -cp ${classpath} -extdirs ${commonLib} ${util}/net/sf/gratia/util/*.java
-	cp ${util}/net/sf/gratia/util/*.class war/WEB-INF/classes/net/sf/gratia/util
-	cp ${commonLib}/*.jar war/WEB-INF/lib
-	rm -f  war/WEB-INF/lib/util*
-# ###	cp ${util}/net/sf/gratia/util/web.xml war/WEB-INF/web.xml
-	jar -cfM ${target}/gratia-util.war -C war .
-	rm -rf  war
-	# --- Target: util COMPLETED ---
+### util:
+###     # --------------------
+###     # --- Target: util ---
+###     # --------------------
+###     rm -rf   war
+###     mkdir -p war/WEB-INF/lib
+###     mkdir -p war/WEB-INF/classes/net/sf/gratia/util
+###     javac -cp ${classpath} -extdirs ${commonLib} ${util}/net/sf/gratia/util/*.java
+###     cp ${util}/net/sf/gratia/util/*.class war/WEB-INF/classes/net/sf/gratia/util
+###     cp ${commonLib}/*.jar war/WEB-INF/lib
+###     rm -f  war/WEB-INF/lib/util*
+###      ###	cp ${util}/net/sf/gratia/util/web.xml war/WEB-INF/web.xml
+###     jar -cfM ${target}/gratia-util.war -C war .
+###     rm -rf  war
+###     # --- Target: util COMPLETED ---
 
 #-------------------------------------------------------------
 reporting: birt-reporting
@@ -321,7 +321,7 @@ reports:
 	# --- Target: reports COMPLETED ---
 
 #-------------------------------------------------------------
-birt-reporting: util
+birt-reporting: 
 	# ------------------------------
 	# --- Target: birt-reporting ---
 	# ------------------------------
@@ -394,7 +394,7 @@ release: gratia
 	# --- Target: release COMPLETED ---
 
 #-------------------------------------------------------------
-gratia: clean util services servlets soap reporting reports administration security
+gratia: clean services servlets soap reporting reports administration security
 	# ------------------------------
 	# --- Target: gratia         ---
 	# ------------------------------
