@@ -30,16 +30,6 @@
             <property name="namespace">gratia-lib1</property>
         </structure>
     </list-property>
-    <list-property name="configVars">
-        <structure>
-            <property name="name">DatabaseUser</property>
-            <property name="value">gratia</property>
-        </structure>
-        <structure>
-            <property name="name">DatabasePassword</property>
-            <property name="value">notused</property>
-        </structure>
-    </list-property>
     <parameters>
         <parameter-group name="DatabaseAccess" id="84">
             <parameters>
@@ -61,7 +51,7 @@
                     <property name="dataType">string</property>
                     <property name="isRequired">true</property>
                     <property name="controlType">text-box</property>
-                    <property name="defaultValue">gratia</property>
+                    <property name="defaultValue">reader</property>
                     <structure name="format">
                         <property name="category">Unformatted</property>
                         <property name="pattern">Unformatted</property>
@@ -73,7 +63,7 @@
                     <property name="dataType">string</property>
                     <property name="isRequired">true</property>
                     <property name="controlType">text-box</property>
-                    <property name="defaultValue">notused</property>
+                    <property name="defaultValue">reader</property>
                     <structure name="format">
                         <property name="category">Unformatted</property>
                         <property name="pattern">Unformatted</property>
@@ -173,8 +163,8 @@
         <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="fermigrid1" id="4">
             <property name="odaDriverClass">com.mysql.jdbc.Driver</property>
             <property name="odaURL">jdbc:mysql://gratia-vm02.fnal.gov:3320/gratia_jeffmack</property>
-            <property name="odaUser">gratia</property>
-            <encrypted-property name="odaPassword">cHJvdG8=</encrypted-property>
+            <property name="odaUser">reader</property>
+            <encrypted-property name="odaPassword">cmVhZGVy</encrypted-property>
         </oda-data-source>
     </data-sources>
     <data-sets>
@@ -451,10 +441,8 @@ order by name</property>
                     <property name="name">if(row["CPU Minutes Used"] *0 > 1000000) 
      Math.floor(  (row["CPU Minutes Used"]) / 1000000 )+ ' M'
         else  Math.floor( (row["CPU Minutes Used"]) )</property>
-                    <expression name="expression">if(row["CPU Minutes Used"] *0 > 1000000) 
-     Math.floor(  (row["CPU Minutes Used"]) / 1000000 )+ ' M'
-        else  Math.floor( (row["CPU Minutes Used"]) )</expression>
-                    <property name="dataType">integer</property>
+                    <expression name="expression">(row["CPU Minutes Used"])</expression>
+                    <property name="dataType">decimal</property>
                 </structure>
                 <structure>
                     <property name="name">Njobs</property>
@@ -512,6 +500,42 @@ order by name</property>
                     <property name="name">Grand Total: Jobs</property>
                     <expression name="expression">Total.sum(row["Njobs"])</expression>
                     <property name="dataType">any</property>
+                </structure>
+                <structure>
+                    <property name="name">JobCountforSite</property>
+                    <expression name="expression">dataSetRow["Njobs"]</expression>
+                    <property name="dataType">any</property>
+                    <simple-property-list name="aggregateOn">
+                        <value>Compute Element</value>
+                    </simple-property-list>
+                    <property name="aggregateFunction">sum</property>
+                </structure>
+                <structure>
+                    <property name="name">Aggregation</property>
+                    <expression name="expression">dataSetRow["Njobs"]</expression>
+                    <property name="dataType">any</property>
+                    <simple-property-list name="aggregateOn">
+                        <value>Probe Name</value>
+                    </simple-property-list>
+                    <property name="aggregateFunction">sum</property>
+                </structure>
+                <structure>
+                    <property name="name">Aggregation_1</property>
+                    <expression name="expression">dataSetRow["CPU Minutes Used"]</expression>
+                    <property name="dataType">any</property>
+                    <simple-property-list name="aggregateOn">
+                        <value>Probe Name</value>
+                    </simple-property-list>
+                    <property name="aggregateFunction">sum</property>
+                </structure>
+                <structure>
+                    <property name="name">Aggregation_2</property>
+                    <expression name="expression">dataSetRow["CPU Minutes Used"]</expression>
+                    <property name="dataType">any</property>
+                    <simple-property-list name="aggregateOn">
+                        <value>Compute Element</value>
+                    </simple-property-list>
+                    <property name="aggregateFunction">sum</property>
                 </structure>
             </list-property>
             <column id="107"/>
@@ -634,16 +658,16 @@ else
                             <property name="borderTopColor">#000000</property>
                             <property name="borderTopStyle">solid</property>
                             <property name="borderTopWidth">thin</property>
-                            <data id="400">
+                            <data id="407">
                                 <property name="style">sans-style1</property>
                                 <property name="fontSize">small</property>
                                 <property name="fontWeight">bold</property>
                                 <structure name="numberFormat">
                                     <property name="category">Fixed</property>
-                                    <property name="pattern">###0.0</property>
+                                    <property name="pattern">#,##0.0</property>
                                 </structure>
                                 <property name="textAlign">right</property>
-                                <property name="resultSetColumn">Column Binding_2</property>
+                                <property name="resultSetColumn">Aggregation_2</property>
                             </data>
                         </cell>
                         <cell id="118">
@@ -652,11 +676,14 @@ else
                             <property name="borderTopColor">#000000</property>
                             <property name="borderTopStyle">solid</property>
                             <property name="borderTopWidth">thin</property>
-                            <data id="402">
-                                <property name="style">sans-style1</property>
+                            <data id="404">
                                 <property name="fontSize">small</property>
+                                <structure name="numberFormat">
+                                    <property name="category">Fixed</property>
+                                    <property name="pattern">#,##0</property>
+                                </structure>
                                 <property name="textAlign">right</property>
-                                <property name="resultSetColumn">Column Binding_4</property>
+                                <property name="resultSetColumn">JobCountforSite</property>
                             </data>
                         </cell>
                     </row>
@@ -735,6 +762,7 @@ else
                             <text-data id="169">
                                 <property name="style">sans-style1</property>
                                 <property name="fontFamily">sans-serif</property>
+                                <property name="fontSize">small</property>
                                 <property name="fontWeight">bold</property>
                                 <expression name="valueExpr">"Total for Probe '" + row["ProbeName"] + "'"</expression>
                                 <property name="contentType">html</property>
@@ -744,37 +772,32 @@ else
                             <property name="borderTopColor">#000000</property>
                             <property name="borderTopStyle">solid</property>
                             <property name="borderTopWidth">thin</property>
-                            <data id="399">
+                            <data id="406">
                                 <property name="style">sans-style1</property>
                                 <property name="fontSize">small</property>
                                 <property name="fontWeight">bold</property>
                                 <structure name="numberFormat">
                                     <property name="category">Fixed</property>
-                                    <property name="pattern">###0.0</property>
-                                </structure>
-                                <structure name="stringFormat">
-                                    <property name="category">Custom</property>
-                                    <property name="pattern">#</property>
+                                    <property name="pattern">#,##0.0</property>
                                 </structure>
                                 <property name="textAlign">right</property>
-                                <property name="resultSetColumn">Column Binding_1</property>
+                                <property name="resultSetColumn">Aggregation_1</property>
                             </data>
                         </cell>
                         <cell id="129">
                             <property name="borderTopColor">#000000</property>
                             <property name="borderTopStyle">solid</property>
                             <property name="borderTopWidth">thin</property>
-                            <data id="398">
+                            <data id="405">
                                 <property name="style">sans-style1</property>
                                 <property name="fontSize">small</property>
                                 <property name="fontWeight">bold</property>
-                                <property name="paddingTop">1pt</property>
                                 <structure name="numberFormat">
-                                    <property name="category">General Number</property>
-                                    <property name="pattern">General Number</property>
+                                    <property name="category">Fixed</property>
+                                    <property name="pattern">#,##0</property>
                                 </structure>
                                 <property name="textAlign">right</property>
-                                <property name="resultSetColumn">Column Binding</property>
+                                <property name="resultSetColumn">Aggregation</property>
                             </data>
                         </cell>
                     </row>
@@ -800,7 +823,7 @@ else
                             <property name="paddingRight">1pt</property>
                             <structure name="numberFormat">
                                 <property name="category">Fixed</property>
-                                <property name="pattern">###0.0</property>
+                                <property name="pattern">#,##0.0</property>
                             </structure>
                             <structure name="stringFormat">
                                 <property name="category">Custom</property>
@@ -837,7 +860,7 @@ else
                             <property name="fontWeight">bold</property>
                             <structure name="numberFormat">
                                 <property name="category">Fixed</property>
-                                <property name="pattern">###0.0</property>
+                                <property name="pattern">#,##0.0</property>
                             </structure>
                             <property name="textAlign">right</property>
                             <property name="resultSetColumn">Column Binding_3</property>
@@ -850,6 +873,10 @@ else
                         <data id="403">
                             <property name="style">sans-style1</property>
                             <property name="fontWeight">bold</property>
+                            <structure name="numberFormat">
+                                <property name="category">Fixed</property>
+                                <property name="pattern">#,##0</property>
+                            </structure>
                             <property name="textAlign">right</property>
                             <property name="resultSetColumn">Grand Total: Jobs</property>
                         </data>
