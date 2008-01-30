@@ -782,11 +782,13 @@ EOF
       $trace_fromdate_todate_text = "fromdate,todate";
     }
     $procedure_code = sprintf("%s%s", $procedure_code, <<"EOF");
-  insert into trace(pname,userkey,user,role,vo,p1,p2,p3,p4,data)
-    values('$procedure',\@key,userName,userRole,\@vo,
-    $trace_fromdate_todate_text,format,resourceType,\@sql);
   prepare statement from \@sql;
   execute statement;
+  insert into trace(pname,userkey,user,role,vo,p1,p2,p3,p4,p5,data)
+    values('$procedure',\@key,userName,userRole,\@vo,
+    $trace_fromdate_todate_text,format,resourceType,
+    timestampdiff(second, now(), sysdate()),
+    \@sql);
   deallocate prepare statement;
 end
 ||
