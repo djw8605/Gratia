@@ -27,11 +27,9 @@ my %collector_configs =
                    server_port => 8104,
                    db_host => "gratia07.fnal.gov",
                    db_port => 3320,
-                   db_schema => "gratia_ps_diag",
+                   db_schema => "gratia_itb_innodb",
                    remote_host => "gratia01.fnal.gov",
-                   # Add an extra action if we're re-doing summary tables.
-                   PostInstallCmdPreamble => '[[ "$action" == "summary" ]] && set -- "$@" ps',
-                   UserConfig => "UserConfig_pacct.xml",
+                   collector_host => "gratia01.fnal.gov",
                    "properties.attributes" =>
                    {
                     "maintain.history.log" => 7,
@@ -220,12 +218,15 @@ my %collector_configs =
                server_port => 8124,
                db_host => "localhost",
                db_schema => "gratia_greenc",
+               collector_host => "gratia-vm02.fnal.gov",
                "properties.attributes" =>
                {
                 "maintain.history.log" => 2,
                 "monitor.listener.wait" => 240,
                 "service.rmiservlet.level" => "FINEST",
-                "monitor.to.address0" => 'greenc@fnal.gov'
+                "monitor.to.address0" => 'greenc@fnal.gov',
+                "service.security.level" => 1,
+                "service.use.selfgenerated.certs" => 1
                }
 						 },
 	 vittone => { http_port => 8883,
@@ -622,7 +623,7 @@ sub configure_collector_config {
 		s&^(\Qservice.rmi.rmibind\E\s*=\s*).*$&${1}//$collector_config->{collector_host}:$collector_config->{rmi_port}&;
 		s&^(\Qservice.rmi.rmilookup\E\s*=\s*).*$&${1}rmi://$collector_config->{collector_host}:$collector_config->{rmi_port}&;
 		s&^(\Qservice.open.connection\E\s*=\s*).*$&${1}http://$collector_config->{collector_host}:$collector_config->{http_port}&;
-		s&^(\Qservice.secure.connection\E\s*=\s*).*$&${1}http://$collector_config->{collector_host}:$collector_config->{ssl_port}&;
+		s&^(\Qservice.secure.connection\E\s*=\s*).*$&${1}https://$collector_config->{collector_host}:$collector_config->{ssl_port}&;
 		s&^(\Qservice.mysql.url\E\s*=\s*).*$&${1}jdbc:mysql://$collector_config->{db_host}:$collector_config->{db_port}/$collector_config->{db_schema}&;
 		# Special case for monitoring addresses -- dump addresses not wanted from the config:
 		m&^(\Qmonitor.to.address.\E\d+)& and not $collector_config->{"properties.attributes"}->{${1}}
