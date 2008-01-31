@@ -73,9 +73,11 @@ begin
                      ' order by Site.SiteName'
                  );
   end if;
-  insert into trace(pname,userkey,user,role,vo,p1,p2,p3,p4,data)
+  insert into trace(pname,userkey,user,role,vo,p1,p2,p3,p4,p5,data)
     values('UsageBySite',@key,userName,userRole,@vo,
-    fromdate,todate,format,resourceType,@sql);
+    fromdate,todate,format,resourceType,
+    timestampdiff(second, now(), sysdate()),
+    @sql);
   prepare statement from @sql;
   execute statement;
   deallocate prepare statement;
