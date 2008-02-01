@@ -1,12 +1,11 @@
 #!/bin/bash
-
-source_prefix=~greenc/gratia
-tomcat_root=/data
-
+##############################################################
+#-----------------
 function usage() {
 cat 1>&2 <<EOF
 usage: update-gratia-local [-S <source-prefix>] [-j <jre-home>] [-s] \
-                           [-p <prefix>] [-d <db-root-pw>] [-h] [--] <instance>
+                           [-p <prefix>] [-d <db-root-pw>] 
+                           [-h] [-v <vdt_location>] [--] <instance>
 
        -c <configure-collector-script>
 
@@ -33,11 +32,60 @@ usage: update-gratia-local [-S <source-prefix>] [-j <jre-home>] [-s] \
 
           Configure post-install.sh with this DB root password.
 
+       -v <vdt_location>
+
+          Indicates a VDT installation. 
+
 EOF
 }
+#-----------------
+function set_env_for_vdt {
+  vdtsetup=$vdt_location/setup.sh
+  if [ ! -e $vdtsetup ];then
+    echo "ERROR: Cannot find VDT setup scrpt ($vdtsetup)" 1>&2
+    exit 1
+  fi
+  source $vdtsetup
+  if [ -z $vdt_location ];then
+    echo "ERROR: VDT_LOCATION variable not set ($vdt_location)" 1>&2
+    exit 1
+  fi
+  tomcat_root=$vdt_location/tomcat/v55
+  java_jre=$JAVA_HOME
+  tomcat_top=$tomcat_root
+  init_service=tomcat-55
+}
+#-----------------
+function set_env_for_local {
+  if [[ -n "$tomcat_root" ]] && [[ -z "$java_jre" ]]; then
+    java_jre="${tomcat_root}/jre"
+  fi
+  tomcat_top=$tomcat_root/tomcat-$instance
+  init_service=tomcat-$instance
+}
+#-----------------
+function stop_tomcat {
+  if [ $vdt_install ];then
+    vdt-control --off tomcat-55
+  else
+    if [ -e /etc/init.d/$init_service ];then
+      echo "... stopping tomcat ($init_service)"
+      service $init_service stop 2>/dev/null
+      sleep 5
+    else
+      echo "... $init_service is already stopped"
+    fi
+  fi
+}
 
+
+## MAIN ########################################
 # Defaults
-while getopts :c:j:sp:d:hS: OPT; do
+source_prefix=~greenc/gratia
+tomcat_root=/data
+
+#--- get command line args ----
+while getopts :c:j:sp:d:v:hS: OPT; do
     case $OPT in
         c)  configure_script="$OPTARG"
             ;;
@@ -57,6 +105,10 @@ while getopts :c:j:sp:d:hS: OPT; do
             dbp_arg="-d"
             dbpwd="$OPTARG"
             ;;
+        v)
+            vdt_install=1
+            vdt_location="$OPTARG"
+            ;;
         h)
             usage
             exit 1
@@ -68,60 +120,130 @@ while getopts :c:j:sp:d:hS: OPT; do
 done
 shift $[ OPTIND - 1 ]
 
-if [[ -n "$tomcat_root" ]] && [[ -z "$java_jre" ]]; then
-  java_jre="${tomcat_root}/jre"
+instance=$1
+
+#--- set env for either vdt or local install ----
+if [ $vdt_install ];then
+  set_env_for_vdt
+  source $vdt_location/setup.sh
+else
+  set_env_for_local
 fi
 
 configuration_dir=$source_prefix/common/configuration
-target_dir=$source_prefix/target
+       target_dir=$source_prefix/target
+   tomcat_webapps=$tomcat_top/webapps
+    tomcat_gratia=$tomcat_top/gratia
 
-instance=$1
-tomcat_top=$tomcat_root/tomcat-$instance
+for dir in $source_prefix \
+           $configuration_dir \
+           $tomcat_root \
+           $target_dir \
+           $tomcat_webapps \
+           $tomcat_gratia
+do
+  echo "... checking $dir"
+  if [ ! -d $dir ]; then
+    echo "ERROR: Unable to find specified directory ($dir)" 1>&2
+    exit 1
+  fi
+done
 
-if ! [[ -d "$tomcat_top" ]]; then
-  echo "Unable to find specified instance $instance" on this node 1>&2
-  exit 1
-fi
 
-service tomcat-$instance stop 2>/dev/null
-sleep 5
+#-----------------------
+# Stop tomcat
+#-----------------------
+stop_tomcat
 
+#-----------------------
 # Update gratia directory
-mkdir -p "$tomcat_top/gratia"
-tar xf "$target_dir/gratia.tar" -C "$tomcat_top/gratia"
+#-----------------------
+echo
+echo
+echo "... updating $tomcat_gratia"
+mkdir -p $tomcat_gratia
+tar xf $target_dir/gratia.tar -C $tomcat_gratia
+ls -l $tomcat_gratia
 
+#-----------------------
 # Update webapps
-
+#-----------------------
+sleep 3
+echo
+echo
+echo "... removing obsolete directories in  $tomcat_webapps"
 # Remove obsolete war files
-( cd "$tomcat_top/webapps/" ; \
+( cd "$tomcat_webapps/" ; \
   rm -rf GratiaServices{,.war} \
          gratia-report-configuration{,.war} \
+         gratia-util{,.war} \
          birt-*{,.war} \
 )
 
-# Any updated war files?
-for war in $tomcat_top/webapps/*.war; do
-  if [[ -f "$target_dir/${war##*/}" ]]; then
-    rm -rf "${war%.war}"
-    cp -pv "$target_dir/${war##*/}" "$tomcat_top/webapps/"
-  fi
+#-----------------------
+# Updated war files
+#-----------------------
+echo "... loading war files in $tomcat_webapps"
+for warfile in $(cd $target_dir;ls *.war)
+
+do
+  echo "      $warfile"
+  wardir=$(echo $warfile | cut -d'.' -f1)
+  rm -rf ${tomcat_webapps}/${wardir} ${tomcat_webapps}/${warfile}
+  mkdir  ${tomcat_webapps}/${wardir}
+  cp -pv ${target_dir}/${warfile}  ${tomcat_webapps}/${wardir}/.
+  cd ${tomcat_webapps}/${wardir}
+  jar xf $warfile
+  rm -f  $warfile
+  cd -
 done
 
-# Any new war files?
-for war in $target_dir/*.war; do
-  if ! [[ -f "$tomcat_top/webapps/${war##*/}" ]]; then
-    cp -pv "$war" "$tomcat_top/webapps/"
-  fi
-done
-
+#-----------------------
 # Configure gratia dir
-[[ -n "$configure_script" ]] || configure_script="$configuration_dir/configure-collector"
+#-----------------------
+if [ $vdt_install ];then
+#--- vdt ---
+  #-- need to remove some things from the post-install.sh --
+  post_install=$tomcat_gratia/post-install.sh
+  cp -p ${post_install} ${post_install}.orig
+  cat ${post_install}.orig | awk '{ sub("CMD_PREAMBLE","");sub("CMD_PREFIX","");sub("CMD_SUFFIX","");print $0 }' >${post_install}
 
-"$configure_script" \
+  #-- create a special tarball to replace the VDT one used by the VDT configure
+  cd $tomcat_root 
+  vdt_tar=${vdt_location}/gratia/lib/gratia-services-webbase.tar.gz
+  if [ ! -e ${vdt_tar}.original ];then
+    cp ${vdt_tar} ${vdt_tar}.original 
+  fi
+  tar zcf ${vdt_tar} gratia/service-configuration.properties gratia/post-install.sh
+  cd -  
+
+  #-- run the VDT configure scripts --
+  for arg in --reporting --services
+  do
+    echo "... running VDT configure_gratia $arg"
+    ${vdt_location}/vdt/setup/configure_gratia $arg
+    rtn=$?
+    if [ "$rtn" != "0" ];then
+      echo "ERROR: configure_gratia $arg script FAILED"
+      exit 1
+    fi
+  done
+  #-- reset some permissions --
+  chown -R daemon $tomcat_webapps
+#--- local ---
+else
+  [[ -n "$configure_script" ]] || configure_script="$configuration_dir/configure-collector"
+  echo "... running $configure_script"
+  "$configure_script" \
 $use_ssl \
 -p "$tomcat_root" \
 -j "$java_jre" \
 $dbp_arg "$dbpwd" \
 $instance
+fi 
+ls -l ${tomcat_webapps}
 
 # service tomcat-$instance start
+
+echo "... ALL DONE.  Have fun!!!"
+exit 0
