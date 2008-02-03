@@ -4,7 +4,7 @@ import sys, os, commands, string, urlparse, urllib
 from xml.dom import minidom, Node
 from ConfigParser import ConfigParser
 
-def walkTree(node): 
+def walkTree(node):
     if node.nodeType == Node.ELEMENT_NODE:
         yield node
         for child in node.childNodes:
@@ -18,23 +18,23 @@ def showNode(node, reportsFolder, staticFolder, birtURL):
         for attrName in attrs.keys():
             if attrName == 'link':
                 reportsFolder = reportsFolder + '/'
-        urlQuery = attrs.get(attrName).nodeValue
-        i = urlQuery.index(']') + 1
-        s1 = urlQuery[i:]
-        i = s1.index('.') + 1
-        reportFile = os.path.join(staticFolder, s1[:i] + 'pdf')
-        ## print reportFile     
-        callURL = birtURL + '/' + attrs.get(attrName).nodeValue.replace('[ReportsFolder]', reportsFolder)
-        ## print ('URL \n%s\n' % (callURL))
-        try:
-            f = urllib.urlopen(callURL)
-            w = open(reportFile, 'w')
-            w.write(f.read())
-            w.close
-        except IOError, e:
-            sys.exit(1)
+                urlQuery = attrs.get(attrName).nodeValue
+                i = urlQuery.index(']') + 1
+                s1 = urlQuery[i:]
+                i = s1.index('.') + 1
+                reportFile = os.path.join(staticFolder, s1[:i] + 'pdf')
+                ## print reportFile
+                callURL = birtURL + '/' + attrs.get(attrName).nodeValue.replace('[ReportsFolder]', reportsFolder)
+                ## print ('URL \n%s\n' % (callURL))
+                try:
+                    f = urllib.urlopen(callURL)
+                    w = open(reportFile, 'w')
+                    w.write(f.read())
+                    w.close
+                except IOError, e:
+                    sys.exit(1)
 
-def parseFile(inFileName, reportsFolder, staticFolder, birtURL): 
+def parseFile(inFileName, reportsFolder, staticFolder, birtURL):
     doc = minidom.parse(inFileName)
     rootNode = doc.documentElement
     for node in walkTree(rootNode):
@@ -43,7 +43,7 @@ def parseFile(inFileName, reportsFolder, staticFolder, birtURL):
 def main():
     args = sys.argv[1:]
     if len(args) != 2:
-        print 'usage: ./staticReports.py catalina.home reportsURL'
+        print 'usage: ./staticReports.py catalina.home reportsURL(form: http://gratiaxxx:8881/gratia-reporting)'
         sys.exit(1)
     config = ConfigParser()
     catalinaHome = args[0]
