@@ -120,7 +120,9 @@ while getopts :c:j:sp:d:v:hS: OPT; do
 done
 shift $[ OPTIND - 1 ]
 
+
 instance=$1
+
 
 #--- set env for either vdt or local install ----
 if [ $vdt_install ];then
@@ -185,11 +187,14 @@ echo "... removing obsolete directories in  $tomcat_webapps"
 #-----------------------
 echo "... loading war files in $tomcat_webapps"
 for warfile in $(cd $target_dir;ls *.war)
-
 do
   echo "      $warfile"
   wardir=$(echo $warfile | cut -d'.' -f1)
   rm -rf ${tomcat_webapps}/${wardir} ${tomcat_webapps}/${warfile}
+  if [ ! $vdt_install ];then
+    cp -pv ${target_dir}/${warfile}  ${tomcat_webapps}/.
+    continue
+  fi
   mkdir  ${tomcat_webapps}/${wardir}
   cp -pv ${target_dir}/${warfile}  ${tomcat_webapps}/${wardir}/.
   cd ${tomcat_webapps}/${wardir}
