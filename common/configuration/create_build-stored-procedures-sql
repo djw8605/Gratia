@@ -37,48 +37,6 @@ my @default_procedure_arguments =
 
 my %procedures =
 (
- DailyJobsBySite =>
- { select_columns => q/Site.SiteName as sitename,
-                      ProbeSummary.EndTime as endtime,
-                      sum(ProbeSummary.Njobs) as Njobs/,
-   from_tables => q/Site,Probe,ProbeSummary/,
-   main_where => q/Probe.siteid = Site.siteid
-               and ProbeSummary.ProbeName = Probe.probename/,
-   group_by => q/ProbeSummary.EndTime, Site.SiteName/,
-   order_by => q/ProbeSummary.EndTime/
- },
- DailyJobsByProbe =>
- { select_columns => q/ProbeSummary.ProbeName,
-                      ProbeSummary.EndTime as endtime,
-                      sum(ProbeSummary.Njobs) as Njobs/,
-   from_tables => q/ProbeSummary/,
-   main_where => q//,
-   group_by => q/ProbeSummary.EndTime, ProbeSummary.ProbeName/,
-   order_by => q/ProbeSummary.EndTime/
- },
- DailyJobsByVO =>
- { select_columns => q/VOProbeSummary.VOName,
-                      VOProbeSummary.EndTime as endtime,
-                      sum(VOProbeSummary.Njobs) as Njobs/,
-   from_tables => q/VOProbeSummary/,
-   main_where => q//,
-   group_by => q/VOProbeSummary.EndTime,
-                VOProbeSummary.VOName/,
-   order_by => q/VOProbeSummary.EndTime/
- },
- DailyUsageBySite =>
- { select_columns => q/Site.SiteName as sitename,
-                      VOProbeSummary.EndTime as endtime,
-                      sum(VOProbeSummary.WallDuration) as WallDuration,
-                      sum(VOProbeSummary.CpuUserDuration +
-                        VOProbeSummary.CpuSystemDuration) as Cpu,
-                      sum(VOProbeSummary.Njobs) as Njobs/,
-   from_tables => q/Site,Probe,VOProbeSummary/,
-   main_where => q/Probe.siteid = Site.siteid
-              and VOProbeSummary.ProbeName = Probe.probename/,
-   group_by => q/VOProbeSummary.EndTime,Site.SiteName/,
-   order_by => q/VOProbeSummary.EndTime/
- },
  DailyUsageByProbe =>
  { select_columns => q/ProbeSummary.ProbeName,
                       ProbeSummary.EndTime as endtime,
@@ -91,15 +49,6 @@ my %procedures =
    group_by => q/ProbeSummary.EndTime,
                 ProbeSummary.ProbeName/,
    order_by => q/ProbeSummary.EndTime/
- },
- JobsBySite =>
- { select_columns => q/Site.SiteName as sitename,
-                      sum(ProbeSummary.Njobs) as Njobs/,
-   from_tables => q/Site,Probe,ProbeSummary/,
-   main_where => q/Probe.siteid = Site.siteid
-              and ProbeSummary.ProbeName = Probe.probename/,
-   group_by => q/Site.SiteName/,
-   order_by => q/Site.SiteName/
  },
  JobsByProbeNoFacility =>
  { select_columns => q/ProbeSummary.ProbeName,
@@ -121,30 +70,6 @@ my %procedures =
               and VOProbeSummary.ProbeName = Probe.probename/,
    group_by => q/Site.SiteName/,
    order_by => q/Site.SiteName/
- },
- UsageByProbe =>
- { select_columns => q/ProbeSummary.ProbeName,
-                      sum(ProbeSummary.WallDuration) as WallDuration,
-                      sum(ProbeSummary.CpuUserDuration +
-                        ProbeSummary.CpuSystemDuration) as Cpu,
-                      sum(ProbeSummary.Njobs) as Njobs/,
-   from_tables => q/ProbeSummary/,
-   main_where => q//,
-   group_by => q/ProbeSummary.ProbeName/,
-   order_by => q/ProbeSummary.ProbeName/
- },
- DailyUsageByVO =>
- { select_columns => q/VOProbeSummary.VOName,
-                      VOProbeSummary.EndTime as endtime,
-                      sum(VOProbeSummary.WallDuration) as WallDuration,
-                      sum(VOProbeSummary.CpuUserDuration +
-                        VOProbeSummary.CpuSystemDuration) as Cpu,
-                      sum(VOProbeSummary.Njobs) as Njobs/,
-   from_tables => q/VOProbeSummary/,
-   main_where => q//,
-   group_by => q/VOProbeSummary.EndTime,
-                VOProbeSummary.VOName/,
-   order_by => q/VOProbeSummary.EndTime/
  },
  UsageByVO =>
  { select_columns => q/VOProbeSummary.VOName,
@@ -292,14 +217,6 @@ my %procedures =
    group_by => q/UserName, sitename, VOProbeSummary.VOName, VOProbeSummary.EndTime/,
    order_by => q/UserName/
  },
- JobsByVO =>
- { select_columns => q/VOProbeSummary.VOName,
-                      sum(VOProbeSummary.Njobs) as Njobs/,
-   from_tables => q/VOProbeSummary/,
-   main_where => q//,
-   group_by => q/VOProbeSummary.VOName/,
-   order_by => q/VOProbeSummary.VOName/
- },
  WeeklyUsageByVO =>
  { procedure_arguments => [ @default_procedure_arguments,
                             q/vos varchar(128)/,
@@ -315,41 +232,6 @@ my %procedures =
    group_by => q/VOProbeSummary.EndTime,
                 VOProbeSummary.VOName/,
    order_by => q/VOProbeSummary.EndTime/
- },
- WeeklyJobsByVO =>
- { procedure_arguments => [ @default_procedure_arguments,
-                            q/vos varchar(128)/,
-                            q/voseltype varchar(8)/ ],
-   select_columns => q/VOProbeSummary.VOName,
-                      date_format(VOProbeSummary.EndTime, ''', format, ''') as endtime,
-                      sum(VOProbeSummary.Njobs) as Njobs/,
-   from_tables => q/VOProbeSummary/,
-   main_where => q/VOProbeSummary.VOName ', voseltype, vos, '/,
-   group_by => q/VOProbeSummary.EndTime,
-                VOProbeSummary.VOName/,
-   order_by => q/VOProbeSummary.EndTime/
- },
- JobsBySiteByVO =>
- { select_columns => q/Site.SiteName as sitename,
-                      sum(VOProbeSummary.Njobs) as Njobs,
-                      VOProbeSummary.VOName/,
-   from_tables => q/Site,Probe,VOProbeSummary/,
-   main_where => q/Probe.siteid = Site.siteid
-              and VOProbeSummary.ProbeName = Probe.probename/,
-   group_by => q/sitename, VOProbeSummary.VOName/,
-   order_by => q/sitename, VOProbeSummary.VOName/
- },
- UsageBySiteByVO =>
- { select_columns => q/Site.SiteName as sitename,
-                      sum(VOProbeSummary.WallDuration) as WallDuration,
-                      sum(VOProbeSummary.CpuUserDuration + VOProbeSummary.CpuSystemDuration) as Cpu,
-                      sum(VOProbeSummary.Njobs) as Njobs,
-                      VOProbeSummary.VOName/,
-   from_tables => q/Site,Probe,VOProbeSummary/,
-   main_where => q/Probe.siteid = Site.siteid
-              and VOProbeSummary.ProbeName = Probe.probename/,
-   group_by => q/sitename, VOProbeSummary.VOName/,
-   order_by => q/sitename, VOProbeSummary.VOName/
  },
  UsageBySiteByVO1 =>
  { procedure_arguments => [ @default_procedure_arguments,
