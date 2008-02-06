@@ -343,7 +343,7 @@
                     <property name="dataType">string</property>
                 </structure>
             </list-property>
-            <property name="queryText">call usagebyuserbyvobysiteforweek(?,?,?,'xx','%Y-%U','Batch',?,?,?,?)</property>
+            <property name="queryText">call UsageByUserByVOBySiteForWeek(?,?,?,'xx','%Y-%U','Batch',?,?,?,?)</property>
         </oda-data-set>
     </data-sets>
     <styles>
