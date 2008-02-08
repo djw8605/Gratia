@@ -1571,7 +1571,7 @@ else {
     <Bounds>
       <Left>0.0</Left>
       <Top>0.0</Top>
-      <Width>45.0</Width>
+      <Width>47.25</Width>
       <Height>60.0</Height>
     </Bounds>
     <Insets>
@@ -2792,7 +2792,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
                                                 </structure>
                                             </list-property>
                                             <property name="height">80px</property>
-                                            <property name="width">60px</property>
+                                            <property name="width">63px</property>
                                             <list-property name="paramBindings">
                                                 <structure>
                                                     <property name="paramName">UserName</property>
