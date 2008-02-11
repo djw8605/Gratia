@@ -535,6 +535,7 @@ begin
 
 ", $procedure_code, join(", ",@{$procedures{$procedure}->{procedure_arguments}}));
     $procedure_code = sprintf("%s%s", $procedure_code, <<'EOF');
+  select sysdate() into @proc_start;
   select generateResourceTypeClause(resourceType) into @myresourceclause;
   select SystemProplist.cdr into @usereportauthentication from SystemProplist
   where SystemProplist.car = 'use.report.authentication';
@@ -542,6 +543,7 @@ begin
     where Role.role = userRole;
   select generateWhereClause(userName,userRole,@mywhereclause)
     into @mywhereclause;
+  select sysdate() into @query_start;
   call parse(userName,@name,@key,@vo);
 EOF
 
@@ -666,10 +668,11 @@ EOF
     $procedure_code = sprintf("%s%s", $procedure_code, <<"EOF");
   prepare statement from \@sql;
   execute statement;
-  insert into trace(pname,userkey,user,role,vo,p1,p2,p3,p4,p5,data)
+  insert into trace(pname,userkey,user,role,vo,p1,p2,p3,p4,p5,p6,data)
     values('$procedure',\@key,userName,userRole,\@vo,
     $trace_fromdate_todate_text,format,resourceType,
-    timestampdiff(second, now(), sysdate()),
+    timediff(\@query_start, \@proc_start),
+    timediff(sysdate(), \@query_start),
     \@sql);
   deallocate prepare statement;
 end

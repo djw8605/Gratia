@@ -6,6 +6,7 @@ create procedure UsageBySite (userName varchar(64), userRole varchar(64), fromda
 READS SQL DATA
 begin
 
+  select sysdate() into @proc_start;
   select generateResourceTypeClause(resourceType) into @myresourceclause;
   select SystemProplist.cdr into @usereportauthentication from SystemProplist
   where SystemProplist.car = 'use.report.authentication';
@@ -14,6 +15,7 @@ begin
   select generateWhereClause(userName,userRole,@mywhereclause)
     into @mywhereclause;
   call parse(userName,@name,@key,@vo);
+  select sysdate() into @query_start;
   if ( @mywhereclause = '' or @mywhereclause is NULL ) and datediff(todate,fromdate) <= 1 and datediff(todate,fromdate) >= 0 then
 
   set @sql :=
@@ -73,13 +75,14 @@ begin
                      ' order by Site.SiteName'
                  );
   end if;
-  insert into trace(pname,userkey,user,role,vo,p1,p2,p3,p4,p5,data)
-    values('UsageBySite',@key,userName,userRole,@vo,
-    fromdate,todate,format,resourceType,
-    timestampdiff(second, now(), sysdate()),
-    @sql);
   prepare statement from @sql;
   execute statement;
+  insert into trace(pname,userkey,user,role,vo,p1,p2,p3,p4,p5,p6,data)
+    values('UsageBySite',@key,userName,userRole,@vo,
+    fromdate,todate,format,resourceType,
+    timediff(@query_start, @proc_start),
+    timediff(sysdate(), @query_start),
+    @sql);
   deallocate prepare statement;
 end
 ||
@@ -97,7 +100,7 @@ drop procedure if exists DailyUsageBySiteByVO
 create procedure DailyUsageBySiteByVO (userName varchar(64), userRole varchar(64), fromdate varchar(64), todate varchar(64), format varchar(64), resourceType varchar(64), forvo varchar(64), forvoname varchar(64), forsite varchar(64), forsitename varchar(64))
 READS SQL DATA
 begin
-
+  select sysdate() into @proc_start;
   select generateResourceTypeClause(resourceType) into @myresourceclause;
   select SystemProplist.cdr into @usereportauthentication from SystemProplist
   where SystemProplist.car = 'use.report.authentication';
@@ -106,6 +109,7 @@ begin
   select generateWhereClause(userName,userRole,@mywhereclause)
     into @mywhereclause;
   call parse(userName,@name,@key,@vo);
+  select sysdate() into @query_start;
   if ( @mywhereclause = '' or @mywhereclause is NULL ) and datediff(todate,fromdate) <= 1 and datediff(todate,fromdate) >= 0 then
 
   set @sql :=
@@ -163,13 +167,14 @@ begin
                      ' order by EndTime, Site.SiteName, VO.VOName'
                  );
   end if;
-  insert into trace(pname,userkey,user,role,vo,p1,p2,p3,p4,p5,data)
-    values('DailyUsageBySiteByVO',@key,userName,userRole,@vo,
-    fromdate,todate,format,resourceType,
-    timestampdiff(second, now(), sysdate()),
-    @sql);
   prepare statement from @sql;
   execute statement;
+  insert into trace(pname,userkey,user,role,vo,p1,p2,p3,p4,p5,p6,data)
+    values('DailyUsageBySiteByVO',@key,userName,userRole,@vo,
+    fromdate,todate,format,resourceType,
+    timediff(@query_start, @proc_start),
+    timediff(sysdate(), @query_start),
+    @sql);
   deallocate prepare statement;
 end
 ||
