@@ -5,7 +5,7 @@
 #
 # library to create simple report using the Gratia psacct database
 #
-#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.7 2007-08-23 14:51:06 pcanal Exp $
+#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.8 2008-02-12 21:48:34 pcanal Exp $
 
 import time
 import datetime
@@ -208,7 +208,7 @@ def ProbeWhere():
 
 def CommonWhere():
     global gProbeName, gBegin, gEnd
-    return " and \"" \
+    return " VOName != \"Unknown\" and \"" \
         + DateToString(gBegin) +"\"<EndTime and EndTime<\"" + DateToString(gEnd) + "\"" \
         + ProbeWhere()
 
@@ -330,7 +330,7 @@ def DailySiteData(begin,end):
         
         select = " SELECT Site.SiteName, sum(NJobs), sum(J.WallDuration) " \
                 + " from "+schema+".Site, "+schema+".Probe, "+schema+".JobUsageRecord_Report J " \
-                + " where Probe.siteid = Site.siteid and J.ProbeName = Probe.probename" \
+                + " where VOName != \"Unknown\" and Probe.siteid = Site.siteid and J.ProbeName = Probe.probename" \
                 + " and \""+ DateToString(begin) +"\"<EndTime and EndTime<\"" + DateToString(end) + "\"" \
                 + " and J.ProbeName not like \"psacct:%\" " \
                 + " group by Probe.siteid "
@@ -341,7 +341,7 @@ def DailyVOData(begin,end):
             
         select = " SELECT J.VOName, Sum(NJobs), sum(J.WallDuration) " \
                 + " from "+schema+".Site, "+schema+".Probe, "+schema+".JobUsageRecord_Report J " \
-                + " where Probe.siteid = Site.siteid and J.ProbeName = Probe.probename" \
+                + " where VOName != \"Unknown\" and Probe.siteid = Site.siteid and J.ProbeName = Probe.probename" \
                 + " and \""+ DateToString(begin) +"\"<EndTime and EndTime<\"" + DateToString(end) + "\"" \
                 + " and J.ProbeName not like \"psacct:%\" " \
                 + " group by J.VOName "
@@ -352,7 +352,7 @@ def DailySiteVOData(begin,end):
         
         select = " SELECT Site.SiteName, J.VOName, sum(NJobs), sum(J.WallDuration) " \
                 + " from "+schema+".Site, "+schema+".Probe, "+schema+".JobUsageRecord_Report J " \
-                + " where Probe.siteid = Site.siteid and J.ProbeName = Probe.probename" \
+                + " where VOName != \"Unknown\" and Probe.siteid = Site.siteid and J.ProbeName = Probe.probename" \
                 + " and \""+ DateToString(begin) +"\"<EndTime and EndTime<\"" + DateToString(end) + "\"" \
                 + " and J.ProbeName not like \"psacct:%\" " \
                 + " group by J.VOName, Probe.siteid order by Site.SiteName "
@@ -363,7 +363,7 @@ def DailyVOSiteData(begin,end):
         
         select = " SELECT J.VOName, Site.SiteName, sum(NJobs), sum(J.WallDuration) " \
                 + " from "+schema+".Site, "+schema+".Probe, "+schema+".JobUsageRecord_Report J " \
-                + " where Probe.siteid = Site.siteid and J.ProbeName = Probe.probename" \
+                + " where VOName != \"Unknown\" and Probe.siteid = Site.siteid and J.ProbeName = Probe.probename" \
                 + " and \""+ DateToString(begin) +"\"<EndTime and EndTime<\"" + DateToString(end) + "\"" \
                 + " and J.ProbeName not like \"psacct:%\" " \
                 + " group by J.VOName, Probe.siteid order by J.VOName, Site.SiteName "
@@ -374,7 +374,7 @@ def DailySiteVODataFromDaily(begin,end,select,count):
         
         select = " SELECT M.ReportedSiteName, J.VOName, "+count+", sum(J.WallDuration) " \
                 + " from "+schema+".JobUsageRecord J," + schema +".JobUsageRecord_Meta M " \
-                + " where \""+ DateToString(begin) +"\"<EndTime and EndTime<\"" + DateToString(end) + "\"" \
+                + " where VOName != \"Unknown\" and \""+ DateToString(begin) +"\"<EndTime and EndTime<\"" + DateToString(end) + "\"" \
                 + " and M.dbid = J.dbid " \
                 + " and ProbeName " + select + "\"daily:goc\" " \
                 + " group by J.VOName, M.ReportedSiteName order by M.ReportedSiteName, J.VOName "
@@ -386,7 +386,7 @@ def DailyVOSiteDataFromDaily(begin,end,select,count):
         select = " SELECT J.VOName, M.ReportedSiteName, "+count+", sum(J.WallDuration) " \
                 + " from "+schema+".JobUsageRecord J," \
                 + schema + ".JobUsagRecord_Meta M " \
-                + " where \""+ DateToString(begin) +"\"<EndTime and EndTime<\"" + DateToString(end) + "\"" \
+                + " where VOName != \"Unknown\" and \""+ DateToString(begin) +"\"<EndTime and EndTime<\"" + DateToString(end) + "\"" \
                 + " and M.dbid = J.dbid " \
                 + " and ProbeName " + select + "\"daily:goc\" " \
                 + " group by J.VOName, M.ReportedSiteName order by J.VOName, M.ReportedSiteName "
@@ -397,7 +397,7 @@ def DailySiteJobStatus(begin,end,select = "", count = "", what = "Site.SiteName"
 
         select = " SELECT " + what + ", J.Status,count(*) " \
                 + " from "+schema+".Site, "+schema+".Probe, "+schema+".JobUsageRecord_Report J " \
-                + " where Probe.siteid = Site.siteid and J.ProbeName = Probe.probename" \
+                + " where VOName != \"Unknown\" and Probe.siteid = Site.siteid and J.ProbeName = Probe.probename" \
                 + " and \""+ DateToString(begin) +"\"<EndTime and EndTime<\"" + DateToString(end) + "\"" \
                 + select \
                 + " group by " + what + ",J.Status " \
@@ -409,7 +409,7 @@ def DailySiteJobStatusCondor(begin,end,select = "", count = "", what = "Site.Sit
 
         select = " SELECT "+what+", R.Value,count(*) " \
                 + " from "+schema+".Site, "+schema+".Probe, "+schema+".JobUsageRecord_Report J, "+schema+".Resource R "\
-                + " where Probe.siteid = Site.siteid and J.ProbeName = Probe.probename" \
+                + " where VOName != \"Unknown\" and Probe.siteid = Site.siteid and J.ProbeName = Probe.probename" \
                 + " and \""+ DateToString(begin) +"\"<EndTime and EndTime<\"" + DateToString(end) + "\"" \
                 + " and J.dbid = R.dbid and R.Description = \"ExitCode\" " \
                 + " group by " + what + ",R.Value " \
@@ -560,7 +560,7 @@ class DailySiteJobStatusConf:
     
   
 class DailySiteReportConf:
-        title = "OSG usage summary (midnight to midnight central time) for %s\nincluding all jobs that finished in that time period.\nWall Duration is expressed in hours and rounded to the nearest hour.\nWall Duration is the duration between the instant the job start running and the instant the job ends its execution.\nDeltas are the differences with the previous day.\n"
+        title = "OSG usage summary (midnight to midnight central time) for %s\nincluding all jobs that finished in that time period.\nWall Duration is expressed in hours and rounded to the nearest hour.\nWall Duration is the duration between the instant the job start running and the instant the job ends its execution.\nThe number of jobs counted here includes only the jobs directly seen by batch system and does not include the request sent directly to a pilot job.\nThe Wall Duration includes the total duration of the the pilot jobs.\nDeltas are the differences with the previous day.\n"
         headline = "For all jobs finished on %s (Central Time)"
         headers = ("Site","# of Jobs","Wall Duration","Delta jobs","Delta duration")
         formats = {}
@@ -580,7 +580,7 @@ class DailySiteReportConf:
            return DailySiteData(start,end)      
 
 class DailyVOReportConf:
-        title = "OSG usage summary (midnight to midnight central time) for %s\nincluding all jobs that finished in that time period.\nWall Duration is expressed in hours and rounded to the nearest hour.\nWall Duration is the duration between the instant the job start running and the instant the job ends its execution.\nDeltas are the differences with the previous day.\n"
+        title = "OSG usage summary (midnight to midnight central time) for %s\nincluding all jobs that finished in that time period.\nWall Duration is expressed in hours and rounded to the nearest hour.\nWall Duration is the duration between the instant the job start running and the instant the job ends its execution.\nThe number of jobs counted here includes only the jobs directly seen by batch system and does not include the request sent directly to a pilot job.\nThe Wall Duration includes the total duration of the the pilot jobs.\nDeltas are the differences with the previous day.\n"
         headline = "For all jobs finished on %s (Central Time)"
         headers = ("VO","# of Jobs","Wall Duration","Delta jobs","Delta duration")
         formats = {}
@@ -599,7 +599,7 @@ class DailyVOReportConf:
            return DailyVOData(start,end)      
 
 class DailySiteVOReportConf:
-        title = "OSG usage summary (midnight to midnight central time) for %s\nincluding all jobs that finished in that time period.\nWall Duration is expressed in hours and rounded to the nearest hour.\nWall Duration is the duration between the instant the job start running and the instant the job ends its execution.\nDeltas are the differences with the previous day.\n"
+        title = "OSG usage summary (midnight to midnight central time) for %s\nincluding all jobs that finished in that time period.\nWall Duration is expressed in hours and rounded to the nearest hour.\nWall Duration is the duration between the instant the job start running and the instant the job ends its execution.\nThe number of jobs counted here includes only the jobs directly seen by batch system and does not include the request sent directly to a pilot job.\nThe Wall Duration includes the total duration of the the pilot jobs.\nDeltas are the differences with the previous day.\n"
         headline = "For all jobs finished on %s (Central Time)"
         headers = ("Site","VO","# of Jobs","Wall Duration","Delta jobs","Delta duration")
         formats = {}
@@ -620,7 +620,7 @@ class DailySiteVOReportConf:
            return DailySiteVOData(start,end)      
 
 class DailyVOSiteReportConf:
-        title = "OSG usage summary (midnight to midnight central time) for %s\nincluding all jobs that finished in that time period.\nWall Duration is expressed in hours and rounded to the nearest hour.\nWall Duration is the duration between the instant the job start running and the instant the job ends its execution.\nDeltas are the differences with the previous day.\n"
+        title = "OSG usage summary (midnight to midnight central time) for %s\nincluding all jobs that finished in that time period.\nWall Duration is expressed in hours and rounded to the nearest hour.\nWall Duration is the duration between the instant the job start running and the instant the job ends its execution.\nThe number of jobs counted here includes only the jobs directly seen by batch system and does not include the request sent directly to a pilot job.\nThe Wall Duration includes the total duration of the the pilot jobs.\nDeltas are the differences with the previous day.\n"
         headline = "For all jobs finished on %s (Central Time)"
         headers = ("VO","Site","# of Jobs","Wall Duration","Delta jobs","Delta duration")
         formats = {}
@@ -900,7 +900,7 @@ def RangeVOData(begin, end, with_panda = False):
     select = """\
 select J.VOName, sum(J.NJobs), sum(J.WallDuration)
   from """ + schema + """.VOProbeSummary J
-  where
+  where VOName != \"Unknown\" and 
     EndTime >= \"""" + DateTimeToString(begin) + """\" and
     EndTime < \"""" + DateTimeToString(end) + """\" and
     J.ProbeName not like \"psacct:%\"
@@ -910,7 +910,7 @@ select J.VOName, sum(J.NJobs), sum(J.WallDuration)
         panda_select = """\
 select J.VOName, sum(J.NJobs), sum(J.WallDuration)
   from gratia_osg_daily.JobUsageRecord_Report J
-  where
+  where 
     J.ProbeName != \"daily:goc\" and
     J.SiteName not in (select GT.SiteName from gratia.Site GT) and
     J.EndTime >= \"""" + DateTimeToString(begin) + """\" and
@@ -925,7 +925,7 @@ def RangeSiteData(begin, end, with_panda = False):
     select = """\
 select T.SiteName, sum(J.NJobs), sum(J.WallDuration)
   from """ + schema + ".Site T, " + schema + ".Probe P, " + schema + """.VOProbeSummary J
-  where
+  where VOName != \"Unknown\" and 
     P.siteid = T.siteid and
     J.ProbeName = P.probename and
     EndTime >= \"""" + DateTimeToString(begin) + """\" and
@@ -936,7 +936,7 @@ select T.SiteName, sum(J.NJobs), sum(J.WallDuration)
         panda_select = """\
 select J.SiteName, sum(J.NJobs), sum(J.WallDuration)
   from gratia_osg_daily.JobUsageRecord_Report J
-  where
+  where VOName != \"Unknown\" and 
     J.ProbeName != \"daily:goc\" and
     J.SiteName not in (select GT.SiteName from gratia.Site GT) and
     J.EndTime >= \"""" + DateTimeToString(begin) + """\" and
@@ -951,7 +951,7 @@ def RangeSiteVOData(begin, end, with_panda = False):
     select = """\
 select T.SiteName, J.VOName, sum(NJobs), sum(J.WallDuration)
   from """ + schema + ".Site T, " + schema + ".Probe P, " + schema + """.VOProbeSummary J
-  where
+  where VOName != \"Unknown\" and 
     P.siteid = T.siteid and
     J.ProbeName = P.probename and
     EndTime >= \"""" + DateTimeToString(begin) + """\" and
@@ -963,7 +963,7 @@ select T.SiteName, J.VOName, sum(NJobs), sum(J.WallDuration)
         panda_select = """\
 select J.SiteName, J.VOName, sum(J.NJobs), sum(J.WallDuration)
   from gratia_osg_daily.JobUsageRecord_Report J
-  where
+  where VOName != \"Unknown\" and 
     J.ProbeName != \"daily:goc\" and
     J.ReportedSiteName not in (select GT.SiteName from gratia.Site GT) and
     J.EndTime >= \"""" + DateTimeToString(begin) + """\" and
@@ -979,7 +979,7 @@ def RangeVOSiteData(begin, end, with_panda = False):
     select = """\
 select J.VOName, T.SiteName, sum(NJobs), sum(J.WallDuration)
   from """ + schema + ".Site T, " + schema + ".Probe P, " + schema + """.VOProbeSummary J
-  where
+  where VOName != \"Unknown\" and 
     P.siteid = T.siteid and
     J.ProbeName = P.probename and
     EndTime >= \"""" + DateTimeToString(begin) + """\" and
@@ -991,7 +991,7 @@ select J.VOName, T.SiteName, sum(NJobs), sum(J.WallDuration)
         panda_select = """\
 select J.VOName, J.SiteName, sum(J.NJobs), sum(J.WallDuration)
   from gratia_osg_daily.JobUsageRecord_Report J
-  where
+  where VOName != \"Unknown\" and 
     J.ProbeName != \"daily:goc\" and
     J.SiteName not in (select GT.SiteName from gratia.Site GT) and
     J.EndTime >= \"""" + DateTimeToString(begin) + """\" and
@@ -1280,7 +1280,7 @@ def GetLisOfReportingSites(begin,end):
     schema = "gratia.";
 
     select = """\
-select distinct SiteName from """+schema+"""JobUsageRecord_Report where 
+select distinct SiteName from """+schema+"""JobUsageRecord_Report where VOName != \"Unknown\" and 
             EndTime >= \"""" + DateToString(begin) + """\" and
             EndTime < \"""" + DateToString(end) + """\"
             order by SiteName
@@ -1293,7 +1293,7 @@ def GetTotals(begin,end):
     schema = "gratia.";
 
     select = """\
-select sum(Njobs),sum(WallDuration),sum(CpuUserDuration+CpuSystemDuration)/sum(WallDuration) from """+schema+"""JobUsageRecord_Report where 
+select sum(Njobs),sum(WallDuration),sum(CpuUserDuration+CpuSystemDuration)/sum(WallDuration) from """+schema+"""JobUsageRecord_Report where VOName != \"Unknown\" and 
             EndTime >= \"""" + DateToString(begin) + """\" and
             EndTime < \"""" + DateToString(end) + """\"
             """
@@ -1334,7 +1334,7 @@ def RangeSummup(range_end = datetime.date.today(),
     # Call it twice to avoid a 'bug' in wget where on of the row is missing the first few characters.
     allSites = GetListOfOSGSites();
  
-    exceptionSites = ['BNL_ATLAS_1', 'BNL_ATLAS_2','USCMS-FNAL-WC1-CE2','BNL_LOCAL', 'BNL_OSG', 'BNL_PANDA', 'FNAL_CDFOSG_1', 'FNAL_CDFOSG_2', 'FNAL_DZEROOSG_1', 'FNAL_DZEROOSG_2']
+    exceptionSites = ['BNL_ATLAS_1', 'BNL_ATLAS_2', 'USCMS-FNAL-WC1-CE2', 'USCMS-FNAL-WC1-CE3', 'USCMS-FNAL-WC1-CE4', 'BNL_LOCAL', 'BNL_OSG', 'BNL_PANDA', 'FNAL_CDFOSG_1', 'FNAL_CDFOSG_2', 'FNAL_CDFOSG_3', 'FNAL_CDFOSG_4', 'FNAL_DZEROOSG_1', 'FNAL_DZEROOSG_2', 'GLOW-CMS', 'UCSDT2-B']
 
 
     allSites = [name for name in allSites if name not in exceptionSites]
