@@ -4,7 +4,7 @@ import org.eclipse.birt.report.engine.api.script.eventadapter.ReportEventAdapter
 import javax.servlet.http.HttpServletRequest;
 import org.eclipse.birt.report.engine.api.script.IReportContext;
 import org.eclipse.birt.report.engine.api.script.element.IReportDesign;
-//import java.io.*;
+import java.io.*;
 //import java.text.SimpleDateFormat;
 //import java.util.Date;
 //import net.sf.gratia.reporting.ReportingConfiguration;
@@ -16,21 +16,54 @@ import org.eclipse.birt.report.engine.api.script.element.IReportDesign;
  */
 
 public class GratiaBirtReportEH extends ReportEventAdapter {
+	private static String timeStampFile = "/gratia-logs/gratiaReportingLog.csv";
+	private static String timeStampFolder ="/gratia-logs/";
 
 	public void afterFactory(IReportContext rc) {
+		long timeStamp = System.currentTimeMillis();
+
+		try
+		{
+			File checkFile = new java.io.File(System.getProperty("catalina.home") + timeStampFile);
+			if (checkFile.exists())
+			{
+				BufferedWriter out = new BufferedWriter(new FileWriter(System.getProperty("catalina.home") + timeStampFile, true));
+				out.write(", afterFactory = ," + timeStamp);
+				out.flush();
+				out.close();
+			}
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	public void afterRender(IReportContext rc) {
+		// Get current time
+		long timeStamp = System.currentTimeMillis();
+
+		try
+		{
+			File checkFile = new java.io.File(System.getProperty("catalina.home") + timeStampFile);
+			if (checkFile.exists())
+			{
+				BufferedWriter out = new BufferedWriter(new FileWriter(System.getProperty("catalina.home") + timeStampFile, true));
+				out.write(", afterRender = ," + timeStamp + "\n");
+				out.flush();
+				out.close();
+			}
+		}
+		catch  (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	public void beforeFactory(IReportDesign design, IReportContext rc) {
+		// Get current time
+		long timeStamp = System.currentTimeMillis();
+
 		try
 		{
-			// Debugging ...
-			// BufferedWriter out = new BufferedWriter(new FileWriter("./GratiaBirtEH.log", true));
-			// out.write("\n+++++++++ BEFORE FACTORY ++++++++++++++++\n");
-			// out.flush();
-
 			HttpServletRequest request = (HttpServletRequest) rc.getHttpServletRequest();
 			String outReportURL = request.getRequestURL().toString().replace("frameset", "checkDateParameters.jsp") + "?" + request.getQueryString();
 
@@ -72,8 +105,14 @@ public class GratiaBirtReportEH extends ReportEventAdapter {
 					rc.setParameterValue("ReportURL", outReportURL);
 				}
 			}
-
-			// out.close();
+			File checkFile = new java.io.File(System.getProperty("catalina.home") + timeStampFile);
+			if (checkFile.exists())
+			{
+				BufferedWriter out = new BufferedWriter(new FileWriter(System.getProperty("catalina.home") + timeStampFile, true));
+				out.write(", beforeFactory = ," + timeStamp);
+				out.flush();
+				out.close();
+			}
 		}
 		catch (Exception e) {
 			e.printStackTrace();
@@ -81,24 +120,45 @@ public class GratiaBirtReportEH extends ReportEventAdapter {
 	}
 
 	public void beforeRender(IReportContext rc) {
+		// Get current time
+		long timeStamp = System.currentTimeMillis();
+
+		try
+		{
+			File checkFile = new java.io.File(System.getProperty("catalina.home") + timeStampFile);
+			if (checkFile.exists())
+			{
+				BufferedWriter out = new BufferedWriter(new FileWriter(System.getProperty("catalina.home") + timeStampFile, true));
+				out.write(", beforeRender = ," + timeStamp);
+				out.flush();
+				out.close();
+			}
+		}
+		catch  (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	public void initialize(IReportContext inReport) {
 
+		// Get current time
+		long timeStamp = System.currentTimeMillis();
+
 		try
 		{
 			// Debugging ...
-			// BufferedWriter out = new BufferedWriter(new FileWriter("./GratiaBirtEH.log", true));
-			// out.write("\n+++++++++ INTIALIZE REPORT PARAMETERS ++++++++++++++++\n");
+			//BufferedWriter out1 = new BufferedWriter(new FileWriter("./GratiaBirtEH.log", true));
+			//out1.write("\n+++++++++ INTIALIZE REPORT ++++++++++++++++\n");
+			//out1.flush();
 
 			HttpServletRequest request = (HttpServletRequest) inReport.getHttpServletRequest();
 
 			if (request != null)
 			{
 				// DEBUG
-				// String ReportURL = request.getRequestURL().toString() + "?" + request.getQueryString();
-				// out.write("ReportURL = " + ReportURL + "\n");
-				// out.flush();
+				//String ReportURL = request.getRequestURL().toString() + "?" + request.getQueryString();
+
+
 				ReportingConfiguration reportingConfig = new ReportingConfiguration();
 				reportingConfig.loadReportingConfiguration(request);
 
@@ -128,6 +188,33 @@ public class GratiaBirtReportEH extends ReportEventAdapter {
 				inReport.setParameterValue("UserRole", userRole);
 				// inReport.setParameterValue("ReportSubtitle", subtitle);
 
+				// out1.write("Time Stamp file = " + timeStampFile + " \tLogging is: " + logTimeStamps + "\n");
+				// out1.flush();
+				// out1.close();
+
+				if (reportingConfig.getLogging())
+				{
+					File checkFolder = new java.io.File(System.getProperty("catalina.home") + timeStampFolder);
+					if (!checkFolder.exists())
+						checkFolder.mkdirs();
+					checkFolder = null;
+					BufferedWriter out = new BufferedWriter(new FileWriter(System.getProperty("catalina.home") + timeStampFile, true));
+					String reportName = request.getParameter("__report");
+					reportName = reportName.substring(reportName.lastIndexOf("/")+1, reportName.indexOf(".rptdesign"));
+					out.write(reportName + " = ,"+ timeStamp);
+					out.flush();
+					out.close();
+				}
+				else
+				{
+					File checkFile = new java.io.File(System.getProperty("catalina.home") + timeStampFile);
+					if (checkFile.exists())
+					{
+						File dest = new java.io.File (System.getProperty("catalina.home") + timeStampFile + userKey);
+						checkFile.renameTo(dest);
+					}
+				}
+
 				// out.write("\tParameters are set\n");
 				// out.write("\tDatabaseURL= " + inReport.getParameterValue("DatabaseURL")+"\n");
 				// out.write("\tDatabasePassword= " + inReport.getParameterValue("DatabasePassword")+"\n");
@@ -139,6 +226,14 @@ public class GratiaBirtReportEH extends ReportEventAdapter {
 			}
 			else
 			{
+				File checkFile = new java.io.File(System.getProperty("catalina.home") + timeStampFile);
+				if (checkFile.exists())
+				{
+					BufferedWriter out = new BufferedWriter(new FileWriter(System.getProperty("catalina.home") + timeStampFile, true));
+					out.write(", initialize = ," + timeStamp);
+					out.flush();
+					out.close();
+				}
 				// out.write("\tHttpServletRequest is NULL");
 				// out.flush();
 			}
