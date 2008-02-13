@@ -1,6 +1,6 @@
 package net.sf.gratia.reporting;
 
-import java.io.*;
+//import java.io.*;
 import java.util.Properties;
 import javax.servlet.http.HttpServletRequest;
 
@@ -9,27 +9,32 @@ public class ReportingConfiguration
 	HttpServletRequest request = null;
 	Properties p = net.sf.gratia.util.Configuration.getProperties();
 	private String _configLoaded = null;
-	private String _reportsFolder = null;
 	private String _databaseURL = null;
 	private String _databaseUser = null;
 	private String _databasePassword = null;
+	private String _reportsFolder = null;
 	private String _reportsMenuConfig = null;
 	private String _csvHome = null;
 	private String _reportingVersion = null;
 	private String _staticFolder = null;
 	private String _staticFolderPath = null;
 	private String _statReportsConfig = null;
+	private boolean _logging = false;
 
-	public String getDatabasePassword() {
-		return _databasePassword;
+	public String getConfigLoaded() {
+		return _configLoaded;
 	}
-
+	
 	public String getDatabaseURL() {
 		return _databaseURL;
 	}
 
 	public String getDatabaseUser() {
 		return _databaseUser;
+	}
+	
+	public String getDatabasePassword() {
+		return _databasePassword;
 	}
 
 	public String getReportsFolder() {
@@ -38,10 +43,6 @@ public class ReportingConfiguration
 
 	public String getReportsMenuConfig() {
 		return _reportsMenuConfig;
-	}
-
-	public String getConfigLoaded() {
-		return _configLoaded;
 	}
 
 	public String getCsvHome() {
@@ -56,12 +57,16 @@ public class ReportingConfiguration
 		return _staticFolder;
 	}
 
+	public String getStaticFolderPath() {
+		return _staticFolderPath;
+	}
+
 	public String getStaticReportsConfig() {
 		return _statReportsConfig;
 	}
 
-	public String getStaticFolderPath() {
-		return _staticFolderPath;
+	public boolean getLogging() {
+		return _logging;
 	}
 
 	public void loadReportingConfiguration(javax.servlet.http.HttpServletRequest request)
@@ -74,20 +79,28 @@ public class ReportingConfiguration
 		{
 			try
 			{
-				String webappsHome =  System.getProperty("catalina.home") + File.separatorChar+ "webapps" + File.separatorChar;
+				String webappsHome =  System.getProperty("catalina.home") + "/" + "webapps" + "/";
 
-				_reportsFolder     = (webappsHome + p.getProperty("service.reporting.reports.folder").replace("/", File.separator) + File.separatorChar);
-				_reportsMenuConfig = (webappsHome + p.getProperty("service.reporting.menuconfig").replace("/", File.separator));
-				_statReportsConfig = (webappsHome + p.getProperty("service.reporting.staticreports").replace("/", File.separator));
-				_staticFolderPath  = (webappsHome + p.getProperty("service.reporting.static.folder").replace("/", File.separator) + File.separatorChar);
+				_reportsFolder     = (webappsHome + p.getProperty("service.reporting.reports.folder") + "/");
+				_reportsMenuConfig = (webappsHome + p.getProperty("service.reporting.menuconfig"));
+				_statReportsConfig = (webappsHome + p.getProperty("service.reporting.staticreports"));
+				_staticFolderPath  = (webappsHome + p.getProperty("service.reporting.static.folder") + "/");
 				_staticFolder      = p.getProperty("service.reporting.static.folder");
+				if (p.getProperty("service.reporting.logging").indexOf("true") > -1)
+					_logging = true;
+				else
+					_logging = false;
 
 				if (_staticFolder.charAt(_staticFolder.length()-1) != '/')
 					_staticFolder = _staticFolder + "/";
 				if (_staticFolder.charAt(0) != '/')
 					_staticFolder = "/" + _staticFolder;
 
-				_csvHome           = (webappsHome + "birt_csv_temp" + File.separatorChar);
+
+				if (System.getProperty( "os.name" ).indexOf("Windows") > -1)
+					_csvHome = "./";
+				else
+					_csvHome       = (webappsHome + "gratia_csv_temp" + "/");
 
 				_databaseURL       = p.getProperty("service.mysql.url");
 				_databaseUser      = p.getProperty("service.reporting.user");
