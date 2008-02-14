@@ -36,10 +36,6 @@
             <property name="value">gratia</property>
         </structure>
         <structure>
-            <property name="name">DatabasePassword</property>
-            <property name="value">proto</property>
-        </structure>
-        <structure>
             <property name="name">DisplayMetric</property>
             <property name="value">jobcount</property>
         </structure>
@@ -65,10 +61,6 @@
         <structure>
             <property name="name">StartDate</property>
             <property name="value">2007-01-01</property>
-        </structure>
-        <structure>
-            <property name="name">EndDate</property>
-            <property name="value">2007-02-01</property>
         </structure>
     </list-property>
     <template-parameter-definitions>
@@ -1027,13 +1019,61 @@
             <text-property name="promptText">EndDate</text-property>
             <property name="isRequired">true</property>
             <property name="controlType">text-box</property>
-            <property name="defaultValue">2007-02-01</property>
+            <property name="defaultValue">2007-12-31</property>
             <structure name="format">
                 <property name="category">Unformatted</property>
                 <property name="pattern">Unformatted</property>
             </structure>
         </scalar-parameter>
         <parameter-group name="ReportInfo" id="365" extends="gratia-lib1.ReportInfo"/>
+        <scalar-parameter name="GroupsPerChart" id="397">
+            <text-property name="helpText">Select number of groups (e.g. VO's or Sites) to be displayed on each chart</text-property>
+            <property name="valueType">static</property>
+            <property name="dataType">integer</property>
+            <text-property name="promptText">Select # of groups per chart</text-property>
+            <property name="controlType">list-box</property>
+            <property name="mustMatch">true</property>
+            <property name="fixedOrder">true</property>
+            <property name="defaultValue">15</property>
+            <property name="distinct">false</property>
+            <structure name="format">
+                <property name="category">Unformatted</property>
+            </structure>
+            <list-property name="selectionList">
+                <structure>
+                    <property name="value">1</property>
+                    <property name="label">1</property>
+                </structure>
+                <structure>
+                    <property name="value">2</property>
+                    <property name="label">2</property>
+                </structure>
+                <structure>
+                    <property name="value">5</property>
+                    <property name="label">5</property>
+                </structure>
+                <structure>
+                    <property name="value">10</property>
+                    <property name="label">10</property>
+                </structure>
+                <structure>
+                    <property name="value">15</property>
+                    <property name="label">15</property>
+                </structure>
+                <structure>
+                    <property name="value">20</property>
+                    <property name="label">20</property>
+                </structure>
+                <structure>
+                    <property name="value">25</property>
+                    <property name="label">25</property>
+                </structure>
+                <structure>
+                    <property name="value">1000</property>
+                    <property name="label">ALL</property>
+                </structure>
+            </list-property>
+        </scalar-parameter>
     </parameters>
     <data-sources>
         <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="fermigrid1" id="357">
@@ -1045,6 +1085,13 @@
     </data-sources>
     <data-sets>
         <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="UsageByVORanked" id="358">
+            <list-property name="computedColumns">
+                <structure>
+                    <property name="name">YearMonth-rank</property>
+                    <expression name="expression">row["datevalue"] + '-' + row["final_rank"]</expression>
+                    <property name="dataType">any</property>
+                </structure>
+            </list-property>
             <structure name="cachedMetaData">
                 <list-property name="resultSet">
                     <structure>
@@ -1077,6 +1124,11 @@
                         <property name="name">Njobs</property>
                         <property name="dataType">decimal</property>
                     </structure>
+                    <structure>
+                        <property name="position">7</property>
+                        <property name="name">YearMonth-rank</property>
+                        <property name="dataType">any</property>
+                    </structure>
                 </list-property>
             </structure>
             <property name="dataSource">fermigrid1</property>
@@ -1107,15 +1159,17 @@
                     <property name="name">EndDate</property>
                     <property name="dataType">string</property>
                     <property name="position">4</property>
-                    <expression name="defaultValue">'2010-12-31'</expression>
+                    <expression name="defaultValue">'2007-12-31'</expression>
                     <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
                 </structure>
                 <structure>
                     <property name="name">GroupByFormat</property>
                     <property name="dataType">string</property>
                     <property name="position">5</property>
-                    <expression name="defaultValue">"%Y-%m-%d"</expression>
+                    <expression name="defaultValue">"%Y-%m"</expression>
                     <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
                 </structure>
             </list-property>
             <list-property name="resultSet">
@@ -1158,6 +1212,238 @@
             </list-property>
             <property name="queryText">call WeeklyUsageByVORanked(?,?,?,?,?,'Batch')</property>
         </oda-data-set>
+        <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="YearMonths" id="390">
+            <list-property name="computedColumns">
+                <structure>
+                    <property name="name">YearMonth-VOOrdinal</property>
+                    <expression name="expression">row["yearmonth"] + '-' + row["VONumber"]</expression>
+                    <property name="dataType">any</property>
+                </structure>
+            </list-property>
+            <structure name="cachedMetaData">
+                <list-property name="resultSet">
+                    <structure>
+                        <property name="position">1</property>
+                        <property name="name">yearmonth</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">2</property>
+                        <property name="name">VONumber</property>
+                        <property name="dataType">float</property>
+                    </structure>
+                    <structure>
+                        <property name="position">3</property>
+                        <property name="name">vonamex</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">4</property>
+                        <property name="name">YearMonth-VOOrdinal</property>
+                        <property name="dataType">any</property>
+                    </structure>
+                </list-property>
+            </structure>
+            <property name="dataSource">fermigrid1</property>
+            <list-property name="parameters">
+                <structure>
+                    <property name="name">StartDatex</property>
+                    <property name="paramName">StartDate</property>
+                    <property name="dataType">string</property>
+                    <property name="position">1</property>
+                    <expression name="defaultValue">'2007-01-01'</expression>
+                    <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
+                </structure>
+                <structure>
+                    <property name="name">EndDatex</property>
+                    <property name="paramName">EndDate</property>
+                    <property name="dataType">string</property>
+                    <property name="position">2</property>
+                    <expression name="defaultValue">'2007-12-31'</expression>
+                    <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
+                </structure>
+            </list-property>
+            <list-property name="resultSet">
+                <structure>
+                    <property name="position">1</property>
+                    <property name="name">yearmonth</property>
+                    <property name="nativeName">yearmonth</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                </structure>
+                <structure>
+                    <property name="position">2</property>
+                    <property name="name">VONumber</property>
+                    <property name="nativeName">VONumber</property>
+                    <property name="dataType">float</property>
+                    <property name="nativeDataType">8</property>
+                </structure>
+                <structure>
+                    <property name="position">3</property>
+                    <property name="name">vonamex</property>
+                    <property name="nativeName">vonamex</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                </structure>
+            </list-property>
+            <property name="queryText">select yearmonth, VONumber, VOName as vonamex
+from Months,
+	(select  voname,
+  	  @rank:=@rank+1 as VONumber
+	from  (select  distinct voname, @rank:=0 as rank from VOProbeSummary 
+	where (date_format(endtime,'%Y-%m-%d') >= ?
+	and date_format(endtime,'%Y-%m-%d') &lt;= ? )) xjeff
+	 order by voname ) yjeff order by voname, yearmonth</property>
+        </oda-data-set>
+        <joint-data-set name="UsageByVORanked-allmonths" id="391">
+            <structure name="cachedMetaData">
+                <list-property name="resultSet">
+                    <structure>
+                        <property name="position">1</property>
+                        <property name="name">YearMonths::yearmonth</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">2</property>
+                        <property name="name">YearMonths::VONumber</property>
+                        <property name="dataType">float</property>
+                    </structure>
+                    <structure>
+                        <property name="position">3</property>
+                        <property name="name">YearMonths::vonamex</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">4</property>
+                        <property name="name">YearMonths::YearMonth-VOOrdinal</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">5</property>
+                        <property name="name">UsageByVORanked::final_rank</property>
+                        <property name="dataType">float</property>
+                    </structure>
+                    <structure>
+                        <property name="position">6</property>
+                        <property name="name">UsageByVORanked::VOName</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">7</property>
+                        <property name="name">UsageByVORanked::datevalue</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">8</property>
+                        <property name="name">UsageByVORanked::WallDuration</property>
+                        <property name="dataType">float</property>
+                    </structure>
+                    <structure>
+                        <property name="position">9</property>
+                        <property name="name">UsageByVORanked::Cpu</property>
+                        <property name="dataType">float</property>
+                    </structure>
+                    <structure>
+                        <property name="position">10</property>
+                        <property name="name">UsageByVORanked::Njobs</property>
+                        <property name="dataType">decimal</property>
+                    </structure>
+                    <structure>
+                        <property name="position">11</property>
+                        <property name="name">UsageByVORanked::YearMonth-rank</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                </list-property>
+            </structure>
+            <list-property name="parameters">
+                <structure>
+                    <property name="name">YearMonths::StartDatex</property>
+                    <property name="dataType">string</property>
+                    <property name="position">1</property>
+                    <expression name="defaultValue">'2007-01-01'</expression>
+                    <property name="isOptional">false</property>
+                    <property name="allowNull">false</property>
+                    <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
+                </structure>
+                <structure>
+                    <property name="name">YearMonths::EndDatex</property>
+                    <property name="dataType">string</property>
+                    <property name="position">2</property>
+                    <expression name="defaultValue">'2007-12-31'</expression>
+                    <property name="isOptional">false</property>
+                    <property name="allowNull">false</property>
+                    <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
+                </structure>
+                <structure>
+                    <property name="name">UsageByVORanked::UserName</property>
+                    <property name="dataType">string</property>
+                    <property name="position">3</property>
+                    <expression name="defaultValue">""</expression>
+                    <property name="isOptional">false</property>
+                    <property name="allowNull">false</property>
+                    <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
+                </structure>
+                <structure>
+                    <property name="name">UsageByVORanked::UserRole</property>
+                    <property name="dataType">string</property>
+                    <property name="position">4</property>
+                    <expression name="defaultValue">""</expression>
+                    <property name="isOptional">false</property>
+                    <property name="allowNull">false</property>
+                    <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
+                </structure>
+                <structure>
+                    <property name="name">UsageByVORanked::StartDate</property>
+                    <property name="dataType">string</property>
+                    <property name="position">5</property>
+                    <expression name="defaultValue">'2007-01-01'</expression>
+                    <property name="isOptional">false</property>
+                    <property name="allowNull">false</property>
+                    <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
+                </structure>
+                <structure>
+                    <property name="name">UsageByVORanked::EndDate</property>
+                    <property name="dataType">string</property>
+                    <property name="position">6</property>
+                    <expression name="defaultValue">'2007-12-31'</expression>
+                    <property name="isOptional">false</property>
+                    <property name="allowNull">false</property>
+                    <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
+                </structure>
+                <structure>
+                    <property name="name">UsageByVORanked::GroupByFormat</property>
+                    <property name="dataType">string</property>
+                    <property name="position">7</property>
+                    <expression name="defaultValue">"%Y-%m"</expression>
+                    <property name="isOptional">false</property>
+                    <property name="allowNull">false</property>
+                    <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
+                </structure>
+            </list-property>
+            <simple-property-list name="dataSets">
+                <value>YearMonths</value>
+                <value>UsageByVORanked</value>
+            </simple-property-list>
+            <list-property name="joinConditions">
+                <structure>
+                    <property name="joinType">left-out</property>
+                    <property name="joinOperator">eq</property>
+                    <property name="leftDataSet">YearMonths</property>
+                    <property name="rightDataSet">UsageByVORanked</property>
+                    <expression name="leftExpression">dataSetRow["YearMonth-VOOrdinal"]</expression>
+                    <expression name="rightExpression">dataSetRow["YearMonth-rank"]</expression>
+                </structure>
+            </list-property>
+        </joint-data-set>
     </data-sets>
     <styles>
         <style name="sans-style1" id="95">
@@ -1183,41 +1469,90 @@
                 <property name="height">0.322in</property>
                 <cell id="7">
                     <property name="verticalAlign">top</property>
-                    <text-data id="94">
-                        <property name="style">sans-style1</property>
-                        <property name="fontSize">9pt</property>
-                        <property name="textAlign">center</property>
-                        <expression name="valueExpr">"Date range: "+ params["StartDate"] + " - " + params["EndDate"]</expression>
-                        <property name="contentType">html</property>
-                    </text-data>
                 </cell>
             </row>
         </grid>
         <table name="table1" id="9">
             <property name="width">100%</property>
-            <property name="dataSet">UsageByVORanked</property>
+            <property name="dataSet">UsageByVORanked-allmonths</property>
             <list-property name="paramBindings">
                 <structure>
-                    <property name="paramName">UserName</property>
-                    <expression name="expression">params["UserName"]</expression>
-                </structure>
-                <structure>
-                    <property name="paramName">UserRole</property>
-                    <expression name="expression">params["UserRole"]</expression>
-                </structure>
-                <structure>
-                    <property name="paramName">StartDate</property>
+                    <property name="paramName">YearMonths::StartDatex</property>
                     <expression name="expression">params["StartDate"]</expression>
                 </structure>
                 <structure>
-                    <property name="paramName">EndDate</property>
+                    <property name="paramName">YearMonths::EndDatex</property>
+                    <expression name="expression">params["EndDate"]</expression>
+                </structure>
+                <structure>
+                    <property name="paramName">UsageByVORanked::StartDate</property>
+                    <expression name="expression">params["StartDate"]</expression>
+                </structure>
+                <structure>
+                    <property name="paramName">UsageByVORanked::EndDate</property>
                     <expression name="expression">params["EndDate"]</expression>
                 </structure>
             </list-property>
             <list-property name="boundDataColumns">
                 <structure>
-                    <property name="name">final_rank</property>
-                    <expression name="expression">dataSetRow["final_rank"]</expression>
+                    <property name="name">YearMonths::yearmonth</property>
+                    <expression name="expression">dataSetRow["YearMonths::yearmonth"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">YearMonths::VONumber</property>
+                    <expression name="expression">dataSetRow["YearMonths::VONumber"]</expression>
+                    <property name="dataType">float</property>
+                </structure>
+                <structure>
+                    <property name="name">YearMonths::vonamex</property>
+                    <expression name="expression">dataSetRow["YearMonths::vonamex"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">YearMonths::YearMonth-VOOrdinal</property>
+                    <expression name="expression">dataSetRow["YearMonths::YearMonth-VOOrdinal"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">UsageByVORanked::final_rank</property>
+                    <expression name="expression">dataSetRow["UsageByVORanked::final_rank"]</expression>
+                    <property name="dataType">float</property>
+                </structure>
+                <structure>
+                    <property name="name">UsageByVORanked::VOName</property>
+                    <expression name="expression">dataSetRow["UsageByVORanked::VOName"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">UsageByVORanked::datevalue</property>
+                    <expression name="expression">dataSetRow["UsageByVORanked::datevalue"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">UsageByVORanked::WallDuration</property>
+                    <expression name="expression">dataSetRow["UsageByVORanked::WallDuration"]</expression>
+                    <property name="dataType">float</property>
+                </structure>
+                <structure>
+                    <property name="name">UsageByVORanked::Cpu</property>
+                    <expression name="expression">dataSetRow["UsageByVORanked::Cpu"]</expression>
+                    <property name="dataType">float</property>
+                </structure>
+                <structure>
+                    <property name="name">UsageByVORanked::Njobs</property>
+                    <expression name="expression">dataSetRow["UsageByVORanked::Njobs"]</expression>
+                    <property name="dataType">decimal</property>
+                </structure>
+                <structure>
+                    <property name="name">UsageByVORanked::YearMonth-rank</property>
+                    <expression name="expression">dataSetRow["UsageByVORanked::YearMonth-rank"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">ChartNumber</property>
+                    <expression name="expression">(row["YearMonths::VONumber"]-1) / params["GroupsPerChart"]</expression>
+                    <property name="dataType">integer</property>
                 </structure>
             </list-property>
             <column id="30">
@@ -1232,16 +1567,32 @@
             <header>
                 <row id="10">
                     <cell id="11"/>
-                    <cell id="12"/>
+                    <cell id="12">
+                        <text-data id="94">
+                            <property name="style">sans-style1</property>
+                            <property name="fontSize">9pt</property>
+                            <property name="textAlign">center</property>
+                            <expression name="valueExpr">"Date range: "+ params["StartDate"] + " - " + params["EndDate"]</expression>
+                            <property name="contentType">html</property>
+                        </text-data>
+                    </cell>
                     <cell id="13"/>
                 </row>
             </header>
             <group id="14">
                 <property name="groupName">Rank</property>
                 <property name="interval">interval</property>
-                <property name="intervalRange">8.0</property>
+                <property name="intervalRange">1.0</property>
                 <property name="sortDirection">asc</property>
-                <expression name="keyExpr">row["final_rank"]</expression>
+                <expression name="keyExpr">row["ChartNumber"]</expression>
+                <structure name="toc">
+                    <expression name="expressionValue">row["ChartNumber"]</expression>
+                </structure>
+                <property name="repeatHeader">true</property>
+                <property name="hideDetail">true</property>
+                <property name="pageBreakAfter">avoid</property>
+                <property name="pageBreakBefore">always-excluding-first</property>
+                <property name="pageBreakInside">auto</property>
                 <header>
                     <row id="15">
                         <cell id="16">
@@ -1395,6 +1746,7 @@
         <Width>0.0</Width>
         <Height>0.0</Height>
       </Bounds>
+      <Anchor>North</Anchor>
       <Stretch>Both</Stretch>
       <Insets>
         <Top>2.0</Top>
@@ -1457,7 +1809,7 @@
           <Blue>0</Blue>
         </Color>
       </Text>
-      <Orientation>Horizontal</Orientation>
+      <Orientation>Vertical</Orientation>
       <Direction>Top_Bottom</Direction>
       <Separator>
         <Style>Solid</Style>
@@ -1470,7 +1822,7 @@
         </Color>
         <Visible>true</Visible>
       </Separator>
-      <Position>Below</Position>
+      <Position>Right</Position>
       <ItemType>Series</ItemType>
       <Title>
         <Caption>
@@ -1505,6 +1857,7 @@
         <Visible>false</Visible>
       </Title>
       <TitlePosition>Above</TitlePosition>
+      <WrappingSize>0.0</WrappingSize>
     </Children>
     <Bounds>
       <Left>0.0</Left>
@@ -1612,7 +1965,13 @@ function beforeGeneration( chart, context ){
 
 	rep = context.getExternalContext().getScriptable();
 	val = rep.getParameterValue(&quot;TimeAxisPattern&quot;);
-	rep_title = rep.getParameterValue(&quot;ReportTitle&quot;);
+	
+	metric = rep.getParameterValue(&quot;DisplayMetric&quot;);
+	if(metric==&quot;process&quot;) metric_text = &quot;Process Hours&quot;;
+	if(metric==&quot;wallclock&quot;) metric_text = &quot;Wallclock Hours&quot;;
+	if(metric==&quot;jobcount&quot;) metric_text = &quot;Job Count&quot;;
+
+	rep_title = rep.getParameterValue(&quot;ReportTitle&quot;) + &quot; (&quot; + metric_text + &quot;)&quot; ;
 	rep_subtitle = rep.getParameterValue(&quot;ReportSubtitle&quot;);
 	chart.getTitle().getLabel().getCaption().setValue(rep_title + &quot;\n&quot; + rep_subtitle);
 
@@ -2029,7 +2388,7 @@ function beforeDrawAxisTitle( axis, label, context )
       <TitlePosition>Left</TitlePosition>
       <SeriesDefinitions>
         <Query>
-          <Definition>row[&quot;VOName&quot;]</Definition>
+          <Definition>row[&quot;YearMonths::vonamex&quot;]</Definition>
         </Query>
         <SeriesPalette>
           <Entries xsi:type="attribute:ColorDefinition">
@@ -2080,6 +2439,48 @@ function beforeDrawAxisTitle( axis, label, context )
             <Green>128</Green>
             <Blue>0</Blue>
           </Entries>
+          <Entries xsi:type="attribute:ColorDefinition">
+            <Transparency>255</Transparency>
+            <Red>0</Red>
+            <Green>0</Green>
+            <Blue>0</Blue>
+          </Entries>
+          <Entries xsi:type="attribute:ColorDefinition">
+            <Transparency>255</Transparency>
+            <Red>0</Red>
+            <Green>0</Green>
+            <Blue>254</Blue>
+          </Entries>
+          <Entries xsi:type="attribute:ColorDefinition">
+            <Transparency>255</Transparency>
+            <Red>254</Red>
+            <Green>0</Green>
+            <Blue>254</Blue>
+          </Entries>
+          <Entries xsi:type="attribute:ColorDefinition">
+            <Transparency>255</Transparency>
+            <Red>0</Red>
+            <Green>254</Green>
+            <Blue>254</Blue>
+          </Entries>
+          <Entries xsi:type="attribute:ColorDefinition">
+            <Transparency>255</Transparency>
+            <Red>254</Red>
+            <Green>254</Green>
+            <Blue>0</Blue>
+          </Entries>
+          <Entries xsi:type="attribute:ColorDefinition">
+            <Transparency>255</Transparency>
+            <Red>204</Red>
+            <Green>153</Green>
+            <Blue>254</Blue>
+          </Entries>
+          <Entries xsi:type="attribute:ColorDefinition">
+            <Transparency>255</Transparency>
+            <Red>145</Red>
+            <Green>145</Green>
+            <Blue>145</Blue>
+          </Entries>
         </SeriesPalette>
         <Series xsi:type="type:BarSeries">
           <Visible>true</Visible>
@@ -2117,13 +2518,13 @@ function beforeDrawAxisTitle( axis, label, context )
           </Label>
           <DataDefinition>
             <Definition>if (params[&quot;DisplayMetric&quot;] == &quot;wallclock&quot;) {&#xD;
- row[&quot;WallDuration&quot;] / 3600&#xD;
+ row[&quot;UsageByVORanked::WallDuration&quot;]/ 3600&#xD;
 }&#xD;
 else if (params[&quot;DisplayMetric&quot;]==&quot;process&quot;) {&#xD;
-row[&quot;Cpu&quot;]/3600&#xD;
+row[&quot;UsageByVORanked::Cpu&quot;]/3600&#xD;
 }&#xD;
 else if (params[&quot;DisplayMetric&quot;]==&quot;jobcount&quot;){&#xD;
-row[&quot;Njobs&quot;]&#xD;
+row[&quot;UsageByVORanked::Njobs&quot;]&#xD;
 }&#xD;
 else {&#xD;
 &quot;***Unknown metric***&quot;&#xD;
@@ -2136,7 +2537,7 @@ else {&#xD;
             </Components>
             <Separator>, </Separator>
           </DataPoint>
-          <LabelPosition>Outside</LabelPosition>
+          <LabelPosition>Inside</LabelPosition>
           <Stacked>true</Stacked>
           <Triggers>
             <Condition>onclick</Condition>
@@ -2150,18 +2551,6 @@ else {&#xD;
     &lt;property name=&quot;targetWindow&quot;>_self&lt;/property>
     &lt;property name=&quot;targetFileType&quot;>report-design&lt;/property>
     &lt;list-property name=&quot;paramBindings&quot;>
-        &lt;structure>
-            &lt;property name=&quot;paramName&quot;>DatabaseURL&lt;/property>
-            &lt;expression name=&quot;expression&quot;>params[&quot;DatabaseURL&quot;]&lt;/expression>
-        &lt;/structure>
-        &lt;structure>
-            &lt;property name=&quot;paramName&quot;>DatabaseUser&lt;/property>
-            &lt;expression name=&quot;expression&quot;>params[&quot;DatabaseUser&quot;]&lt;/expression>
-        &lt;/structure>
-        &lt;structure>
-            &lt;property name=&quot;paramName&quot;>DatabasePassword&lt;/property>
-            &lt;expression name=&quot;expression&quot;>params[&quot;DatabasePassword&quot;]&lt;/expression>
-        &lt;/structure>
         &lt;structure>
             &lt;property name=&quot;paramName&quot;>ForVO&lt;/property>
             &lt;expression name=&quot;expression&quot;>'ForVO'&lt;/expression>
@@ -2192,6 +2581,39 @@ else {&#xD;
                 <BaseParameterName>StartDate</BaseParameterName>
                 <ValueParameterName></ValueParameterName>
                 <SeriesParameterName>ForVOName</SeriesParameterName>
+              </Value>
+            </Action>
+          </Triggers>
+          <Triggers>
+            <Condition>onmouseover</Condition>
+            <Action>
+              <Type>Show_Tooltip</Type>
+              <Value xsi:type="attribute:TooltipValue">
+                <Text>var voname = row[&quot;VOName&quot;];&#xD;
+var metricvalue =&quot;&quot;;&#xD;
+var label;&#xD;
+var dotpos;&#xD;
+&#xD;
+if (params[&quot;DisplayMetric&quot;] == &quot;wallclock&quot;) { &#xD;
+	metricvalue = String(row[&quot;WallDuration&quot;] / 3600);&#xD;
+	label = &quot;Wallclock Hours: &quot;;&#xD;
+}&#xD;
+if (params[&quot;DisplayMetric&quot;] == &quot;process&quot;)  {&#xD;
+	metricvalue = String(row[&quot;Cpu&quot;] / 3600);&#xD;
+	label = &quot;Process Hours: &quot;;&#xD;
+} &#xD;
+if (params[&quot;DisplayMetric&quot;] == &quot;jobcount&quot;) {&#xD;
+	metricvalue = String(row[&quot;Njobs&quot;]);&#xD;
+	label = &quot;Jobs: &quot;;&#xD;
+}&#xD;
+var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
+	if(dotpos > 0)&#xD;
+	{ &#xD;
+	metricvalue = metricvalue.substring(0,dotpos+2);&#xD;
+	}&#xD;
+&#xD;
+&quot;VOName: &quot; + voname + &quot;\n&quot; + label + metricvalue</Text>
+                <Delay>200</Delay>
               </Value>
             </Action>
           </Triggers>
@@ -2248,6 +2670,11 @@ else {&#xD;
         </Insets>
         <Visible>true</Visible>
       </Label>
+      <FormatSpecifier xsi:type="attribute:NumberFormatSpecifier">
+        <Prefix></Prefix>
+        <Suffix></Suffix>
+        <FractionDigits>0</FractionDigits>
+      </FormatSpecifier>
       <LabelPosition>Left</LabelPosition>
       <MajorGrid>
         <LineAttributes>
@@ -2415,7 +2842,7 @@ else {&#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;YearMonths::yearmonth&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -2565,18 +2992,6 @@ else {&#xD;
                                     <property name="reportName">UsageByUserForDate1.rptdesign</property>
                                     <list-property name="paramBindings">
                                         <structure>
-                                            <property name="paramName">DatabaseURL</property>
-                                            <expression name="expression">params["DatabaseURL"]</expression>
-                                        </structure>
-                                        <structure>
-                                            <property name="paramName">DatabaseUser</property>
-                                            <expression name="expression">params["DatabaseUser"]</expression>
-                                        </structure>
-                                        <structure>
-                                            <property name="paramName">DatabasePassword</property>
-                                            <expression name="expression">params["DatabasePassword"]</expression>
-                                        </structure>
-                                        <structure>
                                             <property name="paramName">ForVO</property>
                                             <expression name="expression">'ForVO'</expression>
                                         </structure>
@@ -2605,28 +3020,6 @@ else {&#xD;
                                 <property name="height">600px</property>
                                 <property name="width">800px</property>
                                 <property name="refTemplateParameter">NewTemplateParameterDefinition</property>
-                                <list-property name="boundDataColumns">
-                                    <structure>
-                                        <property name="name">VOName</property>
-                                        <expression name="expression">dataSetRow["VOName"]</expression>
-                                    </structure>
-                                    <structure>
-                                        <property name="name">datevalue</property>
-                                        <expression name="expression">dataSetRow["datevalue"]</expression>
-                                    </structure>
-                                    <structure>
-                                        <property name="name">WallDuration</property>
-                                        <expression name="expression">dataSetRow["WallDuration"]</expression>
-                                    </structure>
-                                    <structure>
-                                        <property name="name">Cpu</property>
-                                        <expression name="expression">dataSetRow["Cpu"]</expression>
-                                    </structure>
-                                    <structure>
-                                        <property name="name">Njobs</property>
-                                        <expression name="expression">dataSetRow["Njobs"]</expression>
-                                    </structure>
-                                </list-property>
                                 <property name="style">sans-style1</property>
                             </extended-item>
                         </cell>
@@ -2637,6 +3030,8 @@ else {&#xD;
                         <cell id="19">
                             <property name="colSpan">3</property>
                             <property name="rowSpan">1</property>
+                            <label name="ReportURL" id="408" extends="gratia-lib1.ReportURL"/>
+                            <label name="ShowQuery" id="409" extends="gratia-lib1.ShowQuery"/>
                         </cell>
                     </row>
                 </footer>
@@ -2656,7 +3051,5 @@ else {&#xD;
                 </row>
             </footer>
         </table>
-        <label name="ReportURL" id="363" extends="gratia-lib1.ReportURL"/>
-        <label name="ShowQuery" id="364" extends="gratia-lib1.ShowQuery"/>
     </body>
 </report>
