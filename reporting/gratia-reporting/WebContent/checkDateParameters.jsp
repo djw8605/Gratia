@@ -13,7 +13,32 @@
 <link href="stylesheet.css" type="text/css" rel="stylesheet">
 <base target="reportFrame">
 <title>Gratia Accounting</title>
+
+<script type="text/javascript">
+
+var currentFramePath = findPath(self);
+
+
+function findPath(currentFrame) {
+	var path = "";
+	while (currentFrame != top) {
+		path = "." + currentFrame.name+path;
+		currentFrame = currentFrame.parent;
+	}
+	return "top" + path;
+}
+
+function displayReport(link) {
+	if (currentFramePath != 'top')
+		parent.reportFrame.location = link;
+	else
+		parent.location = link;
+}
+
+</script>
+
 </head>
+
 <body>
 
 <jsp:include page="common.jsp" />
@@ -146,7 +171,7 @@
 %>
 
 	<script type="text/javascript">
-		parent.reportFrame.location = "<%=link %>";
+		displayReport("<%=link %>");
 	</script>
 
 
