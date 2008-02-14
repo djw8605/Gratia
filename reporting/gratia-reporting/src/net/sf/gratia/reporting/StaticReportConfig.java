@@ -45,8 +45,8 @@ public class StaticReportConfig
 
 			if (statReportConfig == null)
 			{
-				String catalinaHome =  System.getProperty("catalina.home") + File.separatorChar;
-				statReportConfig = (catalinaHome + "webapps" + File.separatorChar + "gratia-reports" + File.separatorChar  + "MenuConfig"+ File.separator + "StaticReports.xml");
+				String catalinaHome =  System.getProperty("catalina.home") + "/";
+				statReportConfig = (catalinaHome + "webapps" + "/" + "gratia-reports" + "/"  + "MenuConfig" + "/" + "StaticReports.xml");
 			}
 
 			try
