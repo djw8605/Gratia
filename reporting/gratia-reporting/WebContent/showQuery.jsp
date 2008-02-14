@@ -119,7 +119,7 @@ function closeAll () {
 		// Do not put in the try/catch block the output to the screen - query and buttons
 		// in case of error they will be displayed and the user can correct the query
 		// Using document.write so:
-		// must replace ' -> \' , / -> \/  
+		// must replace ' -> \' , / -> \/
 		// and eliminate line feeds, carriage returns and multiple spaces
 
 		String sql = inSQL.replace("'", "\\'").replace("/", "\\/").replace("\n", " ").replace("\r", " ").trim();
@@ -141,20 +141,10 @@ function closeAll () {
 		}
 		sql = sb.toString();
 
-		// Construct the csv file name. Do not open any files at this point
-		// Check if on windows
 		String tempCsvPath = "";
 		String somethingUnique = "" + System.currentTimeMillis();
-		if (System.getProperty( "os.name" ).indexOf("Windows") != -1)
-		{
-			tempCsvPath = ".\\";
-			csvFileName = "gratia_report_data_" + somethingUnique + ".csv";
-		}
-		else
-		{
-			tempCsvPath = reportingConfiguration.getCsvHome();
-			csvFileName = tempCsvPath + "gratia_report_data_" + somethingUnique + ".csv";
-		}
+		tempCsvPath = reportingConfiguration.getCsvHome();
+		csvFileName = tempCsvPath + "gratia_report_data_" + somethingUnique + ".csv";
 
 		%>
 		<script type="text/javascript">
