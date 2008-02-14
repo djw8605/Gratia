@@ -98,6 +98,9 @@
 #             Removing US-T1-BNL entry.
 #   1/20/08 (John Weigand) - 
 #             Updated Normalization factor for PROD_SLAC       (1779)
+#   2/14/08 (John Weigand) - 
+#             Updated Normalization factor for AGLT2 from 2100 to 2168
+#             effective 1/1/2008.  Update for January effected 2/15.
 #    
 ##################################################################
 #-- Site  ------- SPECint2000
@@ -116,7 +119,7 @@ UCSDT2
 UCSDT2-B
 UFlorida-PG         1602
 #--- ATLAS ----
-AGLT2               2100
+AGLT2               2168
 BU_ATLAS_Tier2      1123
 BU_ATLAS_Tier2o     1624
 IU_ATLAS_Tier2       921
