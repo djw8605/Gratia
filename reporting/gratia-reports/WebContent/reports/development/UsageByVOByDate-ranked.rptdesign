@@ -3017,6 +3017,16 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
                                         </structure>
                                     </list-property>
                                 </structure>
+                                <list-property name="filter">
+                                    <structure>
+                                        <property name="operator">is-true</property>
+                                        <expression name="expr">row["YearMonths::yearmonth"] >=params["StartDate"].substring(0,7)</expression>
+                                    </structure>
+                                    <structure>
+                                        <property name="operator">is-true</property>
+                                        <expression name="expr">row["YearMonths::yearmonth"] &lt;=params["EndDate"].substring(0,7)</expression>
+                                    </structure>
+                                </list-property>
                                 <property name="height">600px</property>
                                 <property name="width">800px</property>
                                 <property name="refTemplateParameter">NewTemplateParameterDefinition</property>
