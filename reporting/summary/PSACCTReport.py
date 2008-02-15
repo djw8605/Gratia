@@ -5,7 +5,7 @@
 #
 # library to create simple report using the Gratia psacct database
 #
-#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.8 2008-02-12 21:48:34 pcanal Exp $
+#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.9 2008-02-15 23:28:43 pcanal Exp $
 
 import time
 import datetime
@@ -1276,13 +1276,45 @@ def RangeVOSiteReport(range_end = datetime.date.today(),
                         range_begin,
                         output)
 
-def GetLisOfReportingSites(begin,end):
+def GetSiteLastReportingDate(begin,recent):
+    schema = "gratia.";
+    if (recent):
+        test = ">="
+    else:
+        test = "<"
+    
+    select = """\
+select SiteName,Date(currentTime) as DateOfLastContact from (
+    select SiteName,ProbeName,max(currentTime) as currentTime from Probe, Site
+where Site.siteid = Probe.siteid and active = true group by SiteName) sub
+where currentTime """+test+"""  \"""" + DateToString(begin) + """\" order by currentTime
+       """
+    #print "Query = " + select;
+
+    return RunQueryAndSplit(select);
+
+def GetSiteLastActivity(begin):
     schema = "gratia.";
 
     select = """\
-select distinct SiteName from """+schema+"""JobUsageRecord_Report where VOName != \"Unknown\" and 
+    select * from (select SiteName, max(probeMaxTime) as siteMaxTime from
+(select ProbeName,max(EndTime) as probeMaxTime from ProbeSummary where ResourceType = \"Batch\" group by ProbeName order by probeMaxTime) sub,Probe P, Site S
+where sub.ProbeName = P.ProbeName and P.siteid = S.siteid and P.active = True
+group by S.siteid
+order by siteMaxTime) ssub where siteMaxTime < \"""" + DateToString(begin) + """\" 
+       """
+    #print "Query = " + select;
+
+    return RunQueryAndSplit(select);
+
+def GetListOfReportingSites(begin,end):
+    schema = "gratia.";
+
+    select = """\
+select distinct SiteName from """+schema+"""VOProbeSummary V,Probe P,Site S where VOName != \"Unknown\" and 
             EndTime >= \"""" + DateToString(begin) + """\" and
             EndTime < \"""" + DateToString(end) + """\"
+            and V.ProbeName = P.ProbeName and P.siteid = S.siteid
             order by SiteName
             """
     #print "Query = " + select;
@@ -1293,7 +1325,7 @@ def GetTotals(begin,end):
     schema = "gratia.";
 
     select = """\
-select sum(Njobs),sum(WallDuration),sum(CpuUserDuration+CpuSystemDuration)/sum(WallDuration) from """+schema+"""JobUsageRecord_Report where VOName != \"Unknown\" and 
+select sum(Njobs),sum(WallDuration),sum(CpuUserDuration+CpuSystemDuration)/sum(WallDuration) from """+schema+"""VOProbeSummary where VOName != \"Unknown\" and 
             EndTime >= \"""" + DateToString(begin) + """\" and
             EndTime < \"""" + DateToString(end) + """\"
             """
@@ -1312,6 +1344,7 @@ def prettyList(l):
     for name in l:
         result = result + name + ", "
     result = result + lastname
+    l.append(lastname)
     return result
 
 def RangeSummup(range_end = datetime.date.today(),
@@ -1333,13 +1366,22 @@ def RangeSummup(range_end = datetime.date.today(),
     allSites = GetListOfOSGSites();
     # Call it twice to avoid a 'bug' in wget where on of the row is missing the first few characters.
     allSites = GetListOfOSGSites();
- 
+
+    reportingSitesDate = GetSiteLastReportingDate(range_begin,True)
+    pingSites = []
+    for data in reportingSitesDate:
+        (name,lastreport) = data.split("\t")
+        pingSites.append(name)
+
     exceptionSites = ['BNL_ATLAS_1', 'BNL_ATLAS_2', 'USCMS-FNAL-WC1-CE2', 'USCMS-FNAL-WC1-CE3', 'USCMS-FNAL-WC1-CE4', 'BNL_LOCAL', 'BNL_OSG', 'BNL_PANDA', 'FNAL_CDFOSG_1', 'FNAL_CDFOSG_2', 'FNAL_CDFOSG_3', 'FNAL_CDFOSG_4', 'FNAL_DZEROOSG_1', 'FNAL_DZEROOSG_2', 'GLOW-CMS', 'UCSDT2-B']
 
 
     allSites = [name for name in allSites if name not in exceptionSites]
-    reportingSites = GetLisOfReportingSites(range_begin,range_end);
-    missingSites = [name for name in allSites if name not in reportingSites]
+    reportingSites = GetListOfReportingSites(range_begin,range_end);
+
+    missingSites = [name for name in allSites if name not in reportingSites and name not in pingSites]
+    emptySites = [name for name in allSites if name not in reportingSites and name in pingSites]
+    
     extraSites = [name for name in reportingSites if name not in allSites]
     knownExtras = [name for name in extraSites if name in exceptionSites]
     extraSites = [name for name in extraSites if name not in exceptionSites]
@@ -1370,6 +1412,9 @@ def RangeSummup(range_end = datetime.date.today(),
     n = len(missingSites);
     print prettyInt(n)+" registered sites have NOT reported ("+niceNum(n*100/len(allSites),1)+"% of OSG Sites)"
 
+    n = len(emptySites);
+    print prettyInt(n)+" registered sites have reported but have no activity ("+niceNum(n*100/len(allSites),1)+"% of OSG Sites)"
+
     print
     
     n = len(extraSites);
@@ -1381,9 +1426,108 @@ def RangeSummup(range_end = datetime.date.today(),
     #print "\nThe reporting sites are:\n"+prettyList(reportingSites)
     #print "\nThe registered sites are:\n"+prettyList(allSites)
     
+    print "\nThe sites with no activity are: \n"+prettyList(emptySites);
     print "\nThe non reporting sites are: \n"+prettyList(missingSites);
     print "\nThe sanctioned non registered sites are: \n"+prettyList(knownExtras)
     print "\nThe non registered sites are: \n"+prettyList(extraSites)
     print "\n"
+    return missingSites
+
+def NonReportingSites(
+                when = datetime.date.today(),
+                output = "text",
+                header = True):
+
+    print "This reports indicates which sites Gratia has heard from or have known activity\nsince %s (midnight central time)\n" % ( DateToString(when,False) )
+
+    allSites = GetListOfOSGSites();
+    # Call it twice to avoid a 'bug' in wget where on of the row is missing the first few characters.
+    allSites = GetListOfOSGSites();
+ 
+    exceptionSites = ['BNL_ATLAS_1', 'BNL_ATLAS_2', 'USCMS-FNAL-WC1-CE2', 'USCMS-FNAL-WC1-CE3', 'USCMS-FNAL-WC1-CE4', 'BNL_LOCAL', 'BNL_OSG', 'BNL_PANDA', 'FNAL_CDFOSG_1', 'FNAL_CDFOSG_2', 'FNAL_CDFOSG_3', 'FNAL_CDFOSG_4', 'FNAL_DZEROOSG_1', 'FNAL_DZEROOSG_2', 'GLOW-CMS', 'UCSDT2-B']
+
+
+    allSites = [name for name in allSites if name not in exceptionSites]
+    reportingSitesDate = GetSiteLastReportingDate(when,True)
+    stoppedSitesDate = GetSiteLastReportingDate(when,False)
+    activitySitesDate = GetSiteLastActivity(when);
+
+    reportingSites = []
+    stoppedSites = []
+    dates = {}
+    for data in reportingSitesDate:
+        (name,lastreport) = data.split("\t")
+        reportingSites.append(name)
+        dates[name] = lastreport
+    for data in stoppedSitesDate:
+        (name,lastreport) = data.split("\t")
+        dates[name] = lastreport
+        stoppedSites.append(name);
+
+    stoppedSites = [name for name in stoppedSites if name in allSites]
+    missingSites = [name for name in allSites if name not in reportingSites and name not in stoppedSites]
+    extraSites = [name for name in reportingSites if name not in allSites]
+    knownExtras = [name for name in extraSites if name in exceptionSites]
+    extraSites = [name for name in extraSites if name not in exceptionSites]
+
+    #print allSites
+    #print reportingSites
+    #print missingSites
+    #print extraSites
+    print "As of "+DateToString(datetime.date.today(),False) +", there are "+prettyInt(len(allSites))+" registered OSG sites"
+
+    n = len(reportingSites)
+    ne = len(knownExtras);
+    print prettyInt(n)+" sites reported (including "+prettyInt(ne)+" sanctioned non registered sites)\n"
+
+    n = len(reportingSites)-len(extraSites)-len(knownExtras)
+    print prettyInt(n)+" registered sites reported ("+niceNum(n*100/len(allSites),1)+"% of OSG Sites)"
+
+    n = len(stoppedSites)
+    print prettyInt(n)+" registered sites have stopped reporting ("+niceNum(n*100/len(allSites),1)+"% of OSG Sites)"
+    
+    n = len(missingSites);
+    print prettyInt(n)+" registered sites have never reported ("+niceNum(n*100/len(allSites),1)+"% of OSG Sites)"
+
+    print
+    
+    n = len(extraSites);
+    print prettyInt(n)+" non-sanctioned non-registered sites reported (might indicate a discrepancy between VORS and Gratia)"
+
+    n = len(knownExtras);
+    print prettyInt(n)+" sanctioned non-registered sites reported"
+
+    #print "\nThe reporting sites are:\n"+prettyList(reportingSites)
+    #print "\nThe registered sites are:\n"+prettyList(allSites)
+    
+    print "\nThe sanctioned non registered sites are: \n"+prettyList(knownExtras)
+    print "\nThe non registered sites are: \n"+prettyList(extraSites)
+
+    print "\nThe non reporting sites are: " # \n"+prettyList(missingSites)
+    for name in missingSites:
+        if len(name)>15:
+            delim = "\t"
+        else:
+            delim = "\t\t"
+        if not dates.has_key(name):
+            print name+" :"+delim+"never reported or inactive"
+    for data in stoppedSitesDate:        
+        (name,lastreport) = data.split("\t")
+        if len(name)>15:
+            delim = "\t"
+        else:
+            delim = "\t\t"
+        print name+":"+delim+lastreport
+
+    print "\nThe sites with no (known) recent activity:"
+    for data in activitySitesDate:
+        (name,lastreport) = data.split("\t")
+        if len(name)>15:
+            delim = "\t"
+        else:
+            delim = "\t\t"
+        print name+":"+delim+lastreport
+        
+            
     return missingSites
 
