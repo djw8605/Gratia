@@ -7,7 +7,7 @@
 # Script to transfer the data from Gratia to APEL (WLCG)
 ########################################################################
 #
-#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: LCG.py,v 1.9 2007-11-02 13:57:43 jgweigand Exp $
+#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: LCG.py,v 1.10 2008-02-19 14:27:13 jgweigand Exp $
 #
 #
 ########################################################################
@@ -33,6 +33,13 @@
 #
 # 9/12/07 (John Weigand)
 #   Fixed a problem when an empty set is returned from the query.
+#
+# 2/19/08 (John Weigand)
+#   Due to the length of time it was taking to collect data on the 
+#   'Unknown' VOs, added an extra set of methods to determine the 
+#   'Unknown' VOs for all sites and only process those.  This reduces
+#   the duration significantly.
+# 
 # 
 ########################################################################
 import traceback
@@ -600,7 +607,7 @@ from
 where 
       Site.SiteName = "%s"
   and Site.siteid   = Probe.siteid 
-  and Probe.ProbeName  = M.ProbeName 
+  and Probe.probeid  = M.probeid 
   and M.dbid           = R.dbid
   and R.VOName = "Unknown"
   and "%s" <= R.EndTime and R.EndTime < "%s"
@@ -610,6 +617,59 @@ group by ExecutingSite,
 """ % (vos,strNormalization,strNormalization,fmtMonth,fmtYear,fmtDate,fmtDate,strNormalization,site,strBegin,strEnd,percent,vos,percent)
     return query
 
+#-----------------------------------------------
+def FindSitesWithUnknownVOs(vos,gDatabaseParameters):
+  """ Finds the sites with an 'Unknown' VO name and UNIX account like the
+      'vos' variable, specifically  'atlas' at this point.
+
+      Due to the length of time when the query was performed for every site
+      in the lcg-reportableSites table, this is an attempt to make one pass
+      at seeing the sites the individual query must be performed for. 
+      This is a bandaid.
+  """
+
+  query = GetQuerySitesWithUnknownVOs(vos)
+  Logit("Checking for Unknown VOs with '%s'-like account:" % vos)
+  LogToFile(query)
+  results = RunGratiaQuery(query,gDatabaseParameters)
+  sites = results.split("\n")
+  return sites
+
+  
+#-----------------------------------------------
+def GetQuerySitesWithUnknownVOs(vos):
+    """ Creates the SQL query DML statement for the Gratia database 
+        This query looks to find the sites with an 'Unknown' VO name
+        with an 'atlas' like UNIX account.  
+
+        Due to the length of time when the query was performed for every site
+        in the lcg-reportableSites table, this is an attempt to make one pass
+        at seeing the sites the individual query must be performed for. 
+        This is a bandaid.
+    """
+    
+    begin,end = SetQueryDates()
+    strBegin =  DateToString(begin)
+    strEnd   =  DateToString(end)
+    percent  = "%"
+    query="""\
+SELECT STRAIGHT_JOIN
+  DISTINCT(Site.SiteName)
+from
+     JobUsageRecord R,
+     JobUsageRecord_Meta M,
+     Probe,
+     Site
+where
+      "%s" <= R.EndTime and R.EndTime < "%s"
+  and R.VOName      = "Unknown"
+  and R.LocalUserid like "%s%s%s"  
+  and R.dbid        = M.dbid
+  and M.probeid     = Probe.probeid
+  and Probe.siteid  = Site.siteid
+""" % (strBegin,strEnd,percent,vos,percent)
+
+    return query
 
 #-----------------------------------------------
 def RunGratiaQuery(select,params):
@@ -812,8 +872,13 @@ def main(argv=None):
     #--- query gratia for Unknown VOs and create updates (appending them ----
     unknowns = ""
     firstTime = 1
-    sites = ReportableSites.keys()
+    sites = FindSitesWithUnknownVOs("atlas",gDatabaseParameters)
     for site in sites:
+      if ReportableSites.has_key(site):
+        Logit("Site(%s) is LCG reportable." % site)
+      else:
+        Logit("Site(%s) is not LCG reportable." % site)
+        continue
       normalizationFactor = ReportableSites[site]
       unknown_query = GetQueryAtlasUnknowns(site,normalizationFactor,"atlas")
       if firstTime:
@@ -827,11 +892,12 @@ def main(argv=None):
       gSitesWithUnknowns.append(site)
       unknowns = unknowns + unknown_results + "\n"
 
+
     #--- update the APEL accounting database ----
     Logit("Sites with no data: %s" % gSitesWithNoData)
     Logit("Sites with Atlas unknown VOs: %s" % gSitesWithUnknowns)
     if len(output) == 0:
-      if len(unknown) == 0:
+      if len(unknowns) == 0:
         raise Exception("No updates to apply")
     CreateLCGsql(output,GetFileName("sql"))
     CreateLCGsqlUnknownUpdates(unknowns,GetFileName("sql"))
