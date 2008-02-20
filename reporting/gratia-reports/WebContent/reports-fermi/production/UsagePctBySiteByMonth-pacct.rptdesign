@@ -257,7 +257,7 @@
                     <property name="nativeDataType">3</property>
                 </structure>
             </list-property>
-            <property name="queryText">select   S.SiteName,date_format(N.EndTime,'%Y-%m') as datevalue,
+            <property name="queryText">select   S.SiteName,date_format(N.EndTime, '%Y-%m') as datevalue,
 sum(N.CpuSystemTime)*N.BenchmarkScore/1000/86400 as cpusystembenchdays, sum(CpuUserTime)*N.BenchmarkScore/1000/86400 as cpuuserbenchdays,
 count(distinct N.Node), N.BenchmarkScore,N.CpuCount, N.HostDescription, count(distinct N.Node)*N.BenchmarkScore*N.DaysInMonth*N.CpuCount/1000 as availablebenchdays,
 count(distinct N.Node)*N.BenchmarkScore*N.DaysInMonth*N.CpuCount*.5/1000 as halfavailablebenchdays
@@ -266,9 +266,8 @@ where P.siteid = S.siteid and N.ProbeName = P.ProbeName
 and S.SiteName like ?
 and date_format(N.EndTime,'%Y-%m') >= ?
 and date_format(N.EndTime,'%Y-%m') &lt;= ?
-
-group by S.SiteName,  date_format(N.EndTime,'%Y-%m'), BenchmarkScore
-order by S.SiteName, date_format(N.EndTime,'%Y-%m'), BenchmarkScore
+group by S.SiteName,  datevalue, BenchmarkScore
+order by S.SiteName, datevalue, BenchmarkScore
 </property>
             <xml-property name="designerValues"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <model:DesignValues xmlns:design="http://www.eclipse.org/datatools/connectivity/oda/design" xmlns:model="http://www.eclipse.org/birt/report/model/adapter/odaModel">

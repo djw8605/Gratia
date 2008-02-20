@@ -1570,7 +1570,7 @@ function beforeGeneration(chart, icsc)
           </Triggers>
           <Markers>
             <Type>Box</Type>
-            <Size>2</Size>
+            <Size>0</Size>
             <Visible>true</Visible>
           </Markers>
           <LineAttributes>
@@ -1828,7 +1828,7 @@ function beforeGeneration(chart, icsc)
           </Triggers>
           <Markers>
             <Type>Box</Type>
-            <Size>2</Size>
+            <Size>0</Size>
             <Visible>true</Visible>
           </Markers>
           <LineAttributes>
