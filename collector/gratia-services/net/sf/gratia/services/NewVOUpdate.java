@@ -90,10 +90,16 @@ public class NewVOUpdate
          if (icount > 0)
             return;
          //
-         // otherwise get facilityid for sitename
+         // Otherwise check for an existing entry for this VO to put in a default mapping
          //
+         String votablekey;
+         if (voname.startsWith("/")) { // FQAN -- use ReportableVOName for default instead
+             votablekey = reportablevoname;
+         } else {
+             votablekey = voname;
+         }
 
-         command = "select VOid from VO where VOName = " + dq + voname + dq; // Case INsensitive match.
+         command = "select VOid from VO where VOName = " + dq + votablekey + dq;
          statement = connection.prepareStatement(command);
          resultSet = statement.executeQuery(command);
          while (resultSet.next())
@@ -103,15 +109,15 @@ public class NewVOUpdate
          resultSet.close();
          statement.close();
          //
-         // if facilityid == -1 it doesn't exist - add it to Site table 
+         // if VOid == -1 it doesn't exist - add it to VO table 
          //
          if (VOid == -1)
          {
-            command = "insert into VO(VOName) values(" + dq + voname + dq + ")";
+            command = "insert into VO(VOName) values(" + dq + votablekey + dq + ")";
             statement = connection.createStatement();
             statement.executeUpdate(command);
             statement.close();
-            command = "select VOid from VO where VOName = " + dq + voname + dq; // Case INsensitive match.
+            command = "select VOid from VO where VOName = " + dq + votablekey + dq;
             statement = connection.prepareStatement(command);
             resultSet = statement.executeQuery(command);
             while (resultSet.next())
@@ -122,7 +128,7 @@ public class NewVOUpdate
             statement.close();
          }
          //
-         // now add a new entry to ceprobes with default values
+         // now add a new entry to VONameCorrection with default values
          //
          command =
                "insert into VONameCorrection(VOid,VOName,ReportableVOName) values(" +
