@@ -37,7 +37,7 @@
                     <structure>
                         <property name="position">2</property>
                         <property name="name">datevalue</property>
-                        <property name="dataType">date</property>
+                        <property name="dataType">string</property>
                     </structure>
                     <structure>
                         <property name="position">3</property>
@@ -118,8 +118,8 @@
                     <property name="position">2</property>
                     <property name="name">datevalue</property>
                     <property name="nativeName">datevalue</property>
-                    <property name="dataType">date</property>
-                    <property name="nativeDataType">91</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
                 </structure>
                 <structure>
                     <property name="position">3</property>
@@ -178,7 +178,7 @@
                     <property name="nativeDataType">3</property>
                 </structure>
             </list-property>
-            <property name="queryText">select   S.SiteName,str_to_date(date_format(N.EndTime, '%x-%v Monday'), '%x-%v %W') as datevalue,
+            <property name="queryText">select   S.SiteName,date_format(str_to_date(date_format(N.EndTime, '%x-%v Monday'), '%x-%v %W'), '%Y-%m-%d') as datevalue,
 sum(N.CpuSystemTime)*N.BenchmarkScore/1000/86400 as cpusystembenchdays, sum(CpuUserTime)*N.BenchmarkScore/1000/86400 as cpuuserbenchdays,
 count(distinct N.Node), N.BenchmarkScore,N.CpuCount, N.HostDescription, count(distinct N.Node)*N.BenchmarkScore*N.DaysInMonth*N.CpuCount/1000 as availablebenchdays,
 count(distinct N.Node)*N.BenchmarkScore*N.DaysInMonth*N.CpuCount*.5/1000 as halfavailablebenchdays
@@ -382,7 +382,7 @@ order by S.SiteName, datevalue, BenchmarkScore
                 </row>
             </header>
             <group id="18">
-                <property name="groupName">NewTableGroup1</property>
+                <property name="groupName">SiteNameGroup</property>
                 <property name="interval">none</property>
                 <property name="sortDirection">asc</property>
                 <expression name="keyExpr">row["SiteName"]</expression>
@@ -417,7 +417,7 @@ order by S.SiteName, datevalue, BenchmarkScore
                 </footer>
             </group>
             <group id="106">
-                <property name="groupName">NewTableGroup2</property>
+                <property name="groupName">DateGroup</property>
                 <property name="interval">none</property>
                 <property name="sortDirection">asc</property>
                 <expression name="keyExpr">row["datevalue"]</expression>
@@ -453,7 +453,7 @@ order by S.SiteName, datevalue, BenchmarkScore
                 </footer>
             </group>
             <group id="116">
-                <property name="groupName">NewTableGroup3</property>
+                <property name="groupName">CPUTypeGroup</property>
                 <property name="interval">none</property>
                 <property name="sortDirection">asc</property>
                 <expression name="keyExpr">row["HostDescription"]</expression>
