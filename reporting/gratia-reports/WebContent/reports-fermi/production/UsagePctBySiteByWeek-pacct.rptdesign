@@ -259,13 +259,13 @@
             </list-property>
             <property name="queryText">select   S.SiteName,str_to_date(date_format(N.EndTime, '%x-%v Monday'), '%x-%v %W') as datevalue,
 sum(N.CpuSystemTime)*N.BenchmarkScore/1000/86400 as cpusystembenchdays, sum(CpuUserTime)*N.BenchmarkScore/1000/86400 as cpuuserbenchdays,
-count(distinct N.Node), N.BenchmarkScore,N.CpuCount, N.HostDescription, count(distinct N.Node)*N.BenchmarkScore*N.DaysInMonth*N.CpuCount/1000 as availablebenchdays,
+count(distinct N.Node), N.BenchmarkScore,N.CpuCount, N.HostDescription, count(distinct N.Node)*N.BenchmarkScore*7*N.CpuCount/1000 as availablebenchdays,
 count(distinct N.Node)*N.BenchmarkScore*N.DaysInMonth*N.CpuCount*.5/1000 as halfavailablebenchdays
 from NodeSummary N, Probe P, Site S
 where P.siteid = S.siteid and N.ProbeName = P.ProbeName
 and S.SiteName like ?
-and date_format(N.EndTime,'%Y-%m-%d') >= ?
-and date_format(N.EndTime,'%Y-%m-%d') &lt;= ?
+and N.EndTime >= ?
+and N.EndTime &lt;= ?
 group by S.SiteName,  datevalue, BenchmarkScore
 order by S.SiteName, datevalue, BenchmarkScore
 </property>
