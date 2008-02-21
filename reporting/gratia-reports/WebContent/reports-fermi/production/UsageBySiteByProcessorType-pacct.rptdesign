@@ -89,7 +89,7 @@
                     <property name="dataType">any</property>
                     <property name="nativeDataType">12</property>
                     <property name="position">1</property>
-                    <expression name="defaultValue">'2007-01'</expression>
+                    <expression name="defaultValue">'2008-01-01'</expression>
                     <property name="isOptional">false</property>
                     <property name="isInput">true</property>
                     <property name="isOutput">false</property>
@@ -100,7 +100,7 @@
                     <property name="dataType">any</property>
                     <property name="nativeDataType">12</property>
                     <property name="position">2</property>
-                    <expression name="defaultValue">'2007-12'</expression>
+                    <expression name="defaultValue">'2008-02-01'</expression>
                     <property name="isOptional">false</property>
                     <property name="isInput">true</property>
                     <property name="isOutput">false</property>
@@ -184,8 +184,8 @@ count(distinct N.Node), N.BenchmarkScore,N.CpuCount, N.HostDescription, count(di
 count(distinct N.Node)*N.BenchmarkScore*N.DaysInMonth*N.CpuCount*.5/1000 as halfavailablebenchdays
 from NodeSummary N, Probe P, Site S
 where P.siteid = S.siteid and N.ProbeName = P.ProbeName
-and date_format(N.EndTime,'%Y-%m-%d') >= ?
-and date_format(N.EndTime,'%Y-%m-%d') &lt;= ?
+and N.EndTime >= ?
+and N.EndTime &lt;= ?
 group by S.SiteName,  datevalue, BenchmarkScore
 order by S.SiteName, datevalue, BenchmarkScore
 </property>
@@ -203,7 +203,7 @@ order by S.SiteName, datevalue, BenchmarkScore
       </design:attributes>
       <design:inputAttributes>
         <design:elementAttributes>
-          <design:defaultScalarValue>2007-12</design:defaultScalarValue>
+          <design:defaultScalarValue>2008-02-01</design:defaultScalarValue>
           <design:optional>false</design:optional>
         </design:elementAttributes>
       </design:inputAttributes>
@@ -467,15 +467,7 @@ order by S.SiteName, datevalue, BenchmarkScore
                 <property name="pageBreakInside">auto</property>
                 <header>
                     <row id="117">
-                        <cell id="118">
-                            <data id="125">
-                                <property name="style">sans-style1</property>
-                                <property name="paddingTop">1pt</property>
-                                <property name="paddingLeft">5pt</property>
-                                <property name="paddingRight">1pt</property>
-                                <property name="resultSetColumn">HostDescription</property>
-                            </data>
-                        </cell>
+                        <cell id="118"/>
                         <cell id="119"/>
                         <cell id="120"/>
                     </row>
@@ -490,7 +482,19 @@ order by S.SiteName, datevalue, BenchmarkScore
             </group>
             <detail>
                 <row id="27">
-                    <cell id="28"/>
+                    <cell id="28">
+                        <text-data id="139">
+                            <expression name="valueExpr">var hostdesc;
+hostdesc = row["HostDescription"].substring(7);
+hostdesc = hostdesc.replace("CPU","");
+hostdesc = hostdesc.replace("Processor","");
+hostdesc = hostdesc.replace("(TM)","");
+hostdesc = hostdesc.replace("(tm)","");
+hostdesc = hostdesc.replace("(R)","");
+hostdesc = hostdesc.replace("'","");</expression>
+                            <property name="contentType">html</property>
+                        </text-data>
+                    </cell>
                     <cell id="29">
                         <data id="100">
                             <property name="style">sans-style1</property>
