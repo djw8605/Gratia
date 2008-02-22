@@ -108,9 +108,9 @@ public class MetricRecordLoader implements RecordLoader
             {
                SetPerformanceData(job, sub);
             }
-            else if (sub.getName().equalsIgnoreCase("VOName"))
+            else if (sub.getName().equalsIgnoreCase("VoName"))
             {
-               SetVOName(job, sub);
+               SetVoName(job, sub);
             }
             else if (sub.getName().equalsIgnoreCase("SamUploadFlag"))
             {
@@ -415,14 +415,14 @@ public class MetricRecordLoader implements RecordLoader
       job.setPerformanceData(el);
    }
 
-   public static void SetVOName(MetricRecord job, Element element)
+   public static void SetVoName(MetricRecord job, Element element)
             throws Exception
    {
-      StringElement el = job.getVOName();
+      StringElement el = job.getVoName();
       if (el != null /* Vo name already set */)
       {
-         Utils.GratiaError("SetVOName", "parsing",
-                                    " found a second VOName field in the xml file", false);
+         Utils.GratiaError("SetVoName", "parsing",
+                                    " found a second VoName field in the xml file", false);
          return;
       }
       el = new StringElement();
@@ -435,7 +435,7 @@ public class MetricRecordLoader implements RecordLoader
          }
       }
       el.setValue(element.getText());
-      job.setVOName(el);
+      job.setVoName(el);
    }
 
    public static void SetSamUploadFlag(MetricRecord job, Element element)
@@ -457,7 +457,7 @@ public class MetricRecordLoader implements RecordLoader
             el.setDescription(a.getValue());
          }
       }
-      el.setValue((new Long(element.getText())).longValue());
+      el.setValue((new Long(element.getText())).longValue()); 
       job.setSamUploadFlag(el);
    }
 

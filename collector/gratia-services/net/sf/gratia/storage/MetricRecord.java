@@ -42,8 +42,8 @@ public class MetricRecord implements Record
     
    // The name of the metric. this be of the format <SERVICE>-<METRIC>
    private StringElement MetricName;   
-
    private StringElement MetricType; // Type of metric:status/peformance
+
    // A return status code (See https://twiki.cern.ch/twiki/bin/view/LCG/
    //         GridMonitoringProbeSpecification#Status_and_Performance_Metrics)
    private StringElement MetricStatus; 
@@ -61,7 +61,7 @@ public class MetricRecord implements Record
    private StringElement DetailsData;   // Details of Status probe output
    private StringElement PerformanceData;// Details of Performance probe output
 
-   private StringElement VOName;     // Details of VO for the proxy 
+   private StringElement VoName;     // Details of VO for the proxy 
 
    private IntegerElement SamUploadFlag;// Details of External (SAM) 
                                         //      Upload Status
@@ -96,7 +96,7 @@ public class MetricRecord implements Record
       output = output + "summaryData: " + SummaryData + "\n";
       output = output + "detailsData: " + DetailsData + "\n";
       output = output + "performanceData: " + PerformanceData + "\n";
-      output = output + "voName: " + VOName + "\n";
+      output = output + "voName: " + VoName + "\n";
       output = output + "samUploadFlag: " + SamUploadFlag + "\n";
       output = output + "hostName: " + HostName + "\n";
       return output;
@@ -120,7 +120,7 @@ public class MetricRecord implements Record
       if (SummaryData != null) output = output + SummaryData.asXml("SummaryData");
       if (DetailsData != null) output = output + DetailsData.asXml("DetailsData");
       if (PerformanceData != null) output = output + PerformanceData.asXml("PerformanceData");
-      if (VOName != null) output = output + VOName.asXml("VOName");
+      if (VoName != null) output = output + VoName.asXml("VoName");
       if (SamUploadFlag != null) output = output + SamUploadFlag.asXml("SamUploadFlag");
       if (HostName != null) output = output + HostName.asXml("HostName");
       output = output + ("</MetricRecord>\n");
@@ -360,14 +360,14 @@ public class MetricRecord implements Record
       return PerformanceData;
    }
 
-   public void setVOName(StringElement VOName)
+   public void setVoName(StringElement VoName)
    {
-      this.VOName = VOName;
+      this.VoName = VoName;
    }
 
-   public StringElement getVOName()
+   public StringElement getVoName()
    {
-      return VOName;
+      return VoName;
    }
 
    public void setSamUploadFlag(IntegerElement SamUploadFlag)
