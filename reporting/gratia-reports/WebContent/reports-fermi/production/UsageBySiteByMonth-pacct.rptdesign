@@ -738,6 +738,13 @@ order by S.SiteName, date_format(N.EndTime,'%Y-%m'), BenchmarkScore
 
 function beforeGeneration(chart, icsc)
 {
+rep = icsc.getExternalContext().getScriptable();
+	rep = icsc.getExternalContext().getScriptable();
+
+	rep_title = rep.getParameterValue(&quot;ReportTitle&quot;);
+	rep_subtitle = rep.getParameterValue(&quot;ReportSubtitle&quot;);
+	chart.getTitle().getLabel().getCaption().setValue(rep_title + &quot;\n&quot; + rep_subtitle);
+
 }</Script>
   <Units>Points</Units>
   <SeriesThickness>10.0</SeriesThickness>
@@ -2167,6 +2174,7 @@ function beforeGeneration(chart, icsc)
                         <cell id="19">
                             <property name="colSpan">3</property>
                             <property name="rowSpan">1</property>
+                            <label name="ReportURL" id="392" extends="gratia-lib1.ReportURL"/>
                         </cell>
                     </row>
                 </footer>
