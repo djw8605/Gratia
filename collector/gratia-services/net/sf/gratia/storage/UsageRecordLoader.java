@@ -226,18 +226,23 @@ public class UsageRecordLoader implements RecordLoader {
 
     public static KeyInfoType genKeyInfo(Element element) throws Exception {
         KeyInfoType info = new KeyInfoType();
-        for (Iterator i = element.attributeIterator(); i.hasNext();) {
-            Attribute a = (Attribute) i.next();
-            if (a.getName().equalsIgnoreCase("Id")) {
-                info.setId(a.getValue());
+        if (element.getName().equalsIgnoreCase("DN")) { // New DN element
+            info.setId(null);
+            info.setContent(element.getText());
+        } else { // Real KeyInfo block
+            for (Iterator i = element.attributeIterator(); i.hasNext();) {
+                Attribute a = (Attribute) i.next();
+                if (a.getName().equalsIgnoreCase("Id")) {
+                    info.setId(a.getValue());
+                }
             }
+            String keyContent = "";
+            for (Iterator i = element.elementIterator(); i.hasNext();) {
+                Element sub = (Element) i.next();
+                keyContent = keyContent + "\t" + sub.asXML();
+            }
+            info.setContent(keyContent);
         }
-        String keyContent = "";
-        for (Iterator i = element.elementIterator(); i.hasNext();) {
-            Element sub = (Element) i.next();
-            keyContent = keyContent + "\t" + sub.asXML();
-        }
-        info.setContent(keyContent);
         return info;
     }
 
@@ -264,6 +269,11 @@ public class UsageRecordLoader implements RecordLoader {
                     id = new UserIdentity();
                 id.setLocalUserId(sub.getText());
             } else if (sub.getName().equalsIgnoreCase("KeyInfo")) {
+                if (id == null)
+                    id = new UserIdentity();
+                if (id.getKeyInfo() == null) // Subordinate to DN field
+                    id.setKeyInfo(genKeyInfo(sub));
+            } else if (sub.getName().equalsIgnoreCase("DN")) {
                 if (id == null)
                     id = new UserIdentity();
                 id.setKeyInfo(genKeyInfo(sub));

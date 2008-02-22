@@ -45,11 +45,16 @@ public class KeyInfoType {
 
     public String asXML() {
         if (Id == null && Content == null) return "";
-        String output = "<ds:KeyInfo xmlns:ds=\"http://www.w3.org/2000/09/xmldsig#\" ";
-        if (Id != null) output = output + "Id=\""+Id+"\" ";
-        output = output + ">\n";
-        if (Content != null) output = output + Content;
-        output = output + "\n</ds:KeyInfo>\n";
+        String output;
+        if (Content != null && Content.startsWith("/")) { // Straight DN
+            output = "<DN>" + Content + "</DN>";
+        } else {
+            output = "<ds:KeyInfo xmlns:ds=\"http://www.w3.org/2000/09/xmldsig#\" ";
+            if (Id != null) output = output + "Id=\""+Id+"\" ";
+            output = output + ">\n";
+            if (Content != null) output = output + Content;
+            output = output + "\n</ds:KeyInfo>\n";
+        }
         return output;
     }
 }
