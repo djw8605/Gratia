@@ -7,6 +7,7 @@
     <text-property name="displayName">Chart &amp; Listing</text-property>
     <property name="iconFile">/templates/chart_listing.gif</property>
     <property name="cheatSheet">org.eclipse.birt.report.designer.ui.cheatsheet.chartlisting</property>
+    <property name="eventHandlerClass">net.sf.gratia.reporting.GratiaBirtReportEH</property>
     <list-property name="libraries">
         <structure>
             <property name="fileName">gratia-lib1.rptlibrary</property>
@@ -86,7 +87,7 @@
                 </scalar-parameter>
             </parameters>
         </parameter-group>
-        <scalar-parameter name="SelectSiteName" id="218" extends="gratia-lib1.SelectSiteName"/>
+        <parameter-group name="ReportInfo1" id="220" extends="gratia-lib1.ReportInfo"/>
     </parameters>
     <data-sources>
         <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="fermigrid1" id="69">
@@ -155,20 +156,12 @@
             <property name="dataSource">fermigrid1</property>
             <list-property name="parameters">
                 <structure>
-                    <property name="name">SiteName</property>
-                    <property name="dataType">any</property>
-                    <property name="position">1</property>
-                    <expression name="defaultValue">"FNAL_CDFOSG_1"</expression>
-                    <property name="isInput">true</property>
-                    <property name="isOutput">false</property>
-                </structure>
-                <structure>
                     <property name="name">StartDate</property>
                     <property name="nativeName"></property>
                     <property name="dataType">any</property>
                     <property name="nativeDataType">12</property>
-                    <property name="position">2</property>
-                    <expression name="defaultValue">'2007-01'</expression>
+                    <property name="position">1</property>
+                    <expression name="defaultValue">'2007-01-01'</expression>
                     <property name="isOptional">false</property>
                     <property name="isInput">true</property>
                     <property name="isOutput">false</property>
@@ -177,9 +170,9 @@
                     <property name="name">EndDate</property>
                     <property name="nativeName"></property>
                     <property name="dataType">any</property>
-                    <property name="nativeDataType">12</property>
-                    <property name="position">3</property>
-                    <expression name="defaultValue">'2007-12'</expression>
+                    <property name="nativeDataType">0</property>
+                    <property name="position">2</property>
+                    <expression name="defaultValue">'2007-12-31'</expression>
                     <property name="isOptional">false</property>
                     <property name="isInput">true</property>
                     <property name="isOutput">false</property>
@@ -263,7 +256,6 @@ count(distinct N.Node), N.BenchmarkScore,N.CpuCount, N.HostDescription, count(di
 count(distinct N.Node)*N.BenchmarkScore*N.DaysInMonth*N.CpuCount*.5/1000 as halfavailablebenchdays
 from NodeSummary N, Probe P, Site S
 where P.siteid = S.siteid and N.ProbeName = P.ProbeName
-and S.SiteName like ?
 and date_format(N.EndTime,'%Y-%m') >= ?
 and date_format(N.EndTime,'%Y-%m') &lt;= ?
 group by S.SiteName,  datevalue, BenchmarkScore
@@ -278,27 +270,11 @@ order by S.SiteName, datevalue, BenchmarkScore
       <design:attributes>
         <design:name></design:name>
         <design:position>2</design:position>
-        <design:nativeDataTypeCode>12</design:nativeDataTypeCode>
         <design:nullability>Unknown</design:nullability>
       </design:attributes>
       <design:inputAttributes>
         <design:elementAttributes>
-          <design:defaultScalarValue>2007-01</design:defaultScalarValue>
-          <design:optional>false</design:optional>
-        </design:elementAttributes>
-      </design:inputAttributes>
-    </design:parameterDefinitions>
-    <design:parameterDefinitions>
-      <design:inOutMode>In</design:inOutMode>
-      <design:attributes>
-        <design:name></design:name>
-        <design:position>3</design:position>
-        <design:nativeDataTypeCode>12</design:nativeDataTypeCode>
-        <design:nullability>Unknown</design:nullability>
-      </design:attributes>
-      <design:inputAttributes>
-        <design:elementAttributes>
-          <design:defaultScalarValue>2007-12</design:defaultScalarValue>
+          <design:defaultScalarValue>2007-12-31</design:defaultScalarValue>
           <design:optional>false</design:optional>
         </design:elementAttributes>
       </design:inputAttributes>
@@ -360,10 +336,6 @@ order by S.SiteName, datevalue, BenchmarkScore
             <property name="width">100%</property>
             <property name="dataSet">UsageBySiteByMonth</property>
             <list-property name="paramBindings">
-                <structure>
-                    <property name="paramName">SiteName</property>
-                    <expression name="expression">params["SelectSiteName"]</expression>
-                </structure>
                 <structure>
                     <property name="paramName">StartDate</property>
                     <expression name="expression">params["StartDate"]</expression>
@@ -447,7 +419,7 @@ order by S.SiteName, datevalue, BenchmarkScore
                 <property name="repeatHeader">true</property>
                 <property name="hideDetail">false</property>
                 <property name="pageBreakAfter">auto</property>
-                <property name="pageBreakBefore">auto</property>
+                <property name="pageBreakBefore">always-excluding-first</property>
                 <property name="pageBreakInside">auto</property>
                 <header>
                     <row id="15">
@@ -457,7 +429,7 @@ order by S.SiteName, datevalue, BenchmarkScore
                             <property name="textAlign">center</property>
                             <text-data id="219">
                                 <property name="style">sans-style1</property>
-                                <expression name="valueExpr">"Site: "+ params["SelectSiteName"]</expression>
+                                <expression name="valueExpr">"Site: "+ row["SiteName"]</expression>
                                 <property name="contentType">html</property>
                             </text-data>
                             <extended-item extensionName="Chart" name="NewChart" id="187">
@@ -701,8 +673,8 @@ order by S.SiteName, datevalue, BenchmarkScore
     <Bounds>
       <Left>0.0</Left>
       <Top>0.0</Top>
-      <Width>450.0</Width>
-      <Height>420.0</Height>
+      <Width>600.0</Width>
+      <Height>450.0</Height>
     </Bounds>
     <Insets>
       <Top>3.0</Top>
@@ -736,6 +708,12 @@ order by S.SiteName, datevalue, BenchmarkScore
   <Dimension>Two_Dimensional</Dimension>
   <Script>function beforeGeneration(chart, icsc)&#xD;
 {&#xD;
+rep = icsc.getExternalContext().getScriptable();&#xD;
+	rep = icsc.getExternalContext().getScriptable();&#xD;
+&#xD;
+	rep_title = rep.getParameterValue(&quot;ReportTitle&quot;);&#xD;
+	rep_subtitle = rep.getParameterValue(&quot;ReportSubtitle&quot;);&#xD;
+	chart.getTitle().getLabel().getCaption().setValue(rep_title + &quot;\n&quot; + rep_subtitle);&#xD;
 &#xD;
 /**&#xD;
  * Called before generation of chart model to GeneratedChartState.&#xD;
@@ -3800,8 +3778,8 @@ order by S.SiteName, datevalue, BenchmarkScore
 </model:ChartWithAxes>
 ]]></xml-property>
                                 <property name="outputFormat">SVG</property>
-                                <property name="height">560px</property>
-                                <property name="width">600px</property>
+                                <property name="height">600px</property>
+                                <property name="width">800px</property>
                                 <property name="style">sans-style1</property>
                             </extended-item>
                         </cell>
@@ -3812,6 +3790,7 @@ order by S.SiteName, datevalue, BenchmarkScore
                         <cell id="19">
                             <property name="colSpan">3</property>
                             <property name="rowSpan">1</property>
+                            <label name="ReportURL" id="390" extends="gratia-lib1.ReportURL"/>
                         </cell>
                     </row>
                 </footer>
