@@ -54,7 +54,7 @@
       <property name="Value" column="PerformanceData" />
     </component>
 
-    <component name="VOName" class="StringElement" insert="true">
+    <component name="VoName" class="StringElement" insert="true">
       <property name="Value" column="VoName" />
     </component>
 

@@ -142,30 +142,30 @@ begin
   else
     -- Use summary table
     set @sql :=
-         concat_ws('', 'select EndTime as endtime, Site.SiteName as sitename,
-                      sum(VOProbeSummary.WallDuration) as WallDuration,
-                      sum(VOProbeSummary.Cpu) as Cpu,
-                      VO.VOName, sum(VOProbeSummary.Njobs) as Njobs',
-                     ' from Site,Probe, ',
-                     '      (select date_format(VOProbeSummaryData.EndTime,''', format, ''') as EndTime, sum(VOProbeSummaryData.WallDuration) as WallDuration,
-                      sum(VOProbeSummaryData.CpuUserDuration + VOProbeSummaryData.CpuSystemDuration) as Cpu,
-                      sum(VOProbeSummaryData.Njobs) as Njobs, ProbeName, VOcorrid'
-                     '   from VOProbeSummaryData ',
-                     '   where ',
-                     '     (EndTime) >= (''', fromdate, ' 00:00:00 '')',
-                     '     and (EndTime) <= (''', todate, ' 00:00:00 '')',
-                     '    ', @myresourceclause,
-                     '    ', @mywhereclause,
-                     '     and VOcorrid IN(select corrid from VONameCorrection VC, VO where (`VC`.`VOid` = `VO`.`VOid`) and (VO.VOName =''', forvoname, ''' or (''', forvo, ''' = ''AnyVO'' and VO.VOName like ''%'' ))) ',
-                     '     and ProbeName IN(select ProbeName from Probe,Site where Probe.siteid = Site.siteid and (Site.SiteName =''', forsitename, ''' or (''', forsite, ''' = ''AnySite'' and Site.SiteName like ''%'' )))',
-                     '     group by date_format(VOProbeSummaryData.EndTime,''', format, '''), ProbeName, VOcorrid ',
-                     '    ) VOProbeSummary, VO, VONameCorrection VC',
-                     ' where',
-                     ' ((`VOProbeSummary`.`VOcorrid` = `VC`.`corrid`) and (`VC`.`VOid` = `VO`.`VOid`)) and ',
-                     ' Probe.siteid = Site.siteid and VOProbeSummary.ProbeName = Probe.probename',
-                     ' group by EndTime, Site.SiteName, VO.VOName'
-                     ' order by EndTime, Site.SiteName, VO.VOName'
-                 );
+         concat_ws('', 
+'select EndTime as endtime, Site.SiteName as sitename,
+        sum(VOProbeSummary.WallDuration) as WallDuration,
+        sum(VOProbeSummary.Cpu) as Cpu,
+        VO.VOName, sum(VOProbeSummary.Njobs) as Njobs
+from Site,Probe,
+     (select date_format(VOProbeSummaryData.EndTime,''', format, ''') as EndTime, 
+             sum(VOProbeSummaryData.WallDuration) as WallDuration,
+             sum(VOProbeSummaryData.CpuUserDuration + VOProbeSummaryData.CpuSystemDuration) as Cpu,
+             sum(VOProbeSummaryData.Njobs) as Njobs, ProbeName, VOcorrid
+      from VOProbeSummaryData
+      where (EndTime) >= ('' ', fromdate,' 00:00:00 '')
+            and (EndTime) <= ('' ', todate,' 00:00:00 '')
+            ', @myresourceclause, '
+            ', @mywhereclause, '
+            and VOcorrid IN(select corrid from VONameCorrection VC, VO where (`VC`.`VOid` = `VO`.`VOid`) and (VO.VOName =''', forvoname, ''' or (''', forvo, ''' = ''AnyVO'' and VO.VOName like ''%'' )))
+            and ProbeName IN(select ProbeName from Probe,Site where Probe.siteid = Site.siteid and (Site.SiteName = ''', forsitename,''' or (''', forsite, ''' = ''AnySite'' and Site.SiteName like ''%'' )))
+      group by date_format(VOProbeSummaryData.EndTime,''', format, '''), ProbeName, VOcorrid
+     ) VOProbeSummary, VO, VONameCorrection VC
+where ((`VOProbeSummary`.`VOcorrid` = `VC`.`corrid`) and (`VC`.`VOid` = `VO`.`VOid`)) and 
+      Probe.siteid = Site.siteid and VOProbeSummary.ProbeName = Probe.probename
+      group by EndTime, Site.SiteName, VO.VOName
+      order by EndTime, Site.SiteName, VO.VOName'
+         );
   end if;
   prepare statement from @sql;
   execute statement;
