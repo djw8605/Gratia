@@ -63,7 +63,6 @@ public class NewVOUpdate
           comparisonString = "is null";
       } else {
           comparisonString = "= " + dq + reportablevoname + dq;
-          reportablevoname = dq + reportablevoname + dq;
       }
       int icount = 0;
       int VOid = -1;
@@ -132,7 +131,7 @@ public class NewVOUpdate
          //
          command =
                "insert into VONameCorrection(VOid,VOName,ReportableVOName) values(" +
-               VOid + comma + dq + voname + dq + comma + reportablevoname + ")";
+               VOid + comma + dq + voname + dq + comma + dq + reportablevoname + dq + ")";
          statement = connection.createStatement();
          statement.executeUpdate(command);
          statement.close();
