@@ -280,7 +280,7 @@ order by S.SiteName, datevalue, BenchmarkScore
                         <property name="fontWeight">bold</property>
                         <property name="textUnderline">underline</property>
                         <property name="textAlign">center</property>
-                        <text-property name="text">Usage By Site (SpecINT2K)</text-property>
+                        <text-property name="text">Usage By Site (SpecINT2000)</text-property>
                     </label>
                 </cell>
             </row>
@@ -435,7 +435,7 @@ order by S.SiteName, datevalue, BenchmarkScore
                             <property name="style">sans-style1</property>
                             <property name="textUnderline">underline</property>
                             <property name="textAlign">right</property>
-                            <text-property name="text">User Days </text-property>
+                            <text-property name="text">User K-Days </text-property>
                         </label>
                     </cell>
                     <cell id="17">
@@ -444,7 +444,7 @@ order by S.SiteName, datevalue, BenchmarkScore
                             <property name="textUnderline">underline</property>
                             <property name="paddingTop">1pt</property>
                             <property name="textAlign">right</property>
-                            <text-property name="text">System Days</text-property>
+                            <text-property name="text">System K-Days</text-property>
                         </label>
                     </cell>
                 </row>
