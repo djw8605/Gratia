@@ -1095,6 +1095,7 @@ rep = icsc.getExternalContext().getScriptable();
         <GroupType>Text</GroupType>
         <AggregateExpression>Sum</AggregateExpression>
       </Grouping>
+      <Sorting>Ascending</Sorting>
     </SeriesDefinitions>
     <Orientation>Horizontal</Orientation>
     <LineAttributes>
