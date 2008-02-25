@@ -709,7 +709,6 @@ order by S.SiteName, datevalue, BenchmarkScore
   <Dimension>Two_Dimensional</Dimension>
   <Script>function beforeGeneration(chart, icsc)&#xD;
 {&#xD;
-rep = icsc.getExternalContext().getScriptable();&#xD;
 	rep = icsc.getExternalContext().getScriptable();&#xD;
 &#xD;
 	rep_title = rep.getParameterValue(&quot;ReportTitle&quot;);&#xD;
