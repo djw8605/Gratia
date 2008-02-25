@@ -247,6 +247,9 @@ order by S.SiteName, datevalue, BenchmarkScore
     </styles>
     <page-setup>
         <simple-master-page name="Simple MasterPage" id="2">
+            <property name="type">custom</property>
+            <property name="height">11in</property>
+            <property name="width">11in</property>
             <page-footer>
                 <grid id="3">
                     <property name="width">100%</property>
