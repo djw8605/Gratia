@@ -1084,7 +1084,9 @@ rep = icsc.getExternalContext().getScriptable();
         <Visible>false</Visible>
       </Label>
       <DataDefinition>
-        <Definition>row[&quot;HostDescription&quot;]</Definition>
+        <Definition>var hostd;&#xD;
+hostd =  row[&quot;HostDescription&quot;];&#xD;
+hostd = hostd.replace(&quot;          &quot;, &quot;&quot;);</Definition>
       </DataDefinition>
       <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
       <DataPoint>
