@@ -498,7 +498,7 @@ order by date_format(V.EndTime, ?)</property>
       <ItemType>Series</ItemType>
       <Title>
         <Caption>
-          <Value>Group (VO)</Value>
+          <Value>Group</Value>
           <Font>
             <Size>8.0</Size>
             <Bold>true</Bold>
