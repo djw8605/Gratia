@@ -866,6 +866,16 @@ rep = icsc.getExternalContext().getScriptable();
     &lt;property name=&quot;reportName&quot;>SystemCapacityForSiteForMonth-pacct.rptdesign&lt;/property>
     &lt;property name=&quot;targetWindow&quot;>_self&lt;/property>
     &lt;property name=&quot;targetFileType&quot;>report-design&lt;/property>
+    &lt;list-property name=&quot;paramBindings&quot;>
+        &lt;structure>
+            &lt;property name=&quot;paramName&quot;>ReportTitle&lt;/property>
+            &lt;expression name=&quot;expression&quot;>params[&quot;ReportTitle&quot;] + ' - ' + 'drill-through'&lt;/expression>
+        &lt;/structure>
+        &lt;structure>
+            &lt;property name=&quot;paramName&quot;>ReportSubtitle&lt;/property>
+            &lt;expression name=&quot;expression&quot;>params[&quot;ReportSubtitle&quot;]&lt;/expression>
+        &lt;/structure>
+    &lt;/list-property>
 &lt;/structure>
 </BaseUrl>
                 <BaseParameterName>StartDate</BaseParameterName>
@@ -1204,6 +1214,16 @@ rep = icsc.getExternalContext().getScriptable();
                 <property name="linkType">drill-through</property>
                 <property name="targetFileType">report-design</property>
                 <property name="reportName">SystemCapacityForSiteForMonth-pacct.rptdesign</property>
+                <list-property name="paramBindings">
+                    <structure>
+                        <property name="paramName">ReportTitle</property>
+                        <expression name="expression">params["ReportTitle"] + ' - ' + 'drill-through'</expression>
+                    </structure>
+                    <structure>
+                        <property name="paramName">ReportSubtitle</property>
+                        <expression name="expression">params["ReportSubtitle"]</expression>
+                    </structure>
+                </list-property>
             </structure>
             <property name="dataSet">UsageBySiteByMonth</property>
             <property name="height">600px</property>
