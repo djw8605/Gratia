@@ -5,7 +5,7 @@
 #
 # library to create simple report using the Gratia psacct database
 #
-#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.10 2008-02-25 20:17:05 pcanal Exp $
+#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.11 2008-02-25 21:20:10 pcanal Exp $
 
 import time
 import datetime
@@ -701,6 +701,11 @@ def sortedDictValues(adict):
     items.sort()
     return [(key,value) for key, value in items]
 
+def sortedDictValuesFunc(adict,compare):
+    items = adict.items()
+    items.sort( compare )
+    return [(key,value) for key, value in items]
+
 def GenericDailyStatus(what, when = datetime.date.today(), output = "text"):
 
         if (output != "None") :
@@ -1031,6 +1036,17 @@ order by VO.VOName, SiteName"""
 
     return RunQueryAndSplit(select)
 
+def UserReportData(begin, end, with_panda = False):
+    select = """
+SELECT CommonName, sum(NJobs), sum(WallDuration) as Wall
+FROM UserProbeSummary U where
+    EndTime >= \"""" + DateTimeToString(begin) + """\" and
+    EndTime < \"""" + DateTimeToString(end) + """\"
+    and CommonName != \"Unknown\"
+    group by CommonName
+"""
+    return RunQueryAndSplit(select)
+
 class RangeVOReportConf:
     title = """\
 OSG usage summary for  %s - %s (midnight UTC - midnight UTC)
@@ -1044,6 +1060,7 @@ Deltas are the differences with the previous period."""
     formats = {}
     lines = {}
     col1 = "All VOs"
+    defaultSort = True
 
     def __init__(self, header = False, with_panda = False):
         self.formats["csv"] = ",%s,\"%s\",\"%s\",\"%s\",\"%s\""
@@ -1069,6 +1086,7 @@ Deltas are the differences with the previous period."""
     formats = {}
     lines = {}
     col1 = "All sites"
+    defaultSort = True
 
     def __init__(self, header = False, with_panda = False):
         self.formats["csv"] = ",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""
@@ -1095,6 +1113,7 @@ Deltas are the differences with the previous period."""
     lines = {}
     col1 = "All sites"    
     col2 = "All VOs"    
+    defaultSort = True
 
     def __init__(self, header = False, with_panda = False):
         self.formats["csv"] = ",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""
@@ -1121,6 +1140,7 @@ Deltas are the differences with the previous period."""
     lines = {}
     col1 = "All VOs"    
     col2 = "All sites"    
+    defaultSort = True
 
     def __init__(self, header = False, with_panda = False):
         self.formats["csv"] = ",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""
@@ -1132,6 +1152,45 @@ Deltas are the differences with the previous period."""
 
     def GetData(self, start,end):
         return RangeVOSiteData(start, end, self.with_panda)      
+
+class RangeUserReportConf:
+    title = """\
+OSG usage summary for  %s - %s (midnight UTC - midnight UTC)
+including all jobs that finished in that time period.
+Wall Duration is expressed in hours and rounded to the nearest hour. Wall
+Duration is the duration between the instant the job started running
+and the instant the job ended its execution.
+Deltas are the differences with the previous period."""
+    headline = "For all jobs finished between %s and %s (midnight UTC)"
+    headers = ("User", "# of Jobs", "Wall Duration", "Delta jobs", "Delta duration")
+    formats = {}
+    lines = {}
+    col1 = "All Users"    
+    col2 = "All sites"    
+    defaultSort = False
+
+    def __init__(self, header = False, with_panda = False):
+        self.formats["csv"] = ",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""
+        self.formats["text"] = "| %-30s | %9s | %13s | %10s | %14s"
+        self.lines["csv"] = ""
+        self.lines["text"] = "------------------------------------------------------------------------------------------------"
+        if (not header) :  self.title = ""
+        self.with_panda = with_panda
+
+    def GetData(self, start,end):
+        l = UserReportData(start, end, self.with_panda)
+        r = []
+        for x in l:
+            (user,njobs,wall) = x.split('\t')
+            user = user[0:30]
+            r.append( user + '\t' + njobs + '\t' + wall)
+        return r
+
+    def Sorting(self, x,y):
+        xval = (x[1])[1]
+        yval = (y[1])[1]
+        return cmp(yval,xval)
+
 
 class LongJobsConf:
     title = """\
@@ -1318,7 +1377,12 @@ def GenericRange(what, range_end = datetime.date.today(),
         if (key != "total") :
             printValues[key] = (0,0,oldnjobs,oldwall,site,vo)
 
-    for key,(njobs,wall,oldnjobs,oldwall,site,vo) in sortedDictValues(printValues):
+    if (what.defaultSort):
+        sortedValues = sortedDictValues(printValues)
+    else:
+        sortedValues = sortedDictValuesFunc(printValues,what.Sorting)
+        
+    for key,(njobs,wall,oldnjobs,oldwall,site,vo) in sortedValues:
         index = index + 1;
         if (num_header == 2) :
             values = (site,vo,niceNum(njobs), niceNum(wall),
@@ -1381,6 +1445,16 @@ def RangeVOSiteReport(range_end = datetime.date.today(),
                       header = True,
                       with_panda = False):
     return GenericRange(RangeVOSiteReportConf(header, with_panda),
+                        range_end,
+                        range_begin,
+                        output)
+
+def RangeUserReport(range_end = datetime.date.today(),
+                      range_begin = None,
+                      output = "text",
+                      header = True,
+                      with_panda = False):
+    return GenericRange(RangeUserReportConf(header, with_panda),
                         range_end,
                         range_begin,
                         output)
@@ -1658,3 +1732,9 @@ def LongJobs(range_end = datetime.date.today(),
     print "This report is a summary of long running jobs that finished between %s - %s (midnight - midnight central time):\n" % ( DateToString(range_begin,False),
                                                                         DateToString(range_end,False) )
     RangeLongJobs(range_end,range_begin,output,header)
+
+def UserReport(range_end = datetime.date.today(),
+            range_begin = None,
+            output = "text",
+            header = True):
+    RangeUserReport(range_end,range_begin,output,header)
