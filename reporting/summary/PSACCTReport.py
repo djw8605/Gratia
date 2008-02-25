@@ -5,7 +5,7 @@
 #
 # library to create simple report using the Gratia psacct database
 #
-#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.9 2008-02-15 23:28:43 pcanal Exp $
+#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.10 2008-02-25 20:17:05 pcanal Exp $
 
 import time
 import datetime
@@ -1002,6 +1002,35 @@ select J.VOName, J.SiteName, sum(J.NJobs), sum(J.WallDuration)
     else:
         return RunQueryAndSplit(select)
 
+def LongJobsData(begin, end, with_panda = False):
+    schema = "gratia"
+    
+    select = """
+select SiteName, VO.VOName, sum(NJobs), avg(WallDuration)/3600.0/24.0, avg(Cpu*100/WallDuration),
+Date(max(EndTime)) from (select dbid, NJobs, WallDuration,CpuUserDuration+CpuSystemDuration as
+Cpu,VOName,ReportableVOName,EndTime from JobUsageRecord J
+where
+    EndTime >= \"""" + DateTimeToString(begin) + """\" and
+    EndTime < \"""" + DateTimeToString(end) + """\" and
+    WallDuration > 3600*24*7
+) as sub,
+JobUsageRecord_Meta M, VONameCorrection, VO, Probe, Site
+where sub.dbid = M.dbid
+and M.ProbeName = Probe.ProbeName and Probe.siteid = Site.siteid
+and (cast(sub.VOName as char charset binary) =
+cast(VONameCorrection.VOName as char charset binary))
+and ((cast(sub.ReportableVOName as char charset binary) =
+cast(VONameCorrection.ReportableVOName as char charset binary))
+or (isnull(sub.ReportableVOName) and
+isnull(VONameCorrection.ReportableVOName)))
+and (VONameCorrection.VOid = VO.VOid)
+and (sub.VOName = VONameCorrection.VOName)
+and SiteName != \"OU_OSCER_ATLAS\"
+group by VO.VOName, SiteName
+order by VO.VOName, SiteName"""
+
+    return RunQueryAndSplit(select)
+
 class RangeVOReportConf:
     title = """\
 OSG usage summary for  %s - %s (midnight UTC - midnight UTC)
@@ -1103,6 +1132,86 @@ Deltas are the differences with the previous period."""
 
     def GetData(self, start,end):
         return RangeVOSiteData(start, end, self.with_panda)      
+
+class LongJobsConf:
+    title = """\
+Summary of long running jobs that finished between %s - %s (midnight UTC - midnight UTC)
+
+Wall Duration is expressed in days to the nearest days.
+%% Cpu is the percentage of the wall duration time where the cpu was used.
+Only jobs that last 7 days or longer are counted in this report.
+"""
+    headline = "For all jobs finished between %s and %s (midnight UTC)"
+    headers = ("Site", "VO", "# of Jobs","Avg Wall","% Cpu","Max EndTime")
+    formats = {}
+    lines = {}
+    col1 = "All VOs"    
+    col2 = "All sites"    
+
+    def __init__(self, header = False, with_panda = False):
+        self.formats["csv"] = ",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""
+        self.formats["text"] = "| %-18s | %-14s | %9s | %8s | %5s | %11s"
+        self.lines["csv"] = ""
+        self.lines["text"] = "---------------------------------------------------------------------------------------"
+        if (not header) :  self.title = ""
+        self.with_panda = with_panda
+
+    def GetData(self, start,end):
+        return LongJobsData(start, end, self.with_panda)      
+
+def SimpleRange(what, range_end = datetime.date.today(),
+                 range_begin = None,
+                 output = "text"):
+
+    if not range_begin: range_begin = range_end + datetime.timedelta(days=-1)
+    timediff = range_end - range_begin
+
+    if (output != "None") :
+        if (what.title != "") :
+            print what.title % ( DateToString(range_begin,False),
+                                 DateToString(range_end,False) )
+        if (what.headline != "") :
+            print what.headline % ( DateToString(range_begin,False),
+                                    DateToString(range_end,False) )
+        print what.lines[output]
+        print "    ", what.formats[output] % what.headers
+        print what.lines[output]
+
+    start = range_begin
+    end = range_end
+    lines = what.GetData(start,end)
+    num_header = 1;
+    index = 0
+    printValues = {}
+    if (len(lines)==1 and lines[0]==""):
+        print "\nNo data to report.\n"
+        return []
+    
+    for i in range (0,len(lines)):
+        val = lines[i].split('\t')
+        site = val[0]
+        vo = val[1]
+        key = site + " " + vo
+        njobs= string.atoi( val[2] )
+        wall = string.atof( val[3] )
+        cpu = string.atof( val[4] )
+        endtime = val[5]
+        if printValues.has_key(key):
+            printValues[key][0] += njobs
+            printValues[key][1] += wall
+        else:
+            printValues[key] = [njobs,wall,cpu,endtime,site,vo]
+        
+    result = []
+
+    for key,(njobs,wall,cpu,endtime,site,vo) in sortedDictValues(printValues):
+        index = index + 1;
+        values = (site,vo,niceNum(njobs), niceNum(wall), niceNum(cpu), endtime)
+
+        if (output != "None"):
+            print "%3d " %(index), what.formats[output] % values
+        result.append(values)       
+                
 
 def GenericRange(what, range_end = datetime.date.today(),
                  range_begin = None,
@@ -1276,6 +1385,16 @@ def RangeVOSiteReport(range_end = datetime.date.today(),
                         range_begin,
                         output)
 
+def RangeLongJobs(range_end = datetime.date.today(),
+                      range_begin = None,
+                      output = "text",
+                      header = True,
+                      with_panda = False):
+    return SimpleRange(LongJobsConf(header, with_panda),
+                        range_end,
+                        range_begin,
+                        output)
+
 def GetSiteLastReportingDate(begin,recent):
     schema = "gratia.";
     if (recent):
@@ -1438,7 +1557,7 @@ def NonReportingSites(
                 output = "text",
                 header = True):
 
-    print "This reports indicates which sites Gratia has heard from or have known activity\nsince %s (midnight central time)\n" % ( DateToString(when,False) )
+    print "This report indicates which sites Gratia has heard from or have known activity\nsince %s (midnight central time)\n" % ( DateToString(when,False) )
 
     allSites = GetListOfOSGSites();
     # Call it twice to avoid a 'bug' in wget where on of the row is missing the first few characters.
@@ -1531,3 +1650,11 @@ def NonReportingSites(
             
     return missingSites
 
+def LongJobs(range_end = datetime.date.today(),
+            range_begin = None,
+            output = "text",
+            header = True):
+
+    print "This report is a summary of long running jobs that finished between %s - %s (midnight - midnight central time):\n" % ( DateToString(range_begin,False),
+                                                                        DateToString(range_end,False) )
+    RangeLongJobs(range_end,range_begin,output,header)
