@@ -1576,8 +1576,8 @@ rep = icsc.getExternalContext().getScriptable();
             </Action>
           </Triggers>
           <Markers>
-            <Type>Box</Type>
-            <Size>0</Size>
+            <Type>Circle</Type>
+            <Size>2</Size>
             <Visible>true</Visible>
           </Markers>
           <LineAttributes>
@@ -1834,8 +1834,8 @@ rep = icsc.getExternalContext().getScriptable();
             </Action>
           </Triggers>
           <Markers>
-            <Type>Box</Type>
-            <Size>0</Size>
+            <Type>Triangle</Type>
+            <Size>2</Size>
             <Visible>true</Visible>
           </Markers>
           <LineAttributes>
@@ -1843,7 +1843,7 @@ rep = icsc.getExternalContext().getScriptable();
             <Thickness>1</Thickness>
             <Color>
               <Transparency>255</Transparency>
-              <Red>0</Red>
+              <Red>254</Red>
               <Green>0</Green>
               <Blue>0</Blue>
             </Color>
