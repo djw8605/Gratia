@@ -252,12 +252,7 @@ order by S.SiteName, datevalue, BenchmarkScore
                     <property name="width">100%</property>
                     <column id="4"/>
                     <row id="5">
-                        <cell id="6">
-                            <text id="7">
-                                <property name="contentType">html</property>
-                                <text-property name="content"><![CDATA[<value-of>new Date()</value-of>]]></text-property>
-                            </text>
-                        </cell>
+                        <cell id="6"/>
                     </row>
                 </grid>
             </page-footer>
@@ -286,6 +281,7 @@ order by S.SiteName, datevalue, BenchmarkScore
             </row>
         </grid>
         <table name="table1" id="13">
+            <property name="marginTop">0pt</property>
             <property name="canShrink">true</property>
             <property name="width">90%</property>
             <property name="dataSet">UsageBySiteByWeek</property>
@@ -418,6 +414,7 @@ order by S.SiteName, datevalue, BenchmarkScore
                         <label id="155">
                             <property name="style">sans-style1</property>
                             <property name="textUnderline">underline</property>
+                            <property name="paddingTop">1pt</property>
                             <property name="textAlign">right</property>
                             <text-property name="text">Nodes Reporting</text-property>
                         </label>
@@ -504,6 +501,8 @@ order by S.SiteName, datevalue, BenchmarkScore
                 <header>
                     <row id="107">
                         <cell id="108">
+                            <property name="paddingTop">5pt</property>
+                            <property name="paddingBottom">1pt</property>
                             <data id="115">
                                 <property name="style">sans-style1</property>
                                 <property name="fontWeight">bold</property>
@@ -619,6 +618,8 @@ order by S.SiteName, datevalue, BenchmarkScore
                 <row id="27">
                     <cell id="28">
                         <text-data id="139">
+                            <property name="style">sans-style1</property>
+                            <property name="paddingTop">1pt</property>
                             <expression name="valueExpr">var hostdesc;
 hostdesc = row["HostDescription"].substring(7);
 hostdesc = hostdesc.replace("CPU","");
