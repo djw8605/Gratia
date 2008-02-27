@@ -541,8 +541,8 @@ order by date_format(V.EndTime, ?)</property>
     <Bounds>
       <Left>0.0</Left>
       <Top>0.0</Top>
-      <Width>600.0</Width>
-      <Height>360.0</Height>
+      <Width>450.0</Width>
+      <Height>420.0</Height>
     </Bounds>
     <Insets>
       <Top>3.0</Top>
@@ -1248,8 +1248,8 @@ MM/dd/yyyy
                 </list-property>
             </structure>
             <property name="dataSet">TimeQuery</property>
-            <property name="height">480px</property>
-            <property name="width">800px</property>
+            <property name="height">560px</property>
+            <property name="width">600px</property>
             <list-property name="paramBindings">
                 <structure>
                     <property name="paramName">SelectSiteName</property>
