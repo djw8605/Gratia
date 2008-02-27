@@ -742,7 +742,7 @@ sub construct_monitor_message_subject {
 
 sub temporary_filename {
 	my $stem = shift;
-	my $tmp_file=`mktemp "\${TMPDIR:/tmp}/${stem}_XXXXXXXXXX\"`;
+	my $tmp_file=`mktemp "\${TMPDIR:-/tmp}/${stem}_XXXXXXXXXX\"`;
 	chomp $tmp_file;
 	$tmp_file or die "Unable to create temporary file from stem $stem";
 	return $tmp_file;
