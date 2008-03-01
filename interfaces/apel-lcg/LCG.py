@@ -7,7 +7,7 @@
 # Script to transfer the data from Gratia to APEL (WLCG)
 ########################################################################
 #
-#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: LCG.py,v 1.10 2008-02-19 14:27:13 jgweigand Exp $
+#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: LCG.py,v 1.11 2008-03-01 14:38:14 jgweigand Exp $
 #
 #
 ########################################################################
@@ -871,6 +871,7 @@ def main(argv=None):
     ##### UNKNOWNS#########
     #--- query gratia for Unknown VOs and create updates (appending them ----
     unknowns = ""
+    unknown_query = "No sites with 'unknown' VO"
     firstTime = 1
     sites = FindSitesWithUnknownVOs("atlas",gDatabaseParameters)
     for site in sites:
@@ -899,8 +900,10 @@ def main(argv=None):
     if len(output) == 0:
       if len(unknowns) == 0:
         raise Exception("No updates to apply")
-    CreateLCGsql(output,GetFileName("sql"))
-    CreateLCGsqlUnknownUpdates(unknowns,GetFileName("sql"))
+    if len(output) > 0:
+      CreateLCGsql(output,GetFileName("sql"))
+    if len(unknowns) > 0:
+      CreateLCGsqlUnknownUpdates(unknowns,GetFileName("sql"))
     if gInUpdateMode:
       RunLCGUpdate(GetFileName("sql"),gDatabaseParameters)
       SendEmailNotificationSuccess("Sample query:\n" + query + "\n\nResults of all queries:\n" + output + "\n\n#################\nSample Atlas unknown query:\n" + unknown_query + "\n\nResults of all Atlas unknown queries:\n" + unknowns)
