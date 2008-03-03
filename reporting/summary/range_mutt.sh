@@ -2,6 +2,7 @@
 
 # space separated list of mail recipients
 MAILTO="osg-accounting-info@fnal.gov"
+#MAILTO="pcanal@fnal.gov"
 WEBLOC="http://gratia-osg.fnal.gov:8880/gratia-reporting"
 SUM_WEBLOC="http://gratia-osg.fnal.gov:8884/gratia-reporting"
 
@@ -38,6 +39,9 @@ whenarg=$(date -d "${date_arg:-yesterday}" +"%Y/%m/%d")
 MAIL_MSG="${ExtraHeader}Report from the job level Gratia db for $when"
 SUM_MAIL_MSG="${ExtraHeader}Report from the daily summary Gratia db for $when"
 STATUS_MAIL_MSG="${ExtraHeader}Job Success Rate for $when (from the job level Gratia db)"
+REPORTING_MAIL_MSG="${ExtraHeader}Summary on how sites are reporting to Gratia for $when"
+LONGJOBS_MAIL_MSG="${ExtraHeader}Report of jobs longer than 7 days for $when"
+USER_MAIL_MSG="${ExtraHeader}Report by user for $when"
 
 # Transfer the file now
 WORK_DIR=workdir.${RANDOM}
@@ -64,8 +68,9 @@ function sendto {
 
 
 sendto ./range "$ExtraArgs $whenarg" ${WORK_DIR}/report "$MAIL_MSG"
-#sendto ./dailyFromSummary $whenarg ${WORK_DIR}/summary_report "$SUM_MAIL_MSG"
-#sendto ./dailyStatus  $whenarg ${WORK_DIR}/status_report "$STATUS_MAIL_MSG"
+sendto ./reporting "$ExtraArgs $whenarg" ${WORK_DIR}/report "$REPORTING_MAIL_MSG"
+sendto ./longjobs "$ExtraArgs $whenarg" ${WORK_DIR}/report "$LONGJOBS_MAIL_MSG"
+sendto ./usersreport "$ExtraArgs $whenarg" ${WORK_DIR}/report "$USER_MAIL_MSG"
 
 
 if [ "$debug" != "x" ]; then 
