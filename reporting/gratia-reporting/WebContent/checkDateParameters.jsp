@@ -97,8 +97,12 @@ function displayReport(link) {
 	String link = initUrl + "/frameset?"; // "/run?"; //"/frameset?";
 
 	String inFormat = request.getParameter("__format");
+	boolean staticReport = false;
 	if (inFormat != null && inFormat.indexOf("html") == -1)
-		link = initUrl + "/run?";
+	{
+		link = "/run?";
+		staticReport = true;
+	}
 
 	// Get current date (End date) and a week ago (Start Date)
 	Date now = new Date();
@@ -167,13 +171,21 @@ function displayReport(link) {
 	}
 	link += params;
 	link = link.replace("\\", "/");
-
+	if (staticReport)
+	{
 %>
-
+	<jsp:forward page="<%=link %>"></jsp:forward>
+<%
+	}
+	else
+	{
+%>
 	<script type="text/javascript">
 		displayReport("<%=link %>");
 	</script>
-
+<%
+	}
+%>
 
 </body>
 </html>
