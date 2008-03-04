@@ -22,6 +22,7 @@ import java.util.Date;
 public class ProbeDetails implements Record
 {
     // Information regarding the probe itself
+    private java.util.Map<String, Software> SoftwareMap;
     private Set Software;
 
     // Calculated information (not directly in the xml file)
@@ -51,12 +52,35 @@ public class ProbeDetails implements Record
     public void addSoftware(Software soft) 
     {
         if (this.Software == null) {
-            this.Software = new java.util.HashSet ( ) ;
+            this.Software = new java.util.HashSet();
+            this.SoftwareMap =  new java.util.HashMap<String,Software>();
         }
-        this.Software.add(soft);
+        try {
+            if (this.SoftwareMap.get( soft.getmd5() ) == null ) {
+                this.SoftwareMap.put( soft.getmd5(), soft);
+                this.Software.add( soft );
+            }
+        } catch (Exception e) {
+            // ignore software if we can't get the md5
+        }        
     }
 
-    public void setSoftware(Set s) { this.Software = s; }
+    public void setSoftware(Set s) { 
+        this.Software = s; 
+
+        for (Iterator i = s.iterator(); i.hasNext(); )
+         {
+             Software soft = (Software)i.next();
+             try {
+                 if (this.SoftwareMap.get( soft.getmd5() ) == null ) {
+                     this.SoftwareMap.put( soft.getmd5(), soft);
+                 }
+             } catch (Exception e) {
+                 // ignore software if we can't get the md5
+             }
+         }
+    }
+
     public Set getSoftware() { return this.Software; }
 
     public void setProbeName(StringElement ProbeName)
@@ -165,10 +189,32 @@ public class ProbeDetails implements Record
       return output;
    }
 
+   public String mapToString(String name, java.util.Map<String, Software> l)
+   {
+      String output = "";
+      for (Iterator i = l.values().iterator(); i.hasNext(); )
+      {
+         Object el = i.next();
+         output = output + " " + name + ": " + el;
+      }
+      return output;
+   }
+
    public String setAsXml(String name, Set l)
    {
       String output = "";
       for (Iterator i = l.iterator(); i.hasNext(); )
+      {
+         XmlElement el = (XmlElement)i.next();
+         output = output + el.asXml(name);
+      }
+      return output;
+   }
+
+   public String mapAsXml(String name, java.util.Map<String,Software> l)
+   {
+      String output = "";
+      for (Iterator i = l.values().iterator(); i.hasNext(); )
       {
          XmlElement el = (XmlElement)i.next();
          output = output + el.asXml(name);
@@ -184,7 +230,7 @@ public class ProbeDetails implements Record
       if (SiteName != null) output = output + " SiteName: " + SiteName + "\n";
       if (ProbeName != null) output = output + "ProbeName: " + ProbeName + "\n";
       if (ProbeName != null) output = output + "Grid: " + Grid + "\n";
-      if (Software != null) output = output + setToString("", Software);
+      if (SoftwareMap != null) output = output + mapToString("", SoftwareMap);
 
       return output;
    }
@@ -198,7 +244,7 @@ public class ProbeDetails implements Record
       if (SiteName != null) output = output + SiteName.asXml("SiteName");
       if (Grid != null) output = output + Grid.asXml("Grid");
 
-      if (Software != null) output = output + setAsXml("", Software);
+      if (SoftwareMap != null) output = output + mapAsXml("", SoftwareMap);
 
       output = output + ("</ProbeDetails\n");
       return output;
@@ -206,7 +252,7 @@ public class ProbeDetails implements Record
 
    public void AttachContent( org.hibernate.Session session ) throws Exception
    {
-      for (Iterator i = this.Software.iterator(); i.hasNext(); )
+       for (Iterator i = this.SoftwareMap.values().iterator(); i.hasNext(); )
       {
           Software s = (Software)i.next();
 
