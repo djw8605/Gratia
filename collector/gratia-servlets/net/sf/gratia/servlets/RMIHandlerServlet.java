@@ -64,17 +64,32 @@ public class RMIHandlerServlet extends HttpServlet
                 //
                 // the following is a hack to get around a python post issue
                 //
+                // As new probes get out into the wild, this code will
+                // be called less and less often.
                 ServletInputStream input = req.getInputStream();
-                byte buffer[] = new byte[4 * 4096];
                 int icount = 0;
-                int istatus = 0;
-                for (icount = 0; icount < buffer.length; icount++)
-                    {
-                        istatus = input.read(buffer,icount,1);
-                        if (istatus == -1)
-                            break;
-                    }
-                String body = new String(buffer,0,icount);
+                int loopcount = 0;
+                int maxloops = 10;
+                String body = new String("");
+                int bcount;
+                byte buffer[];
+                do {
+                    bcount = 0;
+                    buffer = new byte[4 * 4096];
+                    int istatus = 0;
+                    for (bcount = 0; bcount < buffer.length; ++bcount, ++icount)
+                        {
+                            istatus = input.read(buffer,icount,1);
+                            if (istatus == -1)
+                                break;
+                        }
+                    body += new String(buffer,0,icount);
+                } while ((bcount == buffer.length) && (++loopcount < maxloops));
+                if (loopcount == maxloops) {
+                    Logging.warning("RMIHanderservlet: record exceeds maximum buffer size of " +
+                                    loopcount * buffer.length + " bytes!");
+                    return;
+                }
                 Logging.debug("RMIHandlerServlet: body = " + body);
 
                 StringTokenizer st1 = new StringTokenizer(body,"&");
