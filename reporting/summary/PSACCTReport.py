@@ -5,7 +5,7 @@
 #
 # library to create simple report using the Gratia psacct database
 #
-#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.11 2008-02-25 21:20:10 pcanal Exp $
+#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.12 2008-03-05 15:23:43 pcanal Exp $
 
 import time
 import datetime
@@ -551,6 +551,10 @@ class DailySiteJobStatusConf:
                self.headers = ("VO","Success Rate","Success","Failed","Total")
                self.col1 = "All VOs"
 
+    def Sorting(self, x,y):
+        xval = (x[1])[1]*100 / ( (x[1])[1] + (x[1])[2] ) 
+        yval = (y[1])[1]*100 / ( (y[1])[1] + (y[1])[2] )
+        return cmp(yval,xval)
 
     def GetData(self,start,end):
        if self.CondorSpecial:
@@ -767,7 +771,7 @@ def GenericDailyStatus(what, when = datetime.date.today(), output = "text"):
         totaljobs = 0
         totalsuccess = 0
         totalfailed = 0
-        for key,(site,success,failed) in sortedDictValues(sum_values):
+        for key,(site,success,failed) in sortedDictValuesFunc(sum_values,what.Sorting):
             index = index + 1;
             total = success+failed
             values = (site,str((success*100/total))+" %",success,failed,total)
