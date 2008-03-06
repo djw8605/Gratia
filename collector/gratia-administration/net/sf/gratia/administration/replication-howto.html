@@ -1,207 +1,34 @@
-<html xmlns:o="urn:schemas-microsoft-com:office:office"
-xmlns:w="urn:schemas-microsoft-com:office:word"
-xmlns="http://www.w3.org/TR/REC-html40">
-
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
 <head>
-<meta http-equiv=Content-Type content="text/html; charset=iso-8859-1">
-<meta name=ProgId content=Word.Document>
-<meta name=Generator content="Microsoft Word 11">
-<meta name=Originator content="Microsoft Word 11">
-<link rel=File-List href="replication-howto_files/filelist.xml">
-<title>Gratia Accounting | Documentation</title>
-<!--[if gte mso 9]><xml>
- <o:DocumentProperties>
-  <o:Author>glr</o:Author>
-  <o:Template>Normal</o:Template>
-  <o:LastAuthor>glr</o:LastAuthor>
-  <o:Revision>2</o:Revision>
-  <o:TotalTime>24</o:TotalTime>
-  <o:Created>2006-08-15T14:00:00Z</o:Created>
-  <o:LastSaved>2006-08-15T14:24:00Z</o:LastSaved>
-  <o:Pages>1</o:Pages>
-  <o:Words>209</o:Words>
-  <o:Characters>1194</o:Characters>
-  <o:Company>glr</o:Company>
-  <o:Lines>9</o:Lines>
-  <o:Paragraphs>2</o:Paragraphs>
-  <o:CharactersWithSpaces>1401</o:CharactersWithSpaces>
-  <o:Version>11.8036</o:Version>
- </o:DocumentProperties>
-</xml><![endif]--><!--[if gte mso 9]><xml>
- <w:WordDocument>
-  <w:Zoom>125</w:Zoom>
-  <w:SpellingState>Clean</w:SpellingState>
-  <w:GrammarState>Clean</w:GrammarState>
-  <w:ValidateAgainstSchemas/>
-  <w:SaveIfXMLInvalid>false</w:SaveIfXMLInvalid>
-  <w:IgnoreMixedContent>false</w:IgnoreMixedContent>
-  <w:AlwaysShowPlaceholderText>false</w:AlwaysShowPlaceholderText>
-  <w:BrowserLevel>MicrosoftInternetExplorer4</w:BrowserLevel>
- </w:WordDocument>
-</xml><![endif]--><!--[if gte mso 9]><xml>
- <w:LatentStyles DefLockedState="false" LatentStyleCount="156">
- </w:LatentStyles>
-</xml><![endif]-->
-<style>
-<!--
- /* Font Definitions */
- @font-face
-	{font-family:Wingdings;
-	panose-1:5 0 0 0 0 0 0 0 0 0;
-	mso-font-charset:2;
-	mso-generic-font-family:auto;
-	mso-font-pitch:variable;
-	mso-font-signature:0 268435456 0 0 -2147483648 0;}
- /* Style Definitions */
- p.MsoNormal, li.MsoNormal, div.MsoNormal
-	{mso-style-parent:"";
-	margin:0in;
-	margin-bottom:.0001pt;
-	mso-pagination:widow-orphan;
-	font-size:12.0pt;
-	font-family:"Times New Roman";
-	mso-fareast-font-family:"Times New Roman";}
-a:link, span.MsoHyperlink
-	{color:blue;
-	text-decoration:underline;
-	text-underline:single;}
-a:visited, span.MsoHyperlinkFollowed
-	{color:purple;
-	text-decoration:underline;
-	text-underline:single;}
-p
-	{font-size:12.0pt;
-	font-family:"Times New Roman";
-	mso-fareast-font-family:"Times New Roman";}
-span.SpellE
-	{mso-style-name:"";
-	mso-spl-e:yes;}
-span.GramE
-	{mso-style-name:"";
-	mso-gram-e:yes;}
-@page Section1
-	{size:8.5in 11.0in;
-	margin:1.0in 1.25in 1.0in 1.25in;
-	mso-header-margin:.5in;
-	mso-footer-margin:.5in;
-	mso-paper-source:0;}
-div.Section1
-	{page:Section1;}
- /* List Definitions */
- @list l0
-	{mso-list-id:1464695933;
-	mso-list-type:hybrid;
-	mso-list-template-ids:1087419986 67698689 67698691 67698693 67698689 67698691 67698693 67698689 67698691 67698693;}
-@list l0:level1
-	{mso-level-number-format:bullet;
-	mso-level-text:\F0B7;
-	mso-level-tab-stop:.5in;
-	mso-level-number-position:left;
-	text-indent:-.25in;
-	font-family:Symbol;}
-ol
-	{margin-bottom:0in;}
-ul
-	{margin-bottom:0in;}
--->
-</style>
-<!--[if gte mso 10]>
-<style>
- /* Style Definitions */
- table.MsoNormalTable
-	{mso-style-name:"Table Normal";
-	mso-tstyle-rowband-size:0;
-	mso-tstyle-colband-size:0;
-	mso-style-noshow:yes;
-	mso-style-parent:"";
-	mso-padding-alt:0in 5.4pt 0in 5.4pt;
-	mso-para-margin:0in;
-	mso-para-margin-bottom:.0001pt;
-	mso-pagination:widow-orphan;
-	font-size:10.0pt;
-	font-family:"Times New Roman";
-	mso-ansi-language:#0400;
-	mso-fareast-language:#0400;
-	mso-bidi-language:#0400;}
-</style>
-<![endif]-->
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<link href="docstyle.css" type="text/css" rel="stylesheet">
+<title>Gratia - Replication howto</title>
 </head>
 
-<body lang=EN-US link=blue vlink=purple style='tab-interval:.5in'>
-
-<div class=Section1>
-
-<h1 align=center style='text-align:center'>Replication How To</h1>
-
-<p>Gratia has the ability to replicate <span class=GramE>it&#8217;s</span>
-database contents (actually, the XML records) to
-another instance of gratia running &#8220;out there somewhere&#8221;. This
-service can be found on the gratia-administration dashboard. Assuming your
-database is the source, and our database at Fermi is the target:</p>
-
-<p style='margin-left:.5in;text-indent:-.25in;mso-list:l0 level1 lfo1;
-tab-stops:list .5in'><![if !supportLists]><span style='font-family:Symbol;
-mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol'><span
-style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span></span><![endif]>You must first determine whether or not the
-target is running secured by contacting our gratia system administrator.</p>
-
-<p style='margin-left:.5in;text-indent:-.25in;mso-list:l0 level1 lfo1;
-tab-stops:list .5in'><![if !supportLists]><span style='font-family:Symbol;
-mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol'><span
-style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span></span><![endif]>You add an entry to our &#8220;open&#8221;
-connection &#8211; e.g. &#8211; <a href="http://gratia.opensciencegrid.org:8880/gratia-reporting/">
-http://gratia.opensciencegrid.org:8880</a></p>
-
-<p style='margin-left:.5in;text-indent:-.25in;mso-list:l0 level1 lfo1;
-tab-stops:list .5in'><![if !supportLists]><span style='font-family:Symbol;
-mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol'><span
-style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span></span><![endif]>You select which probes (or VOs, or Grid designations) you want to replicate to
-our system.</p>
-
-<p style='margin-left:.5in;text-indent:-.25in;mso-list:l0 level1 lfo1;
-tab-stops:list .5in'><![if !supportLists]><span style='font-family:Symbol;
-mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol'><span
-style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span></span><![endif]>Press the &#8220;update&#8221; button to add the
-entry to your local database.</p>
-
-<p style='margin-left:.5in;text-indent:-.25in;mso-list:l0 level1 lfo1;
-tab-stops:list .5in'><![if !supportLists]><span style='font-family:Symbol;
-mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol'><span
-style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span></span><![endif]>If we at Fermi are running &#8220;secured&#8221;,
-you must (1) set the security flag to &#8220;secured&#8221; and update, (2)
-using the &#8220;<span class=SpellE>registed</span>&#8221; entry, register your
-server with us.</p>
-
-<p style='margin-left:.5in;text-indent:-.25in;mso-list:l0 level1 lfo1;
-tab-stops:list .5in'><![if !supportLists]><span style='font-family:Symbol;
-mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol'><span
-style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span></span><![endif]>You can test the connection by using the &#8220;Test&#8221;
-link. Your server will send a dummy transaction to our machine at Fermi and let
-you know whether or not the connection was made. If it reports an error, you
-should contact the target gratia administrator for support.</p>
-
-<p style='margin-left:.5in;text-indent:-.25in;mso-list:l0 level1 lfo1;
-tab-stops:list .5in'><![if !supportLists]><span style='font-family:Symbol;
-mso-fareast-font-family:Symbol;mso-bidi-font-family:Symbol'><span
-style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span></span><![endif]>Finally, start the replication process by using
-the &#8220;Start&#8221; link; replication should start within a minute or so.
-You can stop the process with the &#8220;Stop&#8221; link (which will also take
-a minute or so).</p>
-
-<p>From our testing gratia can replicate roughly 2000 records per minute for
-each active replication entry.</p>
-
-<p>&nbsp;</p>
-
-</div>
-
+<body>
+<h1 align="center">Replication How To</h1>
+<p>Gratia has the ability to replicate its database contents (actually, the JobUsageRecords) 
+to another instance of gratia running "out there somewhere". 
+This service can be found on the gratia-administration dashboard. 
+Assuming your database is the source, and our database at Fermi is the target:</p>
+<ul>
+  <li>You must first determine whether or not the target is running secured by contacting our gratia system administrator.</li>
+  <li>You add an entry to our "open" connection  e.g.  http://fermilab:8080</li>
+  <li>You select which probes you want to replicate to our system.</li>
+  <li>Press the &ldquo;update&rdquo; button to add the entry to your local database.</li>
+  <li>
+  If we at Fermi are running "secured", you must <br>
+  (1) set the security flag to "secured" and update, <br>
+  (2) using the "registed" entry, register your server with us.</li>
+  <li>You can test the connection by using the "Test" link. 
+  Your server will send a dummy transaction to our machine at Fermi and let you know 
+  whether or not the connection was made. If it reports and error, you should contact 
+  the target gratia administrator for support.</li>
+  <li>Finally, start the replication process by using the "Start" link. 
+  Replication should start within a minute or so. You can stop the process with the "Stop" link 
+  (which will also take a minute or so).</li>
+  </ul>
+<p>From our testing gratia can replicate roughly 2000 records per minute for each active replication entry.</p>
 </body>
-
 </html>
