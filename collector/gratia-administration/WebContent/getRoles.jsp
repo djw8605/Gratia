@@ -34,22 +34,22 @@ String selectedVO = request.getParameter("selectedVO");
 		
 			if (VoUserRole.length > 0)
 			{
-				out.println("<tr><td><label class='paramName'>Select a Role for VO: " + selectedVO + "</label><br></td></tr>");
+				out.println("<table><tr><td><label class='paramName'>Select a Role for VO: " + selectedVO + "</label><br></td></tr>");
 				out.println("<tr><td><select size='5' id='myRole' name='myRole' onchange='confirmRole(this.value);' >");
 				for(int i=0; i < VoUserRole.length; i++)
 				{
 		     			out.println("<option value=" + VoUserRole[i] +">" + VoUserRole[i] + "</option>");
 				}
-				out.println("</select></td></tr>");
+				out.println("</select></td></tr></table>");
 			}
 			else 
 			{
-				out.println("<tr><td><p class='txt'>No Roles defined for VO: " + selectedVO + "</p></td></tr>");
+				out.println("<table><tr><td><p class='txt'>No Roles defined for VO: " + selectedVO + "</p></td></tr></table>");
 			}
 		}
 		else
 		{
-			out.println("<tr><td><p class='txt'>Could not connect to VO: " + selectedVO + "</p></td></tr>");
+			out.println("<table><tr><td><p class='txt'>Could not connect to VO: " + selectedVO + "</p></td></tr></table>");
 		}
 	
 	}

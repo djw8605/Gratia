@@ -54,9 +54,7 @@
 		<td>&nbsp;&nbsp;&nbsp;</td>
 
 		<td valign="top" align="left">
-			<table>
 				<div id="getRoles"></div>
-			</table>
 		</td>
 	</tr>
 	</table>
