@@ -1,721 +1,184 @@
-<html xmlns:o="urn:schemas-microsoft-com:office:office"
-xmlns:w="urn:schemas-microsoft-com:office:word"
-xmlns="http://www.w3.org/TR/REC-html40">
-
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
 <head>
-<meta http-equiv=Content-Type content="text/html; charset=iso-8859-1">
-<meta name=ProgId content=Word.Document>
-<meta name=Generator content="Microsoft Word 11">
-<meta name=Originator content="Microsoft Word 11">
-<link rel=File-List href="service-configuration-settings_files/filelist.xml">
-<title>Untitled Document</title>
-<!--[if gte mso 9]><xml>
- <o:DocumentProperties>
-  <o:Author>glr</o:Author>
-  <o:Template>Normal</o:Template>
-  <o:LastAuthor>glr</o:LastAuthor>
-  <o:Revision>5</o:Revision>
-  <o:TotalTime>44</o:TotalTime>
-  <o:Created>2006-07-30T12:23:00Z</o:Created>
-  <o:LastSaved>2006-09-03T10:10:00Z</o:LastSaved>
-  <o:Pages>1</o:Pages>
-  <o:Words>356</o:Words>
-  <o:Characters>2033</o:Characters>
-  <o:Company>glr</o:Company>
-  <o:Lines>16</o:Lines>
-  <o:Paragraphs>4</o:Paragraphs>
-  <o:CharactersWithSpaces>2385</o:CharactersWithSpaces>
-  <o:Version>11.8036</o:Version>
- </o:DocumentProperties>
-</xml><![endif]--><!--[if gte mso 9]><xml>
- <w:WordDocument>
-  <w:Zoom>125</w:Zoom>
-  <w:SpellingState>Clean</w:SpellingState>
-  <w:GrammarState>Clean</w:GrammarState>
-  <w:ValidateAgainstSchemas/>
-  <w:SaveIfXMLInvalid>false</w:SaveIfXMLInvalid>
-  <w:IgnoreMixedContent>false</w:IgnoreMixedContent>
-  <w:AlwaysShowPlaceholderText>false</w:AlwaysShowPlaceholderText>
-  <w:BrowserLevel>MicrosoftInternetExplorer4</w:BrowserLevel>
- </w:WordDocument>
-</xml><![endif]--><!--[if gte mso 9]><xml>
- <w:LatentStyles DefLockedState="false" LatentStyleCount="156">
- </w:LatentStyles>
-</xml><![endif]-->
-<style>
-<!--
- /* Style Definitions */
- p.MsoNormal, li.MsoNormal, div.MsoNormal
-	{mso-style-parent:"";
-	margin:0in;
-	margin-bottom:.0001pt;
-	mso-pagination:widow-orphan;
-	font-size:12.0pt;
-	font-family:"Times New Roman";
-	mso-fareast-font-family:"Times New Roman";}
-a:link, span.MsoHyperlink
-	{color:blue;
-	text-decoration:underline;
-	text-underline:single;}
-a:visited, span.MsoHyperlinkFollowed
-	{color:purple;
-	text-decoration:underline;
-	text-underline:single;}
-p
-	{mso-margin-top-alt:auto;
-	margin-right:0in;
-	mso-margin-bottom-alt:auto;
-	margin-left:0in;
-	mso-pagination:widow-orphan;
-	font-size:12.0pt;
-	font-family:"Times New Roman";
-	mso-fareast-font-family:"Times New Roman";}
-span.SpellE
-	{mso-style-name:"";
-	mso-spl-e:yes;}
-span.GramE
-	{mso-style-name:"";
-	mso-gram-e:yes;}
-@page Section1
-	{size:8.5in 11.0in;
-	margin:1.0in 1.25in 1.0in 1.25in;
-	mso-header-margin:.5in;
-	mso-footer-margin:.5in;
-	mso-paper-source:0;}
-div.Section1
-	{page:Section1;}
--->
-</style>
-<!--[if gte mso 10]>
-<style>
- /* Style Definitions */
- table.MsoNormalTable
-	{mso-style-name:"Table Normal";
-	mso-tstyle-rowband-size:0;
-	mso-tstyle-colband-size:0;
-	mso-style-noshow:yes;
-	mso-style-parent:"";
-	mso-padding-alt:0in 5.4pt 0in 5.4pt;
-	mso-para-margin:0in;
-	mso-para-margin-bottom:.0001pt;
-	mso-pagination:widow-orphan;
-	font-size:10.0pt;
-	font-family:"Times New Roman";
-	mso-ansi-language:#0400;
-	mso-fareast-language:#0400;
-	mso-bidi-language:#0400;}
-table.MsoTableGrid
-	{mso-style-name:"Table Grid";
-	mso-tstyle-rowband-size:0;
-	mso-tstyle-colband-size:0;
-	border:solid windowtext 1.0pt;
-	mso-border-alt:solid windowtext .5pt;
-	mso-padding-alt:0in 5.4pt 0in 5.4pt;
-	mso-border-insideh:.5pt solid windowtext;
-	mso-border-insidev:.5pt solid windowtext;
-	mso-para-margin:0in;
-	mso-para-margin-bottom:.0001pt;
-	mso-pagination:widow-orphan;
-	font-size:10.0pt;
-	font-family:"Times New Roman";
-	mso-ansi-language:#0400;
-	mso-fareast-language:#0400;
-	mso-bidi-language:#0400;}
-</style>
-<![endif]-->
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<link href="docstyle.css" type="text/css" rel="stylesheet">
+
+<title>Gratia - Service configuration howto</title>
 </head>
 
-<body lang=EN-US link=blue vlink=purple style='tab-interval:.5in'>
+<body>
+<h1 align="center">Service Configuration Settings </h1>
+<h3>Server Specific Settings</h3>
 
-<div class=Section1>
-
-<h1 align=center style='text-align:center'>Service Configuration Settings </h1>
-
-<h1><u><span style='font-size:14.0pt'>Server Specific Settings<o:p></o:p></span></u></h1>
-
-<table class=MsoTableGrid border=1 cellspacing=0 cellpadding=0
- style='border-collapse:collapse;border:none;mso-border-alt:solid windowtext .5pt;
- mso-yfti-tbllook:480;mso-padding-alt:0in 5.4pt 0in 5.4pt;mso-border-insideh:
- .5pt solid windowtext;mso-border-insidev:.5pt solid windowtext'>
- <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes'>
-  <td width=197 valign=top style='width:2.05in;border:solid windowtext 1.0pt;
-  mso-border-alt:solid windowtext .5pt;background:silver;padding:0in 5.4pt 0in 5.4pt'>
-  <h1 align=center style='text-align:center'><span style='font-size:14.0pt'>Setting<o:p></o:p></span></h1>
-  </td>
-  <td width=197 valign=top style='width:2.05in;border:solid windowtext 1.0pt;
-  border-left:none;mso-border-left-alt:solid windowtext .5pt;mso-border-alt:
-  solid windowtext .5pt;background:silver;padding:0in 5.4pt 0in 5.4pt'>
-  <h1 align=center style='text-align:center'><span style='font-size:14.0pt'>Meaning<o:p></o:p></span></h1>
-  </td>
-  <td width=242 valign=top style='width:181.2pt;border:solid windowtext 1.0pt;
-  border-left:none;mso-border-left-alt:solid windowtext .5pt;mso-border-alt:
-  solid windowtext .5pt;background:silver;padding:0in 5.4pt 0in 5.4pt'>
-  <h1 align=center style='text-align:center'><span style='font-size:14.0pt'>Default/Example<o:p></o:p></span></h1>
-  </td>
- </tr>
- <tr style='mso-yfti-irow:1'>
-  <td width=197 valign=top style='width:2.05in;border:solid windowtext 1.0pt;
-  border-top:none;mso-border-top-alt:solid windowtext .5pt;mso-border-alt:solid windowtext .5pt;
-  padding:0in 5.4pt 0in 5.4pt'>
-  <h1><span class=SpellE><span style='font-size:12.0pt'>service.rmi.port</span></span><span
-  style='font-size:12.0pt'><o:p></o:p></span></h1>
-  </td>
-  <td width=197 valign=top style='width:2.05in;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt'>
-  <h1><span style='font-size:12.0pt'>The default port used by gratia for
-  internal <span class=SpellE>rmi</span> use<o:p></o:p></span></h1>
-  </td>
-  <td width=242 valign=top style='width:181.2pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt'>
-  <h1><span style='font-size:12.0pt'>17000<o:p></o:p></span></h1>
-  </td>
- </tr>
- <tr style='mso-yfti-irow:2'>
-  <td width=197 valign=top style='width:2.05in;border:solid windowtext 1.0pt;
-  border-top:none;mso-border-top-alt:solid windowtext .5pt;mso-border-alt:solid windowtext .5pt;
-  padding:0in 5.4pt 0in 5.4pt'>
-  <h1><span class=SpellE><span style='font-size:12.0pt'>service.rmi.bin</span></span><span
-  style='font-size:12.0pt'><o:p></o:p></span></h1>
-  </td>
-  <td width=197 valign=top style='width:2.05in;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt'>
-  <h1><span style='font-size:12.0pt'>The registered <span class=SpellE>rmi</span>
-  name for <span class=SpellE>rmi</span> access<o:p></o:p></span></h1>
-  </td>
-  <td width=242 valign=top style='width:181.2pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt'>
-  <h1><span style='font-size:12.0pt'>//Fermi.fnal.gov:17000<o:p></o:p></span></h1>
-  </td>
- </tr>
- <tr style='mso-yfti-irow:3'>
-  <td width=197 valign=top style='width:2.05in;border:solid windowtext 1.0pt;
-  border-top:none;mso-border-top-alt:solid windowtext .5pt;mso-border-alt:solid windowtext .5pt;
-  padding:0in 5.4pt 0in 5.4pt'>
-  <h1><span class=SpellE><span style='font-size:12.0pt'>service.rmi.lookup</span></span><span
-  style='font-size:12.0pt'><o:p></o:p></span></h1>
-  </td>
-  <td width=197 valign=top style='width:2.05in;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt'>
-  <h1><span style='font-size:12.0pt'>The &#8220;external&#8221; <span
-  class=SpellE>rmi</span> name that outside services can access<o:p></o:p></span></h1>
-  </td>
-  <td width=242 valign=top style='width:181.2pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt'>
-  <h1><span style='font-size:12.0pt'>rmi://Fermi.fnal.gov:17000<o:p></o:p></span></h1>
-  </td>
- </tr>
- <tr style='mso-yfti-irow:4;mso-yfti-lastrow:yes'>
-  <td width=197 valign=top style='width:2.05in;border:solid windowtext 1.0pt;
-  border-top:none;mso-border-top-alt:solid windowtext .5pt;mso-border-alt:solid windowtext .5pt;
-  padding:0in 5.4pt 0in 5.4pt'>
-  <h1><span class=SpellE><span style='font-size:12.0pt'>service.rmi.service</span></span><span
-  style='font-size:12.0pt'><o:p></o:p></span></h1>
-  </td>
-  <td width=197 valign=top style='width:2.05in;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt'>
-  <h1><span style='font-size:12.0pt'>The tomcat <span class=SpellE>webapp</span>
-  that <span class=SpellE>rmi</span> requests can be sent to<o:p></o:p></span></h1>
-  </td>
-  <td width=242 valign=top style='width:181.2pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt'>
-  <h1><span style='font-size:12.0pt'>/gratia<o:p></o:p></span></h1>
-  </td>
- </tr>
+<table  border="1" cellpadding="0" cellspacing="0" width="80%">
+  <tbody>
+    <tr bgcolor="#CCCCCC" >
+      <th valign="top" width="20%">Setting</th>
+      <th valign="top" width="45%">Meaning</th>
+      <th valign="top" width="35%">Default/Example</th>
+    </tr>
+    <tr >
+      <td   valign="top" >service.rmi.port</td>
+      <td   valign="top" >The default port used by gratia for internal rmi use</td>
+      <td   valign="top" >17000</td>
+    </tr>
+    <tr >
+      <td   valign="top" >service.rmi.bin</td>
+      <td   valign="top" >The registered rmi name for rmi access</td>
+      <td   valign="top" >//Fermi.fnal.gov:17000</td>
+    </tr>
+    <tr >
+      <td   valign="top" >service.rmi.lookup</td>
+      <td   valign="top" >The &quot;external&quot; rmi name that outside services can access</td>
+      <td   valign="top" >rmi://Fermi.fnal.gov:17000</td>
+    </tr>
+    <tr >
+      <td   valign="top" >service.rmi.service</td>
+      <td   valign="top" >The tomcat webapp that rmi requests can be sent to</td>
+      <td   valign="top" >/gratia</td>
+    </tr>
+  </tbody>
+</table>
+<h3>Security Settings</h3>
+<table  border="1" cellpadding="0" cellspacing="0" width="80%">
+  <tbody>
+    <tr bgcolor="#CCCCCC" >
+      <th valign="top" width="20%">Setting</th>
+      <th  valign="top" width="45%">Meaning</th>
+      <th valign="top" width="35%">Default/Example</th>
+    </tr>
+    <tr >
+      <td   valign="top" >service.security.level</td>
+      <td   valign="top" >Flag indicating what form of security should gratia assume.</td>
+      <td   valign="top" >0 = No security<br>
+          1 = Use tomcat ssl<br>
+          2 = Apache handling security</td>
+    </tr>
+    <tr >
+      <td   valign="top" >service.use.selfgenerated.certs</td>
+      <td   valign="top" >Flag indicating whether or not gratia should generate it&rsquo;s own certs or use vdt/doe certs</td>
+      <td   valign="top" >1 = Use self generated certs</td>
+    </tr>
+    <tr >
+      <td   valign="top" >service.vdt.cert.file</td>
+      <td   valign="top" >Absolute path to vdt/doe public cert file</td>
+      <td   valign="top" >/etc/grid-security/httpcert.pem</td>
+    </tr>
+    <tr >
+      <td   valign="top" >Service.vdt.key.file</td>
+      <td   valign="top" >Absolute path to vdt/doe private key file</td>
+      <td   valign="top" >/etc/grid-security/httpkey.pem</td>
+    </tr>
+    <tr >
+      <td   valign="top" >service.autoregister.pem</td>
+      <td   valign="top" >Flag indicating whether or not external services (when running ssl) will automatically be trusted. Values are 0 (no) or 1 (yes) &ndash; refer to security howto</td>
+      <td   valign="top" >1</td>
+    </tr>
+    <tr >
+      <td   valign="top" >service.open.connection</td>
+      <td   valign="top" >The open, unsecured url clients can connect to</td>
+      <td   valign="top" >http://fermilab:8880</td>
+    </tr>
+    <tr >
+      <td   valign="top" >service.secure.connection</td>
+      <td   valign="top" >The ssl enabled url that clients can connect to</td>
+      <td   valign="top" >https://fermilab:8843</td>
+    </tr>
+  </tbody>
 </table>
 
-<h1><u><span style='font-size:14.0pt'>Security Settings<o:p></o:p></span></u></h1>
-
-<table class=MsoTableGrid border=1 cellspacing=0 cellpadding=0
- style='border-collapse:collapse;border:none;mso-border-alt:solid windowtext .5pt;
- mso-yfti-tbllook:480;mso-padding-alt:0in 5.4pt 0in 5.4pt;mso-border-insideh:
- .5pt solid windowtext;mso-border-insidev:.5pt solid windowtext'>
- <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes'>
-  <td width=222 valign=top style='width:166.8pt;border:solid windowtext 1.0pt;
-  mso-border-alt:solid windowtext .5pt;background:silver;padding:0in 5.4pt 0in 5.4pt'>
-  <h1 align=center style='text-align:center'><span style='font-size:14.0pt'>Setting<o:p></o:p></span></h1>
-  </td>
-  <td width=197 valign=top style='width:2.05in;border:solid windowtext 1.0pt;
-  border-left:none;mso-border-left-alt:solid windowtext .5pt;mso-border-alt:
-  solid windowtext .5pt;background:silver;padding:0in 5.4pt 0in 5.4pt'>
-  <h1 align=center style='text-align:center'><span style='font-size:14.0pt'>Meaning<o:p></o:p></span></h1>
-  </td>
-  <td width=241 valign=top style='width:181.1pt;border:solid windowtext 1.0pt;
-  border-left:none;mso-border-left-alt:solid windowtext .5pt;mso-border-alt:
-  solid windowtext .5pt;background:silver;padding:0in 5.4pt 0in 5.4pt'>
-  <h1 align=center style='text-align:center'><span style='font-size:14.0pt'>Default/Example<o:p></o:p></span></h1>
-  </td>
- </tr>
- <tr style='mso-yfti-irow:1'>
-  <td width=222 valign=top style='width:166.8pt;border:solid windowtext 1.0pt;
-  border-top:none;mso-border-top-alt:solid windowtext .5pt;mso-border-alt:solid windowtext .5pt;
-  padding:0in 5.4pt 0in 5.4pt'>
-  <h1><span class=SpellE><span style='font-size:12.0pt'>service.security.level</span></span><span
-  style='font-size:12.0pt'><o:p></o:p></span></h1>
-  </td>
-  <td width=197 valign=top style='width:2.05in;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt'>
-  <h1><span style='font-size:12.0pt'>Flag indicating what form of security <span
-  class=GramE>should gratia</span> assume.<o:p></o:p></span></h1>
-  </td>
-  <td width=241 valign=top style='width:181.1pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt'>
-  <h1><span style='font-size:12.0pt'>0 = No security<o:p></o:p></span></h1>
-  <h1><span style='font-size:12.0pt'>1 = Use tomcat <span class=SpellE>ssl</span><o:p></o:p></span></h1>
-  <h1><span style='font-size:12.0pt'>2 = Apache handling security<o:p></o:p></span></h1>
-  </td>
- </tr>
- <tr style='mso-yfti-irow:2'>
-  <td width=222 valign=top style='width:166.8pt;border:solid windowtext 1.0pt;
-  border-top:none;mso-border-top-alt:solid windowtext .5pt;mso-border-alt:solid windowtext .5pt;
-  padding:0in 5.4pt 0in 5.4pt'>
-  <h1><span class=SpellE><span style='font-size:12.0pt'>service.use.selfgenerated.certs</span></span><span
-  style='font-size:12.0pt'><o:p></o:p></span></h1>
-  </td>
-  <td width=197 valign=top style='width:2.05in;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt'>
-  <h1><span style='font-size:12.0pt'>Flag indicating whether or not gratia should
-  generate it&#8217;s own <span class=SpellE>certs</span> or use <span
-  class=SpellE>vdt</span>/doe <span class=SpellE>certs</span><o:p></o:p></span></h1>
-  </td>
-  <td width=241 valign=top style='width:181.1pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt'>
-  <h1><span style='font-size:12.0pt'>1 = Use self generated <span class=SpellE>certs</span><o:p></o:p></span></h1>
-  </td>
- </tr>
- <tr style='mso-yfti-irow:3'>
-  <td width=222 valign=top style='width:166.8pt;border:solid windowtext 1.0pt;
-  border-top:none;mso-border-top-alt:solid windowtext .5pt;mso-border-alt:solid windowtext .5pt;
-  padding:0in 5.4pt 0in 5.4pt'>
-  <h1><span class=SpellE><span style='font-size:12.0pt'>service.vdt.cert.file</span></span><span
-  style='font-size:12.0pt'><o:p></o:p></span></h1>
-  </td>
-  <td width=197 valign=top style='width:2.05in;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt'>
-  <h1><span style='font-size:12.0pt'>Absolute path to <span class=SpellE>vdt</span>/doe
-  public cert file<o:p></o:p></span></h1>
-  </td>
-  <td width=241 valign=top style='width:181.1pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt'>
-  <h1><span style='font-size:12.0pt'>/etc/grid-security/<span class=SpellE>httpcert.pem</span><o:p></o:p></span></h1>
-  </td>
- </tr>
- <tr style='mso-yfti-irow:4'>
-  <td width=222 valign=top style='width:166.8pt;border:solid windowtext 1.0pt;
-  border-top:none;mso-border-top-alt:solid windowtext .5pt;mso-border-alt:solid windowtext .5pt;
-  padding:0in 5.4pt 0in 5.4pt'>
-  <h1><span class=SpellE><span style='font-size:12.0pt'>Service.vdt.key.file</span></span><span
-  style='font-size:12.0pt'><o:p></o:p></span></h1>
-  </td>
-  <td width=197 valign=top style='width:2.05in;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt'>
-  <h1><span style='font-size:12.0pt'>Absolute path to <span class=SpellE>vdt</span>/doe
-  private key file<o:p></o:p></span></h1>
-  </td>
-  <td width=241 valign=top style='width:181.1pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt'>
-  <h1><span style='font-size:12.0pt'>/etc/grid-security/<span class=SpellE>httpkey.pem</span><o:p></o:p></span></h1>
-  </td>
- </tr>
- <tr style='mso-yfti-irow:5'>
-  <td width=222 valign=top style='width:166.8pt;border:solid windowtext 1.0pt;
-  border-top:none;mso-border-top-alt:solid windowtext .5pt;mso-border-alt:solid windowtext .5pt;
-  padding:0in 5.4pt 0in 5.4pt'>
-  <h1><span class=SpellE><span style='font-size:12.0pt'>service.autoregister.pem</span></span><span
-  style='font-size:12.0pt'><o:p></o:p></span></h1>
-  </td>
-  <td width=197 valign=top style='width:2.05in;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt'>
-  <h1><span style='font-size:12.0pt'>Flag indicating whether or not external
-  services (when running <span class=SpellE>ssl</span>) will automatically <span
-  class=GramE>be</span> trusted. Values are 0 (no) or 1 (yes) &#8211; refer to
-  security <span class=SpellE>howto</span><o:p></o:p></span></h1>
-  </td>
-  <td width=241 valign=top style='width:181.1pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt'>
-  <h1><span style='font-size:12.0pt'>1<o:p></o:p></span></h1>
-  </td>
- </tr>
- <tr style='mso-yfti-irow:6'>
-  <td width=222 valign=top style='width:166.8pt;border:solid windowtext 1.0pt;
-  border-top:none;mso-border-top-alt:solid windowtext .5pt;mso-border-alt:solid windowtext .5pt;
-  padding:0in 5.4pt 0in 5.4pt'>
-  <h1><span class=SpellE><span style='font-size:12.0pt'>service.open.commection</span></span><span
-  style='font-size:12.0pt'><o:p></o:p></span></h1>
-  </td>
-  <td width=197 valign=top style='width:2.05in;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt'>
-  <h1><span style='font-size:12.0pt'>The open, unsecured <span class=SpellE><span
-  class=GramE>url</span></span> clients can connect to<o:p></o:p></span></h1>
-  </td>
-  <td width=241 valign=top style='width:181.1pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt'>
-  <h1><span style='font-size:12.0pt'>http://fermilab:8880<o:p></o:p></span></h1>
-  </td>
- </tr>
- <tr style='mso-yfti-irow:7;mso-yfti-lastrow:yes'>
-  <td width=222 valign=top style='width:166.8pt;border:solid windowtext 1.0pt;
-  border-top:none;mso-border-top-alt:solid windowtext .5pt;mso-border-alt:solid windowtext .5pt;
-  padding:0in 5.4pt 0in 5.4pt'>
-  <h1><span class=SpellE><span style='font-size:12.0pt'>service.secure.connection</span></span><span
-  style='font-size:12.0pt'><o:p></o:p></span></h1>
-  </td>
-  <td width=197 valign=top style='width:2.05in;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt'>
-  <h1><span style='font-size:12.0pt'>The <span class=SpellE>ssl</span> enabled <span
-  class=SpellE><span class=GramE>url</span></span> that clients can connect to<o:p></o:p></span></h1>
-  </td>
-  <td width=241 valign=top style='width:181.1pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt'>
-  <h1><span style='font-size:12.0pt'>https://fermilab:8843<o:p></o:p></span></h1>
-  </td>
- </tr>
+<h3>JMS Settings</h3>
+<table  border="1" cellpadding="0" cellspacing="0" width="80%">
+  <tbody>
+    <tr bgcolor="#CCCCCC" >
+      <th  valign="top" width="20%">Setting</th>
+      <th  valign="top"  width="45%">Meaning</th>
+      <th  valign="top" width="35%">Default/Example</th>
+    </tr>
+    <tr >
+      <td   valign="top" >service.listener.threads</td>
+      <td   valign="top">The number of threads used to process incoming data transmissions</td>
+      <td   valign="top">e</td>
+    </tr>
+  </tbody>
 </table>
 
-<h1><u><span style='font-size:14.0pt'>JMS Settings<o:p></o:p></span></u></h1>
-
-<table class=MsoTableGrid border=1 cellspacing=0 cellpadding=0
- style='border-collapse:collapse;border:none;mso-border-alt:solid windowtext .5pt;
- mso-yfti-tbllook:480;mso-padding-alt:0in 5.4pt 0in 5.4pt;mso-border-insideh:
- .5pt solid windowtext;mso-border-insidev:.5pt solid windowtext'>
- <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes'>
-  <td width=197 valign=top style='width:2.05in;border:solid windowtext 1.0pt;
-  mso-border-alt:solid windowtext .5pt;background:silver;padding:0in 5.4pt 0in 5.4pt'>
-  <h1 align=center style='text-align:center'><span style='font-size:14.0pt'>Setting<o:p></o:p></span></h1>
-  </td>
-  <td width=197 valign=top style='width:2.05in;border:solid windowtext 1.0pt;
-  border-left:none;mso-border-left-alt:solid windowtext .5pt;mso-border-alt:
-  solid windowtext .5pt;background:silver;padding:0in 5.4pt 0in 5.4pt'>
-  <h1 align=center style='text-align:center'><span style='font-size:14.0pt'>Meaning<o:p></o:p></span></h1>
-  </td>
-  <td width=197 valign=top style='width:2.05in;border:solid windowtext 1.0pt;
-  border-left:none;mso-border-left-alt:solid windowtext .5pt;mso-border-alt:
-  solid windowtext .5pt;background:silver;padding:0in 5.4pt 0in 5.4pt'>
-  <h1 align=center style='text-align:center'><span style='font-size:14.0pt'>Default/Example<o:p></o:p></span></h1>
-  </td>
- </tr>
- <tr style='mso-yfti-irow:1;mso-yfti-lastrow:yes'>
-  <td width=197 valign=top style='width:2.05in;border:solid windowtext 1.0pt;
-  border-top:none;mso-border-top-alt:solid windowtext .5pt;mso-border-alt:solid windowtext .5pt;
-  padding:0in 5.4pt 0in 5.4pt'>
-  <h1><span class=SpellE><span style='font-size:12.0pt'>service.listener.threads</span></span><span
-  style='font-size:12.0pt'><o:p></o:p></span></h1>
-  </td>
-  <td width=197 valign=top style='width:2.05in;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt'>
-  <h1><span style='font-size:12.0pt'>The number of threads used to process
-  incoming data transmissions<o:p></o:p></span></h1>
-  </td>
-  <td width=197 valign=top style='width:2.05in;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt'>
-  <h1><span style='font-size:12.0pt'>e<o:p></o:p></span></h1>
-  </td>
- </tr>
+<h3>Database Settings</h3>
+<table  border="1" cellpadding="0" cellspacing="0" width="80%">
+  <tbody>
+    <tr bgcolor="#CCCCCC" >
+      <th  valign="top" width="20%">Setting</th>
+      <th  valign="top" width="45%">Meaning</th>
+      <th  valign="top" width="35%">Default/Example</th>
+    </tr>
+    <tr >
+      <td valign="top" >service.mysql.driver</td>
+      <td valign="top" >The name of the mysql sql driver being used.</td>
+      <td valign="top" >com.mysql.jdbc.Driver</td>
+    </tr>
+    <tr >
+      <td   valign="top" >service.mysql.url</td>
+      <td   valign="top" >The url of the gratia database</td>
+      <td   valign="top" >jdbc:mysql://Fermi.fnal.gov:3306/gratia</td>
+    </tr>
+    <tr >
+      <td   valign="top" >service.mysql.user</td>
+      <td   valign="top" >The user id allowed to access/update the database</td>
+      <td   valign="top" >youruserid</td>
+    </tr>
+    <tr >
+      <td   valign="top" >service.mysql.password</td>
+      <td   valign="top" >Database password</td>
+      <td   valign="top" >youruserpassword</td>
+    </tr>
+  </tbody>
 </table>
 
-<h1><u><span style='font-size:14.0pt'>Database Settings<o:p></o:p></span></u></h1>
-
-<table class=MsoTableGrid border=1 cellspacing=0 cellpadding=0
- style='border-collapse:collapse;border:none;mso-border-alt:solid windowtext .5pt;
- mso-yfti-tbllook:480;mso-padding-alt:0in 5.4pt 0in 5.4pt;mso-border-insideh:
- .5pt solid windowtext;mso-border-insidev:.5pt solid windowtext'>
- <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes'>
-  <td width=197 valign=top style='width:2.05in;border:solid windowtext 1.0pt;
-  mso-border-alt:solid windowtext .5pt;background:silver;padding:0in 5.4pt 0in 5.4pt'>
-  <h1 align=center style='text-align:center'><span style='font-size:14.0pt'>Setting<o:p></o:p></span></h1>
-  </td>
-  <td width=197 valign=top style='width:2.05in;border:solid windowtext 1.0pt;
-  border-left:none;mso-border-left-alt:solid windowtext .5pt;mso-border-alt:
-  solid windowtext .5pt;background:silver;padding:0in 5.4pt 0in 5.4pt'>
-  <h1 align=center style='text-align:center'><span style='font-size:14.0pt'>Meaning<o:p></o:p></span></h1>
-  </td>
-  <td width=282 valign=top style='width:211.2pt;border:solid windowtext 1.0pt;
-  border-left:none;mso-border-left-alt:solid windowtext .5pt;mso-border-alt:
-  solid windowtext .5pt;background:silver;padding:0in 5.4pt 0in 5.4pt'>
-  <h1 align=center style='text-align:center'><span style='font-size:14.0pt'>Default/Example<o:p></o:p></span></h1>
-  </td>
- </tr>
- <tr style='mso-yfti-irow:1'>
-  <td width=197 valign=top style='width:2.05in;border:solid windowtext 1.0pt;
-  border-top:none;mso-border-top-alt:solid windowtext .5pt;mso-border-alt:solid windowtext .5pt;
-  padding:0in 5.4pt 0in 5.4pt'>
-  <h1><span class=SpellE><span style='font-size:12.0pt'>service.mysql.driver</span></span><span
-  style='font-size:12.0pt'><o:p></o:p></span></h1>
-  </td>
-  <td width=197 valign=top style='width:2.05in;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt'>
-  <h1><span class=GramE><span style='font-size:12.0pt'>The name of the <span
-  class=SpellE>mysql</span> <span class=SpellE>sql</span> driver being used.</span></span><span
-  style='font-size:12.0pt'><o:p></o:p></span></h1>
-  </td>
-  <td width=282 valign=top style='width:211.2pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt'>
-  <h1><span class=SpellE><span style='font-size:12.0pt'>com.mysql.jdbc.Driver</span></span><span
-  style='font-size:12.0pt'><o:p></o:p></span></h1>
-  </td>
- </tr>
- <tr style='mso-yfti-irow:2'>
-  <td width=197 valign=top style='width:2.05in;border:solid windowtext 1.0pt;
-  border-top:none;mso-border-top-alt:solid windowtext .5pt;mso-border-alt:solid windowtext .5pt;
-  padding:0in 5.4pt 0in 5.4pt'>
-  <h1><span class=SpellE><span style='font-size:12.0pt'>service.mysql.url</span></span><span
-  style='font-size:12.0pt'><o:p></o:p></span></h1>
-  </td>
-  <td width=197 valign=top style='width:2.05in;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt'>
-  <h1><span style='font-size:12.0pt'>The <span class=SpellE><span class=GramE>url</span></span>
-  of the gratia database<o:p></o:p></span></h1>
-  </td>
-  <td width=282 valign=top style='width:211.2pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt'>
-  <h1><span style='font-size:12.0pt'>jdbc:mysql://Fermi.fnal.gov:3306/gratia<o:p></o:p></span></h1>
-  </td>
- </tr>
- <tr style='mso-yfti-irow:3'>
-  <td width=197 valign=top style='width:2.05in;border:solid windowtext 1.0pt;
-  border-top:none;mso-border-top-alt:solid windowtext .5pt;mso-border-alt:solid windowtext .5pt;
-  padding:0in 5.4pt 0in 5.4pt'>
-  <h1><span class=SpellE><span style='font-size:12.0pt'>service.mysql.user</span></span><span
-  style='font-size:12.0pt'><o:p></o:p></span></h1>
-  </td>
-  <td width=197 valign=top style='width:2.05in;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt'>
-  <h1><span style='font-size:12.0pt'>The user id allowed to access/update the
-  database<o:p></o:p></span></h1>
-  </td>
-  <td width=282 valign=top style='width:211.2pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt'>
-  <h1><span class=SpellE><span class=GramE><span style='font-size:12.0pt'>youruserid</span></span></span><span
-  style='font-size:12.0pt'><o:p></o:p></span></h1>
-  </td>
- </tr>
- <tr style='mso-yfti-irow:4;mso-yfti-lastrow:yes'>
-  <td width=197 valign=top style='width:2.05in;border:solid windowtext 1.0pt;
-  border-top:none;mso-border-top-alt:solid windowtext .5pt;mso-border-alt:solid windowtext .5pt;
-  padding:0in 5.4pt 0in 5.4pt'>
-  <h1><span class=SpellE><span style='font-size:12.0pt'>service.mysql.password</span></span><span
-  style='font-size:12.0pt'><o:p></o:p></span></h1>
-  </td>
-  <td width=197 valign=top style='width:2.05in;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt'>
-  <h1><span style='font-size:12.0pt'>Database password<o:p></o:p></span></h1>
-  </td>
-  <td width=282 valign=top style='width:211.2pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt'>
-  <h1><span class=SpellE><span class=GramE><span style='font-size:12.0pt'>youruserpassword</span></span></span><span
-  style='font-size:12.0pt'><o:p></o:p></span></h1>
-  </td>
- </tr>
+<h3>Reporting Settings</h3>
+<table  border="1" cellpadding="0" cellspacing="0" width="80%">
+  <tbody>
+    <tr bgcolor="#CCCCCC" >
+      <th  valign="top" width="20%">Setting</th>
+      <th  valign="top" width="45%">Meaning</th>
+      <th  valign="top" width="35%">Default/Example</th>
+    </tr>
+    <tr >
+      <td   valign="top" >service.reporting.user</td>
+      <td   valign="top" >The userid (with read only access) to your database</td>
+      <td   valign="top" >reader</td>
+    </tr>
+    <tr >
+      <td   valign="top" >service.reporting.password</td>
+      <td   valign="top" >Password for user.</td>
+      <td   valign="top" >reader</td>
+    </tr>
+    <tr >
+      <td   valign="top" >service.reporting.reports.folder</td>
+      <td   valign="top" >Path (relative to webapps) of the folder containing the various rptdesign files</td>
+      <td   valign="top" >gratia-reports/reports</td>
+    </tr>
+    <tr >
+      <td   valign="top" >service.reporting.static.folder</td>
+      <td   valign="top" >Path (relative to webapps) of the folder to store the static reports (pdf format) produced daily.</td>
+      <td   valign="top" >gratia-reports/reports-static</td>
+    </tr>
+    <tr >
+      <td   valign="top" >service.reporting.webapp.home</td>
+      <td   valign="top" >Path (relative to webapps) of the folder containing the reporting application</td>
+      <td   valign="top" >gratia-reporting</td>
+    </tr>
+    <tr >
+      <td   valign="top" >service.reporting.menuconfig</td>
+      <td   valign="top" >Path (relative to webapps) and file name of the file containg the menu configuration</td>
+      <td   valign="top" >gratia-reports/MenuConfig/UserConfig_osg.xml</td>
+    </tr>
+    <tr >
+      <td   valign="top" >service.reporting.staticreports</td>
+      <td   valign="top" >Path (relative to webapps) and file name of the file containg the static reports to be produced on a daily basis</td>
+      <td   valign="top" >gratia-reports/MenuConfig/StaticReports.xml</td>
+    </tr>
+  </tbody>
 </table>
-
-<h1><span class=SpellE><u><span style='font-size:14.0pt'>Birt</span></u></span><u><span
-style='font-size:14.0pt'> Settings<o:p></o:p></span></u></h1>
-
-<table class=MsoTableGrid border=1 cellspacing=0 cellpadding=0
- style='border-collapse:collapse;border:none;mso-border-alt:solid windowtext .5pt;
- mso-yfti-tbllook:480;mso-padding-alt:0in 5.4pt 0in 5.4pt;mso-border-insideh:
- .5pt solid windowtext;mso-border-insidev:.5pt solid windowtext'>
- <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes'>
-  <td width=197 valign=top style='width:2.05in;border:solid windowtext 1.0pt;
-  mso-border-alt:solid windowtext .5pt;background:silver;padding:0in 5.4pt 0in 5.4pt'>
-  <h1 align=center style='text-align:center'><span style='font-size:14.0pt'>Setting<o:p></o:p></span></h1>
-  </td>
-  <td width=197 valign=top style='width:2.05in;border:solid windowtext 1.0pt;
-  border-left:none;mso-border-left-alt:solid windowtext .5pt;mso-border-alt:
-  solid windowtext .5pt;background:silver;padding:0in 5.4pt 0in 5.4pt'>
-  <h1 align=center style='text-align:center'><span style='font-size:14.0pt'>Meaning<o:p></o:p></span></h1>
-  </td>
-  <td width=197 valign=top style='width:2.05in;border:solid windowtext 1.0pt;
-  border-left:none;mso-border-left-alt:solid windowtext .5pt;mso-border-alt:
-  solid windowtext .5pt;background:silver;padding:0in 5.4pt 0in 5.4pt'>
-  <h1 align=center style='text-align:center'><span style='font-size:14.0pt'>Default/Example<o:p></o:p></span></h1>
-  </td>
- </tr>
- <tr style='mso-yfti-irow:1'>
-  <td width=197 valign=top style='width:2.05in;border:solid windowtext 1.0pt;
-  border-top:none;mso-border-top-alt:solid windowtext .5pt;mso-border-alt:solid windowtext .5pt;
-  padding:0in 5.4pt 0in 5.4pt'>
-  <h1><span class=SpellE><span style='font-size:12.0pt'>service.birt.user</span></span><span
-  style='font-size:12.0pt'><o:p></o:p></span></h1>
-  </td>
-  <td width=197 valign=top style='width:2.05in;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt'>
-  <h1><span style='font-size:12.0pt'>The <span class=SpellE>userid</span> (with
-  read only access) to your database<o:p></o:p></span></h1>
-  </td>
-  <td width=197 valign=top style='width:2.05in;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt'>
-  <h1><span class=GramE><span style='font-size:12.0pt'>reader</span></span><span
-  style='font-size:12.0pt'><o:p></o:p></span></h1>
-  </td>
- </tr>
- <tr style='mso-yfti-irow:2'>
-  <td width=197 valign=top style='width:2.05in;border:solid windowtext 1.0pt;
-  border-top:none;mso-border-top-alt:solid windowtext .5pt;mso-border-alt:solid windowtext .5pt;
-  padding:0in 5.4pt 0in 5.4pt'>
-  <h1><span class=SpellE><span style='font-size:12.0pt'>service.birt.password</span></span><span
-  style='font-size:12.0pt'><o:p></o:p></span></h1>
-  </td>
-  <td width=197 valign=top style='width:2.05in;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt'>
-  <h1><span class=GramE><span style='font-size:12.0pt'>Password for user.</span></span><span
-  style='font-size:12.0pt'><o:p></o:p></span></h1>
-  </td>
-  <td width=197 valign=top style='width:2.05in;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt'>
-  <h1><span class=GramE><span style='font-size:12.0pt'>reader</span></span><span
-  style='font-size:12.0pt'><o:p></o:p></span></h1>
-  </td>
- </tr>
- <tr style='mso-yfti-irow:3'>
-  <td width=197 valign=top style='width:2.05in;border:solid windowtext 1.0pt;
-  border-top:none;mso-border-top-alt:solid windowtext .5pt;mso-border-alt:solid windowtext .5pt;
-  padding:0in 5.4pt 0in 5.4pt'>
-  <h1><span class=SpellE><span style='font-size:12.0pt'>service.birt.reports.folder</span></span><span
-  style='font-size:12.0pt'><o:p></o:p></span></h1>
-  </td>
-  <td width=197 valign=top style='width:2.05in;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt'>
-  <h1><span style='font-size:12.0pt'>Path (relative to <span class=SpellE>webapps</span>)
-  of the folder containing the various <span class=SpellE>rptdesign</span>
-  files<o:p></o:p></span></h1>
-  </td>
-  <td width=197 valign=top style='width:2.05in;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt'>
-  <h1><span class=GramE><span style='font-size:12.0pt'>gratia-reports</span></span><span
-  style='font-size:12.0pt'><o:p></o:p></span></h1>
-  </td>
- </tr>
- <tr style='mso-yfti-irow:4'>
-  <td width=197 valign=top style='width:2.05in;border:solid windowtext 1.0pt;
-  border-top:none;mso-border-top-alt:solid windowtext .5pt;mso-border-alt:solid windowtext .5pt;
-  padding:0in 5.4pt 0in 5.4pt'>
-  <h1><span class=SpellE><span style='font-size:12.0pt'>service.birt.engine.home</span></span><span
-  style='font-size:12.0pt'><o:p></o:p></span></h1>
-  </td>
-  <td width=197 valign=top style='width:2.05in;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt'>
-  <h1><span style='font-size:12.0pt'>Path (relative to <span class=SpellE>webapps</span>)
-  of the folder containing the <span class=SpellE>Birt</span> report engine<o:p></o:p></span></h1>
-  </td>
-  <td width=197 valign=top style='width:2.05in;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt'>
-  <h1><span class=SpellE><span style='font-size:12.0pt'>Birt</span></span><span
-  style='font-size:12.0pt'><o:p></o:p></span></h1>
-  </td>
- </tr>
- <tr style='mso-yfti-irow:5;mso-yfti-lastrow:yes'>
-  <td width=197 valign=top style='width:2.05in;border:solid windowtext 1.0pt;
-  border-top:none;mso-border-top-alt:solid windowtext .5pt;mso-border-alt:solid windowtext .5pt;
-  padding:0in 5.4pt 0in 5.4pt'>
-  <h1><span class=SpellE><span style='font-size:12.0pt'>service.birt.webapp.home</span></span><span
-  style='font-size:12.0pt'><o:p></o:p></span></h1>
-  </td>
-  <td width=197 valign=top style='width:2.05in;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt'>
-  <h1><span style='font-size:12.0pt'>Path (relative to <span class=SpellE>webapps</span>)
-  of the folder containing the <span class=SpellE>Birt</span> reporting application<o:p></o:p></span></h1>
-  </td>
-  <td width=197 valign=top style='width:2.05in;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
-  mso-border-alt:solid windowtext .5pt;padding:0in 5.4pt 0in 5.4pt'>
-  <h1><span style='font-size:12.0pt'>gratia-reporting<o:p></o:p></span></h1>
-  </td>
- </tr>
-</table>
-
-<h1><span style='font-size:14.0pt'><o:p>&nbsp;</o:p></span></h1>
-
-<h1><span style='font-size:14.0pt'><o:p>&nbsp;</o:p></span></h1>
-
-<h1><span style='font-size:14.0pt'><o:p>&nbsp;</o:p></span></h1>
-
-<h1><span style='font-size:14.0pt'><o:p>&nbsp;</o:p></span></h1>
-
-</div>
-
 </body>
-
 </html>
