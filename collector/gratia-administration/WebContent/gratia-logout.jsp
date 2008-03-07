@@ -4,20 +4,20 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<link href="stylesheet.css" type="text/css" rel="stylesheet">
 <title>Gratia Accounting</title>
 </head>
-<body>
-	<%
-	session.invalidate();
-	%>
 
-	<script type="text/javascript">
-		parent.adminDashboard.location = "./dashboard.jsp";
-	</script>
-	<table>
-		<tr>
-			<td>Thank you for using the OSG reporting system</td>
-		</tr>
-	</table>
+<body>
+<%
+	session.invalidate();
+%>
+
+<script type="text/javascript">
+	parent.adminDashboard.location = "./dashboard.jsp";
+</script>
+	
+<p class="txt"> Thank you for using the gratia grid Accounting System.</p>
+ 
 </body>
 </html>
