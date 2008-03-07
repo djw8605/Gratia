@@ -17,7 +17,7 @@
 <p ><b><u>Building:</u></b></p>
 <ul type="disc">
   <li>There are 4 projects that must be downloaded from CVS in order to build the complete gratia release. Specifically, gratia, GratiaReportConfiguration, GratiaReporting, and GratiaReports.</li>
-  <li>Additionally, all 4 projects must be placed in a common directory.<b><u></u></b></li>
+  <li>Additionally, all 4 projects must be placed in a common directory.</li>
   <li>To actually build a complete release, run the makefile found in gratia/build-scripts. This will create all of the necessary war files and place them in gratia/target.</li>
 </ul>
 
@@ -30,19 +30,19 @@
 <p ><b><u>Tomcat Configuration:</u></b></p>
 <ul type="disc">
   <li>Modify $CATALINA_HOME/gratia/service-configuration.properties:</li>
-</ul>
 
   <ul type="circle">
     <li>HOSTNAME entry to the fully qualified host name of the machine you have installed on.</li>
-    <li>DBURL to point <span class="GramE">the what ever mysql database you are going to use. The form of the url is 
+    <li>DBURL to point the what ever mysql database you are going to use. The form of the url is 
 	<br><em>jdbc:mysql://HOSTNAME:&lt;mysqlport&gt;/&lt;schema name&gt;. </em>
 	<br> Look at the entries in configuration-psg3 to get an example.</li>
     <li>DBUSER must be set to an appropriate user name on the database with table create priveledges.</li>
     <li>DBPASSWORD must be set.</li>
   </ul>
-  <p>Modify $CATALINA_HOME/conf/server.xml. Specifically, you must define at least 1 open socket 
+ <li>Modify $CATALINA_HOME/conf/server.xml. Specifically, you must define at least 1 open socket 
   (we use 8880 as a default) and, if running a secure connection,  a ssl port (we use 8843 as a default). 
-  More information on security can be found in the gratia security howto page.</p>
+  More information on security can be found in the gratia security howto page.</li>
+</ul>
 
 <p ><b><u>Server Configuration:</u></b></p>
 <p >Under linux, at least, you should use something similar to the following for you inet.d configuration:</p>
@@ -71,7 +71,7 @@ fi
 # -----------------------------------------------------------------------------
 # Stop script for the CATALINA Server
 #
-# $Id: installation-howto.html,v 1.1 2008-03-07 19:45:21 penelopec Exp $
+# $Id: installation-howto.html,v 1.2 2008-03-07 21:26:43 penelopec Exp $
 # -----------------------------------------------------------------------------
 
 unset $JAVA_OPTS
@@ -83,7 +83,7 @@ while [ -h "$PRG" ] ; do
  link=`expr "$ls" : '.*-&gt; \(.*\)$'` 
  if expr "$link" : '.*/.*' &gt; /dev/null; then 
   PRG="$link" 
- else</p>
+ else
   PRG=`dirname "$PRG"`/"$link" 
  fi 
 done
@@ -92,7 +92,7 @@ PRGDIR=`dirname "$PRG"`
 EXECUTABLE=catalina.sh
 
 # Check that target executable exists
-if [ ! -x "$PRGDIR"/"$EXECUTABLE<span class="GramE">" ]; then
+if [ ! -x "$PRGDIR"/"$EXECUTABLE]; then
  echo "Cannot find $PRGDIR/$EXECUTABLE"
  echo "This file is needed to run this program"
  exit 1
