@@ -185,10 +185,11 @@ administration: vomssecurity ${target}/gratia-administration.war
 #------------------------------------------------------------------
 ${target}/gratia-administration.war: ${administration}/net/sf/gratia/administration/*.java \
                                      ${administration}/net/sf/gratia/administration/web.xml \
-                                     ${administration}/net/sf/gratia/administration/*.html \
-                                     ${administration}/net/sf/gratia/administration/*.css \
-                                     ${administration}/net/sf/gratia/administration/*.jsp \
-                                     ${administration}/net/sf/gratia/administration/images/*.gif \
+                                     ${administration}/WebContent/*.html \
+                                     ${administration}/WebContent/*.css \
+                                     ${administration}/WebContent/*.jsp \
+                                     ${administration}/WebContent/*.js \
+                                     ${administration}/WebContent/images/*.gif \
                                      ${commonLib)/tar.jar \
                                      ${commonLib)/bzip2.jar \
                                      ${commonLib}/mysql*.jar
