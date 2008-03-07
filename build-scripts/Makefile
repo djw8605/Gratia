@@ -179,7 +179,7 @@ soap: services
 	# --- Target: soap COMPLETED  ---
 
 #------------------------------------------------------------------
-administration: services ${target}/gratia-administration.war
+administration: vomssecurity ${target}/gratia-administration.war
 	# --- Target: administration COMPLETED  ---
 
 #------------------------------------------------------------------
@@ -189,7 +189,6 @@ ${target}/gratia-administration.war: ${administration}/net/sf/gratia/administrat
                                      ${administration}/net/sf/gratia/administration/*.css \
                                      ${administration}/net/sf/gratia/administration/*.jsp \
                                      ${administration}/net/sf/gratia/administration/images/*.gif \
-                                     ${docs}/*.html \
                                      ${commonLib)/tar.jar \
                                      ${commonLib)/bzip2.jar \
                                      ${commonLib}/mysql*.jar
@@ -207,16 +206,22 @@ ${target}/gratia-administration.war: ${administration}/net/sf/gratia/administrat
 	cp ${administration}/net/sf/gratia/administration/*.class war/WEB-INF/classes/net/sf/gratia/administration
 	cp ${services}/net/sf/gratia/services/*.class war/WEB-INF/classes/net/sf/gratia/services
 	cp ${administration}/net/sf/gratia/administration/web.xml war/WEB-INF/web.xml
-	cp ${administration}/net/sf/gratia/administration/*.html war
-	cp ${administration}/net/sf/gratia/administration/*.css war
-	cp ${administration}/net/sf/gratia/administration/*.jsp war
-	cp ${administration}/net/sf/gratia/administration/images/*.gif war/images
-	cp ${docs}/*.html war
+	cp ${administration}/WebContent/*.html war
+	cp ${administration}/WebContent/*.css war
+	cp ${administration}/WebContent/*.jsp war
+	cp ${administration}/WebContent/*.js war
+	cp ${administration}/WebContent/images/*.gif war/images
+	# cp ${docs}/*.html war # included in the administration WebContent
+	cp ${commonLib}/axis.jar ${commonLib}/bcprov-jdk14-133.jar ${commonLib}/commons-discovery.jar war/WEB-INF/lib
+	cp ${commonLib}/commons-logging.jar ${commonLib}/glite-security-trustmanager.jar  war/WEB-INF/lib
+	cp ${commonLib}/glite-security-util-java.jar ${commonLib}/glite-security-voms-admin-server.jar war/WEB-INF/lib
+	cp ${commonLib}/jaxrpc.jar ${commonLib}/log4j-1.2.8.jar ${commonLib}/saaj.jar ${commonLib}/xercesImpl.jar war/WEB-INF/lib
 	cp ${commonLib}/mysql*.jar ${commonLib}/tar.jar ${commonLib}/bzip2.jar war/WEB-INF/lib
+	cp ${target}/gratiaSecurity.jar war/WEB-INF/lib
 	jar -cfM ${target}/gratia-administration.war -C war .
 	rm -rf  war
 	# --- Target: ${target}/gratia-administration.war COMPLETED ---
-
+	
 #------------------------------------------------------------------
 security: services
 	# ------------------------
@@ -241,6 +246,30 @@ security: services
 	jar -cfM ${target}/gratia-security.war -C war .
 	rm -rf war
 	# --- Target: security COMPLETED ---
+
+#------------------------------------------------------------------
+vomssecurity: services
+	# ----------------------------
+	# --- Target: vomssecurity ---
+	# ----------------------------
+	rm   -rf jar-lib
+	mkdir -p jar-lib/net/sf/gratia/util
+	mkdir -p jar-lib/net/sf/gratia/services
+	mkdir -p jar-lib/net/sf/gratia/vomsSecurity
+	javac -cp ${classpath} -extdirs ${commonLib} ${util}/net/sf/gratia/util/*.java
+	javac -cp ${classpath} -extdirs ${commonLib} ${security}/net/sf/gratia/vomsSecurity/*.java
+	cp ${util}/net/sf/gratia/util/*.class jar-lib/net/sf/gratia/util
+	cp ${security}/net/sf/gratia/vomsSecurity/*.class jar-lib/net/sf/gratia/vomsSecurity
+	cp ${services}/net/sf/gratia/services/JMS*.class jar-lib/net/sf/gratia/services
+	cp ${services}/net/sf/gratia/services/Logging.class jar-lib/net/sf/gratia/services        # is in the $(util)
+	cp ${services}/net/sf/gratia/services/Configuration.class jar-lib/net/sf/gratia/services  # is in the $(util)
+	cp ${services}/net/sf/gratia/services/X*.class jar-lib/net/sf/gratia/services             # is in the $(util)
+	# cp ${services}/net/sf/gratia/services/*Skel.class jar-lib/net/sf/gratia/services        # does not exist
+	# cp ${services}/net/sf/gratia/services/*Stub.class jar-lib/net/sf/gratia/services        # does not exist
+	jar -cvfM ${target}/gratiaSecurity.jar -C jar-lib .
+	rm -rf jar-lib
+	# --- Target: vomssecurity COMPLETED ---
+
 
 #------------------------------------------------------------------
 ### util:
