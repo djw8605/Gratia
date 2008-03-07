@@ -52,6 +52,36 @@ public class CertificateHandler
 	String voSelect = null;
 	String voConnect = null;
 
+	   private String _configLoaded = null;
+	   private String _secureConnection = null;
+	     // ----------------------------------
+	   public String getSecureConnection() {
+	       return _secureConnection;
+	   }
+	   // ----------------------------------
+	     public void loadCertificateConfiguration(HttpServletRequest request)
+	   {
+	       this.request = request;
+	       Properties p = net.sf.gratia.util.Configuration.getProperties();
+
+	       // The flag 'configLoaded' is set when the configuration has been already loaded
+	       if (_configLoaded == null)
+	       {
+	           try
+	           {
+	               String webappsHome =  System.getProperty("catalina.home") + "/" + "webapps" + "/";
+
+	               _secureConnection      = p.getProperty("service.secure.connection");
+
+	    // Set a flag indicating the configuration has been loaded, so subsequent calls will not load again
+	                _configLoaded = "1";
+
+	           } catch (Exception e) {
+	               e.printStackTrace();
+	           }
+	       }
+	   }
+	       // ---------------------------------- 
 	//---------------------------------------------------
 	public CertificateHandler(HttpServletRequest request)
 	{
@@ -129,7 +159,7 @@ public class CertificateHandler
 			// other test VOMS servers
 			//String VomsLocation = "https://gratiax34.fnal.gov:8443/voms/" + voConnect + "/services/VOMSAdmin";
 
-			System.out.println("### CertificateHandler: connectVOname : ###Locating VOMS Server"+VomsLocation);
+			System.out.println("### CertificateHandler: connectVOname : ###Locating VOMS Server: "+VomsLocation);
 			final VOMSAdminServiceLocator locator = new VOMSAdminServiceLocator();
 			stub = locator.getVOMSAdmin(new URL(VomsLocation));
 
@@ -139,7 +169,8 @@ public class CertificateHandler
 			System.out.println("### CertificateHandler: connectVOname : ###  Getting groups from  VOMS Server");
 			groups = stub.listGroups(dn,ca);
 		} catch (Exception e) {
-			System.out.println("### CertificateHandler: connectVOname : ###  Unable to contact VOMS service");
+			String msg = e.getMessage();
+			System.out.println("### CertificateHandler: connectVOname : ###  error:\n\t\t"+msg);
 			//e.printStackTrace();
 			return "Connection Error";
 		}
@@ -165,7 +196,7 @@ public class CertificateHandler
     //---------------------------------------------------
 	public String[] getVoNodes()
 	{
-		String[] VoNodesInit = {"VDT","oiv_test1","oiv_test2","cms","cdf"};
+		String[] VoNodesInit = {"VDT","gratia-vo1","gratia-vo2","cms","cdf"};
 		this.VoNodes = VoNodesInit;
 		return this.VoNodes;
 	}
