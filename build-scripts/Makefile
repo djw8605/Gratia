@@ -203,7 +203,6 @@ ${target}/gratia-administration.war: ${administration}/net/sf/gratia/administrat
 	mkdir -p war/WEB-INF/classes/net/sf/gratia/administration
 	mkdir -p war/WEB-INF/lib
 	javac -cp ${classpath} -extdirs ${commonLib} ${administration}/net/sf/gratia/administration/*.java
-	cp ${administration}/net/sf/gratia/administration/images/*.gif war/images
 	cp ${administration}/net/sf/gratia/administration/*.class war/WEB-INF/classes/net/sf/gratia/administration
 	cp ${services}/net/sf/gratia/services/*.class war/WEB-INF/classes/net/sf/gratia/services
 	cp ${administration}/net/sf/gratia/administration/web.xml war/WEB-INF/web.xml
