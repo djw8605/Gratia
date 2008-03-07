@@ -1,4 +1,4 @@
-package net.sf.gratia.security;
+package net.sf.gratia.vomsSecurity;
 
 import java.io.*;
 import java.net.URL;
