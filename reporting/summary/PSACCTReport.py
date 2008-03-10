@@ -5,7 +5,7 @@
 #
 # library to create simple report using the Gratia psacct database
 #
-#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.12 2008-03-05 15:23:43 pcanal Exp $
+#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.13 2008-03-10 17:56:28 pcanal Exp $
 
 import time
 import datetime
@@ -415,8 +415,16 @@ def DailySiteJobStatusCondor(begin,end,select = "", count = "", what = "Site.Sit
                 + " group by " + what + ",R.Value " \
                 + " order by " + what
         return RunQueryAndSplit(select)
-
 # Condor Exit Status
+
+def CMSProdData(begin,end):
+    schema = "gratia"
+    select = "select sum(WallDuration) from JobUsageRecord J, JobUsageRecord_Meta M " \
+            "where J.dbid = M.dbid and ResourceType = \"Batch\" and VOName = \"uscms\" "\
+            "and \""+ DateToString(begin) +"\"<=EndTime and EndTime<\"" + DateToString(end) + "\" " \
+            "and (LocalUserId = \"cmsprod\" or LocalUserId = \"cmsprd\") and ReportedSiteName = \"USCMS-FNAL-WC1-CE\" "
+    return RunQueryAndSplit(select)
+
 
 def PrintHeader():
         print " VO        | Wall Hours | Norm Wall | CPU Hours |  Norm CPU | Wall Load| Norm Wall| CPU Load | Norm CPU |"
@@ -1742,3 +1750,29 @@ def UserReport(range_end = datetime.date.today(),
             output = "text",
             header = True):
     RangeUserReport(range_end,range_begin,output,header)
+
+def CMSProd(range_end = datetime.date.today(),
+            range_begin = None,
+            output = "text"):
+
+    factor = 3600  # Convert number of seconds to number of hours
+
+    if not range_end:
+        if not range_begin:
+            range_end = datetime.date.today()
+        else:
+            range_end = range_begin + datetime.timedelta(days=+1)
+    if not range_begin:
+        range_begin = range_end + datetime.timedelta(days=-1)
+#    else:
+#        range_begin = datetime.date(*time.strptime(range_begin, "%Y/%m/%d")[0:3])
+    timediff = range_end - range_begin
+
+    print "For jobs finished between %s and %s (midnight UTC)" % ( DateToString(range_begin,False),
+                                                                   DateToString(range_end,False) )
+    print "Number of wallclock hours during the previous 7 days consumed by the cmsprod and cmsprd user ids reported via USCMS-FNAL-WC1-CE:"
+
+    data = CMSProdData(range_begin,range_end)
+    wall = string.atof( data[0] ) / factor
+    print
+    print niceNum(wall)
