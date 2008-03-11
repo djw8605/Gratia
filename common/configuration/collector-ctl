@@ -1,0 +1,24 @@
+#!/bin/bash
+
+while getopts :n OPT; do
+    case $OPT in
+        n)
+            dryrun=1
+            ;;
+        *)
+            echo "usage: ${0##*/} [-n} [--] ARGS..."
+            exit 2
+    esac
+done
+shift $[ OPTIND - 1 ]
+
+if [[ "$1" = "start" ]]; then
+  command=start
+elif [[ "$1" = "stop" ]]; then
+  command=stop
+fi
+
+for initscript in `chkconfig --list | grep -e '^tomcat-' | cut -f 1`; do
+  echo "service $initscript $command"
+  [[ -z "$dryrun" ]] && service $initscript $command
+done
