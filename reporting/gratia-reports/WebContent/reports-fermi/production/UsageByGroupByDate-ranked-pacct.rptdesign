@@ -1549,8 +1549,8 @@ ORDER BY final_rank, VOProbeSummary.VOName,datevalue</property>
     <Bounds>
       <Left>0.0</Left>
       <Top>0.0</Top>
-      <Width>600.0</Width>
-      <Height>450.0</Height>
+      <Width>450.0</Width>
+      <Height>420.0</Height>
     </Bounds>
     <Insets>
       <Top>3.0</Top>
@@ -2293,8 +2293,8 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
                                         </structure>
                                     </list-property>
                                 </structure>
-                                <property name="height">600px</property>
-                                <property name="width">800px</property>
+                                <property name="height">560px</property>
+                                <property name="width">600px</property>
                                 <property name="refTemplateParameter">NewTemplateParameterDefinition</property>
                                 <property name="style">sans-style1</property>
                             </extended-item>
