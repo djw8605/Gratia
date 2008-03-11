@@ -1,0 +1,171 @@
+(
+ itb_innodb => { http_port => 8880,
+                 ssl_port => 8845,
+                 rmi_port => 17000,
+                 jmx_port => 8004,
+                 server_port => 8104,
+                 db_host => "gratia07.fnal.gov",
+                 db_port => 3320,
+                 db_schema => "gratia_itb_innodb",
+                 remote_host => "gratia01.fnal.gov",
+                 collector_host => "gratia01.fnal.gov",
+                 "properties.attributes" =>
+                 {
+                  "maintain.history.log" => 7,
+                  "monitor.listener.wait" => 2880,
+                  "service.rmiservlet.level" => "FINE",
+                  "monitor.to.address0" => 'greenc@fnal.gov',
+                  "service.listener.threads" => 1
+                 }
+               },
+ itb_control => { http_port => 8881,
+                  ssl_port => 8850,
+                  rmi_port => 18000,
+                  jmx_port => 8014,
+                  server_port => 8114,
+                  db_host => "gratia07.fnal.gov",
+                  db_port => 3320,
+                  db_schema => "gratia_itb",
+                  remote_host => "gratia01.fnal.gov",
+                  "properties.attributes" =>
+                  {
+                   "maintain.history.log" => 7,
+                   "monitor.listener.wait" => 2880,
+                   "service.rmiservlet.level" => "FINEST",
+                   "monitor.to.address0" => 'greenc@fnal.gov',
+                   "service.listener.threads" => 1
+                  }
+                },
+ #  itb_control => { http_port => 8880,
+ #                   ssl_port => 8845,
+ #                   rmi_port => 17000,
+ #                   jmx_port => 8004,
+ #                   server_port => 8104,
+ #                   db_host => "gratia07.fnal.gov",
+ #                   db_port => 3320,
+ #                   db_schema => "gratia",
+ #                   no_collector => 1,
+ #                   remote_host => "gratia01.fnal.gov",
+ #                   "properties.attributes" =>
+ #                   {
+ #                    "service.mysql.user" => "reader", # Disable updates
+ #                    "service.mysql.password" => "reader",
+ #                    "maintain.history.log" => 7,
+ #                    "montor.listener.threads" => "false",
+ #                    "monitor.listener.wait" => 2880,
+ #                    "service.rmiservlet.level" => "FINEST",
+ #                    "monitor.to.address0" => 'greenc@fnal.gov',
+ #                    "service.listener.threads" => 1
+ #                   }
+ #                 },
+ jeffmack => {http_port => 8880,
+              ssl_port => 8845,
+              rmi_port => 17000,
+              jmx_port => 8004,
+              server_port => 8104,
+              db_host => "localhost",
+              db_schema => "gratia_jeffmack",
+              "properties.attributes" =>
+              {
+               "maintain.history.log" => 2,
+               "monitor.listener.wait" => 240,
+               "monitor.to.address0" => 'jeffmack@fnal.gov'
+              }
+             },
+ pcanal => { http_port => 8881,
+             ssl_port => 8850,
+             rmi_port => 18000,
+             jmx_port => 8014,
+             server_port => 8114,
+             db_host => "localhost",
+             db_schema => "gratia_pcanal",
+             "properties.attributes" =>
+             {
+              "maintain.history.log" => 2,
+              "monitor.listener.wait" => 240,
+              "monitor.to.address0" => 'pcanal@fnal.gov'
+             }
+           },
+ greenc => { http_port => 8882,
+             ssl_port => 8855,
+             rmi_port => 19000,
+             jmx_port => 8024,
+             server_port => 8124,
+             db_host => "localhost",
+             db_schema => "gratia_greenc",
+             collector_host => "gratia-vm02.fnal.gov",
+             "properties.attributes" =>
+             {
+              "maintain.history.log" => 2,
+              "monitor.listener.wait" => 240,
+              "service.rmiservlet.level" => "FINEST",
+              "monitor.to.address0" => 'greenc@fnal.gov',
+              "service.security.level" => 1,
+              "service.use.selfgenerated.certs" => 1
+             }
+           },
+ vittone => { http_port => 8883,
+              ssl_port => 8860,
+              rmi_port => 20000,
+              jmx_port => 8034,
+              server_port => 8134,
+              db_host => "localhost",
+              db_schema => "gratia_vittone",
+              "properties.attributes" =>
+              {
+               "maintain.history.log" => 2,
+               "monitor.listener.wait" => 240,
+               "monitor.to.address0" => 'vittone@fnal.gov'
+              }
+            },
+ penelope => { http_port => 8884,
+               ssl_port => 8865,
+               rmi_port => 21000,
+               jmx_port => 8044,
+               server_port => 8144,
+               db_host => "localhost",
+               db_schema => "gratia_penelope",
+               "properties.attributes" =>
+               {
+                "maintain.history.log" => 2,
+                "monitor.listener.wait" => 240,
+                "monitor.to.address0" => 'penelope@fnal.gov'
+               }
+             },
+ greenc_test => { http_port => 8885,
+                  ssl_port => 8875,
+                  rmi_port => 22000,
+                  jmx_port => 8054,
+                  server_port => 8154,
+                  db_host => "localhost",
+                  db_schema => "gratia_greenc_test",
+                  "properties.attributes" =>
+                  {
+                   "maintain.history.log" => 2,
+                   "monitor.listener.wait" => 240,
+                   "service.rmiservlet.level" => "FINEST",
+                   "monitor.to.address0" => 'greenc@fnal.gov',
+                   "service.listener.threads" => 1
+                  }
+                },
+ rsv_test => { http_port => 8886,
+               ssl_port => 8880,
+               rmi_port => 23000,
+               jmx_port => 8064,
+               server_port => 8164,
+               db_host => "localhost",
+               db_schema => "gratia_rsv_test",
+               "properties.attributes" =>
+               {
+                "maintain.history.log" => 2,
+                "monitor.listener.wait" => 240,
+                "service.rmiservlet.level" => "FINEST",
+                "monitor.to.address0" => 'greenc@fnal.gov',
+                "service.listener.threads" => 1
+               }
+             }
+);
+
+### Local Variables:
+### mode: cperl
+### End:
