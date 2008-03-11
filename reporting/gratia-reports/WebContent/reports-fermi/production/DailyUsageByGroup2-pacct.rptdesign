@@ -572,16 +572,6 @@ order by date_format(V.EndTime, ?)</property>
       <Blue>255</Blue>
     </Background>
     <Visible>true</Visible>
-    <Triggers>
-      <Condition>onmouseover</Condition>
-      <Action>
-        <Type>Show_Tooltip</Type>
-        <Value xsi:type="attribute:TooltipValue">
-          <Text>Click to select group chart</Text>
-          <Delay>200</Delay>
-        </Value>
-      </Action>
-    </Triggers>
   </Block>
   <Dimension>Two_Dimensional</Dimension>
   <Script>/**

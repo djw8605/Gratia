@@ -541,16 +541,6 @@ where S.siteid = P.siteid
       <Blue>255</Blue>
     </Background>
     <Visible>true</Visible>
-    <Triggers>
-      <Condition>onmouseover</Condition>
-      <Action>
-        <Type>Show_Tooltip</Type>
-        <Value xsi:type="attribute:TooltipValue">
-          <Text>Click to select zooming points</Text>
-          <Delay>200</Delay>
-        </Value>
-      </Action>
-    </Triggers>
   </Block>
   <Dimension>Two_Dimensional</Dimension>
   <Script>/**
