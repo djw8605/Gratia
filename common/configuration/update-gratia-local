@@ -4,7 +4,8 @@
 function usage() {
 cat 1>&2 <<EOF
 usage: update-gratia-local [-S <source-prefix>] [-j <jre-home>] [-s] \
-                           [-p <prefix>] [-d <db-root-pw>] 
+                           [-p <prefix>] [-d <db-root-pw>] \
+                           [-c <configure-collector-script>] \
                            [-h] [-v <vdt_location>] [--] <instance>
 
        -c <configure-collector-script>
@@ -71,7 +72,6 @@ function stop_tomcat {
     if [ -e /etc/init.d/$init_service ];then
       echo "... stopping tomcat ($init_service)"
       service $init_service stop 2>/dev/null
-      sleep 5
     else
       echo "... $init_service is already stopped"
     fi
@@ -141,8 +141,7 @@ for dir in $source_prefix \
            $configuration_dir \
            $tomcat_root \
            $target_dir \
-           $tomcat_webapps \
-           $tomcat_gratia
+           $tomcat_webapps
 do
   echo "... checking $dir"
   if [ ! -d $dir ]; then
@@ -245,6 +244,11 @@ $use_ssl \
 -j "$java_jre" \
 $dbp_arg "$dbpwd" \
 $instance
+status=$?
+  if (( $status != 0 )); then
+    echo "ERROR: configure-collector invocation returned non-zero exit code $status." 1>&2
+    exit $status
+  fi 
 fi 
 ls -l ${tomcat_webapps}
 
