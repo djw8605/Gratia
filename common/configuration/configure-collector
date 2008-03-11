@@ -18,263 +18,7 @@ if (-l $0) {
   $gratia_dir = dirname $0;
 }
 
-my %collector_configs =
-	(
-   itb_innodb => { http_port => 8880,
-                   ssl_port => 8845,
-                   rmi_port => 17000,
-                   jmx_port => 8004,
-                   server_port => 8104,
-                   db_host => "gratia07.fnal.gov",
-                   db_port => 3320,
-                   db_schema => "gratia_itb_innodb",
-                   remote_host => "gratia01.fnal.gov",
-                   collector_host => "gratia01.fnal.gov",
-                   "properties.attributes" =>
-                   {
-                    "maintain.history.log" => 7,
-                    "monitor.listener.wait" => 2880,
-                    "service.rmiservlet.level" => "FINE",
-                    "monitor.to.address0" => 'greenc@fnal.gov',
-                    "service.listener.threads" => 1
-                   }
-                 },
-   itb_control => { http_port => 8881,
-                    ssl_port => 8850,
-                    rmi_port => 18000,
-                    jmx_port => 8014,
-                    server_port => 8114,
-                    db_host => "gratia07.fnal.gov",
-                    db_port => 3320,
-                    db_schema => "gratia_itb",
-                    remote_host => "gratia01.fnal.gov",
-                    "properties.attributes" =>
-                    {
-                     "maintain.history.log" => 7,
-                     "monitor.listener.wait" => 2880,
-                     "service.rmiservlet.level" => "FINEST",
-                     "monitor.to.address0" => 'greenc@fnal.gov',
-                     "service.listener.threads" => 1
-                    }
-                  },
-#  itb_control => { http_port => 8880,
-#                   ssl_port => 8845,
-#                   rmi_port => 17000,
-#                   jmx_port => 8004,
-#                   server_port => 8104,
-#                   db_host => "gratia07.fnal.gov",
-#                   db_port => 3320,
-#                   db_schema => "gratia",
-#                   no_collector => 1,
-#                   remote_host => "gratia01.fnal.gov",
-#                   "properties.attributes" =>
-#                   {
-#                    "service.mysql.user" => "reader", # Disable updates
-#                    "service.mysql.password" => "reader",
-#                    "maintain.history.log" => 7,
-#                    "montor.listener.threads" => "false",
-#                    "monitor.listener.wait" => 2880,
-#                    "service.rmiservlet.level" => "FINEST",
-#                    "monitor.to.address0" => 'greenc@fnal.gov',
-#                    "service.listener.threads" => 1
-#                   }
-#                 },
-	 gratia => { http_port => 8880,
-							 ssl_port => 8845,
-							 rmi_port => 17000,
-							 jmx_port => 8004,
-							 server_port => 8104,
-							 db_schema => "gratia",
-							 remote_host => "gratia.opensciencegrid.org",
-               max_perm_size => "256m",
-							 max_heap_size => "1024m",
-							 "properties.attributes" =>
-							 {
-								"maintain.history.log" => 7,
-								"monitor.listener.wait" => 60
-							 }
-						 },
-	 fermi_osg => { http_port => 8880,
-									ssl_port => 8845,
-									rmi_port => 17000,
-									jmx_port => 8004,
-									server_port => 8104,
-									db_schema => "fermi_osg",
-									remote_host => "gratia-fermi.fnal.gov",
-                  "properties.attributes" =>
-                  {
-                   "monitor.listener.wait" => 1440
-                  }
-								},
-   #	 test => { http_port => 8885,
-   #						 ssl_port => 8870,
-   #						 rmi_port => 22000,
-   #						 jmx_port => 8050,
-   #						 db_schema => "gratia-test"
-   #					 },
-	 itb => { http_port => 8881,
-						ssl_port => 8850,
-						rmi_port => 18000,
-						jmx_port => 8014,
-						server_port => 8114,
-						db_schema => "gratia_itb",
-						remote_host => "gratia.opensciencegrid.org",
-						"properties.attributes" =>
-						{
-						 "monitor.listener.wait" => 60
-						}
-					},
-	 fermi_itb => { http_port => 8881,
-									ssl_port => 8850,
-									rmi_port => 18000,
-									jmx_port => 8014,
-									server_port => 8114,
-									db_schema => "fermi_itb",
-									remote_host => "gratia-fermi.fnal.gov",
-                  "properties.attributes" =>
-                  {
-                   "monitor.listener.wait" => 1440
-                  }
-								},
-	 ps => { http_port => 8882,
-					 ssl_port => 8855,
-					 rmi_port => 19000,
-					 jmx_port => 8024,
-					 server_port => 8124,
-					 db_schema => "gratia_psacct",
-					 UserConfig => "UserConfig_pacct.xml",
-					 remote_host => "gratia-fermi.fnal.gov",
-					 # Add an extra action if we're re-doing summary tables.
-					 PostInstallCmdPreamble => '[[ "$action" == "summary" ]] && set -- "$@" ps'
-				 },
-	 qcd => { http_port => 8883,
-						ssl_port => 8865,
-						rmi_port => 21000,
-						jmx_port => 8040,
-						server_port => 8144,
-						db_schema => "gratia_qcd",
-						remote_host => "gratia-fermi.fnal.gov"
-					},
-	 osg_daily => { http_port => 8884,
-									ssl_port => 8860,
-									rmi_port => 20000,
-									jmx_port => 8034,
-									server_port => 8134,
-									db_schema => "gratia_osg_daily",
-									UserConfig => "UserConfig_osg_daily.xml",
-									PostInstallCmdPreamble => '[[ "$action" == *"stored"* ]] || continue',
-									"properties.attributes" =>
-                  { "monitor.listener.wait" => 1440,
-                    "gratia.database.wantSummaryTable" => 0,
-                    "gratia.database.wantSummaryTrigger" => 0
-									},
-									remote_host => "gratia.opensciencegrid.org"
-								},
-	 osg_integration => { http_port => 8885,
-                        ssl_port => 8870,
-                        rmi_port => 21000,
-                        jmx_port => 8044,
-                        server_port => 8144,
-                        db_schema => "gratia_osg_integration",
-                        remote_host => "gratia.opensciencegrid.org",
-                        "properties.attributes" =>
-                        {
-                         "monitor.listener.wait" => 60,
-                         "service.listener.threads" => 1
-                        }
-                      },
-	 jeffmack => {http_port => 8880,
-								ssl_port => 8845,
-								rmi_port => 17000,
-								jmx_port => 8004,
-								server_port => 8104,
-								db_host => "localhost",
-								db_schema => "gratia_jeffmack",
-								"properties.attributes" =>
-								{
-                 "maintain.history.log" => 2,
-								 "monitor.listener.wait" => 240,
-								 "monitor.to.address0" => 'jeffmack@fnal.gov'
-								}
-							 },
-	 pcanal => { http_port => 8881,
-               ssl_port => 8850,
-               rmi_port => 18000,
-               jmx_port => 8014,
-               server_port => 8114,
-               db_host => "localhost",
-               db_schema => "gratia_pcanal",
-               "properties.attributes" =>
-               {
-                "maintain.history.log" => 2,
-                "monitor.listener.wait" => 240,
-                "monitor.to.address0" => 'pcanal@fnal.gov'
-               }
-						 },
-	 greenc => { http_port => 8882,
-               ssl_port => 8855,
-               rmi_port => 19000,
-               jmx_port => 8024,
-               server_port => 8124,
-               db_host => "localhost",
-               db_schema => "gratia_greenc",
-               collector_host => "gratia-vm02.fnal.gov",
-               "properties.attributes" =>
-               {
-                "maintain.history.log" => 2,
-                "monitor.listener.wait" => 240,
-                "service.rmiservlet.level" => "FINEST",
-                "monitor.to.address0" => 'greenc@fnal.gov',
-                "service.security.level" => 1,
-                "service.use.selfgenerated.certs" => 1
-               }
-						 },
-	 vittone => { http_port => 8883,
-                ssl_port => 8860,
-                rmi_port => 20000,
-                jmx_port => 8034,
-                server_port => 8134,
-                db_host => "localhost",
-                db_schema => "gratia_vittone",
-                "properties.attributes" =>
-                {
-                 "maintain.history.log" => 2,
-                 "monitor.listener.wait" => 240,
-                 "monitor.to.address0" => 'vittone@fnal.gov'
-                }
-							},
-	 penelope => { http_port => 8884,
-                 ssl_port => 8865,
-                 rmi_port => 21000,
-                 jmx_port => 8044,
-                 server_port => 8144,
-                 db_host => "localhost",
-                 db_schema => "gratia_penelope",
-                 "properties.attributes" =>
-                 {
-                  "maintain.history.log" => 2,
-                  "monitor.listener.wait" => 240,
-                  "monitor.to.address0" => 'penelope@fnal.gov'
-                 }
-               },
-	 greenc_test => { http_port => 8885,
-                    ssl_port => 8875,
-                    rmi_port => 22000,
-                    jmx_port => 8054,
-                    server_port => 8154,
-                    db_host => "localhost",
-                    db_schema => "gratia_greenc_test",
-                    "properties.attributes" =>
-                    {
-                     "maintain.history.log" => 2,
-                     "monitor.listener.wait" => 240,
-                     "service.rmiservlet.level" => "FINEST",
-                     "monitor.to.address0" => 'greenc@fnal.gov',
-                     "service.listener.threads" => 1
-                    }
-                  },
-
-	);
+my %collector_configs = ();
 
 my @required_attributes =
 	(
@@ -358,12 +102,15 @@ JAVA_HOME=
 ####################################
 export JAVA_HOME
 
+PATH="$PATH:$JAVA_HOME/bin" # Needed for SSL keytool
+
 # This should be fine as a default
 TOMCAT_INSTANCE_NAME=`basename "$0" | sed -e 's/^.*\(tomcat-.*\)$/\1/'`
 
 ########################################################################
 # No User Servicable Parts
 CATALINA_HOME="${TOMCAT_PATH_STEM}/${TOMCAT_INSTANCE_NAME}"; export CATALINA_HOME
+
 [[ -n "$KRB5CCNAME" ]] && KRB5CCNAME=`echo "$KRB5CCNAME" | sed -e 's/^FILE://'`
 if [ "$1" = "start" ] ; then
   JAVA_OPTS="-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=${TOMCAT_MANAGEMENT_PORT} -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dssl.port=${TOMCAT_SSL_PORT}"; export JAVA_OPTS
@@ -384,13 +131,19 @@ my $default_remote_host = `uname -n`;
 chomp $default_remote_host;
 my $default_prefix = "/scratch";
 
+my @default_collector_info =
+  ( "collector-pro.dat",
+    "collector-dev.dat" );
+
 Getopt::Long::Configure(qw(no_ignore_case bundling require_order));
 
-GetOptions(\%options, "java-home|j=s", "remote-host|r=s",
-					 "use-ssl|s",
-					 "prefix|p=s",
-					 "db-root|d=s",
-					 "help|h|\?") or pod2usage(-exitval => 2);
+GetOptions(\%options, "java-home|j=s",
+           "remote-host|r=s",
+           "use-ssl|s",
+           "prefix|p=s",
+           "db-root|d=s",
+           "collector-info|c=s@",
+           "help|h|\?") or pod2usage(-exitval => 2);
 
 pod2usage(-exitval => 1, -verbose => 3) if $options{help};
 
@@ -419,76 +172,101 @@ pod2usage(-exitval => 1) unless scalar @ARGV;
 
 my @instance_list = @ARGV;
 
+unless (exists $options{"collector-info"} and scalar @{$options{"collector-info"}}) {
+  $options{"collector-info"} = [ @default_collector_info ];
+}
+
 
 foreach my $config (@instance_list) {
-	my $config_ref = $collector_configs{$config};
+  foreach my $dat_file (@{$options{"collector-info"}}) {
+    $dat_file = find_dat_file($dat_file, "$options{prefix}/tomcat-${config}/gratia");
+    if (not open(DAT_SOURCE, $dat_file)) {
+      print STDERR "ERROR: Unable to open data file $dat_file\n";
+      next;
+    }
+    my $dat_source = join('', <DAT_SOURCE>);
+    close DAT_SOURCE;
+    my %tmp_hash = eval $dat_source;
+    if ($@) {
+      print STDERR "ERROR: Problem reading collector data file $dat_file\n";
+      next;
+    }
+    if (exists $tmp_hash{$config}) {
+      $collector_configs{$config} = $tmp_hash{$config};
+      print STDERR "INFO: found configuration for instance, \"$config\" in $dat_file\n";
+      last;
+    }
+  }
 
-	if (not $config_ref) {
-		print STDERR "WARNING: configuration for specified gratia instance $config not found: ignoring.\n";
-		next;
-	}
+  my $config_ref = $collector_configs{$config};
+
+  if (not $config_ref) {
+    print STDERR "WARNING: configuration for specified gratia instance $config not found!\n";
+    exit 1;
+  }
 	
-	# attributes.properties container if not previously existing.
-	$config_ref->{"properties.attributes"} = {}
-		unless exists $config_ref->{"properties.attributes"};
+  # attributes.properties container if not previously existing.
+  $config_ref->{"properties.attributes"} = {}
+    unless exists $config_ref->{"properties.attributes"};
 
-	# Standard attribute defaults.
-	my $specified_addresses = grep m&monitor\.to\.address&o, keys %{$config_ref->{"properties.attributes"}};
-	foreach my $attribute_key (sort keys %attribute_defaults) {
-		$config_ref->{$attribute_key} = $attribute_defaults{$attribute_key}
-			unless exists $config_ref->{$attribute_key};
-	}
+  # Standard attribute defaults.
+  my $specified_addresses = grep m&monitor\.to\.address&o, keys %{$config_ref->{"properties.attributes"}};
+  foreach my $attribute_key (sort keys %attribute_defaults) {
+    $config_ref->{$attribute_key} = $attribute_defaults{$attribute_key}
+      unless exists $config_ref->{$attribute_key};
+  }
 
-	# Properties attribute defaults.
-	foreach my $properties_key (sort keys %{$attribute_defaults{"properties.attributes"}}) {
-		# Skip all default email addresses if we specified any at all.
-		next if $specified_addresses and $properties_key =~ m&monitor\.to\.address&o;
-		$config_ref->{"properties.attributes"}->{$properties_key} =
-			$attribute_defaults{"properties.attributes"}->{$properties_key}
-				unless exists $config_ref->{"properties.attributes"}->{$properties_key};
-	}
+  # Properties attribute defaults.
+  foreach my $properties_key (sort keys %{$attribute_defaults{"properties.attributes"}}) {
+    # Skip all default email addresses if we specified any at all.
+    next if $specified_addresses and $properties_key =~ m&monitor\.to\.address&o;
+    $config_ref->{"properties.attributes"}->{$properties_key} =
+      $attribute_defaults{"properties.attributes"}->{$properties_key}
+        unless exists $config_ref->{"properties.attributes"}->{$properties_key};
+  }
 
-	# Required attributes
-	my $requirements_error = 0;
-	foreach my $required_attribute (@required_attributes) {
-		unless (exists $config_ref->{$required_attribute}) {
-			print STDERR "Configuration for instance \"$config\" does not have ",
-				"required attribute \"$required_attribute\"\n";
-			$requirements_error = 1;
-		}
-	}
+  # Required attributes
+  my $requirements_error = 0;
+  foreach my $required_attribute (@required_attributes) {
+    unless (exists $config_ref->{$required_attribute}) {
+      print STDERR "Configuration for instance \"$config\" does not have ",
+        "required attribute \"$required_attribute\"\n";
+      $requirements_error = 1;
+    }
+  }
 
-	foreach my $required_attribute (@required_properties) {
-		unless (exists $config_ref->{"properties.attributes"}->{$required_attribute}) {
-			print STDERR "Configuration for instance \"$config\" does not have ",
-				"required properties.attributes entry \"$required_attribute\"\n";
-			$requirements_error = 1;
-		}
-	}
+  foreach my $required_attribute (@required_properties) {
+    unless (exists $config_ref->{"properties.attributes"}->{$required_attribute}) {
+      print STDERR "Configuration for instance \"$config\" does not have ",
+        "required properties.attributes entry \"$required_attribute\"\n";
+      $requirements_error = 1;
+    }
+  }
 
-	# Next if failed requirements.
-	next if $requirements_error;
+  # Next if failed requirements.
+  next if $requirements_error;
 
-	# Configuration operations.
-	configure_collector_config($config, $config_ref);
-	configure_init_file($config, $config_ref);
-	configure_tomcat_config($config, $config_ref);
-	configure_tomcat_users($config, $config_ref);
-	configure_log4j_properties($config, $config_ref) if $options{"use-ssl"};
+  # Configuration operations.
+  configure_collector_config($config, $config_ref);
+  configure_init_file($config, $config_ref);
+  configure_tomcat_config($config, $config_ref);
+  configure_tomcat_users($config, $config_ref);
+  configure_log4j_properties($config, $config_ref) if $options{"use-ssl"};
   configure_static_report_generation($config, $config_ref);
 
-	if (exists $options{"db-root"}) {
-		configure_post_install($config, $config_ref);
-	} else {
-		print STDERR "WARNING: no DB root password specified: post-install.sh not configured\n";
-	}
+  if (exists $options{"db-root"}) {
+    configure_post_install($config, $config_ref);
+  } else {
+    print STDERR "WARNING: no DB root password specified: post-install.sh not configured\n";
+  }
 
   if ($config_ref->{"no_collector"}) {
     foreach my $war qw(services soap servlets administration) {
       system("rm -rf $options{prefix}/tomcat-${config}/webapps/gratia-$war\{,.war\}");
     }
   }
-};
+}
+;
 
 1;
 
@@ -690,7 +468,7 @@ EOF
                sslKey="/etc/grid-security/hostkey.pem" sslCAFiles="/etc/grid-security/certificates/*.0"
                sslCertFile="/etc/grid-security/hostcert.pem"
                crlFiles="/etc/grid-security/certificates/*.r0"
-               sSLImplementation="org.glite.security.trustmanager.tomcat.TMSSLImplementation"
+               SSLImplementation="org.glite.security.trustmanager.tomcat.TMSSLImplementation"
                log4jConfFile="$options{prefix}/tomcat-${instance_name}/conf/log4j-trustmanager.properties"
                keystoreFile="$options{prefix}/tomcat-${instance_name}/gratia/keystore" keystorePass="server"
                truststoreFile="$options{prefix}/tomcat-${instance_name}/gratia/truststore" truststorePass="server"
@@ -759,6 +537,34 @@ sub configure_static_report_generation {
                              $options{"use-ssl"}?$collector_config->{ssl_port}:$collector_config->{http_port}));
   system(sprintf("VISUAL=${gratia_dir}/safe-replace-crontab CRON_TIMING=\"42 0 * * *\" CRON_CMD=\"'$static_report_generator' %s >/dev/null 2>&1\" crontab -e",
                  join(" ", map { "'$_'"; } @script_pars)));
+}
+
+use File::Find;
+my (@found_files, $list_file);
+sub wanted {
+  if (-d $_) {
+    if (-f "$_/$list_file") {
+      push @found_files, "$File::Find::name/$list_file";
+      $File::Find::prune = 1;
+    } elsif (-f "$_/$list_file.dat") { # Default extension
+      push @found_files, "$File::Find::name/$list_file.dat";
+      $File::Find::prune = 1;
+    }
+  }
+}
+
+sub find_dat_file {
+  $list_file = shift;
+  @found_files = ();
+  my @search_path = ( "$gratia_dir", @_ );
+  chomp $list_file;
+  unless ( -f $list_file ) {
+    my @dir_list = map { (-d)?$_:() } @search_path;
+    find ( \&wanted, @dir_list );
+    # First found in search path order.
+    $list_file = $found_files[0] if scalar @found_files;
+  }
+  return $list_file;
 }
 
 __END__
