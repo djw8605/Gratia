@@ -1,5 +1,7 @@
 package net.sf.gratia.storage;
 
+import net.sf.gratia.util.XP;
+
 import net.sf.gratia.services.*;
 import java.util.*;
 import org.dom4j.*;

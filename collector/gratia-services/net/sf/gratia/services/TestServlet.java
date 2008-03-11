@@ -1,5 +1,7 @@
 package net.sf.gratia.services;
 
+import net.sf.gratia.util.Logging;
+
 import java.io.*;
 import javax.servlet.*;
 import javax.servlet.http.*;

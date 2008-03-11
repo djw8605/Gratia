@@ -1,5 +1,7 @@
 package net.sf.gratia.storage;
 
+import net.sf.gratia.util.Configuration;
+
 import java.text.*;
 import java.util.Date;
 import java.util.TimeZone;

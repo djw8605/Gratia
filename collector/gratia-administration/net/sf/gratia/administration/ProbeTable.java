@@ -1,5 +1,11 @@
 package net.sf.gratia.administration;
 
+import net.sf.gratia.util.XP;
+
+import net.sf.gratia.util.Configuration;
+
+import net.sf.gratia.util.Logging;
+
 import net.sf.gratia.services.*;
 
 import java.io.*;

@@ -1,5 +1,7 @@
 package net.sf.gratia.storage;
 
+import net.sf.gratia.util.Configuration;
+
 import javax.xml.datatype.DatatypeConfigurationException;
 
 

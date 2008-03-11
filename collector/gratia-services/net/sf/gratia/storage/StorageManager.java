@@ -4,7 +4,6 @@
  */
 package net.sf.gratia.storage;
 
-
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
 import org.hibernate.Session;

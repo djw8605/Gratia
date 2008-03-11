@@ -1,5 +1,9 @@
 package net.sf.gratia.services;
 
+import net.sf.gratia.util.XP;
+
+import net.sf.gratia.util.Configuration;
+
 import java.rmi.*;
 import java.rmi.server.*;
 import java.util.Hashtable;

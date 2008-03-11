@@ -1,5 +1,7 @@
 package net.sf.gratia.soap;
 
+import net.sf.gratia.util.Configuration;
+
 import java.util.*;
 import java.io.*;
 import java.rmi.*;

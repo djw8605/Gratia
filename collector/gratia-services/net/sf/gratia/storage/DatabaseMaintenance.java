@@ -1,9 +1,14 @@
 package net.sf.gratia.storage;
 
+import net.sf.gratia.util.XP;
+
+import net.sf.gratia.util.Execute;
+
+import net.sf.gratia.util.Configuration;
+
+import net.sf.gratia.util.Logging;
+
 import java.sql.*;
-import net.sf.gratia.services.Execute;
-import net.sf.gratia.services.XP;
-import net.sf.gratia.services.Logging;
 import java.util.Properties;
 import java.io.File;
 import java.lang.System;
@@ -329,7 +334,7 @@ public class DatabaseMaintenance {
         //
         // place holder to initialize SystemProplist
         //
-        Properties p = net.sf.gratia.services.Configuration.getProperties();
+        Properties p = net.sf.gratia.util.Configuration.getProperties();
 
         UpdateDbProperty("use.report.authentication", p.getProperty("use.report.authentication"));
         UpdateDbProperty("gratia.database.wantSummaryTable",

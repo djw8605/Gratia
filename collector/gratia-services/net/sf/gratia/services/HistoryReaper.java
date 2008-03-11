@@ -1,5 +1,11 @@
 package net.sf.gratia.services;
 
+import net.sf.gratia.util.XP;
+
+import net.sf.gratia.util.Configuration;
+
+import net.sf.gratia.util.Logging;
+
 import java.util.*;
 import java.sql.*;
 import java.io.*;
@@ -31,7 +37,7 @@ public class HistoryReaper
    {
       Logging.log("HistoryReaper: Starting");
 
-      p = net.sf.gratia.services.Configuration.getProperties();
+      p = net.sf.gratia.util.Configuration.getProperties();
       driver = p.getProperty("service.mysql.driver");
       url = p.getProperty("service.mysql.url");
       user = p.getProperty("service.mysql.user");

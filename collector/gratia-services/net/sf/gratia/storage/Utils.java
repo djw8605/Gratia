@@ -1,11 +1,15 @@
 package net.sf.gratia.storage;
 
+import net.sf.gratia.util.XP;
+
+import net.sf.gratia.util.Configuration;
+
+import net.sf.gratia.util.Logging;
+
 import java.util.Calendar;
 import javax.xml.datatype.Duration;
 import javax.xml.datatype.DatatypeConfigurationException;
 
-import net.sf.gratia.services.Logging;
-import net.sf.gratia.services.XP;
 
 import java.security.MessageDigest;
 

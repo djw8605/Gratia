@@ -1,5 +1,13 @@
 package net.sf.gratia.services;
 
+import net.sf.gratia.util.XP;
+
+import net.sf.gratia.util.Execute;
+
+import net.sf.gratia.util.Configuration;
+
+import net.sf.gratia.util.Logging;
+
 import java.util.*;
 import java.sql.*;
 

@@ -1,5 +1,13 @@
 package net.sf.gratia.services;
 
+import net.sf.gratia.util.XP;
+
+import net.sf.gratia.util.Execute;
+
+import net.sf.gratia.util.Configuration;
+
+import net.sf.gratia.util.Logging;
+
 import java.util.Properties;
 
 import java.rmi.*;
@@ -56,7 +64,7 @@ public class CollectorService implements ServletContextListener
       // initialize logging
       //
 
-      p = net.sf.gratia.services.Configuration.getProperties();
+      p = net.sf.gratia.util.Configuration.getProperties();
 
       Logging.initialize(p.getProperty("service.service.logfile"),
                                   p.getProperty("service.service.maxlog"),
@@ -88,7 +96,7 @@ public class CollectorService implements ServletContextListener
       Logging.log("");
       Logging.log("service.security.level: " + p.getProperty("service.security.level"));
 
-      configurationPath = net.sf.gratia.services.Configuration.getConfigurationPath();
+      configurationPath = net.sf.gratia.util.Configuration.getConfigurationPath();
 
       if (p.getProperty("service.security.level").equals("1"))
          try
@@ -441,7 +449,7 @@ public class CollectorService implements ServletContextListener
 
       if (exitValue1 == 0)
          Execute.execute(command2);
-      FlipSSL.flip();
+      //      FlipSSL.flip();
    }
 
    public void loadVDTCerts()

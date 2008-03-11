@@ -1,5 +1,9 @@
 package net.sf.gratia.services;
 
+import net.sf.gratia.util.Configuration;
+
+import net.sf.gratia.util.Logging;
+
 import java.util.*;
 import java.io.*;
 
@@ -21,9 +25,9 @@ public class HibernateWrapper
       if (systemDatabaseUp())
          return;
 
-      p = net.sf.gratia.services.Configuration.getProperties();
+      p = net.sf.gratia.util.Configuration.getProperties();
 
-      // String configurationPath = net.sf.gratia.services.Configuration.getConfigurationPath();
+      // String configurationPath = net.sf.gratia.util.Configuration.getConfigurationPath();
 
       try
       {
@@ -36,10 +40,10 @@ public class HibernateWrapper
       try
       {
          hibernateConfiguration = new org.hibernate.cfg.Configuration();
-         hibernateConfiguration.addFile(new File(net.sf.gratia.services.Configuration.getGratiaHbmPath()));
-         hibernateConfiguration.addFile(new File(net.sf.gratia.services.Configuration.getJobUsagePath()));
-         hibernateConfiguration.addFile(new File(net.sf.gratia.services.Configuration.getMetricRecordPath()));
-         hibernateConfiguration.configure(new File(net.sf.gratia.services.Configuration.getHibernatePath()));
+         hibernateConfiguration.addFile(new File(net.sf.gratia.util.Configuration.getGratiaHbmPath()));
+         hibernateConfiguration.addFile(new File(net.sf.gratia.util.Configuration.getJobUsagePath()));
+         hibernateConfiguration.addFile(new File(net.sf.gratia.util.Configuration.getMetricRecordPath()));
+         hibernateConfiguration.configure(new File(net.sf.gratia.util.Configuration.getHibernatePath()));
 
          Properties hp = new Properties();
          hp.setProperty("hibernate.connection.driver_class", p.getProperty("service.mysql.driver"));

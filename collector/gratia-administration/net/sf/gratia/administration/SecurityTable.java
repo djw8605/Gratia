@@ -1,5 +1,11 @@
 package net.sf.gratia.administration;
 
+import net.sf.gratia.util.XP;
+
+import net.sf.gratia.util.Execute;
+
+import net.sf.gratia.util.Configuration;
+
 import net.sf.gratia.services.*;
 
 import java.io.*;
@@ -263,7 +269,7 @@ public class SecurityTable extends HttpServlet
 						 "-storepass",
 						 "server"};
 				Execute.execute(command1);
-				FlipSSL.flip();
+				// FlipSSL.flip();
 		}
 
 		public void deploy(String dbid,String alias)

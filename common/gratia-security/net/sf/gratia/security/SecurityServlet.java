@@ -1,5 +1,13 @@
 package net.sf.gratia.security;
 
+import net.sf.gratia.util.Logging;
+
+import net.sf.gratia.util.Execute;
+
+import net.sf.gratia.util.Configuration;
+
+import net.sf.gratia.util.XP;
+
 import net.sf.gratia.services.*;
 
 import java.io.*;
@@ -511,7 +519,7 @@ public class SecurityServlet extends HttpServlet
 								statement = connection.createStatement();
 								statement.executeUpdate(command);
 								statement.close();
-								FlipSSL.flip();
+								// FlipSSL.flip();
 								return "ok:ok";
 						}
 				catch (Exception e)
@@ -606,7 +614,7 @@ public class SecurityServlet extends HttpServlet
 
 								String mypem = xp.get("gratia.hostcert.pem");
 
-								FlipSSL.flip();
+								// FlipSSL.flip();
 
 								return "ok:" + mypem + ":" + URLEncoder.encode(p.getProperty("service.secure.connection","UTF-8"));
 						}
@@ -731,7 +739,7 @@ public class SecurityServlet extends HttpServlet
 								statement = connection.createStatement();
 								statement.executeUpdate(command);
 								statement.close();
-								FlipSSL.flip();
+								// FlipSSL.flip();
 								return "ok:ok";
 						}
 				catch (Exception e)

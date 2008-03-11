@@ -1,5 +1,7 @@
 package net.sf.gratia.security;
 
+import net.sf.gratia.util.XP;
+
 import net.sf.gratia.services.*;
 
 import sun.misc.BASE64Encoder;

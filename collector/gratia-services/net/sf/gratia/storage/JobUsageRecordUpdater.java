@@ -3,6 +3,8 @@
  */
 package net.sf.gratia.storage;
 
+import net.sf.gratia.util.Configuration;
+
 import java.util.GregorianCalendar;
 
 import java.io.StringReader;
@@ -13,7 +15,6 @@ import org.dom4j.io.SAXReader;
 import org.dom4j.Element;
 import org.xml.sax.InputSource;
 
-import net.sf.gratia.services.Configuration;
 
 /**
  * @author pcanal
