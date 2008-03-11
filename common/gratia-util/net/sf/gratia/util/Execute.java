@@ -1,4 +1,4 @@
-package net.sf.gratia.services;
+package net.sf.gratia.util;
 
 import java.io.*;
 
