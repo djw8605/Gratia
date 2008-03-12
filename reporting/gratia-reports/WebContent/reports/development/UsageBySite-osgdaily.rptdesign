@@ -297,6 +297,11 @@
                         <property name="name">Cpu</property>
                         <property name="dataType">float</property>
                     </structure>
+                    <structure>
+                        <property name="position">5</property>
+                        <property name="name">Njobs</property>
+                        <property name="dataType">decimal</property>
+                    </structure>
                 </list-property>
             </structure>
             <property name="dataSource">fermigrid1</property>
@@ -351,10 +356,18 @@
                     <property name="dataType">float</property>
                     <property name="nativeDataType">8</property>
                 </structure>
+                <structure>
+                    <property name="position">5</property>
+                    <property name="name">Njobs</property>
+                    <property name="nativeName">Njobs</property>
+                    <property name="dataType">decimal</property>
+                    <property name="nativeDataType">3</property>
+                </structure>
             </list-property>
             <property name="queryText">select ReportedSiteName as sitename, date_format(JR.EndTime, '%Y-%m-%d') as endtime,
 	sum(WallDuration) as WallDuration,
-	sum(CpuUserDuration+CpuSystemDuration) as Cpu
+	sum(CpuUserDuration+CpuSystemDuration) as Cpu,
+	sum(Njobs) as Njobs
 from JobUsageRecord_Report JR
 where (? &lt;= EndTime and EndTime &lt;= ?)
 group by sitename
@@ -1627,6 +1640,11 @@ else {&#xD;
                     <property name="name">endtime</property>
                     <expression name="expression">dataSetRow["endtime"]</expression>
                     <property name="dataType">any</property>
+                </structure>
+                <structure>
+                    <property name="name">Njobs</property>
+                    <expression name="expression">dataSetRow["Njobs"]</expression>
+                    <property name="dataType">integer</property>
                 </structure>
             </list-property>
             <property name="style">sans-style1</property>
