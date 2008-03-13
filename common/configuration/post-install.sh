@@ -6,7 +6,7 @@
 script_location=${VDT_LOCATION}/tomcat/v55/gratia/
 
 TMP=${TMPDIR:-/tmp}/post-install.sh.$$
-#trap "rm $TMP* 2>/dev/null" EXIT
+trap "rm $TMP* 2>/dev/null" EXIT
 
 if grep -e 'org\.hibernate\.dialect\.MySQLInnoDBDialect' \
    "${script_location}/hibernate.cfg.xml" \
