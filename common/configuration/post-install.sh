@@ -6,7 +6,7 @@
 script_location=${VDT_LOCATION}/tomcat/v55/gratia/
 
 TMP=${TMPDIR:-/tmp}/post-install.sh.$$
-trap "rm $TMP* 2>/dev/null" EXIT
+#trap "rm $TMP* 2>/dev/null" EXIT
 
 if grep -e 'org\.hibernate\.dialect\.MySQLInnoDBDialect' \
    "${script_location}/hibernate.cfg.xml" \
@@ -21,7 +21,7 @@ function preprocess_proc() {
             echo "Unable to create temporary file \"$TMP.preprocess.XXXXXXXXXX\"" 1>&2
             exit 1
         fi
-        sed -e 's/ ENGINE='"'"'innodb'"'"'//g' "$proc" > "$TPROC"
+        sed -e 's/[ 	]*ENGINE[ 	]*=[ 	]*'"'"'innodb'"'"'//gi' "$proc" > "$TPROC"
         proc="$TPROC"
      fi
 }
