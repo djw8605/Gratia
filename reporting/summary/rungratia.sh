@@ -1,5 +1,6 @@
-#!/bin/sh
-#mutt=$HOME/bin/mymutt/runmutt
+#!/bin/sh 
+mutt=/usr/bin/mutt
+#$HOME/bin/mymutt/runmutt
 
 # space separated list of mail recipients
 PROD_MAILTO="osg-accounting-info@fnal.gov"
@@ -28,6 +29,7 @@ done
 
 where=`dirname $0`
 
+. /fnal/ups/etc/setups.sh
 cd $HOME/root.mysql
 . ../set_root_opt
 

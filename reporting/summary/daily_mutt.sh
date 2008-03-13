@@ -29,6 +29,7 @@ MAIL_MSG="Report from the job level Gratia db for $when"
 SUM_MAIL_MSG="Report from the daily summary Gratia db for $when"
 STATUS_MAIL_MSG="Job Success Rate for $when (from the job level Gratia db)"
 VO_STATUS_MAIL_MSG="Job Success Rate by VO for $when (from the job level Gratia db) "
+BOTH_STATUS_MAIL_MSG="Job Success Rate by Site and VO for $when (from the job level Gratia db) "
 
 # Transfer the file now
 WORK_DIR=workdir.${RANDOM}
@@ -61,6 +62,7 @@ sendto ./daily $whenarg ${WORK_DIR}/report "$MAIL_MSG"
 sendto ./dailyFromSummary $whenarg ${WORK_DIR}/summary_report "$SUM_MAIL_MSG"
 sendto ./dailyStatus  $whenarg ${WORK_DIR}/status_report "$STATUS_MAIL_MSG"
 sendto "./dailyStatus --groupby=VO"  $whenarg ${WORK_DIR}/vo_status_report "$VO_STATUS_MAIL_MSG"
+sendto "./dailyStatus --groupby=Both"  $whenarg ${WORK_DIR}/vo_status_report "$BOTH_STATUS_MAIL_MSG"
 
 
 if [ "$debug" != "x" ]; then 

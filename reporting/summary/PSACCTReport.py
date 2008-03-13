@@ -5,7 +5,7 @@
 #
 # library to create simple report using the Gratia psacct database
 #
-#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.13 2008-03-10 17:56:28 pcanal Exp $
+#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.14 2008-03-13 14:58:45 pcanal Exp $
 
 import time
 import datetime
@@ -543,8 +543,10 @@ class DailySiteJobStatusConf:
     formats = {}
     lines = {}
     col1 = "All sites"
+    col2 = ""
     CondorSpecial = False
     GroupBy = "Site.SiteName"
+    Both = False
 
     def __init__(self, header = False, CondorSpecial = True, groupby = "Site"):
            self.formats["csv"] = ",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""
@@ -558,11 +560,27 @@ class DailySiteJobStatusConf:
                self.GroupBy = "J.VOName"
                self.headers = ("VO","Success Rate","Success","Failed","Total")
                self.col1 = "All VOs"
+           elif (groupby == "Both"):
+               self.formats["csv"] = ",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""
+               self.formats["text"] = "| %-22s | %-22s | %12s | %10s | %10s | %10s "
+               self.lines["text"] = "-------------------------------------------------------------------------------------------------------------"
+               self.GroupBy = "Site.SiteName,J.VOName"
+               self.headers = ("Site","VO","Success Rate","Success","Failed","Total")
+               self.col1 = "All Sites"
+               self.col2 = "All VOs"
+               self.Both = True
+               
 
     def Sorting(self, x,y):
-        xval = (x[1])[1]*100 / ( (x[1])[1] + (x[1])[2] ) 
-        yval = (y[1])[1]*100 / ( (y[1])[1] + (y[1])[2] )
-        return cmp(yval,xval)
+        if (self.Both):
+            xval = (x[1])[0] + (x[1])[1]
+            yval = (y[1])[0] + (y[1])[1] 
+            return cmp(xval,yval)
+        else:
+            xval = (x[1])[2]*100 / ( (x[1])[2] + (x[1])[3] ) 
+            yval = (y[1])[2]*100 / ( (y[1])[2] + (y[1])[3] )
+            return cmp(yval,xval)
+        
 
     def GetData(self,start,end):
        if self.CondorSpecial:
@@ -747,27 +765,33 @@ def GenericDailyStatus(what, when = datetime.date.today(), output = "text"):
                     continue
 
                 site = val[0]
-                status = val[1]
-                count = string.atoi(val[2])
+                if (what.Both):
+                   vo = val[1]
+                   status = val[2]
+                   count = string.atoi(val[3])
+                else:
+                   vo = ""
+                   status = val[1]
+                   count = string.atoi(val[2])
 
-                key = site + " has status " + status
+                key = site + ";" + vo + " has status " + status
 
                 if all_values.has_key(key):
-                    (a,b,oldvalue) = all_values[key]
+                    (a,b,c,oldvalue) = all_values[key]
                     oldvalue = oldvalue + count
-                    all_values[key] = (a,b,oldvalue)
+                    all_values[key] = (a,b,c,oldvalue)
                 else:
-                    all_values[key] = (site,status,count)
+                    all_values[key] = (site,vo,status,count)
 
-                key = site
-                (tmp, success, failed ) = ("",0,0)
+                key = site + ";" + vo
+                (tmp, tmp2, success, failed ) = ("","",0,0)
                 if sum_values.has_key(key) :
-                    (tmp, success, failed ) = sum_values[key]
+                    (tmp, tmp2, success, failed ) = sum_values[key]
                 if status == "0" :
                     success = success + count
                 else:
                     failed = failed + count
-                sum_values[key] = (site, success, failed)
+                sum_values[key] = (site, vo, success, failed)
                 
 ##        for key,(site,status,count) in sortedDictValues(all_values):
 ##            index = index + 1;
@@ -779,10 +803,13 @@ def GenericDailyStatus(what, when = datetime.date.today(), output = "text"):
         totaljobs = 0
         totalsuccess = 0
         totalfailed = 0
-        for key,(site,success,failed) in sortedDictValuesFunc(sum_values,what.Sorting):
+        for key,(site,vo,success,failed) in sortedDictValuesFunc(sum_values,what.Sorting):
             index = index + 1;
             total = success+failed
-            values = (site,str((success*100/total))+" %",success,failed,total)
+            if (what.Both):
+               values = (site,vo,str((success*100/total))+" %",success,failed,total)
+            else: 
+               values = (site,str((success*100/total))+" %",success,failed,total)
             totaljobs = totaljobs + total
             totalsuccess = totalsuccess + success
             totalfailed = totalfailed + failed
@@ -792,7 +819,10 @@ def GenericDailyStatus(what, when = datetime.date.today(), output = "text"):
 
         if (output != "None") :
                 print what.lines[output]
-                print "    ", what.formats[output] % ( what.col1, str(totalsuccess*100/totaljobs) + " %", totalsuccess,totalfailed,totaljobs)
+                if (what.Both):
+                    print "    ", what.formats[output] % ( what.col1, what.col2, str(totalsuccess*100/totaljobs) + " %", totalsuccess,totalfailed,totaljobs)
+                else:
+                    print "    ", what.formats[output] % ( what.col1, str(totalsuccess*100/totaljobs) + " %", totalsuccess,totalfailed,totaljobs)
                 print what.lines[output]
 
         return result
