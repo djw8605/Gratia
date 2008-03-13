@@ -1141,59 +1141,6 @@ else {&#xD;
           </DataPoint>
           <LabelPosition>Outside</LabelPosition>
           <Stacked>false</Stacked>
-          <Triggers>
-            <Condition>onclick</Condition>
-            <Action>
-              <Type>URL_Redirect</Type>
-              <Value xsi:type="attribute:URLValue">
-                <BaseUrl>&lt;structure name=&quot;action&quot;>
-    &lt;property name=&quot;formatType&quot;>html&lt;/property>
-    &lt;property name=&quot;linkType&quot;>drill-through&lt;/property>
-    &lt;property name=&quot;reportName&quot;>UsageByUser.rptdesign&lt;/property>
-    &lt;property name=&quot;targetWindow&quot;>_self&lt;/property>
-    &lt;property name=&quot;targetFileType&quot;>report-design&lt;/property>
-    &lt;list-property name=&quot;paramBindings&quot;>
-        &lt;structure>
-            &lt;property name=&quot;paramName&quot;>StartDate&lt;/property>
-            &lt;expression name=&quot;expression&quot;>params[&quot;StartDate&quot;]&lt;/expression>
-        &lt;/structure>
-        &lt;structure>
-            &lt;property name=&quot;paramName&quot;>EndDate&lt;/property>
-            &lt;expression name=&quot;expression&quot;>params[&quot;EndDate&quot;]&lt;/expression>
-        &lt;/structure>
-        &lt;structure>
-            &lt;property name=&quot;paramName&quot;>DisplayMetric&lt;/property>
-            &lt;expression name=&quot;expression&quot;>params[&quot;DisplayMetric&quot;]&lt;/expression>
-        &lt;/structure>
-        &lt;structure>
-            &lt;property name=&quot;paramName&quot;>ForVOName&lt;/property>
-            &lt;expression name=&quot;expression&quot;>params[&quot;ForVOName&quot;]&lt;/expression>
-        &lt;/structure>
-        &lt;structure>
-            &lt;property name=&quot;paramName&quot;>ForVO&lt;/property>
-            &lt;expression name=&quot;expression&quot;>&quot;ForVO&quot;&lt;/expression>
-        &lt;/structure>
-        &lt;structure>
-            &lt;property name=&quot;paramName&quot;>ForSite&lt;/property>
-            &lt;expression name=&quot;expression&quot;>&quot;ForSite&quot;&lt;/expression>
-        &lt;/structure>
-        &lt;structure>
-            &lt;property name=&quot;paramName&quot;>ReportTitle&lt;/property>
-            &lt;expression name=&quot;expression&quot;>params[&quot;ReportTitle&quot;]&lt;/expression>
-        &lt;/structure>
-        &lt;structure>
-            &lt;property name=&quot;paramName&quot;>ReportSubtitle&lt;/property>
-            &lt;expression name=&quot;expression&quot;>params[&quot;ReportSubtitle&quot;]&lt;/expression>
-        &lt;/structure>
-    &lt;/list-property>
-&lt;/structure>
-</BaseUrl>
-                <BaseParameterName>ForSiteName</BaseParameterName>
-                <ValueParameterName></ValueParameterName>
-                <SeriesParameterName></SeriesParameterName>
-              </Value>
-            </Action>
-          </Triggers>
           <Riser>Rectangle</Riser>
           <RiserOutline>
             <Transparency>255</Transparency>
@@ -2176,15 +2123,15 @@ else {&#xD;
                 </structure>
                 <structure>
                     <property name="paramName">ForVO</property>
-                    <expression name="expression">params["ForVO"]</expression>
+                    <expression name="expression">"ForVO"</expression>
                 </structure>
                 <structure>
                     <property name="paramName">ForSiteName</property>
-                    <expression name="expression">params["ForSiteName"]</expression>
+                    <expression name="expression">''</expression>
                 </structure>
                 <structure>
                     <property name="paramName">ForSite</property>
-                    <expression name="expression">params["ForSite"]</expression>
+                    <expression name="expression">'AnySite'</expression>
                 </structure>
                 <structure>
                     <property name="paramName">StartDate</property>
