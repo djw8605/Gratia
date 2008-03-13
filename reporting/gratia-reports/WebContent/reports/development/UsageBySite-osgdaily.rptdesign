@@ -1118,21 +1118,13 @@ else {&#xD;
                 <BaseUrl>&lt;structure name=&quot;action&quot;>
     &lt;property name=&quot;formatType&quot;>html&lt;/property>
     &lt;property name=&quot;linkType&quot;>drill-through&lt;/property>
-    &lt;property name=&quot;reportName&quot;>UsageByVOForSite.rptdesign&lt;/property>
+    &lt;property name=&quot;reportName&quot;>UsageByVOForSite-osgdaily.rptdesign&lt;/property>
     &lt;property name=&quot;targetWindow&quot;>_self&lt;/property>
     &lt;property name=&quot;targetFileType&quot;>report-design&lt;/property>
     &lt;list-property name=&quot;paramBindings&quot;>
         &lt;structure>
-            &lt;property name=&quot;paramName&quot;>StartDate&lt;/property>
-            &lt;expression name=&quot;expression&quot;>params[&quot;StartDate&quot;]&lt;/expression>
-        &lt;/structure>
-        &lt;structure>
-            &lt;property name=&quot;paramName&quot;>EndDate&lt;/property>
-            &lt;expression name=&quot;expression&quot;>params[&quot;EndDate&quot;]&lt;/expression>
-        &lt;/structure>
-        &lt;structure>
-            &lt;property name=&quot;paramName&quot;>DisplayMetric&lt;/property>
-            &lt;expression name=&quot;expression&quot;>params[&quot;DisplayMetric&quot;]&lt;/expression>
+            &lt;property name=&quot;paramName&quot;>ForVOName&lt;/property>
+            &lt;expression name=&quot;expression&quot;>params[&quot;ForVOName&quot;]&lt;/expression>
         &lt;/structure>
         &lt;structure>
             &lt;property name=&quot;paramName&quot;>ForVO&lt;/property>
@@ -1143,12 +1135,24 @@ else {&#xD;
             &lt;expression name=&quot;expression&quot;>'ForSite'&lt;/expression>
         &lt;/structure>
         &lt;structure>
+            &lt;property name=&quot;paramName&quot;>StartDate&lt;/property>
+            &lt;expression name=&quot;expression&quot;>params[&quot;StartDate&quot;]&lt;/expression>
+        &lt;/structure>
+        &lt;structure>
+            &lt;property name=&quot;paramName&quot;>EndDate&lt;/property>
+            &lt;expression name=&quot;expression&quot;>params[&quot;EndDate&quot;]&lt;/expression>
+        &lt;/structure>
+        &lt;structure>
             &lt;property name=&quot;paramName&quot;>ReportTitle&lt;/property>
-            &lt;expression name=&quot;expression&quot;>params[&quot;ReportTitle&quot;] + ' - ' + 'drill-through'&lt;/expression>
+            &lt;expression name=&quot;expression&quot;>params[&quot;ReportTitle&quot;]&lt;/expression>
         &lt;/structure>
         &lt;structure>
             &lt;property name=&quot;paramName&quot;>ReportSubtitle&lt;/property>
-            &lt;expression name=&quot;expression&quot;>params[&quot;ReportSubtitle&quot;]&lt;/expression>
+            &lt;expression name=&quot;expression&quot;>params[&quot;ReportTitle&quot;] + ' - ' + 'drill-through'&lt;/expression>
+        &lt;/structure>
+        &lt;structure>
+            &lt;property name=&quot;paramName&quot;>DisplayMetric&lt;/property>
+            &lt;expression name=&quot;expression&quot;>params[&quot;DisplayMetric&quot;]&lt;/expression>
         &lt;/structure>
     &lt;/list-property>
 &lt;/structure>
@@ -1578,19 +1582,11 @@ else {&#xD;
                 <property name="linkType">drill-through</property>
                 <property name="formatType">html</property>
                 <property name="targetFileType">report-design</property>
-                <property name="reportName">UsageByVOForSite.rptdesign</property>
+                <property name="reportName">UsageByVOForSite-osgdaily.rptdesign</property>
                 <list-property name="paramBindings">
                     <structure>
-                        <property name="paramName">StartDate</property>
-                        <expression name="expression">params["StartDate"]</expression>
-                    </structure>
-                    <structure>
-                        <property name="paramName">EndDate</property>
-                        <expression name="expression">params["EndDate"]</expression>
-                    </structure>
-                    <structure>
-                        <property name="paramName">DisplayMetric</property>
-                        <expression name="expression">params["DisplayMetric"]</expression>
+                        <property name="paramName">ForVOName</property>
+                        <expression name="expression">params["ForVOName"]</expression>
                     </structure>
                     <structure>
                         <property name="paramName">ForVO</property>
@@ -1601,12 +1597,24 @@ else {&#xD;
                         <expression name="expression">'ForSite'</expression>
                     </structure>
                     <structure>
+                        <property name="paramName">StartDate</property>
+                        <expression name="expression">params["StartDate"]</expression>
+                    </structure>
+                    <structure>
+                        <property name="paramName">EndDate</property>
+                        <expression name="expression">params["EndDate"]</expression>
+                    </structure>
+                    <structure>
                         <property name="paramName">ReportTitle</property>
-                        <expression name="expression">params["ReportTitle"] + ' - ' + 'drill-through'</expression>
+                        <expression name="expression">params["ReportTitle"]</expression>
                     </structure>
                     <structure>
                         <property name="paramName">ReportSubtitle</property>
-                        <expression name="expression">params["ReportSubtitle"]</expression>
+                        <expression name="expression">params["ReportTitle"] + ' - ' + 'drill-through'</expression>
+                    </structure>
+                    <structure>
+                        <property name="paramName">DisplayMetric</property>
+                        <expression name="expression">params["DisplayMetric"]</expression>
                     </structure>
                 </list-property>
             </structure>
@@ -1650,6 +1658,5 @@ else {&#xD;
             <property name="style">sans-style1</property>
         </extended-item>
         <label name="ReportURL" id="391" extends="gratia-lib1.ReportURL"/>
-        <label name="ShowQuery" id="392" extends="gratia-lib1.ShowQuery"/>
     </body>
 </report>
