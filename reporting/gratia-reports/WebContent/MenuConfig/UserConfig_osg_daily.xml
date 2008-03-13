@@ -3,10 +3,8 @@
 		<MenuGroup name="Reports">
 			<MenuItem name="Daily Usage by Site" link="GratiaParameterInput.jsp?report=[ReportsFolder]UsageBySiteByDate-ranked-osgdaily.rptdesign&amp;CPUMetric=wallclock"/>
 			<MenuItem display="true" name="Usage by Site" link="GratiaParameterInput.jsp?report=[ReportsFolder]UsageBySite-osgdaily.rptdesign&amp;CPUMetric=wallclock"/>
-			<MenuItem name="Jobs by Site" link="GratiaParameterInput.jsp?report=[ReportsFolder]JobsBySite-osgdaily.rptdesign"/>
 			<MenuItem name="Daily Usage by VO" link="GratiaParameterInput.jsp?report=[ReportsFolder]UsageByVOByDate-ranked-osgdaily.rptdesign&amp;CPUMetric=wallclock"/>
 			<MenuItem name="Usage by VO" link="GratiaParameterInput.jsp?report=[ReportsFolder]UsageByVO-osgdaily.rptdesign&amp;CPUMetric=wallclock"/>
-			<MenuItem name="Jobs by VO" link="GratiaParameterInput.jsp?report=[ReportsFolder]JobsByVO-osgdaily.rptdesign"/>
 			<MenuItem name="Panda and goc Probe Comparison" link="GratiaParameterInput.jsp?report=[ReportsFolder]UsageByDateByProbeForVO-osgdaily.rptdesign"/>
 		</MenuGroup>
 		<MenuGroup name="SQL Queries">
