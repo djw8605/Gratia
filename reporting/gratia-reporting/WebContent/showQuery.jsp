@@ -262,7 +262,7 @@ function closeAll () {
 					if(value == null)
 						cellvalue = "[null]";
 
-					if (value instanceof Double)
+					else if (value instanceof Double)
 					{
 						int intvalue = (int)Math.floor(((Double)value).doubleValue());
 						Integer toprint = new Integer(intvalue);
@@ -336,6 +336,7 @@ function closeAll () {
 				The following error occur while executing the query: <br>
 				&nbsp;&nbsp;&nbsp;&nbsp;<strong><%= msg %></strong> <br>
 				<em><%= ex %> </em>
+				<% ex.printStackTrace(); %> 
 			</font></td></tr><tr> <td align="left" ><hr color="#FF8330"></td></tr></table>
 			<script type="text/javascript">
 				if (currentFramePath == 'top')
