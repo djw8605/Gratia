@@ -96,7 +96,7 @@
         <parameter-group name="VOandSite" id="108">
             <parameters>
                 <scalar-parameter name="ForVOName" id="106">
-                    <property name="hidden">false</property>
+                    <property name="hidden">true</property>
                     <property name="valueType">static</property>
                     <property name="dataType">string</property>
                     <text-property name="promptText">Enter VO Name</text-property>
@@ -388,7 +388,7 @@
    sum(JobUsageRecord_Report.WallDuration) as WallDuration,
    sum(JobUsageRecord_Report.CpuUserDuration + JobUsageRecord_Report.CpuSystemDuration) as Cpu,
    sum(JobUsageRecord_Report.Njobs) as Njobs,
-   JobUsageRecord_Report.VOName from Site,Probe,JobUsageRecord_Report
+   JobUsageRecord_Report.VOName from JobUsageRecord_Report
 WHERE 
    (JobUsageRecord_Report.VOName =?  OR (? = 'AnyVO' AND JobUsageRecord_Report.VOName like '%' )) 
    AND (ReportedSiteName = ? OR (? = 'AnySite' and ReportedSiteName like '%' )) 
