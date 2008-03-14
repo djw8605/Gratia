@@ -307,7 +307,7 @@
                     <property name="name">ForVOName</property>
                     <property name="dataType">string</property>
                     <property name="position">1</property>
-                    <expression name="defaultValue">''</expression>
+                    <expression name="defaultValue">' '</expression>
                     <property name="isInput">true</property>
                     <property name="isOutput">false</property>
                 </structure>
@@ -323,7 +323,7 @@
                     <property name="name">ForSiteName</property>
                     <property name="dataType">string</property>
                     <property name="position">3</property>
-                    <expression name="defaultValue">'ASGC_OSG'</expression>
+                    <expression name="defaultValue">'Purdue-Lear'</expression>
                     <property name="isInput">true</property>
                     <property name="isOutput">false</property>
                 </structure>
@@ -352,14 +352,6 @@
                     <expression name="defaultValue">'2008-02-01'</expression>
                     <property name="isOptional">false</property>
                     <property name="allowNull">true</property>
-                    <property name="isInput">true</property>
-                    <property name="isOutput">false</property>
-                </structure>
-                <structure>
-                    <property name="name">ResourceType</property>
-                    <property name="dataType">string</property>
-                    <property name="position">7</property>
-                    <expression name="defaultValue">'Batch'</expression>
                     <property name="isInput">true</property>
                     <property name="isOutput">false</property>
                 </structure>
@@ -405,14 +397,15 @@
    sum(JobUsageRecord_Report.WallDuration) as WallDuration,
    sum(JobUsageRecord_Report.CpuUserDuration + JobUsageRecord_Report.CpuSystemDuration) as Cpu,
    sum(JobUsageRecord_Report.Njobs) as Njobs,
-   JobUsageRecord_Report.VOName from Site,Probe,JobUsageRecord_Report
+   JobUsageRecord_Report.VOName
+FROM JobUsageRecord_Report
 WHERE 
    (JobUsageRecord_Report.VOName =?  OR (? = 'AnyVO' AND JobUsageRecord_Report.VOName like '%' )) 
    AND (ReportedSiteName = ? OR (? = 'AnySite' and ReportedSiteName like '%' )) 
-   AND EndTime >= date(?) and EndTime &lt;= date(?)
-   AND ResourceType = ? 
-   GROUP BY sitename, JobUsageRecord_Report.VOName 
-   ORDER BY sitename, JobUsageRecord_Report.VOName</property>
+   AND date_format(EndTime,'%Y-%m-%d') >= ?
+   AND date_format(EndTime,'%Y-%m-%d') &lt;= ?
+   GROUP BY ReportedSiteName, JobUsageRecord_Report.VOName 
+   ORDER BY ReportedSiteName, JobUsageRecord_Report.VOName</property>
         </oda-data-set>
     </data-sets>
     <styles>
