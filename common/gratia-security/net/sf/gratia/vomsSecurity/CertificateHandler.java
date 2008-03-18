@@ -52,36 +52,45 @@ public class CertificateHandler
 	String voSelect = null;
 	String voConnect = null;
 
-	   private String _configLoaded = null;
-	   private String _secureConnection = null;
-	     // ----------------------------------
-	   public String getSecureConnection() {
-	       return _secureConnection;
-	   }
-	   // ----------------------------------
-	     public void loadCertificateConfiguration(HttpServletRequest request)
-	   {
-	       this.request = request;
-	       Properties p = net.sf.gratia.util.Configuration.getProperties();
+	private String _configLoaded = null;
+	private String _secureConnection = null;
+	private String _openConnection = null;
 
-	       // The flag 'configLoaded' is set when the configuration has been already loaded
-	       if (_configLoaded == null)
-	       {
-	           try
-	           {
-	               String webappsHome =  System.getProperty("catalina.home") + "/" + "webapps" + "/";
+	// ----------------------------------
+	public String getSecureConnection() {
+		return _secureConnection;
+	}
+	   
+	// ----------------------------------
+	public String getOpenConnection() {
+		return _openConnection;
+	}
+	   
+	// ----------------------------------
+	public void loadCertificateConfiguration(HttpServletRequest request)
+	{
+		this.request = request;
+		Properties p = net.sf.gratia.util.Configuration.getProperties();
 
-	               _secureConnection      = p.getProperty("service.secure.connection");
+		// The flag 'configLoaded' is set when the configuration has been already loaded
+		if (_configLoaded == null)
+		{
+			try
+			{
+				String webappsHome =  System.getProperty("catalina.home") + "/" + "webapps" + "/";
 
-	    // Set a flag indicating the configuration has been loaded, so subsequent calls will not load again
-	                _configLoaded = "1";
+				_secureConnection      = p.getProperty("service.secure.connection");
+				_openConnection        = p.getProperty("service.open.connection");
 
-	           } catch (Exception e) {
-	               e.printStackTrace();
-	           }
-	       }
-	   }
-	       // ---------------------------------- 
+				// Set a flag indicating the configuration has been loaded, so subsequent calls will not load again
+				_configLoaded = "1";
+
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
 	//---------------------------------------------------
 	public CertificateHandler(HttpServletRequest request)
 	{
