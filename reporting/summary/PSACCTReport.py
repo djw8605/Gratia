@@ -5,7 +5,7 @@
 #
 # library to create simple report using the Gratia psacct database
 #
-#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.14 2008-03-13 14:58:45 pcanal Exp $
+#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.15 2008-03-18 21:18:09 pcanal Exp $
 
 import time
 import datetime
@@ -395,7 +395,7 @@ def DailyVOSiteDataFromDaily(begin,end,select,count):
 def DailySiteJobStatus(begin,end,select = "", count = "", what = "Site.SiteName" ):
         schema = "gratia"
 
-        select = " SELECT " + what + ", J.Status,count(*) " \
+        select = " SELECT " + what + ", J.Status,count(*), sum(WallDuration) " \
                 + " from "+schema+".Site, "+schema+".Probe, "+schema+".JobUsageRecord_Report J " \
                 + " where VOName != \"Unknown\" and Probe.siteid = Site.siteid and J.ProbeName = Probe.probename" \
                 + " and \""+ DateToString(begin) +"\"<EndTime and EndTime<\"" + DateToString(end) + "\"" \
@@ -407,7 +407,7 @@ def DailySiteJobStatus(begin,end,select = "", count = "", what = "Site.SiteName"
 def DailySiteJobStatusCondor(begin,end,select = "", count = "", what = "Site.SiteName" ):
         schema = "gratia"
 
-        select = " SELECT "+what+", R.Value,count(*) " \
+        select = " SELECT "+what+", R.Value,count(*), sum(WallDuration) " \
                 + " from "+schema+".Site, "+schema+".Probe, "+schema+".JobUsageRecord_Report J, "+schema+".Resource R "\
                 + " where VOName != \"Unknown\" and Probe.siteid = Site.siteid and J.ProbeName = Probe.probename" \
                 + " and \""+ DateToString(begin) +"\"<EndTime and EndTime<\"" + DateToString(end) + "\"" \
@@ -539,7 +539,7 @@ def FromCondor():
 class DailySiteJobStatusConf:
     title = "Summary of the job exit status (midnight to midnight central time) for %s\nincluding all jobs that finished in that time period.\n\nFor Condor the value used is taken from 'ExitCode' and NOT from 'Exit Status'\n"
     headline = "For all jobs finished on %s (Central Time)"
-    headers = ("Site","Success Rate","Success","Failed","Total")
+    headers = ("Site","Success Rate","Success","Failed","Total","Wall Success","Wall Failed")
     formats = {}
     lines = {}
     col1 = "All sites"
@@ -549,23 +549,23 @@ class DailySiteJobStatusConf:
     Both = False
 
     def __init__(self, header = False, CondorSpecial = True, groupby = "Site"):
-           self.formats["csv"] = ",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""
-           self.formats["text"] = "| %-22s | %12s | %10s | %10s | %10s "
+           self.formats["csv"] = ",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""
+           self.formats["text"] = "| %-22s | %12s | %10s | %10s | %10s | %12s | %11s "
            self.lines["csv"] = ""
-           self.lines["text"] = "---------------------------------------------------------------------------------------"
+           self.lines["text"] = "----------------------------------------------------------------------------------------------------------------"
 
            if (not header) :  self.title = ""
            self.CondorSpecial = CondorSpecial
            if (groupby == "VO"):
                self.GroupBy = "J.VOName"
-               self.headers = ("VO","Success Rate","Success","Failed","Total")
+               self.headers = ("VO","Success Rate","Success","Failed","Total","Wall Success","Wall Failed")
                self.col1 = "All VOs"
            elif (groupby == "Both"):
-               self.formats["csv"] = ",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""
-               self.formats["text"] = "| %-22s | %-22s | %12s | %10s | %10s | %10s "
-               self.lines["text"] = "-------------------------------------------------------------------------------------------------------------"
+               self.formats["csv"] = ",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""
+               self.formats["text"] = "| %-22s | %-22s | %12s | %10s | %10s | %10s | %12s | %11s "
+               self.lines["text"] = "-----------------------------------------------------------------------------------------------------------------------------------------"
                self.GroupBy = "Site.SiteName,J.VOName"
-               self.headers = ("Site","VO","Success Rate","Success","Failed","Total")
+               self.headers = ("Site","VO","Success Rate","Success","Failed","Total","Wall Success","Wall Failed")
                self.col1 = "All Sites"
                self.col2 = "All VOs"
                self.Both = True
@@ -737,6 +737,7 @@ def sortedDictValuesFunc(adict,compare):
     return [(key,value) for key, value in items]
 
 def GenericDailyStatus(what, when = datetime.date.today(), output = "text"):
+        factor = 3600  # Convert number of seconds to number of hours
 
         if (output != "None") :
             if (what.title != "") :
@@ -769,29 +770,40 @@ def GenericDailyStatus(what, when = datetime.date.today(), output = "text"):
                    vo = val[1]
                    status = val[2]
                    count = string.atoi(val[3])
+                   if val[4] == "NULL":
+                      wall = 0
+                   else:
+                      wall = string.atof( val[4] ) / factor
                 else:
                    vo = ""
                    status = val[1]
                    count = string.atoi(val[2])
+                   if val[3] == "NULL":
+                      wall = 0
+                   else:
+                      wall = string.atof( val[3] ) / factor
 
                 key = site + ";" + vo + " has status " + status
 
                 if all_values.has_key(key):
-                    (a,b,c,oldvalue) = all_values[key]
+                    (a,b,c,oldvalue,oldwall) = all_values[key]
                     oldvalue = oldvalue + count
-                    all_values[key] = (a,b,c,oldvalue)
+                    oldwall = oldwall + wall
+                    all_values[key] = (a,b,c,oldvalue,oldwall)
                 else:
-                    all_values[key] = (site,vo,status,count)
+                    all_values[key] = (site,vo,status,count,wall)
 
                 key = site + ";" + vo
-                (tmp, tmp2, success, failed ) = ("","",0,0)
+                (tmp, tmp2, success, failed, wsuccess, wfailed) = ("","",0,0, 0.0, 0.0)
                 if sum_values.has_key(key) :
-                    (tmp, tmp2, success, failed ) = sum_values[key]
+                    (tmp, tmp2, success, failed, wsuccess, wfailed ) = sum_values[key]
                 if status == "0" :
                     success = success + count
+                    wsuccess = wsuccess + wall
                 else:
                     failed = failed + count
-                sum_values[key] = (site, vo, success, failed)
+                    wfailed = wfailed + wall
+                sum_values[key] = (site, vo, success, failed, wsuccess, wfailed)
                 
 ##        for key,(site,status,count) in sortedDictValues(all_values):
 ##            index = index + 1;
@@ -803,16 +815,20 @@ def GenericDailyStatus(what, when = datetime.date.today(), output = "text"):
         totaljobs = 0
         totalsuccess = 0
         totalfailed = 0
-        for key,(site,vo,success,failed) in sortedDictValuesFunc(sum_values,what.Sorting):
+        totalws = 0.0
+        totalwf = 0.0
+        for key,(site,vo,success,failed,wsuccess,wfailed) in sortedDictValuesFunc(sum_values,what.Sorting):
             index = index + 1;
             total = success+failed
             if (what.Both):
-               values = (site,vo,str((success*100/total))+" %",success,failed,total)
+               values = (site,vo,str((success*100/total))+" %",success,failed,total,niceNum(wsuccess),niceNum(wfailed))
             else: 
-               values = (site,str((success*100/total))+" %",success,failed,total)
+               values = (site,str((success*100/total))+" %",success,failed,total,niceNum(wsuccess),niceNum(wfailed))
             totaljobs = totaljobs + total
             totalsuccess = totalsuccess + success
             totalfailed = totalfailed + failed
+            totalws = totalws + wsuccess
+            totalwf = totalwf + wfailed
             if (output != "None") :
                      print "%3d " %(index), what.formats[output] % values
             result.append(values)
@@ -820,9 +836,9 @@ def GenericDailyStatus(what, when = datetime.date.today(), output = "text"):
         if (output != "None") :
                 print what.lines[output]
                 if (what.Both):
-                    print "    ", what.formats[output] % ( what.col1, what.col2, str(totalsuccess*100/totaljobs) + " %", totalsuccess,totalfailed,totaljobs)
+                    print "    ", what.formats[output] % ( what.col1, what.col2, str(totalsuccess*100/totaljobs) + " %", totalsuccess,totalfailed,totaljobs,niceNum(totalws),niceNum(totalwf))
                 else:
-                    print "    ", what.formats[output] % ( what.col1, str(totalsuccess*100/totaljobs) + " %", totalsuccess,totalfailed,totaljobs)
+                    print "    ", what.formats[output] % ( what.col1, str(totalsuccess*100/totaljobs) + " %", totalsuccess,totalfailed,totaljobs,niceNum(totalws),niceNum(totalwf))
                 print what.lines[output]
 
         return result
