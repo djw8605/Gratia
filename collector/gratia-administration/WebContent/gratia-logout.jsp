@@ -10,14 +10,13 @@
 
 <body>
 <%
-	session.invalidate();
+	session.removeAttribute("FQAN");
 %>
 
 <script type="text/javascript">
-	parent.adminDashboard.location = "./dashboard.jsp";
+	parent.location = "./index.html";
+	//parent.adminDashboard.location = "./dashboard.jsp";
 </script>
 	
-<p class="txt"> Thank you for using the gratia grid Accounting System.</p>
- 
 </body>
 </html>
