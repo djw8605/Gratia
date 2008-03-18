@@ -2259,51 +2259,6 @@ else {&#xD;
           <LabelPosition>Inside</LabelPosition>
           <Stacked>true</Stacked>
           <Triggers>
-            <Condition>onclick</Condition>
-            <Action>
-              <Type>URL_Redirect</Type>
-              <Value xsi:type="attribute:URLValue">
-                <BaseUrl>&lt;structure name=&quot;action&quot;>
-    &lt;property name=&quot;formatType&quot;>html&lt;/property>
-    &lt;property name=&quot;linkType&quot;>drill-through&lt;/property>
-    &lt;property name=&quot;reportName&quot;>UsageByUserForDate1.rptdesign&lt;/property>
-    &lt;property name=&quot;targetWindow&quot;>_self&lt;/property>
-    &lt;property name=&quot;targetFileType&quot;>report-design&lt;/property>
-    &lt;list-property name=&quot;paramBindings&quot;>
-        &lt;structure>
-            &lt;property name=&quot;paramName&quot;>ForVOName&lt;/property>
-            &lt;expression name=&quot;expression&quot;>'xxx'&lt;/expression>
-        &lt;/structure>
-        &lt;structure>
-            &lt;property name=&quot;paramName&quot;>ForVO&lt;/property>
-            &lt;expression name=&quot;expression&quot;>'AnyVO'&lt;/expression>
-        &lt;/structure>
-        &lt;structure>
-            &lt;property name=&quot;paramName&quot;>ForSite&lt;/property>
-            &lt;expression name=&quot;expression&quot;>'ForSite'&lt;/expression>
-        &lt;/structure>
-        &lt;structure>
-            &lt;property name=&quot;paramName&quot;>DisplayMetric&lt;/property>
-            &lt;expression name=&quot;expression&quot;>params[&quot;DisplayMetric&quot;]&lt;/expression>
-        &lt;/structure>
-        &lt;structure>
-            &lt;property name=&quot;paramName&quot;>ReportTitle&lt;/property>
-            &lt;expression name=&quot;expression&quot;>params[&quot;ReportTitle&quot;] + ' - ' + 'drill-through'&lt;/expression>
-        &lt;/structure>
-        &lt;structure>
-            &lt;property name=&quot;paramName&quot;>ReportSubtitle&lt;/property>
-            &lt;expression name=&quot;expression&quot;>params[&quot;ReportSubtitle&quot;]&lt;/expression>
-        &lt;/structure>
-    &lt;/list-property>
-&lt;/structure>
-</BaseUrl>
-                <BaseParameterName>StartDate</BaseParameterName>
-                <ValueParameterName></ValueParameterName>
-                <SeriesParameterName>ForSiteName</SeriesParameterName>
-              </Value>
-            </Action>
-          </Triggers>
-          <Triggers>
             <Condition>onmouseover</Condition>
             <Action>
               <Type>Show_Tooltip</Type>
