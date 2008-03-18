@@ -1,4 +1,5 @@
  <%
+ 
  net.sf.gratia.vomsSecurity.CertificateHandler certificateHandler = new net.sf.gratia.vomsSecurity.CertificateHandler(request);
 
 String setVO        = null;
@@ -11,7 +12,6 @@ String VoUserGrp    = null;
 String RolesStr     = "";
 	
 String selectedVO = request.getParameter("selectedVO");
-//out.println("Selected VO: " + selectedVO + "<br>");
 
 	if(selectedVO != null)
 	{
