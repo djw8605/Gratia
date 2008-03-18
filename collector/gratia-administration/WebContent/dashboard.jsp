@@ -7,19 +7,17 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <link href="stylesheet.css" type="text/css" rel="stylesheet">
-<base target="paramFrame">
 <title>Gratia Accounting</title>
-
 </head>
 <body>
 
-<a href="http://opensciencegrid.org/" target="_blank"><img src="./images/osg-logo.gif" alt="OSG Logo" width="174" height="81" border="0"></a>
+<a href="http://opensciencegrid.org/" target="_blank"><img src="./images/osg-logo.gif" alt="OSG Logo" width="174" height="81" border="0"></a><br /> <hr>
 <%
-	
 	net.sf.gratia.vomsSecurity.CertificateHandler certificateHandler = new net.sf.gratia.vomsSecurity.CertificateHandler(request);
 	certificateHandler.loadCertificateConfiguration(request);
-	String secureLink = certificateHandler.getSecureConnection() + request.getContextPath() + "/gratia-login.jsp";
-	
+	String loginLink = certificateHandler.getSecureConnection() + request.getContextPath() + "/gratia-login.jsp";
+	String logoutLink  = certificateHandler.getOpenConnection() + request.getContextPath() + "/gratia-logout.jsp";
+
 	String userDN = (String) session.getAttribute("userDN");
 	String fqan = (String) session.getAttribute("FQAN");
 	boolean login = false;
@@ -31,30 +29,20 @@
 			login = true;
 	}
 	else
+	{
 		login = false;
-		
-	if (userDN != null)
-		userDN = "DN: " + userDN;
-	else
-		userDN = "";
-	
-	if (fqan != null)
-		fqan = "FQAN: " + fqan;
-	else
-		fqan = "";
+	}
 		
    if (login)
    {
    %>
-	<hr><div class="menuFqan"> <%=userDN %> <br>&nbsp;<br> <%=fqan %></div><hr>
-	<a href="./gratia-logout.jsp" target="adminContent" class="menuItem">logout</a><br /> 
+	<a href="<%=logoutLink %>" target="adminContent" class="menuItem">logout</a><br /> 
    <%
    }
    else
    {
    %>
-	<div class="menuFqan"><%=userDN %> <br>&nbsp;<br><%=fqan %></div><hr>
-	<a href="<%=secureLink %>" target="adminContent" class="menuItem">login</a><br />
+	<a href="<%=loginLink %>" target="adminContent" class="menuItem">login</a><br />
    <%
    }
 
