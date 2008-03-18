@@ -6,7 +6,7 @@
     import="java.sql.*"
     import="java.io.*"
 %>
- 
+
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
 <head>
@@ -19,19 +19,19 @@
 <script type="text/javascript" src="calendar/calendardef.js"></script>
 <script type="text/javascript" src="calendar/calendarstd.js"></script>
 <script type="text/javascript">
-	
+
 var c1 = new CodeThatCalendar(caldef1);
 
-function addVOs (form) 
+function addVOs (form)
 {
 	/* Construct the VOs string from the selection */
 	form.SelectVOs.value = "";
-		
+
 	for(var i = 0; i < form.myVOs.options.length; i++)
 	{
 		if (form.myVOs.options[i].selected)
 		{
-			if (form.SelectVOs.value != "") 
+			if (form.SelectVOs.value != "")
 				form.SelectVOs.value += ";" + form.myVOs.options[i].value;
 			else
 				form.SelectVOs.value += form.myVOs.options[i].value;
@@ -65,9 +65,9 @@ function getURL ()
 	myurl = myurl.replace(/ /g, "%20");
 	myurl = myurl.replace(/;/g, "%3B");
 	x.ReportURL.value = myurl;
-	
+
 	return myurl;
-	
+
 	// document.write(myurl);
 	// document.write("<br />");
 }
@@ -102,14 +102,14 @@ String displayReport = "true"; //request.getParameter("displayReport");
 //if (displayReport == null)
 //	displayReport = "false";
 
-//if (wholeParams.indexOf("displayReport=true") > -1)	
+//if (wholeParams.indexOf("displayReport=true") > -1)
 //	displayReport = "true";
 
 String report = request.getParameter("report");
 
 String inTitle = request.getParameter("ReportTitle");
 if (inTitle == null)
-{	
+{
 	inTitle = "";
 	if (wholeParams.indexOf("ReportTitle") > -1)
 	{
@@ -120,7 +120,7 @@ if (inTitle == null)
 			i2 = wholeParams.length();	// last parameter
 		else
 			i2 += i1;
-				
+
 		inTitle = wholeParams.substring(i1, i2).replace("%20", " ");
 	}
 }
@@ -151,7 +151,7 @@ String propertyName = null;
 String propertyValue = null;
 String selectName = null;
 String selectValue = null;
-%> 
+%>
 <table>
 <tr>
 <td>
@@ -174,13 +174,13 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 	String inputValue = null;
 	Boolean hasSelectionOptions = false;
 	Boolean hidden = false;
-	
+
 // Get the Parameter properties and set the appropriate variables
 	for(int z=0; z < paramGroup.getParameterProperties().size(); z++)
 	{
 		ParameterProperty paramProperty = (ParameterProperty)paramGroup.getParameterProperties().get(z);
-						
-		propertyName = paramProperty.getPropertyName();				
+
+		propertyName = paramProperty.getPropertyName();
 		propertyValue = paramProperty.getPropertyValue();
 		if ((propertyName.indexOf("hidden") >-1) && (propertyValue.indexOf("true") >-1))
 		{
@@ -194,7 +194,7 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 		if (propertyName.indexOf("defaultValue") >-1)
 			defaultValue = propertyValue;
 		if ((propertyName.indexOf("controlType") >-1) && (propertyValue.indexOf("list-box") >-1))
-			hasSelectionOptions = true;	
+			hasSelectionOptions = true;
 	}
 
 // Display information only for parameters that are not hidden
@@ -206,16 +206,16 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 			helpText = "";
 		if (defaultValue == null)
 			defaultValue = "";
-		
+
 		helpText = helpText.replace("'", "\\'"); // Escape "'" so that the tool tip works
 
 		// check if a value has been passed for this parameter in the URL.
 		// If so then make it the default value for this parameter.
 		// If the parameters are Start/EndDate do not use the given default value.
 		inputValue = request.getParameter(paramName);
-		if (inputValue != null) 
+		if (inputValue != null)
 				defaultValue = inputValue;
-			
+
 	// Set the start and end date
 		if(paramName.equals("StartDate"))
 			defaultValue = Start;
@@ -245,7 +245,7 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 			String selected = "selected";
 			String onchangeFunction = "getURL();";
 			String sql = "";
-			
+
 			if (paramName.indexOf("SelectVOs") > -1 )
 			{
 				selectNameID = "myVOs";
@@ -270,10 +270,10 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 			%>
 			<tr>
 			   <td valign="top" align="right"><label class="paramName" onMouseOver="Tip('<%= helpText%>');" ><%= promptText %></label></td>
-			   
+
 			   <td>&nbsp;&nbsp;</td>
-			   <td> 
-				<select <%= selectMultiple %> size="5" id="<%= selectNameID %>" name="<%= selectNameID %>" onmouseover="Tip('<%= helpText%>');" onchange="<%= onchangeFunction %>" >					
+			   <td>
+				<select <%= selectMultiple %> size="5" id="<%= selectNameID %>" name="<%= selectNameID %>" onmouseover="Tip('<%= helpText%>');" onchange="<%= onchangeFunction %>" >
 			<%
 
 			// Execute the sql statement
@@ -288,7 +288,7 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 			} catch (ClassNotFoundException ce){
 				out.println(ce);
 			}
-			
+
 			try{
 				con = DriverManager.getConnection(reportingConfiguration.getDatabaseURL(), reportingConfiguration.getDatabaseUser(), reportingConfiguration.getDatabasePassword());
 				statement = con.createStatement();
@@ -300,20 +300,24 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 				{
 				// Get the value for this column from the recordset, ommitting nulls
 					Object value = results.getObject(1);
-					if (value != null) 
+					if (value != null)
 					{
 						resultValue = value.toString();
 
-						if(defaultValue.indexOf(resultValue) > -1)
+						String compareValue = resultValue;
+						if (paramName.indexOf("SelectVOs") > -1 )
+							compareValue = "'" + resultValue + "'";
+
+						if(defaultValue.indexOf(compareValue) > -1)
 						{
 							selected="selected";
 
-							if (selectedItems != "") 
+							if (selectedItems != "")
 								selectedItems += ";" + resultValue;
 							else
 								selectedItems += resultValue;
 						}
-						%> <option value="<%= resultValue %>" <%= selected %> ><%= resultValue %></option> 
+						%> <option value="<%= resultValue %>" <%= selected %> ><%= resultValue %></option>
 						<%
 					}
 					selected="";
@@ -362,7 +366,7 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 				<tr>
 				   <td align="right"><em><label class="paramName" onmouseover="Tip('Readonly field')" ><%= selectedLabel %></label></em></td>
 				   <td>&nbsp;&nbsp;</td>
-				   <td><em><input id="<%= paramName%>" type="text" size="30" name="<%= paramName%>" Value = "<%= selectedItems %>" readonly onmouseover="Tip('Readonly field', CLICKCLOSE, false)"></em>
+				   <td><em><input id="<%= paramName%>" type="text" size="30" name="<%= paramName%>" value = "<%= selectedItems %>" readonly onmouseover="Tip('Readonly field', CLICKCLOSE, false)"></em>
 				   </td>
 				</tr>
 				<%
@@ -387,7 +391,7 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 				if(selectValue.equals(defaultValue))
 					selected="selected";
 				%>
-				<option value=<%= selectValue %> <%= selected %>><%= selectName %></option>
+				<option value="<%= selectValue %>" <%= selected %>><%= selectName %></option>
 				<%
 			}
 			%>
@@ -406,7 +410,7 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 				</td>
 			</tr>
 			<%
-		} 
+		}
 	}
 }
 %>
@@ -473,8 +477,8 @@ else
 			parent.reportFrame.document.write('<br><label class="paramName">To see the report, please make the appropriate selections and press one of the "Display Report" buttons<\/label>');
 			parent.reportFrame.document.close();
 	</script>
-<% 
-} 
+<%
+}
 %>
 
 </body>
