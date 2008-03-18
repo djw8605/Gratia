@@ -119,9 +119,54 @@
         <parameter-group name="UserInfo" id="117" extends="gratia-lib1.UserInfo"/>
         <parameter-group name="ReportInfo" id="118" extends="gratia-lib1.ReportInfo"/>
         <parameter-group name="DateRange" id="390" extends="gratia-lib1.DateRange"/>
-        <scalar-parameter name="VOs" id="391" extends="gratia-lib1.VOs"/>
-        <scalar-parameter name="SelectionType" id="392" extends="gratia-lib1.SelectionType"/>
         <parameter-group name="Metrics" id="393" extends="gratia-lib1.Metrics"/>
+        <scalar-parameter name="SelectVOs" id="106">
+            <text-property name="helpText">Select VO's to include/exclude in the report.</text-property>
+            <property name="valueType">static</property>
+            <property name="dataType">string</property>
+            <text-property name="promptText">Select one or more VOs</text-property>
+            <property name="controlType">text-box</property>
+            <property name="defaultValue">('cms','cdf','d0sar','dzero','usatlas','uscms','uscmspool')</property>
+            <structure name="format">
+                <property name="category">Unformatted</property>
+            </structure>
+            <list-property name="boundDataColumns">
+                <structure>
+                    <property name="name">vos</property>
+                    <expression name="expression">dataSetRow["vos"]</expression>
+                </structure>
+                <structure>
+                    <property name="name">voname</property>
+                    <expression name="expression">dataSetRow["voname"]</expression>
+                </structure>
+            </list-property>
+        </scalar-parameter>
+        <scalar-parameter name="SelType" id="107">
+            <text-property name="helpText">Include or exclude VO's in list.</text-property>
+            <property name="valueType">static</property>
+            <property name="dataType">string</property>
+            <text-property name="promptText">Enter type of VO selection</text-property>
+            <property name="isRequired">true</property>
+            <property name="controlType">list-box</property>
+            <property name="mustMatch">true</property>
+            <property name="fixedOrder">true</property>
+            <property name="defaultValue">IN</property>
+            <property name="distinct">false</property>
+            <structure name="format">
+                <property name="category">Unformatted</property>
+                <property name="pattern">Unformatted</property>
+            </structure>
+            <list-property name="selectionList">
+                <structure>
+                    <property name="value">IN</property>
+                    <property name="label">Include</property>
+                </structure>
+                <structure>
+                    <property name="value">NOT</property>
+                    <property name="label">Exclude</property>
+                </structure>
+            </list-property>
+        </scalar-parameter>
     </parameters>
     <data-sources>
         <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="fermigrid1" id="4">
@@ -364,7 +409,7 @@ order by voname</property>
             <property name="fontFamily">sans-serif</property>
             <property name="fontSize">9pt</property>
             <property name="textAlign">center</property>
-            <expression name="valueExpr">if(params["SelectionType"] == "IN"){"VO\'s selected:  " + params["VOs"]}else{"VO\'s excluded:  " + params["VOs"]}</expression>
+            <expression name="valueExpr">if(params["SelType"] == "IN"){"VO\'s selected:  " + params["SelectVOs"]}else{"VO\'s excluded:  " + params["SelectVOs"]}</expression>
             <property name="contentType">html</property>
         </text-data>
         <text-data id="112">
@@ -2508,11 +2553,11 @@ else {&#xD;
                 </structure>
                 <structure>
                     <property name="paramName">VOselect</property>
-                    <expression name="expression">params["VOs"]</expression>
+                    <expression name="expression">params["SelectVOs"]</expression>
                 </structure>
                 <structure>
                     <property name="paramName">VOSelType</property>
-                    <expression name="expression">params["SelectionType"]</expression>
+                    <expression name="expression">params["SelType"]</expression>
                 </structure>
                 <structure>
                     <property name="paramName">Sites</property>
