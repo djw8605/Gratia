@@ -6,28 +6,21 @@
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <title>Gratia Accounting</title>
 <LINK href="stylesheet.css" type="text/css" rel="stylesheet">
-<script src="resolveRequest.js"></script>
+<script src="resolveRequest.js" type="text/javascript"></script>
 </head>
 
 <body>
 <%
-	String[] VoNodes	= {""};
-	String UserName		= "";
-	String UserDN		= "";
-	String UserGroup 	= "";
-	String VO		= "";
-
+try
+{
 	net.sf.gratia.vomsSecurity.CertificateHandler certificateHandler = new net.sf.gratia.vomsSecurity.CertificateHandler(request);
-	
-	UserName  = certificateHandler.getName();
-	UserDN    = certificateHandler.getDN();
-	UserGroup = certificateHandler.getGroups();
-	VO        = certificateHandler.getVO();
-	VoNodes	  = certificateHandler.getVoNodes();
+
+	String[] VoNodes = certificateHandler.getVoNodes();
 
 %>
-<div id="confirmRole">
-<form>
+<div id="roleSelected">
+
+<form action="">
 	<table class="query">
 	<tr>
 		<td valign="top" align="left">
@@ -37,7 +30,8 @@
 			</tr>
 			<tr>
 				<td>
-				<select size="5" id="myVO" name="myVO" onchange="getRoles(this.value)">
+				
+				<select size="5" id="myVO" name="myVO" onchange="getRoles(this.value); return false;" >
 
 				<%
 				for(int i=0; i < VoNodes.length; i++)
@@ -54,12 +48,26 @@
 		<td>&nbsp;&nbsp;&nbsp;</td>
 
 		<td valign="top" align="left">
-				<div id="getRoles"></div>
+				<div id="displayRoles"></div>
 		</td>
 	</tr>
 	</table>
 </form>
-
+<%
+}
+catch (Exception ex)
+{
+	String msg = ex.getMessage();
+	%>
+	<table class="query" border="0"><tr> <td align="left" ><hr color="#FF8330"></td></tr>
+	<tr><td><font color="#FF8330">
+		The following error occured: <br>
+		&nbsp;&nbsp;&nbsp;&nbsp;<strong><%= msg %></strong> <br>
+		<em><%= ex %> </em>
+		</font></td></tr><tr> <td align="left" ><hr color="#FF8330"></td></tr></table>
+	<%
+}
+%>
 </div>
 </body>
 </html>
