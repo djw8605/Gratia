@@ -101,6 +101,8 @@
 #   2/14/08 (John Weigand) - 
 #             Updated Normalization factor for AGLT2 from 2100 to 2168
 #             effective 1/1/2008.  Update for January effected 2/15.
+#   3/18/08 (John Weigand) - 
+#             Added SWT2_CPB (1645) per Pat McGuigan request
 #    
 ##################################################################
 #-- Site  ------- SPECint2000
@@ -134,6 +136,7 @@ UC_ATLAS_MWT2       1169
 BNL_ATLAS_1         1351
 UTA_DPCC             915
 UTA_SWT2            1543
+SWT2_CPB            1645
 ##-- obsolete --
 ##BNL_PANDA           1351 
 ##BNL_OSG             1351
