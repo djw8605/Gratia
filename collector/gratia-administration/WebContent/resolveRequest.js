@@ -1,4 +1,4 @@
-var xmlHttp
+var xmlHttp;
 
 function getRoles(str)
 {
@@ -19,9 +19,14 @@ function stateChangedGetRoles()
 {
 	if (xmlHttp.readyState==4)
 	{
-		document.getElementById("getRoles").innerHTML=xmlHttp.responseText;
+		document.getElementById("displayRoles").innerHTML=xmlHttp.responseText;
+	}
+	else
+	{
+		document.getElementById("displayRoles").innerHTML="Please wait. Processing your request";	
 	}
 }
+
 
 function confirmRole(str)
 {
@@ -42,8 +47,13 @@ function stateChangedConfirmRole()
 {
 	if (xmlHttp.readyState==4)
 	{
-		document.getElementById("confirmRole").innerHTML=xmlHttp.responseText;
-		parent.adminDashboard.location = "./dashboard.jsp";
+		document.getElementById("roleSelected").innerHTML=xmlHttp.responseText;
+		parent.location = "./index.html";
+		//parent.adminDashboard.location = "./dashboard.jsp";
+	}
+	else
+	{
+		document.getElementById("displayRoles").innerHTML="Please wait. Processing your request";	
 	}
 }
 
