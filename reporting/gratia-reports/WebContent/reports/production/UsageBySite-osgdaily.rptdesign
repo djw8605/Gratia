@@ -1137,7 +1137,7 @@ else {&#xD;
         &lt;/structure>
         &lt;structure>
             &lt;property name=&quot;paramName&quot;>ReportSubtitle&lt;/property>
-            &lt;expression name=&quot;expression&quot;>params[&quot;ReportTitle&quot;] + ' - ' + 'drill-through'&lt;/expression>
+            &lt;expression name=&quot;expression&quot;>params[&quot;ReportSubtitle&quot;] + ' - ' + 'drill-through'&lt;/expression>
         &lt;/structure>
         &lt;structure>
             &lt;property name=&quot;paramName&quot;>DisplayMetric&lt;/property>
@@ -1599,7 +1599,7 @@ else {&#xD;
                     </structure>
                     <structure>
                         <property name="paramName">ReportSubtitle</property>
-                        <expression name="expression">params["ReportTitle"] + ' - ' + 'drill-through'</expression>
+                        <expression name="expression">params["ReportSubtitle"] + ' - ' + 'drill-through'</expression>
                     </structure>
                     <structure>
                         <property name="paramName">DisplayMetric</property>
