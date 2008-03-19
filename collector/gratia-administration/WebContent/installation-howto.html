@@ -12,7 +12,7 @@
 <p >There are a number of assumptions being made when you bring up gratia for the first time:</p>
 <ul type="disc">
   <li>You are running java 1.5 or greater.</li>
-  <li>You have installed mysql and have created an empty schema (default name gratia) that the system will use. The userid and password associated with the schema must have table/index creation priveleges.</li>
+  <li>You have installed mysql and have created an empty schema (default name gratia) that the system will use. The userid and password associated with the schema must have table/index creation privileges.</li>
 </ul>
 <p ><b><u>Building:</u></b></p>
 <ul type="disc">
@@ -33,14 +33,14 @@
 
   <ul type="circle">
     <li>HOSTNAME entry to the fully qualified host name of the machine you have installed on.</li>
-    <li>DBURL to point the what ever mysql database you are going to use. The form of the url is 
+    <li>DBURL to point the what ever mysql database you are going to use. The form of the url is
 	<br><em>jdbc:mysql://HOSTNAME:&lt;mysqlport&gt;/&lt;schema name&gt;. </em>
 	<br> Look at the entries in configuration-psg3 to get an example.</li>
     <li>DBUSER must be set to an appropriate user name on the database with table create priveledges.</li>
     <li>DBPASSWORD must be set.</li>
   </ul>
- <li>Modify $CATALINA_HOME/conf/server.xml. Specifically, you must define at least 1 open socket 
-  (we use 8880 as a default) and, if running a secure connection,  a ssl port (we use 8843 as a default). 
+ <li>Modify $CATALINA_HOME/conf/server.xml. Specifically, you must define at least 1 open socket
+  (we use 8880 as a default) and, if running a secure connection,  a ssl port (we use 8843 as a default).
   More information on security can be found in the gratia security howto page.</li>
 </ul>
 
@@ -61,7 +61,7 @@ if [ "$1" = "start" ] ; then
 elif [ "$1" = "stop" ] ; then
  $CATALINA_HOME/bin/shutdown.sh
 else
- echo "Usage: tomcat-ps [start | stop]" 
+ echo "Usage: tomcat-ps [start | stop]"
  exit 1
 fi
 </pre>
@@ -71,7 +71,7 @@ fi
 # -----------------------------------------------------------------------------
 # Stop script for the CATALINA Server
 #
-# $Id: installation-howto.html,v 1.2 2008-03-07 21:26:43 penelopec Exp $
+# $Id: installation-howto.html,v 1.3 2008-03-19 16:34:27 penelopec Exp $
 # -----------------------------------------------------------------------------
 
 unset $JAVA_OPTS
@@ -80,12 +80,12 @@ unset $JAVA_OPTS
 PRG="$0"
 while [ -h "$PRG" ] ; do
  ls=`ls -ld "$PRG"`
- link=`expr "$ls" : '.*-&gt; \(.*\)$'` 
- if expr "$link" : '.*/.*' &gt; /dev/null; then 
-  PRG="$link" 
+ link=`expr "$ls" : '.*-&gt; \(.*\)$'`
+ if expr "$link" : '.*/.*' &gt; /dev/null; then
+  PRG="$link"
  else
-  PRG=`dirname "$PRG"`/"$link" 
- fi 
+  PRG=`dirname "$PRG"`/"$link"
+ fi
 done
 
 PRGDIR=`dirname "$PRG"`

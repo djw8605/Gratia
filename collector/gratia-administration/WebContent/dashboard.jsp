@@ -23,7 +23,7 @@
 	boolean login = false;
 	if (fqan != null)
 	{
-		if (fqan.indexOf("NoPriveleges") > -1)
+		if (fqan.indexOf("NoPrivileges") > -1)
 			login = false;
 		else
 			login = true;

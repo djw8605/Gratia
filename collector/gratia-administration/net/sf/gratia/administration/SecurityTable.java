@@ -105,7 +105,7 @@ public class SecurityTable extends HttpServlet
 		boolean login = true;
 		if (fqan == null)
 			login = false;
-		else if (fqan.indexOf("NoPriveleges") > -1)
+		else if (fqan.indexOf("NoPrivileges") > -1)
 			login = false;
 
 		if (!login)

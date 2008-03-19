@@ -9,6 +9,6 @@
  }
  else
  {
-	session.setAttribute("FQAN", "NoPriveleges");
+	session.setAttribute("FQAN", "NoPrivileges");
  }
 %>
