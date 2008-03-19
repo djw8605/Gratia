@@ -55,6 +55,7 @@ public class CertificateHandler
 	private String _configLoaded = null;
 	private String _secureConnection = null;
 	private String _openConnection = null;
+	private String _dbConnection = null;
 
 	// ----------------------------------
 	public String getSecureConnection() {
@@ -64,6 +65,11 @@ public class CertificateHandler
 	// ----------------------------------
 	public String getOpenConnection() {
 		return _openConnection;
+	}
+	   
+	// ----------------------------------
+	public String getdbConnection() {
+		return _dbConnection;
 	}
 	   
 	// ----------------------------------
@@ -79,8 +85,9 @@ public class CertificateHandler
 			{
 				String webappsHome =  System.getProperty("catalina.home") + "/" + "webapps" + "/";
 
-				_secureConnection      = p.getProperty("service.secure.connection");
-				_openConnection        = p.getProperty("service.open.connection");
+				_secureConnection = p.getProperty("service.secure.connection");
+				_openConnection   = p.getProperty("service.open.connection");
+				_dbConnection     = p.getProperty("service.mysql.url");
 
 				// Set a flag indicating the configuration has been loaded, so subsequent calls will not load again
 				_configLoaded = "1";
