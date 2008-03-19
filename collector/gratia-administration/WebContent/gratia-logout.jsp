@@ -11,6 +11,7 @@
 <body>
 <%
 	session.removeAttribute("FQAN");
+	session.removeAttribute("displayLink");
 %>
 
 <script type="text/javascript">
