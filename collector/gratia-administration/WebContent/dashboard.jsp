@@ -28,10 +28,6 @@
 		else
 			login = true;
 	}
-	else
-	{
-		login = false;
-	}
 		
    if (login)
    {
@@ -85,6 +81,19 @@
         <a href="./security-howto.html" target="adminContent" class="menuItem">Security</a><br />
         <a href="./replication-howto.html" target="adminContent" class="menuItem">Replication</a><br />
         <a href="./service-configuration-settings.html" target="adminContent" class="menuItem">Gratia Service Settings</a><br />
+	
+<%	
+	String displayLink = (String) session.getAttribute("displayLink");
+	if (displayLink != null)
+	{
+		%>
+		<script type="text/javascript">
+			parent.adminContent.location = "./pleaseWait.html";
+			parent.adminContent.location = "<%=displayLink %>";
+		</script>
+	<%
+	}
+%>
 	
 </body>
 </html>
