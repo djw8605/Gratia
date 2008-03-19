@@ -103,6 +103,10 @@
 #             effective 1/1/2008.  Update for January effected 2/15.
 #   3/18/08 (John Weigand) - 
 #             Added SWT2_CPB (1645) per Pat McGuigan request
+#   3/19/08 (John Weigand) 
+#             Removed UCSDT2-B, BU_ATLAS_Tier2o, IU_ATLAS_Tier2, UTA_DPCC
+#             in order for mail showing sites with no data is accurate.
+#             These were deprecated some time ago.
 #    
 ##################################################################
 #-- Site  ------- SPECint2000
@@ -118,13 +122,10 @@ Purdue-Lear
 Purdue-RCAC
 SPRACE              1676
 UCSDT2
-UCSDT2-B
 UFlorida-PG         1602
 #--- ATLAS ----
 AGLT2               2168
 BU_ATLAS_Tier2      1123
-BU_ATLAS_Tier2o     1624
-IU_ATLAS_Tier2       921
 IU_OSG              1678
 MWT2_IU             1787
 MWT2_UC             1787
@@ -134,7 +135,6 @@ OU_OSCER_ATLAS      1543
 UC_Teraport         1412
 UC_ATLAS_MWT2       1169
 BNL_ATLAS_1         1351
-UTA_DPCC             915
 UTA_SWT2            1543
 SWT2_CPB            1645
 ##-- obsolete --
@@ -142,3 +142,7 @@ SWT2_CPB            1645
 ##BNL_OSG             1351
 ##BNL_ATLAS_2         1351
 ##US-T1-BNL           1351
+##UCSDT2-B
+##BU_ATLAS_Tier2o     1624
+##IU_ATLAS_Tier2       921
+##UTA_DPCC             915
