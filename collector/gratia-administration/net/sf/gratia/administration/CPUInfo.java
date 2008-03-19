@@ -104,7 +104,7 @@ public class CPUInfo extends HttpServlet
 			login = false;
 		else if (fqan.indexOf("NoPriveleges") > -1)
 			login = false;
-				
+
 		if (!login)
 		{
 			String uriPart = request.getRequestURI();
@@ -274,7 +274,7 @@ public class CPUInfo extends HttpServlet
 		String oldvalue = "";
 		String newvalue = "";
 
-	/*
+		/*
 		Enumeration x = request.getParameterNames();
 		while(x.hasMoreElements())
 		{
@@ -282,7 +282,7 @@ public class CPUInfo extends HttpServlet
 			String value = (String) request.getParameter(key);
 			System.out.println("key: " + key + " value: " + value);
 		}
-	*/
+		 */
 
 		for (index = 0; index < 1000; index++)
 		{
@@ -363,14 +363,14 @@ public class CPUInfo extends HttpServlet
 		String cputype = (String) request.getParameter("cputype:" + index);
 
 		String command =
-				"update CPUInfo set" + cr +
-				" HostDescription = " + dq + HostDescription + dq + comma + cr +
-				" BenchmarkScore = " + dq + benchmarkscore + dq + comma + cr +
-				" CPUCount = " + dq + cpucount + dq + comma + cr +
-				" OS = " + dq + os + dq + comma + cr +
-				" OSVersion = " + dq + osversion + dq + comma + cr +
-				" CPUType = " + dq + cputype + dq + cr +
-				" where hostid = " + hostid;
+			"update CPUInfo set" + cr +
+			" HostDescription = " + dq + HostDescription + dq + comma + cr +
+			" BenchmarkScore = " + dq + benchmarkscore + dq + comma + cr +
+			" CPUCount = " + dq + cpucount + dq + comma + cr +
+			" OS = " + dq + os + dq + comma + cr +
+			" OSVersion = " + dq + osversion + dq + comma + cr +
+			" CPUType = " + dq + cputype + dq + cr +
+			" where hostid = " + hostid;
 		try
 		{
 			statement = connection.createStatement();
@@ -403,15 +403,15 @@ public class CPUInfo extends HttpServlet
 		String cputype = (String) request.getParameter("cputype:" + index);
 
 		String command =
-				"insert into CPUInfo" +
-				"(HostDescription,BenchmarkScore,CPUCount,OS,OSVersion,CPUType)" + cr +
-				"values(" + cr +
-				dq + HostDescription + dq + comma + cr +
-				dq + benchmarkscore + dq + comma + cr +
-				dq + cpucount + dq + comma + cr +
-				dq + os + dq + comma + cr +
-				dq + osversion + dq + comma + cr +
-				dq + cputype + dq + ")";
+			"insert into CPUInfo" +
+			"(HostDescription,BenchmarkScore,CPUCount,OS,OSVersion,CPUType)" + cr +
+			"values(" + cr +
+			dq + HostDescription + dq + comma + cr +
+			dq + benchmarkscore + dq + comma + cr +
+			dq + cpucount + dq + comma + cr +
+			dq + os + dq + comma + cr +
+			dq + osversion + dq + comma + cr +
+			dq + cputype + dq + ")";
 
 		try
 		{
