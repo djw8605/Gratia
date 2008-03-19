@@ -23,247 +23,280 @@ import java.util.regex.*;
 
 public class VOMgmt extends HttpServlet 
 {
-      XP xp = new XP();
-      //
-      // database related
-      //
-      String driver = "";
-      String url = "";
-      String user = "";
-      String password = "";
-      Connection connection;
-      Statement statement;
-      ResultSet resultSet;
-      //
-      // processing related
-      //
-      String html = "";
-      String row = "";
-      Pattern p = Pattern.compile("<tr>.*?</tr>",Pattern.MULTILINE + Pattern.DOTALL);
-      Matcher m = null;
-      StringBuffer buffer = new StringBuffer();
-      //
-      // globals
-      //
-      HttpServletRequest request;
-      HttpServletResponse response;
-      boolean initialized = false;
-      //
-      // support
-      //
-      String dq = "\"";
-      String comma = ",";
-      String cr = "\n";
-      Hashtable table = new Hashtable();
-      String newname = "<New VO Name>";
+	XP xp = new XP();
+	//
+	// database related
+	//
+	String driver = "";
+	String url = "";
+	String user = "";
+	String password = "";
+	Connection connection;
+	Statement statement;
+	ResultSet resultSet;
+	//
+	// processing related
+	//
+	String html = "";
+	String row = "";
+	Pattern p = Pattern.compile("<tr>.*?</tr>",Pattern.MULTILINE + Pattern.DOTALL);
+	Matcher m = null;
+	StringBuffer buffer = new StringBuffer();
+	//
+	// globals
+	//
+	HttpServletRequest request;
+	HttpServletResponse response;
+	boolean initialized = false;
+	//
+	// support
+	//
+	String dq = "\"";
+	String comma = ",";
+	String cr = "\n";
+	Hashtable table = new Hashtable();
+	String newname = "<New VO Name>";
 
-    public void init(ServletConfig config) throws ServletException 
-      {
-    }
-    
-      public void openConnection()
-      {
-            try
-                  {
-                        Properties p = Configuration.getProperties();
-                        driver = p.getProperty("service.mysql.driver");
-                        url = p.getProperty("service.mysql.url");
-                        user = p.getProperty("service.mysql.user");
-                        password = p.getProperty("service.mysql.password");
-                  }
-            catch (Exception ignore)
-                  {
-                  }
-            try
-                  {
-                        Class.forName(driver).newInstance();
-                        connection = DriverManager.getConnection(url,user,password);
-                  }
-            catch (Exception e)
-                  {
-                        e.printStackTrace();
-                  }
-      }
+	public void init(ServletConfig config) throws ServletException 
+	{
+	}
 
-      public void closeConnection()
-      {
-            try
-                  {
-                        connection.close();
-                  }
-            catch (Exception e)
-                  {
-                        e.printStackTrace();
-                  }
-      }
+	public void openConnection()
+	{
+		try
+		{
+			Properties p = Configuration.getProperties();
+			driver = p.getProperty("service.mysql.driver");
+			url = p.getProperty("service.mysql.url");
+			user = p.getProperty("service.mysql.user");
+			password = p.getProperty("service.mysql.password");
+		}
+		catch (Exception ignore)
+		{
+		}
+		try
+		{
+			Class.forName(driver).newInstance();
+			connection = DriverManager.getConnection(url,user,password);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
 
-    public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
-      {
-            openConnection();
-            this.request = request;
-            this.response = response;
-            table = new Hashtable();
-            setup();
-            process();
-            response.setContentType("text/html");
-            response.setHeader("Cache-Control", "no-cache"); // HTTP 1.1
-            response.setHeader("Pragma", "no-cache"); // HTTP 1.0
-            request.getSession().setAttribute("table",table);
-            PrintWriter writer = response.getWriter();
-            writer.write(html);
-            writer.flush();
-            writer.close();
-            closeConnection();
-      }
+	public void closeConnection()
+	{
+		try
+		{
+			connection.close();
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
 
-    public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
-      {
-            openConnection();
-            this.request = request;
-            this.response = response;
-            table = (Hashtable) request.getSession().getAttribute("table");
-            update();
-            closeConnection();
-            response.sendRedirect("vo.html");
-      }
+	public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
+	{
+		String fqan = (String) request.getSession().getAttribute("FQAN");
+		boolean login = true;
+		if (fqan == null)
+			login = false;
+		else if (fqan.indexOf("NoPriveleges") > -1)
+			login = false;
 
-      public void setup()
-      {
-            html = xp.get(request.getRealPath("/") + "vo.html");
-            m = p.matcher(html);
-            while (m.find())
-                  {
-                        String temp = m.group();
-                        if (temp.indexOf("#index#") > 0)
-                              {
-                                    row = temp;
-                                    break;
-                              }
-                  }
-      }
+		if (!login)
+		{
+			String uriPart = request.getRequestURI();
+			int slash2 = uriPart.substring(1).indexOf("/") + 1;
+			uriPart = uriPart.substring(slash2);
+			String queryPart = request.getQueryString();
+			if (queryPart == null)
+				queryPart = "";
+			else
+				queryPart = "?" + queryPart;
 
-      public void process()
-      {
-            int index = 0;
-            String command = "select * from VO order by VOName";
-            buffer = new StringBuffer();
+			request.getSession().setAttribute("displayLink", "." + uriPart + queryPart);
+			Properties p = Configuration.getProperties();
+			String loginLink = p.getProperty("service.secure.connection") + request.getContextPath() + "/gratia-login.jsp";
+			html = "<br><center><h3>Please <a href='" + loginLink + "'>login</a> to access the information</h3></center>";
+			response.setContentType("text/html");
+			response.setHeader("Cache-Control", "no-cache"); // HTTP 1.1
+			response.setHeader("Pragma", "no-cache"); // HTTP 1.0
+			PrintWriter writer = response.getWriter();
+			writer.write(html);
+			writer.flush();
+			writer.close();
+		}
+		else
+		{
+			openConnection();
+			this.request = request;
+			this.response = response;
+			table = new Hashtable();
+			setup();
+			process();
+			response.setContentType("text/html");
+			response.setHeader("Cache-Control", "no-cache"); // HTTP 1.1
+			response.setHeader("Pragma", "no-cache"); // HTTP 1.0
+			request.getSession().setAttribute("table",table);
+			PrintWriter writer = response.getWriter();
+			writer.write(html);
+			writer.flush();
+			writer.close();
+			closeConnection();
+		}
+	}
 
-            try
-                  {
-                        statement = connection.prepareStatement(command);
-                        resultSet = statement.executeQuery(command);
+	public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
+	{
+		openConnection();
+		this.request = request;
+		this.response = response;
+		table = (Hashtable) request.getSession().getAttribute("table");
+		update();
+		closeConnection();
+		response.sendRedirect("vo.html");
+	}
 
-                        while(resultSet.next())
-                              {
-                                    String newrow = new String(row);
-                                    newrow = xp.replaceAll(newrow,"#index#","" + index);
-                                    newrow = xp.replace(newrow,"#void#","" + resultSet.getInt(1));
-                                    newrow = xp.replace(newrow,"#voname#",resultSet.getString(2));
-                                    table.put("index:" + index,"" + index);
-                                    table.put("void:" + index,resultSet.getString(1));
-                                    table.put("voname:" + index,resultSet.getString(2));
-                                    index++;
-                                    buffer.append(newrow);
-                              }
-                        resultSet.close();
-                        statement.close();
-                  }
-            catch (Exception e)
-                  {
-                        e.printStackTrace();
-                  }
-            for (int j = 0; j < 5; j++)
-                  {
-                        String newrow = new String(row);
-                        newrow = xp.replaceAll(newrow,"#index#","" + index);
-                        newrow = xp.replace(newrow,"#voname#",newname);
-                        table.put("index:" + index,"" + index);
-                        table.put("voname:" + index,newname);
-                        index++;
-                        buffer.append(newrow);
-                  }
-            html = xp.replace(html,row,buffer.toString());
-      }
+	public void setup()
+	{
+		html = xp.get(request.getRealPath("/") + "vo.html");
+		m = p.matcher(html);
+		while (m.find())
+		{
+			String temp = m.group();
+			if (temp.indexOf("#index#") > 0)
+			{
+				row = temp;
+				break;
+			}
+		}
+	}
 
-      public void update()
-      {
-            int index;
-            String key = "";
-            String oldvalue = "";
-            String newvalue = "";
+	public void process()
+	{
+		int index = 0;
+		String command = "select * from VO order by VOName";
+		buffer = new StringBuffer();
 
-            for (index = 0; index < 1000; index++)
-                  {
-                        key = "index:" + index;
-                        oldvalue = (String) table.get(key);
-                        newvalue = (String) request.getParameter(key);
-                        if (oldvalue == null)
-                              break;
-                        key = "voname:" + index;
-                        oldvalue = (String) table.get(key);
-                        newvalue = (String) request.getParameter(key);
-                        if (oldvalue.equals(newvalue))
-                              continue;
-                        if (oldvalue.equals(newname))
-                              insert(index);
-                        else
-                              update(index);
-                  }
-      }
+		try
+		{
+			statement = connection.prepareStatement(command);
+			resultSet = statement.executeQuery(command);
 
-      public void update(int index)
-      {
-            String command = 
-                  "update VO set" + cr +
-                  " VOName = " + dq + (String) request.getParameter("voname:" + index) + dq + cr +
-                  " where VOid = " + request.getParameter("void:" + index);
-            try
-                  {
-                        statement = connection.createStatement();
-                        statement.executeUpdate(command);
-                        // connection.commit();
-                  }
-            catch (Exception e)
-                  {
-                        e.printStackTrace();
-                  }
-            finally
-                  {
-                        try
-                              {
-                                    statement.close();
-                              }
-                        catch (Exception ignore)
-                              {
-                              }
-                  }
-      }
+			while(resultSet.next())
+			{
+				String newrow = new String(row);
+				newrow = xp.replaceAll(newrow,"#index#","" + index);
+				newrow = xp.replace(newrow,"#void#","" + resultSet.getInt(1));
+				newrow = xp.replace(newrow,"#voname#",resultSet.getString(2));
+				table.put("index:" + index,"" + index);
+				table.put("void:" + index,resultSet.getString(1));
+				table.put("voname:" + index,resultSet.getString(2));
+				index++;
+				buffer.append(newrow);
+			}
+			resultSet.close();
+			statement.close();
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		for (int j = 0; j < 5; j++)
+		{
+			String newrow = new String(row);
+			newrow = xp.replaceAll(newrow,"#index#","" + index);
+			newrow = xp.replace(newrow,"#voname#",newname);
+			table.put("index:" + index,"" + index);
+			table.put("voname:" + index,newname);
+			index++;
+			buffer.append(newrow);
+		}
+		html = xp.replace(html,row,buffer.toString());
+	}
 
-      public void insert(int index)
-      {
-            String command = 
-                  "insert into VO (VOName) values(" + 
-                  dq + (String) request.getParameter("voname:" + index) + dq + ")";
-            try
-                  {
-                        statement = connection.createStatement();
-                        statement.executeUpdate(command);
-                        // connection.commit();
-                  }
-            catch (Exception e)
-                  {
-                        System.out.println("command: " + command);
-                        e.printStackTrace();
-                  }
-            finally
-                  {
-                        try
-                              {
-                                    statement.close();
-                              }
-                        catch (Exception ignore)
-                              {
-                              }
-                  }
-      }
+	public void update()
+	{
+		int index;
+		String key = "";
+		String oldvalue = "";
+		String newvalue = "";
+
+		for (index = 0; index < 1000; index++)
+		{
+			key = "index:" + index;
+			oldvalue = (String) table.get(key);
+			newvalue = (String) request.getParameter(key);
+			if (oldvalue == null)
+				break;
+			key = "voname:" + index;
+			oldvalue = (String) table.get(key);
+			newvalue = (String) request.getParameter(key);
+			if (oldvalue.equals(newvalue))
+				continue;
+			if (oldvalue.equals(newname))
+				insert(index);
+			else
+				update(index);
+		}
+	}
+
+	public void update(int index)
+	{
+		String command = 
+			"update VO set" + cr +
+			" VOName = " + dq + (String) request.getParameter("voname:" + index) + dq + cr +
+			" where VOid = " + request.getParameter("void:" + index);
+		try
+		{
+			statement = connection.createStatement();
+			statement.executeUpdate(command);
+			// connection.commit();
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		finally
+		{
+			try
+			{
+				statement.close();
+			}
+			catch (Exception ignore)
+			{
+			}
+		}
+	}
+
+	public void insert(int index)
+	{
+		String command = 
+			"insert into VO (VOName) values(" + 
+			dq + (String) request.getParameter("voname:" + index) + dq + ")";
+		try
+		{
+			statement = connection.createStatement();
+			statement.executeUpdate(command);
+			// connection.commit();
+		}
+		catch (Exception e)
+		{
+			System.out.println("command: " + command);
+			e.printStackTrace();
+		}
+		finally
+		{
+			try
+			{
+				statement.close();
+			}
+			catch (Exception ignore)
+			{
+			}
+		}
+	}
 }
