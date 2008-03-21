@@ -107,6 +107,9 @@
 #             Removed UCSDT2-B, BU_ATLAS_Tier2o, IU_ATLAS_Tier2, UTA_DPCC
 #             in order for mail showing sites with no data is accurate.
 #             These were deprecated some time ago.
+#   3/21/08 (John Weigand)
+#             Changed BU_ATLAS_Tier2 normalization (1533) per Saul Youssef
+#             Combined BU_ATLAS_Tier2 and BU_ATLAS_Tier1o clusters
 #    
 ##################################################################
 #-- Site  ------- SPECint2000
@@ -125,7 +128,7 @@ UCSDT2
 UFlorida-PG         1602
 #--- ATLAS ----
 AGLT2               2168
-BU_ATLAS_Tier2      1123
+BU_ATLAS_Tier2      1533
 IU_OSG              1678
 MWT2_IU             1787
 MWT2_UC             1787
