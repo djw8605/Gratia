@@ -5,7 +5,7 @@
 #
 # library to create simple report using the Gratia psacct database
 #
-#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.15 2008-03-18 21:18:09 pcanal Exp $
+#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.16 2008-03-21 13:59:47 pcanal Exp $
 
 import time
 import datetime
@@ -399,6 +399,7 @@ def DailySiteJobStatus(begin,end,select = "", count = "", what = "Site.SiteName"
                 + " from "+schema+".Site, "+schema+".Probe, "+schema+".JobUsageRecord_Report J " \
                 + " where VOName != \"Unknown\" and Probe.siteid = Site.siteid and J.ProbeName = Probe.probename" \
                 + " and \""+ DateToString(begin) +"\"<EndTime and EndTime<\"" + DateToString(end) + "\"" \
+                + " and ResourceType = \"Batch\" " \
                 + select \
                 + " group by " + what + ",J.Status " \
                 + " order by " + what 
@@ -412,6 +413,7 @@ def DailySiteJobStatusCondor(begin,end,select = "", count = "", what = "Site.Sit
                 + " where VOName != \"Unknown\" and Probe.siteid = Site.siteid and J.ProbeName = Probe.probename" \
                 + " and \""+ DateToString(begin) +"\"<EndTime and EndTime<\"" + DateToString(end) + "\"" \
                 + " and J.dbid = R.dbid and R.Description = \"ExitCode\" " \
+                + " and ResourceType = \"Batch\" " \
                 + " group by " + what + ",R.Value " \
                 + " order by " + what
         return RunQueryAndSplit(select)

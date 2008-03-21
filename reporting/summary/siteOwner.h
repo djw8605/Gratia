@@ -63,6 +63,7 @@ const char *siteOwners[] = {
 "LIGO-CIT-VTB","LIGO",
 "LTU_CCT","DOSAR",
 "LTU_OSG","DOSAR",
+"MCGILL_HEP","CDF",
 "MIT_CMS","USCMS",
 "MIT_CMS:srm_v1","USCMS",
 "MWT2_IU","USATLAS",
