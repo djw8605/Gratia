@@ -603,12 +603,23 @@ public class JobUsageRecord implements Record
 
    public String computemd5() throws Exception
    {
-      RecordIdentity temp = getRecordIdentity();
-      setRecordIdentity(null);
-      String md5key = Utils.md5key(asXML());
-      setRecordIdentity(temp);
+       // Zero out things we don't want checksums for
+       RecordIdentity tempRecordIdentity = getRecordIdentity();
+       setRecordIdentity(null);
+       StringElement tempSiteName = getSiteName();
+       setSiteName(null);
+       UserIdentity tempUserIdentity = getUserIdentity();
+       setUserIdentity(null);
 
-      return md5key;
+       // Calculate the checksum
+       String md5key = Utils.md5key(asXML());
+
+       // Put things back
+       setRecordIdentity(tempRecordIdentity);
+       setSiteName(tempSiteName);
+       setUserIdentity(tempUserIdentity);
+
+       return md5key;
    }
 
    public String getmd5()
