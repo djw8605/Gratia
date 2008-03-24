@@ -1284,7 +1284,7 @@ public class DatabaseMaintenance {
                 if (fcheck1 != (fcheck2 + 1)) {
                     Logging.debug("UpdateJobUsageRecords: unable to reprocess " +
                                   "records from " + old_last_dbid + " up to " + failing_dbid);
-                    throw new Exception("Internal Error: unable to reconcile update consistency");
+                    throw new Exception("UpdateJobUsageRecords: Internal Error: unable to reconcile update consistency");
                 }
                 // Obtain the failed record once more from the DB
                 session = HibernateWrapper.getSession();
@@ -1302,6 +1302,13 @@ public class DatabaseMaintenance {
                                             "record where record.md5 = '" +
                                             failed_md5 + "'");
                     JobUsageRecord original_record = (JobUsageRecord) q.uniqueResult();
+                    if (original_record.getRecordId() > failing_dbid) { // Major problem -- hash collision.
+                        throw new Exception("UpdateJobUsageRecords: Internal Error: hash collision " +
+                                            "between new record DBID " +
+                                            failing_dbid +
+                                            " and unconverted record DBID " +
+                                            original_record.getRecordId());
+                    }                        
                     Logging.debug("UpdateJobUsageRecords: check whether to replace " +
                                   "userIdentity block in earlier record DBID " +
                                   original_record.getRecordId());
