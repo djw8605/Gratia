@@ -86,18 +86,24 @@ public class ReportingConfiguration
 				_statReportsConfig = (webappsHome + p.getProperty("service.reporting.staticreports"));
 				_staticFolderPath  = (webappsHome + p.getProperty("service.reporting.static.folder") + "/");
 				_staticFolder      = p.getProperty("service.reporting.static.folder");
-				if (p.getProperty("service.reporting.logging").indexOf("true") > -1)
-					_logging = true;
-				else
-					_logging = false;
 
-				if (_staticFolder.charAt(_staticFolder.length()-1) != '/')
-					_staticFolder = _staticFolder + "/";
-				if (_staticFolder.charAt(0) != '/')
-					_staticFolder = "/" + _staticFolder;
+				_logging = false;
+				String logging = p.getProperty("service.reporting.logging");
+				if (logging != null)
+				{
+					if (logging.trim().equalsIgnoreCase("true"))
+						_logging = true;
+				}
 
+				if (_staticFolder != null)
+				{
+					if (_staticFolder.charAt(_staticFolder.length()-1) != '/')
+						_staticFolder = _staticFolder + "/";
+					if (_staticFolder.charAt(0) != '/')
+						_staticFolder = "/" + _staticFolder;
+				}
 
-				if (System.getProperty( "os.name" ).indexOf("Windows") > -1)
+				if (System.getProperty( "os.name" ).trim().equalsIgnoreCase("Windows"))
 					_csvHome = "./";
 				else
 					_csvHome       = (webappsHome + "gratia_csv_temp" + "/");
