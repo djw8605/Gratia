@@ -236,7 +236,7 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 			</tr>
 			<%
 		}
-		else if (paramName.indexOf("Select") > -1 )
+		else if (paramName.trim().equalsIgnoreCase("Select"))
 		{
 			displayReport = "false";
 			String selectNameID = paramName;
