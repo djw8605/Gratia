@@ -10,7 +10,10 @@
 
 <body>
 <%
+   if ((String) session.getAttribute("FQAN") !=null)
 	session.removeAttribute("FQAN");
+
+   if ((String) session.getAttribute("displayLink") !=null)
 	session.removeAttribute("displayLink");
 %>
 

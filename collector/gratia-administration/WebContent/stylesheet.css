@@ -138,6 +138,12 @@ a.menuItem:active
     font-family: Verdana, Arial, sans-serif;
 	font-size: 0.75em; 
 }
+.txterror
+{
+    font-family: Verdana, Arial, sans-serif;
+	font-size: 0.75em; 
+	color: #FF8330;
+}
 .button
 {
 	font-weight: bold;

@@ -1,5 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
-    pageEncoding="ISO-8859-1"%>
+    pageEncoding="ISO-8859-1"
+%>
+
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
 <head>
@@ -15,7 +17,7 @@ try
 {
 	net.sf.gratia.vomsSecurity.CertificateHandler certificateHandler = new net.sf.gratia.vomsSecurity.CertificateHandler(request);
 
-	String[] VoNodes = certificateHandler.getVoNodes();
+	String[] VOlist = certificateHandler.getVOlist();
 
 %>
 <div id="roleSelected">
@@ -34,9 +36,9 @@ try
 				<select size="5" id="myVO" name="myVO" onchange="getRoles(this.value); return false;" >
 
 				<%
-				for(int i=0; i < VoNodes.length; i++)
+				for(int i=0; i < VOlist.length; i++)
 				{
-					%><option value="<%= VoNodes[i] %>" ><%= VoNodes[i] %> </option>
+					%><option value="<%= VOlist[i] %>" ><%= VOlist[i] %> </option>
 					<%
 				}
 				%>

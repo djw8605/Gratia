@@ -1,14 +1,11 @@
 <%
 	net.sf.gratia.vomsSecurity.CertificateHandler certificateHandler = new net.sf.gratia.vomsSecurity.CertificateHandler(request);
 
-	String setVO        = null;
-	String getSetVO     = null;
-	String connectVOMsg = null;
-	String VoUserName   = null;
-	String VoUserDN     = null;
-	String[] VoUserRole ={"NoRoles"};
-	String VoUserGrp    = null;
-	String RolesStr     = "";
+	String setVO           = null;
+	String getSetVO        = null;
+	String connectVOMsg    = null;
+	String userDN          = null;
+	String[] vomsUserRoles = null;
 	
 	String selectedVO = request.getParameter("selectedVO");
 
@@ -19,25 +16,23 @@
 		
 		connectVOMsg = certificateHandler.connectVOname(selectedVO);
 
-		if (connectVOMsg.indexOf("Connected") > -1)
+		if (connectVOMsg == "")
 		{
-			VoUserName = certificateHandler.getName();
-			VoUserDN   = certificateHandler.getDN();
-			VoUserRole = certificateHandler.getRole();
-			VoUserGrp  = certificateHandler.getGroups();
+			userDN   = certificateHandler.getDN();
+			vomsUserRoles = certificateHandler.getVOMSroles();
 
-			String userDN = (String) session.getAttribute("userDN");
-			if (userDN !=null)
+			if ((String) session.getAttribute("userDN") !=null)
 				session.removeAttribute("userDN");
-			session.setAttribute("userDN", VoUserDN);
+				
+			session.setAttribute("userDN", userDN);
 
-			if (VoUserRole.length > 0)
+			if (vomsUserRoles.length > 0)
 			{
 				out.println("<table><tr><td><label class='paramName'>Select a Role for VO: " + selectedVO + "</label><br></td></tr>");
 				out.println("<tr><td><select size='5' id='myRole' name='myRole' onchange='confirmRole(this.value);' >");
-				for(int i=0; i < VoUserRole.length; i++)
+				for(int i=0; i < vomsUserRoles.length; i++)
 				{
-					out.println("<option value=" + VoUserRole[i] +">" + VoUserRole[i] + "</option>");
+					out.println("<option value=" + vomsUserRoles[i] +">" + vomsUserRoles[i] + "</option>");
 				}
 				out.println("</select></td></tr></table>");
 			}
@@ -48,7 +43,7 @@
 		}
 		else
 		{
-			out.println("<table><tr><td><p class='txt'>Could not connect to VO: " + selectedVO + "</p></td></tr></table>");
+			out.println("<table><tr><td><p class='txterror'>" + connectVOMsg + "</p></td></tr></table>");
 		}
 
 	}
