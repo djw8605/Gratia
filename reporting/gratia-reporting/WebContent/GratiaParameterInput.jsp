@@ -246,24 +246,24 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 			String onchangeFunction = "getURL();";
 			String sql = "";
 
-			if (paramName.indexOf("SelectVOs") > -1 )
+			if (paramName.trim().equalsIgnoreCase("SelectVOs"))
 			{
 				selectNameID = "myVOs";
 				selectedLabel = "Selected VOs:";
 				selectMultiple = "multiple";
 				selected = "";
 				onchangeFunction = "addVOs(this.form); getURL();";
-				sql = "select distinct (VO.VOName) from VO, VONameCorrection where VO.VOid = VONameCorrection.VOid order by VO.VOName";
+				sql = "select distinct VO.VOName from VO join VONameCorrection VC on (VO.void = VC.void) order by VOName";
 			}
-			else if (paramName.indexOf("SelectVOName") > -1 )
+			else if (paramName.trim().equalsIgnoreCase("SelectVOName"))
 			{
-				sql = "select distinct (VO.VOName) from VO, VONameCorrection where VO.VOid = VONameCorrection.VOid order by VO.VOName";
+				sql = "select distinct VO.VOName from VO join VONameCorrection VC on (VO.void = VC.void) order by VOName";
 			}
-			else if (paramName.indexOf("SelectSiteName") > -1 )
+			else if (paramName.trim().equalsIgnoreCase("SelectSiteName"))
 			{
 				sql = "select Site.SiteName as sitename from Site order by sitename";
 			}
-			else if (paramName.indexOf("SelectProbeName") > -1 )
+			else if (paramName.trim().equalsIgnoreCase("SelectProbeName"))
 			{
 				sql = "select 'All' as probename from CEProbes union select CEProbes.probename as probename from CEProbes order by probename";
 			}
@@ -289,6 +289,10 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 				out.println(ce);
 			}
 
+			// In case that the VO name is other or unknown, make it a special case...
+			String other   = "";
+			String unknown = "";
+			
 			try{
 				con = DriverManager.getConnection(reportingConfiguration.getDatabaseURL(), reportingConfiguration.getDatabaseUser(), reportingConfiguration.getDatabasePassword());
 				statement = con.createStatement();
@@ -303,22 +307,32 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 					if (value != null)
 					{
 						resultValue = value.toString();
-
-						String compareValue = resultValue;
-						if (paramName.indexOf("SelectVOs") > -1 )
-							compareValue = "'" + resultValue + "'";
-
-						if(defaultValue.indexOf(compareValue) > -1)
+						if (resultValue.trim().equalsIgnoreCase("other"))
 						{
-							selected="selected";
-
-							if (selectedItems != "")
-								selectedItems += ";" + resultValue;
-							else
-								selectedItems += resultValue;
+							other = resultValue;
 						}
-						%> <option value="<%= resultValue %>" <%= selected %> ><%= resultValue %></option>
-						<%
+						else if (resultValue.trim().equalsIgnoreCase("unknown"))
+						{
+							unknown = resultValue;
+						}
+						else
+						{
+							String compareValue = resultValue;
+							if (paramName.trim().equalsIgnoreCase("SelectVOs"))
+								compareValue = "'" + resultValue + "'";
+
+							if(defaultValue.trim().equalsIgnoreCase(compareValue))
+							{
+								selected = "selected";
+
+								if (selectedItems != "")
+									selectedItems += ";" + resultValue;
+								else
+									selectedItems += resultValue;
+							}
+							%> <option value="<%= resultValue %>" <%= selected %> ><%= resultValue %></option>
+							<%
+						}
 					}
 					selected="";
 				}
@@ -354,13 +368,22 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 				statement = null;
 				con = null;
 			}
-
+			if (!other.trim().equals(""))
+			{
+				%> <option value="<%= other %>" <%= selected %> >Other (non-OSG)</option>
+				<%
+			}
+			if (!unknown.trim().equals(""))
+			{
+				%> <option value="<%= unknown %>" <%= selected %> >Unknown</option>
+				<%
+			}
 			%>
 				</select>
 			   </td>
 			</tr>
 			<%
-			if (paramName.indexOf("SelectVOs") > -1 )
+			if (paramName.trim().equalsIgnoreCase("SelectVOs"))
 			{
 				%>
 				<tr>
@@ -459,7 +482,7 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 </tr>
 </table>
 <%
-if (displayReport.indexOf("true") > -1)
+if (displayReport.trim().equalsIgnoreCase("true"))
 {
 %>
 	<script type="text/javascript">
