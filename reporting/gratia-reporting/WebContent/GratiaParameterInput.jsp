@@ -236,7 +236,7 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 			</tr>
 			<%
 		}
-		else if (paramName.trim().equalsIgnoreCase("Select"))
+		else if (paramName.indexOf("Select") > -1)
 		{
 			displayReport = "false";
 			String selectNameID = paramName;
@@ -321,7 +321,7 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 							if (paramName.trim().equalsIgnoreCase("SelectVOs"))
 								compareValue = "'" + resultValue + "'";
 
-							if(defaultValue.trim().equalsIgnoreCase(compareValue))
+							if(defaultValue.indexOf(compareValue) > -1)
 							{
 								selected = "selected";
 
@@ -411,7 +411,7 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 				selectName = paramListSelection.getSelectionName();
 				selectValue = paramListSelection.getSelectionValue();
 				String selected = "";
-				if(selectValue.equals(defaultValue))
+				if (selectValue.indexOf(defaultValue) > -1)
 					selected="selected";
 				%>
 				<option value="<%= selectValue %>" <%= selected %>><%= selectName %></option>
