@@ -28,12 +28,11 @@ public class CertificateHandler
 	 */
 
 	private String _vomsServerFile;
-	private boolean _vomsServersLoaded = false;
 
 	//---- certificate information ----
-	private String dn        = null;
-	private String ca        = null;
-	private String voServer  = null;
+	private String userDN   = null;
+	private String userCA   = null;
+	private String voServer = null;
 
 	//---- VOMS information ----
 	private String[] voFQANlist = null;		// list of FQAN with admin access to compare with
@@ -44,13 +43,12 @@ public class CertificateHandler
 	private String voSelect  = null;		// User selected VO
 	private String voConnect = null;		// User selected VO connection
 
-	private Object[] voVOMSNameList = null;
-	private Object[] voVOMSUrlList  = null;
+	private String[] vomsNameList = null;	// list of VOs from voms-serevrs
+	private String[] vomsUrlList  = null;	// list of VO URLs from voms-serevrs
 
-	private boolean _configLoaded    = false;
-	private String _secureConnection = null;
-	private String _openConnection   = null;
-	private String _dbConnection     = null;
+	private String secureConnection = null;	// form: https://gratia.osg.org:8899
+	private String openConnection   = null;	// form: http://gratia.osg.org:8801
+	private String dbConnection     = null;	// feature use
 
 	//---------------------------------------------------
 	public CertificateHandler(HttpServletRequest request)
@@ -61,7 +59,7 @@ public class CertificateHandler
 		// ---- reading certificate for dn/ca for VOMS call ----
 		SecurityContext sc = new SecurityContext();
 		SecurityContext.setCurrentContext(sc);
-		
+
 		X509Certificate[] certs = (X509Certificate[]) request.getAttribute("javax.servlet.request.X509Certificate");
 
 		if (certs == null)
@@ -76,8 +74,8 @@ public class CertificateHandler
 			sc.setIssuerName (new DNImpl(sc.getIssuerName ()).getX500());
 
 		X509Certificate cs = sc.getClientCert();
-		this.dn = ((DNImpl) DNHandler.getSubject(cs)).getX500();
-		this.ca = ((DNImpl) DNHandler.getIssuer(cs)).getX500();
+		this.userDN = ((DNImpl) DNHandler.getSubject(cs)).getX500();
+		this.userCA = ((DNImpl) DNHandler.getIssuer(cs)).getX500();
 
 		// ---- setting up to call VOMS (not sure how much is needed)
 		//		this needs to be set some other way (TRUSTED_CA on VDT dist ----
@@ -99,103 +97,89 @@ public class CertificateHandler
 		TreeSet tempVOs = new TreeSet();	// sorted arrayList with unique names for the voList
 		List tempFQANs  = new ArrayList();	// FQAN list from service properties file
 
-		// The flag 'configLoaded' is set when the configuration has been already loaded
-		if (!_configLoaded)
+		try
 		{
-			try
-			{
-				_vomsServerFile = net.sf.gratia.util.Configuration.getConfigurationPath() + "/" + p.getProperty("service.voms.connections");
-				_secureConnection = p.getProperty("service.secure.connection");
-				_openConnection   = p.getProperty("service.open.connection");
-				_dbConnection     = p.getProperty("service.mysql.url");
+			_vomsServerFile = net.sf.gratia.util.Configuration.getConfigurationPath() + "/" + p.getProperty("service.voms.connections");
+			secureConnection = p.getProperty("service.secure.connection");
+			openConnection   = p.getProperty("service.open.connection");
+			dbConnection     = p.getProperty("service.mysql.url");
 
-				boolean foundAdmin = true;
-				int admid = 0;
-				String admin_id = "service.admin.identity.";
-				while(foundAdmin)
+			boolean foundAdmin = true;
+			int admid = 0;
+			String admin_id = "service.admin.identity.";
+			while(foundAdmin)
+			{
+				vos = p.getProperty(admin_id + admid);
+				if (vos != null)
 				{
-					vos = p.getProperty(admin_id + admid);
+					vos = vos.trim();
+					tempFQANs.add(vos);
 
-					if (vos != null)
-					{
-						vos.trim();
-						tempFQANs.add(vos);
-		/*
-		 * Extract the node name from the identity, example of identity:
-		 * 	     /gratia-vo1/Role=VO-Admin
-		 * we want to extract gratia-vo1 to populate the pull down menu.
-		 */
-						String[] VoFullStr = vos.split ("/");
-						voName = VoFullStr[1];
-						if (voName != null)
-						{
-							tempVOs.add(voName);
-						}
-						admid += 1;
-					}
-					else
-					{
-						foundAdmin = false;
-					}
+					// Extract the node name from the identity, example of identity:
+					// 	     /gratia-vo1/Role=VO-Admin
+					// we want to extract gratia-vo1 to populate the pull down menu.
+
+					String[] VoFullStr = vos.split ("/");
+					voName = VoFullStr[1];
+					if (voName != null)
+						tempVOs.add(voName);
+
+					admid += 1;
 				}
-				// Convert the ArrayLists to string arrays
-				voList     = (String[])tempVOs.toArray(new String[tempVOs.size()]);
-				voFQANlist = (String[])tempFQANs.toArray(new String[tempFQANs.size()]);
-
-				// Set a flag indicating the configuration has been loaded, so subsequent calls will not load again
-				_configLoaded = true;
-
-			} 
-			catch (Exception e) 
-			{
-				e.printStackTrace();
+				else
+				{
+					foundAdmin = false;
+				}
 			}
+			// Convert the ArrayLists to string arrays
+			voList     = (String[])tempVOs.toArray(new String[tempVOs.size()]);
+			voFQANlist = (String[])tempFQANs.toArray(new String[tempFQANs.size()]);
+		} 
+		catch (Exception e) 
+		{
+			e.printStackTrace();
 		}
 	}
 
 	// ----------------------------------
 	public String loadVOServers(String voFile)
 	{
-		if (!_vomsServersLoaded)
+		List voVOMSNam = new ArrayList();	// list of VO names from the voms-server file
+		List voVOMSUrl = new ArrayList();	// list of URLs for VO from the voms-server file
+
+		String InStrLine;	// Input line
+		String StrLine;		// Line to parse after trimming
+
+		try
 		{
-			List voVOMSNam = new ArrayList();	// list of VO names from the voms-server file
-			List voVOMSUrl = new ArrayList();	// list of URLs for VO from the voms-server file
+			BufferedReader inFile = new BufferedReader (new FileReader(voFile) );
 
-			String InStrLine;	// Input line
-			String StrLine;		// Line to parse after trimming
-
-			try
+			while ( (InStrLine = inFile.readLine()) != null)
 			{
-				BufferedReader inFile = new BufferedReader (new FileReader(voFile) );
+				StrLine = InStrLine.trim();
+				if (StrLine.length() == 0) continue;	// Skip empty lines
+				if (StrLine.startsWith("#")) continue;
 
-				while ( (InStrLine = inFile.readLine()) != null)
-				{
-					StrLine = InStrLine.trim();
-					if (StrLine.length() == 0) continue;	// Skip empty lines
-					if (StrLine.startsWith("#")) continue;
+				// Line is not a comment, parsing it using token to break it into fields
+				String[] VoInfo = StrLine.split ("=");
 
-					// Line is not a comment, parsing it using token to break it into fields
-					String[] VoInfo = StrLine.split ("=");
-
-					String  voNam = VoInfo[0].trim();
-					String  voUrl = VoInfo[1].trim();
-					voVOMSNam.add(voNam);
-					voVOMSUrl.add(voUrl);
-				}
-			} catch (IOException e) {
-				String msg = "CERTIFICATE HANDLER message: <br>" + e.getMessage();
-				//System.out.println(msg);
-				return msg;
+				String  voNam = VoInfo[0].trim();
+				String  voUrl = VoInfo[1].trim();
+				voVOMSNam.add(voNam);
+				voVOMSUrl.add(voUrl);
 			}
-
-			// Convert now to arrays
-			voVOMSNameList = voVOMSNam.toArray();
-			voVOMSUrlList  = voVOMSUrl.toArray();
-			_vomsServersLoaded = true;
-			return "";
 		}
-		else
-			return "";
+		catch (IOException e)
+		{
+			String msg = "CERTIFICATE HANDLER message: <br>" + e.getMessage();
+			//System.out.println(msg);
+			return msg;
+		}
+
+		// Convert now to arrays
+		vomsNameList = (String[])voVOMSNam.toArray(new String[voVOMSNam.size()]);
+		vomsUrlList  = (String[])voVOMSUrl.toArray(new String[voVOMSUrl.size()]);
+		return "";
 	}
 
 	// ----------------------------------
@@ -220,8 +204,8 @@ public class CertificateHandler
 			final VOMSAdminServiceLocator locator = new VOMSAdminServiceLocator();
 			stub = locator.getVOMSAdmin(new URL(VomsLocation));
 
-			this.rolesVOMS  = stub.listRoles(dn, ca);
-			this.groupsVOMS = stub.listGroups(dn,ca);
+			this.rolesVOMS  = stub.listRoles(userDN, userCA);
+			this.groupsVOMS = stub.listGroups(userDN,userCA);
 		}
 		catch (Exception e)
 		{
@@ -235,17 +219,17 @@ public class CertificateHandler
 
 	// ----------------------------------
 	public String getSecureConnection() {
-		return this._secureConnection;
+		return this.secureConnection;
 	}
 
 	// ----------------------------------
 	public String getOpenConnection() {
-		return this._openConnection;
+		return this.openConnection;
 	}
 
 	// ----------------------------------
 	public String getDBconnection() {
-		return this._dbConnection;
+		return this.dbConnection;
 	}
 
 	//---------------------------------------------------
@@ -256,11 +240,11 @@ public class CertificateHandler
 	{
 		String  conUrl = null;
 
-		for (int j=0; j < voVOMSNameList.length; j++)
+		for (int j=0; j < vomsNameList.length; j++)
 		{
-			if (voVOMSNameList[j].toString().toUpperCase().trim().equals(voCon.toUpperCase().trim()))
+			if (vomsNameList[j].trim().equalsIgnoreCase(voCon.trim()))
 			{
-				conUrl = voVOMSUrlList[j].toString().trim();
+				conUrl = vomsUrlList[j].toString().trim();
 			}
 		}
 		this.voServer = conUrl + "/services/VOMSAdmin";
@@ -283,9 +267,9 @@ public class CertificateHandler
 	//---------------------------------------------------
 	public String getDN()
 	{
-		if (this.dn == null)
+		if (this.userDN == null)
 			return "UnknownDn";
-		return this.dn;
+		return this.userDN;
 	}
 
 	//---------------------------------------------------
@@ -294,13 +278,13 @@ public class CertificateHandler
 		String dnString = "";
 		String[] subwords;
 
-		if (this.dn == null)
+		if (this.userDN == null)
 		{
 			return "GratiaUserName";
 		}
 		else
 		{
-			dnString = this.dn;
+			dnString = this.userDN;
 			String[] dnWords = dnString.split ("/");
 
 			for (int i=0; i < dnWords.length; i++)
@@ -360,5 +344,4 @@ public class CertificateHandler
 	{
 		return this.voSelect;
 	}
-
 }
