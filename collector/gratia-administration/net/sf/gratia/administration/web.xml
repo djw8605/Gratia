@@ -21,7 +21,7 @@
 <web-app>
     <display-name>Gratia System Administration</display-name>
     <description>
-      Gratia System Administration
+      Gratia Accounting - Administration
     </description>
 
     <servlet>
@@ -104,6 +104,12 @@
 				<load-on-startup>1</load-on-startup>
     </servlet>
 
+    <servlet>
+        <servlet-name>StopDatabase</servlet-name>
+        <servlet-class>net.sf.gratia.administration.StopDatabase</servlet-class>
+				<load-on-startup>1</load-on-startup>
+    </servlet>
+
     <servlet-mapping>
         <servlet-name>SiteMgmt</servlet-name>
         <url-pattern>/site.html</url-pattern>
@@ -162,6 +168,11 @@
     <servlet-mapping>
         <servlet-name>NgapStatus</servlet-name>
         <url-pattern>/monitor-status.html</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>StopDatabase</servlet-name>
+        <url-pattern>/stopGratiaDatabaseUpdateThreads.html</url-pattern>
     </servlet-mapping>
 
 </web-app>
