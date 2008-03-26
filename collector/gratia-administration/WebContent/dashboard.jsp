@@ -1,7 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
     pageEncoding="ISO-8859-1"
-    import="net.sf.gratia.vomsSecurity.*"
 %>
+
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional //EN">
 <html>
 <head>
@@ -13,8 +13,15 @@
 
 <a href="http://opensciencegrid.org/" target="_blank"><img src="./images/osg-logo.gif" alt="OSG Logo" width="174" height="81" border="0"></a><br /> <hr>
 <%
-	net.sf.gratia.vomsSecurity.CertificateHandler certificateHandler = new net.sf.gratia.vomsSecurity.CertificateHandler(request);
-	//certificateHandler.loadCertificateConfiguration(request);
+	// Check if a certificate handler seesion attribute exists to pick up the settings
+	net.sf.gratia.vomsSecurity.CertificateHandler certificateHandler = (net.sf.gratia.vomsSecurity.CertificateHandler) session.getAttribute("certificateHandler");
+	if (certificateHandler == null)
+	{
+		certificateHandler = new net.sf.gratia.vomsSecurity.CertificateHandler(request);
+		session.setAttribute("certificateHandler", certificateHandler);
+	}
+	certificateHandler = (net.sf.gratia.vomsSecurity.CertificateHandler) session.getAttribute("certificateHandler");
+
 	String loginLink = certificateHandler.getSecureConnection() + request.getContextPath() + "/gratia-login.jsp";
 	String logoutLink  = certificateHandler.getOpenConnection() + request.getContextPath() + "/gratia-logout.jsp";
 

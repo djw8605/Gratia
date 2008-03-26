@@ -15,7 +15,21 @@
 <%
 try
 {
+	// This is different session (https), so remove session attributes
+   if ((String) session.getAttribute("FQAN") !=null)
+	session.removeAttribute("FQAN");
+
+   if ((String) session.getAttribute("displayLink") !=null)
+	session.removeAttribute("displayLink");
+
+   if ((net.sf.gratia.vomsSecurity.CertificateHandler) session.getAttribute("certificateHandler") != null)
+	session.removeAttribute("certificateHandler");
+
+   // Set session attribute for the CertificateHandler
 	net.sf.gratia.vomsSecurity.CertificateHandler certificateHandler = new net.sf.gratia.vomsSecurity.CertificateHandler(request);
+	session.setAttribute("certificateHandler", certificateHandler);
+	
+	certificateHandler = (net.sf.gratia.vomsSecurity.CertificateHandler) session.getAttribute("certificateHandler");
 
 	String[] VOlist = certificateHandler.getVOlist();
 

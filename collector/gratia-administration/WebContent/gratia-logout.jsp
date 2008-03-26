@@ -10,11 +10,15 @@
 
 <body>
 <%
+	// This is different session (https), so remove session attributes
    if ((String) session.getAttribute("FQAN") !=null)
 	session.removeAttribute("FQAN");
 
    if ((String) session.getAttribute("displayLink") !=null)
 	session.removeAttribute("displayLink");
+
+   if ((net.sf.gratia.vomsSecurity.CertificateHandler) session.getAttribute("certificateHandler") != null)
+	session.removeAttribute("certificateHandler");
 %>
 
 <script type="text/javascript">

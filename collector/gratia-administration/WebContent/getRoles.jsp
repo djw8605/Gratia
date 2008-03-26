@@ -1,5 +1,12 @@
 <%
-	net.sf.gratia.vomsSecurity.CertificateHandler certificateHandler = new net.sf.gratia.vomsSecurity.CertificateHandler(request);
+	// Check if a certificate handler seesion attribute exists to pick up the settings
+	net.sf.gratia.vomsSecurity.CertificateHandler certificateHandler = (net.sf.gratia.vomsSecurity.CertificateHandler) session.getAttribute("certificateHandler");
+	if (certificateHandler == null)
+	{
+		certificateHandler = new net.sf.gratia.vomsSecurity.CertificateHandler(request);
+		session.setAttribute("certificateHandler", certificateHandler);
+	}
+	certificateHandler = (net.sf.gratia.vomsSecurity.CertificateHandler) session.getAttribute("certificateHandler");
 
 	String setVO           = null;
 	String getSetVO        = null;
@@ -45,6 +52,5 @@
 		{
 			out.println("<table><tr><td><p class='txterror'>" + connectVOMsg + "</p></td></tr></table>");
 		}
-
 	}
 %>
