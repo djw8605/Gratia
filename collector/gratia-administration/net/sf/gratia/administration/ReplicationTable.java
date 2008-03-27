@@ -264,25 +264,25 @@ public class ReplicationTable extends HttpServlet
 				e.printStackTrace();
 			}
 		}
-		try {
-			command = "select distinct(Grid) from " + RecordTable + "_Meta order by Grid";
-			statement = connection.prepareStatement(command);
-			resultSet = statement.executeQuery(command);
+// 		try {
+// 			command = "select distinct(Grid) from " + RecordTable + "_Meta order by Grid";
+// 			statement = connection.prepareStatement(command);
+// 			resultSet = statement.executeQuery(command);
 
-			while (resultSet.next()) {
-				String grid = resultSet.getString(1);
-				if (resultSet.wasNull()) {
-					grid = "<null>";
-				}
-				vector.add("Grid:" + grid);
-			}
+// 			while (resultSet.next()) {
+// 				String grid = resultSet.getString(1);
+// 				if (resultSet.wasNull()) {
+// 					grid = "<null>";
+// 				}
+// 				vector.add("Grid:" + grid);
+// 			}
 
-			resultSet.close();
-			statement.close();
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-		}
+// 			resultSet.close();
+// 			statement.close();
+// 		}
+// 		catch (Exception e) {
+// 			e.printStackTrace();
+// 		}
 		try
 		{
 			command =
