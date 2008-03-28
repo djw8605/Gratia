@@ -120,6 +120,7 @@ ${target}/gratia-services.war:  ${services}/net/sf/gratia/services/*.java  \
 	rmic -vcompat -classpath ${classpath} -d . net.sf.gratia.services.JMSProxyImpl
 	cp net/sf/gratia/services/* ${services}/net/sf/gratia/services
 	rm -f -r net
+	cp ${services}/log4j.properties war/WEB-INF/classes/.
 	cp ${services}/net/sf/gratia/services/*.class war/WEB-INF/classes/net/sf/gratia/services
 	cp ${services}/net/sf/gratia/storage/*.class war/WEB-INF/classes/net/sf/gratia/storage
 	cp ${util}/net/sf/gratia/util/Logging.class war/WEB-INF/classes/net/sf/gratia/util
