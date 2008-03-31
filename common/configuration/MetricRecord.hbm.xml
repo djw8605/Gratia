@@ -99,7 +99,7 @@
       <property name="ServerDate" column="ServerDate" type="timestamp"/>
       <property name="md5" column="md5"/>
     </join>
-    <join table="MetricRecord_Xml">
+    <join table="MetricRecord_Xml" optional="true">
       <key column="dbid"/>
       <property name="ExtraXml" type="text"/>
       <property name="RawXml" type="text" />
