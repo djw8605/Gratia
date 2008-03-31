@@ -271,7 +271,7 @@
 
    </join>
 
-   <join table = "JobUsageRecord_Xml">
+   <join table = "JobUsageRecord_Xml" optional="true">
       <key column="dbid"/>
       <property name="ExtraXml" type="text"/>
       <property name="RawXml" type="text" />
