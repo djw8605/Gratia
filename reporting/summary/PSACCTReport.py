@@ -5,7 +5,7 @@
 #
 # library to create simple report using the Gratia psacct database
 #
-#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.16 2008-03-21 13:59:47 pcanal Exp $
+#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.17 2008-03-31 13:06:41 pcanal Exp $
 
 import time
 import datetime
@@ -22,6 +22,7 @@ gBegin = None
 gEnd = None
 gWithPanda = False
 gGroupBy = "Site"
+gVOName = ""
 
 gOutput="text" # Type of output (text, csv, None)
 
@@ -103,7 +104,7 @@ class Usage(Exception):
         self.msg = msg
 
 def UseArgs(argv):
-    global gProbename,gOutput,gWithPanda,gGroupBy
+    global gProbename,gOutput,gWithPanda,gGroupBy,gVOName
 
     monthly = False
     weekly = False
@@ -113,7 +114,7 @@ def UseArgs(argv):
         argv = sys.argv
     try:
         try:
-            opts, args = getopt.getopt(argv[1:], "hm:p:", ["help","monthly","weekly","daily","probe=","output=","with-panda","groupby="])
+            opts, args = getopt.getopt(argv[1:], "hm:p:", ["help","monthly","weekly","daily","probe=","output=","with-panda","groupby=","voname="])
         except getopt.error, msg:
              raise Usage(msg)
         # more code, unchanged
@@ -136,6 +137,8 @@ def UseArgs(argv):
             gWithPanda = True
         if o in ("--groupby"):
             gGroupBy = a
+        if o in ("--voname"):
+            gVOName = a
 
     start = ""
     end = ""
@@ -392,28 +395,37 @@ def DailyVOSiteDataFromDaily(begin,end,select,count):
                 + " group by J.VOName, M.ReportedSiteName order by J.VOName, M.ReportedSiteName "
         return RunQueryAndSplit(select)
 
-def DailySiteJobStatus(begin,end,select = "", count = "", what = "Site.SiteName" ):
+def DailySiteJobStatus(begin,end,selection = "", count = "", what = "Site.SiteName"):
         schema = "gratia"
 
-        select = " SELECT " + what + ", J.Status,count(*), sum(WallDuration) " \
-                + " from "+schema+".Site, "+schema+".Probe, "+schema+".JobUsageRecord_Report J " \
-                + " where VOName != \"Unknown\" and Probe.siteid = Site.siteid and J.ProbeName = Probe.probename" \
-                + " and \""+ DateToString(begin) +"\"<EndTime and EndTime<\"" + DateToString(end) + "\"" \
-                + " and ResourceType = \"Batch\" " \
-                + select \
+        select = " SELECT " + what + ", J.Status, count(*), sum(WallDuration) " \
+                + " from "+schema+".Site, "+schema+".Probe, " \
+                + " ( select M.dbid, Status, VOName,ReportableVOName, ProbeName, EndTime, WallDuration, StatusDescription from JobUsageRecord, JobUsageRecord_Meta M "\
+                + "   where JobUsageRecord.dbid = M.dbid " \
+                + "   and \"" + DateToString(begin) +"\"<EndTime and EndTime<\"" + DateToString(end) + "\"" \
+                + "   and ResourceType = \"Batch\" " \
+                + "  ) J, VONameCorrection, VO " \
+                + " where VO.VOName != \"Unknown\" and Probe.siteid = Site.siteid and J.ProbeName = Probe.probename" \
+                + " and " + VONameCorrectionJoin("J") \
+                + selection \
                 + " group by " + what + ",J.Status " \
                 + " order by " + what 
         return RunQueryAndSplit(select)
 
-def DailySiteJobStatusCondor(begin,end,select = "", count = "", what = "Site.SiteName" ):
+def DailySiteJobStatusCondor(begin,end,selection = "", count = "", what = "Site.SiteName"):
         schema = "gratia"
 
         select = " SELECT "+what+", R.Value,count(*), sum(WallDuration) " \
-                + " from "+schema+".Site, "+schema+".Probe, "+schema+".JobUsageRecord_Report J, "+schema+".Resource R "\
-                + " where VOName != \"Unknown\" and Probe.siteid = Site.siteid and J.ProbeName = Probe.probename" \
-                + " and \""+ DateToString(begin) +"\"<EndTime and EndTime<\"" + DateToString(end) + "\"" \
+                + " from "+schema+".Site, "+schema+".Probe, "+schema+".Resource R, " \
+                + " ( select M.dbid, VOName,ReportableVOName, ProbeName, EndTime, WallDuration, StatusDescription from JobUsageRecord, JobUsageRecord_Meta M "\
+                + "   where JobUsageRecord.dbid = M.dbid " \
+                + "   and \"" + DateToString(begin) +"\"<EndTime and EndTime<\"" + DateToString(end) + "\"" \
+                + "   and ResourceType = \"Batch\" " \
+                + "  ) J, VONameCorrection, VO " \
+                + " where VO.VOName != \"Unknown\" and Probe.siteid = Site.siteid and J.ProbeName = Probe.probename" \
                 + " and J.dbid = R.dbid and R.Description = \"ExitCode\" " \
-                + " and ResourceType = \"Batch\" " \
+                + " and " + VONameCorrectionJoin("J") \
+                + selection \
                 + " group by " + what + ",R.Value " \
                 + " order by " + what
         return RunQueryAndSplit(select)
@@ -549,6 +561,7 @@ class DailySiteJobStatusConf:
     CondorSpecial = False
     GroupBy = "Site.SiteName"
     Both = False
+    ExtraSelect = ""
 
     def __init__(self, header = False, CondorSpecial = True, groupby = "Site"):
            self.formats["csv"] = ",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""
@@ -559,18 +572,21 @@ class DailySiteJobStatusConf:
            if (not header) :  self.title = ""
            self.CondorSpecial = CondorSpecial
            if (groupby == "VO"):
-               self.GroupBy = "J.VOName"
+               self.GroupBy = "VO.VOName"
                self.headers = ("VO","Success Rate","Success","Failed","Total","Wall Success","Wall Failed")
                self.col1 = "All VOs"
            elif (groupby == "Both"):
                self.formats["csv"] = ",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""
                self.formats["text"] = "| %-22s | %-22s | %12s | %10s | %10s | %10s | %12s | %11s "
                self.lines["text"] = "-----------------------------------------------------------------------------------------------------------------------------------------"
-               self.GroupBy = "Site.SiteName,J.VOName"
+               self.GroupBy = "Site.SiteName,VO.VOName"
                self.headers = ("Site","VO","Success Rate","Success","Failed","Total","Wall Success","Wall Failed")
                self.col1 = "All Sites"
                self.col2 = "All VOs"
                self.Both = True
+           elif (groupby == "ForVO"):
+               self.GroupBy = "Site.SiteName"
+               self.ExtraSelect = " and VO.VOName = " + " \"Engage\" "
                
 
     def Sorting(self, x,y):
@@ -586,9 +602,9 @@ class DailySiteJobStatusConf:
 
     def GetData(self,start,end):
        if self.CondorSpecial:
-           return DailySiteJobStatus(start,end,select=" and J.StatusDescription != \"Condor Exit Status\" ",what=self.GroupBy)+DailySiteJobStatusCondor(start,end,what=self.GroupBy)
+           return DailySiteJobStatus(start,end,selection=" and J.StatusDescription != \"Condor Exit Status\" "+self.ExtraSelect,what=self.GroupBy)+DailySiteJobStatusCondor(start,end,what=self.GroupBy)
        else:
-           return DailySiteJobStatus(start,end,what=self.GroupBy)
+           return DailySiteJobStatus(start,end,what=self.GroupBy,selection=self.ExtraSelect)
     
   
 class DailySiteReportConf:
@@ -762,6 +778,8 @@ def GenericDailyStatus(what, when = datetime.date.today(), output = "text"):
         sum_values = {}
         
         for i in range (0,len(lines)):
+                if (lines[i]=="") : continue
+
                 val = lines[i].split('\t')
 
                 if (val[2] == "count(*)"):
@@ -959,6 +977,16 @@ def DailyVOSiteReport(when = datetime.date.today(), output = "text", header = Tr
 
 def DateTimeToString(input):
     return input.strftime("%Y-%m-%d %H:%M:%S");
+
+def VONameCorrectionJoin(table = "sub"):
+    return """(cast("""+table+""".VOName as char charset binary) =
+cast(VONameCorrection.VOName as char charset binary))
+and ((cast("""+table+""".ReportableVOName as char charset binary) =
+cast(VONameCorrection.ReportableVOName as char charset binary))
+or (isnull("""+table+""".ReportableVOName) and
+isnull(VONameCorrection.ReportableVOName)))
+and (VONameCorrection.VOid = VO.VOid)
+and ("""+table+""".VOName = VONameCorrection.VOName)"""
 
 def RangeVOData(begin, end, with_panda = False):
     schema = "gratia"

@@ -1,0 +1,30 @@
+#!/bin/env python
+ 
+import sys
+import PSACCTReport
+
+from PSACCTReport import FromCondor,UseArgs,gOutput,gBegin,CheckDB,gGroupBy
+import sys
+
+def main(argv=None):
+    UseArgs(argv)
+ 
+    if not CheckDB() :
+        return 1
+
+    print "Summary of the job exit status (midnight to midnight central time) for %s\nincluding all jobs that finished in that time period.\n\nFor Condor the value used is taken from 'ExitCode' and NOT from 'Exit Status'"
+    print "\nFor VO: ", PSACCTReport.gVOName, "\n"
+    
+    argOutput = PSACCTReport.gOutput
+    PSACCTReport.GenericDailyStatus( PSACCTReport.DailySiteJobStatusConf(header=False,groupby="ForVO"),PSACCTReport.gBegin,output=argOutput )
+    print
+
+    #PSACCTReport.UserReport(range_begin = PSACCTReport.gBegin,
+    #                         range_end = PSACCTReport.gEnd ,
+    #                         output=argOutput);
+
+if __name__ == "__main__":
+    sys.exit(main())
+
+
+

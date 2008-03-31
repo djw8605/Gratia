@@ -30,6 +30,7 @@ SUM_MAIL_MSG="Report from the daily summary Gratia db (i.e. provided by VOs) for
 STATUS_MAIL_MSG="Job Success Rate by Site for $when (from the job level Gratia db)"
 VO_STATUS_MAIL_MSG="Job Success Rate by VO for $when (from the job level Gratia db) "
 BOTH_STATUS_MAIL_MSG="Job Success Rate by Site and VO for $when (from the job level Gratia db) "
+VO_MAIL_MSG="Gratia Summary for $when for VO: "
 
 # Transfer the file now
 WORK_DIR=workdir.${RANDOM}
@@ -64,6 +65,9 @@ sendto ./dailyStatus  $whenarg ${WORK_DIR}/status_report "$STATUS_MAIL_MSG"
 sendto "./dailyStatus --groupby=VO"  $whenarg ${WORK_DIR}/vo_status_report "$VO_STATUS_MAIL_MSG"
 sendto "./dailyStatus --groupby=Both"  $whenarg ${WORK_DIR}/vo_status_report "$BOTH_STATUS_MAIL_MSG"
 
+export MYVO=Engage
+export MAILTO="-c pcanal@fnal.gov rynge@renci.org"
+sendto "./dailyForVO --voname=${MYVO}"   $whenarg ${WORK_DIR}/forvo "${VO_MAIL_MSG}${MYVO}"
 
 if [ "$debug" != "x" ]; then 
    rm -rf $WORK_DIR
