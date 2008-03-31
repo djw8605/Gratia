@@ -24,6 +24,8 @@
 
 	String loginLink = certificateHandler.getSecureConnection() + request.getContextPath() + "/gratia-login.jsp";
 	String logoutLink  = certificateHandler.getOpenConnection() + request.getContextPath() + "/gratia-logout.jsp";
+	String dbConnection = certificateHandler.getDBconnection();
+	session.setAttribute("dbConnection", dbConnection);
 
 	String userDN = (String) session.getAttribute("userDN");
 	String fqan = (String) session.getAttribute("FQAN");
@@ -89,6 +91,7 @@
 	<a href="./replication-howto.html" target="adminContent" class="menuItem">Replication</a><br />
 	<a href="./service-configuration-settings.html" target="adminContent" class="menuItem">Gratia Service Settings</a><br />
 
+	<p class="menuVersion"><%=dbConnection %></p>
 	<%
 	String displayLink = (String) session.getAttribute("displayLink");
 	if (displayLink != null)
