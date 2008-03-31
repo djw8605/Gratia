@@ -26,7 +26,7 @@ when=$(date -d "${date_arg:-yesterday}" +"%d %B %Y")
 whenarg=$(date -d "${date_arg:-yesterday}" +"%Y/%m/%d")
 
 MAIL_MSG="Report from the job level Gratia db for $when"
-SUM_MAIL_MSG="Report from the daily summary Gratia db for $when"
+SUM_MAIL_MSG="Report from the daily summary Gratia db (i.e. provided by VOs) for $when"
 STATUS_MAIL_MSG="Job Success Rate by Site for $when (from the job level Gratia db)"
 VO_STATUS_MAIL_MSG="Job Success Rate by VO for $when (from the job level Gratia db) "
 BOTH_STATUS_MAIL_MSG="Job Success Rate by Site and VO for $when (from the job level Gratia db) "

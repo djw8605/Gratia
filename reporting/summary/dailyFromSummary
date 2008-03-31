@@ -13,6 +13,7 @@ def main(argv=None):
         return 1
 
     print "OSG usage summary (midnight to midnight central time) for %s\nincluding all jobs that finished in that time period.\nWall Duration is expressed in hours and rounded to the nearest hour.\nDeltas are the differences with the previous day.\nIf the number of jobs stated for a site is always 1\nthen this number is actually the number of summary records sent.\n" % DateToString(PSACCTReport.gBegin,False)
+    print "This information is collected by the VO, for example via a framework like PANDA and then sent to the daily summary Gratia db.\n"
 
     argOutput = PSACCTReport.gOutput
     #PSACCTReport.DailySiteReport(PSACCTReport.gBegin,output=argOutput);
