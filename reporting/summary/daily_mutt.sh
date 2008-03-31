@@ -66,7 +66,7 @@ sendto "./dailyStatus --groupby=VO"  $whenarg ${WORK_DIR}/vo_status_report "$VO_
 sendto "./dailyStatus --groupby=Both"  $whenarg ${WORK_DIR}/vo_status_report "$BOTH_STATUS_MAIL_MSG"
 
 export MYVO=Engage
-export MAILTO="-c pcanal@fnal.gov rynge@renci.org"
+export MAILTO="-c pcanal@fnal.gov engage-team@opensciencegrid.org"
 sendto "./dailyForVO --voname=${MYVO}"   $whenarg ${WORK_DIR}/forvo "${VO_MAIL_MSG}${MYVO}"
 
 if [ "$debug" != "x" ]; then 
