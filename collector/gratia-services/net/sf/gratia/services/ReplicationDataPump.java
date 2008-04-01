@@ -23,8 +23,7 @@ public class ReplicationDataPump extends Thread
     private long chunksize;
 
     long dbid;
-    Post post;
-    java.sql.Connection connection;
+    java.sql.Connection dbconnection;
     Statement statement;
     ResultSet resultSet;
     String command;
@@ -55,6 +54,10 @@ public class ReplicationDataPump extends Thread
         Logging.log("ReplicationDataPump ID #" + replicationid + ": " + log);
     }
 
+    public void replicationLog(String log, Exception ex) {
+        Logging.log("ReplicationDataPump ID #" + replicationid + ": " + log, ex);
+    }
+
     public ReplicationDataPump(String replicationid)
     {
         this.replicationid = replicationid;
@@ -63,7 +66,11 @@ public class ReplicationDataPump extends Thread
         url = p.getProperty("service.mysql.url");
         user = p.getProperty("service.mysql.user");
         password = p.getProperty("service.mysql.password");
-        openConnection();
+
+        if (!openDatabaseConnection()) {
+            exitflag = true;
+            return;
+        }
       
         String tmp = p.getProperty("service.datapump.trace");
         trace = tmp != null && tmp.equals("1");
@@ -82,18 +89,19 @@ public class ReplicationDataPump extends Thread
         }
     }
 
-    public void openConnection()
+    public boolean openDatabaseConnection()
     {
         try
             {
                 Class.forName(driver).newInstance();
-                connection = DriverManager.getConnection(url, user, password);
+                dbconnection = DriverManager.getConnection(url, user, password);
                 replicationLog("Database Connection Opened");
+                return true;
             }
         catch (Exception e)
             {
-                e.printStackTrace();
-                return;
+                replicationLog("Database Connection failed to open",e);
+                return false;
             }
     }
 
@@ -140,8 +148,8 @@ public class ReplicationDataPump extends Thread
             }
         try
             {
-                connection.close();
-                replicationLog("Connection Closed");
+                dbconnection.close();
+                replicationLog("Database Connection Closed");
             }
         catch (Exception ignore)
             {
@@ -183,11 +191,12 @@ public class ReplicationDataPump extends Thread
         String probename = "";
         String frequency = "";
         String table = "";
+        String target = "";
 
         try
             {
                 replicationLog("Executing Command: " + command);
-                statement = connection.prepareStatement(command);
+                statement = dbconnection.prepareStatement(command);
                 resultSet = statement.executeQuery(command);
 
                 while (resultSet.next())
@@ -200,7 +209,7 @@ public class ReplicationDataPump extends Thread
                         probename = resultSet.getString("probename");
                         frequency = resultSet.getString("frequency");
                         table = resultSet.getString("recordtable");
-                        if (table == null) table = "JobUsageRecord";
+                        if (table == null || table == "") table = "JobUsageRecord";
                     }
                 resultSet.close();
                 statement.close();
@@ -209,13 +218,11 @@ public class ReplicationDataPump extends Thread
             {
                 if (!HibernateWrapper.databaseUp())
                     {
-                        cleanup();
                         exitflag = true;
                         return;
                     }
-                replicationLog("Error executing command: " + command);
-                e.printStackTrace();
-                cleanup();
+                replicationLog("Error executing command: " + command, e);
+                // e.printStackTrace();
                 exitflag = true;
                 return;
             }
@@ -260,7 +267,7 @@ public class ReplicationDataPump extends Thread
 
         try
             {
-                statement = connection.prepareStatement(command);
+                statement = dbconnection.prepareStatement(command);
                 resultSet = statement.executeQuery(command);
                 while (resultSet.next())
                     count = resultSet.getInt(1);
@@ -271,13 +278,11 @@ public class ReplicationDataPump extends Thread
             {
                 if (!HibernateWrapper.databaseUp())
                     {
-                        cleanup();
                         exitflag = true;
                         return;
                     }
-                replicationLog("Error during replication executing command: " + command);
-                e.printStackTrace();
-                cleanup();
+                replicationLog("Error during replication executing command: " + command, e);
+                // e.printStackTrace();
                 exitflag = true;
                 return;
             }
@@ -293,25 +298,35 @@ public class ReplicationDataPump extends Thread
         // start replication
         //
 
-        Post post = null;
+        if (security.equals("0"))
+            target = openconnection + "/gratia-servlets/rmi";
+        else
+            target = secureconnection + "/gratia-servlets/rmi";
 
         try
             {
                 statement =
-                    connection.prepareStatement(command,
-                                                java.sql.ResultSet.TYPE_FORWARD_ONLY,
-                                                java.sql.ResultSet.CONCUR_READ_ONLY);
+                    dbconnection.prepareStatement(command,
+                                                  java.sql.ResultSet.TYPE_FORWARD_ONLY,
+                                                  java.sql.ResultSet.CONCUR_READ_ONLY);
                 resultSet = statement.executeQuery(command);
                 command = "";
+
+                int bundle_size = 10;
+                int bundle_count = 0;
+                String lowdbid = "0";
+                StringBuilder xml_msg = new StringBuilder();
+
                 while (resultSet.next())
                     {
                         if (exitflag)
                             {
-                                cleanup();
                                 return;
                             }
                         dbid = resultSet.getString("dbid");
+
                         String xml = getXML(dbid,table);
+
                         if (xml.length() == 0)
                             {
                                 replicationLog("Received Null XML: dbid: " + dbid);
@@ -321,25 +336,24 @@ public class ReplicationDataPump extends Thread
                             replicationLog("TRACE dbid: " + dbid);
                             replicationLog("TRACE xml: " + xml);
                         }
-                        if (security.equals("0"))
-                            post = new Post(openconnection + "/gratia-servlets/rmi", "update", xml);
-                        else
-                            post = new Post(secureconnection + "/gratia-servlets/rmi", "update", xml);
-                        replicationLog("Sending: " + dbid);
-                        String response = post.send();
-                        String[] results = split(response, ":");
-                        if (!results[0].equals("OK"))
-                            {
-                                replicationLog("Error During Post: " + response);
-                                cleanup();
-                                exitflag = true;
-                                return;
-                            }
-                        //
-                        // update replicationtable
-                        //
-                        updateReplicationTable(dbid);
+
+                        xml_msg.append(xml);
+                        if (bundle_count == 0) lowdbid = dbid;
+                        bundle_count = bundle_count + 1;
+                        if (bundle_count == bundle_size) {
+                            
+                            uploadXML(target,xml_msg.toString(),lowdbid, dbid);
+
+                            if (exitflag) return;
+
+                            bundle_count = 0;
+                            xml_msg = new StringBuilder();
+                        }
                     }
+                if (bundle_count != 0) {
+                    uploadXML(target, xml_msg.toString(), lowdbid, dbid);
+                    if (exitflag) return;
+                }
                 resultSet.close();
                 statement.close();
                 replicationLog("Run Complete");
@@ -348,17 +362,16 @@ public class ReplicationDataPump extends Thread
             {
                 if (!HibernateWrapper.databaseUp())
                     {
-                        replicationLog("Database Connection Error");
-                        cleanup();
+                        replicationLog("Database Database Connection Error", e);
                         exitflag = true;
                         return;
                     }
-                replicationLog("Error During Replication");
                 if (command.length() > 0) {
-                    replicationLog("Active command was " + command);
-                }
-                e.printStackTrace();
-                cleanup();
+                    replicationLog("Error During Replication\n Active command was " + command, e);
+                } else {
+                    replicationLog("Error During Replication",e);
+                }                    
+                // e.printStackTrace();
                 exitflag = true;
                 return;
             }
@@ -380,7 +393,7 @@ public class ReplicationDataPump extends Thread
 
     public String getXML(String dbid,String table) throws Exception
     {
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
 
         int i = 0;
 
@@ -429,6 +442,33 @@ public class ReplicationDataPump extends Thread
     //   return duration;
     //}
 
+    public void uploadXML(String target, String xml, String low, String high) throws Exception
+    {
+        Post post = new Post(target, "update", xml);
+
+        replicationLog("Sending: " + low + " to " + high);
+
+        String response = post.send();
+        
+        if (post.success && response != null) {
+            String[] results = split(response, ":");
+            if (!results[0].equals("OK"))
+                {
+                    replicationLog("Error During Post: " + response);
+                    exitflag = true;
+                    return;
+                }
+            //
+            // update replicationtable
+            //
+            updateReplicationTable(high);
+        } else {
+            replicationLog("Error during Replication.",post.exception);
+            exitflag = true;
+            return;
+        }
+    }
+
     public void updateReplicationTable(String dbid) throws Exception
     {
         String command =
@@ -437,7 +477,7 @@ public class ReplicationDataPump extends Thread
             " rowcount = rowcount + 1" + cr +
             " where replicationid = " + replicationid;
 
-        Statement statement = connection.createStatement();
+        Statement statement = dbconnection.createStatement();
         statement.executeUpdate(command);
         statement.close();
     }
