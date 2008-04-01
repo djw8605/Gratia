@@ -636,7 +636,11 @@ public class ReplicationTable extends HttpServlet
 		// get my pem
 		//
 		post = new Post(props.getProperty("service.open.connection") + "/gratia-security/security", "get");
-		response = post.send();
+		response = post.send(true);
+		if (!post.success) {
+                    message = post.errorMsg;
+                    return;
+		}
 		results = split(response, ":");
 		mypem = results[1];
 		//
@@ -646,10 +650,10 @@ public class ReplicationTable extends HttpServlet
 		post.add("arg1", "Client:" + props.getProperty("service.open.connection"));
 		post.add("arg2", "Replication");
 		post.add("arg3", mypem);
-		response = post.send();
+		response = post.send(true);
 		if (!post.success) {
-			message = post.errorMsg;
-			return;
+                    message = post.errorMsg;
+                    return;
 		}
 		results = split(response, ":");
 		if (!results[0].equals("ok"))
@@ -661,7 +665,11 @@ public class ReplicationTable extends HttpServlet
 		// get the hosts pem
 		//
 		post = new Post(openconnection + "/gratia-security/security", "get");
-		response = post.send();
+		response = post.send(true);
+		if (!post.success) {
+                    message = post.errorMsg;
+                    return;
+		}
 		results = split(response, ":");
 		remotepem = results[1];
 		secureconnection = results[2];
@@ -673,7 +681,11 @@ public class ReplicationTable extends HttpServlet
 		post.add("arg1", "Server:" + secureconnection);
 		post.add("arg2", "Replication");
 		post.add("arg3", remotepem);
-		response = post.send();
+		response = post.send(true);
+		if (!post.success) {
+                    message = post.errorMsg;
+                    return;
+		}
 		results = split(response, ":");
 		if (!results[0].equals("ok"))
 		{
@@ -785,66 +797,66 @@ public class ReplicationTable extends HttpServlet
 
 		try
 		{
-			Statement statement = connection.prepareStatement(command);
-			ResultSet resultSet = statement.executeQuery(command);
-			while (resultSet.next())
+                    Statement statement = connection.prepareStatement(command);
+                    ResultSet resultSet = statement.executeQuery(command);
+                    while (resultSet.next())
 			{
-				security = resultSet.getString("security");
-				if (security.equals("0"))
-					target = resultSet.getString("openconnection");
-				else 
-					target = resultSet.getString("secureconnection");
+                            security = resultSet.getString("security");
+                            if (security.equals("0"))
+                                target = resultSet.getString("openconnection");
+                            else 
+                                target = resultSet.getString("secureconnection");
 			}
-			resultSet.close();
-			statement.close();
-
-			statement.close();
+                    resultSet.close();
+                    statement.close();
+                    
+                    statement.close();
 		}
 		catch (Exception e)
-		{
+                    {
 			System.out.println("command: " + command);
 			e.printStackTrace();
-		}
+                    }
 		Post post = new Post(target + "/gratia-servlets/rmi", "update", "xxx");
 		try
-		{
-			response = post.send();
-		}
+                    {
+			response = post.send(true);
+                    }
 		catch (Exception e)
-		{
-			message = "Error for "+target+" : " + cr + xp.parseException(e);
-			return;
-		}
+                    {
+                        message = "Error for "+target+" : " + cr + xp.parseException(e);
+                        return;
+                    }
 		if (!post.success) {
-			message = "Error for "+target+" : " + post.errorMsg;
-			return;
+                    message = "Error for "+target+" : " + post.errorMsg;
+                    return;
 		}
 		try
-		{
+                    {
 			String[] results = split(response, ":");
 			if (!results[0].equals("OK"))
-			{
+                            {
 				message = "Error for "+target+" : " + response;
 				return;
-			}
-		} 
+                            }
+                    } 
 		catch (Exception e)
-		{
+                    {
 			message = "Error for "+target+" : " + cr + xp.parseException(e);
 			return;
-		}
+                    }
 		message = "Test Succeeded !!";
 	}
-
+    
 	public String[] split(String input, String sep)
 	{
-		Vector vector = new Vector();
-		StringTokenizer st = new StringTokenizer(input, sep);
-		while (st.hasMoreTokens())
-			vector.add(st.nextToken());
-		String[] results = new String[vector.size()];
-		for (int i = 0; i < vector.size(); i++)
-			results[i] = (String)vector.elementAt(i);
-		return results;
+            Vector vector = new Vector();
+            StringTokenizer st = new StringTokenizer(input, sep);
+            while (st.hasMoreTokens())
+                vector.add(st.nextToken());
+            String[] results = new String[vector.size()];
+            for (int i = 0; i < vector.size(); i++)
+                results[i] = (String)vector.elementAt(i);
+            return results;
 	}
 }

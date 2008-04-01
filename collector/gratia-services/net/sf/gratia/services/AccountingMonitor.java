@@ -116,8 +116,14 @@ public class AccountingMonitor extends Thread {
                     post.add("to", to);
                     post.add("rmi", externalrmi);
                     post.send();
-                    Logging.info("AccountingMonitor: Sent Request To: " + to
-                            + " DBID: " + value);
+                    if (post.success) {
+                        Logging.info("AccountingMonitor: Sent Request To: " + to
+                                     + " DBID: " + value);
+                    } else {
+                        Logging
+                            .info("AccountingMonitor: Unable To Send Request To: "
+                                  + to);
+                    }   
                 } catch (Exception e) {
                     Logging
                             .info("AccountingMonitor: Unable To Send Request To: "
