@@ -11,6 +11,7 @@ public class Post
     public String destination;
     public Boolean success;
     public String errorMsg;
+    public Exception exception;
 
     public Post(String destination,String command)
     {
@@ -24,7 +25,7 @@ public class Post
 	    {
 		success = false;
 		errorMsg = e.toString();
-		e.printStackTrace();
+		exception = e;
 	    }
     }
 
@@ -42,7 +43,7 @@ public class Post
 	    {
 		success = false;
 		errorMsg = e.toString();
-		e.printStackTrace();
+		exception = e;
 	    }
     }
 
@@ -62,7 +63,7 @@ public class Post
 	    {
 		success = false;
 		errorMsg = e.toString();
-		e.printStackTrace();
+		exception = e;
 	    }
     }
 
@@ -84,7 +85,7 @@ public class Post
 	    {
 		success = false;
 		errorMsg = e.toString();
-		e.printStackTrace();
+		exception = e;
 	    }
     }
 
@@ -108,7 +109,7 @@ public class Post
 	    {
 		success = false;
 		errorMsg = e.toString();
-		e.printStackTrace();
+		exception = e;
 	    }
     }
 
@@ -134,12 +135,14 @@ public class Post
 	    {
 		success = false;
 		errorMsg = e.toString();
-		e.printStackTrace();
+		exception = e;
 	    }
     }
 
     public void add(String key,String value)
     {
+        if (!success) return;
+
 	success = true;
 	try
 	    {
@@ -150,12 +153,17 @@ public class Post
 	    {
 		success = false;
 		errorMsg = e.toString();
-		e.printStackTrace();
+		exception = e;
 	    }
     }
 
-    public String send()
+    public String send(boolean printError)
     {
+        if (!success) {
+            if (printError) exception.printStackTrace();
+            return null;
+        }
+
 	StringBuffer received = new StringBuffer();
 	success = true;
 	try
@@ -184,9 +192,14 @@ public class Post
 	    {
 		success = false;
 		errorMsg = e.toString();
-		e.printStackTrace();
+		exception = e;
+                if (printError) e.printStackTrace();
 		return null;
 	    }
+    }
+
+    public String send() {
+        return send(false);
     }
 
     public static void main(String args[])
