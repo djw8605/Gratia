@@ -420,8 +420,7 @@ public class ListenerThread extends Thread
                                 Logging.log("ListenerThread: " + ident + ":Communications Error:Shutting Down");
                                 return 0; 
                             }
-                            Logging.warning("ListenerThread: " + ident + ":Error In Process: " + e);
-                            Logging.warning("ListenerThread: " + ident + ":Error In Process: " + e.getStackTrace());
+                            Logging.warning("ListenerThread: " + ident + ":Error In Process: ",e);
                             Logging.warning("ListenerThread: " + ident + ":Current: " + current);
                         }
 
@@ -440,8 +439,7 @@ public class ListenerThread extends Thread
                             Logging.log("ListenerThread: " + ident + ":Communications Error:Shutting Down");
                             return 0; 
                         }
-                        Logging.warning("ListenerThread: " + ident + ":Error In Process: " + e);
-                        Logging.warning("ListenerThread: " + ident + ":Error In Process: " + e.getStackTrace());
+                        Logging.warning("ListenerThread: " + ident + ":Error In Process: ",e);
                         Logging.warning("ListenerThread: " + ident + ":Current: " + current);
                     } // End general catch
                 }

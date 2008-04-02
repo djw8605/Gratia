@@ -107,6 +107,18 @@ public class Logging
             System.out.println(format.format(new Date()) + ": " + message);
     }
     
+    public static void warning(String message, Exception ex)
+    {
+        if (! initialized)
+            {
+                System.out.println("Logger Not Initialized !!");
+                return;
+            }
+        logger.log(Level.WARNING,message,ex);
+        if (console)
+            System.out.println(format.format(new Date()) + ": " + message);
+    }
+    
     public static void debug(String message)
     {
         if (! initialized)
