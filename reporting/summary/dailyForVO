@@ -16,7 +16,7 @@ def main(argv=None):
     print "\nFor VO: ", PSACCTReport.gVOName, "\n"
     
     argOutput = PSACCTReport.gOutput
-    PSACCTReport.GenericDailyStatus( PSACCTReport.DailySiteJobStatusConf(header=False,groupby="ForVO"),PSACCTReport.gBegin,output=argOutput )
+    PSACCTReport.GenericDailyStatus( PSACCTReport.DailySiteJobStatusConf(header=False,groupby="ForVO",VOName=PSACCTReport.gVOName),PSACCTReport.gBegin,output=argOutput )
     print
 
     #PSACCTReport.UserReport(range_begin = PSACCTReport.gBegin,

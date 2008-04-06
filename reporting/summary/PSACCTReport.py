@@ -5,7 +5,7 @@
 #
 # library to create simple report using the Gratia psacct database
 #
-#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.18 2008-04-01 16:17:09 pcanal Exp $
+#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.19 2008-04-06 14:23:45 pcanal Exp $
 
 import time
 import datetime
@@ -562,8 +562,9 @@ class DailySiteJobStatusConf:
     GroupBy = "Site.SiteName"
     Both = False
     ExtraSelect = ""
+    VOName = ""
 
-    def __init__(self, header = False, CondorSpecial = True, groupby = "Site"):
+    def __init__(self, header = False, CondorSpecial = True, groupby = "Site", VOName = ""):
            self.formats["csv"] = ",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""
            self.formats["text"] = "| %-22s | %12s | %10s | %10s | %10s | %12s | %11s "
            self.lines["csv"] = ""
@@ -571,6 +572,7 @@ class DailySiteJobStatusConf:
 
            if (not header) :  self.title = ""
            self.CondorSpecial = CondorSpecial
+           self.VOName = VOName
            if (groupby == "VO"):
                self.GroupBy = "VO.VOName"
                self.headers = ("VO","Success Rate","Success","Failed","Total","Wall Success","Wall Failed")
@@ -586,7 +588,7 @@ class DailySiteJobStatusConf:
                self.Both = True
            elif (groupby == "ForVO"):
                self.GroupBy = "Site.SiteName"
-               self.ExtraSelect = " and VO.VOName = " + " \"Engage\" "
+               self.ExtraSelect = " and VO.VOName = " + " \"" + self.VOName + "\" "
                
 
     def Sorting(self, x,y):
