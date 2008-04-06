@@ -267,7 +267,7 @@
      </component>
 
      <property name="ServerDate" column="ServerDate" type="timestamp"/>
-     <property name="md5" column="md5"/>
+     <property name="md5" column="md5" index="index12" unique="true"/>
 
    </join>
 

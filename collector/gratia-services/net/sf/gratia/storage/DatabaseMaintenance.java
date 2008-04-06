@@ -97,11 +97,20 @@ public class DatabaseMaintenance {
     
     public void AddIndex(String table, Boolean unique, String name,
                          String content) {
+
+        AddIndex(table,unique,name,content,false);
+    }
+
+    public void AddIndex(String table, Boolean unique, String name,
+                         String content, Boolean avoidDuplicateIndex) {
         Statement statement;
         ResultSet resultSet;
 
         String check = "show index from " + table + " where Key_name = '"
             + name + "'";
+        String checkcontent = "show index from " + table + " where Column_name = '"
+            + content + "'";
+
         String cmd = "alter table " + table + " add ";
         if (unique) {
             cmd = cmd + "unique ";
@@ -111,14 +120,28 @@ public class DatabaseMaintenance {
             Logging.log("Executing: " + check);
             statement = connection.createStatement();
             resultSet = statement.executeQuery(check);
-            if (!resultSet.next()) {
-                // No index yet
-                Logging.log("Executing: " + cmd);
-                statement = connection.createStatement();
-                statement.executeUpdate(cmd);
-                Logging.log("Command: OK: " + cmd);
+            if (!resultSet.next()) { 
+               resultSet.close();
+               statement.close();
+               Boolean exist = false;
+               if (avoidDuplicateIndex) {
+                  Logging.log("Executing: " + checkcontent);
+                  statement = connection.createStatement();
+                  resultSet = statement.executeQuery(checkcontent);
+
+                  exist = resultSet.next();
+
+                  resultSet.close();
+                  statement.close();
+               }
+               // No index yet
+               if (!exist) {
+                  Logging.log("Executing: " + cmd);
+                  statement = connection.createStatement();
+                  statement.executeUpdate(cmd);
+                  Logging.log("Command: OK: " + cmd);
+               }
             }
-            resultSet.close();
             statement.close();
 
         } catch (Exception e) {
@@ -173,8 +196,12 @@ public class DatabaseMaintenance {
         // AddIndex("JobUsageRecord",false,"index06","GlobalJobid");
         // AddIndex("JobUsageRecord",false,"index07","LocalJobid");
         AddIndex("JobUsageRecord", false, "index08", "Host(255)");
-        AddIndex("JobUsageRecord_Meta", true, "index12", "md5");
+        AddIndex("JobUsageRecord_Meta", true, "index12", "md5", true);
         AddIndex("JobUsageRecord_Meta", false, "index13", "ServerDate");
+
+
+        AddIndex("MetricsRecord_Meta", true, "index12", "md5", true);
+        AddIndex("ProbeDetails_Meta", true, "index12", "md5", true);
 
         // 
         // Index on DupRecord

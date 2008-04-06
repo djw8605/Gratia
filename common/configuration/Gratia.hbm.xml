@@ -177,7 +177,7 @@
       </component> 
 
       <property name="ServerDate" column="ServerDate" type="timestamp"/>
-      <property name="md5" column="md5"/>
+      <property name="md5" column="md5" index="index12" unique="true"/>
     </join>
 
     <join table="ProbeDetails_Xml">
@@ -195,7 +195,7 @@
     <property name="Type"/>
     <property name="Name"/>
     <property name="Version"/>
-    <property name="md5"/>
+    <property name="md5" column="md5" index="index12" unique="true"/>
   </class>
 
   <class name="CEProbeStatus" table="CEProbeStatus" node="CEProbeStatus" lazy="false">
