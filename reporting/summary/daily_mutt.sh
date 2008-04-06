@@ -65,7 +65,7 @@ sendto ./dailyStatus  $whenarg ${WORK_DIR}/status_report "$STATUS_MAIL_MSG"
 sendto "./dailyStatus --groupby=VO"  $whenarg ${WORK_DIR}/vo_status_report "$VO_STATUS_MAIL_MSG"
 sendto "./dailyStatus --groupby=Both"  $whenarg ${WORK_DIR}/vo_status_report "$BOTH_STATUS_MAIL_MSG"
 
-export MYVO=Engage
+export MYVO=engage
 export MAILTO="-c pcanal@fnal.gov engage-team@opensciencegrid.org"
 sendto "./dailyForVO --voname=${MYVO}"   $whenarg ${WORK_DIR}/forvo "${VO_MAIL_MSG}${MYVO}"
 
