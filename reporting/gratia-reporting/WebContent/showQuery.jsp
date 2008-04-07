@@ -272,6 +272,9 @@ function closeAll () {
 						cellvalue= String.format("%,d", value);
 					else
 						cellvalue= value.toString();
+
+					// Escape quotes and slashes, so that the value is displayed correctly
+					cellvalue = cellvalue.replace("'", "\\'").replace("/", "\\/");
 					%>
 					<script type="text/javascript">
 						writeBottom('<td>&nbsp;<\/td> <td align="right"><%= cellvalue %><\/td>');
