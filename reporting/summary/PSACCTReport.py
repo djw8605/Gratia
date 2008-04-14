@@ -5,7 +5,7 @@
 #
 # library to create simple report using the Gratia psacct database
 #
-#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.20 2008-04-14 21:03:59 pcanal Exp $
+#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.21 2008-04-14 21:13:17 pcanal Exp $
 
 import time
 import datetime
@@ -323,7 +323,7 @@ def CondorData():
         select = " SELECT J.VOName, sum((J.CpuUserDuration+J.CpuSystemDuration)) as cputime, " + \
                       " sum((J.CpuUserDuration+J.CpuSystemDuration)*0) as normcpu, " + \
                       " sum(J.WallDuration) as wall, sum(J.WallDuration*0) as normwall " + \
-                 " FROM JobUsageRecord_Report J " + \
+                 " FROM VOProbeSummary J " + \
                  " where 1=1 " + CommonWhere() + \
                  " group by VOName; "
         return RunQueryAndSplit(select)
@@ -332,7 +332,7 @@ def DailySiteData(begin,end):
         schema = "gratia"
         
         select = " SELECT Site.SiteName, sum(NJobs), sum(J.WallDuration) " \
-                + " from "+schema+".Site, "+schema+".Probe, "+schema+".JobUsageRecord_Report J " \
+                + " from "+schema+".Site, "+schema+".Probe, "+schema+".VOProbeSummary J " \
                 + " where VOName != \"Unknown\" and Probe.siteid = Site.siteid and J.ProbeName = Probe.probename" \
                 + " and \""+ DateToString(begin) +"\"<=EndTime and EndTime<\"" + DateToString(end) + "\"" \
                 + " and J.ProbeName not like \"psacct:%\" " \
@@ -343,7 +343,7 @@ def DailyVOData(begin,end):
         schema = "gratia"
             
         select = " SELECT J.VOName, Sum(NJobs), sum(J.WallDuration) " \
-                + " from "+schema+".Site, "+schema+".Probe, "+schema+".JobUsageRecord_Report J " \
+                + " from "+schema+".Site, "+schema+".Probe, "+schema+".VOProbeSummary J " \
                 + " where VOName != \"Unknown\" and Probe.siteid = Site.siteid and J.ProbeName = Probe.probename" \
                 + " and \""+ DateToString(begin) +"\"<=EndTime and EndTime<\"" + DateToString(end) + "\"" \
                 + " and J.ProbeName not like \"psacct:%\" " \
@@ -354,7 +354,7 @@ def DailySiteVOData(begin,end):
         schema = "gratia"
         
         select = " SELECT Site.SiteName, J.VOName, sum(NJobs), sum(J.WallDuration) " \
-                + " from "+schema+".Site, "+schema+".Probe, "+schema+".JobUsageRecord_Report J " \
+                + " from "+schema+".Site, "+schema+".Probe, "+schema+".VOProbeSummary J " \
                 + " where VOName != \"Unknown\" and Probe.siteid = Site.siteid and J.ProbeName = Probe.probename" \
                 + " and \""+ DateToString(begin) +"\"<=EndTime and EndTime<\"" + DateToString(end) + "\"" \
                 + " and J.ProbeName not like \"psacct:%\" " \
@@ -365,7 +365,7 @@ def DailyVOSiteData(begin,end):
         schema = "gratia"
         
         select = " SELECT J.VOName, Site.SiteName, sum(NJobs), sum(J.WallDuration) " \
-                + " from "+schema+".Site, "+schema+".Probe, "+schema+".JobUsageRecord_Report J " \
+                + " from "+schema+".Site, "+schema+".Probe, "+schema+".VOProbeSummary J " \
                 + " where VOName != \"Unknown\" and Probe.siteid = Site.siteid and J.ProbeName = Probe.probename" \
                 + " and \""+ DateToString(begin) +"\"<=EndTime and EndTime<\"" + DateToString(end) + "\"" \
                 + " and J.ProbeName not like \"psacct:%\" " \
