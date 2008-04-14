@@ -1,0 +1,19 @@
+#!/bin/env python
+ 
+import PSACCTReport,datetime,sys
+
+def main(argv=None):
+    PSACCTReport.UseArgs(argv)
+
+    if not PSACCTReport.CheckDB() :
+        return 1
+
+    argOutput = PSACCTReport.gOutput
+
+    PSACCTReport.NonReportingSites(when = PSACCTReport.gBegin, output=argOutput) # datetime.date(2008,02,01))
+
+    #PSACCTReport.RangeSummup(range_begin = PSACCTReport.gBegin,
+    #                         range_end = PSACCTReport.gEnd)
+
+if __name__ == "__main__":
+    sys.exit(main())
