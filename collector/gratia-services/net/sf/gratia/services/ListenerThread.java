@@ -396,9 +396,44 @@ public class ListenerThread extends Thread
                             List list = session.createSQLQuery(sql).list();
                             if (list.size() > 0) {
                                 dupdbid = ((Integer) list.get(0)).intValue();
+                                if (dupdbid != 0) {
+                                    tx = session.beginTransaction();
+                                    try {
+                                        Query q = session.createQuery("select record from JobUsageRecord " +
+                                                                      "record where record.RecordId = " +
+                                                                      dupdbid);
+                                        JobUsageRecord original_record = (JobUsageRecord) q.uniqueResult();
+                                        UserIdentity original_userIdentity = original_record.getUserIdentity();
+                                        if ((original_userIdentity == null) || 
+                                            (original_userIdentity.getVOName() == null) ||
+                                            (original_userIdentity.getVOName().length() == 0) ||
+                                            (original_userIdentity.getVOName().equalsIgnoreCase("Unknown")) ||
+                                            (original_userIdentity.getCommonName().startsWith("Generic")) ||
+                                            (original_userIdentity.getKeyInfo() == null)) {
+                                            // Keep the new one and ditch the old
+                                            Logging.info("ListenerThread: " + ident + ": replacing record " +
+                                                         dupdbid + " with \"better\" record.");
+                                            // Has to be in this order otherwise we'll get a duplicate error.
+                                            session.delete(original_record);
+                                            session.save(current);
+                                            session.flush();
+                                            tx.commit();
+                                            session.close();
+                                        }
+                                    }
+                                    catch (Exception e2) {
+                                        tx.rollback();
+                                        session.close();
+                                        Logging.warning("ListenerThread: " + ident + ": caught exception " + e2 +
+                                                        " trying to update record " +
+                                                        dupdbid + " with a \"better\" one -- saving new record as a duplicate.");
+                                    }
+                                }
                             }
-                            session.close();
+                            if (session.isOpen()) session.close();
                             //Logging.log("ListenerThread: " + ident + ":Before Save Duplicate");
+                            Logging.debug("ListenerThread: " + ident + ": save duplicate of record " +
+                                        dupdbid);
                             if (gotreplication) {
                                 saveDuplicate("Replication", "Duplicate", dupdbid, current);
                             } else if (gothistory) {
