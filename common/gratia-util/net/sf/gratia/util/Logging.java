@@ -130,5 +130,17 @@ public class Logging
         if (console)
             System.out.println(format.format(new Date()) + ": " + message);
     }
+
+    public static void debug(String message, Exception ex)
+    {
+        if (! initialized)
+            {
+                System.out.println("Logger Not Initialized !!");
+                return;
+            }
+        logger.log(Level.FINEST, message, ex);
+        if (console)
+            System.out.println(format.format(new Date()) + ": " + message);
+    }
     
 }
