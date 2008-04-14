@@ -606,18 +606,18 @@ public class JobUsageRecord implements Record
        // Zero out things we don't want checksums for
        RecordIdentity tempRecordIdentity = getRecordIdentity();
        setRecordIdentity(null);
-       StringElement tempSiteName = getSiteName();
-       setSiteName(null);
-       UserIdentity tempUserIdentity = getUserIdentity();
-       setUserIdentity(null);
+//        StringElement tempSiteName = getSiteName();
+//        setSiteName(null);
+//        UserIdentity tempUserIdentity = getUserIdentity();
+//        setUserIdentity(null);
 
        // Calculate the checksum
        String md5key = Utils.md5key(asXML());
 
        // Put things back
        setRecordIdentity(tempRecordIdentity);
-       setSiteName(tempSiteName);
-       setUserIdentity(tempUserIdentity);
+//        setSiteName(tempSiteName);
+//        setUserIdentity(tempUserIdentity);
 
        return md5key;
    }
@@ -631,4 +631,5 @@ public class JobUsageRecord implements Record
    {
       md5 = value;
    }
+
 }
