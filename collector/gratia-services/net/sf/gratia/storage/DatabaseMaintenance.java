@@ -8,34 +8,36 @@ import net.sf.gratia.services.HibernateWrapper;
 import net.sf.gratia.storage.JobUsageRecord;
 import net.sf.gratia.storage.UserIdentity;
 
-import java.sql.*;
-import java.util.Properties;
 import java.io.File;
-import java.lang.System;
 import java.lang.Long;
-import java.util.HashSet;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.regex.*;
-import java.text.NumberFormat;
+import java.lang.System;
+import java.sql.*;
 import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Properties;
+import java.util.regex.*;
 
 import org.hibernate.CacheMode;
 import org.hibernate.FlushMode;
 import org.hibernate.JDBCException;
-import org.hibernate.exception.*;
 import org.hibernate.Query;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
+import org.hibernate.exception.*;
 
 public class DatabaseMaintenance {
     static final String dq = "\"";
     static final String comma = ",";
-    static final int gratiaDatabaseVersion = 29;
+    static final int gratiaDatabaseVersion = 28;
     static final int latestDBVersionRequiringStoredProcedureLoad = gratiaDatabaseVersion;
-    static final int latestDBVersionRequiringSummaryTableLoad = 29;
+    static final int latestDBVersionRequiringSummaryTableLoad = 28;
     static final int latestDBVersionRequiringSummaryViewLoad = 22;
     static final int latestDBVersionRequiringSummaryTriggerLoad = 19;
     static final int latestDBVersionRequiringTableStatisticsRefresh = 27;
@@ -200,7 +202,7 @@ public class DatabaseMaintenance {
         AddIndex("JobUsageRecord_Meta", false, "index13", "ServerDate");
 
 
-        AddIndex("MetricsRecord_Meta", true, "index12", "md5", true);
+        AddIndex("MetricRecord_Meta", true, "index12", "md5", true);
         AddIndex("ProbeDetails_Meta", true, "index12", "md5", true);
 
         // 
@@ -228,10 +230,34 @@ public class DatabaseMaintenance {
         AddIndex("JobUsageRecord", false, "index16", "ResourceType");
         
         //
-        // Indixes for VONameCorrection
+        // Indexes for VONameCorrection
         //
         AddIndex("VONameCorrection",false,"index01","VOName, ReportableVOName");
 
+        //
+        // Index for new md5 column
+        //
+        // NOTE: this routine creates a NON-UNIQUE index, even though it
+        // will eventually become unique. The scenarios are as follows:
+        //
+        // 1. Table does not exist: Hibernate will create column and
+        // index according to config (column md5v2, index17, unique)
+        //
+        // 2. Table exists, column md5v2 does not: Hibernate will create
+        // column but not index; line below will create index.
+        //
+        // 3. Table and column exists, index does not: line below will
+        // create index.
+        //
+        // 4. Table, column and index already exist: NOP.
+        //
+        // This is of course exactly what we want: if there is the
+        // chance of data already existing without the new checksum the
+        // upgrade thread will kick in.
+
+        if (liveVersion >= 29) {
+            AddIndex("JobUsageRecord_Meta", false, "index17", "md5v2");
+        }
     }
 
     private int CallPostInstall(String action) {
@@ -966,18 +992,26 @@ public class DatabaseMaintenance {
                 current = 28;
                 UpdateDbVersion(current);
             }
-            if (current == 28) {
-                int result = RecalculateChecksums();
-                if (result > -1) {
-                    int tmp = current;
-                    current = current + 1;
-                    UpdateDbVersion(current);
-                    Logging.log("Gratia database upgraded from " + tmp + " to " + current);
-                } else {
-                    Logging.log("Gratia database FAILED to upgrade from " + current +
-                                " to " + (current + 1));
-                }
+            if ((gratiaDatabaseVersion >= 29) // May not be activated yet.
+                && (current == 28)) {
+                int tmp = current;
+                current = current + 1;
+                UpdateDbVersion(current);                
+                CheckIndices(); // Call again to update the DupRecord indexes.
+                Logging.log("Gratia database upgraded from " + tmp + " to " + current);
             }
+//             if (current == 29) {
+//                 int result = ReparseRecordsWithExtraXml();
+//                 if (result > -1) {
+//                     int tmp = current;
+//                     current = current + 1;
+//                     UpdateDbVersion(current);
+//                     Logging.log("Gratia database upgraded from " + tmp + " to " + current);
+//                 } else {
+//                     Logging.log("Gratia database FAILED to upgrade from " + current +
+//                                 " to " + (current + 1));
+//                 }                
+//             }
 
             return ((current == gratiaDatabaseVersion) && checkAndUpgradeDbAuxiliaryItems());
         }
@@ -1169,208 +1203,4 @@ public class DatabaseMaintenance {
         return form.format(size) + suffices[suffix_counter];
     }
 
-    private int RecalculateChecksums() {
-        // Need to be very careful to keep session integrity here.
-        Logging.debug("RecalculateChecksums: start.");
-        long last_processed_dbid = 0;
-        int result = 0; // Successful unless an exception makes it all the way out here.
-        int session_records_limit = 5000;
-        int batch_commit_size = 20;
-        try {
-            long old_last_processed_dbid;
-            do {
-                old_last_processed_dbid = last_processed_dbid;
-                Logging.debug("RecalculateChecksums: updating " +
-                              "JobUsageRecords from " +
-                              last_processed_dbid +
-                              ", batch size " + batch_commit_size);
-                last_processed_dbid = updateJobUsageRecords(last_processed_dbid,
-                                                            batch_commit_size);
-            } while (last_processed_dbid > old_last_processed_dbid);
-        }
-        catch (Exception e) {
-            Logging.debug("RecalculateChecksums: caught exception in outer loop: " + e.toString());
-            e.printStackTrace();
-            result = -1;
-        }
-        return result;
-    }
-
-    private long updateJobUsageRecords(long last_dbid) throws Exception {
-        return updateJobUsageRecords(last_dbid, 1);
-    }
-
-    private long updateJobUsageRecords(long last_dbid, int nRecords) throws Exception {
-        Logging.debug("UpdateJobUsageRecords(" + last_dbid + ", " + nRecords + ")");
-        if (nRecords == 0) {
-            Logging.debug("UpdateJobUsageRecords: nothing to do");
-            return last_dbid; // NOP.
-        }
-        int records_processed = 0;
-        HashMap<Long, Integer> dbid_map = new HashMap<Long, Integer>();
-        Logging.debug("UpdateJobUsageRecords: get Session");
-        Session session = HibernateWrapper.getSession();
-        session.setFlushMode(FlushMode.COMMIT);
-        Logging.debug("UpdateJobUsageRecords: Get query for dbid > " +
-                      last_dbid);
-        Query q =
-            session.createQuery("select record from JobUsageRecord " + 
-                                "record where record.RecordId > " +
-                                last_dbid +
-                                " order by record.RecordId")
-            .setCacheMode(CacheMode.IGNORE)
-            .setMaxResults(nRecords);
-        ScrollableResults records = q.scroll(ScrollMode.FORWARD_ONLY);
-        try {
-            Logging.debug("UpdateJobUsageRecords: new transaction for update");
-            session.beginTransaction();
-        }
-        catch (Exception e) {
-            Logging.warning("UpdateJobUsageRecords: Exception opening new transaction: " + e.toString());
-            // Major problem -- finish
-            session.close();
-            throw e;
-        }
-        long current_dbid = 0;
-        while ((records_processed < nRecords) && records.next()) {
-            ++records_processed;
-            Logging.debug("UpdateJobUsageRecords: processing record " +
-                          records_processed + " of " + nRecords);
-            JobUsageRecord record = (JobUsageRecord) records.get(0);
-            current_dbid = record.getRecordId();
-            Logging.debug("UpdateJobUsageRecords: read record " + current_dbid);
-            dbid_map.put(current_dbid, records_processed); // Store record number indexed by dbid.
-            try {
-                String old_md5 = record.getmd5();
-                String new_md5 = record.computemd5();
-                if (new_md5.equals(old_md5)) {
-                    // Nothing to do for this record: skip.
-                    Logging.debug("UpdateJobUsageRecords: no change to " +
-                                  "checksum for " + current_dbid);
-                    continue;
-                }
-                // Set the new checksum.
-                Logging.debug("UpdateJobUsageRecords: updating " +
-                              "checksum from " + old_md5 + " to " + new_md5);
-                record.setmd5(new_md5);
-                session.update(record);
-            }
-            catch (Exception e) {
-                Logging.warning("UpdateJobUsageRecords: error computing " + 
-                                "and updating md5 checksum for record " +
-                                current_dbid + ": " + e.toString());
-                session.getTransaction().rollback();
-                session.close();
-                throw e;
-            }
-        }
-        if (records_processed > 0) {
-            try {
-                Logging.debug("UpdateJobUsageRecords: flush and commit records " +
-                              last_dbid + " through " + current_dbid);
-                session.flush();
-                session.getTransaction().commit();
-                session.close();
-                Logging.debug("UpdateJobUsageRecords: records " +
-                              last_dbid + " through " + current_dbid + " committed");
-                last_dbid = current_dbid;
-            }
-            catch (ConstraintViolationException e) { // Probable duplicate key.
-                Logging.debug("UpdateJobUsageRecords: Exception committing transaction: " + e.toString());
-                session.getTransaction().rollback();
-                session.close();
-                Logging.debug("UpdateJobUsageRecords: error analysis");
-                Pattern dbid_pattern = Pattern.compile("\\.JobUsageRecord#(\\d+)\\]$");
-                Matcher dbid_matcher = dbid_pattern.matcher(e.getMessage());
-                long failing_dbid = 0;
-                if (dbid_matcher.find()) {
-                    failing_dbid = Long.decode(dbid_matcher.group(1)).longValue();
-                    Logging.debug("UpdateJobUsageRecords: failing record identified as DBID " +
-                                  failing_dbid);
-                }
-                if (failing_dbid == 0) {
-                    Logging.debug("UpdateJobUsageRecords: unable to identify failing record");
-                    throw new Exception("Unable to find dbid from exception message");
-                }
-                // Reprocess up to the failed record;
-                Logging.debug("UpdateJobUsageRecords: reprocess " + (dbid_map.get(failing_dbid) - 1) +
-                              " records from " + last_dbid);
-                long old_last_dbid = last_dbid;
-                last_dbid = updateJobUsageRecords(last_dbid, dbid_map.get(failing_dbid) - 1);
-                // Consistency check.
-                Logging.debug("UpdateJobUsageRecords: get fcheck1, dbid = " + failing_dbid);
-                int fcheck1 = dbid_map.get(failing_dbid);
-                Logging.debug("UpdateJobUsageRecords: fcheck1 = " + fcheck1);
-                int fcheck2 = 0;
-                if (fcheck1 != 1) { // If not first record in batch:
-                    Logging.debug("UpdateJobUsageRecords: get fcheck2, dbid = " + last_dbid);
-                    fcheck2 = dbid_map.get(last_dbid);
-                    Logging.debug("UpdateJobUsageRecords: fcheck2 = " + fcheck2);
-                }
-                Logging.debug("UpdateJobUsageRecords: compare fchecks");
-                if (fcheck1 != (fcheck2 + 1)) {
-                    Logging.debug("UpdateJobUsageRecords: unable to reprocess " +
-                                  "records from " + old_last_dbid + " up to " + failing_dbid);
-                    throw new Exception("UpdateJobUsageRecords: Internal Error: unable to reconcile update consistency");
-                }
-                // Obtain the failed record once more from the DB
-                session = HibernateWrapper.getSession();
-                Transaction tx = session.beginTransaction();
-                try {
-                    Logging.debug("UpdateJobUsageRecords: obtain failing record");
-                    q = session.createQuery("select record from JobUsageRecord " +
-                                            "record where record.RecordId = " +
-                                            failing_dbid);
-                    JobUsageRecord failed_record = (JobUsageRecord) q.uniqueResult();
-                    Logging.debug("UpdateJobUsageRecords: compute MD5 for failing record");
-                    String failed_md5 = failed_record.computemd5();
-                    Logging.debug("UpdateJobUsageRecords: obtain matching earlier record");
-                    q = session.createQuery("select record from JobUsageRecord " +
-                                            "record where record.md5 = '" +
-                                            failed_md5 + "'");
-                    JobUsageRecord original_record = (JobUsageRecord) q.uniqueResult();
-                    if (original_record.getRecordId() > failing_dbid) { // Major problem -- hash collision.
-                        throw new Exception("UpdateJobUsageRecords: Internal Error: hash collision " +
-                                            "between new record DBID " +
-                                            failing_dbid +
-                                            " and unconverted record DBID " +
-                                            original_record.getRecordId());
-                    }                        
-                    Logging.debug("UpdateJobUsageRecords: check whether to replace " +
-                                  "userIdentity block in earlier record DBID " +
-                                  original_record.getRecordId());
-                    UserIdentity original_userIdentity = original_record.getUserIdentity();
-                    if ((original_userIdentity == null) || 
-                        (original_userIdentity.getVOName() == null) ||
-                        (original_userIdentity.getVOName().equals("")) ||
-                        (original_userIdentity.getVOName().equalsIgnoreCase("Unknown"))) {
-                        UserIdentity failed_userIdentity = failed_record.getUserIdentity();
-                        if (failed_userIdentity != null) {
-                            original_record.setUserIdentity(failed_userIdentity);
-                            Logging.debug("UpdateJobUsageRecords: update record DBID " +
-                                          original_record.getRecordId());
-                            session.update(original_record);
-                        }
-                    }
-                    Logging.debug("UpdateJobUsageRecords: deleting failed record " + failed_record.getRecordId());
-                    session.delete(failed_record);
-                    Logging.debug("UpdateJobUsageRecords: commit fixed records");
-                    tx.commit();
-                    session.close();
-                }
-                catch (Exception e2) {
-                    Logging.debug("UpdateJobUsageRecords: caught exception " +
-                                  "while fixing duplicate records: " + e2.toString());
-                    Transaction tx2 = session.getTransaction();
-                    if ((tx2 != null) && tx2.isActive()) {
-                        tx2.rollback();
-                    }
-                    session.close();
-                    throw e2;
-                }
-                return failing_dbid;
-            }
-        }
-        return last_dbid;
-    }
 }
