@@ -15,10 +15,12 @@ public class HibernateWrapper
 
    static org.hibernate.cfg.Configuration hibernateConfiguration;
    static org.hibernate.SessionFactory hibernateFactory;
-   static org.hibernate.Session session;
 
    public static boolean databaseDown = true;
 
+    public static synchronized org.hibernate.cfg.Configuration getHibernateConfiguration() {
+        return hibernateConfiguration;
+    }
 
    public static synchronized void start()
    {
