@@ -5,7 +5,7 @@
 #
 # library to create simple report using the Gratia psacct database
 #
-#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.19 2008-04-06 14:23:45 pcanal Exp $
+#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.20 2008-04-14 21:03:59 pcanal Exp $
 
 import time
 import datetime
@@ -212,13 +212,13 @@ def ProbeWhere():
 def CommonWhere():
     global gProbeName, gBegin, gEnd
     return " VOName != \"Unknown\" and \"" \
-        + DateToString(gBegin) +"\"<EndTime and EndTime<\"" + DateToString(gEnd) + "\"" \
+        + DateToString(gBegin) +"\"<=EndTime and EndTime<\"" + DateToString(gEnd) + "\"" \
         + ProbeWhere()
 
 def StringToDate(input):
     return datetime.datetime(*time.strptime(input, "%d/%m/%Y")[0:5])
 
-def DateToString(input,gmt=True):
+def DateToString(input,gmt=False):
     if gmt:
         return input.strftime("%Y-%m-%d 07:00:00");
     else:
@@ -334,7 +334,7 @@ def DailySiteData(begin,end):
         select = " SELECT Site.SiteName, sum(NJobs), sum(J.WallDuration) " \
                 + " from "+schema+".Site, "+schema+".Probe, "+schema+".JobUsageRecord_Report J " \
                 + " where VOName != \"Unknown\" and Probe.siteid = Site.siteid and J.ProbeName = Probe.probename" \
-                + " and \""+ DateToString(begin) +"\"<EndTime and EndTime<\"" + DateToString(end) + "\"" \
+                + " and \""+ DateToString(begin) +"\"<=EndTime and EndTime<\"" + DateToString(end) + "\"" \
                 + " and J.ProbeName not like \"psacct:%\" " \
                 + " group by Probe.siteid "
         return RunQueryAndSplit(select)
@@ -345,7 +345,7 @@ def DailyVOData(begin,end):
         select = " SELECT J.VOName, Sum(NJobs), sum(J.WallDuration) " \
                 + " from "+schema+".Site, "+schema+".Probe, "+schema+".JobUsageRecord_Report J " \
                 + " where VOName != \"Unknown\" and Probe.siteid = Site.siteid and J.ProbeName = Probe.probename" \
-                + " and \""+ DateToString(begin) +"\"<EndTime and EndTime<\"" + DateToString(end) + "\"" \
+                + " and \""+ DateToString(begin) +"\"<=EndTime and EndTime<\"" + DateToString(end) + "\"" \
                 + " and J.ProbeName not like \"psacct:%\" " \
                 + " group by J.VOName "
         return RunQueryAndSplit(select)
@@ -356,7 +356,7 @@ def DailySiteVOData(begin,end):
         select = " SELECT Site.SiteName, J.VOName, sum(NJobs), sum(J.WallDuration) " \
                 + " from "+schema+".Site, "+schema+".Probe, "+schema+".JobUsageRecord_Report J " \
                 + " where VOName != \"Unknown\" and Probe.siteid = Site.siteid and J.ProbeName = Probe.probename" \
-                + " and \""+ DateToString(begin) +"\"<EndTime and EndTime<\"" + DateToString(end) + "\"" \
+                + " and \""+ DateToString(begin) +"\"<=EndTime and EndTime<\"" + DateToString(end) + "\"" \
                 + " and J.ProbeName not like \"psacct:%\" " \
                 + " group by J.VOName, Probe.siteid order by Site.SiteName "
         return RunQueryAndSplit(select)
@@ -367,7 +367,7 @@ def DailyVOSiteData(begin,end):
         select = " SELECT J.VOName, Site.SiteName, sum(NJobs), sum(J.WallDuration) " \
                 + " from "+schema+".Site, "+schema+".Probe, "+schema+".JobUsageRecord_Report J " \
                 + " where VOName != \"Unknown\" and Probe.siteid = Site.siteid and J.ProbeName = Probe.probename" \
-                + " and \""+ DateToString(begin) +"\"<EndTime and EndTime<\"" + DateToString(end) + "\"" \
+                + " and \""+ DateToString(begin) +"\"<=EndTime and EndTime<\"" + DateToString(end) + "\"" \
                 + " and J.ProbeName not like \"psacct:%\" " \
                 + " group by J.VOName, Probe.siteid order by J.VOName, Site.SiteName "
         return RunQueryAndSplit(select)
@@ -377,7 +377,7 @@ def DailySiteVODataFromDaily(begin,end,select,count):
         
         select = " SELECT M.ReportedSiteName, J.VOName, "+count+", sum(J.WallDuration) " \
                 + " from "+schema+".JobUsageRecord J," + schema +".JobUsageRecord_Meta M " \
-                + " where VOName != \"Unknown\" and \""+ DateToString(begin) +"\"<EndTime and EndTime<\"" + DateToString(end) + "\"" \
+                + " where VOName != \"Unknown\" and \""+ DateToString(begin) +"\"<=EndTime and EndTime<\"" + DateToString(end) + "\"" \
                 + " and M.dbid = J.dbid " \
                 + " and ProbeName " + select + "\"daily:goc\" " \
                 + " group by J.VOName, M.ReportedSiteName order by M.ReportedSiteName, J.VOName "
@@ -389,7 +389,7 @@ def DailyVOSiteDataFromDaily(begin,end,select,count):
         select = " SELECT J.VOName, M.ReportedSiteName, "+count+", sum(J.WallDuration) " \
                 + " from "+schema+".JobUsageRecord J," \
                 + schema + ".JobUsagRecord_Meta M " \
-                + " where VOName != \"Unknown\" and \""+ DateToString(begin) +"\"<EndTime and EndTime<\"" + DateToString(end) + "\"" \
+                + " where VOName != \"Unknown\" and \""+ DateToString(begin) +"\"<=EndTime and EndTime<\"" + DateToString(end) + "\"" \
                 + " and M.dbid = J.dbid " \
                 + " and ProbeName " + select + "\"daily:goc\" " \
                 + " group by J.VOName, M.ReportedSiteName order by J.VOName, M.ReportedSiteName "
@@ -402,7 +402,7 @@ def DailySiteJobStatus(begin,end,selection = "", count = "", what = "Site.SiteNa
                 + " from "+schema+".Site, "+schema+".Probe, " \
                 + " ( select M.dbid, Status, VOName,ReportableVOName, ProbeName, EndTime, WallDuration, StatusDescription from JobUsageRecord, JobUsageRecord_Meta M "\
                 + "   where JobUsageRecord.dbid = M.dbid " \
-                + "   and \"" + DateToString(begin) +"\"<EndTime and EndTime<\"" + DateToString(end) + "\"" \
+                + "   and \"" + DateToString(begin) +"\"<=EndTime and EndTime<\"" + DateToString(end) + "\"" \
                 + "   and ResourceType = \"Batch\" " \
                 + "  ) J, VONameCorrection, VO " \
                 + " where VO.VOName != \"Unknown\" and Probe.siteid = Site.siteid and J.ProbeName = Probe.probename" \
@@ -419,7 +419,7 @@ def DailySiteJobStatusCondor(begin,end,selection = "", count = "", what = "Site.
                 + " from "+schema+".Site, "+schema+".Probe, "+schema+".Resource R, " \
                 + " ( select M.dbid, VOName,ReportableVOName, ProbeName, EndTime, WallDuration, StatusDescription from JobUsageRecord, JobUsageRecord_Meta M "\
                 + "   where JobUsageRecord.dbid = M.dbid " \
-                + "   and \"" + DateToString(begin) +"\"<EndTime and EndTime<\"" + DateToString(end) + "\"" \
+                + "   and \"" + DateToString(begin) +"\"<=EndTime and EndTime<\"" + DateToString(end) + "\"" \
                 + "   and ResourceType = \"Batch\" " \
                 + "  ) J, VONameCorrection, VO " \
                 + " where VO.VOName != \"Unknown\" and Probe.siteid = Site.siteid and J.ProbeName = Probe.probename" \
@@ -1675,8 +1675,8 @@ def RangeSummup(range_end = datetime.date.today(),
     #print extraSites
     print "As of "+DateToString(datetime.date.today(),False) +", there are "+prettyInt(len(allSites))+" registered OSG sites"
 
-    print "\nBetween %s - %s (midnight - midnight central time):\n" % ( DateToString(range_begin,False),
-                                                                        DateToString(range_end,False) )
+    print "\nBetween %s - %s (midnight - midnight UTC):\n" % ( DateToString(range_begin,False),
+                                                               DateToString(range_end,False) )
     n = len(reportingSites)
     print prettyInt(n)+" sites reported\n"
 
@@ -1819,7 +1819,7 @@ def LongJobs(range_end = datetime.date.today(),
             output = "text",
             header = True):
 
-    print "This report is a summary of long running jobs that finished between %s - %s (midnight - midnight central time):\n" % ( DateToString(range_begin,False),
+    print "This report is a summary of long running jobs that finished between %s - %s (midnight - midnight UTC):\n" % ( DateToString(range_begin,False),
                                                                         DateToString(range_end,False) )
     RangeLongJobs(range_end,range_begin,output,header)
 
