@@ -4,7 +4,7 @@ import java.util.Date;
 /**
  * <p>Title: Record </p>
  *
- * <p>Description: Interface of the Gratia Records
+ * <p>Description: Interface of the Gratia Records</p>
  *
  * <p>Copyright: Copyright (c) 2005</p>
  *
@@ -13,28 +13,29 @@ import java.util.Date;
  * @Philippe Canal
  * @version 1.0
  */
-public interface Record
-{
-   public void addRawXml(String RawXml);
-   public void setRawXml(String RawXml);
-   public String getRawXml();
-   public void addExtraXml(String ExtraXml);
-   public void setExtraXml(String ExtraXml);
-   public String getExtraXml();
-   public String asXML();
+public interface Record {
+    public void addRawXml(String RawXml);
+    public void setRawXml(String RawXml);
+    public String getRawXml();
+    public void addExtraXml(String ExtraXml);
+    public void setExtraXml(String ExtraXml);
+    public String getExtraXml();
+    public String asXML();
 
-   public StringElement getSiteName();
-   public StringElement getProbeName();
-   public Date getServerDate();
-   public void setServerDate(Date value);
-   public String computemd5() throws Exception;
-   public String getmd5();
-   public void setmd5(String md5set);
+    public StringElement getSiteName();
+    public StringElement getProbeName();
+    public Date getServerDate();
+    public void setServerDate(Date value);
+    public String computemd5() throws Exception;
+    public String getmd5();
+    public void setmd5(String md5set);
+    public int getRecordId();
+    public void setRecordId(int RecordId);
 
-   public void setProbe(Probe p);
-   public boolean setDuplicate(boolean b);
+    public void setProbe(Probe p);
+    public boolean setDuplicate(boolean b);
 
-   public String getTableName();
+    public String getTableName();
 
-   public void AttachContent( org.hibernate.Session session ) throws Exception;
+    public void AttachContent( org.hibernate.Session session ) throws Exception;
 }

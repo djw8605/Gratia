@@ -41,6 +41,7 @@ public class ListenerThread extends Thread
     Transaction tx;
     RecordUpdaterManager updater = new RecordUpdaterManager();
     RecordConverter converter = new RecordConverter();
+
     int itotal = 0;
     boolean duplicateCheck = false;
     Properties p;
@@ -388,62 +389,94 @@ public class ListenerThread extends Thread
                         tx.rollback();
                         session.close();
                         int dupdbid = 0;
-                        if (e.getSQLException().getMessage().matches(".*\\b[Dd]uplicate\\b.*") &&
-                            current.setDuplicate(true)) {
-                            session = HibernateWrapper.getSession();
-                            String sql = "SELECT dbid from " + current.getTableName() + "_Meta" +
-                                " where md5 = " + "\"" + current.getmd5() + "\"";
-                            List list = session.createSQLQuery(sql).list();
-                            if (list.size() > 0) {
-                                dupdbid = ((Integer) list.get(0)).intValue();
-                                if (dupdbid != 0) {
-                                    tx = session.beginTransaction();
-                                    try {
-                                        Query q = session.createQuery("select record from JobUsageRecord " +
-                                                                      "record where record.RecordId = " +
-                                                                      dupdbid);
-                                        JobUsageRecord original_record = (JobUsageRecord) q.uniqueResult();
-                                        UserIdentity original_userIdentity = original_record.getUserIdentity();
-                                        if ((original_userIdentity == null) || 
-                                            (original_userIdentity.getVOName() == null) ||
-                                            (original_userIdentity.getVOName().length() == 0) ||
-                                            (original_userIdentity.getVOName().equalsIgnoreCase("Unknown")) ||
-                                            (original_userIdentity.getCommonName().startsWith("Generic")) ||
-                                            (original_userIdentity.getKeyInfo() == null)) {
+                        Boolean needCurrentSaveDup = false;
+                        if (e.getSQLException().getMessage().matches(".*\\b[Dd]uplicate\\b.*")) {
+                            if (current.getTableName().equals("JobUsageRecord")) {
+                                UserIdentity newUserIdentity = ((JobUsageRecord) current).getUserIdentity();
+                                session = HibernateWrapper.getSession();
+                                Query q =
+                                    session.createQuery("select record from " +
+                                                        "JobUsageRecord " +
+                                                        "record where " +
+                                                        "record.md5 = " +
+                                                        "\"" +
+                                                        current.getmd5() +
+                                                        "\"")
+                                    .setCacheMode(CacheMode.IGNORE);
+                                ScrollableResults dups = q.scroll(ScrollMode.FORWARD_ONLY);
+                                Boolean savedCurrent = false;
+                                tx = session.beginTransaction();
+                                try {
+                                    while (dups.next()) {
+                                        JobUsageRecord original_record = (JobUsageRecord) dups.get(0);
+                                        UserIdentity originalUserIdentity = original_record.getUserIdentity();
+                                        if (newUserIdentity == null) continue; // No replacement
+                                        if ((originalUserIdentity == null) ||
+                                            ((newUserIdentity.getVOName() != null) &&
+                                             (newUserIdentity.getVOName().length() != 0) &&
+                                             ((originalUserIdentity.getVOName() == null) ||
+                                              (originalUserIdentity.getVOName().length() == 0) ||
+                                              (newUserIdentity.getVOName().startsWith("/")) ||
+                                              (originalUserIdentity.getVOName().equalsIgnoreCase("Unknown")) ||
+                                              (originalUserIdentity.getCommonName().startsWith("Generic")) ||
+                                              (originalUserIdentity.getKeyInfo() == null)))) {
                                             // Keep the new one and ditch the old
                                             Logging.info("ListenerThread: " + ident + ": replacing record " +
                                                          dupdbid + " with \"better\" record.");
                                             // Has to be in this order otherwise we'll get a duplicate error.
+                                            if (original_record.setDuplicate(true)) {
+                                                if (gotreplication) {
+                                                    saveDuplicate("Replication", "Duplicate",
+                                                                  current.getRecordId(),
+                                                                  original_record);
+                                                } else if (gothistory) {
+                                                    ;
+                                                } else {
+                                                    saveDuplicate("Probe", "Duplicate",
+                                                                  current.getRecordId(),
+                                                                  original_record);
+                                                }
+                                            }
                                             session.delete(original_record);
-                                            session.save(current);
-                                            session.flush();
-                                            tx.commit();
-                                            session.close();
+                                            if (!savedCurrent) {
+                                                session.save(current);
+                                                savedCurrent = true;
+                                            }
                                         }
                                     }
-                                    catch (Exception e2) {
-                                        tx.rollback();
-                                        session.close();
-                                        Logging.warning("ListenerThread: " + ident + ": caught exception " + e2 +
-                                                        " trying to update record " +
-                                                        dupdbid + " with a \"better\" one -- saving new record as a duplicate.");
+                                    session.flush();
+                                    tx.commit();
+                                    if (!savedCurrent) {
+                                        needCurrentSaveDup = current.setDuplicate(true);
                                     }
+                                    session.close();
                                 }
-                            }
-                            if (session.isOpen()) session.close();
-                            //Logging.log("ListenerThread: " + ident + ":Before Save Duplicate");
-                            Logging.debug("ListenerThread: " + ident + ": save duplicate of record " +
-                                        dupdbid);
-                            if (gotreplication) {
-                                saveDuplicate("Replication", "Duplicate", dupdbid, current);
-                            } else if (gothistory) {
-                                // If we are reprocessing the history date, we should not
-                                // be recording the possible duplicates.
-                                ;
+                                catch (Exception e2) {
+                                    tx.rollback();
+                                    session.close();
+                                    Logging.warning("ListenerThread: " + ident +
+                                                    ": caught exception resolving duplicates for record with md5 checksum" +
+                                                    current.getmd5() +
+                                                    " -- saving new record as duplicate.", e2);
+                                }
                             } else {
-                                saveDuplicate("Probe", "Duplicate", dupdbid, current);
+                                needCurrentSaveDup = current.setDuplicate(true);
                             }
-                            //Logging.log("ListenerThread: " + ident + ":After Save Duplicate");
+                            if (needCurrentSaveDup) {
+                                //Logging.log("ListenerThread: " + ident + ":Before Save Duplicate");
+                                Logging.debug("ListenerThread: " + ident + ": save duplicate of record " +
+                                              dupdbid);
+                                if (gotreplication) {
+                                    saveDuplicate("Replication", "Duplicate", dupdbid, current);
+                                } else if (gothistory) {
+                                    // If we are reprocessing the history date, we should not
+                                    // be recording the possible duplicates.
+                                    ;
+                                } else {
+                                    saveDuplicate("Probe", "Duplicate", dupdbid, current);
+                                }
+                                //Logging.log("ListenerThread: " + ident + ":After Save Duplicate");
+                            }
                         } else { // Constraint exception, but not a duplicate: oops!
                             if (HibernateWrapper.databaseUp()) {
                                 if (gotreplication) {
@@ -458,7 +491,6 @@ public class ListenerThread extends Thread
                             Logging.warning("ListenerThread: " + ident + ":Error In Process: ",e);
                             Logging.warning("ListenerThread: " + ident + ":Current: " + current);
                         }
-
                     }
                     catch (Exception e) {
                         // Must close session!
