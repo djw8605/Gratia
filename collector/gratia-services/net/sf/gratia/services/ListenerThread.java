@@ -50,6 +50,7 @@ public class ListenerThread extends Thread
 
     StatusUpdater statusUpdater = null;
     NewVOUpdate newVOUpdate = null;
+    ErrorRecorder errorRecorder = new ErrorRecorder();
 
     Object lock;
 
@@ -324,12 +325,15 @@ public class ListenerThread extends Thread
                     records = convert(xml);
                 }
                 catch (Exception e) {
-                    if (gotreplication)
-                        saveParse("Replication", "Parse", xml);
-                    else if (gothistory)
-                        saveParse("History", "Parse", xml);
-                    else
-                        saveParse("Probe", "Parse", xml);
+                    try {
+                        if (gotreplication)
+                            errorRecorder.saveParse("Replication", "Parse", xml);
+                        else if (gothistory)
+                            errorRecorder.saveParse("History", "Parse", xml);
+                        else
+                            errorRecorder.saveParse("Probe", "Parse", xml);
+                    }
+                    catch (Exception ignore) { }
                 }
 
                 for (int j = 0; j < records.size(); j++) {
@@ -426,13 +430,13 @@ public class ListenerThread extends Thread
                                             // Has to be in this order otherwise we'll get a duplicate error.
                                             if (original_record.setDuplicate(true)) {
                                                 if (gotreplication) {
-                                                    saveDuplicate("Replication", "Duplicate",
+                                                    errorRecorder.saveDuplicate("Replication", "Duplicate",
                                                                   current.getRecordId(),
                                                                   original_record);
                                                 } else if (gothistory) {
                                                     ;
                                                 } else {
-                                                    saveDuplicate("Probe", "Duplicate",
+                                                    errorRecorder.saveDuplicate("Probe", "Duplicate",
                                                                   current.getRecordId(),
                                                                   original_record);
                                                 }
@@ -457,7 +461,7 @@ public class ListenerThread extends Thread
                                     Logging.warning("ListenerThread: " + ident +
                                                     ": caught exception resolving duplicates for record with md5 checksum" +
                                                     current.getmd5() +
-                                                    " -- saving new record as duplicate.", e2);
+                                                    " -- all duplicates of same will remain in DB", e2);
                                 }
                             } else {
                                 needCurrentSaveDup = current.setDuplicate(true);
@@ -466,24 +470,30 @@ public class ListenerThread extends Thread
                                 //Logging.log("ListenerThread: " + ident + ":Before Save Duplicate");
                                 Logging.debug("ListenerThread: " + ident + ": save duplicate of record " +
                                               dupdbid);
+                                try {
                                 if (gotreplication) {
-                                    saveDuplicate("Replication", "Duplicate", dupdbid, current);
+                                    errorRecorder.saveDuplicate("Replication", "Duplicate", dupdbid, current);
                                 } else if (gothistory) {
                                     // If we are reprocessing the history date, we should not
                                     // be recording the possible duplicates.
                                     ;
                                 } else {
-                                    saveDuplicate("Probe", "Duplicate", dupdbid, current);
+                                    errorRecorder.saveDuplicate("Probe", "Duplicate", dupdbid, current);
                                 }
                                 //Logging.log("ListenerThread: " + ident + ":After Save Duplicate");
+                                }
+                                catch (Exception ignore) { }
                             }
                         } else { // Constraint exception, but not a duplicate: oops!
                             if (HibernateWrapper.databaseUp()) {
-                                if (gotreplication) {
-                                    saveSQL("Replication", "SQLError", current);
-                                } else {
-                                    saveSQL("Probe", "SQLError", current);
+                                try {
+                                    if (gotreplication) {
+                                        errorRecorder.saveSQL("Replication", "SQLError", current);
+                                    } else {
+                                        errorRecorder.saveSQL("Probe", "SQLError", current);
+                                    }
                                 }
+                                catch (Exception ignore) { }
                             } else {
                                 Logging.log("ListenerThread: " + ident + ":Communications Error:Shutting Down");
                                 return 0; 
@@ -497,11 +507,14 @@ public class ListenerThread extends Thread
                         tx.rollback();
                         session.close();
                         if (HibernateWrapper.databaseUp()) {
-                            if (gotreplication) {
-                                saveSQL("Replication", "SQLError", current);
-                            } else {
-                                saveSQL("Probe", "SQLError", current);
+                            try {
+                                if (gotreplication) {
+                                    errorRecorder.saveSQL("Replication", "SQLError", current);
+                                } else {
+                                    errorRecorder.saveSQL("Probe", "SQLError", current);
+                                }
                             }
+                            catch (Exception ignore) { }
                         } else {
                             Logging.log("ListenerThread: " + ident + ":Communications Error:Shutting Down");
                             return 0; 
@@ -598,75 +611,4 @@ public class ListenerThread extends Thread
         return records;
     }
 
-    public void saveDuplicate(String source, String error, int dupdbid, Record current)
-    {
-        DupRecord record = new DupRecord();
-
-        record.seteventdate(new java.util.Date());
-        record.setrawxml(current.asXML());
-        record.setsource(source);
-        record.seterror(error);
-        record.setdbid(dupdbid);
-        record.setRecordType(current.getTableName());
-
-        try
-            {
-                org.hibernate.Session session2 = HibernateWrapper.getSession();
-                Transaction tx2 = session2.beginTransaction();
-                session2.save(record);
-                tx2.commit();
-                session2.close();
-            }
-        catch (Exception e)
-            {
-                e.printStackTrace();
-            }
-    }
-
-    public void saveParse(String source, String error, String xml)
-    {
-        DupRecord record = new DupRecord();
-
-        record.seteventdate(new java.util.Date());
-        record.setrawxml(xml);
-        record.setsource(source);
-        record.seterror(error);
-
-        try
-            {
-                org.hibernate.Session session2 = HibernateWrapper.getSession();
-                Transaction tx2 = session2.beginTransaction();
-                session2.save(record);
-                tx2.commit();
-                session2.close();
-            }
-        catch (Exception e)
-            {
-                e.printStackTrace();
-            }
-    }
-
-    public void saveSQL(String source, String error, Record current)
-    {
-        DupRecord record = new DupRecord();
-
-        record.seteventdate(new java.util.Date());
-        record.setrawxml(current.asXML());
-        record.setsource(source);
-        record.seterror(error);
-        record.setRecordType(current.getTableName());
-
-        try
-            {
-                org.hibernate.Session session2 = HibernateWrapper.getSession();
-                Transaction tx2 = session2.beginTransaction();
-                session2.save(record);
-                tx2.commit();
-                session2.close();
-            }
-        catch (Exception e)
-            {
-                e.printStackTrace();
-            }
-    }
 }
