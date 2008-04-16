@@ -26,8 +26,8 @@
     <property name="eventHandlerClass">net.sf.gratia.reporting.GratiaBirtReportEH</property>
     <list-property name="libraries">
         <structure>
-            <property name="fileName">gratia-lib1.rptlibrary</property>
-            <property name="namespace">gratia-lib1</property>
+            <property name="fileName">gratia-lib2.rptlibrary</property>
+            <property name="namespace">gratia-lib2</property>
         </structure>
     </list-property>
     <list-property name="configVars">
@@ -1017,7 +1017,7 @@
                 <property name="pattern">Unformatted</property>
             </structure>
         </scalar-parameter>
-        <parameter-group name="ReportInfo" id="365" extends="gratia-lib1.ReportInfo"/>
+        <parameter-group name="ReportInfo" id="365" extends="gratia-lib2.ReportInfo"/>
         <scalar-parameter name="GroupsPerChart" id="397">
             <text-property name="helpText">Select number of groups (e.g. VO's or Sites) to be displayed on each chart</text-property>
             <property name="valueType">static</property>
@@ -1228,7 +1228,7 @@
                             and JR.EndTime &lt;= Date(?)
                           GROUP BY vonamex
                           ORDER BY walldurationx desc) as foox) as foo, JobUsageRecord_Report
-			where  JobUsageRecord_Report.VOName = vonamex 
+			where  JobUsageRecord_Report.VOName = vonamex
 			and EndTime >= date(?) and EndTime &lt;= date(?)
 			and ResourceType = 'Batch'
 			group by datevalue, JobUsageRecord_Report.VOName
@@ -1665,7 +1665,7 @@
 
  * This script syntax follows JavaScript specifications, the Java classes that are referred to
 
- * in the comments can be accessed as JavaScript classes. 
+ * in the comments can be accessed as JavaScript classes.
 
  *
 
@@ -1681,7 +1681,7 @@
 
  * Called before populating the series dataset using the DataSetProcessor.
 
- * 
+ *
 
  * @param series
 
@@ -1705,7 +1705,7 @@
 
  * Called before generation of chart model to GeneratedChartState.
 
- * 
+ *
 
  * @param chart
 
@@ -1721,7 +1721,7 @@ function beforeGeneration( chart, context ){
 
 	rep = context.getExternalContext().getScriptable();
 	val = rep.getParameterValue(&quot;TimeAxisPattern&quot;);
-	
+
 	metric = rep.getParameterValue(&quot;DisplayMetric&quot;);
 	if(metric==&quot;process&quot;) metric_text = &quot;Process Hours&quot;;
 	if(metric==&quot;wallclock&quot;) metric_text = &quot;Wallclock Hours&quot;;
@@ -1735,7 +1735,7 @@ function beforeGeneration( chart, context ){
                 axes = chart.getAxes().get(0);
                 formatSpec = axes.getFormatSpecifier();
                 formatSpec.setPattern(val);
-                       }       
+                       }
 }
 
 
@@ -1744,7 +1744,7 @@ function beforeGeneration( chart, context ){
 
  * Called before the chart is rendered.
 
- * 
+ *
 
  * @param gcs
 
@@ -1764,7 +1764,7 @@ function beforeGeneration( chart, context ){
 
  * Called before drawing each block.
 
- * 
+ *
 
  * @param block
 
@@ -1784,7 +1784,7 @@ function beforeGeneration( chart, context ){
 
  * Called before drawing each entry the legend.
 
- * 
+ *
 
  * @param label
 
@@ -1804,7 +1804,7 @@ function beforeGeneration( chart, context ){
 
  * Called before rendering Series.
 
- * 
+ *
 
  * @param series
 
@@ -1828,7 +1828,7 @@ function beforeGeneration( chart, context ){
 
  * Called before rendering the title of a Series.
 
- * 
+ *
 
  * @param series
 
@@ -1852,7 +1852,7 @@ function beforeGeneration( chart, context ){
 
  * Called before drawing each marker line in an Axis.
 
- * 
+ *
 
  * @param axis
 
@@ -1876,7 +1876,7 @@ function beforeGeneration( chart, context ){
 
  * Called before drawing each marker range in an Axis.
 
- * 
+ *
 
  * @param axis
 
@@ -1900,7 +1900,7 @@ function beforeGeneration( chart, context ){
 
  * Called before drawing each datapoint graphical representation or marker.
 
- * 
+ *
 
  * @param dph
 
@@ -1924,7 +1924,7 @@ function beforeGeneration( chart, context ){
 
  * Called before rendering the label for each datapoint.
 
- * 
+ *
 
  * @param dph
 
@@ -1948,7 +1948,7 @@ function beforeGeneration( chart, context ){
 
  * Called before rendering curve fitting.
 
- * 
+ *
 
  * @param cf
 
@@ -1968,7 +1968,7 @@ function beforeGeneration( chart, context ){
 
  * Called before rendering each label on a given Axis.
 
- * 
+ *
 
  * @param axis
 
@@ -1986,7 +1986,7 @@ function beforeGeneration( chart, context ){
 
 function beforeDrawAxisLabel( axis, label, context )
 {
-   
+
 	rep = context.getExternalContext().getScriptable();
 	val = rep.getParameterValue(&quot;HighlightDate&quot;);
 
@@ -2003,7 +2003,7 @@ function beforeDrawAxisLabel( axis, label, context )
 
  * Called before rendering the Title of an Axis.
 
- * 
+ *
 
  * @param axis
 
@@ -2741,8 +2741,8 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
                         <cell id="19">
                             <property name="colSpan">3</property>
                             <property name="rowSpan">1</property>
-                            <label name="ReportURL" id="408" extends="gratia-lib1.ReportURL"/>
-                            <label name="ShowQuery" id="409" extends="gratia-lib1.ShowQuery"/>
+                            <label name="ReportURL" id="408" extends="gratia-lib2.ReportURL"/>
+                            <label name="ShowQuery" id="409" extends="gratia-lib2.ShowQuery"/>
                         </cell>
                     </row>
                 </footer>

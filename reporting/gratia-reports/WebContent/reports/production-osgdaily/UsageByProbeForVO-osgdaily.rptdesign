@@ -26,8 +26,8 @@
     <property name="eventHandlerClass">net.sf.gratia.reporting.GratiaBirtReportEH</property>
     <list-property name="libraries">
         <structure>
-            <property name="fileName">gratia-lib1.rptlibrary</property>
-            <property name="namespace">gratia-lib1</property>
+            <property name="fileName">gratia-lib2.rptlibrary</property>
+            <property name="namespace">gratia-lib2</property>
         </structure>
     </list-property>
     <list-property name="configVars">
@@ -115,11 +115,11 @@
                 </structure>
             </list-property>
         </scalar-parameter>
-        <parameter-group name="Formatting" id="116" extends="gratia-lib1.Formatting"/>
-        <parameter-group name="UserInfo" id="117" extends="gratia-lib1.UserInfo"/>
-        <parameter-group name="ReportInfo" id="118" extends="gratia-lib1.ReportInfo"/>
-        <parameter-group name="DateRange" id="390" extends="gratia-lib1.DateRange"/>
-        <parameter-group name="Metrics" id="393" extends="gratia-lib1.Metrics"/>
+        <parameter-group name="Formatting" id="116" extends="gratia-lib2.Formatting"/>
+        <parameter-group name="UserInfo" id="117" extends="gratia-lib2.UserInfo"/>
+        <parameter-group name="ReportInfo" id="118" extends="gratia-lib2.ReportInfo"/>
+        <parameter-group name="DateRange" id="390" extends="gratia-lib2.DateRange"/>
+        <parameter-group name="Metrics" id="393" extends="gratia-lib2.Metrics"/>
         <scalar-parameter name="SelectVOs" id="106">
             <text-property name="helpText">Select VO's to include/exclude in the report.</text-property>
             <property name="valueType">static</property>
@@ -186,7 +186,7 @@
                 </structure>
                 <structure>
                     <property name="name">sitename_remapped</property>
-                    <expression name="expression">if(row["sitename"] == 'OU_OSCER_ATLAS' || 
+                    <expression name="expression">if(row["sitename"] == 'OU_OSCER_ATLAS' ||
 row["sitename"] == 'OU_OCHEP_SWT2'){
 'OU'}else{
 row["sitename"]
@@ -370,13 +370,13 @@ call UsageByProbeForVOForSite('','',?,?,?,'Batch',?,?,?)
             </list-property>
             <property name="queryText">select ' cdf,d0sar,dzero,usatlas,cms,uscms,uscmspool' as voname, concat("('",'cdf',"','",'d0sar',"','",'dzero',"','",'usatlas',"','",'cms',"','",'uscms',"','",'uscmspool'"')") as vos
 from VO
-union 
+union
 select ' cdf,d0sar,dzero' as voname, concat("('",'cdf',"','",'d0sar',"','",'dzero'"')") as vos
 from VO
-union 
+union
 select ' atlas, usatlasx' as voname, concat("('",'ATLAS',"','",'atlas',"','",'usatlas',"')") as vos
 from VO
-union 
+union
 select '  none' as voname, concat("('",'none',"')") as vos
 from VO
 union all
@@ -702,7 +702,7 @@ order by voname</property>
   <Dimension>Two_Dimensional</Dimension>
   <Script>/**
  * Called before generation of chart model to GeneratedChartState.
- * 
+ *
  * @param chart
  *            Chart
  * @param icsc
@@ -712,7 +712,7 @@ order by voname</property>
 function beforeGeneration(chart, icsc)
 {
 rep = icsc.getExternalContext().getScriptable();
-	
+
 	metric = rep.getParameterValue(&quot;DisplayMetric&quot;);
 	if(metric==&quot;process&quot;) metric_text = &quot;Process Hours&quot;;
 	if(metric==&quot;wallclock&quot;) metric_text = &quot;Wallclock Hours&quot;;
@@ -725,7 +725,7 @@ rep = icsc.getExternalContext().getScriptable();
 
 /**
  * Called before rendering the Title of an Axis.
- * 
+ *
  * @param axis
  *            Axis
  * @param label

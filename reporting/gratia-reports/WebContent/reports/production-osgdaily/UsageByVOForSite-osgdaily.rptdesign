@@ -26,8 +26,8 @@
     <property name="eventHandlerClass">net.sf.gratia.reporting.GratiaBirtReportEH</property>
     <list-property name="libraries">
         <structure>
-            <property name="fileName">gratia-lib1.rptlibrary</property>
-            <property name="namespace">gratia-lib1</property>
+            <property name="fileName">gratia-lib2.rptlibrary</property>
+            <property name="namespace">gratia-lib2</property>
         </structure>
     </list-property>
     <list-property name="configVars">
@@ -260,7 +260,7 @@
                 </scalar-parameter>
             </parameters>
         </parameter-group>
-        <parameter-group name="ReportInfo" id="118" extends="gratia-lib1.ReportInfo"/>
+        <parameter-group name="ReportInfo" id="118" extends="gratia-lib2.ReportInfo"/>
     </parameters>
     <data-sources>
         <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="fermigrid1" id="4">
@@ -393,18 +393,18 @@
                     <property name="nativeDataType">12</property>
                 </structure>
             </list-property>
-            <property name="queryText">SELECT ReportedSiteName as sitename, 
+            <property name="queryText">SELECT ReportedSiteName as sitename,
    sum(JobUsageRecord_Report.WallDuration) as WallDuration,
    sum(JobUsageRecord_Report.CpuUserDuration + JobUsageRecord_Report.CpuSystemDuration) as Cpu,
    sum(JobUsageRecord_Report.Njobs) as Njobs,
    JobUsageRecord_Report.VOName
 FROM JobUsageRecord_Report
-WHERE 
-   (JobUsageRecord_Report.VOName =?  OR (? = 'AnyVO' AND JobUsageRecord_Report.VOName like '%' )) 
-   AND (ReportedSiteName = ? OR (? = 'AnySite' and ReportedSiteName like '%' )) 
+WHERE
+   (JobUsageRecord_Report.VOName =?  OR (? = 'AnyVO' AND JobUsageRecord_Report.VOName like '%' ))
+   AND (ReportedSiteName = ? OR (? = 'AnySite' and ReportedSiteName like '%' ))
    AND date_format(EndTime,'%Y-%m-%d') >= ?
    AND date_format(EndTime,'%Y-%m-%d') &lt;= ?
-   GROUP BY ReportedSiteName, JobUsageRecord_Report.VOName 
+   GROUP BY ReportedSiteName, JobUsageRecord_Report.VOName
    ORDER BY ReportedSiteName, JobUsageRecord_Report.VOName</property>
         </oda-data-set>
     </data-sets>
@@ -728,7 +728,7 @@ WHERE
  * ones you need. Note that for simplicity the &quot;after&quot; methods have not be included here.
  *
  * This script syntax follows JavaScript specifications, the Java classes that are referred to
- * in the comments can be accessed as JavaScript classes. 
+ * in the comments can be accessed as JavaScript classes.
  *
  * Script examples are available in the org.eclipse.birt.chart.examples plugin
  */
@@ -736,7 +736,7 @@ WHERE
 
 /**
  * Called before populating the series dataset using the DataSetProcessor.
- * 
+ *
  * @param series
  *            Series
  * @param dataSetProcessor
@@ -748,7 +748,7 @@ WHERE
 
 /**
  * Called before generation of chart model to GeneratedChartState.
- * 
+ *
  * @param chart
  *            Chart Model
  * @param context
@@ -756,7 +756,7 @@ WHERE
  */
 function beforeGeneration( chart, context ){
 	rep = context.getExternalContext().getScriptable();
-	
+
 	metric = rep.getParameterValue(&quot;DisplayMetric&quot;);
 	if(metric==&quot;process&quot;) metric_text = &quot;Process Hours&quot;;
 	if(metric==&quot;wallclock&quot;) metric_text = &quot;Wallclock Hours&quot;;
@@ -768,7 +768,7 @@ function beforeGeneration( chart, context ){
 }
 /**
  * Called before the chart is rendered.
- * 
+ *
  * @param gcs
  *            GeneratedChartState
  * @param context
@@ -778,7 +778,7 @@ function beforeGeneration( chart, context ){
 
 /**
  * Called before drawing each block.
- * 
+ *
  * @param block
  *            Block
  * @param context
@@ -788,7 +788,7 @@ function beforeGeneration( chart, context ){
 
 /**
  * Called before drawing each entry the legend.
- * 
+ *
  * @param label
  *            Label
  * @param context
@@ -798,7 +798,7 @@ function beforeGeneration( chart, context ){
 
 /**
  * Called before rendering Series.
- * 
+ *
  * @param series
  *            Series
  * @param seriesRenderer
@@ -810,7 +810,7 @@ function beforeGeneration( chart, context ){
 
 /**
  * Called before rendering the title of a Series.
- * 
+ *
  * @param series
  *            Series
  * @param label
@@ -822,7 +822,7 @@ function beforeGeneration( chart, context ){
 
 /**
  * Called before drawing each marker line in an Axis.
- * 
+ *
  * @param axis
  *            Axis
  * @param markerLine
@@ -834,7 +834,7 @@ function beforeGeneration( chart, context ){
 
 /**
  * Called before drawing each marker range in an Axis.
- * 
+ *
  * @param axis
  *            Axis
  * @param markerRange
@@ -846,7 +846,7 @@ function beforeGeneration( chart, context ){
 
 /**
  * Called before drawing each datapoint graphical representation or marker.
- * 
+ *
  * @param dph
  *            DataPointHints
  * @param fill
@@ -858,7 +858,7 @@ function beforeGeneration( chart, context ){
 
 /**
  * Called before rendering the label for each datapoint.
- * 
+ *
  * @param dph
  *            DataPointHints
  * @param label
@@ -870,7 +870,7 @@ function beforeGeneration( chart, context ){
 
 /**
  * Called before rendering curve fitting.
- * 
+ *
  * @param cf
  *            CurveFitting
  * @param context
@@ -880,7 +880,7 @@ function beforeGeneration( chart, context ){
 
 /**
  * Called before rendering each label on a given Axis.
- * 
+ *
  * @param axis
  *            Axis
  * @param label
@@ -892,7 +892,7 @@ function beforeGeneration( chart, context ){
 
 /**
  * Called before rendering the Title of an Axis.
- * 
+ *
  * @param axis
  *            Axis
  * @param label
@@ -2097,6 +2097,6 @@ else {&#xD;
             </list-property>
             <property name="style">sans-style1</property>
         </extended-item>
-        <label name="ReportURL" id="390" extends="gratia-lib1.ReportURL"/>
+        <label name="ReportURL" id="390" extends="gratia-lib2.ReportURL"/>
     </body>
 </report>

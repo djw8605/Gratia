@@ -26,8 +26,8 @@
     <property name="eventHandlerClass">net.sf.gratia.reporting.GratiaBirtReportEH</property>
     <list-property name="libraries">
         <structure>
-            <property name="fileName">gratia-lib1.rptlibrary</property>
-            <property name="namespace">gratia-lib1</property>
+            <property name="fileName">gratia-lib2.rptlibrary</property>
+            <property name="namespace">gratia-lib2</property>
         </structure>
     </list-property>
     <list-property name="configVars">
@@ -263,7 +263,7 @@
                 </scalar-parameter>
             </parameters>
         </parameter-group>
-        <parameter-group name="ReportInfo" id="119" extends="gratia-lib1.ReportInfo"/>
+        <parameter-group name="ReportInfo" id="119" extends="gratia-lib2.ReportInfo"/>
     </parameters>
     <data-sources>
         <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="fermigrid1" id="4">
@@ -677,7 +677,7 @@ order by ReportedSiteName</property>
  * ones you need. Note that for simplicity the &quot;after&quot; methods have not be included here.
  *
  * This script syntax follows JavaScript specifications, the Java classes that are referred to
- * in the comments can be accessed as JavaScript classes. 
+ * in the comments can be accessed as JavaScript classes.
  *
  * Script examples are available in the org.eclipse.birt.chart.examples plugin
  */
@@ -685,7 +685,7 @@ order by ReportedSiteName</property>
 
 /**
  * Called before populating the series dataset using the DataSetProcessor.
- * 
+ *
  * @param series
  *            Series
  * @param dataSetProcessor
@@ -697,7 +697,7 @@ order by ReportedSiteName</property>
 
 /**
  * Called before generation of chart model to GeneratedChartState.
- * 
+ *
  * @param chart
  *            Chart Model
  * @param context
@@ -705,12 +705,12 @@ order by ReportedSiteName</property>
  */
 function beforeGeneration( chart, context ){
 	rep = context.getExternalContext().getScriptable();
-	
+
 	metric = rep.getParameterValue(&quot;DisplayMetric&quot;);
 	if(metric==&quot;process&quot;) metric_text = &quot;Process Hours&quot;;
 	if(metric==&quot;wallclock&quot;) metric_text = &quot;Wallclock Hours&quot;;
 	if(metric==&quot;jobcount&quot;) metric_text = &quot;Job Count&quot;;
-	
+
 	rep_title = rep.getParameterValue(&quot;ReportTitle&quot;) + &quot; (&quot; + metric_text + &quot;)&quot; ;
 	rep_subtitle = rep.getParameterValue(&quot;ReportSubtitle&quot;);
 	chart.getTitle().getLabel().getCaption().setValue(rep_title + &quot;\n&quot; + rep_subtitle);
@@ -719,7 +719,7 @@ function beforeGeneration( chart, context ){
 
 /**
  * Called before the chart is rendered.
- * 
+ *
  * @param gcs
  *            GeneratedChartState
  * @param context
@@ -729,7 +729,7 @@ function beforeGeneration( chart, context ){
 
 /**
  * Called before drawing each block.
- * 
+ *
  * @param block
  *            Block
  * @param context
@@ -739,7 +739,7 @@ function beforeGeneration( chart, context ){
 
 /**
  * Called before drawing each entry the legend.
- * 
+ *
  * @param label
  *            Label
  * @param context
@@ -749,7 +749,7 @@ function beforeGeneration( chart, context ){
 
 /**
  * Called before rendering Series.
- * 
+ *
  * @param series
  *            Series
  * @param seriesRenderer
@@ -761,7 +761,7 @@ function beforeGeneration( chart, context ){
 
 /**
  * Called before rendering the title of a Series.
- * 
+ *
  * @param series
  *            Series
  * @param label
@@ -773,7 +773,7 @@ function beforeGeneration( chart, context ){
 
 /**
  * Called before drawing each marker line in an Axis.
- * 
+ *
  * @param axis
  *            Axis
  * @param markerLine
@@ -785,7 +785,7 @@ function beforeGeneration( chart, context ){
 
 /**
  * Called before drawing each marker range in an Axis.
- * 
+ *
  * @param axis
  *            Axis
  * @param markerRange
@@ -797,7 +797,7 @@ function beforeGeneration( chart, context ){
 
 /**
  * Called before drawing each datapoint graphical representation or marker.
- * 
+ *
  * @param dph
  *            DataPointHints
  * @param fill
@@ -809,7 +809,7 @@ function beforeGeneration( chart, context ){
 
 /**
  * Called before rendering the label for each datapoint.
- * 
+ *
  * @param dph
  *            DataPointHints
  * @param label
@@ -821,7 +821,7 @@ function beforeGeneration( chart, context ){
 
 /**
  * Called before rendering curve fitting.
- * 
+ *
  * @param cf
  *            CurveFitting
  * @param context
@@ -831,7 +831,7 @@ function beforeGeneration( chart, context ){
 
 /**
  * Called before rendering each label on a given Axis.
- * 
+ *
  * @param axis
  *            Axis
  * @param label
@@ -843,7 +843,7 @@ function beforeGeneration( chart, context ){
 
 /**
  * Called before rendering the Title of an Axis.
- * 
+ *
  * @param axis
  *            Axis
  * @param label
@@ -1642,6 +1642,6 @@ else {&#xD;
             <property name="style">sans-style1</property>
             <property name="eventHandlerClass">net.sf.gratia.reporting.GratiaBirtReportEH</property>
         </extended-item>
-        <label name="ReportURL" id="391" extends="gratia-lib1.ReportURL"/>
+        <label name="ReportURL" id="391" extends="gratia-lib2.ReportURL"/>
     </body>
 </report>
