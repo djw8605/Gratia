@@ -344,9 +344,11 @@ reports:
 	mkdir -p war/META-INF
 	cp -p ${reports}/WebContent/WEB-INF/web.xml          war/WEB-INF/web.xml
 	cp -p ${reports}/WebContent/MenuConfig/*.xml         war/MenuConfig
-	cp -p ${reports}/WebContent/reports/production/*.rptdesign            war/reports
-	cp -p ${reports}/WebContent/reports/production/gratia-lib1.rptlibrary war/reports
-	cp -p ${reports}/WebContent/reports-fermi/production/*.rptdesign      war/reports
+	cp -p ${reports}/WebContent/reports/production-osg/*.rptdesign            war/reports
+	cp -p ${reports}/WebContent/reports/production-osg/gratia-lib1.rptlibrary war/reports
+	cp -p ${reports}/WebContent/reports/production-osgdaily/*.rptdesign            war/reports
+	cp -p ${reports}/WebContent/reports/production-osgdaily/gratia-lib2.rptlibrary war/reports
+	cp -p ${reports}/WebContent/production-fermi/*.rptdesign      war/reports
 	${copy_util_lib}
 	jar -cvf ${target}/gratia-reports.war -C war .
 	rm -rf war
