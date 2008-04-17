@@ -110,36 +110,69 @@
 #   3/21/08 (John Weigand)
 #             Changed BU_ATLAS_Tier2 normalization (1533) per Saul Youssef
 #             Combined BU_ATLAS_Tier2 and BU_ATLAS_Tier1o clusters
+#   4/14/08 (John Weigand)
+#             Adding UFlorida-HPC & UFlorida-IHEPA per Backjoo Kim 
+#             Also changed the following factors using Brian Bocklemans system
+#             that derives the processor model from GIP.
+#              Site                New     Old
+#              --------            ----    -----
+#              BNL_ATLAS_1         1393    1351
+#              CIT_CMS_T2          2393    default (1.04)
+#              GLOW                1686    default (1.04)
+#              HEPGRID_UERJ        2117    default (1.04) (Not a Tier2 at EGEE)
+#              MIT_CMS             1364    790                       
+#              Nebraska            1571    1578                  
+#              OU_OCHEP_SWT2       2389    1543                       
+#              PROD_SLAC           1789    1779                       
+#              Purdue-Lear         1285    default (1.04)
+#              Purdue-RCAC         1543    default (1.04)
+#              SPRACE              2117    1676           (Not a Tier2 at EGEE)
+#              UCSDT2              2023    default (1.04)
+#              UC_ATLAS_MWT2       1285    1169                       
+#              UC_Teraport         1250    1412           (Not a Tier2 at EGEE)
+#              UFlorida-HPC        1521    was not reporting
+#              UFlorida-IHEPA      1521    was not reporting
+#              USCMS-FNAL-WC1-CE   1809    default (1.04)
 #    
 ##################################################################
 #-- Site  ------- SPECint2000
 #
-#--- CMS ----    
-USCMS-FNAL-WC1-CE   
-GLOW
-CIT_CMS_T2
-HEPGRID_UERJ
-MIT_CMS              790
-Nebraska            1578
-Purdue-Lear
-Purdue-RCAC
-SPRACE              1676
-UCSDT2
+#--- CMS Tier 1 ----    
+USCMS-FNAL-WC1-CE   1809  
+#--- CMS Tier 2 ----    
+CIT_CMS_T2          2393       
+GLOW                1686
+MIT_CMS             1364
+Nebraska            1571
+Purdue-Lear         1285
+Purdue-RCAC         1543
+UCSDT2              2023
+UFlorida-HPC        1521
+UFlorida-IHEPA      1521
 UFlorida-PG         1602
-#--- ATLAS ----
+#--- CMS Tier unknown ----    
+HEPGRID_UERJ        2117
+SPRACE              2117
+####################################
+####################################
+#--- ATLAS Tier 1 ----
+BNL_ATLAS_1         1393
+#--- ATLAS Tier 2 ----
 AGLT2               2168
 BU_ATLAS_Tier2      1533
 IU_OSG              1678
 MWT2_IU             1787
 MWT2_UC             1787
-PROD_SLAC           1779
-OU_OCHEP_SWT2       1543
-OU_OSCER_ATLAS      1543
-UC_Teraport         1412
-UC_ATLAS_MWT2       1169
-BNL_ATLAS_1         1351
-UTA_SWT2            1543
+OU_OCHEP_SWT2       2389
+PROD_SLAC           1789
 SWT2_CPB            1645
+UC_ATLAS_MWT2       1285
+UTA_SWT2            1543
+#--- ATLAS Tier unknown ----
+UC_Teraport         1250
+OU_OSCER_ATLAS      1543
+####################################
+####################################
 ##-- obsolete --
 ##BNL_PANDA           1351 
 ##BNL_OSG             1351
