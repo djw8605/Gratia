@@ -7,7 +7,7 @@
 # Script to transfer the data from Gratia to APEL (WLCG)
 ########################################################################
 #
-#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: LCG.py,v 1.11 2008-03-01 14:38:14 jgweigand Exp $
+#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: LCG.py,v 1.12 2008-04-17 13:43:37 jgweigand Exp $
 #
 #
 ########################################################################
@@ -39,6 +39,10 @@
 #   'Unknown' VOs, added an extra set of methods to determine the 
 #   'Unknown' VOs for all sites and only process those.  This reduces
 #   the duration significantly.
+#
+# 4/15/08 (John Weigand)
+#   Added methods for creating an xml and html file from the APEL database.
+#   And reorganized some of the main section.
 # 
 # 
 ########################################################################
@@ -90,6 +94,12 @@ gDateFilter         = None
 gNormalization      = None
 gInUpdateMode       = False  
 gEmailNotificationSuppressed = False  #Command line arg to suppress email notice
+
+
+# ----------------------------------------------------------
+# special global variables to display queries in the email 
+gQuery        = ""
+gUnknownQuery = ""
 
 
 #-----------------------------------------------
@@ -397,15 +407,15 @@ def LogToFile(message):
       raise Exception,"IO error(%s): %s (%s)" % (errno,strerror,filename)
 
 #-----------------------------------------------
-def GetFileName(prefix):
-    """ Sets the file name to YYYY-MM.prefix based on the time
+def GetFileName(suffix):
+    """ Sets the file name to YYYY-MM.suffix based on the time
         period for the transfer with the LogSqlDir
         attribute of the filters configuration prepended to it.
     """
     if gDateFilter == None:
-      filename = time.strftime("%Y-%m") + "." + prefix
+      filename = time.strftime("%Y-%m") + "." + suffix
     else:
-      filename = gDateFilter[0:4] + "-" + gDateFilter[5:7] + "." + prefix 
+      filename = gDateFilter[0:4] + "-" + gDateFilter[5:7] + "." + suffix 
     if gFilterParameters["LogSqlDir"] == None:  
       filename = "./" + filename
     else:
@@ -683,7 +693,56 @@ def RunGratiaQuery(select,params):
 
   connectString = CreateConnectString(host,port,user,pswd,db)
   (status,output) = commands.getstatusoutput("echo '" + select + "' | " + connectString)
-  return EvaluateMySqlResults((status,output))
+  results = EvaluateMySqlResults((status,output))
+  if len(results) == 0:
+    Logit("Results: empty results set")
+  else:
+    Logit("Results:\n%s" % results)
+  return results
+
+#-----------------------------------------------
+def RunLCGQuery(type,params):
+  """ Performs a query of the APEL database with output in either xml or 
+      an html format.
+  """
+  Logit("Running query on %s of the %s database" % (params["LcgHost"],params["LcgDB"]))
+  host = params["LcgHost"]
+  port = params["LcgPort"] 
+  user = params["LcgUser"] 
+  pswd = params["LcgPswd"] 
+  db   = params["LcgDB"]
+
+  dates = gDateFilter.split("/")  # YYYY/MM format
+  query = "SELECT * FROM OSG_DATA WHERE Year=%s AND Month=%s ;" % (dates[0],dates[1])
+  connectString = CreateQueryConnectString(host,port,user,pswd,db,type)
+  (status,output) = commands.getstatusoutput("echo '" + query + "' | " + connectString)
+  results = EvaluateMySqlResults((status,output))
+  return results
+
+#-----------------------------------------------
+def CreateXmlHtmlFiles(params):
+  """ Performs a query of the APEL database with output in either xml or 
+      an html format creating those files.
+  """
+  #--- create xml file ---
+  type = "xml"
+  output = RunLCGQuery(type,params)
+  filename = GetFileName(type)
+  WriteFile(output,filename)
+  Logit("%s file created: %s" % (type,filename)) 
+  #--- create html file ---
+  type = "html"
+  output = RunLCGQuery(type,params)
+  filename = GetFileName(type)
+  WriteFile(output,filename)
+  Logit("%s file created: %s" % (type,filename)) 
+
+#-----------------------------------------------
+def WriteFile(data,filename):
+  file = open(filename, 'w')
+  file.write(data+"\n")
+  file.close()
+
 
 #-----------------------------------------------
 def RunLCGUpdate(inputfile,params):
@@ -697,18 +756,26 @@ def RunLCGUpdate(inputfile,params):
 
   connectString = CreateConnectString(host,port,user,pswd,db)
   (status,output) = commands.getstatusoutput("cat '" + inputfile + "' | " + connectString)
-  return EvaluateMySqlResults((status,output))
+  results = EvaluateMySqlResults((status,output))
+  if len(results) == 0:
+    Logit("Results: None")
+  else:
+    LogToFile("Results:\n%s" % results)
+  return results
 
 #------------------------------------------------
 def CreateConnectString(host,port,user,pswd,db):
   return "mysql --defaults-extra-file='%s' --disable-column-names -h %s --port=%s -u %s %s " % (pswd,host,port,user,db)
 
 #------------------------------------------------
+def CreateQueryConnectString(host,port,user,pswd,db,type):
+  return "mysql --defaults-extra-file='%s' --%s -h %s --port=%s -u %s %s " % (pswd,type,host,port,user,db)
+
+#------------------------------------------------
 def EvaluateMySqlResults((status,output)):
   """ Evaluates the output of a MySql execution using the 
       getstatusoutput command.
   """
-  Logit("Results:")
   if status == 0:
     if output.find("ERROR") >= 0 :
       raise Exception("MySql error:  %s" % (output))
@@ -716,14 +783,11 @@ def EvaluateMySqlResults((status,output)):
     raise Exception("Status (non-zero rc): rc=%d - %s " % (status,output))
 
   if output == "NULL": 
-    LogToFile("... empty results set")
     output = ""
-  else:
-    LogToFile(output)
   return output
 
 #-----------------------------------------------
-def CreateLCGsql(results,filename):
+def CreateLCGsqlUpdates(results,filename):
   """ Creates the SQL DML to update the LCG database.
 
       Some special processing is applied here to facillitate handling any
@@ -737,8 +801,8 @@ def CreateLCGsql(results,filename):
   """ 
   Logit("Creating update sql DML for the LCG database:") 
 
-##  if len(results) == 0:
-##    raise Exception("No updates to apply")
+  if len(results) == 0:
+    raise Exception("No updates to apply")
 
   file = open(filename, 'w')
   lines = results.split("\n")
@@ -761,6 +825,56 @@ def CreateLCGsql(results,filename):
   file.close()
 
 #-----------------------------------------------
+def RetrieveVoData(reportableVOs,reportableSites,params):
+  """ Retrieves Gratia data for reportable sites """
+  output = ""
+  firstTime = 1
+  sites = reportableSites.keys()
+  for site in sites:
+    normalizationFactor = reportableSites[site]
+    query = GetQuery(site, normalizationFactor, reportableVOs)
+    if firstTime:
+      gQuery = query
+      Logit("Query:")
+      LogToFile(query)
+      firstTime = 0
+    Logit("Site: %s  Normalization Factor: %s" % (site,normalizationFactor)) 
+    results = RunGratiaQuery(query,params)
+    if len(results) == 0:
+      gSitesWithNoData.append(site)
+      continue
+    output = output + results + "\n"
+  return output
+
+#-----------------------------------------------
+def RetrieveUnknownVoData(reportableSites,params):
+  """ Retrieves Gratia data for 'unknown' VOs """
+  unknowns = ""
+  unknown_query = "No sites with 'unknown' VO"
+  firstTime = 1
+  sites = FindSitesWithUnknownVOs("atlas",params)
+  for site in sites:
+    if reportableSites.has_key(site):
+      Logit("Site(%s) is LCG reportable." % site)
+    else:
+      Logit("Site(%s) is not LCG reportable." % site)
+      continue
+    normalizationFactor = reportableSites[site]
+    unknown_query = GetQueryAtlasUnknowns(site,normalizationFactor,"atlas")
+    if firstTime:
+      gUnknownQuery = query
+      Logit("Query:")
+      LogToFile(unknown_query)
+      firstTime = 0
+    Logit("Site (Unknown atlas VO): %s  Normalization Factor: %s" % (site,normalizationFactor)) 
+    unknown_results = RunGratiaQuery(unknown_query,params)
+    if len(unknown_results) == 0:
+      continue
+    gSitesWithUnknowns.append(site)
+    unknowns = unknowns + unknown_results + "\n"
+  return unknowns
+
+#-----------------------------------------------
 def CreateLCGsqlUnknownUpdates(results,filename):
   """ Creates the SQL DML to update the LCG database.
 
@@ -775,8 +889,9 @@ def CreateLCGsqlUnknownUpdates(results,filename):
   """ 
   Logit("Creating update sql DML for the LCG database for Unknown atlas VOs:") 
 
-##  if len(results) == 0:
-##    raise Exception("No updates to apply")
+  if len(results) == 0:
+    LogToFile("No updates to apply")
+    return
 
   file = open(filename, 'a')
   lines = results.split("\n")
@@ -820,7 +935,10 @@ def main(argv=None):
   global gNormalization
   global gSitesWithNoData
   global gSitesWithUnknowns
-  firstTime = 1
+  global gQuery
+  global gUnknownQuery
+  output   = ""
+  unknowns = ""
 
   #--- get command line arguments  -------------
   try:
@@ -851,62 +969,24 @@ def main(argv=None):
     ReportableSites    = GetSiteFilters(gFilterParameters["SiteFilterFile"])
     ReportableVOs      = GetVOFilters(gFilterParameters["VOFilterFile"])
     
-    #--- query gratia for each site and create updates (appending them ----
-    output = ""
-    sites = ReportableSites.keys()
-    for site in sites:
-      normalizationFactor = ReportableSites[site]
-      query = GetQuery(site, normalizationFactor, ReportableVOs)
-      if firstTime:
-        Logit("Query:")
-        LogToFile(query)
-        firstTime = 0
-      Logit("Site: %s  Normalization Factor: %s" % (site,normalizationFactor)) 
-      results = RunGratiaQuery(query,gDatabaseParameters)
-      if len(results) == 0:
-        gSitesWithNoData.append(site)
-        continue
-      output = output + results + "\n"
+    #--- query gratia for each site and create updates ----
+    output   = RetrieveVoData(ReportableVOs,ReportableSites,gDatabaseParameters)
+    unknowns = RetrieveUnknownVoData(ReportableSites,gDatabaseParameters)
 
-    ##### UNKNOWNS#########
-    #--- query gratia for Unknown VOs and create updates (appending them ----
-    unknowns = ""
-    unknown_query = "No sites with 'unknown' VO"
-    firstTime = 1
-    sites = FindSitesWithUnknownVOs("atlas",gDatabaseParameters)
-    for site in sites:
-      if ReportableSites.has_key(site):
-        Logit("Site(%s) is LCG reportable." % site)
-      else:
-        Logit("Site(%s) is not LCG reportable." % site)
-        continue
-      normalizationFactor = ReportableSites[site]
-      unknown_query = GetQueryAtlasUnknowns(site,normalizationFactor,"atlas")
-      if firstTime:
-        Logit("Query:")
-        LogToFile(unknown_query)
-        firstTime = 0
-      Logit("Site (Unknown atlas VO): %s  Normalization Factor: %s" % (site,normalizationFactor)) 
-      unknown_results = RunGratiaQuery(unknown_query,gDatabaseParameters)
-      if len(unknown_results) == 0:
-        continue
-      gSitesWithUnknowns.append(site)
-      unknowns = unknowns + unknown_results + "\n"
-
-
-    #--- update the APEL accounting database ----
+    #--- create the updates for the APEL accounting database ----
     Logit("Sites with no data: %s" % gSitesWithNoData)
     Logit("Sites with Atlas unknown VOs: %s" % gSitesWithUnknowns)
     if len(output) == 0:
       if len(unknowns) == 0:
         raise Exception("No updates to apply")
-    if len(output) > 0:
-      CreateLCGsql(output,GetFileName("sql"))
-    if len(unknowns) > 0:
-      CreateLCGsqlUnknownUpdates(unknowns,GetFileName("sql"))
+    CreateLCGsqlUpdates(output,GetFileName("sql"))
+    CreateLCGsqlUnknownUpdates(unknowns,GetFileName("sql"))
+
+    #--- apply the updates to the APEL accounting database ----
     if gInUpdateMode:
       RunLCGUpdate(GetFileName("sql"),gDatabaseParameters)
-      SendEmailNotificationSuccess("Sample query:\n" + query + "\n\nResults of all queries:\n" + output + "\n\n#################\nSample Atlas unknown query:\n" + unknown_query + "\n\nResults of all Atlas unknown queries:\n" + unknowns)
+      CreateXmlHtmlFiles(gDatabaseParameters)
+      SendEmailNotificationSuccess("Sample query:\n" + gQuery + "\n\nResults of all queries:\n" + output + "\n\n#################\nSample Atlas unknown query:\n" + gUnknownQuery + "\n\nResults of all Atlas unknown queries:\n" + unknowns)
       Logit("Transfer Completed SUCCESSFULLY from Gratia to APEL")
     else:
       Logit("The --update arg was not specified. No updates attempted.")

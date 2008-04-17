@@ -100,6 +100,11 @@ Additional functionality:
   3. A file containing the latest SQL DML statements used to update the
      APEL/LCG database is created in the same directory as the log files.
      - the format of the sql file is YYYY-MM.sql
+  4. The script will, after completing the APEL database update, create 
+     xml and html files of the data contained in the APEL database table.
+     This was added on 4/17/08 to provide visibility into the data
+     being sent.  No functionality is contained in this script to use
+     these files.  This just makes them available.
 
 Usage:
   LCG.py(lcg.sh)  --conf=config_file --date=month [--update] [--no-email]
