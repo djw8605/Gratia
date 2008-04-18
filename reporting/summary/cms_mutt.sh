@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # space separated list of mail recipients
-MAILTO="cms-t1@fnal.gov pcanal@fnal.gov"
+MAILTO="cms-t1@fnal.gov gutsche@fnal.gov pcanal@fnal.gov"
 #MAILTO="pcanal@fnal.gov"
 WEBLOC="http://gratia-osg.fnal.gov:8880/gratia-reporting"
 SUM_WEBLOC="http://gratia-osg.fnal.gov:8884/gratia-reporting"
