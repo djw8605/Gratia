@@ -7,7 +7,7 @@
 # Script to transfer the data from Gratia to APEL (WLCG)
 ########################################################################
 #
-#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: LCG.py,v 1.12 2008-04-17 13:43:37 jgweigand Exp $
+#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: LCG.py,v 1.13 2008-04-21 15:50:18 jgweigand Exp $
 #
 #
 ########################################################################
@@ -862,7 +862,7 @@ def RetrieveUnknownVoData(reportableSites,params):
     normalizationFactor = reportableSites[site]
     unknown_query = GetQueryAtlasUnknowns(site,normalizationFactor,"atlas")
     if firstTime:
-      gUnknownQuery = query
+      gUnknownQuery = unknown_query
       Logit("Query:")
       LogToFile(unknown_query)
       firstTime = 0
