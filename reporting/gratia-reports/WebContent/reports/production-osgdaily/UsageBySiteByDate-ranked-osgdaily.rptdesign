@@ -26,8 +26,8 @@
     <property name="eventHandlerClass">net.sf.gratia.reporting.GratiaBirtReportEH</property>
     <list-property name="libraries">
         <structure>
-            <property name="fileName">gratia-lib2.rptlibrary</property>
-            <property name="namespace">gratia-lib2</property>
+            <property name="fileName">gratia-lib1.rptlibrary</property>
+            <property name="namespace">gratia-lib1</property>
         </structure>
     </list-property>
     <list-property name="configVars">
@@ -1016,7 +1016,7 @@
                 <property name="pattern">Unformatted</property>
             </structure>
         </scalar-parameter>
-        <parameter-group name="ReportInfo" id="365" extends="gratia-lib2.ReportInfo"/>
+        <parameter-group name="ReportInfo" id="365" extends="gratia-lib1.ReportInfo"/>
         <scalar-parameter name="GroupsPerChart" id="397">
             <text-property name="helpText">Select number of groups (e.g. VO's or Sites) to be displayed on each chart</text-property>
             <property name="valueType">static</property>
@@ -2725,8 +2725,8 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
                         <cell id="19">
                             <property name="colSpan">3</property>
                             <property name="rowSpan">1</property>
-                            <label name="ReportURL" id="401" extends="gratia-lib2.ReportURL"/>
-                            <label name="ShowQuery" id="402" extends="gratia-lib2.ShowQuery"/>
+                            <label name="ReportURL" id="401" extends="gratia-lib1.ReportURL"/>
+                            <label name="ShowQuery" id="402" extends="gratia-lib1.ShowQuery"/>
                         </cell>
                     </row>
                 </footer>

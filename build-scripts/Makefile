@@ -347,7 +347,6 @@ reports:
 	cp -p ${reports}/WebContent/reports/production-osg/*.rptdesign            war/reports
 	cp -p ${reports}/WebContent/reports/production-osg/gratia-lib1.rptlibrary war/reports
 	cp -p ${reports}/WebContent/reports/production-osgdaily/*.rptdesign            war/reports
-	cp -p ${reports}/WebContent/reports/production-osgdaily/gratia-lib2.rptlibrary war/reports
 	cp -p ${reports}/WebContent/reports/production-fermi/*.rptdesign      war/reports
 	${copy_util_lib}
 	jar -cvf ${target}/gratia-reports.war -C war .

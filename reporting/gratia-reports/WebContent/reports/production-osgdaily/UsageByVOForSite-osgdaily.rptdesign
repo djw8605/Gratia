@@ -26,8 +26,8 @@
     <property name="eventHandlerClass">net.sf.gratia.reporting.GratiaBirtReportEH</property>
     <list-property name="libraries">
         <structure>
-            <property name="fileName">gratia-lib2.rptlibrary</property>
-            <property name="namespace">gratia-lib2</property>
+            <property name="fileName">gratia-lib1.rptlibrary</property>
+            <property name="namespace">gratia-lib1</property>
         </structure>
     </list-property>
     <list-property name="configVars">
@@ -260,7 +260,7 @@
                 </scalar-parameter>
             </parameters>
         </parameter-group>
-        <parameter-group name="ReportInfo" id="118" extends="gratia-lib2.ReportInfo"/>
+        <parameter-group name="ReportInfo" id="118" extends="gratia-lib1.ReportInfo"/>
     </parameters>
     <data-sources>
         <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="fermigrid1" id="4">
@@ -2097,6 +2097,6 @@ else {&#xD;
             </list-property>
             <property name="style">sans-style1</property>
         </extended-item>
-        <label name="ReportURL" id="390" extends="gratia-lib2.ReportURL"/>
+        <label name="ReportURL" id="390" extends="gratia-lib1.ReportURL"/>
     </body>
 </report>
