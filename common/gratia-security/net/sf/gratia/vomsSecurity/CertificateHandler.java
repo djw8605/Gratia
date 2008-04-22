@@ -49,6 +49,7 @@ public class CertificateHandler
 	private String secureConnection = null;	// form: https://gratia.osg.org:8899
 	private String openConnection   = null;	// form: http://gratia.osg.org:8801
 	private String dbConnection     = null;	// feature use
+	private String servicesVersion     = null;	// feature use
 
 	//---------------------------------------------------
 	public CertificateHandler(HttpServletRequest request)
@@ -103,6 +104,7 @@ public class CertificateHandler
 			secureConnection = p.getProperty("service.secure.connection");
 			openConnection   = p.getProperty("service.open.connection");
 			dbConnection     = p.getProperty("service.mysql.url");
+			servicesVersion         = p.getProperty("gratia.services.version");
 
 			boolean foundAdmin = true;
 			int admid = 0;
@@ -230,6 +232,11 @@ public class CertificateHandler
 	// ----------------------------------
 	public String getDBconnection() {
 		return this.dbConnection;
+	}
+
+	// ----------------------------------
+	public String getServicesVersion() {
+		return this.servicesVersion;
 	}
 
 	//---------------------------------------------------
