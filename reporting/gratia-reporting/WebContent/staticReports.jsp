@@ -74,15 +74,24 @@
 						linkURL = linkURL.replace("<", "%3c");
 						linkURL = linkURL.replace("\\", "%5c");
 
+
 						for (int j = 0; j < fileObjects.length; j++)
 						{
 							if(!fileObjects[j].isDirectory())
 							{
 								String fileName = fileObjects[j].getName();
-								if (fileName.startsWith(linkREPORT) && fileName.endsWith(".pdf"))
+								if (fileName.startsWith(linkREPORT) && (fileName.endsWith(".pdf") || fileName.endsWith(".csv")))
 								{
-									%><li><a class = "reportItem" target = "reportFrame" href="<%= staticFolder+fileName %>"><%= linkNAME %></a></li>
-									<%
+									if (fileName.endsWith(".pdf"))
+									{
+										%><li><a class = "reportItem" target = "reportFrame" href="<%= staticFolder+fileName %>"><%= linkNAME %> (pdf)</a></li>
+										<%
+									}
+									else
+									{
+										%><li><a class = "reportItem" target = "reportFrame" href="<%= staticFolder+fileName %>" onClick="ww=window.open('downloadFile.jsp?csvFile=<%= fileName %>', 'Gratia', 'width=10,height=10'); ww.close('Gratia');"><%= linkNAME %> (csv)</a></li>
+										<%
+									}
 								}
 							}
 						}
