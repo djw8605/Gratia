@@ -54,6 +54,7 @@ public class StaticReportConfig
 					// Open the config file
 
 				String reportsFolder = reportingConfiguration.getReportsFolder();
+				String staticFolder = reportingConfiguration.getStaticFolder();
 
 				source = new File(statReportConfig);
 
@@ -69,7 +70,7 @@ public class StaticReportConfig
 					if(ndeStatReportGroup.getName().equals("StaticReportGroup"))
 					{
 						_statReportGroups = new ArrayList();
-						
+
 						StaticReportGroup newStatReportGroup = new StaticReportGroup(getAttrValue(ndeStatReportGroup, "name"));
 							
 						for (Iterator statReportItemIterator = ndeStatReportGroup.elementIterator(); statReportItemIterator.hasNext();)
@@ -77,8 +78,17 @@ public class StaticReportConfig
 							Element ndeStatReportItem = (Element) statReportItemIterator.next();
 							String name = getAttrValue(ndeStatReportItem, "name");
 							String link = getAttrValue(ndeStatReportItem, "link");
-							String report = link.substring(link.indexOf("]")+1, link.indexOf(".rptdesign"));
-							link = link.replace("[ReportsFolder]", reportsFolder);
+							String report = "";
+							if (ndeStatReportItem.getName().equals("reportItem") )
+							{
+								report = link.substring(link.indexOf("]")+1, link.indexOf(".rptdesign"));
+								link = link.replace("[ReportsFolder]", reportsFolder);
+							}
+							else if (ndeStatReportItem.getName().equals("csvItem") )
+							{
+								report = name.replaceAll(" ", "");
+								link = staticFolder + "/" + report + ".csv";
+							}
 
 							newStatReportGroup.getStatItems().add(new StaticReportItem(name, report, link));
 						}
