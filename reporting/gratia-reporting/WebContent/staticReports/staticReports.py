@@ -31,6 +31,27 @@ def showNode(node, reportsFolder, staticFolder, birtURL):
                     w = open(reportFile, 'w')
                     w.write(f.read())
                     w.close
+                    f.close
+                except IOError, e:
+                    sys.exit(1)
+    if node.nodeName == "csvItem":
+        # get the attributes.
+        attrs = node.attributes
+        fileName = 'file.csv'
+        for attrName in attrs.keys():
+            if attrName == 'name':
+                name = attrs.get(attrName).nodeValue
+                fileName = name.replace(' ', '') + '.csv'
+        for attrName in attrs.keys():
+            if attrName == 'link':
+                reportsFolder = reportsFolder + '/'
+                reportFile = os.path.join(staticFolder, fileName)
+                ## print reportFile
+                callURL = birtURL + '/' + attrs.get(attrName).nodeValue.replace('[csvFileName]', reportFile)
+                ##print ('URL \n%s\n' % (callURL))
+                try:
+                    f = urllib.urlopen(callURL)
+                    f.close
                 except IOError, e:
                     sys.exit(1)
 
