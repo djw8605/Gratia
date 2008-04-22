@@ -311,7 +311,7 @@ function closeAll () {
 		}
 		catch (com.mysql.jdbc.exceptions.MySQLSyntaxErrorException ex)
 		{
-			String msg = ex.getMessage();
+			String msg = ex.toString();
 			%>
 			<table class="query" border="0"><tr> <td align="left" ><hr color="#FF8330"></td></tr>
 			<tr><td><font color="#FF8330">
@@ -332,14 +332,14 @@ function closeAll () {
 		}
 		catch (Exception ex)
 		{
-			String msg = ex.getMessage();
+			String msg = ex.toString();
 			%>
 			<table class="query" border="0"><tr> <td align="left" ><hr color="#FF8330"></td></tr>
 			<tr><td><font color="#FF8330">
 				The following error occur while executing the query: <br>
 				&nbsp;&nbsp;&nbsp;&nbsp;<strong><%= msg %></strong> <br>
 				<em><%= ex %> </em>
-				<% ex.printStackTrace(); %> 
+				<% ex.printStackTrace(); %>
 			</font></td></tr><tr> <td align="left" ><hr color="#FF8330"></td></tr></table>
 			<script type="text/javascript">
 				if (currentFramePath == 'top')

@@ -173,7 +173,7 @@ public class CertificateHandler
 		}
 		catch (IOException e)
 		{
-			String msg = "CERTIFICATE HANDLER message: <br>" + e.getMessage();
+			String msg = "CERTIFICATE HANDLER message: <br>" + e.toString();
 			//System.out.println(msg);
 			return msg;
 		}
@@ -211,7 +211,7 @@ public class CertificateHandler
 		}
 		catch (Exception e)
 		{
-			String msg = "CERTIFICATE HANDLER message: <br>" + e.getMessage();
+			String msg = "CERTIFICATE HANDLER message: <br>" + e.toString();
 			//System.out.println(msg);
 			return msg;
 		}
