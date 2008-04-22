@@ -25,6 +25,7 @@
 	String loginLink = certificateHandler.getSecureConnection() + request.getContextPath() + "/gratia-login.jsp";
 	String logoutLink  = certificateHandler.getOpenConnection() + request.getContextPath() + "/gratia-logout.jsp";
 	String dbConnection = certificateHandler.getDBconnection();
+	dbConnection = dbConnection.substring(dbConnection.indexOf(":")+1);
 	String version = certificateHandler.getServicesVersion();
 	session.setAttribute("dbConnection", dbConnection);
 
@@ -93,7 +94,7 @@
 	<a href="./service-configuration-settings.html" target="adminContent" class="menuItem">Gratia Service Settings</a><br />
 
 	<p class = "menuVersion">Gratia Services Version: <%= version %></p>
-	<p class="menuVersion"><%=dbConnection %></p>
+	<p class="menuVersion">DB Connection: <%=dbConnection %></p>
 	<%
 	String displayLink = (String) session.getAttribute("displayLink");
 	if (displayLink != null)
