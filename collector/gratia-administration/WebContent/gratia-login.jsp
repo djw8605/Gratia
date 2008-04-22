@@ -28,7 +28,7 @@ try
    // Set session attribute for the CertificateHandler
 	net.sf.gratia.vomsSecurity.CertificateHandler certificateHandler = new net.sf.gratia.vomsSecurity.CertificateHandler(request);
 	session.setAttribute("certificateHandler", certificateHandler);
-	
+
 	certificateHandler = (net.sf.gratia.vomsSecurity.CertificateHandler) session.getAttribute("certificateHandler");
 
 	String[] VOlist = certificateHandler.getVOlist();
@@ -46,7 +46,7 @@ try
 			</tr>
 			<tr>
 				<td>
-				
+
 				<select size="5" id="myVO" name="myVO" onchange="getRoles(this.value); return false;" >
 
 				<%
@@ -73,13 +73,12 @@ try
 }
 catch (Exception ex)
 {
-	String msg = ex.getMessage();
+	String msg = ex.toString();
 	%>
 	<table class="query" border="0"><tr> <td align="left" ><hr color="#FF8330"></td></tr>
 	<tr><td><font color="#FF8330">
 		The following error occured: <br>
-		&nbsp;&nbsp;&nbsp;&nbsp;<strong><%= msg %></strong> <br>
-		<em><%= ex %> </em>
+		&nbsp;&nbsp;&nbsp;&nbsp;<strong><%= msg %></strong>
 		</font></td></tr><tr> <td align="left" ><hr color="#FF8330"></td></tr></table>
 	<%
 }

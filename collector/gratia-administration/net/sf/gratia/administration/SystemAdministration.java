@@ -21,7 +21,7 @@ import java.rmi.*;
 import org.apache.tools.bzip2.*;
 import com.ice.tar.*;
 
-public class SystemAdministration extends HttpServlet 
+public class SystemAdministration extends HttpServlet
 {
 	XP xp = new XP();
 	//
@@ -83,7 +83,7 @@ public class SystemAdministration extends HttpServlet
 		}
 	}
 
-	public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
+	public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
 		String fqan = (String) request.getSession().getAttribute("FQAN");
 		boolean login = true;
@@ -316,7 +316,7 @@ public class SystemAdministration extends HttpServlet
 			System.out.println("RecoveryService: Recovering From: " + databaseDate);
 		}
 
-		public void recoverRecord(String data, String filename) 
+		public void recoverRecord(String data, String filename)
 		{
 			String connection = p.getProperty("service.open.connection");
 			Post post = null;
@@ -343,12 +343,12 @@ public class SystemAdministration extends HttpServlet
 					return;
 				}
 			}
-			else                  
+			else
 			{
 				SystemAdministration.skipped++;
 				System.out.println("RecoveryService: Skipping: " + filename + " :Timestamp: " + recordDate);
 				SystemAdministration.status = "RecoveryService: Skipping: " + filename + " :Timestamp: " + recordDate;
-			}         
+			}
 		}
 
 		public void run()
@@ -375,7 +375,7 @@ public class SystemAdministration extends HttpServlet
 				System.out.println("RecoveryService: Processing Entry: " + tarEntry.getName());
 				//create a file with the same name as the tarEntry
 				int size=(int)tarEntry.getSize();
-				// -1 means unknown size. 
+				// -1 means unknown size.
 				if (size==-1) {
 					size=1000; // ((Integer)htSizes.get(ze.getName())).intValue();
 				}
@@ -392,14 +392,14 @@ public class SystemAdministration extends HttpServlet
 				String data = new String(b);
 				recoverRecord(data,tarEntry.getName());
 			}
-		} 
+		}
 
 		public void recoverArchive(File archive)
 		{
 			System.out.println("RecoveryService: Processing Archive: " + archive.getAbsolutePath());
 			try
 			{
-				FileInputStream fis = new FileInputStream(archive); 
+				FileInputStream fis = new FileInputStream(archive);
 				System.out.println("RecoveryService: Processing Archive 2: " + archive.getName());
 
 				byte skip[] = new byte[2];
@@ -423,15 +423,15 @@ public class SystemAdministration extends HttpServlet
 				while (tarEntry != null)
 				{
 					recoverArchiveEntry(tin,tarEntry);
-					tarEntry = tin.getNextEntry();                             
+					tarEntry = tin.getNextEntry();
 				}
 
 				// Close the file and stream
 				tin.close();
-			} 
-			catch (Exception e) 
+			}
+			catch (Exception e)
 			{
-				System.out.println("recoverArchive: failed to processed file "+archive.getName()+"\nError: "+e.getMessage());
+				System.out.println("recoverArchive: failed to processed file "+archive.getName()+"\nError: "+e.toString());
 				e.printStackTrace();
 			}
 		}
@@ -441,7 +441,7 @@ public class SystemAdministration extends HttpServlet
 			recoverDirectory(new File(directory));
 		}
 
-		public void recoverFile(File file) 
+		public void recoverFile(File file)
 		{
 			String blob = xp.get(file);
 			recoverRecord(blob,file.getName());
