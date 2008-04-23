@@ -137,7 +137,8 @@ public class NewVOUpdate
          //
          command =
                "insert into VONameCorrection(VOid,VOName,ReportableVOName) values(" +
-               VOid + comma + dq + voname + dq + comma + dq + reportablevoname + dq + ")";
+             VOid + comma + dq + voname + dq + comma +
+             ((reportablevoname == null)?(dq + reportablevoname + dq):"null") + ")";
          statement = connection.createStatement();
          statement.executeUpdate(command);
          statement.close();

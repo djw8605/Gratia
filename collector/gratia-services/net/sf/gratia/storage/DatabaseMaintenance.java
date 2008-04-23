@@ -994,11 +994,25 @@ public class DatabaseMaintenance {
             }
             if ((gratiaDatabaseVersion >= 29) // May not be activated yet.
                 && (current == 28)) {
+                // Fix possible problems with VONameCorrection table.
                 int tmp = current;
                 current = current + 1;
                 UpdateDbVersion(current);                
                 CheckIndices(); // Call again to update the DupRecord indexes.
                 Logging.log("Gratia database upgraded from " + tmp + " to " + current);
+            } else { // Done, one way or the other.
+                return ((current == gratiaDatabaseVersion) && checkAndUpgradeDbAuxiliaryItems());
+            }
+            if (current == 29) {
+                int result = Execute("update VONameCorrection set ReportableVOName = null where ReportableVOName = 'null'");
+                if (result > -1) {
+                    Logging.log("Gratia database upgraded from " + current + " to " + (current + 1));
+                    current = current + 1;
+                    UpdateDbVersion(current);
+                } else {
+                    Logging.log("Gratia database FAILED to upgrade from " + current +
+                                " to " + (current + 1));
+                }                
             }
 //             if (current == 29) {
 //                 int result = ReparseRecordsWithExtraXml();
@@ -1074,7 +1088,8 @@ public class DatabaseMaintenance {
         if (result > -1) {
             String command = "CREATE TABLE TableStatistics(" +
                 "RecordType VARCHAR(255) NOT NULL," +
-                "nRecords INTEGER DEFAULT 0, Qualifier VARCHAR(255))";
+                "nRecords INTEGER DEFAULT 0, Qualifier VARCHAR(255)), " +
+                "UNIQUE KEY index1 (RecordType,Qualifier)";
 
             if (isInnoDB) {
                 command += " ENGINE = 'innodb'";
