@@ -35,6 +35,8 @@ function prepareCountTrigger() {
     maybe_increment_error_line="  update TableStatistics set nRecords = nRecords + 1 where RecordType = new.RecordType and Qualifier = new.error;"
     maybe_decrement_error_line=${maybe_increment_error_line/\+/-}
     maybe_decrement_error_line=${maybe_decrement_error_line//new/old}
+    maybe_increment_error_line="  insert ignore into TableStatistics values('${table_name}',0,new.error)\n${maybe_increment_error_line}"
+    maybe_decrement_error_line="  insert ignore into TableStatistics values('${table_name}',1,old.error)\n${maybe_decrement_error_line}"
   fi
   cat > "${TPROC}" <<EOF
 delimiter ||
@@ -79,6 +81,7 @@ call conditional_trigger_drop();
 create trigger countInc${table_name} after insert on ${table_name}
 for each row
 f:begin
+  insert ignore into TableStatistics values('${table_name}',0,null);
   update TableStatistics set nRecords = nRecords + 1 where RecordType = '${table_name}' and Qualifier is null;
 ${maybe_increment_error_line}
 end
@@ -86,6 +89,7 @@ end
 create trigger countDec${table_name} after delete on ${table_name}
 for each row
 f:begin
+  insert ignore into TableStatistics values('${table_name}',1,null);
   update TableStatistics set nRecords = nRecords - 1 where RecordType = '${table_name}' and Qualifier is null;
 ${maybe_decrement_error_line}
 end
