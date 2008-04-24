@@ -11,14 +11,20 @@ public class Logging
     static boolean console = false;
     static DateFormat format = new SimpleDateFormat("kk:mm:ss");
     
-    public static void initialize(String path,String maxSize,String useConsole,String level)
+    public static void initialize(String path,String maxSize,String useConsole,String level,String sNumLogFiles)
     {
         if (initialized)
             return;
         try
             {
+                int numLogFiles = 0;
+                try {
+                    numLogFiles = Integer.valueOf(sNumLogFiles).intValue();
+                }
+                catch (Exception ignore) {
+                }
+                if (numLogFiles == 0) numLogFiles = 3;
                 int limit = Integer.parseInt(maxSize);
-                int numLogFiles = 3;
                 FileHandler fh = new FileHandler(Configuration.getCatalinaHome() + path, limit, numLogFiles);
                 fh.setFormatter(new SimpleFormatter());
                 // Add to logger

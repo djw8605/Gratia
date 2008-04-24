@@ -68,7 +68,8 @@ public class CollectorService implements ServletContextListener {
         Logging.initialize(p.getProperty("service.service.logfile"),
                            p.getProperty("service.service.maxlog"),
                            p.getProperty("service.service.console"),
-                           p.getProperty("service.service.level"));
+                           p.getProperty("service.service.level"),
+                           p.getProperty("service.service.numLogs"));
 
         Enumeration iter = System.getProperties().propertyNames();
         Logging.log("");

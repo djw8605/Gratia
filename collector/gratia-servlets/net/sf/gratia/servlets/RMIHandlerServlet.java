@@ -36,7 +36,8 @@ public class RMIHandlerServlet extends HttpServlet
         Logging.initialize(p.getProperty("service.rmiservlet.logfile"),
                            p.getProperty("service.rmiservlet.maxlog"),
                            p.getProperty("service.rmiservlet.console"),
-                           p.getProperty("service.rmiservlet.level"));
+                           p.getProperty("service.rmiservlet.level"),
+                           p.getProperty("service.rmiservlet.numLogs"));
     }
     
     public void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException 
