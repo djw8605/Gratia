@@ -46,7 +46,7 @@ void sharing(FILE *out, FILE *outcsv, TSQLServer *db, TDatime *begin, TDatime *e
    delete [] buffer;
 
 
-   const char *sql = "SELECT SiteName, Sum(Njobs), Sum(WallDuration), Sum(CpuUserDuration+CpuSystemDuration) FROM JobUsageRecord_Report V where  '%s' < EndTime and EndTime < '%s' group by SiteName order by SiteName";      
+   const char *sql = "SELECT SiteName, Sum(Njobs), Sum(WallDuration), Sum(CpuUserDuration+CpuSystemDuration) FROM VOProbeSummary V, Probe, Site where V.ProbeName = Probe.ProbeName and Site.siteid = Probe.siteid and '%s' < EndTime and EndTime < '%s' group by SiteName order by SiteName";
       
    TString sbegin( begin->AsSQLString() );
    TString send( end->AsSQLString() );
@@ -66,7 +66,7 @@ void sharing(FILE *out, FILE *outcsv, TSQLServer *db, TDatime *begin, TDatime *e
    }
 
    TString pattern = 
-      Form("SELECT VOName, Sum(Njobs),Sum(WallDuration), Sum(CpuUserDuration+CpuSystemDuration), SiteName  FROM JobUsageRecord_Report V where '%s' < EndTime and EndTime < '%s' and SiteName = '%%s' and (UCASE(VOName) = '%%s') group by SiteName",sbegin.Data(),send.Data());
+      Form("SELECT VOName, Sum(Njobs),Sum(WallDuration), Sum(CpuUserDuration+CpuSystemDuration), SiteName  FROM VOProbeSummary V, Probe, Site where V.ProbeName = Probe.ProbeName and Site.siteid = Probe.siteid and '%s' < EndTime and EndTime < '%s' and SiteName = '%%s' and (UCASE(VOName) = '%%s') group by SiteName",sbegin.Data(),send.Data());
 
    long total_njobs = 0;
    long total_owner_njobs = 0;
