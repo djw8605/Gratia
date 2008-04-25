@@ -39,7 +39,7 @@
 				out.println("<tr><td><select size='5' id='myRole' name='myRole' onchange='confirmRole(this.value);' >");
 				for(int i=0; i < vomsUserRoles.length; i++)
 				{
-					out.println("<option value=" + vomsUserRoles[i] +">" + vomsUserRoles[i] + "</option>");
+					out.println("<option value='" + vomsUserRoles[i] +"'>" + vomsUserRoles[i] + "</option>");
 				}
 				out.println("</select></td></tr></table>");
 			}
