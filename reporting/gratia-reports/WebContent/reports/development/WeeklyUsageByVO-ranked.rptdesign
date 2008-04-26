@@ -36,10 +36,6 @@
             <property name="value">gratia</property>
         </structure>
         <structure>
-            <property name="name">DatabasePassword</property>
-            <property name="value">proto</property>
-        </structure>
-        <structure>
             <property name="name">DisplayMetric</property>
             <property name="value">jobcount</property>
         </structure>
@@ -992,6 +988,58 @@
             </structure>
         </scalar-parameter>
         <parameter-group name="ReportInfo" id="363" extends="gratia-lib1.ReportInfo"/>
+        <scalar-parameter name="GroupsPerChart" id="397">
+            <text-property name="helpText">Select number of groups (e.g. VO's or Sites) to be displayed on each chart</text-property>
+            <property name="valueType">static</property>
+            <property name="dataType">integer</property>
+            <text-property name="promptText">Select # of groups per chart</text-property>
+            <property name="controlType">list-box</property>
+            <property name="mustMatch">true</property>
+            <property name="fixedOrder">true</property>
+            <property name="defaultValue">15</property>
+            <property name="distinct">false</property>
+            <structure name="format">
+                <property name="category">Unformatted</property>
+            </structure>
+            <list-property name="selectionList">
+                <structure>
+                    <property name="value">1</property>
+                    <property name="label">1</property>
+                </structure>
+                <structure>
+                    <property name="value">2</property>
+                    <property name="label">2</property>
+                </structure>
+                <structure>
+                    <property name="value">5</property>
+                    <property name="label">5</property>
+                </structure>
+                <structure>
+                    <property name="value">10</property>
+                    <property name="label">10</property>
+                </structure>
+                <structure>
+                    <property name="value">15</property>
+                    <property name="label">15</property>
+                </structure>
+                <structure>
+                    <property name="value">20</property>
+                    <property name="label">20</property>
+                </structure>
+                <structure>
+                    <property name="value">25</property>
+                    <property name="label">25</property>
+                </structure>
+                <structure>
+                    <property name="value">100</property>
+                    <property name="label">100</property>
+                </structure>
+                <structure>
+                    <property name="value">1000</property>
+                    <property name="label">ALL</property>
+                </structure>
+            </list-property>
+        </scalar-parameter>
     </parameters>
     <data-sources>
         <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="fermigrid1" id="357">
@@ -1003,6 +1051,34 @@
     </data-sources>
     <data-sets>
         <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="UsageByVORanked" id="358">
+            <list-property name="computedColumns">
+                <structure>
+                    <property name="name">ChartNr</property>
+                    <expression name="expression">(row["final_rank"]-1) / params["GroupsPerChart"]</expression>
+                    <property name="dataType">integer</property>
+                </structure>
+                <structure>
+                    <property name="name">weekdate</property>
+                    <expression name="expression">var daynr;
+var monthnr;
+var yearynr;
+var yearmon;
+daynr = row["datevalue"].getDate().toString();
+monthnr = ( row["datevalue"].getMonth()+1).toString();
+yearnr =  row["datevalue"].getFullYear().toString();
+if (monthnr.length > 1){
+	yearmon = yearnr  + "-" + monthnr
+}else{
+	yearmon = yearnr  + "-0" +  monthnr
+}
+if (daynr.length > 1){
+	yearmon + "-" + daynr
+}else{
+	yearmon  + "-0" +  daynr 
+}</expression>
+                    <property name="dataType">string</property>
+                </structure>
+            </list-property>
             <structure name="cachedMetaData">
                 <list-property name="resultSet">
                     <structure>
@@ -1035,8 +1111,19 @@
                         <property name="name">Njobs</property>
                         <property name="dataType">decimal</property>
                     </structure>
+                    <structure>
+                        <property name="position">7</property>
+                        <property name="name">ChartNr</property>
+                        <property name="dataType">integer</property>
+                    </structure>
+                    <structure>
+                        <property name="position">8</property>
+                        <property name="name">weekdate</property>
+                        <property name="dataType">string</property>
+                    </structure>
                 </list-property>
             </structure>
+            <property name="rowFetchLimit">10000</property>
             <property name="dataSource">fermigrid1</property>
             <property name="dataSetRowLimit">0</property>
             <list-property name="parameters">
@@ -1084,8 +1171,9 @@ yearnr + "-" + monthnr + "-" + daynr;</expression>
                     <property name="name">GroupByFormat</property>
                     <property name="dataType">string</property>
                     <property name="position">5</property>
-                    <expression name="defaultValue">"%Y-%U"</expression>
+                    <expression name="defaultValue">"%Y-%m-%d"</expression>
                     <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
                 </structure>
             </list-property>
             <list-property name="resultSet">
@@ -1136,10 +1224,6 @@ yearnr + "-" + monthnr + "-" + daynr;</expression>
     </styles>
     <page-setup>
         <simple-master-page name="Simple MasterPage" id="2">
-            <property name="type">us-letter</property>
-            <property name="pageBreakAfter">avoid</property>
-            <property name="pageBreakBefore">auto</property>
-            <property name="pageBreakInside">auto</property>
             <page-footer>
                 <text id="3">
                     <property name="contentType">html</property>
@@ -1178,6 +1262,17 @@ yearnr + "-" + monthnr + "-" + daynr;</expression>
                     <property name="name">final_rank</property>
                     <expression name="expression">dataSetRow["final_rank"]</expression>
                 </structure>
+                <structure>
+                    <property name="name">ChartNumber</property>
+                    <property name="displayName">ChartNumber</property>
+                    <expression name="expression">(dataSetRow["final_rank"]-1) / params["GroupsPerChart"]</expression>
+                    <property name="dataType">integer</property>
+                </structure>
+                <structure>
+                    <property name="name">ChartNr</property>
+                    <expression name="expression">dataSetRow["ChartNr"]</expression>
+                    <property name="dataType">integer</property>
+                </structure>
             </list-property>
             <column id="30">
                 <property name="width">33.3%</property>
@@ -1198,14 +1293,23 @@ yearnr + "-" + monthnr + "-" + daynr;</expression>
             <group id="14">
                 <property name="groupName">Rank</property>
                 <property name="interval">interval</property>
-                <property name="intervalRange">8.0</property>
+                <property name="intervalRange">1.0</property>
                 <property name="sortDirection">asc</property>
-                <expression name="keyExpr">row["final_rank"]</expression>
+                <expression name="keyExpr">row["ChartNumber"]</expression>
+                <structure name="toc">
+                    <expression name="expressionValue">row["ChartNumber"]</expression>
+                </structure>
                 <property name="repeatHeader">true</property>
-                <property name="hideDetail">false</property>
-                <property name="pageBreakAfter">always</property>
-                <property name="pageBreakBefore">avoid</property>
+                <property name="hideDetail">true</property>
+                <property name="pageBreakAfter">avoid</property>
+                <property name="pageBreakBefore">always-excluding-first</property>
                 <property name="pageBreakInside">auto</property>
+                <list-property name="sort">
+                    <structure>
+                        <expression name="key">row["final_rank"]</expression>
+                        <property name="direction">asc</property>
+                    </structure>
+                </list-property>
                 <header>
                     <row id="15">
                         <cell id="16">
@@ -1359,7 +1463,7 @@ yearnr + "-" + monthnr + "-" + daynr;</expression>
         <Width>0.0</Width>
         <Height>0.0</Height>
       </Bounds>
-      <Anchor>West</Anchor>
+      <Anchor>North</Anchor>
       <Stretch>Both</Stretch>
       <Insets>
         <Top>2.0</Top>
@@ -1553,7 +1657,13 @@ yearnr + "-" + monthnr + "-" + daynr;</expression>
  function beforeGeneration( chart, context )
 {	
 	rep = context.getExternalContext().getScriptable();
-	rep_title = rep.getParameterValue(&quot;ReportTitle&quot;);
+	
+	metric = rep.getParameterValue(&quot;DisplayMetric&quot;);
+	if(metric==&quot;process&quot;) metric_text = &quot;Process Hours&quot;;
+	if(metric==&quot;wallclock&quot;) metric_text = &quot;Wallclock Hours&quot;;
+	if(metric==&quot;jobcount&quot;) metric_text = &quot;Job Count&quot;;
+
+	rep_title = rep.getParameterValue(&quot;ReportTitle&quot;) + &quot; (&quot; + metric_text + &quot;)&quot; ;
 	rep_subtitle = rep.getParameterValue(&quot;ReportSubtitle&quot;);
 	chart.getTitle().getLabel().getCaption().setValue(rep_title + &quot;\n&quot; + rep_subtitle);
 
@@ -1860,6 +1970,48 @@ function beforeDrawAxisTitle( axis, label, context )
             <Green>128</Green>
             <Blue>0</Blue>
           </Entries>
+          <Entries xsi:type="attribute:ColorDefinition">
+            <Transparency>255</Transparency>
+            <Red>0</Red>
+            <Green>0</Green>
+            <Blue>0</Blue>
+          </Entries>
+          <Entries xsi:type="attribute:ColorDefinition">
+            <Transparency>255</Transparency>
+            <Red>0</Red>
+            <Green>0</Green>
+            <Blue>254</Blue>
+          </Entries>
+          <Entries xsi:type="attribute:ColorDefinition">
+            <Transparency>255</Transparency>
+            <Red>254</Red>
+            <Green>0</Green>
+            <Blue>254</Blue>
+          </Entries>
+          <Entries xsi:type="attribute:ColorDefinition">
+            <Transparency>255</Transparency>
+            <Red>0</Red>
+            <Green>204</Green>
+            <Blue>254</Blue>
+          </Entries>
+          <Entries xsi:type="attribute:ColorDefinition">
+            <Transparency>255</Transparency>
+            <Red>254</Red>
+            <Green>254</Green>
+            <Blue>0</Blue>
+          </Entries>
+          <Entries xsi:type="attribute:ColorDefinition">
+            <Transparency>255</Transparency>
+            <Red>204</Red>
+            <Green>153</Green>
+            <Blue>254</Blue>
+          </Entries>
+          <Entries xsi:type="attribute:ColorDefinition">
+            <Transparency>255</Transparency>
+            <Red>145</Red>
+            <Green>145</Green>
+            <Blue>145</Blue>
+          </Entries>
         </SeriesPalette>
         <Series xsi:type="type:BarSeries">
           <Visible>true</Visible>
@@ -1916,7 +2068,7 @@ else {&#xD;
             </Components>
             <Separator>, </Separator>
           </DataPoint>
-          <LabelPosition>Outside</LabelPosition>
+          <LabelPosition>Inside</LabelPosition>
           <Stacked>true</Stacked>
           <Triggers>
             <Condition>onclick</Condition>
@@ -1930,18 +2082,6 @@ else {&#xD;
     &lt;property name=&quot;targetWindow&quot;>_self&lt;/property>
     &lt;property name=&quot;targetFileType&quot;>report-design&lt;/property>
     &lt;list-property name=&quot;paramBindings&quot;>
-        &lt;structure>
-            &lt;property name=&quot;paramName&quot;>DatabaseURL&lt;/property>
-            &lt;expression name=&quot;expression&quot;>params[&quot;DatabaseURL&quot;]&lt;/expression>
-        &lt;/structure>
-        &lt;structure>
-            &lt;property name=&quot;paramName&quot;>DatabaseUser&lt;/property>
-            &lt;expression name=&quot;expression&quot;>params[&quot;DatabaseUser&quot;]&lt;/expression>
-        &lt;/structure>
-        &lt;structure>
-            &lt;property name=&quot;paramName&quot;>DatabasePassword&lt;/property>
-            &lt;expression name=&quot;expression&quot;>params[&quot;DatabasePassword&quot;]&lt;/expression>
-        &lt;/structure>
         &lt;structure>
             &lt;property name=&quot;paramName&quot;>DisplayMetric&lt;/property>
             &lt;expression name=&quot;expression&quot;>params[&quot;DisplayMetric&quot;]&lt;/expression>
@@ -1976,26 +2116,30 @@ else {&#xD;
             <Action>
               <Type>Show_Tooltip</Type>
               <Value xsi:type="attribute:TooltipValue">
-                <Text>var voname = row[&quot;VOName&quot;]&#xD;
-if (params[&quot;DisplayMetric&quot;] == &quot;wallclock&quot;) {&#xD;
-	var labval = String(row[&quot;WallDuration&quot;] / 3600);&#xD;
-	var dotpos = labval.indexOf(&quot;.&quot;,0); &#xD;
+                <Text>var voname = row[&quot;VOName&quot;];var metricvalue =&quot;&quot;;&#xD;
+&#xD;
+var label;&#xD;
+var dotpos;&#xD;
+&#xD;
+if (params[&quot;DisplayMetric&quot;] == &quot;wallclock&quot;) { &#xD;
+	metricvalue = String(row[&quot;WallDuration&quot;] / 3600);&#xD;
+	label = &quot;Wallclock Hours: &quot;;&#xD;
+}&#xD;
+if (params[&quot;DisplayMetric&quot;] == &quot;process&quot;)  {&#xD;
+	metricvalue = String(row[&quot;Cpu&quot;] / 3600);&#xD;
+	label = &quot;Process Hours: &quot;;&#xD;
+} &#xD;
+if (params[&quot;DisplayMetric&quot;] == &quot;jobcount&quot;) {&#xD;
+	metricvalue = String(row[&quot;Njobs&quot;]);&#xD;
+	label = &quot;Jobs: &quot;;&#xD;
+}&#xD;
+var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
 	if(dotpos > 0)&#xD;
 	{ &#xD;
-	labval = labval.substring(0,dotpos+2)&#xD;
-	};&#xD;
-var metric = &quot;Wallclock Hours: &quot; + labval&#xD;
-}&#xD;
-else if (params[&quot;DisplayMetric&quot;]==&quot;process&quot;) {&#xD;
-var metric = &quot;Process Hours: &quot; + row[&quot;Cpu&quot;]/3600&#xD;
-}&#xD;
-else if (params[&quot;DisplayMetric&quot;]==&quot;jobcount&quot;){&#xD;
-var metric = &quot;Jobs: &quot; + row[&quot;Njobs&quot;]&#xD;
-}&#xD;
-else {&#xD;
-var metric = &quot;***Unknown metric***&quot;&#xD;
-}&#xD;
-&quot;VOName: &quot; + voname + &quot;\n&quot; + metric</Text>
+	metricvalue = metricvalue.substring(0,dotpos+2);&#xD;
+	}&#xD;
+&#xD;
+&quot;VOName: &quot; + voname + &quot;\n&quot; + label + metricvalue</Text>
                 <Delay>200</Delay>
               </Value>
             </Action>
@@ -2053,6 +2197,11 @@ var metric = &quot;***Unknown metric***&quot;&#xD;
         </Insets>
         <Visible>true</Visible>
       </Label>
+      <FormatSpecifier xsi:type="attribute:NumberFormatSpecifier">
+        <Prefix></Prefix>
+        <Suffix></Suffix>
+        <FractionDigits>0</FractionDigits>
+      </FormatSpecifier>
       <LabelPosition>Left</LabelPosition>
       <MajorGrid>
         <LineAttributes>
@@ -2220,7 +2369,7 @@ var metric = &quot;***Unknown metric***&quot;&#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;weekdate&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -2367,18 +2516,6 @@ var metric = &quot;***Unknown metric***&quot;&#xD;
                                     <property name="reportName">UsageByUserForWeek.rptdesign</property>
                                     <list-property name="paramBindings">
                                         <structure>
-                                            <property name="paramName">DatabaseURL</property>
-                                            <expression name="expression">params["DatabaseURL"]</expression>
-                                        </structure>
-                                        <structure>
-                                            <property name="paramName">DatabaseUser</property>
-                                            <expression name="expression">params["DatabaseUser"]</expression>
-                                        </structure>
-                                        <structure>
-                                            <property name="paramName">DatabasePassword</property>
-                                            <expression name="expression">params["DatabasePassword"]</expression>
-                                        </structure>
-                                        <structure>
                                             <property name="paramName">DisplayMetric</property>
                                             <expression name="expression">params["DisplayMetric"]</expression>
                                         </structure>
@@ -2425,6 +2562,7 @@ var metric = &quot;***Unknown metric***&quot;&#xD;
                                     <structure>
                                         <property name="name">datevalue</property>
                                         <expression name="expression">dataSetRow["datevalue"]</expression>
+                                        <property name="dataType">string</property>
                                     </structure>
                                     <structure>
                                         <property name="name">WallDuration</property>
@@ -2438,9 +2576,18 @@ var metric = &quot;***Unknown metric***&quot;&#xD;
                                         <property name="name">Njobs</property>
                                         <expression name="expression">dataSetRow["Njobs"]</expression>
                                     </structure>
+                                    <structure>
+                                        <property name="name">final_rank</property>
+                                        <expression name="expression">dataSetRow["final_rank"]</expression>
+                                        <property name="dataType">any</property>
+                                    </structure>
+                                    <structure>
+                                        <property name="name">weekdate</property>
+                                        <expression name="expression">dataSetRow["weekdate"]</expression>
+                                        <property name="dataType">string</property>
+                                    </structure>
                                 </list-property>
                                 <property name="style">sans-style1</property>
-                                <property name="eventHandlerClass">net.sf.gratia.reporting.GratiaBirtReportEH</property>
                             </extended-item>
                         </cell>
                     </row>
@@ -2450,48 +2597,8 @@ var metric = &quot;***Unknown metric***&quot;&#xD;
                         <cell id="19">
                             <property name="colSpan">3</property>
                             <property name="rowSpan">1</property>
-                            <grid id="408">
-                                <property name="width">100%</property>
-                                <column id="409"/>
-                                <column id="410"/>
-                                <row id="411">
-                                    <cell id="412">
-                                        <label name="ReportURL" id="390">
-                                            <property name="fontFamily">sans-serif</property>
-                                            <property name="fontSize">12pt</property>
-                                            <property name="fontWeight">bold</property>
-                                            <list-property name="visibility">
-                                                <structure>
-                                                    <property name="format">all</property>
-                                                    <expression name="valueExpr">params["ReportURL"]==""</expression>
-                                                </structure>
-                                            </list-property>
-                                            <text-property name="text">Retrieve Report URL</text-property>
-                                            <structure name="action">
-                                                <property name="linkType">hyperlink</property>
-                                                <expression name="uri">params["ReportURL"]</expression>
-                                                <property name="targetWindow">_blank</property>
-                                            </structure>
-                                        </label>
-                                    </cell>
-                                    <cell id="413">
-                                        <label name="ShowQuery" id="391">
-                                            <property name="style">sans-style1</property>
-                                            <property name="fontSize">12pt</property>
-                                            <property name="fontWeight">bold</property>
-                                            <property name="marginTop">0pt</property>
-                                            <property name="marginBottom">20px</property>
-                                            <property name="paddingTop">1pt</property>
-                                            <text-property name="text">Show Query</text-property>
-                                            <structure name="action">
-                                                <property name="linkType">hyperlink</property>
-                                                <expression name="uri">"../showQuery.jsp?TraceTableKey="+params["UserName"].split("|")[1]</expression>
-                                                <property name="targetWindow">_self</property>
-                                            </structure>
-                                        </label>
-                                    </cell>
-                                </row>
-                            </grid>
+                            <label name="ReportURL" id="400" extends="gratia-lib1.ReportURL"/>
+                            <label name="ShowQuery" id="401" extends="gratia-lib1.ShowQuery"/>
                         </cell>
                     </row>
                 </footer>
