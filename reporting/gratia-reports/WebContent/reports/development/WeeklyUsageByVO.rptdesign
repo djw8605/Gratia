@@ -23,6 +23,7 @@
             <expression name="value">params["DatabasePassword"]</expression>
         </structure>
     </list-property>
+    <property name="eventHandlerClass">net.sf.gratia.reporting.GratiaBirtReportEH</property>
     <list-property name="libraries">
         <structure>
             <property name="fileName">gratia-lib1.rptlibrary</property>
@@ -55,7 +56,7 @@
                     <property name="dataType">string</property>
                     <property name="isRequired">true</property>
                     <property name="controlType">text-box</property>
-                    <property name="defaultValue">jdbc:mysql://gratia-db01.fnal.gov:3320/gratia_itb</property>
+                    <property name="defaultValue">jdbc:mysql://gratia-vm02.fnal.gov:3320/gratia_jeffmack</property>
                     <structure name="format">
                         <property name="category">Unformatted</property>
                         <property name="pattern">Unformatted</property>
@@ -137,7 +138,7 @@
                 <property name="pattern">Unformatted</property>
             </structure>
         </scalar-parameter>
-        <scalar-parameter name="VOs" id="106">
+        <scalar-parameter name="SelectVOs" id="106">
             <text-property name="helpText">List of VO's to include/exclude in chart.</text-property>
             <property name="valueType">static</property>
             <property name="dataType">string</property>
@@ -157,7 +158,7 @@
                 </structure>
             </list-property>
         </scalar-parameter>
-        <scalar-parameter name="SelectionType" id="107">
+        <scalar-parameter name="SelType" id="107">
             <text-property name="helpText">Include or exclude VO's in list.</text-property>
             <property name="valueType">static</property>
             <property name="dataType">string</property>
@@ -218,14 +219,70 @@
     <data-sources>
         <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="fermigrid1" id="4">
             <property name="odaDriverClass">com.mysql.jdbc.Driver</property>
-            <property name="odaURL">jdbc:mysql://gratia-db01.fnal.gov:3320/gratia_itb</property>
+            <property name="odaURL">jdbc:mysql://gratia-vm02.fnal.gov:3320/gratia_jeffmack</property>
             <property name="odaUser">reader</property>
             <encrypted-property name="odaPassword">cmVhZGVy</encrypted-property>
         </oda-data-source>
     </data-sources>
     <data-sets>
         <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="6MonthHistory" id="94">
-            <structure name="cachedMetaData"/>
+            <list-property name="computedColumns">
+                <structure>
+                    <property name="name">weekdate</property>
+                    <expression name="expression">var daynr;
+var monthnr;
+var yearynr;
+var yearmon;
+daynr = row["datevalue"].getDate().toString();
+monthnr = ( row["datevalue"].getMonth()+1).toString();
+yearnr =  row["datevalue"].getFullYear().toString();
+if (monthnr.length > 1){
+	yearmon = yearnr  + "-" + monthnr
+}else{
+	yearmon = yearnr  + "-0" +  monthnr
+}
+if (daynr.length > 1){
+	yearmon + "-" + daynr
+}else{
+	yearmon  + "-0" +  daynr 
+}</expression>
+                    <property name="dataType">string</property>
+                </structure>
+            </list-property>
+            <structure name="cachedMetaData">
+                <list-property name="resultSet">
+                    <structure>
+                        <property name="position">1</property>
+                        <property name="name">VOName</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">2</property>
+                        <property name="name">datevalue</property>
+                        <property name="dataType">date</property>
+                    </structure>
+                    <structure>
+                        <property name="position">3</property>
+                        <property name="name">WallDuration</property>
+                        <property name="dataType">float</property>
+                    </structure>
+                    <structure>
+                        <property name="position">4</property>
+                        <property name="name">Cpu</property>
+                        <property name="dataType">float</property>
+                    </structure>
+                    <structure>
+                        <property name="position">5</property>
+                        <property name="name">Njobs</property>
+                        <property name="dataType">decimal</property>
+                    </structure>
+                    <structure>
+                        <property name="position">6</property>
+                        <property name="name">weekdate</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                </list-property>
+            </structure>
             <property name="dataSource">fermigrid1</property>
             <list-property name="parameters">
                 <structure>
@@ -285,8 +342,9 @@ if (monthnr.toString().length > 1){
                     <property name="name">VOselect</property>
                     <property name="dataType">string</property>
                     <property name="position">6</property>
-                    <expression name="defaultValue">' 'cdf ' '</expression>
+                    <expression name="defaultValue">"('cdf')"</expression>
                     <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
                 </structure>
                 <structure>
                     <property name="name">VOSelType</property>
@@ -296,8 +354,39 @@ if (monthnr.toString().length > 1){
                     <property name="isInput">true</property>
                 </structure>
             </list-property>
-            <property name="queryText">
-call WeeklyUsageByVO(?,?,?,?,?,'Batch',?,?)
+            <list-property name="resultSet">
+                <structure>
+                    <property name="position">1</property>
+                    <property name="name">VOName</property>
+                    <property name="nativeName">VOName</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">2</property>
+                    <property name="name">datevalue</property>
+                    <property name="nativeName">datevalue</property>
+                    <property name="dataType">date</property>
+                </structure>
+                <structure>
+                    <property name="position">3</property>
+                    <property name="name">WallDuration</property>
+                    <property name="nativeName">WallDuration</property>
+                    <property name="dataType">float</property>
+                </structure>
+                <structure>
+                    <property name="position">4</property>
+                    <property name="name">Cpu</property>
+                    <property name="nativeName">Cpu</property>
+                    <property name="dataType">float</property>
+                </structure>
+                <structure>
+                    <property name="position">5</property>
+                    <property name="name">Njobs</property>
+                    <property name="nativeName">Njobs</property>
+                    <property name="dataType">decimal</property>
+                </structure>
+            </list-property>
+            <property name="queryText">call WeeklyUsageByVO(?,?,?,?,?,'Batch',?,?)
 </property>
         </oda-data-set>
         <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="VOList" id="110">
@@ -363,7 +452,7 @@ order by voname</property>
             <property name="fontFamily">sans-serif</property>
             <property name="fontSize">9pt</property>
             <property name="textAlign">center</property>
-            <expression name="valueExpr">if(params["SelectionType"] == "IN"){"VO\'s selected:  " + params["VOs"]}else{"VO\'s excluded:  " + params["VOs"]}</expression>
+            <expression name="valueExpr">if(params["SelType"] == "IN"){"VO\'s selected:  " + params["SelectVOs"]}else{"VO\'s excluded:  " + params["SelectVOs"]}</expression>
             <property name="contentType">html</property>
         </text-data>
         <extended-item extensionName="Chart" name="MyChart" id="90">
@@ -1347,7 +1436,7 @@ else {&#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;endtime&quot;]</Definition>
+          <Definition>row[&quot;weekdate&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>Day</SeriesIdentifier>
         <DataPoint>
@@ -1419,10 +1508,6 @@ else {&#xD;
       </Insets>
       <Visible>true</Visible>
     </Label>
-    <FormatSpecifier xsi:type="attribute:DateFormatSpecifier">
-      <Type>Medium</Type>
-      <Detail>Date</Detail>
-    </FormatSpecifier>
     <LabelPosition>Below</LabelPosition>
     <MajorGrid>
       <LineAttributes>
@@ -1524,36 +1609,36 @@ else {&#xD;
             <property name="dataSet">6MonthHistory</property>
             <property name="height">600px</property>
             <property name="width">800px</property>
-            <list-property name="paramBindings">
-                <structure>
-                    <property name="paramName">VOselect</property>
-                    <expression name="expression">params["VOs"]</expression>
-                </structure>
-                <structure>
-                    <property name="paramName">VOSelType</property>
-                    <expression name="expression">params["SelectionType"]</expression>
-                </structure>
-            </list-property>
             <list-property name="boundDataColumns">
                 <structure>
                     <property name="name">VOName</property>
                     <expression name="expression">dataSetRow["VOName"]</expression>
+                    <property name="dataType">string</property>
                 </structure>
                 <structure>
-                    <property name="name">endtime</property>
-                    <expression name="expression">dataSetRow["endtime"]</expression>
+                    <property name="name">datevalue</property>
+                    <expression name="expression">dataSetRow["datevalue"]</expression>
+                    <property name="dataType">date</property>
                 </structure>
                 <structure>
                     <property name="name">WallDuration</property>
                     <expression name="expression">dataSetRow["WallDuration"]</expression>
+                    <property name="dataType">float</property>
                 </structure>
                 <structure>
                     <property name="name">Cpu</property>
                     <expression name="expression">dataSetRow["Cpu"]</expression>
+                    <property name="dataType">float</property>
                 </structure>
                 <structure>
                     <property name="name">Njobs</property>
                     <expression name="expression">dataSetRow["Njobs"]</expression>
+                    <property name="dataType">decimal</property>
+                </structure>
+                <structure>
+                    <property name="name">weekdate</property>
+                    <expression name="expression">dataSetRow["weekdate"]</expression>
+                    <property name="dataType">string</property>
                 </structure>
             </list-property>
             <property name="style">sans-style1</property>
