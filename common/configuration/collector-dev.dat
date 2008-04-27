@@ -99,9 +99,11 @@
               "maintain.history.log" => 2,
               "monitor.listener.wait" => 240,
               "service.rmiservlet.level" => "FINEST",
-              "monitor.to.address0" => 'greenc@fnal.gov',
-              "service.security.level" => 1,
-              "service.use.selfgenerated.certs" => 1
+              "service.service.level" => 'FINEST',
+              "service.service.numLogs" => 10,
+              "monitor.to.address0" => 'greenc@fnal.gov' #,
+              #              "service.security.level" => 1,
+              #              "service.use.selfgenerated.certs" => 1
              }
            },
  vittone => { http_port => 8883,
@@ -137,13 +139,18 @@
                   rmi_port => 22000,
                   jmx_port => 8054,
                   server_port => 8154,
-                  db_host => "localhost",
-                  db_schema => "gratia_greenc_test",
+                  db_host => "gratia07.fnal.gov",
+                  db_schema => "gratia_itb",
+                  db_port => 3322,
+#                  db_host => "localhost",
+#                  db_schema => "gratia_greenc_test",
                   "properties.attributes" =>
                   {
                    "maintain.history.log" => 2,
                    "monitor.listener.wait" => 240,
                    "service.rmiservlet.level" => "FINEST",
+                   "service.service.level" => 'FINEST',
+                   "service.service.numLogs" => 10,
                    "monitor.to.address0" => 'greenc@fnal.gov',
                    "service.listener.threads" => 1
                   }

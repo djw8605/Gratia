@@ -35,8 +35,8 @@ function prepareCountTrigger() {
     maybe_increment_error_line="  update TableStatistics set nRecords = nRecords + 1 where RecordType = new.RecordType and Qualifier = new.error;"
     maybe_decrement_error_line=${maybe_increment_error_line/\+/-}
     maybe_decrement_error_line=${maybe_decrement_error_line//new/old}
-    maybe_increment_error_line="  insert ignore into TableStatistics values('${table_name}',0,new.error)\n${maybe_increment_error_line}"
-    maybe_decrement_error_line="  insert ignore into TableStatistics values('${table_name}',1,old.error)\n${maybe_decrement_error_line}"
+    maybe_increment_error_line="  insert ignore into TableStatistics values('${table_name}',0,new.error);${maybe_increment_error_line}"
+    maybe_decrement_error_line="  insert ignore into TableStatistics values('${table_name}',1,old.error);${maybe_decrement_error_line}"
   fi
   cat > "${TPROC}" <<EOF
 delimiter ||
@@ -115,7 +115,6 @@ while [[ -n "$1" ]]; do
       stored)
         proc="${script_location}build-stored-procedures.sql"
         set -- "$@" stored-extra-1
-        set -- "$@" stored-extra-2
         ;;
       stored-extra-1)
         # Hand-tweaked procedure (temporary)
@@ -127,6 +126,10 @@ while [[ -n "$1" ]]; do
         ;;
       trigger)
         proc="${script_location}build-trigger.sql"
+        set -- "$@" summary-procedures
+        ;;
+      summary-procedures)
+        proc="${script_location}summary-procedures.sql"
         ;;
       ps)
         proc="${script_location}build-ps-node-summary-table.sql"

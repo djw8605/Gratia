@@ -63,6 +63,7 @@ public class JobUsageRecord implements Record
    private StringElement ProbeName;
    private Date ServerDate;
    private String md5;
+   private String oldMd5;
 
    public JobUsageRecord()
    {
@@ -606,18 +607,18 @@ public class JobUsageRecord implements Record
        // Zero out things we don't want checksums for
        RecordIdentity tempRecordIdentity = getRecordIdentity();
        setRecordIdentity(null);
-//        StringElement tempSiteName = getSiteName();
-//        setSiteName(null);
-//        UserIdentity tempUserIdentity = getUserIdentity();
-//        setUserIdentity(null);
+       StringElement tempSiteName = getSiteName();
+       setSiteName(null);
+       UserIdentity tempUserIdentity = getUserIdentity();
+       setUserIdentity(null);
 
        // Calculate the checksum
        String md5key = Utils.md5key(asXML());
 
        // Put things back
        setRecordIdentity(tempRecordIdentity);
-//        setSiteName(tempSiteName);
-//        setUserIdentity(tempUserIdentity);
+       setSiteName(tempSiteName);
+       setUserIdentity(tempUserIdentity);
 
        return md5key;
    }
@@ -630,6 +631,31 @@ public class JobUsageRecord implements Record
    public void setmd5(String value)
    {
       md5 = value;
+   }
+
+   public String computeOldMd5() throws Exception
+   {
+       // Zero out things we don't want checksums for
+       RecordIdentity tempRecordIdentity = getRecordIdentity();
+       setRecordIdentity(null);
+
+       // Calculate the checksum
+       String md5key = Utils.md5key(asXML());
+
+       // Put things back
+       setRecordIdentity(tempRecordIdentity);
+
+       return md5key;
+   }
+
+   public String getoldMd5()
+   {
+      return oldMd5;
+   }
+
+   public void setoldMd5(String value)
+   {
+      oldMd5 = value;
    }
 
 }

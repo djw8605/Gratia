@@ -116,7 +116,7 @@ if [ "$1" = "start" ] ; then
   JAVA_OPTS="-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=${TOMCAT_MANAGEMENT_PORT} -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dssl.port=${TOMCAT_SSL_PORT}"; export JAVA_OPTS
   $CATALINA_HOME/bin/catalina.sh start
 elif [ "$1" = "stop" ] ; then
-  wget -O - -q '^^^STOP_DB_UPDATE_URL^^^' >/dev/null 2>&1
+  wget --dns-timeout=5 --connect-timeout=10 --read-timeout=40 -O - -q '^^^STOP_DB_UPDATE_URL^^^' >/dev/null 2>&1
   $CATALINA_HOME/bin/shutdown.sh
 else
   echo "Usage: ${TOMCAT_INSTANCE_NAME} [start | stop]"

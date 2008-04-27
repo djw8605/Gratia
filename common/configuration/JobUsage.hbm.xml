@@ -267,8 +267,8 @@
      </component>
 
      <property name="ServerDate" column="ServerDate" type="timestamp"/>
-     <property name="md5" column="md5" index="index12" unique="true"/>
-
+     <property name="oldMd5" column="md5" index="index12" unique="true"/>
+     <property name="md5" column="md5v2"/>
    </join>
 
    <join table = "JobUsageRecord_Xml" optional="true">

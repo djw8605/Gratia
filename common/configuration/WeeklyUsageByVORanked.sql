@@ -31,7 +31,7 @@ from (SELECT @rank:=@rank+1 as final_rank,
             FROM (SELECT VOCorrid as VOCorridx,
                          EndTime as endtimex,
                          sum(WallDuration) as walldurationx 
-                  FROM VOProbeSummaryData 
+                  FROM MasterSummaryData 
        WHERE (EndTime) >= (''', fromdate, ' 00:00:00 '')
                             and (EndTime) <= (''', todate, ' 00:00:00 '')
              and ResourceType = ''Batch''

@@ -4,10 +4,12 @@ import net.sf.gratia.util.Logging;
 
 import net.sf.gratia.storage.JobUsageRecord;
 import net.sf.gratia.storage.UserIdentity;
+import net.sf.gratia.storage.SummaryUpdater;
 
 import java.math.BigInteger;
 import java.sql.*;
 import java.util.Iterator;
+import java.util.List;
 
 import org.hibernate.CacheMode;
 import org.hibernate.FlushMode;
@@ -96,12 +98,12 @@ public class ChecksumUpgrader extends Thread {
                 try {
                     Connection connection = session.connection();
                     Statement statement = connection.createStatement();
-                    ResultSet resultSet = statement
-                        .executeQuery("alter table JobUsageRecord_Meta "
-                                      + "drop index index17"
-                                      + ", " 
-                                      + "add unique index index17(md5v2)"
-                                      );
+                    statement
+                        .execute("alter table JobUsageRecord_Meta "
+                                 + "drop index index17"
+                                 + ", " 
+                                 + "add unique index index17(md5v2)"
+                                 );
                     tx.commit();
                 }
                 catch (Exception e) {
@@ -129,114 +131,142 @@ public class ChecksumUpgrader extends Thread {
     private void fixAllDuplicates() {
         long duplicatesFixedLastIteration = 0;
         long duplicatesFixedThisIteration = 0;
+        long totalDuplicatesFixed = 0;
         int maxIterations = 200;
         int iterations = 0;
         do {
             duplicatesFixedLastIteration = duplicatesFixedThisIteration;
             duplicatesFixedThisIteration = fixDuplicatesOnce();
-        } while ((++iterations < maxIterations) &&
-                 (duplicatesFixedThisIteration < duplicatesFixedLastIteration));
+            totalDuplicatesFixed += duplicatesFixedThisIteration;
+        } while (
+                 // Set maximum number to avoid infinite loop
+                 (++iterations < maxIterations) &&
+                 // Fixed less this time than last
+                 (duplicatesFixedThisIteration < duplicatesFixedLastIteration) &&
+                 // Fixed at least 100 dupes last time.
+                 duplicatesFixedThisIteration > 100);
         if (iterations >= maxIterations) {
             Logging.info("ChecksumUpgrader: maximum of " +
                          maxIterations +
                          " exceeded for duplicate resolution exceeded -- " +
                          " final (locked) pass may take some time.");
         }
+        Logging.info("ChecksumUpgrader: main duplicate resolution phase complete in " +
+                     iterations + " iterations.");
+        Logging.info("ChecksumUpgrader: resolved duplicates for a total of " +
+                     totalDuplicatesFixed +
+                     " duplicated checksums.");
     }
 
     private long fixDuplicatesOnce() {
         long nDupsFixed = 0;
         Logging.debug("fixDuplicatesOnce: starting duplicate resolution cycle");
-        Session session = HibernateWrapper.getSession();
-        session.setFlushMode(FlushMode.COMMIT);
-        Query q =
-            session.createSQLQuery("select md5v2, count(*) as `Count` " +
-                                   "from JobUsageRecord_Meta " +
-                                   "where md5v2 is not null" +
-                                   "group by md5v2 having Count > 1")
-            .setCacheMode(CacheMode.IGNORE);
-        ScrollableResults checksums = q.scroll(ScrollMode.FORWARD_ONLY);
-        session.close();
-        while (checksums.next()) {
-            session = HibernateWrapper.getSession();
-            Transaction tx;
-            tx = session.beginTransaction();
-            String md5 = "";
-            try {
-                md5 = (String) checksums.get(0); 
-                int nDups = ((Integer) checksums.get(1)).intValue();
-                Logging.debug("fixDuplicatesOnce: resolving " + nDups +
-                              " duplicates with checksum" + md5);
-                Query rq =
-                    session.createQuery("select record from " +
-                                        "JobUsageRecord record " +
-                                        " where record.md5 = '" + md5 +
-                                        "' order by record.RecordId")
-                    .setCacheMode(CacheMode.IGNORE);
-                Iterator rIter = rq.iterate();
-                if (!rIter.hasNext()) {
-                    Logging.warning("fixDuplicatesOnce: no results for md5 = " +
-                                    md5);
-                    tx.rollback();
-                    session.close();
-                    continue;
-                }
-                if (!rIter.hasNext()) {
-                    Logging.warning("fixDuplicatesOnce: supposed duplicate md5 = " +
-                                    md5 + " has only one matching record!");
-                    tx.rollback();
-                    session.close();
-                    continue;
-                }
-                JobUsageRecord base = (JobUsageRecord) rIter.next(); // First record in set
-                while (rIter.hasNext()) { // Compare subsequent records.
-                    UserIdentity baseUserIdentity = base.getUserIdentity();
-                    JobUsageRecord compare = (JobUsageRecord) rIter.next();
-                    // Need to add comparison and salt if
-                    // neceessary. Next on the list TODO ...
-                    UserIdentity compareUserIdentity = compare.getUserIdentity();
-                    if (compareUserIdentity == null) {
-                        Logging.debug("fixDuplicatesOnce: deleting record " +
-                                      compare.getRecordId() + " in favor of record " +
-                                      base.getRecordId());
-                        errorRecorder.saveDuplicate("ChecksumUpgrader",
-                                                    "Duplicate",
-                                                    base.getRecordId(),
-                                                    compare);
-                        session.delete(compare);
-                    } else if
-                          ((baseUserIdentity == null) ||
-                           ((compareUserIdentity.getVOName() != null) &&
-                            (compareUserIdentity.getVOName().length() != 0) &&
-                            ((baseUserIdentity.getVOName() == null) ||
-                             (baseUserIdentity.getVOName().length() == 0) ||
-                             (compareUserIdentity.getVOName().startsWith("/")) ||
-                             (baseUserIdentity.getVOName().equalsIgnoreCase("Unknown")) ||
-                             (baseUserIdentity.getCommonName().startsWith("Generic")) ||
-                             (baseUserIdentity.getKeyInfo() == null)))) {
-                        Logging.debug("fixDuplicatesOnce: deleting record " +
-                                      base.getRecordId() + " in favor of record " +
-                                      compare.getRecordId());
-                        errorRecorder.saveDuplicate("ChecksumUpgrader",
-                                                    "Duplicate",
-                                                    compare.getRecordId(),
-                                                    base);
-                        session.delete(base); // Supersedes first record.
-                        base = compare; // Use this for future comparisons.
+        Boolean continueLooping = true;
+        while (continueLooping) {
+            Session session = HibernateWrapper.getSession();
+            session.setFlushMode(FlushMode.COMMIT);
+            Query q =
+                session.createSQLQuery("select md5v2, count(*) as `Count` " +
+                                       "from JobUsageRecord_Meta " +
+                                       "where md5v2 is not null " +
+                                       "group by md5v2 having Count > 1")
+                .setCacheMode(CacheMode.IGNORE)
+                .setMaxResults(10000); // Memory usage limiter
+            List csList = q.list();
+            Logging.debug("fixDuplicatesOnce: this cycle detected " +
+                          csList.size() + " duplicated checksums");
+            Iterator csIter = csList.iterator();
+            session.close();
+            int checksumsReadThisLoop = 0;
+            while (csIter.hasNext()) {
+                ++checksumsReadThisLoop;
+                session = HibernateWrapper.getSession();
+                Transaction tx;
+                tx = session.beginTransaction();
+                String md5 = "";
+                try {
+                    // Multiple results.
+                    Object[] csRow = (Object[]) csIter.next();
+                    md5 = (String) csRow[0]; // MD5 checksum
+                    // Number of entries with that checksum
+                    int nDups = ((BigInteger) csRow[1]).intValue();
+                    Logging.debug("fixDuplicatesOnce: resolving " + nDups +
+                                  " duplicates with checksum " + md5);
+                    Query rq =
+                        session.createQuery("select record from " +
+                                            "JobUsageRecord record " +
+                                            " where record.md5 = '" + md5 +
+                                            "' order by record.RecordId")
+                        .setCacheMode(CacheMode.IGNORE);
+                    Iterator rIter = rq.iterate();
+                    if (!rIter.hasNext()) {
+                        Logging.warning("fixDuplicatesOnce: no results for md5 = " +
+                                        md5);
+                        tx.rollback();
+                        session.close();
+                        continue;
                     }
+                    JobUsageRecord base = (JobUsageRecord) rIter.next(); // First record in set
+                    if (!rIter.hasNext()) {
+                        Logging.warning("fixDuplicatesOnce: supposed duplicate md5 = " +
+                                        md5 + " has only one matching record!");
+                        tx.rollback();
+                        session.close();
+                        continue;
+                    }
+                    while (rIter.hasNext()) { // Compare subsequent records.
+                        UserIdentity baseUserIdentity = base.getUserIdentity();
+                        JobUsageRecord compare = (JobUsageRecord) rIter.next();
+                        // Need to add comparison and salt if
+                        // neceessary. Next on the list TODO ...
+                        UserIdentity compareUserIdentity = compare.getUserIdentity();
+                        if ((compareUserIdentity != null) &&
+                            ((baseUserIdentity == null) ||
+                             ((compareUserIdentity.getVOName() != null) &&
+                              (compareUserIdentity.getVOName().length() != 0) &&
+                              ((baseUserIdentity.getVOName() == null) ||
+                               (baseUserIdentity.getVOName().length() == 0) ||
+                               (compareUserIdentity.getVOName().startsWith("/")) ||
+                               (baseUserIdentity.getVOName().equalsIgnoreCase("Unknown")) ||
+                               (baseUserIdentity.getCommonName().startsWith("Generic")) ||
+                               (baseUserIdentity.getKeyInfo() == null))))) {
+                            Logging.debug("fixDuplicatesOnce: deleting record " +
+                                          base.getRecordId() + " in favor of record " +
+                                          compare.getRecordId());
+                            errorRecorder.saveDuplicate("ChecksumUpgrader",
+                                                        "Duplicate",
+                                                        compare.getRecordId(),
+                                                        base);
+                            SummaryUpdater.removeFromSummary(base.getRecordId(), session);
+                            session.delete(base); // Supersedes first record.
+                            base = compare; // Use this for future comparisons.
+                        } else { // This one is not better: delete it
+                            Logging.debug("fixDuplicatesOnce: deleting record " +
+                                          compare.getRecordId() + " in favor of record " +
+                                          base.getRecordId());
+                            errorRecorder.saveDuplicate("ChecksumUpgrader",
+                                                        "Duplicate",
+                                                        base.getRecordId(),
+                                                        compare);
+                            SummaryUpdater.removeFromSummary(compare.getRecordId(), session);
+                            session.delete(compare);
+                        }
+                            
+                    }
+                    session.flush();
+                    tx.commit();
+                    session.close();
                 }
-                session.flush();
-                tx.commit();
-                session.close();
-            }
-            catch (Exception e) {
-                Logging.warning("fixDuplicatesOnce: caught exception " +
-                                "resolving duplicates with checksum" + md5);
-                tx.rollback();
-                session.close();
+                catch (Exception e) {
+                    Logging.warning("fixDuplicatesOnce: caught exception " +
+                                    "resolving duplicates with checksum " + md5, e);
+                    tx.rollback();
+                    session.close();
                 
+                }
+                ++nDupsFixed;
             }
-            ++nDupsFixed;
+            if (checksumsReadThisLoop == 0) continueLooping = false; // Done
         }
         return nDupsFixed;
     }

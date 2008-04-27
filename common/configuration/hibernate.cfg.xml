@@ -25,7 +25,7 @@
     <property name="hbm2ddl.auto">update</property>
 
     <!-- Set batching -->
-    <property name="hibernate.jdbc.batch_size">20</property>
+    <property name="hibernate.jdbc.batch_size">100</property>
 
   </session-factory>
 </hibernate-configuration>

@@ -234,7 +234,8 @@ public class CollectorService implements ServletContextListener {
                 "information_schema.statistics " +
                 "where table_schema = database() " +
                 " and table_name = 'JobUsageRecord_Meta'" +
-                " and column_name = 'md5v2'";
+                " and column_name = 'md5v2'" +
+                " and index_name != 'md5v2'";
             Session session = HibernateWrapper.getSession();
             Boolean require_checksum_upgrade = true;
             try {

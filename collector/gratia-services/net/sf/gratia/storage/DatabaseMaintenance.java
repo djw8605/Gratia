@@ -35,12 +35,12 @@ import org.hibernate.exception.*;
 public class DatabaseMaintenance {
     static final String dq = "\"";
     static final String comma = ",";
-    static final int gratiaDatabaseVersion = 28;
+    static final int gratiaDatabaseVersion = 31;
     static final int latestDBVersionRequiringStoredProcedureLoad = gratiaDatabaseVersion;
-    static final int latestDBVersionRequiringSummaryTableLoad = 28;
-    static final int latestDBVersionRequiringSummaryViewLoad = 22;
-    static final int latestDBVersionRequiringSummaryTriggerLoad = 19;
-    static final int latestDBVersionRequiringTableStatisticsRefresh = 27;
+    static final int latestDBVersionRequiringSummaryTableLoad = 30;
+    static final int latestDBVersionRequiringSummaryViewLoad = 30;
+    static final int latestDBVersionRequiringSummaryTriggerLoad = 30;
+    static final int latestDBVersionRequiringTableStatisticsRefresh = 29;
 
     java.sql.Connection connection;
     int liveVersion = 0;
@@ -240,23 +240,27 @@ public class DatabaseMaintenance {
         // NOTE: this routine creates a NON-UNIQUE index, even though it
         // will eventually become unique. The scenarios are as follows:
         //
-        // 1. Table does not exist: Hibernate will create column and
-        // index according to config (column md5v2, index17, unique)
+        // 1. Table does not exist, or table exists but column does not:
+        // Hibernate will create column and unique index. Index will be
+        // removed and replaced with a non-unique one called something
+        // different; and then upgrade will take place.
         //
-        // 2. Table exists, column md5v2 does not: Hibernate will create
-        // column but not index; line below will create index.
-        //
-        // 3. Table and column exists, index does not: line below will
+        // 2. Table and column exists, index does not: line below will
         // create index.
         //
-        // 4. Table, column and index already exist: NOP.
+        // 3. Table, column and index already exist: NOP.
         //
         // This is of course exactly what we want: if there is the
         // chance of data already existing without the new checksum the
         // upgrade thread will kick in.
 
-        if (liveVersion >= 29) {
-            AddIndex("JobUsageRecord_Meta", false, "index17", "md5v2");
+        // Remove hibernate's index, because it could be premature: replace it
+        // with our own. This won't remove the, "final" one because we
+        // called it something different. We'll need to calculate the
+        // new checksums en bloc and *then* make the index unique.
+        DropIndex("JobUsageRecord_Meta", "md5v2");
+        if (liveVersion >= 31) { // Note that we're adding a non-unique one, here.
+            AddIndex("JobUsageRecord_Meta", false, "index17", "md5v2", true);
         }
     }
 
@@ -286,7 +290,7 @@ public class DatabaseMaintenance {
             result = statement.executeUpdate(cmd);
             Logging.log("Command: OK: " + cmd);
         } catch (Exception e) {
-            Logging.log("Command: Error: " + cmd + " : " + e);
+            Logging.warning("Command: Error: " + cmd, e);
             result = -1;
         }
         return result;
@@ -552,7 +556,9 @@ public class DatabaseMaintenance {
         Logging.log("gratia.database.wantSummaryTrigger = " + wanted);
         if (1 == wanted) {
             int ver = readIntegerDBProperty("gratia.database.summaryTriggerVersion");
+            Logging.debug("Read gratia.database.summaryTriggerVersion " + ver);
             if (ver < latestDBVersionRequiringSummaryTriggerLoad) {
+                Logging.debug("Calling post install for trigger load");
                 int result = CallPostInstall("trigger");
                 if (result > -1) {
                     UpdateDbProperty("gratia.database.summaryTriggerVersion", gratiaDatabaseVersion);
@@ -817,10 +823,6 @@ public class DatabaseMaintenance {
                                 " to " + (current + 1));
                 }
             }
-            boolean haveProbeSummaryTable =
-                (1 == getCount("select count(*) from information_schema.tables where " +
-                               "table_schema = Database() and table_name = " +
-                               dq + "ProbeSummary" + dq));
             if (current == 15) {
                 int result = Execute("update JobUsageRecord_Meta set ReportedSiteName = SiteName where SiteName is not null");
                 if (result > -1) {
@@ -839,6 +841,10 @@ public class DatabaseMaintenance {
                 }
             }
             if (current == 16) {
+                boolean haveProbeSummaryTable =
+                    (1 == getCount("select count(*) from information_schema.tables where " +
+                                   "table_schema = Database() and table_name = " +
+                                   dq + "ProbeSummary" + dq));
                 int result = 0;
                 if (haveProbeSummaryTable &&
                     (1 == readIntegerDBProperty("gratia.database.wantSummaryTable")) &&
@@ -986,25 +992,54 @@ public class DatabaseMaintenance {
                                 " to " + (current + 1));
                 }
             }
-            if (current == 24 || current == 25 || current == 26 || current == 27) {
+            if (current == 24 || current == 25 || current == 26 || current == 27 || current == 28) {
                 // Auxiliary DB item upgrades only.
-                Logging.log("Gratia database upgraded from " + current + " to 28");
-                current = 28;
+                CheckIndices(); // Call again to update the DupRecord indexes.
+                Logging.log("Gratia database upgraded from " + current + " to 29");
+                current = 29;
                 UpdateDbVersion(current);
             }
-            if ((gratiaDatabaseVersion >= 29) // May not be activated yet.
-                && (current == 28)) {
-                // Fix possible problems with VONameCorrection table.
-                int tmp = current;
-                current = current + 1;
-                UpdateDbVersion(current);                
-                CheckIndices(); // Call again to update the DupRecord indexes.
-                Logging.log("Gratia database upgraded from " + tmp + " to " + current);
-            } else { // Done, one way or the other.
-                return ((current == gratiaDatabaseVersion) && checkAndUpgradeDbAuxiliaryItems());
-            }
             if (current == 29) {
+                Logging.debug("DatabaseMaintenance: " +
+                              "updating VONameCorrection table to contain null values");
+                // Correct the VONameCorrection table -- summary tables need to be recalculated.
                 int result = Execute("update VONameCorrection set ReportableVOName = null where ReportableVOName = 'null'");
+                if (result > -1) {
+                    Logging.debug("DatabaseMaintenance: " +
+                                  "dropping existing NEWVONameCorrection table");
+                    result = Execute("drop table if exists NEWVONameCorrection");
+                }
+                if (result > -1) {
+                    Logging.debug("DatabaseMaintenance: " +
+                                  "create new NEWVONameCorrection table");
+                    result = Execute("create table NEWVONameCorrection like VONameCorrection;");
+                }
+                if (result > -1) {
+                    Logging.debug("DatabaseMaintenance: " +
+                                  "Filling NEWVONameCoorection table");
+                    result = Execute("insert into NEWVONameCorrection(VOName,ReportableVOName) " +
+                                     "select distinct VOName,ReportableVOName from VONameCorrection");
+                }
+                if (result > -1) {
+                    Logging.debug("DatabaseMaintenance: " +
+                                  "Filling in best VOid values");
+                    result = Execute("update NEWVONameCorrection N, VONameCorrection V " +
+                                     "set N.VOid = V.VOid " +
+                                     "where ((N.VOName = V.VOName) and " +
+                                     "(((N.ReportableVOName is null) and (V.ReportableVOName is null)) or " +
+                                     "(N.ReportableVOName = V.ReportableVOName)))");
+                }
+                if (result > -1) {
+                    Logging.debug("DatabaseMaintenance: " +
+                                  "Removing old backup table");
+                    result = Execute("DROP TABLE IF EXISTS BackupVONameCorrection");
+                }
+                if (result > -1) {
+                    Logging.debug("DatabaseMaintenance: " +
+                                  "replacing VONameCorrection table with new one");
+                    result = Execute("rename table VONameCorrection to BackupVONameCorrection, " +
+                                     "NEWVONameCorrection to VONameCorrection");
+                }
                 if (result > -1) {
                     Logging.log("Gratia database upgraded from " + current + " to " + (current + 1));
                     current = current + 1;
@@ -1012,7 +1047,18 @@ public class DatabaseMaintenance {
                 } else {
                     Logging.log("Gratia database FAILED to upgrade from " + current +
                                 " to " + (current + 1));
-                }                
+                }         
+            }
+            if (gratiaDatabaseVersion < 31) { // FQAN checksum upgrade at v31 May not be activated yet.
+                // Done, one way or the other.
+                return ((current == gratiaDatabaseVersion) && checkAndUpgradeDbAuxiliaryItems());
+            }
+            if (current == 30) {
+                int tmp = current;
+                current = current + 1;
+                UpdateDbVersion(current);
+                CheckIndices(); // Call again to update the md5v2 index
+                Logging.log("Gratia database upgraded from " + tmp + " to " + current);
             }
 //             if (current == 29) {
 //                 int result = ReparseRecordsWithExtraXml();
@@ -1088,8 +1134,8 @@ public class DatabaseMaintenance {
         if (result > -1) {
             String command = "CREATE TABLE TableStatistics(" +
                 "RecordType VARCHAR(255) NOT NULL," +
-                "nRecords INTEGER DEFAULT 0, Qualifier VARCHAR(255)), " +
-                "UNIQUE KEY index1 (RecordType,Qualifier)";
+                "nRecords INTEGER DEFAULT 0, Qualifier VARCHAR(255), " +
+                "UNIQUE KEY index1 (RecordType,Qualifier))";
 
             if (isInnoDB) {
                 command += " ENGINE = 'innodb'";

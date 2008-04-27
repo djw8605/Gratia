@@ -350,7 +350,22 @@ public class ListenerThread extends Thread
 
                         if ((!gothistory) || (md5key == null)) {
                             md5key = current.computemd5();
-                            current.setmd5(md5key); 
+                            current.setmd5(md5key);
+                            if (current.getTableName()
+                                .equals("JobUsageRecord")) {
+                                // Need to do this to keep number of
+                                // duplicates making it into the DB
+                                // under control during the upgrade
+                                // procedure. This will be removed for a
+                                // future upgrade as it is only really
+                                // necessary for very large DBs.
+                                Logging.debug("Calculating and saving " +
+                                              "old-style checksum for " +
+                                              "JobUsageRecord");
+                                JobUsageRecord jRecord = (JobUsageRecord) current;
+                                String oldMd5 = jRecord.computeOldMd5();
+                                jRecord.setoldMd5(oldMd5);
+                            }
                         }
                         current.setDuplicate(false);
 
@@ -441,6 +456,8 @@ public class ListenerThread extends Thread
                                                                   original_record);
                                                 }
                                             }
+                                            SummaryUpdater.removeFromSummary(original_record.getRecordId(),
+                                                                             session);
                                             session.delete(original_record);
                                             if (!savedCurrent) {
                                                 session.save(current);

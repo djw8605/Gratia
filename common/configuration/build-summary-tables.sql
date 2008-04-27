@@ -1,185 +1,71 @@
-drop table if exists ProbeSummary, UserProbeSummary, VOProbeSummary, VOProbeSummaryData,
-	ProbeStatus, HostDescriptionProbeSummary;
+DROP TABLE IF EXISTS ProbeStatus, MasterSummaryData;
 
-CREATE TABLE `ProbeStatus` (
-	`EndTime` DATETIME NOT NULL DEFAULT 0,
-	`ProbeName` VARCHAR(255) NOT NULL DEFAULT '',
-	`Njobs` INTEGER NOT NULL DEFAULT 0
+CREATE TABLE `ProbeStatus` 
+(`EndTime` DATETIME NOT NULL DEFAULT 0,
+ `ProbeName` VARCHAR(255) NOT NULL DEFAULT '',
+ `Njobs` INTEGER NOT NULL DEFAULT 0,
+ INDEX index01(EndTime),
+ INDEX index02(ProbeName),
+ UNIQUE INDEX index03(EndTime, ProbeName)
 ) ENGINE = 'innodb';
 
-CREATE TABLE `ProbeSummary` (
-	`EndTime` DATETIME NOT NULL DEFAULT 0,
-	`ProbeName` VARCHAR(255) NOT NULL DEFAULT '',
-	`ResourceType` VARCHAR(255) DEFAULT 'Unknown',
-	`Njobs` INTEGER NOT NULL DEFAULT 0,
-	`WallDuration` DOUBLE NOT NULL DEFAULT 0,
-	`CpuUserDuration` DOUBLE NOT NULL DEFAULT 0,
-	`CpuSystemDuration` DOUBLE NOT NULL DEFAULT 0
+CREATE TABLE `MasterSummaryData`
+(`EndTime` DATETIME NOT NULL DEFAULT 0,
+ `VOcorrid` INT NOT NULL DEFAULT 0,
+ `ProbeName` VARCHAR(255) NOT NULL DEFAULT '',
+ `CommonName` VARCHAR(255) NOT NULL DEFAULT 'Unknown',
+ `ResourceType` VARCHAR(255) NOT NULL DEFAULT 'Unknown',
+ `HostDescription` VARCHAR(255) NOT NULL DEFAULT 'Unknown', 
+ `ApplicationExitCode` VARCHAR(255) NOT NULL DEFAULT '0',
+ `Njobs` INTEGER NOT NULL DEFAULT 0,
+ `WallDuration` DOUBLE NOT NULL DEFAULT 0,
+ `CpuUserDuration` DOUBLE NOT NULL DEFAULT 0,
+ `CpuSystemDuration` DOUBLE NOT NULL DEFAULT 0,
+ INDEX index01(EndTime),
+ INDEX index02(VOcorrid),
+ INDEX index03(ProbeName),
+ INDEX index04(CommonName),
+ INDEX index05(ResourceType),
+ INDEX index06(HostDescription),
+ INDEX index07(ApplicationExitCode),
+ UNIQUE INDEX index08(EndTime, VOcorrid, ProbeName,
+                      CommonName, ResourceType,
+                      HostDescription, ApplicationExitCode)
+
 ) ENGINE = 'innodb';
 
-CREATE TABLE `UserProbeSummary` (
-	`EndTime` DATETIME NOT NULL DEFAULT 0,
-	`CommonName` VARCHAR(255) DEFAULT 'Unknown',
-	`ProbeName` VARCHAR(255) NOT NULL DEFAULT '',
-	`ResourceType` VARCHAR(255) DEFAULT 'Unknown',
-	`Njobs` INTEGER NOT NULL DEFAULT 0,
-	`WallDuration` DOUBLE NOT NULL DEFAULT 0,
-	`CpuUserDuration` DOUBLE NOT NULL DEFAULT 0,
-	`CpuSystemDuration` DOUBLE NOT NULL DEFAULT 0
-) ENGINE = 'innodb';
-
-CREATE TABLE `VOProbeSummaryData` (
-	`EndTime` DATETIME NOT NULL DEFAULT 0,
-	`VOcorrid` INT NOT NULL DEFAULT 0,
-	`ProbeName` VARCHAR(255) NOT NULL DEFAULT '',
-	`CommonName` VARCHAR(255) DEFAULT 'Unknown',
-	`ResourceType` VARCHAR(255) DEFAULT 'Unknown',
-	`Njobs` INTEGER NOT NULL DEFAULT 0,
-	`WallDuration` DOUBLE NOT NULL DEFAULT 0,
-	`CpuUserDuration` DOUBLE NOT NULL DEFAULT 0,
-	`CpuSystemDuration` DOUBLE NOT NULL DEFAULT 0
-) ENGINE = 'innodb';
-
-CREATE TABLE `HostDescriptionProbeSummary` (
-	`EndTime` DATETIME NOT NULL DEFAULT 0,
-	`HostDescription` VARCHAR(255) DEFAULT 'Unknown',
-	`ProbeName` VARCHAR(255) NOT NULL DEFAULT '',
-	`ResourceType` VARCHAR(255) DEFAULT 'Unknown',
-	`Njobs` INTEGER NOT NULL DEFAULT 0,
-	`WallDuration` DOUBLE NOT NULL DEFAULT 0,
-	`CpuUserDuration` DOUBLE NOT NULL DEFAULT 0,
-	`CpuSystemDuration` DOUBLE NOT NULL DEFAULT 0
-) ENGINE = 'innodb';
-
-insert into ProbeStatus
-	(select
-		str_to_date(date_format(ServerDate,'%Y-%c-%e %H:00:00'),'%Y-%c-%e %H:00:00') as EndTime,
-		ProbeName,
-		count(*) as Njobs
-		from JobUsageRecord_Meta
-		group by ProbeName,str_to_date(date_format(ServerDate,'%Y-%c-%e %H:00:00'),'%Y-%c-%e %H:00:00')
-);
-
-alter table ProbeStatus
-	add index index01(EndTime);
-
-alter table ProbeStatus
-	add index index02(ProbeName);
-
-insert into ProbeSummary
-	(select
-		date(EndTime) as EndTime,
-		ProbeName,
-		ResourceType,
-		sum(Njobs) as Njobs,
-		sum(WallDuration) as WallDuration,
-		sum(CpuUserDuration) as CpuUserDuration,
-		sum(CpuSystemDuration) as CpuSystemDuration
-		from JobUsageRecord, JobUsageRecord_Meta
-		where CpuUserDuration is not null
-      and JobUsageRecord.dbid = JobUsageRecord_Meta.dbid
-		group by ProbeName,ResourceType,date(EndTime)
-);
-
-alter table ProbeSummary
-	add index index01(EndTime);
-
-alter table ProbeSummary
-	add index index02(ProbeName);
-
-alter table ProbeSummary
-	add index index03(ResourceType);
-
-insert into UserProbeSummary
-	(select
-		date(EndTime) as EndTime,
-		CommonName,
-		ProbeName,
-		ResourceType,
-		sum(Njobs) as Njobs,
-		sum(WallDuration) as WallDuration,
-		sum(CpuUserDuration) as CpuUserDuration,
-		sum(CpuSystemDuration) as CpuSystemDuration
-		from JobUsageRecord, JobUsageRecord_Meta
-		where CpuUserDuration is not null
-      and JobUsageRecord.dbid = JobUsageRecord_Meta.dbid
-		group by CommonName,ProbeName,ResourceType,date(EndTime)
-);
-
-alter table UserProbeSummary
-	add index index01(EndTime);
-
-alter table UserProbeSummary
-	add index index02(CommonName);
-
-alter table UserProbeSummary
-	add index index03(ProbeName);
-
-alter table UserProbeSummary
-	add index index04(ResourceType);
-
-INSERT INTO VOProbeSummaryData
-	(SELECT
-		DATE(EndTime) AS EndTime,
-		VC.corrid AS VOcorrid,
-		ProbeName,
-		CommonName,
-		ResourceType,
-		SUM(Njobs) AS Njobs,
-		SUM(WallDuration) AS WallDuration,
-		SUM(CpuUserDuration) AS CpuUserDuration,
-		SUM(CpuSystemDuration) AS CpuSystemDuration
-		FROM JobUsageRecord J, JobUsageRecord_Meta M, VONameCorrection VC
-		WHERE J.CpuUserDuration IS NOT NULL
-      AND J.dbid = M.dbid
-      AND J.VOName = binary VC.VOName
-      AND ((binary J.ReportableVOName = binary VC.ReportableVOName)
-           OR ((J.ReportableVOName IS NULL) AND (VC.ReportableVOName IS NULL)))
-		GROUP BY VOcorrid, ProbeName, CommonName, ResourceType, DATE(EndTime)
-);
-
-alter table VOProbeSummaryData
-	add index index01(EndTime);
-
-alter table VOProbeSummaryData
-	add index index02(VOcorrid);
-
-alter table VOProbeSummaryData
-	add index index03(ProbeName);
-
-alter table VOProbeSummaryData
-	add index index04(ResourceType);
-
-alter table VOProbeSummaryData
-	add index index05(CommonName);
-
-insert into HostDescriptionProbeSummary
-	(select
-		date(EndTime) as EndTime,
-		HostDescription,
-		ProbeName,
-		ResourceType,
-		sum(Njobs) as Njobs,
-		sum(WallDuration) as WallDuration,
-		sum(CpuUserDuration) as CpuUserDuration,
-		sum(CpuSystemDuration) as CpuSystemDuration
-		from JobUsageRecord, JobUsageRecord_Meta
-		where CpuUserDuration is not null
-      and JobUsageRecord.dbid = JobUsageRecord_Meta.dbid
-		group by HostDescription,ProbeName,ResourceType,date(EndTime)
-);
-
-alter table HostDescriptionProbeSummary
-	add index index01(EndTime);
-
-alter table HostDescriptionProbeSummary
-	add index index02(HostDescription);
-
-alter table HostDescriptionProbeSummary
-	add index index03(ProbeName);
-
-alter table HostDescriptionProbeSummary
-	add index index04(ResourceType);
+INSERT INTO ProbeStatus
+SELECT STR_TO_DATE(DATE_FORMAT(ServerDate, '%Y-%c-%e %H:00:00'),
+                   '%Y-%c-%e %H:00:00') AS sTime,
+       ProbeName,
+       COUNT(*)
+FROM JobUsageRecord_Meta
+GROUP BY ProbeName, sTime;
+         
+INSERT INTO MasterSummaryData
+SELECT DATE(EndTime) AS eDate,
+       VC.corrid AS VOcorrid,
+       ProbeName,
+       CommonName,
+       ResourceType,
+       HostDescription,
+       IFNULL(RT.value, J.Status) AS ApplicationExitCode,
+       SUM(Njobs),
+       SUM(WallDuration),
+       SUM(CpuUserDuration),
+       SUM(CpuSystemDuration)
+FROM JobUsageRecord J
+     JOIN JobUsageRecord_Meta M ON (J.dbid = M.dbid)
+     JOIN VONameCorrection VC ON
+      ((J.VOName = BINARY VC.VOName) AND
+       (((J.ReportableVOName IS NULL) AND (VC.ReportableVOName IS NULL))
+        OR (BINARY J.ReportableVOName = BINARY VC.ReportableVOName)))
+     LEFT JOIN Resource RT ON
+      ((J.dbid = RT.dbid) AND
+       (RT.description = 'ExitCode'))
+WHERE J.CpuUserDuration IS NOT NULL
+GROUP BY VOcorrid, ProbeName, CommonName,
+         ResourceType, HostDescription, ApplicationExitCode, eDate;
 
 -- Local Variables:
 -- mode: sql
