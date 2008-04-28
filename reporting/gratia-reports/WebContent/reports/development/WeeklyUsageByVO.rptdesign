@@ -1609,6 +1609,19 @@ else {&#xD;
             <property name="dataSet">6MonthHistory</property>
             <property name="height">600px</property>
             <property name="width">800px</property>
+            <list-property name="paramBindings">
+                <structure>
+                    <property name="paramName">VOselect</property>
+                    <expression name="expression">params["SelectVOs"]</expression>
+                </structure>
+                <structure>
+                    <property name="paramName">VOSelType</property>
+                    <expression name="expression">params["SelType"]</expression>
+                </structure>
+                <structure>
+                    <property name="paramName">UserRole</property>
+                </structure>
+            </list-property>
             <list-property name="boundDataColumns">
                 <structure>
                     <property name="name">VOName</property>
