@@ -133,6 +133,19 @@
 #              UFlorida-HPC        1521    was not reporting
 #              UFlorida-IHEPA      1521    was not reporting
 #              USCMS-FNAL-WC1-CE   1809    default (1.04)
+#   4/29/08 (John Weigand)
+#              Changed the following to use the GIP reported configuration and the 
+#              normalization factors from http://t2.unl.edu/gratia/site_normalization
+#                                     old   new
+#                                     ----  ----
+#                 AGLT2               2168  2167
+#                 BU_ATLAS_Tier2      1533  1487
+#                 IU_OSG              1678  2101
+#                 MWT2_UC             1787  1521
+#                 MWT2_IU             1787  not being reported
+#                 SWT2_CPB            1645  1628
+#                 UFlorida-PG         1602  1535
+#
 #    
 ##################################################################
 #-- Site  ------- SPECint2000
@@ -149,7 +162,7 @@ Purdue-RCAC         1543
 UCSDT2              2023
 UFlorida-HPC        1521
 UFlorida-IHEPA      1521
-UFlorida-PG         1602
+UFlorida-PG         1535
 #--- CMS Tier unknown ----    
 HEPGRID_UERJ        2117
 SPRACE              2117
@@ -158,14 +171,14 @@ SPRACE              2117
 #--- ATLAS Tier 1 ----
 BNL_ATLAS_1         1393
 #--- ATLAS Tier 2 ----
-AGLT2               2168
-BU_ATLAS_Tier2      1533
-IU_OSG              1678
+AGLT2               2167
+BU_ATLAS_Tier2      1487
+IU_OSG              2101
 MWT2_IU             1787
-MWT2_UC             1787
+MWT2_UC             1521
 OU_OCHEP_SWT2       2389
 PROD_SLAC           1789
-SWT2_CPB            1645
+SWT2_CPB            1628
 UC_ATLAS_MWT2       1285
 UTA_SWT2            1543
 #--- ATLAS Tier unknown ----
