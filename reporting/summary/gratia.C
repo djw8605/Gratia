@@ -579,7 +579,7 @@ void CpuPerWeek(TSQLServer *db, TDatime *begin, TDatime *end, const char *dir, i
    const char *sql = 
       "select date_format(VOProbeSummary.EndTime, '%Y-%U') as endtime,"
       "    sum(VOProbeSummary.WallDuration) as WallDuration"
-      "  from VOProbeSummaryData as VOProbeSummary"
+      "  from VOProbeSummary"
       "  where (EndTime) >= date('%s') and (EndTime) < date('%s')  and ResourceType = 'Batch'"
       " group by date_format(VOProbeSummary.EndTime,'%Y-%U') order by VOProbeSummary.EndTime;";
 
@@ -664,15 +664,11 @@ void VOWeek(TSQLServer *db, TDatime *begin, TDatime *end, const char *dir, int x
 {
 
    const char *sql = 
-      "select VO.VOName, sum(Wall) as sumwall from ("
-      "   select VOProbeSummary.VOcorrid, sum(VOProbeSummary.WallDuration) as Wall"
-      "   from VOProbeSummaryData as VOProbeSummary"
-      "   where (EndTime) >= date('%s') and (EndTime) < date('%s')  and ResourceType = 'Batch'    " 
-      "   group by VOProbeSummary.VOcorrid) as sub2, VONameCorrection, VO "
-      "where sub2.VOCorrid = VONameCorrection.corrid and VONameCorrection.VOid = VO.VOid "
-      "and VO.VOName != 'Unknown' "
-      "group by VO.VOName "
-      "order by sumwall desc, VO.VOName     ";
+      "select VOName, sum(WallDuration) as sumwall from VOProbeSummary"
+      "   where EndTime >= date('%s') and EndTime < date('%s') " 
+      "     and ResourceType = 'Batch'and VOName != 'Unknown' "
+      "group by VOName "
+      "order by sumwall desc, VOName     ";
 
    TString sbegin( begin->AsSQLString() );
    TString send( end->AsSQLString() );
