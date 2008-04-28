@@ -36,10 +36,6 @@
             <property name="value">gratia</property>
         </structure>
         <structure>
-            <property name="name">DatabasePassword</property>
-            <property name="value">notused</property>
-        </structure>
-        <structure>
             <property name="name">DisplayMetric</property>
             <property name="value">jobcount</property>
         </structure>
@@ -851,7 +847,7 @@
                     <property name="dataType">string</property>
                     <property name="isRequired">true</property>
                     <property name="controlType">text-box</property>
-                    <property name="defaultValue">jdbc:mysql://gratia-db01.fnal.gov:3320/gratia</property>
+                    <property name="defaultValue">jdbc:mysql://gratia-vm02.fnal.gov:3320/gratia_jeffmack</property>
                     <structure name="format">
                         <property name="category">Unformatted</property>
                         <property name="pattern">Unformatted</property>
@@ -875,7 +871,7 @@
                     <property name="dataType">string</property>
                     <property name="isRequired">true</property>
                     <property name="controlType">text-box</property>
-                    <property name="defaultValue">notused</property>
+                    <property name="defaultValue">proto</property>
                     <structure name="format">
                         <property name="category">Unformatted</property>
                         <property name="pattern">Unformatted</property>
@@ -1048,7 +1044,7 @@
     <data-sources>
         <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="fermigrid1" id="357">
             <property name="odaDriverClass">com.mysql.jdbc.Driver</property>
-            <property name="odaURL">jdbc:mysql://gratia-db01.fnal.gov:3320/gratia</property>
+            <property name="odaURL">jdbc:mysql://gratia-vm02.fnal.gov:3320/gratia_jeffmack</property>
             <property name="odaUser">gratia</property>
             <encrypted-property name="odaPassword">cHJvdG8=</encrypted-property>
         </oda-data-source>
@@ -1060,6 +1056,27 @@
                     <property name="name">ChartNr</property>
                     <expression name="expression">(row["final_rank"]-1) / params["GroupsPerChart"]</expression>
                     <property name="dataType">integer</property>
+                </structure>
+                <structure>
+                    <property name="name">weekdate</property>
+                    <expression name="expression">var daynr;
+var monthnr;
+var yearynr;
+var yearmon;
+daynr = row["datevalue"].getDate().toString();
+monthnr = ( row["datevalue"].getMonth()+1).toString();
+yearnr =  row["datevalue"].getFullYear().toString();
+if (monthnr.length > 1){
+	yearmon = yearnr  + "-" + monthnr
+}else{
+	yearmon = yearnr  + "-0" +  monthnr
+}
+if (daynr.length > 1){
+	yearmon + "-" + daynr
+}else{
+	yearmon  + "-0" +  daynr 
+}</expression>
+                    <property name="dataType">string</property>
                 </structure>
             </list-property>
             <structure name="cachedMetaData">
@@ -1098,6 +1115,11 @@
                         <property name="position">7</property>
                         <property name="name">ChartNr</property>
                         <property name="dataType">integer</property>
+                    </structure>
+                    <structure>
+                        <property name="position">8</property>
+                        <property name="name">weekdate</property>
+                        <property name="dataType">string</property>
                     </structure>
                 </list-property>
             </structure>
@@ -1149,8 +1171,9 @@ yearnr + "-" + monthnr + "-" + daynr;</expression>
                     <property name="name">GroupByFormat</property>
                     <property name="dataType">string</property>
                     <property name="position">5</property>
-                    <expression name="defaultValue">"%Y-%U"</expression>
+                    <expression name="defaultValue">"%Y-%m-%d"</expression>
                     <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
                 </structure>
             </list-property>
             <list-property name="resultSet">
@@ -2346,7 +2369,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;weekdate&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -2539,6 +2562,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
                                     <structure>
                                         <property name="name">datevalue</property>
                                         <expression name="expression">dataSetRow["datevalue"]</expression>
+                                        <property name="dataType">string</property>
                                     </structure>
                                     <structure>
                                         <property name="name">WallDuration</property>
@@ -2556,6 +2580,11 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
                                         <property name="name">final_rank</property>
                                         <expression name="expression">dataSetRow["final_rank"]</expression>
                                         <property name="dataType">any</property>
+                                    </structure>
+                                    <structure>
+                                        <property name="name">weekdate</property>
+                                        <expression name="expression">dataSetRow["weekdate"]</expression>
+                                        <property name="dataType">string</property>
                                     </structure>
                                 </list-property>
                                 <property name="style">sans-style1</property>
