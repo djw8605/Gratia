@@ -206,7 +206,7 @@ my %procedures =
             VOProbeSummary.CommonName as UserName/,
    from_tables => q/Site,Probe,VOProbeSummary/,
    main_where => q/Probe.siteid = Site.siteid
-          and date_format(VOProbeSummary.EndTime,''',format,''') = ''',fordate,'''
+          and str_to_date(date_format(VOProbeSummary.EndTime, ''%x-%v Monday''),'' %x-%v %W'') = ''',fordate,'''
               and VOProbeSummary.ProbeName = Probe.probename
               and (VOProbeSummary.VOName =''', forvoname, ''' or
                    (''', forvo, ''' = ''AnyVO'' and
@@ -222,16 +222,16 @@ my %procedures =
                             q/vos varchar(128)/,
                             q/voseltype varchar(8)/ ],
    select_columns => q/VOProbeSummary.VOName,
-                      date_format(VOProbeSummary.EndTime, ''', format, ''') as endtime,
-                      sum(VOProbeSummary.WallDuration) as WallDuration,
-                      sum(VOProbeSummary.CpuUserDuration +
-                        VOProbeSummary.CpuSystemDuration) as Cpu,
-                      sum(VOProbeSummary.Njobs) as Njobs/,
+   					str_to_date(date_format(VOProbeSummary.EndTime, ''%x-%v Monday''),'' %x-%v %W'') as datevalue,	
+                    sum(VOProbeSummary.WallDuration) as WallDuration,
+                    sum(VOProbeSummary.CpuUserDuration +
+                    VOProbeSummary.CpuSystemDuration) as Cpu,
+                    sum(VOProbeSummary.Njobs) as Njobs/,
    from_tables => q/VOProbeSummary/,
    main_where => q/VOProbeSummary.VOName ', voseltype, vos, '/,
-   group_by => q/VOProbeSummary.EndTime,
+   group_by => q/datevalue,
                 VOProbeSummary.VOName/,
-   order_by => q/VOProbeSummary.EndTime/
+   order_by => q/datevalue/
  },
  UsageBySiteByVO1 =>
  { procedure_arguments => [ @default_procedure_arguments,
@@ -314,7 +314,7 @@ my %procedures =
   WeeklyUsageByVORanked =>
  { select_columns => q/final_rank,
                       VOProbeSummary.VOName,
-                      date_format(VOProbeSummary.EndTime,''', format, ''') as datevalue,
+                      str_to_date(date_format(VOProbeSummary.EndTime, ''%x-%v Monday''),'' %x-%v %W'') as datevalue,
                       sum(VOProbeSummary.WallDuration) as WallDuration,
                       sum(VOProbeSummary.CpuUserDuration +
                         VOProbeSummary.CpuSystemDuration) as Cpu,
