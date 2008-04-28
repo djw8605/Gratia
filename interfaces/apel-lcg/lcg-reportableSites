@@ -145,6 +145,12 @@
 #                 MWT2_IU             1787  not being reported
 #                 SWT2_CPB            1645  1628
 #                 UFlorida-PG         1602  1535
+#   4/29/08 (John Weigand)
+#               Dropped the following as they are not in the org_Tier2 table.
+#                 HEPGRID_UERJ        2117
+#                 SPRACE              2117
+#                 UC_Teraport         1250
+#                 OU_OSCER_ATLAS      1543
 #
 #    
 ##################################################################
@@ -164,8 +170,8 @@ UFlorida-HPC        1521
 UFlorida-IHEPA      1521
 UFlorida-PG         1535
 #--- CMS Tier unknown ----    
-HEPGRID_UERJ        2117
-SPRACE              2117
+#HEPGRID_UERJ        2117
+#SPRACE              2117
 ####################################
 ####################################
 #--- ATLAS Tier 1 ----
@@ -182,8 +188,8 @@ SWT2_CPB            1628
 UC_ATLAS_MWT2       1285
 UTA_SWT2            1543
 #--- ATLAS Tier unknown ----
-UC_Teraport         1250
-OU_OSCER_ATLAS      1543
+#UC_Teraport         1250
+#OU_OSCER_ATLAS      1543
 ####################################
 ####################################
 ##-- obsolete --
