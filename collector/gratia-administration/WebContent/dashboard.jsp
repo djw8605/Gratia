@@ -33,13 +33,8 @@
 	String menuClass = "menuItem2";
 	if (fqan != null)
 	{
-		if (fqan.indexOf("NoPrivileges") > -1)
-			login = false;
-		else
-		{
-			login = true;
-			menuClass = "menuItem";
-		}
+		login = true;
+		menuClass = "menuItem";
 	}
 
 	%>

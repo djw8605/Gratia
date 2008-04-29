@@ -18,6 +18,9 @@ try
    if ((net.sf.gratia.vomsSecurity.CertificateHandler) session.getAttribute("certificateHandler") != null)
 	session.removeAttribute("certificateHandler");
 
+   if ((String) session.getAttribute("FQAN") != null)
+	session.removeAttribute("FQAN");
+   
    // Set session attribute for the CertificateHandler
 	net.sf.gratia.vomsSecurity.CertificateHandler certificateHandler = new net.sf.gratia.vomsSecurity.CertificateHandler(request);
 	session.setAttribute("certificateHandler", certificateHandler);
@@ -97,6 +100,10 @@ try
 				<div id="displayRoles"></div>
 		</td>
 	</tr>
+	<tr>
+	<td><div id="roleSelected"></div>
+	</td>
+	</tr>
 	</table>
 </form>
 <%
@@ -108,6 +115,14 @@ try
 	<p class='txterror'>You have no privileges to access the administration pages</p>
 	<hr>
 	<%
+	}
+	if ((String) session.getAttribute("FQAN") == null)
+	{
+		%>
+		<hr>
+		<p class='txterror'>You have no privileges to access the administration pages</p>
+		<hr>
+		<%		
 	}
 }
 catch (Exception ex)

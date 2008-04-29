@@ -1,10 +1,10 @@
 <%
-	session.setAttribute("FQAN", "NoPrivileges");
+   if ((String) session.getAttribute("FQAN") != null)
+		session.removeAttribute("FQAN");
 
 	String selectedRole = request.getParameter("selectedRole");
 	if (selectedRole != null)
 	{
-	out.println("<br>Selected Role = " + selectedRole + "<br>");
 		selectedRole = selectedRole.trim();
 
 		//  Check if a certificate handler seesion attribute exists to pick up the settings
@@ -26,4 +26,7 @@
 			}
 		}
  	}
+
+	   if ((String) session.getAttribute("FQAN") == null)
+			out.println("<hr><p class='txterror'>You have no privileges to access the administration pages</p><hr>");
 %>

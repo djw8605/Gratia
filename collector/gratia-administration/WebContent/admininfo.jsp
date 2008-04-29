@@ -23,7 +23,7 @@
    if (fqan != null)
 	fqan = " FQAN: " + fqan;
    else
-	fqan = "";
+	fqan = "No Administrative Privileges";
 %>
 <div class='menuFqan'>
   <table width="80%" cellspacing="0" cellpadding="0">
