@@ -28,6 +28,12 @@ public class CertificateHandler
 	 */
 
 	private String _vomsServerFile;
+	private String _configPath;
+
+	//---- ssl information ----
+	private String sslCAFiles  = null;
+	private String sslKey      = null;
+	private String sslCertfile = null;
 
 	//---- certificate information ----
 	private String userDN   = null;
@@ -36,6 +42,7 @@ public class CertificateHandler
 
 	//---- VOMS information ----
 	private String[] voFQANlist = null;		// list of FQAN with admin access to compare with
+	private String[] DNlist     = null;		// list of FQAN with admin access to compare with
 	private String[] voList     = null;		// list of VOs to display for user selection
 	private String[] rolesVOMS  = null;		// list of VOMS roles to display for user selection
 	private String[] groupsVOMS = null;		// list of VOMS groups to display for user selection
@@ -48,8 +55,8 @@ public class CertificateHandler
 
 	private String secureConnection = null;	// form: https://gratia.osg.org:8899
 	private String openConnection   = null;	// form: http://gratia.osg.org:8801
-	private String dbConnection     = null;	// feature use
-	private String servicesVersion     = null;	// feature use
+	private String dbConnection     = null;	// connected database
+	private String servicesVersion  = null;	// services version
 
 	//---------------------------------------------------
 	public CertificateHandler(HttpServletRequest request)
@@ -80,12 +87,10 @@ public class CertificateHandler
 
 		// ---- setting up to call VOMS (not sure how much is needed)
 		//		this needs to be set some other way (TRUSTED_CA on VDT dist ----
-		System.setProperty("sslCAFiles","/etc/grid-security/certificates/*.0");
-		// this may be ok
+		System.setProperty("sslCAFiles", sslCAFiles);
 		System.setProperty("axis.socketSecureFactory","org.glite.security.trustmanager.axis.AXISSocketFactory");
-		// these needs to be set some other way (I think there is a properties file)
-		System.setProperty("sslKey","/etc/grid-security/http/httpkey.pem");
-		System.setProperty("sslCertfile","/etc/grid-security/http/httpcert.pem");
+		System.setProperty("sslKey", sslKey);
+		System.setProperty("sslCertfile", sslCertfile);
 
 	}
 
@@ -97,47 +102,77 @@ public class CertificateHandler
 		String voName = "";
 		TreeSet tempVOs = new TreeSet();	// sorted arrayList with unique names for the voList
 		List tempFQANs  = new ArrayList();	// FQAN list from service properties file
+		List tempDNs    = new ArrayList();	// DN list from service properties file
 
 		try
 		{
-			_vomsServerFile = net.sf.gratia.util.Configuration.getConfigurationPath() + "/" + p.getProperty("service.voms.connections");
+			_configPath      = net.sf.gratia.util.Configuration.getConfigurationPath() + "/";
+			_vomsServerFile  = p.getProperty("service.voms.connections");
 			secureConnection = p.getProperty("service.secure.connection");
+			if (secureConnection == null)
+				secureConnection = "";
 			openConnection   = p.getProperty("service.open.connection");
+			if (openConnection == null)
+				openConnection = "";
 			dbConnection     = p.getProperty("service.mysql.url");
-			servicesVersion         = p.getProperty("gratia.services.version");
+			if (dbConnection == null)
+				dbConnection = "";
+			servicesVersion  = p.getProperty("gratia.services.version");
+			if (servicesVersion == null)
+				servicesVersion = "";
+			sslCAFiles       = p.getProperty("service.ca.certificates");
+			if (sslCAFiles == null)
+				sslCAFiles = "/etc/grid-security/certificates/";
+			sslCAFiles = sslCAFiles + "*.0";
+			sslKey           = p.getProperty("service.vdt.key.file");
+			if (sslKey == null)
+				sslKey = "/etc/grid-security/http/httpkey.pem";
+			sslCertfile      = p.getProperty("service.vdt.cert.file");
+			if (sslCertfile == null)
+				sslCertfile = "/etc/grid-security/http/httpcert.pem";
 
-			boolean foundAdmin = true;
-			int admid = 0;
-			String admin_id = "service.admin.identity.";
-			while(foundAdmin)
+			Enumeration e = p.propertyNames ();
+			String key = "";
+			String value = "";
+			while ( e.hasMoreElements() )
 			{
-				vos = p.getProperty(admin_id + admid);
-				if (vos != null)
+				key =  (String) e.nextElement();
+				if (key.indexOf("service.admin.FQAN") >= 0)
 				{
-					vos = vos.trim();
-					tempFQANs.add(vos);
+					value = p.getProperty (key);
+
+					if (value != null)
+					{
+						value = value.trim();
+						tempFQANs.add(value);
 
 					// Extract the node name from the identity, example of identity:
-					// 	     /gratia-vo1/Role=VO-Admin
+					//       /gratia-vo1/Role=VO-Admin
 					// we want to extract gratia-vo1 to populate the pull down menu.
 
-					String[] VoFullStr = vos.split ("/");
-					voName = VoFullStr[1];
-					if (voName != null)
-						tempVOs.add(voName);
-
-					admid += 1;
+						String[] VoFullStr = value.split ("/");
+						voName = VoFullStr[1];
+						if (voName != null)
+							tempVOs.add(voName);
+					}
 				}
-				else
+				else if (key.indexOf("service.admin.DN") >= 0)
 				{
-					foundAdmin = false;
+					value =  p.getProperty (key);
+
+					if (value != null)
+					{
+						value = value.trim();
+						tempDNs.add(value);
+					}
 				}
 			}
 			// Convert the ArrayLists to string arrays
 			voList     = (String[])tempVOs.toArray(new String[tempVOs.size()]);
 			voFQANlist = (String[])tempFQANs.toArray(new String[tempFQANs.size()]);
-		} 
-		catch (Exception e) 
+			DNlist     = (String[])tempDNs.toArray(new String[tempDNs.size()]);
+		}
+		catch (Exception e)
 		{
 			e.printStackTrace();
 		}
@@ -173,8 +208,7 @@ public class CertificateHandler
 		}
 		catch (IOException e)
 		{
-			String msg = "CERTIFICATE HANDLER message: <br>" + e.toString();
-			//System.out.println(msg);
+			String msg = "ERROR reading file: " + voFile + "<br>" + e.toString();
 			return msg;
 		}
 
@@ -185,35 +219,70 @@ public class CertificateHandler
 	}
 
 	// ----------------------------------
+	public String checkVOMSFile ()
+	{
+
+		File vomsFile = new File(_configPath + _vomsServerFile);
+		String msg1 = "<hr><p class='txterror'>File of VOMS servers "; 
+		String msg2 = _configPath + _vomsServerFile + "</em> <br>Please contact your administrator to check your installation.<br>Additional administrative services are not available until this is resolved.";
+		String msg3 = "<br>Please contact your administrator to check your installation.<br>Additional administrative services are not available until this is resolved.";
+		msg2 += "</p><hr>";
+		msg3 += "</p><hr>";
+		
+		if (_vomsServerFile == null)
+			return msg1 + " was NOT specified in the gratia service properties." + msg3;
+		if (!vomsFile.exists()) 
+			return  msg1 + " does not exist: <em>" + msg2;
+
+		if (!vomsFile.isFile())
+			return  msg1 + " is not a file: <em>" + msg2;
+
+		if (!vomsFile.canRead())
+			return  msg1 + " is not readable: <em>" + msg2;
+
+		return "";
+	}
+
+	// ----------------------------------
 	public String connectVOname(String voname)
 	{
-//		Read voms-servers file: the file resides in the tomcat/gratia area
-		String fileStatus = loadVOServers(_vomsServerFile);
-		if (fileStatus.length() > 1 )
-			return fileStatus;
-
-		voConnect = voname.trim();
-
-		String VomsLocation = getVoVOMSserver(voConnect);
-
-		// ---- calling VOMS ---
-		final VOMSAdmin stub;
-		try
+		if (_vomsServerFile != null)
 		{
-			// other test VOMS servers
-			// String VomsLocation = "https://gratiax34.fnal.gov:8443/voms/" + voConnect + "/services/VOMSAdmin";
+			// check if the file exists etc
+			String msg = checkVOMSFile();
+			if ( msg.length() > 1)
+				return msg;
 
-			final VOMSAdminServiceLocator locator = new VOMSAdminServiceLocator();
-			stub = locator.getVOMSAdmin(new URL(VomsLocation));
+			// Read voms-servers file: the file resides in the tomcat/gratia area
+			String fileStatus = loadVOServers(_configPath + _vomsServerFile);
+			if (fileStatus.length() > 1 )
+				return fileStatus;
 
-			this.rolesVOMS  = stub.listRoles(userDN, userCA);
-			this.groupsVOMS = stub.listGroups(userDN,userCA);
+			voConnect = voname.trim();
+
+			String VomsLocation = getVoVOMSserver(voConnect);
+
+			// ---- calling VOMS ---
+			final VOMSAdmin stub;
+			try
+			{
+				// other test VOMS servers
+				// String VomsLocation = "https://gratiax34.fnal.gov:8443/voms/" + voConnect + "/services/VOMSAdmin";
+
+				final VOMSAdminServiceLocator locator = new VOMSAdminServiceLocator();
+				stub = locator.getVOMSAdmin(new URL(VomsLocation));
+
+				this.rolesVOMS  = stub.listRoles(userDN, userCA);
+				this.groupsVOMS = stub.listGroups(userDN, userCA);
+			}
+			catch (Exception e)
+			{
+				return "ERROR connecting to VOMS location: " + VomsLocation + "<br>" + e.toString();
+			}
 		}
-		catch (Exception e)
+		else
 		{
-			String msg = "CERTIFICATE HANDLER message: <br>" + e.toString();
-			//System.out.println(msg);
-			return msg;
+			return "<hr color='#FF8330'><p class='txterror'>No VOMS servers file was specified in the gratia service properties. <br>Please contact your administrator to check your installation.<br>Additional administrative services are not available until this is resolved.</p><hr color='#FF8330'>";
 		}
 
 		return "";
@@ -269,6 +338,13 @@ public class CertificateHandler
 	public String[] getFQANlist()
 	{
 		return this.voFQANlist;
+	}
+
+	//---------------------------------------------------
+
+	public String[] getDNlist()
+	{
+		return this.DNlist;
 	}
 
 	//---------------------------------------------------
@@ -351,4 +427,11 @@ public class CertificateHandler
 	{
 		return this.voSelect;
 	}
+
+	// ----------------------------------
+	public String getVomsFile()
+	{
+		return this._vomsServerFile;
+	}
+
 }
