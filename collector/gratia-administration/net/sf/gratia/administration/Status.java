@@ -183,6 +183,18 @@ public class Status extends HttpServlet {
 		openConnection();
 		this.request = request;
 		this.response = response;
+		
+		String uriPart = request.getRequestURI();
+		int slash2 = uriPart.substring(1).indexOf("/") + 1;
+		uriPart = uriPart.substring(slash2);
+		String queryPart = request.getQueryString();
+		if (queryPart == null)
+			queryPart = "";
+		else
+			queryPart = "?" + queryPart;
+
+		request.getSession().setAttribute("displayLink", "." + uriPart + queryPart);
+		
 		String wantDetails = request.getParameter("wantDetails");
 		Logging.debug("Got parameter wantDetails=" + wantDetails);
 		if (wantDetails != null) {

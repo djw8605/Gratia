@@ -97,6 +97,17 @@ public class NgapStatus extends HttpServlet
 		String host = null;
 		String allsites = null;
 		openConnection();
+		
+		String uriPart = request.getRequestURI();
+		int slash2 = uriPart.substring(1).indexOf("/") + 1;
+		uriPart = uriPart.substring(slash2);
+		String queryPart = request.getQueryString();
+		if (queryPart == null)
+			queryPart = "";
+		else
+			queryPart = "?" + queryPart;
+
+		request.getSession().setAttribute("displayLink", "." + uriPart + queryPart);
 
 		this.request = request;
 		this.response = response;

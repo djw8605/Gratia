@@ -1,3 +1,7 @@
+<%@ page language="java" contentType="text/html; charset=ISO-8859-1"
+    pageEncoding="ISO-8859-1"
+%>
+
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
@@ -8,6 +12,19 @@
 </head>
 
 <body>
+<%
+		
+		String uriPart = request.getRequestURI();
+		int slash2 = uriPart.substring(1).indexOf("/") + 1;
+		uriPart = uriPart.substring(slash2);
+		String queryPart = request.getQueryString();
+		if (queryPart == null)
+			queryPart = "";
+		else
+			queryPart = "?" + queryPart;
+
+		session.setAttribute("displayLink", "." + uriPart + queryPart);
+%>
 <h1 align="center">Service Configuration Settings </h1>
 <h3>Server Specific Settings</h3>
 

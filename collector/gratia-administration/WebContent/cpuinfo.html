@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
 <title>Gratia Accounting</title>
-<link href="stylesheet.css" type="text/css" rel="stylesheet">
+<link href="stylesheet.css" type="text/css" rel="stylesheet" />
 
 </head>
 <body>
@@ -12,7 +12,6 @@
 <form id="form1" name="form1" method="post" action="">
   <table width="100%" border="1">
     <tr>
-        <tr>
       <th width="15%" bgcolor="#999999" scope="col"><span class="style1">Host Description</span></th>
       <th width="15%" bgcolor="#999999" scope="col"><span class="style1">Benchmark Score </span></th>
       <th width="15%" bgcolor="#999999" scope="col"><span class="style1">CPU Count </span></th>
@@ -20,7 +19,7 @@
       <th width="15%" bgcolor="#999999" scope="col"><span class="style1">OS Version </span></th>
       <th width="15%" bgcolor="#999999" scope="col"><span class="style1">CPU Type </span></th>
       <th width="10%" bgcolor="#999999" scope="col"><span class="style1">Options</span></th>
-    </tr></tr>
+    </tr>
     <tr>
       <td>
           <input name="index:#index#" type="hidden" id="index:#index#" value="#index#" />
@@ -54,15 +53,12 @@
           <input name="cputype:#index#" type="text" value="#cputype#" size="15" maxlength="32" />
           </label>
         </td>
-      <td><a href="cpuinfo.html?action=delete&hostid=#hostid#">Delete</a></td>
+      <td><a href="cpuinfo.html?action=delete&amp;hostid=#hostid#">Delete</a></td>
     </tr>
     <tr>
-      <td colspan="7"><label>
-        <div align="center">
-        <div align="center">
-          <input type="submit" name="Submit" value="Update" />
-          </label>
-        </div></td>
+      <td colspan="7" align="center">
+          <label><input type="submit" name="Submit" value="Update" /></label>
+      </td>
     </tr>
   </table>
 </form>

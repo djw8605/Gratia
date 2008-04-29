@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
-    pageEncoding="ISO-8859-1"%>
+    pageEncoding="ISO-8859-1"
+%>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
 <head>
@@ -10,20 +11,20 @@
 
 <body>
 <%
-	// This is different session (https), so remove session attributes
-   if ((String) session.getAttribute("FQAN") !=null)
-	session.removeAttribute("FQAN");
 
-   if ((String) session.getAttribute("displayLink") !=null)
-	session.removeAttribute("displayLink");
-
-   if ((net.sf.gratia.vomsSecurity.CertificateHandler) session.getAttribute("certificateHandler") != null)
-	session.removeAttribute("certificateHandler");
+   String userDN = (String) session.getAttribute("userDN");
+	String logoutLink = "./index.html";
+   	
+	java.util.Properties p = net.sf.gratia.util.Configuration.getProperties();
+	if (p != null)
+		logoutLink = p.getProperty("service.open.connection") + request.getContextPath() + "/index.html";
+	
+	session.invalidate();
+	session = request.getSession();
+	session.setAttribute("userDN", userDN);
 %>
-
 <script type="text/javascript">
-	parent.location = "./index.html";
-	//parent.adminDashboard.location = "./dashboard.jsp";
+	parent.location = "<%=logoutLink %>";
 </script>
 	
 </body>

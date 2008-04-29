@@ -15,13 +15,6 @@
 <%
 try
 {
-	// This is different session (https), so remove session attributes
-   if ((String) session.getAttribute("FQAN") !=null)
-	session.removeAttribute("FQAN");
-
-   if ((String) session.getAttribute("displayLink") !=null)
-	session.removeAttribute("displayLink");
-
    if ((net.sf.gratia.vomsSecurity.CertificateHandler) session.getAttribute("certificateHandler") != null)
 	session.removeAttribute("certificateHandler");
 
@@ -32,7 +25,44 @@ try
 	certificateHandler = (net.sf.gratia.vomsSecurity.CertificateHandler) session.getAttribute("certificateHandler");
 
 	String[] VOlist = certificateHandler.getVOlist();
+	String[] DNlist = certificateHandler.getDNlist();
+	String vomsChck = certificateHandler.checkVOMSFile();
+	String vomsFile = certificateHandler.getVomsFile();
+	String userDN   = certificateHandler.getDN();
+	boolean foundDN = false;
 
+	if (DNlist.length > 0)
+	{
+		session.setAttribute("userDN", userDN);
+
+		for (int j = 0; j < DNlist.length; j++)
+		{
+			if (userDN.equals(DNlist[j].trim()))
+			{
+				session.setAttribute("FQAN", "");
+				foundDN = true;
+			}
+		}
+		if (foundDN)
+		{
+			String displayLink = (String) session.getAttribute("displayLink");
+			if (displayLink == null)
+				displayLink = "./status.html?wantDetails=0";
+
+			%>
+			<script type="text/javascript">
+				parent.adminContent.location = "./index.html";
+			</script>
+			<%
+		}
+	}
+	
+	if (vomsFile != null && vomsChck.length() > 1)
+	{
+		%><%= vomsChck %><%
+	}
+	else if (!foundDN && vomsFile != null)
+	{
 %>
 <div id="roleSelected">
 
@@ -70,16 +100,25 @@ try
 	</table>
 </form>
 <%
+	}
+	else
+	{
+	%>
+	<hr>
+	<p class='txterror'>You have no privileges to access the administration pages</p>
+	<hr>
+	<%
+	}
 }
 catch (Exception ex)
 {
 	String msg = ex.toString();
 	%>
-	<table class="query" border="0"><tr> <td align="left" ><hr color="#FF8330"></td></tr>
-	<tr><td><font color="#FF8330">
+	<hr>
+	<p class='txterror'>
 		The following error occured: <br>
-		&nbsp;&nbsp;&nbsp;&nbsp;<strong><%= msg %></strong>
-		</font></td></tr><tr> <td align="left" ><hr color="#FF8330"></td></tr></table>
+		&nbsp;&nbsp;&nbsp;&nbsp;<strong><%= msg %></p>
+	<hr>
 	<%
 }
 %>

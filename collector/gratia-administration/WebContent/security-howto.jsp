@@ -1,3 +1,7 @@
+<%@ page language="java" contentType="text/html; charset=ISO-8859-1"
+    pageEncoding="ISO-8859-1"
+%>
+
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
@@ -7,6 +11,19 @@
 </head>
 
 <body>
+<%
+		
+		String uriPart = request.getRequestURI();
+		int slash2 = uriPart.substring(1).indexOf("/") + 1;
+		uriPart = uriPart.substring(slash2);
+		String queryPart = request.getQueryString();
+		if (queryPart == null)
+			queryPart = "";
+		else
+			queryPart = "?" + queryPart;
+
+		session.setAttribute("displayLink", "." + uriPart + queryPart);
+%>
 
   <h1 align="center">Security How To</h1>
   <h3>Introduction:</h3>
@@ -76,7 +93,6 @@ Note that the  ssl.port property must be equal to the ssl connector defined in  
   </pre>
   </li>
     <li>Restart tomcat</li>
-  <p style="margin-left: 0.75in; text-indent: -0.25in;">
 <li>Finally, the easiest way to handle services such as gratia-administration or gratia-reporting is to use the 
 normal tomcat userid/password security. </li>
 </ul>

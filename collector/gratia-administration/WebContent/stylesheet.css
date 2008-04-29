@@ -7,10 +7,18 @@ body
 {
 	font-family: Verdana, Arial, sans-serif;
 }
+
 label
 {
 	font-family: Verdana, Arial, sans-serif;
 	font-size: 0.75em; 
+}
+
+hr
+{
+	height: 0.12em;
+	background: #e07630;
+	border: #e07630;
 }
 
 table.menu
@@ -39,7 +47,19 @@ a.menuItem
 {
 	cursor: pointer;
 	overflow: hidden;
-	color: #e07630;
+	color: #e07630; /*color: #FFCC66;*/
+	text-indent: 0.65em;
+	text-align: left;
+	font-weight: bold;
+	font-family: Verdana, Arial, sans-serif;
+	font-size: 0.65em; 
+	text-decoration: none;
+}
+a.menuItem2
+{
+	cursor: pointer;
+	overflow: hidden;
+	color: #F7BE81;  /* #F7BE81  #FFCC66 */
 	text-indent: 0.65em;
 	text-align: left;
 	font-weight: bold;
@@ -141,8 +161,9 @@ a.menuItem:active
 .txterror
 {
     font-family: Verdana, Arial, sans-serif;
-	font-size: 0.75em; 
-	color: #FF8330;
+	font-size: 0.75em;
+	font-weight: bold;
+	color: #e07630; /* #FF8330 */
 }
 .button
 {

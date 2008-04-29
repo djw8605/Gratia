@@ -1,12 +1,29 @@
+<%@ page language="java" contentType="text/html; charset=ISO-8859-1"
+    pageEncoding="ISO-8859-1"
+%>
+
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-<link href="docstyle.css" type="text/css" rel="stylesheet">
+<link href="docstyle.css" type="text/css" rel="stylesheet" >
 <title>Gratia - Installation howto</title>
 </head>
 
 <body>
+<%
+		
+		String uriPart = request.getRequestURI();
+		int slash2 = uriPart.substring(1).indexOf("/") + 1;
+		uriPart = uriPart.substring(slash2);
+		String queryPart = request.getQueryString();
+		if (queryPart == null)
+			queryPart = "";
+		else
+			queryPart = "?" + queryPart;
+
+		session.setAttribute("displayLink", "." + uriPart + queryPart);
+%>
 <p align="center"><b ><u>Installation</u></b></p>
 <p >O.K. &hellip; You&rsquo;ve now downloaded from CVS the gratia source tree. Where to go from here?</p>
 <p >There are a number of assumptions being made when you bring up gratia for the first time:</p>
@@ -29,7 +46,7 @@
 </ul>
 <p ><b><u>Tomcat Configuration:</u></b></p>
 <ul type="disc">
-  <li>Modify $CATALINA_HOME/gratia/service-configuration.properties:</li>
+  <li>Modify $CATALINA_HOME/gratia/service-configuration.properties:
 
   <ul type="circle">
     <li>HOSTNAME entry to the fully qualified host name of the machine you have installed on.</li>
@@ -38,7 +55,7 @@
 	<br> Look at the entries in configuration-psg3 to get an example.</li>
     <li>DBUSER must be set to an appropriate user name on the database with table create priveledges.</li>
     <li>DBPASSWORD must be set.</li>
-  </ul>
+  </ul></li>
  <li>Modify $CATALINA_HOME/conf/server.xml. Specifically, you must define at least 1 open socket
   (we use 8880 as a default) and, if running a secure connection,  a ssl port (we use 8843 as a default).
   More information on security can be found in the gratia security howto page.</li>
@@ -71,7 +88,7 @@ fi
 # -----------------------------------------------------------------------------
 # Stop script for the CATALINA Server
 #
-# $Id: installation-howto.html,v 1.3 2008-03-19 16:34:27 penelopec Exp $
+# $Id: installation-howto.jsp,v 1.1 2008-04-29 21:34:12 penelopec Exp $
 # -----------------------------------------------------------------------------
 
 unset $JAVA_OPTS

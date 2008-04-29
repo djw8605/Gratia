@@ -7,6 +7,8 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <link href="stylesheet.css" type="text/css" rel="stylesheet">
+<title>Gratia Accounting</title>
+</head>
 <body>
 
 <%
@@ -36,7 +38,7 @@
 	<%
     }
 
-    if (fqan.length() > 1)
+    if (fqan.length() > 7)
     {
 	%>
 	<td nowrap align="right"><%=fqan %> <br>

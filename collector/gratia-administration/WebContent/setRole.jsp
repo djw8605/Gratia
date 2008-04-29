@@ -4,6 +4,7 @@
 	String selectedRole = request.getParameter("selectedRole");
 	if (selectedRole != null)
 	{
+	out.println("<br>Selected Role = " + selectedRole + "<br>");
 		selectedRole = selectedRole.trim();
 
 		//  Check if a certificate handler seesion attribute exists to pick up the settings

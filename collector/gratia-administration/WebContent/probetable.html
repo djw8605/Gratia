@@ -3,8 +3,8 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
 <title>Gratia Accounting</title>
-<link href="stylesheet.css" type="text/css" rel="stylesheet">
-<link href="docstyle.css" type="text/css" rel="stylesheet">
+<link href="stylesheet.css" type="text/css" rel="stylesheet" />
+<link href="docstyle.css" type="text/css" rel="stylesheet" />
 <style type="text/css">
 <!--
 .red {color: #FF0000}
@@ -30,7 +30,7 @@
       <th width="21%" bgcolor="#999999" scope="col">Total records</th>
     </tr>
     <tr>
-      <td><span class="red">#lastcontact#</span></td>
+      <td><span class="red">&nbsp;#lastcontact#</span></td>
       <td><input name="probename:#index#" type="text" value="#probename#" size="32" />      </td>
       <td><label>
         <input name="index:#index#" type="hidden" id="index:#index#" value="#index#" />
@@ -41,19 +41,18 @@
         </label>      </td>
       <td><label>
         <select name="active:#index#" id="active:#index#">
-          <option value="Yes" #selected#>Yes</option>
-          <option value="No" #selected#>No</option>
+          <option value='Yes'>Yes</option>
+          <option value='No' >No</option>
         </select>
         </label>      </td>
       <td>#nRecords#</td>
     </tr>
     <tr>
-      <td colspan="4"><label></label>
-        <div align="center">
+      <td colspan="4" align="center">
           <label>
           <input name="Apply" type="submit" id="Apply" value="Apply" />
           </label>
-      </div></td>
+      </td>
     </tr>
   </table>
 </form>
