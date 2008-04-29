@@ -122,13 +122,13 @@ public class VONameCorrection extends HttpServlet
 		request.getSession().setAttribute("displayLink", "." + uriPart + queryPart);
 
 		if (!login)
-            	{
-               		Properties p = Configuration.getProperties();
-                	String loginLink = p.getProperty("service.secure.connection") + request.getContextPath() + "/gratia-login.jsp";
+        {
+			Properties p = Configuration.getProperties();
+            String loginLink = p.getProperty("service.secure.connection") + request.getContextPath() + "/gratia-login.jsp";
 			String redirectLocation = response.encodeRedirectURL(loginLink);
 			response.sendRedirect(redirectLocation);
 			request.getSession().setAttribute("displayLink", "." + uriPart + queryPart);
-            	}
+        }
 		else
 		{
 			openConnection();
@@ -281,7 +281,7 @@ public class VONameCorrection extends HttpServlet
 			newoption = xp.replaceAll(newoption,"#actualname#",name);
 			if (name.equals(current))
 			{
-				newoption = xp.replace(newoption,"#selected#","selected=" + dq + "selected" + dq);
+				newoption = xp.replace(newoption,"#selected#","selected='selected'");
 				table.put("actualname:" + index,current);
 			}
 			else
@@ -305,16 +305,16 @@ public class VONameCorrection extends HttpServlet
 		table.put("active:" + index,current);
 		if (current.equals("Yes"))
 		{
-			r = "<select name=" + dq + "active:" + index + dq + "id=" + dq + "active:" + index + dq + ">" + cr;
-			r = r + "<option value=" + dq + "Yes" + dq + " selected=" + dq + "selected" + dq + ">Yes</option>" + cr;
-			r = r + "<option value=" + dq + "No" + dq + ">No</option>" + cr;
+			r = "<select name='active:" + index + "' id='active:" + index + "'>" + cr;
+			r = r + "<option value='Yes' selected='selected'>Yes</option>" + cr;
+			r = r + "<option value='No'>No</option>" + cr;
 			r = r + "</select>" + cr;
 		}
 		else
 		{
-			r = "<select name=" + dq + "active:" + index + dq + "id=" + dq + "active:" + index + dq + ">" + cr;
-			r = r + "<option value=" + dq + "No" + dq + " selected=" + dq + "selected" + dq + ">No</option>" + cr;
-			r = r + "<option value=" + dq + "Yes" + dq + ">Yes</option>" + cr;
+			r = "<select name='active:" + index + "' id='active:" + index +"'>" + cr;
+			r = r + "<option value='No' selected='selected'>No</option>" + cr;
+			r = r + "<option value='Yes'>Yes</option>" + cr;
 			r = r + "</select>" + cr;
 		}
 
