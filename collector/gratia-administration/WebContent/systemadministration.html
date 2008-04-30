@@ -10,7 +10,7 @@
 <body>
 <h1 align="center" class="osgcolor">&nbsp;&nbsp;&nbsp;&nbsp;Gratia Administration&nbsp;&nbsp;&nbsp;&nbsp;</h1>
 <h3 align="center">System Administration </h3>
-<form action="probetable.html" method="post" name="form1" target="iframe" id="form1">
+<form action="probetable.html" method="post" name="form1" target="adminContent" id="form1">
   <table width="100%" border="1">
     <tr>
       <th width="30%" bgcolor="#999999" scope="col">Replay</th>
@@ -33,11 +33,11 @@
   <p>The Gratia data collector maintains two sets of transaction logs (both found in $CATALINA_HOME/gratia/data). The first set (directories named &quot;historyYYYYMMDDHH&quot;)  contains a copy of all committed xml files with a timestamp. The second set (directories named &quot;oldYYYYMMDDHH&quot;) contains a copy of everything that Gratia recieved from any source. In the event that you have a system outage and must do a database restore/repair you have two options. The first is to simply replay all history. This will blindly restart at the first history record that Gratia has and attempt to reapply it to the database. In the event that Gratia has seen the record before, it will simply be ignored. This particular option can be triggered by using the following link: </p>
   <ul>
     <li>
-      <a href="systemadministration.html?action=replayAll" target="iframe">Replay All History</a>    </li>
+      <a href="systemadministration.html?action=replayAll" target="adminContent">Replay All History</a>    </li>
   </ul>
   <p>The second option for recovery is that Gratia will query the database for the last known update and replay just the history from that timestamp (minus 5 minutes or so) forward. This option is can be triggered by the following: </p>
   <ul>
-    <li><a href="systemadministration.html?action=replay"target="iframe" >Replay New History</a>  
+    <li><a href="systemadministration.html?action=replay"target="adminContent" >Replay New History</a>  
     </li>
   </ul>
   <p><strong>Notes/Asides:</strong></p>
@@ -51,8 +51,8 @@
 <p><strong>Starting/Stopping Database Update Services:</strong></p>
 <p><strong>Current Status: #threadstatus#</strong></p>
 <blockquote>
-  <p><a href="systemadministration.html?action=stopDatabaseUpdateThreads" target="iframe">Stop Update Services</a> </p>
-  <p><a href="systemadministration.html?action=startDatabaseUpdateThreads" target="iframe">Start Update Services</a></p>
+  <p><a href="systemadministration.html?action=stopDatabaseUpdateThreads" target="adminContent">Stop Update Services</a> </p>
+  <p><a href="systemadministration.html?action=startDatabaseUpdateThreads" target="adminContent">Start Update Services</a></p>
 </blockquote>
 <hr size="4" />
 <p><strong>Creating/Recreating Report Summary Tables:</strong></p>
