@@ -59,7 +59,7 @@ a.menuItem2
 {
 	cursor: pointer;
 	overflow: hidden;
-	color: #F7BE81;  /* #F7BE81  #FFCC66 */
+	color: #BDBDBD; /* #BDBDBD #F7BE81  #FFCC66 */
 	text-indent: 0.65em;
 	text-align: left;
 	font-weight: bold;
