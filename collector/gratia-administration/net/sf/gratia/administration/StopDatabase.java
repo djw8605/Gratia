@@ -115,7 +115,7 @@ public class StopDatabase extends HttpServlet
 
 	public void setup()
 	{
-		html = xp.get(request.getRealPath("/") + "systemadministration.html");
+		html = xp.get(request.getRealPath("/") + "stopDatabaseThreads.html");
 	}
 
 	public void process()
