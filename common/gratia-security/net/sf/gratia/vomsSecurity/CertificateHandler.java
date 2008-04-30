@@ -231,6 +231,7 @@ public class CertificateHandler
 		
 		if (_vomsServerFile == null)
 			return msg1 + " was NOT specified in the gratia service properties." + msg3;
+
 		if (!vomsFile.exists()) 
 			return  msg1 + " does not exist: <em>" + msg2;
 
@@ -277,12 +278,16 @@ public class CertificateHandler
 			}
 			catch (Exception e)
 			{
-				return "ERROR connecting to VOMS location: " + VomsLocation + "<br>" + e.toString();
+				return "ERROR connecting to VOMS location: <br>" + VomsLocation + "<br>" + e.toString();
 			}
 		}
 		else
 		{
-			return "<hr color='#FF8330'><p class='txterror'>No VOMS servers file was specified in the gratia service properties. <br>Please contact your administrator to check your installation.<br>Additional administrative services are not available until this is resolved.</p><hr color='#FF8330'>";
+			String err = "<hr><p class='txterror'>";
+			err += "File of VOMS servers was NOT specified in the gratia service properties. ";
+			err += "<br>Please contact your administrator to check your installation.";
+			err += "<br>Additional administrative services are not available until this is resolved.</p><hr>";
+			return err;
 		}
 
 		return "";
