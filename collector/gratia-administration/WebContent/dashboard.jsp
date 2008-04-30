@@ -24,10 +24,11 @@
 
 	String loginLink = certificateHandler.getSecureConnection() + request.getContextPath() + "/gratia-login.jsp";
 	String logoutLink  = certificateHandler.getOpenConnection() + request.getContextPath() + "/gratia-logout.jsp";
-	String dbConnection = certificateHandler.getDBconnection();
-	dbConnection = dbConnection.substring(dbConnection.indexOf(":")+1);
+	String dbConnection1 = certificateHandler.getDBconnection();
+	dbConnection1 = dbConnection1.substring(dbConnection1.indexOf(":")+1);
+	String dbConnection = dbConnection1.substring(dbConnection1.lastIndexOf("/")+1);
+	
 	String version = certificateHandler.getServicesVersion();
-	session.setAttribute("dbConnection", dbConnection);
 	String fqan = (String) session.getAttribute("FQAN");
 	boolean login = false;
 	String menuClass = "menuItem2";
@@ -35,10 +36,11 @@
 	{
 		login = true;
 		menuClass = "menuItem";
+		dbConnection = dbConnection1;
 	}
 
 	%>
-	<a href="<%=logoutLink %>" target="adminContent" class="menuItem">logout</a><br />
+	<a href="<%=logoutLink %>" target="adminContent" class="<%=menuClass%>">logout</a><br />
 	<hr><label class="menuGroup">Maintenance</label> <br /><hr>
 	<a href="./site.html" target="adminContent" class="<%=menuClass%>">Site Table</a><br />
 	<a href="./vo.html" target="adminContent" class="<%=menuClass%>">VO Management</a><br />
