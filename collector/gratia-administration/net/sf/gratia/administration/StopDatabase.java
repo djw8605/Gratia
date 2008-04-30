@@ -157,4 +157,16 @@ public class StopDatabase extends HttpServlet
 			e.printStackTrace();
 		}
 	}
+
+	public void startDatabaseUpdateThreads()
+	{
+		try
+		{
+			proxy.startDatabaseUpdateThreads();
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
 }
