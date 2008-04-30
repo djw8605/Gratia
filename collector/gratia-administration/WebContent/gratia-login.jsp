@@ -15,13 +15,13 @@
 <%
 try
 {
-   if ((net.sf.gratia.vomsSecurity.CertificateHandler) session.getAttribute("certificateHandler") != null)
-	session.removeAttribute("certificateHandler");
+	if ((net.sf.gratia.vomsSecurity.CertificateHandler) session.getAttribute("certificateHandler") != null)
+		session.removeAttribute("certificateHandler");
 
-   if ((String) session.getAttribute("FQAN") != null)
-	session.removeAttribute("FQAN");
-   
-   // Set session attribute for the CertificateHandler
+	if ((String) session.getAttribute("FQAN") != null)
+		session.removeAttribute("FQAN");
+
+	// Set session attribute for the CertificateHandler
 	net.sf.gratia.vomsSecurity.CertificateHandler certificateHandler = new net.sf.gratia.vomsSecurity.CertificateHandler(request);
 	session.setAttribute("certificateHandler", certificateHandler);
 
@@ -30,7 +30,6 @@ try
 	String[] VOlist = certificateHandler.getVOlist();
 	String[] DNlist = certificateHandler.getDNlist();
 	String vomsChck = certificateHandler.checkVOMSFile();
-	String vomsFile = certificateHandler.getVomsFile();
 	String userDN   = certificateHandler.getDN();
 	boolean foundDN = false;
 
@@ -40,18 +39,19 @@ try
 
 		for (int j = 0; j < DNlist.length; j++)
 		{
-			if (userDN.equals(DNlist[j].trim()))
+			if (DNlist[j].trim().equals("ALLOW ALL"))
 			{
-				session.setAttribute("FQAN", "");
+				session.setAttribute("FQAN", "Privileges based on a valid certificate");
+				foundDN = true;
+			}
+			else if (userDN.equals(DNlist[j].trim()))
+			{
+				session.setAttribute("FQAN", "Privileges based on DN authorization");
 				foundDN = true;
 			}
 		}
 		if (foundDN)
 		{
-			String displayLink = (String) session.getAttribute("displayLink");
-			if (displayLink == null)
-				displayLink = "./status.html?wantDetails=0";
-
 			%>
 			<script type="text/javascript">
 				parent.adminContent.location = "./index.html";
@@ -59,13 +59,16 @@ try
 			<%
 		}
 	}
+	else
+		foundDN = false;
 	
-	if (vomsFile != null && vomsChck.length() > 1)
+	if ((vomsChck.length() > 1) && !foundDN)
 	{
 		%><%= vomsChck %><%
 	}
-	else if (!foundDN && vomsFile != null)
+	else if ((vomsChck.length() < 1) && !foundDN)
 	{
+		foundDN = true;
 %>
 <div id="roleSelected">
 
@@ -97,32 +100,26 @@ try
 		<td>&nbsp;&nbsp;&nbsp;</td>
 
 		<td valign="top" align="left">
-				<div id="displayRoles"></div>
+			<div id="displayRoles"></div>
 		</td>
 	</tr>
 	<tr>
-	<td><div id="roleSelected"></div>
+	<td><div id="roleDisplay"></div>
 	</td>
 	</tr>
 	</table>
 </form>
 <%
 	}
-	else
-	{
-	%>
-	<hr>
-	<p class='txterror'>You have no privileges to access the administration pages</p>
-	<hr>
-	<%
-	}
-	if ((String) session.getAttribute("FQAN") == null)
+	
+	if (((String) session.getAttribute("FQAN") == null) && foundDN)
 	{
 		%>
 		<hr>
-		<p class='txterror'>You have no privileges to access the administration pages</p>
+		<p class='txterror'>You have no privileges to access the administration pages.
+		<br>Login by selecting a VO and then a Role. </p>
 		<hr>
-		<%		
+		<%
 	}
 }
 catch (Exception ex)

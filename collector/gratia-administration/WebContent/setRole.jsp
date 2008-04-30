@@ -1,5 +1,5 @@
 <%
-   if ((String) session.getAttribute("FQAN") != null)
+	if ((String) session.getAttribute("FQAN") != null)
 		session.removeAttribute("FQAN");
 
 	String selectedRole = request.getParameter("selectedRole");
@@ -27,6 +27,15 @@
 		}
  	}
 
-	   if ((String) session.getAttribute("FQAN") == null)
-			out.println("<hr><p class='txterror'>You have no privileges to access the administration pages</p><hr>");
+	if ((String) session.getAttribute("FQAN") == null)
+	{
+		session.setAttribute("displayLink", "./noPrivileges.html");
+
+		%>
+		<script type="text/javascript">
+			parent.adminContent.location = "./index.html";
+		</script>
+		<%
+		
+	}
 %>
