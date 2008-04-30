@@ -99,9 +99,14 @@ public class StopDatabase extends HttpServlet
 			queryPart = "?" + queryPart;
 
 		request.getSession().setAttribute("displayLink", "." + uriPart + queryPart);
-		
-		stopDatabaseUpdateThreads();
 
+		if (request.getParameter("action") != null)
+		{
+			if (request.getParameter("action").equals("stopDatabaseUpdateThreads"))
+				stopDatabaseUpdateThreads();
+			else if (request.getParameter("action").equals("startDatabaseUpdateThreads"))
+				startDatabaseUpdateThreads();
+		}
 		setup();
 		process();
 		response.setContentType("text/html");
@@ -115,7 +120,7 @@ public class StopDatabase extends HttpServlet
 
 	public void setup()
 	{
-		html = xp.get(request.getRealPath("/") + "stopDatabaseThreads.html");
+		html = xp.get(request.getRealPath("/") + "stopGratiaDatabaseUpdateThreads.html");
 	}
 
 	public void process()
