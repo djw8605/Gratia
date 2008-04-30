@@ -41,7 +41,7 @@
 
 	%>
 	<a href="<%=logoutLink %>" target="adminContent" class="<%=menuClass%>">logout</a><br />
-	<hr><label class="menuGroup">Maintenance</label> <br /><hr>
+	<hr><label class="menuGroup">Maintenance</label> <br />
 	<a href="./site.html" target="adminContent" class="<%=menuClass%>">Site Table</a><br />
 	<a href="./vo.html" target="adminContent" class="<%=menuClass%>">VO Management</a><br />
 	<font size="-2">Probes: </font><a href="./probetable.html?activeFilter=active" target="adminContent" class="<%=menuClass%>">active</a>,
