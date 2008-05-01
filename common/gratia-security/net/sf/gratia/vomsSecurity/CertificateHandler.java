@@ -356,7 +356,7 @@ public class CertificateHandler
 	public String getDN()
 	{
 		if (this.userDN == null)
-			return "UnknownDn";
+			return " ";
 		return this.userDN;
 	}
 
