@@ -41,7 +41,16 @@ try
 		{
 			if (DNlist[j].trim().equals("ALLOW ALL"))
 			{
-				session.setAttribute("FQAN", "Privileges based on a valid certificate");
+				if (userDN.trim().length() == 0)
+				{
+					userDN = "Non SSL Connection";
+					session.setAttribute("userDN", userDN);
+					session.setAttribute("FQAN", "Privileges based on property: ALLOW ALL");
+				}
+				else
+				{
+					session.setAttribute("FQAN", "Privileges based on a valid certificate and property: ALLOW ALL");
+				}
 				foundDN = true;
 			}
 			else if (userDN.equals(DNlist[j].trim()))
