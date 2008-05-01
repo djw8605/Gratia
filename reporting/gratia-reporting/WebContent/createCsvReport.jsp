@@ -167,7 +167,7 @@ try
 	if (incsvFileName == null)
 		incsvFileName = "";
 
-	String sql = "call testP(null,null,'" + sDate +"', '" + eDate +"','" + timeUnit + "','" + dateGrouping +"','batch')";
+	String sql = "call groupByDate(null,null,'" + sDate +"', '" + eDate +"','" + timeUnit + "','" + dateGrouping +"','batch')";
 
 	String tempCsvPath = "";
 	String csvFileName = "";
@@ -224,8 +224,8 @@ try
 
 	Class.forName("com.mysql.jdbc.Driver").newInstance();
 
-	// cnn = DriverManager.getConnection(reportingConfiguration.getDatabaseURL(), reportingConfiguration.getDatabaseUser(), reportingConfiguration.getDatabasePassword());
-	cnn = DriverManager.getConnection("jdbc:mysql://gratia-vm02.fnal.gov:3320/gratia_penelope", "reader", "reader");
+	 cnn = DriverManager.getConnection(reportingConfiguration.getDatabaseURL(), reportingConfiguration.getDatabaseUser(), reportingConfiguration.getDatabasePassword());
+	//cnn = DriverManager.getConnection("jdbc:mysql://gratia-vm02.fnal.gov:3320/gratia_penelope", "reader", "reader");
 
 	statement = cnn.createStatement();
 	results = statement.executeQuery(sql);
