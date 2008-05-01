@@ -223,23 +223,39 @@ public class CertificateHandler
 	{
 
 		File vomsFile = new File(_configPath + _vomsServerFile);
-		String msg1 = "<hr><p class='txterror'>File of VOMS servers "; 
-		String msg2 = _configPath + _vomsServerFile + "</em> <br>Please contact your administrator to check your installation.<br>Additional administrative services are not available until this is resolved.";
-		String msg3 = "<br>Please contact your administrator to check your installation.<br>Additional administrative services are not available until this is resolved.";
-		msg2 += "</p><hr>";
-		msg3 += "</p><hr>";
-		
+		String msgS = "<hr><p class='txterror'>";
+		String msgE = "</p><hr>";
+		String msg1 = msgS + "File of VOMS servers ";
+		String msg3 = "<br>Please contact your administrator to check your installation.<br>Additional administrative services are not available until this is resolved." + msgE;
+		String msg2 = "<em>" + _configPath + _vomsServerFile + "</em>" ;
+		String msg4 = msgS + "No FQAN's or DN's have been specified " + msg3;
+
+		boolean ll = false;
+		if (voList != null)
+			if (voList.length == 0)
+				ll = true;
+			else
+				ll = false;
+				
+		if (DNlist != null)
+			if (DNlist.length == 0)
+				ll = true;
+			else
+				ll = false;
+		if (ll)
+			return msg4;
+
 		if (_vomsServerFile == null)
-			return msg1 + " was NOT specified in the gratia service properties." + msg3;
+			return msg1 + " was NOT specified in the gratia service properties. <br>" + msg2 + msg3;
 
 		if (!vomsFile.exists()) 
-			return  msg1 + " does not exist: <em>" + msg2;
+			return  msg1 + " does not exist: " + msg2 + msg3;
 
 		if (!vomsFile.isFile())
-			return  msg1 + " is not a file: <em>" + msg2;
+			return  msg1 + " is not a file: " + msg2 + msg3;
 
 		if (!vomsFile.canRead())
-			return  msg1 + " is not readable: <em>" + msg2;
+			return  msg1 + " is not readable: " + msg2 + msg3;
 
 		return "";
 	}

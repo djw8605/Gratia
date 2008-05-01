@@ -75,7 +75,7 @@ try
 	{
 		%><%= vomsChck %><%
 	}
-	else if ((vomsChck.length() < 1) && !foundDN)
+	else if ((vomsChck.length() < 1) && !foundDN && (VOlist.length > 0))
 	{
 		foundDN = true;
 %>
@@ -119,6 +119,15 @@ try
 	</table>
 </form>
 <%
+	}
+	else
+	{
+		%>
+		<hr>
+		<p class='txterror'>You have no privileges to access the administration pages.
+		<br>Login by selecting a VO and then a Role. </p>
+		<hr>
+		<%
 	}
 	
 	if (((String) session.getAttribute("FQAN") == null) && foundDN)
