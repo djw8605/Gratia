@@ -5,7 +5,7 @@
 #
 # library to create simple report using the Gratia psacct database
 #
-#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.22 2008-04-14 21:24:33 pcanal Exp $
+#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.23 2008-05-05 19:35:45 pcanal Exp $
 
 import time
 import datetime
@@ -1128,8 +1128,8 @@ order by VO.VOName, SiteName"""
 
 def UserReportData(begin, end, with_panda = False):
     select = """
-SELECT CommonName, sum(NJobs), sum(WallDuration) as Wall
-FROM UserProbeSummary U where
+SELECT VOName, CommonName, sum(NJobs), sum(WallDuration) as Wall
+FROM VOProbeSummary U where
     EndTime >= \"""" + DateTimeToString(begin) + """\" and
     EndTime < \"""" + DateTimeToString(end) + """\"
     and CommonName != \"unknown\"
@@ -1252,18 +1252,18 @@ Duration is the duration between the instant the job started running
 and the instant the job ended its execution.
 Deltas are the differences with the previous period."""
     headline = "For all jobs finished between %s and %s (midnight UTC)"
-    headers = ("User", "# of Jobs", "Wall Duration", "Delta jobs", "Delta duration")
+    headers = ("VO", "User", "# of Jobs", "Wall Duration", "Delta jobs", "Delta duration")
     formats = {}
     lines = {}
-    col1 = "All Users"    
-    col2 = "All sites"    
+    col1 = "All VOs"    
+    col2 = "All Users"    
     defaultSort = False
 
     def __init__(self, header = False, with_panda = False):
-        self.formats["csv"] = ",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""
-        self.formats["text"] = "| %-30s | %9s | %13s | %10s | %14s"
+        self.formats["csv"] = ",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""
+        self.formats["text"] = "| %-14s | %-30s | %9s | %13s | %10s | %14s"
         self.lines["csv"] = ""
-        self.lines["text"] = "------------------------------------------------------------------------------------------------"
+        self.lines["text"] = "-----------------------------------------------------------------------------------------------------------------"
         if (not header) :  self.title = ""
         self.with_panda = with_panda
 
@@ -1271,9 +1271,9 @@ Deltas are the differences with the previous period."""
         l = UserReportData(start, end, self.with_panda)
         r = []
         for x in l:
-            (user,njobs,wall) = x.split('\t')
+            (vo,user,njobs,wall) = x.split('\t')
             user = user[0:30]
-            r.append( user + '\t' + njobs + '\t' + wall)
+            r.append( vo + '\t' + user + '\t' + njobs + '\t' + wall )
         return r
 
     def Sorting(self, x,y):
