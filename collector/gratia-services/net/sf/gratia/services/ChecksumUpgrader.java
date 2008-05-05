@@ -62,7 +62,11 @@ public class ChecksumUpgrader extends Thread {
         // 1.
         Logging.info("ChecksumUpgrader: updating all checksums in JobUsageRecord_Meta");
         try {
+//             runGC();
+//             Logging.debug("ChecksumUpgrader: memory report -- " + usedMemory());
             batchUpdateChecksums();
+//             runGC();
+//             Logging.debug("ChecksumUpgrader: memory report -- " + usedMemory());
         }
         catch (Exception e) {
             Logging.warning("ChecksumUpgrader: batch update of checksums failed!", e);
@@ -323,8 +327,11 @@ public class ChecksumUpgrader extends Thread {
             return last_dbid; // NOP.
         }
         int records_processed = 0;
+//         runGC();
+//         Logging.debug("UpdateJobUsageRecords: memory report 1 -- " + usedMemory());
         Logging.debug("UpdateJobUsageRecords: get Session");
         Session session = HibernateWrapper.getSession();
+        session.setCacheMode(CacheMode.IGNORE);
         session.setFlushMode(FlushMode.COMMIT);
         Logging.debug("UpdateJobUsageRecords: Get query for dbid > " +
                       last_dbid);
@@ -392,8 +399,44 @@ public class ChecksumUpgrader extends Thread {
                 if (session.isOpen()) session.close();
                 throw e;
             }
+        } else { // Clean up from whatever stage we've reached
+            Transaction tx = session.getTransaction();
+            if ((tx != null) && tx.isActive()) {
+                tx.rollback();
+            }
+            if (session.isOpen()) session.close();
         }
+//         runGC();
+//         Logging.debug("UpdateJobUsageRecords: memory report 2 -- " + usedMemory());
         return last_dbid;
     }
+
+    private static void runGC () throws Exception
+    {
+        // It helps to call Runtime.gc()
+        // using several method calls:
+        for (int r = 0; r < 4; ++ r) _runGC ();
+    }
+
+    private static void _runGC () throws Exception
+    {
+        long usedMem1 = usedMemory (), usedMem2 = Long.MAX_VALUE;
+        for (int i = 0; (usedMem1 < usedMem2) && (i < 500); ++ i)
+        {
+            s_runtime.runFinalization ();
+            s_runtime.gc ();
+            Thread.currentThread ().yield ();
+            
+            usedMem2 = usedMem1;
+            usedMem1 = usedMemory ();
+        }
+    }
+
+    private static long usedMemory ()
+    {
+        return s_runtime.totalMemory () - s_runtime.freeMemory ();
+    }
+    
+    private static final Runtime s_runtime = Runtime.getRuntime ();
 
 }
