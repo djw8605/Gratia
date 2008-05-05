@@ -5,7 +5,7 @@
 #
 # library to create simple report using the Gratia psacct database
 #
-#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.23 2008-05-05 19:35:45 pcanal Exp $
+#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.24 2008-05-05 19:52:02 pcanal Exp $
 
 import time
 import datetime
@@ -1126,13 +1126,14 @@ order by VO.VOName, SiteName"""
 
     return RunQueryAndSplit(select)
 
-def UserReportData(begin, end, with_panda = False):
+def UserReportData(begin, end, with_panda = False, selection = ""):
     select = """
 SELECT VOName, CommonName, sum(NJobs), sum(WallDuration) as Wall
 FROM VOProbeSummary U where
     EndTime >= \"""" + DateTimeToString(begin) + """\" and
     EndTime < \"""" + DateTimeToString(end) + """\"
     and CommonName != \"unknown\"
+    """ + selection + """
     group by CommonName
 """
     return RunQueryAndSplit(select)
@@ -1258,17 +1259,20 @@ Deltas are the differences with the previous period."""
     col1 = "All VOs"    
     col2 = "All Users"    
     defaultSort = False
+    ExtraSelect = ""
 
-    def __init__(self, header = False, with_panda = False):
+    def __init__(self, header = False, with_panda = False, selectVOName = ""):
         self.formats["csv"] = ",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""
         self.formats["text"] = "| %-14s | %-30s | %9s | %13s | %10s | %14s"
         self.lines["csv"] = ""
         self.lines["text"] = "-----------------------------------------------------------------------------------------------------------------"
         if (not header) :  self.title = ""
         self.with_panda = with_panda
+        if (len(selectVOName)>0):
+            self.ExtraSelect = " and VOName = \""+selectVOName+"\" "
 
     def GetData(self, start,end):
-        l = UserReportData(start, end, self.with_panda)
+        l = UserReportData(start, end, self.with_panda, self.ExtraSelect)
         r = []
         for x in l:
             (vo,user,njobs,wall) = x.split('\t')
@@ -1543,8 +1547,9 @@ def RangeUserReport(range_end = datetime.date.today(),
                       range_begin = None,
                       output = "text",
                       header = True,
-                      with_panda = False):
-    return GenericRange(RangeUserReportConf(header, with_panda),
+                      with_panda = False,
+                      selectVOName = ""):
+    return GenericRange(RangeUserReportConf(header, with_panda, selectVOName),
                         range_end,
                         range_begin,
                         output)
@@ -1822,12 +1827,6 @@ def LongJobs(range_end = datetime.date.today(),
     print "This report is a summary of long running jobs that finished between %s - %s (midnight - midnight UTC):\n" % ( DateToString(range_begin,False),
                                                                         DateToString(range_end,False) )
     RangeLongJobs(range_end,range_begin,output,header)
-
-def UserReport(range_end = datetime.date.today(),
-            range_begin = None,
-            output = "text",
-            header = True):
-    RangeUserReport(range_end,range_begin,output,header)
 
 def CMSProd(range_end = datetime.date.today(),
             range_begin = None,
