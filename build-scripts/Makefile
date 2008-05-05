@@ -120,7 +120,9 @@ ${target}/gratia-services.war:  ${services}/net/sf/gratia/services/*.java  \
 	rmic -vcompat -classpath ${classpath} -d . net.sf.gratia.services.JMSProxyImpl
 	cp net/sf/gratia/services/* ${services}/net/sf/gratia/services
 	rm -f -r net
-	cp ${services}/log4j.properties war/WEB-INF/classes/.
+	cp ${services}/log4j.properties war/WEB-INF/classes/
+	cp ${services}/ehcache.xml war/WEB-INF/classes/
+	cp ${services}/c3p0.properties war/WEB-INF/classes/
 	cp ${services}/net/sf/gratia/services/*.class war/WEB-INF/classes/net/sf/gratia/services
 	cp ${services}/net/sf/gratia/storage/*.class war/WEB-INF/classes/net/sf/gratia/storage
 	cp ${util}/net/sf/gratia/util/Logging.class war/WEB-INF/classes/net/sf/gratia/util
@@ -177,7 +179,7 @@ soap: services
 	cp ${soap}/net/sf/gratia/soap/web.xml war/WEB-INF/web.xml
 	cp ${soap}/net/sf/gratia/soap/collector.wsdl war/wsdl
 	cp ${commonLib}/axis*.jar war/WEB-INF/lib
-	cp ${commonLib}/commons-dis*.jar war/WEB-INF/lib
+	cp ${commonLib}/commons-discovery*.jar war/WEB-INF/lib
 	cp ${commonLib}/jaxrpc*.jar war/WEB-INF/lib
 	cp ${commonLib}/saaj*.jar war/WEB-INF/lib
 	cp ${commonLib}/wsdl*.jar war/WEB-INF/lib
@@ -222,10 +224,10 @@ ${target}/gratia-administration.war: ${administration}/net/sf/gratia/administrat
 	cp ${administration}/WebContent/images/*.gif war/images
 	# cp ${docs}/*.html war # included in the administration WebContent
 	cp ${util}/net/sf/gratia/util/Logging.class war/WEB-INF/classes/net/sf/gratia/util
-	cp ${commonLib}/axis.jar ${commonLib}/bcprov-jdk14-133.jar ${commonLib}/commons-discovery.jar war/WEB-INF/lib
-	cp ${commonLib}/commons-logging.jar ${commonLib}/glite-security-trustmanager.jar  war/WEB-INF/lib
+	cp ${commonLib}/axis.jar ${commonLib}/bcprov-jdk14-133.jar ${commonLib}/commons-discovery*.jar war/WEB-INF/lib
+	cp ${commonLib}/commons-logging*.jar ${commonLib}/glite-security-trustmanager.jar  war/WEB-INF/lib
 	cp ${commonLib}/glite-security-util-java.jar ${commonLib}/glite-security-voms-admin-server.jar war/WEB-INF/lib
-	cp ${commonLib}/jaxrpc.jar ${commonLib}/log4j-1.2.8.jar ${commonLib}/saaj.jar ${commonLib}/xercesImpl.jar war/WEB-INF/lib
+	cp ${commonLib}/jaxrpc.jar ${commonLib}/log4j-*.jar ${commonLib}/saaj.jar ${commonLib}/xercesImpl.jar war/WEB-INF/lib
 	cp ${commonLib}/mysql*.jar ${commonLib}/tar.jar ${commonLib}/bzip2.jar war/WEB-INF/lib
 	cp ${target}/gratiaSecurity.jar war/WEB-INF/lib
 	${copy_util_lib}
@@ -266,7 +268,7 @@ util:
 	rm -rf  jar-lib
 	mkdir -p jar-lib
 	mkdir -p jar-lib/net/sf/gratia/util
-	javac -cp ${classpath} -extdirs ${commonLib} ${util}/net/sf/gratia/util/*.java
+	javac -Xlint:unchecked -cp ${classpath} -extdirs ${commonLib} ${util}/net/sf/gratia/util/*.java
 	cp ${util}/net/sf/gratia/util/*.class jar-lib/net/sf/gratia/util
 	jar -cfM ${target}/gratia-util.jar -C jar-lib .
 	rm -rf jar-lib
