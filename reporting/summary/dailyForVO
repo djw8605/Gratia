@@ -19,9 +19,10 @@ def main(argv=None):
     PSACCTReport.GenericDailyStatus( PSACCTReport.DailySiteJobStatusConf(header=False,groupby="ForVO",VOName=PSACCTReport.gVOName),PSACCTReport.gBegin,output=argOutput )
     print
 
-    #PSACCTReport.UserReport(range_begin = PSACCTReport.gBegin,
-    #                         range_end = PSACCTReport.gEnd ,
-    #                         output=argOutput);
+    PSACCTReport.RangeUserReport(range_begin = PSACCTReport.gBegin,
+                             range_end = PSACCTReport.gEnd ,
+                             output=argOutput,
+                             selectVOName=PSACCTReport.gVOName);
 
 if __name__ == "__main__":
     sys.exit(main())
