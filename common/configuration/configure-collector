@@ -344,6 +344,7 @@ sub configure_init_file {
 	$init_script_txt =~ s&^(\s*JAVA_OPTS\s*=\s*".*?)"&${1} -Xms$collector_config->{initial_heap_size}"&m if $collector_config->{inital_heap_size};
 	$init_script_txt =~ s&^(\s*JAVA_OPTS\s*=\s*".*?)"&${1} -XX:MaxPermSize=$collector_config->{max_perm_size}"&m if $collector_config->{max_perm_size};
 	$init_script_txt =~ s&^(\s*JAVA_OPTS\s*=\s*".*?)"&${1} -XX:PermSize=$collector_config->{initial_perm_size}"&m if $collector_config->{initial_perm_size};
+        $init_script_txt =~ s&^(\s*JAVA_OPTS\s*=\s*".*?)"&${1} -Djava.library.path=$collector_config->{tomcat_native_lib}"&m if $collector_config->{tomcat_native_lib};
 	$init_script_txt =~ s&^(TOMCAT_MANAGEMENT_PORT=).*$&${1}$collector_config->{jmx_port}&m;
 	$init_script_txt =~ s&^(TOMCAT_HTTP_PORT=).*$&${1}$collector_config->{http_port}&m;
 	$init_script_txt =~ s&^(TOMCAT_SSL_PORT=).*$&${1}$collector_config->{ssl_port}&m;

@@ -144,6 +144,7 @@
                   db_port => 3322,
 #                  db_host => "localhost",
 #                  db_schema => "gratia_greenc_test",
+                  tomcat_native_lib => '/data/apr/lib',
                   "properties.attributes" =>
                   {
                    "maintain.history.log" => 2,
