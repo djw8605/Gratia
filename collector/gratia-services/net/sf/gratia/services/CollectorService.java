@@ -62,14 +62,16 @@ public class CollectorService implements ServletContextListener {
         //
         // initialize logging
         //
-
         p = net.sf.gratia.util.Configuration.getProperties();
-
+        
         Logging.initialize(p.getProperty("service.service.logfile"),
                            p.getProperty("service.service.maxlog"),
                            p.getProperty("service.service.console"),
                            p.getProperty("service.service.level"),
                            p.getProperty("service.service.numLogs"));
+
+        Logging.info("CollectorService: classpath = " +
+                     java.lang.System.getProperty("java.class.path", "."));
 
         Enumeration iter = System.getProperties().propertyNames();
         Logging.log("");
