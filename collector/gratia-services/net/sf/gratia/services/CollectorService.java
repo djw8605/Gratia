@@ -70,8 +70,8 @@ public class CollectorService implements ServletContextListener {
                            p.getProperty("service.service.level"),
                            p.getProperty("service.service.numLogs"));
 
-        Logging.info("CollectorService: classpath = " +
-                     java.lang.System.getProperty("java.class.path", "."));
+//         Logging.info("CollectorService: classpath = " +
+//                      java.lang.System.getProperty("java.class.path", "."));
 
         Enumeration iter = System.getProperties().propertyNames();
         Logging.log("");
