@@ -96,7 +96,33 @@
                        "monitor.listener.wait" => 60,
                        "service.listener.threads" => 1
                       }
-                    }
+                    },
+ osg_transfer => { http_port => 8886,
+                   ssl_port => 8840,
+                   rmi_port => 21000,
+                   jmx_port => 8054,
+                   server_port => 8154,
+                   db_schema => "gratia_osg_transfer",
+                   remote_host => "gratia-transfer.opensciencegrid.org",
+                   "properties.attributes" =>
+                   {
+                    "monitor.listener.wait" => 240,
+                    "service.listener.threads" => 1
+                   }
+                 },
+ fermi_transfer => { http_port => 8886,
+                     ssl_port => 8840,
+                     rmi_port => 22000,
+                     jmx_port => 8054,
+                     server_port => 8154,
+                     db_schema => "fermi_transfer",
+                     remote_host => "gratia-fermi.fnal.gov",
+                     "properties.attributes" =>
+                     {
+                      "monitor.listener.wait" => 240,
+                      "service.listener.threads" => 1
+                     }
+                   }
 );
 
 ### Local Variables:
