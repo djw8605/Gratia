@@ -35,12 +35,12 @@ import org.hibernate.exception.*;
 public class DatabaseMaintenance {
     static final String dq = "\"";
     static final String comma = ",";
-    static final int gratiaDatabaseVersion = 31;
+    static final int gratiaDatabaseVersion = 32;
     static final int latestDBVersionRequiringStoredProcedureLoad = gratiaDatabaseVersion;
     static final int latestDBVersionRequiringSummaryTableLoad = 30;
     static final int latestDBVersionRequiringSummaryViewLoad = 30;
     static final int latestDBVersionRequiringSummaryTriggerLoad = 30;
-    static final int latestDBVersionRequiringTableStatisticsRefresh = 29;
+    static final int latestDBVersionRequiringTableStatisticsRefresh = 32;
 
     java.sql.Connection connection;
     int liveVersion = 0;
@@ -1060,6 +1060,12 @@ public class DatabaseMaintenance {
                 CheckIndices(); // Call again to update the md5v2 index
                 Logging.log("Gratia database upgraded from " + tmp + " to " + current);
             }
+            if (current == 31) {
+                // Auxiliary DB item upgrades only.
+                Logging.log("Gratia database upgraded from " + current + " to " + (current + 1));
+                current = current + 1;
+                UpdateDbVersion(current);
+            }                
 //             if (current == 29) {
 //                 int result = ReparseRecordsWithExtraXml();
 //                 if (result > -1) {
@@ -1134,8 +1140,8 @@ public class DatabaseMaintenance {
         if (result > -1) {
             String command = "CREATE TABLE TableStatistics(" +
                 "RecordType VARCHAR(255) NOT NULL," +
-                "nRecords INTEGER DEFAULT 0, Qualifier VARCHAR(255), " +
-                "UNIQUE KEY index1 (RecordType,Qualifier))";
+                "nRecords INTEGER DEFAULT 0, Qualifier VARCHAR(255) NOT NULL DEFAULT '', " +
+                "UNIQUE KEY index1 (RecordType, Qualifier))";
 
             if (isInnoDB) {
                 command += " ENGINE = 'innodb'";
