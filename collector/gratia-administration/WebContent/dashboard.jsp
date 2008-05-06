@@ -69,7 +69,10 @@
 	<a href="./security-howto.jsp" target="adminContent" class="menuItem">Security</a><br />
 	<a href="./replication-howto.jsp" target="adminContent" class="menuItem">Replication</a><br />
 	<a href="./service-configuration-settings.jsp" target="adminContent" class="menuItem">Gratia Service Settings</a><br />
+
 	<hr>
+	<a href="https://twiki.grid.iu.edu/twiki/bin/view/Accounting/ContactUs" target="_blank" class="menuItem">Contact us</a>
+
 	<p class = "menuVersion">Gratia Services Version: <%= version %></p>
 	<p class="menuVersion">DB Connection: <%=dbConnection %></p>
 
