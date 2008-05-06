@@ -278,6 +278,16 @@ public class CertificateHandler
 			voConnect = voname.trim();
 
 			String VomsLocation = getVoVOMSserver(voConnect);
+			if (VomsLocation.startsWith("null"))
+			{
+				msg = "<hr><p class='txterror'>";
+				msg += "No VOMS URL has been specified for selected VO: <em>" + voConnect + "</em>";
+				msg += "<br>in the file specified by the <em>service.voms.connections</em> key in the gratia service-configuration.properties";
+				msg += "<br>Please contact your administrator to check your installation.<br>";
+				msg += "Additional administrative services are not available until this is resolved.";
+				msg += "</p><hr>";
+				return msg;
+			}
 
 			// ---- calling VOMS ---
 			final VOMSAdmin stub;
@@ -299,11 +309,11 @@ public class CertificateHandler
 		}
 		else
 		{
-			String err = "<hr><p class='txterror'>";
-			err += "File of VOMS servers was NOT specified in the gratia service properties. ";
-			err += "<br>Please contact your administrator to check your installation.";
-			err += "<br>Additional administrative services are not available until this is resolved.</p><hr>";
-			return err;
+			String msg = "<hr><p class='txterror'>";
+			msg += "File of VOMS servers was NOT specified in the gratia service properties. ";
+			msg += "<br>Please contact your administrator to check your installation.";
+			msg += "<br>Additional administrative services are not available until this is resolved.</p><hr>";
+			return msg;
 		}
 
 		return "";
