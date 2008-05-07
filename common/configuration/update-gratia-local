@@ -77,12 +77,52 @@ function stop_tomcat {
     fi
   fi
 }
+#-----------------
+function remove_deprecated_webapps_services {
+  sleep 3
+  removed_services=n
+  echo
+  echo "... removing obsolete services in $tomcat_webapps:
+$deprecated_webapps_services
+"
+  ( cd "$tomcat_webapps/" ; \
+    ls -l ;
+    for service in $deprecated_webapps_services
+    do
+      if [ -d $service ];then
+        echo "...... removing:
+`ls -ld ${service}*`
+"
+        rm -rf ${service}*
+        if [ "$?" != "0" ];then
+          echo "ERROR: failed to remove ${service}*";exit 1
+        fi
+        removed_services=y
+      fi
+    done
+    if [ "$removed_services" = "n" ];then
+      echo "...... no deprecated services found... looks good."
+    else 
+      echo "...... services remaining:"
+      ls -l
+    fi
+  )
+  echo
+}
+
 
 
 ## MAIN ########################################
 # Defaults
 source_prefix=~greenc/gratia
 tomcat_root=/data
+#--- deprecated webapps serrvices ----
+deprecated_webapps_services="GratiaServices
+gratia-report-configuration
+gratia-util
+gratia-security
+birt
+"
 
 #--- get command line args ----
 while getopts :c:j:sp:d:v:hS: OPT; do
@@ -166,20 +206,10 @@ mkdir -p $tomcat_gratia
 tar xf $target_dir/gratia.tar -C $tomcat_gratia
 ls -l $tomcat_gratia
 
-#-----------------------
-# Update webapps
-#-----------------------
-sleep 3
-echo
-echo
-echo "... removing obsolete directories in  $tomcat_webapps"
-# Remove obsolete war files
-( cd "$tomcat_webapps/" ; \
-  rm -rf GratiaServices{,.war} \
-         gratia-report-configuration{,.war} \
-         gratia-util{,.war} \
-         birt-*{,.war} \
-)
+#----------------------------
+# Remove deprecated services
+#----------------------------
+remove_deprecated_webapps_services
 
 #-----------------------
 # Updated war files
@@ -228,11 +258,13 @@ if [ $vdt_install ];then
     ${vdt_location}/vdt/setup/configure_gratia $arg
     rtn=$?
     if [ "$rtn" != "0" ];then
-      echo "ERROR: configure_gratia $arg script FAILED"
-      exit 1
+      echo "ERROR: configure_gratia $arg script FAILED";exit 1
     fi
   done
+  #--- remove any services VDT may have re-installed ---
+  remove_deprecated_webapps_services
   #-- reset some permissions --
+  echo "... fixing ownership:"
   chown -R daemon $tomcat_webapps
 #--- local ---
 else
