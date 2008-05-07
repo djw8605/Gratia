@@ -410,6 +410,7 @@ gratia: clean util services servlets soap reporting reports administration
 	mkdir tarball; \
 	cp ${configuration}/UserVoMap.* ${configuration}/*xml $(staticScript)/*.py ${configuration}/*properties tarball; \
 	cp ${configuration}/*sql ${configuration}/*sh tarball; \
+	cp ${security}/scripts/voms-server.sh         tarball; chmod 744 tarball/voms-server.sh
 	chmod 755 tarball/*.py
 	chmod 700 tarball/post-install.sh; \
 	perl -wape 's&^(\s*gratia\.services\.version\s*=\s*).*$$&$$1${gratia_services_version}&; s&^(\s*gratia\.reporting\.version\s*=\s*).*$$&$$1${gratia_reporting_version}&; ' ${configuration}/service-configuration.properties > tarball/service-configuration.properties && chmod 600 tarball/service-configuration.properties; \
