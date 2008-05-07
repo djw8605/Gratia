@@ -151,7 +151,11 @@ public class CertificateHandler
 					// we want to extract gratia-vo1 to populate the pull down menu.
 
 						String[] VoFullStr = value.split ("/");
-						voName = VoFullStr[1];
+						if (VoFullStr.length >= 2)
+							voName = VoFullStr[1];
+						else
+							voName = VoFullStr[0];
+
 						if (voName != null)
 							tempVOs.add(voName);
 					}
@@ -199,7 +203,13 @@ public class CertificateHandler
 
 				// Line is not a comment, parsing it using token to break it into fields
 				String[] VoInfo = StrLine.split ("=");
-
+				if (VoInfo.length < 2)
+				{
+					String msg = "<hr><p class='txterror'>ERROR reading file: " + voFile + "<br>";
+					msg += "Input lines must be of the form: <em>voname=URL</em> <br>";
+					msg += "Line read: <em>" + StrLine + "</em></p><hr>";
+					return msg;
+				}
 				String  voNam = VoInfo[0].trim();
 				String  voUrl = VoInfo[1].trim();
 				voVOMSNam.add(voNam);
@@ -230,23 +240,25 @@ public class CertificateHandler
 		String msg2 = "<em>" + _configPath + _vomsServerFile + "</em>" ;
 		String msg4 = msgS + "No FQAN's or DN's have been specified " + msg3;
 
-		boolean ll = false;
-		if (voList != null)
+		boolean f = false;
+		boolean d = false;
+
+		if (this.voList != null)
 			if (voList.length == 0)
-				ll = true;
+				f = true;
 			else
-				ll = false;
+				f = false;
 				
 		if (DNlist != null)
 			if (DNlist.length == 0)
-				ll = true;
+				d = true;
 			else
-				ll = false;
-		if (ll)
+				d = false;
+		if (f && d)
 			return msg4;
 
 		if (_vomsServerFile == null)
-			return msg1 + " was NOT specified in the gratia service properties. <br>" + msg2 + msg3;
+			return msg1 + " was NOT specified in the gratia service properties (<em>service.voms.connections)</em>. <br>" + msg3;
 
 		if (!vomsFile.exists()) 
 			return  msg1 + " does not exist: " + msg2 + msg3;
@@ -304,7 +316,7 @@ public class CertificateHandler
 			}
 			catch (Exception e)
 			{
-				return "ERROR connecting to VOMS location: <br>" + VomsLocation + "<br>" + e.toString();
+				return "<hr><p class='txterror'>ERROR connecting to VOMS location: <br>" + VomsLocation + "<br>" + e.toString()+"</p><hr>";
 			}
 		}
 		else
