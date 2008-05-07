@@ -189,7 +189,7 @@ soap: services
 	# --- Target: soap COMPLETED  ---
 
 #------------------------------------------------------------------
-administration: vomssecurity ${target}/gratia-administration.war
+administration: security ${target}/gratia-administration.war
 	# --- Target: administration COMPLETED  ---
 
 #------------------------------------------------------------------
@@ -236,31 +236,6 @@ ${target}/gratia-administration.war: ${administration}/net/sf/gratia/administrat
 	# --- Target: ${target}/gratia-administration.war COMPLETED ---
 
 #------------------------------------------------------------------
-security: services util
-	# ------------------------
-	# --- Target: security ---
-	# ------------------------
-	rm -rf   war
-	mkdir -p war/META-INF
-	mkdir -p war/WEB-INF
-	mkdir -p war/WEB-INF/lib
-	mkdir -p war/WEB-INF/classes/net/sf/gratia/services
-	mkdir -p war/WEB-INF/classes/net/sf/gratia/security
-	mkdir -p war/WEB-INF/classes/net/sf/gratia/util
-	javac -cp ${classpath} -extdirs ${commonLib} ${security}/net/sf/gratia/security/*.java
-	cp ${security}/net/sf/gratia/security/*.class war/WEB-INF/classes/net/sf/gratia/security
-	cp ${services}/net/sf/gratia/services/*Skel.class war/WEB-INF/classes/net/sf/gratia/services
-	cp ${services}/net/sf/gratia/services/*Stub.class war/WEB-INF/classes/net/sf/gratia/services
-	cp ${services}/net/sf/gratia/services/JMS*.class war/WEB-INF/classes/net/sf/gratia/services
-	cp ${security}/net/sf/gratia/security/web.xml war/WEB-INF/web.xml
-	cp ${util}/net/sf/gratia/util/Logging.class war/WEB-INF/classes/net/sf/gratia/util
-	cp ${commonLib}/mysql*.jar war/WEB-INF/lib
-	${copy_util_lib}
-	jar -cfM ${target}/gratia-security.war -C war .
-	rm -rf war
-	# --- Target: security COMPLETED ---
-
-#------------------------------------------------------------------
 util:
 	# --------------------
 	# --- Target: util ---
@@ -274,9 +249,10 @@ util:
 	rm -rf jar-lib
 	# --- Target: util COMPLETED ---
 
-vomssecurity: services util
+#------------------------------------------------------------------
+security: services util
 	# ----------------------------
-	# --- Target: vomssecurity ---
+	# --- Target: security ---
 	# ----------------------------
 	rm   -rf jar-lib
 	mkdir -p jar-lib/net/sf/gratia/util
@@ -290,7 +266,7 @@ vomssecurity: services util
 	cp ${util}/net/sf/gratia/util/Logging.class jar-lib/net/sf/gratia/services
 	jar -cvfM ${target}/gratiaSecurity.jar -C jar-lib .
 	rm -rf jar-lib
-	# --- Target: vomssecurity COMPLETED ---
+	# --- Target: security COMPLETED ---
 
 #-------------------------------------------------------------
 reporting: birt-reporting
@@ -329,7 +305,6 @@ reporting: birt-reporting
 	cp -R ${reportsrc}/WebContent/images                   war/.
 	cp -R ${reportsrc}/WebContent/tooltip                  war/.
 	# --- copy the web.xml  file ---
-###	cp ${reportsrc}/src/net/sf/gratia/reporting/web.xml    war/WEB-INF/web.xml
 	jar -cfM ${target}/gratia-reporting.war -C war .
 	rm -rf war
 	# --- Target: reporting COMPLETED ---
@@ -377,7 +352,7 @@ birt-reporting:
 
 
 #---------------------------------------------------------------
-local: clean util services servlets soap reporting reports administration security 
+local: clean util services servlets soap reporting reports administration 
 	# --- Target: local COMPLETED ---
 #---------------------------------------------------------------
 
@@ -399,7 +374,6 @@ release: gratia
 	perl -wape 's&^(\s*gratia\.services\.version\s*=\s*).*$$&$$1${gratia_services_version}&; s&^(\s*gratia\.reporting\.version\s*=\s*).*$$&$$1${gratia_reporting_version}&; ' ${configuration}/service-configuration.properties > tarball/tomcat/v55/gratia/service-configuration.properties && chmod 600 tarball/tomcat/v55/gratia/service-configuration.properties; \
 	cp ${target}/gratia-reports.war tarball/gratia/gratia_reporting; \
 	cp ${target}/gratia-reporting.war tarball/gratia/gratia_reporting; \
-	cp ${target}/gratia-security.war tarball/gratia/gratia_reporting; \
 	tar ${tarowner} -cvf ${target}/gratia_reporting_${gratia_reporting_version}.tar -C tarball .; \
 	rm -rf tarball
 	# -------------------------------
@@ -423,13 +397,12 @@ release: gratia
 	cp ${target}/gratia-servlets.war tarball/gratia/gratia_services; \
 	cp ${target}/gratia-soap.war tarball/gratia/gratia_services; \
 	cp ${target}/gratia-administration.war tarball/gratia/gratia_services; \
-	cp ${target}/gratia-security.war tarball/gratia/gratia_services; \
 	tar ${tarowner} -cvf ${target}/gratia_services_${gratia_services_version}.tar -C tarball .; \
 	rm -f -r tarball
 	# --- Target: release COMPLETED ---
 
 #-------------------------------------------------------------
-gratia: clean util services servlets soap reporting reports administration security
+gratia: clean util services servlets soap reporting reports administration 
 	# ------------------------------
 	# --- Target: gratia         ---
 	# ------------------------------
