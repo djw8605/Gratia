@@ -7,10 +7,18 @@ body
 {
 	font-family: Verdana, Arial, sans-serif;
 }
+
 label
 {
 	font-family: Verdana, Arial, sans-serif;
 	font-size: 0.75em; 
+}
+
+hr
+{
+	height: 0.12em;
+	background: #e07630;
+	border: #e07630;
 }
 
 table.menu
@@ -26,11 +34,32 @@ table.menu
         font-size: 0.70em;
 	text-align: left;
 }
+.menuText
+{
+	overflow: hidden;
+	width: 12em;
+        font-family: Verdana, Arial, sans-serif;
+        color: #462300;
+        font-size: 0.65em;
+	text-align: left;
+}
 a.menuItem
 {
 	cursor: pointer;
 	overflow: hidden;
-	color: #e07630;
+	color: #e07630; /*color: #FFCC66;*/
+	text-indent: 0.65em;
+	text-align: left;
+	font-weight: bold;
+	font-family: Verdana, Arial, sans-serif;
+	font-size: 0.65em; 
+	text-decoration: none;
+}
+a.menuItem2
+{
+	cursor: pointer;
+	overflow: hidden;
+	color: #BDBDBD; /* #BDBDBD #F7BE81  #FFCC66 */
 	text-indent: 0.65em;
 	text-align: left;
 	font-weight: bold;
@@ -114,10 +143,27 @@ a.menuItem:active
 	font-size: 0.58em; 
 }
 
+.menuFqan
+{
+	color: #462300;
+	/* text-indent: 0.65em; */
+	text-align: left;
+	/* font-weight: bold; */
+	font-family: Verdana, Arial, sans-serif;
+	font-size: 0.58em; 
+}
+
 .txt
 {
     font-family: Verdana, Arial, sans-serif;
 	font-size: 0.75em; 
+}
+.txterror
+{
+    font-family: Verdana, Arial, sans-serif;
+	font-size: 0.75em;
+	font-weight: bold;
+	color: #e07630; /* #FF8330 */
 }
 .button
 {
