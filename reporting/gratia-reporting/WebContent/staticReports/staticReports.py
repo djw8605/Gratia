@@ -25,7 +25,7 @@ def showNode(node, reportsFolder, staticFolder, birtURL):
                 reportFile = os.path.join(staticFolder, s1[:i] + 'pdf')
                 ## print reportFile
                 callURL = birtURL + '/' + attrs.get(attrName).nodeValue.replace('[ReportsFolder]', reportsFolder)
-                ## print ('URL \n%s\n' % (callURL))
+                #print ('URL \n%s\n' % (callURL))
                 try:
                     f = urllib.urlopen(callURL)
                     w = open(reportFile, 'w')
@@ -48,7 +48,7 @@ def showNode(node, reportsFolder, staticFolder, birtURL):
                 reportFile = os.path.join(staticFolder, fileName)
                 ## print reportFile
                 callURL = birtURL + '/' + attrs.get(attrName).nodeValue.replace('[csvFileName]', reportFile)
-                ##print ('URL \n%s\n' % (callURL))
+                #print ('URL \n%s\n' % (callURL))
                 try:
                     f = urllib.urlopen(callURL)
                     f.close
@@ -84,12 +84,14 @@ def main():
     staticFolder = os.path.join(catalinaHome, 'webapps', config.get( 'gratia', 'service.reporting.static.folder'))
     try:
         os.mkdir(staticFolder)
+        os.chown(staticFolder, 2, 2)
     except OSError, e:
         pass
     exists = os.path.exists(staticFolder)
     if exists != 1:
         print ('Static Reports folder \n    %s \ndoes not exist and cannot be made' %(staticFolder))
         sys.exit(1)
+    #print('StaticConfig %s\nreports folder %s\n static folder %s\n birtURL %s\n' %(staticConfig, reportsFolder, staticFolder, birtURL))
     parseFile(staticConfig, reportsFolder, staticFolder, birtURL)
 
 if __name__ == '__main__':
