@@ -32,9 +32,13 @@
 	if (staticFolder.charAt(0) != '/')
 		staticFolder = "/" + staticFolder;
 
-
+	// Construct the csv path
+	String csvFolder = staticFolder.substring(0, staticFolder.length() - 1) + "_csv/";
+	String csvFolderPath = staticFolderPath.substring(0, staticFolderPath.length() - 1) + "_csv/";
+	
 	File f = new File(staticFolderPath);
-	if (!f.exists())
+	File c = new File(csvFolderPath);
+	if (!f.exists() && !c.exists())
 	{
 		%><p class = "reportItem">There are no available reports</p> <%
 	}
@@ -46,8 +50,9 @@
 		}
 		else
 		{
-			File [] fileObjects = f.listFiles();	// Get all files in the directory
-			if (fileObjects.length == 0)
+			File [] pdfObjects = f.listFiles();	// Get all files in the directory
+			File [] csvObjects = c.listFiles();	// Get all files in the directory
+			if ((pdfObjects.length == 0) && (csvObjects.length == 0))
 			{
 				%> <p class = "reportItem" >No Static reports are available</p> <%
 			}
@@ -75,25 +80,33 @@
 						linkURL = linkURL.replace("\\", "%5c");
 
 
-						for (int j = 0; j < fileObjects.length; j++)
+						for (int j = 0; j < pdfObjects.length; j++)
 						{
-							if(!fileObjects[j].isDirectory())
+							if(!pdfObjects[j].isDirectory())
 							{
-								String fileName = fileObjects[j].getName();
-								if (fileName.startsWith(linkREPORT) && (fileName.endsWith(".pdf") || fileName.endsWith(".csv")))
+								String fileName = pdfObjects[j].getName();
+								if (fileName.startsWith(linkREPORT) && (fileName.endsWith(".pdf")))
 								{
-									if (fileName.endsWith(".pdf"))
-									{
-										%><li><a class = "reportItem" target = "reportFrame" href="<%= staticFolder+fileName %>"><%= linkNAME %> (pdf)</a></li>
-										<%
-									}
-									else
-									{
-										%><li><a class = "reportItem" target = "reportFrame" href="<%= staticFolder+fileName %>" onClick="ww=window.open('downloadFile.jsp?csvFile=<%= fileName %>', 'Gratia', 'width=10,height=10'); ww.close('Gratia');"><%= linkNAME %> (csv)</a></li>
-										<%
-									}
+									%><li><a class = "reportItem" target = "reportFrame" href="<%= staticFolder+fileName %>"><%= linkNAME %> (pdf)</a></li>
+									<%
 								}
 							}
+							
+						}
+						
+
+						for (int j = 0; j < csvObjects.length; j++)
+						{
+							if(!csvObjects[j].isDirectory())
+							{
+								String fileName = csvObjects[j].getName();
+								if (fileName.startsWith(linkREPORT) && (fileName.endsWith(".csv")))
+								{
+										%><li><a class = "reportItem" target = "reportFrame" href="<%= csvFolder+fileName %>" onClick="ww=window.open('downloadFile.jsp?csvFile=<%= fileName %>', 'Gratia', 'width=10,height=10'); ww.close('Gratia');"><%= linkNAME %> (csv)</a></li>
+										<%
+								}
+							}
+							
 						}
 					}
 				}
