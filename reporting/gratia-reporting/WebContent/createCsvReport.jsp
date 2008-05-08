@@ -51,10 +51,10 @@
  *                       year
  *
  *   o _execute      = csv file name including path
- *                     * temporary file in cvsHome
+ *                     * temporary file in csvHome
  *
  * calls the following stored procedure:
- * PROCEDURE generate_static_report (userName, userRole, fromdate, todate, dateGrouping, timeUnit, resourceType)
+ * PROCEDURE generate_static_report (userName, userRole, fromdate, todate, dateGrouping, timeUnit,  resourceType)
  * 	passing a "null" as an argument results is using the procedure default value
  */
 try
@@ -186,7 +186,9 @@ try
 		csvFileName = incsvFileName;
 	}
 	java.io.File ff = new java.io.File(csvFileName);
-	tempCsvPath = ff.getParent() + "/";
+	tempCsvPath = ff.getParent() + "_csv/";
+	String thisFile = ff.getName();
+	csvFileName = tempCsvPath + thisFile;
 
 	// if it does not exist create the directory to hold the csv file
 	java.io.File newCsvDir = new java.io.File(tempCsvPath);
