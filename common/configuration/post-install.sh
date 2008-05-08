@@ -114,15 +114,18 @@ while [[ -n "$1" ]]; do
         ;;
       stored)
         proc="${script_location}build-stored-procedures.sql"
-        set -- "$@" stored-extra-1
+        set -- "$@" stored-extra-1 static-reports
+        if [[ `hostname -f` == *.fnal.gov ]]; then
+          set -- "$@" proc-edit-permission
+        fi
         ;;
       stored-extra-1)
         # Hand-tweaked procedure (temporary)
         proc="${script_location}WeeklyUsageByVORanked.sql"
         ;;
-      stored-extra-2)
-        # Hand-tweaked procedure (temporary)
-        proc="${script_location}custom.sql"
+      static-reports)
+        # For CSV static reports
+        proc="${script_location}static-report-procedures.sql"
         ;;
       trigger)
         proc="${script_location}build-trigger.sql"
@@ -140,19 +143,22 @@ while [[ -n "$1" ]]; do
       countTrigger*)
         prepareCountTrigger $action
         ;;
+      proc-edit-permission)
+        proc="${script_location}proc-edit-permission.sql"
+        ;;
       *)
         echo "Unrecognized action \"$action\"" 1>&2
         exit 1
   esac
 
-  printf "post-install.sh: loading $proc ... "
-
   CMD_PREAMBLE
   if [[ -r "${proc}" ]]; then
+    printf "post-install.sh: loading $proc ... "
     preprocess_proc
     cat ${proc} | CMD_PREFIX ${VDT_LOCATION}/mysql5/bin/mysql -B --unbuffered --user=root --password=ROOTPASS --host=localhost --port=PORT gratia CMD_SUFFIX
     status=$?
   else
+    echo "$proc is not readable!" 1>&2
     status=1
   fi
   if (( $status != 0 )); then

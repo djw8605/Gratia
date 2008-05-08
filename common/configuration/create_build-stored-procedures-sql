@@ -833,7 +833,6 @@ EOF
 sub generate_frontmatter {
 return << 'EOF';
 -- Allow gratia user to view stored procedures via query browser.
-GRANT SELECT ON mysql.proc TO gratia;
 delimiter ||
 
 EOF
