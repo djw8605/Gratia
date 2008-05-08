@@ -151,7 +151,7 @@ function closeAll () {
 			writeTop('<table class="query"> <tr> <td> <em>Enter below a SQL statement and press "Execute Query" to see the results.<\/em> <br \/>');
 			writeTop('<textarea name="sql" rows="8" cols="85"  class="querytxt"><%= sql %><\/textarea> <\/td>');
 			writeTop('<td> <input class= "button" type="submit" value="Execute Query" onclick="clearParamFrame();clearReportFrame();"> <br \/>');
-			writeTop('<p ><input  class= "button" type="button" value="Export Data (csv)" onClick="window.open(\'ww=downloadFile.jsp?csvFile=<%= csvFileName %>\', \'Gratia\'); ww.close()"><\/p> <br \/> <\/td> <\/tr> <\/table>');
+			writeTop('<p ><input  class= "button" type="button" value="Export Data (csv)" onClick="window.open(\'downloadFile.jsp?csvFile=<%= csvFileName %>\', \'Gratia\');"><\/p> <br \/> <\/td> <\/tr> <\/table>');
 		</script>
 
 		<%
