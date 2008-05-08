@@ -398,7 +398,7 @@ public class Status extends HttpServlet {
 				// Totals for all time
 				////////////////////////////////////
 				command = "select nRecords from TableStatistics where RecordType = '" +
-				table_name + "' and Qualifier is null";
+				table_name + "' and Qualifier = ''";
 				Logging.log("command: " + command);
 				statement = connection.prepareStatement(command);
 				resultSet = statement.executeQuery(command);
@@ -412,7 +412,7 @@ public class Status extends HttpServlet {
 				statement.close();
 				command = "select nRecords, Qualifier from TableStatistics where RecordType = " +
 				dq + table_name + dq +
-				" and Qualifier is not null group by Qualifier";
+				" and Qualifier is not null and Qualifier != '' group by Qualifier";
 				Logging.log("command: " + command);
 				statement = connection.prepareStatement(command);
 				resultSet = statement.executeQuery(command);
