@@ -66,6 +66,7 @@
 
 	<hr><label class="menuGroup">Documentation</label> <br />
 	<a href="./installation-howto.jsp" target="adminContent" class="menuItem">Installation</a><br />
+	<a href="./adminlogin-howto.jsp" target="adminContent" class="menuItem">Administration Login</a><br />
 	<a href="./security-howto.jsp" target="adminContent" class="menuItem">Security</a><br />
 	<a href="./replication-howto.jsp" target="adminContent" class="menuItem">Replication</a><br />
 	<a href="./service-configuration-settings.jsp" target="adminContent" class="menuItem">Gratia Service Settings</a><br />
