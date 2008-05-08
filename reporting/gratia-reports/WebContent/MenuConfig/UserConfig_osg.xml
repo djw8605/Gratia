@@ -39,7 +39,7 @@
 			<MenuItem name="Records Without Dates" link="showQuery.jsp?sql=select count(*) from JobUsageRecord where starttime is null or endtime is null;"/>
 		</MenuGroup>
 		<MenuGroup name="Static Reports">
-			<MenuItem name="Static Reports (in PDF format)" link="staticReports.jsp"/>
+			<MenuItem name="Static Reports (PDF, csv)" link="staticReports.jsp"/>
 		</MenuGroup>
 		<MenuGroup name="Commands">
 			<MenuItem name="Logout" link="logout.jsp"/>
