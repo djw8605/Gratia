@@ -48,7 +48,7 @@ def showNode(node, reportsFolder, staticFolder, birtURL):
                 reportFile = os.path.join(staticFolder, fileName)
                 ## print reportFile
                 callURL = birtURL + '/' + attrs.get(attrName).nodeValue.replace('[csvFileName]', reportFile)
-                print ('URL \n%s\n' % (callURL))
+                #print ('URL \n%s\n' % (callURL))
                 try:
                     f = urllib.urlopen(callURL)
                     f.close
