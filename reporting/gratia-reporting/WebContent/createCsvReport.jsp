@@ -54,11 +54,14 @@
  *                     * temporary file in cvsHome
  *
  * calls the following stored procedure:
- * PROCEDURE testP (userName, userRole, fromdate, todate, timeUnit, dateGrouping, resourceType)
+ * PROCEDURE generate_static_report (userName, userRole, fromdate, todate, dateGrouping, timeUnit, resourceType)
  * 	passing a "null" as an argument results is using the procedure default value
  */
 try
 {
+	net.sf.gratia.reporting.ReportingConfiguration reportingConfiguration = new net.sf.gratia.reporting.ReportingConfiguration();
+	reportingConfiguration.loadReportingConfiguration(request);
+
 	// Define the date format to be used in this jsp
 	SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 
