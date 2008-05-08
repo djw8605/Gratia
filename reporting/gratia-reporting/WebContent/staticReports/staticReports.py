@@ -48,7 +48,7 @@ def showNode(node, reportsFolder, staticFolder, birtURL):
                 reportFile = os.path.join(staticFolder, fileName)
                 ## print reportFile
                 callURL = birtURL + '/' + attrs.get(attrName).nodeValue.replace('[csvFileName]', reportFile)
-                #print ('URL \n%s\n' % (callURL))
+                print ('URL \n%s\n' % (callURL))
                 try:
                     f = urllib.urlopen(callURL)
                     f.close
@@ -84,7 +84,6 @@ def main():
     staticFolder = os.path.join(catalinaHome, 'webapps', config.get( 'gratia', 'service.reporting.static.folder'))
     try:
         os.mkdir(staticFolder)
-        os.chown(staticFolder, 2, 2)
     except OSError, e:
         pass
     exists = os.path.exists(staticFolder)
