@@ -58,6 +58,27 @@ public class GratiaBirtReportEH extends ReportEventAdapter {
 		}
 	}
 
+	public String formatParam (String param)
+	{
+		if (param == null)
+			return "";
+
+		// out.write("Param = " + param +"\n");
+		// out.flush();
+
+		String[] words = param.split (";");
+		String outParam = "(";
+		for (int i=0; i < words.length; i++)
+		{
+			if (outParam != "(")
+				outParam += "," + "'"+ words[i] + "'";
+			else
+				outParam += "'"+ words[i] + "'";
+		}
+		outParam += ")";
+		return outParam;
+	}
+
 	public void beforeFactory(IReportDesign design, IReportContext rc) {
 		// Get current time
 		long timeStamp = System.currentTimeMillis();
@@ -67,25 +88,23 @@ public class GratiaBirtReportEH extends ReportEventAdapter {
 			HttpServletRequest request = (HttpServletRequest) rc.getHttpServletRequest();
 			String outReportURL = request.getRequestURL().toString().replace("frameset", "checkDateParameters.jsp") + "?" + request.getQueryString();
 
-			// Check if there is a VOs parameter. If so, format it for SQL input
+			// Check if there is a VOs or Sites parameter. If so, format it for SQL input
 			Object inVOsObj = rc.getParameterValue("SelectVOs");
 			if (inVOsObj != null)
 			{
-				String inVOs = inVOsObj.toString();
-				// out.write("VOs = " + inVOs +"\n");
-				// out.flush();
+				rc.setParameterValue("SelectVOs", formatParam(inVOsObj.toString()));
+			}
 
-				String[] words = inVOs.split (";");
-				String outVOs = "(";
-				for (int i=0; i < words.length; i++)
-				{
-					if (outVOs != "(")
-						outVOs += "," + "'"+ words[i] + "'";
-					else
-						outVOs += "'"+ words[i] + "'";
-				}
-				outVOs += ")";
-				rc.setParameterValue("SelectVOs", outVOs);
+			Object inSitesObj = rc.getParameterValue("SelectSites");
+			if (inSitesObj != null)
+			{
+				rc.setParameterValue("SelectSites", formatParam(inSitesObj.toString()));
+			}
+
+			Object inProbesObj = rc.getParameterValue("SelectProbes");
+			if (inProbesObj != null)
+			{
+				rc.setParameterValue("SelectProbes", formatParam(inProbesObj.toString()));
 			}
 
 			// Set parameter "ReportURL" to the called URL.
