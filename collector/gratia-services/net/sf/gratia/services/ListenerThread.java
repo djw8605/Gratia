@@ -418,9 +418,9 @@ public class ListenerThread extends Thread
                                                         "JobUsageRecord " +
                                                         "record where " +
                                                         "record.md5 = " +
-                                                        "\"" +
+                                                        "'" +
                                                         current.getmd5() +
-                                                        "\"")
+                                                        "'")
                                     .setCacheMode(CacheMode.IGNORE);
                                 ScrollableResults dups = q.scroll(ScrollMode.FORWARD_ONLY);
                                 Boolean savedCurrent = false;
@@ -428,6 +428,7 @@ public class ListenerThread extends Thread
                                 try {
                                     while (dups.next()) {
                                         JobUsageRecord original_record = (JobUsageRecord) dups.get(0);
+                                        dupdbid = original_record.getRecordId();
                                         UserIdentity originalUserIdentity = original_record.getUserIdentity();
                                         if (newUserIdentity == null) continue; // No replacement
                                         if ((originalUserIdentity == null) ||
