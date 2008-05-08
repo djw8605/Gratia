@@ -167,8 +167,8 @@ try
 	if (incsvFileName == null)
 		incsvFileName = "";
 
-	String sql = "call groupByDate(null,null,'" + sDate +"', '" + eDate +"','" + timeUnit + "','" + dateGrouping +"','batch')";
-
+	String sql = "call generate_static_report(null, null,'" + sDate +"', '" + eDate +"','" + dateGrouping + "','" + timeUnit +"','batch')";
+            
 	String tempCsvPath = "";
 	String csvFileName = "";
 	if (incsvFileName.length() == 0)
