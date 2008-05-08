@@ -39,6 +39,40 @@ function addVOs (form)
 	}
 }
 
+function addSites(form)
+{
+	/* Construct the Sites string from the selection */
+	form.SelectSites.value = "";
+
+	for(var i = 0; i < form.mySites.options.length; i++)
+	{
+		if (form.mySites.options[i].selected)
+		{
+			if (form.SelectSites.value != "")
+				form.SelectSites.value += ";" + form.mySites.options[i].value;
+			else
+				form.SelectSites.value += form.mySites.options[i].value;
+		}
+	}
+}
+
+function addProbes(form)
+{
+	/* Construct the Sites string from the selection */
+	form.SelectProbes.value = "";
+
+	for(var i = 0; i < form.myProbes.options.length; i++)
+	{
+		if (form.myProbes.options[i].selected)
+		{
+			if (form.SelectProbes.value != "")
+				form.SelectProbes.value += ";" + form.myProbes.options[i].value;
+			else
+				form.SelectProbes.value += form.myProbes.options[i].value;
+		}
+	}
+}
+
 function getURL ()
 {
 	var x=document.getElementsByTagName('form')[0];
@@ -56,7 +90,7 @@ function getURL ()
 	{
 		elnam = x.elements[i].name;
 		elval = x.elements[i].value;
-		if (elnam != "myVOs" && elnam != "cal1" && elnam != "submitButton" && elnam != "partURL"  && elnam != "ReportURL" )
+		if (elnam != "myVOs" && elname != "mySites"  && elnam != "cal1" && elnam != "submitButton" && elnam != "partURL"  && elnam != "ReportURL" )
 		{
 			myurl += "&" + elnam + "=" + elval;
 		}
@@ -69,15 +103,6 @@ function getURL ()
 	return myurl;
 
 	// document.write(myurl);
-	// document.write("<br />");
-}
-
-function getAction()
-{
-	var x=document.getElementsByTagName('form')[0];
-	var newAction = x.ReportURL.value;
-	document.mySubmitForm.action = newAction;
-	// document.write(newAction);
 	// document.write("<br />");
 }
 
@@ -255,6 +280,24 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 				onchangeFunction = "addVOs(this.form); getURL();";
 				sql = "select distinct VO.VOName from VO join VONameCorrection VC on (VO.void = VC.void) order by VOName";
 			}
+			else if (paramName.trim().equalsIgnoreCase("SelectSites"))
+			{
+				selectNameID = "mySites";
+				selectedLabel = "Selected Sites:";
+				selectMultiple = "multiple";
+				selected = "";
+				onchangeFunction = "addSites(this.form); getURL();";
+				sql = "select Site.SiteName as sitename from Site order by sitename";
+			}
+			else if (paramName.trim().equalsIgnoreCase("SelectProbes"))
+			{
+				selectNameID = "myProbes";
+				selectedLabel = "Selected Probes:";
+				selectMultiple = "multiple";
+				selected = "";
+				onchangeFunction = "addProbes(this.form); getURL();";
+				sql = "select 'All' as probename from CEProbes union select CEProbes.probename as probename from CEProbes order by probename";
+			}
 			else if (paramName.trim().equalsIgnoreCase("SelectVOName"))
 			{
 				sql = "select distinct VO.VOName from VO join VONameCorrection VC on (VO.void = VC.void) order by VOName";
@@ -318,7 +361,7 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 						else
 						{
 							String compareValue = resultValue;
-							if (paramName.trim().equalsIgnoreCase("SelectVOs"))
+							if (paramName.trim().equalsIgnoreCase("SelectVOs") || paramName.trim().equalsIgnoreCase("SelectSites"))
 								compareValue = "'" + resultValue + "'";
 
 							if(defaultValue.indexOf(compareValue) > -1)
@@ -383,7 +426,7 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 			   </td>
 			</tr>
 			<%
-			if (paramName.trim().equalsIgnoreCase("SelectVOs"))
+			if (paramName.trim().equalsIgnoreCase("SelectVOs") || paramName.trim().equalsIgnoreCase("SelectSites") || paramName.trim().equalsIgnoreCase("SelectProbes"))
 			{
 				%>
 				<tr>
@@ -457,7 +500,7 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 	{
 		elname = x.elements[i].name;
 		elvalue = x.elements[i].value;
-		if (elname != "myVOs" && elname != "cal1" && elname != "submitButton" && elname != "partURL" && elname != "ReportURL" )
+		if (elname != "myVOs" && elname != "mySites" && elname != "cal1" && elname != "submitButton" && elname != "partURL" && elname != "ReportURL" )
 		{
 			outurl += "&" + elname + "=" + elvalue;
 		}
