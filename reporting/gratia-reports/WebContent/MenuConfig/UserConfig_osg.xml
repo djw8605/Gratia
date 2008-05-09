@@ -6,7 +6,7 @@
 			<MenuItem name="Daily Usage by Site for VO" link="GratiaParameterInput.jsp?report=[ReportsFolder]DailyUsageBySiteForVO.rptdesign&amp;DisplayMetric=wallclock"/>
 		</MenuGroup>
 		<MenuGroup name="Reports - VO Views - Weekly History">
-			<MenuItem name="Usage By VO" link="GratiaParameterInput.jsp?report=[ReportsFolder]WeeklyUsageByVO-ranked.rptdesign&amp;DisplayMetric=process"/>
+			<MenuItem name="Usage By VO" link="GratiaParameterInput.jsp?report=[ReportsFolder]WeeklyUsageByVO-ranked.rptdesign&amp;DisplayMetric=wallclock"/>
 			<MenuItem name="Usage Metrics - For VO(s)" link="GratiaParameterInput.jsp?report=[ReportsFolder]WeeklyUsageByVO.rptdesign"/>
 			<MenuItem name="Usage Metrics - For Site(s)" link="GratiaParameterInput.jsp?report=[ReportsFolder]WeeklyUsageBySite.rptdesign"/>
 		</MenuGroup>
