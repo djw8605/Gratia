@@ -40,10 +40,6 @@
             <property name="value">gratia</property>
         </structure>
         <structure>
-            <property name="name">DatabasePassword</property>
-            <property name="value">notused</property>
-        </structure>
-        <structure>
             <property name="name">GroupByFormat</property>
             <property name="value">%c/%d/%Y</property>
         </structure>
@@ -125,7 +121,7 @@
                     <property name="dataType">string</property>
                     <property name="isRequired">true</property>
                     <property name="controlType">text-box</property>
-                    <property name="defaultValue">notused</property>
+                    <property name="defaultValue">proto</property>
                     <structure name="format">
                         <property name="category">Unformatted</property>
                         <property name="pattern">Unformatted</property>
@@ -804,9 +800,12 @@ function beforeGeneration( chart, context ){
 	if(metric==&quot;jobcount&quot;) metric_text = &quot;Job Count&quot;;
 
 	rep_title = rep.getParameterValue(&quot;ReportTitle&quot;) + &quot; (&quot; + metric_text + &quot;)&quot; ;
-	rep_subtitle =rep.getParameterValue(&quot;ReportSubtitle&quot;);
-	chart.getTitle().getLabel().getCaption().setValue(rep_title + &quot; (&quot; + rep.getParameterValue(&quot;DisplayMetric&quot;) + &quot;)&quot; + &quot;\n&quot; + rep_subtitle);
-
+	rep_subtitle = rep.getParameterValue(&quot;ReportSubtitle&quot;);
+	chart.getTitle().getLabel().getCaption().setValue(rep_title + &quot;\n&quot; + rep_subtitle);
+	
+rep = context.getExternalContext().getScriptable();
+	val = rep.getParameterValue(&quot;TimeAxisPattern&quot;);
+	
 	if(val != null) {
                 axes = chart.getAxes().get(0);
                 formatSpec = axes.getFormatSpecifier();
