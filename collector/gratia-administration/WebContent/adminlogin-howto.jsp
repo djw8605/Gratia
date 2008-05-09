@@ -36,7 +36,7 @@
      you are authorized. 
      When you attempt to access those tasks, you will be redirected to an 
      SSL secured port requiring you to have a certificate in your browser from 
-     a trusted CA (Certificate Authority).
+     a trusted CA (Certificate Authority).  This initiates the login process.
   </p>
   <p>As you may have noticed, the default is <i>no access</i> as all the 
      properties in the configuration file are commented out on 
@@ -61,7 +61,7 @@ service.admin.DN.a=PERSON_TWO
 </pre>
 <p>The <i>service.voms.connections</i> attribute is only required when using the
 <i>service.admin.FQAN.x</i> property and identifies a file containing the url of 
-the VO's VOMS server that will be used for authorization.</p>
+the VO's VOMS web service that will be used for authorization.</p>
 
 <hr width="75%"/>
 <p><b>IMPORTANT:</b> Note the <i>logout</i> menu option at the top of the menu.
@@ -103,7 +103,7 @@ service.admin.DN.c=/DC=org/DC=doegrids/OU=People/CN=Person Three
 
 <hr width="75%"/>
 <p><b>Based on an FQAN (Fully Qualified Attribute Name) of any VO using a 
-VOMS server.</b></p> 
+VOMS  web service.</b></p> 
 <p>This option is intended to allow individuals from specified VO's having 
 an agreed upon FQAN (belonging to a certain group/role) within the VO to 
 administer this Gratia instance.</p>
@@ -119,28 +119,74 @@ It is not necessary to define a role in the VO as the 2nd and 3rd examples
 illustrate.</p>
 
 <p>When this option is used, the login process will contact the VOMS 
-server for the VO identified by the top level group in the FQAN. In the 1st
+web service for the VO identified by the top level group in the FQAN. In the 1st
 example, it would be <i>cms</i>.
 This is where the <i>service.voms.connections</i> property comes it to play.  It identifies the file located in 
-<i>TOMCAT_LOCATION/gratia</i> that contains a list of the VOMS server urls for each
+<i>TOMCAT_LOCATION/gratia</i> that contains a list of the VOMS web service urls for each
 VO.</p>
-<p>The login process will contact the VO's VOMS server and determine if the 
-individual, based on <i>DN</i>, is a member of that VO in that group and with
-that role, if specified.</p>
+<p>The actual steps that the user will see are:</p>
+<ol>
+<li>A selection window will appear listing the VO (top level group) for all the
+<i>service.admin.FQAN.x</i> properties you have defined</li>
+
+<li>When the user selects a VO, the login process will retrieve all the possible
+FQAN's (groups-roles) for that user 
+from the VO's VOMS web services  and present them in another seleection window.
+The <i>service.admin.ccnnections</i> will identify the url for that VO's VOMS
+web service.</li>
+
+<li>When the user selects the FQAN, the login process will match that against the
+set of <i>service.admin.FQAN.x</i> that have been defined</li>
+</ol>
+<p>Authorization will be granted (all administrative options will be available)
+if all of the above conditions are met.</p>
+
+<p>This process uses both the DN and CA from the browsers certificate to access the VOMS web services.</p>
+
 
 
 <hr width="75%"/>
 <p><b>Maintaining the <i>voms-servers</i> file.</b></p>
-<p>This file will be empty on initial installation.</p>
+<p>This file will be empty on initial installation. 
+It only needs to be created (maintained) if the <i>service.admin.FQAN.x</i>
+properties are in effect.
+</p>
 <p>This file (<i>voms-servers</i>) can be manually maintained or you can use a 
 script that has been provided that will update this file based on the OSG 
 edg-mkgridmap.conf template at:</p>
+
 <pre>
 http://software.grid.iu.edu/pacman/tarballs/vo-version/edg-mkgridmap.osg
 </pre>
+
 <p>The format for the <i>voms-servers</i> file is a 
 simple <i>VO</i>=<i>VOMS_URL</i> format.</p>
 
+<p>The script that has been provided is:</p>
+<pre>
+TOMCAT_LOCATION/gratia/voms-server.sh
+</pre>
+
+<p>This can be run manually or as a cron process. Running it as a cron process 
+is the recommended method since this insures any changes in VOMS service urls 
+is automatic.</p>
+
+<p>In a VDT installation of Gratia services, then the cron process has 
+already been registered for <i>vdt-control</i> use.  However, it has <u>not</u>
+been <i>enabled</i>.  This was done as we weren't sure how you would configure the
+login process and did not need unnecessary processes running. So to <i>enable</i>
+for a VDT installation:</p>
+<pre>
+source VDT_LOCATION/setup.sh
+vdt-control --enable gratia-voms-servers
+vdt-control --on     gratia-voms-servers
+</pre>
+
+<p>In a non-VDT installation of Gratia services, you will have to set the <i>root</i> cron up 
+manually as:</p>
+<pre>
+42 1 * * * TOMCAT_LOCATION/gratia/voms-server.sh -t TOMCAT_LOCATION >/dev/null 2>&1
+</pre>
 
   
 
