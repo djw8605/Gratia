@@ -1,13 +1,16 @@
 package net.sf.gratia.storage;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
+
 import org.dom4j.Attribute;
 import org.dom4j.Element;
-import java.util.List;
-import java.util.ArrayList;
 
 import net.sf.gratia.storage.RecordIdentity;
 import net.sf.gratia.storage.StringElement;
+
+import net.sf.gratia.util.Logging;
 
 /**
  * <p>Title: UsageRecordLoader</p>
@@ -143,9 +146,9 @@ public class UsageRecordLoader implements RecordLoader {
                 // continue to try to parse.  The next step in the processing
                 // would need to see what's missing.
                 job.addExtraXml(sub.asXML());
-                Utils.GratiaInfo("Warning: error during the xml parsing of "
-                        + job.getRecordId() + " : " + e);
-                e.printStackTrace();
+                Logging.warning("Warning: error during the xml parsing of " +
+                                job.getRecordId() + " : " + e +
+                                "; offending XML: " + sub.asXML(), e);
             }
         }
         return job;
