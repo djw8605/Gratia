@@ -38,22 +38,26 @@
      SSL secured port requiring you to have a certificate in your browser from 
      a trusted CA (Certificate Authority).  This initiates the login process.
   </p>
-  <p>As you may have noticed, the default is <i>no access</i> as all the 
-     properties in the configuration file are commented out on 
-     initial installation.
-  </p>
 
 <p>The properties for the administration login can be found in the
-<i>TOMCAT_LOCATION/gratia/service-configuration.properties</i> file with the
-following default values.
+<i>TOMCAT_LOCATION/gratia/service-configuration.properties</i> file set as
+follows: 
 <pre>
 # service.admin.DN.0=ALLOW ALL
 # service.admin.FQAN.0=FQAN
 # service.voms.connections=voms-servers
 </pre>
 </p>
-<p>A little comment on the <i>DN</i> and <i>FQAN</i> properities syntax as they allow you to specify more than one for each of the properties.  The last level in the 
-property can be either alpha or numeric as long as it is unique as shown below:
+
+  <p>As you may have noticed above or if you have tried to access an 
+     administrative task, all the properties are commented out. 
+     Hence, the default is <i>no access</i> on initial installation.
+  </p>
+
+<p>A little comment on the <i>DN</i> and <i>FQAN</i> properities syntax as 
+   they allow you to specify more than one for each of the properties.  
+   The last level in the property can be either alpha or numeric as long as 
+   it is unique as shown below:
 </p>
 <pre>
 service.admin.DN.0=PERSON_ONE
