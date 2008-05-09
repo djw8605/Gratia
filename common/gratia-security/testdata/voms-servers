@@ -1,0 +1,8 @@
+# This is the mapping from the vo coming from the service-properties
+# to the real url to connect to.
+
+gratia-vo1=https://gratiax34.fnal.gov:8443/voms/gratia-vo1
+gratia-vo2=https://gratiax34.fnal.gov:8443/voms/gratia-vo2
+cms=https://voms.cern.ch:8443/voms/cms
+atlas=https://voms.cern.ch:8443/voms/atlas
+
