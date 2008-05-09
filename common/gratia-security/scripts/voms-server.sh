@@ -120,7 +120,7 @@ cat >$outfile <<EOF
 # Format:
 #  VO=VOMS_Server_url
 # e.g.
-#  cdf=http://
+#  cdf=https://
 #
 # The VO should match the root group of the FQAN entry for attribute
 # (w/o the slash).
@@ -143,7 +143,7 @@ awk '{
      if ( $1 == "group" )  { 
        sub(/vomss:/,"",$2)
        url=$2 
-       printf "%s=http:%s\n",vo,url
+       printf "%s=https:%s\n",vo,url
      }
   }' $tmpVOMS  |sort -u >>$outfile
 
