@@ -113,14 +113,15 @@ an agreed upon FQAN (belonging to a certain group/role) within the VO to
 administer this Gratia instance.</p>
 <pre>
 service.admin.FQAN.0=/cms/usmcs/Role=GratiaAdmin
-service.admin.FQAN.1=/atlas/usatlas/gratiaadmin
-service.admin.FQAN.d=/fermilab/gratia
+service.admin.FQAN.1=/atlas/usatlas/Role=gratia
+service.admin.FQAN.d=/fermilab/gratia/Role=admin
 </pre>
 <p>So for the first entry, any CMS VO member in the <i>/cms/uscms</i> group with a 
 role of <i>GratiaAdmin</i> will be authorized to perform administative tasks on 
 this instance of Gratia.
-It is not necessary to define a role in the VO as the 2nd and 3rd examples 
-illustrate.</p>
+<font color="blue">At this time, it is necessary to define a role in the VO VOMS 
+to validate against.  This should be changed in the next release to allow just 
+a subgroup, if desired.</font></p>
 
 <p>When this option is used, the login process will contact the VOMS 
 web service for the VO identified by the top level group in the FQAN. In the 1st
@@ -174,6 +175,10 @@ TOMCAT_LOCATION/gratia/voms-server.sh
 <p>This can be run manually or as a cron process. Running it as a cron process 
 is the recommended method since this insures any changes in VOMS service urls 
 is automatic.</p>
+
+<p><font color="blue">In this release, the script does not create a perfect list 
+of voms server urls.  It is close.  You will probably have to tweek it for some VO's.
+We hope to resolve this in the very near future.</font></p>
 
 <p>In a VDT installation of Gratia services, then the cron process has 
 already been registered for <i>vdt-control</i> use.  However, it has <u>not</u>
