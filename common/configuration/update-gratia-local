@@ -217,7 +217,7 @@ remove_deprecated_webapps_services
 echo "... loading war files in $tomcat_webapps"
 for warfile in $(cd $target_dir;ls *.war)
 do
-  echo "      $warfile"
+  echo "...... $warfile"
   wardir=$(echo $warfile | cut -d'.' -f1)
   rm -rf ${tomcat_webapps}/${wardir} ${tomcat_webapps}/${warfile}
   if [ ! $vdt_install ];then
@@ -263,6 +263,20 @@ if [ $vdt_install ];then
   done
   #--- remove any services VDT may have re-installed ---
   remove_deprecated_webapps_services
+  echo "... loading war files AGAIN in $tomcat_webapps"
+  for warfile in $(cd $target_dir;ls *.war)
+  do
+    echo "...... $warfile"
+    wardir=$(echo $warfile | cut -d'.' -f1)
+    rm -rf ${tomcat_webapps}/${wardir} ${tomcat_webapps}/${warfile}
+    mkdir  ${tomcat_webapps}/${wardir}
+    cp -pv ${target_dir}/${warfile}  ${tomcat_webapps}/${wardir}/.
+    cd ${tomcat_webapps}/${wardir}
+    jar xf $warfile
+    rm -f  $warfile
+    cd -
+  done
+
   #-- reset some permissions --
   echo "... fixing ownership:"
   chown -R daemon $tomcat_webapps
