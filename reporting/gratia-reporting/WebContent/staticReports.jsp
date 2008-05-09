@@ -16,8 +16,12 @@
 <body>
 	<jsp:include page="common.jsp" />
 
-	<div class="osgcolor">&nbsp;&nbsp;&nbsp;&nbsp;Gratia Reporting&nbsp;&nbsp;&nbsp;&nbsp;</div> <br />
+	
 	<%
+	String title = request.getParameter("ReportTitle");
+	if (title == null)
+		title = "Static Reports";
+	%><div class="reportTitle"><%= title %></div><br><%
 	String linkURL = null;
 	String linkNAME = null;
 	String linkREPORT = null;
@@ -102,7 +106,7 @@
 								String fileName = csvObjects[j].getName();
 								if (fileName.startsWith(linkREPORT) && (fileName.endsWith(".csv")))
 								{
-										%><li><a class = "reportItem" target = "reportFrame" href="<%= csvFolder+fileName %>" onClick="ww=window.open('downloadFile.jsp?csvFile=<%= fileName %>', 'Gratia', 'width=10,height=10'); ww.close('Gratia');"><%= linkNAME %> (csv)</a></li>
+										%><li onClick="window.open('downloadFile.jsp?csvFile=<%= csvFolderPath+fileName %>', 'Gratia');"><span class = "txtasLink"><%= linkNAME %> (csv)</span></li>
 										<%
 								}
 							}
