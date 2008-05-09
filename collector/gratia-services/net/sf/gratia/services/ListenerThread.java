@@ -424,9 +424,9 @@ public class ListenerThread extends Thread
                                     .setCacheMode(CacheMode.IGNORE);
                                 ScrollableResults dups = q.scroll(ScrollMode.FORWARD_ONLY);
                                 Boolean savedCurrent = false;
-                                tx = session.beginTransaction();
                                 try {
-                                    while (dups.next()) {
+                                    if (dups.next()) {
+                                        tx = session.beginTransaction();
                                         JobUsageRecord original_record = (JobUsageRecord) dups.get(0);
                                         dupdbid = original_record.getRecordId();
                                         UserIdentity originalUserIdentity = original_record.getUserIdentity();
@@ -447,27 +447,30 @@ public class ListenerThread extends Thread
                                             if (original_record.setDuplicate(true)) {
                                                 if (gotreplication) {
                                                     errorRecorder.saveDuplicate("Replication", "Duplicate",
-                                                                  current.getRecordId(),
-                                                                  original_record);
+                                                                                current.getRecordId(),
+                                                                                original_record);
                                                 } else if (gothistory) {
                                                     ;
                                                 } else {
                                                     errorRecorder.saveDuplicate("Probe", "Duplicate",
-                                                                  current.getRecordId(),
-                                                                  original_record);
+                                                                                current.getRecordId(),
+                                                                                original_record);
                                                 }
                                             }
                                             SummaryUpdater.removeFromSummary(original_record.getRecordId(),
                                                                              session);
                                             session.delete(original_record);
                                             if (!savedCurrent) {
+                                                session.flush();
+                                                tx.commit();
+                                                tx = session.beginTransaction();
                                                 session.save(current);
                                                 savedCurrent = true;
                                             }
                                         }
+                                        session.flush();
+                                        tx.commit();
                                     }
-                                    session.flush();
-                                    tx.commit();
                                     if (!savedCurrent) {
                                         needCurrentSaveDup = current.setDuplicate(true);
                                     }
@@ -489,16 +492,16 @@ public class ListenerThread extends Thread
                                 Logging.debug("ListenerThread: " + ident + ": save duplicate of record " +
                                               dupdbid);
                                 try {
-                                if (gotreplication) {
-                                    errorRecorder.saveDuplicate("Replication", "Duplicate", dupdbid, current);
-                                } else if (gothistory) {
-                                    // If we are reprocessing the history date, we should not
-                                    // be recording the possible duplicates.
-                                    ;
-                                } else {
-                                    errorRecorder.saveDuplicate("Probe", "Duplicate", dupdbid, current);
-                                }
-                                //Logging.log("ListenerThread: " + ident + ":After Save Duplicate");
+                                    if (gotreplication) {
+                                        errorRecorder.saveDuplicate("Replication", "Duplicate", dupdbid, current);
+                                    } else if (gothistory) {
+                                        // If we are reprocessing the history date, we should not
+                                        // be recording the possible duplicates.
+                                        ;
+                                    } else {
+                                        errorRecorder.saveDuplicate("Probe", "Duplicate", dupdbid, current);
+                                    }
+                                    //Logging.log("ListenerThread: " + ident + ":After Save Duplicate");
                                 }
                                 catch (Exception ignore) { }
                             }
