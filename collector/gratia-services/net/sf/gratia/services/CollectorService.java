@@ -280,12 +280,6 @@ public class CollectorService implements ServletContextListener {
             Logging.log("JMSProxy Started");
 
             //
-            // whack old history
-            //
-
-            new HistoryReaper();
-
-            //
             // start a thread to recheck history directories every 6 hours
             //
 
