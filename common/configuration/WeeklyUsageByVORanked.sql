@@ -78,7 +78,8 @@ from (SELECT @rank:=@rank+1 as final_rank,
               sum(VOProbeSummary.CpuUserDuration +
 VOProbeSummary.CpuSystemDuration) as Cpu,
               sum(VOProbeSummary.Njobs) as Njobs,
-         str_to_date(date_format(VOProbeSummary.EndTime,''', idatr, '''), ''', idats, ''') as  datevalue     
+         date_format(str_to_date(date_format(VOProbeSummary.EndTime,''', idatr, '''), ''', idats, '''),
+                     ''%Y-%m-%d'') as  datevalue     
        from VOProbeSummary 
        WHERE (EndTime) >= (''', fromdate, ' 00:00:00 '')
                             and (EndTime) <= (''', todate, ' 00:00:00 '')
