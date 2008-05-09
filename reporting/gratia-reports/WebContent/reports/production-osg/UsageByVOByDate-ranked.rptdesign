@@ -36,10 +36,6 @@
             <property name="value">gratia</property>
         </structure>
         <structure>
-            <property name="name">DatabasePassword</property>
-            <property name="value">notused</property>
-        </structure>
-        <structure>
             <property name="name">DisplayMetric</property>
             <property name="value">jobcount</property>
         </structure>
@@ -867,7 +863,7 @@
                     <property name="dataType">string</property>
                     <property name="isRequired">true</property>
                     <property name="controlType">text-box</property>
-                    <property name="defaultValue">jdbc:mysql://gratia-db01.fnal.gov:3320/gratia</property>
+                    <property name="defaultValue">jdbc:mysql://gratia-vm02.fnal.gov:3320/gratia_greenc</property>
                     <structure name="format">
                         <property name="category">Unformatted</property>
                         <property name="pattern">Unformatted</property>
@@ -936,7 +932,7 @@
             <property name="concealValue">true</property>
             <property name="isRequired">false</property>
             <property name="controlType">text-box</property>
-            <property name="defaultValue">%Y-%m-%d</property>
+            <property name="defaultValue">day</property>
             <structure name="format">
                 <property name="category">Unformatted</property>
                 <property name="pattern">Unformatted</property>
@@ -1086,7 +1082,7 @@
     <data-sources>
         <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="fermigrid1" id="357">
             <property name="odaDriverClass">com.mysql.jdbc.Driver</property>
-            <property name="odaURL">jdbc:mysql://gratia-db01.fnal.gov:3320/gratia</property>
+            <property name="odaURL">jdbc:mysql://gratia-vm02.fnal.gov:3320/gratia_greenc</property>
             <property name="odaUser">gratia</property>
             <encrypted-property name="odaPassword">cHJvdG8=</encrypted-property>
         </oda-data-source>
@@ -1163,8 +1159,9 @@
                     <property name="name">GroupByFormat</property>
                     <property name="dataType">string</property>
                     <property name="position">5</property>
-                    <expression name="defaultValue">"%Y-%m-%d"</expression>
+                    <expression name="defaultValue">"day"</expression>
                     <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
                 </structure>
             </list-property>
             <list-property name="resultSet">
