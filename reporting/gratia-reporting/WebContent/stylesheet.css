@@ -210,3 +210,15 @@ a.reportItem:active
 	color: #FFFFFF; 
 	background-color: #e07630;
 }
+.txtasLink
+{
+	cursor: pointer;
+	overflow: hidden;
+	color: #e07630;
+	text-indent: 0.65em;
+	text-align: left;
+	font-weight: bold;
+	font-family: Verdana, Arial, sans-serif;
+	font-size: 0.85em; 
+	text-decoration: none;
+}
