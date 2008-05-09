@@ -68,6 +68,7 @@ function closeAll () {
 
 </head>
 <body>
+<jsp:include page="common.jsp" />
 
 <script type="text/javascript">
 	writeTop('<link href="stylesheet.css" type="text\/css" rel="stylesheet">');
