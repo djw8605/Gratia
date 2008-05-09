@@ -89,7 +89,7 @@ service.admin.DN.0=ALLOW ALL
 
 <hr width="75%"/>
 <p><b>By specific individual</b></p>
-<p>This option allows you to specify individual administratorss based on 
+<p>This option allows you to specify individual administrators based on 
 the DN (certificate subject) of their browser's certificate.
 </p>
 
