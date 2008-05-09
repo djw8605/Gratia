@@ -100,7 +100,7 @@ function displayReport(link) {
 	boolean staticReport = false;
 	if (inFormat != null && inFormat.indexOf("html") == -1)
 	{
-		link = "/run?";
+		link = "/run?__fittopage=true&";
 		staticReport = true;
 	}
 
