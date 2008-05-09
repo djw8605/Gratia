@@ -114,6 +114,7 @@ ${target}/gratia-services.war:  ${services}/net/sf/gratia/services/*.java  \
 	mkdir -p war/WEB-INF/classes/net/sf/gratia/storage
 	mkdir -p war/WEB-INF/classes/net/sf/gratia/util
 	mkdir -p war/WEB-INF/lib
+	echo "${version_default}" >war/gratia-release
 	rm -f -r net
 	javac -cp ${classpath} -extdirs ${commonLib} ${services}/net/sf/gratia/services/*.java
 	javac -cp ${classpath} -extdirs ${commonLib} ${services}/net/sf/gratia/storage/*.java
@@ -146,6 +147,7 @@ servlets: services util
 	mkdir -p war/WEB-INF/classes/net/sf/gratia/services
 	mkdir -p war/WEB-INF/classes/net/sf/gratia/servlets
 	mkdir -p war/WEB-INF/classes/net/sf/gratia/util
+	echo "${version_default}" >war/gratia-release
 	javac -cp ${classpath} -extdirs ${commonLib} ${servlets}/net/sf/gratia/servlets/*.java
 	cp ${servlets}/net/sf/gratia/servlets/*.class war/WEB-INF/classes/net/sf/gratia/servlets
 	cp ${services}/net/sf/gratia/services/*Skel.class war/WEB-INF/classes/net/sf/gratia/services
@@ -170,6 +172,7 @@ soap: services
 	mkdir -p war/WEB-INF/lib
 	mkdir -p war/WEB-INF/classes/net/sf/gratia/services
 	mkdir -p war/WEB-INF/classes/net/sf/gratia/soap
+	echo "${version_default}" >war/gratia-release
 	javac -cp ${classpath} -extdirs ${commonLib} ${soap}/net/sf/gratia/soap/*.java
 	cp ${soap}/net/sf/gratia/soap/*.class war/WEB-INF/classes/net/sf/gratia/soap
 	cp ${services}/net/sf/gratia/services/*Skel.class war/WEB-INF/classes/net/sf/gratia/services
@@ -213,6 +216,7 @@ ${target}/gratia-administration.war: ${administration}/net/sf/gratia/administrat
 	mkdir -p war/WEB-INF/classes/net/sf/gratia/administration
 	mkdir -p war/WEB-INF/classes/net/sf/gratia/util
 	mkdir -p war/WEB-INF/lib
+	echo "${version_default}" >war/gratia-release
 	javac -cp ${classpath} -extdirs ${commonLib} ${administration}/net/sf/gratia/administration/*.java
 	cp ${administration}/net/sf/gratia/administration/*.class war/WEB-INF/classes/net/sf/gratia/administration
 	cp ${services}/net/sf/gratia/services/*.class war/WEB-INF/classes/net/sf/gratia/services
@@ -276,6 +280,7 @@ reporting: birt-reporting
 	rm -rf   war
 	mkdir -p war/documents
 	mkdir -p war/WEB-INF/attachments
+	echo "${version_default}" >war/gratia-release
 	# --- expand the birt war file  -----
 	cp ${birtDir}/${birtwarFile} war/.
 	cd war && jar xf ${birtwarFile}
@@ -311,6 +316,7 @@ reports:
 	mkdir -p war/MenuConfig
 	mkdir -p war/WEB-INF
 	mkdir -p war/META-INF
+	echo "${version_default}" >war/gratia-release
 	cp -p ${reports}/WebContent/WEB-INF/web.xml          war/WEB-INF/web.xml
 	cp -p ${reports}/WebContent/MenuConfig/*.xml         war/MenuConfig
 	cp -p ${reports}/WebContent/reports/production-osg/*.rptdesign            war/reports
