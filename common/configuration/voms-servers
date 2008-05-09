@@ -1,0 +1,22 @@
+##########################################################################
+# VOMS server file
+#
+# This file is used in the adminstrative login identifying the
+# VOMS servers for all VOs potentially defined by the
+# service.admin.FQAN.n attributes of the service-configuration.properties
+# file.
+#
+# Format:
+#  VO=VOMS_Server_url
+# e.g.
+#  cdf=https://
+#
+# The VO should match the root group of the FQAN entry for attribute
+# (w/o the slash).
+#
+# It can be maintained manually or by executing the voms-server-cron.sh
+# script which creates the file using the the OSG edg-mkgridmap.conf file.
+# Having extra entries in the file does no harm.
+############################################################################
+#
+

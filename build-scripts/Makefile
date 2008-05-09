@@ -414,6 +414,7 @@ gratia: clean util services servlets soap reporting reports administration
 	perl -wape 's&^(\s*gratia\.services\.version\s*=\s*).*$$&$$1${gratia_services_version}&; s&^(\s*gratia\.reporting\.version\s*=\s*).*$$&$$1${gratia_reporting_version}&; ' ${configuration}/service-configuration.properties > tarball/service-configuration.properties && chmod 600 tarball/service-configuration.properties; \
 	cp ${configuration}/configure-* ${configuration}/update-gratia-local tarball; \
 	cp ${configuration}/truststore ${configuration}/keystore tarball; \
+	cp ${configuration}/voms-servers tarball; \
 	tar -cvf ${target}/gratia.tar -C tarball .; \
 	rm -f -r tarball
 	# --- Target: gratia COMPLETED ---
