@@ -286,7 +286,7 @@ public abstract class JobUsageRecordUpdater implements RecordUpdater
                 if (fieldValue.startsWith("cn=")) {
                     // Raw DN: Grab *first* CN clause for CommonName (thank you, KCA)
                     if (userName != null) {
-                        Utils.GratiaInfo("Extra CommonName " + caseFieldValue.substring(3) +
+                        Utils.GratiaDebug("Extra CommonName " + caseFieldValue.substring(3) +
                                          " found in subject " + subjectName + ": IGNORED" );
                     } else {
                         userName = caseFieldValue.substring(3);
