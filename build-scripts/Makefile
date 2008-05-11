@@ -384,6 +384,10 @@ release: gratia
 	mkdir -p tarball/var/data; \
 	mkdir -p tarball/var/logs; \
 	mkdir -p tarball/var/tmp; \
+	cp ${configuration}/voms-servers    tarball/tomcat/v55/gratia; 
+	chmod 644 tarball/tomcat/v55/gratia/voms-servers;
+	cp ${security}/scripts/voms-server.sh   tarball/tomcat/v55/gratia; 
+	chmod 744 tarball/tomcat/v55/gratia/voms-server.sh;
 	cp ${configuration}/*gov ${configuration}/*xml ${configuration}/*properties  $(staticScript)/*.py tarball/tomcat/v55/gratia; \
 	chmod 755 tarball/tomcat/v55/gratia/*.py
 	cp ${configuration}/*sql ${configuration}/*sh tarball/tomcat/v55/gratia; \
