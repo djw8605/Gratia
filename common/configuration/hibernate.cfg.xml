@@ -16,6 +16,9 @@
     <!-- SQL dialect -->
     <property name="dialect">org.hibernate.dialect.MySQLInnoDBDialect</property>
 
+    <!-- Set autocommit to false -->
+    <property name="hibernate.connection.autocommit">false</property>
+
     <!-- Echo all executed SQL to stdout -->
     <property name="show_sql">false</property>
 
