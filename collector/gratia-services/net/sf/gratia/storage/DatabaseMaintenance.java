@@ -259,7 +259,9 @@ public class DatabaseMaintenance {
         // called it something different. We'll need to calculate the
         // new checksums en bloc and *then* make the index unique.
         DropIndex("JobUsageRecord_Meta", "md5v2");
-        if (liveVersion >= 31) { // Note that we're adding a non-unique one, here.
+        if (liveVersion >= 31 ||
+            (gratiaDatabaseVersion >= 31 && liveVersion == 0)) {
+            // Note that we're adding a non-unique one, here.
             AddIndex("JobUsageRecord_Meta", false, "index17", "md5v2", true);
         }
     }
