@@ -374,7 +374,7 @@ public class ListenerThread extends Thread
 
                         synchronized (lock)
                             {
-                                newVOUpdate.check(current);
+                                newVOUpdate.check(current, session);
                             }
                         synchronized (lock)
                             {
