@@ -462,19 +462,31 @@ sub configure_tomcat_config {
                connectionTimeout="20000" disableUploadTimeout="true" />
 EOF
 				print REPORTING_CONFIG <<EOF if $options{"use-ssl"};
-    <Connector port="$collector_config->{ssl_port}" maxHttpHeaderSize="8192"
-               maxThreads="150" minSpareThreads="25" maxSpareThreads="75"
-               enableLookups="false" disableUploadTimeout="true"
-               acceptCount="100" scheme="https" secure="true"
-               sslKey="/etc/grid-security/hostkey.pem" sslCAFiles="/etc/grid-security/certificates/*.0"
-               sslCertFile="/etc/grid-security/hostcert.pem"
+    <Connector port="$collector_config->{ssl_port}"
+               maxHttpHeaderSize="8192"
+               maxThreads="150"
+               minSpareThreads="25"
+               maxSpareThreads="75"
+               enableLookups="false"
+               disableUploadTimeout="true"
+               acceptCount="100"
+               debug="0"
+               scheme="https"
+               secure="true"
+               sSLImplementation="org.glite.security.trustmanager.tomcat.TMSSLImplementation"
+               sslCAFiles="/etc/grid-security/certificates/*.0"
                crlFiles="/etc/grid-security/certificates/*.r0"
-               SSLImplementation="org.glite.security.trustmanager.tomcat.TMSSLImplementation"
+               sslCertFile="/etc/grid-security/hostcert.pem"
+               sslKey="/etc/grid-security/hostkey.pem"
                log4jConfFile="$options{prefix}/tomcat-${instance_name}/conf/log4j-trustmanager.properties"
                keystoreFile="$options{prefix}/tomcat-${instance_name}/gratia/keystore" keystorePass="server"
                truststoreFile="$options{prefix}/tomcat-${instance_name}/gratia/truststore" truststorePass="server"
-               clientAuth="true" sslProtocol="TLS" />
+               clientAuth="true"
+               sslProtocol="TLS"
+               crlEnabled="true"
+               crlRequired="true"/>
 EOF
+
 			}
 		}
 		
