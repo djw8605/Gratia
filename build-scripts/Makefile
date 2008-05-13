@@ -41,6 +41,13 @@ security=${common}/gratia-security
 util=${common}/gratia-util
 commonLib=${common}/lib
 
+server_lib_jars = log4j- \
+                  glite-security-trustmanager \
+                  glite-security-util-java \
+                  bcprov-
+
+SERVER_LIBS = $(foreach d, $(server_lib_jars), $(wildcard $(commonLib)/$(d)*.jar))
+
 # check where we are as the tar file ownership cannot be set correctly on cygwin
 ifeq ($(filter CYGWIN%,${PLATFORM}),)
 tarowner=--owner=root --group=root
@@ -403,8 +410,19 @@ release: gratia
 	rm -f -r tarball
 	# --- Target: release COMPLETED ---
 
+server_lib:
+	# ------------------------------
+	# --- Target: server_lib     ---
+	# ------------------------------
+	rm -f -r tarball; \
+	mkdir tarball; \
+	cp -v $(SERVER_LIBS) tarball/; \
+	tar -cvf ${target}/server_lib.tar -C tarball .; \
+        rm -f -r tarball
+	# --- Target: server_lib COMPLETED ---
+
 #-------------------------------------------------------------
-gratia: clean util services servlets soap reporting reports administration 
+gratia: clean util services servlets soap reporting reports administration server_lib
 	# ------------------------------
 	# --- Target: gratia         ---
 	# ------------------------------
@@ -418,6 +436,7 @@ gratia: clean util services servlets soap reporting reports administration
 	perl -wape 's&^(\s*gratia\.services\.version\s*=\s*).*$$&$$1${gratia_services_version}&; s&^(\s*gratia\.reporting\.version\s*=\s*).*$$&$$1${gratia_reporting_version}&; ' ${configuration}/service-configuration.properties > tarball/service-configuration.properties && chmod 600 tarball/service-configuration.properties; \
 	cp ${configuration}/configure-* ${configuration}/update-gratia-local tarball; \
 	cp ${configuration}/truststore ${configuration}/keystore tarball; \
+	cp ${configuration}/cleanup_server_lib tarball/; \
 	cp ${configuration}/voms-servers tarball; \
 	tar -cvf ${target}/gratia.tar -C tarball .; \
 	rm -f -r tarball
