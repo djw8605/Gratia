@@ -110,6 +110,15 @@ $deprecated_webapps_services
   echo
 }
 
+function populate_server_lib {
+    cd "$tomcat_top/server/lib"
+    if [[ -x "$tomcat_gratia/cleanup_server_lib" ]]; then
+      echo "... running cleanup script in $tomcat_top/server/lib:"
+      "$tomcat_gratia/cleanup_server_lib"
+    fi
+    echo "... populating $tomcat_top/server/lib:"
+    tar xvf ${target_dir}/server_lib.tar
+}
 
 
 ## MAIN ########################################
@@ -282,6 +291,14 @@ if [ $vdt_install ];then
   chown -R daemon $tomcat_webapps
 #--- local ---
 else
+  #-----------------------
+  # Put required libs in server/lib
+  #-----------------------
+  populate_server_lib
+
+  #-----------------------
+  # Run configure script
+  #-----------------------  
   [[ -n "$configure_script" ]] || configure_script="$configuration_dir/configure-collector"
   echo "... running $configure_script"
   "$configure_script" \
