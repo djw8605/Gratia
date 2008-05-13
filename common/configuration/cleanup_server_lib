@@ -1,0 +1,12 @@
+#!/bin/bash
+
+# Script to remove libs in tomcat/server/lib prior to updating, to avoid
+# confusion over versions.
+
+rm -fv log4j-*.jar \
+       bcprov-*.jar \
+       glite-security-*.jar
+
+exit $?
+
+
