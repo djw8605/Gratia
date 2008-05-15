@@ -5,7 +5,7 @@
 #
 # library to create simple report using the Gratia psacct database
 #
-#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.24 2008-05-05 19:52:02 pcanal Exp $
+#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.25 2008-05-15 16:29:11 pcanal Exp $
 
 import time
 import datetime
@@ -433,10 +433,10 @@ def DailySiteJobStatusCondor(begin,end,selection = "", count = "", what = "Site.
 
 def CMSProdData(begin,end):
     schema = "gratia"
-    select = "select sum(WallDuration) from JobUsageRecord J, JobUsageRecord_Meta M " \
-            "where J.dbid = M.dbid and ResourceType = \"Batch\" and VOName = \"uscms\" "\
-            "and \""+ DateToString(begin) +"\"<=EndTime and EndTime<\"" + DateToString(end) + "\" " \
-            "and (LocalUserId = \"cmsprod\" or LocalUserId = \"cmsprd\") and ReportedSiteName = \"USCMS-FNAL-WC1-CE\" "
+    select = "select sum(WallDuration) from JobUsageRecord_Report  " \
+            "where \""+ DateToString(begin) +"\"<=EndTime and EndTime<\"" + DateToString(end) + "\" " \
+            "and ResourceType = \"Batch\" and VOName = \"cms\" "\
+            "and (LocalUserId = \"cmsprod\" or LocalUserId = \"cmsprd\") and SiteName = \"USCMS-FNAL-WC1-CE\" "
     return RunQueryAndSplit(select)
 
 
