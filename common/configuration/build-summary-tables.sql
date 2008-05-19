@@ -63,7 +63,7 @@ FROM JobUsageRecord J
      LEFT JOIN Resource RT ON
       ((J.dbid = RT.dbid) AND
        (RT.description = 'ExitCode'))
-WHERE J.CpuUserDuration IS NOT NULL
+WHERE J.CpuUserDuration IS NOT NULL and ResourceType = 'Batch'
 GROUP BY VOcorrid, ProbeName, CommonName,
          ResourceType, HostDescription, ApplicationExitCode, eDate;
 
