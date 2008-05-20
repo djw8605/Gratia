@@ -45,7 +45,7 @@ SP:BEGIN
          VC.corrid,
          IFNULL(J.ResourceType, ''),
          IFNULL(J.HostDescription, ''),
-         IFNULL(RT.value, J.Status),
+         IFNULL(IFNULL(RT.value, J.Status), 0),
          J.Njobs,
          J.WallDuration,
          J.CpuUserDuration,
