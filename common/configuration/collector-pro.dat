@@ -80,7 +80,7 @@
                 "properties.attributes" =>
                 { "monitor.listener.wait" => 1440,
                   "gratia.database.wantSummaryTable" => 0,
-                  "gratia.database.wantSummaryTrigger" => 0
+                  "gratia.database.wantSummaryTrigger" => 0,
                   "gratia.database.useJobUsageSiteName" => 1
                 },
                 remote_host => "gratia.opensciencegrid.org"
