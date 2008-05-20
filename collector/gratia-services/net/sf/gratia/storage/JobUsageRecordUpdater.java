@@ -208,7 +208,7 @@ public abstract class JobUsageRecordUpdater implements RecordUpdater
                                 String subjectName = ((Element)subjectNames.get(0)).getText();
 
                                 String cName = getCNFromDN(subjectName);
-                                if ((cName != null) && (cName.length() == 0)) {
+                                if ((cName != null) && (cName.length() != 0)) {
                                     userName = cName;
                                     populatedUserNameFromKeyInfoContent = true;
                                     Utils.GratiaDebug("Extracted a Username from X509SubjectNameNode: " + userName);
