@@ -42,6 +42,9 @@ public class DatabaseMaintenance {
     static final int latestDBVersionRequiringSummaryTriggerLoad = 30;
     static final int latestDBVersionRequiringTableStatisticsRefresh = 32;
 
+    static boolean dbWantSummaryTable = true;
+    static boolean dbUseJobUsageSiteName = false;
+
     java.sql.Connection connection;
     int liveVersion = 0;
     XP xp = new XP();
@@ -69,6 +72,7 @@ public class DatabaseMaintenance {
         RationalizePropsTable();
 
         ReadLiveVersion();
+
     }
     
     public boolean IsDbNewer()
@@ -76,6 +80,14 @@ public class DatabaseMaintenance {
         return (liveVersion > gratiaDatabaseVersion);
     }
     
+    static public boolean UseJobUsageSiteName() {
+        return dbUseJobUsageSiteName; 
+    }
+
+    static public boolean WantSummaryTable() {
+        return dbWantSummaryTable;
+    }
+
     public boolean InitialCleanup() {
         // Do check and cleanup that must be done before Hibernate is started.
         
@@ -414,6 +426,11 @@ public class DatabaseMaintenance {
                          p.getProperty("gratia.database.wantSummaryTrigger"));
         UpdateDbProperty("gratia.database.wantStoredProcedures",
                          p.getProperty("gratia.database.wantStoredProcedures"));
+        UpdateDbProperty("gratia.database.useJobUsageSiteName",
+                         p.getProperty("gratia.database.useJobUsageSiteName"));
+
+        dbWantSummaryTable = 0 != readIntegerDBProperty("gratia.database.wantSummaryTable");
+        dbUseJobUsageSiteName = 0 != readIntegerDBProperty("gratia.database.useJobUsageSiteName");
     }
     
     public void AddViews() {

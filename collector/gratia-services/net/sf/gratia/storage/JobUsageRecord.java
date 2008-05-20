@@ -607,10 +607,14 @@ public class JobUsageRecord implements Record
        // Zero out things we don't want checksums for
        RecordIdentity tempRecordIdentity = getRecordIdentity();
        setRecordIdentity(null);
-       StringElement tempSiteName = getSiteName();
-       setSiteName(null);
        UserIdentity tempUserIdentity = getUserIdentity();
        setUserIdentity(null);
+
+       StringElement tempSiteName = getSiteName();
+
+       if (!DatabaseMaintenance.UseJobUsageSiteName()) {
+           setSiteName(null);
+       }
 
        // Calculate the checksum
        String md5key = Utils.md5key(asXML());
