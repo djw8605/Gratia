@@ -77,8 +77,8 @@ public class Utils
       javax.xml.datatype.DatatypeFactory fac = javax.xml.datatype.
                                DatatypeFactory.
                                newInstance();
-      Duration du = fac.newDuration((long)val * 1000);
-      String str = du.toString();
+      Duration du = fac.newDuration((long)(val * 1000));
+      String str = du.toString();      
       return str;
    }
 
