@@ -263,8 +263,9 @@ public class CollectorService implements ServletContextListener {
                 if (session.isOpen()) session.close();
                 throw e;
             }
+            boolean checksum_upgrade_disabled = 0 < checker.readIntegerDBProperty("gratia.database.disableChecksumUpgrade");
 
-            if (require_checksum_upgrade) {
+            if (require_checksum_upgrade && !checksum_upgrade_disabled) {
                 Logging.info("CollectorService: starting checksum upgrade thread.");
                 ChecksumUpgrader CU = new ChecksumUpgrader(this);
                 CU.start();
