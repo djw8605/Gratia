@@ -279,19 +279,36 @@ public abstract class JobUsageRecordUpdater implements RecordUpdater
         private String getCNFromDN(String subjectName) {
             String[] subjectNameFields = subjectName.split("[,/]");
             String userName = null;
+            int cnToIgnore = 0;
+            int cnSeen = 0;
             for (int i = 0; i < subjectNameFields.length; ++i) {
                 String caseFieldValue = subjectNameFields[i].trim();
                 String fieldValue = subjectNameFields[i].toLowerCase().trim();
 
+                if (fieldValue.equals("ou=robots")) {
+                    // This is for cron, we need the 3rd CNs:
+                    //     /DC=gov/DC=fnal/O=Fermilab/OU=Robots/CN=fermigrid0.fnal.gov/CN=cron/CN=Keith Chadwick/CN=UID:chadwick
+                    cnToIgnore = 2;
+                }
                 if (fieldValue.startsWith("cn=")) {
                     // Raw DN: Grab *first* CN clause for CommonName (thank you, KCA)
-                    if (userName != null) {
+                    if (cnSeen < cnToIgnore) {
+                        String name = caseFieldValue.substring(3);
+                        Utils.GratiaDebug("Skipping CommonName " + name + 
+                                         " found in subject " + subjectName);
+                        if ( (cnSeen+1) == cnToIgnore && ! name.equals("cron") ) {
+                            Utils.GratiaInfo("Warning: 2nd CN of a robot DN is expected to be 'cron',"+
+                                             " we found " + name +
+                                             " in subject " + subjectName); 
+                        }
+                    } else if (userName != null) {
                         Utils.GratiaDebug("Extra CommonName " + caseFieldValue.substring(3) +
                                          " found in subject " + subjectName + ": IGNORED" );
                     } else {
                         userName = caseFieldValue.substring(3);
                         Utils.GratiaDebug("Extracted a Username from subject:  " + userName);
                     }
+                    cnSeen = cnSeen + 1;
                 }
             }
             return userName;
