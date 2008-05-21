@@ -607,12 +607,14 @@ public class JobUsageRecord implements Record
        // Zero out things we don't want checksums for
        RecordIdentity tempRecordIdentity = getRecordIdentity();
        setRecordIdentity(null);
-       UserIdentity tempUserIdentity = getUserIdentity();
-       setUserIdentity(null);
 
+       UserIdentity tempUserIdentity = getUserIdentity();
        StringElement tempSiteName = getSiteName();
 
-       if (!DatabaseMaintenance.UseJobUsageSiteName()) {
+       if (!DatabaseMaintenance.UseJobUsageSiteName()) { 
+           setUserIdentity(null);
+       }
+       if (!DatabaseMaintenance.UseJobUsageSiteName()) { 
            setSiteName(null);
        }
 
