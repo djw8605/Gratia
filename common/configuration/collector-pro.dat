@@ -58,6 +58,10 @@
          db_schema => "gratia_psacct",
          UserConfig => "UserConfig_pacct.xml",
          remote_host => "gratia-fermi.fnal.gov",
+         "properties.attributes" =>
+         {
+            "gratia.database.useJobUsageSiteName" => 1
+         },
          # Add an extra action if we're re-doing summary tables.
          PostInstallCmdPreamble => '[[ "$action" == "summary" ]] && set -- "$@" ps'
        },
