@@ -20,6 +20,7 @@ SP:BEGIN
   DECLARE n_EndTime DATETIME;
 
   -- NodeSummary update only
+  DECLARE n_Host text;
   DECLARE mycount INT(11);
   DECLARE startdate DATETIME;
   DECLARE enddate DATETIME;
@@ -45,6 +46,7 @@ SP:BEGIN
          VC.corrid,
          IFNULL(J.ResourceType, ''),
          IFNULL(J.HostDescription, ''),
+         IFNULL(J.Host, ''),
          IFNULL(IFNULL(RT.value, J.Status), 0),
          J.Njobs,
          J.WallDuration,
@@ -58,6 +60,7 @@ SP:BEGIN
        n_VOcorrid,
        n_ResourceType,
        n_HostDescription,
+       n_Host,
        n_ApplicationExitCode,
        n_Njobs,
        n_WallDuration,
