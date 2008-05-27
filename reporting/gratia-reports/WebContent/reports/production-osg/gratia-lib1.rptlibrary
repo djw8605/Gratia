@@ -223,6 +223,44 @@
                         </structure>
                     </list-property>
                 </scalar-parameter>
+                <scalar-parameter name="SelectSiteName" id="101">
+                    <property name="valueType">static</property>
+                    <property name="dataType">string</property>
+                    <text-property name="promptText">Site Name</text-property>
+                    <property name="controlType">text-box</property>
+                    <property name="defaultValue">FNAL_CDFOSG_1</property>
+                    <property name="distinct">false</property>
+                    <property name="sortBy">label</property>
+                    <property name="sortDirection">asc</property>
+                    <structure name="format">
+                        <property name="category">Unformatted</property>
+                    </structure>
+                    <list-property name="boundDataColumns">
+                        <structure>
+                            <property name="name">sitename</property>
+                            <expression name="expression">dataSetRow["sitename"]</expression>
+                        </structure>
+                    </list-property>
+                </scalar-parameter>
+                <scalar-parameter name="SelectVOName" id="392">
+                    <property name="valueType">static</property>
+                    <property name="dataType">string</property>
+                    <text-property name="promptText">VO Name</text-property>
+                    <property name="controlType">text-box</property>
+                    <property name="defaultValue">cdf</property>
+                    <property name="distinct">false</property>
+                    <property name="sortBy">label</property>
+                    <property name="sortDirection">asc</property>
+                    <structure name="format">
+                        <property name="category">Unformatted</property>
+                    </structure>
+                    <list-property name="boundDataColumns">
+                        <structure>
+                            <property name="name">sitename</property>
+                            <expression name="expression">dataSetRow["sitename"]</expression>
+                        </structure>
+                    </list-property>
+                </scalar-parameter>
             </parameters>
         </parameter-group>
         <parameter-group name="DateRange" id="17">
@@ -300,6 +338,7 @@
                     <property name="mustMatch">true</property>
                     <property name="fixedOrder">true</property>
                     <property name="defaultValue">wallclock</property>
+                    <property name="distinct">false</property>
                     <structure name="format">
                         <property name="category">Unformatted</property>
                         <property name="pattern">Unformatted</property>
@@ -311,11 +350,15 @@
                         </structure>
                         <structure>
                             <property name="value">process</property>
-                            <property name="label">Process Hours</property>
+                            <property name="label">Process (User+System) Hours</property>
                         </structure>
                         <structure>
-                            <property name="value">jobcount</property>
-                            <property name="label">Job Count</property>
+                            <property name="value">cpuuser</property>
+                            <property name="label">User Hours</property>
+                        </structure>
+                        <structure>
+                            <property name="value">cpusystem</property>
+                            <property name="label">System Hours</property>
                         </structure>
                     </list-property>
                 </scalar-parameter>
