@@ -6,12 +6,14 @@
              server_port => 8104,
              db_schema => "gratia",
              remote_host => "gratia.opensciencegrid.org",
+             collector_host => "gratia.opensciencegrid.org",
              max_perm_size => "256m",
              max_heap_size => "1024m",
              "properties.attributes" =>
              {
               "maintain.history.log" => 7,
-              "monitor.listener.wait" => 60
+              "monitor.listener.wait" => 60,
+              "service.listener.threads" => 5
              }
            },
  fermi_osg => { http_port => 8880,
@@ -21,6 +23,7 @@
                 server_port => 8104,
                 db_schema => "fermi_osg",
                 remote_host => "gratia-fermi.fnal.gov",
+                collector_host => "gratia-fermi.fnal.gov",
                 "properties.attributes" =>
                 {
                  "monitor.listener.wait" => 1440
@@ -33,9 +36,11 @@
           server_port => 8114,
           db_schema => "gratia_itb",
           remote_host => "gratia.opensciencegrid.org",
+          collector_host => "gratia.opensciencegrid.org",
           "properties.attributes" =>
           {
-           "monitor.listener.wait" => 60
+           "monitor.listener.wait" => 60,
+           "service.listener.threads" => 1
           }
         },
  fermi_itb => { http_port => 8881,
@@ -45,6 +50,7 @@
                 server_port => 8114,
                 db_schema => "fermi_itb",
                 remote_host => "gratia-fermi.fnal.gov",
+                collector_host => "gratia-fermi.fnal.gov",
                 "properties.attributes" =>
                 {
                  "monitor.listener.wait" => 1440
@@ -58,6 +64,7 @@
          db_schema => "gratia_psacct",
          UserConfig => "UserConfig_pacct.xml",
          remote_host => "gratia-fermi.fnal.gov",
+         collector_host => "gratia-fermi.fnal.gov",
          "properties.attributes" =>
          {
             "gratia.database.useJobUsageSiteName" => 1
@@ -87,7 +94,8 @@
                   "gratia.database.wantSummaryTrigger" => 0,
                   "gratia.database.useJobUsageSiteName" => 1
                 },
-                remote_host => "gratia.opensciencegrid.org"
+                remote_host => "gratia.opensciencegrid.org",
+                collector_host => "gratia.opensciencegrid.org"
               },
  osg_integration => { http_port => 8885,
                       ssl_port => 8870,
@@ -96,6 +104,7 @@
                       server_port => 8144,
                       db_schema => "gratia_osg_integration",
                       remote_host => "gratia.opensciencegrid.org",
+                      collector_host => "gratia.opensciencegrid.org",
                       "properties.attributes" =>
                       {
                        "monitor.listener.wait" => 60,
@@ -109,6 +118,7 @@
                    server_port => 8154,
                    db_schema => "gratia_osg_transfer",
                    remote_host => "gratia-transfer.opensciencegrid.org",
+                   collector_host => "gratia-transfer.opensciencegrid.org",
                    "properties.attributes" =>
                    {
                     "monitor.listener.wait" => 240,
@@ -122,12 +132,29 @@
                      server_port => 8154,
                      db_schema => "fermi_transfer",
                      remote_host => "gratia-fermi.fnal.gov",
+                     collector_host => "gratia-fermi.fnal.gov",
                      "properties.attributes" =>
                      {
                       "monitor.listener.wait" => 240,
                       "service.listener.threads" => 1
                      }
-                   }
+                   },
+ conversion => { http_port => 8884,
+                 ssl_port => 8860,
+                 rmi_port => 20000,
+                 jmx_port => 8034,
+                 server_port => 8134,
+                 db_schema => "gratia",
+                 remote_host => "gratia-fermi.fnal.gov",
+                 collector_host => "gratia-fermi.fnal.gov",
+                 max_perm_size => "256m",
+                 max_heap_size => "1024m",
+                 "properties.attributes" =>
+                 {
+                  "maintain.history.log" => 7,
+                  "monitor.listener.wait" => 60
+                 }
+               }
 );
 
 ### Local Variables:
