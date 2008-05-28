@@ -39,7 +39,7 @@ public class DatabaseMaintenance {
     static final int latestDBVersionRequiringStoredProcedureLoad = gratiaDatabaseVersion;
     static final int latestDBVersionRequiringSummaryTableLoad = 30;
     static final int latestDBVersionRequiringSummaryViewLoad = 30;
-    static final int latestDBVersionRequiringSummaryTriggerLoad = 33;
+    static final int latestDBVersionRequiringSummaryTriggerLoad = 35;
     static final int latestDBVersionRequiringTableStatisticsRefresh = 32;
 
     static boolean dbWantSummaryTable = true;
@@ -1098,7 +1098,7 @@ public class DatabaseMaintenance {
                 UpdateDbVersion(current);
             }                
             if (current == 34) {
-                // Auxiliary DB item upgrades only (stored procedures)
+                // Auxiliary DB item upgrades only (stored procedures and trigger code)
                 Logging.log("Gratia database upgraded from " + current + " to " + (current + 1));
                 current = current + 1;
                 UpdateDbVersion(current);
