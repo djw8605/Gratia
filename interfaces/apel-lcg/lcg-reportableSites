@@ -151,6 +151,20 @@
 #                 SPRACE              2117
 #                 UC_Teraport         1250
 #                 OU_OSCER_ATLAS      1543
+#   5/21/08 (John Weigand)
+#           Updates based on https://t2.unl.edu/gratia/wlcg_reporting#sitenorm
+#           GIP data.
+#                 AGLT2              2698
+#                 GLOW               2108
+#                 PROD_SLAC          2412
+#           Added Purdue_Steele with Purdue_Lear factor to see if Brians
+#           site picks it up tomorrow.
+#   5/28/08 (John Weigand)
+#           Updates based on https://t2.unl.edu/gratia/wlcg_reporting#sitenorm
+#           GIP data.
+#             BU_ATLAS_Tier2      2022   previously 1487 
+#             Purdue-RCAC         1756   previously 1543
+#             Purdue-Steele       1756   previously 1285
 #
 #    
 ##################################################################
@@ -160,11 +174,12 @@
 USCMS-FNAL-WC1-CE   1809  
 #--- CMS Tier 2 ----    
 CIT_CMS_T2          2393       
-GLOW                1686
+GLOW                2108
 MIT_CMS             1364
 Nebraska            1571
 Purdue-Lear         1285
-Purdue-RCAC         1543
+Purdue-RCAC         1756
+Purdue-Steele       1756
 UCSDT2              2023
 UFlorida-HPC        1521
 UFlorida-IHEPA      1521
@@ -177,13 +192,13 @@ UFlorida-PG         1535
 #--- ATLAS Tier 1 ----
 BNL_ATLAS_1         1393
 #--- ATLAS Tier 2 ----
-AGLT2               2167
-BU_ATLAS_Tier2      1487
+AGLT2               2698
+BU_ATLAS_Tier2      2022
 IU_OSG              2101
 MWT2_IU             1787
 MWT2_UC             1521
 OU_OCHEP_SWT2       2389
-PROD_SLAC           1789
+PROD_SLAC           2412
 SWT2_CPB            1628
 UC_ATLAS_MWT2       1285
 UTA_SWT2            1543
