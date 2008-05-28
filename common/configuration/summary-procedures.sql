@@ -81,6 +81,12 @@ SP:BEGIN
   WHERE J.dbid = input_dbid;
 
   -- Basic data checks
+  IF n_ResourceType IS NOT NULL AND
+     n_ResourceType NOT IN ('Batch', 'RawCPU') THEN
+     -- Very common case: no message necessary
+     LEAVE SP;
+  END IF;
+
   IF n_ProbeName IS NULL THEN
      INSERT INTO trace(eventtime, pname, p1, `data`)
       VALUES(UTC_TIMESTAMP(), 'add_JUR_to_summary', input_dbid, 'Failed due to null ProbeName');
