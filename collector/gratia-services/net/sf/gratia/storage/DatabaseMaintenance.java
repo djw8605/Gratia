@@ -1103,7 +1103,7 @@ public class DatabaseMaintenance {
                 current = current + 1;
                 UpdateDbVersion(current);
             }                
-            if (current == 5) {
+            if (current == 35) {
                 // Auxiliary DB item upgrades only (summary tables and trigger code)
                 Logging.log("Gratia database upgraded from " + current + " to " + (current + 1));
                 current = current + 1;
