@@ -32,10 +32,6 @@
     </list-property>
     <list-property name="configVars">
         <structure>
-            <property name="name">DatabaseUser</property>
-            <property name="value">gratia</property>
-        </structure>
-        <structure>
             <property name="name">DisplayMetric</property>
             <property name="value">jobcount</property>
         </structure>
@@ -847,7 +843,7 @@
                     <property name="dataType">string</property>
                     <property name="isRequired">true</property>
                     <property name="controlType">text-box</property>
-                    <property name="defaultValue">jdbc:mysql://gratia-vm02.fnal.gov:3320/gratia_greenc</property>
+                    <property name="defaultValue">jdbc:mysql://gratia06.fnal.gov:3320/gratia_itb</property>
                     <structure name="format">
                         <property name="category">Unformatted</property>
                         <property name="pattern">Unformatted</property>
@@ -859,7 +855,7 @@
                     <property name="dataType">string</property>
                     <property name="isRequired">true</property>
                     <property name="controlType">text-box</property>
-                    <property name="defaultValue">gratia</property>
+                    <property name="defaultValue">reader</property>
                     <structure name="format">
                         <property name="category">Unformatted</property>
                         <property name="pattern">Unformatted</property>
@@ -871,7 +867,7 @@
                     <property name="dataType">string</property>
                     <property name="isRequired">true</property>
                     <property name="controlType">text-box</property>
-                    <property name="defaultValue">proto</property>
+                    <property name="defaultValue">reader</property>
                     <structure name="format">
                         <property name="category">Unformatted</property>
                         <property name="pattern">Unformatted</property>
@@ -1044,9 +1040,9 @@
     <data-sources>
         <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="fermigrid1" id="357">
             <property name="odaDriverClass">com.mysql.jdbc.Driver</property>
-            <property name="odaURL">jdbc:mysql://gratia-vm02.fnal.gov:3320/gratia_greenc</property>
-            <property name="odaUser">gratia</property>
-            <encrypted-property name="odaPassword">cHJvdG8=</encrypted-property>
+            <property name="odaURL">jdbc:mysql://gratia06.fnal.gov:3320/gratia_itb</property>
+            <property name="odaUser">reader</property>
+            <encrypted-property name="odaPassword">cmVhZGVy</encrypted-property>
         </oda-data-source>
     </data-sources>
     <data-sets>
@@ -1207,18 +1203,10 @@ yearnr + "-" + monthnr + "-" + daynr;</expression>
         </simple-master-page>
     </page-setup>
     <body>
-        <grid id="4">
-            <property name="height">0.322in</property>
-            <property name="width">5.968in</property>
-            <column id="5"/>
-            <row id="6">
-                <property name="height">0.322in</property>
-                <cell id="7">
-                    <property name="verticalAlign">top</property>
-                </cell>
-            </row>
-        </grid>
         <table name="table1" id="9">
+            <property name="backgroundPositionX">0%</property>
+            <property name="backgroundPositionY">0%</property>
+            <property name="textIndent">0em</property>
             <property name="width">100%</property>
             <property name="dataSet">UsageByVORanked</property>
             <list-property name="paramBindings">
@@ -1246,6 +1234,31 @@ yearnr + "-" + monthnr + "-" + daynr;</expression>
                     <property name="name">ChartNr</property>
                     <expression name="expression">dataSetRow["ChartNr"]</expression>
                     <property name="dataType">integer</property>
+                </structure>
+                <structure>
+                    <property name="name">VOName</property>
+                    <expression name="expression">dataSetRow["VOName"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">datevalue</property>
+                    <expression name="expression">dataSetRow["datevalue"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">WallDuration</property>
+                    <expression name="expression">dataSetRow["WallDuration"]</expression>
+                    <property name="dataType">float</property>
+                </structure>
+                <structure>
+                    <property name="name">Cpu</property>
+                    <expression name="expression">dataSetRow["Cpu"]</expression>
+                    <property name="dataType">float</property>
+                </structure>
+                <structure>
+                    <property name="name">Njobs</property>
+                    <expression name="expression">dataSetRow["Njobs"]</expression>
+                    <property name="dataType">decimal</property>
                 </structure>
             </list-property>
             <column id="30">
@@ -2511,6 +2524,8 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
                                         </structure>
                                     </list-property>
                                 </structure>
+                                <property name="marginTop">0pt</property>
+                                <property name="dataSet">UsageByVORanked</property>
                                 <property name="height">600px</property>
                                 <property name="width">800px</property>
                                 <list-property name="paramBindings">
@@ -2532,6 +2547,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
                                     <structure>
                                         <property name="name">VOName</property>
                                         <expression name="expression">dataSetRow["VOName"]</expression>
+                                        <property name="dataType">string</property>
                                     </structure>
                                     <structure>
                                         <property name="name">datevalue</property>
@@ -2541,19 +2557,27 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
                                     <structure>
                                         <property name="name">WallDuration</property>
                                         <expression name="expression">dataSetRow["WallDuration"]</expression>
+                                        <property name="dataType">float</property>
                                     </structure>
                                     <structure>
                                         <property name="name">Cpu</property>
                                         <expression name="expression">dataSetRow["Cpu"]</expression>
+                                        <property name="dataType">float</property>
                                     </structure>
                                     <structure>
                                         <property name="name">Njobs</property>
                                         <expression name="expression">dataSetRow["Njobs"]</expression>
+                                        <property name="dataType">decimal</property>
                                     </structure>
                                     <structure>
                                         <property name="name">final_rank</property>
                                         <expression name="expression">dataSetRow["final_rank"]</expression>
-                                        <property name="dataType">any</property>
+                                        <property name="dataType">integer</property>
+                                    </structure>
+                                    <structure>
+                                        <property name="name">ChartNr</property>
+                                        <expression name="expression">dataSetRow["ChartNr"]</expression>
+                                        <property name="dataType">integer</property>
                                     </structure>
                                 </list-property>
                                 <property name="style">sans-style1</property>
