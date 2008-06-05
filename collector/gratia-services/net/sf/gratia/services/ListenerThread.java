@@ -31,7 +31,8 @@ public class ListenerThread extends Thread
     String ident = null;
     String directory = null;         // Location of the incoming messages.
     Hashtable global;
-    long nrecords = 0;                // Number of records processed
+    long ninput = 0;                 // Number of input messages processed
+    long nrecords = 0;                // Number of records processed;
     String directory_part = null;    // stemp for history and old subdirectory
     long recordsPerDirectory = 10000; // Maximum number of records per directory.
 
@@ -223,7 +224,7 @@ public class ListenerThread extends Thread
 
                 gotreplication = gothistory = false;
 
-                nrecords = nrecords + 1;
+                ninput = ninput + 1;
 
                 try
                     {
@@ -261,8 +262,8 @@ public class ListenerThread extends Thread
                                     String val = st.nextToken();
                                     if (val.equals(replication) && st.hasMoreTokens()) {
                                         val = st.nextToken();
-                                    }
-                                    xml.concat(val);
+                                    }                 
+                                    xml = xml.concat(val);
                                     if (st.hasMoreTokens()) {
                                         rawxmllist.add(st.nextToken());
                                     } else {
@@ -278,8 +279,10 @@ public class ListenerThread extends Thread
                                     } else {
                                         extraxmllist.add(null);
                                     }
+                                    ninput = ninput + 1;
                                 }
                             }
+                                
                         else if (blob.startsWith("history"))
                             {
                                 gothistory = true;
@@ -292,7 +295,7 @@ public class ListenerThread extends Thread
                                         historydatelist.add(null);
                                     }
                                     if (st.hasMoreTokens()) {
-                                        xml.concat(st.nextToken());
+                                        xml = xml.concat(st.nextToken());
                                     }
                                     if (st.hasMoreTokens()) {
                                         rawxmllist.add(st.nextToken());
@@ -304,6 +307,7 @@ public class ListenerThread extends Thread
                                     } else {
                                         extraxmllist.add(null);
                                     }
+                                    ninput = ninput + 1;
                                 }
 
                             }
@@ -319,17 +323,22 @@ public class ListenerThread extends Thread
                                         historydatelist.add(null);
                                     }
                                     if (st.hasMoreTokens()) {
-                                        xml.concat(st.nextToken());
+                                        xml = xml.concat(st.nextToken());
                                     }
                                     if (st.hasMoreTokens()) {
                                         md5list.add(st.nextToken());
                                     } else {
                                         md5list.add(null);
                                     }
+                                    ninput = ninput + 1;
                                 }
                             }
                         else {
                             xml = blob;
+                            ninput = ninput + 1;
+                        }
+                        if (ninput>1) {
+                            xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><UsageRecords xmlns=\"http://www.gridforum.org/2003/ur-wg1\" xmlns:urwg=\"http://www.gridforum.org/2003/ur-wg2\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n" + xml + "\n</UsageRecords>";
                         }
                     }
                 catch (Exception e)
@@ -457,6 +466,7 @@ public class ListenerThread extends Thread
                         tx.commit();
                         session.close();
                         // Logging.log("ListenerThread: " + ident + ":After Transaction Commit");
+                        nrecords = nrecords + 1;
                     }
                     catch (ConstraintViolationException e) {
                         tx.rollback();
@@ -609,7 +619,8 @@ public class ListenerThread extends Thread
                 }
                 // Logging.log("ListenerThread: " + ident + ":After File Delete: " + file);
                 itotal++;
-                Logging.log("ListenerThread: " + ident + ":Total Records: " + itotal);
+                Logging.log("ListenerThread: " + ident + ":Total Input Messages: " + itotal);
+                Logging.log("ListenerThread: " + ident + ":Total Records: " + nrecords);
                 
             }
         return nfiles; 
