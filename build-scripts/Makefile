@@ -13,6 +13,12 @@ endif
 # define useful variables
 base := $(shell cd .. >/dev/null 2>&1; /bin/pwd)
 
+gratia_release_data := Gratia release: ${gratia_reporting_version} \
+	Build date: $(shell date) \
+	Build host: $(shell hostname -f) \
+	Build path: ${base} \
+	Builder: $(shell id |cut -d" " -f1)
+
 target=${base}/target
 
 # module top location
@@ -121,7 +127,7 @@ ${target}/gratia-services.war:  ${services}/net/sf/gratia/services/*.java  \
 	mkdir -p war/WEB-INF/classes/net/sf/gratia/storage
 	mkdir -p war/WEB-INF/classes/net/sf/gratia/util
 	mkdir -p war/WEB-INF/lib
-	echo "${version_default}" >war/gratia-release
+	echo "${gratia_release_data}" >war/gratia-release
 	rm -f -r net
 	javac -cp ${classpath} -extdirs ${commonLib} ${services}/net/sf/gratia/services/*.java
 	javac -cp ${classpath} -extdirs ${commonLib} ${services}/net/sf/gratia/storage/*.java
@@ -154,7 +160,7 @@ servlets: services util
 	mkdir -p war/WEB-INF/classes/net/sf/gratia/services
 	mkdir -p war/WEB-INF/classes/net/sf/gratia/servlets
 	mkdir -p war/WEB-INF/classes/net/sf/gratia/util
-	echo "${version_default}" >war/gratia-release
+	echo "${gratia_release_data}" >war/gratia-release
 	javac -cp ${classpath} -extdirs ${commonLib} ${servlets}/net/sf/gratia/servlets/*.java
 	cp ${servlets}/net/sf/gratia/servlets/*.class war/WEB-INF/classes/net/sf/gratia/servlets
 	cp ${services}/net/sf/gratia/services/*Skel.class war/WEB-INF/classes/net/sf/gratia/services
@@ -179,7 +185,7 @@ soap: services
 	mkdir -p war/WEB-INF/lib
 	mkdir -p war/WEB-INF/classes/net/sf/gratia/services
 	mkdir -p war/WEB-INF/classes/net/sf/gratia/soap
-	echo "${version_default}" >war/gratia-release
+	echo "${gratia_release_data}" >war/gratia-release
 	javac -cp ${classpath} -extdirs ${commonLib} ${soap}/net/sf/gratia/soap/*.java
 	cp ${soap}/net/sf/gratia/soap/*.class war/WEB-INF/classes/net/sf/gratia/soap
 	cp ${services}/net/sf/gratia/services/*Skel.class war/WEB-INF/classes/net/sf/gratia/services
@@ -223,7 +229,7 @@ ${target}/gratia-administration.war: ${administration}/net/sf/gratia/administrat
 	mkdir -p war/WEB-INF/classes/net/sf/gratia/administration
 	mkdir -p war/WEB-INF/classes/net/sf/gratia/util
 	mkdir -p war/WEB-INF/lib
-	echo "${version_default}" >war/gratia-release
+	echo "${gratia_release_data}" >war/gratia-release
 	javac -cp ${classpath} -extdirs ${commonLib} ${administration}/net/sf/gratia/administration/*.java
 	cp ${administration}/net/sf/gratia/administration/*.class war/WEB-INF/classes/net/sf/gratia/administration
 	cp ${services}/net/sf/gratia/services/*.class war/WEB-INF/classes/net/sf/gratia/services
@@ -287,7 +293,7 @@ reporting: birt-reporting
 	rm -rf   war
 	mkdir -p war/documents
 	mkdir -p war/WEB-INF/attachments
-	echo "${version_default}" >war/gratia-release
+	echo "${gratia_release_data}" >war/gratia-release
 	# --- expand the birt war file  -----
 	cp ${birtDir}/${birtwarFile} war/.
 	cd war && jar xf ${birtwarFile}
@@ -323,7 +329,7 @@ reports:
 	mkdir -p war/MenuConfig
 	mkdir -p war/WEB-INF
 	mkdir -p war/META-INF
-	echo "${version_default}" >war/gratia-release
+	echo "${gratia_release_data}" >war/gratia-release
 	cp -p ${reports}/WebContent/WEB-INF/web.xml          war/WEB-INF/web.xml
 	cp -p ${reports}/WebContent/MenuConfig/*.xml         war/MenuConfig
 	cp -p ${reports}/WebContent/reports/production-osg/*.rptdesign            war/reports
@@ -369,6 +375,7 @@ release: gratia
 	rm   -rf tarball; \
 	mkdir -p tarball/tomcat/v55/gratia; \
 	mkdir -p tarball/gratia/gratia_reporting; \
+	echo "${gratia_release_data}" >tarball/tomcat/v55/gratia/gratia-release
 	cp ${configuration}/*gov ${configuration}/*xml ${configuration}/*properties $(staticScript)/*.py tarball/tomcat/v55/gratia; \
 	chmod 755 tarball/tomcat/v55/gratia/*.py
 	cp ${configuration}/*sql ${configuration}/*sh tarball/tomcat/v55/gratia; \
@@ -391,6 +398,7 @@ release: gratia
 	mkdir -p tarball/var/data; \
 	mkdir -p tarball/var/logs; \
 	mkdir -p tarball/var/tmp; \
+	echo "${gratia_release_data}" >tarball/tomcat/v55/gratia/gratia-release
 	cp ${configuration}/voms-servers    tarball/tomcat/v55/gratia; 
 	chmod 644 tarball/tomcat/v55/gratia/voms-servers;
 	cp ${security}/scripts/voms-server.sh   tarball/tomcat/v55/gratia; 
@@ -428,6 +436,7 @@ gratia: clean util services servlets soap reporting reports administration serve
 	# ------------------------------
 	rm -f -r tarball; \
 	mkdir tarball; \
+	echo "${gratia_release_data}" >tarball/gratia-release
 	cp ${configuration}/UserVoMap.* ${configuration}/*xml $(staticScript)/*.py ${configuration}/*properties tarball; \
 	cp ${configuration}/*sql ${configuration}/*sh tarball; \
 	cp ${security}/scripts/voms-server.sh         tarball; chmod 744 tarball/voms-server.sh
