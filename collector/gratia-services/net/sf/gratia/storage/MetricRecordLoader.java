@@ -39,7 +39,23 @@ public class MetricRecordLoader implements RecordLoader
       {
          // The current element is a metric record node.  Use it to populate a MetricRecord object            	
          records.add(ReadRecord(eroot));
-      }
+
+      }  else if (eroot.getName() == "RecordEnvelope") {
+
+            for (Iterator i = eroot.elementIterator(); i.hasNext();) {
+                Element element = (Element) i.next();
+                if (element.getName() == "MetricRecord") {
+
+                    //The current element is a job usage record node.  Use it to populate a JobUsageRecord object
+                    records.add(ReadRecord(eroot));
+
+                } else {
+                    // Unexpected element
+                    throw new Exception("Unexpected element: "
+                            + element.getName() + "\n" + element);
+                }
+            }
+        }
 
       if (records.size() == 0)
       {

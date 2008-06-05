@@ -30,15 +30,16 @@ public class UsageRecordLoader implements RecordLoader {
         ArrayList usageRecords = new ArrayList();
 
         if (eroot.getName() == "JobUsageRecord"
-                || eroot.getName() == "UsageRecord"
-                || eroot.getName() == "Usage"
-                || eroot.getName() == "UsageRecordType") {
+            || eroot.getName() == "UsageRecord"
+            || eroot.getName() == "Usage"
+            || eroot.getName() == "UsageRecordType") {
             // The current element is a job usage record node.  Use it to populate a JobUsageRecord object            	
             Record job = ReadRecord(eroot);
 
             // Add this populated job usage record to the usage records array list
             usageRecords.add(job);
-        } else if (eroot.getName() == "UsageRecords") {
+        } else if (eroot.getName() == "UsageRecords"
+                   || eroot.getName() == "RecordEnvelope") {
             // This is a usage records node
             // which should contain one to many job usage record nodes so start a loop through its children
             for (Iterator i = eroot.elementIterator(); i.hasNext();) {
