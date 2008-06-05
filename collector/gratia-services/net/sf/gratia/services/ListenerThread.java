@@ -252,6 +252,7 @@ public class ListenerThread extends Thread
 
                 try
                     {
+                        int nseen = 0;
                         if (blob.startsWith(replication))
                             {
                                 StringTokenizer st = new StringTokenizer(blob, "|");
@@ -279,7 +280,7 @@ public class ListenerThread extends Thread
                                     } else {
                                         extraxmllist.add(null);
                                     }
-                                    ninput = ninput + 1;
+                                    nseen = nseen + 1;
                                 }
                             }
                                 
@@ -307,7 +308,7 @@ public class ListenerThread extends Thread
                                     } else {
                                         extraxmllist.add(null);
                                     }
-                                    ninput = ninput + 1;
+                                    nseen = nseen + 1;
                                 }
 
                             }
@@ -330,15 +331,15 @@ public class ListenerThread extends Thread
                                     } else {
                                         md5list.add(null);
                                     }
-                                    ninput = ninput + 1;
+                                    nseen = nseen + 1;
                                 }
                             }
                         else {
                             xml = blob;
-                            ninput = ninput + 1;
+                            nseen = nseen + 1;
                         }
-                        if (ninput>1) {
-                            xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><UsageRecords xmlns=\"http://www.gridforum.org/2003/ur-wg1\" xmlns:urwg=\"http://www.gridforum.org/2003/ur-wg2\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n" + xml + "\n</UsageRecords>";
+                        if (nseen>1) {
+                            xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><RecordEnvelope>" + xml + "</RecordEnvelope>";
                         }
                     }
                 catch (Exception e)
