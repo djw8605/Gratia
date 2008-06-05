@@ -263,7 +263,7 @@ public class ChecksumUpgrader extends Thread {
                 }
                 catch (Exception e) {
                     Logging.warning("fixDuplicatesOnce: caught exception " +
-                                    "resolving duplicates with checksum " + md5, e);
+                                    "resolving duplicates with checksum " + md5 + " with " + net.sf.gratia.storage.DatabaseMaintenance.UseJobUsageSiteName(), e);
                     tx.rollback();
                     session.close();
                 

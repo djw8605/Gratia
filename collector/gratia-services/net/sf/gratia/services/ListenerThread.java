@@ -26,6 +26,8 @@ import org.hibernate.exception.ConstraintViolationException;
 
 public class ListenerThread extends Thread
 {
+    static String replication = "replication";
+
     String ident = null;
     String directory = null;         // Location of the incoming messages.
     Hashtable global;
@@ -60,14 +62,6 @@ public class ListenerThread extends Thread
     // various things used in the update loop
     //
 
-    String file = "";
-    String blob = "";
-    String xml = "";
-    String rawxml = "";
-    String extraxml = "";
-    String md5key = "";
-    boolean gotreplication = false;
-    boolean gothistory = false;
     boolean stopflag = false;
 
     public ListenerThread(String ident,
@@ -180,6 +174,18 @@ public class ListenerThread extends Thread
 
     public int loop()
     {
+        String file = "";
+        String blob = "";
+
+        String xml = "";
+        ArrayList rawxmllist = new ArrayList();
+        ArrayList extraxmllist = new ArrayList();
+        ArrayList md5list = new ArrayList();
+        ArrayList historydatelist = new ArrayList();
+
+        boolean gotreplication = false;
+        boolean gothistory = false;
+
         // Return the number of files seen.
         // or 0 in the case of error.
 
@@ -208,10 +214,13 @@ public class ListenerThread extends Thread
 
                 file = files[i];
                 blob = xp.get(files[i]);
-                xml = null;
-                rawxml = null;
-                extraxml = null;
-                md5key = null;
+
+                xml = "";
+                rawxmllist.clear();
+                extraxmllist.clear();
+                md5list.clear();
+                historydatelist.clear();
+
                 gotreplication = gothistory = false;
 
                 nrecords = nrecords + 1;
@@ -240,53 +249,88 @@ public class ListenerThread extends Thread
                 // see if we got a normal update or a replicated one
                 //
 
-                String historydate = null;
-
                 try
                     {
-                        if (blob.startsWith("replication"))
+                        if (blob.startsWith(replication))
                             {
                                 StringTokenizer st = new StringTokenizer(blob, "|");
-                                if (st.hasMoreTokens())
-                                    st.nextToken();
-                                if (st.hasMoreTokens())
-                                    xml = st.nextToken();
-                                if (st.hasMoreTokens())
-                                    rawxml = st.nextToken();
-                                if (st.hasMoreTokens())
-                                    extraxml = st.nextToken();
+
                                 gotreplication = true;
+
+                                while(st.hasMoreTokens()) {
+                                    String val = st.nextToken();
+                                    if (val.equals(replication) && st.hasMoreTokens()) {
+                                        val = st.nextToken();
+                                    }
+                                    xml.concat(val);
+                                    if (st.hasMoreTokens()) {
+                                        rawxmllist.add(st.nextToken());
+                                    } else {
+                                        rawxmllist.add(null);
+                                    }
+                                    if (st.hasMoreTokens()) {
+                                        // The extraxml can be directly followed by the word 'replication'
+                                        String extraxml = st.nextToken();
+                                        if (extraxml.endsWith(replication)) {
+                                            extraxml = extraxml.substring(0,extraxml.length()-replication.length());
+                                        }
+                                        extraxmllist.add(extraxml);
+                                    } else {
+                                        extraxmllist.add(null);
+                                    }
+                                }
                             }
                         else if (blob.startsWith("history"))
                             {
-                                StringTokenizer st = new StringTokenizer(blob, "|");
-                                if (st.hasMoreTokens())
-                                    st.nextToken();
-                                if (st.hasMoreTokens())
-                                    historydate = st.nextToken();
-                                if (st.hasMoreTokens())
-                                    xml = st.nextToken();
-                                if (st.hasMoreTokens())
-                                    rawxml = st.nextToken();
-                                if (st.hasMoreTokens())
-                                    extraxml = st.nextToken();
                                 gothistory = true;
+                                StringTokenizer st = new StringTokenizer(blob, "|");
+                                while(st.hasMoreTokens()) {
+                                    st.nextToken();
+                                    if (st.hasMoreTokens()) {
+                                        historydatelist.add(st.nextToken());
+                                    } else {
+                                        historydatelist.add(null);
+                                    }
+                                    if (st.hasMoreTokens()) {
+                                        xml.concat(st.nextToken());
+                                    }
+                                    if (st.hasMoreTokens()) {
+                                        rawxmllist.add(st.nextToken());
+                                    } else {
+                                        rawxmllist.add(null);
+                                    }
+                                    if (st.hasMoreTokens()) {
+                                        extraxmllist.add(st.nextToken());
+                                    } else {
+                                        extraxmllist.add(null);
+                                    }
+                                }
+
                             }
                         else if (blob.startsWith("historymd5"))
                             {
-                                StringTokenizer st = new StringTokenizer(blob, "|");
-                                if (st.hasMoreTokens())
-                                    st.nextToken();
-                                if (st.hasMoreTokens())
-                                    historydate = st.nextToken();
-                                if (st.hasMoreTokens())
-                                    xml = st.nextToken();
-                                if (st.hasMoreTokens())
-                                    md5key = st.nextToken();
                                 gothistory = true;
+                                StringTokenizer st = new StringTokenizer(blob, "|");
+                                while (st.hasMoreTokens()) {
+                                    st.nextToken();
+                                    if (st.hasMoreTokens()) {
+                                        historydatelist.add(st.nextToken());
+                                    } else {
+                                        historydatelist.add(null);
+                                    }
+                                    if (st.hasMoreTokens()) {
+                                        xml.concat(st.nextToken());
+                                    }
+                                    if (st.hasMoreTokens()) {
+                                        md5list.add(st.nextToken());
+                                    } else {
+                                        md5list.add(null);
+                                    }
+                                }
                             }
-                        else
+                        else {
                             xml = blob;
+                        }
                     }
                 catch (Exception e)
                     {
@@ -348,8 +392,11 @@ public class ListenerThread extends Thread
                         Probe probe = statusUpdater.update(session, current, xml);
                         current.setProbe(probe);
 
-                        if ((!gothistory) || (md5key == null)) {
-                            md5key = current.computemd5();
+                        // Logging.log("ListenerThread: " + ident + ":After New Probe Update");
+                        updater.Update(current);
+
+                        if ((!gothistory) || (md5list.size()<j && md5list.get(j) == null)) {
+                            String md5key = current.computemd5();
                             current.setmd5(md5key);
                             if (current.getTableName()
                                 .equals("JobUsageRecord")) {
@@ -366,11 +413,10 @@ public class ListenerThread extends Thread
                                 String oldMd5 = jRecord.computeOldMd5();
                                 jRecord.setoldMd5(oldMd5);
                             }
+                        } else {
+                            current.setmd5((String)md5list.get(j));
                         }
                         current.setDuplicate(false);
-
-                        // Logging.log("ListenerThread: " + ident + ":After New Probe Update");
-                        updater.Update(current);
 
                         synchronized (lock)
                             {
@@ -381,13 +427,21 @@ public class ListenerThread extends Thread
                                 current.AttachContent(session);
                             }
 
-                        if (rawxml != null)
-                            current.setRawXml(rawxml);
-                        if (extraxml != null)
-                            current.setExtraXml(extraxml);
+                        String rawxml = null;
+                        String extraxml = null;
+                        if (rawxmllist.size()>j) {
+                            rawxml = (String)rawxmllist.get(j);
+                            if (rawxml != null)
+                                current.setRawXml(rawxml);
+                        }
+                        if (extraxmllist.size()>j) {
+                            extraxml = (String)extraxmllist.get(j);
+                            if (extraxml != null)
+                                current.setExtraXml(extraxml);
+                        }
                         Logging.log("ListenerThread: " + ident + ":Before Hibernate Save");
                         if (gothistory) {
-                            Date serverDate = new Date(Long.parseLong(historydate));
+                            Date serverDate = new Date(Long.parseLong((String)historydatelist.get(j)));
                             current.setServerDate(serverDate);
                         }
                         session.save(current);
@@ -395,7 +449,7 @@ public class ListenerThread extends Thread
                         // now - save history
                         //
                         if (!gothistory) {
-                            saveHistory(current);
+                            saveHistory(current,xml,rawxml,extraxml,gotreplication);
                         }
                         // Logging.log("ListenerThread: " + ident + ":After Hibernate Save");
                         // Logging.log("ListenerThread: " + ident + ":Before Transaction Commit");
@@ -593,7 +647,7 @@ public class ListenerThread extends Thread
     }
 
 
-    public void saveHistory(Record current) throws java.io.IOException
+    public void saveHistory(Record current, String xml, String rawxml, String extraxml, boolean gotreplication) throws java.io.IOException
     {
         Date serverDate = current.getServerDate();
         File where = getDirectory("history");

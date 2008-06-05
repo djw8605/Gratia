@@ -342,7 +342,7 @@ public class ReplicationDataPump extends Thread
                         bundle_count = bundle_count + 1;
                         if (bundle_count == bundle_size) {
                             
-                            uploadXML(target,xml_msg.toString(),lowdbid, dbid);
+                            uploadXML(target,xml_msg.toString(),lowdbid, dbid, bundle_count);
 
                             if (exitflag) return;
 
@@ -351,7 +351,7 @@ public class ReplicationDataPump extends Thread
                         }
                     }
                 if (bundle_count != 0) {
-                    uploadXML(target, xml_msg.toString(), lowdbid, dbid);
+                    uploadXML(target, xml_msg.toString(), lowdbid, dbid, bundle_count);
                     if (exitflag) return;
                 }
                 resultSet.close();
@@ -405,44 +405,16 @@ public class ReplicationDataPump extends Thread
         for (i = 0; i < result.size(); i++)
             {
                 Record record = (Record)result.get(i);
-                //DurationElement duration = getCpuSystemDuration(dbid,table);
-                //if (duration != null)
-                //   record.setCpuSystemDuration(duration);
-                //if (record.getCpuSystemDuration() == null)
-                //   Logging.log("dbid: " + dbid + " null cpu system duration");
-                buffer.append("replication" + "|");
+                buffer.append("replication|");
                 buffer.append(record.asXML() + "|");
                 buffer.append(record.getRawXml() + "|");
-                buffer.append(record.getExtraXml());
+                buffer.append(record.getExtraXml() + "|");
             }
         session.close();
         return buffer.toString();
     }
 
-    //public DurationElement getCpuSystemDuration(String dbid, String table) throws Exception
-    //{
-    //   String command = "select CpuSystemDuration from "+table+" where dbid = " + dbid;
-    //   Double value = null;
-
-    //   Statement statement = connection.prepareStatement(command);
-    //   ResultSet resultSet = statement.executeQuery(command);
-    //   while (resultSet.next())
-    //   {
-    //      value = resultSet.getDouble(1);
-    //   }
-    //   resultSet.close();
-    //   statement.close();
-
-    //   if (value == null)
-    //      return null;
-
-    //   DurationElement duration = new DurationElement();
-    //   duration.setValue(value);
-    //   duration.setType("system");
-    //   return duration;
-    //}
-
-    public void uploadXML(String target, String xml, String low, String high) throws Exception
+    public void uploadXML(String target, String xml, String low, String high, int nrows) throws Exception
     {
         Post post = new Post(target, "update", xml);
 
@@ -461,7 +433,7 @@ public class ReplicationDataPump extends Thread
             //
             // update replicationtable
             //
-            updateReplicationTable(high);
+            updateReplicationTable(high, nrows);
         } else {
             replicationLog("Error during Replication.",post.exception);
             exitflag = true;
@@ -469,12 +441,12 @@ public class ReplicationDataPump extends Thread
         }
     }
 
-    public void updateReplicationTable(String dbid) throws Exception
+    public void updateReplicationTable(String dbid, int nrows) throws Exception
     {
         String command =
             "update Replication" + cr +
             " set dbid = " + dbid + comma + cr +
-            " rowcount = rowcount + 1" + cr +
+            " rowcount = rowcount + " + nrows + cr +
             " where replicationid = " + replicationid;
 
         Statement statement = dbconnection.createStatement();
