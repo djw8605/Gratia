@@ -13,7 +13,8 @@
              {
               "maintain.history.log" => 7,
               "monitor.listener.wait" => 60,
-              "service.listener.threads" => 5
+              "service.listener.threads" => 5,
+              "service.admin.DN.0" => 'ALLOW ALL'
              }
            },
  fermi_osg => { http_port => 8880,
@@ -26,7 +27,8 @@
                 collector_host => "gratia-fermi.fnal.gov",
                 "properties.attributes" =>
                 {
-                 "monitor.listener.wait" => 1440
+                 "monitor.listener.wait" => 1440,
+                 "service.admin.DN.0" => 'ALLOW ALL'
                 }
               },
  itb => { http_port => 8881,
@@ -40,7 +42,8 @@
           "properties.attributes" =>
           {
            "monitor.listener.wait" => 60,
-           "service.listener.threads" => 1
+           "service.listener.threads" => 1,
+           "service.admin.DN.0" => 'ALLOW ALL'
           }
         },
  fermi_itb => { http_port => 8881,
@@ -53,7 +56,8 @@
                 collector_host => "gratia-fermi.fnal.gov",
                 "properties.attributes" =>
                 {
-                 "monitor.listener.wait" => 1440
+                 "monitor.listener.wait" => 1440,
+                 "service.admin.DN.0" => 'ALLOW ALL'
                 }
               },
  ps => { http_port => 8882,
@@ -67,7 +71,8 @@
          collector_host => "gratia-fermi.fnal.gov",
          "properties.attributes" =>
          {
-            "gratia.database.useJobUsageSiteName" => 1
+            "gratia.database.useJobUsageSiteName" => 1,
+            "service.admin.DN.0" => 'ALLOW ALL'
          },
          # Add an extra action if we're re-doing summary tables.
          PostInstallCmdPreamble => '[[ "$action" == "summary" ]] && set -- "$@" ps'
@@ -92,7 +97,8 @@
                 { "monitor.listener.wait" => 1440,
                   "gratia.database.wantSummaryTable" => 0,
                   "gratia.database.wantSummaryTrigger" => 0,
-                  "gratia.database.useJobUsageSiteName" => 1
+                  "gratia.database.useJobUsageSiteName" => 1,
+                  "service.admin.DN.0" => 'ALLOW ALL'
                 },
                 remote_host => "gratia.opensciencegrid.org",
                 collector_host => "gratia.opensciencegrid.org"
@@ -108,7 +114,8 @@
                       "properties.attributes" =>
                       {
                        "monitor.listener.wait" => 60,
-                       "service.listener.threads" => 1
+                       "service.listener.threads" => 1,
+                       "service.admin.DN.0" => 'ALLOW ALL'
                       }
                     },
  osg_transfer => { http_port => 8886,
@@ -122,7 +129,8 @@
                    "properties.attributes" =>
                    {
                     "monitor.listener.wait" => 240,
-                    "service.listener.threads" => 1
+                    "service.listener.threads" => 1,
+                    "service.admin.DN.0" => 'ALLOW ALL'
                    }
                  },
  fermi_transfer => { http_port => 8886,
@@ -136,7 +144,8 @@
                      "properties.attributes" =>
                      {
                       "monitor.listener.wait" => 240,
-                      "service.listener.threads" => 1
+                      "service.listener.threads" => 1,
+                      "service.admin.DN.0" => 'ALLOW ALL'
                      }
                    },
  conversion => { http_port => 8884,
@@ -152,7 +161,8 @@
                  "properties.attributes" =>
                  {
                   "maintain.history.log" => 7,
-                  "monitor.listener.wait" => 60
+                  "monitor.listener.wait" => 60,
+                  "service.admin.DN.0" => 'ALLOW ALL'
                  }
                }
 );
