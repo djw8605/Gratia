@@ -81,7 +81,7 @@ call conditional_trigger_drop();
 create trigger countInc${table_name} after insert on ${table_name}
 for each row
 f:begin
-  insert ignore into TableStatistics values('${table_name}',0,null);
+  insert ignore into TableStatistics values('${table_name}',0,'');
   update TableStatistics set nRecords = nRecords + 1 where RecordType = '${table_name}' and Qualifier = '';
 ${maybe_increment_error_line}
 end
@@ -89,7 +89,7 @@ end
 create trigger countDec${table_name} after delete on ${table_name}
 for each row
 f:begin
-  insert ignore into TableStatistics values('${table_name}',1,null);
+  insert ignore into TableStatistics values('${table_name}',1,'');
   update TableStatistics set nRecords = nRecords - 1 where RecordType = '${table_name}' and Qualifier = '';
 ${maybe_decrement_error_line}
 end
