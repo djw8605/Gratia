@@ -545,9 +545,9 @@ sub configure_static_report_generation {
   return unless (-x $static_report_generator);
   my @script_pars = ("$options{prefix}/tomcat-${instance_name}",
                      sprintf("%s%s:%s/gratia-reporting/",
-                             $options{"use-ssl"}?"https://":"http://",
+                             "http://",
                              $collector_config->{remote_host},
-                             $options{"use-ssl"}?$collector_config->{ssl_port}:$collector_config->{http_port}));
+                             $collector_config->{http_port}));
   system(sprintf("VISUAL=${gratia_dir}/safe-replace-crontab CRON_TIMING=\"42 0 * * *\" CRON_CMD=\"'$static_report_generator' %s >/dev/null 2>&1\" crontab -e",
                  join(" ", map { "'$_'"; } @script_pars)));
 }
