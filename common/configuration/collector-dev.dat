@@ -172,6 +172,21 @@
                 "service.listener.threads" => 1
                }
              }
+ weigand => { http_port => 8887,
+               ssl_port => 8867,
+               rmi_port => 24000,
+               jmx_port => 8074,
+               server_port => 8174,
+               db_host => "gratia-vm02.fnal.gov",
+               db_schema => "gratia_weigand",
+               "properties.attributes" =>
+               {
+                "maintain.history.log" => 2,
+                "monitor.listener.wait" => 240,
+                "monitor.to.address0" => 'weigand@fnal.gov'
+                "service.admin.DN.0" => 'ALLOW ALL'
+               }
+             },
 );
 
 ### Local Variables:
