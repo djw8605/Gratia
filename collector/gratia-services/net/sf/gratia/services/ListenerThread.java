@@ -405,7 +405,7 @@ public class ListenerThread extends Thread
                         // Logging.log("ListenerThread: " + ident + ":After New Probe Update");
                         updater.Update(current);
 
-                        if ((!gothistory) || (md5list.size()<j && md5list.get(j) == null)) {
+                        if ((!gothistory) || (!(md5list.size()>j)) || md5list.get(j) == null) {
                             String md5key = current.computemd5();
                             current.setmd5(md5key);
                             if (current.getTableName()
