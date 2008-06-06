@@ -437,6 +437,8 @@ public class ListenerThread extends Thread
                                 current.AttachContent(session);
                             }
 
+                        
+                        String incomingxml = current.getRawXml();
                         String rawxml = null;
                         String extraxml = null;
                         if (rawxmllist.size()>j) {
@@ -459,7 +461,7 @@ public class ListenerThread extends Thread
                         // now - save history
                         //
                         if (!gothistory) {
-                            saveHistory(current,xml,rawxml,extraxml,gotreplication);
+                            saveHistory(current,incomingxml,rawxml,extraxml,gotreplication);
                         }
                         // Logging.log("ListenerThread: " + ident + ":After Hibernate Save");
                         // Logging.log("ListenerThread: " + ident + ":Before Transaction Commit");
