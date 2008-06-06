@@ -11,6 +11,7 @@ import net.sf.gratia.storage.UserIdentity;
 import java.io.File;
 import java.lang.Long;
 import java.lang.System;
+import java.math.BigInteger;
 import java.sql.*;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -26,6 +27,7 @@ import org.hibernate.CacheMode;
 import org.hibernate.FlushMode;
 import org.hibernate.JDBCException;
 import org.hibernate.Query;
+import org.hibernate.SQLQuery;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
@@ -188,9 +190,11 @@ public class DatabaseMaintenance {
         }
     }
 
-    public void CheckIndices() {
+    public void CheckIndices() throws Exception {
         AddIndex("Site", true, "index02", "SiteName");
         AddIndex("Probe", true, "index02", "probename");
+
+        Boolean md5v2_checksum_is_operational = checkMd5v2Unique();
 
         //
         // the following were added to get rid of unused indexes
@@ -200,6 +204,11 @@ public class DatabaseMaintenance {
         DropIndex("JobUsageRecord", "index07");
         DropIndex("JobUsageRecord", "index09");
         DropIndex("JobUsageRecord", "index10");
+        if (md5v2_checksum_is_operational) {
+            // No longer necessary since we're using md5v2 instead
+            DropIndex("JobUsageRecord_Meta", "index12");
+            DropIndex("JobUsageRecord_Meta", "md5"); // Possible
+        }
         //
         // original index structure
         //
@@ -210,9 +219,10 @@ public class DatabaseMaintenance {
         // AddIndex("JobUsageRecord",false,"index06","GlobalJobid");
         // AddIndex("JobUsageRecord",false,"index07","LocalJobid");
         AddIndex("JobUsageRecord", false, "index08", "Host(255)");
-        AddIndex("JobUsageRecord_Meta", true, "index12", "md5", true);
+        if (!md5v2_checksum_is_operational) { // Still relying on old index, md5v2 not ready yet.
+            AddIndex("JobUsageRecord_Meta", true, "index12", "md5", true);
+        }
         AddIndex("JobUsageRecord_Meta", false, "index13", "ServerDate");
-
 
         AddIndex("MetricRecord_Meta", true, "index12", "md5", true);
         AddIndex("ProbeDetails_Meta", true, "index12", "md5", true);
@@ -693,7 +703,7 @@ public class DatabaseMaintenance {
                         current = current + 1;
                         UpdateDbVersion(current);
                     } else {
-                        Logging.log("Gratia database FAILED to upgrade from "
+                        Logging.warning("Gratia database FAILED to upgrade from "
                                     + current + " to " + (current + 1));
                     }
                 }
@@ -717,7 +727,7 @@ public class DatabaseMaintenance {
                     current = current + 1;
                     UpdateDbVersion(current);
                 } else {
-                    Logging.log("Gratia database FAILED to upgrade from " + current + " to " + (current + 1));
+                    Logging.warning("Gratia database FAILED to upgrade from " + current + " to " + (current + 1));
                 }
             }
             if (current == 4) {
@@ -730,7 +740,7 @@ public class DatabaseMaintenance {
                     current = current + 1;
                     UpdateDbVersion(current);
                 } else {
-                    Logging.log("Gratia database FAILED to upgrade from " + current + " to " + (current + 1));
+                    Logging.warning("Gratia database FAILED to upgrade from " + current + " to " + (current + 1));
                 }
             }
             if (current == 5) {
@@ -743,7 +753,7 @@ public class DatabaseMaintenance {
                     current = current + 1;
                     UpdateDbVersion(current);
                 } else {
-                    Logging.log("Gratia database FAILED to upgrade from " + current + " to " + (current + 1));
+                    Logging.warning("Gratia database FAILED to upgrade from " + current + " to " + (current + 1));
                 }
             }
             if (current == 6) {
@@ -760,7 +770,7 @@ public class DatabaseMaintenance {
                     current = current + 1;
                     UpdateDbVersion(current);
                 } else {
-                    Logging.log("Gratia database FAILED to upgrade from " + current + " to " + (current + 1));
+                    Logging.warning("Gratia database FAILED to upgrade from " + current + " to " + (current + 1));
                 }
             }
             if (current == 7) {
@@ -776,7 +786,7 @@ public class DatabaseMaintenance {
                     current = current + 1;
                     UpdateDbVersion(current);
                 } else {
-                    Logging.log("Gratia database FAILED to upgrade from " + current + " to " + (current + 1));
+                    Logging.warning("Gratia database FAILED to upgrade from " + current + " to " + (current + 1));
                 }                
             }
             if (current == 8 || current == 9) { // Can combine update command into one SQL statement for both versions
@@ -791,7 +801,7 @@ public class DatabaseMaintenance {
                     current = 10;
                     UpdateDbVersion(current);
                 } else {
-                    Logging.log("Gratia database FAILED to upgrade from " + current + " to " + 10);
+                    Logging.warning("Gratia database FAILED to upgrade from " + current + " to " + 10);
                 }
             }
             if (current == 10) {
@@ -801,7 +811,7 @@ public class DatabaseMaintenance {
                     current = current + 1;
                     UpdateDbVersion(current);
                 } else {
-                    Logging.log("Gratia database FAILED to upgrade from " + current + " to " + (current + 1));
+                    Logging.warning("Gratia database FAILED to upgrade from " + current + " to " + (current + 1));
                 } 
             }
             if ((current > 10 ) && (current < 14)) { // Never saw the light of day and superseded.
@@ -838,7 +848,7 @@ public class DatabaseMaintenance {
                     current = current + 1;
                     UpdateDbVersion(current);
                 } else {
-                    Logging.log("Gratia database FAILED to upgrade from " + current +
+                    Logging.warning("Gratia database FAILED to upgrade from " + current +
                                 " to " + (current + 1));
                 }
             }
@@ -855,7 +865,7 @@ public class DatabaseMaintenance {
                     current = current + 1;
                     UpdateDbVersion(current);
                 } else {
-                    Logging.log("Gratia database FAILED to upgrade from " + current +
+                    Logging.warning("Gratia database FAILED to upgrade from " + current +
                                 " to " + (current + 1));
                 }
             }
@@ -907,7 +917,7 @@ public class DatabaseMaintenance {
                     current = current + 1;
                     UpdateDbVersion(current);
                 } else {
-                    Logging.log("Gratia database FAILED to upgrade from " + current +
+                    Logging.warning("Gratia database FAILED to upgrade from " + current +
                                 " to " + (current + 1));
                 }
             }
@@ -956,7 +966,7 @@ public class DatabaseMaintenance {
                     current = current + 1;
                     UpdateDbVersion(current);
                 } else {
-                    Logging.log("Gratia database FAILED to upgrade from " + current +
+                    Logging.warning("Gratia database FAILED to upgrade from " + current +
                                 " to " + (current + 1));
                 }
             }
@@ -982,7 +992,7 @@ public class DatabaseMaintenance {
                     current = current + 1;
                     UpdateDbVersion(current);
                 } else {
-                    Logging.log("Gratia database FAILED to upgrade from " + current +
+                    Logging.warning("Gratia database FAILED to upgrade from " + current +
                                 " to " + (current + 1));
                 }
             }
@@ -1001,19 +1011,31 @@ public class DatabaseMaintenance {
             if (current == 23) {
                 int result = Execute("alter table DupRecord modify column RecordType varchar(255) binary");
                 if (result > -1) {
+                    try {
+                        CheckIndices(); // Call again to update the DupRecord indexes.
+                    }
+                    catch (Exception e) {
+                        Logging.warning("Gratia database FAILED to upgrade from " + current +
+                                        " to " + (current + 1), e);
+                    }
                     int tmp = current;
                     current = current + 1;
                     UpdateDbVersion(current);
-                    CheckIndices(); // Call again to update the DupRecord indexes.
                     Logging.log("Gratia database upgraded from " + tmp + " to " + current);
                 } else {
-                    Logging.log("Gratia database FAILED to upgrade from " + current +
+                    Logging.warning("Gratia database FAILED to upgrade from " + current +
                                 " to " + (current + 1));
                 }
             }
             if (current == 24 || current == 25 || current == 26 || current == 27 || current == 28) {
                 // Auxiliary DB item upgrades only.
-                CheckIndices(); // Call again to update the DupRecord indexes.
+                try {
+                    CheckIndices(); // Call again to update the DupRecord indexes.
+                 }
+                catch (Exception e) {
+                    Logging.warning("Gratia database FAILED to upgrade from " + current +
+                                    " to 29", e);
+                }
                 Logging.log("Gratia database upgraded from " + current + " to 29");
                 current = 29;
                 UpdateDbVersion(current);
@@ -1064,7 +1086,7 @@ public class DatabaseMaintenance {
                     current = current + 1;
                     UpdateDbVersion(current);
                 } else {
-                    Logging.log("Gratia database FAILED to upgrade from " + current +
+                    Logging.warning("Gratia database FAILED to upgrade from " + current +
                                 " to " + (current + 1));
                 }         
             }
@@ -1073,10 +1095,16 @@ public class DatabaseMaintenance {
                 return ((current == gratiaDatabaseVersion) && checkAndUpgradeDbAuxiliaryItems());
             }
             if (current == 30) {
+                try {
+                    CheckIndices(); // Call again to update the md5v2 index
+                }
+                catch (Exception e) {
+                    Logging.warning("Gratia database FAILED to upgrade from " + current +
+                                    " to " + (current + 1), e);
+                }
                 int tmp = current;
                 current = current + 1;
                 UpdateDbVersion(current);
-                CheckIndices(); // Call again to update the md5v2 index
                 Logging.log("Gratia database upgraded from " + tmp + " to " + current);
             }
             if (current == 31) {
@@ -1123,7 +1151,7 @@ public class DatabaseMaintenance {
 //                     UpdateDbVersion(current);
 //                     Logging.log("Gratia database upgraded from " + tmp + " to " + current);
 //                 } else {
-//                     Logging.log("Gratia database FAILED to upgrade from " + current +
+//                     Logging.warning("Gratia database FAILED to upgrade from " + current +
 //                                 " to " + (current + 1));
 //                 }                
 //             }
@@ -1317,6 +1345,42 @@ public class DatabaseMaintenance {
             ++suffix_counter;
         }
         return form.format(size) + suffices[suffix_counter];
+    }
+
+    private Boolean checkMd5v2Unique() throws Exception {
+        Logging.debug("DatabaseMaintenance: Checking for unique index on md5v2");
+
+        String checksum_check = "select non_unique from " +
+            "information_schema.statistics " +
+            "where table_schema = database() " +
+            " and table_name = 'JobUsageRecord_Meta'" +
+            " and column_name = 'md5v2'" +
+            " and index_name != 'md5v2'";
+        Session session = HibernateWrapper.getSession();
+        Boolean result = false;
+        try {
+            SQLQuery q = session.createSQLQuery(checksum_check);
+            List results_list = q.list();
+            if (! results_list.isEmpty()) {
+                BigInteger non_unique = (BigInteger) results_list.get(0);
+                Logging.debug("checkMd5v2Unique: received answer: " + non_unique);
+                if ((non_unique != null) && (non_unique.intValue() == 0)) {
+                    Logging.debug("checkMd5v2Unique: found unique index on md5v2 in JobUsageRecord_Meta.");
+                    result = true;
+                } else {
+                    Logging.debug("checkMd5v2Unique: found non-unique index on md5v2 in JobUsageRecord_Meta.");
+                }
+            } else {
+                Logging.info("CollectorService: no index found on column md5v2 in JobUsageRecord_Meta: not attempting upgrade.");
+            }
+            session.close();
+        }
+        catch (Exception e) {
+            Logging.debug("checkMd5v2Unique: attempt to check for index on md5v2 in JobUsageRecord_Meta failed!");
+            if (session.isOpen()) session.close();
+            throw e;
+        }
+        return result;
     }
 
 }

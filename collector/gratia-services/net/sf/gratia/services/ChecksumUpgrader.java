@@ -52,9 +52,11 @@ public class ChecksumUpgrader extends Thread {
         //
         // 5. Fix the last lot of duplicates.
         //
-        // 6. Drop the old non-unique index and create a new, unique one.
+        // 6. Drop the old non-unique index on md5v2and create a new, unique one.
         //
-        // 7. Release the lock and complete.
+        // 7. Drop the index on md5.
+        //
+        // 8. Release the lock and complete.
         //
         // A failure at any stage will result in the process picking up
         // where it left off at the next restart.
@@ -73,7 +75,8 @@ public class ChecksumUpgrader extends Thread {
             return;
         }
 
-        // 2., 3.
+        // 2., 3. Fix duplicates, iterating until we're as done as we
+        // can be without stopping updates.
         Logging.info("ChecksumUpgrader: fixing all duplicates based on md5v2");
         try {
             fixAllDuplicates();
@@ -83,9 +86,9 @@ public class ChecksumUpgrader extends Thread {
             return;
         }
 
-        // 4.
         try {
             Logging.info("ChecksumUpgrader: preventing external changes to listener thread state");
+            // 4. Lock the DB.
             synchronized (collectorService) {
                 Boolean activeStatus = collectorService.databaseUpdateThreadsActive();
             
@@ -93,9 +96,11 @@ public class ChecksumUpgrader extends Thread {
                     Logging.info("ChecksumUpgrader: deactivating listener threads");
                     collectorService.stopDatabaseUpdateThreads();
                 }
+                // 5. Final duplicate resolution pass.
                 Logging.info("ChecksumUpgrader: final pass on duplicates");
                 fixDuplicatesOnce();
 
+                // 6. Make index unique.
                 Logging.info("ChecksumUpgrader: make index on md5v2 unique (could take some time)");
                 Session session = HibernateWrapper.getSession();
                 Transaction tx = session.beginTransaction();
@@ -118,7 +123,17 @@ public class ChecksumUpgrader extends Thread {
                 }
                 session.close();
 
-                // 7.
+                // 7. Drop the index on md5.
+                Logging.info("ChecksumUpgrader: drop index on old md5 column");
+                try {
+                    DropIndexByColumn("JobUsageRecord_Meta", "md5");
+                }
+                catch (Exception e) {
+                    Logging.warning("ChecksumUpgrader: removal of index(es) on md5 failed! \nNote: vestigial index(es) on old md5 column will be removed on collector restart", e);
+                    return;
+                }
+
+                // 8. Reactivate undates.
                 if (activeStatus) {
                     Logging.info("ChecksumUpgrader: reactivating listener threads");
                     collectorService.startDatabaseUpdateThreads();
@@ -263,7 +278,8 @@ public class ChecksumUpgrader extends Thread {
                 }
                 catch (Exception e) {
                     Logging.warning("fixDuplicatesOnce: caught exception " +
-                                    "resolving duplicates with checksum " + md5 + " with " + net.sf.gratia.storage.DatabaseMaintenance.UseJobUsageSiteName(), e);
+                                    "resolving duplicates with checksum " + md5 + " with " +
+                                    net.sf.gratia.storage.DatabaseMaintenance.UseJobUsageSiteName(), e);
                     tx.rollback();
                     session.close();
                 
@@ -438,5 +454,45 @@ public class ChecksumUpgrader extends Thread {
     }
     
     private static final Runtime s_runtime = Runtime.getRuntime ();
+
+    private void DropIndexByColumn(String table, String column) throws Exception {
+        Statement statement;
+        ResultSet resultSet;
+
+        Session session = HibernateWrapper.getSession();
+        Transaction tx = session.beginTransaction();
+        Connection connection = session.connection();
+        
+        String check = "select index_name from information_schema.statistics where " +
+            "table_schema = database() and table_name = '" + table
+            + "' and column_name = '"
+            + column + "'";
+        try {
+            
+            Logging.log("Executing: " + check);
+            statement = connection.createStatement();
+            resultSet = statement.executeQuery(check);
+            while (resultSet.next()) {
+                String index_name  = resultSet.getString(1);
+                String cmd = "alter table " + table + " drop index " + index_name;
+                // Index still there
+                try {
+                    Logging.log("Executing: " + cmd);
+                    statement = connection.createStatement();
+                    statement.executeUpdate(cmd);
+                } catch (Exception e) {
+                    Logging.log("Command: Error: " + cmd + " : " + e);
+                    throw e;
+                }
+                Logging.log("Command: OK: " + cmd);
+            }
+            resultSet.close();
+            statement.close();
+        } catch (Exception e) {
+            Logging.log("Command: Error: " + check + " : " + e);
+            throw e;
+        }
+        
+    }
 
 }
