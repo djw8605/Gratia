@@ -94,6 +94,7 @@
              db_host => "localhost",
              db_schema => "gratia_greenc",
              collector_host => "gratia-vm02.fnal.gov",
+#             tomcat_native_lib => '/data/apr/lib',
              "properties.attributes" =>
              {
               "maintain.history.log" => 2,
@@ -101,7 +102,10 @@
               "service.rmiservlet.level" => "FINEST",
               "service.service.level" => 'FINEST',
               "service.service.numLogs" => 10,
-              "monitor.to.address0" => 'greenc@fnal.gov' #,
+              "monitor.to.address0" => 'greenc@fnal.gov' ,
+              "service.admin.DN.0" => '/DC=org/DC=doegrids/OU=People/CN=Christopher H. Green 851859',
+              "service.admin.DN.1" => '/DC=gov/DC=fnal/O=Fermilab/OU=People/CN=Chris Green/CN=UID=greenc',
+              "service.admin.DN.2" => '/DC=gov/DC=fnal/O=Fermilab/OU=People/CN=Chris Green/CN=UID:greenc'#,
               #              "service.security.level" => 1,
               #              "service.use.selfgenerated.certs" => 1
              }
@@ -139,12 +143,13 @@
                   rmi_port => 22000,
                   jmx_port => 8054,
                   server_port => 8154,
-                  db_host => "gratia07.fnal.gov",
-                  db_schema => "gratia_itb",
-                  db_port => 3322,
-#                  db_host => "localhost",
-#                  db_schema => "gratia_greenc_test",
-                  tomcat_native_lib => '/data/apr/lib',
+#                  db_host => "gratia07.fnal.gov",
+#                  db_schema => "gratia_itb",
+#                  db_port => 3322,
+                  collector_host => "gratia-vm02.fnal.gov",
+                  db_host => "localhost",
+                  db_schema => "gratia_greenc_test",
+#                  tomcat_native_lib => '/data/apr/lib',
                   "properties.attributes" =>
                   {
                    "maintain.history.log" => 2,
@@ -153,7 +158,10 @@
                    "service.service.level" => 'FINEST',
                    "service.service.numLogs" => 10,
                    "monitor.to.address0" => 'greenc@fnal.gov',
-                   "service.listener.threads" => 1
+#                   "service.listener.threads" => 10,
+                   "service.admin.DN.0" => '/DC=org/DC=doegrids/OU=People/CN=Christopher H. Green 851859',
+                   "service.admin.DN.1" => '/DC=gov/DC=fnal/O=Fermilab/OU=People/CN=Chris Green/CN=UID=greenc',
+                   "service.admin.DN.2" => '/DC=gov/DC=fnal/O=Fermilab/OU=People/CN=Chris Green/CN=UID:greenc'#,
                   }
                 },
  rsv_test => { http_port => 8886,
@@ -171,7 +179,7 @@
                 "monitor.to.address0" => 'greenc@fnal.gov',
                 "service.listener.threads" => 1
                }
-             }
+             },
  weigand => { http_port => 8887,
                ssl_port => 8867,
                rmi_port => 24000,
@@ -183,10 +191,10 @@
                {
                 "maintain.history.log" => 2,
                 "monitor.listener.wait" => 240,
-                "monitor.to.address0" => 'weigand@fnal.gov'
+                "monitor.to.address0" => 'weigand@fnal.gov',
                 "service.admin.DN.0" => 'ALLOW ALL'
                }
-             },
+             }
 );
 
 ### Local Variables:
