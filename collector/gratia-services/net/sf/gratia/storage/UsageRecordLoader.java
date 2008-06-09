@@ -195,7 +195,7 @@ public class UsageRecordLoader implements RecordLoader {
             throws Exception {
         JobIdentity id = job.getJobIdentity();
         if (id != null /* job identity already set */) {
-            Utils.GratiaError("SetRecordIdentity", "parsing",
+            Utils.GratiaError("SetJobIdentity", "parsing",
                     " found a second JobIdentity field in the xml file", false);
             job.addExtraXml(element.asXML());
             return;
