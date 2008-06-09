@@ -4,6 +4,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Date;
 
+import net.sf.gratia.util.Logging;
+
 /**
  * <p>Title: JobUsageRecord </p>
  *
@@ -610,21 +612,23 @@ public class JobUsageRecord implements Record
 
        UserIdentity tempUserIdentity = getUserIdentity();
        StringElement tempSiteName = getSiteName();
+       StringElement tempGrid = getGrid();
 
        if (!DatabaseMaintenance.UseJobUsageSiteName()) { 
            setUserIdentity(null);
-       }
-       if (!DatabaseMaintenance.UseJobUsageSiteName()) { 
            setSiteName(null);
+           setGrid(null);
        }
 
        // Calculate the checksum
        String md5key = Utils.md5key(asXML());
+//        Logging.debug("DEBUG: Calculated md5v2 value of " + md5key + " on following XML:\n" + asXML());
 
        // Put things back
        setRecordIdentity(tempRecordIdentity);
        setSiteName(tempSiteName);
        setUserIdentity(tempUserIdentity);
+       setGrid(tempGrid);
 
        return md5key;
    }
@@ -647,6 +651,7 @@ public class JobUsageRecord implements Record
 
        // Calculate the checksum
        String md5key = Utils.md5key(asXML());
+//        Logging.debug("DEBUG: Calculated md5 value of " + md5key + " on following XML:\n" + asXML());
 
        // Put things back
        setRecordIdentity(tempRecordIdentity);
