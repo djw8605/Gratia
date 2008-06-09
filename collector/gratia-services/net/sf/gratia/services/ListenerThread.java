@@ -556,17 +556,24 @@ public class ListenerThread extends Thread
                             }
                             if (needCurrentSaveDup) {
                                 //Logging.log("ListenerThread: " + ident + ":Before Save Duplicate");
-                                Logging.debug("ListenerThread: " + ident + ": save duplicate of record " +
-                                              dupdbid);
                                 try {
                                     if (gotreplication) {
+                                        Logging.debug("ListenerThread: " + ident +
+                                                      ": save duplicate of record " +
+                                                      dupdbid);
                                         errorRecorder.saveDuplicate("Replication", "Duplicate", dupdbid, current);
                                     } else if (gothistory) {
                                         // If we are reprocessing the history date, we should not
                                         // be recording the possible duplicates.
+                                        Logging.debug("ListenerThread: " + ident +
+                                                      ": ignore duplicate of record " +
+                                                      dupdbid + " (history replay)");
                                         ;
                                     } else {
                                         errorRecorder.saveDuplicate("Probe", "Duplicate", dupdbid, current);
+                                        Logging.debug("ListenerThread: " + ident +
+                                                      ": save duplicate of record " +
+                                                      dupdbid);
                                     }
                                     //Logging.log("ListenerThread: " + ident + ":After Save Duplicate");
                                 }
