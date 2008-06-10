@@ -446,11 +446,6 @@ public class ListenerThread extends Thread
                             if (rawxml != null)
                                 current.setRawXml(rawxml);
                         }
-                        if (extraxmllist.size()>j) {
-                            extraxml = (String)extraxmllist.get(j);
-                            if (extraxml != null)
-                                current.setExtraXml(extraxml);
-                        }
                         Logging.log("ListenerThread: " + ident + ":Before Hibernate Save");
                         if (gothistory) {
                             Date serverDate = new Date(Long.parseLong((String)historydatelist.get(j)));
