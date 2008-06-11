@@ -153,7 +153,9 @@
                  rmi_port => 20000,
                  jmx_port => 8034,
                  server_port => 8134,
-                 db_schema => "gratia",
+                 db_schema => "gratiaXXX", # CHANGEME
+                 db_host => "example.com", # CHANGEME
+                 db_port => "65537", # CHANGEME
                  remote_host => "gratia-fermi.fnal.gov",
                  collector_host => "gratia-fermi.fnal.gov",
                  max_perm_size => "256m",
