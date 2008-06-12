@@ -7,7 +7,7 @@
 # Script to transfer the data from Gratia to APEL (WLCG)
 ########################################################################
 #
-#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: LCG.py,v 1.13 2008-04-21 15:50:18 jgweigand Exp $
+#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: LCG.py,v 1.14 2008-06-12 13:27:39 jgweigand Exp $
 #
 #
 ########################################################################
@@ -43,7 +43,11 @@
 # 4/15/08 (John Weigand)
 #   Added methods for creating an xml and html file from the APEL database.
 #   And reorganized some of the main section.
-# 
+#
+# 6/3/08 (John Weigand)
+#   In the past when a site had no data, no update was made to the APEL
+#   table.  Now we will create an update record showing it was processed.  
+#   We will create the update records for each VO.
 # 
 ########################################################################
 import traceback
@@ -57,7 +61,8 @@ import string
 import smtplib, rfc822  # for email notifications via smtp
 import commands, os, sys, time, string
 
-gSitesWithNoData = []
+gSitesWithData     = []
+gSitesWithNoData   = []
 gSitesWithUnknowns = []
 gKnownVOs = {}
 
@@ -183,9 +188,9 @@ def SendEmailNotification(subject,message):
     return
   
   hostname = commands.getoutput("hostname -f")
-  logfile  = commands.getoutput("echo $PWD")+"/"+GetFileName("log")
+  logfile  = commands.getoutput("echo $PWD")+"/"+GetFileName(None,"log")
   username = commands.getoutput("whoami")
-  sqlfile  = commands.getoutput("echo $PWD")+"/"+GetFileName("sql")
+  sqlfile  = commands.getoutput("echo $PWD")+"/"+GetFileName(None,"sql")
   body = """\
 Gratia to APEL/WLCG transfer. 
 Script..... %s
@@ -398,7 +403,7 @@ def LogToFile(message):
     file = None
     filename = ""
     try:
-        filename = GetFileName("log")
+        filename = GetFileName(None,"log")
         file = open(filename, 'a')  
         file.write( message + "\n")
         if file != None:
@@ -407,15 +412,19 @@ def LogToFile(message):
       raise Exception,"IO error(%s): %s (%s)" % (errno,strerror,filename)
 
 #-----------------------------------------------
-def GetFileName(suffix):
-    """ Sets the file name to YYYY-MM.suffix based on the time
-        period for the transfer with the LogSqlDir
+def GetFileName(type,suffix):
+    """ Sets the file name to YYYY-MM[.type].suffix based on the time
+        period for the transfer with the LogSqlDir, the type and the 
         attribute of the filters configuration prepended to it.
     """
-    if gDateFilter == None:
-      filename = time.strftime("%Y-%m") + "." + suffix
+    if type == None:
+      qualifier = ""
     else:
-      filename = gDateFilter[0:4] + "-" + gDateFilter[5:7] + "." + suffix 
+      qualifier = "." + type
+    if gDateFilter == None:
+      filename = time.strftime("%Y-%m") + qualifier + "." + suffix
+    else:
+      filename = gDateFilter[0:4] + "-" + gDateFilter[5:7] + qualifier + "." + suffix 
     if gFilterParameters["LogSqlDir"] == None:  
       filename = "./" + filename
     else:
@@ -596,7 +605,8 @@ def GetQueryAtlasUnknowns(site,normalizationFactor,vos):
     fmtDate  = "%Y-%m-%d"
     percent  = "%"
     query="""\
-SELECT Site.SiteName AS ExecutingSite, 
+SELECT STRAIGHT_JOIN
+               Site.SiteName AS ExecutingSite, 
                "us%s" as LCGUserVO, 
                Sum(R.NJobs), 
                Round(Sum(R.CpuUserDuration+R.CpuSystemDuration)/3600) as SumCPU, 
@@ -701,7 +711,7 @@ def RunGratiaQuery(select,params):
   return results
 
 #-----------------------------------------------
-def RunLCGQuery(type,params):
+def RunLCGQuery(query,type,params):
   """ Performs a query of the APEL database with output in either xml or 
       an html format.
   """
@@ -712,8 +722,6 @@ def RunLCGQuery(type,params):
   pswd = params["LcgPswd"] 
   db   = params["LcgDB"]
 
-  dates = gDateFilter.split("/")  # YYYY/MM format
-  query = "SELECT * FROM OSG_DATA WHERE Year=%s AND Month=%s ;" % (dates[0],dates[1])
   connectString = CreateQueryConnectString(host,port,user,pswd,db,type)
   (status,output) = commands.getstatusoutput("echo '" + query + "' | " + connectString)
   results = EvaluateMySqlResults((status,output))
@@ -721,21 +729,31 @@ def RunLCGQuery(type,params):
 
 #-----------------------------------------------
 def CreateXmlHtmlFiles(params):
-  """ Performs a query of the APEL database with output in either xml or 
+  """ Performs a query of the APEL database tables with output in either xml or 
       an html format creating those files.
   """
-  #--- create xml file ---
-  type = "xml"
-  output = RunLCGQuery(type,params)
-  filename = GetFileName(type)
-  WriteFile(output,filename)
-  Logit("%s file created: %s" % (type,filename)) 
-  #--- create html file ---
-  type = "html"
-  output = RunLCGQuery(type,params)
-  filename = GetFileName(type)
-  WriteFile(output,filename)
-  Logit("%s file created: %s" % (type,filename)) 
+  dates = gDateFilter.split("/")  # YYYY/MM format
+  lcgtable = gDatabaseParameters["LcgTable"]
+  queries =  {
+    lcgtable : "select * from %s where Year=%s and Month=%s order by ExecutingSite,LCGUserVO ;" % (lcgtable,dates[0],dates[1]),
+    "org_Tier1" : 'select * from org_Tier1 where Path like "1.10%" or Path like "1.4%" order by Path' ,
+    "org_Tier2" : 'select * from org_Tier2 where Path like "1.31%" order by Path' ,
+  } 
+  tables = queries.keys() 
+  for table in tables:
+    Logit("Running query: " + queries[table])
+    #--- create xml file ---
+    type = "xml"
+    output = RunLCGQuery(queries[table],type,params)
+    filename = GetFileName(table,type)
+    WriteFile(output,filename)
+    Logit("%s file created: %s" % (type,filename)) 
+    #--- create html file ---
+    type = "html"
+    output = RunLCGQuery(queries[table],type,params)
+    filename = GetFileName(table,type)
+    WriteFile(output,filename)
+    Logit("%s file created: %s" % (type,filename)) 
 
 #-----------------------------------------------
 def WriteFile(data,filename):
@@ -841,9 +859,29 @@ def RetrieveVoData(reportableVOs,reportableSites,params):
     Logit("Site: %s  Normalization Factor: %s" % (site,normalizationFactor)) 
     results = RunGratiaQuery(query,params)
     if len(results) == 0:
-      gSitesWithNoData.append(site)
-      continue
+      results = ProcessEmptyResultsSet(site,reportableVOs,reportableSites)
+    else:
+      gSitesWithData.append(site)
     output = output + results + "\n"
+  return output
+
+#-----------------------------------------------
+def ProcessEmptyResultsSet(site,reportableVOs,reportableSites):
+  """ Creates an update for each reportable VO with no Gratia
+      data from query. 
+      The purpose of this is to indicate in the APEL table that
+      the site was processes.
+  """
+  gSitesWithNoData.append(site)
+  output      = ""
+  year        = gDateFilter[0:4]
+  month       = gDateFilter[5:7]
+  currentTime = time.strftime("%Y-%m-%d %H:%M:%S",time.localtime())
+  today       = time.strftime("%Y-%m-%d",time.localtime())
+  for vo in reportableVOs.split(","):
+    normalizationFactor = reportableSites[site]
+    output = output + "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" % (site,vo.strip('"'),"0","0","0","0","0",month,year,today,today,normalizationFactor,currentTime)
+
   return output
 
 #-----------------------------------------------
@@ -974,17 +1012,18 @@ def main(argv=None):
     unknowns = RetrieveUnknownVoData(ReportableSites,gDatabaseParameters)
 
     #--- create the updates for the APEL accounting database ----
+    Logit("Sites with data: %s" % gSitesWithData)
     Logit("Sites with no data: %s" % gSitesWithNoData)
     Logit("Sites with Atlas unknown VOs: %s" % gSitesWithUnknowns)
-    if len(output) == 0:
-      if len(unknowns) == 0:
+    if len(gSitesWithData) == 0:
+      if len(gSitesWithUnknowns) == 0:
         raise Exception("No updates to apply")
-    CreateLCGsqlUpdates(output,GetFileName("sql"))
-    CreateLCGsqlUnknownUpdates(unknowns,GetFileName("sql"))
+    CreateLCGsqlUpdates(output,GetFileName(None,"sql"))
+    CreateLCGsqlUnknownUpdates(unknowns,GetFileName(None,"sql"))
 
     #--- apply the updates to the APEL accounting database ----
     if gInUpdateMode:
-      RunLCGUpdate(GetFileName("sql"),gDatabaseParameters)
+      RunLCGUpdate(GetFileName(None,"sql"),gDatabaseParameters)
       CreateXmlHtmlFiles(gDatabaseParameters)
       SendEmailNotificationSuccess("Sample query:\n" + gQuery + "\n\nResults of all queries:\n" + output + "\n\n#################\nSample Atlas unknown query:\n" + gUnknownQuery + "\n\nResults of all Atlas unknown queries:\n" + unknowns)
       Logit("Transfer Completed SUCCESSFULLY from Gratia to APEL")
