@@ -165,6 +165,13 @@
 #             BU_ATLAS_Tier2      2022   previously 1487 
 #             Purdue-RCAC         1756   previously 1543
 #             Purdue-Steele       1756   previously 1285
+#   6/12/08 (John Weigand)
+#           Updates based on https://t2.unl.edu/gratia/wlcg_reporting#sitenorm
+#           GIP data.
+#             MWT2_UC             1935   previously 1521
+#             Purdue-RCAC         2338   previously 1756
+#             Purdue-Steele       2529   previously 1756
+#
 #
 #    
 ##################################################################
@@ -178,8 +185,8 @@ GLOW                2108
 MIT_CMS             1364
 Nebraska            1571
 Purdue-Lear         1285
-Purdue-RCAC         1756
-Purdue-Steele       1756
+Purdue-RCAC         2338
+Purdue-Steele       2529
 UCSDT2              2023
 UFlorida-HPC        1521
 UFlorida-IHEPA      1521
@@ -196,7 +203,7 @@ AGLT2               2698
 BU_ATLAS_Tier2      2022
 IU_OSG              2101
 MWT2_IU             1787
-MWT2_UC             1521
+MWT2_UC             1935
 OU_OCHEP_SWT2       2389
 PROD_SLAC           2412
 SWT2_CPB            1628
