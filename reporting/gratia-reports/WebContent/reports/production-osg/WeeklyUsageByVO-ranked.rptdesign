@@ -2,49 +2,11 @@
 <report xmlns="http://www.eclipse.org/birt/2005/design" version="3.2.14" id="1">
     <property name="createdBy">Eclipse BIRT Designer Version 1.0.1 Build &lt;20050815-0740></property>
     <property name="units">in</property>
-    <list-property name="propertyBindings">
-        <structure>
-            <property name="name">odaDriverClass</property>
-            <property name="id">357</property>
-        </structure>
-        <structure>
-            <property name="name">odaURL</property>
-            <property name="id">357</property>
-            <expression name="value">params["DatabaseURL"]</expression>
-        </structure>
-        <structure>
-            <property name="name">odaUser</property>
-            <property name="id">357</property>
-            <expression name="value">params["DatabaseUser"]</expression>
-        </structure>
-        <structure>
-            <property name="name">odaPassword</property>
-            <property name="id">357</property>
-            <expression name="value">params["DatabasePassword"]</expression>
-        </structure>
-    </list-property>
     <property name="eventHandlerClass">net.sf.gratia.reporting.GratiaBirtReportEH</property>
     <list-property name="libraries">
         <structure>
-            <property name="fileName">gratia-lib1.rptlibrary</property>
-            <property name="namespace">gratia-lib1</property>
-        </structure>
-    </list-property>
-    <list-property name="configVars">
-        <structure>
-            <property name="name">DisplayMetric</property>
-            <property name="value">jobcount</property>
-        </structure>
-        <structure>
-            <property name="name">HighlightDate</property>
-        </structure>
-        <structure>
-            <property name="name">UserName</property>
-            <property name="value">None</property>
-        </structure>
-        <structure>
-            <property name="name">UserRole</property>
-            <property name="value">None</property>
+            <property name="fileName">reportLib.rptlibrary</property>
+            <property name="namespace">reportLib</property>
         </structure>
     </list-property>
     <template-parameter-definitions>
@@ -835,215 +797,15 @@
         </template-parameter-definition>
     </template-parameter-definitions>
     <parameters>
-        <parameter-group name="DatabaseAccess" id="84">
-            <parameters>
-                <scalar-parameter name="DatabaseURL" id="81">
-                    <property name="hidden">true</property>
-                    <property name="valueType">static</property>
-                    <property name="dataType">string</property>
-                    <property name="isRequired">true</property>
-                    <property name="controlType">text-box</property>
-                    <property name="defaultValue">jdbc:mysql://gratia06.fnal.gov:3320/gratia_itb</property>
-                    <structure name="format">
-                        <property name="category">Unformatted</property>
-                        <property name="pattern">Unformatted</property>
-                    </structure>
-                </scalar-parameter>
-                <scalar-parameter name="DatabaseUser" id="83">
-                    <property name="hidden">true</property>
-                    <property name="valueType">static</property>
-                    <property name="dataType">string</property>
-                    <property name="isRequired">true</property>
-                    <property name="controlType">text-box</property>
-                    <property name="defaultValue">reader</property>
-                    <structure name="format">
-                        <property name="category">Unformatted</property>
-                        <property name="pattern">Unformatted</property>
-                    </structure>
-                </scalar-parameter>
-                <scalar-parameter name="DatabasePassword" id="82">
-                    <property name="hidden">true</property>
-                    <property name="valueType">static</property>
-                    <property name="dataType">string</property>
-                    <property name="isRequired">true</property>
-                    <property name="controlType">text-box</property>
-                    <property name="defaultValue">reader</property>
-                    <structure name="format">
-                        <property name="category">Unformatted</property>
-                        <property name="pattern">Unformatted</property>
-                    </structure>
-                </scalar-parameter>
-            </parameters>
-        </parameter-group>
-        <scalar-parameter name="DisplayMetric" id="101">
-            <property name="hidden">false</property>
-            <text-property name="helpText">Select metric for chart</text-property>
-            <property name="valueType">static</property>
-            <property name="dataType">string</property>
-            <text-property name="promptText">Select metric for chart</text-property>
-            <property name="isRequired">true</property>
-            <property name="controlType">list-box</property>
-            <property name="mustMatch">true</property>
-            <property name="fixedOrder">true</property>
-            <property name="defaultValue">wallclock</property>
-            <structure name="format">
-                <property name="category">Unformatted</property>
-                <property name="pattern">Unformatted</property>
-            </structure>
-            <list-property name="selectionList">
-                <structure>
-                    <property name="value">wallclock</property>
-                    <property name="label">Wallclock Hours</property>
-                </structure>
-                <structure>
-                    <property name="value">process</property>
-                    <property name="label">Process Hours</property>
-                </structure>
-                <structure>
-                    <property name="value">jobcount</property>
-                    <property name="label">Job Count</property>
-                </structure>
-            </list-property>
-        </scalar-parameter>
-        <scalar-parameter name="GroupByFormat" id="362">
-            <property name="hidden">true</property>
-            <property name="valueType">static</property>
-            <property name="dataType">string</property>
-            <property name="concealValue">true</property>
-            <property name="isRequired">false</property>
-            <property name="controlType">text-box</property>
-            <property name="defaultValue">week</property>
-            <structure name="format">
-                <property name="category">Unformatted</property>
-                <property name="pattern">Unformatted</property>
-            </structure>
-        </scalar-parameter>
-        <scalar-parameter name="HighlightDate" id="98">
-            <property name="hidden">true</property>
-            <property name="valueType">static</property>
-            <property name="dataType">string</property>
-            <property name="isRequired">false</property>
-            <property name="controlType">text-box</property>
-            <structure name="format">
-                <property name="category">Unformatted</property>
-                <property name="pattern">Unformatted</property>
-            </structure>
-        </scalar-parameter>
-        <scalar-parameter name="UserName" id="104">
-            <property name="hidden">true</property>
-            <property name="valueType">static</property>
-            <property name="dataType">string</property>
-            <property name="concealValue">true</property>
-            <property name="isRequired">false</property>
-            <property name="controlType">text-box</property>
-            <property name="defaultValue">None</property>
-            <structure name="format">
-                <property name="category">Unformatted</property>
-                <property name="pattern">Unformatted</property>
-            </structure>
-        </scalar-parameter>
-        <scalar-parameter name="UserRole" id="103">
-            <property name="hidden">true</property>
-            <property name="valueType">static</property>
-            <property name="dataType">string</property>
-            <property name="concealValue">true</property>
-            <property name="isRequired">false</property>
-            <property name="controlType">text-box</property>
-            <property name="defaultValue">None</property>
-            <structure name="format">
-                <property name="category">Unformatted</property>
-                <property name="pattern">Unformatted</property>
-            </structure>
-        </scalar-parameter>
-        <scalar-parameter name="StartDate" id="86">
-            <property name="hidden">true</property>
-            <text-property name="helpText">Only jobs that finished after this date will be included</text-property>
-            <property name="valueType">static</property>
-            <property name="dataType">string</property>
-            <text-property name="promptText">StartDate</text-property>
-            <property name="isRequired">false</property>
-            <property name="controlType">text-box</property>
-            <property name="defaultValue">2007-01-01</property>
-            <structure name="format">
-                <property name="category">Unformatted</property>
-                <property name="pattern">Unformatted</property>
-            </structure>
-        </scalar-parameter>
-        <scalar-parameter name="EndDate" id="87">
-            <property name="hidden">true</property>
-            <text-property name="helpText">Only jobs that finished before this date will be included</text-property>
-            <property name="valueType">static</property>
-            <property name="dataType">string</property>
-            <text-property name="promptText">EndDate</text-property>
-            <property name="isRequired">false</property>
-            <property name="controlType">text-box</property>
-            <property name="defaultValue">2007-02-01</property>
-            <structure name="format">
-                <property name="category">Unformatted</property>
-                <property name="pattern">Unformatted</property>
-            </structure>
-        </scalar-parameter>
-        <parameter-group name="ReportInfo" id="363" extends="gratia-lib1.ReportInfo"/>
-        <scalar-parameter name="GroupsPerChart" id="397">
-            <text-property name="helpText">Select number of groups (e.g. VO's or Sites) to be displayed on each chart</text-property>
-            <property name="valueType">static</property>
-            <property name="dataType">integer</property>
-            <text-property name="promptText">Select # of groups per chart</text-property>
-            <property name="controlType">list-box</property>
-            <property name="mustMatch">true</property>
-            <property name="fixedOrder">true</property>
-            <property name="defaultValue">15</property>
-            <property name="distinct">false</property>
-            <structure name="format">
-                <property name="category">Unformatted</property>
-            </structure>
-            <list-property name="selectionList">
-                <structure>
-                    <property name="value">1</property>
-                    <property name="label">1</property>
-                </structure>
-                <structure>
-                    <property name="value">2</property>
-                    <property name="label">2</property>
-                </structure>
-                <structure>
-                    <property name="value">5</property>
-                    <property name="label">5</property>
-                </structure>
-                <structure>
-                    <property name="value">10</property>
-                    <property name="label">10</property>
-                </structure>
-                <structure>
-                    <property name="value">15</property>
-                    <property name="label">15</property>
-                </structure>
-                <structure>
-                    <property name="value">20</property>
-                    <property name="label">20</property>
-                </structure>
-                <structure>
-                    <property name="value">25</property>
-                    <property name="label">25</property>
-                </structure>
-                <structure>
-                    <property name="value">100</property>
-                    <property name="label">100</property>
-                </structure>
-                <structure>
-                    <property name="value">1000</property>
-                    <property name="label">ALL</property>
-                </structure>
-            </list-property>
-        </scalar-parameter>
+        <parameter-group name="MetricsFormatting" id="428" extends="reportLib.MetricsFormatting"/>
+        <scalar-parameter name="GroupsPerChart" id="417" extends="reportLib.GroupsPerChart"/>
+        <parameter-group name="DatabaseAccess" id="407" extends="reportLib.DatabaseAccess"/>
+        <parameter-group name="ReportInfo" id="408" extends="reportLib.ReportInfo"/>
+        <parameter-group name="UserInfo" id="411" extends="reportLib.UserInfo"/>
     </parameters>
     <data-sources>
-        <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="fermigrid1" id="357">
-            <property name="odaDriverClass">com.mysql.jdbc.Driver</property>
-            <property name="odaURL">jdbc:mysql://gratia06.fnal.gov:3320/gratia_itb</property>
-            <property name="odaUser">reader</property>
-            <encrypted-property name="odaPassword">cmVhZGVy</encrypted-property>
-        </oda-data-source>
+        <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="gratia-db01_gratia_itb" id="404"
+ extends="reportLib.gratia-db01_gratia_itb"/>
     </data-sources>
     <data-sets>
         <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="UsageByVORanked" id="358">
@@ -1094,7 +856,7 @@
                 </list-property>
             </structure>
             <property name="rowFetchLimit">10000</property>
-            <property name="dataSource">fermigrid1</property>
+            <property name="dataSource">gratia-db01_gratia_itb</property>
             <property name="dataSetRowLimit">0</property>
             <list-property name="parameters">
                 <structure>
@@ -1129,6 +891,7 @@ if (daynr.toString().length &lt; 2){daynr ="0" +daynr;}
 daynr = "01";
 yearnr + "-" + monthnr + "-" + daynr;</expression>
                     <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
                 </structure>
                 <structure>
                     <property name="name">EndDate</property>
@@ -2092,7 +1855,7 @@ else {&#xD;
     &lt;/list-property>
 &lt;/structure>
 </BaseUrl>
-                <BaseParameterName>ForWeek</BaseParameterName>
+                <BaseParameterName>StartDate</BaseParameterName>
                 <ValueParameterName></ValueParameterName>
                 <SeriesParameterName>ForVOName</SeriesParameterName>
               </Value>
@@ -2537,10 +2300,6 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
                                         <property name="paramName">UserRole</property>
                                         <expression name="expression">params["UserRole"]</expression>
                                     </structure>
-                                    <structure>
-                                        <property name="paramName">GroupByFormat</property>
-                                        <expression name="expression">params["GroupByFormat"]</expression>
-                                    </structure>
                                 </list-property>
                                 <property name="refTemplateParameter">NewTemplateParameterDefinition</property>
                                 <list-property name="boundDataColumns">
@@ -2590,8 +2349,8 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
                         <cell id="19">
                             <property name="colSpan">3</property>
                             <property name="rowSpan">1</property>
-                            <label name="ReportURL" id="400" extends="gratia-lib1.ReportURL"/>
-                            <label name="ShowQuery" id="401" extends="gratia-lib1.ShowQuery"/>
+                            <label name="ReportURL" id="405" extends="reportLib.ReportURL"/>
+                            <label name="ShowQuery" id="406" extends="reportLib.ShowQuery"/>
                         </cell>
                     </row>
                 </footer>

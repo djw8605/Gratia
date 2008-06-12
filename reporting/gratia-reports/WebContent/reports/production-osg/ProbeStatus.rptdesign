@@ -2,210 +2,23 @@
 <report xmlns="http://www.eclipse.org/birt/2005/design" version="3.2.14" id="1">
     <property name="createdBy">Eclipse BIRT Designer Version 2.0.1 Build &lt;20060222-1204></property>
     <property name="units">in</property>
-    <list-property name="propertyBindings">
-        <structure>
-            <property name="name">odaDriverClass</property>
-            <property name="id">4</property>
-        </structure>
-        <structure>
-            <property name="name">odaURL</property>
-            <property name="id">4</property>
-            <expression name="value">params["DatabaseURL"]</expression>
-        </structure>
-        <structure>
-            <property name="name">odaUser</property>
-            <property name="id">4</property>
-            <expression name="value">params["DatabaseUser"]</expression>
-        </structure>
-        <structure>
-            <property name="name">odaPassword</property>
-            <property name="id">4</property>
-            <expression name="value">params["DatabasePassword"]</expression>
-        </structure>
-    </list-property>
     <property name="eventHandlerClass">net.sf.gratia.reporting.GratiaBirtReportEH</property>
     <list-property name="libraries">
         <structure>
-            <property name="fileName">gratia-lib1.rptlibrary</property>
-            <property name="namespace">gratia-lib1</property>
-        </structure>
-    </list-property>
-    <list-property name="configVars">
-        <structure>
-            <property name="name">DatabaseUser</property>
-            <property name="value">gratia</property>
-        </structure>
-        <structure>
-            <property name="name">DatabasePassword</property>
-            <property name="value">notused</property>
-        </structure>
-        <structure>
-            <property name="name">StartDate</property>
-            <property name="value">2006-01-01</property>
-        </structure>
-        <structure>
-            <property name="name">EndDate</property>
-            <property name="value">2006-08-15</property>
-        </structure>
-        <structure>
-            <property name="name">GroupByFormat</property>
-            <property name="value">%Y-%c-%e %H</property>
-        </structure>
-        <structure>
-            <property name="name">TimeAxisPattern</property>
-            <property name="value">MM/dd/yyyy</property>
-        </structure>
-        <structure>
-            <property name="name">HighlightDate</property>
-        </structure>
-        <structure>
-            <property name="name">UserName</property>
-            <property name="value">None</property>
-        </structure>
-        <structure>
-            <property name="name">UserRole</property>
-            <property name="value">None</property>
+            <property name="fileName">reportLib.rptlibrary</property>
+            <property name="namespace">reportLib</property>
         </structure>
     </list-property>
     <parameters>
-        <parameter-group name="DatabaseAccess" id="84">
-            <parameters>
-                <scalar-parameter name="DatabaseURL" id="81">
-                    <property name="hidden">true</property>
-                    <property name="valueType">static</property>
-                    <property name="dataType">string</property>
-                    <property name="isRequired">true</property>
-                    <property name="controlType">text-box</property>
-                    <property name="defaultValue">jdbc:mysql://gratia-vm02.fnal.gov:3320/gratia_jeffmack</property>
-                    <structure name="format">
-                        <property name="category">Unformatted</property>
-                        <property name="pattern">Unformatted</property>
-                    </structure>
-                </scalar-parameter>
-                <scalar-parameter name="DatabaseUser" id="83">
-                    <property name="hidden">true</property>
-                    <property name="valueType">static</property>
-                    <property name="dataType">string</property>
-                    <property name="isRequired">true</property>
-                    <property name="controlType">text-box</property>
-                    <property name="defaultValue">gratia</property>
-                    <structure name="format">
-                        <property name="category">Unformatted</property>
-                        <property name="pattern">Unformatted</property>
-                    </structure>
-                </scalar-parameter>
-                <scalar-parameter name="DatabasePassword" id="82">
-                    <property name="hidden">true</property>
-                    <property name="valueType">static</property>
-                    <property name="dataType">string</property>
-                    <property name="isRequired">true</property>
-                    <property name="controlType">text-box</property>
-                    <property name="defaultValue">notused</property>
-                    <structure name="format">
-                        <property name="category">Unformatted</property>
-                        <property name="pattern">Unformatted</property>
-                    </structure>
-                </scalar-parameter>
-            </parameters>
-        </parameter-group>
-        <scalar-parameter name="StartDate" id="86">
-            <text-property name="helpText">Only jobs that finished after this date will be included</text-property>
-            <property name="valueType">static</property>
-            <property name="dataType">string</property>
-            <text-property name="promptText">StartDate</text-property>
-            <property name="isRequired">true</property>
-            <property name="controlType">text-box</property>
-            <property name="defaultValue">3/1/2006</property>
-            <structure name="format">
-                <property name="category">Unformatted</property>
-                <property name="pattern">Unformatted</property>
-            </structure>
-        </scalar-parameter>
-        <scalar-parameter name="EndDate" id="87">
-            <text-property name="helpText">Only jobs that finished before this date will be included</text-property>
-            <property name="valueType">static</property>
-            <property name="dataType">string</property>
-            <text-property name="promptText">EndDate</text-property>
-            <property name="isRequired">true</property>
-            <property name="controlType">text-box</property>
-            <property name="defaultValue">12/31/2999</property>
-            <structure name="format">
-                <property name="category">Unformatted</property>
-                <property name="pattern">Unformatted</property>
-            </structure>
-        </scalar-parameter>
-        <scalar-parameter name="GroupByFormat" id="95">
-            <property name="hidden">true</property>
-            <property name="valueType">static</property>
-            <property name="dataType">string</property>
-            <property name="concealValue">true</property>
-            <property name="isRequired">false</property>
-            <property name="controlType">text-box</property>
-            <property name="defaultValue">%Y-%c-%e %H</property>
-            <structure name="format">
-                <property name="category">Unformatted</property>
-                <property name="pattern">Unformatted</property>
-            </structure>
-        </scalar-parameter>
-        <scalar-parameter name="TimeAxisPattern" id="97">
-            <property name="hidden">true</property>
-            <property name="valueType">static</property>
-            <property name="dataType">string</property>
-            <property name="concealValue">true</property>
-            <property name="isRequired">false</property>
-            <property name="controlType">text-box</property>
-            <property name="defaultValue">MM/dd/yyyy</property>
-            <structure name="format">
-                <property name="category">Unformatted</property>
-                <property name="pattern">Unformatted</property>
-            </structure>
-        </scalar-parameter>
-        <scalar-parameter name="HighlightDate" id="98">
-            <property name="hidden">true</property>
-            <property name="valueType">static</property>
-            <property name="dataType">string</property>
-            <property name="isRequired">false</property>
-            <property name="controlType">text-box</property>
-            <structure name="format">
-                <property name="category">Unformatted</property>
-                <property name="pattern">Unformatted</property>
-            </structure>
-        </scalar-parameter>
-        <scalar-parameter name="UserName" id="102">
-            <property name="hidden">true</property>
-            <property name="valueType">static</property>
-            <property name="dataType">string</property>
-            <property name="concealValue">true</property>
-            <property name="isRequired">false</property>
-            <property name="controlType">text-box</property>
-            <property name="defaultValue">None</property>
-            <structure name="format">
-                <property name="category">Unformatted</property>
-                <property name="pattern">Unformatted</property>
-            </structure>
-        </scalar-parameter>
-        <scalar-parameter name="UserRole" id="103">
-            <property name="hidden">true</property>
-            <property name="valueType">static</property>
-            <property name="dataType">string</property>
-            <property name="concealValue">true</property>
-            <property name="isRequired">false</property>
-            <property name="controlType">text-box</property>
-            <property name="defaultValue">None</property>
-            <structure name="format">
-                <property name="category">Unformatted</property>
-                <property name="pattern">Unformatted</property>
-            </structure>
-        </scalar-parameter>
-        <parameter-group name="ReportInfo" id="104" extends="gratia-lib1.ReportInfo"/>
+        <parameter-group name="MetricsFormatting" id="401" extends="reportLib.MetricsFormatting"/>
+        <parameter-group name="DateRange" id="402" extends="reportLib.DateRange"/>
+        <parameter-group name="DatabaseAccess" id="403" extends="reportLib.DatabaseAccess"/>
+        <parameter-group name="ReportInfo" id="404" extends="reportLib.ReportInfo"/>
+        <parameter-group name="UserInfo" id="405" extends="reportLib.UserInfo"/>
     </parameters>
     <data-sources>
-        <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="fermigrid1" id="4">
-            <property name="odaDriverClass">com.mysql.jdbc.Driver</property>
-            <property name="odaURL">jdbc:mysql://gratia-vm02.fnal.gov:3320/gratia_jeffmack</property>
-            <property name="odaUser">gratia</property>
-            <encrypted-property name="odaPassword">cHJvdG8=</encrypted-property>
-        </oda-data-source>
+        <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="gratia-db01_gratia_itb" id="392"
+ extends="reportLib.gratia-db01_gratia_itb"/>
     </data-sources>
     <data-sets>
         <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="TimeQuery" id="94">
@@ -228,7 +41,7 @@
                     </structure>
                 </list-property>
             </structure>
-            <property name="dataSource">fermigrid1</property>
+            <property name="dataSource">gratia-db01_gratia_itb</property>
             <list-property name="parameters">
                 <structure>
                     <property name="name">UserName</property>
@@ -309,15 +122,7 @@ call ProbeStatus(?,?,?,?,?)
         </simple-master-page>
     </page-setup>
     <body>
-        <text-data id="99">
-            <property name="style">sans-style1</property>
-            <property name="fontSize">9pt</property>
-            <property name="marginTop">0pt</property>
-            <property name="marginLeft">0pt</property>
-            <property name="textAlign">center</property>
-            <expression name="valueExpr">"Date range: "+ params["StartDate"] + " - " + params["EndDate"]</expression>
-            <property name="contentType">html</property>
-        </text-data>
+        <text-data name="DateRange" id="400" extends="reportLib.DateRange"/>
         <extended-item extensionName="Chart" name="MyChart" id="90">
             <xml-property name="xmlRepresentation"><![CDATA[<model:ChartWithAxes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:attribute="http://www.birt.eclipse.org/ChartModelAttribute" xmlns:data="http://www.birt.eclipse.org/ChartModelData" xmlns:layout="http://www.birt.eclipse.org/ChartModelLayout" xmlns:model="http://www.birt.eclipse.org/ChartModel" xmlns:type="http://www.birt.eclipse.org/ChartModelType">
   <Type>Line Chart</Type>
@@ -711,17 +516,17 @@ call ProbeStatus(?,?,?,?,?)
  */
 function beforeGeneration( chart, context ){
 	rep = context.getExternalContext().getScriptable();
-	val = rep.getParameterValue(&quot;TimeAxisPattern&quot;);
-	rep = context.getExternalContext().getScriptable();
 	rep_title = rep.getParameterValue(&quot;ReportTitle&quot;);
 	rep_subtitle = rep.getParameterValue(&quot;ReportSubtitle&quot;);
 	chart.getTitle().getLabel().getCaption().setValue(rep_title + &quot;\n&quot; + rep_subtitle);
 
-	if(val != null) {
-                axes = chart.getAxes().get(0);
-                formatSpec = axes.getFormatSpecifier();
-                formatSpec.setPattern(val);
-        }       
+
+//	val = rep.getParameterValue(&quot;TimeAxisPattern&quot;);
+//	if(val != null) {
+//                axes = chart.getAxes().get(0);
+//                formatSpec = axes.getFormatSpecifier();
+//                formatSpec.setPattern(val);
+//        }       
 }
 
 /**
@@ -846,20 +651,19 @@ function beforeGeneration( chart, context ){
  * @param context
  *            IChartScriptContext
  */
-function beforeDrawAxisLabel( axis, label, context )
-{
+//function beforeDrawAxisLabel( axis, label, context )
+//{
+//	rep = context.getExternalContext().getScriptable();
+//	val = rep.getParameterValue(&quot;HighlightDate&quot;);
 
-	rep = context.getExternalContext().getScriptable();
-	val = rep.getParameterValue(&quot;HighlightDate&quot;);
+//	if(val == null)
+//		val = &quot;&quot;;
 
-	if(val == null)
-		val = &quot;&quot;;
-
-	if(val.equals(label.getCaption().getValue()))
-		label.getOutline().setVisible(true);
-	else
-		label.getOutline().setVisible(false);
-}
+//	if(val.equals(label.getCaption().getValue()))
+//		label.getOutline().setVisible(true);
+//	else
+//		label.getOutline().setVisible(false);
+//}
 
 /**
  * Called before rendering the Title of an Axis.
@@ -1086,10 +890,6 @@ function beforeDrawAxisLabel( axis, label, context )
             &lt;expression name=&quot;expression&quot;>params[&quot;EndDate&quot;]&lt;/expression>
         &lt;/structure>
         &lt;structure>
-            &lt;property name=&quot;paramName&quot;>HighlightDate&lt;/property>
-            &lt;expression name=&quot;expression&quot;>params[&quot;HighlightDate&quot;]&lt;/expression>
-        &lt;/structure>
-        &lt;structure>
             &lt;property name=&quot;paramName&quot;>ReportTitle&lt;/property>
             &lt;expression name=&quot;expression&quot;>params[&quot;ReportTitle&quot;] + ' - ' + 'drill-through'&lt;/expression>
         &lt;/structure>
@@ -1130,6 +930,7 @@ function beforeDrawAxisLabel( axis, label, context )
           <GroupType>Text</GroupType>
           <AggregateExpression>Sum</AggregateExpression>
         </Grouping>
+        <Sorting>Ascending</Sorting>
       </SeriesDefinitions>
       <Orientation>Vertical</Orientation>
       <LineAttributes>
@@ -1435,6 +1236,194 @@ function beforeDrawAxisLabel( axis, label, context )
         <LabelPosition>Outside</LabelPosition>
         <Stacked>false</Stacked>
       </Series>
+      <Series>
+        <Visible>true</Visible>
+        <Label>
+          <Caption>
+            <Value>&lt;undefined></Value>
+            <Font>
+              <Alignment/>
+            </Font>
+          </Caption>
+          <Background xsi:type="attribute:ColorDefinition">
+            <Transparency>0</Transparency>
+            <Red>255</Red>
+            <Green>255</Green>
+            <Blue>255</Blue>
+          </Background>
+          <Outline>
+            <Style>Solid</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>false</Visible>
+          </Outline>
+          <Insets>
+            <Top>0.0</Top>
+            <Left>2.0</Left>
+            <Bottom>0.0</Bottom>
+            <Right>3.0</Right>
+          </Insets>
+          <Visible>false</Visible>
+        </Label>
+        <DataDefinition>
+          <Definition>row[&quot;endtime&quot;]</Definition>
+        </DataDefinition>
+        <SeriesIdentifier>Day</SeriesIdentifier>
+        <DataPoint>
+          <Components>
+            <Type>Orthogonal_Value</Type>
+          </Components>
+          <Separator>, </Separator>
+        </DataPoint>
+        <LabelPosition>Outside</LabelPosition>
+        <Stacked>false</Stacked>
+      </Series>
+      <Series>
+        <Visible>true</Visible>
+        <Label>
+          <Caption>
+            <Value>&lt;undefined></Value>
+            <Font>
+              <Alignment/>
+            </Font>
+          </Caption>
+          <Background xsi:type="attribute:ColorDefinition">
+            <Transparency>0</Transparency>
+            <Red>255</Red>
+            <Green>255</Green>
+            <Blue>255</Blue>
+          </Background>
+          <Outline>
+            <Style>Solid</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>false</Visible>
+          </Outline>
+          <Insets>
+            <Top>0.0</Top>
+            <Left>2.0</Left>
+            <Bottom>0.0</Bottom>
+            <Right>3.0</Right>
+          </Insets>
+          <Visible>false</Visible>
+        </Label>
+        <DataDefinition>
+          <Definition>row[&quot;endtime&quot;]</Definition>
+        </DataDefinition>
+        <SeriesIdentifier>Day</SeriesIdentifier>
+        <DataPoint>
+          <Components>
+            <Type>Orthogonal_Value</Type>
+          </Components>
+          <Separator>, </Separator>
+        </DataPoint>
+        <LabelPosition>Outside</LabelPosition>
+        <Stacked>false</Stacked>
+      </Series>
+      <Series>
+        <Visible>true</Visible>
+        <Label>
+          <Caption>
+            <Value>&lt;undefined></Value>
+            <Font>
+              <Alignment/>
+            </Font>
+          </Caption>
+          <Background xsi:type="attribute:ColorDefinition">
+            <Transparency>0</Transparency>
+            <Red>255</Red>
+            <Green>255</Green>
+            <Blue>255</Blue>
+          </Background>
+          <Outline>
+            <Style>Solid</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>false</Visible>
+          </Outline>
+          <Insets>
+            <Top>0.0</Top>
+            <Left>2.0</Left>
+            <Bottom>0.0</Bottom>
+            <Right>3.0</Right>
+          </Insets>
+          <Visible>false</Visible>
+        </Label>
+        <DataDefinition>
+          <Definition>row[&quot;endtime&quot;]</Definition>
+        </DataDefinition>
+        <SeriesIdentifier>Day</SeriesIdentifier>
+        <DataPoint>
+          <Components>
+            <Type>Orthogonal_Value</Type>
+          </Components>
+          <Separator>, </Separator>
+        </DataPoint>
+        <LabelPosition>Outside</LabelPosition>
+        <Stacked>false</Stacked>
+      </Series>
+      <Series>
+        <Visible>true</Visible>
+        <Label>
+          <Caption>
+            <Value>&lt;undefined></Value>
+            <Font>
+              <Alignment/>
+            </Font>
+          </Caption>
+          <Background xsi:type="attribute:ColorDefinition">
+            <Transparency>0</Transparency>
+            <Red>255</Red>
+            <Green>255</Green>
+            <Blue>255</Blue>
+          </Background>
+          <Outline>
+            <Style>Solid</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>false</Visible>
+          </Outline>
+          <Insets>
+            <Top>0.0</Top>
+            <Left>2.0</Left>
+            <Bottom>0.0</Bottom>
+            <Right>3.0</Right>
+          </Insets>
+          <Visible>false</Visible>
+        </Label>
+        <DataDefinition>
+          <Definition>row[&quot;endtime&quot;]</Definition>
+        </DataDefinition>
+        <SeriesIdentifier>Day</SeriesIdentifier>
+        <DataPoint>
+          <Components>
+            <Type>Orthogonal_Value</Type>
+          </Components>
+          <Separator>, </Separator>
+        </DataPoint>
+        <LabelPosition>Outside</LabelPosition>
+        <Stacked>false</Stacked>
+      </Series>
       <Grouping>
         <Enabled>false</Enabled>
         <GroupingUnit>Days</GroupingUnit>
@@ -1585,10 +1574,6 @@ MM/dd/yyyy
                         <expression name="expression">params["EndDate"]</expression>
                     </structure>
                     <structure>
-                        <property name="paramName">HighlightDate</property>
-                        <expression name="expression">params["HighlightDate"]</expression>
-                    </structure>
-                    <structure>
                         <property name="paramName">ReportTitle</property>
                         <expression name="expression">params["ReportTitle"] + ' - ' + 'drill-through'</expression>
                     </structure>
@@ -1623,7 +1608,7 @@ MM/dd/yyyy
             </list-property>
             <property name="style">sans-style1</property>
         </extended-item>
-        <label name="ReportURL" id="390" extends="gratia-lib1.ReportURL"/>
-        <label name="ShowQuery" id="391" extends="gratia-lib1.ShowQuery"/>
+        <label name="ReportURL" id="398" extends="reportLib.ReportURL"/>
+        <label name="ShowQuery" id="399" extends="reportLib.ShowQuery"/>
     </body>
 </report>

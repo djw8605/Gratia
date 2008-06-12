@@ -2,227 +2,24 @@
 <report xmlns="http://www.eclipse.org/birt/2005/design" version="3.2.14" id="1">
     <property name="createdBy">Eclipse BIRT Designer Version 2.0.1 Build &lt;20060222-1204></property>
     <property name="units">in</property>
-    <list-property name="propertyBindings">
-        <structure>
-            <property name="name">odaDriverClass</property>
-            <property name="id">4</property>
-        </structure>
-        <structure>
-            <property name="name">odaURL</property>
-            <property name="id">4</property>
-            <expression name="value">params["DatabaseURL"]</expression>
-        </structure>
-        <structure>
-            <property name="name">odaUser</property>
-            <property name="id">4</property>
-            <expression name="value">params["DatabaseUser"]</expression>
-        </structure>
-        <structure>
-            <property name="name">odaPassword</property>
-            <property name="id">4</property>
-            <expression name="value">params["DatabasePassword"]</expression>
-        </structure>
-    </list-property>
     <property name="eventHandlerClass">net.sf.gratia.reporting.GratiaBirtReportEH</property>
     <list-property name="libraries">
         <structure>
-            <property name="fileName">gratia-lib1.rptlibrary</property>
-            <property name="namespace">gratia-lib1</property>
-        </structure>
-    </list-property>
-    <list-property name="configVars">
-        <structure>
-            <property name="name">GroupByFormat</property>
-            <property name="value">%Y-%U</property>
-        </structure>
-        <structure>
-            <property name="name">HighlightDate</property>
-        </structure>
-        <structure>
-            <property name="name">UserName</property>
-            <property name="value">None</property>
-        </structure>
-        <structure>
-            <property name="name">UserRole</property>
-            <property name="value">None</property>
+            <property name="fileName">reportLib.rptlibrary</property>
+            <property name="namespace">reportLib</property>
         </structure>
     </list-property>
     <parameters>
-        <parameter-group name="DatabaseAccess" id="84">
-            <parameters>
-                <scalar-parameter name="DatabaseURL" id="81">
-                    <property name="hidden">true</property>
-                    <property name="valueType">static</property>
-                    <property name="dataType">string</property>
-                    <property name="isRequired">true</property>
-                    <property name="controlType">text-box</property>
-                    <property name="defaultValue">jdbc:mysql://gratia-vm02.fnal.gov:3320/gratia_jeffmack</property>
-                    <structure name="format">
-                        <property name="category">Unformatted</property>
-                        <property name="pattern">Unformatted</property>
-                    </structure>
-                </scalar-parameter>
-                <scalar-parameter name="DatabaseUser" id="83">
-                    <property name="hidden">true</property>
-                    <property name="valueType">static</property>
-                    <property name="dataType">string</property>
-                    <property name="isRequired">true</property>
-                    <property name="controlType">text-box</property>
-                    <property name="defaultValue">reader</property>
-                    <structure name="format">
-                        <property name="category">Unformatted</property>
-                        <property name="pattern">Unformatted</property>
-                    </structure>
-                </scalar-parameter>
-                <scalar-parameter name="DatabasePassword" id="82">
-                    <property name="hidden">true</property>
-                    <property name="valueType">static</property>
-                    <property name="dataType">string</property>
-                    <property name="isRequired">true</property>
-                    <property name="controlType">text-box</property>
-                    <property name="defaultValue">reader</property>
-                    <structure name="format">
-                        <property name="category">Unformatted</property>
-                        <property name="pattern">Unformatted</property>
-                    </structure>
-                </scalar-parameter>
-            </parameters>
-        </parameter-group>
-        <scalar-parameter name="GroupByFormat" id="95">
-            <property name="hidden">true</property>
-            <property name="valueType">static</property>
-            <property name="dataType">string</property>
-            <property name="concealValue">true</property>
-            <property name="isRequired">false</property>
-            <property name="controlType">text-box</property>
-            <property name="defaultValue">%Y-%U</property>
-            <structure name="format">
-                <property name="category">Unformatted</property>
-                <property name="pattern">Unformatted</property>
-            </structure>
-        </scalar-parameter>
-        <scalar-parameter name="HighlightDate" id="98">
-            <property name="hidden">true</property>
-            <property name="valueType">static</property>
-            <property name="dataType">string</property>
-            <property name="isRequired">false</property>
-            <property name="controlType">text-box</property>
-            <structure name="format">
-                <property name="category">Unformatted</property>
-                <property name="pattern">Unformatted</property>
-            </structure>
-        </scalar-parameter>
-        <scalar-parameter name="UserName" id="104">
-            <property name="hidden">true</property>
-            <property name="valueType">static</property>
-            <property name="dataType">string</property>
-            <property name="concealValue">true</property>
-            <property name="isRequired">false</property>
-            <property name="controlType">text-box</property>
-            <property name="defaultValue">None</property>
-            <structure name="format">
-                <property name="category">Unformatted</property>
-                <property name="pattern">Unformatted</property>
-            </structure>
-        </scalar-parameter>
-        <scalar-parameter name="UserRole" id="103">
-            <property name="hidden">true</property>
-            <property name="valueType">static</property>
-            <property name="dataType">string</property>
-            <property name="concealValue">true</property>
-            <property name="isRequired">false</property>
-            <property name="controlType">text-box</property>
-            <property name="defaultValue">None</property>
-            <structure name="format">
-                <property name="category">Unformatted</property>
-                <property name="pattern">Unformatted</property>
-            </structure>
-        </scalar-parameter>
-        <scalar-parameter name="SelectSites" id="106">
-            <text-property name="helpText">List of VO's to include/exclude in chart.</text-property>
-            <property name="valueType">static</property>
-            <property name="dataType">string</property>
-            <property name="controlType">text-box</property>
-            <property name="defaultValue">('FNAL_FERMIGRID_ITB','FNAL_FERMIGRID_ITB')</property>
-            <structure name="format">
-                <property name="category">Unformatted</property>
-            </structure>
-            <list-property name="boundDataColumns">
-                <structure>
-                    <property name="name">vos</property>
-                    <expression name="expression">dataSetRow["vos"]</expression>
-                </structure>
-                <structure>
-                    <property name="name">voname</property>
-                    <expression name="expression">dataSetRow["voname"]</expression>
-                </structure>
-            </list-property>
-        </scalar-parameter>
-        <scalar-parameter name="SelType" id="107">
-            <text-property name="helpText">Include or exclude VO's in list.</text-property>
-            <property name="valueType">static</property>
-            <property name="dataType">string</property>
-            <text-property name="promptText">Enter type of VO selection</text-property>
-            <property name="isRequired">true</property>
-            <property name="controlType">list-box</property>
-            <property name="mustMatch">true</property>
-            <property name="fixedOrder">true</property>
-            <property name="defaultValue">IN</property>
-            <property name="distinct">false</property>
-            <structure name="format">
-                <property name="category">Unformatted</property>
-                <property name="pattern">Unformatted</property>
-            </structure>
-            <list-property name="selectionList">
-                <structure>
-                    <property name="value">IN</property>
-                    <property name="label">Include</property>
-                </structure>
-                <structure>
-                    <property name="value">NOT</property>
-                    <property name="label">Exclude</property>
-                </structure>
-            </list-property>
-        </scalar-parameter>
-        <scalar-parameter name="DisplayMetric" id="111">
-            <property name="hidden">false</property>
-            <text-property name="helpText">Select metric for chart</text-property>
-            <property name="valueType">static</property>
-            <property name="dataType">string</property>
-            <text-property name="promptText">Select metric for chart</text-property>
-            <property name="isRequired">true</property>
-            <property name="controlType">list-box</property>
-            <property name="mustMatch">true</property>
-            <property name="fixedOrder">true</property>
-            <property name="defaultValue">wallclock</property>
-            <structure name="format">
-                <property name="category">Unformatted</property>
-                <property name="pattern">Unformatted</property>
-            </structure>
-            <list-property name="selectionList">
-                <structure>
-                    <property name="value">wallclock</property>
-                    <property name="label">Wallclock Hours</property>
-                </structure>
-                <structure>
-                    <property name="value">process</property>
-                    <property name="label">Process Hours</property>
-                </structure>
-                <structure>
-                    <property name="value">jobcount</property>
-                    <property name="label">Job Count</property>
-                </structure>
-            </list-property>
-        </scalar-parameter>
-        <parameter-group name="ReportInfo" id="125" extends="gratia-lib1.ReportInfo"/>
+        <parameter-group name="MetricsFormatting" id="398" extends="reportLib.MetricsFormatting"/>
+        <scalar-parameter name="SelType" id="402" extends="reportLib.SelType"/>
+        <scalar-parameter name="SelectSites" id="396" extends="reportLib.SelectSites"/>
+        <parameter-group name="DatabaseAccess" id="401" extends="reportLib.DatabaseAccess"/>
+        <parameter-group name="ReportInfo" id="399" extends="reportLib.ReportInfo"/>
+        <parameter-group name="UserInfo" id="400" extends="reportLib.UserInfo"/>
     </parameters>
     <data-sources>
-        <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="fermigrid1" id="4">
-            <property name="odaDriverClass">com.mysql.jdbc.Driver</property>
-            <property name="odaURL">jdbc:mysql://gratia-vm02.fnal.gov:3320/gratia_jeffmack</property>
-            <property name="odaUser">reader</property>
-            <encrypted-property name="odaPassword">cmVhZGVy</encrypted-property>
-        </oda-data-source>
+        <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="gratia-db01_gratia_itb" id="391"
+ extends="reportLib.gratia-db01_gratia_itb"/>
     </data-sources>
     <data-sets>
         <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="6MonthHistory" id="94">
@@ -244,7 +41,7 @@ if (monthnr.length > 1){
 if (daynr.length > 1){
 	yearmon + "-" + daynr
 }else{
-	yearmon  + "-0" +  daynr 
+	yearmon  + "-0" +  daynr
 }</expression>
                     <property name="dataType">string</property>
                 </structure>
@@ -283,7 +80,7 @@ if (daynr.length > 1){
                     </structure>
                 </list-property>
             </structure>
-            <property name="dataSource">fermigrid1</property>
+            <property name="dataSource">gratia-db01_gratia_itb</property>
             <list-property name="parameters">
                 <structure>
                     <property name="name">UserName</property>
@@ -390,29 +187,6 @@ if (monthnr.toString().length > 1){
             <property name="queryText">call WeeklyUsageBySite(?,?,?,?,?,'Batch',?,?)
 </property>
         </oda-data-set>
-        <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="VOList" id="110">
-            <structure name="cachedMetaData">
-                <list-property name="resultSet">
-                    <structure>
-                        <property name="position">1</property>
-                        <property name="name">SiteName</property>
-                        <property name="dataType">string</property>
-                    </structure>
-                </list-property>
-            </structure>
-            <property name="dataSource">fermigrid1</property>
-            <list-property name="resultSet">
-                <structure>
-                    <property name="position">1</property>
-                    <property name="name">SiteName</property>
-                    <property name="nativeName">SiteName</property>
-                    <property name="dataType">string</property>
-                    <property name="nativeDataType">12</property>
-                </structure>
-            </list-property>
-            <property name="queryText">select Site.SiteName
-from Site</property>
-        </oda-data-set>
     </data-sets>
     <styles>
         <style name="sans-style1" id="100">
@@ -426,14 +200,7 @@ from Site</property>
         </simple-master-page>
     </page-setup>
     <body>
-        <text-data id="109">
-            <property name="style">sans-style1</property>
-            <property name="fontFamily">sans-serif</property>
-            <property name="fontSize">9pt</property>
-            <property name="textAlign">center</property>
-            <expression name="valueExpr">if(params["SelType"] == "IN"){"Site\'s selected:  " + params["SelectSites"]}else{"Site\'s excluded:  " + params["SelectSites"]}</expression>
-            <property name="contentType">html</property>
-        </text-data>
+        <text-data name="SelectSites" id="390" extends="reportLib.SelectSites"/>
         <extended-item extensionName="Chart" name="MyChart" id="90">
             <xml-property name="xmlRepresentation"><![CDATA[<model:ChartWithAxes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:attribute="http://www.birt.eclipse.org/ChartModelAttribute" xmlns:data="http://www.birt.eclipse.org/ChartModelData" xmlns:layout="http://www.birt.eclipse.org/ChartModelLayout" xmlns:model="http://www.birt.eclipse.org/ChartModel" xmlns:type="http://www.birt.eclipse.org/ChartModelType">
   <Type>Bar Chart</Type>
@@ -721,7 +488,7 @@ from Site</property>
  * ones you need. Note that for simplicity the &quot;after&quot; methods have not be included here.
  *
  * This script syntax follows JavaScript specifications, the Java classes that are referred to
- * in the comments can be accessed as JavaScript classes. 
+ * in the comments can be accessed as JavaScript classes.
  *
  * Script examples are available in the org.eclipse.birt.chart.examples plugin
  */
@@ -729,7 +496,7 @@ from Site</property>
 
 /**
  * Called before populating the series dataset using the DataSetProcessor.
- * 
+ *
  * @param series
  *            Series
  * @param dataSetProcessor
@@ -741,14 +508,14 @@ from Site</property>
 
 /**
  * Called before generation of chart model to GeneratedChartState.
- * 
+ *
  * @param chart
  *            Chart Model
  * @param context
  *            IChartScriptContext
  */
 function beforeGeneration( chart, context )
-{	
+{
 	rep = context.getExternalContext().getScriptable();
 	rep_title = rep.getParameterValue(&quot;ReportTitle&quot;);
 	rep_subtitle = rep.getParameterValue(&quot;ReportSubtitle&quot;);
@@ -756,7 +523,7 @@ function beforeGeneration( chart, context )
 }
 /**
  * Called before the chart is rendered.
- * 
+ *
  * @param gcs
  *            GeneratedChartState
  * @param context
@@ -766,7 +533,7 @@ function beforeGeneration( chart, context )
 
 /**
  * Called before drawing each block.
- * 
+ *
  * @param block
  *            Block
  * @param context
@@ -776,7 +543,7 @@ function beforeGeneration( chart, context )
 
 /**
  * Called before drawing each entry the legend.
- * 
+ *
  * @param label
  *            Label
  * @param context
@@ -786,7 +553,7 @@ function beforeGeneration( chart, context )
 
 /**
  * Called before rendering Series.
- * 
+ *
  * @param series
  *            Series
  * @param seriesRenderer
@@ -798,7 +565,7 @@ function beforeGeneration( chart, context )
 
 /**
  * Called before rendering the title of a Series.
- * 
+ *
  * @param series
  *            Series
  * @param label
@@ -810,7 +577,7 @@ function beforeGeneration( chart, context )
 
 /**
  * Called before drawing each marker line in an Axis.
- * 
+ *
  * @param axis
  *            Axis
  * @param markerLine
@@ -822,7 +589,7 @@ function beforeGeneration( chart, context )
 
 /**
  * Called before drawing each marker range in an Axis.
- * 
+ *
  * @param axis
  *            Axis
  * @param markerRange
@@ -834,7 +601,7 @@ function beforeGeneration( chart, context )
 
 /**
  * Called before drawing each datapoint graphical representation or marker.
- * 
+ *
  * @param dph
  *            DataPointHints
  * @param fill
@@ -846,7 +613,7 @@ function beforeGeneration( chart, context )
 
 /**
  * Called before rendering the label for each datapoint.
- * 
+ *
  * @param dph
  *            DataPointHints
  * @param label
@@ -858,7 +625,7 @@ function beforeGeneration( chart, context )
 
 /**
  * Called before rendering curve fitting.
- * 
+ *
  * @param cf
  *            CurveFitting
  * @param context
@@ -868,7 +635,7 @@ function beforeGeneration( chart, context )
 
 /**
  * Called before rendering each label on a given Axis.
- * 
+ *
  * @param axis
  *            Axis
  * @param label
@@ -876,21 +643,21 @@ function beforeGeneration( chart, context )
  * @param context
  *            IChartScriptContext
  */
-function beforeDrawAxisLabel( axis, label, context )
-{
-	rep = context.getExternalContext().getScriptable();
-	val = rep.getParameterValue(&quot;HighlightDate&quot;);
-	if(val == null)
-		val = &quot;&quot;;
-	if(val.equals(label.getCaption().getValue()))
-		label.getOutline().setVisible(true);
-	else
-		label.getOutline().setVisible(false);
-}
+//function beforeDrawAxisLabel( axis, label, context )
+//{
+//	rep = context.getExternalContext().getScriptable();
+//	val = rep.getParameterValue(&quot;HighlightDate&quot;);
+//	if(val == null)
+//		val = &quot;&quot;;
+//	if(val.equals(label.getCaption().getValue()))
+//		label.getOutline().setVisible(true);
+//	else
+//		label.getOutline().setVisible(false);
+//}
 
 /**
  * Called before rendering the Title of an Axis.
- * 
+ *
  * @param axis
  *            Axis
  * @param label
@@ -1166,7 +933,7 @@ else {&#xD;
     &lt;/list-property>
 &lt;/structure>
 </BaseUrl>
-                <BaseParameterName>ForWeek</BaseParameterName>
+                <BaseParameterName>StartDate</BaseParameterName>
                 <ValueParameterName></ValueParameterName>
                 <SeriesParameterName>ForSiteName</SeriesParameterName>
               </Value>
@@ -1679,8 +1446,8 @@ else {&#xD;
             </list-property>
             <property name="style">sans-style1</property>
         </extended-item>
-        <label name="ReportURL" id="123" extends="gratia-lib1.ReportURL"/>
-        <label name="ShowQuery" id="124" extends="gratia-lib1.ShowQuery"/>
+        <label name="ReportURL" id="392" extends="reportLib.ReportURL"/>
+        <label name="ShowQuery" id="393" extends="reportLib.ShowQuery"/>
     </body>
     <list-property name="images">
         <structure>

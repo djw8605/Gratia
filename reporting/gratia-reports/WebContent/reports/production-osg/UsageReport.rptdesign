@@ -2,170 +2,24 @@
 <report xmlns="http://www.eclipse.org/birt/2005/design" version="3.2.14" id="1">
     <property name="createdBy">Eclipse BIRT Designer Version 2.0.1 Build &lt;20060222-1204></property>
     <property name="units">in</property>
-    <list-property name="propertyBindings">
-        <structure>
-            <property name="name">odaDriverClass</property>
-            <property name="id">4</property>
-        </structure>
-        <structure>
-            <property name="name">odaURL</property>
-            <property name="id">4</property>
-            <expression name="value">params["DatabaseURL"]</expression>
-        </structure>
-        <structure>
-            <property name="name">odaUser</property>
-            <property name="id">4</property>
-            <expression name="value">params["DatabaseUser"]</expression>
-        </structure>
-        <structure>
-            <property name="name">odaPassword</property>
-            <property name="id">4</property>
-            <expression name="value">params["DatabasePassword"]</expression>
-        </structure>
-    </list-property>
     <property name="eventHandlerClass">net.sf.gratia.reporting.GratiaBirtReportEH</property>
     <list-property name="libraries">
         <structure>
-            <property name="fileName">gratia-lib1.rptlibrary</property>
-            <property name="namespace">gratia-lib1</property>
+            <property name="fileName">reportLib.rptlibrary</property>
+            <property name="namespace">reportLib</property>
         </structure>
     </list-property>
     <parameters>
-        <parameter-group name="DatabaseAccess" id="84">
-            <parameters>
-                <scalar-parameter name="DatabaseURL" id="81">
-                    <property name="hidden">true</property>
-                    <property name="valueType">static</property>
-                    <property name="dataType">string</property>
-                    <property name="isRequired">true</property>
-                    <property name="controlType">text-box</property>
-                    <property name="defaultValue">jdbc:mysql://gratia-vm02.fnal.gov:3320/gratia_jeffmack</property>
-                    <structure name="format">
-                        <property name="category">Unformatted</property>
-                        <property name="pattern">Unformatted</property>
-                    </structure>
-                </scalar-parameter>
-                <scalar-parameter name="DatabaseUser" id="83">
-                    <property name="hidden">true</property>
-                    <property name="valueType">static</property>
-                    <property name="dataType">string</property>
-                    <property name="isRequired">true</property>
-                    <property name="controlType">text-box</property>
-                    <property name="defaultValue">reader</property>
-                    <structure name="format">
-                        <property name="category">Unformatted</property>
-                        <property name="pattern">Unformatted</property>
-                    </structure>
-                </scalar-parameter>
-                <scalar-parameter name="DatabasePassword" id="82">
-                    <property name="hidden">true</property>
-                    <property name="valueType">static</property>
-                    <property name="dataType">string</property>
-                    <property name="isRequired">true</property>
-                    <property name="controlType">text-box</property>
-                    <property name="defaultValue">reader</property>
-                    <structure name="format">
-                        <property name="category">Unformatted</property>
-                        <property name="pattern">Unformatted</property>
-                    </structure>
-                </scalar-parameter>
-            </parameters>
-        </parameter-group>
-        <scalar-parameter name="StartDate" id="86">
-            <text-property name="helpText">Only jobs that finished after this date will be included</text-property>
-            <property name="valueType">static</property>
-            <property name="dataType">string</property>
-            <text-property name="promptText">StartDate</text-property>
-            <property name="isRequired">true</property>
-            <property name="controlType">text-box</property>
-            <property name="defaultValue">2007-01-01</property>
-            <structure name="format">
-                <property name="category">Unformatted</property>
-                <property name="pattern">Unformatted</property>
-            </structure>
-        </scalar-parameter>
-        <scalar-parameter name="EndDate" id="87">
-            <text-property name="helpText">Only jobs that finished before this date will be included</text-property>
-            <property name="valueType">static</property>
-            <property name="dataType">string</property>
-            <text-property name="promptText">EndDate</text-property>
-            <property name="isRequired">true</property>
-            <property name="controlType">text-box</property>
-            <property name="defaultValue">2007-02-01</property>
-            <structure name="format">
-                <property name="category">Unformatted</property>
-                <property name="pattern">Unformatted</property>
-            </structure>
-        </scalar-parameter>
-        <scalar-parameter name="SelectSiteName" id="90">
-            <text-property name="helpText">Select the site to be reported</text-property>
-            <property name="valueType">static</property>
-            <property name="dataType">string</property>
-            <text-property name="promptText">Select Site Name</text-property>
-            <property name="controlType">text-box</property>
-            <property name="defaultValue">All</property>
-            <structure name="format">
-                <property name="category">Unformatted</property>
-            </structure>
-            <list-property name="boundDataColumns">
-                <structure>
-                    <property name="name">name</property>
-                    <expression name="expression">dataSetRow["name"]</expression>
-                </structure>
-            </list-property>
-        </scalar-parameter>
-        <scalar-parameter name="SelectProbeName" id="92">
-            <text-property name="helpText">Select the probe to be reported.</text-property>
-            <property name="valueType">static</property>
-            <property name="dataType">string</property>
-            <text-property name="promptText">Select Probe</text-property>
-            <property name="controlType">text-box</property>
-            <property name="defaultValue">All</property>
-            <structure name="format">
-                <property name="category">Unformatted</property>
-            </structure>
-            <list-property name="boundDataColumns">
-                <structure>
-                    <property name="name">name</property>
-                    <expression name="expression">dataSetRow["name"]</expression>
-                </structure>
-            </list-property>
-        </scalar-parameter>
-        <parameter-group name="ReportInfo" id="189" extends="gratia-lib1.ReportInfo"/>
-        <scalar-parameter name="UserName" id="393">
-            <property name="hidden">true</property>
-            <property name="valueType">static</property>
-            <property name="dataType">string</property>
-            <property name="concealValue">true</property>
-            <property name="isRequired">false</property>
-            <property name="controlType">text-box</property>
-            <property name="defaultValue">None</property>
-            <structure name="format">
-                <property name="category">Unformatted</property>
-                <property name="pattern">Unformatted</property>
-            </structure>
-        </scalar-parameter>
-        <scalar-parameter name="UserRole" id="394">
-            <property name="hidden">true</property>
-            <property name="valueType">static</property>
-            <property name="dataType">string</property>
-            <property name="concealValue">true</property>
-            <property name="isRequired">false</property>
-            <property name="controlType">text-box</property>
-            <property name="defaultValue">None</property>
-            <structure name="format">
-                <property name="category">Unformatted</property>
-                <property name="pattern">Unformatted</property>
-            </structure>
-        </scalar-parameter>
+        <parameter-group name="DateRange" id="413" extends="reportLib.DateRange"/>
+        <scalar-parameter name="SelectSiteName" id="414" extends="reportLib.SelectSiteName"/>
+        <scalar-parameter name="SelectProbeName" id="415" extends="reportLib.SelectProbeName"/>
+        <parameter-group name="DatabaseAccess" id="412" extends="reportLib.DatabaseAccess"/>
+        <parameter-group name="ReportInfo" id="416" extends="reportLib.ReportInfo"/>
+        <parameter-group name="UserInfo" id="417" extends="reportLib.UserInfo"/>
     </parameters>
     <data-sources>
-        <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="fermigrid1" id="4">
-            <property name="odaDriverClass">com.mysql.jdbc.Driver</property>
-            <property name="odaURL">jdbc:mysql://gratia-vm02.fnal.gov:3320/gratia_jeffmack</property>
-            <property name="odaUser">reader</property>
-            <encrypted-property name="odaPassword">cmVhZGVy</encrypted-property>
-        </oda-data-source>
+        <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="gratia-db01_gratia_itb" id="418"
+ extends="reportLib.gratia-db01_gratia_itb"/>
     </data-sources>
     <data-sets>
         <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="AllSites" id="89">
@@ -178,13 +32,14 @@
                     </structure>
                 </list-property>
             </structure>
-            <property name="dataSource">fermigrid1</property>
+            <property name="dataSource">gratia-db01_gratia_itb</property>
             <list-property name="resultSet">
                 <structure>
                     <property name="position">1</property>
                     <property name="name">name</property>
                     <property name="nativeName">name</property>
                     <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
                 </structure>
             </list-property>
             <property name="queryText">
@@ -205,13 +60,14 @@ order by name</property>
                     </structure>
                 </list-property>
             </structure>
-            <property name="dataSource">fermigrid1</property>
+            <property name="dataSource">gratia-db01_gratia_itb</property>
             <list-property name="resultSet">
                 <structure>
                     <property name="position">1</property>
                     <property name="name">name</property>
                     <property name="nativeName">name</property>
                     <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
                 </structure>
             </list-property>
             <property name="queryText">
@@ -279,7 +135,7 @@ order by name</property>
                     </structure>
                 </list-property>
             </structure>
-            <property name="dataSource">fermigrid1</property>
+            <property name="dataSource">gratia-db01_gratia_itb</property>
             <list-property name="parameters">
                 <structure>
                     <property name="name">UserName</property>
@@ -396,8 +252,6 @@ order by name</property>
         <simple-master-page name="Simple MasterPage" id="2"/>
     </page-setup>
     <body>
-        <label name="ReportURL" id="392" extends="gratia-lib1.ReportURL"/>
-        <label name="ShowQuery" id="391" extends="gratia-lib1.ShowQuery"/>
         <table id="94">
             <property name="height">800px</property>
             <property name="width">600px</property>
@@ -546,6 +400,8 @@ order by name</property>
                     <cell id="96">
                         <property name="colSpan">3</property>
                         <property name="rowSpan">1</property>
+                        <label name="ReportURL" id="409" extends="reportLib.ReportURL"/>
+                        <label name="ShowQuery" id="410" extends="reportLib.ShowQuery"/>
                         <text-data id="390">
                             <property name="style">sans-style1</property>
                             <property name="fontSize">larger</property>
