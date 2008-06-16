@@ -79,15 +79,11 @@
                         </structure>
                         <structure>
                             <property name="value">process</property>
-                            <property name="label">Process (User+System) Hours</property>
+                            <property name="label">Process Hours</property>
                         </structure>
                         <structure>
-                            <property name="value">cpuuser</property>
-                            <property name="label">User Hours</property>
-                        </structure>
-                        <structure>
-                            <property name="value">cpusystem</property>
-                            <property name="label">System Hours</property>
+                            <property name="value">jobcount</property>
+                            <property name="label">Job Count</property>
                         </structure>
                     </list-property>
                 </scalar-parameter>
