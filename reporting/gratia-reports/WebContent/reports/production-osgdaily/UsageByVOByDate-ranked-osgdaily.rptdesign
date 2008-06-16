@@ -1262,6 +1262,7 @@
             </row>
         </grid>
         <table name="table1" id="9">
+            <property name="eventHandlerClass">net.sf.gratia.reporting.GratiaBirtReportEH</property>
             <property name="width">100%</property>
             <property name="dataSet">UsageByVORanked</property>
             <list-property name="paramBindings">
