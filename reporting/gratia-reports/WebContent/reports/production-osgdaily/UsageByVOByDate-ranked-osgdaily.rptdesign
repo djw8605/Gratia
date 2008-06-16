@@ -23,7 +23,6 @@
             <expression name="value">params["DatabasePassword"]</expression>
         </structure>
     </list-property>
-    <property name="eventHandlerClass">net.sf.gratia.reporting.GratiaBirtReportEH</property>
     <list-property name="libraries">
         <structure>
             <property name="fileName">gratia-lib1.rptlibrary</property>
@@ -1144,7 +1143,7 @@
                 </structure>
                 <structure>
                     <property name="name">StartDate1</property>
-                    <property name="dataType">any</property>
+                    <property name="dataType">string</property>
                     <property name="position">4</property>
                     <expression name="defaultValue">'2008-01-01'</expression>
                     <property name="isInput">true</property>
@@ -1152,7 +1151,7 @@
                 </structure>
                 <structure>
                     <property name="name">EndDate1</property>
-                    <property name="dataType">any</property>
+                    <property name="dataType">string</property>
                     <property name="position">5</property>
                     <expression name="defaultValue">'2008-02-01'</expression>
                     <property name="isInput">true</property>
@@ -1272,6 +1271,14 @@
                 </structure>
                 <structure>
                     <property name="paramName">EndDate</property>
+                    <expression name="expression">params["EndDate"]</expression>
+                </structure>
+                <structure>
+                    <property name="paramName">StartDate1</property>
+                    <expression name="expression">params["StartDate"]</expression>
+                </structure>
+                <structure>
+                    <property name="paramName">EndDate1</property>
                     <expression name="expression">params["EndDate"]</expression>
                 </structure>
             </list-property>
