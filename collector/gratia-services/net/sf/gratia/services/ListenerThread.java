@@ -493,41 +493,89 @@ public class ListenerThread extends Thread
                                         dupdbid = original_record.getRecordId();
                                         UserIdentity originalUserIdentity = original_record.getUserIdentity();
                                         if (newUserIdentity == null) continue; // No replacement
-                                        if ((originalUserIdentity == null) ||
-                                            ((newUserIdentity.getVOName() != null) &&
-                                             (newUserIdentity.getVOName().length() != 0) &&
-                                             ((originalUserIdentity.getVOName() == null) ||
-                                              (originalUserIdentity.getVOName().length() == 0) ||
-                                              (newUserIdentity.getVOName().startsWith("/")) ||
-                                              (originalUserIdentity.getVOName().equalsIgnoreCase("Unknown")) ||
-                                              (originalUserIdentity.getCommonName().startsWith("Generic")) ||
-                                              (originalUserIdentity.getKeyInfo() == null)))) {
+                                        Boolean newerIsBetter = false;
+                                        String replaceReason = null;
+                                        if (originalUserIdentity == null) {
+                                            newerIsBetter = true;
+                                            replaceReason = "original UserIdentity block is null";
+                                        } else if ((newUserIdentity.getVOName() != null) &&
+                                                   (newUserIdentity.getVOName().length() != 0) &&
+                                                   (!newUserIdentity.getVOName().equalsIgnoreCase("Unknown"))) {
+                                            // Have something with which to replace it.
+                                            replaceReason = "New VOName is better";
+                                            if (originalUserIdentity.getVOName() == null) {
+                                                newerIsBetter = true;
+                                                replaceReason += " -- original VOName is null";
+                                            } else if (originalUserIdentity.getVOName().length() == 0) {
+                                                newerIsBetter = true;
+                                                replaceReason += " -- original VOName is empty";
+                                            } else if (originalUserIdentity.getVOName().equalsIgnoreCase("Unknown")) {
+                                                newerIsBetter = true;
+                                                replaceReason += " -- original VOName is \"Unknown\")";
+                                            } else if ((newUserIdentity.getVOName().startsWith("/")) &&
+                                                       (!originalUserIdentity.getVOName().startsWith("/"))) {
+                                                newerIsBetter = true;
+                                                replaceReason += " -- original VOName is not fully qualified";
+                                            }
+                                        }
+                                        if (!newerIsBetter) { // Still haven't decided
+                                            if ((newUserIdentity.getCommonName() != null) &&
+                                                (!newUserIdentity.getCommonName().startsWith("Generic"))) {
+                                                replaceReason = "New CommonName is better";
+                                                if (originalUserIdentity.getCommonName() == null) {
+                                                    newerIsBetter = true;
+                                                    replaceReason += " -- original CommonName is null";
+                                                } else if (originalUserIdentity.getCommonName().length() == 0) {
+                                                    newerIsBetter = true;
+                                                    replaceReason += " -- original CommonName is empty";
+                                                } else if (originalUserIdentity.getCommonName().startsWith("Generic")) {
+                                                    newerIsBetter = true;
+                                                    replaceReason += " -- original CommonName is generic";
+                                                }
+                                            } else if ((newUserIdentity.getKeyInfo() != null) &&
+                                                       (originalUserIdentity.getKeyInfo() == null)) { 
+                                                newerIsBetter = true;
+                                                replaceReason = "Original KeyInfo is null";
+                                            }
+                                        }
+                                        if (newerIsBetter) {
                                             // Keep the new one and ditch the old
                                             Logging.info("ListenerThread: " + ident + ": replacing record " +
-                                                         dupdbid + " with \"better\" record.");
-                                            // Has to be in this order otherwise we'll get a duplicate error.
-                                            if (original_record.setDuplicate(true)) {
-                                                if (gotreplication) {
-                                                    errorRecorder.saveDuplicate("Replication", "Duplicate",
-                                                                                current.getRecordId(),
-                                                                                original_record);
-                                                } else if (gothistory) {
-                                                    ;
-                                                } else {
-                                                    errorRecorder.saveDuplicate("Probe", "Duplicate",
-                                                                                current.getRecordId(),
-                                                                                original_record);
-                                                }
-                                            }
+                                                         dupdbid + " with \"better\" record (" +
+                                                         replaceReason + ").");
                                             SummaryUpdater.removeFromSummary(original_record.getRecordId(),
                                                                              session);
+                                            // Delete the record.
+                                            String originalXml = original_record.asXML();
+                                            String originalTableName = original_record.getTableName();
                                             session.delete(original_record);
                                             if (!savedCurrent) {
+                                                // If we haven't saved
+                                                // the current record
+                                                // yet, flush and commit
+                                                // the delete
+                                                // (important) and then
+                                                // save the current record. 
                                                 session.flush();
                                                 tx.commit();
                                                 tx = session.beginTransaction();
                                                 session.save(current);
                                                 savedCurrent = true;
+                                            }
+                                            if (original_record.setDuplicate(true)) {
+                                                if (gotreplication) {
+                                                    errorRecorder.saveDuplicate("Replication", "Duplicate",
+                                                                                current.getRecordId(),
+                                                                                originalXml,
+                                                                                originalTableName);
+                                                } else if (gothistory) {
+                                                    ;
+                                                } else {
+                                                    errorRecorder.saveDuplicate("Probe", "Duplicate",
+                                                                                current.getRecordId(),
+                                                                                originalXml,
+                                                                                originalTableName);
+                                                }
                                             }
                                         }
                                         session.flush();
