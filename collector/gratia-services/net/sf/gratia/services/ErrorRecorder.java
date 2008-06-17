@@ -42,6 +42,20 @@ public class ErrorRecorder {
         saveDupRecord(record);
     }
 
+    public void saveDuplicate(String source, String error,
+                              int dupdbid, String xml, String tableName) throws Exception {
+        DupRecord record = new DupRecord();
+
+        record.seteventdate(new java.util.Date());
+        record.setrawxml(xml);
+        record.setsource(source);
+        record.seterror(error);
+        record.setdbid(dupdbid);
+        record.setRecordType(tableName);
+
+        saveDupRecord(record);
+    }
+
     public void saveParse(String source, String error, String xml) throws Exception {
         DupRecord record = new DupRecord();
 
