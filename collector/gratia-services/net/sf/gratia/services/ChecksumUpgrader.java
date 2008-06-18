@@ -179,7 +179,7 @@ public class ChecksumUpgrader extends Thread {
 
     private long fixDuplicatesOnce() {
         long nDupsFixed = 0;
-        Logging.debug("fixDuplicatesOnce: starting duplicate resolution cycle");
+        Logging.log("fixDuplicatesOnce: starting duplicate resolution cycle");
         Boolean continueLooping = true;
         while (continueLooping) {
             Session session = HibernateWrapper.getSession();
@@ -192,7 +192,7 @@ public class ChecksumUpgrader extends Thread {
                 .setCacheMode(CacheMode.IGNORE)
                 .setMaxResults(10000); // Memory usage limiter
             List csList = q.list();
-            Logging.debug("fixDuplicatesOnce: this cycle detected " +
+            Logging.log("fixDuplicatesOnce: this cycle detected " +
                           csList.size() + " duplicated checksums");
             Iterator csIter = csList.iterator();
             session.close();
@@ -239,19 +239,56 @@ public class ChecksumUpgrader extends Thread {
                         // Need to add comparison and salt if
                         // neceessary. Next on the list TODO ...
                         UserIdentity compareUserIdentity = compare.getUserIdentity();
-                        if ((compareUserIdentity != null) &&
-                            ((baseUserIdentity == null) ||
-                             ((compareUserIdentity.getVOName() != null) &&
-                              (compareUserIdentity.getVOName().length() != 0) &&
-                              ((baseUserIdentity.getVOName() == null) ||
-                               (baseUserIdentity.getVOName().length() == 0) ||
-                               (compareUserIdentity.getVOName().startsWith("/")) ||
-                               (baseUserIdentity.getVOName().equalsIgnoreCase("Unknown")) ||
-                               (baseUserIdentity.getCommonName().startsWith("Generic")) ||
-                               (baseUserIdentity.getKeyInfo() == null))))) {
+                        Boolean newerIsBetter = false;
+                        String replaceReason = null;
+                        if (baseUserIdentity == null) {
+                            newerIsBetter = true;
+                            replaceReason = "original UserIdentity block is null";
+                        } else if ((compareUserIdentity.getVOName() != null) &&
+                                   (compareUserIdentity.getVOName().length() != 0) &&
+                                   (!compareUserIdentity.getVOName().equalsIgnoreCase("Unknown"))) {
+                            // Have something with which to replace it.
+                            replaceReason = "New VOName is better";
+                            if (baseUserIdentity.getVOName() == null) {
+                                newerIsBetter = true;
+                                replaceReason += " -- original VOName is null";
+                            } else if (baseUserIdentity.getVOName().length() == 0) {
+                                newerIsBetter = true;
+                                replaceReason += " -- original VOName is empty";
+                            } else if (baseUserIdentity.getVOName().equalsIgnoreCase("Unknown")) {
+                                newerIsBetter = true;
+                                replaceReason += " -- original VOName is \"Unknown\")";
+                            } else if ((compareUserIdentity.getVOName().startsWith("/")) &&
+                                       (!baseUserIdentity.getVOName().startsWith("/"))) {
+                                newerIsBetter = true;
+                                replaceReason += " -- original VOName is not fully qualified";
+                            }
+                        }
+                        if (!newerIsBetter) { // Still haven't decided
+                            if ((compareUserIdentity.getCommonName() != null) &&
+                                (!compareUserIdentity.getCommonName().startsWith("Generic"))) {
+                                replaceReason = "New CommonName is better";
+                                if (baseUserIdentity.getCommonName() == null) {
+                                    newerIsBetter = true;
+                                    replaceReason += " -- original CommonName is null";
+                                } else if (baseUserIdentity.getCommonName().length() == 0) {
+                                    newerIsBetter = true;
+                                    replaceReason += " -- original CommonName is empty";
+                                } else if (baseUserIdentity.getCommonName().startsWith("Generic")) {
+                                    newerIsBetter = true;
+                                    replaceReason += " -- original CommonName is generic";
+                                }
+                            } else if ((compareUserIdentity.getKeyInfo() != null) &&
+                                       (baseUserIdentity.getKeyInfo() == null)) { 
+                                newerIsBetter = true;
+                                replaceReason = "Original KeyInfo is null";
+                            }
+                        }
+                        if (newerIsBetter) {
                             Logging.debug("fixDuplicatesOnce: deleting record " +
                                           base.getRecordId() + " in favor of record " +
-                                          compare.getRecordId());
+                                          compare.getRecordId() +
+                                          " (" + replaceReason + ").");
                             errorRecorder.saveDuplicate("ChecksumUpgrader",
                                                         "Duplicate",
                                                         compare.getRecordId(),
@@ -261,7 +298,7 @@ public class ChecksumUpgrader extends Thread {
                             base = compare; // Use this for future comparisons.
                         } else { // This one is not better: delete it
                             Logging.debug("fixDuplicatesOnce: deleting record " +
-                                          compare.getRecordId() + " in favor of record " +
+                                          compare.getRecordId() + " as not better than earlier record " +
                                           base.getRecordId());
                             errorRecorder.saveDuplicate("ChecksumUpgrader",
                                                         "Duplicate",
@@ -469,7 +506,7 @@ public class ChecksumUpgrader extends Thread {
             + column + "'";
         try {
             
-            Logging.log("Executing: " + check);
+            Logging.debug("Executing: " + check);
             statement = connection.createStatement();
             resultSet = statement.executeQuery(check);
             while (resultSet.next()) {
@@ -477,19 +514,19 @@ public class ChecksumUpgrader extends Thread {
                 String cmd = "alter table " + table + " drop index " + index_name;
                 // Index still there
                 try {
-                    Logging.log("Executing: " + cmd);
+                    Logging.debug("Executing: " + cmd);
                     statement = connection.createStatement();
                     statement.executeUpdate(cmd);
                 } catch (Exception e) {
-                    Logging.log("Command: Error: " + cmd + " : " + e);
+                    Logging.debug("Command: Error: " + cmd + " : " + e);
                     throw e;
                 }
-                Logging.log("Command: OK: " + cmd);
+                Logging.debug("Command: OK: " + cmd);
             }
             resultSet.close();
             statement.close();
         } catch (Exception e) {
-            Logging.log("Command: Error: " + check + " : " + e);
+            Logging.debug("Command: Error: " + check + " : " + e);
             throw e;
         }
         
