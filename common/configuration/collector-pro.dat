@@ -83,7 +83,12 @@
           jmx_port => 8040,
           server_port => 8144,
           db_schema => "gratia_qcd",
-          remote_host => "gratia-fermi.fnal.gov"
+          remote_host => "gratia-fermi.fnal.gov",
+          collector_host => "gratia-fermi.fnal.gov",
+         "properties.attributes" =>
+          {
+            "service.admin.DN.0" => 'ALLOW ALL'
+          }
         },
  osg_daily => { http_port => 8884,
                 ssl_port => 8860,
