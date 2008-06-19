@@ -124,8 +124,8 @@
                    jmx_port => 8054,
                    server_port => 8154,
                    db_schema => "gratia_osg_transfer",
-                   remote_host => "gratia-transfer.opensciencegrid.org",
-                   collector_host => "gratia-transfer.opensciencegrid.org",
+                   remote_host => "gratia.opensciencegrid.org",
+                   collector_host => "gratia.opensciencegrid.org",
                    "properties.attributes" =>
                    {
                     "monitor.listener.wait" => 240,
