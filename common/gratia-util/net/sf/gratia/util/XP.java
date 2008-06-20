@@ -12,7 +12,7 @@ import com.ice.tar.*;
 public class XP
 {
 
-    public String directorySeparator = "/";
+    public static final String directorySeparator = "/";
     
     public XP()
     {
@@ -22,7 +22,7 @@ public class XP
     // directory support
     //
     
-    public String[] getDirectoryList(String directory)
+    public static String[] getDirectoryList(String directory)
     {
         String filelist[] = null;
         String results[] = new String[0];
@@ -55,7 +55,7 @@ public class XP
         return results;
     }
     
-    public String[] getDirectoryListRecursive(String directory)
+    public static String[] getDirectoryListRecursive(String directory)
     {
         String filelist[] = null;
         String results[] = new String[0];
@@ -89,7 +89,7 @@ public class XP
         return results;
     }
     
-    public String[] getFileListRecursive(String directory,String filetype)
+    public static String[] getFileListRecursive(String directory,String filetype)
     {
         String filelist[] = null;
         String results[] = new String[0];
@@ -130,7 +130,7 @@ public class XP
         return newResults;
     }
     
-    public String[] getFileListRecursive(String directory,String filetypes[])
+    public static String[] getFileListRecursive(String directory,String filetypes[])
     {
         String filelist[] = null;
         String results[] = new String[0];
@@ -173,7 +173,7 @@ public class XP
         return newResults;
     }
     
-    public String[] getFileList(String directory)
+    public static String[] getFileList(String directory)
     {
         String filelist[] = null;
         String results[] = new String[0];
@@ -207,7 +207,7 @@ public class XP
         return results;
     }
     
-    public String[] getFileList(String directory,String fileType)
+    public static String[] getFileList(String directory,String fileType)
     {
         String filelist[] = null;
         Vector files = new Vector();
@@ -231,7 +231,7 @@ public class XP
         return filelist;
     }
     
-    public String[] getFileList(String directory,String filetypes[])
+    public static String[] getFileList(String directory,String filetypes[])
     {
         String filelist[] = null;
         Vector files = new Vector();
@@ -257,7 +257,7 @@ public class XP
         return filelist;
     }
 		
-    public void deleteFileList(String directory,String fileType)
+    public static void deleteFileList(String directory,String fileType)
     {
         String filelist[] = null;
         Vector files = new Vector();
@@ -290,7 +290,7 @@ public class XP
             }
     }
 		
-    public void deleteFileList(String arg1[])
+    public static void deleteFileList(String arg1[])
     {
         int i = 0;
 				
@@ -310,7 +310,7 @@ public class XP
     // serialization support
     //
 
-    public Object getObject(byte buffer[])
+    public static Object getObject(byte buffer[])
     {
         try
             {
@@ -325,7 +325,7 @@ public class XP
             }
     }
   
-    public Object getObject(FileInputStream inputStream)
+    public static Object getObject(FileInputStream inputStream)
     {
         try
             {
@@ -340,7 +340,7 @@ public class XP
             }
     }
   
-    public Object getObject(ObjectInputStream input)
+    public static Object getObject(ObjectInputStream input)
     {
         try
             {
@@ -354,7 +354,7 @@ public class XP
             }
     }
   
-    public Object getObject(String path)
+    public static Object getObject(String path)
     {
         try
             {
@@ -370,7 +370,7 @@ public class XP
             }
     }
   
-    public Object getObject(String path,int bufferSize)
+    public static Object getObject(String path,int bufferSize)
     {
         try
             {
@@ -386,7 +386,7 @@ public class XP
             }
     }
   
-    public boolean putObject(String path,Object object)
+    public static boolean putObject(String path,Object object)
     {
         try
             {
@@ -402,7 +402,7 @@ public class XP
             }
     }
   
-    public boolean putObject(String path,Object object,int bufferSize)
+    public static boolean putObject(String path,Object object,int bufferSize)
     {
         try
             {
@@ -418,7 +418,7 @@ public class XP
             }
     }
   
-    public boolean putObject(ObjectOutputStream output,Object object)
+    public static boolean putObject(ObjectOutputStream output,Object object)
     {
         try
             {
@@ -436,7 +436,7 @@ public class XP
     // compression support
     //
 
-    public byte[] compress(Serializable object)
+    public static byte[] compress(Serializable object)
     {
         byte buffer[] = toByteArray(object);
         byte results[] = new byte[0];
@@ -457,7 +457,7 @@ public class XP
             }
     }
 		
-    public Object decompress(byte input[])
+    public static Object decompress(byte input[])
     {
         Object result = null;
         try
@@ -481,12 +481,12 @@ public class XP
     // file support utilities
     //
 
-    public String get(String path)
+    public static String get(String path)
     {
         return get(new File(path));
     }
 
-    public String get(File file)
+    public static String get(File file)
     {
         try
             {
@@ -503,7 +503,7 @@ public class XP
             }
     }
   
-    public String get(URL url)
+    public static String get(URL url)
     {
         int i = 0;
 				
@@ -522,12 +522,12 @@ public class XP
             }
     }
   
-    public byte[] getBinary(String path)
+    public static byte[] getBinary(String path)
     {
         return getBinary(path,4096);
     }
   
-    public byte[] getBinary(String path,int bufferSize)
+    public static byte[] getBinary(String path,int bufferSize)
     {
         try
             {
@@ -547,7 +547,7 @@ public class XP
             }
     }
   
-    public boolean save(String path,String contents)
+    public static boolean save(String path,String contents)
     {
         try
             {
@@ -563,7 +563,7 @@ public class XP
             }
     }
 
-    public boolean save_bzip2(String path,String contents)
+    public static boolean save_bzip2(String path,String contents)
     {
         try
             {
@@ -588,7 +588,7 @@ public class XP
             }
    }
 
-    public boolean save_tar(String tarpath, String path,String contents)
+    public static boolean save_tar(String tarpath, String path,String contents)
     {
         try
             {
@@ -616,7 +616,7 @@ public class XP
             }
    }
 
-    public boolean append(String path,String contents)
+    public static boolean append(String path,String contents)
     {
         try
             {
@@ -633,7 +633,7 @@ public class XP
             }
     }
 
-    public boolean saveBinary(String path,byte[] contents)
+    public static boolean saveBinary(String path,byte[] contents)
     {
         int bufferSize = contents.length;
 				
@@ -656,7 +656,7 @@ public class XP
             }
     }
 
-    public boolean appendBinary(String path,byte[] contents)
+    public static boolean appendBinary(String path,byte[] contents)
     {
         try
             {
@@ -673,7 +673,7 @@ public class XP
             }
     }
 
-    public boolean appendBinary(RandomAccessFile output,byte[] contents)
+    public static boolean appendBinary(RandomAccessFile output,byte[] contents)
     {
         try
             {
@@ -692,7 +692,7 @@ public class XP
     // parsing support
     //
 
-    public String replaceAll(String source,String from,String to)
+    public static String replaceAll(String source,String from,String to)
     {
         int index;
         int start = 0;
@@ -717,7 +717,7 @@ public class XP
         */
     }
   
-    public String replace(String source,String from,String to)
+    public static String replace(String source,String from,String to)
     {
         if (from.length() == 0) return source;
         int index = source.indexOf(from);
@@ -733,7 +733,7 @@ public class XP
             return source;
     }
   
-    public String replaceRange(String source,String key1,String key2,String to)
+    public static String replaceRange(String source,String key1,String key2,String to)
     {
         StringBuffer buffer = new StringBuffer();
     
@@ -752,7 +752,7 @@ public class XP
         return buffer.toString();
     }
   
-    public XSpan find(String source,String key1,int start)
+    public static XSpan find(String source,String key1,int start)
     {
         int index = source.indexOf(key1,start);
         if (index == -1)
@@ -760,12 +760,12 @@ public class XP
         return new XSpan(index,index + key1.length());
     }
 
-    public XSpan find(String source,String key1)
+    public static XSpan find(String source,String key1)
     {
         return find(source,key1,0);
     }
   
-    public XSpan find(String source,String key1,String key2,int start)
+    public static XSpan find(String source,String key1,String key2,int start)
     {
         int index1 = source.indexOf(key1,start);
         int index2 = source.indexOf(key2,start);
@@ -776,12 +776,12 @@ public class XP
         return new XSpan(index1,index2 + key2.length());
     }
   
-    public XSpan find(String source,String key1,String key2)
+    public static XSpan find(String source,String key1,String key2)
     {
         return find(source,key1,key2,0);
     }
 
-    public XSpan find(String source,String key1,String key2,String key3,int start)
+    public static XSpan find(String source,String key1,String key2,String key3,int start)
     {
         int index2 = source.indexOf(key2,start);
         if (index2 == -1)
@@ -797,12 +797,12 @@ public class XP
             return null;
     }
   
-    public XSpan find(String source,String key1,String key2,String key3)
+    public static XSpan find(String source,String key1,String key2,String key3)
     {
         return find(source,key1,key2,key3,0);
     }
 
-    public String replace(String source,XSpan location)
+    public static String replace(String source,XSpan location)
     {
         StringBuffer buffer = new StringBuffer(source.length() + location.replace.length());
         buffer.append(source.substring(0,location.from));
@@ -815,12 +815,12 @@ public class XP
     // double support
     //
 
-    public String toString(double arg1[])
+    public static String toString(double arg1[])
     {
         return toString(arg1,"0.000E0");
     }
 		
-    public String toString(double arg1[],String formatString)
+    public static String toString(double arg1[],String formatString)
     {
         StringBuffer buffer = new StringBuffer();
         DecimalFormat format = new DecimalFormat(formatString);
@@ -833,12 +833,12 @@ public class XP
         return buffer.toString();
     }
 		
-    public void dump(double arg1[])
+    public static void dump(double arg1[])
     {
         Logging.log(toString(arg1));
     }
 		
-    public String toString(double arg1[][])
+    public static String toString(double arg1[][])
     {
         StringBuffer buffer = new StringBuffer();
         for (int i = 0; i < arg1.length; i++)
@@ -846,13 +846,13 @@ public class XP
         return buffer.toString();
     }
 		
-    public void dump(double arg1[][])
+    public static void dump(double arg1[][])
     {
         for (int i = 0; i < arg1.length; i++)
             dump(arg1[i]);
     }
 		
-    public void dumpToFile(String path,double arg1[][])
+    public static void dumpToFile(String path,double arg1[][])
     {
         int i,j;
         try
@@ -878,7 +878,7 @@ public class XP
             }
     }
 
-    public double[] copy(double values[])
+    public static double[] copy(double values[])
     {
         double result[] = new double[values.length];
         for (int i = 0; i < values.length; i++)
@@ -886,7 +886,7 @@ public class XP
         return result;
     }
 		
-    public double[] subset(double input[],int index[])
+    public static double[] subset(double input[],int index[])
     {
         double output[] = new double[index.length];
         int i = 0;
@@ -901,7 +901,7 @@ public class XP
         return output;
     }
 		
-    public double[][] subset(double input[][],int index[])
+    public static double[][] subset(double input[][],int index[])
     {
         double output[][] = new double[input.length][index.length];
         int i = 0;
@@ -918,7 +918,7 @@ public class XP
         return output;
     }
 		
-    public double[][] append(double arg1[][],double arg2[])
+    public static double[][] append(double arg1[][],double arg2[])
     {
         double result[][] = new double[arg1.length + 1][arg2.length];
         System.arraycopy(arg1,0,result,0,arg1.length);
@@ -926,7 +926,7 @@ public class XP
         return result;
     }
 		
-    public double[][] deleteColumn(double arg1[][],int index)
+    public static double[][] deleteColumn(double arg1[][],int index)
     {
         double result[][] = new double[arg1.length][arg1[0].length - 1];
         int i = 0;
@@ -941,7 +941,7 @@ public class XP
         return result;
     }
 
-    public float[][] toFloat(double values[][])
+    public static float[][] toFloat(double values[][])
     {
         float result[][] = new float[values.length][values[0].length];
         for (int i = 0; i < values.length; i++)
@@ -950,7 +950,7 @@ public class XP
         return result;
     }
 
-    public float[] toFloat(double values[])
+    public static float[] toFloat(double values[])
     {
         float result[] = new float[values.length];
         for (int i = 0; i < values.length; i++)
@@ -958,7 +958,7 @@ public class XP
         return result;
     }
 
-    public double sum(double values[])
+    public static double sum(double values[])
     {
         float result = 0;
         for (int i = 0; i < values.length; i++)
@@ -966,7 +966,7 @@ public class XP
         return result;
     }
 		
-    public double[] times(double values1[],double values2[])
+    public static double[] times(double values1[],double values2[])
     {
         double result[] = new double[values1.length];
         for (int i = 0; i < values1.length; i++)
@@ -974,7 +974,7 @@ public class XP
         return result;
     }
 		
-    public double[] append(double arg1[],double arg2[])
+    public static double[] append(double arg1[],double arg2[])
     {
         if (arg1.length == 0)
             return arg2;
@@ -984,7 +984,7 @@ public class XP
         return result;
     }
 
-    public double[] append(double arg1[],double arg2)
+    public static double[] append(double arg1[],double arg2)
     {
         int i,j;
 				
@@ -995,21 +995,21 @@ public class XP
         return result;
     }
 
-    public boolean zerop(double values[])
+    public static boolean zerop(double values[])
     {
         for (int i = 0; i < values.length; i++)
             if (Math.abs(values[i]) > 0.00001) return false;
         return true;
     }
 
-    public boolean zerop(double values[],int max)
+    public static boolean zerop(double values[],int max)
     {
         for (int i = 0; i < values.length && i < max; i++)
             if (Math.abs(values[i]) > 0.00001) return false;
         return true;
     }
 
-    public boolean nanp(double value)
+    public static boolean nanp(double value)
     {
         String temp = "" + value;
         if (temp.equals("NaN"))
@@ -1017,7 +1017,7 @@ public class XP
         return false;
     }
 
-    public Vector part(double input[],int maxArrayLength)
+    public static Vector part(double input[],int maxArrayLength)
     {
         Vector results = new Vector();
         int index = 0;
@@ -1034,7 +1034,7 @@ public class XP
         return results;
     }
 		
-    public double[] rest(double input[],int start)
+    public static double[] rest(double input[],int start)
     {
         int index = 0;
 				
@@ -1046,7 +1046,7 @@ public class XP
         return result;
     }
 				
-    public double[][] toArray(String data)
+    public static double[][] toArray(String data)
     {
         StringTokenizer st1 = new StringTokenizer(data,"\n\r");
         Vector temp1 = new Vector();
@@ -1077,12 +1077,12 @@ public class XP
     // float operations
     //
 
-    public String toString(float arg1[])
+    public static String toString(float arg1[])
     {
         return toString(arg1,"0.000E0");
     }
 		
-    public String toString(float arg1[],String formatString)
+    public static String toString(float arg1[],String formatString)
     {
         StringBuffer buffer = new StringBuffer();
         DecimalFormat format = new DecimalFormat(formatString);
@@ -1095,12 +1095,12 @@ public class XP
         return buffer.toString();
     }
 		
-    public void dump(float arg1[])
+    public static void dump(float arg1[])
     {
         Logging.log(toString(arg1));
     }
 		
-    public String toString(float arg1[][])
+    public static String toString(float arg1[][])
     {
         StringBuffer buffer = new StringBuffer();
         for (int i = 0; i < arg1.length; i++)
@@ -1108,13 +1108,13 @@ public class XP
         return buffer.toString();
     }
 		
-    public void dump(float arg1[][])
+    public static void dump(float arg1[][])
     {
         for (int i = 0; i < arg1.length; i++)
             dump(arg1[i]);
     }
 		
-    public float[] subset(float input[],int index[])
+    public static float[] subset(float input[],int index[])
     {
         float output[] = new float[index.length];
         int i = 0;
@@ -1129,7 +1129,7 @@ public class XP
         return output;
     }
 		
-    public float[] copy(float values[])
+    public static float[] copy(float values[])
     {
         float result[] = new float[values.length];
         for (int i = 0; i < values.length; i++)
@@ -1137,7 +1137,7 @@ public class XP
         return result;
     }
 		
-    public float[][] copy(float values[][])
+    public static float[][] copy(float values[][])
     {
         float result[][] = new float[values.length][values[0].length];
         for (int i = 0; i < values.length; i++)
@@ -1146,7 +1146,7 @@ public class XP
         return result;
     }
 
-    public double[] toDouble(float values[])
+    public static double[] toDouble(float values[])
     {
         double result[] = new double[values.length];
         for (int i = 0; i < values.length; i++)
@@ -1154,7 +1154,7 @@ public class XP
         return result;
     }
 		
-    public double[][] toDouble(float values[][])
+    public static double[][] toDouble(float values[][])
     {
         double result[][] = new double[values.length][values[0].length];
         for (int i = 0; i < values.length; i++)
@@ -1163,7 +1163,7 @@ public class XP
         return result;
     }
 
-    public float sum(float values[])
+    public static float sum(float values[])
     {
         float result = 0;
         for (int i = 0; i < values.length; i++)
@@ -1171,7 +1171,7 @@ public class XP
         return result;
     }
 		
-    public float[][] append(float arg1[][],float arg2[])
+    public static float[][] append(float arg1[][],float arg2[])
     {
         float result[][] = new float[arg1.length + 1][arg2.length];
         System.arraycopy(arg1,0,result,0,arg1.length);
@@ -1179,7 +1179,7 @@ public class XP
         return result;
     }
 		
-    public float[] append(float arg1[],float arg2[])
+    public static float[] append(float arg1[],float arg2[])
     {
         int i,j;
 				
@@ -1191,7 +1191,7 @@ public class XP
         return result;
     }
 
-    public float[] append(float arg1[],float arg2)
+    public static float[] append(float arg1[],float arg2)
     {
         float results[] = new float[arg1.length + 1];
         System.arraycopy(arg1,0,results,0,arg1.length);
@@ -1199,21 +1199,21 @@ public class XP
         return results;
     }
 
-    public boolean zerop(float values[])
+    public static boolean zerop(float values[])
     {
         for (int i = 0; i < values.length; i++)
             if (Math.abs(values[i]) > 0.100) return false;
         return true;
     }
 
-    public boolean zerop(float values[],int max)
+    public static boolean zerop(float values[],int max)
     {
         for (int i = 0; i < values.length && i < max; i++)
             if (Math.abs(values[i]) > 0.100) return false;
         return true;
     }
 
-    public boolean nanp(float value)
+    public static boolean nanp(float value)
     {
         String temp = "" + value;
         if (temp.equals("NaN"))
@@ -1221,21 +1221,21 @@ public class XP
         return false;
     }
 
-    public float min(float v1,float v2)
+    public static float min(float v1,float v2)
     {
         if (v1 > v2)
             return v2;
         return v1;
     }
 		
-    public float min(float v1,float v2,float v3)
+    public static float min(float v1,float v2,float v3)
     {
         if (v1 > min(v2,v3))
             return min(v2,v3);
         return v1;
     }
 		
-    public float[] toFloatArray(Vector input)
+    public static float[] toFloatArray(Vector input)
     {
         float results[] = new float[0];
         for (Enumeration enumeration = input.elements(); enumeration.hasMoreElements();)
@@ -1243,7 +1243,7 @@ public class XP
         return results;
     }
 		
-    public Vector part(float input[],int maxArrayLength)
+    public static Vector part(float input[],int maxArrayLength)
     {
         Vector results = new Vector();
         int index = 0;
@@ -1264,7 +1264,7 @@ public class XP
     // integer ops
     //
 
-    public String toString(int arg1[])
+    public static String toString(int arg1[])
     {
         StringBuffer buffer = new StringBuffer();
         for (int i = 0; i < arg1.length - 1; i++)
@@ -1276,12 +1276,12 @@ public class XP
         return buffer.toString();
     }
 		
-    public void dump(int arg1[])
+    public static void dump(int arg1[])
     {
         Logging.log(toString(arg1));
     }
 		
-    public String toString(int arg1[][])
+    public static String toString(int arg1[][])
     {
         StringBuffer buffer = new StringBuffer();
         for (int i = 0; i < arg1.length; i++)
@@ -1289,7 +1289,7 @@ public class XP
         return buffer.toString();
     }
 		
-    public void dump(int arg1[][])
+    public static void dump(int arg1[][])
     {
         for (int i = 0; i < arg1.length; i++)
             dump(arg1[i]);
@@ -1299,7 +1299,7 @@ public class XP
     // dump functions
     //
 
-    public void dump(String message,double values[])
+    public static void dump(String message,double values[])
     {
         DecimalFormat format1 = new DecimalFormat("0000");
         DecimalFormat format2 = new DecimalFormat("0.000E0");
@@ -1307,7 +1307,7 @@ public class XP
             Logging.log(message + ": Index: " + format1.format(i) + " V: " + format2.format(values[i]));
     }
 		
-    public void dump(String message,float values[])
+    public static void dump(String message,float values[])
     {
         DecimalFormat format1 = new DecimalFormat("0000");
         DecimalFormat format2 = new DecimalFormat("###0.###E0");
@@ -1319,7 +1319,7 @@ public class XP
     // utility functions
     //
 
-    public int[] chop(int arg1[], int maxLength)
+    public static int[] chop(int arg1[], int maxLength)
     {
         int i = 0;
 				
@@ -1332,7 +1332,7 @@ public class XP
         return result;
     }
 		
-    public int[] copy(int values[])
+    public static int[] copy(int values[])
     {
         int result[] = new int[values.length];
         for (int i = 0; i < values.length; i++)
@@ -1340,7 +1340,7 @@ public class XP
         return result;
     }
 		
-    public long[] copy(long values[])
+    public static long[] copy(long values[])
     {
         long result[] = new long[values.length];
         for (int i = 0; i < values.length; i++)
@@ -1348,7 +1348,7 @@ public class XP
         return result;
     }
 		
-    public int[][] copy(int values[][])
+    public static int[][] copy(int values[][])
     {
         int result[][] = new int[values.length][values[0].length];
         for (int i = 0; i < values.length; i++)
@@ -1357,7 +1357,7 @@ public class XP
         return result;
     }
 		
-    public byte[][] copy(byte values[][])
+    public static byte[][] copy(byte values[][])
     {
         byte result[][] = new byte[values.length][values[0].length];
         for (int i = 0; i < values.length; i++)
@@ -1366,7 +1366,7 @@ public class XP
         return result;
     }
 		
-    public double[][] copy(double values[][])
+    public static double[][] copy(double values[][])
     {
         double result[][] = new double[values.length][values[0].length];
         for (int i = 0; i < values.length; i++)
@@ -1375,7 +1375,7 @@ public class XP
         return result;
     }
 
-    public int sum(int values[])
+    public static int sum(int values[])
     {
         int result = 0;
         for (int i = 0; i < values.length; i++)
@@ -1383,7 +1383,7 @@ public class XP
         return result;
     }
 		
-    public float[] times(float values1[],float values2[])
+    public static float[] times(float values1[],float values2[])
     {
         float result[] = new float[values1.length];
         for (int i = 0; i < values1.length; i++)
@@ -1391,7 +1391,7 @@ public class XP
         return result;
     }
 		
-    public int[] times(int values1[],int values2[])
+    public static int[] times(int values1[],int values2[])
     {
         int result[] = new int[values1.length];
         for (int i = 0; i < values1.length; i++)
@@ -1399,7 +1399,7 @@ public class XP
         return result;
     }
 		
-    public byte[] append(byte arg1[],byte arg2[])
+    public static byte[] append(byte arg1[],byte arg2[])
     {
         int i,j;
         byte result[] = new byte[arg1.length + arg2.length];
@@ -1411,7 +1411,7 @@ public class XP
         return result;
     }
 		
-    public int[] append(int arg1[],int arg2[])
+    public static int[] append(int arg1[],int arg2[])
     {
         int i,j;
 				
@@ -1423,7 +1423,7 @@ public class XP
         return result;
     }
 
-    public int[] append(int arg1[],int arg2)
+    public static int[] append(int arg1[],int arg2)
     {
         int i,j;
 				
@@ -1434,7 +1434,7 @@ public class XP
         return result;
     }
 
-    public long[] append(long arg1[],long arg2[])
+    public static long[] append(long arg1[],long arg2[])
     {
         int i,j;
 				
@@ -1446,7 +1446,7 @@ public class XP
         return result;
     }
 
-    public long[] append(long arg1[],long arg2)
+    public static long[] append(long arg1[],long arg2)
     {
         int i;
 				
@@ -1457,7 +1457,7 @@ public class XP
         return result;
     }
 
-    public long[] appendUnique(long arg1[],long arg2[])
+    public static long[] appendUnique(long arg1[],long arg2[])
     {
         Hashtable table = new Hashtable();
         int i;
@@ -1481,7 +1481,7 @@ public class XP
         return results;
     }
 
-    public long[] unique(long arg1[])
+    public static long[] unique(long arg1[])
     {
         int i,j,index;
         long value;
@@ -1508,7 +1508,7 @@ public class XP
         return result2;
     }
 
-    public int[] unique(int arg1[])
+    public static int[] unique(int arg1[])
     {
         int i,j,index;
         int value;
@@ -1535,7 +1535,7 @@ public class XP
         return result2;
     }
 
-    public long[] chop(long input[],int maxLength)
+    public static long[] chop(long input[],int maxLength)
     {
         if (input.length < maxLength)
             return input;
@@ -1545,7 +1545,7 @@ public class XP
         return results;
     }
 		
-    public long[] remove(long arg1[],long arg2[])
+    public static long[] remove(long arg1[],long arg2[])
     {
         Hashtable temp = new Hashtable();
         int i = 0;
@@ -1561,7 +1561,7 @@ public class XP
         return finalResults;
     }
 		
-    public Vector part(String input[],int maxArrayLength)
+    public static Vector part(String input[],int maxArrayLength)
     {
         Vector results = new Vector();
         int index = 0;
@@ -1578,7 +1578,7 @@ public class XP
         return results;
     }
 		
-    public String[] chop(String input[],int maxLength)
+    public static String[] chop(String input[],int maxLength)
     {
         if (input.length < maxLength)
             return input;
@@ -1588,7 +1588,7 @@ public class XP
         return results;
     }
 		
-    public String[] append(String arg1[],String arg2[])
+    public static String[] append(String arg1[],String arg2[])
     {
         if (arg1.length == 0)
             return arg2;
@@ -1602,7 +1602,7 @@ public class XP
         return results;
     }
 		
-    public String[] append(String arg1,String arg2[])
+    public static String[] append(String arg1,String arg2[])
     {
         String results[] = new String[arg2.length + 1];
         int i = 0;
@@ -1613,7 +1613,7 @@ public class XP
         return results;
     }
 		
-    public String[] append(String arg1[],String arg2)
+    public static String[] append(String arg1[],String arg2)
     {
         String results[] = new String[arg1.length + 1];
         int i = 0;
@@ -1624,7 +1624,7 @@ public class XP
         return results;
     }
 		
-    public String[] unique(String arg1[])
+    public static String[] unique(String arg1[])
     {
         Hashtable table = new Hashtable();
         int i = 0;
@@ -1641,7 +1641,7 @@ public class XP
         return results;
     }
 		
-    public String[] delete(String arg1[],String arg2)
+    public static String[] delete(String arg1[],String arg2)
     {
         int i = 0;
         int imax = 0;
@@ -1656,7 +1656,7 @@ public class XP
         return results;
     }
 		
-    public String[] search(String arg1[],String arg2,boolean endsWith)
+    public static String[] search(String arg1[],String arg2,boolean endsWith)
     {
         int i = 0;
         String result[] = new String[0];
@@ -1674,12 +1674,12 @@ public class XP
         return result;
     }
 		
-    public String[] search(String arg1[],String arg2)
+    public static String[] search(String arg1[],String arg2)
     {
         return search(arg1,arg2,false);
     }
 		
-    public String[] sort(String arg1[])
+    public static String[] sort(String arg1[])
     {
         Arrays.sort(arg1);
         return arg1;
@@ -1689,7 +1689,7 @@ public class XP
     // conversion support
     //
 
-    public long[] toLong(int input[])
+    public static long[] toLong(int input[])
     {
         long results[] = new long[input.length];
         for (int i = 0; i < input.length; i++)
@@ -1697,12 +1697,12 @@ public class XP
         return results;
     }
 		
-    public byte[] toByteArray(Object object)
+    public static byte[] toByteArray(Object object)
     {
         return toByteArray(object,4096);
     }
 		
-    public byte[] toByteArray(Object object,int bufferSize)
+    public static byte[] toByteArray(Object object,int bufferSize)
     {
         try
             {
@@ -1719,7 +1719,7 @@ public class XP
             }
     }
 		
-    public Object fromByteArray(byte data[])
+    public static Object fromByteArray(byte data[])
     {
         try
             {
@@ -1734,7 +1734,7 @@ public class XP
             }
     }
 
-    public Object duplicate(Object input)
+    public static Object duplicate(Object input)
     {
         return fromByteArray(toByteArray(input));
     }
@@ -1743,13 +1743,13 @@ public class XP
     // other stuff
     //
 
-    public long random(long[] values)
+    public static long random(long[] values)
     {
         int index = (int) (Math.random() * values.length);
         return values[index];
     }
 		
-    public int random(int max)
+    public static int random(int max)
     {
         return (int) (Math.random() * max);
     }
@@ -1758,7 +1758,7 @@ public class XP
     // exception handling
     //
 
-    public String parseException(Exception e)
+    public static String parseException(Exception e)
     {
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw);
@@ -1775,7 +1775,7 @@ public class XP
         return result;
     }
 
-    private char translate(char input)
+    private static char translate(char input)
     {
         String string = "!@#$%^&*()_+`-={}[]\\:\";'<>?,./ ";
 
