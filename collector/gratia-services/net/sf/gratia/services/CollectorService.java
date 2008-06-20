@@ -3,7 +3,6 @@ package net.sf.gratia.services;
 import net.sf.gratia.util.Configuration;
 import net.sf.gratia.util.Execute;
 import net.sf.gratia.util.Logging;
-import net.sf.gratia.util.XP;
 
 import java.lang.Thread.*;
 import java.math.BigInteger;
@@ -16,7 +15,11 @@ import java.util.List;
 import java.util.Properties;
 import java.util.TimeZone;
 import javax.servlet.*;
-
+import javax.management.MBeanServerConnection;
+import javax.management.ObjectName;
+import javax.management.remote.JMXConnector;
+import javax.management.remote.JMXConnectorFactory;
+import javax.management.remote.JMXServiceURL;
 import net.sf.gratia.storage.DatabaseMaintenance;
 
 import org.hibernate.HibernateException;
@@ -25,11 +28,16 @@ import org.hibernate.Session;
 import org.hibernate.exception.*;
 
 public class CollectorService implements ServletContextListener {
-    public String rmibind;
-    public String rmilookup;
-    public String service;
+    String rmibind;
+    String rmilookup;
+    String service;
 
-    public Properties p;
+    Properties p;
+
+    static final long threadStopWaitTime = 60 * 1000; // One minute, in milliseconds
+    static final long safeStartCheckInterval = 30 * 1000; // 30s in ms.
+    Boolean opsEnabled = false;
+    Boolean m_servletEnabled = false;
 
     //
     // various threads
@@ -43,8 +51,6 @@ public class CollectorService implements ServletContextListener {
     QSizeMonitor qsizeMonitor;;
     MonitorListenerThread monitorListenerThread;
 
-    XP xp = new XP();
-
     public String configurationPath;
 
     //
@@ -54,9 +60,9 @@ public class CollectorService implements ServletContextListener {
     String queues[] = null;
     Object lock = new Object();
     Hashtable global = new Hashtable();
+    DatabaseMaintenance checker = null;
 
-    public void contextInitialized(ServletContextEvent sce)
-    {
+    public void contextInitialized(ServletContextEvent sce) {
         int i = 0;
 
         //
@@ -70,71 +76,66 @@ public class CollectorService implements ServletContextListener {
                            p.getProperty("service.service.level"),
                            p.getProperty("service.service.numLogs"));
 
-//         Logging.info("CollectorService: classpath = " +
-//                      java.lang.System.getProperty("java.class.path", "."));
+        //         Logging.info("CollectorService: classpath = " +
+        //                      java.lang.System.getProperty("java.class.path", "."));
 
         Enumeration iter = System.getProperties().propertyNames();
         Logging.log("");
-        while (iter.hasMoreElements())
-            {
-                String key = (String)iter.nextElement();
-                if (key.endsWith(".password")) continue;
-                String value = (String)System.getProperty(key);
-                Logging.log("Key: " + key + " value: " + value);
-            }
+        while (iter.hasMoreElements()) {
+            String key = (String)iter.nextElement();
+            if (key.endsWith(".password")) continue;
+            String value = (String)System.getProperty(key);
+            Logging.log("Key: " + key + " value: " + value);
+        }
         Logging.log("");
 
         Logging.log("");
         Logging.log("service properties:");
         Logging.log("");
         iter = p.propertyNames();
-        while (iter.hasMoreElements())
-            {
-                String key = (String)iter.nextElement();
-                if (key.endsWith(".password")) continue;
-                String value = (String)p.getProperty(key);
-                Logging.log("Key: " + key + " value: " + value);
-            }
+        while (iter.hasMoreElements()) {
+            String key = (String)iter.nextElement();
+            if (key.endsWith(".password")) continue;
+            String value = (String)p.getProperty(key);
+            Logging.log("Key: " + key + " value: " + value);
+        }
         Logging.log("");
         Logging.log("service.security.level: " + p.getProperty("service.security.level"));
 
         configurationPath = net.sf.gratia.util.Configuration.getConfigurationPath();
 
-        if (p.getProperty("service.security.level").equals("1"))
-            try
-                {
-                    Logging.log("");
-                    Logging.log("Initializing HTTPS Support");
-                    Logging.log("");
-                    //
-                    // setup configuration path/https system parameters
-                    //
-                    System.setProperty("java.protocol.handler.pkgs", "com.sun.net.ssl.internal.www.protocol");
-                    Security.addProvider(new com.sun.net.ssl.internal.ssl.Provider());
+        if (p.getProperty("service.security.level").equals("1")) {
+            try {
+                Logging.log("");
+                Logging.log("Initializing HTTPS Support");
+                Logging.log("");
+                //
+                // setup configuration path/https system parameters
+                //
+                System.setProperty("java.protocol.handler.pkgs", "com.sun.net.ssl.internal.www.protocol");
+                Security.addProvider(new com.sun.net.ssl.internal.ssl.Provider());
 
-                    System.setProperty("javax.net.ssl.trustStore", configurationPath + "/truststore");
-                    System.setProperty("javax.net.ssl.trustStorePassword", "server");
+                System.setProperty("javax.net.ssl.trustStore", configurationPath + "/truststore");
+                System.setProperty("javax.net.ssl.trustStorePassword", "server");
 
-                    System.setProperty("javax.net.ssl.keyStore", configurationPath + "/keystore");
-                    System.setProperty("javax.net.ssl.keyStorePassword", "server");
+                System.setProperty("javax.net.ssl.keyStore", configurationPath + "/keystore");
+                System.setProperty("javax.net.ssl.keyStorePassword", "server");
 
-                    com.sun.net.ssl.HostnameVerifier hv = new com.sun.net.ssl.HostnameVerifier()
-                        {
-                            public boolean verify(String urlHostname, String certHostname)
-                            {
-                                Logging.log("url host name: " + urlHostname);
-                                Logging.log("cert host name: " + certHostname);
-                                Logging.log("WARNING: Hostname is not matched for cert.");
-                                return true;
-                            }
-                        };
+                com.sun.net.ssl.HostnameVerifier hv = new com.sun.net.ssl.HostnameVerifier() {
+                        public boolean verify(String urlHostname, String certHostname) {
+                            Logging.log("url host name: " + urlHostname);
+                            Logging.log("cert host name: " + certHostname);
+                            Logging.log("WARNING: Hostname is not matched for cert.");
+                            return true;
+                        }
+                    };
 
-                    com.sun.net.ssl.HttpsURLConnection.setDefaultHostnameVerifier(hv);
-                }
-            catch (Exception e)
-                {
-                    e.printStackTrace();
-                }
+                com.sun.net.ssl.HttpsURLConnection.setDefaultHostnameVerifier(hv);
+            }
+            catch (Exception e) {
+                Logging.warning("CollectorService: contextInitialized() caught exception ", e);
+            }
+        }
 
         try {
             //
@@ -163,7 +164,7 @@ public class CollectorService implements ServletContextListener {
             Logging.log("CollectorService: RMI Service Started");
             Logging.log("");
 
-            DatabaseMaintenance checker = new DatabaseMaintenance(p);
+            checker = new DatabaseMaintenance(p);
 
             //
             // Check the database version, before starting
@@ -215,16 +216,61 @@ public class CollectorService implements ServletContextListener {
             queues = new String[maxthreads];
 
             Execute.execute("mkdir -p " + configurationPath + "/data");
-            for (i = 0; i < maxthreads; i++)
-                {
-                    Execute.execute("mkdir -p " + configurationPath + "/data/thread" + i);
-                    queues[i] = configurationPath + "/data/thread" + i;
-                    Logging.log("Created Q: " + queues[i]);
-                }
+            for (i = 0; i < maxthreads; i++) {
+                Execute.execute("mkdir -p " + configurationPath + "/data/thread" + i);
+                queues[i] = configurationPath + "/data/thread" + i;
+                Logging.log("Created Q: " + queues[i]);
+            }
 
             Logging.log("");
             Logging.log("CollectorService: JMS Server Started");
             Logging.log("");
+
+            //
+            // poke in rmi
+            //
+
+            JMSProxyImpl proxy = new JMSProxyImpl(this);
+            Naming.rebind(rmibind + service, proxy);
+            Logging.log("JMSProxy Started");
+
+            // Determine whether we can start normal operations.
+            Boolean safeStart = false;
+            try {
+                safeStart = 0 <
+                    Integer.parseInt(p.getProperty("gratia.service.safeStart"));
+            } catch (Exception ignore) {
+            }
+
+            synchronized (this) { // Set current status
+                opsEnabled = !safeStart;
+                m_servletEnabled = opsEnabled;
+                if (safeStart) {
+                    Logging.info("CollectorService: starting in safe mode -- no operational services started yet ...");
+                } else {
+                    startAllOperations();
+                } 
+            }
+        }
+        catch (Exception e) {
+            Logging.warning("CollectorService: contextInitialized() caught exception ", e);
+        }
+
+    }
+        
+    private void startAllOperations() {
+        int i = 0; // Loop variable
+        int maxthreads = Integer.parseInt(p.getProperty("service.listener.threads"));
+        
+        try {
+            Logging.info("CollectorService: beginning normal operational startup.");
+
+            //
+            // Start the servlet that receives records from probes.
+            //
+
+            Logging.info("CollectorService: enabling servlet to receive records.");
+            enableServlet();
 
             //
             // Check whether we need to start a checksum upgrade thread
@@ -273,14 +319,6 @@ public class CollectorService implements ServletContextListener {
             }
 
             //
-            // poke in rmi
-            //
-
-            JMSProxyImpl proxy = new JMSProxyImpl(this);
-            Naming.rebind(rmibind + service, proxy);
-            Logging.log("JMSProxy Started");
-
-            //
             // start a thread to recheck history directories every 6 hours
             //
 
@@ -291,66 +329,58 @@ public class CollectorService implements ServletContextListener {
             // start msg listener
             //
 
-            if (p.getProperty("performance.test") != null)
-                {
-                    if (p.getProperty("performance.test").equals("false"))
-                        {
-                            threads = new ListenerThread[maxthreads];
-                            for (i = 0; i < maxthreads; i++)
-                                {
-                                    threads[i] = new ListenerThread("ListenerThread: " + i, queues[i], lock, global);
-                                    threads[i].setPriority(Thread.MAX_PRIORITY);
-                                    threads[i].setDaemon(true);
-                                }
-                            for (i = 0; i < maxthreads; i++)
-                                threads[i].start();
-                        }
-                    else
-                        {
-                            pthreads = new PerformanceThread[maxthreads];
-                            for (i = 0; i < maxthreads; i++)
-                                {
-                                    pthreads[i] = new PerformanceThread("PerformanceThread: " + i, queues[i], lock, global);
-                                    pthreads[i].setPriority(Thread.MAX_PRIORITY);
-                                    pthreads[i].setDaemon(true);
-                                }
-                            for (i = 0; i < maxthreads; i++)
-                                pthreads[i].start();
-                        }
-                }
-            else
-                {
+            if (p.getProperty("performance.test") != null) {
+                if (p.getProperty("performance.test").equals("false")) {
                     threads = new ListenerThread[maxthreads];
-                    for (i = 0; i < maxthreads; i++)
-                        {
-                            threads[i] = new ListenerThread("ListenerThread: " + i, queues[i], lock, global);
-                            threads[i].setPriority(Thread.MAX_PRIORITY);
-                            threads[i].setDaemon(true);
-                        }
-                    for (i = 0; i < maxthreads; i++)
+                    for (i = 0; i < maxthreads; i++) {
+                        threads[i] = new ListenerThread("ListenerThread: " + i, queues[i], lock, global);
+                        threads[i].setPriority(Thread.MAX_PRIORITY);
+                        threads[i].setDaemon(true);
+                    }
+                    for (i = 0; i < maxthreads; i++) {
                         threads[i].start();
+                    }
+                } else {
+                    pthreads = new PerformanceThread[maxthreads];
+                    for (i = 0; i < maxthreads; i++) {
+                        pthreads[i] = new PerformanceThread("PerformanceThread: " + i, queues[i], lock, global);
+                        pthreads[i].setPriority(Thread.MAX_PRIORITY);
+                        pthreads[i].setDaemon(true);
+                    }
+                    for (i = 0; i < maxthreads; i++) {
+                        pthreads[i].start();
+                    }
                 }
+            } else {
+                threads = new ListenerThread[maxthreads];
+                for (i = 0; i < maxthreads; i++) {
+                    threads[i] = new ListenerThread("ListenerThread: " + i, queues[i], lock, global);
+                    threads[i].setPriority(Thread.MAX_PRIORITY);
+                    threads[i].setDaemon(true);
+                }
+                for (i = 0; i < maxthreads; i++) {
+                    threads[i].start();
+                }
+            }
 
             //
             // if requested - start thread to monitor listener activity
             //
-            if (p.getProperty("monitor.listener.threads") != null)
-                if (p.getProperty("monitor.listener.threads").equals("true"))
-                    {
-                        monitorListenerThread = new MonitorListenerThread(global);
-                        monitorListenerThread.start();
-                        Logging.log("CollectorService: Started MonitorListenerThread");
-                    }
+            if ((p.getProperty("monitor.listener.threads") != null) &&
+                p.getProperty("monitor.listener.threads").equals("true")) {
+                monitorListenerThread = new MonitorListenerThread(global);
+                monitorListenerThread.start();
+                Logging.log("CollectorService: Started MonitorListenerThread");
+            }
             //
             // if requested - start service to monitor input queue sizes
             //
 
-            if (p.getProperty("monitor.q.size").equals("1"))
-                {
-                    Logging.log("CollectorService: Starting QSizeMonitor");
-                    qsizeMonitor = new QSizeMonitor();
-                    qsizeMonitor.start();
-                }
+            if (p.getProperty("monitor.q.size").equals("1")) {
+                Logging.log("CollectorService: Starting QSizeMonitor");
+                qsizeMonitor = new QSizeMonitor();
+                qsizeMonitor.start();
+            }
 
             /*
               statusListenerThread = new StatusListenerThread();
@@ -359,30 +389,28 @@ public class CollectorService implements ServletContextListener {
             */
 
         }
-        catch (Exception e)
-            {
-                e.printStackTrace();
-            }
+        catch (Exception e) {
+            Logging.warning("CollectorService: contextInitialized() caught exception ", e);
+        }
 
         //
         // add a server cert if one isn't there
         //
 
-        if (p.getProperty("service.security.level").equals("1"))
-            {
-                if ((p.getProperty("service.use.selfgenerated.certs") != null) &&
-                    (p.getProperty("service.use.selfgenerated.certs").equals("1")))
-                    loadSelfGeneratedCerts();
-                else
-                    loadVDTCerts();
+        if (p.getProperty("service.security.level").equals("1")) {
+            if ((p.getProperty("service.use.selfgenerated.certs") != null) &&
+                (p.getProperty("service.use.selfgenerated.certs").equals("1"))) {
+                loadSelfGeneratedCerts();
+            } else {
+                loadVDTCerts();
             }
+        }
 
         //
         // start replication service
         //
 
-        replicationService = new ReplicationService();
-        replicationService.start();
+        startReplicationService();
 
         //
         // wait 1 minute to create new report config for birt (giving tomcat time to deploy the war)
@@ -393,9 +421,66 @@ public class CollectorService implements ServletContextListener {
 
     }
 
+    public synchronized Boolean operationsDisabled() {
+        return !opsEnabled;
+    }
 
-    public synchronized void stopDatabaseUpdateThreads()
-    {
+    public synchronized void enableOperations() {
+        if (opsEnabled) {
+            return;
+        } else {
+            startAllOperations();
+            opsEnabled = true;
+        }
+    }
+
+    public synchronized Boolean servletEnabled() {
+        return m_servletEnabled;
+    }
+
+    public synchronized void enableServlet() {
+        m_servletEnabled = true;
+    }
+
+    public synchronized void disableServlet() {
+        m_servletEnabled = false;
+    }
+
+    public synchronized void startReplicationService() {
+        if (replicationService == null || !replicationService.isAlive()) {
+            Logging.info("CollectorService: Starting replication service");
+            replicationService = new ReplicationService();
+            replicationService.start();
+        }
+    }
+
+    public synchronized void stopReplicationService() {
+        if (replicationService == null || !replicationService.isAlive()) {
+            Logging.info("CollectorService: replication service cannot be stopped -- not started!");
+            return;
+        }
+        Logging.info("CollectorService: Stopping replication service.");
+        replicationService.requestStop();
+        if (replicationService.getState() == Thread.State.TIMED_WAITING) {
+            replicationService.interrupt();
+        }
+        try {
+            replicationService.join(threadStopWaitTime); // Wait up to one minute for thread exit.
+        }
+        catch (InterruptedException e) { // Ignore
+        }
+        if (replicationService.isAlive()) { // Still working
+            Logging.warning("CollectorService: replication service has not stopped after " +
+                            (long) (threadStopWaitTime / 1000) + "s");
+        }
+        return;
+    }
+    
+    public synchronized Boolean replicationServiceActive() {
+        return replicationService != null && replicationService.isAlive();
+    }
+
+    public synchronized void stopDatabaseUpdateThreads() {
         if (!databaseUpdateThreadsActive()) {
             Logging.info("CollectorService: DB update threads cannot be stopped -- not started!");
             return;
@@ -412,16 +497,13 @@ public class CollectorService implements ServletContextListener {
                 }
             }
         int unfinished = 0;
-        try
-            {
-                long delayMillis = 60*1000; // 60 seconds
-                for (i = 0; i < maxthreads; i++) {
-                    if (threads[i] != null) threads[i].join(delayMillis);                  
-                }
+        try {
+            for (i = 0; i < maxthreads; i++) {
+                if (threads[i] != null) threads[i].join(threadStopWaitTime);                  
             }
-        catch (Exception ignore)
-            {
-            }
+        }
+        catch (Exception ignore) {
+        }
         for (i = 0; i < maxthreads; i++) {
             if ((threads[i] != null) && threads[i].isAlive()) {
                 // Timeout occurred; thread has not finished
@@ -431,12 +513,12 @@ public class CollectorService implements ServletContextListener {
             }
         }
         if (unfinished != 0) {
-            Logging.warning("CollectorService: Some threads ("+unfinished+") have not finished after 60 seconds");
+            Logging.warning("CollectorService: Some threads ("+unfinished+") have not finished after " +
+                            (long) (threadStopWaitTime / 1000) + "s");
         }
     }
 
-    public synchronized void startDatabaseUpdateThreads()
-    {
+    public synchronized void startDatabaseUpdateThreads() {
         if (databaseUpdateThreadsActive()) {
             Logging.info("CollectorService: DB update threads cannot be started -- already active");
             return;
@@ -444,20 +526,18 @@ public class CollectorService implements ServletContextListener {
         int i;
         int maxthreads = Integer.parseInt(p.getProperty("service.listener.threads"));
         threads = new ListenerThread[maxthreads];
-        for (i = 0; i < maxthreads; i++)
-            {
-                threads[i] = new ListenerThread("ListenerThread: " + i, queues[i], lock, global);
-                threads[i].setPriority(Thread.MAX_PRIORITY);
-                threads[i].setDaemon(true);
-            }
+        for (i = 0; i < maxthreads; i++) {
+            threads[i] = new ListenerThread("ListenerThread: " + i, queues[i], lock, global);
+            threads[i].setPriority(Thread.MAX_PRIORITY);
+            threads[i].setDaemon(true);
+        }
         for (i = 0; i < maxthreads; i++) {
             threads[i].start();
         }
 
     }
 
-    public synchronized boolean databaseUpdateThreadsActive()
-    {
+    public synchronized boolean databaseUpdateThreadsActive() {
         int i;
         int maxthreads = Integer.parseInt(p.getProperty("service.listener.threads"));
 
@@ -469,10 +549,9 @@ public class CollectorService implements ServletContextListener {
         return false;
     }
 
-    public void loadSelfGeneratedCerts()
-    {
+    public void loadSelfGeneratedCerts() {
         String keystore = System.getProperty("catalina.home") + "/gratia/keystore";
-        keystore = xp.replaceAll(keystore, "\\", "/");
+        keystore = keystore.replaceAll("\\\\", "/");
         String command1[] =
             {"keytool",
              "-genkey",
@@ -506,11 +585,10 @@ public class CollectorService implements ServletContextListener {
         //      FlipSSL.flip();
     }
 
-    public void loadVDTCerts()
-    {
+    public void loadVDTCerts() {
         String keystore = System.getProperty("catalina.home") + "/gratia/keystore";
         String configurationPath = System.getProperty("catalina.home") + "/gratia/";
-        keystore = xp.replaceAll(keystore, "\\", "/");
+        keystore = keystore.replaceAll("\\\\", "/");
         String command1[] =
             {
                 "openssl",
@@ -530,26 +608,20 @@ public class CollectorService implements ServletContextListener {
 
         int exitValue1 = Execute.execute(command1);
 
-        if (exitValue1 == 0)
-            {
-                PKCS12Load load = new PKCS12Load();
-                try
-                    {
-                        load.load(
-                                  configurationPath + "server.pkcs12",
-                                  keystore
-                                  );
-                    }
-                catch (Exception e)
-                    {
-                        e.printStackTrace();
-                    }
+        if (exitValue1 == 0) {
+            PKCS12Load load = new PKCS12Load();
+            try {
+                load.load(configurationPath + "server.pkcs12",
+                          keystore);
             }
+            catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
         FlipSSL.flip();
     }
 
-    public void contextDestroyed(ServletContextEvent sce)
-    {
+    public void contextDestroyed(ServletContextEvent sce) {
         Logging.info("");
         Logging.info("Context Destroy Event");
         Logging.info("");
@@ -557,83 +629,40 @@ public class CollectorService implements ServletContextListener {
     }
 
 
-    public class ReportSetup extends Thread
-    {
-        public ReportSetup()
-        {
+    public class ReportSetup extends Thread {
+        public ReportSetup() {
         }
 
-        public void run()
-        {
-            try
-                {
-                    Thread.sleep(30 * 1000);
-                }
-            catch (Exception ignore)
-                {
-                }
-
-            //
-            // create a dummy ReportingConfig.xml for birt
-            //
-            /* PENELOPE: no need to create the file
-               String dq = "\"";
-               XP xp = new XP();
-               StringBuffer xml = new StringBuffer();
-               String catalinaHome = System.getProperty("catalina.home");
-               catalinaHome = xp.replaceAll(catalinaHome, "\\", "/");
-
-               xml.append("<ReportingConfig>" + "\n");
-               xml.append("<DataSourceConfig" + "\n");
-               xml.append("url=" + dq + p.getProperty("service.mysql.url") + dq + "\n");
-               xml.append("user=" + dq + p.getProperty("service.birt.user") + dq + "\n");
-               xml.append("password=" + dq + p.getProperty("service.birt.password") + dq + "\n");
-               xml.append("/>" + "\n");
-               xml.append("<PathConfig" + "\n");
-               xml.append("reportsFolder=" + dq + catalinaHome +
-               "/webapps/" + p.getProperty("service.birt.reports.folder") + "/" + dq + "\n");
-               xml.append("engineHome=" + dq + catalinaHome +
-               "/webapps/" + p.getProperty("service.birt.engine.home") + "/" + dq + "\n");
-               xml.append("webappHome=" + dq + catalinaHome +
-               "/webapps/" + p.getProperty("service.birt.webapp.home") + "/" + dq + "\n");
-               xml.append("/>" + "\n");
-               xml.append("</ReportingConfig>" + "\n");
-               xp.save(catalinaHome + "/webapps/gratia-report-configuration/ReportingConfig.xml",
-               xml.toString());
-               Logging.log("ReportConfig updated");
-            */
+        public void run() {
+            try {
+                Thread.sleep(30 * 1000);
+            }
+            catch (Exception ignore) {
+            }
         }
     }
 
-    public class HistoryMonitor extends Thread
-    {
-        public HistoryMonitor()
-        {
+    public class HistoryMonitor extends Thread {
+        public HistoryMonitor() {
         }
 
-        public void run()
-        {
-            while (true)
-                {
-                    try
-                        {
-                            Thread.sleep(6 * 60 * 60 * 1000);
-                            new HistoryReaper();
-                        }
-                    catch (Exception ignore)
-                        {
-                        }
+        public void run() {
+            while (true) {
+                try {
+                    Thread.sleep(6 * 60 * 60 * 1000);
+                    new HistoryReaper();
                 }
+                catch (Exception ignore) {
+                }
+            }
         }
     }
-
 
     //
     // testing
     //
 
-    static public void main(String args[])
-    {
+    static public void main(String args[]) {
         CollectorService service = new CollectorService();
         service.contextInitialized(null);
     }

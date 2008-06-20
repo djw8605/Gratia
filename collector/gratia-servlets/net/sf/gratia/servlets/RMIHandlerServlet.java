@@ -1,7 +1,5 @@
 package net.sf.gratia.servlets;
 
-import net.sf.gratia.util.XP;
-
 import net.sf.gratia.util.Configuration;
 
 import net.sf.gratia.util.Logging;
@@ -19,10 +17,23 @@ import java.rmi.*;
 
 public class RMIHandlerServlet extends HttpServlet 
 {
-    public Properties p;
-    public JMSProxy proxy = null;
-    XP xp = new XP();
+    Properties p;
+    static JMSProxy proxy = null;
     static URLDecoder D;
+
+    private void lookupProxy() {
+        synchronized (proxy) {
+            if (proxy != null) {
+                try {
+                    proxy = (JMSProxy) Naming.lookup(p.getProperty("service.rmi.rmilookup") +
+                                                     p.getProperty("service.rmi.service"));
+                }
+                catch (Exception e) {
+                    Logging.warning("RMIHandlerServlet caught exception doing RMI lookup: ", e);
+                }
+            }
+        }
+    }
 
     public void init(ServletConfig config) throws ServletException 
     {
@@ -53,19 +64,18 @@ public class RMIHandlerServlet extends HttpServlet
 
         int argcount = 0;
 
-        try
-            {
-                proxy = (JMSProxy) Naming.lookup(p.getProperty("service.rmi.rmilookup") +
-                                                 p.getProperty("service.rmi.service"));
-            }
-        catch (Exception e)
-            {
-                Logging.warning(xp.parseException(e));
-            }
+        lookupProxy();
+
+        if (!proxy.servletEnabled()) {
+            PrintWriter writer = res.getWriter();
+            writer.write("Error: service not ready.");
+            writer.flush();
+            return;
+        }
 
         try {
             command = req.getParameter("command");
-                
+
             if (command == null) {
                 Logging.log("RMIHandlerServlet got buggy POST: remediating");
                 //
@@ -101,52 +111,51 @@ public class RMIHandlerServlet extends HttpServlet
 
                 StringTokenizer st1 = new StringTokenizer(body,"&");
                 boolean swallowAll = false;
-                while(st1.hasMoreTokens())
-                    {
-                        String token = st1.nextToken();
-                        if (swallowAll) { // Swallow everything from here on in
-                            arg1 += "&" + token;
-                            continue;
-                        }
-                        int index = token.indexOf("=");
-                        if (index < 0) {
-                            Logging.info("RMIHandlerServlet: warning: token = " + token);
-                        }
-                        String key = token.substring(0,index);
-                        String value = token.substring(index + 1);
-                        key = key.toLowerCase();
-                        if ((command == null) && key.equals("command")) {
-                            // Only if command is still null
-                            Logging.debug("RMIHandlerServlet: setting command = " + value);
-                            command = value.toLowerCase();
-                        } else if (key.equals("from")) {
-                            Logging.debug("RMIHandlerServlet: setting from = " + value);
-                            from = maybeURLDecode(command, value);
-                        } else if (key.equals("to")) {
-                            Logging.debug("RMIHandlerServlet: setting to = " + value);
-                            to = maybeURLDecode(command, value);
-                        } else if (key.equals("rmi")) {
-                            Logging.debug("RMIHandlerServlet: setting rmi = " + value);
-                            rmi = maybeURLDecode(command, value);
-                        } else if (key.equals("arg1")) {
-                            Logging.debug("RMIHandlerServlet: setting arg1 = " + value);
-                            arg1 = value;
-                            // Check for old command construction and rescue
-                            if ((command != null) && command.equals("update")) {
-                                Logging.log("RMIHandlerServlet: setting swallowAll to true");
-                                swallowAll = true;
-                            }
-                        } else if (key.equals("arg2")) {
-                            arg2 = maybeURLDecode(command, value);
-                            Logging.debug("RMIHandlerServlet: setting arg2 = " + arg2);
-                        } else if (key.equals("arg3")) {
-                            arg3 = maybeURLDecode(command, value);
-                            Logging.debug("RMIHandlerServlet: setting arg3 = " + arg3);
-                        } else if (key.equals("arg4")) {
-                            arg4 = maybeURLDecode(command, value);
-                            Logging.debug("RMIHandlerServlet: setting arg4 = " + arg4);
-                        }
+                while(st1.hasMoreTokens()) {
+                    String token = st1.nextToken();
+                    if (swallowAll) { // Swallow everything from here on in
+                        arg1 += "&" + token;
+                        continue;
                     }
+                    int index = token.indexOf("=");
+                    if (index < 0) {
+                        Logging.info("RMIHandlerServlet: warning: token = " + token);
+                    }
+                    String key = token.substring(0,index);
+                    String value = token.substring(index + 1);
+                    key = key.toLowerCase();
+                    if ((command == null) && key.equals("command")) {
+                        // Only if command is still null
+                        Logging.debug("RMIHandlerServlet: setting command = " + value);
+                        command = value.toLowerCase();
+                    } else if (key.equals("from")) {
+                        Logging.debug("RMIHandlerServlet: setting from = " + value);
+                        from = maybeURLDecode(command, value);
+                    } else if (key.equals("to")) {
+                        Logging.debug("RMIHandlerServlet: setting to = " + value);
+                        to = maybeURLDecode(command, value);
+                    } else if (key.equals("rmi")) {
+                        Logging.debug("RMIHandlerServlet: setting rmi = " + value);
+                        rmi = maybeURLDecode(command, value);
+                    } else if (key.equals("arg1")) {
+                        Logging.debug("RMIHandlerServlet: setting arg1 = " + value);
+                        arg1 = value;
+                        // Check for old command construction and rescue
+                        if ((command != null) && command.equals("update")) {
+                            Logging.log("RMIHandlerServlet: setting swallowAll to true");
+                            swallowAll = true;
+                        }
+                    } else if (key.equals("arg2")) {
+                        arg2 = maybeURLDecode(command, value);
+                        Logging.debug("RMIHandlerServlet: setting arg2 = " + arg2);
+                    } else if (key.equals("arg3")) {
+                        arg3 = maybeURLDecode(command, value);
+                        Logging.debug("RMIHandlerServlet: setting arg3 = " + arg3);
+                    } else if (key.equals("arg4")) {
+                        arg4 = maybeURLDecode(command, value);
+                        Logging.debug("RMIHandlerServlet: setting arg4 = " + arg4);
+                    }
+                }
                 arg1 = maybeURLDecode(command, arg1);
             } else {
                 // getParameter already handles URLEncoded data.
@@ -169,15 +178,15 @@ public class RMIHandlerServlet extends HttpServlet
             if (arg4 != null)
                 argcount++;
 
-            Logging.log("RMIHandlerServlet: From: " + from);
-            Logging.log("RMIHandlerServlet: To: " + to);
-            Logging.log("RMIHandlerServlet: RMI: " + rmi);
-            Logging.log("RMIHandlerServlet: Command: " + command);
-            Logging.log("RMIHandlerServlet: Argcount: " + argcount);
-            Logging.log("RMIHandlerServlet: Arg1: " + arg1);
-            Logging.log("RMIHandlerServlet: Arg2: " + arg2);
-            Logging.log("RMIHandlerServlet: Arg3: " + arg3);
-            Logging.log("RMIHandlerServlet: Arg4: " + arg4);
+            Logging.debug("RMIHandlerServlet: From: " + from);
+            Logging.debug("RMIHandlerServlet: To: " + to);
+            Logging.debug("RMIHandlerServlet: RMI: " + rmi);
+            Logging.debug("RMIHandlerServlet: Command: " + command);
+            Logging.debug("RMIHandlerServlet: Argcount: " + argcount);
+            Logging.debug("RMIHandlerServlet: Arg1: " + arg1);
+            Logging.debug("RMIHandlerServlet: Arg2: " + arg2);
+            Logging.debug("RMIHandlerServlet: Arg3: " + arg3);
+            Logging.debug("RMIHandlerServlet: Arg4: " + arg4);
 
             //
             // the - connect to rmi
@@ -204,19 +213,18 @@ public class RMIHandlerServlet extends HttpServlet
                 }
             }
             if (parse_error) {
-                Logging.info("RMIHandlerServlet: Error: Unknown Command: " +
-                             command + " Or Invalid Arg Count: " + argcount);
+                Logging.warning("RMIHandlerServlet: Error: Unknown Command: " +
+                                command + " Or Invalid Arg Count: " + argcount);
                 writer.write("Error: Unknown Command: " + command +
                              " or Invalid Arg Count: " + argcount);
             }
             writer.flush();
         }
         catch (Exception e) {
-            Logging.info("RMIHandlerServlet: Error: Problematic req: " + req);
+            Logging.warning("RMIHandlerServlet: Error: Problematic req: " + req, e);
             PrintWriter writer = res.getWriter();
             writer.write("Error: RMIHandlerServlet: Error: Problematic req: " + req);
             writer.flush();
-            e.printStackTrace();
         }
     }
 

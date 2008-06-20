@@ -9,8 +9,23 @@
 </head>
 <body>
 <h1 align="center" class="osgcolor">&nbsp;&nbsp;&nbsp;&nbsp;Gratia Administration&nbsp;&nbsp;&nbsp;&nbsp;</h1>
-<h3 align="center">System Administration </h3>
-<form action="probetable.html" method="post" name="form1" target="adminContent" id="form1">
+<h3>System Administration</h3>
+
+<p>Status last updated at: <strong>#date#</strong></p>
+<table width="100%">
+<tr>
+  <th width="30%" scope="col"><strong><div align="center">Item</div></strong></th>
+  <th width="10%" scope="col"><strong><div align="center">Status</div></strong></th>
+  <th width="60%" scope="col"><strong><div align="center">Comments</div></strong></th>
+</tr>
+<tr><td><strong>Global Operational Status</strong><td><div align="center">#opstatus#</div></td><td>#opcomment#</td></tr>
+<tr><td><strong>Collector</strong><td><div align="center">#servletstatus#</div></td><td>#servletcomment#</td></tr>
+<tr><td><strong>Database updates</strong><td><div align="center">#listenerstatus#</div></td><td>#listenercomment#</td></tr>
+<tr><td><strong>Replication</strong><td><div align="center">#replicationstatus#</div></td><td>#replicationcomment#</td></tr>
+</table>
+<hr size="4" />
+<p><strong>History Replay Control</strong><p>
+<form action="probetable.html" method="post" name="form1" id="form1">
   <table width="100%" border="1">
     <tr>
       <th width="30%" bgcolor="#999999" scope="col">Replay</th>
@@ -18,26 +33,26 @@
     </tr>
     <tr>
       <td><strong>Status</strong></td>
-      <td><div align="left"><strong>#status#</strong></div></td>
+      <td><div align="left"><strong>#replaystatus#</strong></div></td>
     </tr>
     <tr>
       <td><strong>Processed</strong></td>
-      <td><div align="right"><strong>#processed#</strong></div></td>
+      <td><div align="right"><strong>#replayrecordsprocessed#</strong></div></td>
     </tr>
     <tr>
       <td><strong>Skipped</strong></td>
-      <td><div align="right"><strong>#skipped#</strong></div></td>
+      <td><div align="right"><strong>#replayrecordsskipped#</strong></div></td>
     </tr>
   </table>
   <p><strong>Disaster Recovery/Replay:</strong></p>
   <p>The Gratia data collector maintains two sets of transaction logs (both found in $CATALINA_HOME/gratia/data). The first set (directories named &quot;historyYYYYMMDDHH&quot;)  contains a copy of all committed xml files with a timestamp. The second set (directories named &quot;oldYYYYMMDDHH&quot;) contains a copy of everything that Gratia recieved from any source. In the event that you have a system outage and must do a database restore/repair you have two options. The first is to simply replay all history. This will blindly restart at the first history record that Gratia has and attempt to reapply it to the database. In the event that Gratia has seen the record before, it will simply be ignored. This particular option can be triggered by using the following link: </p>
   <ul>
     <li>
-      <a href="systemadministration.html?action=replayAll" target="adminContent">Replay All History</a>    </li>
+      <a href="systemadministration.html?action=replayAll">Replay All History</a>    </li>
   </ul>
   <p>The second option for recovery is that Gratia will query the database for the last known update and replay just the history from that timestamp (minus 5 minutes or so) forward. This option is can be triggered by the following: </p>
   <ul>
-    <li><a href="systemadministration.html?action=replay"target="adminContent" >Replay New History</a>  
+    <li><a href="systemadministration.html?action=replay">Replay New History</a>  
     </li>
   </ul>
   <p><strong>Notes/Asides:</strong></p>
@@ -47,26 +62,5 @@
     <li>Finally, you can do a replay while processing new information from probes.  </li>
   </ul>
 </form>
-<hr size="4" />
-<p><strong>Starting/Stopping Database Update Services:</strong></p>
-<p><strong>Current Status: #threadstatus#</strong></p>
-<blockquote>
-  <p><a href="systemadministration.html?action=stopDatabaseUpdateThreads" target="adminContent">Stop Update Services</a> </p>
-  <p><a href="systemadministration.html?action=startDatabaseUpdateThreads" target="adminContent">Start Update Services</a></p>
-</blockquote>
-<hr size="4" />
-<p><strong>Creating/Recreating Report Summary Tables:</strong></p>
-<p>Unfortunately, this process cannot be (safely) automated. Specifically what you have to do is:</p>
-<ul>
-  <li>Bring down the tomcat service accessing your Gratia database.</li>
-  <li>In your $CATALINA_HOME/gratia subdirectory you will find a script called build-summary-tables.bat (or build-summary-tables.sh) which will drop/create the various summary tables used by reporting and install an &quot;after insert&quot; trigger on the JobUsageRecord table which will dynamically update the summary tables as new information is received by the Gratia system.</li>
-  <li>The actual SQL that is being executed is in $CATALNA_HOME/gratia/build-summary-tables.sql.</li>
-  <li>Restart your tomcat service. </li>
-</ul>
-<p><strong>Warnings:</strong></p>
-<ul>
-  <li><strong>Be very, very careful if you modify the build-summary-table.sql code. Any errors in this can cause the Gratia data collector to hang. If this happens you must stop the tomcat service and delete the trigger.</strong></li>
-  <li><strong>MySQL does not, repeat does not, backup triggers and stored procedures as part of a mysqldump. If you have to do a restore, you must recreate the trigger. </strong></li>
-</ul>
 </body>
 </html>

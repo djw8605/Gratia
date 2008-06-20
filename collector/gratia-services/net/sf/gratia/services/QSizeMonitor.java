@@ -26,153 +26,107 @@ import javax.management.remote.*;
 // note that this will only work with the 5.x series of tomcat
 //
 
-public class QSizeMonitor extends Thread
-{
+public class QSizeMonitor extends Thread {
 
-		public boolean running = true;
-		public Properties p;
-		public String path = "";
-		public int maxthreads = 0;
-		public int maxqsize = 0;
-		public XP xp = new XP();
+    boolean running = true;
+    Properties p;
+    String path = "";
+    int maxthreads = 0;
+    int maxqsize = 0;
+    static final double restartThreshold = 0.8;
 
-		public QSizeMonitor()
-		{
-				p = Configuration.getProperties();
-				maxthreads = Integer.parseInt(p.getProperty("service.listener.threads"));
-				maxqsize = Integer.parseInt(p.getProperty("max.q.size"));
-				path = System.getProperties().getProperty("catalina.home");
-				path = xp.replaceAll(path,"\\","/");
-		}
+    public QSizeMonitor() {
+        p = Configuration.getProperties();
+        maxthreads = Integer.parseInt(p.getProperty("service.listener.threads"));
+        maxqsize = Integer.parseInt(p.getProperty("max.q.size"));
+        path = System.getProperties().getProperty("catalina.home");
+        path = path.replaceAll("\\\\", "/");
+    }
 
-		public void run()
-		{
-				Logging.log("QSizeMonitor: Started");
-				while (true)
-						{
-								try
-										{
-												Thread.sleep(60 * 1000);
-										}
-								catch (Exception e)
-										{
-										}
-								check();
-						}
-		}
+    public void run() {
+        Logging.log("QSizeMonitor: Started");
+        while (true) {
+            try {
+                Thread.sleep(60 * 1000);
+            }
+            catch (Exception e) {
+            }
+            check();
+        }
+    }
 
-		public void check()
-		{
-				boolean toobig = false;
-				int maxfound = 0;
+    public void check() {
+        boolean toobig = false;
+        int maxfound = 0;
 
-				Logging.log("QSizeMonitor: Checking");
-				for (int i = 0; i < maxthreads; i++)
-						{
-								String xpath = path + "/gratia/data/thread" + i;
-								String filelist[] = xp.getFileList(xpath);
-								if (filelist.length > maxqsize)
-										toobig = true;
-								if (filelist.length > maxfound)
-										maxfound = filelist.length;
-						}
-				if (toobig && running)
-						{
-								Logging.log("QSizeMonitor: Q Size Exceeded: " + maxfound);
-								Logging.log("QSizeMonitor: Shuttinng Down Input");
-								turnoff();
-								running = false;
-								return;
-						}
-				if ((! toobig) && (! running))
-						if (maxfound < (maxqsize / 2))
-								{
-										Logging.log("QSizeMonitor: Restarting Input: " + maxfound);
-										turnon();
-										running = true;
-								}
-		}
+        Logging.log("QSizeMonitor: Checking");
+        for (int i = 0; i < maxthreads; i++) {
+            String xpath = path + "/gratia/data/thread" + i;
+            String filelist[] = XP.getFileList(xpath);
+            if (filelist.length > maxqsize)
+                toobig = true;
+            if (filelist.length > maxfound)
+                maxfound = filelist.length;
+        }
+        if (toobig && running) {
+            Logging.log("QSizeMonitor: Q Size Exceeded: " + maxfound);
+            Logging.log("QSizeMonitor: Shuttinng Down Input");
+            stopServlet();
+            running = false;
+            return;
+        }
+        if ((! toobig) && (! running)) {
+            if (maxfound < (maxqsize * restartThreshold)){
+                Logging.log("QSizeMonitor: Restarting Input: " + maxfound);
+                startServlet();
+                running = true;
+            }
+        }
+    }
 
+    void startServlet() {
+        servletCommand("start");
+    }
 
-		public void turnoff()
-		{
-				String bean1 = "Catalina:j2eeType=WebModule,name=//localhost/gratia-servlets,J2EEApplication=none,J2EEServer=none";
-				String urlstring = "service:jmx:rmi:///jndi/rmi://localhost:xxxx/jmxrmi";
+    void stopServlet() {
+        servletCommand("stop");
+    }
 
-				if (System.getProperty("com.sun.management.jmxremote.port") == null)
-						return;
+    void servletCommand(String cmd) {
+        String bean1 = "Catalina:j2eeType=WebModule,name=//localhost/gratia-servlets,J2EEApplication=none,J2EEServer=none";
+        String urlstring = "service:jmx:rmi:///jndi/rmi://localhost:xxxx/jmxrmi";
 
-				urlstring = urlstring.replace("xxxx",System.getProperty("com.sun.management.jmxremote.port"));
+        if (System.getProperty("com.sun.management.jmxremote.port") == null) {
+            return;
+        }
+
+        urlstring = urlstring.replace("xxxx", System.getProperty("com.sun.management.jmxremote.port"));
 				
-				JMXConnector jmxc = null;
+        JMXConnector jmxc = null;
 
-				try
-						{
-						
-								JMXServiceURL url = new JMXServiceURL(urlstring); 
-								jmxc = JMXConnectorFactory.connect(url,null); 
-								MBeanServerConnection mbsc = jmxc.getMBeanServerConnection(); 
-								ObjectName objectName = new ObjectName(bean1);
-								//
-								// now call
-								//
-								mbsc.invoke(objectName,"stop",null,null);
-						}
-				catch (Exception e)
-						{
-								e.printStackTrace();
-						}
-				finally
-						{
-								try
-										{
-												jmxc.close();
-										}
-								catch (Exception ignore)
-										{
-										}
-						}
-		}
+        try {						
+            JMXServiceURL url = new JMXServiceURL(urlstring); 
+            jmxc = JMXConnectorFactory.connect(url,null); 
+            MBeanServerConnection mbsc = jmxc.getMBeanServerConnection(); 
+            ObjectName objectName = new ObjectName(bean1);
+            //
+            // now call
+            //
+            mbsc.invoke(objectName, cmd, null, null);
+        }
+        catch (Exception e) {
+            Logging.warning("CollectorService: ServletCommand(\"" +
+                            cmd + "\") caught exception ", e);
+        }
+        finally {
+            try {
+                jmxc.close();
+            }
+            catch (Exception ignore) {
+            }
+        }
+    }
 
-		public void turnon()
-		{
-				String bean1 = "Catalina:j2eeType=WebModule,name=//localhost/gratia-servlets,J2EEApplication=none,J2EEServer=none";
-				String urlstring = "service:jmx:rmi:///jndi/rmi://localhost:xxxx/jmxrmi";
-
-				if (System.getProperty("com.sun.management.jmxremote.port") == null)
-						return;
-
-				urlstring = urlstring.replace("xxxx",System.getProperty("com.sun.management.jmxremote.port"));
-				
-				JMXConnector jmxc = null;
-
-				try
-						{
-						
-								JMXServiceURL url = new JMXServiceURL(urlstring); 
-								jmxc = JMXConnectorFactory.connect(url,null); 
-								MBeanServerConnection mbsc = jmxc.getMBeanServerConnection(); 
-								ObjectName objectName = new ObjectName(bean1);
-								//
-								// now call
-								//
-								mbsc.invoke(objectName,"start",null,null);
-						}
-				catch (Exception e)
-						{
-								e.printStackTrace();
-						}
-				finally
-						{
-								try
-										{
-												jmxc.close();
-										}
-								catch (Exception ignore)
-										{
-										}
-						}
-		}
 }
 
 

@@ -12,6 +12,7 @@ import java.util.Properties;
 import java.util.Hashtable;
 import java.util.Enumeration;
 import java.util.Vector;
+import java.util.Date;
 import javax.servlet.*;
 import javax.servlet.http.*;
 import java.sql.*;
@@ -21,448 +22,516 @@ import java.rmi.*;
 import org.apache.tools.bzip2.*;
 import com.ice.tar.*;
 
-public class SystemAdministration extends HttpServlet
-{
-	XP xp = new XP();
-	//
-	// database related
-	//
-	String driver = "";
-	String url = "";
-	String user = "";
-	String password = "";
-	Connection connection;
-	Statement statement;
-	ResultSet resultSet;
-	//
-	// processing related
-	//
-	String html = "";
-	String row = "";
-	StringBuffer buffer = new StringBuffer();
-	//
-	// globals
-	//
-	HttpServletRequest request;
-	HttpServletResponse response;
-	boolean initialized = false;
-	Properties props;
-	Properties p;
-	String message = null;
-	//
-	// support
-	//
-	String dq = "\"";
-	String comma = ",";
-	String cr = "\n";
+public class SystemAdministration extends HttpServlet {
+    //
+    // database related
+    //
+    String driver = "";
+    String url = "";
+    String user = "";
+    String password = "";
+    Connection connection;
+    Statement statement;
+    ResultSet resultSet;
+    //
+    // processing related
+    //
+    String html = "";
+    String row = "";
+    StringBuffer buffer = new StringBuffer();
+    //
+    // globals
+    //
+    HttpServletRequest request;
+    HttpServletResponse response;
+    boolean initialized = false;
+    Properties props;
+    Properties p;
+    String message = null;
+    //
+    // support
+    //
+    String dq = "\"";
+    String comma = ",";
+    String cr = "\n";
 
-	public JMSProxy proxy = null;
+    JMSProxy proxy = null;
 
-	//
-	// statics for recovery thread
-	//
+    //
+    // statics for recovery thread
+    //
 
-	public static RecoveryService recoveryService = null;
-	public static String status = "";
-	public static long skipped = 0;
-	public static long processed = 0;
-	public static long errors = 0;
-	public static boolean replayall = false;
+    static RecoveryService recoveryService = null;
+    static String replayStatus = "";
+    static long replayRecordsSkipped = 0;
+    static long replayRecordsProcessed = 0;
+    static long errors = 0;
+    static boolean replayall = false;
 
-	public void initialize()
-	{
-		p = net.sf.gratia.util.Configuration.getProperties();
-		try
-		{
-			proxy = (JMSProxy) Naming.lookup(p.getProperty("service.rmi.rmilookup") +
-					p.getProperty("service.rmi.service"));
-		}
-		catch (Exception e)
-		{
-			Logging.warning(xp.parseException(e));
-		}
-	}
+    public void initialize() {
+        p = net.sf.gratia.util.Configuration.getProperties();
+        try {
+            proxy = (JMSProxy) Naming.lookup(p.getProperty("service.rmi.rmilookup") +
+                                             p.getProperty("service.rmi.service"));
+        }
+        catch (Exception e) {
+            Logging.warning("SystemAdministration: Caught exception during RMI lookup", e);
+        }
+    }
 
-	public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
-	{
-		String fqan = (String) request.getSession().getAttribute("FQAN");
-		boolean login = true;
-		if (fqan == null)
-			login = false;
-		else if (fqan.indexOf("NoPrivileges") > -1)
-			login = false;
-		
-		String uriPart = request.getRequestURI();
-		int slash2 = uriPart.substring(1).indexOf("/") + 1;
-		uriPart = uriPart.substring(slash2);
-		String queryPart = request.getQueryString();
-		if (queryPart == null)
-			queryPart = "";
-		else
-			queryPart = "?" + queryPart;
+    public void doGet(HttpServletRequest request, HttpServletResponse response)
+        throws ServletException, IOException {
+        String fqan = (String) request.getSession().getAttribute("FQAN");
+        boolean login = true;
+        if (fqan == null)
+            login = false;
+        else if (fqan.indexOf("NoPrivileges") > -1)
+            login = false;
+                
+        String uriPart = request.getRequestURI();
+        int slash2 = uriPart.substring(1).indexOf("/") + 1;
+        uriPart = uriPart.substring(slash2);
+        String queryPart = request.getQueryString();
+        if (queryPart == null)
+            queryPart = "";
+        else
+            queryPart = "?" + queryPart;
 
-		request.getSession().setAttribute("displayLink", "." + uriPart + queryPart);
+        request.getSession().setAttribute("displayLink", "." + uriPart + queryPart);
 
-		if (!login)
-            	{
-               		Properties p = Configuration.getProperties();
-                	String loginLink = p.getProperty("service.secure.connection") + request.getContextPath() + "/gratia-login.jsp";
-			String redirectLocation = response.encodeRedirectURL(loginLink);
-			response.sendRedirect(redirectLocation);
-			request.getSession().setAttribute("displayLink", "." + uriPart + queryPart);
-            	}
-		else
-		{
-			initialize();
-			this.request = request;
-			this.response = response;
-			if (request.getParameter("action") != null)
-			{
-				if (request.getParameter("action").equals("replay"))
-					replay();
-				else if (request.getParameter("action").equals("replayAll"))
-					replayAll();
-				else if (request.getParameter("action").equals("stopDatabaseUpdateThreads"))
-					stopDatabaseUpdateThreads();
-				else if (request.getParameter("action").equals("startDatabaseUpdateThreads"))
-					startDatabaseUpdateThreads();
-			}
-			setup();
-			process();
-			response.setContentType("text/html");
-			response.setHeader("Cache-Control", "no-cache"); // HTTP 1.1
-			response.setHeader("Pragma", "no-cache"); // HTTP 1.0
-			PrintWriter writer = response.getWriter();
-			writer.write(html);
-			writer.flush();
-			writer.close();
-		}
-	}
+        if (!login) {
+            Properties p = Configuration.getProperties();
+            String loginLink = p.getProperty("service.secure.connection") + request.getContextPath() + "/gratia-login.jsp";
+            String redirectLocation = response.encodeRedirectURL(loginLink);
+            response.sendRedirect(redirectLocation);
+            request.getSession().setAttribute("displayLink", "." + uriPart + queryPart);
+        } else {
+            initialize();
+            this.request = request;
+            this.response = response;
+            if (request.getParameter("action") != null) {
+                String action = request.getParameter("action");
+                if (action.equals("replay")) {
+                    replay();
+                } else if (action.equals("replayAll")) {
+                    replayAll();
+                } else { // Proxy operation
+                    executeProxyAction(request.getParameter("action"));
+                }
+            }
+            setup();
+            process();
+            response.setContentType("text/html");
+            response.setHeader("Cache-Control", "no-cache"); // HTTP 1.1
+            response.setHeader("Pragma", "no-cache"); // HTTP 1.0
+            PrintWriter writer = response.getWriter();
+            writer.write(html);
+            writer.flush();
+            writer.close();
+        }
+    }
 
-	public void setup()
-	{
-		html = xp.get(request.getRealPath("/") + "systemadministration.html");
-	}
+    public void setup() {
+        html = XP.get(request.getRealPath("/") + "systemadministration.html");
+    }
 
-	public void process()
-	{
-		String status = "Active";
+    public void process() {
+        String operationsStatus = "Unknown";
+        String listenerStatus = "Unknown";
+        String replicationStatus = "Unknown";
+        String servletStatus = "Unknown";
 
-		html = xp.replaceAll(html,"#status#",SystemAdministration.status);
-		html = xp.replaceAll(html,"#processed#","" + SystemAdministration.processed);
-		html = xp.replaceAll(html,"#skipped#","" + SystemAdministration.skipped);
+        try {
+            Boolean flag = proxy.operationsDisabled();
+            if (flag) {
+                operationsStatus = "Safe";
+            } else {
+                operationsStatus = "Active";
+                flag = proxy.databaseUpdateThreadsActive();
+                if (flag) {
+                    listenerStatus = "Active";
+                } else {
+                    listenerStatus = "Stopped";
+                }
+                flag = proxy.replicationServiceActive();
+                if (flag) {
+                    replicationStatus = "Active";
+                } else {
+                    replicationStatus = "Stopped";
+                }
+                flag = proxy.servletEnabled();
+                if (flag) {
+                   servletStatus = "Active";
+                } else {
+                   servletStatus = "Stopped";
+                }
+            }
+        }
+        catch (Exception e) {
+            Logging.warning("SystemAdministration.process: Caught exception assessing operational status via proxy", e);
+        }
 
-		try
-		{
-			boolean flag = proxy.databaseUpdateThreadsActive();
-			if (flag)
-				status = "Alive";
-			else
-				status = "Stopped";
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-		html = xp.replaceAll(html,"#threadstatus#",status);
-	}
+        html = html.replaceAll("#date#", DateFormat.getDateTimeInstance().format(new Date()) + " UTC");
 
-	public void replay()
-	{
-		if (SystemAdministration.recoveryService != null)
-			if (SystemAdministration.recoveryService.isAlive())
-				return;
-		SystemAdministration.status = "Starting";
-		SystemAdministration.skipped = 0;
-		SystemAdministration.processed = 0;
-		SystemAdministration.replayall = false;
-		SystemAdministration.recoveryService = new RecoveryService();
-		SystemAdministration.recoveryService.start();
-	}
+        if (operationsStatus.equals("Safe")) {
+            html = html.replaceAll("#opstatus#",
+                                   "<font color=\"fuchsia\"><strong>DISABLED</strong></font>");
+            html = html.replaceAll("#opcomment#", 
+                                   "<a href=\"systemadministration.html?action=enableOperations\"><strong>Enable</strong></a><br />To disable safe mode start, set <tt>gratia.service.safeStart = 0</tt> in service-configuration.properties.");
+            listenerStatus = "Safe";
+            replicationStatus = "Safe";
+            servletStatus = "Safe";
+        } else if (operationsStatus.equals("Active")) {
+            html = html.replaceAll("#opstatus#",
+                                   "<font color=\"green\"><strong>ENABLED</strong></font>");
+            html = html.replaceAll("#opcomment#",
+                                   "To start in safe mode, set <tt>gratia.service.safeStart = 1</tt> in service-configuration.properties.");
+        } else {
+            html = html.replaceAll("#opstatus#",
+                                   "<font color=\"red\"><strong>UNKNOWN</strong></font>");
+            html = html.replaceAll("#opcomment#",
+                                   "Check logs for errors");
+        }
 
-	public void replayAll()
-	{
-		if (SystemAdministration.recoveryService != null)
-			if (SystemAdministration.recoveryService.isAlive())
-				return;
-		SystemAdministration.status = "Starting";
-		SystemAdministration.skipped = 0;
-		SystemAdministration.processed = 0;
-		SystemAdministration.replayall = true;
-		SystemAdministration.recoveryService = new RecoveryService();
-		SystemAdministration.recoveryService.start();
-	}
+        html = html.replaceAll("#replaystatus#", replayStatus);
+        html = html.replaceAll("#replayrecordsprocessed#","" + replayRecordsProcessed);
+        html = html.replaceAll("#replayrecordsskipped#","" + replayRecordsSkipped);
 
-	public void stopDatabaseUpdateThreads()
-	{
-		try
-		{
-			proxy.stopDatabaseUpdateThreads();
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-	}
+        if (listenerStatus.equals("Active")) {
+            html = html.replaceAll("#listenerstatus#",
+                                   "<font color=\"green\"><strong>ACTIVE</strong</font>");
+            html = html.replaceAll("#listenercomment#",
+                                   "<a href=\"systemadministration.html?action=stopDatabaseUpdateThreads\"><strong>Stop</strong></a>.");
+        } else if (listenerStatus.equals("Safe")) {
+            html = html.replaceAll("#listenerstatus#",
+                                   "<font color=\"fuchsia\"><strong>SAFE</strong</font>");
+            html = html.replaceAll("#listenercomment#",
+                                   "See <strong>Global Operational Status</strong>, above.");
+        } else if (listenerStatus.equals("Stopped")) {
+            html = html.replaceAll("#listenerstatus#",
+                                   "<font color=\"red\"><strong>STOPPED</strong</font>");
+            html = html.replaceAll("#listenercomment#",
+                                   "<a href=\"systemadministration.html?action=startDatabaseUpdateThreads\"><strong>Start</strong></a>.");
+        } else {
+            html = html.replaceAll("#listenerstatus#",
+                                   "<font color=\"red\"><strong>UNKNOWN</strong></font>");
+            html = html.replaceAll("#listenercomment#",
+                                   "Check log for errors.");
+        }
 
-	public void startDatabaseUpdateThreads()
-	{
-		try
-		{
-			proxy.startDatabaseUpdateThreads();
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-	}
+        if (replicationStatus.equals("Active")) {
+            html = html.replaceAll("#replicationstatus#",
+                                   "<font color=\"green\"><strong>ACTIVE</strong</font>");
+            html = html.replaceAll("#replicationcomment#",
+                                   "<a href=\"systemadministration.html?action=stopReplication\"><strong>Stop</strong></a>.");
+        } else if (replicationStatus.equals("Safe")) {
+            html = html.replaceAll("#replicationstatus#",
+                                   "<font color=\"fuchsia\"><strong>SAFE</strong</font>");
+            html = html.replaceAll("#replicationcomment#",
+                                   "See <strong>Global Operational Status</strong>, above.");
+        } else if (replicationStatus.equals("Stopped")) {
+            html = html.replaceAll("#replicationstatus#",
+                                   "<font color=\"red\"><strong>STOPPED</strong</font>");
+            html = html.replaceAll("#replicationcomment#",
+                                   "<a href=\"systemadministration.html?action=startReplication\"><strong>Start</strong></a>.");
+        } else {
+            html = html.replaceAll("#replicationstatus#",
+                                   "<font color=\"red\"><strong>UNKNOWN</strong></font>");
+            html = html.replaceAll("#replicationcomment#",
+                                   "Check log for errors.");
+        }
 
-	public class RecoveryService extends Thread
-	{
-		public String driver;
-		public String url;
-		public String user;
-		public String password;
+        if (servletStatus.equals("Active")) {
+            html = html.replaceAll("#servletstatus#",
+                                   "<font color=\"green\"><strong>ACTIVE</strong</font>");
+            html = html.replaceAll("#servletcomment#",
+                                   "<a href=\"systemadministration.html?action=disableServlet\"><strong>Stop</strong></a>.");
+        } else if (servletStatus.equals("Safe")) {
+            html = html.replaceAll("#servletstatus#",
+                                   "<font color=\"fuchsia\"><strong>SAFE</strong</font>");
+            html = html.replaceAll("#servletcomment#",
+                                   "See <strong>Global Operational Status</strong>, above.");
+        } else if (servletStatus.equals("Stopped")) {
+            html = html.replaceAll("#servletstatus#",
+                                   "<font color=\"red\"><strong>STOPPED</strong</font>");
+            html = html.replaceAll("#servletcomment#",
+                                   "<a href=\"systemadministration.html?action=enableServlet\"><strong>Start</strong></a>.");
+        } else {
+            html = html.replaceAll("#servletstatus#",
+                                   "<font color=\"red\"><strong>UNKNOWN</strong></font>");
+            html = html.replaceAll("#servletcomment#",
+                                   "Check log for errors.");
+        }
+    }
 
-		Connection connection;
-		Statement statement;
-		ResultSet resultSet;
+    public void replay() {
+        if ((SystemAdministration.recoveryService != null) &&
+            SystemAdministration.recoveryService.isAlive()) {
+            return;
+        }
+        SystemAdministration.replayStatus = "Starting";
+        SystemAdministration.replayRecordsSkipped = 0;
+        SystemAdministration.replayRecordsProcessed = 0;
+        SystemAdministration.replayall = false;
+        SystemAdministration.recoveryService = new RecoveryService();
+        SystemAdministration.recoveryService.start();
+    }
 
-		String command;
+    public void replayAll() {
+        if ((SystemAdministration.recoveryService != null) &&
+            SystemAdministration.recoveryService.isAlive()) {
+            return;
+        }
+        SystemAdministration.replayStatus = "Starting";
+        SystemAdministration.replayRecordsSkipped = 0;
+        SystemAdministration.replayRecordsProcessed = 0;
+        SystemAdministration.replayall = true;
+        SystemAdministration.recoveryService = new RecoveryService();
+        SystemAdministration.recoveryService.start();
+    }
 
-		Properties p;
+    public void executeProxyAction(String action) {
+        try {
+            if (action.equals("stopDatabaseUpdateThreads")) {
+                proxy.stopDatabaseUpdateThreads();
+            } else if (action.equals("startDatabaseUpdateThreads")) {
+                proxy.startDatabaseUpdateThreads();
+            } else if (action.equals("enableOperations")) {
+                proxy.enableOperations();
+            } else if (action.equals("startReplication")) {
+                proxy.startReplicationService();
+            } else if (action.equals("stopReplication")) {
+                proxy.stopReplicationService();
+            } else if (action.equals("enableServlet")) {
+                proxy.enableServlet();
+            } else if (action.equals("disableServlet")) {
+                proxy.disableServlet();
+            } else {
+                Logging.warning("SystemAdministration.executeProxyAction called with unknown action " + action);
+            }
+            
+        }
+        catch (Exception e) {
+            Logging.warning("SystemAdministration.executeProxyAction: Caught exception during proxy operation", e);
+        }
+    }
 
-		XP xp = new XP();
+    private class RecoveryService extends Thread {
+        String driver;
+        String url;
+        String user;
+        String password;
 
-		Vector history = new Vector();
-		String filenames[] = new String[0];
-		java.util.Date databaseDate = null;
+        Connection connection;
+        Statement statement;
+        ResultSet resultSet;
 
-		int irecords = 0;
+        String command;
 
-		public RecoveryService()
-		{
-			System.out.println("RecoveryService: Starting");
-			SystemAdministration.status = "RecoveryService: Starting";
+        Properties p;
 
-			p = net.sf.gratia.util.Configuration.getProperties();
-			driver = p.getProperty("service.mysql.driver");
-			url = p.getProperty("service.mysql.url");
-			user = p.getProperty("service.mysql.user");
-			password = p.getProperty("service.mysql.password");
-			openConnection();
-			getDirectories();
-			getDatabaseDate();
-		}
+        Vector history = new Vector();
+        String filenames[] = new String[0];
+        java.util.Date databaseDate = null;
 
-		public void openConnection()
-		{
-			try
-			{
-				Class.forName(driver).newInstance();
-				connection = null;
-				connection = DriverManager.getConnection(url,user,password);
-			}
-			catch (Exception e)
-			{
-			}
-		}
+        int irecords = 0;
 
-		public void getDirectories()
-		{
-			int i = 0;
-			Vector vector = new Vector();
-			String path = System.getProperties().getProperty("catalina.home") + "/gratia/data";
-			path = xp.replaceAll(path,"\\","/");
-			System.out.println("RecoveryService: Path: " + path);
-			String temp[] = xp.getDirectoryList(path);
-			for (i = 0; i < temp.length; i++)
-				if (temp[i].indexOf("history") > -1)
-					history.add(temp[i]);
-			System.out.println("RecoveryService: Directories To Process: " + history.size());
-		}
+        public RecoveryService() {
+            Logging.info("RecoveryService: Starting");
+            SystemAdministration.replayStatus = "RecoveryService: Starting";
 
-		public void getDatabaseDate()
-		{
-			long days = Long.parseLong(p.getProperty("maintain.history.log"));
-			long now = (new java.util.Date()).getTime();
-			databaseDate = new java.util.Date(now - (days * 24 * 60 * 1000));
+            p = net.sf.gratia.util.Configuration.getProperties();
+            driver = p.getProperty("service.mysql.driver");
+            url = p.getProperty("service.mysql.url");
+            user = p.getProperty("service.mysql.user");
+            password = p.getProperty("service.mysql.password");
+            openConnection();
+            getDirectories();
+            getDatabaseDate();
+        }
 
-			command = "select max(ServerDate) from JobUsageRecord_Meta";
-			try
-			{
-				statement = connection.prepareStatement(command);
-				resultSet = statement.executeQuery(command);
-				while(resultSet.next())
-				{
-					Timestamp timestamp = resultSet.getTimestamp(1);
-					if (timestamp != null)
-						databaseDate = new java.util.Date(timestamp.getTime());
-				}
-				resultSet.close();
-				statement.close();
-			}
-			catch (Exception e)
-			{
-				e.printStackTrace();
-			}
+        public void openConnection() {
+            try {
+                Class.forName(driver).newInstance();
+                connection = null;
+                connection = DriverManager.getConnection(url,user,password);
+            }
+            catch (Exception e) {
+            }
+        }
 
-			long temp = databaseDate.getTime() - (5 * 60 * 1000);
-			databaseDate = new java.util.Date(temp);
-			System.out.println("RecoveryService: Recovering From: " + databaseDate);
-		}
+        public void getDirectories() {
+            int i = 0;
+            Vector vector = new Vector();
+            String path = System.getProperties().getProperty("catalina.home") + "/gratia/data";
+            path = path.replaceAll("\\\\","/");
+            Logging.debug("RecoveryService: Path: " + path);
+            String temp[] = XP.getDirectoryList(path);
+            for (i = 0; i < temp.length; i++)
+                if (temp[i].indexOf("history") > -1)
+                    history.add(temp[i]);
+            Logging.log("RecoveryService: Directories To Process: " + history.size());
+        }
 
-		public void recoverRecord(String data, String filename)
-		{
-			String connection = p.getProperty("service.open.connection");
-			Post post = null;
+        public void getDatabaseDate() {
+            long days = Long.parseLong(p.getProperty("maintain.history.log"));
+            long now = (new java.util.Date()).getTime();
+            databaseDate = new java.util.Date(now - (days * 24 * 60 * 1000));
 
-			StringTokenizer st = new StringTokenizer(data,"|");
-			st.nextToken();
-			String timestamp = st.nextToken();
-			java.util.Date recordDate = new java.util.Date(Long.parseLong(timestamp));
+            command = "select max(ServerDate) from JobUsageRecord_Meta";
+            try {
+                statement = connection.prepareStatement(command);
+                resultSet = statement.executeQuery(command);
+                while(resultSet.next()) {
+                    Timestamp timestamp = resultSet.getTimestamp(1);
+                    if (timestamp != null)
+                        databaseDate = new java.util.Date(timestamp.getTime());
+                }
+                resultSet.close();
+                statement.close();
+            }
+            catch (Exception e) {
+                Logging.warning("RecoveryService: received exception getting database date.", e);
+            }
 
-			if (SystemAdministration.replayall || recordDate.after(databaseDate))
-			{
-				post = new Post(connection + "/gratia-servlets/rmi","update",data);
-				try
-				{
-					irecords++;
-					post.send();
-					SystemAdministration.processed++;
-					System.out.println("RecoveryService: Sent: " + irecords + ":" + filename + " :Timestamp: " + recordDate);
-					SystemAdministration.status = "RecoveryService: Sent: " + irecords + ":" + filename + " :Timestamp: " + recordDate;
-				}
-				catch (Exception e)
-				{
-					System.out.println("RecoveryService: Error Sending: " + filename + " Error: " + e);
-					return;
-				}
-			}
-			else
-			{
-				SystemAdministration.skipped++;
-				System.out.println("RecoveryService: Skipping: " + filename + " :Timestamp: " + recordDate);
-				SystemAdministration.status = "RecoveryService: Skipping: " + filename + " :Timestamp: " + recordDate;
-			}
-		}
+            long temp = databaseDate.getTime() - (5 * 60 * 1000);
+            databaseDate = new java.util.Date(temp);
+            Logging.info("RecoveryService: Recovering From: " + databaseDate);
+        }
 
-		public void run()
-		{
-			String directory = "";
-			System.out.println("RecoveryService: Started");
-			for (int i = 0; i < history.size(); i++)
-			{
-				directory = (String) history.elementAt(i);
-				recover(directory);
-			}
-			System.out.println("RecoveryService: Exiting");
-			SystemAdministration.status = "Finished";
-		}
+        public void recoverRecord(String data, String filename) {
+            String connection = p.getProperty("service.open.connection");
+            Post post = null;
 
-		public void recoverArchiveEntry(TarInputStream tin, TarEntry tarEntry) throws java.io.IOException
-		{
-			if (tarEntry.isDirectory()) {
+            StringTokenizer st = new StringTokenizer(data,"|");
+            st.nextToken();
+            String timestamp = st.nextToken();
+            java.util.Date recordDate = new java.util.Date(Long.parseLong(timestamp));
 
-				// Ignore directories
+            if (SystemAdministration.replayall || recordDate.after(databaseDate)) {
+                post = new Post(connection + "/gratia-servlets/rmi","update",data);
+                try {
+                    irecords++;
+                    post.send();
+                    SystemAdministration.replayRecordsProcessed++;
+                    Logging.debug("RecoveryService: Sent: " + irecords + ":" + filename + " :Timestamp: " + recordDate);
+                    SystemAdministration.replayStatus = "RecoveryService: Sent: " + irecords + ":" + filename + " :Timestamp: " + recordDate;
+                }
+                catch (Exception e) {
+                    Logging.warning("RecoveryService: Error Sending " + filename, e);
+                    return;
+                }
+            } else {
+                SystemAdministration.replayRecordsSkipped++;
+                Logging.debug("RecoveryService: Skipping: " + filename + " :Timestamp: " + recordDate);
+                SystemAdministration.replayStatus = "RecoveryService: Skipping: " + filename + " :Timestamp: " + recordDate;
+            }
+        }
 
-			} else {
+        public void run() {
+            String directory = "";
+            Logging.info("RecoveryService: Started");
+            for (int i = 0; i < history.size(); i++) {
+                directory = (String) history.elementAt(i);
+                recover(directory);
+            }
+            Logging.info("RecoveryService: Exiting");
+            SystemAdministration.replayStatus = "Finished";
+        }
 
-				System.out.println("RecoveryService: Processing Entry: " + tarEntry.getName());
-				//create a file with the same name as the tarEntry
-				int size=(int)tarEntry.getSize();
-				// -1 means unknown size.
-				if (size==-1) {
-					size=1000; // ((Integer)htSizes.get(ze.getName())).intValue();
-				}
-				byte[] b=new byte[(int)size];
-				int rb=0;
-				int chunk=0;
-				while (((int)size - rb) > 0) {
-					chunk=tin.read(b,rb,(int)size - rb);
-					if (chunk==-1) {
-						break;
-					}
-					rb+=chunk;
-				}
-				String data = new String(b);
-				recoverRecord(data,tarEntry.getName());
-			}
-		}
+        public void recoverArchiveEntry(TarInputStream tin, TarEntry tarEntry)
+            throws java.io.IOException {
+            if (tarEntry.isDirectory()) {
+                // Ignore directories
+            } else {
+                Logging.debug("RecoveryService: Processing Entry: " + tarEntry.getName());
+                //create a file with the same name as the tarEntry
+                int size=(int)tarEntry.getSize();
+                // -1 means unknown size.
+                if (size==-1) {
+                    size=1000; // ((Integer)htSizes.get(ze.getName())).intValue();
+                }
+                byte[] b=new byte[(int)size];
+                int rb=0;
+                int chunk=0;
+                while (((int)size - rb) > 0) {
+                    chunk=tin.read(b,rb,(int)size - rb);
+                    if (chunk==-1) {
+                        break;
+                    }
+                    rb+=chunk;
+                }
+                String data = new String(b);
+                recoverRecord(data,tarEntry.getName());
+            }
+        }
 
-		public void recoverArchive(File archive)
-		{
-			System.out.println("RecoveryService: Processing Archive: " + archive.getAbsolutePath());
-			try
-			{
-				FileInputStream fis = new FileInputStream(archive);
-				System.out.println("RecoveryService: Processing Archive 2: " + archive.getName());
+        public void recoverArchive(File archive) {
+            Logging.debug("RecoveryService: Processing Archive: " + archive.getAbsolutePath());
+            try {
+                FileInputStream fis = new FileInputStream(archive);
+                Logging.debug("RecoveryService: Processing Archive 2: " + archive.getName());
 
-				byte skip[] = new byte[2];
-				fis.read(skip,0,2);
+                byte skip[] = new byte[2];
+                fis.read(skip,0,2);
 
-				CBZip2InputStream gzipInputStream = new CBZip2InputStream(fis);
+                CBZip2InputStream gzipInputStream = new CBZip2InputStream(fis);
 
-				System.out.println("RecoveryService: Processing Archive 3: " + archive.getName());
+                Logging.debug("RecoveryService: Processing Archive 3: " + archive.getName());
 
-				// Byte skip[] = new Byte[2];
-				// gzipInputStream.read(skip,0,2);
+                // Byte skip[] = new Byte[2];
+                // gzipInputStream.read(skip,0,2);
 
-				TarInputStream tin = new TarInputStream( gzipInputStream );
+                TarInputStream tin = new TarInputStream( gzipInputStream );
 
-				System.out.println("RecoveryService: Processing Archive 4: " + archive.getName());
+                Logging.debug("RecoveryService: Processing Archive 4: " + archive.getName());
 
-				TarEntry tarEntry = tin.getNextEntry();
+                TarEntry tarEntry = tin.getNextEntry();
 
-				System.out.println("RecoveryService: Processing Archive 5: " + archive.getName());
+                Logging.debug("RecoveryService: Processing Archive 5: " + archive.getName());
 
-				while (tarEntry != null)
-				{
-					recoverArchiveEntry(tin,tarEntry);
-					tarEntry = tin.getNextEntry();
-				}
+                while (tarEntry != null)
+                    {
+                        recoverArchiveEntry(tin,tarEntry);
+                        tarEntry = tin.getNextEntry();
+                    }
 
-				// Close the file and stream
-				tin.close();
-			}
-			catch (Exception e)
-			{
-				System.out.println("recoverArchive: failed to processed file "+archive.getName()+"\nError: "+e.toString());
-				e.printStackTrace();
-			}
-		}
+                // Close the file and stream
+                tin.close();
+            }
+            catch (Exception e) {
+                Logging.warning("recoverArchive: failed to processed file " +
+                                archive.getName(), e);
+            }
+        }
 
-		public void recover(String directory)
-		{
-			recoverDirectory(new File(directory));
-		}
+        public void recover(String directory) {
+            recoverDirectory(new File(directory));
+        }
 
-		public void recoverFile(File file)
-		{
-			String blob = xp.get(file);
-			recoverRecord(blob,file.getName());
-		}
+        public void recoverFile(File file) {
+            String blob = XP.get(file);
+            recoverRecord(blob,file.getName());
+        }
 
-		public void recoverDirectory(File directory)
-		{
-			System.out.println("RecoveryService: Processing Directory: " + directory.getName());
+        public void recoverDirectory(File directory) {
+            Logging.log("RecoveryService: Processing Directory: " + directory.getName());
 
-			int i = 0;
+            int i = 0;
 
-			File filelist[] = directory.listFiles();
+            File filelist[] = directory.listFiles();
 
-			for (i = 0; i < filelist.length; i++)
-			{
-				File current = filelist[i];
-				System.out.println("RecoveryService: sub-processing "+current.getName());
-				if (current.isDirectory()) {
-					recoverDirectory(current);
-				} else if (current.getName().endsWith(".tar.bz2")) {
-					recoverArchive(current);
-				} else {
-					recoverFile(current);
-				}
-			}
-		}
-	}
+            for (i = 0; i < filelist.length; i++) {
+                File current = filelist[i];
+                Logging.debug("RecoveryService: sub-processing "+current.getName());
+                if (current.isDirectory()) {
+                    recoverDirectory(current);
+                } else if (current.getName().endsWith(".tar.bz2")) {
+                    recoverArchive(current);
+                } else {
+                    recoverFile(current);
+                }
+            }
+        }
+    }
 }

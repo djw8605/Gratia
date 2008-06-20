@@ -56,7 +56,7 @@ public class JMSProxyImpl extends UnicastRemoteObject implements JMSProxy {
         }
     }
 
-    public boolean update(String xml) throws RemoteException {
+    public Boolean update(String xml) throws RemoteException {
         irecords++;
 
         if ((irecords % 100) == 0) {
@@ -81,7 +81,7 @@ public class JMSProxyImpl extends UnicastRemoteObject implements JMSProxy {
         return false;
     }
 
-    public boolean handshake(String xml) throws RemoteException {
+    public Boolean handshake(String xml) throws RemoteException {
         ProbeStatusUpdate update = new ProbeStatusUpdate();
 
         update.update(xml);
@@ -97,7 +97,40 @@ public class JMSProxyImpl extends UnicastRemoteObject implements JMSProxy {
         collectorService.startDatabaseUpdateThreads();
     }
 
-    public boolean databaseUpdateThreadsActive() throws RemoteException {
+    public Boolean databaseUpdateThreadsActive() throws RemoteException {
         return collectorService.databaseUpdateThreadsActive();
     }
+
+    public Boolean operationsDisabled() throws RemoteException {
+        return collectorService.operationsDisabled();
+    }
+
+    public void enableOperations() throws RemoteException {
+        collectorService.enableOperations();
+    }
+
+    public Boolean replicationServiceActive() throws RemoteException {
+        return collectorService.replicationServiceActive();
+    }
+
+    public void startReplicationService() throws RemoteException {
+        collectorService.startReplicationService();
+    }
+
+    public void stopReplicationService() throws RemoteException {
+        collectorService.stopReplicationService();
+    }
+
+    public Boolean servletEnabled() throws RemoteException {
+        return collectorService.servletEnabled();
+    }
+
+    public void enableServlet() throws RemoteException {
+        collectorService.enableServlet();
+    }
+
+    public void disableServlet() throws RemoteException {
+        collectorService.disableServlet();
+    }
+
 }
