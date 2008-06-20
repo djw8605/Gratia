@@ -334,7 +334,7 @@ reports:
 	cp -p ${reports}/WebContent/WEB-INF/web.xml          war/WEB-INF/web.xml
 	cp -p ${reports}/WebContent/MenuConfig/*.xml         war/MenuConfig
 	cp -p ${reports}/WebContent/reports/production-osg/*.rptdesign            war/reports
-	cp -p ${reports}/WebContent/reports/production-fermi/*.rptlibrary war/reports
+	-cp -p ${reports}/WebContent/reports/production-fermi/*.rptlibrary war/reports
 	cp -p ${reports}/WebContent/reports/production-osg/*.rptlibrary war/reports
 	cp -p ${reports}/WebContent/reports/production-osgdaily/*.rptdesign            war/reports
 	cp -p ${reports}/WebContent/reports/production-fermi/*.rptdesign      war/reports
