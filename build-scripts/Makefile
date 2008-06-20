@@ -40,7 +40,7 @@ reportsrc=${reporting}/gratia-reporting
 staticScript=$(reportsrc)/WebContent/staticReports
 birtDir=${reporting}/birt-wars
 #birtwarFile=birt-v220.war
-birtwarFile=birt-v230-S20080618.war
+birtwarFile=birt-v230-S20080619.war
 
 # common modules
 configuration=${common}/configuration
@@ -334,7 +334,8 @@ reports:
 	cp -p ${reports}/WebContent/WEB-INF/web.xml          war/WEB-INF/web.xml
 	cp -p ${reports}/WebContent/MenuConfig/*.xml         war/MenuConfig
 	cp -p ${reports}/WebContent/reports/production-osg/*.rptdesign            war/reports
-	cp -p ${reports}/WebContent/reports/production-osg/gratia-lib1.rptlibrary war/reports
+	-cp -p ${reports}/WebContent/reports/production-osg/*.rptlibrary war/reports
+	-cp -p ${reports}/WebContent/reports/production-fermi/*.rptlibrary war/reports
 	cp -p ${reports}/WebContent/reports/production-osgdaily/*.rptdesign            war/reports
 	cp -p ${reports}/WebContent/reports/production-fermi/*.rptdesign      war/reports
 	${copy_util_lib}
