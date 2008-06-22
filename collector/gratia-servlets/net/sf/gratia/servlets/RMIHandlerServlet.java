@@ -21,16 +21,14 @@ public class RMIHandlerServlet extends HttpServlet
     static JMSProxy proxy = null;
     static URLDecoder D;
 
-    private void lookupProxy() {
-        synchronized (proxy) {
-            if (proxy != null) {
-                try {
-                    proxy = (JMSProxy) Naming.lookup(p.getProperty("service.rmi.rmilookup") +
-                                                     p.getProperty("service.rmi.service"));
-                }
-                catch (Exception e) {
-                    Logging.warning("RMIHandlerServlet caught exception doing RMI lookup: ", e);
-                }
+    private synchronized void lookupProxy() {
+        if (proxy == null) {
+            try {
+                proxy = (JMSProxy) Naming.lookup(p.getProperty("service.rmi.rmilookup") +
+                                                 p.getProperty("service.rmi.service"));
+            }
+            catch (Exception e) {
+                Logging.warning("RMIHandlerServlet caught exception doing RMI lookup: ", e);
             }
         }
     }
