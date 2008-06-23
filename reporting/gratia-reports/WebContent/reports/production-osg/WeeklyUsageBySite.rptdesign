@@ -2,251 +2,46 @@
 <report xmlns="http://www.eclipse.org/birt/2005/design" version="3.2.14" id="1">
     <property name="createdBy">Eclipse BIRT Designer Version 2.0.1 Build &lt;20060222-1204></property>
     <property name="units">in</property>
-    <list-property name="propertyBindings">
-        <structure>
-            <property name="name">odaDriverClass</property>
-            <property name="id">4</property>
-        </structure>
-        <structure>
-            <property name="name">odaURL</property>
-            <property name="id">4</property>
-            <expression name="value">params["DatabaseURL"]</expression>
-        </structure>
-        <structure>
-            <property name="name">odaUser</property>
-            <property name="id">4</property>
-            <expression name="value">params["DatabaseUser"]</expression>
-        </structure>
-        <structure>
-            <property name="name">odaPassword</property>
-            <property name="id">4</property>
-            <expression name="value">params["DatabasePassword"]</expression>
-        </structure>
-    </list-property>
     <property name="eventHandlerClass">net.sf.gratia.reporting.GratiaBirtReportEH</property>
     <list-property name="libraries">
-        <structure>
-            <property name="fileName">gratia-lib1.rptlibrary</property>
-            <property name="namespace">gratia-lib1</property>
-        </structure>
         <structure>
             <property name="fileName">reporting/reportLib.rptlibrary</property>
             <property name="namespace">reportLib</property>
         </structure>
     </list-property>
-    <list-property name="configVars">
-        <structure>
-            <property name="name">GroupByFormat</property>
-            <property name="value">%Y-%U</property>
-        </structure>
-        <structure>
-            <property name="name">HighlightDate</property>
-        </structure>
-        <structure>
-            <property name="name">UserName</property>
-            <property name="value">None</property>
-        </structure>
-        <structure>
-            <property name="name">UserRole</property>
-            <property name="value">None</property>
-        </structure>
-    </list-property>
     <parameters>
-        <parameter-group name="DatabaseAccess" id="84">
-            <parameters>
-                <scalar-parameter name="DatabaseURL" id="81">
-                    <property name="hidden">true</property>
-                    <property name="valueType">static</property>
-                    <property name="dataType">string</property>
-                    <property name="isRequired">true</property>
-                    <property name="controlType">text-box</property>
-                    <property name="defaultValue">jdbc:mysql://gratia-vm02.fnal.gov:3320/gratia_jeffmack</property>
-                    <structure name="format">
-                        <property name="category">Unformatted</property>
-                        <property name="pattern">Unformatted</property>
-                    </structure>
-                </scalar-parameter>
-                <scalar-parameter name="DatabaseUser" id="83">
-                    <property name="hidden">true</property>
-                    <property name="valueType">static</property>
-                    <property name="dataType">string</property>
-                    <property name="isRequired">true</property>
-                    <property name="controlType">text-box</property>
-                    <property name="defaultValue">reader</property>
-                    <structure name="format">
-                        <property name="category">Unformatted</property>
-                        <property name="pattern">Unformatted</property>
-                    </structure>
-                </scalar-parameter>
-                <scalar-parameter name="DatabasePassword" id="82">
-                    <property name="hidden">true</property>
-                    <property name="valueType">static</property>
-                    <property name="dataType">string</property>
-                    <property name="isRequired">true</property>
-                    <property name="controlType">text-box</property>
-                    <property name="defaultValue">reader</property>
-                    <structure name="format">
-                        <property name="category">Unformatted</property>
-                        <property name="pattern">Unformatted</property>
-                    </structure>
-                </scalar-parameter>
-            </parameters>
-        </parameter-group>
-        <scalar-parameter name="GroupByFormat" id="95">
-            <property name="hidden">true</property>
-            <property name="valueType">static</property>
-            <property name="dataType">string</property>
-            <property name="concealValue">true</property>
-            <property name="isRequired">false</property>
-            <property name="controlType">text-box</property>
-            <property name="defaultValue">%Y-%U</property>
-            <structure name="format">
-                <property name="category">Unformatted</property>
-                <property name="pattern">Unformatted</property>
-            </structure>
-        </scalar-parameter>
-        <scalar-parameter name="HighlightDate" id="98">
-            <property name="hidden">true</property>
-            <property name="valueType">static</property>
-            <property name="dataType">string</property>
-            <property name="isRequired">false</property>
-            <property name="controlType">text-box</property>
-            <structure name="format">
-                <property name="category">Unformatted</property>
-                <property name="pattern">Unformatted</property>
-            </structure>
-        </scalar-parameter>
-        <scalar-parameter name="UserName" id="104">
-            <property name="hidden">true</property>
-            <property name="valueType">static</property>
-            <property name="dataType">string</property>
-            <property name="concealValue">true</property>
-            <property name="isRequired">false</property>
-            <property name="controlType">text-box</property>
-            <property name="defaultValue">None</property>
-            <structure name="format">
-                <property name="category">Unformatted</property>
-                <property name="pattern">Unformatted</property>
-            </structure>
-        </scalar-parameter>
-        <scalar-parameter name="UserRole" id="103">
-            <property name="hidden">true</property>
-            <property name="valueType">static</property>
-            <property name="dataType">string</property>
-            <property name="concealValue">true</property>
-            <property name="isRequired">false</property>
-            <property name="controlType">text-box</property>
-            <property name="defaultValue">None</property>
-            <structure name="format">
-                <property name="category">Unformatted</property>
-                <property name="pattern">Unformatted</property>
-            </structure>
-        </scalar-parameter>
-        <scalar-parameter name="SelectSites" id="106">
-            <text-property name="helpText">List of VO's to include/exclude in chart.</text-property>
-            <property name="valueType">static</property>
-            <property name="dataType">string</property>
-            <property name="controlType">text-box</property>
-            <property name="defaultValue">('FNAL_FERMIGRID_ITB','FNAL_FERMIGRID_ITB')</property>
-            <structure name="format">
-                <property name="category">Unformatted</property>
-            </structure>
-            <list-property name="boundDataColumns">
-                <structure>
-                    <property name="name">vos</property>
-                    <expression name="expression">dataSetRow["vos"]</expression>
-                </structure>
-                <structure>
-                    <property name="name">voname</property>
-                    <expression name="expression">dataSetRow["voname"]</expression>
-                </structure>
-            </list-property>
-        </scalar-parameter>
-        <scalar-parameter name="SelType" id="107">
-            <text-property name="helpText">Include or exclude VO's in list.</text-property>
-            <property name="valueType">static</property>
-            <property name="dataType">string</property>
-            <text-property name="promptText">Enter type of VO selection</text-property>
-            <property name="isRequired">true</property>
-            <property name="controlType">list-box</property>
-            <property name="mustMatch">true</property>
-            <property name="fixedOrder">true</property>
-            <property name="defaultValue">IN</property>
-            <property name="distinct">false</property>
-            <structure name="format">
-                <property name="category">Unformatted</property>
-                <property name="pattern">Unformatted</property>
-            </structure>
-            <list-property name="selectionList">
-                <structure>
-                    <property name="value">IN</property>
-                    <property name="label">Include</property>
-                </structure>
-                <structure>
-                    <property name="value">NOT</property>
-                    <property name="label">Exclude</property>
-                </structure>
-            </list-property>
-        </scalar-parameter>
-        <scalar-parameter name="DisplayMetric" id="111">
-            <property name="hidden">false</property>
-            <text-property name="helpText">Select metric for chart</text-property>
-            <property name="valueType">static</property>
-            <property name="dataType">string</property>
-            <text-property name="promptText">Select metric for chart</text-property>
-            <property name="isRequired">true</property>
-            <property name="controlType">list-box</property>
-            <property name="mustMatch">true</property>
-            <property name="fixedOrder">true</property>
-            <property name="defaultValue">wallclock</property>
-            <structure name="format">
-                <property name="category">Unformatted</property>
-                <property name="pattern">Unformatted</property>
-            </structure>
-            <list-property name="selectionList">
-                <structure>
-                    <property name="value">wallclock</property>
-                    <property name="label">Wallclock Hours</property>
-                </structure>
-                <structure>
-                    <property name="value">process</property>
-                    <property name="label">Process Hours</property>
-                </structure>
-                <structure>
-                    <property name="value">jobcount</property>
-                    <property name="label">Job Count</property>
-                </structure>
-            </list-property>
-        </scalar-parameter>
-        <parameter-group name="ReportInfo" id="126" extends="reportLib.ReportInfo"/>
+        <parameter-group name="MetricsFormatting" id="398" extends="reportLib.MetricsFormatting"/>
+        <scalar-parameter name="SelType" id="402" extends="reportLib.SelType"/>
+        <scalar-parameter name="SelectSites" id="396" extends="reportLib.SelectSites"/>
+        <parameter-group name="DatabaseAccess" id="401" extends="reportLib.DatabaseAccess"/>
+        <parameter-group name="ReportInfo" id="399" extends="reportLib.ReportInfo"/>
+        <parameter-group name="UserInfo" id="400" extends="reportLib.UserInfo"/>
     </parameters>
     <data-sources>
-        <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="Data Source" id="4">
-            <property name="odaDriverClass">com.mysql.jdbc.Driver</property>
-            <property name="odaURL">jdbc:mysql://gratia-vm02.fnal.gov:3320/gratia_jeffmack</property>
-            <property name="odaUser">reader</property>
-            <encrypted-property name="odaPassword">cmVhZGVy</encrypted-property>
-        </oda-data-source>
+        <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="Data Source" id="391"
+ extends="reportLib.gratia-db01_gratia_itb"/>
     </data-sources>
     <data-sets>
         <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="6MonthHistory" id="94">
             <list-property name="computedColumns">
                 <structure>
                     <property name="name">weekdate</property>
-                    <expression name="expression">var yearmon;
-var daynr = row["datevalue"].getDate().toString();
-var monthnr = (row["datevalue"].getMonth()+1).toString();
-var yearnr =  row["datevalue"].getYear().toString();
-if (yearnr.charAt(0) == '1') {yearnr = "20" + yearnr.charAt(1) + yearnr.charAt(2);}
+                    <expression name="expression">var daynr;
+var monthnr;
+var yearynr;
+var yearmon;
+daynr = row["datevalue"].getDate().toString();
+monthnr = ( row["datevalue"].getMonth()+1).toString();
+yearnr =  row["datevalue"].getFullYear().toString();
 if (monthnr.length > 1){
-	yearmon = yearnr  + "-" + monthnr;
+	yearmon = yearnr  + "-" + monthnr
 }else{
-	yearmon = yearnr  + "-0" +  monthnr;
+	yearmon = yearnr  + "-0" +  monthnr
 }
 if (daynr.length > 1){
-	yearmon + "-" + daynr;
+	yearmon + "-" + daynr
 }else{
-	yearmon  + "-0" +  daynr ;
+	yearmon  + "-0" +  daynr
 }</expression>
                     <property name="dataType">string</property>
                 </structure>
@@ -405,14 +200,7 @@ if (monthnr.toString().length > 1){
         </simple-master-page>
     </page-setup>
     <body>
-        <text-data id="109">
-            <property name="style">sans-style1</property>
-            <property name="fontFamily">sans-serif</property>
-            <property name="fontSize">9pt</property>
-            <property name="textAlign">center</property>
-            <expression name="valueExpr">if(params["SelType"] == "IN"){"Site\'s selected:  " + params["SelectSites"]}else{"Site\'s excluded:  " + params["SelectSites"]}</expression>
-            <property name="contentType">html</property>
-        </text-data>
+        <text-data name="SelectSites" id="390" extends="reportLib.SelectSites"/>
         <extended-item extensionName="Chart" name="MyChart" id="90">
             <xml-property name="xmlRepresentation"><![CDATA[<model:ChartWithAxes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:attribute="http://www.birt.eclipse.org/ChartModelAttribute" xmlns:data="http://www.birt.eclipse.org/ChartModelData" xmlns:layout="http://www.birt.eclipse.org/ChartModelLayout" xmlns:model="http://www.birt.eclipse.org/ChartModel" xmlns:type="http://www.birt.eclipse.org/ChartModelType">
   <Type>Bar Chart</Type>
@@ -700,7 +488,7 @@ if (monthnr.toString().length > 1){
  * ones you need. Note that for simplicity the &quot;after&quot; methods have not be included here.
  *
  * This script syntax follows JavaScript specifications, the Java classes that are referred to
- * in the comments can be accessed as JavaScript classes. 
+ * in the comments can be accessed as JavaScript classes.
  *
  * Script examples are available in the org.eclipse.birt.chart.examples plugin
  */
@@ -708,7 +496,7 @@ if (monthnr.toString().length > 1){
 
 /**
  * Called before populating the series dataset using the DataSetProcessor.
- * 
+ *
  * @param series
  *            Series
  * @param dataSetProcessor
@@ -720,14 +508,14 @@ if (monthnr.toString().length > 1){
 
 /**
  * Called before generation of chart model to GeneratedChartState.
- * 
+ *
  * @param chart
  *            Chart Model
  * @param context
  *            IChartScriptContext
  */
 function beforeGeneration( chart, context )
-{	
+{
 	rep = context.getExternalContext().getScriptable();
 	rep_title = rep.getParameterValue(&quot;ReportTitle&quot;);
 	rep_subtitle = rep.getParameterValue(&quot;ReportSubtitle&quot;);
@@ -735,7 +523,7 @@ function beforeGeneration( chart, context )
 }
 /**
  * Called before the chart is rendered.
- * 
+ *
  * @param gcs
  *            GeneratedChartState
  * @param context
@@ -745,7 +533,7 @@ function beforeGeneration( chart, context )
 
 /**
  * Called before drawing each block.
- * 
+ *
  * @param block
  *            Block
  * @param context
@@ -755,7 +543,7 @@ function beforeGeneration( chart, context )
 
 /**
  * Called before drawing each entry the legend.
- * 
+ *
  * @param label
  *            Label
  * @param context
@@ -765,7 +553,7 @@ function beforeGeneration( chart, context )
 
 /**
  * Called before rendering Series.
- * 
+ *
  * @param series
  *            Series
  * @param seriesRenderer
@@ -777,7 +565,7 @@ function beforeGeneration( chart, context )
 
 /**
  * Called before rendering the title of a Series.
- * 
+ *
  * @param series
  *            Series
  * @param label
@@ -789,7 +577,7 @@ function beforeGeneration( chart, context )
 
 /**
  * Called before drawing each marker line in an Axis.
- * 
+ *
  * @param axis
  *            Axis
  * @param markerLine
@@ -801,7 +589,7 @@ function beforeGeneration( chart, context )
 
 /**
  * Called before drawing each marker range in an Axis.
- * 
+ *
  * @param axis
  *            Axis
  * @param markerRange
@@ -813,7 +601,7 @@ function beforeGeneration( chart, context )
 
 /**
  * Called before drawing each datapoint graphical representation or marker.
- * 
+ *
  * @param dph
  *            DataPointHints
  * @param fill
@@ -825,7 +613,7 @@ function beforeGeneration( chart, context )
 
 /**
  * Called before rendering the label for each datapoint.
- * 
+ *
  * @param dph
  *            DataPointHints
  * @param label
@@ -837,7 +625,7 @@ function beforeGeneration( chart, context )
 
 /**
  * Called before rendering curve fitting.
- * 
+ *
  * @param cf
  *            CurveFitting
  * @param context
@@ -847,7 +635,7 @@ function beforeGeneration( chart, context )
 
 /**
  * Called before rendering each label on a given Axis.
- * 
+ *
  * @param axis
  *            Axis
  * @param label
@@ -855,21 +643,21 @@ function beforeGeneration( chart, context )
  * @param context
  *            IChartScriptContext
  */
-function beforeDrawAxisLabel( axis, label, context )
-{
-	rep = context.getExternalContext().getScriptable();
-	val = rep.getParameterValue(&quot;HighlightDate&quot;);
-	if(val == null)
-		val = &quot;&quot;;
-	if(val.equals(label.getCaption().getValue()))
-		label.getOutline().setVisible(true);
-	else
-		label.getOutline().setVisible(false);
-}
+//function beforeDrawAxisLabel( axis, label, context )
+//{
+//	rep = context.getExternalContext().getScriptable();
+//	val = rep.getParameterValue(&quot;HighlightDate&quot;);
+//	if(val == null)
+//		val = &quot;&quot;;
+//	if(val.equals(label.getCaption().getValue()))
+//		label.getOutline().setVisible(true);
+//	else
+//		label.getOutline().setVisible(false);
+//}
 
 /**
  * Called before rendering the Title of an Axis.
- * 
+ *
  * @param axis
  *            Axis
  * @param label
@@ -1145,7 +933,7 @@ else {&#xD;
     &lt;/list-property>
 &lt;/structure>
 </BaseUrl>
-                <BaseParameterName>ForWeek</BaseParameterName>
+                <BaseParameterName>StartDate</BaseParameterName>
                 <ValueParameterName></ValueParameterName>
                 <SeriesParameterName>ForSiteName</SeriesParameterName>
               </Value>
@@ -1658,7 +1446,87 @@ else {&#xD;
             </list-property>
             <property name="style">sans-style1</property>
         </extended-item>
-        <label name="ReportURL" id="123" extends="gratia-lib1.ReportURL"/>
-        <label name="ShowQuery" id="124" extends="gratia-lib1.ShowQuery"/>
+        <label name="ReportURL" id="392" extends="reportLib.ReportURL"/>
+        <label name="ShowQuery" id="393" extends="reportLib.ShowQuery"/>
     </body>
+    <list-property name="images">
+        <structure>
+            <property name="name">ReportURL.gif</property>
+            <property name="data">
+                R0lGODlhrgAeAHAAACwAAAAArgAeAIcAAAAgICAkJCAkJCQIQHk4ODgcUIEgVYFMTEwwXYkwYY1dXV08
+                ZY1hXV1hYV1hYWFAbZVEbZFtbW1xbW1xcW1xcXF9fX2BgX2BgYFlia5tiZ1pja6NiYlxka6NjYmNjY11
+                la55la55lbKRkY2RkZF5mbJ5mbZ9mbJ9mbZ9nbZ9nbqZmZmFobqdnZmdnZ2NqsKVqr6Vrr6VrsKVrsaq
+                qqWZrsKZssKZssaurqqdssadtsq2trK2tralvs66ura6urrCwr7CwsLGxsK2ytrGxsa+zt7OzsrS0s7S
+                0tLW1tLe2s7a2tre3tre3t7W4uri4t7e5urq5ubq6ubq6uru7uru7u7y7uru8vLu8vby8u729vL29vb2
+                +vr6+vb6+vr///r///8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+                AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+                AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+                AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+                AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+                AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+                AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+                AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+                AAAAAAAAAAAAAAAI/wDBgOFSpKDBgwgTKlzIsKHDhxAjSpxIUSIWgWBmEIDAsaPHjyBDihxJsqTJkyhT
+                qlyZksAGME4IQMFIs6bNmzhz6tzJs6fPn0CDCr2iYMiLDEKTKl3KtKnTpixUpEjxparVq1izat3KtavX
+                r2DDih1LlqwOFShQeFnLtq3bt3Djyp1Lt67du3jz6tV7Nu3ev4ADCx5MeHAOtGoLK17MuLHjtof9vkUw
+                oLJlBEnsYpCLYcDmx14si34AGm6Vz24pow49gIgXIqIrF0D9oAAJuzcQd9nNu0sBAKIBAH/Su3iXJwUG
+                GOfdGcPy59ChDwBuWXiB6Niz98Yx4Lrx3855T/8n0oWI8OAAKuwGrz132uXsd/+YPiK6eeXa8+vfPZ73
+                COFI7CcgcwB4V1x8/AFA3n29PQDcegCEh517KMAXYW8IPlAZAj90gcRvBdaHAAKwDYDECAXU5yFlAzxA
+                3IcI8IZcAVSsWJmLy/UnnoK7IcEijl3UNkIFlanHGw7JDYBAgLuNWOII03XHJG8IdtEfg0c+6NuF2eVm
+                gglbhCnmFuCFicQHwrkQ5m/dAYcEbOdhsEWUlW2BQYRbIDFdAb8VEOZ0am5BAQAI5Llnn2OKOV6YRDgA
+                XBOGFogomdQlB4ADYbpgXZQ//EmdZ9MBR0SiZSqq4Bb3iUnEpKUm6qqXYLr/+psAtAp3aZho+rkFmoUK
+                AYAAYgpA6BaQXgDABVsgcOsWjn6whbGFbiGsD8ku26yrwtIq7K+BKospswA4O+sUW/gAoLThhumorsIW
+                WmyBrlKKbLAACLGFr7/W+qu98sb7qgollKDFwARrMWsBwhYgBMHKNiCEEC38qoWvAhAsbAsEG3uBFhc/
+                PAGhWjBBKxPmVswxAC14DHLBJ/MpHAJMWIyyyggYDMAEMn9AMcEiCxDzxRkXyPLAv20s88L4unxswUUP
+                7XRuATvdtBAJEzyrtrROLPHAwi48sMYnYy1AzVosEK7ZRmeLNdkFd61FxAAsILPYNTdN9LE7H32y11oY
+                /1uA1EvrnbfZKFsduNMF2wCwwEP/ZsHANAgnwcBmT85yEAAEQHAAAARBsAUAPM45DU7zUGAAAcSsxeiI
+                b975wBIIR/rqAMzO9Mq084B5AFIMbLrmtHs+MOh/Nx43wUcId4QWuxue+t2Pt05wDYsDHn3ZwvHwduae
+                LxDA5LsH0TvnwmsB+uNmFyCFFAUEYDuIbKe/fvu2u17+b8DLz777NgPggRYeyNzdEHCEI/xGbsH7XIHK
+                R7AAxi0ILcDfwJo3sCNwjmy/QYAFNrjB3g2NeiIQQRZGSMIsOI6EUuBcAUZoNtRlzggj5FzossA5IJDw
+                fCPEnwpL6MAdlFCHBSohCf9rSMIdSC6HmduhCQuUOeGsYIRAkKF1hggAG47QiMKx4g9tJRz3QTFzJQRd
+                7ZbIxSwKcYQgFOEZPWABHxZxgzDMwgoWUAALLIGENBiRDzcYhTe6MQseGJEHzrjBNQryjCPkIw8VCchD
+                IrGNCFjAH0cYSAQM8oYW6CMJPVCABWhSiHPkkx1JGIVChtECg2QjBzn4yRKmEZGwjKUsZ0nLWtpylie8
+                pS53yUshykAFIeylMIdJzFrmspjILOYvg5nMZjpTl3TkwDOnecsYAFON1MymNrfJTVhaMwQhsII4x0nO
+                cprznOhMpzrXyc52uvOd8IxnPK0JAhBQ4Z74zKc+98mBz376858ADahAB0rQghrUoNY8QQcOytCGOvSh
+                EI0oRGGggiEYQAkYzahGN8rRjnr0oyANqUhHStKSmvSkJ42ADsDAgARo4KUwjalMZ0rTmtr0pjjNqU53
+                ytOe+pSnETgAFwTSAxUY9ahITapSl8rUpjr1qVCNqlSnStWqTnUGQw0IADs=
+            </property>
+        </structure>
+        <structure>
+            <property name="name">ShowQuery.gif</property>
+            <property name="data">
+                R0lGODlhcAAeAHAAACwAAAAAcAAeAIcAAAAgICAkJCAkJCQAPHU4ODgQSH0USH0gVYFMTEhMTEwoWYUo
+                WYkwXYk4ZZFdXV1hXV08aY1hYV1hYWFAbZVIcZFtbW1xcW1xcXF9fX2BgX2BgYFlia5tiZ1xka6NjYmN
+                jY11la55la55lbKRkY15mbJ5mbZ9mbJ9mbZ9nbZ9nbqZmZmFobqdnZmdnZ2NpbqNqsKVrr6VrsKqqqWZ
+                rsKZssKZssaurqqdssadtsq2trK2tra6ura6urquwtLCwr7CwsLGxsK2ytrGxsbKysa+zt7OzsrS0s7S
+                0tLG1uLW0s7W1tLe2s7a2trW3ube3tre3t7W4uri4t7i4uLm5uLq5ubq6ubm7vLu7ury7ury8u729vL2
+                9vb2+vr6+vb6+vr///r///8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+                AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+                AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+                AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+                AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+                AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+                AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+                AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+                AAAAAAAAAAAAAAAI/wDDCExSpKDBgwgTKlzIsKHDhxAjChSYw4ADChgzatzIsaPHjyBDihxJkoCKMFEM
+                OJnIsqXLlzBjypxJs6ZNllcYCIHB4abPn0CDCp3IQkWKFGCSKl3KtKnTp1CjSp1KtarSHCpQoPjCtavX
+                r2DDih1LtqzZs2i7YtWatq3bt3DjdsWRdSvZKUTk6u2Kd69fumzFbhgwAMAABUu4Djns1+zgwgMK9GgM
+                10ZdL5gzY8YAAECBApAxD/GsubTp06hLF+gcuTAAF6ljy57txbJW1IVhe1kMgMRu0rSDm+b8GjOW1QOk
+                CF8u2zYK3L0zk+iB5XeBG6ALDMmMRAHh65gnSP/GrAC8F/E9ShfeoBlLYd/ifXtBUkBB5scFdHtRoGDx
+                ABcFTCBdgKhZZoIJXCSoYIISsKYACFAoONp3kCWIBGSrAbABFxcAcAEXUBQmAYiELcjFaAAMYeJqBXCx
+                2oYnGsagYaABAEKCkBEW4gARuviaiQoaiCCQDArQGQACfMhFEEgGAaKRSHChAAAjcuECklAggSQXIHQm
+                gJUAKGAik1+aqIFnPmqQIJlcaClAhEEIUKaRYka42o1QyElkgpaVUMIWgAYq6BMgKGAkABpsQWagRgax
+                RaOMAtDCowI8YWgBlU45qaCLCroFBJ5tsVqiiiK5RZcFBKGqkUc8KmmgLYT/2qUCngra55+1WhEECII+
+                ECqTBUTqKKSAjrqFBYjKGWsLctb6hJE8ABqtqAA8QC2pi56JpJxyDguAo4xWutq0tW5Rgwp+lgsEAAE8
+                ESiyAWyxbrCABgAAEFvYO0Og9u4gL7vVPhHAarTWSvAWAheA7KurZQBorPHGSq+n9uIbqK8WBBBvuYDS
+                gC6uBnvWAhAf2GvtvPzeu4WvAezwhK8T2/uqzB+UO0NnCuxQcmf0ZuCZFU+sFq/Ar5ZMb8WC7gCwtRxv
+                4fEII2gh9dRS/yDzkQVU7dnU9v4gdYb2BuC11CyTzW4TVFO9wtVHBqCDFjp0prHQUq8gd2crSN112jIb
+                /5F22k9H/bfUTXxQ3gN5S11FBh9MnUEGVUy9wgMFZID21EYwLnXmjQ9OuOEFIF423A8osMLiGUytgwUK
+                vy3145FTDa/nUwdO++2456477Tp0vjvuVDSMuwwqQP378cgnr/zgGrObO/HGLy/99NSnnUABCfiNewzF
+                C1799+CHTzX3IoiQxfnop6/++uy37/778Mcv//zocx9CCFjkr//+/Pfv//8ADKAAB0jAAuqPeyfwgAEX
+                yMAGOvCB+nuBCopwACUw4YIYzKAGN8jBDnrwgyAMoQhHeMEI5CAMFUBAB1bIwha68IUwjKEMZ0jDGtrw
+                hh1owAK6IJAiqOCHQAyiEBKHSMQiGvGISEyiEpeoAh/wMCAAOw==
+            </property>
+        </structure>
+    </list-property>
 </report>
