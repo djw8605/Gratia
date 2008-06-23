@@ -5,22 +5,34 @@
     <list-property name="propertyBindings">
         <structure>
             <property name="name">odaDriverClass</property>
-            <property name="id">4</property>
+            <property name="id">444</property>
         </structure>
         <structure>
             <property name="name">odaURL</property>
-            <property name="id">4</property>
+            <property name="id">444</property>
             <expression name="value">params["DatabaseURL"]</expression>
         </structure>
         <structure>
             <property name="name">odaUser</property>
-            <property name="id">4</property>
+            <property name="id">444</property>
             <expression name="value">params["DatabaseUser"]</expression>
         </structure>
         <structure>
             <property name="name">odaPassword</property>
-            <property name="id">4</property>
+            <property name="id">444</property>
             <expression name="value">params["DatabasePassword"]</expression>
+        </structure>
+        <structure>
+            <property name="name">odaJndiName</property>
+            <property name="id">444</property>
+        </structure>
+        <structure>
+            <property name="name">OdaConnProfileName</property>
+            <property name="id">444</property>
+        </structure>
+        <structure>
+            <property name="name">OdaConnProfileStorePath</property>
+            <property name="id">444</property>
         </structure>
     </list-property>
     <property name="eventHandlerClass">net.sf.gratia.reporting.GratiaBirtReportEH</property>
@@ -28,6 +40,10 @@
         <structure>
             <property name="fileName">gratia-lib1.rptlibrary</property>
             <property name="namespace">gratia-lib1</property>
+        </structure>
+        <structure>
+            <property name="fileName">reporting/reportLib.rptlibrary</property>
+            <property name="namespace">reportLib</property>
         </structure>
     </list-property>
     <list-property name="configVars">
@@ -214,12 +230,12 @@
                 </structure>
             </list-property>
         </scalar-parameter>
-        <parameter-group name="ReportInfo" id="125" extends="gratia-lib1.ReportInfo"/>
+        <parameter-group name="ReportInfo" id="445" extends="reportLib.ReportInfo"/>
     </parameters>
     <data-sources>
-        <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="fermigrid1" id="4">
+        <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="Data Source" id="444">
             <property name="odaDriverClass">com.mysql.jdbc.Driver</property>
-            <property name="odaURL">jdbc:mysql://gratia-vm02.fnal.gov:3320/gratia_jeffmack</property>
+            <property name="odaURL">jdbc:mysql://gratia-db01.fnal.gov:3320/gratia_itb</property>
             <property name="odaUser">reader</property>
             <encrypted-property name="odaPassword">cmVhZGVy</encrypted-property>
         </oda-data-source>
@@ -281,7 +297,7 @@ if (daynr.length > 1){
                     </structure>
                 </list-property>
             </structure>
-            <property name="dataSource">fermigrid1</property>
+            <property name="dataSource">Data Source</property>
             <list-property name="parameters">
                 <structure>
                     <property name="name">UserName</property>
