@@ -2,6 +2,101 @@
 <library xmlns="http://www.eclipse.org/birt/2005/design" version="3.2.14" id="1">
     <property name="createdBy">Eclipse BIRT Designer Version 2.0.1 Build &lt;20060222-1204></property>
     <property name="units">in</property>
+    <list-property name="propertyBindings">
+        <structure>
+            <property name="name">odaDriverClass</property>
+            <property name="id">365</property>
+        </structure>
+        <structure>
+            <property name="name">odaURL</property>
+            <property name="id">365</property>
+            <expression name="value">params["DatabaseURL"]</expression>
+        </structure>
+        <structure>
+            <property name="name">odaUser</property>
+            <property name="id">365</property>
+            <expression name="value">params["DatabaseUser"]</expression>
+        </structure>
+        <structure>
+            <property name="name">odaPassword</property>
+            <property name="id">365</property>
+            <expression name="value">params["DatabasePassword"]</expression>
+        </structure>
+        <structure>
+            <property name="name">odaJndiName</property>
+            <property name="id">365</property>
+        </structure>
+        <structure>
+            <property name="name">OdaConnProfileName</property>
+            <property name="id">365</property>
+        </structure>
+        <structure>
+            <property name="name">OdaConnProfileStorePath</property>
+            <property name="id">365</property>
+        </structure>
+        <structure>
+            <property name="name">odaDriverClass</property>
+            <property name="id">364</property>
+        </structure>
+        <structure>
+            <property name="name">odaURL</property>
+            <property name="id">364</property>
+            <expression name="value">params["DatabaseURL"]</expression>
+        </structure>
+        <structure>
+            <property name="name">odaUser</property>
+            <property name="id">364</property>
+            <expression name="value">params["DatabaseUser"]</expression>
+        </structure>
+        <structure>
+            <property name="name">odaPassword</property>
+            <property name="id">364</property>
+            <expression name="value">params["DatabasePassword"]</expression>
+        </structure>
+        <structure>
+            <property name="name">odaJndiName</property>
+            <property name="id">364</property>
+        </structure>
+        <structure>
+            <property name="name">OdaConnProfileName</property>
+            <property name="id">364</property>
+        </structure>
+        <structure>
+            <property name="name">OdaConnProfileStorePath</property>
+            <property name="id">364</property>
+        </structure>
+        <structure>
+            <property name="name">odaDriverClass</property>
+            <property name="id">386</property>
+        </structure>
+        <structure>
+            <property name="name">odaURL</property>
+            <property name="id">386</property>
+            <expression name="value">params["DatabaseURL"]</expression>
+        </structure>
+        <structure>
+            <property name="name">odaUser</property>
+            <property name="id">386</property>
+            <expression name="value">params["DatabaseUser"]</expression>
+        </structure>
+        <structure>
+            <property name="name">odaPassword</property>
+            <property name="id">386</property>
+            <expression name="value">params["DatabasePassword"]</expression>
+        </structure>
+        <structure>
+            <property name="name">odaJndiName</property>
+            <property name="id">386</property>
+        </structure>
+        <structure>
+            <property name="name">OdaConnProfileName</property>
+            <property name="id">386</property>
+        </structure>
+        <structure>
+            <property name="name">OdaConnProfileStorePath</property>
+            <property name="id">386</property>
+        </structure>
+    </list-property>
     <property name="theme">defaultTheme</property>
     <list-property name="configVars">
         <structure>
