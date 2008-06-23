@@ -109,8 +109,11 @@ while [[ -n "$1" ]]; do
   shift
   case $action in
       summary)
-        proc="${script_location}build-summary-tables.sql"
+#        proc="${script_location}build-summary-tables.sql"
         set -- "$@" summary-view
+        # build-summary-tables.sql removed.
+        echo "argument \"summary\" obsolete -- ignored\" 1>&2
+        continue
         ;;
       stored)
         proc="${script_location}build-stored-procedures.sql"
@@ -135,7 +138,9 @@ while [[ -n "$1" ]]; do
         proc="${script_location}summary-procedures.sql"
         ;;
       ps)
-        proc="${script_location}build-ps-node-summary-table.sql"
+#        proc="${script_location}build-ps-node-summary-table.sql"
+        echo "argument \"ps\" obsolete -- ignored\" 1>&2
+        continue;
         ;;
       summary[-_]view)
         proc="${script_location}build-summary-view.sql"

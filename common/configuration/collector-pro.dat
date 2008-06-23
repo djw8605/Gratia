@@ -74,8 +74,6 @@
             "gratia.database.useJobUsageSiteName" => 1,
             "service.admin.DN.0" => 'ALLOW ALL'
          },
-         # Add an extra action if we're re-doing summary tables.
-         PostInstallCmdPreamble => '[[ "$action" == "summary" ]] && set -- "$@" ps'
        },
  qcd => { http_port => 8883,
           ssl_port => 8865,

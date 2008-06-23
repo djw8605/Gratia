@@ -39,12 +39,10 @@ public class DatabaseMaintenance {
     static final String comma = ",";
     static final int gratiaDatabaseVersion = 38;
     static final int latestDBVersionRequiringStoredProcedureLoad = gratiaDatabaseVersion;
-    static final int latestDBVersionRequiringSummaryTableLoad = 36;
     static final int latestDBVersionRequiringSummaryViewLoad = 37;
     static final int latestDBVersionRequiringSummaryTriggerLoad = 36;
     static final int latestDBVersionRequiringTableStatisticsRefresh = 38;
 
-    static boolean dbWantSummaryTable = true;
     static boolean dbUseJobUsageSiteName = false;
 
     java.sql.Connection connection;
@@ -84,10 +82,6 @@ public class DatabaseMaintenance {
     
     static public boolean UseJobUsageSiteName() {
         return dbUseJobUsageSiteName; 
-    }
-
-    static public boolean WantSummaryTable() {
-        return dbWantSummaryTable;
     }
 
     public boolean InitialCleanup() {
@@ -430,8 +424,6 @@ public class DatabaseMaintenance {
         Properties p = net.sf.gratia.util.Configuration.getProperties();
 
         UpdateDbProperty("use.report.authentication", p.getProperty("use.report.authentication"));
-        UpdateDbProperty("gratia.database.wantSummaryTable",
-                         p.getProperty("gratia.database.wantSummaryTable"));
         UpdateDbProperty("gratia.database.wantSummaryTrigger",
                          p.getProperty("gratia.database.wantSummaryTrigger"));
         UpdateDbProperty("gratia.database.wantStoredProcedures",
@@ -439,7 +431,6 @@ public class DatabaseMaintenance {
         UpdateDbProperty("gratia.database.useJobUsageSiteName",
                          p.getProperty("gratia.database.useJobUsageSiteName"));
 
-        dbWantSummaryTable = 0 != readIntegerDBProperty("gratia.database.wantSummaryTable");
         dbUseJobUsageSiteName = 0 != readIntegerDBProperty("gratia.database.useJobUsageSiteName");
     }
     
@@ -555,36 +546,23 @@ public class DatabaseMaintenance {
         }
 
         // First check summary tables
-        int wanted = readIntegerDBProperty("gratia.database.wantSummaryTable");
-        Logging.log("gratia.database.wantSummaryTable = " + wanted);
-        if (1 == wanted) {
-            int ver = readIntegerDBProperty("gratia.database.summaryTableVersion");
-            if (ver < latestDBVersionRequiringSummaryTableLoad) {
-                int result = CallPostInstall("summary");
-                if (result > -1) {
-                    UpdateDbProperty("gratia.database.summaryTableVersion", gratiaDatabaseVersion);
-                    Logging.log("Summary tables updated successfully");
-                } else {
-                    Logging.log("FAIL: summary tables NOT updated");
-                    return false;
-                }
-            } else if (ver < latestDBVersionRequiringSummaryViewLoad) {
-                int result = CallPostInstall("summary-view");
-                if (result > -1) {
-                    UpdateDbProperty("gratia.database.summaryTableVersion", gratiaDatabaseVersion);
-                    Logging.log("Summary view updated successfully");
-                } else {
-                    Logging.log("FAIL: summary view NOT updated");
-                    return false;
-                }
+        int ver = readIntegerDBProperty("gratia.database.summaryViewVersion");
+        if (ver < latestDBVersionRequiringSummaryViewLoad) {
+            int result = CallPostInstall("summary-view");
+            if (result > -1) {
+                UpdateDbProperty("gratia.database.summaryViewVersion", gratiaDatabaseVersion);
+                Logging.log("Summary view updated successfully");
+            } else {
+                Logging.log("FAIL: summary view NOT updated");
+                return false;
             }
         }
 
         // Next check trigger
-        wanted = readIntegerDBProperty("gratia.database.wantSummaryTrigger");
+        int wanted = readIntegerDBProperty("gratia.database.wantSummaryTrigger");
         Logging.log("gratia.database.wantSummaryTrigger = " + wanted);
         if (1 == wanted) {
-            int ver = readIntegerDBProperty("gratia.database.summaryTriggerVersion");
+            ver = readIntegerDBProperty("gratia.database.summaryTriggerVersion");
             Logging.debug("Read gratia.database.summaryTriggerVersion " + ver);
             if (ver < latestDBVersionRequiringSummaryTriggerLoad) {
                 Logging.debug("Calling post install for trigger load");
@@ -603,7 +581,7 @@ public class DatabaseMaintenance {
         wanted = readIntegerDBProperty("gratia.database.wantStoredProcedures");
         Logging.log("gratia.database.wantStoredProcedures = " + wanted);
         if (1 == wanted) {
-            int ver = readIntegerDBProperty("gratia.database.storedProcedureVersion");
+            ver = readIntegerDBProperty("gratia.database.storedProcedureVersion");
             if (ver < latestDBVersionRequiringStoredProcedureLoad) {
                 int result = CallPostInstall("stored");
                 if (result > -1) {
@@ -619,7 +597,7 @@ public class DatabaseMaintenance {
 
         // Check TableStatistics
         {
-            int ver = readIntegerDBProperty("gratia.database.TableStatisticsVersion");
+            ver = readIntegerDBProperty("gratia.database.TableStatisticsVersion");
             if (ver < latestDBVersionRequiringTableStatisticsRefresh) {
                 int result = RefreshTableStatistics();
                 if (result > -1) {
@@ -870,56 +848,10 @@ public class DatabaseMaintenance {
                 }
             }
             if (current == 16) {
-                boolean haveProbeSummaryTable =
-                    (1 == getCount("select count(*) from information_schema.tables where " +
-                                   "table_schema = Database() and table_name = " +
-                                   dq + "ProbeSummary" + dq));
-                int result = 0;
-                if (haveProbeSummaryTable &&
-                    (1 == readIntegerDBProperty("gratia.database.wantSummaryTable")) &&
-                    ! (readIntegerDBProperty("gratia.database.summaryTableVersion") <
-                       latestDBVersionRequiringSummaryTableLoad)) {
-                    // Only if we have summary tables but we're not
-                    // going to upgrade them.
-                    try {
-                        // For a short time, DB conversion 15 -> 16 was
-                        // changing the name of a column in ProbeSummary
-                        // from SiteName to ReportedSiteName; since in
-                        // version 17 we decided to drop it, we take the
-                        // name change out of the v16 upgrade and delete
-                        // whichever column we find.
-                        Statement statement;
-                        ResultSet resultSet;
-                        statement = connection.createStatement();
-                        String query = "select COLUMN_NAME from " +
-                            "information_schema.COLUMNS where TABLE_SCHEMA = Database()" +
-                            " and TABLE_NAME = " +
-                            dq + "ProbeSummary" + dq + " and COLUMN_NAME like " +
-                            dq + "%SiteName" + dq;
-                        resultSet = statement.executeQuery(query);
-                        String cmd = "alter table ProbeSummary";
-                        int nresults = 0;
-                        while (resultSet.next()) {
-                            if (nresults > 0) {
-                                cmd += ",";
-                            }
-                            cmd += " drop column " + resultSet.getString(1);
-                            ++nresults;
-                        }
-                        result = Execute(cmd);
-                    }
-                    catch (Exception e) {
-                        result = -1;
-                    }
-                }
-                if (result > -1) {
-                    Logging.log("Gratia database upgraded from " + current + " to " + (current + 1));
-                    current = current + 1;
-                    UpdateDbVersion(current);
-                } else {
-                    Logging.warning("Gratia database FAILED to upgrade from " + current +
-                                " to " + (current + 1));
-                }
+                // NOP -- used to manipulate summary tables.
+                Logging.log("Gratia database upgraded from " + current + " to " + (current + 1));
+                current = current + 1;
+                UpdateDbVersion(current);
             }
             if (current == 17) {
                 // Auxiliary DB item upgrades only.
