@@ -77,12 +77,14 @@ public class DateElement implements XmlElement {
         if (Description != null) output = output + "urwg:description=\"" + Description + "\" ";
         if (Type != null) output = output + "urwg:type=\"" + Type + "\" ";
         output = output + ">";
-				//
-				// glr: a hack to get around conversion problems switching from date <-> xml
-				//
-				TimeZone.setDefault(TimeZone.getTimeZone("GMT"));
-				SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-				output = output + format.format(Value);
+
+        //
+        // glr: a hack to get around conversion problems switching from date <-> xml
+        //
+        TimeZone.setDefault(TimeZone.getTimeZone("GMT"));
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+        output = output + format.format(Value);
+
         output = output + "</" + elementName + ">\n";
         return output;
     }
