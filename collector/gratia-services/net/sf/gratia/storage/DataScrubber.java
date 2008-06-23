@@ -25,11 +25,14 @@ public class DataScrubber {
 
     int DupRecordDuplicateLimit = 0; // Limit expressed in month
     int DupRecordLimit = 0;          // Limit expressed in month
+    int JobUsageRecordLimit = 0;
+    int JobUsageRecordXmlLimit = 0;
+    int MetricRecordLimit = 0;
+    int MetricRecordXmlLimit = 0;
 
     public static int ParseLimit( String date ) {
         // For now hardcoded!
 
-        
         if (date == null || date.equalsIgnoreCase("unlimited")) {
             return 0;
         } else {
@@ -51,25 +54,18 @@ public class DataScrubber {
     {
         Properties p = net.sf.gratia.util.Configuration.getProperties();
 
-        DupRecordDuplicateLimit = ParseLimit(p.getProperty( "service.lifetime.DupRecord.Duplicates" ));
-        DupRecordLimit = ParseLimit(p.getProperty( "service.lifetime.DupRecord" ));
+        DupRecordDuplicateLimit = ParseLimit(p.getProperty( "service.lifetime.DupRecord.Duplicates"));
+        DupRecordLimit          = ParseLimit(p.getProperty( "service.lifetime.DupRecord"));
+
+        JobUsageRecordLimit     = ParseLimit(p.getProperty( "service.lifetime.JobUsageRecord"));
+        JobUsageRecordXmlLimit  = ParseLimit(p.getProperty( "service.lifetime.JobUsageRecord.RawXML"));
+        MetricRecordLimit       = ParseLimit(p.getProperty( "service.lifetime.MetricRecord"));
+        MetricRecordXmlLimit    = ParseLimit(p.getProperty( "service.lifetime.MetricRecord.RawXML"));
     }
 
     public int RawXml( String tableName ) 
     {
         // Execute: delete from tableName_Xml where EndTime < cutoffdate and ExtraXml == null
-
-        return 0;
-    }
-
-    public int IndividualRecords( String tableName ) 
-    {
-        // Execute: delete from tableName set where EndTime < cutoffdata
-
-        // We need to handle the case where
-        //   a) EndTime is null
-        //   b) EndTime is incorrect (usually 1970-01-01)
-        //   c) Normal case
 
         return 0;
     }
@@ -81,9 +77,17 @@ public class DataScrubber {
         Session session =  HibernateWrapper.getSession();
         Transaction tx = session.beginTransaction();
         try {
-            deletedEntities = session.createQuery( deletecmd )
-                .setString( "dateLimit", limit )
-                .executeUpdate();
+
+            org.hibernate.Query query = session.createQuery( deletecmd );
+            Logging.warning("DataScrubber: About to query " + query.getQueryString());
+            Logging.warning("DataScrubber: About to query " + query.getNamedParameters()[0]);
+
+            query.setString( "dateLimit", limit );
+
+            Logging.warning("DataScrubber: About to query " + query.getQueryString());
+            Logging.warning("DataScrubber: About to query " + query.getNamedParameters()[0]);
+
+            deletedEntities = query.executeUpdate();
             tx.commit();
         }
         catch (Exception e) {
@@ -95,18 +99,67 @@ public class DataScrubber {
         return deletedEntities;
     }
 
+
+    public int IndividualJobUsageRecords()
+    {
+        // Execute: delete from tableName set where EndTime < cutoffdata
+
+        // We need to handle the case where
+        //   a) EndTime is null
+        //   b) EndTime is incorrect (usually 1970-01-01)
+        //   c) Normal case
+
+        //   c) Normal case
+        Logging.warning("DataScrubber: Check for JobUsage record to be removed");
+        int nrecords = 0;
+        if (JobUsageRecordLimit != 0) {
+            String limit = WhatDate( JobUsageRecordLimit );
+            Logging.debug("DataScrubber: Would have remove all JobUsage records older than: "+limit);
+
+            String hqlDelete = "delete JobUsageRecord where EndTime < :dateLimit";
+            nrecords = Execute( hqlDelete, limit, "JobUsageRecord records" );
+            Logging.debug("DataScrubber: deleted "+nrecords+" JobUsage records ");
+        }
+
+        return nrecords;
+    }
+
+    public int IndividualMetricRecords()
+    {
+        // Execute: delete from tableName set where EndTime < cutoffdata
+
+        // We need to handle the case where
+        //   a) EndTime is null
+        //   b) EndTime is incorrect (usually 1970-01-01)
+        //   c) Normal case
+
+        //   c) Normal case
+        Logging.warning("DataScrubber: Check for Metric record to be removed");
+        int nrecords = 0;
+        if (MetricRecordLimit != 0) {
+            String limit = WhatDate( MetricRecordLimit );
+            Logging.debug("DataScrubber: Would have remove all Metric records older than: "+limit);
+
+            String hqlDelete = "delete MetricRecord where TimeStamp < :dateLimit";
+            nrecords = Execute( hqlDelete, limit, "Metric records" );
+            Logging.debug("DataScrubber: deleted "+nrecords+" Metric records ");
+        }
+
+        return nrecords;
+    }
+
     public int Duplicate() 
     {
         // Execute: delete from DupRecord where eventtime < cutoffdate && RecordType == "Duplicate"
         // Returns the number of objects deleted from the database.
 
-        Logging.warning("DataScrubber: Check for Duplicates to be remove");
+        Logging.warning("DataScrubber: Check for Duplicates to be removed");
 
         int n = 0;
         int ndup = 0;
         if (DupRecordLimit != 0 ) {
             String limit = WhatDate( DupRecordLimit );
-            Logging.debug("DataScrubber: Would have remove all error record older than: "+limit);
+            Logging.debug("DataScrubber: Will remove all error record older than: "+limit);
 
             String hqlDelete = "delete DupRecord where eventtime < :dateLimit";
             n = Execute(  hqlDelete, limit, " error records " );
