@@ -33,8 +33,8 @@ public class RMIHandlerServlet extends HttpServlet
         }
     }
 
-    public void init(ServletConfig config) throws ServletException 
-    {
+    public void init(ServletConfig config)
+        throws ServletException {
         super.init(config);
         p = Configuration.getProperties();
 
@@ -49,8 +49,8 @@ public class RMIHandlerServlet extends HttpServlet
                            p.getProperty("service.rmiservlet.numLogs"));
     }
     
-    public void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException 
-    {
+    public void doPost(HttpServletRequest req, HttpServletResponse res)
+        throws ServletException, IOException {
         String command = null;
         String from = null;
         String to = null;
@@ -72,10 +72,17 @@ public class RMIHandlerServlet extends HttpServlet
         }
 
         try {
+            Logging.debug("RMIHandlerServlet debug diagnostics for req: " +
+                          req +
+                          ", originating server: " +
+                          req.getRemoteHost() +
+                          ", headers: \n" + requestDiagnostics(req));
             command = req.getParameter("command");
 
             if (command == null) {
-                Logging.log("RMIHandlerServlet got buggy POST: remediating");
+                Logging.log("RMIHandlerServlet got buggy POST from " +
+                            req.getRemoteHost() +
+                            ": remediating");
                 //
                 // the following is a hack to get around a python post issue
                 //
@@ -86,27 +93,52 @@ public class RMIHandlerServlet extends HttpServlet
                 int loopcount = 0;
                 int maxloops = 10;
                 String body = new String("");
-                int bcount;
+                int bcount = 0;
                 byte buffer[];
-                do {
-                    bcount = 0;
-                    buffer = new byte[4 * 4096];
-                    int istatus = 0;
-                    for (bcount = 0; bcount < buffer.length; ++bcount, ++icount)
-                        {
-                            istatus = input.read(buffer,icount,1);
-                            if (istatus == -1)
+                try {
+                    do {
+                        bcount = 0;
+                        buffer = new byte[4 * 4096];
+                        int istatus = 0;
+                        for (bcount = 0; bcount < buffer.length; ++bcount, ++icount) {
+                            istatus = input.read(buffer, bcount, 1);
+                            if (istatus == -1) {
                                 break;
+                            }
                         }
-                    body += new String(buffer,0,icount);
-                } while ((bcount == buffer.length) && (++loopcount < maxloops));
-                if (loopcount == maxloops) {
-                    Logging.warning("RMIHanderservlet: record exceeds maximum buffer size of " +
-                                    loopcount * buffer.length + " bytes!");
+                        body += new String(buffer, 0, bcount);
+                    } while ((bcount == buffer.length) && (++loopcount < maxloops));
+                    if (loopcount == maxloops) {
+                        Logging.warning("RMIHanderservlet: record exceeds maximum buffer size of " +
+                                        loopcount * buffer.length + " bytes!");
+                        return;
+                    }
+                    Logging.debug("RMIHandlerServlet: body = " + body);
+                }
+                catch (Exception e) {
+                    Logging.warning("RMIHandlerServlet: Error: Problematic req: " +
+                                    req +
+                                    ", originating server: " +
+                                    req.getRemoteHost() +
+                                    "\nData received so far:\n" +
+                                    body,
+                                    e);
+                    Logging.log("RMIHandlerServlet error diagnostic for req: " +
+                                req +
+                                ": read parameters: iteration " +
+                                loopcount +
+                                ", buffer position " +
+                                bcount + 
+                                ", input position "
+                                + icount);
+                    Logging.log("RMIHandlerServlet error diagnostic for req: " +
+                                req +
+                                ", headers: \n" + requestDiagnostics(req));
+                    PrintWriter writer = res.getWriter();
+                    writer.write("Error: RMIHandlerServlet: Error: Problematic req: " + req);
+                    writer.flush();
                     return;
                 }
-                Logging.debug("RMIHandlerServlet: body = " + body);
-
                 StringTokenizer st1 = new StringTokenizer(body,"&");
                 boolean swallowAll = false;
                 while(st1.hasMoreTokens()) {
@@ -219,7 +251,11 @@ public class RMIHandlerServlet extends HttpServlet
             writer.flush();
         }
         catch (Exception e) {
-            Logging.warning("RMIHandlerServlet: Error: Problematic req: " + req, e);
+            Logging.warning("RMIHandlerServlet: Error: Problematic req: " +
+                            req +
+                            ", originating server: " +
+                            req.getRemoteHost(),
+                            e);
             PrintWriter writer = res.getWriter();
             writer.write("Error: RMIHandlerServlet: Error: Problematic req: " + req);
             writer.flush();
@@ -234,4 +270,16 @@ public class RMIHandlerServlet extends HttpServlet
         }
     }
 
+    private String requestDiagnostics(HttpServletRequest req) {
+        Enumeration hNameList = req.getHeaderNames();
+        String hList = new String("");
+        while (hNameList.hasMoreElements()) {
+            if (hList.length() != 0) {
+                hList += ", ";
+            }
+            String hName = (String) hNameList.nextElement();
+            hList += hName + ": " + req.getHeader(hName);
+        }
+        return hList;
+    }
 }
