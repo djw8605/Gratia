@@ -5,7 +5,7 @@
     <property name="eventHandlerClass">net.sf.gratia.reporting.GratiaBirtReportEH</property>
     <list-property name="libraries">
         <structure>
-            <property name="fileName">reporting/reportLib.rptlibrary</property>
+            <property name="fileName">reportLib.rptlibrary</property>
             <property name="namespace">reportLib</property>
         </structure>
     </list-property>
@@ -18,7 +18,7 @@
         <parameter-group name="UserInfo" id="400" extends="reportLib.UserInfo"/>
     </parameters>
     <data-sources>
-        <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="Data Source" id="391"
+        <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="gratia-db01_gratia_itb" id="391"
  extends="reportLib.gratia-db01_gratia_itb"/>
     </data-sources>
     <data-sets>
@@ -80,7 +80,7 @@ if (daynr.length > 1){
                     </structure>
                 </list-property>
             </structure>
-            <property name="dataSource">Data Source</property>
+            <property name="dataSource">gratia-db01_gratia_itb</property>
             <list-property name="parameters">
                 <structure>
                     <property name="name">UserName</property>
