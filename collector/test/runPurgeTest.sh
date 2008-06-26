@@ -8,6 +8,8 @@ usage: runPurgeTest.sh [-h] [-l] [-d] [-c] [-p port_number]
    -c reinstall the collector
    -p use this port for the main collector (default 9000)
    -l load the data
+   -f execute fix ups
+   -w [filename] upload the war file
 EOF
 }
 
@@ -24,29 +26,34 @@ reader_password=reader
 pass=lisp01
 
 schema_name=gratia_purge_${USER}
+tomcatpwd=/data/tomcat-${schema_name}
+
 host=`hostname`
 source=${PWD}
 source=`dirname $source`
 source=`dirname $source`
 
 
+function stop_server {
+  echo "Stopping server ${webhost}:${http_port}"
+  ssh -l root ${webhost} service tomcat-${schema_name} stop 2>&1 | head -3 
+  sleep 7
+}
+
 function start_server {
+  echo "Starting server ${webhost}:${http_port}"
   ssh -l root ${webhost} service tomcat-${schema_name} start
-  sleep 5
+  sleep 7
 }
 
 function restart_server {
-  echo "Restarting server ${webhost}:${http_port}"
-  ssh -l root ${webhost} service tomcat-${schema_name} stop
-  sleep 7
-  ssh -l root ${webhost} service tomcat-${schema_name} start
-  sleep 5
+  stop_server
+  start_server
 }
 
 function reset_database {
 
-  ssh -l root ${webhost} service tomcat-${schema_name} stop
-  sleep 5
+  stop_server
 
   ssh ${webhost} mysql -h ${dbhost} --port=${dbport} -u root --password=${pass}<<EOF 
 drop database if exists ${schema_name};
@@ -97,8 +104,6 @@ function reset_collector {
 ### End:
 EOF
 
-   tomcatpwd=/data/tomcat-${schema_name}
-
    ssh -l root ${webhost} cp -rp /data/tomcat-install ${tomcatpwd}\; mkdir -p ${tomcatpwd}/gratia\; chown -R ${USER} ${tomcatpwd}
 
    ssh -l root ${webhost}  cd ${source}/common/configuration\; \
@@ -109,7 +114,61 @@ EOF
 }
 
 
+function fix_duplicate_date {
+  expected_duplicate=23
+
+  echo '0' > dups.count
+  while [ `tail -1 dups.count` -lt ${expected_duplicate} ]; do
+  echo "Waiting for Duplicate data to be loaded." `cat dups.count`
+  mysql -h ${dbhost} --port=${dbport} -u gratia --password=${update_password} > dups.count 2>&1 <<EOF 
+use ${schema_name};
+select count(*) from DupRecord;
+EOF
+  if [ $? -ne 0 ]; then
+     cat dups.count
+     return
+  fi
+  sleep 2
+  done
+
+  echo "Attempt fix-up the DupRecord table so that we have a range of eventtime."
+
+  mysql -h ${dbhost} --port=${dbport} -u gratia --password=${update_password}<<EOF 
+use ${schema_name};
+update DupRecord set eventdate = date_sub(eventdate,interval dupid week) where Error = 'Parse';
+update DupRecord set eventdate = date_sub(eventdate,interval dupid-12 week) where Error = 'Duplicate';
+EOF
+}
+
+function fix_server_date {
+
+  expected_records=32
+
+  echo '0' > records.count
+  while [ `tail -1 records.count` -lt ${expected_records} ]; do
+  echo "Waiting for Record data to be loaded."
+  mysql -h ${dbhost} --port=${dbport} -u gratia --password=${update_password} > records.count 2>&1 <<EOF 
+use ${schema_name};
+select count(*) from JobUsageRecord;
+EOF
+  if [ $? -ne 0 ]; then
+     cat records.count
+     return
+  fi
+  sleep 2
+  done
+
+  echo "Attempt fix-up the JobUsageRecord table so that we have a range of ServerDate."
+
+  mysql -h ${dbhost} --port=${dbport} -u gratia --password=${update_password}<<EOF 
+use ${schema_name};
+EOF
+}
+
 function loaddata {
+    echo "Sending data"
+
+    start_server
 
 cat > ProbeConfig <<EOF
 <ProbeConfiguration 
@@ -164,11 +223,9 @@ EOF
     mv "$file" "$new_file"
   done
 
-set -x
   # First extend artificially the retention to let the old record in.
-  tomcatpwd=/data/tomcat-${schema_name}
-  ssh ${webhost} set -x \; cd ${tomcatpwd}/gratia \; chown ${USER} service-configuration.properties \; mv service-configuration.properties service-configuration.properties.auto.old \; sed  -e '"s:service.lifetime.JobUsageRecord = .*:service.lifetime.JobUsageRecord = 24 months:"' service-configuration.properties.auto.old \> service-configuration.properties
-  restart_server
+  ssh ${webhost} cd ${tomcatpwd}/gratia \; chown ${USER} service-configuration.properties \; mv service-configuration.properties service-configuration.properties.auto.old \; sed  -e '"s:service.lifetime.JobUsageRecord = .*:service.lifetime.JobUsageRecord = 24 months:"' service-configuration.properties.auto.old \> service-configuration.properties
+  #restart_server
 
   python <<EOF
 import Gratia
@@ -178,24 +235,40 @@ EOF
 
   # Restore the original (we could also set it to specific values)
   ssh ${webhost} cd ${tomcatpwd}/gratia\; mv service-configuration.properties.auto.old service-configuration.properties \;
-  restart_server
+  #restart_server
+}
 
+function upload_war()
+{
+    stop_server
+    ssh -l root ${webhost} rm -rf ${tomcatpwd}/webapps/$WAR\*
+    scp ../../target/$WAR.war ${webhost}:${tomcatpwd}/webapps
+    start_server
 }
 
 #--- get command line args ----
-while getopts :hcdlp: OPT; do
+while getopts :hcfdlw:p: OPT; do
     case $OPT in
+        w)  do_war=1
+            WAR=$OPTARG
+            ;;
         c)  do_collector=1
             ;;
         l)  do_load=1
             ;;
         d)  do_databasereset=1
             ;;
+        f)  do_fixup=1
+            ;;
         h)
             usage
             exit 1
             ;;
         p)  http_port=$OPTARG
+            ;;
+        *)
+            usage
+            exit 1
             ;;
     esac
 done
@@ -213,8 +286,16 @@ fi
 if [ $do_collector ]; then 
    reset_collector
 fi
+
+if [ $do_war ]; then
+   upload_war
+fi
+
 if [ $do_load ]; then
-   echo "Uploading data"
    loaddata
 fi
 
+if [ $do_fixup ]; then 
+   fix_duplicate_date
+   fix_server_date
+fi
