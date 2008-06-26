@@ -22,7 +22,6 @@ public class ErrorRecorder {
         }
         catch (Exception e) {
             tx.rollback();
-            session.close();
             Logging.warning("ErrorRecorder: error saving in table!", e);
         }
         session.close();
