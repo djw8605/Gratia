@@ -8,6 +8,7 @@ import java.util.TimeZone;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.Properties;
+import java.util.List;
 
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -80,12 +81,10 @@ public class DataScrubber {
 
             org.hibernate.Query query = session.createQuery( deletecmd );
             Logging.warning("DataScrubber: About to query " + query.getQueryString());
-            Logging.warning("DataScrubber: About to query " + query.getNamedParameters()[0]);
 
             query.setString( "dateLimit", limit );
 
             Logging.warning("DataScrubber: About to query " + query.getQueryString());
-            Logging.warning("DataScrubber: About to query " + query.getNamedParameters()[0]);
 
             deletedEntities = query.executeUpdate();
             tx.commit();
@@ -99,6 +98,47 @@ public class DataScrubber {
         return deletedEntities;
     }
 
+    static List GetList( String listcmd, String limit, String msg ) 
+    {
+        List result = null;
+
+        Session session =  HibernateWrapper.getSession();
+        Transaction tx = session.beginTransaction();
+        try {
+
+            org.hibernate.Query query = session.createQuery( listcmd );
+            Logging.warning("DataScrubber: About to query " + query.getQueryString());
+
+            query.setString( "dateLimit", limit );
+
+            Logging.warning("DataScrubber: About to query " + query.getQueryString());
+
+            result = query.list();
+            tx.commit();
+        }
+        catch (Exception e) {
+            tx.rollback();
+            Logging.warning("DataScrubber: error in deleting " + msg + "!", e);
+            result = null;
+        }
+        if (session!=null) session.close();
+        return result;
+    }
+
+    public int DeleteRows(Session session, String tablename, List ids) 
+    {
+        String delcmd = "delete from " + tablename + " where dbid in ( :ids )";
+
+        Logging.warning("DataScrubber: About to " + delcmd);
+
+        //statement = connection.createStatement();
+        //statement.executeUpdate(cmd);
+
+        org.hibernate.SQLQuery query = session.createSQLQuery( delcmd );
+        query.setParameterList( "ids", ids );
+
+        return query.executeUpdate();
+    }
 
     public int IndividualJobUsageRecords()
     {
@@ -110,17 +150,66 @@ public class DataScrubber {
         //   c) Normal case
 
         //   c) Normal case
-        Logging.warning("DataScrubber: Check for JobUsage record to be removed");
+        List  ids = null;
         int nrecords = 0;
         if (JobUsageRecordLimit != 0) {
+            Logging.warning("DataScrubber: Check for JobUsage record to be removed");
+
             String limit = WhatDate( JobUsageRecordLimit );
             Logging.debug("DataScrubber: Would have remove all JobUsage records older than: "+limit);
 
-            String hqlDelete = "delete JobUsageRecord where EndTime < :dateLimit";
-            nrecords = Execute( hqlDelete, limit, "JobUsageRecord records" );
-            Logging.debug("DataScrubber: deleted "+nrecords+" JobUsage records ");
-        }
+            String hqlList = "select RecordId from JobUsageRecord where EndTime.Value < :dateLimit";
+            String hqlDelete = "delete JobUsageRecord where RecordId in ( :ids )";
+            ids = GetList( hqlList, limit, "JobUsageRecord records" );
+            Logging.debug("DataScrubber: deleting "+ids);
 
+            if (ids!=null && !ids.isEmpty()) {
+
+                Session session =  HibernateWrapper.getSession();
+                Transaction tx = session.beginTransaction();
+                try {
+                    int res = 0;
+                    // Ideally Hibernate would put a cascading foreign key
+                    // on the JobUsageRecord, it does not work now.  So 
+                    // do the delete from each table by hand.
+                    // Ideally we would extract this list of tables from
+                    // the hibernate configuration
+                    String [] tables = { 
+                        "Disk",
+                        "Memory",
+                        "Swap",
+                        "Network",
+                        "TimeDuration",
+                        "TimeInstant",
+                        "ServiceLevel",
+                        "PhaseResource",
+                        "VolumeResource",
+                        "ConsumableResource",
+                        "Resource",
+                        "JobUsageRecord_Xml",
+                        "JobUsageRecord_Meta",
+                        "JobUsageRecord"
+                    };
+
+                    for (int r=0; r < tables.length; ++r) {
+                        DeleteRows(session,tables[r],ids);
+                    }
+
+//                     Logging.debug("DataScrubber: About to run "+hqlDelete);
+//                     org.hibernate.Query delquery = session.createQuery( hqlDelete );
+//                     delquery.setParameterList( "ids", ids );                   
+//                     nrecords = delquery.executeUpdate();
+                    
+                    tx.commit();                   
+                }
+                catch (Exception e) {
+                    tx.rollback();
+                    Logging.warning("DataScrubber: error in deleting JobUsageRecord!", e);
+                }
+                if (session!=null) session.close();
+            }
+            Logging.warning("DataScrubber: "+nrecords+" JobUsageRecord have been deleted.");
+        }
         return nrecords;
     }
 
@@ -140,7 +229,7 @@ public class DataScrubber {
             String limit = WhatDate( MetricRecordLimit );
             Logging.debug("DataScrubber: Would have remove all Metric records older than: "+limit);
 
-            String hqlDelete = "delete MetricRecord where TimeStamp < :dateLimit";
+            String hqlDelete = "delete MetricRecord where TimeStamp.Value < :dateLimit";
             nrecords = Execute( hqlDelete, limit, "Metric records" );
             Logging.debug("DataScrubber: deleted "+nrecords+" Metric records ");
         }
