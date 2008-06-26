@@ -104,7 +104,7 @@ function reset_collector {
 ### End:
 EOF
 
-   ssh -l root ${webhost} cp -rp /data/tomcat-install ${tomcatpwd}\; mkdir -p ${tomcatpwd}/gratia\; chown -R ${USER} ${tomcatpwd}
+   ssh -l root ${webhost} mkdir -p ${tomcatpwd} \; cp -rp /data/tomcat-install/\* ${tomcatpwd}\; mkdir -p ${tomcatpwd}/gratia\; chown -R ${USER} ${tomcatpwd}\; rm -f ${tomcatpwd}/logs/*
 
    ssh -l root ${webhost}  cd ${source}/common/configuration\; \
      ./update-gratia-local -s -S ${source} -d ${pass} -i ${filename} ${schema_name} \; \
@@ -162,6 +162,7 @@ EOF
 
   mysql -h ${dbhost} --port=${dbport} -u gratia --password=${update_password}<<EOF 
 use ${schema_name};
+update JobUsageRecord_Meta M, JobUsageRecord J set ServerDate = date_add(EndTime, interval 65 minute) where M.dbid = J.dbid;
 EOF
 }
 
@@ -283,6 +284,7 @@ if [ $do_databasereset ];then
    echo "Cleanup all database content"
    reset_database
 fi
+
 if [ $do_collector ]; then 
    reset_collector
 fi
@@ -296,6 +298,6 @@ if [ $do_load ]; then
 fi
 
 if [ $do_fixup ]; then 
-   fix_duplicate_date
+   #fix_duplicate_date
    fix_server_date
 fi
