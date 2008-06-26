@@ -1285,7 +1285,7 @@ public class DatabaseMaintenance {
         return form.format(size) + suffices[suffix_counter];
     }
 
-    private Boolean checkMd5v2Unique() throws Exception {
+    public Boolean checkMd5v2Unique() throws Exception {
         Logging.debug("DatabaseMaintenance: Checking for unique index on md5v2");
 
         String checksum_check = "select non_unique from " +
@@ -1309,13 +1309,14 @@ public class DatabaseMaintenance {
                     Logging.debug("checkMd5v2Unique: found non-unique index on md5v2 in JobUsageRecord_Meta.");
                 }
             } else {
-                Logging.info("CollectorService: no index found on column md5v2 in JobUsageRecord_Meta: not attempting upgrade.");
+                Logging.debug("checkMd5v2Unique: no index found on column md5v2 in JobUsageRecord_Meta.");
+                throw new Exception("No md5v2 index");
             }
             session.close();
         }
         catch (Exception e) {
-            Logging.debug("checkMd5v2Unique: attempt to check for index on md5v2 in JobUsageRecord_Meta failed!");
-            if (session.isOpen()) session.close();
+            Logging.warning("checkMd5v2Unique: attempt to check for index on md5v2 in JobUsageRecord_Meta failed!");
+            if (session != null && session.isOpen()) session.close();
             throw e;
         }
         return result;
