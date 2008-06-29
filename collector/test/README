@@ -1,0 +1,39 @@
+        README for the Gratia Collector test
+
+This directory contains test of the Gratia collector.
+
+--- runPurgeTest.sh 
+
+Goal: test that the collector is properly purging old records.  
+
+This test is ran when doing
+
+   gmake test
+
+To run it by hand, make sure you build the Gratia war file
+(see ../build-scripts)
+
+   ./runPurgeTest.sh -c -d -l -f -t
+
+This test requires access to the root user on gratia-vm02 (for
+the tomcat install) and a priviledge db user (from gratia-vm02)
+
+It assumes the presence of a working tomcat installation at
+   gratia-vm02:/data/tomcat-install
+
+This test will 
+  -c: install tomcat and install the collector software on gratia-vm02
+  -d: clean-out and/or create the database schema (requires superuser db access from gratia-vm02)
+  -l: load a known dataset spread over the last year (JobUsageRecord) and the last 4 years (Metric)
+  -f: update the record's server date to make them appear older.
+  -t: run the purge and check that the data left is as expected
+
+The data loading is done via a couple of custom probes.  So this test
+exercise the chain:
+  Gratia.py -> Collector -> rmi -> ListenerThread -> database
+as well as the purge mechanism.
+
+The default port for the server is: 8000 + your numerical userid.
+This can be overridden by using the -p option.
+
+
