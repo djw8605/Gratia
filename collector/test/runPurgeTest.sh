@@ -362,13 +362,22 @@ function turn_on_purging {
 
    # Wait until the purge has been done
    wait_for_server
-   sleep 60
+
+   # Load a few old record to make sure they are caught by the filter.
+   python loadstale.py
+
+   sleep 2
+   expected_count=0
+   echo 99 > file.count
+   while [ `tail -1 file.count` -gt ${expected_count} ]; do
+      ssh ${webhost} ls ${tomcatpwd}/gratia/data/thread\? | wc -l > file.count
+      echo "Waiting for all input msg to be used." `tail -1 file.count` left
+      sleep 2
+   done
 }
 
 function check_data {
 
-   turn_on_purging
-   
    echo "Checking duplicates"
    mysql -h ${dbhost} --port=${dbport} -u gratia --password=${update_password} > duplicate.validate 2>&1 <<EOF 
 use ${schema_name};
@@ -484,6 +493,7 @@ fi
 if [ $do_fixup ]; then 
    fix_duplicate_date
    fix_server_date
+   turn_on_purging
 fi
 
 if [ $do_test ]; then
