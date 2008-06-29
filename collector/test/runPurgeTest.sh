@@ -10,10 +10,12 @@ usage: runPurgeTest.sh [-h] [-l] [-d] [-c] [-p port_number]
    -l load the data
    -f execute fix ups
    -w [filename] upload the war file
+   -s stop server
+   -t test content
 EOF
 }
 
-http_port=9000
+http_port=`expr 8000 + ${UID}`
 
 
 dbhost=gratia-vm02.fnal.gov
@@ -32,23 +34,129 @@ host=`hostname`
 source=${PWD}
 source=`dirname $source`
 source=`dirname $source`
+export PYTHONPATH=${source}/probe/common:${source}/probe/metric:${PYTHONPATH}
 
+server_status=unknown
 
 function stop_server {
-  echo "Stopping server ${webhost}:${http_port}"
-  ssh -l root ${webhost} service tomcat-${schema_name} stop 2>&1 | head -3 
-  sleep 7
+  if [ "${server_status}" != "stopped" ]; then 
+     echo "Stopping server ${webhost}:${http_port}"
+     alive=`ssh ${webhost} netstat -l | grep ${http_port} | wc -l`
+     if [ ${alive} -eq 1 ]; then 
+       ssh -l root ${webhost} service tomcat-${schema_name} stop 2>&1 | head -3 
+       server_status=stopping
+       wait_for_server_shutdown 
+     fi
+     server_status=stopped
+  fi
 }
 
 function start_server {
-  echo "Starting server ${webhost}:${http_port}"
-  ssh -l root ${webhost} service tomcat-${schema_name} start
-  sleep 7
+  if [ "${server_status}" = "unknown" -o "${server_status}" = "stopped"  ]; then 
+     echo "Starting server ${webhost}:${http_port}"
+     ssh -l root ${webhost} service tomcat-${schema_name} start
+     server_status=starting
+#     sleep 7
+     server_status=started
+  fi
 }
 
 function restart_server {
   stop_server
   start_server
+}
+
+function write_ProbeConfig {
+   cat > ProbeConfig <<EOF
+<ProbeConfiguration 
+    UseSSL="0" 
+
+    UseGratiaCertificates="0"
+
+    SSLHost="${webhost}:8443" 
+    SSLCollectorService="/gratia-servlets/rmi"
+    SSLRegistrationHost="${webhost}:${http_port}"
+    SSLRegistrationService="/gratia-security/security"
+
+    GratiaCertificateFile="gratia.hostcert.pem"
+    GratiaKeyFile="gratia.hostkey.pem"
+
+    SOAPHost="${webhost}:${http_port}" 
+    CollectorService="/gratia-servlets/rmi" 
+    UseSoapProtocol="0"
+    
+    MeterName="LocalTester" 
+    SiteName="LocalTesting"
+    Grid="OSG"
+    
+    LogLevel="2"
+    DebugLevel="0" 
+    GratiaExtension="gratia.xml"
+    CertificateFile="/etc/grid-security/hostcert.pem"
+    KeyFile="/etc/grid-security/hostkey.pem"
+
+    VDTSetupFile="MAGIC_VDT_LOCATION/setup.sh"
+    UserVOMapFile="MAGIC_VDT_LOCATION/monitoring/grid3-user-vo-map.txt"
+
+    MaxPendingFiles="100000"
+    DataFolder="MAGIC_VDT_LOCATION/gratia/var/data/"
+    WorkingFolder="MAGIC_VDT_LOCATION/gratia/var/tmp"
+    LogFolder="MAGIC_VDT_LOCATION/gratia/var/logs/"
+    LogRotate="31"
+    UseSyslog="0"
+    SuppressUnknownVORecords="0"
+    SuppressNoDNRecords="0"
+    EnableProbe="0"
+
+/>
+
+EOF
+
+}
+
+function wait_for_server {
+
+   write_ProbeConfig
+
+   alive=0
+   try=0
+   while [ ${alive} -eq 0 -a ${try} -lt 10 ]; do   \
+      echo "Waiting for server"
+      python > alive.tmp <<EOF
+import Gratia
+Gratia.Initialize()
+print Gratia.successfulHandshakes
+EOF
+      alive=`cat alive.tmp`
+      rm alive.tmp
+      try=`expr ${try} + 1`
+      if [ ${alive} -ne 1 ]; then
+         sleep 1
+      fi
+   done
+   if [ ${try} -gt 9 ]; then
+      echo "Error server is not started after 10 checks"
+      exit
+   fi
+   server_status=started
+}
+
+function wait_for_server_shutdown {
+
+   alive=1
+   try=0
+   while [ ${alive} -eq 1 -a ${try} -lt 10 ]; do   \
+      echo "Waiting for server shutdown"
+      alive=`ssh ${webhost} netstat -l | grep ${http_port} | wc -l`
+      try=`expr ${try} + 1`
+      if [ ${alive} -ne 0 ]; then
+         sleep 1
+      fi
+   done
+   if [ ${try} -gt 9 ]; then
+      echo "Error server is not started after 10 checks"
+      exit
+   fi
 }
 
 function reset_database {
@@ -61,6 +169,7 @@ EOF
 
   ssh ${webhost} mysql -h ${dbhost} --port=${dbport} -u root --password=${pass}<<EOF 
 CREATE DATABASE ${schema_name};
+GRANT ALL PRIVILEGES ON ${schema_name}.* TO 'gratia'@'airdrie.fnal.gov' IDENTIFIED BY '${update_password}';
 GRANT ALL PRIVILEGES ON ${schema_name}.* TO 'gratia'@'${host}' IDENTIFIED BY '${update_password}';
 GRANT ALL PRIVILEGES ON ${schema_name}.* TO 'gratia'@'localhost' IDENTIFIED BY '${update_password}';
 GRANT ALL PRIVILEGES ON ${schema_name}.* TO 'gratia'@'${webhost}' IDENTIFIED BY '${update_password}';
@@ -119,7 +228,7 @@ function fix_duplicate_date {
 
   echo '0' > dups.count
   while [ `tail -1 dups.count` -lt ${expected_duplicate} ]; do
-  echo "Waiting for Duplicate data to be loaded." `cat dups.count`
+  echo "Waiting for Duplicate data to be loaded." `tail -1 dups.count`
   mysql -h ${dbhost} --port=${dbport} -u gratia --password=${update_password} > dups.count 2>&1 <<EOF 
 use ${schema_name};
 select count(*) from DupRecord;
@@ -140,13 +249,13 @@ update DupRecord set eventdate = date_sub(eventdate,interval dupid-12 week) wher
 EOF
 }
 
-function fix_server_date {
+function fix_usage_server_date {
 
-  expected_records=32
+  expected_records=431
 
   echo '0' > records.count
   while [ `tail -1 records.count` -lt ${expected_records} ]; do
-  echo "Waiting for Record data to be loaded."
+  echo "Waiting for Record data to be loaded." `tail -1 records.count` " out of ${expected_records}"
   mysql -h ${dbhost} --port=${dbport} -u gratia --password=${update_password} > records.count 2>&1 <<EOF 
 use ${schema_name};
 select count(*) from JobUsageRecord;
@@ -164,79 +273,147 @@ EOF
 use ${schema_name};
 update JobUsageRecord_Meta M, JobUsageRecord J set ServerDate = date_add(EndTime, interval 65 minute) where M.dbid = J.dbid;
 EOF
+
+}
+
+function fix_metric_server_date {
+
+  expected_records=400
+
+  echo '0' > mrecords.count
+  while [ `tail -1 mrecords.count` -lt ${expected_records} ]; do
+  echo "Waiting for Metric Record data to be loaded." `tail -1 mrecords.count` " out of ${expected_records}"
+  mysql -h ${dbhost} --port=${dbport} -u gratia --password=${update_password} > mrecords.count 2>&1 <<EOF 
+use ${schema_name};
+select count(*) from MetricRecord;
+EOF
+  if [ $? -ne 0 ]; then
+     cat mrecords.count
+     return
+  fi
+  sleep 2
+  done
+
+  echo "Attempt fix-up the MetricRecord table so that we have a range of ServerDate."
+
+  mysql -h ${dbhost} --port=${dbport} -u gratia --password=${update_password}<<EOF 
+use ${schema_name};
+update MetricRecord_Meta M, MetricRecord J set ServerDate = date_add(Timestamp, interval 65 minute) where M.dbid = J.dbid;
+EOF
+
+}
+
+function fix_server_date {
+    fix_usage_server_date
+    fix_metric_server_date
 }
 
 function loaddata {
-    echo "Sending data"
+   echo "Sending data"
 
-    start_server
+   # First extend artificially the retention to let the old record in.
+   echo "Turn off record purging"
+   ssh ${webhost} cd ${tomcatpwd}/gratia \; chown ${USER} service-configuration.properties \; mv service-configuration.properties service-configuration.properties.auto.old \; sed  -e '"s:service.lifetime.JobUsageRecord = .*:service.lifetime.JobUsageRecord = 24 months:"'  -e '"s:service.lifetime.DupRecord.Duplicates = .*:service.lifetime.DupRecord.Duplicates = 24 months:"' service-configuration.properties.auto.old \> service-configuration.properties
+   restart_server
 
-cat > ProbeConfig <<EOF
-<ProbeConfiguration 
-    UseSSL="0" 
+   start_server
 
-    UseGratiaCertificates="0"
+   write_ProbeConfig
+   wait_for_server
 
-    SSLHost="${webhost}:8443" 
-    SSLCollectorService="/gratia-servlets/rmi"
-    SSLRegistrationHost="${webhost}:${http_port}"
-    SSLRegistrationService="/gratia-security/security"
+   tar xfz preparedrecords.tar.gz
+   if [ "gratia-vm02.fnal.gov_9000" != "${webhost}_${http_port}" ]; then 
+      find MAGIC_VDT_LOCATION/gratia/var/tmp/gratiafiles -type f -name '*'"gratia-vm02.fnal.gov_9000"'*' | while read file; do
+         new_file=`echo "$file" | perl -wpe 's&\Q'"gratia-vm02.fnal.gov_9000.gratia.xml"'\E&'"${webhost}_${http_port}.gratia.xml"'&'`
+         mv "$file" "$new_file"
+      done
+   fi
 
-    GratiaCertificateFile="gratia.hostcert.pem"
-    GratiaKeyFile="gratia.hostkey.pem"
-
-    SOAPHost="${webhost}:${http_port}" 
-    CollectorService="/gratia-servlets/rmi" 
-    UseSoapProtocol="0"
-    
-    MeterName="LocalTester" 
-    SiteName="LocalTesting"
-    Grid="OSG"
-    
-    LogLevel="2"
-    DebugLevel="0" 
-    GratiaExtension="gratia.xml"
-    CertificateFile="/etc/grid-security/hostcert.pem"
-    KeyFile="/etc/grid-security/hostkey.pem"
-
-    VDTSetupFile="MAGIC_VDT_LOCATION/setup.sh"
-    UserVOMapFile="MAGIC_VDT_LOCATION/monitoring/grid3-user-vo-map.txt"
-
-    MaxPendingFiles="100000"
-    DataFolder="MAGIC_VDT_LOCATION/gratia/var/data/"
-    WorkingFolder="MAGIC_VDT_LOCATION/gratia/var/tmp"
-    LogFolder="MAGIC_VDT_LOCATION/gratia/var/logs/"
-    LogRotate="31"
-    UseSyslog="0"
-    SuppressUnknownVORecords="0"
-    SuppressNoDNRecords="0"
-    EnableProbe="0"
-
-/>
-
-EOF
-
-  export PYTHONPATH=${source}/probe/common:${PYTHONPATH}
-
-  tar xfz preparedrecords.tar.gz
-  find MAGIC_VDT_LOCATION/gratia/var/tmp/gratiafiles -type f -name '*'"gratia-vm02.fnal.gov_9000"'*' | while read file; do
-    new_file=`echo "$file" | perl -wpe 's&\Q'"gratia-vm02.fnal.gov_9000.gratia.xml"'\E&'"${webhost}_${http_port}.gratia.xml"'&'`
-    mv "$file" "$new_file"
-  done
-
-  # First extend artificially the retention to let the old record in.
-  ssh ${webhost} cd ${tomcatpwd}/gratia \; chown ${USER} service-configuration.properties \; mv service-configuration.properties service-configuration.properties.auto.old \; sed  -e '"s:service.lifetime.JobUsageRecord = .*:service.lifetime.JobUsageRecord = 24 months:"' service-configuration.properties.auto.old \> service-configuration.properties
-  #restart_server
-
-  python <<EOF
+   python <<EOF
 import Gratia
 Gratia.Initialize()
 EOF
-  python loaddata.py
 
-  # Restore the original (we could also set it to specific values)
-  ssh ${webhost} cd ${tomcatpwd}/gratia\; mv service-configuration.properties.auto.old service-configuration.properties \;
-  #restart_server
+   python loaddata.py
+   python loadmetric.py
+}
+
+function check_result {
+   msg=$2
+   stem=$1
+
+   diff $1.ref $1.validate
+   res=$?
+   if [ ${res} -eq 0 ]; then
+      echo ${msg} is OK.
+   else
+      echo ${msg} is INCORRECT.
+   fi;
+}
+
+
+function turn_on_purging {
+
+   # Restore the original (we could also set it to specific values)
+   echo "Turn on record purging"
+   ssh ${webhost} cd ${tomcatpwd}/gratia\; mv service-configuration.properties.auto.old service-configuration.properties \;
+   restart_server
+
+   # Wait until the purge has been done
+   wait_for_server
+   sleep 60
+}
+
+function check_data {
+
+   turn_on_purging
+   
+   echo "Checking duplicates"
+   mysql -h ${dbhost} --port=${dbport} -u gratia --password=${update_password} > duplicate.validate 2>&1 <<EOF 
+use ${schema_name};
+select RecordType, error, count(*) from DupRecord group by RecordType, error;
+EOF
+
+   echo "Check JobUsageRecord"
+   mysql -h ${dbhost} --port=${dbport} -u gratia --password=${update_password} > jobusagerecord.validate 2>&1 <<EOF 
+use ${schema_name};
+select ProbeName, VOName, count(*) as Nrecord, Sum(NJobs) as NJobs, Sum(WallDuration) as Wall, Sum(CpuUserDuration+CpuSystemDuration) as Cpu 
+    from JobUsageRecord_Report group by ProbeName, VOName;
+EOF
+
+   echo "Check JobUsageRecord_Xml"
+   mysql -h ${dbhost} --port=${dbport} -u gratia --password=${update_password} > jobusagerecordxml.validate 2>&1 <<EOF 
+use ${schema_name};
+select count(*),(ExtraXml!="" and not isnull(ExtraXml)) as hasExtraXml from JobUsageRecord_Xml group by hasExtraXml
+EOF
+
+   echo "Check MasterSummaryData"
+   mysql -h ${dbhost} --port=${dbport} -u gratia --password=${update_password} > jobsummary.validate 2>&1 <<EOF 
+use ${schema_name};
+select ProbeName, VOName, count(*) as Nrecord, Sum(NJobs) as NJobs, Sum(WallDuration) as Wall, Sum(CpuUserDuration+CpuSystemDuration) as Cpu 
+    from VOProbeSummary group by ProbeName, VOName;
+EOF
+
+   echo "Check MetricRecord"
+   mysql -h ${dbhost} --port=${dbport} -u gratia --password=${update_password} > metricrecord.validate 2>&1 <<EOF 
+use ${schema_name};
+select ProbeName, MetricName, count(*) as Nrecord
+    from MetricRecord J, MetricRecord_Meta M where J.dbid = M.dbid group by ProbeName, MetricName;
+EOF
+
+   echo "Check MetricRecord_Xml"
+   mysql -h ${dbhost} --port=${dbport} -u gratia --password=${update_password} > metricrecordxml.validate 2>&1 <<EOF 
+use ${schema_name};
+select count(*),(ExtraXml!="" and not isnull(ExtraXml)) as hasExtraXml from MetricRecord_Xml group by hasExtraXml
+EOF
+
+  check_result duplicate "Duplicate"
+  check_result jobsummary "JobUsageRecord Summary Table"
+  check_result jobusagerecord "JobUsageRecord"
+  check_result jobusagerecordxml "JobUsageRecord's RawXml"
+  check_result metricrecord "MetricRecord"
+  check_result metricrecordxml "MetricRecord's RawXml"
+ 
 }
 
 function upload_war()
@@ -248,7 +425,7 @@ function upload_war()
 }
 
 #--- get command line args ----
-while getopts :hcfdlw:p: OPT; do
+while getopts :tshcfdlw:p: OPT; do
     case $OPT in
         w)  do_war=1
             WAR=$OPTARG
@@ -267,6 +444,10 @@ while getopts :hcfdlw:p: OPT; do
             ;;
         p)  http_port=$OPTARG
             ;;
+        t)  do_test=1
+            ;;
+        s)  do_stop=1
+            ;;
         *)
             usage
             exit 1
@@ -280,6 +461,9 @@ rmi_port=`expr $http_port + 2`
 jmx_port=`expr $http_port + 3`
 server_port=`expr $http_port + 4`
 
+if [ $do_stop ]; then
+   stop_server
+fi
 if [ $do_databasereset ];then
    echo "Cleanup all database content"
    reset_database
@@ -298,6 +482,10 @@ if [ $do_load ]; then
 fi
 
 if [ $do_fixup ]; then 
-   #fix_duplicate_date
+   fix_duplicate_date
    fix_server_date
+fi
+
+if [ $do_test ]; then
+   check_data
 fi

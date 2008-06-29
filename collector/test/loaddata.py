@@ -55,8 +55,9 @@ def GetRecord(jobid, endtime):
         return r
 
 
-def sendRecords(nrecords, end):
+def sendRecords(nrecords, end, extra = ""):
         start =  end - datetime.timedelta(days=365)
+        start.replace(hour=18,minute=10,second=00);
         step = 365.0 / nrecords;
         ndays = 0;
 
@@ -64,23 +65,27 @@ def sendRecords(nrecords, end):
         
         for i in range(nrecords):
                 r = GetRecord(i,current)
+                r.RecordData.append(extra);
                 Gratia.Send(r)
                 ndays = ndays + step;
                 current = start + datetime.timedelta(days=ndays)
         
 
 if __name__ == '__main__': 
-        rev = "$Revision: 1.1 $"
-        Gratia.RegisterReporterLibrary("samplemeter.py",Gratia.ExtractCvsRevision(rev))
+        rev = "$Revision: 1.2 $"
+        Gratia.RegisterReporterLibrary("loaddata.py",Gratia.ExtractCvsRevision(rev))
         
         Gratia.Initialize()
 
         end = datetime.datetime.now();
 
         # Send several records records
-        #sendRecords(400,end);
+        sendRecords(400,end);
 
         # Send a few duplicates
         sendRecords(20,end)
         sendRecords(20,end)
+
+        # Send a few record with ExtraXml
+        sendRecords(12,end,"<RealJobName>testing extra xml</RealJobName>");
         
