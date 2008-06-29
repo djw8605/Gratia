@@ -183,6 +183,21 @@ public class MetricRecord implements Record
       return ExtraXml;
    }
 
+   public static Date expirationDate() {
+      return new Date(0);
+   }
+
+   public Date getExpirationDate() {
+      // Returns the date of the oldest raw records we keep
+      return expirationDate();
+   }
+
+   public Date getDate() 
+   {
+      // Returns the date this records is reporting about.
+      return this.Timestamp.getValue();
+   }
+
    public Date getServerDate()
    {
       return ServerDate;

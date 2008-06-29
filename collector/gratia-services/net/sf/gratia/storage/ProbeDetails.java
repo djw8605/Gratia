@@ -168,120 +168,135 @@ public class ProbeDetails implements Record
 	return ExtraXml;
     }
 
-   public Date getServerDate()
-   {
-      return ServerDate;
-   }
-
-   public void setServerDate(Date value)
-   {
-      ServerDate = value;
-   }
-
-   public String setToString(String name, Set l)
-   {
-      String output = "";
-      for (Iterator i = l.iterator(); i.hasNext(); )
-      {
-         Object el = i.next();
-         output = output + " " + name + ": " + el;
-      }
-      return output;
-   }
-
-   public String mapToString(String name, java.util.Map<String, Software> l)
-   {
-      String output = "";
-      for (Iterator i = l.values().iterator(); i.hasNext(); )
-      {
-         Object el = i.next();
-         output = output + " " + name + ": " + el;
-      }
-      return output;
-   }
-
-   public String setAsXml(String name, Set l)
-   {
-      String output = "";
-      for (Iterator i = l.iterator(); i.hasNext(); )
-      {
+    public static Date expirationDate() {
+        return new Date(0);
+    }
+    
+    public Date getExpirationDate() {
+        // Returns the date of the oldest raw records we keep
+        return expirationDate();
+    }
+    
+    public Date getDate() 
+    {
+        // Returns the date this records is reporting about.
+        return new Date(); // We don't know, so say it's about today!
+    }
+    
+    public Date getServerDate()
+    {
+        return ServerDate;
+    }
+    
+    public void setServerDate(Date value)
+    {
+        ServerDate = value;
+    }
+    
+    public String setToString(String name, Set l)
+    {
+        String output = "";
+        for (Iterator i = l.iterator(); i.hasNext(); )
+            {
+                Object el = i.next();
+                output = output + " " + name + ": " + el;
+            }
+        return output;
+    }
+    
+    public String mapToString(String name, java.util.Map<String, Software> l)
+    {
+        String output = "";
+        for (Iterator i = l.values().iterator(); i.hasNext(); )
+            {
+                Object el = i.next();
+                output = output + " " + name + ": " + el;
+            }
+        return output;
+    }
+    
+    public String setAsXml(String name, Set l)
+    {
+        String output = "";
+        for (Iterator i = l.iterator(); i.hasNext(); )
+            {
+                XmlElement el = (XmlElement)i.next();
+                output = output + el.asXml(name);
+            }
+        return output;
+    }
+    
+    public String mapAsXml(String name, java.util.Map<String,Software> l)
+    {
+        String output = "";
+        for (Iterator i = l.values().iterator(); i.hasNext(); )
+            {
          XmlElement el = (XmlElement)i.next();
          output = output + el.asXml(name);
-      }
-      return output;
-   }
+            }
+        return output;
+    }
+    
+    public String toString()
+    {
+        String output = "";
+        //      String output = "Details dbid: " + RecordId + "\n";
+        if (RecordIdentity != null) output = output + RecordIdentity + "\n";
+        if (SiteName != null) output = output + " SiteName: " + SiteName + "\n";
+        if (ProbeName != null) output = output + "ProbeName: " + ProbeName + "\n";
+        if (ProbeName != null) output = output + "Grid: " + Grid + "\n";
+        if (SoftwareMap != null) output = output + mapToString("", SoftwareMap);
 
-   public String mapAsXml(String name, java.util.Map<String,Software> l)
-   {
-      String output = "";
-      for (Iterator i = l.values().iterator(); i.hasNext(); )
-      {
-         XmlElement el = (XmlElement)i.next();
-         output = output + el.asXml(name);
-      }
-      return output;
-   }
+        return output;
+    }
+    
+    public String asXML()
+    {
+        String output = ""; // ("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+        output = output + ("<ProbeDetails xmlns:urwg=\"http://www.gridforum.org/2003/ur-wg\">\n>");
+        if (RecordIdentity != null) output = output + RecordIdentity.asXml();
+        if (ProbeName != null) output = output + ProbeName.asXml("ProbeName");
+        if (SiteName != null) output = output + SiteName.asXml("SiteName");
+        if (Grid != null) output = output + Grid.asXml("Grid");
 
-   public String toString()
-   {
-       String output = "";
-       //      String output = "Details dbid: " + RecordId + "\n";
-      if (RecordIdentity != null) output = output + RecordIdentity + "\n";
-      if (SiteName != null) output = output + " SiteName: " + SiteName + "\n";
-      if (ProbeName != null) output = output + "ProbeName: " + ProbeName + "\n";
-      if (ProbeName != null) output = output + "Grid: " + Grid + "\n";
-      if (SoftwareMap != null) output = output + mapToString("", SoftwareMap);
-
-      return output;
-   }
-
-   public String asXML()
-   {
-      String output = ""; // ("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-      output = output + ("<ProbeDetails xmlns:urwg=\"http://www.gridforum.org/2003/ur-wg\">\n>");
-      if (RecordIdentity != null) output = output + RecordIdentity.asXml();
-      if (ProbeName != null) output = output + ProbeName.asXml("ProbeName");
-      if (SiteName != null) output = output + SiteName.asXml("SiteName");
-      if (Grid != null) output = output + Grid.asXml("Grid");
-
-      if (SoftwareMap != null) output = output + mapAsXml("", SoftwareMap);
-
-      output = output + ("</ProbeDetails\n");
-      return output;
-   }
-
-   public void AttachContent( org.hibernate.Session session ) throws Exception
-   {
+        if (SoftwareMap != null) output = output + mapAsXml("", SoftwareMap);
+        
+        output = output + ("</ProbeDetails\n");
+        return output;
+    }
+    
+    public void AttachContent( org.hibernate.Session session ) throws Exception
+    {
        for (Iterator i = this.SoftwareMap.values().iterator(); i.hasNext(); )
-      {
-          Software s = (Software)i.next();
-
+           {
+               Software s = (Software)i.next();
+               
           s.Attach(session);
-      }
-   }
-
-   public String computemd5() throws Exception
-   {
-      RecordIdentity temp = getRecordIdentity();
-      setRecordIdentity(null);
-      String md5key = Utils.md5key(asXML());
-      setRecordIdentity(temp);
-
-      return md5key;
-   }
-
-   public String getmd5()
-   {
+           }
+    }
+    
+    public String computemd5() throws Exception
+    {
+        RecordIdentity temp = getRecordIdentity();
+        setRecordIdentity(null);
+        String md5key = Utils.md5key(asXML());
+        setRecordIdentity(temp);
+        
+        return md5key;
+    }
+    
+    public String getmd5()
+    {
       return md5;
-   }
+    }
+    
+    public void setmd5(String value)
+    {
+        md5 = value;
+    }
 
-   public void setmd5(String value)
-   {
-      md5 = value;
-   }
-
-   public String getTableName()
-   {
-      return "ProbeDetails";
-   }
+    public String getTableName()
+    {
+        return "ProbeDetails";
+    }
 }

@@ -594,6 +594,24 @@ public class JobUsageRecord implements Record
       return ResourceType;
    }
 
+   public Date getDate() 
+   {
+      // Returns the date this records is reporting about.
+      return EndTime.getValue();
+   }
+
+   public static Date expirationDate() {
+       int months = DataScrubber.getJobUsageRecordLimit();
+       java.util.GregorianCalendar jcal = new java.util.GregorianCalendar( java.util.TimeZone.getTimeZone("GMT") );
+       jcal.add( java.util.Calendar.MONTH, -1 * months );
+       return jcal.getTime();
+   }
+
+   public Date getExpirationDate() {
+      // Returns the date of the oldest raw records we keep
+      return expirationDate();
+   }
+
    public Date getServerDate()
    {
       return ServerDate;

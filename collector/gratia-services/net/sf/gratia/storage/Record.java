@@ -37,5 +37,8 @@ public interface Record {
 
     public String getTableName();
 
+    public Date getDate();  // Returns the date this records is reporting about.
+    public Date getExpirationDate(); // Returns the date of the oldest raw records we keep
+
     public void AttachContent( org.hibernate.Session session ) throws Exception;
 }

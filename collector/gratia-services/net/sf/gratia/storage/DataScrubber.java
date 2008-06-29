@@ -57,6 +57,11 @@ public class DataScrubber {
         return format.format(jcal.getTime());
     }
 
+    public static int getJobUsageRecordLimit() {
+        Properties p = net.sf.gratia.util.Configuration.getProperties();
+        return ParseLimit(p.getProperty( "service.lifetime.JobUsageRecord"));
+    }
+
     public DataScrubber() 
     {
         Properties p = net.sf.gratia.util.Configuration.getProperties();
@@ -168,7 +173,8 @@ public class DataScrubber {
         String limit = WhatDate( JobUsageRecordXmlLimit );
         Logging.log("DataScrubber: Remove all MetricRecord RawXML records older than: "+limit);
 
-        String delquery = "delete X from MetricRecord_Xml as X, MetricRecord_Meta as M, MetricRecord as J where X.dbid = M.dbid and X.dbid = J.dbid and ExtraXml = \"\" and (Timestamp is null || Timestamp < :dateLimit) and ServerDate < :dateLimit";
+        String delquery = "delete X from MetricRecord_Xml as X, MetricRecord_Meta as M, MetricRecord as J " +
+            " where X.dbid = M.dbid and X.dbid = J.dbid and ExtraXml = \"\" and (Timestamp is null || Timestamp < :dateLimit) and ServerDate < :dateLimit";
         long nrecords = ExecuteSQL( delquery, limit, "MetricRecord RawXML");
 
         Logging.info("DataScrubber: Removed "+nrecords+" MetricRecord RawXML records older than: "+limit);
