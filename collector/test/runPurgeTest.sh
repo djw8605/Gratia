@@ -348,6 +348,7 @@ function check_result {
       echo ${msg} is OK.
    else
       echo ${msg} is INCORRECT.
+      check_failed=1
    fi;
 }
 
@@ -412,8 +413,7 @@ EOF
   check_result jobusagerecord "JobUsageRecord"
   check_result jobusagerecordxml "JobUsageRecord's RawXml"
   check_result metricrecord "MetricRecord"
-  check_result metricrecordxml "MetricRecord's RawXml"
- 
+  check_result metricrecordxml "MetricRecord's RawXml" 
 }
 
 function upload_war()
@@ -488,4 +488,8 @@ fi
 
 if [ $do_test ]; then
    check_data
+fi
+
+if [ $check_failed ]; then
+   exit 1;
 fi
