@@ -83,7 +83,7 @@ public class ListenerThread extends Thread
             {
                 String url = p.getProperty("service.jms.url");
                 Logging.log("");
-                Logging.log("ListenerThread: " + ident + ":" + directory + ": Started");
+                Logging.log(ident + ": " + directory + ": Started");
                 Logging.log("");
             }
         catch (Exception e)
@@ -103,7 +103,7 @@ public class ListenerThread extends Thread
             duplicateCheck = true;
         else
             duplicateCheck = false;
-        Logging.log("ListenerThread: " + ident + ":Duplicate Check: " + duplicateCheck);
+        Logging.log(ident + ": Duplicate Check: " + duplicateCheck);
 
         try 
             {
@@ -113,23 +113,25 @@ public class ListenerThread extends Thread
         catch (Exception e) 
             {
                 // Only issue a warning here
-                Logging.log("ListernerThread: " + ident + " Failed to parse property maintain.recordsPerDirectory");
+                Logging.log(ident + ": Failed to parse property maintain.recordsPerDirectory");
             }            
     }
 
     public void stopRequest()
     {
         stopflag = true;
-        Logging.log("ListenerThread: " + ident + ":Stop Requested");
+        Logging.log(ident + ": Stop Requested");
     }
 
     public void run()
     {
+//         net.sf.gratia.storage.DataScrubber scrub = new net.sf.gratia.storage.DataScrubber();
+
         while (true)
             {
                 if (stopflag)
                     {
-                        Logging.log("ListenerThread: " + ident + ":Exiting");
+                        Logging.log(ident + ": Exiting");
                         return;
                     }
 
@@ -138,7 +140,7 @@ public class ListenerThread extends Thread
                         HibernateWrapper.start();
                         if (HibernateWrapper.databaseDown)
                             {
-                                Logging.log("ListenerThread: " + ident + ":Hibernate Down: Sleeping");
+                                Logging.log(ident + ": Hibernate Down: Sleeping");
                                 try
                                     {
                                         Thread.sleep(30 * 1000);
@@ -151,13 +153,18 @@ public class ListenerThread extends Thread
                     }
                 if (stopflag)
                     {
-                        Logging.log("ListenerThread: " + ident + ":Exiting");
+                        Logging.log(ident + ": Exiting");
                         return;
                     }
                 int nfiles = loop();
+//                 scrub.Duplicate();
+//                 scrub.JobUsageRawXml();
+//                 scrub.IndividualJobUsageRecords();
+//                 scrub.MetricRawXml();
+//                 scrub.IndividualMetricRecords();
                 if (stopflag)
                     {
-                        Logging.log("ListenerThread: " + ident + ":Exiting");
+                        Logging.log(ident + ": Exiting");
                         return;
                     }
                 if (nfiles==0) {
@@ -209,7 +216,7 @@ public class ListenerThread extends Thread
 
                 if (stopflag)
                     {
-                        Logging.log("ListenerThread: " + ident + ":Exiting");
+                        Logging.log(ident + ": Exiting");
                         return nfiles;
                     }
 
@@ -232,7 +239,7 @@ public class ListenerThread extends Thread
                     }
                 catch (Exception e) 
                     {
-                        Logging.log("ListenerThread: " + ident + ":loop failed to backup incoming message. \nError: "+e.getMessage()+"\n");
+                        Logging.log(ident + ": loop failed to backup incoming message. \nError: "+e.getMessage()+"\n");
                     }
 
                 Record current = null;
@@ -243,7 +250,7 @@ public class ListenerThread extends Thread
 
                 if (p.getProperty("service.datapump.trace").equals("1"))
                     {
-                        Logging.log("ListenerThread: " + ident + ":XML Trace:" + "\n\n" + blob + "\n\n");
+                        Logging.log(ident + ": XML Trace:" + "\n\n" + blob + "\n\n");
                     }
 
                 //
@@ -344,8 +351,8 @@ public class ListenerThread extends Thread
                     }
                 catch (Exception e)
                     {
-                        Logging.log("ListenerThread: " + ident + ":Error:Processing File: " + file);
-                        Logging.log("ListenerThread: " + ident + ":Blob: " + blob);
+                        Logging.log(ident + ": Error:Processing File: " + file);
+                        Logging.log(ident + ": Blob: " + blob);
                         try
                             {
                                 File temp = new File(file);
@@ -359,7 +366,7 @@ public class ListenerThread extends Thread
 
                 if (xml == null)
                     {
-                        Logging.log("ListenerThread: " + ident + ":Error:No Data To Process: " + file);
+                        Logging.log(ident + ": Error:No Data To Process: " + file);
                         try
                             {
                                 File temp = new File(file);
@@ -371,7 +378,7 @@ public class ListenerThread extends Thread
                         continue;
                     }
 
-                Logging.log("ListenerThread: " + ident + ":Processing: " + file);
+                Logging.log(ident + ": Processing: " + file);
 
                 ArrayList records = new ArrayList();
 
@@ -391,80 +398,100 @@ public class ListenerThread extends Thread
                 }
 
                 for (int j = 0; j < records.size(); j++) {
-                    // Logging.log("ListenerThread: " + ident + ":Before Begin Transaction");
+                    // Logging.log(ident + ": Before Begin Transaction");
                     session = HibernateWrapper.getSession();
                     tx = session.beginTransaction();
                     try {
-                        // Logging.log("ListenerThread: " + ident + ":After Begin Transaction");
+                        // Logging.log(ident + ": After Begin Transaction");
 
                         current = (Record)records.get(j);
 
                         Probe probe = statusUpdater.update(session, current, xml);
                         current.setProbe(probe);
 
-                        // Logging.log("ListenerThread: " + ident + ":After New Probe Update");
-                        updater.Update(current);
+                        Date date = current.getDate();
+                        Date expirationDate = current.getExpirationDate();
+                        if ( date.before(expirationDate) ) {
 
-                        if ((!gothistory) || (!(md5list.size()>j)) || md5list.get(j) == null) {
-                            String md5key = current.computemd5();
-                            current.setmd5(md5key);
-                            if (current.getTableName()
-                                .equals("JobUsageRecord")) {
-                                // Need to do this to keep number of
-                                // duplicates making it into the DB
-                                // under control during the upgrade
-                                // procedure. This will be removed for a
-                                // future upgrade as it is only really
-                                // necessary for very large DBs.
-                                Logging.debug("Calculating and saving " +
-                                              "old-style checksum for " +
-                                              "JobUsageRecord");
-                                JobUsageRecord jRecord = (JobUsageRecord) current;
-                                String oldMd5 = jRecord.computeOldMd5();
-                                jRecord.setoldMd5(oldMd5);
+                            if (gotreplication) {
+                                Logging.info(ident + ": Rejected record because its 'data' is too old ("+current.getDate()+" < "+expirationDate+")");
+                                errorRecorder.saveDuplicate("Replication","ExpirationDate",0,current);
+                            } else if (gothistory) {
+                                Logging.info(ident + ": Ignored history record because its 'data' is too old ("+current.getDate()+" < "+expirationDate+")");                                
+                            } else {
+                                Logging.info(ident + ": Rejected record because its 'data' is too old ("+current.getDate()+" < "+expirationDate+")");
+                                errorRecorder.saveDuplicate("Probe","ExpirationDate",0,current);
                             }
+
+                            session.flush();
+                            tx.commit();
+                            session.close();
+
                         } else {
-                            current.setmd5((String)md5list.get(j));
-                        }
-                        current.setDuplicate(false);
+                            // This is a recent record, let's process it
 
-                        synchronized (lock)
-                            {
-                                newVOUpdate.check(current, session);
-                            }
-                        synchronized (lock)
-                            {
-                                current.AttachContent(session);
-                            }
+                            updater.Update(current);
 
-                        
-                        String incomingxml = current.getRawXml();
-                        String rawxml = null;
-                        String extraxml = null;
-                        if (rawxmllist.size()>j) {
-                            rawxml = (String)rawxmllist.get(j);
-                            if (rawxml != null)
-                                current.setRawXml(rawxml);
+                            if ((!gothistory) || (!(md5list.size()>j)) || md5list.get(j) == null) {
+                                String md5key = current.computemd5();
+                                current.setmd5(md5key);
+                                if (current.getTableName()
+                                    .equals("JobUsageRecord")) {
+                                    // Need to do this to keep number of
+                                    // duplicates making it into the DB
+                                    // under control during the upgrade
+                                    // procedure. This will be removed for a
+                                    // future upgrade as it is only really
+                                    // necessary for very large DBs.
+                                    Logging.debug("Calculating and saving " +
+                                                  "old-style checksum for " +
+                                                  "JobUsageRecord");
+                                    JobUsageRecord jRecord = (JobUsageRecord) current;
+                                    String oldMd5 = jRecord.computeOldMd5();
+                                    jRecord.setoldMd5(oldMd5);
+                                }
+                            } else {
+                                current.setmd5((String)md5list.get(j));
+                            }
+                            current.setDuplicate(false);
+
+                            synchronized (lock)
+                                {
+                                    newVOUpdate.check(current, session);
+                                }
+                            synchronized (lock)
+                                {
+                                    current.AttachContent(session);
+                                }
+
+                            String incomingxml = current.getRawXml();
+                            String rawxml = null;
+                            String extraxml = null;
+                            if (rawxmllist.size()>j) {
+                                rawxml = (String)rawxmllist.get(j);
+                                if (rawxml != null)
+                                    current.setRawXml(rawxml);
+                            }
+                            Logging.log(ident + ": Before Hibernate Save");
+                            if (gothistory) {
+                                Date serverDate = new Date(Long.parseLong((String)historydatelist.get(j)));
+                                current.setServerDate(serverDate);
+                            }
+                            session.save(current);
+                            //
+                            // now - save history
+                            //
+                            if (!gothistory) {
+                                saveHistory(current,incomingxml,rawxml,extraxml,gotreplication);
+                            }
+                            // Logging.log(ident + ": After Hibernate Save");
+                            // Logging.log(ident + ": Before Transaction Commit");
+                            session.flush();
+                            tx.commit();
+                            session.close();
+                            // Logging.log(ident + ": After Transaction Commit");
+                            nrecords = nrecords + 1;
                         }
-                        Logging.log("ListenerThread: " + ident + ":Before Hibernate Save");
-                        if (gothistory) {
-                            Date serverDate = new Date(Long.parseLong((String)historydatelist.get(j)));
-                            current.setServerDate(serverDate);
-                        }
-                        session.save(current);
-                        //
-                        // now - save history
-                        //
-                        if (!gothistory) {
-                            saveHistory(current,incomingxml,rawxml,extraxml,gotreplication);
-                        }
-                        // Logging.log("ListenerThread: " + ident + ":After Hibernate Save");
-                        // Logging.log("ListenerThread: " + ident + ":Before Transaction Commit");
-                        session.flush();
-                        tx.commit();
-                        session.close();
-                        // Logging.log("ListenerThread: " + ident + ":After Transaction Commit");
-                        nrecords = nrecords + 1;
                     }
                     catch (ConstraintViolationException e) {
                         tx.rollback();
@@ -540,7 +567,7 @@ public class ListenerThread extends Thread
                                         }
                                         if (newerIsBetter) {
                                             // Keep the new one and ditch the old
-                                            Logging.info("ListenerThread: " + ident + ": replacing record " +
+                                            Logging.info(ident + ": Replacing record " +
                                                          dupdbid + " with \"better\" record (" +
                                                          replaceReason + ").");
                                             SummaryUpdater.removeFromSummary(original_record.getRecordId(),
@@ -589,7 +616,7 @@ public class ListenerThread extends Thread
                                 catch (Exception e2) {
                                     tx.rollback();
                                     session.close();
-                                    Logging.warning("ListenerThread: " + ident +
+                                    Logging.warning(ident +
                                                     ": caught exception resolving duplicates for record with md5 checksum" +
                                                     current.getmd5() +
                                                     " -- all duplicates of same will remain in DB", e2);
@@ -598,27 +625,27 @@ public class ListenerThread extends Thread
                                 needCurrentSaveDup = current.setDuplicate(true);
                             }
                             if (needCurrentSaveDup) {
-                                //Logging.log("ListenerThread: " + ident + ":Before Save Duplicate");
+                                //Logging.log(ident + ": Before Save Duplicate");
                                 try {
                                     if (gotreplication) {
-                                        Logging.debug("ListenerThread: " + ident +
+                                        Logging.debug(ident +
                                                       ": save duplicate of record " +
                                                       dupdbid);
                                         errorRecorder.saveDuplicate("Replication", "Duplicate", dupdbid, current);
                                     } else if (gothistory) {
                                         // If we are reprocessing the history date, we should not
                                         // be recording the possible duplicates.
-                                        Logging.debug("ListenerThread: " + ident +
+                                        Logging.debug(ident +
                                                       ": ignore duplicate of record " +
                                                       dupdbid + " (history replay)");
                                         ;
                                     } else {
                                         errorRecorder.saveDuplicate("Probe", "Duplicate", dupdbid, current);
-                                        Logging.debug("ListenerThread: " + ident +
+                                        Logging.debug(ident +
                                                       ": save duplicate of record " +
                                                       dupdbid);
                                     }
-                                    //Logging.log("ListenerThread: " + ident + ":After Save Duplicate");
+                                    //Logging.log(ident + ": After Save Duplicate");
                                 }
                                 catch (Exception ignore) { }
                             }
@@ -633,11 +660,11 @@ public class ListenerThread extends Thread
                                 }
                                 catch (Exception ignore) { }
                             } else {
-                                Logging.log("ListenerThread: " + ident + ":Communications Error:Shutting Down");
+                                Logging.log(ident + ": Communications Error:Shutting Down");
                                 return 0; 
                             }
-                            Logging.warning("ListenerThread: " + ident + ":Error In Process: ",e);
-                            Logging.warning("ListenerThread: " + ident + ":Current: " + current);
+                            Logging.warning(ident + ": Error In Process: ",e);
+                            Logging.warning(ident + ": Current: " + current);
                         }
                     }
                     catch (Exception e) {
@@ -654,26 +681,26 @@ public class ListenerThread extends Thread
                             }
                             catch (Exception ignore) { }
                         } else {
-                            Logging.log("ListenerThread: " + ident + ":Communications Error:Shutting Down");
+                            Logging.log(ident + ": Communications Error:Shutting Down");
                             return 0; 
                         }
-                        Logging.warning("ListenerThread: " + ident + ":Error In Process: ",e);
-                        Logging.warning("ListenerThread: " + ident + ":Current: " + current);
+                        Logging.warning(ident + ": Error In Process: ",e);
+                        Logging.warning(ident + ": Current: " + current);
                     } // End general catch
-                }
-                // Logging.log("ListenerThread: " + ident + ":Before File Delete: " + file);
+                } // End of for each record loop
+                // Logging.log(ident + ": Before File Delete: " + file);
                 try {
                     File temp = new File(file);
                     temp.delete();
                 }
                 catch (Exception ignore) {
 
-                    // Logging.log("ListenerThread: " + ident + ":File Delete Failed: " + file + " Error: " + ignore);
+                    // Logging.log(ident + ": File Delete Failed: " + file + " Error: " + ignore);
                 }
-                // Logging.log("ListenerThread: " + ident + ":After File Delete: " + file);
+                // Logging.log(ident + ": After File Delete: " + file);
                 itotal++;
-                Logging.log("ListenerThread: " + ident + ":Total Input Messages: " + itotal);
-                Logging.log("ListenerThread: " + ident + ":Total Records: " + nrecords);
+                Logging.log(ident + ": Total Input Messages: " + itotal);
+                Logging.log(ident + ": Total Records: " + nrecords);
                 
             }
         return nfiles; 
@@ -740,8 +767,8 @@ public class ListenerThread extends Thread
         }
         catch (Exception e)
             {
-                Logging.log("ListenerThread: " + ident + ":Parse error:  " + e.getMessage());
-                Logging.log("ListenerThread: " + ident + ":XML:  " + "\n" + xml);
+                Logging.log(ident + ": Parse error:  " + e.getMessage());
+                Logging.log(ident + ": XML:  " + "\n" + xml);
                 throw e;
             }
 
