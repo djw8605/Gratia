@@ -1,68 +1,96 @@
 #!/usr/bin/env bash
 ###########################################################################
+# 06/30/2008 (John Weigand)
+#
 # Query to find any JobUsageRecords entries with a HostDecription missing
 # in the CPUInfo table.
 # 
-# This is primarily intended for use against the gratia_psacct database
-# but can be run for others.
-#
-# It should probably be cron scheduled to run weekly.
-#
-# It currently needs to be run on a node that has a ups version of mysql.
-# It also makes some assumptions about the current environment.
+# Refer to the usage function for more details.
 ###########################################################################
+function logerr {
+  echo;echo "ERROR: $1";usage;exit 1
+}
+#------------------
 function send_mail {
-    cmd=$1
-    when=$2
-    txtfile=$3.txt
-    csvfile=$3.csv
-    subject="${SCHEMA}: CPUInfo HostDescriptions missing entries"
-    mail -s "$subject" $MAILTO <<EOF
-This is an automated message running from cron. 
+  msg="\
+Cron host...... $(hostname -f)
+Cron user...... $(whoami)
+Script......... $PGM
 
-Cron host: $(hostname -f)
-Cron user: $(whoami)
-
-Database node: $DBNODE
-Schema: $SCHEMA
+Database node.. $DBNODE
+Schema......... $SCHEMA
 
 This script checks to see if there are any JobUsageRecords whose
 HostDescription records have not been defined in the CPUInfo table.
 
-This following were  detected:
+This following HostDescriptions were  detected:
 $(cat $tmpfile)
 
 These should be reviewed and a Specint2000 benchmark value set.
+"
+  
+  if [ -z "$MAILTO" ];then
+    echo;echo "$msg"
+  else
+    subject="${SCHEMA}: CPUInfo HostDescriptions missing entries"
+    mail -s "$subject" $MAILTO <<EOF
 
+This is an automated message from a script most likely running from cron.
+
+$msg
 EOF
+  fi
 }
+
 #-------
 function usage {
   echo "
-Usage: $0 [--mail email] [--schema database_schema] [--dbhost database_host]
+Usage: $0 --schema database_schema --dbhost database_host --port port 
+         [--mail email] [--help]
 
-    --mail    default: $MAILTO
-    --schema  default: $SCHEMA
-    --dbhost  default: $DBNODE
+    --schema  The database schema to query (required)
+    --dbhost  The host (full) of the database host (required)
+    --port    Port number of the dbms instance  (required)
+
+    --mail    Specifies the email adddress(es) to be sent an email
+              notice if HostDescriptions are not in the CPUInfo table.
+              (optional)
+    --help    provides usage
+    
+   This script queries to find any JobUsageRecords entries with a 
+   HostDecription missing in the CPUInfo table.
+   
+   It is primarily intended for use against the gratia_psacct database
+   but can be run for others.
+  
+   It should probably be cron scheduled to run weekly.
+  
+   It currently needs to be run on a node that has a ups version of mysql.
+   It also makes some assumptions about the current environment.
+
+   Email (--email argument) will be sent if any updates to CPUInfo are 
+   required.  If no --email option is specified it will display the
+   results to stdout.
 
 "
 }
 ### MAIN ###########################################################
 PGM=$(basename $0)
 tmpfile=/tmp/$PGM.$$
-echo HI
 
 
 #--------------------------------------------
 # space separated list of default mail recipients
-MAILTO="osg-operation@opensciencegrid.org"
-SCHEMA=gratia_psacct
-DBNODE="gratia-db01.fnal.gov"
+HELP=""
+MAILTO=""
+SCHEMA=""
+DBNODE=""
+PORT=""
 
 #--- source ups for setup script for mysql ----
 setups=/fnal/ups/etc/setups.sh
 if [ ! -f $setups ];then
-  echo  "UPS setups.sh ($setups) script not available"
+  logerr  "UPS setups.sh ($setups) script not available"
   exit 1
 fi
 source $setups
@@ -70,7 +98,7 @@ source $setups
 #--- setup mysql ----
 setup mysql 2>/dev/null
 if [ "$(type mysql 1>/dev/null 2>&1;echo $?)" != "0" ];then
-  echo "MySql client not available.  This script assumes it is
+  logerr "MySql client not available.  This script assumes it is
 available via Fermi UPS in $setups"
   exit 1
 fi
@@ -79,30 +107,47 @@ fi
 #--- validate any command line arguments
 while test "x$1" != "x"; do
    if [ "$1" == "--help" ]; then 
-	usage
-	exit 1
+	HELP="yes"
+	shift
    elif [ "$1" == "--mail" ]; then
 	MAILTO="$2"
 	shift
 	shift
    elif [ "$1" == "--schema" ]; then
-	SCHEMA=$1
+	SCHEMA=$2
    	shift
    	shift
    elif [ "$1" == "--dbhost" ]; then
-	DB_NODE=$1
+	DBNODE=$2
+   	shift
+   	shift
+   elif [ "$1" == "--port" ]; then
+	PORT=$2
    	shift
    	shift
    else 
-        echo "ERROR: Invalid command line argument"
+        logerr "Invalid command line argument"
         usage
         exit 1
    fi
 done
 
+if [ -n "$HELP" ];then
+  usage;exit 1
+fi
+if [ -z "$SCHEMA" ];then
+  logerr "--schema is a required argument"
+fi
+if [ -z "$DBNODE" ];then
+  logerr "--host is a required argument"
+fi
+if [ -z "$PORT" ];then
+  logerr "--port is a required argument"
+fi
+
 
 #--- perform the query ----
-mysql --skip-column-names --host=$DBNODE --port=3320 -u reader -preader $SCHEMA >$tmpfile <<EOF
+mysql --skip-column-names --host=$DBNODE --port=$PORT -u reader -preader $SCHEMA >$tmpfile <<EOF
 select distinct(j.HostDescription)
 from JobUsageRecord j
 where j.HostDescription IS NOT NULL
