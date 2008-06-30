@@ -5,7 +5,7 @@
 #
 # library to create simple report using the Gratia psacct database
 #
-#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.26 2008-06-27 11:37:59 pcanal Exp $
+#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.27 2008-06-30 21:52:05 pcanal Exp $
 
 import time
 import datetime
@@ -1732,8 +1732,7 @@ def NonReportingSites(
     # Call it twice to avoid a 'bug' in wget where on of the row is missing the first few characters.
     allSites = GetListOfOSGSites();
  
-    exceptionSites = ['BNL_ATLAS_1', 'BNL_ATLAS_2', 'USCMS-FNAL-WC1-CE2', 'USCMS-FNAL-WC1-CE3', 'USCMS-FNAL-WC1-CE4', 'BNL_LOCAL', 'BNL_OSG', 'BNL_PANDA', 'FNAL_CDFOSG_1', 'FNAL_CDFOSG_2', 'FNAL_CDFOSG_3', 'FNAL_CDFOSG_4', 'FNAL_DZEROOSG_1', 'FNAL_DZEROOSG_2', 'GLOW-CMS', 'UCSDT2-B']
-
+    exceptionSites = ['BNL_ATLAS_1', 'BNL_ATLAS_2', 'USCMS-FNAL-WC1-CE2', 'USCMS-FNAL-WC1-CE3', 'USCMS-FNAL-WC1-CE4', 'BNL_LOCAL', 'BNL_OSG', 'BNL_PANDA', 'FNAL_CDFOSG_1', 'FNAL_CDFOSG_2', 'FNAL_CDFOSG_3', 'FNAL_CDFOSG_4', 'FNAL_DZEROOSG_1', 'FNAL_DZEROOSG_2', 'GLOW-CMS', 'UCSDT2-B', 'FNAL_GPGRID_1', 'FNAL_GPGRID_2', 'Purdue-Lear' ]
 
     allSites = [name for name in allSites if name not in exceptionSites]
     reportingSitesDate = GetSiteLastReportingDate(when,True)
@@ -1801,22 +1800,24 @@ def NonReportingSites(
             print name+" :"+delim+"never reported or inactive"
     for data in stoppedSitesDate:        
         (name,lastreport) = data.split("\t")
-        if len(name)>15:
-            delim = "\t"
-        else:
-            delim = "\t\t"
-        print name+":"+delim+lastreport
+        if name in allSites:
+            if len(name)>15:
+                delim = "\t"
+            else:
+                delim = "\t\t"
+            print name+":"+delim+lastreport
 
     print "\nThe sites with no (known) recent activity:"
     for data in activitySitesDate:
         (name,lastreport) = data.split("\t")
-        if len(name)>15:
-            delim = "\t"
-        else:
-            delim = "\t\t"
-        print name+":"+delim+lastreport
-        
-            
+        if name in allSites:
+            if len(name)>=14:
+                delim = "\t"
+            if len(name)>=7:
+                delim = "\t\t"
+            else:
+                delim = "\t\t\t"
+            print name+":"+delim+lastreport
     return missingSites
 
 def LongJobs(range_end = datetime.date.today(),
