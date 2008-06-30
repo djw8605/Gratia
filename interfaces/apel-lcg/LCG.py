@@ -7,7 +7,7 @@
 # Script to transfer the data from Gratia to APEL (WLCG)
 ########################################################################
 #
-#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: LCG.py,v 1.14 2008-06-12 13:27:39 jgweigand Exp $
+#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: LCG.py,v 1.15 2008-06-30 17:09:09 jgweigand Exp $
 #
 #
 ########################################################################
@@ -48,6 +48,15 @@
 #   In the past when a site had no data, no update was made to the APEL
 #   table.  Now we will create an update record showing it was processed.  
 #   We will create the update records for each VO.
+# 
+# 6/25/08 (John Weigand)
+#   Removed the calculation (just commented in case it has to be
+#   re-instated) of a default normalization factor using the 
+#   NormalizationProbe attribute.  The NormalizationDefault attribute
+#   is used soley for sites not having a normalization factor which
+#   as of now, there are none and hopefully in the future this will 
+#   remain true.   
+#   
 # 
 ########################################################################
 import traceback
@@ -1000,8 +1009,9 @@ def main(argv=None):
       CheckLcgDBAvailability(gDatabaseParameters)
 
     #--- set the default normalization factor --------------
-    query = GetNormalizationQuery(gFilterParameters["NormalizationProbe"])
-    gNormalization =  SetNormalizationFactor(query,gDatabaseParameters)
+    ## query = GetNormalizationQuery(gFilterParameters["NormalizationProbe"])
+    ## gNormalization =  SetNormalizationFactor(query,gDatabaseParameters)
+    gNormalization = gFilterParameters["NormalizationDefault"]
 
     #--- get all filters -------------
     ReportableSites    = GetSiteFilters(gFilterParameters["SiteFilterFile"])
