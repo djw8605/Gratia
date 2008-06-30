@@ -1,0 +1,60 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+    
+<hibernate-mapping package= "net.sf.gratia.storage">
+
+<class name="NodeSummary"
+       table="NodeSummary"
+       node="NodeSummary"
+       lazy="false">
+
+    <id name="RecordId"
+        column="dbid"
+        type="integer">
+        <generator class="native"/>
+    </id>
+
+   <component name="EndTime" class="DateElement" insert="true">
+       <property name="Value" type="timestamp">
+           <column name="EndTime"  not-null="true" default="0" />
+       </property>
+   </component>
+   <component name="Node" class="StringElement" insert="true">
+       <property name="Value">
+           <column name="Node" not-null="true" default="0" />
+       </property>
+   </component>
+   <component name="ProbeName" class="StringElement" insert="true">
+       <property name="Value">
+           <column name="ProbeName" not-null="true" default="''" />
+       </property>
+   </component>
+   <component name="ResourceType" class="StringElement" insert="true">
+       <property name="Value">
+           <column name="ResourceType" not-null="true" default="'Unknown'" />
+       </property>
+   </component>
+   <component name="CpuSystemDuration" class="DurationElement" insert="true">
+       <property name="Value" column="CpuSystemDuration" />
+   </component>
+   <component name="CpuUserDuration" class="DurationElement" insert="true">
+       <property name="Value" column="CpuUserDuration" />
+   </component>
+   <component name="CpuCount" class="IntegerElement" insert="true">
+       <property name="Value" column="CpuCount" />
+   </component>
+   <component name="HostDescription" class="StringElement" insert="true">
+       <property name="Value" column="HostDescription" />
+   </component>
+   <component name="BenchmarkScore" class="IntegerElement" insert="true">
+       <property name="Value" column="BenchmarkScore" />
+   </component>
+   <component name="DaysInMonth" class="IntegerElement" insert="true">
+       <property name="Value" column="DaysInMonth" />
+   </component>
+
+</class>
+</hibernate-mapping>

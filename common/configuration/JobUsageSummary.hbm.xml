@@ -1,0 +1,76 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+    
+<hibernate-mapping package= "net.sf.gratia.storage">
+
+<class name="JobUsageSummary"
+       table="MasterSummaryData"
+       node="JobUsageSummary"
+       lazy="false">
+
+    <id name="RecordId"
+        column="SummaryID"
+        type="integer">
+        <generator class="native"/>
+    </id>
+
+   <component name="EndTime" class="DateElement" insert="true">
+       <property name="Value" type="timestamp">
+           <column name="EndTime" not-null="true" default="0" />
+       </property>
+   </component>
+   <component name="VOcorrid" class="IntegerElement" insert="true">
+       <property name="Value">
+           <column name="VOcorrid" not-null="true" default="0" />
+       </property>
+   </component>
+   <component name="ProbeName" class="StringElement" insert="true">
+       <property name="Value">
+           <column name="ProbeName" not-null="true" default="''" />
+       </property>
+   </component>
+   <component name="CommonName" class="StringElement" insert="true">
+       <property name="Value">
+           <column name="CommonName" not-null="true" default="'Unknown'" />
+       </property>
+   </component>
+   <component name="ResourceType" class="StringElement" insert="true">
+       <property name="Value">
+           <column name="ResourceType" not-null="true" default="'Unknown'" />
+       </property>
+   </component>
+   <component name="HostDescription" class="StringElement" insert="true">
+       <property name="Value">
+           <column name="HostDescription" not-null="true" default="'Unknown'" />
+       </property>
+   </component>
+   <component name="ApplicationExitCode" class="IntegerElement" insert="true">
+       <property name="Value">
+           <column name="ApplicationExitCode" not-null="true" default="0"/>
+       </property>
+   </component>
+   <component name="Njobs" class="IntegerElement" insert="true">
+       <property name="Value">
+           <column name="Njobs" not-null="true" default="0" />
+       </property>
+   </component>
+   <component name="WallDuration" class="DurationElement" insert="true">
+       <property name="Value">
+           <column name="WallDuration" not-null="true" default="0" />
+       </property>
+   </component>
+   <component name="CpuUserDuration" class="DurationElement" insert="true">
+       <property name="Value">
+           <column name="CpuUserDuration" not-null="true" default="0" />
+       </property>
+   </component>
+   <component name="CpuSystemDuration" class="DurationElement" insert="true">
+       <property name="Value">
+           <column name="CpuSystemDuration" not-null="true" default="0" />
+       </property>
+   </component>
+</class>
+</hibernate-mapping>
