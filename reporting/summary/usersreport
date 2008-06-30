@@ -14,7 +14,7 @@ def main(argv=None):
 
     argOutput = PSACCTReport.gOutput
 
-    PSACCTReport.UserReport(range_begin = PSACCTReport.gBegin,
+    PSACCTReport.RangeUserReport(range_begin = PSACCTReport.gBegin,
                              range_end = PSACCTReport.gEnd ,
                              output=argOutput);
 
