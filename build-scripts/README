@@ -1,0 +1,15 @@
+############################################################
+# 6/30/08 (John Weigand)
+############################################################
+To perform a manual build of gratia:
+  source setup-jdk15.sh
+  make 
+   or
+  make release
+
+
+To extract the latest (head) version of gratia) and build it,
+you can use the nightly-build.sh script.  This script can be
+placed in a cron.  
+Execute 'nightly-build.sh --help' for more details.
+
