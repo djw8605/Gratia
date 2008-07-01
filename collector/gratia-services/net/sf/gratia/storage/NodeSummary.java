@@ -12,7 +12,7 @@ import net.sf.gratia.util.Logging;
 // creation. When this starts to be used in earnest it will be necessary
 // to implement this class fully.
 
-public class NodeSummary implements Record {
+public class NodeSummary extends Record {
 
     // Information directly reflecting DB contents
     private int RecordId;
@@ -116,10 +116,6 @@ public class NodeSummary implements Record {
 
     public Date getDate() {
         return EndTime.getValue();
-    }
-
-    public Date getExpirationDate() {
-        return new Date(); // FIXME
     }
 
     public void AttachContent( org.hibernate.Session session ) throws Exception {

@@ -19,7 +19,7 @@ import java.util.Date;
  *
  */
 
-public class ProbeDetails implements Record
+public class ProbeDetails extends Record
 {
     // Information regarding the probe itself
     private java.util.Map<String, Software> SoftwareMap;
@@ -170,11 +170,6 @@ public class ProbeDetails implements Record
 
     public static Date expirationDate() {
         return new Date(0);
-    }
-    
-    public Date getExpirationDate() {
-        // Returns the date of the oldest raw records we keep
-        return expirationDate();
     }
     
     public Date getDate() 

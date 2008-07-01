@@ -19,7 +19,7 @@ import java.util.Date;
  * More Updates by Arvind Gopu 2007-10-19
  *
  */
-public class MetricRecord implements Record
+public class MetricRecord extends Record
 {
 
    // Meta Information (from the xml file)
@@ -185,11 +185,6 @@ public class MetricRecord implements Record
 
    public static Date expirationDate() {
       return new Date(0);
-   }
-
-   public Date getExpirationDate() {
-      // Returns the date of the oldest raw records we keep
-      return expirationDate();
    }
 
    public Date getDate() 
