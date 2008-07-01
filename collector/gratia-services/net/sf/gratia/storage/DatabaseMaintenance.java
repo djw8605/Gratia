@@ -188,7 +188,14 @@ public class DatabaseMaintenance {
         AddIndex("Site", true, "index02", "SiteName");
         AddIndex("Probe", true, "index02", "probename");
 
-        Boolean md5v2_checksum_is_operational = checkMd5v2Unique();
+        Boolean md5v2_checksum_is_operational = false;
+
+        try {
+            md5v2_checksum_is_operational = checkMd5v2Unique();
+        }
+        catch (Exception e) {
+            // Ignore
+        }
 
         //
         // the following were added to get rid of unused indexes
@@ -280,6 +287,31 @@ public class DatabaseMaintenance {
             // Note that we're adding a non-unique one, here.
             AddIndex("JobUsageRecord_Meta", false, "index17", "md5v2", true);
         }
+
+        // Indexes for MasterSummaryData
+        AddIndex("MasterSummaryData", false, "index01", "EndTime");
+        AddIndex("MasterSummaryData", false, "index02", "VOcorrid");
+        AddIndex("MasterSummaryData", false, "index03", "ProbeName");
+        AddIndex("MasterSummaryData", false, "index04", "CommonName");
+        AddIndex("MasterSummaryData", false, "index05", "ResourceType");
+        AddIndex("MasterSummaryData", false, "index06", "HostDescription");
+        AddIndex("MasterSummaryData", false, "index07", "ApplicationExitCode");
+        AddIndex("MasterSummaryData", true, "index08",
+                 "EndTime, VOcorrid, ProbeName, " +
+                 "CommonName, ResourceType, " +
+                 "HostDescription, ApplicationExitCode");
+
+        if (readIntegerDBProperty("gratia.database.wantNodeSummary") > 0) {
+            // Indexes for NodeSummary
+            AddIndex("NodeSummary", false, "index01", "EndTime");
+            AddIndex("NodeSummary", false, "index02", "Node");
+            AddIndex("NodeSummary", false, "index03", "ProbeName");
+            AddIndex("NodeSummary", false, "index04", "ResourceType");
+            AddIndex("NodeSummary", true, "index05", "EndTime, Node, ProbeName, ResourceType");
+        }
+        // SystemProplist management (safety)
+        AddIndex("SystemProplist", true, "index01", "car");
+
     }
 
     private int CallPostInstall(String action) {
@@ -423,12 +455,15 @@ public class DatabaseMaintenance {
         //
         Properties p = net.sf.gratia.util.Configuration.getProperties();
 
-        UpdateDbProperty("use.report.authentication", p.getProperty("use.report.authentication"));
+        UpdateDbProperty("use.report.authentication",
+                         p.getProperty("use.report.authentication"));
         UpdateDbProperty("gratia.database.wantSummaryTrigger",
                          p.getProperty("gratia.database.wantSummaryTrigger"));
         UpdateDbProperty("gratia.database.wantStoredProcedures",
                          p.getProperty("gratia.database.wantStoredProcedures"));
         UpdateDbProperty("gratia.database.useJobUsageSiteName",
+                         p.getProperty("gratia.database.useJobUsageSiteName"));
+        UpdateDbProperty("gratia.database.wantNodeSummary",
                          p.getProperty("gratia.database.useJobUsageSiteName"));
 
         dbUseJobUsageSiteName = 0 != readIntegerDBProperty("gratia.database.useJobUsageSiteName");
