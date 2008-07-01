@@ -26,7 +26,9 @@
     <id name="propid" column="propid" type="int">
       <generator class="native"/>
     </id>
-    <property name="car" column="car"/>
+    <property name="car">
+      <column name="car" not-null="true" default="''">
+    </property>
     <property name="cdr" column="cdr"/>
   </class>
 
