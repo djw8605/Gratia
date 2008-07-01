@@ -284,7 +284,7 @@ public class CollectorService implements ServletContextListener {
                 checker.checkMd5v2Unique();
             }
             catch (Exception e) {
-                Logging.warn("CollectorService: unable to ascertain md5v2 index status: not starting upgrade thread", e);
+                Logging.warning("CollectorService: unable to ascertain md5v2 index status: not starting upgrade thread", e);
             }
 
             boolean checksum_upgrade_disabled =
