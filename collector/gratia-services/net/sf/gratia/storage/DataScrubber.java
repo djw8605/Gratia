@@ -1,6 +1,7 @@
 package net.sf.gratia.storage;
 
 import net.sf.gratia.services.HibernateWrapper;
+import net.sf.gratia.services.ExpirationDateCalculator;
 import net.sf.gratia.util.Logging;
 
 import java.text.SimpleDateFormat;
@@ -8,7 +9,11 @@ import java.util.TimeZone;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.Properties;
+import java.util.Hashtable;
 import java.util.List;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.regex.*;
 
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -21,59 +26,27 @@ public class DataScrubber {
     // service.lifetime.MetricRecord = 3 months
     // service.lifetime.MetricRecord.RawXML = 1 month
     // service.lifetime.DupRecord.Duplicates = 1 month
+    // service.lifetime.DupRecord.* = <as specified>
     // service.lifetime.DupRecord = UNLIMITED
     //
 
-    int DupRecordDuplicateLimit = 0; // Limit expressed in month
-    int DupRecordLimit = 0;          // Limit expressed in month
-    int JobUsageRecordLimit = 0;
-    int JobUsageRecordXmlLimit = 0;
-    int MetricRecordLimit = 0;
-    int MetricRecordXmlLimit = 0;
-
     int bunchSize = 10000; // Should be set to 10000 in production.
 
-    protected static int ParseLimit( String timelimit ) {
-        // For now hardcoded!
+    ExpirationDateCalculator eCalc = new ExpirationDateCalculator();
 
-        timelimit = timelimit.trim();
-        if (timelimit == null || timelimit.equalsIgnoreCase("unlimited")) {
-            return 0;
-        } else {
-            timelimit = timelimit.toLowerCase();
-            // Assume 'month'
-            int index = timelimit.indexOf('m');
-            return Integer.parseInt(timelimit.substring(0,index).trim());
-        }
-    }
+//     protected static int ParseLimit( String timelimit ) {
+//         // For now hardcoded!
 
-    protected static String WhatDate( int months )
-    {
-        // Return the date 'months' months ago.
-
-        GregorianCalendar jcal = new GregorianCalendar( TimeZone.getTimeZone("GMT") );
-        jcal.add( Calendar.MONTH, -1 * months );
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-        return format.format(jcal.getTime());
-    }
-
-    public static int getJobUsageRecordLimit() {
-        Properties p = net.sf.gratia.util.Configuration.getProperties();
-        return ParseLimit(p.getProperty( "service.lifetime.JobUsageRecord"));
-    }
-
-    public DataScrubber() 
-    {
-        Properties p = net.sf.gratia.util.Configuration.getProperties();
-
-        DupRecordDuplicateLimit = ParseLimit(p.getProperty( "service.lifetime.DupRecord.Duplicates"));
-        DupRecordLimit          = ParseLimit(p.getProperty( "service.lifetime.DupRecord"));
-
-        JobUsageRecordLimit     = ParseLimit(p.getProperty( "service.lifetime.JobUsageRecord"));
-        JobUsageRecordXmlLimit  = ParseLimit(p.getProperty( "service.lifetime.JobUsageRecord.RawXML"));
-        MetricRecordLimit       = ParseLimit(p.getProperty( "service.lifetime.MetricRecord"));
-        MetricRecordXmlLimit    = ParseLimit(p.getProperty( "service.lifetime.MetricRecord.RawXML"));
-    }
+//         timelimit = timelimit.trim();
+//         if (timelimit == null || timelimit.equalsIgnoreCase("unlimited")) {
+//             return 0;
+//         } else {
+//             timelimit = timelimit.toLowerCase();
+//             // Assume 'month'
+//             int index = timelimit.indexOf('m');
+//             return Integer.parseInt(timelimit.substring(0,index).trim());
+//         }
+//     }
 
     static protected long ExecuteSQL( String deletecmd, String limit, String msg ) 
     {
@@ -164,43 +137,44 @@ public class DataScrubber {
     }
 
 
-    public long MetricRawXml()
-    {
+    public long MetricRawXml() {
         // Execute: delete from tableName_Xml where EndTime < cutoffdate and ExtraXml == null
+        Properties p = eCalc.refreshLimits(); // Everybody's on the same page
+        String limit = eCalc.expirationDateAsSQLString(new Date(), "MetricRecord", "RawXML");
 
-        if (MetricRecordXmlLimit==0) return 0;
-
-        String limit = WhatDate( JobUsageRecordXmlLimit );
-        Logging.log("DataScrubber: Remove all MetricRecord RawXML records older than: "+limit);
+        if (!(limit.length() > 0)) return 0;
+        Logging.log("DataScrubber: Remove all MetricRecord RawXML records older than: " + limit);
 
         String delquery = "delete X from MetricRecord_Xml as X, MetricRecord_Meta as M, MetricRecord as J " +
             " where X.dbid = M.dbid and X.dbid = J.dbid and ExtraXml = \"\" and (Timestamp is null || Timestamp < :dateLimit) and ServerDate < :dateLimit";
         long nrecords = ExecuteSQL( delquery, limit, "MetricRecord RawXML");
 
-        Logging.info("DataScrubber: Removed "+nrecords+" MetricRecord RawXML records older than: "+limit);
+        Logging.info("DataScrubber: Removed " + nrecords +
+                     " MetricRecord RawXML records older than: " + limit);
         return nrecords;
     }
 
-    public long JobUsageRawXml()
-    {
+    public long JobUsageRawXml() {
         // Execute: delete from tableName_Xml where EndTime < cutoffdate and ExtraXml == null
+        Properties p = eCalc.refreshLimits(); // Everybody's on the same page
+        String limit = eCalc.expirationDateAsSQLString(new Date(), "JobUsageRecord", "RawXML");
 
-        if (JobUsageRecordXmlLimit==0) return 0;
-
-        String limit = WhatDate( JobUsageRecordXmlLimit );
-        Logging.log("DataScrubber: Remove all JobUsage RawXML records older than: "+limit);
+        if (!(limit.length() > 0)) return 0;
+        Logging.log("DataScrubber: Remove all JobUsage RawXML records older than: " + limit);
  
         String delquery = "delete X from JobUsageRecord_Xml X, JobUsageRecord_Meta as M, JobUsageRecord as J " + 
             " where M.dbid = X.dbid and J.dbid = X.dbid and ExtraXml = \"\" and (EndTime is null || EndTime < :dateLimit) and ServerDate < :dateLimit";
-        long nrecords = ExecuteSQL( delquery, limit, "JobUsageRecrod RawXML");
+        long nrecords = ExecuteSQL(delquery, limit, "JobUsageRecrod RawXML");
 
-        Logging.info("DataScrubber: Removed "+nrecords+" JobUsage RawXML records older than: "+limit);
+        Logging.info("DataScrubber: Removed " + nrecords +
+                     " JobUsage RawXML records older than: " + limit);
         return nrecords;
     }
 
-    public long IndividualJobUsageRecords()
-    {
-        // Execute: delete from tableName set where EndTime < cutoffdata
+    public long IndividualJobUsageRecords() {
+        // Execute: delete from tableName set where EndTime < cutoffdate
+        Properties p = eCalc.refreshLimits(); // Everybody's on the same page
+        String limit = eCalc.expirationDateAsSQLString(new Date(), "JobUsageRecord");
 
         // We need to handle the case where
         //   a) EndTime is null
@@ -208,24 +182,22 @@ public class DataScrubber {
         //   c) Normal case
 
         //   c) Normal case
-        List  ids = null;
+        List ids = null;
         long nrecords = 0;
-        if (JobUsageRecordLimit != 0) {
-
-            String limit = WhatDate( JobUsageRecordLimit );
-            Logging.log("DataScrubber: Remove all JobUsage records older than: "+limit);
+        if (limit.length() > 0) {
+            Logging.log("DataScrubber: Remove all JobUsage records older than: " + limit);
 
             String hqlList = "select RecordId from JobUsageRecord where EndTime.Value < :dateLimit and ServerDate < :dateLimit";
             boolean done = false;
 
             while (!done) {
-                ids = GetList( hqlList, limit, "JobUsageRecord records" );
-                Logging.info("DataScrubber: deleting "+ids);
+                ids = GetList(hqlList, limit, "JobUsageRecord records");
+                Logging.info("DataScrubber: deleting " + ids);
                 
                 // Here we decide whether to loop or not after each 'bunch'
                 done = (ids==null) || (ids.size() < bunchSize);
 
-                if (ids!=null && !ids.isEmpty()) {
+                if ((ids != null) && (!ids.isEmpty())) {
                 
                     Session session =  HibernateWrapper.getSession();
                     Transaction tx = session.beginTransaction();
@@ -269,14 +241,16 @@ public class DataScrubber {
                     if (session!=null) session.close();
                 }
             }
-            Logging.info("DataScrubber: "+nrecords+" JobUsageRecord have been deleted.");
+            Logging.info("DataScrubber: " + nrecords +
+                         " JobUsageRecord have been deleted.");
         }
         return nrecords;
     }
 
-    public long IndividualMetricRecords()
-    {
-        // Execute: delete from tableName set where EndTime < cutoffdata
+    public long IndividualMetricRecords() {
+        // Execute: delete from tableName set where EndTime < cutoffdate
+        Properties p = eCalc.refreshLimits(); // Everybody's on the same page
+        String limit = eCalc.expirationDateAsSQLString(new Date(), "MetricRecord");
 
         // We need to handle the case where
         //   a) EndTime is null
@@ -285,45 +259,67 @@ public class DataScrubber {
 
         //   c) Normal case
         long nrecords = 0;
-        if (MetricRecordLimit != 0) {
-            String limit = WhatDate( MetricRecordLimit );
-            Logging.log("DataScrubber: Remove all Metric records older than: "+limit); 
+        if (limit.length() > 0) {
+            Logging.log("DataScrubber: Remove all Metric records older than: " + limit); 
 
             String hqlDelete = "delete MetricRecord where Timestamp.Value < :dateLimit and ServerDate < :dateLimit";
-            nrecords = Execute( hqlDelete, limit, "Metric records" );
+            nrecords = Execute(hqlDelete, limit, "Metric records");
 
-            Logging.info("DataScrubber: deleted "+nrecords+" Metric records ");
+            Logging.info("DataScrubber: deleted " + nrecords + " Metric records ");
         }
 
         return nrecords;
     }
 
-    public long Duplicate() 
-    {
-        // Execute: delete from DupRecord where eventtime < cutoffdate && RecordType == "Duplicate"
-        // Returns the number of objects deleted from the database.
-
-        long n = 0;
-        long ndup = 0;
-        if (DupRecordLimit != 0 ) {
-            String limit = WhatDate( DupRecordLimit );
-            Logging.log("DataScrubber: Will remove all error record older than: "+limit);
-
-            String hqlDelete = "delete DupRecord where eventtime < :dateLimit";
-            n = Execute(  hqlDelete, limit, " error records " );
-
-            Logging.info("DataScrubber: deleted "+n+" error records ");
+    public long DupRecord() {
+        Properties p = eCalc.refreshLimits(); // Everybody's on the same page
+        Enumeration properties = p.keys();
+        Pattern errorTypePattern = // Want DupRecord lifetimes with error specifiers
+            Pattern.compile("service\\.lifetime\\.DupRecord\\.([\\.]+)");
+        Date refDate = new Date();
+        long count = 0;
+        String extraWhereClause = "";
+        String qualifierList = "";
+        while (properties.hasMoreElements()) { // Loop over all specified properties.
+            String key = (String) properties.nextElement();
+            Matcher m = errorTypePattern.matcher(key);
+            if (m.lookingAt()) { // Match to property
+                String qualifier = m.group(1);
+                if ((qualifier != null) && (qualifier.length() > 0)) {
+                    extraWhereClause = "error = '" + qualifier + "' and ";
+                    qualifierList += (qualifierList.length() > 0)?", ":"" +
+                        "'" + qualifier + "'";
+                    count += DupRecord(refDate, qualifier, extraWhereClause);
+                }
+            }
         }
-
-        if (DupRecordDuplicateLimit != 0 ) {
-            String limit = WhatDate( DupRecordDuplicateLimit );
-
-            Logging.log("DataScrubber: Will remove all duplicates record older than: "+limit);
-            String hqlDelete = "delete DupRecord where error = 'Duplicate' and eventdate < :dateLimit";
-            ndup = Execute(  hqlDelete, limit, " duplicate records " );
-            Logging.info("DataScrubber: deleted "+ndup+" duplicate records ");
+        if (qualifierList.length() > 0) {
+            // Lifetime without error specifier is a default, not an
+            // override.
+            extraWhereClause = "error NOT IN (" + qualifierList + ") and ";
         }
-        return n + ndup;
+        count += DupRecord(refDate, "", extraWhereClause); // Catch-all
+        return count;
+    }
+
+    private long DupRecord(Date refDate, String qualifier, String extraWhereClause) {
+        String expirationDate = eCalc.expirationDateAsSQLString(refDate, "DupRecord", qualifier);
+        long count = 0;
+        String extra_message =
+            ((qualifier != null) && (qualifier.length() > 0))?
+            ("with error type " + qualifier):
+            "";
+        if ((expirationDate != null) && (expirationDate.length() > 0)) {
+            Logging.log("DataScrubber: Will remove all DupRecord entries " +
+                        extra_message +
+                        " older than: " + expirationDate);
+            String hqlDelete = "delete DupRecord where " +
+                extraWhereClause +
+                " eventdate < :dateLimit";
+            count = Execute(  hqlDelete, extraWhereClause, " records " + extra_message);
+            Logging.info("DataScrubber: deleted " + count + "  records " + extra_message);
+        }
+        return count;
     }
 
 }

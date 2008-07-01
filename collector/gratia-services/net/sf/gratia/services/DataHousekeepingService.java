@@ -18,7 +18,7 @@ public class DataHousekeepingService extends Thread {
     private DataScrubber housekeeper = new DataScrubber();
     private long checkInterval;
     public enum HousekeepingAction { 
-        ALL, JOBUSAGEXML, METRICXML, METRICRECORD, JOBUSAGERECORD, DUPLICATE;
+        ALL, JOBUSAGEXML, METRICXML, METRICRECORD, JOBUSAGERECORD, DUPRECORD;
         private Lock l = new ReentrantLock();
         public Boolean tryLock() {
             return l.tryLock();
@@ -155,10 +155,10 @@ public class DataHousekeepingService extends Thread {
                 }
             }
             break;
-        case DUPLICATE:
+        case DUPRECORD:
             if (action.tryLock()) {
                 try {
-                    housekeeper.Duplicate();
+                    housekeeper.DupRecord();
                     result = true; // OK
                 }
                 finally {
