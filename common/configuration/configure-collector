@@ -94,15 +94,16 @@ my $init_script_template = <<'EOF';
 
 ####################################
 # Ensure these variables are set as appropriate
-TOMCAT_MANAGEMENT_PORT=
-TOMCAT_HTTP_PORT=
-TOMCAT_SSL_PORT=
-TOMCAT_PATH_STEM=
 JAVA_HOME=
+TOMCAT_HTTP_PORT=
+TOMCAT_MANAGEMENT_PORT=
+TOMCAT_PATH_STEM=
+TOMCAT_SSL_PORT=
+TOMCAT_USER=
 ####################################
 export JAVA_HOME
 
-PATH="$PATH:$JAVA_HOME/bin" # Needed for SSL keytool
+PATH="${PATH}:${JAVA_HOME}/bin" # Needed for SSL keytool
 
 # This should be fine as a default
 TOMCAT_INSTANCE_NAME=`basename "$0" | sed -e 's/^.*\(tomcat-.*\)$/\1/'`
@@ -111,13 +112,21 @@ TOMCAT_INSTANCE_NAME=`basename "$0" | sed -e 's/^.*\(tomcat-.*\)$/\1/'`
 # No User Servicable Parts
 CATALINA_HOME="${TOMCAT_PATH_STEM}/${TOMCAT_INSTANCE_NAME}"; export CATALINA_HOME
 
-[[ -n "$KRB5CCNAME" ]] && KRB5CCNAME=`echo "$KRB5CCNAME" | sed -e 's/^FILE://'`
+[[ -n "${KRB5CCNAME}" ]] && KRB5CCNAME=`echo "${KRB5CCNAME}" | sed -e 's/^FILE://'`
 if [ "$1" = "start" ] ; then
   JAVA_OPTS="-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=${TOMCAT_MANAGEMENT_PORT} -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dssl.port=${TOMCAT_SSL_PORT}"; export JAVA_OPTS
-  $CATALINA_HOME/bin/catalina.sh start
+  if [[ -n "${TOMCAT_USER}" ]]; then
+    su -c "${CATALINA_HOME}/bin/catalina.sh start" ${TOMCAT_USER}
+  else
+    $CATALINA_HOME/bin/catalina.sh start
+  fi
 elif [ "$1" = "stop" ] ; then
   wget --dns-timeout=5 --connect-timeout=10 --read-timeout=40 -O - -q '^^^STOP_DB_UPDATE_URL^^^' >/dev/null 2>&1
-  $CATALINA_HOME/bin/shutdown.sh
+  if [[ -n "${TOMCAT_USER}" ]]; then
+    su -c "${CATALINA_HOME}/bin/shutdown.sh" ${TOMCAT_USER}
+  else
+    ${CATALINA_HOME}/bin/shutdown.sh
+  fi
 else
   echo "Usage: ${TOMCAT_INSTANCE_NAME} [start | stop]"
   exit 1
@@ -254,6 +263,24 @@ foreach my $config (@instance_list) {
   configure_log4j_properties($config, $config_ref) if $options{"use-ssl"};
   configure_static_report_generation($config, $config_ref);
 
+  if (exists $config_ref->{"tomcat_user"}) {
+    print STDERR "TOMCAT_USER specified as ",
+      $config_ref->{"tomcat_user"},
+        ": changing ownership of $options{prefix}/tomcat-${config} ... ";
+    my $group = ($config_ref->{"tomcat_group"})?sprintf(".%s", $config_ref->{"tomcat_group"}):"";
+    my $status =
+      system("chown -R $config_ref->{\"tomcat_user\"}${group} \"$options{prefix}/tomcat-${config}\"");
+    if ($status == 0) {
+      print STDERR "OK\n";
+      system("chmod g+s \"$options{prefix}/tomcat-${config}\"") if ${group};
+    } else {
+      print STDERR "FAILED!\n";
+      print STDERR "ERROR changing ownership of ",
+        "\"$options{prefix}/tomcat-${config}\" ",
+          "to $config_ref->{\"tomcat_user\"}${group}\n";
+    }
+  }
+
   if (exists $options{"db-root"}) {
     configure_post_install($config, $config_ref);
   } else {
@@ -345,12 +372,15 @@ sub configure_init_file {
 	$init_script_txt =~ s&^(\s*JAVA_OPTS\s*=\s*".*?)"&${1} -XX:MaxPermSize=$collector_config->{max_perm_size}"&m if $collector_config->{max_perm_size};
 	$init_script_txt =~ s&^(\s*JAVA_OPTS\s*=\s*".*?)"&${1} -XX:PermSize=$collector_config->{initial_perm_size}"&m if $collector_config->{initial_perm_size};
         $init_script_txt =~ s&^(\s*JAVA_OPTS\s*=\s*".*?)"&${1} -Djava.library.path=$collector_config->{tomcat_native_lib}"&m if $collector_config->{tomcat_native_lib};
-	$init_script_txt =~ s&^(TOMCAT_MANAGEMENT_PORT=).*$&${1}$collector_config->{jmx_port}&m;
-	$init_script_txt =~ s&^(TOMCAT_HTTP_PORT=).*$&${1}$collector_config->{http_port}&m;
-	$init_script_txt =~ s&^(TOMCAT_SSL_PORT=).*$&${1}$collector_config->{ssl_port}&m;
-	$init_script_txt =~ s&^(TOMCAT_PATH_STEM=).*$&${1}"$options{prefix}"&m;
 	$init_script_txt =~ s&^(JAVA_HOME=).*$&${1}"$options{"java-home"}"&m;
-  $init_script_txt =~ s&\^\^\^STOP_DB_UPDATE_URL\^\^\^&$stop_db_update_url&;
+	$init_script_txt =~ s&^(TOMCAT_HTTP_PORT=).*$&${1}$collector_config->{http_port}&m;
+	$init_script_txt =~ s&^(TOMCAT_MANAGEMENT_PORT=).*$&${1}$collector_config->{jmx_port}&m;
+	$init_script_txt =~ s&^(TOMCAT_PATH_STEM=).*$&${1}"$options{prefix}"&m;
+	$init_script_txt =~ s&^(TOMCAT_SSL_PORT=).*$&${1}$collector_config->{ssl_port}&m;
+	$init_script_txt =~
+          s&^(TOMCAT_USER=).*$&${1}$collector_config->{tomcat_user}&m
+            if $collector_config->{tomcat_user};
+        $init_script_txt =~ s&\^\^\^STOP_DB_UPDATE_URL\^\^\^&$stop_db_update_url&;
 	open(INIT_SCRIPT, ">$init_script") or die("Unable to open $init_script for writing");
 	print INIT_SCRIPT $init_script_txt;
 	close(INIT_SCRIPT);
@@ -479,13 +509,13 @@ EOF
                sslCertFile="/etc/grid-security/hostcert.pem"
                sslKey="/etc/grid-security/hostkey.pem"
                log4jConfFile="$options{prefix}/tomcat-${instance_name}/conf/log4j-trustmanager.properties"
-               keystoreFile="$options{prefix}/tomcat-${instance_name}/gratia/keystore" keystorePass="server"
-               truststoreFile="$options{prefix}/tomcat-${instance_name}/gratia/truststore" truststorePass="server"
                clientAuth="true"
                sslProtocol="TLS"
                crlEnabled="true"
-               crlRequired="true"/>
+               crlRequired="false"/>
 EOF
+#               keystoreFile="$options{prefix}/tomcat-${instance_name}/gratia/keystore" keystorePass="server"
+#               truststoreFile="$options{prefix}/tomcat-${instance_name}/gratia/truststore" truststorePass="server"
 
 			}
 		}
