@@ -37,10 +37,10 @@ import org.hibernate.exception.*;
 public class DatabaseMaintenance {
     static final String dq = "\"";
     static final String comma = ",";
-    static final int gratiaDatabaseVersion = 38;
+    static final int gratiaDatabaseVersion = 39;
     static final int latestDBVersionRequiringStoredProcedureLoad = gratiaDatabaseVersion;
     static final int latestDBVersionRequiringSummaryViewLoad = 37;
-    static final int latestDBVersionRequiringSummaryTriggerLoad = 36;
+    static final int latestDBVersionRequiringSummaryTriggerLoad = 39;
     static final int latestDBVersionRequiringTableStatisticsRefresh = 38;
 
     static boolean dbUseJobUsageSiteName = false;
@@ -1116,19 +1116,19 @@ public class DatabaseMaintenance {
                 current = current + 1;
                 UpdateDbVersion(current);
             }                
-//             if (current == 29) {
-//                 int result = ReparseRecordsWithExtraXml();
-//                 if (result > -1) {
-//                     int tmp = current;
-//                     current = current + 1;
-//                     UpdateDbVersion(current);
-//                     Logging.log("Gratia database upgraded from " + tmp + " to " + current);
-//                 } else {
-//                     Logging.warning("Gratia database FAILED to upgrade from " + current +
-//                                 " to " + (current + 1));
-//                 }                
-//             }
-
+            if (current == 38) {
+                int result = Execute("alter table SystemProplist modify column car varchar(255) not null default ''");
+                if (result > -1) {
+                    Logging.log("Gratia database upgraded from " + current + " to " + (current + 1));
+                    current = current + 1;
+                    UpdateDbVersion(current);
+                } else {
+                    Logging.warning("Gratia database FAILED to upgrade from " + current +
+                                " to " + (current + 1));
+                }         
+                // Also auxiliary DB item upgrades (trigger and friends)
+            }
+            
             return ((current == gratiaDatabaseVersion) && checkAndUpgradeDbAuxiliaryItems());
         }
     }
