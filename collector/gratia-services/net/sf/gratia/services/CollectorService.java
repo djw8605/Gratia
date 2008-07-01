@@ -45,7 +45,6 @@ public class CollectorService implements ServletContextListener {
 
     ListenerThread threads[];
     PerformanceThread pthreads[];
-    StatusListenerThread statusListenerThread;
     ReplicationService replicationService;
     RMIService rmiservice;
     QSizeMonitor qsizeMonitor;;
@@ -381,13 +380,6 @@ public class CollectorService implements ServletContextListener {
                 qsizeMonitor = new QSizeMonitor();
                 qsizeMonitor.start();
             }
-
-            /*
-              statusListenerThread = new StatusListenerThread();
-              statusListenerThread.setDaemon(true);
-              statusListenerThread.start();
-            */
-
         }
         catch (Exception e) {
             Logging.warning("CollectorService: contextInitialized() caught exception ", e);

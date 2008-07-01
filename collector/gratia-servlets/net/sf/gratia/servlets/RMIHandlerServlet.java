@@ -233,13 +233,6 @@ public class RMIHandlerServlet extends HttpServlet
                         writer.write("OK");
                     else
                         writer.write("Error");
-                } else if (command.endsWith("handshake")) {
-                    parse_error = false;
-                    boolean status = proxy.handshake(arg1);
-                    if (status)
-                        writer.write("OK");
-                    else
-                        writer.write("Error");
                 }
             }
             if (parse_error) {

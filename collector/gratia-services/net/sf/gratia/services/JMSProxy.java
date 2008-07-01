@@ -4,7 +4,6 @@ import java.rmi.RemoteException;
 
 public interface JMSProxy extends java.rmi.Remote {
     public Boolean update(String xml) throws RemoteException;
-    public Boolean handshake(String xml) throws RemoteException;
     public void stopDatabaseUpdateThreads() throws RemoteException;
     public void startDatabaseUpdateThreads() throws RemoteException;
     public Boolean databaseUpdateThreadsActive() throws RemoteException;

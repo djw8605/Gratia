@@ -81,14 +81,6 @@ public class JMSProxyImpl extends UnicastRemoteObject implements JMSProxy {
         return false;
     }
 
-    public Boolean handshake(String xml) throws RemoteException {
-        ProbeStatusUpdate update = new ProbeStatusUpdate();
-
-        update.update(xml);
-
-        return true;
-    }
-
     public void stopDatabaseUpdateThreads() throws RemoteException {
         collectorService.stopDatabaseUpdateThreads();
     }
