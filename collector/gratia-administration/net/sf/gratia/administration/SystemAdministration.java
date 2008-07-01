@@ -140,11 +140,13 @@ public class SystemAdministration extends HttpServlet {
         String listenerStatus = "Unknown";
         String replicationStatus = "Unknown";
         String servletStatus = "Unknown";
+        String housekeepingStatus = "Unknown";
+        String checksumUpgradeStatus = "Unknown";
 
         try {
             Boolean flag = proxy.operationsDisabled();
             if (flag) {
-                operationsStatus = "Safe";
+                operationsStatus = "SAFE";
             } else {
                 operationsStatus = "Active";
                 flag = proxy.databaseUpdateThreadsActive();
@@ -165,6 +167,8 @@ public class SystemAdministration extends HttpServlet {
                 } else {
                    servletStatus = "Stopped";
                 }
+                housekeepingStatus = proxy.housekeepingServiceStatus();
+                checksumUpgradeStatus = proxy.checksumUpgradeStatus();
             }
         }
         catch (Exception e) {
@@ -173,14 +177,16 @@ public class SystemAdministration extends HttpServlet {
 
         html = html.replaceAll("#date#", DateFormat.getDateTimeInstance().format(new Date()) + " UTC");
 
-        if (operationsStatus.equals("Safe")) {
+        if (operationsStatus.equals("SAFE")) {
             html = html.replaceAll("#opstatus#",
                                    "<font color=\"fuchsia\"><strong>DISABLED</strong></font>");
             html = html.replaceAll("#opcomment#", 
                                    "<a href=\"systemadministration.html?action=enableOperations\"><strong>Enable</strong></a><br />To disable safe mode start, set <tt>gratia.service.safeStart = 0</tt> in service-configuration.properties.");
-            listenerStatus = "Safe";
-            replicationStatus = "Safe";
-            servletStatus = "Safe";
+            listenerStatus = "SAFE";
+            replicationStatus = "SAFE";
+            servletStatus = "SAFE";
+            housekeepingStatus = "SAFE";
+            checksumUpgradeStatus = "SAFE";
         } else if (operationsStatus.equals("Active")) {
             html = html.replaceAll("#opstatus#",
                                    "<font color=\"green\"><strong>ENABLED</strong></font>");
@@ -202,7 +208,7 @@ public class SystemAdministration extends HttpServlet {
                                    "<font color=\"green\"><strong>ACTIVE</strong</font>");
             html = html.replaceAll("#listenercomment#",
                                    "<a href=\"systemadministration.html?action=stopDatabaseUpdateThreads\"><strong>Stop</strong></a>.");
-        } else if (listenerStatus.equals("Safe")) {
+        } else if (listenerStatus.equals("SAFE")) {
             html = html.replaceAll("#listenerstatus#",
                                    "<font color=\"fuchsia\"><strong>SAFE</strong</font>");
             html = html.replaceAll("#listenercomment#",
@@ -224,7 +230,7 @@ public class SystemAdministration extends HttpServlet {
                                    "<font color=\"green\"><strong>ACTIVE</strong</font>");
             html = html.replaceAll("#replicationcomment#",
                                    "<a href=\"systemadministration.html?action=stopReplication\"><strong>Stop</strong></a>.");
-        } else if (replicationStatus.equals("Safe")) {
+        } else if (replicationStatus.equals("SAFE")) {
             html = html.replaceAll("#replicationstatus#",
                                    "<font color=\"fuchsia\"><strong>SAFE</strong</font>");
             html = html.replaceAll("#replicationcomment#",
@@ -246,7 +252,7 @@ public class SystemAdministration extends HttpServlet {
                                    "<font color=\"green\"><strong>ACTIVE</strong</font>");
             html = html.replaceAll("#servletcomment#",
                                    "<a href=\"systemadministration.html?action=disableServlet\"><strong>Stop</strong></a>.");
-        } else if (servletStatus.equals("Safe")) {
+        } else if (servletStatus.equals("SAFE")) {
             html = html.replaceAll("#servletstatus#",
                                    "<font color=\"fuchsia\"><strong>SAFE</strong</font>");
             html = html.replaceAll("#servletcomment#",
@@ -261,6 +267,53 @@ public class SystemAdministration extends HttpServlet {
                                    "<font color=\"red\"><strong>UNKNOWN</strong></font>");
             html = html.replaceAll("#servletcomment#",
                                    "Check log for errors.");
+        }
+
+        String color;
+
+        if (housekeepingStatus.equals("SAFE")) {
+            color = "fuschia";
+            html = html.replaceAll("#housekeepingcomment#",
+                                   "See <strong>Global Operational Status</strong>, above.");
+        } else if (housekeepingStatus.equalsIgnoreCase("STOPPED")) {
+            color = "red";
+            html = html.replaceAll("#housekeepingcomment#",
+                                   "<a href=\"systemadministration.html?action=startHousekeeping\">Start normally<strong></strong></a> or <a href=\"systemadministration.html?action=startHousekeepingNow\"><strong>Start run now</strong></a>.");
+        } else if (housekeepingStatus.equalsIgnoreCase("SLEEPING")) {
+            color = "green";
+            html = html.replaceAll("#housekeepingcomment#",
+                                   "<a href=\"systemadministration.html?action=startHousekeepingNow\"><strong>Run now</strong></a> or <a href=\"systemadministration.html?action=stopHousekeeping\"><strong>Stop</strong></a>.");
+        } else if (housekeepingStatus.equalsIgnoreCase("RUNNING")) {
+            color = "green";
+            html = html.replaceAll("#housekeepingcomment#",
+                                   "<a href=\"systemadministration.html?action=stopHousekeeping\"><strong>Stop after current run</strong></a>.");
+        } else {
+            color = "red";
+            html = html.replaceAll("#housekeepingcomment#",
+                                   "Check log for errors.");
+        }
+        html = html.replaceAll("#housekeepingstatus#",
+                               "<font color=\"" +
+                               color +
+                               "\"><strong>" +
+                               housekeepingStatus +
+                               "</strong></font>");
+
+        if (checksumUpgradeStatus.equals("OFF") ||
+            checksumUpgradeStatus.equals("STOPPED")) {
+            color = "red";
+        } else if (checksumUpgradeStatus.equals("SAFE")) {
+            color = "fuchsia";
+        } else {
+            color = "green";
+        }
+        if (!checksumUpgradeStatus.equals("OFF")) {
+            html =
+                html.replaceAll("<!-- CHECKSUM UPGRADE STATUS PLACEHHOLDER -->",
+                                "<tr><td><strong>Checksum upgrade status</strong></td>" +
+                                "<td><div align=\"center\">" +
+                                checksumUpgradeStatus +
+                                "</div></td></tr>");
         }
     }
 
@@ -306,6 +359,12 @@ public class SystemAdministration extends HttpServlet {
                 proxy.enableServlet();
             } else if (action.equals("disableServlet")) {
                 proxy.disableServlet();
+            } else if (action.equals("startHousekeeping")) {
+                proxy.startHousekeepingService();
+            } else if (action.equals("stopHousekeeping")) {
+                proxy.stopHousekeepingService();
+            } else if (action.equals("startHousekeepingNow")) {
+                proxy.startHousekeepingActionNow();
             } else {
                 Logging.warning("SystemAdministration.executeProxyAction called with unknown action " + action);
             }
