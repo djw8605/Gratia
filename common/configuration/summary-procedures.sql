@@ -123,14 +123,6 @@ SP:BEGIN
      LEAVE SP;
   END IF;
 
-  -- ProbeStatus
-  INSERT INTO ProbeStatus
-  VALUES(STR_TO_DATE(DATE_FORMAT(n_ServerDate, '%Y-%c-%e %H:00:00'),
-                     '%Y-%c-%e %H:00:00'),
-         n_ProbeName,
-         n_Njobs)
-  ON DUPLICATE KEY UPDATE Njobs = Njobs + VALUES(Njobs);
-
   -- MasterSummaryData
   INSERT INTO MasterSummaryData
   VALUES(DATE(n_EndTime),
@@ -309,17 +301,6 @@ SP:BEGIN
       VALUES(UTC_TIMESTAMP(), 'del_JUR_from_summary', input_dbid, 'Failed due to null CpuSystemDuration');
      LEAVE SP;
   END IF;
-
-  -- ProbeStatus
-  UPDATE ProbeStatus
-  SET Njobs = Njobs - n_Njobs
-  WHERE EndTime = ps_ServerDate
-    AND ProbeName = n_ProbeName;
-
-  DELETE FROM ProbeStatus
-  WHERE EndTime = ps_ServerDate
-    AND ProbeName = n_ProbeName
-    AND Njobs <= 0; -- Clean up emptied row if it exists.
 
   -- MasterSummaryData
   UPDATE MasterSummaryData
