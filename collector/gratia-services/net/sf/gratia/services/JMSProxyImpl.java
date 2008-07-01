@@ -125,4 +125,23 @@ public class JMSProxyImpl extends UnicastRemoteObject implements JMSProxy {
         collectorService.disableServlet();
     }
 
+    public String housekeepingServiceStatus() throws RemoteException {
+        return collectorService.housekeepingServiceStatus();
+    }
+
+    public void startHousekeepingService() throws RemoteException {
+        collectorService.startHousekeepingService();
+    }
+
+    public Boolean startHousekeepingActionNow() throws RemoteException {
+        return collectorService.startHousekeepingActionNow();
+    }
+
+    public void stopHousekeepingService() throws RemoteException {
+        collectorService.stopHousekeepingService();
+    }
+
+    public String checksumUpgradeStatus() throws RemoteException {
+        return collectorService.checksumUpgradeStatus();
+    }
 }

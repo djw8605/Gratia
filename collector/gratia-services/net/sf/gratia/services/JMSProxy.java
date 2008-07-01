@@ -15,4 +15,9 @@ public interface JMSProxy extends java.rmi.Remote {
     public void enableOperations() throws RemoteException;
     public void enableServlet() throws RemoteException;
     public void disableServlet() throws RemoteException;
+    public String housekeepingServiceStatus() throws RemoteException;
+    public void startHousekeepingService() throws RemoteException;
+    public void stopHousekeepingService() throws RemoteException;
+    public Boolean startHousekeepingActionNow() throws RemoteException;
+    public String checksumUpgradeStatus() throws RemoteException;
 }

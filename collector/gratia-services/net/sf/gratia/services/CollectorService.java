@@ -47,8 +47,10 @@ public class CollectorService implements ServletContextListener {
     PerformanceThread pthreads[];
     ReplicationService replicationService;
     RMIService rmiservice;
-    QSizeMonitor qsizeMonitor;;
+    QSizeMonitor qsizeMonitor;
     MonitorListenerThread monitorListenerThread;
+    DataHousekeepingService housekeepingService;
+    ChecksumUpgrader checksumUpgrader;
 
     public String configurationPath;
 
@@ -277,45 +279,28 @@ public class CollectorService implements ServletContextListener {
 
             Logging.debug("CollectorService: Checking for unique index on md5v2");
 
-            String checksum_check = "select non_unique from " +
-                "information_schema.statistics " +
-                "where table_schema = database() " +
-                " and table_name = 'JobUsageRecord_Meta'" +
-                " and column_name = 'md5v2'" +
-                " and index_name != 'md5v2'";
-            Session session = HibernateWrapper.getSession();
-            Boolean require_checksum_upgrade = true;
+            Boolean require_checksum_upgrade = false;
             try {
-                SQLQuery q = session.createSQLQuery(checksum_check);
-                List results_list = q.list();
-                if (! results_list.isEmpty()) {
-                    BigInteger non_unique = (BigInteger) results_list.get(0);
-                    Logging.debug("CollectorService: received answer: " + non_unique);
-                    if ((non_unique != null) && (non_unique.intValue() == 0)) {
-                        Logging.debug("CollectorService: found unique index on md5v2 in JobUsageRecord_Meta: no upgrade necessary.");
-                        require_checksum_upgrade = false;
-                    } else {
-                        Logging.debug("CollectorService: found non-unique index on md5v2 in JobUsageRecord_Meta.");
-                    }
-                } else {
-                    Logging.info("CollectorService: No index found on column md5v2 in JobUsageRecord_Meta: not attempting upgrade.");
-                    require_checksum_upgrade = false;
-                }
-                session.close();
+                checker.checkMd5v2Unique();
             }
             catch (Exception e) {
-                Logging.debug("CollectorService: Attempt to check for index on md5v2 in JobUsageRecord_Meta failed!");
-                if (session.isOpen()) session.close();
-                throw e;
+                Logging.warn("CollectorService: unable to ascertain md5v2 index status: not starting upgrade thread", e);
             }
-            boolean checksum_upgrade_disabled = 0 < checker.readIntegerDBProperty("gratia.database.disableChecksumUpgrade");
 
+            boolean checksum_upgrade_disabled =
+                0 < checker.readIntegerDBProperty("gratia.database.disableChecksumUpgrade");
+            
             if (require_checksum_upgrade && !checksum_upgrade_disabled) {
                 Logging.info("CollectorService: starting checksum upgrade thread.");
-                ChecksumUpgrader CU = new ChecksumUpgrader(this);
-                CU.start();
+                checksumUpgrader = new ChecksumUpgrader(this);
+                checksumUpgrader.start();
                 Logging.log("CollectorService: ChecksumUpgrader started");
             }
+
+            //
+            // Start a thread to periodically clear expired data
+            //
+            startHousekeepingService();
 
             //
             // start a thread to recheck history directories every 6 hours
@@ -438,6 +423,66 @@ public class CollectorService implements ServletContextListener {
         m_servletEnabled = false;
     }
 
+    public synchronized void startHousekeepingService() {
+        startHousekeepingService(true);
+    }
+
+    private synchronized void startHousekeepingService(Boolean initialDelay) {
+        if (housekeepingService == null ||
+            !housekeepingService.isAlive()) {
+            Logging.info("CollectorService: Starting data housekeeping service");
+            housekeepingService =
+                new DataHousekeepingService(this,
+                                            DataHousekeepingService.HousekeepingAction.ALL,
+                                            initialDelay);
+        }
+    }
+
+    public synchronized void stopHousekeepingService() {
+        if (housekeepingService == null || !housekeepingService.isAlive()) {
+            Logging.info("CollectorService: housekeeping service cannot be stopped -- not started!");
+            return;
+        }
+        Logging.info("CollectorService: Stopping housekeeping service.");
+        housekeepingService.requestStop();
+        if (housekeepingService.getState() == Thread.State.TIMED_WAITING) {
+            housekeepingService.interrupt();
+        }
+        try {
+            housekeepingService.join(threadStopWaitTime); // Wait up to one minute for thread exit.
+        }
+        catch (InterruptedException e) { // Ignore
+        }
+        if (housekeepingService.isAlive()) { // Still working
+            Logging.warning("CollectorService: housekeeping service has not stopped after " +
+                            (long) (threadStopWaitTime / 1000) + "s");
+        }
+    }
+
+    public synchronized String housekeepingServiceStatus() {
+        String status;
+        if (housekeepingService == null || !housekeepingService.isAlive()) {
+            status = "STOPPED";
+        } else if (housekeepingService.getState() == Thread.State.TIMED_WAITING) {
+            status = "SLEEPING";
+        } else {
+            status = "RUNNING";
+        }
+        return status;
+    }
+
+    public synchronized Boolean startHousekeepingActionNow() {
+        if (housekeepingServiceStatus().equalsIgnoreCase("SLEEPING")) {
+            housekeepingService.interrupt();
+            return true;
+        } else if (housekeepingServiceStatus().equals("STOPPED")) {
+            startHousekeepingService(false); // No initial delay.
+            return true;
+        } else {
+            return false; // No action.
+        }
+    }
+
     public synchronized void startReplicationService() {
         if (replicationService == null || !replicationService.isAlive()) {
             Logging.info("CollectorService: Starting replication service");
@@ -470,6 +515,14 @@ public class CollectorService implements ServletContextListener {
     
     public synchronized Boolean replicationServiceActive() {
         return replicationService != null && replicationService.isAlive();
+    }
+
+    public synchronized String checksumUpgradeStatus() {
+        if (checksumUpgrader  != null) {
+            return checksumUpgrader.checksumUpgradeStatus();
+        } else {
+            return "OFF";
+        }
     }
 
     public synchronized void stopDatabaseUpdateThreads() {
@@ -539,6 +592,10 @@ public class CollectorService implements ServletContextListener {
             if ((threads[i] != null) && threads[i].isAlive()) return true;
         }
         return false;
+    }
+
+    public Boolean checkMd5v2Unique() throws Exception {
+        return checker.checkMd5v2Unique();
     }
 
     public void loadSelfGeneratedCerts() {
