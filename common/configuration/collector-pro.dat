@@ -72,6 +72,7 @@
          "properties.attributes" =>
          {
             "gratia.database.useJobUsageSiteName" => 1,
+            "gratia.database.wantNodeSummary" => 1,
             "service.admin.DN.0" => 'ALLOW ALL'
          },
        },
