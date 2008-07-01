@@ -45,6 +45,10 @@ public class HibernateWrapper
          hibernateConfiguration.addFile(new File(net.sf.gratia.util.Configuration.getGratiaHbmPath()));
          hibernateConfiguration.addFile(new File(net.sf.gratia.util.Configuration.getJobUsagePath()));
          hibernateConfiguration.addFile(new File(net.sf.gratia.util.Configuration.getMetricRecordPath()));
+         hibernateConfiguration.addFile(new File(net.sf.gratia.util.Configuration.getJobUsageSummaryPath()));
+         if (p.getProperty("gratia.database.wantNodeSummary", "0").equals("1")) { // Only if we want (eg PS accounting)
+             hibernateConfiguration.addFile(new File(net.sf.gratia.util.Configuration.getNodeSummaryPath()));
+         }
          hibernateConfiguration.configure(new File(net.sf.gratia.util.Configuration.getHibernatePath()));
 
          Properties hp = new Properties();
@@ -56,19 +60,13 @@ public class HibernateWrapper
 
          hibernateFactory = hibernateConfiguration.buildSessionFactory();
 
-         Logging.log("");
-         Logging.log("HibernateWrapper: Hibernate Services Started");
-         Logging.log("");
+         Logging.info("HibernateWrapper: Hibernate Services Started");
 
          databaseDown = false;
       }
-      catch (Exception databaseError)
-      {
-         Logging.log("");
-         Logging.log("HibernateWrapper: Error Starting Hibernate");
-         Logging.log("");
-         databaseError.printStackTrace();
-         databaseDown = true;
+      catch (Exception databaseError) {
+          Logging.warning("HibernateWrapper: Error Starting Hibernate", databaseError);
+          databaseDown = true;
       }
    }
 
