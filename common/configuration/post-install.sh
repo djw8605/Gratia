@@ -112,7 +112,7 @@ while [[ -n "$1" ]]; do
 #        proc="${script_location}build-summary-tables.sql"
         set -- "$@" summary-view
         # build-summary-tables.sql removed.
-        echo "argument \"summary\" obsolete -- ignored\" 1>&2
+        echo "argument \"summary\" obsolete -- ignored" 1>&2
         continue
         ;;
       stored)
@@ -139,7 +139,7 @@ while [[ -n "$1" ]]; do
         ;;
       ps)
 #        proc="${script_location}build-ps-node-summary-table.sql"
-        echo "argument \"ps\" obsolete -- ignored\" 1>&2
+        echo "argument \"ps\" obsolete -- ignored" 1>&2
         continue;
         ;;
       summary[-_]view)
