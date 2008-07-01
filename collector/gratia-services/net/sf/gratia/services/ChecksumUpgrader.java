@@ -28,8 +28,27 @@ public class ChecksumUpgrader extends Thread {
 
     private CollectorService collectorService = null;
 
+    private enum Status {
+        UPDATING_CHECKSUMS, RESOLVING_DUPLICATES,
+            BLOCKING_UPDATES,
+            RESOLVING_DUPLICATES_BLOCKING,
+            UPDATING_MD5V2_INDEX,
+            DROPPING_OLD_MD5_INDEX,
+            COMPLETE,
+            STOPPED }
+
+    private Status checksumUpgradeStatus = Status.STOPPED;
+
     public ChecksumUpgrader(CollectorService cS) {
         collectorService = cS;
+    }
+
+    public String checksumUpgradeStatus() {
+        // Reset status if necessary
+        if ((!isAlive()) && !(checksumUpgradeStatus == Status.COMPLETE)) {
+            checksumUpgradeStatus = Status.STOPPED;
+        }
+        return checksumUpgradeStatus.toString();
     }
 
     public void run() {
@@ -62,6 +81,7 @@ public class ChecksumUpgrader extends Thread {
         // where it left off at the next restart.
 
         // 1.
+        checksumUpgradeStatus = Status.UPDATING_CHECKSUMS;
         Logging.info("ChecksumUpgrader: updating all checksums in JobUsageRecord_Meta");
         try {
 //             runGC();
@@ -77,6 +97,7 @@ public class ChecksumUpgrader extends Thread {
 
         // 2., 3. Fix duplicates, iterating until we're as done as we
         // can be without stopping updates.
+        checksumUpgradeStatus = Status.RESOLVING_DUPLICATES;
         Logging.info("ChecksumUpgrader: fixing all duplicates based on md5v2");
         try {
             fixAllDuplicates();
@@ -87,6 +108,7 @@ public class ChecksumUpgrader extends Thread {
         }
 
         try {
+            checksumUpgradeStatus = Status.BLOCKING_UPDATES;
             Logging.info("ChecksumUpgrader: preventing external changes to listener thread state");
             // 4. Lock the DB.
             synchronized (collectorService) {
@@ -97,10 +119,12 @@ public class ChecksumUpgrader extends Thread {
                     collectorService.stopDatabaseUpdateThreads();
                 }
                 // 5. Final duplicate resolution pass.
+                checksumUpgradeStatus = Status.RESOLVING_DUPLICATES_BLOCKING;
                 Logging.info("ChecksumUpgrader: final pass on duplicates");
                 fixDuplicatesOnce();
 
                 // 6. Make index unique.
+                checksumUpgradeStatus = Status.UPDATING_MD5V2_INDEX;
                 Logging.info("ChecksumUpgrader: make index on md5v2 unique (could take some time)");
                 Session session = HibernateWrapper.getSession();
                 Transaction tx = session.beginTransaction();
@@ -124,6 +148,7 @@ public class ChecksumUpgrader extends Thread {
                 session.close();
 
                 // 7. Drop the index on md5.
+                checksumUpgradeStatus = Status.DROPPING_OLD_MD5_INDEX;
                 Logging.info("ChecksumUpgrader: drop index on old md5 column");
                 try {
                     DropIndexByColumn("JobUsageRecord_Meta", "md5");
@@ -144,6 +169,7 @@ public class ChecksumUpgrader extends Thread {
             Logging.warning("ChecksumUpgrader: final stage fix and index recreation failed!", e);
             return;
         }
+        checksumUpgradeStatus = Status.COMPLETE;
         Logging.info("ChecksumUpgrader: checksum upgrade operation complete");
     }
 
