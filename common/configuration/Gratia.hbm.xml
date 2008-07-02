@@ -27,7 +27,7 @@
       <generator class="native"/>
     </id>
     <property name="car">
-      <column name="car" not-null="true" default="''">
+      <column name="car" not-null="true" default="''" />
     </property>
     <property name="cdr" column="cdr"/>
   </class>
@@ -198,20 +198,6 @@
     <property name="Name"/>
     <property name="Version"/>
     <property name="md5" column="md5" index="index12" unique="true"/>
-  </class>
-
-  <class name="CEProbeStatus" table="CEProbeStatus" node="CEProbeStatus" lazy="false">
-    <id name="statusid" column="statusid" type="int">
-      <generator class="native"/>
-    </id>
-    <component name="currenttime" class="DateElement" insert="true">
-      <property name="Value" column="currenttime" type="timestamp"  />
-      <property name="Description" column="CurrentTimeDescription" />
-    </component>
-    <property name="probename" column="probename"/>
-    <property name="probestatus" column="probestatus"/>
-    <property name="jobs" column="jobs" type="int"/>
-    <property name="lostjobs" column="lostjobs" type="int"/>
   </class>
 
 </hibernate-mapping>
