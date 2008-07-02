@@ -278,7 +278,7 @@ public class SystemAdministration extends HttpServlet {
         } else if (housekeepingStatus.equalsIgnoreCase("STOPPED")) {
             color = "red";
             html = html.replaceAll("#housekeepingcomment#",
-                                   "<a href=\"systemadministration.html?action=startHousekeeping\">Start normally<strong></strong></a> or <a href=\"systemadministration.html?action=startHousekeepingNow\"><strong>Start run now</strong></a>.");
+                                   "<a href=\"systemadministration.html?action=startHousekeeping\"><strong>Start normally</strong></a> or <a href=\"systemadministration.html?action=startHousekeepingNow\"><strong>Start run now</strong></a>.");
         } else if (housekeepingStatus.equalsIgnoreCase("SLEEPING")) {
             color = "green";
             html = html.replaceAll("#housekeepingcomment#",
