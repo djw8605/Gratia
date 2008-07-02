@@ -124,7 +124,10 @@ SP:BEGIN
   END IF;
 
   -- MasterSummaryData
-  INSERT INTO MasterSummaryData
+  INSERT INTO MasterSummaryData(EndTime, VOcorrid, ProbeName, CommonName,
+                                ResourceType, HostDescription,
+                                ApplicationExitCode, Njobs, WallDuration,
+                                CpuUserDuration, CpuSystemDuration)
   VALUES(DATE(n_EndTime),
          n_VOcorrid,
          n_ProbeName,
@@ -328,6 +331,71 @@ SP:BEGIN
   -- Don't do anything for NodeSummary -- AT YOUR OWN RISK.
 
 END;
+||
+
+drop procedure if exists updatenodesummary 
+||
+create procedure updatenodesummary(enddate datetime,mynode varchar(255),
+	myprobename varchar(255),myresourcetype varchar(255),
+	mycpusystemtime int,mycpuusertime int,mycpucount int,
+	myhostdescription varchar(255),mybenchmarkscore int,mydaysinmonth int)
+begin
+	declare mycount int default 0;
+	select count(*) into mycount from NodeSummary
+		where EndTime = enddate
+		and Node = mynode
+    and ProbeName = myprobename
+		and ResourceType = myresourcetype;
+	if mycount = 0 then
+--    insert into trace(eventtime,pname, p1, p2, p3, p4, p5, p6, p7, p8, p9, data)
+--     values(date(enddate), 'trigger02', mynode,
+--			myprobename,
+--			myresourcetype,
+--			mycpusystemtime,
+--			mycpuusertime,
+--			mycpucount,
+--			myhostdescription,
+--			mybenchmarkscore,
+--			mydaysinmonth, 'New entry in NodeSummary');
+     
+		insert into NodeSummary(EndTime, Node, ProbeName, ResourceType,
+                                        CpuSystemDuration, CpuUserDuration,
+                                        CpuCount, HostDescription,
+                                        BenchmarkScore, DaysInMonth)
+                values( date(enddate),
+			mynode,
+			myprobename,
+			myresourcetype,
+			mycpusystemtime,
+			mycpuusertime,
+			mycpucount,
+			myhostdescription,
+			mybenchmarkscore,
+			mydaysinmonth);
+	else
+--    insert into trace(eventtime,pname, p1, p2, p3, p4, p5, p6, p7, p8, p9, data)
+--     values(date(enddate), 'trigger02', mynode,
+--			myprobename,
+--			myresourcetype,
+--			mycpusystemtime,
+--			mycpuusertime,
+--			mycpucount,
+--			myhostdescription,
+--      mybenchmarkscore,
+--      mydaysinmonth, 'Updating entry in NodeSummary');
+
+    update NodeSummary
+      set 
+        CpuSystemTime = CpuSystemTime + mycpusystemtime,
+        CpuUserTime = CpuUserTime + mycpuusertime
+      where
+        EndTime = enddate
+        and Node = mynode
+        and ProbeName = myprobename
+        and ResourceType = myresourcetype;
+  end if;
+end;
+||
 
 -- Local Variables:
 -- mode: sql
