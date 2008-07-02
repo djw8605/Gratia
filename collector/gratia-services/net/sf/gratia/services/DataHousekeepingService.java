@@ -55,7 +55,7 @@ public class DataHousekeepingService extends Thread {
         collectorService = cS;
         Properties p = net.sf.gratia.util.Configuration.getProperties();
         checkInterval = 24 * 3600 * 1000 *
-            Long.valueOf(p.getProperty("service.lifetime.checkIntervalDays",
+            Long.valueOf(p.getProperty("service.lifetimeManagement.checkIntervalDays",
                                        "2"));
     }
 
