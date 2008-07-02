@@ -17,6 +17,12 @@ usage: update-gratia-local [-S <source-prefix>] [-j <jre-home>] [-s] \
 
           Find all sources under <source-prefix>.
 
+
+       -i <collector-info-file>
+
+          Use collector-info-file instead of the default files
+          (collector-pro.dat collector-dev.dat)
+
        -j <jre-home>
 
           JRE location.
@@ -134,7 +140,7 @@ birt
 "
 
 #--- get command line args ----
-while getopts :c:j:sp:d:v:hS: OPT; do
+while getopts :c:i:j:sp:d:v:hS: OPT; do
     case $OPT in
         c)  configure_script="$OPTARG"
             ;;
@@ -144,6 +150,9 @@ while getopts :c:j:sp:d:v:hS: OPT; do
         j)
             java_jre="$OPTARG"
             ;;
+        i)
+            collector_info="--collector-info=$OPTARG"
+            ;;
         s)
             use_ssl="-s"
             ;;
@@ -151,8 +160,7 @@ while getopts :c:j:sp:d:v:hS: OPT; do
             tomcat_root="$OPTARG"
             ;;
         d)
-            dbp_arg="-d"
-            dbpwd="$OPTARG"
+            dbp_arg="-d \"$OPTARG\" "
             ;;
         v)
             vdt_install=1
@@ -301,11 +309,12 @@ else
   #-----------------------  
   [[ -n "$configure_script" ]] || configure_script="$configuration_dir/configure-collector"
   echo "... running $configure_script"
-  "$configure_script" \
+   "$configure_script" \
 $use_ssl \
 -p "$tomcat_root" \
 -j "$java_jre" \
-$dbp_arg "$dbpwd" \
+$dbp_arg \
+${collector_info} \
 $instance
 status=$?
   if (( $status != 0 )); then
