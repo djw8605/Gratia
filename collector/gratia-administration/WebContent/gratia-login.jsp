@@ -25,6 +25,9 @@ try
 	net.sf.gratia.vomsSecurity.CertificateHandler certificateHandler = new net.sf.gratia.vomsSecurity.CertificateHandler(request);
 	session.setAttribute("certificateHandler", certificateHandler);
 
+        String displayLink = (String) session.getAttribute("displayLink");   
+	%><%= displayLink %><%
+
 	certificateHandler = (net.sf.gratia.vomsSecurity.CertificateHandler) session.getAttribute("certificateHandler");
 
 	String[] VOlist = certificateHandler.getVOlist();
@@ -120,7 +123,7 @@ try
 </form>
 <%
 	}
-	else
+	else if (!foundDN)
 	{
 		%>
 		<hr>
@@ -128,9 +131,7 @@ try
 		<br>Login by selecting a VO and then a Role. </p>
 		<hr>
 		<%
-	}
-	
-	if (((String) session.getAttribute("FQAN") == null) && foundDN)
+	} else if (((String) session.getAttribute("FQAN") == null) && foundDN)
 	{
 		%>
 		<hr>
@@ -138,7 +139,11 @@ try
 		<br>Login by selecting a VO and then a Role. </p>
 		<hr>
 		<%
-	}
+	} else if (displayLink != null) {
+
+                response.sendRedirect(displayLink);
+
+        }
 }
 catch (Exception ex)
 {
