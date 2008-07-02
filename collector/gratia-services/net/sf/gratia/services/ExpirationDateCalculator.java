@@ -35,7 +35,7 @@ public class ExpirationDateCalculator {
     static final Date invalidDate = new Date(0);
 
     Hashtable eDateCache = new Hashtable(); // Pre-calculated expiration dates still valid?
-    String lastExpirationRefDate; // Pre-calculated expiration dates still valid?
+    String lastExpirationRefDate = ""; // Pre-calculated expiration dates still valid?
 
     public enum DurationUnit {
         DAY(Calendar.DAY_OF_MONTH),
@@ -87,39 +87,44 @@ public class ExpirationDateCalculator {
         }
 
         public Duration(String property) throws DurationParseException {
-            Matcher m = durationPattern.matcher(property.toLowerCase());
-            if (m.lookingAt()) {
-                ordinality = Integer.parseInt(m.group(1));
-                char switchChar;
-                if (m.group(2) == null) {
-                    unit = defaultUnit;
-                } else {
-                    switch(m.group(2).charAt(0)) {
-                    case 'd':
-                        unit = DurationUnit.DAY;
-                        break;
-                    case 'w':
-                        unit = DurationUnit.WEEK;
-                        break;
-                    case 'm':
-                        unit = DurationUnit.MONTH;
-                        break;
-                    case 'y':
-                        unit = DurationUnit.YEAR;
-                        break;
-                    case 'u':
-                        unit = DurationUnit.UNLIMITED;
-                        break;
-                    default:
-                        throw new
-                            DurationParseException("unable to parse unit specification \"" +
-                                                   m.group(2) + "\"");
-                    }
-                }
+            String low = property.toLowerCase();
+            if (low.equals("unlimited")) {
+                unit = DurationUnit.UNLIMITED;
             } else {
-                throw new
-                    DurationParseException("ExpirationDateCalculator.Duration: unable to parse lifetime specification \"" +
-                                           property + "\"");
+                Matcher m = durationPattern.matcher(low);
+                if (m.lookingAt()) {
+                    ordinality = Integer.parseInt(m.group(1));
+                    char switchChar;
+                    if (m.group(2) == null) {
+                        unit = defaultUnit;
+                    } else {
+                        switch(m.group(2).charAt(0)) {
+                        case 'd':
+                            unit = DurationUnit.DAY;
+                            break;
+                        case 'w':
+                            unit = DurationUnit.WEEK;
+                            break;
+                        case 'm':
+                            unit = DurationUnit.MONTH;
+                            break;
+                        case 'y':
+                            unit = DurationUnit.YEAR;
+                            break;
+                        case 'u':
+                            unit = DurationUnit.UNLIMITED;
+                            break;
+                        default:
+                            throw new
+                                DurationParseException("unable to parse unit specification \"" +
+                                                       m.group(2) + "\"");
+                        }
+                    }
+                } else {
+                    throw new
+                        DurationParseException("ExpirationDateCalculator.Duration: unable to parse lifetime specification \"" +
+                                               property + "\"");
+                }
             }
         }
     }
@@ -183,7 +188,6 @@ public class ExpirationDateCalculator {
         try {
             if (lastExpirationRefDate.equals(date)) {
                 if (eDateCache.containsKey(key)) {
-                    cacheLock.unlock();
                     return (Date) eDateCache.get(key);
                 } else {
                     // Calendar starts from the reference date
@@ -193,7 +197,6 @@ public class ExpirationDateCalculator {
                     catch (java.text.ParseException e) {
                         Logging.warning("ExpirationDateCalculator: internal error: could not parse " +
                                         lastExpirationRefDate, e);
-                        cacheLock.unlock();
                         return (Date) invalidDate.clone();
                     }
                 }
@@ -216,19 +219,16 @@ public class ExpirationDateCalculator {
                     (Duration) limitCache.get(key);
                 if (limitDuration.unit().equals(DurationUnit.UNLIMITED)) {
                     eDateCache.put(key, invalidDate);
-                    cacheLock.unlock();
                     return (Date) invalidDate.clone();
                 } else {
                     cal.add(limitDuration.unit().calField(),
                             -1 * limitDuration.ordinality());
                     eDateCache.put(key, cal.getTime());
-                    cacheLock.unlock();
                     return cal.getTime();
                 }
             }
             catch (NullPointerException e) {
                 // No property for that, return invalid date;
-                cacheLock.unlock();
                 return (Date) invalidDate.clone();
             }
         }
