@@ -139,7 +139,7 @@ public class DataScrubber {
 
     public long MetricRawXml() {
         // Execute: delete from tableName_Xml where EndTime < cutoffdate and ExtraXml == null
-        Properties p = eCalc.refreshLimits(); // Everybody's on the same page
+        Properties p = eCalc.lifetimeProperties(); // Everybody's on the same page
         String limit = eCalc.expirationDateAsSQLString(new Date(), "MetricRecord", "RawXML");
 
         if (!(limit.length() > 0)) return 0;
@@ -156,7 +156,7 @@ public class DataScrubber {
 
     public long JobUsageRawXml() {
         // Execute: delete from tableName_Xml where EndTime < cutoffdate and ExtraXml == null
-        Properties p = eCalc.refreshLimits(); // Everybody's on the same page
+        Properties p = eCalc.lifetimeProperties(); // Everybody's on the same page
         String limit = eCalc.expirationDateAsSQLString(new Date(), "JobUsageRecord", "RawXML");
 
         if (!(limit.length() > 0)) return 0;
@@ -173,7 +173,7 @@ public class DataScrubber {
 
     public long IndividualJobUsageRecords() {
         // Execute: delete from tableName set where EndTime < cutoffdate
-        Properties p = eCalc.refreshLimits(); // Everybody's on the same page
+        Properties p = eCalc.lifetimeProperties(); // Everybody's on the same page
         String limit = eCalc.expirationDateAsSQLString(new Date(), "JobUsageRecord");
 
         // We need to handle the case where
@@ -249,7 +249,7 @@ public class DataScrubber {
 
     public long IndividualMetricRecords() {
         // Execute: delete from tableName set where EndTime < cutoffdate
-        Properties p = eCalc.refreshLimits(); // Everybody's on the same page
+        Properties p = eCalc.lifetimeProperties(); // Everybody's on the same page
         String limit = eCalc.expirationDateAsSQLString(new Date(), "MetricRecord");
 
         // We need to handle the case where
@@ -272,7 +272,7 @@ public class DataScrubber {
     }
 
     public long DupRecord() {
-        Properties p = eCalc.refreshLimits(); // Everybody's on the same page
+        Properties p = eCalc.lifetimeProperties(); // Everybody's on the same page
         Enumeration properties = p.keys();
         Pattern errorTypePattern = // Want DupRecord lifetimes with error specifiers
             Pattern.compile("service\\.lifetime\\.DupRecord\\.([\\.]+)");
@@ -303,20 +303,20 @@ public class DataScrubber {
     }
 
     private long DupRecord(Date refDate, String qualifier, String extraWhereClause) {
-        String expirationDate = eCalc.expirationDateAsSQLString(refDate, "DupRecord", qualifier);
+        String limit = eCalc.expirationDateAsSQLString(refDate, "DupRecord", qualifier);
         long count = 0;
         String extra_message =
             ((qualifier != null) && (qualifier.length() > 0))?
             ("with error type " + qualifier):
             "";
-        if ((expirationDate != null) && (expirationDate.length() > 0)) {
+        if (limit.length() > 0) {
             Logging.log("DataScrubber: Will remove all DupRecord entries " +
                         extra_message +
-                        " older than: " + expirationDate);
+                        " older than: " + limit);
             String hqlDelete = "delete DupRecord where " +
                 extraWhereClause +
                 " eventdate < :dateLimit";
-            count = Execute(  hqlDelete, extraWhereClause, " records " + extra_message);
+            count = Execute(  hqlDelete, limit, " records " + extra_message);
             Logging.info("DataScrubber: deleted " + count + "  records " + extra_message);
         }
         return count;
