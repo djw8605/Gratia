@@ -54,7 +54,7 @@ public class ExpirationDateCalculator {
     // Used by Duration class, below
     static final DurationUnit defaultUnit = DurationUnit.MONTH;
     static protected Pattern durationPattern =
-        Pattern.compile("(\\d+)\\s+([DWMY]|UNLIMITED)?",
+        Pattern.compile("(\\d+)\\s*([DWMY]|UNLIMITED)?",
                         Pattern.CASE_INSENSITIVE);
 
     public class DurationParseException extends Exception {
