@@ -435,6 +435,7 @@ public class CollectorService implements ServletContextListener {
                 new DataHousekeepingService(this,
                                             DataHousekeepingService.HousekeepingAction.ALL,
                                             initialDelay);
+            housekeepingService.start();
         }
     }
 
