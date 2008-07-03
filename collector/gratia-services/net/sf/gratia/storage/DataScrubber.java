@@ -275,7 +275,7 @@ public class DataScrubber {
         Properties p = eCalc.lifetimeProperties(); // Everybody's on the same page
         Enumeration properties = p.keys();
         Pattern errorTypePattern = // Want DupRecord lifetimes with error specifiers
-            Pattern.compile("service\\.lifetime\\.DupRecord\\.([\\.]+)");
+            Pattern.compile("service\\.lifetime\\.DupRecord\\.([^\\.]+)");
         Date refDate = new Date();
         long count = 0;
         String extraWhereClause = "";
@@ -310,7 +310,7 @@ public class DataScrubber {
             ("with error type " + qualifier):
             "";
         if (limit.length() > 0) {
-            Logging.log("DataScrubber: Will remove all DupRecord entries " +
+            Logging.log("DataScrubber: Remove all DupRecord entries " +
                         extra_message +
                         " older than: " + limit);
             String hqlDelete = "delete DupRecord where " +
