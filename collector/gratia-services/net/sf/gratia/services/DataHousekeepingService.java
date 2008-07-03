@@ -20,7 +20,7 @@ public class DataHousekeepingService extends Thread {
 
     private CollectorService collectorService = null;
     private Boolean stopRequested = false;
-    private Boolean initialDelay = true;
+    private Boolean sleepEnabled = true;
     private Date lastCompletionDate;
 
     private DataScrubber housekeeper = new DataScrubber();
@@ -58,7 +58,7 @@ public class DataHousekeepingService extends Thread {
                                    Boolean iD) {
         initialize(cS);
         defaultAction = action;
-        initialDelay = iD;
+        sleepEnabled = iD;
     }
 
     private void initialize(CollectorService cS) {
@@ -90,12 +90,19 @@ public class DataHousekeepingService extends Thread {
     public void run() {
         Logging.info("DataHousekeepingService started");
         while (!stopRequested) {
-            currentStatus = Status.SLEEPING;
-            try {
-                Thread.sleep(checkInterval);
-            }
-            catch (Exception e) {
-                // Ignore
+            if (sleepEnabled) {
+                currentStatus = Status.SLEEPING;
+                try {
+                    Thread.sleep(checkInterval);
+                }
+                catch (Exception e) {
+                    // Ignore
+                }
+            } else {
+                // Re-enable sleep every time we skip one.
+                // I.e. this let's us skip the first sleep
+                // or the code below could request an immediate re-run.
+                sleepEnabled = true;
             }
             if (!stopRequested) {
                 currentStatus = Status.RUNNING;
