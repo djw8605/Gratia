@@ -2,7 +2,7 @@ import Gratia
 import time
 import datetime
 
-def GetRecord(jobid, endtime):
+def GetRecord(jobid, endtime, type):
         r = Gratia.UsageRecord("Batch")
 
         r.LocalUserId("cmsuser000")
@@ -41,7 +41,7 @@ def GetRecord(jobid, endtime):
         r.Host("flxi02.fnal.gov",True)
         r.Queue("CepaQueue")
 
-        r.ProjectName("cms reco")
+        r.ProjectName(type)
 
         r.AdditionalInfo("RemoteWallTime",94365)
         r.Resource("RemoteCpuTime","PT23H")
@@ -49,7 +49,7 @@ def GetRecord(jobid, endtime):
         return r
 
 
-def sendRecords(nrecords, end, extra = ""):
+def sendRecords(nrecords, end, type, extra = ""):
         start =  end - datetime.timedelta(days=365)
         start.replace(hour=18,minute=10,second=00);
         step = 365.0 / nrecords;
@@ -58,7 +58,7 @@ def sendRecords(nrecords, end, extra = ""):
         current = start
         
         for i in range(nrecords):
-                r = GetRecord(i,current)
+                r = GetRecord(i,current, type)
                 r.RecordData.append(extra);
                 Gratia.Send(r)
                 ndays = ndays + step;
@@ -66,20 +66,22 @@ def sendRecords(nrecords, end, extra = ""):
         
 
 if __name__ == '__main__': 
-        rev = "$Revision: 1.3 $"
+        rev = "$Revision: 1.4 $"
         Gratia.RegisterReporterLibrary("loaddata.py",Gratia.ExtractCvsRevision(rev))
         
         Gratia.Initialize()
 
         end = datetime.datetime.now();
 
+        #sendRecords(3,end)
+
         # Send several records records
-        sendRecords(400,end);
+        sendRecords(400,end, "regular");
 
         # Send a few duplicates
-        sendRecords(20,end)
-        sendRecords(20,end)
+        sendRecords(20,end, "duplicate")
+        sendRecords(20,end, "duplicate")
 
         # Send a few record with ExtraXml
-        sendRecords(12,end,"<RealJobName>testing extra xml</RealJobName>");
+        sendRecords(12,end,"extraxml","<RealJobName>testing extra xml</RealJobName>");
         
