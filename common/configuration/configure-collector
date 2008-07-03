@@ -414,6 +414,17 @@ sub configure_collector_config {
 			s&^(\s*#\s)\s*\d*\s*(->\s*mysql)&${1}$spaced_db_port ${2}&;
 			s&^(\s*#\s)\s*\d*\s*(->\s*tomcat/jmx)&${1}$spaced_jmx_port ${2}&;
 		}
+		# Compound attributes and those using common attributes (eg http_port).
+		s&^(\Qservice.reporting.menuconfig\E\s*=\s*).*$&${1}$collector_config->{UserConfigPath}$collector_config->{UserConfig}&;
+		s&^(\Qservice.rmi.port\E\s*=\s*).*$&${1}$collector_config->{rmi_port}&;
+		s&^(\Qservice.rmi.rmibind\E\s*=\s*).*$&${1}//$collector_config->{collector_host}:$collector_config->{rmi_port}&;
+		s&^(\Qservice.rmi.rmilookup\E\s*=\s*).*$&${1}rmi://$collector_config->{collector_host}:$collector_config->{rmi_port}&;
+		s&^(\Qservice.open.connection\E\s*=\s*).*$&${1}http://$collector_config->{collector_host}:$collector_config->{http_port}&;
+		s&^(\Qservice.secure.connection\E\s*=\s*).*$&${1}https://$collector_config->{collector_host}:$collector_config->{ssl_port}&;
+		s&^(\Qservice.mysql.url\E\s*=\s*).*$&${1}jdbc:mysql://$collector_config->{db_host}:$collector_config->{db_port}/$collector_config->{db_schema}&;
+		# Special case for monitoring addresses -- dump addresses not wanted from the config:
+		m&^(\Qmonitor.to.address.\E\d+)& and not $collector_config->{"properties.attributes"}->{${1}}
+			and next;
 		# Simple attributes
 		foreach my $config_attribute (sort keys %{$collector_config->{"properties.attributes"}}) {
 			unless (ref($collector_config->{"properties.attributes"}->{$config_attribute}) eq "CODE") {
@@ -426,17 +437,6 @@ sub configure_collector_config {
 				}
 			}
 		}
-		# Compound attributes and those using common attributes (eg http_port).
-		s&^(\Qservice.reporting.menuconfig\E\s*=\s*).*$&${1}$collector_config->{UserConfigPath}$collector_config->{UserConfig}&;
-		s&^(\Qservice.rmi.port\E\s*=\s*).*$&${1}$collector_config->{rmi_port}&;
-		s&^(\Qservice.rmi.rmibind\E\s*=\s*).*$&${1}//$collector_config->{collector_host}:$collector_config->{rmi_port}&;
-		s&^(\Qservice.rmi.rmilookup\E\s*=\s*).*$&${1}rmi://$collector_config->{collector_host}:$collector_config->{rmi_port}&;
-		s&^(\Qservice.open.connection\E\s*=\s*).*$&${1}http://$collector_config->{collector_host}:$collector_config->{http_port}&;
-		s&^(\Qservice.secure.connection\E\s*=\s*).*$&${1}https://$collector_config->{collector_host}:$collector_config->{ssl_port}&;
-		s&^(\Qservice.mysql.url\E\s*=\s*).*$&${1}jdbc:mysql://$collector_config->{db_host}:$collector_config->{db_port}/$collector_config->{db_schema}&;
-		# Special case for monitoring addresses -- dump addresses not wanted from the config:
-		m&^(\Qmonitor.to.address.\E\d+)& and not $collector_config->{"properties.attributes"}->{${1}}
-			and next;
 		print REPORTING_CONFIG "$_\n";
 	}
 	close(ORIG_CONFIG);
