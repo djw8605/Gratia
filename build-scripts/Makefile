@@ -364,7 +364,7 @@ birt-reporting:
 
 
 #---------------------------------------------------------------
-local: clean util services servlets soap reporting reports administration 
+local: clean util services servlets  administration soap reporting reports 
 	# --- Target: local COMPLETED ---
 #---------------------------------------------------------------
 
@@ -431,7 +431,7 @@ server_lib:
 	# --- Target: server_lib COMPLETED ---
 
 #-------------------------------------------------------------
-gratia: clean util services servlets soap reporting reports administration server_lib
+gratia: clean util services servlets administration soap reporting reports server_lib
 	# ------------------------------
 	# --- Target: gratia         ---
 	# ------------------------------
