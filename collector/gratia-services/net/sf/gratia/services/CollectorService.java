@@ -422,11 +422,21 @@ public class CollectorService implements ServletContextListener {
     }
 
     public synchronized void enableServlet() {
-        m_servletEnabled = true;
+        if (!m_servletEnabled) {
+            Logging.info("CollectorService: telling servlet to resume receiving records");
+            m_servletEnabled = true;
+        } else {
+            Logging.info("CollectorService: servlet is already receiving records.");
+        }
     }
 
     public synchronized void disableServlet() {
-        m_servletEnabled = false;
+        if (m_servletEnabled) {
+            Logging.info("CollectorService: telling servlet to stop receiving records");
+            m_servletEnabled = false;
+        } else {
+            Logging.info("CollectorService: servlet is already set to reject incoming records");
+        }
     }
 
     public synchronized void startHousekeepingService() {
