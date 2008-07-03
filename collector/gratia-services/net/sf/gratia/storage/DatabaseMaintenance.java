@@ -464,7 +464,9 @@ public class DatabaseMaintenance {
         UpdateDbProperty("gratia.database.useJobUsageSiteName",
                          p.getProperty("gratia.database.useJobUsageSiteName"));
         UpdateDbProperty("gratia.database.wantNodeSummary",
-                         p.getProperty("gratia.database.useJobUsageSiteName"));
+                         p.getProperty("gratia.database.wantNodeSummary"));
+        UpdateDbProperty("gratia.database.disableChecksumUpgrade",
+                         p.getProperty("gratia.database.disableChecksumUpgrade"));
 
         dbUseJobUsageSiteName = 0 != readIntegerDBProperty("gratia.database.useJobUsageSiteName");
     }
