@@ -1,8 +1,6 @@
 Gratia - APEL/LCG Interface (John Weigand -2/25/2007)
 -----------------------------------------------------
 
-The intent of this whole process is to 
-
 The following files are associated with this interface:
  lcg.sh
  lcg-all-dates.sh
@@ -18,7 +16,7 @@ The following files are associated with this interface:
 #################################
 lcg.sh
 
-The purpose of this shell script is primarily to get access to a mysql
+The primary purpose of this shell script is to get access to a mysql
 client.  The mysql being used comes from Fermi UPS.  It assumes UPS is
 available via /fnal/ups/etc/setups.sh.  There is no command line argument to
 override this.  All other command line arguments are passed directly to
@@ -34,7 +32,7 @@ accounting data has been reported.
              --date=current
              --update
 
-This script will log error messages to stdout so it is important you do not
+This script will log error messages to stdout. So it is important you do not
 redirect stdout/err in the cron entry.  This will insure that someone gets an
 email notification if a failure occurs.
 
