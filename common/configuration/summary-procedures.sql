@@ -359,7 +359,7 @@ begin
 --			mydaysinmonth, 'New entry in NodeSummary');
      
 		insert into NodeSummary(EndTime, Node, ProbeName, ResourceType,
-                                        CpuSystemDuration, CpuUserDuration,
+                                        CpuSystemTime, CpuUserTime,
                                         CpuCount, HostDescription,
                                         BenchmarkScore, DaysInMonth)
                 values( date(enddate),

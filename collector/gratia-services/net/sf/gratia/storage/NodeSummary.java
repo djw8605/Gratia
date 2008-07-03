@@ -20,8 +20,8 @@ public class NodeSummary extends Record {
     private StringElement Node;
     private StringElement ProbeName;
     private StringElement ResourceType;
-    private DurationElement CpuSystemDuration;
-    private DurationElement CpuUserDuration;
+    private DurationElement CpuSystemTime;
+    private DurationElement CpuUserTime;
     private IntegerElement CpuCount;
     private StringElement HostDescription;
     private IntegerElement BenchmarkScore;
@@ -158,22 +158,22 @@ public class NodeSummary extends Record {
         this.ResourceType = ResourceType;
     }
 
-    // CpuSystemDuration
-    public DurationElement getCpuSystemDuration() {
-        return CpuSystemDuration;
+    // CpuSystemTime
+    public DurationElement getCpuSystemTime() {
+        return CpuSystemTime;
     }
 
-    public void setCpuSystemDuration(DurationElement CpuSystemDuration) {
-        this.CpuSystemDuration = CpuSystemDuration;
+    public void setCpuSystemTime(DurationElement CpuSystemTime) {
+        this.CpuSystemTime = CpuSystemTime;
     }
 
-    // CpuUserDuration
-    public DurationElement getCpuUserDuration() {
-        return CpuUserDuration;
+    // CpuUserTime
+    public DurationElement getCpuUserTime() {
+        return CpuUserTime;
     }
 
-    public void setCpuUserDuration(DurationElement CpuUserDuration) {
-        this.CpuUserDuration = CpuUserDuration;
+    public void setCpuUserTime(DurationElement CpuUserTime) {
+        this.CpuUserTime = CpuUserTime;
     }
 
     // CpuCount

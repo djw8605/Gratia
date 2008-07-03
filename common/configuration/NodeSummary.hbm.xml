@@ -37,11 +37,11 @@
            <column name="ResourceType" not-null="true" default="'Unknown'" />
        </property>
    </component>
-   <component name="CpuSystemDuration" class="DurationElement" insert="true">
-       <property name="Value" column="CpuSystemDuration" />
+   <component name="CpuSystemTime" class="DurationElement" insert="true">
+       <property name="Value" column="CpuSystemTime" />
    </component>
-   <component name="CpuUserDuration" class="DurationElement" insert="true">
-       <property name="Value" column="CpuUserDuration" />
+   <component name="CpuUserTime" class="DurationElement" insert="true">
+       <property name="Value" column="CpuUserTime" />
    </component>
    <component name="CpuCount" class="IntegerElement" insert="true">
        <property name="Value" column="CpuCount" />
