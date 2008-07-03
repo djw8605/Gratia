@@ -282,11 +282,11 @@ public class SystemAdministration extends HttpServlet {
         } else if (housekeepingStatus.equalsIgnoreCase("STOPPED")) {
             color = "red";
             html = html.replaceAll("#housekeepingcomment#",
-                                   "Old records are <strong>rejected</strong>. <a href=\"systemadministration.html?action=startHousekeeping\"><strong>Start normally</strong></a> or <a href=\"systemadministration.html?action=startHousekeepingNow\"><strong>Start run now</strong></a>.");
+                                   "Old records are <strong>rejected</strong> as normal. <a href=\"systemadministration.html?action=startHousekeeping\"><strong>Start normally</strong></a>; <a href=\"systemadministration.html?action=startHousekeepingNow\"><strong>Start run now</strong></a>; or <a href=\"systemadministration.html?action=disableHousekeeping\"><strong>Disable</strong></a> (incoming old records will be accepted).");
         } else if (housekeepingStatus.equalsIgnoreCase("SLEEPING")) {
             color = "green";
             html = html.replaceAll("#housekeepingcomment#",
-                                   "<a href=\"systemadministration.html?action=startHousekeepingNow\"><strong>Run now</strong></a> or <a href=\"systemadministration.html?action=stopHousekeeping\"><strong>Stop</strong></a>.");
+                                   "<a href=\"systemadministration.html?action=startHousekeepingNow\"><strong>Run now</strong></a>, or: <a href=\"systemadministration.html?action=stopHousekeeping\"><strong>Stop</strong></a>; or <a href=\"systemadministration.html?action=disableHousekeeping\"><strong>Stop and disable</strong></a> after current run.");
         } else if (housekeepingStatus.equalsIgnoreCase("Unknown")) {
             color = "red";
             html = html.replaceAll("#housekeepingcomment#",
@@ -314,7 +314,7 @@ public class SystemAdministration extends HttpServlet {
         } else if (checksumUpgradeStatus.startsWith("DISABLED")) {
             color = "fuchsia";
             if (checksumUpgradeStatus.contains("MANUAL")) {
-                checksumUpgradeComment = "<td>To re-enable, reset or remove <strong><tt>gratia.database.checksumUpgradeDisabled<tt></strong> in service-configuration.properties and restart the collector.</td>";
+                checksumUpgradeComment = "<td>To re-enable, set <strong><tt>gratia.database.checksumUpgradeDisabled = 0<tt></strong> in service-configuration.properties and restart the collector.</td>";
             } else {
                 checksumUpgradeComment = "<td><strong><font color=\"red\">Disabled automatically due to a serious internal problem. Please contact gratia-operation@opensciencegrid.org for support.</font></strong></td>";
             }
