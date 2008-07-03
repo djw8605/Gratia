@@ -10,6 +10,14 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class DataHousekeepingService extends Thread {
 
+    private enum Status {
+        STOPPED,
+            INITIALIZING,
+            RUNNING,
+            SLEEPING,
+            STOPPING;
+    }
+
     private CollectorService collectorService = null;
     private Boolean stopRequested = false;
     private Boolean initialDelay = true;
@@ -18,7 +26,7 @@ public class DataHousekeepingService extends Thread {
     private DataScrubber housekeeper = new DataScrubber();
     private long checkInterval;
     public enum HousekeepingAction { 
-        ALL, JOBUSAGEXML, METRICXML, METRICRECORD, JOBUSAGERECORD, DUPRECORD;
+        ALL, JOBUSAGEXML, METRICXML, METRICRECORD, JOBUSAGERECORD, DUPRECORD, NONE;
         private Lock l = new ReentrantLock();
         public Boolean tryLock() {
             return l.tryLock();
@@ -32,6 +40,8 @@ public class DataHousekeepingService extends Thread {
     }
 
     private HousekeepingAction defaultAction = HousekeepingAction.ALL;
+    private HousekeepingAction currentAction = HousekeepingAction.NONE;
+    private Status currentStatus = Status.STOPPED;
 
     public DataHousekeepingService(CollectorService cS) {
         initialize(cS);
@@ -52,6 +62,7 @@ public class DataHousekeepingService extends Thread {
     }
 
     private void initialize(CollectorService cS) {
+        currentStatus = Status.INITIALIZING;
         collectorService = cS;
         Properties p = net.sf.gratia.util.Configuration.getProperties();
         checkInterval = 24 * 3600 * 1000 *
@@ -59,17 +70,27 @@ public class DataHousekeepingService extends Thread {
                                        "2"));
     }
 
+    public String housekeepingStatus() {
+        // Reset status if neccessary
+        if (!isAlive()) {
+            currentStatus = Status.STOPPED;
+        }
+        return ((currentStatus == Status.RUNNING)?currentAction.toString():currentStatus.toString());
+    }
+
     public Date lastCompletionDate() {
         return lastCompletionDate;
     }
 
     public void requestStop() {
+        currentStatus = Status.STOPPING;
         stopRequested = true;
     }
 
     public void run() {
         Logging.info("DataHousekeepingService started");
         while (!stopRequested) {
+            currentStatus = Status.SLEEPING;
             try {
                 Thread.sleep(checkInterval);
             }
@@ -77,6 +98,7 @@ public class DataHousekeepingService extends Thread {
                 // Ignore
             }
             if (!stopRequested) {
+                currentStatus = Status.RUNNING;
                 Boolean md5v2Status = false;
                 try {
                     md5v2Status = collectorService.checkMd5v2Unique();
@@ -97,6 +119,7 @@ public class DataHousekeepingService extends Thread {
 
     private Boolean executeHousekeeping(HousekeepingAction action) {
         Boolean result = false;
+        currentAction = action;
         switch(action) {
         case ALL:
             for (HousekeepingAction a : HousekeepingAction.values()) {
@@ -104,6 +127,7 @@ public class DataHousekeepingService extends Thread {
                     continue;
                 }
                 if (stopRequested) {
+                    currentStatus = Status.STOPPING;
                     break;
                 } else {
                     executeHousekeeping(a);

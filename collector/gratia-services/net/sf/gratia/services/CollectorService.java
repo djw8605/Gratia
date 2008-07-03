@@ -38,6 +38,8 @@ public class CollectorService implements ServletContextListener {
     static final long safeStartCheckInterval = 30 * 1000; // 30s in ms.
     Boolean opsEnabled = false;
     Boolean m_servletEnabled = false;
+    private Boolean housekeepingDisabled = false;
+    private Boolean checksumUpgradeDisabled = false;
 
     //
     // various threads
@@ -281,16 +283,20 @@ public class CollectorService implements ServletContextListener {
 
             Boolean require_checksum_upgrade = false;
             try {
-                checker.checkMd5v2Unique();
+                require_checksum_upgrade = !checker.checkMd5v2Unique();
             }
             catch (Exception e) {
                 Logging.warning("CollectorService: unable to ascertain md5v2 index status: not starting upgrade thread", e);
+                checksumUpgradeDisabled = true;
+                housekeepingDisabled = true; // Also don't start housekeeping.
             }
 
-            boolean checksum_upgrade_disabled =
-                0 < checker.readIntegerDBProperty("gratia.database.disableChecksumUpgrade");
+            if (!checksumUpgradeDisabled) {
+                checksumUpgradeDisabled =
+                    0 < checker.readIntegerDBProperty("gratia.database.disableChecksumUpgrade");
+            }
             
-            if (require_checksum_upgrade && !checksum_upgrade_disabled) {
+            if (require_checksum_upgrade && !checksumUpgradeDisabled) {
                 Logging.info("CollectorService: starting checksum upgrade thread.");
                 checksumUpgrader = new ChecksumUpgrader(this);
                 checksumUpgrader.start();
@@ -317,7 +323,7 @@ public class CollectorService implements ServletContextListener {
                 if (p.getProperty("performance.test").equals("false")) {
                     threads = new ListenerThread[maxthreads];
                     for (i = 0; i < maxthreads; i++) {
-                        threads[i] = new ListenerThread("ListenerThread: " + i, queues[i], lock, global);
+                        threads[i] = new ListenerThread("ListenerThread: " + i, queues[i], lock, global, this);
                         threads[i].setPriority(Thread.MAX_PRIORITY);
                         threads[i].setDaemon(true);
                     }
@@ -338,7 +344,7 @@ public class CollectorService implements ServletContextListener {
             } else {
                 threads = new ListenerThread[maxthreads];
                 for (i = 0; i < maxthreads; i++) {
-                    threads[i] = new ListenerThread("ListenerThread: " + i, queues[i], lock, global);
+                    threads[i] = new ListenerThread("ListenerThread: " + i, queues[i], lock, global, this);
                     threads[i].setPriority(Thread.MAX_PRIORITY);
                     threads[i].setDaemon(true);
                 }
@@ -428,9 +434,11 @@ public class CollectorService implements ServletContextListener {
     }
 
     private synchronized void startHousekeepingService(Boolean initialDelay) {
-        if (housekeepingService == null ||
+        if (housekeepingDisabled ||
+            housekeepingService == null ||
             !housekeepingService.isAlive()) {
             Logging.info("CollectorService: Starting data housekeeping service");
+            housekeepingDisabled = false;
             housekeepingService =
                 new DataHousekeepingService(this,
                                             DataHousekeepingService.HousekeepingAction.ALL,
@@ -460,23 +468,31 @@ public class CollectorService implements ServletContextListener {
         }
     }
 
+    public synchronized Boolean housekeepingServiceDisabled() {
+        return housekeepingDisabled;
+    }
+
     public synchronized String housekeepingServiceStatus() {
-        String status;
-        if (housekeepingService == null || !housekeepingService.isAlive()) {
-            status = "STOPPED";
-        } else if (housekeepingService.getState() == Thread.State.TIMED_WAITING) {
-            status = "SLEEPING";
+        if (housekeepingService == null) {
+            return "STOPPED";
+        } else if (housekeepingDisabled) {
+            return "DISABLED";
         } else {
-            status = "RUNNING";
+            return housekeepingService.housekeepingStatus();
         }
-        return status;
+    }
+
+    public synchronized void disableHousekeepingService() {
+        stopHousekeepingService();
+        housekeepingDisabled = true;
     }
 
     public synchronized Boolean startHousekeepingActionNow() {
         if (housekeepingServiceStatus().equalsIgnoreCase("SLEEPING")) {
             housekeepingService.interrupt();
             return true;
-        } else if (housekeepingServiceStatus().equals("STOPPED")) {
+        } else if (housekeepingDisabled ||
+                   housekeepingServiceStatus().equals("STOPPED")) {
             startHousekeepingService(false); // No initial delay.
             return true;
         } else {
@@ -519,7 +535,13 @@ public class CollectorService implements ServletContextListener {
     }
 
     public synchronized String checksumUpgradeStatus() {
-        if (checksumUpgrader  != null) {
+        if (checksumUpgradeDisabled) {
+            if (0 < checker.readIntegerDBProperty("gratia.database.disableChecksumUpgrade")) {
+                return "DISABLED (MANUAL)";
+            } else {
+                return "DISABLED (AUTO-SAFETY)";
+            }
+        } else if (checksumUpgrader  != null) {
             return checksumUpgrader.checksumUpgradeStatus();
         } else {
             return "OFF";
@@ -573,7 +595,7 @@ public class CollectorService implements ServletContextListener {
         int maxthreads = Integer.parseInt(p.getProperty("service.listener.threads"));
         threads = new ListenerThread[maxthreads];
         for (i = 0; i < maxthreads; i++) {
-            threads[i] = new ListenerThread("ListenerThread: " + i, queues[i], lock, global);
+            threads[i] = new ListenerThread("ListenerThread: " + i, queues[i], lock, global, this);
             threads[i].setPriority(Thread.MAX_PRIORITY);
             threads[i].setDaemon(true);
         }

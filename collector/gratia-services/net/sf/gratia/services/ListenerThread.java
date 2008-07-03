@@ -35,6 +35,7 @@ public class ListenerThread extends Thread
     long nrecords = 0;                // Number of records processed;
     String directory_part = null;    // stemp for history and old subdirectory
     long recordsPerDirectory = 10000; // Maximum number of records per directory.
+    CollectorService collectorService;
 
     //
     // database parameters
@@ -68,12 +69,14 @@ public class ListenerThread extends Thread
     public ListenerThread(String ident,
                           String directory,
                           Object lock,
-                          Hashtable global)
+                          Hashtable global,
+                          CollectorService collectorService)
     {      
         this.ident = ident;
         this.directory = directory;
         this.lock = lock;
         this.global = global;
+        this.collectorService = collectorService;
 
         File tmp = new File(directory);
         this.directory_part = tmp.getName();
@@ -409,25 +412,29 @@ public class ListenerThread extends Thread
                         Probe probe = statusUpdater.update(session, current, xml);
                         current.setProbe(probe);
 
-                        Date date = current.getDate();
-                        Date expirationDate = current.getExpirationDate();
-                        if ( date.before(expirationDate) ) {
+                        Boolean acceptRecord = true;
+                        if (!collectorService.housekeepingServiceDisabled()) {
+                            Date date = current.getDate();
+                            Date expirationDate = current.getExpirationDate();
+                            if ( date.before(expirationDate) ) {
+                                acceptRecord = false;
+                                if (gotreplication) {
+                                    Logging.info(ident + ": Rejected record because its 'data' is too old ("+current.getDate()+" < "+expirationDate+")");
+                                    errorRecorder.saveDuplicate("Replication","ExpirationDate",0,current);
+                                } else if (gothistory) {
+                                    Logging.info(ident + ": Ignored history record because its 'data' is too old ("+current.getDate()+" < "+expirationDate+")");                                
+                                } else {
+                                    Logging.info(ident + ": Rejected record because its 'data' is too old ("+current.getDate()+" < "+expirationDate+")");
+                                    errorRecorder.saveDuplicate("Probe","ExpirationDate",0,current);
+                                }
 
-                            if (gotreplication) {
-                                Logging.info(ident + ": Rejected record because its 'data' is too old ("+current.getDate()+" < "+expirationDate+")");
-                                errorRecorder.saveDuplicate("Replication","ExpirationDate",0,current);
-                            } else if (gothistory) {
-                                Logging.info(ident + ": Ignored history record because its 'data' is too old ("+current.getDate()+" < "+expirationDate+")");                                
-                            } else {
-                                Logging.info(ident + ": Rejected record because its 'data' is too old ("+current.getDate()+" < "+expirationDate+")");
-                                errorRecorder.saveDuplicate("Probe","ExpirationDate",0,current);
+                                session.flush();
+                                tx.commit();
+                                session.close();
+
                             }
-
-                            session.flush();
-                            tx.commit();
-                            session.close();
-
-                        } else {
+                        }
+                        if (acceptRecord) {
                             // This is a recent record, let's process it
 
                             updater.Update(current);

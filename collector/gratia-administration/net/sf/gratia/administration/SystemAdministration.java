@@ -191,7 +191,7 @@ public class SystemAdministration extends HttpServlet {
             html = html.replaceAll("#opstatus#",
                                    "<font color=\"green\"><strong>ENABLED</strong></font>");
             html = html.replaceAll("#opcomment#",
-                                   "To start in safe mode, set <tt>gratia.service.safeStart = 1</tt> in service-configuration.properties.");
+                                   "To start in safe mode, set <strong><tt>gratia.service.safeStart = 1</tt></strong> in service-configuration.properties.");
         } else {
             html = html.replaceAll("#opstatus#",
                                    "<font color=\"red\"><strong>UNKNOWN</strong></font>");
@@ -272,25 +272,30 @@ public class SystemAdministration extends HttpServlet {
         String color;
 
         if (housekeepingStatus.equals("SAFE")) {
-            color = "fuschia";
+            color = "fuchsia";
             html = html.replaceAll("#housekeepingcomment#",
                                    "See <strong>Global Operational Status</strong>, above.");
+        } else if (housekeepingStatus.equals("DISABLED")) {
+            color = "fuchsia";
+            html = html.replaceAll("#housekeepingcomment#",
+                                   "Old records are <strong>accepted</strong>. <a href=\"systemadministration.html?action=startHousekeeping\"><strong>Start normally</strong></a> or <a href=\"systemadministration.html?action=startHousekeepingNow\"><strong>Start run now</strong></a>.");
         } else if (housekeepingStatus.equalsIgnoreCase("STOPPED")) {
             color = "red";
             html = html.replaceAll("#housekeepingcomment#",
-                                   "<a href=\"systemadministration.html?action=startHousekeeping\"><strong>Start normally</strong></a> or <a href=\"systemadministration.html?action=startHousekeepingNow\"><strong>Start run now</strong></a>.");
+                                   "Old records are <strong>rejected</strong>. <a href=\"systemadministration.html?action=startHousekeeping\"><strong>Start normally</strong></a> or <a href=\"systemadministration.html?action=startHousekeepingNow\"><strong>Start run now</strong></a>.");
         } else if (housekeepingStatus.equalsIgnoreCase("SLEEPING")) {
             color = "green";
             html = html.replaceAll("#housekeepingcomment#",
                                    "<a href=\"systemadministration.html?action=startHousekeepingNow\"><strong>Run now</strong></a> or <a href=\"systemadministration.html?action=stopHousekeeping\"><strong>Stop</strong></a>.");
-        } else if (housekeepingStatus.equalsIgnoreCase("RUNNING")) {
-            color = "green";
-            html = html.replaceAll("#housekeepingcomment#",
-                                   "<a href=\"systemadministration.html?action=stopHousekeeping\"><strong>Stop after current run</strong></a>.");
-        } else {
+        } else if (housekeepingStatus.equalsIgnoreCase("Unknown")) {
             color = "red";
             html = html.replaceAll("#housekeepingcomment#",
                                    "Check log for errors.");
+        } else {
+            color = "green";
+            html = html.replaceAll("#housekeepingcomment#",
+                                   "<a href=\"systemadministration.html?action=stopHousekeeping\"><strong>Stop</strong></a> or " +
+                                   "<a href=\"systemadministration.html?action=disableHousekeeping\"><strong>Stop and disable</strong></a> after current run.");
         }
         html = html.replaceAll("#housekeepingstatus#",
                                "<font color=\"" +
@@ -299,11 +304,20 @@ public class SystemAdministration extends HttpServlet {
                                housekeepingStatus +
                                "</strong></font>");
 
+        String checksumUpgradeComment = "";
+
         if (checksumUpgradeStatus.equals("OFF") ||
             checksumUpgradeStatus.equals("STOPPED")) {
             color = "red";
         } else if (checksumUpgradeStatus.equals("SAFE")) {
             color = "fuchsia";
+        } else if (checksumUpgradeStatus.startsWith("DISABLED")) {
+            color = "fuchsia";
+            if (checksumUpgradeStatus.contains("MANUAL")) {
+                checksumUpgradeComment = "<td>To re-enable, reset or remove <strong><tt>gratia.database.checksumUpgradeDisabled<tt></strong> in service-configuration.properties and restart the collector.</td>";
+            } else {
+                checksumUpgradeComment = "<td><strong><font color=\"red\">Disabled automatically due to a serious internal problem. Please contact gratia-operation@opensciencegrid.org for support.</font></strong></td>";
+            }
         } else {
             color = "green";
         }
@@ -312,8 +326,14 @@ public class SystemAdministration extends HttpServlet {
                 html.replaceAll("<!-- CHECKSUM UPGRADE STATUS PLACEHHOLDER -->",
                                 "<tr><td><strong>Checksum upgrade status</strong></td>" +
                                 "<td><div align=\"center\">" +
+                                "<font color=\"" +
+                                color +
+                                "\"><strong>" +
                                 checksumUpgradeStatus +
-                                "</div></td></tr>");
+                                "</strong></font>" +
+                                "</div></td>" +
+                                checksumUpgradeComment +
+                                "</tr>");
         }
     }
 
@@ -363,6 +383,8 @@ public class SystemAdministration extends HttpServlet {
                 proxy.startHousekeepingService();
             } else if (action.equals("stopHousekeeping")) {
                 proxy.stopHousekeepingService();
+            } else if (action.equals("disableHousekeeping")) {
+                proxy.disableHousekeepingService();
             } else if (action.equals("startHousekeepingNow")) {
                 proxy.startHousekeepingActionNow();
             } else {
