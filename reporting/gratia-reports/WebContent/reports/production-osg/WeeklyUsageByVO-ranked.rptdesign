@@ -2325,57 +2325,9 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
                                     </list-property>
                                 </structure>
                                 <property name="marginTop">0pt</property>
-                                <property name="dataSet">UsageByVORanked</property>
                                 <property name="height">600px</property>
                                 <property name="width">800px</property>
-                                <list-property name="paramBindings">
-                                    <structure>
-                                        <property name="paramName">UserName</property>
-                                        <expression name="expression">params["UserName"]</expression>
-                                    </structure>
-                                    <structure>
-                                        <property name="paramName">UserRole</property>
-                                        <expression name="expression">params["UserRole"]</expression>
-                                    </structure>
-                                </list-property>
                                 <property name="refTemplateParameter">NewTemplateParameterDefinition</property>
-                                <list-property name="boundDataColumns">
-                                    <structure>
-                                        <property name="name">VOName</property>
-                                        <expression name="expression">dataSetRow["VOName"]</expression>
-                                        <property name="dataType">string</property>
-                                    </structure>
-                                    <structure>
-                                        <property name="name">datevalue</property>
-                                        <expression name="expression">dataSetRow["datevalue"]</expression>
-                                        <property name="dataType">string</property>
-                                    </structure>
-                                    <structure>
-                                        <property name="name">WallDuration</property>
-                                        <expression name="expression">dataSetRow["WallDuration"]</expression>
-                                        <property name="dataType">float</property>
-                                    </structure>
-                                    <structure>
-                                        <property name="name">Cpu</property>
-                                        <expression name="expression">dataSetRow["Cpu"]</expression>
-                                        <property name="dataType">float</property>
-                                    </structure>
-                                    <structure>
-                                        <property name="name">Njobs</property>
-                                        <expression name="expression">dataSetRow["Njobs"]</expression>
-                                        <property name="dataType">decimal</property>
-                                    </structure>
-                                    <structure>
-                                        <property name="name">final_rank</property>
-                                        <expression name="expression">dataSetRow["final_rank"]</expression>
-                                        <property name="dataType">integer</property>
-                                    </structure>
-                                    <structure>
-                                        <property name="name">ChartNr</property>
-                                        <expression name="expression">dataSetRow["ChartNr"]</expression>
-                                        <property name="dataType">integer</property>
-                                    </structure>
-                                </list-property>
                                 <property name="style">sans-style1</property>
                             </extended-item>
                         </cell>
