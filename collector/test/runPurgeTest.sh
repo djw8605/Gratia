@@ -169,7 +169,6 @@ EOF
 
   ssh ${webhost} mysql -h ${dbhost} --port=${dbport} -u root --password=${pass}<<EOF 
 CREATE DATABASE ${schema_name};
-GRANT ALL PRIVILEGES ON ${schema_name}.* TO 'gratia'@'airdrie.fnal.gov' IDENTIFIED BY '${update_password}';
 GRANT ALL PRIVILEGES ON ${schema_name}.* TO 'gratia'@'${host}' IDENTIFIED BY '${update_password}';
 GRANT ALL PRIVILEGES ON ${schema_name}.* TO 'gratia'@'localhost' IDENTIFIED BY '${update_password}';
 GRANT ALL PRIVILEGES ON ${schema_name}.* TO 'gratia'@'${webhost}' IDENTIFIED BY '${update_password}';
@@ -203,7 +202,8 @@ function reset_collector {
               "maintain.history.log" => 2,
               "monitor.listener.wait" => 240,
               "monitor.to.address0" => '${USER}@fnal.gov',
-              "service.admin.DN.0" => 'ALLOW ALL'
+              "service.admin.DN.0" => 'ALLOW ALL',
+              "service.secure.connection" => 'http://${webhost}:${http_port}'
              }
            }
 );
@@ -212,6 +212,8 @@ function reset_collector {
 ### mode: cperl
 ### End:
 EOF
+
+   stop_server
 
    ssh -l root ${webhost} mkdir -p ${tomcatpwd} \; cp -rp /data/tomcat-install/\* ${tomcatpwd}\; mkdir -p ${tomcatpwd}/gratia\; chown -R ${USER} ${tomcatpwd}\; rm -f ${tomcatpwd}/logs/*
 
@@ -309,17 +311,26 @@ function fix_server_date {
 }
 
 function loaddata {
-   echo "Sending data"
 
-   # First extend artificially the retention to let the old record in.
-   echo "Turn off record purging"
-   ssh ${webhost} cd ${tomcatpwd}/gratia \; chown ${USER} service-configuration.properties \; mv service-configuration.properties service-configuration.properties.auto.old \; sed  -e '"s:service.lifetime.JobUsageRecord = .*:service.lifetime.JobUsageRecord = 24 months:"'  -e '"s:service.lifetime.DupRecord.Duplicates = .*:service.lifetime.DupRecord.Duplicates = 24 months:"' service-configuration.properties.auto.old \> service-configuration.properties
-   restart_server
+#   ssh ${webhost} cd ${tomcatpwd}/gratia \; chown ${USER} service-configuration.properties \; mv service-configuration.properties service-configuration.properties.auto.old \; sed  -e '"s:service.lifetime.JobUsageRecord = .*:service.lifetime.JobUsageRecord = 24 months:"'  -e '"s:service.lifetime.DupRecord.Duplicates = .*:service.lifetime.DupRecord.Duplicates = 24 months:"' service-configuration.properties.auto.old \> service-configuration.properties
+#   restart_server
 
    start_server
 
    write_ProbeConfig
    wait_for_server
+
+   # First extend artificially the retention to let the old record in.
+   echo "Turning off record purging"
+
+   wget --dns-timeout=5 --connect-timeout=10 --read-timeout=40 -O - "http://${webhost}:${ssl_port}/gratia-administration/systemadministration.html?action=disableHousekeeping" 2>&1 | grep House | grep DISABLED > wget.log
+   result=$?
+   if [ ${result} -ne 0 ]; then
+      echo "Error: Turning off the record purging failed"
+      exit 1
+   fi
+
+   echo "Sending data"
 
    tar xfz preparedrecords.tar.gz
    if [ "gratia-vm02.fnal.gov_9000" != "${webhost}_${http_port}" ]; then 
@@ -334,7 +345,9 @@ import Gratia
 Gratia.Initialize()
 EOF
 
+   echo "Loading job usage record"
    python loaddata.py
+   echo "Loading metric record"
    python loadmetric.py
 }
 
@@ -356,12 +369,22 @@ function check_result {
 function turn_on_purging {
 
    # Restore the original (we could also set it to specific values)
-   echo "Turn on record purging"
-   ssh ${webhost} cd ${tomcatpwd}/gratia\; mv service-configuration.properties.auto.old service-configuration.properties \;
-   restart_server
+   echo "Turning on record purging"
+    #   ssh ${webhost} cd ${tomcatpwd}/gratia\; mv service-configuration.properties.auto.old service-configuration.properties \;
+    #   restart_server
+
+   start_server
+   wait_for_server
+
+   wget --dns-timeout=5 --connect-timeout=10 --read-timeout=40 -O - http://${webhost}:${ssl_port}/gratia-administration/systemadministration.html?action=startHousekeepingNow 2>&1 | grep House | grep STOPPED > wget.log
+   result=$?
+   if [ ${result} -ne 1 ]; then
+      echo "Error: Turning on the record purging failed"
+      exit 1
+   fi
 
    # Wait until the purge has been done
-   wait_for_server
+   sleep 3
 
    # Load a few old record to make sure they are caught by the filter.
    python loadstale.py
@@ -465,7 +488,7 @@ while getopts :tshcfdlw:p: OPT; do
 done
 shift $[ OPTIND - 1 ]
 
-ssl_port=`expr $http_port + 1`
+ssl_port=`expr $http_port + 0`
 rmi_port=`expr $http_port + 2`
 jmx_port=`expr $http_port + 3`
 server_port=`expr $http_port + 4`
