@@ -282,11 +282,11 @@ public class SystemAdministration extends HttpServlet {
         } else if (housekeepingStatus.equalsIgnoreCase("STOPPED")) {
             color = "red";
             html = html.replaceAll("#housekeepingcomment#",
-                                   "Old records are <strong>rejected</strong> as normal. <a href=\"systemadministration.html?action=startHousekeeping\"><strong>Start normally</strong></a>; <a href=\"systemadministration.html?action=startHousekeepingNow\"><strong>Start run now</strong></a>; or <a href=\"systemadministration.html?action=disableHousekeeping\"><strong>Disable</strong></a> (incoming old records will be accepted).");
+                                   "Old records are <strong>rejected</strong> as normal. <a href=\"systemadministration.html?action=startHousekeeping\"><strong>Start normally</strong></a>; <a href=\"systemadministration.html?action=startHousekeepingNow\"><strong>Start run now</strong></a>; or <a href=\"systemadministration.html?action=disableHousekeeping\"><strong>Disable</strong></a> housekeeping service and the rejection of incoming old records.");
         } else if (housekeepingStatus.equalsIgnoreCase("SLEEPING")) {
             color = "green";
             html = html.replaceAll("#housekeepingcomment#",
-                                   "<a href=\"systemadministration.html?action=startHousekeepingNow\"><strong>Run now</strong></a>, or: <a href=\"systemadministration.html?action=stopHousekeeping\"><strong>Stop</strong></a>; or <a href=\"systemadministration.html?action=disableHousekeeping\"><strong>Stop and disable</strong></a> after current run.");
+                                   "<a href=\"systemadministration.html?action=startHousekeepingNow\"><strong>Run now</strong></a>, <a href=\"systemadministration.html?action=stopHousekeeping\"><strong>Stop</strong></a> after current run or <a href=\"systemadministration.html?action=disableHousekeeping\"><strong>Stop and disable</strong></a> housekeeping service and the rejection of incoming old records after current run.");
         } else if (housekeepingStatus.equalsIgnoreCase("Unknown")) {
             color = "red";
             html = html.replaceAll("#housekeepingcomment#",
@@ -295,7 +295,7 @@ public class SystemAdministration extends HttpServlet {
             color = "green";
             html = html.replaceAll("#housekeepingcomment#",
                                    "<a href=\"systemadministration.html?action=stopHousekeeping\"><strong>Stop</strong></a> or " +
-                                   "<a href=\"systemadministration.html?action=disableHousekeeping\"><strong>Stop and disable</strong></a> after current run.");
+                                   "<a href=\"systemadministration.html?action=disableHousekeeping\"><strong>Stop and disable</strong></a> housekeeping service and the rejection of incoming old records after current run.");
         }
         html = html.replaceAll("#housekeepingstatus#",
                                "<font color=\"" +
