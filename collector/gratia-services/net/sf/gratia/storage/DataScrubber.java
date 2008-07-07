@@ -271,25 +271,36 @@ public class DataScrubber {
         return nrecords;
     }
 
+    public long Trace() {
+        return tableCleanupHelper("Trace", "pname", "eventtime");
+    }
+
     public long DupRecord() {
+        return tableCleanupHelper("DupRecord", "error", "eventdate");
+    }
+
+    private long tableCleanupHelper(String tableName, String qualifierColumn,
+                                    String dateColumn) {
         Properties p = eCalc.lifetimeProperties(); // Everybody's on the same page
         Enumeration properties = p.keys();
-        Pattern errorTypePattern = // Want DupRecord lifetimes with error specifiers
-            Pattern.compile("service\\.lifetime\\.DupRecord\\.([^\\.]+)");
+        Pattern propertyPattern = // Want lifetimes with table and qualifiers
+            Pattern.compile("service\\.lifetime\\." + tableName + "\\.([^\\.]+)");
         Date refDate = new Date();
         long count = 0;
         String extraWhereClause = "";
         String qualifierList = "";
         while (properties.hasMoreElements()) { // Loop over all specified properties.
             String key = (String) properties.nextElement();
-            Matcher m = errorTypePattern.matcher(key);
+            Matcher m = propertyPattern.matcher(key);
             if (m.lookingAt()) { // Match to property
                 String qualifier = m.group(1);
                 if ((qualifier != null) && (qualifier.length() > 0)) {
-                    extraWhereClause = "error = '" + qualifier + "' and ";
+                    extraWhereClause = qualifierColumn + " = '" + qualifier + "' and ";
                     qualifierList += (qualifierList.length() > 0)?", ":"" +
                         "'" + qualifier + "'";
-                    count += DupRecord(refDate, qualifier, extraWhereClause);
+                    count += tableCleanupHelper(refDate, qualifier,
+                                                tableName, qualifierColumn, dateColumn,
+                                                extraWhereClause);
                 }
             }
         }
@@ -298,26 +309,31 @@ public class DataScrubber {
             // override.
             extraWhereClause = "error NOT IN (" + qualifierList + ") and ";
         }
-        count += DupRecord(refDate, "", extraWhereClause); // Catch-all
+        count += tableCleanupHelper(refDate, "",
+                                    tableName, qualifierColumn, dateColumn,
+                                    extraWhereClause); // Catch-all
         return count;
     }
 
-    private long DupRecord(Date refDate, String qualifier, String extraWhereClause) {
-        String limit = eCalc.expirationDateAsSQLString(refDate, "DupRecord", qualifier);
+    private long tableCleanupHelper(Date refDate, String qualifier,
+                                    String tableName, String qualifierColumn, String dateColumn,
+                                    String extraWhereClause) {
+        String limit = eCalc.expirationDateAsSQLString(refDate, tableName, qualifier);
         long count = 0;
         String extra_message =
             ((qualifier != null) && (qualifier.length() > 0))?
-            ("with error type " + qualifier):
+            ("with " + qualifierColumn + qualifier):
             "";
         if (limit.length() > 0) {
-            Logging.log("DataScrubber: Remove all DupRecord entries " +
+            Logging.log("DataScrubber: Remove all " + tableName + " entries " +
                         extra_message +
                         " older than: " + limit);
-            String hqlDelete = "delete DupRecord where " +
+            String hqlDelete = "delete " + tableName + " where " +
                 extraWhereClause +
-                " eventdate < :dateLimit";
-            count = Execute(  hqlDelete, limit, " records " + extra_message);
-            Logging.info("DataScrubber: deleted " + count + "  records " + extra_message);
+                dateColumn + " < :dateLimit";
+            count = Execute(  hqlDelete, limit, " entries " + extra_message);
+            Logging.info("DataScrubber: deleted " + count + "  entries from " +
+                         tableName + extra_message);
         }
         return count;
     }

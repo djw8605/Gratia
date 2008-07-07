@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping package= "net.sf.gratia.storage">
+  <class name="Trace" table="trace" node="Trace" lazy="false">
+    <id name="traceId" column="traceId" type="int">
+      <generator class="native" />
+    </id>
+   <property name="eventtime" type="timestamp">
+     <column name="eventtime" not-null="true" sql-type="timestamp" />
+   </property>
+   <property name="pname">
+     <column name="pname" sql-type="varchar(64)" />
+   </property>
+   <property name="userkey">
+     <column name="userkey" sql-type="varchar(64)" />
+   </property>
+   <property name="user">
+     <column name="user" sql-type="varchar(64)" />
+   </property>
+   <property name="role">
+     <column name="role" sql-type="varchar(64)" />
+   </property>
+   <property name="vo">
+     <column name="vo" sql-type="varchar(64)" />
+   </property>
+   <property name="p1">
+      <column name="p1" sql-type="varchar(64)" />
+   </property>
+   <property name="p2">
+     <column name="p2" sql-type="varchar(64)" />
+   </property>
+   <property name="p3">
+     <column name="p3" sql-type="varchar(64)" />
+   </property>
+   <property name="p4">
+     <column name="p4" sql-type="varchar(64)" />
+   </property>
+   <property name="p5">
+     <column name="p5" sql-type="varchar(64)" />
+   </property>
+   <property name="p6">
+     <column name="p6" sql-type="varchar(64)" />
+   </property>
+   <property name="p7">
+     <column name="p7" sql-type="varchar(64)" />
+   </property>
+   <property name="p8">
+     <column name="p8" sql-type="varchar(64)" />
+   </property>
+   <property name="p9">
+     <column name="p9" sql-type="varchar(64)" />
+   </property>
+   <property name="data" column="data" type="text" />
+  </class>
+</hibernate-mapping>

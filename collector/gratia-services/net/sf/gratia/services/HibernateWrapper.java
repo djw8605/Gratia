@@ -46,6 +46,7 @@ public class HibernateWrapper
          hibernateConfiguration.addFile(new File(net.sf.gratia.util.Configuration.getJobUsagePath()));
          hibernateConfiguration.addFile(new File(net.sf.gratia.util.Configuration.getMetricRecordPath()));
          hibernateConfiguration.addFile(new File(net.sf.gratia.util.Configuration.getJobUsageSummaryPath()));
+         hibernateConfiguration.addFile(new File(net.sf.gratia.util.Configuration.getTracePath()));
          if (p.getProperty("gratia.database.wantNodeSummary", "0").equals("1")) { // Only if we want (eg PS accounting)
              hibernateConfiguration.addFile(new File(net.sf.gratia.util.Configuration.getNodeSummaryPath()));
          }

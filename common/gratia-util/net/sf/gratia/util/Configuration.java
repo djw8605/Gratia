@@ -46,6 +46,11 @@ public class Configuration {
         return getConfigurationPath() + "/" + "NodeSummary.hbm.xml";
     }
 
+    public static String getTracePath()
+    {
+        return getConfigurationPath() + "/" + "Trace.hbm.xml";
+    }
+
     public static String getMetricRecordPath()
     {
         return getConfigurationPath() + "/" + "MetricRecord.hbm.xml";

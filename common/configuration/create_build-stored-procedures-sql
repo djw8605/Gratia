@@ -719,29 +719,6 @@ sub generate_sql_boilerplate {
   if (system("grep -e 'org\\.hibernate\\.dialect\\.MySQLInnoDBDialect' \"$script_dir/hibernate.cfg.xml\" >/dev/null 2>&1") == 0) {
     $engine_text = "ENGINE='innodb'";
   }
-  my $result = <<"EOF";
-drop table if exists trace
-||
-CREATE TABLE trace (
-  eventtime TIMESTAMP NOT NULL,
-  pname varchar(64),
-  userkey varchar(64),
-  user varchar(64),
-  role varchar(64),
-  vo varchar(64),
-  p1 varchar(64),
-  p2 varchar(64),
-  p3 varchar(64),
-  p4 varchar(64),
-  p5 varchar(64),
-  p6 varchar(64),
-  p7 varchar(64),
-  p8 varchar(64),
-  p9 varchar(64),
-  data TEXT
-) ${engine_text}
-||
-EOF
   return sprintf("%s%s", $result, <<'EOF');
 drop procedure if exists parse
 ||
