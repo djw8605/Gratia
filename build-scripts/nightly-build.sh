@@ -163,17 +163,34 @@ $(ls -l $buildDir/../target)
 # -------------------------------
 function cleanup {
   logit "==== cleanup $(date) ==="
-  cd $buildDir
+  cd $build_dir
+  logit "... PWD: $PWD"
   files=$(($files * 2 + 1))
+  logit "... Files to keep: $files"
   total=$(ls |  wc -l)
+  logit "... Total files: $total"
   cnt=$(($total - $files))
   if [ $cnt -le 0 ];then
-    return
+    logit "... No files to remove. $total total files"
   fi
+  logit "... Files to remove: $cnt"
   for file in $(ls | head -$cnt )
   do
-    rm -f $file
+    if [ -f $file ];then
+      logit "... removing file: $file"
+      runit "rm -f $file"
+    fi
+    if [ -d $file ];then
+      logit "... removing directory: $file"
+      runit "rm -rf $file"
+    fi
   done 
+}
+# -------------------------------
+function make_symlink {
+  logit "==== make_symlink $(date) ==="
+  runit "rm -f $latest_good_build"
+  runit "ln -s $nightly_dir $latest_good_build"
 }
 ##### MAIN ############################################
 PGM=$(basename $0)
@@ -235,9 +252,11 @@ cvs_checkout_gratia
 validate_build_env 
 make_gratia
 
+#--- clean up make area ---
+cleanup
+
 #--- make symlink ---
-runit "rm -f $latest_good_build"
-runit "ln -s $nightly_dir $latest_good_build"
+make_symlink
 
 logit "Logfile: $logfile"
 logit "Symbolic link: $(ls -l $latest_good_build)"
