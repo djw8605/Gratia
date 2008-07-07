@@ -185,6 +185,8 @@ public class DatabaseMaintenance {
     }
 
     public void CheckIndices() throws Exception {
+        Logging.info("DatabaseMaintenance: checking indexes on tables.");
+
         AddIndex("Site", true, "index02", "SiteName");
         AddIndex("Probe", true, "index02", "probename");
 
@@ -309,8 +311,15 @@ public class DatabaseMaintenance {
             AddIndex("NodeSummary", false, "index04", "ResourceType");
             AddIndex("NodeSummary", true, "index05", "EndTime, Node, ProbeName, ResourceType");
         }
+
+        // Indexes for Trace table to facilitate housekeeping.
+        AddIndex("trace", false, "index01", "eventtime");
+        AddIndex("trace", false, "index02", "pname");
+
         // SystemProplist management (safety)
         AddIndex("SystemProplist", true, "index01", "car");
+
+        Logging.info("DatabaseMaintenance: table index checking complete.");
 
     }
 
