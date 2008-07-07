@@ -1,6 +1,7 @@
 package net.sf.gratia.services;
 
 import net.sf.gratia.util.Logging;
+import net.sf.gratia.services.Duration.*;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -36,98 +37,6 @@ public class ExpirationDateCalculator {
 
     Hashtable eDateCache = new Hashtable(); // Pre-calculated expiration dates still valid?
     String lastExpirationRefDate = ""; // Pre-calculated expiration dates still valid?
-
-    public enum DurationUnit {
-        DAY(Calendar.DAY_OF_MONTH),
-            WEEK(Calendar.WEEK_OF_YEAR),
-            MONTH(Calendar.MONTH),
-            YEAR(Calendar.YEAR),
-            UNLIMITED(Calendar.ERA);
-
-        private final int calField;
-
-        DurationUnit(int calField) { this.calField = calField; }
-
-        public int calField() { return calField; }
-    };
-
-    // Used by Duration class, below
-    static final DurationUnit defaultUnit = DurationUnit.MONTH;
-    static protected Pattern durationPattern =
-        Pattern.compile("(\\d+)\\s*([DWMY]|UNLIMITED)?",
-                        Pattern.CASE_INSENSITIVE);
-
-    public class DurationParseException extends Exception {
-        public DurationParseException(String message) {
-            super(message);
-        }
-        public DurationParseException(String message, Throwable cause) {
-            super(message, cause);
-        }
-        public DurationParseException(Throwable cause) {
-            super(cause);
-        }
-    }
-
-    class Duration {
-        int ordinality;
-        DurationUnit unit;
-
-        public int ordinality() {
-            return ordinality;
-        }
-
-        public DurationUnit unit() {
-            return unit;
-        }
-
-        public Duration(int ordinality, DurationUnit unit) {
-            this.ordinality = ordinality;
-            this.unit = unit;
-        }
-
-        public Duration(String property) throws DurationParseException {
-            String low = property.toLowerCase();
-            if (low.equals("unlimited")) {
-                unit = DurationUnit.UNLIMITED;
-            } else {
-                Matcher m = durationPattern.matcher(low);
-                if (m.lookingAt()) {
-                    ordinality = Integer.parseInt(m.group(1));
-                    char switchChar;
-                    if (m.group(2) == null) {
-                        unit = defaultUnit;
-                    } else {
-                        switch(m.group(2).charAt(0)) {
-                        case 'd':
-                            unit = DurationUnit.DAY;
-                            break;
-                        case 'w':
-                            unit = DurationUnit.WEEK;
-                            break;
-                        case 'm':
-                            unit = DurationUnit.MONTH;
-                            break;
-                        case 'y':
-                            unit = DurationUnit.YEAR;
-                            break;
-                        case 'u':
-                            unit = DurationUnit.UNLIMITED;
-                            break;
-                        default:
-                            throw new
-                                DurationParseException("unable to parse unit specification \"" +
-                                                       m.group(2) + "\"");
-                        }
-                    }
-                } else {
-                    throw new
-                        DurationParseException("ExpirationDateCalculator.Duration: unable to parse lifetime specification \"" +
-                                               property + "\"");
-                }
-            }
-        }
-    }
 
     public ExpirationDateCalculator() {
         cacheLock.lock();

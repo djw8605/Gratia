@@ -2,6 +2,7 @@ package net.sf.gratia.services;
 
 import net.sf.gratia.util.Logging;
 import net.sf.gratia.storage.DataScrubber;
+import net.sf.gratia.services.Duration.*;
 
 import java.util.Date;
 import java.util.Properties;
@@ -22,11 +23,14 @@ public class DataHousekeepingService extends Thread {
     private Boolean stopRequested = false;
     private Boolean sleepEnabled = true;
     private Date lastCompletionDate;
+    private Duration checkInterval;
+
+    private static final int defaultCheckIntervalDays = 2;
 
     private DataScrubber housekeeper = new DataScrubber();
-    private long checkInterval;
+
     public enum HousekeepingAction { 
-        ALL, JOBUSAGEXML, METRICXML, METRICRECORD, JOBUSAGERECORD, DUPRECORD, NONE;
+        ALL, JOBUSAGEXML, METRICXML, METRICRECORD, JOBUSAGERECORD, DUPRECORD, TRACE, NONE;
         private Lock l = new ReentrantLock();
         public Boolean tryLock() {
             return l.tryLock();
@@ -65,9 +69,32 @@ public class DataHousekeepingService extends Thread {
         currentStatus = Status.INITIALIZING;
         collectorService = cS;
         Properties p = net.sf.gratia.util.Configuration.getProperties();
-        checkInterval = 24 * 3600 * 1000 *
-            Long.valueOf(p.getProperty("service.lifetimeManagement.checkIntervalDays",
-                                       "2"));
+        String checkIntervalDays = p.getProperty("service.lifetimeManagement.checkIntervalDays");
+        if ((checkIntervalDays != null) && (checkIntervalDays.length() > 0)) {
+            Logging.info("DataHousekeepingService: found obsolete property " +
+                         "service.lifetimeManagement.checkIntervalDays\n" +
+                         "Please use service.lifetimeManagement.checkInterval instead " +
+                         "with value <num> [hdwmy] (default [d]ays)");
+            try {
+                checkInterval = new Duration(checkIntervalDays, DurationUnit.DAY);
+            } catch (DurationParseException e) {
+                Logging.warning("DataHouseKeepingService: caught exception " +
+                                "parsing service.lifetimeManagement.checkIntervalDays property", e);
+                checkInterval = new Duration(defaultCheckIntervalDays, DurationUnit.DAY);
+            }
+        } else { // Preferred control
+            try {
+                checkInterval =
+                    new Duration(p.getProperty("service.lifetimeManagement.checkInterval",
+                                               defaultCheckIntervalDays +
+                                               " d"), DurationUnit.DAY);
+            }
+            catch (DurationParseException e) {
+                Logging.warning("DataHouseKeepingService: caught exception " +
+                                "parsing service.lifetimeManagement.checkInterval property", e);
+                checkInterval = new Duration(defaultCheckIntervalDays, DurationUnit.DAY);
+            }
+        }
     }
 
     public String housekeepingStatus() {
@@ -93,6 +120,9 @@ public class DataHousekeepingService extends Thread {
             if (sleepEnabled) {
                 currentStatus = Status.SLEEPING;
                 try {
+                    long checkInterval = this.checkInterval.msFromDate(new Date());
+                    Logging.debug("DataHousekeepingService: going to sleep for " +
+                                  checkInterval + "ms.");
                     Thread.sleep(checkInterval);
                 }
                 catch (Exception e) {
@@ -190,6 +220,17 @@ public class DataHousekeepingService extends Thread {
             if (action.tryLock()) {
                 try {
                     housekeeper.DupRecord();
+                    result = true; // OK
+                }
+                finally {
+                    action.unlock();
+                }
+            }
+            break;
+        case TRACE:
+            if (action.tryLock()) {
+                try {
+                    housekeeper.Trace();
                     result = true; // OK
                 }
                 finally {
