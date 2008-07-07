@@ -26,8 +26,10 @@ public class DataScrubber {
     // service.lifetime.MetricRecord = 3 months
     // service.lifetime.MetricRecord.RawXML = 1 month
     // service.lifetime.DupRecord.Duplicates = 1 month
-    // service.lifetime.DupRecord.* = <as specified>
+    // service.lifetime.DupRecord.<error-type>  = <as specified>
     // service.lifetime.DupRecord = UNLIMITED
+    // service.lifetime.Trace.<pname> = <as specified>
+    // service.lifetime.Trace.<pname> = 1 month
     //
 
     int bunchSize = 10000; // Should be set to 10000 in production.
