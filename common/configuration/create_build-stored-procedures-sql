@@ -719,7 +719,7 @@ sub generate_sql_boilerplate {
   if (system("grep -e 'org\\.hibernate\\.dialect\\.MySQLInnoDBDialect' \"$script_dir/hibernate.cfg.xml\" >/dev/null 2>&1") == 0) {
     $engine_text = "ENGINE='innodb'";
   }
-  return sprintf("%s%s", $result, <<'EOF');
+  return <<'EOF';
 drop procedure if exists parse
 ||
 create procedure parse(username varchar(64),out outname varchar(64),
