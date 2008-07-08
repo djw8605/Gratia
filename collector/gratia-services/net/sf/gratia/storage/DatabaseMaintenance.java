@@ -465,17 +465,17 @@ public class DatabaseMaintenance {
         Properties p = net.sf.gratia.util.Configuration.getProperties();
 
         UpdateDbProperty("use.report.authentication",
-                         p.getProperty("use.report.authentication"));
+                         p.getProperty("use.report.authentication", "0"));
         UpdateDbProperty("gratia.database.wantSummaryTrigger",
-                         p.getProperty("gratia.database.wantSummaryTrigger"));
+                         p.getProperty("gratia.database.wantSummaryTrigger", "1"));
         UpdateDbProperty("gratia.database.wantStoredProcedures",
-                         p.getProperty("gratia.database.wantStoredProcedures"));
+                         p.getProperty("gratia.database.wantStoredProcedures", "1"));
         UpdateDbProperty("gratia.database.useJobUsageSiteName",
-                         p.getProperty("gratia.database.useJobUsageSiteName"));
+                         p.getProperty("gratia.database.useJobUsageSiteName", "0"));
         UpdateDbProperty("gratia.database.wantNodeSummary",
-                         p.getProperty("gratia.database.wantNodeSummary"));
+                         p.getProperty("gratia.database.wantNodeSummary", "0"));
         UpdateDbProperty("gratia.database.disableChecksumUpgrade",
-                         p.getProperty("gratia.database.disableChecksumUpgrade"));
+                         p.getProperty("gratia.database.disableChecksumUpgrade", "0"));
 
         dbUseJobUsageSiteName = 0 != readIntegerDBProperty("gratia.database.useJobUsageSiteName");
     }
@@ -564,6 +564,12 @@ public class DatabaseMaintenance {
 
     private void UpdateDbProperty(String property, int value) {
         UpdateDbProperty(property, "" + value);
+    }
+
+    private void UpdateDbProperty(String property, String value,
+                                  Boolean ignoreNull) {
+        if (value == null) return;
+        UpdateDbProperty(property, value);
     }
     
     private void UpdateDbProperty(String property, String value) {

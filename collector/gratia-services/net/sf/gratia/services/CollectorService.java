@@ -292,8 +292,9 @@ public class CollectorService implements ServletContextListener {
             }
 
             if (!checksumUpgradeDisabled) {
+                String upgradeVal = p.getProperty("gratia.database.disableChecksumUpgrade", "0");
                 checksumUpgradeDisabled =
-                    0 < checker.readIntegerDBProperty("gratia.database.disableChecksumUpgrade");
+                    0 < Integer.valueOf(upgradeVal);
             }
             
             if (require_checksum_upgrade && !checksumUpgradeDisabled) {
