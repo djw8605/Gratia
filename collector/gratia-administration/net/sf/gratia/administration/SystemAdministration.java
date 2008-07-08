@@ -99,6 +99,11 @@ public class SystemAdministration extends HttpServlet {
 
         request.getSession().setAttribute("displayLink", "." + uriPart + queryPart);
 
+        // This could be use to avoid using redirection altogether in non-interactive browsing (wget)
+        //         String agent = request.getHeader("User-Agent");
+        //         Logging.warning("SystemAdministration: request coming from : "+ agent);
+        //         boolean noninterative = agent.startsWith("Wget/");
+
         if (!login) {
             Properties p = Configuration.getProperties();
             String loginLink = p.getProperty("service.secure.connection") + request.getContextPath() + "/gratia-login.jsp";

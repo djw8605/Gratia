@@ -26,7 +26,6 @@ try
 	session.setAttribute("certificateHandler", certificateHandler);
 
         String displayLink = (String) session.getAttribute("displayLink");   
-	%><%= displayLink %><%
 
 	certificateHandler = (net.sf.gratia.vomsSecurity.CertificateHandler) session.getAttribute("certificateHandler");
 
@@ -61,14 +60,6 @@ try
 				session.setAttribute("FQAN", "Privileges based on DN authorization");
 				foundDN = true;
 			}
-		}
-		if (foundDN)
-		{
-			%>
-			<script type="text/javascript">
-				parent.adminContent.location = "./index.html";
-			</script>
-			<%
 		}
 	}
 	else
@@ -141,7 +132,20 @@ try
 		<%
 	} else if (displayLink != null) {
 
-                response.sendRedirect(displayLink);
+            String agent = (String) request.getHeader("User-Agent");
+            boolean hasjavascript = !agent.startsWith("Wget/");
+
+            if (hasjavascript) {
+               // Case where javascript is supported
+			%>
+			<script type="text/javascript">
+				parent.adminContent.location = "./index.html";
+			</script>
+			<%
+            } else {
+              // No javascript
+              response.sendRedirect(displayLink);
+            }
 
         }
 }
