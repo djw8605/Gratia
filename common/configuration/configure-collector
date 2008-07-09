@@ -43,6 +43,8 @@ my %attribute_defaults =
 	 PostInstallCmdPreamble => "",
 	 PostInstallCmdPrefix => "",
 	 PostInstallCmdSuffix => "",
+         host_cert => "/etc/grid-security/hostcert.pem",
+         host_key => "/etc/grid-security/hostkey.pem",
 
 	 "properties.attributes" =>
 	 { "service.rmi.service" => "/gratia",
@@ -121,7 +123,7 @@ if [ "$1" = "start" ] ; then
     $CATALINA_HOME/bin/catalina.sh start
   fi
 elif [ "$1" = "stop" ] ; then
-  wget --dns-timeout=5 --connect-timeout=10 --read-timeout=40 -O - -q '^^^STOP_DB_UPDATE_URL^^^' >/dev/null 2>&1
+  wget --no-check-certificate --certificate="^^^HOST_CERT^^^" --private-key="^^^HOST_KEY^^^" --dns-timeout=5 --connect-timeout=10 --read-timeout=20 -O - -q '^^^STOP_DB_UPDATE_URL^^^' >/dev/null 2>&1
   if [[ -n "${TOMCAT_USER}" ]]; then
     su -c "${CATALINA_HOME}/bin/shutdown.sh" ${TOMCAT_USER}
   else
@@ -256,6 +258,7 @@ foreach my $config (@instance_list) {
   next if $requirements_error;
 
   # Configuration operations.
+  configure_keyfile_owner($config, $config_ref);
   configure_collector_config($config, $config_ref);
   configure_init_file($config, $config_ref);
   configure_tomcat_config($config, $config_ref);
@@ -263,23 +266,6 @@ foreach my $config (@instance_list) {
   configure_log4j_properties($config, $config_ref) if $options{"use-ssl"};
   configure_static_report_generation($config, $config_ref);
 
-  if (exists $config_ref->{"tomcat_user"}) {
-    print STDERR "TOMCAT_USER specified as ",
-      $config_ref->{"tomcat_user"},
-        ": changing ownership of $options{prefix}/tomcat-${config} ... ";
-    my $group = ($config_ref->{"tomcat_group"})?sprintf(".%s", $config_ref->{"tomcat_group"}):"";
-    my $status =
-      system("chown -R $config_ref->{\"tomcat_user\"}${group} \"$options{prefix}/tomcat-${config}\"");
-    if ($status == 0) {
-      print STDERR "OK\n";
-      system("chmod g+s \"$options{prefix}/tomcat-${config}\"") if ${group};
-    } else {
-      print STDERR "FAILED!\n";
-      print STDERR "ERROR changing ownership of ",
-        "\"$options{prefix}/tomcat-${config}\" ",
-          "to $config_ref->{\"tomcat_user\"}${group}\n";
-    }
-  }
 
   if (exists $options{"db-root"}) {
     configure_post_install($config, $config_ref);
@@ -292,8 +278,10 @@ foreach my $config (@instance_list) {
       system("rm -rf $options{prefix}/tomcat-${config}/webapps/gratia-$war\{,.war\}");
     }
   }
+
+  configure_installation_owner($config, $config_ref);
+
 }
-;
 
 1;
 
@@ -381,6 +369,8 @@ sub configure_init_file {
           s&^(TOMCAT_USER=).*$&${1}$collector_config->{tomcat_user}&m
             if $collector_config->{tomcat_user};
         $init_script_txt =~ s&\^\^\^STOP_DB_UPDATE_URL\^\^\^&$stop_db_update_url&;
+        $init_script_txt =~ s&\^\^\^HOST_CERT\^\^\^&$collector_config->{host_cert}&;
+        $init_script_txt =~ s&\^\^\^HOST_KEY\^\^\^&$collector_config->{host_key}&;
 	open(INIT_SCRIPT, ">$init_script") or die("Unable to open $init_script for writing");
 	print INIT_SCRIPT $init_script_txt;
 	close(INIT_SCRIPT);
@@ -422,9 +412,6 @@ sub configure_collector_config {
 		s&^(\Qservice.open.connection\E\s*=\s*).*$&${1}http://$collector_config->{collector_host}:$collector_config->{http_port}&;
 		s&^(\Qservice.secure.connection\E\s*=\s*).*$&${1}https://$collector_config->{collector_host}:$collector_config->{ssl_port}&;
 		s&^(\Qservice.mysql.url\E\s*=\s*).*$&${1}jdbc:mysql://$collector_config->{db_host}:$collector_config->{db_port}/$collector_config->{db_schema}&;
-		# Special case for monitoring addresses -- dump addresses not wanted from the config:
-		m&^(\Qmonitor.to.address.\E\d+)& and not $collector_config->{"properties.attributes"}->{${1}}
-			and next;
 		# Simple attributes
 		foreach my $config_attribute (sort keys %{$collector_config->{"properties.attributes"}}) {
 			unless (ref($collector_config->{"properties.attributes"}->{$config_attribute}) eq "CODE") {
@@ -437,6 +424,10 @@ sub configure_collector_config {
 				}
 			}
 		}
+		# Special case for multi-value configuration options -- dump items not wanted from the config:
+		m&^((?:\Qmonitor.to.address\E|\Qservice.admin.DN\E|\Qservice.admin.FQAN\E)\.\d+)& and
+                  not $collector_config->{"properties.attributes"}->{${1}} and
+                    next;
 		print REPORTING_CONFIG "$_\n";
 	}
 	close(ORIG_CONFIG);
@@ -450,48 +441,104 @@ sub configure_collector_config {
 	system("mv -bv \"$config_file\" \"$orig_config\"");
 }
 
+sub configure_keyfile_owner {
+  my ($instance_name, $collector_config) = @_;
+  if (exists $collector_config->{"tomcat_user"}) {
+    print STDERR "TOMCAT_USER specified as ",
+      $collector_config->{"tomcat_user"},
+        ": verifying readable copy of host key ...\n";
+    if ($collector_config->{"host_key"} and -e $collector_config->{"host_key"}) {
+      my (@temp) = stat($collector_config->{"host_key"});
+      @temp = getpwuid($temp[4]);
+      my $user = $temp[0];
+      print STDERR "DEBUG: Extracted user name $user as owner of $collector_config->{\"host_key\"}\n";
+      if ($user ne
+          $collector_config->{"tomcat_user"}) {
+        print STDERR "Producing copy of key file readable by $collector_config->{\"host_key\"} ...\n";
+        my ($path, $basename, $ext) = ($collector_config->{"host_key"} =~ m&^(.*/)?([^\.]*)(.*)$&);
+        $path = "" unless defined $path;
+        $basename = "" unless defined $basename;
+        $ext = "" unless defined $ext;
+        print STDERR "DEBUG: deconstructed $collector_config->{\"host_key\"} to ($path, $basename, $ext).\n";
+        $basename = "$basename-$collector_config->{\"tomcat_user\"}";
+        if (system("install -o $collector_config->{\"tomcat_user\"} -m 600 \"$collector_config->{\"host_key\"}\" \"$path$basename$ext\"") == 0) {
+          print STDERR "Successfully copied \"$collector_config->{\"host_key\"}\" to \"$path$basename$ext\"\n";
+          $collector_config->{"host_key"} = "$path$basename$ext";
+        } else {
+          print STDERR "ERROR: could not create copy of key readable by ",
+            "$collector_config->{\"tomcat_user\"} -- you will need to do this ",
+              "and alter the init script and server.xml manually\n";
+        }
+      }
+    } else {
+      print STDERR "Host key not specified or does not point to real file!\n";
+    }
+  }
+}
+
+sub configure_installation_owner {
+  my ($instance_name, $collector_config) = @_;
+  if (exists $collector_config->{"tomcat_user"}) {
+    print STDERR "TOMCAT_USER specified as ",
+      $collector_config->{"tomcat_user"},
+        ": changing ownership of $options{prefix}/tomcat-${instance_name} ... ";
+    my $group = ($collector_config->{"tomcat_group"})?sprintf(".%s", $collector_config->{"tomcat_group"}):"";
+    my $status =
+      system("chown -R $collector_config->{\"tomcat_user\"}${group} \"$options{prefix}/tomcat-${instance_name}\"");
+    if ($status == 0) {
+      print STDERR "OK\n";
+      system("chmod g+s \"$options{prefix}/tomcat-${instance_name}\"") if ${group};
+    } else {
+      print STDERR "FAILED!\n";
+      print STDERR "ERROR changing ownership of ",
+        "\"$options{prefix}/tomcat-${instance_name}\" ",
+          "to $collector_config->{\"tomcat_user\"}${group}\n";
+    }
+  }
+}
+
 sub configure_tomcat_config {
-	my ($instance_name, $collector_config) = @_;
-	my $orig_config = "$options{prefix}/tomcat-${instance_name}/conf/server.xml";
-	my $config_file = temporary_filename("server.xml");
-	open(ORIG_CONFIG, "<$orig_config") or die "Unable to open $orig_config for reading";
-	open(REPORTING_CONFIG, ">$config_file") or die "Unable to open $config_file for writing";
-	chmod 0600, $config_file;
-	my %seen_attributes = ();
-	my $line_buffer = "";
-	my $in_comment;
-	my $in_catalina;
-	my $in_connector;
-	while (<ORIG_CONFIG>) {
-		next if m&<!-- Gratia connectors -->&; # Avoid comment build-up, floss regularly.
-		$line_buffer = "${line_buffer}$_";
-		$in_comment = 1 if (m&<!--&);
-		if ($line_buffer =~ m&-->&) {
-			undef $in_comment;
-		}
+  my ($instance_name, $collector_config) = @_;
+  my $orig_config = "$options{prefix}/tomcat-${instance_name}/conf/server.xml";
+  my $config_file = temporary_filename("server.xml");
+  open(ORIG_CONFIG, "<$orig_config") or die "Unable to open $orig_config for reading";
+  open(REPORTING_CONFIG, ">$config_file") or die "Unable to open $config_file for writing";
+  chmod 0600, $config_file;
+  my %seen_attributes = ();
+  my $line_buffer = "";
+  my $in_comment;
+  my $in_catalina;
+  my $in_connector;
+  while (<ORIG_CONFIG>) {
+    next if m&<!-- Gratia connectors -->&; # Avoid comment build-up, floss regularly.
+    $line_buffer = "${line_buffer}$_";
+    $in_comment = 1 if (m&<!--&);
+    if ($line_buffer =~ m&-->&) {
+      undef $in_comment;
+    }
 		
-		next if $in_comment;
+    next if $in_comment;
 
-		$line_buffer =~ s&(<Server\s*port\s*=\s*)"[^"]+"&${1}"$collector_config->{server_port}"&;
+    $line_buffer =~ s&(<Server\s*port\s*=\s*)"[^"]+"&${1}"$collector_config->{server_port}"&;
 
-		$line_buffer =~ m&<\s*Service\s*name\s*=\s*"Catalina"\s*>\s*$& and $in_catalina = 1;
+    $line_buffer =~ m&<\s*Service\s*name\s*=\s*"Catalina"\s*>\s*$& and $in_catalina = 1;
 
-		if ($in_catalina and not $in_comment) {
-			$line_buffer =~ m&^\s*<\s*Connector\s*& and $in_connector = 1;
-			if ($in_connector) {
-				next unless $line_buffer =~ m&/\s*>&;
-				undef $in_connector;
-				$line_buffer =~ s&<\s*Connector.*\s*/\s*>(?:\s*$)?&&s;
-			}
-			if ($line_buffer =~ m&^\s*<\s*Engine&) {
-				print REPORTING_CONFIG <<EOF;
+    if ($in_catalina and not $in_comment) {
+      $line_buffer =~ m&^\s*<\s*Connector\s*& and $in_connector = 1;
+      if ($in_connector) {
+        next unless $line_buffer =~ m&/\s*>&;
+        undef $in_connector;
+        $line_buffer =~ s&<\s*Connector.*\s*/\s*>(?:\s*$)?&&s;
+      }
+      if ($line_buffer =~ m&^\s*<\s*Engine&) {
+        print REPORTING_CONFIG <<EOF;
     <!-- Gratia connectors -->
     <Connector port="$collector_config->{http_port}" maxHttpHeaderSize="8192"
                maxThreads="150" minSpareThreads="25" maxSpareThreads="75"
                enableLookups="false" redirectPort="$collector_config->{ssl_port}" acceptCount="100"
                connectionTimeout="20000" disableUploadTimeout="true" />
 EOF
-				print REPORTING_CONFIG <<EOF if $options{"use-ssl"};
+        print REPORTING_CONFIG <<EOF if $options{"use-ssl"};
     <Connector port="$collector_config->{ssl_port}"
                maxHttpHeaderSize="8192"
                maxThreads="150"
@@ -506,27 +553,27 @@ EOF
                sSLImplementation="org.glite.security.trustmanager.tomcat.TMSSLImplementation"
                sslCAFiles="/etc/grid-security/certificates/*.0"
                crlFiles="/etc/grid-security/certificates/*.r0"
-               sslCertFile="/etc/grid-security/hostcert.pem"
-               sslKey="/etc/grid-security/hostkey.pem"
+               sslCertFile="$collector_config->{host_cert}"
+               sslKey="$collector_config->{host_key}"
                log4jConfFile="$options{prefix}/tomcat-${instance_name}/conf/log4j-trustmanager.properties"
                clientAuth="true"
                sslProtocol="TLS"
                crlEnabled="true"
                crlRequired="false"/>
 EOF
-#               keystoreFile="$options{prefix}/tomcat-${instance_name}/gratia/keystore" keystorePass="server"
-#               truststoreFile="$options{prefix}/tomcat-${instance_name}/gratia/truststore" truststorePass="server"
+        #               keystoreFile="$options{prefix}/tomcat-${instance_name}/gratia/keystore" keystorePass="server"
+        #               truststoreFile="$options{prefix}/tomcat-${instance_name}/gratia/truststore" truststorePass="server"
 
-			}
-		}
+      }
+    }
 		
-		print REPORTING_CONFIG "$line_buffer";
-		$line_buffer = "";
+    print REPORTING_CONFIG "$line_buffer";
+    $line_buffer = "";
 		
-	}
-	close(ORIG_CONFIG);
-	close(REPORTING_CONFIG);
-	system("mv -bv \"$config_file\" \"$orig_config\"");
+  }
+  close(ORIG_CONFIG);
+  close(REPORTING_CONFIG);
+  system("mv -bv \"$config_file\" \"$orig_config\"");
 }
 
 sub configure_tomcat_users {
