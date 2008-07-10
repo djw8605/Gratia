@@ -11,12 +11,12 @@
         collector_host => "gratia02.fnal.gov",
         max_perm_size => "256m",
         max_heap_size => "1024m",
-        monitor.to.address.0 => "gratia-operation@fnal.gov",
         "properties.attributes" =>
         {
          "maintain.history.log" => 7,
          "monitor.listener.wait" => 60,
          "service.listener.threads" => 1,
+         "monitor.to.address.0" => 'gratia-operation@fnal.gov',
          "service.admin.DN.0" => 'ALLOW ALL'
         }
       },
@@ -31,13 +31,13 @@
         remote_host => "gratia02.fnal.gov",
         collector_host => "gratia02.fnal.gov",
         UserConfig => "UserConfig_pacct.xml",
-        monitor.to.address.0 => "gratia-operation@fnal.gov",
         "properties.attributes" =>
         {
           "gratia.database.useJobUsageSiteName" => 1,
           "gratia.database.wantNodeSummary" => 1,
+          "monitor.to.address.0" => 'gratia-operation@fnal.gov',
           "service.admin.DN.0" => 'ALLOW ALL'
-        },
+        }
        },
  itb_gratia_osg_daily => { http_port => 8882,
         ssl_port => 8847,
@@ -51,15 +51,15 @@
         collector_host => "gratia02.fnal.gov",
         UserConfig => "UserConfig_osg_daily.xml",
         PostInstallCmdPreamble => '[[ "$action" == *"stored"* ]] || continue',
-        monitor.to.address.0 => "gratia-operation@fnal.gov",
         "properties.attributes" =>
         { "monitor.listener.wait" => 1440,
           "gratia.database.wantSummaryTable" => 0,
           "gratia.database.wantSummaryTrigger" => 0,
           "gratia.database.useJobUsageSiteName" => 1,
+          "monitor.to.address.0" => 'gratia-operation@fnal.gov',
           "service.admin.DN.0" => 'ALLOW ALL'
-        },
-       },
+        }
+       }
 );
 
 ### Local Variables:
