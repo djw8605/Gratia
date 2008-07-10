@@ -144,6 +144,7 @@ my $default_prefix = "/scratch";
 
 my @default_collector_info =
   ( "collector-pro.dat",
+    "collector-itb.dat",
     "collector-dev.dat" );
 
 Getopt::Long::Configure(qw(no_ignore_case bundling require_order));

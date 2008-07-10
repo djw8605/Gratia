@@ -21,7 +21,7 @@ usage: update-gratia-local [-S <source-prefix>] [-j <jre-home>] [-s] \
        -i <collector-info-file>
 
           Use collector-info-file instead of the default files
-          (collector-pro.dat collector-dev.dat)
+          (collector-pro.dat  collector-itb.dat collector-dev.dat)
 
        -j <jre-home>
 

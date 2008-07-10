@@ -1,0 +1,67 @@
+(
+ itb_gratia_itb => { http_port => 8880,
+        ssl_port => 8845,
+        rmi_port => 17000,
+        jmx_port => 8004,
+        server_port => 8104,
+        db_schema => "itb_gratia_itb",
+        db_host => "gratia07.fnal.gov",
+        db_port => "3322",
+        remote_host => "gratia02.fnal.gov",
+        collector_host => "gratia02.fnal.gov",
+        max_perm_size => "256m",
+        max_heap_size => "1024m",
+        monitor.to.address.0 => "gratia-operation@fnal.gov",
+        "properties.attributes" =>
+        {
+         "maintain.history.log" => 7,
+         "monitor.listener.wait" => 60,
+         "service.listener.threads" => 1,
+         "service.admin.DN.0" => 'ALLOW ALL'
+        }
+      },
+ itb_gratia_psacct => { http_port => 8881,
+        ssl_port => 8846,
+        rmi_port => 18000,
+        jmx_port => 8014,
+        server_port => 8114,
+        db_schema => "itb_gratia_psacct",
+        db_host => "gratia07.fnal.gov",
+        db_port => "3322",
+        remote_host => "gratia02.fnal.gov",
+        collector_host => "gratia02.fnal.gov",
+        UserConfig => "UserConfig_pacct.xml",
+        monitor.to.address.0 => "gratia-operation@fnal.gov",
+        "properties.attributes" =>
+        {
+          "gratia.database.useJobUsageSiteName" => 1,
+          "gratia.database.wantNodeSummary" => 1,
+          "service.admin.DN.0" => 'ALLOW ALL'
+        },
+       },
+ itb_gratia_osg_daily => { http_port => 8882,
+        ssl_port => 8847,
+        rmi_port => 19000,
+        jmx_port => 8024,
+        server_port => 8124,
+        db_schema => "itb_gratia_osg_daily",
+        db_host => "gratia07.fnal.gov",
+        db_port => "3322",
+        remote_host => "gratia02.fnal.gov",
+        collector_host => "gratia02.fnal.gov",
+        UserConfig => "UserConfig_osg_daily.xml",
+        PostInstallCmdPreamble => '[[ "$action" == *"stored"* ]] || continue',
+        monitor.to.address.0 => "gratia-operation@fnal.gov",
+        "properties.attributes" =>
+        { "monitor.listener.wait" => 1440,
+          "gratia.database.wantSummaryTable" => 0,
+          "gratia.database.wantSummaryTrigger" => 0,
+          "gratia.database.useJobUsageSiteName" => 1,
+          "service.admin.DN.0" => 'ALLOW ALL'
+        },
+       },
+);
+
+### Local Variables:
+### mode: cperl
+### End:
