@@ -185,6 +185,7 @@
                rmi_port => 24000,
                jmx_port => 8074,
                server_port => 8174,
+               collector_host => "gratia-vm02.fnal.gov",
                db_host => "gratia-vm02.fnal.gov",
                db_schema => "gratia_weigand",
                "properties.attributes" =>
