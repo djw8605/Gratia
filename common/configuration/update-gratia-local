@@ -207,6 +207,25 @@ do
   fi
 done
 
+#-----------------------
+# Check for java
+#-----------------------
+echo "... checking for java"
+if [ "$(type java >/dev/null 2>&1;echo $?)" ];then
+  if [ ! -x $java_jre/bin/java ];then
+    echo;echo "ERROR: Cannot find java ($java_jre/bin/java)";echo
+    exit 1
+  fi
+fi
+#-----------------------
+# Check for mysql
+#-----------------------
+echo "... checking for mysql"
+if [ "$(type mysql >/dev/null 2>&1;echo $?)" != "0" ];then
+  echo;echo "ERROR: Cannot find mysql client on this node";echo
+  exit 1
+fi
+
 
 #-----------------------
 # Stop tomcat
