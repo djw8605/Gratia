@@ -86,7 +86,9 @@
               "monitor.to.address0" => 'pcanal@fnal.gov'
              }
            },
- greenc => { http_port => 8882,
+ greenc => { tomcat_user => "greenc",
+             tomcat_group => "gratia",
+             http_port => 8882,
              ssl_port => 8855,
              rmi_port => 19000,
              jmx_port => 8024,
@@ -97,6 +99,7 @@
 #             tomcat_native_lib => '/data/apr/lib',
              "properties.attributes" =>
              {
+              "gratia.service.safeStart" => 1,
               "maintain.history.log" => 2,
               "monitor.listener.wait" => 240,
               "service.rmiservlet.level" => "FINEST",
@@ -152,16 +155,26 @@
 #                  tomcat_native_lib => '/data/apr/lib',
                   "properties.attributes" =>
                   {
+#                   "gratia.service.safeStart" => 1,
+                   "gratia.database.wantNodeSummary" => 1,
+                   "gratia.database.disableChecksumUpgrade" => 0,
                    "maintain.history.log" => 2,
                    "monitor.listener.wait" => 240,
                    "service.rmiservlet.level" => "FINEST",
                    "service.service.level" => 'FINEST',
-                   "service.service.numLogs" => 10,
+                   "service.service.numLogs" => 200,
                    "monitor.to.address0" => 'greenc@fnal.gov',
-#                   "service.listener.threads" => 10,
+                   "service.listener.threads" => 1,
+#                   "service.admin.DN.0" => 'ALLOW ALL',
                    "service.admin.DN.0" => '/DC=org/DC=doegrids/OU=People/CN=Christopher H. Green 851859',
-                   "service.admin.DN.1" => '/DC=gov/DC=fnal/O=Fermilab/OU=People/CN=Chris Green/CN=UID=greenc',
-                   "service.admin.DN.2" => '/DC=gov/DC=fnal/O=Fermilab/OU=People/CN=Chris Green/CN=UID:greenc'#,
+                   "service.admin.DN.1" => '/DC=gov/DC=fnal/O=Fermilab/OU=People/CN=Chris Green/CN=UID:greenc',
+                   "service.admin.DN.2" => '/DC=org/DC=doegrids/OU=Services/CN=gratia-vm02.fnal.gov',
+                   "service.lifetime.JobUsageRecord" => "2y",
+                   "service.lifetime.JobUsageRecord.RawXML" => "2y",
+                   "service.lifetime.MetricRecord" => "2y",
+                   "service.lifetime.MetricRecord.RawXML" => "2y",
+                   "service.lifetime.DupRecord.Duplicates" => "2y",
+                   "service.lifetime.DupRecord" => "UNLIMITED"
                   }
                 },
  rsv_test => { http_port => 8886,
