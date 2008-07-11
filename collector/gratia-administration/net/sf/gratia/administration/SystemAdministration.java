@@ -148,37 +148,43 @@ public class SystemAdministration extends HttpServlet {
         String housekeepingStatus = "Unknown";
         String checksumUpgradeStatus = "Unknown";
 
-        try {
-            Boolean flag = proxy.operationsDisabled();
-            if (flag) {
-                operationsStatus = "SAFE";
-            } else {
-                operationsStatus = "Active";
-                flag = proxy.databaseUpdateThreadsActive();
+        if (proxy == null) {
+            initialize();
+        }
+
+        if (proxy != null ) {
+            try {
+                Boolean flag = proxy.operationsDisabled();
                 if (flag) {
-                    listenerStatus = "Active";
+                    operationsStatus = "SAFE";
                 } else {
-                    listenerStatus = "Stopped";
+                    operationsStatus = "Active";
+                    flag = proxy.databaseUpdateThreadsActive();
+                    if (flag) {
+                        listenerStatus = "Active";
+                    } else {
+                        listenerStatus = "Stopped";
+                    }
+                    flag = proxy.replicationServiceActive();
+                    if (flag) {
+                        replicationStatus = "Active";
+                    } else {
+                        replicationStatus = "Stopped";
+                    }
+                    flag = proxy.servletEnabled();
+                    if (flag) {
+                        servletStatus = "Active";
+                    } else {
+                        servletStatus = "Stopped";
+                    }
+                    housekeepingStatus = proxy.housekeepingServiceStatus();
+                    checksumUpgradeStatus = proxy.checksumUpgradeStatus();
                 }
-                flag = proxy.replicationServiceActive();
-                if (flag) {
-                    replicationStatus = "Active";
-                } else {
-                    replicationStatus = "Stopped";
-                }
-                flag = proxy.servletEnabled();
-                if (flag) {
-                   servletStatus = "Active";
-                } else {
-                   servletStatus = "Stopped";
-                }
-                housekeepingStatus = proxy.housekeepingServiceStatus();
-                checksumUpgradeStatus = proxy.checksumUpgradeStatus();
             }
-        }
-        catch (Exception e) {
-            Logging.warning("SystemAdministration.process: Caught exception assessing operational status via proxy", e);
-        }
+            catch (Exception e) {
+                Logging.warning("SystemAdministration.process: Caught exception assessing operational status via proxy", e);
+            }
+        } 
 
         html = html.replaceAll("#date#", DateFormat.getDateTimeInstance().format(new Date()) + " UTC");
 
