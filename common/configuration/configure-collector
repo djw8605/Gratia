@@ -633,7 +633,14 @@ sub configure_static_report_generation {
 use File::Find;
 my (@found_files, $list_file);
 sub wanted {
+#  print STDERR "File::Find: dir = $File::Find::dir\n";
+  if ($File::Find::name =~ m&gratia/data/(?:history-|old-|thread)&) {
+#    print STDERR "File::Find: pruning search tree\n";
+    $File::Find::prune = 1;
+    return;
+  }
   if (-d $_) {
+#    print STDERR "File::Find: looking in $File::Find::name ...\n";
     if (-f "$_/$list_file") {
       push @found_files, "$File::Find::name/$list_file";
       $File::Find::prune = 1;
@@ -651,6 +658,7 @@ sub find_dat_file {
   chomp $list_file;
   unless ( -f $list_file ) {
     my @dir_list = map { (-d)?$_:() } @search_path;
+#    print STDERR "Looking for $list_file, dir list = ", join(", ", @dir_list), "\n";
     find ( \&wanted, @dir_list );
     # First found in search path order.
     $list_file = $found_files[0] if scalar @found_files;
