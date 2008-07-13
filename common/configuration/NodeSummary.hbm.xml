@@ -12,7 +12,7 @@
        lazy="false">
 
     <id name="RecordId"
-        column="dbid"
+        column="NodeSummaryID"
         type="integer">
         <generator class="native"/>
     </id>
