@@ -205,7 +205,7 @@ soap: services
 	# --- Target: soap COMPLETED  ---
 
 #------------------------------------------------------------------
-administration: security ${target}/gratia-administration.war
+administration: util security ${target}/gratia-administration.war
 	# --- Target: administration COMPLETED  ---
 
 #------------------------------------------------------------------
@@ -303,8 +303,8 @@ reporting: birt-reporting
 	# --- copy in needed libraries ---
 	cp -p ${target}/gratiaReporting.jar                    war/WEB-INF/lib/.
 	cp -p ${target}/gratiaReporting.jar                    war/scriptlib/.
-	cp -p ${commonLib}/mysql-connector-java-5.0.4-bin.jar  war/WEB-INF/lib/.
-	cp -p ${commonLib}/mysql-connector-java-5.0.4-bin.jar  war/WEB-INF/platform/plugins/org.eclipse.birt.report.data.oda.jdbc*/drivers/.
+	cp -p ${commonLib}/mysql-connector-java-5.0.8-bin.jar  war/WEB-INF/lib/.
+	cp -p ${commonLib}/mysql-connector-java-5.0.8-bin.jar  war/WEB-INF/platform/plugins/org.eclipse.birt.report.data.oda.jdbc*/drivers/.
 	cp -p ${commonLib}/dom4j-1.6.1.jar                     war/WEB-INF/lib/.
 	# --- copy needed jsp and css files ----
 	cp -p ${reportsrc}/WebContent/*.jsp                    war/.
