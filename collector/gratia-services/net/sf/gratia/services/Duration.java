@@ -142,5 +142,11 @@ public class Duration {
         }
     }
 
+    public String toString() {
+        if (unit == DurationUnit.UNLIMITED)
+            return "UNLIMITED";
+        else return ordinality + " " + unit + (((ordinality == 1 ) || (ordinality == -1))?"":"S");
+    }
+
 }
 
