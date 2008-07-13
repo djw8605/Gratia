@@ -2,8 +2,9 @@ DELIMITER ||
 
 DROP PROCEDURE IF EXISTS add_JUR_to_summary
 ||
-CREATE PROCEDURE add_JUR_to_summary(input_dbid INT(11))
-SP:BEGIN
+CREATE PROCEDURE add_JUR_to_summary(inputDbid INT(11))
+DETERMINISTIC
+AJUR:BEGIN
   -- Main
   DECLARE n_ProbeName VARCHAR(255);
   DECLARE n_CommonName VARCHAR(255);
@@ -20,17 +21,9 @@ SP:BEGIN
   DECLARE n_EndTime DATETIME;
 
   -- NodeSummary update only
+  DECLARE wantNodeSummary VARCHAR(64) DEFAULT '';
   DECLARE n_Host text;
-  DECLARE mycount INT(11);
-  DECLARE startdate DATETIME;
-  DECLARE enddate DATETIME;
-  DECLARE node VARCHAR(255);
-  DECLARE myprobename VARCHAR(255);
-  DECLARE myresourcetype VARCHAR(255);
-  DECLARE mycpuusertime INT DEFAULT 0;
-  DECLARE mycpusystemtime INT DEFAULT 0;
   DECLARE mycpucount INT DEFAULT 0;
-  DECLARE myhostdescription VARCHAR(255);
   DECLARE mybenchmarkscore INT DEFAULT 0;
   DECLARE divide INT DEFAULT 0;
   DECLARE counter INT DEFAULT 0;  
@@ -78,49 +71,55 @@ SP:BEGIN
        LEFT JOIN Resource RT ON
         ((J.dbid = RT.dbid) AND
          (RT.description = 'ExitCode'))
-  WHERE J.dbid = input_dbid;
+  WHERE J.dbid = inputDbid;
 
   -- Basic data checks
   IF n_ResourceType IS NOT NULL AND
      n_ResourceType NOT IN ('Batch', 'RawCPU') THEN
      -- Very common case: no message necessary
-     LEAVE SP;
+     LEAVE AJUR;
   END IF;
 
   IF n_ProbeName IS NULL THEN
      INSERT INTO trace(eventtime, pname, p1, `data`)
-      VALUES(UTC_TIMESTAMP(), 'add_JUR_to_summary', input_dbid, 'Failed due to null ProbeName');
-     LEAVE SP;
+      VALUES(UTC_TIMESTAMP(), 'add_JUR_to_summary', inputDbid, 'Failed due to null ProbeName');
+     LEAVE AJUR;
   END IF;
 
   IF n_VOcorrid IS NULL THEN
      INSERT INTO trace(eventtime, pname, p1, `data`)
-      VALUES(UTC_TIMESTAMP(), 'add_JUR_to_summary', input_dbid, 'Failed due to null VOcorrid');
-     LEAVE SP;
+      VALUES(UTC_TIMESTAMP(), 'add_JUR_to_summary', inputDbid, 'Failed due to null VOcorrid');
+     LEAVE AJUR;
   END IF;
 
   IF n_Njobs IS NULL THEN
      INSERT INTO trace(eventtime, pname, p1, `data`)
-      VALUES(UTC_TIMESTAMP(), 'add_JUR_to_summary', input_dbid, 'Failed due to null Njobs');
-     LEAVE SP;
+      VALUES(UTC_TIMESTAMP(), 'add_JUR_to_summary', inputDbid, 'Failed due to null Njobs');
+     LEAVE AJUR;
   END IF;
 
   IF n_WallDuration IS NULL THEN
      INSERT INTO trace(eventtime, pname, p1, `data`)
-      VALUES(UTC_TIMESTAMP(), 'add_JUR_to_summary', input_dbid, 'Failed due to null WallDuration');
-     LEAVE SP;
+      VALUES(UTC_TIMESTAMP(), 'add_JUR_to_summary', inputDbid, 'Failed due to null WallDuration');
+     LEAVE AJUR;
   END IF;
 
   IF n_CpuUserDuration IS NULL THEN
      INSERT INTO trace(eventtime, pname, p1, `data`)
-      VALUES(UTC_TIMESTAMP(), 'add_JUR_to_summary', input_dbid, 'Failed due to null CpuUserDuration');
-     LEAVE SP;
+      VALUES(UTC_TIMESTAMP(), 'add_JUR_to_summary', inputDbid, 'Failed due to null CpuUserDuration');
+     LEAVE AJUR;
   END IF;
 
   IF n_CpuSystemDuration IS NULL THEN
      INSERT INTO trace(eventtime, pname, p1, `data`)
-      VALUES(UTC_TIMESTAMP(), 'add_JUR_to_summary', input_dbid, 'Failed due to null CpuSystemDuration');
-     LEAVE SP;
+      VALUES(UTC_TIMESTAMP(), 'add_JUR_to_summary', inputDbid, 'Failed due to null CpuSystemDuration');
+     LEAVE AJUR;
+  END IF;
+
+  IF n_EndTime < n_StartTime THEN
+     INSERT INTO trace(eventtime, pname, p1, `data`)
+      VALUES(UTC_TIMESTAMP(), 'add_JUR_to_summary', inputDbid, 'Failed due to EndTime < StartTime');
+     LEAVE AJUR;
   END IF;
 
   -- MasterSummaryData
@@ -145,69 +144,48 @@ SP:BEGIN
    CpuUserDuration = CpuUserDuration + VALUES(CpuUserDuration),
    CpuSystemDuration = CpuSystemDuration + VALUES(CpuSystemDuration);
 
-  -- NodeSummary: remains old-style due to its complication.
-  select count(*) into mycount from information_schema.tables where
-    table_schema = Database() and
-    table_name = 'NodeSummary';
+  -- NodeSummary
+  select cdr into wantNodeSummary from SystemProplist
+    where car = 'gratia.database.wantNodeSummary';
 
-  if mycount > 0 then
+  if wantNodeSummary = '1' then
+    set mycpucount = 0;
+    set mybenchmarkscore = 0;
+    select BenchmarkScore, CPUCount
+      into mybenchmarkscore, mycpucount from CPUInfo
+      where n_HostDescription = CPUInfo.HostDescription;
 
-    set startdate = n_StartTime;
-    set enddate = n_EndTime;
-    set node = n_Host;
-    set myprobename = n_ProbeName;
-    set myresourcetype = n_ResourceType;
-    set mycpuusertime = n_CpuUserDuration;
-    set mycpusystemtime = n_CpuSystemDuration;
-    set myhostdescription = n_HostDescription;
-  
-    if myprobename = null then
-      set myprobename = 'Unknown';
-    end if;
-
-    begin
-      set mycpucount = 0;
-      set mybenchmarkscore = 0;
-      select BenchmarkScore,CPUCount
-        into mybenchmarkscore,mycpucount from CPUInfo
-        where myhostdescription = CPUInfo.HostDescription;
-    end;
-
-    set numberofdays = datediff(enddate,startdate);
-    set divide = numberofdays + 1;
-    set newcpusystemtime = mycpusystemtime / divide;
-    set newcpuusertime = mycpuusertime / divide;
-
---    insert into trace(eventtime,pname,p1,p2,data)
---     values(UTC_TIMESTAMP(), 'add_JUR_to_summary', n_dbid, numberofdays, 'Calling updatenodesummary');
-
-    if numberofdays = 0 then
-        call updatenodesummary(
-        date(enddate),node,myprobename,myresourcetype,
-        mycpusystemtime,mycpuusertime,mycpucount,myhostdescription,
-        mybenchmarkscore,extract(DAY from last_day(enddate)));
-    end if;
-
-    if numberofdays > 0 then
-      set imax = numberofdays + 1;
-      set counter = 0;
-      while counter < imax do
-        set newdate = adddate(startdate,counter);
-        call updatenodesummary(
-          date(newdate),node,myprobename,myresourcetype,
-          newcpusystemtime,newcpuusertime,mycpucount,
-          myhostdescription,mybenchmarkscore,
-          extract(DAY from last_day(newdate)));
-        set counter = counter + 1;
-      end while;
-    end if;
-  end if;
+    set imax = datediff(n_EndTime, n_StartTime) + 1;
+    set newcpusystemtime = n_CpuSystemDuration / imax;
+    set newcpuusertime = n_CpuUserDuration / imax;
+    set counter = 0;
+    while counter < imax do
+      -- Calculate date for summary entry
+      set newdate = adddate(n_StartTime,counter);
+      -- Insert / update
+      insert into NodeSummary
+        (EndTime, Node, ProbeName, ResourceType,
+         CpuSystemTime, CpuUserTime,
+         CpuCount, HostDescription,
+         BenchmarkScore, DaysInMonth)
+       values(date(newdate), n_Host, n_ProbeName, n_ResourceType,
+              newcpusystemtime, newcpuusertime, mycpucount,
+              n_HostDescription, mybenchmarkscore,
+              extract(DAY from last_day(newdate)))
+       on duplicate key update
+         CpuSystemTime = CpuSystemTime + values(CpuSystemTime),
+         CpuUserTime = CpuUserTime + values(CpuUserTime);
+      -- Update counter
+      set counter = counter + 1;
+    end while;
+  end if; -- wantNodeSummary
 END;
 ||
 DROP PROCEDURE IF EXISTS del_JUR_from_summary
 ||
-CREATE PROCEDURE del_JUR_from_summary(input_dbid INT(11))
-SP:BEGIN
+CREATE PROCEDURE del_JUR_from_summary(inputDbid INT(11))
+DETERMINISTIC
+DJUR:BEGIN
   -- Main
   DECLARE n_ProbeName VARCHAR(255);
   DECLARE n_CommonName VARCHAR(255);
@@ -225,13 +203,27 @@ SP:BEGIN
   DECLARE ps_ServerDate DATETIME;
   DECLARE d_EndTime DATE;
 
+  -- NodeSummary update only
+  DECLARE wantNodeSummary VARCHAR(64) DEFAULT '';
+  DECLARE n_Host text;
+  DECLARE mycpucount INT DEFAULT 0;
+  DECLARE mybenchmarkscore INT DEFAULT 0;
+  DECLARE divide INT DEFAULT 0;
+  DECLARE counter INT DEFAULT 0;  
+  DECLARE newdate DATETIME;
+  DECLARE newcpusystemtime INT DEFAULT 0;
+  DECLARE newcpuusertime INT DEFAULT 0;
+  DECLARE numberofdays INT DEFAULT 0;
+  DECLARE imax INT DEFAULT 0;
+
   -- Data collection
   SELECT M.ProbeName,
-         J.CommonName,
+         IFNULL(J.CommonName, ''),
          VC.corrid,
-         J.ResourceType,
-         J.HostDescription,
-         IFNULL(RT.value, J.Status),
+         IFNULL(J.ResourceType, ''),
+         IFNULL(J.HostDescription, ''),
+         IFNULL(J.Host, ''),
+         IFNULL(IFNULL(RT.value, J.Status), 0),
          J.Njobs,
          J.WallDuration,
          J.CpuUserDuration,
@@ -247,6 +239,7 @@ SP:BEGIN
        n_VOcorrid,
        n_ResourceType,
        n_HostDescription,
+       n_Host,
        n_ApplicationExitCode,
        n_Njobs,
        n_WallDuration,
@@ -266,43 +259,49 @@ SP:BEGIN
        LEFT JOIN Resource RT ON
         ((J.dbid = RT.dbid) AND
          (RT.description = 'ExitCode'))
-  WHERE J.dbid = input_dbid;
+  WHERE J.dbid = inputDbid;
 
   -- Basic data checks
   IF n_ProbeName IS NULL THEN
      INSERT INTO trace(eventtime, pname, p1, `data`)
-      VALUES(UTC_TIMESTAMP(), 'del_JUR_from_summary', input_dbid, 'Failed due to null ProbeName');
-     LEAVE SP;
+      VALUES(UTC_TIMESTAMP(), 'del_JUR_from_summary', inputDbid, 'Failed due to null ProbeName');
+     LEAVE DJUR;
   END IF;
 
   IF n_VOcorrid IS NULL THEN
      INSERT INTO trace(eventtime, pname, p1, `data`)
-      VALUES(UTC_TIMESTAMP(), 'del_JUR_from_summary', input_dbid, 'Failed due to null VOcorrid');
-     LEAVE SP;
+      VALUES(UTC_TIMESTAMP(), 'del_JUR_from_summary', inputDbid, 'Failed due to null VOcorrid');
+     LEAVE DJUR;
   END IF;
 
   IF n_Njobs IS NULL THEN
      INSERT INTO trace(eventtime, pname, p1, `data`)
-      VALUES(UTC_TIMESTAMP(), 'del_JUR_from_summary', input_dbid, 'Failed due to null Njobs');
-     LEAVE SP;
+      VALUES(UTC_TIMESTAMP(), 'del_JUR_from_summary', inputDbid, 'Failed due to null Njobs');
+     LEAVE DJUR;
   END IF;
 
   IF n_WallDuration IS NULL THEN
      INSERT INTO trace(eventtime, pname, p1, `data`)
-      VALUES(UTC_TIMESTAMP(), 'del_JUR_from_summary', input_dbid, 'Failed due to null WallDuration');
-     LEAVE SP;
+      VALUES(UTC_TIMESTAMP(), 'del_JUR_from_summary', inputDbid, 'Failed due to null WallDuration');
+     LEAVE DJUR;
   END IF;
 
   IF n_CpuUserDuration IS NULL THEN
      INSERT INTO trace(eventtime, pname, p1, `data`)
-      VALUES(UTC_TIMESTAMP(), 'del_JUR_from_summary', input_dbid, 'Failed due to null CpuUserDuration');
-     LEAVE SP;
+      VALUES(UTC_TIMESTAMP(), 'del_JUR_from_summary', inputDbid, 'Failed due to null CpuUserDuration');
+     LEAVE DJUR;
   END IF;
 
   IF n_CpuSystemDuration IS NULL THEN
      INSERT INTO trace(eventtime, pname, p1, `data`)
-      VALUES(UTC_TIMESTAMP(), 'del_JUR_from_summary', input_dbid, 'Failed due to null CpuSystemDuration');
-     LEAVE SP;
+      VALUES(UTC_TIMESTAMP(), 'del_JUR_from_summary', inputDbid, 'Failed due to null CpuSystemDuration');
+     LEAVE DJUR;
+  END IF;
+
+  IF n_EndTime < n_StartTime THEN
+     INSERT INTO trace(eventtime, pname, p1, `data`)
+      VALUES(UTC_TIMESTAMP(), 'add_JUR_to_summary', inputDbid, 'Failed due to EndTime < StartTime');
+     LEAVE DJUR;
   END IF;
 
   -- MasterSummaryData
@@ -319,82 +318,57 @@ SP:BEGIN
     AND HostDescription = IFNULL(n_HostDescription, '')
     AND ApplicationExitCode = n_ApplicationExitCode;
 
- -- Clean up emptied rows (may check multiple rows, but trying to be
- -- economical with dynamically evaluated expressions (like IFNULL).
- DELETE FROM MasterSummaryData
+  -- Clean up emptied rows (may check multiple rows, but trying to be
+  -- economical with dynamically evaluated expressions (like IFNULL).
+  DELETE FROM MasterSummaryData
   WHERE EndTime = d_EndTime
     AND VOcorrid = n_VOcorrid
     AND ProbeName = n_Probename
     AND ApplicationExitCode = n_ApplicationExitCode
     AND Njobs <= 0;
 
-  -- Don't do anything for NodeSummary -- AT YOUR OWN RISK.
+  -- NodeSumary
+  select cdr into wantNodeSummary from SystemProplist
+    where car = 'gratia.database.wantNodeSummary';
+
+  if wantNodeSummary = '1' then
+    set mycpucount = 0;
+    set mybenchmarkscore = 0;
+    select BenchmarkScore, CPUCount
+      into mybenchmarkscore, mycpucount from CPUInfo
+      where n_HostDescription = CPUInfo.HostDescription;
+
+    set imax = datediff(n_EndTime, n_StartTime) + 1;
+    set newcpusystemtime = n_CpuSystemDuration / imax;
+    set newcpuusertime = n_CpuUserDuration / imax;
+    set counter = 0;
+    while counter < imax do
+      -- Calculate date for summary entry
+      set newdate = adddate(n_StartTime,counter);
+      -- Update
+      update NodeSummary
+      set CpuSystemTime = CpuSystemTime - newcpusystemtime,
+          CpuUserTime = CpuUserTime - newcpuusertime
+      where EndTime = d_EndTime
+        and Host = n_Host
+        and ProbeName = n_ProbeName
+        and ResourceType = n_ResourceType;
+
+      -- Clean up emptied rows
+      delete from NodeSummary
+      where EndTime = d_EndTime
+        and Host = n_Host
+        and ProbeName = n_ProbeName
+        and ResourceType = n_ResourceType
+        and CpuSystemTime <= 0
+        and CpuUserTime <= 0;
+
+      -- Update counter
+      set counter = counter + 1;
+    end while;
+  end if; -- wantNodeSummary
 
 END;
-||
-
-drop procedure if exists updatenodesummary 
-||
-create procedure updatenodesummary(enddate datetime,mynode varchar(255),
-	myprobename varchar(255),myresourcetype varchar(255),
-	mycpusystemtime int,mycpuusertime int,mycpucount int,
-	myhostdescription varchar(255),mybenchmarkscore int,mydaysinmonth int)
-begin
-	declare mycount int default 0;
-	select count(*) into mycount from NodeSummary
-		where EndTime = enddate
-		and Node = mynode
-    and ProbeName = myprobename
-		and ResourceType = myresourcetype;
-	if mycount = 0 then
---    insert into trace(eventtime,pname, p1, p2, p3, p4, p5, p6, p7, p8, p9, data)
---     values(date(enddate), 'trigger02', mynode,
---			myprobename,
---			myresourcetype,
---			mycpusystemtime,
---			mycpuusertime,
---			mycpucount,
---			myhostdescription,
---			mybenchmarkscore,
---			mydaysinmonth, 'New entry in NodeSummary');
-     
-		insert into NodeSummary(EndTime, Node, ProbeName, ResourceType,
-                                        CpuSystemTime, CpuUserTime,
-                                        CpuCount, HostDescription,
-                                        BenchmarkScore, DaysInMonth)
-                values( date(enddate),
-			mynode,
-			myprobename,
-			myresourcetype,
-			mycpusystemtime,
-			mycpuusertime,
-			mycpucount,
-			myhostdescription,
-			mybenchmarkscore,
-			mydaysinmonth);
-	else
---    insert into trace(eventtime,pname, p1, p2, p3, p4, p5, p6, p7, p8, p9, data)
---     values(date(enddate), 'trigger02', mynode,
---			myprobename,
---			myresourcetype,
---			mycpusystemtime,
---			mycpuusertime,
---			mycpucount,
---			myhostdescription,
---      mybenchmarkscore,
---      mydaysinmonth, 'Updating entry in NodeSummary');
-
-    update NodeSummary
-      set 
-        CpuSystemTime = CpuSystemTime + mycpusystemtime,
-        CpuUserTime = CpuUserTime + mycpuusertime
-      where
-        EndTime = enddate
-        and Node = mynode
-        and ProbeName = myprobename
-        and ResourceType = myresourcetype;
-  end if;
-end;
 ||
 
 -- Local Variables:

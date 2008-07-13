@@ -42,14 +42,14 @@ public class HibernateWrapper
       try
       {
          hibernateConfiguration = new org.hibernate.cfg.Configuration();
-         hibernateConfiguration.addFile(new File(net.sf.gratia.util.Configuration.getGratiaHbmPath()));
-         hibernateConfiguration.addFile(new File(net.sf.gratia.util.Configuration.getJobUsagePath()));
-         hibernateConfiguration.addFile(new File(net.sf.gratia.util.Configuration.getMetricRecordPath()));
-         hibernateConfiguration.addFile(new File(net.sf.gratia.util.Configuration.getJobUsageSummaryPath()));
-         hibernateConfiguration.addFile(new File(net.sf.gratia.util.Configuration.getTracePath()));
-         if (p.getProperty("gratia.database.wantNodeSummary", "0").equals("1")) { // Only if we want (eg PS accounting)
-             hibernateConfiguration.addFile(new File(net.sf.gratia.util.Configuration.getNodeSummaryPath()));
-         }
+         hibernateConfiguration.addDirectory(new File(net.sf.gratia.util.Configuration.getConfigurationPath()));
+//          hibernateConfiguration.addFile(new File(net.sf.gratia.util.Configuration.getGratiaHbmPath()));
+//          hibernateConfiguration.addFile(new File(net.sf.gratia.util.Configuration.getJobUsagePath()));
+//          hibernateConfiguration.addFile(new File(net.sf.gratia.util.Configuration.getMetricRecordPath()));
+//          hibernateConfiguration.addFile(new File(net.sf.gratia.util.Configuration.getJobUsageSummaryPath()));
+//          hibernateConfiguration.addFile(new File(net.sf.gratia.util.Configuration.getTracePath()));
+//          hibernateConfiguration.addFile(new File(net.sf.gratia.util.Configuration.getNodeSummaryPath()));
+
          hibernateConfiguration.configure(new File(net.sf.gratia.util.Configuration.getHibernatePath()));
 
          Properties hp = new Properties();
