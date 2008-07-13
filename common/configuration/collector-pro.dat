@@ -1,177 +1,201 @@
 (
- gratia => { http_port => 8880,
-             ssl_port => 8845,
-             rmi_port => 17000,
-             jmx_port => 8004,
-             server_port => 8104,
-             db_schema => "gratia",
-             remote_host => "gratia.opensciencegrid.org",
-             collector_host => "gratia.opensciencegrid.org",
-             max_perm_size => "256m",
-             max_heap_size => "1024m",
-             "properties.attributes" =>
-             {
-              "maintain.history.log" => 7,
-              "monitor.listener.wait" => 60,
-              "monitor.q.size" => 100000,
-              "service.listener.threads" => 1,
-              "service.admin.DN.0" => 'ALLOW ALL'
-             }
-           },
- fermi_osg => { http_port => 8880,
-                ssl_port => 8845,
-                rmi_port => 17000,
-                jmx_port => 8004,
-                server_port => 8104,
-                db_schema => "fermi_osg",
-                remote_host => "gratia-fermi.fnal.gov",
-                collector_host => "gratia-fermi.fnal.gov",
-                "properties.attributes" =>
-                {
-                 "monitor.listener.wait" => 1440,
-                 "service.admin.DN.0" => 'ALLOW ALL'
-                }
-              },
- itb => { http_port => 8881,
-          ssl_port => 8850,
-          rmi_port => 18000,
-          jmx_port => 8014,
-          server_port => 8114,
-          db_schema => "gratia_itb",
-          remote_host => "gratia.opensciencegrid.org",
-          collector_host => "gratia.opensciencegrid.org",
-          "properties.attributes" =>
-          {
-           "monitor.listener.wait" => 60,
-           "service.listener.threads" => 1,
-           "service.admin.DN.0" => 'ALLOW ALL'
-          }
-        },
- fermi_itb => { http_port => 8881,
-                ssl_port => 8850,
-                rmi_port => 18000,
-                jmx_port => 8014,
-                server_port => 8114,
-                db_schema => "fermi_itb",
-                remote_host => "gratia-fermi.fnal.gov",
-                collector_host => "gratia-fermi.fnal.gov",
-                "properties.attributes" =>
-                {
-                 "monitor.listener.wait" => 1440,
-                 "service.admin.DN.0" => 'ALLOW ALL'
-                }
-              },
- ps => { http_port => 8882,
-         ssl_port => 8855,
-         rmi_port => 19000,
-         jmx_port => 8024,
-         server_port => 8124,
-         db_schema => "gratia_psacct",
-         UserConfig => "UserConfig_pacct.xml",
-         remote_host => "gratia-fermi.fnal.gov",
-         collector_host => "gratia-fermi.fnal.gov",
-         "properties.attributes" =>
-         {
-            "gratia.database.useJobUsageSiteName" => 1,
-            "gratia.database.wantNodeSummary" => 1,
-            "service.admin.DN.0" => 'ALLOW ALL'
-         },
-       },
- qcd => { http_port => 8883,
-          ssl_port => 8865,
-          rmi_port => 21000,
-          jmx_port => 8040,
-          server_port => 8144,
-          db_schema => "gratia_qcd",
-          remote_host => "gratia-fermi.fnal.gov",
-          collector_host => "gratia-fermi.fnal.gov",
-         "properties.attributes" =>
-          {
-            "service.admin.DN.0" => 'ALLOW ALL'
-          }
-        },
- osg_daily => { http_port => 8884,
-                ssl_port => 8860,
-                rmi_port => 20000,
-                jmx_port => 8034,
-                server_port => 8134,
-                db_schema => "gratia_osg_daily",
-                UserConfig => "UserConfig_osg_daily.xml",
-                PostInstallCmdPreamble => '[[ "$action" == *"stored"* ]] || continue',
-                "properties.attributes" =>
-                { "monitor.listener.wait" => 1440,
-                  "gratia.database.wantSummaryTable" => 0,
-                  "gratia.database.wantSummaryTrigger" => 0,
-                  "gratia.database.useJobUsageSiteName" => 1,
-                  "service.admin.DN.0" => 'ALLOW ALL'
-                },
-                remote_host => "gratia.opensciencegrid.org",
-                collector_host => "gratia.opensciencegrid.org"
-              },
- osg_integration => { http_port => 8885,
-                      ssl_port => 8870,
-                      rmi_port => 21000,
-                      jmx_port => 8044,
-                      server_port => 8144,
-                      db_schema => "gratia_osg_integration",
-                      remote_host => "gratia.opensciencegrid.org",
-                      collector_host => "gratia.opensciencegrid.org",
-                      "properties.attributes" =>
-                      {
-                       "monitor.listener.wait" => 60,
-                       "service.listener.threads" => 1,
-                       "service.admin.DN.0" => 'ALLOW ALL'
-                      }
-                    },
- osg_transfer => { http_port => 8886,
-                   ssl_port => 8840,
-                   rmi_port => 22000,
-                   jmx_port => 8054,
-                   server_port => 8154,
-                   db_schema => "gratia_osg_transfer",
-                   remote_host => "gratia.opensciencegrid.org",
-                   collector_host => "gratia.opensciencegrid.org",
-                   "properties.attributes" =>
-                   {
-                    "monitor.listener.wait" => 240,
-                    "service.listener.threads" => 1,
-                    "service.admin.DN.0" => 'ALLOW ALL'
-                   }
-                 },
- fermi_transfer => { http_port => 8886,
-                     ssl_port => 8840,
-                     rmi_port => 22000,
-                     jmx_port => 8054,
-                     server_port => 8154,
-                     db_schema => "fermi_transfer",
-                     remote_host => "gratia-fermi.fnal.gov",
-                     collector_host => "gratia-fermi.fnal.gov",
-                     "properties.attributes" =>
-                     {
-                      "monitor.listener.wait" => 240,
-                      "service.listener.threads" => 1,
-                      "service.admin.DN.0" => 'ALLOW ALL'
-                     }
-                   },
- conversion => { http_port => 8884,
-                 ssl_port => 8860,
-                 rmi_port => 20000,
-                 jmx_port => 8034,
-                 server_port => 8134,
-                 db_schema => "gratiaXXX", # CHANGEME
-                 db_host => "example.com", # CHANGEME
-                 db_port => "65537", # CHANGEME
-                 remote_host => "gratia-fermi.fnal.gov",
-                 collector_host => "gratia-fermi.fnal.gov",
-                 max_perm_size => "256m",
-                 max_heap_size => "1024m",
-                 "properties.attributes" =>
-                 {
-                  "maintain.history.log" => 7,
-                  "monitor.listener.wait" => 60,
-                  "service.admin.DN.0" => 'ALLOW ALL'
-                 }
-               }
+ gratia =>
+ { http_port => 8880,
+   ssl_port => 8845,
+   rmi_port => 17000,
+   jmx_port => 8004,
+   server_port => 8104,
+   db_schema => "gratia",
+   remote_host => "gratia.opensciencegrid.org",
+   collector_host => "gratia.opensciencegrid.org",
+   max_perm_size => "256m",
+   max_heap_size => "1024m",
+   "properties.attributes" =>
+   {
+    "maintain.history.log" => 7,
+    "monitor.listener.wait" => 60,
+    "monitor.q.size" => 100000,
+    "service.listener.threads" => 1,
+    "service.lifetime.JobUsageRecord" => "3 months",
+    "service.lifetime.MetricRecord" => "1 month",
+    "service.admin.DN.0" => 'ALLOW ALL'
+   }
+ },
+ fermi_osg =>
+ { http_port => 8880,
+   ssl_port => 8845,
+   rmi_port => 17000,
+   jmx_port => 8004,
+   server_port => 8104,
+   db_schema => "fermi_osg",
+   remote_host => "gratia-fermi.fnal.gov",
+   collector_host => "gratia-fermi.fnal.gov",
+   "properties.attributes" =>
+   {
+    "service.lifetime.JobUsageRecord" => "1 year", # Safety
+    "service.lifetime.MetricRecord" => "1 month",
+    "monitor.listener.wait" => 1440,
+    "service.admin.DN.0" => 'ALLOW ALL'
+   }
+ },
+ itb =>
+ { http_port => 8881,
+   ssl_port => 8850,
+   rmi_port => 18000,
+   jmx_port => 8014,
+   server_port => 8114,
+   db_schema => "gratia_itb",
+   remote_host => "gratia.opensciencegrid.org",
+   collector_host => "gratia.opensciencegrid.org",
+   "properties.attributes" =>
+   {
+    "service.lifetime.JobUsageRecord" => "1 year",
+    "monitor.listener.wait" => 60,
+    "service.listener.threads" => 1,
+    "service.admin.DN.0" => 'ALLOW ALL'
+   }
+ },
+ fermi_itb =>
+ { http_port => 8881,
+   ssl_port => 8850,
+   rmi_port => 18000,
+   jmx_port => 8014,
+   server_port => 8114,
+   db_schema => "fermi_itb",
+   remote_host => "gratia-fermi.fnal.gov",
+   collector_host => "gratia-fermi.fnal.gov",
+   "properties.attributes" =>
+   {
+    "service.lifetime.JobUsageRecord" => "1 year",
+    "monitor.listener.wait" => 1440,
+    "service.admin.DN.0" => 'ALLOW ALL'
+   }
+ },
+ ps =>
+ { http_port => 8882,
+   ssl_port => 8855,
+   rmi_port => 19000,
+   jmx_port => 8024,
+   server_port => 8124,
+   db_schema => "gratia_psacct",
+   UserConfig => "UserConfig_pacct.xml",
+   remote_host => "gratia-fermi.fnal.gov",
+   collector_host => "gratia-fermi.fnal.gov",
+   "properties.attributes" =>
+   {
+    "gratia.database.useJobUsageSiteName" => 1,
+    "gratia.database.wantNodeSummary" => 1,
+    "service.admin.DN.0" => 'ALLOW ALL'
+   },
+ },
+ qcd =>
+ { http_port => 8883,
+   ssl_port => 8865,
+   rmi_port => 21000,
+   jmx_port => 8040,
+   server_port => 8144,
+   db_schema => "gratia_qcd",
+   remote_host => "gratia-fermi.fnal.gov",
+   collector_host => "gratia-fermi.fnal.gov",
+   "properties.attributes" =>
+   {
+    "service.lifetime.JobUsageRecord" => "UNLIMITED",
+    "service.admin.DN.0" => 'ALLOW ALL'
+   }
+ },
+ osg_daily =>
+ { http_port => 8884,
+   ssl_port => 8860,
+   rmi_port => 20000,
+   jmx_port => 8034,
+   server_port => 8134,
+   db_schema => "gratia_osg_daily",
+   UserConfig => "UserConfig_osg_daily.xml",
+   PostInstallCmdPreamble => '[[ "$action" == *"stored"* ]] || continue',
+   "properties.attributes" =>
+   {
+    "service.lifetime.JobUsageRecord" => "UNLIMITED", # Very low volume
+    "monitor.listener.wait" => 1440,
+    "gratia.database.wantSummaryTable" => 0,
+    "gratia.database.wantSummaryTrigger" => 0,
+    "gratia.database.useJobUsageSiteName" => 1,
+    "service.admin.DN.0" => 'ALLOW ALL'
+   },
+   remote_host => "gratia.opensciencegrid.org",
+   collector_host => "gratia.opensciencegrid.org"
+ },
+ osg_integration =>
+ { http_port => 8885,
+   ssl_port => 8870,
+   rmi_port => 21000,
+   jmx_port => 8044,
+   server_port => 8144,
+   db_schema => "gratia_osg_integration",
+   remote_host => "gratia.opensciencegrid.org",
+   collector_host => "gratia.opensciencegrid.org",
+   "properties.attributes" =>
+   {
+    "service.lifetime.JobUsageRecord" => "1 year",
+    "monitor.listener.wait" => 60,
+    "service.listener.threads" => 1,
+    "service.admin.DN.0" => 'ALLOW ALL'
+   }
+ },
+ osg_transfer =>
+ { http_port => 8886,
+   ssl_port => 8840,
+   rmi_port => 22000,
+   jmx_port => 8054,
+   server_port => 8154,
+   db_schema => "gratia_osg_transfer",
+   remote_host => "gratia.opensciencegrid.org",
+   collector_host => "gratia.opensciencegrid.org",
+   "properties.attributes" =>
+   {
+    "service.lifetime.JobUsageRecord" => "1 year", # Not yet settled?
+    "monitor.listener.wait" => 240,
+    "service.listener.threads" => 1,
+    "service.admin.DN.0" => 'ALLOW ALL'
+   }
+ },
+ fermi_transfer =>
+ { http_port => 8886,
+   ssl_port => 8840,
+   rmi_port => 22000,
+   jmx_port => 8054,
+   server_port => 8154,
+   db_schema => "fermi_transfer",
+   remote_host => "gratia-fermi.fnal.gov",
+   collector_host => "gratia-fermi.fnal.gov",
+   "properties.attributes" =>
+   {
+    "service.lifetime.JobUsageRecord" => "1 year",
+    "monitor.listener.wait" => 240,
+    "service.listener.threads" => 1,
+    "service.admin.DN.0" => 'ALLOW ALL'
+   }
+ },
+ conversion =>
+ { http_port => 8884,
+   ssl_port => 8860,
+   rmi_port => 20000,
+   jmx_port => 8034,
+   server_port => 8134,
+   db_schema => "gratiaXXX",    # CHANGEME
+   db_host => "example.com",    # CHANGEME
+   db_port => "65537",          # CHANGEME
+   remote_host => "gratia-fermi.fnal.gov",
+   collector_host => "gratia-fermi.fnal.gov",
+   max_perm_size => "256m",
+   max_heap_size => "1024m",
+   "properties.attributes" =>
+   {
+    "service.lifetime.JobUsageRecord" => "UNLIMITED", # Safety
+    "maintain.history.log" => 7,
+    "monitor.listener.wait" => 60,
+    "service.admin.DN.0" => 'ALLOW ALL'
+   }
+ }
 );
 
 ### Local Variables:
