@@ -1,5 +1,9 @@
 DELIMITER ||
 
+DROP TABLE IF EXISTS ProbeStatus -- Obsolete summary table
+||
+DROP PROCEDURE IF EXISTS updatenodesummary -- Obsolete summary procedure
+||
 DROP PROCEDURE IF EXISTS add_JUR_to_summary
 ||
 CREATE PROCEDURE add_JUR_to_summary(inputDbid INT(11))
