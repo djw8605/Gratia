@@ -133,7 +133,7 @@ function cvs_checkout_gratia {
   logit "==== cvs_checkout_gratia - $(date) ==="
   export CVSROOT=":pserver:anonymous@gratia.cvs.sourceforge.net:2401/cvsroot/gratia"
   cd $build_dir
-  cmd="$cvs export -d $(basename $nightly_dir) -D $DATE gratia"
+  cmd="$cvs export -d $(basename $nightly_dir) -r HEAD gratia"
   runit "$cmd"
 }
 # -------------------------------
