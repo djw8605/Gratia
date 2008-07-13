@@ -37,10 +37,10 @@ import org.hibernate.exception.*;
 public class DatabaseMaintenance {
     static final String dq = "\"";
     static final String comma = ",";
-    static final int gratiaDatabaseVersion = 40;
+    static final int gratiaDatabaseVersion = 41;
     static final int latestDBVersionRequiringStoredProcedureLoad = gratiaDatabaseVersion;
     static final int latestDBVersionRequiringSummaryViewLoad = 37;
-    static final int latestDBVersionRequiringSummaryTriggerLoad = 40;
+    static final int latestDBVersionRequiringSummaryTriggerLoad = 41;
     static final int latestDBVersionRequiringTableStatisticsRefresh = 38;
 
     static boolean dbUseJobUsageSiteName = false;
@@ -106,13 +106,13 @@ public class DatabaseMaintenance {
     }
     
     public void AddIndex(String table, Boolean unique, String name,
-                         String content) {
+                         String content) throws Exception {
 
         AddIndex(table,unique,name,content,false);
     }
 
     public void AddIndex(String table, Boolean unique, String name,
-                         String content, Boolean avoidDuplicateIndex) {
+                         String content, Boolean avoidDuplicateIndex) throws Exception {
         Statement statement;
         ResultSet resultSet;
 
@@ -156,10 +156,11 @@ public class DatabaseMaintenance {
 
         } catch (Exception e) {
             Logging.log("Command: Error: " + cmd + " : " + e);
+            throw e;
         }
     }
 
-    public void DropIndex(String table, String name) {
+    public void DropIndex(String table, String name) throws Exception {
         Statement statement;
         ResultSet resultSet;
 
@@ -181,6 +182,7 @@ public class DatabaseMaintenance {
             statement.close();
         } catch (Exception e) {
             Logging.log("Command: Error: " + cmd + " : " + e);
+            throw e;
         }
     }
 
@@ -1145,10 +1147,10 @@ public class DatabaseMaintenance {
                 }         
                 // Also auxiliary DB item upgrades (trigger and friends)
             }
-            if (current == 39) {
+            if (current == 39 || current == 40) {
                 // Auxiliary DB item upgrades only (trigger and friends)
-                Logging.log("Gratia database upgraded from " + current + " to " + (current + 1));
-                current = current + 1;
+                Logging.log("Gratia database upgraded from " + current + " to 41");
+                current = 41;
                 UpdateDbVersion(current);
             }                
             
