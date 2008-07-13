@@ -98,7 +98,14 @@ public class StatusUpdater
           if (result.size() == 0) {
               // We need a new Probe object
               probe = new Probe(probeName);
-              site = getSite(session, record.getSiteName().getValue());
+              String siteName;
+              try {
+                  siteName = record.getSiteName().getValue();
+              }
+              catch (NullPointerException e) {
+                  siteName = "Unknown";
+              }
+              site = getSite(session, siteName);
               probe.setsite(site);
               probe.setactive(1);
 
