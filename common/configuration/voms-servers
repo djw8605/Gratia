@@ -19,4 +19,4 @@
 # Having extra entries in the file does no harm.
 ############################################################################
 #
-
+fermilab=https://voms.fnal.gov:8443/voms/fermilab
