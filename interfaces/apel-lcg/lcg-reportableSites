@@ -171,8 +171,14 @@
 #             MWT2_UC             1935   previously 1521
 #             Purdue-RCAC         2338   previously 1756
 #             Purdue-Steele       2529   previously 1756
-#
-#
+#   7/14/08 (Karthik Arunachalam)
+#           Updates based on https://t2.unl.edu/gratia/wlcg_reporting#sitenorm
+#           GIP data.
+#            CIT_CMS_T2           2354   previously 2393
+#            UCSDT2               2497   previously 2023
+#            BNL_ATLAS_1          1593   previously 1393
+#	     Purdue-Lear          1285   Removed (Taken out of service)
+#    
 #    
 ##################################################################
 #-- Site  ------- SPECint2000
@@ -180,14 +186,13 @@
 #--- CMS Tier 1 ----    
 USCMS-FNAL-WC1-CE   1809  
 #--- CMS Tier 2 ----    
-CIT_CMS_T2          2393       
+CIT_CMS_T2          2354       
 GLOW                2108
 MIT_CMS             1364
 Nebraska            1571
-Purdue-Lear         1285
 Purdue-RCAC         2338
 Purdue-Steele       2529
-UCSDT2              2023
+UCSDT2              2497
 UFlorida-HPC        1521
 UFlorida-IHEPA      1521
 UFlorida-PG         1535
@@ -197,7 +202,7 @@ UFlorida-PG         1535
 ####################################
 ####################################
 #--- ATLAS Tier 1 ----
-BNL_ATLAS_1         1393
+BNL_ATLAS_1         1593
 #--- ATLAS Tier 2 ----
 AGLT2               2698
 BU_ATLAS_Tier2      2022
@@ -223,3 +228,4 @@ UTA_SWT2            1543
 ##BU_ATLAS_Tier2o     1624
 ##IU_ATLAS_Tier2       921
 ##UTA_DPCC             915
+##Purdue-Lear         1285
