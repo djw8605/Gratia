@@ -27,7 +27,9 @@ my @required_attributes =
 	 'rmi_port',
 	 'jmx_port',
 	 'db_schema',
-	 'UserConfig'
+	 'UserConfig',
+         'sslCAFiles',
+         'crlFiles'
 	);
 
 my @required_properties = ();
@@ -45,7 +47,8 @@ my %attribute_defaults =
 	 PostInstallCmdSuffix => "",
          host_cert => "/etc/grid-security/hostcert.pem",
          host_key => "/etc/grid-security/hostkey.pem",
-
+         sslCAFiles => "/etc/grid-security/certificates/*.0",
+         crlFiles => "/etc/grid-security/certificates/*.r0",
 	 "properties.attributes" =>
 	 { "service.rmi.service" => "/gratia",
            "use.report.authentication" => "true",
@@ -585,8 +588,8 @@ EOF
                scheme="https"
                secure="true"
                sSLImplementation="org.glite.security.trustmanager.tomcat.TMSSLImplementation"
-               sslCAFiles="/etc/grid-security/certificates/*.0"
-               crlFiles="/etc/grid-security/certificates/*.r0"
+               sslCAFiles="$collector_config->{sslCAFiles}"
+               crlFiles="$collector_config->{crlFiles}"
                sslCertFile="$collector_config->{host_cert}"
                sslKey="$collector_config->{host_key}"
                log4jConfFile="$options{prefix}/tomcat-${instance_name}/conf/log4j-trustmanager.properties"
