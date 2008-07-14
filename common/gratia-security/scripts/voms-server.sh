@@ -16,7 +16,7 @@
 #
 ##########################################################################
 function usage {
-   echo "Usage: $PGM -t TOMCAT_LOCATION <-s EDG_MKGRIDMAP> <-h> <-e>
+   echo "Usage: $PGM -t TOMCAT_LOCATION <-s EDG_MKGRIDMAP> <-h> <-e> [<vo> ...]
 
     -t - the top level tomcat location specifying where the
          TOMCAT_LOCATION/gratia directory is located.
@@ -33,6 +33,8 @@ function usage {
    login process when FQAN/DN authorizations are used.  The format of the
    file is:
       VO=VOMS_SERVER_URL
+
+If <vo>s are specified, then only these VOs shall be entered into voms-servers.
 "   
 }
 #--------------
@@ -44,20 +46,39 @@ function logerr {
   logit "ERROR: $1";exit 1
 }
 
+
+function add_vo_line {
+  [[ -n "$1" ]] && conditional='if (vo == "'"$1"'") '
+  awk '{ 
+       url=""
+       if ( $2 == "USER-VO-MAP" )  { vo=$3;next }
+       if ( $1 == "group" )  { 
+         sub(/vomss:/,"",$2)
+         url=$2 
+         '"$conditional"'printf "%s=https:%s\n",vo,url
+     }
+  }' $tmpVOMS  |sort -u >>$outfile
+}
 #### MAIN ################################################################
 PGM=$(basename $0)
 
 osgVOMS=http://software.grid.iu.edu/pacman/tarballs/vo-version/edg-mkgridmap.osg
-tmpVOMS=/tmp/$PGM.tmp
+tmpVOMS=`mktemp ${TMPDIR:-/tmp}/voms-server.sh.XXXXXXXXXX`
+if [[ -z "$tmpVOMS" ]]; then
+  logerr "Error getting temporary file"
+fi
+
+trap "[[ -n \"$tmpVOMS\" ]] && rm \"$tmpVOMS\" 2>/dev/null" EXIT
+
 gratiaVOMS=voms-servers
 TOMCAT_LOCATION=""
 help=n
 empty=n
 
 #---- verify root ----
-if [ "`id -u`" != "0" ];then
-  logerr "You must be root to use this command"
-fi
+#if [ "`id -u`" != "0" ];then
+#  logerr "You must be root to use this command"
+#fi
 
 #---- validate command line ----
 while getopts t:s:he a
@@ -137,18 +158,12 @@ if [ "$empty" = "y" ];then
   exit 0
 fi
 
-awk '{ 
-     url=""
-     if ( $2 == "USER-VO-MAP" )  { vo=$3;next }
-     if ( $1 == "group" )  { 
-       sub(/vomss:/,"",$2)
-       url=$2 
-       printf "%s=https:%s\n",vo,url
-     }
-  }' $tmpVOMS  |sort -u >>$outfile
-
-rm -f $tmpVOMS
+if [[ -n "$*" ]]; then
+  for wanted_vo in "$@"; do
+    add_vo_line "$wanted_vo"
+  done
+else
+  add_vo_line
+fi
 
 exit 0
-
-
