@@ -183,20 +183,34 @@ public class CollectorService implements ServletContextListener {
                 return;
             }
          
-         
+            Logging.info("CollectorService: doing initial cleanup");
             checker.InitialCleanup();
          
             //
             // start database
             //
 
+            Logging.info("CollectorService: starting Hibernate");
             HibernateWrapper.start();
+
+            // Verify defaults.
+            Logging.info("CollectorService: checking defaults in DB");
+            checker.AddDefaults();
+
+            // Verify indexes.
+            try {
+                Logging.info("CollectorService: checking indexes on DB tables");
+                checker.CheckIndices();
+            }
+            catch (Exception e) {
+                Logging.warning("CollectorService: error while checking indexes.");
+                Logging.warning("CollectorService: manual correction required");
+            }
 
             //
             // Upgrade the database
             // 
-
-            checker.CheckIndices();
+            Logging.info("CollectorService: check / upgrade schema to current version");
             if (!checker.Upgrade()) {
                 // The database has not been upgraded correctly.
                 Logging.warning("CollectorService: The database schema was not upgraded properly.");
@@ -208,7 +222,7 @@ public class CollectorService implements ServletContextListener {
             // zap database
             //
 
-            checker.AddDefaults();
+            Logging.info("CollectorService: refreshing views");
             checker.AddViews();
 
             //
