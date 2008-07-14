@@ -1064,40 +1064,36 @@ FROM (SELECT @rank:=@rank+1 as final_rank,
          VONamex,
          cpuuserdurationx
       FROM (SELECT @rank:=0 as rank,
-               VO.VOName as VONamex,
-               endtimex,
-               sum(V.cpuuserdurationx) as cpuuserdurationx
-            FROM (SELECT VOCorrid as VOCorridx,
-                     EndTime as endtimex,
-                     sum(CpuUserDuration) as cpuuserdurationx 
-                  FROM VOProbeSummary
-                  WHERE Date(EndTime) >= ?
-                     and Date(EndTime) &lt;= ?
-                     and ResourceType = 'RawCPU'
-                     and SiteName = ?
-                  GROUP by VOCorrid
-                 ) 
-                  V,VONameCorrection Corr,VO
-            WHERE V.VOCorridx = Corr.corrid and Corr.VOid = VO.VOid
+            VOName as VONamex,
+            date(EndTime) as EndTime,
+            sum(cpuuserduration) as cpuuserdurationx
+            FROM VOProbeSummary V
+                 join Probe P on (V.ProbeName = P.probename)
+                 join Site S on (P.siteid = S.siteid)
+            WHERE EndTime >= ?
+              and EndTime &lt;= ?
+              and ResourceType = 'RawCPU'
+              and SiteName = ?
             GROUP BY VONamex
             ORDER BY cpuuserdurationx desc
            ) as foox
      ) as foo,
      ( SELECT EndTime,
           VOName,
-          sum(VOProbeSummary.WallDuration) as WallDuration,
-          sum(VOProbeSummary.CpuUserDuration + VOProbeSummary.CpuSystemDuration) as Cpu,
-          sum(VOProbeSummary.CpuUserDuration) as CpuUser,
-          sum(VOProbeSummary.CpuSystemDuration) as CpuSystem,
-          sum(VOProbeSummary.Njobs) as Njobs,
-          date_format(VOProbeSummary.EndTime,'%Y-%U') as datevalue
-       FROM VOProbeSummary, Site S, Probe P 
-       WHERE VOProbeSummary.ProbeName = P.probename and P.siteid = S.Siteid
-          and Date(EndTime) >= ?
-          and Date(EndTime) &lt;= ?
-          and ResourceType = 'RawCPU'
-          and S.SiteName = ?
-       GROUP by datevalue, VOProbeSummary.VOName 
+          sum(WallDuration) as WallDuration,
+          sum(CpuUserDuration + CpuSystemDuration) as Cpu,
+          sum(CpuUserDuration) as CpuUser,
+          sum(CpuSystemDuration) as CpuSystem,
+          sum(Njobs) as Njobs,
+          date_format(EndTime,'%Y-%U') as datevalue
+       FROM VOProbeSummary V
+            join Probe P on (V.ProbeName = P.probename)
+            join Site S on (P.siteid = S.siteid)
+       WHERE EndTime >= ?
+         and EndTime &lt;= ?
+         and ResourceType = 'RawCPU'
+         and SiteName = ?
+       GROUP by datevalue, VOName 
      ) as VOProbeSummary
 WHERE VOProbeSummary.VOName = foo.VONamex
 GROUP BY datevalue, VOProbeSummary.VOName
