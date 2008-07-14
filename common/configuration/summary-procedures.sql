@@ -34,7 +34,6 @@ AJUR:BEGIN
   DECLARE newdate DATETIME;
   DECLARE newcpusystemtime INT DEFAULT 0;
   DECLARE newcpuusertime INT DEFAULT 0;
-  DECLARE numberofdays INT DEFAULT 0;
   DECLARE imax INT DEFAULT 0;
 
   -- Data collection
@@ -166,6 +165,12 @@ AJUR:BEGIN
     while counter < imax do
       -- Calculate date for summary entry
       set newdate = adddate(n_StartTime,counter);
+--      insert into trace(eventtime, pname, p1, p2, p3, p4, p5, p6, p7, p8, p9, data)
+--        values(n_EndTime, 'add_JUR_to_summary',
+--               date(newdate), n_Host, n_ProbeName, n_ResourceType,
+--               newcpusystemtime, newcpuusertime, mycpucount,
+--               n_HostDescription, mybenchmarkscore,
+--               'Insert / Update NodeSummary');
       -- Insert / update
       insert into NodeSummary
         (EndTime, Node, ProbeName, ResourceType,
@@ -217,7 +222,6 @@ DJUR:BEGIN
   DECLARE newdate DATETIME;
   DECLARE newcpusystemtime INT DEFAULT 0;
   DECLARE newcpuusertime INT DEFAULT 0;
-  DECLARE numberofdays INT DEFAULT 0;
   DECLARE imax INT DEFAULT 0;
 
   -- Data collection
