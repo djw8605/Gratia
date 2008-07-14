@@ -725,28 +725,28 @@ order by date_format(V.EndTime, ?)</property>
     </Triggers>
   </Block>
   <Dimension>Two_Dimensional</Dimension>
-  <Script>/**
- * Called before generation of chart model to GeneratedChartState.
- * 
- * @param chart
- *            Chart
- * @param icsc
- *            IChartScriptContext
- */
-
-function beforeGeneration(chart, icsc)
-{
-	rep = icsc.getExternalContext().getScriptable();
-	
-	metric = rep.getParameterValue(&quot;DisplayMetric&quot;);
-	if(metric==&quot;process&quot;) metric_text = &quot;Process Hours&quot;;
-	if(metric==&quot;wallclock&quot;) metric_text = &quot;Wallclock Hours&quot;;
-	if(metric==&quot;cpuuser&quot;) metric_text = &quot;User Hours&quot;;
-	if(metric==&quot;cpusystem&quot;) metric_text = &quot;System Hours&quot;;
-	
-	rep_title = rep.getParameterValue(&quot;ReportTitle&quot;) + &quot; (&quot; + metric_text + &quot;)&quot; ;
-	rep_subtitle = rep.getParameterValue(&quot;ReportSubtitle&quot;);
-	chart.getTitle().getLabel().getCaption().setValue(rep_title + &quot;\n&quot; + rep_subtitle);
+  <Script>/**&#xD;
+ * Called before generation of chart model to GeneratedChartState.&#xD;
+ * &#xD;
+ * @param chart&#xD;
+ *            Chart&#xD;
+ * @param icsc&#xD;
+ *            IChartScriptContext&#xD;
+ */&#xD;
+&#xD;
+function beforeGeneration(chart, icsc)&#xD;
+{&#xD;
+	rep = icsc.getExternalContext().getScriptable();&#xD;
+	&#xD;
+	metric = rep.getParameterValue(&quot;DisplayMetric&quot;);&#xD;
+	if(metric==&quot;process&quot;) metric_text = &quot;Process Hours&quot;;&#xD;
+	if(metric==&quot;wallclock&quot;) metric_text = &quot;Wallclock Hours&quot;;&#xD;
+	if(metric==&quot;cpuuser&quot;) metric_text = &quot;User Hours&quot;;&#xD;
+	if(metric==&quot;cpusystem&quot;) metric_text = &quot;System Hours&quot;;&#xD;
+	&#xD;
+	rep_title = rep.getParameterValue(&quot;ReportTitle&quot;) + &quot; (&quot; + metric_text + &quot;)&quot; ;&#xD;
+	rep_subtitle = rep.getParameterValue(&quot;ReportSubtitle&quot;);&#xD;
+	chart.getTitle().getLabel().getCaption().setValue(rep_title + &quot;\n&quot; + rep_subtitle);&#xD;
 }</Script>
   <Units>Points</Units>
   <SeriesThickness>10.0</SeriesThickness>
@@ -1386,8 +1386,6 @@ MM/dd/yyyy
             </list-property>
             <property name="style">sans-style1</property>
         </extended-item>
-        <label name="ReportURL" id="393" extends="gratia-lib1.ReportURL">
-            <property name="eventHandlerClass">net.sf.gratia.reporting.GratiaBirtReportEH</property>
-        </label>
+        <label name="ReportURL" id="393" extends="gratia-lib1.ReportURL"/>
     </body>
 </report>
