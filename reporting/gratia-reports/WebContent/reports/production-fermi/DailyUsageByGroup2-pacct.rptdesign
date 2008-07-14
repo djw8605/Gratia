@@ -819,7 +819,7 @@ else {&#xD;
     &lt;property name=&quot;formatType&quot;>html&lt;/property>
     &lt;property name=&quot;linkType&quot;>drill-through&lt;/property>
     &lt;property name=&quot;reportName&quot;>DailyUsageByGroup2a-pacct.rptdesign&lt;/property>
-    &lt;property name=&quot;targetWindow&quot;>_blank&lt;/property>
+    &lt;property name=&quot;targetWindow&quot;>_self&lt;/property>
     &lt;property name=&quot;targetFileType&quot;>report-design&lt;/property>
     &lt;list-property name=&quot;paramBindings&quot;>
         &lt;structure>
@@ -1213,7 +1213,7 @@ MM/dd/yyyy
 ]]></xml-property>
             <property name="outputFormat">SVG</property>
             <structure name="action">
-                <property name="targetWindow">_blank</property>
+                <property name="targetWindow">_self</property>
                 <property name="linkType">drill-through</property>
                 <property name="formatType">html</property>
                 <property name="targetFileType">report-design</property>
