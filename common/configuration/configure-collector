@@ -69,6 +69,8 @@ my %attribute_defaults =
            "monitor.subject" => \&construct_monitor_message_subject,
            "service.rmiservlet.console" => 0,
            "service.security.console" => 0,
+           "service.vdt.cert.file" => "/etc/grid-security/http/httpcert.pem",
+           "service.vdt.key.file" => "/etc/grid-security/http/httpkey.pem",
            "service.listener.threads" => 1,
            "service.lifetime.JobUsageRecord" => "1 year", # May wish to dencrease
            "service.lifetime.JobUsageRecord.RawXML" => "1 month",
@@ -268,14 +270,13 @@ foreach my $config (@instance_list) {
   next if $requirements_error;
 
   # Configuration operations.
-  configure_keyfile_owner($config, $config_ref);
+  configure_keyfile_owners($config, $config_ref);
   configure_collector_config($config, $config_ref);
   configure_init_file($config, $config_ref);
   configure_tomcat_config($config, $config_ref);
   configure_tomcat_users($config, $config_ref);
   configure_log4j_properties($config, $config_ref) if $options{"use-ssl"};
   configure_static_report_generation($config, $config_ref);
-
 
   if (exists $options{"db-root"}) {
     configure_post_install($config, $config_ref);
@@ -451,37 +452,60 @@ sub configure_collector_config {
 	system("mv -bv \"$config_file\" \"$orig_config\"");
 }
 
-sub configure_keyfile_owner {
+sub configure_keyfile_owners {
   my ($instance_name, $collector_config) = @_;
+  configure_host_keyfile_owner($instance_name, $collector_config);
+  configure_http_keyfile_owner($instance_name, $collector_config);
+}
+
+sub configure_host_keyfile_owner {
+  my ($instance_name, $collector_config) = @_;
+  return unless exists $collector_config->{"host_key"};
+  configure_keyfile_owner($instance_name, $collector_config,
+                          "configuration attribute host_key",
+                          \$collector_config->{"host_key"});
+}
+
+sub configure_http_keyfile_owner {
+  my ($instance_name, $collector_config) = @_;
+  return unless exists $collector_config->{"properties.attributes"}->{"service.vdt.key.file"};
+  configure_keyfile_owner($instance_name, $collector_config,
+                          "service-configuration.properties attribute service.vdt.key.file",
+                          \$collector_config->{"properties.attributes"}->{"service.vdt.key.file"});
+}
+
+sub configure_keyfile_owner {
+  my ($instance_name, $collector_config, $key_message, $key_ref) = @_;
   if (exists $collector_config->{"tomcat_user"}) {
-    print STDERR "TOMCAT_USER specified as ",
-      $collector_config->{"tomcat_user"},
-        ": verifying readable copy of host key ...\n";
-    if ($collector_config->{"host_key"} and -e $collector_config->{"host_key"}) {
-      my (@temp) = stat($collector_config->{"host_key"});
+    if ($$key_ref and -e $$key_ref) {
+      print STDERR "TOMCAT_USER specified as ",
+        $collector_config->{"tomcat_user"},
+          ": verifying readable copy of key at $$key_ref for $key_message ...\n";
+      my (@temp) = stat($$key_ref);
       @temp = getpwuid($temp[4]);
       my $user = $temp[0];
-      print STDERR "DEBUG: Extracted user name $user as owner of $collector_config->{\"host_key\"}\n";
+      print STDERR "DEBUG: Extracted user name $user as owner of $$key_ref\n";
       if ($user ne
           $collector_config->{"tomcat_user"}) {
-        print STDERR "Producing copy of key file readable by $collector_config->{\"host_key\"} ...\n";
-        my ($path, $basename, $ext) = ($collector_config->{"host_key"} =~ m&^(.*/)?([^\.]*)(.*)$&);
+        print STDERR "Producing copy of key file readable by $$key_ref ...\n";
+        my ($path, $basename, $ext) = ($$key_ref =~ m&^(.*/)?([^\.]*)(.*)$&);
         $path = "" unless defined $path;
         $basename = "" unless defined $basename;
         $ext = "" unless defined $ext;
-        print STDERR "DEBUG: deconstructed $collector_config->{\"host_key\"} to ($path, $basename, $ext).\n";
+        print STDERR "DEBUG: deconstructed $$key_ref to ($path, $basename, $ext).\n";
         $basename = "$basename-$collector_config->{\"tomcat_user\"}";
-        if (system("install -o $collector_config->{\"tomcat_user\"} -m 600 \"$collector_config->{\"host_key\"}\" \"$path$basename$ext\"") == 0) {
-          print STDERR "Successfully copied \"$collector_config->{\"host_key\"}\" to \"$path$basename$ext\"\n";
-          $collector_config->{"host_key"} = "$path$basename$ext";
+        my $orig_key = $$key_ref;
+        $$key_ref = "$path$basename$ext";
+        if (system("install -o $collector_config->{\"tomcat_user\"} -m 600 \"$orig_key\" \"$$key_ref\"") == 0) {
+          print STDERR "Successfully copied \"$orig_key\" to \"$$key_ref\"\n";
         } else {
           print STDERR "ERROR: could not create copy of key readable by ",
-            "$collector_config->{\"tomcat_user\"} -- you will need to do this ",
-              "and alter the init script and server.xml manually\n";
+            "$collector_config->{\"tomcat_user\"} as $$key_ref -- you will need to do this ",
+              "manually to match the personalized configuration\n";
         }
       }
     } else {
-      print STDERR "Host key not specified or does not point to real file!\n";
+      print STDERR "Key not specified or does not point to real file!\n";
     }
   }
 }
