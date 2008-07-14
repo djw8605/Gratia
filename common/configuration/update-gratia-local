@@ -3,9 +3,10 @@
 #-----------------
 function usage() {
 cat 1>&2 <<EOF
-usage: update-gratia-local [-S <source-prefix>] [-j <jre-home>] [-s] \
-                           [-p <prefix>] [-d <db-root-pw>] \
-                           [-c <configure-collector-script>] \
+usage: update-gratia-local [-S <source-prefix>] [-j <jre-home>] [-s]
+                           [-p <prefix>] [-d <db-root-pw>]
+                           [-i <collector-info-file>]
+                           [-c <configure-collector-script>]
                            [-h] [-v <vdt_location>] [--] <instance>
 
        -c <configure-collector-script>
@@ -17,11 +18,10 @@ usage: update-gratia-local [-S <source-prefix>] [-j <jre-home>] [-s] \
 
           Find all sources under <source-prefix>.
 
-
        -i <collector-info-file>
 
           Use collector-info-file instead of the default files
-          (collector-pro.dat  collector-itb.dat collector-dev.dat)
+          (collector-pro.dat collector-itb.dat collector-dev.dat)
 
        -j <jre-home>
 
