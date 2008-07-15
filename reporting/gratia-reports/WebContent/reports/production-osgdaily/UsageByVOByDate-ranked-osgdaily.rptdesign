@@ -23,6 +23,7 @@
             <expression name="value">params["DatabasePassword"]</expression>
         </structure>
     </list-property>
+    <property name="eventHandlerClass">net.sf.gratia.reporting.GratiaBirtReportEH</property>
     <list-property name="libraries">
         <structure>
             <property name="fileName">gratia-lib1.rptlibrary</property>
@@ -1262,7 +1263,6 @@
             </row>
         </grid>
         <table name="table1" id="9">
-            <property name="eventHandlerClass">net.sf.gratia.reporting.GratiaBirtReportEH</property>
             <property name="width">100%</property>
             <property name="dataSet">UsageByVORanked</property>
             <list-property name="paramBindings">
