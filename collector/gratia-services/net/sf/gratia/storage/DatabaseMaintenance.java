@@ -37,7 +37,7 @@ import org.hibernate.exception.*;
 public class DatabaseMaintenance {
     static final String dq = "\"";
     static final String comma = ",";
-    static final int gratiaDatabaseVersion = 41;
+    static final int gratiaDatabaseVersion = 42;
     static final int latestDBVersionRequiringStoredProcedureLoad = gratiaDatabaseVersion;
     static final int latestDBVersionRequiringSummaryViewLoad = 37;
     static final int latestDBVersionRequiringSummaryTriggerLoad = 41;
@@ -1153,6 +1153,47 @@ public class DatabaseMaintenance {
                 current = 41;
                 UpdateDbVersion(current);
             }                
+            if (current == 41) {
+                int result = 0;
+                Statement statement;
+                ResultSet resultSet;
+                String command = "select column_name, column_key, table_name, EXTRA from information_schema.COLUMNS where table_schema = DATABASE() and column_name like '%SummaryID';";
+                // May need to add primary key manually to
+                // MasterSummaryData and/or NodeSummary if not already
+                // done by Hibernate (table already existed).
+                try {
+                    Logging.log("Executing: " + command);
+                    statement = connection.createStatement();
+                    resultSet = statement.executeQuery(command);
+                    while (result > -1 && resultSet.next()) {
+                        String columnName = resultSet.getString(1);
+                        String columnKey = resultSet.getString(2);
+                        String tableName = resultSet.getString(3);
+                        String extra = resultSet.getString(4);
+                        if (extra.contains("auto_increment")) continue; // No change required.
+                        if (tableName.equals("MasterSummaryData")) {
+                            Logging.debug("DatabaseMaintenance: adding auto_increment key to MasterSummaryData.");
+                            result = Execute("alter table MasterSummaryData MODIFY COLUMN SummaryID INT NOT NULL AUTO_INCREMENT, ADD PRIMARY KEY (SummaryID);");
+                        } else if (tableName.equals("NodeSummary")) {
+                            Logging.debug("DatabaseMaintenance: adding auto_increment key to NodeSummary.");
+                            result = Execute("alter table NodeSummary MODIFY COLUMN NodeSummaryID INT NOT NULL AUTO_INCREMENT, ADD PRIMARY KEY (NodeSummaryID);");
+                        }
+                    }
+                }
+                catch (Exception e) {
+                    Logging.warning("Command: Error: " + command + " : ", e);
+                    result = -1;
+                }
+                if (result > -1) {
+                    Logging.log("Gratia database upgraded from " + current + " to " + (current + 1));
+                    current = current + 1;
+                    UpdateDbVersion(current);
+                } else {
+                    Logging.warning("Gratia database FAILED to upgrade from " + current +
+                                " to " + (current + 1));
+                }         
+                // Also auxiliary DB item upgrades (trigger and friends)
+            }
             
             return ((current == gratiaDatabaseVersion) && checkAndUpgradeDbAuxiliaryItems());
         }
