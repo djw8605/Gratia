@@ -1,5 +1,7 @@
 (
- itb_gratia_itb => { http_port => 8880,
+ itb_gratia_itb => { tomcat_user => "daemon",
+        tomcat_group => "daemon",
+        http_port => 8880,
         ssl_port => 8845,
         rmi_port => 17000,
         jmx_port => 8004,
@@ -17,10 +19,13 @@
          "monitor.listener.wait" => 60,
          "service.listener.threads" => 1,
          "monitor.to.address.0" => 'gratia-operation@fnal.gov',
-         "service.admin.DN.0" => 'ALLOW ALL'
+         "service.admin.FQAN.0" => "/fermilab/Role=GratiaGlobalAdmin",
+         "service.admin.FQAN.1" => "/fermilab/Role=GratiaFermilabAdmin"
         }
       },
- itb_gratia_psacct => { http_port => 8881,
+ itb_gratia_psacct => { tomcat_user => "daemon",
+        tomcat_group => "daemon",
+        http_port => 8881,
         ssl_port => 8846,
         rmi_port => 18000,
         jmx_port => 8014,
@@ -39,7 +44,9 @@
           "service.admin.DN.0" => 'ALLOW ALL'
         }
        },
- itb_gratia_osg_daily => { http_port => 8882,
+ itb_gratia_osg_daily => { tomcat_user => "daemon",
+        tomcat_group => "daemon",
+        http_port => 8882,
         ssl_port => 8847,
         rmi_port => 19000,
         jmx_port => 8024,
