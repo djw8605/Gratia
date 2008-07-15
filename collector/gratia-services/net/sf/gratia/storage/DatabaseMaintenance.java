@@ -312,6 +312,9 @@ public class DatabaseMaintenance {
             AddIndex("NodeSummary", false, "index03", "ProbeName");
             AddIndex("NodeSummary", false, "index04", "ResourceType");
             AddIndex("NodeSummary", true, "index05", "EndTime, Node, ProbeName, ResourceType");
+        } else if (readIntegerDBProperty("gratia.database.useJobUsageSiteName") > 0) {
+            // OSG Daily.
+            AddIndex("JobUsageRecord_Meta", false, "index18", "ReportedSiteName");
         }
 
         // Indexes for Trace table to facilitate housekeeping.
