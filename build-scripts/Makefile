@@ -87,7 +87,7 @@ clean:
 	find ${base}/ -name "#*" -exec rm -f {} \;
 	rm -f ${configuration}/build-stored-procedures.sql ${configuration}/build-stored-procedures_debug.sql
 	rm -f ${target}/*.[wjt]ar
-	mkdir ${target}
+	-mkdir ${target}
 	# --- Target: clean COMPLETED ---
 
 #-------------------------------------------------------------
