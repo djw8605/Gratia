@@ -1640,7 +1640,6 @@ else {&#xD;
                 </structure>
             </list-property>
             <property name="style">sans-style1</property>
-            <property name="eventHandlerClass">net.sf.gratia.reporting.GratiaBirtReportEH</property>
         </extended-item>
         <label name="ReportURL" id="391" extends="reportLib.ReportURL"/>
     </body>
