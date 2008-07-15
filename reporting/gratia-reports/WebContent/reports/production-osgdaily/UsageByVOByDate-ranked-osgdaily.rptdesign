@@ -1210,29 +1210,43 @@
                     <property name="nativeDataType">3</property>
                 </structure>
             </list-property>
-            <property name="queryText">select final_rank, JobUsageRecord_Report.VOName,
-                      JobUsageRecord_Report.ReportedSiteName as sitename,
-                      date_format(JobUsageRecord_Report.EndTime,?) as datevalue,
-                      sum(JobUsageRecord_Report.WallDuration) as WallDuration,
-                      sum(JobUsageRecord_Report.CpuUserDuration +
-                        JobUsageRecord_Report.CpuSystemDuration) as Cpu,
-                      sum(JobUsageRecord_Report.Njobs) as Njobs from (SELECT @rank:=@rank+1 as final_rank, vonamex,
-                    walldurationx
-                    FROM (SELECT @rank:=0 as rank,
-                          JR.VOName as vonamex,
-                          JR.EndTime as endtimex,
-                          sum(JR.WallDuration) as walldurationx
-                          FROM JobUsageRecord_Report JR
-                          WHERE
-                            JR.EndTime >= Date(?)
-                            and JR.EndTime &lt;= Date(?)
-                          GROUP BY vonamex
-                          ORDER BY walldurationx desc) as foox) as foo, JobUsageRecord_Report
-			where  JobUsageRecord_Report.VOName = vonamex
-			and EndTime >= date(?) and EndTime &lt;= date(?)
-			and ResourceType = 'Batch'
-			group by datevalue, JobUsageRecord_Report.VOName
-			order by final_rank, JobUsageRecord_Report.VOName,datevalue</property>
+            <property name="queryText"> SELECT
+       final_rank,
+       VO.VOName,
+       DATE_FORMAT(EndTime, ?) AS datevalue,
+       SUM(WallDuration) AS WallDuration,
+       SUM(CpuUserDuration + CpuSystemDuration) AS Cpu,
+       SUM(Njobs) AS Njobs
+FROM (SELECT
+      @rank:=@rank+1 AS final_rank,
+      corridx,
+      walldurationx
+      FROM (SELECT @rank:=0 AS rank,
+            VC.corrid AS corridx,
+            EndTime AS endtimex,
+            SUM(WallDuration) AS walldurationx
+            FROM JobUsageRecord R
+                 JOIN VONameCorrection VC ON
+                   ((R.VOName = BINARY VC.VOName) AND
+                    (((R.ReportableVOName IS NULL) AND (VC.ReportableVOName IS NULL))
+                     OR (BINARY R.ReportableVOName = BINARY VC.ReportableVOName)))
+            WHERE EndTime >= ?
+              AND EndTime &lt;= ?
+              AND ResourceType = 'Batch'
+              GROUP BY corridx
+              ORDER BY walldurationx desc) as foox) as foo,
+           JobUsageRecord R
+           JOIN VONameCorrection VC ON
+             ((R.VOName = BINARY VC.VOName) AND
+              (((R.ReportableVOName IS NULL) AND (VC.ReportableVOName IS NULL))
+               OR (BINARY R.ReportableVOName = BINARY VC.ReportableVOName)))
+           JOIN VO on (VC.void = VO.void)
+WHERE VC.corrid = corridx
+  AND EndTime >= ?
+  AND EndTime &lt;= ?
+  AND ResourceType = 'Batch'
+GROUP BY datevalue, VO.VOName
+ORDER BY final_rank, VO.VOName, datevalue</property>
         </oda-data-set>
     </data-sets>
     <styles>
