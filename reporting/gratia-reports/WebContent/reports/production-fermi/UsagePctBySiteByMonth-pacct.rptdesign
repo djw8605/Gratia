@@ -161,7 +161,7 @@
                     <property name="dataType">any</property>
                     <property name="nativeDataType">12</property>
                     <property name="position">1</property>
-                    <expression name="defaultValue">'2007-01-01'</expression>
+                    <expression name="defaultValue">'2008-01-01'</expression>
                     <property name="isOptional">false</property>
                     <property name="isInput">true</property>
                     <property name="isOutput">false</property>
@@ -172,7 +172,7 @@
                     <property name="dataType">any</property>
                     <property name="nativeDataType">0</property>
                     <property name="position">2</property>
-                    <expression name="defaultValue">'2007-12-31'</expression>
+                    <expression name="defaultValue">'2008-02-01'</expression>
                     <property name="isOptional">false</property>
                     <property name="isInput">true</property>
                     <property name="isOutput">false</property>
@@ -270,11 +270,12 @@ order by S.SiteName, datevalue, BenchmarkScore
       <design:attributes>
         <design:name></design:name>
         <design:position>2</design:position>
+        <design:nativeDataTypeCode>0</design:nativeDataTypeCode>
         <design:nullability>Unknown</design:nullability>
       </design:attributes>
       <design:inputAttributes>
         <design:elementAttributes>
-          <design:defaultScalarValue>2007-12-31</design:defaultScalarValue>
+          <design:defaultScalarValue>2008-02-01</design:defaultScalarValue>
           <design:optional>false</design:optional>
         </design:elementAttributes>
       </design:inputAttributes>
@@ -1084,16 +1085,6 @@ rep = icsc.getExternalContext().getScriptable();&#xD;
               </Value>
             </Action>
           </Triggers>
-          <Triggers>
-            <Condition>onmouseover</Condition>
-            <Action>
-              <Type>Show_Tooltip</Type>
-              <Value xsi:type="attribute:TooltipValue">
-                <Text>row[&quot;cpusystembenchdays&quot;] + row[&quot;cpuuserbenchdays&quot;]</Text>
-                <Delay>200</Delay>
-              </Value>
-            </Action>
-          </Triggers>
           <Riser>Rectangle</Riser>
         </Series>
         <Grouping>
@@ -1312,16 +1303,6 @@ rep = icsc.getExternalContext().getScriptable();&#xD;
           </DataPoint>
           <LabelPosition>Inside</LabelPosition>
           <Stacked>false</Stacked>
-          <Triggers>
-            <Condition>onmouseover</Condition>
-            <Action>
-              <Type>Show_Tooltip</Type>
-              <Value xsi:type="attribute:TooltipValue">
-                <Text>row[&quot;cpusystembenchdays&quot;] + row[&quot;cpuuserbenchdays&quot;]</Text>
-                <Delay>200</Delay>
-              </Value>
-            </Action>
-          </Triggers>
           <Triggers>
             <Condition>onmouseover</Condition>
             <Action>
@@ -1687,16 +1668,6 @@ rep = icsc.getExternalContext().getScriptable();&#xD;
           </DataPoint>
           <LabelPosition>Above</LabelPosition>
           <Stacked>false</Stacked>
-          <Triggers>
-            <Condition>onmouseover</Condition>
-            <Action>
-              <Type>Show_Tooltip</Type>
-              <Value xsi:type="attribute:TooltipValue">
-                <Text>row[&quot;cpusystembenchdays&quot;] + row[&quot;cpuuserbenchdays&quot;]</Text>
-                <Delay>200</Delay>
-              </Value>
-            </Action>
-          </Triggers>
           <Triggers>
             <Condition>onmouseover</Condition>
             <Action>
@@ -2089,16 +2060,6 @@ rep = icsc.getExternalContext().getScriptable();&#xD;
           </DataPoint>
           <LabelPosition>Above</LabelPosition>
           <Stacked>false</Stacked>
-          <Triggers>
-            <Condition>onmouseover</Condition>
-            <Action>
-              <Type>Show_Tooltip</Type>
-              <Value xsi:type="attribute:TooltipValue">
-                <Text>row[&quot;cpusystembenchdays&quot;] + row[&quot;cpuuserbenchdays&quot;]</Text>
-                <Delay>200</Delay>
-              </Value>
-            </Action>
-          </Triggers>
           <Triggers>
             <Condition>onmouseover</Condition>
             <Action>
@@ -2635,16 +2596,6 @@ rep = icsc.getExternalContext().getScriptable();&#xD;
           </DataPoint>
           <LabelPosition>Inside</LabelPosition>
           <Stacked>true</Stacked>
-          <Triggers>
-            <Condition>onmouseover</Condition>
-            <Action>
-              <Type>Show_Tooltip</Type>
-              <Value xsi:type="attribute:TooltipValue">
-                <Text>row[&quot;cpusystembenchdays&quot;] + row[&quot;cpuuserbenchdays&quot;]</Text>
-                <Delay>200</Delay>
-              </Value>
-            </Action>
-          </Triggers>
           <Riser>Rectangle</Riser>
         </Series>
         <Grouping>
@@ -3288,16 +3239,6 @@ rep = icsc.getExternalContext().getScriptable();&#xD;
           </DataPoint>
           <LabelPosition>Inside</LabelPosition>
           <Stacked>true</Stacked>
-          <Triggers>
-            <Condition>onmouseover</Condition>
-            <Action>
-              <Type>Show_Tooltip</Type>
-              <Value xsi:type="attribute:TooltipValue">
-                <Text>row[&quot;cpusystembenchdays&quot;] + row[&quot;cpuuserbenchdays&quot;]</Text>
-                <Delay>200</Delay>
-              </Value>
-            </Action>
-          </Triggers>
           <Triggers>
             <Condition>onmouseover</Condition>
             <Action>
