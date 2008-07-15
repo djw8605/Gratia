@@ -1130,7 +1130,7 @@
                     <property name="name">StartDate</property>
                     <property name="dataType">string</property>
                     <property name="position">2</property>
-                    <expression name="defaultValue">'2008-01-01'</expression>
+                    <expression name="defaultValue">'2008-07-01'</expression>
                     <property name="isInput">true</property>
                     <property name="isOutput">false</property>
                 </structure>
@@ -1138,7 +1138,7 @@
                     <property name="name">EndDate</property>
                     <property name="dataType">string</property>
                     <property name="position">3</property>
-                    <expression name="defaultValue">'2008-02-01'</expression>
+                    <expression name="defaultValue">'2008-07-05'</expression>
                     <property name="isInput">true</property>
                     <property name="isOutput">false</property>
                 </structure>
@@ -1146,7 +1146,7 @@
                     <property name="name">StartDate1</property>
                     <property name="dataType">any</property>
                     <property name="position">4</property>
-                    <expression name="defaultValue">'2008-01-01'</expression>
+                    <expression name="defaultValue">'2008-07-01'</expression>
                     <property name="isInput">true</property>
                     <property name="isOutput">false</property>
                 </structure>
@@ -1154,7 +1154,7 @@
                     <property name="name">EndDate1param1</property>
                     <property name="dataType">any</property>
                     <property name="position">5</property>
-                    <expression name="defaultValue">'2008-02-01'</expression>
+                    <expression name="defaultValue">'2008-07-05'</expression>
                     <property name="isInput">true</property>
                     <property name="isOutput">false</property>
                 </structure>
@@ -1224,12 +1224,12 @@
                           sum(JR.WallDuration) as walldurationx
                           FROM JobUsageRecord_Report JR
                           WHERE
-                            JR.EndTime >= Date(?)
-                            and JR.EndTime &lt;= Date(?)
+                            JR.EndTime >= ?
+                            and JR.EndTime &lt;= ?
                           GROUP BY sitenamex
                           ORDER BY walldurationx desc) as foox) as foo, JobUsageRecord_Report
 			where  JobUsageRecord_Report.ReportedSiteName = sitenamex
-			and EndTime >= date(?) and EndTime &lt;= date(?)
+			and EndTime >= ? and EndTime &lt;= ?
 			and ResourceType = 'Batch'
 			group by datevalue, JobUsageRecord_Report.ReportedSiteName
 			order by final_rank, JobUsageRecord_Report.ReportedSiteName,datevalue</property>
@@ -1272,6 +1272,14 @@
                 </structure>
                 <structure>
                     <property name="paramName">EndDate</property>
+                    <expression name="expression">params["EndDate"]</expression>
+                </structure>
+                <structure>
+                    <property name="paramName">StartDate1</property>
+                    <expression name="expression">params["StartDate"]</expression>
+                </structure>
+                <structure>
+                    <property name="paramName">EndDate1param1</property>
                     <expression name="expression">params["EndDate"]</expression>
                 </structure>
             </list-property>
