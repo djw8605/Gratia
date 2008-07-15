@@ -1,6 +1,8 @@
 (
  gratia =>
- { http_port => 8880,
+ { tomcat_user => "daemon",
+   tomcat_group => "daemon",
+   http_port => 8880,
    ssl_port => 8845,
    rmi_port => 17000,
    jmx_port => 8004,
@@ -23,7 +25,9 @@
    }
  },
  fermi_osg =>
- { http_port => 8880,
+ { tomcat_user => "daemon",
+   tomcat_group => "daemon",
+   http_port => 8880,
    ssl_port => 8845,
    rmi_port => 17000,
    jmx_port => 8004,
@@ -41,7 +45,9 @@
    }
  },
  itb =>
- { http_port => 8881,
+ { tomcat_user => "daemon",
+   tomcat_group => "daemon",
+   http_port => 8881,
    ssl_port => 8850,
    rmi_port => 18000,
    jmx_port => 8014,
@@ -59,7 +65,9 @@
    }
  },
  fermi_itb =>
- { http_port => 8881,
+ { tomcat_user => "daemon",
+   tomcat_group => "daemon",
+   http_port => 8881,
    ssl_port => 8850,
    rmi_port => 18000,
    jmx_port => 8014,
@@ -76,7 +84,9 @@
    }
  },
  ps =>
- { http_port => 8882,
+ { tomcat_user => "daemon",
+   tomcat_group => "daemon",
+   http_port => 8882,
    ssl_port => 8855,
    rmi_port => 19000,
    jmx_port => 8024,
@@ -94,7 +104,9 @@
    },
  },
  qcd =>
- { http_port => 8883,
+ { tomcat_user => "daemon",
+   tomcat_group => "daemon",
+   http_port => 8883,
    ssl_port => 8865,
    rmi_port => 21000,
    jmx_port => 8040,
@@ -110,7 +122,9 @@
    }
  },
  osg_daily =>
- { http_port => 8884,
+ { tomcat_user => "daemon",
+   tomcat_group => "daemon",
+   http_port => 8884,
    ssl_port => 8860,
    rmi_port => 20000,
    jmx_port => 8034,
@@ -132,7 +146,9 @@
    collector_host => "gratia.opensciencegrid.org"
  },
  osg_integration =>
- { http_port => 8885,
+ { tomcat_user => "daemon",
+   tomcat_group => "daemon",
+   http_port => 8885,
    ssl_port => 8870,
    rmi_port => 21000,
    jmx_port => 8044,
@@ -150,7 +166,9 @@
    }
  },
  osg_transfer =>
- { http_port => 8886,
+ { tomcat_user => "daemon",
+   tomcat_group => "daemon",
+   http_port => 8886,
    ssl_port => 8840,
    rmi_port => 22000,
    jmx_port => 8054,
@@ -168,7 +186,9 @@
    }
  },
  fermi_transfer =>
- { http_port => 8886,
+ { tomcat_user => "daemon",
+   tomcat_group => "daemon",
+   http_port => 8886,
    ssl_port => 8840,
    rmi_port => 22000,
    jmx_port => 8054,
@@ -186,7 +206,9 @@
    }
  },
  conversion =>
- { http_port => 8884,
+ { tomcat_user => "daemon",
+   tomcat_group => "daemon",
+   http_port => 8884,
    ssl_port => 8860,
    rmi_port => 20000,
    jmx_port => 8034,
