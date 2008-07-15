@@ -5,7 +5,6 @@
 			<MenuItem display="true" name="Usage by Site" link="GratiaParameterInput.jsp?report=[ReportsFolder]UsageBySite-osgdaily.rptdesign&amp;CPUMetric=wallclock"/>
 			<MenuItem name="Daily Usage by VO" link="GratiaParameterInput.jsp?report=[ReportsFolder]UsageByVOByDate-ranked-osgdaily.rptdesign&amp;CPUMetric=wallclock"/>
 			<MenuItem name="Usage by VO" link="GratiaParameterInput.jsp?report=[ReportsFolder]UsageByVO-osgdaily.rptdesign&amp;CPUMetric=wallclock"/>
-			<MenuItem name="Panda and goc Probe Comparison" link="GratiaParameterInput.jsp?report=[ReportsFolder]UsageByProbeForVO-osgdaily.rptdesign"/>
 		</MenuGroup>
 		<MenuGroup name="SQL Queries">
 			<MenuItem name="Custom SQL Report" link="showQuery.jsp"/>
