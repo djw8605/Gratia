@@ -50,10 +50,11 @@ The script will prompt you for:
  mysql root password
 
 The script then:
- 1. run update-gratia-local with the appropriate arguments
- 2. clean your log directory saving the old logs in 
+ 1. shutdown your tomcat instance
+ 2. run update-gratia-local with the appropriate arguments
+ 3. clean your log directory saving the old logs in 
       /data/gratia_tomcat_logs_backups
- 3. optionally, allow you to start your collector
+ 4. optionally, allow you to start your collector
 
 You must be root user to execute this script.
 "
