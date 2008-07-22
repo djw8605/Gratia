@@ -309,7 +309,7 @@ public class DataScrubber {
         if (qualifierList.length() > 0) {
             // Lifetime without error specifier is a default, not an
             // override.
-            extraWhereClause = "error NOT IN (" + qualifierList + ") and ";
+            extraWhereClause = qualifierColumn + " NOT IN (" + qualifierList + ") and ";
         }
         count += tableCleanupHelper(refDate, "",
                                     tableName, qualifierColumn, dateColumn,
@@ -324,7 +324,7 @@ public class DataScrubber {
         long count = 0;
         String extra_message =
             ((qualifier != null) && (qualifier.length() > 0))?
-            ("with " + qualifierColumn + qualifier):
+            ("with " + qualifierColumn + " " + qualifier):
             "";
         if (limit.length() > 0) {
             Logging.log("DataScrubber: Remove all " + tableName + " entries " +
