@@ -126,6 +126,30 @@ function populate_server_lib {
     tar xvf ${target_dir}/server_lib.tar
 }
 
+function populate_common_lib {
+    cd "$tomcat_top/common/lib"
+    if [[ -x "$tomcat_gratia/cleanup_common_lib" ]]; then
+      echo "... running cleanup script in $tomcat_top/common/lib:"
+      "$tomcat_gratia/cleanup_common_lib"
+    fi
+    echo "... populating $tomcat_top/common/lib:"
+    tar xvf ${target_dir}/common_lib.tar
+}
+
+function populate_common_classes {
+    cd "$tomcat_top/common/classes"
+    if [[ -f "$tomcat_top/common/classes/log4j.properties" ]]; then
+      echo "$tomcat_top/common/classes/log4j.properties exists --"
+      echo "Check ${tomcat_top}/gratia/log4j.properties for updates"
+    else
+      cp -f "${tomcat_top}/gratia/log4j.properties" .
+      if (( $? != 0 )); then
+        echo "ERROR: Unable to copy ${tomcat_top}/gratia/log4j.properties in to $tomcat_top/common/classes/ -- pleae check"
+        exit 1
+      fi
+    fi
+}
+
 
 ## MAIN ########################################
 # Defaults
@@ -322,6 +346,16 @@ else
   # Put required libs in server/lib
   #-----------------------
   populate_server_lib
+
+  #-----------------------
+  # Put required libs in common/lib
+  #-----------------------
+  populate_common_lib
+
+  #-----------------------
+  # Put required files in common/classes
+  #-----------------------
+  populate_common_classes
 
   #-----------------------
   # Run configure script

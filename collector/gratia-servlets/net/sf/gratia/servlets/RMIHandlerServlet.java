@@ -42,7 +42,8 @@ public class RMIHandlerServlet extends HttpServlet
         // initialize logging
         //
 
-        Logging.initialize(p.getProperty("service.rmiservlet.logfile"),
+        Logging.initialize("servlet",
+                           p.getProperty("service.rmiservlet.logfile"),
                            p.getProperty("service.rmiservlet.maxlog"),
                            p.getProperty("service.rmiservlet.console"),
                            p.getProperty("service.rmiservlet.level"),

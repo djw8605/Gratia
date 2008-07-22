@@ -3,150 +3,244 @@ package net.sf.gratia.util;
 import java.util.*;
 import java.text.*;
 import java.util.logging.*;
+import org.apache.log4j.RollingFileAppender;
 
-public class Logging
-{
-    static Logger logger;
+public class Logging {
+    static Logger oldLogger;
+    static org.apache.log4j.Logger log4jLogger;
+
     static boolean initialized = false;
     static boolean console = false;
     static DateFormat format = new SimpleDateFormat("kk:mm:ss");
-    
-    public static void initialize(String path,String maxSize,String useConsole,String level,String sNumLogFiles)
-    {
+    static DateFormat screenformat = new SimpleDateFormat("MMM dd, yyyy h:mm:ss a");
+    static String logDomain = "";
+
+    public static void initialize(String logDomain,
+                                  String path,
+                                  String maxSize,
+                                  String useConsole,
+                                  String level,
+                                  String sNumLogFiles) {
         if (initialized)
             return;
-        try
-            {
-                int numLogFiles = 0;
+        screenformat.setTimeZone(TimeZone.getDefault());
+
+        Logging.logDomain = logDomain;
+        try {
+            int numLogFiles = 0;
+            try {
+                numLogFiles = Integer.valueOf(sNumLogFiles).intValue();
+            }
+            catch (Exception ignore) {
+            }
+            if (numLogFiles == 0) numLogFiles = 3;
+            int limit = 0;
+            try {
+                Integer.parseInt(maxSize);
+            }
+            catch (Exception ignore) {
+            }
+            if (limit == 0) limit = 10000000;
+            if ((level == null) || (level.length() == 0)) {
+                logToScreen("logging level not set -- defaulting to INFO");
+                level = "INFO";
+            }
+            if ((path == null) || path.length() == 0) {
+                logToScreen("path for log file null or empty: activating logging to console");
+                useConsole = "1";
+            }
+
+
+            Properties p = net.sf.gratia.util.Configuration.getProperties();
+        
+            if (p.getProperty("service.logging.useLog4j", "0").equals("1")) {
+                // Use log4j
+
+                // Fix path from old style;
+                if (path.contains("%g")) {
+                    String newPath = System.getProperty("catalina.home") + (path.startsWith("/")?"":"/") + path;
+                    newPath = newPath.replaceFirst("-?%g", "");
+                    logToScreen("fixing old-style path spec " +
+                                path + " to log4j-style " + newPath);
+                    path = newPath;
+                }
+
+                org.apache.log4j.Layout layout =
+                    new org.apache.log4j.PatternLayout("%d %c{2}(%t) [%p]: %m%n");
+
+                log4jLogger = org.apache.log4j.Logger.getLogger("net.sf.gratia." + logDomain);
+                org.apache.log4j.RollingFileAppender appender =
+                    new RollingFileAppender();
+                appender.setFile(path);
+                appender.setAppend(true);
+                appender.setBufferedIO(false);
+                //                appender.setBufferSize(4096);
+                appender.setMaximumFileSize(limit);
+                appender.setMaxBackupIndex(numLogFiles);
+                appender.setLayout(layout);
+                appender.activateOptions();
+                appender.rollOver();
+                log4jLogger.setLevel(LogLevel.toLevel(level));
+                log4jLogger.addAppender(appender);
+
+                if (useConsole.equals("1")) {
+                    org.apache.log4j.ConsoleAppender consoleAppender =
+                        new org.apache.log4j.ConsoleAppender(layout);
+                    consoleAppender.activateOptions();
+                    log4jLogger.addAppender(consoleAppender);
+                }
+
+            } else { // Old-style logger
+    
                 try {
-                    numLogFiles = Integer.valueOf(sNumLogFiles).intValue();
+                    FileHandler fh = new FileHandler(Configuration.getCatalinaHome() + path, limit, numLogFiles);
+                    fh.setFormatter(new SimpleFormatter());
+                    // Add to logger
+                    oldLogger = Logger.getLogger("gratia");
+                    oldLogger.setUseParentHandlers(false);
+                    oldLogger.addHandler(fh);
                 }
-                catch (Exception ignore) {
+                catch (Exception e) {
+                    logToScreen("caught exception initializing logging to " +
+                                Configuration.getCatalinaHome() + path + ": " + e);
+                    logToScreen("activating Console logging for this stream");
+                    useConsole = "1";
                 }
-                if (numLogFiles == 0) numLogFiles = 3;
-                int limit = Integer.parseInt(maxSize);
-                FileHandler fh = new FileHandler(Configuration.getCatalinaHome() + path, limit, numLogFiles);
-                fh.setFormatter(new SimpleFormatter());
-                // Add to logger
-                logger = Logger.getLogger("gratia");
-                logger.setUseParentHandlers(false);
-                if (useConsole.equals("1"))
-                    {
-                        logger.addHandler(new ConsoleHandler());
-                        console = true;
-                    }
-                logger.addHandler(fh);
+                if (useConsole.equals("1")) {
+                    oldLogger.addHandler(new ConsoleHandler());
+                    console = true;
+                }
                 if (level.equals("ALL"))
-                    logger.setLevel(Level.ALL);
+                    oldLogger.setLevel(Level.ALL);
                 else if (level.equals("CONFIG"))
-                    logger.setLevel(Level.CONFIG);
+                    oldLogger.setLevel(Level.CONFIG);
                 else if (level.equals("FINE"))
-                    logger.setLevel(Level.FINE);
+                    oldLogger.setLevel(Level.FINE);
                 else if (level.equals("FINER"))
-                    logger.setLevel(Level.FINER);
+                    oldLogger.setLevel(Level.FINER);
                 else if (level.equals("FINEST"))
-                    logger.setLevel(Level.FINEST);
+                    oldLogger.setLevel(Level.FINEST);
                 else if (level.equals("INFO"))
-                    logger.setLevel(Level.INFO);
+                    oldLogger.setLevel(Level.INFO);
                 else if (level.equals("OFF"))
-                    logger.setLevel(Level.OFF);
+                    oldLogger.setLevel(Level.OFF);
                 else if (level.equals("SEVERE"))
-                    logger.setLevel(Level.SEVERE);
+                    oldLogger.setLevel(Level.SEVERE);
                 else if (level.equals("WARNING"))
-                    logger.setLevel(Level.WARNING);
-                System.out.println("\nLogging Level: " + logger.getLevel() + "\n");
+                    oldLogger.setLevel(Level.WARNING);
             }
-        catch (Exception e)
-            {
-                e.printStackTrace();
-            }
+            logToScreen("logging level set to " + log4jLogger.getLevel() + "\n");
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
         initialized = true;
     }
     
-    public static void log(String message)
-    {
-        if (! initialized)
-            {
-                System.out.println("Logger Not Initialized !!");
-                return;
-            }
-        logger.fine(message);
-        if (console)
-            System.out.println(format.format(new Date()) + ": " + message);
+    public static void log(String message) {
+        if (! initialized) {
+            logToScreen("Logger Not Initialized!");
+            return;
+        }
+        if (log4jLogger != null) {
+            log4jLogger.log(LogLevel.FINE, message);
+        } else {
+            oldLogger.fine(message);
+            if (console)
+                System.out.println(format.format(new Date()) + ": " + message);
+        }
     }
+
     
-    public static void log(String message, Exception ex)
-    {
-        if (! initialized)
-            {
-                System.out.println("Logger Not Initialized !!");
-                return;
+    public static void log(String message, Exception ex) {
+        if (! initialized) {
+            logToScreen("Logger Not Initialized!");
+            return;
+        }
+        if (log4jLogger != null) {
+            log4jLogger.log(LogLevel.FINE, message, ex);
+        } else {
+            oldLogger.log(Level.FINE,message,ex);
+            if (console) {
+                System.out.println(format.format(new Date()) + ": " + message);
+                ex.printStackTrace();
             }
-        logger.log(Level.FINE,message,ex);
-        if (console) {
-            System.out.println(format.format(new Date()) + ": " + message);
-            ex.printStackTrace();
         }
     }
     
-    public static void info(String message)
-    {
-        if (! initialized)
-            {
-                System.out.println("Logger Not Initialized !!");
-                return;
-            }
-        logger.info(message);
-        if (console)
-            System.out.println(format.format(new Date()) + ": " + message);
+    public static void info(String message) {
+        if (! initialized) {
+            logToScreen("Logger Not Initialized!");
+            return;
+        }
+        if (log4jLogger != null) {
+            log4jLogger.log(LogLevel.INFO, message);
+        } else {
+            oldLogger.info(message);
+            if (console)
+                System.out.println(format.format(new Date()) + ": " + message);
+        }
     }
     
-    public static void warning(String message)
-    {
-        if (! initialized)
-            {
-                System.out.println("Logger Not Initialized !!");
-                return;
-            }
-        logger.warning(message);
-        if (console)
-            System.out.println(format.format(new Date()) + ": " + message);
+    public static void warning(String message) {
+        if (! initialized) {
+            logToScreen("Logger Not Initialized!");
+            return;
+        }
+        if (log4jLogger != null) {
+            log4jLogger.log(LogLevel.WARNING, message);
+        } else {
+            oldLogger.warning(message);
+            if (console)
+                System.out.println(format.format(new Date()) + ": " + message);
+        }
     }
     
-    public static void warning(String message, Exception ex)
-    {
-        if (! initialized)
-            {
-                System.out.println("Logger Not Initialized !!");
-                return;
-            }
-        logger.log(Level.WARNING,message,ex);
-        if (console)
-            System.out.println(format.format(new Date()) + ": " + message);
+    public static void warning(String message, Exception ex) {
+        if (! initialized) {
+            logToScreen("Logger Not Initialized!");
+            return;
+        }
+        if (log4jLogger != null) {
+            log4jLogger.log(LogLevel.WARNING, message, ex);
+        } else {
+            oldLogger.log(Level.WARNING,message,ex);
+            if (console)
+                System.out.println(format.format(new Date()) + ": " + message);
+        }
     }
     
-    public static void debug(String message)
-    {
-        if (! initialized)
-            {
-                System.out.println("Logger Not Initialized !!");
-                return;
-            }
-        logger.finest(message);
-        if (console)
-            System.out.println(format.format(new Date()) + ": " + message);
+    public static void debug(String message) {
+        if (! initialized) {
+            logToScreen("Logger Not Initialized!");
+            return;
+        }
+        if (log4jLogger != null) {
+            log4jLogger.log(LogLevel.FINEST, message);
+        } else {
+            oldLogger.finest(message);
+            if (console)
+                System.out.println(format.format(new Date()) + ": " + message);
+        }
     }
 
-    public static void debug(String message, Exception ex)
-    {
-        if (! initialized)
-            {
-                System.out.println("Logger Not Initialized !!");
-                return;
-            }
-        logger.log(Level.FINEST, message, ex);
-        if (console)
-            System.out.println(format.format(new Date()) + ": " + message);
+    public static void debug(String message, Exception ex) {
+        if (! initialized) {
+            logToScreen("Logger Not Initialized!");
+            return;
+        }
+        if (log4jLogger != null) {
+            log4jLogger.log(LogLevel.FINEST, message, ex);
+        } else {
+            oldLogger.log(Level.FINEST, message, ex);
+            if (console)
+                System.out.println(format.format(new Date()) + ": " + message);
+        }
     }
     
+    private static void logToScreen(String message) {
+        if (logDomain == null) logDomain = "Unknown";
+        System.out.println(format.format(new Date()) + " Logging (" + logDomain + "): " + message);
+    }
+
 }

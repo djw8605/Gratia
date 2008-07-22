@@ -47,12 +47,13 @@ security=${common}/gratia-security
 util=${common}/gratia-util
 commonLib=${common}/lib
 
-server_lib_jars = log4j- \
-                  glite-security-trustmanager \
+server_lib_jars = glite-security-trustmanager \
                   glite-security-util-java \
                   bcprov-
-
 SERVER_LIBS = $(foreach d, $(server_lib_jars), $(wildcard $(commonLib)/$(d)*.jar))
+
+common_lib_jars = log4j-
+COMMON_LIBS = $(foreach d, $(common_lib_jars), $(wildcard $(commonLib)/$(d)*.jar))
 
 # check where we are as the tar file ownership cannot be set correctly on cygwin
 ifeq ($(filter CYGWIN%,${PLATFORM}),)
@@ -134,14 +135,13 @@ ${target}/gratia-services.war:  ${services}/net/sf/gratia/services/*.java  \
 	rmic -vcompat -classpath ${classpath} -d . net.sf.gratia.services.JMSProxyImpl
 	cp net/sf/gratia/services/* ${services}/net/sf/gratia/services
 	rm -f -r net
-	cp ${services}/log4j.properties war/WEB-INF/classes/
 	cp ${services}/ehcache.xml war/WEB-INF/classes/
 	cp ${services}/c3p0.properties war/WEB-INF/classes/
 	cp ${services}/net/sf/gratia/services/*.class war/WEB-INF/classes/net/sf/gratia/services
 	cp ${services}/net/sf/gratia/storage/*.class war/WEB-INF/classes/net/sf/gratia/storage
 	cp ${util}/net/sf/gratia/util/Logging.class war/WEB-INF/classes/net/sf/gratia/util
 	cp ${commonLib}/*.jar war/WEB-INF/lib
-	rm -f  war/WEB-INF/lib/serv*
+	rm -f  war/WEB-INF/lib/{serv,log4j}*
 	cp ${services}/net/sf/gratia/services/web.xml war/WEB-INF/web.xml
 	${copy_util_lib}
 	jar -cfM ${target}/gratia-services.war -C war .
@@ -244,7 +244,7 @@ ${target}/gratia-administration.war: ${administration}/net/sf/gratia/administrat
 	cp ${commonLib}/axis.jar ${commonLib}/bcprov-jdk14-133.jar ${commonLib}/commons-discovery*.jar war/WEB-INF/lib
 	cp ${commonLib}/commons-logging*.jar ${commonLib}/glite-security-trustmanager.jar  war/WEB-INF/lib
 	cp ${commonLib}/glite-security-util-java.jar ${commonLib}/glite-security-voms-admin-server.jar war/WEB-INF/lib
-	cp ${commonLib}/jaxrpc.jar ${commonLib}/log4j-*.jar ${commonLib}/saaj.jar ${commonLib}/xercesImpl.jar war/WEB-INF/lib
+	cp ${commonLib}/jaxrpc.jar ${commonLib}/saaj.jar ${commonLib}/xercesImpl.jar war/WEB-INF/lib
 	cp ${commonLib}/mysql*.jar ${commonLib}/tar.jar ${commonLib}/bzip2.jar war/WEB-INF/lib
 	cp ${target}/gratiaSecurity.jar war/WEB-INF/lib
 	${copy_util_lib}
@@ -419,7 +419,7 @@ release: gratia
 	rm -f -r tarball
 	# --- Target: release COMPLETED ---
 
-server_lib:
+server_lib: $(target)/cleanup_server_lib
 	# ------------------------------
 	# --- Target: server_lib     ---
 	# ------------------------------
@@ -430,8 +430,19 @@ server_lib:
         rm -f -r tarball
 	# --- Target: server_lib COMPLETED ---
 
+common_lib: $(target)/cleanup_common_lib
+	# ------------------------------
+	# --- Target: common_lib     ---
+	# ------------------------------
+	rm -f -r tarball; \
+	mkdir tarball; \
+	cp -v $(COMMON_LIBS) tarball/; \
+	tar -cvf ${target}/common_lib.tar -C tarball .; \
+        rm -f -r tarball
+	# --- Target: common_lib COMPLETED ---
+
 #-------------------------------------------------------------
-gratia: clean util services servlets administration soap reporting reports server_lib
+gratia: clean util services servlets administration soap reporting reports common_lib server_lib
 	# ------------------------------
 	# --- Target: gratia         ---
 	# ------------------------------
@@ -446,11 +457,27 @@ gratia: clean util services servlets administration soap reporting reports serve
 	perl -wape 's&^(\s*gratia\.services\.version\s*=\s*).*$$&$$1${gratia_services_version}&; s&^(\s*gratia\.reporting\.version\s*=\s*).*$$&$$1${gratia_reporting_version}&; ' ${configuration}/service-configuration.properties > tarball/service-configuration.properties && chmod 600 tarball/service-configuration.properties; \
 	cp ${configuration}/configure-* ${configuration}/update-gratia-local tarball; \
 	cp ${configuration}/truststore ${configuration}/keystore tarball; \
-	cp ${configuration}/cleanup_server_lib tarball/; \
+	cp ${configuration}/common_server_lib tarball/; \
 	cp ${configuration}/voms-servers tarball; \
+	cp ${services}/log4j.properties tarball; \
+	cp ${target}/{cleanup_server_lib,cleanup_common_lib} tarball; \
 	tar -cvf ${target}/gratia.tar -C tarball .; \
 	rm -f -r tarball
 	# --- Target: gratia COMPLETED ---
+
+$(target)/cleanup_server_lib: ${configuration}/cleanup_template
+	# ------------------------------
+	# --- Target: cleanup_server_lib
+	# ------------------------------
+	sed -e 's/%%%FILES%%%/$(foreach d, $(server_lib_jars), $(d)*.jar)/' $(^) > $(@)
+	chmod a+x $(@)
+
+$(target)/cleanup_common_lib: ${configuration}/cleanup_template
+	# ------------------------------
+	# --- Target: cleanup_common_lib
+	# ------------------------------
+	sed -e 's/%%%FILES%%%/$(foreach d, $(common_lib_jars), $(d)*.jar)/' $(^) > $(@)
+	chmod a+x $(@)
 
 #-------------------------------------------------------------
 define defaultdirs
