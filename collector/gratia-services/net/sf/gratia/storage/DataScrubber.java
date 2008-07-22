@@ -32,23 +32,19 @@ public class DataScrubber {
     // service.lifetime.Trace.<pname> = 1 month
     //
 
-    int bunchSize = 10000; // Should be set to 10000 in production.
+    int batchSize = 10000; // Default only
 
     ExpirationDateCalculator eCalc = new ExpirationDateCalculator();
 
-//     protected static int ParseLimit( String timelimit ) {
-//         // For now hardcoded!
-
-//         timelimit = timelimit.trim();
-//         if (timelimit == null || timelimit.equalsIgnoreCase("unlimited")) {
-//             return 0;
-//         } else {
-//             timelimit = timelimit.toLowerCase();
-//             // Assume 'month'
-//             int index = timelimit.indexOf('m');
-//             return Integer.parseInt(timelimit.substring(0,index).trim());
-//         }
-//     }
+    public DataScrubber() {
+        try {
+            // Get batch size from properties if set.
+            batchSize = Integer.valueOf(eCalc.lifetimeProperties().
+                                        getProperty("service.lifetimeManagement.batchSize"));
+        }
+        catch (Exception ignore) {
+        }
+    }
 
     static protected long ExecuteSQL( String deletecmd, String limit, String msg ) 
     {
@@ -112,7 +108,7 @@ public class DataScrubber {
             Logging.debug("DataScrubber: About to query " + query.getQueryString());
 
             query.setString( "dateLimit", datelimit );
-            query.setMaxResults( bunchSize );
+            query.setMaxResults( batchSize );
 
             result = query.list();
             tx.commit();
@@ -141,7 +137,6 @@ public class DataScrubber {
 
     public long MetricRawXml() {
         // Execute: delete from tableName_Xml where EndTime < cutoffdate and ExtraXml == null
-        Properties p = eCalc.lifetimeProperties(); // Everybody's on the same page
         String limit = eCalc.expirationDateAsSQLString(new Date(), "MetricRecord", "RawXML");
 
         if (!(limit.length() > 0)) return 0;
@@ -158,7 +153,6 @@ public class DataScrubber {
 
     public long JobUsageRawXml() {
         // Execute: delete from tableName_Xml where EndTime < cutoffdate and ExtraXml == null
-        Properties p = eCalc.lifetimeProperties(); // Everybody's on the same page
         String limit = eCalc.expirationDateAsSQLString(new Date(), "JobUsageRecord", "RawXML");
 
         if (!(limit.length() > 0)) return 0;
@@ -175,7 +169,6 @@ public class DataScrubber {
 
     public long IndividualJobUsageRecords() {
         // Execute: delete from tableName set where EndTime < cutoffdate
-        Properties p = eCalc.lifetimeProperties(); // Everybody's on the same page
         String limit = eCalc.expirationDateAsSQLString(new Date(), "JobUsageRecord");
 
         // We need to handle the case where
@@ -196,8 +189,8 @@ public class DataScrubber {
                 ids = GetList(hqlList, limit, "JobUsageRecord records");
                 Logging.info("DataScrubber: deleting " + ids);
                 
-                // Here we decide whether to loop or not after each 'bunch'
-                done = (ids==null) || (ids.size() < bunchSize);
+                // Here we decide whether to loop or not after each 'batch'
+                done = (ids==null) || (ids.size() < batchSize);
 
                 if ((ids != null) && (!ids.isEmpty())) {
                 
@@ -251,7 +244,6 @@ public class DataScrubber {
 
     public long IndividualMetricRecords() {
         // Execute: delete from tableName set where EndTime < cutoffdate
-        Properties p = eCalc.lifetimeProperties(); // Everybody's on the same page
         String limit = eCalc.expirationDateAsSQLString(new Date(), "MetricRecord");
 
         // We need to handle the case where
