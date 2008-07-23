@@ -1,5 +1,6 @@
 package net.sf.gratia.util;
 
+import java.io.File;
 import java.util.*;
 import java.text.*;
 import java.util.logging.*;
@@ -12,7 +13,7 @@ public class Logging {
     static boolean initialized = false;
     static boolean console = false;
     static DateFormat format = new SimpleDateFormat("kk:mm:ss");
-    static DateFormat screenformat = new SimpleDateFormat("MMM dd, yyyy h:mm:ss a");
+    static DateFormat screenFormat = new SimpleDateFormat("MMM dd, yyyy kk:mm:ss z");
     static String logDomain = "";
 
     public static void initialize(String logDomain,
@@ -23,7 +24,7 @@ public class Logging {
                                   String sNumLogFiles) {
         if (initialized)
             return;
-        screenformat.setTimeZone(TimeZone.getDefault());
+        screenFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
 
         Logging.logDomain = logDomain;
         try {
@@ -79,7 +80,11 @@ public class Logging {
                 appender.setMaxBackupIndex(numLogFiles);
                 appender.setLayout(layout);
                 appender.activateOptions();
-                appender.rollOver();
+                File logFile = new File(appender.getFile());
+                if (logFile.length() > 0L) {
+                    logToScreen("Rolling over existing non-zero log file " + logFile);
+                    appender.rollOver();
+                }
                 log4jLogger.setLevel(LogLevel.toLevel(level));
                 log4jLogger.addAppender(appender);
 
@@ -129,8 +134,8 @@ public class Logging {
                     oldLogger.setLevel(Level.SEVERE);
                 else if (level.equals("WARNING"))
                     oldLogger.setLevel(Level.WARNING);
+                logToScreen("logging level set to " + oldLogger.getLevel() + " (old-style logging)");
             }
-            logToScreen("logging level set to " + oldLogger.getLevel() + " (old-style logging)");
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -241,7 +246,7 @@ public class Logging {
     
     private static void logToScreen(String message) {
         if (logDomain == null) logDomain = "Unknown";
-        System.out.println(format.format(new Date()) + " Logging (" + logDomain + "): " + message);
+        System.out.println(screenFormat.format(new Date()) + " Logging (" + logDomain + "): " + message);
     }
 
 }
