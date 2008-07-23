@@ -89,6 +89,7 @@ public class Logging {
                     consoleAppender.activateOptions();
                     log4jLogger.addAppender(consoleAppender);
                 }
+                logToScreen("logging level set to " + log4jLogger.getLevel() + " (log4j)");
 
             } else { // Old-style logger
     
@@ -129,7 +130,7 @@ public class Logging {
                 else if (level.equals("WARNING"))
                     oldLogger.setLevel(Level.WARNING);
             }
-            logToScreen("logging level set to " + log4jLogger.getLevel() + "\n");
+            logToScreen("logging level set to " + oldLogger.getLevel() + " (old-style logging)");
         }
         catch (Exception e) {
             e.printStackTrace();
