@@ -178,6 +178,11 @@
 #            UCSDT2               2497   previously 2023
 #            BNL_ATLAS_1          1593   previously 1393
 #	     Purdue-Lear          1285   Removed (Taken out of service)
+#   7/24/08 (Karthik Arunachalam)
+#           Updates based on https://t2.unl.edu/gratia/wlcg_reporting#sitenorm
+#           GIP data.
+#           Update because site name PROD_SLAC changed to WT2 (Equivalent of dropping PROD_SLAC and adding WT2)
+#	     WT2 		   2412  previously PROD_SLAC	2412 
 #    
 #    
 ##################################################################
@@ -210,7 +215,7 @@ IU_OSG              2101
 MWT2_IU             1787
 MWT2_UC             1935
 OU_OCHEP_SWT2       2389
-PROD_SLAC           2412
+WT2                 2412
 SWT2_CPB            1628
 UC_ATLAS_MWT2       1285
 UTA_SWT2            1543
@@ -229,3 +234,4 @@ UTA_SWT2            1543
 ##IU_ATLAS_Tier2       921
 ##UTA_DPCC             915
 ##Purdue-Lear         1285
+##PROD_SLAC           2412 (replaced by WT2)
