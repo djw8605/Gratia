@@ -117,7 +117,7 @@ while [[ -n "$1" ]]; do
         ;;
       stored)
         proc="${script_location}build-stored-procedures.sql"
-        set -- "$@" stored-extra-1 static-reports
+        set -- "$@" stored-extra-1 stored-extra-2 static-reports
         if [[ `hostname -f` == *.fnal.gov ]]; then
           set -- "$@" proc-edit-permission
         fi
@@ -125,6 +125,10 @@ while [[ -n "$1" ]]; do
       stored-extra-1)
         # Hand-tweaked procedure (temporary)
         proc="${script_location}WeeklyUsageByVORanked.sql"
+        ;;
+      stored-extra-2)
+        # Hand-tweaked procedure (temporary)
+        proc="${script_location}SiteUsageCountByVO.sql"
         ;;
       static-reports)
         # For CSV static reports
