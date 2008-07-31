@@ -846,7 +846,7 @@
         </oda-data-source>
     </data-sources>
     <data-sets>
-        <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="UsageByVORanked" id="358">
+        <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="SiteCountByVORanked" id="358">
             <list-property name="computedColumns">
                 <structure>
                     <property name="name">ChartNr</property>
@@ -1034,7 +1034,7 @@ ORDER BY final_rank, VOProbeSummary.VOName</property>
             <property name="backgroundPositionY">0%</property>
             <property name="textIndent">0em</property>
             <property name="width">100%</property>
-            <property name="dataSet">UsageByVORanked</property>
+            <property name="dataSet">SiteCountByVORanked</property>
             <list-property name="paramBindings">
                 <structure>
                     <property name="paramName">StartDate</property>
