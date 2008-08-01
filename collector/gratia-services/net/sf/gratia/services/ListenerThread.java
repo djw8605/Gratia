@@ -657,6 +657,8 @@ public class ListenerThread extends Thread
                                 catch (Exception ignore) { }
                             }
                         } else { // Constraint exception, but not a duplicate: oops!
+                            Logging.debug(ident + ": received constraint violation " +
+                                          e.getSQLException().getMessage());
                             if (HibernateWrapper.databaseUp()) {
                                 try {
                                     if (gotreplication) {
