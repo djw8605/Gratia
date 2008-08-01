@@ -111,6 +111,7 @@ public class DataHousekeepingService extends Thread {
 
     public void requestStop() {
         currentStatus = Status.STOPPING;
+        housekeeper.requestStop();
         stopRequested = true;
     }
 

@@ -32,7 +32,9 @@ public class DataScrubber {
     // service.lifetime.Trace.<pname> = 1 month
     //
 
-    int batchSize = 10000; // Default only
+    int batchSize = 200; // Default only
+
+    private Boolean stopRequested = false;
 
     ExpirationDateCalculator eCalc = new ExpirationDateCalculator();
 
@@ -46,53 +48,65 @@ public class DataScrubber {
         }
     }
 
-    static protected long ExecuteSQL( String deletecmd, String limit, String msg ) 
+    public void requestStop() {
+        stopRequested = true;
+    }
+
+    protected long ExecuteSQL( String deletecmd, String limit, String msg ) 
     {
         long deletedEntities = 0;
+        long deletedThisIteration = 0;
 
-        Session session =  HibernateWrapper.getSession();
-        Transaction tx = session.beginTransaction();
-        try {
+        do {
+            Session session =  HibernateWrapper.getSession();
+            Transaction tx = session.beginTransaction();
+            try {
+                org.hibernate.SQLQuery query = session.createSQLQuery( deletecmd );
+                Logging.debug("DataScrubber: About to query " + query.getQueryString());
 
-            org.hibernate.SQLQuery query = session.createSQLQuery( deletecmd );
-            Logging.debug("DataScrubber: About to query " + query.getQueryString());
+                query.setString( "dateLimit", limit );
+                query.setMaxResults(batchSize);
 
-            query.setString( "dateLimit", limit );
-
-            deletedEntities = query.executeUpdate();
-            tx.commit();
-        }
-        catch (Exception e) {
-            tx.rollback();
-            Logging.warning("DataScrubber: error in deleting " + msg + "!", e);
-            deletedEntities = 0;
-        }
-        session.close();
+                deletedThisIteration = query.executeUpdate();
+                tx.commit();
+            }
+            catch (Exception e) {
+                tx.rollback();
+                Logging.warning("DataScrubber: error in deleting " + msg + "!", e);
+                deletedThisIteration = 0;
+            }
+            session.close();
+            deletedEntities += deletedThisIteration;
+        } while ((deletedThisIteration == batchSize) && (!stopRequested));
         return deletedEntities;
     }
 
-    static protected long Execute( String deletecmd, String limit, String msg ) 
+    protected long Execute( String deletecmd, String limit, String msg ) 
     {
         long deletedEntities = 0;
+        long deletedThisIteration = 0; 
 
-        Session session =  HibernateWrapper.getSession();
-        Transaction tx = session.beginTransaction();
-        try {
+        do {
+            Session session =  HibernateWrapper.getSession();
+            Transaction tx = session.beginTransaction();
+            try {
+                org.hibernate.Query query = session.createQuery( deletecmd );
+                Logging.debug("DataScrubber: About to query " + query.getQueryString());
 
-            org.hibernate.Query query = session.createQuery( deletecmd );
-            Logging.debug("DataScrubber: About to query " + query.getQueryString());
+                query.setString( "dateLimit", limit );
+                query.setMaxResults(batchSize);
 
-            query.setString( "dateLimit", limit );
-
-            deletedEntities = query.executeUpdate();
-            tx.commit();
-        }
-        catch (Exception e) {
-            tx.rollback();
-            Logging.warning("DataScrubber: error in deleting " + msg + "!", e);
-            deletedEntities = 0;
-        }
-        session.close();
+                deletedThisIteration = query.executeUpdate();
+                tx.commit();
+            }
+            catch (Exception e) {
+                tx.rollback();
+                Logging.warning("DataScrubber: error in deleting " + msg + "!", e);
+                deletedThisIteration = 0;
+            }
+            session.close();
+            deletedEntities += deletedThisIteration;
+        } while ((deletedThisIteration == batchSize) && (!stopRequested));
         return deletedEntities;
     }
 
@@ -234,6 +248,7 @@ public class DataScrubber {
                         return nrecords; // Intentionally return now to exit the loop.
                     }
                     if (session!=null) session.close();
+                    if (stopRequested) done = true; // Truncate after this loop if we're asked.
                 }
             }
             Logging.info("DataScrubber: " + nrecords +
@@ -273,7 +288,7 @@ public class DataScrubber {
         return tableCleanupHelper("DupRecord", "error", "eventdate");
     }
 
-    private long tableCleanupHelper(String tableName, String qualifierColumn,
+    protected long tableCleanupHelper(String tableName, String qualifierColumn,
                                     String dateColumn) {
         Properties p = eCalc.lifetimeProperties(); // Everybody's on the same page
         Enumeration properties = p.keys();
@@ -309,9 +324,9 @@ public class DataScrubber {
         return count;
     }
 
-    private long tableCleanupHelper(Date refDate, String qualifier,
-                                    String tableName, String qualifierColumn, String dateColumn,
-                                    String extraWhereClause) {
+    protected long tableCleanupHelper(Date refDate, String qualifier,
+                                      String tableName, String qualifierColumn, String dateColumn,
+                                      String extraWhereClause) {
         String limit = eCalc.expirationDateAsSQLString(refDate, tableName, qualifier);
         long count = 0;
         String extra_message =
