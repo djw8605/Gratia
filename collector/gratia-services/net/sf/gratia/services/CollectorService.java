@@ -73,12 +73,7 @@ public class CollectorService implements ServletContextListener {
         //
         p = net.sf.gratia.util.Configuration.getProperties();
 
-        Logging.initialize("service",
-                           p.getProperty("service.service.logfile"),
-                           p.getProperty("service.service.maxlog"),
-                           p.getProperty("service.service.console"),
-                           p.getProperty("service.service.level"),
-                           p.getProperty("service.service.numLogs"));
+        Logging.initialize("service");
 
         Enumeration iter = System.getProperties().propertyNames();
         Logging.log("");
@@ -407,13 +402,6 @@ public class CollectorService implements ServletContextListener {
         //
 
         startReplicationService();
-
-        //
-        // wait 1 minute to create new report config for birt (giving tomcat time to deploy the war)
-        //
-        //      
-        // PENELOPE: no need to setup the reports
-        //      (new ReportSetup()).start();
 
     }
 

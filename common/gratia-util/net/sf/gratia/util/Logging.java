@@ -4,7 +4,12 @@ import java.io.File;
 import java.util.*;
 import java.text.*;
 import java.util.logging.*;
+import org.apache.log4j.ConsoleAppender;
+import org.apache.log4j.FileAppender;
 import org.apache.log4j.RollingFileAppender;
+import org.apache.log4j.PatternLayout;
+import org.apache.log4j.Layout;
+import org.apache.log4j.DailyRollingFileAppender;
 
 public class Logging {
     static Logger oldLogger;
@@ -12,19 +17,21 @@ public class Logging {
 
     static boolean initialized = false;
     static boolean console = false;
-    static DateFormat format = new SimpleDateFormat("kk:mm:ss");
+    static DateFormat format = new SimpleDateFormat("kk:mm:ss z");
     static DateFormat screenFormat = new SimpleDateFormat("MMM dd, yyyy kk:mm:ss z");
     static String logDomain = "";
 
-    public static void initialize(String logDomain,
-                                  String path,
-                                  String maxSize,
-                                  String useConsole,
-                                  String level,
-                                  String sNumLogFiles) {
+    public static void initialize(String logDomain) {
         if (initialized)
             return;
-        screenFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+        screenFormat.setTimeZone(TimeZone.getDefault());
+        Properties p = net.sf.gratia.util.Configuration.getProperties();
+
+        String path = p.getProperty("service." + logDomain + ".logfile");
+        String maxSize = p.getProperty("service." + logDomain + ".maxlog");
+        String useConsole = p.getProperty("service." + logDomain + ".console");
+        String level = p.getProperty("service." + logDomain + ".level");
+        String sNumLogFiles = p.getProperty("service." + logDomain + ".numLogs");
 
         Logging.logDomain = logDomain;
         try {
@@ -50,11 +57,8 @@ public class Logging {
                 logToScreen("path for log file null or empty: activating logging to console");
                 useConsole = "1";
             }
-
-
-            Properties p = net.sf.gratia.util.Configuration.getProperties();
         
-            if (p.getProperty("service.logging.useLog4j", "0").equals("1")) {
+            if (p.getProperty("service.logging.useLog4j", "1").equals("1")) {
                 // Use log4j
 
                 // Fix path from old style;
@@ -66,31 +70,38 @@ public class Logging {
                     path = newPath;
                 }
 
-                org.apache.log4j.Layout layout =
-                    new org.apache.log4j.PatternLayout("%d %c{2}(%t) [%p]: %m%n");
+                Layout layout =
+                    new PatternLayout("%d %c{2}(%t) [%p]: %m%n");
 
                 log4jLogger = org.apache.log4j.Logger.getLogger("net.sf.gratia." + logDomain);
-                org.apache.log4j.RollingFileAppender appender =
-                    new RollingFileAppender();
+                FileAppender appender = null;
+                if (p.getProperty("service.logging.dailyLogging", "0").equals("1")) {
+                    appender = new TidiedDailyRollingFileAppender();
+                    ((TidiedDailyRollingFileAppender) appender).setDatePattern("'.'yyyy-MM-dd");
+                    ((TidiedDailyRollingFileAppender) appender).setMaxAgeDays(numLogFiles);
+                } else {
+                   appender = new RollingFileAppender();
+                   ((RollingFileAppender) appender).setMaximumFileSize(limit);
+                   ((RollingFileAppender) appender).setMaxBackupIndex(numLogFiles);
+                }
                 appender.setFile(path);
                 appender.setAppend(true);
                 appender.setBufferedIO(false);
                 //                appender.setBufferSize(4096);
-                appender.setMaximumFileSize(limit);
-                appender.setMaxBackupIndex(numLogFiles);
                 appender.setLayout(layout);
                 appender.activateOptions();
                 File logFile = new File(appender.getFile());
-                if (logFile.length() > 0L) {
+                if ((RollingFileAppender.class.isInstance(appender)) &&
+                    (logFile.length() > 0L)) {
                     logToScreen("Rolling over existing non-zero log file " + logFile);
-                    appender.rollOver();
+                    ((RollingFileAppender) appender).rollOver();
                 }
                 log4jLogger.setLevel(LogLevel.toLevel(level));
                 log4jLogger.addAppender(appender);
 
                 if (useConsole.equals("1")) {
-                    org.apache.log4j.ConsoleAppender consoleAppender =
-                        new org.apache.log4j.ConsoleAppender(layout);
+                    ConsoleAppender consoleAppender =
+                        new ConsoleAppender(layout);
                     consoleAppender.activateOptions();
                     log4jLogger.addAppender(consoleAppender);
                 }
@@ -141,6 +152,34 @@ public class Logging {
             e.printStackTrace();
         }
         initialized = true;
+    }
+
+    public static void log(LogLevel level, String message) {
+        if (! initialized) {
+            logToScreen("Logger Not Initialized!");
+            return;
+        }
+        if (log4jLogger != null) {
+            log4jLogger.log(level, message);
+        } else {
+            oldLogger.log(Level.parse(level.toString()), message);
+            if (console)
+                System.out.println(format.format(new Date()) + ": " + message);
+        }
+    }
+    
+    public static void log(LogLevel level, String message, Exception ex) {
+        if (! initialized) {
+            logToScreen("Logger Not Initialized!");
+            return;
+        }
+        if (log4jLogger != null) {
+            log4jLogger.log(level, message, ex);
+        } else {
+            oldLogger.log(Level.parse(level.toString()), message, ex);
+            if (console)
+                System.out.println(format.format(new Date()) + ": " + message);
+        }
     }
     
     public static void log(String message) {

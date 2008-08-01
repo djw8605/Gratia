@@ -59,12 +59,7 @@ public class SecurityServlet extends HttpServlet
         // initialize logging
         //
 
-        Logging.initialize("security",
-                           p.getProperty("service.security.logfile"),
-                           p.getProperty("service.security.maxlog"),
-                           p.getProperty("service.security.console"),
-                           p.getProperty("service.security.level"),
-                           p.getProperty("service.security.numLogs"));
+        Logging.initialize("security");
         try
             {
                 props = Configuration.getProperties();

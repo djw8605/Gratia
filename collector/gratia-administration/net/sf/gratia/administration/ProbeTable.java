@@ -74,12 +74,7 @@ public class ProbeTable extends HttpServlet
 		// initialize logging
 		//
 
-		Logging.initialize("administration",
-                                   p.getProperty("service.administration.logfile"),
-				   p.getProperty("service.administration.maxlog"),
-				   p.getProperty("service.administration.console"),
-				   p.getProperty("service.administration.level"),
-				   p.getProperty("service.administration.numLogs"));
+		Logging.initialize("administration");
 
 	}
 

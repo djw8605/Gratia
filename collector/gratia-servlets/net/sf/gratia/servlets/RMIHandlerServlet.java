@@ -35,6 +35,7 @@ public class RMIHandlerServlet extends HttpServlet
 
     public void init(ServletConfig config)
         throws ServletException {
+        TimeZone.setDefault(null);
         super.init(config);
         p = Configuration.getProperties();
 
@@ -42,12 +43,7 @@ public class RMIHandlerServlet extends HttpServlet
         // initialize logging
         //
 
-        Logging.initialize("servlet",
-                           p.getProperty("service.rmiservlet.logfile"),
-                           p.getProperty("service.rmiservlet.maxlog"),
-                           p.getProperty("service.rmiservlet.console"),
-                           p.getProperty("service.rmiservlet.level"),
-                           p.getProperty("service.rmiservlet.numLogs"));
+        Logging.initialize("rmiservlet");
     }
     
     public void doPost(HttpServletRequest req, HttpServletResponse res)
