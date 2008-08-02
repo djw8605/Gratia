@@ -519,40 +519,7 @@ if (monthnr.toString().length > 1){
     <Visible>true</Visible>
   </Block>
   <Dimension>Two_Dimensional</Dimension>
-  <Script>/**
- * The chart script methods provide control on the chart databinding, generation and rendering.
- *
- * The methods have been commented in the following code, please uncomment and implement the
- * ones you need. Note that for simplicity the &quot;after&quot; methods have not be included here.
- *
- * This script syntax follows JavaScript specifications, the Java classes that are referred to
- * in the comments can be accessed as JavaScript classes.
- *
- * Script examples are available in the org.eclipse.birt.chart.examples plugin
- */
-
-
-/**
- * Called before populating the series dataset using the DataSetProcessor.
- *
- * @param series
- *            Series
- * @param dataSetProcessor
- *            DataSetProcessor
- * @param context
- *            IChartScriptContext
- */
-//function beforeDataSetFilled( series, dataSetProcessor, context ){}
-
-/**
- * Called before generation of chart model to GeneratedChartState.
- *
- * @param chart
- *            Chart Model
- * @param context
- *            IChartScriptContext
- */
-function beforeGeneration( chart, context )
+  <Script>function beforeGeneration( chart, context )
 {
 	rep = context.getExternalContext().getScriptable();
 	rep_title = rep.getParameterValue(&quot;ReportTitle&quot;);
@@ -565,22 +532,40 @@ function beforeGeneration( chart, context )
 	var values = new Array();
 
 	// Get values for all data series
-	for ( i = 0; i &lt; 1; i++ )
+	
+	// Only 1 series here
+	k = 0;
+	
+	for ( i = k; i &lt; k+1; i++ )
 	{
 		sd = orthAxis.getSeriesDefinitions( ).get( i );
 		runtimeSeries = sd.getRunTimeSeries( );
-		s = runtimeSeries.get(0);
-		values[i] = s.getDataSet( ).getValues( );
+		
 	}
-
-	for ( j = 1; j &lt; values[0].length - 1; j++ )
+	
+	//groups in series
+	groupnr = 29;
+	
+	for ( kk = 0; kk &lt; groupnr - 1; kk++ )
 	{
-		// Calculate running total
-		values[0][j] = new java.lang.Double( values[0][j - 1].doubleValue()  +
-			values[0][j].doubleValue() );
-
-	} 
-
+		s = runtimeSeries.get(kk);
+		values[0] = s.getDataSet( ).getValues( );
+	
+	values[k][0] = 0;
+		for ( j = 1; j &lt; values[0].length ; j++ )
+		{
+	 		if(null == values[k][j]){
+	 			nextval = 0;
+	 		}else{
+ 				nextval = values[k][j].doubleValue();
+	 		}
+					
+			// Calculate running total
+			values[k][j] = new java.lang.Double( values[k][j - 1].doubleValue()  +
+				nextval );
+	
+		} 
+	}
 }
 /**
  * Called before the chart is rendered.
