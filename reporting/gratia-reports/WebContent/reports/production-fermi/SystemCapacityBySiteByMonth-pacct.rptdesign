@@ -114,7 +114,7 @@
                     <structure>
                         <property name="position">3</property>
                         <property name="name">availablebenchdays</property>
-                        <property name="dataType">decimal</property>
+                        <property name="dataType">float</property>
                     </structure>
                 </list-property>
             </structure>
@@ -159,18 +159,19 @@
                     <property name="position">3</property>
                     <property name="name">availablebenchdays</property>
                     <property name="nativeName">availablebenchdays</property>
-                    <property name="dataType">decimal</property>
-                    <property name="nativeDataType">3</property>
+                    <property name="dataType">float</property>
+                    <property name="nativeDataType">8</property>
                 </structure>
             </list-property>
             <property name="queryText">select   S.SiteName,date_format(N.EndTime,'%Y-%m') as datevalue,
-count(distinct N.Node)*N.BenchmarkScore*N.DaysInMonth*N.CpuCount/1000 as availablebenchdays
-from NodeSummary N, Probe P, Site S
+count(distinct N.Node)*C.BenchmarkScore*N.DaysInMonth*C.CpuCount/1000 as availablebenchdays
+from NodeSummary N, Probe P, Site S, CPUInfo C
 where P.siteid = S.siteid and N.ProbeName = P.ProbeName
+		and N.HostDescription = C.HostDescription
 and N.EndTime >= ?
 and N.EndTime &lt;= ?
-group by S.SiteName,  datevalue, BenchmarkScore
-order by S.SiteName, datevalue, BenchmarkScore
+group by S.SiteName,  datevalue, N.BenchmarkScore
+order by S.SiteName, datevalue, N.BenchmarkScore
 </property>
         </oda-data-set>
     </data-sets>
