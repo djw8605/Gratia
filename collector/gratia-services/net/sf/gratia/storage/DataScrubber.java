@@ -65,7 +65,6 @@ public class DataScrubber {
                 Logging.debug("DataScrubber: About to query " + query.getQueryString());
 
                 query.setString( "dateLimit", limit );
-                query.setMaxResults(batchSize);
 
                 deletedThisIteration = query.executeUpdate();
                 tx.commit();
@@ -94,7 +93,6 @@ public class DataScrubber {
                 Logging.debug("DataScrubber: About to query " + query.getQueryString());
 
                 query.setString( "dateLimit", limit );
-                query.setMaxResults(batchSize);
 
                 deletedThisIteration = query.executeUpdate();
                 tx.commit();
@@ -157,7 +155,9 @@ public class DataScrubber {
         Logging.log("DataScrubber: Remove all MetricRecord RawXML records older than: " + limit);
 
         String delquery = "delete X from MetricRecord_Xml as X, MetricRecord_Meta as M, MetricRecord as J " +
-            " where X.dbid = M.dbid and X.dbid = J.dbid and ExtraXml = \"\" and (Timestamp is null || Timestamp < :dateLimit) and ServerDate < :dateLimit";
+            " where X.dbid = M.dbid and X.dbid = J.dbid and ExtraXml = \"\" " +
+            "and (Timestamp is null || Timestamp < :dateLimit) and ServerDate < :dateLimit" +
+            " limit " + batchSize;
         long nrecords = ExecuteSQL( delquery, limit, "MetricRecord RawXML");
 
         Logging.info("DataScrubber: Removed " + nrecords +
@@ -173,7 +173,8 @@ public class DataScrubber {
         Logging.log("DataScrubber: Remove all JobUsage RawXML records older than: " + limit);
  
         String delquery = "delete X from JobUsageRecord_Xml X, JobUsageRecord_Meta as M, JobUsageRecord as J " + 
-            " where M.dbid = X.dbid and J.dbid = X.dbid and ExtraXml = \"\" and (EndTime is null || EndTime < :dateLimit) and ServerDate < :dateLimit";
+            " where M.dbid = X.dbid and J.dbid = X.dbid and ExtraXml = \"\" and (EndTime is null || EndTime < :dateLimit) and ServerDate < :dateLimit" +
+            " limit " + batchSize;
         long nrecords = ExecuteSQL(delquery, limit, "JobUsageRecrod RawXML");
 
         Logging.info("DataScrubber: Removed " + nrecords +
@@ -271,7 +272,8 @@ public class DataScrubber {
         if (limit.length() > 0) {
             Logging.log("DataScrubber: Remove all Metric records older than: " + limit); 
 
-            String hqlDelete = "delete MetricRecord where Timestamp.Value < :dateLimit and ServerDate < :dateLimit";
+            String hqlDelete = "delete MetricRecord where Timestamp.Value < :dateLimit and ServerDate < :dateLimit" +
+                " limit " + batchSize;
             nrecords = Execute(hqlDelete, limit, "Metric records");
 
             Logging.info("DataScrubber: deleted " + nrecords + " Metric records ");
@@ -339,7 +341,8 @@ public class DataScrubber {
                         " older than: " + limit);
             String hqlDelete = "delete " + tableName + " where " +
                 extraWhereClause +
-                dateColumn + " < :dateLimit";
+                dateColumn + " < :dateLimit" +
+                " limit " + batchSize;
             count = Execute(  hqlDelete, limit, " entries " + extra_message);
             Logging.info("DataScrubber: deleted " + count + "  entries from " +
                          tableName + extra_message);
