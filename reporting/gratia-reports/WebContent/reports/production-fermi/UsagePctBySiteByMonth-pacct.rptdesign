@@ -138,18 +138,13 @@
                     </structure>
                     <structure>
                         <property name="position">8</property>
-                        <property name="name">HostDescription</property>
-                        <property name="dataType">string</property>
+                        <property name="name">availablebenchdays</property>
+                        <property name="dataType">float</property>
                     </structure>
                     <structure>
                         <property name="position">9</property>
-                        <property name="name">availablebenchdays</property>
-                        <property name="dataType">decimal</property>
-                    </structure>
-                    <structure>
-                        <property name="position">10</property>
                         <property name="name">halfavailablebenchdays</property>
-                        <property name="dataType">decimal</property>
+                        <property name="dataType">float</property>
                     </structure>
                 </list-property>
             </structure>
@@ -230,37 +225,37 @@
                 </structure>
                 <structure>
                     <property name="position">8</property>
-                    <property name="name">HostDescription</property>
-                    <property name="nativeName">HostDescription</property>
-                    <property name="dataType">string</property>
-                    <property name="nativeDataType">12</property>
+                    <property name="name">availablebenchdays</property>
+                    <property name="nativeName">availablebenchdays</property>
+                    <property name="dataType">float</property>
+                    <property name="nativeDataType">8</property>
                 </structure>
                 <structure>
                     <property name="position">9</property>
-                    <property name="name">availablebenchdays</property>
-                    <property name="nativeName">availablebenchdays</property>
-                    <property name="dataType">decimal</property>
-                    <property name="nativeDataType">3</property>
-                </structure>
-                <structure>
-                    <property name="position">10</property>
                     <property name="name">halfavailablebenchdays</property>
                     <property name="nativeName">halfavailablebenchdays</property>
-                    <property name="dataType">decimal</property>
-                    <property name="nativeDataType">3</property>
+                    <property name="dataType">float</property>
+                    <property name="nativeDataType">8</property>
                 </structure>
             </list-property>
-            <property name="queryText">select   S.SiteName,date_format(N.EndTime, '%Y-%m') as datevalue,
-sum(N.CpuSystemTime)*N.BenchmarkScore/1000/86400 as cpusystembenchdays, sum(CpuUserTime)*N.BenchmarkScore/1000/86400 as cpuuserbenchdays,
-count(distinct N.Node), N.BenchmarkScore,N.CpuCount, N.HostDescription, count(distinct N.Node)*N.BenchmarkScore*N.DaysInMonth*N.CpuCount/1000 as availablebenchdays,
-count(distinct N.Node)*N.BenchmarkScore*N.DaysInMonth*N.CpuCount*.5/1000 as halfavailablebenchdays
-from NodeSummary N, Probe P, Site S
+            <property name="queryText">
+select   S.SiteName,
+	date_format(N.EndTime, '%Y-%m') as datevalue,
+	sum(N.CpuSystemTime)*N.BenchmarkScore/1000/86400 as cpusystembenchdays,
+	sum(CpuUserTime)*N.BenchmarkScore/1000/86400 as cpuuserbenchdays,
+	count(distinct N.Node),
+	N.BenchmarkScore,
+	N.CpuCount,
+	count(distinct N.Node)*C.BenchmarkScore*N.DaysInMonth*N.CpuCount/1000 as availablebenchdays,
+	count(distinct N.Node)*C.BenchmarkScore*N.DaysInMonth*N.CpuCount*.5/1000 as halfavailablebenchdays
+from NodeSummary N, Probe P, Site S, CPUInfo C
 where P.siteid = S.siteid and N.ProbeName = P.ProbeName
-and date_format(N.EndTime,'%Y-%m') >= ?
-and date_format(N.EndTime,'%Y-%m') &lt;= ?
+	and N.HostDescription = C.HostDescription
+	and date_format(N.EndTime,'%Y-%m') >= ?
+	and date_format(N.EndTime,'%Y-%m') &lt;= ?
+
 group by S.SiteName,  datevalue, BenchmarkScore
-order by S.SiteName, datevalue, BenchmarkScore
-</property>
+order by S.SiteName, datevalue, BenchmarkScore</property>
             <xml-property name="designerValues"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <model:DesignValues xmlns:design="http://www.eclipse.org/datatools/connectivity/oda/design" xmlns:model="http://www.eclipse.org/birt/report/model/adapter/odaModel">
   <Version>1.0</Version>
@@ -381,11 +376,6 @@ order by S.SiteName, datevalue, BenchmarkScore
                     <property name="name">CpuCount</property>
                     <expression name="expression">dataSetRow["CpuCount"]</expression>
                     <property name="dataType">integer</property>
-                </structure>
-                <structure>
-                    <property name="name">HostDescription</property>
-                    <expression name="expression">dataSetRow["HostDescription"]</expression>
-                    <property name="dataType">string</property>
                 </structure>
                 <structure>
                     <property name="name">availablebenchdays</property>
