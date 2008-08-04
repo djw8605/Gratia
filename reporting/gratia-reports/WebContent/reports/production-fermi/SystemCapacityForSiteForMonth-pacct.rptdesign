@@ -872,7 +872,7 @@
                     <structure>
                         <property name="position">5</property>
                         <property name="name">availablebenchdays</property>
-                        <property name="dataType">decimal</property>
+                        <property name="dataType">float</property>
                     </structure>
                 </list-property>
             </structure>
@@ -931,18 +931,20 @@
                     <property name="position">5</property>
                     <property name="name">availablebenchdays</property>
                     <property name="nativeName">availablebenchdays</property>
-                    <property name="dataType">decimal</property>
-                    <property name="nativeDataType">3</property>
+                    <property name="dataType">float</property>
+                    <property name="nativeDataType">8</property>
                 </structure>
             </list-property>
-            <property name="queryText">select   S.SiteName,date_format(N.EndTime,'%Y-%m') as datevalue, N.HostDescription,count(distinct N.Node) as nodecount,
-count(distinct N.Node)*N.BenchmarkScore*N.DaysInMonth*N.CpuCount/1000 as availablebenchdays
-from NodeSummary N, Probe P, Site S
+            <property name="queryText">select   S.SiteName,date_format(N.EndTime,'%Y-%m') as datevalue, 
+	C.HostDescription,count(distinct N.Node) as nodecount,
+	count(distinct N.Node)*C.BenchmarkScore*N.DaysInMonth*C.CpuCount/1000 as availablebenchdays
+from NodeSummary N, Probe P, Site S, CPUInfo C
 where P.siteid = S.siteid and N.ProbeName = P.ProbeName
-and date_format(N.EndTime,'%Y-%m') = ?
-and S.SiteName = ?
-group by  HostDescription
-order by  HostDescription
+	and N.HostDescription = C.HostDescription
+	and date_format(N.EndTime,'%Y-%m') = ?
+	and S.SiteName = ?
+group by  C.HostDescription
+order by  C.HostDescription
 </property>
         </oda-data-set>
     </data-sets>
