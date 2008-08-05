@@ -8,7 +8,18 @@ import org.dom4j.*;
 import org.dom4j.io.*;
 import java.io.*;
 
+import net.sf.gratia.util.Logging;
+
 public class RecordConverter {
+    private ArrayList<RecordLoader> loaderList = new ArrayList<RecordLoader>();
+
+    public RecordConverter() {
+        // Load up the list with loaders
+        loaderList.add(new UsageRecordLoader());
+        loaderList.add(new MetricRecordLoader());
+        loaderList.add(new ProbeDetailsLoader());
+    }
+
     public ArrayList convert(String xml) throws Exception {
         ArrayList foundRecords = new ArrayList(); 
         SAXReader saxReader = new SAXReader();
@@ -32,11 +43,6 @@ public class RecordConverter {
                 expectedRecords = eroot.nodeCount();
             }
 
-            ArrayList<RecordLoader> loaderList = new ArrayList<RecordLoader>();
-            loaderList.add(new UsageRecordLoader());
-            loaderList.add(new MetricRecordLoader());
-            loaderList.add(new ProbeDetailsLoader());
-
             ArrayList recordsThisLoader = null;
          
             for (RecordLoader loader : loaderList) {
@@ -52,6 +58,10 @@ public class RecordConverter {
             if (foundRecords.size() == 0) {
                 // Unexpected root element
                 throw new Exception("Found problem parsing document with root name " + eroot.getName());
+            } else if ((expectedRecords > -1) &&
+                       (expectedRecords != foundRecords.size())) {
+                Logging.log("Expected an envelope with " + expectedRecords +
+                            " records but found " + foundRecords.size());
             }
         }
         catch (Exception e) {
