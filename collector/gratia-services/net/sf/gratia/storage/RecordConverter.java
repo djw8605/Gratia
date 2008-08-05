@@ -8,70 +8,67 @@ import org.dom4j.*;
 import org.dom4j.io.*;
 import java.io.*;
 
-public class RecordConverter
-{
-   XP xp = new XP();
+public class RecordConverter {
+    public ArrayList convert(String xml) throws Exception {
+        ArrayList foundRecords = new ArrayList(); 
+        SAXReader saxReader = new SAXReader();
+        Document doc = null;
+        Element eroot = null;
 
-   public ArrayList convert(String xml) throws Exception
-   {
-      ArrayList usageRecords = null; 
-      SAXReader saxReader = new SAXReader();
-      Document doc = null;
-      Element eroot = null;
+        // Read the XML into a document for parsing
+        try {
+            doc = saxReader.read(new StringReader(xml));
+        }
+        catch (Exception e) {
+            Utils.GratiaError(e,"XML:" + "\n\n" + xml + "\n\n");
+            throw new Exception("Badly formed xml file");
+        }
+        try {
+            eroot = doc.getRootElement();
 
-      // Read the XML into a document for parsing
-      try
-      {
-         doc = saxReader.read(new StringReader(xml));
-      }
-      catch (Exception e)
-      {
-         Utils.GratiaError(e,"XML:" + "\n\n" + xml + "\n\n");
-         throw new Exception("Badly formed xml file");
-      }
-      try
-      {
-         eroot = doc.getRootElement();
+            int expectedRecords = -1;
 
-         UsageRecordLoader load = new UsageRecordLoader();
-         MetricRecordLoader mload = new MetricRecordLoader();
-         ProbeDetailsLoader hload = new ProbeDetailsLoader();
+            if (eroot.getName().equals("RecordEnvelope")) {
+                expectedRecords = eroot.nodeCount();
+            }
 
-         usageRecords = load.ReadRecords(eroot);
-         if (usageRecords == null)
-         {
-            usageRecords = mload.ReadRecords(eroot);
-         }
-         if (usageRecords == null)
-         {
-             usageRecords = hload.ReadRecords(eroot);
-         }
-         if (usageRecords == null)
-         {
-            // Unexpected root element
-            throw new Exception("In the xml usage record, the expected root nodes are " +
-                                "JobUsageRecords, JobUsageRecord, Usage, UsageRecord " +
-                                "UsageRecordType and MetricRecord.\nHowever we got " + eroot.getName());
-         }
-      }
-      catch (Exception e)
-      {
-         Utils.GratiaError(e);
-         throw e;
-         // throw new Exception("loadURXmlFile saw an error at 2:" + e);
-      }
-      finally
-      {
-         // Cleanup object instantiations
-         saxReader = null;
-         doc = null;
-         eroot = null;
-      }
+            ArrayList<RecordLoader> loaderList = new ArrayList<RecordLoader>();
+            loaderList.add(new UsageRecordLoader());
+            loaderList.add(new MetricRecordLoader());
+            loaderList.add(new ProbeDetailsLoader());
 
-      // The usage records array list is now populated with all the job usage records found in the given XML file
-      //  return it to the caller.
-      if (usageRecords == null) usageRecords = new ArrayList();
-      return usageRecords;
-   }
+            ArrayList recordsThisLoader = null;
+         
+            for (RecordLoader loader : loaderList) {
+                recordsThisLoader = loader.ReadRecords(eroot);
+                if (recordsThisLoader != null) {
+                    foundRecords.addAll(recordsThisLoader);
+                    if ((expectedRecords == -1) || // Only expected one record or type of record
+                        (expectedRecords >= foundRecords.size())) { // Found what we're looking for
+                        break; // done
+                    }
+                }
+            }
+            if (foundRecords.size() == 0) {
+                // Unexpected root element
+                throw new Exception("Found problem parsing document with root name " + eroot.getName());
+            }
+        }
+        catch (Exception e) {
+            Utils.GratiaError(e);
+            throw e;
+            // throw new Exception("loadURXmlFile saw an error at 2:" + e);
+        }
+        finally {
+            // Cleanup object instantiations
+            saxReader = null;
+            doc = null;
+            eroot = null;
+        }
+
+        // The records array list is now populated with all the records
+        // found in the given XML file: return it to the caller.
+        return foundRecords;
+    }
 
 }

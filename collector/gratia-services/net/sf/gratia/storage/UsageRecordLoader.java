@@ -38,20 +38,22 @@ public class UsageRecordLoader implements RecordLoader {
 
             // Add this populated job usage record to the usage records array list
             usageRecords.add(job);
-        } else if (eroot.getName() == "UsageRecords"
-                   || eroot.getName() == "RecordEnvelope") {
+        } else if (eroot.getName().equals("UsageRecords")
+                   || eroot.getName().equals("RecordEnvelope")) {
             // This is a usage records node
             // which should contain one to many job usage record nodes so start a loop through its children
             for (Iterator i = eroot.elementIterator(); i.hasNext();) {
                 Element element = (Element) i.next();
-                if (element.getName() == "JobUsageRecord") {
+                if (element.getName().equals("JobUsageRecord")) {
                     //The current element is a job usage record node.  Use it to populate a JobUsageRecord object
                     Record job = ReadRecord(element);
                     usageRecords.add(job);
-                } else {
+                } else if (eroot.getName().equals("UsageRecords")) { // Definitely expected JobUsageRecord here
                     // Unexpected element
                     throw new Exception("Unexpected element: "
-                            + element.getName() + "\n" + element);
+                                        + element.getName() + "\n" + element);
+                } else {
+                    // Don't care
                 }
             }
         }
