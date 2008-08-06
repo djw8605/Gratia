@@ -154,21 +154,23 @@ where S.siteid = P.siteid
                     <property name="name">GroupByFormat</property>
                     <property name="dataType">string</property>
                     <property name="position">1</property>
-                    <expression name="defaultValue">'%M %d,%Y'</expression>
+                    <expression name="defaultValue">'%Y-%m-%d'</expression>
                     <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
                 </structure>
                 <structure>
                     <property name="name">SelectSiteName</property>
                     <property name="dataType">string</property>
                     <property name="position">2</property>
-                    <expression name="defaultValue">' '</expression>
+                    <expression name="defaultValue">'FNAL_CDFOSG_1'</expression>
                     <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
                 </structure>
                 <structure>
                     <property name="name">StartDate</property>
                     <property name="dataType">string</property>
                     <property name="position">3</property>
-                    <expression name="defaultValue">'2008-5-01'</expression>
+                    <expression name="defaultValue">'2008-01-01'</expression>
                     <property name="isOptional">false</property>
                     <property name="allowNull">true</property>
                     <property name="isInput">true</property>
@@ -178,7 +180,7 @@ where S.siteid = P.siteid
                     <property name="name">EndDate</property>
                     <property name="dataType">string</property>
                     <property name="position">4</property>
-                    <expression name="defaultValue">'2008-06-01'</expression>
+                    <expression name="defaultValue">'2008-02-01'</expression>
                     <property name="isOptional">false</property>
                     <property name="allowNull">true</property>
                     <property name="isInput">true</property>
