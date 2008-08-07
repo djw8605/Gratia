@@ -337,6 +337,12 @@ if [ $vdt_install ];then
     cd -
   done
 
+  # May not always need to do this ...
+  populate_server_lib
+  populate_common_lib
+  populate_common_classes
+
+
   #-- reset some permissions --
   echo "... fixing ownership:"
   chown -R daemon $tomcat_webapps
