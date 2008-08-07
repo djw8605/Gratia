@@ -118,15 +118,10 @@ function validate_environment {
     logit "... deleting $dir"
     rm -rf $dir
   fi 
-  #--- verify ups is available ---- 
-  if [ -f /usr/local/etc/setups.sh ];then
-    . /usr/local/etc/setups.sh
-  elif [ -f "/fnal/ups/etc/setups.sh" ];then
-      . /fnal/ups/etc/setups.sh
-  else
-    logerr "Cannot find UPS CVS on this host: $(hostname)"
+  #--- verify cvs is available ---- 
+  if [ "$(type cvs >/dev/null 2>&1 ;echo $?)" != "0" ];then
+    logerr "Cannot find CVS on this host: $(hostname)"
   fi
-  setup cvs
 }
 # -------------------------------
 function cvs_checkout_gratia {
@@ -172,19 +167,20 @@ function cleanup {
   cnt=$(($total - $files))
   if [ $cnt -le 0 ];then
     logit "... No files to remove. $total total files"
+  else
+    logit "... Files to remove: $cnt"
+    for file in $(ls | head -$cnt )
+    do
+      if [ -f $file ];then
+        logit "... removing file: $file"
+        runit "rm -f $file"
+      fi
+      if [ -d $file ];then
+        logit "... removing directory: $file"
+        runit "rm -rf $file"
+      fi
+    done 
   fi
-  logit "... Files to remove: $cnt"
-  for file in $(ls | head -$cnt )
-  do
-    if [ -f $file ];then
-      logit "... removing file: $file"
-      runit "rm -f $file"
-    fi
-    if [ -d $file ];then
-      logit "... removing directory: $file"
-      runit "rm -rf $file"
-    fi
-  done 
 }
 # -------------------------------
 function make_symlink {
@@ -196,10 +192,6 @@ function make_symlink {
 PGM=$(basename $0)
 DATE=$(date '+%Y-%m-%d')
 buildHOME=$HOME
-build_dir=$buildHOME/gratia-builds
-nightly_dir=$build_dir/gratia-$DATE
-latest_good_build=$build_dir/gratia-latest
-logfile=$nightly_dir.log
 files=7
 
 MAILTO=""
@@ -230,9 +222,10 @@ while test "x$1" != "x"; do
 done
 
 #--- build area ----
-build_dir=$buildHOME/$(basename $build_dir)
-nightly_dir=$build_dir/$(basename $nightly_dir)
-logfile=$build_dir/$(basename $logfile)
+build_dir=$buildHOME/gratia-builds
+nightly_dir=$build_dir/gratia-$DATE
+latest_good_build=$build_dir/gratia-latest
+logfile=$nightly_dir.log
 
 
 #--- make area ----
