@@ -99,8 +99,9 @@
 #             tomcat_native_lib => '/data/apr/lib',
              "properties.attributes" =>
              {
-              "gratia.service.safeStart" => 1,
+              "gratia.service.safeStart" => 0,
               "service.logging.useLog4j" => 1,
+              "service.logging.dailyLogging" => "1",
               "maintain.history.log" => 2,
               "monitor.listener.wait" => 240,
               "service.rmiservlet.level" => "FINEST",
@@ -179,7 +180,7 @@
                   }
                 },
  rsv_test => { http_port => 8886,
-               ssl_port => 8880,
+               ssl_port => 8868,
                rmi_port => 23000,
                jmx_port => 8064,
                server_port => 8164,
@@ -191,7 +192,9 @@
                 "monitor.listener.wait" => 240,
                 "service.rmiservlet.level" => "FINEST",
                 "monitor.to.address0" => 'greenc@fnal.gov',
-                "service.listener.threads" => 1
+                "service.listener.threads" => 1,
+                "service.admin.FQAN.0" => "/fermilab/Role=GratiaGlobalAdmin",
+                "service.admin.FQAN.1" => "/fermilab/Role=GratiaFermilabAdmin"
                }
              },
  weigand => { http_port => 8887,
