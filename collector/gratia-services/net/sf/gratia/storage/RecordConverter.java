@@ -40,7 +40,7 @@ public class RecordConverter {
             int expectedRecords = -1;
 
             if (eroot.getName().equals("RecordEnvelope")) {
-                expectedRecords = eroot.nodeCount();
+                expectedRecords = eroot.elements().size();
             }
 
             ArrayList recordsThisLoader = null;
