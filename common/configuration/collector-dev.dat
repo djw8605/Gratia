@@ -101,7 +101,6 @@
              {
               "gratia.service.safeStart" => 0,
               "service.logging.useLog4j" => 1,
-              "service.logging.dailyLogging" => "1",
               "maintain.history.log" => 2,
               "monitor.listener.wait" => 240,
               "service.rmiservlet.level" => "FINEST",
