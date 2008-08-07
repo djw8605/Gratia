@@ -52,7 +52,7 @@ public class ExpirationDateCalculator {
                         // Parse and cache
                         try {
                             Duration duration = new Duration(p.getProperty(key));
-                            limitCache.put(m.group(1), duration);
+                            limitCache.put(m.group(1).toLowerCase(), duration);
                             Logging.log("ExpirationDateCalculator found lifetime property " +
                                         key + " of " + duration);
                         }
@@ -91,8 +91,7 @@ public class ExpirationDateCalculator {
 
     public Date expirationDate(Date refDate, String table,
                                String qualifier) {
-        String key = table +
-            ((qualifier.length() > 0)?("." + qualifier):"");
+        String key = (table + ((qualifier.length() > 0)?("." + qualifier):"")).toLowerCase();
         String date = dateFormatter.format(refDate);
         cacheLock.lock();
         GregorianCalendar cal = new
