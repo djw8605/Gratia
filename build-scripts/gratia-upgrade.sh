@@ -125,10 +125,10 @@ function choose_collector {
 These are the collectors on this node ($tomcat_host) you are permitted to upgrade:
 $(for a in $collectors;do echo "   $a";done)
 
-Choose a collector: " 
+Choose a collector (none to exit): " 
     read tomcat 
     if [ -z "$tomcat" ];then
-      try_again "... You HAVE to choose one to proceed."
+      exit 0
     fi
     validate_collector
     break
