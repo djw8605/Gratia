@@ -37,7 +37,6 @@ my @required_properties = ();
 my %attribute_defaults =
 	(
 	 max_heap_size => "256m",
-	 collector_host => "localhost",
 	 db_port => 3320,
 	 db_host => "gratia-db01.fnal.gov",
 	 UserConfig => "UserConfig_osg.xml",
@@ -272,6 +271,9 @@ foreach my $config (@instance_list) {
   # Next if failed requirements.
   next if $requirements_error;
 
+  # Check and (maybe) override remote_host setting
+  verify_remote_host_setting($config, $config_ref);
+
   # Configuration operations.
   configure_keyfile_owners($config, $config_ref);
   configure_collector_config($config, $config_ref);
@@ -365,7 +367,7 @@ sub configure_init_file {
   my $stop_db_update_url =
     sprintf("%s%s:%s/gratia-administration/systemadministration.html?action=stopDatabaseUpdateThreads",
             $options{"use-ssl"}?"https://":"http://",
-            $collector_config->{remote_host},
+            $collector_config->{collector_host},
             $options{"use-ssl"}?$collector_config->{ssl_port}:$collector_config->{http_port});
 	my $init_script = "/etc/rc.d/init.d/tomcat-$instance_name";
 	my $init_script_txt = $init_script_template;
@@ -623,23 +625,9 @@ sub configure_tomcat_users {
 }
 
 sub construct_monitor_message_subject {
-	my ($instance_name, $collector_config) = @_;
-  my $remote_host;
-  if ($options{"remote-host"}) {
-    print STDERR "INFO: overriding instance-specified remote hostname with command-line-specified $options{\"remote-host\"}\n";
-    $remote_host = $options{"remote-host"};
-  } elsif ($collector_config->{remote_host}) {
-    print STDERR "INFO: using instance-specified remote hostname ",
-      $collector_config->{remote_host}, "\n";
-    $remote_host = $collector_config->{remote_host};
-  } else {
-    print STDERR "INFO: using default remote hostname $default_remote_host";
-    $remote_host = $default_remote_host;
-  }
-  # Propagate back
-  $collector_config->{remote_host} = $remote_host;
-	return sprintf("%s:%s %s Potential listener problem",
-                 $remote_host,
+  my ($instance_name, $collector_config) = @_;
+  return sprintf("%s:%s %s Potential listener problem",
+                 $collector_config->{remote_host},
                  $collector_config->{http_port},
                  "tomcat-$instance_name"
                 );
@@ -664,6 +652,27 @@ sub configure_static_report_generation {
                              $collector_config->{http_port}));
   system(sprintf("VISUAL=${gratia_dir}/safe-replace-crontab CRON_TIMING=\"42 0 * * *\" CRON_CMD=\"'$static_report_generator' %s >/dev/null 2>&1\" crontab -e",
                  join(" ", map { "'$_'"; } @script_pars)));
+}
+
+sub verify_remote_host_setting {
+  my ($instance_name, $collector_config) = @_;
+  my $remote_host;
+  if ($options{"remote-host"}) {
+    print STDERR "INFO: overriding instance-specified remote hostname with command-line-specified $options{\"remote-host\"}\n";
+    $remote_host = $options{"remote-host"};
+  } elsif ($collector_config->{remote_host}) {
+    print STDERR "INFO: using instance-specified remote hostname ",
+      $collector_config->{remote_host}, "\n";
+    $remote_host = $collector_config->{remote_host};
+  } else {
+    print STDERR "INFO: using default remote hostname $default_remote_host";
+    $remote_host = $default_remote_host;
+  }
+  # Propagate back for consistency
+  $collector_config->{remote_host} = $remote_host;
+  $collector_config->{collector_host} =
+    ( $collector_config->{remote_host} || "localhost" )
+      unless exists $collector_config->{collector_host};
 }
 
 use File::Find;
