@@ -4,7 +4,7 @@
         "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 
 
-<hibernate-mapping package= "net.sf.gratia.storage">
+<hibernate-mapping package="net.sf.gratia.storage">
 
   <class name="Role" table="Role" node="Role" lazy="false">
     <id name="roleid" column="roleid" type="int">
@@ -59,6 +59,9 @@
     <property name="rowcount" column="rowcount" type="int"/>
     <property name="probename" column="probename"/>
     <property name="recordtable" column="recordtable"/>
+    <property name="bundleSize" type="int">
+      <column name="bundleSize" not-null="true" default="0" />
+    </property>
   </class>
 
   <class name="Security" table="Security" node="Security" lazy="false">
