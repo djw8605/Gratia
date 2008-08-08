@@ -14,9 +14,11 @@ function ask_continue {
 }
 #------------------------------------
 function logit {
-  logfile=$tomcat_dir/${tomcat}-upgrade.log
   DATE="$(date '+%Y/%m/%d-%H:%M:%S')"
-  echo "$1" | tee -a $logfile
+  case $daily in
+    "yes" ) echo "$1" >>$logfile 2>&1 ;;
+       *  ) echo "$1" 2>&1 | tee -a $logfile ;;
+  esac
 }
 #------------------------------------
 function logerr {
@@ -29,6 +31,24 @@ function logerr {
 function usage_error {
   usage;echo;echo "ERROR- $1";echo
   exit 1
+}
+#------------------------------------
+function runit {
+  cmd="$1"
+  logit "...RUNNING: $cmd"
+  case $daily in
+   "yes" ) $cmd >>$logfile 2>&1;rtn=$?
+           if [ "$rtn" != "0" ];then
+             logerr "Command failed: $cmd"
+           fi
+          ;;
+       * ) ( $cmd;rtn=$?
+            if [ "$rtn" != "0" ];then
+              logerr "Command failed: $cmd"
+              exit 1  # because it is in a child shell
+            fi ) 2>&1 | tee -a $logfile
+           ;;
+  esac
 }
 #----------------------
 function try_again {
@@ -157,6 +177,7 @@ function choose_source_directory {
     if [ -n "$ans" ];then
       source_type=$ans
     fi
+    echo prompt:  $prompt
     case $source_type in 
       "releases" ) find_release_source ; break ;;
       "builds"   ) find_build_source   ; break ;;
@@ -260,16 +281,7 @@ function install_upgrade {
   if [ "$mysql_file" != "NONE" ];then
     pswd="$(cat $mysql_file)"
   fi
-  cmd="$pgm -d $pswd -S $source -s $(echo $tomcat|cut -d'-' -f2)"
-echo "
-... executing:
-$cmd"
-  sleep 3
-  (${cmd};rtn=$?
-   if [ "$rtn" != "0" ];then
-     logerr "Install FAILED!!!!"
-   fi
-  ) 2>&1 |tee -a $logfile
+  runit "$pgm -d $pswd -S $source -s $(echo $tomcat|cut -d'-' -f2)"
   logit "Install was successful"
   sleep 3
 }
@@ -318,14 +330,13 @@ function ask_to_start_collector {
 #-----------------------
 function start_collector {
   delimit start_collector
-  cmd="service $(echo $tomcat |cut -d'/' -f3) start"
   logit "... starting collector"
-  logit "    $cmd" 
-  ( $cmd;rtn=$?
-    if [ "$rtn" != "0" ];then
-      logerr "Non-zero return code ($rtn) on collector startup"
-    fi
-  ) 2>&1 | tee -a $logfile
+  runit "/sbin/service $(echo $tomcat |cut -d'/' -f3) start"
+  logit
+  logit "... collector started
+$(ps -ef |grep $tomcat | grep '   1' | egrep -v grep)
+"
+  logit
 }
 #-----------------------
 function ask_to_run_static_reports {
@@ -339,26 +350,27 @@ function ask_to_run_static_reports {
 #-----------------------
 function run_static_reports {
   delimit run_static_reports
-  pdf_dir=$tomcat_dir/$tomcat/webapps/reports-static
-  csv_dir=$tomcat_dir/$tomcat/webapps/reports-static_csv
+  pdf_dir=$tomcat_dir/$tomcat/webapps/gratia-reports/reports-static
+  csv_dir=$tomcat_dir/$tomcat/webapps/gratia-reports/reports-static_csv
   case $tomcat in 
-   "itb_gratia_itb" ) logit "... sleeping 20 seconds to allow tomcat to initialize"
-                      sleep 20 
-                      cmd="$(crontab -l | grep $tomcat_dir/$tomcat |awk '{print $6,$7,$8}')"
-                      logit "RUNNING: $cmd"
-                      ( $cmd;rtn=$?
-                        if [ "$rtn" != "0" ];then
-                          logerr "Non-zero return code ($rtn) on static reports"
-                        fi
-                      ) 2>&1 | tee -a $logfile
-                      if [ ! -d "$pdf_dir" ];then
-                        logerr "Static reports not available. Directory does not exist: $pdf_dir"
-                      fi
-                      if [ ! -d "$csv_dir" ];then
-                        logerr "Static reports not available. Directory does not exist: $csv_dir"
-                      fi
-                     ;;
-   * ) logit "... static reports not used for $tomcat";;
+   "tomcat-itb_gratia_itb" ) 
+         logit "... sleeping 20 seconds for tomcat to autodeply war files."
+         sleep 20
+         logit "... running static reports."
+         script="$(crontab -l| grep $tomcat_dir/$tomcat |awk '{print $6,$7,$8}' |sed -e s/\'//g)"
+         runit "$script"
+         if [ ! -d "$pdf_dir" ];then
+           logerr "Static reports not available. Directory does not exist: $pdf_dir"
+         fi
+         if [ ! -d "$csv_dir" ];then
+           logerr "Static reports not available. Directory does not exist: $csv_dir"
+         fi
+         logit "Static reports:
+$(ls -l $pdf_dir)
+$(ls -l $csv_dir)
+"
+         ;;
+   * ) logit "... static reports not used for $tomcat";logit;;
   esac     
 }
 #--------------------------------
@@ -407,9 +419,9 @@ $subject
 
 This is an automated message from $PGM running on $(hostname -s). 
 
-Check the following logs for possible causes:
+The following logs are available for more details:
   $logfile
-  $tomcat_dir/$tomcat/logs files.
+  $tomcat_dir/$tomcat/logs/*.log files.
 
 $msg
 EOF
@@ -429,7 +441,7 @@ function log_upgrade_end {
   logit "Log file: $logfile"
   logit "Upgrade of $tomcat on $(hostname -s) completed: $(date)"
   logit "=============================================================="
-  logit
+  cleanup
 }
 #----------------------------
 function process_in_prompt_mode {
@@ -466,10 +478,23 @@ function process_in_no_prompt_mode {
   fi
   log_upgrade_end
 }
+#----------------------------
+function cleanup {
+  cd $logdir
+  total=$(ls |  wc -l)
+  cnt=$(($total - $total_logfiles))
+  if [ $cnt -gt 0 ];then
+    for file in $(ls | head -$cnt )
+    do
+      rm -f $file
+    done
+  fi
+}
 #### MAIN ##############################################
 PGM=$(basename $0)
 tomcat_tarball=/home/gratia/tomcat-tarballs/apache-tomcat-5.5.25.tar.gz
 
+total_logfiles=10
 daily=NONE
 new_instance="no"
 prompt=yes
@@ -551,6 +576,13 @@ if [ "$prompt" = "no" ];then
   fi
 fi
 
+#--- set log file name ---
+logdir=$tomcat_dir/${tomcat}-upgrade.log
+logfile=$logdir/$(date '+%Y-%m-%d').log
+if [ ! -d "$logdir" ];then
+  mkdir -p $logdir
+fi
+
 #--- do it -----------
 qa_mode=yes
 while 
@@ -567,7 +599,10 @@ do
   esac
 done
 
+cleanup
+send_mail "SUCCESS" "The Gratia upgrade on $(hostname -f) of the $tomcat instance completed on $(date).
+
+Release data:
+$(cat $tomcat_dir/$tomcat/gratia/gratia-release)
+"
 exit 0
-
-
-
