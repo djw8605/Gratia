@@ -154,7 +154,7 @@ public class Logging {
         initialized = true;
     }
 
-    public static void log(LogLevel level, String message) {
+    public static void log(org.apache.log4j.Level level, String message) {
         if (! initialized) {
             logToScreen("Logger Not Initialized!");
             return;
@@ -168,7 +168,7 @@ public class Logging {
         }
     }
     
-    public static void log(LogLevel level, String message, Exception ex) {
+    public static void log(org.apache.log4j.Level level, String message, Exception ex) {
         if (! initialized) {
             logToScreen("Logger Not Initialized!");
             return;
