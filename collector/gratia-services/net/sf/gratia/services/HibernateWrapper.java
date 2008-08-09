@@ -22,7 +22,7 @@ public class HibernateWrapper
         return hibernateConfiguration;
     }
 
-   public static synchronized void start()
+   public static synchronized void start() throws Exception
    {
       if (systemDatabaseUp())
          return;
@@ -68,6 +68,7 @@ public class HibernateWrapper
       catch (Exception databaseError) {
           Logging.warning("HibernateWrapper: Error Starting Hibernate", databaseError);
           databaseDown = true;
+          throw databaseError; // Rethrow
       }
    }
 

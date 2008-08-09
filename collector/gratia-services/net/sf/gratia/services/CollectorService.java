@@ -184,8 +184,16 @@ public class CollectorService implements ServletContextListener {
             //
 
             Logging.info("CollectorService: starting Hibernate");
-            HibernateWrapper.start();
-
+            try {
+                HibernateWrapper.start();
+            }
+            catch (Exception e) {
+                Logging.warning("CollectorService: error while checking indexes.");
+                Logging.warning("CollectorService: manual correction required");
+                Logging.debug("Exception details:", e);
+                return;
+            }
+            
             // Verify defaults.
             Logging.info("CollectorService: checking defaults in DB");
             checker.AddDefaults();
@@ -198,6 +206,7 @@ public class CollectorService implements ServletContextListener {
             catch (Exception e) {
                 Logging.warning("CollectorService: error while checking indexes.");
                 Logging.warning("CollectorService: manual correction required");
+                return;
             }
 
             //

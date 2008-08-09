@@ -176,7 +176,11 @@ public class PerformanceThread extends Thread
 
          if (!HibernateWrapper.databaseUp())
          {
-            HibernateWrapper.start();
+             try {
+                 HibernateWrapper.start();
+             }
+             catch (Exception e) { // Ignore
+             }
             if (HibernateWrapper.databaseDown)
             {
                Logging.log("PerformanceThread: " + ident + ":Hibernate Down: Sleeping");

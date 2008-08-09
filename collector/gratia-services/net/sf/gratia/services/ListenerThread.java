@@ -140,7 +140,11 @@ public class ListenerThread extends Thread
 
                 if (!HibernateWrapper.databaseUp())
                     {
-                        HibernateWrapper.start();
+                        try {
+                            HibernateWrapper.start();
+                        }
+                        catch (Exception e) { // Ignore
+                        }
                         if (HibernateWrapper.databaseDown)
                             {
                                 Logging.log(ident + ": Hibernate Down: Sleeping");
@@ -253,7 +257,7 @@ public class ListenerThread extends Thread
 
                 if (p.getProperty("service.datapump.trace").equals("1"))
                     {
-                        Logging.log(ident + ": XML Trace:" + "\n\n" + blob + "\n\n");
+                        Logging.debug(ident + ": XML Trace:" + "\n\n" + blob + "\n\n");
                     }
 
                 //

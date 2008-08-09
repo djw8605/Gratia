@@ -60,7 +60,11 @@ public class ReplicationDataPump extends Thread {
     public void run() {
         replicationLog("Started run");
         if (!HibernateWrapper.databaseUp()) {
-            HibernateWrapper.start();
+            try {
+                HibernateWrapper.start();
+            }
+            catch (Exception ignore) {
+            }
             if (!HibernateWrapper.databaseUp()) {
                 replicationLog(LogLevel.INFO, "Hibernate Down - Exiting");
                 return;
