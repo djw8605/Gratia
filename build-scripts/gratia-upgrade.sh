@@ -337,6 +337,9 @@ function start_collector {
 $(ps -ef |grep $tomcat | grep '   1' | egrep -v grep)
 "
   logit
+  logit "... sleeping 20 seconds to allow tomcat to deplay war files"
+  sleep 20
+  verify_tomcat_connection
 }
 #-----------------------
 function ask_to_run_static_reports {
@@ -354,8 +357,6 @@ function run_static_reports {
   csv_dir=$tomcat_dir/$tomcat/webapps/gratia-reports/reports-static_csv
   case $tomcat in 
    "tomcat-itb_gratia_itb" ) 
-         logit "... sleeping 20 seconds for tomcat to autodeply war files."
-         sleep 20
          logit "... running static reports."
          script="$(crontab -l| grep $tomcat_dir/$tomcat |awk '{print $6,$7,$8}' |sed -e s/\'//g)"
          runit "$script"
@@ -458,7 +459,6 @@ function process_in_prompt_mode {
   finish_up
   ask_to_start_collector
   ask_to_run_static_reports
-  log_upgrade_end
 }
 #----------------------------
 function process_in_no_prompt_mode {
@@ -476,7 +476,6 @@ function process_in_no_prompt_mode {
   else
     ask_to_start_collector
   fi
-  log_upgrade_end
 }
 #----------------------------
 function cleanup {
@@ -489,6 +488,32 @@ function cleanup {
       rm -f $file
     done
   fi
+}
+#--------------------------------
+function verify_tomcat_connection {
+  delimit  verify_tomcat_connection
+  properties_file=$tomcat_dir/$tomcat/gratia/service-configuration.properties
+  if [ ! -e $properties ];then
+    logerr "Properties file does not exist: $properties_file"
+  fi
+  property=service.open.connection 
+  service="$(grep $property $properties_file |egrep -v "#" | cut -d'=' -f2)"
+  if [ -z $service ];then
+    logerr "Cannot find attribute ($property) in $properties_file"
+  fi
+  logit "tomcat service: $service" 
+  gratia_release="$service/gratia-services/gratia-release"
+  logit "... checking access to $gratia_release"
+  cmd="wget $gratia_release"
+  cd $tomcat_dir/$tomcat
+  rm -f $(basename $service)
+  runit "$cmd"
+  logit "$(ls -l $(basename $gratia_release))"
+  logit "$(cat $(basename $gratia_release))"
+  rm -f $(basename $service)
+  logit
+  logit "Tomcat service ($service) is good"
+  cd -
 }
 #### MAIN ##############################################
 PGM=$(basename $0)
@@ -605,4 +630,5 @@ send_mail "SUCCESS" "The Gratia upgrade on $(hostname -f) of the $tomcat instanc
 Release data:
 $(cat $tomcat_dir/$tomcat/gratia/gratia-release)
 "
+log_upgrade_end
 exit 0
