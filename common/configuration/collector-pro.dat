@@ -14,14 +14,14 @@
    max_heap_size => "1024m",
    "properties.attributes" =>
    {
-    "maintain.history.log" => 7,
+    "maintain.history.log" => 75,
     "monitor.listener.wait" => 60,
     "monitor.q.size" => 100000,
-    "service.listener.threads" => 1,
-    "service.lifetime.JobUsageRecord" => "3 months",
-    "service.lifetime.MetricRecord" => "1 month",
     "service.admin.FQAN.0" => "/fermilab/Role=GratiaGlobalAdmin",
     "service.admin.FQAN.1" => "/fermilab/Role=GratiaFermilabAdmin"
+    "service.lifetime.JobUsageRecord" => "3 months",
+    "service.lifetime.MetricRecord" => "1 month",
+    "service.listener.threads" => 1,
    }
  },
  fermi_osg =>
@@ -37,11 +37,12 @@
    collector_host => "gratia-fermi.fnal.gov",
    "properties.attributes" =>
    {
-    "service.lifetime.JobUsageRecord" => "1 year", # Safety
-    "service.lifetime.MetricRecord" => "1 month",
+    "maintain.history.log" => 75,
     "monitor.listener.wait" => 1440,
     "service.admin.FQAN.0" => "/fermilab/Role=GratiaGlobalAdmin",
     "service.admin.FQAN.1" => "/fermilab/Role=GratiaFermilabAdmin"
+    "service.lifetime.JobUsageRecord" => "1 year", # Safety
+    "service.lifetime.MetricRecord" => "1 month",
    }
  },
  itb =>
@@ -57,11 +58,12 @@
    collector_host => "gratia.opensciencegrid.org",
    "properties.attributes" =>
    {
-    "service.lifetime.JobUsageRecord" => "1 year",
+    "maintain.history.log" => 75,
     "monitor.listener.wait" => 60,
-    "service.listener.threads" => 1,
     "service.admin.FQAN.0" => "/fermilab/Role=GratiaGlobalAdmin",
     "service.admin.FQAN.1" => "/fermilab/Role=GratiaFermilabAdmin"
+    "service.lifetime.JobUsageRecord" => "1 year",
+    "service.listener.threads" => 1,
    }
  },
  fermi_itb =>
@@ -77,10 +79,11 @@
    collector_host => "gratia-fermi.fnal.gov",
    "properties.attributes" =>
    {
-    "service.lifetime.JobUsageRecord" => "1 year",
+    "maintain.history.log" => 75,
     "monitor.listener.wait" => 1440,
     "service.admin.FQAN.0" => "/fermilab/Role=GratiaGlobalAdmin",
     "service.admin.FQAN.1" => "/fermilab/Role=GratiaFermilabAdmin"
+    "service.lifetime.JobUsageRecord" => "1 year",
    }
  },
  ps =>
@@ -99,6 +102,7 @@
    {
     "gratia.database.useJobUsageSiteName" => 1,
     "gratia.database.wantNodeSummary" => 1,
+    "maintain.history.log" => 75,
     "service.admin.FQAN.0" => "/fermilab/Role=GratiaGlobalAdmin",
     "service.admin.FQAN.1" => "/fermilab/Role=GratiaFermilabAdmin"
    },
@@ -116,9 +120,10 @@
    collector_host => "gratia-fermi.fnal.gov",
    "properties.attributes" =>
    {
-    "service.lifetime.JobUsageRecord" => "UNLIMITED",
+    "maintain.history.log" => 75,
     "service.admin.FQAN.0" => "/fermilab/Role=GratiaGlobalAdmin",
     "service.admin.FQAN.1" => "/fermilab/Role=GratiaFermilabAdmin"
+    "service.lifetime.JobUsageRecord" => "UNLIMITED",
    }
  },
  osg_daily =>
@@ -134,13 +139,14 @@
    PostInstallCmdPreamble => '[[ "$action" == *"stored"* ]] || continue',
    "properties.attributes" =>
    {
-    "service.lifetime.JobUsageRecord" => "UNLIMITED", # Very low volume
-    "monitor.listener.wait" => 1440,
+    "gratia.database.useJobUsageSiteName" => 1,
     "gratia.database.wantSummaryTable" => 0,
     "gratia.database.wantSummaryTrigger" => 0,
-    "gratia.database.useJobUsageSiteName" => 1,
+    "maintain.history.log" => 75,
+    "monitor.listener.wait" => 1440,
     "service.admin.FQAN.0" => "/fermilab/Role=GratiaGlobalAdmin",
     "service.admin.FQAN.1" => "/fermilab/Role=GratiaFermilabAdmin"
+    "service.lifetime.JobUsageRecord" => "UNLIMITED", # Very low volume
    },
    remote_host => "gratia.opensciencegrid.org",
    collector_host => "gratia.opensciencegrid.org"
@@ -158,11 +164,12 @@
    collector_host => "gratia.opensciencegrid.org",
    "properties.attributes" =>
    {
-    "service.lifetime.JobUsageRecord" => "1 year",
+    "maintain.history.log" => 75,
     "monitor.listener.wait" => 60,
-    "service.listener.threads" => 1,
     "service.admin.FQAN.0" => "/fermilab/Role=GratiaGlobalAdmin",
     "service.admin.FQAN.1" => "/fermilab/Role=GratiaFermilabAdmin"
+    "service.lifetime.JobUsageRecord" => "1 year",
+    "service.listener.threads" => 1,
    }
  },
  osg_transfer =>
@@ -178,11 +185,12 @@
    collector_host => "gratia.opensciencegrid.org",
    "properties.attributes" =>
    {
-    "service.lifetime.JobUsageRecord" => "1 year", # Not yet settled?
+    "maintain.history.log" => 75,
     "monitor.listener.wait" => 240,
-    "service.listener.threads" => 1,
     "service.admin.FQAN.0" => "/fermilab/Role=GratiaGlobalAdmin",
     "service.admin.FQAN.1" => "/fermilab/Role=GratiaFermilabAdmin"
+    "service.lifetime.JobUsageRecord" => "1 year", # Not yet settled?
+    "service.listener.threads" => 1,
    }
  },
  fermi_transfer =>
@@ -198,11 +206,12 @@
    collector_host => "gratia-fermi.fnal.gov",
    "properties.attributes" =>
    {
-    "service.lifetime.JobUsageRecord" => "1 year",
+    "maintain.history.log" => 75,
     "monitor.listener.wait" => 240,
-    "service.listener.threads" => 1,
     "service.admin.FQAN.0" => "/fermilab/Role=GratiaGlobalAdmin",
     "service.admin.FQAN.1" => "/fermilab/Role=GratiaFermilabAdmin"
+    "service.lifetime.JobUsageRecord" => "1 year",
+    "service.listener.threads" => 1,
    }
  },
  conversion =>
@@ -222,11 +231,11 @@
    max_heap_size => "1024m",
    "properties.attributes" =>
    {
-    "service.lifetime.JobUsageRecord" => "UNLIMITED", # Safety
-    "maintain.history.log" => 7,
+    "maintain.history.log" => 75,
     "monitor.listener.wait" => 60,
     "service.admin.FQAN.0" => "/fermilab/Role=GratiaGlobalAdmin",
     "service.admin.FQAN.1" => "/fermilab/Role=GratiaFermilabAdmin"
+    "service.lifetime.JobUsageRecord" => "UNLIMITED", # Safety
    }
  }
 );
