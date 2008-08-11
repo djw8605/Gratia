@@ -513,7 +513,7 @@ function verify_tomcat_connection {
   rm -f $(basename $service)
   logit
   logit "Tomcat service ($service) is good"
-  cd -
+  cd - >/dev/null
 }
 #### MAIN ##############################################
 PGM=$(basename $0)
