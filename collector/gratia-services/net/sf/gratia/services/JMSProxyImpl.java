@@ -1,8 +1,8 @@
 package net.sf.gratia.services;
 
-import net.sf.gratia.util.XP;
-
 import net.sf.gratia.util.Configuration;
+
+import net.sf.gratia.util.XP;
 
 import java.rmi.*;
 import java.rmi.server.*;
@@ -13,17 +13,9 @@ import java.io.*;
 public class JMSProxyImpl extends UnicastRemoteObject implements JMSProxy {
 
     static final long serialVersionUID = 1;
-    private String rmilookup;
-    private String service;
-    private String driver;
-    private String url;
-    private String user;
-    private String password;
-    Hashtable pumps = new Hashtable();
     Properties p;
     String queues[] = null;
     int iq = 0;
-    XP xp = new XP();
     int irecords = 0;
     CollectorService collectorService = null;
 
@@ -46,24 +38,18 @@ public class JMSProxyImpl extends UnicastRemoteObject implements JMSProxy {
     public void loadProperties() {
         try {
             p = Configuration.getProperties();
-            rmilookup = p.getProperty("service.rmi.rmilookup");
-            service = p.getProperty("service.rmi.service");
-            driver = p.getProperty("service.mysql.driver");
-            url = p.getProperty("service.mysql.url");
-            user = p.getProperty("service.mysql.user");
-            password = p.getProperty("service.mysql.password");
         } catch (Exception ignore) {
         }
     }
 
     public Boolean update(String xml) throws RemoteException {
-        irecords++;
+        ++irecords;
 
         if ((irecords % 100) == 0) {
-            iq++;
-            if (iq > (queues.length - 1))
+            ++iq;
+            if (iq > (queues.length - 1)) {
                 iq = 0;
-
+            }
             try {
                 Thread.yield();
             } catch (Exception ignore) {
@@ -73,7 +59,7 @@ public class JMSProxyImpl extends UnicastRemoteObject implements JMSProxy {
         try {
             File file = File.createTempFile("job", "xml", new File(queues[iq]));
             String filename = file.getPath();
-            xp.save(filename, xml);
+            XP.save(filename, xml);
             return true;
         } catch (Exception e) {
             e.printStackTrace();
