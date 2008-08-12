@@ -14,6 +14,10 @@ usage: update-gratia-local [-S <source-prefix>] [-j <jre-home>] [-s]
           Execute <configure-collector-script> instead of
           <source-prefix>/common/configuration/configure-collector.
 
+       --force-log4j
+
+          Force overwrite of configurable files (like log4j.properties).
+
        -S <source-prefix>
 
           Find all sources under <source-prefix>.
@@ -147,11 +151,11 @@ function misc_cleanup {
 function populate_common_classes {
     cd "$tomcat_top/common/classes"
     echo "... populating $tomcat_top/common/classes"
-    if [[ -f "$tomcat_top/common/classes/log4j.properties" ]]; then
+    if [[ -z "$forcelog4j" ]] && [[ -f "$tomcat_top/common/classes/log4j.properties" ]]; then
       echo "$tomcat_top/common/classes/log4j.properties exists --"
       echo "Check ${tomcat_top}/gratia/log4j.properties for updates"
     else
-      cp -f "${tomcat_top}/gratia/log4j.properties" .
+      cp -vf "${tomcat_top}/gratia/log4j.properties" .
       if (( $? != 0 )); then
         echo "ERROR: Unable to copy ${tomcat_top}/gratia/log4j.properties in to $tomcat_top/common/classes/ -- pleae check"
         exit 1
@@ -173,43 +177,69 @@ gratia-security
 birt
 "
 
+# Use getopt(1) -- enhanced to process long options
+TEMP=`getopt -o :c:i:j:sp:d:v:hS: --long force-log4j -n "update-gratia-local" -- "$@"`
+
+if [ $? != 0 ]; then
+  echo "terminating due to option parse errors" 1>&2
+  exit 1
+fi
+
+eval set -- "$TEMP"
+
 #--- get command line args ----
-while getopts :c:i:j:sp:d:v:hS: OPT; do
-    case $OPT in
-        c)  configure_script="$OPTARG"
+while true; do
+    case "$1" in
+        -c)
+            configure_script="$2"
+            shift 2
             ;;
-        S)
-            source_prefix="$OPTARG"
+        --force-log4j)
+            forcelog4j=1
+            shift
             ;;
-        j)
-            java_jre="$OPTARG"
+        -S)
+            source_prefix="$2"
+            shift 2
             ;;
-        i)
-            collector_info="--collector-info=$OPTARG"
+        -j)
+            java_jre="$2"
+            shift 2
             ;;
-        s)
+        -i)
+            collector_info="--collector-info=$2"
+            shift 2
+            ;;
+        -s)
             use_ssl="-s"
+            shift
             ;;
-        p)
-            tomcat_root="$OPTARG"
+        -p)
+            tomcat_root="$2"
+            shift 2
             ;;
-        d)
-            dbp_arg="-d \"$OPTARG\" "
+        -d)
+            dbp_arg="-d \"$2\" "
+            shift 2
             ;;
-        v)
+        -v)
             vdt_install=1
-            vdt_location="$OPTARG"
+            vdt_location="$2"
+            shift 2
             ;;
-        h)
+        -h)
             usage
             exit 1
+            ;;
+        --)
+            shift
+            break
             ;;
         *)
             usage
             exit 1
     esac
 done
-shift $[ OPTIND - 1 ]
 
 
 instance=$1

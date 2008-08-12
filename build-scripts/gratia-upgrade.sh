@@ -103,6 +103,7 @@ If this is not true, you will have to do it the old fashion way.
  --mysql          DB MySql file containing the password for upgrades 
                   (required when running from cron and when used the 
                   --pswd argument is ignored)
+ --force-log4j    Force overwrite of log4j config file.
 
 If '--daily' is used, then all arguments are required and use of this argument
 will automatically start the tomcat/collector and requires specifying the
@@ -253,6 +254,15 @@ function choose_db_root_password {
   echo
 }
 #--------------------------------
+function choose_force_mode {
+  echo "----- choose_force_mode -----"
+  echo -n "Do you wish to force update of some config files (eg log4j)?: (y/n): "
+  read ans
+  if [ "$ans" = "y" ];then
+    force="${force_log4j} "
+  fi
+}
+#--------------------------------
 function clean_log_directory {
   delimit clean_log_directory
   backup_file=$log_backup_dir/$tomcat.$(date '+%Y%m%d-%H%M').tgz
@@ -288,7 +298,7 @@ function install_upgrade {
   if [ "$mysql_file" != "NONE" ];then
     pswd="$(cat $mysql_file)"
   fi
-  runit "$pgm -d $pswd -S $source -s $(echo $tomcat|cut -d'-' -f2)"
+  runit "$pgm -d $pswd -S $source ${force}-s $(echo $tomcat|cut -d'-' -f2)"
   logit "Install was successful"
   sleep 3
 }
@@ -360,12 +370,19 @@ function ask_to_run_static_reports {
 #--------------------------------
 function final_verification {
   echo "----- final_verification ------"
-echo "
+printf "
 We are ready to upgrade with the following information provided:
-  host............... $(hostname -f)
-  tomcat instance.... $tomcat
-  source location.... $source
-  password........... $pswd
+  host...................... $(hostname -f)
+  tomcat instance........... $tomcat
+  source location........... $source
+  password.................. $pswd
+  log4j config overwrite.... "
+if [[ -n "$force" ]]; then
+  printf "yes"
+else
+  printf "no"
+fi
+echo "
 "
   ask_continue
 }
@@ -570,6 +587,7 @@ function process_in_prompt_mode {
   choose_collector
   choose_source_directory
   choose_db_root_password 
+  choose_force_mode
   final_verification
   log_upgrade_start
   log_final_verification
@@ -622,7 +640,7 @@ tomcat_dir=/data
 log_backup_dir=$tomcat_dir/gratia_tomcat_logs_backups
 update_pgm=common/configuration/update-gratia-local
 mysql_file=NONE
-
+force_log4j="--force-log4j"
 
 #--- get command line arguements ----
 while test "x$1" != "x"; do
@@ -638,6 +656,8 @@ while test "x$1" != "x"; do
         daily="yes";recipients="$2";shift;shift
    elif [ "$1" == "--mysql" ];then
         mysql_file="$2";shift;shift
+   elif [ "$1" == "${force_log4j}" ];then
+        force="${force_log4j} ";shift
    else
         usage_error "Invalid command line argument: $1"
    fi
