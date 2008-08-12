@@ -245,7 +245,7 @@ ${target}/gratia-administration.war: ${administration}/net/sf/gratia/administrat
 	cp ${commonLib}/commons-logging*.jar ${commonLib}/glite-security-trustmanager.jar  war/WEB-INF/lib
 	cp ${commonLib}/glite-security-util-java.jar ${commonLib}/glite-security-voms-admin-server.jar war/WEB-INF/lib
 	cp ${commonLib}/jaxrpc.jar ${commonLib}/saaj.jar ${commonLib}/xercesImpl.jar war/WEB-INF/lib
-	cp ${commonLib}/mysql*.jar ${commonLib}/tar.jar ${commonLib}/bzip2.jar war/WEB-INF/lib
+	cp ${commonLib}/mysql*.jar ${commonLib}/tar.jar ${commonLib}/bzip2.jar ${commonLib}/log4j*.jar war/WEB-INF/lib
 	cp ${target}/gratiaSecurity.jar war/WEB-INF/lib
 	${copy_util_lib}
 	jar -cfM ${target}/gratia-administration.war -C war .
