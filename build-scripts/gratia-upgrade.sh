@@ -14,7 +14,11 @@ function ask_continue {
 }
 #------------------------------------
 function logit {
-  DATE="$(date '+%Y/%m/%d-%H:%M:%S')"
+  logdir=$tomcat_dir/${tomcat}-upgrade.log
+  logfile=$logdir/$DATE.log
+  if [ ! -d "$logdir" ];then
+    mkdir -p $logdir
+  fi
   case $daily in
     "yes" ) echo "$1" >>$logfile 2>&1 ;;
        *  ) echo "$1" 2>&1 | tee -a $logfile ;;
@@ -59,7 +63,10 @@ function try_again {
 }
 #------------------------------------
 function delimit {
-  logit "----- $1 ----------"
+  logit;
+  logit "#-------------------------------" 
+  logit "# $1"
+  logit "#-------------------------------" 
 }
 #-----------------------------------
 function usage {
@@ -122,7 +129,7 @@ you give the FINAL approval to perform the update.
 This script will allow you to upgrade one of these Gratia collectors in 
 the $tomcat_dir directory on $tomcat_host:"
   cnt=0
-  for dir in $(ls -d $tomcat_dir/tomcat-* |egrep -v "log|grep")
+  for dir in $(ls -d $tomcat_dir/tomcat-* |egrep -v "log|gratia-release|grep")
   do 
     ls -ld $dir |egrep -v 'log|grep'
     if [ -w "$dir" ];then
@@ -337,9 +344,9 @@ function start_collector {
 $(ps -ef |grep $tomcat | grep '   1' | egrep -v grep)
 "
   logit
-  logit "... sleeping 20 seconds to allow tomcat to deplay war files"
+  logit "... sleeping 20 seconds to allow tomcat to deploy war files"
   sleep 20
-  verify_tomcat_connection
+  verify_upgrade
 }
 #-----------------------
 function ask_to_run_static_reports {
@@ -347,32 +354,8 @@ function ask_to_run_static_reports {
   echo -n "Do you want to run the static reports: (y/n): "
   read ans
   if [ "$ans" = "y" ];then
-    run_static_reports
+    verify_static_reports
   fi
-}
-#-----------------------
-function run_static_reports {
-  delimit run_static_reports
-  pdf_dir=$tomcat_dir/$tomcat/webapps/gratia-reports/reports-static
-  csv_dir=$tomcat_dir/$tomcat/webapps/gratia-reports/reports-static_csv
-  case $tomcat in 
-   "tomcat-itb_gratia_itb" ) 
-         logit "... running static reports."
-         script="$(crontab -l| grep $tomcat_dir/$tomcat |awk '{print $6,$7,$8}' |sed -e s/\'//g)"
-         runit "$script"
-         if [ ! -d "$pdf_dir" ];then
-           logerr "Static reports not available. Directory does not exist: $pdf_dir"
-         fi
-         if [ ! -d "$csv_dir" ];then
-           logerr "Static reports not available. Directory does not exist: $csv_dir"
-         fi
-         logit "Static reports:
-$(ls -l $pdf_dir)
-$(ls -l $csv_dir)
-"
-         ;;
-   * ) logit "... static reports not used for $tomcat";logit;;
-  esac     
 }
 #--------------------------------
 function final_verification {
@@ -405,13 +388,15 @@ function verify_root_user {
 }
 #-------------------------------------
 function send_mail {
+  delimit send_mail
   status="$1"
   msg="$2"
   if [ -z "$recipients" ];then
     recipients=$default_recipients
   fi
-  logit "... sending mail to $recipients"
   subject="Gratia upgrade: $(hostname -s) of $tomcat - $status"
+  logit "Sending mail to $recipients"
+  logit "Subject: $subject"
 
 ##cat <<EOF
 ##mail -s "$subject" $recipients
@@ -423,6 +408,7 @@ This is an automated message from $PGM running on $(hostname -s).
 The following logs are available for more details:
   $logfile
   $tomcat_dir/$tomcat/logs/*.log files.
+  $tomcat_dir/$tomcat/gratia-release
 
 $msg
 EOF
@@ -443,6 +429,141 @@ function log_upgrade_end {
   logit "Upgrade of $tomcat on $(hostname -s) completed: $(date)"
   logit "=============================================================="
   cleanup
+}
+#----------------------------
+function cleanup {
+  cd $logdir
+  total=$(ls |  wc -l)
+  cnt=$(($total - $total_logfiles))
+  if [ $cnt -gt 0 ];then
+    for file in $(ls | head -$cnt )
+    do
+      rm -f $file
+    done
+  fi
+}
+#--------------------------------
+function verify_instance_is_running {
+  delimit  verify_instance_is_running
+  cmd="ps -ef |grep file=$tomcat_dir/$tomcat |egrep -v grep"
+  logit "Verifying that the tomcat instance is running using
+  $cmd
+"
+  sleep 4
+  process_cnt="$(ps -ef |grep file=$tomcat_dir/$tomcat |egrep -v grep |wc -l)"
+  case $process_cnt in 
+    0 ) logerr "... tomcat instance ($tomcat) not running" ;;
+    1 ) ;;
+    * ) logerr "More than 1 tomcat instance running for this gratia instance:
+$(ps -ef |grep file=$tomcat_dir/$tomcat |egrep -v grep)
+" 
+        ;;
+  esac
+  logit "Tomcat instance for ($tomcat):
+$(ps -ef |grep file=$tomcat_dir/$tomcat |egrep -v grep)
+"
+  logit "PASSED: tomcat instance ($tomcat) is running"
+  sleep 1
+}
+#--------------------------------
+function verify_tomcat_connection {
+  delimit  verify_tomcat_connection
+  logit "\
+Verifying that tomcat is listening for the following connection
+by doing a wget on the gratia-release file:"
+  properties_file=$tomcat_dir/$tomcat/gratia/service-configuration.properties
+  if [ ! -e $properties ];then
+    logerr "Properties file does not exist: $properties_file"
+  fi
+  property=service.open.connection 
+  service="$(grep $property $properties_file |egrep -v '#'|egrep -v grep| cut -d'=' -f2)"
+  if [ -z $service ];then
+    logerr "Cannot find attribute ($property) in $properties_file"
+  fi
+  logit "    tomcat service: $service" 
+  gratia_release="$service/gratia-services/gratia-release"
+  release_file=$tomcat_dir/$tomcat.$(basename $gratia_release)
+  logit "... checking access to $gratia_release"
+  sleep 4
+  cmd="/usr/bin/wget --tries=5 --timeout=30 --dns-timeout=30 -O $release_file $gratia_release"
+  rm -f $release_file
+  runit "$cmd"
+  logit "\
+$(ls -l $release_file)
+
+$(cat $release_file)
+"
+  logit "PASSED: Tomcat connection ($service) is good"
+  sleep 1
+}
+#--------------------------------
+function verify_port_availability {
+  delimit  verify_port_availability
+  expected_number_of_ports=6
+  logit "
+Verifying that the tomcat process has $expected_number_of_ports ports it
+is listening on for this tomcat instance and all are by the same process.
+Disclaimer: This is the closest one can do for this type validation.
+"
+  properties_file=$tomcat_dir/$tomcat/gratia/service-configuration.properties
+  if [ ! -e $properties ];then
+    logerr "Properties file does not exist: $properties_file"
+  fi
+  property=service.rmi.port 
+  port="$(grep $property $properties_file |egrep -v '#' |egrep -v grep| cut -d'=' -f2)"
+  if [ -z $port ];then
+    logerr "Cannot find attribute ($property) in $properties_file"
+  fi
+  pid="$(/bin/netstat -n --listening --program |egrep $port |egrep -v grep|awk '{print $7}')"
+  logit "...using port $port as the basis for the netstat command:
+  /bin/netstat -n --listening --program |egrep $port
+$(/bin/netstat -n --listening --program |egrep $port |egrep -v grep)
+"
+  sleep 4
+  cmd="/bin/netstat -n --listening --program |egrep $pid |egrep -v grep"
+  connection_cnt="$(/bin/netstat -n --listening --program |egrep $pid |egrep -v grep |wc -l)"
+  case $connection_cnt in 
+    $expected_number_of_ports ) ;;
+    * ) logerr "Expected $expected_number_of_ports connections.... found ${connection_cnt}.
+$(/bin/netstat -n --listening --program |egrep $pid |egrep -v grep)
+" ;;
+  esac
+  logit "... connections based on pid ($pid):
+$(/bin/netstat -n --listening --program |egrep $pid |egrep -v grep)
+"
+  logit "PASSED: number of connections look good"
+  sleep 1
+}
+#-----------------------
+function verify_static_reports {
+  delimit verify_static_reports
+  pdf_dir=$tomcat_dir/$tomcat/webapps/gratia-reports/reports-static
+  csv_dir=$tomcat_dir/$tomcat/webapps/gratia-reports/reports-static_csv
+  case $tomcat in 
+   "tomcat-itb_gratia_itb" ) 
+         logit "... running static reports."
+         script="$(crontab -l| grep $tomcat_dir/$tomcat |awk '{print $6,$7,$8}' |sed -e s/\'//g)"
+         runit "$script"
+         if [ ! -d "$pdf_dir" ];then
+           logerr "Static reports not available. Directory does not exist: $pdf_dir"
+         fi
+         if [ ! -d "$csv_dir" ];then
+           logerr "Static reports not available. Directory does not exist: $csv_dir"
+         fi
+         logit "Static reports:
+$(ls -l $pdf_dir)
+$(ls -l $csv_dir)
+"
+         logit "PASSED: static reports processed"
+         ;;
+   * ) logit "NOT APPLICABLE: static reports not used for $tomcat" ;;
+  esac     
+}
+#---------------------------
+function verify_upgrade {
+   verify_instance_is_running 
+   verify_tomcat_connection 
+   verify_port_availability 
 }
 #----------------------------
 function process_in_prompt_mode {
@@ -472,53 +593,16 @@ function process_in_no_prompt_mode {
   finish_up
   if [ "$daily" = "yes" ];then
     start_collector 
-    run_static_reports
+    verify_static_reports
   else
     ask_to_start_collector
+    ask_to_run_static_reports
   fi
-}
-#----------------------------
-function cleanup {
-  cd $logdir
-  total=$(ls |  wc -l)
-  cnt=$(($total - $total_logfiles))
-  if [ $cnt -gt 0 ];then
-    for file in $(ls | head -$cnt )
-    do
-      rm -f $file
-    done
-  fi
-}
-#--------------------------------
-function verify_tomcat_connection {
-  delimit  verify_tomcat_connection
-  properties_file=$tomcat_dir/$tomcat/gratia/service-configuration.properties
-  if [ ! -e $properties ];then
-    logerr "Properties file does not exist: $properties_file"
-  fi
-  property=service.open.connection 
-  service="$(grep $property $properties_file |egrep -v "#" | cut -d'=' -f2)"
-  if [ -z $service ];then
-    logerr "Cannot find attribute ($property) in $properties_file"
-  fi
-  logit "tomcat service: $service" 
-  gratia_release="$service/gratia-services/gratia-release"
-  logit "... checking access to $gratia_release"
-  cmd="wget $gratia_release"
-  cd $tomcat_dir/$tomcat
-  rm -f $(basename $service)
-  runit "$cmd"
-  logit "$(ls -l $(basename $gratia_release))"
-  logit "$(cat $(basename $gratia_release))"
-  rm -f $(basename $service)
-  logit
-  logit "Tomcat service ($service) is good"
-  cd - >/dev/null
 }
 #### MAIN ##############################################
 PGM=$(basename $0)
-tomcat_tarball=/home/gratia/tomcat-tarballs/apache-tomcat-5.5.25.tar.gz
 
+DATE=$(date '+%Y-%m-%d')
 total_logfiles=10
 daily=NONE
 new_instance="no"
@@ -599,13 +683,6 @@ if [ "$prompt" = "no" ];then
   if [ ! -d "$tomcat_dir/$tomcat" ];then
     usage_error "--instance directory ($tomcat_dir/$tomcat) does not exist."
   fi
-fi
-
-#--- set log file name ---
-logdir=$tomcat_dir/${tomcat}-upgrade.log
-logfile=$logdir/$(date '+%Y-%m-%d').log
-if [ ! -d "$logdir" ];then
-  mkdir -p $logdir
 fi
 
 #--- do it -----------
