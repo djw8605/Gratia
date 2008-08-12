@@ -123,6 +123,11 @@ public class SystemAdministration extends HttpServlet {
                 } else { // Proxy operation
                     executeProxyAction(request.getParameter("action"));
                 }
+                try {
+                    Thread.sleep(1000); // Time for state to change
+                }
+                catch (Exception ignore) {
+                }
             }
             setup();
             process();
