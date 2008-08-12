@@ -5,7 +5,7 @@
 #
 # library to create simple report using the Gratia psacct database
 #
-#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.27 2008-06-30 21:52:05 pcanal Exp $
+#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.28 2008-08-12 16:17:04 pcanal Exp $
 
 import time
 import datetime
@@ -1371,7 +1371,8 @@ def GenericRange(what, range_end = datetime.date.today(),
                  output = "text"):
     factor = 3600  # Convert number of seconds to number of hours
 
-    if not range_begin: range_begin = range_end + datetime.timedelta(days=-1)
+    if (not range_begin or range_begin == None): range_begin = range_end + datetime.timedelta(days=-1)
+    if (not range_end or range_end == None): range_end = range_begin + datetime.timedelta(days=+1)
     timediff = range_end - range_begin
 
     if (output != "None") :
