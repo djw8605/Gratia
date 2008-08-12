@@ -94,7 +94,7 @@ public class DataScrubber {
             Transaction tx = session.beginTransaction();
             try {
                 String deleteCmd = "delete " + className +
-                    " record where RecordId in ( :ids )";
+                    " record where record.RecordId in ( :ids )";
                 org.hibernate.Query query = session.createQuery( deleteCmd );
                 Logging.debug("DataScrubber: About to " + query.getQueryString());
                 query.setParameterList("ids", ids);
