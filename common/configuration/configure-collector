@@ -280,7 +280,7 @@ foreach my $config (@instance_list) {
   configure_init_file($config, $config_ref);
   configure_tomcat_config($config, $config_ref);
   configure_tomcat_users($config, $config_ref);
-  configure_log4j_properties($config, $config_ref) if $options{"use-ssl"};
+# configure_log4j_properties($config, $config_ref) if $options{"use-ssl"};
   configure_static_report_generation($config, $config_ref);
 
   if (exists $options{"db-root"}) {
@@ -594,7 +594,6 @@ EOF
                crlFiles="$collector_config->{crlFiles}"
                sslCertFile="$collector_config->{host_cert}"
                sslKey="$collector_config->{host_key}"
-               log4jConfFile="$options{prefix}/tomcat-${instance_name}/conf/log4j-trustmanager.properties"
                clientAuth="true"
                sslProtocol="TLS"
                crlEnabled="true"
@@ -602,6 +601,7 @@ EOF
 EOF
         #               keystoreFile="$options{prefix}/tomcat-${instance_name}/gratia/keystore" keystorePass="server"
         #               truststoreFile="$options{prefix}/tomcat-${instance_name}/gratia/truststore" truststorePass="server"
+        #               log4jConfFile="$options{prefix}/tomcat-${instance_name}/conf/log4j-trustmanager.properties"
 
       }
     }

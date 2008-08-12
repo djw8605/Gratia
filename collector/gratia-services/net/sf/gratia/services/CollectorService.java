@@ -185,7 +185,7 @@ public class CollectorService implements ServletContextListener {
 
             Logging.info("CollectorService: starting Hibernate");
             try {
-                HibernateWrapper.start();
+                HibernateWrapper.startMaster();
             }
             catch (Exception e) {
                 Logging.warning("CollectorService: error while checking indexes.");
@@ -248,10 +248,9 @@ public class CollectorService implements ServletContextListener {
             //
             // poke in rmi
             //
-
             JMSProxyImpl proxy = new JMSProxyImpl(this);
             Naming.rebind(rmibind + service, proxy);
-            Logging.log("JMSProxy Started");
+            Logging.log("JMSProxy started");
 
             // Determine whether we can start normal operations.
             Boolean safeStart = false;

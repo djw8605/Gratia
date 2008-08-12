@@ -22,11 +22,17 @@
     <!-- Echo all executed SQL to stdout -->
     <property name="show_sql">false</property>
 
-    <!-- Drop and re-create the database schema on startup -->
-    <property name="hbm2ddl.auto">update</property>
+    <!-- Format SQL printed to log or console -->
+    <property name="format_sql">true</property>
+
+    <!-- Add comments to SQL -->
+    <property name="use_sql_comments">true</property>
 
     <!-- Set batching -->
     <property name="hibernate.jdbc.batch_size">100</property>
+
+    <!-- Order updates -->
+    <property name="hibernate.order_updates">true</property>
 
     <!-- Set cache manager -->
     <property name="hibernate.cache.provider_class">org.hibernate.cache.EhCacheProvider</property>

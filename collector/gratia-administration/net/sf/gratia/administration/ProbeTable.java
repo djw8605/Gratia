@@ -74,6 +74,26 @@ public class ProbeTable extends HttpServlet {
 
         Logging.initialize("administration");
 
+        while (true) {
+            // Wait until JMS service is up
+            try { 
+                JMSProxy proxy = (JMSProxy)
+                    java.rmi.Naming.lookup(p.getProperty("service.rmi.rmilookup") +
+                                           p.getProperty("service.rmi.service"));
+            } catch (Exception e) {
+                try {
+                    Thread.sleep(5000);
+                } catch (Exception ignore) {
+                }
+            }
+            break;
+        }
+        try {
+            HibernateWrapper.start();
+        }
+        catch (Exception e) {
+            Logging.warning("Caught exception during hibernate init", e);
+        }
     }
 
     public void openConnection() {

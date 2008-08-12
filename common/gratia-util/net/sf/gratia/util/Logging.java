@@ -74,6 +74,7 @@ public class Logging {
                     new PatternLayout("%d %c{2}(%t) [%p]: %m%n");
 
                 log4jLogger = org.apache.log4j.Logger.getLogger("net.sf.gratia." + logDomain);
+                log4jLogger.setAdditivity(false); // Don't propagate to root logger
                 FileAppender appender = null;
                 if (p.getProperty("service.logging.dailyLogging", "0").equals("1")) {
                     appender = new TidiedDailyRollingFileAppender();

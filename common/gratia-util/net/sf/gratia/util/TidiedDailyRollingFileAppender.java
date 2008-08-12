@@ -59,51 +59,51 @@ public class TidiedDailyRollingFileAppender
         }
     }
 
+    class DatedFileFilter implements FilenameFilter {
 
-}
+        private String filename;
+        private SimpleDateFormat sdf;
+        private int maxAgeDays;
 
-class DatedFileFilter implements FilenameFilter {
-
-    private String filename;
-    private SimpleDateFormat sdf;
-    private int maxAgeDays;
-
-    public DatedFileFilter(String datePattern, String filename, int maxAgeDays) {
-        // LogLog.warn("Instantiated a DatedFileFilter(" + datePattern + ", " + filename + ", " + maxAgeDays + ")");
-        sdf = new SimpleDateFormat(datePattern);
-        this.filename = filename;
-        this.maxAgeDays = maxAgeDays;
-    }
-
-    public boolean accept(File dir, String name) {
-        // LogLog.warn("DatedFileFilter.accept(" + dir + ", " + name + ")");
-        boolean result = false;
-        if (maxAgeDays < 0) {
-            // LogLog.warn("DatedFileFilter.accept(" + dir + ", " + name + "): maxAgeDays < 0");
-            return result; // Quick kick out
+        public DatedFileFilter(String datePattern, String filename, int maxAgeDays) {
+            // LogLog.warn("Instantiated a DatedFileFilter(" + datePattern + ", " + filename + ", " + maxAgeDays + ")");
+            sdf = new SimpleDateFormat(datePattern);
+            this.filename = filename;
+            this.maxAgeDays = maxAgeDays;
         }
-        if (!name.startsWith(filename)) {
-            // LogLog.warn("DatedFileFilter.accept(" + dir + ", " + name + "): no match to " + filename);
-            return result; // Not our file
-        }
-        ParsePosition pos = new ParsePosition(filename.length());
-        Date filedate = sdf.parse(name, pos);
-        // LogLog.warn("DatedFileFilter.accept(" + dir + ", " + name + "): SimpleDateFormat.parse() returned " +
-        // ((filedate == null)?"null":filedate.toString()) +
-        // ", error pos = " + pos.getErrorIndex());
-        if ((filedate == null) || (pos.getErrorIndex() > -1)) {
+
+        public boolean accept(File dir, String name) {
+            // LogLog.warn("DatedFileFilter.accept(" + dir + ", " + name + ")");
+            boolean result = false;
+            if (maxAgeDays < 0) {
+                // LogLog.warn("DatedFileFilter.accept(" + dir + ", " + name + "): maxAgeDays < 0");
+                return result; // Quick kick out
+            }
+            if (!name.startsWith(filename)) {
+                // LogLog.warn("DatedFileFilter.accept(" + dir + ", " + name + "): no match to " + filename);
+                return result; // Not our file
+            }
+            ParsePosition pos = new ParsePosition(filename.length());
+            Date filedate = sdf.parse(name, pos);
+            // LogLog.warn("DatedFileFilter.accept(" + dir + ", " + name + "): SimpleDateFormat.parse() returned " +
+            // ((filedate == null)?"null":filedate.toString()) +
+            // ", error pos = " + pos.getErrorIndex());
+            if ((filedate == null) || (pos.getErrorIndex() > -1)) {
+                return result;
+            }
+            GregorianCalendar fileCal = new GregorianCalendar();
+            fileCal.setTime(filedate);
+            GregorianCalendar cmpCal = new GregorianCalendar();
+            cmpCal.add(Calendar.DAY_OF_MONTH, -1 * maxAgeDays);
+            // LogLog.warn("DatedFileFilter.accept(" + dir + ", " + name + "): comparing " + filedate + " to " + cmpCal.getTime());
+            if (cmpCal.after(fileCal)) {
+                // LogLog.warn("DatedFileFilter.accept(" + dir + ", " + name + "): identified old file " + name);
+                result = true;
+            }
             return result;
         }
-        GregorianCalendar fileCal = new GregorianCalendar();
-        fileCal.setTime(filedate);
-        GregorianCalendar cmpCal = new GregorianCalendar();
-        cmpCal.add(Calendar.DAY_OF_MONTH, -1 * maxAgeDays);
-        // LogLog.warn("DatedFileFilter.accept(" + dir + ", " + name + "): comparing " + filedate + " to " + cmpCal.getTime());
-        if (cmpCal.after(fileCal)) {
-            // LogLog.warn("DatedFileFilter.accept(" + dir + ", " + name + "): identified old file " + name);
-            result = true;
-        }
-        return result;
+
     }
 
 }
+

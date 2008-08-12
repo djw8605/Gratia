@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Script to remove libs in tomcat/server/lib prior to updating, to avoid
+# Script to remove libs in common dirs prior to updating, to avoid
 # confusion over versions.
 
 rm -fv %%%FILES%%%

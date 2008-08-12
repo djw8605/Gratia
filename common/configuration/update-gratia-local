@@ -136,8 +136,17 @@ function populate_common_lib {
     tar xvf ${target_dir}/common_lib.tar
 }
 
+function misc_cleanup {
+    cd "$tomcat_top"
+    if [[ -x "$tomcat_gratia/cleanup_misc" ]]; then
+      echo " running cleanup script in $tomcat_top:"
+      "$tomcat_gratia/cleanup_misc"
+    fi
+}
+
 function populate_common_classes {
     cd "$tomcat_top/common/classes"
+    echo "... populating $tomcat_top/common/classes"
     if [[ -f "$tomcat_top/common/classes/log4j.properties" ]]; then
       echo "$tomcat_top/common/classes/log4j.properties exists --"
       echo "Check ${tomcat_top}/gratia/log4j.properties for updates"
@@ -148,6 +157,7 @@ function populate_common_classes {
         exit 1
       fi
     fi
+    tar xvf ${target_dir}/common_classes.tar
 }
 
 
@@ -256,6 +266,12 @@ done
 #-----------------------
 stop_tomcat
 
+
+#-----------------------
+# Cleanup miscellaneous files that could cause trouble
+#-----------------------
+misc_cleanup
+
 #-----------------------
 # Update gratia directory
 #-----------------------
@@ -342,12 +358,12 @@ if [ $vdt_install ];then
   populate_common_lib
   populate_common_classes
 
-
   #-- reset some permissions --
   echo "... fixing ownership:"
   chown -R daemon $tomcat_webapps
 #--- local ---
 else
+
   #-----------------------
   # Put required libs in server/lib
   #-----------------------

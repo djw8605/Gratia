@@ -27,7 +27,7 @@
     <servlet>
         <servlet-name>SiteMgmt</servlet-name>
         <servlet-class>net.sf.gratia.administration.SiteMgmt</servlet-class>
-	<load-on-startup>1</load-on-startup>
+	<load-on-startup>2</load-on-startup>
     </servlet>
 
     <servlet>
@@ -39,25 +39,25 @@
     <servlet>
         <servlet-name>VOMgmt</servlet-name>
         <servlet-class>net.sf.gratia.administration.VOMgmt</servlet-class>
-        <load-on-startup>1</load-on-startup>
+        <load-on-startup>2</load-on-startup>
     </servlet>
 
     <servlet>
         <servlet-name>VONameCorrection</servlet-name>
         <servlet-class>net.sf.gratia.administration.VONameCorrection</servlet-class>
-	<load-on-startup>1</load-on-startup>
+	<load-on-startup>2</load-on-startup>
     </servlet>
 
     <servlet>
         <servlet-name>SecurityTable</servlet-name>
         <servlet-class>net.sf.gratia.administration.SecurityTable</servlet-class>
-				<load-on-startup>1</load-on-startup>
+				<load-on-startup>2</load-on-startup>
     </servlet>
 
     <servlet>
         <servlet-name>replicationtable</servlet-name>
         <servlet-class>net.sf.gratia.administration.ReplicationTable</servlet-class>
-				<load-on-startup>1</load-on-startup>
+				<load-on-startup>2</load-on-startup>
         <init-param>
             <param-name>RecordType</param-name>
             <param-value>JobUsageRecord</param-value>
@@ -77,37 +77,37 @@
     <servlet>
         <servlet-name>CPUInfo</servlet-name>
         <servlet-class>net.sf.gratia.administration.CPUInfo</servlet-class>
-				<load-on-startup>1</load-on-startup>
+				<load-on-startup>2</load-on-startup>
     </servlet>
 
     <servlet>
         <servlet-name>Roles</servlet-name>
         <servlet-class>net.sf.gratia.administration.Roles</servlet-class>
-				<load-on-startup>1</load-on-startup>
+				<load-on-startup>2</load-on-startup>
     </servlet>
 
     <servlet>
         <servlet-name>Status</servlet-name>
         <servlet-class>net.sf.gratia.administration.Status</servlet-class>
-				<load-on-startup>1</load-on-startup>
+				<load-on-startup>2</load-on-startup>
     </servlet>
 
     <servlet>
         <servlet-name>NgapStatus</servlet-name>
         <servlet-class>net.sf.gratia.administration.NgapStatus</servlet-class>
-				<load-on-startup>1</load-on-startup>
+				<load-on-startup>2</load-on-startup>
     </servlet>
 
     <servlet>
         <servlet-name>SystemAdministration</servlet-name>
         <servlet-class>net.sf.gratia.administration.SystemAdministration</servlet-class>
-				<load-on-startup>1</load-on-startup>
+				<load-on-startup>2</load-on-startup>
     </servlet>
 
     <servlet>
         <servlet-name>StopDatabase</servlet-name>
         <servlet-class>net.sf.gratia.administration.StopDatabase</servlet-class>
-				<load-on-startup>1</load-on-startup>
+				<load-on-startup>2</load-on-startup>
     </servlet>
 
     <servlet-mapping>
