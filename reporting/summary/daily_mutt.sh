@@ -65,9 +65,17 @@ sendto ./dailyStatus  $whenarg ${WORK_DIR}/status_report "$STATUS_MAIL_MSG"
 sendto "./dailyStatus --groupby=VO"  $whenarg ${WORK_DIR}/vo_status_report "$VO_STATUS_MAIL_MSG"
 sendto "./dailyStatus --groupby=Both"  $whenarg ${WORK_DIR}/vo_status_report "$BOTH_STATUS_MAIL_MSG"
 
-export MYVO=engage
-export MAILTO="-c pcanal@fnal.gov engage-team@opensciencegrid.org"
-sendto "./dailyForVO --voname=${MYVO}"   $whenarg ${WORK_DIR}/forvo "${VO_MAIL_MSG}${MYVO}"
+grep -v '^#' voreports.config | while read line; do
+    MYVO=`echo $line | cut -d\  -f1`
+    export EMAIL1=`echo $line | cut -d\  -f2`
+    export EMAIL_CC=`echo $line | cut -d\  -f3-`
+    if [ "x$EMAIL_CC" == "x" ]; then
+       export MAILTO=$EMAIL1
+    else 
+       export MAILTO="-c \"$EMAIL_CC\" $EMAIL1"
+    fi
+    sendto "./dailyForVO --voname=${MYVO}"   $whenarg ${WORK_DIR}/forvo "${VO_MAIL_MSG}${MYVO}"
+done 
 
 if [ "$debug" != "x" ]; then 
    rm -rf $WORK_DIR
