@@ -225,7 +225,7 @@ ${target}/gratia-administration.war: ${administration}/net/sf/gratia/administrat
                                      ${administration}/WebContent/images/*.gif \
                                      $(commonLib)/tar.jar \
                                      $(commonLib)/bzip2.jar \
-                                     $(commonLib)mysql*.jar util
+                                     $(commonLib)/mysql*.jar util
 	#----------------------------------------------------
 	# --- Target: $(target)/gratia-administration.war ---
 	#----------------------------------------------------
