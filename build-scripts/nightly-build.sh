@@ -54,6 +54,12 @@ newly built gratia source directory.
 exit 1
 }
 # -------------------------------
+function usage_error {
+  usage
+  echo;echo "ERROR: $1"
+  exit 1
+}
+# -------------------------------
 function logit {
   if [ -z "$MAILTO" ];then
     echo "$1" | tee -a $logfile
@@ -64,33 +70,47 @@ function logit {
 # -------------------------------
 function logerr {
   logit "ERROR: $1"
-  send_mail "ERROR: $1"
+  send_error_mail "$1"  
   logit "... refer to the log file for details"
   logit "Logfile: $logfile"
   logit "==== $PGM   End: $(date) ==="
   exit 1
 }
 # -------------------------------
+function send_error_mail {
+  message="It failed for the following reason:
+$1
+"
+  send_mail "$message" "FAILED"
+}
+# -------------------------------
+function send_success_mail {
+  logit "$1"
+  send_mail "$1" "SUCCESSFUL"
+}
+# -------------------------------
 function send_mail {
+  msg="$1"
+  status="$2"
   if [ -z "$MAILTO" ];then
     logit "... no mail being sent"
     return
   fi
-  logit "... mail being sent to: $MAILTO"
-  msg="$1"
-  subject="Gratia build on $(hostname) FAILED"
+  subject="Gratia build on $(hostname -s) $status"
+  logit "... mail being sent to: $MAILTO
+Subject: $subject
+"
 mail -s "$subject" $MAILTO <<EOF
 
-This is an automated message from a cron script running
-on $(hostname) that has failed.
-
-Script: $PGM
-Date: $(date)
-Logfile: $logfile
+This is an automated message from a cron script running on $(hostname -f).
 
 This script performs a nightly build of Gratia.
 
-It failed with the following error:
+Status: $status
+Date: $(date)
+Script: $PGM
+Logfile: $logfile
+
 $msg
 
 Refer to the logfile shown above for more details.
@@ -102,11 +122,12 @@ function runit {
   cmd=$1
   logit "... executing in $PWD:
   $cmd
-  "
+"
   $cmd >>$logfile 2>&1;rtn=$?
   logit "Return code: $rtn"
   if [ "$rtn" != "0" ];then
-    logerr "command failed...exitting"
+    logerr "Command failed: $cmd 
+Return code: $rtn"
   fi
 }
 # -------------------------------
@@ -191,10 +212,11 @@ function make_symlink {
 ##### MAIN ############################################
 PGM=$(basename $0)
 DATE=$(date '+%Y-%m-%d')
+
+#-- defaults ---
+MAILTO="gratia-operation@fnal.gov"
 buildHOME=$HOME
 files=7
-
-MAILTO=""
 
 #--- cvs ----
 cvs='cvs -z3 -d:pserver:anonymous@gratia.cvs.sourceforge.net:/cvsroot/gratia'
@@ -221,12 +243,18 @@ while test "x$1" != "x"; do
    fi
 done
 
+if [ ! -d "$buildHOME" ];then
+  mkdir $buildHOME
+fi
+if [ -z "$files" ];then
+  files=7
+fi
+
 #--- build area ----
 build_dir=$buildHOME/gratia-builds
 nightly_dir=$build_dir/gratia-$DATE
 latest_good_build=$build_dir/gratia-latest
 logfile=$nightly_dir.log
-
 
 #--- make area ----
 buildDir=$nightly_dir/build-scripts
@@ -251,8 +279,16 @@ cleanup
 #--- make symlink ---
 make_symlink
 
+#--- all done ---
+message="Build directory: $nightly_dir/target
+$(ls -l $nightly_dir/target)
+
+Symlink:
+$(ls -l $latest_good_build)
+"
+
+send_success_mail "$message" 
 logit "Logfile: $logfile"
-logit "Symbolic link: $(ls -l $latest_good_build)"
 logit "==== $PGM   End: $(date) ==="
 
 exit 0
