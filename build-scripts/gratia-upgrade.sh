@@ -98,7 +98,7 @@ Modes for running the script:
           --pswd ROOT_PSWD
           --daily  EMAIL_ADDRESS(ES) 
           --mysql MYSQL_FILE
-          --force-lo4je
+          --force-log4j
 
 Although it does not really do much more than is already available to do, its
 intent is to take some of the guesswork (memory-like) out of the upgrade
@@ -109,7 +109,7 @@ If this is not true, you will have to do it the old fashion way.
 
  No prompt mode   Prompt mode questions
  --------------   --------------------- 
- --instance       tomcat instance (e.g, tomcat-weigand)
+ --instance       tomcat instance (e.g, tomcat-itb_gratia_itb)
  --source         source directory
                     - daily builds..... /home/gratia/gratia-builds
                     - release builds... /home/gratia/gratia-releases
@@ -627,6 +627,7 @@ function process_in_prompt_mode {
   finish_up
   ask_to_start_collector
   ask_to_run_static_reports
+  record_successful_upgrade
 }
 #----------------------------
 function process_in_no_prompt_mode {
@@ -645,6 +646,18 @@ function process_in_no_prompt_mode {
     ask_to_start_collector
     ask_to_run_static_reports
   fi
+  record_successful_upgrade
+}
+#----------------------------
+function record_successful_upgrade {
+  delimit record_successful_upgrade
+  cleanup
+  send_mail "SUCCESS" "The Gratia upgrade on $(hostname -f) of the $tomcat instance completed on $(date).
+
+Release data:
+$(cat $tomcat_dir/$tomcat/gratia/gratia-release)
+"
+  log_upgrade_end
 }
 #### MAIN ##############################################
 PGM=$(basename $0)
@@ -658,8 +671,8 @@ pswd=NONE
 qa_mode=yes
 source_type=""
 source=NONE
-##default_recipients="weigand@fnal.gov greenc@fnal.gov pcanal@fnal.gov fermigrid-operations@fnal.gov"
-default_recipients="weigand@fnal.gov"
+##default_recipients="weigand@fnal.gov"
+default_recipients="gratia-operation@fnal.gov"
 recipients=""
 release=NONE
 release_dir=""
@@ -750,11 +763,4 @@ do
   esac
 done
 
-cleanup
-send_mail "SUCCESS" "The Gratia upgrade on $(hostname -f) of the $tomcat instance completed on $(date).
-
-Release data:
-$(cat $tomcat_dir/$tomcat/gratia/gratia-release)
-"
-log_upgrade_end
 exit 0
