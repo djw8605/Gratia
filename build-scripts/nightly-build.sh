@@ -22,17 +22,14 @@ It will create a directory called $(basename $build_dir) in your \$HOME
 area unless overridden using the --dir argument. If the directory does not
 exist, it will create it. 
 
-Parent source directory: $nightly_dir
-Log file: $logfile
+Parent source directory.. $nightly_dir
+Log file................. $logfile
 
 CVS: $cvs.
 
 Arguments:
    --dir   - the parent directory for the $(basename $build_dir) directory
-   --mail  - email address(es) to be used if the build fails.  This should be
-             used only when running as a cron job.  It will only send mail on
-             failure. 
-             This should be specified when running as a cron process.
+   --mail  - email address(es) to be used on completion of the build.
    --files - number of build directories to retain in $build_dir
              Since the source directory and log files are timestamped by day,
              this argument allows you to specify the number (not days) of 
@@ -48,8 +45,12 @@ Cron entry note: do not redirect stdout/stderr to /dev/null or you may be
 If you run this more than once per day, the parent source directory will be
 overwritten each time.  However the log file will be appended to.
 
-On success, it will create a symbolic link called gratia-latest to the
-newly built gratia source directory.
+On success, it will create a symbolic link to the newly built gratia source 
+directory called:
+  $latest_good_build
+
+An email notification upon completion will be sent to: 
+  $MAILTO
 "
 exit 1
 }
@@ -209,6 +210,13 @@ function make_symlink {
   runit "rm -f $latest_good_build"
   runit "ln -s $nightly_dir $latest_good_build"
 }
+#----------------------
+function set_build_area {
+  build_dir=$buildHOME/gratia-builds
+  nightly_dir=$build_dir/gratia-$DATE
+  latest_good_build=$build_dir/gratia-latest
+  logfile=$nightly_dir.log
+}
 ##### MAIN ############################################
 PGM=$(basename $0)
 DATE=$(date '+%Y-%m-%d')
@@ -217,6 +225,7 @@ DATE=$(date '+%Y-%m-%d')
 MAILTO="gratia-operation@fnal.gov"
 buildHOME=$HOME
 files=7
+set_build_area
 
 #--- cvs ----
 cvs='cvs -z3 -d:pserver:anonymous@gratia.cvs.sourceforge.net:/cvsroot/gratia'
@@ -251,10 +260,7 @@ if [ -z "$files" ];then
 fi
 
 #--- build area ----
-build_dir=$buildHOME/gratia-builds
-nightly_dir=$build_dir/gratia-$DATE
-latest_good_build=$build_dir/gratia-latest
-logfile=$nightly_dir.log
+set_build_area
 
 #--- make area ----
 buildDir=$nightly_dir/build-scripts
