@@ -78,15 +78,31 @@ in development, integration and production.
 There are 2 modes:
 1. Question and answer mode (no command line arguments)
      $PGM 
-2. No prompt mode (all arguments are required)
+   This is the recommended mode for performing upgrades.
+
+2. Expert user mode.  
+     $PGM --instance TOMCAT_INSTANCE 
+          --source SOURCE_DIR 
+          --pswd ROOT_PSWD
+          [--force-log4j]
+   For those that disdain questions and answers. This mode eliminates some
+   questions.  There will be prompts for starting the service and a few 
+   tests.  Available, but not a recommended mode of upgrading.
+
+3. Cron mode.  Used for daily upgrades of the test environment.
+   There are no prompts (all arguments are required).
    Refer to the paragraph below as to the prompts for the value of the
    individual arguments.
-     $PGM --instance TOMCAT_INSTANCE --source SOURCE_DIR --pswd ROOT_PSWD
-          [--daily  EMAIL_ADDRESS(ES) --mysql MYSQL_FILE]
+     $PGM --instance TOMCAT_INSTANCE 
+          --source SOURCE_DIR 
+          --pswd ROOT_PSWD
+          --daily  EMAIL_ADDRESS(ES) 
+          --mysql MYSQL_FILE
+          --force-lo4je
 
 Although it does not really do much more than is already available to do, its
 intent is to take some of the guesswork (memory-like) out of the upgrade
-process.
+process and it does some validation.
 
 A major assumption it makes is that all tomcat collectors are in $tomcat_dir.
 If this is not true, you will have to do it the old fashion way.
@@ -110,6 +126,11 @@ will automatically start the tomcat/collector and requires specifying the
 email address(es).  It is intended for use ONLY when running from cron for 
 the purpose of daily test installations.
 
+The '--force-log4j' argument is used to force the over-writing of the
+log4j.properties file used for logging.  If these properties have been 
+modified locally and you desire to preserve these changes, then this option
+should not be used and any changes will have to be performed manually.
+
 The script performs the following:
  1. shutdown your tomcat instance/collector
  2. run update-gratia-local with the appropriate arguments
@@ -117,6 +138,15 @@ The script performs the following:
       $tomcat_dir/gratia_tomcat_logs_backups
  4. optionally, allow you to start your collector
     (when the --daily argument is specified, it will start the collector)
+ 5. optionally, overwrite your log4j.properties file
+
+Log files are maintained for every execution of this script in this directory:
+  /data/TOMCAT_INSTANCE-upgrades.log 
+as YYYY-MM-DD.log.  These files are appended to and this script perform a 
+housekeeping retaining only the last 10 log files.
+
+The latest release data will be shown in:
+  /data/TOMCAT_INSTANCE.gratia-release
 
 You must be root user to execute this script.
 "
@@ -185,7 +215,6 @@ function choose_source_directory {
     if [ -n "$ans" ];then
       source_type=$ans
     fi
-    echo prompt:  $prompt
     case $source_type in 
       "releases" ) find_release_source ; break ;;
       "builds"   ) find_build_source   ; break ;;
