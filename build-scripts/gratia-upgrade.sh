@@ -75,7 +75,7 @@ Usage: $PGM --help
 This script is intended to simplify the upgrading of a gratia instance
 in development, integration and production.  
 
-There are 2 modes:
+Modes for running the script:
 1. Question and answer mode (no command line arguments)
      $PGM 
    This is the recommended mode for performing upgrades.
