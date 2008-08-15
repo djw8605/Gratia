@@ -222,7 +222,15 @@ public class ReplicationDataPump extends Thread {
                 bundle_count = bundle_count + 1;
                 if (bundle_count == bundle_size) {
                     replicationLog("Sending: " + lowdbid + " to " + dbid);
-                    uploadXML(replicationTarget, xml_msg.toString());
+                    if (uploadXML(replicationTarget, xml_msg.toString())) {
+                        // Successful -- update replication table entry
+                        session.refresh(replicationEntry);
+                        session.beginTransaction();
+                        replicationEntry.setdbid((int)dbid);
+                        replicationEntry.setrowcount(replicationEntry.getrowcount() + bundle_count);
+                        session.flush();
+                        session.getTransaction().commit();
+                    }
                     if (exitflag) return;
                     bundle_count = 0;
                     xml_msg = new StringBuilder();
