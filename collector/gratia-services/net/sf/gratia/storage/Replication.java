@@ -1,6 +1,8 @@
 package net.sf.gratia.storage;
 
-public class Replication {
+import java.lang.Comparable;
+
+public class Replication implements Comparable {
     private int replicationid;
     private int registered;
     private int running;
@@ -14,7 +16,35 @@ public class Replication {
     private String recordtable;
     private int bundleSize;
 
+    public int compareTo(Object obj) {
+        try {
+            Replication cmp = (Replication) obj;
+
+            int result = openconnection.compareTo(cmp.getopenconnection());
+            if (result == 0) {
+                result = probename.compareTo(cmp.getprobename());
+            }
+            return result;
+        }
+        catch (Exception e) {
+            return -1;
+        }
+    }
+
     public Replication() {
+        initialValues("");
+    }
+
+    public Replication(String recordTable) {
+        initialValues(recordTable);
+    }
+
+    private void initialValues(String recordTable) {
+        setopenconnection("");
+        setsecureconnection("");
+        setprobename("");
+        setrecordtable(recordTable);
+        setfrequency(1);
     }
 
     public int getreplicationid() {

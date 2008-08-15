@@ -37,7 +37,7 @@ import org.hibernate.exception.*;
 public class DatabaseMaintenance {
     static final String dq = "\"";
     static final String comma = ",";
-    static final int gratiaDatabaseVersion = 42;
+    static final int gratiaDatabaseVersion = 43;
     static final int latestDBVersionRequiringStoredProcedureLoad = gratiaDatabaseVersion;
     static final int latestDBVersionRequiringSummaryViewLoad = 37;
     static final int latestDBVersionRequiringSummaryTriggerLoad = 41;
@@ -1198,7 +1198,76 @@ public class DatabaseMaintenance {
                 }         
                 // Also auxiliary DB item upgrades (trigger and friends)
             }
-            
+            if (current == 42) {
+                int result = 0;
+                Session session = null;
+                try {
+                    session = HibernateWrapper.getSession();
+                    Transaction tx = session.beginTransaction();                    
+                    Query q =
+                        session.createSQLQuery("UPDATE Replication SET " +
+                                               "registered = 0 where registered IS NULL");
+                    q.executeUpdate();
+                    q = session.createSQLQuery("UPDATE Replication SET " +
+                                               "running = 0 where running IS NULL"); 
+                    q.executeUpdate();
+                    q = session.createSQLQuery("UPDATE Replication SET " +
+                                               "registered = 0 where registered IS NULL"); 
+                    q.executeUpdate();
+                    q = session.createSQLQuery("UPDATE Replication SET " +
+                                               "security = 0 where security IS NULL"); 
+                    q.executeUpdate();
+                    q = session.createSQLQuery("UPDATE Replication SET " +
+                                               "openconnection = '' where openconnection IS NULL"); 
+                    q.executeUpdate();
+                    q = session.createSQLQuery("UPDATE Replication SET " +
+                                               "secureconnection = '' where secureconnection IS NULL"); 
+                    q.executeUpdate();
+                    q = session.createSQLQuery("UPDATE Replication SET " +
+                                               "frequency = 0 where frequency IS NULL"); 
+                    q.executeUpdate();
+                    q = session.createSQLQuery("UPDATE Replication SET " +
+                                               "dbid = 0 where dbid IS NULL"); 
+                    q.executeUpdate();
+                    q = session.createSQLQuery("UPDATE Replication SET " +
+                                               "rowcount = 0 where rowcount IS NULL"); 
+                    q.executeUpdate();
+                    q = session.createSQLQuery("UPDATE Replication SET " +
+                                               "probename = 'All' where probename IS NULL"); 
+                    q.executeUpdate();
+                    q = session.createSQLQuery("UPDATE Replication SET " +
+                                               "recordtable = 'JobUsageRecord' where recordtable IS NULL"); 
+                    q.executeUpdate();
+                    q = session.createSQLQuery("ALTER TABLE Replication " +
+                                               "MODIFY COLUMN registered INT NOT NULL DEFAULT '0', " +
+                                               "MODIFY COLUMN running INT NOT NULL DEFAULT '0', " +
+                                               "MODIFY COLUMN security INT NOT NULL DEFAULT '0', " +
+                                               "MODIFY COLUMN openconnection VARCHAR(255) NOT NULL DEFAULT '', " +
+                                               "MODIFY COLUMN secureconnection VARCHAR(255) NOT NULL DEFAULT '', " +
+                                               "MODIFY COLUMN frequency INT NOT NULL DEFAULT '1', " +
+                                               "MODIFY COLUMN dbid INT NOT NULL DEFAULT '0', " +
+                                               "MODIFY COLUMN rowcount INT NOT NULL DEFAULT '0', " +
+                                               "MODIFY COLUMN probename VARCHAR(255) NOT NULL DEFAULT 'All', " +
+                                               "MODIFY COLUMN recordtable VARCHAR(255) NOT NULL DEFAULT '';");
+                    q.executeUpdate();
+                    tx.commit();
+                } catch (Exception e) {
+                    if ((session != null) && (session.isOpen())) {
+                        Transaction tx = session.getTransaction();
+                        if (tx != null) tx.rollback();
+                        session.close();
+                        Logging.debug("Exception detail: ", e);
+                        Logging.warning("Gratia database FAILED to upgrade from " + current +
+                                        " to " + (current + 1)); 
+                    }
+                    result = -1;
+                }
+                if (result > -1) {
+                    Logging.log("Gratia database upgraded from " + current + " to " + (current + 1));
+                    current = current + 1;
+                    UpdateDbVersion(current);
+                }         
+            }
             return ((current == gratiaDatabaseVersion) && checkAndUpgradeDbAuxiliaryItems());
         }
     }
