@@ -13,41 +13,29 @@
   <h3 align="center">#recordtable# Replication Administration </h3>
   <table width="100%" border="1">
     <tr>
-      <th width="18%" bgcolor="#999999" scope="col">Remote Host </th>
-      <th width="10%" bgcolor="#999999" scope="col">Registered</th>
-      <th width="10%" bgcolor="#999999" scope="col">Running</th>
-      <th width="8%" bgcolor="#999999" scope="col">Security </th>
-      <th width="22%" bgcolor="#999999" scope="col">Probe Name </th>
-      <th width="9%" bgcolor="#999999" scope="col">Frequency</th>
-      <th width="7%" bgcolor="#999999" scope="col">DBID</th>
-      <th width="8%" bgcolor="#999999" scope="col">Row Count </th>
-      <th width="8%" bgcolor="#999999" scope="col">Options</th>
+      <th bgcolor="#999999" scope="col">Remote Host</th>
+      <th bgcolor="#999999" scope="col">Registered</th>
+      <th bgcolor="#999999" scope="col">Running</th>
+      <th bgcolor="#999999" scope="col">Security</th>
+      <th bgcolor="#999999" scope="col">Probe Name</th>
+      <th bgcolor="#999999" scope="col">Check Interval (m)</th>
+      <th bgcolor="#999999" scope="col">DBID</th>
+      <th bgcolor="#999999" scope="col">Row Count</th>
+      <th bgcolor="#999999" scope="col">Bundle Size</th>
+      <th bgcolor="#999999" scope="col">Actions</th>
     </tr>
-    <tr id="datarow:#index#">
+    <tr id="datarow:#replicationid#">
       <td>
-        <input id="openconnection:#index#" name="openconnection:#index#" type="text" value="#openconnection#" size="25" maxlength="50" />
-        <input type="hidden" name="index:#index#" value="#index#"/>
-        <input type="hidden" name="replicationid:#index#" value="#replicationid#"/>
+          #openconnection#
       </td>
-      <td><label>#registered#</label>
-        &nbsp;</td>
-      <td>#running#</td>
-      <td><label>
-        <select id="security:#index#" name="security:#index#">
-          <option>Yes</option>
-          <option selected="selected">No</option>
-        </select>
-        </label></td>
-      <td style="width: 200px"><label>
-        <select id="probename:#index#" name="probename:#index#">
-          <option selected="selected">All</option>
-        </select>
-        </label></td>
-      <td><label>
-        <input name="frequency:#index#" type="text" value="#frequency#" size="3" maxlength="2" />
-        </label></td>
-      <td><label>#dbid#</label></td>
-      <td><label>#rowcount#</label></td>
+      <td style="text-align: center">#registered#</td>
+      <td style="text-align: center">#running#</td>
+      <td style="text-align: center">#security#</td>
+      <td style="width: 200px; text-align:left">#probename#</td>
+      <td style="text-align: right">#frequency#</td>
+      <td style="text-align: right">#dbid#</td>
+      <td style="text-align: right">#rowcount#</td>
+      <td style="text-align: right">#bundleSize#</td>
       <td><table id="optiontable#replicationid#" width="100%" border="1">
               <colgroup><col width="50%" /><col width="50%" /></colgroup>
           <tr>
@@ -62,12 +50,13 @@
             <td><a href="#webpagename#.html?action=reset&amp;replicationid=#replicationid#">Reset</a></td>
             <td><a href="#webpagename#.html?action=delete&amp;replicationid=#replicationid#">Delete</a></td>
           </tr>
+          <tr>#modifyupdate#</tr>
         </table></td>
     </tr>
     <tr>
-      <td colspan="9" align="center"><label>
-          <input type="submit" name="update" value="Update" />
-        </label></td>
+      <td colspan="10" style="text-align: center">
+      <label><input type="submit" name="refresh" value="Refresh" /></label>&nbsp;&nbsp;&nbsp;
+      <label><input type="submit" name="new" value="New Entry" /></label></td>
     </tr>
   </table>
 </form>

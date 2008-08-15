@@ -329,7 +329,6 @@ public class ReplicationTable extends HttpServlet {
         Collections.sort(vec); // Sort according to Replication.CompareTo().
         for ( Replication repEntry : vec ) {
             Boolean modifyThisEntry = false;
-            repEntry = repEntries.nextElement();
             if ((modify == true) &&
                 (selectedReplicationId != null) &&
                 (repEntry.getreplicationid() == selectedReplicationId.intValue())) {
