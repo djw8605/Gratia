@@ -81,7 +81,7 @@ endef
 #-------------------------------------------------------------
 all: gratia
 	#------------------------------
-	# --- Target: all COMPLETED ---
+	# --- Target: all COMPLETED at $(shell date) ---
 	#------------------------------
 
 #-------------------------------------------------------------
@@ -96,14 +96,14 @@ clean:
 	rm -f $(configuration)/build-stored-procedures.sql $(configuration)/build-stored-procedures_debug.sql
 	rm -f $(target)/*.[wjt]ar $(target)/cleanup_*
 	mkdir -p $(target)
-	# --- Target: clean COMPLETED ---
+	# --- Target: clean COMPLETED at $(shell date) ---
 
 #-------------------------------------------------------------
 # services will eventually need the util package
 services: $(configuration)/build-stored-procedures.sql \
 $(configuration)/build-stored-procedures_debug.sql \
 $(target)/gratia-services.war
-	# --- Target: services COMPLETED ---
+	# --- Target: services COMPLETED at $(shell date) ---
 
 #-------------------------------------------------------------
 $(configuration)/build-stored-procedures_debug.sql : $(configuration)/create_build-stored-procedures-sql
@@ -111,7 +111,7 @@ $(configuration)/build-stored-procedures_debug.sql : $(configuration)/create_bui
 	# --- Target: $(configuration)/build-stored-procedures_debug.sql ---
 	#-------------------------------------------------------------------
 	$(<) -dt > $(@)
-	# --- Target: $(configuration)/build-stored-procedures_debug.sql COMPLETED ---
+	# --- Target: $(configuration)/build-stored-procedures_debug.sql COMPLETED at $(shell date) ---
 
 #-------------------------------------------------------------
 $(configuration)/build-stored-procedures.sql : $(configuration)/create_build-stored-procedures-sql
@@ -119,7 +119,7 @@ $(configuration)/build-stored-procedures.sql : $(configuration)/create_build-sto
 	# --- Target: $(configuration)/build-stored-procedures.sql ---
 	#-------------------------------------------------------------
 	$(<) -d > $(@)
-	# --- Target: $(configuration)/build-stored-procedures.sql COMPLETED ---
+	# --- Target: $(configuration)/build-stored-procedures.sql COMPLETED at $(shell date) ---
 
 #-------------------------------------------------------------
 $(target)/gratia-services.war:  $(services)/net/sf/gratia/services/*.java  \
@@ -153,7 +153,7 @@ $(target)/gratia-services.war:  $(services)/net/sf/gratia/services/*.java  \
 	$(copy_util_lib)
 	jar -cfM $(target)/gratia-services.war -C war .
 	rm -rf  war
-	# --- Target: gratia-services.war COMPLETED  ---
+	# --- Target: gratia-services.war COMPLETED at $(shell date) ---
 
 
 #-------------------------------------------------------------
@@ -178,7 +178,7 @@ servlets: services util
 	$(copy_util_lib)
 	jar -cfM $(target)/gratia-servlets.war -C war .
 	rm -rf  war
-	# --- Target: services COMPLETED  ---
+	# --- Target: services COMPLETED at $(shell date) ---
 
 #------------------------------------------------------------------
 soap: services
@@ -209,14 +209,15 @@ soap: services
 	$(copy_util_lib)
 	jar -cfM $(target)/gratia-soap.war -C war .
 	rm -rf war
-	# --- Target: soap COMPLETED  ---
+	# --- Target: soap COMPLETED at $(shell date) ---
 
 #------------------------------------------------------------------
-administration: util security $(target)/gratia-administration.war
-	# --- Target: administration COMPLETED  ---
+administration: $(target)/gratia-administration.war
+	# --- Target: administration COMPLETED at $(shell date) ---
 
 #------------------------------------------------------------------
-${target}/gratia-administration.war: ${administration}/net/sf/gratia/administration/*.java \
+${target}/gratia-administration.war: util security \
+                                     ${administration}/net/sf/gratia/administration/*.java \
                                      ${administration}/net/sf/gratia/administration/web.xml \
                                      ${administration}/WebContent/*.html \
                                      ${administration}/WebContent/*.css \
@@ -258,12 +259,12 @@ ${target}/gratia-administration.war: ${administration}/net/sf/gratia/administrat
 	$(copy_util_lib)
 	jar -cfM $(target)/gratia-administration.war -C war .
 	rm -rf  war
-	# --- Target: $(target)/gratia-administration.war COMPLETED ---
+	# --- Target: $(target)/gratia-administration.war COMPLETED at $(shell date) ---
 
 #------------------------------------------------------------------
-util:
+$(target)/gratia-util.war: ${util}/net/sf/gratia/util/*.java
 	# --------------------
-	# --- Target: util ---
+	# --- Target: $(target)/gratia-util.war ---
 	# --------------------
 	rm -rf  jar-lib
 	mkdir -p jar-lib
@@ -272,26 +273,30 @@ util:
 	cp $(util)/net/sf/gratia/util/*.class jar-lib/net/sf/gratia/util
 	jar -cfM $(target)/gratia-util.jar -C jar-lib .
 	rm -rf jar-lib
-	# --- Target: util COMPLETED ---
+	# --- Target: $(target)/gratia-util.war COMPLETED at $(shell date) ---
+
+util: $(target)/gratia-util.war
+	# --- Target: util COMPLETED at $(shell date) ---
 
 #------------------------------------------------------------------
-security: services util
+security: $(target)/gratiaSecurity.jar
+	# --- Target: security COMPLETED at $(shell date) ---
+
+$(target)/gratiaSecurity.jar: services util $(security)/net/sf/gratia/vomsSecurity/*.java
 	# ----------------------------
-	# --- Target: security ---
+	# --- Target: $(target)/gratiaSecurity.jar ---
 	# ----------------------------
 	rm   -rf jar-lib
 	mkdir -p jar-lib/net/sf/gratia/util
 	mkdir -p jar-lib/net/sf/gratia/services
 	mkdir -p jar-lib/net/sf/gratia/vomsSecurity
-	javac -cp $(classpath) -extdirs $(commonLib) $(util)/net/sf/gratia/util/*.java
 	javac -cp $(classpath) -extdirs $(commonLib) $(security)/net/sf/gratia/vomsSecurity/*.java
 	cp $(util)/net/sf/gratia/util/*.class jar-lib/net/sf/gratia/util
 	cp $(security)/net/sf/gratia/vomsSecurity/*.class jar-lib/net/sf/gratia/vomsSecurity
 	cp $(services)/net/sf/gratia/services/JMS*.class jar-lib/net/sf/gratia/services
-	cp $(util)/net/sf/gratia/util/Logging.class jar-lib/net/sf/gratia/services
 	jar -cvfM $(target)/gratiaSecurity.jar -C jar-lib .
 	rm -rf jar-lib
-	# --- Target: security COMPLETED ---
+	# --- Target: $(target)/gratiaSecurity.jar COMPLETED at $(shell date) ---
 
 #-------------------------------------------------------------
 reporting: birt-reporting
@@ -325,7 +330,7 @@ reporting: birt-reporting
 	# --- copy the web.xml  file ---
 	jar -cfM $(target)/gratia-reporting.war -C war .
 	rm -rf war
-	# --- Target: reporting COMPLETED ---
+	# --- Target: reporting COMPLETED at $(shell date) ---
 
 #-------------------------------------------------------------
 reports:
@@ -348,7 +353,7 @@ reports:
 	${copy_util_lib}
 	jar -cvf ${target}/gratia-reports.war -C war .
 	rm -rf war
-	# --- Target: reports COMPLETED ---
+	# --- Target: reports COMPLETED at $(shell date) ---
 
 #-------------------------------------------------------------
 birt-reporting: 
@@ -368,12 +373,12 @@ birt-reporting:
 	cp $(reportsrc)/src/net/sf/gratia/reporting/exceptions/*.class jar-lib/net/sf/gratia/reporting/exceptions
 	jar -cvfM $(target)/gratiaReporting.jar -C jar-lib .
 	rm -rf jar-lib
-	# --- Target: birt-reporting COMPLETED ---
+	# --- Target: birt-reporting COMPLETED at $(shell date) ---
 
 
 #---------------------------------------------------------------
 local: clean util services servlets  administration soap reporting reports 
-	# --- Target: local COMPLETED ---
+	# --- Target: local COMPLETED at $(shell date) ---
 #---------------------------------------------------------------
 
 release: gratia
@@ -425,7 +430,7 @@ release: gratia
 	cp $(target)/gratia-administration.war tarball/gratia/gratia_services; \
 	tar $(tarowner) -cvf $(target)/gratia_services_$(gratia_services_version).tar -C tarball .; \
 	rm -f -r tarball
-	# --- Target: release COMPLETED ---
+	# --- Target: release COMPLETED at $(shell date) ---
 
 server_lib: $(target)/cleanup_server_lib
 	# ------------------------------
@@ -436,7 +441,7 @@ server_lib: $(target)/cleanup_server_lib
 	cp -v $(SERVER_LIBS) tarball/; \
 	tar -cvf $(target)/server_lib.tar -C tarball .; \
         rm -f -r tarball
-	# --- Target: server_lib COMPLETED ---
+	# --- Target: server_lib COMPLETED at $(shell date) ---
 
 common_lib: $(target)/cleanup_common_lib
 	# ------------------------------
@@ -447,7 +452,7 @@ common_lib: $(target)/cleanup_common_lib
 	cp -v $(COMMON_LIBS) tarball/; \
 	tar -cvf $(target)/common_lib.tar -C tarball .; \
         rm -f -r tarball
-	# --- Target: common_lib COMPLETED ---
+	# --- Target: common_lib COMPLETED at $(shell date) ---
 
 shared_lib: $(target)/cleanup_shared_lib
 	# ------------------------------
@@ -458,7 +463,7 @@ shared_lib: $(target)/cleanup_shared_lib
 	cp -v $(SHARED_LIBS) tarball/; \
 	tar -cvf $(target)/shared_lib.tar -C tarball .; \
         rm -f -r tarball
-	# --- Target: shared_lib COMPLETED ---
+	# --- Target: shared_lib COMPLETED at $(shell date) ---
 
 common_classes: util
 	# ------------------------------
@@ -474,7 +479,7 @@ common_classes: util
 	done; \
 	tar -cvf $(target)/common_classes.tar -C tarball .; \
 	rm -f -r tarball
-	# --- Target: common_classes COMPLETED ---
+	# --- Target: common_classes COMPLETED at $(shell date) ---
 
 #-------------------------------------------------------------
 gratia: clean util services servlets administration soap reporting reports common_lib server_lib common_classes
@@ -497,7 +502,7 @@ gratia: clean util services servlets administration soap reporting reports commo
 	cp $(wildcard $(target)/cleanup_*) tarball; \
 	tar -cvf $(target)/gratia.tar -C tarball .; \
 	rm -f -r tarball
-	# --- Target: gratia COMPLETED ---
+	# --- Target: gratia COMPLETED at $(shell date) ---
 
 $(target)/cleanup_server_lib: $(configuration)/cleanup_template
 	# ------------------------------
