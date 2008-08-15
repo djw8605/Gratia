@@ -63,16 +63,18 @@ public class ProbeTable extends HttpServlet {
     String newname = "<New Probe Name>";
     TreeSet siteList = new TreeSet();
 
+    Boolean hibernateInitialized = false;
+
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
 
-        Properties p = Configuration.getProperties();
-
-        //
         // initialize logging
-        //
-
         Logging.initialize("administration");
+    }
+
+    void initHibernate() {
+        if (hibernateInitialized) return;
+        Properties p = Configuration.getProperties();
 
         while (true) {
             // Wait until JMS service is up
@@ -93,7 +95,9 @@ public class ProbeTable extends HttpServlet {
         }
         catch (Exception e) {
             Logging.warning("Caught exception during hibernate init", e);
+            return;
         }
+        hibernateInitialized = true;
     }
 
     public void openConnection() {
@@ -125,6 +129,7 @@ public class ProbeTable extends HttpServlet {
     }
 
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        initHibernate();
         String fqan = (String) request.getSession().getAttribute("FQAN");
         boolean login = true;
         if (fqan == null)
