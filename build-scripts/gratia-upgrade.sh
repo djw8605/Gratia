@@ -299,6 +299,7 @@ function clean_log_directory {
     mkdir $log_backup_dir >/dev/null 2>&1
   fi
   tomcat_log_dir=$tomcat_dir/$tomcat/logs
+  prev_dir=$(pwd)
   cd $tomcat_log_dir
   if [ ! -d "$tomcat_log_dir" ];then
     logerr "the tomcat log directory does not exist ($tomcat_log_dir)"
@@ -311,7 +312,7 @@ $(ls -l)
 "
   sleep 2
   tar zcf $backup_file *
-  rm -f admin* catalina.* glite-* gratia* hibernate* host* localhost* manager*
+  rm -f $tomcat_log_dir/*
   logit "... all done
 $PWD:
 $(ls -l)
@@ -319,6 +320,7 @@ $(ls -l)
 Log file backup: 
 $(ls -l $backup_file)
 "
+  cd $prev_dir
   sleep 2
 }
 #------------------------------- 
