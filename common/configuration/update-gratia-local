@@ -82,6 +82,8 @@ function stop_tomcat {
     if [ -e /etc/init.d/$init_service ];then
       echo "... stopping tomcat ($init_service)"
       service $init_service stop 2>/dev/null
+      echo "... sleeping 60 seconds for tomcat to free ports (temporary fix)"
+      sleep 60
     else
       echo "... $init_service is already stopped"
     fi
