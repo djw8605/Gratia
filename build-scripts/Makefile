@@ -59,8 +59,8 @@ COMMON_LIBS = $(foreach d, $(common_lib_jars), $(wildcard $(commonLib)/$(d)*.jar
 shared_lib_jars = 
 SHARED_LIBS = $(foreach d, $(shared_lib_jars), $(wildcard $(commonLib)/$(d)*.jar))
 
-COMMON_CLASSES = \
-	 $(wildcard $(util)/net/sf/gratia/util/TidiedDailyRollingFileAppender*.class)
+COMMON_CLASSES = $(util)/net/sf/gratia/util/TidiedDailyRollingFileAppender$$DatedFileFilter.class \
+                 $(util)/net/sf/gratia/util/TidiedDailyRollingFileAppender.class
 
 # check where we are as the tar file ownership cannot be set correctly on cygwin
 ifeq ($(filter CYGWIN%,$(PLATFORM)),)
