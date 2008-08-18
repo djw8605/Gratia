@@ -50,6 +50,11 @@ usage: update-gratia-local [-S <source-prefix>] [-j <jre-home>] [-s]
 EOF
 }
 #-----------------
+function logerr {
+    echo "ERROR: $1"
+    exit 1
+}
+#-----------------
 function set_env_for_vdt {
   vdtsetup=$vdt_location/setup.sh
   if [ ! -e $vdtsetup ];then
@@ -76,18 +81,55 @@ function set_env_for_local {
 }
 #-----------------
 function stop_tomcat {
+  echo "... stopping tomcat services"
   if [ $vdt_install ];then
     vdt-control --off tomcat-55
   else
-    if [ -e /etc/init.d/$init_service ];then
-      echo "... stopping tomcat ($init_service)"
-      service $init_service stop 2>/dev/null
-      echo "... sleeping 60 seconds for tomcat to free ports (temporary fix)"
-      sleep 60
+    if [ ! -e /etc/init.d/$init_service ];then
+      echo "... no tomcat initd service defined"
     else
-      echo "... $init_service is already stopped"
+      shutdown_local_tomcat
     fi
   fi
+}
+#-----------------
+function shutdown_local_tomcat {
+    echo "... finding tomcat pid for later verfication that ports are free"
+    pid="$(ps axxx |grep $init_service |grep Dcom.sun.management.jmxremote.port  |egrep -v grep |awk '{print $1}')"
+    if [ -z "${pid}" ];then
+      echo "... tomcat process does not appear to be running"
+      return
+    fi
+    echo "... tomcat pid: $pid"
+    echo "... stopping tomcat service ($init_service)"
+    service $init_service stop 2>/dev/null
+    verify_shutdown $pid
+    echo "... tomcat service ($init_service) successfully stopped"
+}
+#-----------------
+function verify_shutdown {
+    pid="$1"
+    echo "... verify ports are free and tomcat fully shutdown for pid ($pid)"
+    tries=20
+    sleep=5
+    while
+      [ $tries -gt 1 ]
+    do
+      connection_cnt="$(/bin/netstat -n --listening --program |egrep ${pid}/java |egrep -v grep |wc -l)"
+      if [ $connection_cnt -eq 0 ];then
+        break   # all ports free
+      fi
+      tries=$(($tries -1))
+      echo "... found $connection_cnt ports still in use for pid($pid)"
+      echo "$(/bin/netstat -n --listening --program |egrep ${pid}/java |egrep -v grep)"
+      echo "... sleeping $sleep seconds for them to free.. will try $tries more times"
+      sleep $sleep
+    done
+    if [ $connection_cnt -gt 0 ];then 
+      logerr "Server never fully shutdown.. $connection_cnt ports are still in use by pid ($pid).
+$(/bin/netstat -n --listening --program |egrep $pid |egrep -v grep)
+  "
+    fi
 }
 #-----------------
 function remove_deprecated_webapps_services {
@@ -297,7 +339,6 @@ done
 # Stop tomcat
 #-----------------------
 stop_tomcat
-
 
 #-----------------------
 # Cleanup miscellaneous files that could cause trouble
