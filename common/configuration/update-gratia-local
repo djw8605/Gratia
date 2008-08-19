@@ -3,10 +3,9 @@
 #-----------------
 function usage() {
 cat 1>&2 <<EOF
-usage: update-gratia-local [-S <source-prefix>] [-j <jre-home>] [-s]
-                           [-p <prefix>] [-d <db-root-pw>]
-                           [-i <collector-info-file>]
-                           [-c <configure-collector-script>]
+usage: update-gratia-local [-S <source-prefix>] [-j <jre-home>] [-s] \
+                           [-p <prefix>] [-d <db-root-pw>] \
+                           [-c <configure-collector-script>] \
                            [-h] [-v <vdt_location>] [--] <instance>
 
        -c <configure-collector-script>
@@ -14,18 +13,9 @@ usage: update-gratia-local [-S <source-prefix>] [-j <jre-home>] [-s]
           Execute <configure-collector-script> instead of
           <source-prefix>/common/configuration/configure-collector.
 
-       --force-log4j
-
-          Force overwrite of configurable files (like log4j.properties).
-
        -S <source-prefix>
 
           Find all sources under <source-prefix>.
-
-       -i <collector-info-file>
-
-          Use collector-info-file instead of the default files
-          (collector-pro.dat collector-itb.dat collector-dev.dat)
 
        -j <jre-home>
 
@@ -48,11 +38,6 @@ usage: update-gratia-local [-S <source-prefix>] [-j <jre-home>] [-s]
           Indicates a VDT installation. 
 
 EOF
-}
-#-----------------
-function logerr {
-    echo "ERROR: $1"
-    exit 1
 }
 #-----------------
 function set_env_for_vdt {
@@ -81,55 +66,16 @@ function set_env_for_local {
 }
 #-----------------
 function stop_tomcat {
-  echo "... stopping tomcat services"
   if [ $vdt_install ];then
     vdt-control --off tomcat-55
   else
-    if [ ! -e /etc/init.d/$init_service ];then
-      echo "... no tomcat initd service defined"
+    if [ -e /etc/init.d/$init_service ];then
+      echo "... stopping tomcat ($init_service)"
+      service $init_service stop 2>/dev/null
     else
-      shutdown_local_tomcat
+      echo "... $init_service is already stopped"
     fi
   fi
-}
-#-----------------
-function shutdown_local_tomcat {
-    echo "... finding tomcat pid for later verfication that ports are free"
-    pid="$(ps axxx |grep $init_service |grep Dcom.sun.management.jmxremote.port  |egrep -v grep |awk '{print $1}')"
-    if [ -z "${pid}" ];then
-      echo "... tomcat process does not appear to be running"
-      return
-    fi
-    echo "... tomcat pid: $pid"
-    echo "... stopping tomcat service ($init_service)"
-    service $init_service stop 2>/dev/null
-    verify_shutdown $pid
-    echo "... tomcat service ($init_service) successfully stopped"
-}
-#-----------------
-function verify_shutdown {
-    pid="$1"
-    echo "... verify ports are free and tomcat fully shutdown for pid ($pid)"
-    tries=20
-    sleep=5
-    while
-      [ $tries -gt 1 ]
-    do
-      connection_cnt="$(/bin/netstat -n --listening --program |egrep ${pid}/java |egrep -v grep |wc -l)"
-      if [ $connection_cnt -eq 0 ];then
-        break   # all ports free
-      fi
-      tries=$(($tries -1))
-      echo "... found $connection_cnt ports still in use for pid($pid)"
-      echo "$(/bin/netstat -n --listening --program |egrep ${pid}/java |egrep -v grep)"
-      echo "... sleeping $sleep seconds for them to free.. will try $tries more times"
-      sleep $sleep
-    done
-    if [ $connection_cnt -gt 0 ];then 
-      logerr "Server never fully shutdown.. $connection_cnt ports are still in use by pid ($pid).
-$(/bin/netstat -n --listening --program |egrep $pid |egrep -v grep)
-  "
-    fi
 }
 #-----------------
 function remove_deprecated_webapps_services {
@@ -174,40 +120,6 @@ function populate_server_lib {
     tar xvf ${target_dir}/server_lib.tar
 }
 
-function populate_common_lib {
-    cd "$tomcat_top/common/lib"
-    if [[ -x "$tomcat_gratia/cleanup_common_lib" ]]; then
-      echo "... running cleanup script in $tomcat_top/common/lib:"
-      "$tomcat_gratia/cleanup_common_lib"
-    fi
-    echo "... populating $tomcat_top/common/lib:"
-    tar xvf ${target_dir}/common_lib.tar
-}
-
-function misc_cleanup {
-    cd "$tomcat_top"
-    if [[ -x "$tomcat_gratia/cleanup_misc" ]]; then
-      echo " running cleanup script in $tomcat_top:"
-      "$tomcat_gratia/cleanup_misc"
-    fi
-}
-
-function populate_common_classes {
-    cd "$tomcat_top/common/classes"
-    echo "... populating $tomcat_top/common/classes"
-    if [[ -z "$forcelog4j" ]] && [[ -f "$tomcat_top/common/classes/log4j.properties" ]]; then
-      echo "$tomcat_top/common/classes/log4j.properties exists --"
-      echo "Check ${tomcat_top}/gratia/log4j.properties for updates"
-    else
-      cp -vf "${tomcat_top}/gratia/log4j.properties" .
-      if (( $? != 0 )); then
-        echo "ERROR: Unable to copy ${tomcat_top}/gratia/log4j.properties in to $tomcat_top/common/classes/ -- pleae check"
-        exit 1
-      fi
-    fi
-    tar xvf ${target_dir}/common_classes.tar
-}
-
 
 ## MAIN ########################################
 # Defaults
@@ -221,69 +133,41 @@ gratia-security
 birt
 "
 
-# Use getopt(1) -- enhanced to process long options
-TEMP=`getopt -o :c:i:j:sp:d:v:hS: --long force-log4j -n "update-gratia-local" -- "$@"`
-
-if [ $? != 0 ]; then
-  echo "terminating due to option parse errors" 1>&2
-  exit 1
-fi
-
-eval set -- "$TEMP"
-
 #--- get command line args ----
-while true; do
-    case "$1" in
-        -c)
-            configure_script="$2"
-            shift 2
+while getopts :c:j:sp:d:v:hS: OPT; do
+    case $OPT in
+        c)  configure_script="$OPTARG"
             ;;
-        --force-log4j)
-            forcelog4j=1
-            shift
+        S)
+            source_prefix="$OPTARG"
             ;;
-        -S)
-            source_prefix="$2"
-            shift 2
+        j)
+            java_jre="$OPTARG"
             ;;
-        -j)
-            java_jre="$2"
-            shift 2
-            ;;
-        -i)
-            collector_info="--collector-info=$2"
-            shift 2
-            ;;
-        -s)
+        s)
             use_ssl="-s"
-            shift
             ;;
-        -p)
-            tomcat_root="$2"
-            shift 2
+        p)
+            tomcat_root="$OPTARG"
             ;;
-        -d)
-            dbp_arg="-d \"$2\" "
-            shift 2
+        d)
+            dbp_arg="-d"
+            dbpwd="$OPTARG"
             ;;
-        -v)
+        v)
             vdt_install=1
-            vdt_location="$2"
-            shift 2
+            vdt_location="$OPTARG"
             ;;
-        -h)
+        h)
             usage
             exit 1
-            ;;
-        --)
-            shift
-            break
             ;;
         *)
             usage
             exit 1
     esac
 done
+shift $[ OPTIND - 1 ]
 
 
 instance=$1
@@ -315,35 +199,11 @@ do
   fi
 done
 
-#-----------------------
-# Check for java
-#-----------------------
-##echo "... checking for java"
-##if [ "$(type java >/dev/null 2>&1;echo $?)" ];then
-##  if [ ! -x $java_jre/bin/java ];then
-##    echo;echo "ERROR: Cannot find java ($java_jre/bin/java)";echo
-##    exit 1
-##  fi
-##fi
-#-----------------------
-# Check for mysql
-#-----------------------
-##echo "... checking for mysql"
-##if [ "$(type mysql >/dev/null 2>&1;echo $?)" != "0" ];then
-##  echo;echo "ERROR: Cannot find mysql client on this node";echo
-##  exit 1
-##fi
-
 
 #-----------------------
 # Stop tomcat
 #-----------------------
 stop_tomcat
-
-#-----------------------
-# Cleanup miscellaneous files that could cause trouble
-#-----------------------
-misc_cleanup
 
 #-----------------------
 # Update gratia directory
@@ -426,43 +286,26 @@ if [ $vdt_install ];then
     cd -
   done
 
-  # May not always need to do this ...
-  populate_server_lib
-  populate_common_lib
-  populate_common_classes
-
   #-- reset some permissions --
   echo "... fixing ownership:"
   chown -R daemon $tomcat_webapps
 #--- local ---
 else
-
   #-----------------------
   # Put required libs in server/lib
   #-----------------------
   populate_server_lib
 
   #-----------------------
-  # Put required libs in common/lib
-  #-----------------------
-  populate_common_lib
-
-  #-----------------------
-  # Put required files in common/classes
-  #-----------------------
-  populate_common_classes
-
-  #-----------------------
   # Run configure script
   #-----------------------  
   [[ -n "$configure_script" ]] || configure_script="$configuration_dir/configure-collector"
   echo "... running $configure_script"
-   "$configure_script" \
+  "$configure_script" \
 $use_ssl \
 -p "$tomcat_root" \
 -j "$java_jre" \
-$dbp_arg \
-${collector_info} \
+$dbp_arg "$dbpwd" \
 $instance
 status=$?
   if (( $status != 0 )); then
