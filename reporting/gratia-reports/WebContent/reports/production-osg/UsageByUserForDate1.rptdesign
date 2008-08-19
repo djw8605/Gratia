@@ -504,7 +504,7 @@
  * ones you need. Note that for simplicity the &quot;after&quot; methods have not be included here.
  *
  * This script syntax follows JavaScript specifications, the Java classes that are referred to
- * in the comments can be accessed as JavaScript classes. 
+ * in the comments can be accessed as JavaScript classes.
  *
  * Script examples are available in the org.eclipse.birt.chart.examples plugin
  */
@@ -512,7 +512,7 @@
 
 /**
  * Called before populating the series dataset using the DataSetProcessor.
- * 
+ *
  * @param series
  *            Series
  * @param dataSetProcessor
@@ -524,7 +524,7 @@
 
 /**
  * Called before generation of chart model to GeneratedChartState.
- * 
+ *
  * @param chart
  *            Chart Model
  * @param context
@@ -533,18 +533,18 @@
 function beforeGeneration( chart, context ){
 	rep = context.getExternalContext().getScriptable();
 	metric = rep.getParameterValue(&quot;DisplayMetric&quot;);
-	if(metric==&quot;process&quot;) metric_text = &quot;Process Hours&quot;;
-	if(metric==&quot;wallclock&quot;) metric_text = &quot;Wallclock Hours&quot;;
-	if(metric==&quot;jobcount&quot;) metric_text = &quot;Job Count&quot;;
-	
+	if(metric==&quot;Cpu&quot;) metric_text = &quot;Process Hours&quot;;
+	if(metric==&quot;WallDuration&quot;) metric_text = &quot;Wallclock Hours&quot;;
+	if(metric==&quot;Njobs&quot;) metric_text = &quot;Job Count&quot;;
+
 	rep_title = rep.getParameterValue(&quot;ReportTitle&quot;) + &quot; (&quot; + metric_text + &quot;)&quot; ;	rep_subtitle = rep.getParameterValue(&quot;ReportSubtitle&quot;);
 	chart.getTitle().getLabel().getCaption().setValue(rep_title + &quot;\n&quot; + rep_subtitle);
 
-}	
+}
 
 /**
  * Called before the chart is rendered.
- * 
+ *
  * @param gcs
  *            GeneratedChartState
  * @param context
@@ -554,7 +554,7 @@ function beforeGeneration( chart, context ){
 
 /**
  * Called before drawing each block.
- * 
+ *
  * @param block
  *            Block
  * @param context
@@ -564,7 +564,7 @@ function beforeGeneration( chart, context ){
 
 /**
  * Called before drawing each entry the legend.
- * 
+ *
  * @param label
  *            Label
  * @param context
@@ -574,7 +574,7 @@ function beforeGeneration( chart, context ){
 
 /**
  * Called before rendering Series.
- * 
+ *
  * @param series
  *            Series
  * @param seriesRenderer
@@ -586,7 +586,7 @@ function beforeGeneration( chart, context ){
 
 /**
  * Called before rendering the title of a Series.
- * 
+ *
  * @param series
  *            Series
  * @param label
@@ -598,7 +598,7 @@ function beforeGeneration( chart, context ){
 
 /**
  * Called before drawing each marker line in an Axis.
- * 
+ *
  * @param axis
  *            Axis
  * @param markerLine
@@ -610,7 +610,7 @@ function beforeGeneration( chart, context ){
 
 /**
  * Called before drawing each marker range in an Axis.
- * 
+ *
  * @param axis
  *            Axis
  * @param markerRange
@@ -622,7 +622,7 @@ function beforeGeneration( chart, context ){
 
 /**
  * Called before drawing each datapoint graphical representation or marker.
- * 
+ *
  * @param dph
  *            DataPointHints
  * @param fill
@@ -634,7 +634,7 @@ function beforeGeneration( chart, context ){
 
 /**
  * Called before rendering the label for each datapoint.
- * 
+ *
  * @param dph
  *            DataPointHints
  * @param label
@@ -643,33 +643,33 @@ function beforeGeneration( chart, context ){
  *            IChartScriptContext
  */
  function beforeDrawDataPointLabel(dph, label, icsc)
-{ 
+{
 /**
  * Called before rendering curve fitting.
- * 
+ *
  * @param cf
  *            CurveFitting
  * @param context
  *            IChartScriptContext
  */
-/** 
+/**
 	* Color change based on value
 	*
-val = dph.getOrthogonalValue( ); 
+val = dph.getOrthogonalValue( );
 clr = label.getCaption( ).getColor( );
-if ( val &lt; -10 ) clr.set( 32, 268, 255 ); 
-else if ( ( val >= -10 ) &amp; ( val &lt;=10 ) ) clr.set( 168, 0, 208 ); 
+if ( val &lt; -10 ) clr.set( 32, 268, 255 );
+else if ( ( val >= -10 ) &amp; ( val &lt;=10 ) ) clr.set( 168, 0, 208 );
 else if ( val > 10 ) clr.set( 0, 0, 200 );
 */
 
 rep = icsc.getExternalContext().getScriptable();
 val1 = rep.getParameterValue(&quot;DisplayMetric&quot;);
-if(val1 == 'jobcount')
+if(val1 == 'Njobs')
 	{
-	labval = label.getCaption().getValue(); 
+	labval = label.getCaption().getValue();
 	dotpos = labval.indexOf(&quot;.&quot;);
 	if(dotpos > 0)
-		{ 
+		{
 		frmt = label.getCaption().getValue().substring(0,dotpos);
 		label.getCaption().setValue(frmt)
 		};
@@ -679,7 +679,7 @@ if(val1 == 'jobcount')
 
 /**
  * Called before rendering each label on a given Axis.
- * 
+ *
  * @param axis
  *            Axis
  * @param label
@@ -691,7 +691,7 @@ if(val1 == 'jobcount')
 
 /**
  * Called before rendering the Title of an Axis.
- * 
+ *
  * @param axis
  *            Axis
  * @param label
@@ -705,15 +705,15 @@ function beforeDrawAxisTitle( axis, label, context )
 	val1 =rep.getParameterValue(&quot;DisplayMetric&quot;);
 	if(!axis.isCategoryAxis())
 	{
-		if(val1==&quot;process&quot;)
+		if(val1==&quot;Cpu&quot;)
 		{
 		label.getCaption().setValue(&quot;Process Hours&quot;);
 		}
-		else if(val1==&quot;wallclock&quot;)
+		else if(val1==&quot;WallDuration&quot;)
 		{
 		label.getCaption().setValue(&quot;Wallclock Hours&quot;);
 		}
-		else if(val1==&quot;jobcount&quot;)
+		else if(val1==&quot;Njobs&quot;)
 		{
 		label.getCaption().setValue(&quot;Job Count&quot;);
 		}
@@ -969,18 +969,7 @@ else{&#xD;
             <Visible>true</Visible>
           </Label>
           <DataDefinition>
-            <Definition>if (params[&quot;DisplayMetric&quot;] == &quot;wallclock&quot;) {&#xD;
- row[&quot;WallDuration&quot;] / 3600&#xD;
-}&#xD;
-else if (params[&quot;DisplayMetric&quot;]==&quot;process&quot;) {&#xD;
-row[&quot;Cpu&quot;]/3600&#xD;
-}&#xD;
-else if (params[&quot;DisplayMetric&quot;]==&quot;jobcount&quot;){&#xD;
-row[&quot;Njobs&quot;]&#xD;
-}&#xD;
-else {&#xD;
-&quot;***Unknown metric***&quot;&#xD;
-}</Definition>
+            <Definition>row[params[&quot;DisplayMetric&quot;].value]</Definition>
           </DataDefinition>
           <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
           <DataPoint>
@@ -999,15 +988,15 @@ var metricvalue =&quot;&quot;;&#xD;
 var label;&#xD;
 var dotpos;&#xD;
 &#xD;
-if (params[&quot;DisplayMetric&quot;] == &quot;wallclock&quot;) { &#xD;
+if (params[&quot;DisplayMetric&quot;] == &quot;WallDuration&quot;) { &#xD;
 	metricvalue = String(row[&quot;WallDuration&quot;] / 3600);&#xD;
 	label = &quot;Wallclock Hours: &quot;;&#xD;
 }&#xD;
-if (params[&quot;DisplayMetric&quot;] == &quot;process&quot;)  {&#xD;
+if (params[&quot;DisplayMetric&quot;] == &quot;Cpu&quot;)  {&#xD;
 	metricvalue = String(row[&quot;Cpu&quot;] / 3600);&#xD;
 	label = &quot;Process Hours: &quot;;&#xD;
 } &#xD;
-if (params[&quot;DisplayMetric&quot;] == &quot;jobcount&quot;) {&#xD;
+if (params[&quot;DisplayMetric&quot;] == &quot;Njobs&quot;) {&#xD;
 	metricvalue = String(row[&quot;Njobs&quot;]);&#xD;
 	label = &quot;Jobs: &quot;;&#xD;
 }&#xD;
@@ -1707,11 +1696,13 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
                 </structure>
                 <structure>
                     <property name="name">WallDuration</property>
-                    <expression name="expression">dataSetRow["WallDuration"]</expression>
+                    <expression name="expression">dataSetRow["WallDuration"]/3600</expression>
+                    <property name="dataType">any</property>
                 </structure>
                 <structure>
                     <property name="name">Cpu</property>
-                    <expression name="expression">dataSetRow["Cpu"]</expression>
+                    <expression name="expression">dataSetRow["Cpu"]/3600</expression>
+                    <property name="dataType">any</property>
                 </structure>
                 <structure>
                     <property name="name">Njobs</property>

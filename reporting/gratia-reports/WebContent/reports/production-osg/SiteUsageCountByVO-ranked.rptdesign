@@ -1406,9 +1406,9 @@
 	rep = context.getExternalContext().getScriptable();&#xD;
 	&#xD;
 	metric = rep.getParameterValue(&quot;DisplayMetric&quot;);&#xD;
-	if(metric==&quot;process&quot;) metric_text = &quot;Process Hours&quot;;&#xD;
-	if(metric==&quot;wallclock&quot;) metric_text = &quot;Wallclock Hours&quot;;&#xD;
-	if(metric==&quot;jobcount&quot;) metric_text = &quot;Job Count&quot;;&#xD;
+	if(metric==&quot;Cpu&quot;) metric_text = &quot;Process Hours&quot;;&#xD;
+	if(metric==&quot;WallDuration&quot;) metric_text = &quot;Wallclock Hours&quot;;&#xD;
+	if(metric==&quot;Njobs&quot;) metric_text = &quot;Job Count&quot;;&#xD;
 	&#xD;
 	// Force title&#xD;
 	metric_text = &quot;&quot;&#xD;

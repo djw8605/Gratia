@@ -161,7 +161,7 @@
                     <property name="controlType">list-box</property>
                     <property name="mustMatch">true</property>
                     <property name="fixedOrder">true</property>
-                    <property name="defaultValue">wallclock</property>
+                    <property name="defaultValue">WallDuration</property>
                     <property name="distinct">false</property>
                     <structure name="format">
                         <property name="category">Unformatted</property>
@@ -169,15 +169,15 @@
                     </structure>
                     <list-property name="selectionList">
                         <structure>
-                            <property name="value">wallclock</property>
+                            <property name="value">WallDuration</property>
                             <property name="label">Wallclock Hours</property>
                         </structure>
                         <structure>
-                            <property name="value">process</property>
+                            <property name="value">Cpu</property>
                             <property name="label">Process Hours</property>
                         </structure>
                         <structure>
-                            <property name="value">jobcount</property>
+                            <property name="value">Njobs</property>
                             <property name="label">Job Count</property>
                         </structure>
                     </list-property>

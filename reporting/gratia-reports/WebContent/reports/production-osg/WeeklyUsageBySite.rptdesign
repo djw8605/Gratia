@@ -63,23 +63,14 @@
             <list-property name="computedColumns">
                 <structure>
                     <property name="name">weekdate</property>
-                    <expression name="expression">var daynr;
-var monthnr;
-var yearynr;
-var yearmon;
-daynr = row["datevalue"].getDate().toString();
-monthnr = ( row["datevalue"].getMonth()+1).toString();
-yearnr =  row["datevalue"].getFullYear().toString();
-if (monthnr.length > 1){
-	yearmon = yearnr  + "-" + monthnr
-}else{
-	yearmon = yearnr  + "-0" +  monthnr
-}
-if (daynr.length > 1){
-	yearmon + "-" + daynr
-}else{
-	yearmon  + "-0" +  daynr
-}</expression>
+                    <expression name="expression">var yearmon;
+var rowdate = new Date( row["datevalue"].getTime());
+var daynr = rowdate.getDate().toString();
+var monthnr = (rowdate.getMonth()+1).toString();
+var yearnr = rowdate.getFullYear().toString();
+if (monthnr.length &lt; 2) {monthnr = "0" + monthnr;}
+if (daynr.length &lt; 2) {daynr = "0" + daynr;}
+yearmon = yearnr + "-" + monthnr +  "-" + daynr;</expression>
                     <property name="dataType">string</property>
                 </structure>
             </list-property>
@@ -138,18 +129,14 @@ if (daynr.length > 1){
                     <property name="dataType">string</property>
                     <property name="position">3</property>
                     <expression name="defaultValue">// Calculate starting month - 6 months ago
-var now = new Date();
-var begdate;
-now.setDate(1);
-var begdate = DateTimeSpan.subDate(now,0,6,0);
-var yearnr = begdate.getYear() + 1900;
-var monthnr = begdate.getMonth()+ 1;
 var yearmon;
-if (monthnr.toString().length > 1){
-	yearnr  + "-" + monthnr + "-01"
-}else{
-	yearnr  + "-0" +  monthnr + "-01"
-}</expression>
+var now = new Date();
+now.setDate(1);
+var begdate = new Date(DateTimeSpan.subDate(now,0,6,0).getTime());
+var yearnr = begdate.getFullYear().toString();
+var monthnr = (begdate.getMonth() + 1).toString();
+if (monthnr.length &lt; 2){monthnr ="0" + monthnr;}
+yearmon = yearnr  + "-" + monthnr + "-01";</expression>
                     <property name="isOptional">false</property>
                     <property name="allowNull">true</property>
                     <property name="isInput">true</property>
@@ -708,15 +695,15 @@ function beforeDrawAxisTitle( axis, label, context )
 	val1 =rep.getParameterValue(&quot;DisplayMetric&quot;);
 	if(!axis.isCategoryAxis())
 	{
-		if(val1==&quot;process&quot;)
+		if(val1==&quot;Cpu&quot;)
 		{
 		label.getCaption().setValue(&quot;Process Hours&quot;);
 		}
-		else if(val1==&quot;wallclock&quot;)
+		else if(val1==&quot;WallDuration&quot;)
 		{
 		label.getCaption().setValue(&quot;Wallclock Hours&quot;);
 		}
-		else if(val1==&quot;jobcount&quot;)
+		else if(val1==&quot;Njobs&quot;)
 		{
 		label.getCaption().setValue(&quot;Job Count&quot;);
 		}
@@ -913,18 +900,7 @@ function beforeDrawAxisTitle( axis, label, context )
             <Visible>false</Visible>
           </Label>
           <DataDefinition>
-            <Definition>if (params[&quot;DisplayMetric&quot;] == &quot;wallclock&quot;) {&#xD;
- row[&quot;WallDuration&quot;] / 3600&#xD;
-}&#xD;
-else if (params[&quot;DisplayMetric&quot;]==&quot;process&quot;) {&#xD;
-row[&quot;Cpu&quot;]/3600&#xD;
-}&#xD;
-else if (params[&quot;DisplayMetric&quot;]==&quot;jobcount&quot;){&#xD;
-row[&quot;Njobs&quot;]&#xD;
-}&#xD;
-else {&#xD;
-&quot;***Unknown metric***&quot;&#xD;
-}</Definition>
+            <Definition>row[params[&quot;DisplayMetric&quot;].value]</Definition>
           </DataDefinition>
           <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
           <DataPoint>
@@ -982,7 +958,7 @@ else {&#xD;
               <Type>Show_Tooltip</Type>
               <Value xsi:type="attribute:TooltipValue">
                 <Text>var sitename = row[&quot;sitename&quot;]&#xD;
-if (params[&quot;DisplayMetric&quot;] == &quot;wallclock&quot;) {&#xD;
+if (params[&quot;DisplayMetric&quot;] == &quot;WallDuration&quot;) {&#xD;
 	var labval = String(row[&quot;WallDuration&quot;] / 3600);&#xD;
 	var dotpos = labval.indexOf(&quot;.&quot;,0); &#xD;
 	if(dotpos > 0)&#xD;
@@ -991,10 +967,10 @@ if (params[&quot;DisplayMetric&quot;] == &quot;wallclock&quot;) {&#xD;
 	};&#xD;
    var metric = &quot;Wallclock Hours: &quot; + labval&#xD;
 }&#xD;
-else if (params[&quot;DisplayMetric&quot;]==&quot;process&quot;) {&#xD;
+else if (params[&quot;DisplayMetric&quot;]==&quot;Cpu&quot;) {&#xD;
 var metric = &quot;Process Hours: &quot; + row[&quot;Cpu&quot;]/3600&#xD;
 }&#xD;
-else if (params[&quot;DisplayMetric&quot;]==&quot;jobcount&quot;){&#xD;
+else if (params[&quot;DisplayMetric&quot;]==&quot;Njobs&quot;){&#xD;
 var metric = &quot;Jobs: &quot; + row[&quot;Njobs&quot;]&#xD;
 }&#xD;
 else {&#xD;
@@ -1470,12 +1446,12 @@ else {&#xD;
                 </structure>
                 <structure>
                     <property name="name">WallDuration</property>
-                    <expression name="expression">dataSetRow["WallDuration"]</expression>
+                    <expression name="expression">dataSetRow["WallDuration"]/3600</expression>
                     <property name="dataType">float</property>
                 </structure>
                 <structure>
                     <property name="name">Cpu</property>
-                    <expression name="expression">dataSetRow["Cpu"]</expression>
+                    <expression name="expression">dataSetRow["Cpu"]/3600</expression>
                     <property name="dataType">float</property>
                 </structure>
                 <structure>

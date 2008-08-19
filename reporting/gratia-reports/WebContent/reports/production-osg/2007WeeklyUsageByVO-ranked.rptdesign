@@ -1077,12 +1077,12 @@
                 </structure>
                 <structure>
                     <property name="name">WallDuration</property>
-                    <expression name="expression">dataSetRow["WallDuration"]</expression>
+                    <expression name="expression">dataSetRow["WallDuration"]/3600</expression>
                     <property name="dataType">float</property>
                 </structure>
                 <structure>
                     <property name="name">Cpu</property>
-                    <expression name="expression">dataSetRow["Cpu"]</expression>
+                    <expression name="expression">dataSetRow["Cpu"]/3600</expression>
                     <property name="dataType">float</property>
                 </structure>
                 <structure>
@@ -1103,13 +1103,13 @@
                             <property name="fontWeight">bold</property>
                             <property name="textUnderline">none</property>
                             <property name="textAlign">center</property>
-                            <expression name="valueExpr">if (params["DisplayMetric"] == "wallclock") {
+                            <expression name="valueExpr">if (params["DisplayMetric"] == "WallDuration") {
  "&lt;p>2007 Wallclock Hours per VO&lt;/p>"
 }
-else if (params["DisplayMetric"]=="process") {
+else if (params["DisplayMetric"]=="Cpu") {
  "&lt;p>2007 CPU Hours per VO&lt;/p>"
 }
-else if (params["DisplayMetric"]=="jobcount"){
+else if (params["DisplayMetric"]=="Njobs"){
  "&lt;p>2007 Number of Jobs per VO&lt;/p>"
 }
 else {
@@ -1888,18 +1888,7 @@ else {
             <Visible>false</Visible>
           </Label>
           <DataDefinition>
-            <Definition>if (params[&quot;DisplayMetric&quot;] == &quot;wallclock&quot;) {&#xD;
- row[&quot;WallDuration&quot;] / 3600&#xD;
-}&#xD;
-else if (params[&quot;DisplayMetric&quot;]==&quot;process&quot;) {&#xD;
-row[&quot;Cpu&quot;]/3600&#xD;
-}&#xD;
-else if (params[&quot;DisplayMetric&quot;]==&quot;jobcount&quot;){&#xD;
-row[&quot;Njobs&quot;]&#xD;
-}&#xD;
-else {&#xD;
-&quot;***Unknown metric***&quot;&#xD;
-}</Definition>
+            <Definition>row[params[&quot;DisplayMetric&quot;].value]</Definition>
           </DataDefinition>
           <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
           <DataPoint>
@@ -1920,15 +1909,15 @@ else {&#xD;
 var label;&#xD;
 var dotpos;&#xD;
 &#xD;
-if (params[&quot;DisplayMetric&quot;] == &quot;wallclock&quot;) { &#xD;
+if (params[&quot;DisplayMetric&quot;] == &quot;WallDuration&quot;) { &#xD;
 	metricvalue = String(row[&quot;WallDuration&quot;] / 3600);&#xD;
 	label = &quot;Wallclock Hours: &quot;;&#xD;
 }&#xD;
-if (params[&quot;DisplayMetric&quot;] == &quot;process&quot;)  {&#xD;
+if (params[&quot;DisplayMetric&quot;] == &quot;Cpu&quot;)  {&#xD;
 	metricvalue = String(row[&quot;Cpu&quot;] / 3600);&#xD;
 	label = &quot;Process Hours: &quot;;&#xD;
 } &#xD;
-if (params[&quot;DisplayMetric&quot;] == &quot;jobcount&quot;) {&#xD;
+if (params[&quot;DisplayMetric&quot;] == &quot;Njobs&quot;) {&#xD;
 	metricvalue = String(row[&quot;Njobs&quot;]);&#xD;
 	label = &quot;Jobs: &quot;;&#xD;
 }&#xD;
@@ -2620,43 +2609,6 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
                                                 </structure>
                                             </list-property>
                                             <property name="refTemplateParameter">NewTemplateParameterDefinition</property>
-                                            <list-property name="boundDataColumns">
-                                                <structure>
-                                                    <property name="name">VOName</property>
-                                                    <expression name="expression">dataSetRow["VOName"]</expression>
-                                                </structure>
-                                                <structure>
-                                                    <property name="name">datevalue</property>
-                                                    <expression name="expression">dataSetRow["datevalue"]</expression>
-                                                </structure>
-                                                <structure>
-                                                    <property name="name">WallDuration</property>
-                                                    <expression name="expression">dataSetRow["WallDuration"]</expression>
-                                                </structure>
-                                                <structure>
-                                                    <property name="name">Cpu</property>
-                                                    <expression name="expression">dataSetRow["Cpu"]</expression>
-                                                </structure>
-                                                <structure>
-                                                    <property name="name">Njobs</property>
-                                                    <expression name="expression">dataSetRow["Njobs"]</expression>
-                                                </structure>
-                                                <structure>
-                                                    <property name="name">final_rank</property>
-                                                    <expression name="expression">dataSetRow["final_rank"]</expression>
-                                                    <property name="dataType">any</property>
-                                                </structure>
-                                                <structure>
-                                                    <property name="name">table_row</property>
-                                                    <expression name="expression">(row["final_rank"]-1) / 4</expression>
-                                                    <property name="dataType">integer</property>
-                                                </structure>
-                                                <structure>
-                                                    <property name="name">table_column</property>
-                                                    <expression name="expression">(row["final_rank"] -1)%4</expression>
-                                                    <property name="dataType">integer</property>
-                                                </structure>
-                                            </list-property>
                                             <property name="style">sans-style1</property>
                                         </extended-item>
                                     </cell>
@@ -3409,18 +3361,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
             <Visible>false</Visible>
           </Label>
           <DataDefinition>
-            <Definition>if (params[&quot;DisplayMetric&quot;] == &quot;wallclock&quot;) {&#xD;
- row[&quot;WallDuration&quot;] / 3600&#xD;
-}&#xD;
-else if (params[&quot;DisplayMetric&quot;]==&quot;process&quot;) {&#xD;
-row[&quot;Cpu&quot;]/3600&#xD;
-}&#xD;
-else if (params[&quot;DisplayMetric&quot;]==&quot;jobcount&quot;){&#xD;
-row[&quot;Njobs&quot;]&#xD;
-}&#xD;
-else {&#xD;
-&quot;***Unknown metric***&quot;&#xD;
-}</Definition>
+            <Definition>row[params[&quot;DisplayMetric&quot;].value]</Definition>
           </DataDefinition>
           <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
           <DataPoint>
@@ -3441,15 +3382,15 @@ else {&#xD;
 var label;&#xD;
 var dotpos;&#xD;
 &#xD;
-if (params[&quot;DisplayMetric&quot;] == &quot;wallclock&quot;) { &#xD;
+if (params[&quot;DisplayMetric&quot;] == &quot;WallDuration&quot;) { &#xD;
 	metricvalue = String(row[&quot;WallDuration&quot;] / 3600);&#xD;
 	label = &quot;Wallclock Hours: &quot;;&#xD;
 }&#xD;
-if (params[&quot;DisplayMetric&quot;] == &quot;process&quot;)  {&#xD;
+if (params[&quot;DisplayMetric&quot;] == &quot;Cpu&quot;)  {&#xD;
 	metricvalue = String(row[&quot;Cpu&quot;] / 3600);&#xD;
 	label = &quot;Process Hours: &quot;;&#xD;
 } &#xD;
-if (params[&quot;DisplayMetric&quot;] == &quot;jobcount&quot;) {&#xD;
+if (params[&quot;DisplayMetric&quot;] == &quot;Njobs&quot;) {&#xD;
 	metricvalue = String(row[&quot;Njobs&quot;]);&#xD;
 	label = &quot;Jobs: &quot;;&#xD;
 }&#xD;
@@ -4820,43 +4761,6 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
                                                 </structure>
                                             </list-property>
                                             <property name="refTemplateParameter">NewTemplateParameterDefinition</property>
-                                            <list-property name="boundDataColumns">
-                                                <structure>
-                                                    <property name="name">VOName</property>
-                                                    <expression name="expression">dataSetRow["VOName"]</expression>
-                                                </structure>
-                                                <structure>
-                                                    <property name="name">datevalue</property>
-                                                    <expression name="expression">dataSetRow["datevalue"]</expression>
-                                                </structure>
-                                                <structure>
-                                                    <property name="name">WallDuration</property>
-                                                    <expression name="expression">dataSetRow["WallDuration"]</expression>
-                                                </structure>
-                                                <structure>
-                                                    <property name="name">Cpu</property>
-                                                    <expression name="expression">dataSetRow["Cpu"]</expression>
-                                                </structure>
-                                                <structure>
-                                                    <property name="name">Njobs</property>
-                                                    <expression name="expression">dataSetRow["Njobs"]</expression>
-                                                </structure>
-                                                <structure>
-                                                    <property name="name">final_rank</property>
-                                                    <expression name="expression">dataSetRow["final_rank"]</expression>
-                                                    <property name="dataType">any</property>
-                                                </structure>
-                                                <structure>
-                                                    <property name="name">table_row</property>
-                                                    <expression name="expression">(row["final_rank"]-1) / 4</expression>
-                                                    <property name="dataType">integer</property>
-                                                </structure>
-                                                <structure>
-                                                    <property name="name">table_column</property>
-                                                    <expression name="expression">(row["final_rank"] -1)%4</expression>
-                                                    <property name="dataType">integer</property>
-                                                </structure>
-                                            </list-property>
                                             <property name="style">sans-style1</property>
                                         </extended-item>
                                     </cell>
@@ -5610,18 +5514,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
             <Visible>false</Visible>
           </Label>
           <DataDefinition>
-            <Definition>if (params[&quot;DisplayMetric&quot;] == &quot;wallclock&quot;) {&#xD;
- row[&quot;WallDuration&quot;] / 3600&#xD;
-}&#xD;
-else if (params[&quot;DisplayMetric&quot;]==&quot;process&quot;) {&#xD;
-row[&quot;Cpu&quot;]/3600&#xD;
-}&#xD;
-else if (params[&quot;DisplayMetric&quot;]==&quot;jobcount&quot;){&#xD;
-row[&quot;Njobs&quot;]&#xD;
-}&#xD;
-else {&#xD;
-&quot;***Unknown metric***&quot;&#xD;
-}</Definition>
+            <Definition>row[params[&quot;DisplayMetric&quot;].value]</Definition>
           </DataDefinition>
           <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
           <DataPoint>
@@ -5642,15 +5535,15 @@ else {&#xD;
 var label;&#xD;
 var dotpos;&#xD;
 &#xD;
-if (params[&quot;DisplayMetric&quot;] == &quot;wallclock&quot;) { &#xD;
+if (params[&quot;DisplayMetric&quot;] == &quot;WallDuration&quot;) { &#xD;
 	metricvalue = String(row[&quot;WallDuration&quot;] / 3600);&#xD;
 	label = &quot;Wallclock Hours: &quot;;&#xD;
 }&#xD;
-if (params[&quot;DisplayMetric&quot;] == &quot;process&quot;)  {&#xD;
+if (params[&quot;DisplayMetric&quot;] == &quot;Cpu&quot;)  {&#xD;
 	metricvalue = String(row[&quot;Cpu&quot;] / 3600);&#xD;
 	label = &quot;Process Hours: &quot;;&#xD;
 } &#xD;
-if (params[&quot;DisplayMetric&quot;] == &quot;jobcount&quot;) {&#xD;
+if (params[&quot;DisplayMetric&quot;] == &quot;Njobs&quot;) {&#xD;
 	metricvalue = String(row[&quot;Njobs&quot;]);&#xD;
 	label = &quot;Jobs: &quot;;&#xD;
 }&#xD;
@@ -5858,6 +5751,147 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Blue>0</Blue>
         </Entries>
       </SeriesPalette>
+      <Series>
+        <Visible>true</Visible>
+        <Label>
+          <Caption>
+            <Value>&lt;undefined></Value>
+            <Font>
+              <Alignment/>
+            </Font>
+          </Caption>
+          <Background xsi:type="attribute:ColorDefinition">
+            <Transparency>0</Transparency>
+            <Red>255</Red>
+            <Green>255</Green>
+            <Blue>255</Blue>
+          </Background>
+          <Outline>
+            <Style>Solid</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>false</Visible>
+          </Outline>
+          <Insets>
+            <Top>0.0</Top>
+            <Left>2.0</Left>
+            <Bottom>0.0</Bottom>
+            <Right>3.0</Right>
+          </Insets>
+          <Visible>false</Visible>
+        </Label>
+        <DataDefinition>
+          <Definition>row[&quot;datevalue&quot;]</Definition>
+        </DataDefinition>
+        <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
+        <DataPoint>
+          <Components>
+            <Type>Orthogonal_Value</Type>
+          </Components>
+          <Separator>, </Separator>
+        </DataPoint>
+        <LabelPosition>Outside</LabelPosition>
+        <Stacked>false</Stacked>
+      </Series>
+      <Series>
+        <Visible>true</Visible>
+        <Label>
+          <Caption>
+            <Value>&lt;undefined></Value>
+            <Font>
+              <Alignment/>
+            </Font>
+          </Caption>
+          <Background xsi:type="attribute:ColorDefinition">
+            <Transparency>0</Transparency>
+            <Red>255</Red>
+            <Green>255</Green>
+            <Blue>255</Blue>
+          </Background>
+          <Outline>
+            <Style>Solid</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>false</Visible>
+          </Outline>
+          <Insets>
+            <Top>0.0</Top>
+            <Left>2.0</Left>
+            <Bottom>0.0</Bottom>
+            <Right>3.0</Right>
+          </Insets>
+          <Visible>false</Visible>
+        </Label>
+        <DataDefinition>
+          <Definition>row[&quot;datevalue&quot;]</Definition>
+        </DataDefinition>
+        <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
+        <DataPoint>
+          <Components>
+            <Type>Orthogonal_Value</Type>
+          </Components>
+          <Separator>, </Separator>
+        </DataPoint>
+        <LabelPosition>Outside</LabelPosition>
+        <Stacked>false</Stacked>
+      </Series>
+      <Series>
+        <Visible>true</Visible>
+        <Label>
+          <Caption>
+            <Value>&lt;undefined></Value>
+            <Font>
+              <Alignment/>
+            </Font>
+          </Caption>
+          <Background xsi:type="attribute:ColorDefinition">
+            <Transparency>0</Transparency>
+            <Red>255</Red>
+            <Green>255</Green>
+            <Blue>255</Blue>
+          </Background>
+          <Outline>
+            <Style>Solid</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>false</Visible>
+          </Outline>
+          <Insets>
+            <Top>0.0</Top>
+            <Left>2.0</Left>
+            <Bottom>0.0</Bottom>
+            <Right>3.0</Right>
+          </Insets>
+          <Visible>false</Visible>
+        </Label>
+        <DataDefinition>
+          <Definition>row[&quot;datevalue&quot;]</Definition>
+        </DataDefinition>
+        <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
+        <DataPoint>
+          <Components>
+            <Type>Orthogonal_Value</Type>
+          </Components>
+          <Separator>, </Separator>
+        </DataPoint>
+        <LabelPosition>Outside</LabelPosition>
+        <Stacked>false</Stacked>
+      </Series>
       <Series>
         <Visible>true</Visible>
         <Label>
@@ -7491,43 +7525,6 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
                                                 </structure>
                                             </list-property>
                                             <property name="refTemplateParameter">NewTemplateParameterDefinition</property>
-                                            <list-property name="boundDataColumns">
-                                                <structure>
-                                                    <property name="name">VOName</property>
-                                                    <expression name="expression">dataSetRow["VOName"]</expression>
-                                                </structure>
-                                                <structure>
-                                                    <property name="name">datevalue</property>
-                                                    <expression name="expression">dataSetRow["datevalue"]</expression>
-                                                </structure>
-                                                <structure>
-                                                    <property name="name">WallDuration</property>
-                                                    <expression name="expression">dataSetRow["WallDuration"]</expression>
-                                                </structure>
-                                                <structure>
-                                                    <property name="name">Cpu</property>
-                                                    <expression name="expression">dataSetRow["Cpu"]</expression>
-                                                </structure>
-                                                <structure>
-                                                    <property name="name">Njobs</property>
-                                                    <expression name="expression">dataSetRow["Njobs"]</expression>
-                                                </structure>
-                                                <structure>
-                                                    <property name="name">final_rank</property>
-                                                    <expression name="expression">dataSetRow["final_rank"]</expression>
-                                                    <property name="dataType">any</property>
-                                                </structure>
-                                                <structure>
-                                                    <property name="name">table_row</property>
-                                                    <expression name="expression">(row["final_rank"]-1) / 4</expression>
-                                                    <property name="dataType">integer</property>
-                                                </structure>
-                                                <structure>
-                                                    <property name="name">table_column</property>
-                                                    <expression name="expression">(row["final_rank"] -1)%4</expression>
-                                                    <property name="dataType">integer</property>
-                                                </structure>
-                                            </list-property>
                                             <property name="style">sans-style1</property>
                                         </extended-item>
                                     </cell>
@@ -8281,18 +8278,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
             <Visible>false</Visible>
           </Label>
           <DataDefinition>
-            <Definition>if (params[&quot;DisplayMetric&quot;] == &quot;wallclock&quot;) {&#xD;
- row[&quot;WallDuration&quot;] / 3600&#xD;
-}&#xD;
-else if (params[&quot;DisplayMetric&quot;]==&quot;process&quot;) {&#xD;
-row[&quot;Cpu&quot;]/3600&#xD;
-}&#xD;
-else if (params[&quot;DisplayMetric&quot;]==&quot;jobcount&quot;){&#xD;
-row[&quot;Njobs&quot;]&#xD;
-}&#xD;
-else {&#xD;
-&quot;***Unknown metric***&quot;&#xD;
-}</Definition>
+            <Definition>row[params[&quot;DisplayMetric&quot;].value]</Definition>
           </DataDefinition>
           <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
           <DataPoint>
@@ -8313,15 +8299,15 @@ else {&#xD;
 var label;&#xD;
 var dotpos;&#xD;
 &#xD;
-if (params[&quot;DisplayMetric&quot;] == &quot;wallclock&quot;) { &#xD;
+if (params[&quot;DisplayMetric&quot;] == &quot;WallDuration&quot;) { &#xD;
 	metricvalue = String(row[&quot;WallDuration&quot;] / 3600);&#xD;
 	label = &quot;Wallclock Hours: &quot;;&#xD;
 }&#xD;
-if (params[&quot;DisplayMetric&quot;] == &quot;process&quot;)  {&#xD;
+if (params[&quot;DisplayMetric&quot;] == &quot;Cpu&quot;)  {&#xD;
 	metricvalue = String(row[&quot;Cpu&quot;] / 3600);&#xD;
 	label = &quot;Process Hours: &quot;;&#xD;
 } &#xD;
-if (params[&quot;DisplayMetric&quot;] == &quot;jobcount&quot;) {&#xD;
+if (params[&quot;DisplayMetric&quot;] == &quot;Njobs&quot;) {&#xD;
 	metricvalue = String(row[&quot;Njobs&quot;]);&#xD;
 	label = &quot;Jobs: &quot;;&#xD;
 }&#xD;
@@ -8529,6 +8515,147 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Blue>0</Blue>
         </Entries>
       </SeriesPalette>
+      <Series>
+        <Visible>true</Visible>
+        <Label>
+          <Caption>
+            <Value>&lt;undefined></Value>
+            <Font>
+              <Alignment/>
+            </Font>
+          </Caption>
+          <Background xsi:type="attribute:ColorDefinition">
+            <Transparency>0</Transparency>
+            <Red>255</Red>
+            <Green>255</Green>
+            <Blue>255</Blue>
+          </Background>
+          <Outline>
+            <Style>Solid</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>false</Visible>
+          </Outline>
+          <Insets>
+            <Top>0.0</Top>
+            <Left>2.0</Left>
+            <Bottom>0.0</Bottom>
+            <Right>3.0</Right>
+          </Insets>
+          <Visible>false</Visible>
+        </Label>
+        <DataDefinition>
+          <Definition>row[&quot;datevalue&quot;]</Definition>
+        </DataDefinition>
+        <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
+        <DataPoint>
+          <Components>
+            <Type>Orthogonal_Value</Type>
+          </Components>
+          <Separator>, </Separator>
+        </DataPoint>
+        <LabelPosition>Outside</LabelPosition>
+        <Stacked>false</Stacked>
+      </Series>
+      <Series>
+        <Visible>true</Visible>
+        <Label>
+          <Caption>
+            <Value>&lt;undefined></Value>
+            <Font>
+              <Alignment/>
+            </Font>
+          </Caption>
+          <Background xsi:type="attribute:ColorDefinition">
+            <Transparency>0</Transparency>
+            <Red>255</Red>
+            <Green>255</Green>
+            <Blue>255</Blue>
+          </Background>
+          <Outline>
+            <Style>Solid</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>false</Visible>
+          </Outline>
+          <Insets>
+            <Top>0.0</Top>
+            <Left>2.0</Left>
+            <Bottom>0.0</Bottom>
+            <Right>3.0</Right>
+          </Insets>
+          <Visible>false</Visible>
+        </Label>
+        <DataDefinition>
+          <Definition>row[&quot;datevalue&quot;]</Definition>
+        </DataDefinition>
+        <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
+        <DataPoint>
+          <Components>
+            <Type>Orthogonal_Value</Type>
+          </Components>
+          <Separator>, </Separator>
+        </DataPoint>
+        <LabelPosition>Outside</LabelPosition>
+        <Stacked>false</Stacked>
+      </Series>
+      <Series>
+        <Visible>true</Visible>
+        <Label>
+          <Caption>
+            <Value>&lt;undefined></Value>
+            <Font>
+              <Alignment/>
+            </Font>
+          </Caption>
+          <Background xsi:type="attribute:ColorDefinition">
+            <Transparency>0</Transparency>
+            <Red>255</Red>
+            <Green>255</Green>
+            <Blue>255</Blue>
+          </Background>
+          <Outline>
+            <Style>Solid</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>false</Visible>
+          </Outline>
+          <Insets>
+            <Top>0.0</Top>
+            <Left>2.0</Left>
+            <Bottom>0.0</Bottom>
+            <Right>3.0</Right>
+          </Insets>
+          <Visible>false</Visible>
+        </Label>
+        <DataDefinition>
+          <Definition>row[&quot;datevalue&quot;]</Definition>
+        </DataDefinition>
+        <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
+        <DataPoint>
+          <Components>
+            <Type>Orthogonal_Value</Type>
+          </Components>
+          <Separator>, </Separator>
+        </DataPoint>
+        <LabelPosition>Outside</LabelPosition>
+        <Stacked>false</Stacked>
+      </Series>
       <Series>
         <Visible>true</Visible>
         <Label>
@@ -10115,43 +10242,6 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
                                                 </structure>
                                             </list-property>
                                             <property name="refTemplateParameter">NewTemplateParameterDefinition</property>
-                                            <list-property name="boundDataColumns">
-                                                <structure>
-                                                    <property name="name">VOName</property>
-                                                    <expression name="expression">dataSetRow["VOName"]</expression>
-                                                </structure>
-                                                <structure>
-                                                    <property name="name">datevalue</property>
-                                                    <expression name="expression">dataSetRow["datevalue"]</expression>
-                                                </structure>
-                                                <structure>
-                                                    <property name="name">WallDuration</property>
-                                                    <expression name="expression">dataSetRow["WallDuration"]</expression>
-                                                </structure>
-                                                <structure>
-                                                    <property name="name">Cpu</property>
-                                                    <expression name="expression">dataSetRow["Cpu"]</expression>
-                                                </structure>
-                                                <structure>
-                                                    <property name="name">Njobs</property>
-                                                    <expression name="expression">dataSetRow["Njobs"]</expression>
-                                                </structure>
-                                                <structure>
-                                                    <property name="name">final_rank</property>
-                                                    <expression name="expression">dataSetRow["final_rank"]</expression>
-                                                    <property name="dataType">any</property>
-                                                </structure>
-                                                <structure>
-                                                    <property name="name">table_row</property>
-                                                    <expression name="expression">(row["final_rank"]-1) / 4</expression>
-                                                    <property name="dataType">integer</property>
-                                                </structure>
-                                                <structure>
-                                                    <property name="name">table_column</property>
-                                                    <expression name="expression">(row["final_rank"] -1)%4</expression>
-                                                    <property name="dataType">integer</property>
-                                                </structure>
-                                            </list-property>
                                             <property name="style">sans-style1</property>
                                         </extended-item>
                                     </cell>
@@ -10905,18 +10995,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
             <Visible>false</Visible>
           </Label>
           <DataDefinition>
-            <Definition>if (params[&quot;DisplayMetric&quot;] == &quot;wallclock&quot;) {&#xD;
- row[&quot;WallDuration&quot;] / 3600&#xD;
-}&#xD;
-else if (params[&quot;DisplayMetric&quot;]==&quot;process&quot;) {&#xD;
-row[&quot;Cpu&quot;]/3600&#xD;
-}&#xD;
-else if (params[&quot;DisplayMetric&quot;]==&quot;jobcount&quot;){&#xD;
-row[&quot;Njobs&quot;]&#xD;
-}&#xD;
-else {&#xD;
-&quot;***Unknown metric***&quot;&#xD;
-}</Definition>
+            <Definition>row[params[&quot;DisplayMetric&quot;].value]</Definition>
           </DataDefinition>
           <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
           <DataPoint>
@@ -10937,15 +11016,15 @@ else {&#xD;
 var label;&#xD;
 var dotpos;&#xD;
 &#xD;
-if (params[&quot;DisplayMetric&quot;] == &quot;wallclock&quot;) { &#xD;
+if (params[&quot;DisplayMetric&quot;] == &quot;WallDuration&quot;) { &#xD;
 	metricvalue = String(row[&quot;WallDuration&quot;] / 3600);&#xD;
 	label = &quot;Wallclock Hours: &quot;;&#xD;
 }&#xD;
-if (params[&quot;DisplayMetric&quot;] == &quot;process&quot;)  {&#xD;
+if (params[&quot;DisplayMetric&quot;] == &quot;Cpu&quot;)  {&#xD;
 	metricvalue = String(row[&quot;Cpu&quot;] / 3600);&#xD;
 	label = &quot;Process Hours: &quot;;&#xD;
 } &#xD;
-if (params[&quot;DisplayMetric&quot;] == &quot;jobcount&quot;) {&#xD;
+if (params[&quot;DisplayMetric&quot;] == &quot;Njobs&quot;) {&#xD;
 	metricvalue = String(row[&quot;Njobs&quot;]);&#xD;
 	label = &quot;Jobs: &quot;;&#xD;
 }&#xD;
@@ -12563,6 +12642,147 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
         <LabelPosition>Outside</LabelPosition>
         <Stacked>false</Stacked>
       </Series>
+      <Series>
+        <Visible>true</Visible>
+        <Label>
+          <Caption>
+            <Value>&lt;undefined></Value>
+            <Font>
+              <Alignment/>
+            </Font>
+          </Caption>
+          <Background xsi:type="attribute:ColorDefinition">
+            <Transparency>0</Transparency>
+            <Red>255</Red>
+            <Green>255</Green>
+            <Blue>255</Blue>
+          </Background>
+          <Outline>
+            <Style>Solid</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>false</Visible>
+          </Outline>
+          <Insets>
+            <Top>0.0</Top>
+            <Left>2.0</Left>
+            <Bottom>0.0</Bottom>
+            <Right>3.0</Right>
+          </Insets>
+          <Visible>false</Visible>
+        </Label>
+        <DataDefinition>
+          <Definition>row[&quot;datevalue&quot;]</Definition>
+        </DataDefinition>
+        <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
+        <DataPoint>
+          <Components>
+            <Type>Orthogonal_Value</Type>
+          </Components>
+          <Separator>, </Separator>
+        </DataPoint>
+        <LabelPosition>Outside</LabelPosition>
+        <Stacked>false</Stacked>
+      </Series>
+      <Series>
+        <Visible>true</Visible>
+        <Label>
+          <Caption>
+            <Value>&lt;undefined></Value>
+            <Font>
+              <Alignment/>
+            </Font>
+          </Caption>
+          <Background xsi:type="attribute:ColorDefinition">
+            <Transparency>0</Transparency>
+            <Red>255</Red>
+            <Green>255</Green>
+            <Blue>255</Blue>
+          </Background>
+          <Outline>
+            <Style>Solid</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>false</Visible>
+          </Outline>
+          <Insets>
+            <Top>0.0</Top>
+            <Left>2.0</Left>
+            <Bottom>0.0</Bottom>
+            <Right>3.0</Right>
+          </Insets>
+          <Visible>false</Visible>
+        </Label>
+        <DataDefinition>
+          <Definition>row[&quot;datevalue&quot;]</Definition>
+        </DataDefinition>
+        <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
+        <DataPoint>
+          <Components>
+            <Type>Orthogonal_Value</Type>
+          </Components>
+          <Separator>, </Separator>
+        </DataPoint>
+        <LabelPosition>Outside</LabelPosition>
+        <Stacked>false</Stacked>
+      </Series>
+      <Series>
+        <Visible>true</Visible>
+        <Label>
+          <Caption>
+            <Value>&lt;undefined></Value>
+            <Font>
+              <Alignment/>
+            </Font>
+          </Caption>
+          <Background xsi:type="attribute:ColorDefinition">
+            <Transparency>0</Transparency>
+            <Red>255</Red>
+            <Green>255</Green>
+            <Blue>255</Blue>
+          </Background>
+          <Outline>
+            <Style>Solid</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>false</Visible>
+          </Outline>
+          <Insets>
+            <Top>0.0</Top>
+            <Left>2.0</Left>
+            <Bottom>0.0</Bottom>
+            <Right>3.0</Right>
+          </Insets>
+          <Visible>false</Visible>
+        </Label>
+        <DataDefinition>
+          <Definition>row[&quot;datevalue&quot;]</Definition>
+        </DataDefinition>
+        <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
+        <DataPoint>
+          <Components>
+            <Type>Orthogonal_Value</Type>
+          </Components>
+          <Separator>, </Separator>
+        </DataPoint>
+        <LabelPosition>Outside</LabelPosition>
+        <Stacked>false</Stacked>
+      </Series>
       <Grouping>
         <Enabled>false</Enabled>
         <GroupingInterval>2</GroupingInterval>
@@ -12739,43 +12959,6 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
                                                 </structure>
                                             </list-property>
                                             <property name="refTemplateParameter">NewTemplateParameterDefinition</property>
-                                            <list-property name="boundDataColumns">
-                                                <structure>
-                                                    <property name="name">VOName</property>
-                                                    <expression name="expression">dataSetRow["VOName"]</expression>
-                                                </structure>
-                                                <structure>
-                                                    <property name="name">datevalue</property>
-                                                    <expression name="expression">dataSetRow["datevalue"]</expression>
-                                                </structure>
-                                                <structure>
-                                                    <property name="name">WallDuration</property>
-                                                    <expression name="expression">dataSetRow["WallDuration"]</expression>
-                                                </structure>
-                                                <structure>
-                                                    <property name="name">Cpu</property>
-                                                    <expression name="expression">dataSetRow["Cpu"]</expression>
-                                                </structure>
-                                                <structure>
-                                                    <property name="name">Njobs</property>
-                                                    <expression name="expression">dataSetRow["Njobs"]</expression>
-                                                </structure>
-                                                <structure>
-                                                    <property name="name">final_rank</property>
-                                                    <expression name="expression">dataSetRow["final_rank"]</expression>
-                                                    <property name="dataType">any</property>
-                                                </structure>
-                                                <structure>
-                                                    <property name="name">table_row</property>
-                                                    <expression name="expression">(row["final_rank"]-1) / 4</expression>
-                                                    <property name="dataType">integer</property>
-                                                </structure>
-                                                <structure>
-                                                    <property name="name">table_column</property>
-                                                    <expression name="expression">(row["final_rank"] -1)%4</expression>
-                                                    <property name="dataType">integer</property>
-                                                </structure>
-                                            </list-property>
                                             <property name="style">sans-style1</property>
                                         </extended-item>
                                     </cell>
