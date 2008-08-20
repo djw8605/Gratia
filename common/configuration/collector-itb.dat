@@ -19,8 +19,8 @@
     "maintain.history.log" => 7,
     "monitor.listener.wait" => 60,
     "service.listener.threads" => 1,
-    "monitor.from.address" => 'grid-accounting-@fnal.gov',
-    "monitor.to.address.0" => 'gratia-root@fnal.gov',
+    "monitor.from.address" => 'grid-accounting@fnal.gov',
+    "monitor.to.address.0" => 'grid-accounting@fnal.gov',
     "service.admin.FQAN.0" => "/fermilab/Role=GratiaGlobalAdmin",
     "service.admin.FQAN.1" => "/fermilab/Role=GratiaFermilabAdmin",
     "service.admin.FQAN.2" => "/fermilab/Role=GratiaDeveloper"
@@ -44,8 +44,8 @@
    {
     "gratia.database.useJobUsageSiteName" => 1,
     "gratia.database.wantNodeSummary" => 1,
-    "monitor.from.address" => 'grid-accounting-@fnal.gov',
-    "monitor.to.address.0" => 'gratia-root@fnal.gov',
+    "monitor.from.address" => 'grid-accounting@fnal.gov',
+    "monitor.to.address.0" => 'grid-accounting@fnal.gov',
     "service.admin.FQAN.0" => "/fermilab/Role=GratiaGlobalAdmin",
     "service.admin.FQAN.1" => "/fermilab/Role=GratiaFermilabAdmin",
     "service.admin.FQAN.2" => "/fermilab/Role=GratiaDeveloper"
@@ -71,8 +71,8 @@
      "gratia.database.wantSummaryTable" => 0,
      "gratia.database.wantSummaryTrigger" => 0,
      "gratia.database.useJobUsageSiteName" => 1, 
-     "monitor.from.address" => 'grid-accounting-@fnal.gov',
-     "monitor.to.address.0" => 'gratia-root@fnal.gov',
+     "monitor.from.address" => 'grid-accounting@fnal.gov',
+     "monitor.to.address.0" => 'grid-accounting@fnal.gov',
      "service.admin.FQAN.0" => "/fermilab/Role=GratiaGlobalAdmin",
      "service.admin.FQAN.1" => "/fermilab/Role=GratiaFermilabAdmin",
      "service.admin.FQAN.2" => "/fermilab/Role=GratiaDeveloper"
