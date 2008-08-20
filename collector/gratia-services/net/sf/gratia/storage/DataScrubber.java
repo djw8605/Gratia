@@ -167,10 +167,7 @@ public class DataScrubber {
         return result;
     }
 
-    protected long DeleteRows(Session session, String tablename, List ids) 
-    {
-        String delcmd = "delete from " + tablename + " where dbid in ( :ids )";
-
+    private long DeleteRows(String delcmd, Session session, List ids) {
         Logging.debug("DataScrubber: About to " + delcmd);
 
         org.hibernate.SQLQuery query = session.createSQLQuery( delcmd );
@@ -179,16 +176,21 @@ public class DataScrubber {
         return query.executeUpdate();
     }
 
+    protected long DeleteRows(Session session, String tablename, List ids) {
+        return DeleteRows("delete from " + tablename + " where dbid in ( :ids )",
+                          session, ids);
+    }
 
     public long MetricRawXml() {
         // Execute: delete from tableName_Xml where EndTime < cutoffdate and ExtraXml == null
         String limit = eCalc.expirationDateAsSQLString(new Date(), "MetricRecord", "RawXML");
 
         if (!(limit.length() > 0)) return 0;
-        Logging.log("DataScrubber: Remove all MetricRecord RawXML records older than: " + limit);
+        Logging.debug("DataScrubber: Remove all MetricRecord RawXML records older than: " + limit);
 
         String delquery = "delete from MetricRecord_Xml where ExtraXml = \"\" " +
-            "and dbid in (select M.dbid from MetricRecord_Meta M, MetricRecord R" +
+            "and dbid in (select M.dbid from MetricRecord_Meta M join " +
+            "MetricRecord R on (M.dbid = R.dbid)" +
             " where (Timestamp is null || Timestamp < :dateLimit) and " +
             "ServerDate < :dateLimit)" + " limit " + batchSize;
         long nrecords = ExecuteSQL( delquery, limit, "MetricRecord RawXML");
@@ -203,10 +205,11 @@ public class DataScrubber {
         String limit = eCalc.expirationDateAsSQLString(new Date(), "JobUsageRecord", "RawXML");
 
         if (!(limit.length() > 0)) return 0;
-        Logging.log("DataScrubber: Remove all JobUsage RawXML records older than: " + limit);
+        Logging.debug("DataScrubber: Remove all JobUsage RawXML records older than: " + limit);
  
         String delquery = "delete from JobUsageRecord_Xml where ExtraXml = \"\" " +
-            "and dbid in (select M.dbid from JobUsageRecord_Meta M, JobUsageRecord R" +
+            "and dbid in (select M.dbid from JobUsageRecord_Meta M join " +
+            "JobUsageRecord R on (M.dbid = R.dbid)" +
             " where (EndTime is null || EndTime < :dateLimit) and " +
             "ServerDate < :dateLimit)" + " limit " + batchSize;
         long nrecords = ExecuteSQL(delquery, limit, "JobUsageRecrod RawXML");
@@ -220,23 +223,23 @@ public class DataScrubber {
         // Execute: delete from tableName set where EndTime < cutoffdate
         String limit = eCalc.expirationDateAsSQLString(new Date(), "JobUsageRecord");
 
-        // We need to handle the case where
+        // We handle the case where
         //   a) EndTime is null
         //   b) EndTime is incorrect (usually 1970-01-01)
-        //   c) Normal case
-
         //   c) Normal case
         List ids = null;
         long nrecords = 0;
         if (limit.length() > 0) {
             Logging.log("DataScrubber: Remove all JobUsage records older than: " + limit);
 
-            String hqlList = "select RecordId from JobUsageRecord where EndTime.Value < :dateLimit and ServerDate < :dateLimit";
+            String hqlList = "select RecordId from JobUsageRecord where " +
+                "((EndTime.Value is null) or " +
+                "(EndTime.Value < :dateLimit)) and ServerDate < :dateLimit";
             boolean done = false;
 
             while (!done) {
                 ids = GetList(hqlList, limit, "JobUsageRecord records");
-                Logging.info("DataScrubber: deleting " + ids);
+                Logging.debug("DataScrubber: deleting " + ids);
                 
                 // Here we decide whether to loop or not after each 'batch'
                 done = (ids==null) || (ids.size() < batchSize);
@@ -265,14 +268,23 @@ public class DataScrubber {
                             "ConsumableResource",
                             "Resource",
                             "JobUsageRecord_Xml",
-                            "JobUsageRecord_Meta",
-                            "JobUsageRecord"
+                            "JobUsageRecord_Meta"
                         };
                         
                         long n = 0;
+                        // Special case multi-table delete since
+                        // TransferDetails isn't keyed on dbid.
+                        DeleteRows("delete TD, T from TransferDetails TD, " +
+                                   "TDCorr T where T.TransferDetailsId = " +
+                                   "TD.TransferDetailsId and T.dbid in " +
+                                   "( :ids )",
+                                   session, ids);
                         for (int r=0; r < tables.length; ++r) {
-                            n = DeleteRows(session,tables[r],ids);
-                        }                             
+                            DeleteRows(session, tables[r], ids);
+                        }
+                        // JobUsageRecord should be last, so do it
+                        // explicitly so we never forget:
+                        DeleteRows(session, "JobUsageRecord", ids);
                         tx.commit();                   
                         nrecords = nrecords + n;
                     }
@@ -304,7 +316,7 @@ public class DataScrubber {
         //   c) Normal case
         long nrecords = 0;
         if (limit.length() > 0) {
-            Logging.log("DataScrubber: Remove all Metric records older than: " + limit); 
+            Logging.debug("DataScrubber: Remove all Metric records older than: " + limit); 
 
             // Can't use deleteHibernateRecords until we find a way to
             // specify to hibernate that the key field should be
@@ -381,7 +393,7 @@ public class DataScrubber {
             (" with " + qualifierColumn + " " + qualifier):
             "";
         if (limit.length() > 0) {
-            Logging.log("DataScrubber: Remove all " + tableName + " entries " +
+            Logging.debug("DataScrubber: Remove all " + tableName + " entries " +
                         extra_message +
                         " older than: " + limit);
             count = deleteHibernateRecords(tableName,
