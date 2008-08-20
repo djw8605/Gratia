@@ -24,6 +24,15 @@ begin
   if mycount > 0 then
     drop trigger trigger02;
   end if;
+
+  select count(*) into mycount from information_schema.triggers where
+    trigger_schema = Database()
+    and event_object_table = 'TDCorr'
+    and trigger_name = 'trigger03';
+
+  if mycount > 0 then
+    drop trigger trigger03;
+  end if;
 end
 ||
 call conditional_trigger_drop()
@@ -31,7 +40,13 @@ call conditional_trigger_drop()
 create trigger trigger02 after insert on JobUsageRecord_Meta
 for each row
 begin
-  call add_JUR_to_summary(new.dbid);
+  call add_JUR_to_summary(new.dbid, 0);
+end;
+
+create trigger trigger03 after insert on TDCorr
+for each row
+begin
+  call add_JUR_to_summary(new.dbid, 1);
 end;
 
 -- Local Variables:
