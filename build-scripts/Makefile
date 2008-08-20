@@ -39,7 +39,7 @@ reports=$(reporting)/gratia-reports
 reportsrc=$(reporting)/gratia-reporting
 staticScript=$(reportsrc)/WebContent/staticReports
 birtDir=$(reporting)/birt-wars
-birtwarFile=birt-v220.war
+birtwarFile=birt-v231-N20080820.war
 
 # common modules
 configuration=$(common)/configuration
