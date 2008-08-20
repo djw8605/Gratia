@@ -153,13 +153,13 @@ AJUR:BEGIN
     -- independently and must be combined manually outside the DB
 
     INSERT INTO MasterTransferSummary(StartTime, VOcorrid, ProbeName,
-                                      DN, Protocol, RemoteSite, Status,
+                                      CommonName, Protocol, RemoteSite, Status,
                                       IsNew, Njobs, TransferSize, StorageUnit,
                                       TransferDuration)
     VALUES(DATE(n_StartTime),
            n_VOcorrid,
            n_ProbeName,
-           IF(SUBSTRING(n_DN, 1, 1) = '/', n_DN, n_CommonName),
+           n_CommonName,
            n_Protocol,
            n_RemoteSite,
            n_Status,
