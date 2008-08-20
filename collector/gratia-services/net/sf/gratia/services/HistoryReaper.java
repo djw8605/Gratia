@@ -35,7 +35,7 @@ public class HistoryReaper
 
    public HistoryReaper()
    {
-      Logging.log("HistoryReaper: Starting");
+      Logging.fine("HistoryReaper: Starting");
 
       p = net.sf.gratia.util.Configuration.getProperties();
       driver = p.getProperty("service.mysql.driver");
@@ -153,7 +153,7 @@ public class HistoryReaper
  
                     } catch (Exception e) {
                         
-                        Logging.log("HistoryReaper: Compression or deletion of "+file.getAbsolutePath()+" failed\nError: "+e.getMessage());
+                        Logging.warning("HistoryReaper: Compression or deletion of "+file.getAbsolutePath()+" failed\nError: "+e.getMessage());
                     }
                         
                 }
@@ -236,12 +236,12 @@ public class HistoryReaper
          String directory = (String)history.elementAt(i);
          if (directory.startsWith(oldhistory) || (directory.compareTo(beginningHistory) < 0))
          {
-            Logging.log("HistoryReaper: Deleting Directory: " + directory);
+            Logging.fine("HistoryReaper: Deleting Directory: " + directory);
             deleteDirectory(directory);
          }
          else if (directory.startsWith(oldold) || directory.compareTo(cbeginningHistory) < 0)
          {
-            Logging.log("HistoryReaper: Compressing Directory: " + directory);
+            Logging.fine("HistoryReaper: Compressing Directory: " + directory);
             compressDirectory(directory);
          }
       }
@@ -250,12 +250,12 @@ public class HistoryReaper
          String directory = (String)old.elementAt(i);
          if (directory.compareTo(beginningOld) < 0)
          {
-            Logging.log("HistoryReaper: Deleting Directory: " + directory);
+            Logging.fine("HistoryReaper: Deleting Directory: " + directory);
             deleteDirectory(directory);
 
          } else if (directory.compareTo(cbeginningOld) < 0)
          {
-            Logging.log("HistoryReaper: Compressing Directory: " + directory);
+            Logging.fine("HistoryReaper: Compressing Directory: " + directory);
             compressDirectory(directory);
          } 
       }

@@ -47,7 +47,6 @@ public class ListenerThread extends Thread
     RecordConverter converter = new RecordConverter();
 
     int itotal = 0;
-    boolean duplicateCheck = false;
     Properties p;
 
     XP xp = new XP();
@@ -85,13 +84,12 @@ public class ListenerThread extends Thread
         try
             {
                 String url = p.getProperty("service.jms.url");
-                Logging.log("");
-                Logging.log(ident + ": " + directory + ": Started");
-                Logging.log("");
+                Logging.info(ident + ": " + directory + ": Started");
             }
         catch (Exception e)
             {
-                e.printStackTrace();
+                Logging.warning(ident + ": ERROR! Serious problems starting listener");
+                Logging.debug(ident + "Exception detail: ", e);
             }
         historypath = System.getProperties().getProperty("catalina.home") + "/gratia/data/";
 
@@ -101,12 +99,6 @@ public class ListenerThread extends Thread
     public void loadProperties()
     {
         p = Configuration.getProperties();
-        String temp = p.getProperty("service.duplicate.check");
-        if (temp.equals("1"))
-            duplicateCheck = true;
-        else
-            duplicateCheck = false;
-        Logging.log(ident + ": Duplicate Check: " + duplicateCheck);
 
         try 
             {
@@ -116,7 +108,7 @@ public class ListenerThread extends Thread
         catch (Exception e) 
             {
                 // Only issue a warning here
-                Logging.log(ident + ": Failed to parse property maintain.recordsPerDirectory");
+                Logging.warning(ident + ": Failed to parse property maintain.recordsPerDirectory");
             }            
     }
 
@@ -134,7 +126,7 @@ public class ListenerThread extends Thread
             {
                 if (stopflag)
                     {
-                        Logging.log(ident + ": Exiting");
+                        Logging.info(ident + ": Exiting");
                         return;
                     }
 
@@ -160,7 +152,7 @@ public class ListenerThread extends Thread
                     }
                 if (stopflag)
                     {
-                        Logging.log(ident + ": Exiting");
+                        Logging.info(ident + ": Exiting");
                         return;
                     }
                 int nfiles = loop();
@@ -171,7 +163,7 @@ public class ListenerThread extends Thread
 //                 scrub.IndividualMetricRecords();
                 if (stopflag)
                     {
-                        Logging.log(ident + ": Exiting");
+                        Logging.info(ident + ": Exiting");
                         return;
                     }
                 if (nfiles==0) {
@@ -223,7 +215,7 @@ public class ListenerThread extends Thread
 
                 if (stopflag)
                     {
-                        Logging.log(ident + ": Exiting");
+                        Logging.info(ident + ": Exiting");
                         return nfiles;
                     }
 
@@ -246,7 +238,8 @@ public class ListenerThread extends Thread
                     }
                 catch (Exception e) 
                     {
-                        Logging.log(ident + ": loop failed to backup incoming message. \nError: "+e.getMessage()+"\n");
+                        Logging.warning(ident + ": ERROR! Loop failed to backup incoming message. \nError: " +
+                                        e.getMessage()+"\n");
                     }
 
                 Record current = null;
@@ -358,8 +351,8 @@ public class ListenerThread extends Thread
                     }
                 catch (Exception e)
                     {
-                        Logging.log(ident + ": Error:Processing File: " + file);
-                        Logging.log(ident + ": Blob: " + blob);
+                        Logging.warning(ident + ": Error:Processing File: " + file);
+                        Logging.warning(ident + ": Blob: " + blob);
                         try
                             {
                                 File temp = new File(file);
@@ -373,7 +366,7 @@ public class ListenerThread extends Thread
 
                 if (xml == null)
                     {
-                        Logging.log(ident + ": Error:No Data To Process: " + file);
+                        Logging.warning(ident + ": No data to process: " + file);
                         try
                             {
                                 File temp = new File(file);
@@ -428,12 +421,12 @@ public class ListenerThread extends Thread
                             if ( date.before(expirationDate) ) {
                                 acceptRecord = false;
                                 if (gotreplication) {
-                                    Logging.info(ident + ": Rejected record because its 'data' is too old ("+current.getDate()+" < "+expirationDate+")");
+                                    Logging.info(ident + ": Rejected record because its 'data' are too old ("+current.getDate()+" < "+expirationDate+")");
                                     errorRecorder.saveDuplicate("Replication","ExpirationDate",0,current);
                                 } else if (gothistory) {
-                                    Logging.info(ident + ": Ignored history record because its 'data' is too old ("+current.getDate()+" < "+expirationDate+")");                                
+                                    Logging.info(ident + ": Ignored history record because its 'data' are too old ("+current.getDate()+" < "+expirationDate+")");                                
                                 } else {
-                                    Logging.info(ident + ": Rejected record because its 'data' is too old ("+current.getDate()+" < "+expirationDate+")");
+                                    Logging.info(ident + ": Rejected record because its 'data' are too old ("+current.getDate()+" < "+expirationDate+")");
                                     errorRecorder.saveDuplicate("Probe","ExpirationDate",0,current);
                                 }
 
@@ -690,7 +683,7 @@ public class ListenerThread extends Thread
                                 }
                                 catch (Exception ignore) { }
                             } else {
-                                Logging.log(ident + ": Communications Error:Shutting Down");
+                                Logging.warning(ident + ": Communications error: shutting down");
                                 return 0; 
                             }
                             Logging.warning(ident + ": Error In Process: ",e);
@@ -711,7 +704,7 @@ public class ListenerThread extends Thread
                             }
                             catch (Exception ignore) { }
                         } else {
-                            Logging.log(ident + ": Communications Error:Shutting Down");
+                            Logging.warning(ident + ": Communications error: shutting down");
                             return 0; 
                         }
                         Logging.warning(ident + ": Error In Process: ",e);
@@ -729,8 +722,8 @@ public class ListenerThread extends Thread
                 }
                 // Logging.log(ident + ": After File Delete: " + file);
                 itotal++;
-                Logging.log(ident + ": Total Input Messages: " + itotal);
-                Logging.log(ident + ": Total Records: " + nrecords);
+                Logging.fine(ident + ": Total Input Messages: " + itotal);
+                Logging.fine(ident + ": Total Records: " + nrecords);
                 
             }
         return nfiles; 
@@ -797,8 +790,8 @@ public class ListenerThread extends Thread
         }
         catch (Exception e)
             {
-                Logging.log(ident + ": Parse error:  " + e.getMessage());
-                Logging.log(ident + ": XML:  " + "\n" + xml);
+                Logging.info(ident + ": Parse error:  " + e.getMessage());
+                Logging.info(ident + ": XML:  " + "\n" + xml);
                 throw e;
             }
 

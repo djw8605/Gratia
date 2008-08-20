@@ -53,8 +53,8 @@ public class ExpirationDateCalculator {
                         try {
                             Duration duration = new Duration(p.getProperty(key));
                             limitCache.put(m.group(1).toLowerCase(), duration);
-                            Logging.log("ExpirationDateCalculator found lifetime property " +
-                                        key + " of " + duration);
+                            Logging.fine("ExpirationDateCalculator found lifetime property " +
+                                         key + " of " + duration);
                         }
                         catch (DurationParseException e) {
                             Logging.warning("ExpirationDateCalculator: found problem with lifetime property " +

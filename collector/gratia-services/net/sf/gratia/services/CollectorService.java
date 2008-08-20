@@ -3,6 +3,7 @@ package net.sf.gratia.services;
 import net.sf.gratia.util.Configuration;
 import net.sf.gratia.util.Execute;
 import net.sf.gratia.util.Logging;
+import net.sf.gratia.util.LogLevel;
 
 import java.lang.Thread.*;
 import java.math.BigInteger;
@@ -76,35 +77,30 @@ public class CollectorService implements ServletContextListener {
         Logging.initialize("service");
 
         Enumeration iter = System.getProperties().propertyNames();
-        Logging.log("");
+        Logging.log(LogLevel.CONFIG, "System properties:");
         while (iter.hasMoreElements()) {
             String key = (String)iter.nextElement();
             if (key.endsWith(".password")) continue;
             String value = (String)System.getProperty(key);
-            Logging.log("Key: " + key + " value: " + value);
+            Logging.log(LogLevel.CONFIG,
+                        "Key: " + key + " value: " + value);
         }
-        Logging.log("");
 
-        Logging.log("");
-        Logging.log("service properties:");
-        Logging.log("");
+
+        Logging.log(LogLevel.CONFIG, "Service properties:");
         iter = p.propertyNames();
         while (iter.hasMoreElements()) {
             String key = (String)iter.nextElement();
             if (key.endsWith(".password")) continue;
             String value = (String)p.getProperty(key);
-            Logging.log("Key: " + key + " value: " + value);
+            Logging.log(LogLevel.CONFIG, "Key: " + key + " value: " + value);
         }
-        Logging.log("");
-        Logging.log("service.security.level: " + p.getProperty("service.security.level"));
 
         configurationPath = net.sf.gratia.util.Configuration.getConfigurationPath();
 
-        if (p.getProperty("service.security.level").equals("1")) {
+        if (p.getProperty("service.security.level", "0").equals("1")) {
             try {
-                Logging.log("");
-                Logging.log("Initializing HTTPS Support");
-                Logging.log("");
+                Logging.info("Initializing HTTPS Support");
                 //
                 // setup configuration path/https system parameters
                 //
@@ -119,9 +115,9 @@ public class CollectorService implements ServletContextListener {
 
                 com.sun.net.ssl.HostnameVerifier hv = new com.sun.net.ssl.HostnameVerifier() {
                         public boolean verify(String urlHostname, String certHostname) {
-                            Logging.log("url host name: " + urlHostname);
-                            Logging.log("cert host name: " + certHostname);
-                            Logging.log("WARNING: Hostname is not matched for cert.");
+                            Logging.info("url host name: " + urlHostname);
+                            Logging.info("cert host name: " + certHostname);
+                            Logging.info("WARNING: Hostname is not matched for cert.");
                             return true;
                         }
                     };
@@ -156,9 +152,7 @@ public class CollectorService implements ServletContextListener {
             rmiservice.setDaemon(true);
             rmiservice.start();
             Thread.sleep(10);
-            Logging.log("");
-            Logging.log("CollectorService: RMI Service Started");
-            Logging.log("");
+            Logging.info("CollectorService: RMI Service Started");
 
             checker = new DatabaseMaintenance(p);
 
@@ -171,8 +165,13 @@ public class CollectorService implements ServletContextListener {
             if (checker.IsDbNewer()) {
                 // The database is newer than the currently running code
                 // we should abort since we might enter incorrect data.
-                Logging.warning("CollectorService: The database schema is newer than what is expected by this code.  You need to upgrade this code to a newer version of the Gratia Collector");
-                Logging.warning("CollectorService: The service is NOT started");
+                Logging.log(LogLevel.SEVERE,
+                            "CollectorService: The database schema is newer " +
+                            "than what is expected by this code.  You need " +
+                            "to upgrade this code to a newer version " +
+                            "of the Gratia Collector");
+                Logging.log(LogLevel.SEVERE,
+                            "CollectorService: The service is NOT started");
                 return;
             }
          
@@ -188,8 +187,8 @@ public class CollectorService implements ServletContextListener {
                 HibernateWrapper.startMaster();
             }
             catch (Exception e) {
-                Logging.warning("CollectorService: error while checking indexes.");
-                Logging.warning("CollectorService: manual correction required");
+                Logging.log(LogLevel.SEVERE, "CollectorService: error while checking indexes.");
+                Logging.log(LogLevel.SEVERE, "CollectorService: manual correction required");
                 Logging.debug("Exception details:", e);
                 return;
             }
@@ -204,8 +203,8 @@ public class CollectorService implements ServletContextListener {
                 checker.CheckIndices();
             }
             catch (Exception e) {
-                Logging.warning("CollectorService: error while checking indexes.");
-                Logging.warning("CollectorService: manual correction required");
+                Logging.log(LogLevel.SEVERE, "CollectorService: error while checking indexes.");
+                Logging.log(LogLevel.SEVERE, "CollectorService: manual correction required");
                 return;
             }
 
@@ -215,8 +214,8 @@ public class CollectorService implements ServletContextListener {
             Logging.info("CollectorService: check / upgrade schema to current version");
             if (!checker.Upgrade()) {
                 // The database has not been upgraded correctly.
-                Logging.warning("CollectorService: The database schema was not upgraded properly.");
-                Logging.warning("CollectorService: Manual correction required.");
+                Logging.log(LogLevel.SEVERE, "CollectorService: The database schema was not upgraded properly.");
+                Logging.log(LogLevel.SEVERE, "CollectorService: Manual correction required.");
                 return;
             }
 
@@ -241,16 +240,14 @@ public class CollectorService implements ServletContextListener {
                 Logging.log("Created Q: " + queues[i]);
             }
 
-            Logging.log("");
-            Logging.log("CollectorService: JMS Server Started");
-            Logging.log("");
+            Logging.info("CollectorService: JMS Server Started");
 
             //
             // poke in rmi
             //
             JMSProxyImpl proxy = new JMSProxyImpl(this);
             Naming.rebind(rmibind + service, proxy);
-            Logging.log("JMSProxy started");
+            Logging.info("JMSProxy started");
 
             // Determine whether we can start normal operations.
             Boolean safeStart = false;
@@ -271,7 +268,7 @@ public class CollectorService implements ServletContextListener {
             }
         }
         catch (Exception e) {
-            Logging.warning("CollectorService: contextInitialized() caught exception ", e);
+            Logging.log(LogLevel.SEVERE, "CollectorService: contextInitialized() caught exception ", e);
         }
 
     }
@@ -294,14 +291,15 @@ public class CollectorService implements ServletContextListener {
             // Check whether we need to start a checksum upgrade thread
             //
 
-            Logging.debug("CollectorService: Checking for unique index on md5v2");
+            Logging.log("CollectorService: Checking for unique index on md5v2");
 
             Boolean require_checksum_upgrade = false;
             try {
                 require_checksum_upgrade = !checker.checkMd5v2Unique();
             }
             catch (Exception e) {
-                Logging.warning("CollectorService: unable to ascertain md5v2 index status: not starting upgrade thread", e);
+                Logging.log(LogLevel.SEVERE,
+                            "CollectorService: unable to ascertain md5v2 index status: not starting upgrade thread", e);
                 checksumUpgradeDisabled = true;
                 housekeepingDisabled = true; // Also don't start housekeeping.
             }
@@ -313,10 +311,10 @@ public class CollectorService implements ServletContextListener {
             }
             
             if (require_checksum_upgrade && !checksumUpgradeDisabled) {
-                Logging.info("CollectorService: starting checksum upgrade thread.");
+                Logging.log("CollectorService: starting checksum upgrade thread.");
                 checksumUpgrader = new ChecksumUpgrader(this);
                 checksumUpgrader.start();
-                Logging.log("CollectorService: ChecksumUpgrader started");
+                Logging.info("CollectorService: ChecksumUpgrader started");
             }
 
             //
@@ -376,7 +374,7 @@ public class CollectorService implements ServletContextListener {
                 p.getProperty("monitor.listener.threads").equals("true")) {
                 monitorListenerThread = new MonitorListenerThread(global);
                 monitorListenerThread.start();
-                Logging.log("CollectorService: Started MonitorListenerThread");
+                Logging.info("CollectorService: Started MonitorListenerThread");
             }
             //
             // if requested - start service to monitor input queue sizes
@@ -386,10 +384,11 @@ public class CollectorService implements ServletContextListener {
                 Logging.log("CollectorService: Starting QSizeMonitor");
                 qsizeMonitor = new QSizeMonitor();
                 qsizeMonitor.start();
+                Logging.info("CollectorService: QSizeMonitor started");
             }
         }
         catch (Exception e) {
-            Logging.warning("CollectorService: contextInitialized() caught exception ", e);
+            Logging.log(LogLevel.SEVERE, "CollectorService: contextInitialized() caught exception ", e);
         }
 
         //
@@ -713,9 +712,7 @@ public class CollectorService implements ServletContextListener {
     }
 
     public void contextDestroyed(ServletContextEvent sce) {
-        Logging.info("");
         Logging.info("Context Destroy Event");
-        Logging.info("");
         System.exit(0);
     }
 

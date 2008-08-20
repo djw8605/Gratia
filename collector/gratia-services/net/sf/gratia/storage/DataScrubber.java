@@ -150,7 +150,7 @@ public class DataScrubber {
         try {
 
             org.hibernate.Query query = session.createQuery( listcmd );
-            Logging.debug("DataScrubber: About to query " + query.getQueryString());
+            Logging.fine("DataScrubber: About to query " + query.getQueryString());
 
             query.setString( "dateLimit", datelimit );
             query.setMaxResults( batchSize );
@@ -186,7 +186,7 @@ public class DataScrubber {
         String limit = eCalc.expirationDateAsSQLString(new Date(), "MetricRecord", "RawXML");
 
         if (!(limit.length() > 0)) return 0;
-        Logging.debug("DataScrubber: Remove all MetricRecord RawXML records older than: " + limit);
+        Logging.fine("DataScrubber: Remove all MetricRecord RawXML records older than: " + limit);
 
         String delquery = "delete from MetricRecord_Xml where ExtraXml = \"\" " +
             "and dbid in (select M.dbid from MetricRecord_Meta M join " +
@@ -205,7 +205,7 @@ public class DataScrubber {
         String limit = eCalc.expirationDateAsSQLString(new Date(), "JobUsageRecord", "RawXML");
 
         if (!(limit.length() > 0)) return 0;
-        Logging.debug("DataScrubber: Remove all JobUsage RawXML records older than: " + limit);
+        Logging.fine("DataScrubber: Remove all JobUsage RawXML records older than: " + limit);
  
         String delquery = "delete from JobUsageRecord_Xml where ExtraXml = \"\" " +
             "and dbid in (select M.dbid from JobUsageRecord_Meta M join " +
@@ -230,7 +230,7 @@ public class DataScrubber {
         List ids = null;
         long nrecords = 0;
         if (limit.length() > 0) {
-            Logging.log("DataScrubber: Remove all JobUsage records older than: " + limit);
+            Logging.fine("DataScrubber: Remove all JobUsage records older than: " + limit);
 
             String hqlList = "select RecordId from JobUsageRecord where " +
                 "((EndTime.Value is null) or " +
@@ -316,7 +316,7 @@ public class DataScrubber {
         //   c) Normal case
         long nrecords = 0;
         if (limit.length() > 0) {
-            Logging.debug("DataScrubber: Remove all Metric records older than: " + limit); 
+            Logging.fine("DataScrubber: Remove all Metric records older than: " + limit); 
 
             // Can't use deleteHibernateRecords until we find a way to
             // specify to hibernate that the key field should be

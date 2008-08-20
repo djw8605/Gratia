@@ -119,8 +119,8 @@ public class HibernateWrapper {
         }
         catch (Exception e) {
             databaseDown = true;
-            Logging.log("HibernateWrapper: Database Check: Database Down");
-            e.printStackTrace();
+            Logging.info("HibernateWrapper: Database Check: Database Down");
+            Logging.debug("Exception details: ", e);
             return false;
         }
     }
@@ -132,7 +132,7 @@ public class HibernateWrapper {
         }
         catch (Exception e) {
             databaseDown = true;
-            Logging.log("HibernateWrapper: Get Session: Database Down");
+            Logging.info("HibernateWrapper: Get Session: Database Down");
             return null;
         }
     }

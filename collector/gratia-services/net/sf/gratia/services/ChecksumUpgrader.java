@@ -205,7 +205,7 @@ public class ChecksumUpgrader extends Thread {
 
     private long fixDuplicatesOnce() {
         long nDupsFixed = 0;
-        Logging.log("fixDuplicatesOnce: starting duplicate resolution cycle");
+        Logging.fine("fixDuplicatesOnce: starting duplicate resolution cycle");
         Boolean continueLooping = true;
         while (continueLooping) {
             Session session = HibernateWrapper.getSession();
@@ -351,6 +351,8 @@ public class ChecksumUpgrader extends Thread {
             }
             if (checksumsReadThisLoop == 0) continueLooping = false; // Done
         }
+        Logging.fine("fixDuplicatesOnce: this cycle resolved " +
+                     nDupsFixed + " duplicated checksums");
         return nDupsFixed;
     }
 

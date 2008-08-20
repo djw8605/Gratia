@@ -112,9 +112,9 @@ public class NewVOUpdate {
             // communications error
             //
             if (HibernateWrapper.databaseUp()) {
-                Logging.log("NewVOUpdate: Processing Error");
-                Logging.log("NewVOUpdate: command: " + command);
-                Logging.log("NewVOUpdate: e: " + e);
+                Logging.warning("NewVOUpdate: Processing Error, command " +
+                                command + ", exception " + e);
+                Logging.debug("Exception detail: ", e);
             }
             throw new Exception("NewVOUpdate: No Connection");
         }

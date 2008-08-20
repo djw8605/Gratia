@@ -4,6 +4,7 @@ import net.sf.gratia.util.XP;
 import net.sf.gratia.util.Execute;
 import net.sf.gratia.util.Configuration;
 import net.sf.gratia.util.Logging;
+import net.sf.gratia.util.LogLevel;
 import net.sf.gratia.services.HibernateWrapper;
 import net.sf.gratia.storage.JobUsageRecord;
 import net.sf.gratia.storage.UserIdentity;
@@ -37,10 +38,10 @@ import org.hibernate.exception.*;
 public class DatabaseMaintenance {
     static final String dq = "\"";
     static final String comma = ",";
-    static final int gratiaDatabaseVersion = 45;
+    static final int gratiaDatabaseVersion = 46;
     static final int latestDBVersionRequiringStoredProcedureLoad = gratiaDatabaseVersion;
     static final int latestDBVersionRequiringSummaryViewLoad = 37;
-    static final int latestDBVersionRequiringSummaryTriggerLoad = 45;
+    static final int latestDBVersionRequiringSummaryTriggerLoad = 46;
     static final int latestDBVersionRequiringTableStatisticsRefresh = 38;
 
     static boolean dbUseJobUsageSiteName = false;
@@ -344,7 +345,7 @@ public class DatabaseMaintenance {
     }
 
     private int CallPostInstall(String action) {
-        Logging.log("DatabaseMaintenance: calling post-install script for action \"" + action + "\"");
+        Logging.fine("DatabaseMaintenance: calling post-install script for action \"" + action + "\"");
         String post_install = System.getProperty("catalina.home");
         post_install = xp.replaceAll(post_install, "\\", "" + File.separatorChar);
         post_install = post_install + File.separatorChar + "gratia" + File.separatorChar + "post-install.sh";
@@ -369,7 +370,7 @@ public class DatabaseMaintenance {
             result = statement.executeUpdate(cmd);
             Logging.log("Command: OK: " + cmd);
         } catch (Exception e) {
-            Logging.warning("Command: Error: " + cmd, e);
+            Logging.warning("Command: Error: " + cmd + " : " + e);
             result = -1;
         }
         return result;
@@ -388,7 +389,7 @@ public class DatabaseMaintenance {
             }
             Logging.log("Command: OK: " + cmd);
         } catch (Exception e) {
-            Logging.log("Command: Error: " + cmd + " : " + e);
+            Logging.warning("Command: Error: " + cmd + " : " + e);
         }
         return 0;
     }
@@ -416,7 +417,7 @@ public class DatabaseMaintenance {
             }
             Logging.log("Command: OK: " + cmd);
         } catch (Exception e) {
-            Logging.log("Command: Error: " + cmd + " : " + e);
+            Logging.warning("Command: Error: " + cmd + " : " + e);
         }
     }
     
@@ -448,7 +449,7 @@ public class DatabaseMaintenance {
                 result = result + column;
             }
         } catch (Exception e) {
-            Logging.log("Command: Error: " + cmd + " : " + e);
+            Logging.warning("Command: Error: " + cmd + " : " + e);
         }
         return result;
     }
@@ -541,7 +542,7 @@ public class DatabaseMaintenance {
             }           
             Logging.log("Command: OK: " + check);
         } catch (Exception e) {
-            Logging.log("Command: Error: " + check + " : " + e);
+            Logging.warning("Command: Error: " + check + " : " + e);
         }
         return result;
     }
@@ -578,7 +579,7 @@ public class DatabaseMaintenance {
             }
             Logging.log("Command: OK: " + check);
         } catch (Exception e) {
-            Logging.log("Command: Error: " + check + " : " + e);
+            Logging.warning("Command: Error: " + check + " : " + e);
         }        
     }
 
@@ -612,7 +613,8 @@ public class DatabaseMaintenance {
 
     private boolean checkAndUpgradeDbAuxiliaryItems() {
         if (readIntegerDBProperty("gratia.database.version") != gratiaDatabaseVersion) {
-            Logging.log("INTERNAL ERROR: DatabaseMainentance::checkAndUpgradeDbAuxiliaryItems" +
+            Logging.log(LogLevel.SEVERE,
+                        "INTERNAL ERROR: DatabaseMainentance::checkAndUpgradeDbAuxiliaryItems" +
                         " called with inconsistent DB version");
             return false;
         }
@@ -625,7 +627,7 @@ public class DatabaseMaintenance {
                 UpdateDbProperty("gratia.database.summaryViewVersion", gratiaDatabaseVersion);
                 Logging.log("Summary view updated successfully");
             } else {
-                Logging.log("FAIL: summary view NOT updated");
+                Logging.warning("FAIL: summary view NOT updated");
                 return false;
             }
         }
@@ -643,7 +645,7 @@ public class DatabaseMaintenance {
                     UpdateDbProperty("gratia.database.summaryTriggerVersion", gratiaDatabaseVersion);
                     Logging.log("Summary trigger updated successfully");
                 } else {
-                    Logging.log("FAIL: summary trigger NOT updated");
+                    Logging.warning("FAIL: summary trigger NOT updated");
                     return false;
                 }
             }
@@ -661,7 +663,7 @@ public class DatabaseMaintenance {
                                      gratiaDatabaseVersion);
                     Logging.log("Stored procedures updated successfully");
                 } else {
-                    Logging.log("FAIL: stored procedures NOT updated");
+                    Logging.warning("FAIL: stored procedures NOT updated");
                     return false;
                 }
             }
@@ -677,7 +679,7 @@ public class DatabaseMaintenance {
                                      gratiaDatabaseVersion);
                     Logging.log("Table statistics updated successfully");
                 } else {
-                    Logging.log("FAIL: table statistics NOT updated");
+                    Logging.warning("FAIL: table statistics NOT updated");
                     return false;
                 }
             }
@@ -713,24 +715,24 @@ public class DatabaseMaintenance {
                 }
                 Logging.log("Command: OK: " + check);
             } catch (Exception e) {
-                Logging.log("Command: Error: " + check + " : " + e);
+                Logging.warning("Command: Error: " + check + " : " + e);
             }    
 
-            Logging.log("Gratia database now at version "
-                        + gratiaDatabaseVersion);
+            Logging.info("Gratia database now at version "
+                         + gratiaDatabaseVersion);
 
             return checkAndUpgradeDbAuxiliaryItems();
             
         } else {
             // Do the necessary upgrades if any
 
-            Logging.log("Gratia database at version " + oldvers);
+            Logging.info("Gratia database at version " + oldvers);
 
             
             int current = oldvers;
 
             if (current == 1) {
-                Logging.log("Gratia database upgraded from " + current
+                Logging.fine("Gratia database upgraded from " + current
                             + " to " + (current + 1));
                 current = current + 1;
                 UpdateDbVersion(current);
@@ -748,7 +750,7 @@ public class DatabaseMaintenance {
                         result = Execute("alter table MetricRecord_Meta drop column RawXml, drop column ExtraXml");
                     }
                     if (result > -1) {
-                        Logging.log("Gratia database upgraded from " + current
+                        Logging.fine("Gratia database upgraded from " + current
                                     + " to " + (current + 1));
                         current = current + 1;
                         UpdateDbVersion(current);
@@ -773,7 +775,7 @@ public class DatabaseMaintenance {
                     result = Execute("alter table JobUsageRecord drop column md5, drop column ServerDate, drop column SiteName, drop column SiteNameDescription, drop column ProbeName, drop column ProbeNameDescription, drop column recordId, drop column CreateTime, drop column CreateTimeDescription, drop column RecordKeyInfoId, drop column RecordKeyInfoContent; ");
                 }
                 if (result > -1) {
-                    Logging.log("Gratia database upgraded from " + current + " to " + (current + 1));
+                    Logging.fine("Gratia database upgraded from " + current + " to " + (current + 1));
                     current = current + 1;
                     UpdateDbVersion(current);
                 } else {
@@ -786,7 +788,7 @@ public class DatabaseMaintenance {
                     result = Execute("drop table RolesTable;");
                 }
                 if (result > -1) {
-                    Logging.log("Gratia database upgraded from " + current + " to " + (current + 1));
+                    Logging.fine("Gratia database upgraded from " + current + " to " + (current + 1));
                     current = current + 1;
                     UpdateDbVersion(current);
                 } else {
@@ -799,7 +801,7 @@ public class DatabaseMaintenance {
                     result = Execute("drop table CETable;");
                 }
                 if (result > -1) {
-                    Logging.log("Gratia database upgraded from " + current + " to " + (current + 1));
+                    Logging.fine("Gratia database upgraded from " + current + " to " + (current + 1));
                     current = current + 1;
                     UpdateDbVersion(current);
                 } else {
@@ -816,7 +818,7 @@ public class DatabaseMaintenance {
                     result = Execute("drop table CEProbes;");
                 }
                 if (result > -1) {
-                    Logging.log("Gratia database upgraded from " + current + " to " + (current + 1));
+                    Logging.fine("Gratia database upgraded from " + current + " to " + (current + 1));
                     current = current + 1;
                     UpdateDbVersion(current);
                 } else {
@@ -832,7 +834,7 @@ public class DatabaseMaintenance {
                     result = Execute("update VONameCorrection,VO set VONameCorrection.VOid = VO.VOid where binary VONameCorrection.VOName = binary VO.VOName");
                 }
                 if (result > -1) {
-                    Logging.log("Gratia database upgraded from " + current + " to " + (current + 1));
+                    Logging.fine("Gratia database upgraded from " + current + " to " + (current + 1));
                     current = current + 1;
                     UpdateDbVersion(current);
                 } else {
@@ -847,7 +849,7 @@ public class DatabaseMaintenance {
                     }
                 }
                 if (result > -1) {
-                    Logging.log("Gratia database upgraded from " + current + " to " + 10);
+                    Logging.fine("Gratia database upgraded from " + current + " to " + 10);
                     current = 10;
                     UpdateDbVersion(current);
                 } else {
@@ -857,7 +859,7 @@ public class DatabaseMaintenance {
             if (current == 10) {
                 int result = Execute("ALTER TABLE MetricRecord MODIFY DetailsData TEXT");
                 if (result > -1) {
-                    Logging.log("Gratia database upgraded from " + current + " to " + (current + 1));
+                    Logging.fine("Gratia database upgraded from " + current + " to " + (current + 1));
                     current = current + 1;
                     UpdateDbVersion(current);
                 } else {
@@ -866,7 +868,7 @@ public class DatabaseMaintenance {
             }
             if ((current > 10 ) && (current < 14)) { // Never saw the light of day and superseded.
                 int new_version = 14;
-                Logging.log("Gratia database upgraded from " + current + " to " + new_version);
+                Logging.fine("Gratia database upgraded from " + current + " to " + new_version);
                 current = new_version;
                 UpdateDbVersion(current);
             }
@@ -894,7 +896,7 @@ public class DatabaseMaintenance {
                     result = Execute("update VONameCorrection,VO set VONameCorrection.VOid=VO.VOid where VONameCorrection.VOName = binary VO.VOName");
                 }
                 if (result > -1) {
-                    Logging.log("Gratia database upgraded from " + current + " to " + (current + 1));
+                    Logging.fine("Gratia database upgraded from " + current + " to " + (current + 1));
                     current = current + 1;
                     UpdateDbVersion(current);
                 } else {
@@ -911,7 +913,7 @@ public class DatabaseMaintenance {
                     result = Execute("alter table JobUsageRecord_Meta drop column SiteName, drop column SiteNameDescription");
                 }
                 if (result > -1) {
-                    Logging.log("Gratia database upgraded from " + current + " to " + (current + 1));
+                    Logging.fine("Gratia database upgraded from " + current + " to " + (current + 1));
                     current = current + 1;
                     UpdateDbVersion(current);
                 } else {
@@ -921,13 +923,13 @@ public class DatabaseMaintenance {
             }
             if (current == 16) {
                 // NOP -- used to manipulate summary tables.
-                Logging.log("Gratia database upgraded from " + current + " to " + (current + 1));
+                Logging.fine("Gratia database upgraded from " + current + " to " + (current + 1));
                 current = current + 1;
                 UpdateDbVersion(current);
             }
             if (current == 17) {
                 // Auxiliary DB item upgrades only.
-                Logging.log("Gratia database upgraded from " + current + " to " + (current + 1));
+                Logging.fine("Gratia database upgraded from " + current + " to " + (current + 1));
                 current = current + 1;
                 UpdateDbVersion(current);
             }
@@ -966,7 +968,7 @@ public class DatabaseMaintenance {
                      result = -1;
                 }
                 if (result > -1) {
-                    Logging.log("Gratia database upgraded from " + current + " to " + (current + 1));
+                    Logging.fine("Gratia database upgraded from " + current + " to " + (current + 1));
                     current = current + 1;
                     UpdateDbVersion(current);
                 } else {
@@ -976,7 +978,7 @@ public class DatabaseMaintenance {
             }
             if (current == 19) {
                 // Auxiliary DB item upgrades only.
-                Logging.log("Gratia database upgraded from " + current + " to " + (current + 1));
+                Logging.fine("Gratia database upgraded from " + current + " to " + (current + 1));
                 current = current + 1;
                 UpdateDbVersion(current);
             }
@@ -992,7 +994,7 @@ public class DatabaseMaintenance {
                     result = Execute("update ProbeDetails_Meta, Probe set ProbeDetails_Meta.probeid = Probe.probeid where ProbeDetails_Meta.probename = Probe.probename");
                 } 
                 if (result > -1) {
-                    Logging.log("Gratia database upgraded from " + current + " to " + (current + 1));
+                    Logging.fine("Gratia database upgraded from " + current + " to " + (current + 1));
                     current = current + 1;
                     UpdateDbVersion(current);
                 } else {
@@ -1002,13 +1004,13 @@ public class DatabaseMaintenance {
             }
             if (current == 21) {
                 // Auxiliary DB item upgrades only.
-                Logging.log("Gratia database upgraded from " + current + " to " + (current + 1));
+                Logging.fine("Gratia database upgraded from " + current + " to " + (current + 1));
                 current = current + 1;
                 UpdateDbVersion(current);
             }
             if (current == 22) {
                 // Auxiliary DB item upgrades only.
-                Logging.log("Gratia database upgraded from " + current + " to " + (current + 1));
+                Logging.fine("Gratia database upgraded from " + current + " to " + (current + 1));
                 current = current + 1;
                 UpdateDbVersion(current);
             }
@@ -1025,7 +1027,7 @@ public class DatabaseMaintenance {
                     int tmp = current;
                     current = current + 1;
                     UpdateDbVersion(current);
-                    Logging.log("Gratia database upgraded from " + tmp + " to " + current);
+                    Logging.fine("Gratia database upgraded from " + tmp + " to " + current);
                 } else {
                     Logging.warning("Gratia database FAILED to upgrade from " + current +
                                 " to " + (current + 1));
@@ -1040,7 +1042,7 @@ public class DatabaseMaintenance {
                     Logging.warning("Gratia database FAILED to upgrade from " + current +
                                     " to 29", e);
                 }
-                Logging.log("Gratia database upgraded from " + current + " to 29");
+                Logging.fine("Gratia database upgraded from " + current + " to 29");
                 current = 29;
                 UpdateDbVersion(current);
             }
@@ -1086,7 +1088,7 @@ public class DatabaseMaintenance {
                                      "NEWVONameCorrection to VONameCorrection");
                 }
                 if (result > -1) {
-                    Logging.log("Gratia database upgraded from " + current + " to " + (current + 1));
+                    Logging.fine("Gratia database upgraded from " + current + " to " + (current + 1));
                     current = current + 1;
                     UpdateDbVersion(current);
                 } else {
@@ -1109,54 +1111,54 @@ public class DatabaseMaintenance {
                 int tmp = current;
                 current = current + 1;
                 UpdateDbVersion(current);
-                Logging.log("Gratia database upgraded from " + tmp + " to " + current);
+                Logging.fine("Gratia database upgraded from " + tmp + " to " + current);
             }
             if (current == 31) {
                 // Auxiliary DB item upgrades only.
-                Logging.log("Gratia database upgraded from " + current + " to " + (current + 1));
+                Logging.fine("Gratia database upgraded from " + current + " to " + (current + 1));
                 current = current + 1;
                 UpdateDbVersion(current);
             }                
             if (current == 32) {
                 // Auxiliary DB item upgrades only (trigger code)
-                Logging.log("Gratia database upgraded from " + current + " to " + (current + 1));
+                Logging.fine("Gratia database upgraded from " + current + " to " + (current + 1));
                 current = current + 1;
                 UpdateDbVersion(current);
             }                
             if (current == 33) {
                 // Auxiliary DB item upgrades only (trigger code)
-                Logging.log("Gratia database upgraded from " + current + " to " + (current + 1));
+                Logging.fine("Gratia database upgraded from " + current + " to " + (current + 1));
                 current = current + 1;
                 UpdateDbVersion(current);
             }                
             if (current == 34) {
                 // Auxiliary DB item upgrades only (stored procedures and trigger code)
-                Logging.log("Gratia database upgraded from " + current + " to " + (current + 1));
+                Logging.fine("Gratia database upgraded from " + current + " to " + (current + 1));
                 current = current + 1;
                 UpdateDbVersion(current);
             }                
             if (current == 35) {
                 // Auxiliary DB item upgrades only (summary tables and trigger code)
-                Logging.log("Gratia database upgraded from " + current + " to " + (current + 1));
+                Logging.fine("Gratia database upgraded from " + current + " to " + (current + 1));
                 current = current + 1;
                 UpdateDbVersion(current);
             }                
             if (current == 36) {
                 // Auxiliary DB item upgrades only (summary views)
-                Logging.log("Gratia database upgraded from " + current + " to " + (current + 1));
+                Logging.fine("Gratia database upgraded from " + current + " to " + (current + 1));
                 current = current + 1;
                 UpdateDbVersion(current);
             }                
             if (current == 37) {
                 // Auxiliary DB item upgrades only (TableStatistics)
-                Logging.log("Gratia database upgraded from " + current + " to " + (current + 1));
+                Logging.fine("Gratia database upgraded from " + current + " to " + (current + 1));
                 current = current + 1;
                 UpdateDbVersion(current);
             }                
             if (current == 38) {
                 int result = Execute("alter table SystemProplist modify column car varchar(255) not null default ''");
                 if (result > -1) {
-                    Logging.log("Gratia database upgraded from " + current + " to " + (current + 1));
+                    Logging.fine("Gratia database upgraded from " + current + " to " + (current + 1));
                     current = current + 1;
                     UpdateDbVersion(current);
                 } else {
@@ -1167,7 +1169,7 @@ public class DatabaseMaintenance {
             }
             if (current == 39 || current == 40) {
                 // Auxiliary DB item upgrades only (trigger and friends)
-                Logging.log("Gratia database upgraded from " + current + " to 41");
+                Logging.fine("Gratia database upgraded from " + current + " to 41");
                 current = 41;
                 UpdateDbVersion(current);
             }                
@@ -1203,7 +1205,7 @@ public class DatabaseMaintenance {
                     result = -1;
                 }
                 if (result > -1) {
-                    Logging.log("Gratia database upgraded from " + current + " to " + (current + 1));
+                    Logging.fine("Gratia database upgraded from " + current + " to " + (current + 1));
                     current = current + 1;
                     UpdateDbVersion(current);
                 } else {
@@ -1277,15 +1279,15 @@ public class DatabaseMaintenance {
                     result = -1;
                 }
                 if (result > -1) {
-                    Logging.log("Gratia database upgraded from " + current + " to " + (current + 1));
+                    Logging.fine("Gratia database upgraded from " + current + " to " + (current + 1));
                     current = current + 1;
                     UpdateDbVersion(current);
                 }         
             }
-            if ((current == 43) || (current == 44)) {
+            if ((current == 43) || (current == 44) || (current == 45)) {
                 // Auxiliary DB item upgrades only (trigger and friends)
-                Logging.log("Gratia database upgraded from " + current + " to 45");
-                current = 45;
+                Logging.fine("Gratia database upgraded from " + current + " to 46");
+                current = 46;
                 UpdateDbVersion(current);
             }                
             return ((current == gratiaDatabaseVersion) && checkAndUpgradeDbAuxiliaryItems());
@@ -1308,7 +1310,7 @@ public class DatabaseMaintenance {
                 }
             }
         } catch (Exception e) {
-            Logging.log("Command: Error: " + cmd + " : " + e);
+            Logging.warning("Command: Error: " + cmd + " : " + e);
         }   
         return "";
     }
@@ -1340,7 +1342,7 @@ public class DatabaseMaintenance {
             }
             Logging.log("Command: OK: " + check);
         } catch (Exception e) {
-            Logging.log("Command: Error: " + check + " : " + e);
+            Logging.warning("Command: Error: " + check + " : " + e);
         }        
     }
 
@@ -1418,7 +1420,7 @@ public class DatabaseMaintenance {
                 String tableName = resultSet.getString(1);
                 Long dataLength = resultSet.getLong(2);
                 Long indexLength = resultSet.getLong(3);
-                Logging.log("Converting table " + tableName +
+                Logging.fine("Converting table " + tableName +
                             " (data_length = " + prettySize(dataLength) +
                             ", index_length = " + prettySize(indexLength) + ")");
                 long startTime = System.currentTimeMillis();
@@ -1441,7 +1443,7 @@ public class DatabaseMaintenance {
                     Long.valueOf((timeTaken % 3600000)/ 60000).toString() + ":" +
                     form.format(Long.valueOf(timeTaken % 60000) / 1000.0);
                 if (result > -1) {
-                    Logging.log("Table " + tableName +
+                    Logging.fine("Table " + tableName +
                                 " converted to INNODB in " + tTString);
                 } else {
                     Logging.warning("Table " + tableName +
@@ -1451,9 +1453,9 @@ public class DatabaseMaintenance {
             }
             resultSet.close();
             statement.close();
-            Logging.log("Table conversion to INNODB complete");
+            Logging.info("Table conversion to INNODB complete");
         } catch (Exception e) {
-            Logging.log("Command: Error: " + get_convert_list + " : " + e);
+            Logging.warning("Command: Error: " + get_convert_list + " : " + e);
             return false;
         }
         return true;

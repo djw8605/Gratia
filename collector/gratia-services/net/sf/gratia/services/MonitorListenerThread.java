@@ -18,9 +18,7 @@ public class MonitorListenerThread extends Thread
         this.global = global;
         loadProperties();
 	
-        Logging.log("");
-        Logging.log("MonitorListenerThread: Started");
-        Logging.log("");
+        Logging.info("MonitorListenerThread: Started");
     }
     
     public void loadProperties()
@@ -70,9 +68,9 @@ public class MonitorListenerThread extends Thread
     {
         String cr = "\n";
         
-        Logging.log("");
-        Logging.log("MonitorListenerThread: Possible Listener Wedge");
-        Logging.log("");
+        Logging.warning("MonitorListenerThread: no records processed for last " +
+                        p.getProperty("monitor.listener.wait") +
+                        " minutes." );
         p = Configuration.getProperties();
         try
             {

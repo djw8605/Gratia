@@ -22,13 +22,17 @@ public class RMIHandlerServlet extends HttpServlet
     static URLDecoder D;
 
     private synchronized void lookupProxy() {
-        if (proxy == null) {
+        while (proxy == null) {
             try {
                 proxy = (JMSProxy) Naming.lookup(p.getProperty("service.rmi.rmilookup") +
                                                  p.getProperty("service.rmi.service"));
             }
             catch (Exception e) {
                 Logging.warning("RMIHandlerServlet caught exception doing RMI lookup: ", e);
+                try {
+                    Thread.sleep(5000);
+                } catch (Exception ignore) {
+                }
             }
         }
     }
@@ -77,7 +81,7 @@ public class RMIHandlerServlet extends HttpServlet
             command = req.getParameter("command");
 
             if (command == null) {
-                Logging.log("RMIHandlerServlet got buggy POST from " +
+                Logging.fine("RMIHandlerServlet got buggy POST from " +
                             req.getRemoteHost() +
                             ": remediating");
                 //
@@ -118,9 +122,8 @@ public class RMIHandlerServlet extends HttpServlet
                                     ", originating server: " +
                                     req.getRemoteHost() +
                                     "\nData received so far:\n" +
-                                    body,
-                                    e);
-                    Logging.log("RMIHandlerServlet error diagnostic for req: " +
+                                    body);
+                    Logging.debug("RMIHandlerServlet error diagnostic for req: " +
                                 req +
                                 ": read parameters: iteration " +
                                 loopcount +
@@ -128,9 +131,10 @@ public class RMIHandlerServlet extends HttpServlet
                                 bcount + 
                                 ", input position "
                                 + icount);
-                    Logging.log("RMIHandlerServlet error diagnostic for req: " +
+                    Logging.debug("RMIHandlerServlet error diagnostic for req: " +
                                 req +
                                 ", headers: \n" + requestDiagnostics(req));
+                    Logging.debug("Exception detail:", e);
                     PrintWriter writer = res.getWriter();
                     writer.write("Error: RMIHandlerServlet: Error: Problematic req: " + req);
                     writer.flush();
@@ -146,7 +150,7 @@ public class RMIHandlerServlet extends HttpServlet
                     }
                     int index = token.indexOf("=");
                     if (index < 0) {
-                        Logging.info("RMIHandlerServlet: warning: token = " + token);
+                        Logging.warning("RMIHandlerServlet: warning: token = " + token);
                     }
                     String key = token.substring(0,index);
                     String value = token.substring(index + 1);
@@ -251,8 +255,11 @@ public class RMIHandlerServlet extends HttpServlet
             Logging.warning("RMIHandlerServlet: Error: Problematic req: " +
                             req +
                             ", originating server: " +
-                            req.getRemoteHost(),
-                            e);
+                            req.getRemoteHost());
+            Logging.debug("RMIHandlerServlet error diagnostic for req: " +
+                          req +
+                          ", headers: \n" + requestDiagnostics(req));
+            Logging.debug("Exception detail:", e);
             PrintWriter writer = res.getWriter();
             writer.write("Error: RMIHandlerServlet: Error: Problematic req: " + req);
             writer.flush();

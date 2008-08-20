@@ -58,7 +58,7 @@ public class ReplicationDataPump extends Thread {
     }
 
     public void run() {
-        replicationLog("Started run");
+        replicationLog(LogLevel.FINE, "Started run");
         if (!HibernateWrapper.databaseUp()) {
             try {
                 HibernateWrapper.start();
@@ -74,7 +74,7 @@ public class ReplicationDataPump extends Thread {
         while (true) {
             loop();
             if (exitflag) {
-                replicationLog("Stopping/Exiting");
+                replicationLog(LogLevel.FINE, "Stopping/Exiting");
                 return;
             }
         }
@@ -82,7 +82,7 @@ public class ReplicationDataPump extends Thread {
 
     public void exit() {
         exitflag = true;
-        replicationLog("Exit Requested");
+        replicationLog(LogLevel.FINE, "Exit Requested");
     }
 
     public void loop() {
@@ -106,7 +106,7 @@ public class ReplicationDataPump extends Thread {
             if ((replicationEntry == null) ||
                 (replicationEntry.getrunning() == 0)) {
                 // Entry has been turned off or removed -- exit.
-                replicationLog(LogLevel.FINEST,
+                replicationLog(LogLevel.FINE,
                                "replication entry " +
                                replicationId +
                                " has been removed or turned off");
@@ -263,7 +263,7 @@ public class ReplicationDataPump extends Thread {
         finally {
             if ((session != null) && session.isOpen()) session.close();
         }
-        replicationLog("Run Complete");
+        replicationLog(LogLevel.FINE, "Run Complete");
 
         //
         // now wait frequency minutes

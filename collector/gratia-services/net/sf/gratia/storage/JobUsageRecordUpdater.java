@@ -142,11 +142,11 @@ public abstract class JobUsageRecordUpdater implements RecordUpdater
             if ((!current.getResourceType().getValue().equals("Storage")) || // Not Storage
                 ((current.getDisk() != null) &&
                  (current.getDisk().size() > 0))) { // Not Transfer
-                Logging.debug("JobUsageRecordUpdater.CheckIsNew.Update(): rejecting record: " +
-                              current.getResourceType().getValue() + ", " +
-                              ((current.getDisk() != null)?
-                               ("hasDisk, size = " + current.getDisk().size()):
-                               "noDisk"));                              
+//                 Logging.debug("JobUsageRecordUpdater.CheckIsNew.Update(): rejecting record: " +
+//                               current.getResourceType().getValue() + ", " +
+//                               ((current.getDisk() != null)?
+//                                ("hasDisk, size = " + current.getDisk().size()):
+//                                "noDisk"));                              
                 return;
             }
 
@@ -191,8 +191,8 @@ public abstract class JobUsageRecordUpdater implements RecordUpdater
                     td.setIsNew(Integer.parseInt(IsNew.getValue()));
                     v.add(IsNew);
                 } catch (Exception e) {
-                    Logging.log("JobUsageRecordUpdaterCheckIsNew.Update(): unable to parse IsNew resource "
-                                + IsNew.getValue());
+                    Logging.warning("JobUsageRecordUpdaterCheckIsNew.Update(): unable to parse IsNew resource "
+                                    + IsNew.getValue());
                     td.setIsNew(0);
                 }
             }

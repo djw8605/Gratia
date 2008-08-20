@@ -44,7 +44,7 @@ public class QSizeMonitor extends Thread {
     }
 
     public void run() {
-        Logging.log("QSizeMonitor: Started");
+        Logging.fine("QSizeMonitor: Started");
         while (true) {
             try {
                 Thread.sleep(60 * 1000);
@@ -69,15 +69,15 @@ public class QSizeMonitor extends Thread {
                 maxfound = filelist.length;
         }
         if (toobig && running) {
-            Logging.log("QSizeMonitor: Q Size Exceeded: " + maxfound);
-            Logging.log("QSizeMonitor: Shuttinng Down Input");
+            Logging.info("QSizeMonitor: Q Size Exceeded: " + maxfound);
+            Logging.info("QSizeMonitor: Shuttinng Down Input");
             stopServlet();
             running = false;
             return;
         }
         if ((! toobig) && (! running)) {
             if (maxfound < (maxqsize * restartThreshold)){
-                Logging.log("QSizeMonitor: Restarting Input: " + maxfound);
+                Logging.info("QSizeMonitor: Restarting Input: " + maxfound);
                 startServlet();
                 running = true;
             }

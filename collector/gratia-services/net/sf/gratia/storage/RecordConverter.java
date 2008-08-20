@@ -60,8 +60,8 @@ public class RecordConverter {
                 throw new Exception("Found problem parsing document with root name " + eroot.getName());
             } else if ((expectedRecords > -1) &&
                        (expectedRecords != foundRecords.size())) {
-                Logging.log("Expected an envelope with " + expectedRecords +
-                            " records but found " + foundRecords.size());
+                Logging.info("Expected an envelope with " + expectedRecords +
+                             " records but found " + foundRecords.size());
             }
         }
         catch (Exception e) {
