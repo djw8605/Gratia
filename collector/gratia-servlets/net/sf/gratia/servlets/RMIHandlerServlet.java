@@ -225,11 +225,18 @@ public class RMIHandlerServlet extends HttpServlet
                 if (command.equals("update") ||
                     command.equals("urlencodedupdate")) {
                     parse_error = false;
-                    boolean status = proxy.update(arg1);
-                    if (status)
+                    boolean status = true;
+                    if (arg1.equals("xxx")) {
+                        Logging.info("RMIHandlerServlet: received test message from " +
+                                     req.getRemoteHost());
+                    } else { // Process normally
+                        status = proxy.update(arg1);
+                    }
+                    if (status) {
                         writer.write("OK");
-                    else
-                        writer.write("Error");
+                    } else {
+                        writer.write("Error"); 
+                    }
                 }
             }
             if (parse_error) {
