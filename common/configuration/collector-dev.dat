@@ -15,7 +15,9 @@
                   "monitor.listener.wait" => 2880,
                   "service.rmiservlet.level" => "FINE",
                   "monitor.to.address0" => 'greenc@fnal.gov',
-                  "service.listener.threads" => 1
+                  "service.listener.threads" => 1,
+                  "service.admin.FQAN.0" => "/fermilab/Role=GratiaAdmin",
+                  "service.admin.FQAN.1" => "/fermilab/Role=GratiaDeveloper"
                  }
                },
  itb_control => { http_port => 8881,
@@ -33,31 +35,11 @@
                    "monitor.listener.wait" => 2880,
                    "service.rmiservlet.level" => "FINEST",
                    "monitor.to.address0" => 'greenc@fnal.gov',
-                   "service.listener.threads" => 1
+                   "service.listener.threads" => 1,
+                   "service.admin.FQAN.0" => "/fermilab/Role=GratiaAdmin",
+                   "service.admin.FQAN.1" => "/fermilab/Role=GratiaDeveloper"
                   }
                 },
- #  itb_control => { http_port => 8880,
- #                   ssl_port => 8845,
- #                   rmi_port => 17000,
- #                   jmx_port => 8004,
- #                   server_port => 8104,
- #                   db_host => "gratia07.fnal.gov",
- #                   db_port => 3320,
- #                   db_schema => "gratia",
- #                   no_collector => 1,
- #                   remote_host => "gratia01.fnal.gov",
- #                   "properties.attributes" =>
- #                   {
- #                    "service.mysql.user" => "reader", # Disable updates
- #                    "service.mysql.password" => "reader",
- #                    "maintain.history.log" => 7,
- #                    "montor.listener.threads" => "false",
- #                    "monitor.listener.wait" => 2880,
- #                    "service.rmiservlet.level" => "FINEST",
- #                    "monitor.to.address0" => 'greenc@fnal.gov',
- #                    "service.listener.threads" => 1
- #                   }
- #                 },
  jeffmack => {http_port => 8880,
               ssl_port => 8845,
               rmi_port => 17000,
@@ -69,7 +51,9 @@
               {
                "maintain.history.log" => 2,
                "monitor.listener.wait" => 240,
-               "monitor.to.address0" => 'jeffmack@fnal.gov'
+               "monitor.to.address0" => 'jeffmack@fnal.gov',
+               "service.admin.FQAN.0" => "/fermilab/Role=GratiaAdmin",
+               "service.admin.FQAN.1" => "/fermilab/Role=GratiaDeveloper"
               }
              },
  pcanal => { http_port => 8881,
@@ -83,7 +67,9 @@
              {
               "maintain.history.log" => 2,
               "monitor.listener.wait" => 240,
-              "monitor.to.address0" => 'pcanal@fnal.gov'
+              "monitor.to.address0" => 'pcanal@fnal.gov',
+              "service.admin.FQAN.0" => "/fermilab/Role=GratiaAdmin",
+              "service.admin.FQAN.1" => "/fermilab/Role=GratiaDeveloper"
              }
            },
  greenc => { tomcat_user => "greenc",
@@ -96,7 +82,7 @@
              db_host => "localhost",
              db_schema => "gratia_greenc",
              collector_host => "gratia-vm02.fnal.gov",
-#             tomcat_native_lib => '/data/apr/lib',
+             #             tomcat_native_lib => '/data/apr/lib',
              "properties.attributes" =>
              {
               "gratia.service.safeStart" => 0,
@@ -107,9 +93,8 @@
               "service.service.level" => 'FINEST',
               "service.service.numLogs" => 10,
               "monitor.to.address0" => 'greenc@fnal.gov' ,
-              "service.admin.DN.0" => '/DC=org/DC=doegrids/OU=People/CN=Christopher H. Green 851859',
-              "service.admin.DN.1" => '/DC=gov/DC=fnal/O=Fermilab/OU=People/CN=Chris Green/CN=UID=greenc',
-              "service.admin.DN.2" => '/DC=gov/DC=fnal/O=Fermilab/OU=People/CN=Chris Green/CN=UID:greenc'#,
+              "service.admin.FQAN.0" => "/fermilab/Role=GratiaAdmin",
+              "service.admin.FQAN.1" => "/fermilab/Role=GratiaDeveloper"
               #              "service.security.level" => 1,
               #              "service.use.selfgenerated.certs" => 1
              }
@@ -125,7 +110,9 @@
               {
                "maintain.history.log" => 2,
                "monitor.listener.wait" => 240,
-               "monitor.to.address0" => 'vittone@fnal.gov'
+               "monitor.to.address0" => 'vittone@fnal.gov',
+               "service.admin.FQAN.0" => "/fermilab/Role=GratiaAdmin",
+               "service.admin.FQAN.1" => "/fermilab/Role=GratiaDeveloper"
               }
             },
  penelope => { http_port => 8884,
@@ -139,7 +126,9 @@
                {
                 "maintain.history.log" => 2,
                 "monitor.listener.wait" => 240,
-                "monitor.to.address0" => 'penelope@fnal.gov'
+                "monitor.to.address0" => 'penelope@fnal.gov',
+                "service.admin.FQAN.0" => "/fermilab/Role=GratiaAdmin",
+                "service.admin.FQAN.1" => "/fermilab/Role=GratiaDeveloper"
                }
              },
  greenc_test => { http_port => 8885,
@@ -147,16 +136,16 @@
                   rmi_port => 22000,
                   jmx_port => 8054,
                   server_port => 8154,
-#                  db_host => "gratia07.fnal.gov",
-#                  db_schema => "gratia_itb",
-#                  db_port => 3322,
+                  #                  db_host => "gratia07.fnal.gov",
+                  #                  db_schema => "gratia_itb",
+                  #                  db_port => 3322,
                   collector_host => "gratia-vm02.fnal.gov",
                   db_host => "localhost",
                   db_schema => "gratia_greenc_test",
-#                  tomcat_native_lib => '/data/apr/lib',
+                  #                  tomcat_native_lib => '/data/apr/lib',
                   "properties.attributes" =>
                   {
-#                   "gratia.service.safeStart" => 1,
+                   #                   "gratia.service.safeStart" => 1,
                    "gratia.database.wantNodeSummary" => 1,
                    "gratia.database.disableChecksumUpgrade" => 0,
                    "maintain.history.log" => 2,
@@ -166,16 +155,14 @@
                    "service.service.numLogs" => 200,
                    "monitor.to.address0" => 'greenc@fnal.gov',
                    "service.listener.threads" => 1,
-#                   "service.admin.DN.0" => 'ALLOW ALL',
-                   "service.admin.DN.0" => '/DC=org/DC=doegrids/OU=People/CN=Christopher H. Green 851859',
-                   "service.admin.DN.1" => '/DC=gov/DC=fnal/O=Fermilab/OU=People/CN=Chris Green/CN=UID:greenc',
-                   "service.admin.DN.2" => '/DC=org/DC=doegrids/OU=Services/CN=gratia-vm02.fnal.gov',
                    "service.lifetime.JobUsageRecord" => "2y",
                    "service.lifetime.JobUsageRecord.RawXML" => "2y",
                    "service.lifetime.MetricRecord" => "2y",
                    "service.lifetime.MetricRecord.RawXML" => "2y",
                    "service.lifetime.DupRecord.Duplicates" => "2y",
-                   "service.lifetime.DupRecord" => "UNLIMITED"
+                   "service.lifetime.DupRecord" => "UNLIMITED",
+                   "service.admin.FQAN.0" => "/fermilab/Role=GratiaAdmin",
+                   "service.admin.FQAN.1" => "/fermilab/Role=GratiaDeveloper"
                   }
                 },
  rsv_test => { http_port => 8886,
@@ -192,26 +179,27 @@
                 "service.rmiservlet.level" => "FINEST",
                 "monitor.to.address0" => 'greenc@fnal.gov',
                 "service.listener.threads" => 1,
-                "service.admin.FQAN.0" => "/fermilab/Role=GratiaGlobalAdmin",
-                "service.admin.FQAN.1" => "/fermilab/Role=GratiaFermilabAdmin"
+                "service.admin.FQAN.0" => "/fermilab/Role=GratiaAdmin",
+                "service.admin.FQAN.1" => "/fermilab/Role=GratiaDeveloper"
                }
              },
  weigand => { http_port => 8887,
-               ssl_port => 8867,
-               rmi_port => 24000,
-               jmx_port => 8074,
-               server_port => 8174,
-               collector_host => "gratia-vm02.fnal.gov",
-               db_host => "gratia-vm02.fnal.gov",
-               db_schema => "gratia_weigand",
-               "properties.attributes" =>
-               {
-                "maintain.history.log" => 2,
-                "monitor.listener.wait" => 240,
-                "monitor.to.address0" => 'weigand@fnal.gov',
-                "service.admin.DN.0" => 'ALLOW ALL'
-               }
-             }
+              ssl_port => 8867,
+              rmi_port => 24000,
+              jmx_port => 8074,
+              server_port => 8174,
+              collector_host => "gratia-vm02.fnal.gov",
+              db_host => "gratia-vm02.fnal.gov",
+              db_schema => "gratia_weigand",
+              "properties.attributes" =>
+              {
+               "maintain.history.log" => 2,
+               "monitor.listener.wait" => 240,
+               "monitor.to.address0" => 'weigand@fnal.gov',
+               "service.admin.FQAN.0" => "/fermilab/Role=GratiaAdmin",
+               "service.admin.FQAN.1" => "/fermilab/Role=GratiaDeveloper"
+              }
+            }
 );
 
 ### Local Variables:
