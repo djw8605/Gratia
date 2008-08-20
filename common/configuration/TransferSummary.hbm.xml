@@ -1,0 +1,76 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+    
+<hibernate-mapping package= "net.sf.gratia.storage">
+
+<class name="TransferSummary"
+       table="MasterTransferSummary"
+       node="TransferSummary"
+       lazy="false">
+
+    <id name="RecordId"
+        column="TransferSummaryID"
+        type="integer">
+        <generator class="native"/>
+    </id>
+
+   <component name="StartTime" class="DateElement" insert="true">
+       <property name="Value" type="timestamp">
+           <column name="StartTime" not-null="true" default="0" />
+       </property>
+   </component>
+   <component name="VOcorrid" class="IntegerElement" insert="true">
+       <property name="Value">
+           <column name="VOcorrid" not-null="true" default="0" />
+       </property>
+   </component>
+   <component name="ProbeName" class="StringElement" insert="true">
+       <property name="Value">
+           <column name="ProbeName" not-null="true" default="''" />
+       </property>
+   </component>
+   <component name="CommonName" class="StringElement" insert="true">
+       <property name="Value">
+           <column name="CommonName" not-null="true" default="'Unknown'" />
+       </property>
+   </component>
+   <component name="Protocol" class="StringElement" insert="true">
+       <property name="Value">
+           <column name="Protocol" not-null="true" default="''" />
+       </property>
+   </component>
+   <component name="RemoteSite" class="StringElement" insert="true">
+       <property name="Value">
+           <column name="RemoteSite" not-null="true" default="''" />
+       </property>
+   </component>
+   <component name="Status" class="IntegerElement" insert="true">
+       <property name="Value">
+           <column name="Status" not-null="true" default="0" />
+       </property>
+   </component>
+   <component name="IsNew" class="IntegerElement" insert="true">
+       <property name="Value">
+           <column name="IsNew" not-null="true" default="0" />
+       </property>
+   </component>
+   <component name="Njobs" class="IntegerElement" insert="true">
+       <property name="Value">
+           <column name="Njobs" not-null="true" default="0" />
+       </property>
+   </component>
+   <component name="TransferStats" class="ResourceElement" insert="true">
+       <property name="Value">
+           <column name="TransferSize" not-null="true" default="0" />
+       </property>
+       <property name="PhaseUnit">
+           <column name="TransferDuration" not-null="true" default="0" />
+       </property>
+       <property name="StorageUnit">
+           <column name="StorageUnit" not-null="true" default="0" />
+       </property>
+   </component>
+</class>
+</hibernate-mapping>

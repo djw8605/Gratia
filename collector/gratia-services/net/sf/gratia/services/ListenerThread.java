@@ -418,7 +418,12 @@ public class ListenerThread extends Thread
 
                         Boolean acceptRecord = true;
                         if (!collectorService.housekeepingServiceDisabled()) {
-                            Date date = current.getDate();
+                            Date date;
+                            try {
+                                date = current.getDate();
+                            } catch (NullPointerException e) {
+                                date = current.getServerDate();
+                            }
                             Date expirationDate = current.getExpirationDate();
                             if ( date.before(expirationDate) ) {
                                 acceptRecord = false;
@@ -489,6 +494,13 @@ public class ListenerThread extends Thread
                                 current.setServerDate(serverDate);
                             }
                             session.save(current);
+                            if (current.getTableName().equals("JobUsageRecord")) {
+                                TransferDetails td = ((JobUsageRecord) current).getTransferDetails();
+                                if ((td != null) && (!session.contains(td))) { // No cascade
+                                    Logging.debug(ident + ": saving TransferDetails object (no cascade)");
+                                    session.save(td);
+                                }
+                            }
                             //
                             // now - save history
                             //
@@ -598,6 +610,11 @@ public class ListenerThread extends Thread
                                                 tx.commit();
                                                 tx = session.beginTransaction();
                                                 session.save(current);
+                                                TransferDetails td = ((JobUsageRecord) current).getTransferDetails();
+                                                if ((td != null) && (!session.contains(td))) { // No cascade
+                                                    Logging.debug(ident + ": saving TransferDetails object (no cascade)");
+                                                    session.save(td);
+                                                }
                                                 savedCurrent = true;
                                             }
                                             if (original_record.setDuplicate(true)) {

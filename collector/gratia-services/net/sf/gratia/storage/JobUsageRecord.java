@@ -1,8 +1,10 @@
 package net.sf.gratia.storage;
 
+import java.util.Date;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Date;
+import java.util.Set;
 
 import net.sf.gratia.util.Logging;
 
@@ -67,6 +69,8 @@ public class JobUsageRecord extends Record
    private String md5;
    private String oldMd5;
 
+    private Set TDSet;
+
    public JobUsageRecord()
    {
       RecordIdentity = null; // new RecordIdentity();
@@ -76,6 +80,7 @@ public class JobUsageRecord extends Record
       RawXml = "";
       ExtraXml = "";
       ServerDate = new Date();
+      TDSet = null;
    }
 
    public String listToString(String name, List l)
@@ -189,6 +194,7 @@ public class JobUsageRecord extends Record
       if (Grid != null) output = output + Grid.asXml("Grid");
       if (ResourceType != null) output = output + ResourceType.asXml("Resource");
       if (ExtraXml != null) output = output + ExtraXml;
+      if ((TDSet != null) && (TDSet.size() > 0)) output = output + getTransferDetails().asXML();
       output = output + "</JobUsageRecord>" + "\n";
       return output;
    }
@@ -596,8 +602,14 @@ public class JobUsageRecord extends Record
 
    public Date getDate() 
    {
-      // Returns the date this records is reporting about.
-      return EndTime.getValue();
+      // Returns the date this record is reporting about.
+       if (EndTime != null) {
+           return EndTime.getValue();
+       } else if (StartTime != null) {
+           return EndTime.getValue();
+       }
+       // If this doesn't work then exception should be thrown
+       return ServerDate;
    }
 
    public Date getServerDate()
@@ -674,5 +686,36 @@ public class JobUsageRecord extends Record
    {
       oldMd5 = value;
    }
+
+    // TDSet
+    public void setTDSet(Set TDSet) {
+        this.TDSet = TDSet;
+    }
+
+    public Set getTDSet() {
+        return TDSet;
+    }
+
+    // Convenience methods
+    public void setTransferDetails(TransferDetails details) {
+        if (TDSet == null) {
+            TDSet = new HashSet();
+        } else {
+            TDSet.clear();
+        }
+        TDSet.add(details);
+    }
+
+    public TransferDetails getTransferDetails() {
+        if (TDSet == null) return null;
+        if (TDSet.size() == 0) {
+            return null;
+        } else if (TDSet.size() > 1) {
+            Logging.warning("TransferDetails: TDSet has multiple entries -- not returning any!");
+            return null;
+        } else {
+            return (TransferDetails) TDSet.iterator().next();
+        }
+    }
 
 }

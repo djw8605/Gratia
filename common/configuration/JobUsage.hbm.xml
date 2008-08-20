@@ -229,6 +229,11 @@
        </composite-element>
    </bag>
 
+   <set name="TDSet" table="TDCorr" inverse="true">
+      <key column="dbid" />
+      <many-to-many column="TransferDetailsId" class="TransferDetails" />
+   </set>
+
    <join table="JobUsageRecord_Meta">
       <key column="dbid"/>
 
@@ -279,5 +284,4 @@
    </join>
 
 </class>
-
 </hibernate-mapping>

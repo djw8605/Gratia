@@ -6,7 +6,7 @@ DROP PROCEDURE IF EXISTS updatenodesummary -- Obsolete summary procedure
 ||
 DROP PROCEDURE IF EXISTS add_JUR_to_summary
 ||
-CREATE PROCEDURE add_JUR_to_summary(inputDbid INT(11))
+CREATE PROCEDURE add_JUR_to_summary(inputDbid INT(11), updateTransferSummary INT(1))
 DETERMINISTIC
 AJUR:BEGIN
   -- Main
@@ -23,6 +23,16 @@ AJUR:BEGIN
   DECLARE n_ServerDate DATETIME;
   DECLARE n_StartTime DATETIME;
   DECLARE n_EndTime DATETIME;
+
+  -- Storage only
+  DECLARE n_DN VARCHAR(255);
+  DECLARE n_Protocol VARCHAR(255);
+  DECLARE n_RemoteSite VARCHAR(255);
+  DECLARE n_Status BIGINT(20);
+  DECLARE n_IsNew BIGINT(20);
+  DECLARE n_StorageUnit VARCHAR(64);
+  DECLARE n_TransferDuration DOUBLE;
+  DECLARE n_TransferSize DOUBLE;
 
   -- NodeSummary update only
   DECLARE wantNodeSummary VARCHAR(64) DEFAULT '';
@@ -78,7 +88,7 @@ AJUR:BEGIN
 
   -- Basic data checks
   IF n_ResourceType IS NOT NULL AND
-     n_ResourceType NOT IN ('Batch', 'RawCPU') THEN
+     n_ResourceType NOT IN ('Batch', 'RawCPU', 'Storage') THEN
      -- Very common case: no message necessary
      LEAVE AJUR;
   END IF;
@@ -99,6 +109,72 @@ AJUR:BEGIN
      INSERT INTO trace(eventtime, pname, p1, `data`)
       VALUES(UTC_TIMESTAMP(), 'add_JUR_to_summary', inputDbid, 'Failed due to null Njobs');
      LEAVE AJUR;
+  END IF;
+
+  IF n_ResourceType = 'Storage' THEN
+
+    -- Nasty kludge to avoid trying to update when Hibernate hasn't
+    --  filled in TransferDetails yet. See build-trigger.sql for details.
+
+    IF updateTransferSummary = 0 THEN
+       LEAVE AJUR;
+    END IF;
+
+    IF n_StartTime IS NULL THEN
+      INSERT INTO trace(eventtime, pname, p1, `data`)
+       VALUES(UTC_TIMESTAMP(), 'add_JUR_to_summary', inputDbid, 'Failed due to null StartTime');
+      LEAVE AJUR;
+    END IF;
+
+    SELECT Protocol,
+           IF(IsNew = '1', `Source`, `Destination`),
+           IsNew,
+           Status,
+           StorageUnit,
+           TransferDuration,
+           TransferSize
+    INTO n_Protocol,
+         n_RemoteSite,
+         n_IsNew,
+         n_Status,
+         n_StorageUnit,
+         n_TransferDuration,
+         n_TransferSize
+    FROM JobUsageRecord R
+         join TDCorr on (R.dbid = TDCorr.dbid)
+         join TransferDetails T on (TDCorr.TransferDetailsId = T.TransferDetailsId),
+         (SELECT StorageUnit,
+                 PhaseUnit as TransferDuration,
+                 `Value` as TransferSize
+          FROM Network where dbid = inputDbid limit 1) N
+    WHERE R.dbid = inputDbid;
+
+    -- Note entries with different StorageUnit values get stored
+    -- independently and must be combined manually outside the DB
+
+    INSERT INTO MasterTransferSummary(StartTime, VOcorrid, ProbeName,
+                                      DN, Protocol, RemoteSite, Status,
+                                      IsNew, Njobs, TransferSize, StorageUnit,
+                                      TransferDuration)
+    VALUES(DATE(n_StartTime),
+           n_VOcorrid,
+           n_ProbeName,
+           IF(SUBSTRING(n_DN, 1, 1) = '/', n_DN, n_CommonName),
+           n_Protocol,
+           n_RemoteSite,
+           n_Status,
+           n_IsNew,
+           n_Njobs,
+           n_TransferSize,
+           n_StorageUnit,
+           n_TransferDuration)
+    ON DUPLICATE KEY UPDATE
+     Njobs = Njobs + VALUES(Njobs),
+     TransferSize = TransferSize + VALUES(TransferSize),
+     TransferDuration = TransferDuration + VALUES(TransferDuration);
+
+    LEAVE AJUR; -- Don't need anything below
+
   END IF;
 
   IF n_WallDuration IS NULL THEN

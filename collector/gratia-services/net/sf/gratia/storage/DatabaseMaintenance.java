@@ -37,10 +37,10 @@ import org.hibernate.exception.*;
 public class DatabaseMaintenance {
     static final String dq = "\"";
     static final String comma = ",";
-    static final int gratiaDatabaseVersion = 43;
+    static final int gratiaDatabaseVersion = 44;
     static final int latestDBVersionRequiringStoredProcedureLoad = gratiaDatabaseVersion;
     static final int latestDBVersionRequiringSummaryViewLoad = 37;
-    static final int latestDBVersionRequiringSummaryTriggerLoad = 41;
+    static final int latestDBVersionRequiringSummaryTriggerLoad = 44;
     static final int latestDBVersionRequiringTableStatisticsRefresh = 38;
 
     static boolean dbUseJobUsageSiteName = false;
@@ -304,6 +304,20 @@ public class DatabaseMaintenance {
                  "EndTime, VOcorrid, ProbeName, " +
                  "CommonName, ResourceType, " +
                  "HostDescription, ApplicationExitCode");
+
+        // Indexes for MasterTransferSummary
+        AddIndex("MasterTransferSummary", false, "index01", "StartTime");
+        AddIndex("MasterTransferSummary", false, "index02", "VOcorrid");
+        AddIndex("MasterTransferSummary", false, "index03", "ProbeName");
+        AddIndex("MasterTransferSummary", false, "index04", "CommonName");
+        AddIndex("MasterTransferSummary", false, "index05", "Protocol");
+        AddIndex("MasterTransferSummary", false, "index06", "RemoteSite");
+        AddIndex("MasterTransferSummary", false, "index07", "Status");
+        AddIndex("MasterTransferSummary", false, "index08", "IsNew");
+        AddIndex("MasterTransferSummary", false, "index09", "StorageUnit");
+        AddIndex("MasterTransferSummary", true, "index10",
+                 "StartTime, VOcorrid, ProbeName, " +
+                 "CommonName, Protocol, RemoteSite, Status, IsNew, StorageUnit");
 
         if (readIntegerDBProperty("gratia.database.wantNodeSummary") > 0) {
             // Indexes for NodeSummary
@@ -1268,6 +1282,12 @@ public class DatabaseMaintenance {
                     UpdateDbVersion(current);
                 }         
             }
+            if (current == 43) {
+                // Auxiliary DB item upgrades only (trigger and friends)
+                Logging.log("Gratia database upgraded from " + current + " to " + (current + 1));
+                current = current + 1;
+                UpdateDbVersion(current);
+            }                
             return ((current == gratiaDatabaseVersion) && checkAndUpgradeDbAuxiliaryItems());
         }
     }

@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+    
+<hibernate-mapping package= "net.sf.gratia.storage">
+
+<class name="TransferDetails"
+       table="TransferDetails"
+       node="TransferDetails"
+       lazy="false">
+
+   <id name="RecordId"
+       column="TransferDetailsId"
+       type="integer">
+       <generator class="native"/>
+   </id>
+
+   <property name="Protocol"/>
+   <property name="Source"/>
+   <property name="Destination"/>
+   <property name="IsNew"/>
+   
+   <set name="JURSet" table="TDCorr" inverse="false">
+      <key column="TransferDetailsId" />
+      <many-to-many column="dbid" class="JobUsageRecord" />
+   </set>
+</class>
+</hibernate-mapping>

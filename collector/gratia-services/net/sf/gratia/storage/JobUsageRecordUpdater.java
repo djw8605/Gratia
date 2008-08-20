@@ -4,10 +4,12 @@
 package net.sf.gratia.storage;
 
 import net.sf.gratia.util.Configuration;
-
-import java.util.GregorianCalendar;
+import net.sf.gratia.util.Logging;
 
 import java.io.StringReader;
+import java.util.GregorianCalendar;
+import java.util.List;
+import java.util.Vector;
 
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
@@ -132,6 +134,91 @@ public abstract class JobUsageRecordUpdater implements RecordUpdater
         }
     }
 
+    public static class CheckIsNew extends JobUsageRecordUpdater {
+        public void Update(JobUsageRecord current) {
+            // All we need to do here is rip Source, Destination,
+            // Protocol and IsNew out of the Resource list, create a new
+            // TransferDetails object and set the bi-directional links.
+            if ((!current.getResourceType().getValue().equals("Storage")) || // Not Storage
+                ((current.getDisk() != null) &&
+                 (current.getDisk().size() > 0))) { // Not Transfer
+                Logging.debug("JobUsageRecordUpdater.CheckIsNew.Update(): rejecting record: " +
+                              current.getResourceType().getValue() + ", " +
+                              ((current.getDisk() != null)?
+                               ("hasDisk, size = " + current.getDisk().size()):
+                               "noDisk"));                              
+                return;
+            }
+
+            Vector v = new Vector();
+
+            StringElement Protocol = findResource(current, "Protocol");
+            if (Protocol == null) {
+                Logging.warning("JobUsageRecordUpdater.CheckIsNew.Update(): could not find Protocol resource for transfer record");
+                return;
+            }
+            v.add(Protocol);
+
+            StringElement Source = findResource(current, "Source");
+            if (Source == null) {
+                Logging.warning("JobUsageRecordUpdater.CheckIsNew.Update(): could not find Source resource for transfer record");
+                return;
+            }
+            v.add(Source);
+
+            StringElement Destination = findResource(current, "Destination");
+            if (Destination == null) {
+                Logging.warning("JobUsageRecordUpdater.CheckIsNew.Update(): could not find Destination resource for transfer record");
+                return;
+            }
+            v.add(Destination);
+
+            TransferDetails td = new TransferDetails();
+            td.setProtocol(Protocol.getValue());
+            td.setSource(Source.getValue());
+            td.setDestination(Destination.getValue());
+
+            StringElement IsNew = findResource(current, "IsNew");
+            if (IsNew == null) {
+                Logging.log("JobUsageRecordUpdater.CheckIsNew.Update(): setting isNew based on Destination resource");
+                if (Destination.getValue().contains("@")) {
+                    td.setIsNew(1);
+                } else {
+                    td.setIsNew(0);
+                }
+            } else {
+                try {
+                    td.setIsNew(Integer.parseInt(IsNew.getValue()));
+                    v.add(IsNew);
+                } catch (Exception e) {
+                    Logging.log("JobUsageRecordUpdaterCheckIsNew.Update(): unable to parse IsNew resource "
+                                + IsNew.getValue());
+                    td.setIsNew(0);
+                }
+            }
+            td.setJobUsageRecord(current); // Set link
+            current.setTransferDetails(td); // Set other link
+            current.getResource().removeAll(v); // Remove resource entries
+        }
+
+        private StringElement findResource(JobUsageRecord current,
+                                           String description) {
+            List resource = current.getResource();
+            try {
+                for (Object rObj : resource) {
+                    StringElement se = (StringElement) rObj;
+                    if (se.getDescription().equalsIgnoreCase(description)) {
+                        return se;
+                    }
+                }
+            } catch (Exception e) {
+                Logging.warning("JobUsageRecordUpdater unable to find resource " +
+                                description);
+            }
+            return null;
+        }
+    }
+
     public static class CheckCpuDuration extends JobUsageRecordUpdater
     {
         public void Update(JobUsageRecord current)
@@ -203,50 +290,50 @@ public abstract class JobUsageRecordUpdater implements RecordUpdater
                             // Try to xpath to the 'ds:X509SubjectName' node
                             java.util.List subjectNames = doc.selectNodes("//ds:X509SubjectName");
 
-                            // Check that the xpath returned a node
-                            if (subjectNames.size() > 0) {
-                                String subjectName = ((Element)subjectNames.get(0)).getText();
+                                    // Check that the xpath returned a node
+                                    if (subjectNames.size() > 0) {
+                                        String subjectName = ((Element)subjectNames.get(0)).getText();
 
-                                String cName = getCNFromDN(subjectName);
-                                if ((cName != null) && (cName.length() != 0)) {
-                                    userName = cName;
-                                    populatedUserNameFromKeyInfoContent = true;
-                                    Utils.GratiaDebug("Extracted a Username from X509SubjectNameNode: " + userName);
-                                }
-                                String[] subjectNameFields = subjectName.split("[,/]");
+                                        String cName = getCNFromDN(subjectName);
+                                        if ((cName != null) && (cName.length() != 0)) {
+                                            userName = cName;
+                                            populatedUserNameFromKeyInfoContent = true;
+                                            Utils.GratiaDebug("Extracted a Username from X509SubjectNameNode: " + userName);
+                                        }
+                                        String[] subjectNameFields = subjectName.split("[,/]");
 
-                                for (int i = 0; i < subjectNameFields.length; ++i) {
-                                    String caseFieldValue = subjectNameFields[i].trim();
-                                    String fieldValue = subjectNameFields[i].toLowerCase().trim();
+                                        for (int i = 0; i < subjectNameFields.length; ++i) {
+                                            String caseFieldValue = subjectNameFields[i].trim();
+                                            String fieldValue = subjectNameFields[i].toLowerCase().trim();
 
-                                    if (fieldValue.startsWith("o=") && VO.equals("Unknown")) {
-                                        VO = fieldValue.substring(2);
-                                        populatedVOFromKeyInfoContent = true;
-                                        Utils.GratiaDebug("Extracted a VO from X509SubjectNameNode:  " + VO);
+                                            if (fieldValue.startsWith("o=") && VO.equals("Unknown")) {
+                                                VO = fieldValue.substring(2);
+                                                populatedVOFromKeyInfoContent = true;
+                                                Utils.GratiaDebug("Extracted a VO from X509SubjectNameNode:  " + VO);
+                                            }
+                                        }
+
+                                        if (populatedVOFromKeyInfoContent == false) {
+                                            Utils.GratiaDebug("'o=' was not found in key info content.  Defaulting VO Name to " + VO);
+                                        }
+                                        if (populatedUserNameFromKeyInfoContent == false) {
+                                            Utils.GratiaDebug("'CN=' was not found in key info content.  Defaulting Common name Name to " + userName);
+                                        }
+                                    } else {
+                                        Utils.GratiaDebug("No X509SubjectName node.  Will have to search for VO and user by something else");
                                     }
-                                }
 
-                                if (populatedVOFromKeyInfoContent == false) {
-                                    Utils.GratiaDebug("'o=' was not found in key info content.  Defaulting VO Name to " + VO);
-                                }
-                                if (populatedUserNameFromKeyInfoContent == false) {
-                                    Utils.GratiaDebug("'CN=' was not found in key info content.  Defaulting Common name Name to " + userName);
-                                }
-                            } else {
-                                Utils.GratiaDebug("No X509SubjectName node.  Will have to search for VO and user by something else");
-                            }
-
-                            subjectNames = null;
-                            doc = null;
-                            saxReader = null;
-                        } // End check for xpath returning a node
+                                    subjectNames = null;
+                                    doc = null;
+                                    saxReader = null;
+                                    } // End check for xpath returning a node
                         catch (DocumentException ex) {
                             // Failing to parse the KeyInfo shouldn't be a terrible failure, we'll just fall through
                             //  to the 'search elsewhere' portion
                             Utils.GratiaDebug("Exception in parsing for VO.  Will have to search for VO and user by something else\n" + ex.getMessage());
                         }
-                    }
-                } else {
+                }
+        } else {
                     Utils.GratiaDebug("No KeyInfo Content.  Will have to search for VO and user by something else");
                 } // End check for KeyInfoContent not null
             } else {
@@ -315,6 +402,7 @@ public abstract class JobUsageRecordUpdater implements RecordUpdater
         man.AddUpdater(new CheckCpuDuration());
         man.AddUpdater(new ExtractKeyInfoContent());
         man.AddUpdater(new CheckResourceType());
+        man.AddUpdater(new CheckIsNew());
     }
 
 }
