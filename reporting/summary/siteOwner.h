@@ -32,6 +32,8 @@ const char *siteOwners[] = {
 "FNAL_FERMIGRID_TEST","FERMILAB",
 "FNAL_GPFARM","Fermilab",
 "FNAL_GPFARM_TEST","Fermilab",
+"FNAL_GPGRID_1","Fermilab",
+"FNAL_GPGRID_2","Fermilab",
 "FSU-HEP","CMS",
 "GLOW","CMS",
 "GRASE-ALBANY-NYS","GRASE",
