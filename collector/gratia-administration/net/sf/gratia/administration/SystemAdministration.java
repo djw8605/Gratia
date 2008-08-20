@@ -124,7 +124,7 @@ public class SystemAdministration extends HttpServlet {
                     executeProxyAction(request.getParameter("action"));
                 }
                 try {
-                    Thread.sleep(1000); // Time for state to change
+                    Thread.sleep(2000); // Time for state to change
                 }
                 catch (Exception ignore) {
                 }
