@@ -47,13 +47,17 @@ AJUR:BEGIN
   DECLARE imax INT DEFAULT 0;
 
   -- Data collection
+  --
   SELECT M.ProbeName,
          IFNULL(J.CommonName, ''),
          VC.corrid,
          IFNULL(J.ResourceType, ''),
          IFNULL(J.HostDescription, ''),
          IFNULL(J.Host, ''),
-         IFNULL(IFNULL(RT.value, J.Status), 0),
+         IFNULL(EC.Value,
+                IF(EBS.Value = 'TRUE' OR EBS.Value = '1',
+                   IFNULL(ES.Value, 128),
+                   IFNULL(J.Status, 0))),
          J.Njobs,
          J.WallDuration,
          J.CpuUserDuration,
@@ -81,9 +85,15 @@ AJUR:BEGIN
         ((J.VOName = BINARY VC.VOName) AND
          (((J.ReportableVOName IS NULL) AND (VC.ReportableVOName IS NULL))
           OR (BINARY J.ReportableVOName = BINARY VC.ReportableVOName)))
-       LEFT JOIN Resource RT ON
-        ((J.dbid = RT.dbid) AND
-         (RT.description = 'ExitCode'))
+       LEFT JOIN Resource EC ON
+        ((J.dbid = EC.dbid) AND
+         (EC.description = 'ExitCode'))
+       LEFT JOIN Resource ES ON
+        ((J.dbid = ES.dbid) AND
+         (ES.description = 'ExitSignal'))
+       LEFT JOIN Resource EBS ON
+        ((J.dbid = EBS.dbid) AND
+         (EBS.description = 'ExitBySignal'))
   WHERE J.dbid = inputDbid;
 
   -- Basic data checks
