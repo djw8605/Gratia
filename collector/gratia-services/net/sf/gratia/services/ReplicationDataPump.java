@@ -133,7 +133,7 @@ public class ReplicationDataPump extends Thread {
                     "        C.void = V.void";
             } else if (probename.startsWith("Probe:")) {
                 probename = probename.replace("Probe:", "");
-                where += " AND M.ProbeName = " + dq + probename + dq;
+                where += " AND M.ProbeName like " + dq + probename + dq;
             } else if (probename.startsWith("Grid:")) {
                 probename = probename.replace("Grid:", "");
                 where += " AND M.Grid";
