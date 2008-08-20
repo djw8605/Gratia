@@ -155,6 +155,14 @@ public class Logging {
         initialized = true;
     }
 
+    public static void fine(String message) {
+        log(LogLevel.FINE, message);
+    }
+
+    public static void fine(String message, Exception ex) {
+        log(LogLevel.FINE, message, ex);
+    }
+
     public static void log(org.apache.log4j.Level level, String message) {
         if (! initialized) {
             logToScreen("Logger Not Initialized!");
@@ -189,14 +197,13 @@ public class Logging {
             return;
         }
         if (log4jLogger != null) {
-            log4jLogger.log(LogLevel.FINE, message);
+            log4jLogger.log(LogLevel.FINER, message);
         } else {
-            oldLogger.fine(message);
+            oldLogger.finer(message);
             if (console)
                 System.out.println(format.format(new Date()) + ": " + message);
         }
     }
-
     
     public static void log(String message, Exception ex) {
         if (! initialized) {
@@ -204,9 +211,9 @@ public class Logging {
             return;
         }
         if (log4jLogger != null) {
-            log4jLogger.log(LogLevel.FINE, message, ex);
+            log4jLogger.log(LogLevel.FINER, message, ex);
         } else {
-            oldLogger.log(Level.FINE,message,ex);
+            oldLogger.log(Level.FINER,message,ex);
             if (console) {
                 System.out.println(format.format(new Date()) + ": " + message);
                 ex.printStackTrace();
