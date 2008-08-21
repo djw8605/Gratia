@@ -176,7 +176,7 @@ order by name</property>
             <list-property name="parameters">
                 <structure>
                     <property name="name">UserName</property>
-                    <property name="dataType">any</property>
+                    <property name="dataType">string</property>
                     <property name="position">1</property>
                     <expression name="defaultValue">'none'</expression>
                     <property name="isInput">true</property>
@@ -184,7 +184,7 @@ order by name</property>
                 </structure>
                 <structure>
                     <property name="name">UserRole</property>
-                    <property name="dataType">any</property>
+                    <property name="dataType">string</property>
                     <property name="position">2</property>
                     <expression name="defaultValue">'none'</expression>
                     <property name="isInput">true</property>
@@ -350,52 +350,52 @@ order by name</property>
                 <structure>
                     <property name="name">WallDuration</property>
                     <expression name="expression">dataSetRow["WallDuration"]</expression>
-                    <property name="dataType">any</property>
+                    <property name="dataType">float</property>
                 </structure>
                 <structure>
                     <property name="name">Cpu</property>
                     <expression name="expression">dataSetRow["Cpu"]</expression>
-                    <property name="dataType">any</property>
+                    <property name="dataType">float</property>
                 </structure>
                 <structure>
                     <property name="name">UserName</property>
                     <expression name="expression">dataSetRow["UserName"]</expression>
-                    <property name="dataType">any</property>
+                    <property name="dataType">string</property>
                 </structure>
                 <structure>
                     <property name="name">Column Binding</property>
                     <expression name="expression">Total.sum(row["Njobs"])</expression>
-                    <property name="dataType">any</property>
+                    <property name="dataType">decimal</property>
                 </structure>
                 <structure>
                     <property name="name">Column Binding_1</property>
                     <expression name="expression">Total.sum(row["CPU Minutes Used"])</expression>
-                    <property name="dataType">any</property>
+                    <property name="dataType">float</property>
                 </structure>
                 <structure>
                     <property name="name">Column Binding_2</property>
                     <expression name="expression">Total.sum(row["CPU Minutes Used"])</expression>
-                    <property name="dataType">any</property>
+                    <property name="dataType">float</property>
                 </structure>
                 <structure>
                     <property name="name">Column Binding_3</property>
                     <expression name="expression">Total.sum(row["CPU Minutes Used"])</expression>
-                    <property name="dataType">any</property>
+                    <property name="dataType">float</property>
                 </structure>
                 <structure>
                     <property name="name">Column Binding_4</property>
                     <expression name="expression">Total.sum(row["Njobs"])</expression>
-                    <property name="dataType">any</property>
+                    <property name="dataType">decimal</property>
                 </structure>
                 <structure>
                     <property name="name">Grand Total: Jobs</property>
                     <expression name="expression">Total.sum(row["Njobs"])</expression>
-                    <property name="dataType">any</property>
+                    <property name="dataType">decimal</property>
                 </structure>
                 <structure>
                     <property name="name">JobCountforSite</property>
                     <expression name="expression">dataSetRow["Njobs"]</expression>
-                    <property name="dataType">any</property>
+                    <property name="dataType">decimal</property>
                     <simple-property-list name="aggregateOn">
                         <value>Compute Element</value>
                     </simple-property-list>
@@ -404,7 +404,7 @@ order by name</property>
                 <structure>
                     <property name="name">Aggregation</property>
                     <expression name="expression">dataSetRow["Njobs"]</expression>
-                    <property name="dataType">any</property>
+                    <property name="dataType">decimal</property>
                     <simple-property-list name="aggregateOn">
                         <value>Probe Name</value>
                     </simple-property-list>
@@ -413,7 +413,7 @@ order by name</property>
                 <structure>
                     <property name="name">Aggregation_1</property>
                     <expression name="expression">dataSetRow["CPU Minutes Used"]</expression>
-                    <property name="dataType">any</property>
+                    <property name="dataType">float</property>
                     <simple-property-list name="aggregateOn">
                         <value>Probe Name</value>
                     </simple-property-list>
@@ -422,7 +422,7 @@ order by name</property>
                 <structure>
                     <property name="name">Aggregation_2</property>
                     <expression name="expression">dataSetRow["CPU Minutes Used"]</expression>
-                    <property name="dataType">any</property>
+                    <property name="dataType">float</property>
                     <simple-property-list name="aggregateOn">
                         <value>Compute Element</value>
                     </simple-property-list>

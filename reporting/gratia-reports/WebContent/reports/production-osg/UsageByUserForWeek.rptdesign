@@ -101,7 +101,7 @@
             <list-property name="parameters">
                 <structure>
                     <property name="name">UserName</property>
-                    <property name="dataType">any</property>
+                    <property name="dataType">string</property>
                     <property name="position">1</property>
                     <expression name="defaultValue">'none'</expression>
                     <property name="isInput">true</property>
@@ -109,7 +109,7 @@
                 </structure>
                 <structure>
                     <property name="name">UserRole</property>
-                    <property name="dataType">any</property>
+                    <property name="dataType">string</property>
                     <property name="position">2</property>
                     <expression name="defaultValue">'none'</expression>
                     <property name="isInput">true</property>

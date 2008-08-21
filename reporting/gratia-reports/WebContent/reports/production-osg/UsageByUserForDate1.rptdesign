@@ -101,7 +101,7 @@
             <list-property name="parameters">
                 <structure>
                     <property name="name">UserName</property>
-                    <property name="dataType">any</property>
+                    <property name="dataType">string</property>
                     <property name="position">1</property>
                     <expression name="defaultValue">'none'</expression>
                     <property name="isInput">true</property>
@@ -109,7 +109,7 @@
                 </structure>
                 <structure>
                     <property name="name">UserRole</property>
-                    <property name="dataType">any</property>
+                    <property name="dataType">string</property>
                     <property name="position">2</property>
                     <expression name="defaultValue">'none'</expression>
                     <property name="isInput">true</property>
@@ -1671,28 +1671,32 @@ if(dotpos > 0) {metricvalue = metricvalue.substring(0,dotpos+2);}&#xD;
                 <structure>
                     <property name="name">sitename</property>
                     <expression name="expression">dataSetRow["sitename"]</expression>
+                    <property name="dataType">string</property>
                 </structure>
                 <structure>
                     <property name="name">voname</property>
                     <expression name="expression">dataSetRow["voname"]</expression>
+                    <property name="dataType">string</property>
                 </structure>
                 <structure>
                     <property name="name">UserName</property>
                     <expression name="expression">dataSetRow["UserName"]</expression>
+                    <property name="dataType">string</property>
                 </structure>
                 <structure>
                     <property name="name">WallDuration</property>
                     <expression name="expression">dataSetRow["WallDuration"]/3600</expression>
-                    <property name="dataType">any</property>
+                    <property name="dataType">float</property>
                 </structure>
                 <structure>
                     <property name="name">Cpu</property>
                     <expression name="expression">dataSetRow["Cpu"]/3600</expression>
-                    <property name="dataType">any</property>
+                    <property name="dataType">float</property>
                 </structure>
                 <structure>
                     <property name="name">Njobs</property>
                     <expression name="expression">dataSetRow["Njobs"]</expression>
+                    <property name="dataType">decimal</property>
                 </structure>
             </list-property>
             <property name="style">san-style1</property>

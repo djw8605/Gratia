@@ -477,7 +477,7 @@ call UsageBySiteByVO1(?,?,?,?,?,?,?,?,?,?)
       <Left>0.0</Left>
       <Top>0.0</Top>
       <Width>480.0</Width>
-      <Height>550.0</Height>
+      <Height>549.75</Height>
     </Bounds>
     <Insets>
       <Top>3.0</Top>
@@ -1692,20 +1692,22 @@ function beforeDrawAxisTitle( axis, label, context )
                 <structure>
                     <property name="name">sitename</property>
                     <expression name="expression">dataSetRow["sitename"]</expression>
+                    <property name="dataType">string</property>
                 </structure>
                 <structure>
                     <property name="name">WallDuration</property>
                     <expression name="expression">dataSetRow["WallDuration"]/3600</expression>
-                    <property name="dataType">any</property>
+                    <property name="dataType">float</property>
                 </structure>
                 <structure>
                     <property name="name">Cpu</property>
                     <expression name="expression">dataSetRow["Cpu"]/3600</expression>
-                    <property name="dataType">any</property>
+                    <property name="dataType">float</property>
                 </structure>
                 <structure>
                     <property name="name">Njobs</property>
                     <expression name="expression">dataSetRow["Njobs"]</expression>
+                    <property name="dataType">decimal</property>
                 </structure>
             </list-property>
             <property name="style">sans-style1</property>
