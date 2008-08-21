@@ -477,7 +477,7 @@ call UsageBySiteByVO1(?,?,?,?,?,?,?,?,?,?)
       <Left>0.0</Left>
       <Top>0.0</Top>
       <Width>480.0</Width>
-      <Height>549.75</Height>
+      <Height>550.0</Height>
     </Bounds>
     <Insets>
       <Top>3.0</Top>
@@ -545,6 +545,7 @@ call UsageBySiteByVO1(?,?,?,?,?,?,?,?,?,?)
 function beforeGeneration( chart, context )
 {	rep = context.getExternalContext().getScriptable();
 	
+	metric_text = &quot;&quot;;
 	metric = rep.getParameterValue(&quot;DisplayMetric&quot;);
 	if(metric==&quot;Cpu&quot;) metric_text = &quot;Process Hours&quot;;
 	if(metric==&quot;WallDuration&quot;) metric_text = &quot;Wallclock Hours&quot;;

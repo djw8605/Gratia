@@ -1064,7 +1064,7 @@
                 </structure>
                 <property name="repeatHeader">true</property>
                 <property name="hideDetail">true</property>
-                <property name="pageBreakAfter">avoid</property>
+                <property name="pageBreakAfter">auto</property>
                 <property name="pageBreakBefore">always-excluding-first</property>
                 <property name="pageBreakInside">auto</property>
                 <list-property name="sort">
@@ -1421,6 +1421,7 @@
 {
 	rep = context.getExternalContext().getScriptable();
 
+	metric_text = &quot;&quot;;
 	metric = rep.getParameterValue(&quot;DisplayMetric&quot;);
 	if(metric==&quot;Cpu&quot;) metric_text = &quot;Process Hours&quot;;
 	if(metric==&quot;WallDuration&quot;) metric_text = &quot;Wallclock Hours&quot;;
@@ -1876,30 +1877,16 @@ function beforeDrawAxisTitle( axis, label, context )
             <Action>
               <Type>Show_Tooltip</Type>
               <Value xsi:type="attribute:TooltipValue">
-                <Text>var voname = row[&quot;VOName&quot;];var metricvalue =&quot;&quot;;&#xD;
-&#xD;
-var label;&#xD;
+                <Text>var voname = row[&quot;VOName&quot;];&#xD;
+var metricvalue =String(row[params[&quot;DisplayMetric&quot;].value] );&#xD;
+var label = &quot; &quot;;&#xD;
 var dotpos;&#xD;
-&#xD;
-if (params[&quot;DisplayMetric&quot;] == &quot;WallDuration&quot;) { &#xD;
-	metricvalue = String(row[&quot;WallDuration&quot;] / 3600);&#xD;
-	label = &quot;Wallclock Hours: &quot;;&#xD;
-}&#xD;
-if (params[&quot;DisplayMetric&quot;] == &quot;Cpu&quot;)  {&#xD;
-	metricvalue = String(row[&quot;Cpu&quot;] / 3600);&#xD;
-	label = &quot;Process Hours: &quot;;&#xD;
-} &#xD;
-if (params[&quot;DisplayMetric&quot;] == &quot;Njobs&quot;) {&#xD;
-	metricvalue = String(row[&quot;Njobs&quot;]);&#xD;
-	label = &quot;Jobs: &quot;;&#xD;
-}&#xD;
-var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
-	if(dotpos > 0)&#xD;
-	{ &#xD;
-	metricvalue = metricvalue.substring(0,dotpos+2);&#xD;
-	}&#xD;
-&#xD;
-&quot;VOName: &quot; + voname + &quot;\n&quot; + label + metricvalue</Text>
+if (params[&quot;DisplayMetric&quot;] == &quot;WallDuration&quot;) {label = &quot;Wallclock Hours: &quot;;}&#xD;
+if (params[&quot;DisplayMetric&quot;] == &quot;Cpu&quot;)  {label = &quot;Process Hours: &quot;;}&#xD;
+if (params[&quot;DisplayMetric&quot;] == &quot;Njobs&quot;) {label = &quot;Jobs: &quot;;}&#xD;
+var dotpos = metricvalue.indexOf(&quot;.&quot;,0);&#xD;
+if(dotpos > 0) {metricvalue = metricvalue.substring(0,dotpos+2);}&#xD;
+&quot;VOName: &quot; + voname + &quot;   \n&quot; + label + metricvalue;</Text>
                 <Delay>200</Delay>
               </Value>
             </Action>

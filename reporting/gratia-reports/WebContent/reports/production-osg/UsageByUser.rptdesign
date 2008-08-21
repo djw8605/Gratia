@@ -487,6 +487,7 @@ call UsageByUser(?,?,?,?,?,?,?,?,?,?)
 function beforeGeneration( chart, context ){
 	rep = context.getExternalContext().getScriptable();
 
+	metric_text = &quot;&quot;;
 	metric = rep.getParameterValue(&quot;DisplayMetric&quot;);
 	if(metric==&quot;Cpu&quot;) metric_text = &quot;Process Hours&quot;;
 	if(metric==&quot;WallDuration&quot;) metric_text = &quot;Wallclock Hours&quot;;

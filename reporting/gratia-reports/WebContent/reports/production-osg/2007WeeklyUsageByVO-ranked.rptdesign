@@ -1131,9 +1131,9 @@ else {
                 </structure>
                 <property name="repeatHeader">true</property>
                 <property name="hideDetail">true</property>
-                <property name="pageBreakAfter">avoid</property>
-                <property name="pageBreakBefore">avoid</property>
-                <property name="pageBreakInside">avoid</property>
+                <property name="pageBreakAfter">auto</property>
+                <property name="pageBreakBefore">auto</property>
+                <property name="pageBreakInside">auto</property>
                 <list-property name="sort">
                     <structure>
                         <expression name="key">row["final_rank"]</expression>
@@ -3372,39 +3372,6 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           </DataPoint>
           <LabelPosition>Inside</LabelPosition>
           <Stacked>true</Stacked>
-          <Triggers>
-            <Condition>onmouseover</Condition>
-            <Action>
-              <Type>Show_Tooltip</Type>
-              <Value xsi:type="attribute:TooltipValue">
-                <Text>var voname = row[&quot;VOName&quot;];var metricvalue =&quot;&quot;;&#xD;
-&#xD;
-var label;&#xD;
-var dotpos;&#xD;
-&#xD;
-if (params[&quot;DisplayMetric&quot;] == &quot;WallDuration&quot;) { &#xD;
-	metricvalue = String(row[&quot;WallDuration&quot;] / 3600);&#xD;
-	label = &quot;Wallclock Hours: &quot;;&#xD;
-}&#xD;
-if (params[&quot;DisplayMetric&quot;] == &quot;Cpu&quot;)  {&#xD;
-	metricvalue = String(row[&quot;Cpu&quot;] / 3600);&#xD;
-	label = &quot;Process Hours: &quot;;&#xD;
-} &#xD;
-if (params[&quot;DisplayMetric&quot;] == &quot;Njobs&quot;) {&#xD;
-	metricvalue = String(row[&quot;Njobs&quot;]);&#xD;
-	label = &quot;Jobs: &quot;;&#xD;
-}&#xD;
-var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
-	if(dotpos > 0)&#xD;
-	{ &#xD;
-	metricvalue = metricvalue.substring(0,dotpos+2);&#xD;
-	}&#xD;
-&#xD;
-&quot;VOName: &quot; + voname + &quot;\n&quot; + label + metricvalue</Text>
-                <Delay>200</Delay>
-              </Value>
-            </Action>
-          </Triggers>
           <Riser>Rectangle</Riser>
         </Series>
         <Grouping>
@@ -5525,39 +5492,6 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           </DataPoint>
           <LabelPosition>Inside</LabelPosition>
           <Stacked>true</Stacked>
-          <Triggers>
-            <Condition>onmouseover</Condition>
-            <Action>
-              <Type>Show_Tooltip</Type>
-              <Value xsi:type="attribute:TooltipValue">
-                <Text>var voname = row[&quot;VOName&quot;];var metricvalue =&quot;&quot;;&#xD;
-&#xD;
-var label;&#xD;
-var dotpos;&#xD;
-&#xD;
-if (params[&quot;DisplayMetric&quot;] == &quot;WallDuration&quot;) { &#xD;
-	metricvalue = String(row[&quot;WallDuration&quot;] / 3600);&#xD;
-	label = &quot;Wallclock Hours: &quot;;&#xD;
-}&#xD;
-if (params[&quot;DisplayMetric&quot;] == &quot;Cpu&quot;)  {&#xD;
-	metricvalue = String(row[&quot;Cpu&quot;] / 3600);&#xD;
-	label = &quot;Process Hours: &quot;;&#xD;
-} &#xD;
-if (params[&quot;DisplayMetric&quot;] == &quot;Njobs&quot;) {&#xD;
-	metricvalue = String(row[&quot;Njobs&quot;]);&#xD;
-	label = &quot;Jobs: &quot;;&#xD;
-}&#xD;
-var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
-	if(dotpos > 0)&#xD;
-	{ &#xD;
-	metricvalue = metricvalue.substring(0,dotpos+2);&#xD;
-	}&#xD;
-&#xD;
-&quot;VOName: &quot; + voname + &quot;\n&quot; + label + metricvalue</Text>
-                <Delay>200</Delay>
-              </Value>
-            </Action>
-          </Triggers>
           <Riser>Rectangle</Riser>
         </Series>
         <Grouping>
@@ -5751,6 +5685,53 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Blue>0</Blue>
         </Entries>
       </SeriesPalette>
+      <Series>
+        <Visible>true</Visible>
+        <Label>
+          <Caption>
+            <Value>&lt;undefined></Value>
+            <Font>
+              <Alignment/>
+            </Font>
+          </Caption>
+          <Background xsi:type="attribute:ColorDefinition">
+            <Transparency>0</Transparency>
+            <Red>255</Red>
+            <Green>255</Green>
+            <Blue>255</Blue>
+          </Background>
+          <Outline>
+            <Style>Solid</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>false</Visible>
+          </Outline>
+          <Insets>
+            <Top>0.0</Top>
+            <Left>2.0</Left>
+            <Bottom>0.0</Bottom>
+            <Right>3.0</Right>
+          </Insets>
+          <Visible>false</Visible>
+        </Label>
+        <DataDefinition>
+          <Definition>row[&quot;datevalue&quot;]</Definition>
+        </DataDefinition>
+        <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
+        <DataPoint>
+          <Components>
+            <Type>Orthogonal_Value</Type>
+          </Components>
+          <Separator>, </Separator>
+        </DataPoint>
+        <LabelPosition>Outside</LabelPosition>
+        <Stacked>false</Stacked>
+      </Series>
       <Series>
         <Visible>true</Visible>
         <Label>
@@ -8289,39 +8270,6 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           </DataPoint>
           <LabelPosition>Inside</LabelPosition>
           <Stacked>true</Stacked>
-          <Triggers>
-            <Condition>onmouseover</Condition>
-            <Action>
-              <Type>Show_Tooltip</Type>
-              <Value xsi:type="attribute:TooltipValue">
-                <Text>var voname = row[&quot;VOName&quot;];var metricvalue =&quot;&quot;;&#xD;
-&#xD;
-var label;&#xD;
-var dotpos;&#xD;
-&#xD;
-if (params[&quot;DisplayMetric&quot;] == &quot;WallDuration&quot;) { &#xD;
-	metricvalue = String(row[&quot;WallDuration&quot;] / 3600);&#xD;
-	label = &quot;Wallclock Hours: &quot;;&#xD;
-}&#xD;
-if (params[&quot;DisplayMetric&quot;] == &quot;Cpu&quot;)  {&#xD;
-	metricvalue = String(row[&quot;Cpu&quot;] / 3600);&#xD;
-	label = &quot;Process Hours: &quot;;&#xD;
-} &#xD;
-if (params[&quot;DisplayMetric&quot;] == &quot;Njobs&quot;) {&#xD;
-	metricvalue = String(row[&quot;Njobs&quot;]);&#xD;
-	label = &quot;Jobs: &quot;;&#xD;
-}&#xD;
-var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
-	if(dotpos > 0)&#xD;
-	{ &#xD;
-	metricvalue = metricvalue.substring(0,dotpos+2);&#xD;
-	}&#xD;
-&#xD;
-&quot;VOName: &quot; + voname + &quot;\n&quot; + label + metricvalue</Text>
-                <Delay>200</Delay>
-              </Value>
-            </Action>
-          </Triggers>
           <Riser>Rectangle</Riser>
         </Series>
         <Grouping>
@@ -8515,6 +8463,53 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Blue>0</Blue>
         </Entries>
       </SeriesPalette>
+      <Series>
+        <Visible>true</Visible>
+        <Label>
+          <Caption>
+            <Value>&lt;undefined></Value>
+            <Font>
+              <Alignment/>
+            </Font>
+          </Caption>
+          <Background xsi:type="attribute:ColorDefinition">
+            <Transparency>0</Transparency>
+            <Red>255</Red>
+            <Green>255</Green>
+            <Blue>255</Blue>
+          </Background>
+          <Outline>
+            <Style>Solid</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>false</Visible>
+          </Outline>
+          <Insets>
+            <Top>0.0</Top>
+            <Left>2.0</Left>
+            <Bottom>0.0</Bottom>
+            <Right>3.0</Right>
+          </Insets>
+          <Visible>false</Visible>
+        </Label>
+        <DataDefinition>
+          <Definition>row[&quot;datevalue&quot;]</Definition>
+        </DataDefinition>
+        <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
+        <DataPoint>
+          <Components>
+            <Type>Orthogonal_Value</Type>
+          </Components>
+          <Separator>, </Separator>
+        </DataPoint>
+        <LabelPosition>Outside</LabelPosition>
+        <Stacked>false</Stacked>
+      </Series>
       <Series>
         <Visible>true</Visible>
         <Label>
@@ -11006,39 +11001,6 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           </DataPoint>
           <LabelPosition>Inside</LabelPosition>
           <Stacked>true</Stacked>
-          <Triggers>
-            <Condition>onmouseover</Condition>
-            <Action>
-              <Type>Show_Tooltip</Type>
-              <Value xsi:type="attribute:TooltipValue">
-                <Text>var voname = row[&quot;VOName&quot;];var metricvalue =&quot;&quot;;&#xD;
-&#xD;
-var label;&#xD;
-var dotpos;&#xD;
-&#xD;
-if (params[&quot;DisplayMetric&quot;] == &quot;WallDuration&quot;) { &#xD;
-	metricvalue = String(row[&quot;WallDuration&quot;] / 3600);&#xD;
-	label = &quot;Wallclock Hours: &quot;;&#xD;
-}&#xD;
-if (params[&quot;DisplayMetric&quot;] == &quot;Cpu&quot;)  {&#xD;
-	metricvalue = String(row[&quot;Cpu&quot;] / 3600);&#xD;
-	label = &quot;Process Hours: &quot;;&#xD;
-} &#xD;
-if (params[&quot;DisplayMetric&quot;] == &quot;Njobs&quot;) {&#xD;
-	metricvalue = String(row[&quot;Njobs&quot;]);&#xD;
-	label = &quot;Jobs: &quot;;&#xD;
-}&#xD;
-var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
-	if(dotpos > 0)&#xD;
-	{ &#xD;
-	metricvalue = metricvalue.substring(0,dotpos+2);&#xD;
-	}&#xD;
-&#xD;
-&quot;VOName: &quot; + voname + &quot;\n&quot; + label + metricvalue</Text>
-                <Delay>200</Delay>
-              </Value>
-            </Action>
-          </Triggers>
           <Riser>Rectangle</Riser>
         </Series>
         <Grouping>
@@ -11232,6 +11194,53 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Blue>0</Blue>
         </Entries>
       </SeriesPalette>
+      <Series>
+        <Visible>true</Visible>
+        <Label>
+          <Caption>
+            <Value>&lt;undefined></Value>
+            <Font>
+              <Alignment/>
+            </Font>
+          </Caption>
+          <Background xsi:type="attribute:ColorDefinition">
+            <Transparency>0</Transparency>
+            <Red>255</Red>
+            <Green>255</Green>
+            <Blue>255</Blue>
+          </Background>
+          <Outline>
+            <Style>Solid</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>false</Visible>
+          </Outline>
+          <Insets>
+            <Top>0.0</Top>
+            <Left>2.0</Left>
+            <Bottom>0.0</Bottom>
+            <Right>3.0</Right>
+          </Insets>
+          <Visible>false</Visible>
+        </Label>
+        <DataDefinition>
+          <Definition>row[&quot;datevalue&quot;]</Definition>
+        </DataDefinition>
+        <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
+        <DataPoint>
+          <Components>
+            <Type>Orthogonal_Value</Type>
+          </Components>
+          <Separator>, </Separator>
+        </DataPoint>
+        <LabelPosition>Outside</LabelPosition>
+        <Stacked>false</Stacked>
+      </Series>
       <Series>
         <Visible>true</Visible>
         <Label>

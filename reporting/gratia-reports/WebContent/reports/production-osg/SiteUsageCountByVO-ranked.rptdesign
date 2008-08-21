@@ -1041,7 +1041,7 @@
                 </structure>
                 <property name="repeatHeader">true</property>
                 <property name="hideDetail">true</property>
-                <property name="pageBreakAfter">avoid</property>
+                <property name="pageBreakAfter">auto</property>
                 <property name="pageBreakBefore">always-excluding-first</property>
                 <property name="pageBreakInside">auto</property>
                 <list-property name="sort">
@@ -1405,13 +1405,14 @@
 {	&#xD;
 	rep = context.getExternalContext().getScriptable();&#xD;
 	&#xD;
+	metric_text = &quot;&quot;;&#xD;
 	metric = rep.getParameterValue(&quot;DisplayMetric&quot;);&#xD;
 	if(metric==&quot;Cpu&quot;) metric_text = &quot;Process Hours&quot;;&#xD;
 	if(metric==&quot;WallDuration&quot;) metric_text = &quot;Wallclock Hours&quot;;&#xD;
 	if(metric==&quot;Njobs&quot;) metric_text = &quot;Job Count&quot;;&#xD;
 	&#xD;
 	// Force title&#xD;
-	metric_text = &quot;&quot;&#xD;
+	metric_text = &quot;&quot;;&#xD;
 &#xD;
 	rep_title = rep.getParameterValue(&quot;ReportTitle&quot;) + &quot; (&quot; + metric_text + &quot;)&quot; ;&#xD;
 	rep_subtitle = rep.getParameterValue(&quot;ReportSubtitle&quot;);&#xD;
