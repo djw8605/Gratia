@@ -1,23 +1,23 @@
 <UserConfig>
 	<Menu>
 		<MenuGroup name="Reports - VO Views">
-			<MenuItem name="Usage by VO" link="GratiaParameterInput.jsp?report=[ReportsFolder]UsageByVO.rptdesign&amp;DisplayMetric=wallclock"/>
-			<MenuItem display="true" name="Daily Usage by VO" link="GratiaParameterInput.jsp?report=[ReportsFolder]UsageByVOByDate-ranked.rptdesign&amp;DisplayMetric=wallclock"/>
-			<MenuItem name="Daily Usage by Site for VO" link="GratiaParameterInput.jsp?report=[ReportsFolder]DailyUsageBySiteForVO.rptdesign&amp;DisplayMetric=wallclock"/>
+			<MenuItem name="Usage by VO" link="GratiaParameterInput.jsp?report=[ReportsFolder]UsageByVO.rptdesign&amp;DisplayMetric=WallDuration"/>
+			<MenuItem display="true" name="Daily Usage by VO" link="GratiaParameterInput.jsp?report=[ReportsFolder]UsageByVOByDate-ranked.rptdesign&amp;DisplayMetric=WallDuration"/>
+			<MenuItem name="Daily Usage by Site for VO" link="GratiaParameterInput.jsp?report=[ReportsFolder]DailyUsageBySiteForVO.rptdesign&amp;DisplayMetric=WallDuration"/>
 		</MenuGroup>
 		<MenuGroup name="Reports - VO Views - Weekly History">
-			<MenuItem name="Usage By VO" link="GratiaParameterInput.jsp?report=[ReportsFolder]WeeklyUsageByVO-ranked.rptdesign&amp;DisplayMetric=wallclock"/>
+			<MenuItem name="Usage By VO" link="GratiaParameterInput.jsp?report=[ReportsFolder]WeeklyUsageByVO-ranked.rptdesign&amp;DisplayMetric=WallDuration"/>
 			<MenuItem name="Usage Metrics - For VO(s)" link="GratiaParameterInput.jsp?report=[ReportsFolder]WeeklyUsageByVO.rptdesign"/>
 			<MenuItem name="Usage Metrics - For Site(s)" link="GratiaParameterInput.jsp?report=[ReportsFolder]WeeklyUsageBySite.rptdesign"/>
 		</MenuGroup>
 		<MenuGroup name="Reports - Site Views">
-			<MenuItem name="Usage by Site" link="GratiaParameterInput.jsp?report=[ReportsFolder]UsageBySite.rptdesign&amp;DisplayMetric=wallclock"/>
-			<MenuItem name="Daily Usage by Site" link="GratiaParameterInput.jsp?report=[ReportsFolder]UsageBySiteByDate-ranked.rptdesign&amp;DisplayMetric=wallclock"/>
-			<MenuItem name="Daily Usage by VO for Site" link="GratiaParameterInput.jsp?report=[ReportsFolder]DailyUsageByVOForSite.rptdesign&amp;DisplayMetric=wallclock"/>
+			<MenuItem name="Usage by Site" link="GratiaParameterInput.jsp?report=[ReportsFolder]UsageBySite.rptdesign&amp;DisplayMetric=WallDuration"/>
+			<MenuItem name="Daily Usage by Site" link="GratiaParameterInput.jsp?report=[ReportsFolder]UsageBySiteByDate-ranked.rptdesign&amp;DisplayMetric=WallDuration"/>
+			<MenuItem name="Daily Usage by VO for Site" link="GratiaParameterInput.jsp?report=[ReportsFolder]DailyUsageByVOForSite.rptdesign&amp;DisplayMetric=WallDuration"/>
 		</MenuGroup>
 		<MenuGroup name="Reports - by Probe">
 			<MenuItem name="Jobs by Probe" link="GratiaParameterInput.jsp?report=[ReportsFolder]JobsByProbeNoFacility.rptdesign"/>
-			<MenuItem name="Daily Usage by Probe" link="GratiaParameterInput.jsp?report=[ReportsFolder]DailyUsageByProbe.rptdesign&amp;DisplayMetric=wallclock"/>
+			<MenuItem name="Daily Usage by Probe" link="GratiaParameterInput.jsp?report=[ReportsFolder]DailyUsageByProbe.rptdesign&amp;DisplayMetric=WallDuration"/>
 		</MenuGroup>
 <!--		<MenuGroup name="Reports - miscellaneous">
 			<MenuItem name="Probe Status" link="GratiaParameterInput.jsp?report=[ReportsFolder]ProbeStatus.rptdesign"/>
@@ -26,7 +26,7 @@
 		<MenuGroup name="Reports - Display in >30 secs">
 <!-- 			<MenuItem name="Usage Report" link="GratiaParameterInput.jsp?report=[ReportsFolder]UsageReport.rptdesign"/>
 -->
-			<MenuItem name="2007 Usage for All VOs" link="GratiaParameterInput.jsp?report=[ReportsFolder]2007WeeklyUsageByVO-ranked.rptdesign&amp;DisplayMetric=wallclock"/>
+			<MenuItem name="2007 Usage for All VOs" link="GratiaParameterInput.jsp?report=[ReportsFolder]2007WeeklyUsageByVO-ranked.rptdesign&amp;DisplayMetric=WallDuration"/>
 		</MenuGroup>
 		<MenuGroup name="DCache">
 			<MenuItem name="Dcache Probe Table" link="showQuery.jsp?sql=select S.SiteName, X.ProbeName, X.Njobs from Probe P, Site S, (select M.ProbeName, M.probeid, sum(R.Njobs) as Njobs from JobUsageRecord R, JobUsageRecord_Meta M where R.ResourceType = 'Storage' and M.dbid = R.dbid group by M.ProbeName) X where X.probeid = P.probeid and P.siteid = S.siteid order by SiteName, ProbeName;"/>
