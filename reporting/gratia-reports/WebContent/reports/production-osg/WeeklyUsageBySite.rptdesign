@@ -966,7 +966,7 @@ if (params[&quot;DisplayMetric&quot;] == &quot;Cpu&quot;)  {label = &quot;Proces
 if (params[&quot;DisplayMetric&quot;] == &quot;Njobs&quot;) {label = &quot;Jobs: &quot;;}&#xD;
 var dotpos = metricvalue.indexOf(&quot;.&quot;,0);&#xD;
 if(dotpos > 0) {metricvalue = metricvalue.substring(0,dotpos+2);}&#xD;
-&quot;Site: &quot; + sitename + &quot;   \n&quot; + metric;</Text>
+&quot;Site: &quot; + sitename + &quot;   \n&quot; + label + metricvalue;</Text>
                 <Delay>200</Delay>
               </Value>
             </Action>
