@@ -23,8 +23,8 @@
     "monitor.to.address.0" => 'grid-accounting@fnal.gov',
     "service.admin.FQAN.0" => "/fermilab/Role=GratiaAdmin",
     "service.admin.FQAN.1" => "/fermilab/Role=GratiaDeveloper",
-    "service.admin.FQAN.2" = >"/fermilab/Role=GratiaGlobalAdmin",
-    "service.admin.FQAN.3" = >"/fermilab/Role=GratiaFermilabAdmin",
+    "service.admin.FQAN.2" =>"/fermilab/Role=GratiaGlobalAdmin",
+    "service.admin.FQAN.3" =>"/fermilab/Role=GratiaFermilabAdmin",
    }
  },
  itb_gratia_psacct =>
@@ -49,8 +49,8 @@
     "monitor.to.address.0" => 'grid-accounting@fnal.gov',
     "service.admin.FQAN.0" => "/fermilab/Role=GratiaAdmin",
     "service.admin.FQAN.1" => "/fermilab/Role=GratiaDeveloper",
-    "service.admin.FQAN.2" = >"/fermilab/Role=GratiaGlobalAdmin",
-    "service.admin.FQAN.3" = >"/fermilab/Role=GratiaFermilabAdmin",
+    "service.admin.FQAN.2" =>"/fermilab/Role=GratiaGlobalAdmin",
+    "service.admin.FQAN.3" =>"/fermilab/Role=GratiaFermilabAdmin",
    }
  },
  itb_gratia_osg_daily =>
@@ -77,8 +77,8 @@
      "monitor.to.address.0" => 'grid-accounting@fnal.gov',
      "service.admin.FQAN.0" => "/fermilab/Role=GratiaAdmin",
      "service.admin.FQAN.1" => "/fermilab/Role=GratiaDeveloper",
-     "service.admin.FQAN.2" = >"/fermilab/Role=GratiaGlobalAdmin",
-     "service.admin.FQAN.3" = >"/fermilab/Role=GratiaFermilabAdmin",
+     "service.admin.FQAN.2" =>"/fermilab/Role=GratiaGlobalAdmin",
+     "service.admin.FQAN.3" =>"/fermilab/Role=GratiaFermilabAdmin",
    }
  }
 );
