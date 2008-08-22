@@ -34,7 +34,7 @@ void sharing(FILE *out, FILE *outcsv, TSQLServer *db, TDatime *begin, TDatime *e
    time_t value = begin->Convert();
    strftime(buffer,127, "%Y-%m-%d",localtime(&value));
 
-   fprintf(out,"OSG usage summary (midnight to midnight central time) for %s\n"
+   fprintf(out,"OSG usage summary (midnight to midnight UTC) for %s\n"
 "including all jobs that finished in that time period.\n\n"
 "The ownership information was extracted from http://www.grid.iu.edu/resources,\n"
 "with some straightforward changes applied (for example USATLAS -> ATLAS),\n"
@@ -42,7 +42,7 @@ void sharing(FILE *out, FILE *outcsv, TSQLServer *db, TDatime *begin, TDatime *e
 "The subgroups in the Fermilab VO are __not__ considered owners of the\n"
 "sites operated by Fermilab.\n\n",buffer);
 
-   TString todaystring = Form("For all jobs finished on %s (Central time)\n",buffer);
+   TString todaystring = Form("For all jobs finished on %s (UTC)\n",buffer);
    delete [] buffer;
 
 
