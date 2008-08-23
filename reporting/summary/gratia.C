@@ -61,9 +61,45 @@ void sharing(FILE *out, FILE *outcsv, TSQLServer *db, TDatime *begin, TDatime *e
    stmt->StoreResult();
       
    map<string,string> owners;
-   for(UInt_t i=0; i < sizeof(siteOwners)/sizeof(void*); i += 2) {
-      owners[ siteOwners[i] ] = siteOwners[i+1];
-   }
+   TString cmd = "wget -q -O - http://oim.grid.iu.edu/pub/resource/show.php?format=plain-text | cut -d, -f1,4,7,8,14 | grep -e ',OSG,[^,]*,CE [^,]*,1' | cut -d, -f1,3";
+   FILE * f = gSystem->OpenPipe(cmd,"r");
+   //if (!f) {
+      for(UInt_t i=0; i < sizeof(siteOwners)/sizeof(void*); i += 2) {
+         owners[ siteOwners[i] ] = siteOwners[i+1];
+      }
+   //} else {
+      char x;
+      string name;
+      string owner;
+      bool left = true;
+      string result;
+      while ((x = fgetc(f))!=EOF ) {
+         switch (x) {
+             case ',': left = false; break;
+             case '\n':
+             case '\r':
+                if (owner == "USCMS") {
+                   owner = "CMS";
+                }
+                if (name == "SPRACE-CE") {
+                   name = "SPRACE";
+                }
+                owners[ name ] = owner;
+                name = "";
+                owner = "";
+                left = true;
+                break;
+             default:
+                if (left) {
+                   name += x;
+                } else {
+                   owner += x;
+                }
+         }
+      }
+      fclose(f);
+   //}
+
 
    TString pattern = 
       Form("SELECT VOName, Sum(Njobs),Sum(WallDuration), Sum(CpuUserDuration+CpuSystemDuration), SiteName  FROM VOProbeSummary V, Probe, Site where V.ProbeName = Probe.ProbeName and Site.siteid = Probe.siteid and '%s' < EndTime and EndTime < '%s' and SiteName = '%%s' and (UCASE(VOName) = '%%s') group by SiteName",sbegin.Data(),send.Data());
