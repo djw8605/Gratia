@@ -5,7 +5,7 @@
 #
 # library to create simple report using the Gratia psacct database
 #
-#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.28 2008-08-12 16:17:04 pcanal Exp $
+#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.29 2008-08-23 05:43:58 pcanal Exp $
 
 import time
 import datetime
@@ -303,7 +303,7 @@ def NumberOfCpus():
         return (ncpu,benchtotal);
 
 def GetListOfOSGSites():
-        cmd = "wget -O  - 'http://vors.grid.iu.edu/cgi-bin/tindex.cgi?grid=1' 2>&1  | grep ',compute,' | cut -f2 -d,"
+        cmd = "wget -q -O - http://oim.grid.iu.edu/pub/resource/show.php?format=plain-text | cut -d, -f4,1,14,8 | grep -e ',OSG,CE [^,]*,1' | cut -d, -f1"
         #print "Will execute: " + cmd;
         allSites = commands.getoutput(cmd).split("\n");
         #print allSites;
@@ -1707,7 +1707,7 @@ def RangeSummup(range_end = datetime.date.today(),
     print
     
     n = len(extraSites);
-    print prettyInt(n)+" non-sanctioned non-registered sites reported (might indicate a discrepancy between VORS and Gratia)"
+    print prettyInt(n)+" non-sanctioned non-registered sites reported (might indicate a discrepancy between OIM and Gratia)"
 
     n = len(knownExtras);
     print prettyInt(n)+" sanctioned non-registered sites reported"
@@ -1780,7 +1780,7 @@ def NonReportingSites(
     print
     
     n = len(extraSites);
-    print prettyInt(n)+" non-sanctioned non-registered sites reported (might indicate a discrepancy between VORS and Gratia)"
+    print prettyInt(n)+" non-sanctioned non-registered sites reported (might indicate a discrepancy between OIM and Gratia)"
 
     n = len(knownExtras);
     print prettyInt(n)+" sanctioned non-registered sites reported"
