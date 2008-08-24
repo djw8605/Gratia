@@ -36,8 +36,8 @@ void sharing(FILE *out, FILE *outcsv, TSQLServer *db, TDatime *begin, TDatime *e
 
    fprintf(out,"OSG usage summary (midnight to midnight UTC) for %s\n"
 "including all jobs that finished in that time period.\n\n"
-"The ownership information was extracted from http://www.grid.iu.edu/resources,\n"
-"with some straightforward changes applied (for example USATLAS -> ATLAS),\n"
+"The ownership information was extracted from http://oim.grid.iu.edu,\n"
+"with some straightforward changes applied (for example USCMS -> CMS),\n"
 "Some owners (DOSAR, fGOC) has not yet been associated to a VO\n"
 "The subgroups in the Fermilab VO are __not__ considered owners of the\n"
 "sites operated by Fermilab.\n\n",buffer);
