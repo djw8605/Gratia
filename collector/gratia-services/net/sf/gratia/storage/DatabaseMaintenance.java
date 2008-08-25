@@ -38,10 +38,10 @@ import org.hibernate.exception.*;
 public class DatabaseMaintenance {
     static final String dq = "\"";
     static final String comma = ",";
-    static final int gratiaDatabaseVersion = 46;
+    static final int gratiaDatabaseVersion = 47;
     static final int latestDBVersionRequiringStoredProcedureLoad = gratiaDatabaseVersion;
     static final int latestDBVersionRequiringSummaryViewLoad = 37;
-    static final int latestDBVersionRequiringSummaryTriggerLoad = 46;
+    static final int latestDBVersionRequiringSummaryTriggerLoad = 47;
     static final int latestDBVersionRequiringTableStatisticsRefresh = 38;
 
     static boolean dbUseJobUsageSiteName = false;
@@ -1284,10 +1284,10 @@ public class DatabaseMaintenance {
                     UpdateDbVersion(current);
                 }         
             }
-            if ((current == 43) || (current == 44) || (current == 45)) {
+            if ((current >= 43) && (current <= 46)) {
                 // Auxiliary DB item upgrades only (trigger and friends)
-                Logging.fine("Gratia database upgraded from " + current + " to 46");
-                current = 46;
+                Logging.fine("Gratia database upgraded from " + current + " to 47");
+                current = 47;
                 UpdateDbVersion(current);
             }                
             return ((current == gratiaDatabaseVersion) && checkAndUpgradeDbAuxiliaryItems());

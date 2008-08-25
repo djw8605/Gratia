@@ -56,7 +56,7 @@ AJUR:BEGIN
          IFNULL(J.Host, ''),
          IFNULL(EC.Value,
                 IF(EBS.Value = 'TRUE' OR EBS.Value = '1',
-                   IFNULL(ES.Value, 128),
+                   IFNULL(ES.Value, 0) + 128,
                    IFNULL(J.Status, 0))),
          J.Njobs,
          J.WallDuration,
