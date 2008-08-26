@@ -383,6 +383,12 @@ public class ListenerThread extends Thread
                 ArrayList records = new ArrayList();
 
                 try {
+                    if (gotreplication) {
+                        // First attempt to fix an error in data
+                        // replicated from old collectors.
+                        xml = xml.replaceAll("<LocalJobId ><undefined></LocalJobId>",
+                                             "<LocalJobId >&lt;undefined&gt;</LocalJobId>");
+                    }
                     records = convert(xml);
                 }
                 catch (Exception e) {
