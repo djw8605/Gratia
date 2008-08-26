@@ -6,6 +6,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang.StringEscapeUtils;
+
 import net.sf.gratia.util.Logging;
 
 /**
@@ -193,7 +195,7 @@ public class JobUsageRecord extends Record
       if (ProbeName != null) output = output + ProbeName.asXml("ProbeName");
       if (Grid != null) output = output + Grid.asXml("Grid");
       if (ResourceType != null) output = output + ResourceType.asXml("Resource");
-      if (ExtraXml != null) output = output + ExtraXml;
+      if (ExtraXml != null) output = output + StringEscapeUtils.escapeXml(ExtraXml);
       if ((TDSet != null) && (TDSet.size() > 0)) output = output + getTransferDetails().asXML();
       output = output + "</JobUsageRecord>" + "\n";
       return output;

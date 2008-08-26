@@ -1,5 +1,7 @@
 package net.sf.gratia.storage;
 
+import org.apache.commons.lang.StringEscapeUtils;
+
 /**
  * <p>Title: JobIdentity</p>
  *
@@ -54,9 +56,9 @@ public class JobIdentity {
 
     public String asXml() {
         String output = "<JobIdentity>\n";
-        if (GlobalJobId != null) output = output + "<GlobalJobId >"+GlobalJobId+"</GlobalJobId>\n";
-        if (LocalJobId != null) output = output + "<LocalJobId >"+LocalJobId+"</LocalJobId>\n";
-        if (ProcessIds != null)  output = output + "<ProcessId>"+ProcessIds+"</ProcessId>\n"; // FIXME: need to split the ProcessIds
+        if (GlobalJobId != null) output = output + "<GlobalJobId >"+StringEscapeUtils.escapeXml(GlobalJobId)+"</GlobalJobId>\n";
+        if (LocalJobId != null) output = output + "<LocalJobId >"+StringEscapeUtils.escapeXml(LocalJobId)+"</LocalJobId>\n";
+        if (ProcessIds != null) output = output + "<ProcessId>"+StringEscapeUtils.escapeXml(ProcessIds)+"</ProcessId>\n"; // FIXME: need to split the ProcessIds
         output = output + "</JobIdentity>\n";
         return output;
     }

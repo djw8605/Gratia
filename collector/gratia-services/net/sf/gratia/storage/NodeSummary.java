@@ -4,6 +4,8 @@ import java.util.Date;
 
 import net.sf.gratia.util.Logging;
 
+import org.apache.commons.lang.StringEscapeUtils;
+
 //
 // Gratia's in-memory representation of a Node summary record.
 //

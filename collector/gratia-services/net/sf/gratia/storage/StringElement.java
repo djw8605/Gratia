@@ -1,6 +1,6 @@
 package net.sf.gratia.storage;
 
-
+import org.apache.commons.lang.StringEscapeUtils;
 
 /**
  * <p>Title: StringElement</p>
@@ -56,9 +56,10 @@ public class StringElement implements XmlElement {
 
     public String asXml(String elementName) {
         String output = "<"+elementName+" ";
-        if (Description != null) output = output + "urwg:description=\"" + Description + "\" ";
-        if (Type != null) output = output + "urwg:type=\"" + Type + "\" ";
-        output = output + ">" + Value + "</" + elementName + ">\n";
+        if (Description != null) output = output + "urwg:description=\"" +
+            StringEscapeUtils.escapeXml(Description) + "\" ";
+        if (Type != null) output = output + "urwg:type=\"" + StringEscapeUtils.escapeXml(Type) + "\" ";
+        output = output + ">" + StringEscapeUtils.escapeXml(Value) + "</" + elementName + ">\n";
         return output;
     }
 }

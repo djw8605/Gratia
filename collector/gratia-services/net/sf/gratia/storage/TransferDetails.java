@@ -6,6 +6,8 @@ import java.util.Set;
 
 import net.sf.gratia.util.Logging;
 
+import org.apache.commons.lang.StringEscapeUtils;
+
 public class TransferDetails extends Record {
 
     // Link to associated class
@@ -76,9 +78,9 @@ public class TransferDetails extends Record {
 
     private String resourceAsXML(String name, String value) {
         return new String("<urwg:Resource description=\"" +
-                          name +
+                          StringEscapeUtils.escapeXml(name) +
                           "\">" +
-                          value +
+                          StringEscapeUtils.escapeXml(value) +
                           "</urwg:Resource>");
     }
 

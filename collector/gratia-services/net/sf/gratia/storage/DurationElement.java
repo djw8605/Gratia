@@ -4,6 +4,8 @@ import net.sf.gratia.util.Configuration;
 
 import javax.xml.datatype.DatatypeConfigurationException;
 
+import org.apache.commons.lang.StringEscapeUtils;
+
 /**
  * <p>Title: DurationElement</p>
  *
@@ -62,9 +64,13 @@ public class DurationElement implements XmlElement {
 
     public String asXml(String elementName, String type_name, String duration_type) {
         String output = "<"+elementName+" ";
-        if (Description != null) output = output + "urwg:description=\"" + Description + "\" ";
-        if (Type != null) output = output + "urwg:"+type_name+"=\"" + Type + "\" ";
-        else if (duration_type != null) output = output + "urwg:"+type_name+"=\"" + duration_type + "\" ";
+        if (Description != null) output = output + "urwg:description=\"" + StringEscapeUtils.escapeXml(Description) + "\" ";
+        if (Type != null) output = output + "urwg:" +
+            StringEscapeUtils.escapeXml(type_name) +
+            "=\"" + StringEscapeUtils.escapeXml(Type) + "\" ";
+        else if (duration_type != null) output = output + "urwg:" +
+            StringEscapeUtils.escapeXml(type_name) +
+            "=\"" + StringEscapeUtils.escapeXml(duration_type) + "\" ";
         output = output + ">";
         try {
             output = output + Utils.DurationToXml(Value);
@@ -76,6 +82,6 @@ public class DurationElement implements XmlElement {
     }
 
     public String asXml(String elementName) {
-        return asXml(elementName,"type",null);
+        return asXml(elementName, "type", null);
     }    
 }

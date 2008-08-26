@@ -1,5 +1,7 @@
 package net.sf.gratia.storage;
 
+import org.apache.commons.lang.StringEscapeUtils;
+
 /**
  * <p>Title: FloatElement</p>
  *
@@ -63,9 +65,10 @@ public class FloatElement implements XmlElement {
 
     public String asXml(String elementName) {
         String output = "<"+elementName+" ";
-        if (Description != null) output = output + "urwg:description=\"" + Description + "\" ";
-        if (Unit != null) output = output + "urwg:unit=\"" + Unit + "\" ";
-        if (Formula != null) output = output + "urwg:formula=\"" + Formula + "\" ";
+        if (Description != null) output = output + "urwg:description=\"" +
+            StringEscapeUtils.escapeXml(Description) + "\" ";
+        if (Unit != null) output = output + "urwg:unit=\"" + StringEscapeUtils.escapeXml(Unit) + "\" ";
+        if (Formula != null) output = output + "urwg:formula=\"" + StringEscapeUtils.escapeXml(Formula) + "\" ";
         output = output + ">" + Value + "</" + elementName + ">\n";
         return output;
     }

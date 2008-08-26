@@ -1,5 +1,7 @@
 package net.sf.gratia.storage;
 
+import org.apache.commons.lang.StringEscapeUtils;
+
 import java.util.Iterator;
 import java.util.Set;
 import java.util.List;

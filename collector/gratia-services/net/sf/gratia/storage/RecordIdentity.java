@@ -3,6 +3,7 @@ package net.sf.gratia.storage;
 import java.util.*;
 import java.text.*;
 
+import org.apache.commons.lang.StringEscapeUtils;
 
 /**
  * <p>Title: RecordIdentity</p>
@@ -64,10 +65,11 @@ public class RecordIdentity
          String timestamp = format.format(CreateTime.getValue());
          String dq = "\"";
 
-         String output = "<RecordIdentity urwg:recordId=" + dq + RecordId + dq +
-                  " urwg:createTime=" + dq + timestamp + dq;
+         String output = "<RecordIdentity urwg:recordId=" + dq +
+             StringEscapeUtils.escapeXml(RecordId) + dq +
+             " urwg:createTime=" + dq + StringEscapeUtils.escapeXml(timestamp) + dq;
          if (KeyInfo != null) 
-                  output = output + ">" + KeyInfo + "</RecordIdentity>\n";
+             output = output + ">" + KeyInfo.asXML() + "</RecordIdentity>\n";
          else output = output + " />\n";
          return output;
     }

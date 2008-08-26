@@ -234,6 +234,10 @@ public class RMIHandlerServlet extends HttpServlet
                         Logging.info("RMIHandlerServlet: received test message from " +
                                      req.getRemoteHost());
                     } else { // Process normally
+                        // First attempt to fix an error in data
+                        // replicated from old collectors.
+                        arg1 = arg1.ReplaceAll("<LocalJobId ><undefined></LocalJobId>",
+                                               "<LocalJobId >&lt;undefined&gt;</LocalJobId>");
                         status = proxy.update(arg1);
                     }
                     if (status) {

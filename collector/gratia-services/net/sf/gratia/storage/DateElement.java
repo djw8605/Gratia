@@ -1,13 +1,17 @@
 package net.sf.gratia.storage;
 
 import net.sf.gratia.util.Configuration;
+import net.sf.gratia.util.Logging;
 
 import java.text.*;
 import java.util.Date;
 import java.util.TimeZone;
 import java.util.GregorianCalendar;
-
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.xml.datatype.*;
+
+import org.apache.commons.lang.StringEscapeUtils;
 
 
 /**
@@ -27,15 +31,34 @@ public class DateElement implements XmlElement {
     private Date Value;
     private String Description;
     private String Type;
+    private Pattern wrongDateFixer =
+        Pattern.compile("(\\d{4}-\\d{2}-\\d{2})\\s+(\\d+:\\d+:[\\d\\.]+)");
+
     public DateElement() {
     }
 
-    public void setValue(String str) throws DatatypeConfigurationException {
+    public void setValue(String str) throws Exception {
 				TimeZone.setDefault(TimeZone.getTimeZone("GMT"));
         javax.xml.datatype.DatatypeFactory fac = javax.xml.datatype.
                                                  DatatypeFactory.
                                                  newInstance();
-        XMLGregorianCalendar cal = fac.newXMLGregorianCalendar(str.trim());
+        XMLGregorianCalendar cal;
+        try {
+            cal = fac.newXMLGregorianCalendar(str.trim());
+        } catch (Exception e) {
+            Logging.debug("DateElement: caught bad date element, \"" +
+                          str.trim() + "\" -- attempting to fix\"");
+            // Mitigation
+            Matcher m = wrongDateFixer.matcher(str.trim());
+            if (m.lookingAt()) {
+                String newStr = m.group(1) + "T" + m.group(2) + "Z";
+                cal = fac.newXMLGregorianCalendar(newStr);
+                Logging.fine("DateElement: caught problem with date element, \"" +
+                             str.trim() + "\", fixed to \"" + newStr + "\"");
+            } else {
+                throw e;
+            }
+        }
         GregorianCalendar jcal = cal.toGregorianCalendar();
         this.Value = new Date( jcal.getTimeInMillis() );
     }

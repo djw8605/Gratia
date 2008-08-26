@@ -4,7 +4,7 @@ import net.sf.gratia.util.Configuration;
 
 import javax.xml.datatype.DatatypeConfigurationException;
 
-
+import org.apache.commons.lang.StringEscapeUtils;
 
 /**
  * <p>Title: ResourceElement</p>
@@ -90,19 +90,19 @@ public class ResourceElement implements XmlElement {
 
     public String asXml(String elementName) {
         String output = "<"+elementName+" ";
-        if (Description != null) output = output + "urwg:description=\"" + Description + "\" ";
-        if (Type != null) output = output + "urwg:type=\"" + Type + "\" ";
-        if (Unit != null) output = output + "urwg:unit=\"" + Unit + "\" ";
-				try
-						{
-								if (PhaseUnit != null) output = output + "urwg:phaseUnit=\"" + Utils.DurationToXml(PhaseUnit) + "\" ";
-						}
-				catch (Exception e)
-						{
-								e.printStackTrace();
-						}
-        if (StorageUnit != null) output = output + "urwg:storageUnit=\"" + StorageUnit + "\" ";
-        if (Metrics != null) output = output + "urwg:metrics=\"" + Metrics + "\" ";
+        if (Description != null) output = output + "urwg:description=\"" + StringEscapeUtils.escapeXml(Description) + "\" ";
+        if (Type != null) output = output + "urwg:type=\"" + StringEscapeUtils.escapeXml(Type) + "\" ";
+        if (Unit != null) output = output + "urwg:unit=\"" + StringEscapeUtils.escapeXml(Unit) + "\" ";
+        try
+            {
+                if (PhaseUnit != null) output = output + "urwg:phaseUnit=\"" + Utils.DurationToXml(PhaseUnit) + "\" ";
+            }
+        catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+        if (StorageUnit != null) output = output + "urwg:storageUnit=\"" + StringEscapeUtils.escapeXml(StorageUnit) + "\" ";
+        if (Metrics != null) output = output + "urwg:metrics=\"" + StringEscapeUtils.escapeXml(Metrics) + "\" ";
         output = output + ">" + Value + "</" + elementName + ">\n";
         return output;
     }

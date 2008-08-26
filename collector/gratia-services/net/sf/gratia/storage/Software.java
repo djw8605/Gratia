@@ -1,5 +1,7 @@
 package net.sf.gratia.storage;
 
+import org.apache.commons.lang.StringEscapeUtils;
+
 /**
  * <p>Title: Software </p>
  *
@@ -45,9 +47,11 @@ public class Software implements XmlElement
     {
         String output = "<";
         output = output + Type + " ";
-        if (Version != null) output = output + "version = \"" + Version + "\"";
+        if (Version != null) output = output + "version = \"" +
+            StringEscapeUtils.escapeXml(Version) + "\"";
         if (Name != null) {
-            output = output + ">" + Name + "</" + Type + ">";
+            output = output + ">" + StringEscapeUtils.escapeXml(Name) + "</" +
+                StringEscapeUtils.escapeXml(Type) + ">";
         } else {
             output = output + "/>";
         }

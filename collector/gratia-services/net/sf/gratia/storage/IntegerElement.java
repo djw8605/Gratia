@@ -1,5 +1,7 @@
 package net.sf.gratia.storage;
 
+import org.apache.commons.lang.StringEscapeUtils;
+
 /**
  * <p>Title: IntegerElement</p>
  *
@@ -56,8 +58,8 @@ public class IntegerElement implements XmlElement {
 
     public String asXml(String elementName) {
         String output = "<"+elementName+" ";
-        if (Description != null) output = output + "urwg:description=\"" + Description + "\" ";
-        if (Metric != null) output = output + "urwg:metric=\"" + Metric + "\" ";
+        if (Description != null) output = output + "urwg:description=\"" + StringEscapeUtils.escapeXml(Description) + "\" ";
+        if (Metric != null) output = output + "urwg:metric=\"" + StringEscapeUtils.escapeXml(Metric) + "\" ";
         if (ConsumptionRate != 1) output = output + "urwg:consumptionRate=\"" + ConsumptionRate + "\" ";
         output = output + ">" + Value + "</" + elementName + ">\n";
         return output;

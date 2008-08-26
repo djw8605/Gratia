@@ -1,5 +1,7 @@
 package net.sf.gratia.storage;
 
+import org.apache.commons.lang.StringEscapeUtils;
+
 /**
  * <p>Title: KeyInfoType</p>
  *
@@ -47,10 +49,11 @@ public class KeyInfoType {
         if (Id == null && Content == null) return "";
         String output;
         if (Content != null && Content.startsWith("/")) { // Straight DN
-            output = "<DN>" + Content + "</DN>";
+            output = "<DN>" + StringEscapeUtils.escapeXml(Content) + "</DN>";
         } else {
             output = "<ds:KeyInfo xmlns:ds=\"http://www.w3.org/2000/09/xmldsig#\" ";
-            if (Id != null) output = output + "Id=\""+Id+"\" ";
+            if (Id != null) output = output + "Id=\""+
+                StringEscapeUtils.escapeXml(Id)+"\" ";
             output = output + ">\n";
             if (Content != null) output = output + Content;
             output = output + "\n</ds:KeyInfo>\n";

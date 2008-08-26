@@ -1,5 +1,6 @@
 package net.sf.gratia.storage;
 
+import org.apache.commons.lang.StringEscapeUtils;
 
 /**
  * <p>Title: UserIdentity</p>
@@ -87,12 +88,19 @@ public class UserIdentity {
     }
     public String asXml() {
         String output = "<UserIdentity>\n";
-		if (GlobalUsername != null) output = output + "\t<GlobalUsername>" + GlobalUsername + "</GlobalUsername>\n";
-		if (LocalUserId != null) output = output + "\t<LocalUserId>" + LocalUserId + "</LocalUserId>\n";
-		if (KeyInfo != null) output = output + "\t" + KeyInfo.asXML();
-		if (VOName != null) output = output + "\t<VOName>" + VOName + "</VOName>\n";
-		if (ReportableVOName != null) output = output + "\t<ReportableVOName>" + ReportableVOName + "</ReportableVOName>\n";
-		if (CommonName != null) output = output + "\t<CommonName>" + CommonName + "</CommonName>\n";
+        if (GlobalUsername != null) output = output + "\t<GlobalUsername>" +
+            StringEscapeUtils.escapeXml(GlobalUsername) + "</GlobalUsername>\n";
+        if (LocalUserId != null) output = output + "\t<LocalUserId>" +
+            StringEscapeUtils.escapeXml(LocalUserId) + "</LocalUserId>\n";
+        if (KeyInfo != null) output = output + "\t" + KeyInfo.asXML();
+        if (VOName != null) output = output + "\t<VOName>" +
+            StringEscapeUtils.escapeXml(VOName) +
+            "</VOName>\n";
+        if (ReportableVOName != null) output = output + "\t<ReportableVOName>" +
+            StringEscapeUtils.escapeXml(ReportableVOName) + "</ReportableVOName>\n";
+        if (CommonName != null) output = output + "\t<CommonName>" +
+            StringEscapeUtils.escapeXml(CommonName) +
+            "</CommonName>\n";
         output = output + "</UserIdentity>\n";
         return output;
     }
