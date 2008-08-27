@@ -7,11 +7,12 @@ public class LogLevel extends Level {
     static public final int SEVERE_INT = Level.ERROR_INT;
     static public final int WARNING_INT = Level.WARN_INT;
     static public final int CONFIG_INT =
+        (Level.INFO_INT - ((Level.INFO_INT - Level.DEBUG_INT)/4));
+    static public final int FINE_INT =
         (Level.DEBUG_INT + ((Level.INFO_INT - Level.DEBUG_INT)/2));
-    static public final int FINE_INT = Level.DEBUG_INT;
     static public final int FINER_INT =
-        (Level.TRACE_INT + ((Level.DEBUG_INT - Level.TRACE_INT)/2));
-    static public final int FINEST_INT = Level.TRACE_INT;
+        (Level.DEBUG_INT + ((Level.INFO_INT - Level.DEBUG_INT)/4));
+    static public final int FINEST_INT = Level.DEBUG_INT;
 
     private static String SEVERE_STR = "SEVERE";
     private static String WARNING_STR = "WARNING";
