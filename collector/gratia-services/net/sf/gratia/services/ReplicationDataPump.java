@@ -161,7 +161,7 @@ public class ReplicationDataPump extends Thread {
         catch (Exception e) {
             replicationLog(LogLevel.WARNING,
                            "Problem encountered obtaining list of records to replicate");
-            replicationLog(LogLevel.DEBUG,
+            replicationLog(LogLevel.FINEST,
                            "Exception details: ", e);
             exitflag = true;
             return;
@@ -214,8 +214,8 @@ public class ReplicationDataPump extends Thread {
                     continue;
                 }
                 if (trace) {
-                    replicationLog(LogLevel.DEBUG, "TRACE dbid: " + dbid);
-                    replicationLog(LogLevel.DEBUG, "TRACE xml: " + xml);
+                    replicationLog(LogLevel.FINEST, "TRACE dbid: " + dbid);
+                    replicationLog(LogLevel.FINEST, "TRACE xml: " + xml);
                 }
                 xml_msg.append(xml);
                 if (bundle_count == 0) lowdbid = dbid;
@@ -257,7 +257,7 @@ public class ReplicationDataPump extends Thread {
             }
             replicationLog(LogLevel.WARNING,
                            "Problem encountered duplicating records");
-            replicationLog(LogLevel.DEBUG,
+            replicationLog(LogLevel.FINEST,
                            "Exception details: ", e);
         }
         finally {
@@ -282,7 +282,7 @@ public class ReplicationDataPump extends Thread {
         throws Exception {
         StringBuilder buffer = new StringBuilder();
 
-        replicationLog(LogLevel.DEBUG, "getXML: dbid: " + dbid);
+        replicationLog(LogLevel.FINEST, "getXML: dbid: " + dbid);
 
         Record record = (Record) session.get("net.sf.gratia.storage." + table, (int) dbid);
 
