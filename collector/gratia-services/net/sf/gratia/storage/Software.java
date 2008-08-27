@@ -2,6 +2,8 @@ package net.sf.gratia.storage;
 
 import org.apache.commons.lang.StringEscapeUtils;
 
+import net.sf.gratia.util.Logging;
+
 /**
  * <p>Title: Software </p>
  *
@@ -124,7 +126,7 @@ public class Software implements XmlElement
 
     public void Attach( org.hibernate.Session session ) throws Exception
     {
-        Utils.GratiaInfo("Software::Attach: "+softid);
+        Logging.debug("Software::Attach: " + softid);
 
         if (softid != 0) return;
 
