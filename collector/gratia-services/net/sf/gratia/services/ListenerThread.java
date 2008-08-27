@@ -354,31 +354,50 @@ public class ListenerThread extends Thread {
                                          "</LocalJobId>");
                 }
                 records = convert(xml);
+                if (records.size() > 1) {
+                    Logging.fine(ident + ": Received envelope of " +
+                                 records.size() + " records");
+                }
             }
             catch (Exception e) {
                 try {
-                    if (gotreplication)
+                    if (gotreplication) {
+                        Logging.fine(ident + ": Received bad replication XML");
                         errorRecorder.saveParse("Replication", "Parse", xml);
-                    else if (gothistory)
+                    } else if (gothistory) {
+                        Logging.fine(ident + ": Received bad history XML");
                         errorRecorder.saveParse("History", "Parse", xml);
-                    else
+                    } else {
+                        Logging.fine(ident + ": Received bad probe XML");
                         errorRecorder.saveParse("Probe", "Parse", xml);
+                    }
                 }
                 catch (Exception ignore) { }
             }
-
-            for (int j = 0; j < records.size(); j++) {
-                // Logging.log(ident + ": Before Begin Transaction");
+            int rSize = records.size();
+            for (int j = 0; j < rSize; j++) {
+                // For information logging.
+                String rId = ": ";
+                if (gotreplication) {
+                    rId += "Replication";
+                } else if (gothistory) {
+                    rId += "History";
+                } else {
+                    rId += "Probe";
+                }
+                rId += " record ";
+                if (rSize > 1) {
+                    rId += j + " / " + rSize;
+                }
                 session = HibernateWrapper.getSession();
                 tx = session.beginTransaction();
                 try {
-                    // Logging.log(ident + ": After Begin Transaction");
-
                     current = (Record)records.get(j);
-
+                    rId += " (" + 
+                        current.getClass().getSimpleName() + " from " +
+                        current.getProbeName() + ")";
                     Probe probe = statusUpdater.update(session, current, xml);
                     current.setProbe(probe);
-
                     Boolean acceptRecord = true;
                     if (!collectorService.housekeepingServiceDisabled()) {
                         Date date;
@@ -391,7 +410,7 @@ public class ListenerThread extends Thread {
                         if ( date.before(expirationDate) ) {
                             acceptRecord = false;
                             if (gotreplication) {
-                                Logging.info(ident +
+                                Logging.fine(ident + rId +
                                              ": Rejected record because " +
                                              "its 'data' are too old (" +
                                              current.getDate() + " < " +
@@ -401,13 +420,13 @@ public class ListenerThread extends Thread {
                                                   "ExpirationDate",
                                                   0, current);
                             } else if (gothistory) {
-                                Logging.info(ident +
+                                Logging.fine(ident + rId +
                                              ": Ignored history record " +
                                              "because its 'data' are too " +
                                              "old (" + current.getDate() +
                                              " < " + expirationDate + ")");                                
                             } else {
-                                Logging.info(ident +
+                                Logging.fine(ident + rId +
                                              ": Rejected record because " +
                                              "its 'data' are too old (" +
                                              current.getDate() + " < " +
@@ -417,7 +436,6 @@ public class ListenerThread extends Thread {
                                                   "ExpirationDate",
                                                   0, current);
                             }
-
                             session.flush();
                             tx.commit();
                             session.close();
@@ -469,7 +487,7 @@ public class ListenerThread extends Thread {
                             if (rawxml != null)
                                 current.setRawXml(rawxml);
                         }
-                        Logging.log(ident + ": Before Hibernate Save");
+                        Logging.debug(ident + rId + ": Before Hibernate Save");
                         if (gothistory) {
                             Date serverDate = new
                                 Date(Long.parseLong((String) 
@@ -483,8 +501,8 @@ public class ListenerThread extends Thread {
                                 getTransferDetails();
                             if ((td != null) &&
                                 (!session.contains(td))) { // No cascade
-                                Logging.debug(ident +
-                                              ": saving TransferDetails object " +
+                                Logging.debug(ident + rId +
+                                              ": Saving TransferDetails object " +
                                               "(no cascade)");
                                 session.save(td);
                             }
@@ -503,6 +521,7 @@ public class ListenerThread extends Thread {
                         session.close();
                         // Logging.log(ident + ": After Transaction Commit");
                         nrecords = nrecords + 1;
+                        Logging.fine(ident + rId + " saved.");
                     }
                 }
                 catch (ConstraintViolationException e) {
@@ -620,7 +639,7 @@ public class ListenerThread extends Thread {
                                     }
                                     if (newerIsBetter) {
                                         // Keep the new one and ditch the old
-                                        Logging.info(ident +
+                                        Logging.fine(ident + rId +
                                                      ": Replacing record " +
                                                      dupdbid +
                                                      " with \"better\" " +
@@ -653,8 +672,8 @@ public class ListenerThread extends Thread {
                                             if ((td != null) &&
                                                 (!session.contains(td))) {
                                                 // No cascade
-                                                Logging.debug(ident +
-                                                              ": saving " +
+                                                Logging.debug(ident + rId +
+                                                              ": Saving " +
                                                               "TransferDetails"+
                                                               " object " + 
                                                               "(no cascade)");
@@ -697,8 +716,8 @@ public class ListenerThread extends Thread {
                             catch (Exception e2) {
                                 tx.rollback();
                                 session.close();
-                                Logging.warning(ident +
-                                                ": caught exception resolving " +
+                                Logging.warning(ident + rId +
+                                                ": Caught exception resolving " +
                                                 "duplicates for record with " +
                                                 "md5 checksum" +
                                                 current.getmd5() +
@@ -707,14 +726,30 @@ public class ListenerThread extends Thread {
                             }
                         } else {
                             needCurrentSaveDup = current.setDuplicate(true);
+                            session = HibernateWrapper.getSession();
+                            try {
+                                Query q =
+                                    session.createQuery("select record from " +
+                                                        current.getTableName() +
+                                                        " record where " +
+                                                        "record.md5 = " +
+                                                        "'" +
+                                                        current.getmd5() +
+                                                        "'")
+                                    .setCacheMode(CacheMode.IGNORE);
+                                dupdbid = ((Record) q.list().get(0)).getRecordId();
+                            }
+                            finally {
+                                session.close();
+                            }
                         }
                         if (needCurrentSaveDup) {
-                            //Logging.log(ident + ": Before Save Duplicate");
                             try {
+                                Logging.fine(ident + rId +
+                                             ": " + (gothistory?"Ignore":"Save") +
+                                             " duplicate of record " +
+                                             dupdbid);
                                 if (gotreplication) {
-                                    Logging.debug(ident +
-                                                  ": save duplicate of record " +
-                                                  dupdbid);
                                     errorRecorder.saveDuplicate("Replication",
                                                                 "Duplicate",
                                                                 dupdbid,
@@ -724,30 +759,20 @@ public class ListenerThread extends Thread {
                                     // history date, we should not be
                                     // recording the possible
                                     // duplicates.
-                                    Logging.debug(ident +
-                                                  ": ignore duplicate of " +
-                                                  "record " +
-                                                  dupdbid +
-                                                  " (history replay)");
                                     ;
                                 } else {
                                     errorRecorder.saveDuplicate("Probe",
                                                                 "Duplicate",
                                                                 dupdbid,
                                                                 current);
-                                    Logging.debug(ident +
-                                                  ": save duplicate of " +
-                                                  "record " +
-                                                  dupdbid);
                                 }
-                                //Logging.log(ident + ": After Save Duplicate");
                             }
                             catch (Exception ignore) { }
                         }
                     } else { // Constraint exception, but not a duplicate: oops!
-                        Logging.debug(ident +
-                                      ": received constraint violation " +
-                                      e.getSQLException().getMessage());
+                        Logging.warning(ident + rId +
+                                        ": Received unexpected constraint violation " +
+                                        e.getSQLException().getMessage());
                         if (HibernateWrapper.databaseUp()) {
                             try {
                                 if (gotreplication) {
@@ -760,19 +785,22 @@ public class ListenerThread extends Thread {
                             }
                             catch (Exception ignore) { }
                         } else {
-                            Logging.warning(ident +
+                            Logging.warning(ident + rId +
                                             ": Communications error: " +
                                             "shutting down");
                             return 0; 
                         }
-                        Logging.warning(ident + ": Error In Process: ", e);
-                        Logging.warning(ident + ": Current: " + current);
+                        Logging.warning(ident + rId +": Error In Process: ", e);
+                        Logging.warning(ident + rId +": Current: " + current);
                     }
                 }
                 catch (Exception e) {
                     // Must close session!
                     tx.rollback();
                     session.close();
+                    Logging.warning(ident + rId +
+                                    ": Received unexpected exception " + e.getMessage());
+                    Logging.debug(ident + rId + ": exception details:", e);
                     if (HibernateWrapper.databaseUp()) {
                         try {
                             if (gotreplication) {
