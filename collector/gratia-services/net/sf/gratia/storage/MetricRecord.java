@@ -364,7 +364,7 @@ public class MetricRecord extends Record
 
    public void setPerformanceData(StringElement PerformanceData)
    {
-      this.DetailsData = PerformanceData;
+      this.PerformanceData = PerformanceData;
    }
 
    public StringElement getPerformanceData()
