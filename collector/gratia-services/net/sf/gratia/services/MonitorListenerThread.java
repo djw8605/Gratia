@@ -88,7 +88,22 @@ public class MonitorListenerThread extends Thread
                     "no input records processed in the past " + p.getProperty("monitor.listener.wait") +
                     " minutes. Please check the service." + cr;
                 message.setText(textMessage);
-                message.setSubject(p.getProperty("monitor.subject"));
+                message.setSubject(p.getProperty("monitor.subject", "Gratia collector problems"));
+                String mailUsername = null;
+                if (p.getProperty("monitor.from.address") == null) {
+                    Logging.warning("MonitorListenerThread unable to send " +
+                                    "inactivity warning via email because " +
+                                    "monitor.from.address property is not set!");
+                    return;
+                } else if (p.getProperty("monitor.to.address.0") == null) {
+                    Logging.warning("MonitorListenerThread unable to send " +
+                                    "inactivity warning via email because " +
+                                    "monitor.to.address.0 property is not set!");
+                    return;
+                } else {
+                    mailUsername = p.getProperty("monitor.from.address");
+                    mailUsername = mailUsername.split("\\.", 1)[0];
+                }
                 Address fromAddress = new InternetAddress(p.getProperty("monitor.from.address"));
                 Address toAddress = new InternetAddress(p.getProperty("monitor.to.address.0"));
                 message.setFrom(fromAddress);
@@ -103,7 +118,7 @@ public class MonitorListenerThread extends Thread
                             }
                     }
                 Transport transport = session.getTransport("smtp");
-                transport.connect(p.getProperty("monitor.smtp.server"),"glr","lisp01");
+                transport.connect(p.getProperty("monitor.smtp.server"), mailUsername, null);
                 transport.sendMessage(message, message.getAllRecipients());
                 transport.close();
             }
