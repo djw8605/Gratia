@@ -65,6 +65,7 @@
                     <property name="name">weekdate</property>
                     <expression name="expression">var yearmon;
 var rowdate = new Date( row["datevalue"].getTime());
+rowdate.setTime(rowdate.getTime() + (rowdate.getTimezoneOffset() * 60 * 1000));
 var daynr = rowdate.getDate().toString();
 var monthnr = (rowdate.getMonth()+1).toString();
 var yearnr = rowdate.getFullYear().toString();
@@ -156,7 +157,7 @@ yearmon = yearnr  + "-" + monthnr + "-01";</expression>
                     <property name="name">GroupByFormat</property>
                     <property name="dataType">string</property>
                     <property name="position">5</property>
-                    <expression name="defaultValue">'%Y-%v'</expression>
+                    <expression name="defaultValue">'%x-%v'</expression>
                     <property name="isInput">true</property>
                     <property name="isOutput">false</property>
                 </structure>
