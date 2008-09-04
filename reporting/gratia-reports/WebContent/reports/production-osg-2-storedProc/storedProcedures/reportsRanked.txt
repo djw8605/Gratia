@@ -29,6 +29,7 @@ begin
     set @idats := '%Y-%m-%d';
   END IF;
 
+  set @idatme := '%Y-%m-%d';
 
   IF timeUnit IS NOT NULL then
     set @iunit := TRIM(timeUnit);
@@ -58,7 +59,7 @@ begin
            concat_ws('',
                ' select final_rank,',
                ' zVOProbeSummary.zVOName as VOName,',
-               ' zVOProbeSummary.zDateValue as DateValue,',
+               ' str_to_date(zVOProbeSummary.zDateValue,''', @idatme,''') as DateValue,',
                ' sum(zVOProbeSummary.zWallDuration) as WallDuration,',
                ' sum(zVOProbeSummary.zcpu) as cpu,',
                ' sum(zVOProbeSummary.zNjobs) as Njobs',
@@ -86,7 +87,7 @@ begin
                '   sum(VOProbeSummary.WallDuration)/', @iunit, ' as zWallDuration,',
                '   sum(VOProbeSummary.CpuUserDuration + VOProbeSummary.CpuSystemDuration)/', @iunit, ' as zcpu,',
                '   sum(VOProbeSummary.Njobs) as zNjobs,',
-               '   date_format(str_to_date(date_format(VOProbeSummary.EndTime,''', @idatr, '''), ''', @idats, '''), ''%Y-%m-%d'') as  zDateValue',
+               '   str_to_date(date_format(VOProbeSummary.EndTime,''', @idatr, '''), ''', @idats, ''') as  zDateValue',
                '   FROM VOProbeSummary',
                '   WHERE (EndTime) >= (''', fromdate, ''')'
                '   and (EndTime) <= (''', todate, ''')',

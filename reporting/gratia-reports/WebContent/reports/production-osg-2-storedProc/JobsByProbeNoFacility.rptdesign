@@ -1704,10 +1704,12 @@ function beforeGeneration( chart, context )
                 <structure>
                     <property name="name">ProbeName</property>
                     <expression name="expression">dataSetRow["ProbeName"]</expression>
+                    <property name="dataType">string</property>
                 </structure>
                 <structure>
                     <property name="name">Njobs</property>
                     <expression name="expression">dataSetRow["Njobs"]</expression>
+                    <property name="dataType">decimal</property>
                 </structure>
             </list-property>
             <property name="style">sans-style1</property>

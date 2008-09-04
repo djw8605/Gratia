@@ -529,9 +529,9 @@ function beforeGeneration( chart, context ){
 	rep = context.getExternalContext().getScriptable();
 	
 	metric = rep.getParameterValue(&quot;DisplayMetric&quot;);
-	if(metric==&quot;process&quot;) metric_text = &quot;Process Hours&quot;;
-	if(metric==&quot;wallclock&quot;) metric_text = &quot;Wallclock Hours&quot;;
-	if(metric==&quot;jobcount&quot;) metric_text = &quot;Job Count&quot;;
+	if(metric==&quot;cpu&quot;) metric_text = &quot;Process Hours&quot;;
+	if(metric==&quot;WallDuration&quot;) metric_text = &quot;Wallclock Hours&quot;;
+	if(metric==&quot;Njobs&quot;) metric_text = &quot;Job Count&quot;;
 
 	rep_title = rep.getParameterValue(&quot;ReportTitle&quot;) + &quot; (&quot; + metric_text + &quot;)&quot; ;
 	rep_subtitle = rep.getParameterValue(&quot;ReportSubtitle&quot;);
@@ -653,7 +653,7 @@ else if ( val > 10 ) clr.set( 0, 0, 200 );
 
 rep = icsc.getExternalContext().getScriptable();
 val1 = rep.getParameterValue(&quot;DisplayMetric&quot;);
-if(val1 == 'jobcount')
+if(val1 == 'Njobs')
 	{
 	labval = label.getCaption().getValue(); 
 	dotpos = labval.indexOf(&quot;.&quot;); 
@@ -702,15 +702,15 @@ function beforeDrawAxisTitle( axis, label, context )
 	val1 =rep.getParameterValue(&quot;DisplayMetric&quot;);
 	if(!axis.isCategoryAxis())
 	{
-		if(val1==&quot;process&quot;)
+		if(val1==&quot;cpu&quot;)
 		{
 		label.getCaption().setValue(&quot;Process Hours&quot;);
 		}
-		else if(val1==&quot;wallclock&quot;)
+		else if(val1==&quot;WallDuration&quot;)
 		{
 		label.getCaption().setValue(&quot;Wallclock Hours&quot;);
 		}
-		else if(val1==&quot;jobcount&quot;)
+		else if(val1==&quot;Njobs&quot;)
 		{
 		label.getCaption().setValue(&quot;Job Count&quot;);
 		}
@@ -916,10 +916,7 @@ function beforeDrawAxisTitle( axis, label, context )
             <Visible>true</Visible>
           </Label>
           <DataDefinition>
-            <Definition>if (params[&quot;DisplayMetric&quot;] == &quot;wallclock&quot;) { row[&quot;WallDuration&quot;]}&#xD;
-else if (params[&quot;DisplayMetric&quot;]==&quot;process&quot;) {row[&quot;cpu&quot;]}&#xD;
-else if (params[&quot;DisplayMetric&quot;]==&quot;jobcount&quot;){row[&quot;Njobs&quot;]}&#xD;
-else {&quot;***Unknown metric***&quot;}</Definition>
+            <Definition>row[params[&quot;DisplayMetric&quot;]]</Definition>
           </DataDefinition>
           <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
           <DataPoint>
@@ -1379,18 +1376,22 @@ else {&quot;***Unknown metric***&quot;}</Definition>
                 <structure>
                     <property name="name">UserName</property>
                     <expression name="expression">dataSetRow["UserName"]</expression>
+                    <property name="dataType">string</property>
                 </structure>
                 <structure>
                     <property name="name">WallDuration</property>
                     <expression name="expression">dataSetRow["WallDuration"]</expression>
+                    <property name="dataType">float</property>
                 </structure>
                 <structure>
                     <property name="name">cpu</property>
                     <expression name="expression">dataSetRow["cpu"]</expression>
+                    <property name="dataType">float</property>
                 </structure>
                 <structure>
                     <property name="name">Njobs</property>
                     <expression name="expression">dataSetRow["Njobs"]</expression>
+                    <property name="dataType">decimal</property>
                 </structure>
             </list-property>
             <property name="style">san-style1</property>

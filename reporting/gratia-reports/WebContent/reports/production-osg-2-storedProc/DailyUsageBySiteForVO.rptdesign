@@ -650,9 +650,9 @@ function beforeGeneration( chart, context ){
 	rep = context.getExternalContext().getScriptable();
 	
 	metric = rep.getParameterValue(&quot;DisplayMetric&quot;);
-	if(metric==&quot;process&quot;) metric_text = &quot;Process Hours&quot;;
-	if(metric==&quot;wallclock&quot;) metric_text = &quot;Wallclock Hours&quot;;
-	if(metric==&quot;jobcount&quot;) metric_text = &quot;Job Count&quot;;
+	if(metric==&quot;cpu&quot;) metric_text = &quot;Process Hours&quot;;
+	if(metric==&quot;WallDuration&quot;) metric_text = &quot;Wallclock Hours&quot;;
+	if(metric==&quot;Njobs&quot;) metric_text = &quot;Job Count&quot;;
 
 	rep_title = rep.getParameterValue(&quot;ReportTitle&quot;) + &quot; (&quot; + metric_text + &quot;)&quot; ;
 	rep_subtitle = rep.getParameterValue(&quot;ReportSubtitle&quot;);
@@ -819,15 +819,15 @@ function beforeDrawAxisTitle( axis, label, context )
 	val1 =rep.getParameterValue(&quot;DisplayMetric&quot;);
 	if(!axis.isCategoryAxis())
 	{
-		if(val1==&quot;process&quot;)
+		if(val1==&quot;cpu&quot;)
 		{
 		label.getCaption().setValue(&quot;Process Hours&quot;);
 		}
-		else if(val1==&quot;wallclock&quot;)
+		else if(val1==&quot;WallDuration&quot;)
 		{
 		label.getCaption().setValue(&quot;Wallclock Hours&quot;);
 		}
-		else if(val1==&quot;jobcount&quot;)
+		else if(val1==&quot;Njobs&quot;)
 		{
 		label.getCaption().setValue(&quot;Job Count&quot;);
 		}
@@ -840,7 +840,7 @@ function beforeDrawAxisTitle( axis, label, context )
   <SeriesThickness>10.0</SeriesThickness>
   <SampleData>
     <BaseSampleData>
-      <DataSetRepresentation>'A','B','C'</DataSetRepresentation>
+      <DataSetRepresentation>01/05/2000,02/01/2000,04/12/2000</DataSetRepresentation>
     </BaseSampleData>
     <OrthogonalSampleData>
       <DataSetRepresentation>5.0,4.0,12.0</DataSetRepresentation>
@@ -851,7 +851,7 @@ function beforeDrawAxisTitle( axis, label, context )
     <LegendBehavior>HighlightSerie</LegendBehavior>
   </Interactivity>
   <Axes>
-    <Type>Text</Type>
+    <Type>DateTime</Type>
     <Title>
       <Caption>
         <Value>Day</Value>
@@ -1030,10 +1030,7 @@ function beforeDrawAxisTitle( axis, label, context )
             <Visible>false</Visible>
           </Label>
           <DataDefinition>
-            <Definition>if (params[&quot;DisplayMetric&quot;] == &quot;wallclock&quot;) { row[&quot;WallDuration&quot;] }&#xD;
-else if (params[&quot;DisplayMetric&quot;]==&quot;process&quot;) {row[&quot;cpu&quot;]}&#xD;
-else if (params[&quot;DisplayMetric&quot;]==&quot;jobcount&quot;){row[&quot;Njobs&quot;]}&#xD;
-else {&quot;***Unknown metric***&quot;}</Definition>
+            <Definition>row[params[&quot;DisplayMetric&quot;]]</Definition>
           </DataDefinition>
           <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
           <DataPoint>
@@ -1086,30 +1083,16 @@ else {&quot;***Unknown metric***&quot;}</Definition>
             <Action>
               <Type>Show_Tooltip</Type>
               <Value xsi:type="attribute:TooltipValue">
-                <Text>var SiteName = row[&quot;SiteName&quot;]&#xD;
-&#xD;
-var label;&#xD;
+                <Text>var SiteName = row[&quot;SiteName&quot;];&#xD;
+var metricvalue =String(row[params[&quot;DisplayMetric&quot;].value] );&#xD;
+var label = &quot; &quot;;&#xD;
 var dotpos;&#xD;
-&#xD;
-if (params[&quot;DisplayMetric&quot;] == &quot;wallclock&quot;) { &#xD;
-	metricvalue = String(row[&quot;WallDuration&quot;]);&#xD;
-	label = &quot;Wallclock Hours: &quot;;&#xD;
-}&#xD;
-if (params[&quot;DisplayMetric&quot;] == &quot;process&quot;)  {&#xD;
-	metricvalue = String(row[&quot;cpu&quot;]);&#xD;
-	label = &quot;Process Hours: &quot;;&#xD;
-} &#xD;
-if (params[&quot;DisplayMetric&quot;] == &quot;jobcount&quot;) {&#xD;
-	metricvalue = String(row[&quot;Njobs&quot;]);&#xD;
-	label = &quot;Jobs: &quot;;&#xD;
-}&#xD;
-var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
-	if(dotpos > 0)&#xD;
-	{ &#xD;
-	metricvalue = metricvalue.substring(0,dotpos+2);&#xD;
-	}&#xD;
-&#xD;
-&quot;Site: &quot; + SiteName + &quot;\n&quot; + label + metricvalue</Text>
+if (params[&quot;DisplayMetric&quot;] == &quot;WallDuration&quot;) {label = &quot;Wallclock Hours: &quot;;}&#xD;
+if (params[&quot;DisplayMetric&quot;] == &quot;cpu&quot;)  {label = &quot;Process Hours: &quot;;}&#xD;
+if (params[&quot;DisplayMetric&quot;] == &quot;Njobs&quot;) {label = &quot;Jobs: &quot;;}&#xD;
+var dotpos = metricvalue.indexOf(&quot;.&quot;,0);&#xD;
+if(dotpos > 0) {metricvalue = metricvalue.substring(0,dotpos+2);}&#xD;
+&quot;Site: &quot; + SiteName  + &quot;   \n&quot; + label + metricvalue;</Text>
                 <Delay>200</Delay>
               </Value>
             </Action>
@@ -1964,6 +1947,10 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
       </Insets>
       <Visible>true</Visible>
     </Label>
+    <FormatSpecifier xsi:type="attribute:DateFormatSpecifier">
+      <Type>Medium</Type>
+      <Detail>Date</Detail>
+    </FormatSpecifier>
     <LabelPosition>Below</LabelPosition>
     <MajorGrid>
       <LineAttributes>
@@ -2092,21 +2079,22 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
                 <structure>
                     <property name="name">DateValue</property>
                     <expression name="expression">dataSetRow["DateValue"]</expression>
-                    <property name="dataType">string</property>
+                    <property name="dataType">date</property>
                 </structure>
                 <structure>
                     <property name="name">WallDuration</property>
                     <expression name="expression">dataSetRow["WallDuration"]</expression>
-                    <property name="dataType">any</property>
+                    <property name="dataType">float</property>
                 </structure>
                 <structure>
                     <property name="name">cpu</property>
                     <expression name="expression">dataSetRow["cpu"]</expression>
-                    <property name="dataType">any</property>
+                    <property name="dataType">float</property>
                 </structure>
                 <structure>
                     <property name="name">Njobs</property>
                     <expression name="expression">dataSetRow["Njobs"]</expression>
+                    <property name="dataType">decimal</property>
                 </structure>
                 <structure>
                     <property name="name">VOName</property>

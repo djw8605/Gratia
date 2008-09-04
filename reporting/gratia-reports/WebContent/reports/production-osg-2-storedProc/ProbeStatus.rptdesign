@@ -1521,10 +1521,9 @@ function beforeGeneration( chart, context ){
       </Insets>
       <Visible>true</Visible>
     </Label>
-    <FormatSpecifier xsi:type="attribute:JavaDateFormatSpecifier">
-      <Pattern>
-MM/dd/yyyy
-    </Pattern>
+    <FormatSpecifier xsi:type="attribute:DateFormatSpecifier">
+      <Type>Medium</Type>
+      <Detail>Date</Detail>
     </FormatSpecifier>
     <LabelPosition>Below</LabelPosition>
     <MajorGrid>
@@ -1633,14 +1632,17 @@ MM/dd/yyyy
                 <structure>
                     <property name="name">ProbeName</property>
                     <expression name="expression">dataSetRow["ProbeName"]</expression>
+                    <property name="dataType">string</property>
                 </structure>
                 <structure>
                     <property name="name">endtime</property>
                     <expression name="expression">dataSetRow["endtime"]</expression>
+                    <property name="dataType">date-time</property>
                 </structure>
                 <structure>
                     <property name="name">Njobs</property>
                     <expression name="expression">dataSetRow["Njobs"]</expression>
+                    <property name="dataType">decimal</property>
                 </structure>
             </list-property>
             <property name="style">sans-style1</property>
