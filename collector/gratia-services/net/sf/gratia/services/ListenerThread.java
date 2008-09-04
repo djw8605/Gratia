@@ -355,8 +355,8 @@ public class ListenerThread extends Thread {
                 }
                 records = convert(xml);
                 if (records.size() > 1) {
-                    Logging.fine(ident + ": Received envelope of " +
-                                 records.size() + " records");
+                    Logging.log(ident + ": Received envelope of " +
+                                records.size() + " records");
                 }
             }
             catch (Exception e) {
@@ -387,7 +387,7 @@ public class ListenerThread extends Thread {
                 }
                 rId += " record ";
                 if (rSize > 1) {
-                    rId += j + " / " + rSize;
+                    rId += (j + 1) + " / " + rSize;
                 }
                 session = HibernateWrapper.getSession();
                 tx = session.beginTransaction();
@@ -506,6 +506,11 @@ public class ListenerThread extends Thread {
                                               "(no cascade)");
                                 session.save(td);
                             }
+                            session.flush();
+                            Query q =
+                                session.createSQLQuery("call add_JUR_to_summary(" +
+                                                       current.getRecordId() + ")");
+                            q.executeUpdate();
                         }
                         //
                         // now - save history
@@ -529,14 +534,15 @@ public class ListenerThread extends Thread {
                     session.close();
                     int dupdbid = 0;
                     Boolean needCurrentSaveDup = false;
+                    Query q;
+                    Query sq;
                     if (e.getSQLException().getMessage().
                         matches(".*\\b[Dd]uplicate\\b.*")) {
                         if (current.getTableName().equals("JobUsageRecord")) {
                             UserIdentity newUserIdentity =
                                 ((JobUsageRecord) current).getUserIdentity();
                             session = HibernateWrapper.getSession();
-                            Query q =
-                                session.createQuery("select record from " +
+                            q = session.createQuery("select record from " +
                                                     "JobUsageRecord " +
                                                     "record where " +
                                                     "record.md5 = " +
@@ -679,6 +685,10 @@ public class ListenerThread extends Thread {
                                                               "(no cascade)");
                                                 session.save(td);
                                             }
+                                            session.flush();
+                                            sq = session.createSQLQuery("call add_JUR_to_summary(" +
+                                                                        current.getRecordId() + ")");
+                                            sq.executeUpdate();
                                             savedCurrent = true;
                                         }
                                         if (original_record.
@@ -728,7 +738,7 @@ public class ListenerThread extends Thread {
                             needCurrentSaveDup = current.setDuplicate(true);
                             session = HibernateWrapper.getSession();
                             try {
-                                Query q =
+                                q =
                                     session.createQuery("select record from " +
                                                         current.getTableName() +
                                                         " record where " +
@@ -741,6 +751,11 @@ public class ListenerThread extends Thread {
                             }
                             finally {
                                 session.close();
+                            }
+                            if (!needCurrentSaveDup) {
+                                Logging.fine(ident + rId +
+                                             ": " + "Ignore duplicate of record " +
+                                             dupdbid);
                             }
                         }
                         if (needCurrentSaveDup) {

@@ -6,7 +6,7 @@ DROP PROCEDURE IF EXISTS updatenodesummary -- Obsolete summary procedure
 ||
 DROP PROCEDURE IF EXISTS add_JUR_to_summary
 ||
-CREATE PROCEDURE add_JUR_to_summary(inputDbid INT(11), updateTransferSummary INT(1))
+CREATE PROCEDURE add_JUR_to_summary(inputDbid INT(11))
 DETERMINISTIC
 AJUR:BEGIN
   -- Main
@@ -23,6 +23,7 @@ AJUR:BEGIN
   DECLARE n_ServerDate DATETIME;
   DECLARE n_StartTime DATETIME;
   DECLARE n_EndTime DATETIME;
+  DECLARE n_rowDate DATETIME;
 
   -- Storage only
   DECLARE n_DN VARCHAR(255);
@@ -54,17 +55,20 @@ AJUR:BEGIN
          IFNULL(J.ResourceType, ''),
          IFNULL(J.HostDescription, ''),
          IFNULL(J.Host, ''),
-         IFNULL(EC.Value,
-                IF(EBS.Value = 'TRUE' OR EBS.Value = '1',
-                   IFNULL(ES.Value, 0) + 128,
-                   IFNULL(J.Status, 0))),
+         IFNULL(EC.`Value`,
+                IF(EBS.`Value` = 'TRUE' OR EBS.`Value` = '1',
+                   IFNULL(ES.`Value`, 0) + 128,
+                   IFNULL(J.`Status`, 0))),
          J.Njobs,
          J.WallDuration,
          J.CpuUserDuration,
          J.CpuSystemDuration,
          M.ServerDate,
          J.StartTime,
-         J.EndTime
+         J.EndTime,
+         IF(ResourceType = 'Batch',
+            DATE(J.EndTime),
+            DATE(J.StartTime))        
   INTO n_ProbeName,
        n_CommonName,
        n_VOcorrid,
@@ -78,7 +82,8 @@ AJUR:BEGIN
        n_CpuSystemDuration,
        n_ServerDate,
        n_StartTime,
-       n_EndTime
+       n_EndTime,
+       n_rowdate
   FROM JobUsageRecord J
        JOIN JobUsageRecord_Meta M ON (J.dbid = M.dbid)
        JOIN VONameCorrection VC ON
@@ -123,13 +128,6 @@ AJUR:BEGIN
 
   IF n_ResourceType = 'Storage' THEN
 
-    -- Nasty kludge to avoid trying to update when Hibernate hasn't
-    --  filled in TransferDetails yet. See build-trigger.sql for details.
-
-    IF updateTransferSummary = 0 THEN
-       LEAVE AJUR;
-    END IF;
-
     IF n_StartTime IS NULL THEN
       INSERT INTO trace(eventtime, pname, p1, `data`)
        VALUES(UTC_TIMESTAMP(), 'add_JUR_to_summary', inputDbid, 'Failed due to null StartTime');
@@ -142,7 +140,7 @@ AJUR:BEGIN
            Status,
            StorageUnit,
            TransferDuration,
-           TransferSize
+           IF(TransferSize > 0, TransferSize, 0)
     INTO n_Protocol,
          n_RemoteSite,
          n_IsNew,
@@ -166,7 +164,7 @@ AJUR:BEGIN
                                       CommonName, Protocol, RemoteSite, Status,
                                       IsNew, Njobs, TransferSize, StorageUnit,
                                       TransferDuration)
-    VALUES(DATE(n_StartTime),
+    VALUES(n_rowDate,
            n_VOcorrid,
            n_ProbeName,
            n_CommonName,
@@ -183,7 +181,7 @@ AJUR:BEGIN
      TransferSize = TransferSize + VALUES(TransferSize),
      TransferDuration = TransferDuration + VALUES(TransferDuration);
 
-    LEAVE AJUR; -- Don't need anything below
+    LEAVE AJUR; -- Done
 
   END IF;
 
@@ -295,8 +293,17 @@ DJUR:BEGIN
   DECLARE n_ServerDate DATETIME;
   DECLARE n_StartTime DATETIME;
   DECLARE n_EndTime DATETIME;
-  DECLARE ps_ServerDate DATETIME;
-  DECLARE d_EndTime DATE;
+  DECLARE n_rowDate DATE;
+
+  -- Storage only
+  DECLARE n_DN VARCHAR(255);
+  DECLARE n_Protocol VARCHAR(255);
+  DECLARE n_RemoteSite VARCHAR(255);
+  DECLARE n_Status BIGINT(20);
+  DECLARE n_IsNew BIGINT(20);
+  DECLARE n_StorageUnit VARCHAR(64);
+  DECLARE n_TransferDuration DOUBLE;
+  DECLARE n_TransferSize DOUBLE;
 
   -- NodeSummary update only
   DECLARE wantNodeSummary VARCHAR(64) DEFAULT '';
@@ -317,7 +324,10 @@ DJUR:BEGIN
          IFNULL(J.ResourceType, ''),
          IFNULL(J.HostDescription, ''),
          IFNULL(J.Host, ''),
-         IFNULL(IFNULL(RT.value, J.Status), 0),
+         IFNULL(EC.`Value`,
+                IF(EBS.`Value` = 'TRUE' OR EBS.`Value` = '1',
+                   IFNULL(ES.`Value`, 0) + 128,
+                   IFNULL(J.`Status`, 0))),
          J.Njobs,
          J.WallDuration,
          J.CpuUserDuration,
@@ -325,9 +335,8 @@ DJUR:BEGIN
          M.ServerDate,
          J.StartTime,
          J.EndTime,
-         STR_TO_DATE(DATE_FORMAT(M.ServerDate, '%Y-%c-%e %H:00:00'),
-                     '%Y-%c-%e %H:00:00'),
-         DATE(J.EndTime)
+         IF(ResourceType = 'Batch', DATE(J.EndTime),
+            DATE(J.StartTime))
   INTO n_ProbeName,
        n_CommonName,
        n_VOcorrid,
@@ -342,20 +351,31 @@ DJUR:BEGIN
        n_ServerDate,
        n_StartTime,
        n_EndTime,
-       ps_ServerDate,
-       d_EndTime
+       n_rowDate
   FROM JobUsageRecord J
        JOIN JobUsageRecord_Meta M ON (J.dbid = M.dbid)
        JOIN VONameCorrection VC ON
         ((J.VOName = BINARY VC.VOName) AND
          (((J.ReportableVOName IS NULL) AND (VC.ReportableVOName IS NULL))
           OR (BINARY J.ReportableVOName = BINARY VC.ReportableVOName)))
-       LEFT JOIN Resource RT ON
-        ((J.dbid = RT.dbid) AND
-         (RT.description = 'ExitCode'))
+       LEFT JOIN Resource EC ON
+        ((J.dbid = EC.dbid) AND
+         (EC.description = 'ExitCode'))
+       LEFT JOIN Resource ES ON
+        ((J.dbid = ES.dbid) AND
+         (ES.description = 'ExitSignal'))
+       LEFT JOIN Resource EBS ON
+        ((J.dbid = EBS.dbid) AND
+         (EBS.description = 'ExitBySignal'))
   WHERE J.dbid = inputDbid;
 
   -- Basic data checks
+  IF n_ResourceType IS NOT NULL AND
+     n_ResourceType NOT IN ('Batch', 'RawCPU', 'Storage') THEN
+     -- Very common case: no message necessary
+     LEAVE DJUR;
+  END IF;
+
   IF n_ProbeName IS NULL THEN
      INSERT INTO trace(eventtime, pname, p1, `data`)
       VALUES(UTC_TIMESTAMP(), 'del_JUR_from_summary', inputDbid, 'Failed due to null ProbeName');
@@ -372,6 +392,65 @@ DJUR:BEGIN
      INSERT INTO trace(eventtime, pname, p1, `data`)
       VALUES(UTC_TIMESTAMP(), 'del_JUR_from_summary', inputDbid, 'Failed due to null Njobs');
      LEAVE DJUR;
+  END IF;
+
+  IF n_ResourceType = 'Storage' THEN
+    IF n_StartTime IS NULL THEN
+      INSERT INTO trace(eventtime, pname, p1, `data`)
+       VALUES(UTC_TIMESTAMP(), 'del_JUR_from_summary', inputDbid, 'Failed due to null StartTime');
+      LEAVE DJUR;
+    END IF;
+
+    SELECT Protocol,
+           IF(IsNew = '1', `Source`, `Destination`),
+           IsNew,
+           Status,
+           StorageUnit,
+           TransferDuration,
+           IF(TransferSize > 0, TransferSize, 0)
+    INTO n_Protocol,
+         n_RemoteSite,
+         n_IsNew,
+         n_Status,
+         n_StorageUnit,
+         n_TransferDuration,
+         n_TransferSize
+    FROM JobUsageRecord R
+         join TDCorr on (R.dbid = TDCorr.dbid)
+         join TransferDetails T on (TDCorr.TransferDetailsId = T.TransferDetailsId),
+         (SELECT StorageUnit,
+                 PhaseUnit as TransferDuration,
+                 `Value` as TransferSize
+          FROM Network where dbid = inputDbid limit 1) N
+    WHERE R.dbid = inputDbid;
+
+    -- Update MasterTransferSummary
+    UPDATE MasterTransferSummary
+    SET Njobs = Njobs - n_Njobs,
+        TransferSize = TransferSize - n_TransferSize,
+        TransferDuration = TransferDuration - n_TransferDuration
+    WHERE StartTime = n_rowDate
+      AND VOcorrid = n_VOcorrid
+      AND CommonName = n_CommonName
+      AND Protocol = n_Protocol
+      AND RemoteSite = n_RemoteSite
+      AND Status = n_Status
+      AND IsNew = n_IsNew
+      AND StorageUnit = n_StorageUnit;
+
+    -- Clean up emptied rows
+    DELETE FROM MasterTransferSummary
+    WHERE StartTime = n_rowDate
+        AND VOcorrid = n_VOcorrid
+        AND CommonName = n_CommonName
+        AND Protocol = n_Protocol
+        AND RemoteSite = n_RemoteSite
+        AND Status = n_Status
+        AND IsNew = n_IsNew
+        AND StorageUnit = n_StorageUnit
+        AND Njobs <= 0;
+
+    LEAVE DJUR; -- Done
   END IF;
 
   IF n_WallDuration IS NULL THEN
@@ -394,7 +473,7 @@ DJUR:BEGIN
 
   IF n_EndTime < n_StartTime THEN
      INSERT INTO trace(eventtime, pname, p1, `data`)
-      VALUES(UTC_TIMESTAMP(), 'add_JUR_to_summary', inputDbid, 'Failed due to EndTime < StartTime');
+      VALUES(UTC_TIMESTAMP(), 'del_JUR_from_summary', inputDbid, 'Failed due to EndTime < StartTime');
      LEAVE DJUR;
   END IF;
 
@@ -404,20 +483,22 @@ DJUR:BEGIN
       WallDuration = WallDuration - n_WallDuration,
       CpuUserDuration = CpuUserDuration - n_CpuUserDuration,
       CpuSystemDuration = CpuSystemDuration - n_CpuSystemDuration
-  WHERE EndTime = d_EndTime
+  WHERE EndTime = n_rowdate
     AND VOcorrid = n_VOcorrid
     AND ProbeName = n_ProbeName
-    AND CommonName = IFNULL(n_CommonName, '')
-    AND ResourceType = IFNULL(n_ResourceType, '')
-    AND HostDescription = IFNULL(n_HostDescription, '')
+    AND CommonName = n_CommonName
+    AND ResourceType = n_ResourceType
+    AND HostDescription = n_HostDescription
     AND ApplicationExitCode = n_ApplicationExitCode;
 
-  -- Clean up emptied rows (may check multiple rows, but trying to be
-  -- economical with dynamically evaluated expressions (like IFNULL).
+  -- Clean up emptied rows
   DELETE FROM MasterSummaryData
-  WHERE EndTime = d_EndTime
+  WHERE EndTime = n_rowdate
     AND VOcorrid = n_VOcorrid
-    AND ProbeName = n_Probename
+    AND ProbeName = n_ProbeName
+    AND CommonName = n_CommonName
+    AND ResourceType = n_ResourceType
+    AND HostDescription = n_HostDescription
     AND ApplicationExitCode = n_ApplicationExitCode
     AND Njobs <= 0;
 
@@ -443,15 +524,15 @@ DJUR:BEGIN
       update NodeSummary
       set CpuSystemTime = CpuSystemTime - newcpusystemtime,
           CpuUserTime = CpuUserTime - newcpuusertime
-      where EndTime = d_EndTime
-        and Host = n_Host
+      where EndTime = date(newdate)
+        and Node = n_Host
         and ProbeName = n_ProbeName
         and ResourceType = n_ResourceType;
 
       -- Clean up emptied rows
       delete from NodeSummary
       where EndTime = d_EndTime
-        and Host = n_Host
+        and Node = n_Host
         and ProbeName = n_ProbeName
         and ResourceType = n_ResourceType
         and CpuSystemTime <= 0
