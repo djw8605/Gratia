@@ -919,8 +919,8 @@ var yearmon;
 var now = new Date();
 now.setDate(1);
 var begdate = new Date(DateTimeSpan.subDate(now,0,6,0).getTime());
-var yearnr = begdate.getFullYear().toString();
-var monthnr = (begdate.getMonth() + 1).toString();
+var yearnr = begdate.getUTCFullYear().toString();
+var monthnr = (begdate.getUTCMonth() + 1).toString();
 if (monthnr.length &lt; 2){monthnr ="0" + monthnr;}
 yearmon = yearnr  + "-" + monthnr + "-01";</expression>
                     <property name="isInput">true</property>
