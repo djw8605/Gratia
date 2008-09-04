@@ -112,7 +112,7 @@ function shutdown_local_tomcat {
 function verify_shutdown {
     pid="$1"
     echo "... verify ports are free and tomcat fully shutdown for pid ($pid)"
-    tries=10
+    tries=20
     sleep=5
     while
       [ $tries -gt 1 ]
