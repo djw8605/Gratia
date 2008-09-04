@@ -18,8 +18,6 @@
                   "service.listener.threads" => 1,
                   "service.admin.FQAN.0" => "/fermilab/Role=GratiaAdmin",
                   "service.admin.FQAN.1" => "/fermilab/Role=GratiaDeveloper",
-                  "service.admin.FQAN.2" =>"/fermilab/Role=GratiaGlobalAdmin",
-                  "service.admin.FQAN.3" =>"/fermilab/Role=GratiaFermilabAdmin",
 
                  }
                },
@@ -41,8 +39,6 @@
                    "service.listener.threads" => 1,
                    "service.admin.FQAN.0" => "/fermilab/Role=GratiaAdmin",
                    "service.admin.FQAN.1" => "/fermilab/Role=GratiaDeveloper",
-                   "service.admin.FQAN.2" =>"/fermilab/Role=GratiaGlobalAdmin",
-                   "service.admin.FQAN.3" =>"/fermilab/Role=GratiaFermilabAdmin",
                   }
                 },
  jeffmack => {http_port => 8880,
@@ -59,8 +55,6 @@
                "monitor.to.address0" => 'jeffmack@fnal.gov',
                "service.admin.FQAN.0" => "/fermilab/Role=GratiaAdmin",
                "service.admin.FQAN.1" => "/fermilab/Role=GratiaDeveloper",
-               "service.admin.FQAN.2" =>"/fermilab/Role=GratiaGlobalAdmin",
-               "service.admin.FQAN.3" =>"/fermilab/Role=GratiaFermilabAdmin",
               }
              },
  pcanal => { http_port => 8881,
@@ -77,8 +71,6 @@
               "monitor.to.address0" => 'pcanal@fnal.gov',
               "service.admin.FQAN.0" => "/fermilab/Role=GratiaAdmin",
               "service.admin.FQAN.1" => "/fermilab/Role=GratiaDeveloper",
-              "service.admin.FQAN.2" =>"/fermilab/Role=GratiaGlobalAdmin",
-              "service.admin.FQAN.3" =>"/fermilab/Role=GratiaFermilabAdmin",
              }
            },
  greenc => { tomcat_user => "greenc",
@@ -104,8 +96,6 @@
               "monitor.to.address0" => 'greenc@fnal.gov' ,
               "service.admin.FQAN.0" => "/fermilab/Role=GratiaAdmin",
               "service.admin.FQAN.1" => "/fermilab/Role=GratiaDeveloper",
-              "service.admin.FQAN.2" =>"/fermilab/Role=GratiaGlobalAdmin",
-              "service.admin.FQAN.3" =>"/fermilab/Role=GratiaFermilabAdmin",
               #              "service.security.level" => 1,
               #              "service.use.selfgenerated.certs" => 1
              }
@@ -124,8 +114,6 @@
                "monitor.to.address0" => 'vittone@fnal.gov',
                "service.admin.FQAN.0" => "/fermilab/Role=GratiaAdmin",
                "service.admin.FQAN.1" => "/fermilab/Role=GratiaDeveloper",
-               "service.admin.FQAN.2" =>"/fermilab/Role=GratiaGlobalAdmin",
-               "service.admin.FQAN.3" =>"/fermilab/Role=GratiaFermilabAdmin",
               }
             },
  penelope => { http_port => 8884,
@@ -142,8 +130,6 @@
                 "monitor.to.address0" => 'penelope@fnal.gov',
                 "service.admin.FQAN.0" => "/fermilab/Role=GratiaAdmin",
                 "service.admin.FQAN.1" => "/fermilab/Role=GratiaDeveloper",
-                "service.admin.FQAN.2" =>"/fermilab/Role=GratiaGlobalAdmin",
-                "service.admin.FQAN.3" =>"/fermilab/Role=GratiaFermilabAdmin",
                }
              },
  greenc_test => { http_port => 8885,
@@ -178,8 +164,6 @@
                    "service.lifetime.DupRecord" => "UNLIMITED",
                    "service.admin.FQAN.0" => "/fermilab/Role=GratiaAdmin",
                    "service.admin.FQAN.1" => "/fermilab/Role=GratiaDeveloper",
-                   "service.admin.FQAN.2" =>"/fermilab/Role=GratiaGlobalAdmin",
-                   "service.admin.FQAN.3" =>"/fermilab/Role=GratiaFermilabAdmin",
                   }
                 },
  rsv_test => { http_port => 8886,
@@ -198,8 +182,6 @@
                 "service.listener.threads" => 1,
                 "service.admin.FQAN.0" => "/fermilab/Role=GratiaAdmin",
                 "service.admin.FQAN.1" => "/fermilab/Role=GratiaDeveloper",
-                "service.admin.FQAN.2" =>"/fermilab/Role=GratiaGlobalAdmin",
-                "service.admin.FQAN.3" =>"/fermilab/Role=GratiaFermilabAdmin",
                }
              },
  weigand => { http_port => 8887,
@@ -217,8 +199,6 @@
                "monitor.to.address0" => 'weigand@fnal.gov',
                "service.admin.FQAN.0" => "/fermilab/Role=GratiaAdmin",
                "service.admin.FQAN.1" => "/fermilab/Role=GratiaDeveloper",
-               "service.admin.FQAN.2" =>"/fermilab/Role=GratiaGlobalAdmin",
-               "service.admin.FQAN.3" =>"/fermilab/Role=GratiaFermilabAdmin",
               }
             }
 );
