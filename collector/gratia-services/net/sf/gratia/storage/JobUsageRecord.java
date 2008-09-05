@@ -720,4 +720,18 @@ public class JobUsageRecord extends Record
         }
     }
 
+    // Trigger called after session.save()
+    public void executeTrigger(org.hibernate.Session session) throws Exception {
+        TransferDetails td = getTransferDetails();
+        if ((td != null) &&
+            (!session.contains(td))) { // No cascade
+            session.save(td); // Save TransferDetails session.
+        }
+        session.flush();
+        org.hibernate.Query q =
+            session.createSQLQuery("call add_JUR_to_summary(" +
+                                   getRecordId() + ")");
+        q.executeUpdate();
+    }
+
 }

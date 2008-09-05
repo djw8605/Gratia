@@ -40,5 +40,8 @@ public interface RecordInterface {
     public Date getDate();  // Returns the date this records is reporting about.
     public Date getExpirationDate(); // Returns the date of the oldest raw records we keep
 
+    // In case anything special needs to be done after saving.
+    public void executeTrigger(org.hibernate.Session session) throws Exception;
+
     public void AttachContent( org.hibernate.Session session ) throws Exception;
 }

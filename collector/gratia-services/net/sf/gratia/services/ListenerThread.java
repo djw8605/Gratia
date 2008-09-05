@@ -495,23 +495,7 @@ public class ListenerThread extends Thread {
                             current.setServerDate(serverDate);
                         }
                         session.save(current);
-                        if (current.getTableName().equals("JobUsageRecord")) {
-                            TransferDetails td =
-                                ((JobUsageRecord) current).
-                                getTransferDetails();
-                            if ((td != null) &&
-                                (!session.contains(td))) { // No cascade
-                                Logging.debug(ident + rId +
-                                              ": Saving TransferDetails object " +
-                                              "(no cascade)");
-                                session.save(td);
-                            }
-                            session.flush();
-                            Query q =
-                                session.createSQLQuery("call add_JUR_to_summary(" +
-                                                       current.getRecordId() + ")");
-                            q.executeUpdate();
-                        }
+                        current.executeTrigger(session);
                         //
                         // now - save history
                         //
@@ -672,23 +656,7 @@ public class ListenerThread extends Thread {
                                             tx.commit();
                                             tx = session.beginTransaction();
                                             session.save(current);
-                                            TransferDetails td =
-                                                ((JobUsageRecord) current).
-                                                getTransferDetails();
-                                            if ((td != null) &&
-                                                (!session.contains(td))) {
-                                                // No cascade
-                                                Logging.debug(ident + rId +
-                                                              ": Saving " +
-                                                              "TransferDetails"+
-                                                              " object " + 
-                                                              "(no cascade)");
-                                                session.save(td);
-                                            }
-                                            session.flush();
-                                            sq = session.createSQLQuery("call add_JUR_to_summary(" +
-                                                                        current.getRecordId() + ")");
-                                            sq.executeUpdate();
+                                            current.executeTrigger(session);
                                             savedCurrent = true;
                                         }
                                         if (original_record.
