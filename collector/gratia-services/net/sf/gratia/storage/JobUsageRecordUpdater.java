@@ -139,66 +139,58 @@ public abstract class JobUsageRecordUpdater implements RecordUpdater
             // All we need to do here is rip Source, Destination,
             // Protocol and IsNew out of the Resource list, create a new
             // TransferDetails object and set the bi-directional links.
-            if ((!current.getResourceType().getValue().equals("Storage")) || // Not Storage
-                ((current.getDisk() != null) &&
-                 (current.getDisk().size() > 0))) { // Not Transfer
-//                 Logging.debug("JobUsageRecordUpdater.CheckIsNew.Update(): rejecting record: " +
-//                               current.getResourceType().getValue() + ", " +
-//                               ((current.getDisk() != null)?
-//                                ("hasDisk, size = " + current.getDisk().size()):
-//                                "noDisk"));                              
-                return;
-            }
+            if (current.getResourceType().getValue().equals("Storage") &&
+                current.getStartTime() != null) { // Transfer record
+                Vector v = new Vector();
 
-            Vector v = new Vector();
+                StringElement Protocol = findResource(current, "Protocol");
+                if (Protocol == null) {
+                    Logging.warning("JobUsageRecordUpdater.CheckIsNew.Update(): could not find Protocol resource for transfer record");
+                    return;
+                }
+                v.add(Protocol);
 
-            StringElement Protocol = findResource(current, "Protocol");
-            if (Protocol == null) {
-                Logging.warning("JobUsageRecordUpdater.CheckIsNew.Update(): could not find Protocol resource for transfer record");
-                return;
-            }
-            v.add(Protocol);
+                StringElement Source = findResource(current, "Source");
+                if (Source == null) {
+                    Logging.warning("JobUsageRecordUpdater.CheckIsNew.Update(): could not find Source resource for transfer record");
+                    return;
+                }
+                v.add(Source);
 
-            StringElement Source = findResource(current, "Source");
-            if (Source == null) {
-                Logging.warning("JobUsageRecordUpdater.CheckIsNew.Update(): could not find Source resource for transfer record");
-                return;
-            }
-            v.add(Source);
+                StringElement Destination = findResource(current, "Destination");
+                if (Destination == null) {
+                    Logging.warning("JobUsageRecordUpdater.CheckIsNew.Update(): could not find Destination resource for transfer record");
+                    return;
+                }
+                v.add(Destination);
 
-            StringElement Destination = findResource(current, "Destination");
-            if (Destination == null) {
-                Logging.warning("JobUsageRecordUpdater.CheckIsNew.Update(): could not find Destination resource for transfer record");
-                return;
-            }
-            v.add(Destination);
+                TransferDetails td = new TransferDetails();
+                td.setProtocol(Protocol.getValue());
+                td.setSource(Source.getValue());
+                td.setDestination(Destination.getValue());
 
-            TransferDetails td = new TransferDetails();
-            td.setProtocol(Protocol.getValue());
-            td.setSource(Source.getValue());
-            td.setDestination(Destination.getValue());
-
-            StringElement IsNew = findResource(current, "IsNew");
-            if (IsNew == null) {
-                Logging.log("JobUsageRecordUpdater.CheckIsNew.Update(): setting isNew based on Destination resource");
-                if (Destination.getValue().contains("@")) {
-                    td.setIsNew(1);
+                StringElement IsNew = findResource(current, "IsNew");
+                if (IsNew == null) {
+                    Logging.log("JobUsageRecordUpdater.CheckIsNew.Update(): setting isNew based on Destination resource");
+                    if (Destination.getValue().contains("@")) {
+                        td.setIsNew(1);
+                    } else {
+                        td.setIsNew(0);
+                    }
                 } else {
-                    td.setIsNew(0);
+                    try {
+                        td.setIsNew(Integer.parseInt(IsNew.getValue()));
+                        v.add(IsNew);
+                    } catch (Exception e) {
+                        Logging.warning("JobUsageRecordUpdaterCheckIsNew.Update(): unable to parse IsNew resource "
+                                        + IsNew.getValue());
+                        td.setIsNew(0);
+                    }
                 }
-            } else {
-                try {
-                    td.setIsNew(Integer.parseInt(IsNew.getValue()));
-                    v.add(IsNew);
-                } catch (Exception e) {
-                    Logging.warning("JobUsageRecordUpdaterCheckIsNew.Update(): unable to parse IsNew resource "
-                                    + IsNew.getValue());
-                    td.setIsNew(0);
-                }
+                td.setJobUsageRecord(current); // Set link
+                current.setTransferDetails(td); // Set other link
+                current.getResource().removeAll(v); // Remove resource entries
             }
-            td.setJobUsageRecord(current); // Set link
-            current.setTransferDetails(td); // Set other link
-            current.getResource().removeAll(v); // Remove resource entries
         }
 
         private StringElement findResource(JobUsageRecord current,

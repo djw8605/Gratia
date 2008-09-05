@@ -139,8 +139,8 @@ AJUR:BEGIN
            IsNew,
            Status,
            StorageUnit,
-           TransferDuration,
-           IF(TransferSize > 0, TransferSize, 0)
+           PhaseUnit,
+           IF(`Value` > 0, `Value`, 0)
     INTO n_Protocol,
          n_RemoteSite,
          n_IsNew,
@@ -150,12 +150,10 @@ AJUR:BEGIN
          n_TransferSize
     FROM JobUsageRecord R
          join TDCorr on (R.dbid = TDCorr.dbid)
-         join TransferDetails T on (TDCorr.TransferDetailsId = T.TransferDetailsId),
-         (SELECT StorageUnit,
-                 PhaseUnit as TransferDuration,
-                 `Value` as TransferSize
-          FROM Network where dbid = inputDbid limit 1) N
-    WHERE R.dbid = inputDbid;
+         join TransferDetails T on (TDCorr.TransferDetailsId = T.TransferDetailsId)
+         join Network N on (R.dbid = N.dbid)
+    WHERE R.dbid = inputDbid
+    LIMIT 1;
 
     -- Note entries with different StorageUnit values get stored
     -- independently and must be combined manually outside the DB
