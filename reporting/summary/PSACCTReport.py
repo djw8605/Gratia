@@ -5,7 +5,7 @@
 #
 # library to create simple report using the Gratia psacct database
 #
-#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.30 2008-09-07 04:00:32 pcanal Exp $
+#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.31 2008-09-07 04:31:42 pcanal Exp $
 
 import time
 import datetime
@@ -303,7 +303,7 @@ def NumberOfCpus():
         return (ncpu,benchtotal);
 
 def GetListOfOSGSites():
-        cmd = "wget -q -O - http://oim.grid.iu.edu/pub/resource/show.php?format=plain-text | cut -d, -f4,1,14,8 | grep -e ',OSG,CE [^,]*,1' | cut -d, -f1"
+        cmd = "wget -q -O - http://oim.grid.iu.edu/pub/resource/show.php?format=plain-text | cut -d, -f4,1,14,8 | grep -e ',OSG,\(CE\|Hidden CE/SE\) [^,]*,1' | cut -d, -f1"
         #print "Will execute: " + cmd;
         allSites = commands.getoutput(cmd).split("\n");
         #print allSites;
@@ -1683,7 +1683,7 @@ def RangeSummup(range_end = datetime.date.today(),
         (name,lastreport) = data.split("\t")
         pingSites.append(name)
 
-    exceptionSites = ['BNL_ATLAS_1', 'BNL_ATLAS_2', 'USCMS-FNAL-WC1-CE2', 'USCMS-FNAL-WC1-CE3', 'USCMS-FNAL-WC1-CE4', 'BNL_LOCAL', 'BNL_OSG', 'BNL_PANDA', 'FNAL_CDFOSG_1', 'FNAL_CDFOSG_2', 'FNAL_CDFOSG_3', 'FNAL_CDFOSG_4', 'FNAL_DZEROOSG_1', 'FNAL_DZEROOSG_2', 'GLOW-CMS', 'UCSDT2-B', 'FNAL_GPGRID_1', 'FNAL_GPGRID_2']
+    exceptionSites = ['BNL_ATLAS_1', 'BNL_ATLAS_2', 'USCMS-FNAL-WC1-CE2', 'USCMS-FNAL-WC1-CE3', 'USCMS-FNAL-WC1-CE4', 'BNL_LOCAL', 'BNL_OSG', 'BNL_PANDA', 'GLOW-CMS', 'UCSDT2-B']
 
 
     allSites = [name for name in allSites if name not in exceptionSites]
