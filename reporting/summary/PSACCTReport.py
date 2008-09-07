@@ -5,7 +5,7 @@
 #
 # library to create simple report using the Gratia psacct database
 #
-#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.29 2008-08-23 05:43:58 pcanal Exp $
+#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.30 2008-09-07 04:00:32 pcanal Exp $
 
 import time
 import datetime
@@ -395,6 +395,23 @@ def DailyVOSiteDataFromDaily(begin,end,select,count):
                 + " group by J.VOName, M.ReportedSiteName order by J.VOName, M.ReportedSiteName "
         return RunQueryAndSplit(select)
 
+def DailySiteJobStatusSummary(begin,end,selection = "", count = "", what = "Site.SiteName"):
+        schema = "gratia"
+        
+        select = " SELECT " + what + ", J.ApplicationExitCode, sum(Njobs), sum(WallDuration) " \
+                + " from "+schema+".Site, "+schema+".Probe, " \
+                + " ( select ApplicationExitCode, VOcorrid, ProbeName, EndTime, Njobs, WallDuration from MasterSummaryData "\
+                + "   where \"" + DateToString(begin) +"\"<=EndTime and EndTime<\"" + DateToString(end) + "\"" \
+                + "   and ResourceType = \"Batch\" " \
+                + "  ) J, VONameCorrection, VO " \
+                + " where VO.VOName != \"unknown\" and Probe.siteid = Site.siteid and J.ProbeName = Probe.probename" \
+                + " and " + VONameCorrectionSummaryJoin("J") \
+                + selection \
+                + " group by " + what + ",J.ApplicationExitCode " \
+                + " order by " + what 
+        return RunQueryAndSplit(select)
+        
+                        
 def DailySiteJobStatus(begin,end,selection = "", count = "", what = "Site.SiteName"):
         schema = "gratia"
 
@@ -551,8 +568,8 @@ def FromCondor():
         print "Date : " + gBegin.strftime("%m/%Y") + " (" + str(days )+ " days)"
 
 class DailySiteJobStatusConf:
-    title = "Summary of the job exit status (midnight to midnight central time) for %s\nincluding all jobs that finished in that time period.\n\nFor Condor the value used is taken from 'ExitCode' and NOT from 'Exit Status'\n"
-    headline = "For all jobs finished on %s (Central Time)"
+    title = "Summary of the job exit status (midnight to midnight UTC) for %s\nincluding all jobs that finished in that time period.\n\nFor Condor the value used is taken from 'ExitCode' and NOT from 'Exit Status'\n"
+    headline = "For all jobs finished on %s (UTC)"
     headers = ("Site","Success Rate","Success","Failed","Total","Wall Success","Wall Failed")
     formats = {}
     lines = {}
@@ -603,6 +620,7 @@ class DailySiteJobStatusConf:
         
 
     def GetData(self,start,end):
+       #return DailySiteJobStatusSummary(start,end,what=self.GroupBy,selection=self.ExtraSelect)
        if self.CondorSpecial:
            return DailySiteJobStatus(start,end,selection=" and J.StatusDescription != \"Condor Exit Status\" "+self.ExtraSelect,what=self.GroupBy)+DailySiteJobStatusCondor(start,end,what=self.GroupBy,selection=self.ExtraSelect)
        else:
@@ -610,8 +628,8 @@ class DailySiteJobStatusConf:
     
   
 class DailySiteReportConf:
-        title = "OSG usage summary (midnight to midnight central time) for %s\nincluding all jobs that finished in that time period.\nWall Duration is expressed in hours and rounded to the nearest hour.\nWall Duration is the duration between the instant the job start running and the instant the job ends its execution.\nThe number of jobs counted here includes only the jobs directly seen by batch system and does not include the request sent directly to a pilot job.\nThe Wall Duration includes the total duration of the the pilot jobs.\nDeltas are the differences with the previous day.\n"
-        headline = "For all jobs finished on %s (Central Time)"
+        title = "OSG usage summary (midnight to midnight UTC) for %s\nincluding all jobs that finished in that time period.\nWall Duration is expressed in hours and rounded to the nearest hour.\nWall Duration is the duration between the instant the job start running and the instant the job ends its execution.\nThe number of jobs counted here includes only the jobs directly seen by batch system and does not include the request sent directly to a pilot job.\nThe Wall Duration includes the total duration of the the pilot jobs.\nDeltas are the differences with the previous day.\n"
+        headline = "For all jobs finished on %s (UTC)"
         headers = ("Site","# of Jobs","Wall Duration","Delta jobs","Delta duration")
         formats = {}
         lines = {}
@@ -630,8 +648,8 @@ class DailySiteReportConf:
            return DailySiteData(start,end)      
 
 class DailyVOReportConf:
-        title = "OSG usage summary (midnight to midnight central time) for %s\nincluding all jobs that finished in that time period.\nWall Duration is expressed in hours and rounded to the nearest hour.\nWall Duration is the duration between the instant the job start running and the instant the job ends its execution.\nThe number of jobs counted here includes only the jobs directly seen by batch system and does not include the request sent directly to a pilot job.\nThe Wall Duration includes the total duration of the the pilot jobs.\nDeltas are the differences with the previous day.\n"
-        headline = "For all jobs finished on %s (Central Time)"
+        title = "OSG usage summary (midnight to midnight UTC) for %s\nincluding all jobs that finished in that time period.\nWall Duration is expressed in hours and rounded to the nearest hour.\nWall Duration is the duration between the instant the job start running and the instant the job ends its execution.\nThe number of jobs counted here includes only the jobs directly seen by batch system and does not include the request sent directly to a pilot job.\nThe Wall Duration includes the total duration of the the pilot jobs.\nDeltas are the differences with the previous day.\n"
+        headline = "For all jobs finished on %s (UTC)"
         headers = ("VO","# of Jobs","Wall Duration","Delta jobs","Delta duration")
         formats = {}
         lines = {}
@@ -649,8 +667,8 @@ class DailyVOReportConf:
            return DailyVOData(start,end)      
 
 class DailySiteVOReportConf:
-        title = "OSG usage summary (midnight to midnight central time) for %s\nincluding all jobs that finished in that time period.\nWall Duration is expressed in hours and rounded to the nearest hour.\nWall Duration is the duration between the instant the job start running and the instant the job ends its execution.\nThe number of jobs counted here includes only the jobs directly seen by batch system and does not include the request sent directly to a pilot job.\nThe Wall Duration includes the total duration of the the pilot jobs.\nDeltas are the differences with the previous day.\n"
-        headline = "For all jobs finished on %s (Central Time)"
+        title = "OSG usage summary (midnight to midnight UTC) for %s\nincluding all jobs that finished in that time period.\nWall Duration is expressed in hours and rounded to the nearest hour.\nWall Duration is the duration between the instant the job start running and the instant the job ends its execution.\nThe number of jobs counted here includes only the jobs directly seen by batch system and does not include the request sent directly to a pilot job.\nThe Wall Duration includes the total duration of the the pilot jobs.\nDeltas are the differences with the previous day.\n"
+        headline = "For all jobs finished on %s (UTC)"
         headers = ("Site","VO","# of Jobs","Wall Duration","Delta jobs","Delta duration")
         formats = {}
         lines = {}
@@ -670,8 +688,8 @@ class DailySiteVOReportConf:
            return DailySiteVOData(start,end)      
 
 class DailyVOSiteReportConf:
-        title = "OSG usage summary (midnight to midnight central time) for %s\nincluding all jobs that finished in that time period.\nWall Duration is expressed in hours and rounded to the nearest hour.\nWall Duration is the duration between the instant the job start running and the instant the job ends its execution.\nThe number of jobs counted here includes only the jobs directly seen by batch system and does not include the request sent directly to a pilot job.\nThe Wall Duration includes the total duration of the the pilot jobs.\nDeltas are the differences with the previous day.\n"
-        headline = "For all jobs finished on %s (Central Time)"
+        title = "OSG usage summary (midnight to midnight UTC) for %s\nincluding all jobs that finished in that time period.\nWall Duration is expressed in hours and rounded to the nearest hour.\nWall Duration is the duration between the instant the job start running and the instant the job ends its execution.\nThe number of jobs counted here includes only the jobs directly seen by batch system and does not include the request sent directly to a pilot job.\nThe Wall Duration includes the total duration of the the pilot jobs.\nDeltas are the differences with the previous day.\n"
+        headline = "For all jobs finished on %s (UTC)"
         headers = ("VO","Site","# of Jobs","Wall Duration","Delta jobs","Delta duration")
         formats = {}
         lines = {}
@@ -989,6 +1007,9 @@ or (isnull("""+table+""".ReportableVOName) and
 isnull(VONameCorrection.ReportableVOName)))
 and (VONameCorrection.VOid = VO.VOid)
 and ("""+table+""".VOName = VONameCorrection.VOName)"""
+
+def VONameCorrectionSummaryJoin(table = "sub"):
+    return table + ".VOcorrid = VONameCorrection.corrid  and (VONameCorrection.VOid = VO.VOid) "
 
 def RangeVOData(begin, end, with_panda = False):
     schema = "gratia"
@@ -1727,7 +1748,7 @@ def NonReportingSites(
                 output = "text",
                 header = True):
 
-    print "This report indicates which sites Gratia has heard from or have known activity\nsince %s (midnight central time)\n" % ( DateToString(when,False) )
+    print "This report indicates which sites Gratia has heard from or have known activity\nsince %s (midnight UTC)\n" % ( DateToString(when,False) )
 
     allSites = GetListOfOSGSites();
     # Call it twice to avoid a 'bug' in wget where on of the row is missing the first few characters.
