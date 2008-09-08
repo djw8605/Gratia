@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # space separated list of mail recipients
-MAILTO="osg-accounting-info@fnal.gov"
+PROD_MAILTO="osg-accounting-info@fnal.gov"
 WEBLOC="http://gratia-osg.fnal.gov:8880/gratia-reporting"
 SUM_WEBLOC="http://gratia-osg.fnal.gov:8884/gratia-reporting"
 
@@ -11,6 +11,9 @@ while test "x$1" != "x"; do
 	exit 1
    elif [ "$1" == "--debug" ]; then
 	debug=x
+	shift
+   elif [ "$1" == "--production" ]; then
+	MAILTO=$PROD_MAILTO
 	shift
    elif [ "$1" == "--mail" ]; then
 	MAILTO=$2
