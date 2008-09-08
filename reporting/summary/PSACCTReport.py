@@ -5,7 +5,7 @@
 #
 # library to create simple report using the Gratia psacct database
 #
-#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.31 2008-09-07 04:31:42 pcanal Exp $
+#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.32 2008-09-08 22:14:32 pcanal Exp $
 
 import time
 import datetime
@@ -456,6 +456,20 @@ def CMSProdData(begin,end):
             "and (LocalUserId = \"cmsprod\" or LocalUserId = \"cmsprd\") and SiteName = \"USCMS-FNAL-WC1-CE\" "
     return RunQueryAndSplit(select)
 
+def GetSiteVOEfficiency(begin,end):
+    schema = "gratia.";
+
+    select = """\
+            select SiteName,VOName, sum(Njobs),sum(WallDuration),sum(CpuUserDuration+CpuSystemDuration)/sum(WallDuration) 
+            from """+schema+"""VOProbeSummary, """+schema+"""Site, """+schema+"""Probe
+            where VOName != \"unknown\" and Probe.siteid = Site.siteid and VOProbeSummary.ProbeName = Probe.probename and 
+               EndTime >= \"""" + DateToString(begin) + """\" and
+               EndTime < \"""" + DateToString(end) + """\"
+            group by Site.SiteName, VOName
+            """
+    #print "Query = " + select;
+
+    return RunQueryAndSplit(select);    
 
 def PrintHeader():
         print " VO        | Wall Hours | Norm Wall | CPU Hours |  Norm CPU | Wall Load| Norm Wall| CPU Load | Norm CPU |"
@@ -571,6 +585,7 @@ class DailySiteJobStatusConf:
     title = "Summary of the job exit status (midnight to midnight UTC) for %s\nincluding all jobs that finished in that time period.\n\nFor Condor the value used is taken from 'ExitCode' and NOT from 'Exit Status'\n"
     headline = "For all jobs finished on %s (UTC)"
     headers = ("Site","Success Rate","Success","Failed","Total","Wall Success","Wall Failed")
+    num_header = 1
     formats = {}
     lines = {}
     col1 = "All sites"
@@ -631,6 +646,7 @@ class DailySiteReportConf:
         title = "OSG usage summary (midnight to midnight UTC) for %s\nincluding all jobs that finished in that time period.\nWall Duration is expressed in hours and rounded to the nearest hour.\nWall Duration is the duration between the instant the job start running and the instant the job ends its execution.\nThe number of jobs counted here includes only the jobs directly seen by batch system and does not include the request sent directly to a pilot job.\nThe Wall Duration includes the total duration of the the pilot jobs.\nDeltas are the differences with the previous day.\n"
         headline = "For all jobs finished on %s (UTC)"
         headers = ("Site","# of Jobs","Wall Duration","Delta jobs","Delta duration")
+        num_header = 1
         formats = {}
         lines = {}
         col1 = "All sites"
@@ -651,6 +667,7 @@ class DailyVOReportConf:
         title = "OSG usage summary (midnight to midnight UTC) for %s\nincluding all jobs that finished in that time period.\nWall Duration is expressed in hours and rounded to the nearest hour.\nWall Duration is the duration between the instant the job start running and the instant the job ends its execution.\nThe number of jobs counted here includes only the jobs directly seen by batch system and does not include the request sent directly to a pilot job.\nThe Wall Duration includes the total duration of the the pilot jobs.\nDeltas are the differences with the previous day.\n"
         headline = "For all jobs finished on %s (UTC)"
         headers = ("VO","# of Jobs","Wall Duration","Delta jobs","Delta duration")
+        num_header = 1
         formats = {}
         lines = {}
         col1 = "All VOs"
@@ -670,6 +687,7 @@ class DailySiteVOReportConf:
         title = "OSG usage summary (midnight to midnight UTC) for %s\nincluding all jobs that finished in that time period.\nWall Duration is expressed in hours and rounded to the nearest hour.\nWall Duration is the duration between the instant the job start running and the instant the job ends its execution.\nThe number of jobs counted here includes only the jobs directly seen by batch system and does not include the request sent directly to a pilot job.\nThe Wall Duration includes the total duration of the the pilot jobs.\nDeltas are the differences with the previous day.\n"
         headline = "For all jobs finished on %s (UTC)"
         headers = ("Site","VO","# of Jobs","Wall Duration","Delta jobs","Delta duration")
+        num_header = 2
         formats = {}
         lines = {}
         select = "=="
@@ -691,6 +709,7 @@ class DailyVOSiteReportConf:
         title = "OSG usage summary (midnight to midnight UTC) for %s\nincluding all jobs that finished in that time period.\nWall Duration is expressed in hours and rounded to the nearest hour.\nWall Duration is the duration between the instant the job start running and the instant the job ends its execution.\nThe number of jobs counted here includes only the jobs directly seen by batch system and does not include the request sent directly to a pilot job.\nThe Wall Duration includes the total duration of the the pilot jobs.\nDeltas are the differences with the previous day.\n"
         headline = "For all jobs finished on %s (UTC)"
         headers = ("VO","Site","# of Jobs","Wall Duration","Delta jobs","Delta duration")
+        num_header = 2
         formats = {}
         lines = {}
         select = "=="
@@ -712,6 +731,7 @@ class DailySiteVOReportFromDailyConf:
         title = "OSG usage summary (midnight to midnight central time) for %s\nincluding all jobs that finished in that time period.\nWall Duration is expressed in hours and rounded to the nearest hour.\nWall Duration is the duration between the instant the job start running and the instant the job ends its execution.\nDeltas are the differences with the previous day.\nIf the number of jobs stated for a site is always 1\nthen this number is actually the number of summary records sent.\n"
         headline = "For all jobs finished on %s (Central Time)"
         headers = ("Site","VO","# of Jobs","Wall Duration","Delta jobs","Delta duration")
+        num_header = 2
         formats = {}
         lines = {}
         select = "=="
@@ -740,6 +760,7 @@ class DailyVOSiteReportFromDailyConf:
         title = "OSG usage summary (midnight to midnight central time) for %s\nincluding all jobs that finished in that time period.\nWall Duration is expressed in hours and rounded to the nearest hour.\nWall Duration is the duration between the instant the job start running and the instant the job ends its execution.\nDeltas are the differences with the previous day.\nIf the number of jobs stated for a site is always 1\nthen this number is actually the number of summary records sent.\n"
         headline = "For all jobs finished on %s (Central Time)"
         headers = ("VO","Site","# of Jobs","Wall Duration","Delta jobs","Delta duration")
+        num_header = 2
         formats = {}
         lines = {}
         select = "=="
@@ -1169,6 +1190,7 @@ and the instant the job ended its execution.
 Deltas are the differences with the previous period."""
     headline = "For all jobs finished between %s and %s (midnight UTC)"
     headers = ("VO","# of Jobs","Wall Duration","Delta jobs","Delta duration")
+    num_header = 1
     formats = {}
     lines = {}
     col1 = "All VOs"
@@ -1195,6 +1217,7 @@ and the instant the job ended its execution.
 Deltas are the differences with the previous period."""
     headline = "For all jobs finished between %s and %s (midnight, UTC)"
     headers = ("Site","# of Jobs","Wall Duration","Delta jobs","Delta duration")
+    num_header = 1
     formats = {}
     lines = {}
     col1 = "All sites"
@@ -1221,6 +1244,7 @@ and the instant the job ended its execution.
 Deltas are the differences with the previous period."""
     headline = "For all jobs finished between %s and %s (midnight UTC)"
     headers = ("Site", "VO","# of Jobs","Wall Duration","Delta jobs","Delta duration")
+    num_header = 2
     formats = {}
     lines = {}
     col1 = "All sites"    
@@ -1248,6 +1272,7 @@ and the instant the job ended its execution.
 Deltas are the differences with the previous period."""
     headline = "For all jobs finished between %s and %s (midnight UTC)"
     headers = ("VO", "Site","# of Jobs","Wall Duration","Delta jobs","Delta duration")
+    num_header = 2
     formats = {}
     lines = {}
     col1 = "All VOs"    
@@ -1275,6 +1300,7 @@ and the instant the job ended its execution.
 Deltas are the differences with the previous period."""
     headline = "For all jobs finished between %s and %s (midnight UTC)"
     headers = ("VO", "User", "# of Jobs", "Wall Duration", "Delta jobs", "Delta duration")
+    num_header = 2
     formats = {}
     lines = {}
     col1 = "All VOs"    
@@ -1317,6 +1343,7 @@ Only jobs that last 7 days or longer are counted in this report.
 """
     headline = "For all jobs finished between %s and %s (midnight UTC)"
     headers = ("Site", "VO", "# of Jobs","Avg Wall","% Cpu","Max EndTime")
+    num_header = 2
     formats = {}
     lines = {}
     col1 = "All VOs"    
@@ -1333,6 +1360,34 @@ Only jobs that last 7 days or longer are counted in this report.
     def GetData(self, start,end):
         return LongJobsData(start, end, self.with_panda)      
 
+class RangeSiteVOEfficiencyConf:
+        title = """\
+OSG efficiency summary for  %s - %s (midnight UTC - midnight UTC)
+including all jobs that finished in that time period.
+Wall Duration is expressed in hours and rounded to the nearest hour. Wall
+Duration is the duration between the instant the job started running
+and the instant the job ended its execution.
+Deltas are the differences with the previous period."""
+        headline = "For all jobs finished between %s and %s (midnight UTC)"
+        headers = ("Site", "VO","# of Jobs","Wall Dur.","Cpu / Wall","Delta")
+        num_header = 2
+        formats = {}
+        lines = {}
+        col1 = "All sites"    
+        col2 = "All VOs"
+        defaultSort = True
+
+        def __init__(self, header = False):
+           self.formats["csv"] = ",\"%s\",%s,\"%s\",\"%s\",\"%s\",\"%s\"  "
+           self.formats["text"] = "| %-22s | %-14s | %9s | %9s | %10s | %10s"
+           self.lines["csv"] = ""
+           self.lines["text"] = "-------------------------------------------------------------------------------------------------"
+
+           if (not header) :  self.title = ""
+
+        def GetData(self,start,end):
+           return GetSiteVOEfficiency(start,end) 
+           
 def SimpleRange(what, range_end = datetime.date.today(),
                  range_begin = None,
                  output = "text"):
@@ -1426,6 +1481,10 @@ def GenericRange(what, range_end = datetime.date.today(),
             if site == "atlas": site = "usatlas"
         key = site
         vo = ""
+
+        num_header = what.num_header;
+        offset = num_header - 1;
+
         if (len(val)==4) :
             # Nasty hack to harmonize Panda output
             if what.headers[1] == "VO":
@@ -1433,9 +1492,11 @@ def GenericRange(what, range_end = datetime.date.today(),
                if vo == "atlas": vo = "usatlas"
             else:
 		        vo = val[1]
-            offset = 1
-            num_header = 2
             key = site + " " + vo
+        elif (num_header == 2) :
+            vo = val[1]
+            key = site + " " + vo
+
         njobs= string.atoi( val[offset+1] )
         wall = string.atof( val[offset+2] ) / factor
         totalwall = totalwall + wall
@@ -1465,6 +1526,10 @@ def GenericRange(what, range_end = datetime.date.today(),
             if site == "atlas": site = "usatlas"
         key = site
         offset = 0
+
+        num_header = what.num_header;
+        offset = num_header - 1;
+
         if (len(val)==4) :
             # Nasty hack to harmonize Panda output
             if what.headers[1] == "VO":
@@ -1472,9 +1537,11 @@ def GenericRange(what, range_end = datetime.date.today(),
 	           if vo == "atlas": vo = "usatlas"
             else:
 		        vo = val[1]
-            offset = 1
-            num_header = 2
             key = site + " " + vo
+        elif (num_header == 2) :
+            vo = val[1]
+            key = site + " " + vo
+        
         (oldnjobs,oldwall) = (0,0)
         if oldValues.has_key(key):
             (oldnjobs,oldwall,s,v) = oldValues[key]
@@ -1522,6 +1589,206 @@ def GenericRange(what, range_end = datetime.date.today(),
             print "    ", what.formats[output] % \
                   (what.col1, niceNum(totaljobs), niceNum(totalwall),
                    niceNum(totaljobs-oldnjobs), niceNum(totalwall-oldwall))
+        print what.lines[output]
+    return result
+
+def EfficiencyRange(what, range_end = datetime.date.today(),
+                 range_begin = None,
+                 output = "text"):
+    factor = 3600  # Convert number of seconds to number of hours
+
+    if (not range_begin or range_begin == None): range_begin = range_end + datetime.timedelta(days=-1)
+    if (not range_end or range_end == None): range_end = range_begin + datetime.timedelta(days=+1)
+    timediff = range_end - range_begin
+
+    if (output != "None") :
+        if (what.title != "") :
+            print what.title % ( DateToString(range_begin,False),
+                                 DateToString(range_end,False) )
+        if (what.headline != "") :
+            print what.headline % ( DateToString(range_begin,False),
+                                    DateToString(range_end,False) )
+        print what.lines[output]
+        print "    ", what.formats[output] % what.headers
+        print what.lines[output]
+        
+    # First get the previous' range-length's information
+    totalwall = 0
+    totaljobs = 0
+    totaleff = 0
+    nrecords = 0
+    oldValues = {}
+    result = []
+
+    start = range_begin - timediff
+    end = range_end - timediff
+    lines = what.GetData(start,end)
+    for i in range (0,len(lines)):
+        val = lines[i].split('\t')
+        offset = 0
+        site = val[0]
+        if what.headers[0] == "VO":
+            # "site" is really "VO": hack to harmonize Panda output
+            if site != "unknown": site = string.lower(site)
+            if site == "atlas": site = "usatlas"
+        key = site
+        vo = ""
+
+        num_header = what.num_header;
+        offset = num_header - 1;
+
+        if (len(val)==4) :
+            # Nasty hack to harmonize Panda output
+            if what.headers[1] == "VO":
+               if vo != "unknown": vo = string.lower(val[1])
+               if vo == "atlas": vo = "usatlas"
+            else:
+		        vo = val[1]
+            key = site + " " + vo
+        elif (num_header == 2) :
+            vo = val[1]
+            key = site + " " + vo
+            
+        njobs= string.atoi( val[offset+1] )
+        wall = string.atof( val[offset+2] ) / factor
+        if (wall != 0) :
+            eff = string.atof( val[offset+3] )
+        else:
+            eff = -1
+        nrecords = nrecords + 1
+        totalwall = totalwall + wall
+        totaljobs = totaljobs + njobs
+        totaleff = totaleff + eff
+        if (oldValues.has_key(key)):
+            print "Error: can not add efficiencies"
+            print key
+            print oldValues[key]
+            print [njobs,wall,eff,site,vo]
+        else:
+            oldValues[key] = [njobs,wall,eff,site,vo]
+
+    [totaljobs,totalwall,totaleff] = GetTotals(start,end)
+    totaljobs = string.atoi(totaljobs);
+    totalwall = string.atof(totalwall) /factor
+    totaleff = string.atof(totaleff)
+
+    oldValues["total"] = (totaljobs, totalwall, totaleff, "total","")
+
+    # Then getting the current information and print it
+    totalwall = 0
+    totaljobs = 0
+    totaleff = 0
+    nrecords = 0
+    start = range_begin
+    end = range_end
+    lines = what.GetData(start,end)
+    num_header = 1;
+    index = 0
+    printValues = {}
+    for i in range (0,len(lines)):
+        val = lines[i].split('\t')
+        site = val[0]
+        if what.headers[0] == "VO":
+            # "site" is really "VO": hack to harmonize Panda output
+            if site != "unknown": site = string.lower(site)
+            if site == "atlas": site = "usatlas"
+        key = site
+        offset = 0
+
+        num_header = what.num_header;
+        offset = num_header - 1;
+        
+        if (len(val)==4) :
+            # Nasty hack to harmonize Panda output
+            if what.headers[1] == "VO":
+	           if vo != "unknown": vo = string.lower(val[1])
+	           if vo == "atlas": vo = "usatlas"
+            else:
+		        vo = val[1]
+            key = site + " " + vo
+        elif (num_header == 2) :
+            vo = val[1]
+            key = site + " " + vo
+
+        (oldnjobs,oldwall,oldeff) = (0,0,0)
+        if oldValues.has_key(key):
+            (oldnjobs,oldwall,oldeff,s,v) = oldValues[key]
+            del oldValues[key]
+        njobs= string.atoi( val[offset+1] )
+        wall = string.atof( val[offset+2] ) / factor
+        if (wall != 0) :
+            eff = string.atof( val[offset+3] )
+        else:
+            eff = -1
+        totalwall = totalwall + wall
+        totaljobs = totaljobs + njobs
+        totaleff = totaleff + eff
+        nrecords = nrecords + 1
+        if printValues.has_key(key):
+            print "Error: can not add efficiencies"
+            print key
+            print printValues[key]
+            print [njobs,wall,oldwall,eff,site,vo]
+            print "Error: can not add efficiencies"
+        else:
+            printValues[key] = [njobs,wall,oldwall,eff,oldeff,site,vo]
+                
+    for key,(oldnjobs,oldwall,oldeff,site,vo) in oldValues.iteritems():            
+        if (key != "total") :
+            printValues[key] = (0,0,oldwall,0,oldeff,site,vo)
+
+    if (what.defaultSort):
+        sortedValues = sortedDictValues(printValues)
+    else:
+        sortedValues = sortedDictValuesFunc(printValues,what.Sorting)
+        
+    for key,(njobs,wall,oldwall,eff,oldeff,site,vo) in sortedValues:
+        index = index + 1;
+        if (eff==-1) : 
+           effstring = "n/a"
+           oldeffstring = niceNum(oldeff*100.0,0.1)
+        else: 
+           effstring = niceNum(eff*100.0,0.1)
+           if (oldeff == - 1 or oldwall < 0.1): 
+              oldeffstring = "n/a"
+           else:
+              oldeffstring = niceNum((eff-oldeff)*100.0,1)
+        if (wall < 0.1):
+           wallstring = "0.0"
+           effstring = "n/a"
+        elif (wall < 1):
+           wallstring = niceNum( wall, 0.1)
+        else:
+           wallstring = niceNum( wall )
+        if (num_header == 2) :
+            values = (site,vo,niceNum(njobs), wallstring,
+                      effstring,oldeffstring)
+        else:
+            values = (site,niceNum(njobs), wallstring,
+                      effstring,oldeffstring)
+        if (output != "None") :
+            print "%3d " %(index), what.formats[output] % values
+        result.append(values)       
+        
+        
+    [totaljobs,totalwall,totaleff] = GetTotals(range_begin,range_end)
+    totaljobs = string.atoi(totaljobs);
+    totalwall = string.atof(totalwall) /factor
+    totaleff = string.atof(totaleff)
+
+    (oldnjobs,oldwall,oldeff,s,v) = oldValues["total"]
+    if (output != "None") :
+        print what.lines[output]
+        if (num_header == 2) :
+            print "    ", what.formats[output] % \
+                  (what.col1, what.col2, niceNum(totaljobs),
+                   niceNum(totalwall), niceNum( totaleff * 100.0, 0.1 ),
+                   niceNum( 100.0* (totaleff- oldeff), 0.1 ) )
+        else:
+            print "    ", what.formats[output] % \
+                  (what.col1, niceNum(totaljobs), niceNum(totalwall),
+                    niceNum( totaleff / nrecords * 100.0 ),
+                   niceNum( 100.0* (totaleff - oldeff) ))
         print what.lines[output]
     return result
 

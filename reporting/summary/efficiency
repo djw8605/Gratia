@@ -1,0 +1,25 @@
+#!/bin/env python
+ 
+import sys
+import PSACCTReport
+
+from PSACCTReport import FromCondor,UseArgs,gOutput,gBegin,CheckDB
+import sys
+
+def main(argv=None):
+    UseArgs(argv)
+
+    if not CheckDB() :
+        return 1
+
+    argOutput = PSACCTReport.gOutput
+
+    PSACCTReport.EfficiencyRange(PSACCTReport.RangeSiteVOEfficiencyConf(header = True),
+                              range_begin = PSACCTReport.gBegin,
+                              range_end = PSACCTReport.gEnd ,
+                              output=argOutput)
+
+
+if __name__ == "__main__":
+    sys.exit(main())
+
