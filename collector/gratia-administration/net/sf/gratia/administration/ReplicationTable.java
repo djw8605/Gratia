@@ -407,13 +407,13 @@ public class ReplicationTable extends HttpServlet {
                             "type=\"text\" value=\"" +
                             Integer.toString(repEntry.getbundleSize()) +
                             "\" size=\"3\" maxlength=\"4\" />")
-                .replaceAll("#modifyupdate#",
-                            "<td style=\"text-align: center\">" +
+                .replaceAll("#actionblock#",
+                            "<tr><td style=\"text-align: center\">" +
                             "<input type=\"submit\" name=\"update:#replicationid#\" value=\"Update\"/>" +
                             "</td>" +
                             "<td style=\"text-align: center\">" +
                             "<input type=\"submit\" name=\"cancel:#replicationid#\" value=\"Cancel\"/>" +
-                            "</td>")
+                            "</td></tr>")
                 .replaceAll("#webpagename#", Name)
                 .replaceAll("#replicationid#",
                             Integer.toString(repEntry.getreplicationid()));
@@ -436,12 +436,21 @@ public class ReplicationTable extends HttpServlet {
                 .replaceAll("#bundleSize#",
                             Integer.toString(repEntry.getbundleSize()))
                 .replaceAll("#probename#", repEntry.getprobename())
-                .replaceAll("#modifyupdate#",
-                            "<td colspan=\"2\" " +
-                            "style=\"text-align: center\">" +
-                            "<a href=\"#webpagename#.html?" +
-                            "action=modify&amp;replicationid=" +
-                            "#replicationid#\">Modify</a></td>")
+                .replaceAll("#actionblock#",
+                            "          <tr>\n" +
+                            "            <td><a href=\"#webpagename#.html?action=register&amp;replicationid=#replicationid#\">Register</a></td>\n" +
+                            "            <td><a href=\"#webpagename#.html?action=test&amp;replicationid=#replicationid#\">Test</a></td>\n" +
+                            "          </tr>\n" +
+                            "          <tr>\n" +
+                            "            <td><a href=\"#webpagename#.html?action=activate&amp;replicationid=#replicationid#\">Start</a></td>\n" +
+                            "            <td><a href=\"#webpagename#.html?action=deactivate&amp;replicationid=#replicationid#\">Stop</a></td>\n" +
+                            "          </tr>\n" +
+                            "          <tr>\n" +
+                            "            <td><a href=\"#webpagename#.html?action=reset&amp;replicationid=#replicationid#\">Reset</a></td>\n" +
+                            "            <td><a href=\"#webpagename#.html?action=delete&amp;replicationid=#replicationid#\">Delete</a></td>\n" +
+                            "          </tr>\n" +
+                            "          <tr><td colspan=\"2\" style=\"text-align: center\">" +
+                            "              <a href=\"#webpagename#.html?action=modify&amp;replicationid=#replicationid#\">Modify</a></td></tr>")
                 .replaceAll("#webpagename#", Name)
                 .replaceAll("#replicationid#",
                             Integer.toString(repEntry.getreplicationid()));
