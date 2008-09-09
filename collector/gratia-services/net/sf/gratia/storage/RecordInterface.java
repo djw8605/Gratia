@@ -32,6 +32,7 @@ public interface RecordInterface {
     public int getRecordId();
     public void setRecordId(int RecordId);
 
+    public Probe getProbe();
     public void setProbe(Probe p);
     public boolean setDuplicate(boolean b);
 

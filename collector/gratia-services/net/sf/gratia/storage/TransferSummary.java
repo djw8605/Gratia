@@ -105,6 +105,11 @@ public class TransferSummary extends Record {
         this.RecordId = RecordId;
     }
 
+    public Probe getProbe() {
+        // FIXME
+        return null;
+    }
+
     public void setProbe(Probe p) {
         // FIXME
     }

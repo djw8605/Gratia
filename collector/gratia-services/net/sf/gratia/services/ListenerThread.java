@@ -390,13 +390,32 @@ public class ListenerThread extends Thread {
                     rId += (j + 1) + " / " + rSize;
                 }
                 session = HibernateWrapper.getSession();
-                tx = session.beginTransaction();
+                Probe probe;
                 try {
                     current = (Record)records.get(j);
+                    tx = session.beginTransaction();
                     rId += " (" + 
                         current.getClass().getSimpleName() + " from " +
                         current.getProbeName() + ")";
-                    Probe probe = statusUpdater.update(session, current, xml);
+                    probe = statusUpdater.update(session, current, xml);
+                    session.flush();
+                    tx.commit();
+                }
+                catch (Exception e) {
+                    if (session.isOpen()) {
+                        if ((tx != null) && tx.isActive()) {
+                            tx.rollback();
+                        }
+                        session.close();
+                    }
+                    Logging.warning(ident + rId +
+                                    ": received unexpected exception " +
+                                    e.getMessage() + " while processing probe entry.");
+                    Logging.debug(ident + rId + ": exception details:", e);
+                    return 0;
+                }
+                try {
+                    tx = session.beginTransaction();
                     current.setProbe(probe);
                     Boolean acceptRecord = true;
                     if (!collectorService.housekeepingServiceDisabled()) {
@@ -439,7 +458,6 @@ public class ListenerThread extends Thread {
                             session.flush();
                             tx.commit();
                             session.close();
-
                         }
                     }
                     if (acceptRecord) {
@@ -688,6 +706,15 @@ public class ListenerThread extends Thread {
                                 if (!savedCurrent) {
                                     needCurrentSaveDup =
                                         current.setDuplicate(true);
+                                    if (!needCurrentSaveDup) { // Save probe object anyway
+                                        Probe p = current.getProbe();
+                                        if (p != null) {
+                                            tx = session.beginTransaction();
+                                            session.saveOrUpdate(p);
+                                            session.flush();
+                                            tx.commit();
+                                        }
+                                    }
                                 }
                                 session.close();
                             }

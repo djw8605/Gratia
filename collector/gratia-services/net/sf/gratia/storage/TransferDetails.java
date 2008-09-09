@@ -123,6 +123,11 @@ public class TransferDetails extends Record {
         this.TransferDetailsId = RecordId;
     }
 
+    public Probe getProbe() {
+        // FIXME
+        return null;
+    }
+
     public void setProbe(Probe p) {
         // FIXME
     }

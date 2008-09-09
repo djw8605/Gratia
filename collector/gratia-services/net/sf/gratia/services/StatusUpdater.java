@@ -108,11 +108,9 @@ public class StatusUpdater
               site = getSite(session, siteName);
               probe.setsite(site);
               probe.setactive(1);
-
-              session.save(probe);
-              
           } else if (result.size() == 1) {
               probe = (Probe)result.get(0);
+              probe.setactive(1);
           } else {
               // Humm there is more than one probe with the same name!
               // We have a problem.
@@ -126,8 +124,7 @@ public class StatusUpdater
           // probe.setnRecords( probe.getnRecords() + 1 );
 
           Logging.log("StatusUpdater: will save/update "+probe.getprobename()+" n="+probe.getnRecords());
-
-          //          session.flush();
+          session.saveOrUpdate(probe);
       }
       return probe;
    }

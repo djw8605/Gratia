@@ -4,6 +4,7 @@ import net.sf.gratia.util.Logging;
 
 import net.sf.gratia.storage.DupRecord;
 import net.sf.gratia.storage.Record;
+import net.sf.gratia.storage.Probe;
 
 import org.hibernate.Transaction;
 import org.hibernate.Session;
@@ -13,11 +14,19 @@ public class ErrorRecorder {
     public ErrorRecorder() { }
 
     private void saveDupRecord(DupRecord record) throws Exception {
+        saveDupRecord(record, null);
+    }
+
+    private void saveDupRecord(DupRecord record,
+                               Probe probe) throws Exception {
         Session session = HibernateWrapper.getSession();
         Transaction tx = session.beginTransaction();
 
         try {
             session.save(record);
+            if (probe != null) {
+                session.saveOrUpdate(probe);
+            }
             tx.commit();
         }
         catch (Exception e) {
@@ -38,11 +47,12 @@ public class ErrorRecorder {
         record.setdbid(dupdbid);
         record.setRecordType(current.getTableName());
 
-        saveDupRecord(record);
+        saveDupRecord(record, current.getProbe());
     }
 
     public void saveDuplicate(String source, String error,
-                              int dupdbid, String xml, String tableName) throws Exception {
+                              int dupdbid, String xml,
+                              String tableName) throws Exception {
         DupRecord record = new DupRecord();
 
         record.seteventdate(new java.util.Date());
@@ -55,7 +65,8 @@ public class ErrorRecorder {
         saveDupRecord(record);
     }
 
-    public void saveParse(String source, String error, String xml) throws Exception {
+    public void saveParse(String source, String error,
+                          String xml) throws Exception {
         DupRecord record = new DupRecord();
 
         record.seteventdate(new java.util.Date());
@@ -66,7 +77,8 @@ public class ErrorRecorder {
         saveDupRecord(record);
     }
 
-    public void saveSQL(String source, String error, Record current) throws Exception {
+    public void saveSQL(String source, String error,
+                        Record current) throws Exception {
         DupRecord record = new DupRecord();
 
         record.seteventdate(new java.util.Date());
@@ -75,6 +87,6 @@ public class ErrorRecorder {
         record.seterror(error);
         record.setRecordType(current.getTableName());
 
-        saveDupRecord(record);
+        saveDupRecord(record, current.getProbe());
     }
 }
