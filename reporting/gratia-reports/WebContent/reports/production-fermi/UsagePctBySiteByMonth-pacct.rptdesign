@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<report xmlns="http://www.eclipse.org/birt/2005/design" version="3.2.14" id="1">
-    <property name="createdBy">Eclipse BIRT Designer Version 1.0.1 Build &lt;20050815-0740></property>
+<report xmlns="http://www.eclipse.org/birt/2005/design" version="3.2.17" id="1">
+    <property name="createdBy">Eclipse BIRT Designer Version 2.3.1.v20080901 Build &lt;2.3.1.v20080902-0630></property>
     <property name="units">in</property>
     <property name="comments">Copyright (c) 2007 &lt;&lt;Your Company Name here>></property>
     <html-property name="description">Creates a grouped report with a chart giving a visual representation of each group data.</html-property>
@@ -21,9 +21,11 @@
                     <property name="hidden">true</property>
                     <property name="valueType">static</property>
                     <property name="dataType">string</property>
+                    <property name="paramType">simple</property>
                     <property name="isRequired">true</property>
                     <property name="controlType">text-box</property>
-                    <property name="defaultValue">jdbc:mysql://gratia-db01.fnal.gov:3320/gratia_psacct</property>
+                    <property name="defaultValue">jdbc:mysql://gratia07.fnal.gov:3322/itb_gratia_psacct</property>
+                    <property name="distinct">true</property>
                     <structure name="format">
                         <property name="category">Unformatted</property>
                         <property name="pattern">Unformatted</property>
@@ -92,9 +94,9 @@
     <data-sources>
         <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="fermigrid1" id="69">
             <property name="odaDriverClass">com.mysql.jdbc.Driver</property>
-            <property name="odaURL">jdbc:mysql://gratia-db01.fnal.gov:3320/gratia_psacct</property>
+            <property name="odaURL">jdbc:mysql://gratia07.fnal.gov:3322/itb_gratia_psacct</property>
             <property name="odaUser">gratia</property>
-            <encrypted-property name="odaPassword">cHJvdG8=</encrypted-property>
+            <encrypted-property name="odaPassword" encryptionID="base64">cHJvdG8=</encrypted-property>
         </oda-data-source>
     </data-sources>
     <data-sets>
@@ -383,6 +385,7 @@ order by S.SiteName, datevalue, C.BenchmarkScore</property>
                     <property name="dataType">float</property>
                 </structure>
             </list-property>
+            <property name="pageBreakInterval">50</property>
             <column id="30">
                 <property name="width">33.3%</property>
             </column>
@@ -1079,7 +1082,7 @@ rep = icsc.getExternalContext().getScriptable();&#xD;
         </Series>
         <Grouping>
           <Enabled>false</Enabled>
-          <GroupingInterval>2</GroupingInterval>
+          <GroupingInterval>2.0</GroupingInterval>
           <GroupType>Text</GroupType>
           <AggregateExpression>Sum</AggregateExpression>
         </Grouping>
@@ -1307,7 +1310,7 @@ rep = icsc.getExternalContext().getScriptable();&#xD;
         </Series>
         <Grouping>
           <Enabled>false</Enabled>
-          <GroupingInterval>2</GroupingInterval>
+          <GroupingInterval>2.0</GroupingInterval>
           <GroupType>Text</GroupType>
           <AggregateExpression>Sum</AggregateExpression>
         </Grouping>
@@ -1687,7 +1690,7 @@ rep = icsc.getExternalContext().getScriptable();&#xD;
         </Series>
         <Grouping>
           <Enabled>false</Enabled>
-          <GroupingInterval>2</GroupingInterval>
+          <GroupingInterval>2.0</GroupingInterval>
           <GroupType>Text</GroupType>
           <AggregateExpression>Sum</AggregateExpression>
         </Grouping>
@@ -2079,7 +2082,7 @@ rep = icsc.getExternalContext().getScriptable();&#xD;
         </Series>
         <Grouping>
           <Enabled>false</Enabled>
-          <GroupingInterval>2</GroupingInterval>
+          <GroupingInterval>2.0</GroupingInterval>
           <GroupType>Text</GroupType>
           <AggregateExpression>Sum</AggregateExpression>
         </Grouping>
@@ -2590,7 +2593,7 @@ rep = icsc.getExternalContext().getScriptable();&#xD;
         </Series>
         <Grouping>
           <Enabled>false</Enabled>
-          <GroupingInterval>2</GroupingInterval>
+          <GroupingInterval>2.0</GroupingInterval>
           <GroupType>Text</GroupType>
           <AggregateExpression>Sum</AggregateExpression>
         </Grouping>
@@ -3243,7 +3246,7 @@ rep = icsc.getExternalContext().getScriptable();&#xD;
         </Series>
         <Grouping>
           <Enabled>false</Enabled>
-          <GroupingInterval>2</GroupingInterval>
+          <GroupingInterval>2.0</GroupingInterval>
           <GroupType>Text</GroupType>
           <AggregateExpression>Sum</AggregateExpression>
         </Grouping>
@@ -3591,7 +3594,7 @@ rep = icsc.getExternalContext().getScriptable();&#xD;
       </Series>
       <Grouping>
         <Enabled>true</Enabled>
-        <GroupingInterval>0</GroupingInterval>
+        <GroupingInterval>0.0</GroupingInterval>
         <GroupType>Text</GroupType>
         <AggregateExpression>Sum</AggregateExpression>
       </Grouping>
