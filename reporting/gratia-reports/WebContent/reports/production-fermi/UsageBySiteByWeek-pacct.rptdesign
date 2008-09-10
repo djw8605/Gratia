@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<report xmlns="http://www.eclipse.org/birt/2005/design" version="3.2.14" id="1">
-    <property name="createdBy">Eclipse BIRT Designer Version 1.0.1 Build &lt;20050815-0740></property>
+<report xmlns="http://www.eclipse.org/birt/2005/design" version="3.2.17" id="1">
+    <property name="createdBy">Eclipse BIRT Designer Version 2.3.1.v20080901 Build &lt;2.3.1.v20080902-0630></property>
     <property name="units">in</property>
     <property name="comments">Copyright (c) 2007 &lt;&lt;Your Company Name here>></property>
     <html-property name="description">Creates a grouped report with a chart giving a visual representation of each group data.</html-property>
@@ -21,9 +21,11 @@
                     <property name="hidden">true</property>
                     <property name="valueType">static</property>
                     <property name="dataType">string</property>
+                    <property name="paramType">simple</property>
                     <property name="isRequired">true</property>
                     <property name="controlType">text-box</property>
-                    <property name="defaultValue">jdbc:mysql://gratia-db01.fnal.gov:3320/gratia_psacct</property>
+                    <property name="defaultValue">jdbc:mysql://gratia07.fnal.gov:3322/itb_gratia_psacct</property>
+                    <property name="distinct">true</property>
                     <structure name="format">
                         <property name="category">Unformatted</property>
                         <property name="pattern">Unformatted</property>
@@ -88,14 +90,14 @@
             </parameters>
         </parameter-group>
         <parameter-group name="ReportInfo" id="218" extends="gratia-lib1.ReportInfo"/>
-        <scalar-parameter name="SelectSiteName" id="390" extends="gratia-lib1.SelectSiteName"/>
+        <scalar-parameter name="SelectSiteName" id="393" extends="gratia-lib1.SelectSiteName"/>
     </parameters>
     <data-sources>
         <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="fermigrid1" id="69">
             <property name="odaDriverClass">com.mysql.jdbc.Driver</property>
-            <property name="odaURL">jdbc:mysql://gratia-db01.fnal.gov:3320/gratia_psacct</property>
-            <property name="odaUser">gratia</property>
-            <encrypted-property name="odaPassword">cHJvdG8=</encrypted-property>
+            <property name="odaURL">jdbc:mysql://gratia07.fnal.gov:3322/itb_gratia_psacct</property>
+            <property name="odaUser">reader</property>
+            <encrypted-property name="odaPassword" encryptionID="base64">cmVhZGVy</encrypted-property>
         </oda-data-source>
     </data-sources>
     <data-sets>
@@ -135,7 +137,7 @@
                     <property name="name">SiteName</property>
                     <property name="dataType">any</property>
                     <property name="position">1</property>
-                    <expression name="defaultValue">"FNAL_CDFOSG_1"</expression>
+                    <expression name="defaultValue">'fnal_cdfosg_1'</expression>
                     <property name="isInput">true</property>
                     <property name="isOutput">false</property>
                 </structure>
@@ -145,19 +147,15 @@
                     <property name="dataType">any</property>
                     <property name="nativeDataType">12</property>
                     <property name="position">2</property>
-                    <expression name="defaultValue">'2008-01-01'</expression>
-                    <property name="isOptional">false</property>
+                    <expression name="defaultValue">'2008-06-01'</expression>
                     <property name="isInput">true</property>
                     <property name="isOutput">false</property>
                 </structure>
                 <structure>
                     <property name="name">EndDate</property>
-                    <property name="nativeName"></property>
                     <property name="dataType">any</property>
-                    <property name="nativeDataType">12</property>
                     <property name="position">3</property>
-                    <expression name="defaultValue">'2008-02-01'</expression>
-                    <property name="isOptional">false</property>
+                    <expression name="defaultValue">'2008-06-02'</expression>
                     <property name="isInput">true</property>
                     <property name="isOutput">false</property>
                 </structure>
@@ -168,35 +166,30 @@
                     <property name="name">SiteName</property>
                     <property name="nativeName">SiteName</property>
                     <property name="dataType">string</property>
-                    <property name="nativeDataType">12</property>
                 </structure>
                 <structure>
                     <property name="position">2</property>
                     <property name="name">datevalue</property>
                     <property name="nativeName">datevalue</property>
                     <property name="dataType">date</property>
-                    <property name="nativeDataType">91</property>
                 </structure>
                 <structure>
                     <property name="position">3</property>
                     <property name="name">cpusystembenchdays</property>
                     <property name="nativeName">cpusystembenchdays</property>
                     <property name="dataType">float</property>
-                    <property name="nativeDataType">8</property>
                 </structure>
                 <structure>
                     <property name="position">4</property>
                     <property name="name">cpuuserbenchdays</property>
                     <property name="nativeName">cpuuserbenchdays</property>
                     <property name="dataType">float</property>
-                    <property name="nativeDataType">8</property>
                 </structure>
                 <structure>
                     <property name="position">5</property>
                     <property name="name">availablebenchdays</property>
                     <property name="nativeName">availablebenchdays</property>
                     <property name="dataType">float</property>
-                    <property name="nativeDataType">8</property>
                 </structure>
             </list-property>
             <property name="queryText">SELECT   S.SiteName,str_to_date(date_format(N.EndTime, '%x-%v Monday'), '%x-%v %W') as datevalue,
@@ -205,8 +198,8 @@
 	count(distinct N.Node)*C.BenchmarkScore*7*C.CpuCount/1000 as availablebenchdays
 FROM NodeSummary N, Probe P, Site S, CPUInfo C
 WHERE P.siteid = S.siteid and N.ProbeName = P.ProbeName
-	and N.HostDescription = C.HostDescription
 	and S.SiteName like ?
+	and N.HostDescription = C.HostDescription
 	and N.EndTime >= ?
 	and N.EndTime &lt;= ?
 GROUP BY S.SiteName, datevalue, C.HostDescription
@@ -222,27 +215,13 @@ ORDER BY S.SiteName, datevalue, C.HostDescription
         <design:name></design:name>
         <design:position>2</design:position>
         <design:nativeDataTypeCode>12</design:nativeDataTypeCode>
-        <design:nullability>Unknown</design:nullability>
+        <design:precision>0</design:precision>
+        <design:scale>0</design:scale>
+        <design:nullability>Nullable</design:nullability>
       </design:attributes>
       <design:inputAttributes>
         <design:elementAttributes>
-          <design:defaultScalarValue>2008-01-01</design:defaultScalarValue>
-          <design:optional>false</design:optional>
-        </design:elementAttributes>
-      </design:inputAttributes>
-    </design:parameterDefinitions>
-    <design:parameterDefinitions>
-      <design:inOutMode>In</design:inOutMode>
-      <design:attributes>
-        <design:name></design:name>
-        <design:position>3</design:position>
-        <design:nativeDataTypeCode>12</design:nativeDataTypeCode>
-        <design:nullability>Unknown</design:nullability>
-      </design:attributes>
-      <design:inputAttributes>
-        <design:elementAttributes>
-          <design:defaultScalarValue>2008-02-01</design:defaultScalarValue>
-          <design:optional>false</design:optional>
+          <design:optional>true</design:optional>
         </design:elementAttributes>
       </design:inputAttributes>
     </design:parameterDefinitions>
@@ -304,16 +283,16 @@ ORDER BY S.SiteName, datevalue, C.HostDescription
             <property name="dataSet">UsageBySiteByWeek</property>
             <list-property name="paramBindings">
                 <structure>
+                    <property name="paramName">EndDate</property>
+                    <expression name="expression">params["EndDate"].value</expression>
+                </structure>
+                <structure>
                     <property name="paramName">SiteName</property>
-                    <expression name="expression">params["SelectSiteName"]</expression>
+                    <expression name="expression">params["SelectSiteName"].value</expression>
                 </structure>
                 <structure>
                     <property name="paramName">StartDate</property>
-                    <expression name="expression">params["StartDate"]</expression>
-                </structure>
-                <structure>
-                    <property name="paramName">EndDate</property>
-                    <expression name="expression">params["EndDate"]</expression>
+                    <expression name="expression">params["StartDate"].value</expression>
                 </structure>
             </list-property>
             <list-property name="boundDataColumns">
@@ -343,6 +322,7 @@ ORDER BY S.SiteName, datevalue, C.HostDescription
                     <property name="dataType">decimal</property>
                 </structure>
             </list-property>
+            <property name="pageBreakInterval">50</property>
             <column id="30">
                 <property name="width">33.3%</property>
             </column>
@@ -684,7 +664,7 @@ rep = icsc.getExternalContext().getScriptable();
   <GridColumnCount>1</GridColumnCount>
   <SampleData>
     <BaseSampleData>
-      <DataSetRepresentation>01/05/2000,02/01/2000,04/12/2000</DataSetRepresentation>
+      <DataSetRepresentation>'A','B','C','D','E'</DataSetRepresentation>
     </BaseSampleData>
     <OrthogonalSampleData>
       <DataSetRepresentation>5.0,4.0,12.0</DataSetRepresentation>
@@ -708,7 +688,7 @@ rep = icsc.getExternalContext().getScriptable();
     <LegendBehavior>None</LegendBehavior>
   </Interactivity>
   <Axes>
-    <Type>DateTime</Type>
+    <Type>Text</Type>
     <Title>
       <Caption>
         <Value>X-Axis Title</Value>
@@ -1010,7 +990,7 @@ rep = icsc.getExternalContext().getScriptable();
         </Series>
         <Grouping>
           <Enabled>false</Enabled>
-          <GroupingInterval>2</GroupingInterval>
+          <GroupingInterval>2.0</GroupingInterval>
           <GroupType>Text</GroupType>
           <AggregateExpression>Sum</AggregateExpression>
         </Grouping>
@@ -1239,7 +1219,7 @@ rep = icsc.getExternalContext().getScriptable();
         </Series>
         <Grouping>
           <Enabled>false</Enabled>
-          <GroupingInterval>2</GroupingInterval>
+          <GroupingInterval>2.0</GroupingInterval>
           <GroupType>Text</GroupType>
           <AggregateExpression>Sum</AggregateExpression>
         </Grouping>
@@ -1497,7 +1477,7 @@ rep = icsc.getExternalContext().getScriptable();
         </Series>
         <Grouping>
           <Enabled>false</Enabled>
-          <GroupingInterval>2</GroupingInterval>
+          <GroupingInterval>2.0</GroupingInterval>
           <GroupType>Text</GroupType>
           <AggregateExpression>Sum</AggregateExpression>
         </Grouping>
@@ -1755,7 +1735,7 @@ rep = icsc.getExternalContext().getScriptable();
         </Series>
         <Grouping>
           <Enabled>false</Enabled>
-          <GroupingInterval>2</GroupingInterval>
+          <GroupingInterval>2.0</GroupingInterval>
           <GroupType>Text</GroupType>
           <AggregateExpression>Sum</AggregateExpression>
         </Grouping>
@@ -1947,7 +1927,7 @@ rep = icsc.getExternalContext().getScriptable();
       </Series>
       <Grouping>
         <Enabled>true</Enabled>
-        <GroupingInterval>0</GroupingInterval>
+        <GroupingInterval>0.0</GroupingInterval>
         <GroupType>Text</GroupType>
         <AggregateExpression>Sum</AggregateExpression>
       </Grouping>
@@ -1996,10 +1976,6 @@ rep = icsc.getExternalContext().getScriptable();
       </Insets>
       <Visible>true</Visible>
     </Label>
-    <FormatSpecifier xsi:type="attribute:DateFormatSpecifier">
-      <Type>Short</Type>
-      <Detail>Date</Detail>
-    </FormatSpecifier>
     <LabelPosition>Below</LabelPosition>
     <Interval>4</Interval>
     <MajorGrid>
