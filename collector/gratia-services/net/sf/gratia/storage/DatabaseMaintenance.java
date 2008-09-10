@@ -327,11 +327,16 @@ public class DatabaseMaintenance {
             AddIndex("NodeSummary", false, "index03", "ProbeName");
             AddIndex("NodeSummary", false, "index04", "ResourceType");
             AddIndex("NodeSummary", true, "index05", "EndTime, Node, ProbeName, ResourceType");
+            AddIndex("NodeSummary", false, "index06", "HostDescription");
         }
+
         if (readIntegerDBProperty("gratia.database.wantSummaryTrigger") == 0) {
             // OSG Daily.
             AddIndex("JobUsageRecord_Meta", false, "index18", "ReportedSiteName");
         }
+
+        // CPUInfo
+        AddIndex("CPUInfo", false, "index01", "HostDescription");
 
         // Indexes for Trace table to facilitate housekeeping.
         AddIndex("trace", false, "index01", "eventtime");
