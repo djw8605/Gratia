@@ -2,7 +2,9 @@
 
 # space separated list of mail recipients
 PROD_MAILTO="osg-accounting-info@fnal.gov"
+PROD_USER_MAILTO="osg-accounting-info@fnal.gov"
 MAILTO="pcanal@fnal.gov"
+USER_MAILTO=$MAILTO
 WEBLOC="http://gratia-osg.fnal.gov:8880/gratia-reporting"
 SUM_WEBLOC="http://gratia-osg.fnal.gov:8884/gratia-reporting"
 
@@ -17,9 +19,11 @@ while test "x$1" != "x"; do
 	shift
    elif [ "$1" == "--production" ]; then
 	MAILTO=$PROD_MAILTO
+        USER_MAILTO=$PROD_USER_MAILTO
 	shift
    elif [ "$1" == "--mail" ]; then
 	MAILTO=$2
+        USER_MAILTO=$2
 	shift
 	shift
    elif [ "$1" == "--weekly" ]; then
@@ -57,6 +61,7 @@ function sendto {
     txtfile=$3.txt
     csvfile=$3.csv
     subject="$4"
+    to="$5"
 
     echo "See $WEBLOC for more information" > $txtfile
     echo >> $txtfile
@@ -66,16 +71,17 @@ function sendto {
     echo >> $csvfile
     eval $1 --output=csv $when >>  $csvfile
     
-    mutt -F ./muttrc -a $csvfile -s "$subject" $MAILTO < $txtfile
+    mutt -F ./muttrc -a $csvfile -s "$subject" $to < $txtfile
 }
 
 
-sendto ./range "$ExtraArgs $whenarg" ${WORK_DIR}/report "$MAIL_MSG"
-sendto ./reporting "$ExtraArgs $whenarg" ${WORK_DIR}/report "$REPORTING_MAIL_MSG"
-sendto ./longjobs "$ExtraArgs $whenarg" ${WORK_DIR}/report "$LONGJOBS_MAIL_MSG"
-sendto ./usersreport "$ExtraArgs $whenarg" ${WORK_DIR}/report "$USER_MAIL_MSG"
-sendto ./efficiency "$ExtraArgs $whenarg" ${WORK_DIR}/report "${ExtraHeader}OSG Efficiency by Site and VO for $when"
+sendto ./range "$ExtraArgs $whenarg" ${WORK_DIR}/report "$MAIL_MSG" $MAILTO
+sendto ./reporting "$ExtraArgs $whenarg" ${WORK_DIR}/report "$REPORTING_MAIL_MSG" $MAILTO
+sendto ./longjobs "$ExtraArgs $whenarg" ${WORK_DIR}/report "$LONGJOBS_MAIL_MSG" $MAILTO
+sendto ./usersreport "$ExtraArgs $whenarg" ${WORK_DIR}/report "$USER_MAIL_MSG" $MAILTO
+sendto ./efficiency "$ExtraArgs $whenarg" ${WORK_DIR}/report "${ExtraHeader}OSG Efficiency by Site and VO for $when" $MAILTO
 
+sendto ./usersitereport "$ExtraArgs $whenarg" ${WORK_DIR}/report "${ExtraHeader}Report by user by site for $when" $USER_MAILTO
 
 if [ "$debug" != "x" ]; then 
    rm -rf $WORK_DIR

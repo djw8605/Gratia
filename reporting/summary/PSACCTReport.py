@@ -5,7 +5,7 @@
 #
 # library to create simple report using the Gratia psacct database
 #
-#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.32 2008-09-08 22:14:32 pcanal Exp $
+#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.33 2008-09-10 15:58:40 pcanal Exp $
 
 import time
 import datetime
@@ -1179,6 +1179,19 @@ FROM VOProbeSummary U where
     group by CommonName
 """
     return RunQueryAndSplit(select)
+    
+def UserSiteReportData(begin, end, with_panda = False, selection = ""):
+    select = """
+SELECT CommonName, SiteName, sum(NJobs), sum(WallDuration) as Wall
+FROM VOProbeSummary U, Probe P, Site S where
+    EndTime >= \"""" + DateTimeToString(begin) + """\" and
+    EndTime < \"""" + DateTimeToString(end) + """\" and
+    U.ProbeName = P.ProbeName and P.siteid = S.siteid 
+    and CommonName != \"unknown\"
+    """ + selection + """
+    group by CommonName, SiteName
+"""
+    return RunQueryAndSplit(select)
 
 class RangeVOReportConf:
     title = """\
@@ -1332,6 +1345,58 @@ Deltas are the differences with the previous period."""
         yval = (y[1])[1]
         return cmp(yval,xval)
 
+class RangeUserSiteReportConf:
+    title = """\
+OSG usage summary for  %s - %s (midnight UTC - midnight UTC)
+including all jobs that finished in that time period.
+Wall Duration is expressed in hours and rounded to the nearest hour. Wall
+Duration is the duration between the instant the job started running
+and the instant the job ended its execution.
+Deltas are the differences with the previous period."""
+    headline = "For all jobs finished between %s and %s (midnight UTC)"
+    headers = ("User", "Site", "# of Jobs", "Wall Duration", "Delta jobs", "Delta duration")
+    num_header = 2
+    formats = {}
+    lines = {}
+    col1 = "All VOs"    
+    col2 = "All Users"    
+    defaultSort = False
+    ExtraSelect = ""
+
+    def __init__(self, header = False, with_panda = False, selectVOName = ""):
+        self.formats["csv"] = ",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""
+        self.formats["text"] = "| %-35s | %-19s | %9s | %13s | %10s | %14s"
+        self.lines["csv"] = ""
+        self.lines["text"] = "---------------------------------------------------------------------------------------------------------------------------"
+        if (not header) :  self.title = ""
+        self.with_panda = with_panda
+        if (len(selectVOName)>0):
+            self.ExtraSelect = " and VOName = \""+selectVOName+"\" "
+
+    def GetData(self, start,end):
+        l = UserSiteReportData(start, end, self.with_panda, self.ExtraSelect)
+        r = []
+        maxlen = 35
+        for x in l:
+            (user,site,njobs,wall) = x.split('\t')
+            if ( not user.startswith("Generic") ):
+               pos = user.find("/CN=cron/");
+               if ( pos >= 0) : user = user[pos+8:maxlen+pos+8]
+               pat1 = re.compile("/CN=[0-9]*/");
+               user = pat1.sub("/",user);
+               pat2 = re.compile("/CN=");
+               user = pat2.sub("; ",user);
+               if ( user.startswith("; ") ):
+                  user = user[2:maxlen+2]
+               else :
+                  user = user[0:maxlen]
+               r.append( user + '\t' + site + '\t' + njobs + '\t' + wall )
+        return r
+
+    def Sorting(self, x,y):
+        xval = x[0].lower()
+        yval = y[0].lower()
+        return cmp(xval,yval)
 
 class LongJobsConf:
     title = """\
@@ -1839,6 +1904,17 @@ def RangeUserReport(range_end = datetime.date.today(),
                       with_panda = False,
                       selectVOName = ""):
     return GenericRange(RangeUserReportConf(header, with_panda, selectVOName),
+                        range_end,
+                        range_begin,
+                        output)
+
+def RangeSiteUserReport(range_end = datetime.date.today(),
+                      range_begin = None,
+                      output = "text",
+                      header = True,
+                      with_panda = False,
+                      selectVOName = ""):
+    return GenericRange(RangeUserSiteReportConf(header, with_panda, selectVOName),
                         range_end,
                         range_begin,
                         output)
