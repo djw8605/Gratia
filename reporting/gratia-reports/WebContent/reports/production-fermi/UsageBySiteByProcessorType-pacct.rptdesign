@@ -76,7 +76,7 @@
                 <structure>
                     <property name="name">StartDate</property>
                     <property name="nativeName"></property>
-                    <property name="dataType">any</property>
+                    <property name="dataType">date</property>
                     <property name="nativeDataType">12</property>
                     <property name="position">1</property>
                     <expression name="defaultValue">'2008-01-01'</expression>
@@ -87,7 +87,7 @@
                 <structure>
                     <property name="name">EndDate</property>
                     <property name="nativeName"></property>
-                    <property name="dataType">any</property>
+                    <property name="dataType">date</property>
                     <property name="nativeDataType">12</property>
                     <property name="position">2</property>
                     <expression name="defaultValue">'2008-02-01'</expression>
@@ -322,7 +322,7 @@ order by S.SiteName, datevalue</property>
                 <structure>
                     <property name="name">Aggregation</property>
                     <expression name="expression">dataSetRow["count(distinct N.Node)"]</expression>
-                    <property name="dataType">any</property>
+                    <property name="dataType">decimal</property>
                     <simple-property-list name="aggregateOn">
                         <value>DateGroup</value>
                     </simple-property-list>
@@ -331,7 +331,7 @@ order by S.SiteName, datevalue</property>
                 <structure>
                     <property name="name">Aggregation_1</property>
                     <expression name="expression">dataSetRow["cpuuserbenchdays"]</expression>
-                    <property name="dataType">any</property>
+                    <property name="dataType">decimal</property>
                     <simple-property-list name="aggregateOn">
                         <value>DateGroup</value>
                     </simple-property-list>
@@ -340,7 +340,7 @@ order by S.SiteName, datevalue</property>
                 <structure>
                     <property name="name">Aggregation_2</property>
                     <expression name="expression">dataSetRow["cpusystembenchdays"]</expression>
-                    <property name="dataType">any</property>
+                    <property name="dataType">decimal</property>
                     <simple-property-list name="aggregateOn">
                         <value>DateGroup</value>
                     </simple-property-list>
@@ -349,7 +349,7 @@ order by S.SiteName, datevalue</property>
                 <structure>
                     <property name="name">Aggregation_3</property>
                     <expression name="expression">dataSetRow["availablebenchdays"]</expression>
-                    <property name="dataType">any</property>
+                    <property name="dataType">decimal</property>
                     <simple-property-list name="aggregateOn">
                         <value>DateGroup</value>
                     </simple-property-list>
@@ -358,7 +358,7 @@ order by S.SiteName, datevalue</property>
                 <structure>
                     <property name="name">Aggregation_4</property>
                     <expression name="expression">(row["Aggregation_1"] + row["Aggregation_2"] ) / row["Aggregation_3"]</expression>
-                    <property name="dataType">any</property>
+                    <property name="dataType">float</property>
                     <simple-property-list name="aggregateOn">
                         <value>DateGroup</value>
                     </simple-property-list>
