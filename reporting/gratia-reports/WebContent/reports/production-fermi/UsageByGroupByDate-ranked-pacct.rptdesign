@@ -965,7 +965,7 @@
                 </structure>
                 <structure>
                     <property name="name">StartDate1</property>
-                    <property name="dataType">any</property>
+                    <property name="dataType">date</property>
                     <property name="position">4</property>
                     <expression name="defaultValue">'2007-01-01'</expression>
                     <property name="isInput">true</property>
@@ -974,7 +974,7 @@
                 <structure>
                     <property name="name">EndDate1</property>
                     <property name="nativeName"></property>
-                    <property name="dataType">any</property>
+                    <property name="dataType">date</property>
                     <property name="nativeDataType">0</property>
                     <property name="position">5</property>
                     <expression name="defaultValue">'2007-01-31'</expression>
@@ -1188,6 +1188,7 @@ ORDER BY final_rank, VOProbeSummary.VOName,datevalue</property>
                 <structure>
                     <property name="name">final_rank</property>
                     <expression name="expression">dataSetRow["final_rank"]</expression>
+                    <property name="dataType">integer</property>
                 </structure>
                 <structure>
                     <property name="name">ChartNumber</property>
@@ -1197,37 +1198,37 @@ ORDER BY final_rank, VOProbeSummary.VOName,datevalue</property>
                 <structure>
                     <property name="name">VOName</property>
                     <expression name="expression">dataSetRow["VOName"]</expression>
-                    <property name="dataType">any</property>
+                    <property name="dataType">string</property>
                 </structure>
                 <structure>
                     <property name="name">WallDuration</property>
                     <expression name="expression">dataSetRow["WallDuration"]</expression>
-                    <property name="dataType">any</property>
+                    <property name="dataType">float</property>
                 </structure>
                 <structure>
                     <property name="name">Cpu</property>
                     <expression name="expression">dataSetRow["Cpu"]</expression>
-                    <property name="dataType">any</property>
+                    <property name="dataType">float</property>
                 </structure>
                 <structure>
                     <property name="name">Njobs</property>
                     <expression name="expression">dataSetRow["Njobs"]</expression>
-                    <property name="dataType">any</property>
+                    <property name="dataType">decimal</property>
                 </structure>
                 <structure>
                     <property name="name">datevalue</property>
                     <expression name="expression">dataSetRow["datevalue"]</expression>
-                    <property name="dataType">any</property>
+                    <property name="dataType">string</property>
                 </structure>
                 <structure>
                     <property name="name">CpuUser</property>
                     <expression name="expression">dataSetRow["CpuUser"]</expression>
-                    <property name="dataType">any</property>
+                    <property name="dataType">float</property>
                 </structure>
                 <structure>
                     <property name="name">CpuSystem</property>
                     <expression name="expression">dataSetRow["CpuSystem"]</expression>
-                    <property name="dataType">any</property>
+                    <property name="dataType">float</property>
                 </structure>
             </list-property>
             <column id="30">
@@ -1272,7 +1273,7 @@ ORDER BY final_rank, VOProbeSummary.VOName,datevalue</property>
                 </structure>
                 <property name="repeatHeader">true</property>
                 <property name="hideDetail">true</property>
-                <property name="pageBreakAfter">avoid</property>
+                <property name="pageBreakAfter">auto</property>
                 <property name="pageBreakBefore">always-excluding-first</property>
                 <property name="pageBreakInside">auto</property>
                 <header>

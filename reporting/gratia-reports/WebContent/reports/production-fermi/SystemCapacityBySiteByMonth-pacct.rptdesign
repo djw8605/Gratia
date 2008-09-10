@@ -123,7 +123,7 @@
                 <structure>
                     <property name="name">StartDate</property>
                     <property name="nativeName"></property>
-                    <property name="dataType">any</property>
+                    <property name="dataType">date</property>
                     <property name="nativeDataType">12</property>
                     <property name="position">1</property>
                     <expression name="defaultValue">'2008-01-01'</expression>
@@ -133,7 +133,7 @@
                 </structure>
                 <structure>
                     <property name="name">EndDate</property>
-                    <property name="dataType">any</property>
+                    <property name="dataType">date</property>
                     <property name="position">2</property>
                     <expression name="defaultValue">'2008-02-01'</expression>
                     <property name="isInput">true</property>
