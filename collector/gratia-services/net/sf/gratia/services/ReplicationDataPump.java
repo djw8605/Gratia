@@ -307,13 +307,14 @@ public class ReplicationDataPump extends Thread {
             if (results[0].equals("OK")) {
                 result = true;
             } else {
-                replicationLog(LogLevel.WARNING, "Error During Post: " + response);
+                replicationLog(LogLevel.WARNING, "Error during post: " + response);
                 exitflag = true;
             }
         } else {
             replicationLog(LogLevel.WARNING,
-                           "Error during Replication.",
-                           post.exception);
+                           "Error during replication:" +
+                           post.exception.getMessage() +
+                           "; will retry later.");
             exitflag = true;
         }
         return result;
