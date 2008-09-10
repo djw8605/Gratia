@@ -200,19 +200,19 @@
                     <property name="nativeDataType">8</property>
                 </structure>
             </list-property>
-            <property name="queryText">SELECT   S.SiteName,date_format(N.EndTime,'%Y-%m') as datevalue,
-	sum(N.CpuSystemTime)*C.BenchmarkScore/1000/86400 as cpusystembenchdays, 
-	sum(CpuUserTime)*C.BenchmarkScore/1000/86400 as cpuuserbenchdays,
-	count(distinct N.Node)*C.BenchmarkScore*N.DaysInMonth*C.CpuCount/1000 as availablebenchdays
-FROM NodeSummary N, Probe P, Site S, CPUInfo C
-WHERE P.siteid = S.siteid and N.ProbeName = P.ProbeName
-	and N.HostDescription = C.HostDescription
-and S.SiteName = ?
-and date_format(N.EndTime,'%Y-%m') >= ?
-and date_format(N.EndTime,'%Y-%m') &lt;= ?
-
-GROUP BY S.SiteName,  date_format(N.EndTime,'%Y-%m'), C.HostDescription
-ORDER BY S.SiteName, date_format(N.EndTime,'%Y-%m')</property>
+            <property name="queryText">SELECT S.SiteName,date_format(N.EndTime,'%Y-%m') AS datevalue,
+	SUM(N.CpuSystemTime)*C.BenchmarkScore/1000/86400 AS cpusystembenchdays, 
+	SUM(CpuUserTime)*C.BenchmarkScore/1000/86400 AS cpuuserbenchdays,
+	COUNT(DISTINCT N.Node)*C.BenchmarkScore*N.DaysInMonth*C.CpuCount/1000 AS availablebenchdays
+FROM NodeSummary N
+     JOIN Probe P ON (N.ProbeName = P.probename)
+     JOIN Site S ON (P.siteid = S.siteid)
+     JOIN CPUInfo C ON (N.HostDescription = C.HostDescription)
+WHERE S.SiteName = ?
+  AND N.EndTime >= STR_TO_DATE(DATE_FORMAT(?, '%Y-%m-01'), '%Y-%m-%d %H-%i-%s') 
+  AND N.EndTime &lt; STR_TO_DATE(DATE_FORMAT(DATE_ADD(?, INTERVAL 1 MONTH), '%Y-%m-01'), '%Y-%m-%d %H-%i-%s')
+GROUP BY S.SiteName, datevalue, C.HostDescription
+ORDER BY S.SiteName, datevalue</property>
             <xml-property name="designerValues"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <model:DesignValues xmlns:design="http://www.eclipse.org/datatools/connectivity/oda/design" xmlns:model="http://www.eclipse.org/birt/report/model/adapter/odaModel">
   <Version>1.0</Version>

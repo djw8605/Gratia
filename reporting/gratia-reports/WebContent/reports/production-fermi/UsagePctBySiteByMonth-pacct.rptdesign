@@ -242,19 +242,20 @@
             </list-property>
             <property name="queryText">
 select   S.SiteName,
-	date_format(N.EndTime, '%Y-%m') as datevalue,
-	sum(N.CpuSystemTime)*C.BenchmarkScore/1000/86400 as cpusystembenchdays,
-	sum(N.CpuUserTime)*C.BenchmarkScore/1000/86400 as cpuuserbenchdays,
-	count(distinct N.Node),
-	C.BenchmarkScore,
-	C.CpuCount,
-	count(distinct N.Node)*C.BenchmarkScore*N.DaysInMonth*C.CpuCount/1000 as availablebenchdays,
-	count(distinct N.Node)*C.BenchmarkScore*N.DaysInMonth*C.CpuCount*.5/1000 as halfavailablebenchdays
-from NodeSummary N, Probe P, Site S, CPUInfo C
-where P.siteid = S.siteid and N.ProbeName = P.ProbeName
-	and N.HostDescription = C.HostDescription
-	and date_format(N.EndTime,'%Y-%m') >= ?
-	and date_format(N.EndTime,'%Y-%m') &lt;= ?
+        date_format(N.EndTime, '%Y-%m') as datevalue,
+        sum(N.CpuSystemTime)*C.BenchmarkScore/1000/86400 as cpusystembenchdays,
+        sum(N.CpuUserTime)*C.BenchmarkScore/1000/86400 as cpuuserbenchdays,
+        count(distinct N.Node),
+        C.BenchmarkScore,
+        C.CpuCount,
+        count(distinct N.Node)*C.BenchmarkScore*N.DaysInMonth*C.CpuCount/1000 as availablebenchdays,
+        count(distinct N.Node)*C.BenchmarkScore*N.DaysInMonth*C.CpuCount*.5/1000 as halfavailablebenchdays
+from NodeSummary N
+     JOIN Probe P ON (N.ProbeName = P.probename)
+     JOIN Site S ON (P.siteid = S.siteid)
+     JOIN CPUInfo C ON (N.HostDescription = C.HostDescription)
+where N.EndTime >= STR_TO_DATE(DATE_FORMAT(?, '%Y-%m-01'), '%Y-%m-%d %H-%i-%s') 
+        and N.EndTime &lt; STR_TO_DATE(DATE_FORMAT(DATE_ADD(?, INTERVAL 1 MONTH), '%Y-%m-01'), '%Y-%m-%d %H-%i-%s')
 
 group by S.SiteName,  datevalue, C.BenchmarkScore
 order by S.SiteName, datevalue, C.BenchmarkScore</property>
