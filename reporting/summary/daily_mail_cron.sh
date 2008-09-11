@@ -6,5 +6,5 @@ setup mysql > /dev/null 2>&1
 
 where=`dirname $0`
 cd $where
-$where/daily_mutt.sh
+$where/daily_mutt.sh $1
 
