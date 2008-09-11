@@ -379,24 +379,20 @@ public class ListenerThread extends Thread {
                 // For information logging.
                 String rId = ": ";
                 if (gotreplication) {
-                    rId += "Replication";
+                    rId += "Replication ";
                 } else if (gothistory) {
-                    rId += "History";
-                } else {
-                    rId += "Probe";
-                }
-                rId += " record ";
-                if (rSize > 1) {
-                    rId += (j + 1) + " / " + rSize;
+                    rId += "History ";
                 }
                 session = HibernateWrapper.getSession();
                 Probe probe;
                 try {
                     current = (Record)records.get(j);
                     tx = session.beginTransaction();
-                    rId += " (" + 
-                        current.getClass().getSimpleName() + " from " +
-                        current.getProbeName() + ")";
+                    rId += current.getClass().getSimpleName();
+                    if (rSize > 1) {
+                        rId += " " + (j + 1) + " / " + rSize;
+                    }
+                    rId += " (" + current.getProbeName() + ")";
                     probe = statusUpdater.update(session, current, xml);
                     session.flush();
                     tx.commit();

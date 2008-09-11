@@ -33,7 +33,10 @@ public class ReplicationDataPump extends Thread {
     private int chunksize;
 
     // Class state
+    private String currentDestination = null;
     private boolean exitflag = false;
+    private int nSentThisLoop = 0;
+    private int nSentThisRun = 0;
 
     public ReplicationDataPump(int replicationId) {
         this.replicationId = replicationId;
@@ -58,7 +61,7 @@ public class ReplicationDataPump extends Thread {
     }
 
     public void run() {
-        replicationLog(LogLevel.FINE, "Started run");
+        replicationLog(LogLevel.FINER, "Started run");
         if (!HibernateWrapper.databaseUp()) {
             try {
                 HibernateWrapper.start();
@@ -73,8 +76,13 @@ public class ReplicationDataPump extends Thread {
 
         while (true) {
             loop();
+            nSentThisRun += nSentThisLoop;
             if (exitflag) {
-                replicationLog(LogLevel.FINE, "Stopping/Exiting");
+                replicationLog(LogLevel.FINER, "Stopping/Exiting");
+                if (nSentThisRun > 0) {
+                    replicationLog(LogLevel.FINE,
+                                   nSentThisRun + " records sent during this run.");
+                }
                 return;
             }
         }
@@ -86,6 +94,7 @@ public class ReplicationDataPump extends Thread {
     }
 
     public void loop() {
+        nSentThisLoop = 0;
         if (exitflag) return;
         
         if (!HibernateWrapper.databaseUp()) { 
@@ -103,13 +112,17 @@ public class ReplicationDataPump extends Thread {
             replicationEntry =
             (Replication) session.get("net.sf.gratia.storage.Replication", replicationId);
 
+            if (replicationEntry != null) {
+                currentDestination = replicationEntry.getDestination();
+            }
+
             if ((replicationEntry == null) ||
                 (replicationEntry.getrunning() == 0)) {
                 // Entry has been turned off or removed -- exit.
                 replicationLog(LogLevel.FINE,
                                "replication entry " +
                                replicationId +
-                               " has been removed or turned off");
+                               " has been removed or turned off.");
                 exitflag = true;
                 return;
             }
@@ -173,12 +186,7 @@ public class ReplicationDataPump extends Thread {
         //
         // start replication
         //
-        String replicationTarget = null;
-        if (replicationEntry.getsecurity() == 0) {
-            replicationTarget = replicationEntry.getopenconnection() + "/gratia-servlets/rmi";
-        } else {
-            replicationTarget = replicationEntry.getsecureconnection() + "/gratia-servlets/rmi";
-        }
+        String replicationTarget = replicationEntry.getDestination() + "/gratia-servlets/rmi";
 
         Iterator dIter = dbidList.iterator();
         int bundle_size = replicationEntry.getbundleSize(); // Read table entry
@@ -230,6 +238,10 @@ public class ReplicationDataPump extends Thread {
                         replicationEntry.setrowcount(replicationEntry.getrowcount() + bundle_count);
                         session.flush();
                         session.getTransaction().commit();
+                        if (nSentThisLoop == 0) { // Message for first send
+                            replicationLog(LogLevel.FINE, " active");
+                        }
+                        nSentThisLoop += bundle_count;
                     }
                     if (exitflag) return;
                     bundle_count = 0;
@@ -246,6 +258,10 @@ public class ReplicationDataPump extends Thread {
                     replicationEntry.setrowcount(replicationEntry.getrowcount() + bundle_count);
                     session.flush();
                     session.getTransaction().commit();
+                    if (nSentThisLoop == 0) { // Message for first send
+                        replicationLog(LogLevel.FINE, " active");
+                    }
+                    nSentThisLoop += bundle_count;
                 }
                 if (exitflag) return;
             }
@@ -263,12 +279,13 @@ public class ReplicationDataPump extends Thread {
         finally {
             if ((session != null) && session.isOpen()) session.close();
         }
-        replicationLog(LogLevel.FINE, "Run Complete");
+        replicationLog(LogLevel.FINE,
+                       " waiting for more records (" + nSentThisLoop +
+                       " records sent, " + nSentThisRun + "this run)");
 
         //
         // now wait frequency minutes
         //
-
         long wait = replicationEntry.getfrequency();
         wait = wait * 60 * 1000;
         try {
@@ -311,8 +328,8 @@ public class ReplicationDataPump extends Thread {
                 exitflag = true;
             }
         } else {
-            replicationLog(LogLevel.WARNING,
-                           "Error during replication:" +
+            replicationLog(LogLevel.INFO,
+                           "Error during replication: " +
                            post.exception.getMessage() +
                            "; will retry later.");
             exitflag = true;
@@ -332,24 +349,30 @@ public class ReplicationDataPump extends Thread {
         return results;
     }
 
+    private String logPreamble() {
+        String preamble = "ReplicationDataPump #" + replicationId;
+        if (currentDestination != null) {
+            preamble += " (" + currentDestination + ")";
+        }
+        preamble += ": ";
+        return preamble;
+    }
+            
+
     public void replicationLog(Level level, String log) {
-        Logging.log(level, "ReplicationDataPump ID #" +
-                    replicationId + ": " + log);
+        Logging.log(level, logPreamble() + log);
     }
 
     public void replicationLog(Level level, String log, Exception ex) {
-        Logging.log(level, "ReplicationDataPump ID #" +
-                    replicationId + ": " + log, ex);
+        Logging.log(level, logPreamble() + log, ex);
     }
 
     public void replicationLog(String log) {
-        Logging.log("ReplicationDataPump ID #" +
-                    replicationId + ": " + log);
+        Logging.log(logPreamble() + log);
     }
 
     public void replicationLog(String log, Exception ex) {
-        Logging.log("ReplicationDataPump ID #" +
-                    replicationId + ": " + log, ex);
+        Logging.log(logPreamble() + log, ex);
     }
 
 
