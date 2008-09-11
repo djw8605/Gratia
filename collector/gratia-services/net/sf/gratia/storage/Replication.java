@@ -95,6 +95,15 @@ public class Replication implements Comparable {
         secureconnection = value;
     }
 
+    // Convenience method
+    public String getDestination() {
+        if (security == 0) {
+            return openconnection;
+        } else {
+            return secureconnection;
+        }
+    }
+
     public void setdbid(int value) {
         dbid = value;
     }
