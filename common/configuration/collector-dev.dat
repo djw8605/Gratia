@@ -14,8 +14,9 @@
                   "maintain.history.log" => 7,
                   "monitor.listener.wait" => 2880,
                   "service.rmiservlet.level" => "FINE",
-                  "monitor.to.address0" => 'greenc@fnal.gov',
-                  "service.listener.threads" => 1,
+                  "monitor.to.address.0" => 'greenc@fnal.gov',
+                  "service.listener.threads" => 1, 
+                  "service.admin.DN.0" => '/DC=org/DC=doegrids/OU=Services/CN=gratia-vm02.fnal.gov',
                   "service.admin.FQAN.0" => "/fermilab/Role=GratiaAdmin",
                   "service.admin.FQAN.1" => "/fermilab/Role=GratiaDeveloper",
 
@@ -35,8 +36,9 @@
                    "maintain.history.log" => 7,
                    "monitor.listener.wait" => 2880,
                    "service.rmiservlet.level" => "FINEST",
-                   "monitor.to.address0" => 'greenc@fnal.gov',
+                   "monitor.to.address.0" => 'greenc@fnal.gov',
                    "service.listener.threads" => 1,
+                   "service.admin.DN.0" => '/DC=org/DC=doegrids/OU=Services/CN=gratia-vm02.fnal.gov',
                    "service.admin.FQAN.0" => "/fermilab/Role=GratiaAdmin",
                    "service.admin.FQAN.1" => "/fermilab/Role=GratiaDeveloper",
                   }
@@ -52,7 +54,8 @@
               {
                "maintain.history.log" => 2,
                "monitor.listener.wait" => 240,
-               "monitor.to.address0" => 'jeffmack@fnal.gov',
+               "monitor.to.address.0" => 'jeffmack@fnal.gov',
+               "service.admin.DN.0" => '/DC=org/DC=doegrids/OU=Services/CN=gratia-vm02.fnal.gov',
                "service.admin.FQAN.0" => "/fermilab/Role=GratiaAdmin",
                "service.admin.FQAN.1" => "/fermilab/Role=GratiaDeveloper",
               }
@@ -68,7 +71,8 @@
              {
               "maintain.history.log" => 2,
               "monitor.listener.wait" => 240,
-              "monitor.to.address0" => 'pcanal@fnal.gov',
+              "monitor.to.address.0" => 'pcanal@fnal.gov',
+              "service.admin.DN.0" => '/DC=org/DC=doegrids/OU=Services/CN=gratia-vm02.fnal.gov',
               "service.admin.FQAN.0" => "/fermilab/Role=GratiaAdmin",
               "service.admin.FQAN.1" => "/fermilab/Role=GratiaDeveloper",
              }
@@ -90,10 +94,11 @@
               "service.logging.useLog4j" => 1,
               "maintain.history.log" => 2,
               "monitor.listener.wait" => 240,
-              "service.rmiservlet.level" => "FINEST",
+#              "service.rmiservlet.level" => "FINEST",
               "service.service.level" => 'FINEST',
               "service.service.numLogs" => 10,
-              "monitor.to.address0" => 'greenc@fnal.gov' ,
+              "monitor.to.address.0" => 'greenc@fnal.gov' ,
+              "service.admin.DN.0" => '/DC=org/DC=doegrids/OU=Services/CN=gratia-vm02.fnal.gov',
               "service.admin.FQAN.0" => "/fermilab/Role=GratiaAdmin",
               "service.admin.FQAN.1" => "/fermilab/Role=GratiaDeveloper",
               #              "service.security.level" => 1,
@@ -111,7 +116,8 @@
               {
                "maintain.history.log" => 2,
                "monitor.listener.wait" => 240,
-               "monitor.to.address0" => 'vittone@fnal.gov',
+               "monitor.to.address.0" => 'vittone@fnal.gov',
+               "service.admin.DN.0" => '/DC=org/DC=doegrids/OU=Services/CN=gratia-vm02.fnal.gov',
                "service.admin.FQAN.0" => "/fermilab/Role=GratiaAdmin",
                "service.admin.FQAN.1" => "/fermilab/Role=GratiaDeveloper",
               }
@@ -127,7 +133,8 @@
                {
                 "maintain.history.log" => 2,
                 "monitor.listener.wait" => 240,
-                "monitor.to.address0" => 'penelope@fnal.gov',
+                "monitor.to.address.0" => 'penelope@fnal.gov',
+                "service.admin.DN.0" => '/DC=org/DC=doegrids/OU=Services/CN=gratia-vm02.fnal.gov',
                 "service.admin.FQAN.0" => "/fermilab/Role=GratiaAdmin",
                 "service.admin.FQAN.1" => "/fermilab/Role=GratiaDeveloper",
                }
@@ -154,7 +161,7 @@
                    "service.rmiservlet.level" => "FINEST",
                    "service.service.level" => 'FINEST',
                    "service.service.numLogs" => 200,
-                   "monitor.to.address0" => 'greenc@fnal.gov',
+                   "monitor.to.address.0" => 'greenc@fnal.gov',
                    "service.listener.threads" => 1,
                    "service.lifetime.JobUsageRecord" => "2y",
                    "service.lifetime.JobUsageRecord.RawXML" => "2y",
@@ -162,6 +169,7 @@
                    "service.lifetime.MetricRecord.RawXML" => "2y",
                    "service.lifetime.DupRecord.Duplicates" => "2y",
                    "service.lifetime.DupRecord" => "UNLIMITED",
+                   "service.admin.DN.0" => '/DC=org/DC=doegrids/OU=Services/CN=gratia-vm02.fnal.gov',
                    "service.admin.FQAN.0" => "/fermilab/Role=GratiaAdmin",
                    "service.admin.FQAN.1" => "/fermilab/Role=GratiaDeveloper",
                   }
@@ -178,8 +186,10 @@
                 "maintain.history.log" => 2,
                 "monitor.listener.wait" => 240,
                 "service.rmiservlet.level" => "FINEST",
-                "monitor.to.address0" => 'greenc@fnal.gov',
+                "service.service.level" => "FINEST",
+                "monitor.to.address.0" => 'greenc@fnal.gov',
                 "service.listener.threads" => 1,
+                "service.admin.DN.0" => '/DC=org/DC=doegrids/OU=Services/CN=gratia-vm02.fnal.gov',
                 "service.admin.FQAN.0" => "/fermilab/Role=GratiaAdmin",
                 "service.admin.FQAN.1" => "/fermilab/Role=GratiaDeveloper",
                }
@@ -196,7 +206,8 @@
               {
                "maintain.history.log" => 2,
                "monitor.listener.wait" => 240,
-               "monitor.to.address0" => 'weigand@fnal.gov',
+               "monitor.to.address.0" => 'weigand@fnal.gov',
+               "service.admin.DN.0" => '/DC=org/DC=doegrids/OU=Services/CN=gratia-vm02.fnal.gov',
                "service.admin.FQAN.0" => "/fermilab/Role=GratiaAdmin",
                "service.admin.FQAN.1" => "/fermilab/Role=GratiaDeveloper",
               }
