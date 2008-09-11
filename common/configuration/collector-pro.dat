@@ -19,6 +19,7 @@
     "maintain.history.log" => 75,
     "monitor.listener.wait" => 60,
     "monitor.q.size" => 100000,
+    "service.admin.DN.0" => '/DC=org/DC=doegrids/OU=Services/CN=gratia09.fnal.gov',
     "service.admin.FQAN.0" => "/fermilab/Role=GratiaAdmin",
     "service.lifetime.JobUsageRecord" => "3 months",
     "service.lifetime.MetricRecord" => "1 month",
@@ -42,6 +43,7 @@
     "monitor.to.address.0" => 'gratia-root@fnal.gov',
     "maintain.history.log" => 75,
     "monitor.listener.wait" => 1440,
+    "service.admin.DN.0" => '/DC=org/DC=doegrids/OU=Services/CN=gratia08.fnal.gov',
     "service.admin.FQAN.0" => "/fermilab/Role=GratiaAdmin",
     "service.lifetime.JobUsageRecord" => "1 year", # Safety
     "service.lifetime.MetricRecord" => "1 month",
@@ -64,6 +66,7 @@
     "monitor.to.address.0" => 'gratia-root@fnal.gov',
     "maintain.history.log" => 75,
     "monitor.listener.wait" => 60,
+    "service.admin.DN.0" => '/DC=org/DC=doegrids/OU=Services/CN=gratia09.fnal.gov',
     "service.admin.FQAN.0" => "/fermilab/Role=GratiaAdmin",
     "service.lifetime.JobUsageRecord" => "1 year",
     "service.listener.threads" => 1,
@@ -86,6 +89,7 @@
     "monitor.to.address.0" => 'gratia-root@fnal.gov',
     "maintain.history.log" => 75,
     "monitor.listener.wait" => 1440,
+    "service.admin.DN.0" => '/DC=org/DC=doegrids/OU=Services/CN=gratia08.fnal.gov',
     "service.admin.FQAN.0" => "/fermilab/Role=GratiaAdmin",
     "service.lifetime.JobUsageRecord" => "1 year",
    }
@@ -109,6 +113,7 @@
     "gratia.database.useJobUsageSiteName" => 1,
     "gratia.database.wantNodeSummary" => 1,
     "maintain.history.log" => 75,
+    "service.admin.DN.0" => '/DC=org/DC=doegrids/OU=Services/CN=gratia08.fnal.gov',
     "service.admin.FQAN.0" => "/fermilab/Role=GratiaAdmin",
    },
  },
@@ -128,6 +133,7 @@
     "monitor.from.address" => 'gratia-operation@opensciencegrid.org',
     "monitor.to.address.0" => 'gratia-root@fnal.gov',
     "maintain.history.log" => 75,
+    "service.admin.DN.0" => '/DC=org/DC=doegrids/OU=Services/CN=gratia08.fnal.gov',
     "service.admin.FQAN.0" => "/fermilab/Role=GratiaAdmin",
     "service.lifetime.JobUsageRecord" => "UNLIMITED",
    }
@@ -152,6 +158,7 @@
     "gratia.database.wantSummaryTrigger" => 0,
     "maintain.history.log" => 75,
     "monitor.listener.wait" => 1440,
+    "service.admin.DN.0" => '/DC=org/DC=doegrids/OU=Services/CN=gratia09.fnal.gov',
     "service.admin.FQAN.0" => "/fermilab/Role=GratiaAdmin",
     "service.lifetime.JobUsageRecord" => "UNLIMITED", # Very low volume
    },
@@ -175,6 +182,7 @@
     "monitor.to.address.0" => 'gratia-root@fnal.gov',
     "maintain.history.log" => 75,
     "monitor.listener.wait" => 60,
+    "service.admin.DN.0" => '/DC=org/DC=doegrids/OU=Services/CN=gratia09.fnal.gov',
     "service.admin.FQAN.0" => "/fermilab/Role=GratiaAdmin",
     "service.lifetime.JobUsageRecord" => "1 year",
     "service.listener.threads" => 1,
@@ -197,6 +205,7 @@
     "monitor.to.address.0" => 'gratia-root@fnal.gov',
     "maintain.history.log" => 75,
     "monitor.listener.wait" => 240,
+    "service.admin.DN.0" => '/DC=org/DC=doegrids/OU=Services/CN=gratia09.fnal.gov',
     "service.admin.FQAN.0" => "/fermilab/Role=GratiaAdmin",
     "service.lifetime.JobUsageRecord" => "1 year", # Not yet settled?
     "service.listener.threads" => 1,
@@ -219,6 +228,7 @@
     "monitor.to.address.0" => 'gratia-root@fnal.gov',
     "maintain.history.log" => 75,
     "monitor.listener.wait" => 240,
+    "service.admin.DN.0" => '/DC=org/DC=doegrids/OU=Services/CN=gratia08.fnal.gov',
     "service.admin.FQAN.0" => "/fermilab/Role=GratiaAdmin",
     "service.lifetime.JobUsageRecord" => "1 year",
     "service.listener.threads" => 1,
@@ -245,6 +255,7 @@
     "monitor.to.address.0" => 'gratia-root@fnal.gov',
     "maintain.history.log" => 75,
     "monitor.listener.wait" => 60,
+    "service.admin.DN.0" => '/DC=org/DC=doegrids/OU=Services/CN=gratia08.fnal.gov',
     "service.admin.FQAN.0" => "/fermilab/Role=GratiaAdmin",
     "service.lifetime.JobUsageRecord" => "UNLIMITED", # Safety
    }
