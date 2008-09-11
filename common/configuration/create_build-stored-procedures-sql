@@ -113,19 +113,20 @@ my %procedures =
                             q/forprobe varchar(128)/,
                             q/forsite varchar(128)/ ],
    select_columns => q/Site.SiteName as sitename,
-            JobUsageRecord_Report.JobName,
-            JobUsageRecord_Report.ProbeName,
-            JobUsageRecord_Report.WallDuration as WallDuration,
-            JobUsageRecord_Report.CpuUserDuration + JobUsageRecord_Report.CpuSystemDuration as Cpu,
-            JobUsageRecord_Report.Njobs as Njobs,
-            JobUsageRecord_Report.VOName as voname,
-            JobUsageRecord_Report.CommonName as UserName/,
-   from_tables => q/JobUsageRecord_Report,  Site, Probe/,
+            '"'"'Oops'"'"' as JobName,
+            VOProbeSummary.ProbeName,
+            VOProbeSummary.WallDuration as WallDuration,
+            VOProbeSummary.CpuUserDuration + VOProbeSummary.CpuSystemDuration as Cpu,
+            VOProbeSummary.Njobs as Njobs,
+            VOProbeSummary.VOName as voname,
+            VOProbeSummary.CommonName as UserName/,
+   from_tables => q/VOProbeSummary,  Site, Probe/,
    main_where => q/Probe.siteid = Site.siteid
-      and JobUsageRecord_Report.ProbeName = Probe.probename
-      and ((''', begdatetime, ' 00:00:00 '') <= (JobUsageRecord_Report.EndTime) and (JobUsageRecord_Report.EndTime) <= (''', enddatetime, ' 00:00:00 ''))
-      and (''', forprobe, ''' = ''All'' or  JobUsageRecord_Report.ProbeName = ''', forprobe, ''')
-      and (''', forsite, '''  = ''All'' or  Site.SiteName = ''', forsite, ''')/
+      and VOProbeSummary.ProbeName = Probe.probename
+      and ((''', begdatetime, ' 00:00:00 '') <= (VOProbeSummary.EndTime) and (VOProbeSummary.EndTime) <= (''', enddatetime, ' 00:00:00 ''))
+      and (''', forprobe, ''' = ''All'' or  VOProbeSummary.ProbeName = ''', forprobe, ''')
+      and (''', forsite, '''  = ''All'' or  Site.SiteName = ''', forsite, ''')/,
+   group_by => q/voname, Username/
  },
  UsageByUserForDate =>
  { procedure_arguments => [ q/userName varchar(64)/,
