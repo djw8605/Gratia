@@ -38,10 +38,10 @@ import org.hibernate.exception.*;
 public class DatabaseMaintenance {
     static final String dq = "\"";
     static final String comma = ",";
-    static final int gratiaDatabaseVersion = 50;
+    static final int gratiaDatabaseVersion = 51;
     static final int latestDBVersionRequiringStoredProcedureLoad = gratiaDatabaseVersion;
     static final int latestDBVersionRequiringSummaryViewLoad = 37;
-    static final int latestDBVersionRequiringSummaryTriggerLoad = 49;
+    static final int latestDBVersionRequiringSummaryTriggerLoad = 51;
     static final int latestDBVersionRequiringTableStatisticsRefresh = 38;
 
     static boolean dbUseJobUsageSiteName = false;
@@ -492,8 +492,17 @@ public class DatabaseMaintenance {
 
         UpdateDbProperty("use.report.authentication",
                          p.getProperty("use.report.authentication", "0"));
+        int wantSummaryTrigger = 1;
+        try {
+            wantSummaryTrigger =
+                Integer.
+                parseInt(p.getProperty("gratia.database.wantSummaryTrigger",
+                                       "1"));
+        } catch (Exception ignore) {
+        }
         UpdateDbProperty("gratia.database.wantSummaryTrigger",
-                         p.getProperty("gratia.database.wantSummaryTrigger", "1"));
+                         wantSummaryTrigger);
+        JobUsageRecord.setwantSummary(wantSummaryTrigger == 1);
         UpdateDbProperty("gratia.database.wantStoredProcedures",
                          p.getProperty("gratia.database.wantStoredProcedures", "1"));
         UpdateDbProperty("gratia.database.useJobUsageSiteName",
@@ -1367,10 +1376,10 @@ public class DatabaseMaintenance {
                     UpdateDbVersion(current);
                 }         
             }
-            if ((current >= 48) && (current <= 49)) {
-                // Auxiliary DB item upgrades only (trigger code and friends)
-                Logging.fine("Gratia database upgraded from " + current + " to 50");
-                current = 50;
+            if ((current >= 48) && (current <= 50)) {
+                // Auxiliary DB item upgrades only (trigger code and friends, stored procedures)
+                Logging.fine("Gratia database upgraded from " + current + " to 51");
+                current = 51;
                 UpdateDbVersion(current);
             }                
 

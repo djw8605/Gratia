@@ -73,6 +73,8 @@ public class JobUsageRecord extends Record
 
     private Set TDSet;
 
+    private static Boolean wantSummary = true;
+
    public JobUsageRecord()
    {
       RecordIdentity = null; // new RecordIdentity();
@@ -727,11 +729,17 @@ public class JobUsageRecord extends Record
             (!session.contains(td))) { // No cascade
             session.save(td); // Save TransferDetails session.
         }
-        session.flush();
-        org.hibernate.Query q =
-            session.createSQLQuery("call add_JUR_to_summary(" +
-                                   getRecordId() + ")");
-        q.executeUpdate();
+        if (wantSummary) {
+            session.flush();
+            org.hibernate.Query q =
+                session.createSQLQuery("call add_JUR_to_summary(" +
+                                       getRecordId() + ")");
+            q.executeUpdate();
+        }
+    }
+
+    public static void setwantSummary(Boolean wantSummary) {
+        JobUsageRecord.wantSummary = wantSummary;
     }
 
 }
