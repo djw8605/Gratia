@@ -39,8 +39,8 @@ reports=$(reporting)/gratia-reports
 reportsrc=$(reporting)/gratia-reporting
 staticScript=$(reportsrc)/WebContent/staticReports
 birtDir=$(reporting)/birt-wars
-birtwarFile=birt-v231-N20080820.war
-
+#birtwarFile=birt-v231-N20080820.war
+birtwarFile=birt-v231-N20080818.war
 # common modules
 configuration=$(common)/configuration
 security=$(common)/gratia-security
@@ -428,6 +428,9 @@ release: gratia
 	cp $(target)/gratia-servlets.war tarball/gratia/gratia_services; \
 	cp $(target)/gratia-soap.war tarball/gratia/gratia_services; \
 	cp $(target)/gratia-administration.war tarball/gratia/gratia_services; \
+	cp $(target)/cleanup_{server,common}_lib tarball/gratia/gratia_services; \
+	cp $(target)/{server,common}_lib.tar tarball/gratia/gratia_services; \
+	cp $(target)/common_classes.tar tarball/gratia/gratia_services; \
 	tar $(tarowner) -cvf $(target)/gratia_services_$(gratia_services_version).tar -C tarball .; \
 	rm -f -r tarball
 	# --- Target: release COMPLETED at $(shell date) ---
