@@ -130,6 +130,10 @@ while [[ -n "$1" ]]; do
         # Hand-tweaked procedure (temporary)
         proc="${script_location}SiteUsageCountByVO.sql"
         ;;
+      stored-extra-3)
+        # Hand-tweaked procedure (temporary)
+        proc="${script_location}dCacheSimple.sql"
+        ;;
       static-reports)
         # For CSV static reports
         proc="${script_location}static-report-procedures.sql"

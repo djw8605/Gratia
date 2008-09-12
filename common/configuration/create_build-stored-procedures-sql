@@ -112,14 +112,14 @@ my %procedures =
                             q/format varchar(64)/, q/resourceType varchar(64)/,
                             q/forprobe varchar(128)/,
                             q/forsite varchar(128)/ ],
-   select_columns => q/Site.SiteName as sitename,
-            '"'"'Oops'"'"' as JobName,
+   select_columns => q^Site.SiteName as sitename,
+            concat(''Jobs for '', VOProbeSummary.VOName, ''/'', VOProbeSummary.CommonName) as JobName,
             VOProbeSummary.ProbeName,
             VOProbeSummary.WallDuration as WallDuration,
             VOProbeSummary.CpuUserDuration + VOProbeSummary.CpuSystemDuration as Cpu,
             VOProbeSummary.Njobs as Njobs,
             VOProbeSummary.VOName as voname,
-            VOProbeSummary.CommonName as UserName/,
+            VOProbeSummary.CommonName as UserName^,
    from_tables => q/VOProbeSummary,  Site, Probe/,
    main_where => q/Probe.siteid = Site.siteid
       and VOProbeSummary.ProbeName = Probe.probename

@@ -29,8 +29,8 @@
 			<MenuItem name="2007 Usage for All VOs" link="GratiaParameterInput.jsp?report=[ReportsFolder]2007WeeklyUsageByVO-ranked.rptdesign&amp;DisplayMetric=WallDuration"/>
 		</MenuGroup>
 		<MenuGroup name="DCache">
-			<MenuItem name="Dcache Probe Table" link="showQuery.jsp?sql=select S.SiteName, X.ProbeName, X.Njobs from Probe P, Site S, (select M.ProbeName, M.probeid, sum(R.Njobs) as Njobs from JobUsageRecord R, JobUsageRecord_Meta M where R.ResourceType = 'Storage' and M.dbid = R.dbid group by M.ProbeName) X where X.probeid = P.probeid and P.siteid = S.siteid order by SiteName, ProbeName;"/>
-<!--			<MenuItem name="Dcache Report" link="GratiaParameterInput.jsp?report=[ReportsFolder]DcacheBySource.rptdesign"/>
+			<MenuItem name="Dcache Probe Table" link="showQuery.jsp?sql=call dCacheSimple();"/>
+ <!--			<MenuItem name="Dcache Report" link="GratiaParameterInput.jsp?report=[ReportsFolder]DcacheBySource.rptdesign"/>
 -->
 		</MenuGroup>
 		<MenuGroup name="SQL Queries">
