@@ -187,7 +187,7 @@ public class CollectorService implements ServletContextListener {
                 HibernateWrapper.startMaster();
             }
             catch (Exception e) {
-                Logging.log(LogLevel.SEVERE, "CollectorService: error while checking indexes.");
+                Logging.log(LogLevel.SEVERE, "CollectorService: error starting Hibernate.");
                 Logging.log(LogLevel.SEVERE, "CollectorService: manual correction required");
                 Logging.debug("Exception details:", e);
                 return;
