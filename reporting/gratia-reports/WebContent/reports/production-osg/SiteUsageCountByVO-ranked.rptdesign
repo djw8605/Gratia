@@ -830,7 +830,6 @@
         </template-parameter-definition>
     </template-parameter-definitions>
     <parameters>
-        <parameter-group name="MetricsFormatting" id="428" extends="reportLib.MetricsFormatting"/>
         <scalar-parameter name="GroupsPerChart" id="417" extends="reportLib.GroupsPerChart"/>
         <parameter-group name="DatabaseAccess" id="407" extends="reportLib.DatabaseAccess"/>
         <parameter-group name="ReportInfo" id="408" extends="reportLib.ReportInfo"/>
@@ -1405,13 +1404,12 @@
  function beforeGeneration( chart, context )&#xD;
 {	&#xD;
 	rep = context.getExternalContext().getScriptable();&#xD;
-	&#xD;
-	metric_text = &quot;&quot;;&#xD;
+/*	&#xD;
 	metric = rep.getParameterValue(&quot;DisplayMetric&quot;);&#xD;
 	if(metric==&quot;Cpu&quot;) metric_text = &quot;Process Hours&quot;;&#xD;
 	if(metric==&quot;WallDuration&quot;) metric_text = &quot;Wallclock Hours&quot;;&#xD;
 	if(metric==&quot;Njobs&quot;) metric_text = &quot;Job Count&quot;;&#xD;
-	&#xD;
+*/	&#xD;
 	// Force title&#xD;
 	metric_text = &quot;&quot;;&#xD;
 &#xD;
@@ -1820,10 +1818,6 @@
             &lt;property name=&quot;paramName&quot;>ReportSubtitle&lt;/property>
             &lt;expression name=&quot;expression&quot;>params[&quot;ReportSubtitle&quot;]&lt;/expression>
         &lt;/structure>
-        &lt;structure>
-            &lt;property name=&quot;paramName&quot;>DisplayMetric&lt;/property>
-            &lt;expression name=&quot;expression&quot;>'ALL'&lt;/expression>
-        &lt;/structure>
     &lt;/list-property>
 &lt;/structure>
 </BaseUrl>
@@ -2223,10 +2217,6 @@
                                         <structure>
                                             <property name="paramName">ReportSubtitle</property>
                                             <expression name="expression">params["ReportSubtitle"]</expression>
-                                        </structure>
-                                        <structure>
-                                            <property name="paramName">DisplayMetric</property>
-                                            <expression name="expression">'ALL'</expression>
                                         </structure>
                                     </list-property>
                                 </structure>

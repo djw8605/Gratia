@@ -43,7 +43,6 @@
         </structure>
     </list-property>
     <parameters>
-        <parameter-group name="MetricsFormatting" id="401" extends="reportLib.MetricsFormatting"/>
         <parameter-group name="DateRange" id="402" extends="reportLib.DateRange"/>
         <scalar-parameter name="ForVOName" id="403" extends="reportLib.ForVOName"/>
         <scalar-parameter name="ForVO" id="404" extends="reportLib.ForVO">
@@ -991,7 +990,7 @@ function beforeDrawAxisTitle( axis, label, context )
         &lt;/structure>
         &lt;structure>
             &lt;property name=&quot;paramName&quot;>DisplayMetric&lt;/property>
-            &lt;expression name=&quot;expression&quot;>params[&quot;DisplayMetric&quot;]&lt;/expression>
+            &lt;expression name=&quot;expression&quot;>&quot;WallDuration&quot;&lt;/expression>
         &lt;/structure>
         &lt;structure>
             &lt;property name=&quot;paramName&quot;>ForVOName&lt;/property>
@@ -1688,7 +1687,7 @@ function beforeDrawAxisTitle( axis, label, context )
                                 </structure>
                                 <structure>
                                     <property name="paramName">DisplayMetric</property>
-                                    <expression name="expression">params["DisplayMetric"]</expression>
+                                    <expression name="expression">"WallDuration"</expression>
                                 </structure>
                                 <structure>
                                     <property name="paramName">ForVOName</property>
@@ -2072,7 +2071,7 @@ else{
       <Left>0.0</Left>
       <Top>0.0</Top>
       <Width>480.0</Width>
-      <Height>550.0</Height>
+      <Height>549.75</Height>
     </Bounds>
     <Insets>
       <Top>3.0</Top>
@@ -2377,7 +2376,7 @@ function beforeDrawAxisTitle( axis, label, context )
       <Type>Linear</Type>
       <Title>
         <Caption>
-          <Value>hours</Value>
+          <Value># of Jobs</Value>
           <Font>
             <Size>12.0</Size>
             <Bold>true</Bold>
@@ -2554,7 +2553,7 @@ function beforeDrawAxisTitle( axis, label, context )
         &lt;/structure>
         &lt;structure>
             &lt;property name=&quot;paramName&quot;>DisplayMetric&lt;/property>
-            &lt;expression name=&quot;expression&quot;>params[&quot;DisplayMetric&quot;]&lt;/expression>
+            &lt;expression name=&quot;expression&quot;>&quot;Njobs&quot;&lt;/expression>
         &lt;/structure>
         &lt;structure>
             &lt;property name=&quot;paramName&quot;>ForVOName&lt;/property>
@@ -3251,7 +3250,7 @@ function beforeDrawAxisTitle( axis, label, context )
                                 </structure>
                                 <structure>
                                     <property name="paramName">DisplayMetric</property>
-                                    <expression name="expression">params["DisplayMetric"]</expression>
+                                    <expression name="expression">"Njobs"</expression>
                                 </structure>
                                 <structure>
                                     <property name="paramName">ForVOName</property>
