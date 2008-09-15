@@ -696,6 +696,14 @@ else
                             <property name="borderTopColor">#000000</property>
                             <property name="borderTopStyle">solid</property>
                             <property name="borderTopWidth">thin</property>
+                            <text-data id="169">
+                                <property name="style">sans-style1</property>
+                                <property name="fontFamily">sans-serif</property>
+                                <property name="fontSize">small</property>
+                                <property name="fontWeight">bold</property>
+                                <expression name="valueExpr">"Total for Probe '" + row["ProbeName"] + "'"</expression>
+                                <property name="contentType">html</property>
+                            </text-data>
                         </cell>
                         <cell id="467">
                             <property name="borderTopColor">#000000</property>
@@ -834,13 +842,5 @@ else
                 </row>
             </footer>
         </table>
-        <text-data id="169">
-            <property name="style">sans-style1</property>
-            <property name="fontFamily">sans-serif</property>
-            <property name="fontSize">small</property>
-            <property name="fontWeight">bold</property>
-            <expression name="valueExpr">"Total for Probe '" + row["ProbeName"] + "'"</expression>
-            <property name="contentType">html</property>
-        </text-data>
     </body>
 </report>
