@@ -35,7 +35,6 @@
             <property name="id">444</property>
         </structure>
     </list-property>
-    <property name="eventHandlerClass">net.sf.gratia.reporting.GratiaBirtReportEH</property>
     <list-property name="libraries">
         <structure>
             <property name="fileName">reportLib.rptlibrary</property>
@@ -53,7 +52,7 @@
     <data-sources>
         <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="Data Source" id="444">
             <property name="odaDriverClass">com.mysql.jdbc.Driver</property>
-            <property name="odaURL">jdbc:mysql://gratia-db01.fnal.gov:3320/gratia_itb</property>
+            <property name="odaURL">jdbc:mysql://gratia07.fnal.gov:3322/itb_gratia_itb</property>
             <property name="odaUser">reader</property>
             <encrypted-property name="odaPassword">cmVhZGVy</encrypted-property>
         </oda-data-source>
@@ -194,7 +193,7 @@ order by name</property>
                     <property name="name">StartDate</property>
                     <property name="dataType">string</property>
                     <property name="position">3</property>
-                    <expression name="defaultValue">'2007-01-01'</expression>
+                    <expression name="defaultValue">'2008-06-01'</expression>
                     <property name="isInput">true</property>
                     <property name="isOutput">false</property>
                 </structure>
@@ -202,7 +201,7 @@ order by name</property>
                     <property name="name">EndDate</property>
                     <property name="dataType">string</property>
                     <property name="position">4</property>
-                    <expression name="defaultValue">'2007-02-01'</expression>
+                    <expression name="defaultValue">'2008-06-13'</expression>
                     <property name="isInput">true</property>
                     <property name="isOutput">false</property>
                 </structure>
@@ -321,10 +320,6 @@ order by name</property>
             </list-property>
             <list-property name="boundDataColumns">
                 <structure>
-                    <property name="name">JobName</property>
-                    <expression name="expression">dataSetRow["JobName"]</expression>
-                </structure>
-                <structure>
                     <property name="name">CPU Minutes Used</property>
                     <expression name="expression">dataSetRow["CPU Minutes Used"]</expression>
                 </structure>
@@ -334,10 +329,6 @@ order by name</property>
         else  Math.floor( (row["CPU Minutes Used"]) )</property>
                     <expression name="expression">(row["CPU Minutes Used"])</expression>
                     <property name="dataType">decimal</property>
-                </structure>
-                <structure>
-                    <property name="name">Njobs</property>
-                    <expression name="expression">dataSetRow["Njobs"]</expression>
                 </structure>
                 <structure>
                     <property name="name">sitename</property>
@@ -356,11 +347,6 @@ order by name</property>
                     <property name="name">Cpu</property>
                     <expression name="expression">dataSetRow["Cpu"]</expression>
                     <property name="dataType">float</property>
-                </structure>
-                <structure>
-                    <property name="name">UserName</property>
-                    <expression name="expression">dataSetRow["UserName"]</expression>
-                    <property name="dataType">string</property>
                 </structure>
                 <structure>
                     <property name="name">Column Binding</property>
@@ -427,6 +413,31 @@ order by name</property>
                         <value>Compute Element</value>
                     </simple-property-list>
                     <property name="aggregateFunction">sum</property>
+                </structure>
+                <structure>
+                    <property name="name">Njobs</property>
+                    <property name="displayName">Njobs</property>
+                    <expression name="expression">dataSetRow["Njobs"]</expression>
+                    <property name="dataType">float</property>
+                </structure>
+                <structure>
+                    <property name="name">UserName</property>
+                    <expression name="expression">dataSetRow["UserName"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+            </list-property>
+            <list-property name="sort">
+                <structure>
+                    <expression name="key">row["sitename"]</expression>
+                    <property name="direction">asc</property>
+                </structure>
+                <structure>
+                    <expression name="key">row["ProbeName"]</expression>
+                    <property name="direction">asc</property>
+                </structure>
+                <structure>
+                    <expression name="key">row["UserName"]</expression>
+                    <property name="direction">asc</property>
                 </structure>
             </list-property>
             <column id="107"/>
@@ -592,6 +603,12 @@ else
                 <property name="pageBreakAfter">auto</property>
                 <property name="pageBreakBefore">auto</property>
                 <property name="pageBreakInside">auto</property>
+                <list-property name="sort">
+                    <structure>
+                        <expression name="key">row["UserName"]</expression>
+                        <property name="direction">asc</property>
+                    </structure>
+                </list-property>
                 <header>
                     <row id="122">
                         <cell id="123">
@@ -617,7 +634,7 @@ else
                                 <property name="fontWeight">bold</property>
                                 <property name="textUnderline">underline</property>
                                 <property name="contentType">plain</property>
-                                <text-property name="content"><![CDATA[Job Name]]></text-property>
+                                <text-property name="content"><![CDATA[User Name]]></text-property>
                             </text>
                         </cell>
                         <cell id="163">
@@ -652,14 +669,6 @@ else
                             <property name="borderTopColor">#000000</property>
                             <property name="borderTopStyle">solid</property>
                             <property name="borderTopWidth">thin</property>
-                            <text-data id="169">
-                                <property name="style">sans-style1</property>
-                                <property name="fontFamily">sans-serif</property>
-                                <property name="fontSize">small</property>
-                                <property name="fontWeight">bold</property>
-                                <expression name="valueExpr">"Total for Probe '" + row["ProbeName"] + "'"</expression>
-                                <property name="contentType">html</property>
-                            </text-data>
                         </cell>
                         <cell id="128">
                             <property name="borderTopColor">#000000</property>
@@ -699,11 +708,10 @@ else
             <detail>
                 <row id="99">
                     <cell id="100">
-                        <data id="131">
-                            <property name="style">sans-style1</property>
-                            <property name="fontFamily">sans-serif</property>
-                            <property name="fontSize">small</property>
-                            <property name="resultSetColumn">JobName</property>
+                        <data id="458">
+                            <property name="marginTop">0pt</property>
+                            <property name="paddingTop">1pt</property>
+                            <property name="resultSetColumn">UserName</property>
                         </data>
                     </cell>
                     <cell id="101">
@@ -727,7 +735,12 @@ else
         else  Math.floor( (row["CPU Minutes Used"]) )</property>
                         </data>
                     </cell>
-                    <cell id="102"/>
+                    <cell id="102">
+                        <data id="453">
+                            <property name="textAlign">right</property>
+                            <property name="resultSetColumn">Njobs</property>
+                        </data>
+                    </cell>
                 </row>
             </detail>
             <footer>
@@ -777,5 +790,13 @@ else
                 </row>
             </footer>
         </table>
+        <text-data id="169">
+            <property name="style">sans-style1</property>
+            <property name="fontFamily">sans-serif</property>
+            <property name="fontSize">small</property>
+            <property name="fontWeight">bold</property>
+            <expression name="valueExpr">"Total for Probe '" + row["ProbeName"] + "'"</expression>
+            <property name="contentType">html</property>
+        </text-data>
     </body>
 </report>
