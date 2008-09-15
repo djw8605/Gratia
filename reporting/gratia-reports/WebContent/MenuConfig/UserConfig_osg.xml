@@ -4,6 +4,7 @@
 			<MenuItem name="Usage by VO" link="GratiaParameterInput.jsp?report=[ReportsFolder]UsageByVO.rptdesign&amp;DisplayMetric=WallDuration"/>
 			<MenuItem display="true" name="Daily Usage by VO" link="GratiaParameterInput.jsp?report=[ReportsFolder]UsageByVOByDate-ranked.rptdesign&amp;DisplayMetric=WallDuration"/>
 			<MenuItem name="Daily Usage by Site for VO" link="GratiaParameterInput.jsp?report=[ReportsFolder]DailyUsageBySiteForVO.rptdesign&amp;DisplayMetric=WallDuration"/>
+                        <MenuItem name="Site Usage by VO" link="GratiaParameterInput.jsp?report=[ReportsFolder]SiteUsageCountByVO-ranked.rptdesign"/>
 		</MenuGroup>
 		<MenuGroup name="Reports - VO Views - Weekly History">
 			<MenuItem name="Usage By VO" link="GratiaParameterInput.jsp?report=[ReportsFolder]WeeklyUsageByVO-ranked.rptdesign&amp;DisplayMetric=WallDuration"/>
