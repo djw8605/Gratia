@@ -113,7 +113,6 @@ my %procedures =
                             q/forprobe varchar(128)/,
                             q/forsite varchar(128)/ ],
    select_columns => q^Site.SiteName as sitename,
-            concat(''Jobs for '', VOProbeSummary.VOName, ''/'', VOProbeSummary.CommonName) as JobName,
             VOProbeSummary.ProbeName,
             VOProbeSummary.WallDuration as WallDuration,
             VOProbeSummary.CpuUserDuration + VOProbeSummary.CpuSystemDuration as Cpu,
