@@ -35,6 +35,7 @@
             <property name="id">444</property>
         </structure>
     </list-property>
+    <property name="eventHandlerClass">net.sf.gratia.reporting.GratiaBirtReportEH</property>
     <list-property name="libraries">
         <structure>
             <property name="fileName">reportLib.rptlibrary</property>
@@ -425,6 +426,11 @@ order by name</property>
                     <expression name="expression">dataSetRow["UserName"]</expression>
                     <property name="dataType">string</property>
                 </structure>
+                <structure>
+                    <property name="name">voname</property>
+                    <expression name="expression">dataSetRow["voname"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
             </list-property>
             <list-property name="sort">
                 <structure>
@@ -439,14 +445,19 @@ order by name</property>
                     <expression name="key">row["UserName"]</expression>
                     <property name="direction">asc</property>
                 </structure>
+                <structure>
+                    <expression name="key">row["voname"]</expression>
+                    <property name="direction">asc</property>
+                </structure>
             </list-property>
             <column id="107"/>
+            <column id="470"/>
             <column id="108"/>
             <column id="109"/>
             <header>
                 <row id="95">
                     <cell id="96">
-                        <property name="colSpan">3</property>
+                        <property name="colSpan">4</property>
                         <property name="rowSpan">1</property>
                         <label name="ReportURL" id="409" extends="reportLib.ReportURL"/>
                         <label name="ShowQuery" id="410" extends="reportLib.ShowQuery"/>
@@ -462,7 +473,7 @@ order by name</property>
                 </row>
                 <row id="148">
                     <cell id="149">
-                        <property name="colSpan">3</property>
+                        <property name="colSpan">4</property>
                         <property name="rowSpan">1</property>
                         <text-data id="168">
                             <property name="style">sans-style1</property>
@@ -477,7 +488,7 @@ order by name</property>
                 </row>
                 <row id="144">
                     <cell id="145">
-                        <property name="colSpan">3</property>
+                        <property name="colSpan">4</property>
                         <property name="rowSpan">1</property>
                         <text-data id="159">
                             <property name="style">sans-style1</property>
@@ -497,7 +508,7 @@ else
                 <row id="152">
                     <property name="height">0.791in</property>
                     <cell id="153">
-                        <property name="colSpan">3</property>
+                        <property name="colSpan">4</property>
                         <property name="rowSpan">1</property>
                         <text-data id="160">
                             <property name="style">sans-style1</property>
@@ -528,7 +539,7 @@ else
                     <row id="111">
                         <property name="height">0.26in</property>
                         <cell id="112">
-                            <property name="colSpan">3</property>
+                            <property name="colSpan">4</property>
                             <property name="rowSpan">1</property>
                             <property name="paddingTop">10pt</property>
                             <property name="paddingBottom">10pt</property>
@@ -557,6 +568,11 @@ else
                                 <expression name="valueExpr">"Total for Site '" + row["sitename"] + "'"</expression>
                                 <property name="contentType">html</property>
                             </text-data>
+                        </cell>
+                        <cell id="468">
+                            <property name="borderTopColor">#000000</property>
+                            <property name="borderTopStyle">solid</property>
+                            <property name="borderTopWidth">thin</property>
                         </cell>
                         <cell id="117">
                             <property name="borderTopColor">#000000</property>
@@ -612,7 +628,7 @@ else
                 <header>
                     <row id="122">
                         <cell id="123">
-                            <property name="colSpan">3</property>
+                            <property name="colSpan">4</property>
                             <property name="rowSpan">1</property>
                             <property name="paddingBottom">10pt</property>
                             <text-data id="396">
@@ -635,6 +651,17 @@ else
                                 <property name="textUnderline">underline</property>
                                 <property name="contentType">plain</property>
                                 <text-property name="content"><![CDATA[User Name]]></text-property>
+                            </text>
+                        </cell>
+                        <cell id="465">
+                            <text id="472">
+                                <property name="style">sans-style1</property>
+                                <property name="fontFamily">sans-serif</property>
+                                <property name="fontSize">small</property>
+                                <property name="fontWeight">bold</property>
+                                <property name="textUnderline">underline</property>
+                                <property name="contentType">plain</property>
+                                <text-property name="content"><![CDATA[VO Name]]></text-property>
                             </text>
                         </cell>
                         <cell id="163">
@@ -666,6 +693,11 @@ else
                 <footer>
                     <row id="126">
                         <cell id="127">
+                            <property name="borderTopColor">#000000</property>
+                            <property name="borderTopStyle">solid</property>
+                            <property name="borderTopWidth">thin</property>
+                        </cell>
+                        <cell id="467">
                             <property name="borderTopColor">#000000</property>
                             <property name="borderTopStyle">solid</property>
                             <property name="borderTopWidth">thin</property>
@@ -714,6 +746,13 @@ else
                             <property name="resultSetColumn">UserName</property>
                         </data>
                     </cell>
+                    <cell id="466">
+                        <data id="471">
+                            <property name="marginTop">0pt</property>
+                            <property name="paddingTop">1pt</property>
+                            <property name="resultSetColumn">voname</property>
+                        </data>
+                    </cell>
                     <cell id="101">
                         <data id="135">
                             <property name="style">sans-style1</property>
@@ -756,6 +795,11 @@ else
                             <property name="contentType">plain</property>
                             <text-property name="content"><![CDATA[Grand Total]]></text-property>
                         </text>
+                    </cell>
+                    <cell id="469">
+                        <property name="borderTopColor">#000000</property>
+                        <property name="borderTopStyle">solid</property>
+                        <property name="borderTopWidth">medium</property>
                     </cell>
                     <cell id="105">
                         <property name="borderTopColor">#000000</property>
