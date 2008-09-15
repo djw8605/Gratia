@@ -38,7 +38,7 @@ import org.hibernate.exception.*;
 public class DatabaseMaintenance {
     static final String dq = "\"";
     static final String comma = ",";
-    static final int gratiaDatabaseVersion = 53;
+    static final int gratiaDatabaseVersion = 54;
     static final int latestDBVersionRequiringStoredProcedureLoad = gratiaDatabaseVersion;
     static final int latestDBVersionRequiringSummaryViewLoad = 37;
     static final int latestDBVersionRequiringSummaryTriggerLoad = 51;
@@ -230,12 +230,25 @@ public class DatabaseMaintenance {
         }
         AddIndex("JobUsageRecord_Meta", false, "index13", "ServerDate");
 
-        AddIndex("MetricRecord_Meta", true, "index12", "md5", true);
-        AddIndex("ProbeDetails_Meta", true, "index12", "md5", true);
+        // ProbeDetails
+        ensureUniqueMd5("ProbeDetails");
+        AddIndex("ProbeDetails_Meta", false, "index03", "ProbeName");
+        AddIndex("ProbeDetails_Meta", false, "index13", "ServerDate");
+        AddIndex("ProbeDetails_Meta", false, "probeid", "probeid");
 
-        // 
+        // MetricRecord
+        ensureUniqueMd5("MetricRecord");
+        AddIndex("MetricRecord_Meta", false, "index03", "ProbeName");
+        AddIndex("MetricRecord_Meta", false, "index13", "ServerDate");
+        AddIndex("MetricRecord_Meta", false, "probeid", "probeid");
+        AddIndex("MetricRecord", false, "MetricName", "MetricName");
+        AddIndex("MetricRecord", false, "MetricType", "MetricType");
+        AddIndex("MetricRecord", false, "MetricStatus", "MetricStatus");
+        AddIndex("MetricRecord", false, "ServiceType", "ServiceType");
+        AddIndex("MetricRecord", false, "VoName", "VoName");
+        AddIndex("MetricRecord", false, "HostName", "HostName");
+
         // Index on DupRecord
-        //
         AddIndex("DupRecord",false,"index02","eventdate");
         if ((liveVersion == 0) || (liveVersion >= 24)) { // Only if we have the correct table format.
             AddIndex("DupRecord",false,"index03","RecordType");
@@ -1305,84 +1318,23 @@ public class DatabaseMaintenance {
                 UpdateDbVersion(current);
             }
             if (current == 47) {
-                // Ensure MetricRecord_Xml has an unique index on md5
-                int result = 0;
-                Session session = null;
-                try {
-                    session = HibernateWrapper.getSession();
-                    Transaction tx = session.beginTransaction();                    
-                    Query q = 
-                        session.createSQLQuery("SELECT INDEX_NAME, NON_UNIQUE " +
-                                               "FROM information_schema.STATISTICS " +
-                                               "WHERE TABLE_SCHEMA = DATABASE() " +
-                                               "  AND TABLE_NAME = 'MetricRecord_Meta'" +
-                                               "  AND COLUMN_NAME = 'md5'");
-                    ScrollableResults records = q.scroll(ScrollMode.FORWARD_ONLY);
-                    Boolean hasUnique = false;
-                    ArrayList<String> indexesToRemove = new ArrayList<String>();
-                    while (records.next()) {
-                        Object[] results = records.get();
-                        if (((BigInteger) results[1]).intValue() == 0) { // Unique
-                            hasUnique = true;
-                        } else { // Remove non-unique index
-                            indexesToRemove.add((String) results[0]);
-                        }
-                    }
-                    String removeCommand = null;
-                    // Remove indexes
-                    for (String iName : indexesToRemove) {
-                        if (removeCommand == null) {
-                            removeCommand = "ALTER TABLE MetricRecord_Meta ";
-                        } else {
-                            removeCommand += ", ";
-                        }
-                        removeCommand += "DROP INDEX " + iName;
-                    }
-                    if (removeCommand != null) {
-                        q = session.createSQLQuery(removeCommand);
-                        q.executeUpdate();
-                    }
-                    if (!hasUnique) {
-                        // Add unique index, dropping duplicates
-                        q = session.createSQLQuery("ALTER IGNORE TABLE MetricRecord_Meta ADD UNIQUE INDEX `index12` (md5)");
-                        q.executeUpdate();
-                        // Clear up other tables.
-                        q = session.createSQLQuery("DELETE X FROM MetricRecord_Xml " +
-                                                   "X LEFT JOIN MetricRecord_Meta M " +
-                                                   "ON (X.dbid = M.dbid) " +
-                                                   "WHERE M.dbid IS NULL");
-                        q.executeUpdate();
-                        q = session.createSQLQuery("DELETE X FROM MetricRecord " +
-                                                   "X LEFT JOIN MetricRecord_Meta M " +
-                                                   "ON (X.dbid = M.dbid) " +
-                                                   "WHERE M.dbid IS NULL");
-                        q.executeUpdate();
-                    }
-                    tx.commit();
-                } catch (Exception e) {
-                    if ((session != null) && (session.isOpen())) {
-                        Transaction tx = session.getTransaction();
-                        if (tx != null) tx.rollback();
-                        session.close();
-                    }
-                    Logging.debug("Exception detail: ", e);
-                    Logging.warning("Gratia database FAILED to upgrade from " + current +
-                                    " to " + (current + 1)); 
-                    result = -1;
-                }
-                if (result > -1) {
-                    Logging.fine("Gratia database upgraded from " + current + " to " + (current + 1));
-                    current = current + 1;
-                    UpdateDbVersion(current);
-                }         
+                // NOP (md5 index on MetricRecord_Meta handled with rest of indexes).
+                Logging.fine("Gratia database upgraded from " + current + " to " + (current + 1));
+                ++current;
+                UpdateDbVersion(current);
             }
             if ((current >= 48) && (current <= 52)) {
                 // Auxiliary DB item upgrades only (trigger code and friends, stored procedures)
                 Logging.fine("Gratia database upgraded from " + current + " to 53");
-                current = 52;
+                current = 53;
                 UpdateDbVersion(current);
             }                
-
+            if (current == 53) {
+                // Auxiliary DB item upgrades only (stored procedures)                }         
+                Logging.fine("Gratia database upgraded from " + current + " to " + (current + 1));
+                ++current;
+                UpdateDbVersion(current);
+            }
             return ((current == gratiaDatabaseVersion) && checkAndUpgradeDbAuxiliaryItems());
         }
     }
@@ -1609,6 +1561,70 @@ public class DatabaseMaintenance {
             throw e;
         }
         return result;
+    }
+
+    private void ensureUniqueMd5(String table) throws Exception {
+        Session session = null;
+        try {
+            session = HibernateWrapper.getSession();
+            Transaction tx = session.beginTransaction();                    
+            Query q = 
+                session.createSQLQuery("SELECT INDEX_NAME, NON_UNIQUE " +
+                                       "FROM information_schema.STATISTICS " +
+                                       "WHERE TABLE_SCHEMA = DATABASE() " +
+                                       "  AND TABLE_NAME = '" + table + "_Meta'" +
+                                       "  AND COLUMN_NAME = 'md5'");
+            ScrollableResults records = q.scroll(ScrollMode.FORWARD_ONLY);
+            Boolean hasUnique = false;
+            ArrayList<String> indexesToRemove = new ArrayList<String>();
+            while (records.next()) {
+                Object[] results = records.get();
+                if (((BigInteger) results[1]).intValue() == 0) { // Unique
+                    hasUnique = true;
+                } else { // Remove non-unique index
+                    indexesToRemove.add((String) results[0]);
+                }
+            }
+            String removeCommand = null;
+            // Remove indexes
+            for (String iName : indexesToRemove) {
+                if (removeCommand == null) {
+                    removeCommand = "ALTER TABLE " + table + "_Meta ";
+                } else {
+                    removeCommand += ", ";
+                }
+                removeCommand += "DROP INDEX " + iName;
+            }
+            if (removeCommand != null) {
+                q = session.createSQLQuery(removeCommand);
+                q.executeUpdate();
+            }
+            if (!hasUnique) {
+                // Add unique index, dropping duplicates
+                q = session.createSQLQuery("ALTER IGNORE TABLE " + table +
+                                           "_Meta ADD UNIQUE INDEX `index12` (md5)");
+                q.executeUpdate();
+                // Clear up other tables.
+                q = session.createSQLQuery("DELETE X FROM " + table + "_Xml " +
+                                           "X LEFT JOIN " + table + "_Meta M " +
+                                           "ON (X.dbid = M.dbid) " +
+                                           "WHERE M.dbid IS NULL");
+                q.executeUpdate();
+                q = session.createSQLQuery("DELETE X FROM " + table +
+                                           " X LEFT JOIN " + table + "_Meta M " +
+                                           "ON (X.dbid = M.dbid) " +
+                                           "WHERE M.dbid IS NULL");
+                q.executeUpdate();
+            }
+            tx.commit();
+        } catch (Exception e) {
+            if ((session != null) && (session.isOpen())) {
+                Transaction tx = session.getTransaction();
+                if (tx != null) tx.rollback();
+                session.close();
+            }
+            throw e;
+        }
     }
 
 }
