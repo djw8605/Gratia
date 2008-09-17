@@ -38,7 +38,7 @@ import org.hibernate.exception.*;
 public class DatabaseMaintenance {
     static final String dq = "\"";
     static final String comma = ",";
-    static final int gratiaDatabaseVersion = 57;
+    static final int gratiaDatabaseVersion = 58;
     static final int latestDBVersionRequiringStoredProcedureLoad = gratiaDatabaseVersion;
     static final int latestDBVersionRequiringSummaryViewLoad = 37;
     static final int latestDBVersionRequiringSummaryTriggerLoad = 51;
@@ -1329,7 +1329,7 @@ public class DatabaseMaintenance {
                 current = 56;
                 UpdateDbVersion(current);
             }
-            if (current == 56) {
+            if (current == 56 || current == 57) {
                 int result = 0;
                 Session session = null;
                 try {
@@ -1337,6 +1337,7 @@ public class DatabaseMaintenance {
                     Transaction tx = session.beginTransaction();                    
                     Query q = session.createSQLQuery("ALTER TABLE MasterSummaryData " +
                                                      "MODIFY COLUMN ApplicationExitCode VARCHAR(255) NOT NULL DEFAULT '0', " +
+                                                     "MODIFY COLUMN VOcorrid BIGINT(20) NOT NULL DEFAULT 0," +
                                                      "MODIFY COLUMN Njobs BIGINT(20) NOT NULL DEFAULT 0;");
                     q.executeUpdate();
                     tx.commit();
@@ -1352,8 +1353,8 @@ public class DatabaseMaintenance {
                     result = -1;
                 }
                 if (result > -1) {
-                    Logging.fine("Gratia database upgraded from " + current + " to " + (current + 1));
-                    current = current + 1;
+                    Logging.fine("Gratia database upgraded from " + current + " to 58");
+                    current = 58;
                     UpdateDbVersion(current);
                 }
             }
