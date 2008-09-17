@@ -11,7 +11,8 @@ my $cron_tmp = $ARGV[0];
 
 exit(1) unless (-e $cron_tmp);
 
-exit(2) unless ($ENV{"CRON_TIMING"} and $ENV{"CRON_CMD"});
+exit(2) unless (($ENV{"CRON_TIMING"} or $ENV{"CRON_REMOVE"}) and
+                $ENV{"CRON_CMD"});
 
 my $tmp_out = `mktemp /tmp/cron.safe.XXXXXXXXXX`;
 chomp $tmp_out;
@@ -26,7 +27,8 @@ while (<CRON_TMP>) {
 }
 close CRON_TMP;
 
-print TMP_OUT qq&$ENV{"CRON_TIMING"} $ENV{"CRON_CMD"}&, "\n";
+$ENV{CRON_REMOVE} or
+  print TMP_OUT qq&$ENV{"CRON_TIMING"} $ENV{"CRON_CMD"}&, "\n";
 
 close TMP_OUT;
 
