@@ -285,7 +285,7 @@ function choose_db_root_password {
 #--------------------------------
 function choose_force_mode {
   echo "----- choose_force_mode -----"
-  echo -n "Do you wish to force update of some config files (eg log4j)?: (y/n): "
+  echo -n "Do you wish to force update of some config files (eg log4j): (y/n) [default - $force]: "
   read ans
   if [ "$ans" = "y" ];then
     force="${force_log4j} "
@@ -587,10 +587,9 @@ function verify_static_reports {
   delimit verify_static_reports
   pdf_dir=$tomcat_dir/$tomcat/webapps/gratia-reports/reports-static
   csv_dir=$tomcat_dir/$tomcat/webapps/gratia-reports/reports-static_csv
-  case $tomcat in 
-   "tomcat-itb_gratia_itb" ) 
+  script="$(crontab -l| grep -e '^[^#]*'$tomcat_dir/$tomcat |awk '{print $6,$7,$8}' |sed -e s/\'//g)"
+  if [[ -n "$script" ]]; then
          logit "... running static reports."
-         script="$(crontab -l| grep $tomcat_dir/$tomcat |awk '{print $6,$7,$8}' |sed -e s/\'//g)"
          runit "$script"
          if [ ! -d "$pdf_dir" ];then
            logerr "Static reports not available. Directory does not exist: $pdf_dir"
@@ -603,9 +602,9 @@ $(ls -l $pdf_dir)
 $(ls -l $csv_dir)
 "
          logit "PASSED: static reports processed"
-         ;;
-   * ) logit "NOT APPLICABLE: static reports not used for $tomcat" ;;
-  esac     
+  else
+    logit "NOT APPLICABLE: static reports not used for $tomcat"
+  fi
 }
 #---------------------------
 function verify_upgrade {
