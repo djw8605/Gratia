@@ -141,7 +141,7 @@ public abstract class JobUsageRecordUpdater implements RecordUpdater
             // TransferDetails object and set the bi-directional links.
             StringElement Protocol = findResource(current, "Protocol");
             if (current.getResourceType().getValue().equals("Storage") &&
-                current.getStartTime() != null &&
+                (current.getStartTime() != null) &&
                 (Protocol != null)) { // Transfer record
                 Vector v = new Vector();
 
