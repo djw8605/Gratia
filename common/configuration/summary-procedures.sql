@@ -66,9 +66,9 @@ AJUR:BEGIN
          M.ServerDate,
          J.StartTime,
          J.EndTime,
-         IF(ResourceType = 'Batch',
-            DATE(J.EndTime),
-            DATE(J.StartTime))        
+         IF(ResourceType IN ('Storage', 'RawCPU', 'Transfer'),
+            DATE(J.StartTime),
+            DATE(J.EndTime))        
   INTO n_ProbeName,
        n_CommonName,
        n_VOcorrid,
@@ -102,12 +102,6 @@ AJUR:BEGIN
   WHERE J.dbid = inputDbid;
 
   -- Basic data checks
-  IF n_ResourceType IS NOT NULL AND
-     n_ResourceType NOT IN ('Batch', 'RawCPU', 'Storage') THEN
-     -- Very common case: no message necessary
-     LEAVE AJUR;
-  END IF;
-
   IF n_ProbeName IS NULL THEN
      INSERT INTO trace(eventtime, pname, p1, `data`)
       VALUES(UTC_TIMESTAMP(), 'add_JUR_to_summary', inputDbid, 'Failed due to null ProbeName');
@@ -126,7 +120,7 @@ AJUR:BEGIN
      LEAVE AJUR;
   END IF;
 
-  IF n_ResourceType = 'Storage' THEN
+  IF n_ResourceType IN ('Storage', 'Transfer') THEN
 
     IF n_StartTime IS NULL THEN
       INSERT INTO trace(eventtime, pname, p1, `data`)
