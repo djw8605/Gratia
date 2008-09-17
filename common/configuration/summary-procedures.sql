@@ -149,6 +149,12 @@ AJUR:BEGIN
     WHERE R.dbid = inputDbid
     LIMIT 1;
 
+    IF n_Protocol IS NULL THEN
+      INSERT INTO trace(eventtime, pname, p1, `data`)
+       VALUES(UTC_TIMESTAMP(), 'add_JUR_to_summary', inputDbid, 'Failed due to null Protocol');
+      LEAVE AJUR;
+    END IF;
+
     -- Note entries with different StorageUnit values get stored
     -- independently and must be combined manually outside the DB
 

@@ -139,17 +139,16 @@ public abstract class JobUsageRecordUpdater implements RecordUpdater
             // All we need to do here is rip Source, Destination,
             // Protocol and IsNew out of the Resource list, create a new
             // TransferDetails object and set the bi-directional links.
+            StringElement Protocol = findResource(current, "Protocol");
             if (current.getResourceType().getValue().equals("Storage") &&
-                current.getStartTime() != null) { // Transfer record
+                current.getStartTime() != null &&
+                (Protocol != null)) { // Transfer record
                 Vector v = new Vector();
 
-                StringElement Protocol = findResource(current, "Protocol");
-                if (Protocol == null) {
-                    Logging.warning("JobUsageRecordUpdater.CheckIsNew.Update(): could not find Protocol resource for transfer record");
-                    return;
-                }
+                // Protocol
                 v.add(Protocol);
 
+                // Source
                 StringElement Source = findResource(current, "Source");
                 if (Source == null) {
                     Logging.warning("JobUsageRecordUpdater.CheckIsNew.Update(): could not find Source resource for transfer record");
@@ -157,6 +156,7 @@ public abstract class JobUsageRecordUpdater implements RecordUpdater
                 }
                 v.add(Source);
 
+                // Destination
                 StringElement Destination = findResource(current, "Destination");
                 if (Destination == null) {
                     Logging.warning("JobUsageRecordUpdater.CheckIsNew.Update(): could not find Destination resource for transfer record");
@@ -169,6 +169,7 @@ public abstract class JobUsageRecordUpdater implements RecordUpdater
                 td.setSource(Source.getValue());
                 td.setDestination(Destination.getValue());
 
+                // IsNew
                 StringElement IsNew = findResource(current, "IsNew");
                 if (IsNew == null) {
                     Logging.log("JobUsageRecordUpdater.CheckIsNew.Update(): setting isNew based on Destination resource");
