@@ -34,6 +34,7 @@ public class ReplicationDataPump extends Thread {
 
     // Class state
     private String currentDestination = null;
+    private String currentProbename = null;
     private boolean exitflag = false;
     private int nSentThisLoop = 0;
     private int nSentThisRun = 0;
@@ -114,6 +115,7 @@ public class ReplicationDataPump extends Thread {
 
             if (replicationEntry != null) {
                 currentDestination = replicationEntry.getDestination();
+                currentProbename = replicationEntry.getprobename();
             }
 
             if ((replicationEntry == null) ||
@@ -364,7 +366,7 @@ public class ReplicationDataPump extends Thread {
     private String logPreamble() {
         String preamble = "ReplicationDataPump #" + replicationId;
         if (currentDestination != null) {
-            preamble += " (" + currentDestination + ")";
+            preamble += " (" + currentProbename + " to " + currentDestination + ")";
         }
         preamble += ": ";
         return preamble;
