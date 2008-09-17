@@ -54,9 +54,9 @@
 		}
 		else
 		{
-			File [] pdfObjects = f.listFiles();	// Get all files in the directory
+			File [] pptObjects = f.listFiles();	// Get all files in the directory
 			File [] csvObjects = c.listFiles();	// Get all files in the directory
-			if ((pdfObjects.length == 0) && (csvObjects.length == 0))
+			if ((pptObjects.length == 0) && (csvObjects.length == 0))
 			{
 				%> <p class = "reportItem" >No Static reports are available</p> <%
 			}
@@ -84,14 +84,14 @@
 						linkURL = linkURL.replace("\\", "%5c");
 
 
-						for (int j = 0; j < pdfObjects.length; j++)
+						for (int j = 0; j < pptObjects.length; j++)
 						{
-							if(!pdfObjects[j].isDirectory())
+							if(!pptObjects[j].isDirectory())
 							{
-								String fileName = pdfObjects[j].getName();
-								if (fileName.startsWith(linkREPORT) && (fileName.endsWith(".pdf")))
+								String fileName = pptObjects[j].getName();
+								if (fileName.startsWith(linkREPORT) && (fileName.endsWith(".ppt")))
 								{
-									%><li><a class = "reportItem" target = "reportFrame" href="<%= staticFolder+fileName %>"><%= linkNAME %> (pdf)</a></li>
+									%><li><a class = "reportItem" target = "reportFrame" href="<%= staticFolder+fileName %>"><%= linkNAME %> (ppt)</a></li>
 									<%
 								}
 							}
