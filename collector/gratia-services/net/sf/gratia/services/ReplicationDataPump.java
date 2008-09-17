@@ -281,7 +281,7 @@ public class ReplicationDataPump extends Thread {
         }
         replicationLog(LogLevel.FINE,
                        " waiting for more records (" + nSentThisLoop +
-                       " records sent, " + nSentThisRun + "this run)");
+                       " records sent, " + nSentThisRun + " this run)");
 
         //
         // now wait frequency minutes
@@ -328,10 +328,22 @@ public class ReplicationDataPump extends Thread {
                 exitflag = true;
             }
         } else {
+            String errorMessage;
+            if (post.exception != null) {
+                errorMessage = post.exception.toString();
+            } else if (response != null) {
+                errorMessage = response;
+            } else {
+                errorMessage = "UNKNOWN";
+            }
             replicationLog(LogLevel.INFO,
                            "Error during replication: " +
-                           post.exception.getMessage() +
+                           errorMessage +
                            "; will retry later.");
+            if (post.exception != null) {
+                replicationLog(LogLevel.DEBUG,
+                               "Exception details:", post.exception);
+            }
             exitflag = true;
         }
         return result;
