@@ -87,6 +87,7 @@
              db_host => "localhost",
              db_schema => "gratia_greenc",
              collector_host => "gratia-vm02.fnal.gov",
+#             staticReports => 0,
              #             tomcat_native_lib => '/data/apr/lib',
              "properties.attributes" =>
              {
@@ -181,6 +182,7 @@
                server_port => 8164,
                db_host => "localhost",
                db_schema => "gratia_rsv_test",
+               staticReports => 0,
                "properties.attributes" =>
                {
                 "maintain.history.log" => 2,

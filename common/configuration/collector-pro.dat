@@ -106,6 +106,7 @@
    UserConfig => "UserConfig_pacct.xml",
    remote_host => "gratia-fermi.fnal.gov",
    collector_host => "gratia-fermi.fnal.gov",
+   staticReports => 0,
    "properties.attributes" =>
    {
     "monitor.from.address" => 'gratia-operation@opensciencegrid.org',
@@ -149,6 +150,7 @@
    db_schema => "gratia_osg_daily",
    UserConfig => "UserConfig_osg_daily.xml",
    PostInstallCmdPreamble => '[[ "$action" == *"stored"* ]] || continue',
+   staticReports => 0,
    "properties.attributes" =>
    {
     "monitor.from.address" => 'gratia-operation@opensciencegrid.org',
@@ -199,6 +201,7 @@
    db_schema => "gratia_osg_transfer",
    remote_host => "gratia.opensciencegrid.org",
    collector_host => "gratia.opensciencegrid.org",
+   staticReports => 0,
    "properties.attributes" =>
    {
     "monitor.from.address" => 'gratia-operation@opensciencegrid.org',
@@ -222,6 +225,7 @@
    db_schema => "fermi_transfer",
    remote_host => "gratia-fermi.fnal.gov",
    collector_host => "gratia-fermi.fnal.gov",
+   staticReports => 0,
    "properties.attributes" =>
    {
     "monitor.from.address" => 'gratia-operation@opensciencegrid.org',

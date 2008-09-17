@@ -29,7 +29,8 @@ my @required_attributes =
 	 'db_schema',
 	 'UserConfig',
          'sslCAFiles',
-         'crlFiles'
+         'crlFiles',
+         'staticReports'
 	);
 
 my @required_properties = ();
@@ -44,6 +45,7 @@ my %attribute_defaults =
 	 PostInstallCmdPreamble => "",
 	 PostInstallCmdPrefix => "",
 	 PostInstallCmdSuffix => "",
+         staticReports => 1,
          host_cert => "/etc/grid-security/hostcert.pem",
          host_key => "/etc/grid-security/hostkey.pem",
          sslCAFiles => "/etc/grid-security/certificates/*.0",
@@ -616,12 +618,12 @@ EOF
 }
 
 sub configure_tomcat_users {
-	my ($instance_name, $collector_config) = @_;
-	my $config_file = "$options{prefix}/tomcat-${instance_name}/conf/tomcat-users.xml";
-	open(CONFIG_SCRIPT, ">$config_file") or die("Unable to open $config_file for writing");
-	chmod 0600, $config_file;
-	print CONFIG_SCRIPT $tomcat_users_txt;
-	close(CONFIG_SCRIPT);
+  my ($instance_name, $collector_config) = @_;
+  my $config_file = "$options{prefix}/tomcat-${instance_name}/conf/tomcat-users.xml";
+  open(CONFIG_SCRIPT, ">$config_file") or die("Unable to open $config_file for writing");
+  chmod 0600, $config_file;
+  print CONFIG_SCRIPT $tomcat_users_txt;
+  close(CONFIG_SCRIPT);
 }
 
 sub construct_monitor_message_subject {
@@ -634,15 +636,20 @@ sub construct_monitor_message_subject {
 }
 
 sub temporary_filename {
-	my $stem = shift;
-	my $tmp_file=`mktemp "\${TMPDIR:-/tmp}/${stem}_XXXXXXXXXX\"`;
-	chomp $tmp_file;
-	$tmp_file or die "Unable to create temporary file from stem $stem";
-	return $tmp_file;
+  my $stem = shift;
+  my $tmp_file=`mktemp "\${TMPDIR:-/tmp}/${stem}_XXXXXXXXXX\"`;
+  chomp $tmp_file;
+  $tmp_file or die "Unable to create temporary file from stem $stem";
+  return $tmp_file;
 }
 
 sub configure_static_report_generation {
   my ($instance_name, $collector_config) = @_;
+  my $wantStatic =
+    ($collector_config->{staticReports} =~ /(?:t|true|1)/i);
+  my $removeOrTime = ($wantStatic)?
+    "CRON_TIMING=\"42 0 * * *\"":
+      "CRON_REMOVE=1";
   my $static_report_generator = "$options{prefix}/tomcat-${instance_name}/gratia/staticReports.py";
   return unless (-x $static_report_generator);
   my @script_pars = ("$options{prefix}/tomcat-${instance_name}",
@@ -650,7 +657,12 @@ sub configure_static_report_generation {
                              "http://",
                              $collector_config->{remote_host},
                              $collector_config->{http_port}));
-  system(sprintf("VISUAL=${gratia_dir}/safe-replace-crontab CRON_TIMING=\"42 0 * * *\" CRON_CMD=\"'$static_report_generator' %s >/dev/null 2>&1\" crontab -e",
+  print STDERR "INFO: ",
+    ($wantStatic?
+     "configuring static reports":
+     "removing any existing static report generation"),
+       "\n";
+  system(sprintf("VISUAL=${gratia_dir}/safe-replace-crontab $removeOrTime CRON_CMD=\"'$static_report_generator' %s >/dev/null 2>&1\" crontab -e",
                  join(" ", map { "'$_'"; } @script_pars)));
 }
 

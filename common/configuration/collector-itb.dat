@@ -40,6 +40,7 @@
    remote_host => "gratia02.fnal.gov",
    collector_host => "gratia02.fnal.gov",
    UserConfig => "UserConfig_pacct.xml",
+   staticReports => 0,
    "properties.attributes" =>
    {
     "gratia.database.useJobUsageSiteName" => 1,
@@ -66,6 +67,7 @@
    collector_host => "gratia02.fnal.gov",
    UserConfig => "UserConfig_osg_daily.xml",
    PostInstallCmdPreamble => '[[ "$action" == *"stored"* ]] || continue',
+   staticReports => 0,
    "properties.attributes" =>
    { "monitor.listener.wait" => 1440,
      "gratia.database.wantSummaryTable" => 0,
