@@ -62,9 +62,10 @@ from (SELECT @rank:=@rank+1 as final_rank,
                          sum(WallDuration) as walldurationx 
                   FROM MasterSummaryData 
        WHERE (EndTime) >= (''', fromdate, ' 00:00:00 '')
-                            and (EndTime) <= (''', todate, ' 00:00:00 '')
-             and ResourceType = ''Batch''
-                  GROUP by VOCorrid) V, 
+                            and (EndTime) <= (''', todate, ' 00:00:00 '')',
+        ' ', @myresourceclause,
+        ' ', @mywhereclause,
+        ' GROUP by VOCorrid) V, 
                  VONameCorrection Corr, 
                  VO
             WHERE V.VOCorridx = Corr.corrid and Corr.VOid = VO.VOid
@@ -82,9 +83,10 @@ VOProbeSummary.CpuSystemDuration) as Cpu,
                      ''%Y-%m-%d'') as  datevalue     
        from VOProbeSummary 
        WHERE (EndTime) >= (''', fromdate, ' 00:00:00 '')
-                            and (EndTime) <= (''', todate, ' 00:00:00 '')
-             and ResourceType = ''Batch''
-       GROUP by datevalue, VOProbeSummary.VOName 
+                            and (EndTime) <= (''', todate, ' 00:00:00 '')',
+        ' ', @myresourceclause,
+        ' ', @mywhereclause,
+        ' GROUP by datevalue, VOProbeSummary.VOName 
      ) as VOProbeSummary
 WHERE VOProbeSummary.VOName = foo.VONamex
 GROUP by datevalue, VOProbeSummary.VOName

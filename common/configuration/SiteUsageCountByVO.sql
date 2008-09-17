@@ -58,9 +58,10 @@ FROM (SELECT @rank:=@rank+1 AS final_rank,
                    COUNT(distinct S.sitename) AS sitecntx
             FROM MasterSummaryData M, Probe P, Site S, VO, VONameCorrection Corr
             WHERE EndTime >= (''', fromdate, ' 00:00:00 '')
-              AND EndTime <= (''', todate, ' 00:00:00 '')
-              AND ResourceType = ''Batch''
-	      AND P.siteid = S.siteid
+              AND EndTime <= (''', todate, ' 00:00:00 '')',
+        ' ', @myresourceclause,
+        ' ', @mywhereclause,
+        ' AND P.siteid = S.siteid
               AND M.probename = P.probename
               AND M.VOCorrid = Corr.corrid
               AND Corr.void = VO.void
@@ -76,9 +77,10 @@ FROM (SELECT @rank:=@rank+1 AS final_rank,
       WHERE Probe.siteid = Site.siteid
         AND VOProbeSummary.probename = Probe.probename
         AND EndTime >= (''', fromdate, ' 00:00:00 '')
-        AND EndTime <= (''', todate, ' 00:00:00 '')
-        AND ResourceType = ''Batch''
-       GROUP by VOProbeSummary.VOName
+        AND EndTime <= (''', todate, ' 00:00:00 '')',
+        ' ', @myresourceclause,
+        ' ', @mywhereclause,
+        ' GROUP by VOProbeSummary.VOName
      ) AS VOProbeSummary
 WHERE VOProbeSummary.VOName = foo.vonamex
 ORDER BY final_rank, VOProbeSummary.VOName;'
