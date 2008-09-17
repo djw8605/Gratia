@@ -47,7 +47,7 @@
            <column name="HostDescription" not-null="true" default="'Unknown'" />
        </property>
    </component>
-   <component name="ApplicationExitCode" class="IntegerElement" insert="true">
+   <component name="ApplicationExitCode" class="StringElement" insert="true">
        <property name="Value">
            <column name="ApplicationExitCode" not-null="true" default="0"/>
        </property>

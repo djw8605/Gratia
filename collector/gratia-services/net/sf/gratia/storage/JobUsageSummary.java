@@ -24,7 +24,7 @@ public class JobUsageSummary extends Record {
     private StringElement CommonName;
     private StringElement ResourceType;
     private StringElement HostDescription;
-    private IntegerElement ApplicationExitCode;
+    private StringElement ApplicationExitCode;
     private IntegerElement Njobs;
     private DurationElement WallDuration;
     private DurationElement CpuUserDuration;
@@ -185,11 +185,11 @@ public class JobUsageSummary extends Record {
     }
 
     // ApplicationExitCode
-    public IntegerElement getApplicationExitCode() {
+    public StringElement getApplicationExitCode() {
         return ApplicationExitCode;
     }
 
-    public void setApplicationExitCode(IntegerElement ApplicationExitCode) {
+    public void setApplicationExitCode(StringElement ApplicationExitCode) {
         this.ApplicationExitCode = ApplicationExitCode;
     }
 

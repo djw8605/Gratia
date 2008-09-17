@@ -38,7 +38,7 @@ import org.hibernate.exception.*;
 public class DatabaseMaintenance {
     static final String dq = "\"";
     static final String comma = ",";
-    static final int gratiaDatabaseVersion = 55;
+    static final int gratiaDatabaseVersion = 57;
     static final int latestDBVersionRequiringStoredProcedureLoad = gratiaDatabaseVersion;
     static final int latestDBVersionRequiringSummaryViewLoad = 37;
     static final int latestDBVersionRequiringSummaryTriggerLoad = 51;
@@ -1323,12 +1323,40 @@ public class DatabaseMaintenance {
                 ++current;
                 UpdateDbVersion(current);
             }
-            if ((current >= 48) && (current <= 54)) {
+            if ((current >= 48) && (current <= 55)) {
                 // Auxiliary DB item upgrades only (trigger code and friends, stored procedures)
-                Logging.fine("Gratia database upgraded from " + current + " to 55");
-                current = 55;
+                Logging.fine("Gratia database upgraded from " + current + " to 56");
+                current = 56;
                 UpdateDbVersion(current);
-            }                
+            }
+            if (current == 56) {
+                int result = 0;
+                Session session = null;
+                try {
+                    session = HibernateWrapper.getSession();
+                    Transaction tx = session.beginTransaction();                    
+                    Query q = session.createSQLQuery("ALTER TABLE MasterSummaryData " +
+                                                     "MODIFY COLUMN ApplicationExitCode VARCHAR(255) NOT NULL DEFAULT '0', " +
+                                                     "MODIFY COLUMN Njobs BIGINT(20) NOT NULL DEFAULT 0;");
+                    q.executeUpdate();
+                    tx.commit();
+                } catch (Exception e) {
+                    if ((session != null) && (session.isOpen())) {
+                        Transaction tx = session.getTransaction();
+                        if (tx != null) tx.rollback();
+                        session.close();
+                    }
+                    Logging.debug("Exception detail: ", e);
+                    Logging.warning("Gratia database FAILED to upgrade from " + current +
+                                    " to " + (current + 1)); 
+                    result = -1;
+                }
+                if (result > -1) {
+                    Logging.fine("Gratia database upgraded from " + current + " to " + (current + 1));
+                    current = current + 1;
+                    UpdateDbVersion(current);
+                }
+            }
             return ((current == gratiaDatabaseVersion) && checkAndUpgradeDbAuxiliaryItems());
         }
     }
