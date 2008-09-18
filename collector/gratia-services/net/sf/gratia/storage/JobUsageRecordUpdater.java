@@ -197,6 +197,7 @@ public abstract class JobUsageRecordUpdater implements RecordUpdater
         private StringElement findResource(JobUsageRecord current,
                                            String description) {
             List resource = current.getResource();
+            if (resource == null) return null;
             try {
                 for (Object rObj : resource) {
                     StringElement se = (StringElement) rObj;
@@ -204,9 +205,7 @@ public abstract class JobUsageRecordUpdater implements RecordUpdater
                         return se;
                     }
                 }
-            } catch (Exception e) {
-                Logging.warning("JobUsageRecordUpdater unable to find resource " +
-                                description);
+            } catch (Exception ignore) {
             }
             return null;
         }
