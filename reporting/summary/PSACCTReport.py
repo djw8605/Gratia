@@ -5,7 +5,7 @@
 #
 # library to create simple report using the Gratia psacct database
 #
-#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.33 2008-09-10 15:58:40 pcanal Exp $
+#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.34 2008-09-18 03:18:08 pcanal Exp $
 
 import time
 import datetime
@@ -584,7 +584,7 @@ def FromCondor():
 class DailySiteJobStatusConf:
     title = "Summary of the job exit status (midnight to midnight UTC) for %s\nincluding all jobs that finished in that time period.\n\nFor Condor the value used is taken from 'ExitCode' and NOT from 'Exit Status'\n"
     headline = "For all jobs finished on %s (UTC)"
-    headers = ("Site","Success Rate","Success","Failed","Total","Wall Success","Wall Failed")
+    headers = ("Site","Wall Succ Rate","Wall Success","Wall Failed","Success Rate","Success","Failed")
     num_header = 1
     formats = {}
     lines = {}
@@ -598,23 +598,23 @@ class DailySiteJobStatusConf:
 
     def __init__(self, header = False, CondorSpecial = True, groupby = "Site", VOName = ""):
            self.formats["csv"] = ",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""
-           self.formats["text"] = "| %-22s | %12s | %10s | %10s | %10s | %12s | %11s "
+           self.formats["text"] = "| %-22s | %14s | %12s | %11s | %12s | %10s | %10s "
            self.lines["csv"] = ""
-           self.lines["text"] = "----------------------------------------------------------------------------------------------------------------"
+           self.lines["text"] = "--------------------------------------------------------------------------------------------------------------------"
 
            if (not header) :  self.title = ""
            self.CondorSpecial = CondorSpecial
            self.VOName = VOName
            if (groupby == "VO"):
                self.GroupBy = "VO.VOName"
-               self.headers = ("VO","Success Rate","Success","Failed","Total","Wall Success","Wall Failed")
+               self.headers = ("VO","Wall Succ. Rate","Wall Success","Wall Failed","Success Rate","Success","Failed")
                self.col1 = "All VOs"
            elif (groupby == "Both"):
                self.formats["csv"] = ",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""
-               self.formats["text"] = "| %-22s | %-22s | %12s | %10s | %10s | %10s | %12s | %11s "
-               self.lines["text"] = "-----------------------------------------------------------------------------------------------------------------------------------------"
+               self.formats["text"] = "| %-22s | %-22s | %14s | %12s | %11s | %12s | %10s | %10s "
+               self.lines["text"] = "---------------------------------------------------------------------------------------------------------------------------------------------"
                self.GroupBy = "Site.SiteName,VO.VOName"
-               self.headers = ("Site","VO","Success Rate","Success","Failed","Total","Wall Success","Wall Failed")
+               self.headers = ("Site","VO","Wall Succ Rate","Wall Success","Wall Failed","Success Rate","Success","Failed")
                self.col1 = "All Sites"
                self.col2 = "All VOs"
                self.Both = True
@@ -629,8 +629,14 @@ class DailySiteJobStatusConf:
             yval = (y[1])[0] + (y[1])[1] 
             return cmp(xval,yval)
         else:
-            xval = (x[1])[2]*100 / ( (x[1])[2] + (x[1])[3] ) 
-            yval = (y[1])[2]*100 / ( (y[1])[2] + (y[1])[3] )
+            if ( ( (x[1])[4] + (x[1])[5] ) > 0) :
+               xval = (x[1])[4]*100 / ( (x[1])[4] + (x[1])[5] )
+            else:
+               xval = (x[1])[2]*100 / ( (x[1])[2] + (x[1])[3] )
+            if (  ( (y[1])[4] + (y[1])[5] ) >0):
+               yval = (y[1])[4]*100 / ( (y[1])[4] + (y[1])[5] )
+            else:
+               yval = (y[1])[2]*100 / ( (y[1])[2] + (y[1])[3] )
             return cmp(yval,xval)
         
 
@@ -881,10 +887,17 @@ def GenericDailyStatus(what, when = datetime.date.today(), output = "text"):
         for key,(site,vo,success,failed,wsuccess,wfailed) in sortedDictValuesFunc(sum_values,what.Sorting):
             index = index + 1;
             total = success+failed
+            wtotal = wsuccess+wfailed
+            rate = (success*100/total)
+            if (wtotal > 0): 
+               wrate = (wsuccess*100/wtotal)
+            else:
+               wrate = rate
+            if (wrate > 90): wrate = wrate - 0.5
             if (what.Both):
-               values = (site,vo,str((success*100/total))+" %",success,failed,total,niceNum(wsuccess),niceNum(wfailed))
+               values = (site,vo,str(niceNum(wrate))+" %",niceNum(wsuccess),niceNum(wfailed),str(rate)+" %",success,failed)
             else: 
-               values = (site,str((success*100/total))+" %",success,failed,total,niceNum(wsuccess),niceNum(wfailed))
+               values = (site,str(niceNum(wrate))+" %",niceNum(wsuccess),niceNum(wfailed),str(rate)+" %",success,failed)
             totaljobs = totaljobs + total
             totalsuccess = totalsuccess + success
             totalfailed = totalfailed + failed
@@ -896,10 +909,14 @@ def GenericDailyStatus(what, when = datetime.date.today(), output = "text"):
 
         if (output != "None") :
                 print what.lines[output]
-                if (what.Both):
-                    print "    ", what.formats[output] % ( what.col1, what.col2, str(totalsuccess*100/totaljobs) + " %", totalsuccess,totalfailed,totaljobs,niceNum(totalws),niceNum(totalwf))
+                if ( (totalws+totalwf) > 0 ):
+                   totalwrate = niceNum( 100*totalws / (totalws+totalwf))
                 else:
-                    print "    ", what.formats[output] % ( what.col1, str(totalsuccess*100/totaljobs) + " %", totalsuccess,totalfailed,totaljobs,niceNum(totalws),niceNum(totalwf))
+                   totalwrate = totalsuccess*100/totaljobs
+                if (what.Both):
+                    print "    ", what.formats[output] % ( what.col1, what.col2, str(totalwrate) + " %", niceNum(totalws),niceNum(totalwf), str(totalsuccess*100/totaljobs) + " %", totalsuccess,totalfailed)
+                else:
+                    print "    ", what.formats[output] % ( what.col1, str(totalwrate) + " %", niceNum(totalws),niceNum(totalwf), str(totalsuccess*100/totaljobs) + " %", totalsuccess,totalfailed)
                 print what.lines[output]
 
         return result
