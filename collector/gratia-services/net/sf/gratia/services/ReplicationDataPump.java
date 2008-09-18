@@ -33,6 +33,7 @@ public class ReplicationDataPump extends Thread {
     private int chunksize;
 
     // Class state
+    private Replication replicationEntry = null;
     private String currentDestination = null;
     private String currentProbename = null;
     private boolean exitflag = false;
@@ -75,18 +76,35 @@ public class ReplicationDataPump extends Thread {
             }
         }
 
-        while (true) {
+        while (!exitflag) {
             loop();
             nSentThisRun += nSentThisLoop;
-            if (exitflag) {
-                replicationLog(LogLevel.FINER, "Stopping/Exiting");
-                if (nSentThisRun > 0) {
-                    replicationLog(LogLevel.FINE,
-                                   nSentThisRun + " records sent during this run.");
-                }
-                return;
+            if (exitflag) break; // Skip wait
+            replicationLog(LogLevel.FINE,
+                           " waiting for more records (" + nSentThisLoop +
+                           " records sent, " + nSentThisRun + " this run)");
+            //
+            // now wait frequency minutes
+            //
+            long wait = 0;
+            if (replicationEntry != null) {
+                wait = replicationEntry.getfrequency();
+            }
+            if (wait == 0) wait = 1;
+            wait = wait * 60 * 1000;
+            try {
+                Thread.sleep(wait);
+            }
+            catch (Exception ignore) {
             }
         }
+
+        replicationLog(LogLevel.FINER, "Stopping/Exiting");
+        if (nSentThisRun > 0) {
+            replicationLog(LogLevel.FINE,
+                           nSentThisRun + " records sent during this run.");
+        }
+        return;
     }
 
     public void exit() {
@@ -94,7 +112,7 @@ public class ReplicationDataPump extends Thread {
         replicationLog(LogLevel.FINE, "Exit Requested");
     }
 
-    public void loop() {
+    private void loop() {
         nSentThisLoop = 0;
         if (exitflag) return;
         
@@ -280,20 +298,6 @@ public class ReplicationDataPump extends Thread {
         }
         finally {
             if ((session != null) && session.isOpen()) session.close();
-        }
-        replicationLog(LogLevel.FINE,
-                       " waiting for more records (" + nSentThisLoop +
-                       " records sent, " + nSentThisRun + " this run)");
-
-        //
-        // now wait frequency minutes
-        //
-        long wait = replicationEntry.getfrequency();
-        wait = wait * 60 * 1000;
-        try {
-            Thread.sleep(wait);
-        }
-        catch (Exception ignore) {
         }
     }
 
