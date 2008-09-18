@@ -123,13 +123,12 @@ public class ReplicationDataPump extends Thread {
         }
 
         Session session = null;
-        Replication replicationEntry = null;
         List dbidList = null;
         try {
             session = HibernateWrapper.getSession();
 
             replicationEntry =
-            (Replication) session.get("net.sf.gratia.storage.Replication", replicationId);
+                (Replication) session.get("net.sf.gratia.storage.Replication", replicationId);
 
             if (replicationEntry != null) {
                 currentDestination = replicationEntry.getDestination();
