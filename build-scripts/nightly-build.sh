@@ -224,7 +224,7 @@ DATE=$(date '+%Y-%m-%d')
 #-- defaults ---
 MAILTO="gratia-operation@fnal.gov"
 buildHOME=$HOME
-files=7
+files=4
 set_build_area
 
 #--- cvs ----
