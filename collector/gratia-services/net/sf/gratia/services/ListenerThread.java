@@ -413,6 +413,10 @@ public class ListenerThread extends Thread {
                 try {
                     tx = session.beginTransaction();
                     current.setProbe(probe);
+                   
+                    // Fix up the record; in particular set EndTime if it out of whack.
+                    updater.Update(current);
+
                     Boolean acceptRecord = true;
                     if (!collectorService.housekeepingServiceDisabled()) {
                         Date date;
@@ -458,8 +462,6 @@ public class ListenerThread extends Thread {
                     }
                     if (acceptRecord) {
                         // This is a recent record, let's process it
-
-                        updater.Update(current);
 
                         if ((!gothistory) || (!(md5list.size()>j)) ||
                             md5list.get(j) == null) {
