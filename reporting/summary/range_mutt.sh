@@ -57,7 +57,7 @@ mkdir $WORK_DIR
 
 function sendto {
     cmd=$1
-    when=$2
+    rep_args=$2
     txtfile=$3.txt
     csvfile=$3.csv
     subject="$4"
@@ -65,11 +65,11 @@ function sendto {
 
     echo "See $WEBLOC for more information" > $txtfile
     echo >> $txtfile
-    eval $1 --output=text $when >> $txtfile
+    eval $1 --output=text $rep_args >> $txtfile
 
     echo "For more information see:,$WEBLOC" > $csvfile
     echo >> $csvfile
-    eval $1 --output=csv $when >>  $csvfile
+    eval $1 --output=csv $rep_args >>  $csvfile
     
     mutt -F ./muttrc -a $csvfile -s "$subject" $to < $txtfile
 }
