@@ -9,6 +9,7 @@ WEBLOC="http://gratia-osg.fnal.gov:8880/gratia-reporting"
 SUM_WEBLOC="http://gratia-osg.fnal.gov:8884/gratia-reporting"
 
 ExtraArgs=--daily
+(( mailOverride = 0 ))
 
 while test "x$1" != "x"; do
    if [ "$1" == "--help" ]; then 
@@ -24,6 +25,7 @@ while test "x$1" != "x"; do
    elif [ "$1" == "--mail" ]; then
 	MAILTO=$2
         USER_MAILTO=$2
+        (( mailOverride = 1 ))
 	shift
 	shift
    elif [ "$1" == "--weekly" ]; then
@@ -63,6 +65,14 @@ function sendto {
     subject="$4"
     to="$5"
 
+    local whenarg="${ExtraArgs#--}"
+    whenarg=${whenarg:-all}
+
+    if (( $mailOverride == 0 )); then
+      newto=$(sed -ne 's/^[ 	]*'"`basename $cmd`"'[ 	]\{1,\}'"${ExtraArgs#--}"'[ 	]\{1,\}\(.*\)$/\1/p' \
+              reportMail.config | sed -e 's/\b\default\b/'"$to"'/' | head -1) 
+      to=${newto:-$to}
+    fi
     echo "See $WEBLOC for more information" > $txtfile
     echo >> $txtfile
     eval $1 --output=text $rep_args >> $txtfile
