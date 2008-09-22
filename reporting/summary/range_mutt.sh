@@ -10,6 +10,7 @@ SUM_WEBLOC="http://gratia-osg.fnal.gov:8884/gratia-reporting"
 
 ExtraArgs=--daily
 (( mailOverride = 0 ))
+(( production = 0 ))
 
 while test "x$1" != "x"; do
    if [ "$1" == "--help" ]; then 
@@ -21,6 +22,7 @@ while test "x$1" != "x"; do
    elif [ "$1" == "--production" ]; then
 	MAILTO=$PROD_MAILTO
         USER_MAILTO=$PROD_USER_MAILTO
+        (( production = 1 ))
 	shift
    elif [ "$1" == "--mail" ]; then
 	MAILTO=$2
@@ -68,7 +70,7 @@ function sendto {
     local whenarg="${ExtraArgs#--}"
     whenarg=${whenarg:-all}
 
-    if (( $mailOverride == 0 )); then
+    if (( $mailOverride == 0 )) && (( $production > 0 )); then
       newto=$(sed -ne 's/^[ 	]*'"`basename $cmd`"'[ 	]\{1,\}'"${ExtraArgs#--}"'[ 	]\{1,\}\(.*\)$/\1/p' \
               reportMail.config | sed -e 's/\b\default\b/'"$to"'/' | head -1) 
       to=${newto:-$to}
