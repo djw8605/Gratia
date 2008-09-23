@@ -2,22 +2,32 @@
 
 # space separated list of mail recipients
 PROD_MAILTO="osg-accounting-info@fnal.gov"
-PROD_USER_MAILTO="osg-accounting-info@fnal.gov"
+PROD_USER_MAILTO="osg-user-accounting-info@opensciencegrid.org"
 MAILTO="pcanal@fnal.gov"
 USER_MAILTO=$MAILTO
 WEBLOC="http://gratia-osg.fnal.gov:8880/gratia-reporting"
 SUM_WEBLOC="http://gratia-osg.fnal.gov:8884/gratia-reporting"
 
+ExtraHeader=
 ExtraArgs=--daily
 (( mailOverride = 0 ))
 (( production = 0 ))
 
 while test "x$1" != "x"; do
    if [ "$1" == "--help" ]; then 
-	echo "usage: $0 [--debug] [--mail email] [quoted_string_representing_starting_date (as accepted by date -d)]"
+	echo "usage: $0 [--dry-run] [--debug] [--mail email] [--draft] [--production] [quoted_string_representing_starting_date (as accepted by date -d)]"
 	exit 1
    elif [ "$1" == "--debug" ]; then
-	debug=x
+	debug=yes
+	shift
+   elif [ "$1" == "--dry-run" ]; then
+	dryrun=yes
+	shift
+   elif [ "$1" == "--draft" ]; then
+        ExtraHeader="[Draft] ${ExtraHeader}"
+	MAILTO=$PROD_MAILTO
+        USER_MAILTO=$PROD_USER_MAILTO
+        (( production = 1 ))
 	shift
    elif [ "$1" == "--production" ]; then
 	MAILTO=$PROD_MAILTO
@@ -32,11 +42,11 @@ while test "x$1" != "x"; do
 	shift
    elif [ "$1" == "--weekly" ]; then
     ExtraArgs=$1
-    ExtraHeader="Weekly "
+    ExtraHeader="${ExtraHeader}Weekly "
     shift
    elif [ "$1" == "--monthly" ]; then
     ExtraArgs=$1
-    ExtraHeader="Monthly "
+    ExtraHeader="${ExtraHeader}Monthly "
     shift
    else 
     date_arg=$1
@@ -83,7 +93,12 @@ function sendto {
     echo >> $csvfile
     eval $1 --output=csv $rep_args >>  $csvfile
     
-    mutt -F ./muttrc -a $csvfile -s "$subject" $to < $txtfile
+    if [ "$dryrun" != "yes" ]; then 
+       mutt -F ./muttrc -a $csvfile -s "$subject" $to < $txtfile
+    else 
+       echo mutt -F ./muttrc -a $csvfile -s "$subject" $to < $txtfile
+    fi
+   
 }
 
 
@@ -95,7 +110,7 @@ sendto ./efficiency "$ExtraArgs $whenarg" ${WORK_DIR}/report "${ExtraHeader}OSG 
 
 sendto ./usersitereport "$ExtraArgs $whenarg" ${WORK_DIR}/report "${ExtraHeader}Report by user by site for $when" $USER_MAILTO
 
-if [ "$debug" != "x" ]; then 
+if [ "$debug" != "yes" ]; then 
    rm -rf $WORK_DIR
 fi
 
