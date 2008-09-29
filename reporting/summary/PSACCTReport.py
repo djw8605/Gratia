@@ -5,7 +5,7 @@
 #
 # library to create simple report using the Gratia psacct database
 #
-#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.34 2008-09-18 03:18:08 pcanal Exp $
+#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.35 2008-09-29 16:09:16 pcanal Exp $
 
 import time
 import datetime
@@ -454,6 +454,12 @@ def CMSProdData(begin,end):
             "where \""+ DateToString(begin) +"\"<=EndTime and EndTime<\"" + DateToString(end) + "\" " \
             "and ResourceType = \"Batch\" and VOName = \"cms\" "\
             "and (LocalUserId = \"cmsprod\" or LocalUserId = \"cmsprd\") and SiteName = \"USCMS-FNAL-WC1-CE\" "
+
+    select = "select (LocalUserId = \"cmsprod\" or LocalUserId = \"cmsprd\") as production, sum(WallDuration) from JobUsageRecord_Report  " \
+            "where \""+ DateToString(begin) +"\"<=EndTime and EndTime<\"" + DateToString(end) + "\" " \
+            "and ResourceType = \"Batch\" and VOName = \"cms\" "\
+            "and SiteName = \"USCMS-FNAL-WC1-CE\" " \
+            "group by production"
     return RunQueryAndSplit(select)
 
 def GetSiteVOEfficiency(begin,end):
@@ -2233,6 +2239,18 @@ def CMSProd(range_end = datetime.date.today(),
     print "Number of wallclock hours during the previous 7 days consumed by the cmsprod and cmsprd user ids reported via USCMS-FNAL-WC1-CE:"
 
     data = CMSProdData(range_begin,range_end)
-    wall = string.atof( data[0] ) / factor
+    wall = 0
+    user = 0
+    for line in data:
+       (prod, value) = line.split("\t")
+       if (prod == "0"):
+          user = string.atof( value ) / factor
+       elif (prod == "1"):
+          wall = string.atof( value ) / factor
+       else:
+          print "Unexpected value in first column (production):",prod
+    total = wall + user
     print
-    print niceNum(wall)
+    print "Production: ",niceNum(wall)
+    print "Users     : ",niceNum(user)
+    print "Total     : ",niceNum(total)
