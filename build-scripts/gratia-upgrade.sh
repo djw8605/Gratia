@@ -382,7 +382,7 @@ function start_collector {
   runit "/sbin/service $(echo $tomcat |cut -d'/' -f3) start"
   logit
   logit "... collector started
-$(ps -ef |grep $tomcat | grep '   1' | egrep -v grep)
+$(ps -ef |grep file=$tomcat_dir/$tomcat |grep '   1 ' |egrep -v grep)
 "
   logit
   logit "... sleeping 20 seconds to allow tomcat to deploy war files"
@@ -493,22 +493,21 @@ function cleanup {
 #--------------------------------
 function verify_instance_is_running {
   delimit  verify_instance_is_running
-  cmd="ps -ef |grep file=$tomcat_dir/$tomcat |egrep -v grep"
   logit "Verifying that the tomcat instance is running using
-  $cmd
+   ps -ef |grep file=$tomcat_dir/$tomcat |grep '   1 ' |egrep -v grep
 "
   sleep 4
-  process_cnt="$(ps -ef |grep file=$tomcat_dir/$tomcat |egrep -v grep |wc -l)"
+  process_cnt="$(ps -ef |grep file=$tomcat_dir/$tomcat |grep '  1 '|egrep -v grep |wc -l)"
   case $process_cnt in 
     0 ) logerr "... tomcat instance ($tomcat) not running" ;;
     1 ) ;;
     * ) logerr "More than 1 tomcat instance running for this gratia instance:
-$(ps -ef |grep file=$tomcat_dir/$tomcat |egrep -v grep)
+$(ps -ef |grep file=$tomcat_dir/$tomcat |grep '  1 '|egrep -v grep)
 " 
         ;;
   esac
   logit "Tomcat instance for ($tomcat):
-$(ps -ef |grep file=$tomcat_dir/$tomcat |egrep -v grep)
+$(ps -ef |grep file=$tomcat_dir/$tomcat |grep '   1 ' |egrep -v grep)
 "
   logit "PASSED: tomcat instance ($tomcat) is running"
   sleep 1
