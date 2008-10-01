@@ -7,7 +7,7 @@
 # Script to transfer the data from Gratia to APEL (WLCG)
 ########################################################################
 #
-#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: LCG.py,v 1.15 2008-06-30 17:09:09 jgweigand Exp $
+#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: LCG.py,v 1.16 2008-10-01 13:54:22 jgweigand Exp $
 #
 #
 ########################################################################
@@ -56,7 +56,19 @@
 #   is used soley for sites not having a normalization factor which
 #   as of now, there are none and hopefully in the future this will 
 #   remain true.   
-#   
+#
+# 9/25/08 (John Weigand)
+#   1. Added methods to copy the xml/html files that are extracted from
+#   the APEL database tables to the Gratia collector for this
+#   database.  The lcg.conf file has a new attribute called
+#   GratiaCollector defining (in scp format) the directory to copy
+#   this files to.
+#   2. Also added method(s) to trap 'warning' type messages that do
+#   not affect the actual update of the APEL data, but may represent
+#   conditions that should be investigated.  This was put in to trap
+#   any errors that may occur on the copy to the Gratia collector,
+#   but can be used to detect site not reporting for a period or
+#   other conditions.
 # 
 ########################################################################
 import traceback
@@ -67,15 +79,18 @@ import getopt
 import math
 import re
 import string
+import popen2
 import smtplib, rfc822  # for email notifications via smtp
 import commands, os, sys, time, string
 
+gWarnings          = []
 gSitesWithData     = []
 gSitesWithNoData   = []
 gSitesWithUnknowns = []
 gKnownVOs = {}
 
-gFilterParameters = {"SiteFilterFile"       :None,
+gFilterParameters = {"GratiaCollector"      :None,
+                     "SiteFilterFile"       :None,
                      "VOFilterFile"         :None,
                      "DBConfFile"           :None,
                      "LogSqlDir"            :None,
@@ -184,7 +199,24 @@ def SendEmailNotificationSuccess(contents):
   """ Sends a successful email notification to the EmailNotice attribute""" 
   subject  = "Gratia transfer to APEL (WLCG) for %s - Completed" % gDateFilter
   SendEmailNotification(subject,contents)
+  if len(gWarnings) == 0:
+    Logit("No warning conditions detected.")
+    return
+  SendEmailNotificationWarnings()
+#-----------------------------------------------
+def SendEmailNotificationWarnings():
+  """ Sends a warning email notification to the EmailNotice attribute""" 
+  subject  = "Gratia transfer to APEL (WLCG) for %s - WARNINGS" % gDateFilter
+  contents = """
+The interface from Gratia to the APEL (WLCG) database was successful.
 
+However, the following possible problems were detected during the execution 
+of the interface script and should be investigated.
+"""
+  for warning in gWarnings:
+    contents = "%s\n%s\n" % (contents,warning)
+  Logit(contents)
+  SendEmailNotification(subject,contents)
 #-----------------------------------------------
 def SendEmailNotification(subject,message):
   """ Sends an email notification to the EmailNotice attribute value
@@ -403,6 +435,10 @@ def Logit(message):
 #-----------------------------------------------
 def Logerr(message):
     Logit("ERROR: " + message)
+#-----------------------------------------------
+def Logwarn(message):
+    Logit("WARNING: " + message)
+    gWarnings.append(message)
     
 
 #-----------------------------------------------
@@ -724,12 +760,13 @@ def RunLCGQuery(query,type,params):
   """ Performs a query of the APEL database with output in either xml or 
       an html format.
   """
-  Logit("Running query on %s of the %s database" % (params["LcgHost"],params["LcgDB"]))
   host = params["LcgHost"]
   port = params["LcgPort"] 
   user = params["LcgUser"] 
   pswd = params["LcgPswd"] 
   db   = params["LcgDB"]
+  Logit("Running query on %s of the %s database" % (host,db))
+  Logit("Query - type %s: %s" % (type,query))
 
   connectString = CreateQueryConnectString(host,port,user,pswd,db,type)
   (status,output) = commands.getstatusoutput("echo '" + query + "' | " + connectString)
@@ -741,6 +778,8 @@ def CreateXmlHtmlFiles(params):
   """ Performs a query of the APEL database tables with output in either xml or 
       an html format creating those files.
   """
+  Logit("------")
+  Logit("Retrieving APEL database data")
   dates = gDateFilter.split("/")  # YYYY/MM format
   lcgtable = gDatabaseParameters["LcgTable"]
   queries =  {
@@ -750,19 +789,24 @@ def CreateXmlHtmlFiles(params):
   } 
   tables = queries.keys() 
   for table in tables:
-    Logit("Running query: " + queries[table])
+    Logit("")
     #--- create xml file ---
     type = "xml"
     output = RunLCGQuery(queries[table],type,params)
     filename = GetFileName(table,type)
     WriteFile(output,filename)
     Logit("%s file created: %s" % (type,filename)) 
+    SendXmlHtmlFiles(filename,gFilterParameters["GratiaCollector"])
     #--- create html file ---
+    Logit("")
     type = "html"
     output = RunLCGQuery(queries[table],type,params)
     filename = GetFileName(table,type)
     WriteFile(output,filename)
     Logit("%s file created: %s" % (type,filename)) 
+    SendXmlHtmlFiles(filename,gFilterParameters["GratiaCollector"])
+  Logit("Retrieval of APEL database data complete")
+  Logit("------")
 
 #-----------------------------------------------
 def WriteFile(data,filename):
@@ -770,6 +814,27 @@ def WriteFile(data,filename):
   file.write(data+"\n")
   file.close()
 
+#-----------------------------------------------
+def SendXmlHtmlFiles(filename,dest):
+  """ Copies the xml and html files created to a Gratia collector
+      data area to they are accessible for reporting on the
+      collector or by other software.
+  """
+  if dest == 'DO_NOT_SEND':
+    Logit("%s file NOT copied to a Gratia collector (arg is '%s')" % (filename,dest))
+    return
+  cmd = "cp %s %s" % (filename,dest) 
+  Logit(cmd)
+  p = popen2.Popen3(cmd,1)
+  rtn = p.wait()
+  if rtn <> 0:
+    stderr = p.childerr.readlines()
+    p.childerr.close()
+    Logwarn("SendXmlHtmlFiles method: command(%s) failed rtn code %d: %s" % (cmd,rtn,stderr))
+    return
+  p.childerr.close()
+  Logit("%s file successfully copied" % filename)
+  
 
 #-----------------------------------------------
 def RunLCGUpdate(inputfile,params):
@@ -979,6 +1044,7 @@ def CreateLCGsqlUnknownUpdates(results,filename):
 
 #--- MAIN --------------------------------------------
 def main(argv=None):
+  global gWarnings
   global gNormalization
   global gSitesWithNoData
   global gSitesWithUnknowns
@@ -1002,7 +1068,7 @@ def main(argv=None):
     Logit("====================================================")
     Logit("Starting transfer from Gratia to APEL")
     Logit("Filter date: %s" % gDateFilter)
- 
+
     #--- check db availability -------------
     CheckGratiaDBAvailability(gDatabaseParameters)
     if gInUpdateMode:

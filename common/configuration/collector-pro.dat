@@ -24,6 +24,8 @@
     "service.lifetime.JobUsageRecord" => "3 months",
     "service.lifetime.MetricRecord" => "1 month",
     "service.listener.threads" => 1,
+    "service.reporting.interfaces.apel.folder" => "gratia-data/interfaces/apel-lcg",
+    "service.reporting.interfaces.apel.folder.groupowner" => "gratia",
    }
  },
  fermi_osg =>

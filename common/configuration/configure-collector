@@ -9,6 +9,7 @@ use strict;
 
 use Getopt::Long;
 use File::Basename;
+use File::Path;
 use Pod::Usage;
 
 my $gratia_dir;
@@ -284,6 +285,7 @@ foreach my $config (@instance_list) {
   configure_tomcat_users($config, $config_ref);
 # configure_log4j_properties($config, $config_ref) if $options{"use-ssl"};
   configure_static_report_generation($config, $config_ref);
+  configure_apel_directory($config, $config_ref);
 
   if (exists $options{"db-root"}) {
     configure_post_install($config, $config_ref);
@@ -303,6 +305,46 @@ foreach my $config (@instance_list) {
 
 1;
 
+#--------------------------------------
+sub configure_apel_directory {
+  my ($instance_name, $collector_config) = @_;
+  my $type = "APEL interfaces folder -";
+  print STDERR "INFO: $type starting\n"; 
+  my $apel       = $collector_config->{"properties.attributes"}->{"service.reporting.interfaces.apel.folder"};
+  my $apel_group = $collector_config->{"properties.attributes"}->{"service.reporting.interfaces.apel.folder.groupowner"};
+  unless ( defined $apel ) {
+    print STDERR "INFO: $type not required.\n";
+    print STDERR "INFO: $type complete\n"; 
+    return 1;
+  }
+  unless ( defined $apel_group ) {
+    print  STDERR "ERROR: $type requested but no service.reporting.interfaces.apel.folder.groupowner specified.\n";
+    exit 1;
+  }
+  my $data_directory = "$options{prefix}/tomcat-${instance_name}/webapps/$apel";
+  if ( -d $data_directory ) { 
+    print STDERR "INFO: $type already exists - $data_directory \n"; 
+  }
+  else {
+    print STDERR "INFO: $type creating directory - $data_directory\n";
+    eval ( mkpath($data_directory) );
+    if ($@) { print  STDERR "ERROR: $type Failed to make directory - $data_directory\n"; exit 1; }
+  }
+  my $owner = $collector_config->{tomcat_user};
+  unless ( defined $owner ) {
+    $owner = getlogin();
+  }
+  print STDERR "INFO: $type setting ownership($owner.$apel_group)/permissions(0775)\n";
+  chmod 0775, $data_directory;
+  my $uid = getpwnam($owner);
+  my $gid = getgrnam($apel_group);
+  unless ( defined $uid ) { print  STDERR "ERROR: $type owner ($owner) not in /etc/passwd file\n";exit 1; } 
+  unless ( defined $gid ) { print  STDERR "ERROR: $type group ($apel_group) not in /etc/group file\n";exit 1; } 
+  chown $uid,$gid, $data_directory;
+  print STDERR "INFO: $type complete\n"; 
+}
+
+#--------------------------------------
 sub configure_log4j_properties {
 	return unless $options{"use-ssl"};
 	my ($instance_name, $collector_config) = @_;

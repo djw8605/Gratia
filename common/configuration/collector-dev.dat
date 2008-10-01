@@ -225,6 +225,7 @@
               collector_host => "gratia-vm02.fnal.gov",
               db_host => "gratia-vm02.fnal.gov",
               db_schema => "gratia_weigand",
+ #             tomcat_user => "daemon",
               "properties.attributes" =>
               {
                "maintain.history.log" => 2,
@@ -233,6 +234,8 @@
                "service.admin.DN.0" => '/DC=org/DC=doegrids/OU=Services/CN=gratia-vm02.fnal.gov',
                "service.admin.FQAN.0" => "/fermilab/Role=GratiaAdmin",
                "service.admin.FQAN.1" => "/fermilab/Role=GratiaDeveloper",
+               "service.reporting.interfaces.apel.folder" => "gratia-data/interfaces/apel-lcg",
+               "service.reporting.interfaces.apel.folder.groupowner" => "gratia",
               }
             }
 );
