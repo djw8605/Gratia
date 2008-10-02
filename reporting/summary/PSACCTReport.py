@@ -5,7 +5,7 @@
 #
 # library to create simple report using the Gratia psacct database
 #
-#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.35 2008-09-29 16:09:16 pcanal Exp $
+#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.36 2008-10-02 01:09:16 pcanal Exp $
 
 import time
 import datetime
@@ -588,7 +588,7 @@ def FromCondor():
         print "Date : " + gBegin.strftime("%m/%Y") + " (" + str(days )+ " days)"
 
 class DailySiteJobStatusConf:
-    title = "Summary of the job exit status (midnight to midnight UTC) for %s\nincluding all jobs that finished in that time period.\n\nFor Condor the value used is taken from 'ExitCode' and NOT from 'Exit Status'\n"
+    title = "Summary of the job exit status (midnight to midnight UTC) for %s\nincluding all jobs that finished in that time period.\n\nFor Condor the value used is taken from 'ExitCode' and NOT from 'Exit Status'\n\nWall Success: Wall clock hours of successfully completed jobs\nWall Failed: Wall clock hours of unsuccessfully completed jobs\nWall Success Rate: Wall Success / (Wall Success + Wall Failed)\nSuccess: number of successfully completed jobs\nFailed: Number of unsuccessfully completed jobs\nSuccess Rate: number of successfull jobs / total number of jobs\n"
     headline = "For all jobs finished on %s (UTC)"
     headers = ("Site","Wall Succ Rate","Wall Success","Wall Failed","Success Rate","Success","Failed")
     num_header = 1
