@@ -40,17 +40,17 @@ call conditional_trigger_drop()
 -- No more trigger -- called manually from Hibernate.
 -- 2008-09-04 CG
 --
---create trigger trigger02 after insert on JobUsageRecord_Meta
---for each row
---begin
+-- create trigger trigger02 after insert on JobUsageRecord_Meta
+-- for each row
+-- begin
 --  call add_JUR_to_summary(new.dbid, 0);
---end;
+-- end;
 
---create trigger trigger03 after insert on TDCorr
---for each row
---begin
+-- create trigger trigger03 after insert on TDCorr
+-- for each row
+-- begin
 --  call add_JUR_to_summary(new.dbid, 1);
---end;
+-- end;
 
 -- Local Variables:
 -- mode: sql

@@ -1,6 +1,6 @@
-------------------------------------
+-- ----------------------------------
 -- ProbeSummary
-------------------------------------
+-- ----------------------------------
 -- Previous versions had a table.
 DROP TABLE IF EXISTS ProbeSummary;
 DROP VIEW IF EXISTS ProbeSummary;
@@ -15,9 +15,9 @@ CREATE VIEW `ProbeSummary` AS
          MSD.CpuSystemDuration AS CpuSystemDuration
   FROM MasterSummaryData MSD;
 
-------------------------------------
+-- ----------------------------------
 -- UserProbeSummary
-------------------------------------
+-- ----------------------------------
 -- Previous versions had a table.
 DROP TABLE IF EXISTS UserProbeSummary;
 DROP VIEW IF EXISTS UserProbeSummary;
@@ -33,9 +33,9 @@ CREATE VIEW `UserProbeSummary` AS
          MSD.CpuSystemDuration AS CpuSystemDuration
   FROM MasterSummaryData MSD;
 
-------------------------------------
+-- ----------------------------------
 -- VOProbeSummary
-------------------------------------
+-- ----------------------------------
 -- Previous versions had a table.
 DROP TABLE IF EXISTS VOProbeSummary;
 DROP VIEW IF EXISTS VOProbeSummary;
@@ -54,9 +54,9 @@ CREATE VIEW `VOProbeSummary` AS
         JOIN VONameCorrection VC ON (MSD.VOcorrid = VC.corrid)
         JOIN VO ON (VC.VOid = VO.VOid);
 
-------------------------------------
+-- ----------------------------------
 -- HostDescriptionProbeSummary
-------------------------------------
+-- ----------------------------------
 -- Previous versions had a table.
 DROP TABLE IF EXISTS HostDescriptionProbeSummary;
 DROP VIEW IF EXISTS HostDescriptionProbeSummary;
@@ -72,11 +72,11 @@ CREATE VIEW `HostDescriptionProbeSummary` AS
          MSD.CpuSystemDuration AS CpuSystemDuration
   FROM MasterSummaryData MSD;
 
-------------------------------------
+-- ----------------------------------
 -- VOProbeSummaryData
 --
 -- This summary table is no longer needed.
-------------------------------------
+-- ----------------------------------
 DROP TABLE IF EXISTS VOProbeSummaryData;
 
 -- Local Variables:
