@@ -284,7 +284,7 @@ public class DataScrubber {
                         }
                         // JobUsageRecord should be last, so do it
                         // explicitly so we never forget:
-                        DeleteRows(session, "JobUsageRecord", ids);
+                        n = DeleteRows(session, "JobUsageRecord", ids);
                         tx.commit();                   
                         nrecords = nrecords + n;
                     }
