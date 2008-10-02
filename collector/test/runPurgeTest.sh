@@ -488,7 +488,7 @@ while getopts :tshcfdlw:p: OPT; do
 done
 shift $[ OPTIND - 1 ]
 
-ssl_port=`expr $http_port + 1`
+ssl_port=`expr $http_port + 0`
 rmi_port=`expr $http_port + 2`
 jmx_port=`expr $http_port + 3`
 server_port=`expr $http_port + 4`
