@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<report xmlns="http://www.eclipse.org/birt/2005/design" version="3.2.14" id="1">
-    <property name="createdBy">Eclipse BIRT Designer Version 2.0.1 Build &lt;20060222-1204></property>
+<report xmlns="http://www.eclipse.org/birt/2005/design" version="3.2.17" id="1">
+    <property name="createdBy">Eclipse BIRT Designer Version 2.3.1.v20080911 Build &lt;2.3.1.v20080922-1151></property>
     <property name="units">in</property>
     <list-property name="propertyBindings">
         <structure>
@@ -45,6 +45,8 @@
     <parameters>
         <parameter-group name="MetricsFormatting" id="401" extends="reportLib.MetricsFormatting"/>
         <parameter-group name="DateRange" id="400" extends="reportLib.DateRange"/>
+        <scalar-parameter name="SelType" id="446" extends="reportLib.SelType"/>
+        <scalar-parameter name="SelectVOs" id="445" extends="reportLib.SelectVOs"/>
         <scalar-parameter name="VOs" id="397" extends="reportLib.VOs"/>
         <scalar-parameter name="Sites" id="395" extends="reportLib.Sites"/>
         <parameter-group name="DatabaseAccess" id="399" extends="reportLib.DatabaseAccess"/>
@@ -54,85 +56,37 @@
     <data-sources>
         <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="Data Source" id="444">
             <property name="odaDriverClass">com.mysql.jdbc.Driver</property>
-            <property name="odaURL">jdbc:mysql://gratia-db01.fnal.gov:3320/gratia_itb</property>
+            <property name="odaURL">jdbc:mysql://gratia-vm02.fnal.gov:3320/gratia_gratiax21</property>
             <property name="odaUser">reader</property>
-            <encrypted-property name="odaPassword">cmVhZGVy</encrypted-property>
+            <encrypted-property name="odaPassword" encryptionID="base64">cmVhZGVy</encrypted-property>
         </oda-data-source>
     </data-sources>
     <data-sets>
         <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="reportsProcedure" id="85">
-            <structure name="cachedMetaData">
-                <list-property name="resultSet">
-                    <structure>
-                        <property name="position">1</property>
-                        <property name="name">SiteName</property>
-                        <property name="dataType">string</property>
-                    </structure>
-                    <structure>
-                        <property name="position">2</property>
-                        <property name="name">WallDuration</property>
-                        <property name="dataType">float</property>
-                    </structure>
-                    <structure>
-                        <property name="position">3</property>
-                        <property name="name">cpu</property>
-                        <property name="dataType">float</property>
-                    </structure>
-                    <structure>
-                        <property name="position">4</property>
-                        <property name="name">cpuUser</property>
-                        <property name="dataType">float</property>
-                    </structure>
-                    <structure>
-                        <property name="position">5</property>
-                        <property name="name">cpuSystem</property>
-                        <property name="dataType">float</property>
-                    </structure>
-                    <structure>
-                        <property name="position">6</property>
-                        <property name="name">Njobs</property>
-                        <property name="dataType">decimal</property>
-                    </structure>
-                    <structure>
-                        <property name="position">7</property>
-                        <property name="name">VOName</property>
-                        <property name="dataType">string</property>
-                    </structure>
-                    <structure>
-                        <property name="position">8</property>
-                        <property name="name">UserName</property>
-                        <property name="dataType">string</property>
-                    </structure>
-                    <structure>
-                        <property name="position">9</property>
-                        <property name="name">ProbeName</property>
-                        <property name="dataType">string</property>
-                    </structure>
-                    <structure>
-                        <property name="position">10</property>
-                        <property name="name">DateValue</property>
-                        <property name="dataType">date</property>
-                    </structure>
-                </list-property>
-            </structure>
+            <structure name="cachedMetaData"/>
             <property name="dataSource">Data Source</property>
             <list-property name="parameters">
                 <structure>
                     <property name="name">UserName</property>
+                    <property name="paramName">UserName</property>
                     <property name="dataType">string</property>
                     <property name="position">1</property>
                     <expression name="defaultValue">params["UserName"]</expression>
                     <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
                 </structure>
                 <structure>
                     <property name="name">UserRole</property>
+                    <property name="paramName">UserRole</property>
                     <property name="dataType">string</property>
                     <property name="position">2</property>
                     <expression name="defaultValue">params["UserRole"]</expression>
                     <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
                 </structure>
                 <structure>
                     <property name="name">StartDate</property>
+                    <property name="paramName">StartDate</property>
                     <property name="dataType">string</property>
                     <property name="position">3</property>
                     <expression name="defaultValue">'2007-01-01'</expression>
@@ -143,6 +97,7 @@
                 </structure>
                 <structure>
                     <property name="name">EndDate</property>
+                    <property name="paramName">EndDate</property>
                     <property name="dataType">string</property>
                     <property name="position">4</property>
                     <expression name="defaultValue">'2099-12-31'</expression>
@@ -152,7 +107,7 @@
                     <property name="isOutput">false</property>
                 </structure>
                 <structure>
-                    <property name="name">timUnit</property>
+                    <property name="name">timeUnit</property>
                     <property name="dataType">string</property>
                     <property name="position">5</property>
                     <expression name="defaultValue">'3600'</expression>
@@ -193,9 +148,10 @@
                 </structure>
                 <structure>
                     <property name="name">VOs</property>
+                    <property name="paramName">SelectVOs</property>
                     <property name="dataType">string</property>
                     <property name="position">10</property>
-                    <expression name="defaultValue">null</expression>
+                    <expression name="defaultValue">'("cms")'</expression>
                     <property name="isInput">true</property>
                     <property name="isOutput">false</property>
                 </structure>
@@ -224,85 +180,15 @@
                     <property name="isOutput">false</property>
                 </structure>
                 <structure>
-                    <property name="name">JobUsageRecord</property>
-                    <property name="dataType">string</property>
-                    <property name="position">14</property>
-                    <expression name="defaultValue">null</expression>
-                    <property name="isInput">true</property>
-                    <property name="isOutput">false</property>
-                </structure>
-                <structure>
                     <property name="name">selType</property>
                     <property name="dataType">string</property>
-                    <property name="position">15</property>
-                    <expression name="defaultValue">null</expression>
+                    <property name="position">14</property>
+                    <expression name="defaultValue">'IN'</expression>
                     <property name="isInput">true</property>
                     <property name="isOutput">false</property>
                 </structure>
             </list-property>
-            <list-property name="resultSet">
-                <structure>
-                    <property name="position">1</property>
-                    <property name="name">SiteName</property>
-                    <property name="nativeName">SiteName</property>
-                    <property name="dataType">string</property>
-                </structure>
-                <structure>
-                    <property name="position">2</property>
-                    <property name="name">WallDuration</property>
-                    <property name="nativeName">WallDuration</property>
-                    <property name="dataType">float</property>
-                </structure>
-                <structure>
-                    <property name="position">3</property>
-                    <property name="name">cpu</property>
-                    <property name="nativeName">cpu</property>
-                    <property name="dataType">float</property>
-                </structure>
-                <structure>
-                    <property name="position">4</property>
-                    <property name="name">cpuUser</property>
-                    <property name="nativeName">cpuUser</property>
-                    <property name="dataType">float</property>
-                </structure>
-                <structure>
-                    <property name="position">5</property>
-                    <property name="name">cpuSystem</property>
-                    <property name="nativeName">cpuSystem</property>
-                    <property name="dataType">float</property>
-                </structure>
-                <structure>
-                    <property name="position">6</property>
-                    <property name="name">Njobs</property>
-                    <property name="nativeName">Njobs</property>
-                    <property name="dataType">decimal</property>
-                </structure>
-                <structure>
-                    <property name="position">7</property>
-                    <property name="name">VOName</property>
-                    <property name="nativeName">VOName</property>
-                    <property name="dataType">string</property>
-                </structure>
-                <structure>
-                    <property name="position">8</property>
-                    <property name="name">UserName</property>
-                    <property name="nativeName">UserName</property>
-                    <property name="dataType">string</property>
-                </structure>
-                <structure>
-                    <property name="position">9</property>
-                    <property name="name">ProbeName</property>
-                    <property name="nativeName">ProbeName</property>
-                    <property name="dataType">string</property>
-                </structure>
-                <structure>
-                    <property name="position">10</property>
-                    <property name="name">DateValue</property>
-                    <property name="nativeName">DateValue</property>
-                    <property name="dataType">date</property>
-                </structure>
-            </list-property>
-            <property name="queryText">call reports(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)</property>
+            <property name="queryText">call reports(?,?,?,?,?,?,?,?,?,?,?,?,?,?)</property>
         </oda-data-set>
     </data-sets>
     <styles>
@@ -1066,7 +952,7 @@ function beforeDrawAxisTitle( axis, label, context )
         </Series>
         <Grouping>
           <Enabled>false</Enabled>
-          <GroupingInterval>2</GroupingInterval>
+          <GroupingInterval>2.0</GroupingInterval>
           <GroupType>Text</GroupType>
           <AggregateExpression>Sum</AggregateExpression>
         </Grouping>
@@ -1392,7 +1278,7 @@ function beforeDrawAxisTitle( axis, label, context )
       </Series>
       <Grouping>
         <Enabled>false</Enabled>
-        <GroupingInterval>2</GroupingInterval>
+        <GroupingInterval>2.0</GroupingInterval>
         <GroupType>Text</GroupType>
         <AggregateExpression>Sum</AggregateExpression>
       </Grouping>
@@ -1554,11 +1440,27 @@ function beforeDrawAxisTitle( axis, label, context )
             <list-property name="paramBindings">
                 <structure>
                     <property name="paramName">StartDate</property>
-                    <expression name="expression">params["StartDate"]</expression>
+                    <expression name="expression">params["StartDate"].value</expression>
                 </structure>
                 <structure>
                     <property name="paramName">EndDate</property>
-                    <expression name="expression">params["EndDate"]</expression>
+                    <expression name="expression">params["EndDate"].value</expression>
+                </structure>
+                <structure>
+                    <property name="paramName">VOs</property>
+                    <expression name="expression">params["SelectVOs"].value</expression>
+                </structure>
+                <structure>
+                    <property name="paramName">selType</property>
+                    <expression name="expression">params["SelType"].value</expression>
+                </structure>
+                <structure>
+                    <property name="paramName">UserName</property>
+                    <expression name="expression">params["UserName"].value</expression>
+                </structure>
+                <structure>
+                    <property name="paramName">UserRole</property>
+                    <expression name="expression">params["UserRole"].value</expression>
                 </structure>
             </list-property>
             <list-property name="boundDataColumns">

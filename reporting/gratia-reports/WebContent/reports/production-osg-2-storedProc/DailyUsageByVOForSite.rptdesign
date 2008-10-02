@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<report xmlns="http://www.eclipse.org/birt/2005/design" version="3.2.14" id="1">
-    <property name="createdBy">Eclipse BIRT Designer Version 2.0.1 Build &lt;20060222-1204></property>
+<report xmlns="http://www.eclipse.org/birt/2005/design" version="3.2.17" id="1">
+    <property name="createdBy">Eclipse BIRT Designer Version 2.3.1.v20080911 Build &lt;2.3.1.v20080922-1151></property>
     <property name="units">in</property>
     <list-property name="propertyBindings">
         <structure>
@@ -59,9 +59,9 @@
     <data-sources>
         <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="Data Source" id="444">
             <property name="odaDriverClass">com.mysql.jdbc.Driver</property>
-            <property name="odaURL">jdbc:mysql://gratia-db01.fnal.gov:3320/gratia_itb</property>
+            <property name="odaURL">jdbc:mysql://gratia-vm02.fnal.gov:3320/gratia_gratiax21</property>
             <property name="odaUser">reader</property>
-            <encrypted-property name="odaPassword">cmVhZGVy</encrypted-property>
+            <encrypted-property name="odaPassword" encryptionID="base64">cmVhZGVy</encrypted-property>
         </oda-data-source>
     </data-sources>
     <data-sets>
@@ -105,7 +105,7 @@
                     </structure>
                     <structure>
                         <property name="position">8</property>
-                        <property name="name">UserName</property>
+                        <property name="name">CommonName</property>
                         <property name="dataType">string</property>
                     </structure>
                     <structure>
@@ -124,20 +124,25 @@
             <list-property name="parameters">
                 <structure>
                     <property name="name">UserName</property>
+                    <property name="paramName">UserName</property>
                     <property name="dataType">string</property>
                     <property name="position">1</property>
                     <expression name="defaultValue">params["UserName"]</expression>
                     <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
                 </structure>
                 <structure>
                     <property name="name">UserRole</property>
+                    <property name="paramName">UserRole</property>
                     <property name="dataType">string</property>
                     <property name="position">2</property>
                     <expression name="defaultValue">params["UserRole"]</expression>
                     <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
                 </structure>
                 <structure>
                     <property name="name">StartDate</property>
+                    <property name="paramName">StartDate</property>
                     <property name="dataType">string</property>
                     <property name="position">3</property>
                     <expression name="defaultValue">'2008-01-01'</expression>
@@ -148,6 +153,7 @@
                 </structure>
                 <structure>
                     <property name="name">EndDate</property>
+                    <property name="paramName">EndDate</property>
                     <property name="dataType">string</property>
                     <property name="position">4</property>
                     <expression name="defaultValue">'2099-12-31'</expression>
@@ -229,17 +235,9 @@
                     <property name="isOutput">false</property>
                 </structure>
                 <structure>
-                    <property name="name">JobUsageRecord</property>
-                    <property name="dataType">string</property>
-                    <property name="position">14</property>
-                    <expression name="defaultValue">null</expression>
-                    <property name="isInput">true</property>
-                    <property name="isOutput">false</property>
-                </structure>
-                <structure>
                     <property name="name">selType</property>
                     <property name="dataType">string</property>
-                    <property name="position">15</property>
+                    <property name="position">14</property>
                     <expression name="defaultValue">null</expression>
                     <property name="isInput">true</property>
                     <property name="isOutput">false</property>
@@ -290,8 +288,8 @@
                 </structure>
                 <structure>
                     <property name="position">8</property>
-                    <property name="name">UserName</property>
-                    <property name="nativeName">UserName</property>
+                    <property name="name">CommonName</property>
+                    <property name="nativeName">CommonName</property>
                     <property name="dataType">string</property>
                 </structure>
                 <structure>
@@ -307,7 +305,7 @@
                     <property name="dataType">date</property>
                 </structure>
             </list-property>
-            <property name="queryText">call reports(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)</property>
+            <property name="queryText">call reports(?,?,?,?,?,?,?,?,?,?,?,?,?,?)</property>
         </oda-data-set>
     </data-sets>
     <styles>
@@ -1106,7 +1104,7 @@ if(dotpos > 0) {metricvalue = metricvalue.substring(0,dotpos+2);}&#xD;
         </Series>
         <Grouping>
           <Enabled>false</Enabled>
-          <GroupingInterval>2</GroupingInterval>
+          <GroupingInterval>2.0</GroupingInterval>
           <GroupType>Text</GroupType>
           <AggregateExpression>Sum</AggregateExpression>
         </Grouping>
@@ -2218,7 +2216,7 @@ if(dotpos > 0) {metricvalue = metricvalue.substring(0,dotpos+2);}&#xD;
       <Grouping>
         <Enabled>false</Enabled>
         <GroupingUnit>Days</GroupingUnit>
-        <GroupingInterval>1</GroupingInterval>
+        <GroupingInterval>1.0</GroupingInterval>
         <GroupType>DateTime</GroupType>
         <AggregateExpression>Sum</AggregateExpression>
       </Grouping>

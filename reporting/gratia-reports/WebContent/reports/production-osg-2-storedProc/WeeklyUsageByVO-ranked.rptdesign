@@ -1,12 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<report xmlns="http://www.eclipse.org/birt/2005/design" version="3.2.14" id="1">
-    <property name="createdBy">Eclipse BIRT Designer Version 1.0.1 Build &lt;20050815-0740></property>
+<report xmlns="http://www.eclipse.org/birt/2005/design" version="3.2.17" id="1">
+    <property name="createdBy">Eclipse BIRT Designer Version 2.3.1.v20080911 Build &lt;2.3.1.v20080922-1151></property>
     <property name="units">in</property>
     <list-property name="propertyBindings">
-        <structure>
-            <property name="name">odaDriverClass</property>
-            <property name="id">444</property>
-        </structure>
         <structure>
             <property name="name">odaURL</property>
             <property name="id">444</property>
@@ -21,18 +17,6 @@
             <property name="name">odaPassword</property>
             <property name="id">444</property>
             <expression name="value">params["DatabasePassword"]</expression>
-        </structure>
-        <structure>
-            <property name="name">odaJndiName</property>
-            <property name="id">444</property>
-        </structure>
-        <structure>
-            <property name="name">OdaConnProfileName</property>
-            <property name="id">444</property>
-        </structure>
-        <structure>
-            <property name="name">OdaConnProfileStorePath</property>
-            <property name="id">444</property>
         </structure>
     </list-property>
     <property name="eventHandlerClass">net.sf.gratia.reporting.GratiaBirtReportEH</property>
@@ -495,7 +479,7 @@
         </Series>
         <Grouping>
           <Enabled>false</Enabled>
-          <GroupingInterval>2</GroupingInterval>
+          <GroupingInterval>2.0</GroupingInterval>
           <GroupType>Text</GroupType>
           <AggregateExpression>Sum</AggregateExpression>
         </Grouping>
@@ -706,7 +690,7 @@
       </Series>
       <Grouping>
         <Enabled>false</Enabled>
-        <GroupingInterval>2</GroupingInterval>
+        <GroupingInterval>2.0</GroupingInterval>
         <GroupType>Text</GroupType>
         <AggregateExpression>Sum</AggregateExpression>
       </Grouping>
@@ -839,9 +823,9 @@
     <data-sources>
         <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="Data Source" id="444">
             <property name="odaDriverClass">com.mysql.jdbc.Driver</property>
-            <property name="odaURL">jdbc:mysql://gratia-db01.fnal.gov:3320/gratia_itb</property>
+            <property name="odaURL">jdbc:mysql://gratia-vm02.fnal.gov:3320/gratia_gratiax21</property>
             <property name="odaUser">reader</property>
-            <encrypted-property name="odaPassword">cmVhZGVy</encrypted-property>
+            <encrypted-property name="odaPassword" encryptionID="base64">cmVhZGVy</encrypted-property>
         </oda-data-source>
     </data-sources>
     <data-sets>
@@ -898,6 +882,7 @@
             <list-property name="parameters">
                 <structure>
                     <property name="name">UserName</property>
+                    <property name="paramName">UserName</property>
                     <property name="dataType">string</property>
                     <property name="position">1</property>
                     <expression name="defaultValue">params["UserName"]</expression>
@@ -906,6 +891,7 @@
                 </structure>
                 <structure>
                     <property name="name">UserRole</property>
+                    <property name="paramName">UserRole</property>
                     <property name="dataType">string</property>
                     <property name="position">2</property>
                     <expression name="defaultValue">params["UserRole"]</expression>
@@ -964,6 +950,31 @@ yearnr + "-" + monthnr + "-" + daynr;</expression>
                     <property name="isInput">true</property>
                     <property name="isOutput">false</property>
                 </structure>
+                <structure>
+                    <property name="name">metric</property>
+                    <property name="paramName">DisplayMetric</property>
+                    <property name="dataType">string</property>
+                    <property name="position">8</property>
+                    <expression name="defaultValue">params["DisplayMetric"].value</expression>
+                    <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
+                </structure>
+                <structure>
+                    <property name="name">VOs</property>
+                    <property name="dataType">string</property>
+                    <property name="position">9</property>
+                    <expression name="defaultValue">null</expression>
+                    <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
+                </structure>
+                <structure>
+                    <property name="name">selType</property>
+                    <property name="dataType">string</property>
+                    <property name="position">10</property>
+                    <expression name="defaultValue">null</expression>
+                    <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
+                </structure>
             </list-property>
             <list-property name="resultSet">
                 <structure>
@@ -1003,7 +1014,7 @@ yearnr + "-" + monthnr + "-" + daynr;</expression>
                     <property name="dataType">decimal</property>
                 </structure>
             </list-property>
-            <property name="queryText">call reportsRanked(?,?,?,?,?,?,?)</property>
+            <property name="queryText">call reportsRanked(?,?,?,?,?,?,?,?,?,?)</property>
         </oda-data-set>
     </data-sets>
     <styles>
@@ -1042,6 +1053,7 @@ yearnr + "-" + monthnr + "-" + daynr;</expression>
                 <structure>
                     <property name="name">final_rank</property>
                     <expression name="expression">dataSetRow["final_rank"]</expression>
+                    <property name="dataType">float</property>
                 </structure>
                 <structure>
                     <property name="name">ChartNumber</property>
@@ -1080,6 +1092,7 @@ yearnr + "-" + monthnr + "-" + daynr;</expression>
                     <property name="dataType">decimal</property>
                 </structure>
             </list-property>
+            <property name="pageBreakInterval">50</property>
             <column id="30">
                 <property name="width">33.3%</property>
             </column>
@@ -1628,7 +1641,7 @@ function beforeDrawAxisTitle( axis, label, context )
   <SeriesThickness>10.0</SeriesThickness>
   <SampleData>
     <BaseSampleData>
-      <DataSetRepresentation>01/05/2000,02/01/2000,04/12/2000</DataSetRepresentation>
+      <DataSetRepresentation>01/05/2000,02/01/2000,04/12/2000,03/12/2000,02/29/2000</DataSetRepresentation>
     </BaseSampleData>
     <OrthogonalSampleData>
       <DataSetRepresentation>5,4,12</DataSetRepresentation>
@@ -1921,7 +1934,7 @@ if(dotpos > 0) {metricvalue = metricvalue.substring(0,dotpos+2);}&#xD;
         </Series>
         <Grouping>
           <Enabled>false</Enabled>
-          <GroupingInterval>2</GroupingInterval>
+          <GroupingInterval>2.0</GroupingInterval>
           <GroupType>Text</GroupType>
           <AggregateExpression>Sum</AggregateExpression>
         </Grouping>
@@ -2156,11 +2169,14 @@ if(dotpos > 0) {metricvalue = metricvalue.substring(0,dotpos+2);}&#xD;
       </Series>
       <Grouping>
         <Enabled>false</Enabled>
-        <GroupingInterval>2</GroupingInterval>
+        <GroupingInterval>2.0</GroupingInterval>
         <GroupType>Text</GroupType>
         <AggregateExpression>Sum</AggregateExpression>
       </Grouping>
       <Sorting>Ascending</Sorting>
+      <SortKey>
+        <Definition>row[&quot;DateValue&quot;]</Definition>
+      </SortKey>
     </SeriesDefinitions>
     <Orientation>Horizontal</Orientation>
     <LineAttributes>
@@ -2307,57 +2323,9 @@ if(dotpos > 0) {metricvalue = metricvalue.substring(0,dotpos+2);}&#xD;
                                     </list-property>
                                 </structure>
                                 <property name="marginTop">0pt</property>
-                                <property name="dataSet">reportsRankedProcedure</property>
                                 <property name="height">600px</property>
                                 <property name="width">800px</property>
-                                <list-property name="paramBindings">
-                                    <structure>
-                                        <property name="paramName">UserName</property>
-                                        <expression name="expression">params["UserName"]</expression>
-                                    </structure>
-                                    <structure>
-                                        <property name="paramName">UserRole</property>
-                                        <expression name="expression">params["UserRole"]</expression>
-                                    </structure>
-                                </list-property>
                                 <property name="refTemplateParameter">NewTemplateParameterDefinition</property>
-                                <list-property name="boundDataColumns">
-                                    <structure>
-                                        <property name="name">VOName</property>
-                                        <expression name="expression">dataSetRow["VOName"]</expression>
-                                        <property name="dataType">string</property>
-                                    </structure>
-                                    <structure>
-                                        <property name="name">DateValue</property>
-                                        <expression name="expression">dataSetRow["DateValue"]</expression>
-                                        <property name="dataType">date</property>
-                                    </structure>
-                                    <structure>
-                                        <property name="name">WallDuration</property>
-                                        <expression name="expression">dataSetRow["WallDuration"]</expression>
-                                        <property name="dataType">float</property>
-                                    </structure>
-                                    <structure>
-                                        <property name="name">cpu</property>
-                                        <expression name="expression">dataSetRow["cpu"]</expression>
-                                        <property name="dataType">float</property>
-                                    </structure>
-                                    <structure>
-                                        <property name="name">Njobs</property>
-                                        <expression name="expression">dataSetRow["Njobs"]</expression>
-                                        <property name="dataType">decimal</property>
-                                    </structure>
-                                    <structure>
-                                        <property name="name">final_rank</property>
-                                        <expression name="expression">dataSetRow["final_rank"]</expression>
-                                        <property name="dataType">integer</property>
-                                    </structure>
-                                    <structure>
-                                        <property name="name">ChartNr</property>
-                                        <expression name="expression">dataSetRow["ChartNr"]</expression>
-                                        <property name="dataType">integer</property>
-                                    </structure>
-                                </list-property>
                                 <property name="style">sans-style1</property>
                             </extended-item>
                         </cell>

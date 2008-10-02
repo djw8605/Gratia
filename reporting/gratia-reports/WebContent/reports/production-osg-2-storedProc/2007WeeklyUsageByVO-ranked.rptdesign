@@ -1,12 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<report xmlns="http://www.eclipse.org/birt/2005/design" version="3.2.14" id="1">
-    <property name="createdBy">Eclipse BIRT Designer Version 1.0.1 Build &lt;20050815-0740></property>
+<report xmlns="http://www.eclipse.org/birt/2005/design" version="3.2.17" id="1">
+    <property name="createdBy">Eclipse BIRT Designer Version 2.3.1.v20080911 Build &lt;2.3.1.v20080922-1151></property>
     <property name="units">in</property>
     <list-property name="propertyBindings">
-        <structure>
-            <property name="name">odaDriverClass</property>
-            <property name="id">444</property>
-        </structure>
         <structure>
             <property name="name">odaURL</property>
             <property name="id">444</property>
@@ -21,18 +17,6 @@
             <property name="name">odaPassword</property>
             <property name="id">444</property>
             <expression name="value">params["DatabasePassword"]</expression>
-        </structure>
-        <structure>
-            <property name="name">odaJndiName</property>
-            <property name="id">444</property>
-        </structure>
-        <structure>
-            <property name="name">OdaConnProfileName</property>
-            <property name="id">444</property>
-        </structure>
-        <structure>
-            <property name="name">OdaConnProfileStorePath</property>
-            <property name="id">444</property>
         </structure>
     </list-property>
     <property name="eventHandlerClass">net.sf.gratia.reporting.GratiaBirtReportEH</property>
@@ -495,7 +479,7 @@
         </Series>
         <Grouping>
           <Enabled>false</Enabled>
-          <GroupingInterval>2</GroupingInterval>
+          <GroupingInterval>2.0</GroupingInterval>
           <GroupType>Text</GroupType>
           <AggregateExpression>Sum</AggregateExpression>
         </Grouping>
@@ -706,7 +690,7 @@
       </Series>
       <Grouping>
         <Enabled>false</Enabled>
-        <GroupingInterval>2</GroupingInterval>
+        <GroupingInterval>2.0</GroupingInterval>
         <GroupType>Text</GroupType>
         <AggregateExpression>Sum</AggregateExpression>
       </Grouping>
@@ -883,9 +867,9 @@
     <data-sources>
         <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="Data Source" id="444">
             <property name="odaDriverClass">com.mysql.jdbc.Driver</property>
-            <property name="odaURL">jdbc:mysql://gratia-db01.fnal.gov:3320/gratia_itb</property>
+            <property name="odaURL">jdbc:mysql://gratia-vm02.fnal.gov:3320/gratia_gratiax21</property>
             <property name="odaUser">reader</property>
-            <encrypted-property name="odaPassword">cmVhZGVy</encrypted-property>
+            <encrypted-property name="odaPassword" encryptionID="base64">cmVhZGVy</encrypted-property>
         </oda-data-source>
     </data-sources>
     <data-sets>
@@ -912,7 +896,7 @@
                     <structure>
                         <property name="position">3</property>
                         <property name="name">DateValue</property>
-                        <property name="dataType">string</property>
+                        <property name="dataType">date</property>
                     </structure>
                     <structure>
                         <property name="position">4</property>
@@ -942,6 +926,7 @@
             <list-property name="parameters">
                 <structure>
                     <property name="name">UserName</property>
+                    <property name="paramName">UserName</property>
                     <property name="dataType">string</property>
                     <property name="position">1</property>
                     <expression name="defaultValue">params["UserName"]</expression>
@@ -950,6 +935,7 @@
                 </structure>
                 <structure>
                     <property name="name">UserRole</property>
+                    <property name="paramName">UserRole</property>
                     <property name="dataType">string</property>
                     <property name="position">2</property>
                     <expression name="defaultValue">params["UserRole"]</expression>
@@ -996,6 +982,30 @@
                     <property name="isInput">true</property>
                     <property name="isOutput">false</property>
                 </structure>
+                <structure>
+                    <property name="name">DisplayMetric</property>
+                    <property name="dataType">string</property>
+                    <property name="position">8</property>
+                    <expression name="defaultValue">params["DisplayMetric"].value</expression>
+                    <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
+                </structure>
+                <structure>
+                    <property name="name">VOs</property>
+                    <property name="dataType">string</property>
+                    <property name="position">9</property>
+                    <expression name="defaultValue">null</expression>
+                    <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
+                </structure>
+                <structure>
+                    <property name="name">selType</property>
+                    <property name="dataType">string</property>
+                    <property name="position">10</property>
+                    <expression name="defaultValue">null</expression>
+                    <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
+                </structure>
             </list-property>
             <list-property name="resultSet">
                 <structure>
@@ -1014,7 +1024,7 @@
                     <property name="position">3</property>
                     <property name="name">DateValue</property>
                     <property name="nativeName">DateValue</property>
-                    <property name="dataType">string</property>
+                    <property name="dataType">date</property>
                 </structure>
                 <structure>
                     <property name="position">4</property>
@@ -1035,7 +1045,7 @@
                     <property name="dataType">decimal</property>
                 </structure>
             </list-property>
-            <property name="queryText">call reportsRanked(?,?,?,?,?,?,?)</property>
+            <property name="queryText">call reportsRanked(?,?,?,?,?,?,?,?,?,?)</property>
         </oda-data-set>
     </data-sets>
     <styles>
@@ -1071,6 +1081,7 @@
                 <structure>
                     <property name="name">final_rank</property>
                     <expression name="expression">dataSetRow["final_rank"]</expression>
+                    <property name="dataType">float</property>
                 </structure>
                 <structure>
                     <property name="name">ChartNumber</property>
@@ -1109,6 +1120,7 @@
                     <property name="dataType">decimal</property>
                 </structure>
             </list-property>
+            <property name="pageBreakInterval">50</property>
             <column id="30">
                 <property name="width">33.3%</property>
             </column>
@@ -1906,10 +1918,7 @@ else {
             <Visible>false</Visible>
           </Label>
           <DataDefinition>
-            <Definition>if (params[&quot;DisplayMetric&quot;] == &quot;wallclock&quot;) { row[&quot;WallDuration&quot;] }&#xD;
-else if (params[&quot;DisplayMetric&quot;]==&quot;process&quot;) {row[&quot;cpu&quot;]}&#xD;
-else if (params[&quot;DisplayMetric&quot;]==&quot;jobcount&quot;){row[&quot;Njobs&quot;]}&#xD;
-else {&quot;***Unknown metric***&quot;}</Definition>
+            <Definition>row[params[&quot;DisplayMetric&quot;].value]</Definition>
           </DataDefinition>
           <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
           <DataPoint>
@@ -1957,7 +1966,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
         </Series>
         <Grouping>
           <Enabled>false</Enabled>
-          <GroupingInterval>2</GroupingInterval>
+          <GroupingInterval>2.0</GroupingInterval>
           <GroupType>Text</GroupType>
           <AggregateExpression>Sum</AggregateExpression>
         </Grouping>
@@ -2478,11 +2487,14 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
       </Series>
       <Grouping>
         <Enabled>false</Enabled>
-        <GroupingInterval>2</GroupingInterval>
+        <GroupingInterval>2.0</GroupingInterval>
         <GroupType>Text</GroupType>
         <AggregateExpression>Sum</AggregateExpression>
       </Grouping>
       <Sorting>Ascending</Sorting>
+      <SortKey>
+        <Definition>0</Definition>
+      </SortKey>
     </SeriesDefinitions>
     <Orientation>Horizontal</Orientation>
     <LineAttributes>
@@ -2614,56 +2626,49 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
                                                 <structure>
                                                     <property name="operator">eq</property>
                                                     <expression name="expr">(row["final_rank"]-1)%4</expression>
-                                                    <expression name="value1">0</expression>
+                                                    <simple-property-list name="value1">
+                                                        <value>0</value>
+                                                    </simple-property-list>
                                                 </structure>
                                             </list-property>
+                                            <property name="dataSet">reportsRankedProcedure</property>
                                             <property name="height">80px</property>
                                             <property name="width">63px</property>
-                                            <list-property name="paramBindings">
-                                                <structure>
-                                                    <property name="paramName">UserName</property>
-                                                    <expression name="expression">params["UserName"]</expression>
-                                                </structure>
-                                                <structure>
-                                                    <property name="paramName">UserRole</property>
-                                                    <expression name="expression">params["UserRole"]</expression>
-                                                </structure>
-                                            </list-property>
                                             <property name="refTemplateParameter">NewTemplateParameterDefinition</property>
                                             <list-property name="boundDataColumns">
                                                 <structure>
+                                                    <property name="name">final_rank</property>
+                                                    <expression name="expression">dataSetRow["final_rank"]</expression>
+                                                    <property name="dataType">float</property>
+                                                </structure>
+                                                <structure>
                                                     <property name="name">VOName</property>
                                                     <expression name="expression">dataSetRow["VOName"]</expression>
+                                                    <property name="dataType">string</property>
                                                 </structure>
                                                 <structure>
                                                     <property name="name">DateValue</property>
                                                     <expression name="expression">dataSetRow["DateValue"]</expression>
+                                                    <property name="dataType">string</property>
                                                 </structure>
                                                 <structure>
                                                     <property name="name">WallDuration</property>
                                                     <expression name="expression">dataSetRow["WallDuration"]</expression>
+                                                    <property name="dataType">float</property>
                                                 </structure>
                                                 <structure>
                                                     <property name="name">cpu</property>
                                                     <expression name="expression">dataSetRow["cpu"]</expression>
+                                                    <property name="dataType">float</property>
                                                 </structure>
                                                 <structure>
                                                     <property name="name">Njobs</property>
                                                     <expression name="expression">dataSetRow["Njobs"]</expression>
+                                                    <property name="dataType">decimal</property>
                                                 </structure>
                                                 <structure>
-                                                    <property name="name">final_rank</property>
-                                                    <expression name="expression">dataSetRow["final_rank"]</expression>
-                                                    <property name="dataType">any</property>
-                                                </structure>
-                                                <structure>
-                                                    <property name="name">table_row</property>
-                                                    <expression name="expression">(row["final_rank"]-1) / 4</expression>
-                                                    <property name="dataType">integer</property>
-                                                </structure>
-                                                <structure>
-                                                    <property name="name">table_column</property>
-                                                    <expression name="expression">(row["final_rank"] -1)%4</expression>
+                                                    <property name="name">ChartNr</property>
+                                                    <expression name="expression">dataSetRow["ChartNr"]</expression>
                                                     <property name="dataType">integer</property>
                                                 </structure>
                                             </list-property>
@@ -3194,7 +3199,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
   <SeriesThickness>10.0</SeriesThickness>
   <SampleData>
     <BaseSampleData>
-      <DataSetRepresentation>A, B, C</DataSetRepresentation>
+      <DataSetRepresentation>01/05/2000,02/01/2000,04/12/2000,03/12/2000,02/29/2000</DataSetRepresentation>
     </BaseSampleData>
     <OrthogonalSampleData>
       <DataSetRepresentation>5,4,12</DataSetRepresentation>
@@ -3205,7 +3210,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
     <LegendBehavior>None</LegendBehavior>
   </Interactivity>
   <Axes>
-    <Type>Text</Type>
+    <Type>DateTime</Type>
     <Title>
       <Caption>
         <Value>2007</Value>
@@ -3419,10 +3424,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
             <Visible>false</Visible>
           </Label>
           <DataDefinition>
-            <Definition>if (params[&quot;DisplayMetric&quot;] == &quot;wallclock&quot;) { row[&quot;WallDuration&quot;]}&#xD;
-else if (params[&quot;DisplayMetric&quot;]==&quot;process&quot;) {row[&quot;cpu&quot;]}&#xD;
-else if (params[&quot;DisplayMetric&quot;]==&quot;jobcount&quot;){row[&quot;Njobs&quot;]}&#xD;
-else {&quot;***Unknown metric***&quot;}</Definition>
+            <Definition>row[params[&quot;DisplayMetric&quot;].value]</Definition>
           </DataDefinition>
           <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
           <DataPoint>
@@ -3470,7 +3472,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
         </Series>
         <Grouping>
           <Enabled>false</Enabled>
-          <GroupingInterval>2</GroupingInterval>
+          <GroupingInterval>2.0</GroupingInterval>
           <GroupType>Text</GroupType>
           <AggregateExpression>Sum</AggregateExpression>
         </Grouping>
@@ -4648,11 +4650,14 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
       </Series>
       <Grouping>
         <Enabled>false</Enabled>
-        <GroupingInterval>2</GroupingInterval>
+        <GroupingInterval>2.0</GroupingInterval>
         <GroupType>Text</GroupType>
         <AggregateExpression>Sum</AggregateExpression>
       </Grouping>
       <Sorting>Ascending</Sorting>
+      <SortKey>
+        <Definition>row[&quot;DateValue&quot;]</Definition>
+      </SortKey>
     </SeriesDefinitions>
     <Orientation>Horizontal</Orientation>
     <LineAttributes>
@@ -4704,6 +4709,10 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
       </Insets>
       <Visible>false</Visible>
     </Label>
+    <FormatSpecifier xsi:type="attribute:DateFormatSpecifier">
+      <Type>Medium</Type>
+      <Detail>Date</Detail>
+    </FormatSpecifier>
     <LabelPosition>Below</LabelPosition>
     <Staggered>false</Staggered>
     <MajorGrid>
@@ -4806,60 +4815,14 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
                                                 <structure>
                                                     <property name="operator">eq</property>
                                                     <expression name="expr">(row["final_rank"]-1)%4</expression>
-                                                    <expression name="value1">0</expression>
+                                                    <simple-property-list name="value1">
+                                                        <value>0</value>
+                                                    </simple-property-list>
                                                 </structure>
                                             </list-property>
                                             <property name="height">80px</property>
                                             <property name="width">100px</property>
-                                            <list-property name="paramBindings">
-                                                <structure>
-                                                    <property name="paramName">UserName</property>
-                                                    <expression name="expression">params["UserName"]</expression>
-                                                </structure>
-                                                <structure>
-                                                    <property name="paramName">UserRole</property>
-                                                    <expression name="expression">params["UserRole"]</expression>
-                                                </structure>
-                                            </list-property>
                                             <property name="refTemplateParameter">NewTemplateParameterDefinition</property>
-                                            <list-property name="boundDataColumns">
-                                                <structure>
-                                                    <property name="name">VOName</property>
-                                                    <expression name="expression">dataSetRow["VOName"]</expression>
-                                                </structure>
-                                                <structure>
-                                                    <property name="name">DateValue</property>
-                                                    <expression name="expression">dataSetRow["DateValue"]</expression>
-                                                    <property name="dataType">string</property>
-                                                </structure>
-                                                <structure>
-                                                    <property name="name">WallDuration</property>
-                                                    <expression name="expression">dataSetRow["WallDuration"]</expression>
-                                                </structure>
-                                                <structure>
-                                                    <property name="name">cpu</property>
-                                                    <expression name="expression">dataSetRow["cpu"]</expression>
-                                                </structure>
-                                                <structure>
-                                                    <property name="name">Njobs</property>
-                                                    <expression name="expression">dataSetRow["Njobs"]</expression>
-                                                </structure>
-                                                <structure>
-                                                    <property name="name">final_rank</property>
-                                                    <expression name="expression">dataSetRow["final_rank"]</expression>
-                                                    <property name="dataType">any</property>
-                                                </structure>
-                                                <structure>
-                                                    <property name="name">table_row</property>
-                                                    <expression name="expression">(row["final_rank"]-1) / 4</expression>
-                                                    <property name="dataType">integer</property>
-                                                </structure>
-                                                <structure>
-                                                    <property name="name">table_column</property>
-                                                    <expression name="expression">(row["final_rank"] -1)%4</expression>
-                                                    <property name="dataType">integer</property>
-                                                </structure>
-                                            </list-property>
                                             <property name="style">sans-style1</property>
                                         </extended-item>
                                     </cell>
@@ -5387,7 +5350,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
   <SeriesThickness>10.0</SeriesThickness>
   <SampleData>
     <BaseSampleData>
-      <DataSetRepresentation>A, B, C</DataSetRepresentation>
+      <DataSetRepresentation>01/05/2000,02/01/2000,04/12/2000,03/12/2000,02/29/2000</DataSetRepresentation>
     </BaseSampleData>
     <OrthogonalSampleData>
       <DataSetRepresentation>5,4,12</DataSetRepresentation>
@@ -5398,7 +5361,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
     <LegendBehavior>None</LegendBehavior>
   </Interactivity>
   <Axes>
-    <Type>Text</Type>
+    <Type>DateTime</Type>
     <Title>
       <Caption>
         <Value>X-Axis Title</Value>
@@ -5613,10 +5576,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
             <Visible>false</Visible>
           </Label>
           <DataDefinition>
-            <Definition>if (params[&quot;DisplayMetric&quot;] == &quot;wallclock&quot;) { row[&quot;WallDuration&quot;]}&#xD;
-else if (params[&quot;DisplayMetric&quot;]==&quot;process&quot;) {row[&quot;cpu&quot;]}&#xD;
-else if (params[&quot;DisplayMetric&quot;]==&quot;jobcount&quot;){row[&quot;Njobs&quot;]}&#xD;
-else {&quot;***Unknown metric***&quot;}</Definition>
+            <Definition>row[params[&quot;DisplayMetric&quot;].value]</Definition>
           </DataDefinition>
           <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
           <DataPoint>
@@ -5664,7 +5624,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
         </Series>
         <Grouping>
           <Enabled>false</Enabled>
-          <GroupingInterval>2</GroupingInterval>
+          <GroupingInterval>2.0</GroupingInterval>
           <GroupType>Text</GroupType>
           <AggregateExpression>Sum</AggregateExpression>
         </Grouping>
@@ -7594,11 +7554,14 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
       </Series>
       <Grouping>
         <Enabled>false</Enabled>
-        <GroupingInterval>2</GroupingInterval>
+        <GroupingInterval>2.0</GroupingInterval>
         <GroupType>Text</GroupType>
         <AggregateExpression>Sum</AggregateExpression>
       </Grouping>
       <Sorting>Ascending</Sorting>
+      <SortKey>
+        <Definition>row[&quot;DateValue&quot;]</Definition>
+      </SortKey>
     </SeriesDefinitions>
     <Orientation>Horizontal</Orientation>
     <LineAttributes>
@@ -7650,6 +7613,10 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
       </Insets>
       <Visible>false</Visible>
     </Label>
+    <FormatSpecifier xsi:type="attribute:DateFormatSpecifier">
+      <Type>Medium</Type>
+      <Detail>Date</Detail>
+    </FormatSpecifier>
     <LabelPosition>Below</LabelPosition>
     <Staggered>false</Staggered>
     <MajorGrid>
@@ -7752,60 +7719,14 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
                                                 <structure>
                                                     <property name="operator">eq</property>
                                                     <expression name="expr">(row["final_rank"]-1)%4</expression>
-                                                    <expression name="value1">1</expression>
+                                                    <simple-property-list name="value1">
+                                                        <value>1</value>
+                                                    </simple-property-list>
                                                 </structure>
                                             </list-property>
                                             <property name="height">80px</property>
                                             <property name="width">100px</property>
-                                            <list-property name="paramBindings">
-                                                <structure>
-                                                    <property name="paramName">UserName</property>
-                                                    <expression name="expression">params["UserName"]</expression>
-                                                </structure>
-                                                <structure>
-                                                    <property name="paramName">UserRole</property>
-                                                    <expression name="expression">params["UserRole"]</expression>
-                                                </structure>
-                                            </list-property>
                                             <property name="refTemplateParameter">NewTemplateParameterDefinition</property>
-                                            <list-property name="boundDataColumns">
-                                                <structure>
-                                                    <property name="name">VOName</property>
-                                                    <expression name="expression">dataSetRow["VOName"]</expression>
-                                                </structure>
-                                                <structure>
-                                                    <property name="name">DateValue</property>
-                                                    <expression name="expression">dataSetRow["DateValue"]</expression>
-                                                    <property name="dataType">string</property>
-                                                </structure>
-                                                <structure>
-                                                    <property name="name">WallDuration</property>
-                                                    <expression name="expression">dataSetRow["WallDuration"]</expression>
-                                                </structure>
-                                                <structure>
-                                                    <property name="name">cpu</property>
-                                                    <expression name="expression">dataSetRow["cpu"]</expression>
-                                                </structure>
-                                                <structure>
-                                                    <property name="name">Njobs</property>
-                                                    <expression name="expression">dataSetRow["Njobs"]</expression>
-                                                </structure>
-                                                <structure>
-                                                    <property name="name">final_rank</property>
-                                                    <expression name="expression">dataSetRow["final_rank"]</expression>
-                                                    <property name="dataType">any</property>
-                                                </structure>
-                                                <structure>
-                                                    <property name="name">table_row</property>
-                                                    <expression name="expression">(row["final_rank"]-1) / 4</expression>
-                                                    <property name="dataType">integer</property>
-                                                </structure>
-                                                <structure>
-                                                    <property name="name">table_column</property>
-                                                    <expression name="expression">(row["final_rank"] -1)%4</expression>
-                                                    <property name="dataType">integer</property>
-                                                </structure>
-                                            </list-property>
                                             <property name="style">sans-style1</property>
                                         </extended-item>
                                     </cell>
@@ -8333,7 +8254,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
   <SeriesThickness>10.0</SeriesThickness>
   <SampleData>
     <BaseSampleData>
-      <DataSetRepresentation>A, B, C</DataSetRepresentation>
+      <DataSetRepresentation>01/05/2000,02/01/2000,04/12/2000,03/12/2000,02/29/2000</DataSetRepresentation>
     </BaseSampleData>
     <OrthogonalSampleData>
       <DataSetRepresentation>5,4,12</DataSetRepresentation>
@@ -8344,7 +8265,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
     <LegendBehavior>None</LegendBehavior>
   </Interactivity>
   <Axes>
-    <Type>Text</Type>
+    <Type>DateTime</Type>
     <Title>
       <Caption>
         <Value>X-Axis Title</Value>
@@ -8559,10 +8480,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
             <Visible>false</Visible>
           </Label>
           <DataDefinition>
-            <Definition>if (params[&quot;DisplayMetric&quot;] == &quot;wallclock&quot;) { row[&quot;WallDuration&quot;]}&#xD;
-else if (params[&quot;DisplayMetric&quot;]==&quot;process&quot;) {row[&quot;cpu&quot;]}&#xD;
-else if (params[&quot;DisplayMetric&quot;]==&quot;jobcount&quot;){row[&quot;Njobs&quot;]}&#xD;
-else {&quot;***Unknown metric***&quot;}</Definition>
+            <Definition>row[params[&quot;DisplayMetric&quot;].value]</Definition>
           </DataDefinition>
           <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
           <DataPoint>
@@ -8610,7 +8528,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
         </Series>
         <Grouping>
           <Enabled>false</Enabled>
-          <GroupingInterval>2</GroupingInterval>
+          <GroupingInterval>2.0</GroupingInterval>
           <GroupType>Text</GroupType>
           <AggregateExpression>Sum</AggregateExpression>
         </Grouping>
@@ -10681,11 +10599,14 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
       </Series>
       <Grouping>
         <Enabled>false</Enabled>
-        <GroupingInterval>2</GroupingInterval>
+        <GroupingInterval>2.0</GroupingInterval>
         <GroupType>Text</GroupType>
         <AggregateExpression>Sum</AggregateExpression>
       </Grouping>
       <Sorting>Ascending</Sorting>
+      <SortKey>
+        <Definition>row[&quot;DateValue&quot;]</Definition>
+      </SortKey>
     </SeriesDefinitions>
     <Orientation>Horizontal</Orientation>
     <LineAttributes>
@@ -10737,6 +10658,10 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
       </Insets>
       <Visible>false</Visible>
     </Label>
+    <FormatSpecifier xsi:type="attribute:DateFormatSpecifier">
+      <Type>Medium</Type>
+      <Detail>Date</Detail>
+    </FormatSpecifier>
     <LabelPosition>Below</LabelPosition>
     <Staggered>false</Staggered>
     <MajorGrid>
@@ -10839,60 +10764,14 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
                                                 <structure>
                                                     <property name="operator">eq</property>
                                                     <expression name="expr">(row["final_rank"]-1)%4</expression>
-                                                    <expression name="value1">2</expression>
+                                                    <simple-property-list name="value1">
+                                                        <value>2</value>
+                                                    </simple-property-list>
                                                 </structure>
                                             </list-property>
                                             <property name="height">80px</property>
                                             <property name="width">100px</property>
-                                            <list-property name="paramBindings">
-                                                <structure>
-                                                    <property name="paramName">UserName</property>
-                                                    <expression name="expression">params["UserName"]</expression>
-                                                </structure>
-                                                <structure>
-                                                    <property name="paramName">UserRole</property>
-                                                    <expression name="expression">params["UserRole"]</expression>
-                                                </structure>
-                                            </list-property>
                                             <property name="refTemplateParameter">NewTemplateParameterDefinition</property>
-                                            <list-property name="boundDataColumns">
-                                                <structure>
-                                                    <property name="name">VOName</property>
-                                                    <expression name="expression">dataSetRow["VOName"]</expression>
-                                                </structure>
-                                                <structure>
-                                                    <property name="name">DateValue</property>
-                                                    <expression name="expression">dataSetRow["DateValue"]</expression>
-                                                    <property name="dataType">string</property>
-                                                </structure>
-                                                <structure>
-                                                    <property name="name">WallDuration</property>
-                                                    <expression name="expression">dataSetRow["WallDuration"]</expression>
-                                                </structure>
-                                                <structure>
-                                                    <property name="name">cpu</property>
-                                                    <expression name="expression">dataSetRow["cpu"]</expression>
-                                                </structure>
-                                                <structure>
-                                                    <property name="name">Njobs</property>
-                                                    <expression name="expression">dataSetRow["Njobs"]</expression>
-                                                </structure>
-                                                <structure>
-                                                    <property name="name">final_rank</property>
-                                                    <expression name="expression">dataSetRow["final_rank"]</expression>
-                                                    <property name="dataType">any</property>
-                                                </structure>
-                                                <structure>
-                                                    <property name="name">table_row</property>
-                                                    <expression name="expression">(row["final_rank"]-1) / 4</expression>
-                                                    <property name="dataType">integer</property>
-                                                </structure>
-                                                <structure>
-                                                    <property name="name">table_column</property>
-                                                    <expression name="expression">(row["final_rank"] -1)%4</expression>
-                                                    <property name="dataType">integer</property>
-                                                </structure>
-                                            </list-property>
                                             <property name="style">sans-style1</property>
                                         </extended-item>
                                     </cell>
@@ -11420,7 +11299,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
   <SeriesThickness>10.0</SeriesThickness>
   <SampleData>
     <BaseSampleData>
-      <DataSetRepresentation>A, B, C</DataSetRepresentation>
+      <DataSetRepresentation>01/05/2000,02/01/2000,04/12/2000,03/12/2000,02/29/2000</DataSetRepresentation>
     </BaseSampleData>
     <OrthogonalSampleData>
       <DataSetRepresentation>5,4,12</DataSetRepresentation>
@@ -11431,7 +11310,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
     <LegendBehavior>None</LegendBehavior>
   </Interactivity>
   <Axes>
-    <Type>Text</Type>
+    <Type>DateTime</Type>
     <Title>
       <Caption>
         <Value>X-Axis Title</Value>
@@ -11646,10 +11525,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
             <Visible>false</Visible>
           </Label>
           <DataDefinition>
-            <Definition>if (params[&quot;DisplayMetric&quot;] == &quot;wallclock&quot;) { row[&quot;WallDuration&quot;]}&#xD;
-else if (params[&quot;DisplayMetric&quot;]==&quot;process&quot;) {row[&quot;cpu&quot;]}&#xD;
-else if (params[&quot;DisplayMetric&quot;]==&quot;jobcount&quot;){row[&quot;Njobs&quot;]}&#xD;
-else {&quot;***Unknown metric***&quot;}</Definition>
+            <Definition>row[params[&quot;DisplayMetric&quot;].value]</Definition>
           </DataDefinition>
           <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
           <DataPoint>
@@ -11697,7 +11573,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
         </Series>
         <Grouping>
           <Enabled>false</Enabled>
-          <GroupingInterval>2</GroupingInterval>
+          <GroupingInterval>2.0</GroupingInterval>
           <GroupType>Text</GroupType>
           <AggregateExpression>Sum</AggregateExpression>
         </Grouping>
@@ -13721,11 +13597,14 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
       </Series>
       <Grouping>
         <Enabled>false</Enabled>
-        <GroupingInterval>2</GroupingInterval>
+        <GroupingInterval>2.0</GroupingInterval>
         <GroupType>Text</GroupType>
         <AggregateExpression>Sum</AggregateExpression>
       </Grouping>
       <Sorting>Ascending</Sorting>
+      <SortKey>
+        <Definition>row[&quot;DateValue&quot;]</Definition>
+      </SortKey>
     </SeriesDefinitions>
     <Orientation>Horizontal</Orientation>
     <LineAttributes>
@@ -13777,6 +13656,10 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
       </Insets>
       <Visible>false</Visible>
     </Label>
+    <FormatSpecifier xsi:type="attribute:DateFormatSpecifier">
+      <Type>Medium</Type>
+      <Detail>Date</Detail>
+    </FormatSpecifier>
     <LabelPosition>Below</LabelPosition>
     <Staggered>false</Staggered>
     <MajorGrid>
@@ -13879,60 +13762,14 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
                                                 <structure>
                                                     <property name="operator">eq</property>
                                                     <expression name="expr">(row["final_rank"]-1)%4</expression>
-                                                    <expression name="value1">3</expression>
+                                                    <simple-property-list name="value1">
+                                                        <value>3</value>
+                                                    </simple-property-list>
                                                 </structure>
                                             </list-property>
                                             <property name="height">80px</property>
                                             <property name="width">100px</property>
-                                            <list-property name="paramBindings">
-                                                <structure>
-                                                    <property name="paramName">UserName</property>
-                                                    <expression name="expression">params["UserName"]</expression>
-                                                </structure>
-                                                <structure>
-                                                    <property name="paramName">UserRole</property>
-                                                    <expression name="expression">params["UserRole"]</expression>
-                                                </structure>
-                                            </list-property>
                                             <property name="refTemplateParameter">NewTemplateParameterDefinition</property>
-                                            <list-property name="boundDataColumns">
-                                                <structure>
-                                                    <property name="name">VOName</property>
-                                                    <expression name="expression">dataSetRow["VOName"]</expression>
-                                                </structure>
-                                                <structure>
-                                                    <property name="name">DateValue</property>
-                                                    <expression name="expression">dataSetRow["DateValue"]</expression>
-                                                    <property name="dataType">string</property>
-                                                </structure>
-                                                <structure>
-                                                    <property name="name">WallDuration</property>
-                                                    <expression name="expression">dataSetRow["WallDuration"]</expression>
-                                                </structure>
-                                                <structure>
-                                                    <property name="name">cpu</property>
-                                                    <expression name="expression">dataSetRow["cpu"]</expression>
-                                                </structure>
-                                                <structure>
-                                                    <property name="name">Njobs</property>
-                                                    <expression name="expression">dataSetRow["Njobs"]</expression>
-                                                </structure>
-                                                <structure>
-                                                    <property name="name">final_rank</property>
-                                                    <expression name="expression">dataSetRow["final_rank"]</expression>
-                                                    <property name="dataType">any</property>
-                                                </structure>
-                                                <structure>
-                                                    <property name="name">table_row</property>
-                                                    <expression name="expression">(row["final_rank"]-1) / 4</expression>
-                                                    <property name="dataType">integer</property>
-                                                </structure>
-                                                <structure>
-                                                    <property name="name">table_column</property>
-                                                    <expression name="expression">(row["final_rank"] -1)%4</expression>
-                                                    <property name="dataType">integer</property>
-                                                </structure>
-                                            </list-property>
                                             <property name="style">sans-style1</property>
                                         </extended-item>
                                     </cell>

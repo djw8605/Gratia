@@ -814,13 +814,11 @@
         </template-parameter-definition>
     </template-parameter-definitions>
     <parameters>
-        <parameter-group name="MetricsFormatting" id="416" extends="reportLib.MetricsFormatting"/>
-        <parameter-group name="DateRange" id="413" extends="reportLib.DateRange"/>
-        <scalar-parameter name="GroupsPerChart" id="428" extends="reportLib.GroupsPerChart"/>
-        <scalar-parameter name="VOs" id="429" extends="reportLib.VOs"/>
-        <parameter-group name="DatabaseAccess" id="419" extends="reportLib.DatabaseAccess"/>
-        <parameter-group name="ReportInfo" id="423" extends="reportLib.ReportInfo"/>
-        <parameter-group name="UserInfo" id="426" extends="reportLib.UserInfo"/>
+        <scalar-parameter name="GroupsPerChart" id="417" extends="reportLib.GroupsPerChart"/>
+        <parameter-group name="DatabaseAccess" id="407" extends="reportLib.DatabaseAccess"/>
+        <parameter-group name="ReportInfo" id="408" extends="reportLib.ReportInfo"/>
+        <parameter-group name="UserInfo" id="411" extends="reportLib.UserInfo"/>
+        <parameter-group name="DateRange" id="448" extends="reportLib.DateRange"/>
     </parameters>
     <data-sources>
         <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="Data Source" id="444">
@@ -853,8 +851,8 @@
                     </structure>
                     <structure>
                         <property name="position">3</property>
-                        <property name="name">DateValue</property>
-                        <property name="dataType">date</property>
+                        <property name="name">sitecntx</property>
+                        <property name="dataType">decimal</property>
                     </structure>
                     <structure>
                         <property name="position">4</property>
@@ -878,7 +876,7 @@
                     </structure>
                 </list-property>
             </structure>
-            <property name="rowFetchLimit">10000</property>
+            <property name="rowFetchLimit">100</property>
             <property name="dataSource">Data Source</property>
             <property name="dataSetRowLimit">0</property>
             <list-property name="parameters">
@@ -887,7 +885,7 @@
                     <property name="paramName">UserName</property>
                     <property name="dataType">string</property>
                     <property name="position">1</property>
-                    <expression name="defaultValue">params["UserName"]</expression>
+                    <expression name="defaultValue">params["UserName"].value</expression>
                     <property name="isInput">true</property>
                     <property name="isOutput">false</property>
                 </structure>
@@ -896,7 +894,7 @@
                     <property name="paramName">UserRole</property>
                     <property name="dataType">string</property>
                     <property name="position">2</property>
-                    <expression name="defaultValue">params["UserRole"]</expression>
+                    <expression name="defaultValue">params["UserRole"].value</expression>
                     <property name="isInput">true</property>
                     <property name="isOutput">false</property>
                 </structure>
@@ -905,7 +903,7 @@
                     <property name="paramName">StartDate</property>
                     <property name="dataType">string</property>
                     <property name="position">3</property>
-                    <expression name="defaultValue">'2007-01-01'</expression>
+                    <expression name="defaultValue">'2008-06-01'</expression>
                     <property name="isInput">true</property>
                     <property name="isOutput">false</property>
                 </structure>
@@ -914,12 +912,12 @@
                     <property name="paramName">EndDate</property>
                     <property name="dataType">string</property>
                     <property name="position">4</property>
-                    <expression name="defaultValue">'2007-12-31'</expression>
+                    <expression name="defaultValue">'2008-07-01'</expression>
                     <property name="isInput">true</property>
                     <property name="isOutput">false</property>
                 </structure>
                 <structure>
-                    <property name="name">timeUnit</property>
+                    <property name="name">TimeUnit</property>
                     <property name="dataType">string</property>
                     <property name="position">5</property>
                     <expression name="defaultValue">'3600'</expression>
@@ -930,7 +928,7 @@
                     <property name="name">dateGrouping</property>
                     <property name="dataType">string</property>
                     <property name="position">6</property>
-                    <expression name="defaultValue">"week"</expression>
+                    <expression name="defaultValue">'day'</expression>
                     <property name="isInput">true</property>
                     <property name="isOutput">false</property>
                 </structure>
@@ -943,11 +941,10 @@
                     <property name="isOutput">false</property>
                 </structure>
                 <structure>
-                    <property name="name">DisplayMetric</property>
-                    <property name="paramName">DisplayMetric</property>
+                    <property name="name">Metric</property>
                     <property name="dataType">string</property>
                     <property name="position">8</property>
-                    <expression name="defaultValue">params["DisplayMetric"].value</expression>
+                    <expression name="defaultValue">'SiteCount'</expression>
                     <property name="isInput">true</property>
                     <property name="isOutput">false</property>
                 </structure>
@@ -983,9 +980,9 @@
                 </structure>
                 <structure>
                     <property name="position">3</property>
-                    <property name="name">DateValue</property>
-                    <property name="nativeName">DateValue</property>
-                    <property name="dataType">date</property>
+                    <property name="name">sitecntx</property>
+                    <property name="nativeName">sitecntx</property>
+                    <property name="dataType">decimal</property>
                 </structure>
                 <structure>
                     <property name="position">4</property>
@@ -1025,28 +1022,20 @@
         </simple-master-page>
     </page-setup>
     <body>
-        <grid id="4">
-            <property name="height">0.322in</property>
-            <property name="width">5.968in</property>
-            <column id="5"/>
-            <row id="6">
-                <property name="height">0.322in</property>
-                <cell id="7">
-                    <property name="verticalAlign">top</property>
-                </cell>
-            </row>
-        </grid>
         <table name="table1" id="9">
+            <property name="backgroundPositionX">0%</property>
+            <property name="backgroundPositionY">0%</property>
+            <property name="textIndent">0em</property>
             <property name="width">100%</property>
             <property name="dataSet">reportsRankedProcedure</property>
             <list-property name="paramBindings">
                 <structure>
-                    <property name="paramName">UserName</property>
-                    <expression name="expression">params["UserName"]</expression>
+                    <property name="paramName">StartDate</property>
+                    <expression name="expression">params["StartDate"]</expression>
                 </structure>
                 <structure>
-                    <property name="paramName">UserRole</property>
-                    <expression name="expression">params["UserRole"]</expression>
+                    <property name="paramName">EndDate</property>
+                    <expression name="expression">params["EndDate"]</expression>
                 </structure>
             </list-property>
             <list-property name="boundDataColumns">
@@ -1058,7 +1047,7 @@
                 <structure>
                     <property name="name">ChartNumber</property>
                     <property name="displayName">ChartNumber</property>
-                    <expression name="expression">1</expression>
+                    <expression name="expression">(dataSetRow["final_rank"]-1) / params["GroupsPerChart"]</expression>
                     <property name="dataType">integer</property>
                 </structure>
                 <structure>
@@ -1072,23 +1061,8 @@
                     <property name="dataType">string</property>
                 </structure>
                 <structure>
-                    <property name="name">DateValue</property>
-                    <expression name="expression">dataSetRow["DateValue"]</expression>
-                    <property name="dataType">string</property>
-                </structure>
-                <structure>
-                    <property name="name">WallDuration</property>
-                    <expression name="expression">dataSetRow["WallDuration"]</expression>
-                    <property name="dataType">float</property>
-                </structure>
-                <structure>
-                    <property name="name">cpu</property>
-                    <expression name="expression">dataSetRow["cpu"]</expression>
-                    <property name="dataType">float</property>
-                </structure>
-                <structure>
-                    <property name="name">Njobs</property>
-                    <expression name="expression">dataSetRow["Njobs"]</expression>
+                    <property name="name">sitecnt</property>
+                    <expression name="expression">dataSetRow["sitecntx"]</expression>
                     <property name="dataType">decimal</property>
                 </structure>
             </list-property>
@@ -1105,9 +1079,7 @@
             <header>
                 <row id="10">
                     <cell id="11"/>
-                    <cell id="12">
-                        <text-data name="DateRange" id="407" extends="reportLib.DateRange"/>
-                    </cell>
+                    <cell id="12"/>
                     <cell id="13"/>
                 </row>
             </header>
@@ -1137,6 +1109,13 @@
                             <property name="colSpan">3</property>
                             <property name="rowSpan">1</property>
                             <property name="textAlign">center</property>
+                            <text-data name="DateRange1" id="476">
+                                <property name="fontFamily">sans-serif</property>
+                                <property name="fontSize">9pt</property>
+                                <property name="textAlign">center</property>
+                                <expression name="valueExpr">"Date range: "+ params["StartDate"] + " - " + params["EndDate"]</expression>
+                                <property name="contentType">html</property>
+                            </text-data>
                             <extended-item extensionName="Chart" name="NewChart" id="361">
                                 <xml-property name="xmlRepresentation"><![CDATA[<model:ChartWithAxes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:attribute="http://www.birt.eclipse.org/ChartModelAttribute" xmlns:data="http://www.birt.eclipse.org/ChartModelData" xmlns:layout="http://www.birt.eclipse.org/ChartModelLayout" xmlns:model="http://www.birt.eclipse.org/ChartModel" xmlns:type="http://www.birt.eclipse.org/ChartModelType">
   <Type>Bar Chart</Type>
@@ -1432,226 +1411,198 @@
     <Visible>true</Visible>
   </Block>
   <Dimension>Two_Dimensional</Dimension>
-  <Script>/**
- * The chart script methods provide control on the chart databinding, generation and rendering.
- *
- * The methods have been commented in the following code, please uncomment and implement the
- * ones you need. Note that for simplicity the &quot;after&quot; methods have not be included here.
- *
- * This script syntax follows JavaScript specifications, the Java classes that are referred to
- * in the comments can be accessed as JavaScript classes. 
- *
- * Script examples are available in the org.eclipse.birt.chart.examples plugin
- */
-
-
-/**
- * Called before populating the series dataset using the DataSetProcessor.
- * 
- * @param series
- *            Series
- * @param dataSetProcessor
- *            DataSetProcessor
- * @param context
- *            IChartScriptContext
- */
-//function beforeDataSetFilled( series, dataSetProcessor, context ){}
-
-/**
- * Called before generation of chart model to GeneratedChartState.
- * 
- * @param chart
- *            Chart Model
- * @param context
- *            IChartScriptContext
- */
-//function beforeGeneration( chart, context ){}
-
-/**
- * Called before the chart is rendered.
- * 
- * @param gcs
- *            GeneratedChartState
- * @param context
- *            IChartScriptContext
- */
- function beforeGeneration( chart, context )
-{	
-	rep = context.getExternalContext().getScriptable();
-	metric_text = &quot;&quot;;
-	metric = rep.getParameterValue(&quot;DisplayMetric&quot;);
-	if(metric==&quot;process&quot;) metric_text = &quot;Process Hours&quot;;
-	if(metric==&quot;wallclock&quot;) metric_text = &quot;Wallclock Hours&quot;;
-	if(metric==&quot;jobcount&quot;) metric_text = &quot;Job Count&quot;;
-
-	rep_title = rep.getParameterValue(&quot;ReportTitle&quot;) + &quot; (&quot; + metric_text + &quot;)&quot; ;
-	rep_subtitle = rep.getParameterValue(&quot;ReportSubtitle&quot;);
-	
-
-	orthAxis = chart.getBaseAxes( )[0].getAssociatedAxes( ).get( 0 );
-    sd = orthAxis.getSeriesDefinitions( ).get( 0 );
-    runtimeSeries = sd.getRunTimeSeries( ).get(0);
-    rep_vo = runtimeSeries.getSeriesIdentifier();
-            
-	// chart.getTitle().getLabel().getCaption().setValue(rep_title + &quot;\n&quot; + rep_subtitle);
-	chart.getTitle().getLabel().getCaption().setValue(rep_title + &quot;\n&quot; + rep_vo);
-
-}
-
-//function beforeRendering( gcs, context ){}
-
-/**
- * Called before drawing each block.
- * 
- * @param block
- *            Block
- * @param context
- *            IChartScriptContext
- */
-//function beforeDrawBlock( block, context ){}
-
-/**
- * Called before drawing each entry the legend.
- * 
- * @param label
- *            Label
- * @param context
- *            IChartScriptContext
- */
-//function beforeDrawLegendEntry( label, context ){}
-
-/**
- * Called before rendering Series.
- * 
- * @param series
- *            Series
- * @param seriesRenderer
- *            ISeriesRenderer
- * @param context
- *            IChartScriptContext
- */
-//function beforeDrawSeries( series, seriesRenderer, context ){}
-
-/**
- * Called before rendering the title of a Series.
- * 
- * @param series
- *            Series
- * @param label
- *            Label
- * @param context
- *            IChartScriptContext
- */
-//function beforeDrawSeriesTitle( series, label, context ){}
-
-/**
- * Called before drawing each marker line in an Axis.
- * 
- * @param axis
- *            Axis
- * @param markerLine
- *            MarkerLine
- * @param context
- *            IChartScriptContext
- */
-//function beforeDrawMarkerLine( axis, markerLine, context ){}
-
-/**
- * Called before drawing each marker range in an Axis.
- * 
- * @param axis
- *            Axis
- * @param markerRange
- *            MarkerRange
- * @param context
- *            IChartScriptContext
- */
-//function beforeDrawMarkerRange( axis, markerRange, context ){}
-
-/**
- * Called before drawing each datapoint graphical representation or marker.
- * 
- * @param dph
- *            DataPointHints
- * @param fill
- *            Fill
- * @param context
- *            IChartScriptContext
- */
-//function beforeDrawDataPoint( dph, fill, context ){}
-
-/**
- * Called before rendering the label for each datapoint.
- * 
- * @param dph
- *            DataPointHints
- * @param label
- *            Label
- * @param context
- *            IChartScriptContext
- */
-//function beforeDrawDataPointLabel( dph, label, context ){}
-
-/**
- * Called before rendering curve fitting.
- * 
- * @param cf
- *            CurveFitting
- * @param context
- *            IChartScriptContext
- */
-//function beforeDrawFittingCurve( cf, context ){}
-
-/**
- * Called before rendering each label on a given Axis.
- * 
- * @param axis
- *            Axis
- * @param label
- *            Label
- * @param context
- *            IChartScriptContext
- */
-//function beforeDrawAxisLabel( axis, label, context ){}
-
-/**
- * Called before rendering the Title of an Axis.
- * 
- * @param axis
- *            Axis
- * @param label
- *            Title Label
- * @param context
- *            IChartScriptContext
- */
-function beforeDrawAxisTitle( axis, label, context )
-{
-	rep = context.getExternalContext().getScriptable();
-	val1 =rep.getParameterValue(&quot;DisplayMetric&quot;);
-	if(!axis.isCategoryAxis())
-	{
-		if(val1==&quot;process&quot;)
-		{
-		label.getCaption().setValue(&quot;Process Hours&quot;);
-		}
-		else if(val1==&quot;wallclock&quot;)
-		{
-		label.getCaption().setValue(&quot;Wallclock Hours&quot;);
-		}
-		else if(val1==&quot;jobcount&quot;)
-		{
-		label.getCaption().setValue(&quot;Job Count&quot;);
-		}
-		else {
-		label.getCaption().setValue(&quot;***undefined metric&quot;);
-		}
-	}
-}</Script>
+  <Script>/**&#xD;
+ * The chart script methods provide control on the chart databinding, generation and rendering.&#xD;
+ *&#xD;
+ * The methods have been commented in the following code, please uncomment and implement the&#xD;
+ * ones you need. Note that for simplicity the &quot;after&quot; methods have not be included here.&#xD;
+ *&#xD;
+ * This script syntax follows JavaScript specifications, the Java classes that are referred to&#xD;
+ * in the comments can be accessed as JavaScript classes. &#xD;
+ *&#xD;
+ * Script examples are available in the org.eclipse.birt.chart.examples plugin&#xD;
+ */&#xD;
+&#xD;
+&#xD;
+/**&#xD;
+ * Called before populating the series dataset using the DataSetProcessor.&#xD;
+ * &#xD;
+ * @param series&#xD;
+ *            Series&#xD;
+ * @param dataSetProcessor&#xD;
+ *            DataSetProcessor&#xD;
+ * @param context&#xD;
+ *            IChartScriptContext&#xD;
+ */&#xD;
+//function beforeDataSetFilled( series, dataSetProcessor, context ){}&#xD;
+&#xD;
+/**&#xD;
+ * Called before generation of chart model to GeneratedChartState.&#xD;
+ * &#xD;
+ * @param chart&#xD;
+ *            Chart Model&#xD;
+ * @param context&#xD;
+ *            IChartScriptContext&#xD;
+ */&#xD;
+//function beforeGeneration( chart, context ){}&#xD;
+&#xD;
+/**&#xD;
+ * Called before the chart is rendered.&#xD;
+ * &#xD;
+ * @param gcs&#xD;
+ *            GeneratedChartState&#xD;
+ * @param context&#xD;
+ *            IChartScriptContext&#xD;
+ */&#xD;
+ function beforeGeneration( chart, context )&#xD;
+{	&#xD;
+	rep = context.getExternalContext().getScriptable();&#xD;
+/*	&#xD;
+	metric = rep.getParameterValue(&quot;DisplayMetric&quot;);&#xD;
+	if(metric==&quot;Cpu&quot;) metric_text = &quot;Process Hours&quot;;&#xD;
+	if(metric==&quot;WallDuration&quot;) metric_text = &quot;Wallclock Hours&quot;;&#xD;
+	if(metric==&quot;Njobs&quot;) metric_text = &quot;Job Count&quot;;&#xD;
+*/	&#xD;
+	// Force title&#xD;
+	metric_text = &quot;&quot;;&#xD;
+&#xD;
+	rep_title = rep.getParameterValue(&quot;ReportTitle&quot;) + &quot; (&quot; + metric_text + &quot;)&quot; ;&#xD;
+	rep_subtitle = rep.getParameterValue(&quot;ReportSubtitle&quot;);&#xD;
+	chart.getTitle().getLabel().getCaption().setValue(rep_title + &quot;\n&quot; + rep_subtitle);&#xD;
+&#xD;
+}&#xD;
+&#xD;
+//function beforeRendering( gcs, context ){}&#xD;
+&#xD;
+/**&#xD;
+ * Called before drawing each block.&#xD;
+ * &#xD;
+ * @param block&#xD;
+ *            Block&#xD;
+ * @param context&#xD;
+ *            IChartScriptContext&#xD;
+ */&#xD;
+//function beforeDrawBlock( block, context ){}&#xD;
+&#xD;
+/**&#xD;
+ * Called before drawing each entry the legend.&#xD;
+ * &#xD;
+ * @param label&#xD;
+ *            Label&#xD;
+ * @param context&#xD;
+ *            IChartScriptContext&#xD;
+ */&#xD;
+//function beforeDrawLegendEntry( label, context ){}&#xD;
+&#xD;
+/**&#xD;
+ * Called before rendering Series.&#xD;
+ * &#xD;
+ * @param series&#xD;
+ *            Series&#xD;
+ * @param seriesRenderer&#xD;
+ *            ISeriesRenderer&#xD;
+ * @param context&#xD;
+ *            IChartScriptContext&#xD;
+ */&#xD;
+//function beforeDrawSeries( series, seriesRenderer, context ){}&#xD;
+&#xD;
+/**&#xD;
+ * Called before rendering the title of a Series.&#xD;
+ * &#xD;
+ * @param series&#xD;
+ *            Series&#xD;
+ * @param label&#xD;
+ *            Label&#xD;
+ * @param context&#xD;
+ *            IChartScriptContext&#xD;
+ */&#xD;
+//function beforeDrawSeriesTitle( series, label, context ){}&#xD;
+&#xD;
+/**&#xD;
+ * Called before drawing each marker line in an Axis.&#xD;
+ * &#xD;
+ * @param axis&#xD;
+ *            Axis&#xD;
+ * @param markerLine&#xD;
+ *            MarkerLine&#xD;
+ * @param context&#xD;
+ *            IChartScriptContext&#xD;
+ */&#xD;
+//function beforeDrawMarkerLine( axis, markerLine, context ){}&#xD;
+&#xD;
+/**&#xD;
+ * Called before drawing each marker range in an Axis.&#xD;
+ * &#xD;
+ * @param axis&#xD;
+ *            Axis&#xD;
+ * @param markerRange&#xD;
+ *            MarkerRange&#xD;
+ * @param context&#xD;
+ *            IChartScriptContext&#xD;
+ */&#xD;
+//function beforeDrawMarkerRange( axis, markerRange, context ){}&#xD;
+&#xD;
+/**&#xD;
+ * Called before drawing each datapoint graphical representation or marker.&#xD;
+ * &#xD;
+ * @param dph&#xD;
+ *            DataPointHints&#xD;
+ * @param fill&#xD;
+ *            Fill&#xD;
+ * @param context&#xD;
+ *            IChartScriptContext&#xD;
+ */&#xD;
+//function beforeDrawDataPoint( dph, fill, context ){}&#xD;
+&#xD;
+/**&#xD;
+ * Called before rendering the label for each datapoint.&#xD;
+ * &#xD;
+ * @param dph&#xD;
+ *            DataPointHints&#xD;
+ * @param label&#xD;
+ *            Label&#xD;
+ * @param context&#xD;
+ *            IChartScriptContext&#xD;
+ */&#xD;
+//function beforeDrawDataPointLabel( dph, label, context ){}&#xD;
+&#xD;
+/**&#xD;
+ * Called before rendering curve fitting.&#xD;
+ * &#xD;
+ * @param cf&#xD;
+ *            CurveFitting&#xD;
+ * @param context&#xD;
+ *            IChartScriptContext&#xD;
+ */&#xD;
+//function beforeDrawFittingCurve( cf, context ){}&#xD;
+&#xD;
+/**&#xD;
+ * Called before rendering each label on a given Axis.&#xD;
+ * &#xD;
+ * @param axis&#xD;
+ *            Axis&#xD;
+ * @param label&#xD;
+ *            Label&#xD;
+ * @param context&#xD;
+ *            IChartScriptContext&#xD;
+ */&#xD;
+//function beforeDrawAxisLabel( axis, label, context ){}&#xD;
+&#xD;
+/**&#xD;
+ * Called before rendering the Title of an Axis.&#xD;
+ * &#xD;
+ * @param axis&#xD;
+ *            Axis&#xD;
+ * @param label&#xD;
+ *            Title Label&#xD;
+ * @param context&#xD;
+ *            IChartScriptContext&#xD;
+ */</Script>
   <Units>Points</Units>
   <SeriesThickness>10.0</SeriesThickness>
   <SampleData>
     <BaseSampleData>
-      <DataSetRepresentation>01/05/2000,02/01/2000,04/12/2000,03/12/2000,02/29/2000</DataSetRepresentation>
+      <DataSetRepresentation>A, B, C</DataSetRepresentation>
     </BaseSampleData>
     <OrthogonalSampleData>
       <DataSetRepresentation>5,4,12</DataSetRepresentation>
@@ -1662,7 +1613,7 @@ function beforeDrawAxisTitle( axis, label, context )
     <LegendBehavior>None</LegendBehavior>
   </Interactivity>
   <Axes>
-    <Type>DateTime</Type>
+    <Type>Text</Type>
     <Title>
       <Caption>
         <Value>X-Axis Title</Value>
@@ -1704,7 +1655,7 @@ function beforeDrawAxisTitle( axis, label, context )
       <Type>Linear</Type>
       <Title>
         <Caption>
-          <Value>Y-Axis Title</Value>
+          <Value># of Sites Used</Value>
           <Font>
             <Size>12.0</Size>
             <Bold>true</Bold>
@@ -1712,7 +1663,7 @@ function beforeDrawAxisTitle( axis, label, context )
               <horizontalAlignment>Center</horizontalAlignment>
               <verticalAlignment>Center</verticalAlignment>
             </Alignment>
-            <Rotation>90.0</Rotation>
+            <Rotation>0.0</Rotation>
           </Font>
           <Color>
             <Transparency>255</Transparency>
@@ -1748,7 +1699,7 @@ function beforeDrawAxisTitle( axis, label, context )
       <TitlePosition>Left</TitlePosition>
       <SeriesDefinitions>
         <Query>
-          <Definition>row[&quot;VOName&quot;]</Definition>
+          <Definition></Definition>
         </Query>
         <SeriesPalette>
           <Entries xsi:type="attribute:ColorDefinition">
@@ -1874,10 +1825,10 @@ function beforeDrawAxisTitle( axis, label, context )
               <Bottom>0.0</Bottom>
               <Right>3.0</Right>
             </Insets>
-            <Visible>false</Visible>
+            <Visible>true</Visible>
           </Label>
           <DataDefinition>
-            <Definition>row[params[&quot;DisplayMetric&quot;].value]</Definition>
+            <Definition>row[&quot;sitecnt&quot;]</Definition>
           </DataDefinition>
           <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
           <DataPoint>
@@ -1896,13 +1847,17 @@ function beforeDrawAxisTitle( axis, label, context )
                 <BaseUrl>&lt;structure name=&quot;action&quot;>
     &lt;property name=&quot;formatType&quot;>html&lt;/property>
     &lt;property name=&quot;linkType&quot;>drill-through&lt;/property>
-    &lt;property name=&quot;reportName&quot;>UsageByUserForWeek.rptdesign&lt;/property>
+    &lt;property name=&quot;reportName&quot;>UsageBySiteForVO1.rptdesign&lt;/property>
     &lt;property name=&quot;targetWindow&quot;>_self&lt;/property>
     &lt;property name=&quot;targetFileType&quot;>report-design&lt;/property>
     &lt;list-property name=&quot;paramBindings&quot;>
         &lt;structure>
-            &lt;property name=&quot;paramName&quot;>DisplayMetric&lt;/property>
-            &lt;expression name=&quot;expression&quot;>params[&quot;DisplayMetric&quot;]&lt;/expression>
+            &lt;property name=&quot;paramName&quot;>StartDate&lt;/property>
+            &lt;expression name=&quot;expression&quot;>params[&quot;StartDate&quot;]&lt;/expression>
+        &lt;/structure>
+        &lt;structure>
+            &lt;property name=&quot;paramName&quot;>EndDate&lt;/property>
+            &lt;expression name=&quot;expression&quot;>params[&quot;EndDate&quot;]&lt;/expression>
         &lt;/structure>
         &lt;structure>
             &lt;property name=&quot;paramName&quot;>ReportTitle&lt;/property>
@@ -1915,28 +1870,9 @@ function beforeDrawAxisTitle( axis, label, context )
     &lt;/list-property>
 &lt;/structure>
 </BaseUrl>
-                <BaseParameterName>StartDate</BaseParameterName>
+                <BaseParameterName>VOs</BaseParameterName>
                 <ValueParameterName></ValueParameterName>
-                <SeriesParameterName>VOs</SeriesParameterName>
-              </Value>
-            </Action>
-          </Triggers>
-          <Triggers>
-            <Condition>onmouseover</Condition>
-            <Action>
-              <Type>Show_Tooltip</Type>
-              <Value xsi:type="attribute:TooltipValue">
-                <Text>var voname = row[&quot;VOName&quot;];&#xD;
-var metricvalue =String(row[params[&quot;DisplayMetric&quot;].value] );&#xD;
-var label = &quot; &quot;;&#xD;
-var dotpos;&#xD;
-if (params[&quot;DisplayMetric&quot;] == &quot;WallDuration&quot;) {label = &quot;Wallclock Hours: &quot;;}&#xD;
-if (params[&quot;DisplayMetric&quot;] == &quot;cpu&quot;)  {label = &quot;Process Hours: &quot;;}&#xD;
-if (params[&quot;DisplayMetric&quot;] == &quot;Njobs&quot;) {label = &quot;Jobs: &quot;;}&#xD;
-var dotpos = metricvalue.indexOf(&quot;.&quot;,0);&#xD;
-if(dotpos > 0) {metricvalue = metricvalue.substring(0,dotpos+2);}&#xD;
-&quot;VOName: &quot; + voname + &quot;   \n&quot; + label + metricvalue;</Text>
-                <Delay>200</Delay>
+                <SeriesParameterName></SeriesParameterName>
               </Value>
             </Action>
           </Triggers>
@@ -2165,1370 +2101,7 @@ if(dotpos > 0) {metricvalue = metricvalue.substring(0,dotpos+2);}&#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;DateValue&quot;]</Definition>
-        </DataDefinition>
-        <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
-        <DataPoint>
-          <Components>
-            <Type>Orthogonal_Value</Type>
-          </Components>
-          <Separator>, </Separator>
-        </DataPoint>
-        <LabelPosition>Outside</LabelPosition>
-        <Stacked>false</Stacked>
-      </Series>
-      <Series>
-        <Visible>true</Visible>
-        <Label>
-          <Caption>
-            <Value>&lt;undefined></Value>
-            <Font>
-              <Alignment/>
-            </Font>
-          </Caption>
-          <Background xsi:type="attribute:ColorDefinition">
-            <Transparency>0</Transparency>
-            <Red>255</Red>
-            <Green>255</Green>
-            <Blue>255</Blue>
-          </Background>
-          <Outline>
-            <Style>Solid</Style>
-            <Thickness>1</Thickness>
-            <Color>
-              <Transparency>255</Transparency>
-              <Red>0</Red>
-              <Green>0</Green>
-              <Blue>0</Blue>
-            </Color>
-            <Visible>false</Visible>
-          </Outline>
-          <Insets>
-            <Top>0.0</Top>
-            <Left>2.0</Left>
-            <Bottom>0.0</Bottom>
-            <Right>3.0</Right>
-          </Insets>
-          <Visible>false</Visible>
-        </Label>
-        <DataDefinition>
-          <Definition>row[&quot;DateValue&quot;]</Definition>
-        </DataDefinition>
-        <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
-        <DataPoint>
-          <Components>
-            <Type>Orthogonal_Value</Type>
-          </Components>
-          <Separator>, </Separator>
-        </DataPoint>
-        <LabelPosition>Outside</LabelPosition>
-        <Stacked>false</Stacked>
-      </Series>
-      <Series>
-        <Visible>true</Visible>
-        <Label>
-          <Caption>
-            <Value>&lt;undefined></Value>
-            <Font>
-              <Alignment/>
-            </Font>
-          </Caption>
-          <Background xsi:type="attribute:ColorDefinition">
-            <Transparency>0</Transparency>
-            <Red>255</Red>
-            <Green>255</Green>
-            <Blue>255</Blue>
-          </Background>
-          <Outline>
-            <Style>Solid</Style>
-            <Thickness>1</Thickness>
-            <Color>
-              <Transparency>255</Transparency>
-              <Red>0</Red>
-              <Green>0</Green>
-              <Blue>0</Blue>
-            </Color>
-            <Visible>false</Visible>
-          </Outline>
-          <Insets>
-            <Top>0.0</Top>
-            <Left>2.0</Left>
-            <Bottom>0.0</Bottom>
-            <Right>3.0</Right>
-          </Insets>
-          <Visible>false</Visible>
-        </Label>
-        <DataDefinition>
-          <Definition>row[&quot;DateValue&quot;]</Definition>
-        </DataDefinition>
-        <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
-        <DataPoint>
-          <Components>
-            <Type>Orthogonal_Value</Type>
-          </Components>
-          <Separator>, </Separator>
-        </DataPoint>
-        <LabelPosition>Outside</LabelPosition>
-        <Stacked>false</Stacked>
-      </Series>
-      <Series>
-        <Visible>true</Visible>
-        <Label>
-          <Caption>
-            <Value>&lt;undefined></Value>
-            <Font>
-              <Alignment/>
-            </Font>
-          </Caption>
-          <Background xsi:type="attribute:ColorDefinition">
-            <Transparency>0</Transparency>
-            <Red>255</Red>
-            <Green>255</Green>
-            <Blue>255</Blue>
-          </Background>
-          <Outline>
-            <Style>Solid</Style>
-            <Thickness>1</Thickness>
-            <Color>
-              <Transparency>255</Transparency>
-              <Red>0</Red>
-              <Green>0</Green>
-              <Blue>0</Blue>
-            </Color>
-            <Visible>false</Visible>
-          </Outline>
-          <Insets>
-            <Top>0.0</Top>
-            <Left>2.0</Left>
-            <Bottom>0.0</Bottom>
-            <Right>3.0</Right>
-          </Insets>
-          <Visible>false</Visible>
-        </Label>
-        <DataDefinition>
-          <Definition>row[&quot;DateValue&quot;]</Definition>
-        </DataDefinition>
-        <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
-        <DataPoint>
-          <Components>
-            <Type>Orthogonal_Value</Type>
-          </Components>
-          <Separator>, </Separator>
-        </DataPoint>
-        <LabelPosition>Outside</LabelPosition>
-        <Stacked>false</Stacked>
-      </Series>
-      <Series>
-        <Visible>true</Visible>
-        <Label>
-          <Caption>
-            <Value>&lt;undefined></Value>
-            <Font>
-              <Alignment/>
-            </Font>
-          </Caption>
-          <Background xsi:type="attribute:ColorDefinition">
-            <Transparency>0</Transparency>
-            <Red>255</Red>
-            <Green>255</Green>
-            <Blue>255</Blue>
-          </Background>
-          <Outline>
-            <Style>Solid</Style>
-            <Thickness>1</Thickness>
-            <Color>
-              <Transparency>255</Transparency>
-              <Red>0</Red>
-              <Green>0</Green>
-              <Blue>0</Blue>
-            </Color>
-            <Visible>false</Visible>
-          </Outline>
-          <Insets>
-            <Top>0.0</Top>
-            <Left>2.0</Left>
-            <Bottom>0.0</Bottom>
-            <Right>3.0</Right>
-          </Insets>
-          <Visible>false</Visible>
-        </Label>
-        <DataDefinition>
-          <Definition>row[&quot;DateValue&quot;]</Definition>
-        </DataDefinition>
-        <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
-        <DataPoint>
-          <Components>
-            <Type>Orthogonal_Value</Type>
-          </Components>
-          <Separator>, </Separator>
-        </DataPoint>
-        <LabelPosition>Outside</LabelPosition>
-        <Stacked>false</Stacked>
-      </Series>
-      <Series>
-        <Visible>true</Visible>
-        <Label>
-          <Caption>
-            <Value>&lt;undefined></Value>
-            <Font>
-              <Alignment/>
-            </Font>
-          </Caption>
-          <Background xsi:type="attribute:ColorDefinition">
-            <Transparency>0</Transparency>
-            <Red>255</Red>
-            <Green>255</Green>
-            <Blue>255</Blue>
-          </Background>
-          <Outline>
-            <Style>Solid</Style>
-            <Thickness>1</Thickness>
-            <Color>
-              <Transparency>255</Transparency>
-              <Red>0</Red>
-              <Green>0</Green>
-              <Blue>0</Blue>
-            </Color>
-            <Visible>false</Visible>
-          </Outline>
-          <Insets>
-            <Top>0.0</Top>
-            <Left>2.0</Left>
-            <Bottom>0.0</Bottom>
-            <Right>3.0</Right>
-          </Insets>
-          <Visible>false</Visible>
-        </Label>
-        <DataDefinition>
-          <Definition>row[&quot;DateValue&quot;]</Definition>
-        </DataDefinition>
-        <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
-        <DataPoint>
-          <Components>
-            <Type>Orthogonal_Value</Type>
-          </Components>
-          <Separator>, </Separator>
-        </DataPoint>
-        <LabelPosition>Outside</LabelPosition>
-        <Stacked>false</Stacked>
-      </Series>
-      <Series>
-        <Visible>true</Visible>
-        <Label>
-          <Caption>
-            <Value>&lt;undefined></Value>
-            <Font>
-              <Alignment/>
-            </Font>
-          </Caption>
-          <Background xsi:type="attribute:ColorDefinition">
-            <Transparency>0</Transparency>
-            <Red>255</Red>
-            <Green>255</Green>
-            <Blue>255</Blue>
-          </Background>
-          <Outline>
-            <Style>Solid</Style>
-            <Thickness>1</Thickness>
-            <Color>
-              <Transparency>255</Transparency>
-              <Red>0</Red>
-              <Green>0</Green>
-              <Blue>0</Blue>
-            </Color>
-            <Visible>false</Visible>
-          </Outline>
-          <Insets>
-            <Top>0.0</Top>
-            <Left>2.0</Left>
-            <Bottom>0.0</Bottom>
-            <Right>3.0</Right>
-          </Insets>
-          <Visible>false</Visible>
-        </Label>
-        <DataDefinition>
-          <Definition>row[&quot;DateValue&quot;]</Definition>
-        </DataDefinition>
-        <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
-        <DataPoint>
-          <Components>
-            <Type>Orthogonal_Value</Type>
-          </Components>
-          <Separator>, </Separator>
-        </DataPoint>
-        <LabelPosition>Outside</LabelPosition>
-        <Stacked>false</Stacked>
-      </Series>
-      <Series>
-        <Visible>true</Visible>
-        <Label>
-          <Caption>
-            <Value>&lt;undefined></Value>
-            <Font>
-              <Alignment/>
-            </Font>
-          </Caption>
-          <Background xsi:type="attribute:ColorDefinition">
-            <Transparency>0</Transparency>
-            <Red>255</Red>
-            <Green>255</Green>
-            <Blue>255</Blue>
-          </Background>
-          <Outline>
-            <Style>Solid</Style>
-            <Thickness>1</Thickness>
-            <Color>
-              <Transparency>255</Transparency>
-              <Red>0</Red>
-              <Green>0</Green>
-              <Blue>0</Blue>
-            </Color>
-            <Visible>false</Visible>
-          </Outline>
-          <Insets>
-            <Top>0.0</Top>
-            <Left>2.0</Left>
-            <Bottom>0.0</Bottom>
-            <Right>3.0</Right>
-          </Insets>
-          <Visible>false</Visible>
-        </Label>
-        <DataDefinition>
-          <Definition>row[&quot;DateValue&quot;]</Definition>
-        </DataDefinition>
-        <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
-        <DataPoint>
-          <Components>
-            <Type>Orthogonal_Value</Type>
-          </Components>
-          <Separator>, </Separator>
-        </DataPoint>
-        <LabelPosition>Outside</LabelPosition>
-        <Stacked>false</Stacked>
-      </Series>
-      <Series>
-        <Visible>true</Visible>
-        <Label>
-          <Caption>
-            <Value>&lt;undefined></Value>
-            <Font>
-              <Alignment/>
-            </Font>
-          </Caption>
-          <Background xsi:type="attribute:ColorDefinition">
-            <Transparency>0</Transparency>
-            <Red>255</Red>
-            <Green>255</Green>
-            <Blue>255</Blue>
-          </Background>
-          <Outline>
-            <Style>Solid</Style>
-            <Thickness>1</Thickness>
-            <Color>
-              <Transparency>255</Transparency>
-              <Red>0</Red>
-              <Green>0</Green>
-              <Blue>0</Blue>
-            </Color>
-            <Visible>false</Visible>
-          </Outline>
-          <Insets>
-            <Top>0.0</Top>
-            <Left>2.0</Left>
-            <Bottom>0.0</Bottom>
-            <Right>3.0</Right>
-          </Insets>
-          <Visible>false</Visible>
-        </Label>
-        <DataDefinition>
-          <Definition>row[&quot;DateValue&quot;]</Definition>
-        </DataDefinition>
-        <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
-        <DataPoint>
-          <Components>
-            <Type>Orthogonal_Value</Type>
-          </Components>
-          <Separator>, </Separator>
-        </DataPoint>
-        <LabelPosition>Outside</LabelPosition>
-        <Stacked>false</Stacked>
-      </Series>
-      <Series>
-        <Visible>true</Visible>
-        <Label>
-          <Caption>
-            <Value>&lt;undefined></Value>
-            <Font>
-              <Alignment/>
-            </Font>
-          </Caption>
-          <Background xsi:type="attribute:ColorDefinition">
-            <Transparency>0</Transparency>
-            <Red>255</Red>
-            <Green>255</Green>
-            <Blue>255</Blue>
-          </Background>
-          <Outline>
-            <Style>Solid</Style>
-            <Thickness>1</Thickness>
-            <Color>
-              <Transparency>255</Transparency>
-              <Red>0</Red>
-              <Green>0</Green>
-              <Blue>0</Blue>
-            </Color>
-            <Visible>false</Visible>
-          </Outline>
-          <Insets>
-            <Top>0.0</Top>
-            <Left>2.0</Left>
-            <Bottom>0.0</Bottom>
-            <Right>3.0</Right>
-          </Insets>
-          <Visible>false</Visible>
-        </Label>
-        <DataDefinition>
-          <Definition>row[&quot;DateValue&quot;]</Definition>
-        </DataDefinition>
-        <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
-        <DataPoint>
-          <Components>
-            <Type>Orthogonal_Value</Type>
-          </Components>
-          <Separator>, </Separator>
-        </DataPoint>
-        <LabelPosition>Outside</LabelPosition>
-        <Stacked>false</Stacked>
-      </Series>
-      <Series>
-        <Visible>true</Visible>
-        <Label>
-          <Caption>
-            <Value>&lt;undefined></Value>
-            <Font>
-              <Alignment/>
-            </Font>
-          </Caption>
-          <Background xsi:type="attribute:ColorDefinition">
-            <Transparency>0</Transparency>
-            <Red>255</Red>
-            <Green>255</Green>
-            <Blue>255</Blue>
-          </Background>
-          <Outline>
-            <Style>Solid</Style>
-            <Thickness>1</Thickness>
-            <Color>
-              <Transparency>255</Transparency>
-              <Red>0</Red>
-              <Green>0</Green>
-              <Blue>0</Blue>
-            </Color>
-            <Visible>false</Visible>
-          </Outline>
-          <Insets>
-            <Top>0.0</Top>
-            <Left>2.0</Left>
-            <Bottom>0.0</Bottom>
-            <Right>3.0</Right>
-          </Insets>
-          <Visible>false</Visible>
-        </Label>
-        <DataDefinition>
-          <Definition>row[&quot;DateValue&quot;]</Definition>
-        </DataDefinition>
-        <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
-        <DataPoint>
-          <Components>
-            <Type>Orthogonal_Value</Type>
-          </Components>
-          <Separator>, </Separator>
-        </DataPoint>
-        <LabelPosition>Outside</LabelPosition>
-        <Stacked>false</Stacked>
-      </Series>
-      <Series>
-        <Visible>true</Visible>
-        <Label>
-          <Caption>
-            <Value>&lt;undefined></Value>
-            <Font>
-              <Alignment/>
-            </Font>
-          </Caption>
-          <Background xsi:type="attribute:ColorDefinition">
-            <Transparency>0</Transparency>
-            <Red>255</Red>
-            <Green>255</Green>
-            <Blue>255</Blue>
-          </Background>
-          <Outline>
-            <Style>Solid</Style>
-            <Thickness>1</Thickness>
-            <Color>
-              <Transparency>255</Transparency>
-              <Red>0</Red>
-              <Green>0</Green>
-              <Blue>0</Blue>
-            </Color>
-            <Visible>false</Visible>
-          </Outline>
-          <Insets>
-            <Top>0.0</Top>
-            <Left>2.0</Left>
-            <Bottom>0.0</Bottom>
-            <Right>3.0</Right>
-          </Insets>
-          <Visible>false</Visible>
-        </Label>
-        <DataDefinition>
-          <Definition>row[&quot;DateValue&quot;]</Definition>
-        </DataDefinition>
-        <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
-        <DataPoint>
-          <Components>
-            <Type>Orthogonal_Value</Type>
-          </Components>
-          <Separator>, </Separator>
-        </DataPoint>
-        <LabelPosition>Outside</LabelPosition>
-        <Stacked>false</Stacked>
-      </Series>
-      <Series>
-        <Visible>true</Visible>
-        <Label>
-          <Caption>
-            <Value>&lt;undefined></Value>
-            <Font>
-              <Alignment/>
-            </Font>
-          </Caption>
-          <Background xsi:type="attribute:ColorDefinition">
-            <Transparency>0</Transparency>
-            <Red>255</Red>
-            <Green>255</Green>
-            <Blue>255</Blue>
-          </Background>
-          <Outline>
-            <Style>Solid</Style>
-            <Thickness>1</Thickness>
-            <Color>
-              <Transparency>255</Transparency>
-              <Red>0</Red>
-              <Green>0</Green>
-              <Blue>0</Blue>
-            </Color>
-            <Visible>false</Visible>
-          </Outline>
-          <Insets>
-            <Top>0.0</Top>
-            <Left>2.0</Left>
-            <Bottom>0.0</Bottom>
-            <Right>3.0</Right>
-          </Insets>
-          <Visible>false</Visible>
-        </Label>
-        <DataDefinition>
-          <Definition>row[&quot;DateValue&quot;]</Definition>
-        </DataDefinition>
-        <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
-        <DataPoint>
-          <Components>
-            <Type>Orthogonal_Value</Type>
-          </Components>
-          <Separator>, </Separator>
-        </DataPoint>
-        <LabelPosition>Outside</LabelPosition>
-        <Stacked>false</Stacked>
-      </Series>
-      <Series>
-        <Visible>true</Visible>
-        <Label>
-          <Caption>
-            <Value>&lt;undefined></Value>
-            <Font>
-              <Alignment/>
-            </Font>
-          </Caption>
-          <Background xsi:type="attribute:ColorDefinition">
-            <Transparency>0</Transparency>
-            <Red>255</Red>
-            <Green>255</Green>
-            <Blue>255</Blue>
-          </Background>
-          <Outline>
-            <Style>Solid</Style>
-            <Thickness>1</Thickness>
-            <Color>
-              <Transparency>255</Transparency>
-              <Red>0</Red>
-              <Green>0</Green>
-              <Blue>0</Blue>
-            </Color>
-            <Visible>false</Visible>
-          </Outline>
-          <Insets>
-            <Top>0.0</Top>
-            <Left>2.0</Left>
-            <Bottom>0.0</Bottom>
-            <Right>3.0</Right>
-          </Insets>
-          <Visible>false</Visible>
-        </Label>
-        <DataDefinition>
-          <Definition>row[&quot;DateValue&quot;]</Definition>
-        </DataDefinition>
-        <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
-        <DataPoint>
-          <Components>
-            <Type>Orthogonal_Value</Type>
-          </Components>
-          <Separator>, </Separator>
-        </DataPoint>
-        <LabelPosition>Outside</LabelPosition>
-        <Stacked>false</Stacked>
-      </Series>
-      <Series>
-        <Visible>true</Visible>
-        <Label>
-          <Caption>
-            <Value>&lt;undefined></Value>
-            <Font>
-              <Alignment/>
-            </Font>
-          </Caption>
-          <Background xsi:type="attribute:ColorDefinition">
-            <Transparency>0</Transparency>
-            <Red>255</Red>
-            <Green>255</Green>
-            <Blue>255</Blue>
-          </Background>
-          <Outline>
-            <Style>Solid</Style>
-            <Thickness>1</Thickness>
-            <Color>
-              <Transparency>255</Transparency>
-              <Red>0</Red>
-              <Green>0</Green>
-              <Blue>0</Blue>
-            </Color>
-            <Visible>false</Visible>
-          </Outline>
-          <Insets>
-            <Top>0.0</Top>
-            <Left>2.0</Left>
-            <Bottom>0.0</Bottom>
-            <Right>3.0</Right>
-          </Insets>
-          <Visible>false</Visible>
-        </Label>
-        <DataDefinition>
-          <Definition>row[&quot;DateValue&quot;]</Definition>
-        </DataDefinition>
-        <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
-        <DataPoint>
-          <Components>
-            <Type>Orthogonal_Value</Type>
-          </Components>
-          <Separator>, </Separator>
-        </DataPoint>
-        <LabelPosition>Outside</LabelPosition>
-        <Stacked>false</Stacked>
-      </Series>
-      <Series>
-        <Visible>true</Visible>
-        <Label>
-          <Caption>
-            <Value>&lt;undefined></Value>
-            <Font>
-              <Alignment/>
-            </Font>
-          </Caption>
-          <Background xsi:type="attribute:ColorDefinition">
-            <Transparency>0</Transparency>
-            <Red>255</Red>
-            <Green>255</Green>
-            <Blue>255</Blue>
-          </Background>
-          <Outline>
-            <Style>Solid</Style>
-            <Thickness>1</Thickness>
-            <Color>
-              <Transparency>255</Transparency>
-              <Red>0</Red>
-              <Green>0</Green>
-              <Blue>0</Blue>
-            </Color>
-            <Visible>false</Visible>
-          </Outline>
-          <Insets>
-            <Top>0.0</Top>
-            <Left>2.0</Left>
-            <Bottom>0.0</Bottom>
-            <Right>3.0</Right>
-          </Insets>
-          <Visible>false</Visible>
-        </Label>
-        <DataDefinition>
-          <Definition>row[&quot;DateValue&quot;]</Definition>
-        </DataDefinition>
-        <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
-        <DataPoint>
-          <Components>
-            <Type>Orthogonal_Value</Type>
-          </Components>
-          <Separator>, </Separator>
-        </DataPoint>
-        <LabelPosition>Outside</LabelPosition>
-        <Stacked>false</Stacked>
-      </Series>
-      <Series>
-        <Visible>true</Visible>
-        <Label>
-          <Caption>
-            <Value>&lt;undefined></Value>
-            <Font>
-              <Alignment/>
-            </Font>
-          </Caption>
-          <Background xsi:type="attribute:ColorDefinition">
-            <Transparency>0</Transparency>
-            <Red>255</Red>
-            <Green>255</Green>
-            <Blue>255</Blue>
-          </Background>
-          <Outline>
-            <Style>Solid</Style>
-            <Thickness>1</Thickness>
-            <Color>
-              <Transparency>255</Transparency>
-              <Red>0</Red>
-              <Green>0</Green>
-              <Blue>0</Blue>
-            </Color>
-            <Visible>false</Visible>
-          </Outline>
-          <Insets>
-            <Top>0.0</Top>
-            <Left>2.0</Left>
-            <Bottom>0.0</Bottom>
-            <Right>3.0</Right>
-          </Insets>
-          <Visible>false</Visible>
-        </Label>
-        <DataDefinition>
-          <Definition>row[&quot;DateValue&quot;]</Definition>
-        </DataDefinition>
-        <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
-        <DataPoint>
-          <Components>
-            <Type>Orthogonal_Value</Type>
-          </Components>
-          <Separator>, </Separator>
-        </DataPoint>
-        <LabelPosition>Outside</LabelPosition>
-        <Stacked>false</Stacked>
-      </Series>
-      <Series>
-        <Visible>true</Visible>
-        <Label>
-          <Caption>
-            <Value>&lt;undefined></Value>
-            <Font>
-              <Alignment/>
-            </Font>
-          </Caption>
-          <Background xsi:type="attribute:ColorDefinition">
-            <Transparency>0</Transparency>
-            <Red>255</Red>
-            <Green>255</Green>
-            <Blue>255</Blue>
-          </Background>
-          <Outline>
-            <Style>Solid</Style>
-            <Thickness>1</Thickness>
-            <Color>
-              <Transparency>255</Transparency>
-              <Red>0</Red>
-              <Green>0</Green>
-              <Blue>0</Blue>
-            </Color>
-            <Visible>false</Visible>
-          </Outline>
-          <Insets>
-            <Top>0.0</Top>
-            <Left>2.0</Left>
-            <Bottom>0.0</Bottom>
-            <Right>3.0</Right>
-          </Insets>
-          <Visible>false</Visible>
-        </Label>
-        <DataDefinition>
-          <Definition>row[&quot;DateValue&quot;]</Definition>
-        </DataDefinition>
-        <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
-        <DataPoint>
-          <Components>
-            <Type>Orthogonal_Value</Type>
-          </Components>
-          <Separator>, </Separator>
-        </DataPoint>
-        <LabelPosition>Outside</LabelPosition>
-        <Stacked>false</Stacked>
-      </Series>
-      <Series>
-        <Visible>true</Visible>
-        <Label>
-          <Caption>
-            <Value>&lt;undefined></Value>
-            <Font>
-              <Alignment/>
-            </Font>
-          </Caption>
-          <Background xsi:type="attribute:ColorDefinition">
-            <Transparency>0</Transparency>
-            <Red>255</Red>
-            <Green>255</Green>
-            <Blue>255</Blue>
-          </Background>
-          <Outline>
-            <Style>Solid</Style>
-            <Thickness>1</Thickness>
-            <Color>
-              <Transparency>255</Transparency>
-              <Red>0</Red>
-              <Green>0</Green>
-              <Blue>0</Blue>
-            </Color>
-            <Visible>false</Visible>
-          </Outline>
-          <Insets>
-            <Top>0.0</Top>
-            <Left>2.0</Left>
-            <Bottom>0.0</Bottom>
-            <Right>3.0</Right>
-          </Insets>
-          <Visible>false</Visible>
-        </Label>
-        <DataDefinition>
-          <Definition>row[&quot;DateValue&quot;]</Definition>
-        </DataDefinition>
-        <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
-        <DataPoint>
-          <Components>
-            <Type>Orthogonal_Value</Type>
-          </Components>
-          <Separator>, </Separator>
-        </DataPoint>
-        <LabelPosition>Outside</LabelPosition>
-        <Stacked>false</Stacked>
-      </Series>
-      <Series>
-        <Visible>true</Visible>
-        <Label>
-          <Caption>
-            <Value>&lt;undefined></Value>
-            <Font>
-              <Alignment/>
-            </Font>
-          </Caption>
-          <Background xsi:type="attribute:ColorDefinition">
-            <Transparency>0</Transparency>
-            <Red>255</Red>
-            <Green>255</Green>
-            <Blue>255</Blue>
-          </Background>
-          <Outline>
-            <Style>Solid</Style>
-            <Thickness>1</Thickness>
-            <Color>
-              <Transparency>255</Transparency>
-              <Red>0</Red>
-              <Green>0</Green>
-              <Blue>0</Blue>
-            </Color>
-            <Visible>false</Visible>
-          </Outline>
-          <Insets>
-            <Top>0.0</Top>
-            <Left>2.0</Left>
-            <Bottom>0.0</Bottom>
-            <Right>3.0</Right>
-          </Insets>
-          <Visible>false</Visible>
-        </Label>
-        <DataDefinition>
-          <Definition>row[&quot;DateValue&quot;]</Definition>
-        </DataDefinition>
-        <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
-        <DataPoint>
-          <Components>
-            <Type>Orthogonal_Value</Type>
-          </Components>
-          <Separator>, </Separator>
-        </DataPoint>
-        <LabelPosition>Outside</LabelPosition>
-        <Stacked>false</Stacked>
-      </Series>
-      <Series>
-        <Visible>true</Visible>
-        <Label>
-          <Caption>
-            <Value>&lt;undefined></Value>
-            <Font>
-              <Alignment/>
-            </Font>
-          </Caption>
-          <Background xsi:type="attribute:ColorDefinition">
-            <Transparency>0</Transparency>
-            <Red>255</Red>
-            <Green>255</Green>
-            <Blue>255</Blue>
-          </Background>
-          <Outline>
-            <Style>Solid</Style>
-            <Thickness>1</Thickness>
-            <Color>
-              <Transparency>255</Transparency>
-              <Red>0</Red>
-              <Green>0</Green>
-              <Blue>0</Blue>
-            </Color>
-            <Visible>false</Visible>
-          </Outline>
-          <Insets>
-            <Top>0.0</Top>
-            <Left>2.0</Left>
-            <Bottom>0.0</Bottom>
-            <Right>3.0</Right>
-          </Insets>
-          <Visible>false</Visible>
-        </Label>
-        <DataDefinition>
-          <Definition>row[&quot;DateValue&quot;]</Definition>
-        </DataDefinition>
-        <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
-        <DataPoint>
-          <Components>
-            <Type>Orthogonal_Value</Type>
-          </Components>
-          <Separator>, </Separator>
-        </DataPoint>
-        <LabelPosition>Outside</LabelPosition>
-        <Stacked>false</Stacked>
-      </Series>
-      <Series>
-        <Visible>true</Visible>
-        <Label>
-          <Caption>
-            <Value>&lt;undefined></Value>
-            <Font>
-              <Alignment/>
-            </Font>
-          </Caption>
-          <Background xsi:type="attribute:ColorDefinition">
-            <Transparency>0</Transparency>
-            <Red>255</Red>
-            <Green>255</Green>
-            <Blue>255</Blue>
-          </Background>
-          <Outline>
-            <Style>Solid</Style>
-            <Thickness>1</Thickness>
-            <Color>
-              <Transparency>255</Transparency>
-              <Red>0</Red>
-              <Green>0</Green>
-              <Blue>0</Blue>
-            </Color>
-            <Visible>false</Visible>
-          </Outline>
-          <Insets>
-            <Top>0.0</Top>
-            <Left>2.0</Left>
-            <Bottom>0.0</Bottom>
-            <Right>3.0</Right>
-          </Insets>
-          <Visible>false</Visible>
-        </Label>
-        <DataDefinition>
-          <Definition>row[&quot;DateValue&quot;]</Definition>
-        </DataDefinition>
-        <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
-        <DataPoint>
-          <Components>
-            <Type>Orthogonal_Value</Type>
-          </Components>
-          <Separator>, </Separator>
-        </DataPoint>
-        <LabelPosition>Outside</LabelPosition>
-        <Stacked>false</Stacked>
-      </Series>
-      <Series>
-        <Visible>true</Visible>
-        <Label>
-          <Caption>
-            <Value>&lt;undefined></Value>
-            <Font>
-              <Alignment/>
-            </Font>
-          </Caption>
-          <Background xsi:type="attribute:ColorDefinition">
-            <Transparency>0</Transparency>
-            <Red>255</Red>
-            <Green>255</Green>
-            <Blue>255</Blue>
-          </Background>
-          <Outline>
-            <Style>Solid</Style>
-            <Thickness>1</Thickness>
-            <Color>
-              <Transparency>255</Transparency>
-              <Red>0</Red>
-              <Green>0</Green>
-              <Blue>0</Blue>
-            </Color>
-            <Visible>false</Visible>
-          </Outline>
-          <Insets>
-            <Top>0.0</Top>
-            <Left>2.0</Left>
-            <Bottom>0.0</Bottom>
-            <Right>3.0</Right>
-          </Insets>
-          <Visible>false</Visible>
-        </Label>
-        <DataDefinition>
-          <Definition>row[&quot;DateValue&quot;]</Definition>
-        </DataDefinition>
-        <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
-        <DataPoint>
-          <Components>
-            <Type>Orthogonal_Value</Type>
-          </Components>
-          <Separator>, </Separator>
-        </DataPoint>
-        <LabelPosition>Outside</LabelPosition>
-        <Stacked>false</Stacked>
-      </Series>
-      <Series>
-        <Visible>true</Visible>
-        <Label>
-          <Caption>
-            <Value>&lt;undefined></Value>
-            <Font>
-              <Alignment/>
-            </Font>
-          </Caption>
-          <Background xsi:type="attribute:ColorDefinition">
-            <Transparency>0</Transparency>
-            <Red>255</Red>
-            <Green>255</Green>
-            <Blue>255</Blue>
-          </Background>
-          <Outline>
-            <Style>Solid</Style>
-            <Thickness>1</Thickness>
-            <Color>
-              <Transparency>255</Transparency>
-              <Red>0</Red>
-              <Green>0</Green>
-              <Blue>0</Blue>
-            </Color>
-            <Visible>false</Visible>
-          </Outline>
-          <Insets>
-            <Top>0.0</Top>
-            <Left>2.0</Left>
-            <Bottom>0.0</Bottom>
-            <Right>3.0</Right>
-          </Insets>
-          <Visible>false</Visible>
-        </Label>
-        <DataDefinition>
-          <Definition>row[&quot;DateValue&quot;]</Definition>
-        </DataDefinition>
-        <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
-        <DataPoint>
-          <Components>
-            <Type>Orthogonal_Value</Type>
-          </Components>
-          <Separator>, </Separator>
-        </DataPoint>
-        <LabelPosition>Outside</LabelPosition>
-        <Stacked>false</Stacked>
-      </Series>
-      <Series>
-        <Visible>true</Visible>
-        <Label>
-          <Caption>
-            <Value>&lt;undefined></Value>
-            <Font>
-              <Alignment/>
-            </Font>
-          </Caption>
-          <Background xsi:type="attribute:ColorDefinition">
-            <Transparency>0</Transparency>
-            <Red>255</Red>
-            <Green>255</Green>
-            <Blue>255</Blue>
-          </Background>
-          <Outline>
-            <Style>Solid</Style>
-            <Thickness>1</Thickness>
-            <Color>
-              <Transparency>255</Transparency>
-              <Red>0</Red>
-              <Green>0</Green>
-              <Blue>0</Blue>
-            </Color>
-            <Visible>false</Visible>
-          </Outline>
-          <Insets>
-            <Top>0.0</Top>
-            <Left>2.0</Left>
-            <Bottom>0.0</Bottom>
-            <Right>3.0</Right>
-          </Insets>
-          <Visible>false</Visible>
-        </Label>
-        <DataDefinition>
-          <Definition>row[&quot;DateValue&quot;]</Definition>
-        </DataDefinition>
-        <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
-        <DataPoint>
-          <Components>
-            <Type>Orthogonal_Value</Type>
-          </Components>
-          <Separator>, </Separator>
-        </DataPoint>
-        <LabelPosition>Outside</LabelPosition>
-        <Stacked>false</Stacked>
-      </Series>
-      <Series>
-        <Visible>true</Visible>
-        <Label>
-          <Caption>
-            <Value>&lt;undefined></Value>
-            <Font>
-              <Alignment/>
-            </Font>
-          </Caption>
-          <Background xsi:type="attribute:ColorDefinition">
-            <Transparency>0</Transparency>
-            <Red>255</Red>
-            <Green>255</Green>
-            <Blue>255</Blue>
-          </Background>
-          <Outline>
-            <Style>Solid</Style>
-            <Thickness>1</Thickness>
-            <Color>
-              <Transparency>255</Transparency>
-              <Red>0</Red>
-              <Green>0</Green>
-              <Blue>0</Blue>
-            </Color>
-            <Visible>false</Visible>
-          </Outline>
-          <Insets>
-            <Top>0.0</Top>
-            <Left>2.0</Left>
-            <Bottom>0.0</Bottom>
-            <Right>3.0</Right>
-          </Insets>
-          <Visible>false</Visible>
-        </Label>
-        <DataDefinition>
-          <Definition>row[&quot;DateValue&quot;]</Definition>
-        </DataDefinition>
-        <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
-        <DataPoint>
-          <Components>
-            <Type>Orthogonal_Value</Type>
-          </Components>
-          <Separator>, </Separator>
-        </DataPoint>
-        <LabelPosition>Outside</LabelPosition>
-        <Stacked>false</Stacked>
-      </Series>
-      <Series>
-        <Visible>true</Visible>
-        <Label>
-          <Caption>
-            <Value>&lt;undefined></Value>
-            <Font>
-              <Alignment/>
-            </Font>
-          </Caption>
-          <Background xsi:type="attribute:ColorDefinition">
-            <Transparency>0</Transparency>
-            <Red>255</Red>
-            <Green>255</Green>
-            <Blue>255</Blue>
-          </Background>
-          <Outline>
-            <Style>Solid</Style>
-            <Thickness>1</Thickness>
-            <Color>
-              <Transparency>255</Transparency>
-              <Red>0</Red>
-              <Green>0</Green>
-              <Blue>0</Blue>
-            </Color>
-            <Visible>false</Visible>
-          </Outline>
-          <Insets>
-            <Top>0.0</Top>
-            <Left>2.0</Left>
-            <Bottom>0.0</Bottom>
-            <Right>3.0</Right>
-          </Insets>
-          <Visible>false</Visible>
-        </Label>
-        <DataDefinition>
-          <Definition>row[&quot;DateValue&quot;]</Definition>
-        </DataDefinition>
-        <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
-        <DataPoint>
-          <Components>
-            <Type>Orthogonal_Value</Type>
-          </Components>
-          <Separator>, </Separator>
-        </DataPoint>
-        <LabelPosition>Outside</LabelPosition>
-        <Stacked>false</Stacked>
-      </Series>
-      <Series>
-        <Visible>true</Visible>
-        <Label>
-          <Caption>
-            <Value>&lt;undefined></Value>
-            <Font>
-              <Alignment/>
-            </Font>
-          </Caption>
-          <Background xsi:type="attribute:ColorDefinition">
-            <Transparency>0</Transparency>
-            <Red>255</Red>
-            <Green>255</Green>
-            <Blue>255</Blue>
-          </Background>
-          <Outline>
-            <Style>Solid</Style>
-            <Thickness>1</Thickness>
-            <Color>
-              <Transparency>255</Transparency>
-              <Red>0</Red>
-              <Green>0</Green>
-              <Blue>0</Blue>
-            </Color>
-            <Visible>false</Visible>
-          </Outline>
-          <Insets>
-            <Top>0.0</Top>
-            <Left>2.0</Left>
-            <Bottom>0.0</Bottom>
-            <Right>3.0</Right>
-          </Insets>
-          <Visible>false</Visible>
-        </Label>
-        <DataDefinition>
-          <Definition>row[&quot;DateValue&quot;]</Definition>
-        </DataDefinition>
-        <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
-        <DataPoint>
-          <Components>
-            <Type>Orthogonal_Value</Type>
-          </Components>
-          <Separator>, </Separator>
-        </DataPoint>
-        <LabelPosition>Outside</LabelPosition>
-        <Stacked>false</Stacked>
-      </Series>
-      <Series>
-        <Visible>true</Visible>
-        <Label>
-          <Caption>
-            <Value>&lt;undefined></Value>
-            <Font>
-              <Alignment/>
-            </Font>
-          </Caption>
-          <Background xsi:type="attribute:ColorDefinition">
-            <Transparency>0</Transparency>
-            <Red>255</Red>
-            <Green>255</Green>
-            <Blue>255</Blue>
-          </Background>
-          <Outline>
-            <Style>Solid</Style>
-            <Thickness>1</Thickness>
-            <Color>
-              <Transparency>255</Transparency>
-              <Red>0</Red>
-              <Green>0</Green>
-              <Blue>0</Blue>
-            </Color>
-            <Visible>false</Visible>
-          </Outline>
-          <Insets>
-            <Top>0.0</Top>
-            <Left>2.0</Left>
-            <Bottom>0.0</Bottom>
-            <Right>3.0</Right>
-          </Insets>
-          <Visible>false</Visible>
-        </Label>
-        <DataDefinition>
-          <Definition>row[&quot;DateValue&quot;]</Definition>
-        </DataDefinition>
-        <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
-        <DataPoint>
-          <Components>
-            <Type>Orthogonal_Value</Type>
-          </Components>
-          <Separator>, </Separator>
-        </DataPoint>
-        <LabelPosition>Outside</LabelPosition>
-        <Stacked>false</Stacked>
-      </Series>
-      <Series>
-        <Visible>true</Visible>
-        <Label>
-          <Caption>
-            <Value>&lt;undefined></Value>
-            <Font>
-              <Alignment/>
-            </Font>
-          </Caption>
-          <Background xsi:type="attribute:ColorDefinition">
-            <Transparency>0</Transparency>
-            <Red>255</Red>
-            <Green>255</Green>
-            <Blue>255</Blue>
-          </Background>
-          <Outline>
-            <Style>Solid</Style>
-            <Thickness>1</Thickness>
-            <Color>
-              <Transparency>255</Transparency>
-              <Red>0</Red>
-              <Green>0</Green>
-              <Blue>0</Blue>
-            </Color>
-            <Visible>false</Visible>
-          </Outline>
-          <Insets>
-            <Top>0.0</Top>
-            <Left>2.0</Left>
-            <Bottom>0.0</Bottom>
-            <Right>3.0</Right>
-          </Insets>
-          <Visible>false</Visible>
-        </Label>
-        <DataDefinition>
-          <Definition>row[&quot;DateValue&quot;]</Definition>
+          <Definition>row[&quot;VOName&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -3546,10 +2119,6 @@ if(dotpos > 0) {metricvalue = metricvalue.substring(0,dotpos+2);}&#xD;
         <GroupType>Text</GroupType>
         <AggregateExpression>Sum</AggregateExpression>
       </Grouping>
-      <Sorting>Ascending</Sorting>
-      <SortKey>
-        <Definition>row[&quot;DateValue&quot;]</Definition>
-      </SortKey>
     </SeriesDefinitions>
     <Orientation>Horizontal</Orientation>
     <LineAttributes>
@@ -3568,7 +2137,7 @@ if(dotpos > 0) {metricvalue = metricvalue.substring(0,dotpos+2);}&#xD;
         <Value>&lt;undefined></Value>
         <Font>
           <Alignment/>
-          <Rotation>45.0</Rotation>
+          <Rotation>0.0</Rotation>
         </Font>
         <Color>
           <Transparency>255</Transparency>
@@ -3601,11 +2170,8 @@ if(dotpos > 0) {metricvalue = metricvalue.substring(0,dotpos+2);}&#xD;
       </Insets>
       <Visible>true</Visible>
     </Label>
-    <FormatSpecifier xsi:type="attribute:DateFormatSpecifier">
-      <Type>Medium</Type>
-      <Detail>Date</Detail>
-    </FormatSpecifier>
     <LabelPosition>Below</LabelPosition>
+    <Staggered>false</Staggered>
     <MajorGrid>
       <LineAttributes>
         <Style>Solid</Style>
@@ -3669,21 +2235,25 @@ if(dotpos > 0) {metricvalue = metricvalue.substring(0,dotpos+2);}&#xD;
     <CategoryAxis>true</CategoryAxis>
     <Percent>false</Percent>
   </Axes>
-  <Orientation>Vertical</Orientation>
+  <Orientation>Horizontal</Orientation>
   <Rotation/>
 </model:ChartWithAxes>
 ]]></xml-property>
-                                <property name="outputFormat">JPG</property>
+                                <property name="outputFormat">SVG</property>
                                 <structure name="action">
                                     <property name="targetWindow">_self</property>
                                     <property name="linkType">drill-through</property>
                                     <property name="formatType">html</property>
                                     <property name="targetFileType">report-design</property>
-                                    <property name="reportName">UsageByUserForWeek.rptdesign</property>
+                                    <property name="reportName">UsageBySiteForVO1.rptdesign</property>
                                     <list-property name="paramBindings">
                                         <structure>
-                                            <property name="paramName">DisplayMetric</property>
-                                            <expression name="expression">params["DisplayMetric"]</expression>
+                                            <property name="paramName">StartDate</property>
+                                            <expression name="expression">params["StartDate"]</expression>
+                                        </structure>
+                                        <structure>
+                                            <property name="paramName">EndDate</property>
+                                            <expression name="expression">params["EndDate"]</expression>
                                         </structure>
                                         <structure>
                                             <property name="paramName">ReportTitle</property>
@@ -3695,6 +2265,7 @@ if(dotpos > 0) {metricvalue = metricvalue.substring(0,dotpos+2);}&#xD;
                                         </structure>
                                     </list-property>
                                 </structure>
+                                <property name="marginTop">0pt</property>
                                 <property name="height">600px</property>
                                 <property name="width">800px</property>
                                 <property name="refTemplateParameter">NewTemplateParameterDefinition</property>
@@ -3708,8 +2279,8 @@ if(dotpos > 0) {metricvalue = metricvalue.substring(0,dotpos+2);}&#xD;
                         <cell id="19">
                             <property name="colSpan">3</property>
                             <property name="rowSpan">1</property>
-                            <label name="ReportURL" id="408" extends="reportLib.ReportURL"/>
-                            <label name="ShowQuery" id="409" extends="reportLib.ShowQuery"/>
+                            <label name="ReportURL" id="405" extends="reportLib.ReportURL"/>
+                            <label name="ShowQuery" id="406" extends="reportLib.ShowQuery"/>
                         </cell>
                     </row>
                 </footer>

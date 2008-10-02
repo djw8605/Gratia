@@ -1,16 +1,16 @@
 ﻿DELIMITER $$
 
-DROP PROCEDURE IF EXISTS `gratia_itb`.`reports` $$
-CREATE DEFINER=`gratia`@`%.fnal.gov` PROCEDURE `reports`(userName varchar(64), userRole varchar(64),
+DROP PROCEDURE IF EXISTS `gratia_gratiax21`.`reports` $$
+CREATE DEFINER=`gratia`@`%.fnal.gov` PROCEDURE `reports`(
+				        userName varchar(64), userRole varchar(64),
                 fromdate varchar(64), todate varchar(64),
                 timeUnit varchar(64), dateGrouping varchar(64),
                 groupBy varchar(128), orderBy varchar(128),
                 resourceType varchar(64),
-                VOs varchar(256),
-                Sites varchar(256),
-                Probes varchar(256),
+                VOs varchar(1024),
+                Sites varchar(1024),
+                Probes varchar(1024),
                 Ranked varchar(5),
-                JobUsageRecord varchar(5),
                 selType varchar(5)
                 )
     READS SQL DATA
@@ -29,16 +29,26 @@ begin
   END IF;
 
   IF fromdate IS NOT NULL then
-    set @ifrom := concat_ws('','and VOProbeSummary.EndTIme >=''', TRIM(fromdate), '''');
-    IF todate IS NULL then
-       set @ifrom := concat_ws('','and VOProbeSummary.EndTIme =''', TRIM(fromdate), '''');
-    END IF;
+    set @thisFromDate := fromdate;
+    select STR_TO_DATE(fromdate, '%M %e, %Y') into @testDate;
+    if @testDate IS NOT NULL then
+      select  date_format(@testDate, '%Y-%m-%d') into @thisFromDate;
+    end if;
+
+    set @ifrom := concat_ws('','and VOProbeSummary.EndTIme >=''', TRIM(@thisFromDate), '''');
+  ELSEIF todate IS NULL then
+      set @ifrom := concat_ws('','and VOProbeSummary.EndTIme >=''', SUBDATE(CURDATE(), 800),'''');
   ELSE
-    set @ifrom := concat_ws('','and VOProbeSummary.EndTIme >=''', SUBDATE(CURDATE(), 800), '''');
+      set @ifrom := '';
   END IF;
 
   IF todate IS NOT NULL then
-    set @ito := concat_ws('','and VOProbeSummary.EndTime <= ''', TRIM(todate), '''');
+    set @thisToDate := todate;
+    select STR_TO_DATE(todate, '%M %e, %Y') into @testDate;
+    if @testDate IS NOT NULL then
+      select  date_format(@testDate, '%Y-%m-%d') into @thisToDate;
+    end if;
+    set @ito := concat_ws('','and VOProbeSummary.EndTime <= ''', TRIM(@thisToDate),'''');
   ELSE
     set @ito := '';
   END IF;
@@ -105,23 +115,29 @@ begin
   END IF;
 
   set @iVOs := '';
+  set @rVOs := '';
   IF VOs IS NOT NULL then
-    IF STRCMP(LOWER(TRIM(VOs)), 'null') != 0  then
+    IF TRIM(VOs) != '' then
       set @iVOs := concat_ws('', 'and VOProbeSummary.VOName', @iselTypeA, '',TRIM(VOs), @iselTypeB, '');
+      set @rVOs := concat_ws('', 'and V.VOName', @iselTypeA, '',TRIM(VOs), @iselTypeB, '');
     END IF;
   END IF;
 
   set @iSites := '';
+  set @rSites := '';
   IF Sites IS NOT NULL then
-    IF STRCMP(LOWER(TRIM(Sites)), 'null') != 0  then
+    IF TRIM(Sites) != '' then
       set @iSites := concat_ws('', 'and Site.SiteName', @iselTypeA, '',TRIM(Sites), @iselTypeB, '');
+      set @rSites := concat_ws('', 'and S.SiteName', @iselTypeA, '',TRIM(Sites), @iselTypeB, '');
     END IF;
   END IF;
 
   set @iProbes := '';
+  set @rProbes := '';
   IF Probes IS NOT NULL then
-    IF STRCMP(LOWER(TRIM(Probes)), 'null') != 0  then
-      set @iProbes := concat_ws('', 'and SOProbeSummary.ProbeName', @iselTypeA, '',TRIM(Probes), @iselTypeB, '');
+    IF TRIM(Probes) != '' then
+      set @iProbes := concat_ws('', 'and VOProbeSummary.ProbeName', @iselTypeA, '',TRIM(Probes), @iselTypeB, '');
+      set @rProbes := concat_ws('', 'and P.ProbeName', @iselTypeA, '',TRIM(Probes), @iselTypeB, '');
     END IF;
   END IF;
 
@@ -136,6 +152,9 @@ begin
            '        WHERE V.ProbeName = P.probename and P.siteid = S.Siteid',
            '        and (V.EndTime) >= (''', fromdate, ''')',
            '        and (V.EndTime) <= (''', todate, ''')',
+           ' ', @rVOs,
+           ' ', @rSites,
+           ' ', @rProbes,
            '        GROUP BY sitenamex',
            '        ORDER BY walldurationx desc) as foox) as foo', ','
            );
@@ -153,8 +172,7 @@ begin
   select generateWhereClause(@iuser,@irole,@mywhereclause) into @mywhereclause;
   call parse(@iuser,@name,@key,@vo);
 
-    IF JobUsageRecord IS NULL then
-        set @sql := concat_ws('',
+  set @sql := concat_ws('',
            ' select ', @final_rank,
            ' Site.SiteName as SiteName,',
            ' sum(VOProbeSummary.WallDuration)/', @iunit, ' as WallDuration,',
@@ -174,38 +192,13 @@ begin
            ' ', @ito,
            ' ', @iVOs,
            ' ', @iSites,
+           ' ', @iProbes,
            ' ', @myresourceclause,
            ' ', @mywhereclause,
            ' ', @igroupBy,
            ' ', @iorderBy,
            ';'
         );
-      ELSE
-        set @ifrom := TRIM(fromdate);
-        set @ito := TRIM(todate);
-        set @iSites := TRIM(Sites);
-        set @iProbes := TRIM(Probes);
-        set @sql := concat_ws('',
-            ' select Site.SiteName as SiteName,',
-            ' JobUsageRecord_Report.JobName as JobName,',
-            ' JobUsageRecord_Report.ProbeName as ProbeName,',
-            ' JobUsageRecord_Report.WallDuration as WallDuration,',
-            ' (JobUsageRecord_Report.CpuUserDuration + JobUsageRecord_Report.CpuSystemDuration)/',@iunit, ' as cpu,',
-            ' JobUsageRecord_Report.Njobs as Njobs,',
-            ' JobUsageRecord_Report.VOName as VOName,',
-            ' JobUsageRecord_Report.CommonName as UserName',
-            ' from JobUsageRecord_Report, Site, Probe',
-            ' where Probe.siteid = Site.siteid',
-            ' and JobUsageRecord_Report.ProbeName = Probe.probename',
-            ' and JobUsageRecord_Report.EndTIme >=''', @ifrom, '''',
-            ' and JobUsageRecord_Report.EndTIme <=''', @ito, '''',
-            ' and (''', @iProbes, ''' = ''All'' or  JobUsageRecord_Report.ProbeName = ''', @iProbes, ''')',
-            ' and (''', @iSites, '''  = ''All'' or  Site.SiteName = ''', @iSites, ''')',
-            ' ', @myresourceclause,
-            ' ', @mywhereclause,
-            ';'
-        );
-      END IF;
 
     insert into trace(pname,userkey,user,role,vo,p1,p2,p3,p4,p5,p6,p7,data)
         values('reports',@key,@iuser,@irole,@vo,

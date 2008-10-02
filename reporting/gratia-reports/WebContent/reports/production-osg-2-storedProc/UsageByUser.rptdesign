@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<report xmlns="http://www.eclipse.org/birt/2005/design" version="3.2.14" id="1">
-    <property name="createdBy">Eclipse BIRT Designer Version 2.0.1 Build &lt;20060222-1204></property>
+<report xmlns="http://www.eclipse.org/birt/2005/design" version="3.2.17" id="1">
+    <property name="createdBy">Eclipse BIRT Designer Version 2.3.1.v20080911 Build &lt;2.3.1.v20080922-1151></property>
     <property name="units">in</property>
     <list-property name="propertyBindings">
         <structure>
@@ -56,7 +56,7 @@
             <property name="odaDriverClass">com.mysql.jdbc.Driver</property>
             <property name="odaURL">jdbc:mysql://gratia-db01.fnal.gov:3320/gratia_itb</property>
             <property name="odaUser">reader</property>
-            <encrypted-property name="odaPassword">cmVhZGVy</encrypted-property>
+            <encrypted-property name="odaPassword" encryptionID="base64">cmVhZGVy</encrypted-property>
         </oda-data-source>
     </data-sources>
     <data-sets>
@@ -66,20 +66,25 @@
             <list-property name="parameters">
                 <structure>
                     <property name="name">UserName</property>
+                    <property name="paramName">UserName</property>
                     <property name="dataType">string</property>
                     <property name="position">1</property>
                     <expression name="defaultValue">params["UserName"]</expression>
                     <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
                 </structure>
                 <structure>
                     <property name="name">UserRole</property>
+                    <property name="paramName">UserRole</property>
                     <property name="dataType">string</property>
                     <property name="position">2</property>
                     <expression name="defaultValue">params["UserRole"]</expression>
                     <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
                 </structure>
                 <structure>
                     <property name="name">StartDate</property>
+                    <property name="paramName">StartDate</property>
                     <property name="dataType">string</property>
                     <property name="position">3</property>
                     <expression name="defaultValue">'2006-03-01'</expression>
@@ -90,6 +95,7 @@
                 </structure>
                 <structure>
                     <property name="name">EndDate</property>
+                    <property name="paramName">EndDate</property>
                     <property name="dataType">string</property>
                     <property name="position">4</property>
                     <expression name="defaultValue">'2099-12-31'</expression>
@@ -140,6 +146,7 @@
                 </structure>
                 <structure>
                     <property name="name">VOs</property>
+                    <property name="paramName">VOs</property>
                     <property name="dataType">string</property>
                     <property name="position">10</property>
                     <expression name="defaultValue">params["VOs"]''</expression>
@@ -171,23 +178,15 @@
                     <property name="isOutput">false</property>
                 </structure>
                 <structure>
-                    <property name="name">jobUsageRecord</property>
+                    <property name="name">selType</property>
                     <property name="dataType">string</property>
                     <property name="position">14</property>
                     <expression name="defaultValue">null</expression>
                     <property name="isInput">true</property>
                     <property name="isOutput">false</property>
                 </structure>
-                <structure>
-                    <property name="name">selType</property>
-                    <property name="dataType">string</property>
-                    <property name="position">15</property>
-                    <expression name="defaultValue">null</expression>
-                    <property name="isInput">true</property>
-                    <property name="isOutput">false</property>
-                </structure>
             </list-property>
-            <property name="queryText">call reports(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)</property>
+            <property name="queryText">call reports(?,?,?,?,?,?,?,?,?,?,?,?,?,?)</property>
         </oda-data-set>
     </data-sets>
     <styles>
@@ -946,7 +945,7 @@ function beforeDrawAxisTitle( axis, label, context )
         </Series>
         <Grouping>
           <Enabled>false</Enabled>
-          <GroupingInterval>2</GroupingInterval>
+          <GroupingInterval>2.0</GroupingInterval>
           <GroupType>Text</GroupType>
           <AggregateExpression>Sum</AggregateExpression>
         </Grouping>
@@ -1218,7 +1217,7 @@ function beforeDrawAxisTitle( axis, label, context )
       </Series>
       <Grouping>
         <Enabled>false</Enabled>
-        <GroupingInterval>2</GroupingInterval>
+        <GroupingInterval>2.0</GroupingInterval>
         <GroupType>Text</GroupType>
         <AggregateExpression>Sum</AggregateExpression>
       </Grouping>

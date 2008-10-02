@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<library xmlns="http://www.eclipse.org/birt/2005/design" version="3.2.14" id="1">
-    <property name="createdBy">Eclipse BIRT Designer Version 2.0.1 Build &lt;20060222-1204></property>
+<library xmlns="http://www.eclipse.org/birt/2005/design" version="3.2.17" id="1">
+    <property name="createdBy">Eclipse BIRT Designer Version 2.3.1.v20080911 Build &lt;2.3.1.v20080922-1151></property>
     <property name="units">in</property>
     <list-property name="propertyBindings">
         <structure>
@@ -315,6 +315,18 @@
                         <property name="pattern">Unformatted</property>
                     </structure>
                 </scalar-parameter>
+                <scalar-parameter name="Probes" id="406">
+                    <property name="hidden">true</property>
+                    <property name="valueType">static</property>
+                    <property name="dataType">string</property>
+                    <property name="paramType">simple</property>
+                    <property name="controlType">text-box</property>
+                    <property name="defaultValue">null</property>
+                    <property name="distinct">true</property>
+                    <structure name="format">
+                        <property name="category">Unformatted</property>
+                    </structure>
+                </scalar-parameter>
                 <scalar-parameter name="SelectSiteName" id="101">
                     <property name="valueType">static</property>
                     <property name="dataType">string</property>
@@ -454,19 +466,19 @@
             <property name="odaDriverClass">com.mysql.jdbc.Driver</property>
             <property name="odaURL">jdbc:mysql://gratia-vm02.fnal.gov:3320/gratia_jeffmack</property>
             <property name="odaUser">reader</property>
-            <encrypted-property name="odaPassword">cmVhZGVy</encrypted-property>
+            <encrypted-property name="odaPassword" encryptionID="base64">cmVhZGVy</encrypted-property>
         </oda-data-source>
         <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="gratia-db01_gratia" id="386">
             <property name="odaDriverClass">com.mysql.jdbc.Driver</property>
             <property name="odaURL">jdbc:mysql://gratia-db01.fnal.gov:3320/gratia</property>
             <property name="odaUser">reader</property>
-            <encrypted-property name="odaPassword">cmVhZGVy</encrypted-property>
+            <encrypted-property name="odaPassword" encryptionID="base64">cmVhZGVy</encrypted-property>
         </oda-data-source>
         <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="gratia-db01_gratia_itb" id="365">
             <property name="odaDriverClass">com.mysql.jdbc.Driver</property>
             <property name="odaURL">jdbc:mysql://gratia-db01.fnal.gov:3320/gratia_itb</property>
             <property name="odaUser">reader</property>
-            <encrypted-property name="odaPassword">cmVhZGVy</encrypted-property>
+            <encrypted-property name="odaPassword" encryptionID="base64">cmVhZGVy</encrypted-property>
         </oda-data-source>
     </data-sources>
     <data-sets>
@@ -572,11 +584,8 @@
             <property name="fontFamily">sans-serif</property>
             <property name="fontSize">9pt</property>
             <property name="textAlign">center</property>
-            <expression name="valueExpr">if (params["VOs"] != null){
-   if (params["VOs"] != "null") {"VO = "+ params["VOs"]}
-   else{"All VO's"}
-   }
-else {"All VO's"}</expression>
+            <expression name="valueExpr">if (params["VOs"] != "null") {"VO = "+ params["VOs"].value}
+else{"All VO's"}</expression>
             <property name="contentType">html</property>
         </text-data>
         <text-data name="ForDate" id="97">
@@ -660,11 +669,8 @@ else {"All VO's"}</expression>
             <property name="fontFamily">sans-serif</property>
             <property name="fontSize">9pt</property>
             <property name="textAlign">center</property>
-            <expression name="valueExpr">if (params["Sites"] != null){
-   if (params["Sites"] != "null") {"Site = "+ params["Sites"]}
-   else{"All SItes"}
-   }
-else {"All SItes"}</expression>
+            <expression name="valueExpr">if (params["Sites"] != "null") {"Site = "+ params["Sites"].value}
+else{"All SItes"}</expression>
             <property name="contentType">html</property>
         </text-data>
     </components>
