@@ -161,7 +161,7 @@ public class ReportParameters
 
 					// Get the information only if this is the element we are looking for
 
-						if (paramType.indexOf("parameter-group") > -1)
+						if (paramType.compareTo("parameter-group") == 0)
 						{
 							for (Iterator gIterator = pType.elementIterator(); gIterator.hasNext();)
 							{
@@ -170,17 +170,17 @@ public class ReportParameters
 								{
 									Element groupType = (Element) ggIter.next();
 									String gType = groupType.getName();
-									if  (gType.indexOf("scalar-parameter") > -1 )
+									if  (gType.compareTo("scalar-parameter") == 0 )
 									{
 										String scalarName = groupType.attributeValue("name").trim();
-										if ((scalarName.indexOf(lookForElement) > -1) || (paramName.indexOf(lookForElement) > -1))
+										if ((scalarName.compareTo(lookForElement) == 0) || (paramName.compareTo(lookForElement) == 0))
 										{
 											addParameterInfo(groupType);
 										}
 									} // "scalar-parameter"
 								} // "for (Iterator ggIter..."
 							} // "for (Iterator gIterator..."
-						}else if ((paramType.indexOf("scalar-parameter") > -1 ) && (paramName.indexOf(lookForElement) > -1))
+						}else if ((paramType.compareTo("scalar-parameter") == 0 ) && (paramName.compareTo(lookForElement) == 0 ))
 						{
 							addParameterInfo(pType);
 						} // "if (paramType == "scalar-parameter")"
