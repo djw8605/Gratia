@@ -221,17 +221,17 @@ public class SystemAdministration extends HttpServlet {
 
         if (listenerStatus.equals("Active")) {
             html = html.replaceAll("#listenerstatus#",
-                                   "<font color=\"green\"><strong>ACTIVE</strong</font>");
+                                   "<font color=\"green\"><strong>ACTIVE</strong></font>");
             html = html.replaceAll("#listenercomment#",
                                    "<a href=\"systemadministration.html?action=stopDatabaseUpdateThreads\"><strong>Stop</strong></a>.");
         } else if (listenerStatus.equals("SAFE")) {
             html = html.replaceAll("#listenerstatus#",
-                                   "<font color=\"fuchsia\"><strong>SAFE</strong</font>");
+                                   "<font color=\"fuchsia\"><strong>SAFE</strong></font>");
             html = html.replaceAll("#listenercomment#",
                                    "See <strong>Global Operational Status</strong>, above.");
         } else if (listenerStatus.equals("Stopped")) {
             html = html.replaceAll("#listenerstatus#",
-                                   "<font color=\"red\"><strong>STOPPED</strong</font>");
+                                   "<font color=\"red\"><strong>STOPPED</strong></font>");
             html = html.replaceAll("#listenercomment#",
                                    "<a href=\"systemadministration.html?action=startDatabaseUpdateThreads\"><strong>Start</strong></a>.");
         } else {
@@ -243,17 +243,17 @@ public class SystemAdministration extends HttpServlet {
 
         if (replicationStatus.equals("Active")) {
             html = html.replaceAll("#replicationstatus#",
-                                   "<font color=\"green\"><strong>ACTIVE</strong</font>");
+                                   "<font color=\"green\"><strong>ACTIVE</strong></font>");
             html = html.replaceAll("#replicationcomment#",
                                    "<a href=\"systemadministration.html?action=stopReplication\"><strong>Stop</strong></a>.");
         } else if (replicationStatus.equals("SAFE")) {
             html = html.replaceAll("#replicationstatus#",
-                                   "<font color=\"fuchsia\"><strong>SAFE</strong</font>");
+                                   "<font color=\"fuchsia\"><strong>SAFE</strong></font>");
             html = html.replaceAll("#replicationcomment#",
                                    "See <strong>Global Operational Status</strong>, above.");
         } else if (replicationStatus.equals("Stopped")) {
             html = html.replaceAll("#replicationstatus#",
-                                   "<font color=\"red\"><strong>STOPPED</strong</font>");
+                                   "<font color=\"red\"><strong>STOPPED</strong></font>");
             html = html.replaceAll("#replicationcomment#",
                                    "<a href=\"systemadministration.html?action=startReplication\"><strong>Start</strong></a>.");
         } else {
@@ -265,17 +265,17 @@ public class SystemAdministration extends HttpServlet {
 
         if (servletStatus.equals("Active")) {
             html = html.replaceAll("#servletstatus#",
-                                   "<font color=\"green\"><strong>ACTIVE</strong</font>");
+                                   "<font color=\"green\"><strong>ACTIVE</strong></font>");
             html = html.replaceAll("#servletcomment#",
                                    "<a href=\"systemadministration.html?action=disableServlet\"><strong>Stop</strong></a>.");
         } else if (servletStatus.equals("SAFE")) {
             html = html.replaceAll("#servletstatus#",
-                                   "<font color=\"fuchsia\"><strong>SAFE</strong</font>");
+                                   "<font color=\"fuchsia\"><strong>SAFE</strong></font>");
             html = html.replaceAll("#servletcomment#",
                                    "See <strong>Global Operational Status</strong>, above.");
         } else if (servletStatus.equals("Stopped")) {
             html = html.replaceAll("#servletstatus#",
-                                   "<font color=\"red\"><strong>STOPPED</strong</font>");
+                                   "<font color=\"red\"><strong>STOPPED</strong></font>");
             html = html.replaceAll("#servletcomment#",
                                    "<a href=\"systemadministration.html?action=enableServlet\"><strong>Start</strong></a>.");
         } else {
