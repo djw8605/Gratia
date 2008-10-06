@@ -12,79 +12,102 @@ CREATE PROCEDURE `reportsRanked`(
     READS SQL DATA
 begin
 
+
+  set @iuser := concat_ws('','GratiaUser|', UNIX_TIMESTAMP(), '|Unknown');
+  IF userName IS NOT NULL then
+    IF (TRIM(userName) != '') AND (TRIM(userName) != 'null') then
+      set @iuser := TRIM(userName);
+    END IF;
+  END IF;
+
+  set @irole := 'GratiaUser';
+  IF userRole IS NOT NULL then
+    IF (TRIM(userRole) != '') AND (TRIM(userRole) != 'null') then
+      set @irole := TRIM(userRole);
+    END IF;
+  END IF;
+
   IF fromdate IS NOT NULL then
-    set @thisFromDate := fromdate;
-    select STR_TO_DATE(fromdate, '%M %e, %Y') into @testDate;
-    IF @testDate IS NOT NULL then
-      select  date_format(@testDate, '%Y-%m-%d') into @thisFromDate;
+    IF (TRIM(fromdate) != '') AND (TRIM(fromdate) != 'null') then
+      set @thisFromDate := fromdate;
+      select STR_TO_DATE(fromdate, '%M %e, %Y') into @testDate;
+      IF @testDate IS NOT NULL then
+        select  date_format(@testDate, '%Y-%m-%d') into @thisFromDate;
+      END IF;
     END IF;
   END IF;
   
   IF todate IS NOT NULL then
-    set @thisToDate := todate;
-    select STR_TO_DATE(todate, '%M %e, %Y') into @testDate;
-    if @testDate IS NOT NULL then
-      select  date_format(@testDate, '%Y-%m-%d') into @thisToDate;
-    end if;
-  END IF;
-  
-  IF dateGrouping IS NOT NULL then
-    IF STRCMP(LOWER(TRIM(dateGrouping)), 'day') = 0 then
-      set @idatr := '%Y-%m-%d';
-      set @idats := '%Y-%m-%d';
-    ELSEIF STRCMP(LOWER(TRIM(dateGrouping)),'week') = 0 then
-      set @idatr := '%x-%v Monday';
-      set @idats := '%x-%v %W';
-    ELSEIF STRCMP(LOWER(TRIM(dateGrouping)), 'month') = 0  then
-      set @idatr := '%Y-%m-01';
-      set @idats := '%Y-%m-%d';
-    ELSEIF STRCMP(LOWER(TRIM(dateGrouping)), 'year') = 0  then
-      set @idatr := '%Y-01-01';
-      set @idats := '%Y-%m-%d';
-    ELSE
-      set @idatr := '%Y-%m-%d';
-      set @idats := '%Y-%m-%d';
+    IF (TRIM(todate) != '') AND (TRIM(todate) != 'null') then
+      set @thisToDate := todate;
+      select STR_TO_DATE(todate, '%M %e, %Y') into @testDate;
+      if @testDate IS NOT NULL then
+        select  date_format(@testDate, '%Y-%m-%d') into @thisToDate;
+      END IF;
     END IF;
-  ELSE
-    set @idatr := '%Y-%m-%d';
-    set @idats := '%Y-%m-%d';
   END IF;
 
 
+  set @iunit := '3600';
   IF timeUnit IS NOT NULL then
-    set @iunit := TRIM(timeUnit);
-  ELSE
-    set @iunit := '3600';
+    IF (TRIM(timeUnit) != '') AND (TRIM(timeUnit) != 'null') then
+      set @iunit := TRIM(timeUnit);
+    END IF;
   END IF;
 
+
+  set @idatr := '%Y-%m-%d';
+  set @idats := '%Y-%m-%d';
+  set @igroup := 'day';
+  IF dateGrouping IS NOT NULL then
+    IF (TRIM(dateGrouping) != '') AND (TRIM(dateGrouping) != 'null') then
+      set @igroup := TRIM(dateGrouping);
+      IF STRCMP(LOWER(TRIM(dateGrouping)), 'day') = 0 then
+        set @idatr := '%Y-%m-%d';
+        set @idats := '%Y-%m-%d';
+      ELSEIF STRCMP(LOWER(TRIM(dateGrouping)),'week') = 0 then
+        set @idatr := '%x-%v Monday';
+        set @idats := '%x-%v %W';
+      ELSEIF STRCMP(LOWER(TRIM(dateGrouping)), 'month') = 0  then
+        set @idatr := '%Y-%m-01';
+        set @idats := '%Y-%m-%d';
+      ELSEIF STRCMP(LOWER(TRIM(dateGrouping)), 'year') = 0  then
+        set @idatr := '%Y-01-01';
+        set @idats := '%Y-%m-%d';
+      END IF;
+    END IF;
+  END IF;
+
+  set @itype := 'batch';
   IF resourceType IS NOT NULL then
-    set @itype := TRIM(resourceType);
-  ELSE
-    set @itype := 'batch';
+    IF (TRIM(resourceType) != '') AND (TRIM(resourceType) != 'null') then
+      set @itype := TRIM(resourceType);
+    END IF;
   END IF;
 
+  set @imetric := 'WallDuration';
   IF metric IS NOT NULL then
-    set @imetric := TRIM(metric);
-  ELSE
-    set @imetric := '';
+    IF (TRIM(metric) != '') AND (TRIM(metric) != 'null') then
+      set @imetric := TRIM(metric);
+    END IF;
   END IF;
 
+  set @iselTypeA := '=''';
+  set @iselTypeB := '''';
   IF selType IS NOT NULL then
     IF selType = 'NOT' then
       set @iselTypeA := ' NOT IN ';
       set @iselTypeB := '';
-    ELSE
+    ELSEIF selType = 'IN' then
       set @iselTypeA := ' IN ';
       set @iselTypeB := '';
     END IF;
-  ELSE
-    set @iselTypeA := '=''';
-    set @iselTypeB := '''';
   END IF;
+
 
   set @iselValues := '';
   IF selValues IS NOT NULL then
-    IF TRIM(selValues) != '' then
+    IF (TRIM(selValues) != '') AND (TRIM(selValues) != 'null') then
       set @iselValues := concat_ws('', 'and VO.VOName', @iselTypeA, '',TRIM(selValues), @iselTypeB, '');
     END IF;
   END IF;
@@ -95,9 +118,9 @@ begin
   where SystemProplist.car = 'use.report.authentication';
   select Role.whereclause into @mywhereclause from Role
     where Role.role = userRole;
-  select generateWhereClause(userName,userRole,@mywhereclause)
+  select generateWhereClause(@iuserName,@iuserRole,@mywhereclause)
     into @mywhereclause;
-  call parse(userName,@name,@key,@vo);
+  call parse(@iuserName,@name,@key,@vo);
   select sysdate() into @query_start;
 
 if @imetric = 'SiteCount' then
@@ -147,7 +170,6 @@ if @imetric = 'SiteCount' then
 else
     set @sql :=
              concat_ws('',
-                 ' select final_rank, VOname, DateValue, WallDuration, cpu, Njobs from (',
                  ' select final_rank,',
                  ' zVOProbeSummary.zVOName as VOName,',
                  ' zVOProbeSummary.zDateValue as DateValue,',
@@ -189,7 +211,6 @@ else
                  ' WHERE zVOProbeSummary.zVOName = foo.oVOName',
                  ' GROUP by DateValue, VOName',
                  ' ORDER by final_rank, VOName, DateValue',
-                 ') as realquery',
                  ';'
               );
 end if;
