@@ -67,6 +67,11 @@ public class GratiaBirtReportEH extends ReportEventAdapter {
 		// out.flush();
 
 		String[] words = param.split (";");
+		
+		// If the first value is " ALL" then return an empty string
+		if (words[0].trim().compareToIgnoreCase("ALL") == 0)
+			return "";
+		
 		String outParam = "(";
 		for (int i=0; i < words.length; i++)
 		{
