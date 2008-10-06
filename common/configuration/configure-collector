@@ -171,11 +171,15 @@ GetOptions(\%options, "java-home|j=s",
            "prefix|p=s",
            "db-root|d=s",
            "collector-info|c=s@",
+           "obtain-config-item=s@",
+           "obtain-properties-item=s@",
            "help|h|\?") or pod2usage(-exitval => 2);
 
 pod2usage(-exitval => 1, -verbose => 3) if $options{help};
 
-unless (exists $options{"java-home"}) {
+unless (exists $options{"java-home"} or
+        exists $options{"obtain-config-item"} or
+        exists $options{"obtain-properties-item"}) {
 	if (-d $default_java_home) {
 		print STDERR "INFO: using default JAVA_HOME $default_java_home\n";
 		$options{"java-home"} = $default_java_home;
@@ -273,6 +277,9 @@ foreach my $config (@instance_list) {
 
   # Next if failed requirements.
   next if $requirements_error;
+
+  # Maybe print requested config information and exit
+  maybe_print_config_info($config, $config_ref) and exit(1);
 
   # Check and (maybe) override remote_host setting
   verify_remote_host_setting($config, $config_ref);
@@ -729,6 +736,37 @@ sub verify_remote_host_setting {
       unless exists $collector_config->{collector_host};
 }
 
+sub maybe_print_config_info {
+  my ($instance_name, $collector_config) = @_;
+  my $printed_info = 0;
+  if ($options{"obtain-config-item"} and scalar @{$options{"obtain-config-item"}}) {
+    foreach my $item (@{$options{"obtain-config-item"}}) {
+      if (exists ($collector_config->{$item})) {
+        ++$printed_info;
+        print "config: ",
+          $item,
+            " = ",
+              $collector_config->{$item},
+                "\n";
+      }
+    }
+  }
+  if ($options{"obtain-properties-item"} and scalar @{$options{"obtain-properties-item"}}) {
+    foreach my $item (@{$options{"obtain-properties-item"}}) {
+      if (exists ($collector_config->{"properties.attributes"}->{$item})) {
+        ++$printed_info;
+        print "property: ",
+          $item,
+            " = ",
+              $collector_config->{"properties.attributes"}->{$item},
+                "\n";
+      }
+    }
+  }
+  return $printed_info;
+}
+
+
 use File::Find;
 my (@found_files, $list_file);
 sub wanted {
@@ -837,7 +875,21 @@ The DB (not system) root password.
 =item B<--use-ssl>
 
 
-Configure tomcat to open the SSL port (default is no).
+Configure tomcat to open the SSL port (default is yes).
+
+=item B<--obtain-config-item> I<config-item>
+
+
+Print the specified configuration item to be used for the chosen
+instance. Does not continue with the install.
+
+
+=item B<--obtain-properties-item> I<properties-item>
+
+
+Print the specified service-configuration.properties item to be used for
+the chosen instance. Does not continue with the install.
+
 
 =head1 AUTHOR
 
