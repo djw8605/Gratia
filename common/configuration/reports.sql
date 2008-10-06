@@ -16,108 +16,111 @@ CREATE PROCEDURE `reports`(
     READS SQL DATA
 begin
 
-  IF userName IS NOT NULL then
-    set @iuser := TRIM(userName);
-  ELSE
-    set @iuser := concat_ws('','GratiaUser|', UNIX_TIMESTAMP(), '|Unknown');
-  END IF;
-
-  IF userRole IS NOT NULL then
-    set @irole := TRIM(userRole);
-  ELSE
-    set @irole := 'GratiaUser';
-  END IF;
-
-  IF fromdate IS NOT NULL then
-    set @thisFromDate := fromdate;
-    select STR_TO_DATE(fromdate, '%M %e, %Y') into @testDate;
-    if @testDate IS NOT NULL then
-      select  date_format(@testDate, '%Y-%m-%d') into @thisFromDate;
-    end if;
-
-    set @ifrom := concat_ws('','and VOProbeSummary.EndTIme >=''', TRIM(@thisFromDate), '''');
-  ELSEIF todate IS NULL then
-      set @ifrom := concat_ws('','and VOProbeSummary.EndTIme >=''', SUBDATE(CURDATE(), 800),'''');
-  ELSE
-      set @ifrom := '';
-  END IF;
-
-  IF todate IS NOT NULL then
-    set @thisToDate := todate;
-    select STR_TO_DATE(todate, '%M %e, %Y') into @testDate;
-    if @testDate IS NOT NULL then
-      select  date_format(@testDate, '%Y-%m-%d') into @thisToDate;
-    end if;
-    set @ito := concat_ws('','and VOProbeSummary.EndTime <= ''', TRIM(@thisToDate),'''');
-  ELSE
-    set @ito := '';
-  END IF;
-
-  IF timeUnit IS NOT NULL then
-    set @iunit := TRIM(timeUnit);
-  ELSE
-    set @iunit := '3600';
-  END IF;
-
-  IF dateGrouping IS NOT NULL then
-    set @igroup := dateGrouping;
-    IF STRCMP(LOWER(TRIM(dateGrouping)), 'day') = 0 then
-      set @idatr := '%Y-%m-%d';
-      set @idats := '%Y-%m-%d';
-    ELSEIF STRCMP(LOWER(TRIM(dateGrouping)),'week') = 0 then
-      set @idatr := '%x-%v Monday';
-      set @idats := '%x-%v %W';
-    ELSEIF STRCMP(LOWER(TRIM(dateGrouping)), 'month') = 0  then
-      set @idatr := '%Y-%m-01';
-      set @idats := '%Y-%m-%d';
-    ELSEIF STRCMP(LOWER(TRIM(dateGrouping)), 'year') = 0  then
-      set @idatr := '%Y-01-01';
-      set @idats := '%Y-%m-%d';
-    ELSE
-      set @idatr := '%Y-%m-%d';
-      set @idats := '%Y-%m-%d';
+  set @iuser := concat_ws('','GratiaUser|', UNIX_TIMESTAMP(), '|Unknown');
+  IF userName IS NOT NULL THEN
+    IF (TRIM(userName) != '') AND (TRIM(userName) != 'null') THEN
+      set @iuser := TRIM(userName);
     END IF;
-  ELSE
-    set @idatr := '%Y-%m-%d';
-    set @idats := '%Y-%m-%d';
-    set @igroup := 'day';
   END IF;
 
-  IF groupBy IS NOT NULL then
-    set @igroupBy := concat_ws('', 'group by ', TRIM(groupBy));
-  ELSE
-    set @igroupBy := 'group by DateValue, UserName, SiteName, VOName';
+  set @irole := 'GratiaUser';
+  IF userRole IS NOT NULL THEN
+    IF (TRIM(userRole) != '') AND (TRIM(userRole) != 'null') THEN
+      set @irole := TRIM(userRole);
+    END IF;
   END IF;
 
-  IF orderBy IS NOT NULL then
-    set @iorderBy := concat_ws('', 'order by ', TRIM(orderBy));
-  ELSE
-    set @iorderBy := 'order by UserName, SiteName, VOName, DateValue';
+  set @ifrom := concat_ws('','and VOProbeSummary.EndTIme >=''', SUBDATE(CURDATE(), 800),'''');
+  IF fromdate IS NOT NULL THEN
+    IF (TRIM(fromdate) != '') AND (TRIM(fromdate) != 'null') THEN
+      set @thisFromDate := fromdate;
+      select STR_TO_DATE(fromdate, '%M %e, %Y') into @testDate;
+      if @testDate IS NOT NULL THEN
+        select  date_format(@testDate, '%Y-%m-%d') into @thisFromDate;
+      end if;
+      set @ifrom := concat_ws('','and VOProbeSummary.EndTIme >=''', TRIM(@thisFromDate), '''');
+    END IF;
   END IF;
 
-  IF resourceType IS NOT NULL then
-    set @itype := TRIM(resourceType);
-  ELSE
-    set @itype := 'batch';
+  set @ito := '';
+  IF todate IS NOT NULL THEN
+    IF (TRIM(todate) != '') AND (TRIM(todate) != 'null') THEN
+      set @thisToDate := todate;
+      select STR_TO_DATE(todate, '%M %e, %Y') into @testDate;
+      if @testDate IS NOT NULL THEN
+        select  date_format(@testDate, '%Y-%m-%d') into @thisToDate;
+      end if;
+      set @ito := concat_ws('','and VOProbeSummary.EndTime <= ''', TRIM(@thisToDate),'''');
+    END IF;
   END IF;
 
-  IF selType IS NOT NULL then
-    IF selType = 'NOT' then
+  set @iunit := '3600';
+  IF timeUnit IS NOT NULL THEN
+    IF (TRIM(timeUnit) != '') AND (TRIM(timeUnit) != 'null') THEN
+      set @iunit := TRIM(timeUnit);
+    END IF;
+  END IF;
+
+
+  set @idatr := '%Y-%m-%d';
+  set @idats := '%Y-%m-%d';
+  set @igroup := 'day';
+  IF dateGrouping IS NOT NULL THEN
+    IF (TRIM(dateGrouping) != '') AND (TRIM(dateGrouping) != 'null') THEN
+      set @igroup := TRIM(dateGrouping);
+      IF STRCMP(LOWER(TRIM(dateGrouping)), 'day') = 0 THEN
+        set @idatr := '%Y-%m-%d';
+        set @idats := '%Y-%m-%d';
+      ELSEIF STRCMP(LOWER(TRIM(dateGrouping)),'week') = 0 THEN
+        set @idatr := '%x-%v Monday';
+        set @idats := '%x-%v %W';
+      ELSEIF STRCMP(LOWER(TRIM(dateGrouping)), 'month') = 0  THEN
+        set @idatr := '%Y-%m-01';
+        set @idats := '%Y-%m-%d';
+      ELSEIF STRCMP(LOWER(TRIM(dateGrouping)), 'year') = 0  THEN
+        set @idatr := '%Y-01-01';
+        set @idats := '%Y-%m-%d';
+      END IF;
+    END IF;
+  END IF;
+
+  set @igroupBy := 'group by DateValue, UserName, SiteName, VOName';
+  IF groupBy IS NOT NULL THEN
+    IF TRIM(groupBy) != 'null' THEN
+      set @igroupBy := concat_ws('', 'group by ', TRIM(groupBy));
+    END IF;
+  END IF;
+
+  set @iorderBy := 'order by CommonName, SiteName, VOName, DateValue';
+  IF orderBy IS NOT NULL THEN
+    IF TRIM(orderBy) != 'null' THEN
+      set @iorderBy := concat_ws('', 'order by ', TRIM(orderBy));
+    END IF;
+  END IF;
+
+  set @itype := 'batch';
+  IF resourceType IS NOT NULL THEN
+    IF (TRIM(resourceType) != '') AND (TRIM(resourceType) != 'null') THEN
+      set @itype := TRIM(resourceType);
+    END IF;
+  END IF;
+  
+  set @iselTypeA := '=''';
+  set @iselTypeB := '''';
+  IF selType IS NOT NULL THEN
+    IF selType = 'NOT' THEN
       set @iselTypeA := ' NOT IN ';
       set @iselTypeB := '';
-    ELSE
+    ELSEIF selType = 'IN' THEN
       set @iselTypeA := ' IN ';
       set @iselTypeB := '';
     END IF;
-  ELSE
-    set @iselTypeA := '=''';
-    set @iselTypeB := '''';
   END IF;
 
   set @iVOs := '';
   set @rVOs := '';
-  IF VOs IS NOT NULL then
-    IF TRIM(VOs) != '' then
+  IF VOs IS NOT NULL THEN
+    IF (TRIM(VOs) != '') AND (TRIM(VOs) != 'null') THEN
       set @iVOs := concat_ws('', 'and VOProbeSummary.VOName', @iselTypeA, '',TRIM(VOs), @iselTypeB, '');
       set @rVOs := concat_ws('', 'and V.VOName', @iselTypeA, '',TRIM(VOs), @iselTypeB, '');
     END IF;
@@ -125,8 +128,8 @@ begin
 
   set @iSites := '';
   set @rSites := '';
-  IF Sites IS NOT NULL then
-    IF TRIM(Sites) != '' then
+  IF Sites IS NOT NULL THEN
+    IF (TRIM(Sites) != '') AND (TRIM(Sites) != 'null') THEN
       set @iSites := concat_ws('', 'and Site.SiteName', @iselTypeA, '',TRIM(Sites), @iselTypeB, '');
       set @rSites := concat_ws('', 'and S.SiteName', @iselTypeA, '',TRIM(Sites), @iselTypeB, '');
     END IF;
@@ -134,15 +137,19 @@ begin
 
   set @iProbes := '';
   set @rProbes := '';
-  IF Probes IS NOT NULL then
-    IF TRIM(Probes) != '' then
+  IF Probes IS NOT NULL THEN
+    IF (TRIM(Probes) != '') AND (TRIM(Probes) != 'null') THEN
       set @iProbes := concat_ws('', 'and VOProbeSummary.ProbeName', @iselTypeA, '',TRIM(Probes), @iselTypeB, '');
       set @rProbes := concat_ws('', 'and P.ProbeName', @iselTypeA, '',TRIM(Probes), @iselTypeB, '');
     END IF;
   END IF;
 
-  IF Ranked IS NOT NULL then
-     set @rankfrom := concat_ws('',
+  set @rankfrom := '';
+  set @rankwhere := '';
+  set @final_rank := '';
+  IF Ranked IS NOT NULL THEN
+    IF (TRIM(Ranked) != '') AND (TRIM(Ranked) != 'null') THEN
+      set @rankfrom := concat_ws('',
            ' (SELECT @rank:=@rank+1 as final_rank, sitenamex, walldurationx',
            '   FROM (SELECT @rank:=0 as rank,',
            '      S.SiteName as sitenamex,',
@@ -158,12 +165,9 @@ begin
            '   GROUP BY sitenamex',
            '   ORDER BY walldurationx desc) as foox) as foo', ','
            );
-     set @rankwhere := ' and Site.SiteName = sitenamex';
-     set @final_rank := 'final_rank,';
-  ELSE
-     set @rankfrom := '';
-     set @rankwhere := '';
-     set @final_rank := '';
+       set @rankwhere := ' and Site.SiteName = sitenamex';
+       set @final_rank := 'final_rank,';
+    END IF;
   END IF;
 
   select generateResourceTypeClause(@itype) into @myresourceclause;
