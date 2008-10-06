@@ -116,27 +116,45 @@ while [[ -n "$1" ]]; do
         continue
         ;;
       stored)
-        proc="${script_location}build-stored-procedures.sql"
-        set -- "$@" stored-extra-1 stored-extra-2 static-reports
+        #proc="${script_location}build-stored-procedures.sql"
+        set -- "$@" stored-extra-3 stored-extra-4 stored-extra-5
         if [[ `hostname -f` == *.fnal.gov ]]; then
           set -- "$@" proc-edit-permission
         fi
+        continue
         ;;
       stored-extra-1)
         # Hand-tweaked procedure (temporary)
-        proc="${script_location}WeeklyUsageByVORanked.sql"
+        #proc="${script_location}WeeklyUsageByVORanked.sql"
+        # WeeklyUsageByVORanked.sql removed.
+        echo "stored procedure \"WeeklyUsageByVORanked.sql\" obsolete -- ignored" 1>&2
+        continue
         ;;
       stored-extra-2)
         # Hand-tweaked procedure (temporary)
-        proc="${script_location}SiteUsageCountByVO.sql"
+        #proc="${script_location}SiteUsageCountByVO.sql"
+        # SiteUsageCountByVO.sql removed.
+        echo "stored procedure \"SiteUsageCountByVO.sql\" obsolete -- ignored" 1>&2
+        continue
         ;;
       stored-extra-3)
         # Hand-tweaked procedure (temporary)
         proc="${script_location}dCacheSimple.sql"
         ;;
+      stored-extra-4)
+        # Hand-tweaked procedure (temporary)
+        proc="${script_location}reports.sql"
+        ;;
+      stored-extra-5)
+        # Hand-tweaked procedure (temporary)
+        proc="${script_location}reportsRanked.sql"
+        ;;
       static-reports)
         # For CSV static reports
-        proc="${script_location}static-report-procedures.sql"
+        #proc="${script_location}static-report-procedures.sql"
+        # static-report-procedures.sql removed.
+        echo "stored procedure \"static-report-procedures.sql\" obsolete -- ignored" 1>&2
+        continue
         ;;
       trigger)
         proc="${script_location}build-trigger.sql"
@@ -168,7 +186,7 @@ while [[ -n "$1" ]]; do
   if [[ -r "${proc}" ]]; then
     printf "post-install.sh: loading $proc ... "
     preprocess_proc
-    cat ${proc} | CMD_PREFIX ${VDT_LOCATION}/mysql5/bin/mysql -B --unbuffered --user=root --password=ROOTPASS --host=localhost --port=PORT gratia CMD_SUFFIX
+   cat ${proc} | CMD_PREFIX ${VDT_LOCATION}/mysql5/bin/mysql -B --unbuffered --user=root --password=ROOTPASS --host=localhost --port=PORT gratia CMD_SUFFIX
     status=$?
   else
     echo "$proc is not readable!" 1>&2
