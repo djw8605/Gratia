@@ -5,7 +5,7 @@
 #
 # library to create simple report using the Gratia psacct database
 #
-#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.38 2008-10-06 19:45:44 pcanal Exp $
+#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.39 2008-10-06 20:55:11 pcanal Exp $
 
 import time
 import datetime
@@ -1533,7 +1533,7 @@ of the amount of time the core participated actively to the job.
 
 Efficiency is the ratio of Cpu Duration used over the WallDuration."""
         headline = "For all jobs finished between %s and %s (midnight UTC)"
-        headers = ("VO","30 Days","7 Days","1 Day")
+        headers = ("VO","1 Days","7 Days","30 Days")
         num_header = 1
         formats = {}
         lines = {}
@@ -1961,7 +1961,7 @@ def EfficiencyGraded(what, range_end = datetime.date.today(),
                      output = "text"):
     factor = 3600  # Convert number of seconds to number of hours
 
-    deltas = [30,7,1]
+    deltas = [1,7,30]
     
     range_begin = range_end + datetime.timedelta(days=-deltas[0])
     
@@ -2019,15 +2019,16 @@ def EfficiencyGraded(what, range_end = datetime.date.today(),
           
           if (values.has_key(key)):
               current = values[key]
-              current[when] = [njobs,wall,eff,first,second]
+              current[when+1] = [njobs,wall,eff]
               values[key] = current
 #             print "Error: can not add efficiencies"
 #             print key
 #             print oldValues[key]
 #             print [njobs,wall,eff,site,vo]
           else:
-             empty = [[],[],[]]
-             empty[when] = [njobs,wall,eff,first,second]
+             empty = [[],[],[],[]]
+             empty[0] = [first,second]
+             empty[when+1] = [njobs,wall,eff]
              values[key] = empty
 
     [totaljobs,totalwall,totaleff] = GetTotals(start,end)
@@ -2046,12 +2047,13 @@ def EfficiencyGraded(what, range_end = datetime.date.today(),
         
     index = 0
     for key,data in sortedValues:
+
         index = index + 1
         printval = []
-        printval.append( data[0][3] )
+        printval.append( data[0][0] )
         if (what.num_header==2):
-           printval.append( data[0][4])
-        for inside in data:
+           printval.append( data[0][1] )
+        for inside in data[1:]:
            if (len(inside)>2):
               eff = inside[2]
               if (eff==-1):
