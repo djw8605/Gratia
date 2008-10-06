@@ -1,8 +1,8 @@
 <UserConfig>
 	<Menu>
 		<MenuGroup name="Reports - VO Views">
-			<MenuItem name="Usage by VO" link="GratiaParameterInput.jsp?report=[ReportsFolder]UsageByVO.rptdesign&amp;DisplayMetric=WallDuration"/>
-			<MenuItem display="true" name="Daily Usage by VO" link="GratiaParameterInput.jsp?report=[ReportsFolder]UsageByVOByDate-ranked.rptdesign&amp;DisplayMetric=WallDuration"/>
+			<MenuItem name="Usage by VO" link="GratiaParameterInput.jsp?report=[ReportsFolder]UsageByVO.rptdesign&amp;DisplayMetric=WallDuration&amp;SelectVOs=ALL"/>
+			<MenuItem display="true" name="Daily Usage by VO" link="GratiaParameterInput.jsp?report=[ReportsFolder]UsageByVOByDate-ranked.rptdesign&amp;DisplayMetric=WallDuration&amp;SelectVOs=ALL"/>
 			<MenuItem name="Daily Usage by Site for VO" link="GratiaParameterInput.jsp?report=[ReportsFolder]DailyUsageBySiteForVO.rptdesign&amp;DisplayMetric=WallDuration"/>
                         <MenuItem name="Site Usage by VO" link="GratiaParameterInput.jsp?report=[ReportsFolder]SiteUsageCountByVO-ranked.rptdesign"/>
 		</MenuGroup>
@@ -12,8 +12,8 @@
 			<MenuItem name="Usage Metrics - For Site(s)" link="GratiaParameterInput.jsp?report=[ReportsFolder]WeeklyUsageBySite.rptdesign"/>
 		</MenuGroup>
 		<MenuGroup name="Reports - Site Views">
-			<MenuItem name="Usage by Site" link="GratiaParameterInput.jsp?report=[ReportsFolder]UsageBySite.rptdesign&amp;DisplayMetric=WallDuration"/>
-			<MenuItem name="Daily Usage by Site" link="GratiaParameterInput.jsp?report=[ReportsFolder]UsageBySiteByDate-ranked.rptdesign&amp;DisplayMetric=WallDuration"/>
+			<MenuItem name="Usage by Site" link="GratiaParameterInput.jsp?report=[ReportsFolder]UsageBySite.rptdesign&amp;DisplayMetric=WallDuration&amp;SelectSites=ALL"/>
+			<MenuItem name="Daily Usage by Site" link="GratiaParameterInput.jsp?report=[ReportsFolder]UsageBySiteByDate-ranked.rptdesign&amp;DisplayMetric=WallDuration&amp;SelectSites=ALL"/>
 			<MenuItem name="Daily Usage by VO for Site" link="GratiaParameterInput.jsp?report=[ReportsFolder]DailyUsageByVOForSite.rptdesign&amp;DisplayMetric=WallDuration"/>
 		</MenuGroup>
 		<MenuGroup name="Reports - by Probe">
