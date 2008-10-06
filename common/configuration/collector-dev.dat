@@ -144,6 +144,31 @@
                  "service.admin.FQAN.1" => "/fermilab/Role=GratiaDeveloper",
                 }
               },
+ "gratiax21-ps" => { tomcat_user => "penelope",
+                     tomcat_group => "gratia",
+                     http_port => 8881,
+                     ssl_port => 8850,
+                     rmi_port => 18000,
+                     jmx_port => 8014,
+                     server_port => 8114,
+                     db_host => "gratia-vm02.fnal.gov",
+                     db_port => 3320,
+                     db_schema => "gratia_gratiax21_ps",
+                     collector_host => "gratiax21.fnal.gov",
+                     UserConfig => "UserConfig_pacct.xml",
+                     staticReports => 0,
+                     "properties.attributes" =>
+                     {
+                      "gratia.database.useJobUsageSiteName" => 1,
+                      "gratia.database.wantNodeSummary" => 1,
+                      "maintain.history.log" => 2,
+                      "monitor.listener.threads" => 'false',
+                      "monitor.to.address.0" => 'penelope@fnal.gov',
+                      "service.admin.DN.0" => '/DC=org/DC=doegrids/OU=Services/CN=gratia-vm02.fnal.gov',
+                      "service.admin.FQAN.0" => "/fermilab/Role=GratiaAdmin",
+                      "service.admin.FQAN.1" => "/fermilab/Role=GratiaDeveloper"
+                     }
+                   },
  penelope => { http_port => 8884,
                ssl_port => 8865,
                rmi_port => 21000,
