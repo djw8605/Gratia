@@ -319,7 +319,7 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 			   <td>
 				<select <%= selectMultiple %> size="5" id="<%= selectNameID %>" name="<%= selectNameID %>" onmouseover="Tip('<%= helpText%>');" onchange="<%= onchangeFunction %>" >
 				<% 
-				if(defaultValue.indexOf("ALL") > -1)
+				if(defaultValue.trim().equalsIgnoreCase("ALL"))
 				{
 					selected = "selected";
 					selectedItems = "ALL";
