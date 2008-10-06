@@ -54,7 +54,8 @@
  *                     * temporary file in csvHome
  *
  * calls the following stored procedure:
- * PROCEDURE generate_static_report (userName, userRole, fromdate, todate, dateGrouping, timeUnit,  resourceType)
+ * PROCEDURE reports (	userName, userRole, fromdate, todate, timeUnit, dateGrouping, 
+ *						groupBy, orderBy, resourceType, VOs, Sites, Probes, Ranked, selType)
  * 	passing a "null" as an argument results is using the procedure default value
  */
 try
@@ -165,12 +166,15 @@ try
 		dateGrouping = "year";
 	else
 		dateGrouping = "day";
+	
+	String groupBy = "DateValue, UserName, SiteName, VOName";
+	String orderBy = "UserName, SiteName, VOName, DateValue";
 
 	String incsvFileName = request.getParameter("_csvFile");
 	if (incsvFileName == null)
 		incsvFileName = "";
 
-	String sql = "call generate_static_report(null, null,'" + sDate +"', '" + eDate +"','" + dateGrouping + "','" + timeUnit +"','batch')";
+	String sql = "call reports(null, null,'" + sDate +"', '" + eDate + "','" + timeUnit + "','" + dateGrouping + "','" + groupBy  + "','" + orderBy + "','batch', null, null, null, null, null)";
             
 	String tempCsvPath = "";
 	String csvFileName = "";
