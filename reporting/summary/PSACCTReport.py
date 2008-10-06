@@ -5,7 +5,7 @@
 #
 # library to create simple report using the Gratia psacct database
 #
-#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.36 2008-10-02 01:09:16 pcanal Exp $
+#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.37 2008-10-06 16:03:20 pcanal Exp $
 
 import time
 import datetime
@@ -2120,7 +2120,7 @@ def NonReportingSites(
     # Call it twice to avoid a 'bug' in wget where on of the row is missing the first few characters.
     allSites = GetListOfOSGSites();
  
-    exceptionSites = ['BNL_ATLAS_1', 'BNL_ATLAS_2', 'USCMS-FNAL-WC1-CE2', 'USCMS-FNAL-WC1-CE3', 'USCMS-FNAL-WC1-CE4', 'BNL_LOCAL', 'BNL_OSG', 'BNL_PANDA', 'FNAL_CDFOSG_1', 'FNAL_CDFOSG_2', 'FNAL_CDFOSG_3', 'FNAL_CDFOSG_4', 'FNAL_DZEROOSG_1', 'FNAL_DZEROOSG_2', 'GLOW-CMS', 'UCSDT2-B', 'FNAL_GPGRID_1', 'FNAL_GPGRID_2', 'Purdue-Lear' ]
+    exceptionSites = ['BNL_ATLAS_1', 'BNL_ATLAS_2', 'USCMS-FNAL-WC1-CE2', 'USCMS-FNAL-WC1-CE3', 'USCMS-FNAL-WC1-CE4', 'BNL_LOCAL', 'BNL_OSG', 'BNL_PANDA', 'GLOW-CMS', 'UCSDT2-B', 'Purdue-Lear' ]
 
     allSites = [name for name in allSites if name not in exceptionSites]
     reportingSitesDate = GetSiteLastReportingDate(when,True)
