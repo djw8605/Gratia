@@ -254,7 +254,7 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 			   <td align="right"><label class="paramName" onMouseOver="Tip('<%= helpText%>')" ><%= promptText %></label></td>
 			   <td>&nbsp;&nbsp;</td>
 			   <td>
-			   <input type="text" id="<%= paramName %>" name="<%= paramName %>" value="<%= defaultValue %>" onmouseover="Tip('<%= helpText%>')" onchange="getURL();" >
+			   <input type="text" id="<%= paramName %>" name="<%= paramName %>" value="<%= defaultValue %>" onmouseover="Tip('<%= helpText%>')" onchange="getURL();" size="10">
 				<button name="cal1" value="cal1" type="button" class="button" onmouseover="Tip('<%= helpText%>')" onclick="c1.popup('<%= paramName %>');" >
 				<img src="./calendar/img/cal.gif" alt="<%= helpText%>"></BUTTON>
 			   </td>
@@ -270,6 +270,7 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 			String selected = "selected";
 			String onchangeFunction = "getURL();";
 			String sql = "";
+			String selectedItems = "";
 
 			if (paramName.trim().equalsIgnoreCase("SelectVOs"))
 			{
@@ -317,6 +318,15 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 			   <td>&nbsp;&nbsp;</td>
 			   <td>
 				<select <%= selectMultiple %> size="5" id="<%= selectNameID %>" name="<%= selectNameID %>" onmouseover="Tip('<%= helpText%>');" onchange="<%= onchangeFunction %>" >
+				<% 
+				if(defaultValue.indexOf("ALL") > -1)
+				{
+					selected = "selected";
+					selectedItems = "ALL";
+					displayReport = "true";
+				}
+				%>
+				<option value=" ALL" <%= selected %> >--- Select ALL --- </option>
 			<%
 
 			// Execute the sql statement
@@ -324,7 +334,7 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 			Statement statement = null;
 			ResultSet results = null;
 			String resultValue = "";
-			String selectedItems = "";
+			selected = "";
 
 			try {
 				Class.forName("com.mysql.jdbc.Driver").newInstance();
