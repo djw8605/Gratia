@@ -40,7 +40,8 @@ reportsrc=$(reporting)/gratia-reporting
 staticScript=$(reportsrc)/WebContent/staticReports
 birtDir=$(reporting)/birt-wars
 #birtwarFile=birt-v231-N20080820.war
-birtwarFile=birt-v231-N20080818.war
+#birtwarFile=birt-v231-N20080818.war
+birtwarFile=birt-v231.war
 # common modules
 configuration=$(common)/configuration
 security=$(common)/gratia-security
@@ -100,25 +101,28 @@ clean:
 
 #-------------------------------------------------------------
 # services will eventually need the util package
-services: $(configuration)/build-stored-procedures.sql \
-$(configuration)/build-stored-procedures_debug.sql \
-$(target)/gratia-services.war
+# services:  $(configuration)/build-stored-procedures.sql \
+# $(configuration)/build-stored-procedures_debug.sql \
+
+services: $(target)/gratia-services.war
+	#------------------------------------
 	# --- Target: services COMPLETED at $(shell date) ---
+	#------------------------------------
 
 #-------------------------------------------------------------
-$(configuration)/build-stored-procedures_debug.sql : $(configuration)/create_build-stored-procedures-sql
+# $(configuration)/build-stored-procedures_debug.sql : $(configuration)/create_build-stored-procedures-sql
 	#-------------------------------------------------------------------
 	# --- Target: $(configuration)/build-stored-procedures_debug.sql ---
 	#-------------------------------------------------------------------
-	$(<) -dt > $(@)
+	#$(<) -dt > $(@)
 	# --- Target: $(configuration)/build-stored-procedures_debug.sql COMPLETED at $(shell date) ---
 
 #-------------------------------------------------------------
-$(configuration)/build-stored-procedures.sql : $(configuration)/create_build-stored-procedures-sql
+# $(configuration)/build-stored-procedures.sql : $(configuration)/create_build-stored-procedures-sql
 	#-------------------------------------------------------------
 	# --- Target: $(configuration)/build-stored-procedures.sql ---
 	#-------------------------------------------------------------
-	$(<) -d > $(@)
+	#$(<) -d > $(@)
 	# --- Target: $(configuration)/build-stored-procedures.sql COMPLETED at $(shell date) ---
 
 #-------------------------------------------------------------
