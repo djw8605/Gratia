@@ -1,12 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<report xmlns="http://www.eclipse.org/birt/2005/design" version="3.2.14" id="1">
-    <property name="createdBy">Eclipse BIRT Designer Version 1.0.1 Build &lt;20050815-0740></property>
+<report xmlns="http://www.eclipse.org/birt/2005/design" version="3.2.17" id="1">
+    <property name="createdBy">Eclipse BIRT Designer Version 2.3.1.v20080911 Build &lt;2.3.1.v20080922-1151></property>
     <property name="units">in</property>
     <list-property name="propertyBindings">
-        <structure>
-            <property name="name">odaDriverClass</property>
-            <property name="id">444</property>
-        </structure>
         <structure>
             <property name="name">odaURL</property>
             <property name="id">444</property>
@@ -21,18 +17,6 @@
             <property name="name">odaPassword</property>
             <property name="id">444</property>
             <expression name="value">params["DatabasePassword"]</expression>
-        </structure>
-        <structure>
-            <property name="name">odaJndiName</property>
-            <property name="id">444</property>
-        </structure>
-        <structure>
-            <property name="name">OdaConnProfileName</property>
-            <property name="id">444</property>
-        </structure>
-        <structure>
-            <property name="name">OdaConnProfileStorePath</property>
-            <property name="id">444</property>
         </structure>
     </list-property>
     <property name="eventHandlerClass">net.sf.gratia.reporting.GratiaBirtReportEH</property>
@@ -495,7 +479,7 @@
         </Series>
         <Grouping>
           <Enabled>false</Enabled>
-          <GroupingInterval>2</GroupingInterval>
+          <GroupingInterval>2.0</GroupingInterval>
           <GroupType>Text</GroupType>
           <AggregateExpression>Sum</AggregateExpression>
         </Grouping>
@@ -706,7 +690,7 @@
       </Series>
       <Grouping>
         <Enabled>false</Enabled>
-        <GroupingInterval>2</GroupingInterval>
+        <GroupingInterval>2.0</GroupingInterval>
         <GroupType>Text</GroupType>
         <AggregateExpression>Sum</AggregateExpression>
       </Grouping>
@@ -883,18 +867,28 @@
     <data-sources>
         <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="Data Source" id="444">
             <property name="odaDriverClass">com.mysql.jdbc.Driver</property>
-            <property name="odaURL">jdbc:mysql://gratia-db01.fnal.gov:3320/gratia_itb</property>
+            <property name="odaURL">jdbc:mysql://gratia-vm02.fnal.gov:3320/gratia_gratiax21</property>
             <property name="odaUser">reader</property>
-            <encrypted-property name="odaPassword">cmVhZGVy</encrypted-property>
+            <encrypted-property name="odaPassword" encryptionID="base64">cmVhZGVy</encrypted-property>
         </oda-data-source>
     </data-sources>
     <data-sets>
-        <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="UsageByVORanked" id="358">
+        <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="reportsRankedProcedure" id="358">
             <list-property name="computedColumns">
                 <structure>
                     <property name="name">ChartNr</property>
                     <expression name="expression">(row["final_rank"]-1)</expression>
                     <property name="dataType">integer</property>
+                </structure>
+            </list-property>
+            <list-property name="columnHints">
+                <structure>
+                    <property name="columnName">zVOName</property>
+                    <property name="alias">VOName</property>
+                </structure>
+                <structure>
+                    <property name="columnName">zDateValue</property>
+                    <property name="alias">DateValue</property>
                 </structure>
             </list-property>
             <structure name="cachedMetaData">
@@ -911,8 +905,8 @@
                     </structure>
                     <structure>
                         <property name="position">3</property>
-                        <property name="name">datevalue</property>
-                        <property name="dataType">string</property>
+                        <property name="name">DateValue</property>
+                        <property name="dataType">date</property>
                     </structure>
                     <structure>
                         <property name="position">4</property>
@@ -921,7 +915,7 @@
                     </structure>
                     <structure>
                         <property name="position">5</property>
-                        <property name="name">Cpu</property>
+                        <property name="name">cpu</property>
                         <property name="dataType">float</property>
                     </structure>
                     <structure>
@@ -942,17 +936,21 @@
             <list-property name="parameters">
                 <structure>
                     <property name="name">UserName</property>
+                    <property name="paramName">UserName</property>
                     <property name="dataType">string</property>
                     <property name="position">1</property>
-                    <expression name="defaultValue">""</expression>
+                    <expression name="defaultValue">params["UserName"]</expression>
                     <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
                 </structure>
                 <structure>
                     <property name="name">UserRole</property>
+                    <property name="paramName">UserRole</property>
                     <property name="dataType">string</property>
                     <property name="position">2</property>
-                    <expression name="defaultValue">""</expression>
+                    <expression name="defaultValue">params["UserRole"]</expression>
                     <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
                 </structure>
                 <structure>
                     <property name="name">StartDate</property>
@@ -971,10 +969,50 @@
                     <property name="isOutput">false</property>
                 </structure>
                 <structure>
-                    <property name="name">GroupByFormat</property>
+                    <property name="name">timeUnit</property>
                     <property name="dataType">string</property>
                     <property name="position">5</property>
+                    <expression name="defaultValue">'3600'</expression>
+                    <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
+                </structure>
+                <structure>
+                    <property name="name">dateGrouping</property>
+                    <property name="dataType">string</property>
+                    <property name="position">6</property>
                     <expression name="defaultValue">"week"</expression>
+                    <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
+                </structure>
+                <structure>
+                    <property name="name">resourceType</property>
+                    <property name="dataType">string</property>
+                    <property name="position">7</property>
+                    <expression name="defaultValue">'Batch'</expression>
+                    <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
+                </structure>
+                <structure>
+                    <property name="name">DisplayMetric</property>
+                    <property name="dataType">string</property>
+                    <property name="position">8</property>
+                    <expression name="defaultValue">params["DisplayMetric"].value</expression>
+                    <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
+                </structure>
+                <structure>
+                    <property name="name">VOs</property>
+                    <property name="dataType">string</property>
+                    <property name="position">9</property>
+                    <expression name="defaultValue">null</expression>
+                    <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
+                </structure>
+                <structure>
+                    <property name="name">selType</property>
+                    <property name="dataType">string</property>
+                    <property name="position">10</property>
+                    <expression name="defaultValue">null</expression>
                     <property name="isInput">true</property>
                     <property name="isOutput">false</property>
                 </structure>
@@ -988,15 +1026,15 @@
                 </structure>
                 <structure>
                     <property name="position">2</property>
-                    <property name="name">VOName</property>
-                    <property name="nativeName">VOName</property>
+                    <property name="name">zVOName</property>
+                    <property name="nativeName">zVOName</property>
                     <property name="dataType">string</property>
                 </structure>
                 <structure>
                     <property name="position">3</property>
-                    <property name="name">datevalue</property>
-                    <property name="nativeName">datevalue</property>
-                    <property name="dataType">string</property>
+                    <property name="name">zDateValue</property>
+                    <property name="nativeName">zDateValue</property>
+                    <property name="dataType">date</property>
                 </structure>
                 <structure>
                     <property name="position">4</property>
@@ -1006,8 +1044,8 @@
                 </structure>
                 <structure>
                     <property name="position">5</property>
-                    <property name="name">Cpu</property>
-                    <property name="nativeName">Cpu</property>
+                    <property name="name">cpu</property>
+                    <property name="nativeName">cpu</property>
                     <property name="dataType">float</property>
                 </structure>
                 <structure>
@@ -1017,7 +1055,7 @@
                     <property name="dataType">decimal</property>
                 </structure>
             </list-property>
-            <property name="queryText">call WeeklyUsageByVORanked(?,?,?,?,?,'Batch')</property>
+            <property name="queryText">call reportsRanked(?,?,?,?,?,?,?,?,?,?)</property>
         </oda-data-set>
     </data-sets>
     <styles>
@@ -1038,7 +1076,7 @@
     <body>
         <table name="table1" id="9">
             <property name="width">100%</property>
-            <property name="dataSet">UsageByVORanked</property>
+            <property name="dataSet">reportsRankedProcedure</property>
             <list-property name="paramBindings">
                 <structure>
                     <property name="paramName">UserName</property>
@@ -1072,18 +1110,18 @@
                     <property name="dataType">string</property>
                 </structure>
                 <structure>
-                    <property name="name">datevalue</property>
-                    <expression name="expression">dataSetRow["datevalue"]</expression>
-                    <property name="dataType">string</property>
+                    <property name="name">DateValue</property>
+                    <expression name="expression">dataSetRow["DateValue"]</expression>
+                    <property name="dataType">date-time</property>
                 </structure>
                 <structure>
                     <property name="name">WallDuration</property>
-                    <expression name="expression">dataSetRow["WallDuration"]/3600</expression>
+                    <expression name="expression">dataSetRow["WallDuration"]</expression>
                     <property name="dataType">float</property>
                 </structure>
                 <structure>
-                    <property name="name">Cpu</property>
-                    <expression name="expression">dataSetRow["Cpu"]/3600</expression>
+                    <property name="name">cpu</property>
+                    <expression name="expression">dataSetRow["cpu"]</expression>
                     <property name="dataType">float</property>
                 </structure>
                 <structure>
@@ -1092,6 +1130,7 @@
                     <property name="dataType">decimal</property>
                 </structure>
             </list-property>
+            <property name="pageBreakInterval">50</property>
             <column id="30">
                 <property name="width">33.3%</property>
             </column>
@@ -1104,18 +1143,10 @@
                             <property name="fontWeight">bold</property>
                             <property name="textUnderline">none</property>
                             <property name="textAlign">center</property>
-                            <expression name="valueExpr">if (params["DisplayMetric"] == "WallDuration") {
- "&lt;p>2007 Wallclock Hours per VO&lt;/p>"
-}
-else if (params["DisplayMetric"]=="Cpu") {
- "&lt;p>2007 CPU Hours per VO&lt;/p>"
-}
-else if (params["DisplayMetric"]=="Njobs"){
- "&lt;p>2007 Number of Jobs per VO&lt;/p>"
-}
-else {
-"&lt;p>2007&lt;/p>"
-}</expression>
+                            <expression name="valueExpr">if (params["DisplayMetric"].value == "WallDuration") {"&lt;p>2007 Wallclock Hours per VO&lt;/p>"}
+else if (params["DisplayMetric"].value == "cpu") {"&lt;p>2007 cpu Hours per VO&lt;/p>"}
+else if (params["DisplayMetric"].value == "Njobs"){"&lt;p>2007 Number of Jobs per VO&lt;/p>"}
+else {"&lt;p>2007&lt;/p>"}</expression>
                             <property name="contentType">html</property>
                         </text-data>
                     </cell>
@@ -1132,9 +1163,9 @@ else {
                 </structure>
                 <property name="repeatHeader">true</property>
                 <property name="hideDetail">true</property>
-                <property name="pageBreakAfter">auto</property>
-                <property name="pageBreakBefore">auto</property>
-                <property name="pageBreakInside">auto</property>
+                <property name="pageBreakAfter">avoid</property>
+                <property name="pageBreakBefore">avoid</property>
+                <property name="pageBreakInside">avoid</property>
                 <list-property name="sort">
                     <structure>
                         <expression name="key">row["final_rank"]</expression>
@@ -1662,7 +1693,7 @@ else {
   <SeriesThickness>10.0</SeriesThickness>
   <SampleData>
     <BaseSampleData>
-      <DataSetRepresentation>A, B, C</DataSetRepresentation>
+      <DataSetRepresentation>6,4,12,8,10</DataSetRepresentation>
     </BaseSampleData>
     <OrthogonalSampleData>
       <DataSetRepresentation>5,4,12</DataSetRepresentation>
@@ -1674,7 +1705,7 @@ else {
     <LegendBehavior>None</LegendBehavior>
   </Interactivity>
   <Axes>
-    <Type>Text</Type>
+    <Type>Linear</Type>
     <Title>
       <Caption>
         <Value>X-Axis Title</Value>
@@ -1905,17 +1936,17 @@ else {
             <Action>
               <Type>Show_Tooltip</Type>
               <Value xsi:type="attribute:TooltipValue">
-                <Text>var voname = row[&quot;VOName&quot;];var metricvalue =&quot;&quot;;&#xD;
+                <Text>var VOName = row[&quot;VOName&quot;];var metricvalue =&quot;&quot;;&#xD;
 &#xD;
 var label;&#xD;
 var dotpos;&#xD;
 &#xD;
 if (params[&quot;DisplayMetric&quot;] == &quot;WallDuration&quot;) { &#xD;
-	metricvalue = String(row[&quot;WallDuration&quot;] / 3600);&#xD;
+	metricvalue = String(row[&quot;WallDuration&quot;]);&#xD;
 	label = &quot;Wallclock Hours: &quot;;&#xD;
 }&#xD;
-if (params[&quot;DisplayMetric&quot;] == &quot;Cpu&quot;)  {&#xD;
-	metricvalue = String(row[&quot;Cpu&quot;] / 3600);&#xD;
+if (params[&quot;DisplayMetric&quot;] == &quot;cpu&quot;)  {&#xD;
+	metricvalue = String(row[&quot;cpu&quot;]);&#xD;
 	label = &quot;Process Hours: &quot;;&#xD;
 } &#xD;
 if (params[&quot;DisplayMetric&quot;] == &quot;Njobs&quot;) {&#xD;
@@ -1928,7 +1959,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
 	metricvalue = metricvalue.substring(0,dotpos+2);&#xD;
 	}&#xD;
 &#xD;
-&quot;VOName: &quot; + voname + &quot;\n&quot; + label + metricvalue</Text>
+&quot;VOName: &quot; + VOName + &quot;\n&quot; + label + metricvalue</Text>
                 <Delay>200</Delay>
               </Value>
             </Action>
@@ -1937,7 +1968,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
         </Series>
         <Grouping>
           <Enabled>false</Enabled>
-          <GroupingInterval>2</GroupingInterval>
+          <GroupingInterval>2.0</GroupingInterval>
           <GroupType>Text</GroupType>
           <AggregateExpression>Sum</AggregateExpression>
         </Grouping>
@@ -2209,7 +2240,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -2256,7 +2287,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -2303,7 +2334,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -2350,7 +2381,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -2397,7 +2428,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -2444,7 +2475,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -2458,11 +2489,14 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
       </Series>
       <Grouping>
         <Enabled>false</Enabled>
-        <GroupingInterval>2</GroupingInterval>
+        <GroupingInterval>2.0</GroupingInterval>
         <GroupType>Text</GroupType>
         <AggregateExpression>Sum</AggregateExpression>
       </Grouping>
       <Sorting>Ascending</Sorting>
+      <SortKey>
+        <Definition>0</Definition>
+      </SortKey>
     </SeriesDefinitions>
     <Orientation>Horizontal</Orientation>
     <LineAttributes>
@@ -2590,25 +2624,8 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
                                                 <property name="targetFileType">report-design</property>
                                                 <property name="reportName">WeeklyUsageForVO.rptdesign</property>
                                             </structure>
-                                            <list-property name="filter">
-                                                <structure>
-                                                    <property name="operator">eq</property>
-                                                    <expression name="expr">(row["final_rank"]-1)%4</expression>
-                                                    <expression name="value1">0</expression>
-                                                </structure>
-                                            </list-property>
                                             <property name="height">80px</property>
                                             <property name="width">63px</property>
-                                            <list-property name="paramBindings">
-                                                <structure>
-                                                    <property name="paramName">UserName</property>
-                                                    <expression name="expression">params["UserName"]</expression>
-                                                </structure>
-                                                <structure>
-                                                    <property name="paramName">UserRole</property>
-                                                    <expression name="expression">params["UserRole"]</expression>
-                                                </structure>
-                                            </list-property>
                                             <property name="refTemplateParameter">NewTemplateParameterDefinition</property>
                                             <property name="style">sans-style1</property>
                                         </extended-item>
@@ -2920,7 +2937,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
     &lt;property name=&quot;targetFileType&quot;>report-design&lt;/property>
     &lt;list-property name=&quot;paramBindings&quot;>
         &lt;structure>
-            &lt;property name=&quot;paramName&quot;>ForVOName&lt;/property>
+            &lt;property name=&quot;paramName&quot;>VOs&lt;/property>
             &lt;expression name=&quot;expression&quot;>params[&quot;thisVO&quot;]&lt;/expression>
         &lt;/structure>
         &lt;structure>
@@ -3137,7 +3154,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
   <SeriesThickness>10.0</SeriesThickness>
   <SampleData>
     <BaseSampleData>
-      <DataSetRepresentation>A, B, C</DataSetRepresentation>
+      <DataSetRepresentation>01/05/2000,02/01/2000,04/12/2000,03/12/2000,02/29/2000</DataSetRepresentation>
     </BaseSampleData>
     <OrthogonalSampleData>
       <DataSetRepresentation>5,4,12</DataSetRepresentation>
@@ -3148,7 +3165,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
     <LegendBehavior>None</LegendBehavior>
   </Interactivity>
   <Axes>
-    <Type>Text</Type>
+    <Type>DateTime</Type>
     <Title>
       <Caption>
         <Value>2007</Value>
@@ -3373,11 +3390,44 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           </DataPoint>
           <LabelPosition>Inside</LabelPosition>
           <Stacked>true</Stacked>
+          <Triggers>
+            <Condition>onmouseover</Condition>
+            <Action>
+              <Type>Show_Tooltip</Type>
+              <Value xsi:type="attribute:TooltipValue">
+                <Text>var VOName = row[&quot;VOName&quot;];var metricvalue =&quot;&quot;;&#xD;
+&#xD;
+var label;&#xD;
+var dotpos;&#xD;
+&#xD;
+if (params[&quot;DisplayMetric&quot;] == &quot;WallDuration&quot;) { &#xD;
+	metricvalue = String(row[&quot;WallDuration&quot;]);&#xD;
+	label = &quot;Wallclock Hours: &quot;;&#xD;
+}&#xD;
+if (params[&quot;DisplayMetric&quot;] == &quot;cpu&quot;)  {&#xD;
+	metricvalue = String(row[&quot;cpu&quot;]);&#xD;
+	label = &quot;Process Hours: &quot;;&#xD;
+} &#xD;
+if (params[&quot;DisplayMetric&quot;] == &quot;Njobs&quot;) {&#xD;
+	metricvalue = String(row[&quot;Njobs&quot;]);&#xD;
+	label = &quot;Jobs: &quot;;&#xD;
+}&#xD;
+var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
+	if(dotpos > 0)&#xD;
+	{ &#xD;
+	metricvalue = metricvalue.substring(0,dotpos+2);&#xD;
+	}&#xD;
+&#xD;
+&quot;VOName: &quot; + VOName + &quot;\n&quot; + label + metricvalue</Text>
+                <Delay>200</Delay>
+              </Value>
+            </Action>
+          </Triggers>
           <Riser>Rectangle</Riser>
         </Series>
         <Grouping>
           <Enabled>false</Enabled>
-          <GroupingInterval>2</GroupingInterval>
+          <GroupingInterval>2.0</GroupingInterval>
           <GroupType>Text</GroupType>
           <AggregateExpression>Sum</AggregateExpression>
         </Grouping>
@@ -3601,7 +3651,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -3648,7 +3698,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -3695,7 +3745,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -3742,7 +3792,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -3789,7 +3839,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -3836,7 +3886,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -3883,7 +3933,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -3930,7 +3980,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -3977,7 +4027,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -4024,7 +4074,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -4071,7 +4121,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -4118,7 +4168,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -4165,7 +4215,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -4212,7 +4262,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -4259,7 +4309,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -4306,7 +4356,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -4353,7 +4403,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -4400,7 +4450,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -4447,7 +4497,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -4494,7 +4544,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -4541,7 +4591,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -4555,11 +4605,14 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
       </Series>
       <Grouping>
         <Enabled>false</Enabled>
-        <GroupingInterval>2</GroupingInterval>
+        <GroupingInterval>2.0</GroupingInterval>
         <GroupType>Text</GroupType>
         <AggregateExpression>Sum</AggregateExpression>
       </Grouping>
       <Sorting>Ascending</Sorting>
+      <SortKey>
+        <Definition>row[&quot;DateValue&quot;]</Definition>
+      </SortKey>
     </SeriesDefinitions>
     <Orientation>Horizontal</Orientation>
     <LineAttributes>
@@ -4611,6 +4664,10 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
       </Insets>
       <Visible>false</Visible>
     </Label>
+    <FormatSpecifier xsi:type="attribute:DateFormatSpecifier">
+      <Type>Medium</Type>
+      <Detail>Date</Detail>
+    </FormatSpecifier>
     <LabelPosition>Below</LabelPosition>
     <Staggered>false</Staggered>
     <MajorGrid>
@@ -4688,7 +4745,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
                                                 <property name="reportName">WeeklyUsageForVO.rptdesign</property>
                                                 <list-property name="paramBindings">
                                                     <structure>
-                                                        <property name="paramName">ForVOName</property>
+                                                        <property name="paramName">VOs</property>
                                                         <expression name="expression">params["thisVO"]</expression>
                                                     </structure>
                                                     <structure>
@@ -4713,21 +4770,13 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
                                                 <structure>
                                                     <property name="operator">eq</property>
                                                     <expression name="expr">(row["final_rank"]-1)%4</expression>
-                                                    <expression name="value1">0</expression>
+                                                    <simple-property-list name="value1">
+                                                        <value>0</value>
+                                                    </simple-property-list>
                                                 </structure>
                                             </list-property>
                                             <property name="height">80px</property>
                                             <property name="width">100px</property>
-                                            <list-property name="paramBindings">
-                                                <structure>
-                                                    <property name="paramName">UserName</property>
-                                                    <expression name="expression">params["UserName"]</expression>
-                                                </structure>
-                                                <structure>
-                                                    <property name="paramName">UserRole</property>
-                                                    <expression name="expression">params["UserRole"]</expression>
-                                                </structure>
-                                            </list-property>
                                             <property name="refTemplateParameter">NewTemplateParameterDefinition</property>
                                             <property name="style">sans-style1</property>
                                         </extended-item>
@@ -5039,7 +5088,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
     &lt;property name=&quot;targetFileType&quot;>report-design&lt;/property>
     &lt;list-property name=&quot;paramBindings&quot;>
         &lt;structure>
-            &lt;property name=&quot;paramName&quot;>ForVOName&lt;/property>
+            &lt;property name=&quot;paramName&quot;>VOs&lt;/property>
             &lt;expression name=&quot;expression&quot;>params[&quot;thisVO&quot;]&lt;/expression>
         &lt;/structure>
         &lt;structure>
@@ -5256,7 +5305,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
   <SeriesThickness>10.0</SeriesThickness>
   <SampleData>
     <BaseSampleData>
-      <DataSetRepresentation>A, B, C</DataSetRepresentation>
+      <DataSetRepresentation>01/05/2000,02/01/2000,04/12/2000,03/12/2000,02/29/2000</DataSetRepresentation>
     </BaseSampleData>
     <OrthogonalSampleData>
       <DataSetRepresentation>5,4,12</DataSetRepresentation>
@@ -5267,7 +5316,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
     <LegendBehavior>None</LegendBehavior>
   </Interactivity>
   <Axes>
-    <Type>Text</Type>
+    <Type>DateTime</Type>
     <Title>
       <Caption>
         <Value>X-Axis Title</Value>
@@ -5493,11 +5542,44 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           </DataPoint>
           <LabelPosition>Inside</LabelPosition>
           <Stacked>true</Stacked>
+          <Triggers>
+            <Condition>onmouseover</Condition>
+            <Action>
+              <Type>Show_Tooltip</Type>
+              <Value xsi:type="attribute:TooltipValue">
+                <Text>var VOName = row[&quot;VOName&quot;];var metricvalue =&quot;&quot;;&#xD;
+&#xD;
+var label;&#xD;
+var dotpos;&#xD;
+&#xD;
+if (params[&quot;DisplayMetric&quot;] == &quot;WallDuration&quot;) { &#xD;
+	metricvalue = String(row[&quot;WallDuration&quot;]);&#xD;
+	label = &quot;Wallclock Hours: &quot;;&#xD;
+}&#xD;
+if (params[&quot;DisplayMetric&quot;] == &quot;cpu&quot;)  {&#xD;
+	metricvalue = String(row[&quot;cpu&quot;]);&#xD;
+	label = &quot;Process Hours: &quot;;&#xD;
+} &#xD;
+if (params[&quot;DisplayMetric&quot;] == &quot;Njobs&quot;) {&#xD;
+	metricvalue = String(row[&quot;Njobs&quot;]);&#xD;
+	label = &quot;Jobs: &quot;;&#xD;
+}&#xD;
+var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
+	if(dotpos > 0)&#xD;
+	{ &#xD;
+	metricvalue = metricvalue.substring(0,dotpos+2);&#xD;
+	}&#xD;
+&#xD;
+&quot;VOName: &quot; + VOName + &quot;\n&quot; + label + metricvalue</Text>
+                <Delay>200</Delay>
+              </Value>
+            </Action>
+          </Triggers>
           <Riser>Rectangle</Riser>
         </Series>
         <Grouping>
           <Enabled>false</Enabled>
-          <GroupingInterval>2</GroupingInterval>
+          <GroupingInterval>2.0</GroupingInterval>
           <GroupType>Text</GroupType>
           <AggregateExpression>Sum</AggregateExpression>
         </Grouping>
@@ -5721,7 +5803,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -5768,7 +5850,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -5815,7 +5897,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -5862,7 +5944,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -5909,7 +5991,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -5956,7 +6038,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -6003,7 +6085,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -6050,7 +6132,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -6097,7 +6179,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -6144,7 +6226,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -6191,7 +6273,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -6238,7 +6320,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -6285,7 +6367,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -6332,7 +6414,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -6379,7 +6461,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -6426,7 +6508,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -6473,7 +6555,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -6520,7 +6602,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -6567,7 +6649,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -6614,7 +6696,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -6661,7 +6743,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -6708,7 +6790,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -6755,7 +6837,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -6802,7 +6884,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -6849,7 +6931,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -6896,7 +6978,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -6943,7 +7025,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -6990,7 +7072,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -7037,7 +7119,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -7084,7 +7166,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -7131,7 +7213,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -7178,7 +7260,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -7225,7 +7307,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -7272,7 +7354,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -7319,7 +7401,101 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
+        </DataDefinition>
+        <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
+        <DataPoint>
+          <Components>
+            <Type>Orthogonal_Value</Type>
+          </Components>
+          <Separator>, </Separator>
+        </DataPoint>
+        <LabelPosition>Outside</LabelPosition>
+        <Stacked>false</Stacked>
+      </Series>
+      <Series>
+        <Visible>true</Visible>
+        <Label>
+          <Caption>
+            <Value>&lt;undefined></Value>
+            <Font>
+              <Alignment/>
+            </Font>
+          </Caption>
+          <Background xsi:type="attribute:ColorDefinition">
+            <Transparency>0</Transparency>
+            <Red>255</Red>
+            <Green>255</Green>
+            <Blue>255</Blue>
+          </Background>
+          <Outline>
+            <Style>Solid</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>false</Visible>
+          </Outline>
+          <Insets>
+            <Top>0.0</Top>
+            <Left>2.0</Left>
+            <Bottom>0.0</Bottom>
+            <Right>3.0</Right>
+          </Insets>
+          <Visible>false</Visible>
+        </Label>
+        <DataDefinition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
+        </DataDefinition>
+        <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
+        <DataPoint>
+          <Components>
+            <Type>Orthogonal_Value</Type>
+          </Components>
+          <Separator>, </Separator>
+        </DataPoint>
+        <LabelPosition>Outside</LabelPosition>
+        <Stacked>false</Stacked>
+      </Series>
+      <Series>
+        <Visible>true</Visible>
+        <Label>
+          <Caption>
+            <Value>&lt;undefined></Value>
+            <Font>
+              <Alignment/>
+            </Font>
+          </Caption>
+          <Background xsi:type="attribute:ColorDefinition">
+            <Transparency>0</Transparency>
+            <Red>255</Red>
+            <Green>255</Green>
+            <Blue>255</Blue>
+          </Background>
+          <Outline>
+            <Style>Solid</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>false</Visible>
+          </Outline>
+          <Insets>
+            <Top>0.0</Top>
+            <Left>2.0</Left>
+            <Bottom>0.0</Bottom>
+            <Right>3.0</Right>
+          </Insets>
+          <Visible>false</Visible>
+        </Label>
+        <DataDefinition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -7333,11 +7509,14 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
       </Series>
       <Grouping>
         <Enabled>false</Enabled>
-        <GroupingInterval>2</GroupingInterval>
+        <GroupingInterval>2.0</GroupingInterval>
         <GroupType>Text</GroupType>
         <AggregateExpression>Sum</AggregateExpression>
       </Grouping>
       <Sorting>Ascending</Sorting>
+      <SortKey>
+        <Definition>row[&quot;DateValue&quot;]</Definition>
+      </SortKey>
     </SeriesDefinitions>
     <Orientation>Horizontal</Orientation>
     <LineAttributes>
@@ -7389,6 +7568,10 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
       </Insets>
       <Visible>false</Visible>
     </Label>
+    <FormatSpecifier xsi:type="attribute:DateFormatSpecifier">
+      <Type>Medium</Type>
+      <Detail>Date</Detail>
+    </FormatSpecifier>
     <LabelPosition>Below</LabelPosition>
     <Staggered>false</Staggered>
     <MajorGrid>
@@ -7466,7 +7649,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
                                                 <property name="reportName">WeeklyUsageForVO.rptdesign</property>
                                                 <list-property name="paramBindings">
                                                     <structure>
-                                                        <property name="paramName">ForVOName</property>
+                                                        <property name="paramName">VOs</property>
                                                         <expression name="expression">params["thisVO"]</expression>
                                                     </structure>
                                                     <structure>
@@ -7491,21 +7674,13 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
                                                 <structure>
                                                     <property name="operator">eq</property>
                                                     <expression name="expr">(row["final_rank"]-1)%4</expression>
-                                                    <expression name="value1">1</expression>
+                                                    <simple-property-list name="value1">
+                                                        <value>1</value>
+                                                    </simple-property-list>
                                                 </structure>
                                             </list-property>
                                             <property name="height">80px</property>
                                             <property name="width">100px</property>
-                                            <list-property name="paramBindings">
-                                                <structure>
-                                                    <property name="paramName">UserName</property>
-                                                    <expression name="expression">params["UserName"]</expression>
-                                                </structure>
-                                                <structure>
-                                                    <property name="paramName">UserRole</property>
-                                                    <expression name="expression">params["UserRole"]</expression>
-                                                </structure>
-                                            </list-property>
                                             <property name="refTemplateParameter">NewTemplateParameterDefinition</property>
                                             <property name="style">sans-style1</property>
                                         </extended-item>
@@ -7817,7 +7992,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
     &lt;property name=&quot;targetFileType&quot;>report-design&lt;/property>
     &lt;list-property name=&quot;paramBindings&quot;>
         &lt;structure>
-            &lt;property name=&quot;paramName&quot;>ForVOName&lt;/property>
+            &lt;property name=&quot;paramName&quot;>VOs&lt;/property>
             &lt;expression name=&quot;expression&quot;>params[&quot;thisVO&quot;]&lt;/expression>
         &lt;/structure>
         &lt;structure>
@@ -8034,7 +8209,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
   <SeriesThickness>10.0</SeriesThickness>
   <SampleData>
     <BaseSampleData>
-      <DataSetRepresentation>A, B, C</DataSetRepresentation>
+      <DataSetRepresentation>01/05/2000,02/01/2000,04/12/2000,03/12/2000,02/29/2000</DataSetRepresentation>
     </BaseSampleData>
     <OrthogonalSampleData>
       <DataSetRepresentation>5,4,12</DataSetRepresentation>
@@ -8045,7 +8220,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
     <LegendBehavior>None</LegendBehavior>
   </Interactivity>
   <Axes>
-    <Type>Text</Type>
+    <Type>DateTime</Type>
     <Title>
       <Caption>
         <Value>X-Axis Title</Value>
@@ -8271,11 +8446,44 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           </DataPoint>
           <LabelPosition>Inside</LabelPosition>
           <Stacked>true</Stacked>
+          <Triggers>
+            <Condition>onmouseover</Condition>
+            <Action>
+              <Type>Show_Tooltip</Type>
+              <Value xsi:type="attribute:TooltipValue">
+                <Text>var VOName = row[&quot;VOName&quot;];var metricvalue =&quot;&quot;;&#xD;
+&#xD;
+var label;&#xD;
+var dotpos;&#xD;
+&#xD;
+if (params[&quot;DisplayMetric&quot;] == &quot;WallDuration&quot;) { &#xD;
+	metricvalue = String(row[&quot;WallDuration&quot;]);&#xD;
+	label = &quot;Wallclock Hours: &quot;;&#xD;
+}&#xD;
+if (params[&quot;DisplayMetric&quot;] == &quot;cpu&quot;)  {&#xD;
+	metricvalue = String(row[&quot;cpu&quot;]);&#xD;
+	label = &quot;Process Hours: &quot;;&#xD;
+} &#xD;
+if (params[&quot;DisplayMetric&quot;] == &quot;Njobs&quot;) {&#xD;
+	metricvalue = String(row[&quot;Njobs&quot;]);&#xD;
+	label = &quot;Jobs: &quot;;&#xD;
+}&#xD;
+var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
+	if(dotpos > 0)&#xD;
+	{ &#xD;
+	metricvalue = metricvalue.substring(0,dotpos+2);&#xD;
+	}&#xD;
+&#xD;
+&quot;VOName: &quot; + VOName + &quot;\n&quot; + label + metricvalue</Text>
+                <Delay>200</Delay>
+              </Value>
+            </Action>
+          </Triggers>
           <Riser>Rectangle</Riser>
         </Series>
         <Grouping>
           <Enabled>false</Enabled>
-          <GroupingInterval>2</GroupingInterval>
+          <GroupingInterval>2.0</GroupingInterval>
           <GroupType>Text</GroupType>
           <AggregateExpression>Sum</AggregateExpression>
         </Grouping>
@@ -8499,7 +8707,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -8546,7 +8754,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -8593,7 +8801,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -8640,7 +8848,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -8687,7 +8895,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -8734,7 +8942,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -8781,7 +8989,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -8828,7 +9036,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -8875,7 +9083,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -8922,7 +9130,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -8969,7 +9177,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -9016,7 +9224,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -9063,7 +9271,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -9110,7 +9318,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -9157,7 +9365,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -9204,7 +9412,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -9251,7 +9459,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -9298,7 +9506,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -9345,7 +9553,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -9392,7 +9600,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -9439,7 +9647,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -9486,7 +9694,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -9533,7 +9741,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -9580,7 +9788,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -9627,7 +9835,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -9674,7 +9882,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -9721,7 +9929,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -9768,7 +9976,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -9815,7 +10023,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -9862,7 +10070,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -9909,7 +10117,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -9956,7 +10164,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -10003,7 +10211,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -10050,7 +10258,289 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
+        </DataDefinition>
+        <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
+        <DataPoint>
+          <Components>
+            <Type>Orthogonal_Value</Type>
+          </Components>
+          <Separator>, </Separator>
+        </DataPoint>
+        <LabelPosition>Outside</LabelPosition>
+        <Stacked>false</Stacked>
+      </Series>
+      <Series>
+        <Visible>true</Visible>
+        <Label>
+          <Caption>
+            <Value>&lt;undefined></Value>
+            <Font>
+              <Alignment/>
+            </Font>
+          </Caption>
+          <Background xsi:type="attribute:ColorDefinition">
+            <Transparency>0</Transparency>
+            <Red>255</Red>
+            <Green>255</Green>
+            <Blue>255</Blue>
+          </Background>
+          <Outline>
+            <Style>Solid</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>false</Visible>
+          </Outline>
+          <Insets>
+            <Top>0.0</Top>
+            <Left>2.0</Left>
+            <Bottom>0.0</Bottom>
+            <Right>3.0</Right>
+          </Insets>
+          <Visible>false</Visible>
+        </Label>
+        <DataDefinition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
+        </DataDefinition>
+        <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
+        <DataPoint>
+          <Components>
+            <Type>Orthogonal_Value</Type>
+          </Components>
+          <Separator>, </Separator>
+        </DataPoint>
+        <LabelPosition>Outside</LabelPosition>
+        <Stacked>false</Stacked>
+      </Series>
+      <Series>
+        <Visible>true</Visible>
+        <Label>
+          <Caption>
+            <Value>&lt;undefined></Value>
+            <Font>
+              <Alignment/>
+            </Font>
+          </Caption>
+          <Background xsi:type="attribute:ColorDefinition">
+            <Transparency>0</Transparency>
+            <Red>255</Red>
+            <Green>255</Green>
+            <Blue>255</Blue>
+          </Background>
+          <Outline>
+            <Style>Solid</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>false</Visible>
+          </Outline>
+          <Insets>
+            <Top>0.0</Top>
+            <Left>2.0</Left>
+            <Bottom>0.0</Bottom>
+            <Right>3.0</Right>
+          </Insets>
+          <Visible>false</Visible>
+        </Label>
+        <DataDefinition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
+        </DataDefinition>
+        <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
+        <DataPoint>
+          <Components>
+            <Type>Orthogonal_Value</Type>
+          </Components>
+          <Separator>, </Separator>
+        </DataPoint>
+        <LabelPosition>Outside</LabelPosition>
+        <Stacked>false</Stacked>
+      </Series>
+      <Series>
+        <Visible>true</Visible>
+        <Label>
+          <Caption>
+            <Value>&lt;undefined></Value>
+            <Font>
+              <Alignment/>
+            </Font>
+          </Caption>
+          <Background xsi:type="attribute:ColorDefinition">
+            <Transparency>0</Transparency>
+            <Red>255</Red>
+            <Green>255</Green>
+            <Blue>255</Blue>
+          </Background>
+          <Outline>
+            <Style>Solid</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>false</Visible>
+          </Outline>
+          <Insets>
+            <Top>0.0</Top>
+            <Left>2.0</Left>
+            <Bottom>0.0</Bottom>
+            <Right>3.0</Right>
+          </Insets>
+          <Visible>false</Visible>
+        </Label>
+        <DataDefinition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
+        </DataDefinition>
+        <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
+        <DataPoint>
+          <Components>
+            <Type>Orthogonal_Value</Type>
+          </Components>
+          <Separator>, </Separator>
+        </DataPoint>
+        <LabelPosition>Outside</LabelPosition>
+        <Stacked>false</Stacked>
+      </Series>
+      <Series>
+        <Visible>true</Visible>
+        <Label>
+          <Caption>
+            <Value>&lt;undefined></Value>
+            <Font>
+              <Alignment/>
+            </Font>
+          </Caption>
+          <Background xsi:type="attribute:ColorDefinition">
+            <Transparency>0</Transparency>
+            <Red>255</Red>
+            <Green>255</Green>
+            <Blue>255</Blue>
+          </Background>
+          <Outline>
+            <Style>Solid</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>false</Visible>
+          </Outline>
+          <Insets>
+            <Top>0.0</Top>
+            <Left>2.0</Left>
+            <Bottom>0.0</Bottom>
+            <Right>3.0</Right>
+          </Insets>
+          <Visible>false</Visible>
+        </Label>
+        <DataDefinition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
+        </DataDefinition>
+        <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
+        <DataPoint>
+          <Components>
+            <Type>Orthogonal_Value</Type>
+          </Components>
+          <Separator>, </Separator>
+        </DataPoint>
+        <LabelPosition>Outside</LabelPosition>
+        <Stacked>false</Stacked>
+      </Series>
+      <Series>
+        <Visible>true</Visible>
+        <Label>
+          <Caption>
+            <Value>&lt;undefined></Value>
+            <Font>
+              <Alignment/>
+            </Font>
+          </Caption>
+          <Background xsi:type="attribute:ColorDefinition">
+            <Transparency>0</Transparency>
+            <Red>255</Red>
+            <Green>255</Green>
+            <Blue>255</Blue>
+          </Background>
+          <Outline>
+            <Style>Solid</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>false</Visible>
+          </Outline>
+          <Insets>
+            <Top>0.0</Top>
+            <Left>2.0</Left>
+            <Bottom>0.0</Bottom>
+            <Right>3.0</Right>
+          </Insets>
+          <Visible>false</Visible>
+        </Label>
+        <DataDefinition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
+        </DataDefinition>
+        <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
+        <DataPoint>
+          <Components>
+            <Type>Orthogonal_Value</Type>
+          </Components>
+          <Separator>, </Separator>
+        </DataPoint>
+        <LabelPosition>Outside</LabelPosition>
+        <Stacked>false</Stacked>
+      </Series>
+      <Series>
+        <Visible>true</Visible>
+        <Label>
+          <Caption>
+            <Value>&lt;undefined></Value>
+            <Font>
+              <Alignment/>
+            </Font>
+          </Caption>
+          <Background xsi:type="attribute:ColorDefinition">
+            <Transparency>0</Transparency>
+            <Red>255</Red>
+            <Green>255</Green>
+            <Blue>255</Blue>
+          </Background>
+          <Outline>
+            <Style>Solid</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>false</Visible>
+          </Outline>
+          <Insets>
+            <Top>0.0</Top>
+            <Left>2.0</Left>
+            <Bottom>0.0</Bottom>
+            <Right>3.0</Right>
+          </Insets>
+          <Visible>false</Visible>
+        </Label>
+        <DataDefinition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -10064,11 +10554,14 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
       </Series>
       <Grouping>
         <Enabled>false</Enabled>
-        <GroupingInterval>2</GroupingInterval>
+        <GroupingInterval>2.0</GroupingInterval>
         <GroupType>Text</GroupType>
         <AggregateExpression>Sum</AggregateExpression>
       </Grouping>
       <Sorting>Ascending</Sorting>
+      <SortKey>
+        <Definition>row[&quot;DateValue&quot;]</Definition>
+      </SortKey>
     </SeriesDefinitions>
     <Orientation>Horizontal</Orientation>
     <LineAttributes>
@@ -10120,6 +10613,10 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
       </Insets>
       <Visible>false</Visible>
     </Label>
+    <FormatSpecifier xsi:type="attribute:DateFormatSpecifier">
+      <Type>Medium</Type>
+      <Detail>Date</Detail>
+    </FormatSpecifier>
     <LabelPosition>Below</LabelPosition>
     <Staggered>false</Staggered>
     <MajorGrid>
@@ -10197,7 +10694,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
                                                 <property name="reportName">WeeklyUsageForVO.rptdesign</property>
                                                 <list-property name="paramBindings">
                                                     <structure>
-                                                        <property name="paramName">ForVOName</property>
+                                                        <property name="paramName">VOs</property>
                                                         <expression name="expression">params["thisVO"]</expression>
                                                     </structure>
                                                     <structure>
@@ -10222,21 +10719,13 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
                                                 <structure>
                                                     <property name="operator">eq</property>
                                                     <expression name="expr">(row["final_rank"]-1)%4</expression>
-                                                    <expression name="value1">2</expression>
+                                                    <simple-property-list name="value1">
+                                                        <value>2</value>
+                                                    </simple-property-list>
                                                 </structure>
                                             </list-property>
                                             <property name="height">80px</property>
                                             <property name="width">100px</property>
-                                            <list-property name="paramBindings">
-                                                <structure>
-                                                    <property name="paramName">UserName</property>
-                                                    <expression name="expression">params["UserName"]</expression>
-                                                </structure>
-                                                <structure>
-                                                    <property name="paramName">UserRole</property>
-                                                    <expression name="expression">params["UserRole"]</expression>
-                                                </structure>
-                                            </list-property>
                                             <property name="refTemplateParameter">NewTemplateParameterDefinition</property>
                                             <property name="style">sans-style1</property>
                                         </extended-item>
@@ -10548,7 +11037,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
     &lt;property name=&quot;targetFileType&quot;>report-design&lt;/property>
     &lt;list-property name=&quot;paramBindings&quot;>
         &lt;structure>
-            &lt;property name=&quot;paramName&quot;>ForVOName&lt;/property>
+            &lt;property name=&quot;paramName&quot;>VOs&lt;/property>
             &lt;expression name=&quot;expression&quot;>params[&quot;thisVO&quot;]&lt;/expression>
         &lt;/structure>
         &lt;structure>
@@ -10765,7 +11254,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
   <SeriesThickness>10.0</SeriesThickness>
   <SampleData>
     <BaseSampleData>
-      <DataSetRepresentation>A, B, C</DataSetRepresentation>
+      <DataSetRepresentation>01/05/2000,02/01/2000,04/12/2000,03/12/2000,02/29/2000</DataSetRepresentation>
     </BaseSampleData>
     <OrthogonalSampleData>
       <DataSetRepresentation>5,4,12</DataSetRepresentation>
@@ -10776,7 +11265,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
     <LegendBehavior>None</LegendBehavior>
   </Interactivity>
   <Axes>
-    <Type>Text</Type>
+    <Type>DateTime</Type>
     <Title>
       <Caption>
         <Value>X-Axis Title</Value>
@@ -11002,11 +11491,44 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           </DataPoint>
           <LabelPosition>Inside</LabelPosition>
           <Stacked>true</Stacked>
+          <Triggers>
+            <Condition>onmouseover</Condition>
+            <Action>
+              <Type>Show_Tooltip</Type>
+              <Value xsi:type="attribute:TooltipValue">
+                <Text>var VOName = row[&quot;VOName&quot;];var metricvalue =&quot;&quot;;&#xD;
+&#xD;
+var label;&#xD;
+var dotpos;&#xD;
+&#xD;
+if (params[&quot;DisplayMetric&quot;] == &quot;WallDuration&quot;) { &#xD;
+	metricvalue = String(row[&quot;WallDuration&quot;]);&#xD;
+	label = &quot;Wallclock Hours: &quot;;&#xD;
+}&#xD;
+if (params[&quot;DisplayMetric&quot;] == &quot;cpu&quot;)  {&#xD;
+	metricvalue = String(row[&quot;cpu&quot;]);&#xD;
+	label = &quot;Process Hours: &quot;;&#xD;
+} &#xD;
+if (params[&quot;DisplayMetric&quot;] == &quot;Njobs&quot;) {&#xD;
+	metricvalue = String(row[&quot;Njobs&quot;]);&#xD;
+	label = &quot;Jobs: &quot;;&#xD;
+}&#xD;
+var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
+	if(dotpos > 0)&#xD;
+	{ &#xD;
+	metricvalue = metricvalue.substring(0,dotpos+2);&#xD;
+	}&#xD;
+&#xD;
+&quot;VOName: &quot; + VOName + &quot;\n&quot; + label + metricvalue</Text>
+                <Delay>200</Delay>
+              </Value>
+            </Action>
+          </Triggers>
           <Riser>Rectangle</Riser>
         </Series>
         <Grouping>
           <Enabled>false</Enabled>
-          <GroupingInterval>2</GroupingInterval>
+          <GroupingInterval>2.0</GroupingInterval>
           <GroupType>Text</GroupType>
           <AggregateExpression>Sum</AggregateExpression>
         </Grouping>
@@ -11230,7 +11752,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -11277,7 +11799,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -11324,7 +11846,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -11371,7 +11893,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -11418,7 +11940,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -11465,7 +11987,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -11512,7 +12034,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -11559,7 +12081,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -11606,7 +12128,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -11653,7 +12175,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -11700,7 +12222,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -11747,7 +12269,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -11794,7 +12316,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -11841,7 +12363,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -11888,7 +12410,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -11935,7 +12457,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -11982,7 +12504,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -12029,7 +12551,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -12076,7 +12598,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -12123,7 +12645,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -12170,7 +12692,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -12217,7 +12739,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -12264,7 +12786,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -12311,7 +12833,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -12358,7 +12880,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -12405,7 +12927,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -12452,7 +12974,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -12499,7 +13021,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -12546,7 +13068,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -12593,7 +13115,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -12640,7 +13162,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -12687,7 +13209,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -12734,7 +13256,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -12781,7 +13303,242 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
+        </DataDefinition>
+        <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
+        <DataPoint>
+          <Components>
+            <Type>Orthogonal_Value</Type>
+          </Components>
+          <Separator>, </Separator>
+        </DataPoint>
+        <LabelPosition>Outside</LabelPosition>
+        <Stacked>false</Stacked>
+      </Series>
+      <Series>
+        <Visible>true</Visible>
+        <Label>
+          <Caption>
+            <Value>&lt;undefined></Value>
+            <Font>
+              <Alignment/>
+            </Font>
+          </Caption>
+          <Background xsi:type="attribute:ColorDefinition">
+            <Transparency>0</Transparency>
+            <Red>255</Red>
+            <Green>255</Green>
+            <Blue>255</Blue>
+          </Background>
+          <Outline>
+            <Style>Solid</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>false</Visible>
+          </Outline>
+          <Insets>
+            <Top>0.0</Top>
+            <Left>2.0</Left>
+            <Bottom>0.0</Bottom>
+            <Right>3.0</Right>
+          </Insets>
+          <Visible>false</Visible>
+        </Label>
+        <DataDefinition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
+        </DataDefinition>
+        <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
+        <DataPoint>
+          <Components>
+            <Type>Orthogonal_Value</Type>
+          </Components>
+          <Separator>, </Separator>
+        </DataPoint>
+        <LabelPosition>Outside</LabelPosition>
+        <Stacked>false</Stacked>
+      </Series>
+      <Series>
+        <Visible>true</Visible>
+        <Label>
+          <Caption>
+            <Value>&lt;undefined></Value>
+            <Font>
+              <Alignment/>
+            </Font>
+          </Caption>
+          <Background xsi:type="attribute:ColorDefinition">
+            <Transparency>0</Transparency>
+            <Red>255</Red>
+            <Green>255</Green>
+            <Blue>255</Blue>
+          </Background>
+          <Outline>
+            <Style>Solid</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>false</Visible>
+          </Outline>
+          <Insets>
+            <Top>0.0</Top>
+            <Left>2.0</Left>
+            <Bottom>0.0</Bottom>
+            <Right>3.0</Right>
+          </Insets>
+          <Visible>false</Visible>
+        </Label>
+        <DataDefinition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
+        </DataDefinition>
+        <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
+        <DataPoint>
+          <Components>
+            <Type>Orthogonal_Value</Type>
+          </Components>
+          <Separator>, </Separator>
+        </DataPoint>
+        <LabelPosition>Outside</LabelPosition>
+        <Stacked>false</Stacked>
+      </Series>
+      <Series>
+        <Visible>true</Visible>
+        <Label>
+          <Caption>
+            <Value>&lt;undefined></Value>
+            <Font>
+              <Alignment/>
+            </Font>
+          </Caption>
+          <Background xsi:type="attribute:ColorDefinition">
+            <Transparency>0</Transparency>
+            <Red>255</Red>
+            <Green>255</Green>
+            <Blue>255</Blue>
+          </Background>
+          <Outline>
+            <Style>Solid</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>false</Visible>
+          </Outline>
+          <Insets>
+            <Top>0.0</Top>
+            <Left>2.0</Left>
+            <Bottom>0.0</Bottom>
+            <Right>3.0</Right>
+          </Insets>
+          <Visible>false</Visible>
+        </Label>
+        <DataDefinition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
+        </DataDefinition>
+        <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
+        <DataPoint>
+          <Components>
+            <Type>Orthogonal_Value</Type>
+          </Components>
+          <Separator>, </Separator>
+        </DataPoint>
+        <LabelPosition>Outside</LabelPosition>
+        <Stacked>false</Stacked>
+      </Series>
+      <Series>
+        <Visible>true</Visible>
+        <Label>
+          <Caption>
+            <Value>&lt;undefined></Value>
+            <Font>
+              <Alignment/>
+            </Font>
+          </Caption>
+          <Background xsi:type="attribute:ColorDefinition">
+            <Transparency>0</Transparency>
+            <Red>255</Red>
+            <Green>255</Green>
+            <Blue>255</Blue>
+          </Background>
+          <Outline>
+            <Style>Solid</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>false</Visible>
+          </Outline>
+          <Insets>
+            <Top>0.0</Top>
+            <Left>2.0</Left>
+            <Bottom>0.0</Bottom>
+            <Right>3.0</Right>
+          </Insets>
+          <Visible>false</Visible>
+        </Label>
+        <DataDefinition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
+        </DataDefinition>
+        <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
+        <DataPoint>
+          <Components>
+            <Type>Orthogonal_Value</Type>
+          </Components>
+          <Separator>, </Separator>
+        </DataPoint>
+        <LabelPosition>Outside</LabelPosition>
+        <Stacked>false</Stacked>
+      </Series>
+      <Series>
+        <Visible>true</Visible>
+        <Label>
+          <Caption>
+            <Value>&lt;undefined></Value>
+            <Font>
+              <Alignment/>
+            </Font>
+          </Caption>
+          <Background xsi:type="attribute:ColorDefinition">
+            <Transparency>0</Transparency>
+            <Red>255</Red>
+            <Green>255</Green>
+            <Blue>255</Blue>
+          </Background>
+          <Outline>
+            <Style>Solid</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>false</Visible>
+          </Outline>
+          <Insets>
+            <Top>0.0</Top>
+            <Left>2.0</Left>
+            <Bottom>0.0</Bottom>
+            <Right>3.0</Right>
+          </Insets>
+          <Visible>false</Visible>
+        </Label>
+        <DataDefinition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -12795,11 +13552,14 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
       </Series>
       <Grouping>
         <Enabled>false</Enabled>
-        <GroupingInterval>2</GroupingInterval>
+        <GroupingInterval>2.0</GroupingInterval>
         <GroupType>Text</GroupType>
         <AggregateExpression>Sum</AggregateExpression>
       </Grouping>
       <Sorting>Ascending</Sorting>
+      <SortKey>
+        <Definition>row[&quot;DateValue&quot;]</Definition>
+      </SortKey>
     </SeriesDefinitions>
     <Orientation>Horizontal</Orientation>
     <LineAttributes>
@@ -12851,6 +13611,10 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
       </Insets>
       <Visible>false</Visible>
     </Label>
+    <FormatSpecifier xsi:type="attribute:DateFormatSpecifier">
+      <Type>Medium</Type>
+      <Detail>Date</Detail>
+    </FormatSpecifier>
     <LabelPosition>Below</LabelPosition>
     <Staggered>false</Staggered>
     <MajorGrid>
@@ -12928,7 +13692,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
                                                 <property name="reportName">WeeklyUsageForVO.rptdesign</property>
                                                 <list-property name="paramBindings">
                                                     <structure>
-                                                        <property name="paramName">ForVOName</property>
+                                                        <property name="paramName">VOs</property>
                                                         <expression name="expression">params["thisVO"]</expression>
                                                     </structure>
                                                     <structure>
@@ -12953,21 +13717,13 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
                                                 <structure>
                                                     <property name="operator">eq</property>
                                                     <expression name="expr">(row["final_rank"]-1)%4</expression>
-                                                    <expression name="value1">3</expression>
+                                                    <simple-property-list name="value1">
+                                                        <value>3</value>
+                                                    </simple-property-list>
                                                 </structure>
                                             </list-property>
                                             <property name="height">80px</property>
                                             <property name="width">100px</property>
-                                            <list-property name="paramBindings">
-                                                <structure>
-                                                    <property name="paramName">UserName</property>
-                                                    <expression name="expression">params["UserName"]</expression>
-                                                </structure>
-                                                <structure>
-                                                    <property name="paramName">UserRole</property>
-                                                    <expression name="expression">params["UserRole"]</expression>
-                                                </structure>
-                                            </list-property>
                                             <property name="refTemplateParameter">NewTemplateParameterDefinition</property>
                                             <property name="style">sans-style1</property>
                                         </extended-item>

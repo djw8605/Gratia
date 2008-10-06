@@ -1,12 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<report xmlns="http://www.eclipse.org/birt/2005/design" version="3.2.14" id="1">
-    <property name="createdBy">Eclipse BIRT Designer Version 2.0.1 Build &lt;20060222-1204></property>
+<report xmlns="http://www.eclipse.org/birt/2005/design" version="3.2.17" id="1">
+    <property name="createdBy">Eclipse BIRT Designer Version 2.3.1.v20080911 Build &lt;2.3.1.v20080922-1151></property>
     <property name="units">in</property>
     <list-property name="propertyBindings">
-        <structure>
-            <property name="name">odaDriverClass</property>
-            <property name="id">444</property>
-        </structure>
         <structure>
             <property name="name">odaURL</property>
             <property name="id">444</property>
@@ -22,18 +18,6 @@
             <property name="id">444</property>
             <expression name="value">params["DatabasePassword"]</expression>
         </structure>
-        <structure>
-            <property name="name">odaJndiName</property>
-            <property name="id">444</property>
-        </structure>
-        <structure>
-            <property name="name">OdaConnProfileName</property>
-            <property name="id">444</property>
-        </structure>
-        <structure>
-            <property name="name">OdaConnProfileStorePath</property>
-            <property name="id">444</property>
-        </structure>
     </list-property>
     <property name="eventHandlerClass">net.sf.gratia.reporting.GratiaBirtReportEH</property>
     <list-property name="libraries">
@@ -45,10 +29,8 @@
     <parameters>
         <parameter-group name="MetricsFormatting" id="399" extends="reportLib.MetricsFormatting"/>
         <scalar-parameter name="StartDate" id="400" extends="reportLib.StartDate"/>
-        <scalar-parameter name="ForVOName" id="401" extends="reportLib.ForVOName"/>
-        <scalar-parameter name="ForVO" id="402" extends="reportLib.ForVO"/>
-        <scalar-parameter name="ForSiteName" id="403" extends="reportLib.ForSiteName"/>
-        <scalar-parameter name="ForSite" id="404" extends="reportLib.ForSite"/>
+        <scalar-parameter name="VOs" id="401" extends="reportLib.VOs"/>
+        <scalar-parameter name="Sites" id="403" extends="reportLib.Sites"/>
         <parameter-group name="DatabaseAccess" id="405" extends="reportLib.DatabaseAccess"/>
         <parameter-group name="ReportInfo" id="406" extends="reportLib.ReportInfo"/>
         <parameter-group name="UserInfo" id="407" extends="reportLib.UserInfo"/>
@@ -56,18 +38,18 @@
     <data-sources>
         <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="Data Source" id="444">
             <property name="odaDriverClass">com.mysql.jdbc.Driver</property>
-            <property name="odaURL">jdbc:mysql://gratia-db01.fnal.gov:3320/gratia_itb</property>
+            <property name="odaURL">jdbc:mysql://gratia-vm02.fnal.gov:3320/gratia_gratiax21</property>
             <property name="odaUser">reader</property>
-            <encrypted-property name="odaPassword">cmVhZGVy</encrypted-property>
+            <encrypted-property name="odaPassword" encryptionID="base64">cmVhZGVy</encrypted-property>
         </oda-data-source>
     </data-sources>
     <data-sets>
-        <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="UsageBy" id="85">
+        <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="reportsProcedure" id="85">
             <structure name="cachedMetaData">
                 <list-property name="resultSet">
                     <structure>
                         <property name="position">1</property>
-                        <property name="name">sitename</property>
+                        <property name="name">SiteName</property>
                         <property name="dataType">string</property>
                     </structure>
                     <structure>
@@ -77,23 +59,43 @@
                     </structure>
                     <structure>
                         <property name="position">3</property>
-                        <property name="name">Cpu</property>
+                        <property name="name">cpu</property>
                         <property name="dataType">float</property>
                     </structure>
                     <structure>
                         <property name="position">4</property>
+                        <property name="name">cpuUser</property>
+                        <property name="dataType">float</property>
+                    </structure>
+                    <structure>
+                        <property name="position">5</property>
+                        <property name="name">cpuSystem</property>
+                        <property name="dataType">float</property>
+                    </structure>
+                    <structure>
+                        <property name="position">6</property>
                         <property name="name">Njobs</property>
                         <property name="dataType">decimal</property>
                     </structure>
                     <structure>
-                        <property name="position">5</property>
-                        <property name="name">voname</property>
+                        <property name="position">7</property>
+                        <property name="name">VOName</property>
                         <property name="dataType">string</property>
                     </structure>
                     <structure>
-                        <property name="position">6</property>
+                        <property name="position">8</property>
                         <property name="name">UserName</property>
                         <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">9</property>
+                        <property name="name">ProbeName</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">10</property>
+                        <property name="name">DateValue</property>
+                        <property name="dataType">date</property>
                     </structure>
                 </list-property>
             </structure>
@@ -101,22 +103,25 @@
             <list-property name="parameters">
                 <structure>
                     <property name="name">UserName</property>
+                    <property name="paramName">UserName</property>
                     <property name="dataType">string</property>
                     <property name="position">1</property>
-                    <expression name="defaultValue">'none'</expression>
+                    <expression name="defaultValue">params["UserName"]</expression>
                     <property name="isInput">true</property>
                     <property name="isOutput">false</property>
                 </structure>
                 <structure>
                     <property name="name">UserRole</property>
+                    <property name="paramName">UserRole</property>
                     <property name="dataType">string</property>
                     <property name="position">2</property>
-                    <expression name="defaultValue">'none'</expression>
+                    <expression name="defaultValue">params["UserRole"]</expression>
                     <property name="isInput">true</property>
                     <property name="isOutput">false</property>
                 </structure>
                 <structure>
                     <property name="name">StartDate</property>
+                    <property name="paramName">StartDate</property>
                     <property name="dataType">string</property>
                     <property name="position">3</property>
                     <expression name="defaultValue">'2007-01-01'</expression>
@@ -126,34 +131,92 @@
                     <property name="isOutput">false</property>
                 </structure>
                 <structure>
-                    <property name="name">ForVO</property>
+                    <property name="name">EndDate</property>
                     <property name="dataType">string</property>
                     <property name="position">4</property>
-                    <expression name="defaultValue">'ForVO'</expression>
+                    <expression name="defaultValue">null</expression>
                     <property name="isInput">true</property>
                     <property name="isOutput">false</property>
                 </structure>
                 <structure>
-                    <property name="name">VOName</property>
+                    <property name="name">timeUnit</property>
                     <property name="dataType">string</property>
                     <property name="position">5</property>
+                    <expression name="defaultValue">'3600'</expression>
+                    <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
+                </structure>
+                <structure>
+                    <property name="name">dateGrouping</property>
+                    <property name="dataType">string</property>
+                    <property name="position">6</property>
+                    <expression name="defaultValue">'day'</expression>
+                    <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
+                </structure>
+                <structure>
+                    <property name="name">groupBy</property>
+                    <property name="dataType">string</property>
+                    <property name="position">7</property>
+                    <expression name="defaultValue">'UserName'</expression>
+                    <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
+                </structure>
+                <structure>
+                    <property name="name">orderby</property>
+                    <property name="dataType">string</property>
+                    <property name="position">8</property>
+                    <expression name="defaultValue">'UserName'</expression>
+                    <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
+                </structure>
+                <structure>
+                    <property name="name">resourceType</property>
+                    <property name="dataType">string</property>
+                    <property name="position">9</property>
+                    <expression name="defaultValue">'Batch'</expression>
+                    <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
+                </structure>
+                <structure>
+                    <property name="name">VOs</property>
+                    <property name="paramName">VOs</property>
+                    <property name="dataType">string</property>
+                    <property name="position">10</property>
                     <expression name="defaultValue">'gridex'</expression>
                     <property name="isInput">true</property>
                     <property name="isOutput">false</property>
                 </structure>
                 <structure>
-                    <property name="name">ForSite</property>
+                    <property name="name">Sites</property>
+                    <property name="paramName">Sites</property>
                     <property name="dataType">string</property>
-                    <property name="position">6</property>
-                    <expression name="defaultValue">'ForSite'</expression>
+                    <property name="position">11</property>
+                    <expression name="defaultValue">'FNAL_GPFARM_TEST'</expression>
                     <property name="isInput">true</property>
                     <property name="isOutput">false</property>
                 </structure>
                 <structure>
-                    <property name="name">SiteName</property>
+                    <property name="name">Probes</property>
                     <property name="dataType">string</property>
-                    <property name="position">7</property>
-                    <expression name="defaultValue">'FNAL_GPFARM_TEST'</expression>
+                    <property name="position">12</property>
+                    <expression name="defaultValue">null</expression>
+                    <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
+                </structure>
+                <structure>
+                    <property name="name">Ranked</property>
+                    <property name="dataType">string</property>
+                    <property name="position">13</property>
+                    <expression name="defaultValue">null</expression>
+                    <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
+                </structure>
+                <structure>
+                    <property name="name">selType</property>
+                    <property name="dataType">string</property>
+                    <property name="position">14</property>
+                    <expression name="defaultValue">null</expression>
                     <property name="isInput">true</property>
                     <property name="isOutput">false</property>
                 </structure>
@@ -161,8 +224,8 @@
             <list-property name="resultSet">
                 <structure>
                     <property name="position">1</property>
-                    <property name="name">sitename</property>
-                    <property name="nativeName">sitename</property>
+                    <property name="name">SiteName</property>
+                    <property name="nativeName">SiteName</property>
                     <property name="dataType">string</property>
                 </structure>
                 <structure>
@@ -173,30 +236,54 @@
                 </structure>
                 <structure>
                     <property name="position">3</property>
-                    <property name="name">Cpu</property>
-                    <property name="nativeName">Cpu</property>
+                    <property name="name">cpu</property>
+                    <property name="nativeName">cpu</property>
                     <property name="dataType">float</property>
                 </structure>
                 <structure>
                     <property name="position">4</property>
+                    <property name="name">cpuUser</property>
+                    <property name="nativeName">cpuUser</property>
+                    <property name="dataType">float</property>
+                </structure>
+                <structure>
+                    <property name="position">5</property>
+                    <property name="name">cpuSystem</property>
+                    <property name="nativeName">cpuSystem</property>
+                    <property name="dataType">float</property>
+                </structure>
+                <structure>
+                    <property name="position">6</property>
                     <property name="name">Njobs</property>
                     <property name="nativeName">Njobs</property>
                     <property name="dataType">decimal</property>
                 </structure>
                 <structure>
-                    <property name="position">5</property>
-                    <property name="name">voname</property>
-                    <property name="nativeName">voname</property>
+                    <property name="position">7</property>
+                    <property name="name">VOName</property>
+                    <property name="nativeName">VOName</property>
                     <property name="dataType">string</property>
                 </structure>
                 <structure>
-                    <property name="position">6</property>
+                    <property name="position">8</property>
                     <property name="name">UserName</property>
                     <property name="nativeName">UserName</property>
                     <property name="dataType">string</property>
                 </structure>
+                <structure>
+                    <property name="position">9</property>
+                    <property name="name">ProbeName</property>
+                    <property name="nativeName">ProbeName</property>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="position">10</property>
+                    <property name="name">DateValue</property>
+                    <property name="nativeName">DateValue</property>
+                    <property name="dataType">date</property>
+                </structure>
             </list-property>
-            <property name="queryText">Call UsageByUserForDate(?,?,?,'x','%Y-%m-%d','Batch',?,?,?,?)</property>
+            <property name="queryText">call reports(?,?,?,?,?,?,?,?,?,?,?,?,?,?)</property>
         </oda-data-set>
     </data-sets>
     <styles>
@@ -503,7 +590,7 @@
   <Dimension>Two_Dimensional</Dimension>
   <Script>/**
  * Called before generation of chart model to GeneratedChartState.
- *
+ * 
  * @param chart
  *            Chart
  * @param icsc
@@ -513,10 +600,9 @@
 function beforeGeneration(chart, icsc)
 {
 rep = icsc.getExternalContext().getScriptable();
-
-	metric_text = &quot;&quot;;
+	
 	metric = rep.getParameterValue(&quot;DisplayMetric&quot;);
-	if(metric==&quot;Cpu&quot;) metric_text = &quot;Process Hours&quot;;
+	if(metric==&quot;cpu&quot;) metric_text = &quot;Process Hours&quot;;
 	if(metric==&quot;WallDuration&quot;) metric_text = &quot;Wallclock Hours&quot;;
 	if(metric==&quot;Njobs&quot;) metric_text = &quot;Job Count&quot;;
 
@@ -527,7 +613,7 @@ rep = icsc.getExternalContext().getScriptable();
 
 /**
  * Called before rendering the label for each datapoint.
- *
+ * 
  * @param dph
  *            DataPointHints
  * @param label
@@ -542,10 +628,10 @@ rep = icsc.getExternalContext().getScriptable();
 val1 = rep.getParameterValue(&quot;DisplayMetric&quot;);
 if(val1 == 'Njobs')
 	{
-	labval = label.getCaption().getValue();
+	labval = label.getCaption().getValue(); 
 	dotpos = labval.indexOf(&quot;.&quot;);
 	if(dotpos > 0)
-		{
+		{ 
 		frmt = label.getCaption().getValue().substring(0,dotpos);
 		label.getCaption().setValue(frmt)
 		};
@@ -554,7 +640,7 @@ if(val1 == 'Njobs')
 
 /**
  * Called before rendering the Title of an Axis.
- *
+ * 
  * @param axis
  *            Axis
  * @param label
@@ -569,7 +655,7 @@ rep = icsc.getExternalContext().getScriptable();
 	val1 =rep.getParameterValue(&quot;DisplayMetric&quot;);
 	if(!axis.isCategoryAxis())
 	{
-		if(val1==&quot;Cpu&quot;)
+		if(val1==&quot;cpu&quot;)
 		{
 		label.getCaption().setValue(&quot;Process Hours&quot;);
 		}
@@ -803,7 +889,7 @@ rep = icsc.getExternalContext().getScriptable();
         </Series>
         <Grouping>
           <Enabled>false</Enabled>
-          <GroupingInterval>2</GroupingInterval>
+          <GroupingInterval>2.0</GroupingInterval>
           <GroupType>Text</GroupType>
           <AggregateExpression>Sum</AggregateExpression>
         </Grouping>
@@ -1543,9 +1629,479 @@ rep = icsc.getExternalContext().getScriptable();
         <LabelPosition>Outside</LabelPosition>
         <Stacked>false</Stacked>
       </Series>
+      <Series>
+        <Visible>true</Visible>
+        <Label>
+          <Caption>
+            <Value>&lt;undefined></Value>
+            <Font>
+              <Alignment/>
+            </Font>
+          </Caption>
+          <Background xsi:type="attribute:ColorDefinition">
+            <Transparency>0</Transparency>
+            <Red>255</Red>
+            <Green>255</Green>
+            <Blue>255</Blue>
+          </Background>
+          <Outline>
+            <Style>Solid</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>false</Visible>
+          </Outline>
+          <Insets>
+            <Top>0.0</Top>
+            <Left>2.0</Left>
+            <Bottom>0.0</Bottom>
+            <Right>3.0</Right>
+          </Insets>
+          <Visible>false</Visible>
+        </Label>
+        <DataDefinition>
+          <Definition>row[&quot;UserName&quot;]</Definition>
+        </DataDefinition>
+        <SeriesIdentifier>Usage</SeriesIdentifier>
+        <DataPoint>
+          <Components>
+            <Type>Orthogonal_Value</Type>
+          </Components>
+          <Separator>, </Separator>
+        </DataPoint>
+        <LabelPosition>Outside</LabelPosition>
+        <Stacked>false</Stacked>
+      </Series>
+      <Series>
+        <Visible>true</Visible>
+        <Label>
+          <Caption>
+            <Value>&lt;undefined></Value>
+            <Font>
+              <Alignment/>
+            </Font>
+          </Caption>
+          <Background xsi:type="attribute:ColorDefinition">
+            <Transparency>0</Transparency>
+            <Red>255</Red>
+            <Green>255</Green>
+            <Blue>255</Blue>
+          </Background>
+          <Outline>
+            <Style>Solid</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>false</Visible>
+          </Outline>
+          <Insets>
+            <Top>0.0</Top>
+            <Left>2.0</Left>
+            <Bottom>0.0</Bottom>
+            <Right>3.0</Right>
+          </Insets>
+          <Visible>false</Visible>
+        </Label>
+        <DataDefinition>
+          <Definition>row[&quot;UserName&quot;]</Definition>
+        </DataDefinition>
+        <SeriesIdentifier>Usage</SeriesIdentifier>
+        <DataPoint>
+          <Components>
+            <Type>Orthogonal_Value</Type>
+          </Components>
+          <Separator>, </Separator>
+        </DataPoint>
+        <LabelPosition>Outside</LabelPosition>
+        <Stacked>false</Stacked>
+      </Series>
+      <Series>
+        <Visible>true</Visible>
+        <Label>
+          <Caption>
+            <Value>&lt;undefined></Value>
+            <Font>
+              <Alignment/>
+            </Font>
+          </Caption>
+          <Background xsi:type="attribute:ColorDefinition">
+            <Transparency>0</Transparency>
+            <Red>255</Red>
+            <Green>255</Green>
+            <Blue>255</Blue>
+          </Background>
+          <Outline>
+            <Style>Solid</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>false</Visible>
+          </Outline>
+          <Insets>
+            <Top>0.0</Top>
+            <Left>2.0</Left>
+            <Bottom>0.0</Bottom>
+            <Right>3.0</Right>
+          </Insets>
+          <Visible>false</Visible>
+        </Label>
+        <DataDefinition>
+          <Definition>row[&quot;UserName&quot;]</Definition>
+        </DataDefinition>
+        <SeriesIdentifier>Usage</SeriesIdentifier>
+        <DataPoint>
+          <Components>
+            <Type>Orthogonal_Value</Type>
+          </Components>
+          <Separator>, </Separator>
+        </DataPoint>
+        <LabelPosition>Outside</LabelPosition>
+        <Stacked>false</Stacked>
+      </Series>
+      <Series>
+        <Visible>true</Visible>
+        <Label>
+          <Caption>
+            <Value>&lt;undefined></Value>
+            <Font>
+              <Alignment/>
+            </Font>
+          </Caption>
+          <Background xsi:type="attribute:ColorDefinition">
+            <Transparency>0</Transparency>
+            <Red>255</Red>
+            <Green>255</Green>
+            <Blue>255</Blue>
+          </Background>
+          <Outline>
+            <Style>Solid</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>false</Visible>
+          </Outline>
+          <Insets>
+            <Top>0.0</Top>
+            <Left>2.0</Left>
+            <Bottom>0.0</Bottom>
+            <Right>3.0</Right>
+          </Insets>
+          <Visible>false</Visible>
+        </Label>
+        <DataDefinition>
+          <Definition>row[&quot;UserName&quot;]</Definition>
+        </DataDefinition>
+        <SeriesIdentifier>Usage</SeriesIdentifier>
+        <DataPoint>
+          <Components>
+            <Type>Orthogonal_Value</Type>
+          </Components>
+          <Separator>, </Separator>
+        </DataPoint>
+        <LabelPosition>Outside</LabelPosition>
+        <Stacked>false</Stacked>
+      </Series>
+      <Series>
+        <Visible>true</Visible>
+        <Label>
+          <Caption>
+            <Value>&lt;undefined></Value>
+            <Font>
+              <Alignment/>
+            </Font>
+          </Caption>
+          <Background xsi:type="attribute:ColorDefinition">
+            <Transparency>0</Transparency>
+            <Red>255</Red>
+            <Green>255</Green>
+            <Blue>255</Blue>
+          </Background>
+          <Outline>
+            <Style>Solid</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>false</Visible>
+          </Outline>
+          <Insets>
+            <Top>0.0</Top>
+            <Left>2.0</Left>
+            <Bottom>0.0</Bottom>
+            <Right>3.0</Right>
+          </Insets>
+          <Visible>false</Visible>
+        </Label>
+        <DataDefinition>
+          <Definition>row[&quot;UserName&quot;]</Definition>
+        </DataDefinition>
+        <SeriesIdentifier>Usage</SeriesIdentifier>
+        <DataPoint>
+          <Components>
+            <Type>Orthogonal_Value</Type>
+          </Components>
+          <Separator>, </Separator>
+        </DataPoint>
+        <LabelPosition>Outside</LabelPosition>
+        <Stacked>false</Stacked>
+      </Series>
+      <Series>
+        <Visible>true</Visible>
+        <Label>
+          <Caption>
+            <Value>&lt;undefined></Value>
+            <Font>
+              <Alignment/>
+            </Font>
+          </Caption>
+          <Background xsi:type="attribute:ColorDefinition">
+            <Transparency>0</Transparency>
+            <Red>255</Red>
+            <Green>255</Green>
+            <Blue>255</Blue>
+          </Background>
+          <Outline>
+            <Style>Solid</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>false</Visible>
+          </Outline>
+          <Insets>
+            <Top>0.0</Top>
+            <Left>2.0</Left>
+            <Bottom>0.0</Bottom>
+            <Right>3.0</Right>
+          </Insets>
+          <Visible>false</Visible>
+        </Label>
+        <DataDefinition>
+          <Definition>row[&quot;UserName&quot;]</Definition>
+        </DataDefinition>
+        <SeriesIdentifier>Usage</SeriesIdentifier>
+        <DataPoint>
+          <Components>
+            <Type>Orthogonal_Value</Type>
+          </Components>
+          <Separator>, </Separator>
+        </DataPoint>
+        <LabelPosition>Outside</LabelPosition>
+        <Stacked>false</Stacked>
+      </Series>
+      <Series>
+        <Visible>true</Visible>
+        <Label>
+          <Caption>
+            <Value>&lt;undefined></Value>
+            <Font>
+              <Alignment/>
+            </Font>
+          </Caption>
+          <Background xsi:type="attribute:ColorDefinition">
+            <Transparency>0</Transparency>
+            <Red>255</Red>
+            <Green>255</Green>
+            <Blue>255</Blue>
+          </Background>
+          <Outline>
+            <Style>Solid</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>false</Visible>
+          </Outline>
+          <Insets>
+            <Top>0.0</Top>
+            <Left>2.0</Left>
+            <Bottom>0.0</Bottom>
+            <Right>3.0</Right>
+          </Insets>
+          <Visible>false</Visible>
+        </Label>
+        <DataDefinition>
+          <Definition>row[&quot;UserName&quot;]</Definition>
+        </DataDefinition>
+        <SeriesIdentifier>Usage</SeriesIdentifier>
+        <DataPoint>
+          <Components>
+            <Type>Orthogonal_Value</Type>
+          </Components>
+          <Separator>, </Separator>
+        </DataPoint>
+        <LabelPosition>Outside</LabelPosition>
+        <Stacked>false</Stacked>
+      </Series>
+      <Series>
+        <Visible>true</Visible>
+        <Label>
+          <Caption>
+            <Value>&lt;undefined></Value>
+            <Font>
+              <Alignment/>
+            </Font>
+          </Caption>
+          <Background xsi:type="attribute:ColorDefinition">
+            <Transparency>0</Transparency>
+            <Red>255</Red>
+            <Green>255</Green>
+            <Blue>255</Blue>
+          </Background>
+          <Outline>
+            <Style>Solid</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>false</Visible>
+          </Outline>
+          <Insets>
+            <Top>0.0</Top>
+            <Left>2.0</Left>
+            <Bottom>0.0</Bottom>
+            <Right>3.0</Right>
+          </Insets>
+          <Visible>false</Visible>
+        </Label>
+        <DataDefinition>
+          <Definition>row[&quot;UserName&quot;]</Definition>
+        </DataDefinition>
+        <SeriesIdentifier>Usage</SeriesIdentifier>
+        <DataPoint>
+          <Components>
+            <Type>Orthogonal_Value</Type>
+          </Components>
+          <Separator>, </Separator>
+        </DataPoint>
+        <LabelPosition>Outside</LabelPosition>
+        <Stacked>false</Stacked>
+      </Series>
+      <Series>
+        <Visible>true</Visible>
+        <Label>
+          <Caption>
+            <Value>&lt;undefined></Value>
+            <Font>
+              <Alignment/>
+            </Font>
+          </Caption>
+          <Background xsi:type="attribute:ColorDefinition">
+            <Transparency>0</Transparency>
+            <Red>255</Red>
+            <Green>255</Green>
+            <Blue>255</Blue>
+          </Background>
+          <Outline>
+            <Style>Solid</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>false</Visible>
+          </Outline>
+          <Insets>
+            <Top>0.0</Top>
+            <Left>2.0</Left>
+            <Bottom>0.0</Bottom>
+            <Right>3.0</Right>
+          </Insets>
+          <Visible>false</Visible>
+        </Label>
+        <DataDefinition>
+          <Definition>row[&quot;UserName&quot;]</Definition>
+        </DataDefinition>
+        <SeriesIdentifier>Usage</SeriesIdentifier>
+        <DataPoint>
+          <Components>
+            <Type>Orthogonal_Value</Type>
+          </Components>
+          <Separator>, </Separator>
+        </DataPoint>
+        <LabelPosition>Outside</LabelPosition>
+        <Stacked>false</Stacked>
+      </Series>
+      <Series>
+        <Visible>true</Visible>
+        <Label>
+          <Caption>
+            <Value>&lt;undefined></Value>
+            <Font>
+              <Alignment/>
+            </Font>
+          </Caption>
+          <Background xsi:type="attribute:ColorDefinition">
+            <Transparency>0</Transparency>
+            <Red>255</Red>
+            <Green>255</Green>
+            <Blue>255</Blue>
+          </Background>
+          <Outline>
+            <Style>Solid</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>false</Visible>
+          </Outline>
+          <Insets>
+            <Top>0.0</Top>
+            <Left>2.0</Left>
+            <Bottom>0.0</Bottom>
+            <Right>3.0</Right>
+          </Insets>
+          <Visible>false</Visible>
+        </Label>
+        <DataDefinition>
+          <Definition>row[&quot;UserName&quot;]</Definition>
+        </DataDefinition>
+        <SeriesIdentifier>Usage</SeriesIdentifier>
+        <DataPoint>
+          <Components>
+            <Type>Orthogonal_Value</Type>
+          </Components>
+          <Separator>, </Separator>
+        </DataPoint>
+        <LabelPosition>Outside</LabelPosition>
+        <Stacked>false</Stacked>
+      </Series>
       <Grouping>
         <Enabled>false</Enabled>
-        <GroupingInterval>2</GroupingInterval>
+        <GroupingInterval>2.0</GroupingInterval>
         <GroupType>Text</GroupType>
         <AggregateExpression>Sum</AggregateExpression>
       </Grouping>
@@ -1671,7 +2227,7 @@ rep = icsc.getExternalContext().getScriptable();
 ]]></xml-property>
             <property name="outputFormat">SVG</property>
             <property name="marginTop">0pt</property>
-            <property name="dataSet">UsageBy</property>
+            <property name="dataSet">reportsProcedure</property>
             <property name="height">600px</property>
             <property name="width">640px</property>
             <list-property name="paramBindings">
@@ -1680,20 +2236,12 @@ rep = icsc.getExternalContext().getScriptable();
                     <expression name="expression">params["StartDate"]</expression>
                 </structure>
                 <structure>
-                    <property name="paramName">VOName</property>
-                    <expression name="expression">params["ForVOName"]</expression>
+                    <property name="paramName">VOs</property>
+                    <expression name="expression">params["VOs"]</expression>
                 </structure>
                 <structure>
-                    <property name="paramName">ForVO</property>
-                    <expression name="expression">params["ForVO"]</expression>
-                </structure>
-                <structure>
-                    <property name="paramName">SiteName</property>
-                    <expression name="expression">params["ForSiteName"]</expression>
-                </structure>
-                <structure>
-                    <property name="paramName">ForSite</property>
-                    <expression name="expression">params["ForSite"]</expression>
+                    <property name="paramName">Sites</property>
+                    <expression name="expression">params["Sites"]</expression>
                 </structure>
                 <structure>
                     <property name="paramName">UserName</property>
@@ -1706,8 +2254,8 @@ rep = icsc.getExternalContext().getScriptable();
             </list-property>
             <list-property name="boundDataColumns">
                 <structure>
-                    <property name="name">sitename</property>
-                    <expression name="expression">dataSetRow["sitename"]</expression>
+                    <property name="name">SiteName</property>
+                    <expression name="expression">dataSetRow["SiteName"]</expression>
                     <property name="dataType">string</property>
                 </structure>
                 <structure>
@@ -1717,12 +2265,12 @@ rep = icsc.getExternalContext().getScriptable();
                 </structure>
                 <structure>
                     <property name="name">WallDuration</property>
-                    <expression name="expression">dataSetRow["WallDuration"]/3600</expression>
+                    <expression name="expression">dataSetRow["WallDuration"]</expression>
                     <property name="dataType">float</property>
                 </structure>
                 <structure>
-                    <property name="name">Cpu</property>
-                    <expression name="expression">dataSetRow["Cpu"]/3600</expression>
+                    <property name="name">cpu</property>
+                    <expression name="expression">dataSetRow["cpu"]</expression>
                     <property name="dataType">float</property>
                 </structure>
                 <structure>
@@ -1731,8 +2279,8 @@ rep = icsc.getExternalContext().getScriptable();
                     <property name="dataType">decimal</property>
                 </structure>
                 <structure>
-                    <property name="name">voname</property>
-                    <expression name="expression">dataSetRow["voname"]</expression>
+                    <property name="name">VOName</property>
+                    <expression name="expression">dataSetRow["VOName"]</expression>
                     <property name="dataType">string</property>
                 </structure>
             </list-property>

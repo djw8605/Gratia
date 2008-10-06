@@ -1,12 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<report xmlns="http://www.eclipse.org/birt/2005/design" version="3.2.14" id="1">
-    <property name="createdBy">Eclipse BIRT Designer Version 1.0.1 Build &lt;20050815-0740></property>
+<report xmlns="http://www.eclipse.org/birt/2005/design" version="3.2.17" id="1">
+    <property name="createdBy">Eclipse BIRT Designer Version 2.3.1.v20080911 Build &lt;2.3.1.v20080922-1151></property>
     <property name="units">in</property>
     <list-property name="propertyBindings">
-        <structure>
-            <property name="name">odaDriverClass</property>
-            <property name="id">444</property>
-        </structure>
         <structure>
             <property name="name">odaURL</property>
             <property name="id">444</property>
@@ -21,18 +17,6 @@
             <property name="name">odaPassword</property>
             <property name="id">444</property>
             <expression name="value">params["DatabasePassword"]</expression>
-        </structure>
-        <structure>
-            <property name="name">odaJndiName</property>
-            <property name="id">444</property>
-        </structure>
-        <structure>
-            <property name="name">OdaConnProfileName</property>
-            <property name="id">444</property>
-        </structure>
-        <structure>
-            <property name="name">OdaConnProfileStorePath</property>
-            <property name="id">444</property>
         </structure>
     </list-property>
     <property name="eventHandlerClass">net.sf.gratia.reporting.GratiaBirtReportEH</property>
@@ -495,7 +479,7 @@
         </Series>
         <Grouping>
           <Enabled>false</Enabled>
-          <GroupingInterval>2</GroupingInterval>
+          <GroupingInterval>2.0</GroupingInterval>
           <GroupType>Text</GroupType>
           <AggregateExpression>Sum</AggregateExpression>
         </Grouping>
@@ -706,7 +690,7 @@
       </Series>
       <Grouping>
         <Enabled>false</Enabled>
-        <GroupingInterval>2</GroupingInterval>
+        <GroupingInterval>2.0</GroupingInterval>
         <GroupType>Text</GroupType>
         <AggregateExpression>Sum</AggregateExpression>
       </Grouping>
@@ -839,13 +823,13 @@
     <data-sources>
         <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="Data Source" id="444">
             <property name="odaDriverClass">com.mysql.jdbc.Driver</property>
-            <property name="odaURL">jdbc:mysql://gratia07.fnal.gov:3322/itb_gratia_itb</property>
+            <property name="odaURL">jdbc:mysql://gratia-vm02.fnal.gov:3320/gratia_gratiax21</property>
             <property name="odaUser">reader</property>
-            <encrypted-property name="odaPassword">cmVhZGVy</encrypted-property>
+            <encrypted-property name="odaPassword" encryptionID="base64">cmVhZGVy</encrypted-property>
         </oda-data-source>
     </data-sources>
     <data-sets>
-        <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="SiteCountByVORanked" id="358">
+        <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="reportsRankedProcedure" id="358">
             <list-property name="computedColumns">
                 <structure>
                     <property name="name">ChartNr</property>
@@ -877,7 +861,7 @@
                     </structure>
                     <structure>
                         <property name="position">5</property>
-                        <property name="name">Cpu</property>
+                        <property name="name">cpu</property>
                         <property name="dataType">float</property>
                     </structure>
                     <structure>
@@ -892,23 +876,91 @@
                     </structure>
                 </list-property>
             </structure>
-            <property name="rowFetchLimit">10000</property>
+            <property name="rowFetchLimit">100</property>
             <property name="dataSource">Data Source</property>
             <property name="dataSetRowLimit">0</property>
             <list-property name="parameters">
                 <structure>
-                    <property name="name">StartDate</property>
+                    <property name="name">UserName</property>
+                    <property name="paramName">UserName</property>
                     <property name="dataType">string</property>
                     <property name="position">1</property>
+                    <expression name="defaultValue">params["UserName"].value</expression>
+                    <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
+                </structure>
+                <structure>
+                    <property name="name">UserRole</property>
+                    <property name="paramName">UserRole</property>
+                    <property name="dataType">string</property>
+                    <property name="position">2</property>
+                    <expression name="defaultValue">params["UserRole"].value</expression>
+                    <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
+                </structure>
+                <structure>
+                    <property name="name">StartDate</property>
+                    <property name="paramName">StartDate</property>
+                    <property name="dataType">string</property>
+                    <property name="position">3</property>
                     <expression name="defaultValue">'2008-06-01'</expression>
                     <property name="isInput">true</property>
                     <property name="isOutput">false</property>
                 </structure>
                 <structure>
                     <property name="name">EndDate</property>
+                    <property name="paramName">EndDate</property>
                     <property name="dataType">string</property>
-                    <property name="position">2</property>
+                    <property name="position">4</property>
                     <expression name="defaultValue">'2008-07-01'</expression>
+                    <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
+                </structure>
+                <structure>
+                    <property name="name">TimeUnit</property>
+                    <property name="dataType">string</property>
+                    <property name="position">5</property>
+                    <expression name="defaultValue">'3600'</expression>
+                    <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
+                </structure>
+                <structure>
+                    <property name="name">dateGrouping</property>
+                    <property name="dataType">string</property>
+                    <property name="position">6</property>
+                    <expression name="defaultValue">'day'</expression>
+                    <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
+                </structure>
+                <structure>
+                    <property name="name">resourceType</property>
+                    <property name="dataType">string</property>
+                    <property name="position">7</property>
+                    <expression name="defaultValue">'Batch'</expression>
+                    <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
+                </structure>
+                <structure>
+                    <property name="name">Metric</property>
+                    <property name="dataType">string</property>
+                    <property name="position">8</property>
+                    <expression name="defaultValue">'SiteCount'</expression>
+                    <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
+                </structure>
+                <structure>
+                    <property name="name">VOs</property>
+                    <property name="dataType">string</property>
+                    <property name="position">9</property>
+                    <expression name="defaultValue">null</expression>
+                    <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
+                </structure>
+                <structure>
+                    <property name="name">selType</property>
+                    <property name="dataType">string</property>
+                    <property name="position">10</property>
+                    <expression name="defaultValue">null</expression>
                     <property name="isInput">true</property>
                     <property name="isOutput">false</property>
                 </structure>
@@ -940,8 +992,8 @@
                 </structure>
                 <structure>
                     <property name="position">5</property>
-                    <property name="name">Cpu</property>
-                    <property name="nativeName">Cpu</property>
+                    <property name="name">cpu</property>
+                    <property name="nativeName">cpu</property>
                     <property name="dataType">float</property>
                 </structure>
                 <structure>
@@ -951,7 +1003,7 @@
                     <property name="dataType">decimal</property>
                 </structure>
             </list-property>
-            <property name="queryText">Call SiteUsageCountByVO('','',?,?,'day','Batch')</property>
+            <property name="queryText">call reportsRanked(?,?,?,?,?,?,?,?,?,?)</property>
         </oda-data-set>
     </data-sets>
     <styles>
@@ -975,7 +1027,7 @@
             <property name="backgroundPositionY">0%</property>
             <property name="textIndent">0em</property>
             <property name="width">100%</property>
-            <property name="dataSet">SiteCountByVORanked</property>
+            <property name="dataSet">reportsRankedProcedure</property>
             <list-property name="paramBindings">
                 <structure>
                     <property name="paramName">StartDate</property>
@@ -1014,6 +1066,7 @@
                     <property name="dataType">decimal</property>
                 </structure>
             </list-property>
+            <property name="pageBreakInterval">50</property>
             <column id="30">
                 <property name="width">33.3%</property>
             </column>
@@ -1784,7 +1837,7 @@
             </Components>
             <Separator>, </Separator>
           </DataPoint>
-          <LabelPosition>Outside</LabelPosition>
+          <LabelPosition>Inside</LabelPosition>
           <Stacked>true</Stacked>
           <Triggers>
             <Condition>onclick</Condition>
@@ -1807,10 +1860,6 @@
             &lt;expression name=&quot;expression&quot;>params[&quot;EndDate&quot;]&lt;/expression>
         &lt;/structure>
         &lt;structure>
-            &lt;property name=&quot;paramName&quot;>ForVO&lt;/property>
-            &lt;expression name=&quot;expression&quot;>'ForVO'&lt;/expression>
-        &lt;/structure>
-        &lt;structure>
             &lt;property name=&quot;paramName&quot;>ReportTitle&lt;/property>
             &lt;expression name=&quot;expression&quot;>params[&quot;ReportTitle&quot;] + ' - ' + 'drill-through'&lt;/expression>
         &lt;/structure>
@@ -1821,7 +1870,7 @@
     &lt;/list-property>
 &lt;/structure>
 </BaseUrl>
-                <BaseParameterName>ForVOName</BaseParameterName>
+                <BaseParameterName>VOs</BaseParameterName>
                 <ValueParameterName></ValueParameterName>
                 <SeriesParameterName></SeriesParameterName>
               </Value>
@@ -1831,7 +1880,7 @@
         </Series>
         <Grouping>
           <Enabled>false</Enabled>
-          <GroupingInterval>2</GroupingInterval>
+          <GroupingInterval>2.0</GroupingInterval>
           <GroupType>Text</GroupType>
           <AggregateExpression>Sum</AggregateExpression>
         </Grouping>
@@ -2066,7 +2115,7 @@
       </Series>
       <Grouping>
         <Enabled>false</Enabled>
-        <GroupingInterval>2</GroupingInterval>
+        <GroupingInterval>2.0</GroupingInterval>
         <GroupType>Text</GroupType>
         <AggregateExpression>Sum</AggregateExpression>
       </Grouping>
@@ -2205,10 +2254,6 @@
                                         <structure>
                                             <property name="paramName">EndDate</property>
                                             <expression name="expression">params["EndDate"]</expression>
-                                        </structure>
-                                        <structure>
-                                            <property name="paramName">ForVO</property>
-                                            <expression name="expression">'ForVO'</expression>
                                         </structure>
                                         <structure>
                                             <property name="paramName">ReportTitle</property>

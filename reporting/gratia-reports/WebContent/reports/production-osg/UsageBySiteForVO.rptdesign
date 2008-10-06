@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<report xmlns="http://www.eclipse.org/birt/2005/design" version="3.2.14" id="1">
-    <property name="createdBy">Eclipse BIRT Designer Version 2.0.1 Build &lt;20060222-1204></property>
+<report xmlns="http://www.eclipse.org/birt/2005/design" version="3.2.17" id="1">
+    <property name="createdBy">Eclipse BIRT Designer Version 2.3.1.v20080911 Build &lt;2.3.1.v20080922-1151></property>
     <property name="units">in</property>
     <list-property name="propertyBindings">
         <structure>
@@ -45,8 +45,7 @@
     <parameters>
         <parameter-group name="MetricsFormatting" id="401" extends="reportLib.MetricsFormatting"/>
         <parameter-group name="DateRange" id="402" extends="reportLib.DateRange"/>
-        <scalar-parameter name="ForVOName" id="403" extends="reportLib.ForVOName"/>
-        <scalar-parameter name="ForVO" id="404" extends="reportLib.ForVO"/>
+        <scalar-parameter name="VOs" id="403" extends="reportLib.VOs"/>
         <parameter-group name="DatabaseAccess" id="405" extends="reportLib.DatabaseAccess"/>
         <parameter-group name="ReportInfo" id="406" extends="reportLib.ReportInfo"/>
         <parameter-group name="UserInfo" id="407" extends="reportLib.UserInfo"/>
@@ -54,63 +53,40 @@
     <data-sources>
         <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="Data Source" id="444">
             <property name="odaDriverClass">com.mysql.jdbc.Driver</property>
-            <property name="odaURL">jdbc:mysql://gratia-db01.fnal.gov:3320/gratia_itb</property>
+            <property name="odaURL">jdbc:mysql://gratia-vm02.fnal.gov:3320/gratia_gratiax21</property>
             <property name="odaUser">reader</property>
-            <encrypted-property name="odaPassword">cmVhZGVy</encrypted-property>
+            <encrypted-property name="odaPassword" encryptionID="base64">cmVhZGVy</encrypted-property>
         </oda-data-source>
     </data-sources>
     <data-sets>
-        <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="UsageBy" id="85">
-            <structure name="cachedMetaData">
-                <list-property name="resultSet">
-                    <structure>
-                        <property name="position">1</property>
-                        <property name="name">sitename</property>
-                        <property name="dataType">string</property>
-                    </structure>
-                    <structure>
-                        <property name="position">2</property>
-                        <property name="name">WallDuration</property>
-                        <property name="dataType">float</property>
-                    </structure>
-                    <structure>
-                        <property name="position">3</property>
-                        <property name="name">Cpu</property>
-                        <property name="dataType">float</property>
-                    </structure>
-                    <structure>
-                        <property name="position">4</property>
-                        <property name="name">Njobs</property>
-                        <property name="dataType">decimal</property>
-                    </structure>
-                    <structure>
-                        <property name="position">5</property>
-                        <property name="name">VOName</property>
-                        <property name="dataType">string</property>
-                    </structure>
-                </list-property>
-            </structure>
+        <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="reportsProcedure" id="85">
+            <structure name="cachedMetaData"/>
             <property name="dataSource">Data Source</property>
             <list-property name="parameters">
                 <structure>
                     <property name="name">UserName</property>
+                    <property name="paramName">UserName</property>
                     <property name="dataType">string</property>
                     <property name="position">1</property>
                     <expression name="defaultValue">params["UserName"]</expression>
                     <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
                 </structure>
                 <structure>
                     <property name="name">UserRole</property>
+                    <property name="paramName">UserRole</property>
                     <property name="dataType">string</property>
                     <property name="position">2</property>
                     <expression name="defaultValue">params["UserRole"]</expression>
                     <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
                 </structure>
                 <structure>
                     <property name="name">StartDate</property>
+                    <property name="paramName">StartDate</property>
                     <property name="dataType">string</property>
                     <property name="position">3</property>
-                    <expression name="defaultValue">'2006-03-01 00:00:00 GMT'</expression>
+                    <expression name="defaultValue">'2006-03-01'</expression>
                     <property name="isOptional">false</property>
                     <property name="allowNull">true</property>
                     <property name="isInput">true</property>
@@ -118,94 +94,98 @@
                 </structure>
                 <structure>
                     <property name="name">EndDate</property>
+                    <property name="paramName">EndDate</property>
                     <property name="dataType">string</property>
                     <property name="position">4</property>
-                    <expression name="defaultValue">'2999-12-31 00:00:00 GMT'</expression>
+                    <expression name="defaultValue">'2999-12-31'</expression>
                     <property name="isOptional">false</property>
                     <property name="allowNull">true</property>
                     <property name="isInput">true</property>
                     <property name="isOutput">false</property>
                 </structure>
                 <structure>
-                    <property name="name">GroupByFormat</property>
+                    <property name="name">unitTime</property>
                     <property name="dataType">string</property>
                     <property name="position">5</property>
-                    <expression name="defaultValue">''</expression>
+                    <expression name="defaultValue">'3600'</expression>
                     <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
                 </structure>
                 <structure>
-                    <property name="name">ResourceType</property>
+                    <property name="name">dateGrouping</property>
                     <property name="dataType">string</property>
                     <property name="position">6</property>
+                    <expression name="defaultValue">'day'</expression>
+                    <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
+                </structure>
+                <structure>
+                    <property name="name">groupBy</property>
+                    <property name="dataType">string</property>
+                    <property name="position">7</property>
+                    <expression name="defaultValue">'SiteName, VOName'</expression>
+                    <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
+                </structure>
+                <structure>
+                    <property name="name">orderBy</property>
+                    <property name="dataType">string</property>
+                    <property name="position">8</property>
+                    <expression name="defaultValue">'SiteName, VOName'</expression>
+                    <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
+                </structure>
+                <structure>
+                    <property name="name">resourceType</property>
+                    <property name="dataType">string</property>
+                    <property name="position">9</property>
                     <expression name="defaultValue">'Batch'</expression>
                     <property name="isInput">true</property>
                     <property name="isOutput">false</property>
                 </structure>
                 <structure>
-                    <property name="name">ForVO</property>
+                    <property name="name">VOs</property>
+                    <property name="paramName">VOs</property>
                     <property name="dataType">string</property>
-                    <property name="position">7</property>
-                    <expression name="defaultValue">'ForVO'</expression>
-                    <property name="isInput">true</property>
-                </structure>
-                <structure>
-                    <property name="name">ForVOName</property>
-                    <property name="dataType">string</property>
-                    <property name="position">8</property>
-                    <expression name="defaultValue">'fermilab'</expression>
+                    <property name="position">10</property>
+                    <expression name="defaultValue">'cms'</expression>
                     <property name="isInput">true</property>
                     <property name="isOutput">false</property>
                 </structure>
                 <structure>
-                    <property name="name">ForSite</property>
+                    <property name="name">Sites</property>
                     <property name="dataType">string</property>
-                    <property name="position">9</property>
-                    <expression name="defaultValue">'AnySite'</expression>
+                    <property name="position">11</property>
+                    <expression name="defaultValue">null</expression>
                     <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
                 </structure>
                 <structure>
-                    <property name="name">ForSiteName</property>
+                    <property name="name">Probes</property>
                     <property name="dataType">string</property>
-                    <property name="position">10</property>
-                    <expression name="defaultValue">''</expression>
+                    <property name="position">12</property>
+                    <expression name="defaultValue">null</expression>
                     <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
+                </structure>
+                <structure>
+                    <property name="name">Ranked</property>
+                    <property name="dataType">string</property>
+                    <property name="position">13</property>
+                    <expression name="defaultValue">null</expression>
+                    <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
+                </structure>
+                <structure>
+                    <property name="name">selType</property>
+                    <property name="dataType">string</property>
+                    <property name="position">14</property>
+                    <expression name="defaultValue">null</expression>
+                    <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
                 </structure>
             </list-property>
-            <list-property name="resultSet">
-                <structure>
-                    <property name="position">1</property>
-                    <property name="name">sitename</property>
-                    <property name="nativeName">sitename</property>
-                    <property name="dataType">string</property>
-                </structure>
-                <structure>
-                    <property name="position">2</property>
-                    <property name="name">WallDuration</property>
-                    <property name="nativeName">WallDuration</property>
-                    <property name="dataType">float</property>
-                </structure>
-                <structure>
-                    <property name="position">3</property>
-                    <property name="name">Cpu</property>
-                    <property name="nativeName">Cpu</property>
-                    <property name="dataType">float</property>
-                </structure>
-                <structure>
-                    <property name="position">4</property>
-                    <property name="name">Njobs</property>
-                    <property name="nativeName">Njobs</property>
-                    <property name="dataType">decimal</property>
-                </structure>
-                <structure>
-                    <property name="position">5</property>
-                    <property name="name">VOName</property>
-                    <property name="nativeName">VOName</property>
-                    <property name="dataType">string</property>
-                </structure>
-            </list-property>
-            <property name="queryText">
-call UsageBySiteByVO1(?,?,?,?,?,?,?,?,?,?)
-</property>
+            <property name="queryText">call reports(?,?,?,?,?,?,?,?,?,?,?,?,?,?)</property>
         </oda-data-set>
     </data-sets>
     <styles>
@@ -221,7 +201,7 @@ call UsageBySiteByVO1(?,?,?,?,?,?,?,?,?,?)
     </page-setup>
     <body>
         <text-data name="DateRange" id="408" extends="reportLib.DateRange"/>
-        <text-data name="ForVO" id="393" extends="reportLib.ForVO"/>
+        <text-data name="ForVO" id="445" extends="reportLib.ForVO"/>
         <extended-item extensionName="Chart" name="NewChart" id="88">
             <xml-property name="xmlRepresentation"><![CDATA[<model:ChartWithAxes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:attribute="http://www.birt.eclipse.org/ChartModelAttribute" xmlns:data="http://www.birt.eclipse.org/ChartModelData" xmlns:layout="http://www.birt.eclipse.org/ChartModelLayout" xmlns:model="http://www.birt.eclipse.org/ChartModel" xmlns:type="http://www.birt.eclipse.org/ChartModelType">
   <Type>Bar Chart</Type>
@@ -477,7 +457,7 @@ call UsageBySiteByVO1(?,?,?,?,?,?,?,?,?,?)
       <Left>0.0</Left>
       <Top>0.0</Top>
       <Width>480.0</Width>
-      <Height>549.75</Height>
+      <Height>550.0</Height>
     </Bounds>
     <Insets>
       <Top>3.0</Top>
@@ -545,9 +525,8 @@ call UsageBySiteByVO1(?,?,?,?,?,?,?,?,?,?)
 function beforeGeneration( chart, context )
 {	rep = context.getExternalContext().getScriptable();
 	
-	metric_text = &quot;&quot;;
 	metric = rep.getParameterValue(&quot;DisplayMetric&quot;);
-	if(metric==&quot;Cpu&quot;) metric_text = &quot;Process Hours&quot;;
+	if(metric==&quot;cpu&quot;) metric_text = &quot;Process Hours&quot;;
 	if(metric==&quot;WallDuration&quot;) metric_text = &quot;Wallclock Hours&quot;;
 	if(metric==&quot;Njobs&quot;) metric_text = &quot;Job Count&quot;;
 
@@ -697,7 +676,7 @@ function beforeDrawAxisTitle( axis, label, context )
 	val1 =rep.getParameterValue(&quot;DisplayMetric&quot;);
 	if(!axis.isCategoryAxis())
 	{
-		if(val1==&quot;Cpu&quot;)
+		if(val1==&quot;cpu&quot;)
 		{
 		label.getCaption().setValue(&quot;Process Hours&quot;);
 		}
@@ -911,7 +890,7 @@ function beforeDrawAxisTitle( axis, label, context )
             <Visible>true</Visible>
           </Label>
           <DataDefinition>
-            <Definition>row[params[&quot;DisplayMetric&quot;].value]</Definition>
+            <Definition>row[params[&quot;DisplayMetric&quot;]]</Definition>
           </DataDefinition>
           <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
           <DataPoint>
@@ -953,16 +932,8 @@ function beforeDrawAxisTitle( axis, label, context )
             &lt;expression name=&quot;expression&quot;>params[&quot;DisplayMetric&quot;]&lt;/expression>
         &lt;/structure>
         &lt;structure>
-            &lt;property name=&quot;paramName&quot;>ForVOName&lt;/property>
-            &lt;expression name=&quot;expression&quot;>params[&quot;ForVOName&quot;]&lt;/expression>
-        &lt;/structure>
-        &lt;structure>
-            &lt;property name=&quot;paramName&quot;>ForVO&lt;/property>
-            &lt;expression name=&quot;expression&quot;>&quot;ForVO&quot;&lt;/expression>
-        &lt;/structure>
-        &lt;structure>
-            &lt;property name=&quot;paramName&quot;>ForSite&lt;/property>
-            &lt;expression name=&quot;expression&quot;>&quot;ForSite&quot;&lt;/expression>
+            &lt;property name=&quot;paramName&quot;>VOs&lt;/property>
+            &lt;expression name=&quot;expression&quot;>params[&quot;VOs&quot;]&lt;/expression>
         &lt;/structure>
         &lt;structure>
             &lt;property name=&quot;paramName&quot;>ReportTitle&lt;/property>
@@ -975,7 +946,7 @@ function beforeDrawAxisTitle( axis, label, context )
     &lt;/list-property>
 &lt;/structure>
 </BaseUrl>
-                <BaseParameterName>ForSiteName</BaseParameterName>
+                <BaseParameterName>Sites</BaseParameterName>
                 <ValueParameterName></ValueParameterName>
                 <SeriesParameterName></SeriesParameterName>
               </Value>
@@ -991,7 +962,7 @@ function beforeDrawAxisTitle( axis, label, context )
         </Series>
         <Grouping>
           <Enabled>false</Enabled>
-          <GroupingInterval>2</GroupingInterval>
+          <GroupingInterval>2.0</GroupingInterval>
           <GroupType>Text</GroupType>
           <AggregateExpression>Sum</AggregateExpression>
         </Grouping>
@@ -1208,7 +1179,7 @@ function beforeDrawAxisTitle( axis, label, context )
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;sitename&quot;]</Definition>
+          <Definition>row[&quot;SiteName&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>Usage</SeriesIdentifier>
         <DataPoint>
@@ -1255,7 +1226,7 @@ function beforeDrawAxisTitle( axis, label, context )
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;sitename&quot;]</Definition>
+          <Definition>row[&quot;SiteName&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>Usage</SeriesIdentifier>
         <DataPoint>
@@ -1302,7 +1273,7 @@ function beforeDrawAxisTitle( axis, label, context )
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;sitename&quot;]</Definition>
+          <Definition>row[&quot;SiteName&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>Usage</SeriesIdentifier>
         <DataPoint>
@@ -1349,7 +1320,7 @@ function beforeDrawAxisTitle( axis, label, context )
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;sitename&quot;]</Definition>
+          <Definition>row[&quot;SiteName&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>Usage</SeriesIdentifier>
         <DataPoint>
@@ -1396,7 +1367,7 @@ function beforeDrawAxisTitle( axis, label, context )
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;sitename&quot;]</Definition>
+          <Definition>row[&quot;SiteName&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>Usage</SeriesIdentifier>
         <DataPoint>
@@ -1443,7 +1414,7 @@ function beforeDrawAxisTitle( axis, label, context )
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;sitename&quot;]</Definition>
+          <Definition>row[&quot;SiteName&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>Usage</SeriesIdentifier>
         <DataPoint>
@@ -1490,7 +1461,7 @@ function beforeDrawAxisTitle( axis, label, context )
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;sitename&quot;]</Definition>
+          <Definition>row[&quot;SiteName&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>Usage</SeriesIdentifier>
         <DataPoint>
@@ -1504,7 +1475,7 @@ function beforeDrawAxisTitle( axis, label, context )
       </Series>
       <Grouping>
         <Enabled>false</Enabled>
-        <GroupingInterval>2</GroupingInterval>
+        <GroupingInterval>2.0</GroupingInterval>
         <GroupType>Text</GroupType>
         <AggregateExpression>Sum</AggregateExpression>
       </Grouping>
@@ -1650,16 +1621,8 @@ function beforeDrawAxisTitle( axis, label, context )
                         <expression name="expression">params["DisplayMetric"]</expression>
                     </structure>
                     <structure>
-                        <property name="paramName">ForVOName</property>
-                        <expression name="expression">params["ForVOName"]</expression>
-                    </structure>
-                    <structure>
-                        <property name="paramName">ForVO</property>
-                        <expression name="expression">"ForVO"</expression>
-                    </structure>
-                    <structure>
-                        <property name="paramName">ForSite</property>
-                        <expression name="expression">"ForSite"</expression>
+                        <property name="paramName">VOs</property>
+                        <expression name="expression">params["VOs"]</expression>
                     </structure>
                     <structure>
                         <property name="paramName">ReportTitle</property>
@@ -1671,7 +1634,7 @@ function beforeDrawAxisTitle( axis, label, context )
                     </structure>
                 </list-property>
             </structure>
-            <property name="dataSet">UsageBy</property>
+            <property name="dataSet">reportsProcedure</property>
             <property name="height">550pt</property>
             <property name="width">640px</property>
             <list-property name="paramBindings">
@@ -1684,24 +1647,24 @@ function beforeDrawAxisTitle( axis, label, context )
                     <expression name="expression">params["EndDate"]</expression>
                 </structure>
                 <structure>
-                    <property name="paramName">ForVOName</property>
-                    <expression name="expression">params["ForVOName"]</expression>
+                    <property name="paramName">VOs</property>
+                    <expression name="expression">params["VOs"]</expression>
                 </structure>
             </list-property>
             <list-property name="boundDataColumns">
                 <structure>
-                    <property name="name">sitename</property>
-                    <expression name="expression">dataSetRow["sitename"]</expression>
+                    <property name="name">SiteName</property>
+                    <expression name="expression">dataSetRow["SiteName"]</expression>
                     <property name="dataType">string</property>
                 </structure>
                 <structure>
                     <property name="name">WallDuration</property>
-                    <expression name="expression">dataSetRow["WallDuration"]/3600</expression>
+                    <expression name="expression">dataSetRow["WallDuration"]</expression>
                     <property name="dataType">float</property>
                 </structure>
                 <structure>
-                    <property name="name">Cpu</property>
-                    <expression name="expression">dataSetRow["Cpu"]/3600</expression>
+                    <property name="name">cpu</property>
+                    <expression name="expression">dataSetRow["cpu"]</expression>
                     <property name="dataType">float</property>
                 </structure>
                 <structure>
