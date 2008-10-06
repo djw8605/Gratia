@@ -5,7 +5,7 @@
 #
 # library to create simple report using the Gratia psacct database
 #
-#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.37 2008-10-06 16:03:20 pcanal Exp $
+#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.38 2008-10-06 19:45:44 pcanal Exp $
 
 import time
 import datetime
@@ -468,10 +468,27 @@ def GetSiteVOEfficiency(begin,end):
     select = """\
             select SiteName,VOName, sum(Njobs),sum(WallDuration),sum(CpuUserDuration+CpuSystemDuration)/sum(WallDuration) 
             from """+schema+"""VOProbeSummary, """+schema+"""Site, """+schema+"""Probe
-            where VOName != \"unknown\" and Probe.siteid = Site.siteid and VOProbeSummary.ProbeName = Probe.probename and 
+            where VOName != \"unknown\" and VOName != \"other\" and
+               Probe.siteid = Site.siteid and VOProbeSummary.ProbeName = Probe.probename and 
                EndTime >= \"""" + DateToString(begin) + """\" and
                EndTime < \"""" + DateToString(end) + """\"
             group by Site.SiteName, VOName
+            """
+    #print "Query = " + select;
+
+    return RunQueryAndSplit(select);    
+
+def GetVOEfficiency(begin,end):
+    schema = "gratia.";
+
+    select = """\
+            select VOName, sum(Njobs),sum(WallDuration),sum(CpuUserDuration+CpuSystemDuration)/sum(WallDuration) 
+            from """+schema+"""VOProbeSummary, """+schema+"""Site, """+schema+"""Probe
+            where VOName != \"unknown\"  and VOName != \"other\" and
+               Probe.siteid = Site.siteid and VOProbeSummary.ProbeName = Probe.probename and 
+               EndTime >= \"""" + DateToString(begin) + """\" and
+               EndTime < \"""" + DateToString(end) + """\"
+            group by VOName
             """
     #print "Query = " + select;
 
@@ -1466,7 +1483,7 @@ Deltas are the differences with the previous period."""
         defaultSort = True
 
         def __init__(self, header = False):
-           self.formats["csv"] = ",\"%s\",%s,\"%s\",\"%s\",\"%s\",\"%s\"  "
+           self.formats["csv"] = ",\"%s\",\"%s\",%s,%s,%s,\"%s\"  "
            self.formats["text"] = "| %-22s | %-14s | %9s | %9s | %10s | %10s"
            self.lines["csv"] = ""
            self.lines["text"] = "-------------------------------------------------------------------------------------------------"
@@ -1475,7 +1492,65 @@ Deltas are the differences with the previous period."""
 
         def GetData(self,start,end):
            return GetSiteVOEfficiency(start,end) 
-           
+
+class RangeVOEfficiencyConf:
+        title = """\
+OSG efficiency summary for  %s - %s (midnight UTC - midnight UTC)
+including all jobs that finished in that time period.
+Wall Duration is expressed in hours and rounded to the nearest hour. Wall
+Duration is the duration between the instant the job started running
+and the instant the job ended its execution.
+Deltas are the differences with the previous period."""
+        headline = "For all jobs finished between %s and %s (midnight UTC)"
+        headers = ("VO","# of Jobs","Wall Dur.","Cpu / Wall","Delta")
+        num_header = 1
+        formats = {}
+        lines = {}
+        col2 = "All sites"    
+        col1 = "All VOs"
+        defaultSort = True
+
+        def __init__(self, header = False):
+           self.formats["csv"] = ",\"%s\",%s,%s,%s,\"%s\"  "
+           self.formats["text"] = "| %-14s | %9s | %9s | %10s | %10s"
+           self.lines["csv"] = ""
+           self.lines["text"] = "------------------------------------------------------------------------"
+
+           if (not header) :  self.title = ""
+
+        def GetData(self,start,end):
+           return GetVOEfficiency(start,end) 
+                      
+class GradedEfficiencyConf:
+        title = """\
+OSG efficiency summary for  %s - %s (midnight UTC - midnight UTC)
+including all jobs that finished in that time period.
+Wall Duration is expressed in hours and rounded to the nearest hour. Wall
+Duration is the duration between the instant the job started running
+and the instant the job ended its execution.
+Cpu Duration is the sum for each core that participated to the job 
+of the amount of time the core participated actively to the job.
+
+Efficiency is the ratio of Cpu Duration used over the WallDuration."""
+        headline = "For all jobs finished between %s and %s (midnight UTC)"
+        headers = ("VO","30 Days","7 Days","1 Day")
+        num_header = 1
+        formats = {}
+        lines = {}
+        col2 = "All VOs"
+        defaultSort = True
+
+        def __init__(self, header = False):
+           self.formats["csv"] = ",\"%s\",%s,%s,%s  "
+           self.formats["text"] = "| %-14s | %9s | %9s | %10s "
+           self.lines["csv"] = ""
+           self.lines["text"] = "-------------------------------------------------------------"
+
+           if (not header) :  self.title = ""
+
+        def GetData(self,start,end):
+           return GetVOEfficiency(start,end) 
+                      
 def SimpleRange(what, range_end = datetime.date.today(),
                  range_begin = None,
                  output = "text"):
@@ -1725,18 +1800,19 @@ def EfficiencyRange(what, range_end = datetime.date.today(),
         num_header = what.num_header;
         offset = num_header - 1;
 
-        if (len(val)==4) :
-            # Nasty hack to harmonize Panda output
-            if what.headers[1] == "VO":
-               if vo != "unknown": vo = string.lower(val[1])
-               if vo == "atlas": vo = "usatlas"
-            else:
-		        vo = val[1]
-            key = site + " " + vo
-        elif (num_header == 2) :
-            vo = val[1]
-            key = site + " " + vo
-            
+        if (num_header==2):
+           if (len(val)==4) :
+              # Nasty hack to harmonize Panda output
+              if what.headers[1] == "VO":
+                 if vo != "unknown": vo = string.lower(val[1])
+                 if vo == "atlas": vo = "usatlas"
+              else:
+		           vo = val[1]
+              key = site + " " + vo
+           else:
+              vo = val[1]
+              key = site + " " + vo
+
         njobs= string.atoi( val[offset+1] )
         wall = string.atof( val[offset+2] ) / factor
         if (wall != 0) :
@@ -1786,17 +1862,18 @@ def EfficiencyRange(what, range_end = datetime.date.today(),
         num_header = what.num_header;
         offset = num_header - 1;
         
-        if (len(val)==4) :
-            # Nasty hack to harmonize Panda output
-            if what.headers[1] == "VO":
-	           if vo != "unknown": vo = string.lower(val[1])
-	           if vo == "atlas": vo = "usatlas"
-            else:
-		        vo = val[1]
-            key = site + " " + vo
-        elif (num_header == 2) :
-            vo = val[1]
-            key = site + " " + vo
+        if (num_header==2):
+           if (len(val)==4):
+              # Nasty hack to harmonize Panda output
+              if what.headers[1] == "VO":
+                 if vo != "unknown": vo = string.lower(val[1])
+                 if vo == "atlas": vo = "usatlas"
+              else:
+		           vo = val[1]
+              key = site + " " + vo
+           else:
+              vo = val[1]
+              key = site + " " + vo
 
         (oldnjobs,oldwall,oldeff) = (0,0,0)
         if oldValues.has_key(key):
@@ -1877,6 +1954,119 @@ def EfficiencyRange(what, range_end = datetime.date.today(),
                   (what.col1, niceNum(totaljobs), niceNum(totalwall),
                     niceNum( totaleff / nrecords * 100.0 ),
                    niceNum( 100.0* (totaleff - oldeff) ))
+        print what.lines[output]
+    return result
+
+def EfficiencyGraded(what, range_end = datetime.date.today(),
+                     output = "text"):
+    factor = 3600  # Convert number of seconds to number of hours
+
+    deltas = [30,7,1]
+    
+    range_begin = range_end + datetime.timedelta(days=-deltas[0])
+    
+    if (output != "None") :
+        if (what.title != "") :
+            print what.title % ( DateToString(range_begin,False),
+                                 DateToString(range_end,False) )
+        if (what.headline != "") :
+            print what.headline % ( DateToString(range_begin,False),
+                                    DateToString(range_end,False) )
+        print what.lines[output]
+        print "    ", what.formats[output] % what.headers
+        print what.lines[output]
+        
+    # First get the previous' range-length's information
+    totalwall = [0,0,0]
+    totaljobs = [0,0,0]
+    totaleff = [0,0,0]
+    nrecords = [0,0,0]
+    values = {}
+    result = []
+
+    for when in range(0,len(deltas)):
+       start = range_end - datetime.timedelta(days=deltas[when])
+       end = range_end
+
+       lines = what.GetData(start,end)
+       for i in range (0,len(lines)):
+          val = lines[i].split('\t')
+ 
+          offset = 0
+          first = val[0]
+          
+          num_header = what.num_header;
+          offset = num_header - 1;
+
+          if (num_header==2):
+             second = val[1]
+             key = first + " " + second
+          else:
+             second = ""
+             key = first
+             
+          njobs= string.atoi( val[offset+1] )
+          wall = string.atof( val[offset+2] ) / factor
+          if (wall != 0) :
+             eff = string.atof( val[offset+3] )
+          else:
+             eff = -1
+
+          nrecords[when] = nrecords[when] + 1
+          totalwall[when] = totalwall[when] + wall
+          totaljobs[when] = totaljobs[when] + njobs
+          totaleff[when] = totaleff[when] + eff
+          
+          if (values.has_key(key)):
+              current = values[key]
+              current[when] = [njobs,wall,eff,first,second]
+              values[key] = current
+#             print "Error: can not add efficiencies"
+#             print key
+#             print oldValues[key]
+#             print [njobs,wall,eff,site,vo]
+          else:
+             empty = [[],[],[]]
+             empty[when] = [njobs,wall,eff,first,second]
+             values[key] = empty
+
+    [totaljobs,totalwall,totaleff] = GetTotals(start,end)
+    totaljobs = string.atoi(totaljobs);
+    totalwall = string.atof(totalwall) /factor
+    totaleff = string.atof(totaleff)
+
+#    for key,(oldnjobs,oldwall,oldeff,site,vo) in values.iteritems():            
+#        if (key != "total") :
+#            printValues[key] = (0,0,oldwall,0,oldeff,site,vo)
+
+    if (what.defaultSort):
+        sortedValues = sortedDictValues(values)
+    else:
+        sortedValues = sortedDictValuesFunc(values,what.Sorting)
+        
+    index = 0
+    for key,data in sortedValues:
+        index = index + 1
+        printval = []
+        printval.append( data[0][3] )
+        if (what.num_header==2):
+           printval.append( data[0][4])
+        for inside in data:
+           if (len(inside)>2):
+              eff = inside[2]
+              if (eff==-1):
+                 effstring = "n/a"
+              else:
+                 effstring = niceNum(eff*100.0,0.1)
+              printval.append( effstring )
+           else:
+              printval.append( "n/a" )
+
+        if (output != "None") :
+            print "%3d " %(index), what.formats[output] % tuple(printval)
+        result.append(values)       
+        
+    if (output != "None") :
         print what.lines[output]
     return result
 
