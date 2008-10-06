@@ -76,7 +76,7 @@ This script is intended to simplify the upgrading of a gratia instance
 in development, integration and production.  
 
 Modes for running the script:
-1. Question and answer mode (no command line arguments)
+1. Question and answer mode (usually no command line arguments)
      $PGM 
    This is the recommended mode for performing upgrades.
 
@@ -105,7 +105,7 @@ intent is to take some of the guesswork (memory-like) out of the upgrade
 process and it does some validation.
 
 A major assumption it makes is that all tomcat collectors are in $tomcat_dir.
-If this is not true, you will have to do it the old fashion way.
+If this is not true, you may use the command-line option \"--tomcat-dir <dir>\".
 
  No prompt mode   Prompt mode questions
  --------------   --------------------- 
@@ -126,6 +126,14 @@ will automatically start the tomcat/collector and requires specifying the
 email address(es).  It is intended for use ONLY when running from cron for 
 the purpose of daily test installations.
 
+If '--daily' is not used and recipients are not specified explicitly
+with \"--mail <recipients>\", the script will attempt to guess a
+suitable email address to which to send the upgrade status email from
+the configured user in the tomcat instance's configuration .dat file. If
+the configured user is not specified then mail is sent to
+grid-accounting@fnal.gov; if the configured user is root or daemon the
+default email destination is not altered.
+
 The '--force-log4j' argument is used to force the over-writing of the
 log4j.properties file used for logging.  If these properties have been 
 modified locally and you desire to preserve these changes, then this option
@@ -141,12 +149,12 @@ The script performs the following:
  5. optionally, overwrite your log4j.properties file
 
 Log files are maintained for every execution of this script in this directory:
-  /data/TOMCAT_INSTANCE-upgrades.log 
+  ${tomcat_dir}/TOMCAT_INSTANCE-upgrades.log 
 as YYYY-MM-DD.log.  These files are appended to and this script perform a 
 housekeeping retaining only the last 10 log files.
 
 The latest release data will be shown in:
-  /data/TOMCAT_INSTANCE.gratia-release
+  ${tomcat_dir}/TOMCAT_INSTANCE.gratia-release
 
 You must be root user to execute this script.
 "
@@ -329,7 +337,7 @@ function install_upgrade {
   if [ "$mysql_file" != "NONE" ];then
     pswd="$(cat $mysql_file)"
   fi
-  runit "$pgm -d $pswd -S $source ${force}-s $(echo $tomcat|cut -d'-' -f2)"
+  runit "$pgm -p ${tomcat_dir} -d $pswd -S $source ${force}-s $(echo $tomcat|cut -d'-' -f2-)"
   logit "Install was successful"
   sleep 3
 }
@@ -622,6 +630,7 @@ function process_in_prompt_mode {
   log_final_verification
   verify_the_makefile_target_dir_exists 
   verify_the_update_program_exists
+  find_configured_user_set_email
   install_upgrade
   clean_log_directory 
   finish_up
@@ -636,6 +645,7 @@ function process_in_no_prompt_mode {
   verify_the_update_program_exists
   log_upgrade_start
   log_final_verification
+  find_configured_user_set_email
   install_upgrade
   clean_log_directory 
   finish_up
@@ -659,6 +669,20 @@ $(cat $tomcat_dir/$tomcat/gratia/gratia-release)
 "
   log_upgrade_end
 }
+#----------------------------
+function find_configured_user_set_email {
+  [[ -n "$recipients" ]] && return
+  local user=`$source/common/configuration/configure-collector -p ${tomcat_dir} --obtain-config-item tomcat_user $(echo $tomcat|cut -d'-' -f2-) | sed -ne 's/^config: tomcat_user = //p'`
+  if [[ $user != "root" ]] && [[ $user != "daemon" ]]; then
+    if [[ -n "$user" ]]; then
+      echo "Setting recipients for upgrade status email to $user@fnal.gov based on configured user $user"
+      default_recipients="$user@fnal.gov"
+    else
+      echo "Setting recipients for upgrade status email to grid-accounting@fnal.gov"
+      default_recipients="grid-accounting@fnal.gov"
+    fi
+  fi
+}
 #### MAIN ##############################################
 PGM=$(basename $0)
 
@@ -673,6 +697,7 @@ source_type=""
 source=NONE
 ##default_recipients="weigand@fnal.gov"
 default_recipients="gratia-operation@fnal.gov"
+##default_recipients="greenc@fnal.gov"
 recipients=""
 release=NONE
 release_dir=""
@@ -700,10 +725,22 @@ while test "x$1" != "x"; do
         mysql_file="$2";shift;shift
    elif [ "$1" == "${force_log4j}" ];then
         force="${force_log4j} ";shift
+   elif [ "$1" == "--tomcat-dir" ]; then
+        tomcat_dir="$2";shift;shift
+   elif [ "$1" == "--mail" ]; then
+        wanted_mail="$2";shift;shift
    else
         usage_error "Invalid command line argument: $1"
    fi
 done
+
+case $daily in
+  "yes" )
+    ;;
+  * )
+    [[ -n "$wanted_mail" ]] && recipients="$wanted_mail"
+    ;;
+esac
 
 if [ -n "$HELP" ];then
   usage;exit 1
