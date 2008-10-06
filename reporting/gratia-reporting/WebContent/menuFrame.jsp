@@ -106,7 +106,7 @@ if (displayLink != null)
 {
    String initUrl = request.getRequestURL().toString();
    displayLink = initUrl.substring(0, initUrl.lastIndexOf("/")) + "/" + displayLink;
-
+   displayLink = displayLink.replace("&amp;", "&");
 %>
 	 <script type="text/javascript">
 	 	parent.paramFrame.location = "<%= displayLink %>";
