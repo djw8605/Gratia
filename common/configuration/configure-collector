@@ -22,72 +22,69 @@ if (-l $0) {
 my %collector_configs = ();
 
 my @required_attributes =
-	(
-	 'http_port',
-	 'ssl_port',
-	 'rmi_port',
-	 'jmx_port',
-	 'db_schema',
-	 'UserConfig',
-         'sslCAFiles',
-         'crlFiles',
-         'staticReports'
-	);
+  (
+   'http_port',
+   'ssl_port',
+   'rmi_port',
+   'jmx_port',
+   'db_schema',
+   'UserConfig',
+   'sslCAFiles',
+   'crlFiles',
+   'staticReports'
+  );
 
 my @required_properties = ();
 
 my %attribute_defaults =
-	(
-	 max_heap_size => "256m",
-	 db_port => 3320,
-	 db_host => "gratia-db01.fnal.gov",
-	 UserConfig => "UserConfig_osg.xml",
-	 UserConfigPath => "gratia-reports/MenuConfig/",
-	 PostInstallCmdPreamble => "",
-	 PostInstallCmdPrefix => "",
-	 PostInstallCmdSuffix => "",
-         staticReports => 1,
-         host_cert => "/etc/grid-security/hostcert.pem",
-         host_key => "/etc/grid-security/hostkey.pem",
-         sslCAFiles => "/etc/grid-security/certificates/*.0",
-         crlFiles => "/etc/grid-security/certificates/*.r0",
-	 "properties.attributes" =>
-	 { "service.rmi.service" => "/gratia",
-           "use.report.authentication" => "true",
-           "maintain.history.log" => 14,
-           "service.mysql.user" => "gratia",
-           "service.mysql.password" => "proto",
-           "service.birt.user" => "reader", # old, deprecated
-           "service.birt.password" => "reader", # old, deprecated
-           "service.reporting.user" => "reader", # new
-           "service.reporting.password" => "reader", # new
-           "service.reporting.engine.home" => "birt-v20", # new reporting engine
-           "monitor.listener.threads" => "true",
-           "monitor.listener.wait" => 240,
-           "monitor.smtp.server" => "smtp.fnal.gov",
-           "monitor.smtp.authentication.required" => "false",
-           "monitor.smtp.user" => "greenc",
-           "monitor.smtp.password" => "",
-           "monitor.from.address" => 'grid-accounting@fnal.gov',
-           "monitor.to.address.0" => 'pcanal@fnal.gov',
-           "monitor.to.address.1" => 'greenc@fnal.gov',
-           "monitor.subject" => \&construct_monitor_message_subject,
-           "service.rmiservlet.console" => 0,
-           "service.security.console" => 0,
-           "service.vdt.cert.file" => "/etc/grid-security/http/httpcert.pem",
-           "service.vdt.key.file" => "/etc/grid-security/http/httpkey.pem",
-           "service.listener.threads" => 1,
-           "service.lifetime.JobUsageRecord" => "1 year", # May wish to dencrease
-           "service.lifetime.JobUsageRecord.RawXML" => "1 month",
-           "service.lifetime.MetricRecord" => "3 months", # Shouldn't get these at all
-           "service.lifetime.MetricRecord.RawXML" => "1 month",
-           "service.lifetime.DupRecord.Duplicate" => "1 month",
-           "service.lifetime.DupRecord.ExpirationDate" => "1 month",
-           "service.lifetime.DupRecord" => "UNLIMITED",
-           "service.lifetime.Trace" => "6 months",
-           "service.lifetime.Trace.add_JUR_to_summary" => "3 months"
-	 }
-	);
+  (
+   max_heap_size => "256m",
+   db_port => 3320,
+   db_host => "gratia-db01.fnal.gov",
+   UserConfig => "UserConfig_osg.xml",
+   UserConfigPath => "gratia-reports/MenuConfig/",
+   PostInstallCmdPreamble => "",
+   PostInstallCmdPrefix => "",
+   PostInstallCmdSuffix => "",
+   staticReports => 1,
+   host_cert => "/etc/grid-security/hostcert.pem",
+   host_key => "/etc/grid-security/hostkey.pem",
+   sslCAFiles => "/etc/grid-security/certificates/*.0",
+   crlFiles => "/etc/grid-security/certificates/*.r0",
+   "properties.attributes" =>
+   { "service.rmi.service" => "/gratia",
+     "use.report.authentication" => "true",
+     "maintain.history.log" => 14,
+     "service.mysql.user" => "gratia",
+     "service.mysql.password" => "proto",
+     "service.reporting.user" => "reader", # new
+     "service.reporting.password" => "reader", # new
+     "monitor.listener.threads" => "true",
+     "monitor.listener.wait" => 240,
+     "monitor.smtp.server" => "smtp.fnal.gov",
+     "monitor.smtp.authentication.required" => "false",
+     "monitor.smtp.user" => "greenc",
+     "monitor.smtp.password" => "",
+     "monitor.from.address" => 'grid-accounting@fnal.gov',
+     "monitor.to.address.0" => 'pcanal@fnal.gov',
+     "monitor.to.address.1" => 'greenc@fnal.gov',
+     "monitor.subject" => \&construct_monitor_message_subject,
+     "service.rmiservlet.console" => 0,
+     "service.security.console" => 0,
+     "service.vdt.cert.file" => "/etc/grid-security/http/httpcert.pem",
+     "service.vdt.key.file" => "/etc/grid-security/http/httpkey.pem",
+     "service.listener.threads" => 1,
+     "service.lifetime.JobUsageRecord" => "1 year", # May wish to dencrease
+     "service.lifetime.JobUsageRecord.RawXML" => "1 month",
+     "service.lifetime.MetricRecord" => "3 months", # Shouldn't get these at all
+     "service.lifetime.MetricRecord.RawXML" => "1 month",
+     "service.lifetime.DupRecord.Duplicate" => "1 month",
+     "service.lifetime.DupRecord.ExpirationDate" => "1 month",
+     "service.lifetime.DupRecord" => "UNLIMITED",
+     "service.lifetime.Trace" => "6 months",
+     "service.lifetime.Trace.add_JUR_to_summary" => "3 months"
+   }
+  );
 
 my $tomcat_users_txt = <<'EOF';
 <?xml version='1.0' encoding='utf-8'?>
@@ -105,7 +102,7 @@ EOF
 my $init_script_template = <<'EOF';
 #!/bin/bash
 #
-# tomcat-<instance>	Start and stop an instance of the standalone tomcat service.
+# tomcat-<instance>     Start and stop an instance of the standalone tomcat service.
 #
 # chkconfig: 345 99 50
 # description: Standalone tomcat invocation for the Gratia service
@@ -180,25 +177,27 @@ pod2usage(-exitval => 1, -verbose => 3) if $options{help};
 unless (exists $options{"java-home"} or
         exists $options{"obtain-config-item"} or
         exists $options{"obtain-properties-item"}) {
-	if (-d $default_java_home) {
-		print STDERR "INFO: using default JAVA_HOME $default_java_home\n";
-		$options{"java-home"} = $default_java_home;
-	} else {
-		print STDERR "ERROR: JAVA_HOME not specified and default \"$default_java_home\" does not exist as a directory\n";
-		pod2usage(-exitval => 1);
-	}
+  if (-d $default_java_home) {
+    print STDERR "INFO: using default JAVA_HOME $default_java_home\n";
+    $options{"java-home"} = $default_java_home;
+  } else {
+    print STDERR "ERROR: JAVA_HOME not specified and default \"$default_java_home\" does not exist as a directory\n";
+    pod2usage(-exitval => 1);
+  }
 }
 
 unless (exists $options{prefix}) {
-	if (-d $default_prefix and -w $default_prefix) {
-		print STDERR "INFO: tomcat install prefix not specified, using default $default_prefix\n";
-		$options{prefix} = $default_prefix;
-	} else {
-		print STDERR "ERROR: tomcat install prefix not specified and default \"$default_prefix\"",
-			"\ndoes not exist as a directory or is not writable\"";
-		pod2usage(-exitval => 1);
-	}
-}		
+  if (-d $default_prefix and -w $default_prefix) {
+    print STDERR "INFO: tomcat install prefix not specified, ",
+      "using default $default_prefix\n";
+    $options{prefix} = $default_prefix;
+  } else {
+    print STDERR "ERROR: tomcat install prefix not specified ",
+      "and default \"$default_prefix\"",
+        "\ndoes not exist as a directory or is not writable\"";
+    pod2usage(-exitval => 1);
+  }
+}               
 
 pod2usage(-exitval => 1) unless scalar @ARGV;
 
@@ -236,7 +235,7 @@ foreach my $config (@instance_list) {
     print STDERR "WARNING: configuration for specified gratia instance $config not found!\n";
     exit 1;
   }
-	
+
   # attributes.properties container if not previously existing.
   $config_ref->{"properties.attributes"} = {}
     unless exists $config_ref->{"properties.attributes"};
@@ -290,7 +289,7 @@ foreach my $config (@instance_list) {
   configure_init_file($config, $config_ref);
   configure_tomcat_config($config, $config_ref);
   configure_tomcat_users($config, $config_ref);
-# configure_log4j_properties($config, $config_ref) if $options{"use-ssl"};
+  # configure_log4j_properties($config, $config_ref) if $options{"use-ssl"};
   configure_static_report_generation($config, $config_ref);
   configure_apel_directory($config, $config_ref);
 
@@ -331,11 +330,12 @@ sub configure_apel_directory {
   my $data_directory = "$options{prefix}/tomcat-${instance_name}/webapps/$apel";
   if ( -d $data_directory ) { 
     print STDERR "INFO: $type already exists - $data_directory \n"; 
-  }
-  else {
+  } else {
     print STDERR "INFO: $type creating directory - $data_directory\n";
     eval ( mkpath($data_directory) );
-    if ($@) { print  STDERR "ERROR: $type Failed to make directory - $data_directory\n"; exit 1; }
+    if ($@) {
+      print  STDERR "ERROR: $type Failed to make directory - $data_directory\n"; exit 1;
+    }
   }
   my $owner = $collector_config->{tomcat_user};
   unless ( defined $owner ) {
@@ -345,19 +345,23 @@ sub configure_apel_directory {
   chmod 0775, $data_directory;
   my $uid = getpwnam($owner);
   my $gid = getgrnam($apel_group);
-  unless ( defined $uid ) { print  STDERR "ERROR: $type owner ($owner) not in /etc/passwd file\n";exit 1; } 
-  unless ( defined $gid ) { print  STDERR "ERROR: $type group ($apel_group) not in /etc/group file\n";exit 1; } 
+  unless ( defined $uid ) {
+    print  STDERR "ERROR: $type owner ($owner) not in /etc/passwd file\n";exit 1;
+  } 
+  unless ( defined $gid ) {
+    print  STDERR "ERROR: $type group ($apel_group) not in /etc/group file\n";exit 1;
+  } 
   chown $uid,$gid, $data_directory;
   print STDERR "INFO: $type complete\n"; 
 }
 
 #--------------------------------------
 sub configure_log4j_properties {
-	return unless $options{"use-ssl"};
-	my ($instance_name, $collector_config) = @_;
-	my $log4j_prop = ">$options{prefix}/tomcat-${instance_name}/conf/log4j-trustmanager.properties";
-	open(LOG4J_PROP, $log4j_prop) or die "Unable to open $log4j_prop for writing";
-	print LOG4J_PROP <<'EOF';
+  return unless $options{"use-ssl"};
+  my ($instance_name, $collector_config) = @_;
+  my $log4j_prop = ">$options{prefix}/tomcat-${instance_name}/conf/log4j-trustmanager.properties";
+  open(LOG4J_PROP, $log4j_prop) or die "Unable to open $log4j_prop for writing";
+  print LOG4J_PROP <<'EOF';
 log4j.logger.org.glite.security=INFO, fileout
 
 log4j.appender.fileout=org.apache.log4j.RollingFileAppender
@@ -377,135 +381,163 @@ log4j.appender.fileout.layout.ConversionPattern=%d{ISO8601} %-5p [%t] %c{2} %x -
 # this also outputs the method name, but is very slow
 #log4j.appender.fileout.layout.ConversionPattern=%d{ISO8601} %-5p [%t] %c{2} %M %x - %m%n
 EOF
-	close(LOG4J_PROP);
+  close(LOG4J_PROP);
 }
 
-sub configure_post_install {
-	my ($instance_name, $collector_config) = @_;
-	my $post_file = "$options{prefix}/tomcat-${instance_name}/gratia/post-install.sh";
-	my $new_post = temporary_filename("post-install.sh");
-	open(ORIG_POST, "<$post_file") or die "Unable to open $post_file for reading";
-	open(NEW_POST, ">$new_post") or die "Unable to open $new_post for writing";
-	chmod 0700, $new_post;
-	$collector_config->{"PostInstallCmdPreamble"} =~
-		s&DB_HOST&$collector_config->{"db_host"}&g
-			if $collector_config->{"PostInstallCmdPrefix"};
-	$collector_config->{"PostInstallCmdPrefix"} =~
-		s&DB_HOST&$collector_config->{"db_host"}&g
-			if $collector_config->{"PostInstallCmdPrefix"};
-	while (<ORIG_POST>) {
-		chomp;
-		s&\${VDT_LOCATION}/mysql5/bin/&&; # VDT-specific location.
-		s&\${VDT_LOCATION}/tomcat/v55/gratia/&$options{prefix}/tomcat-${instance_name}/gratia/&; # VDT-specific location.
-		s&CMD_PREAMBLE&$collector_config->{"PostInstallCmdPreamble"}&;
-		s&localhost&$collector_config->{"db_host"}&;
-		s&(^.*?mysql.*?)CMD_SUFFIX(.*$)&$1$collector_config->{"PostInstallCmdSuffix"}$2&;
-		s&(^.*?mysql.*?)ROOTPASS(.*$)&$1"$options{"db-root"}"$2&; # DB root password
-		s&(^.*?mysql.*?)PORT(.*$)&$1$collector_config->{db_port}$2&; # DB port
-		s&(^.*?mysql.*?) gratia (.*$)&$1 $collector_config->{db_schema} $2&; # Schema
-		s&(^.*?)MAGIC_VDT_LOCATION/tomcat/v55/(.*$)&$1$options{prefix}/tomcat-${instance_name}/$2&; # Tomcat top dir
-		# Extra commands to prefix mysql command (eg ssh, echo);
-		s&^(.*?)CMD_PREFIX(.*$)&$1$collector_config->{"PostInstallCmdPrefix"}$2&;
-		print NEW_POST "$_\n";
-	}
-	close(ORIG_POST);
-	close(NEW_POST);
-	system("mv -bv \"$new_post\" \"$post_file\"");
-}
+  sub configure_post_install {
+    my ($instance_name, $collector_config) = @_;
+    my $post_file = "$options{prefix}/tomcat-${instance_name}/gratia/post-install.sh";
+    my $new_post = temporary_filename("post-install.sh");
+    open(ORIG_POST, "<$post_file") or die "Unable to open $post_file for reading";
+    open(NEW_POST, ">$new_post") or die "Unable to open $new_post for writing";
+    chmod 0700, $new_post;
+    $collector_config->{"PostInstallCmdPreamble"} =~
+      s&DB_HOST&$collector_config->{"db_host"}&g
+        if $collector_config->{"PostInstallCmdPrefix"};
+    $collector_config->{"PostInstallCmdPrefix"} =~
+      s&DB_HOST&$collector_config->{"db_host"}&g
+        if $collector_config->{"PostInstallCmdPrefix"};
+    while (<ORIG_POST>) {
+      chomp;
+      s&\${VDT_LOCATION}/mysql5/bin/&&; # VDT-specific location.
+      s&\${VDT_LOCATION}/tomcat/v55/gratia/&$options{prefix}/tomcat-${instance_name}/gratia/&; # VDT-specific location.
+      s&CMD_PREAMBLE&$collector_config->{"PostInstallCmdPreamble"}&;
+      s&localhost&$collector_config->{"db_host"}&;
+      s&(^.*?mysql.*?)CMD_SUFFIX(.*$)&$1$collector_config->{"PostInstallCmdSuffix"}$2&;
+      s&(^.*?mysql.*?)ROOTPASS(.*$)&$1"$options{"db-root"}"$2&; # DB root password
+      s&(^.*?mysql.*?)PORT(.*$)&$1$collector_config->{db_port}$2&; # DB port
+      s&(^.*?mysql.*?) gratia (.*$)&$1 $collector_config->{db_schema} $2&; # Schema
+      s&(^.*?)MAGIC_VDT_LOCATION/tomcat/v55/(.*$)&$1$options{prefix}/tomcat-${instance_name}/$2&; # Tomcat top dir
+      # Extra commands to prefix mysql command (eg ssh, echo);
+      s&^(.*?)CMD_PREFIX(.*$)&$1$collector_config->{"PostInstallCmdPrefix"}$2&;
+      print NEW_POST "$_\n";
+    }
+    close(ORIG_POST);
+    close(NEW_POST);
+    system("mv -bv \"$new_post\" \"$post_file\"");
+  }
 
 sub configure_init_file {
-	my ($instance_name, $collector_config) = @_;
+  my ($instance_name, $collector_config) = @_;
   my $stop_db_update_url =
     sprintf("%s%s:%s/gratia-administration/systemadministration.html?action=stopDatabaseUpdateThreads",
             $options{"use-ssl"}?"https://":"http://",
             $collector_config->{collector_host},
             $options{"use-ssl"}?$collector_config->{ssl_port}:$collector_config->{http_port});
-	my $init_script = "/etc/rc.d/init.d/tomcat-$instance_name";
-	my $init_script_txt = $init_script_template;
-	$init_script_txt =~ s&^(\s*JAVA_OPTS\s*=\s*".*?)"&${1} -Xmx$collector_config->{max_heap_size}"&m if $collector_config->{max_heap_size};
-	$init_script_txt =~ s&^(\s*JAVA_OPTS\s*=\s*".*?)"&${1} -Xms$collector_config->{initial_heap_size}"&m if $collector_config->{inital_heap_size};
-	$init_script_txt =~ s&^(\s*JAVA_OPTS\s*=\s*".*?)"&${1} -XX:MaxPermSize=$collector_config->{max_perm_size}"&m if $collector_config->{max_perm_size};
-	$init_script_txt =~ s&^(\s*JAVA_OPTS\s*=\s*".*?)"&${1} -XX:PermSize=$collector_config->{initial_perm_size}"&m if $collector_config->{initial_perm_size};
-        $init_script_txt =~ s&^(\s*JAVA_OPTS\s*=\s*".*?)"&${1} -Djava.library.path=$collector_config->{tomcat_native_lib}"&m if $collector_config->{tomcat_native_lib};
-	$init_script_txt =~ s&^(JAVA_HOME=).*$&${1}"$options{"java-home"}"&m;
-	$init_script_txt =~ s&^(TOMCAT_HTTP_PORT=).*$&${1}$collector_config->{http_port}&m;
-	$init_script_txt =~ s&^(TOMCAT_MANAGEMENT_PORT=).*$&${1}$collector_config->{jmx_port}&m;
-	$init_script_txt =~ s&^(TOMCAT_PATH_STEM=).*$&${1}"$options{prefix}"&m;
-	$init_script_txt =~ s&^(TOMCAT_SSL_PORT=).*$&${1}$collector_config->{ssl_port}&m;
-	$init_script_txt =~
-          s&^(TOMCAT_USER=).*$&${1}$collector_config->{tomcat_user}&m
-            if $collector_config->{tomcat_user};
-        $init_script_txt =~ s&\^\^\^STOP_DB_UPDATE_URL\^\^\^&$stop_db_update_url&;
-        $init_script_txt =~ s&\^\^\^HOST_CERT\^\^\^&$collector_config->{host_cert}&;
-        $init_script_txt =~ s&\^\^\^HOST_KEY\^\^\^&$collector_config->{host_key}&;
-	open(INIT_SCRIPT, ">$init_script") or die("Unable to open $init_script for writing");
-	print INIT_SCRIPT $init_script_txt;
-	close(INIT_SCRIPT);
-	chmod 0755, $init_script;
-	system("/sbin/chkconfig --add tomcat-$instance_name");
+  my $init_script = "/etc/rc.d/init.d/tomcat-$instance_name";
+  my $init_script_txt = $init_script_template;
+  $init_script_txt =~ s&^(\s*JAVA_OPTS\s*=\s*".*?)"&${1} -Xmx$collector_config->{max_heap_size}"&m if $collector_config->{max_heap_size};
+  $init_script_txt =~ s&^(\s*JAVA_OPTS\s*=\s*".*?)"&${1} -Xms$collector_config->{initial_heap_size}"&m if $collector_config->{inital_heap_size};
+  $init_script_txt =~ s&^(\s*JAVA_OPTS\s*=\s*".*?)"&${1} -XX:MaxPermSize=$collector_config->{max_perm_size}"&m if $collector_config->{max_perm_size};
+  $init_script_txt =~ s&^(\s*JAVA_OPTS\s*=\s*".*?)"&${1} -XX:PermSize=$collector_config->{initial_perm_size}"&m if $collector_config->{initial_perm_size};
+  $init_script_txt =~ s&^(\s*JAVA_OPTS\s*=\s*".*?)"&${1} -Djava.library.path=$collector_config->{tomcat_native_lib}"&m if $collector_config->{tomcat_native_lib};
+  $init_script_txt =~ s&^(JAVA_HOME=).*$&${1}"$options{"java-home"}"&m;
+  $init_script_txt =~ s&^(TOMCAT_HTTP_PORT=).*$&${1}$collector_config->{http_port}&m;
+  $init_script_txt =~ s&^(TOMCAT_MANAGEMENT_PORT=).*$&${1}$collector_config->{jmx_port}&m;
+  $init_script_txt =~ s&^(TOMCAT_PATH_STEM=).*$&${1}"$options{prefix}"&m;
+  $init_script_txt =~ s&^(TOMCAT_SSL_PORT=).*$&${1}$collector_config->{ssl_port}&m;
+  $init_script_txt =~
+    s&^(TOMCAT_USER=).*$&${1}$collector_config->{tomcat_user}&m
+      if $collector_config->{tomcat_user};
+  $init_script_txt =~ s&\^\^\^STOP_DB_UPDATE_URL\^\^\^&$stop_db_update_url&;
+  $init_script_txt =~ s&\^\^\^HOST_CERT\^\^\^&$collector_config->{host_cert}&;
+  $init_script_txt =~ s&\^\^\^HOST_KEY\^\^\^&$collector_config->{host_key}&;
+  open(INIT_SCRIPT, ">$init_script") or die("Unable to open $init_script for writing");
+  print INIT_SCRIPT $init_script_txt;
+  close(INIT_SCRIPT);
+  chmod 0755, $init_script;
+  system("/sbin/chkconfig --add tomcat-$instance_name");
 }
 
 sub configure_collector_config {
-	my ($instance_name, $collector_config) = @_;
-	my $orig_config = "$options{prefix}/tomcat-${instance_name}/gratia/service-configuration.properties";
-	my $config_file = temporary_filename("service-configuration.properties");
-	open(ORIG_CONFIG, "<$orig_config") or die "Unable to open $orig_config for reading";
-	open(REPORTING_CONFIG, ">$config_file") or die "Unable to open $config_file for writing";
-	chmod 0600, $config_file;
-	my %seen_attributes = ();
-	my $in_summary_comment;
-	my $spaced_rmi_port = sprintf("%5d", $collector_config->{rmi_port});
-	my $spaced_http_port = sprintf("%5d", $collector_config->{http_port});
-	my $spaced_ssl_port = sprintf("%5d", $collector_config->{ssl_port});
-	my $spaced_jmx_port = sprintf("%5d", $collector_config->{jmx_port});
-	my $spaced_db_port = sprintf("%5d", $collector_config->{db_port});
-	while (<ORIG_CONFIG>) {
-		chomp;
-		# Settings summary comment at top of file.
-		m&^\s*#\s*default ports used by& and $in_summary_comment = 1;
-		if ($in_summary_comment) {
-			m&^\s*[^#]& and undef $in_summary_comment;
-			s&^(\s*#\s)\s*\d*\s*(->\s*rmi)&${1}$spaced_rmi_port ${2}&;
-			s&^(\s*#\s)\s*\d*\s*(->\s*tomcat)&${1}$spaced_http_port ${2}&;
-			s&^(\s*#\s)\s*\d*\s*(->\s*tomcat-ssl)&${1}$spaced_ssl_port ${2}&;
-			s&^(\s*#\s)\s*\d*\s*(->\s*mysql)&${1}$spaced_db_port ${2}&;
-			s&^(\s*#\s)\s*\d*\s*(->\s*tomcat/jmx)&${1}$spaced_jmx_port ${2}&;
-		}
-		# Compound attributes and those using common attributes (eg http_port).
-		s&^(\Qservice.reporting.menuconfig\E\s*=\s*).*$&${1}$collector_config->{UserConfigPath}$collector_config->{UserConfig}&;
-		s&^(\Qservice.rmi.port\E\s*=\s*).*$&${1}$collector_config->{rmi_port}&;
-		s&^(\Qservice.rmi.rmibind\E\s*=\s*).*$&${1}//$collector_config->{collector_host}:$collector_config->{rmi_port}&;
-		s&^(\Qservice.rmi.rmilookup\E\s*=\s*).*$&${1}rmi://$collector_config->{collector_host}:$collector_config->{rmi_port}&;
-		s&^(\Qservice.open.connection\E\s*=\s*).*$&${1}http://$collector_config->{collector_host}:$collector_config->{http_port}&;
-		s&^(\Qservice.secure.connection\E\s*=\s*).*$&${1}https://$collector_config->{collector_host}:$collector_config->{ssl_port}&;
-		s&^(\Qservice.mysql.url\E\s*=\s*).*$&${1}jdbc:mysql://$collector_config->{db_host}:$collector_config->{db_port}/$collector_config->{db_schema}&;
-		# Simple attributes
-		foreach my $config_attribute (sort keys %{$collector_config->{"properties.attributes"}}) {
-			unless (ref($collector_config->{"properties.attributes"}->{$config_attribute}) eq "CODE") {
-				s&^(\Q$config_attribute\E\s*=\s*).*$&${1}$collector_config->{"properties.attributes"}->{$config_attribute}& and $seen_attributes{$config_attribute} = 1;
-			} else {
-				if (m&^\Q$config_attribute\E\s*=\s*.*$&) {
-					my $value=$collector_config->{"properties.attributes"}->{$config_attribute}($instance_name, $collector_config);
-					s&^(\Q$config_attribute\E\s*=\s*).*$&${1}$value&;
-					$seen_attributes{$config_attribute} = 1;
-				}
-			}
-		}
-		# Special case for multi-value configuration options -- dump items not wanted from the config:
-		m&^((?:\Qmonitor.to.address\E|\Qservice.admin.DN\E|\Qservice.admin.FQAN\E)\.\d+)& and
-                  not $collector_config->{"properties.attributes"}->{${1}} and
-                    next;
-		print REPORTING_CONFIG "$_\n";
-	}
-	close(ORIG_CONFIG);
-	# Simple attributes which may not already have been in the configuration file (eg monitor.to.address.N)
-	foreach my $config_attribute (sort keys %{$collector_config->{"properties.attributes"}}) {
-		print REPORTING_CONFIG "$config_attribute=",
-			$collector_config->{"properties.attributes"}->{$config_attribute}, "\n"
-			unless $seen_attributes{$config_attribute};
-	}
-	close(REPORTING_CONFIG);
-	system("mv -bv \"$config_file\" \"$orig_config\"");
+  my ($instance_name, $collector_config) = @_;
+  my $orig_config = "$options{prefix}/tomcat-${instance_name}/gratia/service-configuration.properties";
+  my $config_file = temporary_filename("service-configuration.properties");
+  open(ORIG_CONFIG, "<$orig_config") or die "Unable to open $orig_config for reading";
+  open(REPORTING_CONFIG, ">$config_file") or die "Unable to open $config_file for writing";
+  chmod 0600, $config_file;
+  my %seen_attributes = ();
+  my $in_summary_comment;
+  my $spaced_rmi_port = sprintf("%5d", $collector_config->{rmi_port});
+  my $spaced_http_port = sprintf("%5d", $collector_config->{http_port});
+  my $spaced_ssl_port = sprintf("%5d", $collector_config->{ssl_port});
+  my $spaced_jmx_port = sprintf("%5d", $collector_config->{jmx_port});
+  my $spaced_db_port = sprintf("%5d", $collector_config->{db_port});
+
+  foreach my $config_attribute (sort keys %{$collector_config->{"properties.attributes"}}) {
+    # Code substitutions
+    if (ref($collector_config->{"properties.attributes"}->{$config_attribute}) eq "CODE") {
+      $collector_config->{"properties.attributes"}->{$config_attribute} =
+        $collector_config->{"properties.attributes"}->{$config_attribute}($instance_name, $collector_config);
+    }
+  }
+
+  # Compound attributes and those using common attributes (eg http_port).
+  $collector_config->{"properties.attributes"}->{"service.reporting.menuconfig"} =
+    "$collector_config->{UserConfigPath}$collector_config->{UserConfig}";
+  $collector_config->{"properties.attributes"}->{"service.rmi.port"} =
+    "$collector_config->{rmi_port}";
+  $collector_config->{"properties.attributes"}->{"service.rmi.rmibind"} =
+    "//$collector_config->{collector_host}:$collector_config->{rmi_port}";
+  $collector_config->{"properties.attributes"}->{"service.rmi.rmilookup"} =
+    "rmi://$collector_config->{collector_host}:$collector_config->{rmi_port}";
+  $collector_config->{"properties.attributes"}->{"service.open.connection"} =
+    "http://$collector_config->{collector_host}:$collector_config->{http_port}";
+  $collector_config->{"properties.attributes"}->{"service.secure.connection"} =
+    "https://$collector_config->{collector_host}:$collector_config->{ssl_port}";
+  $collector_config->{"properties.attributes"}->{"service.mysql.url"} =
+    "jdbc:mysql://$collector_config->{db_host}:$collector_config->{db_port}/$collector_config->{db_schema}";
+
+  while (<ORIG_CONFIG>) {
+    chomp;
+    # Settings summary comment at top of file.
+    m&^\s*#\s*default ports used by& and $in_summary_comment = 1;
+    if ($in_summary_comment) {
+      m&^\s*[^#]& and undef $in_summary_comment;
+      s&^(\s*#\s)\s*\d*\s*(->\s*rmi)&${1}$spaced_rmi_port ${2}&;
+      s&^(\s*#\s)\s*\d*\s*(->\s*tomcat)&${1}$spaced_http_port ${2}&;
+      s&^(\s*#\s)\s*\d*\s*(->\s*tomcat-ssl)&${1}$spaced_ssl_port ${2}&;
+      s&^(\s*#\s)\s*\d*\s*(->\s*mysql)&${1}$spaced_db_port ${2}&;
+      s&^(\s*#\s)\s*\d*\s*(->\s*tomcat/jmx)&${1}$spaced_jmx_port ${2}&;
+    }
+
+    # Simple attributes
+    foreach my $config_attribute (sort keys %{$collector_config->{"properties.attributes"}}) {
+      $config_attribute =~ m/\.\d+$/ and next; # Special numbered item
+        s&^(?:\s*###\s*)?(\Q$config_attribute\E\s*=\s*).*$&${1}$collector_config->{"properties.attributes"}->{$config_attribute}& and
+          $seen_attributes{$config_attribute} = 1;
+    }
+
+    # Special case for multi-value configuration options -- group
+    # similar numbered items together and dump items not wanted from the
+    # config.
+    if (m&^\s*(###\s*)?((\Qmonitor.to.address\E|\Qservice.admin.DN\E|\Qservice.admin.FQAN\E)\.\d+)&) {
+      my ($prefix, $property, $base) = ($1 || '', $2, $3);
+      next if ($seen_attributes{$base}); # Only print one set.
+      $seen_attributes{$base} = 1;
+      foreach my $numbered_attribute (sort (grep /^$base/,
+                                            keys %{$collector_config->{"properties.attributes"}})) {
+        next if $seen_attributes{$numbered_attribute};
+        my $new_line = sprintf("$numbered_attribute = %s\n",
+                               $collector_config->{"properties.attributes"}->{$numbered_attribute});
+        # print "$_ -> ", $new_line;
+        print REPORTING_CONFIG $new_line;
+        $seen_attributes{$numbered_attribute} = 1;
+      }
+      next; # Don't print the line that triggered it.
+    }
+    print REPORTING_CONFIG "$_\n";
+  }
+  close(ORIG_CONFIG);
+  # Simple attributes which may not already have been in the configuration file (eg monitor.to.address.N)
+
+  foreach my $config_attribute (sort keys %{$collector_config->{"properties.attributes"}}) {
+    print REPORTING_CONFIG "$config_attribute=",
+      $collector_config->{"properties.attributes"}->{$config_attribute}, "\n"
+        unless $seen_attributes{$config_attribute};
+  }
+  close(REPORTING_CONFIG);
+  system("mv -bv \"$config_file\" \"$orig_config\"");
 }
 
 sub configure_keyfile_owners {
@@ -606,7 +638,7 @@ sub configure_tomcat_config {
     if ($line_buffer =~ m&-->&) {
       undef $in_comment;
     }
-		
+
     next if $in_comment;
 
     $line_buffer =~ s&(<Server\s*port\s*=\s*)"[^"]+"&${1}"$collector_config->{server_port}"&;
@@ -656,10 +688,8 @@ EOF
 
       }
     }
-		
     print REPORTING_CONFIG "$line_buffer";
     $line_buffer = "";
-		
   }
   close(ORIG_CONFIG);
   close(REPORTING_CONFIG);
@@ -770,14 +800,14 @@ sub maybe_print_config_info {
 use File::Find;
 my (@found_files, $list_file);
 sub wanted {
-#  print STDERR "File::Find: dir = $File::Find::dir\n";
+  #  print STDERR "File::Find: dir = $File::Find::dir\n";
   if ($File::Find::name =~ m&gratia/data/(?:history-|old-|thread)&) {
-#    print STDERR "File::Find: pruning search tree\n";
+    #    print STDERR "File::Find: pruning search tree\n";
     $File::Find::prune = 1;
     return;
   }
   if (-d $_) {
-#    print STDERR "File::Find: looking in $File::Find::name ...\n";
+    #    print STDERR "File::Find: looking in $File::Find::name ...\n";
     if (-f "$_/$list_file") {
       push @found_files, "$File::Find::name/$list_file";
       $File::Find::prune = 1;
@@ -795,7 +825,7 @@ sub find_dat_file {
   chomp $list_file;
   unless ( -f $list_file ) {
     my @dir_list = map { (-d)?$_:() } @search_path;
-#    print STDERR "Looking for $list_file, dir list = ", join(", ", @dir_list), "\n";
+    #    print STDERR "Looking for $list_file, dir list = ", join(", ", @dir_list), "\n";
     find ( \&wanted, @dir_list );
     # First found in search path order.
     $list_file = $found_files[0] if scalar @found_files;
