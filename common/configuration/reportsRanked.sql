@@ -7,7 +7,7 @@ CREATE PROCEDURE `reportsRanked`(
           timeUnit varchar(64), dateGrouping varchar(64),
           resourceType varchar(64), metric varchar(15),
           selValues varchar(1024),
-          selType varchar(3)
+          selType varchar(4)
           )
     READS SQL DATA
 begin
