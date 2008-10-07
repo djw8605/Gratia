@@ -194,7 +194,7 @@ if (monthnr.toString().length > 1){
                     <property name="name">VOs</property>
                     <property name="dataType">string</property>
                     <property name="position">10</property>
-                    <expression name="defaultValue">null</expression>
+                    <expression name="defaultValue">'null'</expression>
                     <property name="isInput">true</property>
                     <property name="isOutput">false</property>
                 </structure>
@@ -211,7 +211,7 @@ if (monthnr.toString().length > 1){
                     <property name="name">Probes</property>
                     <property name="dataType">string</property>
                     <property name="position">12</property>
-                    <expression name="defaultValue">null</expression>
+                    <expression name="defaultValue">'null'</expression>
                     <property name="isInput">true</property>
                     <property name="isOutput">false</property>
                 </structure>
@@ -219,7 +219,7 @@ if (monthnr.toString().length > 1){
                     <property name="name">Ranked</property>
                     <property name="dataType">string</property>
                     <property name="position">13</property>
-                    <expression name="defaultValue">null</expression>
+                    <expression name="defaultValue">'null'</expression>
                     <property name="isInput">true</property>
                     <property name="isOutput">false</property>
                 </structure>

@@ -1004,7 +1004,7 @@
                     <property name="name">VOs</property>
                     <property name="dataType">string</property>
                     <property name="position">9</property>
-                    <expression name="defaultValue">null</expression>
+                    <expression name="defaultValue">'null'</expression>
                     <property name="isInput">true</property>
                     <property name="isOutput">false</property>
                 </structure>
@@ -1012,7 +1012,7 @@
                     <property name="name">selType</property>
                     <property name="dataType">string</property>
                     <property name="position">10</property>
-                    <expression name="defaultValue">null</expression>
+                    <expression name="defaultValue">'null'</expression>
                     <property name="isInput">true</property>
                     <property name="isOutput">false</property>
                 </structure>
@@ -1163,9 +1163,9 @@ else {"&lt;p>2007&lt;/p>"}</expression>
                 </structure>
                 <property name="repeatHeader">true</property>
                 <property name="hideDetail">true</property>
-                <property name="pageBreakAfter">avoid</property>
-                <property name="pageBreakBefore">avoid</property>
-                <property name="pageBreakInside">avoid</property>
+                <property name="pageBreakAfter">auto</property>
+                <property name="pageBreakBefore">auto</property>
+                <property name="pageBreakInside">auto</property>
                 <list-property name="sort">
                     <structure>
                         <expression name="key">row["final_rank"]</expression>
@@ -4775,6 +4775,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
                                                     </simple-property-list>
                                                 </structure>
                                             </list-property>
+                                            <property name="pageBreakInside">auto</property>
                                             <property name="height">80px</property>
                                             <property name="width">100px</property>
                                             <property name="refTemplateParameter">NewTemplateParameterDefinition</property>
