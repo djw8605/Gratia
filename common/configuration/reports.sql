@@ -30,6 +30,7 @@ begin
     END IF;
   END IF;
 
+  set @thisFromDate := ''; 
   set @ifrom := concat_ws('','and VOProbeSummary.EndTIme >=''', SUBDATE(CURDATE(), 800),'''');
   IF fromdate IS NOT NULL THEN
     IF (TRIM(fromdate) != '') AND (TRIM(fromdate) != 'null') THEN
@@ -42,6 +43,7 @@ begin
     END IF;
   END IF;
 
+  set @thisToDate := ''; 
   set @ito := '';
   IF todate IS NOT NULL THEN
     IF (TRIM(todate) != '') AND (TRIM(todate) != 'null') THEN
@@ -157,8 +159,8 @@ begin
            '      sum(V.WallDuration)/', @iunit, ' as walldurationx',
            '        FROM VOProbeSummary V, Site S, Probe P',
            '        WHERE V.ProbeName = P.probename and P.siteid = S.Siteid',
-           '        and (V.EndTime) >= (''', fromdate, ''')',
-           '        and (V.EndTime) <= (''', todate, ''')',
+           '        and (V.EndTime) >= (''', @thisFromDate, ''')',
+           '        and (V.EndTime) <= (''', @thisToDate, ''')',
            ' ', @rVOs,
            ' ', @rSites,
            ' ', @rProbes,

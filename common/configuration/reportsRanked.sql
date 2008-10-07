@@ -27,6 +27,7 @@ begin
     END IF;
   END IF;
 
+  set @thisFromDate := ''; 
   IF fromdate IS NOT NULL then
     IF (TRIM(fromdate) != '') AND (TRIM(fromdate) != 'null') then
       set @thisFromDate := fromdate;
@@ -36,7 +37,8 @@ begin
       END IF;
     END IF;
   END IF;
-  
+
+  set @thisToDate := ''; 
   IF todate IS NOT NULL then
     IF (TRIM(todate) != '') AND (TRIM(todate) != 'null') then
       set @thisToDate := todate;
@@ -205,7 +207,8 @@ else
                  '   FROM VOProbeSummary',
                  '   WHERE (EndTime) >= (''', @thisFromDate, ''')'
                  '   and (EndTime) <= (''', @thisToDate, ''')',
-                 '   and ResourceType = ''', @itype, '''',
+                 ' ', @myresourceclause,
+                 ' ', @mywhereclause,
                  '   GROUP by zDateValue, zVOName',
                  ' ) zVOProbeSummary',
                  ' WHERE zVOProbeSummary.zVOName = foo.oVOName',
