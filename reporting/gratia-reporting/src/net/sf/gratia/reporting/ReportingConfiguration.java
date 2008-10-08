@@ -69,6 +69,25 @@ public class ReportingConfiguration
 		return _logging;
 	}
 
+  //-----------------------------------------------
+	public boolean doesPropertyExist(String property) {
+	  boolean propertyExists = true;
+    String value = null;
+	  value = p.getProperty(property);
+    if ( value == null ) {
+      propertyExists = false;
+    }
+		return propertyExists;
+	}
+  //-----------------------------------------------
+	public String getPropertyValue(String property) {
+	  String value = p.getProperty(property);
+    if ( value == null ) {
+      value = "false";
+    }
+		return value;
+	}
+
 	public void loadReportingConfiguration(javax.servlet.http.HttpServletRequest request)
 	{
 		this.request = request;

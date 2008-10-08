@@ -43,6 +43,11 @@
 		<MenuGroup name="Static Reports">
 			<MenuItem name="Static Reports (PDF, csv)" link="staticReports.jsp"/>
 		</MenuGroup>
+		<MenuGroup name="WLCG ATLAS/CMS Tier1/2" type="conditional" property="service.reporting.interfaces.apel.folder" >
+			<MenuItem name="APEL-WLCG Interface Data" linkProperty="service.reporting.interfaces.apel.folder" />
+			<MenuItem name="EGEE Accouting Portal - Tier 1" link="http://www3.egee.cesga.es/gridsite/accounting/CESGA/tier1_view.html" />
+			<MenuItem name="EGEE Accouting Portal - Tier 2" link="http://www3.egee.cesga.es/gridsite/accounting/CESGA/tier2_view.html" />
+		</MenuGroup>
 		<MenuGroup name="Commands">
 			<MenuItem name="Logout" link="logout.jsp"/>
 		</MenuGroup>

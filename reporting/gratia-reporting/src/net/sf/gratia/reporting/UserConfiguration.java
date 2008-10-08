@@ -73,12 +73,24 @@ public class UserConfiguration
 						{
 							Element ndeMenuGroup = (Element) menuGroupIterator.next();
 							MenuGroup newMenuGroup = new MenuGroup(getAttributeValue(ndeMenuGroup, "name"));
+
+              // Determine if this is a conditional menu item based on a property in the configuration file
+              if ( (boolean) includeMenuItem(ndeMenuGroup, reportingConfiguration) == false ) {
+                continue; // skip this MenuGroup
+              }
+
 							for (Iterator menuItemIterator = ndeMenuGroup.elementIterator(); menuItemIterator.hasNext();)
 							{
 								Element ndeMenuItem = (Element) menuItemIterator.next();
 								String name = getAttributeValue(ndeMenuItem, "name");
 								String display = getAttributeValue(ndeMenuItem, "display");
-								String link = getAttributeValue(ndeMenuItem, "link").replace("[ReportsFolder]", reportsFolder);
+                String link = "false";
+								String linkProperty = getAttributeValue(ndeMenuItem, "linkProperty");
+                if ( linkProperty.equals("false") ) {
+								  link = getAttributeValue(ndeMenuItem, "link").replace("[ReportsFolder]", reportsFolder);
+                } else {
+                  link = reportingConfiguration.getPropertyValue("service.open.connection") + "/" + reportingConfiguration.getPropertyValue(linkProperty) + "/index.html";
+                }
 								newMenuGroup.getMenuItems().add(new MenuItem(name, link, display));
 							}
 
@@ -103,7 +115,7 @@ public class UserConfiguration
 			}
 		} // if(_configLoaded == null)
 	}
-
+  // --------------------------------------------
 	private String getAttributeValue(Element element, String attributeName)
 		throws InvalidConfigurationException
 	{
@@ -115,4 +127,22 @@ public class UserConfiguration
 
 		return attributeValue;
 	}
+  // --------------------------------------------
+	private boolean includeMenuItem(Element element, ReportingConfiguration reportingConfiguration)
+		throws InvalidConfigurationException
+	{
+    boolean menuItem = true;
+    String type = getAttributeValue(element, "type");
+    if ( type.equals("conditional") ) {
+      String property = getAttributeValue(element, "property");
+      if ( property.equals("false") ) {
+        throw new InvalidConfigurationException("Conditional menu item found with no property attribute");
+      }
+			boolean exists = reportingConfiguration.doesPropertyExist(property);
+      if ( exists == false ) {
+        menuItem = false;
+      }
+    }
+    return menuItem;
+  }
 }
