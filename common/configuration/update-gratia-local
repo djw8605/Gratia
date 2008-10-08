@@ -83,7 +83,10 @@ function set_env_for_local {
 function stop_tomcat {
   echo "... stopping tomcat services"
   if [ $vdt_install ];then
-    vdt-control --off tomcat-55
+    vdt-control --off tomcat-55;rtn=$?
+    if [ "$rtn" != "0" ];then
+      logerr "Unable to stop tomcat service"
+    fi
   else
     if [ ! -e /etc/init.d/$init_service ];then
       echo "... no tomcat initd service defined"
@@ -103,7 +106,10 @@ function shutdown_local_tomcat {
     echo "... tomcat pid: $pid"
     echo "... stopping tomcat service ($init_service)"
     sleep 2
-    /sbin/service $init_service stop 
+    /sbin/service $init_service stop;rtn=$?
+    if [ "$rtn" != "0" ];then
+      logerr "Unable to stop tomcat service"
+    fi
     verify_shutdown $pid
     echo "... tomcat service ($init_service) successfully stopped"
     sleep 2
