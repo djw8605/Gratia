@@ -1,12 +1,15 @@
 #!/bin/bash
 
-while getopts :n OPT; do
+while getopts :nx: OPT; do
     case $OPT in
         n)
             dryrun=1
             ;;
+        x)
+            exclude="$OPTARG"
+            ;;
         *)
-            echo "usage: ${0##*/} [-n} [--] ARGS..."
+            echo "usage: ${0##*/} [-n] [-x <exclude>] [--] ARGS..."
             exit 2
     esac
 done
@@ -16,9 +19,14 @@ if [[ "$1" = "start" ]]; then
   command=start
 elif [[ "$1" = "stop" ]]; then
   command=stop
+elif [[ "$1" = "restart" ]]; then
+  command=restart
 fi
 
 for initscript in `chkconfig --list | grep -e '^tomcat-' | cut -f 1`; do
+  if [[ -z "$initscript" ]] || [[ $initscript == "$exclude" ]]; then
+    continue
+  fi
   echo "service $initscript $command"
   [[ -z "$dryrun" ]] && service $initscript $command
 done
