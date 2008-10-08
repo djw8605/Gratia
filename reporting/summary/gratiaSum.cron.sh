@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+gsum="./gratiaSum.py"
 
 while test "x$1" != "x"; do
    if [ "$1" == "--help" ]; then 
@@ -23,4 +24,5 @@ where=`dirname $0`
 setup mysql
 
 cd $where
-./gratiaSum.py $whenarg
+[[ -x "$gsum" ]] || chmod +x "$gsum"
+"$gsum" $whenarg
