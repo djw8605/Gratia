@@ -135,6 +135,8 @@
    db_schema => "gratia_qcd",
    remote_host => "gratia-fermi.fnal.gov",
    collector_host => "gratia-fermi.fnal.gov",
+   max_perm_size => "256m",
+   max_heap_size => "1024m",
    "properties.attributes" =>
    {
     "monitor.from.address" => 'gratia-operation@opensciencegrid.org',
