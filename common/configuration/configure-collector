@@ -128,22 +128,55 @@ TOMCAT_INSTANCE_NAME=`basename "$0" | sed -e 's/^.*\(tomcat-.*\)$/\1/'`
 CATALINA_HOME="${TOMCAT_PATH_STEM}/${TOMCAT_INSTANCE_NAME}"; export CATALINA_HOME
 
 [[ -n "${KRB5CCNAME}" ]] && KRB5CCNAME=`echo "${KRB5CCNAME}" | sed -e 's/^FILE://'`
-if [ "$1" = "start" ] ; then
+
+function start {
   JAVA_OPTS="-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=${TOMCAT_MANAGEMENT_PORT} -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dssl.port=${TOMCAT_SSL_PORT} -Dcom.mchange.v2.c3p0.management.ManagementCoordinator=com.mchange.v2.c3p0.management.NullManagementCoordinator"; export JAVA_OPTS
   if [[ -n "${TOMCAT_USER}" ]]; then
     su -c "${CATALINA_HOME}/bin/catalina.sh start" ${TOMCAT_USER}
   else
     $CATALINA_HOME/bin/catalina.sh start
   fi
-elif [ "$1" = "stop" ] ; then
+}
+
+function stop {
   wget --no-check-certificate --certificate="^^^HOST_CERT^^^" --private-key="^^^HOST_KEY^^^" --dns-timeout=5 --connect-timeout=10 --read-timeout=20 -O - -q '^^^STOP_DB_UPDATE_URL^^^' >/dev/null 2>&1
   if [[ -n "${TOMCAT_USER}" ]]; then
     su -c "${CATALINA_HOME}/bin/shutdown.sh" ${TOMCAT_USER}
   else
     ${CATALINA_HOME}/bin/shutdown.sh
   fi
+}
+
+function is_running {
+  local process_cnt="$(ps -ef | grep -E -e "file=$TOMCAT_PATH_STEM/$TOMCAT_INSTANCE_NAME" | grep -E -e '  1 ' | grep -E -v grep | wc -l)"
+  local result
+  case $process_cnt in
+    0) result=1
+       ;;
+    1) result=0
+       ;;
+    *) result=2
+       ;;
+  esac
+  return $result
+}
+
+if [ "$1" = "start" ] ; then
+  start
+elif [ "$1" = "stop" ] ; then
+  stop
+elif [ "$1" = "restart" ]; then
+  if is_running; then
+    stop
+    echo "Pause ..."
+    sleep 20
+    start
+  else
+    echo "${TOMCAT_INSTANCE_NAME} does not appear to be running: not attempting to restart"
+    exit 1
+  fi
 else
-  echo "Usage: ${TOMCAT_INSTANCE_NAME} [start | stop]"
+  echo "Usage: ${TOMCAT_INSTANCE_NAME} [start | stop | restart]"
   exit 1
 fi
 EOF
