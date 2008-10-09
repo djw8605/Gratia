@@ -12,7 +12,7 @@ public class Trace {
     private String userVO;
     private String sqlQuery;
     private String procTime;
-    private String procTime;
+    private String queryTime;
     private String p1;
     private String p2;
     private String p3;
