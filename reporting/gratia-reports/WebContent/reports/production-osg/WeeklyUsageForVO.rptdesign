@@ -977,6 +977,14 @@
                     <property name="isInput">true</property>
                     <property name="isOutput">false</property>
                 </structure>
+                <structure>
+                    <property name="name">reportName</property>
+                    <property name="dataType">string</property>
+                    <property name="position">11</property>
+                    <expression name="defaultValue">'WeeklyUsageForVO'</expression>
+                    <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
+                </structure>
             </list-property>
             <list-property name="resultSet">
                 <structure>
@@ -1016,7 +1024,7 @@
                     <property name="dataType">decimal</property>
                 </structure>
             </list-property>
-            <property name="queryText">call reportsRanked(?,?,?,?,?,?,?,?,?,?)</property>
+            <property name="queryText">call reportsRanked(?,?,?,?,?,?,?,?,?,?,?)</property>
         </oda-data-set>
     </data-sets>
     <styles>

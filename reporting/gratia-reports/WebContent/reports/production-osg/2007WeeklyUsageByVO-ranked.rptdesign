@@ -868,8 +868,8 @@
         <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="Data Source" id="444">
             <property name="odaDriverClass">com.mysql.jdbc.Driver</property>
             <property name="odaURL">jdbc:mysql://gratia-vm02.fnal.gov:3320/gratia_gratiax21</property>
-            <property name="odaUser">reader</property>
-            <encrypted-property name="odaPassword" encryptionID="base64">cmVhZGVy</encrypted-property>
+            <property name="odaUser">gratia</property>
+            <encrypted-property name="odaPassword" encryptionID="base64">cHJvdG8=</encrypted-property>
         </oda-data-source>
     </data-sources>
     <data-sets>
@@ -1016,6 +1016,14 @@
                     <property name="isInput">true</property>
                     <property name="isOutput">false</property>
                 </structure>
+                <structure>
+                    <property name="name">reportName</property>
+                    <property name="dataType">string</property>
+                    <property name="position">11</property>
+                    <expression name="defaultValue">'2007WeeklyUsageByVO-ranked'</expression>
+                    <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
+                </structure>
             </list-property>
             <list-property name="resultSet">
                 <structure>
@@ -1055,7 +1063,7 @@
                     <property name="dataType">decimal</property>
                 </structure>
             </list-property>
-            <property name="queryText">call reportsRanked(?,?,?,?,?,?,?,?,?,?)</property>
+            <property name="queryText">call reportsRanked(?,?,?,?,?,?,?,?,?,?,?)</property>
         </oda-data-set>
     </data-sets>
     <styles>

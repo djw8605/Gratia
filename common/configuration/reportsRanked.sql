@@ -7,7 +7,8 @@ CREATE PROCEDURE `reportsRanked`(
           timeUnit varchar(64), dateGrouping varchar(64),
           resourceType varchar(64), metric varchar(15),
           selValues varchar(1024),
-          selType varchar(4)
+          selType varchar(5),
+          reportName varchar(64)
           )
     READS SQL DATA
 begin
@@ -224,7 +225,7 @@ end if;
   select sysdate() into @query_end;
 
       insert into trace(procName,  userKey, userName, userRole, userVO, sqlQuery, procTime, queryTime, p1, p2, p3)
-           values('reportsRanked', @key,    @iuser,   @irole,   @vo,    @sql,
+           values(TRIM(reportName), @key,    @iuser,   @irole,   @vo,    @sql,
            		  timediff(@query_start, @proc_start),
     			  timediff(@query_end,   @query_start),
     			  null, null, null);
