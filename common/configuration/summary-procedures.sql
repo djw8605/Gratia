@@ -103,19 +103,19 @@ AJUR:BEGIN
 
   -- Basic data checks
   IF n_ProbeName IS NULL THEN
-     INSERT INTO trace(eventtime, pname, p1, `data`)
+     INSERT INTO trace(eventtime, procName, p1, sqlQuery)
       VALUES(UTC_TIMESTAMP(), 'add_JUR_to_summary', inputDbid, 'Failed due to null ProbeName');
      LEAVE AJUR;
   END IF;
 
   IF n_VOcorrid IS NULL THEN
-     INSERT INTO trace(eventtime, pname, p1, `data`)
+     INSERT INTO trace(eventtime, procName, p1, sqlQuery)
       VALUES(UTC_TIMESTAMP(), 'add_JUR_to_summary', inputDbid, 'Failed due to null VOcorrid');
      LEAVE AJUR;
   END IF;
 
   IF n_Njobs IS NULL THEN
-     INSERT INTO trace(eventtime, pname, p1, `data`)
+     INSERT INTO trace(eventtime, procName, p1, sqlQuery)
       VALUES(UTC_TIMESTAMP(), 'add_JUR_to_summary', inputDbid, 'Failed due to null Njobs');
      LEAVE AJUR;
   END IF;
@@ -123,7 +123,7 @@ AJUR:BEGIN
   IF n_ResourceType IN ('Storage', 'Transfer') THEN
 
     IF n_StartTime IS NULL THEN
-      INSERT INTO trace(eventtime, pname, p1, `data`)
+      INSERT INTO trace(eventtime, procName, p1, sqlQuery)
        VALUES(UTC_TIMESTAMP(), 'add_JUR_to_summary', inputDbid, 'Failed due to null StartTime');
       LEAVE AJUR;
     END IF;
@@ -150,7 +150,7 @@ AJUR:BEGIN
     LIMIT 1;
 
     IF n_Protocol IS NULL THEN
-      INSERT INTO trace(eventtime, pname, p1, `data`)
+      INSERT INTO trace(eventtime, procName, p1, sqlQuery)
        VALUES(UTC_TIMESTAMP(), 'add_JUR_to_summary', inputDbid, 'Failed due to null Protocol');
       LEAVE AJUR;
     END IF;
@@ -184,25 +184,25 @@ AJUR:BEGIN
   END IF;
 
   IF n_WallDuration IS NULL THEN
-     INSERT INTO trace(eventtime, pname, p1, `data`)
+     INSERT INTO trace(eventtime, procName, p1, sqlQuery)
       VALUES(UTC_TIMESTAMP(), 'add_JUR_to_summary', inputDbid, 'Failed due to null WallDuration');
      LEAVE AJUR;
   END IF;
 
   IF n_CpuUserDuration IS NULL THEN
-     INSERT INTO trace(eventtime, pname, p1, `data`)
+     INSERT INTO trace(eventtime, procName, p1, sqlQuery)
       VALUES(UTC_TIMESTAMP(), 'add_JUR_to_summary', inputDbid, 'Failed due to null CpuUserDuration');
      LEAVE AJUR;
   END IF;
 
   IF n_CpuSystemDuration IS NULL THEN
-     INSERT INTO trace(eventtime, pname, p1, `data`)
+     INSERT INTO trace(eventtime, procName, p1, sqlQuery)
       VALUES(UTC_TIMESTAMP(), 'add_JUR_to_summary', inputDbid, 'Failed due to null CpuSystemDuration');
      LEAVE AJUR;
   END IF;
 
   IF n_EndTime < n_StartTime THEN
-     INSERT INTO trace(eventtime, pname, p1, `data`)
+     INSERT INTO trace(eventtime, procName, p1, sqlQuery)
       VALUES(UTC_TIMESTAMP(), 'add_JUR_to_summary', inputDbid, 'Failed due to EndTime < StartTime');
      LEAVE AJUR;
   END IF;
@@ -247,12 +247,13 @@ AJUR:BEGIN
     while counter < imax do
       -- Calculate date for summary entry
       set newdate = adddate(n_StartTime,counter);
---      insert into trace(eventtime, pname, p1, p2, p3, p4, p5, p6, p7, p8, p9, data)
+--      insert into trace(eventtime, procName, userKey, userName, userRole, userVO, sqlQuery, procTime, queryTime, p1, p2, p3)
 --        values(n_EndTime, 'add_JUR_to_summary',
 --               date(newdate), n_Host, n_ProbeName, n_ResourceType,
---               newcpusystemtime, newcpuusertime, mycpucount,
---               n_HostDescription, mybenchmarkscore,
---               'Insert / Update NodeSummary');
+--               'Insert / Update NodeSummary'
+--               newcpusystemtime, newcpuusertime, 
+--               mycpucount, n_HostDescription, mybenchmarkscore,
+--               );
       -- Insert / update
       insert into NodeSummary
         (EndTime, Node, ProbeName, ResourceType,
@@ -375,26 +376,26 @@ DJUR:BEGIN
   END IF;
 
   IF n_ProbeName IS NULL THEN
-     INSERT INTO trace(eventtime, pname, p1, `data`)
+     INSERT INTO trace(eventtime, procName, p1, sqlQuery)
       VALUES(UTC_TIMESTAMP(), 'del_JUR_from_summary', inputDbid, 'Failed due to null ProbeName');
      LEAVE DJUR;
   END IF;
 
   IF n_VOcorrid IS NULL THEN
-     INSERT INTO trace(eventtime, pname, p1, `data`)
+     INSERT INTO trace(eventtime, procName, p1, sqlQuery)
       VALUES(UTC_TIMESTAMP(), 'del_JUR_from_summary', inputDbid, 'Failed due to null VOcorrid');
      LEAVE DJUR;
   END IF;
 
   IF n_Njobs IS NULL THEN
-     INSERT INTO trace(eventtime, pname, p1, `data`)
+     INSERT INTO trace(eventtime, procName, p1, sqlQuery)
       VALUES(UTC_TIMESTAMP(), 'del_JUR_from_summary', inputDbid, 'Failed due to null Njobs');
      LEAVE DJUR;
   END IF;
 
   IF n_ResourceType = 'Storage' THEN
     IF n_StartTime IS NULL THEN
-      INSERT INTO trace(eventtime, pname, p1, `data`)
+      INSERT INTO trace(eventtime, procName, p1, sqlQuery)
        VALUES(UTC_TIMESTAMP(), 'del_JUR_from_summary', inputDbid, 'Failed due to null StartTime');
       LEAVE DJUR;
     END IF;
@@ -452,25 +453,25 @@ DJUR:BEGIN
   END IF;
 
   IF n_WallDuration IS NULL THEN
-     INSERT INTO trace(eventtime, pname, p1, `data`)
+     INSERT INTO trace(eventtime, procName, p1, sqlQuery)
       VALUES(UTC_TIMESTAMP(), 'del_JUR_from_summary', inputDbid, 'Failed due to null WallDuration');
      LEAVE DJUR;
   END IF;
 
   IF n_CpuUserDuration IS NULL THEN
-     INSERT INTO trace(eventtime, pname, p1, `data`)
+     INSERT INTO trace(eventtime, procName, p1, sqlQuery)
       VALUES(UTC_TIMESTAMP(), 'del_JUR_from_summary', inputDbid, 'Failed due to null CpuUserDuration');
      LEAVE DJUR;
   END IF;
 
   IF n_CpuSystemDuration IS NULL THEN
-     INSERT INTO trace(eventtime, pname, p1, `data`)
+     INSERT INTO trace(eventtime, procName, p1, sqlQuery)
       VALUES(UTC_TIMESTAMP(), 'del_JUR_from_summary', inputDbid, 'Failed due to null CpuSystemDuration');
      LEAVE DJUR;
   END IF;
 
   IF n_EndTime < n_StartTime THEN
-     INSERT INTO trace(eventtime, pname, p1, `data`)
+     INSERT INTO trace(eventtime, procName, p1, sqlQuery)
       VALUES(UTC_TIMESTAMP(), 'del_JUR_from_summary', inputDbid, 'Failed due to EndTime < StartTime');
      LEAVE DJUR;
   END IF;
