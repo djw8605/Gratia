@@ -117,11 +117,23 @@ while [[ -n "$1" ]]; do
         ;;
       stored)
         #proc="${script_location}build-stored-procedures.sql"
-        set -- "$@" stored-extra-3 stored-extra-4 stored-extra-5
+        set -- "$@" stored-extra-3 stored-1 stored-2 stored-3
         if [[ `hostname -f` == *.fnal.gov ]]; then
           set -- "$@" proc-edit-permission
         fi
         continue
+        ;;
+      stored-1)
+        # Create trace table and common functions for the reports stored prcedures        
+        proc="${script_location}reportsGeneral.sql"
+        ;;
+      stored-2)
+        # Reports stored procedure
+        proc="${script_location}reports.sql"
+        ;;
+      stored-3)
+        # Ranked Reports stored procedure
+        proc="${script_location}reportsRanked.sql"
         ;;
       stored-extra-1)
         # Hand-tweaked procedure (temporary)
@@ -140,14 +152,6 @@ while [[ -n "$1" ]]; do
       stored-extra-3)
         # Hand-tweaked procedure (temporary)
         proc="${script_location}dCacheSimple.sql"
-        ;;
-      stored-extra-4)
-        # Hand-tweaked procedure (temporary)
-        proc="${script_location}reports.sql"
-        ;;
-      stored-extra-5)
-        # Hand-tweaked procedure (temporary)
-        proc="${script_location}reportsRanked.sql"
         ;;
       static-reports)
         # For CSV static reports
