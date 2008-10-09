@@ -12,6 +12,7 @@ CREATE PROCEDURE `reportsRanked`(
     READS SQL DATA
 begin
 
+ select sysdate() into @proc_start;
 
   set @iuser := concat_ws('','GratiaUser|', UNIX_TIMESTAMP(), '|Unknown');
   IF userName IS NOT NULL then
@@ -114,16 +115,14 @@ begin
     END IF;
   END IF;
 
-  select sysdate() into @proc_start;
   select generateResourceTypeClause(resourceType) into @myresourceclause;
   select SystemProplist.cdr into @usereportauthentication from SystemProplist
   where SystemProplist.car = 'use.report.authentication';
   select Role.whereclause into @mywhereclause from Role
     where Role.role = userRole;
-  select generateWhereClause(@iuserName,@iuserRole,@mywhereclause)
+  select generateWhereClause(@iuser,@irole,@mywhereclause)
     into @mywhereclause;
-  call parse(@iuserName,@name,@key,@vo);
-  select sysdate() into @query_start;
+  call parse(@iuser,@name,@key,@vo);
 
 if @imetric = 'SiteCount' then
   set @sql :=
@@ -218,16 +217,18 @@ else
               );
 end if;
 
-
+  select sysdate() into @query_start;
+  
   prepare statement from @sql;
   execute statement;
-  insert into trace(pname,userkey,user,role,vo,p1,p2,p3,p4,p5,p6,p7,p8,data)
-    values('reportsRanked',@key,userName,userRole,@vo,
-    @thisFromDate,@thisToDate,dateGrouping,resourceType,
-    timediff(@query_start, @proc_start),
-    timediff(sysdate(), @query_start),
-    @idatr,@idats,
-    @sql);
+  select sysdate() into @query_end;
+
+      insert into trace(procName,  userKey, userName, userRole, userVO, sqlQuery, procTime, queryTime, p1, p2, p3)
+           values('reportsRanked', @key,    @iuser,   @irole,   @vo,    @sql,
+           		  timediff(@query_start, @proc_start),
+    			  timediff(@query_end,   @query_start),
+    			  null, null, null);
+
   deallocate prepare statement;
 
 END $$
