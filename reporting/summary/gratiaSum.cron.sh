@@ -23,6 +23,7 @@ where=`dirname $0`
 . /usr/local/etc/setups.sh 
 setup mysql
 
+export PYTHONPATH=${PYTHON_PATH}:$where/probe/common
 cd $where
 [[ -x "$gsum" ]] || chmod +x "$gsum"
 "$gsum" $whenarg
