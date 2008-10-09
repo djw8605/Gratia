@@ -3,6 +3,7 @@ DELIMITER $$
 drop table if exists trace
 $$
 CREATE TABLE trace (
+	traceID int,
   	eventtime TIMESTAMP NOT NULL,
 	procName varchar(64),
 	userKey varchar(64),
