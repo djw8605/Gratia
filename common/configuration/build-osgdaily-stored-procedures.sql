@@ -3,7 +3,9 @@ DELIMITER $$
 DROP PROCEDURE IF EXISTS `gratia_osg_daily`.`UsageByProbeForVOForSite` $$
 CREATE DEFINER=CURRENT_USER PROCEDURE `UsageByProbeForVOForSite`(userName varchar(64), userRole varchar(64), fromdate varchar(64), todate varchar(64), format varchar(64), resourceType varchar(64), vos varchar(128), voseltype varchar(8),sites varchar(128))
     READS SQL DATA
+
 begin
+  select sysdate() into @proc_start;
   select generateResourceTypeClause(resourceType) into @myresourceclause;
   select SystemProplist.cdr into @usereportauthentication from SystemProplist
   where SystemProplist.car = 'use.report.authentication';
@@ -39,11 +41,17 @@ begin
                      , ' order by probename, sitename, J.EndTime'
                     );
 
-  insert into trace(pname,userkey,user,role,vo,p1,p2,p3,p4,data)
-    values('UsageByProbeForVOForSite',@key,userName,userRole,@vo,
-    fromdate,todate,format,resourceType,@sql);
+
+  select sysdate() into @query_start;
   prepare statement from @sql;
   execute statement;
+  select sysdate() into @query_end;
+  
+  insert into trace(procName,  userKey, userName, userRole, userVO, sqlQuery, procTime, queryTime, p1, p2, p3)
+             values('reports', @key,    userName,   userRole,   @vo,    @sql,
+             		  timediff(@query_start, @proc_start),
+      			  timediff(@query_end,   @query_start),
+    			  null, null, null);   
   deallocate prepare statement;
 end $$
 
