@@ -16,6 +16,7 @@ CREATE PROCEDURE `reports`(
     READS SQL DATA
 begin
 
+  select sysdate() into @proc_start;
   set @iuser := concat_ws('','GratiaUser|', UNIX_TIMESTAMP(), '|Unknown');
   IF userName IS NOT NULL THEN
     IF (TRIM(userName) != '') AND (TRIM(userName) != 'null') THEN
@@ -146,6 +147,12 @@ begin
     END IF;
   END IF;
 
+  select generateResourceTypeClause(@itype) into @myresourceclause;
+  select SystemProplist.cdr into @usereportauthentication from SystemProplist where SystemProplist.car = 'use.report.authentication';
+  select Role.whereclause into @mywhereclause from Role where Role.role = @irole;
+  select generateWhereClause(@iuser,@irole,@mywhereclause) into @mywhereclause;
+  call parse(@iuser,@name,@key,@vo);
+
   set @rankfrom := '';
   set @rankwhere := '';
   set @final_rank := '';
@@ -171,12 +178,6 @@ begin
        set @final_rank := 'final_rank,';
     END IF;
   END IF;
-
-  select generateResourceTypeClause(@itype) into @myresourceclause;
-  select SystemProplist.cdr into @usereportauthentication from SystemProplist where SystemProplist.car = 'use.report.authentication';
-  select Role.whereclause into @mywhereclause from Role where Role.role = @irole;
-  select generateWhereClause(@iuser,@irole,@mywhereclause) into @mywhereclause;
-  call parse(@iuser,@name,@key,@vo);
 
   set @sql := concat_ws('',
            ' select ', @final_rank,
@@ -206,13 +207,18 @@ begin
            ';'
         );
 
-    insert into trace(pname,userkey,user,role,vo,p1,p2,p3,p4,p5,p6,p7,data)
-        values('reports',@key,@iuser,@irole,@vo,
-        @ifrom,@ito,@idatr,@idats,@itype,@iunit,@igroup,@sql);
+  select sysdate() into @query_start;
     prepare statement from @sql;
     execute statement;
-    deallocate prepare statement;
+  select sysdate() into @query_end;
 
+      insert into trace(procName,  userKey, userName, userRole, userVO, sqlQuery, procTime, queryTime, p1, p2, p3)
+           values('reports', @key,    @iuser,   @irole,   @vo,    @sql,
+           		  timediff(@query_start, @proc_start),
+    			  timediff(@query_end,   @query_start),
+    			  null, null, null);      	
+
+  deallocate prepare statement;
 
 END $$
 
