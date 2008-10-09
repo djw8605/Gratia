@@ -28,8 +28,8 @@ public class DataScrubber {
     // service.lifetime.DupRecord.Duplicates = 1 month
     // service.lifetime.DupRecord.<error-type>  = <as specified>
     // service.lifetime.DupRecord = UNLIMITED
-    // service.lifetime.Trace.<pname> = <as specified>
-    // service.lifetime.Trace.<pname> = 1 month
+    // service.lifetime.Trace.<procName> = <as specified>
+    // service.lifetime.Trace.<procName> = 1 month
     //
 
     int batchSize = 200; // Default only
@@ -52,7 +52,7 @@ public class DataScrubber {
         stopRequested = true;
     }
 
-    protected long ExecuteSQL( String deletecmd, String limit, String msg ) 
+    protected long ExecuteSQL( String deletecmd, String limit, String msg )
     {
         long deletedEntities = 0;
         long deletedThisIteration = 0;
@@ -83,7 +83,7 @@ public class DataScrubber {
     protected long deleteHibernateRecords(String className, String whereClause,
                                           String limit, String msg) {
         long deletedEntities = 0;
-        long deletedThisIteration = 0; 
+        long deletedThisIteration = 0;
 
         do {
             String selectCmd = "select record.id from " + className +
@@ -112,10 +112,10 @@ public class DataScrubber {
         return deletedEntities;
     }
 
-    protected long Execute( String deletecmd, String limit, String msg ) 
+    protected long Execute( String deletecmd, String limit, String msg )
     {
         long deletedEntities = 0;
-        long deletedThisIteration = 0; 
+        long deletedThisIteration = 0;
 
         do {
             Session session =  HibernateWrapper.getSession();
@@ -141,7 +141,7 @@ public class DataScrubber {
         return deletedEntities;
     }
 
-    protected List GetList( String listcmd, String datelimit, String msg ) 
+    protected List GetList( String listcmd, String datelimit, String msg )
     {
         List result = null;
 
@@ -206,7 +206,7 @@ public class DataScrubber {
 
         if (!(limit.length() > 0)) return 0;
         Logging.fine("DataScrubber: Remove all JobUsage RawXML records older than: " + limit);
- 
+
         String delquery = "delete from JobUsageRecord_Xml where ExtraXml = \"\" " +
             "and dbid in (select M.dbid from JobUsageRecord_Meta M join " +
             "JobUsageRecord R on (M.dbid = R.dbid)" +
@@ -240,22 +240,22 @@ public class DataScrubber {
             while (!done) {
                 ids = GetList(hqlList, limit, "JobUsageRecord records");
                 Logging.debug("DataScrubber: deleting " + ids);
-                
+
                 // Here we decide whether to loop or not after each 'batch'
                 done = (ids==null) || (ids.size() < batchSize);
 
                 if ((ids != null) && (!ids.isEmpty())) {
-                
+
                     Session session =  HibernateWrapper.getSession();
                     Transaction tx = session.beginTransaction();
                     try {
                         long res = 0;
                         // Ideally Hibernate would put a cascading foreign key
-                        // on the JobUsageRecord, it does not work now.  So 
+                        // on the JobUsageRecord, it does not work now.  So
                         // do the delete from each table by hand.
                         // Ideally we would extract this list of tables from
                         // the hibernate configuration
-                        String [] tables = { 
+                        String [] tables = {
                             "Disk",
                             "Memory",
                             "Swap",
@@ -270,7 +270,7 @@ public class DataScrubber {
                             "JobUsageRecord_Xml",
                             "JobUsageRecord_Meta"
                         };
-                        
+
                         long n = 0;
                         // Special case multi-table delete since
                         // TransferDetails isn't keyed on dbid.
@@ -285,7 +285,7 @@ public class DataScrubber {
                         // JobUsageRecord should be last, so do it
                         // explicitly so we never forget:
                         n = DeleteRows(session, "JobUsageRecord", ids);
-                        tx.commit();                   
+                        tx.commit();
                         nrecords = nrecords + n;
                     }
                     catch (Exception e) {
@@ -316,7 +316,7 @@ public class DataScrubber {
         //   c) Normal case
         long nrecords = 0;
         if (limit.length() > 0) {
-            Logging.fine("DataScrubber: Remove all Metric records older than: " + limit); 
+            Logging.fine("DataScrubber: Remove all Metric records older than: " + limit);
 
             // Can't use deleteHibernateRecords until we find a way to
             // specify to hibernate that the key field should be
@@ -340,7 +340,7 @@ public class DataScrubber {
     }
 
     public long Trace() {
-        return tableCleanupHelper("Trace", "pname", "eventtime");
+        return tableCleanupHelper("Trace", "procName", "eventtime");
     }
 
     public long DupRecord() {

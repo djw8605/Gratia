@@ -52,7 +52,7 @@ public class DatabaseMaintenance {
     boolean isInnoDB = false;
 
     public DatabaseMaintenance(Properties p) {
-        
+
         String driver = p.getProperty("service.mysql.driver");
         String url = p.getProperty("service.mysql.url");
         String user = p.getProperty("service.mysql.user");
@@ -75,19 +75,19 @@ public class DatabaseMaintenance {
         ReadLiveVersion();
 
     }
-    
+
     public boolean IsDbNewer()
     {
         return (liveVersion > gratiaDatabaseVersion);
     }
-    
+
     static public boolean UseJobUsageSiteName() {
-        return dbUseJobUsageSiteName; 
+        return dbUseJobUsageSiteName;
     }
 
     public boolean InitialCleanup() {
         // Do check and cleanup that must be done before Hibernate is started.
-        
+
         if (liveVersion < 4) Execute("Drop view if exists Role;");
         if (liveVersion < 5) Execute("Drop view if exists Site;");
         if (liveVersion < 6) Execute("Drop view if exists Probe;");
@@ -97,7 +97,7 @@ public class DatabaseMaintenance {
         hibernate_cfg = hibernate_cfg + File.separatorChar + "gratia" + File.separatorChar + "hibernate.cfg.xml";
 
         String grep_cmd[] = {"grep", "-e", "org\\.hibernate\\.dialect\\.MySQLInnoDBDialect", hibernate_cfg};
-        
+
         int result = Execute.execute(grep_cmd);
         if (result == 0) {
             isInnoDB = true;
@@ -105,7 +105,7 @@ public class DatabaseMaintenance {
         }
         return true;
     }
-    
+
     public void AddIndex(String table, Boolean unique, String name,
                          String content) throws Exception {
 
@@ -131,7 +131,7 @@ public class DatabaseMaintenance {
             Logging.log("Executing: " + check);
             statement = connection.createStatement();
             resultSet = statement.executeQuery(check);
-            if (!resultSet.next()) { 
+            if (!resultSet.next()) {
                resultSet.close();
                statement.close();
                Boolean exist = false;
@@ -269,7 +269,7 @@ public class DatabaseMaintenance {
         // New index for ResourceType
         //
         AddIndex("JobUsageRecord", false, "index16", "ResourceType");
-        
+
         //
         // Indexes for VONameCorrection
         //
@@ -353,7 +353,7 @@ public class DatabaseMaintenance {
 
         // Indexes for Trace table to facilitate housekeeping.
         AddIndex("trace", false, "index01", "eventtime");
-        AddIndex("trace", false, "index02", "pname");
+        AddIndex("trace", false, "index02", "procName");
 
         // SystemProplist management (safety)
         AddIndex("SystemProplist", true, "index01", "car");
@@ -438,7 +438,7 @@ public class DatabaseMaintenance {
             Logging.warning("Command: Error: " + cmd + " : " + e);
         }
     }
-    
+
     private String GetJobUsageRecordColumnsForReportView() {
         Statement statement;
         ResultSet resultSet;
@@ -471,7 +471,7 @@ public class DatabaseMaintenance {
         }
         return result;
     }
-    
+
 
     public void CPUMetricDefaults() {
         Execute("delete from CPUMetricTypes");
@@ -480,7 +480,7 @@ public class DatabaseMaintenance {
         Execute("insert into CPUMetricTypes(CPUMetricType) values(" + dq
                 + "process" + dq + ")");
     }
-    
+
     public void RoleDefaults() {
         if (getCount("select count(*) from Role where role='GratiaGlobalAdmin'")==0) {
             Execute("insert into Role(role,subtitle,whereclause) values('GratiaGlobalAdmin','GratiaGlobalAdmin','')");
@@ -527,7 +527,7 @@ public class DatabaseMaintenance {
 
         dbUseJobUsageSiteName = 0 != readIntegerDBProperty("gratia.database.useJobUsageSiteName");
     }
-    
+
     public void AddViews() {
         Execute("DROP VIEW IF EXISTS CETable");
         Execute("CREATE VIEW CETable AS select Site.SiteId AS facility_id,Site.SiteName AS facility_name from Site");
@@ -543,10 +543,10 @@ public class DatabaseMaintenance {
                 " where " +
                 " JobUsageRecord_Meta.probeid = Probe.probeid and Probe.siteid = Site.siteid" +
                 " and JobUsageRecord_Meta.dbid = JobUsageRecord.dbid" +
-                " and binary JobUsageRecord.VOName = binary VONameCorrection.VOName" + 
-                " and ((binary JobUsageRecord.ReportableVOName = binary VONameCorrection.ReportableVOName) or" + 
+                " and binary JobUsageRecord.VOName = binary VONameCorrection.VOName" +
+                " and ((binary JobUsageRecord.ReportableVOName = binary VONameCorrection.ReportableVOName) or" +
                 " ((JobUsageRecord.ReportableVOName is null) and (VONameCorrection.ReportableVOName is null)))" +
-                " and VONameCorrection.void = VO.void" + 
+                " and VONameCorrection.void = VO.void" +
                 " and JobUsageRecord.VOName = VONameCorrection.VOName");
     }
 
@@ -566,14 +566,14 @@ public class DatabaseMaintenance {
             if (resultSet.next()) {
                 String vers = resultSet.getString(1);
                 result = Integer.valueOf(vers).intValue();
-            }           
+            }
             Logging.log("Command: OK: " + check);
         } catch (Exception e) {
             Logging.warning("Command: Error: " + check + " : " + e);
         }
         return result;
     }
-    
+
     public void ReadLiveVersion() {
 
         Statement statement;
@@ -607,7 +607,7 @@ public class DatabaseMaintenance {
             Logging.log("Command: OK: " + check);
         } catch (Exception e) {
             Logging.warning("Command: Error: " + check + " : " + e);
-        }        
+        }
     }
 
     private void UpdateDbProperty(String property, int value) {
@@ -619,7 +619,7 @@ public class DatabaseMaintenance {
         if (value == null) return;
         UpdateDbProperty(property, value);
     }
-    
+
     private void UpdateDbProperty(String property, String value) {
         int nRows = getCount("select count(*) from SystemProplist where car = " +
                              dq + property + dq);
@@ -635,7 +635,7 @@ public class DatabaseMaintenance {
 
     private void UpdateDbVersion(int newVersion) {
         UpdateDbProperty("gratia.database.version", newVersion);
-        liveVersion = newVersion;        
+        liveVersion = newVersion;
     }
 
     private boolean checkAndUpgradeDbAuxiliaryItems() {
@@ -710,7 +710,7 @@ public class DatabaseMaintenance {
                     return false;
                 }
             }
-        }                
+        }
         return true;
     }
 
@@ -721,7 +721,7 @@ public class DatabaseMaintenance {
         if (oldvers == 0) {
             Statement statement;
             ResultSet resultSet;
-            
+
             String check = "select count(*),min(PropId) from SystemProplist where car = " + dq
                 + "gratia.database.version" + dq;
 
@@ -743,19 +743,19 @@ public class DatabaseMaintenance {
                 Logging.log("Command: OK: " + check);
             } catch (Exception e) {
                 Logging.warning("Command: Error: " + check + " : " + e);
-            }    
+            }
 
             Logging.info("Gratia database now at version "
                          + gratiaDatabaseVersion);
 
             return checkAndUpgradeDbAuxiliaryItems();
-            
+
         } else {
             // Do the necessary upgrades if any
 
             Logging.info("Gratia database at version " + oldvers);
 
-            
+
             int current = oldvers;
 
             if (current == 1) {
@@ -866,7 +866,7 @@ public class DatabaseMaintenance {
                     UpdateDbVersion(current);
                 } else {
                     Logging.warning("Gratia database FAILED to upgrade from " + current + " to " + (current + 1));
-                }                
+                }
             }
             if (current == 8 || current == 9) { // Can combine update command into one SQL statement for both versions
                 int result = Execute("update (select ProbeName,count(*) as nRecords,max(ServerDate) as ServerDate from JobUsageRecord_Meta group by ProbeName) as sums,Probe set Probe.nRecords = sums.nRecords, Probe.currenttime = sums.ServerDate, Probe.status = 'alive' where Probe.ProbeName = sums.ProbeName;");
@@ -891,7 +891,7 @@ public class DatabaseMaintenance {
                     UpdateDbVersion(current);
                 } else {
                     Logging.warning("Gratia database FAILED to upgrade from " + current + " to " + (current + 1));
-                } 
+                }
             }
             if ((current > 10 ) && (current < 14)) { // Never saw the light of day and superseded.
                 int new_version = 14;
@@ -1019,7 +1019,7 @@ public class DatabaseMaintenance {
                 }
                 if (result > -1) {
                     result = Execute("update ProbeDetails_Meta, Probe set ProbeDetails_Meta.probeid = Probe.probeid where ProbeDetails_Meta.probename = Probe.probename");
-                } 
+                }
                 if (result > -1) {
                     Logging.fine("Gratia database upgraded from " + current + " to " + (current + 1));
                     current = current + 1;
@@ -1121,7 +1121,7 @@ public class DatabaseMaintenance {
                 } else {
                     Logging.warning("Gratia database FAILED to upgrade from " + current +
                                 " to " + (current + 1));
-                }         
+                }
             }
             if (gratiaDatabaseVersion < 31) { // FQAN checksum upgrade at v31 May not be activated yet.
                 // Done, one way or the other.
@@ -1145,43 +1145,43 @@ public class DatabaseMaintenance {
                 Logging.fine("Gratia database upgraded from " + current + " to " + (current + 1));
                 current = current + 1;
                 UpdateDbVersion(current);
-            }                
+            }
             if (current == 32) {
                 // Auxiliary DB item upgrades only (trigger code)
                 Logging.fine("Gratia database upgraded from " + current + " to " + (current + 1));
                 current = current + 1;
                 UpdateDbVersion(current);
-            }                
+            }
             if (current == 33) {
                 // Auxiliary DB item upgrades only (trigger code)
                 Logging.fine("Gratia database upgraded from " + current + " to " + (current + 1));
                 current = current + 1;
                 UpdateDbVersion(current);
-            }                
+            }
             if (current == 34) {
                 // Auxiliary DB item upgrades only (stored procedures and trigger code)
                 Logging.fine("Gratia database upgraded from " + current + " to " + (current + 1));
                 current = current + 1;
                 UpdateDbVersion(current);
-            }                
+            }
             if (current == 35) {
                 // Auxiliary DB item upgrades only (summary tables and trigger code)
                 Logging.fine("Gratia database upgraded from " + current + " to " + (current + 1));
                 current = current + 1;
                 UpdateDbVersion(current);
-            }                
+            }
             if (current == 36) {
                 // Auxiliary DB item upgrades only (summary views)
                 Logging.fine("Gratia database upgraded from " + current + " to " + (current + 1));
                 current = current + 1;
                 UpdateDbVersion(current);
-            }                
+            }
             if (current == 37) {
                 // Auxiliary DB item upgrades only (TableStatistics)
                 Logging.fine("Gratia database upgraded from " + current + " to " + (current + 1));
                 current = current + 1;
                 UpdateDbVersion(current);
-            }                
+            }
             if (current == 38) {
                 int result = Execute("alter table SystemProplist modify column car varchar(255) not null default ''");
                 if (result > -1) {
@@ -1191,7 +1191,7 @@ public class DatabaseMaintenance {
                 } else {
                     Logging.warning("Gratia database FAILED to upgrade from " + current +
                                 " to " + (current + 1));
-                }         
+                }
                 // Also auxiliary DB item upgrades (trigger and friends)
             }
             if (current == 39 || current == 40) {
@@ -1199,7 +1199,7 @@ public class DatabaseMaintenance {
                 Logging.fine("Gratia database upgraded from " + current + " to 41");
                 current = 41;
                 UpdateDbVersion(current);
-            }                
+            }
             if (current == 41) {
                 int result = 0;
                 Statement statement;
@@ -1238,7 +1238,7 @@ public class DatabaseMaintenance {
                 } else {
                     Logging.warning("Gratia database FAILED to upgrade from " + current +
                                 " to " + (current + 1));
-                }         
+                }
                 // Also auxiliary DB item upgrades (trigger and friends)
             }
             if (current == 42) {
@@ -1246,40 +1246,40 @@ public class DatabaseMaintenance {
                 Session session = null;
                 try {
                     session = HibernateWrapper.getSession();
-                    Transaction tx = session.beginTransaction();                    
+                    Transaction tx = session.beginTransaction();
                     Query q =
                         session.createSQLQuery("UPDATE Replication SET " +
                                                "registered = 0 where registered IS NULL");
                     q.executeUpdate();
                     q = session.createSQLQuery("UPDATE Replication SET " +
-                                               "running = 0 where running IS NULL"); 
+                                               "running = 0 where running IS NULL");
                     q.executeUpdate();
                     q = session.createSQLQuery("UPDATE Replication SET " +
-                                               "registered = 0 where registered IS NULL"); 
+                                               "registered = 0 where registered IS NULL");
                     q.executeUpdate();
                     q = session.createSQLQuery("UPDATE Replication SET " +
-                                               "security = 0 where security IS NULL"); 
+                                               "security = 0 where security IS NULL");
                     q.executeUpdate();
                     q = session.createSQLQuery("UPDATE Replication SET " +
-                                               "openconnection = '' where openconnection IS NULL"); 
+                                               "openconnection = '' where openconnection IS NULL");
                     q.executeUpdate();
                     q = session.createSQLQuery("UPDATE Replication SET " +
-                                               "secureconnection = '' where secureconnection IS NULL"); 
+                                               "secureconnection = '' where secureconnection IS NULL");
                     q.executeUpdate();
                     q = session.createSQLQuery("UPDATE Replication SET " +
-                                               "frequency = 0 where frequency IS NULL"); 
+                                               "frequency = 0 where frequency IS NULL");
                     q.executeUpdate();
                     q = session.createSQLQuery("UPDATE Replication SET " +
-                                               "dbid = 0 where dbid IS NULL"); 
+                                               "dbid = 0 where dbid IS NULL");
                     q.executeUpdate();
                     q = session.createSQLQuery("UPDATE Replication SET " +
-                                               "rowcount = 0 where rowcount IS NULL"); 
+                                               "rowcount = 0 where rowcount IS NULL");
                     q.executeUpdate();
                     q = session.createSQLQuery("UPDATE Replication SET " +
-                                               "probename = 'All' where probename IS NULL"); 
+                                               "probename = 'All' where probename IS NULL");
                     q.executeUpdate();
                     q = session.createSQLQuery("UPDATE Replication SET " +
-                                               "recordtable = 'JobUsageRecord' where recordtable IS NULL"); 
+                                               "recordtable = 'JobUsageRecord' where recordtable IS NULL");
                     q.executeUpdate();
                     q = session.createSQLQuery("ALTER TABLE Replication " +
                                                "MODIFY COLUMN registered INT NOT NULL DEFAULT '0', " +
@@ -1302,14 +1302,14 @@ public class DatabaseMaintenance {
                     }
                     Logging.debug("Exception detail: ", e);
                     Logging.warning("Gratia database FAILED to upgrade from " + current +
-                                    " to " + (current + 1)); 
+                                    " to " + (current + 1));
                     result = -1;
                 }
                 if (result > -1) {
                     Logging.fine("Gratia database upgraded from " + current + " to " + (current + 1));
                     current = current + 1;
                     UpdateDbVersion(current);
-                }         
+                }
             }
             if ((current >= 43) && (current <= 46)) {
                 // Auxiliary DB item upgrades only (trigger and friends)
@@ -1334,7 +1334,7 @@ public class DatabaseMaintenance {
                 Session session = null;
                 try {
                     session = HibernateWrapper.getSession();
-                    Transaction tx = session.beginTransaction();                    
+                    Transaction tx = session.beginTransaction();
                     Query q = session.createSQLQuery("ALTER TABLE MasterSummaryData " +
                                                      "MODIFY COLUMN ApplicationExitCode VARCHAR(255) NOT NULL DEFAULT '0', " +
                                                      "MODIFY COLUMN VOcorrid BIGINT(20) NOT NULL DEFAULT 0," +
@@ -1349,7 +1349,7 @@ public class DatabaseMaintenance {
                     }
                     Logging.debug("Exception detail: ", e);
                     Logging.warning("Gratia database FAILED to upgrade from " + current +
-                                    " to 58"); 
+                                    " to 58");
                     result = -1;
                 }
                 if (result > -1) {
@@ -1369,7 +1369,7 @@ public class DatabaseMaintenance {
                 Session session = null;
                 try {
                     session = HibernateWrapper.getSession();
-                    Transaction tx = session.beginTransaction();                    
+                    Transaction tx = session.beginTransaction();
                     Query q =
                         session.createSQLQuery("ALTER TABLE NodeSummary " +
                                                "MODIFY COLUMN CpuSystemTime DOUBLE," +
@@ -1387,12 +1387,12 @@ public class DatabaseMaintenance {
                     }
                     Logging.debug("Exception detail: ", e);
                     Logging.warning("Gratia database FAILED to upgrade from " + current +
-                                    " to " + (current + 1)); 
+                                    " to " + (current + 1));
                     result = -1;
                 }
                 if (result > -1) {
                     Logging.fine("Gratia database upgraded from " + current +
-                                 " to " + (current + 1)); 
+                                 " to " + (current + 1));
                     ++current;
                     UpdateDbVersion(current);
                 }
@@ -1425,7 +1425,7 @@ public class DatabaseMaintenance {
             }
         } catch (Exception e) {
             Logging.warning("Command: Error: " + cmd + " : " + e);
-        }   
+        }
         return "";
     }
 
@@ -1457,7 +1457,7 @@ public class DatabaseMaintenance {
             Logging.log("Command: OK: " + check);
         } catch (Exception e) {
             Logging.warning("Command: Error: " + check + " : " + e);
-        }        
+        }
     }
 
     private int RefreshTableStatistics() {
@@ -1471,7 +1471,7 @@ public class DatabaseMaintenance {
             if (isInnoDB) {
                 command += " ENGINE = 'innodb'";
             }
-                             
+
             result = Execute(command);
             //
             Statement statement;
@@ -1574,7 +1574,7 @@ public class DatabaseMaintenance {
         }
         return true;
     }
-    
+
     private String prettySize(Long number) {
         return prettySize(number, 1100);
     }
@@ -1636,8 +1636,8 @@ public class DatabaseMaintenance {
         Session session = null;
         try {
             session = HibernateWrapper.getSession();
-            Transaction tx = session.beginTransaction();                    
-            Query q = 
+            Transaction tx = session.beginTransaction();
+            Query q =
                 session.createSQLQuery("SELECT INDEX_NAME, NON_UNIQUE " +
                                        "FROM information_schema.STATISTICS " +
                                        "WHERE TABLE_SCHEMA = DATABASE() " +
