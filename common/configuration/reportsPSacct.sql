@@ -1,7 +1,7 @@
 DELIMITER $$
 
 DROP PROCEDURE IF EXISTS `reportsPSacct` $$
-CREATE PROCEDURE `reportsPSacct`(
+CREATE  PROCEDURE `reportsPSacct`(
                 userName varchar(64), userRole varchar(64),
                 fromdate varchar(64), todate varchar(64),
                 dateGrouping varchar(64),
@@ -15,16 +15,13 @@ CREATE PROCEDURE `reportsPSacct`(
                 )
     READS SQL DATA
 begin
-
   select sysdate() into @proc_start;
-
   set @iuser := concat_ws('','GratiaUser|', UNIX_TIMESTAMP(), '|Unknown');
   IF userName IS NOT NULL THEN
     IF (TRIM(userName) != '') AND (TRIM(userName) != 'null') THEN
       set @iuser := TRIM(userName);
     END IF;
   END IF;
-
   set @irole := 'GratiaUser';
   IF userRole IS NOT NULL THEN
     IF (TRIM(userRole) != '') AND (TRIM(userRole) != 'null') THEN
@@ -39,6 +36,8 @@ begin
   call parse(@iuser,@name,@key,@vo);
 
   set @ifrom := '';
+  set @ifromV := '';
+  set @ifromN := '';
   IF fromdate IS NOT NULL THEN
     IF (TRIM(fromdate) != '') AND (LOWER(TRIM(fromdate)) != 'null') THEN
       set @thisFromDate := fromdate;
@@ -47,10 +46,14 @@ begin
         select  date_format(@testDate, '%Y-%m-%d') into @thisFromDate;
       end if;
       set @ifrom := concat_ws('','and VOProbeSummary.EndTIme >=''', TRIM(@thisFromDate), '''');
+      set @ifromV := concat_ws('','and V.EndTIme >=''', TRIM(@thisFromDate), '''');
+      set @ifromN := concat_ws('','and N.EndTIme >=''', TRIM(@thisFromDate), '''');
     END IF;
   END IF;
 
   set @ito := '';
+  set @itoV := '';
+  set @itoN := '';
   IF todate IS NOT NULL THEN
     IF (TRIM(todate) != '') AND (LOWER(TRIM(todate)) != 'null') THEN
       set @thisToDate := todate;
@@ -59,9 +62,10 @@ begin
         select  date_format(@testDate, '%Y-%m-%d') into @thisToDate;
       end if;
       set @ito := concat_ws('','and VOProbeSummary.EndTime <= ''', TRIM(@thisToDate),'''');
+      set @itoV := concat_ws('','and V.EndTime <= ''', TRIM(@thisToDate),'''');
+      set @itoN := concat_ws('','and N.EndTime <= ''', TRIM(@thisToDate),'''');
     END IF;
   END IF;
-
   set @idatr := '%Y-%m-%d';
   set @idats := '%Y-%m-%d';
   set @igroup := 'day';
@@ -83,7 +87,6 @@ begin
       END IF;
     END IF;
   END IF;
-
   set @iVOs := '';
   set @rVOs := '';
   IF VOs IS NOT NULL THEN
@@ -92,7 +95,6 @@ begin
       set @rVOs := concat_ws('', ' and V.VOName = ''',TRIM(VOs), '''');
     END IF;
   END IF;
-
   set @iSites := '';
   set @rSites := '';
   IF Sites IS NOT NULL THEN
@@ -101,22 +103,18 @@ begin
       set @rSites := concat_ws('', 'and S.SiteName = ''', TRIM(Sites), '''');
     END IF;
   END IF;
-
-
   set @iscale := '1';
   IF scaleUnit IS NOT NULL THEN
     IF (TRIM(scaleUnit) != '') AND (LOWER(TRIM(scaleUnit)) != 'null') THEN
       set @iscale := TRIM(scaleUnit);
     END IF;
   END IF;
-
   set @iunit := '3600';
     IF timeUnit IS NOT NULL THEN
     IF (TRIM(timeUnit) != '') AND (LOWER(TRIM(timeUnit)) != 'null') THEN
       set @iunit := TRIM(timeUnit);
     END IF;
   END IF;
-
   set @thisScale := concat_ws('', '/(', @iscale, '*', @iunit, ')');
   
   set @iquery := 'SUM'; 
@@ -125,23 +123,18 @@ begin
       set @iquery := TRIM(queryType);
     END IF;
   END IF;
-
-
   set @igroupBy := 'group by DateValue, SiteName,  VOName';
   IF groupBy IS NOT NULL THEN
     IF (TRIM(groupBy) != '') AND (LOWER(TRIM(groupBy)) != 'null') THEN
       set @igroupBy := concat_ws('', 'group by ', TRIM(groupBy));
     END IF;
   END IF;
-
   set @iorderBy := 'order by DateValue';
   IF orderBy IS NOT NULL THEN
     IF (TRIM(orderBy) != '') AND (LOWER(TRIM(orderBy)) != 'null') THEN
       set @iorderBy := concat_ws('', 'order by ', TRIM(orderBy));
     END IF;
   END IF;
-
-
   set @itype := 'RawCPU';
   IF resourceType IS NOT NULL THEN
     IF (TRIM(resourceType) != '') AND (LOWER(TRIM(resourceType)) != 'null') THEN
@@ -149,14 +142,10 @@ begin
     END IF;
   END IF;
 
-  set @myresourceclause := ' and ResourceType = ''RawCPU''';
-
-
   set @final_rank := '';
   set @sqlSelects := '';
   set @sqlFrom    := '';
   set @sqlWhere   := '';
-
   IF (STRCMP(LOWER(TRIM(@iquery)), 'count') = 0) THEN
     set @ndays := 'N.DaysInMonth';
     IF (STRCMP(LOWER(TRIM(@igroup)),'week') = 0)  THEN
@@ -175,13 +164,12 @@ begin
            ' C.BenchmarkScore as BenchmarkScore,',
            ' C.CpuCount as cpuCount'
            );
-
     set @sqlFrom    := 'NodeSummary N, Probe P, Site S, CPUInfo C';
     set @sqlWhere   := concat_ws('',
            ' P.siteid = S.siteid and N.ProbeName = P.ProbeName and N.HostDescription = C.HostDescription',
            '    and ResourceType =''',@itype, '''',
-           '    and (N.EndTime) >= (''', @thisFromDate, ''')',
-           '    and (N.EndTime) <= (''', @thisToDate, ''')',
+           ' ', @ifromN,
+           ' ', @itoN,
            ' ', @rVOs,
            ' ', @rSites
            );
@@ -198,7 +186,6 @@ begin
            ' VOProbeSummary.CommonName as UserName,',
            ' VOProbeSummary.ProbeName as ProbeName'
            );
-
     set @sqlFrom  := 'VOProbeSummary, Site, Probe';
     set @sqlWhere := concat_ws('',
            ' Probe.siteid = Site.siteid and VOProbeSummary.ProbeName = Probe.probename ',
@@ -209,7 +196,6 @@ begin
            ' ', @iSites
            );
   END IF;
-
   IF (STRCMP(LOWER(TRIM(@iquery)), 'ranked') = 0) THEN
     set @sqlSelects := concat_ws('',
            ' DateValue,',
@@ -234,8 +220,8 @@ begin
          '         FROM VOProbeSummary V, Site S, Probe P',
          '         WHERE  ',
          ' ',         @rsqlWhere,
-         '            and (V.EndTime) >= (''', @thisFromDate, ''')',
-         '            and (V.EndTime) <= (''', @thisToDate, ''')',
+         ' ',         @ifromV,
+          ' ',        @itoV,
          ' ',         @rVOs,
          ' ',         @rSites,
          ' ',         @myresourceclause,
@@ -255,8 +241,8 @@ begin
          '   FROM VOProbeSummary V, Probe P, Site S'
          '   WHERE ',
          ' ', @rsqlWhere,
-         '    and (V.EndTime) >= (''', @thisFromDate, ''')',
-         '    and (V.EndTime) <= (''', @thisToDate, ''')',
+         ' ', @ifromV,
+         ' ', @itoV,
          ' ', @rVOs,
          ' ', @rSites,
          ' ', @myresourceclause,
@@ -275,20 +261,16 @@ begin
            ' ', @iorderBy,
            ';'
         );
-
   select sysdate() into @query_start;
     prepare statement from @sql;
     execute statement;
   select sysdate() into @query_end;
-
   insert into trace(procName,  userKey, userName, userRole, userVO, sqlQuery, procTime, queryTime, p1, p2, p3)
            values(TRIM(reportName), @key,    @iuser,   @irole,   @vo,    @sql,
            		  timediff(@query_start, @proc_start),
     			  timediff(@query_end,   @query_start),
     			  null, null, null);      	
-
   deallocate prepare statement;
-
 END $$
 
 DELIMITER ;
