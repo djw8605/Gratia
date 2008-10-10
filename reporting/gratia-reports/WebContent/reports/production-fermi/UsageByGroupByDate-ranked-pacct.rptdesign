@@ -1,33 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<report xmlns="http://www.eclipse.org/birt/2005/design" version="3.2.14" id="1">
-    <property name="createdBy">Eclipse BIRT Designer Version 1.0.1 Build &lt;20050815-0740></property>
+<report xmlns="http://www.eclipse.org/birt/2005/design" version="3.2.17" id="1">
+    <property name="createdBy">Eclipse BIRT Designer Version 2.3.1.v20080911 Build &lt;2.3.1.v20080922-1151></property>
     <property name="units">in</property>
     <list-property name="propertyBindings">
         <structure>
-            <property name="name">odaDriverClass</property>
-            <property name="id">357</property>
-        </structure>
-        <structure>
             <property name="name">odaURL</property>
-            <property name="id">357</property>
-            <expression name="value">params["DatabaseURL"]</expression>
+            <property name="id">399</property>
+            <expression name="value">params["DatabaseURL"].value</expression>
         </structure>
         <structure>
             <property name="name">odaUser</property>
-            <property name="id">357</property>
-            <expression name="value">params["DatabaseUser"]</expression>
+            <property name="id">399</property>
+            <expression name="value">params["DatabaseUser"].value</expression>
         </structure>
         <structure>
             <property name="name">odaPassword</property>
-            <property name="id">357</property>
-            <expression name="value">params["DatabasePassword"]</expression>
+            <property name="id">399</property>
+            <expression name="value">params["DatabasePassword"].value</expression>
         </structure>
     </list-property>
     <property name="eventHandlerClass">net.sf.gratia.reporting.GratiaBirtReportEH</property>
     <list-property name="libraries">
         <structure>
-            <property name="fileName">gratia-lib1.rptlibrary</property>
-            <property name="namespace">gratia-lib1</property>
+            <property name="fileName">reportLibPSacct.rptlibrary</property>
+            <property name="namespace">reportLibPSacct</property>
         </structure>
     </list-property>
     <template-parameter-definitions>
@@ -483,7 +479,7 @@
         </Series>
         <Grouping>
           <Enabled>false</Enabled>
-          <GroupingInterval>2</GroupingInterval>
+          <GroupingInterval>2.0</GroupingInterval>
           <GroupType>Text</GroupType>
           <AggregateExpression>Sum</AggregateExpression>
         </Grouping>
@@ -694,7 +690,7 @@
       </Series>
       <Grouping>
         <Enabled>false</Enabled>
-        <GroupingInterval>2</GroupingInterval>
+        <GroupingInterval>2.0</GroupingInterval>
         <GroupType>Text</GroupType>
         <AggregateExpression>Sum</AggregateExpression>
       </Grouping>
@@ -818,79 +814,24 @@
         </template-parameter-definition>
     </template-parameter-definitions>
     <parameters>
-        <scalar-parameter name="GroupsPerChart" id="397">
-            <text-property name="helpText">Select number of groups (e.g. VO's or Sites) to be displayed on each chart</text-property>
-            <property name="valueType">static</property>
-            <property name="dataType">integer</property>
-            <text-property name="promptText">Select # of groups per chart</text-property>
-            <property name="controlType">list-box</property>
-            <property name="mustMatch">true</property>
-            <property name="fixedOrder">true</property>
-            <property name="defaultValue">15</property>
-            <property name="distinct">false</property>
-            <structure name="format">
-                <property name="category">Unformatted</property>
-            </structure>
-            <list-property name="selectionList">
-                <structure>
-                    <property name="value">1</property>
-                    <property name="label">1</property>
-                </structure>
-                <structure>
-                    <property name="value">2</property>
-                    <property name="label">2</property>
-                </structure>
-                <structure>
-                    <property name="value">5</property>
-                    <property name="label">5</property>
-                </structure>
-                <structure>
-                    <property name="value">10</property>
-                    <property name="label">10</property>
-                </structure>
-                <structure>
-                    <property name="value">15</property>
-                    <property name="label">15</property>
-                </structure>
-                <structure>
-                    <property name="value">20</property>
-                    <property name="label">20</property>
-                </structure>
-                <structure>
-                    <property name="value">25</property>
-                    <property name="label">25</property>
-                </structure>
-                <structure>
-                    <property name="value">1000</property>
-                    <property name="label">ALL</property>
-                </structure>
-            </list-property>
-        </scalar-parameter>
-        <parameter-group name="DatabaseAccess" id="412" extends="gratia-lib1.DatabaseAccess"/>
-        <parameter-group name="DateRange" id="416" extends="gratia-lib1.DateRange"/>
-        <parameter-group name="Metrics" id="419" extends="gratia-lib1.Metrics"/>
-        <parameter-group name="ReportInfo" id="421" extends="gratia-lib1.ReportInfo"/>
-        <scalar-parameter name="SelectSiteName" id="423" extends="gratia-lib1.SelectSiteName">
-            <property name="valueType">static</property>
-            <property name="dataType">string</property>
-            <text-property name="promptText">Site Name</text-property>
-            <property name="controlType">text-box</property>
-            <property name="defaultValue">FNAL_CDFOSG_1</property>
-            <structure name="format">
-                <property name="category">Unformatted</property>
-            </structure>
-        </scalar-parameter>
+        <parameter-group name="DatabaseAccess" id="434" extends="reportLibPSacct.DatabaseAccess"/>
+        <parameter-group name="UserInfo" id="438" extends="reportLibPSacct.UserInfo"/>
+        <parameter-group name="ReportInfo" id="440" extends="reportLibPSacct.ReportInfo"/>
+        <parameter-group name="MetricsFormatting" id="442" extends="reportLibPSacct.MetricsFormatting"/>
+        <parameter-group name="DateRange" id="444" extends="reportLibPSacct.DateRange"/>
+        <scalar-parameter name="GroupsPerChart" id="448" extends="reportLibPSacct.GroupsPerChart"/>
+        <scalar-parameter name="SelectSiteName" id="447" extends="reportLibPSacct.SelectSiteName"/>
     </parameters>
     <data-sources>
-        <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="fermigrid1" id="357">
+        <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="DataSource" id="399">
             <property name="odaDriverClass">com.mysql.jdbc.Driver</property>
-            <property name="odaURL">jdbc:mysql://gratia-db01.fnal.gov:3320/gratia_psacct</property>
-            <property name="odaUser">reader</property>
-            <encrypted-property name="odaPassword">cmVhZGVy</encrypted-property>
+            <property name="odaURL">jdbc:mysql://gratia-vm02.fnal.gov:3320/gratia_gratiax21_ps</property>
+            <property name="odaUser">gratia</property>
+            <encrypted-property name="odaPassword" encryptionID="base64">cHJvdG8=</encrypted-property>
         </oda-data-source>
     </data-sources>
     <data-sets>
-        <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="UsageByVORanked" id="358">
+        <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.SPSelectDataSet" name="reportsPSacct" id="402">
             <structure name="cachedMetaData">
                 <list-property name="resultSet">
                     <structure>
@@ -900,96 +841,156 @@
                     </structure>
                     <structure>
                         <property name="position">2</property>
-                        <property name="name">VOName</property>
-                        <property name="dataType">string</property>
+                        <property name="name">DateValue</property>
+                        <property name="dataType">date</property>
                     </structure>
                     <structure>
                         <property name="position">3</property>
-                        <property name="name">datevalue</property>
-                        <property name="dataType">string</property>
-                    </structure>
-                    <structure>
-                        <property name="position">4</property>
                         <property name="name">WallDuration</property>
                         <property name="dataType">float</property>
                     </structure>
                     <structure>
+                        <property name="position">4</property>
+                        <property name="name">cpu</property>
+                        <property name="dataType">float</property>
+                    </structure>
+                    <structure>
                         <property name="position">5</property>
-                        <property name="name">Cpu</property>
+                        <property name="name">cpuUser</property>
                         <property name="dataType">float</property>
                     </structure>
                     <structure>
                         <property name="position">6</property>
-                        <property name="name">CpuUser</property>
+                        <property name="name">cpuSystem</property>
                         <property name="dataType">float</property>
                     </structure>
                     <structure>
                         <property name="position">7</property>
-                        <property name="name">CpuSystem</property>
-                        <property name="dataType">float</property>
-                    </structure>
-                    <structure>
-                        <property name="position">8</property>
                         <property name="name">Njobs</property>
                         <property name="dataType">decimal</property>
                     </structure>
+                    <structure>
+                        <property name="position">8</property>
+                        <property name="name">VOName</property>
+                        <property name="dataType">string</property>
+                    </structure>
                 </list-property>
             </structure>
-            <property name="dataSource">fermigrid1</property>
-            <property name="dataSetRowLimit">0</property>
+            <property name="rowFetchLimit">0</property>
+            <property name="dataSource">DataSource</property>
             <list-property name="parameters">
                 <structure>
-                    <property name="name">StartDate</property>
+                    <property name="name">UserName</property>
+                    <property name="paramName">UserName</property>
                     <property name="dataType">string</property>
                     <property name="position">1</property>
-                    <expression name="defaultValue">'2007-01-01'</expression>
                     <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
                 </structure>
                 <structure>
-                    <property name="name">EndDate</property>
+                    <property name="name">UserRole</property>
+                    <property name="paramName">UserRole</property>
                     <property name="dataType">string</property>
                     <property name="position">2</property>
-                    <expression name="defaultValue">'2007-01-31'</expression>
                     <property name="isInput">true</property>
                     <property name="isOutput">false</property>
                 </structure>
                 <structure>
-                    <property name="name">SiteName</property>
-                    <property name="nativeName"></property>
+                    <property name="name">fromdate</property>
+                    <property name="paramName">StartDate</property>
                     <property name="dataType">string</property>
-                    <property name="nativeDataType">12</property>
                     <property name="position">3</property>
-                    <expression name="defaultValue">'FNAL_CDFOSG_1'</expression>
                     <property name="isInput">true</property>
                     <property name="isOutput">false</property>
                 </structure>
                 <structure>
-                    <property name="name">StartDate1</property>
-                    <property name="dataType">date</property>
+                    <property name="name">todate</property>
+                    <property name="paramName">EndDate</property>
+                    <property name="dataType">string</property>
                     <property name="position">4</property>
-                    <expression name="defaultValue">'2007-01-01'</expression>
                     <property name="isInput">true</property>
                     <property name="isOutput">false</property>
                 </structure>
                 <structure>
-                    <property name="name">EndDate1</property>
-                    <property name="nativeName"></property>
-                    <property name="dataType">date</property>
-                    <property name="nativeDataType">0</property>
+                    <property name="name">dateGrouping</property>
+                    <property name="dataType">string</property>
                     <property name="position">5</property>
-                    <expression name="defaultValue">'2007-01-31'</expression>
-                    <property name="isOptional">false</property>
+                    <expression name="defaultValue">'week'</expression>
                     <property name="isInput">true</property>
                     <property name="isOutput">false</property>
                 </structure>
                 <structure>
-                    <property name="name">SiteName1</property>
-                    <property name="nativeName"></property>
+                    <property name="name">timeUnit</property>
+                    <property name="dataType">string</property>
+                    <property name="position">6</property>
+                    <expression name="defaultValue">'3600'</expression>
+                    <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
+                </structure>
+                <structure>
+                    <property name="name">scaleUnit</property>
+                    <property name="dataType">string</property>
+                    <property name="position">7</property>
+                    <expression name="defaultValue">'1'</expression>
+                    <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
+                </structure>
+                <structure>
+                    <property name="name">groupBy</property>
+                    <property name="dataType">string</property>
+                    <property name="position">8</property>
+                    <expression name="defaultValue">'DateValue, VOName'</expression>
+                    <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
+                </structure>
+                <structure>
+                    <property name="name">orderBy</property>
+                    <property name="dataType">string</property>
+                    <property name="position">9</property>
+                    <expression name="defaultValue">'final_rank, VOName, DateValue'</expression>
+                    <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
+                </structure>
+                <structure>
+                    <property name="name">resourceType</property>
+                    <property name="dataType">string</property>
+                    <property name="position">10</property>
+                    <expression name="defaultValue">'RawCPU'</expression>
+                    <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
+                </structure>
+                <structure>
+                    <property name="name">VOs</property>
+                    <property name="dataType">string</property>
+                    <property name="position">11</property>
+                    <expression name="defaultValue">'null'</expression>
+                    <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
+                </structure>
+                <structure>
+                    <property name="name">Sites</property>
+                    <property name="dataType">string</property>
+                    <property name="position">12</property>
+                    <expression name="defaultValue">'null'</expression>
+                    <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
+                </structure>
+                <structure>
+                    <property name="name">queryType</property>
+                    <property name="dataType">string</property>
+                    <property name="position">13</property>
+                    <expression name="defaultValue">'RANKED'</expression>
+                    <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
+                </structure>
+                <structure>
+                    <property name="name">reportName</property>
+                    <property name="nativeName">reportName</property>
                     <property name="dataType">string</property>
                     <property name="nativeDataType">12</property>
-                    <property name="position">6</property>
-                    <expression name="defaultValue">'FNAL_CDFOSG_1'</expression>
-                    <property name="isOptional">false</property>
+                    <property name="position">14</property>
+                    <expression name="defaultValue">'UsageByGroupByDate-ranked-pacct'</expression>
+                    <property name="allowNull">false</property>
                     <property name="isInput">true</property>
                     <property name="isOutput">false</property>
                 </structure>
@@ -1000,104 +1001,51 @@
                     <property name="name">final_rank</property>
                     <property name="nativeName">final_rank</property>
                     <property name="dataType">float</property>
-                    <property name="nativeDataType">8</property>
                 </structure>
                 <structure>
                     <property name="position">2</property>
-                    <property name="name">VOName</property>
-                    <property name="nativeName">VOName</property>
-                    <property name="dataType">string</property>
-                    <property name="nativeDataType">12</property>
+                    <property name="name">DateValue</property>
+                    <property name="nativeName">DateValue</property>
+                    <property name="dataType">date</property>
                 </structure>
                 <structure>
                     <property name="position">3</property>
-                    <property name="name">datevalue</property>
-                    <property name="nativeName">datevalue</property>
-                    <property name="dataType">string</property>
-                    <property name="nativeDataType">12</property>
-                </structure>
-                <structure>
-                    <property name="position">4</property>
                     <property name="name">WallDuration</property>
                     <property name="nativeName">WallDuration</property>
                     <property name="dataType">float</property>
-                    <property name="nativeDataType">8</property>
+                </structure>
+                <structure>
+                    <property name="position">4</property>
+                    <property name="name">cpu</property>
+                    <property name="nativeName">cpu</property>
+                    <property name="dataType">float</property>
                 </structure>
                 <structure>
                     <property name="position">5</property>
-                    <property name="name">Cpu</property>
-                    <property name="nativeName">Cpu</property>
+                    <property name="name">cpuUser</property>
+                    <property name="nativeName">cpuUser</property>
                     <property name="dataType">float</property>
-                    <property name="nativeDataType">8</property>
                 </structure>
                 <structure>
                     <property name="position">6</property>
-                    <property name="name">CpuUser</property>
-                    <property name="nativeName">CpuUser</property>
+                    <property name="name">cpuSystem</property>
+                    <property name="nativeName">cpuSystem</property>
                     <property name="dataType">float</property>
-                    <property name="nativeDataType">8</property>
                 </structure>
                 <structure>
                     <property name="position">7</property>
-                    <property name="name">CpuSystem</property>
-                    <property name="nativeName">CpuSystem</property>
-                    <property name="dataType">float</property>
-                    <property name="nativeDataType">8</property>
-                </structure>
-                <structure>
-                    <property name="position">8</property>
                     <property name="name">Njobs</property>
                     <property name="nativeName">Njobs</property>
                     <property name="dataType">decimal</property>
-                    <property name="nativeDataType">3</property>
+                </structure>
+                <structure>
+                    <property name="position">8</property>
+                    <property name="name">VOName</property>
+                    <property name="nativeName">VOName</property>
+                    <property name="dataType">string</property>
                 </structure>
             </list-property>
-            <property name="queryText">SELECT final_rank,
-   VOProbeSummary.VOName,
-   datevalue,
-   sum(VOProbeSummary.WallDuration) as WallDuration,
-   sum(VOProbeSummary.Cpu) as Cpu,
-   sum(VOProbeSummary.CpuUser) as CpuUser,
-   sum(VOProbeSummary.CpuSystem) as CpuSystem,
-   sum(VOProbeSummary.Njobs) as Njobs 
-FROM (SELECT @rank:=@rank+1 as final_rank,
-         VONamex,
-         cpuuserdurationx
-      FROM (SELECT @rank:=0 as rank,
-            VOName as VONamex,
-            date(EndTime) as EndTime,
-            sum(cpuuserduration) as cpuuserdurationx
-            FROM VOProbeSummary V
-                 join Probe P on (V.ProbeName = P.probename)
-                 join Site S on (P.siteid = S.siteid)
-            WHERE EndTime >= ?
-              and EndTime &lt;= ?
-              and ResourceType = 'RawCPU'
-              and SiteName = ?
-            GROUP BY VONamex
-            ORDER BY cpuuserdurationx desc
-           ) as foox
-     ) as foo,
-     ( SELECT EndTime,
-          VOName,
-          sum(WallDuration) as WallDuration,
-          sum(CpuUserDuration + CpuSystemDuration) as Cpu,
-          sum(CpuUserDuration) as CpuUser,
-          sum(CpuSystemDuration) as CpuSystem,
-          sum(Njobs) as Njobs,
-          date_format(EndTime,'%Y-%U') as datevalue
-       FROM VOProbeSummary V
-            join Probe P on (V.ProbeName = P.probename)
-            join Site S on (P.siteid = S.siteid)
-       WHERE EndTime >= ?
-         and EndTime &lt;= ?
-         and ResourceType = 'RawCPU'
-         and SiteName = ?
-       GROUP by datevalue, VOName 
-     ) as VOProbeSummary
-WHERE VOProbeSummary.VOName = foo.VONamex
-GROUP BY datevalue, VOProbeSummary.VOName
-ORDER BY final_rank, VOProbeSummary.VOName,datevalue</property>
+            <property name="queryText">call reportsPSacct(?,?,?,?,?,?,?,?,?,?,?,?,?,?)</property>
             <xml-property name="designerValues"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <model:DesignValues xmlns:design="http://www.eclipse.org/datatools/connectivity/oda/design" xmlns:model="http://www.eclipse.org/birt/report/model/adapter/odaModel">
   <Version>1.0</Version>
@@ -1105,31 +1053,13 @@ ORDER BY final_rank, VOProbeSummary.VOName,datevalue</property>
     <design:parameterDefinitions>
       <design:inOutMode>In</design:inOutMode>
       <design:attributes>
-        <design:name></design:name>
-        <design:position>5</design:position>
-        <design:nullability>Unknown</design:nullability>
-      </design:attributes>
-      <design:inputAttributes>
-        <design:elementAttributes>
-          <design:defaultScalarValue>2007-01-31</design:defaultScalarValue>
-          <design:optional>false</design:optional>
-        </design:elementAttributes>
-      </design:inputAttributes>
-    </design:parameterDefinitions>
-    <design:parameterDefinitions>
-      <design:inOutMode>In</design:inOutMode>
-      <design:attributes>
-        <design:name></design:name>
-        <design:position>6</design:position>
+        <design:name>reportName</design:name>
+        <design:position>14</design:position>
         <design:nativeDataTypeCode>12</design:nativeDataTypeCode>
-        <design:nullability>Unknown</design:nullability>
+        <design:precision>64</design:precision>
+        <design:scale>0</design:scale>
+        <design:nullability>NotNullable</design:nullability>
       </design:attributes>
-      <design:inputAttributes>
-        <design:elementAttributes>
-          <design:defaultScalarValue>FNAL_CDFOSG_1</design:defaultScalarValue>
-          <design:optional>false</design:optional>
-        </design:elementAttributes>
-      </design:inputAttributes>
     </design:parameterDefinitions>
   </design:DataSetParameters>
 </model:DesignValues>]]></xml-property>
@@ -1157,48 +1087,39 @@ ORDER BY final_rank, VOProbeSummary.VOName,datevalue</property>
         </grid>
         <table name="table1" id="9">
             <property name="width">100%</property>
-            <property name="dataSet">UsageByVORanked</property>
+            <property name="dataSet">reportsPSacct</property>
             <list-property name="paramBindings">
                 <structure>
-                    <property name="paramName">StartDate</property>
-                    <expression name="expression">params["StartDate"]</expression>
+                    <property name="paramName">UserName</property>
+                    <expression name="expression">params["UserName"].value</expression>
                 </structure>
                 <structure>
-                    <property name="paramName">EndDate</property>
-                    <expression name="expression">params["EndDate"]</expression>
+                    <property name="paramName">UserRole</property>
+                    <expression name="expression">params["UserRole"].value</expression>
                 </structure>
                 <structure>
-                    <property name="paramName">StartDate1</property>
-                    <expression name="expression">params["StartDate"]</expression>
+                    <property name="paramName">fromdate</property>
+                    <expression name="expression">params["StartDate"].value</expression>
                 </structure>
                 <structure>
-                    <property name="paramName">EndDate1</property>
-                    <expression name="expression">params["EndDate"]</expression>
+                    <property name="paramName">todate</property>
+                    <expression name="expression">params["EndDate"].value</expression>
                 </structure>
                 <structure>
-                    <property name="paramName">SiteName</property>
-                    <expression name="expression">params["SelectSiteName"]</expression>
-                </structure>
-                <structure>
-                    <property name="paramName">SiteName1</property>
-                    <expression name="expression">params["SelectSiteName"]</expression>
+                    <property name="paramName">Sites</property>
+                    <expression name="expression">params["SelectSiteName"].value</expression>
                 </structure>
             </list-property>
             <list-property name="boundDataColumns">
                 <structure>
                     <property name="name">final_rank</property>
                     <expression name="expression">dataSetRow["final_rank"]</expression>
-                    <property name="dataType">integer</property>
+                    <property name="dataType">float</property>
                 </structure>
                 <structure>
-                    <property name="name">ChartNumber</property>
-                    <expression name="expression">(row["final_rank"]-1) / params["GroupsPerChart"]</expression>
-                    <property name="dataType">integer</property>
-                </structure>
-                <structure>
-                    <property name="name">VOName</property>
-                    <expression name="expression">dataSetRow["VOName"]</expression>
-                    <property name="dataType">string</property>
+                    <property name="name">DateValue</property>
+                    <expression name="expression">dataSetRow["DateValue"]</expression>
+                    <property name="dataType">date</property>
                 </structure>
                 <structure>
                     <property name="name">WallDuration</property>
@@ -1206,8 +1127,18 @@ ORDER BY final_rank, VOProbeSummary.VOName,datevalue</property>
                     <property name="dataType">float</property>
                 </structure>
                 <structure>
-                    <property name="name">Cpu</property>
-                    <expression name="expression">dataSetRow["Cpu"]</expression>
+                    <property name="name">cpu</property>
+                    <expression name="expression">dataSetRow["cpu"]</expression>
+                    <property name="dataType">float</property>
+                </structure>
+                <structure>
+                    <property name="name">cpuUser</property>
+                    <expression name="expression">dataSetRow["cpuUser"]</expression>
+                    <property name="dataType">float</property>
+                </structure>
+                <structure>
+                    <property name="name">cpuSystem</property>
+                    <expression name="expression">dataSetRow["cpuSystem"]</expression>
                     <property name="dataType">float</property>
                 </structure>
                 <structure>
@@ -1216,21 +1147,17 @@ ORDER BY final_rank, VOProbeSummary.VOName,datevalue</property>
                     <property name="dataType">decimal</property>
                 </structure>
                 <structure>
-                    <property name="name">datevalue</property>
-                    <expression name="expression">dataSetRow["datevalue"]</expression>
+                    <property name="name">VOName</property>
+                    <expression name="expression">dataSetRow["VOName"]</expression>
                     <property name="dataType">string</property>
                 </structure>
                 <structure>
-                    <property name="name">CpuUser</property>
-                    <expression name="expression">dataSetRow["CpuUser"]</expression>
-                    <property name="dataType">float</property>
-                </structure>
-                <structure>
-                    <property name="name">CpuSystem</property>
-                    <expression name="expression">dataSetRow["CpuSystem"]</expression>
-                    <property name="dataType">float</property>
+                    <property name="name">ChartNumber</property>
+                    <expression name="expression">(row["final_rank"]-1) / params["GroupsPerChart"]</expression>
+                    <property name="dataType">integer</property>
                 </structure>
             </list-property>
+            <property name="pageBreakInterval">50</property>
             <column id="30">
                 <property name="width">33.3%</property>
             </column>
@@ -1244,20 +1171,8 @@ ORDER BY final_rank, VOProbeSummary.VOName,datevalue</property>
                 <row id="10">
                     <cell id="11"/>
                     <cell id="12">
-                        <text-data id="433">
-                            <property name="style">sans-style1</property>
-                            <property name="fontSize">9pt</property>
-                            <property name="textAlign">center</property>
-                            <expression name="valueExpr">'Site: ' + params["SelectSiteName"]</expression>
-                            <property name="contentType">html</property>
-                        </text-data>
-                        <text-data id="94">
-                            <property name="style">sans-style1</property>
-                            <property name="fontSize">9pt</property>
-                            <property name="textAlign">center</property>
-                            <expression name="valueExpr">"Date range: "+ params["StartDate"] + " - " + params["EndDate"]</expression>
-                            <property name="contentType">html</property>
-                        </text-data>
+                        <text-data name="SelectSiteName" id="458" extends="reportLibPSacct.SelectSiteName"/>
+                        <text-data name="DateRange" id="459" extends="reportLibPSacct.DateRange"/>
                     </cell>
                     <cell id="13"/>
                 </row>
@@ -1592,10 +1507,10 @@ function beforeGeneration(chart, icsc)
 	rep = icsc.getExternalContext().getScriptable();
 	
 	metric = rep.getParameterValue(&quot;DisplayMetric&quot;);
-	if(metric==&quot;process&quot;) metric_text = &quot;Process Hours&quot;;
-	if(metric==&quot;wallclock&quot;) metric_text = &quot;Wallclock Hours&quot;;
-	if(metric==&quot;cpuuser&quot;) metric_text = &quot;User Hours&quot;;
-	if(metric==&quot;cpusystem&quot;) metric_text = &quot;System Hours&quot;;
+	if(metric==&quot;cpu&quot;) metric_text = &quot;Process Hours&quot;;
+	if(metric==&quot;WallDuration&quot;) metric_text = &quot;Wallclock Hours&quot;;
+	if(metric==&quot;cpuUser&quot;) metric_text = &quot;User Hours&quot;;
+	if(metric==&quot;cpuSystem&quot;) metric_text = &quot;System Hours&quot;;
 	
 	rep_title = rep.getParameterValue(&quot;ReportTitle&quot;) + &quot; (&quot; + metric_text + &quot;)&quot; ;
 	rep_subtitle = rep.getParameterValue(&quot;ReportSubtitle&quot;);
@@ -1605,7 +1520,7 @@ function beforeGeneration(chart, icsc)
   <SeriesThickness>10.0</SeriesThickness>
   <SampleData>
     <BaseSampleData>
-      <DataSetRepresentation>A, B, C</DataSetRepresentation>
+      <DataSetRepresentation>01/05/2000,02/01/2000,04/12/2000,03/12/2000,02/29/2000</DataSetRepresentation>
     </BaseSampleData>
     <OrthogonalSampleData>
       <DataSetRepresentation>5,4,12</DataSetRepresentation>
@@ -1616,7 +1531,7 @@ function beforeGeneration(chart, icsc)
     <LegendBehavior>None</LegendBehavior>
   </Interactivity>
   <Axes>
-    <Type>Text</Type>
+    <Type>DateTime</Type>
     <Title>
       <Caption>
         <Value>X-Axis Title</Value>
@@ -1831,21 +1746,7 @@ function beforeGeneration(chart, icsc)
             <Visible>false</Visible>
           </Label>
           <DataDefinition>
-            <Definition>if (params[&quot;DisplayMetric&quot;] == &quot;wallclock&quot;) {&#xD;
- row[&quot;WallDuration&quot;] / 3600&#xD;
-}&#xD;
-else if (params[&quot;DisplayMetric&quot;]==&quot;process&quot;) {&#xD;
-row[&quot;Cpu&quot;]  /3600&#xD;
-}&#xD;
-else if (params[&quot;DisplayMetric&quot;]==&quot;cpuuser&quot;){&#xD;
-row[&quot;CpuUser&quot;] / 3600&#xD;
-}&#xD;
-else if (params[&quot;DisplayMetric&quot;]==&quot;cpusystem&quot;){&#xD;
-row[&quot;CpuSystem&quot;] / 3600&#xD;
-}&#xD;
-else {&#xD;
-&quot;***Unknown metric***&quot;&#xD;
-}</Definition>
+            <Definition>row[params[&quot;DisplayMetric&quot;].value]</Definition>
           </DataDefinition>
           <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
           <DataPoint>
@@ -1861,30 +1762,7 @@ else {&#xD;
             <Action>
               <Type>Show_Tooltip</Type>
               <Value xsi:type="attribute:TooltipValue">
-                <Text>var voname = row[&quot;VOName&quot;];&#xD;
-var metricvalue =&quot;&quot;;&#xD;
-var label;&#xD;
-var dotpos;&#xD;
-&#xD;
-if (params[&quot;DisplayMetric&quot;] == &quot;wallclock&quot;) { &#xD;
-	metricvalue = String(row[&quot;WallDuration&quot;] / 3600);&#xD;
-	label = &quot;Wallclock Hours: &quot;;&#xD;
-}&#xD;
-if (params[&quot;DisplayMetric&quot;] == &quot;process&quot;)  {&#xD;
-	metricvalue = String(row[&quot;Cpu&quot;] / 3600);&#xD;
-	label = &quot;Process Hours: &quot;;&#xD;
-} &#xD;
-if (params[&quot;DisplayMetric&quot;] == &quot;jobcount&quot;) {&#xD;
-	metricvalue = String(row[&quot;Njobs&quot;]);&#xD;
-	label = &quot;Jobs: &quot;;&#xD;
-}&#xD;
-var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
-	if(dotpos > 0)&#xD;
-	{ &#xD;
-	metricvalue = metricvalue.substring(0,dotpos+2);&#xD;
-	}&#xD;
-&#xD;
-&quot;VOName: &quot; + voname + &quot;\n&quot; + label + metricvalue</Text>
+                <Text>&quot;VOName: &quot; + row[&quot;VOName&quot;] + &quot;\n&quot; + params[&quot;DisplayMetric&quot;].value + &quot;: &quot;+ row[params[&quot;DisplayMetric&quot;].value]</Text>
                 <Delay>200</Delay>
               </Value>
             </Action>
@@ -1893,7 +1771,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
         </Series>
         <Grouping>
           <Enabled>false</Enabled>
-          <GroupingInterval>2</GroupingInterval>
+          <GroupingInterval>2.0</GroupingInterval>
           <GroupType>Text</GroupType>
           <AggregateExpression>Sum</AggregateExpression>
         </Grouping>
@@ -2114,7 +1992,7 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
           <Visible>false</Visible>
         </Label>
         <DataDefinition>
-          <Definition>row[&quot;datevalue&quot;]</Definition>
+          <Definition>row[&quot;DateValue&quot;]</Definition>
         </DataDefinition>
         <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
         <DataPoint>
@@ -2128,11 +2006,14 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
       </Series>
       <Grouping>
         <Enabled>false</Enabled>
-        <GroupingInterval>2</GroupingInterval>
+        <GroupingInterval>2.0</GroupingInterval>
         <GroupType>Text</GroupType>
         <AggregateExpression>Sum</AggregateExpression>
       </Grouping>
       <Sorting>Ascending</Sorting>
+      <SortKey>
+        <Definition>row[&quot;DateValue&quot;]</Definition>
+      </SortKey>
     </SeriesDefinitions>
     <Orientation>Horizontal</Orientation>
     <LineAttributes>
@@ -2184,8 +2065,9 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
       </Insets>
       <Visible>true</Visible>
     </Label>
-    <FormatSpecifier xsi:type="attribute:JavaDateFormatSpecifier">
-      <Pattern>MM/dd/yyyy</Pattern>
+    <FormatSpecifier xsi:type="attribute:DateFormatSpecifier">
+      <Type>Medium</Type>
+      <Detail>Date</Detail>
     </FormatSpecifier>
     <LabelPosition>Below</LabelPosition>
     <MajorGrid>
@@ -2302,7 +2184,8 @@ var dotpos = metricvalue.indexOf(&quot;.&quot;,0); &#xD;
                         <cell id="19">
                             <property name="colSpan">3</property>
                             <property name="rowSpan">1</property>
-                            <label name="ReportURL" id="425" extends="gratia-lib1.ReportURL"/>
+                            <label name="ReportURL" id="460" extends="reportLibPSacct.ReportURL"/>
+                            <label name="ShowQuery" id="461" extends="reportLibPSacct.ShowQuery"/>
                         </cell>
                     </row>
                 </footer>
