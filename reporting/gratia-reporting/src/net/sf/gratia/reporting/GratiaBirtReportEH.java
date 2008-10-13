@@ -204,12 +204,18 @@ public class GratiaBirtReportEH extends ReportEventAdapter {
 				//String reportsFolder = reportingConfig.getReportsFolder();
 				//String varConfigLoaded = reportingConfig.getConfigLoaded();
 
+				// get the report name
+
+				String reportName = request.getParameter("__report");
+				reportName = reportName.substring(reportName.lastIndexOf("/")+1, reportName.indexOf(".rptdesign"));
+				
 				// set parameter values
 				inReport.setParameterValue("DatabaseURL", databaseURL);
 				inReport.setParameterValue("DatabasePassword", databasePassword);
 				inReport.setParameterValue("DatabaseUser", databaseUser);
 				inReport.setParameterValue("UserName", userName);
 				inReport.setParameterValue("UserRole", userRole);
+				inReport.setParameterValue("ReportName", reportName);
 				// inReport.setParameterValue("ReportSubtitle", subtitle);
 
 				// out1.write("Time Stamp file = " + timeStampFile + " \tLogging is: " + logTimeStamps + "\n");
@@ -223,8 +229,6 @@ public class GratiaBirtReportEH extends ReportEventAdapter {
 						checkFolder.mkdirs();
 					checkFolder = null;
 					BufferedWriter out = new BufferedWriter(new FileWriter(System.getProperty("catalina.home") + timeStampFile, true));
-					String reportName = request.getParameter("__report");
-					reportName = reportName.substring(reportName.lastIndexOf("/")+1, reportName.indexOf(".rptdesign"));
 					out.write(reportName + " = ,"+ timeStamp);
 					out.flush();
 					out.close();
