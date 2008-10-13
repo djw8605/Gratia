@@ -3,7 +3,7 @@ DELIMITER $$
 drop table if exists trace
 $$
 CREATE TABLE trace (
-	traceID int,
+	traceID INT AUTO_INCREMENT PRIMARY KEY,
   	eventtime TIMESTAMP NOT NULL,
 	procName varchar(64),
 	userKey varchar(64),
