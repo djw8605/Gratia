@@ -1289,6 +1289,9 @@ if(dotpos > 0) {metricvalue = metricvalue.substring(0,dotpos+2);}&#xD;
         <AggregateExpression>Sum</AggregateExpression>
       </Grouping>
       <Sorting>Ascending</Sorting>
+      <SortKey>
+        <Definition>row[&quot;DateValue&quot;]</Definition>
+      </SortKey>
     </SeriesDefinitions>
     <Orientation>Horizontal</Orientation>
     <LineAttributes>
@@ -1449,6 +1452,10 @@ if(dotpos > 0) {metricvalue = metricvalue.substring(0,dotpos+2);}&#xD;
                 </structure>
                 <structure>
                     <property name="paramName">UserRole</property>
+                </structure>
+                <structure>
+                    <property name="paramName">reportName</property>
+                    <expression name="expression">params["ReportName"].value</expression>
                 </structure>
             </list-property>
             <list-property name="boundDataColumns">

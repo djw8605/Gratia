@@ -193,6 +193,18 @@
                         <property name="category">Unformatted</property>
                     </structure>
                 </scalar-parameter>
+                <scalar-parameter name="ReportName" id="407">
+                    <property name="hidden">true</property>
+                    <property name="valueType">static</property>
+                    <property name="dataType">string</property>
+                    <property name="paramType">simple</property>
+                    <property name="isRequired">false</property>
+                    <property name="controlType">text-box</property>
+                    <property name="distinct">true</property>
+                    <structure name="format">
+                        <property name="category">Unformatted</property>
+                    </structure>
+                </scalar-parameter>
             </parameters>
         </parameter-group>
         <parameter-group name="VOSiteProbe" id="395">

@@ -1168,6 +1168,10 @@
                     <property name="paramName">Sites</property>
                     <expression name="expression">params["Sites"].value</expression>
                 </structure>
+                <structure>
+                    <property name="paramName">reportName</property>
+                    <expression name="expression">params["ReportName"].value</expression>
+                </structure>
             </list-property>
             <list-property name="boundDataColumns">
                 <structure>

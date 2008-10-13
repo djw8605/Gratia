@@ -2063,6 +2063,10 @@ if(dotpos > 0) {metricvalue = metricvalue.substring(0,dotpos+2);}&#xD;
                     <property name="paramName">UserRole</property>
                     <expression name="expression">params["UserRole"]</expression>
                 </structure>
+                <structure>
+                    <property name="paramName">reportName</property>
+                    <expression name="expression">params["ReportName"].value</expression>
+                </structure>
             </list-property>
             <list-property name="boundDataColumns">
                 <structure>

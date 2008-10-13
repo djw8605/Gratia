@@ -64,11 +64,11 @@
             <parameters>
                 <scalar-parameter name="DisplayMetric" id="25">
                     <property name="hidden">false</property>
-                    <text-property name="helpText">Select metric for chart</text-property>
+                    <text-property name="helpText">Select metric for Chart (Wallclock, Process etc hours)</text-property>
                     <property name="valueType">static</property>
                     <property name="dataType">string</property>
                     <property name="paramType">simple</property>
-                    <text-property name="promptText">Metric for chart</text-property>
+                    <text-property name="promptText">Metric</text-property>
                     <property name="isRequired">true</property>
                     <property name="controlType">list-box</property>
                     <property name="mustMatch">true</property>
@@ -199,6 +199,20 @@
                     <property name="isRequired">false</property>
                     <property name="controlType">text-box</property>
                     <property name="defaultValue"></property>
+                    <structure name="format">
+                        <property name="category">Unformatted</property>
+                    </structure>
+                </scalar-parameter>
+                <scalar-parameter name="ReportName" id="408">
+                    <property name="hidden">true</property>
+                    <property name="valueType">static</property>
+                    <property name="dataType">string</property>
+                    <property name="paramType">simple</property>
+                    <text-property name="promptText">Report Name</text-property>
+                    <property name="isRequired">false</property>
+                    <property name="controlType">text-box</property>
+                    <property name="defaultValue">ReportName</property>
+                    <property name="distinct">true</property>
                     <structure name="format">
                         <property name="category">Unformatted</property>
                     </structure>

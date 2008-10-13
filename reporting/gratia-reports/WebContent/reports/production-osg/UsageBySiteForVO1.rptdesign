@@ -1758,6 +1758,12 @@ function beforeDrawAxisTitle( axis, label, context )
                         <property name="dataSet">reportsProcedure</property>
                         <property name="height">550pt</property>
                         <property name="width">640px</property>
+                        <list-property name="paramBindings">
+                            <structure>
+                                <property name="paramName">reportName</property>
+                                <expression name="expression">params["ReportName"].value</expression>
+                            </structure>
+                        </list-property>
                         <list-property name="boundDataColumns">
                             <structure>
                                 <property name="name">SiteName</property>

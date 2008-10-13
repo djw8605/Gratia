@@ -213,11 +213,11 @@
                 </structure>
                 <structure>
                     <property name="name">reportName</property>
+                    <property name="paramName">ReportName</property>
                     <property name="nativeName">reportName</property>
                     <property name="dataType">string</property>
                     <property name="nativeDataType">12</property>
                     <property name="position">14</property>
-                    <expression name="defaultValue">'DailyUsageByGroup2-pacct'</expression>
                     <property name="allowNull">false</property>
                     <property name="isInput">true</property>
                     <property name="isOutput">false</property>
@@ -1554,6 +1554,10 @@ function beforeGeneration(chart, icsc)
                 <structure>
                     <property name="paramName">UserRole</property>
                     <expression name="expression">params["UserRole"].value</expression>
+                </structure>
+                <structure>
+                    <property name="paramName">reportName</property>
+                    <expression name="expression">params["ReportName"].value</expression>
                 </structure>
             </list-property>
             <list-property name="boundDataColumns">

@@ -2554,6 +2554,10 @@ function beforeDrawAxisTitle( axis, label, context )
                 <structure>
                     <property name="paramName">VOs</property>
                 </structure>
+                <structure>
+                    <property name="paramName">reportname</property>
+                    <expression name="expression">params["ReportName"].value</expression>
+                </structure>
             </list-property>
             <list-property name="boundDataColumns">
                 <structure>
