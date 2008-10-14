@@ -548,8 +548,8 @@ sub configure_collector_config {
       my ($prefix, $property, $base) = ($1 || '', $2, $3);
       next if ($seen_attributes{$base}); # Only print one set.
       $seen_attributes{$base} = 1;
-      foreach my $numbered_attribute (sort (grep /^$base/,
-                                            keys %{$collector_config->{"properties.attributes"}})) {
+      foreach my $numbered_attribute (sort(grep /^$base/,
+                                           keys %{$collector_config->{"properties.attributes"}})) {
         next if $seen_attributes{$numbered_attribute};
         my $new_line = sprintf("$numbered_attribute = %s\n",
                                $collector_config->{"properties.attributes"}->{$numbered_attribute});
