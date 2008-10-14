@@ -1,23 +1,5 @@
 DELIMITER $$
 
-drop table if exists trace
-$$
-CREATE TABLE trace (
-	traceID INT AUTO_INCREMENT PRIMARY KEY,
-  	eventtime TIMESTAMP NOT NULL,
-	procName varchar(64),
-	userKey varchar(64),
-	userName varchar(64),
-	userRole varchar(64),
-	userVO varchar(64),
-  	sqlQuery TEXT,
-  	procTime varchar(64),
-  	queryTime varchar(64),
-  	p1 varchar(64),
-  	p2 varchar(64),
-  	p3 varchar(64)
-	)
-$$
 drop procedure if exists parse
 $$
 create procedure parse(username varchar(64),out outname varchar(64),
