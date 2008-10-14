@@ -5,7 +5,7 @@
 #
 # library to create simple report using the Gratia psacct database
 #
-#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.39 2008-10-06 20:55:11 pcanal Exp $
+#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.40 2008-10-14 16:55:14 pcanal Exp $
 
 import time
 import datetime
@@ -664,11 +664,11 @@ class DailySiteJobStatusConf:
         
 
     def GetData(self,start,end):
-       #return DailySiteJobStatusSummary(start,end,what=self.GroupBy,selection=self.ExtraSelect)
-       if self.CondorSpecial:
-           return DailySiteJobStatus(start,end,selection=" and J.StatusDescription != \"Condor Exit Status\" "+self.ExtraSelect,what=self.GroupBy)+DailySiteJobStatusCondor(start,end,what=self.GroupBy,selection=self.ExtraSelect)
-       else:
-           return DailySiteJobStatus(start,end,what=self.GroupBy,selection=self.ExtraSelect)
+       return DailySiteJobStatusSummary(start,end,what=self.GroupBy,selection=self.ExtraSelect)
+#       if self.CondorSpecial:
+#           return DailySiteJobStatus(start,end,selection=" and J.StatusDescription != \"Condor Exit Status\" "+self.ExtraSelect,what=self.GroupBy)+DailySiteJobStatusCondor(start,end,what=self.GroupBy,selection=self.ExtraSelect)
+#       else:
+#           return DailySiteJobStatus(start,end,what=self.GroupBy,selection=self.ExtraSelect)
     
   
 class DailySiteReportConf:
