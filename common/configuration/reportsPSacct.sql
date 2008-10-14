@@ -157,12 +157,12 @@ begin
            ' str_to_date(date_format(N.EndTime,''', @idatr, '''), ''', @idats, ''') as  DateValue,',
            ' SUM(N.CpuSystemTime)*C.BenchmarkScore', @thisScale, ' as cpuSystemBenchDays,',
            ' SUM(N.CpuUserTime)*C.BenchmarkScore', @thisScale, ' as cpuUserBenchDays,',
-           ' count(distinct N.Node)*C.BenchmarkScore*C.CpuCount*', @ndays, @thisScale, ' as AvailableBenchDays,',
-           ' count(distinct N.Node)*C.BenchmarkScore*C.CpuCount*0.5*', @ndays, @thisScale, ' as HalfAvailableBenchDays,',
+           ' count(distinct N.Node)*C.BenchmarkScore*C.CPUCount*', @ndays, @thisScale, ' as AvailableBenchDays,',
+           ' count(distinct N.Node)*C.BenchmarkScore*C.CPUCount*0.5*', @ndays, @thisScale, ' as HalfAvailableBenchDays,',
            ' count(distinct N.Node) as NodeCount,',
            ' C.HostDescription as HostDescription,',
            ' C.BenchmarkScore as BenchmarkScore,',
-           ' C.CpuCount as cpuCount'
+           ' C.CPUCount as CPUCount'
            );
     set @sqlFrom    := 'NodeSummary N, Probe P, Site S, CPUInfo C';
     set @sqlWhere   := concat_ws('',
