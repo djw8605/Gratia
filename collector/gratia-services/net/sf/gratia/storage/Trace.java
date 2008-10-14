@@ -73,7 +73,7 @@ public class Trace {
         this.userVO = userVO;
     }
 
-    public String getsqlQuery4() {
+    public String getsqlQuery() {
         return sqlQuery;
     }
 

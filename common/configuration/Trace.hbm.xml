@@ -26,9 +26,7 @@
    <property name="userVO">
      <column name="userVO" sql-type="varchar(64)" />
    </property> 
-   <property name="sqlQuery">
-     <column name="sqlQuery" type="text" />
-   </property> 
+   <property name="sqlQuery" column="sqlQuery" type="text" />
    <property name="procTime">
      <column name="procTime" sql-type="varchar(64)" />
    </property> 
