@@ -831,8 +831,8 @@
         <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="DataSource" id="399">
             <property name="odaDriverClass">com.mysql.jdbc.Driver</property>
             <property name="odaURL">jdbc:mysql://gratia-vm02.fnal.gov:3320/gratia_gratiax21_ps</property>
-            <property name="odaUser">gratia</property>
-            <encrypted-property name="odaPassword" encryptionID="base64">cHJvdG8=</encrypted-property>
+            <property name="odaUser">reader</property>
+            <encrypted-property name="odaPassword" encryptionID="base64">cmVhZGVy</encrypted-property>
         </oda-data-source>
     </data-sources>
     <data-sets>
@@ -886,7 +886,7 @@
                     </structure>
                     <structure>
                         <property name="position">10</property>
-                        <property name="name">cpuCount</property>
+                        <property name="name">CPUCount</property>
                         <property name="dataType">string</property>
                     </structure>
                 </list-property>
@@ -1067,8 +1067,8 @@
                 </structure>
                 <structure>
                     <property name="position">10</property>
-                    <property name="name">cpuCount</property>
-                    <property name="nativeName">cpuCount</property>
+                    <property name="name">CPUCount</property>
+                    <property name="nativeName">CPUCount</property>
                     <property name="dataType">string</property>
                 </structure>
             </list-property>
@@ -1220,8 +1220,8 @@
                     <property name="dataType">string</property>
                 </structure>
                 <structure>
-                    <property name="name">cpuCount</property>
-                    <expression name="expression">dataSetRow["cpuCount"]</expression>
+                    <property name="name">CPUCount</property>
+                    <expression name="expression">dataSetRow["CPUCount"]</expression>
                     <property name="dataType">string</property>
                 </structure>
             </list-property>

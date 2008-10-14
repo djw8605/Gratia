@@ -826,8 +826,8 @@
         <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="DataSource" id="399">
             <property name="odaDriverClass">com.mysql.jdbc.Driver</property>
             <property name="odaURL">jdbc:mysql://gratia-vm02.fnal.gov:3320/gratia_gratiax21_ps</property>
-            <property name="odaUser">gratia</property>
-            <encrypted-property name="odaPassword" encryptionID="base64">cHJvdG8=</encrypted-property>
+            <property name="odaUser">reader</property>
+            <encrypted-property name="odaPassword" encryptionID="base64">cmVhZGVy</encrypted-property>
         </oda-data-source>
     </data-sources>
     <data-sets>
@@ -2188,8 +2188,6 @@ function beforeGeneration(chart, icsc)
                         <cell id="19">
                             <property name="colSpan">3</property>
                             <property name="rowSpan">1</property>
-                            <label name="ReportURL" id="460" extends="reportLibPSacct.ReportURL"/>
-                            <label name="ShowQuery" id="461" extends="reportLibPSacct.ShowQuery"/>
                         </cell>
                     </row>
                 </footer>
@@ -2209,5 +2207,7 @@ function beforeGeneration(chart, icsc)
                 </row>
             </footer>
         </table>
+        <label name="ReportURL" id="460" extends="reportLibPSacct.ReportURL"/>
+        <label name="ShowQuery" id="461" extends="reportLibPSacct.ShowQuery"/>
     </body>
 </report>

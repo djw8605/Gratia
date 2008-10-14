@@ -40,8 +40,8 @@
         <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="DataSource" id="69">
             <property name="odaDriverClass">com.mysql.jdbc.Driver</property>
             <property name="odaURL">jdbc:mysql://gratia-vm02.fnal.gov:3320/gratia_gratiax21_ps</property>
-            <property name="odaUser">gratia</property>
-            <encrypted-property name="odaPassword" encryptionID="base64">cHJvdG8=</encrypted-property>
+            <property name="odaUser">reader</property>
+            <encrypted-property name="odaPassword" encryptionID="base64">cmVhZGVy</encrypted-property>
         </oda-data-source>
     </data-sources>
     <data-sets>
@@ -1554,10 +1554,6 @@ function beforeGeneration(chart, icsc)
                 <structure>
                     <property name="paramName">UserRole</property>
                     <expression name="expression">params["UserRole"].value</expression>
-                </structure>
-                <structure>
-                    <property name="paramName">reportName</property>
-                    <expression name="expression">params["ReportName"].value</expression>
                 </structure>
             </list-property>
             <list-property name="boundDataColumns">
