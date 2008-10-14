@@ -836,7 +836,7 @@
         </oda-data-source>
     </data-sources>
     <data-sets>
-        <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.SPSelectDataSet" name="reportsPSacct" id="402">
+        <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="reportsPSacct" id="402">
             <structure name="cachedMetaData">
                 <list-property name="resultSet">
                     <structure>

@@ -46,7 +46,7 @@
         </oda-data-source>
     </data-sources>
     <data-sets>
-        <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.SPSelectDataSet" name="reportsPSacct" id="402">
+        <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="reportsPSacct" id="402">
             <list-property name="columnHints">
                 <structure>
                     <property name="columnName">CPUCount</property>
