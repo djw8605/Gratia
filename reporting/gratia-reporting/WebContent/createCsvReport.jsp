@@ -174,7 +174,7 @@ try
 	if (incsvFileName == null)
 		incsvFileName = "";
 
-	String sql = "call reports(null, null,'" + sDate +"', '" + eDate + "','" + timeUnit + "','" + dateGrouping + "','" + groupBy  + "','" + orderBy + "','batch', null, null, null, null, null)";
+	String sql = "call reports(null, null,'" + sDate +"', '" + eDate + "','" + timeUnit + "','" + dateGrouping + "','" + groupBy  + "','" + orderBy + "','batch', null, null, null, null, null, 'staticCsv' )";
             
 	String tempCsvPath = "";
 	String csvFileName = "";
