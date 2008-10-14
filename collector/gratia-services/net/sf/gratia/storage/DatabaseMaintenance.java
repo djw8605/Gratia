@@ -38,7 +38,7 @@ import org.hibernate.exception.*;
 public class DatabaseMaintenance {
     static final String dq = "\"";
     static final String comma = ",";
-    static final int gratiaDatabaseVersion = 64;
+    static final int gratiaDatabaseVersion = 65;
     static final int latestDBVersionRequiringStoredProcedureLoad = gratiaDatabaseVersion;
     static final int latestDBVersionRequiringSummaryViewLoad = 37;
     static final int latestDBVersionRequiringSummaryTriggerLoad = 59;
@@ -88,9 +88,10 @@ public class DatabaseMaintenance {
     public boolean InitialCleanup() {
         // Do check and cleanup that must be done before Hibernate is started.
 
-        if (liveVersion < 4) Execute("Drop view if exists Role;");
-        if (liveVersion < 5) Execute("Drop view if exists Site;");
-        if (liveVersion < 6) Execute("Drop view if exists Probe;");
+        if (liveVersion < 4) Execute("DROP VIEW IF EXISTS Role;");
+        if (liveVersion < 5) Execute("DROP VIEW IF EXISTS Site;");
+        if (liveVersion < 6) Execute("DROP VIEW IF EXISTS Probe;");
+        if (liveVersion < 65) Execute("DROP TABLE IF EXISTS trace;");
 
         String hibernate_cfg = System.getProperty("catalina.home");
         hibernate_cfg = xp.replaceAll(hibernate_cfg, "\\", "" + File.separatorChar);
@@ -1397,10 +1398,10 @@ public class DatabaseMaintenance {
                     UpdateDbVersion(current);
                 }
             }
-            if ((current >= 60) && (current < 64)) {
+            if ((current >= 60) && (current < 65)) {
                 // Stored procedures.
                 Logging.fine("Gratia database upgraded from " + current + " to 63");
-                current = 64;
+                current = 65;
                 UpdateDbVersion(current);
             }
 
