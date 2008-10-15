@@ -1681,7 +1681,7 @@ function beforeDrawAxisTitle( axis, label, context )
     <LegendBehavior>None</LegendBehavior>
   </Interactivity>
   <Axes>
-    <Type>DateTime</Type>
+    <Type>Text</Type>
     <Title>
       <Caption>
         <Value>X-Axis Title</Value>
