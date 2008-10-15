@@ -2,7 +2,7 @@
 
 # space separated list of mail recipients
 PROD_MAILTO="osg-accounting-info@fnal.gov"
-PROD_USER_MAILTO="osg-user-accounting-info@opensciencegrid.org"
+PROD_USER_MAILTO="osg-accounting-info@opensciencegrid.org"
 MAILTO="pcanal@fnal.gov"
 USER_MAILTO=$MAILTO
 WEBLOC="http://gratia-osg.fnal.gov:8880/gratia-reporting"
