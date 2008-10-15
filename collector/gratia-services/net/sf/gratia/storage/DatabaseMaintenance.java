@@ -1398,10 +1398,10 @@ public class DatabaseMaintenance {
                     UpdateDbVersion(current);
                 }
             }
-            if ((current >= 60) && (current < 65)) {
+            if ((current >= 60) && (current < 66)) {
                 // Stored procedures.
-                Logging.fine("Gratia database upgraded from " + current + " to 63");
-                current = 65;
+                Logging.fine("Gratia database upgraded from " + current + " to 66");
+                current = 66;
                 UpdateDbVersion(current);
             }
 
