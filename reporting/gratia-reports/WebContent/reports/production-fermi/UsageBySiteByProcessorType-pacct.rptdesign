@@ -608,7 +608,15 @@
                 </header>
                 <footer>
                     <row id="23">
-                        <cell id="24"/>
+                        <cell id="24">
+                            <text id="428">
+                                <property name="contentType">auto</property>
+                                <text-property name="content"><![CDATA[  
+  ]]></text-property>
+                            </text>
+                            <label name="ReportURL" id="419" extends="reportLibPSacct.ReportURL"/>
+                            <label name="ShowQuery" id="420" extends="reportLibPSacct.ShowQuery"/>
+                        </cell>
                         <cell id="152"/>
                         <cell id="173"/>
                         <cell id="25"/>
@@ -647,6 +655,10 @@
                             <property name="fontWeight">bold</property>
                             <property name="textAlign">right</property>
                             <data id="158">
+                                <structure name="numberFormat">
+                                    <property name="category">Custom</property>
+                                    <property name="pattern">###,###,##0</property>
+                                </structure>
                                 <property name="resultSetColumn">SumNodes</property>
                             </data>
                         </cell>
@@ -655,6 +667,10 @@
                             <property name="fontWeight">bold</property>
                             <property name="textAlign">right</property>
                             <data id="178">
+                                <structure name="numberFormat">
+                                    <property name="category">Fixed</property>
+                                    <property name="pattern">#,##0.00</property>
+                                </structure>
                                 <list-property name="visibility">
                                     <structure>
                                         <property name="format">all</property>
@@ -666,7 +682,7 @@
                             <data id="179">
                                 <structure name="numberFormat">
                                     <property name="category">Percent</property>
-                                    <property name="pattern">###0.0%</property>
+                                    <property name="pattern">#,##0.00%</property>
                                 </structure>
                                 <property name="resultSetColumn">SumBenchPercentage</property>
                             </data>
@@ -765,6 +781,10 @@ hostdesc = hostdesc.replace("'","");</expression>
                     <cell id="149">
                         <data id="156">
                             <property name="style">sans-style1</property>
+                            <structure name="numberFormat">
+                                <property name="category">Custom</property>
+                                <property name="pattern">###,###,##0</property>
+                            </structure>
                             <property name="textAlign">right</property>
                             <property name="resultSetColumn">NodeCount</property>
                         </data>
@@ -796,10 +816,7 @@ hostdesc = hostdesc.replace("'","");</expression>
             </detail>
             <footer>
                 <row id="31">
-                    <cell id="32">
-                        <label name="ReportURL" id="419" extends="reportLibPSacct.ReportURL"/>
-                        <label name="ShowQuery" id="420" extends="reportLibPSacct.ShowQuery"/>
-                    </cell>
+                    <cell id="32"/>
                     <cell id="153"/>
                     <cell id="174"/>
                     <cell id="33"/>
