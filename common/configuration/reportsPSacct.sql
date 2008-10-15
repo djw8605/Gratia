@@ -1,7 +1,7 @@
 DELIMITER $$
 
 DROP PROCEDURE IF EXISTS `reportsPSacct` $$
-CREATE  PROCEDURE `reportsPSacct`(
+CREATE PROCEDURE `reportsPSacct`(
                 userName varchar(64), userRole varchar(64),
                 fromdate varchar(64), todate varchar(64),
                 dateGrouping varchar(64),
@@ -28,13 +28,11 @@ begin
       set @irole := TRIM(userRole);
     END IF;
   END IF;
-
   select generateResourceTypeClause(@itype) into @myresourceclause;
   select SystemProplist.cdr into @usereportauthentication from SystemProplist where SystemProplist.car = 'use.report.authentication';
   select Role.whereclause into @mywhereclause from Role where Role.role = @irole;
   select generateWhereClause(@iuser,@irole,@mywhereclause) into @mywhereclause;
   call parse(@iuser,@name,@key,@vo);
-
   set @ifrom := '';
   set @ifromV := '';
   set @ifromN := '';
@@ -50,7 +48,6 @@ begin
       set @ifromN := concat_ws('','and N.EndTIme >=''', TRIM(@thisFromDate), '''');
     END IF;
   END IF;
-
   set @ito := '';
   set @itoV := '';
   set @itoN := '';
@@ -116,7 +113,8 @@ begin
     END IF;
   END IF;
   set @thisScale := concat_ws('', '/(', @iscale, '*', @iunit, ')');
-  
+  set @thisiscale := concat_ws('', '/', @iscale);
+
   set @iquery := 'SUM'; 
   IF queryType IS NOT NULL THEN
     IF (TRIM(queryType) != '') AND (LOWER(TRIM(queryType)) != 'null') THEN
@@ -141,7 +139,6 @@ begin
       set @itype := TRIM(resourceType);
     END IF;
   END IF;
-
   set @final_rank := '';
   set @sqlSelects := '';
   set @sqlFrom    := '';
@@ -157,8 +154,8 @@ begin
            ' str_to_date(date_format(N.EndTime,''', @idatr, '''), ''', @idats, ''') as  DateValue,',
            ' SUM(N.CpuSystemTime)*C.BenchmarkScore', @thisScale, ' as cpuSystemBenchDays,',
            ' SUM(N.CpuUserTime)*C.BenchmarkScore', @thisScale, ' as cpuUserBenchDays,',
-           ' count(distinct N.Node)*C.BenchmarkScore*C.CPUCount*', @ndays, @thisScale, ' as AvailableBenchDays,',
-           ' count(distinct N.Node)*C.BenchmarkScore*C.CPUCount*0.5*', @ndays, @thisScale, ' as HalfAvailableBenchDays,',
+           ' count(distinct N.Node)*C.BenchmarkScore*C.CPUCount*', @ndays, @thisiscale, ' as AvailableBenchDays,',
+           ' count(distinct N.Node)*C.BenchmarkScore*C.CPUCount*0.5*', @ndays, @thisiscale, ' as HalfAvailableBenchDays,',
            ' count(distinct N.Node) as NodeCount,',
            ' C.HostDescription as HostDescription,',
            ' C.BenchmarkScore as BenchmarkScore,',
