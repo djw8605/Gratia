@@ -1145,7 +1145,9 @@
                         <property name="contentType">html</property>
                     </text-data>
                     <text-data name="ForSite" id="484" extends="reportLibPSacct.ForSite"/>
-                    <text-data name="ForDate" id="485" extends="reportLibPSacct.ForDate"/>
+                    <text-data name="ForDate" id="485" extends="reportLibPSacct.ForDate">
+                        <expression name="valueExpr">"Date:  " + params["StartDate"].value.replace("1,", "")</expression>
+                    </text-data>
                 </cell>
             </row>
         </grid>
