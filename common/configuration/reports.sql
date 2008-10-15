@@ -85,13 +85,13 @@ BEGIN
       IF STRCMP(LOWER(TRIM(dateGrouping)), 'day') = 0 THEN
         SET @idatr := '%Y-%m-%d';
         SET @idats := '%Y-%m-%d';
-      ELSE IF STRCMP(LOWER(TRIM(dateGrouping)), 'week') = 0 THEN
+      ELSEIF STRCMP(LOWER(TRIM(dateGrouping)), 'week') = 0 THEN
         SET @idatr := '%x-%v Monday';
         SET @idats := '%x-%v %W';
-      ELSE IF STRCMP(LOWER(TRIM(dateGrouping)), 'month') = 0  THEN
+      ELSEIF STRCMP(LOWER(TRIM(dateGrouping)), 'month') = 0  THEN
         SET @idatr := '%Y-%m-01';
         SET @idats := '%Y-%m-%d';
-      ELSE IF STRCMP(LOWER(TRIM(dateGrouping)), 'year') = 0  THEN
+      ELSEIF STRCMP(LOWER(TRIM(dateGrouping)), 'year') = 0  THEN
         SET @idatr := '%Y-01-01';
         SET @idats := '%Y-%m-%d';
       END IF;
@@ -125,7 +125,7 @@ BEGIN
     IF selType = 'NOT' THEN
       SET @iselTypeA := ' NOT IN ';
       SET @iselTypeB := '';
-    ELSE IF selType = 'IN' THEN
+    ELSEIF selType = 'IN' THEN
       SET @iselTypeA := ' IN ';
       SET @iselTypeB := '';
     END IF;
