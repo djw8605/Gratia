@@ -1,200 +1,210 @@
 DELIMITER $$
 
 DROP PROCEDURE IF EXISTS `reports` $$
-CREATE PROCEDURE `reports`(
-                userName varchar(64), userRole varchar(64),
-                fromdate varchar(64), todate varchar(64),
-                timeUnit varchar(64), dateGrouping varchar(64),
-                groupBy varchar(128), orderBy varchar(128),
-                resourceType varchar(64),
-                VOs varchar(1024),
-                Sites varchar(1024),
-                Probes varchar(1024),
-                Ranked varchar(5),
-                selType varchar(5),
-                reportName varchar(64)
-                )
-    READS SQL DATA
-begin
+CREATE PROCEDURE `reports`
+(
+ userName VARCHAR(64),
+ userRole VARCHAR(64),
+ fromdate VARCHAR(64),
+ todate VARCHAR(64),
+ timeUnit VARCHAR(64),
+ dateGrouping VARCHAR(64),
+ groupBy VARCHAR(128),
+ orderBy VARCHAR(128),
+ resourceType VARCHAR(64),
+ VOs VARCHAR(1024),
+ Sites VARCHAR(1024),
+ Probes VARCHAR(1024),
+ Ranked VARCHAR(5),
+ selType VARCHAR(5),
+ reportName VARCHAR(64)
+) READS SQL DATA
+BEGIN
 
-  select sysdate() into @proc_start;
-  set @iuser := concat_ws('','GratiaUser|', UNIX_TIMESTAMP(), '|Unknown');
+  SELECT SYSDATE() INTO @proc_start;
+  SET @iuser := CONCAT_WS('', 'GratiaUser|', UNIX_TIMESTAMP(), '|Unknown');
   IF userName IS NOT NULL THEN
     IF (TRIM(userName) != '') AND (TRIM(userName) != 'null') THEN
-      set @iuser := TRIM(userName);
+      SET @iuser := TRIM(userName);
     END IF;
   END IF;
 
-  set @irole := 'GratiaUser';
+  SET @irole := 'GratiaUser';
   IF userRole IS NOT NULL THEN
     IF (TRIM(userRole) != '') AND (TRIM(userRole) != 'null') THEN
-      set @irole := TRIM(userRole);
+      SET @irole := TRIM(userRole);
     END IF;
   END IF;
 
-  set @thisFromDate := ''; 
-  set @ifrom := concat_ws('','and VOProbeSummary.EndTIme >=''', SUBDATE(CURDATE(), 800),'''');
+  SET @thisFromDate := ''; 
+  SET @ifrom := CONCAT_WS('', 'AND VOProbeSummary.EndTime >= ''', SUBDATE(CURDATE(), 800),'''');
   IF fromdate IS NOT NULL THEN
     IF (TRIM(fromdate) != '') AND (TRIM(fromdate) != 'null') THEN
-      set @thisFromDate := fromdate;
-      select STR_TO_DATE(fromdate, '%M %e, %Y') into @testDate;
-      if @testDate IS NOT NULL THEN
-        select  date_format(@testDate, '%Y-%m-%d') into @thisFromDate;
-      end if;
-      set @ifrom := concat_ws('','and VOProbeSummary.EndTIme >=''', TRIM(@thisFromDate), '''');
-    END IF;
-  END IF;
-
-  set @thisToDate := ''; 
-  set @ito := '';
-  IF todate IS NOT NULL THEN
-    IF (TRIM(todate) != '') AND (TRIM(todate) != 'null') THEN
-      set @thisToDate := todate;
-      select STR_TO_DATE(todate, '%M %e, %Y') into @testDate;
-      if @testDate IS NOT NULL THEN
-        select  date_format(@testDate, '%Y-%m-%d') into @thisToDate;
-      end if;
-      set @ito := concat_ws('','and VOProbeSummary.EndTime <= ''', TRIM(@thisToDate),'''');
-    END IF;
-  END IF;
-
-  set @iunit := '3600';
-  IF timeUnit IS NOT NULL THEN
-    IF (TRIM(timeUnit) != '') AND (TRIM(timeUnit) != 'null') THEN
-      set @iunit := TRIM(timeUnit);
-    END IF;
-  END IF;
-
-
-  set @idatr := '%Y-%m-%d';
-  set @idats := '%Y-%m-%d';
-  set @igroup := 'day';
-  IF dateGrouping IS NOT NULL THEN
-    IF (TRIM(dateGrouping) != '') AND (TRIM(dateGrouping) != 'null') THEN
-      set @igroup := TRIM(dateGrouping);
-      IF STRCMP(LOWER(TRIM(dateGrouping)), 'day') = 0 THEN
-        set @idatr := '%Y-%m-%d';
-        set @idats := '%Y-%m-%d';
-      ELSEIF STRCMP(LOWER(TRIM(dateGrouping)),'week') = 0 THEN
-        set @idatr := '%x-%v Monday';
-        set @idats := '%x-%v %W';
-      ELSEIF STRCMP(LOWER(TRIM(dateGrouping)), 'month') = 0  THEN
-        set @idatr := '%Y-%m-01';
-        set @idats := '%Y-%m-%d';
-      ELSEIF STRCMP(LOWER(TRIM(dateGrouping)), 'year') = 0  THEN
-        set @idatr := '%Y-01-01';
-        set @idats := '%Y-%m-%d';
+      SELECT STR_TO_DATE(fromdate, '%M %e, %Y') into @testDate;
+      IF @testDate IS NOT NULL THEN
+        SELECT DATE_FORMAT(@testDate, '%Y-%m-%d') into @thisFromDate;
+      ELSE 
+        SET @thisFromDate := fromdate;
+      END IF;
+      IF todate IS NULL THEN
+        SET @ifrom := CONCAT_WS('', 'AND VOProbeSummary.EndTime = ''', TRIM(@thisFromDate), '''');
+      ELSE
+        SET @ifrom := CONCAT_WS('', 'AND VOProbeSummary.EndTime >= ''', TRIM(@thisFromDate), '''');
       END IF;
     END IF;
   END IF;
 
-  set @igroupBy := 'group by DateValue, UserName, SiteName, VOName';
+  SET @thisToDate := ''; 
+  SET @ito := '';
+  IF todate IS NOT NULL THEN
+    IF (TRIM(todate) != '') AND (TRIM(todate) != 'null') THEN
+      SELECT STR_TO_DATE(todate, '%M %e, %Y') into @testDate;
+      IF @testDate IS NOT NULL THEN
+        SELECT DATE_FORMAT(@testDate, '%Y-%m-%d') into @thisToDate;
+      ELSE
+        SET @thisToDate := todate;
+      END IF;
+      SET @ito := CONCAT_WS('', 'AND VOProbeSummary.EndTime <= ''', TRIM(@thisToDate),'''');
+    END IF;
+  END IF;
+
+  SET @iunit := '3600';
+  IF timeUnit IS NOT NULL THEN
+    IF (TRIM(timeUnit) != '') AND (TRIM(timeUnit) != 'null') THEN
+      SET @iunit := TRIM(timeUnit);
+    END IF;
+  END IF;
+
+
+  SET @idatr := '%Y-%m-%d';
+  SET @idats := '%Y-%m-%d';
+  SET @igroup := 'day';
+  IF dateGrouping IS NOT NULL THEN
+    IF (TRIM(dateGrouping) != '') AND (TRIM(dateGrouping) != 'null') THEN
+      SET @igroup := TRIM(dateGrouping);
+      IF STRCMP(LOWER(TRIM(dateGrouping)), 'day') = 0 THEN
+        SET @idatr := '%Y-%m-%d';
+        SET @idats := '%Y-%m-%d';
+      ELSE IF STRCMP(LOWER(TRIM(dateGrouping)), 'week') = 0 THEN
+        SET @idatr := '%x-%v Monday';
+        SET @idats := '%x-%v %W';
+      ELSE IF STRCMP(LOWER(TRIM(dateGrouping)), 'month') = 0  THEN
+        SET @idatr := '%Y-%m-01';
+        SET @idats := '%Y-%m-%d';
+      ELSE IF STRCMP(LOWER(TRIM(dateGrouping)), 'year') = 0  THEN
+        SET @idatr := '%Y-01-01';
+        SET @idats := '%Y-%m-%d';
+      END IF;
+    END IF;
+  END IF;
+
+  SET @igroupBy := 'GROUP BY DateValue, UserName, SiteName, VOName';
   IF groupBy IS NOT NULL THEN
     IF TRIM(groupBy) != 'null' THEN
-      set @igroupBy := concat_ws('', 'group by ', TRIM(groupBy));
+      SET @igroupBy := CONCAT_WS('', 'GROUP BY ', TRIM(groupBy));
     END IF;
   END IF;
 
-  set @iorderBy := 'order by CommonName, SiteName, VOName, DateValue';
+  SET @iorderBy := 'ORDER BY CommonName, SiteName, VOName, DateValue';
   IF orderBy IS NOT NULL THEN
     IF TRIM(orderBy) != 'null' THEN
-      set @iorderBy := concat_ws('', 'order by ', TRIM(orderBy));
+      SET @iorderBy := CONCAT_WS('', 'ORDER BY ', TRIM(orderBy));
     END IF;
   END IF;
 
-  set @itype := 'batch';
+  SET @itype := 'Batch';
   IF resourceType IS NOT NULL THEN
     IF (TRIM(resourceType) != '') AND (TRIM(resourceType) != 'null') THEN
-      set @itype := TRIM(resourceType);
+      SET @itype := TRIM(resourceType);
     END IF;
   END IF;
   
-  set @iselTypeA := '=''';
-  set @iselTypeB := '''';
+  SET @iselTypeA := '=''';
+  SET @iselTypeB := '''';
   IF selType IS NOT NULL THEN
     IF selType = 'NOT' THEN
-      set @iselTypeA := ' NOT IN ';
-      set @iselTypeB := '';
-    ELSEIF selType = 'IN' THEN
-      set @iselTypeA := ' IN ';
-      set @iselTypeB := '';
+      SET @iselTypeA := ' NOT IN ';
+      SET @iselTypeB := '';
+    ELSE IF selType = 'IN' THEN
+      SET @iselTypeA := ' IN ';
+      SET @iselTypeB := '';
     END IF;
   END IF;
 
-  set @iVOs := '';
-  set @rVOs := '';
+  SET @iVOs := '';
+  SET @rVOs := '';
   IF VOs IS NOT NULL THEN
     IF (TRIM(VOs) != '') AND (TRIM(VOs) != 'null') THEN
-      set @iVOs := concat_ws('', 'and VOProbeSummary.VOName', @iselTypeA, '',TRIM(VOs), @iselTypeB, '');
-      set @rVOs := concat_ws('', 'and V.VOName', @iselTypeA, '',TRIM(VOs), @iselTypeB, '');
+      SET @iVOs := CONCAT_WS('', 'AND VOProbeSummary.VOName', @iselTypeA, '', TRIM(VOs), @iselTypeB, '');
+      SET @rVOs := CONCAT_WS('', 'AND V.VOName', @iselTypeA, '', TRIM(VOs), @iselTypeB, '');
     END IF;
   END IF;
 
-  set @iSites := '';
-  set @rSites := '';
+  SET @iSites := '';
+  SET @rSites := '';
   IF Sites IS NOT NULL THEN
     IF (TRIM(Sites) != '') AND (TRIM(Sites) != 'null') THEN
-      set @iSites := concat_ws('', 'and Site.SiteName', @iselTypeA, '',TRIM(Sites), @iselTypeB, '');
-      set @rSites := concat_ws('', 'and S.SiteName', @iselTypeA, '',TRIM(Sites), @iselTypeB, '');
+      SET @iSites := CONCAT_WS('', 'AND Site.SiteName', @iselTypeA, '', TRIM(Sites), @iselTypeB, '');
+      SET @rSites := CONCAT_WS('', 'AND S.SiteName', @iselTypeA, '', TRIM(Sites), @iselTypeB, '');
     END IF;
   END IF;
 
-  set @iProbes := '';
-  set @rProbes := '';
+  SET @iProbes := '';
+  SET @rProbes := '';
   IF Probes IS NOT NULL THEN
     IF (TRIM(Probes) != '') AND (TRIM(Probes) != 'null') THEN
-      set @iProbes := concat_ws('', 'and VOProbeSummary.ProbeName', @iselTypeA, '',TRIM(Probes), @iselTypeB, '');
-      set @rProbes := concat_ws('', 'and P.ProbeName', @iselTypeA, '',TRIM(Probes), @iselTypeB, '');
+      SET @iProbes := CONCAT_WS('', 'AND VOProbeSummary.ProbeName', @iselTypeA, '', TRIM(Probes), @iselTypeB, '');
+      SET @rProbes := CONCAT_WS('', 'AND P.ProbeName', @iselTypeA, '', TRIM(Probes), @iselTypeB, '');
     END IF;
   END IF;
 
-  select generateResourceTypeClause(@itype) into @myresourceclause;
-  select SystemProplist.cdr into @usereportauthentication from SystemProplist where SystemProplist.car = 'use.report.authentication';
-  select Role.whereclause into @mywhereclause from Role where Role.role = @irole;
-  select generateWhereClause(@iuser,@irole,@mywhereclause) into @mywhereclause;
+  SELECT generateResourceTypeClause(@itype) INTO @myresourceclause;
+  SELECT SystemProplist.cdr INTO @usereportauthentication FROM SystemProplist WHERE SystemProplist.car = 'use.report.authentication';
+  SELECT Role.whereclause INTO @mywhereclause FROM Role WHERE Role.role = @irole;
+  SELECT generateWhereClause(@iuser,@irole,@mywhereclause) INTO @mywhereclause;
   call parse(@iuser,@name,@key,@vo);
 
-  set @rankfrom := '';
-  set @rankwhere := '';
-  set @final_rank := '';
+  SET @rankfrom := '';
+  SET @rankwhere := '';
+  SET @final_rank := '';
   IF Ranked IS NOT NULL THEN
     IF (TRIM(Ranked) != '') AND (TRIM(Ranked) != 'null') THEN
-      set @rankfrom := concat_ws('',
-           ' (SELECT @rank:=@rank+1 as final_rank, sitenamex, walldurationx',
-           '   FROM (SELECT @rank:=0 as rank,',
-           '      S.SiteName as sitenamex,',
-           '      V.EndTime as endtimex,',
-           '      sum(V.WallDuration)/', @iunit, ' as walldurationx',
+      SET @rankfrom := CONCAT_WS('',
+           ' (SELECT @rank:=@rank+1 AS final_rank, sitenamex, walldurationx',
+           '   FROM (SELECT @rank:=0 AS rank,',
+           '      S.SiteName AS sitenamex,',
+           '      V.EndTime AS endtimex,',
+           '      SUM(V.WallDuration)/', @iunit, ' AS walldurationx',
            '        FROM VOProbeSummary V, Site S, Probe P',
-           '        WHERE V.ProbeName = P.probename and P.siteid = S.Siteid',
-           '        and (V.EndTime) >= (''', @thisFromDate, ''')',
-           '        and (V.EndTime) <= (''', @thisToDate, ''')',
+           '        WHERE V.ProbeName = P.probename AND P.siteid = S.Siteid',
+           '        AND (V.EndTime) >= (''', @thisFromDate, ''')',
+           '        AND (V.EndTime) <= (''', @thisToDate, ''')',
            ' ', @rVOs,
            ' ', @rSites,
            ' ', @rProbes,
            '   GROUP BY sitenamex',
-           '   ORDER BY walldurationx desc) as foox) as foo', ','
+           '   ORDER BY walldurationx desc) AS foox) AS foo', ','
            );
-       set @rankwhere := ' and Site.SiteName = sitenamex';
-       set @final_rank := 'final_rank,';
+       SET @rankwhere := ' AND Site.SiteName = sitenamex';
+       SET @final_rank := 'final_rank,';
     END IF;
   END IF;
 
-  set @sql := concat_ws('',
-           ' select ', @final_rank,
-           ' Site.SiteName as SiteName,',
-           ' sum(VOProbeSummary.WallDuration)/', @iunit, ' as WallDuration,',
-           ' sum(VOProbeSummary.CpuUserDuration + VOProbeSummary.CpuSystemDuration)/', @iunit, ' as cpu,',
-           ' sum(VOProbeSummary.CpuUserDuration)/', @iunit, ' as cpuUser,',
-           ' sum(VOProbeSummary.CpuSystemDuration)/', @iunit, ' as cpuSystem,',
-           ' sum(VOProbeSummary.Njobs) as Njobs,',
-           ' VOProbeSummary.VOName as VOName,',
-           ' VOProbeSummary.CommonName as UserName,',
-           ' VOProbeSummary.ProbeName as ProbeName,',
-           ' str_to_date(date_format(VOProbeSummary.EndTime,''', @idatr, '''), ''', @idats, ''') as  DateValue',
+  SET @sql := CONCAT_WS('',
+           'SELECT ', @final_rank,
+           ' Site.SiteName AS SiteName,',
+           ' SUM(VOProbeSummary.WallDuration)/', @iunit, ' AS WallDuration,',
+           ' SUM(VOProbeSummary.CpuUserDuration + VOProbeSummary.CpuSystemDuration)/', @iunit, ' AS cpu,',
+           ' SUM(VOProbeSummary.CpuUserDuration)/', @iunit, ' AS cpuUser,',
+           ' SUM(VOProbeSummary.CpuSystemDuration)/', @iunit, ' AS cpuSystem,',
+           ' SUM(VOProbeSummary.Njobs) AS Njobs,',
+           ' VOProbeSummary.VOName AS VOName,',
+           ' VOProbeSummary.CommonName AS UserName,',
+           ' VOProbeSummary.ProbeName AS ProbeName,',
+           ' STR_TO_DATE(DATE_FORMAT(VOProbeSummary.EndTime,''', @idatr, '''), ''', @idats, ''') AS  DateValue',
            ' FROM ', @rankfrom, 'Site,Probe,VOProbeSummary',
            ' WHERE Probe.siteid = Site.siteid',
-           '    and VOProbeSummary.ProbeName = Probe.probename',
+           '    AND VOProbeSummary.ProbeName = Probe.probename',
            ' ', @rankwhere,
            ' ', @ifrom,
            ' ', @ito,
@@ -208,19 +218,37 @@ begin
            ';'
         );
 
-  select sysdate() into @query_start;
-    prepare statement from @sql;
-    execute statement;
-  select sysdate() into @query_end;
+  SELECT SYSDATE() INTO @query_start;
+  PREPARE STATEMENT FROM @sql;
+  EXECUTE STATEMENT;
+  SELECT SYSDATE() INTO @query_end;
 
-      insert into trace(procName,  userKey, userName, userRole, userVO, sqlQuery, procTime, queryTime, p1, p2, p3)
-           values(TRIM(reportName), @key,    @iuser,   @irole,   @vo,    @sql,
-           		  timediff(@query_start, @proc_start),
-    			  timediff(@query_end,   @query_start),
-    			  null, null, null);      	
+  INSERT INTO
+   trace(procName,
+         userKey,
+         userName,
+         userRole,
+         userVO,
+         sqlQuery,
+         procTime,
+         queryTime)
+  VALUES (TRIM(reportName),
+          @key,
+          @iuser,
+          @irole,
+          @vo,
+          @sql,
+          timediff(@query_start, @proc_start),
+          timediff(@query_end, @query_start));              
 
-  deallocate prepare statement;
+  DEALLOCATE PREPARE STATEMENT;
 
 END $$
 
 DELIMITER ;
+
+
+-- Local Variables:
+-- mode: sql
+-- eval: (sql-set-product 'mysql)
+-- End:
