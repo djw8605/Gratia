@@ -858,7 +858,7 @@
                     <structure>
                         <property name="position">3</property>
                         <property name="name">DateValue</property>
-                        <property name="dataType">string</property>
+                        <property name="dataType">date</property>
                     </structure>
                     <structure>
                         <property name="position">4</property>
@@ -990,7 +990,7 @@
                     <property name="position">3</property>
                     <property name="name">zDateValue</property>
                     <property name="nativeName">zDateValue</property>
-                    <property name="dataType">string</property>
+                    <property name="dataType">date</property>
                 </structure>
                 <structure>
                     <property name="position">4</property>
@@ -1081,7 +1081,7 @@
                 <structure>
                     <property name="name">DateValue</property>
                     <expression name="expression">dataSetRow["DateValue"]</expression>
-                    <property name="dataType">string</property>
+                    <property name="dataType">date</property>
                 </structure>
             </list-property>
             <property name="pageBreakInterval">50</property>
@@ -1681,7 +1681,7 @@ function beforeDrawAxisTitle( axis, label, context )
     <LegendBehavior>None</LegendBehavior>
   </Interactivity>
   <Axes>
-    <Type>Text</Type>
+    <Type>DateTime</Type>
     <Title>
       <Caption>
         <Value>X-Axis Title</Value>
