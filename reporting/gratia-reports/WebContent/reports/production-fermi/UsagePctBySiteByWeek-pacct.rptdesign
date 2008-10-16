@@ -469,7 +469,7 @@
                             <extended-item extensionName="Chart" name="NewChart" id="187">
                                 <xml-property name="xmlRepresentation"><![CDATA[<model:ChartWithAxes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:attribute="http://www.birt.eclipse.org/ChartModelAttribute" xmlns:data="http://www.birt.eclipse.org/ChartModelData" xmlns:layout="http://www.birt.eclipse.org/ChartModelLayout" xmlns:model="http://www.birt.eclipse.org/ChartModel" xmlns:type="http://www.birt.eclipse.org/ChartModelType">
   <Type>Bar Chart</Type>
-  <SubType>Side-by-side</SubType>
+  <SubType>Stacked</SubType>
   <Description>
     <Value></Value>
     <Font>
@@ -1106,7 +1106,7 @@
             <Separator>, </Separator>
           </DataPoint>
           <LabelPosition>Inside</LabelPosition>
-          <Stacked>false</Stacked>
+          <Stacked>true</Stacked>
           <Triggers>
             <Condition>onmouseover</Condition>
             <Action>
@@ -1344,7 +1344,67 @@
             <Separator>, </Separator>
           </DataPoint>
           <LabelPosition>Inside</LabelPosition>
-          <Stacked>false</Stacked>
+          <Stacked>true</Stacked>
+          <Triggers>
+            <Condition>onmouseover</Condition>
+            <Action>
+              <Type>Show_Tooltip</Type>
+              <Value xsi:type="attribute:TooltipValue">
+                <Text>row[&quot;cpuSystemBenchDays&quot;] + row[&quot;cpuUserBenchDays&quot;]</Text>
+                <Delay>200</Delay>
+              </Value>
+            </Action>
+          </Triggers>
+          <Triggers>
+            <Condition>onmouseover</Condition>
+            <Action>
+              <Type>Show_Tooltip</Type>
+              <Value xsi:type="attribute:TooltipValue">
+                <Text>row[&quot;cpuSystemBenchDays&quot;] + row[&quot;cpuUserBenchDays&quot;]</Text>
+                <Delay>200</Delay>
+              </Value>
+            </Action>
+          </Triggers>
+          <Triggers>
+            <Condition>onmouseover</Condition>
+            <Action>
+              <Type>Show_Tooltip</Type>
+              <Value xsi:type="attribute:TooltipValue">
+                <Text>row[&quot;cpuSystemBenchDays&quot;] + row[&quot;cpuUserBenchDays&quot;]</Text>
+                <Delay>200</Delay>
+              </Value>
+            </Action>
+          </Triggers>
+          <Triggers>
+            <Condition>onmouseover</Condition>
+            <Action>
+              <Type>Show_Tooltip</Type>
+              <Value xsi:type="attribute:TooltipValue">
+                <Text>row[&quot;cpuSystemBenchDays&quot;] + row[&quot;cpuUserBenchDays&quot;]</Text>
+                <Delay>200</Delay>
+              </Value>
+            </Action>
+          </Triggers>
+          <Triggers>
+            <Condition>onmouseover</Condition>
+            <Action>
+              <Type>Show_Tooltip</Type>
+              <Value xsi:type="attribute:TooltipValue">
+                <Text>row[&quot;cpuSystemBenchDays&quot;] + row[&quot;cpuUserBenchDays&quot;]</Text>
+                <Delay>200</Delay>
+              </Value>
+            </Action>
+          </Triggers>
+          <Triggers>
+            <Condition>onmouseover</Condition>
+            <Action>
+              <Type>Show_Tooltip</Type>
+              <Value xsi:type="attribute:TooltipValue">
+                <Text>row[&quot;cpuSystemBenchDays&quot;] + row[&quot;cpuUserBenchDays&quot;]</Text>
+                <Delay>200</Delay>
+              </Value>
+            </Action>
+          </Triggers>
           <Triggers>
             <Condition>onmouseover</Condition>
             <Action>
@@ -1674,7 +1734,7 @@
             <Blue>254</Blue>
           </Entries>
         </SeriesPalette>
-        <Series xsi:type="type:LineSeries">
+        <Series xsi:type="type:BarSeries">
           <Visible>false</Visible>
           <Label>
             <Caption>
@@ -1718,8 +1778,8 @@
             </Components>
             <Separator>, </Separator>
           </DataPoint>
-          <LabelPosition>Above</LabelPosition>
-          <Stacked>false</Stacked>
+          <LabelPosition>Inside</LabelPosition>
+          <Stacked>true</Stacked>
           <Triggers>
             <Condition>onmouseover</Condition>
             <Action>
@@ -1740,22 +1800,67 @@
               </Value>
             </Action>
           </Triggers>
-          <Markers>
-            <Type>Box</Type>
-            <Size>2</Size>
-            <Visible>true</Visible>
-          </Markers>
-          <LineAttributes>
-            <Style>Solid</Style>
-            <Thickness>1</Thickness>
-            <Color>
-              <Transparency>255</Transparency>
-              <Red>128</Red>
-              <Green>0</Green>
-              <Blue>128</Blue>
-            </Color>
-            <Visible>true</Visible>
-          </LineAttributes>
+          <Triggers>
+            <Condition>onmouseover</Condition>
+            <Action>
+              <Type>Show_Tooltip</Type>
+              <Value xsi:type="attribute:TooltipValue">
+                <Text>row[&quot;cpuSystemBenchDays&quot;] + row[&quot;cpuUserBenchDays&quot;]</Text>
+                <Delay>200</Delay>
+              </Value>
+            </Action>
+          </Triggers>
+          <Triggers>
+            <Condition>onmouseover</Condition>
+            <Action>
+              <Type>Show_Tooltip</Type>
+              <Value xsi:type="attribute:TooltipValue">
+                <Text>row[&quot;cpuSystemBenchDays&quot;] + row[&quot;cpuUserBenchDays&quot;]</Text>
+                <Delay>200</Delay>
+              </Value>
+            </Action>
+          </Triggers>
+          <Triggers>
+            <Condition>onmouseover</Condition>
+            <Action>
+              <Type>Show_Tooltip</Type>
+              <Value xsi:type="attribute:TooltipValue">
+                <Text>row[&quot;cpuSystemBenchDays&quot;] + row[&quot;cpuUserBenchDays&quot;]</Text>
+                <Delay>200</Delay>
+              </Value>
+            </Action>
+          </Triggers>
+          <Triggers>
+            <Condition>onmouseover</Condition>
+            <Action>
+              <Type>Show_Tooltip</Type>
+              <Value xsi:type="attribute:TooltipValue">
+                <Text>row[&quot;cpuSystemBenchDays&quot;] + row[&quot;cpuUserBenchDays&quot;]</Text>
+                <Delay>200</Delay>
+              </Value>
+            </Action>
+          </Triggers>
+          <Triggers>
+            <Condition>onmouseover</Condition>
+            <Action>
+              <Type>Show_Tooltip</Type>
+              <Value xsi:type="attribute:TooltipValue">
+                <Text>row[&quot;cpuSystemBenchDays&quot;] + row[&quot;cpuUserBenchDays&quot;]</Text>
+                <Delay>200</Delay>
+              </Value>
+            </Action>
+          </Triggers>
+          <Triggers>
+            <Condition>onmouseover</Condition>
+            <Action>
+              <Type>Show_Tooltip</Type>
+              <Value xsi:type="attribute:TooltipValue">
+                <Text>row[&quot;cpuSystemBenchDays&quot;] + row[&quot;cpuUserBenchDays&quot;]</Text>
+                <Delay>200</Delay>
+              </Value>
+            </Action>
+          </Triggers>
+          <Riser>Rectangle</Riser>
         </Series>
         <Grouping>
           <Enabled>false</Enabled>
@@ -2076,7 +2181,7 @@
             <Blue>192</Blue>
           </Entries>
         </SeriesPalette>
-        <Series xsi:type="type:LineSeries">
+        <Series xsi:type="type:BarSeries">
           <Visible>false</Visible>
           <Label>
             <Caption>
@@ -2120,8 +2225,8 @@
             </Components>
             <Separator>, </Separator>
           </DataPoint>
-          <LabelPosition>Above</LabelPosition>
-          <Stacked>false</Stacked>
+          <LabelPosition>Inside</LabelPosition>
+          <Stacked>true</Stacked>
           <Triggers>
             <Condition>onmouseover</Condition>
             <Action>
@@ -2142,22 +2247,67 @@
               </Value>
             </Action>
           </Triggers>
-          <Markers>
-            <Type>Box</Type>
-            <Size>2</Size>
-            <Visible>true</Visible>
-          </Markers>
-          <LineAttributes>
-            <Style>Solid</Style>
-            <Thickness>1</Thickness>
-            <Color>
-              <Transparency>255</Transparency>
-              <Red>0</Red>
-              <Green>0</Green>
-              <Blue>0</Blue>
-            </Color>
-            <Visible>true</Visible>
-          </LineAttributes>
+          <Triggers>
+            <Condition>onmouseover</Condition>
+            <Action>
+              <Type>Show_Tooltip</Type>
+              <Value xsi:type="attribute:TooltipValue">
+                <Text>row[&quot;cpuSystemBenchDays&quot;] + row[&quot;cpuUserBenchDays&quot;]</Text>
+                <Delay>200</Delay>
+              </Value>
+            </Action>
+          </Triggers>
+          <Triggers>
+            <Condition>onmouseover</Condition>
+            <Action>
+              <Type>Show_Tooltip</Type>
+              <Value xsi:type="attribute:TooltipValue">
+                <Text>row[&quot;cpuSystemBenchDays&quot;] + row[&quot;cpuUserBenchDays&quot;]</Text>
+                <Delay>200</Delay>
+              </Value>
+            </Action>
+          </Triggers>
+          <Triggers>
+            <Condition>onmouseover</Condition>
+            <Action>
+              <Type>Show_Tooltip</Type>
+              <Value xsi:type="attribute:TooltipValue">
+                <Text>row[&quot;cpuSystemBenchDays&quot;] + row[&quot;cpuUserBenchDays&quot;]</Text>
+                <Delay>200</Delay>
+              </Value>
+            </Action>
+          </Triggers>
+          <Triggers>
+            <Condition>onmouseover</Condition>
+            <Action>
+              <Type>Show_Tooltip</Type>
+              <Value xsi:type="attribute:TooltipValue">
+                <Text>row[&quot;cpuSystemBenchDays&quot;] + row[&quot;cpuUserBenchDays&quot;]</Text>
+                <Delay>200</Delay>
+              </Value>
+            </Action>
+          </Triggers>
+          <Triggers>
+            <Condition>onmouseover</Condition>
+            <Action>
+              <Type>Show_Tooltip</Type>
+              <Value xsi:type="attribute:TooltipValue">
+                <Text>row[&quot;cpuSystemBenchDays&quot;] + row[&quot;cpuUserBenchDays&quot;]</Text>
+                <Delay>200</Delay>
+              </Value>
+            </Action>
+          </Triggers>
+          <Triggers>
+            <Condition>onmouseover</Condition>
+            <Action>
+              <Type>Show_Tooltip</Type>
+              <Value xsi:type="attribute:TooltipValue">
+                <Text>row[&quot;cpuSystemBenchDays&quot;] + row[&quot;cpuUserBenchDays&quot;]</Text>
+                <Delay>200</Delay>
+              </Value>
+            </Action>
+          </Triggers>
+          <Riser>Rectangle</Riser>
         </Series>
         <Grouping>
           <Enabled>false</Enabled>
@@ -2667,7 +2817,37 @@
             <Separator>, </Separator>
           </DataPoint>
           <LabelPosition>Inside</LabelPosition>
-          <Stacked>false</Stacked>
+          <Stacked>true</Stacked>
+          <Triggers>
+            <Condition>onmouseover</Condition>
+            <Action>
+              <Type>Show_Tooltip</Type>
+              <Value xsi:type="attribute:TooltipValue">
+                <Text>row[&quot;cpuSystemBenchDays&quot;] + row[&quot;cpuUserBenchDays&quot;]</Text>
+                <Delay>200</Delay>
+              </Value>
+            </Action>
+          </Triggers>
+          <Triggers>
+            <Condition>onmouseover</Condition>
+            <Action>
+              <Type>Show_Tooltip</Type>
+              <Value xsi:type="attribute:TooltipValue">
+                <Text>row[&quot;cpuSystemBenchDays&quot;] + row[&quot;cpuUserBenchDays&quot;]</Text>
+                <Delay>200</Delay>
+              </Value>
+            </Action>
+          </Triggers>
+          <Triggers>
+            <Condition>onmouseover</Condition>
+            <Action>
+              <Type>Show_Tooltip</Type>
+              <Value xsi:type="attribute:TooltipValue">
+                <Text>row[&quot;cpuSystemBenchDays&quot;] + row[&quot;cpuUserBenchDays&quot;]</Text>
+                <Delay>200</Delay>
+              </Value>
+            </Action>
+          </Triggers>
           <Triggers>
             <Condition>onmouseover</Condition>
             <Action>
@@ -3320,7 +3500,67 @@
             <Separator>, </Separator>
           </DataPoint>
           <LabelPosition>Inside</LabelPosition>
-          <Stacked>false</Stacked>
+          <Stacked>true</Stacked>
+          <Triggers>
+            <Condition>onmouseover</Condition>
+            <Action>
+              <Type>Show_Tooltip</Type>
+              <Value xsi:type="attribute:TooltipValue">
+                <Text>row[&quot;cpuSystemBenchDays&quot;] + row[&quot;cpuUserBenchDays&quot;]</Text>
+                <Delay>200</Delay>
+              </Value>
+            </Action>
+          </Triggers>
+          <Triggers>
+            <Condition>onmouseover</Condition>
+            <Action>
+              <Type>Show_Tooltip</Type>
+              <Value xsi:type="attribute:TooltipValue">
+                <Text>row[&quot;cpuSystemBenchDays&quot;] + row[&quot;cpuUserBenchDays&quot;]</Text>
+                <Delay>200</Delay>
+              </Value>
+            </Action>
+          </Triggers>
+          <Triggers>
+            <Condition>onmouseover</Condition>
+            <Action>
+              <Type>Show_Tooltip</Type>
+              <Value xsi:type="attribute:TooltipValue">
+                <Text>row[&quot;cpuSystemBenchDays&quot;] + row[&quot;cpuUserBenchDays&quot;]</Text>
+                <Delay>200</Delay>
+              </Value>
+            </Action>
+          </Triggers>
+          <Triggers>
+            <Condition>onmouseover</Condition>
+            <Action>
+              <Type>Show_Tooltip</Type>
+              <Value xsi:type="attribute:TooltipValue">
+                <Text>row[&quot;cpuSystemBenchDays&quot;] + row[&quot;cpuUserBenchDays&quot;]</Text>
+                <Delay>200</Delay>
+              </Value>
+            </Action>
+          </Triggers>
+          <Triggers>
+            <Condition>onmouseover</Condition>
+            <Action>
+              <Type>Show_Tooltip</Type>
+              <Value xsi:type="attribute:TooltipValue">
+                <Text>row[&quot;cpuSystemBenchDays&quot;] + row[&quot;cpuUserBenchDays&quot;]</Text>
+                <Delay>200</Delay>
+              </Value>
+            </Action>
+          </Triggers>
+          <Triggers>
+            <Condition>onmouseover</Condition>
+            <Action>
+              <Type>Show_Tooltip</Type>
+              <Value xsi:type="attribute:TooltipValue">
+                <Text>row[&quot;cpuSystemBenchDays&quot;] + row[&quot;cpuUserBenchDays&quot;]</Text>
+                <Delay>200</Delay>
+              </Value>
+            </Action>
+          </Triggers>
           <Triggers>
             <Condition>onmouseover</Condition>
             <Action>
@@ -3747,7 +3987,7 @@
       <Detail>Date</Detail>
     </FormatSpecifier>
     <LabelPosition>Below</LabelPosition>
-    <Interval>4</Interval>
+    <Interval>1</Interval>
     <MajorGrid>
       <LineAttributes>
         <Style>Solid</Style>
