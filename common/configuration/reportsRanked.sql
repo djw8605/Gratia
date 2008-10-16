@@ -54,9 +54,9 @@ BEGIN
       ELSE
         SET @thisToDate := todate;
       END IF;
+    ELSE
+      SET @thisToDate := @thisFromDate;
     END IF;
-  ELSE
-    SET @thisToDate := @thisFromDate;
   END IF;
 
 

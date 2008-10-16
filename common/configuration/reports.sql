@@ -46,7 +46,7 @@ BEGIN
       ELSE 
         SET @thisFromDate := fromdate;
       END IF;
-      IF todate IS NULL THEN
+      IF (todate IS NULL) OR (TRIM(todate) = '') OR (TRIM(todate) = 'null') THEN
         SET @ifrom := CONCAT_WS('', 'AND VOProbeSummary.EndTime = ''', TRIM(@thisFromDate), '''');
       ELSE
         SET @ifrom := CONCAT_WS('', 'AND VOProbeSummary.EndTime >= ''', TRIM(@thisFromDate), '''');
