@@ -2206,6 +2206,12 @@ rep = icsc.getExternalContext().getScriptable();
                         <cell id="19">
                             <property name="colSpan">3</property>
                             <property name="rowSpan">1</property>
+                            <label name="ReportURL" id="430" extends="reportLibPSacct.ReportURL">
+                                <property name="textAlign">left</property>
+                            </label>
+                            <label name="ShowQuery1" id="431" extends="reportLibPSacct.ShowQuery">
+                                <property name="textAlign">left</property>
+                            </label>
                         </cell>
                     </row>
                 </footer>
@@ -2225,11 +2231,5 @@ rep = icsc.getExternalContext().getScriptable();
                 </row>
             </footer>
         </table>
-        <label name="ReportURL" id="430" extends="reportLibPSacct.ReportURL">
-            <property name="textAlign">left</property>
-        </label>
-        <label name="ShowQuery1" id="431" extends="reportLibPSacct.ShowQuery">
-            <property name="textAlign">left</property>
-        </label>
     </body>
 </report>
