@@ -165,7 +165,7 @@
                     <property name="name">groupBy</property>
                     <property name="dataType">string</property>
                     <property name="position">8</property>
-                    <expression name="defaultValue">'SiteName,  DateValue, HostDescription'</expression>
+                    <expression name="defaultValue">'SiteName, DateValue, BenchmarkScore'</expression>
                     <property name="isInput">true</property>
                     <property name="isOutput">false</property>
                 </structure>
@@ -173,7 +173,7 @@
                     <property name="name">orderBy</property>
                     <property name="dataType">string</property>
                     <property name="position">9</property>
-                    <expression name="defaultValue">'SiteName,  DateValue'</expression>
+                    <expression name="defaultValue">'SiteName, DateValue, BenchmarkScore'</expression>
                     <property name="isInput">true</property>
                     <property name="isOutput">false</property>
                 </structure>
