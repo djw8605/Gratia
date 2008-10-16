@@ -4,6 +4,10 @@
 PROD_MAILTO="osg-accounting-info@fnal.gov"
 WEBLOC="http://gratia-osg.fnal.gov:8880/gratia-reporting"
 SUM_WEBLOC="http://gratia-osg.fnal.gov:8884/gratia-reporting"
+VOREPORT_CONFIG="voreports.debug.config"
+
+(( mailOverride = 0 ))
+(( production = 0 ))
 
 while test "x$1" != "x"; do
    if [ "$1" == "--help" ]; then 
@@ -14,8 +18,11 @@ while test "x$1" != "x"; do
 	shift
    elif [ "$1" == "--production" ]; then
 	MAILTO=$PROD_MAILTO
+        VOREPORT_CONFIG="voreports.production.config"
+        (( production = 1 ))
 	shift
    elif [ "$1" == "--mail" ]; then
+        (( mailOverride = 1 ))
 	MAILTO=$2
 	shift
 	shift
@@ -68,14 +75,16 @@ sendto ./dailyStatus  $whenarg ${WORK_DIR}/status_report "$STATUS_MAIL_MSG"
 sendto "./dailyStatus --groupby=VO"  $whenarg ${WORK_DIR}/vo_status_report "$VO_STATUS_MAIL_MSG"
 sendto "./dailyStatus --groupby=Both"  $whenarg ${WORK_DIR}/vo_status_report "$BOTH_STATUS_MAIL_MSG"
 
-grep -v '^#' voreports.config | while read line; do
+grep -v '^#' $VOREPORT_CONFIG | while read line; do
     MYVO=`echo $line | cut -d\  -f1`
-    export EMAIL1=`echo $line | cut -d\  -f2`
-    export EMAIL_CC=`echo $line | cut -d\  -f3-`
-    if [ "x$EMAIL_CC" == "x" ]; then
-       export MAILTO=$EMAIL1
-    else 
-       export MAILTO="-c \"$EMAIL_CC\" $EMAIL1"
+    if (( $mailOverride == 0 )) && (( $production > 0 )); then
+       export EMAIL1=`echo $line | cut -d\  -f2`
+       export EMAIL_CC=`echo $line | cut -d\  -f3-`
+       if [ "x$EMAIL_CC" == "x" ]; then
+          export MAILTO=$EMAIL1
+       else 
+          export MAILTO="-c \"$EMAIL_CC\" $EMAIL1"
+       fi
     fi
     sendto "./dailyForVO --voname=${MYVO}"   $whenarg ${WORK_DIR}/forvo "${VO_MAIL_MSG}${MYVO}"
 done 

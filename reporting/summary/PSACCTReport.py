@@ -5,7 +5,7 @@
 #
 # library to create simple report using the Gratia psacct database
 #
-#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.40 2008-10-14 16:55:14 pcanal Exp $
+#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.41 2008-10-16 21:49:36 pcanal Exp $
 
 import time
 import datetime
@@ -611,8 +611,7 @@ class DailySiteJobStatusConf:
     num_header = 1
     formats = {}
     lines = {}
-    col1 = "All sites"
-    col2 = ""
+    totalheaders = ["All sites"]
     CondorSpecial = False
     GroupBy = "Site.SiteName"
     Both = False
@@ -631,15 +630,14 @@ class DailySiteJobStatusConf:
            if (groupby == "VO"):
                self.GroupBy = "VO.VOName"
                self.headers = ("VO","Wall Succ. Rate","Wall Success","Wall Failed","Success Rate","Success","Failed")
-               self.col1 = "All VOs"
+               self.totalheaders = ["All VOs"]
            elif (groupby == "Both"):
                self.formats["csv"] = ",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""
                self.formats["text"] = "| %-22s | %-22s | %14s | %12s | %11s | %12s | %10s | %10s "
                self.lines["text"] = "---------------------------------------------------------------------------------------------------------------------------------------------"
                self.GroupBy = "Site.SiteName,VO.VOName"
                self.headers = ("Site","VO","Wall Succ Rate","Wall Success","Wall Failed","Success Rate","Success","Failed")
-               self.col1 = "All Sites"
-               self.col2 = "All VOs"
+               self.totalheaders = ["All Sites","All VOs"]
                self.Both = True
            elif (groupby == "ForVO"):
                self.GroupBy = "Site.SiteName"
@@ -678,7 +676,7 @@ class DailySiteReportConf:
         num_header = 1
         formats = {}
         lines = {}
-        col1 = "All sites"
+        totalheaders = ("All sites")
 
         def __init__(self, header = False):
            self.formats["csv"] = ",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""
@@ -699,7 +697,7 @@ class DailyVOReportConf:
         num_header = 1
         formats = {}
         lines = {}
-        col1 = "All VOs"
+        totalheaders = ("All VOs")
 
         def __init__(self, header = False):
            self.formats["csv"] = ",%s,\"%s\",\"%s\",\"%s\",\"%s\""
@@ -720,8 +718,7 @@ class DailySiteVOReportConf:
         formats = {}
         lines = {}
         select = "=="
-        col1 = "All sites"
-        col2 = "All VOs"
+        totalheaders = ("All sites", "All VOs")
         
         def __init__(self, header = False):
            self.formats["csv"] = ",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""
@@ -742,8 +739,7 @@ class DailyVOSiteReportConf:
         formats = {}
         lines = {}
         select = "=="
-        col1 = "All sites"
-        col2 = "All VOs"
+        totalheaders = ("All sites","All VOs")
         
         def __init__(self, header = False):
            self.formats["csv"] = ",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""
@@ -765,9 +761,8 @@ class DailySiteVOReportFromDailyConf:
         lines = {}
         select = "=="
         count = "sum(NJobs)"
-        col1 = "All sites"
-        col2 = "All VOs"
-
+        totalheaders = ("All sites","All VOs")
+        
         def __init__(self, fromGratia, header = False):
            self.formats["csv"] = ",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""
            self.formats["text"] = " | %-22s | %-9s | %9s | %13s | %10s | %14s"
@@ -794,8 +789,7 @@ class DailyVOSiteReportFromDailyConf:
         lines = {}
         select = "=="
         count = "sum(NJobs)"
-        col1 = "All sites"
-        col2 = "All VOs"
+        totalheaders = ("All sites","All VOs")
 
         def __init__(self, fromGratia, header = False):
            self.formats["csv"] = ",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""
@@ -937,9 +931,9 @@ def GenericDailyStatus(what, when = datetime.date.today(), output = "text"):
                 else:
                    totalwrate = totalsuccess*100/totaljobs
                 if (what.Both):
-                    print "    ", what.formats[output] % ( what.col1, what.col2, str(totalwrate) + " %", niceNum(totalws),niceNum(totalwf), str(totalsuccess*100/totaljobs) + " %", totalsuccess,totalfailed)
+                    print "    ", what.formats[output] % ( what.totalheaders[0], what.totalheaders[1], str(totalwrate) + " %", niceNum(totalws),niceNum(totalwf), str(totalsuccess*100/totaljobs) + " %", totalsuccess,totalfailed)
                 else:
-                    print "    ", what.formats[output] % ( what.col1, str(totalwrate) + " %", niceNum(totalws),niceNum(totalwf), str(totalsuccess*100/totaljobs) + " %", totalsuccess,totalfailed)
+                    print "    ", what.formats[output] % ( what.totalheaders[0], str(totalwrate) + " %", niceNum(totalws),niceNum(totalwf), str(totalsuccess*100/totaljobs) + " %", totalsuccess,totalfailed)
                 print what.lines[output]
 
         return result
@@ -1037,9 +1031,9 @@ def GenericDaily(what, when = datetime.date.today(), output = "text"):
         if (output != "None") :
                 print what.lines[output]
                 if (num_header == 2) :
-                    print "    ",what.formats[output] % (what.col1, what.col2, niceNum(totaljobs), niceNum(totalwall), niceNum(totaljobs-oldnjobs), niceNum(totalwall-oldwall))
+                    print "    ",what.formats[output] % (what.totalheaders[0], what.totalheaders[1], niceNum(totaljobs), niceNum(totalwall), niceNum(totaljobs-oldnjobs), niceNum(totalwall-oldwall))
                 else:
-                    print "    ",what.formats[output] % (what.col1, niceNum(totaljobs), niceNum(totalwall), niceNum(totaljobs-oldnjobs), niceNum(totalwall-oldwall))
+                    print "    ",what.formats[output] % (what.totalheaders[0], niceNum(totaljobs), niceNum(totalwall), niceNum(totaljobs-oldnjobs), niceNum(totalwall-oldwall))
                 print what.lines[output]
         return result
 
@@ -1222,14 +1216,14 @@ FROM VOProbeSummary U where
     
 def UserSiteReportData(begin, end, with_panda = False, selection = ""):
     select = """
-SELECT CommonName, SiteName, sum(NJobs), sum(WallDuration) as Wall
+SELECT CommonName, VOName, SiteName, sum(NJobs), sum(WallDuration) as Wall
 FROM VOProbeSummary U, Probe P, Site S where
     EndTime >= \"""" + DateTimeToString(begin) + """\" and
     EndTime < \"""" + DateTimeToString(end) + """\" and
     U.ProbeName = P.ProbeName and P.siteid = S.siteid 
     and CommonName != \"unknown\"
     """ + selection + """
-    group by CommonName, SiteName
+    group by CommonName, SiteName, VOName
 """
     return RunQueryAndSplit(select)
 
@@ -1246,7 +1240,7 @@ Deltas are the differences with the previous period."""
     num_header = 1
     formats = {}
     lines = {}
-    col1 = "All VOs"
+    totalheaders = ["All VOs"]
     defaultSort = True
 
     def __init__(self, header = False, with_panda = False):
@@ -1273,7 +1267,7 @@ Deltas are the differences with the previous period."""
     num_header = 1
     formats = {}
     lines = {}
-    col1 = "All sites"
+    totalheaders = ["All sites"]
     defaultSort = True
 
     def __init__(self, header = False, with_panda = False):
@@ -1300,8 +1294,7 @@ Deltas are the differences with the previous period."""
     num_header = 2
     formats = {}
     lines = {}
-    col1 = "All sites"    
-    col2 = "All VOs"    
+    totalheaders = ["All sites","All VOs"]
     defaultSort = True
 
     def __init__(self, header = False, with_panda = False):
@@ -1328,8 +1321,7 @@ Deltas are the differences with the previous period."""
     num_header = 2
     formats = {}
     lines = {}
-    col1 = "All VOs"    
-    col2 = "All sites"    
+    totalheaders = ["All VOs","All sites"]
     defaultSort = True
 
     def __init__(self, header = False, with_panda = False):
@@ -1356,16 +1348,15 @@ Deltas are the differences with the previous period."""
     num_header = 2
     formats = {}
     lines = {}
-    col1 = "All VOs"    
-    col2 = "All Users"    
+    totalheaders = ["All VOs", "All Users"]
     defaultSort = False
     ExtraSelect = ""
 
     def __init__(self, header = False, with_panda = False, selectVOName = ""):
         self.formats["csv"] = ",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""
-        self.formats["text"] = "| %-14s | %-30s | %9s | %13s | %10s | %14s"
+        self.formats["text"] = "| %-14s | %-35s | %9s | %13s | %10s | %14s"
         self.lines["csv"] = ""
-        self.lines["text"] = "-----------------------------------------------------------------------------------------------------------------"
+        self.lines["text"] = "----------------------------------------------------------------------------------------------------------------------"
         if (not header) :  self.title = ""
         self.with_panda = with_panda
         if (len(selectVOName)>0):
@@ -1374,51 +1365,9 @@ Deltas are the differences with the previous period."""
     def GetData(self, start,end):
         l = UserReportData(start, end, self.with_panda, self.ExtraSelect)
         r = []
-        for x in l:
-            (vo,user,njobs,wall) = x.split('\t')
-            user = user[0:30]
-            r.append( vo + '\t' + user + '\t' + njobs + '\t' + wall )
-        return r
-
-    def Sorting(self, x,y):
-        xval = (x[1])[1]
-        yval = (y[1])[1]
-        return cmp(yval,xval)
-
-class RangeUserSiteReportConf:
-    title = """\
-OSG usage summary for  %s - %s (midnight UTC - midnight UTC)
-including all jobs that finished in that time period.
-Wall Duration is expressed in hours and rounded to the nearest hour. Wall
-Duration is the duration between the instant the job started running
-and the instant the job ended its execution.
-Deltas are the differences with the previous period."""
-    headline = "For all jobs finished between %s and %s (midnight UTC)"
-    headers = ("User", "Site", "# of Jobs", "Wall Duration", "Delta jobs", "Delta duration")
-    num_header = 2
-    formats = {}
-    lines = {}
-    col1 = "All VOs"    
-    col2 = "All Users"    
-    defaultSort = False
-    ExtraSelect = ""
-
-    def __init__(self, header = False, with_panda = False, selectVOName = ""):
-        self.formats["csv"] = ",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""
-        self.formats["text"] = "| %-35s | %-19s | %9s | %13s | %10s | %14s"
-        self.lines["csv"] = ""
-        self.lines["text"] = "---------------------------------------------------------------------------------------------------------------------------"
-        if (not header) :  self.title = ""
-        self.with_panda = with_panda
-        if (len(selectVOName)>0):
-            self.ExtraSelect = " and VOName = \""+selectVOName+"\" "
-
-    def GetData(self, start,end):
-        l = UserSiteReportData(start, end, self.with_panda, self.ExtraSelect)
-        r = []
         maxlen = 35
         for x in l:
-            (user,site,njobs,wall) = x.split('\t')
+            (vo,user,njobs,wall) = x.split('\t')
             if ( not user.startswith("Generic") ):
                pos = user.find("/CN=cron/");
                if ( pos >= 0) : user = user[pos+8:maxlen+pos+8]
@@ -1430,13 +1379,88 @@ Deltas are the differences with the previous period."""
                   user = user[2:maxlen+2]
                else :
                   user = user[0:maxlen]
-               r.append( user + '\t' + site + '\t' + njobs + '\t' + wall )
+               r.append( vo + '\t' + user + '\t' + njobs + '\t' + wall )
         return r
 
     def Sorting(self, x,y):
-        xval = x[0].lower()
-        yval = y[0].lower()
-        return cmp(xval,yval)
+        # decreasing order of WallDuration
+        xval = (x[1])[1]
+        yval = (y[1])[1]
+        res = cmp(yval,xval)
+        # dercreasing order of njobs
+        if (res==0) :
+           print x
+           print y
+           xval = (x[1])[0]
+           yval = (y[1])[0]
+           res = cmp(yval,xval)
+           print res
+        if (res==0) :
+           # If the values are equal, sort on the user vo then the username
+           xval = (x[0])[0].lower()
+           yval = (y[0])[0].lower()
+           res = cmp(xval,yval)
+        if (res==0) : 
+           xval = (x[0])[1].lower()
+           yval = (y[0])[1].lower()
+           res = cmp(xval,yval)
+        return res
+
+class RangeUserSiteReportConf:
+    title = """\
+OSG usage summary for  %s - %s (midnight UTC - midnight UTC)
+including all jobs that finished in that time period.
+Wall Duration is expressed in hours and rounded to the nearest hour. Wall
+Duration is the duration between the instant the job started running
+and the instant the job ended its execution.
+Deltas are the differences with the previous period."""
+    headline = "For all jobs finished between %s and %s (midnight UTC)"
+    headers = ("User", "VO", "Site", "# of Jobs", "Wall Duration", "Delta jobs", "Delta duration")
+    num_header = 3
+    formats = {}
+    lines = {}
+    totalheaders = ["All Users","All VOs","All Sites"]
+    defaultSort = False
+    ExtraSelect = ""
+
+    def __init__(self, header = False, with_panda = False, selectVOName = ""):
+        self.formats["csv"] = ",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""
+        self.formats["text"] = "| %-35s | %-14s | %-19s | %9s | %13s | %10s | %14s"
+        self.lines["csv"] = ""
+        self.lines["text"] = "-------------------------------------------------------------------------------------------------------------------------------------------"
+        if (not header) :  self.title = ""
+        self.with_panda = with_panda
+        if (len(selectVOName)>0):
+            self.ExtraSelect = " and VOName = \""+selectVOName+"\" "
+
+    def GetData(self, start,end):
+        l = UserSiteReportData(start, end, self.with_panda, self.ExtraSelect)
+        r = []
+        maxlen = 35
+        for x in l:
+            (user,vo,site,njobs,wall) = x.split('\t')
+            if ( not user.startswith("Generic") ):
+               pos = user.find("/CN=cron/");
+               if ( pos >= 0) : user = user[pos+8:maxlen+pos+8]
+               pat1 = re.compile("/CN=[0-9]*/");
+               user = pat1.sub("/",user);
+               pat2 = re.compile("/CN=");
+               user = pat2.sub("; ",user);
+               if ( user.startswith("; ") ):
+                  user = user[2:maxlen+2]
+               else :
+                  user = user[0:maxlen]
+               r.append( user + '\t' + vo + '\t' + site + '\t' + njobs + '\t' + wall )
+        return r
+
+    def Sorting(self, x,y):
+        res = 0;
+        for index in range(0,len(x[0])):
+           if (res==0):
+              xval = x[0][index].lower()
+              yval = y[0][index].lower()
+              res = cmp(xval,yval)
+        return res
 
 class LongJobsConf:
     title = """\
@@ -1451,8 +1475,7 @@ Only jobs that last 7 days or longer are counted in this report.
     num_header = 2
     formats = {}
     lines = {}
-    col1 = "All VOs"    
-    col2 = "All sites"    
+    totalheaders = ["All VOs","All sites"]
 
     def __init__(self, header = False, with_panda = False):
         self.formats["csv"] = ",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""
@@ -1478,8 +1501,7 @@ Deltas are the differences with the previous period."""
         num_header = 2
         formats = {}
         lines = {}
-        col1 = "All sites"    
-        col2 = "All VOs"
+        totalheaders = ["All sites","All VOs"]
         defaultSort = True
 
         def __init__(self, header = False):
@@ -1506,8 +1528,7 @@ Deltas are the differences with the previous period."""
         num_header = 1
         formats = {}
         lines = {}
-        col2 = "All sites"    
-        col1 = "All VOs"
+        totalheaders = ["All VOs"]
         defaultSort = True
 
         def __init__(self, header = False):
@@ -1537,7 +1558,7 @@ Efficiency is the ratio of Cpu Duration used over the WallDuration."""
         num_header = 1
         formats = {}
         lines = {}
-        col2 = "All VOs"
+        totalheaders = ["All VOs"]
         defaultSort = True
 
         def __init__(self, header = False):
@@ -1637,39 +1658,39 @@ def GenericRange(what, range_end = datetime.date.today(),
     for i in range (0,len(lines)):
         val = lines[i].split('\t')
         offset = 0
-        site = val[0]
+        
+        lkeys = ["","",""]
+        for iheaders in range(0,what.num_header):
+           lkeys[iheaders] = val[iheaders]
+
         if what.headers[0] == "VO":
             # "site" is really "VO": hack to harmonize Panda output
-            if site != "unknown": site = string.lower(site)
-            if site == "atlas": site = "usatlas"
-        key = site
-        vo = ""
-
-        num_header = what.num_header;
-        offset = num_header - 1;
+            if lkeys[0] != "unknown": lkeys[0] = string.lower(lkeys[0])
+            if lkeys[0] == "atlas": lkeys[0] = "usatlas"
 
         if (len(val)==4) :
             # Nasty hack to harmonize Panda output
             if what.headers[1] == "VO":
-               if vo != "unknown": vo = string.lower(val[1])
-               if vo == "atlas": vo = "usatlas"
-            else:
-		        vo = val[1]
-            key = site + " " + vo
-        elif (num_header == 2) :
-            vo = val[1]
-            key = site + " " + vo
+               if lkeys[1] != "unknown": lkeys[1] = string.lower(lkeys[1])
+               if lkeys[1] == "atlas": lkeys[1] = "usatlas"
+
+        #for iheaders in range(1,len(keys)):
+        #   key = key + keys[iheaders] + " "
+        keys = tuple(lkeys)
+        
+        num_header = what.num_header;
+        offset = num_header - 1;
 
         njobs= string.atoi( val[offset+1] )
         wall = string.atof( val[offset+2] ) / factor
         totalwall = totalwall + wall
         totaljobs = totaljobs + njobs
-        if (oldValues.has_key(key)):
-            oldValues[key][0] += njobs
-            oldValues[key][1] += wall
+        if (oldValues.has_key(keys)):
+            oldValues[keys][0] += njobs
+            oldValues[keys][1] += wall
         else:
-            oldValues[key] = [njobs,wall,site,vo]
-    oldValues["total"] = (totaljobs, totalwall, "total","")
+            oldValues[keys] = [njobs,wall]
+    oldValues[("total","","")] = (totaljobs, totalwall)
 
     # Then getting the current information and print it
     totalwall = 0
@@ -1682,76 +1703,78 @@ def GenericRange(what, range_end = datetime.date.today(),
     printValues = {}
     for i in range (0,len(lines)):
         val = lines[i].split('\t')
-        site = val[0]
+
+        lkeys = ["","",""]
+        for iheaders in range(0,what.num_header):
+           lkeys[iheaders] = val[iheaders]
+
         if what.headers[0] == "VO":
             # "site" is really "VO": hack to harmonize Panda output
-            if site != "unknown": site = string.lower(site)
-            if site == "atlas": site = "usatlas"
-        key = site
-        offset = 0
-
-        num_header = what.num_header;
-        offset = num_header - 1;
+            if lkeys[0] != "unknown": lkeys[0] = string.lower(lkeys[0])
+            if lkeys[0] == "atlas": lkeys[0] = "usatlas"
 
         if (len(val)==4) :
             # Nasty hack to harmonize Panda output
             if what.headers[1] == "VO":
-	           if vo != "unknown": vo = string.lower(val[1])
-	           if vo == "atlas": vo = "usatlas"
-            else:
-		        vo = val[1]
-            key = site + " " + vo
-        elif (num_header == 2) :
-            vo = val[1]
-            key = site + " " + vo
-        
+               if lkeys[1] != "unknown": lkeys[1] = string.lower(lkeys[1])
+               if lkeys[1] == "atlas": lkeys[1] = "usatlas"
+
+#        for iheaders in range(0,len(keys)):
+#           key = key + keys[iheaders] + " "
+        keys = tuple( lkeys )
+
+        num_header = what.num_header;
+        offset = num_header - 1;
+
         (oldnjobs,oldwall) = (0,0)
-        if oldValues.has_key(key):
-            (oldnjobs,oldwall,s,v) = oldValues[key]
-            del oldValues[key]
+        if oldValues.has_key(keys):
+            (oldnjobs,oldwall) = oldValues[keys]
+            del oldValues[keys]
         njobs= string.atoi( val[offset+1] )
         wall = string.atof( val[offset+2] ) / factor
         totalwall = totalwall + wall
         totaljobs = totaljobs + njobs
-        if printValues.has_key(key):
-            printValues[key][0] += njobs
-            printValues[key][1] += wall
+        if printValues.has_key(keys):
+            printValues[keys][0] += njobs
+            printValues[keys][1] += wall
         else:
-            printValues[key] = [njobs,wall,oldnjobs,oldwall,site,vo]
+            printValues[keys] = [njobs,wall,oldnjobs,oldwall]
                 
-    for key,(oldnjobs,oldwall,site,vo) in oldValues.iteritems():            
-        if (key != "total") :
-            printValues[key] = (0,0,oldnjobs,oldwall,site,vo)
+    for key,(oldnjobs,oldwall) in oldValues.iteritems():            
+        if (key[0] != "total") :
+            printValues[key] = (0,0,oldnjobs,oldwall)
 
     if (what.defaultSort):
         sortedValues = sortedDictValues(printValues)
     else:
         sortedValues = sortedDictValuesFunc(printValues,what.Sorting)
         
-    for key,(njobs,wall,oldnjobs,oldwall,site,vo) in sortedValues:
+    for key,(njobs,wall,oldnjobs,oldwall) in sortedValues:
         index = index + 1;
-        if (num_header == 2) :
-            values = (site,vo,niceNum(njobs), niceNum(wall),
-                      niceNum(njobs-oldnjobs),niceNum(wall-oldwall))
-        else:
-            values = (site,niceNum(njobs), niceNum(wall),
-                      niceNum(njobs-oldnjobs),niceNum(wall-oldwall))
+        printedvalues = []
+        for iheaders in range(0,num_header):
+           printedvalues.append( key[iheaders] )
+        printedvalues.append( niceNum(njobs) )
+        printedvalues.append( niceNum(wall) )
+        printedvalues.append( niceNum(njobs-oldnjobs) )
+        printedvalues.append( niceNum(wall-oldwall) )
+        
         if (output != "None") :
-            print "%3d " %(index), what.formats[output] % values
-        result.append(values)       
+            print "%3d " %(index), what.formats[output] % tuple(printedvalues)
+        result.append(tuple(printedvalues))       
                 
-    (oldnjobs,oldwall,s,v) = oldValues["total"]
+    (oldnjobs,oldwall) = oldValues[("total","","")]
     if (output != "None") :
         print what.lines[output]
-        if (num_header == 2) :
-            print "    ", what.formats[output] % \
-                  (what.col1, what.col2, niceNum(totaljobs),
-                   niceNum(totalwall), niceNum(totaljobs-oldnjobs),
-                   niceNum(totalwall-oldwall))
-        else:
-            print "    ", what.formats[output] % \
-                  (what.col1, niceNum(totaljobs), niceNum(totalwall),
-                   niceNum(totaljobs-oldnjobs), niceNum(totalwall-oldwall))
+        printedvalues = []
+        for iheaders in range(0,num_header):
+           printedvalues.append( what.totalheaders[iheaders] )
+        printedvalues.append( niceNum(totaljobs) )
+        printedvalues.append( niceNum(totalwall) )
+        printedvalues.append( niceNum(totaljobs-oldnjobs) )
+        printedvalues.append( niceNum(totalwall-oldwall) )
+        
+        print "    ", what.formats[output] % tuple(printedvalues)
         print what.lines[output]
     return result
 
@@ -1946,12 +1969,12 @@ def EfficiencyRange(what, range_end = datetime.date.today(),
         print what.lines[output]
         if (num_header == 2) :
             print "    ", what.formats[output] % \
-                  (what.col1, what.col2, niceNum(totaljobs),
+                  (what.totalheaders[0], what.totalheaders[1], niceNum(totaljobs),
                    niceNum(totalwall), niceNum( totaleff * 100.0, 0.1 ),
                    niceNum( 100.0* (totaleff- oldeff), 0.1 ) )
         else:
             print "    ", what.formats[output] % \
-                  (what.col1, niceNum(totaljobs), niceNum(totalwall),
+                  (what.totalheaders[0], niceNum(totaljobs), niceNum(totalwall),
                     niceNum( totaleff / nrecords * 100.0 ),
                    niceNum( 100.0* (totaleff - oldeff) ))
         print what.lines[output]
