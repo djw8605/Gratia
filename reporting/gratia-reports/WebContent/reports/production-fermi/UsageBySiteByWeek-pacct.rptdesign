@@ -175,7 +175,7 @@
                     <property name="name">orderBy</property>
                     <property name="dataType">string</property>
                     <property name="position">9</property>
-                    <expression name="defaultValue">'SiteName,  DateValue'</expression>
+                    <expression name="defaultValue">'SiteName,  DateValue, HostDescription'</expression>
                     <property name="isInput">true</property>
                     <property name="isOutput">false</property>
                 </structure>
@@ -2176,6 +2176,8 @@ rep = icsc.getExternalContext().getScriptable();
                         <cell id="19">
                             <property name="colSpan">3</property>
                             <property name="rowSpan">1</property>
+                            <label name="ReportURL" id="403" extends="reportLibPSacct.ReportURL"/>
+                            <label name="ShowQuery" id="404" extends="reportLibPSacct.ShowQuery"/>
                         </cell>
                     </row>
                 </footer>
@@ -2195,7 +2197,5 @@ rep = icsc.getExternalContext().getScriptable();
                 </row>
             </footer>
         </table>
-        <label name="ReportURL" id="403" extends="reportLibPSacct.ReportURL"/>
-        <label name="ShowQuery" id="404" extends="reportLibPSacct.ShowQuery"/>
     </body>
 </report>
