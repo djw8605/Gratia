@@ -43,9 +43,15 @@ begin
       if @testDate IS NOT NULL THEN
         select  date_format(@testDate, '%Y-%m-%d') into @thisFromDate;
       end if;
-      set @ifrom := concat_ws('','and VOProbeSummary.EndTIme >=''', TRIM(@thisFromDate), '''');
-      set @ifromV := concat_ws('','and V.EndTIme >=''', TRIM(@thisFromDate), '''');
-      set @ifromN := concat_ws('','and N.EndTIme >=''', TRIM(@thisFromDate), '''');
+      IF (todate IS NULL) OR (TRIM(todate) = '') OR (TRIM(todate) = 'null') THEN
+        SET @ifrom := CONCAT_WS('', 'AND VOProbeSummary.EndTime = ''', TRIM(@thisFromDate), '''');
+        SET @ifromV := concat_ws('','AND V.EndTIme = ''', TRIM(@thisFromDate), '''');
+        SET @ifromN := concat_ws('','AND N.EndTIme = ''', TRIM(@thisFromDate), '''');
+      ELSE
+        SET @ifrom := CONCAT_WS('', 'AND VOProbeSummary.EndTime >= ''', TRIM(@thisFromDate), '''');
+        SET @ifromV := concat_ws('','AND V.EndTIme >= ''', TRIM(@thisFromDate), '''');
+        SET @ifromN := concat_ws('','AND N.EndTIme >= ''', TRIM(@thisFromDate), '''');
+      END IF;
     END IF;
   END IF;
   set @ito := '';
