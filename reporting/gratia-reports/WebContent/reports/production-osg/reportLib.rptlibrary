@@ -481,7 +481,7 @@ else{"All VO's"}</expression>
             <property name="style">sans-style1</property>
             <property name="fontSize">9pt</property>
             <property name="textAlign">center</property>
-            <expression name="valueExpr">"Week: "+params["StartDate"]</expression>
+            <expression name="valueExpr">"Week of: "+params["StartDate"]</expression>
             <property name="contentType">html</property>
         </text-data>
         <text-data name="SelectSites" id="401">
