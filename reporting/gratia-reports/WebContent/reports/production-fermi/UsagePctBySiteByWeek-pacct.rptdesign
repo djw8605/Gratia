@@ -4068,6 +4068,12 @@
                         <cell id="19">
                             <property name="colSpan">3</property>
                             <property name="rowSpan">1</property>
+                            <label name="ReportURL" id="415" extends="reportLibPSacct.ReportURL">
+                                <property name="textAlign">left</property>
+                            </label>
+                            <label name="ShowQuery" id="416" extends="reportLibPSacct.ShowQuery">
+                                <property name="textAlign">left</property>
+                            </label>
                         </cell>
                     </row>
                 </footer>
@@ -4087,11 +4093,5 @@
                 </row>
             </footer>
         </table>
-        <label name="ReportURL" id="415" extends="reportLibPSacct.ReportURL">
-            <property name="textAlign">left</property>
-        </label>
-        <label name="ShowQuery" id="416" extends="reportLibPSacct.ShowQuery">
-            <property name="textAlign">left</property>
-        </label>
     </body>
 </report>
