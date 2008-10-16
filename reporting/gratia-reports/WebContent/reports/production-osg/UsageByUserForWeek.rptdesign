@@ -158,7 +158,7 @@
                     <property name="name">groupBy</property>
                     <property name="dataType">string</property>
                     <property name="position">7</property>
-                    <expression name="defaultValue">'UserName, VOName, DateValue'</expression>
+                    <expression name="defaultValue">'UserName, SiteName, VOName, DateValue'</expression>
                     <property name="isInput">true</property>
                     <property name="isOutput">false</property>
                 </structure>
