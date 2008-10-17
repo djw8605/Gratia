@@ -1,7 +1,7 @@
 <StaticReports>
 	<StaticReportGroup name="Reports">
-		<reportItem name="Usage By VO By Date"   link="checkDateParameters.jsp?__report=[ReportsFolder]UsageByVOByDate-ranked.rptdesign&amp;__format=ppt&amp;DisplayMetric=WallDuration&amp;GroupsPerChart=10&amp;ReportTitle=Usage+by+VO&amp;IntervalDays=30"/>
-		<reportItem name="Usage By Site By Date" link="checkDateParameters.jsp?__report=[ReportsFolder]UsageBySiteByDate-ranked.rptdesign&amp;__format=ppt&amp;DisplayMetric=WallDuration&amp;GroupsPerChart=10&amp;ReportTitle=Usage+by+Site&amp;IntervalDays=30"/>
+		<reportItem name="Usage By VO By Date"   link="checkDateParameters.jsp?__report=[ReportsFolder]UsageByVOByDate-ranked.rptdesign&amp;__format=ppt&amp;DisplayMetric=WallDuration&amp;GroupsPerChart=10&amp;ReportTitle=Usage+by+VO&amp;IntervalDays=30&amp;SelType=IN&amp;SelectVOs=ALL"/>
+		<reportItem name="Usage By Site By Date" link="checkDateParameters.jsp?__report=[ReportsFolder]UsageBySiteByDate-ranked.rptdesign&amp;__format=ppt&amp;DisplayMetric=WallDuration&amp;GroupsPerChart=10&amp;ReportTitle=Usage+by+Site&amp;IntervalDays=30&amp;SelType=IN&amp;mySites=%20ALL&amp;SelectSites=ALL"/>
 		<reportItem name="Weekly Usage By VO"    link="checkDateParameters.jsp?__report=[ReportsFolder]WeeklyUsageByVO-ranked.rptdesign&amp;__format=ppt&amp;ReportTitle=Six+Month+History+Usage+by+VO&amp;GroupsPerChart=10&amp;DisplayMetric=WallDuration"/>
 		<!-- <reportItem name="2007 Usage for All VOs" link="checkDateParameters.jsp?__report=[ReportsFolder]2007WeeklyUsageByVO-ranked.rptdesign&amp;__format=ppt&amp;DisplayMetric=WallDuration&amp;ReportTitle=2007+Usage+for+All+VOs"/> -->
 		<csvItem name="Last 12 Months" link="createCsvReport.jsp?_dateRange=12-month&amp;_timeUnit=day&amp;_dateGrouping=month&amp;_csvFile=[csvFileName]"/>
