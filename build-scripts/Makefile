@@ -360,6 +360,7 @@ reports:
 	cp -p ${reports}/WebContent/reports/production-osg/*.rptdesign            war/reports
 	-cp -p ${reports}/WebContent/reports/production-osg/*.rptlibrary war/reports
 	-cp -p ${reports}/WebContent/reports/production-fermi/*.rptlibrary war/reports
+	-cp -p ${reports}/WebContent/reports/production-osgdaily/*.rptlibrary war/reports
 	cp -p ${reports}/WebContent/reports/production-osgdaily/*.rptdesign            war/reports
 	cp -p ${reports}/WebContent/reports/production-fermi/*.rptdesign      war/reports
 	${copy_util_lib}
