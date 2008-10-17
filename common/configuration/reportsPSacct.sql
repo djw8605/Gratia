@@ -1,24 +1,25 @@
 DELIMITER $$
 
 DROP PROCEDURE IF EXISTS `reportsPSacct` $$
-CREATE PROCEDURE `reportsPSacct`(
-                userName varchar(64), 
-                userRole varchar(64),
-                fromdate varchar(64), 
-                todate varchar(64),
-                dateGrouping varchar(64),
-                timeUnit varchar(64), 
-                scaleUnit varchar(64),
-                groupBy varchar(128), 
-                orderBy varchar(128),
-                resourceType varchar(64),
-                VOs varchar(1024),
-                Sites varchar(1024),
-                queryType varchar(10),
-                reportName varchar(64)
-                )
-    READS SQL DATA
+CREATE PROCEDURE `reportsPSacct`
+(
+ userName varchar(64), 
+ userRole varchar(64),
+ fromdate varchar(64), 
+ todate varchar(64),
+ dateGrouping varchar(64),
+ timeUnit varchar(64), 
+ scaleUnit varchar(64),
+ groupBy varchar(128), 
+ orderBy varchar(128),
+ resourceType varchar(64),
+ VOs varchar(1024),
+ Sites varchar(1024),
+ queryType varchar(10),
+ reportName varchar(64)
+) READS SQL DATA
 BEGIN
+
   SELECT sysdate() INTO @proc_start;
   SET @iuser := concat_ws('','GratiaUser|', UNIX_TIMESTAMP(), '|Unknown');
   IF userName IS NOT NULL THEN
@@ -33,6 +34,28 @@ BEGIN
     END IF;
   END IF;
 
+  SET @idatr := '%Y-%m-%d';
+  SET @idats := '%Y-%m-%d';
+  SET @igroup := 'day';
+  IF dateGrouping IS NOT NULL THEN
+    IF (TRIM(dateGrouping) != '') AND (TRIM(dateGrouping) != 'null') THEN
+      SET @igroup := LOWER(TRIM(dateGrouping));
+      IF STRCMP(@igroup, 'day') = 0 THEN
+        SET @idatr := '%Y-%m-%d';
+        SET @idats := '%Y-%m-%d';
+      ELSEIF STRCMP(@igroup, 'week') = 0 THEN
+        SET @idatr := '%x-%v Monday';
+        SET @idats := '%x-%v %W';
+      ELSEIF STRCMP(@igroup, 'month') = 0  THEN
+        SET @idatr := '%Y-%m-01';
+        SET @idats := '%Y-%m-%d';
+      ELSEIF STRCMP(@igroup, 'year') = 0  THEN
+        SET @idatr := '%Y-01-01';
+        SET @idats := '%Y-%m-%d';
+      END IF;
+    END IF;
+  END IF;
+
   SET @ifrom := '';
   SET @ifromV := '';
   SET @ifromN := '';
@@ -44,9 +67,15 @@ BEGIN
         SELECT  DATE_FORMAT(@testDate, '%Y-%m-%d') INTO @thisFromDate;
       end if;
       IF (todate IS NULL) OR (TRIM(todate) = '') OR (TRIM(todate) = 'null') THEN
-        SET @ifrom := CONCAT_WS('', 'AND VOProbeSummary.EndTime = ''', TRIM(@thisFromDate), '''');
-        SET @ifromV := concat_ws('','AND V.EndTIme = ''', TRIM(@thisFromDate), '''');
-        SET @ifromN := concat_ws('','AND N.EndTIme = ''', TRIM(@thisFromDate), '''');
+        IF STRCMP(@igroup, 'day') = 0 THEN
+            SET @ifrom := CONCAT_WS('', 'AND VOProbeSummary.EndTime = ''', TRIM(@thisFromDate), '''');
+            SET @ifromV := concat_ws('','AND V.EndTIme = ''', TRIM(@thisFromDate), '''');
+            SET @ifromN := concat_ws('','AND N.EndTIme = ''', TRIM(@thisFromDate), '''');
+        ELSE
+            SET @ifrom := CONCAT_WS('', 'AND STR_TO_DATE(DATE_FORMAT(VOProbeSummary.EndTime,''', @idatr, '''), ''', @idats, ''') = ''', TRIM(@thisFromDate), '''');
+            SET @ifromV := concat_ws('','AND STR_TO_DATE(DATE_FORMAT(V.EndTIme,''', @idatr, '''), ''', @idats, ''') = ''', TRIM(@thisFromDate), '''');
+            SET @ifromN := concat_ws('','AND STR_TO_DATE(DATE_FORMAT(N.EndTIme,''', @idatr, '''), ''', @idats, ''') = ''', TRIM(@thisFromDate), '''');
+        END IF;
       ELSE
         SET @ifrom := CONCAT_WS('', 'AND VOProbeSummary.EndTime >= ''', TRIM(@thisFromDate), '''');
         SET @ifromV := concat_ws('','AND V.EndTIme >= ''', TRIM(@thisFromDate), '''');
@@ -54,6 +83,7 @@ BEGIN
       END IF;
     END IF;
   END IF;
+
   SET @ito := '';
   SET @itoV := '';
   SET @itoN := '';
@@ -69,27 +99,7 @@ BEGIN
       SET @itoN := concat_ws('','and N.EndTime <= ''', TRIM(@thisToDate),'''');
     END IF;
   END IF;
-  SET @idatr := '%Y-%m-%d';
-  SET @idats := '%Y-%m-%d';
-  SET @igroup := 'day';
-  IF dateGrouping IS NOT NULL THEN
-    IF (TRIM(dateGrouping) != '') AND (LOWER(TRIM(dateGrouping)) != 'null') THEN
-      SET @igroup := TRIM(dateGrouping);
-      IF STRCMP(LOWER(TRIM(dateGrouping)), 'day') = 0 THEN
-        SET @idatr := '%Y-%m-%d';
-        SET @idats := '%Y-%m-%d';
-      ELSEIF STRCMP(LOWER(TRIM(dateGrouping)),'week') = 0 THEN
-        SET @idatr := '%x-%v Monday';
-        SET @idats := '%x-%v %W';
-      ELSEIF STRCMP(LOWER(TRIM(dateGrouping)), 'month') = 0  THEN
-        SET @idatr := '%Y-%m-01';
-        SET @idats := '%Y-%m-%d';
-      ELSEIF STRCMP(LOWER(TRIM(dateGrouping)), 'year') = 0  THEN
-        SET @idatr := '%Y-01-01';
-        SET @idats := '%Y-%m-%d';
-      END IF;
-    END IF;
-  END IF;
+
   SET @iVOs := '';
   SET @rVOs := '';
   IF VOs IS NOT NULL THEN
@@ -98,6 +108,7 @@ BEGIN
       SET @rVOs := concat_ws('', ' and V.VOName = ''',TRIM(VOs), '''');
     END IF;
   END IF;
+
   SET @iSites := '';
   SET @rSites := '';
   IF Sites IS NOT NULL THEN
@@ -106,12 +117,14 @@ BEGIN
       SET @rSites := concat_ws('', 'and S.SiteName = ''', TRIM(Sites), '''');
     END IF;
   END IF;
+
   SET @iscale := '1';
   IF scaleUnit IS NOT NULL THEN
     IF (TRIM(scaleUnit) != '') AND (LOWER(TRIM(scaleUnit)) != 'null') THEN
       SET @iscale := TRIM(scaleUnit);
     END IF;
   END IF;
+
   SET @iunit := '3600';
     IF timeUnit IS NOT NULL THEN
     IF (TRIM(timeUnit) != '') AND (LOWER(TRIM(timeUnit)) != 'null') THEN
@@ -127,18 +140,21 @@ BEGIN
       SET @iquery := TRIM(queryType);
     END IF;
   END IF;
+
   SET @igroupBy := 'GROUP BY DateValue, SiteName,  VOName';
   IF groupBy IS NOT NULL THEN
     IF (TRIM(groupBy) != '') AND (LOWER(TRIM(groupBy)) != 'null') THEN
       SET @igroupBy := concat_ws('', 'GROUP BY ', TRIM(groupBy));
     END IF;
   END IF;
+
   SET @iorderBy := 'order by DateValue';
   IF orderBy IS NOT NULL THEN
     IF (TRIM(orderBy) != '') AND (LOWER(TRIM(orderBy)) != 'null') THEN
       SET @iorderBy := concat_ws('', 'order by ', TRIM(orderBy));
     END IF;
   END IF;
+
   SET @itype := 'RawCPU';
   IF resourceType IS NOT NULL THEN
     IF (TRIM(resourceType) != '') AND (LOWER(TRIM(resourceType)) != 'null') THEN
