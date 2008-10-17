@@ -36,6 +36,28 @@ BEGIN
     END IF;
   END IF;
 
+  SET @idatr := '%Y-%m-%d';
+  SET @idats := '%Y-%m-%d';
+  SET @igroup := 'day';
+  IF dateGrouping IS NOT NULL THEN
+    IF (TRIM(dateGrouping) != '') AND (TRIM(dateGrouping) != 'null') THEN
+      SET @igroup := LOWER(TRIM(dateGrouping));
+      IF STRCMP(@igroup, 'day') = 0 THEN
+        SET @idatr := '%Y-%m-%d';
+        SET @idats := '%Y-%m-%d';
+      ELSEIF STRCMP(@igroup, 'week') = 0 THEN
+        SET @idatr := '%x-%v Monday';
+        SET @idats := '%x-%v %W';
+      ELSEIF STRCMP(@igroup, 'month') = 0  THEN
+        SET @idatr := '%Y-%m-01';
+        SET @idats := '%Y-%m-%d';
+      ELSEIF STRCMP(@igroup, 'year') = 0  THEN
+        SET @idatr := '%Y-01-01';
+        SET @idats := '%Y-%m-%d';
+      END IF;
+    END IF;
+  END IF;
+
   SET @thisFromDate := ''; 
   SET @ifrom := CONCAT_WS('', 'AND VOProbeSummary.EndTime >= ''', SUBDATE(CURDATE(), 800),'''');
   IF fromdate IS NOT NULL THEN
@@ -43,11 +65,15 @@ BEGIN
       SELECT STR_TO_DATE(fromdate, '%M %e, %Y') into @testDate;
       IF @testDate IS NOT NULL THEN
         SELECT DATE_FORMAT(@testDate, '%Y-%m-%d') into @thisFromDate;
-      ELSE 
+      ELSE
         SET @thisFromDate := fromdate;
       END IF;
       IF (todate IS NULL) OR (TRIM(todate) = '') OR (TRIM(todate) = 'null') THEN
-        SET @ifrom := CONCAT_WS('', 'AND VOProbeSummary.EndTime = ''', TRIM(@thisFromDate), '''');
+        IF STRCMP(@igroup, 'day') = 0 THEN
+        	SET @ifrom := CONCAT_WS('', 'AND VOProbeSummary.EndTime = ''', TRIM(@thisFromDate), '''');
+        ELSE
+        	SET @ifrom := CONCAT_WS('', 'AND STR_TO_DATE(DATE_FORMAT(VOProbeSummary.EndTime,''', @idatr, '''), ''', @idats, ''') = ''', TRIM(@thisFromDate), '''');
+        END IF;
       ELSE
         SET @ifrom := CONCAT_WS('', 'AND VOProbeSummary.EndTime >= ''', TRIM(@thisFromDate), '''');
       END IF;
@@ -72,29 +98,6 @@ BEGIN
   IF timeUnit IS NOT NULL THEN
     IF (TRIM(timeUnit) != '') AND (TRIM(timeUnit) != 'null') THEN
       SET @iunit := TRIM(timeUnit);
-    END IF;
-  END IF;
-
-
-  SET @idatr := '%Y-%m-%d';
-  SET @idats := '%Y-%m-%d';
-  SET @igroup := 'day';
-  IF dateGrouping IS NOT NULL THEN
-    IF (TRIM(dateGrouping) != '') AND (TRIM(dateGrouping) != 'null') THEN
-      SET @igroup := TRIM(dateGrouping);
-      IF STRCMP(LOWER(TRIM(dateGrouping)), 'day') = 0 THEN
-        SET @idatr := '%Y-%m-%d';
-        SET @idats := '%Y-%m-%d';
-      ELSEIF STRCMP(LOWER(TRIM(dateGrouping)), 'week') = 0 THEN
-        SET @idatr := '%x-%v Monday';
-        SET @idats := '%x-%v %W';
-      ELSEIF STRCMP(LOWER(TRIM(dateGrouping)), 'month') = 0  THEN
-        SET @idatr := '%Y-%m-01';
-        SET @idats := '%Y-%m-%d';
-      ELSEIF STRCMP(LOWER(TRIM(dateGrouping)), 'year') = 0  THEN
-        SET @idatr := '%Y-01-01';
-        SET @idats := '%Y-%m-%d';
-      END IF;
     END IF;
   END IF;
 
@@ -246,9 +249,3 @@ BEGIN
 END $$
 
 DELIMITER ;
-
-
--- Local Variables:
--- mode: sql
--- eval: (sql-set-product 'mysql)
--- End:
