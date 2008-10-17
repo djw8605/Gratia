@@ -2188,6 +2188,8 @@ function beforeGeneration(chart, icsc)
                         <cell id="19">
                             <property name="colSpan">3</property>
                             <property name="rowSpan">1</property>
+                            <label name="ReportURL" id="460" extends="reportLibPSacct.ReportURL"/>
+                            <label name="ShowQuery" id="461" extends="reportLibPSacct.ShowQuery"/>
                         </cell>
                     </row>
                 </footer>
@@ -2207,7 +2209,5 @@ function beforeGeneration(chart, icsc)
                 </row>
             </footer>
         </table>
-        <label name="ReportURL" id="460" extends="reportLibPSacct.ReportURL"/>
-        <label name="ShowQuery" id="461" extends="reportLibPSacct.ShowQuery"/>
     </body>
 </report>
