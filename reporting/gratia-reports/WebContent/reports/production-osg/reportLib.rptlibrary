@@ -110,7 +110,7 @@
                 </scalar-parameter>
                 <scalar-parameter name="EndDate" id="19">
                     <property name="hidden">false</property>
-                    <text-property name="helpText">Only jobs that finished before this date will be included</text-property>
+                    <text-property name="helpText">Only jobs that finished before or on this date will be included</text-property>
                     <property name="valueType">static</property>
                     <property name="dataType">string</property>
                     <property name="paramType">simple</property>
