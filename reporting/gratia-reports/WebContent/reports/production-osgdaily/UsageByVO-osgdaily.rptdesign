@@ -219,8 +219,8 @@
                 </scalar-parameter>
             </parameters>
         </parameter-group>
-        <parameter-group name="DateRange" id="118" extends="gratia-lib1.DateRange"/>
-        <parameter-group name="ReportInfo" id="119" extends="gratia-lib1.ReportInfo"/>
+        <parameter-group name="DateRange" id="118" extends="reportLib.DateRange"/>
+        <parameter-group name="ReportInfo" id="119" extends="reportLib.ReportInfo"/>
     </parameters>
     <data-sources>
         <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="fermigrid1" id="4">
@@ -1657,6 +1657,6 @@ else {&#xD;
             </list-property>
             <property name="style">sans-style1</property>
         </extended-item>
-        <label name="ReportURL" id="390" extends="gratia-lib1.ReportURL"/>
+        <label name="ReportURL" id="390" extends="reportLib.ReportURL"/>
     </body>
 </report>
