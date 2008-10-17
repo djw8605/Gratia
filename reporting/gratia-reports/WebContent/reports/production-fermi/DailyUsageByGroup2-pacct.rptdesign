@@ -874,7 +874,7 @@ function beforeGeneration(chart, icsc)
             &lt;expression name=&quot;expression&quot;>params[&quot;EndDate&quot;]&lt;/expression>
         &lt;/structure>
         &lt;structure>
-            &lt;property name=&quot;paramName&quot;>ForSiteName&lt;/property>
+            &lt;property name=&quot;paramName&quot;>Sites&lt;/property>
             &lt;expression name=&quot;expression&quot;>params[&quot;SelectSiteName&quot;]&lt;/expression>
         &lt;/structure>
         &lt;structure>
@@ -1514,7 +1514,7 @@ function beforeGeneration(chart, icsc)
                         <expression name="expression">params["EndDate"]</expression>
                     </structure>
                     <structure>
-                        <property name="paramName">ForSiteName</property>
+                        <property name="paramName">Sites</property>
                         <expression name="expression">params["SelectSiteName"]</expression>
                     </structure>
                     <structure>
