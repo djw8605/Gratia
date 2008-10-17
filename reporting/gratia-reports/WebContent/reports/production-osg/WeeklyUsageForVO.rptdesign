@@ -1070,6 +1070,10 @@
                     <property name="paramName">reportName</property>
                     <expression name="expression">params["ReportName"].value</expression>
                 </structure>
+                <structure>
+                    <property name="paramName">VOs</property>
+                    <expression name="expression">params["VOs"].value</expression>
+                </structure>
             </list-property>
             <list-property name="boundDataColumns">
                 <structure>
