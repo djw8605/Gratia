@@ -1764,9 +1764,8 @@ function beforeGeneration(chart, icsc)
       </Insets>
       <Visible>true</Visible>
     </Label>
-    <FormatSpecifier xsi:type="attribute:DateFormatSpecifier">
-      <Type>Medium</Type>
-      <Detail>Date</Detail>
+    <FormatSpecifier xsi:type="attribute:JavaDateFormatSpecifier">
+      <Pattern>MMM YYYY</Pattern>
     </FormatSpecifier>
     <LabelPosition>Below</LabelPosition>
     <MajorGrid>
@@ -1821,6 +1820,7 @@ function beforeGeneration(chart, icsc)
     </MinorGrid>
     <Scale>
       <MinorGridsPerUnit>5</MinorGridsPerUnit>
+      <ShowOutside>false</ShowOutside>
     </Scale>
     <Origin>
       <Type>Min</Type>
