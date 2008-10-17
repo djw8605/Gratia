@@ -26,8 +26,8 @@
     <property name="eventHandlerClass">net.sf.gratia.reporting.GratiaBirtReportEH</property>
     <list-property name="libraries">
         <structure>
-            <property name="fileName">reportLib.rptlibrary</property>
-            <property name="namespace">reportLib</property>
+            <property name="fileName">gratia-lib1.rptlibrary</property>
+            <property name="namespace">gratia-lib1</property>
         </structure>
     </list-property>
     <list-property name="configVars">
@@ -115,11 +115,11 @@
                 </structure>
             </list-property>
         </scalar-parameter>
-        <parameter-group name="Formatting" id="116" extends="reportLib.Formatting"/>
-        <parameter-group name="UserInfo" id="117" extends="reportLib.UserInfo"/>
-        <parameter-group name="ReportInfo" id="118" extends="reportLib.ReportInfo"/>
-        <parameter-group name="DateRange" id="390" extends="reportLib.DateRange"/>
-        <parameter-group name="Metrics" id="393" extends="reportLib.Metrics"/>
+        <parameter-group name="Formatting" id="116" extends="gratia-lib1.Formatting"/>
+        <parameter-group name="UserInfo" id="117" extends="gratia-lib1.UserInfo"/>
+        <parameter-group name="ReportInfo" id="118" extends="gratia-lib1.ReportInfo"/>
+        <parameter-group name="DateRange" id="390" extends="gratia-lib1.DateRange"/>
+        <parameter-group name="Metrics" id="393" extends="gratia-lib1.Metrics"/>
         <scalar-parameter name="SelectVOs" id="106">
             <text-property name="helpText">Select VO's to include/exclude in the report.</text-property>
             <property name="valueType">static</property>
