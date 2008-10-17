@@ -317,6 +317,14 @@ reporting: birt-reporting
 	rm -f war/$(birtwarFile)
 	rm -f war/test.rptdesign
 	rm -f war/test1.rptdesign
+	# --- edit the web.xml for timezone configuration ---
+	tmp=`mktemp $${TMPDIR:-/tmp}/gratia-build.XXXXXXXXXX`; \
+	[[ -n "$$tmp" ]] || exit 1; \
+	trap "[[ -n \"$$tmp\" ]] && rm -f \"$$tmp\"" EXIT; \
+	perl -we 'use strict; my $$seen_par; my $$par = "BIRT_VIEWER_TIMEZONE"; my $$val = "GMT"; while (<>) { m&<param-name>\Q$$par\E</param-name>& and $$seen_par = 1; $$seen_par and s&<param-value>.*&<param-value>$$val</param-value>& and undef $$seen_par; print }' war/WEB-INF/web.xml > "$$tmp"; \
+        (( $$? == 0 )) || exit 1; \
+	cp -p war/WEB-INF/web.xml war/WEB-INF/web.xml.old; \
+	cat "$$tmp" > war/WEB-INF/web.xml;
 	# --- copy in needed libraries ---
 	cp -p $(target)/gratiaReporting.jar                    war/WEB-INF/lib/.
 	cp -p $(target)/gratiaReporting.jar                    war/scriptlib/.
