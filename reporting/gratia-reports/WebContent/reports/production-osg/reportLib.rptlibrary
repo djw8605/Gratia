@@ -427,7 +427,7 @@ else{"All VO's"}</expression>
             <property name="fontFamily">sans-serif</property>
             <property name="fontSize">9pt</property>
             <property name="textAlign">center</property>
-            <expression name="valueExpr">"Date:  " + params["StartDate"].substring(0,10)</expression>
+            <expression name="valueExpr">"Date:  " + params["StartDate"].value</expression>
             <property name="contentType">html</property>
         </text-data>
         <label name="ShowQuery" id="122">
