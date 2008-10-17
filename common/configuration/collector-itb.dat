@@ -43,6 +43,8 @@
    collector_host => "gratia02.fnal.gov",
    UserConfig => "UserConfig_pacct.xml",
    staticReports => 0,
+   max_perm_size => "256m",
+   max_heap_size => "1024m",
    "properties.attributes" =>
    {
     "gratia.database.useJobUsageSiteName" => 1,
