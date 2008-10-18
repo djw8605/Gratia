@@ -279,7 +279,7 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 				selectMultiple = "multiple";
 				selected = "";
 				onchangeFunction = "addVOs(this.form); getURL();";
-				sql = "select distinct VO.VOName from VO join VONameCorrection VC on (VO.void = VC.void) order by VOName";
+				sql = "select ' ALL' as VOName from VO union select distinct VO.VOName from VO join VONameCorrection VC on (VO.void = VC.void) order by VOName";
 			}
 			else if (paramName.trim().equalsIgnoreCase("SelectSites"))
 			{
@@ -288,7 +288,7 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 				selectMultiple = "multiple";
 				selected = "";
 				onchangeFunction = "addSites(this.form); getURL();";
-				sql = "select Site.SiteName as sitename from Site order by sitename";
+				sql = "select ' ALL' as sitename from Site union select Site.SiteName as sitename from Site order by sitename";
 			}
 			else if (paramName.trim().equalsIgnoreCase("SelectProbes"))
 			{
@@ -297,7 +297,7 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 				selectMultiple = "multiple";
 				selected = "";
 				onchangeFunction = "addProbes(this.form); getURL();";
-				sql = "select 'All' as probename from CEProbes union select CEProbes.probename as probename from CEProbes order by probename";
+				sql = "select ' ALL' as probename from CEProbes union select CEProbes.probename as probename from CEProbes order by probename";
 			}
 			else if (paramName.trim().equalsIgnoreCase("SelectVOName"))
 			{
@@ -309,7 +309,7 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 			}
 			else if (paramName.trim().equalsIgnoreCase("SelectProbeName"))
 			{
-				sql = "select 'All' as probename from CEProbes union select CEProbes.probename as probename from CEProbes order by probename";
+				sql = "select CEProbes.probename as probename from CEProbes order by probename";
 			}
 			%>
 			<tr>
@@ -325,10 +325,6 @@ for(int i=0; i < reportParameters.getParamGroups().size(); i++)
 					selectedItems = "ALL";
 					displayReport = "true";
 				}
-				%>
-				<option value=" ALL" <%= selected %> >--- Select ALL --- </option>
-			<%
-
 			// Execute the sql statement
 			Connection con = null;
 			Statement statement = null;
