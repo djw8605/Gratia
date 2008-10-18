@@ -1074,6 +1074,14 @@
                     <property name="paramName">VOs</property>
                     <expression name="expression">params["VOs"].value</expression>
                 </structure>
+                <structure>
+                    <property name="paramName">StartDate</property>
+                    <expression name="expression">params["StartDate"].value</expression>
+                </structure>
+                <structure>
+                    <property name="paramName">EndDate</property>
+                    <expression name="expression">params["EndDate"].value</expression>
+                </structure>
             </list-property>
             <list-property name="boundDataColumns">
                 <structure>
