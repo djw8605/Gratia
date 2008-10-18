@@ -1,5 +1,6 @@
 package net.sf.gratia.services;
 
+import net.sf.gratia.services.Duration.*;
 import net.sf.gratia.util.Configuration;
 import net.sf.gratia.util.Execute;
 import net.sf.gratia.util.Logging;
@@ -326,7 +327,7 @@ public class CollectorService implements ServletContextListener {
             // start a thread to recheck history directories every 6 hours
             //
 
-            HistoryMonitor historyMonitor = new HistoryMonitor();
+            HistoryMonitor historyMonitor = new HistoryMonitor(p);
             historyMonitor.start();
 
             //
@@ -731,13 +732,32 @@ public class CollectorService implements ServletContextListener {
     }
 
     public class HistoryMonitor extends Thread {
-        public HistoryMonitor() {
+
+        private Duration checkInterval;
+        private static final int defaultCheckIntervalHours = 6;
+
+        public HistoryMonitor(Properties p) {
+            try {
+                checkInterval =
+                    new Duration(p.getProperty("maintain.history.checkInterval",
+                                               defaultCheckIntervalHours +
+                                               " h"), DurationUnit.HOUR);
+            }
+            catch (DurationParseException e) {
+                Logging.warning("HistoryMonitor: caught exception " +
+                                "parsing maintain.history.checkInterval property", e);
+                checkInterval = new Duration(defaultCheckIntervalHours, DurationUnit.HOUR);
+            }
+
         }
 
         public void run() {
             while (true) {
                 try {
-                    Thread.sleep(6 * 60 * 60 * 1000);
+                    long checkInterval = this.checkInterval.msFromDate(new java.util.Date());
+                    Logging.debug("HistoryMonitor: going to sleep for " +
+                                  checkInterval + "ms.");
+                    Thread.sleep(checkInterval);
                     new HistoryReaper();
                 }
                 catch (Exception ignore) {

@@ -16,6 +16,7 @@
    max_heap_size => "1024m",
    "properties.attributes" =>
    {
+    "maintain.history.checkInterval" => '4 h',
     "maintain.history.log" => 7,
     "monitor.listener.wait" => 60,
     "service.listener.threads" => 1,

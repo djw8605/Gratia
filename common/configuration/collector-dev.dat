@@ -94,6 +94,7 @@
               "gratia.service.safeStart" => 0,
               "service.logging.useLog4j" => 1,
               "maintain.history.log" => 2,
+              "maintain.history.checkInterval" => "2 h",
               "monitor.listener.wait" => 240,
 #              "service.rmiservlet.level" => "FINEST",
               "service.service.level" => 'FINEST',
