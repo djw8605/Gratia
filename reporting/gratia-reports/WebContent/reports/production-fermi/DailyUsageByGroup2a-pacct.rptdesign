@@ -1249,6 +1249,10 @@ function beforeGeneration(chart, icsc)&#xD;
                     <property name="paramName">UserRole</property>
                     <expression name="expression">params["UserRole"].value</expression>
                 </structure>
+                <structure>
+                    <property name="paramName">reportName</property>
+                    <expression name="expression">params["ReportName"].value</expression>
+                </structure>
             </list-property>
             <list-property name="boundDataColumns">
                 <structure>
