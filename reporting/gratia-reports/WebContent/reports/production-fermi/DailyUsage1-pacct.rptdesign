@@ -138,7 +138,7 @@
                     <property name="name">dateGrouping</property>
                     <property name="dataType">string</property>
                     <property name="position">5</property>
-                    <expression name="defaultValue">'month'</expression>
+                    <expression name="defaultValue">'day'</expression>
                     <property name="isInput">true</property>
                     <property name="isOutput">false</property>
                 </structure>
@@ -1142,7 +1142,7 @@ function beforeGeneration(chart, icsc)
           <Stacked>false</Stacked>
           <Markers>
             <Type>Box</Type>
-            <Size>4</Size>
+            <Size>1</Size>
             <Visible>true</Visible>
           </Markers>
           <LineAttributes>
