@@ -1557,7 +1557,7 @@ rep = icsc.getExternalContext().getScriptable();
             <Blue>106</Blue>
           </Entries>
         </SeriesPalette>
-        <Series xsi:type="type:BarSeries">
+        <Series xsi:type="type:LineSeries">
           <Visible>true</Visible>
           <Label>
             <Caption>
@@ -1601,8 +1601,8 @@ rep = icsc.getExternalContext().getScriptable();
             </Components>
             <Separator>, </Separator>
           </DataPoint>
-          <LabelPosition>Inside</LabelPosition>
-          <Stacked>true</Stacked>
+          <LabelPosition>Above</LabelPosition>
+          <Stacked>false</Stacked>
           <Triggers>
             <Condition>onmouseover</Condition>
             <Action>
@@ -1643,7 +1643,23 @@ rep = icsc.getExternalContext().getScriptable();
               </Value>
             </Action>
           </Triggers>
-          <Riser>Rectangle</Riser>
+          <Markers>
+            <Type>Circle</Type>
+            <Size>3</Size>
+            <Visible>true</Visible>
+          </Markers>
+          <LineAttributes>
+            <Style>Solid</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>true</Visible>
+          </LineAttributes>
+          <PaletteLineColor>true</PaletteLineColor>
         </Series>
         <Grouping>
           <Enabled>false</Enabled>
@@ -1820,7 +1836,7 @@ rep = icsc.getExternalContext().getScriptable();
             <Blue>102</Blue>
           </Entries>
         </SeriesPalette>
-        <Series xsi:type="type:BarSeries">
+        <Series xsi:type="type:LineSeries">
           <Visible>true</Visible>
           <Label>
             <Caption>
@@ -1864,8 +1880,8 @@ rep = icsc.getExternalContext().getScriptable();
             </Components>
             <Separator>, </Separator>
           </DataPoint>
-          <LabelPosition>Inside</LabelPosition>
-          <Stacked>true</Stacked>
+          <LabelPosition>Above</LabelPosition>
+          <Stacked>false</Stacked>
           <Triggers>
             <Condition>onmouseover</Condition>
             <Action>
@@ -1906,7 +1922,23 @@ rep = icsc.getExternalContext().getScriptable();
               </Value>
             </Action>
           </Triggers>
-          <Riser>Rectangle</Riser>
+          <Markers>
+            <Type>Triangle</Type>
+            <Size>3</Size>
+            <Visible>true</Visible>
+          </Markers>
+          <LineAttributes>
+            <Style>Dashed</Style>
+            <Thickness>1</Thickness>
+            <Color>
+              <Transparency>255</Transparency>
+              <Red>0</Red>
+              <Green>0</Green>
+              <Blue>0</Blue>
+            </Color>
+            <Visible>true</Visible>
+          </LineAttributes>
+          <PaletteLineColor>true</PaletteLineColor>
         </Series>
         <Grouping>
           <Enabled>false</Enabled>
