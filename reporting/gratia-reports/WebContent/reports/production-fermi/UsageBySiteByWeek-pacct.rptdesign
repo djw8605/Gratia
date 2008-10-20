@@ -1316,7 +1316,7 @@ rep = icsc.getExternalContext().getScriptable();
             </Components>
             <Separator>, </Separator>
           </DataPoint>
-          <LabelPosition>Inside</LabelPosition>
+          <LabelPosition>Outside</LabelPosition>
           <Stacked>true</Stacked>
           <Riser>Rectangle</Riser>
         </Series>
