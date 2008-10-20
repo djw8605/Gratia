@@ -17,11 +17,11 @@ import java.util.List;
 import java.util.Properties;
 import java.util.TimeZone;
 import javax.servlet.*;
-import javax.management.MBeanServerConnection;
-import javax.management.ObjectName;
-import javax.management.remote.JMXConnector;
-import javax.management.remote.JMXConnectorFactory;
-import javax.management.remote.JMXServiceURL;
+//import javax.management.MBeanServerConnection;
+//import javax.management.ObjectName;
+//import javax.management.remote.JMXConnector;
+//import javax.management.remote.JMXConnectorFactory;
+//import javax.management.remote.JMXServiceURL;
 import net.sf.gratia.storage.DatabaseMaintenance;
 
 import org.hibernate.HibernateException;
@@ -410,7 +410,12 @@ public class CollectorService implements ServletContextListener {
         //
 
         startReplicationService();
-
+       
+        // Let's restart the reporting service to make sure that BIRT is getting the timezone
+        // specified in its web.xml. (During the regular tomcat start this seems to be over-ridden by something else)
+        String reporting_service_name = "Catalina:j2eeType=WebModule,name=//localhost/gratia-reporting,J2EEApplication=none,J2EEServer=none";
+        QSizeMonitor.servletCommand(reporting_service_name,"stop",true);
+        QSizeMonitor.servletCommand(reporting_service_name,"start",true);
     }
 
     public synchronized Boolean operationsDisabled() {

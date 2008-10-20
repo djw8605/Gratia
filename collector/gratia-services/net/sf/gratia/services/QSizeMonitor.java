@@ -84,16 +84,16 @@ public class QSizeMonitor extends Thread {
         }
     }
 
+    final String bean_servlets = "Catalina:j2eeType=WebModule,name=//localhost/gratia-servlets,J2EEApplication=none,J2EEServer=none";
     void startServlet() {
-        servletCommand("start");
+        servletCommand(bean_servlets,"start",false);
     }
 
     void stopServlet() {
-        servletCommand("stop");
+        servletCommand(bean_servlets,"stop",false);
     }
 
-    void servletCommand(String cmd) {
-        String bean1 = "Catalina:j2eeType=WebModule,name=//localhost/gratia-servlets,J2EEApplication=none,J2EEServer=none";
+    static void servletCommand(String bean_name, String cmd, boolean ignore_missing) {
         String urlstring = "service:jmx:rmi:///jndi/rmi://localhost:xxxx/jmxrmi";
 
         if (System.getProperty("com.sun.management.jmxremote.port") == null) {
@@ -108,11 +108,18 @@ public class QSizeMonitor extends Thread {
             JMXServiceURL url = new JMXServiceURL(urlstring); 
             jmxc = JMXConnectorFactory.connect(url,null); 
             MBeanServerConnection mbsc = jmxc.getMBeanServerConnection(); 
-            ObjectName objectName = new ObjectName(bean1);
+            ObjectName objectName = new ObjectName(bean_name);
             //
             // now call
             //
             mbsc.invoke(objectName, cmd, null, null);
+        }
+        catch (javax.management.InstanceNotFoundException missing) {
+           // If ther gratia-reporting is not install, we just ignore the error.
+           if (!ignore_missing) {
+              Logging.warning("CollectorService: ServletCommand(\"" +
+                              cmd + "\") caught exception ", missing);
+           }
         }
         catch (Exception e) {
             Logging.warning("CollectorService: ServletCommand(\"" +
