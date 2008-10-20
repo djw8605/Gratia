@@ -1336,6 +1336,10 @@ if(dotpos > 0) {metricvalue = metricvalue.substring(0,dotpos+2);}&#xD;
       </Insets>
       <Visible>true</Visible>
     </Label>
+    <FormatSpecifier xsi:type="attribute:DateFormatSpecifier">
+      <Type>Medium</Type>
+      <Detail>Date</Detail>
+    </FormatSpecifier>
     <LabelPosition>Below</LabelPosition>
     <MajorGrid>
       <LineAttributes>
