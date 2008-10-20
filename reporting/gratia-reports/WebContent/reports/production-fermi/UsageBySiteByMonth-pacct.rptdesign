@@ -1360,6 +1360,26 @@ rep = icsc.getExternalContext().getScriptable();
               </Value>
             </Action>
           </Triggers>
+          <Triggers>
+            <Condition>onmouseover</Condition>
+            <Action>
+              <Type>Show_Tooltip</Type>
+              <Value xsi:type="attribute:TooltipValue">
+                <Text>row[&quot;cpuSystemBenchDays&quot;] + row[&quot;cpuUserBenchDays&quot;]</Text>
+                <Delay>200</Delay>
+              </Value>
+            </Action>
+          </Triggers>
+          <Triggers>
+            <Condition>onmouseover</Condition>
+            <Action>
+              <Type>Show_Tooltip</Type>
+              <Value xsi:type="attribute:TooltipValue">
+                <Text>row[&quot;cpuSystemBenchDays&quot;] + row[&quot;cpuUserBenchDays&quot;]</Text>
+                <Delay>200</Delay>
+              </Value>
+            </Action>
+          </Triggers>
           <Riser>Rectangle</Riser>
         </Series>
         <Grouping>
@@ -1537,7 +1557,7 @@ rep = icsc.getExternalContext().getScriptable();
             <Blue>106</Blue>
           </Entries>
         </SeriesPalette>
-        <Series xsi:type="type:LineSeries">
+        <Series xsi:type="type:BarSeries">
           <Visible>true</Visible>
           <Label>
             <Caption>
@@ -1581,8 +1601,8 @@ rep = icsc.getExternalContext().getScriptable();
             </Components>
             <Separator>, </Separator>
           </DataPoint>
-          <LabelPosition>Above</LabelPosition>
-          <Stacked>false</Stacked>
+          <LabelPosition>Inside</LabelPosition>
+          <Stacked>true</Stacked>
           <Triggers>
             <Condition>onmouseover</Condition>
             <Action>
@@ -1603,22 +1623,27 @@ rep = icsc.getExternalContext().getScriptable();
               </Value>
             </Action>
           </Triggers>
-          <Markers>
-            <Type>Circle</Type>
-            <Size>2</Size>
-            <Visible>true</Visible>
-          </Markers>
-          <LineAttributes>
-            <Style>Solid</Style>
-            <Thickness>1</Thickness>
-            <Color>
-              <Transparency>255</Transparency>
-              <Red>0</Red>
-              <Green>0</Green>
-              <Blue>0</Blue>
-            </Color>
-            <Visible>true</Visible>
-          </LineAttributes>
+          <Triggers>
+            <Condition>onmouseover</Condition>
+            <Action>
+              <Type>Show_Tooltip</Type>
+              <Value xsi:type="attribute:TooltipValue">
+                <Text>row[&quot;cpuSystemBenchDays&quot;] + row[&quot;cpuUserBenchDays&quot;]</Text>
+                <Delay>200</Delay>
+              </Value>
+            </Action>
+          </Triggers>
+          <Triggers>
+            <Condition>onmouseover</Condition>
+            <Action>
+              <Type>Show_Tooltip</Type>
+              <Value xsi:type="attribute:TooltipValue">
+                <Text>row[&quot;cpuSystemBenchDays&quot;] + row[&quot;cpuUserBenchDays&quot;]</Text>
+                <Delay>200</Delay>
+              </Value>
+            </Action>
+          </Triggers>
+          <Riser>Rectangle</Riser>
         </Series>
         <Grouping>
           <Enabled>false</Enabled>
@@ -1795,7 +1820,7 @@ rep = icsc.getExternalContext().getScriptable();
             <Blue>102</Blue>
           </Entries>
         </SeriesPalette>
-        <Series xsi:type="type:LineSeries">
+        <Series xsi:type="type:BarSeries">
           <Visible>true</Visible>
           <Label>
             <Caption>
@@ -1839,8 +1864,8 @@ rep = icsc.getExternalContext().getScriptable();
             </Components>
             <Separator>, </Separator>
           </DataPoint>
-          <LabelPosition>Above</LabelPosition>
-          <Stacked>false</Stacked>
+          <LabelPosition>Inside</LabelPosition>
+          <Stacked>true</Stacked>
           <Triggers>
             <Condition>onmouseover</Condition>
             <Action>
@@ -1861,22 +1886,27 @@ rep = icsc.getExternalContext().getScriptable();
               </Value>
             </Action>
           </Triggers>
-          <Markers>
-            <Type>Triangle</Type>
-            <Size>2</Size>
-            <Visible>true</Visible>
-          </Markers>
-          <LineAttributes>
-            <Style>Dashed</Style>
-            <Thickness>1</Thickness>
-            <Color>
-              <Transparency>255</Transparency>
-              <Red>254</Red>
-              <Green>0</Green>
-              <Blue>0</Blue>
-            </Color>
-            <Visible>true</Visible>
-          </LineAttributes>
+          <Triggers>
+            <Condition>onmouseover</Condition>
+            <Action>
+              <Type>Show_Tooltip</Type>
+              <Value xsi:type="attribute:TooltipValue">
+                <Text>row[&quot;cpuSystemBenchDays&quot;] + row[&quot;cpuUserBenchDays&quot;]</Text>
+                <Delay>200</Delay>
+              </Value>
+            </Action>
+          </Triggers>
+          <Triggers>
+            <Condition>onmouseover</Condition>
+            <Action>
+              <Type>Show_Tooltip</Type>
+              <Value xsi:type="attribute:TooltipValue">
+                <Text>row[&quot;cpuSystemBenchDays&quot;] + row[&quot;cpuUserBenchDays&quot;]</Text>
+                <Delay>200</Delay>
+              </Value>
+            </Action>
+          </Triggers>
+          <Riser>Rectangle</Riser>
         </Series>
         <Grouping>
           <Enabled>false</Enabled>
@@ -2121,9 +2151,8 @@ rep = icsc.getExternalContext().getScriptable();
       </Insets>
       <Visible>true</Visible>
     </Label>
-    <FormatSpecifier xsi:type="attribute:DateFormatSpecifier">
-      <Type>Medium</Type>
-      <Detail>Date</Detail>
+    <FormatSpecifier xsi:type="attribute:JavaDateFormatSpecifier">
+      <Pattern>MMM YYYY</Pattern>
     </FormatSpecifier>
     <LabelPosition>Below</LabelPosition>
     <MajorGrid>
