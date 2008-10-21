@@ -1,7 +1,18 @@
 DELIMITER $$
 
-DROP PROCEDURE IF EXISTS `gratia_osg_daily`.`UsageByProbeForVOForSite` $$
-CREATE DEFINER=CURRENT_USER PROCEDURE `UsageByProbeForVOForSite`(userName varchar(64), userRole varchar(64), fromdate varchar(64), todate varchar(64), format varchar(64), resourceType varchar(64), vos varchar(128), voseltype varchar(8),sites varchar(128))
+DROP PROCEDURE IF EXISTS `UsageByProbeForVOForSite` $$
+CREATE PROCEDURE `UsageByProbeForVOForSite`
+(
+ userName varchar(64), 
+ userRole varchar(64), 
+ fromdate varchar(64), 
+ todate varchar(64), 
+ format varchar(64), 
+ resourceType varchar(64), 
+ vos varchar(128), 
+ voseltype varchar(8),
+ sites varchar(128)
+ )
     READS SQL DATA
 
 begin
