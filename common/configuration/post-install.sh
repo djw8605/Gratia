@@ -117,7 +117,7 @@ while [[ -n "$1" ]]; do
         ;;
       stored)
         #proc="${script_location}build-stored-procedures.sql"
-        set -- "$@" stored-extra-3 stored-1 stored-2 stored-3 stored-4
+        set -- "$@" stored-extra-3 stored-1 stored-2 stored-3 stored-4 stored-5
         if [[ `hostname -f` == *.fnal.gov ]]; then
           set -- "$@" proc-edit-permission
         fi
@@ -138,6 +138,10 @@ while [[ -n "$1" ]]; do
       stored-4)
         # PSACCT Reports stored procedure
         proc="${script_location}reportsPSacct.sql"
+        ;;
+      stored-5)
+        # PSACCT Reports stored procedure
+        proc="${script_location} build-osgdaily-stored-procedures.sql"
         ;;
       stored-extra-1)
         # Hand-tweaked procedure (temporary)
