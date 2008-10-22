@@ -5,7 +5,7 @@
 #
 # library to create simple report using the Gratia psacct database
 #
-#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.41 2008-10-16 21:49:36 pcanal Exp $
+#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.42 2008-10-22 21:53:16 pcanal Exp $
 
 import time
 import datetime
@@ -676,7 +676,7 @@ class DailySiteReportConf:
         num_header = 1
         formats = {}
         lines = {}
-        totalheaders = ("All sites")
+        totalheaders = ["All sites"]
 
         def __init__(self, header = False):
            self.formats["csv"] = ",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""
@@ -697,7 +697,7 @@ class DailyVOReportConf:
         num_header = 1
         formats = {}
         lines = {}
-        totalheaders = ("All VOs")
+        totalheaders = ["All VOs"]
 
         def __init__(self, header = False):
            self.formats["csv"] = ",%s,\"%s\",\"%s\",\"%s\",\"%s\""
@@ -718,7 +718,7 @@ class DailySiteVOReportConf:
         formats = {}
         lines = {}
         select = "=="
-        totalheaders = ("All sites", "All VOs")
+        totalheaders = ["All sites", "All VOs"]
         
         def __init__(self, header = False):
            self.formats["csv"] = ",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""
@@ -739,7 +739,7 @@ class DailyVOSiteReportConf:
         formats = {}
         lines = {}
         select = "=="
-        totalheaders = ("All sites","All VOs")
+        totalheaders = ["All sites","All VOs"]
         
         def __init__(self, header = False):
            self.formats["csv"] = ",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""
@@ -761,7 +761,7 @@ class DailySiteVOReportFromDailyConf:
         lines = {}
         select = "=="
         count = "sum(NJobs)"
-        totalheaders = ("All sites","All VOs")
+        totalheaders = ["All sites","All VOs"]
         
         def __init__(self, fromGratia, header = False):
            self.formats["csv"] = ",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""
@@ -789,7 +789,7 @@ class DailyVOSiteReportFromDailyConf:
         lines = {}
         select = "=="
         count = "sum(NJobs)"
-        totalheaders = ("All sites","All VOs")
+        totalheaders = ["All sites","All VOs"]
 
         def __init__(self, fromGratia, header = False):
            self.formats["csv"] = ",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""
