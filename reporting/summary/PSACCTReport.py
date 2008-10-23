@@ -5,7 +5,7 @@
 #
 # library to create simple report using the Gratia psacct database
 #
-#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.42 2008-10-22 21:53:16 pcanal Exp $
+#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.43 2008-10-23 14:06:01 pcanal Exp $
 
 import time
 import datetime
@@ -1389,8 +1389,6 @@ Deltas are the differences with the previous period."""
         res = cmp(yval,xval)
         # dercreasing order of njobs
         if (res==0) :
-           print x
-           print y
            xval = (x[1])[0]
            yval = (y[1])[0]
            res = cmp(yval,xval)
