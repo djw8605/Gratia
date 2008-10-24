@@ -5,7 +5,7 @@
 #
 # library to create simple report using the Gratia psacct database
 #
-#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.43 2008-10-23 14:06:01 pcanal Exp $
+#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.44 2008-10-24 14:21:33 pcanal Exp $
 
 import time
 import datetime
@@ -1392,7 +1392,6 @@ Deltas are the differences with the previous period."""
            xval = (x[1])[0]
            yval = (y[1])[0]
            res = cmp(yval,xval)
-           print res
         if (res==0) :
            # If the values are equal, sort on the user vo then the username
            xval = (x[0])[0].lower()
