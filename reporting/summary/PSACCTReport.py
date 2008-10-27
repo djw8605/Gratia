@@ -5,7 +5,7 @@
 #
 # library to create simple report using the Gratia psacct database
 #
-#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.44 2008-10-24 14:21:33 pcanal Exp $
+#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.45 2008-10-27 19:28:26 pcanal Exp $
 
 import time
 import datetime
@@ -1368,7 +1368,7 @@ Deltas are the differences with the previous period."""
         maxlen = 35
         for x in l:
             (vo,user,njobs,wall) = x.split('\t')
-            if ( not user.startswith("Generic") ):
+            if ( vo != "unknown" and vo != "other" ):
                pos = user.find("/CN=cron/");
                if ( pos >= 0) : user = user[pos+8:maxlen+pos+8]
                pat1 = re.compile("/CN=[0-9]*/");
@@ -1436,7 +1436,7 @@ Deltas are the differences with the previous period."""
         maxlen = 35
         for x in l:
             (user,vo,site,njobs,wall) = x.split('\t')
-            if ( not user.startswith("Generic") ):
+            if ( vo != "unknown" and vo != "other" ):
                pos = user.find("/CN=cron/");
                if ( pos >= 0) : user = user[pos+8:maxlen+pos+8]
                pat1 = re.compile("/CN=[0-9]*/");
