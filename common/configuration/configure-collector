@@ -515,9 +515,11 @@ sub configure_collector_config {
   $collector_config->{"properties.attributes"}->{"service.rmi.rmilookup"} =
     "rmi://$collector_config->{collector_host}:$collector_config->{rmi_port}";
   $collector_config->{"properties.attributes"}->{"service.open.connection"} =
-    "http://$collector_config->{collector_host}:$collector_config->{http_port}";
+    "http://$collector_config->{collector_host}:$collector_config->{http_port}"
+      unless exists $collector_config->{"properties.attributes"}->{"service.open.connection"};
   $collector_config->{"properties.attributes"}->{"service.secure.connection"} =
-    "https://$collector_config->{collector_host}:$collector_config->{ssl_port}";
+    "https://$collector_config->{collector_host}:$collector_config->{ssl_port}"
+      unless exists $collector_config->{"properties.attributes"}->{"service.secure.connection"};
   $collector_config->{"properties.attributes"}->{"service.mysql.url"} =
     "jdbc:mysql://$collector_config->{db_host}:$collector_config->{db_port}/$collector_config->{db_schema}";
 
