@@ -199,6 +199,12 @@ function reset_collector {
              db_schema => "${schema_name}",
              "properties.attributes" =>
              {
+              "service.lifetime.JobUsageRecord" => "3 Months",
+              "service.lifetime.JobUsageRecord.RawXML" => "1 Month",
+              "service.lifetime.MetricRecord" => "36 months",
+              "service.lifetime.MetricRecord.RawXML" => "1 month",
+              "service.lifetime.DupRecord.Duplicates" => "1 month",
+              "service.lifetime.DupRecord" => "UNLIMITED",
               "maintain.history.log" => 2,
               "monitor.listener.wait" => 240,
               "monitor.to.address0" => '${USER}@fnal.gov',
@@ -311,9 +317,6 @@ function fix_server_date {
 }
 
 function loaddata {
-
-#   ssh ${webhost} cd ${tomcatpwd}/gratia \; chown ${USER} service-configuration.properties \; mv service-configuration.properties service-configuration.properties.auto.old \; sed  -e '"s:service.lifetime.JobUsageRecord = .*:service.lifetime.JobUsageRecord = 24 months:"'  -e '"s:service.lifetime.DupRecord.Duplicates = .*:service.lifetime.DupRecord.Duplicates = 24 months:"' service-configuration.properties.auto.old \> service-configuration.properties
-#   restart_server
 
    start_server
 
