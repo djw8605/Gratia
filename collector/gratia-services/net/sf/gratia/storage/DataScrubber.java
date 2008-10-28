@@ -80,7 +80,9 @@ public class DataScrubber {
         return deletedEntities;
     }
 
-    protected long deleteHibernateRecords(String className, String whereClause,
+    protected long deleteHibernateRecords(String className,
+                                          String idAttribute,
+                                          String whereClause,
                                           String limit, String msg) {
         long deletedEntities = 0;
         long deletedThisIteration = 0;
@@ -94,7 +96,7 @@ public class DataScrubber {
             Transaction tx = session.beginTransaction();
             try {
                 String deleteCmd = "delete " + className +
-                    " record where record.RecordId in ( :ids )";
+                    " record where record." + idAttribute + " in ( :ids )";
                 org.hibernate.Query query = session.createQuery( deleteCmd );
                 Logging.debug("DataScrubber: About to " + query.getQueryString());
                 query.setParameterList("ids", ids);
@@ -340,14 +342,16 @@ public class DataScrubber {
     }
 
     public long Trace() {
-        return tableCleanupHelper("Trace", "procName", "eventtime");
+        return tableCleanupHelper("Trace", "traceId", "procName", "eventtime");
     }
 
     public long DupRecord() {
-        return tableCleanupHelper("DupRecord", "error", "eventdate");
+        return tableCleanupHelper("DupRecord", "dupid", "error", "eventdate");
     }
 
-    protected long tableCleanupHelper(String tableName, String qualifierColumn,
+    protected long tableCleanupHelper(String tableName,
+                                      String idAttribute,
+                                      String qualifierColumn,
                                       String dateColumn) {
         Properties p = eCalc.lifetimeProperties(); // Everybody's on the same page
         Enumeration properties = p.keys();
@@ -367,7 +371,8 @@ public class DataScrubber {
                     qualifierList += ((qualifierList.length() > 0)?", ":"") +
                         "'" + qualifier + "'";
                     count += tableCleanupHelper(refDate, qualifier,
-                                                tableName, qualifierColumn, dateColumn,
+                                                tableName, idAttribute,
+                                                qualifierColumn, dateColumn,
                                                 extraWhereClause);
                 }
             }
@@ -378,13 +383,15 @@ public class DataScrubber {
             extraWhereClause = qualifierColumn + " NOT IN (" + qualifierList + ") and ";
         }
         count += tableCleanupHelper(refDate, "",
-                                    tableName, qualifierColumn, dateColumn,
+                                    tableName, idAttribute,
+                                    qualifierColumn, dateColumn,
                                     extraWhereClause); // Catch-all
         return count;
     }
 
     protected long tableCleanupHelper(Date refDate, String qualifier,
-                                      String tableName, String qualifierColumn, String dateColumn,
+                                      String tableName, String idAttribute,
+                                      String qualifierColumn, String dateColumn,
                                       String extraWhereClause) {
         String limit = eCalc.expirationDateAsSQLString(refDate, tableName, qualifier);
         long count = 0;
@@ -397,6 +404,7 @@ public class DataScrubber {
                         extra_message +
                         " older than: " + limit);
             count = deleteHibernateRecords(tableName,
+                                           idAttribute,
                                            extraWhereClause +
                                            dateColumn + " < :dateLimit",
                                            limit,
