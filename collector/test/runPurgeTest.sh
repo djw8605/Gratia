@@ -203,7 +203,7 @@ function reset_collector {
               "monitor.listener.wait" => 240,
               "monitor.to.address0" => '${USER}@fnal.gov',
               "service.admin.DN.0" => 'ALLOW ALL',
-              "service.secure.connection" => 'http://${webhost}:${http_port}'
+              "service.secure.connection" => 'http://${webhost}:${ssl_port}'
              }
            }
 );
@@ -323,7 +323,7 @@ function loaddata {
    # First extend artificially the retention to let the old record in.
    echo "Turning off record purging"
 
-   wget --dns-timeout=5 --connect-timeout=10 --read-timeout=40 -O - "http://${webhost}:${ssl_port}/gratia-administration/systemadministration.html?action=disableHousekeeping" 2>&1 | grep House | grep DISABLED > wget.log
+   wget --dns-timeout=5 --connect-timeout=10 --read-timeout=40 -O - "http://${webhost}:${ssl_port}/gratia-administration/systemadministration.html?action=disableHousekeeping" 2>&1 | tee wget.full.log | grep House | grep DISABLED > wget.log
    result=$?
    if [ ${result} -ne 0 ]; then
       echo "Error: Turning off the record purging failed"
@@ -376,7 +376,7 @@ function turn_on_purging {
    start_server
    wait_for_server
 
-   wget --dns-timeout=5 --connect-timeout=10 --read-timeout=40 -O - http://${webhost}:${ssl_port}/gratia-administration/systemadministration.html?action=startHousekeepingNow 2>&1 | grep House | grep STOPPED > wget.log
+   wget --dns-timeout=5 --connect-timeout=10 --read-timeout=40 -O - http://${webhost}:${ssl_port}/gratia-administration/systemadministration.html?action=startHousekeepingNow 2>&1 | tee wget.full.log | grep House | grep STOPPED > wget.log
    result=$?
    if [ ${result} -ne 1 ]; then
       echo "Error: Turning on the record purging failed"
