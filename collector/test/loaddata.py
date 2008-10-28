@@ -33,7 +33,7 @@ def GetRecord(jobid, endtime, type):
         r.NodeCount(3) # default to total
         r.Processors(3,.75,"total")
         r.StartTime(1130946550,"Was entered in seconds")
-        
+
         r.EndTime(time.mktime(endtime.timetuple()))
 
         r.MachineName("flxi02.fnal.gov")
@@ -51,7 +51,7 @@ def GetRecord(jobid, endtime, type):
 
 def sendRecords(nrecords, end, type, extra = ""):
         start =  end - datetime.timedelta(days=365)
-        start.replace(hour=18,minute=10,second=00);
+        start = start.replace(hour=18,minute=10,second=00);
         step = 365.0 / nrecords;
         ndays = 0;
 
@@ -66,7 +66,7 @@ def sendRecords(nrecords, end, type, extra = ""):
         
 
 if __name__ == '__main__': 
-        rev = "$Revision: 1.4 $"
+        rev = "$Revision: 1.5 $"
         Gratia.RegisterReporterLibrary("loaddata.py",Gratia.ExtractCvsRevision(rev))
         
         Gratia.Initialize()
