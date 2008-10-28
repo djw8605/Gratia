@@ -141,7 +141,7 @@ while [[ -n "$1" ]]; do
         ;;
       stored-5)
         # PSACCT Reports stored procedure
-        proc="${script_location} build-osgdaily-stored-procedures.sql"
+        proc="${script_location}build-osgdaily-stored-procedures.sql"
         ;;
       stored-extra-1)
         # Hand-tweaked procedure (temporary)
