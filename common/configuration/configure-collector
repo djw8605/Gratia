@@ -139,7 +139,7 @@ function start {
 }
 
 function stop {
-  wget --no-check-certificate --certificate="^^^HOST_CERT^^^" --private-key="^^^HOST_KEY^^^" --dns-timeout=5 --connect-timeout=10 --read-timeout=20 -O - -q '^^^STOP_DB_UPDATE_URL^^^' >/dev/null 2>&1
+  # wget --no-check-certificate --certificate="^^^HOST_CERT^^^" --private-key="^^^HOST_KEY^^^" --dns-timeout=5 --connect-timeout=10 --read-timeout=20 -O - -q '^^^STOP_DB_UPDATE_URL^^^' >/dev/null 2>&1
   if [[ -n "${TOMCAT_USER}" ]]; then
     su -c "${CATALINA_HOME}/bin/shutdown.sh" ${TOMCAT_USER}
   else
