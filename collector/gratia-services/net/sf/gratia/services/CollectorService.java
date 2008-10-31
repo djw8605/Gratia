@@ -577,6 +577,7 @@ public class CollectorService implements ServletContextListener {
             Logging.info("CollectorService: DB update threads cannot be stopped -- not started!");
             return;
         }
+        Logging.info("CollectorService: stopping DB update threads");
         int i;
         int maxthreads = Integer.parseInt(p.getProperty("service.listener.threads"));
         for (i = 0; i < maxthreads; i++)
@@ -718,6 +719,15 @@ public class CollectorService implements ServletContextListener {
     }
 
     public void contextDestroyed(ServletContextEvent sce) {
+        if (databaseUpdateThreadsActive()) {
+            stopDatabaseUpdateThreads();
+        }
+        if ((housekeepingService != null) && housekeepingService.isAlive()) {
+            stopHousekeepingService();
+        }
+        if ((replicationService != null) && replicationService.isAlive()) {
+            stopReplicationService();
+        }
         Logging.info("Context Destroy Event");
         System.exit(0);
     }
