@@ -1,0 +1,36 @@
+#!/bin/bash
+
+mail="gratia-operation@fnal.gov"
+
+while getopts :t OPT; do
+    case $OPT in
+        t)
+            mail="grid-accounting@fnal.gov" 
+            ;;
+        *)
+            echo "usage: ${0##*/} [-t} [--] <release>"
+            exit 2
+    esac
+done
+shift $[ OPTIND - 1 ]
+
+release="$1"
+
+function install_collector() {
+  local instance="$1"
+  printf "Installing collector $instance with release $release ... "
+  /home/gratia/gratia-releases/gratia-${release}/build-scripts/gratia-upgrade.sh --instance $instance --source /home/gratia/gratia-releases/gratia-${release} --pswd xx --daily "$mail" --mysql /home/gratia/.itb-mysql-gratia02 --force-log4j
+  local status=$?
+  if (( $status == 0 )); then
+    echo "OK"
+  else
+    echo "FAILED!"
+    exit $status
+  fi
+}
+
+install_collector tomcat-itb_gratia_osg_daily;
+install_collector tomcat-itb_gratia_psacct;
+install_collector tomcat-itb_gratia_itb;
+
+exit 0
