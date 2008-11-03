@@ -5,7 +5,7 @@
 #
 # library to create simple report using the Gratia psacct database
 #
-#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.45 2008-10-27 19:28:26 pcanal Exp $
+#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.46 2008-11-03 17:46:30 pcanal Exp $
 
 import time
 import datetime
@@ -1210,7 +1210,7 @@ FROM VOProbeSummary U where
     EndTime < \"""" + DateTimeToString(end) + """\"
     and CommonName != \"unknown\"
     """ + selection + """
-    group by CommonName
+    group by CommonName, VOName
 """
     return RunQueryAndSplit(select)
     
