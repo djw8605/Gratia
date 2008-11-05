@@ -1046,6 +1046,18 @@
                     <property name="paramName">reportName</property>
                     <expression name="expression">params["ReportName"].value</expression>
                 </structure>
+                <structure>
+                    <property name="paramName">UserName</property>
+                    <expression name="expression">params["UserName"].value</expression>
+                </structure>
+                <structure>
+                    <property name="paramName">StartDate</property>
+                    <expression name="expression">params["StartDate"].value</expression>
+                </structure>
+                <structure>
+                    <property name="paramName">EndDate</property>
+                    <expression name="expression">params["EndDate"].value</expression>
+                </structure>
             </list-property>
             <list-property name="boundDataColumns">
                 <structure>
