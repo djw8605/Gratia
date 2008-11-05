@@ -101,6 +101,11 @@ BEGIN
   IF metric IS NOT NULL THEN
     IF (TRIM(metric) != '') AND (TRIM(metric) != 'null') THEN
       SET @imetric := TRIM(metric);
+      IF (TRIM(metric) = 'cpu') THEN
+        SET @smetric := 'CpuUserDuration + CpuSystemDuration';
+      ELSE
+        SET @smetric := TRIM(metric);
+      END IF;
     END IF;
   END IF;
 
