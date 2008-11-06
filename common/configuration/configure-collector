@@ -51,6 +51,7 @@ my %attribute_defaults =
    host_key => "/etc/grid-security/hostkey.pem",
    sslCAFiles => "/etc/grid-security/certificates/*.0",
    crlFiles => "/etc/grid-security/certificates/*.r0",
+   service_auto_start => 1,
    "properties.attributes" =>
    { "service.rmi.service" => "/gratia",
      "use.report.authentication" => "true",
@@ -478,7 +479,11 @@ sub configure_init_file {
   print INIT_SCRIPT $init_script_txt;
   close(INIT_SCRIPT);
   chmod 0755, $init_script;
-  system("/sbin/chkconfig --add tomcat-$instance_name");
+  if ($collector_config->{service_auto_start}) {
+    system("/sbin/chkconfig --add tomcat-$instance_name");
+  } else { # De-activate.
+    system("/sbin/chkconfig --del tomcat-$instance_name");
+  }
 }
 
 sub configure_collector_config {
@@ -652,7 +657,7 @@ sub configure_installation_owner {
     }
   }
   # Configure ownership of the APEL interface directory.
-  configure_apel_directory($config, $config_ref);
+  configure_apel_directory($instance_name, $collector_config);
 }
 
 sub configure_tomcat_config {
