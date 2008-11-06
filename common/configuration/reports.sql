@@ -249,3 +249,9 @@ BEGIN
 END $$
 
 DELIMITER ;
+
+
+-- Local Variables:
+-- mode: sql
+-- eval: (sql-set-product 'mysql)
+-- end:
