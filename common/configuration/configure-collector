@@ -324,7 +324,6 @@ foreach my $config (@instance_list) {
   configure_tomcat_users($config, $config_ref);
   # configure_log4j_properties($config, $config_ref) if $options{"use-ssl"};
   configure_static_report_generation($config, $config_ref);
-  configure_apel_directory($config, $config_ref);
 
   if (exists $options{"db-root"}) {
     configure_post_install($config, $config_ref);
@@ -652,6 +651,8 @@ sub configure_installation_owner {
           "to $collector_config->{\"tomcat_user\"}${group}\n";
     }
   }
+  # Configure ownership of the APEL interface directory.
+  configure_apel_directory($config, $config_ref);
 }
 
 sub configure_tomcat_config {
