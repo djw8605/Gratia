@@ -199,7 +199,7 @@ ELSE
                  '     VO.VOName AS xVOName, SUM(V.m', @imetric,') AS x', @imetric,'',
                  '     FROM ',
                  '     (SELECT VOCorrid AS mVOCorrid,',
-                 '        SUM(', @imetric,') AS m', @imetric,' ',
+                 '        SUM(', @smetric,') AS m', @imetric,' ',
                  '         FROM MasterSummaryData',
                  '         WHERE (EndTime) >= (''', @thisFromDate, ''')',
                  '         AND (EndTime) <= (''', @thisToDate, ''')',
