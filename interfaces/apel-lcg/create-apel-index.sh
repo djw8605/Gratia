@@ -90,6 +90,21 @@ format that can be referenced for troubleshooting purposes.
 EOF
 }
 #---------------------
+function write_lcg_accounting {
+ cat >>$index <<EOF
+The Worldwide LHC Computing Grid Accounting reports for Tier-1 and Tier-2 sites
+can be seen viewed here: 
+<ul>
+<li><a href="http://lcg.web.cern.ch/LCG/accounts.htm">
+http://lcg.web.cern.ch/LCG/accounts.htm
+</a>
+</li>
+</ul>
+<p>
+EOF
+
+}
+#---------------------
 function write_nebraska_description {
  cat >>$index <<EOF
 Additional information related to WLCG Tier 1 and Tier 2 CMS and ATLAS Gratia 
@@ -130,9 +145,14 @@ fi
 
 datadir=$TOMCAT_INSTANCE/webapps/$path
 if [ ! -d "$datadir" ];then
-  logerr "The Gratia-APEL interface directory: 
+  logerr "The Gratia-APEL interface directory does not exist: 
   $datadir
-does not exist or does not have the correct permissions."
+"
+fi
+if [ ! -w "$datadir" ];then
+  logerr "The Gratia-APEL interface directory does not have the correct permissions:
+$(ls -ld $datadir)
+"
 fi
 
 #--------------------
@@ -200,10 +220,13 @@ text '<hr width=60%>'
 start p
 write_nebraska_description
 text '<hr width=60%>'
+write_lcg_accounting
+text '<hr width=60%>'
 text "Last updated: $(date)"
 
 end body;end html
 
 mv $index index.html
 rm -f $index
+chmod 664 index.html
 exit 0
