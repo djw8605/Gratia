@@ -7,7 +7,7 @@
 # Script to transfer the data from Gratia to APEL (WLCG)
 ########################################################################
 #
-#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: LCG.py,v 1.16 2008-10-01 13:54:22 jgweigand Exp $
+#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: LCG.py,v 1.17 2008-11-11 16:53:47 jgweigand Exp $
 #
 #
 ########################################################################
@@ -69,6 +69,16 @@
 #   any errors that may occur on the copy to the Gratia collector,
 #   but can be used to detect site not reporting for a period or
 #   other conditions.
+#
+# 11/11/08 (John Weigand)
+#   Added an additional filter on the selection criterea. Only 
+#   selecting ResourceType='Batch'.  Changes to the condor probes 
+#   (v1.00.3) will result in distinguishing between the actual
+#   grid jobs (Batch) and the grid monitoring job (GridMonitor) when
+#   jobs are submitted using condor_submit. Any 'local' job used to
+#   submit a job on the CE node will be filtered, but should they
+#   at some point be passed to Gratia, these will be identified as
+#   Local.
 # 
 ########################################################################
 import traceback
@@ -631,6 +641,7 @@ where
   and Probe.ProbeName  = Main.ProbeName 
   and Main.VOName in ( %s )
   and "%s" <= Main.EndTime and Main.EndTime < "%s"
+  and Main.ResourceType = 'Batch'
 group by ExecutingSite, 
          LCGUserVO
 """ % (strNormalization,strNormalization,fmtMonth,fmtYear,fmtDate,fmtDate,strNormalization,site,vos,strBegin,strEnd)
@@ -676,6 +687,7 @@ where
   and M.dbid           = R.dbid
   and R.VOName = "Unknown"
   and "%s" <= R.EndTime and R.EndTime < "%s"
+  and R.ResourceType = 'Batch'
   and R.LocalUserid like "%s%s%s"  
 group by ExecutingSite, 
          LCGUserVO
@@ -727,6 +739,7 @@ from
      Site
 where
       "%s" <= R.EndTime and R.EndTime < "%s"
+  and R.ResourceType = 'Batch'
   and R.VOName      = "Unknown"
   and R.LocalUserid like "%s%s%s"  
   and R.dbid        = M.dbid
@@ -823,7 +836,7 @@ def SendXmlHtmlFiles(filename,dest):
   if dest == 'DO_NOT_SEND':
     Logit("%s file NOT copied to a Gratia collector (arg is '%s')" % (filename,dest))
     return
-  cmd = "cp %s %s" % (filename,dest) 
+  cmd = "scp %s %s" % (filename,dest) 
   Logit(cmd)
   p = popen2.Popen3(cmd,1)
   rtn = p.wait()
