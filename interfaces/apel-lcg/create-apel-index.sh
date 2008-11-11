@@ -76,6 +76,14 @@ function font {
   write_file "<font color=white><b>$1</b></font>"
 }
 #---------------------
+function check_for_file { 
+  if [ -f "$1" ];then
+    columnHREF "$url/$1" $2
+  else
+    column "n/a"
+  fi
+}
+#---------------------
 function write_description {
  cat >>$index <<EOF
 The intent of this page is to provide visibility into the APEL accounting
@@ -191,6 +199,7 @@ column "Month"
 column "OSG_DATA"  "colspan=2"
 column "org_Tier1" "colspan=2"
 column "org_Tier2" "colspan=2"
+column "late updates" "colspan=1"
 end TR
 ## -- new row ---
 formatStart="<font color=black><b>"
@@ -199,18 +208,16 @@ start "TR BGCOLOR=beige"
 for date in $dates
 do
   column "$date"
-  for table in OSG_DATA org_Tier1 org_Tier2
+  for table in OSG_DATA org_Tier1 org_Tier2 
   do
     for type in html xml
     do
       file=$date.$table.$type
-      if [ -f $file ];then
-        columnHREF "$url/$file" $type
-      else
-        column "n/a"
-      fi
-    done
-  done
+      check_for_file $file $type
+    done ## done with type
+  done ## done with table
+  file=$date.late_updates.html
+  check_for_file $file html
   end TR
 done
 end TABLE
