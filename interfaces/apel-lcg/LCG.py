@@ -7,7 +7,7 @@
 # Script to transfer the data from Gratia to APEL (WLCG)
 ########################################################################
 #
-#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: LCG.py,v 1.17 2008-11-11 16:53:47 jgweigand Exp $
+#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: LCG.py,v 1.18 2008-11-12 14:55:14 jgweigand Exp $
 #
 #
 ########################################################################
@@ -641,7 +641,7 @@ where
   and Probe.ProbeName  = Main.ProbeName 
   and Main.VOName in ( %s )
   and "%s" <= Main.EndTime and Main.EndTime < "%s"
-  and Main.ResourceType = 'Batch'
+  and Main.ResourceType = "Batch"
 group by ExecutingSite, 
          LCGUserVO
 """ % (strNormalization,strNormalization,fmtMonth,fmtYear,fmtDate,fmtDate,strNormalization,site,vos,strBegin,strEnd)
@@ -687,7 +687,7 @@ where
   and M.dbid           = R.dbid
   and R.VOName = "Unknown"
   and "%s" <= R.EndTime and R.EndTime < "%s"
-  and R.ResourceType = 'Batch'
+  and R.ResourceType = "Batch"
   and R.LocalUserid like "%s%s%s"  
 group by ExecutingSite, 
          LCGUserVO
@@ -739,7 +739,7 @@ from
      Site
 where
       "%s" <= R.EndTime and R.EndTime < "%s"
-  and R.ResourceType = 'Batch'
+  and R.ResourceType = "Batch"
   and R.VOName      = "Unknown"
   and R.LocalUserid like "%s%s%s"  
   and R.dbid        = M.dbid
