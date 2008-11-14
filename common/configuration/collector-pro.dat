@@ -64,6 +64,8 @@
    db_schema => "gratia_itb",
    remote_host => "gratia.opensciencegrid.org",
    collector_host => "gratia.opensciencegrid.org",
+   max_perm_size => "256m",
+   max_heap_size => "1024m",
    "properties.attributes" =>
    {
     "monitor.from.address" => 'gratia-operation@opensciencegrid.org',
