@@ -414,8 +414,18 @@ public class CollectorService implements ServletContextListener {
         // Let's restart the reporting service to make sure that BIRT is getting the timezone
         // specified in its web.xml. (During the regular tomcat start this seems to be over-ridden by something else)
         String reporting_service_name = "Catalina:j2eeType=WebModule,name=//localhost/gratia-reporting,J2EEApplication=none,J2EEServer=none";
-        QSizeMonitor.servletCommand(reporting_service_name,"stop",true);
-        QSizeMonitor.servletCommand(reporting_service_name,"start",true);
+        Logging.info("CollectorService: recycling reporting service to ensure correct date display in reports");
+        Boolean result = 
+            QSizeMonitor.servletCommand(reporting_service_name,"stop",true);
+        if (result) {
+            result =
+                QSizeMonitor.servletCommand(reporting_service_name,"start",true);
+        }
+        if (result) {
+            Logging.info("CollectorService: reporting service recycled successfully.");
+        } else {
+            Logging.warning("CollectorService: Unable to recyle reporting service; reports could display inaccurate dates.");
+        }
     }
 
     public synchronized Boolean operationsDisabled() {
