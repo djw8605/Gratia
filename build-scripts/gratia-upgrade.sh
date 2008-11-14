@@ -554,11 +554,11 @@ $(cat $release_file)
 #--------------------------------
 function verify_port_availability {
   delimit  verify_port_availability
-  expected_number_of_ports=6
+  expected_number_of_ports=5
   logit "
 Verifying that the tomcat process has $expected_number_of_ports ports it
 is listening on for this tomcat instance and all are by the same process.
-Disclaimer: This is the closest one can do for this type validation.
+Disclaimer: This is the closest one can do for this type of validation.
 "
   properties_file=$tomcat_dir/$tomcat/gratia/service-configuration.properties
   if [ ! -e $properties ];then
