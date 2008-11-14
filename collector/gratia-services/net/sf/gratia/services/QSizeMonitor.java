@@ -5,10 +5,11 @@ import net.sf.gratia.util.XP;
 import net.sf.gratia.util.Configuration;
 
 import net.sf.gratia.util.Logging;
+import net.sf.gratia.util.LogLevel;
 
 import java.util.*;
 
-//import java.lang.management.*; 
+import java.lang.management.ManagementFactory; 
 import javax.management.*; 
 import javax.management.remote.*;
 
@@ -84,7 +85,9 @@ public class QSizeMonitor extends Thread {
         }
     }
 
-    final String bean_servlets = "Catalina:j2eeType=WebModule,name=//localhost/gratia-servlets,J2EEApplication=none,J2EEServer=none";
+    final String bean_servlets = "Catalina:j2eeType=WebModule," +
+        "name=//localhost/gratia-servlets,J2EEApplication=none,J2EEServer=none";
+
     void startServlet() {
         servletCommand(bean_servlets,"start",false);
     }
@@ -93,47 +96,45 @@ public class QSizeMonitor extends Thread {
         servletCommand(bean_servlets,"stop",false);
     }
 
-    static void servletCommand(String bean_name, String cmd, boolean ignore_missing) {
-        String urlstring = "service:jmx:rmi:///jndi/rmi://localhost:xxxx/jmxrmi";
+    static Boolean servletCommand(String bean_name, String cmd, boolean ignore_missing) {
+        Boolean result = false;
 
-        if (System.getProperty("com.sun.management.jmxremote.port") == null) {
-            return;
-        }
+        try {
+            MBeanServerConnection mbsc = null;
+            if (System.getProperty("com.sun.management.jmxremote") == null) {
+                Logging.log(LogLevel.SEVERE, "CollectorService: internal servlet " +
+                            "control is not available." +
+                            " Please ensure that the system property " +
+                            "com.sun.management.jmxremote" +
+                            " is set to allow required control of " +
+                            "servlets and reporting service.");
+                return result; // No point in continuing
+            }
+            Logging.log("CollectorService: attempting to obtain local MBeanServer");
+            mbsc = ManagementFactory.getPlatformMBeanServer();
 
-        urlstring = urlstring.replace("xxxx", System.getProperty("com.sun.management.jmxremote.port"));
-				
-        JMXConnector jmxc = null;
-
-        try {						
-            JMXServiceURL url = new JMXServiceURL(urlstring); 
-            jmxc = JMXConnectorFactory.connect(url,null); 
-            MBeanServerConnection mbsc = jmxc.getMBeanServerConnection(); 
             ObjectName objectName = new ObjectName(bean_name);
-            //
-            // now call
-            //
+
             mbsc.invoke(objectName, cmd, null, null);
+            Logging.log("CollectorService: successfully executed MBean control command " +
+                        cmd + " on MBean " + bean_name);
+            result = true;
         }
         catch (javax.management.InstanceNotFoundException missing) {
-           // If ther gratia-reporting is not install, we just ignore the error.
-           if (!ignore_missing) {
-              Logging.warning("CollectorService: ServletCommand(\"" +
-                              cmd + "\") caught exception ", missing);
-           }
+            // We might want to ignore this error.
+            if (!ignore_missing) {
+                Logging.warning("CollectorService: ServletCommand(\"" +
+                                cmd + "\") caught exception " + missing);
+                Logging.debug("Exception details: ", missing);
+            }
         }
         catch (Exception e) {
             Logging.warning("CollectorService: ServletCommand(\"" +
-                            cmd + "\") caught exception ", e);
+                            cmd + "\") caught exception " + e);
+            Logging.debug("Exception details: ", e);
         }
-        finally {
-            try {
-                jmxc.close();
-            }
-            catch (Exception ignore) {
-            }
-        }
+        return result;
     }
-
 }
 
 
