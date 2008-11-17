@@ -122,7 +122,9 @@ public class QSizeMonitor extends Thread {
         }
         catch (javax.management.InstanceNotFoundException missing) {
             // We might want to ignore this error.
-            if (!ignore_missing) {
+            if (ignore_missing) {
+                result = true; // Didn't care whether it was there or not.
+            } else {
                 Logging.warning("CollectorService: ServletCommand(\"" +
                                 cmd + "\") caught exception " + missing);
                 Logging.debug("Exception details: ", missing);
