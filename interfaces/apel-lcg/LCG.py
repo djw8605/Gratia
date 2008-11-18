@@ -7,7 +7,7 @@
 # Script to transfer the data from Gratia to APEL (WLCG)
 ########################################################################
 #
-#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: LCG.py,v 1.18 2008-11-12 14:55:14 jgweigand Exp $
+#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: LCG.py,v 1.19 2008-11-18 21:12:16 jgweigand Exp $
 #
 #
 ########################################################################
@@ -790,6 +790,9 @@ def RunLCGQuery(query,type,params):
 def CreateXmlHtmlFiles(params):
   """ Performs a query of the APEL database tables with output in either xml or 
       an html format creating those files.
+      Additionally, it creates a .dat file for use with a shell script. The
+      format of this data (showing relationships only using the Path column)
+      makes it difficult to parse using xml.
   """
   Logit("------")
   Logit("Retrieving APEL database data")
@@ -814,6 +817,15 @@ def CreateXmlHtmlFiles(params):
     Logit("")
     type = "html"
     output = RunLCGQuery(queries[table],type,params)
+    filename = GetFileName(table,type)
+    WriteFile(output,filename)
+    Logit("%s file created: %s" % (type,filename)) 
+    SendXmlHtmlFiles(filename,gFilterParameters["GratiaCollector"])
+    #--- create dat file ---
+    Logit("")
+    type = "skip-column-names"
+    output = RunLCGQuery(queries[table],type,params)
+    type = "dat"
     filename = GetFileName(table,type)
     WriteFile(output,filename)
     Logit("%s file created: %s" % (type,filename)) 
