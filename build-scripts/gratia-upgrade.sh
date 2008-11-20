@@ -84,6 +84,7 @@ Modes for running the script:
      $PGM --instance TOMCAT_INSTANCE 
           --source SOURCE_DIR 
           --pswd ROOT_PSWD | --mysql MYSQL_FILE
+          [--config DAT_FILE ]
           [--force-log4j]
    For those that disdain questions and answers. This mode eliminates some
    questions.  There will be prompts for starting the service and a few 
@@ -97,7 +98,8 @@ Modes for running the script:
           --source SOURCE_DIR 
           --daily EMAIL_ADDRESS(ES) 
           --mysql MYSQL_FILE
-          --force-log4j
+          [--config DAT_FILE ]
+          [--force-log4j]
 
 Although it does not really do much more than is already available to do, its
 intent is to take some of the guesswork (memory-like) out of the upgrade
