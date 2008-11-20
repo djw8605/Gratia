@@ -579,15 +579,37 @@ Disclaimer: This is the closest one can do for this type of validation.
   /bin/netstat -n --listening --program |egrep $port
 $(/bin/netstat -n --listening --program |egrep $port |egrep -v grep)
 "
-  sleep 4
+
+  #--- check the ports ---
   cmd="/bin/netstat -n --listening --program |egrep $pid |egrep -v grep"
-  connection_cnt="$(/bin/netstat -n --listening --program |egrep $pid |egrep -v grep |wc -l)"
-  case $connection_cnt in 
-    $expected_number_of_ports ) ;;
-    * ) logerr "Expected $expected_number_of_ports connections.... found ${connection_cnt}.
+  maxtries=6
+  sleep=20
+  try=1
+  while 
+    [ $try -lt $maxtries ]
+  do
+    connection_cnt="$(/bin/netstat -n --listening --program |egrep $pid |egrep -v grep |wc -l)"
+    if [ $connection_cnt  -eq  $expected_number_of_ports ];then
+      break
+    fi
+    logit "Expected $expected_number_of_ports connections.... found ${connection_cnt}.
 $(/bin/netstat -n --listening --program |egrep $pid |egrep -v grep)
-" ;;
-  esac
+"
+    logit "... sleeping $sleep seconda and trying again (try $try of $maxtries)" 
+    sleep $sleep
+    try=$(($try + 1))
+  done
+
+  #--- check for failure ---
+  connection_cnt="$(/bin/netstat -n --listening --program |egrep $pid |egrep -v grep |wc -l)"
+  if [ $connection_cnt  -ne  $expected_number_of_ports ];then
+    logerr "Expected $expected_number_of_ports connections.... found ${connection_cnt}.
+$(/bin/netstat -n --listening --program |egrep $pid |egrep -v grep)
+... giving up!!!
+"
+  fi
+
+  #--- all ports available ---
   logit "... connections based on pid ($pid):
 $(/bin/netstat -n --listening --program |egrep $pid |egrep -v grep)
 "
