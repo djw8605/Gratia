@@ -26,7 +26,6 @@ my @required_attributes =
    'http_port',
    'ssl_port',
    'rmi_port',
-   'jmx_port',
    'db_schema',
    'UserConfig',
    'sslCAFiles',
@@ -496,7 +495,6 @@ sub configure_collector_config {
   my $spaced_rmi_port = sprintf("%5d", $collector_config->{rmi_port});
   my $spaced_http_port = sprintf("%5d", $collector_config->{http_port});
   my $spaced_ssl_port = sprintf("%5d", $collector_config->{ssl_port});
-  my $spaced_jmx_port = sprintf("%5d", $collector_config->{jmx_port});
   my $spaced_db_port = sprintf("%5d", $collector_config->{db_port});
 
   foreach my $config_attribute (sort keys %{$collector_config->{"properties.attributes"}}) {
@@ -535,7 +533,6 @@ sub configure_collector_config {
       s&^(\s*#\s)\s*\d*\s*(->\s*tomcat)&${1}$spaced_http_port ${2}&;
       s&^(\s*#\s)\s*\d*\s*(->\s*tomcat-ssl)&${1}$spaced_ssl_port ${2}&;
       s&^(\s*#\s)\s*\d*\s*(->\s*mysql)&${1}$spaced_db_port ${2}&;
-      s&^(\s*#\s)\s*\d*\s*(->\s*tomcat/jmx)&${1}$spaced_jmx_port ${2}&;
     }
 
     # Simple attributes
