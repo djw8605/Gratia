@@ -621,8 +621,8 @@ $(ls -l $csv_dir)
 #---------------------------
 function verify_upgrade {
    verify_instance_is_running 
-   verify_tomcat_connection 
    verify_port_availability 
+   verify_tomcat_connection 
 }
 #----------------------------
 function process_in_prompt_mode {
