@@ -5,7 +5,7 @@
 #
 # library to create simple report using the Gratia psacct database
 #
-#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.46 2008-11-03 17:46:30 pcanal Exp $
+#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.47 2008-11-20 22:25:27 pcanal Exp $
 
 import time
 import datetime
@@ -308,6 +308,34 @@ def GetListOfOSGSites():
         allSites = commands.getoutput(cmd).split("\n");
         #print allSites;
         return allSites;
+
+def GetListOfRegisteredVO():
+        cmd = "wget -q -O - http://oim.grid.iu.edu/pub/vo/show.php?format=plain-text | cut -d, -f1  | grep -v '^#' "
+        
+        allVos = commands.getoutput(cmd).split("\n");
+        # Run a second time to avoid wget bugs
+        allVos = commands.getoutput(cmd).split("\n");
+        ret = []
+        for v in allVos:
+           ret.append( v.lower() );
+        # And hand add a few 'exceptions!"
+        ret.append("usatlas")
+        ret.append("minos")
+        ret.append("miniboone")
+        ret.append("theory")
+        ret.append("cdms")
+        ret.append("other")
+        return ret
+
+def UpdateVOName(list, index):
+      vos = GetListOfRegisteredVO()
+      r = []
+      for row in list:
+         srow = row.split('\t')
+         if srow[index] not in vos:
+            srow[index] = srow[index] + " (nr)"
+         r.append( "\t".join(srow) )
+      return r
 
 def WeeklyData():
         schema = "gratia_psacct";
@@ -670,7 +698,7 @@ class DailySiteJobStatusConf:
     
   
 class DailySiteReportConf:
-        title = "OSG usage summary (midnight to midnight UTC) for %s\nincluding all jobs that finished in that time period.\nWall Duration is expressed in hours and rounded to the nearest hour.\nWall Duration is the duration between the instant the job start running and the instant the job ends its execution.\nThe number of jobs counted here includes only the jobs directly seen by batch system and does not include the request sent directly to a pilot job.\nThe Wall Duration includes the total duration of the the pilot jobs.\nDeltas are the differences with the previous day.\n"
+        title = "OSG usage summary (midnight to midnight UTC) for %s\nincluding all jobs that finished in that time period.\nWall Duration is expressed in hours and rounded to the nearest hour.\nWall Duration is the duration between the instant the job start running and the instant the job ends its execution.\nThe number of jobs counted here includes only the jobs directly seen by batch system and does not include the request sent directly to a pilot job.\nThe Wall Duration includes the total duration of the the pilot jobs.\nDeltas are the differences with the previous day.\n(nr) after after a VO name indicates that the VO is not registered with OSG.\n"
         headline = "For all jobs finished on %s (UTC)"
         headers = ("Site","# of Jobs","Wall Duration","Delta jobs","Delta duration")
         num_header = 1
@@ -691,7 +719,7 @@ class DailySiteReportConf:
            return DailySiteData(start,end)      
 
 class DailyVOReportConf:
-        title = "OSG usage summary (midnight to midnight UTC) for %s\nincluding all jobs that finished in that time period.\nWall Duration is expressed in hours and rounded to the nearest hour.\nWall Duration is the duration between the instant the job start running and the instant the job ends its execution.\nThe number of jobs counted here includes only the jobs directly seen by batch system and does not include the request sent directly to a pilot job.\nThe Wall Duration includes the total duration of the the pilot jobs.\nDeltas are the differences with the previous day.\n"
+        title = "OSG usage summary (midnight to midnight UTC) for %s\nincluding all jobs that finished in that time period.\nWall Duration is expressed in hours and rounded to the nearest hour.\nWall Duration is the duration between the instant the job start running and the instant the job ends its execution.\nThe number of jobs counted here includes only the jobs directly seen by batch system and does not include the request sent directly to a pilot job.\nThe Wall Duration includes the total duration of the the pilot jobs.\nDeltas are the differences with the previous day.\n(nr) after after a VO name indicates that the VO is not registered with OSG.\n"
         headline = "For all jobs finished on %s (UTC)"
         headers = ("VO","# of Jobs","Wall Duration","Delta jobs","Delta duration")
         num_header = 1
@@ -708,7 +736,7 @@ class DailyVOReportConf:
            if (not header) :  self.title = ""
 
         def GetData(self,start,end):
-           return DailyVOData(start,end)      
+           return UpdateVOName( DailyVOData(start,end), 0 )
 
 class DailySiteVOReportConf:
         title = "OSG usage summary (midnight to midnight UTC) for %s\nincluding all jobs that finished in that time period.\nWall Duration is expressed in hours and rounded to the nearest hour.\nWall Duration is the duration between the instant the job start running and the instant the job ends its execution.\nThe number of jobs counted here includes only the jobs directly seen by batch system and does not include the request sent directly to a pilot job.\nThe Wall Duration includes the total duration of the the pilot jobs.\nDeltas are the differences with the previous day.\n"
@@ -729,10 +757,10 @@ class DailySiteVOReportConf:
            if (not header) :  self.title = ""
 
         def GetData(self,start,end):
-           return DailySiteVOData(start,end)      
+           return UpdateVOName(DailySiteVOData(start,end),1)  
 
 class DailyVOSiteReportConf:
-        title = "OSG usage summary (midnight to midnight UTC) for %s\nincluding all jobs that finished in that time period.\nWall Duration is expressed in hours and rounded to the nearest hour.\nWall Duration is the duration between the instant the job start running and the instant the job ends its execution.\nThe number of jobs counted here includes only the jobs directly seen by batch system and does not include the request sent directly to a pilot job.\nThe Wall Duration includes the total duration of the the pilot jobs.\nDeltas are the differences with the previous day.\n"
+        title = "OSG usage summary (midnight to midnight UTC) for %s\nincluding all jobs that finished in that time period.\nWall Duration is expressed in hours and rounded to the nearest hour.\nWall Duration is the duration between the instant the job start running and the instant the job ends its execution.\nThe number of jobs counted here includes only the jobs directly seen by batch system and does not include the request sent directly to a pilot job.\nThe Wall Duration includes the total duration of the the pilot jobs.\nDeltas are the differences with the previous day.\n(nr) after after a VO name indicates that the VO is not registered with OSG.\n"
         headline = "For all jobs finished on %s (UTC)"
         headers = ("VO","Site","# of Jobs","Wall Duration","Delta jobs","Delta duration")
         num_header = 2
@@ -750,10 +778,10 @@ class DailyVOSiteReportConf:
            if (not header) :  self.title = ""
 
         def GetData(self,start,end):
-           return DailyVOSiteData(start,end)      
+           return UpdateVOName(DailyVOSiteData(start,end),0)   
 
 class DailySiteVOReportFromDailyConf:
-        title = "OSG usage summary (midnight to midnight central time) for %s\nincluding all jobs that finished in that time period.\nWall Duration is expressed in hours and rounded to the nearest hour.\nWall Duration is the duration between the instant the job start running and the instant the job ends its execution.\nDeltas are the differences with the previous day.\nIf the number of jobs stated for a site is always 1\nthen this number is actually the number of summary records sent.\n"
+        title = "OSG usage summary (midnight to midnight central time) for %s\nincluding all jobs that finished in that time period.\nWall Duration is expressed in hours and rounded to the nearest hour.\nWall Duration is the duration between the instant the job start running and the instant the job ends its execution.\nDeltas are the differences with the previous day.\nIf the number of jobs stated for a site is always 1\nthen this number is actually the number of summary records sent.\n(nr) after after a VO name indicates that the VO is not registered with OSG.\n"
         headline = "For all jobs finished on %s (Central Time)"
         headers = ("Site","VO","# of Jobs","Wall Duration","Delta jobs","Delta duration")
         num_header = 2
