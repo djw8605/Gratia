@@ -98,7 +98,7 @@ function stop_tomcat {
 #-----------------
 function shutdown_local_tomcat {
     echo "... finding tomcat pid for later verfication that ports are free"
-    pid="$(ps axxx |grep $init_service |grep Dcom.sun.management.jmxremote.port  |egrep -v grep |awk '{print $1}')"
+    pid="$(ps axxx |grep $init_service |grep Dcom.sun.management.jmxremote  |egrep -v grep |awk '{print $1}')"
     if [ -z "${pid}" ];then
       echo "... tomcat process does not appear to be running"
       return
