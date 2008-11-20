@@ -83,7 +83,7 @@ Modes for running the script:
 2. Expert user mode.  
      $PGM --instance TOMCAT_INSTANCE 
           --source SOURCE_DIR 
-          --pswd ROOT_PSWD
+          --pswd ROOT_PSWD | --mysql MYSQL_FILE
           [--force-log4j]
    For those that disdain questions and answers. This mode eliminates some
    questions.  There will be prompts for starting the service and a few 
@@ -95,8 +95,7 @@ Modes for running the script:
    individual arguments.
      $PGM --instance TOMCAT_INSTANCE 
           --source SOURCE_DIR 
-          --pswd ROOT_PSWD
-          --daily  EMAIL_ADDRESS(ES) 
+          --daily EMAIL_ADDRESS(ES) 
           --mysql MYSQL_FILE
           --force-log4j
 
@@ -108,14 +107,18 @@ A major assumption it makes is that all tomcat collectors are in $tomcat_dir.
 If this is not true, you may use the command-line option \"--tomcat-dir <dir>\".
 
  No prompt mode   Prompt mode questions
- --------------   --------------------- 
- --instance       tomcat instance (e.g, tomcat-itb_gratia_itb)
+ --------------   ---------------------
+
+ --config         N/A. Used in only expert or cron modes to specify a
+                  different .dat file from which to obtain the instance
+                  configuration.
+ --instance       tomcat instance (e.g, tomcat-itb_gratia_itb).
  --source         source directory
                     - daily builds..... /home/gratia/gratia-builds
                     - release builds... /home/gratia/gratia-releases
                     - other............ specified by you
- --pswd           mysql root password
- --daily          do you want to start the tomcat/collector service
+ --pswd           mysql root password.
+ --daily          Do you want to start the tomcat/collector service?
  --mysql          DB MySql file containing the password for upgrades 
                   (required when running from cron and when used the 
                   --pswd argument is ignored)
@@ -337,7 +340,7 @@ function install_upgrade {
   if [ "$mysql_file" != "NONE" ];then
     pswd="$(cat $mysql_file)"
   fi
-  runit "$pgm -p ${tomcat_dir} -d $pswd -S $source ${force}-s $(echo $tomcat|cut -d'-' -f2-)"
+  runit "$pgm $ugl_config_arg-p ${tomcat_dir} -d $pswd -S $source ${force}-s $(echo $tomcat|cut -d'-' -f2-)"
   logit "Install was successful"
   sleep 3
 }
@@ -672,7 +675,7 @@ $(cat $tomcat_dir/$tomcat/gratia/gratia-release)
 #----------------------------
 function find_configured_user_set_email {
   [[ -n "$recipients" ]] && return
-  local user=`$source/common/configuration/configure-collector -p ${tomcat_dir} --obtain-config-item tomcat_user $(echo $tomcat|cut -d'-' -f2-) | sed -ne 's/^config: tomcat_user = //p'`
+  local user=`$source/common/configuration/configure-collector $cc_config_arg-p ${tomcat_dir} --obtain-config-item tomcat_user $(echo $tomcat|cut -d'-' -f2-) | sed -ne 's/^config: tomcat_user = //p'`
   if [[ $user != "root" ]] && [[ $user != "daemon" ]]; then
     if [[ -n "$user" ]]; then
       echo "Setting recipients for upgrade status email to $user@fnal.gov based on configured user $user"
@@ -713,11 +716,17 @@ force_log4j="--force-log4j"
 while test "x$1" != "x"; do
    if [ "$1" == "--help" ];then
         HELP="yes";shift
+   elif [ "$1" == "--config" ]; then
+        cc_config_arg="-c $2 "
+        ugl_config_arg="-i $2 "
+        shift;shift
    elif [ "$1" == "--instance" ];then
         tomcat="$2";shift;shift
    elif [ "$1" == "--source" ];then 
         source="$2";shift;shift
    elif [ "$1" == "--pswd" ];then 
+        pswd="$2";shift;shift
+   elif [ "$1" == "--pwd" ];then 
         pswd="$2";shift;shift
    elif [ "$1" == "--daily" ];then
         daily="yes";recipients="$2";shift;shift
@@ -751,7 +760,7 @@ verify_root_user
 #-- check for Q/A mode or required args---
 if [ "$tomcat" != "NONE" ] && \
    [ "$source" != "NONE" ] && \
-   [ "$pswd"   != "NONE" ];then
+   [ "$pswd"   != "NONE" -o "$mysql_file" != "NONE" ];then
   prompt=no
 elif [ "$tomcat" = "NONE" ] && \
      [ "$source" = "NONE" ] && \
@@ -790,8 +799,8 @@ while
  [ "$qa_mode" = "yes" ]
 do 
   case $prompt in 
-    "yes" ) qa_mode="yes"  # allows multiple upgrades to be performed
-            process_in_prompt_mode
+   "yes" ) qa_mode="yes"  # allows multiple upgrades to be performed
+           process_in_prompt_mode
             ;;
    "no"  ) qa_mode="no"   # forces a single upgrade to be performed
            process_in_no_prompt_mode
