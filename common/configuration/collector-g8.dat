@@ -1,0 +1,124 @@
+(
+ fermi_osg =>
+ { tomcat_user => "daemon",
+   tomcat_group => "daemon",
+   http_port => 8880,
+   ssl_port => 8845,
+   rmi_port => 17000,
+   server_port => 8104,
+   db_schema => "old_fermi_osg",
+   remote_host => "gratia-fermi.fnal.gov",
+   collector_host => "gratia-fermi.fnal.gov",
+   max_perm_size => "256m",
+   max_heap_size => "1024m",
+   "properties.attributes" =>
+   {
+    "monitor.from.address" => 'gratia-operation@opensciencegrid.org',
+    "monitor.to.address.0" => 'gratia-root@fnal.gov',
+    "maintain.history.log" => 75,
+    "monitor.listener.wait" => 1440,
+    "service.admin.DN.0" => '/DC=org/DC=doegrids/OU=Services/CN=gratia08.fnal.gov',
+    "service.admin.FQAN.0" => "/fermilab/Role=GratiaAdmin",
+    "service.lifetime.JobUsageRecord" => "1 year", # Safety
+    "service.lifetime.MetricRecord" => "1 month",
+   }
+ },
+ fermi_itb =>
+ { tomcat_user => "daemon",
+   tomcat_group => "daemon",
+   http_port => 8881,
+   ssl_port => 8850,
+   rmi_port => 18000,
+   server_port => 8114,
+   db_schema => "old_fermi_itb",
+   remote_host => "gratia-fermi.fnal.gov",
+   collector_host => "gratia-fermi.fnal.gov",
+   "properties.attributes" =>
+   {
+    "monitor.from.address" => 'gratia-operation@opensciencegrid.org',
+    "monitor.to.address.0" => 'gratia-root@fnal.gov',
+    "maintain.history.log" => 75,
+    "monitor.listener.wait" => 1440,
+    "service.admin.DN.0" => '/DC=org/DC=doegrids/OU=Services/CN=gratia08.fnal.gov',
+    "service.admin.FQAN.0" => "/fermilab/Role=GratiaAdmin",
+    "service.lifetime.JobUsageRecord" => "1 year",
+   }
+ },
+ ps =>
+ { tomcat_user => "daemon",
+   tomcat_group => "daemon",
+   http_port => 8882,
+   ssl_port => 8855,
+   rmi_port => 19000,
+   server_port => 8124,
+   db_schema => "old_gratia_psacct",
+   UserConfig => "UserConfig_pacct.xml",
+   remote_host => "gratia-fermi.fnal.gov",
+   collector_host => "gratia-fermi.fnal.gov",
+   staticReports => 0,
+   max_perm_size => "256m",
+   max_heap_size => "1024m",
+   "properties.attributes" =>
+   {
+    "monitor.from.address" => 'gratia-operation@opensciencegrid.org',
+    "monitor.to.address.0" => 'gratia-root@fnal.gov',
+    "gratia.database.useJobUsageSiteName" => 1,
+    "gratia.database.wantNodeSummary" => 1,
+    "maintain.history.log" => 75,
+    "service.admin.DN.0" => '/DC=org/DC=doegrids/OU=Services/CN=gratia08.fnal.gov',
+    "service.admin.FQAN.0" => "/fermilab/Role=GratiaAdmin",
+   },
+ },
+ qcd =>
+ { tomcat_user => "daemon",
+   tomcat_group => "daemon",
+   http_port => 8883,
+   ssl_port => 8865,
+   rmi_port => 21000,
+   server_port => 8144,
+   db_schema => "old_gratia_qcd",
+   remote_host => "gratia-fermi.fnal.gov",
+   collector_host => "gratia-fermi.fnal.gov",
+   max_perm_size => "256m",
+   max_heap_size => "1024m",
+   "properties.attributes" =>
+   {
+    "monitor.from.address" => 'gratia-operation@opensciencegrid.org',
+    "monitor.to.address.0" => 'gratia-root@fnal.gov',
+    "maintain.history.log" => 75,
+    "service.admin.DN.0" => '/DC=org/DC=doegrids/OU=Services/CN=gratia08.fnal.gov',
+    "service.admin.FQAN.0" => "/fermilab/Role=GratiaAdmin",
+    "service.lifetime.JobUsageRecord" => "UNLIMITED",
+   }
+ },
+ fermi_transfer =>
+ { tomcat_user => "daemon",
+   tomcat_group => "daemon",
+   http_port => 8886,
+   ssl_port => 8840,
+   rmi_port => 22000,
+   server_port => 8154,
+   db_schema => "old_fermi_transfer",
+   remote_host => "gratia-fermi.fnal.gov",
+   collector_host => "gratia-fermi.fnal.gov",
+   staticReports => 0,
+   "properties.attributes" =>
+   {
+    "monitor.from.address" => 'gratia-operation@opensciencegrid.org',
+    "monitor.to.address.0" => 'gratia-root@fnal.gov',
+    "monitor.listener.threads" => 'false',
+    "maintain.history.log" => 75,
+    "monitor.listener.wait" => 240,
+    "service.admin.DN.0" => '/DC=org/DC=doegrids/OU=Services/CN=gratia08.fnal.gov',
+    "service.admin.FQAN.0" => "/fermilab/Role=GratiaAdmin",
+    "service.lifetime.JobUsageRecord" => "1 year",
+    "service.listener.threads" => 1,
+   }
+ }
+);
+
+
+### Local Variables:
+### mode: cperl
+### End:
+

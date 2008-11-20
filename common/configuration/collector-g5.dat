@@ -1,0 +1,109 @@
+(
+ fermi_osg =>
+ { tomcat_user => "daemon",
+   tomcat_group => "daemon",
+   http_port => 80,
+   ssl_port => 443,
+   rmi_port => 17000,
+   server_port => 8104,
+   db_schema => "fermi_osg",
+   max_perm_size => "256m",
+   max_heap_size => "1024m",
+   "properties.attributes" =>
+   {
+    "monitor.from.address" => 'gratia-operation@opensciencegrid.org',
+    "monitor.to.address.0" => 'gratia-root@fnal.gov',
+    "maintain.history.log" => 75,
+    "monitor.listener.wait" => 1440,
+    "service.admin.FQAN.0" => "/fermilab/Role=GratiaAdmin",
+    "service.lifetime.JobUsageRecord" => "1 year", # Safety
+    "service.lifetime.MetricRecord" => "1 month",
+   }
+ },
+ fermi_itb =>
+ { tomcat_user => "daemon",
+   tomcat_group => "daemon",
+   http_port => 80,
+   ssl_port => 443,
+   rmi_port => 17000,
+   server_port => 8104,
+   db_schema => "fermi_itb",
+   "properties.attributes" =>
+   {
+    "monitor.from.address" => 'gratia-operation@opensciencegrid.org',
+    "monitor.to.address.0" => 'gratia-root@fnal.gov',
+    "maintain.history.log" => 75,
+    "monitor.listener.wait" => 1440,
+    "service.admin.FQAN.0" => "/fermilab/Role=GratiaAdmin",
+    "service.lifetime.JobUsageRecord" => "1 year",
+   }
+ },
+ ps =>
+ { tomcat_user => "daemon",
+   tomcat_group => "daemon",
+   http_port => 80,
+   ssl_port => 443,
+   rmi_port => 17000,
+   server_port => 8104,
+   db_schema => "gratia_psacct",
+   UserConfig => "UserConfig_pacct.xml",
+   staticReports => 0,
+   max_perm_size => "256m",
+   max_heap_size => "1024m",
+   "properties.attributes" =>
+   {
+    "monitor.from.address" => 'gratia-operation@opensciencegrid.org',
+    "monitor.to.address.0" => 'gratia-root@fnal.gov',
+    "gratia.database.useJobUsageSiteName" => 1,
+    "gratia.database.wantNodeSummary" => 1,
+    "maintain.history.log" => 75,
+    "service.admin.FQAN.0" => "/fermilab/Role=GratiaAdmin",
+   },
+ },
+ qcd =>
+ { tomcat_user => "daemon",
+   tomcat_group => "daemon",
+   http_port => 80,
+   ssl_port => 443,
+   rmi_port => 17000,
+   server_port => 8104,
+   db_schema => "gratia_qcd",
+   max_perm_size => "256m",
+   max_heap_size => "1024m",
+   "properties.attributes" =>
+   {
+    "monitor.from.address" => 'gratia-operation@opensciencegrid.org',
+    "monitor.to.address.0" => 'gratia-root@fnal.gov',
+    "maintain.history.log" => 75,
+    "service.admin.FQAN.0" => "/fermilab/Role=GratiaAdmin",
+    "service.lifetime.JobUsageRecord" => "UNLIMITED",
+   }
+ },
+ fermi_transfer =>
+ { tomcat_user => "daemon",
+   tomcat_group => "daemon",
+   http_port => 80,
+   ssl_port => 443,
+   rmi_port => 17000,
+   server_port => 8104,
+   db_schema => "fermi_transfer",
+   staticReports => 0,
+   "properties.attributes" =>
+   {
+    "monitor.from.address" => 'gratia-operation@opensciencegrid.org',
+    "monitor.to.address.0" => 'gratia-root@fnal.gov',
+    "monitor.listener.threads" => 'false',
+    "maintain.history.log" => 75,
+    "monitor.listener.wait" => 240,
+    "service.admin.FQAN.0" => "/fermilab/Role=GratiaAdmin",
+    "service.lifetime.JobUsageRecord" => "1 year",
+    "service.listener.threads" => 1,
+   }
+ }
+);
+
+
+
+### Local Variables:
+### mode: cperl
+### End:
