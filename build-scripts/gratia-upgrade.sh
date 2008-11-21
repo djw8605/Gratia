@@ -38,21 +38,28 @@ function usage_error {
 }
 #------------------------------------
 function runit {
-  cmd="$1"
-  logit "...RUNNING: $cmd"
+  local cmd="$1"
+  logit "... RUNNING: $cmd"
+  export TMP=${TMPDIR:-/tmp}/gratia-upgrade.sh.$$
+  trap "[[ -n \"$TMP\" ]] && rm \"$TMP\" 2>/dev/null" EXIT
   case $daily in
    "yes" ) $cmd >>$logfile 2>&1;rtn=$?
-           if [ "$rtn" != "0" ];then
-             logerr "Command failed: $cmd"
-           fi
+           echo $rtn > $TMP
           ;;
        * ) ( $cmd;rtn=$?
-            if [ "$rtn" != "0" ];then
-              logerr "Command failed: $cmd"
-              exit 1  # because it is in a child shell
-            fi ) 2>&1 | tee -a $logfile
+             echo $rtn > $TMP ) 2>&1 | tee -a $logfile
            ;;
   esac
+  local rtn=`cat $TMP`
+  rm -f "$TMP"
+  if [[ -n "$rtn" ]]; then
+    if [ "$rtn" != "0" ]; then
+      logerr "Command failed with non-zero exit code ($rtn): $cmd"
+    fi
+  else
+    logerr "Internal system error executing command: $cmd"
+  fi
+  logit "... successfully executed command"
 }
 #----------------------
 function try_again {
@@ -312,18 +319,20 @@ function clean_log_directory {
     mkdir $log_backup_dir >/dev/null 2>&1
   fi
   tomcat_log_dir=$tomcat_dir/$tomcat/logs
+  if [ ! -d "$tomcat_log_dir" ];then
+    logit "... the tomcat log directory does not exist ($tomcat_log_dir)... skipping this."
+    return
+  fi
+  if [ "$(ls  $tomcat_log_dir |wc -l|sed -e's/ //')" = "0" ];then
+    logit "... there are no log files to process.. skipping this."
+    return
+  fi
+  sleep 2
   prev_dir=$(pwd)
   cd $tomcat_log_dir
-  if [ ! -d "$tomcat_log_dir" ];then
-    logerr "the tomcat log directory does not exist ($tomcat_log_dir)"
-  fi
-  if [ "$PWD" != "$tomcat_log_dir" ];then
-    logerr "We are not in the log directory ($PWD)"
-  fi
   logit "... tar'ing and cleaning log files in $PWD:
 $(ls -l)
 "
-  sleep 2
   tar zcf $backup_file *
   rm -f $tomcat_log_dir/*
   logit "... all done
