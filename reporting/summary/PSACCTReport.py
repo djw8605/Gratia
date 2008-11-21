@@ -5,7 +5,7 @@
 #
 # library to create simple report using the Gratia psacct database
 #
-#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.48 2008-11-20 22:46:18 pcanal Exp $
+#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.49 2008-11-21 17:08:16 pcanal Exp $
 
 import time
 import datetime
@@ -657,7 +657,7 @@ class DailySiteJobStatusConf:
            self.VOName = VOName
            if (groupby == "VO"):
                self.GroupBy = "VO.VOName"
-               self.headers = ("VO","Wall Succ. Rate","Wall Success","Wall Failed","Success Rate","Success","Failed")
+               self.headers = ("VO","Wall Succ Rate","Wall Success","Wall Failed","Success Rate","Success","Failed")
                self.totalheaders = ["All VOs"]
            elif (groupby == "Both"):
                self.formats["csv"] = ",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""
@@ -955,9 +955,9 @@ def GenericDailyStatus(what, when = datetime.date.today(), output = "text"):
                 else:
                    totalwrate = totalsuccess*100/totaljobs
                 if (what.Both):
-                    print "    ", what.formats[output] % ( what.totalheaders[0], what.totalheaders[1], str(totalwrate) + " %", niceNum(totalws),niceNum(totalwf), str(totalsuccess*100/totaljobs) + " %", totalsuccess,totalfailed)
+                    print "    ", what.formats[output] % ( what.totalheaders[0], what.totalheaders[1], str(totalwrate) + " %", niceNum(totalws),niceNum(totalwf), str(totalsuccess*100/totaljobs) + " %", niceNum(totalsuccess),niceNum(totalfailed))
                 else:
-                    print "    ", what.formats[output] % ( what.totalheaders[0], str(totalwrate) + " %", niceNum(totalws),niceNum(totalwf), str(totalsuccess*100/totaljobs) + " %", totalsuccess,totalfailed)
+                    print "    ", what.formats[output] % ( what.totalheaders[0], str(totalwrate) + " %", niceNum(totalws),niceNum(totalwf), str(totalsuccess*100/totaljobs) + " %",niceNum(totalsuccess),niceNum(totalfailed))
                 print what.lines[output]
 
         return result
@@ -2490,3 +2490,11 @@ def CMSProd(range_end = datetime.date.today(),
     print "Production: ",niceNum(wall)
     print "Users     : ",niceNum(user)
     print "Total     : ",niceNum(total)
+
+#
+#
+def TESTER():
+    print """select S.VOName,sum(Njobs),sum(WallDuration) from 
+(select VC.corrid, VO.VOName from VO, VONameCorrection VC where VC.void = VO.void and VO.VOName in ("usatlas","chen") ) S
+left join (select VOcorrid,sum(njobs) as njobs,sum(WallDuration) as WallDuration from MasterSummaryData M where '2008/11/10' <= EndTime and EndTime <= '2008/11/11' group by VOcorrid ) M on S.corrid = M.VOcorrid
+group by S.VOName"""

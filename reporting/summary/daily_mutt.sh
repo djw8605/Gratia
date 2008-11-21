@@ -63,11 +63,16 @@ function sendto {
     echo >> $txtfile
     eval $1 --output=text $when >> $txtfile
 
+    echo "$subject" >> daily.check
+    grep All $txtfile >> daily.check
+
     echo "For more information see:,$WEBLOC" > $csvfile
     echo >> $csvfile
     eval $1 --output=csv $when >>  $csvfile
     mutt -F./muttrc -a $csvfile -s "$subject" $MAILTO < $txtfile
 }
+
+rm -f daily.check
 
 sendto ./daily $whenarg ${WORK_DIR}/report "$MAIL_MSG"
 sendto ./dailyFromSummary $whenarg ${WORK_DIR}/summary_report "$SUM_MAIL_MSG"

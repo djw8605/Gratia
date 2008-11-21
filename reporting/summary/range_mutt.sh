@@ -89,6 +89,9 @@ function sendto {
     echo >> $txtfile
     eval $1 --output=text $rep_args >> $txtfile
 
+    echo "$subject" >> range.check
+    grep All $txtfile >> range.check
+
     echo "For more information see:,$WEBLOC" > $csvfile
     echo >> $csvfile
     eval $1 --output=csv $rep_args >>  $csvfile
@@ -101,6 +104,7 @@ function sendto {
    
 }
 
+rm -f range.check
 
 sendto ./range "$ExtraArgs $whenarg" ${WORK_DIR}/report "$MAIL_MSG" $MAILTO
 sendto ./reporting "$ExtraArgs $whenarg" ${WORK_DIR}/report "$REPORTING_MAIL_MSG" $MAILTO
