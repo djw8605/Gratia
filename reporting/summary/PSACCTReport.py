@@ -5,7 +5,7 @@
 #
 # library to create simple report using the Gratia psacct database
 #
-#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.49 2008-11-21 17:08:16 pcanal Exp $
+#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.50 2008-11-21 17:45:32 pcanal Exp $
 
 import time
 import datetime
@@ -306,6 +306,10 @@ def GetListOfOSGSites():
         cmd = "wget -q -O - http://oim.grid.iu.edu/pub/resource/show.php?format=plain-text | cut -d, -f4,1,14,8 | grep -e ',OSG,\(CE\|Hidden CE/SE\) [^,]*,1' | cut -d, -f1"
         #print "Will execute: " + cmd;
         allSites = commands.getoutput(cmd).split("\n");
+
+        # Call it twice to avoid a 'bug' in wget where on of the row is missing the first few characters.
+        allSites = commands.getoutput(cmd).split("\n");
+      
         #print allSites;
         return allSites;
 
@@ -317,7 +321,8 @@ def GetListOfRegisteredVO():
         allVos = commands.getoutput(cmd).split("\n");
         ret = []
         for v in allVos:
-           ret.append( v.lower() );
+           if (v != "ATLAS" and v!=""):
+              ret.append( v.lower() );
         # And hand add a few 'exceptions!"
         ret.append("usatlas")
         ret.append("minos")
@@ -2205,6 +2210,31 @@ where currentTime """+test+"""  \"""" + DateToString(begin) + """\" order by cur
 
     return RunQueryAndSplit(select);
 
+def GetReportingVOs(begin,end):
+    schema = "gratia.";
+
+    select = """\
+select distinct VOName from """+schema+"""VOProbeSummary V where VOName != \"unknown\" and 
+            EndTime >= \"""" + DateToString(begin) + """\" and
+            EndTime < \"""" + DateToString(end) + """\"
+            order by VOName
+            """
+    #print "Query = " + select;
+
+    return RunQueryAndSplit(select);
+
+def GetLastReportingVOs(when):
+    schema = "gratia.";
+
+    select = """\
+select distinct VOName from """+schema+"""VOProbeSummary V where VOName != \"unknown\" and 
+            EndTime >= \"""" + DateToString(when) + """\" 
+            order by VOName
+            """
+    #print "Query = " + select;
+
+    return RunQueryAndSplit(select);
+
 def GetSiteLastActivity(begin):
     schema = "gratia.";
 
@@ -2276,9 +2306,9 @@ def RangeSummup(range_end = datetime.date.today(),
     timediff = range_end - range_begin
 
     allSites = GetListOfOSGSites();
-    # Call it twice to avoid a 'bug' in wget where on of the row is missing the first few characters.
-    allSites = GetListOfOSGSites();
+    regVOs = GetListOfRegisteredVO();
 
+    reportingVOs = GetReportingVOs(range_begin,range_end)
     reportingSitesDate = GetSiteLastReportingDate(range_begin,True)
     pingSites = []
     for data in reportingSitesDate:
@@ -2286,7 +2316,6 @@ def RangeSummup(range_end = datetime.date.today(),
         pingSites.append(name)
 
     exceptionSites = ['BNL_ATLAS_1', 'BNL_ATLAS_2', 'USCMS-FNAL-WC1-CE2', 'USCMS-FNAL-WC1-CE3', 'USCMS-FNAL-WC1-CE4', 'BNL_LOCAL', 'BNL_OSG', 'BNL_PANDA', 'GLOW-CMS', 'UCSDT2-B']
-
 
     allSites = [name for name in allSites if name not in exceptionSites]
     reportingSites = GetListOfReportingSites(range_begin,range_end);
@@ -2342,7 +2371,15 @@ def RangeSummup(range_end = datetime.date.today(),
     print "\nThe non reporting sites are: \n"+prettyList(missingSites);
     print "\nThe sanctioned non registered sites are: \n"+prettyList(knownExtras)
     print "\nThe non registered sites are: \n"+prettyList(extraSites)
+    
+    expectedNoActivity = ['miniboone','sdss']
+    emptyVO = [name for name in regVOs if name not in reportingVOs and name not in expectedNoActivity]
+    nonregVO = [name for name in reportingVOs if name not in regVOs]
+    print "\nThe registered VOs with no recent activity are:\n"+prettyList(emptyVO)
+    print "\nThe non-registered VOs with recent activity are:\n"+prettyList(nonregVO)
+    
     print "\n"
+
     return missingSites
 
 def NonReportingSites(
@@ -2353,12 +2390,12 @@ def NonReportingSites(
     print "This report indicates which sites Gratia has heard from or have known activity\nsince %s (midnight UTC)\n" % ( DateToString(when,False) )
 
     allSites = GetListOfOSGSites();
-    # Call it twice to avoid a 'bug' in wget where on of the row is missing the first few characters.
-    allSites = GetListOfOSGSites();
+    regVOs = GetListOfRegisteredVO();
  
     exceptionSites = ['BNL_ATLAS_1', 'BNL_ATLAS_2', 'USCMS-FNAL-WC1-CE2', 'USCMS-FNAL-WC1-CE3', 'USCMS-FNAL-WC1-CE4', 'BNL_LOCAL', 'BNL_OSG', 'BNL_PANDA', 'GLOW-CMS', 'UCSDT2-B', 'Purdue-Lear' ]
 
     allSites = [name for name in allSites if name not in exceptionSites]
+    reportingVOs = GetLastReportingVOs(when)
     reportingSitesDate = GetSiteLastReportingDate(when,True)
     stoppedSitesDate = GetSiteLastReportingDate(when,False)
     activitySitesDate = GetSiteLastActivity(when);
@@ -2414,6 +2451,12 @@ def NonReportingSites(
     print "\nThe sanctioned non registered sites are: \n"+prettyList(knownExtras)
     print "\nThe non registered sites are: \n"+prettyList(extraSites)
 
+    expectedNoActivity = ['miniboone','sdss']
+    emptyVO = [name for name in regVOs if name not in reportingVOs and name not in expectedNoActivity]
+    nonregVO = [name for name in reportingVOs if name not in regVOs]
+    print "\nThe registered VOs with no recent activity are:\n"+prettyList(emptyVO)
+    print "\nThe non-registered VOs with recent activity are:\n"+prettyList(nonregVO)
+
     print "\nThe non reporting sites are: " # \n"+prettyList(missingSites)
     for name in missingSites:
         if len(name)>15:
@@ -2442,6 +2485,9 @@ def NonReportingSites(
             else:
                 delim = "\t\t\t"
             print name+":"+delim+lastreport
+            
+            
+    
     return missingSites
 
 def LongJobs(range_end = datetime.date.today(),
