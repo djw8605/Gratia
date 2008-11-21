@@ -382,7 +382,14 @@ sub configure_apel_directory {
   unless ( defined $gid ) {
     print  STDERR "ERROR: $type group ($apel_group) not in /etc/group file\n";exit 1;
   } 
-  chown $uid,$gid, $data_directory;
+  my $status = system("chown -R $uid.$gid $data_directory");
+  if ($status == 0) {
+    system("chmod -R g+w $data_directory");
+  } else {
+    print STDERR "FAILED!\n";
+    print STDERR "ERROR changing ownership of $data_directory\n";
+    exit 1
+  }
   print STDERR "INFO: $type complete\n"; 
 }
 
