@@ -320,8 +320,8 @@ function clean_log_directory {
   fi
   tomcat_log_dir=$tomcat_dir/$tomcat/logs
   if [ ! -d "$tomcat_log_dir" ];then
-    logit "... the tomcat log directory does not exist ($tomcat_log_dir)... skipping this."
-    return
+    logit "... the tomcat log directory does not exist ($tomcat_log_dir)... creating one."
+    runit "mkdir $tomcat_log_dir"
   fi
   if [ "$(ls  $tomcat_log_dir |wc -l|sed -e's/ //')" = "0" ];then
     logit "... there are no log files to process.. skipping this."
