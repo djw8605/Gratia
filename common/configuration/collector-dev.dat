@@ -253,7 +253,9 @@
                 "service.admin.FQAN.1" => "/fermilab/Role=GratiaDeveloper",
                }
              },
- weigand => { http_port => 8887,
+ weigand => { tomcat_user => "weigand",
+              tomcat_group => "gratia",
+              http_port => 8887,
               ssl_port => 8867,
               rmi_port => 24000,
               jmx_port => 8074,
