@@ -368,28 +368,23 @@ sub configure_apel_directory {
       print  STDERR "ERROR: $type Failed to make directory - $data_directory\n"; exit 1;
     }
   }
-  my $owner = $collector_config->{tomcat_user};
-  unless ( defined $owner ) {
-    $owner = getlogin();
-  }
-  print STDERR "INFO: $type setting ownership($owner.$apel_group)/permissions(0775)\n";
+  print STDERR "INFO: $type setting permissions(0775) on $data_directory\n";
   chmod 0775, $data_directory;
-  my $uid = getpwnam($owner);
+  #-- change group --
+  print STDERR "INFO: $type setting group($apel_group) on $data_directory\n";
   my $gid = getgrnam($apel_group);
-  unless ( defined $uid ) {
-    print  STDERR "ERROR: $type owner ($owner) not in /etc/passwd file\n";exit 1;
-  } 
   unless ( defined $gid ) {
     print  STDERR "ERROR: $type group ($apel_group) not in /etc/group file\n";exit 1;
   } 
-  my $status = system("chown -R $uid.$gid $data_directory");
-  if ($status == 0) {
-    system("chmod -R g+w $data_directory");
-  } else {
-    print STDERR "FAILED!\n";
-    print STDERR "ERROR changing ownership of $data_directory\n";
-    exit 1
+  my $status = system("chgrp -R $apel_group $data_directory");
+  if ($status != 0) {
+    print STDERR "ERROR: $type failed changing group ($apel_group) of $data_directory\n"; exit 1
   }
+  #-- change permissions --
+  $status = system("chmod -R g+w $data_directory");
+  if ($status != 0) {
+    print STDERR "ERROR: $type failed changing permissions of $data_directory files\n"; exit 1
+  } 
   print STDERR "INFO: $type complete\n"; 
 }
 
