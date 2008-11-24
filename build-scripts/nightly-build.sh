@@ -222,7 +222,7 @@ PGM=$(basename $0)
 DATE=$(date '+%Y-%m-%d')
 
 #-- defaults ---
-MAILTO="gratia-operation@fnal.gov"
+MAILTO="gratia-builds@fnal.gov"
 buildHOME=$HOME
 files=4
 set_build_area
