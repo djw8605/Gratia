@@ -30,6 +30,8 @@
    ssl_port => 8850,
    rmi_port => 18000,
    server_port => 8114,
+   max_perm_size => "256m",
+   max_heap_size => "1024m",
    db_schema => "old_fermi_itb",
    remote_host => "gratia-fermi.fnal.gov",
    collector_host => "gratia-fermi.fnal.gov",

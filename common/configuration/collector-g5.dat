@@ -28,6 +28,8 @@
    rmi_port => 17000,
    server_port => 8104,
    db_schema => "fermi_itb",
+   max_perm_size => "256m",
+   max_heap_size => "1024m",
    "properties.attributes" =>
    {
     "monitor.from.address" => 'gratia-operation@opensciencegrid.org',
