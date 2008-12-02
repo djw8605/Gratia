@@ -203,6 +203,9 @@
 #	WT2		2171	2412	-9
 #	SWT2_CPB	1877	1628	15
 #       --------------------------------------
+#   12/1/08
+#	Updates based on http://t2.unl.edu/gratia/site_normalization
+#            Nebraska 2027   previously 1571
 #    
 #    
 ##################################################################
@@ -214,7 +217,7 @@ USCMS-FNAL-WC1-CE   1809
 CIT_CMS_T2          2398       
 GLOW                2166
 MIT_CMS             1872
-Nebraska            1571
+Nebraska            2027
 Purdue-RCAC         2883
 Purdue-Steele       3196
 UCSDT2              2871
