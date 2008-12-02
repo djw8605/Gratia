@@ -243,11 +243,14 @@ public class DatabaseMaintenance {
         AddIndex("MetricRecord_Meta", false, "index13", "ServerDate");
         AddIndex("MetricRecord_Meta", false, "probeid", "probeid");
         AddIndex("MetricRecord", false, "MetricName", "MetricName");
-        AddIndex("MetricRecord", false, "MetricType", "MetricType");
         AddIndex("MetricRecord", false, "MetricStatus", "MetricStatus");
+        AddIndex("MetricRecord", false, "Timestamp", "Timestamp");
         AddIndex("MetricRecord", false, "ServiceType", "ServiceType");
-        AddIndex("MetricRecord", false, "VoName", "VoName");
+        AddIndex("MetricRecord", false, "ServiceUri", "ServiceUri");
+        AddIndex("MetricRecord", false, "GatheredAt", "GatheredAt"); 
         AddIndex("MetricRecord", false, "HostName", "HostName");
+        AddIndex("MetricRecord", false, "MetricType", "MetricType");
+        AddIndex("MetricRecord", false, "VoName", "VoName");
 
         // Index on DupRecord
         AddIndex("DupRecord",false,"index02","eventdate");
