@@ -67,10 +67,20 @@
     <servlet>
         <servlet-name>metricreplicationtable</servlet-name>
         <servlet-class>net.sf.gratia.administration.ReplicationTable</servlet-class>
-        <load-on-startup>1</load-on-startup>
+        <load-on-startup>2</load-on-startup>
         <init-param>
            <param-name>RecordType</param-name>
            <param-value>MetricRecord</param-value>
+         </init-param>
+    </servlet>
+
+    <servlet>
+        <servlet-name>probedetailsreplicationtable</servlet-name>
+        <servlet-class>net.sf.gratia.administration.ReplicationTable</servlet-class>
+        <load-on-startup>2</load-on-startup>
+        <init-param>
+           <param-name>RecordType</param-name>
+           <param-value>ProbeDetails</param-value>
          </init-param>
     </servlet>
 
@@ -143,6 +153,11 @@
     <servlet-mapping>
         <servlet-name>metricreplicationtable</servlet-name>
         <url-pattern>/metricreplicationtable.html</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>probedetailsreplicationtable</servlet-name>
+        <url-pattern>/probedetailsreplicationtable.html</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>

@@ -57,6 +57,7 @@
 	<hr><label class="menuGroup">Replication</label> <br />
 	<a href="./replicationtable.html" target="adminContent" class="<%=menuClass%>">Job Usage Replication</a><br />
 	<a href="./metricreplicationtable.html" target="adminContent" class="<%=menuClass%>">Metric Replication</a><br />
+	<a href="./probedetailsreplicationtable.html" target="adminContent" class="<%=menuClass%>">ProbeDetails Replication</a><br />
 
 
 	<hr><label class="menuGroup">System</label> <br />

@@ -26,10 +26,14 @@
 %>
 <h1 align="center">Replication Instructions</h1>
 <p>Gratia has the ability to replicate its database contents 
-(JobUsageRecords and Metric data) 
+(JobUsageRecords, Metric and ProbeDetails data) 
 to another instance of Gratia running "out there somewhere". 
 This replication service can be found on the gratia-administration web service 
 menu.</p>
+
+<p>NB: when deciding what (if any data) to replicate: if you replicate
+JobUsage or Metric data for a particular probe, please also replicate
+ProbeDetails data for that same probe.</p>
 
 <p>Assuming your database is the source, and the OSG/ITB Gratia collector at 
 Fermilab is the target:</p>
