@@ -264,12 +264,13 @@ public class ProbeDetails extends Record
     
     public void AttachContent( org.hibernate.Session session ) throws Exception
     {
-       for (Iterator i = this.SoftwareMap.values().iterator(); i.hasNext(); )
-           {
-               Software s = (Software)i.next();
+        Iterator i = this.SoftwareMap.values().iterator();
+        while ( i.hasNext() )
+            {
+                Software s = (Software)i.next();
                
-          s.Attach(session);
-           }
+                s.Attach(session);
+            }
     }
     
     public String computemd5() throws Exception
