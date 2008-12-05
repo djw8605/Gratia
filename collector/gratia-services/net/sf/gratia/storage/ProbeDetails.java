@@ -250,7 +250,7 @@ public class ProbeDetails extends Record
     public String asXML()
     {
         String output = ""; // ("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-        output = output + ("<ProbeDetails xmlns:urwg=\"http://www.gridforum.org/2003/ur-wg\">\n>");
+        output = output + ("<ProbeDetails xmlns:urwg=\"http://www.gridforum.org/2003/ur-wg\">\n");
         if (RecordIdentity != null) output = output + RecordIdentity.asXml();
         if (ProbeName != null) output = output + ProbeName.asXml("ProbeName");
         if (SiteName != null) output = output + SiteName.asXml("SiteName");
@@ -258,7 +258,7 @@ public class ProbeDetails extends Record
 
         if (SoftwareMap != null) output = output + mapAsXml("", SoftwareMap);
         
-        output = output + ("</ProbeDetails\n");
+        output = output + ("</ProbeDetails>\n");
         return output;
     }
     
