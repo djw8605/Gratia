@@ -415,6 +415,7 @@
         <Width>0.0</Width>
         <Height>0.0</Height>
       </Bounds>
+      <Stretch>Both</Stretch>
       <Insets>
         <Top>3.0</Top>
         <Left>3.0</Left>
@@ -580,7 +581,7 @@
       <Left>0.0</Left>
       <Top>0.0</Top>
       <Width>480.0</Width>
-      <Height>550.0</Height>
+      <Height>800.0</Height>
     </Bounds>
     <Insets>
       <Top>3.0</Top>
@@ -1758,7 +1759,7 @@ function beforeDrawAxisTitle( axis, label, context )
                 </list-property>
             </structure>
             <property name="dataSet">reportsProcedure</property>
-            <property name="height">550pt</property>
+            <property name="height">800pt</property>
             <property name="width">640px</property>
             <list-property name="paramBindings">
                 <structure>
