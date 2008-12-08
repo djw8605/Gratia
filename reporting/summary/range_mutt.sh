@@ -70,6 +70,7 @@ WORK_DIR=workdir.${RANDOM}
 mkdir $WORK_DIR
 
 function sendto {
+
     cmd=$1
     rep_args=$2
     txtfile=$3.txt
@@ -104,6 +105,34 @@ function sendto {
    
 }
 
+function sendtohtml {
+    cmd=$1
+    rep_args=$2
+    txtfile=$3.txt
+    csvfile=$3.csv
+    htmlfile=$3.html
+    subject="$4"
+    to="$5"
+
+    local whenarg="${ExtraArgs#--}"
+    whenarg=${whenarg:-all}
+
+    if (( $mailOverride == 0 )) && (( $production > 0 )); then
+      newto=$(sed -ne 's/^[ 	]*'"`basename $cmd`"'[ 	]\{1,\}'"${ExtraArgs#--}"'[ 	]\{1,\}\(.*\)$/\1/p' \
+              reportMail.config | sed -e 's/\b\default\b/'"$to"'/' | head -1) 
+      to=${newto:-$to}
+    fi
+    #echo "See $WEBLOC for more information" > $txtfile
+    #echo "For more information see: <a href=$WEBLOC>$WEBLOC</a>" > $htmlfile
+    if [ "$dryrun" != "yes" ]; then 
+       $cmd "--subject=$subject" --emailto=$to --output=all $rep_args
+    else
+       echo $cmd \"--subject=$subject\" --emailto=$to --output=all $rep_args
+       $cmd  --output=all $rep_args
+    fi
+    return   
+}
+
 rm -f range.check
 
 sendto ./range "$ExtraArgs $whenarg" ${WORK_DIR}/report "$MAIL_MSG" $MAILTO
@@ -114,8 +143,11 @@ sendto ./efficiency "$ExtraArgs $whenarg" ${WORK_DIR}/report "${ExtraHeader}OSG 
 sendto ./voefficiency "$ExtraArgs $whenarg" ${WORK_DIR}/report "${ExtraHeader}OSG Efficiency by VO for $when" $MAILTO
 sendto ./gradedefficiency "$ExtraArgs $whenarg" ${WORK_DIR}/report "${ExtraHeader}OSG Efficiency by VO by time period for $when" $MAILTO
 
-
 sendto ./usersitereport "$ExtraArgs $whenarg" ${WORK_DIR}/report "${ExtraHeader}Report by user by site for $when" $USER_MAILTO
+
+if [ "$ExtraArgs" == "--monthly" ] ; then
+  sendtohtml ./softwareVersions "$ExtraArgs $whenarg" ${WORK_DIR}/report "OSG Installed Probe Versions as of $when" $MAILTO 
+fi
 
 if [ "$debug" != "yes" ]; then 
    rm -rf $WORK_DIR

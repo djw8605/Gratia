@@ -5,7 +5,7 @@
 #
 # library to create simple report using the Gratia psacct database
 #
-#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.50 2008-11-21 17:45:32 pcanal Exp $
+#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.51 2008-12-08 21:50:19 pcanal Exp $
 
 import time
 import datetime
@@ -13,6 +13,18 @@ import getopt
 import math
 import re
 import string
+import smtplib
+
+import logging
+import logging.config
+import ConfigParser
+
+from email.MIMEText import MIMEText
+from email.MIMEImage import MIMEImage
+from email.MIMEMultipart import MIMEMultipart
+from email.MIMEBase import MIMEBase
+from email.Utils import formataddr
+from email.quopriMIME import encode
 
 gMySQL = "mysql"
 gProbename = "cmslcgce.fnal.gov"
@@ -23,6 +35,10 @@ gEnd = None
 gWithPanda = False
 gGroupBy = "Site"
 gVOName = ""
+gConfig = ConfigParser.ConfigParser()
+gEmailTo = None
+gEmailToNames = None
+gEmailSubject = "not set"
 
 gOutput="text" # Type of output (text, csv, None)
 
@@ -104,17 +120,19 @@ class Usage(Exception):
         self.msg = msg
 
 def UseArgs(argv):
-    global gProbename,gOutput,gWithPanda,gGroupBy,gVOName
+    global gProbename,gOutput,gWithPanda,gGroupBy,gVOName,gEmailTo,gEmailToNames,gEmailSubject,gConfig
 
     monthly = False
     weekly = False
     daily = False
     
+    configFiles = "gratiareports.conf"
+    
     if argv is None:
         argv = sys.argv
     try:
         try:
-            opts, args = getopt.getopt(argv[1:], "hm:p:", ["help","monthly","weekly","daily","probe=","output=","with-panda","groupby=","voname="])
+            opts, args = getopt.getopt(argv[1:], "hm:p:", ["help","config=","monthly","weekly","daily","probe=","output=","with-panda","groupby=","voname=","emailto=","subject="])
         except getopt.error, msg:
              raise Usage(msg)
         # more code, unchanged
@@ -139,7 +157,17 @@ def UseArgs(argv):
             gGroupBy = a
         if o in ("--voname"):
             gVOName = a
+        if o in ("--config"):
+            configFiles = [i.strip() for i in a.split(',')]
+        if o in ("--emailto"):
+            gEmailTo = [i.strip() for i in a.split(',')]
+        if o in ("--subject"):
+            gEmailSubject = a
 
+    gConfig.read(configFiles)
+    if (gEmailToNames == None and gEmailTo != None):
+       gEmailToNames = ["" for i in gEmailTo]
+    
     start = ""
     end = ""
     if len(argv) > len(opts) + 1:
@@ -160,6 +188,7 @@ def UseArgs(argv):
            SetDailyDate(start)
         else:
            SetDate(start,end)
+
 
 def AddMonth(fromd, month):
     newyear = fromd.year
@@ -256,6 +285,74 @@ def LogToFile(message):
         # Close the log file
         file.close()
 
+def _toStr(toList):
+    names = [formataddr(i) for i in zip(*toList)]
+    return ', '.join(names)
+
+def sendEmail( toList, subject, content, log, fromEmail = None, smtpServerHost=None):
+    """
+    This turns the "report" into an email attachment
+    and sends it to the EmailTarget(s).
+    """
+    
+    if (fromEmail == None):
+       fromEmail = (gConfig.get("email","realname"),gConfig.get("email","from"))
+    if (smtpServerHost == None):
+       smtpServerHost = gConfig.get("email", "smtphost")
+    if (toList[1] == None):
+       print "Can send mail (no To: specified)!"
+       return
+       
+    msg = MIMEMultipart()
+    msg["Subject"] = subject
+    msg["From"] = formataddr(fromEmail)
+    msg["To"] = _toStr(toList)
+    msg1 = MIMEMultipart("alternative")
+    #msgText = MIMEText(encode(reportText), "plain", "iso-8859-1")
+    msgText1 = MIMEText("<pre>" + content["text"] + "</pre>", "html")
+    msgText2 = MIMEText(content["text"])
+    msgHtml = MIMEText(content["html"], "html")
+    msg1.attach(msgHtml)
+    msg1.attach(msgText2)
+    msg1.attach(msgText1)
+    msg.attach(msg1)
+    attachment_html = "<html><head><title>%s</title></head><body>%s</body>" \
+        "</html>" % (subject, content["html"])
+    part = MIMEBase('text', "html")
+    part.set_payload( attachment_html )
+    part.add_header('Content-Disposition', \
+        'attachment; filename="report_%s.html"' % datetime.datetime.now().\
+        strftime('%Y_%m_%d'))
+    msg.attach(part)
+    attachment_csv = content["csv"]
+    part = MIMEBase('text', "csv")
+    part.set_payload( attachment_csv )
+    part.add_header('Content-Disposition', \
+        'attachment; filename="report_%s.csv"' % datetime.datetime.now().\
+        strftime('%Y_%m_%d'))
+    msg.attach(part)
+    msg = msg.as_string()
+
+    #log.debug( "Report message:\n\n" + msg )
+    if len(toList[1]) != 0:
+        server = smtplib.SMTP( smtpServerHost )
+        server.sendmail( fromEmail[1], toList[1], msg )
+        server.quit()
+    else:
+        # The email list isn't valid, so we write it to stdout and hope
+        # it reaches somebody who cares.
+        print "Problem in sending email to: ",toList
+
+def sendAll(text, filestem = "temp"):
+   global gEmailTo,gEmailToNames,gEmailSubject
+   
+   if (gEmailTo == None):
+      for iterOutput in ("text","csv","html"):
+         print "===="+iterOutput+"===="
+         print text[iterOutput]
+   else:
+      sendEmail( (gEmailToNames, gEmailTo), gEmailSubject, text, None)
+
 gMySQLConnectString = " -h gratia-db01.fnal.gov -u reader --port=3320 --password=reader "
 
 def CheckDB():
@@ -313,6 +410,17 @@ def GetListOfOSGSites():
         #print allSites;
         return allSites;
 
+def GetListOfOSGSitesVisible():
+        cmd = "wget -q -O - http://oim.grid.iu.edu/pub/resource/show.php?format=plain-text | cut -d, -f4,1,14,8 | grep -e ',OSG,\(CE\) [^,]*,1' | cut -d, -f1"
+        #print "Will execute: " + cmd;
+        allSites = commands.getoutput(cmd).split("\n");
+
+        # Call it twice to avoid a 'bug' in wget where on of the row is missing the first few characters.
+        allSites = commands.getoutput(cmd).split("\n");
+      
+        #print allSites;
+        return allSites;
+
 def GetListOfRegisteredVO():
         cmd = "wget -q -O - http://oim.grid.iu.edu/pub/vo/show.php?format=plain-text | cut -d, -f1  | grep -v '^#' "
         
@@ -325,11 +433,23 @@ def GetListOfRegisteredVO():
               ret.append( v.lower() );
         # And hand add a few 'exceptions!"
         ret.append("usatlas")
-        ret.append("minos")
-        ret.append("miniboone")
-        ret.append("theory")
-        ret.append("cdms")
         ret.append("other")
+        # Fermilab sub-group
+        ret.append("accelerator")
+        ret.append("astro")
+        ret.append("cdms")
+        ret.append("hypercp")
+        ret.append("ktev")
+        ret.append("miniboone")
+        ret.append("minos")
+        ret.append("mipp")
+        ret.append("numi")
+        ret.append("patriot")
+        ret.append("test")
+        ret.append("theory")
+        ret.append("nova")
+        ret.append("grid")
+        ret.append("minerva")
         return ret
 
 def UpdateVOName(list, index):
@@ -980,7 +1100,7 @@ def GenericDaily(what, when = datetime.date.today(), output = "text"):
             print "    ", what.formats[output] % what.headers
             print what.lines[output]
         
-        # First get the previous' day information
+        # First get the previous day's information
         totalwall = 0
         totaljobs = 0
         oldValues = {}
@@ -1009,6 +1129,35 @@ def GenericDaily(what, when = datetime.date.today(), output = "text"):
                 totaljobs = totaljobs + njobs                
                 oldValues[key] = (njobs,wall,site,vo)
         oldValues["total"] = (totaljobs, totalwall, "total","")
+
+        # Then get the previous week's information
+ #       totalwall = 0
+ #       totaljobs = 0
+ #       start = when + datetime.timedelta(days=-8)
+ #       end = when
+ #       weekValues = {}
+ #       lines = what.GetData(start,end)
+ #       for i in range (0,len(lines)):
+ #               val = lines[i].split('\t')
+ #               offset = 0
+ #               site = val[0]
+ #               key = site
+ #               vo = ""
+ #               if (len(val)==4) :
+ #                       vo = val[1]
+ #                       offset = 1
+ #                       num_header = 2
+ #                       key = site + " " + vo
+ #               njobs= string.atoi( val[offset+1] )
+ #               if val[offset+2] == "NULL":
+ #                  wall = 0
+ #               else:
+ #                  wall = string.atof( val[offset+2] ) / factor
+ #               totalwall = totalwall + wall
+ #               totaljobs = totaljobs + njobs                
+ #               weekValues[key] = (njobs,wall,site,vo)
+ #       weekValues["total"] = (totaljobs, totalwall, "total","")
+        
 
         # Then getting the correct day's information and print it
         totalwall = 0
@@ -2536,6 +2685,173 @@ def CMSProd(range_end = datetime.date.today(),
     print "Production: ",niceNum(wall)
     print "Users     : ",niceNum(user)
     print "Total     : ",niceNum(total)
+
+def SoftwareVersionData(schema,begin,end):
+   select = """SELECT Si.SiteName, M.ProbeName, S.Name, S.Version, M.ServerDate as StartedOn, Pr.CurrentTime as LastReport
+FROM """+schema+""".ProbeSoftware P, """+schema+""".ProbeDetails_Meta M, """+schema+""".Software S, """+schema+""".Probe Pr, """+schema+""".Site Si
+where M.dbid = P.dbid and S.dbid = P.softid and M.probeid = Pr.probeid and Pr.siteid = Si.siteid
+and Pr.active = true
+and M.ServerDate <=  \"""" + DateTimeToString(end) + """\" 
+group by Si.SiteName, ProbeName, S.Name, S.Version
+
+order by Si.SiteName, ProbeName, S.Name, ServerDate"""
+
+#and    Pr.CurrentTime >= \"""" + DateTimeToString(begin) + """\" 
+#and    Pr.CurrentTime < \"""" + DateTimeToString(end) + """\" 
+
+   return RunQueryAndSplit(select);
+
+
+class SoftwareVersionConf:
+   title = """This reports list the current version of the Gratia probe(s) installed and reporting at each site as of %s.
+
+Only sites registered in OIM are listed.
+
+The recommended probe versions are those available in VDT 1.10.1n or higher and will be listed below as:
+Probe Library: v1.00.5
+Condor Probe: v1.00.3+
+PBS/LSF Probe: v1.00.1+
+glexec Probe: v1.00.3a-1+
+
+Note that the '+' after the release number indicates that the same version of the probe has been available in the
+given release up to the current release.
+
+"""
+   headers = ("","Site","Soft","Release","Probe name")
+   formats = {}
+   start = {}
+   startlines = {}
+   lines = {}
+   endlines = {}
+   end = {}
+   num_header = 2
+   
+   def __init__(self, header = False):
+      self.formats["csv"] = "%s,\"%s\",%s,%s,%s  "
+      self.formats["text"] = "%6s | %-20s | %-14s | %-12s | %s"
+      self.formats["html"] = "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>"
+      self.start["csv"] = ""
+      self.start["text"] = ""
+      self.start["html"] = "<html><body><br><br>"
+      self.startlines["csv"] = ""
+      self.startlines["text"] = "----------------------------------------------------------------------------------------------------"
+      self.startlines["html"] = "<br><br><table border=\"1\" cellpadding=\"10\" cellspacing=\"0\">"
+      self.endlines["csv"] = ""
+      self.endlines["text"] = "" # self.startlines["text"]
+      self.endlines["html"] = "</table>"
+      self.end["csv"] = ""
+      self.end["text"] = ""
+      self.end["html"] = "</html></body>"
+
+      if (not header) :  self.title = ""
+
+   def GetData(self,start,end):
+      return SoftwareVersionData("gratia",start,end) + SoftwareVersionData("fermi_osg",start,end)
+   
+
+def SoftwareVersion(range_end = datetime.date.today(),
+                range_begin = None,
+                output = "text",
+                header = True):
+   
+   if (range_end == None or range_end > datetime.date.today()):
+      range_end = datetime.date.today()
+   if (range_begin == None):
+      range_begin = range_end + datetime.timedelta(days=-31)
+   elif (range_begin > range_end):
+      range_begin = range_end + datetime.timedelta(days=-31)
+
+   conf = SoftwareVersionConf(header)
+   lines = conf.GetData(range_begin,range_end)
+   values  = {}
+
+   exceptionSites = ['BNL_ATLAS_2', 'USCMS-FNAL-WC1-CE2', 'USCMS-FNAL-WC1-CE3', 'USCMS-FNAL-WC1-CE4', 'Generic Site', 'BNL_LOCAL', 'BNL_OSG', 'BNL_PANDA', 'GLOW-CMS', 'UCSDT2-B']
+   sites = [name for name in GetListOfOSGSites()  if name not in exceptionSites]
+   reportingSites = GetListOfReportingSites(range_begin,range_end);
+
+   versions = {
+     "Gratia": { "1.65":"v0.27.[1-2]","1.67":"v0.27b","1.68":"v0.28","1.69":"v0.30","1.69.2.1":"v0.32.1","1.78":"v0.32.2","1.84":"v0.34.[1-8]","1.85":"v0.34.[9-10]","1.86":"v0.36","1.90":"v0.38.4","1.91":"v1.00.1","1.93":"v1.00.3","1.95":"v1.00.5"},
+     "condor_meter.pl" : { "$Revision: 1.51 $  (tag unknown)":"v0.99", "$Revision: 1.51 $  (tag unknown)":"v1.00.3+" },
+     "pbs-lsf.py" : { "1.7 (tag )":"v1.00.1+" },
+     "glexec_meter.py": {"1.9 (tag )":"v1.00.[3-5]", "1.9 (tag v1-00-3a-1)":"v1.00.3a-1+"}
+     }
+   renames = {
+     "Gratia":"Probe Library",
+     "condor_meter.pl":"Condor Probe",
+     "pbs-lsf.py":"Pbs/Lsf Probe",
+     "glexec_meter.py":"Glexec Probe"
+     }
+     
+   for site in sites:
+      values[site] = {}
+      
+   for row in lines:
+      row = row.split('\t')
+      site = row[0]
+      probe= row[1]
+      
+      if (values.has_key(site)):
+         current = values[site]
+         if (current.has_key(probe)):
+            pcurrent = current[probe]
+         else:
+            pcurrent = [[],{}]
+         pcurrent[0] = row[5] # LastReportTime
+         pcurrent[1][row[2]] = [ row[3], row[4] ]
+       
+         current[probe] = pcurrent
+         values[site] = current
+   
+   msg = ""
+   msg = msg + conf.start[output] + "\n"
+   msg = msg + conf.title % (DateToString(range_end,False)) + "\n"
+   
+   msg = msg + conf.startlines[output] + "\n"
+   if (output == "html"):
+      msg = msg + conf.formats[output].replace("td","th") % conf.headers + "\n"
+   else:
+      msg = msg + conf.formats[output] % conf.headers + "\n"
+   if (output == "text"):
+      msg = msg + conf.startlines[output] + "\n"
+      
+   outer = 0
+   inner = 0
+   for key,data in sortedDictValues(values):
+      outer = outer + 1
+      inner = 0
+      if (len(data)==0):
+         if (key in reportingSites):
+            #print key,"has reported but no information is available about the probe."
+            msg = msg + conf.formats[output] % ("%3d.%-2d" % (outer,inner),key,"n/a","n/a","has reported but no information is available about the probe(s).") + "\n"
+         else:
+            msg = msg + conf.formats[output] % ("%3d.%-2d" % (outer,inner),key,"n/a","n/a","has not reported") + "\n"
+            #print key,"has not reported."
+         if (output == "text"):
+            msg = msg + conf.startlines[output] + "\n"
+      else:
+         # print key,"had",len(data),"probe(s) reporting."
+         for probename,probeinfo in sortedDictValues(data):
+            #print "   ",probename
+            inner = inner + 1
+            for soft,softinfo in probeinfo[1].iteritems():
+               v = softinfo[0]
+               if (soft == "Condor"):
+                  v = v.split(' ')[0]
+               if (versions.has_key(soft)):
+                  if (versions[soft].has_key(v)):
+                     v = versions[soft][v]
+               if (renames.has_key(soft)):
+                  soft = renames[soft]
+               #print "      ",soft,":",v
+               msg = msg + conf.formats[output] % ("%3d.%-2d" % (outer,inner), key,soft,v,probename) + "\n"
+            #print 
+         if (output == "text"):
+            msg = msg + conf.startlines[output] + "\n"
+      #print
+      
+   msg = msg + conf.endlines[output] + "\n"
+   msg = msg + conf.end[output] + "\n"
+   return msg
 
 #
 #
