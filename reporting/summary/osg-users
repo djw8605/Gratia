@@ -314,12 +314,13 @@ if ($options{"aux-db-type"} =~ m&none&i) {
     my $lastname = $cn;
     my @array = split m&/CN=&, $cn;
     my $count = scalar @array;
-    # Neaten
-    $lastname =~ s&^/CN=[^/]+/CN=\d+/CN=([^/]+)$&$1&; # CERN
+    # Attempt to extract a real name from the CN string and neaten.
+    $lastname =~ s&^/CN=[^/]+/CN=\d+/CN=([^/]+)$&${1}&; # CERN
+    $lastname =~ s&^/CN=[^/]+/CN=cron/CN=([^/]+)/CN=UID:[^/]+$&${1}&; # FNAL robot certs
     $lastname =~ s&/CN=\d+&&g; # Numeric CNs
-    $lastname =~ s&^(.*?)\s*\d+$&$1&; # Trailing ID #
-    $lastname =~ s&/CN=UID:[^/]+&&; # FNAL CN UID clause.
+    $lastname =~ s&/CN=UID:[^/]+$&&; # FNAL CN UID clause.
     $lastname =~ s&^/CN=&&; # Leading /CN=
+    $lastname =~ s&^(.*?)\s*\d+$&$1&; # Trailing ID #
     my $member_id;
     # Combine CNs that are identical to within known, simple manipulations
     $seen_lastnames->{$lastname} = ++$userid unless exists $seen_lastnames->{$lastname};
