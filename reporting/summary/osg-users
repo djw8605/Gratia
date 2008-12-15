@@ -1,0 +1,1021 @@
+eval '(exit $?0)' && eval 'exec perl -w -S $0 ${1+"$@"}'
+                  && eval 'exec perl -w -S $0 $argv:q'
+                  if 0;
+
+use strict;
+
+use File::Basename;
+
+use Getopt::Long;
+use Pod::Usage;
+
+use Text::Table; # Available from CPAN / DAG repo.
+
+use Date::Calc ':all'; # Available from CPAN / DAG repo.
+
+use vars qw($script_top_dir);
+
+BEGIN {
+  # Make a spirited attempt to find where our libraries, etc are.
+  if (-l $0) {
+    $script_top_dir = dirname(readlink($0));
+  } else {
+    $script_top_dir = dirname $0;
+  }
+}
+
+# use lib "$script_top_dir/lib";
+
+use FileHandle;
+
+use DBI();
+
+use IPC::Run; # Available from CPAN / DAG repo.
+
+sub wrapped_report(\@\&;$$);
+sub vo_report(\@$$);
+sub old_report(\@$$);
+
+Getopt::Long::Configure(qw(no_ignore_case bundling require_order));
+
+=pod
+
+=head1 NAME
+
+osg-users - Provide a CSV-format usage report by User from VOMRS/VOMS and Gratia.
+
+=head1 SYNOPSIS
+
+B<osg-users> B<-h>|B<--help>|B<-?>
+
+B<osg-users> B<--man>
+
+B<osg-users> [B<-u>|B<--user-regex> I<regex>]+
+[B<-v>|B<--vo> I<vo>]
+[B<-V>|B<--vo-report>]
+[B<-k>|B<--metric-key> I<Njobs|CPU|Wall>]
+[B<--no-totals>]
+[B<-M>|B<mail-admins>]
+[B<-t>|B<--timeperiod> I<week|month>]
+[B<--aux-db-type> I<voms|vomrs|none>]
+[B<--aux-db-connect> I<db-connect-command>]
+[B<-m>|B<--mail> I<recipient>]+
+[B<--history> I<# months>]
+[B<--target-period> I<target-date>]
+[B<--compare-period> I<compare-date>]
+[B<-s>|B<--suppress-idle-users>]
+
+Options marked with B<+> are repeatable and cumulative.
+
+=head1 DESCRIPTION
+
+I<osg-users> will produce a CSV format per-user report using VOMS/VOMRS and Gratia.
+
+
+
+=head1 OPTIONS
+
+=head2 Help Options
+
+=over 4
+
+=item B<--help>
+
+=item B<-h>
+
+=item B<-?>
+
+Short help.
+
+
+=item B<--man>
+
+Full man page information.
+
+=back
+
+=cut
+
+my %options = ();
+
+GetOptions(\%options,
+           "help|h|?",
+           "man",
+           "user-regex|u=s@",
+           "vo|v=s",
+           "vo-report|V",
+           "metric-key|k=s@",
+           "no-totals",
+           "mail-admins|M",
+           "timeperiod|t=s",
+           "history=i",
+           "aux-db-type=s",
+           "aux-db-connect=s",
+           "compare-period=s",
+           "target-period=s",
+           "suppress-idle-users|s",
+           "mail|m=s@") or pod2usage(-exitval => 2);
+
+$options{"help"} and pod2usage(1);
+
+# Medium usage (options explanation)
+pod2usage(-verbose => 1) if exists $options{help};
+
+# Full man page (requires working pod2man)
+pod2usage(-verbose => 2) if exists $options{man};
+
+my $history = $options{history} || 6;
+
+if ($options{"vo-report"}) {
+  $options{"aux-db-type"} = 'none';
+}
+
+if ($options{"aux-db-type"}) {
+  if ($options{"aux-db-type"} !~ m&(?:voms|vomrs|none)&i) {
+    print STDERR "ERROR: unrecognized aux-db-type", $options{"aux-db-type"}, "\n";
+    print STDERR "       valid values are: vomrs, voms, none.\n";
+    exit(1);
+  }
+} else {
+  $options{"aux-db-type"} = "vomrs";
+}
+
+my $vo = $options{vo} || "osg";
+
+if (exists $options{"aux-db-connect"}) {
+  $options{"aux-db-connect"} = [ split /,/, $options{"aux-db-connect"} ]
+} else {
+  $options{"aux-db-connect"} =
+    [ "ssh",
+      "fermigrid2.fnal.gov",
+      ". /usr/local/vdt/setup.sh ; mysql -N -B -q -u root -h localhost vomrs13_$vo" ];
+}
+
+my @keys = process_key_options();
+
+my %available_timeperiods =
+  (
+   week => { # Display the first day of each week (Monday) but sort correctly.
+            select => q{DATE(str_to_date(date_format(EndTime, '%x-%v Monday'), '%x-%v %W'))},
+            sort => q{date_format(EndTime, '%x-%v')},
+            interval_clause => qq{and DATE(EndTime) >= DATE(str_to_date(date_format(utc_timestamp() - interval $history month, '\%x-\%v Monday'), '\%x-\%v \%W'))}
+           },
+   month => {
+             select => q{date_format(EndTime, '%Y-%m-01')},
+             sort => q{date_format(EndTime, '%Y-%m')},
+             interval_clause => qq{and DATE(EndTime) >= str_to_date(date_format(utc_timestamp() - interval $history month, '\%Y-\%m-01'), '\%Y-\%m-\%d')}
+            }
+  );
+
+my $timeperiod;
+
+if ($options{timeperiod}) {
+  $timeperiod = "month" if $options{timeperiod} =~ m&^m&i;
+} else {
+  $timeperiod = "week";
+}
+
+my %mail_list = ();
+
+my @command = @{$options{"aux-db-connect"}};
+
+if ($options{"mail-admins"}) {
+  # Initial email list, including exclusions.
+  %mail_list =
+    (
+     q/yocum@fnal.gov/ => { exclude => 1 },
+     q/chadwick@fnal.gov/ => { exclude => 1 },
+     q/neha@fnal.gov/ => { exclude => 1 }
+    );
+
+  my ($mail_out, $mail_error, $mail_select);
+
+  $mail_select = <<'EOF';
+select firstname,
+       lastname,
+       notification_params as email_address
+from notification_methods N
+join (select distinct
+       md.member_id,
+       mi1.personal_value as firstname,
+       mi2.personal_value as lastname
+      from member_dns md
+      join member_identities mi1 on (md.member_id = mi1.member_id)
+      join personal_data pd1 on (mi1.pd_id = pd1.pd_id)
+      join member_identities mi2 on (md.member_id = mi2.member_id)
+      join personal_data pd2 on (mi2.pd_id = pd2.pd_id)
+      where pd1.personal_name = 'First name'
+        and pd2.personal_name = 'Last name') PD on (N.member_id = PD.member_id)
+join member_roles MR on (N.member_id = MR.member_id)
+join roles R on (MR.r_id = R.r_id)
+where N.notification_method = 'email'
+  and N.notification_status = 'Confirmed'
+  and R.role_name = 'VOAdmin'
+  and N.member_id not in (select mr.member_id
+                          from member_roles mr
+                          join roles r on (mr.r_id = r.r_id)
+                          where r.role_name = 'SiteAdmin')
+order by lastname
+EOF
+
+  my $h = IPC::Run::harness \@command, \$mail_select, \$mail_out, \$mail_error;
+  $h->run();
+  for (split /\n/, $mail_out) {
+    chomp;
+    my ($firstname, $lastname, $email) = split /\t/;
+    $mail_list{$email}->{firstname} = $firstname;
+    $mail_list{$email}->{lastname} = $lastname;
+  }
+}
+
+if (exists $options{mail}) {
+  foreach my $email (@{$options{mail}}) {
+    $mail_list{$email}->{exclude} = 0;
+  }
+}
+
+my @email_addresses = map { $mail_list{$_}->{lastname}?
+                              "$mail_list{$_}->{firstname} $mail_list{$_}->{lastname} <$_>":"$_" }
+  grep { not $mail_list{$_}->{exclude} } sort keys %mail_list;
+
+my $tmpdir;
+
+my $nesting_level = -1;
+
+my ($out, $error, $select);
+
+if ($options{"aux-db-type"} =~ m&vomrs&i) {
+  $select = <<'EOF';
+select firstname,
+       lastname,
+       GR.member_id,
+       SUBSTRING(distinguished_name FROM POSITION('/CN=' IN distinguished_name) + 4) as CN,
+       GR.group_name,
+       GR.role_name
+from member_dns MD
+     join (select distinct
+            md.member_id,
+            mi1.personal_value as firstname,
+            mi2.personal_value as lastname
+           from member_dns md
+           join member_identities mi1 on (md.member_id = mi1.member_id)
+           join personal_data pd1 on (mi1.pd_id = pd1.pd_id)
+           join member_identities mi2 on (md.member_id = mi2.member_id)
+           join personal_data pd2 on (mi2.pd_id = pd2.pd_id)
+           where pd1.personal_name = 'First name'
+             and pd2.personal_name = 'Last name') PD on (MD.member_id = PD.member_id)
+     join (select distinct
+            mg.member_id,
+            groups.group_name,
+            mg.g_id,
+            ifnull(gnr.role_name,'') as role_name
+           from member_groups mg
+           join groups on (mg.g_id = groups.g_id)
+           join roles on (mg.r_id = roles.r_id)
+           left join (select r.r_id, role_name
+                      from roles r
+                      join groups_grouproles ggr on (ggr.r_id = r.r_id)) gnr on mg.r_id = gnr.r_id) GR on (MD.member_id = GR.member_id)
+order by lastname, firstname, distinguished_name, group_name, role_name;
+EOF
+} elsif ($options{"aux-db-type"} =~ m&voms&i) {
+  $select = <<'EOF';
+select '' as firstname,
+       u.cn as lastname,
+       m.userid as member_id,
+       SUBSTRING(u.dn FROM POSITION('/CN=' IN u.dn) + 4) as cn,
+       g.dn as group_name,
+       ifnull(r.role, '') as role_name
+from m
+join usr u on (m.userid = u.userid)
+join groups g on (m.gid = g.gid)
+left join roles r on (m.rid = r.rid)
+order by lastname, cn, group_name, role_name;
+EOF
+}
+
+my $dbh = DBI->connect("DBI:mysql:database=gratia;host=gratia-db01.fnal.gov;port=3320",
+                       "reader", "reader",
+                       { 'RaiseError' => 1,
+                         'AutoCommit' => 1 });
+
+my $vomrs_user_info = {};
+
+if ($options{"aux-db-type"} =~ m&none&i) {
+  # Get known users attached to this VO from Gratia
+  my $sth = $dbh->prepare(sprintf("select distinct CommonName from VOProbeSummary where UPPER(VOName) = '%s' order by CommonName;",
+                                 uc($vo)));
+  $sth->execute();
+  my $userid = 0;
+  $out = '';
+  my $seen_lastnames = {};
+  while (my $row = $sth->fetchrow_hashref()) {
+    my $cn = $row->{CommonName};
+    next if $cn =~ m&^(?:Generic|Unknown$)&;
+    my $lastname = $cn;
+    my @array = split m&/CN=&, $cn;
+    my $count = scalar @array;
+    # Neaten
+    $lastname =~ s&^/CN=[^/]+/CN=\d+/CN=([^/]+)$&$1&; # CERN
+    $lastname =~ s&/CN=\d+&&g; # Numeric CNs
+    $lastname =~ s&^(.*?)\s*\d+$&$1&; # Trailing ID #
+    $lastname =~ s&/CN=UID:[^/]+&&; # FNAL CN UID clause.
+    $lastname =~ s&^/CN=&&; # Leading /CN=
+    my $member_id;
+    # Combine CNs that are identical to within known, simple manipulations
+    $seen_lastnames->{$lastname} = ++$userid unless exists $seen_lastnames->{$lastname};
+    $member_id = $seen_lastnames->{$lastname};
+    my ($firstname, $group_name, $role_name) =
+      ('', '', '');
+    $out = <<"EOF";
+$firstname	$lastname	$member_id	$cn	$group_name	$role_name
+$out
+EOF
+  }
+} else {
+  my $h = IPC::Run::harness \@command, \$select, \$out, \$error;
+  $h->run();
+}
+
+# Add unattribute use user this way to allow the regex search to get its teeth into it.
+$out = <<"EOF";
+Unattributed	Use	0
+$out
+EOF
+
+for (split /\n/, $out) {
+  chomp;
+  my ($firstname, $lastname, $id, $cn, $group, $role) = split /\t/;
+  next if ($role and $role eq 'VO-Admin'); # If we're using VOMS DB instead of VOMRS.
+  if (exists $options{"user-regex"} and scalar @{$options{"user-regex"}}) {
+    my $user_wanted = 0;
+    foreach my $regex (@{$options{"user-regex"}}) {
+      $user_wanted = 1 if "$firstname $lastname" =~ m&$regex&i;
+    }
+    next unless $user_wanted;
+  }
+  unless (exists $vomrs_user_info->{$id}) {
+    $vomrs_user_info->{$id} =
+      { firstname => $firstname,
+        lastname => $lastname,
+      };
+  }
+  $vomrs_user_info->{$id}->{CN}->{$cn}->{FQAN} =
+    sprintf("%s%s", $group, $role?"/Role=$role":"") if $cn;
+}
+
+if (exists $vomrs_user_info->{0}) { # Unattributed user
+  $vomrs_user_info->{0}->{query} =
+    "((UPPER(VO.VOName) = UPPER('$vo')) AND ((CommonName = 'Unknown') OR (CommonName like 'Generic%')))";
+}
+
+my $sites = {};
+
+my %dates = ();
+
+foreach my $id (sort { $a <=> $b } grep /^\d+$/, keys %{$vomrs_user_info}) {
+  my $user_info = $vomrs_user_info->{$id};
+  my @cn_list = keys %{$user_info->{CN}};
+  my $flat_cn_list = join(", ", map {s&\'&\'\'&g; "'$_'"} @cn_list);
+  my $sth = $dbh->prepare(queryString($user_info->{query} || "(CommonName IN ( $flat_cn_list ) AND (UPPER(VO.VOName) = UPPER('$vo')))",
+                                      $available_timeperiods{$timeperiod}->{select},
+                                      $available_timeperiods{$timeperiod}->{sort}?
+                                      $available_timeperiods{$timeperiod}->{sort}:
+                                      $available_timeperiods{$timeperiod}->{select},
+                                      $available_timeperiods{$timeperiod}->{interval_clause}));
+  # print STDERR $sth->{Statement}, "\n";
+  $sth->execute();
+  while (my $row = $sth->fetchrow_hashref()) {
+    $sites->{$row->{SiteName}} = 1;
+    $dates{$row->{TimePeriod}} = $row->{SortTimePeriod};
+    foreach my $key (@keys) {
+      # Totals
+      $user_info->{"totals"}->{$key} += $row->{$key};
+      $vomrs_user_info->{"totals"}->{$key} += $row->{$key};
+      # Per time period
+      $user_info->{"totals"}->{$timeperiod}->{$row->{TimePeriod}}->{$key} += $row->{$key};
+      $vomrs_user_info->{"totals"}->{$timeperiod}->{$row->{TimePeriod}}->{$key} += $row->{$key};
+      # Per site
+      $user_info->{"totals"}->{Site}->{$row->{SiteName}}->{$key} += $row->{$key};
+      $vomrs_user_info->{"totals"}->{Site}->{$row->{SiteName}}->{$key} += $row->{$key};
+      # Per time period per site
+      $user_info->{"totals"}->{$timeperiod}->{$row->{TimePeriod}}->{Site}->{$row->{SiteName}}->{$key} += $row->{$key};
+      $vomrs_user_info->{"totals"}->{$timeperiod}->{$row->{TimePeriod}}->{Site}->{$row->{SiteName}}->{$key} += $row->{$key};
+      my $success = $row->{Success};
+      # Totals ->{$success}
+      $user_info->{"totals"}->{$success}->{$key} += $row->{$key};
+      $vomrs_user_info->{"totals"}->{$success}->{$key} += $row->{$key};
+      # Per time period
+      $user_info->{"totals"}->{$timeperiod}->{$row->{TimePeriod}}->{$success}->{$key} += $row->{$key};
+      $vomrs_user_info->{"totals"}->{$timeperiod}->{$row->{TimePeriod}}->{$success}->{$key} += $row->{$key};
+      # Per site
+      $user_info->{"totals"}->{Site}->{$row->{SiteName}}->{$success}->{$key} += $row->{$key};
+      $vomrs_user_info->{"totals"}->{Site}->{$row->{SiteName}}->{$success}->{$key} += $row->{$key};
+      # Per time period per site
+      $user_info->{"totals"}->{$timeperiod}->{$row->{TimePeriod}}->{Site}->{$row->{SiteName}}->{$success}->{$key} += $row->{$key};
+      $vomrs_user_info->{"totals"}->{$timeperiod}->{$row->{TimePeriod}}->{Site}->{$row->{SiteName}}->{$success}->{$key} += $row->{$key};
+      # Per user per time period per site
+      $user_info->{CN}->{$row->{CommonName}}->{$timeperiod}->{$row->{TimePeriod}}->{Site}->{$row->{SiteName}}->{$success}->{$key} += $row->{$key};
+#      print STDERR
+#        "\$user_info->{CN}->{$row->{CommonName}}->{$timeperiod}->{$row->{TimePeriod}}->{Site}->{$row->{SiteName}}->{$success}->{$key} += $row->{$key}\n";
+    }
+  }
+}
+
+if ($options{"vo-report"}) {
+  wrapped_report(@email_addresses, &vo_report, $ARGV[0], ".txt")
+} else {
+  wrapped_report(@email_addresses, &old_report, $ARGV[0])
+}
+
+END { # Things to do at the end of the program
+  system("rmdir \"$tmpdir\"") if $tmpdir;
+}
+
+1;
+
+sub wrapped_report(\@\&;$$) {
+  my ($email_addresses, $func, $output_filename, $extension) = @_;
+  my $output_filename_is_temporary;
+  my $output_filehandle;
+  if ($extension) {
+    $extension = ".$extension" unless $extension =~ m&^\.&;
+  } else {
+    $extension = ".csv";
+  }
+  if ($ARGV[0]) {
+    $output_filename = $ARGV[0];
+    $output_filehandle = new FileHandle(">$ARGV[0]");
+    $output_filehandle or die "Unable to open output file $ARGV[0]";
+  } else {
+    $output_filehandle = \*STDOUT;
+  }
+
+  if (scalar @$email_addresses and $output_filehandle == \*STDOUT) {
+    # Need to put in a temporary file first.
+    $output_filename_is_temporary = 1;
+    my $tmpdir = `mktemp -d /tmp/osg-users-$vo.XXXXXXXXXX`;
+    chomp $tmpdir;
+    $output_filename = "$tmpdir/osg-users-$vo$extension";
+    $output_filehandle = FileHandle->new(">$output_filename") or die "Unable to open temporary output file";
+  }
+
+  &$func($email_addresses, $output_filehandle, $output_filename);
+
+  # Close the filehandle if appropriate
+  $output_filehandle->close() if $output_filehandle and $output_filehandle != \*STDOUT;
+  # Cat the temporary file to screen and remove it if appropriate
+  if ($output_filename and $output_filename_is_temporary) {
+    system(qq/cat "$output_filename"; rm -f "$output_filename"/);
+  }
+
+}
+
+sub old_report(\@$$) {
+  my ($email_addresses, $output_filehandle, $output_filename) = @_;
+
+  # Totals per user per site (not per CN):
+  foreach my $key (@keys) {
+    print $output_filehandle csv_field("KEY: $key"), "\n";
+    foreach my $id (sort by_name grep /^\d+$/, keys %{$vomrs_user_info}) {
+      my $user_info = $vomrs_user_info->{$id};
+      print $output_filehandle csv_field(sprintf("USER: $user_info->{firstname} $user_info->{lastname}%s",
+                                                 ($user_info->{"totals"}->{"Njobs"})?"":" (no usage this period)")), "\n";
+      foreach my $cn (sort keys %{$user_info->{CN}}) {
+        print $output_filehandle csv_field("CN: $cn"), "\n";
+      }
+      next unless $user_info->{"totals"}->{"Njobs"};
+      my @sites = sort keys %{$user_info->{"totals"}->{Site}};
+      my @columns = ("Date", @sites, "Total");
+      print $output_filehandle join(",", map { csv_field($_) } @columns), "\n";
+      foreach my $date (sort by_date keys %{$user_info->{"totals"}->{$timeperiod}}) {
+        print $output_filehandle csv_field($date);
+        foreach my $site (@sites) {
+          print $output_filehandle ",";
+          if (exists $user_info->{"totals"}->{$timeperiod}->{$date}->{Site}->{$site}) {
+            print $output_filehandle csv_field(convert_num($user_info->{"totals"}->{$timeperiod}->{$date}->{Site}->{$site}->{$key}, $key));
+          }
+        }
+        print $output_filehandle ",", csv_field(convert_num($user_info->{"totals"}->{$timeperiod}->{$date}->{$key}, $key)), "\n";
+      }
+      print $output_filehandle csv_field("Totals");
+      print $output_filehandle map
+        { sprintf(",%s",
+                  exists($user_info->{"totals"}->{Site}->{$_})?
+                  csv_field(convert_num($user_info->{"totals"}->{Site}->{$_}->{$key}, $key)):"") } @sites;
+      print $output_filehandle ", ", csv_field(convert_num($user_info->{"totals"}->{$key}, $key)), "\n";
+    }
+
+    # Totals for all users
+    next if $options{"no-totals"};
+    my @sites = sort keys %$sites;
+    my @columns = ("Date", @sites, "Total");
+    my $user_info = $vomrs_user_info;
+    print $output_filehandle csv_field(sprintf("Totals%s", ($user_info->{"totals"}->{$key})?"":" (no usage)")), "\n";
+    next unless $user_info->{"totals"}->{$key};
+    print $output_filehandle join(",", map { csv_field($_) } @columns), "\n";
+    foreach my $date (sort by_date keys %{$user_info->{"totals"}->{$timeperiod}}) {
+      print $output_filehandle csv_field($date);
+      foreach my $site (@sites) {
+        print $output_filehandle ",";
+        #        all_keys($user_info->{"totals"}->{$timeperiod}->{$date}->{Site});
+        if (exists $user_info->{"totals"}->{$timeperiod}->{$date}->{Site}->{$site}) {
+          print $output_filehandle csv_field(convert_num($user_info->{"totals"}->{$timeperiod}->{$date}->{Site}->{$site}->{$key}, $key));
+        }
+      }
+      print $output_filehandle ",", csv_field(convert_num($user_info->{"totals"}->{$timeperiod}->{$date}->{$key}, $key)), "\n";
+    }
+    print $output_filehandle csv_field("Totals");
+    print $output_filehandle map
+      { sprintf(",%s",
+                exists($user_info->{"totals"}->{Site}->{$_})?
+                csv_field(convert_num($user_info->{"totals"}->{Site}->{$_}->{$key}, $key)):"") } @sites;
+    print $output_filehandle ", ", csv_field(convert_num($user_info->{"totals"}->{$key}, $key)), "\n";
+  }
+
+  if (scalar @$email_addresses) {
+    print "Mailing output to: \n";
+    print join(", ", @$email_addresses), "\n\n";
+    my $cmd = sprintf(qq&mutt -F "$script_top_dir/muttrc" -a "$output_filename" -s "OSG metrics for VO $vo by $timeperiod" %s&,
+                      join(" ", map { qq/"$_"/ } @$email_addresses));
+    open(MUTT, "|$cmd") or die "Unable to open mail command for input";
+    print MUTT <<EOF;
+Please find below the Gratia statistics for OSG usage for the $vo VO by $timeperiod for the last $history months.
+
+Notes:
+
+* The Njobs metric includes forwarding jobs, so there is some
+  double-counting involved.
+
+* The statistics do not include Glexec information currently.
+
+* The TotalCPU metric may not be completely accurate due to limitations
+  on accuracy of CPU time measurement for certain application and/or
+  batch system types. These are limitations of the batch system, not the
+  Gratia accounting system per se.
+EOF
+    close(MUTT);
+  }
+}
+
+sub convert_num {
+  my ($num, $key) = @_;
+  defined $num or return "";
+  if ($key eq "Njobs") {
+    return $num;
+  } else {
+    return sprintf("%.1f", $num / 3600);
+  }
+}
+
+sub all_keys {
+  my $hashref = shift;
+  ++$nesting_level;
+  foreach my $key (sort keys %$hashref) {
+    print '  ' x $nesting_level if $nesting_level > 0;
+    print $key, ": ", ref($hashref->{$key})?ref $hashref->{$key}:$hashref->{$key}, "\n";
+    if (ref $hashref->{$key} eq "HASH") {
+      all_keys($hashref->{$key});
+    }
+  }
+  --$nesting_level;
+}
+
+sub queryString {
+  my ($whereclause,
+      $timeperiod_format,
+      $sorttimeperiod_format,
+      $interval_clause) = @_;
+  return <<EOF;
+select CommonName,
+       VO.VOName,
+       SiteName,
+       $timeperiod_format as TimePeriod,
+       $sorttimeperiod_format as SortTimePeriod,
+       if(ApplicationExitCode = 0, 1, 0) as Success,
+       sum(Njobs) as Njobs,
+       sum(WallDuration) as WallDuration,
+       sum(CpuUserDuration + CpuSystemDuration) as TotalCPU
+from MasterSummaryData MSD
+join VONameCorrection VC on (MSD.VOcorrid = VC.corrid)
+join VO on (VC.void = VO.void)
+join Probe P on (MSD.ProbeName = P.probename)
+join Site S on (P.siteid = S.siteid)
+where ResourceType IN ( 'Batch' )
+$interval_clause
+and $whereclause
+group by CommonName, VO.VOName, SiteName, Success, TimePeriod
+order by CommonName, VO.VOName, SiteName, Success, SortTimePeriod
+EOF
+}
+
+sub by_name {
+  return $vomrs_user_info->{$a}->{lastname} cmp $vomrs_user_info->{$b}->{lastname} or
+    $vomrs_user_info->{$a}->{firstname} cmp $vomrs_user_info->{$b}->{firstname};
+}
+
+sub by_date {
+  return $dates{$a} cmp $dates{$b};
+}
+
+sub csv_field {
+	my $string = shift;
+        chomp $string;
+	my $needs_quoting = $string =~ m&[,"\n]&;
+	if ($needs_quoting) {
+		$string =~ s&\"&\"\"&g;
+		$string="\"$string\"";
+	}
+	return $string;
+}
+
+sub process_key_options {
+  return qw(Njobs TotalCPU WallDuration) unless exists $options{"metric-key"};
+  my @keys = ();
+  foreach my $key (@{$options{"metric-key"}}) {
+    push @keys, "Njobs" if $key =~ m&^(?:Njobs|N|jobs|j)$&i;
+    push @keys, "TotalCPU" if $key =~ m&CPU&i;
+    push @keys, "WallDuration" if $key =~ m&Wall&i;
+  }
+  return @keys;
+}
+
+my $current_date;
+sub vo_report(\@$$) {
+  my ($email_addresses, $output_filehandle, $output_filename) = @_;
+
+  my @lines = ();
+
+  my @dates = sort by_date keys %dates;
+
+  my @default_results = ();
+
+  my ($year, $month, $day) = Today(1);
+  if ($timeperiod eq "month") {
+    @default_results =
+      (scalar convert_to_date(sprintf "%4d-%02d-%02d\n", Add_Delta_YM($year, $month, $day, 0, -2)),
+       scalar convert_to_date(sprintf "%4d-%02d-%02d\n", Add_Delta_YM($year, $month, $day, 0, -1)));
+  } elsif ($timeperiod eq "week") {
+    @default_results =
+      (scalar convert_to_date(sprintf "%4d-%02d-%02d\n", Add_Delta_Days($year, $month, $day, -14)),
+       scalar convert_to_date(sprintf "%4d-%02d-%02d\n", Add_Delta_Days($year, $month, $day, -7)));
+  }
+
+  my ($previous_date, $previous_date_end) =
+    convert_to_date($options{"compare-period"});
+  unless ($previous_date) {
+    ($previous_date, $previous_date_end) =
+      convert_to_date($default_results[0]);
+  }
+
+  my $current_date_end;
+  ($current_date, $current_date_end) =
+    convert_to_date($options{"target-period"});
+  unless ($current_date) {
+    ($current_date, $current_date_end) =
+      convert_to_date($default_results[1]);
+  }
+
+  print $output_filehandle <<EOF;
+Comparing current data for $timeperiod $current_date - $current_date_end (inclusive)
+to previous $timeperiod $previous_date - $previous_date_end (inclusive).
+
+Days start and end at midnight UTC.
+
+EOF
+  my @label = (" Current", "Previous");
+  for my $date ($current_date, $previous_date) {
+    my $label = shift @label;
+    if ($vomrs_user_info->{"totals"}->{$timeperiod}->{$date}->{"Njobs"}) {
+      my $string = "$label ${timeperiod}'s total usage: ";
+      print $output_filehandle $string,
+        num_users($date), " users utilized ",
+          num_sites($date), " sites;\n";
+      my ($total, $success, $fail) =
+        ( $vomrs_user_info->{"totals"}->{$timeperiod}->{$date}->{"Njobs"},
+          $vomrs_user_info->{"totals"}->{$timeperiod}->{$date}->{1}->{"Njobs"} || 0,
+          $vomrs_user_info->{"totals"}->{$timeperiod}->{$date}->{0}->{"Njobs"} || 0 );
+      my $efficiency = $total?(100.0*$success/$total):0;
+      print $output_filehandle ' ' x length($string),
+        $total, " jobs total (",
+          $success, " success, ",
+            $fail, " fail, ",
+              sprintf("%.1f%%", $efficiency),
+                ");\n";
+      ($total, $success, $fail) =
+        ( convert_num($vomrs_user_info->{"totals"}->{$timeperiod}->{$date}->{"WallDuration"},
+                      "WallDuration"),
+          convert_num($vomrs_user_info->{"totals"}->{$timeperiod}->{$date}->{1}->{"WallDuration"} || 0,
+                      "WallDuration"),
+          convert_num($vomrs_user_info->{"totals"}->{$timeperiod}->{$date}->{0}->{"WallDuration"} || 0,
+                      "WallDuration") );
+      $efficiency = $total?(100.0*$success/$total):0;
+      print $output_filehandle ' ' x length($string),
+        $total, " wall clock hours total (",
+          $success, " success, ",
+            $fail, " fail, ",
+              sprintf("%.1f%%", $efficiency),
+                ").\n";
+    } else {
+      print $output_filehandle
+        "$label ${timeperiod}'s total usage: zero.\n";
+    }
+  }
+  print $output_filehandle "\n" if ($#label < 1);
+  foreach my $id (sort by_usage grep /^\d+$/, keys %{$vomrs_user_info}) {
+    my $user_info = $vomrs_user_info->{$id};
+    # User's name
+    unless ($user_info->{"totals"}->{$timeperiod}->{$current_date}->{"Njobs"}) {
+      push @lines, sprintf("%s %s%s\n",
+                           $user_info->{firstname},
+                           $user_info->{lastname},
+                           ": no usage this period\n")
+        unless $options{"suppress-idle-users"};
+      next;
+    }
+    my $column_separator = { title => ' | ', is_sep => '1' };
+    # Define the table
+    my $user_table = Text::Table->new
+      (
+       $column_separator,
+       { title => "CN", align_title => "center", sample => max_length_cn() },
+       $column_separator,
+       { title => "Site", align_title => "center", sample => max_length_site() },
+       $column_separator,
+       { title => "Job\nSuccess?", align_title => "center", sample => "yes" },
+       $column_separator,
+       { title => "# Jobs", align_title => "center", align => "right", sample => "99999" },
+       $column_separator,
+       { title => "Wall\nTime (h)", align_title => "center", sample => "9999999.0" },
+       $column_separator,
+       { title => "Delta\nJobs", align => "right", align_title => "center", sample => "99999" },
+       $column_separator,
+       { title => "Delta Wall\nTime (h)", align_title => "center", sample => "9999999.0" },
+       $column_separator
+      );
+
+    my @sites = sort keys %{$user_info->{"totals"}->{Site}};
+
+    # Load the table
+    foreach my $cn (sort keys %{$user_info->{CN}}) {
+      foreach my $site (@sites) {
+        foreach my $success (1, 0) {
+          my @row =
+            (
+             $cn,
+             $site,
+             $success?"Yes":"No",
+             ($user_info->{CN}->{$cn}->{$timeperiod}->{$current_date}->{Site}->{$site}->{$success}->{"Njobs"} || 0),
+             convert_num(($user_info->{CN}->{$cn}->{$timeperiod}->{$current_date}->{Site}->{$site}->{$success}->{"WallDuration"} || 0),
+                         "WallDuration"),
+             ($user_info->{CN}->{$cn}->{$timeperiod}->{$current_date}->{Site}->{$site}->{$success}->{"Njobs"}  || 0) -
+             ($user_info->{CN}->{$cn}->{$timeperiod}->{$previous_date}->{Site}->{$site}->{$success}->{"Njobs"} || 0),
+             convert_num(($user_info->{CN}->{$cn}->{$timeperiod}->{$current_date}->{Site}->{$site}->{$success}->{"WallDuration"} || 0) -
+                         ($user_info->{CN}->{$cn}->{$timeperiod}->{$previous_date}->{Site}->{$site}->{$success}->{"WallDuration"} || 0),
+                         "WallDuration"),
+            );
+          if ($row[3] || $row[5]) {
+            $user_table->add(@row);
+          }
+        }
+      }
+    }
+
+    # Print the table
+    push @lines,
+      $user_table->rule('_', '_'),
+        $user_table->title(),
+          $user_table->rule('_', '|'),
+            $user_table->body(),
+              $user_table->rule('-', '+');
+
+
+    # User totals
+    my $total_lines = 0;
+    my $user_name = sprintf("%s %s",
+                            $user_info->{firstname},
+                            $user_info->{lastname});
+    $user_name =~ s&^\s*(.*?)\s*$&$1&;
+    foreach my $success (1, 0) {
+      my @row =
+        (
+         sprintf("%s (%s)",
+                 $user_name,
+                 $success?"success":"failure"),
+         "ALL",
+         $success?"Yes":"No",
+         ($user_info->{"totals"}->{$timeperiod}->{$current_date}->{$success}->{"Njobs"} || 0),
+         convert_num(($user_info->{"totals"}->{$timeperiod}->{$current_date}->{$success}->{"WallDuration"} || 0),
+                     "WallDuration"),
+         ($user_info->{"totals"}->{$timeperiod}->{$current_date}->{$success}->{"Njobs"} || 0) -
+         ($user_info->{"totals"}->{$timeperiod}->{$previous_date}->{$success}->{"Njobs"} || 0),
+         convert_num(($user_info->{"totals"}->{$timeperiod}->{$current_date}->{$success}->{"WallDuration"} || 0) -
+                     ($user_info->{"totals"}->{$timeperiod}->{$previous_date}->{$success}->{"WallDuration"} || 0),
+                     "WallDuration")
+        );
+      if ($row[3] || $row[5]) {
+        $user_table->add(@row);
+        ++$total_lines
+      }
+    }
+    push @lines,
+      $user_table->body(-$total_lines, $total_lines),
+        $user_table->rule('-', '+');
+    $user_table->add
+      (
+       sprintf("%s (%s)",
+               $user_name,
+               "all"),
+       "ALL",
+       "N/A",
+       ($user_info->{"totals"}->{$timeperiod}->{$current_date}->{"Njobs"} || 0),
+         convert_num(($user_info->{"totals"}->{$timeperiod}->{$current_date}->{"WallDuration"} || 0),
+                     "WallDuration"),
+         ($user_info->{"totals"}->{$timeperiod}->{$current_date}->{"Njobs"} || 0) -
+         ($user_info->{"totals"}->{$timeperiod}->{$previous_date}->{"Njobs"} || 0),
+         convert_num(($user_info->{"totals"}->{$timeperiod}->{$current_date}->{"WallDuration"} || 0) -
+                     ($user_info->{"totals"}->{$timeperiod}->{$previous_date}->{"WallDuration"} || 0),
+                     "WallDuration")
+      );
+
+    push @lines,
+      $user_table->body(-1, 1),
+        $user_table->rule('=', '='),
+          "\n";
+  }
+  print $output_filehandle
+    join ("", @lines);
+
+  $output_filehandle->close();
+
+  # Send the report if necessary
+  if (scalar @$email_addresses) {
+    print "Mailing output to: \n";
+    print join(", ", @$email_addresses), "\n\n";
+
+    # Fake html for broken browsers
+    open (IN, $output_filename);
+    my $text = join("", <IN>);
+    close(IN);
+    my $html_filename = $output_filename;
+    $html_filename =~ s&\.txt$&.html&;
+    open(OUT, ">$html_filename") or die "Unable to open temporary file $html_filename";
+    print OUT <<EOF;
+<html>
+<body>
+<pre>
+$text
+</pre>
+</body>
+<html>
+EOF
+    close(OUT);
+    my $cmd = sprintf(qq&mutt -F "$script_top_dir/muttrc" -a "$html_filename" -s "OSG metrics for VO $vo for $timeperiod $current_date to $current_date_end" %s&,
+                      join(" ", map { qq/"$_"/ } @$email_addresses));
+
+    open(MUTT, "|$cmd") or die "Unable to open mail command for input";
+    print MUTT <<EOF;
+Please find below the Gratia statistics for OSG usage for the $vo VO
+for the $timeperiod $current_date - $current_date_end (inclusive).
+
+Deltas are with respect to the $timeperiod $previous_date - $previous_date_end (inclusive).
+
+Notes:
+
+* Data are only included for jobs that *completed* in the period in question.
+
+* Durations are expressed in hours, to 1 decimal place.
+
+* The Njobs metric may include intermediate jobs (when a job is
+  forwarded from one gatekeeper to another), so there is the possibility
+  of some double-counting.
+
+* The statistics do not include Glexec information currently.
+
+* The "Job Success?" column indicates whether the data in that row
+  concern jobs where the *application* was successful. Gratia is unable
+  to detect subsequent failures in middleware after the successful
+  completion of the batch job.
+
+------------------------------------------------------------------------
+EOF
+    print MUTT $text;
+    close(MUTT);
+  }
+
+}
+
+sub by_usage {
+  return ($vomrs_user_info->{$b}->{"totals"}->{$timeperiod}->{$current_date}->{"WallDuration"} || 0) <=>
+    ($vomrs_user_info->{$a}->{"totals"}->{$timeperiod}->{$current_date}->{"WallDuration"} || 0);
+}
+
+sub convert_to_date {
+  my $date = shift;
+  return unless $date;
+  my $result;
+  my ($year, $month, $day, $week);
+  if ($timeperiod eq "week") {
+    if ($date =~ m&(\d{4})(?:[-\D])?(\d+)$&) { # Year, week #
+      ($year, $month, $day) = Monday_of_Week($2, $1);
+    } else {
+      if ($date =~ m&(\d{4})(?:[-\D])?(\d{1,2})(?:[-\D])?(\d+)&) {
+        ($year, $month, $day) = ($1, $2, $3);
+      } else {
+        ($year, $month, $day) = Parse_Date($date);
+      }
+      if ($year) {
+        ($week, $year) = Week_of_Year($year, $month, $day);
+        ($year, $month, $day) = Monday_of_Week($week, $year);
+      } else {
+        print STDERR "Unable to decode string $date to a date\n";
+        exit(1);
+      }
+    }
+  } elsif ($timeperiod eq "month") {
+    if ($date =~ m&(\d{4})\D?(\d+)$&) { # Year, month #
+      ($year, $month, $day) = ($1, $2, "01");
+    } else {
+      if ($date =~ m&(\d{4})(?:[-\D])?(\d{1,2})(?:[-\D])?(\d+)&) {
+        ($year, $month, $day) = ($1, $2, "01");
+      } else {
+        ($year, $month, $day) = Parse_Date($date);
+      }
+      unless ($year) {
+        print STDERR "Unable to decode string $date to a date\n";
+        exit(1);
+      }
+    }
+  } else {
+    print STDERR "ERROR: convert_to_dates does not understand timeperiod $timeperiod\n";
+    exit(1);
+  }
+  $result = sprintf("%04d-%02d-%02d", $year, $month, $day);
+  if (wantarray) { # Want period end too
+    if ($timeperiod eq "month") {
+      return ($result,
+              sprintf("%04d-%02d-%02d",
+                      Add_Delta_YMD($year, $month, $day, 0, 1, -1)));
+    } elsif ($timeperiod eq "week") {
+      return ($result,
+              sprintf("%04d-%02d-%02d",
+                      Add_Delta_Days($year, $month, $day, 6)));
+    }
+  } else {
+    return $result;
+  }
+}
+
+sub num_users {
+  my $date = shift;
+
+  my $result = 0;
+  foreach my $id (sort by_name grep /^\d+$/, keys %{$vomrs_user_info}) {
+    ++$result if ($vomrs_user_info->{$id}->{"totals"}->{$timeperiod}->{$date}->{"Njobs"});
+  }
+  return $result;
+}
+
+sub num_sites {
+  my $date = shift;
+
+  my $result = 0;
+  foreach my $site (sort keys %{$vomrs_user_info->{"totals"}->{$timeperiod}->{$date}->{Site}}) {
+    ++$result if ($vomrs_user_info->{"totals"}->{$timeperiod}->{$date}->{Site}->{$site}->{"Njobs"});
+  }
+  return $result;
+}
+
+sub max_length_site {
+  my $result = "";
+  foreach my $date (keys %{$vomrs_user_info->{"totals"}->{$timeperiod}}) {
+    foreach my $site (keys %{$vomrs_user_info->{"totals"}->{$timeperiod}->{$date}->{Site}}) {
+      if (length($site) > length($result)) {
+        $result = $site;
+      }
+    }
+  }
+  return $result;
+}
+
+sub max_length_cn {
+  my $result = "";
+  foreach my $id (grep /^\d+$/, keys %{$vomrs_user_info}) {
+    # User's CNs.
+    foreach my $cn (keys %{$vomrs_user_info->{$id}->{CN}}) {
+      $result = $cn if (length($cn) > length($result));
+    }
+    # User's name (almost)
+    my $user_name_test =
+      sprintf("%s %s (success)",
+              $vomrs_user_info->{$id}->{firstname},
+              $vomrs_user_info->{$id}->{lastname});
+    $result = $user_name_test if (length($user_name_test) > length($result));
+  }
+  return $result;
+}
+
+__END__
+
+### Local Variables:
+### mode: cperl
+### End:
