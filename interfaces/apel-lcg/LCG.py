@@ -7,7 +7,7 @@
 # Script to transfer the data from Gratia to APEL (WLCG)
 ########################################################################
 #
-#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: LCG.py,v 1.19 2008-11-18 21:12:16 jgweigand Exp $
+#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: LCG.py,v 1.20 2008-12-16 14:05:14 jgweigand Exp $
 #
 #
 ########################################################################
@@ -207,7 +207,7 @@ def SendEmailNotificationFailure(error):
 #-----------------------------------------------
 def SendEmailNotificationSuccess(contents):
   """ Sends a successful email notification to the EmailNotice attribute""" 
-  subject  = "Gratia transfer to APEL (WLCG) for %s - Completed" % gDateFilter
+  subject  = "Gratia transfer to APEL (WLCG) for %s - SUCCESS" % gDateFilter
   SendEmailNotification(subject,contents)
   if len(gWarnings) == 0:
     Logit("No warning conditions detected.")
