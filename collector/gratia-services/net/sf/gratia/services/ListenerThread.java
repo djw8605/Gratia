@@ -388,11 +388,17 @@ public class ListenerThread extends Thread {
                 try {
                     current = (Record)records.get(j);
                     tx = session.beginTransaction();
-                    rId += current.getClass().getSimpleName();
+                    String simpleName = current.getClass().getSimpleName();
+                    rId += simpleName;
                     if (rSize > 1) {
                         rId += " " + (j + 1) + " / " + rSize;
                     }
-                    rId += " (" + current.getProbeName() + ")";
+                    rId += " (" + current.getProbeName();
+                    if (simpleName.equals("ProbeDetails")) {
+                        rId += ", recordId=" +
+                            ((ProbeDetails)current).getRecordIdentity();
+                    }
+                    rId += ")";
                     probe = statusUpdater.update(session, current, xml);
                     session.flush();
                     tx.commit();
