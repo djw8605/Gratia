@@ -7,6 +7,7 @@ DROP PROCEDURE IF EXISTS updatenodesummary -- Obsolete summary procedure
 DROP PROCEDURE IF EXISTS add_JUR_to_summary
 ||
 CREATE PROCEDURE add_JUR_to_summary(inputDbid INT(11))
+SQL SECURITY INVOKER
 DETERMINISTIC
 AJUR:BEGIN
   -- Main
@@ -276,6 +277,7 @@ END;
 DROP PROCEDURE IF EXISTS del_JUR_from_summary
 ||
 CREATE PROCEDURE del_JUR_from_summary(inputDbid INT(11))
+SQL SECURITY INVOKER
 DETERMINISTIC
 DJUR:BEGIN
   -- Main
