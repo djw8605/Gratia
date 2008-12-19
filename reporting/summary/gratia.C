@@ -19,14 +19,29 @@
 #include "THStack.h"
 #include "TColor.h"
 #include "TGaxis.h"
+#include "TXMLAttr.h"
+#include "TDOMParser.h"
+#include "TXMLNode.h"
+#include "TXMLDocument.h"
 
 #include "siteOwner.h"
+
+#include <algorithm>
 
 int gDebugLevel = 0;
 
 void genericoutput(TSQLServer *db, const char*sql);
 double getOneDouble(TSQLServer *db, const char *query, int field = 0);
 long getOneLong(TSQLServer *db, const char *query, int field = 0);
+
+class OInfo {
+public:
+   OInfo() : fPercent(0), fNjobs(0), fGuessed(false) {}
+   std::string fVO;
+   short fPercent;
+   long fNjobs;
+   bool fGuessed;
+};
 
 void sharing(FILE *out, FILE *outcsv, TSQLServer *db, TDatime *begin, TDatime *end) 
 {
@@ -36,9 +51,12 @@ void sharing(FILE *out, FILE *outcsv, TSQLServer *db, TDatime *begin, TDatime *e
 
    fprintf(out,"OSG usage summary (midnight to midnight UTC) for %s\n"
 "including all jobs that finished in that time period.\n\n"
-"The ownership information was extracted from http://oim.grid.iu.edu,\n"
-"with some straightforward changes applied (for example USCMS -> CMS),\n"
-"Some owners (DOSAR, fGOC) has not yet been associated to a VO\n"
+"The ownership information was extracted from OIM from http://myosg.grid.iu.edu/trunk/vo/?group=resource.\n"
+"with some straightforward changes applied (for example ATLAS -> USATLAS),\n"
+"Some of the information as not yet been updated in OIM and some attempt was made to 'guess' the owner\n"
+"from previous information source; those guessed owners appear in the table with the tag '(not in OIM)'\n"
+"OIM also sometimes use a generic name 'Other' for one of the owners; this can not be associated with\n"
+"with any information from Gratia."
 "The subgroups in the Fermilab VO are __not__ considered owners of the\n"
 "sites operated by Fermilab.\n\n",buffer);
 
@@ -46,7 +64,10 @@ void sharing(FILE *out, FILE *outcsv, TSQLServer *db, TDatime *begin, TDatime *e
    delete [] buffer;
 
 
-   const char *sql = "SELECT SiteName, Sum(Njobs), Sum(WallDuration), Sum(CpuUserDuration+CpuSystemDuration) FROM VOProbeSummary V, Probe, Site where V.ProbeName = Probe.ProbeName and Site.siteid = Probe.siteid and '%s' < EndTime and EndTime < '%s' group by SiteName order by SiteName";
+   const char *sql = "SELECT SiteName, Sum(Njobs), Sum(WallDuration), Sum(CpuUserDuration+CpuSystemDuration) "
+   " FROM VOProbeSummary V, Probe, Site where V.ProbeName = Probe.ProbeName and Site.siteid = Probe.siteid and '%s' <= EndTime and EndTime < '%s' "
+   " and VOName != 'unknown' and VOName != 'other' "
+   " group by SiteName order by SiteName";
       
    TString sbegin( begin->AsSQLString() );
    TString send( end->AsSQLString() );
@@ -65,7 +86,9 @@ void sharing(FILE *out, FILE *outcsv, TSQLServer *db, TDatime *begin, TDatime *e
    FILE * f = gSystem->OpenPipe(cmd,"r");
    //if (!f) {
       for(UInt_t i=0; i < sizeof(siteOwners)/sizeof(void*); i += 2) {
-         owners[ siteOwners[i] ] = siteOwners[i+1];
+         std::string own( siteOwners[i+1] );
+         std::transform(own.begin(), own.end(), own.begin(), ::tolower);
+         owners[ siteOwners[i] ] = own;
       }
    //} else {
       char x;
@@ -84,6 +107,7 @@ void sharing(FILE *out, FILE *outcsv, TSQLServer *db, TDatime *begin, TDatime *e
                 if (name == "SPRACE-CE") {
                    name = "SPRACE";
                 }
+                std::transform(owner.begin(), owner.end(), owner.begin(), ::tolower);
                 owners[ name ] = owner;
                 name = "";
                 owner = "";
@@ -99,35 +123,118 @@ void sharing(FILE *out, FILE *outcsv, TSQLServer *db, TDatime *begin, TDatime *e
       }
       fclose(f);
    //}
-
+   
+   typedef map<string, OInfo> InnerMap_t;
+   map<string, InnerMap_t > ownerShare;
+   cmd = "wget -q -O - http://myosg.grid.iu.edu/trunk/vo/xml?group=resource";
+   f = gSystem->OpenPipe(cmd,"r");
+   TString xmldoc;
+   while ((x = fgetc(f))!=EOF ) {
+      xmldoc.Append(x);
+   }
+   fclose(f);
+   TDOMParser loader;
+   if ( 0 !=  loader.ParseBuffer( xmldoc.Data(), xmldoc.Length() ) ) {
+      Error("Report","Could not properly parse the result of %s",cmd.Data());
+      return;
+   }
+   TXMLNode *node = loader.GetXMLDocument()->GetRootNode();
+   if (0 != strcmp(node->GetNodeName(),"ResourceOwnerships") ) {
+      Error("Report","Node is not ResourceOwnerships as expected but %s",node->GetNodeName());
+      return;
+   }
+   node = node->GetChildren();
+   while (node) {
+      if ( 0 != strcmp(node->GetNodeName(),"Resource") ) {
+         Error("Report","Node is not Resource as expected but %s",node->GetNodeName());
+         node = node->GetNextNode();
+         continue;
+      }
+      {
+         TXMLNode *sub = node->GetChildren();
+         //fprintf(stderr,"Sub: %s\n",sub->GetNodeName());
+         InnerMap_t owner_percents;
+         std::string owner_name;
+         std::string resource_name;
+         int percent;
+         while (sub) {
+            if ( 0 == strcmp( "ResourceID", sub->GetNodeName() ) ) {
+               // skip
+            } else if ( 0 == strcmp ("ResourceName", sub->GetNodeName() ) ) {
+               resource_name = sub->GetText();
+            } else if ( 0 == strcmp ( "Ownership", sub->GetNodeName() ) ) {
+               TXMLNode *nowner = sub->GetChildren();
+               while( nowner ) {
+                  if ( 0 != strcmp( "Percentage", nowner->GetNodeName() ) ) {
+                     Error("Report","Node is not Percentage as expected but %s",node->GetNodeName());
+                  }
+                  if (nowner->GetAttributes()) {
+                     TXMLAttr *attr = (TXMLAttr*)nowner->GetAttributes()->FindObject("VO");
+                     if (attr) {
+                        owner_name = attr->GetValue();
+                        std::transform(owner_name.begin(), owner_name.end(), owner_name.begin(), ::tolower);
+                     
+                        if (owner_name == "atlas") {
+                           owner_name = "usatlas";
+                        }
+                        if (owner_name == "other") {
+                           owner_name = "Listed as other in OIM";
+                        }
+                        percent = atoi(nowner->GetText());
+                        //fprintf(stderr,"text %s vs value %d\n",nowner->GetText(),percent);
+                        owner_percents[ owner_name ].fVO = owner_name;
+                        owner_percents[ owner_name ].fPercent = percent;
+                     } else {
+                        Error("ParsingXml","Percentage node does not specify a vo: %s\n",nowner->GetContent());
+                     }
+                  }
+                  nowner = nowner->GetNextNode();
+               }
+            }
+            sub = sub->GetNextNode();
+         }
+         ownerShare[ resource_name ] = owner_percents;
+         //fprintf(stderr,"for %s %d\n",resource_name.c_str(), owner_percents.size());
+      }
+      node = node->GetNextNode();
+   }
+   
 
    TString pattern = 
       Form("SELECT VOName, Sum(Njobs),Sum(WallDuration), Sum(CpuUserDuration+CpuSystemDuration), SiteName  FROM VOProbeSummary V, Probe, Site where V.ProbeName = Probe.ProbeName and Site.siteid = Probe.siteid and '%s' < EndTime and EndTime < '%s' and SiteName = '%%s' and (UCASE(VOName) = '%%s') group by SiteName",sbegin.Data(),send.Data());
+
+   TString pattern2 = 
+     Form("SELECT LCASE(VOName), Sum(Njobs),Sum(WallDuration), Sum(CpuUserDuration+CpuSystemDuration), SiteName "
+          "FROM VOProbeSummary V, Probe, Site where V.ProbeName = Probe.ProbeName and Site.siteid = Probe.siteid and '%s' <= EndTime and EndTime < '%s' and SiteName = '%%s' "
+          "and VOName != 'unknown' and VOName != 'other' "
+          "group by SiteName, LCASE(VOName)",sbegin.Data(),send.Data());
 
    long total_njobs = 0;
    long total_owner_njobs = 0;
    // int nfields = stmt->GetNumFields();
 
    const char *dashes = "-----------------------------------";
-   TString  dashFormat( "%5.5s-%27.27s-%11.11s-%9.9s-%18.18s\n");
-   TString  textFormat( " %3s | %-25s | %-9s | %7s | %8s\n");
-   TString valueFormat( " %3d | %-25s | %-9s | %7ld | %8ld (%5.1f%%)\n");
+   TString  dashFormat( "%6.6s-%27.27s-%10.10s-%31.31s-%13.13s-%10.10s\n");
+   TString  textFormat( " %4s | %-25s | %8s | %-29s | %11s | %8s\n");
+   TString valueFormat( " %2d.%1d | %-25s | %8ld | %-22s (%3.0d%%) | %11ld | %5.1f%%\n");
 
-   TString textFormat_csv("%s,%s,%s,%s\n");
-   TString valueFormat_csv( "%s,%s,%7ld,%8ld,%4.1f%%\n");
+   TString textFormat_csv("%s,%s,%s,%s,%s,%s\n");
+   TString valueFormat_csv( "%s,%8ld,%s,%4.1%,%8ld,%4.1f%%\n");
    
    fprintf(out, todaystring.Data());
-   fprintf(out, dashFormat.Data(),dashes,dashes,dashes,dashes,dashes);
-   fprintf(out, textFormat.Data(),"","Site","Owner","NJobs","Owner NJobs");
-   fprintf(out, dashFormat.Data(),dashes,dashes,dashes,dashes,dashes);
+   fprintf(out, dashFormat.Data(),dashes,dashes,dashes,dashes,dashes,dashes);
+   fprintf(out, textFormat.Data(),"","Site","NJobs","Owner","Owner NJobs","Fraction");
+   fprintf(out, dashFormat.Data(),dashes,dashes,dashes,dashes,dashes,dashes);
    
-   fprintf(outcsv, textFormat_csv.Data(),"Site","Owner","NJobs","Owner NJobs");
+   fprintf(outcsv, textFormat_csv.Data(),"Site","NJobs","Owner","Owner NJobs","Fraction");
 
-   int index = 1;
+   int site_index = 1;
+   int vo_index = 1;
    while (stmt->NextResultRow()) {
 
-      TString site = stmt->GetString(0);
-      TString owner = owners[stmt->GetString(0)].c_str();
+      std::string site = stmt->GetString(0);
+      std::string owner = owners[site];
+      InnerMap_t &owners = ownerShare[stmt->GetString(0)];
       long njobs = stmt->GetLong(1);
       //double wall = stmt->GetDouble(2);
       //double cpu = stmt->GetDouble(3);
@@ -140,38 +247,89 @@ void sharing(FILE *out, FILE *outcsv, TSQLServer *db, TDatime *begin, TDatime *e
 
 
 
-      query = Form(pattern,site.Data(),owner.Data(),owner.Data());
+      query = Form(pattern2,site.c_str(),owner.c_str(),owner.c_str());
       
       TSQLStatement *stmt2 = db->Statement(query);
       if (gDebugLevel >= 1) Info("Report","Running : %s\n",query.Data());
    
+      if (owners.size()==0) {
+         owners[owner].fVO = owner;
+         owners[owner].fPercent = 100;
+         owners[owner].fGuessed = true;
+      }
+      
       if (stmt2!=0) {
 
          stmt2->Process();
          stmt2->StoreResult();
       
-         if (stmt2->NextResultRow()) {
+         while (stmt2->NextResultRow()) {
+            std::string vo = stmt2->GetString(0);
+            std::transform(vo.begin(), vo.end(), vo.begin(), ::tolower);
+
             owner_njobs = stmt2->GetLong(1);
             owner_wall = stmt2->GetDouble(2);
             owner_cpu = stmt2->GetDouble(3);
+            
+            owners[vo].fNjobs += owner_njobs;
+            if (owners[vo].fVO.length()==0) {
+               owners[vo].fVO = vo;
+            }
 
-            total_owner_njobs += owner_njobs;
+            if (owners[vo].fPercent) {
+               total_owner_njobs += owner_njobs;
+            }
          }
          delete stmt2;
       }
-
-      fprintf(out,valueFormat.Data(),index, site.Data(),owner.Data(), njobs, owner_njobs,njobs ? 100.0*owner_njobs/njobs : 0.0);
-
-      fprintf(outcsv,valueFormat_csv.Data(),site.Data(),owner.Data(), njobs, owner_njobs,njobs ? 100.0*owner_njobs/njobs : 0.0);
-
-      ++index;
-
+      
+      typedef InnerMap_t::iterator iter_t;
+      
+      std::multimap<int,OInfo > sortedlist;
+      for (iter_t what = owners.begin() ;what != owners.end(); ++what) {
+         sortedlist.insert( make_pair( -what->second.fPercent, what->second ) );
+      }
+      typedef std::multimap<int,OInfo >::iterator siter_t;
+      
+      int n_other_owners = 0;
+      int njobs_other_owners = 0;
+      for (siter_t what = sortedlist.begin() ;what != sortedlist.end(); ++what) {
+         // Count the rest.
+         
+         if (what->second.fPercent != 0) {
+            owner_njobs = what->second.fNjobs;
+            std::string name( what->second.fVO );
+            if (what->second.fGuessed) {
+               name += " (not in OIM)";
+            }
+            
+            fprintf(out,valueFormat.Data(),site_index, vo_index, site.c_str(), njobs,
+                    name.c_str(), what->second.fPercent, owner_njobs, njobs ? 100.0*owner_njobs/njobs : 0.0);
+            
+            fprintf(outcsv,valueFormat_csv.Data(),site.c_str(), njobs,
+                    name.c_str(), what->second.fPercent, owner_njobs, njobs ? 100.0*owner_njobs/njobs : 0.0);
+            
+            ++vo_index;
+         } else {
+            ++n_other_owners;
+            njobs_other_owners += what->second.fNjobs;
+         }
+      }
+      
+      fprintf(out,valueFormat.Data(),site_index, vo_index, site.c_str(), njobs,
+              Form("%d non-owning VOs",n_other_owners), 0, njobs_other_owners, njobs ? 100.0*njobs_other_owners/njobs : 0.0);
+      
+      fprintf(outcsv,valueFormat_csv.Data(),site.c_str(), njobs,
+              Form("%d non-owning VOs",n_other_owners), 0, njobs_other_owners, njobs ? 100.0*njobs_other_owners/njobs : 0.0);
+      fprintf(out, dashFormat.Data(),dashes,dashes,dashes,dashes,dashes,dashes);
+      
+      vo_index = 0;
+      ++site_index;
    }
-   fprintf(out, dashFormat.Data(),dashes,dashes,dashes,dashes,dashes);
-   fprintf(out,valueFormat.Data(),index,"All","", total_njobs, total_owner_njobs,total_njobs ? 100.0*total_owner_njobs/total_njobs : 0.0);
-   fprintf(out, dashFormat.Data(),dashes,dashes,dashes,dashes,dashes);
+   fprintf(out,valueFormat.Data(),site_index,vo_index,"All", total_njobs, "", 100, total_owner_njobs,total_njobs ? 100.0*total_owner_njobs/total_njobs : 0.0);
+   fprintf(out, dashFormat.Data(),dashes,dashes,dashes,dashes,dashes,dashes);
 
-   fprintf(outcsv,valueFormat_csv.Data(),"All","", total_njobs, total_owner_njobs,total_njobs ? 100.0*total_owner_njobs/total_njobs : 0.0);
+   fprintf(outcsv,valueFormat_csv.Data(),"All", total_njobs, "", 100, total_owner_njobs,total_njobs ? 100.0*total_owner_njobs/total_njobs : 0.0);
 
    delete stmt;
 }
@@ -421,7 +579,7 @@ TDatime* adddays(TDatime *in, Int_t days) {
 
 TDatime* gettoday() {
    TDatime *t = new TDatime();
-   t->Set(t->GetDate(),70000);
+   t->Set(t->GetDate(),00000);
    return t;
 }
 
