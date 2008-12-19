@@ -214,16 +214,16 @@ void sharing(FILE *out, FILE *outcsv, TSQLServer *db, TDatime *begin, TDatime *e
    // int nfields = stmt->GetNumFields();
 
    const char *dashes = "-----------------------------------";
-   TString  dashFormat( "%6.6s-%27.27s-%10.10s-%31.31s-%13.13s-%10.10s\n");
-   TString  textFormat( " %4s | %-25s | %8s | %-29s | %11s | %8s\n");
-   TString valueFormat( " %2d.%1d | %-25s | %8ld | %-22s (%3.0d%%) | %11ld | %5.1f%%\n");
+   TString  dashFormat( "%6.6s-%22.22s-%8.8s-%31.31s-%11.11s-%9.9s\n");
+   TString  textFormat( " %4s | %-20s | %7s | %-29s | %9s | %7s\n");
+   TString valueFormat( " %2d.%1d | %-20s | %7ld | %-22s (%3.0d%%) | %9ld | %5.1f%%\n");
 
    TString textFormat_csv("%s,%s,%s,%s,%s,%s\n");
    TString valueFormat_csv( "%s,%8ld,%s,%4.1%,%8ld,%4.1f%%\n");
    
    fprintf(out, todaystring.Data());
    fprintf(out, dashFormat.Data(),dashes,dashes,dashes,dashes,dashes,dashes);
-   fprintf(out, textFormat.Data(),"","Site","NJobs","Owner","Owner NJobs","Fraction");
+   fprintf(out, textFormat.Data(),"","Site","NJobs","Owner","Owner job","");
    fprintf(out, dashFormat.Data(),dashes,dashes,dashes,dashes,dashes,dashes);
    
    fprintf(outcsv, textFormat_csv.Data(),"Site","NJobs","Owner","Owner NJobs","Fraction");
