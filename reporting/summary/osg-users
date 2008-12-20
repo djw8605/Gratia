@@ -52,6 +52,7 @@ B<osg-users> B<--man>
 
 B<osg-users> [B<-u>|B<--user-regex> I<regex>]+
 [B<-v>|B<--vo> I<vo>]
+[B<-r>|B<--reporting>|B<--reporting-name> I<name>]
 [B<-V>|B<--vo-report>]
 [B<-k>|B<--metric-key> I<Njobs|CPU|Wall>]
 [B<--no-totals>]
@@ -114,6 +115,7 @@ GetOptions(\%options,
            "compare-period=s",
            "target-period=s",
            "suppress-idle-users|s",
+           "reporting-name|reporting|r=s",
            "mail|m=s@") or pod2usage(-exitval => 2);
 
 $options{"help"} and pod2usage(1);
@@ -302,8 +304,13 @@ my $vomrs_user_info = {};
 
 if ($options{"aux-db-type"} =~ m&none&i) {
   # Get known users attached to this VO from Gratia
-  my $sth = $dbh->prepare(sprintf("select distinct CommonName from VOProbeSummary where UPPER(VOName) = '%s' order by CommonName;",
-                                 uc($vo)));
+  my $sth = $dbh->prepare(sprintf(<<EOF, RealVOName(), uc($vo)));
+select distinct CommonName
+from MasterSummaryData MSD
+join VONameCorrection VC on (MSD.VOcorrid = VC.corrid)
+join VO on (VC.void = VO.void)
+where UPPER(%s) = '%s' order by CommonName;
+EOF
   $sth->execute();
   my $userid = 0;
   $out = '';
@@ -366,7 +373,9 @@ for (split /\n/, $out) {
 
 if (exists $vomrs_user_info->{0}) { # Unattributed user
   $vomrs_user_info->{0}->{query} =
-    "((UPPER(VO.VOName) = UPPER('$vo')) AND ((CommonName = 'Unknown') OR (CommonName like 'Generic%')))";
+    sprintf(<<EOF, RealVOName());
+((UPPER(%s) = UPPER('$vo')) AND ((CommonName = 'Unknown') OR (CommonName like 'Generic%%')))
+EOF
 }
 
 my $sites = {};
@@ -377,12 +386,17 @@ foreach my $id (sort { $a <=> $b } grep /^\d+$/, keys %{$vomrs_user_info}) {
   my $user_info = $vomrs_user_info->{$id};
   my @cn_list = keys %{$user_info->{CN}};
   my $flat_cn_list = join(", ", map {s&\'&\'\'&g; "'$_'"} @cn_list);
-  my $sth = $dbh->prepare(queryString($user_info->{query} || "(CommonName IN ( $flat_cn_list ) AND (UPPER(VO.VOName) = UPPER('$vo')))",
-                                      $available_timeperiods{$timeperiod}->{select},
-                                      $available_timeperiods{$timeperiod}->{sort}?
-                                      $available_timeperiods{$timeperiod}->{sort}:
-                                      $available_timeperiods{$timeperiod}->{select},
-                                      $available_timeperiods{$timeperiod}->{interval_clause}));
+  my $query =
+    queryString($user_info->{query} ||
+                sprintf("(CommonName IN ( $flat_cn_list ) AND (UPPER(%s) = UPPER('$vo')))",
+                        RealVOName()),
+                $available_timeperiods{$timeperiod}->{select},
+                $available_timeperiods{$timeperiod}->{sort}?
+                $available_timeperiods{$timeperiod}->{sort}:
+                $available_timeperiods{$timeperiod}->{select},
+                $available_timeperiods{$timeperiod}->{interval_clause});
+  # print STDERR $query, "\n";
+  my $sth = $dbh->prepare($query);
   # print STDERR $sth->{Statement}, "\n";
   $sth->execute();
   while (my $row = $sth->fetchrow_hashref()) {
@@ -401,6 +415,8 @@ foreach my $id (sort { $a <=> $b } grep /^\d+$/, keys %{$vomrs_user_info}) {
       # Per time period per site
       $user_info->{"totals"}->{$timeperiod}->{$row->{TimePeriod}}->{Site}->{$row->{SiteName}}->{$key} += $row->{$key};
       $vomrs_user_info->{"totals"}->{$timeperiod}->{$row->{TimePeriod}}->{Site}->{$row->{SiteName}}->{$key} += $row->{$key};
+      # Per user
+      $user_info->{"totals"}->{CN}->{$row->{CommonName}}->{$timeperiod}->{$row->{TimePeriod}}->{$key} += $row->{$key};
       my $success = $row->{Success};
       # Totals ->{$success}
       $user_info->{"totals"}->{$success}->{$key} += $row->{$key};
@@ -416,6 +432,8 @@ foreach my $id (sort { $a <=> $b } grep /^\d+$/, keys %{$vomrs_user_info}) {
       $vomrs_user_info->{"totals"}->{$timeperiod}->{$row->{TimePeriod}}->{Site}->{$row->{SiteName}}->{$success}->{$key} += $row->{$key};
       # Per user per time period per site
       $user_info->{CN}->{$row->{CommonName}}->{$timeperiod}->{$row->{TimePeriod}}->{Site}->{$row->{SiteName}}->{$success}->{$key} += $row->{$key};
+      # Per user per time period per site per reporting name
+      $user_info->{CN}->{$row->{CommonName}}->{$timeperiod}->{$row->{TimePeriod}}->{Site}->{$row->{SiteName}}->{VO}->{"$row->{RealVOName}/$row->{ReportingVOName}"}->{$success}->{$key} += $row->{$key};
 #      print STDERR
 #        "\$user_info->{CN}->{$row->{CommonName}}->{$timeperiod}->{$row->{TimePeriod}}->{Site}->{$row->{SiteName}}->{$success}->{$key} += $row->{$key}\n";
     }
@@ -540,7 +558,7 @@ sub old_report(\@$$) {
                       join(" ", map { qq/"$_"/ } @$email_addresses));
     open(MUTT, "|$cmd") or die "Unable to open mail command for input";
     print MUTT <<EOF;
-Please find below the Gratia statistics for OSG usage for the $vo VO by $timeperiod for the last $history months.
+Please find below the Gratia statistics for OSG usage for the $vo VO by $timeperiod for the last $history months. Some
 
 Notes:
 
@@ -581,14 +599,20 @@ sub all_keys {
   --$nesting_level;
 }
 
+sub RealVOName {
+  return "if(VC.VOName like '/%',VC.ReportableVOName, VC.VOName)";
+}
+
 sub queryString {
   my ($whereclause,
       $timeperiod_format,
       $sorttimeperiod_format,
       $interval_clause) = @_;
+  my $RealVOName = RealVOName();
   return <<EOF;
 select CommonName,
-       VO.VOName,
+       VO.VOName as ReportingVOName,
+       $RealVOName as RealVOName,
        SiteName,
        $timeperiod_format as TimePeriod,
        $sorttimeperiod_format as SortTimePeriod,
@@ -604,8 +628,8 @@ join Site S on (P.siteid = S.siteid)
 where ResourceType IN ( 'Batch' )
 $interval_clause
 and $whereclause
-group by CommonName, VO.VOName, SiteName, Success, TimePeriod
-order by CommonName, VO.VOName, SiteName, Success, SortTimePeriod
+group by CommonName, RealVOName, VO.VOName, SiteName, Success, TimePeriod
+order by CommonName, RealVOName, VO.VOName, SiteName, Success, SortTimePeriod
 EOF
 }
 
@@ -722,6 +746,11 @@ EOF
     }
   }
   print $output_filehandle "\n" if ($#label < 1);
+
+  my $max_length_cn = max_length_cn($previous_date, $current_date);
+  my $max_length_site = max_length_site($previous_date, $current_date);
+  my $max_length_rep_name = max_length_rep_name($previous_date, $current_date);
+
   foreach my $id (sort by_usage grep /^\d+$/, keys %{$vomrs_user_info}) {
     my $user_info = $vomrs_user_info->{$id};
     # User's name
@@ -738,9 +767,11 @@ EOF
     my $user_table = Text::Table->new
       (
        $column_separator,
-       { title => "CN", align_title => "center", sample => max_length_cn() },
+       { title => "CN", align_title => "center", sample =>  $max_length_cn },
        $column_separator,
-       { title => "Site", align_title => "center", sample => max_length_site() },
+       { title => "Site", align_title => "center", sample => $max_length_site },
+       $column_separator,
+       { title => "Reporting\nName", align_title => "center", sample => $max_length_rep_name },
        $column_separator,
        { title => "Job\nSuccess?", align_title => "center", sample => "yes" },
        $column_separator,
@@ -759,23 +790,31 @@ EOF
     # Load the table
     foreach my $cn (sort keys %{$user_info->{CN}}) {
       foreach my $site (@sites) {
-        foreach my $success (1, 0) {
-          my @row =
-            (
-             $cn,
-             $site,
-             $success?"Yes":"No",
-             ($user_info->{CN}->{$cn}->{$timeperiod}->{$current_date}->{Site}->{$site}->{$success}->{"Njobs"} || 0),
-             convert_num(($user_info->{CN}->{$cn}->{$timeperiod}->{$current_date}->{Site}->{$site}->{$success}->{"WallDuration"} || 0),
-                         "WallDuration"),
-             ($user_info->{CN}->{$cn}->{$timeperiod}->{$current_date}->{Site}->{$site}->{$success}->{"Njobs"}  || 0) -
-             ($user_info->{CN}->{$cn}->{$timeperiod}->{$previous_date}->{Site}->{$site}->{$success}->{"Njobs"} || 0),
-             convert_num(($user_info->{CN}->{$cn}->{$timeperiod}->{$current_date}->{Site}->{$site}->{$success}->{"WallDuration"} || 0) -
-                         ($user_info->{CN}->{$cn}->{$timeperiod}->{$previous_date}->{Site}->{$site}->{$success}->{"WallDuration"} || 0),
-                         "WallDuration"),
-            );
-          if ($row[3] || $row[5]) {
-            $user_table->add(@row);
+        # print STDERR "SITE: $site\n";
+        my @name_list = keys %{$user_info->{CN}->{$cn}->{$timeperiod}->{$previous_date}->{Site}->{$site}->{VO}};
+        foreach my $reporting_name (sort(unique_list(keys %{$user_info->{CN}->{$cn}->{$timeperiod}->{$current_date}->{Site}->{$site}->{VO}},
+                                                     keys %{$user_info->{CN}->{$cn}->{$timeperiod}->{$previous_date}->{Site}->{$site}->{VO}}))) {
+          # print STDERR "REPORTING NAME: $reporting_name\n";
+          foreach my $success (1, 0) {
+            my @row =
+              (
+               $cn,
+               $site,
+               $reporting_name,
+               $success?"Yes":"No",
+               ($user_info->{CN}->{$cn}->{$timeperiod}->{$current_date}->{Site}->{$site}->{VO}->{$reporting_name}->{$success}->{"Njobs"} || 0),
+               convert_num(($user_info->{CN}->{$cn}->{$timeperiod}->{$current_date}->{Site}->{$site}->{VO}->{$reporting_name}->{$success}->{"WallDuration"} || 0),
+                           "WallDuration"),
+               ($user_info->{CN}->{$cn}->{$timeperiod}->{$current_date}->{Site}->{$site}->{VO}->{$reporting_name}->{$success}->{"Njobs"}  || 0) -
+               ($user_info->{CN}->{$cn}->{$timeperiod}->{$previous_date}->{Site}->{$site}->{VO}->{$reporting_name}->{$success}->{"Njobs"} || 0),
+               convert_num(($user_info->{CN}->{$cn}->{$timeperiod}->{$current_date}->{Site}->{$site}->{VO}->{$reporting_name}->{$success}->{"WallDuration"} || 0) -
+                           ($user_info->{CN}->{$cn}->{$timeperiod}->{$previous_date}->{Site}->{$site}->{VO}->{$reporting_name}->{$success}->{"WallDuration"} || 0),
+                           "WallDuration"),
+              );
+            if ($row[4] || $row[6]) {
+              $user_table->add(@row);
+            }
+            # print STDERR join(", ", @row), "\n";
           }
         }
       }
@@ -803,6 +842,7 @@ EOF
                  $user_name,
                  $success?"success":"failure"),
          "ALL",
+         "ALL",
          $success?"Yes":"No",
          ($user_info->{"totals"}->{$timeperiod}->{$current_date}->{$success}->{"Njobs"} || 0),
          convert_num(($user_info->{"totals"}->{$timeperiod}->{$current_date}->{$success}->{"WallDuration"} || 0),
@@ -813,7 +853,7 @@ EOF
                      ($user_info->{"totals"}->{$timeperiod}->{$previous_date}->{$success}->{"WallDuration"} || 0),
                      "WallDuration")
         );
-      if ($row[3] || $row[5]) {
+      if ($row[4] || $row[6]) {
         $user_table->add(@row);
         ++$total_lines
       }
@@ -826,6 +866,7 @@ EOF
        sprintf("%s (%s)",
                $user_name,
                "all"),
+       "ALL",
        "ALL",
        "N/A",
        ($user_info->{"totals"}->{$timeperiod}->{$current_date}->{"Njobs"} || 0),
@@ -845,6 +886,27 @@ EOF
   }
   print $output_filehandle
     join ("", @lines);
+
+print $output_filehandle <<EOF;
+
+------------------------------------------------------------------------
+Notes:
+
+* Data are only included for jobs that *completed* in the period in question.
+
+* Durations are expressed in hours, to 1 decimal place.
+
+* The Njobs metric may include intermediate jobs (when a job is
+  forwarded from one gatekeeper to another), so there is the possibility
+  of some double-counting.
+
+* The statistics do not include Glexec information currently.
+
+* The "Job Success?" column indicates whether the data in that row
+  concern jobs where the *application* was successful. Gratia is unable
+  to detect subsequent failures in middleware after the successful
+  completion of the batch job.
+EOF
 
   $output_filehandle->close();
 
@@ -880,22 +942,7 @@ for the $timeperiod $current_date - $current_date_end (inclusive).
 
 Deltas are with respect to the $timeperiod $previous_date - $previous_date_end (inclusive).
 
-Notes:
-
-* Data are only included for jobs that *completed* in the period in question.
-
-* Durations are expressed in hours, to 1 decimal place.
-
-* The Njobs metric may include intermediate jobs (when a job is
-  forwarded from one gatekeeper to another), so there is the possibility
-  of some double-counting.
-
-* The statistics do not include Glexec information currently.
-
-* The "Job Success?" column indicates whether the data in that row
-  concern jobs where the *application* was successful. Gratia is unable
-  to detect subsequent failures in middleware after the successful
-  completion of the batch job.
+Notes follow below the tables.
 
 ------------------------------------------------------------------------
 EOF
@@ -988,8 +1035,9 @@ sub num_sites {
 
 sub max_length_site {
   my $result = "";
-  foreach my $date (keys %{$vomrs_user_info->{"totals"}->{$timeperiod}}) {
+  foreach my $date (@_) {
     foreach my $site (keys %{$vomrs_user_info->{"totals"}->{$timeperiod}->{$date}->{Site}}) {
+      next unless $vomrs_user_info->{"totals"}->{$timeperiod}->{$date}->{Site}->{$site}->{"Njobs"};
       if (length($site) > length($result)) {
         $result = $site;
       }
@@ -999,10 +1047,13 @@ sub max_length_site {
 }
 
 sub max_length_cn {
+  my ($previous_date, $current_date) = @_;
   my $result = "";
   foreach my $id (grep /^\d+$/, keys %{$vomrs_user_info}) {
     # User's CNs.
     foreach my $cn (keys %{$vomrs_user_info->{$id}->{CN}}) {
+      next unless ($vomrs_user_info->{$id}->{"totals"}->{CN}->{$cn}->{$timeperiod}->{$previous_date}->{"Njobs"} or
+                   $vomrs_user_info->{$id}->{"totals"}->{CN}->{$cn}->{$timeperiod}->{$current_date}->{"Njobs"});
       $result = $cn if (length($cn) > length($result));
     }
     # User's name (almost)
@@ -1013,6 +1064,30 @@ sub max_length_cn {
     $result = $user_name_test if (length($user_name_test) > length($result));
   }
   return $result;
+}
+
+sub max_length_rep_name {
+  my $result = "";
+  foreach my $id (grep /^\d+$/, keys %{$vomrs_user_info}) {
+    foreach my $cn (keys %{$vomrs_user_info->{$id}->{CN}}) {
+      foreach my $date (@_) {
+        foreach my $site (keys %{$vomrs_user_info->{$id}->{CN}->{$timeperiod}->{$date}->{Site}}) {
+          foreach my $reporting_name (keys %{$vomrs_user_info->{$id}->{CN}->{$timeperiod}->{$date}->{Site}->{$site}->{VO}}) {
+            $result = $reporting_name if
+              length($result) > length($reporting_name);
+          }
+        }
+      }
+    }
+  }
+  return $result;
+}
+
+sub unique_list {
+  # print STDERR "ARGS = ", join(", ", @_), "\n";
+  my %hash = map { ( $_ => 1 ) } @_;
+  # print STDERR "RETURNING ", join(", ", keys %hash), "\n";
+  return keys %hash;
 }
 
 __END__
