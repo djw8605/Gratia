@@ -328,6 +328,7 @@ EOF
     $lastname =~ s&/CN=UID:[^/]+$&&; # FNAL CN UID clause.
     $lastname =~ s&^/CN=&&; # Leading /CN=
     $lastname =~ s&^(.*?)\s*\d+$&$1&; # Trailing ID #
+    $lastname =~ s&\s*\(.*\)\s*$&&; # Parenthetical notes (eg Frederick G. Chambliss (Engage)).
     my $member_id;
     # Combine CNs that are identical to within known, simple manipulations
     $seen_lastnames->{$lastname} = ++$userid unless exists $seen_lastnames->{$lastname};
@@ -417,8 +418,10 @@ foreach my $id (sort { $a <=> $b } grep /^\d+$/, keys %{$vomrs_user_info}) {
       $vomrs_user_info->{"totals"}->{$timeperiod}->{$row->{TimePeriod}}->{Site}->{$row->{SiteName}}->{$key} += $row->{$key};
       # Per user
       $user_info->{"totals"}->{CN}->{$row->{CommonName}}->{$timeperiod}->{$row->{TimePeriod}}->{$key} += $row->{$key};
-      my $success = $row->{Success};
+      # Per reporting name
+      $vomrs_user_info->{"totals"}->{"Reporting Name"}->{"$row->{RealVOName}/$row->{ReportingVOName}"}->{$timeperiod}->{$row->{TimePeriod}}->{$key} += $row->{$key};
       # Totals ->{$success}
+      my $success = $row->{Success};
       $user_info->{"totals"}->{$success}->{$key} += $row->{$key};
       $vomrs_user_info->{"totals"}->{$success}->{$key} += $row->{$key};
       # Per time period
@@ -430,6 +433,8 @@ foreach my $id (sort { $a <=> $b } grep /^\d+$/, keys %{$vomrs_user_info}) {
       # Per time period per site
       $user_info->{"totals"}->{$timeperiod}->{$row->{TimePeriod}}->{Site}->{$row->{SiteName}}->{$success}->{$key} += $row->{$key};
       $vomrs_user_info->{"totals"}->{$timeperiod}->{$row->{TimePeriod}}->{Site}->{$row->{SiteName}}->{$success}->{$key} += $row->{$key};
+      # Per reporting name
+      $vomrs_user_info->{"totals"}->{"Reporting Name"}->{"$row->{RealVOName}/$row->{ReportingVOName}"}->{$timeperiod}->{$row->{TimePeriod}}->{$success}->{$key} += $row->{$key};
       # Per user per time period per site
       $user_info->{CN}->{$row->{CommonName}}->{$timeperiod}->{$row->{TimePeriod}}->{Site}->{$row->{SiteName}}->{$success}->{$key} += $row->{$key};
       # Per user per time period per site per reporting name
@@ -751,6 +756,60 @@ EOF
   }
   print $output_filehandle "\n" if ($#label < 1);
 
+  my $column_separator = { title => ' | ', is_sep => '1' };
+
+  if ($num_rep_names) {
+    my @reporting_names = keys %{$vomrs_user_info->{"totals"}->{"Reporting Name"}};
+    if ($num_rep_names == 1) {
+      print $output_filehandle "Active reporting name: ",
+        $reporting_names[0], "\n";
+    } else {
+      print $output_filehandle "Active reporting name summary: \n";
+      my $reporting_name_table = Text::Table->new
+        (
+         { title => '| ', is_sep => '1' },
+         { title => 'Reporting Name', align_title => 'center', sample => $max_length_rep_name },
+         $column_separator,
+         { title => "Job\nSuccess?", align_title => 'center', sample => "yes" },
+         $column_separator,
+         { title => "# Jobs", align_title => "center", align => "right", sample => "99999" },
+         $column_separator,
+         { title => "Wall\nTime (h)", align_title => "center", sample => "9999999.0" },
+         $column_separator,
+         { title => "Delta\nJobs", align => "right", align_title => "center", sample => "99999" },
+         $column_separator,
+         { title => "Delta Wall\nTime (h)", align_title => "center", sample => "9999999.0" },
+         { title => ' |', is_sep => '1' }
+        );
+      for my $rep_name (keys %{$vomrs_user_info->{"totals"}->{"Reporting Name"}}) {
+        foreach my $success (1, 0) {
+          my @row =
+            (
+             $rep_name,
+             $success?"Yes":"No",
+             $vomrs_user_info->{"totals"}->{"Reporting Name"}->{$rep_name}->{$timeperiod}->{$current_date}->{$success}->{"Njobs"} || 0,
+             convert_num($vomrs_user_info->{"totals"}->{"Reporting Name"}->{$rep_name}->{$timeperiod}->{$current_date}->{$success}->{"WallDuration"} || 0,
+                         "WallDuration"),
+             ($vomrs_user_info->{"totals"}->{"Reporting Name"}->{$rep_name}->{$timeperiod}->{$current_date}->{$success}->{"Njobs"} || 0) -
+             ($vomrs_user_info->{"totals"}->{"Reporting Name"}->{$rep_name}->{$timeperiod}->{$previous_date}->{$success}->{"Njobs"} || 0),
+             convert_num(($vomrs_user_info->{"totals"}->{"Reporting Name"}->{$rep_name}->{$timeperiod}->{$current_date}->{$success}->{"WallDuration"} || 0) -
+                         ($vomrs_user_info->{"totals"}->{"Reporting Name"}->{$rep_name}->{$timeperiod}->{$previous_date}->{$success}->{"WallDuration"} || 0),
+                         "WallDuration")
+            );
+          if ($row[2] || $row[4]) {
+            $reporting_name_table->add(@row);
+          }
+        }
+      }
+      print $output_filehandle
+        $reporting_name_table->rule('_', '_'),
+          $reporting_name_table->title(),
+            $reporting_name_table->rule('_', '|'),
+              $reporting_name_table->body(),
+                $reporting_name_table->rule('=', '='),
+                  "\n";
+    }
+  }
 
   foreach my $id (sort by_usage grep /^\d+$/, keys %{$vomrs_user_info}) {
     my $user_info = $vomrs_user_info->{$id};
@@ -763,11 +822,10 @@ EOF
         unless $options{"suppress-idle-users"};
       next;
     }
-    my $column_separator = { title => ' | ', is_sep => '1' };
     # Define the table
     my $user_table = Text::Table->new
       (
-       $column_separator,
+       { title => '| ', is_sep => '1' },
        { title => "CN", align_title => "center", sample =>  $max_length_cn },
        $column_separator,
        { title => "Site", align_title => "center", sample => $max_length_site },
@@ -785,7 +843,7 @@ EOF
        { title => "Delta\nJobs", align => "right", align_title => "center", sample => "99999" },
        $column_separator,
        { title => "Delta Wall\nTime (h)", align_title => "center", sample => "9999999.0" },
-       $column_separator
+       { title => ' |', is_sep => '1' }
       );
 
     my @sites = sort keys %{$user_info->{"totals"}->{Site}};
@@ -861,9 +919,11 @@ EOF
         ++$total_lines
       }
     }
-    push @lines,
-      $user_table->body(-$total_lines, $total_lines),
-        $user_table->rule('-', '+');
+    if ($total_lines == 2) {
+      push @lines,
+        $user_table->body(-$total_lines, $total_lines),
+          $user_table->rule('-', '+');
+    }
     $user_table->add
       (
        sprintf("%s (%s)",
@@ -873,13 +933,13 @@ EOF
        ($num_rep_names>1)?("ALL"):(),
        "N/A",
        ($user_info->{"totals"}->{$timeperiod}->{$current_date}->{"Njobs"} || 0),
-         convert_num(($user_info->{"totals"}->{$timeperiod}->{$current_date}->{"WallDuration"} || 0),
-                     "WallDuration"),
-         ($user_info->{"totals"}->{$timeperiod}->{$current_date}->{"Njobs"} || 0) -
-         ($user_info->{"totals"}->{$timeperiod}->{$previous_date}->{"Njobs"} || 0),
-         convert_num(($user_info->{"totals"}->{$timeperiod}->{$current_date}->{"WallDuration"} || 0) -
-                     ($user_info->{"totals"}->{$timeperiod}->{$previous_date}->{"WallDuration"} || 0),
-                     "WallDuration")
+       convert_num(($user_info->{"totals"}->{$timeperiod}->{$current_date}->{"WallDuration"} || 0),
+                   "WallDuration"),
+       ($user_info->{"totals"}->{$timeperiod}->{$current_date}->{"Njobs"} || 0) -
+       ($user_info->{"totals"}->{$timeperiod}->{$previous_date}->{"Njobs"} || 0),
+       convert_num(($user_info->{"totals"}->{$timeperiod}->{$current_date}->{"WallDuration"} || 0) -
+                   ($user_info->{"totals"}->{$timeperiod}->{$previous_date}->{"WallDuration"} || 0),
+                   "WallDuration")
       );
 
     push @lines,
@@ -887,10 +947,11 @@ EOF
         $user_table->rule('=', '='),
           "\n";
   }
+
   print $output_filehandle
     join ("", @lines);
 
-print $output_filehandle <<EOF;
+    print $output_filehandle <<EOF;
 
 ------------------------------------------------------------------------
 Notes:
