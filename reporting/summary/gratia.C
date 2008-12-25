@@ -53,12 +53,13 @@ void sharing(FILE *out, FILE *outcsv, TSQLServer *db, TDatime *begin, TDatime *e
 "including all jobs that finished in that time period.\n\n"
 "The ownership information was extracted from OIM from http://myosg.grid.iu.edu/trunk/vo/?group=resource.\n"
 "with some straightforward changes applied (for example ATLAS -> USATLAS),\n"
-"Some of the information as not yet been updated in OIM and some attempt was made to 'guess' the owner\n"
-"from previous information source; those guessed owners appear in the table with the tag '(not in OIM)'\n"
-"OIM also sometimes use a generic name 'Other' for one of the owners; this can not be associated with\n"
-"with any information from Gratia."
-"The subgroups in the Fermilab VO are __not__ considered owners of the\n"
-"sites operated by Fermilab.\n\n",buffer);
+"Some of the information as not yet been updated in OIM and some attempt was\n"
+"made to 'guess' the owner from previous information source; those guessed\n"
+"owners appear in the table with the tag '(not in OIM)'.\n"
+"OIM also sometimes use a generic name 'Other' for one of the owners; this can\n"
+"not be associated with any information from Gratia.\n"
+"The subgroups in the Fermilab VO are __not__ considered owners of the sites\n"
+"operated by Fermilab.\n\n",buffer);
 
    TString todaystring = Form("For all jobs finished on %s (UTC)\n",buffer);
    delete [] buffer;
@@ -134,6 +135,7 @@ void sharing(FILE *out, FILE *outcsv, TSQLServer *db, TDatime *begin, TDatime *e
    }
    fclose(f);
    TDOMParser loader;
+   loader.SetValidate(false);
    if ( 0 !=  loader.ParseBuffer( xmldoc.Data(), xmldoc.Length() ) ) {
       Error("Report","Could not properly parse the result of %s",cmd.Data());
       return;
