@@ -22,7 +22,7 @@ def main(argv=None):
        PSACCTReport.sendAll(text)
 
     else:
-       PSACCTReport.SoftwareVersion(range_begin = PSACCTReport.gBegin,range_end = PSACCTReport.gEnd ,output=argOutput)
+       print PSACCTReport.SoftwareVersion(range_begin = PSACCTReport.gBegin,range_end = PSACCTReport.gEnd ,output=argOutput)
 
 
 if __name__ == "__main__":
