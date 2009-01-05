@@ -5,7 +5,7 @@
 #
 # library to create simple report using the Gratia psacct database
 #
-#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.51 2008-12-08 21:50:19 pcanal Exp $
+#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.52 2009-01-05 17:49:59 pcanal Exp $
 
 import time
 import datetime
@@ -2771,7 +2771,7 @@ def SoftwareVersion(range_end = datetime.date.today(),
 
    versions = {
      "Gratia": { "1.65":"v0.27.[1-2]","1.67":"v0.27b","1.68":"v0.28","1.69":"v0.30","1.69.2.1":"v0.32.1","1.78":"v0.32.2","1.84":"v0.34.[1-8]","1.85":"v0.34.[9-10]","1.86":"v0.36","1.90":"v0.38.4","1.91":"v1.00.1","1.93":"v1.00.3","1.95":"v1.00.5"},
-     "condor_meter.pl" : { "$Revision: 1.51 $  (tag unknown)":"v0.99", "$Revision: 1.51 $  (tag unknown)":"v1.00.3+" },
+     "condor_meter.pl" : { "$""Revision: 1.29 $  (tag unknown)":"v0.99", "$""Revision: 1.31 $  (tag unknown)":"v1.00.3+" },
      "pbs-lsf.py" : { "1.7 (tag )":"v1.00.1+" },
      "glexec_meter.py": {"1.9 (tag )":"v1.00.[3-5]", "1.9 (tag v1-00-3a-1)":"v1.00.3a-1+"}
      }
