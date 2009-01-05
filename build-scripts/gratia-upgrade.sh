@@ -143,7 +143,7 @@ with \"--mail <recipients>\", the script will attempt to guess a
 suitable email address to which to send the upgrade status email from
 the configured user in the tomcat instance's configuration .dat file. If
 the configured user is not specified then mail is sent to
-grid-accounting@fnal.gov; if the configured user is root or daemon the
+gratia-builds@fnal.gov; if the configured user is root or daemon the
 default email destination is not altered.
 
 The '--force-log4j' argument is used to force the over-writing of the
@@ -714,8 +714,8 @@ function find_configured_user_set_email {
       echo "Setting recipients for upgrade status email to $user@fnal.gov based on configured user $user"
       default_recipients="$user@fnal.gov"
     else
-      echo "Setting recipients for upgrade status email to grid-accounting@fnal.gov"
-      default_recipients="grid-accounting@fnal.gov"
+      echo "Setting recipients for upgrade status email to gratia-builds@fnal.gov"
+      default_recipients="gratia-builds@fnal.gov"
     fi
   fi
 }
