@@ -67,7 +67,7 @@ void sharing(FILE *out, FILE *outcsv, TSQLServer *db, TDatime *begin, TDatime *e
 
    const char *sql = "SELECT SiteName, Sum(Njobs), Sum(WallDuration), Sum(CpuUserDuration+CpuSystemDuration) "
    " FROM VOProbeSummary V, Probe, Site where V.ProbeName = Probe.ProbeName and Site.siteid = Probe.siteid and '%s' <= EndTime and EndTime < '%s' "
-   " and VOName != 'unknown' and VOName != 'other' "
+   " and VOName != 'unknown' and VOName != 'other' and ResourceType = 'Batch'  "
    " group by SiteName order by SiteName";
       
    TString sbegin( begin->AsSQLString() );
@@ -208,7 +208,7 @@ void sharing(FILE *out, FILE *outcsv, TSQLServer *db, TDatime *begin, TDatime *e
    TString pattern2 = 
      Form("SELECT LCASE(VOName), Sum(Njobs),Sum(WallDuration), Sum(CpuUserDuration+CpuSystemDuration), SiteName "
           "FROM VOProbeSummary V, Probe, Site where V.ProbeName = Probe.ProbeName and Site.siteid = Probe.siteid and '%s' <= EndTime and EndTime < '%s' and SiteName = '%%s' "
-          "and VOName != 'unknown' and VOName != 'other' "
+          "and VOName != 'unknown' and VOName != 'other' and ResourceType = 'Batch'  "
           "group by SiteName, LCASE(VOName)",sbegin.Data(),send.Data());
 
    long total_njobs = 0;
@@ -225,7 +225,7 @@ void sharing(FILE *out, FILE *outcsv, TSQLServer *db, TDatime *begin, TDatime *e
    
    fprintf(out, todaystring.Data());
    fprintf(out, dashFormat.Data(),dashes,dashes,dashes,dashes,dashes,dashes);
-   fprintf(out, textFormat.Data(),"","Site","NJobs","Owner","Owner job","");
+   fprintf(out, textFormat.Data(),"","Site","NJobs","Owner (Percent of Ownership)","Owner job","");
    fprintf(out, dashFormat.Data(),dashes,dashes,dashes,dashes,dashes,dashes);
    
    fprintf(outcsv, textFormat_csv.Data(),"Site","NJobs","Owner","Owner NJobs","Fraction");
@@ -724,12 +724,17 @@ void gratia(int /* mode */ = 0)
    printf("\nRealTime=%f seconds, CpuTime=%f seconds\n", rtime, ctime);
 }
 
-void sharing(const char *dirname=0) 
+void sharing(const char *dirname=0, const char *when = 0) 
 {
    TSQLServer *db = getServer();  if (db==0) return;
-   TDatime *today = gettoday();
-   TDatime *yesterday = adddays(gettoday(),-1);
-   TDatime *daybefore = adddays(gettoday(),-2);
+   TDatime *today = 0;
+   if (when) {
+      today = getdatime( when );
+   } else {
+      today = gettoday();
+   }
+   TDatime *yesterday = adddays(new TDatime(*today),-1);
+   TDatime *daybefore = adddays(new TDatime(*today),-2);
  
    // const char *sql = "SELECT EndTime,VOName, Sum(Njobs),Sum(WallDuration),Sum(CPuUserDuration+CpuSystemDuration) FROM VOProbeSummary V where '%s' < EndTime and EndTime < '%s' group by EndTime,VOName";
 
