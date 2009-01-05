@@ -36,10 +36,11 @@ long getOneLong(TSQLServer *db, const char *query, int field = 0);
 
 class OInfo {
 public:
-   OInfo() : fPercent(0), fNjobs(0), fGuessed(false) {}
+   OInfo() : fPercent(0), fNjobs(0), fWall(0), fGuessed(false) {}
    std::string fVO;
    short fPercent;
    long fNjobs;
+   long fWall;
    bool fGuessed;
 };
 
@@ -213,22 +214,24 @@ void sharing(FILE *out, FILE *outcsv, TSQLServer *db, TDatime *begin, TDatime *e
 
    long total_njobs = 0;
    long total_owner_njobs = 0;
+   long total_wall = 0;
+   long total_owner_wall = 0;
    // int nfields = stmt->GetNumFields();
 
    const char *dashes = "-----------------------------------";
-   TString  dashFormat( "%6.6s-%22.22s-%8.8s-%31.31s-%11.11s-%9.9s\n");
-   TString  textFormat( " %4s | %-20s | %7s | %-29s | %9s | %7s\n");
-   TString valueFormat( " %2d.%1d | %-20s | %7ld | %-22s (%3.0d%%) | %9ld | %5.1f%%\n");
+   TString  dashFormat( "%6.6s-%22.22s-%8.8s-%31.31s-%11.11s-%9.9s-%11.11s-%9.9s\n");
+   TString  textFormat( " %4s | %-20s | %7s | %-29s | %9s | %6s | %9s | %6s\n");
+   TString valueFormat( " %2d.%1d | %-20s | %7ld | %-22s (%3.0d%%) | %9ld | %5.1f%% | %9ld | %5.1f%%\n");
 
-   TString textFormat_csv("%s,%s,%s,%s,%s,%s\n");
-   TString valueFormat_csv( "%s,%8ld,%s,%4.1%,%8ld,%4.1f%%\n");
+   TString textFormat_csv("%s,%s,%s,%s,%s,%s,%s,%s\n");
+   TString valueFormat_csv( "%s,%8ld,%s,%4.1%,%8ld,%4.1f%%,%8ld,%4.1f%%\n");
    
    fprintf(out, todaystring.Data());
-   fprintf(out, dashFormat.Data(),dashes,dashes,dashes,dashes,dashes,dashes);
-   fprintf(out, textFormat.Data(),"","Site","NJobs","Owner (Percent of Ownership)","Owner job","");
-   fprintf(out, dashFormat.Data(),dashes,dashes,dashes,dashes,dashes,dashes);
+   fprintf(out, dashFormat.Data(),dashes,dashes,dashes,dashes,dashes,dashes,dashes,dashes);
+   fprintf(out, textFormat.Data(),"","Site","NJobs","Owner (Percent of Ownership)","Owner job","","WallHours","");
+   fprintf(out, dashFormat.Data(),dashes,dashes,dashes,dashes,dashes,dashes,dashes,dashes);
    
-   fprintf(outcsv, textFormat_csv.Data(),"Site","NJobs","Owner","Owner NJobs","Fraction");
+   fprintf(outcsv, textFormat_csv.Data(),"Site","NJobs","Owner","Owner NJobs","Fraction Jobs","Owner Wall","Fraction Wall");
 
    int site_index = 1;
    int vo_index = 1;
@@ -238,13 +241,14 @@ void sharing(FILE *out, FILE *outcsv, TSQLServer *db, TDatime *begin, TDatime *e
       std::string owner = owners[site];
       InnerMap_t &owners = ownerShare[stmt->GetString(0)];
       long njobs = stmt->GetLong(1);
-      //double wall = stmt->GetDouble(2);
+      long wall = stmt->GetDouble(2) / 3600;
       //double cpu = stmt->GetDouble(3);
       
       total_njobs += njobs;
-
+      total_wall += wall;
+      
       long owner_njobs = 0;
-      double owner_wall = 0;
+      long owner_wall = 0;
       double owner_cpu = 0;
 
 
@@ -270,16 +274,18 @@ void sharing(FILE *out, FILE *outcsv, TSQLServer *db, TDatime *begin, TDatime *e
             std::transform(vo.begin(), vo.end(), vo.begin(), ::tolower);
 
             owner_njobs = stmt2->GetLong(1);
-            owner_wall = stmt2->GetDouble(2);
+            owner_wall = stmt2->GetDouble(2) / 3600;
             owner_cpu = stmt2->GetDouble(3);
             
             owners[vo].fNjobs += owner_njobs;
+            owners[vo].fWall += owner_wall;
             if (owners[vo].fVO.length()==0) {
                owners[vo].fVO = vo;
             }
 
             if (owners[vo].fPercent) {
                total_owner_njobs += owner_njobs;
+               total_owner_wall += owner_wall;
             }
          }
          delete stmt2;
@@ -295,43 +301,46 @@ void sharing(FILE *out, FILE *outcsv, TSQLServer *db, TDatime *begin, TDatime *e
       
       int n_other_owners = 0;
       int njobs_other_owners = 0;
+      long wall_other_owners = 0;
       for (siter_t what = sortedlist.begin() ;what != sortedlist.end(); ++what) {
          // Count the rest.
          
          if (what->second.fPercent != 0) {
             owner_njobs = what->second.fNjobs;
+            owner_wall = what->second.fWall;
             std::string name( what->second.fVO );
             if (what->second.fGuessed) {
                name += " (not in OIM)";
             }
             
             fprintf(out,valueFormat.Data(),site_index, vo_index, site.c_str(), njobs,
-                    name.c_str(), what->second.fPercent, owner_njobs, njobs ? 100.0*owner_njobs/njobs : 0.0);
+                    name.c_str(), what->second.fPercent, owner_njobs, njobs ? 100.0*owner_njobs/njobs : 0.0, owner_wall, wall ? 100.0*owner_wall/wall : 0);
             
             fprintf(outcsv,valueFormat_csv.Data(),site.c_str(), njobs,
-                    name.c_str(), what->second.fPercent, owner_njobs, njobs ? 100.0*owner_njobs/njobs : 0.0);
+                    name.c_str(), what->second.fPercent, owner_njobs, njobs ? 100.0*owner_njobs/njobs : 0.0, owner_wall, wall ? 100.0*owner_wall/wall : 0);
             
             ++vo_index;
          } else {
             ++n_other_owners;
             njobs_other_owners += what->second.fNjobs;
+            wall_other_owners += what->second.fWall;
          }
       }
       
       fprintf(out,valueFormat.Data(),site_index, vo_index, site.c_str(), njobs,
-              Form("%d non-owning VOs",n_other_owners), 0, njobs_other_owners, njobs ? 100.0*njobs_other_owners/njobs : 0.0);
+              Form("%d non-owning VOs",n_other_owners), 0, njobs_other_owners, njobs ? 100.0*njobs_other_owners/njobs : 0.0, wall_other_owners, wall ? 100.0*wall_other_owners/wall : 0);
       
       fprintf(outcsv,valueFormat_csv.Data(),site.c_str(), njobs,
-              Form("%d non-owning VOs",n_other_owners), 0, njobs_other_owners, njobs ? 100.0*njobs_other_owners/njobs : 0.0);
-      fprintf(out, dashFormat.Data(),dashes,dashes,dashes,dashes,dashes,dashes);
+              Form("%d non-owning VOs",n_other_owners), 0, njobs_other_owners, njobs ? 100.0*njobs_other_owners/njobs : 0.0, wall_other_owners, wall ? 100.0*wall_other_owners/wall : 0);
+      fprintf(out, dashFormat.Data(),dashes,dashes,dashes,dashes,dashes,dashes,dashes,dashes);
       
       vo_index = 0;
       ++site_index;
    }
-   fprintf(out,valueFormat.Data(),site_index,vo_index,"All", total_njobs, "", 100, total_owner_njobs,total_njobs ? 100.0*total_owner_njobs/total_njobs : 0.0);
-   fprintf(out, dashFormat.Data(),dashes,dashes,dashes,dashes,dashes,dashes);
+   fprintf(out,valueFormat.Data(),site_index,vo_index,"All", total_njobs, "", 100, total_owner_njobs,total_njobs ? 100.0*total_owner_njobs/total_njobs : 0.0, total_owner_wall, total_wall ? 100.0*total_owner_wall/total_wall : 0);
+   fprintf(out, dashFormat.Data(),dashes,dashes,dashes,dashes,dashes,dashes,dashes,dashes);
 
-   fprintf(outcsv,valueFormat_csv.Data(),"All", total_njobs, "", 100, total_owner_njobs,total_njobs ? 100.0*total_owner_njobs/total_njobs : 0.0);
+   fprintf(outcsv,valueFormat_csv.Data(),"All", total_njobs, "", 100, total_owner_njobs,total_njobs ? 100.0*total_owner_njobs/total_njobs : 0.0, total_owner_wall, total_wall ? 100.0*total_owner_wall/total_wall : 0);
 
    delete stmt;
 }
