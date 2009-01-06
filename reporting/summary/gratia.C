@@ -44,6 +44,41 @@ public:
    bool fGuessed;
 };
 
+void getSubVOs(std::map<string,string> &output) 
+{
+   output.clear();
+   
+   TString cmd = "wget -q -O - http://oim.grid.iu.edu/pub/vo/show.php?format=plain-text | cut -d, -f2 | grep '/'";
+   FILE * f = gSystem->OpenPipe(cmd,"r");
+   char x;
+   string main;
+   string sub;
+   bool left = true;
+   while ((x = fgetc(f))!=EOF ) {
+      switch (x) {
+         case '/': left = false; break;
+         case '\n':
+         case '\r':
+            std::transform(main.begin(), main.end(), main.begin(), ::tolower);
+            std::transform(sub.begin(), sub.end(), sub.begin(), ::tolower);
+            output[sub] = main;
+            //fprintf(stderr,"registered:%s:%s:\n",sub.c_str(),main.c_str());
+            main.clear();
+            sub.clear();
+            left = true;
+            break;
+         default:
+            if (left) {
+               main += x;
+            } else {
+               sub += x;
+            }            
+      }
+   }
+}
+
+
+
 void sharing(FILE *out, FILE *outcsv, TSQLServer *db, TDatime *begin, TDatime *end) 
 {
    char *buffer = new char[128];
@@ -59,8 +94,8 @@ void sharing(FILE *out, FILE *outcsv, TSQLServer *db, TDatime *begin, TDatime *e
 "owners appear in the table with the tag '(not in OIM)'.\n"
 "OIM also sometimes use a generic name 'Other' for one of the owners; this can\n"
 "not be associated with any information from Gratia.\n"
-"The subgroups in the Fermilab VO are __not__ considered owners of the sites\n"
-"operated by Fermilab.\n\n",buffer);
+"All the subgroups in the Fermilab VO are considered owners of the sites\n"
+"owned by the Fermilab VO.\n\n",buffer);
 
    TString todaystring = Form("For all jobs finished on %s (UTC)\n",buffer);
    delete [] buffer;
@@ -83,6 +118,10 @@ void sharing(FILE *out, FILE *outcsv, TSQLServer *db, TDatime *begin, TDatime *e
    stmt->Process();
    stmt->StoreResult();
       
+   typedef map<string,string>::iterator subvos_iter;
+   map<string,string> subvos;
+   getSubVOs(subvos);
+   
    map<string,string> owners;
    TString cmd = "wget -q -O - http://oim.grid.iu.edu/pub/resource/show.php?format=plain-text | cut -d, -f1,4,7,8,14 | grep -e ',OSG,[^,]*,CE [^,]*,1' | cut -d, -f1,3";
    FILE * f = gSystem->OpenPipe(cmd,"r");
@@ -241,7 +280,7 @@ void sharing(FILE *out, FILE *outcsv, TSQLServer *db, TDatime *begin, TDatime *e
       std::string owner = owners[site];
       InnerMap_t &owners = ownerShare[stmt->GetString(0)];
       long njobs = stmt->GetLong(1);
-      long wall = stmt->GetDouble(2) / 3600;
+      long wall = (long) (stmt->GetDouble(2) / 3600);
       //double cpu = stmt->GetDouble(3);
       
       total_njobs += njobs;
@@ -271,10 +310,15 @@ void sharing(FILE *out, FILE *outcsv, TSQLServer *db, TDatime *begin, TDatime *e
       
          while (stmt2->NextResultRow()) {
             std::string vo = stmt2->GetString(0);
+            
             std::transform(vo.begin(), vo.end(), vo.begin(), ::tolower);
-
+            subvos_iter sub = subvos.find(vo);
+            if (sub != subvos.end()) {
+               vo = sub->second;
+            }
+            
             owner_njobs = stmt2->GetLong(1);
-            owner_wall = stmt2->GetDouble(2) / 3600;
+            owner_wall = (long) (stmt2->GetDouble(2) / 3600);
             owner_cpu = stmt2->GetDouble(3);
             
             owners[vo].fNjobs += owner_njobs;
@@ -678,7 +722,7 @@ TSQLServer *getServer() {
       return 0;
    }
    if (first) {
-      printf("Server info: %s\n", db->ServerInfo());
+      if (gDebugLevel) printf("Server info: %s\n", db->ServerInfo());
       first = false;
    }
 
