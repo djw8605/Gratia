@@ -7,7 +7,7 @@
  CompBioGrid => [ qw() ],
  DES => [ 'Nickolai Kuropatkin <kuropat@fnal.gov>' ],
  DOSAR => [ 'Dick Greenwood <greenw@phys.latech.edu>', 'Horst Severini <hs@nhn.ou.edu>' ],
- DZero => [ 'Horst Severini <hs@nhn.ou.edu>', 'Joel Snow <snow@fnal.gov>' ],
+ DZero => [ 'Horst Severini <hs@nhn.ou.edu>', 'Joel Snow <snow@fnal.gov>', 'Qizhong Li <qzli@fnal.gov>' ],
  Engage => [ 'Engage Team <engage@renci.org>' ],
  Fermilab => [ 'Keith Chadwick <chadwick@fnal.gov>', 'Steve Timm <timm@fnal.gov>' ],
  GLOW => [ 'Miron Livny <miron@cs.wisc.edu>' ],
