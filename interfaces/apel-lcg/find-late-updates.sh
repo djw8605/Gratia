@@ -184,7 +184,7 @@ do
   days=$((days+1))
   day=$(printf "%02d" $days)
   tmpfile=$tmpdir/$curr_period-$day
-  egrep "INSERT INTO" $prev_period.log |sed -e's/INSERT INTO OSG_DATA VALUES (//'  |grep $curr_period-$day|cut -d"," -f1,2,3,4,5,6,7,8,9,10,11,12 |sort -u >$tmpfile
+  egrep "INSERT INTO" $prev_period.log |sed -e's/INSERT INTO OSG_DATA VALUES (//'  |grep $curr_period-$day|cut -d"," -f1,2,3,4,5,6,7,8,9,12 |sort -u >$tmpfile
   if [ ! -s "$tmpfile" ];then
     rm -f $tmpfile
   fi
