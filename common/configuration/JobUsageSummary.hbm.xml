@@ -72,5 +72,10 @@
            <column name="CpuSystemDuration" not-null="true" default="0" />
        </property>
    </component>
+   <component name="Grid" class="StringElement" insert="true">
+       <property name="Value">
+           <column name="Grid" not-null="true" default="'OSG'" />
+       </property>
+   </component>
 </class>
 </hibernate-mapping>

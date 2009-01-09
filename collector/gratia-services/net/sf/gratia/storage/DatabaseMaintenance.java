@@ -318,10 +318,11 @@ public class DatabaseMaintenance {
         AddIndex("MasterSummaryData", false, "index05", "ResourceType");
         AddIndex("MasterSummaryData", false, "index06", "HostDescription");
         AddIndex("MasterSummaryData", false, "index07", "ApplicationExitCode");
-        AddIndex("MasterSummaryData", true, "index08",
+        AddIndex("MasterSummaryData", true, "index09",
                  "EndTime, VOcorrid, ProbeName, " +
                  "CommonName, ResourceType, " +
-                 "HostDescription, ApplicationExitCode");
+                 "HostDescription, ApplicationExitCode, Grid");
+        DropIndex("MasterSummaryData", "index08");
 
         // Indexes for MasterTransferSummary
         AddIndex("MasterTransferSummary", false, "index01", "StartTime");

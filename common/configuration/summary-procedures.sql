@@ -25,6 +25,7 @@ AJUR:BEGIN
   DECLARE n_StartTime DATETIME;
   DECLARE n_EndTime DATETIME;
   DECLARE n_rowDate DATETIME;
+  DECLARE n_Grid VARCHAR(255);
 
   -- Storage only
   DECLARE n_DN VARCHAR(255);
@@ -69,7 +70,8 @@ AJUR:BEGIN
          J.EndTime,
          IF(ResourceType IN ('Storage', 'RawCPU', 'Transfer'),
             DATE(J.StartTime),
-            DATE(J.EndTime))        
+            DATE(J.EndTime)),
+         M.Grid        
   INTO n_ProbeName,
        n_CommonName,
        n_VOcorrid,
@@ -84,7 +86,8 @@ AJUR:BEGIN
        n_ServerDate,
        n_StartTime,
        n_EndTime,
-       n_rowdate
+       n_rowdate,
+       n_Grid
   FROM JobUsageRecord J
        JOIN JobUsageRecord_Meta M ON (J.dbid = M.dbid)
        JOIN VONameCorrection VC ON
@@ -212,7 +215,7 @@ AJUR:BEGIN
   INSERT INTO MasterSummaryData(EndTime, VOcorrid, ProbeName, CommonName,
                                 ResourceType, HostDescription,
                                 ApplicationExitCode, Njobs, WallDuration,
-                                CpuUserDuration, CpuSystemDuration)
+                                CpuUserDuration, CpuSystemDuration, Grid)
   VALUES(DATE(n_EndTime),
          n_VOcorrid,
          n_ProbeName,
@@ -223,7 +226,8 @@ AJUR:BEGIN
          n_Njobs,
          n_WallDuration,
          n_CpuUserDuration,
-         n_CpuSystemDuration)
+         n_CpuSystemDuration,
+         n_Grid)
   ON DUPLICATE KEY UPDATE
    Njobs = Njobs + VALUES(Njobs),
    WallDuration = WallDuration + VALUES(WallDuration),
@@ -295,6 +299,7 @@ DJUR:BEGIN
   DECLARE n_StartTime DATETIME;
   DECLARE n_EndTime DATETIME;
   DECLARE n_rowDate DATE;
+  DECLARE n_Grid VARCHAR(255);
 
   -- Storage only
   DECLARE n_DN VARCHAR(255);
@@ -337,7 +342,8 @@ DJUR:BEGIN
          J.StartTime,
          J.EndTime,
          IF(ResourceType = 'Batch', DATE(J.EndTime),
-            DATE(J.StartTime))
+            DATE(J.StartTime)),
+         M.Grid
   INTO n_ProbeName,
        n_CommonName,
        n_VOcorrid,
@@ -352,7 +358,8 @@ DJUR:BEGIN
        n_ServerDate,
        n_StartTime,
        n_EndTime,
-       n_rowDate
+       n_rowDate,
+       n_Grid
   FROM JobUsageRecord J
        JOIN JobUsageRecord_Meta M ON (J.dbid = M.dbid)
        JOIN VONameCorrection VC ON
