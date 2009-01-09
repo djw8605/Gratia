@@ -33,6 +33,8 @@ GetOptions($options,
            "replace|r",
            "debug|d",
            "monthly|M",
+           "weekly|W",
+           "yearly|Y",
            "test|t",
            "vo|v=s@" => sub { push @wanted_vos, lc $_[1] } ) or die $@;
 
@@ -81,7 +83,11 @@ $master_vo_list->{"all-vos-test"} = [ @test_addresses ]
 foreach my $vo (sort keys %$master_vo_list) {
   next if (lc $vo eq "all" or lc $vo eq "all-vos-test");
   my @command = ("$osg_users_script", "-v", "$vo", "--aux-db-type=none", "-s", "-V");
-  push @command, "-t", "monthly" if $options->{monthly};
+  if ($options->{monthly}) {
+    push @command, "-t", "month";
+  } elsif ($options->{yearly}) {
+    push @command, "-t", "year";
+  }
   my $email_hash = {};
   my @email_list = $options->{"test"}?
     @{$master_vo_list->{"all-vos-test"}}:
