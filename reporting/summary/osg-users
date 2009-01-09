@@ -435,6 +435,9 @@ foreach my $id (sort { $a <=> $b } grep /^\d+$/, keys %{$vomrs_user_info}) {
       $vomrs_user_info->{"totals"}->{$timeperiod}->{$row->{TimePeriod}}->{Site}->{$row->{SiteName}}->{$success}->{$key} += $row->{$key};
       # Per reporting name
       $vomrs_user_info->{"totals"}->{"Reporting Name"}->{"$row->{RealVOName}/$row->{ReportingVOName}"}->{$timeperiod}->{$row->{TimePeriod}}->{$success}->{$key} += $row->{$key};
+      # Per reporting name per site
+      $vomrs_user_info->{"totals"}->{"Reporting Name"}->{"$row->{RealVOName}/$row->{ReportingVOName}"}->{Site}->{$row->{SiteName}}->{$timeperiod}->{$row->{TimePeriod}}->{$key} += $row->{$key};
+      $vomrs_user_info->{"totals"}->{"Reporting Name"}->{"$row->{RealVOName}/$row->{ReportingVOName}"}->{Site}->{$row->{SiteName}}->{$timeperiod}->{$row->{TimePeriod}}->{$success}->{$key} += $row->{$key};
       # Per user per time period per site
       $user_info->{CN}->{$row->{CommonName}}->{$timeperiod}->{$row->{TimePeriod}}->{Site}->{$row->{SiteName}}->{$success}->{$key} += $row->{$key};
       # Per user per time period per site per reporting name
@@ -582,12 +585,13 @@ EOF
 }
 
 sub convert_num {
-  my ($num, $key) = @_;
+  my ($num, $key, $is_delta) = @_;
   defined $num or return "";
-  if ($key eq "Njobs") {
-    return $num;
+  my ($int_format, $float_format) = $is_delta?("%+d", "%+.1f"):("%d", "%.1f");
+  if ($key eq "Njobs" or $key eq "Sites") {
+    return $num?sprintf($int_format, $num):0;
   } else {
-    return sprintf("%.1f", $num / 3600);
+    return $num?sprintf($float_format, $num / 3600):0;
   }
 }
 
@@ -768,17 +772,21 @@ EOF
       my $reporting_name_table = Text::Table->new
         (
          { title => '| ', is_sep => '1' },
-         { title => 'Reporting Name', align_title => 'center', sample => $max_length_rep_name },
+         { title => 'Reporting Name', align_title => 'center' },
          $column_separator,
-         { title => "Job\nSuccess?", align_title => 'center', sample => "yes" },
+         { title => "Job\nSuccess?", align_title => 'center' },
          $column_separator,
-         { title => "# Jobs", align_title => "center", align => "right", sample => "99999" },
+         { title => '# Sites', align_title => 'center', align => 'num' },
          $column_separator,
-         { title => "Wall\nTime (h)", align_title => "center", sample => "9999999.0" },
+         { title => "# Jobs", align_title => "center", align => 'num' },
          $column_separator,
-         { title => "Delta\nJobs", align => "right", align_title => "center", sample => "99999" },
+         { title => "Wall\nTime (h)", align_title => "center", align => 'num' },
          $column_separator,
-         { title => "Delta Wall\nTime (h)", align_title => "center", sample => "9999999.0" },
+         { title => "Delta\nSites", align => "right", align_title => "center", align => 'num' },
+         $column_separator,
+         { title => "Delta\nJobs", align => "right", align_title => "center", align => 'num' },
+         $column_separator,
+         { title => "Delta Wall\nTime (h)", align_title => "center", align => 'num' },
          { title => ' |', is_sep => '1' }
         );
       for my $rep_name (keys %{$vomrs_user_info->{"totals"}->{"Reporting Name"}}) {
@@ -787,16 +795,19 @@ EOF
             (
              $rep_name,
              $success?"Yes":"No",
+             num_sites($current_date, $rep_name, $success),
              $vomrs_user_info->{"totals"}->{"Reporting Name"}->{$rep_name}->{$timeperiod}->{$current_date}->{$success}->{"Njobs"} || 0,
              convert_num($vomrs_user_info->{"totals"}->{"Reporting Name"}->{$rep_name}->{$timeperiod}->{$current_date}->{$success}->{"WallDuration"} || 0,
                          "WallDuration"),
-             ($vomrs_user_info->{"totals"}->{"Reporting Name"}->{$rep_name}->{$timeperiod}->{$current_date}->{$success}->{"Njobs"} || 0) -
-             ($vomrs_user_info->{"totals"}->{"Reporting Name"}->{$rep_name}->{$timeperiod}->{$previous_date}->{$success}->{"Njobs"} || 0),
+             convert_num(num_sites($current_date, $rep_name, $success) - num_sites($previous_date, $rep_name, $success), "Sites", 1),
+             convert_num(($vomrs_user_info->{"totals"}->{"Reporting Name"}->{$rep_name}->{$timeperiod}->{$current_date}->{$success}->{"Njobs"} || 0) -
+                         ($vomrs_user_info->{"totals"}->{"Reporting Name"}->{$rep_name}->{$timeperiod}->{$previous_date}->{$success}->{"Njobs"} || 0),
+                         "Njobs", 1),
              convert_num(($vomrs_user_info->{"totals"}->{"Reporting Name"}->{$rep_name}->{$timeperiod}->{$current_date}->{$success}->{"WallDuration"} || 0) -
                          ($vomrs_user_info->{"totals"}->{"Reporting Name"}->{$rep_name}->{$timeperiod}->{$previous_date}->{$success}->{"WallDuration"} || 0),
-                         "WallDuration")
+                         "WallDuration", 1)
             );
-          if ($row[2] || $row[4]) {
+          if ($row[3] || $row[6]) {
             $reporting_name_table->add(@row);
           }
         }
@@ -836,13 +847,13 @@ EOF
        $column_separator,
        { title => "Job\nSuccess?", align_title => "center", sample => "yes" },
        $column_separator,
-       { title => "# Jobs", align_title => "center", align => "right", sample => "99999" },
+       { title => "# Jobs", align_title => "center", align => "right", sample => "99999", align => 'num' },
        $column_separator,
-       { title => "Wall\nTime (h)", align_title => "center", sample => "9999999.0" },
+       { title => "Wall\nTime (h)", align_title => "center", sample => "9999999.0", align => 'num' },
        $column_separator,
-       { title => "Delta\nJobs", align => "right", align_title => "center", sample => "99999" },
+       { title => "Delta\nJobs", align => "right", align_title => "center", sample => "-199999", align => 'num' },
        $column_separator,
-       { title => "Delta Wall\nTime (h)", align_title => "center", sample => "9999999.0" },
+       { title => "Delta Wall\nTime (h)", align_title => "center", sample => "-19999999.0", align => 'num' },
        { title => ' |', is_sep => '1' }
       );
 
@@ -866,11 +877,12 @@ EOF
                ($user_info->{CN}->{$cn}->{$timeperiod}->{$current_date}->{Site}->{$site}->{VO}->{$reporting_name}->{$success}->{"Njobs"} || 0),
                convert_num(($user_info->{CN}->{$cn}->{$timeperiod}->{$current_date}->{Site}->{$site}->{VO}->{$reporting_name}->{$success}->{"WallDuration"} || 0),
                            "WallDuration"),
-               ($user_info->{CN}->{$cn}->{$timeperiod}->{$current_date}->{Site}->{$site}->{VO}->{$reporting_name}->{$success}->{"Njobs"}  || 0) -
-               ($user_info->{CN}->{$cn}->{$timeperiod}->{$previous_date}->{Site}->{$site}->{VO}->{$reporting_name}->{$success}->{"Njobs"} || 0),
+               convert_num(($user_info->{CN}->{$cn}->{$timeperiod}->{$current_date}->{Site}->{$site}->{VO}->{$reporting_name}->{$success}->{"Njobs"}  || 0) -
+                           ($user_info->{CN}->{$cn}->{$timeperiod}->{$previous_date}->{Site}->{$site}->{VO}->{$reporting_name}->{$success}->{"Njobs"} || 0),
+                           "Njobs", 1),
                convert_num(($user_info->{CN}->{$cn}->{$timeperiod}->{$current_date}->{Site}->{$site}->{VO}->{$reporting_name}->{$success}->{"WallDuration"} || 0) -
                            ($user_info->{CN}->{$cn}->{$timeperiod}->{$previous_date}->{Site}->{$site}->{VO}->{$reporting_name}->{$success}->{"WallDuration"} || 0),
-                           "WallDuration"),
+                           "WallDuration", 1),
               );
             if ($row[4] || $row[6]) {
               $user_table->add(@row);
@@ -908,11 +920,12 @@ EOF
          ($user_info->{"totals"}->{$timeperiod}->{$current_date}->{$success}->{"Njobs"} || 0),
          convert_num(($user_info->{"totals"}->{$timeperiod}->{$current_date}->{$success}->{"WallDuration"} || 0),
                      "WallDuration"),
-         ($user_info->{"totals"}->{$timeperiod}->{$current_date}->{$success}->{"Njobs"} || 0) -
-         ($user_info->{"totals"}->{$timeperiod}->{$previous_date}->{$success}->{"Njobs"} || 0),
+         convert_num(($user_info->{"totals"}->{$timeperiod}->{$current_date}->{$success}->{"Njobs"} || 0) -
+                     ($user_info->{"totals"}->{$timeperiod}->{$previous_date}->{$success}->{"Njobs"} || 0),
+                     "Njobs", 1),
          convert_num(($user_info->{"totals"}->{$timeperiod}->{$current_date}->{$success}->{"WallDuration"} || 0) -
                      ($user_info->{"totals"}->{$timeperiod}->{$previous_date}->{$success}->{"WallDuration"} || 0),
-                     "WallDuration")
+                     "WallDuration", 1)
         );
       if ($row[4] || $row[6]) {
         $user_table->add(@row);
@@ -935,11 +948,12 @@ EOF
        ($user_info->{"totals"}->{$timeperiod}->{$current_date}->{"Njobs"} || 0),
        convert_num(($user_info->{"totals"}->{$timeperiod}->{$current_date}->{"WallDuration"} || 0),
                    "WallDuration"),
-       ($user_info->{"totals"}->{$timeperiod}->{$current_date}->{"Njobs"} || 0) -
-       ($user_info->{"totals"}->{$timeperiod}->{$previous_date}->{"Njobs"} || 0),
+       convert_num(($user_info->{"totals"}->{$timeperiod}->{$current_date}->{"Njobs"} || 0) -
+                   ($user_info->{"totals"}->{$timeperiod}->{$previous_date}->{"Njobs"} || 0),
+                   "Njobs", 1),
        convert_num(($user_info->{"totals"}->{$timeperiod}->{$current_date}->{"WallDuration"} || 0) -
                    ($user_info->{"totals"}->{$timeperiod}->{$previous_date}->{"WallDuration"} || 0),
-                   "WallDuration")
+                   "WallDuration", 1)
       );
 
     push @lines,
@@ -1088,11 +1102,17 @@ sub num_users {
 }
 
 sub num_sites {
-  my $date = shift;
+  my ($date, $reporting_name, $success) = @_;
 
   my $result = 0;
   foreach my $site (sort keys %{$vomrs_user_info->{"totals"}->{$timeperiod}->{$date}->{Site}}) {
-    ++$result if ($vomrs_user_info->{"totals"}->{$timeperiod}->{$date}->{Site}->{$site}->{"Njobs"});
+    if (($vomrs_user_info->{"totals"}->{$timeperiod}->{$date}->{Site}->{$site}->{"Njobs"}) and
+        ((not $reporting_name) or
+         (defined $success and
+          $vomrs_user_info->{"totals"}->{"Reporting Name"}->{$reporting_name}->{Site}->{$site}->{$timeperiod}->{$date}->{$success}->{"Njobs"}) or
+         $vomrs_user_info->{"totals"}->{"Reporting Name"}->{$reporting_name}->{Site}->{$site}->{$timeperiod}->{$date}->{"Njobs"})) {
+      ++$result;
+    }
   }
   return $result;
 }
