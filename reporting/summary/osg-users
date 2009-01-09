@@ -128,8 +128,11 @@ pod2usage(-verbose => 2) if exists $options{man};
 
 my $history = $options{history} || 6;
 
+my $old_report;
 if ($options{"vo-report"}) {
   $options{"aux-db-type"} = 'none';
+} else {
+  $old_report = 1;
 }
 
 if ($options{"aux-db-type"}) {
@@ -166,16 +169,25 @@ my %available_timeperiods =
              select => q{date_format(EndTime, '%Y-%m-01')},
              sort => q{date_format(EndTime, '%Y-%m')},
              interval_clause => qq{and DATE(EndTime) >= str_to_date(date_format(utc_timestamp() - interval $history month, '\%Y-\%m-01'), '\%Y-\%m-\%d')}
-            }
+            },
+   year => {
+            select => q{date_format(EndTime, '%Y-01-01')},
+            sort => q{date_format(EndTime, '%Y')},
+            interval_clause => qq{and DATE(EndTime) >= str_to_date(date_format(utc_timestamp() - interval $history month, '\%Y-01-01'), '\%Y-\%m-\%d')}
+           }
   );
 
 my $timeperiod;
 
 if ($options{timeperiod}) {
-  $timeperiod = "month" if $options{timeperiod} =~ m&^m&i;
-} else {
-  $timeperiod = "week";
+  if ($options{timeperiod} =~ m&^m&i) {
+    $timeperiod = "month";
+  } elsif ($options{timeperiod} =~ m&^y&i and $options{"vo-report"}) {
+    $timeperiod = "year";
+  }
 }
+
+$timeperiod = "week" unless $timeperiod;
 
 my %mail_list = ();
 
@@ -383,6 +395,42 @@ my $sites = {};
 
 my %dates = ();
 
+my @default_dates = ();
+
+my ($year, $month, $day) = Today(1);
+if ($timeperiod eq "month") {
+  @default_dates =
+    (scalar convert_to_date(sprintf "%4d-%02d-%02d\n", Add_Delta_YM($year, $month, $day, 0, -2)),
+     scalar convert_to_date(sprintf "%4d-%02d-%02d\n", Add_Delta_YM($year, $month, $day, 0, -1)));
+} elsif ($timeperiod eq "week") {
+  @default_dates =
+    (scalar convert_to_date(sprintf "%4d-%02d-%02d\n", Add_Delta_Days($year, $month, $day, -14)),
+     scalar convert_to_date(sprintf "%4d-%02d-%02d\n", Add_Delta_Days($year, $month, $day, -7)));
+} elsif ($timeperiod eq "year") {
+  @default_dates =
+      (scalar convert_to_date(sprintf "%4d-%02d-%02d\n", Add_Delta_YM($year, $month, $day, -2, 0)),
+       scalar convert_to_date(sprintf "%4d-%02d-%02d\n", Add_Delta_YM($year, $month, $day, -1, 0))),;
+}
+
+my ($previous_date, $previous_date_end) =
+  convert_to_date($options{"compare-period"});
+unless ($previous_date) {
+  ($previous_date, $previous_date_end) =
+    convert_to_date($default_dates[0]);
+}
+
+my ($current_date, $current_date_end, $next_date) =
+  convert_to_date($options{"target-period"});
+unless ($current_date) {
+  ($current_date, $current_date_end, $next_date) =
+    convert_to_date($default_dates[1]);
+}
+
+my $interval_clause = $old_report?
+  $available_timeperiods{$timeperiod}->{interval_clause}:
+  sprintf("AND EndTime >= '%s' AND EndTime <= '%s'",
+          $previous_date, $next_date);
+
 foreach my $id (sort { $a <=> $b } grep /^\d+$/, keys %{$vomrs_user_info}) {
   my $user_info = $vomrs_user_info->{$id};
   my @cn_list = keys %{$user_info->{CN}};
@@ -395,7 +443,8 @@ foreach my $id (sort { $a <=> $b } grep /^\d+$/, keys %{$vomrs_user_info}) {
                 $available_timeperiods{$timeperiod}->{sort}?
                 $available_timeperiods{$timeperiod}->{sort}:
                 $available_timeperiods{$timeperiod}->{select},
-                $available_timeperiods{$timeperiod}->{interval_clause});
+                $interval_clause
+                );
   # print STDERR $query, "\n";
   my $sth = $dbh->prepare($query);
   # print STDERR $sth->{Statement}, "\n";
@@ -673,41 +722,12 @@ sub process_key_options {
   return @keys;
 }
 
-my $current_date;
 sub vo_report(\@$$) {
   my ($email_addresses, $output_filehandle, $output_filename) = @_;
 
   my @lines = ();
 
   my @dates = sort by_date keys %dates;
-
-  my @default_results = ();
-
-  my ($year, $month, $day) = Today(1);
-  if ($timeperiod eq "month") {
-    @default_results =
-      (scalar convert_to_date(sprintf "%4d-%02d-%02d\n", Add_Delta_YM($year, $month, $day, 0, -2)),
-       scalar convert_to_date(sprintf "%4d-%02d-%02d\n", Add_Delta_YM($year, $month, $day, 0, -1)));
-  } elsif ($timeperiod eq "week") {
-    @default_results =
-      (scalar convert_to_date(sprintf "%4d-%02d-%02d\n", Add_Delta_Days($year, $month, $day, -14)),
-       scalar convert_to_date(sprintf "%4d-%02d-%02d\n", Add_Delta_Days($year, $month, $day, -7)));
-  }
-
-  my ($previous_date, $previous_date_end) =
-    convert_to_date($options{"compare-period"});
-  unless ($previous_date) {
-    ($previous_date, $previous_date_end) =
-      convert_to_date($default_results[0]);
-  }
-
-  my $current_date_end;
-  ($current_date, $current_date_end) =
-    convert_to_date($options{"target-period"});
-  unless ($current_date) {
-    ($current_date, $current_date_end) =
-      convert_to_date($default_results[1]);
-  }
 
   my ($max_length_site, $num_sites) = site_info($previous_date, $current_date);
   my $max_length_cn = max_length_cn($previous_date, $current_date);
@@ -1071,6 +1091,20 @@ sub convert_to_date {
         exit(1);
       }
     }
+  } elsif ($timeperiod eq "year") {
+    if ($date =~ m&(\d{4})$&) { # Year only
+      ($year, $month, $day) = ($1, "01", "01");
+    } else {
+      if ($date =~ m&(\d{4})(?:[-\D])?(\d{1,2})(?:[-\D])?(\d+)&) {
+        ($year, $month, $day) = ($1, "01", "01");
+      } else {
+        ($year, $month, $day) = Parse_Date($date);
+      }
+      unless ($year) {
+        print STDERR "Unable to decode string $date to a date\n";
+        exit(1);
+      }
+    }
   } else {
     print STDERR "ERROR: convert_to_dates does not understand timeperiod $timeperiod\n";
     exit(1);
@@ -1080,11 +1114,21 @@ sub convert_to_date {
     if ($timeperiod eq "month") {
       return ($result,
               sprintf("%04d-%02d-%02d",
-                      Add_Delta_YMD($year, $month, $day, 0, 1, -1)));
+                      Add_Delta_YMD($year, $month, $day, 0, 1, -1)),
+              sprintf("%04d-%02d-%02d",
+                      Add_Delta_YMD($year, $month, $day, 0, 1, 0)));
     } elsif ($timeperiod eq "week") {
       return ($result,
               sprintf("%04d-%02d-%02d",
-                      Add_Delta_Days($year, $month, $day, 6)));
+                      Add_Delta_Days($year, $month, $day, 6)),
+              sprintf("%04d-%02d-%02d",
+                     Add_Delta_Days($year, $month, $day, 7)));
+    } elsif ($timeperiod eq "year") {
+      return ($result,
+              sprintf("%04d-%02d-%02d",
+                      Add_Delta_YMD($year, $month, $day, 1, 0, -1)),
+              sprintf("%04d-%02d-%02d",
+                      Add_Delta_YMD($year, $month, $day, 1, 0, 0)));
     }
   } else {
     return $result;
