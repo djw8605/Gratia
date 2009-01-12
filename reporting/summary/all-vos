@@ -23,6 +23,7 @@ use lib "$script_top_dir/lib";
 
 my $options = {};
 my $master_vo_list = {};
+my $alt_vo_list = {};
 my $osg_users_script = "$script_top_dir/osg-users";
 my $merge = 1;
 my @wanted_vos = ();
@@ -30,7 +31,7 @@ my @test_addresses = ( 'Chris Green <chris.h.green@gmail.com>' );
 
 GetOptions($options,
            "merge|m",
-           "replace|r",
+           "data-file-precdence|p|r",
            "debug|d",
            "monthly|M",
            "weekly|W",
@@ -38,7 +39,7 @@ GetOptions($options,
            "test|t",
            "vo|v=s@" => sub { push @wanted_vos, lc $_[1] } ) or die $@;
 
-$merge = 0 if ($options->{replace});
+$merge = 0 if ($options->{"data-file-precdence"});
 
 if (not scalar @ARGV) {
   push @ARGV, "$script_top_dir/all-vos.dat";
@@ -63,17 +64,28 @@ foreach my $dat_file (@ARGV) {
     next if (lc $vo ne "all") and
       scalar @wanted_vos and
         not grep /^\Q$vo\E$/i, @wanted_vos;
-    if (exists $master_vo_list->{$vo}) {
+    if (exists $master_vo_list->{lc $vo}) {
       if ($merge) {
         my $email_hash = {};
-        foreach my $email (@{$master_vo_list->{$vo}}, @{$tmp_hash{$vo}}) {
+        foreach my $email (@{$master_vo_list->{lc $vo}}, @{$tmp_hash{$vo}->{mail} || []}) {
           $email_hash->{$email} = 1;
         }
         $master_vo_list->{lc $vo} = [ sort keys %$email_hash ]; # merge
-        next;
       }
+    } else {
+      $master_vo_list->{lc $vo} = [ sort @{$tmp_hash{$vo}->{mail} || []} ];
     }
-    $master_vo_list->{lc $vo} = [ sort @{$tmp_hash{$vo}} ];
+    if (exists $alt_vo_list->{lc $vo}) {
+      if ($merge) {
+        my $vo_hash = {};
+        foreach my $alt_vo (@{$alt_vo_list->{lc $vo}}, @{$tmp_hash{$vo}->{"alt-vos"} || []}) {
+          $vo_hash->{$alt_vo} = 1;
+        }
+        $alt_vo_list->{lc $vo} = [ sort keys %$vo_hash ]; # merge
+      }
+    } else {
+      $alt_vo_list->{lc $vo} = [ sort @{$tmp_hash{$vo}->{"alt-vos"} || []} ];
+    }
   }
 }
 
@@ -95,18 +107,21 @@ foreach my $vo (sort keys %$master_vo_list) {
   foreach my $email (@email_list) {
     $email_hash->{$email} = 1;
   }
+  if (exists $alt_vo_list->{$vo}) {
+    push @command, map { ( "--alt-vo", "$_" ) } sort @{$alt_vo_list->{$vo}};
+  }
   foreach my $email (sort keys %$email_hash) {
     push @command, "-m", "$email";
   }
   print "INFO: compiling and distributing report for VO $vo to: ";
   print join(", ", sort keys %$email_hash),"\n";
-  my @escaped_command = map { "'$_'" } @command;
+  my @escaped_command = map { sprintf('%s', quotemeta($_)) } @command;
   if ($options->{debug}) {
-    unshift(@escaped_command, "echo");
+    unshift @escaped_command, "echo";
   } else {
-    push @escaped_command, ">/dev/null 2>&1";
+    push @escaped_command, ">/dev/null 2>&1" unless $options->{test};
   }
-#  unshift @escaped_command, "set -x; ";
+  # unshift @escaped_command, "set -x; ";
   system(join(" ", @escaped_command));
 }
 
