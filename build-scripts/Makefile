@@ -331,6 +331,7 @@ reporting: birt-reporting
 	cp -p $(commonLib)/mysql-connector-java-5.0.8-bin.jar  war/WEB-INF/lib/.
 	cp -p $(commonLib)/mysql-connector-java-5.0.8-bin.jar  war/WEB-INF/platform/plugins/org.eclipse.birt.report.data.oda.jdbc*/drivers/.
 	cp -p $(commonLib)/dom4j-1.6.1.jar                     war/WEB-INF/lib/.
+	cp -p $(commonLib)/commons-lang-*.jar                  war/WEB-INF/lib/.
 	# --- copy needed jsp and css files ----
 	cp -p $(reportsrc)/WebContent/*.jsp                    war/.
 	cp -p $(reportsrc)/WebContent/*.html                   war/.

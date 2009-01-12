@@ -5,6 +5,7 @@
     import="net.sf.gratia.reporting.*"
     import="java.sql.*"
     import="java.io.*"
+    import="org.apache.commons.lang.StringEscapeUtils"
 %>
 
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
@@ -148,6 +149,9 @@ if (inTitle == null)
 
 		inTitle = wholeParams.substring(i1, i2).replace("%20", " ");
 	}
+}
+if (inTitle != null) {
+  inTitle = StringEscapeUtils.escapeHtml(inTitle);
 }
 
 %><div class="reportTitle"><%= inTitle%></div><br /><%
