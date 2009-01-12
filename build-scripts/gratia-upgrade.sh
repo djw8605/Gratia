@@ -180,9 +180,9 @@ you give the FINAL approval to perform the update.
 This script will allow you to upgrade one of these Gratia collectors in 
 the $tomcat_dir directory on $tomcat_host:"
   cnt=0
-  for dir in $(ls -d $tomcat_dir/tomcat-* |egrep -v "log|gratia-release|grep")
+  for dir in $(ls -d $tomcat_dir/tomcat-* |egrep -v "log|gratia-release|grep" 2>/dev/null)
   do 
-    ls -ld $dir |egrep -v 'log|grep'
+    ls -ld $dir |egrep -v 'log|grep' 2>/dev/null
     if [ -w "$dir" ];then
       collectors="$collectors $(basename $dir)"
       cnt=1
@@ -267,7 +267,7 @@ function find_build_source {
   while :
   do
     echo -n "Which date?
-$(ls -d $release_dir/gratia-* |egrep -v "\.log")
+$(ls -d $release_dir/gratia-* |egrep -v "\.log" 2>/dev/null)
 ... choose the date (eg, 2008-07-14) or 'latest' [default - $release]: "
     read ans
     if [ -n "$ans" ];then
@@ -404,7 +404,7 @@ function start_collector {
   runit "/sbin/service $(echo $tomcat |cut -d'/' -f3) start"
   logit
   logit "... collector started
-$(ps -ef |grep file=$tomcat_dir/$tomcat |grep '   1 ' |egrep -v grep)
+$(ps -ef |grep file=$tomcat_dir/$tomcat |grep '   1 ' |egrep -v grep 2>/dev/null)
 "
   logit
   logit "... sleeping 20 seconds to allow tomcat to deploy war files"
@@ -516,20 +516,20 @@ function cleanup {
 function verify_instance_is_running {
   delimit  verify_instance_is_running
   logit "Verifying that the tomcat instance is running using
-   ps -ef |grep file=$tomcat_dir/$tomcat |grep '   1 ' |egrep -v grep
+   ps -ef |grep file=$tomcat_dir/$tomcat |grep '   1 ' |egrep -v grep 2>/dev/null
 "
   sleep 4
-  process_cnt="$(ps -ef |grep file=$tomcat_dir/$tomcat |grep '  1 '|egrep -v grep |wc -l)"
+  process_cnt="$(ps -ef |grep file=$tomcat_dir/$tomcat |grep '  1 '|egrep -v grep  2>/dev/null|wc -l)"
   case $process_cnt in 
     0 ) logerr "... tomcat instance ($tomcat) not running" ;;
     1 ) ;;
     * ) logerr "More than 1 tomcat instance running for this gratia instance:
-$(ps -ef |grep file=$tomcat_dir/$tomcat |grep '  1 '|egrep -v grep)
+$(ps -ef |grep file=$tomcat_dir/$tomcat |grep '  1 '|egrep -v grep 2>/dev/null)
 " 
         ;;
   esac
   logit "Tomcat instance for ($tomcat):
-$(ps -ef |grep file=$tomcat_dir/$tomcat |grep '   1 ' |egrep -v grep)
+$(ps -ef |grep file=$tomcat_dir/$tomcat |grep '   1 ' |egrep -v grep 2>/dev/null)
 "
   logit "PASSED: tomcat instance ($tomcat) is running"
   sleep 1
@@ -545,7 +545,7 @@ by doing a wget on the gratia-release file:"
     logerr "Properties file does not exist: $properties_file"
   fi
   property=service.open.connection 
-  service="$(grep $property $properties_file |egrep -v '#'|egrep -v grep| cut -d'=' -f2)"
+  service="$(grep $property $properties_file |egrep -v '#' 2>/dev/null| egrep -v grep 2>/dev/null| cut -d'=' -f2)"
   if [ -z $service ];then
     logerr "Cannot find attribute ($property) in $properties_file"
   fi
@@ -579,30 +579,30 @@ Disclaimer: This is the closest one can do for this type of validation.
     logerr "Properties file does not exist: $properties_file"
   fi
   property=service.rmi.port 
-  port="$(grep $property $properties_file |egrep -v '#' |egrep -v grep| cut -d'=' -f2)"
+  port="$(grep $property $properties_file |egrep -v '#'  2>/dev/null|egrep -v grep 2>/dev/null| cut -d'=' -f2)"
   if [ -z $port ];then
     logerr "Cannot find attribute ($property) in $properties_file"
   fi
-  pid="$(/bin/netstat -n --listening --program |egrep $port |egrep -v grep|awk '{print $7}')"
+  pid="$(/bin/netstat -n --listening --program |egrep $port  2>/dev/null|egrep -v grep 2>/dev/null|awk '{print $7}')"
   logit "...using port $port as the basis for the netstat command:
-  /bin/netstat -n --listening --program |egrep $port
-$(/bin/netstat -n --listening --program |egrep $port |egrep -v grep)
+  /bin/netstat -n --listening --program |egrep $port 2>/dev/null
+$(/bin/netstat -n --listening --program |egrep $port  2>/dev/null|egrep -v grep 2>/dev/null)
 "
 
   #--- check the ports ---
-  cmd="/bin/netstat -n --listening --program |egrep $pid |egrep -v grep"
+  cmd="/bin/netstat -n --listening --program |egrep $pid  2>/dev/null|egrep -v grep 2>/dev/null"
   maxtries=6
   sleep=20
   try=1
   while 
     [ $try -lt $maxtries ]
   do
-    connection_cnt="$(/bin/netstat -n --listening --program |egrep $pid |egrep -v grep |wc -l)"
+    connection_cnt="$(/bin/netstat -n --listening --program |egrep $pid  2>/dev/null|egrep -v grep  2>/dev/null|wc -l)"
     if [ $connection_cnt  -eq  $expected_number_of_ports ];then
       break
     fi
     logit "Expected $expected_number_of_ports connections.... found ${connection_cnt}.
-$(/bin/netstat -n --listening --program |egrep $pid |egrep -v grep)
+$(/bin/netstat -n --listening --program |egrep $pid 2>/dev/null |egrep -v grep 2>/dev/null)
 "
     logit "... sleeping $sleep seconda and trying again (try $try of $maxtries)" 
     sleep $sleep
@@ -610,17 +610,17 @@ $(/bin/netstat -n --listening --program |egrep $pid |egrep -v grep)
   done
 
   #--- check for failure ---
-  connection_cnt="$(/bin/netstat -n --listening --program |egrep $pid |egrep -v grep |wc -l)"
+  connection_cnt="$(/bin/netstat -n --listening --program |egrep $pid 2>/dev/null |egrep -v grep 2>/dev/null |wc -l)"
   if [ $connection_cnt  -ne  $expected_number_of_ports ];then
     logerr "Expected $expected_number_of_ports connections.... found ${connection_cnt}.
-$(/bin/netstat -n --listening --program |egrep $pid |egrep -v grep)
+$(/bin/netstat -n --listening --program |egrep $pid 2>/dev/null |egrep -v grep 2>/dev/null)
 ... giving up!!!
 "
   fi
 
   #--- all ports available ---
   logit "... connections based on pid ($pid):
-$(/bin/netstat -n --listening --program |egrep $pid |egrep -v grep)
+$(/bin/netstat -n --listening --program |egrep $pid 2>/dev/null |egrep -v grep 2>/dev/null)
 "
   logit "PASSED: number of connections look good"
   sleep 1
