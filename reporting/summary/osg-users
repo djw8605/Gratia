@@ -52,6 +52,7 @@ B<osg-users> B<--man>
 
 B<osg-users> [B<-u>|B<--user-regex> I<regex>]+
 [B<-v>|B<--vo> I<vo>]
+[B<--alt-vo-name>|B<--alt-vo> I<vo>]+
 [B<-r>|B<--reporting>|B<--reporting-name> I<name>]
 [B<-V>|B<--vo-report>]
 [B<-k>|B<--metric-key> I<Njobs|CPU|Wall>]
@@ -104,6 +105,7 @@ GetOptions(\%options,
            "man",
            "user-regex|u=s@",
            "vo|v=s",
+           "alt-vo-name|alt-vo=s@",
            "vo-report|V",
            "metric-key|k=s@",
            "no-totals",
@@ -146,6 +148,8 @@ if ($options{"aux-db-type"}) {
 }
 
 my $vo = $options{vo} || "osg";
+my @alt_vos = (exists $options{"alt-vo-name"})?@{$options{"alt-vo-name"}}:();
+my $vo_list = sprintf("(%s)", join(", ", map { sprintf("'%s'", uc) } ($vo, @alt_vos)));
 
 if (exists $options{"aux-db-connect"}) {
   $options{"aux-db-connect"} = [ split /,/, $options{"aux-db-connect"} ]
@@ -316,12 +320,12 @@ my $vomrs_user_info = {};
 
 if ($options{"aux-db-type"} =~ m&none&i) {
   # Get known users attached to this VO from Gratia
-  my $sth = $dbh->prepare(sprintf(<<EOF, RealVOName(), uc($vo)));
+  my $sth = $dbh->prepare(sprintf(<<EOF, RealVOName(), $vo_list));
 select distinct CommonName
 from MasterSummaryData MSD
 join VONameCorrection VC on (MSD.VOcorrid = VC.corrid)
 join VO on (VC.void = VO.void)
-where UPPER(%s) = '%s' order by CommonName;
+where UPPER(%s) IN %s order by CommonName;
 EOF
   $sth->execute();
   my $userid = 0;
@@ -437,8 +441,8 @@ foreach my $id (sort { $a <=> $b } grep /^\d+$/, keys %{$vomrs_user_info}) {
   my $flat_cn_list = join(", ", map {s&\'&\'\'&g; "'$_'"} @cn_list);
   my $query =
     queryString($user_info->{query} ||
-                sprintf("(CommonName IN ( $flat_cn_list ) AND (UPPER(%s) = UPPER('$vo')))",
-                        RealVOName()),
+                sprintf("(CommonName IN ( $flat_cn_list ) AND (UPPER(%s) IN %s))",
+                        RealVOName(), $vo_list),
                 $available_timeperiods{$timeperiod}->{select},
                 $available_timeperiods{$timeperiod}->{sort}?
                 $available_timeperiods{$timeperiod}->{sort}:
@@ -867,13 +871,13 @@ EOF
        $column_separator,
        { title => "Job\nSuccess?", align_title => "center", sample => "yes" },
        $column_separator,
-       { title => "# Jobs", align_title => "center", align => "right", sample => "99999", align => 'num' },
+       { title => "# Jobs", align_title => "center", align => "right", sample => "99999999", align => 'num' },
        $column_separator,
-       { title => "Wall\nTime (h)", align_title => "center", sample => "9999999.0", align => 'num' },
+       { title => "Wall\nTime (h)", align_title => "center", sample => "99999999.0", align => 'num' },
        $column_separator,
-       { title => "Delta\nJobs", align => "right", align_title => "center", sample => "-199999", align => 'num' },
+       { title => "Delta\nJobs", align => "right", align_title => "center", sample => "-199999999", align => 'num' },
        $column_separator,
-       { title => "Delta Wall\nTime (h)", align_title => "center", sample => "-19999999.0", align => 'num' },
+       { title => "Delta Wall\nTime (h)", align_title => "center", sample => "-199999999.0", align => 'num' },
        { title => ' |', is_sep => '1' }
       );
 
