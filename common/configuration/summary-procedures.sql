@@ -26,6 +26,7 @@ AJUR:BEGIN
   DECLARE n_EndTime DATETIME;
   DECLARE n_rowDate DATETIME;
   DECLARE n_Grid VARCHAR(255);
+  DECLARE n_Cores INT(11);
 
   -- Storage only
   DECLARE n_DN VARCHAR(255);
@@ -71,7 +72,8 @@ AJUR:BEGIN
          IF(ResourceType IN ('Storage', 'RawCPU', 'Transfer'),
             DATE(J.StartTime),
             DATE(J.EndTime)),
-         M.Grid        
+         IFNULL(M.Grid, ''),
+         IFNULL(J.Processors, 1)
   INTO n_ProbeName,
        n_CommonName,
        n_VOcorrid,
@@ -87,7 +89,8 @@ AJUR:BEGIN
        n_StartTime,
        n_EndTime,
        n_rowdate,
-       n_Grid
+       n_Grid,
+       n_Cores
   FROM JobUsageRecord J
        JOIN JobUsageRecord_Meta M ON (J.dbid = M.dbid)
        JOIN VONameCorrection VC ON
@@ -215,7 +218,8 @@ AJUR:BEGIN
   INSERT INTO MasterSummaryData(EndTime, VOcorrid, ProbeName, CommonName,
                                 ResourceType, HostDescription,
                                 ApplicationExitCode, Njobs, WallDuration,
-                                CpuUserDuration, CpuSystemDuration, Grid)
+                                CpuUserDuration, CpuSystemDuration,
+                                Grid, Cores)
   VALUES(DATE(n_EndTime),
          n_VOcorrid,
          n_ProbeName,
@@ -227,7 +231,8 @@ AJUR:BEGIN
          n_WallDuration,
          n_CpuUserDuration,
          n_CpuSystemDuration,
-         n_Grid)
+         n_Grid,
+         n_Cores)
   ON DUPLICATE KEY UPDATE
    Njobs = Njobs + VALUES(Njobs),
    WallDuration = WallDuration + VALUES(WallDuration),
@@ -300,6 +305,7 @@ DJUR:BEGIN
   DECLARE n_EndTime DATETIME;
   DECLARE n_rowDate DATE;
   DECLARE n_Grid VARCHAR(255);
+  DECLARE n_Cores INT(11);
 
   -- Storage only
   DECLARE n_DN VARCHAR(255);
@@ -343,7 +349,8 @@ DJUR:BEGIN
          J.EndTime,
          IF(ResourceType = 'Batch', DATE(J.EndTime),
             DATE(J.StartTime)),
-         M.Grid
+         M.Grid,
+         IFNULL(J.Processors, 1)
   INTO n_ProbeName,
        n_CommonName,
        n_VOcorrid,
@@ -497,7 +504,9 @@ DJUR:BEGIN
     AND CommonName = n_CommonName
     AND ResourceType = n_ResourceType
     AND HostDescription = n_HostDescription
-    AND ApplicationExitCode = n_ApplicationExitCode;
+    AND ApplicationExitCode = n_ApplicationExitCode
+    AND Grid = n_Grid
+    AND Cores = n_Cores;
 
   -- Clean up emptied rows
   DELETE FROM MasterSummaryData
@@ -508,6 +517,8 @@ DJUR:BEGIN
     AND ResourceType = n_ResourceType
     AND HostDescription = n_HostDescription
     AND ApplicationExitCode = n_ApplicationExitCode
+    AND Grid = n_Grid
+    AND Cores = n_Cores
     AND Njobs <= 0;
 
   -- NodeSumary

@@ -77,5 +77,10 @@
            <column name="Grid" not-null="true" default="'OSG'" />
        </property>
    </component>
+   <component name="Cores" class="IntegerElement" insert="true">
+       <property name="Value">
+           <column name="Cores" not-null="true" default="1" />
+       </property>
+   </component>
 </class>
 </hibernate-mapping>

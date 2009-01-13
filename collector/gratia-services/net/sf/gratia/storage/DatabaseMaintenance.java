@@ -38,7 +38,7 @@ import org.hibernate.exception.*;
 public class DatabaseMaintenance {
     static final String dq = "\"";
     static final String comma = ",";
-    static final int gratiaDatabaseVersion = 70;
+    static final int gratiaDatabaseVersion = 71;
     static final int latestDBVersionRequiringStoredProcedureLoad = gratiaDatabaseVersion;
     static final int latestDBVersionRequiringSummaryViewLoad = 37;
     static final int latestDBVersionRequiringSummaryTriggerLoad = 66;
@@ -318,11 +318,12 @@ public class DatabaseMaintenance {
         AddIndex("MasterSummaryData", false, "index05", "ResourceType");
         AddIndex("MasterSummaryData", false, "index06", "HostDescription");
         AddIndex("MasterSummaryData", false, "index07", "ApplicationExitCode");
-        AddIndex("MasterSummaryData", true, "index09",
+        AddIndex("MasterSummaryData", true, "index10",
                  "EndTime, VOcorrid, ProbeName, " +
                  "CommonName, ResourceType, " +
-                 "HostDescription, ApplicationExitCode, Grid");
+                 "HostDescription, ApplicationExitCode, Grid, Cores");
         DropIndex("MasterSummaryData", "index08");
+        DropIndex("MasterSummaryData", "index09");
 
         // Indexes for MasterTransferSummary
         AddIndex("MasterTransferSummary", false, "index01", "StartTime");
@@ -1402,10 +1403,10 @@ public class DatabaseMaintenance {
                     UpdateDbVersion(current);
                 }
             }
-            if ((current >= 60) && (current < 70)) {
+            if ((current >= 60) && (current < 71)) {
                 // Stored procedures, trigger procedures.
                 Logging.fine("Gratia database upgraded from " + current + " to 70");
-                current = 70;
+                current = 71;
                 UpdateDbVersion(current);
             }
 

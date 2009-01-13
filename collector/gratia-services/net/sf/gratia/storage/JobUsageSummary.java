@@ -30,6 +30,7 @@ public class JobUsageSummary extends Record {
     private DurationElement CpuUserDuration;
     private DurationElement CpuSystemDuration;
     private StringElement Grid;
+    private IntegerElement Cores;
 
     ////////////////////////////////////////////////////////////////////
     // Methods required by interface Record
@@ -237,5 +238,14 @@ public class JobUsageSummary extends Record {
 
     public void setGrid(StringElement Grid) {
         this.Grid = Grid;
+    }
+
+    // Cores
+    public IntegerElement getCores() {
+        return Cores;
+    }
+
+    public void setCores(IntegerElement Cores) {
+        this.Cores = Cores;
     }
 }
