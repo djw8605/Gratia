@@ -122,6 +122,8 @@ If this is not true, you may use the command-line option \"--tomcat-dir <dir>\".
                   different .dat file from which to obtain the instance
                   configuration.
  --instance       tomcat instance (e.g, tomcat-itb_gratia_itb).
+ --config-name    Name of config in data file where difference to instance.
+                  Default is instance.
  --source         source directory
                     - daily builds..... /home/gratia/gratia-builds
                     - release builds... /home/gratia/gratia-releases
@@ -216,6 +218,24 @@ Choose a collector (none to exit): "
 function validate_collector {
   if [ ! -d "$tomcat_dir/$tomcat" ];then
     try_again "The tomcat directory ($tomcat_dir/$tomcat) does not exist..something wrong?"
+  fi
+}
+
+#------------------------
+function choose_config_name {
+  echo "----- choose_config_name ------"
+  config_name=$(echo $tomcat|cut -d'-' -f2-)
+  echo -n "Config name to look for in .dat files? [default - $config_name]: "
+  read ans
+  if [ -n "$ans" ]; then
+    config_name=$ans
+  fi
+}
+#------------------------
+function validate_config_name {
+  [[ $config_name == "NONE" ]] && config_name=$tomcat
+  if [ -z "$config_name" ]; then
+    try_again "Null configuration name specified!"
   fi
 }
 #------------------------
@@ -351,7 +371,7 @@ function install_upgrade {
   if [ "$mysql_file" != "NONE" ];then
     pswd="$(cat $mysql_file)"
   fi
-  runit "$pgm $ugl_config_arg-p ${tomcat_dir} -d $pswd -S $source ${force}-s $(echo $tomcat|cut -d'-' -f2-)"
+  runit "$pgm $ugl_config_arg-p ${tomcat_dir} -d $pswd -S $source ${force}-s -C $config_name $(echo $tomcat|cut -d'-' -f2-)"
   logit "Install was successful"
   sleep 3
 }
@@ -427,6 +447,7 @@ printf "
 We are ready to upgrade with the following information provided:
   host...................... $(hostname -f)
   tomcat instance........... $tomcat
+  tomcat config name........ $config_name
   source location........... $source
   password.................. $pswd
   log4j config overwrite.... "
@@ -445,6 +466,7 @@ function log_final_verification {
 Upgrading with the following information provided:
   host............... $(hostname -f)
   tomcat instance.... $tomcat
+  tomcat config name. $config_name
   source location.... $source
   password........... cannot say
 "
@@ -658,6 +680,7 @@ function verify_upgrade {
 #----------------------------
 function process_in_prompt_mode {
   choose_collector
+  choose_config_name
   choose_source_directory
   choose_db_root_password 
   choose_force_mode
@@ -677,6 +700,7 @@ function process_in_prompt_mode {
 #----------------------------
 function process_in_no_prompt_mode {
   validate_collector
+  validate_config_name
   verify_the_makefile_target_dir_exists 
   verify_the_update_program_exists
   log_upgrade_start
@@ -708,7 +732,7 @@ $(cat $tomcat_dir/$tomcat/gratia/gratia-release)
 #----------------------------
 function find_configured_user_set_email {
   [[ -n "$recipients" ]] && return
-  local user=`$source/common/configuration/configure-collector $cc_config_arg-p ${tomcat_dir} --obtain-config-item tomcat_user $(echo $tomcat|cut -d'-' -f2-) | sed -ne 's/^config: tomcat_user = //p'`
+  local user=`$source/common/configuration/configure-collector $cc_config_arg-p ${tomcat_dir} --obtain-config-item tomcat_user $config_name | sed -ne 's/^config: tomcat_user = //p'`
   if [[ $user != "root" ]] && [[ $user != "daemon" ]]; then
     if [[ -n "$user" ]]; then
       echo "Setting recipients for upgrade status email to $user@fnal.gov based on configured user $user"
@@ -738,6 +762,7 @@ recipients=""
 release=NONE
 release_dir=""
 tomcat=NONE
+config_name=NONE
 tomcat_host=$(hostname -s)
 tomcat_dir=/data
 log_backup_dir=$tomcat_dir/gratia_tomcat_logs_backups
@@ -755,6 +780,8 @@ while test "x$1" != "x"; do
         shift;shift
    elif [ "$1" == "--instance" ];then
         tomcat="$2";shift;shift
+   elif [ "$1" == "--config-name" ];then
+        config_name="$2";shift;shift
    elif [ "$1" == "--source" ];then 
         source="$2";shift;shift
    elif [ "$1" == "--pswd" ];then 

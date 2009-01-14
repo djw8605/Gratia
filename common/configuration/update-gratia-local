@@ -7,12 +7,17 @@ usage: update-gratia-local [-S <source-prefix>] [-j <jre-home>] [-s]
                            [-p <prefix>] [-d <db-root-pw>]
                            [-i <collector-info-file>]
                            [-c <configure-collector-script>]
+                           [-C <config-name>]
                            [-h] [-v <vdt_location>] [--] <instance>
 
        -c <configure-collector-script>
 
           Execute <configure-collector-script> instead of
           <source-prefix>/common/configuration/configure-collector.
+
+       -C <config-name>
+
+          Name of configuration in .dat file where different to <instance>
 
        --force-log4j
 
@@ -46,6 +51,10 @@ usage: update-gratia-local [-S <source-prefix>] [-j <jre-home>] [-s]
        -v <vdt_location>
 
           Indicates a VDT installation. 
+
+       <instance>
+
+          Name of tomcat directory (sans tomcat- prefix).
 
 EOF
 }
@@ -230,7 +239,7 @@ birt
 "
 
 # Use getopt(1) -- enhanced to process long options
-TEMP=`getopt -o :c:i:j:sp:d:v:hS: --long force-log4j -n "update-gratia-local" -- "$@"`
+TEMP=`getopt -o :c:C:i:j:sp:d:v:hS: --long force-log4j -n "update-gratia-local" -- "$@"`
 
 if [ $? != 0 ]; then
   echo "terminating due to option parse errors" 1>&2
@@ -244,6 +253,10 @@ while true; do
     case "$1" in
         -c)
             configure_script="$2"
+            shift 2
+            ;;
+        -C)
+            config_name="$2"
             shift 2
             ;;
         --force-log4j)
@@ -296,6 +309,7 @@ done
 
 instance=$1
 
+[[ -z "$config_name" ]] && config_name=$instance
 
 #--- set env for either vdt or local install ----
 if [ $vdt_install ];then
@@ -471,7 +485,7 @@ $use_ssl \
 -j "$java_jre" \
 $dbp_arg \
 ${collector_info} \
-$instance
+$config_name
 status=$?
   if (( $status != 0 )); then
     echo "ERROR: configure-collector invocation returned non-zero exit code $status." 1>&2

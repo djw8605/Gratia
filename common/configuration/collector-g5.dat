@@ -1,7 +1,8 @@
 (
- fermi_osg =>
+ "fermi-osg" =>
  { tomcat_user => "daemon",
    tomcat_group => "daemon",
+   instance_name => "gratia",
    http_port => 80,
    ssl_port => 443,
    rmi_port => 17000,
@@ -20,9 +21,10 @@
     "service.lifetime.MetricRecord" => "1 month",
    }
  },
- fermi_itb =>
+ "fermi-itb" =>
  { tomcat_user => "daemon",
    tomcat_group => "daemon",
+   instance_name => "gratia",
    http_port => 80,
    ssl_port => 443,
    rmi_port => 17000,
@@ -40,9 +42,10 @@
     "service.lifetime.JobUsageRecord" => "1 year",
    }
  },
- ps =>
+ "fermi-psacct" =>
  { tomcat_user => "daemon",
    tomcat_group => "daemon",
+   instance_name => "gratia",
    http_port => 80,
    ssl_port => 443,
    rmi_port => 17000,
@@ -62,9 +65,10 @@
     "service.admin.FQAN.0" => "/fermilab/Role=GratiaAdmin",
    },
  },
- qcd =>
+ "fermi-qcd" =>
  { tomcat_user => "daemon",
    tomcat_group => "daemon",
+   instance_name => "gratia",
    http_port => 80,
    ssl_port => 443,
    rmi_port => 17000,
@@ -81,9 +85,10 @@
     "service.lifetime.JobUsageRecord" => "UNLIMITED",
    }
  },
- fermi_transfer =>
+ "fermi-transfer" =>
  { tomcat_user => "daemon",
    tomcat_group => "daemon",
+   instance_name => "gratia",
    http_port => 80,
    ssl_port => 443,
    rmi_port => 17000,

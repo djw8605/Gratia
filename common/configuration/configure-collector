@@ -229,7 +229,7 @@ unless (exists $options{prefix}) {
         "\ndoes not exist as a directory or is not writable\"";
     pod2usage(-exitval => 1);
   }
-}               
+}
 
 pod2usage(-exitval => 1) unless scalar @ARGV;
 
@@ -240,9 +240,9 @@ unless (exists $options{"collector-info"} and scalar @{$options{"collector-info"
 }
 
 
-foreach my $config (@instance_list) {
+foreach my $config_name (@instance_list) {
   foreach my $dat_file (@{$options{"collector-info"}}) {
-    $dat_file = find_dat_file($dat_file, "$options{prefix}/tomcat-${config}/gratia");
+    $dat_file = find_dat_file($dat_file);
     if (not open(DAT_SOURCE, $dat_file)) {
       print STDERR "ERROR: Unable to open data file $dat_file\n";
       next;
@@ -254,17 +254,17 @@ foreach my $config (@instance_list) {
       print STDERR "ERROR: Problem reading collector data file $dat_file\n";
       next;
     }
-    if (exists $tmp_hash{$config}) {
-      $collector_configs{$config} = $tmp_hash{$config};
-      print STDERR "INFO: found configuration for instance, \"$config\" in $dat_file\n";
+    if (exists $tmp_hash{$config_name}) {
+      $collector_configs{$config_name} = $tmp_hash{$config_name};
+      print STDERR "INFO: found configuration for instance, \"$config_name\" in $dat_file\n";
       last;
     }
   }
 
-  my $config_ref = $collector_configs{$config};
+  my $config_ref = $collector_configs{$config_name};
 
   if (not $config_ref) {
-    print STDERR "WARNING: configuration for specified gratia instance $config not found!\n";
+    print STDERR "WARNING: configuration for specified gratia instance $config_name not found!\n";
     exit 1;
   }
 
@@ -292,7 +292,7 @@ foreach my $config (@instance_list) {
   my $requirements_error = 0;
   foreach my $required_attribute (@required_attributes) {
     unless (exists $config_ref->{$required_attribute}) {
-      print STDERR "Configuration for instance \"$config\" does not have ",
+      print STDERR "Configuration for instance \"$config_name\" does not have ",
         "required attribute \"$required_attribute\"\n";
       $requirements_error = 1;
     }
@@ -300,7 +300,7 @@ foreach my $config (@instance_list) {
 
   foreach my $required_attribute (@required_properties) {
     unless (exists $config_ref->{"properties.attributes"}->{$required_attribute}) {
-      print STDERR "Configuration for instance \"$config\" does not have ",
+      print STDERR "Configuration for instance \"$config_name\" does not have ",
         "required properties.attributes entry \"$required_attribute\"\n";
       $requirements_error = 1;
     }
@@ -309,34 +309,36 @@ foreach my $config (@instance_list) {
   # Next if failed requirements.
   next if $requirements_error;
 
+  my $instance_name = $config_ref->{instance_name} || $config_name;
+
   # Maybe print requested config information and exit
-  maybe_print_config_info($config, $config_ref) and exit(1);
+  maybe_print_config_info($instance_name, $config_name, $config_ref) and exit(1);
 
   # Check and (maybe) override remote_host setting
-  verify_remote_host_setting($config, $config_ref);
+  verify_remote_host_setting($instance_name, $config_name, $config_ref);
 
   # Configuration operations.
-  configure_keyfile_owners($config, $config_ref);
-  configure_collector_config($config, $config_ref);
-  configure_init_file($config, $config_ref);
-  configure_tomcat_config($config, $config_ref);
-  configure_tomcat_users($config, $config_ref);
-  # configure_log4j_properties($config, $config_ref) if $options{"use-ssl"};
-  configure_static_report_generation($config, $config_ref);
+  configure_keyfile_owners($instance_name, $config_name, $config_ref);
+  configure_collector_config($instance_name, $config_name, $config_ref);
+  configure_init_file($instance_name, $config_name, $config_ref);
+  configure_tomcat_config($instance_name, $config_name, $config_ref);
+  configure_tomcat_users($instance_name, $config_name, $config_ref);
+  # configure_log4j_properties($instance_name, $config_name, $config_ref) if $options{"use-ssl"};
+  configure_static_report_generation($instance_name, $config_name, $config_ref);
 
   if (exists $options{"db-root"}) {
-    configure_post_install($config, $config_ref);
+    configure_post_install($instance_name, $config_name, $config_ref);
   } else {
     print STDERR "WARNING: no DB root password specified: post-install.sh not configured\n";
   }
 
   if ($config_ref->{"no_collector"}) {
     foreach my $war qw(services soap servlets administration) {
-      system("rm -rf $options{prefix}/tomcat-${config}/webapps/gratia-$war\{,.war\}");
+      system("rm -rf $options{prefix}/tomcat-$instance_name/webapps/gratia-$war\{,.war\}");
     }
   }
 
-  configure_installation_owner($config, $config_ref);
+  configure_installation_owner($instance_name, $config_name, $config_ref);
 
 }
 
@@ -344,7 +346,7 @@ foreach my $config (@instance_list) {
 
 #--------------------------------------
 sub configure_apel_directory {
-  my ($instance_name, $collector_config) = @_;
+  my ($instance_name, $config_name, $collector_config) = @_;
   my $type = "APEL interfaces folder -";
   print STDERR "INFO: $type starting\n"; 
   my $apel       = $collector_config->{"properties.attributes"}->{"service.reporting.interfaces.apel.folder"};
@@ -391,7 +393,7 @@ sub configure_apel_directory {
 #--------------------------------------
 sub configure_log4j_properties {
   return unless $options{"use-ssl"};
-  my ($instance_name, $collector_config) = @_;
+  my ($instance_name, $config_name, $collector_config) = @_;
   my $log4j_prop = ">$options{prefix}/tomcat-${instance_name}/conf/log4j-trustmanager.properties";
   open(LOG4J_PROP, $log4j_prop) or die "Unable to open $log4j_prop for writing";
   print LOG4J_PROP <<'EOF';
@@ -418,7 +420,7 @@ EOF
 }
 
   sub configure_post_install {
-    my ($instance_name, $collector_config) = @_;
+    my ($instance_name, $config_name, $collector_config) = @_;
     my $post_file = "$options{prefix}/tomcat-${instance_name}/gratia/post-install.sh";
     my $new_post = temporary_filename("post-install.sh");
     open(ORIG_POST, "<$post_file") or die "Unable to open $post_file for reading";
@@ -451,7 +453,7 @@ EOF
   }
 
 sub configure_init_file {
-  my ($instance_name, $collector_config) = @_;
+  my ($instance_name, $config_name, $collector_config) = @_;
   my $stop_db_update_url =
     sprintf("%s%s:%s/gratia-administration/systemadministration.html?action=stopDatabaseUpdateThreads",
             $options{"use-ssl"}?"https://":"http://",
@@ -486,12 +488,12 @@ sub configure_init_file {
 }
 
 sub configure_collector_config {
-  my ($instance_name, $collector_config) = @_;
+  my ($instance_name, $config_name, $collector_config) = @_;
   my $orig_config = "$options{prefix}/tomcat-${instance_name}/gratia/service-configuration.properties";
-  my $config_file = temporary_filename("service-configuration.properties");
+  my $config_name_file = temporary_filename("service-configuration.properties");
   open(ORIG_CONFIG, "<$orig_config") or die "Unable to open $orig_config for reading";
-  open(REPORTING_CONFIG, ">$config_file") or die "Unable to open $config_file for writing";
-  chmod 0600, $config_file;
+  open(REPORTING_CONFIG, ">$config_name_file") or die "Unable to open $config_name_file for writing";
+  chmod 0600, $config_name_file;
   my %seen_attributes = ();
   my $in_summary_comment;
   my $spaced_rmi_port = sprintf("%5d", $collector_config->{rmi_port});
@@ -499,11 +501,11 @@ sub configure_collector_config {
   my $spaced_ssl_port = sprintf("%5d", $collector_config->{ssl_port});
   my $spaced_db_port = sprintf("%5d", $collector_config->{db_port});
 
-  foreach my $config_attribute (sort keys %{$collector_config->{"properties.attributes"}}) {
+  foreach my $config_name_attribute (sort keys %{$collector_config->{"properties.attributes"}}) {
     # Code substitutions
-    if (ref($collector_config->{"properties.attributes"}->{$config_attribute}) eq "CODE") {
-      $collector_config->{"properties.attributes"}->{$config_attribute} =
-        $collector_config->{"properties.attributes"}->{$config_attribute}($instance_name, $collector_config);
+    if (ref($collector_config->{"properties.attributes"}->{$config_name_attribute}) eq "CODE") {
+      $collector_config->{"properties.attributes"}->{$config_name_attribute} =
+        $collector_config->{"properties.attributes"}->{$config_name_attribute}($instance_name, $config_name, $collector_config);
     }
   }
 
@@ -538,10 +540,10 @@ sub configure_collector_config {
     }
 
     # Simple attributes
-    foreach my $config_attribute (sort keys %{$collector_config->{"properties.attributes"}}) {
-      $config_attribute =~ m/\.\d+$/ and next; # Special numbered item
-        s&^(?:\s*###\s*)?(\Q$config_attribute\E\s*=\s*).*$&${1}$collector_config->{"properties.attributes"}->{$config_attribute}& and
-          $seen_attributes{$config_attribute} = 1;
+    foreach my $config_name_attribute (sort keys %{$collector_config->{"properties.attributes"}}) {
+      $config_name_attribute =~ m/\.\d+$/ and next; # Special numbered item
+        s&^(?:\s*###\s*)?(\Q$config_name_attribute\E\s*=\s*).*$&${1}$collector_config->{"properties.attributes"}->{$config_name_attribute}& and
+          $seen_attributes{$config_name_attribute} = 1;
     }
 
     # Special case for multi-value configuration options -- group
@@ -567,23 +569,23 @@ sub configure_collector_config {
   close(ORIG_CONFIG);
   # Simple attributes which may not already have been in the configuration file (eg monitor.to.address.N)
 
-  foreach my $config_attribute (sort keys %{$collector_config->{"properties.attributes"}}) {
-    print REPORTING_CONFIG "$config_attribute=",
-      $collector_config->{"properties.attributes"}->{$config_attribute}, "\n"
-        unless $seen_attributes{$config_attribute};
+  foreach my $config_name_attribute (sort keys %{$collector_config->{"properties.attributes"}}) {
+    print REPORTING_CONFIG "$config_name_attribute=",
+      $collector_config->{"properties.attributes"}->{$config_name_attribute}, "\n"
+        unless $seen_attributes{$config_name_attribute};
   }
   close(REPORTING_CONFIG);
-  system("mv -bv \"$config_file\" \"$orig_config\"");
+  system("mv -bv \"$config_name_file\" \"$orig_config\"");
 }
 
 sub configure_keyfile_owners {
-  my ($instance_name, $collector_config) = @_;
+  my ($instance_name, $config_name, $collector_config) = @_;
   configure_host_keyfile_owner($instance_name, $collector_config);
   configure_http_keyfile_owner($instance_name, $collector_config);
 }
 
 sub configure_host_keyfile_owner {
-  my ($instance_name, $collector_config) = @_;
+  my ($instance_name, $config_name, $collector_config) = @_;
   return unless exists $collector_config->{"host_key"};
   configure_keyfile_owner($instance_name, $collector_config,
                           "configuration attribute host_key",
@@ -591,7 +593,7 @@ sub configure_host_keyfile_owner {
 }
 
 sub configure_http_keyfile_owner {
-  my ($instance_name, $collector_config) = @_;
+  my ($instance_name, $config_name, $collector_config) = @_;
   return unless exists $collector_config->{"properties.attributes"}->{"service.vdt.key.file"};
   configure_keyfile_owner($instance_name, $collector_config,
                           "service-configuration.properties attribute service.vdt.key.file",
@@ -635,7 +637,7 @@ sub configure_keyfile_owner {
 }
 
 sub configure_installation_owner {
-  my ($instance_name, $collector_config) = @_;
+  my ($instance_name, $config_name, $collector_config) = @_;
   if (exists $collector_config->{"tomcat_user"}) {
     print STDERR "TOMCAT_USER specified as ",
       $collector_config->{"tomcat_user"},
@@ -658,12 +660,12 @@ sub configure_installation_owner {
 }
 
 sub configure_tomcat_config {
-  my ($instance_name, $collector_config) = @_;
+  my ($instance_name, $config_name, $collector_config) = @_;
   my $orig_config = "$options{prefix}/tomcat-${instance_name}/conf/server.xml";
-  my $config_file = temporary_filename("server.xml");
+  my $config_name_file = temporary_filename("server.xml");
   open(ORIG_CONFIG, "<$orig_config") or die "Unable to open $orig_config for reading";
-  open(REPORTING_CONFIG, ">$config_file") or die "Unable to open $config_file for writing";
-  chmod 0600, $config_file;
+  open(REPORTING_CONFIG, ">$config_name_file") or die "Unable to open $config_name_file for writing";
+  chmod 0600, $config_name_file;
   my %seen_attributes = ();
   my $line_buffer = "";
   my $in_comment;
@@ -731,24 +733,25 @@ EOF
   }
   close(ORIG_CONFIG);
   close(REPORTING_CONFIG);
-  system("mv -bv \"$config_file\" \"$orig_config\"");
+  system("mv -bv \"$config_name_file\" \"$orig_config\"");
 }
 
 sub configure_tomcat_users {
-  my ($instance_name, $collector_config) = @_;
-  my $config_file = "$options{prefix}/tomcat-${instance_name}/conf/tomcat-users.xml";
-  open(CONFIG_SCRIPT, ">$config_file") or die("Unable to open $config_file for writing");
-  chmod 0600, $config_file;
+  my ($instance_name, $config_name, $collector_config) = @_;
+  my $config_name_file = "$options{prefix}/tomcat-${instance_name}/conf/tomcat-users.xml";
+  open(CONFIG_SCRIPT, ">$config_name_file") or die("Unable to open $config_name_file for writing");
+  chmod 0600, $config_name_file;
   print CONFIG_SCRIPT $tomcat_users_txt;
   close(CONFIG_SCRIPT);
 }
 
 sub construct_monitor_message_subject {
-  my ($instance_name, $collector_config) = @_;
-  return sprintf("%s:%s %s Potential listener problem",
+  my ($instance_name, $config_name, $collector_config) = @_;
+  return sprintf("%s:%s %s (\"%s\") Potential listener problem",
                  $collector_config->{remote_host},
                  $collector_config->{http_port},
-                 "tomcat-$instance_name"
+                 "tomcat-$instance_name",
+                 $config_name
                 );
 }
 
@@ -761,7 +764,7 @@ sub temporary_filename {
 }
 
 sub configure_static_report_generation {
-  my ($instance_name, $collector_config) = @_;
+  my ($instance_name, $config_name, $collector_config) = @_;
   my $wantStatic =
     ($collector_config->{staticReports} =~ /(?:t|true|1)/i);
   my $removeOrTime = ($wantStatic)?
@@ -784,7 +787,7 @@ sub configure_static_report_generation {
 }
 
 sub verify_remote_host_setting {
-  my ($instance_name, $collector_config) = @_;
+  my ($instance_name, $config_name, $collector_config) = @_;
   my $remote_host;
   if ($options{"remote-host"}) {
     print STDERR "INFO: overriding instance-specified remote hostname with command-line-specified $options{\"remote-host\"}\n";
@@ -794,7 +797,7 @@ sub verify_remote_host_setting {
       $collector_config->{remote_host}, "\n";
     $remote_host = $collector_config->{remote_host};
   } else {
-    print STDERR "INFO: using default remote hostname $default_remote_host";
+    print STDERR "INFO: using default remote hostname $default_remote_host\n";
     $remote_host = $default_remote_host;
   }
   # Propagate back for consistency
@@ -805,7 +808,7 @@ sub verify_remote_host_setting {
 }
 
 sub maybe_print_config_info {
-  my ($instance_name, $collector_config) = @_;
+  my ($instance_name, $config_name, $collector_config) = @_;
   my $printed_info = 0;
   if ($options{"obtain-config-item"} and scalar @{$options{"obtain-config-item"}}) {
     foreach my $item (@{$options{"obtain-config-item"}}) {
