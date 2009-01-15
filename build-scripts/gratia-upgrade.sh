@@ -233,7 +233,7 @@ function choose_config_name {
 }
 #------------------------
 function validate_config_name {
-  [[ $config_name == "NONE" ]] && config_name=$tomcat
+  [[ $config_name == "NONE" ]] && config_name=$(echo $tomcat|cut -d'-' -f2-)
   if [ -z "$config_name" ]; then
     try_again "Null configuration name specified!"
   fi
