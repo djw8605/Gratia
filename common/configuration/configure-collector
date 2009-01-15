@@ -114,6 +114,7 @@ TOMCAT_HTTP_PORT=
 TOMCAT_PATH_STEM=
 TOMCAT_SSL_PORT=
 TOMCAT_USER=
+JSVC=
 ####################################
 export JAVA_HOME
 
@@ -125,24 +126,46 @@ TOMCAT_INSTANCE_NAME=`basename "$0" | sed -e 's/^.*\(tomcat-.*\)$/\1/'`
 ########################################################################
 # No User Servicable Parts
 CATALINA_HOME="${TOMCAT_PATH_STEM}/${TOMCAT_INSTANCE_NAME}"; export CATALINA_HOME
+CATALINA_PID=/var/run/catalina.pid
+CATALINA_TMPDIR=/tmp
 
 [[ -n "${KRB5CCNAME}" ]] && KRB5CCNAME=`echo "${KRB5CCNAME}" | sed -e 's/^FILE://'`
 
+. /etc/init.d/functions
+
 function start {
-  JAVA_OPTS="-server -Dsun.net.inetaddr.ttl=297 -Dcom.sun.management.jmxremote -Dssl.port=${TOMCAT_SSL_PORT} -Dcom.mchange.v2.c3p0.management.ManagementCoordinator=com.mchange.v2.c3p0.management.NullManagementCoordinator"; export JAVA_OPTS
-  if [[ -n "${TOMCAT_USER}" ]]; then
-    su -c "${CATALINA_HOME}/bin/catalina.sh start" ${TOMCAT_USER}
+  JAVA_OPTS="-server"; export JAVA_OPTS
+  CATALINA_OPTS="-Dsun.net.inetaddr.ttl=297 -Dcom.sun.management.jmxremote -Dssl.port=${TOMCAT_SSL_PORT} -Dcom.mchange.v2.c3p0.management.ManagementCoordinator=com.mchange.v2.c3p0.management.NullManagementCoordinator"; export CATALINA_OPTS
+  if [[ -n "$JSVC" ]] && [[ -x "$JSVC" ]] && [[ -n "$TOMCAT_USER" ]]; then
+    daemon --pidfile="$CATALINA_PID" "$JSVC" -user $TOMCAT_USER \
+      -cp "$CATALINA_HOME"/bin/bootstrap.jar \
+      -outfile "$CATALINA_HOME"/logs/catalina.out \
+      -errfile "$CATALINA_HOME"/logs/catalina.err \
+      -pidfile "$CATALINA_PID" \
+      ${CATALINA_OPTS} \
+      -Djava.endorsed.dirs="$CATALINA_HOME"/common/endorsed \
+      -Dcatalina.home="$CATALINA_HOME" \
+      -Djava.io.tmpdir="$CATALINA_TMPDIR" \
+      org.apache.catalina.startup.Bootstrap start
   else
-    $CATALINA_HOME/bin/catalina.sh start
+    if [[ -n "${TOMCAT_USER}" ]]; then
+      su -c "${CATALINA_HOME}/bin/catalina.sh start" ${TOMCAT_USER}
+    else
+      $CATALINA_HOME/bin/catalina.sh start
+    fi
   fi
 }
 
 function stop {
   # wget --no-check-certificate --certificate="^^^HOST_CERT^^^" --private-key="^^^HOST_KEY^^^" --dns-timeout=5 --connect-timeout=10 --read-timeout=20 -O - -q '^^^STOP_DB_UPDATE_URL^^^' >/dev/null 2>&1
-  if [[ -n "${TOMCAT_USER}" ]]; then
-    su -c "${CATALINA_HOME}/bin/shutdown.sh" ${TOMCAT_USER}
+  if [[ -n "$JSVC" ]] && [[ -x "$JSVC" ]] ; then
+    killproc -p "$CATALINA_PID" "$JSVC" -TERM
   else
-    ${CATALINA_HOME}/bin/shutdown.sh
+    if [[ -n "${TOMCAT_USER}" ]]; then
+      su -c "${CATALINA_HOME}/bin/shutdown.sh" ${TOMCAT_USER}
+    else
+      ${CATALINA_HOME}/bin/shutdown.sh
+    fi
   fi
 }
 
@@ -442,7 +465,7 @@ EOF
       s&(^.*?mysql.*?)CMD_SUFFIX(.*$)&$1$collector_config->{"PostInstallCmdSuffix"}$2&;
       s&(^.*?mysql.*?)ROOTPASS(.*$)&$1"$options{"db-root"}"$2&; # DB root password
       s&(^.*?mysql.*?)PORT(.*$)&$1$collector_config->{db_port}$2&; # DB port
-      s&(^.*?mysql.*?) gratia (.*$)&$1 $collector_config->{db_schema} $2&; # Schema
+      s&(^.*?mysql.*?--port=\d+\s+)\S+\s+(.*$)&$1 $collector_config->{db_schema} $2&; # Schema
       s&(^.*?)MAGIC_VDT_LOCATION/tomcat/v55/(.*$)&$1$options{prefix}/tomcat-${instance_name}/$2&; # Tomcat top dir
       # Extra commands to prefix mysql command (eg ssh, echo);
       s&^(.*?)CMD_PREFIX(.*$)&$1$collector_config->{"PostInstallCmdPrefix"}$2&;
@@ -471,6 +494,7 @@ sub configure_init_file {
   $init_script_txt =~ s&^(TOMCAT_HTTP_PORT=).*$&${1}$collector_config->{http_port}&m;
   $init_script_txt =~ s&^(TOMCAT_PATH_STEM=).*$&${1}"$options{prefix}"&m;
   $init_script_txt =~ s&^(TOMCAT_SSL_PORT=).*$&${1}$collector_config->{ssl_port}&m;
+  $init_script_txt =~ s&^(JSVC=).*$&${1}"$collector_config->{jsvc}"&m;
   $init_script_txt =~
     s&^(TOMCAT_USER=).*$&${1}$collector_config->{tomcat_user}&m
       if $collector_config->{tomcat_user};
@@ -645,7 +669,7 @@ sub configure_installation_owner {
         ": changing ownership of $options{prefix}/tomcat-${instance_name} ... ";
     my $group = ($collector_config->{"tomcat_group"})?sprintf(".%s", $collector_config->{"tomcat_group"}):"";
     my $status =
-      system("chown -R $collector_config->{\"tomcat_user\"}${group} \"$options{prefix}/tomcat-${instance_name}\"");
+      system("chown -R $collector_config->{\"tomcat_user\"}${group} \"$options{prefix}/tomcat-${instance_name}/\"");
     if ($status == 0) {
       print STDERR "OK\n";
       system("chmod g+s \"$options{prefix}/tomcat-${instance_name}\"") if ${group};
