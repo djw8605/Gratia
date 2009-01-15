@@ -478,8 +478,8 @@ else
   # Run configure script
   #-----------------------  
   [[ -n "$configure_script" ]] || configure_script="$configuration_dir/configure-collector"
-  echo "... running $configure_script"
-   "$configure_script" \
+  echo "... running $configure_script $use_ssl -p \"$tomcat_root\" -j \"$java_jre\" $dbp_arg ${collector_info} $config_name"
+  "$configure_script" \
 $use_ssl \
 -p "$tomcat_root" \
 -j "$java_jre" \
