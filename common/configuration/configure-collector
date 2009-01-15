@@ -200,8 +200,9 @@ GetOptions(\%options, "java-home|j=s",
            "prefix|p=s",
            "db-root|d=s",
            "collector-info|c=s@",
-           "obtain-config-item=s@",
-           "obtain-properties-item=s@",
+           "print-config",
+           "obtain-config-item|print-config-item=s@",
+           "obtain-properties-item|print-properties-item|print-property=s@",
            "help|h|\?") or pod2usage(-exitval => 2);
 
 pod2usage(-exitval => 1, -verbose => 3) if $options{help};
@@ -580,14 +581,14 @@ sub configure_collector_config {
 
 sub configure_keyfile_owners {
   my ($instance_name, $config_name, $collector_config) = @_;
-  configure_host_keyfile_owner($instance_name, $collector_config);
-  configure_http_keyfile_owner($instance_name, $collector_config);
+  configure_host_keyfile_owner($instance_name, $config_name, $collector_config);
+  configure_http_keyfile_owner($instance_name, $config_name, $collector_config);
 }
 
 sub configure_host_keyfile_owner {
   my ($instance_name, $config_name, $collector_config) = @_;
   return unless exists $collector_config->{"host_key"};
-  configure_keyfile_owner($instance_name, $collector_config,
+  configure_keyfile_owner($instance_name, $config_name, $collector_config,
                           "configuration attribute host_key",
                           \$collector_config->{"host_key"});
 }
@@ -595,13 +596,13 @@ sub configure_host_keyfile_owner {
 sub configure_http_keyfile_owner {
   my ($instance_name, $config_name, $collector_config) = @_;
   return unless exists $collector_config->{"properties.attributes"}->{"service.vdt.key.file"};
-  configure_keyfile_owner($instance_name, $collector_config,
+  configure_keyfile_owner($instance_name, $config_name, $collector_config,
                           "service-configuration.properties attribute service.vdt.key.file",
                           \$collector_config->{"properties.attributes"}->{"service.vdt.key.file"});
 }
 
 sub configure_keyfile_owner {
-  my ($instance_name, $collector_config, $key_message, $key_ref) = @_;
+  my ($instance_name, $config_name, $collector_config, $key_message, $key_ref) = @_;
   if (exists $collector_config->{"tomcat_user"}) {
     if ($$key_ref and -e $$key_ref) {
       print STDERR "TOMCAT_USER specified as ",
@@ -810,27 +811,47 @@ sub verify_remote_host_setting {
 sub maybe_print_config_info {
   my ($instance_name, $config_name, $collector_config) = @_;
   my $printed_info = 0;
-  if ($options{"obtain-config-item"} and scalar @{$options{"obtain-config-item"}}) {
-    foreach my $item (@{$options{"obtain-config-item"}}) {
-      if (exists ($collector_config->{$item})) {
-        ++$printed_info;
-        print "config: ",
-          $item,
-            " = ",
-              $collector_config->{$item},
-                "\n";
+  if ($options{"print-config"}) {
+    foreach my $item (sort keys %{$collector_config}) {
+      next if $item eq "properties.attributes";
+      ++$printed_info;
+      print "config: ",
+        $item,
+          " = ",
+            $collector_config->{$item},
+              "\n";
+    }
+    foreach my $item (sort keys %{$collector_config->{"properties.attributes"}}) {
+      ++$printed_info;
+      print "property: ",
+        $item,
+          " = ",
+            $collector_config->{"properties.attributes"}->{$item},
+              "\n";
+    }
+  } else {
+    if ($options{"obtain-config-item"} and scalar @{$options{"obtain-config-item"}}) {
+      foreach my $item (@{$options{"obtain-config-item"}}) {
+        if (exists ($collector_config->{$item})) {
+          ++$printed_info;
+          print "config: ",
+            $item,
+              " = ",
+                $collector_config->{$item},
+                  "\n";
+        }
       }
     }
-  }
-  if ($options{"obtain-properties-item"} and scalar @{$options{"obtain-properties-item"}}) {
-    foreach my $item (@{$options{"obtain-properties-item"}}) {
-      if (exists ($collector_config->{"properties.attributes"}->{$item})) {
-        ++$printed_info;
-        print "property: ",
-          $item,
-            " = ",
-              $collector_config->{"properties.attributes"}->{$item},
-                "\n";
+    if ($options{"obtain-properties-item"} and scalar @{$options{"obtain-properties-item"}}) {
+      foreach my $item (@{$options{"obtain-properties-item"}}) {
+        if (exists ($collector_config->{"properties.attributes"}->{$item})) {
+          ++$printed_info;
+          print "property: ",
+            $item,
+              " = ",
+                $collector_config->{"properties.attributes"}->{$item},
+                  "\n";
+        }
       }
     }
   }
@@ -889,12 +910,17 @@ configure-collector: Configure a Gratia / Tomcat instance.
 
 B<configure-collector> B<-h> | B<--help> | B<-?>
 
+B<configure-collector> B<--print-config> [--] I<instance>
+
+B<configure-collector> B<--obtain-config-item> I<item>+ |& B<--obtain-properties-item> I<item>+ [--] I<instance>
+
 B<configure-collector> [I<global-options>] [--] I<instance>+
 
 I<global-options>: B<-r> I<collector-host-name> | B<--remote-host> I<collector-host-name> |
                  B<-j> I<JRE-home-dir> | B<--java-home> I<JRE-home-dir> |
                  B<-p> I<install-path-prefix> | B<--prefix> I<install-path-prefix> |
-                 B<--db-root> |
+                 B<--db-root> I<db-root-pword> | B<-d> I<db-root-dir> |
+                 B<--collector-info> I<collector-dat-file> | B<-c> I<collector-dat-file> |
                  B<--use-ssl> | B<-s>
 
 Options marked with B<+> are repeatable and cumulative.
@@ -937,6 +963,8 @@ The directory above the tomcat instance (eg /scratch).
 
 =item B<--db-root> I<db-root-pword>
 
+=item B<-d> I<db-root-pword>
+
 
 The DB (not system) root password.
 
@@ -948,18 +976,33 @@ The DB (not system) root password.
 
 Configure tomcat to open the SSL port (default is yes).
 
-=item B<--obtain-config-item> I<config-item>
+
+=item B<--print-config>
 
 
-Print the specified configuration item to be used for the chosen
-instance. Does not continue with the install.
+Print the full configuration for the first chosen instance. Does not continue
+with the install. Other instances are ignored.
 
 
-=item B<--obtain-properties-item> I<properties-item>
+=item B<--obtain-config-item> I<item>
+
+=item B<--print-config-item> I<item>
+
+
+Print the specified configuration item to be used for the first chosen
+instance. Does not continue with the install. Other instances are ignored.
+
+
+=item B<--obtain-properties-item> I<item>
+
+=item B<--print-properties-item> I<item>
+
+=item B<--print-property> I<item>
 
 
 Print the specified service-configuration.properties item to be used for
-the chosen instance. Does not continue with the install.
+the first chosen instance. Does not continue with the install. Other
+instances are ignored.
 
 
 =head1 AUTHOR
