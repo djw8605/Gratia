@@ -7,8 +7,6 @@
    rmi_port => 17000,
    server_port => 8104,
    db_schema => "old_fermi_osg",
-   remote_host => "gratia-fermi.fnal.gov",
-   collector_host => "gratia-fermi.fnal.gov",
    max_perm_size => "256m",
    max_heap_size => "1024m",
    "properties.attributes" =>
@@ -33,8 +31,6 @@
    max_perm_size => "256m",
    max_heap_size => "1024m",
    db_schema => "old_fermi_itb",
-   remote_host => "gratia-fermi.fnal.gov",
-   collector_host => "gratia-fermi.fnal.gov",
    "properties.attributes" =>
    {
     "monitor.from.address" => 'gratia-operation@opensciencegrid.org',
@@ -55,8 +51,6 @@
    server_port => 8124,
    db_schema => "old_gratia_psacct",
    UserConfig => "UserConfig_pacct.xml",
-   remote_host => "gratia-fermi.fnal.gov",
-   collector_host => "gratia-fermi.fnal.gov",
    staticReports => 0,
    max_perm_size => "256m",
    max_heap_size => "1024m",
@@ -79,8 +73,6 @@
    rmi_port => 21000,
    server_port => 8144,
    db_schema => "old_gratia_qcd",
-   remote_host => "gratia-fermi.fnal.gov",
-   collector_host => "gratia-fermi.fnal.gov",
    max_perm_size => "256m",
    max_heap_size => "1024m",
    "properties.attributes" =>
@@ -101,8 +93,6 @@
    rmi_port => 22000,
    server_port => 8154,
    db_schema => "old_fermi_transfer",
-   remote_host => "gratia-fermi.fnal.gov",
-   collector_host => "gratia-fermi.fnal.gov",
    staticReports => 0,
    "properties.attributes" =>
    {
