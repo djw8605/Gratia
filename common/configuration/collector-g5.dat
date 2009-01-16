@@ -11,12 +11,13 @@
    max_perm_size => "256m",
    max_heap_size => "1024m",
    jsvc => "/data/jsvc/bin/jsvc",
+   collector_host => "gratia-fermi-osg.fnal.gov",
    "properties.attributes" =>
    {
     "monitor.from.address" => 'gratia-operation@opensciencegrid.org',
     "monitor.to.address.0" => 'gratia-root@fnal.gov',
     "maintain.history.log" => 75,
-    "monitor.listener.wait" => 1440,
+    "monitor.listener.wait" => 60,
     "service.admin.FQAN.0" => "/fermilab/Role=GratiaAdmin",
     "service.lifetime.JobUsageRecord" => "1 year", # Safety
     "service.lifetime.MetricRecord" => "1 month",
@@ -36,6 +37,7 @@
    max_perm_size => "256m",
    max_heap_size => "1024m",
    jsvc => "/data/jsvc/bin/jsvc",
+   collector_host => "gratia-fermi-psacct.fnal.gov",
    "properties.attributes" =>
    {
     "monitor.from.address" => 'gratia-operation@opensciencegrid.org',
@@ -58,6 +60,7 @@
    max_perm_size => "256m",
    max_heap_size => "1024m",
    jsvc => "/data/jsvc/bin/jsvc",
+   collector_host => "gratia-fermi-qcd.fnal.gov",
    "properties.attributes" =>
    {
     "monitor.from.address" => 'gratia-operation@opensciencegrid.org',
@@ -78,6 +81,7 @@
    db_schema => "fermi_transfer",
    staticReports => 0,
    jsvc => "/data/jsvc/bin/jsvc",
+   collector_host => "gratia-fermi-transfer.fnal.gov",
    "properties.attributes" =>
    {
     "monitor.from.address" => 'gratia-operation@opensciencegrid.org',
@@ -102,6 +106,7 @@
    max_perm_size => "256m",
    max_heap_size => "1024m",
    jsvc => "/data/jsvc/bin/jsvc",
+   collector_host => "gratia-fermi-itb.fnal.gov",
    "properties.attributes" =>
    {
     "monitor.from.address" => 'gratia-operation@opensciencegrid.org',
