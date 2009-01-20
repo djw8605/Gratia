@@ -1,10 +1,10 @@
 (
- "all-vos-test" => { mail => [ 'Chris Green <greenc@fnal.gov>' ] },
- ALL => { mail => [ 'Chris Green <greenc@fnal.gov>', 'Mine Altunay <maltunay@fnal.gov>', 'Abhishek Rana <rana@fnal.gov>' ] },
+ "all-vos-test" => { mail => [ 'Brian Bockelman <bbockelm@cse.unl.edu>' ] },
+ ALL => { mail => [ 'Chris Green <greenc@fnal.gov>', 'Mine Altunay <maltunay@fnal.gov>', 'Abhishek Rana <rana@fnal.gov>', 'Brian Bockelman <bbockelm@cse.unl.edu>' ] },
  CDF => { },
  CIGI => { },
  CMS => { "alt-vos" => [ 'uscms' ],
-          mail => [ 'Miron Livny <miron@cs.wisc.edu>', 'Burt Holzman <burt@fnal.gov>', 'Frank Wurthwein <fkw@ucsd.edu>' ] },
+          mail => [ 'Miron Livny <miron@cs.wisc.edu>', 'Burt Holzman <burt@fnal.gov>', 'Frank Wurthwein <fkw@ucsd.edu>', 'Ken Bloom <kenbloom@unl.edu>', 'Ruth Pordes <ruth@fnal.gov>' ] },
  CompBioGrid => { },
  DES => { mail => [ 'Nickolai Kuropatkin <kuropat@fnal.gov>' ] },
  DOSAR => { mail => [ 'Dick Greenwood <greenw@phys.latech.edu>', 'Horst Severini <hs@nhn.ou.edu>' ] },
