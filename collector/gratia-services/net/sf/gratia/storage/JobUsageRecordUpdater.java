@@ -84,10 +84,36 @@ public abstract class JobUsageRecordUpdater implements RecordUpdater
         }
     }
 
+    public static class CheckWallDuration extends JobUsageRecordUpdater
+    {
+        public void Update(JobUsageRecord current)
+        {
+            Logging.debug("CheckWallDuration: StartTime, EndTime, WallDuration = " +
+                          ((current.getStartTime() == null)?"NULL":current.getStartTime().toString()) + ", " +
+                          ((current.getEndTime() == null)?"NULL":current.getEndTime().toString()) + ", " +
+                          ((current.getWallDuration() == null)?"NULL":current.getWallDuration().getValue()));
+                           
+            if (current.getStartTime() != null &&
+                current.getWallDuration() == null &&
+                current.getEndTime() != null &&
+                (!current.getEndTime().getValue().before(current.getStartTime().getValue())))
+                {
+                    DurationElement wallDuration = new DurationElement();
+                    wallDuration.setValue((current.getEndTime().getValue().getTime() -
+                                           current.getStartTime().getValue().getTime()) / 1000.0);
+                    Logging.debug("CheckWallDuration: set WallDuration to " + wallDuration.getValue());
+                    wallDuration.setDescription("calculated");
+                    current.setWallDuration(wallDuration);                                  
+                }
+        }
+    }
+                
+
     public static class CheckEndTime extends JobUsageRecordUpdater
     {
         public void Update(JobUsageRecord current)
         {
+            
             if (current.getStartTime() != null &&
                 current.getWallDuration() != null &&
                 (current.getEndTime() == null ||
@@ -391,6 +417,7 @@ public abstract class JobUsageRecordUpdater implements RecordUpdater
         man.AddUpdater(vopatch);
         man.AddUpdater(new CheckStartTime());
         man.AddUpdater(new CheckEndTime());
+        man.AddUpdater(new CheckWallDuration());
         man.AddUpdater(new CheckCpuDuration());
         man.AddUpdater(new ExtractKeyInfoContent());
         man.AddUpdater(new CheckResourceType());
