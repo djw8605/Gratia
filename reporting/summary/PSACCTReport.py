@@ -5,7 +5,7 @@
 #
 # library to create simple report using the Gratia psacct database
 #
-#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.53 2009-01-23 13:38:43 pcanal Exp $
+#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.54 2009-01-23 13:43:07 pcanal Exp $
 
 import time
 import datetime
@@ -2517,6 +2517,7 @@ def RangeSummup(range_end = datetime.date.today(),
     emptyVO = [name for name in regVOs if name not in reportingVOs and name not in expectedNoActivity]
     nonregVO = [name for name in reportingVOs if name not in regVOs]
     print "\nThe registered VOs with no recent activity are:\n"+prettyList(emptyVO)
+    print "\nThe following VOs are expected to have no activity:\n"+prettyList([name for name in expectedNoActivity if name not in reportingVOs])
     print "\nThe non-registered VOs with recent activity are:\n"+prettyList(nonregVO)
     
     print "\n"
@@ -2596,6 +2597,7 @@ def NonReportingSites(
     emptyVO = [name for name in regVOs if name not in reportingVOs and name not in expectedNoActivity]
     nonregVO = [name for name in reportingVOs if name not in regVOs]
     print "\nThe registered VOs with no recent activity are:\n"+prettyList(emptyVO)
+    print "\nThe following VOs are expected to have no activity:\n"+prettyList([name for name in expectedNoActivity if name not in reportingVOs])
     print "\nThe non-registered VOs with recent activity are:\n"+prettyList(nonregVO)
 
     print "\nThe non reporting sites are: " # \n"+prettyList(missingSites)
