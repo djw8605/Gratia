@@ -5,7 +5,7 @@
 #
 # library to create simple report using the Gratia psacct database
 #
-#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.52 2009-01-05 17:49:59 pcanal Exp $
+#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.53 2009-01-23 13:38:43 pcanal Exp $
 
 import time
 import datetime
@@ -422,34 +422,26 @@ def GetListOfOSGSitesVisible():
         return allSites;
 
 def GetListOfRegisteredVO():
-        cmd = "wget -q -O - http://oim.grid.iu.edu/pub/vo/show.php?format=plain-text | cut -d, -f1  | grep -v '^#' "
+        cmd = "wget -q -O - http://oim.grid.iu.edu/pub/vo/show.php?format=plain-text | cut -d, -f1,2  | grep -v -e '^#' -e '^$'  "
         
         allVos = commands.getoutput(cmd).split("\n");
         # Run a second time to avoid wget bugs
         allVos = commands.getoutput(cmd).split("\n");
         ret = []
-        for v in allVos:
-           if (v != "ATLAS" and v!=""):
-              ret.append( v.lower() );
+        for pair in allVos:
+           (longname,description) = pair.split(",");
+           if ("/" in description):
+               (voname,subname) = description.split("/");
+               if (subname.lower() not in ret):
+                  ret.append(subname.lower())
+               else:
+                  ret.append(description.lower())
+           else:
+               if (longname != "ATLAS" and longname!=""):
+                  ret.append( longname.lower() );
         # And hand add a few 'exceptions!"
         ret.append("usatlas")
         ret.append("other")
-        # Fermilab sub-group
-        ret.append("accelerator")
-        ret.append("astro")
-        ret.append("cdms")
-        ret.append("hypercp")
-        ret.append("ktev")
-        ret.append("miniboone")
-        ret.append("minos")
-        ret.append("mipp")
-        ret.append("numi")
-        ret.append("patriot")
-        ret.append("test")
-        ret.append("theory")
-        ret.append("nova")
-        ret.append("grid")
-        ret.append("minerva")
         return ret
 
 def UpdateVOName(list, index):
