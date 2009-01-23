@@ -1,0 +1,262 @@
+eval '(exit $?0)' && eval 'exec perl -w -S $0 ${1+"$@"}'
+                  && eval 'exec perl -w -S $0 $argv:q'
+                  if 0;
+
+use strict;
+
+use Getopt::Long;
+use File::Basename;
+
+Getopt::Long::Configure(qw(no_ignore_case bundling require_order));
+
+use vars qw($script_top_dir);
+BEGIN {
+  # Make a spirited attempt to find where our libraries, etc are.
+  if (-l $0) {
+    $script_top_dir = dirname(readlink($0));
+  } else {
+    $script_top_dir = dirname $0;
+  }
+}
+
+use lib "$script_top_dir/lib";
+
+use XML::LibXML; # Parse XML file
+
+use FileHandle;
+
+sub expandSites(\@);
+
+my $options = {};
+my $osg_users_script = "$script_top_dir/osg-users";
+my @test_addresses = ( 'Chris Green <chris.h.green@gmail.com>' );
+
+GetOptions($options,
+           "debug|d",
+           "monthly|M",
+           "weekly|W",
+           "yearly|Y",
+           "test|t",
+           "data-source|D=s@",
+           "site-name|s=s@",
+           "extra-mail|e=s@",
+           "exclusive-mail|m=s@",
+           "for-user|u=s@") or die $@;
+
+my $parser = XML::LibXML->new();
+
+my $wanted_sites = {};
+foreach my $site (@{$options->{"site-name"}}) {
+  $wanted_sites->{$site} = 1;
+}
+my $all_sites = not scalar keys %{$wanted_sites};
+
+my $vos  = {};
+my $sites = {};
+my $people = {};
+
+# Interrogate the data sources to build our list of interested parties.
+foreach my $data_source (@{$options->{"data-source"}}) {
+  my $data_content;
+  print STDERR "Reading from $data_source\n";
+  my $fh;
+  if ($data_source =~ m&^(\w+)://&) { # Use wget to obtain XML.
+    $fh = FileHandle->new("wget -q -O - \"$data_source\" 2>/dev/null|") or die "Unable to open wget pipe for $data_source";
+  } else {
+    $fh = FileHandle->new("$data_source");
+  }
+  $data_content = join("", <$fh>);
+  if ($data_content =~ m&^\s*<&s) { # XML
+    processXmlData($data_source, $data_content);
+  } else { # Assume Perl data file.
+    processPerlData($data_source, $data_content);
+  }
+}
+
+# Construct the command line(s) and invoke.
+my @base_command = ("$osg_users_script", "-S", "--aux-db-type=none");
+if ($options->{"exclusive-mail"}) { # Short-circuit people list.
+  my @command = @base_command;
+  if ($options->{monthly}) {
+    push @command, "-t", "month";
+  } elsif ($options->{yearly}) {
+    push @command, "-t", "year";
+  }
+  push @command, map { ("--site", $_) } expandSites(@{$options->{"site-name"}})
+    if $options->{"site-name"};
+  push @command, map { ("-m", $_) } @{$options->{"exclusive-mail"}};
+  invoke(@command);
+} else { # Standard -- take main lead from .dat files and OIM.
+  if ($options->{monthly}) {
+    push @base_command, "-t", "month";
+  } elsif ($options->{yearly}) {
+    push @base_command, "-t", "year";
+  }
+  push @base_command, map { ("-m", $_) } @{$options->{"extra-mail"}} if $options->{"extra-mail"};
+  my @user_list;
+  if ($options->{"for-user"}) { # mini-short-circuit
+    @user_list = map {
+      if (exists $people->{$_}) {
+        ($_)
+      } else {
+        print STDERR "WARNING: specified user $_ not known -- ignoring.\n";
+        ()
+      }
+    } @{$options->{"for-user"}};
+  } else {
+    @user_list = keys %$people;
+  }
+  foreach my $primary_email (sort @user_list) {
+    my @command = @base_command;
+    my $person = $people->{$primary_email};
+    if ($options->{test}) {
+      push @command, map { ("-m", $_) } @test_addresses
+        if scalar @test_addresses;
+    } else {
+      push @command, "-m", "$person->{contact_string}";
+    }
+    push @command, map { ("--site-name", $_) } expandSites(@{$person->{sites}});
+    if ($person->{site_vos}) {
+      foreach my $vo (sort map { lc $_ } @{$person->{site_vos}}) {
+        my @looped_cmd = @command;
+        push @looped_cmd, "-v", $vo;
+        push @looped_cmd, map { ("--alt-vo", lc $_) } @{$vos->{$vo}->{alt_vos}} if
+          (exists $vos->{$vo} and exists $vos->{$vo}->{alt_vos});
+        invoke(@looped_cmd);
+      }
+    } else {
+      invoke(@command);
+    }
+  }
+}
+
+1;
+
+sub invoke {
+  my @escaped_command = map { my $cmd = $_; $cmd =~ s&"&\\"&g; sprintf('"%s"', $cmd) } @_;
+  if ($options->{debug}) {
+    print "Would execute ",
+      join(" ", @escaped_command), "\n";
+  } else {                      # For real
+    if ($options->{test}) {
+      unshift @escaped_command, "set -x;";
+    } else {
+      push @escaped_command, ">/dev/null 2>&1";
+    }
+    system(join(" ", @escaped_command));
+  }
+}
+
+sub expandSites(\@) {
+  my $siteList = shift;
+  my %u_sites = ();
+  foreach my $site (@$siteList) {
+    if ($site =~ m&^all$&i) {
+      map { $u_sites{$_} = 1 } keys %$sites;
+    } else {
+      $u_sites{$site} = 1;
+    }
+  }
+  return sort keys %u_sites;
+}
+
+sub processXmlData {
+  my ($data_source, $data_content) = @_;
+  my $tree;
+  eval { $tree = $parser->parse_string($data_content) };
+  if ($@) {
+    print STDERR "ERROR: Problem reading $data_source:\n$@";
+    next;
+  }
+  unless ($tree) {
+    die "Unable to parse a tree from XML source";
+  }
+  my $root = $tree->getDocumentElement;
+  foreach my $resource ($root->findnodes('resource')) { # Each resource
+    my $site_name = $resource->findvalue('resource_name'); # Resource's name
+    next unless ($site_name and ($all_sites or $wanted_sites->{$site_name}));
+    $sites->{$site_name} = 1 unless $site_name =~ m&^all$&i;
+    foreach my $reporting_contact ($resource->findnodes('reporting_contact')) { # Each contact
+      my $primary_email = $reporting_contact->findvalue('primary_email'); # Contact's email
+      next unless $primary_email;
+      my $person = {};
+      $person->{sites} = [ $site_name ];
+      foreach my $attribute qw(first_name middle_name last_name) { # Name info
+        $person->{$attribute} =
+          $reporting_contact->findvalue($attribute);
+      }
+      mergePersonData($primary_email, $person);
+    }
+  }
+}
+
+sub processPerlData {
+  my ($data_source, $data_content) = @_;
+  my %tmp_hash = eval $data_content;
+  if ($@) {
+    print STDERR "ERROR: Problem reading $data_source:\n$@";
+    next;
+  }
+  @test_addresses = @{$tmp_hash{test}} if exists $tmp_hash{test};
+  ImportVOData($tmp_hash{vos}) if exists $tmp_hash{vos};
+  ImportPeopleData($tmp_hash{people}) if exists $tmp_hash{people};
+}
+
+sub ImportVOData {
+  my $vo_data = shift;
+  foreach my $vo_name ( sort keys %$vo_data ) {
+    my $vo = $vo_data->{$vo_name};
+    $vos->{lc $vo_name} = {} unless exists $vos->{lc $vo_name};
+    if (exists $vos->{lc $vo_name}->{alt_vos} and exists $vo->{alt_vos}) {
+      push @{$vos->{lc $vo_name}->{alt_vos}}, @{$vo->{alt_vos}};
+    } else {
+      $vos->{lc $vo_name}->{alt_vos} = $vo->{alt_vos};
+    }
+  }
+}
+
+sub ImportPeopleData {
+  my $people_data = shift;
+  foreach my $person_email (sort keys %$people_data) {
+    mergePersonData($person_email, $people_data->{$person_email});
+  }
+}
+
+sub mergePersonData {
+  my ($primary_email, $person) = @_;
+  if (exists $people->{$primary_email}) {
+    # Merge
+    foreach my $key (sort keys %$person) {
+      if ($people->{$primary_email}->{$key}) {
+        if (ref $people->{$primary_email}->{$key} eq 'ARRAY') {
+          push @{$people->{$primary_email}->{$key}}, @{$person->{$key}};
+        }
+      } else {
+        $people->{$primary_email}->{$key} = $person->{$key};
+      }
+    }
+  } else {
+    $people->{$primary_email} = $person;
+  }
+  # Update person's real name.
+  my $contact_string = sprintf("%s %s %s <%s>",
+                               $people->{$primary_email}->{first_name} || "",
+                               $people->{$primary_email}->{middle_name} || "",
+                               $people->{$primary_email}->{last_name} || "",
+                               $primary_email);
+  $contact_string =~ s&^\s*&&;
+  $contact_string =~ s&\s+& &g;
+  $people->{$primary_email}->{contact_string} = $contact_string;
+}
+
+sub by_lastname {
+  return $people->{$a}->{last_name} cmp $people->{$b}->{last_name} or
+    "$people->{$a}->{first_name} $people->{$a}->{middle_name}" cmp
+      "$people->{$b}->{first_name} $people->{$b}->{middle_name}";
+}
+
+__END__
+
+### Local Variables:
+### mode: cperl
+### End:

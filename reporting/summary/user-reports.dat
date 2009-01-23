@@ -1,0 +1,57 @@
+(
+ test =>
+ [
+  'greenc@fnal.gov'
+ ],
+ vos =>
+ {
+  CMS => { alt_vos => [ 'uscms' ] },
+  Engage => { alt_vos => [ 'Engagement' ] },
+  atlas => { alt_vos => [ 'usatlas' ] }
+ },
+ people =>
+ {
+  'greenc@fnal.gov' =>
+  {
+   first_name => 'Chris',
+   last_name => 'Green',
+   sites => [ 'ALL' ],
+   users => [ 'ALL' ],
+   vos => [ 'ALL' ]
+  },
+  'maltunay@fnal.gov' =>
+  {
+   first_name => 'Mine',
+   last_name => 'Altunay',
+   users => [ 'ALL' ],
+   vos => [ 'ALL' ]
+  },
+  'rana@fnal.gov' =>
+  {
+   first_name => 'Abhishek',
+   middle_name => 'Singh',
+   last_name => 'Rana',
+   users => [ 'ALL' ],
+   vos => [ 'ALL' ]
+  },
+  'kenbloom@unl.edu' =>
+  {
+   first_name => 'Ken',
+   last_name => 'Bloom',
+   users => [ 'ALL' ],
+   vos => [ 'CMS' ],
+   site_vos => [ 'CMS' ],
+   sites =>
+   [
+    'USCMS-FNAL-WC1-CE',
+    'USCMS-FNAL-WC1-CE2',
+    'USCMS-FNAL-WC1-CE3',
+    'USCMS-FNAL-WC1-CE4'
+   ]
+  }
+ }
+)
+
+### Local Variables:
+### mode: cperl
+### End:
