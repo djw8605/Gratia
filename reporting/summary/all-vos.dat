@@ -1,6 +1,6 @@
 (
- "all-vos-test" => { mail => [ 'Brian Bockelman <bbockelm@cse.unl.edu>' ] },
- ALL => { mail => [ 'Chris Green <greenc@fnal.gov>', 'Mine Altunay <maltunay@fnal.gov>', 'Abhishek Rana <rana@fnal.gov>', 'Brian Bockelman <bbockelm@cse.unl.edu>' ] },
+ "all-vos-test" => { mail => [ 'Chris Green <greenc@fnal.gov>' ] },
+ ALL => { mail => [ 'Chris Green <greenc@fnal.gov>', 'Mine Altunay <maltunay@fnal.gov>', 'Abhishek Rana <rana@fnal.gov>' ] },
  CDF => { },
  CIGI => { },
  CMS => { "alt-vos" => [ 'uscms' ],
@@ -17,7 +17,7 @@
  GRASE => { },
  GUGrid => { },
  GridEx => { },
- ILC => { mail => [ 'Lynn Garren <garren@fnal.gov>' ] },
+ ILC => { mail => [ 'Lynn Garren <garren@fnal.gov>', 'G. P. Yeh <gpyeh@fnal.gov>' ] },
  LIGO => { mail => [ 'Kent Blackburn <kent@ligo.caltech.edu>', 'Britta Daudert <bdaudert@ligo.caltech.edu>', 'Chander Sehgal <cssehgal@fnal.gov>'  ] },
  MIS => { },
  NWICG => { },
