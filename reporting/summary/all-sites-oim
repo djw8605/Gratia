@@ -41,6 +41,8 @@ GetOptions($options,
            "site-name|s=s@",
            "extra-mail|e=s@",
            "exclusive-mail|m=s@",
+           "grid-type|g=s@",
+           "service=s@",
            "for-user|u=s@") or die $@;
 
 my $parser = XML::LibXML->new();
@@ -49,6 +51,25 @@ my $wanted_sites = {};
 foreach my $site (@{$options->{"site-name"}}) {
   $wanted_sites->{$site} = 1;
 }
+
+my $wanted_grid_types = {};
+foreach my $grid_type (@{$options->{"grid-type"}}) {
+  $wanted_grid_types = 1;
+}
+unless (scalar keys %$wanted_grid_types) { # Default
+  $wanted_grid_types->{OSG} = 1;
+}
+
+my $wanted_services = {};
+foreach my $service (@{$options->{service}}) {
+  $wanted_services->{$service} = 1;
+}
+unless (scalar keys %$wanted_services) { # Defaults
+  $wanted_services->{CE} = 1;
+  $wanted_services->{"Hidden CE"} = 1;
+  $wanted_services->{"Hidden CE/SE"} = 1;
+}
+
 my $all_sites = not scalar keys %{$wanted_sites};
 
 my $vos  = {};
@@ -74,7 +95,7 @@ foreach my $data_source (@{$options->{"data-source"}}) {
 }
 
 # Construct the command line(s) and invoke.
-my @base_command = ("$osg_users_script", "-S", "--aux-db-type=none");
+my @base_command = ("$osg_users_script", "-s", "-S", "--aux-db-type=none");
 if ($options->{"exclusive-mail"}) { # Short-circuit people list.
   my @command = @base_command;
   if ($options->{monthly}) {
@@ -115,7 +136,9 @@ if ($options->{"exclusive-mail"}) { # Short-circuit people list.
     } else {
       push @command, "-m", "$person->{contact_string}";
     }
-    push @command, map { ("--site-name", $_) } expandSites(@{$person->{sites}});
+    my @wanted_sites = map { ("--site-name", $_) } expandSites(@{$person->{sites}});
+    next unless scalar @wanted_sites;
+    push @command, @wanted_sites;
     if ($person->{site_vos}) {
       foreach my $vo (sort map { lc $_ } @{$person->{site_vos}}) {
         my @looped_cmd = @command;
@@ -135,7 +158,7 @@ if ($options->{"exclusive-mail"}) { # Short-circuit people list.
 sub invoke {
   my @escaped_command = map { my $cmd = $_; $cmd =~ s&"&\\"&g; sprintf('"%s"', $cmd) } @_;
   if ($options->{debug}) {
-    print "Would execute ",
+    print "***> Would execute ",
       join(" ", @escaped_command), "\n";
   } else {                      # For real
     if ($options->{test}) {
@@ -174,10 +197,19 @@ sub processXmlData {
   my $root = $tree->getDocumentElement;
   foreach my $resource ($root->findnodes('resource')) { # Each resource
     my $site_name = $resource->findvalue('resource_name'); # Resource's name
-    next unless ($site_name and ($all_sites or $wanted_sites->{$site_name}));
+    my $grid_type = $resource->findvalue('grid_type'); # Grid type for resource
+    my $service_nodes = $resource->findnodes('service_list/service'); # Services
+    my @services = ();
+    foreach my $service_node ($service_nodes->get_nodelist()) {
+      push @services, $service_node->string_value();
+    }
+    next unless ($site_name and ($all_sites or $wanted_sites->{$site_name})); # Want this site?
+    next if ($grid_type and not $wanted_grid_types->{$grid_type}); # Want this grid type?
+    next if (scalar @services and not grep { $wanted_services->{$_} } @services); # Want these services?
     $sites->{$site_name} = 1 unless $site_name =~ m&^all$&i;
     foreach my $reporting_contact ($resource->findnodes('reporting_contact')) { # Each contact
-      my $primary_email = $reporting_contact->findvalue('primary_email'); # Contact's email
+      my $primary_email = $reporting_contact->findvalue('primary_email')
+        || $reporting_contact->findvalue('alt_email'); # Contact's email
       next unless $primary_email;
       my $person = {};
       $person->{sites} = [ $site_name ];
