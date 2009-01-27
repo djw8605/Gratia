@@ -73,7 +73,13 @@ function clearParamFrame() {
 			{
 				targetFrame = "_blank";
 				styleClass = "contact";
-			}
+			} else if ( menuItem.requestReportFrame() ) 
+                        {
+				targetFrame = "reportFrame";
+				clearFrame = "clearParamFrame(); clearReportFrame();";
+                        } else {
+				targetFrame = "paramFrame";
+                        } 
 
 			if (menuItem.getLink().indexOf("?") > -1) 
 			{

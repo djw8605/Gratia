@@ -85,13 +85,19 @@ public class UserConfiguration
                            String name = getAttributeValue(ndeMenuItem, "name");
                            String display = getAttributeValue(ndeMenuItem, "display");
                            String link = "false";
+                           String requestReportFrameString = getAttributeValue(ndeMenuItem, "reportFrame");
+                           boolean requestReportFrame = false;
+                           if (requestReportFrameString.equals("yes") || requestReportFrameString.equals("true")) {
+                              requestReportFrame = true;
+                           }
+                           
                            String linkProperty = getAttributeValue(ndeMenuItem, "linkProperty");
                            if ( linkProperty.equals("false") ) {
                               link = getAttributeValue(ndeMenuItem, "link").replace("[ReportsFolder]", reportsFolder);
                            } else {
                               link = reportingConfiguration.getPropertyValue("service.open.connection") + "/" + reportingConfiguration.getPropertyValue(linkProperty) + "/index.html";
                            }
-                           newMenuGroup.getMenuItems().add(new MenuItem(name, link, display));
+                           newMenuGroup.getMenuItems().add(new MenuItem(name, link, display, requestReportFrame));
                         }
                         
                         _menuGroups.add(newMenuGroup);
