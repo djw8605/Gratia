@@ -43,10 +43,13 @@
    site_vos => [ 'CMS' ],
    sites =>
    [
-    'USCMS-FNAL-WC1-CE',
-    'USCMS-FNAL-WC1-CE2',
-    'USCMS-FNAL-WC1-CE3',
-    'USCMS-FNAL-WC1-CE4'
+    'Purdue-RCAC',
+    'Nebraska',
+    'CIT_CMS_T2',
+    'UCSDT2',
+    'MIT',
+    'UFlorida-PG',
+    'GLOW'
    ]
   }
  }
