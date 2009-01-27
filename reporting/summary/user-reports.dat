@@ -15,9 +15,10 @@
   {
    first_name => 'Chris',
    last_name => 'Green',
-   sites => [ 'ALL' ],
    users => [ 'ALL' ],
-   vos => [ 'ALL' ]
+   vos => [ 'ALL' ],
+   all_reports => { site => 1,
+                    vo => 1 }
   },
   'maltunay@fnal.gov' =>
   {
