@@ -13,6 +13,8 @@ use Text::Table; # Available from CPAN / DAG repo.
 
 use Date::Calc ':all'; # Available from CPAN / DAG repo.
 
+use ReportingData;
+
 use vars qw($script_top_dir);
 
 BEGIN {
@@ -37,7 +39,7 @@ sub vo_report(\@$$);
 sub old_report(\@$$);
 sub site_report(\@$$);
 sub single_user_report (\@$$$$$$);
-
+sub reporting_name_report ($);
 my $seen_people = {};
 my $userid = 0;
 my $column_separator = { title => ' | ', is_sep => '1' };
@@ -116,6 +118,7 @@ GetOptions(\%options,
            "vo|v=s",
            "alt-vo-name|alt-vo=s@",
            "vo-report|V",
+           "data-source|D=s@",
            "metric-key|k=s@",
            "no-totals",
            "mail-admins|M",
@@ -139,6 +142,14 @@ pod2usage(-verbose => 1) if exists $options{help};
 
 # Full man page (requires working pod2man)
 pod2usage(-verbose => 2) if exists $options{man};
+
+$options{"data-source"} = ["$script_top_dir/user-reports.dat"]
+  unless $options{"data-source"};
+
+my $reporting_data =
+  new ReportingData( verbose => 1,
+                     data_source => $options{"data-source"}
+                   );
 
 my $history = $options{history} || 6;
 
@@ -443,6 +454,8 @@ while (my $row = $sth->fetchrow_hashref()) {
   my $flat_cn_list = join(", ", map {s&\'&\'\'&g; "'$_'"} @cn_list);
   $sites->{$row->{SiteName}} = 1;
   $dates{$row->{TimePeriod}} = $row->{SortTimePeriod};
+  my $real_vo_name = actual_vo_name($row->{RealVOName});
+  my $reporting_name = "$real_vo_name/$row->{ReportingVOName}";
   foreach my $key (@keys) {
     # Totals
     $user_info->{"totals"}->{$key} += $row->{$key};
@@ -459,7 +472,7 @@ while (my $row = $sth->fetchrow_hashref()) {
     # Per user
     $user_info->{"totals"}->{CN}->{$row->{CommonName}}->{$timeperiod}->{$row->{TimePeriod}}->{$key} += $row->{$key};
     # Per reporting name
-    $vomrs_user_info->{"totals"}->{"Reporting Name"}->{"$row->{RealVOName}/$row->{ReportingVOName}"}->{$timeperiod}->{$row->{TimePeriod}}->{$key} += $row->{$key};
+    $vomrs_user_info->{"totals"}->{"Reporting Name"}->{"$reporting_name"}->{$timeperiod}->{$row->{TimePeriod}}->{$key} += $row->{$key};
     # Totals ->{$success}
     my $success = $row->{Success};
     $user_info->{"totals"}->{$success}->{$key} += $row->{$key};
@@ -476,14 +489,14 @@ while (my $row = $sth->fetchrow_hashref()) {
     # Per time period per site per user
     $vomrs_user_info->{"totals"}->{$timeperiod}->{$row->{TimePeriod}}->{Site}->{$row->{SiteName}}->{USER}->{$id}->{$success}->{$key} += $row->{$key};
     # Per reporting name
-    $vomrs_user_info->{"totals"}->{"Reporting Name"}->{"$row->{RealVOName}/$row->{ReportingVOName}"}->{$timeperiod}->{$row->{TimePeriod}}->{$success}->{$key} += $row->{$key};
+    $vomrs_user_info->{"totals"}->{"Reporting Name"}->{"$reporting_name"}->{$timeperiod}->{$row->{TimePeriod}}->{$success}->{$key} += $row->{$key};
     # Per reporting name per site
-    $vomrs_user_info->{"totals"}->{"Reporting Name"}->{"$row->{RealVOName}/$row->{ReportingVOName}"}->{Site}->{$row->{SiteName}}->{$timeperiod}->{$row->{TimePeriod}}->{$key} += $row->{$key};
-    $vomrs_user_info->{"totals"}->{"Reporting Name"}->{"$row->{RealVOName}/$row->{ReportingVOName}"}->{Site}->{$row->{SiteName}}->{$timeperiod}->{$row->{TimePeriod}}->{$success}->{$key} += $row->{$key};
+    $vomrs_user_info->{"totals"}->{"Reporting Name"}->{"$reporting_name"}->{Site}->{$row->{SiteName}}->{$timeperiod}->{$row->{TimePeriod}}->{$key} += $row->{$key};
+    $vomrs_user_info->{"totals"}->{"Reporting Name"}->{"$reporting_name"}->{Site}->{$row->{SiteName}}->{$timeperiod}->{$row->{TimePeriod}}->{$success}->{$key} += $row->{$key};
     # Per user per time period per site
     $user_info->{CN}->{$row->{CommonName}}->{$timeperiod}->{$row->{TimePeriod}}->{Site}->{$row->{SiteName}}->{$success}->{$key} += $row->{$key};
     # Per user per time period per site per reporting name
-    $user_info->{CN}->{$row->{CommonName}}->{$timeperiod}->{$row->{TimePeriod}}->{Site}->{$row->{SiteName}}->{VO}->{"$row->{RealVOName}/$row->{ReportingVOName}"}->{$success}->{$key} += $row->{$key};
+    $user_info->{CN}->{$row->{CommonName}}->{$timeperiod}->{$row->{TimePeriod}}->{Site}->{$row->{SiteName}}->{VO}->{"$reporting_name"}->{$success}->{$key} += $row->{$key};
     #      print STDERR
     #        "\$user_info->{CN}->{$row->{CommonName}}->{$timeperiod}->{$row->{TimePeriod}}->{Site}->{$row->{SiteName}}->{$success}->{$key} += $row->{$key}\n";
   }
@@ -790,57 +803,7 @@ EOF
       print $output_filehandle "Active reporting name: ",
         $reporting_names[0], "\n";
     } else {
-      print $output_filehandle "Active reporting name summary: \n";
-      my $reporting_name_table = Text::Table->new
-        (
-         { title => '| ', is_sep => '1' },
-         { title => 'Reporting Name', align_title => 'center' },
-         $column_separator,
-         { title => "Job\nSuccess?", align_title => 'center' },
-         $column_separator,
-         { title => '# Sites', align_title => 'center', align => 'num' },
-         $column_separator,
-         { title => "# Jobs", align_title => "center", align => 'num' },
-         $column_separator,
-         { title => "Wall\nTime (h)", align_title => "center", align => 'num' },
-         $column_separator,
-         { title => "Delta\nSites", align => "right", align_title => "center", align => 'num' },
-         $column_separator,
-         { title => "Delta\nJobs", align => "right", align_title => "center", align => 'num' },
-         $column_separator,
-         { title => "Delta Wall\nTime (h)", align_title => "center", align => 'num' },
-         { title => ' |', is_sep => '1' }
-        );
-      for my $rep_name (keys %{$vomrs_user_info->{"totals"}->{"Reporting Name"}}) {
-        foreach my $success (1, 0) {
-          my @row =
-            (
-             $rep_name,
-             $success?"Yes":"No",
-             num_sites($current_date, $rep_name, $success),
-             $vomrs_user_info->{"totals"}->{"Reporting Name"}->{$rep_name}->{$timeperiod}->{$current_date}->{$success}->{"Njobs"} || 0,
-             convert_num($vomrs_user_info->{"totals"}->{"Reporting Name"}->{$rep_name}->{$timeperiod}->{$current_date}->{$success}->{"WallDuration"} || 0,
-                         "WallDuration"),
-             convert_num(num_sites($current_date, $rep_name, $success) - num_sites($previous_date, $rep_name, $success), "Sites", 1),
-             convert_num(($vomrs_user_info->{"totals"}->{"Reporting Name"}->{$rep_name}->{$timeperiod}->{$current_date}->{$success}->{"Njobs"} || 0) -
-                         ($vomrs_user_info->{"totals"}->{"Reporting Name"}->{$rep_name}->{$timeperiod}->{$previous_date}->{$success}->{"Njobs"} || 0),
-                         "Njobs", 1),
-             convert_num(($vomrs_user_info->{"totals"}->{"Reporting Name"}->{$rep_name}->{$timeperiod}->{$current_date}->{$success}->{"WallDuration"} || 0) -
-                         ($vomrs_user_info->{"totals"}->{"Reporting Name"}->{$rep_name}->{$timeperiod}->{$previous_date}->{$success}->{"WallDuration"} || 0),
-                         "WallDuration", 1)
-            );
-          if ($row[3] || $row[6]) {
-            $reporting_name_table->add(@row);
-          }
-        }
-      }
-      print $output_filehandle
-        $reporting_name_table->rule('_', '_'),
-          $reporting_name_table->title(),
-            $reporting_name_table->rule('_', '|'),
-              $reporting_name_table->body(),
-                $reporting_name_table->rule('=', '='),
-                  "\n";
+      reporting_name_report($output_filehandle);
     }
   }
 
@@ -1222,6 +1185,8 @@ EOF
   }
   print $output_filehandle "\n" if ($#label < 1);
 
+  reporting_name_report($output_filehandle);
+
   # Main report
   if (num_sites($current_date) > 1) { # Per-site summary.
     print $output_filehandle "Site summary: \n";
@@ -1352,7 +1317,8 @@ $text
 <html>
 EOF
     close(OUT);
-    my $cmd = sprintf(qq&mutt -F "$script_top_dir/muttrc" -a "$html_filename" -s "OSG metrics for VO $vo for $timeperiod $current_date to $current_date_end" %s&,
+    my $cmd = sprintf(qq&mutt -F "$script_top_dir/muttrc" -a "$html_filename" -s "OSG site metrics report for %s for $timeperiod $current_date to $current_date_end" %s&,
+                      $people_data->{$email_addresses->[-1]}->{full_name},
                       join(" ", map { qq/"$_"/ } @$email_addresses));
 
     open(MUTT, "|$cmd") or die "Unable to open mail command for input";
@@ -1522,7 +1488,97 @@ sub single_user_report(\@$$$$$$) {
         "\n";
 }
 
+sub reporting_name_report($) {
+  my $output_filehandle = shift;
+  print $output_filehandle "Active reporting name summary: \n";
+  my %used_real_vos = map { s&/.*$&&; $_ => 1 } keys %{$vomrs_user_info->{"totals"}->{"Reporting Name"}};
+  my $want_vo_column = (scalar keys %used_real_vos) > 1;
+  my $reporting_name_table = Text::Table->new
+    (
+     {
+      title => '| ', is_sep => '1' },
+     $want_vo_column?({ title => 'VO', align_title => 'center' }, $column_separator):(),
+     {
+      title => 'Reporting Name', align_title => 'center' },
+     $column_separator,
+     {
+      title => "Job\nSuccess?", align_title => 'center' },
+     $column_separator,
+     {
+      title => '# Sites', align_title => 'center', align => 'num' },
+     $column_separator,
+     {
+      title => "# Jobs", align_title => "center", align => 'num' },
+     $column_separator,
+     {
+      title => "Wall\nTime (h)", align_title => "center", align => 'num' },
+     $column_separator,
+     {
+      title => "Delta\nSites", align => "right", align_title => "center", align => 'num' },
+     $column_separator,
+     {
+      title => "Delta\nJobs", align => "right", align_title => "center", align => 'num' },
+     $column_separator,
+     {
+      title => "Delta Wall\nTime (h)", align_title => "center", align => 'num' },
+     {
+      title => ' |', is_sep => '1' }
+    );
+  for my $rep_name (keys %{$vomrs_user_info->{"totals"}->{"Reporting Name"}}) {
+    my ($vo_name) = ($rep_name =~ m&^([^/]*)&);
+    foreach my $success (1, 0) {
+      my $njobs = $vomrs_user_info->{"totals"}->{"Reporting Name"}->{$rep_name}->{$timeperiod}->{$current_date}->{$success}->{"Njobs"} || 0;
+      my $delta_njobs = convert_num($njobs -
+                     ($vomrs_user_info->{"totals"}->{"Reporting Name"}->{$rep_name}->{$timeperiod}->{$previous_date}->{$success}->{"Njobs"} || 0),
+                     "Njobs", 1);
+      my @row =
+        (
+         $want_vo_column?($vo_name):(),
+         $rep_name,
+         $success?"Yes":"No",
+         num_sites($current_date, $rep_name, $success),
+         $njobs,
+         convert_num($vomrs_user_info->{"totals"}->{"Reporting Name"}->{$rep_name}->{$timeperiod}->{$current_date}->{$success}->{"WallDuration"} || 0,
+                     "WallDuration"),
+         convert_num(num_sites($current_date, $rep_name, $success) - num_sites($previous_date, $rep_name, $success), "Sites", 1),
+         $delta_njobs,
+         convert_num(($vomrs_user_info->{"totals"}->{"Reporting Name"}->{$rep_name}->{$timeperiod}->{$current_date}->{$success}->{"WallDuration"} || 0) -
+                     ($vomrs_user_info->{"totals"}->{"Reporting Name"}->{$rep_name}->{$timeperiod}->{$previous_date}->{$success}->{"WallDuration"} || 0),
+                     "WallDuration", 1)
+        );
+      if ($njobs || $delta_njobs) {
+        $reporting_name_table->add(@row);
+      }
+    }
+  }
+  print $output_filehandle
+    $reporting_name_table->rule('_', '_'),
+      $reporting_name_table->title(),
+        $reporting_name_table->rule('_', '|'),
+          $reporting_name_table->body(),
+            $reporting_name_table->rule('=', '='),
+              "\n";
+}
 
+sub build_alt_vo_table {
+  my $result = {};
+  foreach my $vo (keys %$vo_data) {
+    if (exists $vo_data->{$vo}->{alt_vos} and $vo_data->{$vo}->{alt_vos}) {
+      foreach my $alt_vo (@{$vo_data->{$vo}->{alt_vos}}) {
+        $result->{$alt_vo} = $vo;
+      }
+    }
+  }
+  return $result;
+}
+
+my $alt_vos;
+sub actual_vo_name {
+  my $vo = shift;
+  $alt_vos = build_alt_vo_table() unless $alt_vos;
+  print STDERR "CHECK: $vo returns ", ($alt_vos->{$vo} || $vo), "\n";
+  return $alt_vos->{$vo} || $vo;
+}
 __END__
 
 ### Local Variables:
