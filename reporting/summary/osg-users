@@ -35,6 +35,13 @@ use IPC::Run; # Available from CPAN / DAG repo.
 sub wrapped_report(\@\&;$$);
 sub vo_report(\@$$);
 sub old_report(\@$$);
+sub site_report(\@$$);
+sub single_user_report (\@$$$$$$);
+
+my $seen_people = {};
+my $userid = 0;
+my $column_separator = { title => ' | ', is_sep => '1' };
+
 
 Getopt::Long::Configure(qw(no_ignore_case bundling require_order));
 
@@ -51,10 +58,12 @@ B<osg-users> B<-h>|B<--help>|B<-?>
 B<osg-users> B<--man>
 
 B<osg-users> [B<-u>|B<--user-regex> I<regex>]+
+[B<-V>|B<--vo-report>]
+[B<-S>|B<--site-report>]
 [B<-v>|B<--vo> I<vo>]
+[B<--site-name> I<site>]
 [B<--alt-vo-name>|B<--alt-vo> I<vo>]+
 [B<-r>|B<--reporting>|B<--reporting-name> I<name>]
-[B<-V>|B<--vo-report>]
 [B<-k>|B<--metric-key> I<Njobs|CPU|Wall>]
 [B<--no-totals>]
 [B<-M>|B<mail-admins>]
@@ -118,6 +127,9 @@ GetOptions(\%options,
            "target-period=s",
            "suppress-idle-users|s",
            "reporting-name|reporting|r=s",
+           "print-queries|print-query",
+           "site-report|S",
+           "site-name=s@",
            "mail|m=s@") or pod2usage(-exitval => 2);
 
 $options{"help"} and pod2usage(1);
@@ -131,7 +143,7 @@ pod2usage(-verbose => 2) if exists $options{man};
 my $history = $options{history} || 6;
 
 my $old_report;
-if ($options{"vo-report"}) {
+if ($options{"vo-report"} or $options{"site-report"}) {
   $options{"aux-db-type"} = 'none';
 } else {
   $old_report = 1;
@@ -147,17 +159,22 @@ if ($options{"aux-db-type"}) {
   $options{"aux-db-type"} = "vomrs";
 }
 
-my $vo = $options{vo} || "osg";
+my $vo = $options{vo} || ($options{"vo-report"} and "osg") || "";
 my @alt_vos = (exists $options{"alt-vo-name"})?@{$options{"alt-vo-name"}}:();
-my $vo_list = sprintf("(%s)", join(", ", map { sprintf("'%s'", uc) } ($vo, @alt_vos)));
+my $vo_list = sprintf("(%s)", join(", ", map { sprintf("'%s'", uc) } ($vo, @alt_vos))) if $vo;
+my $site_list = (exists $options{"site-name"} and scalar @{$options{"site-name"}})?
+  sprintf("(%s)", join(", ", map { sprintf("'%s'", uc) } @{$options{"site-name"}})):
+  "";
 
-if (exists $options{"aux-db-connect"}) {
-  $options{"aux-db-connect"} = [ split /,/, $options{"aux-db-connect"} ]
-} else {
-  $options{"aux-db-connect"} =
-    [ "ssh",
-      "fermigrid2.fnal.gov",
-      ". /usr/local/vdt/setup.sh ; mysql -N -B -q -u root -h localhost vomrs13_$vo" ];
+if ($options{"aux-db-type"} and lc $options{"aux-db-type"} ne "none") {
+  if (exists $options{"aux-db-connect"}) {
+    $options{"aux-db-connect"} = [ split /,/, $options{"aux-db-connect"} ]
+  } else {
+    $options{"aux-db-connect"} =
+      [ "ssh",
+        "fermigrid2.fnal.gov",
+        ". /usr/local/vdt/setup.sh ; mysql -N -B -q -u root -h localhost vomrs13_$vo" ];
+  }
 }
 
 my @keys = process_key_options();
@@ -195,9 +212,9 @@ $timeperiod = "week" unless $timeperiod;
 
 my %mail_list = ();
 
-my @command = @{$options{"aux-db-connect"}};
-
-if ($options{"mail-admins"}) {
+my @command;
+if ($options{"aux-db-connect"} and $options{"mail-admins"}) {
+  @command = @{$options{"aux-db-connect"}};
   # Initial email list, including exclusions.
   %mail_list =
     (
@@ -262,6 +279,8 @@ my $nesting_level = -1;
 
 my ($out, $error, $select);
 
+$out = '';
+
 if ($options{"aux-db-type"} =~ m&vomrs&i) {
   $select = <<'EOF';
 select firstname,
@@ -318,45 +337,8 @@ my $dbh = DBI->connect("DBI:mysql:database=gratia;host=gratia-db01.fnal.gov;port
 
 my $vomrs_user_info = {};
 
-if ($options{"aux-db-type"} =~ m&none&i) {
-  # Get known users attached to this VO from Gratia
-  my $sth = $dbh->prepare(sprintf(<<EOF, RealVOName(), $vo_list));
-select distinct CommonName
-from MasterSummaryData MSD
-join VONameCorrection VC on (MSD.VOcorrid = VC.corrid)
-join VO on (VC.void = VO.void)
-where UPPER(%s) IN %s order by CommonName;
-EOF
-  $sth->execute();
-  my $userid = 0;
-  $out = '';
-  my $seen_lastnames = {};
-  while (my $row = $sth->fetchrow_hashref()) {
-    my $cn = $row->{CommonName};
-    next if $cn =~ m&^(?:Generic|Unknown$)&;
-    my $lastname = $cn;
-    my @array = split m&/CN=&, $cn;
-    my $count = scalar @array;
-    # Attempt to extract a real name from the CN string and neaten.
-    $lastname =~ s&^/CN=[^/]+/CN=\d+/CN=([^/]+)$&${1}&; # CERN
-    $lastname =~ s&^/CN=[^/]+/CN=cron/CN=([^/]+)/CN=UID:[^/]+$&${1}&; # FNAL robot certs
-    $lastname =~ s&/CN=\d+&&g; # Numeric CNs
-    $lastname =~ s&/CN=UID:[^/]+$&&; # FNAL CN UID clause.
-    $lastname =~ s&^/CN=&&; # Leading /CN=
-    $lastname =~ s&^(.*?)\s*\d+$&$1&; # Trailing ID #
-    $lastname =~ s&\s*\(.*\)\s*$&&; # Parenthetical notes (eg Frederick G. Chambliss (Engage)).
-    my $member_id;
-    # Combine CNs that are identical to within known, simple manipulations
-    $seen_lastnames->{$lastname} = ++$userid unless exists $seen_lastnames->{$lastname};
-    $member_id = $seen_lastnames->{$lastname};
-    my ($firstname, $group_name, $role_name) =
-      ('', '', '');
-    $out = <<"EOF";
-$firstname	$lastname	$member_id	$cn	$group_name	$role_name
-$out
-EOF
-  }
-} else {
+# Obtain optional external user information
+if (scalar @command) {
   my $h = IPC::Run::harness \@command, \$select, \$out, \$error;
   $h->run();
 }
@@ -370,6 +352,7 @@ EOF
 for (split /\n/, $out) {
   chomp;
   my ($firstname, $lastname, $id, $cn, $group, $role) = split /\t/;
+  next unless defined $id;
   next if ($role and $role eq 'VO-Admin'); # If we're using VOMS DB instead of VOMRS.
   if (exists $options{"user-regex"} and scalar @{$options{"user-regex"}}) {
     my $user_wanted = 0;
@@ -386,13 +369,7 @@ for (split /\n/, $out) {
   }
   $vomrs_user_info->{$id}->{CN}->{$cn}->{FQAN} =
     sprintf("%s%s", $group, $role?"/Role=$role":"") if $cn;
-}
-
-if (exists $vomrs_user_info->{0}) { # Unattributed user
-  $vomrs_user_info->{0}->{query} =
-    sprintf(<<EOF, RealVOName());
-((UPPER(%s) = UPPER('$vo')) AND ((CommonName = 'Unknown') OR (CommonName like 'Generic%%')))
-EOF
+  $userid = $id if $id > $userid; # Keep count
 }
 
 my $sites = {};
@@ -432,77 +409,90 @@ unless ($current_date) {
 
 my $interval_clause = $old_report?
   $available_timeperiods{$timeperiod}->{interval_clause}:
-  sprintf("AND EndTime >= '%s' AND EndTime <= '%s'",
+  sprintf("AND EndTime >= '%s' AND EndTime < '%s'",
           $previous_date, $next_date);
 
-foreach my $id (sort { $a <=> $b } grep /^\d+$/, keys %{$vomrs_user_info}) {
+my $vo_query = $vo_list?sprintf("(UPPER(%s) IN %s)", RealVOName(), $vo_list):"";
+my $site_query = $site_list?"(SiteName in $site_list)":"";
+my $where_clause = "$vo_query$site_query"?sprintf("(%s%s%s)",
+                                                  $vo_query,
+                                                  ($vo_query and $site_query)?" AND ":"",
+                                                  $site_query):"";
+#foreach my $id (sort { $a <=> $b } grep /^\d+$/, keys %{$vomrs_user_info}) {
+#  my $user_info = $vomrs_user_info->{$id};
+#  my @cn_list = keys %{$user_info->{CN}};
+#  my $flat_cn_list = join(", ", map {s&\'&\'\'&g; "'$_'"} @cn_list);
+my $query =
+  queryString($where_clause,
+              $available_timeperiods{$timeperiod}->{select},
+              $available_timeperiods{$timeperiod}->{sort}?
+              $available_timeperiods{$timeperiod}->{sort}:
+              $available_timeperiods{$timeperiod}->{select},
+              $interval_clause
+             );
+# print STDERR $query, "\n";
+my $sth = $dbh->prepare($query);
+# print STDERR $sth->{Statement}, "\n";
+$sth->execute();
+while (my $row = $sth->fetchrow_hashref()) {
+  my $id = process_cn($row->{CommonName});
+  next unless defined $id;
+#  print STDERR join("\t", map { $row->{$_} } sort keys %$row), "\n";
   my $user_info = $vomrs_user_info->{$id};
   my @cn_list = keys %{$user_info->{CN}};
   my $flat_cn_list = join(", ", map {s&\'&\'\'&g; "'$_'"} @cn_list);
-  my $query =
-    queryString($user_info->{query} ||
-                sprintf("(CommonName IN ( $flat_cn_list ) AND (UPPER(%s) IN %s))",
-                        RealVOName(), $vo_list),
-                $available_timeperiods{$timeperiod}->{select},
-                $available_timeperiods{$timeperiod}->{sort}?
-                $available_timeperiods{$timeperiod}->{sort}:
-                $available_timeperiods{$timeperiod}->{select},
-                $interval_clause
-                );
-  # print STDERR $query, "\n";
-  my $sth = $dbh->prepare($query);
-  # print STDERR $sth->{Statement}, "\n";
-  $sth->execute();
-  while (my $row = $sth->fetchrow_hashref()) {
-    $sites->{$row->{SiteName}} = 1;
-    $dates{$row->{TimePeriod}} = $row->{SortTimePeriod};
-    foreach my $key (@keys) {
-      # Totals
-      $user_info->{"totals"}->{$key} += $row->{$key};
-      $vomrs_user_info->{"totals"}->{$key} += $row->{$key};
-      # Per time period
-      $user_info->{"totals"}->{$timeperiod}->{$row->{TimePeriod}}->{$key} += $row->{$key};
-      $vomrs_user_info->{"totals"}->{$timeperiod}->{$row->{TimePeriod}}->{$key} += $row->{$key};
-      # Per site
-      $user_info->{"totals"}->{Site}->{$row->{SiteName}}->{$key} += $row->{$key};
-      $vomrs_user_info->{"totals"}->{Site}->{$row->{SiteName}}->{$key} += $row->{$key};
-      # Per time period per site
-      $user_info->{"totals"}->{$timeperiod}->{$row->{TimePeriod}}->{Site}->{$row->{SiteName}}->{$key} += $row->{$key};
-      $vomrs_user_info->{"totals"}->{$timeperiod}->{$row->{TimePeriod}}->{Site}->{$row->{SiteName}}->{$key} += $row->{$key};
-      # Per user
-      $user_info->{"totals"}->{CN}->{$row->{CommonName}}->{$timeperiod}->{$row->{TimePeriod}}->{$key} += $row->{$key};
-      # Per reporting name
-      $vomrs_user_info->{"totals"}->{"Reporting Name"}->{"$row->{RealVOName}/$row->{ReportingVOName}"}->{$timeperiod}->{$row->{TimePeriod}}->{$key} += $row->{$key};
-      # Totals ->{$success}
-      my $success = $row->{Success};
-      $user_info->{"totals"}->{$success}->{$key} += $row->{$key};
-      $vomrs_user_info->{"totals"}->{$success}->{$key} += $row->{$key};
-      # Per time period
-      $user_info->{"totals"}->{$timeperiod}->{$row->{TimePeriod}}->{$success}->{$key} += $row->{$key};
-      $vomrs_user_info->{"totals"}->{$timeperiod}->{$row->{TimePeriod}}->{$success}->{$key} += $row->{$key};
-      # Per site
-      $user_info->{"totals"}->{Site}->{$row->{SiteName}}->{$success}->{$key} += $row->{$key};
-      $vomrs_user_info->{"totals"}->{Site}->{$row->{SiteName}}->{$success}->{$key} += $row->{$key};
-      # Per time period per site
-      $user_info->{"totals"}->{$timeperiod}->{$row->{TimePeriod}}->{Site}->{$row->{SiteName}}->{$success}->{$key} += $row->{$key};
-      $vomrs_user_info->{"totals"}->{$timeperiod}->{$row->{TimePeriod}}->{Site}->{$row->{SiteName}}->{$success}->{$key} += $row->{$key};
-      # Per reporting name
-      $vomrs_user_info->{"totals"}->{"Reporting Name"}->{"$row->{RealVOName}/$row->{ReportingVOName}"}->{$timeperiod}->{$row->{TimePeriod}}->{$success}->{$key} += $row->{$key};
-      # Per reporting name per site
-      $vomrs_user_info->{"totals"}->{"Reporting Name"}->{"$row->{RealVOName}/$row->{ReportingVOName}"}->{Site}->{$row->{SiteName}}->{$timeperiod}->{$row->{TimePeriod}}->{$key} += $row->{$key};
-      $vomrs_user_info->{"totals"}->{"Reporting Name"}->{"$row->{RealVOName}/$row->{ReportingVOName}"}->{Site}->{$row->{SiteName}}->{$timeperiod}->{$row->{TimePeriod}}->{$success}->{$key} += $row->{$key};
-      # Per user per time period per site
-      $user_info->{CN}->{$row->{CommonName}}->{$timeperiod}->{$row->{TimePeriod}}->{Site}->{$row->{SiteName}}->{$success}->{$key} += $row->{$key};
-      # Per user per time period per site per reporting name
-      $user_info->{CN}->{$row->{CommonName}}->{$timeperiod}->{$row->{TimePeriod}}->{Site}->{$row->{SiteName}}->{VO}->{"$row->{RealVOName}/$row->{ReportingVOName}"}->{$success}->{$key} += $row->{$key};
-#      print STDERR
-#        "\$user_info->{CN}->{$row->{CommonName}}->{$timeperiod}->{$row->{TimePeriod}}->{Site}->{$row->{SiteName}}->{$success}->{$key} += $row->{$key}\n";
-    }
+  $sites->{$row->{SiteName}} = 1;
+  $dates{$row->{TimePeriod}} = $row->{SortTimePeriod};
+  foreach my $key (@keys) {
+    # Totals
+    $user_info->{"totals"}->{$key} += $row->{$key};
+    $vomrs_user_info->{"totals"}->{$key} += $row->{$key};
+    # Per time period
+    $user_info->{"totals"}->{$timeperiod}->{$row->{TimePeriod}}->{$key} += $row->{$key};
+    $vomrs_user_info->{"totals"}->{$timeperiod}->{$row->{TimePeriod}}->{$key} += $row->{$key};
+    # Per site
+    $user_info->{"totals"}->{Site}->{$row->{SiteName}}->{$key} += $row->{$key};
+    $vomrs_user_info->{"totals"}->{Site}->{$row->{SiteName}}->{$key} += $row->{$key};
+    # Per time period per site
+    $user_info->{"totals"}->{$timeperiod}->{$row->{TimePeriod}}->{Site}->{$row->{SiteName}}->{$key} += $row->{$key};
+    $vomrs_user_info->{"totals"}->{$timeperiod}->{$row->{TimePeriod}}->{Site}->{$row->{SiteName}}->{$key} += $row->{$key};
+    # Per user
+    $user_info->{"totals"}->{CN}->{$row->{CommonName}}->{$timeperiod}->{$row->{TimePeriod}}->{$key} += $row->{$key};
+    # Per reporting name
+    $vomrs_user_info->{"totals"}->{"Reporting Name"}->{"$row->{RealVOName}/$row->{ReportingVOName}"}->{$timeperiod}->{$row->{TimePeriod}}->{$key} += $row->{$key};
+    # Totals ->{$success}
+    my $success = $row->{Success};
+    $user_info->{"totals"}->{$success}->{$key} += $row->{$key};
+    $vomrs_user_info->{"totals"}->{$success}->{$key} += $row->{$key};
+    # Per time period
+    $user_info->{"totals"}->{$timeperiod}->{$row->{TimePeriod}}->{$success}->{$key} += $row->{$key};
+    $vomrs_user_info->{"totals"}->{$timeperiod}->{$row->{TimePeriod}}->{$success}->{$key} += $row->{$key};
+    # Per site
+    $user_info->{"totals"}->{Site}->{$row->{SiteName}}->{$success}->{$key} += $row->{$key};
+    $vomrs_user_info->{"totals"}->{Site}->{$row->{SiteName}}->{$success}->{$key} += $row->{$key};
+    # Per time period per site
+    $user_info->{"totals"}->{$timeperiod}->{$row->{TimePeriod}}->{Site}->{$row->{SiteName}}->{$success}->{$key} += $row->{$key};
+    $vomrs_user_info->{"totals"}->{$timeperiod}->{$row->{TimePeriod}}->{Site}->{$row->{SiteName}}->{$success}->{$key} += $row->{$key};
+    # Per time period per site per user
+    $vomrs_user_info->{"totals"}->{$timeperiod}->{$row->{TimePeriod}}->{Site}->{$row->{SiteName}}->{USER}->{$id}->{$success}->{$key} += $row->{$key};
+    # Per reporting name
+    $vomrs_user_info->{"totals"}->{"Reporting Name"}->{"$row->{RealVOName}/$row->{ReportingVOName}"}->{$timeperiod}->{$row->{TimePeriod}}->{$success}->{$key} += $row->{$key};
+    # Per reporting name per site
+    $vomrs_user_info->{"totals"}->{"Reporting Name"}->{"$row->{RealVOName}/$row->{ReportingVOName}"}->{Site}->{$row->{SiteName}}->{$timeperiod}->{$row->{TimePeriod}}->{$key} += $row->{$key};
+    $vomrs_user_info->{"totals"}->{"Reporting Name"}->{"$row->{RealVOName}/$row->{ReportingVOName}"}->{Site}->{$row->{SiteName}}->{$timeperiod}->{$row->{TimePeriod}}->{$success}->{$key} += $row->{$key};
+    # Per user per time period per site
+    $user_info->{CN}->{$row->{CommonName}}->{$timeperiod}->{$row->{TimePeriod}}->{Site}->{$row->{SiteName}}->{$success}->{$key} += $row->{$key};
+    # Per user per time period per site per reporting name
+    $user_info->{CN}->{$row->{CommonName}}->{$timeperiod}->{$row->{TimePeriod}}->{Site}->{$row->{SiteName}}->{VO}->{"$row->{RealVOName}/$row->{ReportingVOName}"}->{$success}->{$key} += $row->{$key};
+    #      print STDERR
+    #        "\$user_info->{CN}->{$row->{CommonName}}->{$timeperiod}->{$row->{TimePeriod}}->{Site}->{$row->{SiteName}}->{$success}->{$key} += $row->{$key}\n";
   }
 }
 
 if ($options{"vo-report"}) {
   wrapped_report(@email_addresses, &vo_report, $ARGV[0], ".txt")
+} elsif ($options{"site-report"}) {
+  wrapped_report(@email_addresses, &site_report, $ARGV[0], ".txt")
 } else {
   wrapped_report(@email_addresses, &old_report, $ARGV[0])
 }
@@ -641,7 +631,7 @@ sub convert_num {
   my ($num, $key, $is_delta) = @_;
   defined $num or return "";
   my ($int_format, $float_format) = $is_delta?("%+d", "%+.1f"):("%d", "%.1f");
-  if ($key eq "Njobs" or $key eq "Sites") {
+  if ($key eq "Njobs" or $key eq "Sites" or $key eq "Users") {
     return $num?sprintf($int_format, $num):0;
   } else {
     return $num?sprintf($float_format, $num / 3600):0;
@@ -662,7 +652,11 @@ sub all_keys {
 }
 
 sub RealVOName {
-  return "if(VC.VOName like '/%',VC.ReportableVOName, VC.VOName)";
+  return "IF(VC.VOName LIKE '/%',VC.ReportableVOName, VC.VOName)";
+}
+
+sub FQAN {
+  return "IF(VC.VOName LIKE '/%', VC.VOName, 'Unknown')";
 }
 
 sub queryString {
@@ -670,29 +664,34 @@ sub queryString {
       $timeperiod_format,
       $sorttimeperiod_format,
       $interval_clause) = @_;
+  $whereclause="AND $whereclause" if $whereclause;
   my $RealVOName = RealVOName();
-  return <<EOF;
-select CommonName,
-       VO.VOName as ReportingVOName,
-       $RealVOName as RealVOName,
+  my $FQAN = FQAN();
+  my $query_string = <<EOF;
+SELECT CommonName,
+       VO.VOName AS ReportingVOName,
+       $RealVOName AS RealVOName,
+       $FQAN as FQAN,
        SiteName,
-       $timeperiod_format as TimePeriod,
-       $sorttimeperiod_format as SortTimePeriod,
-       if(ApplicationExitCode = 0, 1, 0) as Success,
-       sum(Njobs) as Njobs,
-       sum(WallDuration) as WallDuration,
-       sum(CpuUserDuration + CpuSystemDuration) as TotalCPU
-from MasterSummaryData MSD
-join VONameCorrection VC on (MSD.VOcorrid = VC.corrid)
-join VO on (VC.void = VO.void)
-join Probe P on (MSD.ProbeName = P.probename)
-join Site S on (P.siteid = S.siteid)
-where ResourceType IN ( 'Batch' )
+       $timeperiod_format AS TimePeriod,
+       $sorttimeperiod_format AS SortTimePeriod,
+       IF(ApplicationExitCode = 0, 1, 0) AS Success,
+       SUM(Njobs) AS Njobs,
+       SUM(WallDuration) AS WallDuration,
+       SUM(CpuUserDuration + CpuSystemDuration) AS TotalCPU
+FROM MasterSummaryData MSD
+JOIN VONameCorrection VC on (MSD.VOcorrid = VC.corrid)
+JOIN VO on (VC.void = VO.void)
+JOIN Probe P ON (MSD.ProbeName = P.probename)
+JOIN Site S ON (P.siteid = S.siteid)
+WHERE ResourceType IN ( 'Batch' )
 $interval_clause
-and $whereclause
-group by CommonName, RealVOName, VO.VOName, SiteName, Success, TimePeriod
-order by CommonName, RealVOName, VO.VOName, SiteName, Success, SortTimePeriod
+$whereclause
+GROUP BY CommonName, RealVOName, VO.VOName, SiteName, Success, TimePeriod
+ORDER BY CommonName, RealVOName, VO.VOName, SiteName, Success, SortTimePeriod
 EOF
+  print STDERR "INFO: query string = \n", $query_string, "\n" if $options{"print-queries"};
+  return $query_string;
 }
 
 sub by_name {
@@ -744,6 +743,7 @@ to previous $timeperiod $previous_date - $previous_date_end (inclusive).
 Days start and end at midnight UTC.
 
 EOF
+
   my @label = (" Current", "Previous");
   for my $date ($current_date, $previous_date) {
     my $label = shift @label;
@@ -783,8 +783,6 @@ EOF
     }
   }
   print $output_filehandle "\n" if ($#label < 1);
-
-  my $column_separator = { title => ' | ', is_sep => '1' };
 
   if ($num_rep_names) {
     my @reporting_names = keys %{$vomrs_user_info->{"totals"}->{"Reporting Name"}};
@@ -847,143 +845,12 @@ EOF
   }
 
   foreach my $id (sort by_usage grep /^\d+$/, keys %{$vomrs_user_info}) {
-    my $user_info = $vomrs_user_info->{$id};
-    # User's name
-    unless ($user_info->{"totals"}->{$timeperiod}->{$current_date}->{"Njobs"}) {
-      push @lines, sprintf("%s %s%s\n",
-                           $user_info->{firstname},
-                           $user_info->{lastname},
-                           ": no usage this period\n")
-        unless $options{"suppress-idle-users"};
-      next;
-    }
-    # Define the table
-    my $user_table = Text::Table->new
-      (
-       { title => '| ', is_sep => '1' },
-       { title => "CN", align_title => "center", sample =>  $max_length_cn },
-       $column_separator,
-       { title => "Site", align_title => "center", sample => $max_length_site },
-       ($num_rep_names>1)?($column_separator,
-                       { title => "Reporting\nName",
-                         align_title => "center",
-                         sample => $max_length_rep_name }):(),
-       $column_separator,
-       { title => "Job\nSuccess?", align_title => "center", sample => "yes" },
-       $column_separator,
-       { title => "# Jobs", align_title => "center", align => "right", sample => "99999999", align => 'num' },
-       $column_separator,
-       { title => "Wall\nTime (h)", align_title => "center", sample => "99999999.0", align => 'num' },
-       $column_separator,
-       { title => "Delta\nJobs", align => "right", align_title => "center", sample => "-199999999", align => 'num' },
-       $column_separator,
-       { title => "Delta Wall\nTime (h)", align_title => "center", sample => "-199999999.0", align => 'num' },
-       { title => ' |', is_sep => '1' }
-      );
-
-    my @sites = sort keys %{$user_info->{"totals"}->{Site}};
-
-    # Load the table
-    foreach my $cn (sort keys %{$user_info->{CN}}) {
-      foreach my $site (@sites) {
-        # print STDERR "SITE: $site\n";
-        my @name_list = keys %{$user_info->{CN}->{$cn}->{$timeperiod}->{$previous_date}->{Site}->{$site}->{VO}};
-        foreach my $reporting_name (sort(unique_list(keys %{$user_info->{CN}->{$cn}->{$timeperiod}->{$current_date}->{Site}->{$site}->{VO}},
-                                                     keys %{$user_info->{CN}->{$cn}->{$timeperiod}->{$previous_date}->{Site}->{$site}->{VO}}))) {
-          # print STDERR "REPORTING NAME: $reporting_name\n";
-          foreach my $success (1, 0) {
-            my @row =
-              (
-               $cn,
-               $site,
-               ($num_rep_names>1)?($reporting_name):(),
-               $success?"Yes":"No",
-               ($user_info->{CN}->{$cn}->{$timeperiod}->{$current_date}->{Site}->{$site}->{VO}->{$reporting_name}->{$success}->{"Njobs"} || 0),
-               convert_num(($user_info->{CN}->{$cn}->{$timeperiod}->{$current_date}->{Site}->{$site}->{VO}->{$reporting_name}->{$success}->{"WallDuration"} || 0),
-                           "WallDuration"),
-               convert_num(($user_info->{CN}->{$cn}->{$timeperiod}->{$current_date}->{Site}->{$site}->{VO}->{$reporting_name}->{$success}->{"Njobs"}  || 0) -
-                           ($user_info->{CN}->{$cn}->{$timeperiod}->{$previous_date}->{Site}->{$site}->{VO}->{$reporting_name}->{$success}->{"Njobs"} || 0),
-                           "Njobs", 1),
-               convert_num(($user_info->{CN}->{$cn}->{$timeperiod}->{$current_date}->{Site}->{$site}->{VO}->{$reporting_name}->{$success}->{"WallDuration"} || 0) -
-                           ($user_info->{CN}->{$cn}->{$timeperiod}->{$previous_date}->{Site}->{$site}->{VO}->{$reporting_name}->{$success}->{"WallDuration"} || 0),
-                           "WallDuration", 1),
-              );
-            if ($row[4] || $row[6]) {
-              $user_table->add(@row);
-            }
-            # print STDERR join(", ", @row), "\n";
-          }
-        }
-      }
-    }
-
-    # Print the table
-    push @lines,
-      $user_table->rule('_', '_'),
-        $user_table->title(),
-          $user_table->rule('_', '|'),
-            $user_table->body(),
-              $user_table->rule('-', '+');
-
-
-    # User totals
-    my $total_lines = 0;
-    my $user_name = sprintf("%s %s",
-                            $user_info->{firstname},
-                            $user_info->{lastname});
-    $user_name =~ s&^\s*(.*?)\s*$&$1&;
-    foreach my $success (1, 0) {
-      my @row =
-        (
-         sprintf("%s (%s)",
-                 $user_name,
-                 $success?"success":"failure"),
-         "ALL",
-         ($num_rep_names>1)?("ALL"):(),
-         $success?"Yes":"No",
-         ($user_info->{"totals"}->{$timeperiod}->{$current_date}->{$success}->{"Njobs"} || 0),
-         convert_num(($user_info->{"totals"}->{$timeperiod}->{$current_date}->{$success}->{"WallDuration"} || 0),
-                     "WallDuration"),
-         convert_num(($user_info->{"totals"}->{$timeperiod}->{$current_date}->{$success}->{"Njobs"} || 0) -
-                     ($user_info->{"totals"}->{$timeperiod}->{$previous_date}->{$success}->{"Njobs"} || 0),
-                     "Njobs", 1),
-         convert_num(($user_info->{"totals"}->{$timeperiod}->{$current_date}->{$success}->{"WallDuration"} || 0) -
-                     ($user_info->{"totals"}->{$timeperiod}->{$previous_date}->{$success}->{"WallDuration"} || 0),
-                     "WallDuration", 1)
-        );
-      if ($row[4] || $row[6]) {
-        $user_table->add(@row);
-        ++$total_lines
-      }
-    }
-    if ($total_lines == 2) {
-      push @lines,
-        $user_table->body(-$total_lines, $total_lines),
-          $user_table->rule('-', '+');
-    }
-    $user_table->add
-      (
-       sprintf("%s (%s)",
-               $user_name,
-               "all"),
-       "ALL",
-       ($num_rep_names>1)?("ALL"):(),
-       "N/A",
-       ($user_info->{"totals"}->{$timeperiod}->{$current_date}->{"Njobs"} || 0),
-       convert_num(($user_info->{"totals"}->{$timeperiod}->{$current_date}->{"WallDuration"} || 0),
-                   "WallDuration"),
-       convert_num(($user_info->{"totals"}->{$timeperiod}->{$current_date}->{"Njobs"} || 0) -
-                   ($user_info->{"totals"}->{$timeperiod}->{$previous_date}->{"Njobs"} || 0),
-                   "Njobs", 1),
-       convert_num(($user_info->{"totals"}->{$timeperiod}->{$current_date}->{"WallDuration"} || 0) -
-                   ($user_info->{"totals"}->{$timeperiod}->{$previous_date}->{"WallDuration"} || 0),
-                   "WallDuration", 1)
-      );
-
-    push @lines,
-      $user_table->body(-1, 1),
-        $user_table->rule('=', '='),
-          "\n";
+    single_user_report(@lines,
+                       $id,
+                       $max_length_site, $num_sites,
+                       $max_length_cn,
+                       $max_length_rep_name,
+                       $num_rep_names);
   }
 
   print $output_filehandle
@@ -1167,17 +1034,17 @@ sub num_sites {
 
 sub site_info {
   my $result = "";
-  my $count = 0;
+  my $sites = {};
   foreach my $date (@_) {
     foreach my $site (keys %{$vomrs_user_info->{"totals"}->{$timeperiod}->{$date}->{Site}}) {
       next unless $vomrs_user_info->{"totals"}->{$timeperiod}->{$date}->{Site}->{$site}->{"Njobs"};
-      ++$count;
+      $sites->{$site} = 1;
       if (length($site) > length($result)) {
         $result = $site;
       }
     }
   }
-  return ($result, $count);
+  return ($result, scalar keys %$sites);
 }
 
 sub max_length_cn {
@@ -1193,7 +1060,7 @@ sub max_length_cn {
     # User's name (almost)
     my $user_name_test =
       sprintf("%s %s (success)",
-              $vomrs_user_info->{$id}->{firstname},
+              $vomrs_user_info->{$id}->{firstname} || "",
               $vomrs_user_info->{$id}->{lastname});
     $result = $user_name_test if (length($user_name_test) > length($result));
   }
@@ -1234,6 +1101,427 @@ sub unique_list {
   # print STDERR "RETURNING ", join(", ", keys %hash), "\n";
   return keys %hash;
 }
+
+sub process_cn {
+  my ($cn) = @_;
+  return 0 if $cn =~ m&^(?:^Generic|Unknown$)&;
+  my $person = $cn;
+  my @array = split m&/CN=&, $cn;
+  my $count = scalar @array;
+  # Attempt to extract a real name from the CN string and neaten.
+  $person =~ s&^/CN=[^/]+/CN=\d+/CN=([^/]+)$&${1}&; # CERN
+  $person =~ s&^/CN=[^/]+/CN=cron/CN=([^/]+)/CN=UID:[^/]+$&${1}&; # FNAL robot certs
+  $person =~ s&/CN=\d+&&g;    # Numeric CNs
+  $person =~ s&/CN=UID:[^/]+$&&; # FNAL CN UID clause.
+  $person =~ s&^/CN=&&;       # Leading /CN=
+  $person =~ s&^(.*?)\s*\d+$&$1&; # Trailing ID #
+  $person =~ s&\s*\(.*\)\s*$&&; # Parenthetical notes (eg Frederick G. Chambliss (Engage)).
+  my $member_id;
+  # Combine CNs that are identical to within known, simple manipulations
+  $seen_people->{$person} = ++$userid unless exists $seen_people->{$person};
+  my $id = $seen_people->{$person};
+  unless (exists $vomrs_user_info->{$id}) {
+    # Load up initial info.
+    $vomrs_user_info->{$id} =
+      { lastname => $person };
+  }
+  # Load up CN info.
+  unless (exists $vomrs_user_info->{$id}->{CN}->{$cn}) {
+    $vomrs_user_info->{$id}->{CN}->{$cn}->{FQAN} = '';
+    # print STDERR "Added info for user $person, ID $id, CN=$cn\n";
+  }
+  return $id;
+}
+
+sub site_report(\@$$) {
+  my ($email_addresses, $output_filehandle, $output_filename) = @_;
+
+  my @lines = ();
+
+  my @dates = sort by_date keys %dates;
+
+  my ($max_length_site, $num_sites) = site_info($previous_date, $current_date);
+  my $max_length_cn = max_length_cn($previous_date, $current_date);
+  my ($max_length_rep_name, $num_rep_names) = rep_name_info($previous_date, $current_date);
+
+  ######################################################################
+  # Preamble
+  print $output_filehandle <<EOF;
+Comparing current data for $timeperiod $current_date - $current_date_end (inclusive)
+to previous $timeperiod $previous_date - $previous_date_end (inclusive).
+
+Days start and end at midnight UTC.
+
+EOF
+
+  # List selected sites
+  if ($options{"site-name"}) {
+    print $output_filehandle "Report includes data for ";
+    if (scalar @{$options{"site-name"}} == 1) {
+      print $output_filehandle @{$options{"site-name"}}[0], "\n\n";
+    } else {
+      my $and_index = scalar @{$options{"site-name"}} - 2;
+      my $site_count = 0;
+      foreach my $site (@{$options{"site-name"}}) {
+        print $output_filehandle "$site";
+        if ($site_count < $and_index) {
+          print $output_filehandle ", ";
+        } elsif ($site_count == $and_index) {
+          print $output_filehandle " and ";
+        } else {
+          print $output_filehandle ".\n\n";
+        }
+        ++$site_count;
+      }
+    }
+  }
+
+  my @label = (" Current", "Previous");
+  for my $date ($current_date, $previous_date) {
+    my $label = shift @label;
+    if ($vomrs_user_info->{"totals"}->{$timeperiod}->{$date}->{"Njobs"}) {
+      my $string = "$label ${timeperiod}'s total usage: ";
+      print $output_filehandle $string,
+        num_users($date), " users ";
+      my $num_sites = num_sites($date);
+      if ($options{"site-name"} and scalar @{$options{"site-name"}} > 1) {
+        print $output_filehandle "utilized ",
+          $num_sites, " site", (($num_sites == 1)?"":"s"), ";\n";
+      } else {
+        print $output_filehandle "\n";
+      }
+      my ($total, $success, $fail) =
+        ( $vomrs_user_info->{"totals"}->{$timeperiod}->{$date}->{"Njobs"},
+          $vomrs_user_info->{"totals"}->{$timeperiod}->{$date}->{1}->{"Njobs"} || 0,
+          $vomrs_user_info->{"totals"}->{$timeperiod}->{$date}->{0}->{"Njobs"} || 0 );
+      my $efficiency = $total?(100.0*$success/$total):0;
+      print $output_filehandle ' ' x length($string),
+        $total, " jobs total (",
+          $success, " success, ",
+            $fail, " fail, ",
+              sprintf("%.1f%%", $efficiency),
+                ");\n";
+      ($total, $success, $fail) =
+        ( convert_num($vomrs_user_info->{"totals"}->{$timeperiod}->{$date}->{"WallDuration"},
+                      "WallDuration"),
+          convert_num($vomrs_user_info->{"totals"}->{$timeperiod}->{$date}->{1}->{"WallDuration"} || 0,
+                      "WallDuration"),
+          convert_num($vomrs_user_info->{"totals"}->{$timeperiod}->{$date}->{0}->{"WallDuration"} || 0,
+                      "WallDuration") );
+      $efficiency = $total?(100.0*$success/$total):0;
+      print $output_filehandle ' ' x length($string),
+        $total, " wall clock hours total (",
+          $success, " success, ",
+            $fail, " fail, ",
+              sprintf("%.1f%%", $efficiency),
+                ").\n";
+    } else {
+      print $output_filehandle
+        "$label ${timeperiod}'s total usage: zero.\n";
+    }
+  }
+  print $output_filehandle "\n" if ($#label < 1);
+
+  # Main report
+  if (num_sites($current_date) > 1) { # Per-site summary.
+    print $output_filehandle "Site summary: \n";
+    my $site_summary_table = Text::Table->new({ title => '| ', is_sep => '1' },
+                                              {
+                                               title => 'SiteName', align_title => 'center' },
+                                              $column_separator,
+                                              {
+                                               title => "Job\nSuccess?", align_title => 'center' },
+                                              $column_separator,
+                                              {
+                                               title => "# Users", align_title => "center", align => 'num' },
+                                              $column_separator,
+                                              {
+                                               title => "# Jobs", align_title => "center", align => 'num' },
+                                              $column_separator,
+                                              {
+                                               title => "Wall\nTime (h)", align_title => "center", align => 'num' },
+                                              $column_separator,
+                                              {
+                                               title => "Delta\nUsers", align_title => "center", align => 'num' },
+                                              $column_separator,
+                                              {
+                                               title => "Delta\nJobs", align_title => "center", align => 'num' },
+                                              $column_separator,
+                                              {
+                                               title => "Delta Wall\nTime (h)", align_title => "center", align => 'num' },
+                                              {
+                                               title => ' |', is_sep => '1' });
+    foreach my $site (sort keys %$sites) {
+      foreach my $success (1, 0) {
+        my $num_users_current = scalar keys %{$vomrs_user_info->{"totals"}->{$timeperiod}->{$current_date}->{Site}->{$site}->{USER}};
+        my $num_users_previous = scalar keys %{$vomrs_user_info->{"totals"}->{$timeperiod}->{$previous_date}->{Site}->{$site}->{USER}};
+        my @row =
+          (
+           $site,
+           $success?"Yes":"No",
+           $num_users_current || 0,
+           $vomrs_user_info->{"totals"}->{$timeperiod}->{$current_date}->{Site}->{$site}->{$success}->{"Njobs"} || 0,
+           convert_num($vomrs_user_info->{"totals"}->{$timeperiod}->{$current_date}->{Site}->{$site}->{$success}->{"WallDuration"} || 0,
+                       "WallDuration"),
+           convert_num($num_users_current || 0 - $num_users_previous || 0, "Users", 1),
+           convert_num(($vomrs_user_info->{"totals"}->{$timeperiod}->{$current_date}->{Site}->{$site}->{$success}->{"Njobs"} || 0) -
+                       ($vomrs_user_info->{"totals"}->{$timeperiod}->{$previous_date}->{Site}->{$site}->{$success}->{"Njobs"} || 0),
+                       "Njobs", 1),
+           convert_num(($vomrs_user_info->{"totals"}->{$timeperiod}->{$current_date}->{Site}->{$site}->{$success}->{"WallDuration"} || 0) -
+                       ($vomrs_user_info->{"totals"}->{$timeperiod}->{$previous_date}->{Site}->{$site}->{$success}->{"WallDuration"} || 0),
+                       "WallDuration", 1)
+          );
+        if ($row[3] || $row[6]) {
+          $site_summary_table->add(@row);
+        }
+      }
+    }
+    print $output_filehandle
+      $site_summary_table->rule('_', '_'),
+        $site_summary_table->title(),
+          $site_summary_table->rule('_', '|'),
+            $site_summary_table->body(),
+              $site_summary_table->rule('=', '='),
+                "\n";
+  }
+
+  # Main report.
+  #  print STDERR "Producing individual user reports for ",
+  #    scalar keys %{$vomrs_user_info},
+  #      " users:\n";
+
+  foreach my $id (sort by_usage grep /^\d+$/, keys %{$vomrs_user_info}) {
+    my $name = $vomrs_user_info->{$id}->{firstname} || '';
+    $name = "$name " if $name;
+    $name = "$name$vomrs_user_info->{$id}->{lastname}";
+    # print STDERR "Producing report for id $id, $name\n";
+    my @lines = ();
+    single_user_report(@lines,
+                       $id,
+                       $max_length_site, $num_sites,
+                       $max_length_cn,
+                       $max_length_rep_name,
+                       $num_rep_names);
+    print $output_filehandle
+      join ("", @lines) if scalar @lines;
+  }
+
+
+  print $output_filehandle <<EOF;
+
+------------------------------------------------------------------------
+Notes:
+
+* Data are only included for jobs that *completed* in the period in question.
+
+* Durations are expressed in hours, to 1 decimal place.
+
+* The Njobs metric may include intermediate jobs (when a job is
+  forwarded from one gatekeeper to another), so there is the possibility
+  of some double-counting.
+
+* The statistics do not include Glexec information currently.
+
+* The "Job Success?" column indicates whether the data in that row
+  concern jobs where the *application* was successful. Gratia is unable
+  to detect subsequent failures in middleware after the successful
+  completion of the batch job.
+EOF
+
+  $output_filehandle->close();
+
+  # Send the report if necessary
+  if (scalar @$email_addresses) {
+    print "Mailing output to: \n";
+    print join(", ", @$email_addresses), "\n\n";
+
+    # Fake html for broken browsers
+    open (IN, $output_filename);
+    my $text = join("", <IN>);
+    close(IN);
+    my $html_filename = $output_filename;
+    $html_filename =~ s&\.txt$&.html&;
+    open(OUT, ">$html_filename") or die "Unable to open temporary file $html_filename";
+    print OUT <<EOF;
+<html>
+<body>
+<pre>
+$text
+</pre>
+</body>
+<html>
+EOF
+    close(OUT);
+    my $cmd = sprintf(qq&mutt -F "$script_top_dir/muttrc" -a "$html_filename" -s "OSG metrics for VO $vo for $timeperiod $current_date to $current_date_end" %s&,
+                      join(" ", map { qq/"$_"/ } @$email_addresses));
+
+    open(MUTT, "|$cmd") or die "Unable to open mail command for input";
+    print MUTT <<EOF;
+Please find below the Gratia statistics for OSG usage for the $vo VO
+for the $timeperiod $current_date - $current_date_end (inclusive).
+
+Deltas are with respect to the $timeperiod $previous_date - $previous_date_end (inclusive).
+
+Notes follow below the tables.
+
+------------------------------------------------------------------------
+EOF
+    print MUTT $text;
+    close(MUTT);
+  }
+}
+
+sub single_user_report(\@$$$$$$) {
+  my ($lines,
+      $id,
+      $max_length_site,
+      $num_sites,
+      $max_length_cn,
+      $max_length_rep_name,
+      $num_rep_names) = @_;
+  my $user_info = $vomrs_user_info->{$id};
+  unless ($user_info->{"totals"}->{$timeperiod}->{$current_date}->{"Njobs"}) {
+    push @$lines, sprintf("%s %s%s\n",
+                         $user_info->{firstname} || '',
+                         $user_info->{lastname},
+                         ": no usage this period\n")
+      unless $options{"suppress-idle-users"};
+    return ();
+  }
+  # Define the table
+  my $user_table = Text::Table->new
+    (
+     { title => '| ', is_sep => '1' },
+     { title => "CN", align_title => "center", sample =>  $max_length_cn },
+     ($num_sites>1)?($column_separator,
+                     { title => "Site",
+                       align_title => "center",
+                       sample => $max_length_site }):(),
+     ($num_rep_names>1)?($column_separator,
+                         { title => "Reporting\nName",
+                           align_title => "center",
+                           sample => $max_length_rep_name }):(),
+     $column_separator,
+     { title => "Job\nSuccess?", align_title => "center", sample => "yes" },
+     $column_separator,
+     { title => "# Jobs", align_title => "center", sample => "99999999", align => 'num' },
+     $column_separator,
+     { title => "Wall\nTime (h)", align_title => "center", sample => "99999999.0", align => 'num' },
+     $column_separator,
+     { title => "Delta\nJobs", align_title => "center", sample => "-199999999", align => 'num' },
+     $column_separator,
+     { title => "Delta Wall\nTime (h)", align_title => "center", sample => "-199999999.0", align => 'num' },
+     { title => ' |', is_sep => '1' }
+    );
+
+  my @sites = sort keys %{$user_info->{"totals"}->{Site}};
+
+  # Load the table
+  foreach my $cn (sort keys %{$user_info->{CN}}) {
+    foreach my $site (@sites) {
+      # print STDERR "SITE: $site\n";
+      my @name_list = keys %{$user_info->{CN}->{$cn}->{$timeperiod}->{$previous_date}->{Site}->{$site}->{VO}};
+      foreach my $reporting_name (sort(unique_list(keys %{$user_info->{CN}->{$cn}->{$timeperiod}->{$current_date}->{Site}->{$site}->{VO}},
+                                                   keys %{$user_info->{CN}->{$cn}->{$timeperiod}->{$previous_date}->{Site}->{$site}->{VO}}))) {
+        # print STDERR "REPORTING NAME: $reporting_name\n";
+        foreach my $success (1, 0) {
+          my $njobs_current = ($user_info->{CN}->{$cn}->{$timeperiod}->{$current_date}->{Site}->{$site}->{VO}->{$reporting_name}->{$success}->{"Njobs"} || 0);
+          my $njobs_delta = convert_num($njobs_current -
+                                        ($user_info->{CN}->{$cn}->{$timeperiod}->{$previous_date}->{Site}->{$site}->{VO}->{$reporting_name}->{$success}->{"Njobs"} || 0),
+                                        "Njobs", 1);
+          my @row =
+            (
+             $cn,
+             ($num_sites>1)?($site):(),
+             ($num_rep_names>1)?($reporting_name):(),
+             $success?"Yes":"No",
+             $njobs_current,
+             convert_num(($user_info->{CN}->{$cn}->{$timeperiod}->{$current_date}->{Site}->{$site}->{VO}->{$reporting_name}->{$success}->{"WallDuration"} || 0),
+                         "WallDuration"),
+             $njobs_delta,
+             convert_num(($user_info->{CN}->{$cn}->{$timeperiod}->{$current_date}->{Site}->{$site}->{VO}->{$reporting_name}->{$success}->{"WallDuration"} || 0) -
+                         ($user_info->{CN}->{$cn}->{$timeperiod}->{$previous_date}->{Site}->{$site}->{VO}->{$reporting_name}->{$success}->{"WallDuration"} || 0),
+                         "WallDuration", 1),
+            );
+          if ($njobs_current || $njobs_delta) {
+            $user_table->add(@row);
+          }
+          # print STDERR join(", ", @row), "\n";
+        }
+      }
+    }
+  }
+
+  # Print the table
+  push @$lines,
+    $user_table->rule('_', '_'),
+      $user_table->title(),
+        $user_table->rule('_', '|'),
+          $user_table->body(),
+            $user_table->rule('-', '+');
+
+  # User totals
+  my $total_lines = 0;
+  my $user_name = sprintf("%s %s",
+                          $user_info->{firstname} || "",
+                          $user_info->{lastname}) || "";
+  $user_name =~ s&^\s*(.*?)\s*$&$1&;
+  foreach my $success (1, 0) {
+    my $njobs_current = ($user_info->{"totals"}->{$timeperiod}->{$current_date}->{$success}->{"Njobs"} || 0);
+    my $njobs_delta = convert_num($njobs_current -
+                                  ($user_info->{"totals"}->{$timeperiod}->{$previous_date}->{$success}->{"Njobs"} || 0),
+                                  "Njobs", 1);
+    my @row =
+      (
+       sprintf("%s (%s)",
+               $user_name,
+               $success?"success":"failure"),
+       ($num_sites>1)?("ALL"):(),
+       ($num_rep_names>1)?("ALL"):(),
+       $success?"Yes":"No",
+       $njobs_current,
+       convert_num(($user_info->{"totals"}->{$timeperiod}->{$current_date}->{$success}->{"WallDuration"} || 0),
+                   "WallDuration"),
+       $njobs_delta,
+       convert_num(($user_info->{"totals"}->{$timeperiod}->{$current_date}->{$success}->{"WallDuration"} || 0) -
+                   ($user_info->{"totals"}->{$timeperiod}->{$previous_date}->{$success}->{"WallDuration"} || 0),
+                   "WallDuration", 1)
+      );
+    if ($njobs_current || $njobs_delta) {
+      $user_table->add(@row);
+      ++$total_lines;
+    }
+  }
+  if ($total_lines == 2) {
+    push @$lines,
+      $user_table->body(-$total_lines, $total_lines),
+        $user_table->rule('-', '+');
+  }
+  $user_table->add
+    (
+     sprintf("%s (%s)",
+             $user_name,
+             "all"),
+     ($num_sites>1)?("ALL"):(),
+     ($num_rep_names>1)?("ALL"):(),
+     "N/A",
+     ($user_info->{"totals"}->{$timeperiod}->{$current_date}->{"Njobs"} || 0),
+     convert_num(($user_info->{"totals"}->{$timeperiod}->{$current_date}->{"WallDuration"} || 0),
+                 "WallDuration"),
+     convert_num(($user_info->{"totals"}->{$timeperiod}->{$current_date}->{"Njobs"} || 0) -
+                 ($user_info->{"totals"}->{$timeperiod}->{$previous_date}->{"Njobs"} || 0),
+                 "Njobs", 1),
+     convert_num(($user_info->{"totals"}->{$timeperiod}->{$current_date}->{"WallDuration"} || 0) -
+                 ($user_info->{"totals"}->{$timeperiod}->{$previous_date}->{"WallDuration"} || 0),
+                 "WallDuration", 1)
+    );
+
+  push @$lines,
+    $user_table->body(-1, 1),
+      $user_table->rule('=', '='),
+        "\n";
+}
+
 
 __END__
 
