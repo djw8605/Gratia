@@ -107,9 +107,6 @@ foreach my $vo (sort keys %$master_vo_list) {
   foreach my $email (@email_list) {
     $email_hash->{$email} = 1;
   }
-  if (exists $alt_vo_list->{$vo}) {
-    push @command, map { ( "--alt-vo", "$_" ) } sort @{$alt_vo_list->{$vo}};
-  }
   foreach my $email (sort keys %$email_hash) {
     push @command, "-m", "$email";
   }

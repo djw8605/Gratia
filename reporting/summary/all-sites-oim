@@ -33,6 +33,7 @@ my @test_addresses = ( 'Chris Green <chris.h.green@gmail.com>' );
 
 GetOptions($options,
            "debug|d",
+           "verbose|v",
            "monthly|M",
            "weekly|W",
            "yearly|Y",
@@ -72,7 +73,7 @@ my $all_sites = not scalar keys %{$wanted_sites};
 
 # Parse reporting data from all sources
 my $reporting_data =
-  new ReportingData( verbose => 1,
+  new ReportingData( verbose => $options->{verbose},
                      data_source => $options->{"data-source"}
                    );
 
@@ -136,8 +137,6 @@ if ($options->{"exclusive-mail"}) { # Short-circuit people list.
       foreach my $vo (sort map { lc $_ } @{$person->{site_vos}}) {
         my @looped_cmd = @command;
         push @looped_cmd, "-v", $vo;
-        push @looped_cmd, map { ("--alt-vo", lc $_) } @{$vo_data->{$vo}->{alt_vos}} if
-          (exists $vo_data->{$vo} and exists $vo_data->{$vo}->{alt_vos});
         invoke(@looped_cmd);
       }
     } else {

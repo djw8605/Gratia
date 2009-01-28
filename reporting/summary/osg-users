@@ -64,7 +64,6 @@ B<osg-users> [B<-u>|B<--user-regex> I<regex>]+
 [B<-S>|B<--site-report>]
 [B<-v>|B<--vo> I<vo>]
 [B<--site-name> I<site>]
-[B<--alt-vo-name>|B<--alt-vo> I<vo>]+
 [B<-r>|B<--reporting>|B<--reporting-name> I<name>]
 [B<-k>|B<--metric-key> I<Njobs|CPU|Wall>]
 [B<--no-totals>]
@@ -116,7 +115,6 @@ GetOptions(\%options,
            "man",
            "user-regex|u=s@",
            "vo|v=s",
-           "alt-vo-name|alt-vo=s@",
            "vo-report|V",
            "data-source|D=s@",
            "metric-key|k=s@",
@@ -131,6 +129,7 @@ GetOptions(\%options,
            "suppress-idle-users|s",
            "reporting-name|reporting|r=s",
            "print-queries|print-query",
+           "verbose",
            "site-report|S",
            "site-name=s@",
            "mail|m=s@") or pod2usage(-exitval => 2);
@@ -147,7 +146,7 @@ $options{"data-source"} = ["$script_top_dir/user-reports.dat"]
   unless $options{"data-source"};
 
 my $reporting_data =
-  new ReportingData( verbose => 1,
+  new ReportingData( verbose => $options{verbose},
                      data_source => $options{"data-source"}
                    );
 
@@ -171,8 +170,8 @@ if ($options{"aux-db-type"}) {
 }
 
 my $vo = $options{vo} || ($options{"vo-report"} and "osg") || "";
-my @alt_vos = (exists $options{"alt-vo-name"})?@{$options{"alt-vo-name"}}:();
-my $vo_list = sprintf("(%s)", join(", ", map { sprintf("'%s'", uc) } ($vo, @alt_vos))) if $vo;
+my $alt_vo_list = $vo_data->{$vo}->{alt_vos} if ($vo and $vo_data->{$vo}->{alt_vos});
+my $vo_list = sprintf("(%s)", join(", ", map { sprintf("'%s'", uc) } ($vo, @$alt_vo_list))) if $vo;
 my $site_list = (exists $options{"site-name"} and scalar @{$options{"site-name"}})?
   sprintf("(%s)", join(", ", map { sprintf("'%s'", uc) } @{$options{"site-name"}})):
   "";
@@ -455,6 +454,9 @@ while (my $row = $sth->fetchrow_hashref()) {
   $sites->{$row->{SiteName}} = 1;
   $dates{$row->{TimePeriod}} = $row->{SortTimePeriod};
   my $real_vo_name = actual_vo_name($row->{RealVOName});
+  if ($options{verbose} and $real_vo_name ne $row->{RealVOName}) {
+    print STDERR "Translated $row->{RealVOName} -> $real_vo_name\n";
+  }
   my $reporting_name = "$real_vo_name/$row->{ReportingVOName}";
   foreach my $key (@keys) {
     # Totals
@@ -1560,24 +1562,23 @@ sub reporting_name_report($) {
               "\n";
 }
 
-sub build_alt_vo_table {
-  my $result = {};
+my $alt_vo_lookup_table;
+sub alt_vo_table {
+  return $alt_vo_lookup_table if $alt_vo_lookup_table;
+  $alt_vo_lookup_table = {};
   foreach my $vo (keys %$vo_data) {
     if (exists $vo_data->{$vo}->{alt_vos} and $vo_data->{$vo}->{alt_vos}) {
       foreach my $alt_vo (@{$vo_data->{$vo}->{alt_vos}}) {
-        $result->{$alt_vo} = $vo;
+        $alt_vo_lookup_table->{$alt_vo} = $vo;
       }
     }
   }
-  return $result;
+  return $alt_vo_lookup_table;
 }
 
-my $alt_vos;
 sub actual_vo_name {
   my $vo = shift;
-  $alt_vos = build_alt_vo_table() unless $alt_vos;
-  print STDERR "CHECK: $vo returns ", ($alt_vos->{$vo} || $vo), "\n";
-  return $alt_vos->{$vo} || $vo;
+  return alt_vo_table()->{$vo} || $vo;
 }
 __END__
 
