@@ -157,7 +157,7 @@ sub processXmlResourceContacts {
     #    next if ($grid_type and not $wanted_grid_types->{$grid_type}); # Want this grid type?
     #    next if (scalar @services and not grep { $wanted_services->{$_} } @services); # Want these services?
     #    $sites->{$site_name} = 1 unless $site_name =~ m&^all$&i;
-    my $reporting_contact_nodes = $resource->findnodes('//reporting_contact');
+    my $reporting_contact_nodes = $resource->findnodes('.//reporting_contact');
     foreach my $reporting_contact ($reporting_contact_nodes->get_nodelist()) { # Each contact
       my $primary_email = $reporting_contact->findvalue('primary_email')
         || $reporting_contact->findvalue('alt_email'); # Contact's email
