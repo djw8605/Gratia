@@ -26,6 +26,7 @@ use FileHandle;
 use ReportingData;
 
 sub expandSites(\@);
+sub invoke(\@\@);
 
 my $options = {};
 my $osg_users_script = "$script_top_dir/osg-users";
@@ -83,8 +84,10 @@ my @base_command = ("$osg_users_script",
                     "-S",
                     "--aux-db-type=none",
                     ($options->{"data-source"})?(map { ("-D", $_) } @{$options->{"data-source"}}):());
+my @base_mail_opts = ();
 if ($options->{"exclusive-mail"}) { # Short-circuit people list.
   my @command = @base_command;
+  my @mail_opts = @base_mail_opts;
   if ($options->{monthly}) {
     push @command, "-t", "month";
   } elsif ($options->{yearly}) {
@@ -92,8 +95,8 @@ if ($options->{"exclusive-mail"}) { # Short-circuit people list.
   }
   push @command, map { ("--site", $_) } expandSites(@{$options->{"site-name"}})
     if $options->{"site-name"};
-  push @command, map { ("-m", $_) } @{$options->{"exclusive-mail"}};
-  invoke(@command);
+  push @mail_opts, map { ("-m", $_) } @{$options->{"exclusive-mail"}};
+  invoke(@command, @mail_opts);
 } else { # Standard -- take main lead from .dat files and OIM.
   if ($options->{monthly}) {
     push @base_command, "-t", "month";
@@ -104,7 +107,7 @@ if ($options->{"exclusive-mail"}) { # Short-circuit people list.
   push @{$options->{"extra-mail"}},
     map { (exists $people_data->{$_}->{all_reports}->{site} and
            $people_data->{$_}->{all_reports}->{site})?($_):()} keys %{$people_data};
-  push @base_command, map { ("-m", $_) } @{$options->{"extra-mail"}} if $options->{"extra-mail"};
+  push @base_mail_opts, map { ("-m", $_) } @{$options->{"extra-mail"}} if $options->{"extra-mail"};
   my @user_list;
   if ($options->{"for-user"}) { # mini-short-circuit
     @user_list = map {
@@ -120,14 +123,15 @@ if ($options->{"exclusive-mail"}) { # Short-circuit people list.
   }
   foreach my $primary_email (sort @user_list) {
     my @command = @base_command;
+    my @mail_opts = @base_mail_opts;
     my $person = $people_data->{$primary_email};
     if ($person->{all_reports} and $person->{all_reports}->{site}) {
     }
     if ($options->{test}) {
-      push @command, map { ("-m", $_) } @test_addresses
+      push @mail_opts, map { ("-m", $_) } @test_addresses
         if scalar @test_addresses;
     } else {
-      push @command, "-m", "$person->{contact_string}";
+      push @mail_opts, "-m", "$person->{contact_string}";
     }
     my @wanted_sites = map { ("--site-name", $_) }
       expandSites(@{$person->{sites}}) if $person->{sites};
@@ -137,20 +141,22 @@ if ($options->{"exclusive-mail"}) { # Short-circuit people list.
       foreach my $vo (sort map { lc $_ } @{$person->{site_vos}}) {
         my @looped_cmd = @command;
         push @looped_cmd, "-v", $vo;
-        invoke(@looped_cmd);
+        invoke(@looped_cmd, @mail_opts);
       }
     } else {
-      invoke(@command);
+      invoke(@command, @mail_opts);
     }
   }
 }
 
 1;
 
-sub invoke {
-  my @escaped_command = map { my $cmd = $_; $cmd =~ s&"&\\"&g; sprintf('"%s"', $cmd) } @_;
+sub invoke(\@\@) {
+  my ($command, $mail_opts) = @_;
+  $mail_opts = [] unless $mail_opts;
+  my @escaped_command = map { my $cmd = $_; $cmd =~ s&"&\\"&g; sprintf('"%s"', $cmd) } @$command, @$mail_opts;
   if ($options->{debug}) {
-    print "***> Would execute ",
+    print "Would execute ",
       join(" ", @escaped_command), "\n";
   } else {                      # For real
     if ($options->{test}) {
