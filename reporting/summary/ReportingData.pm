@@ -57,19 +57,74 @@ sub processXmlData {
   }
   my $root = $tree->getDocumentElement;
   if ($self->{options}->{verbose}) {
-    print STDERR "Reading data from OIM ", $root->nodeName , " data\n";
+    print STDERR "Reading OIM ", $root->nodeName , " data\n";
   }
   if ($root->nodeName eq 'resource_contacts') {
     $self->processXmlResourceContacts($root); # OIM site info
   } elsif ($root->nodeName eq 'vo_contacts') {
-    $self->processXmlVoContacts($root); # OIM VO info
+#    $self->processXmlVoContacts($root); # OIM VO info
   } else {
     print STDERR "ERROR: OIM data ", $root->nodeName, " not recognized: ignoring.\n";
   }
 }
 
 sub processXmlVoContacts {
-   my ($self, $root) = @_;
+  my ($self, $root) = @_;
+  foreach my $vo ($root->findnodes('vo')) { # Each vo
+    my $vo_name = $vo->findvalue('vo_name');
+    my $this_vo;
+    if (exists $vo_data->{$vo_name}) {
+      print STDERR "WARNING: info for $vo_name has already been seen: merging.\n";
+    } else {
+      $vo_data->{$vo_name} = {};
+    }
+    $this_vo = $vo_data->{$vo_name};
+    $this_vo->{science_fields} = {} unless $this_vo->{science_fields};
+    my $science_nodes = $vo->findnodes('vo_fields_of_science/vo_field_of_science');
+    foreach my $science_node ($science_nodes->get_nodelist()) {
+      $this_vo->{science_fields}->{$science_node->string_value()} = 1;
+    }
+    my $reporting_contact_nodes = $this_vo->findnodes('reporting_contact');
+    foreach my $reporting_contact ($reporting_contact_nodes->get_nodelist()) {
+      my $primary_email = $reporting_contact->findvalue('primary_email')
+        || $reporting_contact->findvalue('alt_email'); # Contact's email
+      next unless $primary_email;
+      my $person = {};
+      push @{$this_vo->{reporting_contacts}}, $primary_email;
+      $person->{vos} = [ ] unless $person->{vos};
+      push @{$person->{vos}}, "$vo";
+      foreach my $attribute qw(first_name middle_name last_name) { # Name info
+        $person->{$attribute} =
+          $reporting_contact->findvalue($attribute);
+      }
+      $self->mergePersonData($primary_email, $person);
+    }
+    my $reporting_group_nodes = $vo->findnodes('vo_reporting_group');
+    $this_vo->{reporting_groups} = {} unless $this_vo->{reporting_groups};
+    foreach my $reporting_group_node ($reporting_group_nodes->get_nodelist()) {
+      my $vo_reporting_name = $reporting_group_node->findvalue('vo_reporting_name');
+      my $this_reporting_group = $this_vo->{reporting_groups}->{$vo_reporting_name};
+      $this_reporting_group->{reporting_contacts} = []
+        unless $this_reporting_group->{reporting_contacts};
+      $this_vo->{reporting_groups}->{$vo_reporting_name} = {}
+        unless $this_vo->{reporting_groups}->{$vo_reporting_name};
+      my $reporting_contact_nodes = $reporting_group_node->findnodes('reporting_contact');
+      foreach my $reporting_contact ($reporting_contact_nodes->get_nodelist()) {
+        my $primary_email = $reporting_contact->findvalue('primary_email')
+          || $reporting_contact->findvalue('alt_email'); # Contact's email
+        next unless $primary_email;
+        my $person = {};
+        push @{$this_vo->{reporting_contacts}}, $primary_email;
+        $person->{vo_reportingnames} = [ ] unless $person->{vo_reporting_names};
+        push @{$person->{vo_reporting_names}}, "$vo/$vo_reporting_name";
+        foreach my $attribute qw(first_name middle_name last_name) { # Name info
+          $person->{$attribute} =
+            $reporting_contact->findvalue($attribute);
+        }
+        $self->mergePersonData($primary_email, $person);
+      }
+    }
+  }
 }
 
 sub processXmlResourceContacts {
@@ -102,7 +157,8 @@ sub processXmlResourceContacts {
     #    next if ($grid_type and not $wanted_grid_types->{$grid_type}); # Want this grid type?
     #    next if (scalar @services and not grep { $wanted_services->{$_} } @services); # Want these services?
     #    $sites->{$site_name} = 1 unless $site_name =~ m&^all$&i;
-    foreach my $reporting_contact ($resource->findnodes('reporting_contact')) { # Each contact
+    my $reporting_contact_nodes = $resource->findnodes('//reporting_contact');
+    foreach my $reporting_contact ($reporting_contact_nodes->get_nodelist()) { # Each contact
       my $primary_email = $reporting_contact->findvalue('primary_email')
         || $reporting_contact->findvalue('alt_email'); # Contact's email
       next unless $primary_email;
