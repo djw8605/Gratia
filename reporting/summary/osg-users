@@ -670,7 +670,7 @@ sub all_keys {
 
 sub RealVOName {
 #  return "IF(VC.VOName LIKE '/%',VC.ReportableVOName, VC.VOName)";
-  return "IFNULL(VC.ReportableVOName, IF(VC.VOName LIKE '/%', SUBSTRING(SUBSTRING_INDEX(VC.VOName, '/', 2), 2), 'Unknown'))"
+  return "IFNULL(VC.ReportableVOName, IF(VC.VOName LIKE '/%', SUBSTRING(SUBSTRING_INDEX(VC.VOName, '/', 2), 2), VC.VOName))"
 }
 
 sub FQAN {
@@ -1509,7 +1509,7 @@ sub sites_report($) {
 sub reporting_name_report($) {
   my $output_filehandle = shift;
   print $output_filehandle "Active reporting name summary: \n";
-  my %used_real_vos = map { s&/.*$&&; $_ => 1 } keys %{$vomrs_user_info->{"totals"}->{"Reporting Name"}};
+  my %used_real_vos = map { s&:.*$&&; $_ => 1 } keys %{$vomrs_user_info->{"totals"}->{"Reporting Name"}};
   my $want_vo_column = (scalar keys %used_real_vos) > 1;
   my $reporting_name_table = Text::Table->new
     (
@@ -1611,13 +1611,14 @@ EOF
       title => ' |', is_sep => '1' }
     );
   while (my $row = $sth->fetchrow_hashref()) {
+    my $ReportableVOName = (defined $row->{ReportableVOName})?($row->{ReportableVOName} || '""'):"NULL";
     my @row =
       (
        ($row->{ReportedVOName} =~ m&^/&)?
        $row->{ReportedVOName}:
        sprintf("%s:%s",
                $row->{ReportedVOName},
-               $row->{ReportableVOName}),
+               $ReportableVOName),
        $row->{VOName},
        "Gratia"
       );
