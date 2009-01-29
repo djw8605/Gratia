@@ -7,7 +7,7 @@
  {
   CMS => { alt_vos => [ 'uscms' ] },
   Engage => { alt_vos => [ 'Engagement' ] },
-  atlas => { alt_vos => [ 'usatlas' ] }
+  ATLAS => { alt_vos => [ 'usatlas' ] }
  },
  people =>
  {

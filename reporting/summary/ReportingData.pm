@@ -62,7 +62,7 @@ sub processXmlData {
   if ($root->nodeName eq 'resource_contacts') {
     $self->processXmlResourceContacts($root); # OIM site info
   } elsif ($root->nodeName eq 'vo_contacts') {
-#    $self->processXmlVoContacts($root); # OIM VO info
+    $self->processXmlVoContacts($root); # OIM VO info
   } else {
     print STDERR "ERROR: OIM data ", $root->nodeName, " not recognized: ignoring.\n";
   }
@@ -79,6 +79,10 @@ sub processXmlVoContacts {
       $vo_data->{$vo_name} = {};
     }
     $this_vo = $vo_data->{$vo_name};
+    $this_vo->{alt_vos} = [] unless $this_vo->{alt_vos};
+    print STDERR "INFO: Adding $vo_name to alt_vos information\n";
+    push @{$this_vo->{alt_vos}}, $vo_name;
+    next; # Rest is not ready!
     $this_vo->{science_fields} = {} unless $this_vo->{science_fields};
     my $science_nodes = $vo->findnodes('vo_fields_of_science/vo_field_of_science');
     foreach my $science_node ($science_nodes->get_nodelist()) {
@@ -191,11 +195,12 @@ sub ImportVOData {
   my ($self, $vo_in) = @_;
   foreach my $vo_name ( sort keys %$vo_in ) {
     my $vo = $vo_in->{$vo_name};
-    $vo_data->{lc $vo_name} = {} unless exists $vo_data->{lc $vo_name};
-    if (exists $vo_data->{lc $vo_name}->{alt_vos} and exists $vo->{alt_vos}) {
-      push @{$vo_data->{lc $vo_name}->{alt_vos}}, @{$vo->{alt_vos}};
+    $vo_data->{$vo_name} = {} unless exists $vo_data->{$vo_name};
+    if (exists $vo_data->{$vo_name}->{alt_vos} and exists $vo->{alt_vos}) {
+      push @{$vo_data->{$vo_name}->{alt_vos}}, @{$vo->{alt_vos}};
     } else {
-      $vo_data->{lc $vo_name}->{alt_vos} = $vo->{alt_vos};
+      $vo_data->{$vo_name}->{alt_vos} = $vo->{alt_vos} || [];
+      push @{$vo_data->{$vo_name}->{alt_vos}}, $vo_name; # Case correction of real VO name.
     }
   }
 }
