@@ -81,32 +81,25 @@ sub processXmlVoContacts {
     $this_vo = $vo_data->{$vo_name};
     $this_vo->{alt_vos} = [] unless $this_vo->{alt_vos};
     push @{$this_vo->{alt_vos}}, $vo_name;
-    next; # Rest is not ready!
     $this_vo->{science_fields} = {} unless $this_vo->{science_fields};
     my $science_nodes = $vo->findnodes('vo_fields_of_science/vo_field_of_science');
     foreach my $science_node ($science_nodes->get_nodelist()) {
       $this_vo->{science_fields}->{$science_node->string_value()} = 1;
     }
-    my $reporting_contact_nodes = $this_vo->findnodes('reporting_contact');
-    foreach my $reporting_contact ($reporting_contact_nodes->get_nodelist()) {
-      my $primary_email = $reporting_contact->findvalue('primary_email')
-        || $reporting_contact->findvalue('alt_email'); # Contact's email
-      next unless $primary_email;
-      my $person = {};
-      push @{$this_vo->{reporting_contacts}}, $primary_email;
-      $person->{vos} = [ ] unless $person->{vos};
-      push @{$person->{vos}}, "$vo";
-      foreach my $attribute qw(first_name middle_name last_name) { # Name info
-        $person->{$attribute} =
-          $reporting_contact->findvalue($attribute);
-      }
-      $self->mergePersonData($primary_email, $person);
-    }
     my $reporting_group_nodes = $vo->findnodes('vo_reporting_group');
     $this_vo->{reporting_groups} = {} unless $this_vo->{reporting_groups};
     foreach my $reporting_group_node ($reporting_group_nodes->get_nodelist()) {
       my $vo_reporting_name = $reporting_group_node->findvalue('vo_reporting_name');
+      $this_vo->{reporting_groups}->{$vo_reporting_name} = {}
+        unless $this_vo->{reporting_groups}->{$vo_reporting_name};
       my $this_reporting_group = $this_vo->{reporting_groups}->{$vo_reporting_name};
+      $this_reporting_group->{FQAN} = [] unless $this_reporting_group->{FQAN};
+      my $fqan_nodes = $reporting_group_node->findnodes('vo_fqan_group/fqan');
+      my %fqan_node_set  = ( (map { $_?($_ => 1):(); } @{$this_reporting_group->{FQAN}}),
+                             (map { $_?($_->string_value() => 1):() } $fqan_nodes->get_nodelist()) );
+      $this_reporting_group->{FQAN} = [ sort keys %fqan_node_set ];
+#      print STDERR "$vo_reporting_name: ", join(", ", @{$this_reporting_group->{FQAN}}), "\n";
+      next; # Rest is not ready!
       $this_reporting_group->{reporting_contacts} = []
         unless $this_reporting_group->{reporting_contacts};
       $this_vo->{reporting_groups}->{$vo_reporting_name} = {}
