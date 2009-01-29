@@ -41,6 +41,7 @@ sub site_report(\@$$);
 sub single_user_report (\@$$$$$$);
 sub reporting_name_report ($);
 sub sites_report ($);
+sub translation_report ($);
 my $seen_people = {};
 my $userid = 0;
 my $column_separator = { title => ' | ', is_sep => '1' };
@@ -800,6 +801,11 @@ EOF
     }
   }
   print $output_filehandle "\n" if ($#label < 1);
+
+  if ($timeperiod eq "month") {
+    print $output_filehandle "Monthly summary of FQAN / voi:VOc to Reporting Name translations:\n";
+    translation_report($output_filehandle);
+  }
 
   # Reporting name summary
   if ($num_rep_names) {
@@ -1570,6 +1576,77 @@ sub reporting_name_report($) {
           $reporting_name_table->body(),
             $reporting_name_table->rule('=', '='),
               "\n";
+}
+
+sub translation_report($) {
+  my $output_filehandle = shift;
+  return unless $vo_query;
+  my $query = <<EOF;
+SELECT VC.VOName as ReportedVOName,
+       VC.ReportableVOName as ReportableVOName,
+       VO.VOName as `VOName`
+FROM VONameCorrection VC
+     join VO on (VC.void = VO.void)
+WHERE $vo_query
+ORDER BY VC.VOName, `VOName`;
+EOF
+  my $sth = $dbh->prepare($query);
+  # print STDERR $sth->{Statement}, "\n";
+  $sth->execute();
+
+
+  my $translation_summary_table = Text::Table->new
+    (
+     {
+      title => '| ', is_sep => '1' },
+     {
+      title => 'FQAN / voi:VOc', align_title => 'center' },
+     $column_separator,
+     {
+      title => 'Reporting Name', align_title => 'center' },
+     $column_separator,
+     {
+      title => 'Source', align_title => 'center' },
+     {
+      title => ' |', is_sep => '1' }
+    );
+  while (my $row = $sth->fetchrow_hashref()) {
+    my @row =
+      (
+       ($row->{ReportedVOName} =~ m&^/&)?
+       $row->{ReportedVOName}:
+       sprintf("%s:%s",
+               $row->{ReportedVOName},
+               $row->{ReportableVOName}),
+       $row->{VOName},
+       "Gratia"
+      );
+    $translation_summary_table->add(@row);
+  }
+  print $output_filehandle
+    $translation_summary_table->rule('_', '_'),
+      $translation_summary_table->title(),
+        $translation_summary_table->rule('_', '|'),
+          $translation_summary_table->body(),
+            $translation_summary_table->rule('=', '='),
+              "\n";
+
+  print $output_filehandle <<EOF;
+Notes for translation summary table:
+
+* The FQAN is obtained from the job's delegated proxy where available.
+
+* In the absence of the FQAN, the site's reverse gridmap file
+  (osg-user-vo-map.txt) is used providing a voi/VOc pair which is
+  used for lookup.
+
+* "Source" is the source of the translation. Valid values are, "Gratia"
+  or, "OIM." Precedence is given to OIM translations where
+  available. Default translations are provided by the collector the
+  first time a particular FQAN or voi/VOc combination is seen.
+
+EOF
+
 }
 
 my $alt_vo_lookup_table;
