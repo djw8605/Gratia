@@ -171,7 +171,7 @@ if ($options{"aux-db-type"}) {
   $options{"aux-db-type"} = "vomrs";
 }
 
-my $vo = $options{vo} || ($options{"vo-report"} and "osg") || "";
+my $vo = actual_vo_name($options{vo} || ($options{"vo-report"} and "osg") || "");
 my $alt_vo_list = $vo_data->{$vo}->{alt_vos} if ($vo and $vo_data->{$vo}->{alt_vos});
 my $vo_list = sprintf("(%s)", join(", ", map { sprintf("'%s'", uc) } ($vo, @$alt_vo_list))) if $vo;
 my $site_list = (exists $options{"site-name"} and scalar @{$options{"site-name"}})?
@@ -1581,20 +1581,6 @@ sub reporting_name_report($) {
 sub translation_report($) {
   my $output_filehandle = shift;
   return unless $vo_query;
-  my $query = <<EOF;
-SELECT VC.VOName as ReportedVOName,
-       VC.ReportableVOName as ReportableVOName,
-       VO.VOName as `VOName`
-FROM VONameCorrection VC
-     join VO on (VC.void = VO.void)
-WHERE $vo_query
-ORDER BY VC.VOName, `VOName`;
-EOF
-  my $sth = $dbh->prepare($query);
-  # print STDERR $sth->{Statement}, "\n";
-  $sth->execute();
-
-
   my $translation_summary_table = Text::Table->new
     (
      {
@@ -1607,9 +1593,37 @@ EOF
      $column_separator,
      {
       title => 'Source', align_title => 'center' },
+     $column_separator,
+     {
+      title => 'Comment', align_title => 'center' },
      {
       title => ' |', is_sep => '1' }
     );
+  my @rows = ();
+  # From OIM
+  foreach my $reporting_name_group (sort keys %{$vo_data->{$vo}->{reporting_groups}}) {
+    foreach my $fqan (@{$vo_data->{$vo}->{reporting_groups}->{$reporting_name_group}->{FQAN}}) {
+      my @row = (
+                 $fqan,
+                 $reporting_name_group,
+                 "OIM", undef
+                );
+      push @rows, \@row;
+    }
+  }
+  # From DB.
+  my $query = <<EOF;
+SELECT VC.VOName as ReportedVOName,
+       VC.ReportableVOName as ReportableVOName,
+       VO.VOName as `VOName`
+FROM VONameCorrection VC
+     join VO on (VC.void = VO.void)
+WHERE $vo_query
+ORDER BY VC.VOName, `VOName`;
+EOF
+  my $sth = $dbh->prepare($query);
+  # print STDERR $sth->{Statement}, "\n";
+  $sth->execute();
   while (my $row = $sth->fetchrow_hashref()) {
     my $ReportableVOName = (defined $row->{ReportableVOName})?($row->{ReportableVOName} || '""'):"NULL";
     my @row =
@@ -1620,10 +1634,33 @@ EOF
                $row->{ReportedVOName},
                $ReportableVOName),
        $row->{VOName},
-       "Gratia"
+       "Gratia", undef
       );
-    $translation_summary_table->add(@row);
+    push @rows, \@row;
   }
+  my @final_rows = ();
+  foreach my $row (sort rows_by_fqan_rep @rows) {
+    # Toss out Gratia records duplicated by OIM records.
+    next if ($row->[2] eq "Gratia" and
+             grep { $_->[2] eq "OIM" and
+                      $_->[0] eq $row->[0] and
+                        $_->[1] eq $row->[1] } @rows);
+    if ($row->[2] eq "OIM" and
+        grep { $_->[2] eq "Gratia" and
+                 $_->[0] eq $row->[0] and
+                   $_->[1] ne $row->[1] } @rows) {
+      $row->[3] = "MISMATCH: Gratia entry overrides until sync.";
+    } elsif ($row->[2] eq "Gratia" and
+             $row->[0] =~ m&^/& and
+             not grep { $_->[2] eq "OIM" and
+                          $_->[0] eq $row->[0] } @rows) {
+      $row->[3] = "No OIM entry.";
+    }
+
+    push @final_rows, $row;
+  }
+  $translation_summary_table->load(@final_rows);
+
   print $output_filehandle
     $translation_summary_table->rule('_', '_'),
       $translation_summary_table->title(),
@@ -1668,6 +1705,13 @@ sub actual_vo_name {
   my $vo = shift;
   return alt_vo_table()->{lc $vo} || $vo;
 }
+
+sub rows_by_fqan_rep {
+  return ($a->[0] cmp $b->[0] or
+          $a->[2] cmp $b->[2] or
+          $a->[1] cmp $b->[1]);
+}
+
 __END__
 
 ### Local Variables:
