@@ -195,6 +195,8 @@ function reset_collector {
              jmx_port => ${jmx_port},
              server_port => ${server_port},
              collector_host => "${webhost}",
+             max_perm_size => "256m",
+             max_heap_size => "1024m",
              db_host => "${dbhost}",
              db_schema => "${schema_name}",
              "properties.attributes" =>
