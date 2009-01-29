@@ -32,6 +32,7 @@ my @test_addresses = ( 'Chris Green <chris.h.green@gmail.com>' );
 GetOptions($options,
            "merge|m",
            "data-file-precdence|p|r",
+           "data-source|D=s@",
            "debug|d",
            "monthly|M",
            "weekly|W",
@@ -95,6 +96,7 @@ $master_vo_list->{"all-vos-test"} = [ @test_addresses ]
 foreach my $vo (sort keys %$master_vo_list) {
   next if (lc $vo eq "all" or lc $vo eq "all-vos-test");
   my @command = ("$osg_users_script", "-v", "$vo", "--aux-db-type=none", "-s", "-V");
+  push @command, map { ( "-D", $_) } @{$options->{"data-source"}} if $options->{"data-source"};
   if ($options->{monthly}) {
     push @command, "-t", "month";
   } elsif ($options->{yearly}) {
