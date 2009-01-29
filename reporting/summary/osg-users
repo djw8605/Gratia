@@ -457,7 +457,7 @@ while (my $row = $sth->fetchrow_hashref()) {
   if ($options{verbose} and $real_vo_name ne $row->{RealVOName}) {
     print STDERR "Translated $row->{RealVOName} -> $real_vo_name\n";
   }
-  my $reporting_name = "$real_vo_name/$row->{ReportingVOName}";
+  my $reporting_name = "$real_vo_name:$row->{ReportingVOName}";
   foreach my $key (@keys) {
     # Totals
     $user_info->{"totals"}->{$key} += $row->{$key};
@@ -667,7 +667,8 @@ sub all_keys {
 }
 
 sub RealVOName {
-  return "IF(VC.VOName LIKE '/%',VC.ReportableVOName, VC.VOName)";
+#  return "IF(VC.VOName LIKE '/%',VC.ReportableVOName, VC.VOName)";
+  return "IFNULL(VC.ReportableVOName, IF(VC.VOName LIKE '/%', SUBSTRING(SUBSTRING_INDEX(VC.VOName, '/', 2), 2), 'Unknown'))"
 }
 
 sub FQAN {
@@ -1366,7 +1367,7 @@ sub single_user_report(\@$$$$$$) {
                        align_title => "center",
                        sample => $max_length_site }):(),
      ($num_rep_names>1)?($column_separator,
-                         { title => "Reporting\nName",
+                         { title => "VO:Reporting\nName",
                            align_title => "center",
                            sample => $max_length_rep_name }):(),
      $column_separator,
@@ -1527,7 +1528,7 @@ sub reporting_name_report($) {
       title => ' |', is_sep => '1' }
     );
   for my $rep_name (keys %{$vomrs_user_info->{"totals"}->{"Reporting Name"}}) {
-    my ($vo_name) = ($rep_name =~ m&^([^/]*)&);
+    my ($vo_name, $short_reporting_name) = ($rep_name =~ m&^([^:]*):(.*)$&);
     foreach my $success (1, 0) {
       my $njobs = $vomrs_user_info->{"totals"}->{"Reporting Name"}->{$rep_name}->{$timeperiod}->{$current_date}->{$success}->{"Njobs"} || 0;
       my $delta_njobs = convert_num($njobs -
@@ -1536,7 +1537,7 @@ sub reporting_name_report($) {
       my @row =
         (
          $want_vo_column?($vo_name):(),
-         $rep_name,
+         $short_reporting_name,
          $success?"Yes":"No",
          num_sites($current_date, $rep_name, $success),
          $njobs,
@@ -1569,7 +1570,7 @@ sub alt_vo_table {
   foreach my $vo (keys %$vo_data) {
     if (exists $vo_data->{$vo}->{alt_vos} and $vo_data->{$vo}->{alt_vos}) {
       foreach my $alt_vo (@{$vo_data->{$vo}->{alt_vos}}) {
-        $alt_vo_lookup_table->{$alt_vo} = $vo;
+        $alt_vo_lookup_table->{lc $alt_vo} = $vo;
       }
     }
   }
@@ -1578,7 +1579,7 @@ sub alt_vo_table {
 
 sub actual_vo_name {
   my $vo = shift;
-  return alt_vo_table()->{$vo} || $vo;
+  return alt_vo_table()->{lc $vo} || $vo;
 }
 __END__
 
