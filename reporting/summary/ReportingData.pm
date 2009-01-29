@@ -80,7 +80,6 @@ sub processXmlVoContacts {
     }
     $this_vo = $vo_data->{$vo_name};
     $this_vo->{alt_vos} = [] unless $this_vo->{alt_vos};
-    print STDERR "INFO: Adding $vo_name to alt_vos information\n";
     push @{$this_vo->{alt_vos}}, $vo_name;
     next; # Rest is not ready!
     $this_vo->{science_fields} = {} unless $this_vo->{science_fields};
