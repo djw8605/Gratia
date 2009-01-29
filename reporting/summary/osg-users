@@ -40,6 +40,7 @@ sub old_report(\@$$);
 sub site_report(\@$$);
 sub single_user_report (\@$$$$$$);
 sub reporting_name_report ($);
+sub sites_report ($);
 my $seen_people = {};
 my $userid = 0;
 my $column_separator = { title => ' | ', is_sep => '1' };
@@ -800,6 +801,7 @@ EOF
   }
   print $output_filehandle "\n" if ($#label < 1);
 
+  # Reporting name summary
   if ($num_rep_names) {
     my @reporting_names = keys %{$vomrs_user_info->{"totals"}->{"Reporting Name"}};
     if ($num_rep_names == 1) {
@@ -810,6 +812,12 @@ EOF
     }
   }
 
+  # Site summary
+  if (num_sites($current_date) > 1) {
+    sites_report($output_filehandle);
+  }
+
+  # Per user report
   foreach my $id (sort by_usage grep /^\d+$/, keys %{$vomrs_user_info}) {
     single_user_report(@lines,
                        $id,
@@ -1190,74 +1198,12 @@ EOF
 
   reporting_name_report($output_filehandle);
 
-  # Main report
-  if (num_sites($current_date) > 1) { # Per-site summary.
-    print $output_filehandle "Site summary: \n";
-    my $site_summary_table = Text::Table->new({ title => '| ', is_sep => '1' },
-                                              {
-                                               title => 'SiteName', align_title => 'center' },
-                                              $column_separator,
-                                              {
-                                               title => "Job\nSuccess?", align_title => 'center' },
-                                              $column_separator,
-                                              {
-                                               title => "# Users", align_title => "center", align => 'num' },
-                                              $column_separator,
-                                              {
-                                               title => "# Jobs", align_title => "center", align => 'num' },
-                                              $column_separator,
-                                              {
-                                               title => "Wall\nTime (h)", align_title => "center", align => 'num' },
-                                              $column_separator,
-                                              {
-                                               title => "Delta\nUsers", align_title => "center", align => 'num' },
-                                              $column_separator,
-                                              {
-                                               title => "Delta\nJobs", align_title => "center", align => 'num' },
-                                              $column_separator,
-                                              {
-                                               title => "Delta Wall\nTime (h)", align_title => "center", align => 'num' },
-                                              {
-                                               title => ' |', is_sep => '1' });
-    foreach my $site (sort keys %$sites) {
-      foreach my $success (1, 0) {
-        my $num_users_current = scalar keys %{$vomrs_user_info->{"totals"}->{$timeperiod}->{$current_date}->{Site}->{$site}->{USER}};
-        my $num_users_previous = scalar keys %{$vomrs_user_info->{"totals"}->{$timeperiod}->{$previous_date}->{Site}->{$site}->{USER}};
-        my @row =
-          (
-           $site,
-           $success?"Yes":"No",
-           $num_users_current || 0,
-           $vomrs_user_info->{"totals"}->{$timeperiod}->{$current_date}->{Site}->{$site}->{$success}->{"Njobs"} || 0,
-           convert_num($vomrs_user_info->{"totals"}->{$timeperiod}->{$current_date}->{Site}->{$site}->{$success}->{"WallDuration"} || 0,
-                       "WallDuration"),
-           convert_num($num_users_current || 0 - $num_users_previous || 0, "Users", 1),
-           convert_num(($vomrs_user_info->{"totals"}->{$timeperiod}->{$current_date}->{Site}->{$site}->{$success}->{"Njobs"} || 0) -
-                       ($vomrs_user_info->{"totals"}->{$timeperiod}->{$previous_date}->{Site}->{$site}->{$success}->{"Njobs"} || 0),
-                       "Njobs", 1),
-           convert_num(($vomrs_user_info->{"totals"}->{$timeperiod}->{$current_date}->{Site}->{$site}->{$success}->{"WallDuration"} || 0) -
-                       ($vomrs_user_info->{"totals"}->{$timeperiod}->{$previous_date}->{Site}->{$site}->{$success}->{"WallDuration"} || 0),
-                       "WallDuration", 1)
-          );
-        if ($row[3] || $row[6]) {
-          $site_summary_table->add(@row);
-        }
-      }
-    }
-    print $output_filehandle
-      $site_summary_table->rule('_', '_'),
-        $site_summary_table->title(),
-          $site_summary_table->rule('_', '|'),
-            $site_summary_table->body(),
-              $site_summary_table->rule('=', '='),
-                "\n";
+  # Site summary
+  if (num_sites($current_date) > 1) {
+    sites_report($output_filehandle);
   }
 
-  # Main report.
-  #  print STDERR "Producing individual user reports for ",
-  #    scalar keys %{$vomrs_user_info},
-  #      " users:\n";
-
+  # Main report
   foreach my $id (sort by_usage grep /^\d+$/, keys %{$vomrs_user_info}) {
     my $name = $vomrs_user_info->{$id}->{firstname} || '';
     $name = "$name " if $name;
@@ -1489,6 +1435,69 @@ sub single_user_report(\@$$$$$$) {
     $user_table->body(-1, 1),
       $user_table->rule('=', '='),
         "\n";
+}
+
+sub sites_report($) {
+  my $output_filehandle = shift;
+  print $output_filehandle "Site summary: \n";
+  my $site_summary_table = Text::Table->new({ title => '| ', is_sep => '1' },
+                                            {
+                                             title => 'SiteName', align_title => 'center' },
+                                            $column_separator,
+                                            {
+                                             title => "Job\nSuccess?", align_title => 'center' },
+                                            $column_separator,
+                                            {
+                                             title => "# Users", align_title => "center", align => 'num' },
+                                            $column_separator,
+                                            {
+                                             title => "# Jobs", align_title => "center", align => 'num' },
+                                            $column_separator,
+                                            {
+                                             title => "Wall\nTime (h)", align_title => "center", align => 'num' },
+                                            $column_separator,
+                                            {
+                                             title => "Delta\nUsers", align_title => "center", align => 'num' },
+                                            $column_separator,
+                                            {
+                                             title => "Delta\nJobs", align_title => "center", align => 'num' },
+                                            $column_separator,
+                                            {
+                                             title => "Delta Wall\nTime (h)", align_title => "center", align => 'num' },
+                                            {
+                                             title => ' |', is_sep => '1' });
+  foreach my $site (sort keys %$sites) {
+    foreach my $success (1, 0) {
+      my $num_users_current = scalar keys %{$vomrs_user_info->{"totals"}->{$timeperiod}->{$current_date}->{Site}->{$site}->{USER}};
+      my $num_users_previous = scalar keys %{$vomrs_user_info->{"totals"}->{$timeperiod}->{$previous_date}->{Site}->{$site}->{USER}};
+      my @row =
+        (
+         $site,
+         $success?"Yes":"No",
+         $num_users_current || 0,
+         $vomrs_user_info->{"totals"}->{$timeperiod}->{$current_date}->{Site}->{$site}->{$success}->{"Njobs"} || 0,
+         convert_num($vomrs_user_info->{"totals"}->{$timeperiod}->{$current_date}->{Site}->{$site}->{$success}->{"WallDuration"} || 0,
+                     "WallDuration"),
+         convert_num($num_users_current || 0 - $num_users_previous || 0, "Users", 1),
+         convert_num(($vomrs_user_info->{"totals"}->{$timeperiod}->{$current_date}->{Site}->{$site}->{$success}->{"Njobs"} || 0) -
+                     ($vomrs_user_info->{"totals"}->{$timeperiod}->{$previous_date}->{Site}->{$site}->{$success}->{"Njobs"} || 0),
+                     "Njobs", 1),
+         convert_num(($vomrs_user_info->{"totals"}->{$timeperiod}->{$current_date}->{Site}->{$site}->{$success}->{"WallDuration"} || 0) -
+                     ($vomrs_user_info->{"totals"}->{$timeperiod}->{$previous_date}->{Site}->{$site}->{$success}->{"WallDuration"} || 0),
+                     "WallDuration", 1)
+        );
+      if ($row[3] || $row[6]) {
+        $site_summary_table->add(@row);
+      }
+    }
+  }
+  print $output_filehandle
+    $site_summary_table->rule('_', '_'),
+      $site_summary_table->title(),
+        $site_summary_table->rule('_', '|'),
+          $site_summary_table->body(),
+            $site_summary_table->rule('=', '='),
+              "\n";
 }
 
 sub reporting_name_report($) {
