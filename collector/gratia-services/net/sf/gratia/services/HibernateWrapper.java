@@ -48,7 +48,7 @@ public class HibernateWrapper {
 
         try {
             hibernateConfiguration = new org.hibernate.cfg.Configuration();
-            hibernateConfiguration.addDirectory(new File(net.sf.gratia.util.Configuration.getConfigurationPath()));
+            hibernateConfiguration.addDirectory(new File(net.sf.gratia.util.Configuration.getHibernateConfigurationPath()));
             //          hibernateConfiguration.addFile(new File(net.sf.gratia.util.Configuration.getGratiaHbmPath()));
             //          hibernateConfiguration.addFile(new File(net.sf.gratia.util.Configuration.getJobUsagePath()));
             //          hibernateConfiguration.addFile(new File(net.sf.gratia.util.Configuration.getMetricRecordPath()));

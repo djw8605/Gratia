@@ -21,6 +21,13 @@ public class Configuration {
         return path;
     }
 
+    public static String getHibernateConfigurationPath()
+    {
+        String path = System.getProperty("catalina.home");
+        path = path + "/gratia/hibernate";
+        return path;
+    }
+
     public static String getHibernatePath()
     {
         return getConfigurationPath() + "/" + "hibernate.cfg.xml";

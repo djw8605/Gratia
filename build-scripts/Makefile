@@ -407,6 +407,7 @@ release: gratia
 	cp $(configuration)/*gov $(configuration)/*xml $(configuration)/*properties $(staticScript)/*.py tarball/tomcat/v55/gratia; \
 	chmod 755 tarball/tomcat/v55/gratia/*.py
 	cp $(configuration)/*sql $(configuration)/*sh tarball/tomcat/v55/gratia; \
+	cp -R $(configuration)/hibernate tarball/tomcat/v55/gratia; \
 	chmod 700 tarball/tomcat/v55/gratia/post-install.sh; \
 	perl -wapi.bak -e 's&CMD_(?:PREAMBLE|PREFIX|SUFFIX)&&g' tarball/tomcat/v55/gratia/post-install.sh; \
 	rm -f tarball/tomcat/v55/gratia/post-install.sh.bak; \
@@ -508,6 +509,7 @@ gratia: clean util services servlets administration soap reporting reports commo
 	echo "$(gratia_release_data)" >tarball/gratia-release
 	cp $(configuration)/UserVoMap.* $(configuration)/*xml $(staticScript)/*.py $(configuration)/*properties tarball; \
 	cp $(configuration)/*sql $(configuration)/*sh tarball; \
+	cp -R $(configuration)/hibernate tarball; \
 	cp $(security)/scripts/voms-server.sh         tarball; chmod 744 tarball/voms-server.sh
 	chmod 755 tarball/*.py
 	chmod 700 tarball/post-install.sh; \

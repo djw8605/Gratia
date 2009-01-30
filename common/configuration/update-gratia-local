@@ -363,18 +363,19 @@ done
 stop_tomcat
 
 #-----------------------
-# Cleanup miscellaneous files that could cause trouble
-#-----------------------
-misc_cleanup
-
-#-----------------------
 # Update gratia directory
 #-----------------------
 echo
 echo
 echo "... updating $tomcat_gratia"
 mkdir -p $tomcat_gratia
+# retrieve the latest pre-tar cleanup script
+tar xf $target_dir/gratia.tar ./cleanup_misc -C $tomcat_gratia
+# Run it to clean up some miscellaneous files that could cause trouble
+misc_cleanup
+# Untar the whole thing now.
 tar xf $target_dir/gratia.tar -C $tomcat_gratia
+# ls check.
 ls -l $tomcat_gratia
 
 #----------------------------

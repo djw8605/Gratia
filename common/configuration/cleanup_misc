@@ -3,10 +3,12 @@
 # Script to remove libs and other files in common dirs prior to
 # updating.
 
+set -x
 rm -fv  gratia/*.hbm.xml \
+        gratia/*.cfg.xml \
         conf/logging.properties \
         conf/log4j-trustmanager.properties
 
-rm -rfv common/classes/net/sf/gratia
-
+rm -rfv gratia/hibernate common/classes/net/sf/gratia
+set +x
 exit $?
