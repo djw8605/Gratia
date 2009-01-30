@@ -8,7 +8,6 @@
 
 </head>
 <body>
-<form id="form1" name="form1" method="post" action="">
 <h1 align="center" class="osgcolor">&nbsp;&nbsp;&nbsp;&nbsp;Gratia Administration&nbsp;&nbsp;&nbsp;&nbsp;</h1>
   <h3 align="center">#recordtable# Replication Administration </h3>
   <table width="100%" border="1">
@@ -26,7 +25,8 @@
       <th bgcolor="#999999" scope="col">Actions</th>
     </tr>
     <tr id="datarow:#replicationid#">
-      <td>#replicationid#</td>
+<form id="form-#replicationid#" name="form-#replicationid#" method="post" action="replicationtable.html">
+      <td><input type="hidden" name="replicationid" value="#replicationid#" />#replicationid#</td>
       <td>
           #openconnection#
       </td>
@@ -42,14 +42,16 @@
               <colgroup><col width="50%" /><col width="50%" /></colgroup>
               #actionblock#
         </table></td>
+</form>
     </tr>
     <tr>
+<form id="form-end" name="form-end" method="post" action="replicationtable.html">
       <td colspan="11" style="text-align: center">
-      <label><input type="submit" name="refresh" value="Refresh" /></label>&nbsp;&nbsp;&nbsp;
-      <label><input type="submit" name="new" value="New Entry" /></label></td>
+      <label><input type="submit" name="action" value="Refresh" /></label>&nbsp;&nbsp;&nbsp;
+      <label><input type="submit" name="action" value="New Entry" /></label></td>
+</form>
     </tr>
   </table>
-</form>
 <pre id="message" class="msg">#message#</pre>
 
 </body>
