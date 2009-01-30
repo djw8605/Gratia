@@ -101,6 +101,24 @@ void process(TSQLServer *db, const char*sql) {
    delete stmt;
 }
 
+Long_t getMax(TSQLServer *db, const char *sql = "select max(dbid) from JobUsageRecord") 
+{
+   Info("Report","Running : %s\n",sql);
+   TSQLStatement *stmt = db->Statement(sql);
+
+   if (stmt==0) return 0;
+
+   stmt->Process();
+   stmt->StoreResult();
+      
+   Long_t result = 0;
+   if (stmt->NextResultRow()) {
+     result = stmt->GetLong(0);
+   }
+   delete stmt;
+   return result;
+}
+
 TSQLServer *getServer() {
    static TSQLServer *db = TSQLServer::Connect("mysql://gratia-db01.fnal.gov:3320/gratia","reader", "reader");
 
@@ -136,7 +154,11 @@ void downloadxml(const char *from, const char *to) {
   TSQLServer *db = getServer();
 
   Long_t stride =  1000000;
-  for(Long_t l = 0; l < 26000000; l += stride) {
+  //Long_t min_dbid = 17070000;
+  //Long_t max_dbid = 42813485;
+  Long_t min_dbid = 42070000;
+  Long_t max_dbid = getMax(db);
+  for(Long_t l = min_dbid; l < max_dbid; l += stride) {
     downloadxml(db,from,to,l,l+stride);
   }
 }
