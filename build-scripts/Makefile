@@ -253,7 +253,7 @@ ${target}/gratia-administration.war: util security \
 	cp $(administration)/WebContent/*.jsp war
 	cp $(administration)/WebContent/*.js war
 	cp $(administration)/WebContent/images/*.gif war/images
-	cp $(services)/ehcache.xml war/WEB-INF/classes/
+	cp $(administration)/ehcache.xml war/WEB-INF/classes/
 	cp $(services)/c3p0.properties war/WEB-INF/classes/
 	# cp $(docs)/*.html war # included in the administration WebContent
 	cp $(util)/net/sf/gratia/util/Logging.class war/WEB-INF/classes/net/sf/gratia/util
