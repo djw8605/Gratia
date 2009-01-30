@@ -457,13 +457,16 @@ function upload_war()
 {
     stop_server
     ssh -l root ${webhost} rm -rf ${tomcatpwd}/webapps/$WAR\*
-    scp ../../target/$WAR.war ${webhost}:${tomcatpwd}/webapps
+    scp ../../target/$WAR.war root@${webhost}:${tomcatpwd}/webapps
     start_server
 }
 
 #--- get command line args ----
-while getopts :tshcfdlw:p: OPT; do
+while getopts :tshcfdln:w:p: OPT; do
     case $OPT in
+        n)  schema_name=$OPTARG
+            tomcatpwd=/data/tomcat-$OPTARG
+            ;;
         w)  do_war=1
             WAR=$OPTARG
             ;;
