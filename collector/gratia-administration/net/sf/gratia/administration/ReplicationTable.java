@@ -192,7 +192,7 @@ public class ReplicationTable extends HttpServlet {
       } else {
          fHtml = fHtml.replace("#message#", "");
       }
-      // Logging.warning("replication html:\n"+fHtml);
+
       fMessage = null;
       writer.write(fHtml);
       writer.flush();
@@ -210,9 +210,8 @@ public class ReplicationTable extends HttpServlet {
       Enumeration pars = request.getParameterNames();
       while (pars.hasMoreElements()) {
          String par = (String) pars.nextElement();
-         Logging.warning("ReplicationTable: Post Parameter " + par + " : " + request.getParameter(par));
+         Logging.debug("ReplicationTable: Post Parameter " + par + " : " + request.getParameter(par));
       }
-      Logging.warning("ReplicationTable: Post values "+fModify);
                       
 
       setup(request, response);
