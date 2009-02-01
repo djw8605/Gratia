@@ -4,17 +4,6 @@ eval '(exit $?0)' && eval 'exec perl -w -S $0 ${1+"$@"}'
 
 use strict;
 
-use File::Basename;
-
-use Getopt::Long;
-use Pod::Usage;
-
-use Text::Table; # Available from CPAN / DAG repo.
-
-use Date::Calc ':all'; # Available from CPAN / DAG repo.
-
-use ReportingData;
-
 use vars qw($script_top_dir);
 
 BEGIN {
@@ -33,6 +22,18 @@ use FileHandle;
 use DBI();
 
 use IPC::Run; # Available from CPAN / DAG repo.
+
+use ReportingData;
+
+use File::Basename;
+
+use Getopt::Long;
+use Pod::Usage;
+
+use Text::Table; # Available from CPAN / DAG repo.
+
+use Date::Calc ':all'; # Available from CPAN / DAG repo.
+
 
 sub wrapped_report(\@\&;$$);
 sub vo_report(\@$$);
