@@ -4,6 +4,8 @@ eval '(exit $?0)' && eval 'exec perl -w -S $0 ${1+"$@"}'
 
 use strict;
 
+use File::Basename;
+
 use vars qw($script_top_dir);
 
 BEGIN {
@@ -24,8 +26,6 @@ use DBI();
 use IPC::Run; # Available from CPAN / DAG repo.
 
 use ReportingData;
-
-use File::Basename;
 
 use Getopt::Long;
 use Pod::Usage;
