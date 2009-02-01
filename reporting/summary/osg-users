@@ -26,7 +26,7 @@ BEGIN {
   }
 }
 
-# use lib "$script_top_dir/lib";
+use lib "$script_top_dir";
 
 use FileHandle;
 
