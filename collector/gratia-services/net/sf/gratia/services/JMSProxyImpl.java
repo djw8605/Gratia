@@ -75,6 +75,14 @@ public class JMSProxyImpl extends UnicastRemoteObject implements JMSProxy {
         collectorService.startDatabaseUpdateThreads();
     }
 
+    public Boolean reaperActive() throws RemoteException {
+        return collectorService.reaperActive();
+    }
+
+    public void runReaper() throws RemoteException {
+        collectorService.runReaper();
+    }
+
     public Boolean databaseUpdateThreadsActive() throws RemoteException {
         return collectorService.databaseUpdateThreadsActive();
     }

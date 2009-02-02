@@ -428,6 +428,15 @@ public class CollectorService implements ServletContextListener {
         }
     }
 
+    public synchronized Boolean reaperActive() {
+        return HistoryReaper.inProgress();
+    }
+
+    public synchronized void runReaper() {
+        HistoryReaper reaper = new HistoryReaper();
+        new Thread(reaper).start();
+    }
+
     public synchronized Boolean operationsDisabled() {
         return !opsEnabled;
     }
@@ -761,7 +770,10 @@ public class CollectorService implements ServletContextListener {
         private Duration checkInterval;
         private static final int defaultCheckIntervalHours = 6;
 
+        private HistoryReaper reaper;
+
         public HistoryMonitor(Properties p) {
+            reaper = new HistoryReaper();
             try {
                 checkInterval =
                     new Duration(p.getProperty("maintain.history.checkInterval",
@@ -783,7 +795,7 @@ public class CollectorService implements ServletContextListener {
                     Logging.debug("HistoryMonitor: going to sleep for " +
                                   checkInterval + "ms.");
                     Thread.sleep(checkInterval);
-                    new HistoryReaper();
+                    new Thread(reaper).start();
                 }
                 catch (Exception ignore) {
                 }

@@ -9,6 +9,8 @@ public interface JMSProxy extends java.rmi.Remote {
     public Boolean databaseUpdateThreadsActive() throws RemoteException;
     public void stopReplicationService() throws RemoteException;
     public void startReplicationService() throws RemoteException;
+    public Boolean reaperActive() throws RemoteException;
+    public void runReaper() throws RemoteException;
     public Boolean replicationServiceActive() throws RemoteException;
     public Boolean servletEnabled() throws RemoteException;
     public Boolean operationsDisabled() throws RemoteException;

@@ -146,12 +146,13 @@ public class SystemAdministration extends HttpServlet {
     }
 
     public void process() {
-        String operationsStatus = "Unknown";
-        String listenerStatus = "Unknown";
-        String replicationStatus = "Unknown";
-        String servletStatus = "Unknown";
-        String housekeepingStatus = "Unknown";
-        String checksumUpgradeStatus = "Unknown";
+        String operationsStatus = "UNKNOWN";
+        String listenerStatus = "UNKNOWN";
+        String replicationStatus = "UNKNOWN";
+        String servletStatus = "UNKNOWN";
+        String housekeepingStatus = "UNKNOWN";
+        String checksumUpgradeStatus = "UNKNOWN";
+        String reaperStatus = "UNKNOWN";
 
         if (proxy == null) {
             initialize();
@@ -182,6 +183,12 @@ public class SystemAdministration extends HttpServlet {
                     } else {
                         servletStatus = "Stopped";
                     }
+                    flag = proxy.reaperActive();
+                    if (flag) {
+                        reaperStatus = "RUNNING";
+                    } else {
+                        reaperStatus = "NOT RUNNING";
+                    }
                     housekeepingStatus = proxy.housekeepingServiceStatus();
                     checksumUpgradeStatus = proxy.checksumUpgradeStatus();
                 }
@@ -195,9 +202,9 @@ public class SystemAdministration extends HttpServlet {
 
         if (operationsStatus.equals("SAFE")) {
             html = html.replaceAll("#opstatus#",
-                                   "<font color=\"fuchsia\"><strong>DISABLED</strong></font>");
-            html = html.replaceAll("#opcomment#", 
-                                   "<a href=\"systemadministration.html?action=enableOperations\"><strong>Enable</strong></a><br />To disable safe mode start, set <tt>gratia.service.safeStart = 0</tt> in service-configuration.properties.");
+                                   "<font color=\"fuchsia\"><strong>DISABLED</strong></font>").
+                replaceAll("#opcomment#", 
+                           "<a href=\"systemadministration.html?action=enableOperations\"><strong>Enable</strong></a><br />To disable safe mode start, set <tt>gratia.service.safeStart = 0</tt> in service-configuration.properties.");
             listenerStatus = "SAFE";
             replicationStatus = "SAFE";
             servletStatus = "SAFE";
@@ -205,84 +212,95 @@ public class SystemAdministration extends HttpServlet {
             checksumUpgradeStatus = "SAFE";
         } else if (operationsStatus.equals("Active")) {
             html = html.replaceAll("#opstatus#",
-                                   "<font color=\"green\"><strong>ENABLED</strong></font>");
-            html = html.replaceAll("#opcomment#",
-                                   "To start in safe mode, set <strong><tt>gratia.service.safeStart = 1</tt></strong> in service-configuration.properties.");
+                                   "<font color=\"green\"><strong>ENABLED</strong></font>").
+                replaceAll("#opcomment#",
+                           "To start in safe mode, set <strong><tt>gratia.service.safeStart = 1</tt></strong> in service-configuration.properties.");
         } else {
             html = html.replaceAll("#opstatus#",
-                                   "<font color=\"red\"><strong>UNKNOWN</strong></font>");
-            html = html.replaceAll("#opcomment#",
-                                   "Check logs for errors");
+                                   "<font color=\"red\"><strong>UNKNOWN</strong></font>").
+                replaceAll("#opcomment#",
+                           "Check logs for errors");
         }
 
-        html = html.replaceAll("#replaystatus#", replayStatus);
-        html = html.replaceAll("#replayrecordsprocessed#","" + replayRecordsProcessed);
-        html = html.replaceAll("#replayrecordsskipped#","" + replayRecordsSkipped);
+        html = html.replaceAll("#replaystatus#", replayStatus).
+            replaceAll("#replayrecordsprocessed#","" + replayRecordsProcessed).
+            replaceAll("#replayrecordsskipped#","" + replayRecordsSkipped);
 
         if (listenerStatus.equals("Active")) {
             html = html.replaceAll("#listenerstatus#",
-                                   "<font color=\"green\"><strong>ACTIVE</strong></font>");
-            html = html.replaceAll("#listenercomment#",
-                                   "<a href=\"systemadministration.html?action=stopDatabaseUpdateThreads\"><strong>Stop</strong></a>.");
+                                   "<font color=\"green\"><strong>ACTIVE</strong></font>").
+                replaceAll("#listenercomment#",
+                           "<a href=\"systemadministration.html?action=stopDatabaseUpdateThreads\"><strong>Stop</strong></a>.");
         } else if (listenerStatus.equals("SAFE")) {
             html = html.replaceAll("#listenerstatus#",
-                                   "<font color=\"fuchsia\"><strong>SAFE</strong></font>");
-            html = html.replaceAll("#listenercomment#",
-                                   "See <strong>Global Operational Status</strong>, above.");
+                                   "<font color=\"fuchsia\"><strong>SAFE</strong></font>").
+                replaceAll("#listenercomment#",
+                           "See <strong>Global Operational Status</strong>, above.");
         } else if (listenerStatus.equals("Stopped")) {
             html = html.replaceAll("#listenerstatus#",
-                                   "<font color=\"red\"><strong>STOPPED</strong></font>");
-            html = html.replaceAll("#listenercomment#",
-                                   "<a href=\"systemadministration.html?action=startDatabaseUpdateThreads\"><strong>Start</strong></a>.");
+                                   "<font color=\"red\"><strong>STOPPED</strong></font>").
+                replaceAll("#listenercomment#",
+                           "<a href=\"systemadministration.html?action=startDatabaseUpdateThreads\"><strong>Start</strong></a>.");
         } else {
             html = html.replaceAll("#listenerstatus#",
-                                   "<font color=\"red\"><strong>UNKNOWN</strong></font>");
-            html = html.replaceAll("#listenercomment#",
-                                   "Check log for errors.");
+                                   "<font color=\"red\"><strong>UNKNOWN</strong></font>").
+                replaceAll("#listenercomment#",
+                           "Check log for errors.");
         }
 
         if (replicationStatus.equals("Active")) {
             html = html.replaceAll("#replicationstatus#",
-                                   "<font color=\"green\"><strong>ACTIVE</strong></font>");
-            html = html.replaceAll("#replicationcomment#",
-                                   "<a href=\"systemadministration.html?action=stopReplication\"><strong>Stop</strong></a>.");
+                                   "<font color=\"green\"><strong>ACTIVE</strong></font>").
+                replaceAll("#replicationcomment#",
+                           "<a href=\"systemadministration.html?action=stopReplication\"><strong>Stop</strong></a>.");
         } else if (replicationStatus.equals("SAFE")) {
             html = html.replaceAll("#replicationstatus#",
-                                   "<font color=\"fuchsia\"><strong>SAFE</strong></font>");
-            html = html.replaceAll("#replicationcomment#",
-                                   "See <strong>Global Operational Status</strong>, above.");
+                                   "<font color=\"fuchsia\"><strong>SAFE</strong></font>").
+                replaceAll("#replicationcomment#",
+                           "See <strong>Global Operational Status</strong>, above.");
         } else if (replicationStatus.equals("Stopped")) {
             html = html.replaceAll("#replicationstatus#",
-                                   "<font color=\"red\"><strong>STOPPED</strong></font>");
-            html = html.replaceAll("#replicationcomment#",
-                                   "<a href=\"systemadministration.html?action=startReplication\"><strong>Start</strong></a>.");
+                                   "<font color=\"red\"><strong>STOPPED</strong></font>").
+                replaceAll("#replicationcomment#",
+                           "<a href=\"systemadministration.html?action=startReplication\"><strong>Start</strong></a>.");
         } else {
             html = html.replaceAll("#replicationstatus#",
-                                   "<font color=\"red\"><strong>UNKNOWN</strong></font>");
-            html = html.replaceAll("#replicationcomment#",
-                                   "Check log for errors.");
+                                   "<font color=\"red\"><strong>UNKNOWN</strong></font>").
+                replaceAll("#replicationcomment#",
+                           "Check log for errors.");
         }
 
         if (servletStatus.equals("Active")) {
             html = html.replaceAll("#servletstatus#",
-                                   "<font color=\"green\"><strong>ACTIVE</strong></font>");
-            html = html.replaceAll("#servletcomment#",
-                                   "<a href=\"systemadministration.html?action=disableServlet\"><strong>Stop</strong></a>.");
+                                   "<font color=\"green\"><strong>ACTIVE</strong></font>").
+                replaceAll("#servletcomment#",
+                           "<a href=\"systemadministration.html?action=disableServlet\"><strong>Stop</strong></a>.");
         } else if (servletStatus.equals("SAFE")) {
             html = html.replaceAll("#servletstatus#",
-                                   "<font color=\"fuchsia\"><strong>SAFE</strong></font>");
-            html = html.replaceAll("#servletcomment#",
-                                   "See <strong>Global Operational Status</strong>, above.");
+                                   "<font color=\"fuchsia\"><strong>SAFE</strong></font>").
+                replaceAll("#servletcomment#",
+                           "See <strong>Global Operational Status</strong>, above.");
         } else if (servletStatus.equals("Stopped")) {
             html = html.replaceAll("#servletstatus#",
-                                   "<font color=\"red\"><strong>STOPPED</strong></font>");
-            html = html.replaceAll("#servletcomment#",
-                                   "<a href=\"systemadministration.html?action=enableServlet\"><strong>Start</strong></a>.");
+                                   "<font color=\"red\"><strong>STOPPED</strong></font>").
+                replaceAll("#servletcomment#",
+                           "<a href=\"systemadministration.html?action=enableServlet\"><strong>Start</strong></a>.");
         } else {
             html = html.replaceAll("#servletstatus#",
-                                   "<font color=\"red\"><strong>UNKNOWN</strong></font>");
-            html = html.replaceAll("#servletcomment#",
-                                   "Check log for errors.");
+                                   "<font color=\"red\"><strong>UNKNOWN</strong></font>").
+                replaceAll("#servletcomment#",
+                           "Check log for errors.");
+        }
+
+        if (reaperStatus.equals("RUNNING")) {
+            html = html.replaceAll("#reaperstatus#",
+                                   "<font color=\"fucshia\"><strong>RUNNING</strong></font>").
+                replaceAll("#reapercomment#", "");
+        } else {
+            html = html.replaceAll("#reaperstatus#",
+                                   "<font color=\"green\"><strong>NOT RUNNING</strong></font>").
+                replaceAll("#reapercomment#",
+                           "<a href=\"systemadministration.html?action=runReaper\"><strong>Run now</strong></a>.");
         }
 
         String color;
@@ -303,7 +321,7 @@ public class SystemAdministration extends HttpServlet {
             color = "green";
             html = html.replaceAll("#housekeepingcomment#",
                                    "<a href=\"systemadministration.html?action=startHousekeepingNow\"><strong>Run now</strong></a>, <a href=\"systemadministration.html?action=stopHousekeeping\"><strong>Stop</strong></a> after current run or <a href=\"systemadministration.html?action=disableHousekeeping\"><strong>Stop and disable</strong></a> housekeeping service and the rejection of incoming old records after current run.");
-        } else if (housekeepingStatus.equalsIgnoreCase("Unknown")) {
+        } else if (housekeepingStatus.equalsIgnoreCase("UNKNOWN")) {
             color = "red";
             html = html.replaceAll("#housekeepingcomment#",
                                    "Check log for errors.");
@@ -403,6 +421,8 @@ public class SystemAdministration extends HttpServlet {
                 proxy.disableHousekeepingService();
             } else if (action.equals("startHousekeepingNow")) {
                 proxy.startHousekeepingActionNow();
+            } else if (action.equals("runReaper")) {
+                proxy.runReaper();
             } else {
                 Logging.warning("SystemAdministration.executeProxyAction called with unknown action " + action);
             }
