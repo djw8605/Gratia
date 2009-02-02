@@ -93,11 +93,8 @@ public class DatabaseMaintenance {
         if (liveVersion < 6) Execute("DROP VIEW IF EXISTS Probe;");
         if (liveVersion < 65) Execute("DROP TABLE IF EXISTS trace;");
 
-        String hibernate_cfg = System.getProperty("catalina.home");
-        hibernate_cfg = xp.replaceAll(hibernate_cfg, "\\", "" + File.separatorChar);
-        hibernate_cfg = hibernate_cfg + File.separatorChar + "gratia" + File.separatorChar + "hibernate.cfg.xml";
-
-        String grep_cmd[] = {"grep", "-e", "org\\.hibernate\\.dialect\\.MySQLInnoDBDialect", hibernate_cfg};
+        String grep_cmd[] = {"grep", "-e", "org\\.hibernate\\.dialect\\.MySQLInnoDBDialect",
+                             net.sf.gratia.util.Configuration.getHibernatePath()};
 
         int result = Execute.execute(grep_cmd);
         if (result == 0) {

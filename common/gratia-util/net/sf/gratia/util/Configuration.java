@@ -30,37 +30,7 @@ public class Configuration {
 
     public static String getHibernatePath()
     {
-        return getConfigurationPath() + "/" + "hibernate.cfg.xml";
-    }
-
-    public static String getGratiaHbmPath()
-    {
-        return getConfigurationPath() + "/" + "Gratia.hbm.xml";
-    }
-
-    public static String getJobUsagePath()
-    {
-        return getConfigurationPath() + "/" + "JobUsage.hbm.xml";
-    }
-
-    public static String getJobUsageSummaryPath()
-    {
-        return getConfigurationPath() + "/" + "JobUsageSummary.hbm.xml";
-    }
-
-    public static String getNodeSummaryPath()
-    {
-        return getConfigurationPath() + "/" + "NodeSummary.hbm.xml";
-    }
-
-    public static String getTracePath()
-    {
-        return getConfigurationPath() + "/" + "Trace.hbm.xml";
-    }
-
-    public static String getMetricRecordPath()
-    {
-        return getConfigurationPath() + "/" + "MetricRecord.hbm.xml";
+        return getHibernateConfigurationPath() + "/" + "hibernate.cfg.xml";
     }
 
     public static String getJMSPath()
