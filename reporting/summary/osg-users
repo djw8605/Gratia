@@ -813,7 +813,7 @@ EOF
     my @reporting_names = keys %{$vomrs_user_info->{"totals"}->{"Reporting Name"}};
     if ($num_rep_names == 1) {
       print $output_filehandle "Active reporting name: ",
-        $reporting_names[0], "\n";
+        $reporting_names[0], "\n\n";
     } else {
       reporting_name_report($output_filehandle);
     }
