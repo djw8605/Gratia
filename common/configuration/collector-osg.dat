@@ -54,7 +54,7 @@
     "service.lifetime.JobUsageRecord" => "UNLIMITED" # Very low volume
    }
  },
- "osg-transfer" =>
+ "gratia-osg-transfer" =>
  { tomcat_user => "daemon",
    tomcat_group => "daemon",
    instance_name => "gratia",
