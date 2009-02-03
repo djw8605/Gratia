@@ -73,12 +73,14 @@ public class ReplicationTable extends HttpServlet {
    
    // Which Records are we replicating
    String RecordTable = "JobUsageRecord";
+    String fApplicationURL = "replicationtable.html";
    
    public void init(ServletConfig config) throws ServletException {
       // javax.servlet.ServletConfig.getInitParameter() 
       String what = config.getInitParameter("RecordType");
       if ((what != null) && (what.length() > 0)) {
          RecordTable = what;
+         fApplicationURL = RecordTable.toLowerCase() + "replicationtable.html";
       }
       Name = config.getServletName();
    }
@@ -385,7 +387,9 @@ public class ReplicationTable extends HttpServlet {
          buffer.append(process(newEntry, fModify));
       }
       fHtml = fHtml.replace(fRow, buffer.toString());
-      fHtml = fHtml.replace("#recordtable#", RecordTable);
+      fHtml = fHtml.replace("#recordtable#", RecordTable)
+          .replaceAll("#applicationurl#",
+                      fApplicationURL);
    }
    
    String process(Replication repEntry, Boolean modifyThisEntry) {
@@ -505,7 +509,7 @@ public class ReplicationTable extends HttpServlet {
                                        "              <input type=\"submit\" name=\"action\" value=\"Modify\"/></td></tr>");
          }
          newrow = newrow.replaceAll("#webpagename#", Name)
-                        .replaceAll("#replicationid#", Integer.toString(repEntry.getreplicationid()));
+             .replaceAll("#replicationid#", Integer.toString(repEntry.getreplicationid()));
       }
       return newrow;
    }
