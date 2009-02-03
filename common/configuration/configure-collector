@@ -232,7 +232,10 @@ chomp $default_remote_host;
 my $default_prefix = "/scratch";
 
 my @default_collector_info =
-  ( "collector-pro.dat",
+  ( "collector-osg.dat",
+    "collector-fermi.dat",
+    "collector-osg-legacy.dat",
+    "collector-fermi-legacy.dat",
     "collector-itb.dat",
     "collector-dev.dat" );
 

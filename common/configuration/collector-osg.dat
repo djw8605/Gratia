@@ -1,0 +1,129 @@
+(
+ "gratia-osg" =>
+ { tomcat_user => "daemon",
+   tomcat_group => "daemon",
+   http_port => 800,
+   ssl_port => 443,
+   rmi_port => 17000,
+   server_port => 8104,
+   db_schema => "gratia",
+   max_perm_size => "256m",
+   max_heap_size => "1024m",
+   jsvc => "/data/jsvc/bin/jsvc",
+   collector_host => "gratia-osg.opensciencegrid.org",
+   "properties.attributes" =>
+   {
+    "monitor.from.address" => 'gratia-operation@opensciencegrid.org',
+    "monitor.to.address.0" => 'gratia-root@fnal.gov',
+    "maintain.history.log" => 75,
+    "monitor.listener.wait" => 60,
+    "monitor.q.size" => 100000,
+    "service.admin.FQAN.0" => "/fermilab/Role=GratiaAdmin",
+    "service.lifetime.JobUsageRecord" => "3 months",
+    "service.lifetime.MetricRecord" => "1 month",
+    "service.listener.threads" => 1,
+    "service.reporting.interfaces.apel.folder" => "gratia-data/interfaces/apel-lcg",
+    "service.reporting.interfaces.apel.folder.groupowner" => "gratia"
+   }
+ },
+ "gratia-osg-daily" =>
+ { tomcat_user => "daemon",
+   tomcat_group => "daemon",
+   http_port => 80,
+   ssl_port => 443,
+   rmi_port => 17000,
+   server_port => 8104,
+   db_schema => "gratia_osg_daily",
+   jsvc => "/data/jsvc/bin/jsvc",
+   collector_host => "gratia-osg-daily.opensciencegrid.org",
+   UserConfig => "UserConfig_osg_daily.xml",
+   PostInstallCmdPreamble => '[[ "$action" == *"stored"* ]] || continue',
+   staticReports => 0,
+   "properties.attributes" =>
+   {
+    "monitor.from.address" => 'gratia-operation@opensciencegrid.org',
+    "monitor.to.address.0" => 'gratia-root@fnal.gov',
+    "gratia.database.useJobUsageSiteName" => 1,
+    "gratia.database.wantSummaryTable" => 0,
+    "gratia.database.wantSummaryTrigger" => 0,
+    "maintain.history.log" => 75,
+    "monitor.listener.wait" => 1440,
+    "service.admin.FQAN.0" => "/fermilab/Role=GratiaAdmin",
+    "service.lifetime.JobUsageRecord" => "UNLIMITED" # Very low volume
+   }
+ },
+ "osg-transfer" =>
+ { tomcat_user => "daemon",
+   tomcat_group => "daemon",
+   http_port => 80,
+   ssl_port => 443,
+   rmi_port => 17000,
+   server_port => 8104,
+   db_schema => "gratia_osg_transfer",
+   collector_host => "gratia-osg-transfer.opensciencegrid.org",
+   staticReports => 0,
+   max_perm_size => "256m",
+   max_heap_size => "1024m",
+   jsvc => "/data/jsvc/bin/jsvc",
+   "properties.attributes" =>
+   {
+    "monitor.from.address" => 'gratia-operation@opensciencegrid.org',
+    "monitor.to.address.0" => 'gratia-root@fnal.gov',
+    "maintain.history.log" => 75,
+    "monitor.listener.wait" => 240,
+    "service.admin.FQAN.0" => "/fermilab/Role=GratiaAdmin",
+    "service.lifetime.JobUsageRecord" => "1 year", # Not yet settled?
+    "service.listener.threads" => 1
+   }
+ },
+ "gratia-itb" =>
+ { tomcat_user => "daemon",
+   tomcat_group => "daemon",
+   http_port => 80,
+   ssl_port => 443,
+   rmi_port => 17000,
+   server_port => 8104,
+   db_schema => "gratia_itb",
+   max_perm_size => "256m",
+   max_heap_size => "1024m",
+   jsvc => "/data/jsvc/bin/jsvc",
+   collector_host => "gratia-itb.opensciencegrid.org",
+   "properties.attributes" =>
+   {
+    "monitor.from.address" => 'gratia-operation@opensciencegrid.org',
+    "monitor.to.address.0" => 'gratia-root@fnal.gov',
+    "maintain.history.log" => 75,
+    "monitor.listener.wait" => 60,
+    "service.admin.FQAN.0" => "/fermilab/Role=GratiaAdmin",
+    "service.lifetime.JobUsageRecord" => "1 year",
+    "service.listener.threads" => 1
+   }
+ },
+ "gratia-osg-integration" =>
+ { tomcat_user => "daemon",
+   tomcat_group => "daemon",
+   http_port => 80,
+   ssl_port => 443,
+   rmi_port => 17000,
+   server_port => 8104,
+   db_schema => "gratia_osg_integration",
+   max_perm_size => "256m",
+   max_heap_size => "1024m",
+   jsvc => "/data/jsvc/bin/jsvc",
+   collector_host => "gratia-osg-integration.opensciencegrid.org",
+   "properties.attributes" =>
+   {
+    "monitor.from.address" => 'gratia-operation@opensciencegrid.org',
+    "monitor.to.address.0" => 'gratia-root@fnal.gov',
+    "maintain.history.log" => 75,
+    "monitor.listener.wait" => 240,
+    "service.admin.FQAN.0" => "/fermilab/Role=GratiaAdmin",
+    "service.lifetime.JobUsageRecord" => "1 year",
+    "service.listener.threads" => 1
+   }
+ }
+);
+
+### Local Variables:
+### mode: cperl
+### End:
