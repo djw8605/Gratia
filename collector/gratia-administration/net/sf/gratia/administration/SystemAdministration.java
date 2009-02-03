@@ -187,7 +187,7 @@ public class SystemAdministration extends HttpServlet {
                     if (flag) {
                         reaperStatus = "RUNNING";
                     } else {
-                        reaperStatus = "NOT RUNNING";
+                        reaperStatus = "SLEEPING";
                     }
                     housekeepingStatus = proxy.housekeepingServiceStatus();
                     checksumUpgradeStatus = proxy.checksumUpgradeStatus();
@@ -294,11 +294,11 @@ public class SystemAdministration extends HttpServlet {
 
         if (reaperStatus.equals("RUNNING")) {
             html = html.replaceAll("#reaperstatus#",
-                                   "<font color=\"fucshia\"><strong>RUNNING</strong></font>").
+                                   "<font color=\"green\"><strong>RUNNING</strong></font>").
                 replaceAll("#reapercomment#", "");
         } else {
             html = html.replaceAll("#reaperstatus#",
-                                   "<font color=\"green\"><strong>NOT RUNNING</strong></font>").
+                                   "<font color=\"green\"><strong>SLEEPING</strong></font>").
                 replaceAll("#reapercomment#",
                            "<a href=\"systemadministration.html?action=runReaper\"><strong>Run now</strong></a>.");
         }
