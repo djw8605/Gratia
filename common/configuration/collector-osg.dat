@@ -2,6 +2,7 @@
  "gratia-osg" =>
  { tomcat_user => "daemon",
    tomcat_group => "daemon",
+   instance_name => "gratia",
    http_port => 800,
    ssl_port => 443,
    rmi_port => 17000,
@@ -29,6 +30,7 @@
  "gratia-osg-daily" =>
  { tomcat_user => "daemon",
    tomcat_group => "daemon",
+   instance_name => "gratia",
    http_port => 80,
    ssl_port => 443,
    rmi_port => 17000,
@@ -55,6 +57,7 @@
  "osg-transfer" =>
  { tomcat_user => "daemon",
    tomcat_group => "daemon",
+   instance_name => "gratia",
    http_port => 80,
    ssl_port => 443,
    rmi_port => 17000,
@@ -79,6 +82,7 @@
  "gratia-itb" =>
  { tomcat_user => "daemon",
    tomcat_group => "daemon",
+   instance_name => "gratia",
    http_port => 80,
    ssl_port => 443,
    rmi_port => 17000,
@@ -102,6 +106,7 @@
  "gratia-osg-integration" =>
  { tomcat_user => "daemon",
    tomcat_group => "daemon",
+   instance_name => "gratia",
    http_port => 80,
    ssl_port => 443,
    rmi_port => 17000,
