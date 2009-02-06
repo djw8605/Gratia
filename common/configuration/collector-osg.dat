@@ -1,9 +1,9 @@
 (
- "gratia-osg" =>
+ "gratia-osg-prod" =>
  { tomcat_user => "daemon",
    tomcat_group => "daemon",
    instance_name => "gratia",
-   http_port => 800,
+   http_port => 80,
    ssl_port => 443,
    rmi_port => 17000,
    server_port => 8104,
@@ -11,7 +11,7 @@
    max_perm_size => "256m",
    max_heap_size => "1024m",
    jsvc => "/data/jsvc/bin/jsvc",
-   collector_host => "gratia-osg.opensciencegrid.org",
+   collector_host => "gratia-osg-prod.opensciencegrid.org",
    "properties.attributes" =>
    {
     "monitor.from.address" => 'gratia-operation@opensciencegrid.org',
@@ -79,7 +79,7 @@
     "service.listener.threads" => 1
    }
  },
- "gratia-itb" =>
+ "gratia-osg-itb" =>
  { tomcat_user => "daemon",
    tomcat_group => "daemon",
    instance_name => "gratia",
@@ -91,7 +91,7 @@
    max_perm_size => "256m",
    max_heap_size => "1024m",
    jsvc => "/data/jsvc/bin/jsvc",
-   collector_host => "gratia-itb.opensciencegrid.org",
+   collector_host => "gratia-osg-itb.opensciencegrid.org",
    "properties.attributes" =>
    {
     "monitor.from.address" => 'gratia-operation@opensciencegrid.org',
