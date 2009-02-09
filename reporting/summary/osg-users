@@ -1273,8 +1273,7 @@ $text
 <html>
 EOF
     close(OUT);
-    my $cmd = sprintf(qq&mutt -F "$script_top_dir/muttrc" -a "$html_filename" -s "OSG site metrics report for %s for $timeperiod $current_date to $current_date_end" %s&,
-                      $people_data->{$email_addresses->[(scalar @$email_addresses) - 1]}->{full_name},
+    my $cmd = sprintf(qq&echo mutt -F "$script_top_dir/muttrc" -a "$html_filename" -s "OSG site metrics report for $timeperiod $current_date to $current_date_end" %s&,
                       join(" ", map { qq/"$_"/ } @$email_addresses));
 
     open(MUTT, "|$cmd") or die "Unable to open mail command for input";
