@@ -3,12 +3,27 @@
 # Script to remove libs and other files in common dirs prior to
 # updating.
 
-set -x
+echo "cleanup_misc: removing old config files:"
 rm -fv  gratia/*.hbm.xml \
         gratia/*.cfg.xml \
         conf/logging.properties \
         conf/log4j-trustmanager.properties
 
+echo "cleanup_misc: removing old gratia logging classes:"
 rm -rfv gratia/hibernate common/classes/net/sf/gratia
-set +x
+
+echo "cleanup_misc: removing unneeded default services:"
+rm -rfv server/webapps/host-manager/ \
+        server/webapps/manager/ \
+        webapps/balancer/ \
+        webapps/jsp-examples/ \
+        webapps/servlets-examples/ \
+        webapps/tomcat-docs/ \
+        webapps/webdav/
+
+echo "cleanup_misc: removing unneeded service context info:"
+rm -fv conf/Catalina/localhost/host-manager.xml \
+       conf/Catalina/localhost/manager.xml
+
+
 exit $?
