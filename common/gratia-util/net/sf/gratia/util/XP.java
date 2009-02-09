@@ -302,6 +302,10 @@ public class XP
         return newResults;
     }
     
+   public static long getFileNumber(String directory) {
+      return new File(directory).list().length;
+   }
+   
     public static String[] getFileList(String directory)
     {
         String filelist[] = null;
