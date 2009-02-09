@@ -1402,7 +1402,7 @@ public class DatabaseMaintenance {
             }
             if ((current >= 60) && (current < 71)) {
                 // Stored procedures, trigger procedures.
-                Logging.fine("Gratia database upgraded from " + current + " to 70");
+                Logging.fine("Gratia database upgraded from " + current + " to 71");
                 current = 71;
                 UpdateDbVersion(current);
             }
