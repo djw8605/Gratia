@@ -506,11 +506,11 @@ sub configure_init_file {
   my ($instance_name, $config_name, $collector_config) = @_;
   my $init_script = "/etc/rc.d/init.d/tomcat-$instance_name";
   my $init_script_txt = $init_script_template;
-  $init_script_txt =~ s&^(\s*JAVA_OPTS\s*=\s*".*?)"&${1} -Xmx$collector_config->{max_heap_size}"&m if $collector_config->{max_heap_size};
-  $init_script_txt =~ s&^(\s*JAVA_OPTS\s*=\s*".*?)"&${1} -Xms$collector_config->{initial_heap_size}"&m if $collector_config->{inital_heap_size};
-  $init_script_txt =~ s&^(\s*JAVA_OPTS\s*=\s*".*?)"&${1} -XX:MaxPermSize=$collector_config->{max_perm_size}"&m if $collector_config->{max_perm_size};
-  $init_script_txt =~ s&^(\s*JAVA_OPTS\s*=\s*".*?)"&${1} -XX:PermSize=$collector_config->{initial_perm_size}"&m if $collector_config->{initial_perm_size};
-  $init_script_txt =~ s&^(\s*JAVA_OPTS\s*=\s*".*?)"&${1} -Djava.library.path=$collector_config->{tomcat_native_lib}"&m if $collector_config->{tomcat_native_lib};
+  $init_script_txt =~ s&^(\s*CATALINA_OPTS\s*=\s*".*?)"&${1} -Xmx$collector_config->{max_heap_size}"&m if $collector_config->{max_heap_size};
+  $init_script_txt =~ s&^(\s*CATALINA_OPTS\s*=\s*".*?)"&${1} -Xms$collector_config->{initial_heap_size}"&m if $collector_config->{inital_heap_size};
+  $init_script_txt =~ s&^(\s*CATALINA_OPTS\s*=\s*".*?)"&${1} -XX:MaxPermSize=$collector_config->{max_perm_size}"&m if $collector_config->{max_perm_size};
+  $init_script_txt =~ s&^(\s*CATALINA_OPTS\s*=\s*".*?)"&${1} -XX:PermSize=$collector_config->{initial_perm_size}"&m if $collector_config->{initial_perm_size};
+  $init_script_txt =~ s&^(\s*CATALINA_OPTS\s*=\s*".*?)"&${1} -Djava.library.path=$collector_config->{tomcat_native_lib}"&m if $collector_config->{tomcat_native_lib};
   $init_script_txt =~ s&^(JAVA_HOME=).*$&${1}"$options{"java-home"}"&m;
   $init_script_txt =~ s&^(TOMCAT_HTTP_PORT=).*$&${1}$collector_config->{http_port}&m;
   $init_script_txt =~ s&^(TOMCAT_PATH_STEM=).*$&${1}"$options{prefix}"&m;
