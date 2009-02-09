@@ -701,7 +701,7 @@ sub configure_installation_owner {
     }
   }
   # Configure ownership of the APEL interface directory.
-  configure_apel_directory($instance_name, $collector_config);
+  configure_apel_directory($instance_name, $config_name, $collector_config);
 }
 
 sub configure_tomcat_config {
