@@ -15,7 +15,6 @@ import java.text.*;
 import org.apache.tools.bzip2.*;
 import com.ice.tar.*;
 
-
 public class HistoryReaper implements Runnable {
     Properties p;
 
@@ -66,28 +65,15 @@ public class HistoryReaper implements Runnable {
 
     public void deleteDirectory(String path)
     {
-        String files[] = XP.getFileList(path);
-
-        for (int i = 0; i < files.length; i++)
-            {
-                try
-                    {
-                        File file = new File(files[i]);
-                        file.delete();
-                    }
-                catch (Exception ignore)
-                    {
-                    }
-            }
-        try
-            {
-                File file = new File(path);
-                file.delete();
-                Logging.log("HistoryReaper: Deleted Directory: " + path + ":Files: " + files.length);
-            }
-        catch (Exception ignore)
-            {
-            }
+       try
+       {
+          File file = new File(path);
+          XP.forceDelete(file, false);
+          Logging.log("HistoryReaper: Deleted Directory: " + path);
+       }
+       catch (Exception ignore)
+       {
+       }
     }
 
     private static void addFiles(File file, TarOutputStream tos,String strip) throws IOException, FileNotFoundException
@@ -103,7 +89,6 @@ public class HistoryReaper implements Runnable {
                     addFiles(new File(file, fileNames[i]),tos,strip);
                 }
             }
-            
             file.delete();
         }
         //Otherwise, a file so add it as an entry to the tar file.
