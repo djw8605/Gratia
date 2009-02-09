@@ -27,11 +27,11 @@ public class Logging {
         screenFormat.setTimeZone(TimeZone.getDefault());
         Properties p = net.sf.gratia.util.Configuration.getProperties();
 
-        String path = p.getProperty("service." + logDomain + ".logfile");
-        String maxSize = p.getProperty("service." + logDomain + ".maxlog");
-        String useConsole = p.getProperty("service." + logDomain + ".console");
-        String level = p.getProperty("service." + logDomain + ".level");
-        String sNumLogFiles = p.getProperty("service." + logDomain + ".numLogs");
+        String path = p.getProperty("service." + logDomain + ".logfile" , "/logs/gratia-" + logDomain + ".log");
+        String maxSize = p.getProperty("service." + logDomain + ".maxlog" , "10000000");
+        String useConsole = p.getProperty("service." + logDomain + ".console", "0");
+        String level = p.getProperty("service." + logDomain + ".level" , "FINEST");
+        String sNumLogFiles = p.getProperty("service." + logDomain + ".numLogs" , "30");
 
         Logging.logDomain = logDomain;
         try {
@@ -68,6 +68,10 @@ public class Logging {
                     logToScreen("fixing old-style path spec " +
                                 path + " to log4j-style " + newPath);
                     path = newPath;
+                } else {
+                   String newPath = System.getProperty("catalina.home") + (path.startsWith("/")?"":"/") + path;
+                   logToScreen("Use log4j-style path: "+newPath);
+                   path = newPath;
                 }
 
                 Layout layout =
@@ -109,7 +113,8 @@ public class Logging {
                 logToScreen("logging level set to " + log4jLogger.getLevel() + " (log4j)");
 
             } else { // Old-style logger
-    
+                logToScreen("using legacy logger path");
+            
                 try {
                     FileHandler fh = new FileHandler(Configuration.getCatalinaHome() + path, limit, numLogFiles);
                     fh.setFormatter(new SimpleFormatter());
