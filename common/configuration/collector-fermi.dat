@@ -9,7 +9,7 @@
    server_port => 8104,
    db_schema => "fermi_osg",
    max_perm_size => "256m",
-   max_heap_size => "1024m",
+   max_heap_size => "1536m",
    jsvc => "/data/jsvc/bin/jsvc",
    collector_host => "gratia-fermi-osg.fnal.gov",
    "properties.attributes" =>
