@@ -58,16 +58,16 @@ public class QSizeMonitor extends Thread {
 
     public void check() {
         boolean toobig = false;
-        int maxfound = 0;
+        long maxfound = 0;
 
         Logging.log("QSizeMonitor: Checking");
         for (int i = 0; i < maxthreads; i++) {
             String xpath = path + "/gratia/data/thread" + i;
-            String filelist[] = XP.getFileList(xpath);
-            if (filelist.length > maxqsize)
+            long nfiles = XP.getFileNumber(xpath);
+            if (nfiles > maxqsize)
                 toobig = true;
-            if (filelist.length > maxfound)
-                maxfound = filelist.length;
+            if (nfiles > maxfound)
+                maxfound = nfiles;
         }
         if (toobig && running) {
             Logging.info("QSizeMonitor: Q Size Exceeded: " + maxfound);
