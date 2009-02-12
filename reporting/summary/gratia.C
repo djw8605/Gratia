@@ -123,7 +123,7 @@ void sharing(FILE *out, FILE *outcsv, TSQLServer *db, TDatime *begin, TDatime *e
    getSubVOs(subvos);
    
    map<string,string> owners;
-   TString cmd = "wget -q -O - http://oim.grid.iu.edu/pub/resource/show.php?format=plain-text | cut -d, -f1,4,7,8,14 | grep -e ',OSG,[^,]*,CE [^,]*,1' | cut -d, -f1,3";
+   TString cmd = "wget -q -O - http://oim.grid.iu.edu/pub/resource/show.php?format=plain-text | cut -d, -f1,4,7,8,15 | grep -e ',OSG,[^,]*,CE [^,]*,1' | cut -d, -f1,3";
    FILE * f = gSystem->OpenPipe(cmd,"r");
    //if (!f) {
       for(UInt_t i=0; i < sizeof(siteOwners)/sizeof(void*); i += 2) {
@@ -263,7 +263,7 @@ void sharing(FILE *out, FILE *outcsv, TSQLServer *db, TDatime *begin, TDatime *e
    TString valueFormat( " %2d.%1d | %-20s | %7ld | %-22s (%3.0d%%) | %9ld | %5.1f%% | %9ld | %5.1f%%\n");
 
    TString textFormat_csv("%s,%s,%s,%s,%s,%s,%s,%s\n");
-   TString valueFormat_csv( "%s,%8ld,%s,%4.1%,%8ld,%4.1f%%,%8ld,%4.1f%%\n");
+   TString valueFormat_csv( "%s,%8ld,%s,%3.0d%%,%8ld,%4.1f%%,%8ld,%4.1f%%\n");
    
    fprintf(out, todaystring.Data());
    fprintf(out, dashFormat.Data(),dashes,dashes,dashes,dashes,dashes,dashes,dashes,dashes);
@@ -358,10 +358,10 @@ void sharing(FILE *out, FILE *outcsv, TSQLServer *db, TDatime *begin, TDatime *e
             }
             
             fprintf(out,valueFormat.Data(),site_index, vo_index, site.c_str(), njobs,
-                    name.c_str(), what->second.fPercent, owner_njobs, njobs ? 100.0*owner_njobs/njobs : 0.0, owner_wall, wall ? 100.0*owner_wall/wall : 0);
+                    name.c_str(), what->second.fPercent, owner_njobs, njobs ? 100.0*owner_njobs/njobs : 0.0, owner_wall, wall ? 100.0*owner_wall/wall : 0.0);
             
-            fprintf(outcsv,valueFormat_csv.Data(),site.c_str(), njobs,
-                    name.c_str(), what->second.fPercent, owner_njobs, njobs ? 100.0*owner_njobs/njobs : 0.0, owner_wall, wall ? 100.0*owner_wall/wall : 0);
+            fprintf(outcsv,valueFormat_csv.Data(), site.c_str(), njobs,
+                    name.c_str(), what->second.fPercent, owner_njobs, njobs ? 100.0*owner_njobs/njobs : 0.0, owner_wall, wall ? 100.0*owner_wall/wall : 0.0);
             
             ++vo_index;
          } else {
