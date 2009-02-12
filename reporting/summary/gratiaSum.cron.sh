@@ -15,6 +15,7 @@ while test "x$1" != "x"; do
    fi
 done
 
+export http_proxy=squid.fnal.gov:3128 
 when=$(date -d "${date_arg:-yesterday}" +"%d %B %Y")
 whenarg=$(date -d "${date_arg:-yesterday}" +"%Y/%m/%d")
 where=`dirname $0`
