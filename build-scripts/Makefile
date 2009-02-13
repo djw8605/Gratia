@@ -3,6 +3,7 @@ PLATFORM := $(shell uname)
 # tarbal version
 version_default = v1.03
 
+warning := $(shell echo WARNING: Need to update the setting of the gratia_reporting_version 1>&2) 
 gratia_reporting_version := $(shell echo '$$Name: not supported by cvs2svn $$' | sed -e 's/^\$$\Name: \(v[^ ]*\) \$$/\1/' -e 's/-/./g')
 gratia_services_version = $(gratia_reporting_version)
 
