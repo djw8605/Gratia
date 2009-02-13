@@ -63,7 +63,8 @@
 
 	<hr><label class="menuGroup">System</label> <br />
 	<font size="-2">System Status: </font><a href="./status.html?wantDetails=0" target="adminContent" class="menuItem">normal</a>
-	<font size="-2"> or </font><a href="./status.html?wantDetails=1" target="adminContent" class="menuItem">detailed</a><br />
+	<font size="-2"> or </font><a href="./status.html?wantDetails=1" target="adminContent" class="menuItem">detailed</a>
+	<font size="-2"> or </font><a href="./monitor-status.html" target="adminContent" class="menuItem">minimal</a><br />
 
 	<a href="./systemadministration.html" target="adminContent" class="<%=menuClass%>">Administration</a><br />
 
