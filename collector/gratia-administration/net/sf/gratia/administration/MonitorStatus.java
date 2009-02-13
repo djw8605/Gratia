@@ -17,7 +17,7 @@ import java.sql.*;
 import java.util.regex.*;
 import java.text.*;
 
-public class NgapStatus extends HttpServlet 
+public class MonitorStatus extends HttpServlet 
 {
 	XP xp = new XP();
 
