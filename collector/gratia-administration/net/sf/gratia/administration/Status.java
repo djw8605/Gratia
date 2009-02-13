@@ -585,9 +585,9 @@ public class Status extends HttpServlet {
 			{
 				String newrow = new String(row);
 				String xpath = path + "/gratia/data/thread" + i;
-				String filelist[] = xp.getFileList(xpath);
+				long filenumber = xp.getFileNumber(xpath);
 				newrow = xp.replaceAll(newrow,"#queue#","Q" + i);
-				newrow = xp.replaceAll(newrow,"#queuesize#","" + filelist.length);
+				newrow = xp.replaceAll(newrow,"#queuesize#","" + filenumber);
 				buffer.append(newrow);
 			}
 			html = xp.replaceAll(html,row,buffer.toString());
