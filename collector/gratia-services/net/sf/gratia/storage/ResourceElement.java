@@ -88,24 +88,29 @@ public class ResourceElement implements XmlElement {
         return output;
     }
 
-    public String asXml(String elementName) {
-        String output = "<"+elementName+" ";
-        if (Description != null) output = output + "urwg:description=\"" + StringEscapeUtils.escapeXml(Description) + "\" ";
-        if (Type != null) output = output + "urwg:type=\"" + StringEscapeUtils.escapeXml(Type) + "\" ";
-        if (Unit != null) output = output + "urwg:unit=\"" + StringEscapeUtils.escapeXml(Unit) + "\" ";
-        try
-            {
-                if (PhaseUnit != null) output = output + "urwg:phaseUnit=\"" + Utils.DurationToXml(PhaseUnit) + "\" ";
-            }
-        catch (Exception e)
-            {
-                e.printStackTrace();
-            }
-        if (StorageUnit != null) output = output + "urwg:storageUnit=\"" + StringEscapeUtils.escapeXml(StorageUnit) + "\" ";
-        if (Metrics != null) output = output + "urwg:metrics=\"" + StringEscapeUtils.escapeXml(Metrics) + "\" ";
-        output = output + ">" + Value + "</" + elementName + ">\n";
-        return output;
-    }
+   public String asXml(String elementName) {
+      StringBuilder output = new StringBuilder();
+      asXml(output,elementName);
+      return output.toString();
+   }
+   
+   public void asXml(StringBuilder output, String elementName) {
+      output.append("<"+elementName+" ");
+      if (Description != null) output.append("urwg:description=\"" + StringEscapeUtils.escapeXml(Description) + "\" ");
+      if (Type != null) output.append("urwg:type=\"" + StringEscapeUtils.escapeXml(Type) + "\" ");
+      if (Unit != null) output.append("urwg:unit=\"" + StringEscapeUtils.escapeXml(Unit) + "\" ");
+      try
+      {
+         if (PhaseUnit != null) output.append("urwg:phaseUnit=\"" + Utils.DurationToXml(PhaseUnit) + "\" ");
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+      }
+      if (StorageUnit != null) output.append("urwg:storageUnit=\"" + StringEscapeUtils.escapeXml(StorageUnit) + "\" ");
+      if (Metrics != null) output.append("urwg:metrics=\"" + StringEscapeUtils.escapeXml(Metrics) + "\" ");
+      output.append(">" + Value + "</" + elementName + ">\n");
+   }
 
     public void setType(String Type) {
         this.Type = Type;

@@ -45,19 +45,24 @@ public class Software implements XmlElement
     public void setType(String val) { Type = val; }
     public String getType() { return Type; }
 
-    public String asXml(String elementName)
+   public String asXml(String elementName) {
+      StringBuilder output = new StringBuilder();
+      asXml(output,elementName);
+      return output.toString();
+   }
+   
+   public void asXml(StringBuilder output, String elementName)
     {
-        String output = "<";
-        output = output + Type + " ";
-        if (Version != null) output = output + "version = \"" +
-            StringEscapeUtils.escapeXml(Version) + "\"";
+        output.append("<");
+        output.append(Type + " ");
+        if (Version != null) output.append("version = \"" +
+                                           StringEscapeUtils.escapeXml(Version) + "\"");
         if (Name != null) {
-            output = output + ">" + StringEscapeUtils.escapeXml(Name) + "</" +
-                StringEscapeUtils.escapeXml(Type) + ">";
+            output.append(">" + StringEscapeUtils.escapeXml(Name) + "</" +
+                          StringEscapeUtils.escapeXml(Type) + ">");
         } else {
-            output = output + "/>";
+            output.append("/>");
         }
-        return output;
     }
     
     public String toString() 

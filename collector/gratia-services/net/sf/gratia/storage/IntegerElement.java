@@ -56,14 +56,20 @@ public class IntegerElement implements XmlElement {
         return output;
     }
 
-    public String asXml(String elementName) {
-        String output = "<"+elementName+" ";
-        if (Description != null) output = output + "urwg:description=\"" + StringEscapeUtils.escapeXml(Description) + "\" ";
-        if (Metric != null) output = output + "urwg:metric=\"" + StringEscapeUtils.escapeXml(Metric) + "\" ";
-        if (ConsumptionRate != 1) output = output + "urwg:consumptionRate=\"" + ConsumptionRate + "\" ";
-        output = output + ">" + Value + "</" + elementName + ">\n";
-        return output;
-    }
+   public String asXml(String elementName) {
+      StringBuilder output = new StringBuilder();
+      asXml(output,elementName);
+      return output.toString();
+   }
+   
+   public void asXml(StringBuilder output, String elementName) {
+      output.append("<"+elementName+" ");
+      if (Description != null) output.append("urwg:description=\"" + StringEscapeUtils.escapeXml(Description) + "\" ");
+      if (Metric != null) output.append("urwg:metric=\"" + StringEscapeUtils.escapeXml(Metric) + "\" ");
+      if (ConsumptionRate != 1) output.append("urwg:consumptionRate=\"" + ConsumptionRate + "\" ");
+      output.append(">" + Value + "</" + elementName + ">\n");
+      
+   }
 
     public void setConsumptionRate(double ConsumptionRate) {
         this.ConsumptionRate = ConsumptionRate;

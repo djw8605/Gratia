@@ -58,20 +58,29 @@ public class RecordIdentity
         return " Record (Id: "+RecordId+" CreateTime: "+CreateTime+" KeyInfo: "+KeyInfo+") ";
     }
 
-    public String asXml() 
+   public String asXml() {
+      StringBuilder output = new StringBuilder();
+      asXml(output);
+      return output.toString();
+   }
+   
+   public void asXml(StringBuilder output) 
       {
          TimeZone.setDefault(TimeZone.getTimeZone("GMT"));
          SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
          String timestamp = format.format(CreateTime.getValue());
          String dq = "\"";
 
-         String output = "<RecordIdentity urwg:recordId=" + dq +
+         output.append("<RecordIdentity urwg:recordId=" + dq +
              StringEscapeUtils.escapeXml(RecordId) + dq +
-             " urwg:createTime=" + dq + StringEscapeUtils.escapeXml(timestamp) + dq;
-         if (KeyInfo != null) 
-             output = output + ">" + KeyInfo.asXML() + "</RecordIdentity>\n";
-         else output = output + " />\n";
-         return output;
+             " urwg:createTime=" + dq + StringEscapeUtils.escapeXml(timestamp) + dq);
+         if (KeyInfo != null) {
+            output.append(">");
+            KeyInfo.asXml(output);
+            output.append("</RecordIdentity>\n");
+         } else {
+            output.append(" />\n");
+         }
     }
 
     public void setKeyInfo(KeyInfoType KeyInfo) 

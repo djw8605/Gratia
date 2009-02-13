@@ -86,22 +86,30 @@ public class UserIdentity {
     public String toString() {
         return "(LocalId: "+GlobalUsername+" "+LocalUserId+" "+KeyInfo+" "+VOName+" "+CommonName+")";
     }
-    public String asXml() {
-        String output = "<UserIdentity>\n";
-        if (GlobalUsername != null) output = output + "\t<GlobalUsername>" +
-            StringEscapeUtils.escapeXml(GlobalUsername) + "</GlobalUsername>\n";
-        if (LocalUserId != null) output = output + "\t<LocalUserId>" +
-            StringEscapeUtils.escapeXml(LocalUserId) + "</LocalUserId>\n";
-        if (KeyInfo != null) output = output + "\t" + KeyInfo.asXML();
-        if (VOName != null) output = output + "\t<VOName>" +
-            StringEscapeUtils.escapeXml(VOName) +
-            "</VOName>\n";
-        if (ReportableVOName != null) output = output + "\t<ReportableVOName>" +
-            StringEscapeUtils.escapeXml(ReportableVOName) + "</ReportableVOName>\n";
-        if (CommonName != null) output = output + "\t<CommonName>" +
-            StringEscapeUtils.escapeXml(CommonName) +
-            "</CommonName>\n";
-        output = output + "</UserIdentity>\n";
-        return output;
+   public String asXml() {
+      StringBuilder output = new StringBuilder();
+      asXml(output);
+      return output.toString();
+   }
+   
+   public void asXml(StringBuilder output) {
+      output.append("<UserIdentity>\n");
+      if (GlobalUsername != null) output.append("\t<GlobalUsername>" +
+                                                StringEscapeUtils.escapeXml(GlobalUsername) + "</GlobalUsername>\n");
+      if (LocalUserId != null) output.append("\t<LocalUserId>" +
+                                             StringEscapeUtils.escapeXml(LocalUserId) + "</LocalUserId>\n");
+      if (KeyInfo != null) {
+         output.append("\t");
+         KeyInfo.asXml(output);
+      }
+      if (VOName != null) output.append("\t<VOName>" +
+                                        StringEscapeUtils.escapeXml(VOName) +
+                                        "</VOName>\n");
+      if (ReportableVOName != null) output.append("\t<ReportableVOName>" +
+                                                  StringEscapeUtils.escapeXml(ReportableVOName) + "</ReportableVOName>\n");
+      if (CommonName != null) output.append("\t<CommonName>" +
+                                            StringEscapeUtils.escapeXml(CommonName) +
+                                            "</CommonName>\n");
+      output.append("</UserIdentity>\n");
     }
 }

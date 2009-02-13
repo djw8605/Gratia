@@ -96,19 +96,24 @@ public class DateElement implements XmlElement {
     }
 
     public String asXml(String elementName) {
-        String output = "<"+elementName+" ";
-        if (Description != null) output = output + "urwg:description=\"" + Description + "\" ";
-        if (Type != null) output = output + "urwg:type=\"" + Type + "\" ";
-        output = output + ">";
+       StringBuilder output = new StringBuilder();
+       asXml(output,elementName);
+       return output.toString();
+    }
+     
+   public void asXml(StringBuilder output, String elementName) {
+        output.append("<"+elementName+" ");
+        if (Description != null) output.append("urwg:description=\"" + Description + "\" ");
+        if (Type != null) output.append("urwg:type=\"" + Type + "\" ");
+        output.append(">");
 
         //
         // glr: a hack to get around conversion problems switching from date <-> xml
         //
         TimeZone.setDefault(TimeZone.getTimeZone("GMT"));
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-        output = output + format.format(Value);
+        output.append(format.format(Value));
 
-        output = output + "</" + elementName + ">\n";
-        return output;
+        output.append("</" + elementName + ">\n");
     }
 }

@@ -62,26 +62,35 @@ public class DurationElement implements XmlElement {
         return output;
     }
 
-    public String asXml(String elementName, String type_name, String duration_type) {
-        String output = "<"+elementName+" ";
-        if (Description != null) output = output + "urwg:description=\"" + StringEscapeUtils.escapeXml(Description) + "\" ";
-        if (Type != null) output = output + "urwg:" +
-            StringEscapeUtils.escapeXml(type_name) +
-            "=\"" + StringEscapeUtils.escapeXml(Type) + "\" ";
-        else if (duration_type != null) output = output + "urwg:" +
-            StringEscapeUtils.escapeXml(type_name) +
-            "=\"" + StringEscapeUtils.escapeXml(duration_type) + "\" ";
-        output = output + ">";
-        try {
-            output = output + Utils.DurationToXml(Value);
-        } catch (DatatypeConfigurationException ex) {
-            output = output + Value;
-        }
-        output = output + "</" + elementName + ">\n"; //FIXME: I need the right format
-        return output;
-    }
+   public String asXml(String elementName, String type_name, String duration_type) {
+      StringBuilder output = new StringBuilder();
+      asXml(output,elementName);
+      return output.toString();
+   }
+   
+   public void asXml(StringBuilder output, String elementName, String type_name, String duration_type) {
+      output.append("<"+elementName+" ");
+      if (Description != null) output.append("urwg:description=\"" + StringEscapeUtils.escapeXml(Description) + "\" ");
+      if (Type != null) output.append("urwg:" +
+         StringEscapeUtils.escapeXml(type_name) +
+         "=\"" + StringEscapeUtils.escapeXml(Type) + "\" ");
+      else if (duration_type != null) output.append("urwg:" +
+         StringEscapeUtils.escapeXml(type_name) +
+         "=\"" + StringEscapeUtils.escapeXml(duration_type) + "\" ");
+      output.append(">");
+      try {
+         output.append(Utils.DurationToXml(Value));
+      } catch (DatatypeConfigurationException ex) {
+         output.append(Value);
+      }
+      output.append("</" + elementName + ">\n"); //FIXME: I need the right format
+   }
 
-    public String asXml(String elementName) {
-        return asXml(elementName, "type", null);
-    }    
+   public String asXml(String elementName) {
+      return asXml(elementName, "type", null);
+   }    
+   
+   public void asXml(StringBuilder output, String elementName) {
+      asXml(output, elementName, "type", null);
+   }    
 }

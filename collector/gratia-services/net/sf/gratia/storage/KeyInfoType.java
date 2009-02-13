@@ -45,19 +45,24 @@ public class KeyInfoType {
         return output;
     }
 
-    public String asXML() {
-        if (Id == null && Content == null) return "";
-        String output;
-        if (Content != null && Content.startsWith("/")) { // Straight DN
-            output = "<DN>" + StringEscapeUtils.escapeXml(Content) + "</DN>";
-        } else {
-            output = "<ds:KeyInfo xmlns:ds=\"http://www.w3.org/2000/09/xmldsig#\" ";
-            if (Id != null) output = output + "Id=\""+
-                StringEscapeUtils.escapeXml(Id)+"\" ";
-            output = output + ">\n";
-            if (Content != null) output = output + Content;
-            output = output + "\n</ds:KeyInfo>\n";
-        }
-        return output;
-    }
+   public String asXml() {
+      StringBuilder output = new StringBuilder();
+      asXml(output);
+      return output.toString();
+   }
+   
+   public void asXml(StringBuilder output) {
+      if (Id == null && Content == null) return;
+      
+      if (Content != null && Content.startsWith("/")) { // Straight DN
+         output.append("<DN>" + StringEscapeUtils.escapeXml(Content) + "</DN>");
+      } else {
+         output.append("<ds:KeyInfo xmlns:ds=\"http://www.w3.org/2000/09/xmldsig#\" ");
+         if (Id != null) output.append("Id=\""+
+                                       StringEscapeUtils.escapeXml(Id)+"\" ");
+         output.append(">\n");
+         if (Content != null) output.append(Content);
+         output.append("\n</ds:KeyInfo>\n");
+      }
+   }
 }

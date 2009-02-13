@@ -63,13 +63,18 @@ public class FloatElement implements XmlElement {
         return output;
     }
 
-    public String asXml(String elementName) {
-        String output = "<"+elementName+" ";
-        if (Description != null) output = output + "urwg:description=\"" +
-            StringEscapeUtils.escapeXml(Description) + "\" ";
-        if (Unit != null) output = output + "urwg:unit=\"" + StringEscapeUtils.escapeXml(Unit) + "\" ";
-        if (Formula != null) output = output + "urwg:formula=\"" + StringEscapeUtils.escapeXml(Formula) + "\" ";
-        output = output + ">" + Value + "</" + elementName + ">\n";
-        return output;
-    }
+   public String asXml(String elementName) {
+      StringBuilder output = new StringBuilder();
+      asXml(output,elementName);
+      return output.toString();
+   }
+   
+   public void asXml(StringBuilder output, String elementName) {
+      output.append("<"+elementName+" ");
+      if (Description != null) output.append("urwg:description=\"" +
+                                             StringEscapeUtils.escapeXml(Description) + "\" ");
+      if (Unit != null) output.append("urwg:unit=\"" + StringEscapeUtils.escapeXml(Unit) + "\" ");
+      if (Formula != null) output.append("urwg:formula=\"" + StringEscapeUtils.escapeXml(Formula) + "\" ");
+      output.append(">" + Value + "</" + elementName + ">\n");
+   }
 }

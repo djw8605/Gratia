@@ -98,15 +98,13 @@ public class JobUsageRecord extends Record
       return output;
    }
 
-   public String listAsXml(String name, List l)
+   public void listAsXml(StringBuilder output, String name, List l)
    {
-      String output = "";
       for (Iterator i = l.iterator(); i.hasNext(); )
       {
          XmlElement el = (XmlElement)i.next();
-         output = output + el.asXml(name);
+         output.append(el.asXml(name));
       }
-      return output;
    }
 
    public String toString()
@@ -154,53 +152,53 @@ public class JobUsageRecord extends Record
 
    public String asXML()
    {
-      String output = ""; // ("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-      output = output + ("<JobUsageRecord xmlns=\"http://www.gridforum.org/2003/ur-wg\"\n");
-      output = output + ("		xmlns:urwg=\"http://www.gridforum.org/2003/ur-wg\"\n");
-      output = output + ("		xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" \n");
-      // output = output + ("		xsi:schemaLocation=\"http://www.gridforum.org/2003/ur-wg file:/Users/bekah/Documents/GGF/URWG/urwg-schema.09.xsd\">\n");
-      output = output + ("		xsi:schemaLocation=\"http://www.gridforum.org/2003/ur-wg file:///u:/OSG/urwg-schema.11.xsd\">\n");
+      StringBuilder output = new StringBuilder(""); // ("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+      output.append("<JobUsageRecord xmlns=\"http://www.gridforum.org/2003/ur-wg\"\n");
+      output.append("		xmlns:urwg=\"http://www.gridforum.org/2003/ur-wg\"\n");
+      output.append("		xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" \n");
+      // output.append("		xsi:schemaLocation=\"http://www.gridforum.org/2003/ur-wg file:/Users/bekah/Documents/GGF/URWG/urwg-schema.09.xsd\">\n");
+      output.append("		xsi:schemaLocation=\"http://www.gridforum.org/2003/ur-wg file:///u:/OSG/urwg-schema.11.xsd\">\n");
 
-      // output = output + "UsageRecord: Db Id: " + RecordId.asXml();
-      if (RecordIdentity != null) output = output + RecordIdentity.asXml();
-      if (JobIdentity != null) output = output + JobIdentity.asXml();
-      if (UserIdentity != null) output = output + UserIdentity.asXml();
-      if (JobName != null) output = output + JobName.asXml("JobName");
-      if (Charge != null) output = output + Charge.asXml("Charge");
-      if (Status != null) output = output + Status.asXml("Status");
+      // output.append("UsageRecord: Db Id: " + RecordId.asXml(output));
+      if (RecordIdentity != null) RecordIdentity.asXml(output);
+      if (JobIdentity != null) JobIdentity.asXml(output);
+      if (UserIdentity != null) UserIdentity.asXml(output);
+      if (JobName != null) JobName.asXml(output,"JobName");
+      if (Charge != null) Charge.asXml(output,"Charge");
+      if (Status != null) Status.asXml(output,"Status");
       if (Njobs != null
-          && Njobs.getValue() != 1) output = output + Njobs.asXml("Njobs");
-      if (WallDuration != null) output = output + WallDuration.asXml("WallDuration");
-      if (CpuUserDuration != null) output = output + CpuUserDuration.asXml("CpuDuration", "usageType", "user");
-      if (CpuSystemDuration != null) output = output + CpuSystemDuration.asXml("CpuDuration", "usageType", "system");
-      if (NodeCount != null) output = output + NodeCount.asXml("NodeCount");
-      if (Processors != null) output = output + Processors.asXml("Processors");
-      if (StartTime != null) output = output + StartTime.asXml("StartTime");
-      if (EndTime != null) output = output + EndTime.asXml("EndTime");
-      if (MachineName != null) output = output + MachineName.asXml("MachineName");
-      if (SiteName != null) output = output + SiteName.asXml("SiteName");
-      if (SubmitHost != null) output = output + SubmitHost.asXml("SubmitHost");
-      if (Queue != null) output = output + Queue.asXml("Queue");
-      if (ProjectName != null) output = output + ProjectName.asXml("ProjectName");
-      if (Host != null) output = output + Host.asXml("Host");
-      if (Disk != null) output = output + listAsXml("Disk", Disk);
-      if (Memory != null) output = output + listAsXml("Memory", Memory);
-      if (Swap != null) output = output + listAsXml("Swap", Swap);
-      if (Network != null) output = output + listAsXml("Network", Network);
-      if (TimeDuration != null) output = output + listAsXml("TimeDuration", TimeDuration);
-      if (TimeInstant != null) output = output + listAsXml("TimeInstant", TimeInstant);
-      if (ServiceLevel != null) output = output + listAsXml("ServiceLevel", ServiceLevel);
-      if (PhaseResource != null) output = output + listAsXml("PhaseResource", PhaseResource);
-      if (VolumeResource != null) output = output + listAsXml("VolumeResource", VolumeResource);
-      if (ConsumableResource != null) output = output + listAsXml("ConsumableResource", ConsumableResource);
-      if (Resource != null) output = output + listAsXml("Resource", Resource);
-      if (ProbeName != null) output = output + ProbeName.asXml("ProbeName");
-      if (Grid != null) output = output + Grid.asXml("Grid");
-      if (ResourceType != null) output = output + ResourceType.asXml("Resource");
-      if (ExtraXml != null) output = output + StringEscapeUtils.escapeXml(ExtraXml);
-      if ((TDSet != null) && (TDSet.size() > 0)) output = output + getTransferDetails().asXML();
-      output = output + "</JobUsageRecord>" + "\n";
-      return output;
+          && Njobs.getValue() != 1) Njobs.asXml(output,"Njobs");
+      if (WallDuration != null) WallDuration.asXml(output,"WallDuration");
+      if (CpuUserDuration != null) CpuUserDuration.asXml(output,"CpuDuration", "usageType", "user");
+      if (CpuSystemDuration != null) CpuSystemDuration.asXml(output,"CpuDuration", "usageType", "system");
+      if (NodeCount != null) NodeCount.asXml(output,"NodeCount");
+      if (Processors != null) Processors.asXml(output,"Processors");
+      if (StartTime != null) StartTime.asXml(output,"StartTime");
+      if (EndTime != null) EndTime.asXml(output,"EndTime");
+      if (MachineName != null) MachineName.asXml(output,"MachineName");
+      if (SiteName != null) SiteName.asXml(output,"SiteName");
+      if (SubmitHost != null) SubmitHost.asXml(output,"SubmitHost");
+      if (Queue != null) Queue.asXml(output,"Queue");
+      if (ProjectName != null) ProjectName.asXml(output,"ProjectName");
+      if (Host != null) Host.asXml(output,"Host");
+      if (Disk != null) listAsXml(output,"Disk", Disk);
+      if (Memory != null) listAsXml(output,"Memory", Memory);
+      if (Swap != null) listAsXml(output,"Swap", Swap);
+      if (Network != null) listAsXml(output,"Network", Network);
+      if (TimeDuration != null) listAsXml(output,"TimeDuration", TimeDuration);
+      if (TimeInstant != null) listAsXml(output,"TimeInstant", TimeInstant);
+      if (ServiceLevel != null) listAsXml(output,"ServiceLevel", ServiceLevel);
+      if (PhaseResource != null) listAsXml(output,"PhaseResource", PhaseResource);
+      if (VolumeResource != null) listAsXml(output,"VolumeResource", VolumeResource);
+      if (ConsumableResource != null) listAsXml(output,"ConsumableResource", ConsumableResource);
+      if (Resource != null) listAsXml(output,"Resource", Resource);
+      if (ProbeName != null) ProbeName.asXml(output,"ProbeName");
+      if (Grid != null) Grid.asXml(output,"Grid");
+      if (ResourceType != null) ResourceType.asXml(output,"Resource");
+      if (ExtraXml != null) output.append(StringEscapeUtils.escapeXml(ExtraXml));
+      if ((TDSet != null) && (TDSet.size() > 0)) getTransferDetails().asXml(output);
+      output.append("</JobUsageRecord>" + "\n");
+      return output.toString();
    }
 
    public void AttachContent( org.hibernate.Session session ) throws Exception

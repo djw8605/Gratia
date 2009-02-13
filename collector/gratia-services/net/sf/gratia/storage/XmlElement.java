@@ -20,4 +20,5 @@ public interface XmlElement {
      * @return String
      */
     public String asXml(String elementName);
+    public void asXml(StringBuilder output, String elementName);
 }

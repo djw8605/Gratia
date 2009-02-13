@@ -54,12 +54,17 @@ public class StringElement implements XmlElement {
         return output;
     }
 
-    public String asXml(String elementName) {
-        String output = "<"+elementName+" ";
-        if (Description != null) output = output + "urwg:description=\"" +
-            StringEscapeUtils.escapeXml(Description) + "\" ";
-        if (Type != null) output = output + "urwg:type=\"" + StringEscapeUtils.escapeXml(Type) + "\" ";
-        output = output + ">" + StringEscapeUtils.escapeXml(Value) + "</" + elementName + ">\n";
-        return output;
+   public String asXml(String elementName) {
+      StringBuilder output = new StringBuilder();
+      asXml(output,elementName);
+      return output.toString();
+   }
+   
+   public void asXml(StringBuilder output, String elementName) {
+       output.append("<"+elementName+" ");
+       if (Description != null) output.append("urwg:description=\"" +
+                                              StringEscapeUtils.escapeXml(Description) + "\" ");
+       if (Type != null) output.append("urwg:type=\"" + StringEscapeUtils.escapeXml(Type) + "\" ");
+       output.append(">" + StringEscapeUtils.escapeXml(Value) + "</" + elementName + ">\n");
     }
 }
