@@ -12,6 +12,9 @@ import net.sf.gratia.util.LogLevel;
 import java.math.BigInteger;
 import java.util.*;
 import java.sql.*;
+import java.io.*;
+import java.util.Date;
+import java.text.*;
 
 import net.sf.gratia.storage.*;
 
@@ -39,6 +42,7 @@ public class ReplicationDataPump extends Thread {
     private boolean exitflag = false;
     private int nSentThisLoop = 0;
     private int nSentThisRun = 0;
+    private String replicatePath = "";
 
     public ReplicationDataPump(int replicationId) {
         this.replicationId = replicationId;
@@ -59,6 +63,11 @@ public class ReplicationDataPump extends Thread {
                                tmp + " using default value (" +
                                chunksize + ")");
             }
+        }
+        replicatePath = System.getProperties().getProperty("catalina.home") +  "/gratia/data/replicate";
+        File dir = new File(replicatePath);
+        if (!dir.exists()) {
+           dir.mkdir();
         }
     }
 
@@ -205,7 +214,7 @@ public class ReplicationDataPump extends Thread {
         //
         // start replication
         //
-        String replicationTarget = replicationEntry.getDestination() + "/gratia-servlets/rmi";
+        String replicationTarget = replicationEntry.getDestination();
 
         Iterator dIter = dbidList.iterator();
         int bundle_size = replicationEntry.getbundleSize(); // Read table entry
@@ -322,34 +331,62 @@ public class ReplicationDataPump extends Thread {
     public Boolean uploadXML(String replicationTarget, String xml)
         throws Exception {
         Boolean result = false;
-        Post post = new Post(replicationTarget, "update", xml);
-        String response = post.send();        
-        if (post.success && response != null) {
-            String[] results = split(response, ":");
-            if (results[0].equals("OK")) {
-                result = true;
-            } else {
-                replicationLog(LogLevel.WARNING, "Error during post: " + response);
-                exitflag = true;
-            }
+        if (!replicationTarget.startsWith("file:")) {
+           Post post = new Post(replicationTarget + "/gratia-servlets/rmi", "update", xml);
+           String response = post.send();        
+           if (post.success && response != null) {
+              String[] results = split(response, ":");
+              if (results[0].equals("OK")) {
+                 result = true;
+              } else {
+                 replicationLog(LogLevel.WARNING, "Error during post: " + response);
+                 exitflag = true;
+              }
+           } else {
+              String errorMessage;
+              if (post.exception != null) {
+                 errorMessage = post.exception.toString();
+              } else if (response != null) {
+                 errorMessage = response;
+              } else {
+                 errorMessage = "UNKNOWN";
+              }
+              replicationLog(LogLevel.INFO,
+                             "Error during replication: " +
+                             errorMessage +
+                             "; will retry later.");
+              if (post.exception != null) {
+                 replicationLog(LogLevel.DEBUG,
+                                "Exception details:", post.exception);
+              }
+              exitflag = true;
+           }
         } else {
-            String errorMessage;
-            if (post.exception != null) {
-                errorMessage = post.exception.toString();
-            } else if (response != null) {
-                errorMessage = response;
-            } else {
-                errorMessage = "UNKNOWN";
-            }
-            replicationLog(LogLevel.INFO,
-                           "Error during replication: " +
-                           errorMessage +
-                           "; will retry later.");
-            if (post.exception != null) {
-                replicationLog(LogLevel.DEBUG,
-                               "Exception details:", post.exception);
-            }
-            exitflag = true;
+           // Request to save locally instead of sending
+           String dir = replicationTarget.substring(5); // Skip the prefix.
+           // Create the subdir if needed.
+
+           Date now = new Date();
+           SimpleDateFormat format = new SimpleDateFormat("yyyyMMddkk");
+           String path = replicatePath + "/" + dir + "/replicate" + "-" + format.format(now);
+           File directory = new File(path);
+           if (!directory.exists()) {
+              directory.mkdirs();
+           }
+           long part = 0; //nrecords / recordsPerDirectory;
+           
+           String directory_part = "rep" + replicationId;
+           File subdir = new File(directory,directory_part + "-" + part);
+           
+           if (!subdir.exists()) {
+              subdir.mkdir();
+           }
+           
+           // Save the xml
+           File repfile = File.createTempFile("bundle-", ".xml", subdir);
+           String filename = repfile.getPath();
+           XP.save(filename,xml);
+           result = true;
         }
         return result;
     }
