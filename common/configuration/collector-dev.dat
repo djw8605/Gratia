@@ -67,6 +67,8 @@
              rmi_port => 18000,
              jmx_port => 8014,
              server_port => 8114,
+             max_perm_size => "256m",
+             max_heap_size => "1024m",
              db_host => "localhost",
              db_schema => "gratia_pcanal",
              service_auto_start => 0,

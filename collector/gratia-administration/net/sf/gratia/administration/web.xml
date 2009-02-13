@@ -49,6 +49,12 @@
     </servlet>
 
     <servlet>
+        <servlet-name>CertificateTable</servlet-name>
+        <servlet-class>net.sf.gratia.administration.CertificateTable</servlet-class>
+				<load-on-startup>2</load-on-startup>
+    </servlet>
+
+    <servlet>
         <servlet-name>SecurityTable</servlet-name>
         <servlet-class>net.sf.gratia.administration.SecurityTable</servlet-class>
 				<load-on-startup>2</load-on-startup>
@@ -143,6 +149,11 @@
     <servlet-mapping>
         <servlet-name>SecurityTable</servlet-name>
         <url-pattern>/securitytable.html</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>CertificateTable</servlet-name>
+        <url-pattern>/certificatetable.html</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>

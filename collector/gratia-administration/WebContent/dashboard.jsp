@@ -52,7 +52,8 @@
 	<a href="./roles.html" target="adminContent" class="<%=menuClass%>">Roles</a><br />
 
 	<hr><label class="menuGroup">Authentication</label> <br />
-	<a href="./securitytable.html" target="adminContent" class="<%=menuClass%>">Certificates</a><br />
+	<a href="./certificatetable.html" target="adminContent" class="<%=menuClass%>">Certificates</a><br />
+	<a href="./securitytable.html" target="adminContent" class="<%=menuClass%>">Connections</a><br />
 
 	<hr><label class="menuGroup">Replication</label> <br />
 	<a href="./jobusagerecordreplicationtable.html" target="adminContent" class="<%=menuClass%>">Job Usage Replication</a><br />

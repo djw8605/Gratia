@@ -27,7 +27,11 @@ import net.sf.gratia.storage.DatabaseMaintenance;
 import org.hibernate.HibernateException;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
+import org.hibernate.Transaction;
 import org.hibernate.exception.*;
+
+import java.security.cert.X509Certificate;
+import net.sf.gratia.util.Base64;
 
 public class CollectorService implements ServletContextListener {
     String rmibind;
@@ -42,6 +46,7 @@ public class CollectorService implements ServletContextListener {
     Boolean m_servletEnabled = false;
     private Boolean housekeepingDisabled = false;
     private Boolean checksumUpgradeDisabled = false;
+    private int fSecurityLevel = 0;
 
     //
     // various threads
@@ -99,7 +104,8 @@ public class CollectorService implements ServletContextListener {
 
         configurationPath = net.sf.gratia.util.Configuration.getConfigurationPath();
 
-        if (p.getProperty("service.security.level", "0").equals("1")) {
+        fSecurityLevel = Integer.parseInt(p.getProperty("service.security.level", "0"));
+        if (fSecurityLevel == 1) {
             try {
                 Logging.info("Initializing HTTPS Support");
                 //
@@ -736,6 +742,61 @@ public class CollectorService implements ServletContextListener {
         }
         FlipSSL.flip();
     }
+   
+   public Boolean checkCertificate(java.security.cert.X509Certificate certs[]) throws RemoteException {
+      final String command = "from Certificate where pem = ?";
+
+      Logging.warning("checkCertificate");
+
+      if (certs == null) {
+         Logging.warning("checkCertificate: No certificate");
+      } else {
+         Session session = null;
+         session = HibernateWrapper.getSession();
+         
+         for(int i=0; i< certs.length; ++i) {
+            try {
+               String pem =  net.sf.gratia.storage.Certificate.GeneratePem(certs[i]);
+            
+               List result = session.createQuery(command).setString(0,pem).list();
+            
+               if (result.size() == 0) {
+                  // Not registered yet.
+                  
+                  try {
+                     net.sf.gratia.storage.Certificate localcert = new net.sf.gratia.storage.Certificate( certs[i] );
+                     Transaction tx = session.beginTransaction();
+                     session.saveOrUpdate( localcert );
+                     session.flush();
+                     tx.commit();
+                     Logging.warning("checkCertificate has created an entry for: " + certs[i].toString());
+                  } catch (java.security.cert.CertificateException e) {
+                     Logging.warning("checkCertificate: Error when creating certificate object: "+e);
+                  } catch (Exception e) {
+                     Logging.warning("checkCertificate: error when storing certificate object: "+e);
+                  }
+               
+                  return true;
+               } else if (result.size() == 1) {
+                  // Found it
+               
+                  return ((net.sf.gratia.storage.Certificate) result.get(0)).isValid();
+                  
+               } else {
+                  // Humm there is more than one probe with the same name!
+                  // We have a problem.
+                  Logging.warning("checkCertificate got more than one certificate ("+result.size()+" with the pem "+pem);
+                  return false;
+               }
+            } catch (java.security.cert.CertificateEncodingException e) {
+               Logging.warning("exception in checkCertificate: "+e);
+            }            
+         }
+         session.close();
+      }
+      return true;
+   }
+   
 
     public void contextDestroyed(ServletContextEvent sce) {
         if (databaseUpdateThreadsActive()) {

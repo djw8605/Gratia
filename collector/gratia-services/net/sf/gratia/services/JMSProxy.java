@@ -1,6 +1,7 @@
 package net.sf.gratia.services;
 
 import java.rmi.RemoteException;
+import java.security.cert.X509Certificate;
 
 public interface JMSProxy extends java.rmi.Remote {
     public Boolean update(String xml) throws RemoteException;
@@ -23,4 +24,5 @@ public interface JMSProxy extends java.rmi.Remote {
     public void disableHousekeepingService() throws RemoteException;
     public Boolean startHousekeepingActionNow() throws RemoteException;
     public String checksumUpgradeStatus() throws RemoteException;
+    public Boolean checkCertificate(java.security.cert.X509Certificate certs[]) throws RemoteException;
 }
