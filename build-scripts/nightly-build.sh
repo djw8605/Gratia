@@ -12,7 +12,7 @@ function usage {
 
 Usage: $PGM [--dir directory] [--mail addresses] [--files n] [--help]
 
-This script will perform an export of the HEAD of the Gratia CVS repository
+This script will perform an export of the HEAD of the Gratia SVN repository
 and then perform a 'make release' on the software.  
 
 NOTE: Since it is an export, you will not be able to effect any 
@@ -25,7 +25,7 @@ exist, it will create it.
 Parent source directory.. $nightly_dir
 Log file................. $logfile
 
-CVS: $cvs.
+SVN: $svn.
 
 Arguments:
    --dir   - the parent directory for the $(basename $build_dir) directory
@@ -140,17 +140,16 @@ function validate_environment {
     logit "... deleting $dir"
     rm -rf $dir
   fi 
-  #--- verify cvs is available ---- 
-  if [ "$(type cvs >/dev/null 2>&1 ;echo $?)" != "0" ];then
-    logerr "Cannot find CVS on this host: $(hostname)"
+  #--- verify svn is available ---- 
+  if [ "$(type svn >/dev/null 2>&1 ;echo $?)" != "0" ];then
+    logerr "Cannot find svn on this host: $(hostname)"
   fi
 }
 # -------------------------------
-function cvs_checkout_gratia {
-  logit "==== cvs_checkout_gratia - $(date) ==="
-  export CVSROOT=":pserver:anonymous@gratia.cvs.sourceforge.net:2401/cvsroot/gratia"
+function svn_checkout_gratia {
+  logit "==== svn_checkout_gratia - $(date) ==="
   cd $build_dir
-  cmd="$cvs export -d $(basename $nightly_dir) -r HEAD gratia"
+  cmd="$svn export svn export http://gratia.svn.sourceforge.net/svnroot/gratia $(basename $nightly_dir)"
   runit "$cmd"
 }
 # -------------------------------
@@ -227,8 +226,8 @@ buildHOME=$HOME
 files=4
 set_build_area
 
-#--- cvs ----
-cvs='cvs -z3 -d:pserver:anonymous@gratia.cvs.sourceforge.net:/cvsroot/gratia'
+#--- svn ----
+svn='svn'
 
 #--- validate command line ---
 while test "x$1" != "x"; do
@@ -271,9 +270,9 @@ if [ ! -d $build_dir ];then
 fi 
 
 logit "==== $PGM Start: $(date) ==="
-#--- check out from cvs ---
+#--- check out from svn ---
 validate_environment
-cvs_checkout_gratia 
+svn_checkout_gratia 
 
 #--- make gratia ---
 validate_build_env 
