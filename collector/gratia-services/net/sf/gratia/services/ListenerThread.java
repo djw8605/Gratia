@@ -540,15 +540,14 @@ public class ListenerThread extends Thread {
                     session.close();
                     int dupdbid = 0;
                     Boolean needCurrentSaveDup = false;
-                    Query q;
-                    Query sq;
+                   
                     if (e.getSQLException().getMessage().
                         matches(".*\\b[Dd]uplicate\\b.*")) {
                         if (current.getTableName().equals("JobUsageRecord")) {
                             UserIdentity newUserIdentity =
                                 ((JobUsageRecord) current).getUserIdentity();
                             session = HibernateWrapper.getSession();
-                            q = session.createQuery("select record from " +
+                            Query dup_query = session.createQuery("select record from " +
                                                     "JobUsageRecord " +
                                                     "record where " +
                                                     "record.md5 = " +
@@ -557,7 +556,7 @@ public class ListenerThread extends Thread {
                                                     "'")
                                 .setCacheMode(CacheMode.IGNORE);
                             ScrollableResults dups =
-                                q.scroll(ScrollMode.FORWARD_ONLY);
+                                dup_query.scroll(ScrollMode.FORWARD_ONLY);
                             Boolean savedCurrent = false;
                             try {
                                 if (dups.next()) {
@@ -737,16 +736,15 @@ public class ListenerThread extends Thread {
                             needCurrentSaveDup = current.setDuplicate(true);
                             session = HibernateWrapper.getSession();
                             try {
-                                q =
-                                    session.createQuery("select record from " +
-                                                        current.getTableName() +
-                                                        " record where " +
-                                                        "record.md5 = " +
-                                                        "'" +
-                                                        current.getmd5() +
-                                                        "'")
-                                    .setCacheMode(CacheMode.IGNORE);
-                                dupdbid = ((Record) q.list().get(0)).getRecordId();
+                               dupdbid = ((Record)
+                                          (session.createQuery("select record from " +
+                                                              current.getTableName() +
+                                                              " record where " +
+                                                              "record.md5 = " +
+                                                              "'" +
+                                                              current.getmd5() +
+                                                              "'")
+                                          .setCacheMode(CacheMode.IGNORE).list().get(0))).getRecordId();
                             }
                             finally {
                                 session.close();
