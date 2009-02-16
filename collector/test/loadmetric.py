@@ -33,7 +33,7 @@ def sendRecords(nrecords, name, end, extra = ""):
 
 if __name__ == '__main__':
         rev = "$Revision$"
-        Gratia.RegisterReporterLibrary("loadmetric.py",Gratia.ExtractCvsRevision(rev))
+        Gratia.RegisterReporterLibrary("loadmetric.py",Gratia.ExtractSvnRevision(rev))
 
         Gratia.Initialize()
 
