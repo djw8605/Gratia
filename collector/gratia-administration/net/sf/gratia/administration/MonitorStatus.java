@@ -115,17 +115,22 @@ public class MonitorStatus extends HttpServlet
 		sitename = request.getParameter("sitename");
 		allsites = request.getParameter("allsites");
 		host = request.getParameter("host");
+      boolean xml = false;
+      String xmlreq = request.getParameter("xml");
+      if (xmlreq != null && xmlreq.equals("yes")) {
+         xml = true;
+      }
 		buffer = new StringBuffer();
 		if (allsites != null)
-			processAllSites();
+			processAllSites(xml);
 		else if (probename != null)
-			processProbe(probename);
+			processProbe(probename,xml);
 		else if (sitename != null)
-			processSite(sitename);
+			processSite(sitename,xml);
 		else if (host != null)
-			processHost(host);
+			processHost(host,xml);
 		else
-			process();
+			process(xml);
 		response.setContentType("text/plain");
 		response.setHeader("Cache-Control", "no-cache"); // HTTP 1.1
 		response.setHeader("Pragma", "no-cache"); // HTTP 1.0
@@ -135,8 +140,47 @@ public class MonitorStatus extends HttpServlet
 		writer.close();
 		closeConnection();
 	}
-
-	public void processProbe(String probename)
+   
+   private static void append(StringBuffer buffer, String what, int thread, long value, boolean xml) 
+   {
+      if (xml) {
+         buffer.append("<"+what+" thread="+thread+">");
+         buffer.append(value);
+         buffer.append("</"+what+">");
+      } else {
+         buffer.append(what+thread+"=");
+         buffer.append(value);
+         buffer.append("|");
+      }
+   }
+   
+   private static void append(StringBuffer buffer, String what, long value, boolean xml) 
+   {
+      if (xml) {
+         buffer.append("<"+what+">");
+         buffer.append(value);
+         buffer.append("</"+what+">");
+      } else {
+         buffer.append(what+"=");
+         buffer.append(value);
+         buffer.append("|");
+      }
+   }
+   
+   private static void append(StringBuffer buffer, String what, String value, boolean xml) 
+   {
+      if (xml) {
+         buffer.append("<"+what+">");
+         buffer.append(value);
+         buffer.append("</"+what+">");
+      } else {
+         buffer.append(what+"=");
+         buffer.append(value);
+         buffer.append("|");
+      }
+   }
+   
+   public void processProbe(String probename, boolean xml)
 	{
 		String command = "";
 		String dq = "'";
@@ -158,9 +202,9 @@ public class MonitorStatus extends HttpServlet
 			resultSet.close();
 			statement.close();
 			if (date == null)
-				buffer.append("last-contact=never\n");
+				append(buffer,"last-contact","never",xml);
 			else
-				buffer.append("last-contact=" + format.format(date) + "\n");
+				append(buffer,"last-contact",format.format(date),xml);
 		}
 		catch (Exception e)
 		{
@@ -168,7 +212,7 @@ public class MonitorStatus extends HttpServlet
 		}
 	}
 
-	public void processSite(String sitename)
+	public void processSite(String sitename, boolean xml)
 	{
 		String command = "";
 		String dq = "'";
@@ -190,15 +234,18 @@ public class MonitorStatus extends HttpServlet
 				probename = resultSet.getString(2);
 				if (date == null) {
 					if (probename == null) {
-						buffer.append("last-contact=never\n");
+						append(buffer,"last-contact","never",xml);
 					} else {
-						buffer.append(probename + ": last-contact=never\n");
+                  append(buffer,"probename",probename,xml);
+						append(buffer,"last-contact","never",xml);
 					}
 				} else {
 					if (probename == null)
 						probename = "Unknown probe";
-					buffer.append(probename + ": last-contact=" + format.format(date) + "\n");
+               append(buffer,"probename",probename,xml);
+               append(buffer,"last-contact",format.format(date),xml);
 				}
+            buffer.append("\n");
 			}
 			resultSet.close();
 			statement.close();
@@ -209,7 +256,7 @@ public class MonitorStatus extends HttpServlet
 		}
 	}
 
-	public void processAllSites()
+	public void processAllSites(boolean xml)
 	{
 		String command = "";
 		String site = "";
@@ -232,12 +279,14 @@ public class MonitorStatus extends HttpServlet
 				probename = resultSet.getString(3);
 				if (probename == null)
 					probename = "Unknown probe";
-				buffer.append(site + "|" + probename + "|");
+            append(buffer,"site",site,xml);
+            append(buffer,"probename",probename,xml);
 				if (date == null) {
-					buffer.append("never\n");
+					append(buffer,"last-contact","never",xml);
 				} else {
-					buffer.append(format.format(date) + "\n");
+					append(buffer,"last-contact",format.format(date),xml);
 				}
+            buffer.append("\n");
 			}
 			resultSet.close();
 			statement.close();
@@ -249,7 +298,7 @@ public class MonitorStatus extends HttpServlet
 
 	}
 
-	public void processHost(String host)
+	public void processHost(String host, boolean xml)
 	{
 		String command = "";
 		String dq = "'";
@@ -271,9 +320,9 @@ public class MonitorStatus extends HttpServlet
 			resultSet.close();
 			statement.close();
 			if (date == null)
-				buffer.append("last-contact=never\n");
+				append(buffer,"last-contact","never",xml);
 			else
-				buffer.append("last-contact=" + format.format(date) + "\n");
+				append(buffer,"last-contact",format.format(date),xml);
 		}
 		catch (Exception e)
 		{
@@ -281,7 +330,7 @@ public class MonitorStatus extends HttpServlet
 		}
 	}
 
-	public void process()
+	public void process(boolean xml)
 	{
 		int index = 0;
 		String command = "";
@@ -365,8 +414,8 @@ public class MonitorStatus extends HttpServlet
 			e.printStackTrace();
 		}
 
-		buffer.append("record-count-hour=" + count1 + "|");
-		buffer.append("record-count-24hour=" + count24 + "|");
+		append(buffer,"record-count-hour",count1,xml);
+		append(buffer,"record-count-24hour",count24,xml);
 
 		int maxthreads = Integer.parseInt(props.getProperty("service.listener.threads"));
 		String path = System.getProperties().getProperty("catalina.home");
@@ -375,7 +424,7 @@ public class MonitorStatus extends HttpServlet
       
 		for (int i = 0; i < maxthreads; i++)
 		{
-			buffer.append("queuesize" + i + "=" +XP.getFileNumber(path + i)+ "|");
+			append(buffer,"queuesize",i,XP.getFileNumber(path + i),xml);
 		}
 	}
 }
