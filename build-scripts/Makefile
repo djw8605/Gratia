@@ -104,7 +104,7 @@ clean:
 	find $(base)/ -name "*#" -exec rm -f {} \;
 	find $(base)/ -name "#*" -exec rm -f {} \;
 	rm -f $(configuration)/build-stored-procedures.sql $(configuration)/build-stored-procedures_debug.sql
-	rm -f $(target)/*.[wjt]ar $(target)/cleanup_*
+	rm -f $(target)/*.[wjt]ar $(target)/cleanup_* $(target)/gratia*
 	mkdir -p $(target)
 	rm -rf war jar-lib
 	# --- Target: clean COMPLETED at $(shell date) ---
