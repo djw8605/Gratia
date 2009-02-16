@@ -20,6 +20,10 @@ gratia_release_data := Gratia release: $(gratia_reporting_version) \
 	Builder: $(shell id |cut -d" " -f1)
 
 target=$(base)/target
+output-dir=./output-dir
+classes-dir=$(output-dir)/classes
+war-dir=$(output-dir)/wars
+jar-dir=$(output-dir)/jars
 
 # module top location
 collector=$(base)/collector
@@ -61,32 +65,53 @@ COMMON_LIBS = $(foreach d, $(common_lib_jars), $(wildcard $(commonLib)/$(d)*.jar
 shared_lib_jars = 
 SHARED_LIBS = $(foreach d, $(shared_lib_jars), $(wildcard $(commonLib)/$(d)*.jar))
 
-COMMON_CLASSES = $(util)/net/sf/gratia/util/TidiedDailyRollingFileAppender$$DatedFileFilter.class \
-                 $(util)/net/sf/gratia/util/TidiedDailyRollingFileAppender.class
+COMMON_CLASSES = $(classes-dir)/net/sf/gratia/util/TidiedDailyRollingFileAppender$$DatedFileFilter.class \
+                 $(classes-dir)/net/sf/gratia/util/TidiedDailyRollingFileAppender.class
 
 # check where we are as the tar file ownership cannot be set correctly on cygwin
 ifeq ($(filter CYGWIN%,$(PLATFORM)),)
   tarowner=--owner=root --group=root
-  classpath=.:$(services)/:$(servlets)/:$(soap)/:$(administration)/:$(reportsrc)/src:$(security)/:$(util)/
+  classpath=.:$(classes-dir):$(services)/:$(servlets)/:$(soap)/:$(administration)/:$(reportsrc)/src:$(security)/:$(util)/
 else
   warn := $(shell echo "Building the tar file on cygwin will result in incorrect ownership" 1>&2 )
   tarowner=
-  classpath=.\;$(services)\;$(servlets)\;$(soap)\;$(administration)\;$(reportsrc)/src;$(security);$(util)
+  classpath=.\;$(classes-dir);$(services)\;$(servlets)\;$(soap)\;$(administration)\;$(reportsrc)/src;$(security);$(util)
 endif
 
 util_lib=$(target)/gratia-util.jar
 
 define copy_util_lib
-  mkdir -p war/WEB-INF/lib; cp -v $(util_lib) war/WEB-INF/lib/
+  mkdir -p $(war-dir)/$@/WEB-INF/lib; cp -v $(util_lib) $(war-dir)/$@/WEB-INF/lib/
 endef
 
 define copy2_util_lib
-  mkdir -p war/$(name_from_war)/WEB-INF/lib; cp -v $(util_lib) war/$(name_from_war)/WEB-INF/lib/
+  mkdir -p $(war-dir)/$(name_from_war)/WEB-INF/lib; cp -v $(util_lib) $(war-dir)/$(name_from_war)/WEB-INF/lib/
 endef
 
 define name_from_war
 $(subst .war,,$(@F))
 endef
+
+ifeq ($(target),) 
+   $(error The target variable can not be null)
+endif
+
+ifeq ($(output-dir),) 
+   $(error The output-dir variable can not be null)
+endif
+
+ifeq ($(war-dir),) 
+   $(error The war-dir variable can not be null)
+endif
+
+ifeq ($(jar-dir),) 
+   $(error The jar-dir variable can not be null)
+endif
+
+ifeq ($(classes-dir),) 
+   $(error The classes-dir variable can not be null)
+endif
+
 
 #-------------------------------------------------------------
 all: gratia
@@ -104,18 +129,8 @@ clean:
 	find $(base)/ -name "*#" -exec rm -f {} \;
 	find $(base)/ -name "#*" -exec rm -f {} \;
 	rm -f $(configuration)/build-stored-procedures.sql $(configuration)/build-stored-procedures_debug.sql
-	rm -f $(target)/*.[wjt]ar $(target)/cleanup_* $(target)/gratia*
-	mkdir -p $(target)
-	rm -rf war jar-lib
+	rm -rf $(war-dir) $(jar-dir) $(classes-dir) $(target) $(output-dir)
 	# --- Target: clean COMPLETED at $(shell date) ---
-
-#-------------------------------------------------------------
-war:
-	mkdir war
-
-#-------------------------------------------------------------
-jar-lib:
-	mkdir jar-lib
 
 #-------------------------------------------------------------
 # services will eventually need the util package
@@ -153,29 +168,27 @@ $(target)/gratia-services.war:  $(services)/net/sf/gratia/services/*.java  \
 	#------------------------------------
 	# --- Target: gratia-services.war ---
 	#------------------------------------
-	rm -rf war/$(name_from_war)
-	mkdir -p war/$(name_from_war)/META-INF
-	mkdir -p war/$(name_from_war)/WEB-INF/classes/net/sf/gratia/services
-	mkdir -p war/$(name_from_war)/WEB-INF/classes/net/sf/gratia/storage
-	mkdir -p war/$(name_from_war)/WEB-INF/classes/net/sf/gratia/util
-	mkdir -p war/$(name_from_war)/WEB-INF/lib
-	echo "$(gratia_release_data)" >war/gratia-release
-	rm -f -r net
-	javac -cp $(classpath) -extdirs $(commonLib) $(services)/net/sf/gratia/services/*.java
-	javac -cp $(classpath) -extdirs $(commonLib) $(services)/net/sf/gratia/storage/*.java
-	rmic -vcompat -classpath $(classpath) -d . net.sf.gratia.services.JMSProxyImpl
-	cp net/sf/gratia/services/* $(services)/net/sf/gratia/services
-	rm -f -r net
-	cp $(services)/ehcache.xml war/$(name_from_war)/WEB-INF/classes/
-	cp $(services)/c3p0.properties war/$(name_from_war)/WEB-INF/classes/
-	cp $(services)/net/sf/gratia/services/*.class war/$(name_from_war)/WEB-INF/classes/net/sf/gratia/services
-	cp $(services)/net/sf/gratia/storage/*.class war/$(name_from_war)/WEB-INF/classes/net/sf/gratia/storage
-	cp $(util)/net/sf/gratia/util/Logging.class war/$(name_from_war)/WEB-INF/classes/net/sf/gratia/util
-	cp $(commonLib)/*.jar war/$(name_from_war)/WEB-INF/lib
-	rm -f  war/$(name_from_war)/WEB-INF/lib/{serv,log4j}*
-	cp $(services)/net/sf/gratia/services/web.xml war/$(name_from_war)/WEB-INF/web.xml
+	rm -rf $(war-dir)/$(name_from_war)
+	mkdir -p $(classes-dir) $(target)
+	mkdir -p $(war-dir)/$(name_from_war)/META-INF
+	mkdir -p $(war-dir)/$(name_from_war)/WEB-INF/classes/net/sf/gratia/services
+	mkdir -p $(war-dir)/$(name_from_war)/WEB-INF/classes/net/sf/gratia/storage
+	mkdir -p $(war-dir)/$(name_from_war)/WEB-INF/classes/net/sf/gratia/util
+	mkdir -p $(war-dir)/$(name_from_war)/WEB-INF/lib
+	echo "$(gratia_release_data)" >$(war-dir)/$(name_from_war)/gratia-release
+	javac -d $(classes-dir) -cp $(classpath) -extdirs $(commonLib) $(services)/net/sf/gratia/services/*.java
+	javac -d $(classes-dir) -cp $(classpath) -extdirs $(commonLib) $(services)/net/sf/gratia/storage/*.java
+	rmic -vcompat -classpath $(classpath) -d $(classes-dir) net.sf.gratia.services.JMSProxyImpl
+	cp $(services)/ehcache.xml $(war-dir)/$(name_from_war)/WEB-INF/classes/
+	cp $(services)/c3p0.properties $(war-dir)/$(name_from_war)/WEB-INF/classes/
+	cp $(classes-dir)/net/sf/gratia/services/*.class $(war-dir)/$(name_from_war)/WEB-INF/classes/net/sf/gratia/services
+	cp $(classes-dir)/net/sf/gratia/storage/*.class $(war-dir)/$(name_from_war)/WEB-INF/classes/net/sf/gratia/storage
+	cp $(classes-dir)/net/sf/gratia/util/Logging.class $(war-dir)/$(name_from_war)/WEB-INF/classes/net/sf/gratia/util
+	cp $(commonLib)/*.jar $(war-dir)/$(name_from_war)/WEB-INF/lib
+	rm -f  $(war-dir)/$(name_from_war)/WEB-INF/lib/{serv,log4j}*
+	cp $(services)/net/sf/gratia/services/web.xml $(war-dir)/$(name_from_war)/WEB-INF/web.xml
 	$(copy2_util_lib)
-	jar -cfM $(target)/gratia-services.war -C war/$(name_from_war) .
+	jar -cfM $(target)/gratia-services.war -C $(war-dir)/$(name_from_war) .
 	# --- Target: $@ COMPLETED at $(shell date) ---
 
 
@@ -183,27 +196,28 @@ $(target)/gratia-services.war:  $(services)/net/sf/gratia/services/*.java  \
 servlets: $(target)/gratia-servlets.war
 
 #-------------------------------------------------------------
-$(target)/gratia-servlets.war: war $(util_lib) $(servlets)/net/sf/gratia/servlets/*.java $(servlets)/net/sf/gratia/servlets/web.xml $(target)/gratia-services.war
+$(target)/gratia-servlets.war: $(util_lib) $(servlets)/net/sf/gratia/servlets/*.java $(servlets)/net/sf/gratia/servlets/web.xml $(target)/gratia-services.war
 	#-------------------------
 	# --- Target: servlets ---
 	#-------------------------
-	rm -rf war/$(name_from_war)
-	mkdir -p war/$(name_from_war)/META-INF
-	mkdir -p war/$(name_from_war)/WEB-INF/lib
-	mkdir -p war/$(name_from_war)/WEB-INF/classes/net/sf/gratia/services
-	mkdir -p war/$(name_from_war)/WEB-INF/classes/net/sf/gratia/servlets
-	mkdir -p war/$(name_from_war)/WEB-INF/classes/net/sf/gratia/util
-	echo "$(gratia_release_data)" >war/gratia-release
-	javac -cp $(classpath) -extdirs $(commonLib) $(servlets)/net/sf/gratia/servlets/*.java
-	cp $(servlets)/net/sf/gratia/servlets/*.class war/$(name_from_war)/WEB-INF/classes/net/sf/gratia/servlets
-	cp $(servlets)/net/sf/gratia/servlets/web.xml war/$(name_from_war)/WEB-INF/web.xml
+	rm -rf $(war-dir)/$(name_from_war)
+	mkdir -p $(classes-dir) $(target)
+	mkdir -p $(war-dir)/$(name_from_war)/META-INF
+	mkdir -p $(war-dir)/$(name_from_war)/WEB-INF/lib
+	mkdir -p $(war-dir)/$(name_from_war)/WEB-INF/classes/net/sf/gratia/services
+	mkdir -p $(war-dir)/$(name_from_war)/WEB-INF/classes/net/sf/gratia/servlets
+	mkdir -p $(war-dir)/$(name_from_war)/WEB-INF/classes/net/sf/gratia/util
+	echo "$(gratia_release_data)" >$(war-dir)/$(name_from_war)/gratia-release
+	javac -d $(classes-dir) -cp $(classpath) -extdirs $(commonLib) $(servlets)/net/sf/gratia/servlets/*.java
+	cp $(classes-dir)/net/sf/gratia/servlets/*.class $(war-dir)/$(name_from_war)/WEB-INF/classes/net/sf/gratia/servlets
+	cp $(servlets)/net/sf/gratia/servlets/web.xml $(war-dir)/$(name_from_war)/WEB-INF/web.xml
 	#
-	cp $(services)/net/sf/gratia/services/*Skel.class war/$(name_from_war)/WEB-INF/classes/net/sf/gratia/services
-	cp $(services)/net/sf/gratia/services/*Stub.class war/$(name_from_war)/WEB-INF/classes/net/sf/gratia/services
-	cp $(services)/net/sf/gratia/services/JMS*.class war/$(name_from_war)/WEB-INF/classes/net/sf/gratia/services
-	cp $(util)/net/sf/gratia/util/Logging.class war/$(name_from_war)/WEB-INF/classes/net/sf/gratia/util
+	cp $(classes-dir)/net/sf/gratia/services/*Skel.class $(war-dir)/$(name_from_war)/WEB-INF/classes/net/sf/gratia/services
+	cp $(classes-dir)/net/sf/gratia/services/*Stub.class $(war-dir)/$(name_from_war)/WEB-INF/classes/net/sf/gratia/services
+	cp $(classes-dir)/net/sf/gratia/services/JMS*.class $(war-dir)/$(name_from_war)/WEB-INF/classes/net/sf/gratia/services
+	cp $(classes-dir)/net/sf/gratia/util/Logging.class $(war-dir)/$(name_from_war)/WEB-INF/classes/net/sf/gratia/util
 	$(copy2_util_lib)
-	jar -cfM $(target)/gratia-servlets.war -C war/$(name_from_war) .
+	jar -cfM $(target)/gratia-servlets.war -C $(war-dir)/$(name_from_war) .
 	# --- Target: services COMPLETED at $(shell date) ---
 
 #------------------------------------------------------------------
@@ -211,30 +225,30 @@ soap: services
 	#---------------------
 	# --- Target: soap ---
 	#---------------------
-	rm -rf  war
-	mkdir war
-	mkdir -p war/wsdl
-	mkdir -p war/META-INF
-	mkdir -p war/WEB-INF/lib
-	mkdir -p war/WEB-INF/classes/net/sf/gratia/services
-	mkdir -p war/WEB-INF/classes/net/sf/gratia/soap
-	echo "$(gratia_release_data)" >war/gratia-release
-	javac -cp $(classpath) -extdirs $(commonLib) $(soap)/net/sf/gratia/soap/*.java
-	cp $(soap)/net/sf/gratia/soap/*.class war/WEB-INF/classes/net/sf/gratia/soap
-	cp $(services)/net/sf/gratia/services/*Skel.class war/WEB-INF/classes/net/sf/gratia/services
-	cp $(services)/net/sf/gratia/services/*Stub.class war/WEB-INF/classes/net/sf/gratia/services
-	cp $(services)/net/sf/gratia/services/JMS*.class war/WEB-INF/classes/net/sf/gratia/services
-	cp $(soap)/net/sf/gratia/soap/server-config.wsdd war/WEB-INF/server-config.wsdd
-	cp $(soap)/net/sf/gratia/soap/web.xml war/WEB-INF/web.xml
-	cp $(soap)/net/sf/gratia/soap/collector.wsdl war/wsdl
-	cp $(commonLib)/axis*.jar war/WEB-INF/lib
-	cp $(commonLib)/commons-discovery*.jar war/WEB-INF/lib
-	cp $(commonLib)/jaxrpc*.jar war/WEB-INF/lib
-	cp $(commonLib)/saaj*.jar war/WEB-INF/lib
-	cp $(commonLib)/wsdl*.jar war/WEB-INF/lib
+	rm -rf $(war-dir)/$@
+	mkdir -p $(classes-dir) $(target) $(war-dir)
+	mkdir -p $(war-dir)/$@/wsdl
+	mkdir -p $(war-dir)/$@/META-INF
+	mkdir -p $(war-dir)/$@/WEB-INF/lib
+	mkdir -p $(war-dir)/$@/WEB-INF/classes/net/sf/gratia/services
+	mkdir -p $(war-dir)/$@/WEB-INF/classes/net/sf/gratia/soap
+	echo "$(gratia_release_data)" >$(war-dir)/$@/gratia-release
+	javac -d $(classes-dir) -cp $(classpath) -extdirs $(commonLib) $(soap)/net/sf/gratia/soap/*.java
+	cp $(classes-dir)/net/sf/gratia/soap/*.class $(war-dir)/$@/WEB-INF/classes/net/sf/gratia/soap
+	cp $(classes-dir)/net/sf/gratia/services/*Skel.class $(war-dir)/$@/WEB-INF/classes/net/sf/gratia/services
+	cp $(classes-dir)/net/sf/gratia/services/*Stub.class $(war-dir)/$@/WEB-INF/classes/net/sf/gratia/services
+	cp $(classes-dir)/net/sf/gratia/services/JMS*.class $(war-dir)/$@/WEB-INF/classes/net/sf/gratia/services
+	cp $(soap)/net/sf/gratia/soap/server-config.wsdd $(war-dir)/$@/WEB-INF/server-config.wsdd
+	cp $(soap)/net/sf/gratia/soap/web.xml $(war-dir)/$@/WEB-INF/web.xml
+	cp $(soap)/net/sf/gratia/soap/collector.wsdl $(war-dir)/$@/wsdl
+	cp $(commonLib)/axis*.jar $(war-dir)/$@/WEB-INF/lib
+	cp $(commonLib)/commons-discovery*.jar $(war-dir)/$@/WEB-INF/lib
+	cp $(commonLib)/jaxrpc*.jar $(war-dir)/$@/WEB-INF/lib
+	cp $(commonLib)/saaj*.jar $(war-dir)/$@/WEB-INF/lib
+	cp $(commonLib)/wsdl*.jar $(war-dir)/$@/WEB-INF/lib
 	$(copy_util_lib)
-	jar -cfM $(target)/gratia-soap.war -C war .
-	rm -rf war
+	jar -cfM $(target)/gratia-soap.war -C $(war-dir)/$@ .
+	rm -rf $(war-dir)/$@
 	# --- Target: soap COMPLETED at $(shell date) ---
 
 #------------------------------------------------------------------
@@ -256,34 +270,35 @@ ${target}/gratia-administration.war: $(util_lib)  $(target)/gratiaSecurity.jar \
 	#----------------------------------------------------
 	# --- Target: $(target)/gratia-administration.war ---
 	#----------------------------------------------------
-	rm -rf war/$(name_from_war); mkdir -p war/$(name_from_war)/META-INF war/$(name_from_war)/WEB-INF/classes war/$(name_from_war)/WEB-INF/lib;
-	mkdir -p war/$(name_from_war)/images
-	mkdir -p war/$(name_from_war)/META-INF
-	mkdir -p war/$(name_from_war)/WEB-INF/classes/net/sf/gratia/services
-	mkdir -p war/$(name_from_war)/WEB-INF/classes/net/sf/gratia/storage
-	mkdir -p war/$(name_from_war)/WEB-INF/classes/net/sf/gratia/administration
-	mkdir -p war/$(name_from_war)/WEB-INF/classes/net/sf/gratia/util
-	mkdir -p war/$(name_from_war)/WEB-INF/lib
-	echo "$(gratia_release_data)" >war/$(name_from_war)/gratia-release
-	javac -cp $(classpath) -extdirs $(commonLib) $(administration)/net/sf/gratia/administration/*.java
-	cp $(administration)/net/sf/gratia/administration/*.class war/$(name_from_war)/WEB-INF/classes/net/sf/gratia/administration
-	cp $(services)/net/sf/gratia/services/*.class war/$(name_from_war)/WEB-INF/classes/net/sf/gratia/services
-	cp $(services)/net/sf/gratia/storage/*.class war/$(name_from_war)/WEB-INF/classes/net/sf/gratia/storage
-	cp $(administration)/net/sf/gratia/administration/web.xml war/$(name_from_war)/WEB-INF/web.xml
-	cp $(administration)/WebContent/*.html war/$(name_from_war)
-	cp $(administration)/WebContent/*.css war/$(name_from_war)
-	cp $(administration)/WebContent/*.jsp war/$(name_from_war)
-	cp $(administration)/WebContent/*.js war/$(name_from_war)
-	cp $(administration)/WebContent/images/*.gif war/$(name_from_war)/images
-	cp $(services)/ehcache.xml war/$(name_from_war)/WEB-INF/classes/
-	cp $(services)/c3p0.properties war/$(name_from_war)/WEB-INF/classes/
+	rm -rf $(war-dir)/$(name_from_war); mkdir -p $(war-dir)/$(name_from_war)/META-INF $(war-dir)/$(name_from_war)/WEB-INF/classes $(war-dir)/$(name_from_war)/WEB-INF/lib;
+	mkdir -p $(classes-dir) $(target)
+	mkdir -p $(war-dir)/$(name_from_war)/images
+	mkdir -p $(war-dir)/$(name_from_war)/META-INF
+	mkdir -p $(war-dir)/$(name_from_war)/WEB-INF/classes/net/sf/gratia/services
+	mkdir -p $(war-dir)/$(name_from_war)/WEB-INF/classes/net/sf/gratia/storage
+	mkdir -p $(war-dir)/$(name_from_war)/WEB-INF/classes/net/sf/gratia/administration
+	mkdir -p $(war-dir)/$(name_from_war)/WEB-INF/classes/net/sf/gratia/util
+	mkdir -p $(war-dir)/$(name_from_war)/WEB-INF/lib
+	echo "$(gratia_release_data)" >$(war-dir)/$(name_from_war)/gratia-release
+	javac -d $(classes-dir) -cp $(classpath) -extdirs $(commonLib) $(administration)/net/sf/gratia/administration/*.java
+	cp $(classes-dir)/net/sf/gratia/administration/*.class $(war-dir)/$(name_from_war)/WEB-INF/classes/net/sf/gratia/administration
+	cp $(classes-dir)/net/sf/gratia/services/*.class $(war-dir)/$(name_from_war)/WEB-INF/classes/net/sf/gratia/services
+	cp $(classes-dir)/net/sf/gratia/storage/*.class $(war-dir)/$(name_from_war)/WEB-INF/classes/net/sf/gratia/storage
+	cp $(administration)/net/sf/gratia/administration/web.xml $(war-dir)/$(name_from_war)/WEB-INF/web.xml
+	cp $(administration)/WebContent/*.html $(war-dir)/$(name_from_war)
+	cp $(administration)/WebContent/*.css $(war-dir)/$(name_from_war)
+	cp $(administration)/WebContent/*.jsp $(war-dir)/$(name_from_war)
+	cp $(administration)/WebContent/*.js $(war-dir)/$(name_from_war)
+	cp $(administration)/WebContent/images/*.gif $(war-dir)/$(name_from_war)/images
+	cp $(services)/ehcache.xml $(war-dir)/$(name_from_war)/WEB-INF/classes/
+	cp $(services)/c3p0.properties $(war-dir)/$(name_from_war)/WEB-INF/classes/
 	# cp $(docs)/*.html war # included in the administration WebContent
-	cp $(util)/net/sf/gratia/util/Logging.class war/$(name_from_war)/WEB-INF/classes/net/sf/gratia/util
-	cp $(commonLib)/*.jar war/$(name_from_war)/WEB-INF/lib
-	rm -f  war/$(name_from_war)/WEB-INF/lib/{serv,log4j}*
-	cp $(target)/gratiaSecurity.jar war/$(name_from_war)/WEB-INF/lib
+	cp $(classes-dir)/net/sf/gratia/util/Logging.class $(war-dir)/$(name_from_war)/WEB-INF/classes/net/sf/gratia/util
+	cp $(commonLib)/*.jar $(war-dir)/$(name_from_war)/WEB-INF/lib
+	rm -f  $(war-dir)/$(name_from_war)/WEB-INF/lib/{serv,log4j}*
+	cp $(target)/gratiaSecurity.jar $(war-dir)/$(name_from_war)/WEB-INF/lib
 	$(copy2_util_lib)
-	jar -cfM $(target)/gratia-administration.war -C war/$(name_from_war) .
+	jar -cfM $(target)/gratia-administration.war -C $(war-dir)/$(name_from_war) .
 	# --- Target: $@ COMPLETED at $(shell date) ---
 
 #------------------------------------------------------------------
@@ -295,20 +310,21 @@ ${target}/gratia-registration.war: war $(util_lib) $(registration)/net/sf/gratia
 	#----------------------------------------------------
 	# --- Target: $(target)/gratia-administration.war ---
 	#----------------------------------------------------
-	rm -rf war/$(name_from_war); mkdir -p war/$(name_from_war)/META-INF war/$(name_from_war)/WEB-INF/classes war/$(name_from_war)/WEB-INF/lib;
-	echo "$(gratia_release_data)" > war/$(name_from_war)/gratia-release
+	rm -rf $(war-dir)/$(name_from_war); mkdir -p $(war-dir)/$(name_from_war)/META-INF $(war-dir)/$(name_from_war)/WEB-INF/classes $(war-dir)/$(name_from_war)/WEB-INF/lib;
+	echo "$(gratia_release_data)" > $(war-dir)/$(name_from_war)/gratia-release
 	#
-	javac -cp $(classpath) -extdirs $(commonLib) $(registration)/net/sf/gratia/registration/*.java
+	mkdir -p $(classes-dir) $(target)
+	javac -d $(classes-dir) -cp $(classpath) -extdirs $(commonLib) $(registration)/net/sf/gratia/registration/*.java
 	#
-	mkdir -p war/$(name_from_war)/WEB-INF/classes/net/sf/gratia/registration
-	cp $(registration)/net/sf/gratia/registration/*.class war/$(name_from_war)/WEB-INF/classes/net/sf/gratia/registration
-	cp $(registration)/net/sf/gratia/registration/web.xml war/$(name_from_war)/WEB-INF
+	mkdir -p $(war-dir)/$(name_from_war)/WEB-INF/classes/net/sf/gratia/registration
+	cp $(classes-dir)/net/sf/gratia/registration/*.class $(war-dir)/$(name_from_war)/WEB-INF/classes/net/sf/gratia/registration
+	cp $(classes-dir)/net/sf/gratia/registration/web.xml $(war-dir)/$(name_from_war)/WEB-INF
 	#
-	cp $(commonLib)/mysql*.jar war/$(name_from_war)/WEB-INF/lib
-	mkdir -p war/$(name_from_war)/WEB-INF/classes/net/sf/gratia/util
-	cp $(util)/net/sf/gratia/util/Logging.class war/$(name_from_war)/WEB-INF/classes/net/sf/gratia/util
+	cp $(commonLib)/mysql*.jar $(war-dir)/$(name_from_war)/WEB-INF/lib
+	mkdir -p $(war-dir)/$(name_from_war)/WEB-INF/classes/net/sf/gratia/util
+	cp $(classes-dir)/net/sf/gratia/util/Logging.class $(war-dir)/$(name_from_war)/WEB-INF/classes/net/sf/gratia/util
 	$(copy2_util_lib)
-	jar -cfM $@ -C war/$(name_from_war) .
+	jar -cfM $@ -C $(war-dir)/$(name_from_war) .
 	# --- Target: $@ COMPLETED at $(shell date) ---
 
 #------------------------------------------------------------------
@@ -316,11 +332,12 @@ $(target)/gratia-util.jar: ${util}/net/sf/gratia/util/*.java
 	# --------------------
 	# --- Target: $(target)/gratia-util.war ---
 	# --------------------
-	rm -rf jar-lib/$(name_from_war)
-	mkdir -p jar-lib/$(name_from_war)/net/sf/gratia/util
-	javac -Xlint:unchecked -cp $(classpath) -extdirs $(commonLib) $(util)/net/sf/gratia/util/*.java
-	cp $(util)/net/sf/gratia/util/*.class jar-lib/$(name_from_war)/net/sf/gratia/util
-	jar -cfM $(target)/gratia-util.jar -C jar-lib/$(name_from_war) .
+	rm -rf $(jar-dir)/$(name_from_war)
+	mkdir -p $(classes-dir) $(target)
+	mkdir -p $(jar-dir)/$(name_from_war)/net/sf/gratia/util
+	javac -d $(classes-dir) -Xlint:unchecked -cp $(classpath) -extdirs $(commonLib) $(util)/net/sf/gratia/util/*.java
+	cp $(classes-dir)/net/sf/gratia/util/*.class $(jar-dir)/$(name_from_war)/net/sf/gratia/util
+	jar -cfM $(target)/gratia-util.jar -C $(jar-dir)/$(name_from_war) .
 	# --- Target: $(target)/gratia-util.war COMPLETED at $(shell date) ---
 
 util: $(target)/gratia-util.jar
@@ -335,15 +352,16 @@ $(target)/gratiaSecurity.jar: $(target)/gratia-services.war $(util_lib) $(securi
 	# ----------------------------
 	# --- Target: $(target)/gratiaSecurity.jar ---
 	# ----------------------------
-	rm   -rf jar-lib/$(name_from_war)
-	mkdir -p jar-lib/$(name_from_war)/net/sf/gratia/util
-	mkdir -p jar-lib/$(name_from_war)/net/sf/gratia/services
-	mkdir -p jar-lib/$(name_from_war)/net/sf/gratia/vomsSecurity
-	javac -cp $(classpath) -extdirs $(commonLib) $(security)/net/sf/gratia/vomsSecurity/*.java
-	cp $(util)/net/sf/gratia/util/*.class jar-lib/$(name_from_war)/net/sf/gratia/util
-	cp $(security)/net/sf/gratia/vomsSecurity/*.class jar-lib/$(name_from_war)/net/sf/gratia/vomsSecurity
-	cp $(services)/net/sf/gratia/services/JMS*.class jar-lib/$(name_from_war)/net/sf/gratia/services
-	jar -cvfM $(target)/gratiaSecurity.jar -C jar-lib/$(name_from_war) .
+	rm   -rf $(jar-dir)/$(name_from_war)
+	mkdir -p $(classes-dir) $(target)
+	mkdir -p $(jar-dir)/$(name_from_war)/net/sf/gratia/util
+	mkdir -p $(jar-dir)/$(name_from_war)/net/sf/gratia/services
+	mkdir -p $(jar-dir)/$(name_from_war)/net/sf/gratia/vomsSecurity
+	javac -d $(classes-dir) -cp $(classpath) -extdirs $(commonLib) $(security)/net/sf/gratia/vomsSecurity/*.java
+	cp $(classes-dir)/net/sf/gratia/util/*.class $(jar-dir)/$(name_from_war)/net/sf/gratia/util
+	cp $(classes-dir)/net/sf/gratia/vomsSecurity/*.class $(jar-dir)/$(name_from_war)/net/sf/gratia/vomsSecurity
+	cp $(classes-dir)/net/sf/gratia/services/JMS*.class $(jar-dir)/$(name_from_war)/net/sf/gratia/services
+	jar -cvfM $(target)/gratiaSecurity.jar -C $(jar-dir)/$(name_from_war) .
 	# --- Target: $@ COMPLETED at $(shell date) ---
 
 #-------------------------------------------------------------
@@ -351,42 +369,44 @@ reporting: birt-reporting
 	# -------------------------
 	# --- Target: reporting ---
 	# -------------------------
-	rm -rf   war
-	mkdir -p war/documents
-	mkdir -p war/WEB-INF/attachments
-	echo "$(gratia_release_data)" >war/gratia-release
+	rm -rf $(war-dir)/$@
+	mkdir -p $(war-dir)/$@/documents
+	mkdir -p $(war-dir)/$@/WEB-INF/attachments
+	echo "$(gratia_release_data)" >$(war-dir)/$@/gratia-release
 	# --- expand the birt war file  -----
-	cp $(birtDir)/$(birtwarFile) war/.
-	cd war && jar xf $(birtwarFile)
-	rm -f war/$(birtwarFile)
-	rm -f war/test.rptdesign
-	rm -f war/test1.rptdesign
+	cp $(birtDir)/$(birtwarFile) $(war-dir)/$@/.
+	cd $(war-dir)/$@ && jar xf $(birtwarFile)
+	rm -f $(war-dir)/$@/$(birtwarFile)
+	rm -f $(war-dir)/$@/test.rptdesign
+	rm -f $(war-dir)/$@/test1.rptdesign
 	# --- edit the web.xml for timezone configuration ---
 	tmp=`mktemp $${TMPDIR:-/tmp}/gratia-build.XXXXXXXXXX`; \
 	[[ -n "$$tmp" ]] || exit 1; \
 	trap "[[ -n \"$$tmp\" ]] && rm -f \"$$tmp\"" EXIT; \
-	perl -we 'use strict; my $$seen_par; my $$par = "BIRT_VIEWER_TIMEZONE"; my $$val = "GMT"; while (<>) { m&<param-name>\Q$$par\E</param-name>& and $$seen_par = 1; $$seen_par and s&<param-value>.*&<param-value>$$val</param-value>& and undef $$seen_par; print }' war/WEB-INF/web.xml > "$$tmp"; \
+	perl -we 'use strict; my $$seen_par; my $$par = "BIRT_VIEWER_TIMEZONE"; my $$val = "GMT"; while (<>) { m&<param-name>\Q$$par\E</param-name>& and $$seen_par = 1; $$seen_par and s&<param-value>.*&<param-value>$$val</param-value>& and undef $$seen_par; print }' $(war-dir)/$@/WEB-INF/web.xml > "$$tmp"; \
         (( $$? == 0 )) || exit 1; \
-	cp -p war/WEB-INF/web.xml war/WEB-INF/web.xml.old; \
-	cat "$$tmp" > war/WEB-INF/web.xml;
+	cp -p $(war-dir)/$@/WEB-INF/web.xml $(war-dir)/$@/WEB-INF/web.xml.old; \
+	cat "$$tmp" > $(war-dir)/$@/WEB-INF/web.xml;
 	# --- copy in needed libraries ---
-	cp -p $(target)/gratiaReporting.jar                    war/WEB-INF/lib/.
-	cp -p $(target)/gratiaReporting.jar                    war/scriptlib/.
-	cp -p $(commonLib)/mysql-connector-java-5.0.8-bin.jar  war/WEB-INF/lib/.
-	cp -p $(commonLib)/mysql-connector-java-5.0.8-bin.jar  war/WEB-INF/platform/plugins/org.eclipse.birt.report.data.oda.jdbc*/drivers/.
-	cp -p $(commonLib)/dom4j-1.6.1.jar                     war/WEB-INF/lib/.
-	cp -p $(commonLib)/commons-lang-*.jar                  war/WEB-INF/lib/.
+	cp -p $(target)/gratiaReporting.jar                    $(war-dir)/$@/WEB-INF/lib/.
+	cp -p $(target)/gratiaReporting.jar                    $(war-dir)/$@/scriptlib/.
+	cp -p $(commonLib)/mysql-connector-java-5.0.8-bin.jar  $(war-dir)/$@/WEB-INF/lib/.
+	cp -p $(commonLib)/mysql-connector-java-5.0.8-bin.jar  $(war-dir)/$@/WEB-INF/platform/plugins/org.eclipse.birt.report.data.oda.jdbc*/drivers/.
+	cp -p $(commonLib)/dom4j-1.6.1.jar                     $(war-dir)/$@/WEB-INF/lib/.
+	cp -p $(commonLib)/commons-lang-*.jar                  $(war-dir)/$@/WEB-INF/lib/.
 	# --- copy needed jsp and css files ----
-	cp -p $(reportsrc)/WebContent/*.jsp                    war/.
-	cp -p $(reportsrc)/WebContent/*.html                   war/.
-	cp -p $(reportsrc)/WebContent/*.css                    war/.
+	cp -p $(reportsrc)/WebContent/*.jsp                    $(war-dir)/$@/.
+	cp -p $(reportsrc)/WebContent/*.html                   $(war-dir)/$@/.
+	cp -p $(reportsrc)/WebContent/*.css                    $(war-dir)/$@/.
 	# --- copy directories paths ---
-	cp -R $(reportsrc)/WebContent/calendar                 war/.
-	cp -R $(reportsrc)/WebContent/images                   war/.
-	cp -R $(reportsrc)/WebContent/tooltip                  war/.
+	cp -R $(reportsrc)/WebContent/calendar                 $(war-dir)/$@/.
+	cp -R $(reportsrc)/WebContent/images                   $(war-dir)/$@/.
+	cp -R $(reportsrc)/WebContent/tooltip                  $(war-dir)/$@/.
+	# --- Remove .svn directories
+	find $(war-dir)/$@ -depth -type d -name .svn -exec rm -rf {} \;
 	# --- copy the web.xml  file ---
-	jar -cfM $(target)/gratia-reporting.war -C war .
-	rm -rf war
+	jar -cfM $(target)/gratia-reporting.war -C $(war-dir)/$@ .
+	rm -rf $(war-dir)/$@
 	# --- Target: reporting COMPLETED at $(shell date) ---
 
 #-------------------------------------------------------------
@@ -394,23 +414,23 @@ reports:
 	# -----------------------
 	# --- Target: reports ---
 	# -----------------------
-	rm   -rf war
-	mkdir -p war/reports
-	mkdir -p war/MenuConfig
-	mkdir -p war/WEB-INF
-	mkdir -p war/META-INF
-	echo "${gratia_release_data}" >war/gratia-release
-	cp -p ${reports}/WebContent/WEB-INF/web.xml          war/WEB-INF/web.xml
-	cp -p ${reports}/WebContent/MenuConfig/*.xml         war/MenuConfig
-	cp -p ${reports}/WebContent/reports/production-osg/*.rptdesign            war/reports
-	-cp -p ${reports}/WebContent/reports/production-osg/*.rptlibrary war/reports
-	-cp -p ${reports}/WebContent/reports/production-fermi/*.rptlibrary war/reports
-	-cp -p ${reports}/WebContent/reports/production-osgdaily/*.rptlibrary war/reports
-	cp -p ${reports}/WebContent/reports/production-osgdaily/*.rptdesign            war/reports
-	cp -p ${reports}/WebContent/reports/production-fermi/*.rptdesign      war/reports
+	rm   -rf $(war-dir)/$@
+	mkdir -p $(war-dir)/$@/reports
+	mkdir -p $(war-dir)/$@/MenuConfig
+	mkdir -p $(war-dir)/$@/WEB-INF
+	mkdir -p $(war-dir)/$@/META-INF
+	echo "${gratia_release_data}" >$(war-dir)/$@/gratia-release
+	cp -p ${reports}/WebContent/WEB-INF/web.xml          $(war-dir)/$@/WEB-INF/web.xml
+	cp -p ${reports}/WebContent/MenuConfig/*.xml         $(war-dir)/$@/MenuConfig
+	cp -p ${reports}/WebContent/reports/production-osg/*.rptdesign            $(war-dir)/$@/reports
+	-cp -p ${reports}/WebContent/reports/production-osg/*.rptlibrary $(war-dir)/$@/reports
+	-cp -p ${reports}/WebContent/reports/production-fermi/*.rptlibrary $(war-dir)/$@/reports
+	-cp -p ${reports}/WebContent/reports/production-osgdaily/*.rptlibrary $(war-dir)/$@/reports
+	cp -p ${reports}/WebContent/reports/production-osgdaily/*.rptdesign            $(war-dir)/$@/reports
+	cp -p ${reports}/WebContent/reports/production-fermi/*.rptdesign      $(war-dir)/$@/reports
 	${copy_util_lib}
-	jar -cvf ${target}/gratia-reports.war -C war .
-	rm -rf war
+	jar -cvf ${target}/gratia-reports.war -C $(war-dir)/$@ .
+	rm -rf $(war-dir)/$@
 	# --- Target: reports COMPLETED at $(shell date) ---
 
 #-------------------------------------------------------------
@@ -418,19 +438,20 @@ birt-reporting:
 	# ------------------------------
 	# --- Target: birt-reporting ---
 	# ------------------------------
-	rm   -rf  jar-lib
-	mkdir -p jar-lib/WEB-INF
-	mkdir -p jar-lib/WEB-INF/tlds
-	mkdir -p jar-lib/net/sf/gratia/util
-	mkdir -p jar-lib/net/sf/gratia/reporting/exceptions
-	javac -cp $(classpath) -extdirs $(commonLib) $(util)/net/sf/gratia/util/*.java
-	javac -cp $(classpath) -extdirs $(commonLib) $(reportsrc)/src/net/sf/gratia/reporting/exceptions/*.java
-	javac -cp $(classpath) -extdirs $(commonLib) $(reportsrc)/src/net/sf/gratia/reporting/*.java
-	cp $(util)/net/sf/gratia/util/*.class jar-lib/net/sf/gratia/util
-	cp $(reportsrc)/src/net/sf/gratia/reporting/*.class jar-lib/net/sf/gratia/reporting
-	cp $(reportsrc)/src/net/sf/gratia/reporting/exceptions/*.class jar-lib/net/sf/gratia/reporting/exceptions
-	jar -cvfM $(target)/gratiaReporting.jar -C jar-lib .
-	rm -rf jar-lib
+	rm -rf $(jar-dir)/$@
+	mkdir -p $(classes-dir) $(target)
+	mkdir -p $(jar-dir)/$@/WEB-INF
+	mkdir -p $(jar-dir)/$@/WEB-INF/tlds
+	mkdir -p $(jar-dir)/$@/net/sf/gratia/util
+	mkdir -p $(jar-dir)/$@/net/sf/gratia/reporting/exceptions
+	javac -d $(classes-dir) -cp $(classpath) -extdirs $(commonLib) $(util)/net/sf/gratia/util/*.java
+	javac -d $(classes-dir) -cp $(classpath) -extdirs $(commonLib) $(reportsrc)/src/net/sf/gratia/reporting/exceptions/*.java
+	javac -d $(classes-dir) -cp $(classpath) -extdirs $(commonLib) $(reportsrc)/src/net/sf/gratia/reporting/*.java
+	cp $(classes-dir)/net/sf/gratia/util/*.class $(jar-dir)/$@/net/sf/gratia/util
+	cp $(classes-dir)/net/sf/gratia/reporting/*.class $(jar-dir)/$@/net/sf/gratia/reporting
+	cp $(classes-dir)/net/sf/gratia/reporting/exceptions/*.class $(jar-dir)/$@/net/sf/gratia/reporting/exceptions
+	jar -cvfM $(target)/gratiaReporting.jar -C $(jar-dir)/$@ .
+	rm -rf $(jar-dir)/$@
 	# --- Target: birt-reporting COMPLETED at $(shell date) ---
 
 
