@@ -3,11 +3,10 @@ PLATFORM := $(shell uname)
 # tarbal version
 version_default = v1.03
 
-warning := $(shell echo WARNING: Need to update the setting of the gratia_reporting_version 1>&2) 
-gratia_reporting_version := $(shell echo '$$HeadURL$$' | sed -e 's/^\$$\Name: \(v[^ ]*\) \$$/\1/' -e 's/-/./g')
+gratia_reporting_version := $(shell set -x ; echo '$$HeadURL$$' | sed -e 's?^\$$\HeadURL: .*gratia/\(v[^ ]*\)/build-scripts/Makefile \$$?\1?' -e 's/-/./g' )
 gratia_services_version = $(gratia_reporting_version)
 
-ifneq (,$(findstring $$Name,$(gratia_reporting_version)))
+ifneq (,$(findstring $$HeadURL,$(gratia_reporting_version)))
   override gratia_reporting_version := $(version_default)
 endif
 
