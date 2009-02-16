@@ -469,7 +469,7 @@ release: gratia
 	mkdir -p tarball/tomcat/v55/gratia; \
 	mkdir -p tarball/gratia/gratia_reporting; \
 	echo "$(gratia_release_data)" >tarball/tomcat/v55/gratia/gratia-release
-	cp $(configuration)/*gov $(configuration)/*xml $(configuration)/*properties $(staticScript)/*.py tarball/tomcat/v55/gratia; \
+	cp $(configuration)/*gov $(configuration)/*properties $(staticScript)/*.py tarball/tomcat/v55/gratia; \
 	chmod 755 tarball/tomcat/v55/gratia/*.py
 	cp $(configuration)/*sql $(configuration)/*sh tarball/tomcat/v55/gratia; \
 	rm -rf tarball/tomcat/v55/gratia/.svn; \
@@ -499,7 +499,7 @@ release: gratia
 	chmod 644 tarball/tomcat/v55/gratia/voms-servers;
 	cp $(security)/scripts/voms-server.sh   tarball/tomcat/v55/gratia; 
 	chmod 744 tarball/tomcat/v55/gratia/voms-server.sh;
-	cp $(configuration)/*gov $(configuration)/*xml $(configuration)/*properties  $(staticScript)/*.py tarball/tomcat/v55/gratia; \
+	cp $(configuration)/*gov $(configuration)/*properties  $(staticScript)/*.py tarball/tomcat/v55/gratia; \
 	chmod 755 tarball/tomcat/v55/gratia/*.py
 	cp -R $(configuration)/hibernate tarball/tomcat/v55/gratia; \
 	rm -rf tarball/tomcat/v55/gratia/hibernate/.svn; \
@@ -576,7 +576,7 @@ gratia: clean util services servlets administration soap reporting reports commo
 	rm -f -r tarball; \
 	mkdir tarball; \
 	echo "$(gratia_release_data)" >tarball/gratia-release
-	cp $(configuration)/UserVoMap.* $(configuration)/*xml $(staticScript)/*.py $(configuration)/*properties tarball; \
+	cp $(configuration)/UserVoMap.* $(staticScript)/*.py $(configuration)/*properties tarball; \
 	cp $(configuration)/*sql $(configuration)/*sh tarball; \
 	cp -R $(configuration)/hibernate tarball; \
 	rm -rf tarball/hibernate/.svn; \
