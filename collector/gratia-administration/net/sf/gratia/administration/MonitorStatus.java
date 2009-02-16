@@ -305,17 +305,25 @@ public class MonitorStatus extends HttpServlet
 			//
 			// previous hour
 			//
+         
+         String tables [] = { "JobUsageRecord", "MetricRecord" };
+         
+         count1 = new Integer(0);
+         
+         for(int i = 0; i < tables.length; ++i) {
 
-			command = "select count(*) from JobUsageRecord_Meta where ServerDate > " + dq + format.format(from) + dq +
-			" and ServerDate <= " + dq + format.format(to) + dq;
-			System.out.println("command: " + command);
-			statement = connection.prepareStatement(command);
-			resultSet = statement.executeQuery(command);
-			while(resultSet.next())
-				count1 = resultSet.getInt(1);
-			resultSet.close();
-			statement.close();
-
+            command = "select count(*) from " + tables[i] + "_Meta where ServerDate > " + dq + format.format(from) + dq +
+                      " and ServerDate <= " + dq + format.format(to) + dq;
+            System.out.println("command: " + command);
+            statement = connection.prepareStatement(command);
+            resultSet = statement.executeQuery(command);
+            while(resultSet.next()) {
+               count1 = count1 + resultSet.getInt(1);
+            }
+            resultSet.close();
+            statement.close();
+         }
+         
 			command = "select count(*) from DupRecord where EventDate > " + dq + format.format(from) + dq +
 			" and EventDate <= " + dq + format.format(to) + dq;
 			statement = connection.prepareStatement(command);
@@ -332,13 +340,16 @@ public class MonitorStatus extends HttpServlet
 			decrement = 24 * 60 * 60 * 1000;
 			java.util.Date date = new java.util.Date(now.getTime() - decrement);
 
-			command = "select count(*) from JobUsageRecord_Meta where ServerDate > " + dq + format.format(date) + dq;
-			statement = connection.prepareStatement(command);
-			resultSet = statement.executeQuery(command);
-			while(resultSet.next())
-				count24 = resultSet.getInt(1);
-			resultSet.close();
-			statement.close();
+         count24 = new Integer(0);
+         for(int i = 0; i < tables.length; ++i) {
+            command = "select count(*) from " + tables[i] + "_Meta where ServerDate > " + dq + format.format(date) + dq;
+            statement = connection.prepareStatement(command);
+            resultSet = statement.executeQuery(command);
+            while(resultSet.next())
+               count24 = count24 + resultSet.getInt(1);
+            resultSet.close();
+            statement.close();
+         }
 
 			command = "select count(*) from DupRecord where EventDate > " + dq + format.format(date) + dq;
 			statement = connection.prepareStatement(command);
@@ -360,12 +371,11 @@ public class MonitorStatus extends HttpServlet
 		int maxthreads = Integer.parseInt(props.getProperty("service.listener.threads"));
 		String path = System.getProperties().getProperty("catalina.home");
 		path = xp.replaceAll(path,"\\","/");
-
+      path = path + "/gratia/data/thread";
+      
 		for (int i = 0; i < maxthreads; i++)
 		{
-			String xpath = path + "/gratia/data/thread" + i;
-			String filelist[] = xp.getFileList(xpath);
-			buffer.append("queuesize" + i + "=" + filelist.length + "|");
+			buffer.append("queuesize" + i + "=" +XP.getFileNumber(path + i)+ "|");
 		}
 	}
 }
