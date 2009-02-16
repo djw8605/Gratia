@@ -5,7 +5,7 @@
 #
 # library to create simple report using the Gratia psacct database
 #
-#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id$
+#@(#)gratia/summary:$HeadURL$:$Id$
 
 import time
 import datetime
