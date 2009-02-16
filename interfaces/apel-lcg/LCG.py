@@ -7,7 +7,7 @@
 # Script to transfer the data from Gratia to APEL (WLCG)
 ########################################################################
 #
-#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: LCG.py,v 1.20 2008-12-16 14:05:14 jgweigand Exp $
+#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id$
 #
 #
 ########################################################################

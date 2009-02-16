@@ -5,7 +5,7 @@
 #
 # library to create simple report using the Gratia psacct database
 #
-#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id: PSACCTReport.py,v 1.55 2009-02-12 15:38:46 pcanal Exp $
+#@(#)gratia/summary:$Name: not supported by cvs2svn $:$Id$
 
 import time
 import datetime

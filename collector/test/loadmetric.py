@@ -32,7 +32,7 @@ def sendRecords(nrecords, name, end, extra = ""):
                 current = start + datetime.timedelta(days=ndays)
 
 if __name__ == '__main__':
-        rev = "$Revision: 1.2 $"
+        rev = "$Revision$"
         Gratia.RegisterReporterLibrary("loadmetric.py",Gratia.ExtractCvsRevision(rev))
 
         Gratia.Initialize()
