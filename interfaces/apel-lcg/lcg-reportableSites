@@ -186,7 +186,7 @@
 #   8/26/08 (Karthik Arunachalam)
 #           Updates based on comparison of NFgip to NFapel at http://www.nhn.ou.edu/~karunach/nf.html
 # 	    Update logic: If NFgip > NFapel then NFapel=NFgip. 
-# 	    	   	  Else If NFgip < NFapel then Contact site admin to see why NFgip droppedo	 
+# 	    	   	  Else If NFgip < NFapel then Contact site admin to see why NFgip dropped	 
 #		   	  Else Do nothing.
 #       --------------------------------------
 #	Site		NFgip	NFapel	%diff
@@ -206,7 +206,13 @@
 #   12/1/08
 #	Updates based on http://t2.unl.edu/gratia/site_normalization
 #            Nebraska 2027   previously 1571
-#    
+#
+#   02/17/09
+#	Updates based on http://t2.unl.edu/gratia/site_normalization
+#            Nebraska 		1832   previously 2166 (drop confirmed through GOC ticket # 6366
+#            BNL_ATLAS_1 	2302   previously 1944
+#            AGLT2	 	3130   previously 2698
+#   	 
 #    
 ##################################################################
 #-- Site  ------- SPECint2000
@@ -215,7 +221,7 @@
 USCMS-FNAL-WC1-CE   1809  
 #--- CMS Tier 2 ----    
 CIT_CMS_T2          2398       
-GLOW                2166
+GLOW                1832
 MIT_CMS             1872
 Nebraska            2027
 Purdue-RCAC         2883
@@ -230,9 +236,9 @@ UFlorida-PG         1535
 ####################################
 ####################################
 #--- ATLAS Tier 1 ----
-BNL_ATLAS_1         1944
+BNL_ATLAS_1         2302
 #--- ATLAS Tier 2 ----
-AGLT2               2698
+AGLT2               3130
 BU_ATLAS_Tier2      2022
 IU_OSG              2101
 MWT2_IU             1836
