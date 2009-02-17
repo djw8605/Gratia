@@ -18,6 +18,8 @@
     "monitor.to.address.0" => 'gratia-root@fnal.gov',
     "maintain.history.log" => 75,
     "monitor.listener.wait" => 60,
+    "service.admin.DN.0" => '/DC=org/DC=doegrids/OU=Services/CN=gratia06.fnal.gov',
+    "service.admin.DN.1" => '/DC=org/DC=doegrids/OU=Services/CN=gr5x0.fnal.gov',
     "service.admin.FQAN.0" => "/fermilab/Role=GratiaAdmin",
     "service.lifetime.JobUsageRecord" => "1 year", # Safety
     "service.lifetime.MetricRecord" => "1 month",
@@ -45,6 +47,8 @@
     "gratia.database.useJobUsageSiteName" => 1,
     "gratia.database.wantNodeSummary" => 1,
     "maintain.history.log" => 75,
+    "service.admin.DN.0" => '/DC=org/DC=doegrids/OU=Services/CN=gratia06.fnal.gov',
+    "service.admin.DN.1" => '/DC=org/DC=doegrids/OU=Services/CN=gr5x1.fnal.gov',
     "service.admin.FQAN.0" => "/fermilab/Role=GratiaAdmin",
    },
  },
@@ -66,6 +70,8 @@
     "monitor.from.address" => 'gratia-operation@opensciencegrid.org',
     "monitor.to.address.0" => 'gratia-root@fnal.gov',
     "maintain.history.log" => 75,
+    "service.admin.DN.0" => '/DC=org/DC=doegrids/OU=Services/CN=gratia06.fnal.gov',
+    "service.admin.DN.1" => '/DC=org/DC=doegrids/OU=Services/CN=gr5x2.fnal.gov',
     "service.admin.FQAN.0" => "/fermilab/Role=GratiaAdmin",
     "service.lifetime.JobUsageRecord" => "UNLIMITED",
    }
@@ -89,8 +95,9 @@
     "monitor.listener.threads" => 'false',
     "maintain.history.log" => 75,
     "monitor.listener.wait" => 240,
+    "service.admin.DN.0" => '/DC=org/DC=doegrids/OU=Services/CN=gratia06.fnal.gov',
+    "service.admin.DN.1" => '/DC=org/DC=doegrids/OU=Services/CN=gr5x3.fnal.gov',
     "service.admin.FQAN.0" => "/fermilab/Role=GratiaAdmin",
-    "service.lifetime.JobUsageRecord" => "1 year",
     "service.listener.threads" => 1,
    }
  },
@@ -113,6 +120,8 @@
     "monitor.to.address.0" => 'gratia-root@fnal.gov',
     "maintain.history.log" => 75,
     "monitor.listener.wait" => 1440,
+    "service.admin.DN.0" => '/DC=org/DC=doegrids/OU=Services/CN=gratia06.fnal.gov',
+    "service.admin.DN.1" => '/DC=org/DC=doegrids/OU=Services/CN=gr5x4.fnal.gov',
     "service.admin.FQAN.0" => "/fermilab/Role=GratiaAdmin",
     "service.lifetime.JobUsageRecord" => "1 year",
    }
