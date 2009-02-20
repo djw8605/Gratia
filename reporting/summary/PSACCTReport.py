@@ -353,7 +353,9 @@ def sendAll(text, filestem = "temp"):
    else:
       sendEmail( (gEmailToNames, gEmailTo), gEmailSubject, text, None)
 
-gMySQLConnectString = " -h gratia-db01.fnal.gov -u reader --port=3320 --password=reader "
+gMySQLOSGConnectString = " -h gratia09.fnal.gov -u reader --port=3320 --password=reader "
+gMySQLFermiConnectString = " -h gratia-db01.fnal.gov -u reader --port=3320 --password=reader "
+gMySQLConnectString = gMySQLOSGConnectString
 
 def CheckDB():
         global gMySQL,gMySQLConnectString
@@ -373,19 +375,25 @@ def CheckDB():
         return status == 0
         
 def RunQuery(select):
-        global gMySQL
+        global gMySQL,gMySQLConnectString
         LogToFile(select)
         return commands.getoutput("echo '" + select + "' | " + gMySQL + gMySQLConnectString + " -N gratia " )
 
 def RunQueryAndSplit(select):
         res = RunQuery(select)
         LogToFile(res)
-        lines = res.split("\n")
+        if ( len(res) > 0 ) :
+           lines = res.split("\n")
+        else:
+           lines = []
         return lines
 
 
 def NumberOfCpus():
+        global gMySQLConnectString
         schema = "gratia_psacct";
+        keepConnectionValue = gMySQLConnectString
+        gMySQLConnectString = gMySQLFermiConnectString
         
         select = "select sum(cpus),sum(bench) from " \
 			    + " ( SELECT distinct J.Host, cpuinfo.CpuCount as cpus,cpuinfo.CpuCount*cpuinfo.BenchmarkScore/1000 as bench from " \
@@ -393,6 +401,7 @@ def NumberOfCpus():
                 + "where J.HostDescription=cpuinfo.NodeName " \
                 + CommonWhere() + ") as Sub;"
         res = RunQuery(select);
+        gMySQLConnectString = keepConnectionValue;
         LogToFile(res)
         values = res.split("\n")[1]
         ncpu = string.atoi(values.split("\t")[0])
@@ -449,12 +458,17 @@ def UpdateVOName(list, index):
       r = []
       for row in list:
          srow = row.split('\t')
-         if srow[index] not in vos:
+         if len(srow)>index and srow[index] not in vos:
             srow[index] = srow[index] + " (nr)"
          r.append( "\t".join(srow) )
       return r
 
 def WeeklyData():
+        global gMySQLConnectString
+        schema = "gratia_psacct";
+        keepConnectionValue = gMySQLConnectString
+        gMySQLConnectString = gMySQLFermiConnectString
+
         schema = "gratia_psacct";
         select = " SELECT J.VOName, sum((J.CpuUserDuration+J.CpuSystemDuration)) as cputime, " + \
                  " sum((J.CpuUserDuration+J.CpuSystemDuration)*CpuInfo.BenchmarkScore)/1000 as normcpu, " + \
@@ -462,7 +476,9 @@ def WeeklyData():
                  " FROM "+schema+".JobUsageRecord_Report J, "+schema+".CPUInfo CpuInfo " + \
                  " where J.HostDescription=CpuInfo.NodeName " + CommonWhere() + \
                  " group by J.VOName; "
-        return RunQueryAndSplit(select)
+        result = RunQueryAndSplit(select)
+        gMySQLConnectString = keepConnectionValue;
+        return result
 
 def CondorData():
         select = " SELECT J.VOName, sum((J.CpuUserDuration+J.CpuSystemDuration)) as cputime, " + \
@@ -1069,12 +1085,16 @@ def GenericDailyStatus(what, when = datetime.date.today(), output = "text"):
                 print what.lines[output]
                 if ( (totalws+totalwf) > 0 ):
                    totalwrate = niceNum( 100*totalws / (totalws+totalwf))
-                else:
+                elif (totaljobs > 0) :
                    totalwrate = totalsuccess*100/totaljobs
+                else:
+                   totalwrate = 0
                 if (what.Both):
                     print "    ", what.formats[output] % ( what.totalheaders[0], what.totalheaders[1], str(totalwrate) + " %", niceNum(totalws),niceNum(totalwf), str(totalsuccess*100/totaljobs) + " %", niceNum(totalsuccess),niceNum(totalfailed))
                 else:
-                    print "    ", what.formats[output] % ( what.totalheaders[0], str(totalwrate) + " %", niceNum(totalws),niceNum(totalwf), str(totalsuccess*100/totaljobs) + " %",niceNum(totalsuccess),niceNum(totalfailed))
+                    tsrate = 0
+                    if ( totaljobs > 0) : tsrate = totalsuccess*100/totaljobs
+                    print "    ", what.formats[output] % ( what.totalheaders[0], str(totalwrate) + " %", niceNum(totalws),niceNum(totalwf), str(tsrate) + " %",niceNum(totalsuccess),niceNum(totalfailed))
                 print what.lines[output]
 
         return result
@@ -1157,11 +1177,14 @@ def GenericDaily(what, when = datetime.date.today(), output = "text"):
         start = when
         end = start + datetime.timedelta(days=1)
         lines = what.GetData(start,end)
-        num_header = 1;
+        num_header = what.num_header;
         index = 0
         printValues = {}
+        
         for i in range (0,len(lines)):
                 val = lines[i].split('\t')
+                if ( len(val) < 2 ) :
+                   continue;
                 site = val[0]
                 key = site
                 offset = 0
@@ -1200,7 +1223,9 @@ def GenericDaily(what, when = datetime.date.today(), output = "text"):
         (oldnjobs,oldwall,s,v) = oldValues["total"]
         if (output != "None") :
                 print what.lines[output]
-                if (num_header == 2) :
+                if (num_header == 0) :
+                    print 
+                elif (num_header == 2) :
                     print "    ",what.formats[output] % (what.totalheaders[0], what.totalheaders[1], niceNum(totaljobs), niceNum(totalwall), niceNum(totaljobs-oldnjobs), niceNum(totalwall-oldwall))
                 else:
                     print "    ",what.formats[output] % (what.totalheaders[0], niceNum(totaljobs), niceNum(totalwall), niceNum(totaljobs-oldnjobs), niceNum(totalwall-oldwall))
@@ -2453,8 +2478,9 @@ def RangeSummup(range_end = datetime.date.today(),
     reportingSitesDate = GetSiteLastReportingDate(range_begin,True)
     pingSites = []
     for data in reportingSitesDate:
-        (name,lastreport) = data.split("\t")
-        pingSites.append(name)
+        if ( len(data) > 0 ):
+           (name,lastreport) = data.split("\t")
+           pingSites.append(name)
 
     exceptionSites = ['BNL_ATLAS_1', 'BNL_ATLAS_2', 'USCMS-FNAL-WC1-CE2', 'USCMS-FNAL-WC1-CE3', 'USCMS-FNAL-WC1-CE4', 'BNL_LOCAL', 'BNL_OSG', 'BNL_PANDA', 'GLOW-CMS', 'UCSDT2-B']
 
@@ -2480,9 +2506,14 @@ def RangeSummup(range_end = datetime.date.today(),
     print prettyInt(n)+" sites reported\n"
 
     [njobs,wallduration,div] = GetTotals(range_begin,range_end)
-    njobs = string.atoi(njobs);
-    wallduration = string.atof(wallduration)
-    div = string.atof(div)
+    if (njobs != "NULL"):
+       njobs = string.atoi(njobs);
+       wallduration = string.atof(wallduration)
+       div = string.atof(div)
+    else:
+       njobs = 0
+       wallduration = 0
+       div = 1
     
     print "Total number of jobs: "+prettyInt(njobs)
     print "Total wall duration: "+niceNum( wallduration / 3600, 1 )+ " hours"
