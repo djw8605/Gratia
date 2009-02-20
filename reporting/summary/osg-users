@@ -343,7 +343,7 @@ order by lastname, cn, group_name, role_name;
 EOF
 }
 
-my $dbh = DBI->connect("DBI:mysql:database=gratia;host=gratia-db01.fnal.gov;port=3320",
+my $dbh = DBI->connect("DBI:mysql:database=gratia;host=gratia09.fnal.gov;port=3320",
                        "reader", "reader",
                        { 'RaiseError' => 1,
                          'AutoCommit' => 1 });
