@@ -58,9 +58,9 @@ function sendto {
 }
 
 if [ "$debug" != "x" ]; then 
-    root.exe -b -q -l "rungratia.C(\"$WORK_DIR\",0)" 
+    root.exe -b -q -l "rungratia.C(\"$WORK_DIR\",0)" | more +3
 else
-    root.exe -b -q -l "rungratia.C(\"$WORK_DIR\",1)"
+    root.exe -b -q -l "rungratia.C(\"$WORK_DIR\",1)" | more +3
 fi
 
 #scp -r $WORK_DIR/osg_gratia_display flxi02.fnal.gov:/afs/fnal.gov/files/expwww/gratia/html/Files
