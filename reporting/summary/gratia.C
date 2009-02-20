@@ -714,7 +714,7 @@ void nsites(ostream &out, TSQLServer *db, TDatime *begin, TDatime *end)
 
 
 TSQLServer *getServer() {
-   static TSQLServer *db = TSQLServer::Connect("mysql://gratia-db01.fnal.gov:3320/gratia","reader", "reader");
+   static TSQLServer *db = TSQLServer::Connect("mysql://gratia09.fnal.gov:3320/gratia","reader", "reader");
    static bool first = true;
 
    if (db==0) {
