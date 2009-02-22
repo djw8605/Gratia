@@ -57,10 +57,10 @@ function sendto {
     echo $mutt -a $csvfile -s "$subject" $MAILTO < $txtfile
 }
 
-if [ "$debug" != "x" ]; then 
-    root.exe -b -q -l "rungratia.C(\"$WORK_DIR\",0)" | more +3
+if [ "$debug" != "x" ]; then
+    root.exe -b -q -l "rungratia.C(\"$WORK_DIR\",0)" | grep -v -e 'Processing' -e '^$' 
 else
-    root.exe -b -q -l "rungratia.C(\"$WORK_DIR\",1)" | more +3
+    root.exe -b -q -l "rungratia.C(\"$WORK_DIR\",1)" | grep -v -e 'Processing' -e '^$' 
 fi
 
 #scp -r $WORK_DIR/osg_gratia_display flxi02.fnal.gov:/afs/fnal.gov/files/expwww/gratia/html/Files
