@@ -409,7 +409,7 @@ def NumberOfCpus():
         return (ncpu,benchtotal);
 
 def GetListOfOSGSites():
-        cmd = "wget --proxy -q -O - http://oim.grid.iu.edu/pub/resource/show.php?format=plain-text | cut -d, -f4,1,15,8 | grep -e ',OSG,\(CE\|Hidden CE/SE\) [^,]*,1' | cut -d, -f1"
+        cmd = "wget --proxy -q -O - http://oim.grid.iu.edu/pub/resource/show.php?format=plain-text | cut -d, -f4,1,16,8 | grep -e ',OSG,\(CE\|Hidden CE/SE\) [^,]*,1' | cut -d, -f1"
         #print "Will execute: " + cmd;
         allSites = commands.getoutput(cmd).split("\n");
 
@@ -420,7 +420,7 @@ def GetListOfOSGSites():
         return allSites;
 
 def GetListOfOSGSitesVisible():
-        cmd = "wget --proxy -q -O - http://oim.grid.iu.edu/pub/resource/show.php?format=plain-text | cut -d, -f4,1,15,8 | grep -e ',OSG,\(CE\) [^,]*,1' | cut -d, -f1"
+        cmd = "wget --proxy -q -O - http://oim.grid.iu.edu/pub/resource/show.php?format=plain-text | cut -d, -f4,1,16,8 | grep -e ',OSG,\(CE\) [^,]*,1' | cut -d, -f1"
         #print "Will execute: " + cmd;
         allSites = commands.getoutput(cmd).split("\n");
 
