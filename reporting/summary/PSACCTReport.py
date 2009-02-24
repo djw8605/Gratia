@@ -377,6 +377,7 @@ def CheckDB():
 def RunQuery(select):
         global gMySQL,gMySQLConnectString
         LogToFile(select)
+        #print "echo '" + select + "' | " + gMySQL + gMySQLConnectString + " -N gratia "
         return commands.getoutput("echo '" + select + "' | " + gMySQL + gMySQLConnectString + " -N gratia " )
 
 def RunQueryAndSplit(select):
@@ -407,6 +408,18 @@ def NumberOfCpus():
         ncpu = string.atoi(values.split("\t")[0])
         benchtotal = string.atof(values.split("\t")[1]) 
         return (ncpu,benchtotal);
+
+
+def GetListOfDisabledOSGSites():
+        cmd = "wget --proxy -q -O - http://oim.grid.iu.edu/pub/resource/show.php?format=plain-text | cut -d, -f4,1,16,8 | grep -e ',OSG,\(CE\|Hidden CE/SE\) [^,]*,0' | cut -d, -f1"
+        #print "Will execute: " + cmd;
+        allSites = commands.getoutput(cmd).split("\n");
+
+        # Call it twice to avoid a 'bug' in wget where on of the row is missing the first few characters.
+        allSites = commands.getoutput(cmd).split("\n");
+      
+        #print allSites;
+        return allSites;
 
 def GetListOfOSGSites():
         cmd = "wget --proxy -q -O - http://oim.grid.iu.edu/pub/resource/show.php?format=plain-text | cut -d, -f4,1,16,8 | grep -e ',OSG,\(CE\|Hidden CE/SE\) [^,]*,1' | cut -d, -f1"
@@ -2473,6 +2486,7 @@ def RangeSummup(range_end = datetime.date.today(),
 
     allSites = GetListOfOSGSites();
     regVOs = GetListOfRegisteredVO();
+    disabledSites = GetListOfDisabledOSGSites();
 
     reportingVOs = GetReportingVOs(range_begin,range_end)
     reportingSitesDate = GetSiteLastReportingDate(range_begin,True)
@@ -2490,9 +2504,10 @@ def RangeSummup(range_end = datetime.date.today(),
     missingSites = [name for name in allSites if name not in reportingSites and name not in pingSites]
     emptySites = [name for name in allSites if name not in reportingSites and name in pingSites]
     
-    extraSites = [name for name in reportingSites if name not in allSites]
+    extraSites = [name for name in reportingSites if name not in allSites and name not in disabledSites]
     knownExtras = [name for name in extraSites if name in exceptionSites]
     extraSites = [name for name in extraSites if name not in exceptionSites]
+    reportingDisabled = [name for name in reportingSites if name in disabledSites]
 
     #print allSites
     #print reportingSites
@@ -2533,17 +2548,21 @@ def RangeSummup(range_end = datetime.date.today(),
     n = len(extraSites);
     print prettyInt(n)+" non-sanctioned non-registered sites reported (might indicate a discrepancy between OIM and Gratia)"
 
-    n = len(knownExtras);
-    print prettyInt(n)+" sanctioned non-registered sites reported"
+    #n = len(knownExtras);
+    #print prettyInt(n)+" sanctioned non-registered sites reported"
+ 
+    n = len(reportingDisabled)
+    print prettyInt(n)+" disabled sites have reported."
 
     #print "\nThe reporting sites are:\n"+prettyList(reportingSites)
     #print "\nThe registered sites are:\n"+prettyList(allSites)
     
     print "\nThe sites with no activity are: \n"+prettyList(emptySites);
     print "\nThe non reporting sites are: \n"+prettyList(missingSites);
-    print "\nThe sanctioned non registered sites are: \n"+prettyList(knownExtras)
+    #print "\nThe sanctioned non registered sites are: \n"+prettyList(knownExtras)
     print "\nThe non registered sites are: \n"+prettyList(extraSites)
-    
+    print "\nThe disabled sites that are reporting: \n"+prettyList(reportingDisabled)
+
     expectedNoActivity = ['miniboone','sdss']
     emptyVO = [name for name in regVOs if name not in reportingVOs and name not in expectedNoActivity]
     nonregVO = [name for name in reportingVOs if name not in regVOs]
@@ -2733,10 +2752,10 @@ class SoftwareVersionConf:
 Only sites registered in OIM are listed.
 
 The recommended probe versions are those available in VDT 1.10.1n or higher and will be listed below as:
-Probe Library: v1.00.5
-Condor Probe: v1.00.3+
-PBS/LSF Probe: v1.00.1+
-glexec Probe: v1.00.3a-1+
+Probe Library: v1.02.1
+Condor Probe:  v1.02.1
+PBS/LSF Probe: v1.02.1
+glexec Probe:  v1.02.1
 
 Note that the '+' after the release number indicates that the same version of the probe has been available in the
 given release up to the current release.
@@ -2771,7 +2790,17 @@ given release up to the current release.
       if (not header) :  self.title = ""
 
    def GetData(self,start,end):
-      return SoftwareVersionData("gratia",start,end) + SoftwareVersionData("fermi_osg",start,end)
+      global gMySQLConnectString
+      res1 = SoftwareVersionData("gratia",start,end)
+
+      keepConnectionValue = gMySQLConnectString
+      gMySQLConnectString = gMySQLFermiConnectString
+
+      res2 = SoftwareVersionData("fermi_osg",start,end)
+
+      gMySQLConnectString = keepConnectionValue;
+
+      return res1 + res2;
    
 
 def SoftwareVersion(range_end = datetime.date.today(),
@@ -2795,10 +2824,10 @@ def SoftwareVersion(range_end = datetime.date.today(),
    reportingSites = GetListOfReportingSites(range_begin,range_end);
 
    versions = {
-     "Gratia": { "1.65":"v0.27.[1-2]","1.67":"v0.27b","1.68":"v0.28","1.69":"v0.30","1.69.2.1":"v0.32.1","1.78":"v0.32.2","1.84":"v0.34.[1-8]","1.85":"v0.34.[9-10]","1.86":"v0.36","1.90":"v0.38.4","1.91":"v1.00.1","1.93":"v1.00.3","1.95":"v1.00.5"},
-     "condor_meter.pl" : { "$""Revision: 1.29 $  (tag unknown)":"v0.99", "$""Revision: 1.31 $  (tag unknown)":"v1.00.3+" },
-     "pbs-lsf.py" : { "1.7 (tag )":"v1.00.1+" },
-     "glexec_meter.py": {"1.9 (tag )":"v1.00.[3-5]", "1.9 (tag v1-00-3a-1)":"v1.00.3a-1+"}
+     "Gratia": { "1.65":"v0.27.[1-2]","1.67":"v0.27b","1.68":"v0.28","1.69":"v0.30","1.69.2.1":"v0.32.1","1.78":"v0.32.2","1.84":"v0.34.[1-8]","1.85":"v0.34.[9-10]","1.86":"v0.36","1.90":"v0.38.4","1.91":"v1.00.1","1.93":"v1.00.3","1.95":"v1.00.5","1.100":"v1.02.01"},
+     "condor_meter.pl" : { "$""Revision: 1.29 $  (tag unknown)":"v0.99", "$""Revision: 1.31 $  (tag unknown)":"v1.00.3+", "$Revision$  (tag 1.02.1-5)":"v1.02.1" },
+     "pbs-lsf.py" : { "1.7 (tag )":"v1.00.1+", "1.8 (tag )":"v1.00.x", "1.9 (tag 1.02.1-5)":"v1.02.1" },
+     "glexec_meter.py": {"1.9 (tag )":"v1.00.[3-5]", "1.9 (tag v1-00-3a-1)":"v1.00.3a-1+", "1.10 (tag 1.02.1-5)":"v1.02.01"}
      }
    renames = {
      "Gratia":"Probe Library",
@@ -2812,6 +2841,8 @@ def SoftwareVersion(range_end = datetime.date.today(),
       
    for row in lines:
       row = row.split('\t')
+      if (len(row) < 2): 
+         continue
       site = row[0]
       probe= row[1]
       
