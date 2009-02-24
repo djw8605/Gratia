@@ -212,6 +212,8 @@
 #            Nebraska 		1832   previously 2166 (drop confirmed through GOC ticket # 6366
 #            BNL_ATLAS_1 	2302   previously 1944
 #            AGLT2	 	3130   previously 2698
+#   02/24/2009
+#	Removing UFlowida-IHEPA (This site has been de-commissioned according to Bockjoo Kim)
 #   	 
 #    
 ##################################################################
@@ -228,7 +230,6 @@ Purdue-RCAC         2883
 Purdue-Steele       3196
 UCSDT2              2871
 UFlorida-HPC        1521
-UFlorida-IHEPA      1521
 UFlorida-PG         1535
 #--- CMS Tier unknown ----    
 #HEPGRID_UERJ        2117
@@ -254,6 +255,7 @@ UTA_SWT2            1543
 ####################################
 ####################################
 ##-- obsolete --
+##UFlorida-IHEPA      1521
 ##BNL_PANDA           1351 
 ##BNL_OSG             1351
 ##BNL_ATLAS_2         1351
