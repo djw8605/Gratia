@@ -1,0 +1,168 @@
+eval '(exit $?0)' && eval 'exec perl -w -S $0 ${1+"$@"}'
+                  && eval 'exec perl -w -S $0 $argv:q'
+                  if 0;
+
+use strict;
+
+use Getopt::Long;
+use File::Basename;
+
+Getopt::Long::Configure(qw(no_ignore_case bundling require_order));
+
+use vars qw($script_top_dir);
+BEGIN {
+  # Make a spirited attempt to find where our libraries, etc are.
+  if (-l $0) {
+    $script_top_dir = dirname(readlink($0));
+  } else {
+    $script_top_dir = dirname $0;
+  }
+}
+
+use lib "$script_top_dir";
+
+use GratiaReporting::Reporter;
+use GratiaReporting::Data;
+
+my $options = {};
+my $master_vo_list = {};
+my $alt_vo_list = {};
+my $osg_users_script = "$script_top_dir/osg-users";
+my $merge = 1;
+my @wanted_vos = ();
+my @test_addresses = ( 'Chris Green <chris.h.green@gmail.com>' );
+
+GetOptions($options,
+           "merge|m",
+           "data-file-precdence|p|r",
+           "data-source|D=s@",
+           "debug|d",
+           "verbose",
+           "monthly|M",
+           "weekly|W",
+           "yearly|Y",
+           "test|t",
+           "vo|v=s@" => sub { push @wanted_vos, lc $_[1] } ) or die $@;
+
+$merge = 0 if ($options->{"data-file-precdence"});
+
+my $reporter = new GratiaReporting::Reporter( debug => $options->{debug},
+                                              verbose => $options->{verbose},
+                                              test => $options->{test}
+                                            );
+
+if (not scalar @ARGV) {
+  push @ARGV, "$script_top_dir/all-vos.dat";
+}
+
+# Parse reporting data from all sources
+my $reporting_data =
+  new GratiaReporting::Data( debug => $options->{debug},
+                             verbose => $options->{verbose},
+                             data_source => $options->{"data-source"}
+                           );
+
+
+# Read list of VOs and email addresses
+foreach my $dat_file (@ARGV) {
+  print "INFO: attemping to read data file $dat_file\n";
+  if (not open(DAT_SOURCE, $dat_file)) {
+    print STDERR "ERROR: Unable to open data file $dat_file\n";
+    next;
+  }
+  my $dat_source = join('', <DAT_SOURCE>);
+  close DAT_SOURCE;
+  my %tmp_hash = eval $dat_source;
+  if ($@) {
+    print STDERR "ERROR: Problem reading collector data file $dat_file: $@\n";
+    next;
+  }
+  foreach my $vo (sort keys %tmp_hash) {
+    # Filter?
+    next if (lc $vo ne "all") and
+      scalar @wanted_vos and
+        not grep /^\Q$vo\E$/i, @wanted_vos;
+    if (exists $master_vo_list->{lc $vo}) {
+      if ($merge) {
+        my $email_hash = {};
+        foreach my $email (@{$master_vo_list->{lc $vo}}, @{$tmp_hash{$vo}->{mail} || []}) {
+          $email_hash->{$email} = 1;
+        }
+        $master_vo_list->{lc $vo} = [ sort keys %$email_hash ]; # merge
+      }
+    } else {
+      $master_vo_list->{lc $vo} = [ sort @{$tmp_hash{$vo}->{mail} || []} ];
+    }
+    if (exists $alt_vo_list->{lc $vo}) {
+      if ($merge) {
+        my $vo_hash = {};
+        foreach my $alt_vo (@{$alt_vo_list->{lc $vo}}, @{$tmp_hash{$vo}->{"alt-vos"} || []}) {
+          $vo_hash->{$alt_vo} = 1;
+        }
+        $alt_vo_list->{lc $vo} = [ sort keys %$vo_hash ]; # merge
+      }
+    } else {
+      $alt_vo_list->{lc $vo} = [ sort @{$tmp_hash{$vo}->{"alt-vos"} || []} ];
+    }
+  }
+}
+
+$master_vo_list->{"all-vos-test"} = [ @test_addresses ]
+  unless exists $master_vo_list->{"all-vos-test"};
+
+foreach my $vo (sort keys %$master_vo_list) {
+  next if (lc $vo eq "all" or lc $vo eq "all-vos-test");
+  my @command = ("$osg_users_script", "-v", "$vo", "--aux-db-type=none", "-s", "-V");
+  push @command, map { ( "-D", $_) } @{$options->{"data-source"}} if $options->{"data-source"};
+  if ($options->{monthly}) {
+    push @command, "-t", "month";
+  } elsif ($options->{yearly}) {
+    push @command, "-t", "year";
+  }
+  my $email_hash = {};
+  my @email_list = $options->{"test"}?
+    @{$master_vo_list->{"all-vos-test"}}:
+      (@{$master_vo_list->{$vo}}, @{$master_vo_list->{"all"}});
+  foreach my $email (@email_list) {
+    my ($address) = ($email =~ m&<([^>]+)>&);
+    $email_hash->{$email} = $address || $email;
+  }
+  foreach my $email (sort keys %$email_hash) {
+    # Check whether we have information about this person from OIM
+    if (exists $people_data->{$email_hash->{$email}} and
+        $people_data->{$email_hash->{$email}}->wants_vo($vo)) {
+      print "INFO: Matched $email_hash->{$email} in OIM contacts list for VO $vo.\n"
+        if $options->{verbose};
+    } else {
+      print "OIM_WARNING: Local contact $email not found in OIM contacts list for VO $vo.\n";
+    }
+  }
+  # Check whether OIM knows something we don't
+  foreach my $person (sort keys %$people_data) {
+    print "INFO: checking $person in OIM data\n" if $options->{verbose};
+#    print "INFO: person data for $person:\n",
+#      '-' x 72, "\n",
+#        $people_data->{$person}->info(),
+#        '-' x 72, "\n" if $options->{verbose};
+    if ($people_data->{$person}->wants_vo($vo)) {
+      if (grep m&$person&i, %$email_hash) {
+        print "INFO: OIM contact $people_data->{$person}->{full_name} matches data-file email $person for VO $vo.\n"
+          if $options->{verbose};
+      } else {
+        print "OIM_WARNING: OIM contact $people_data->{$person}->{full_name} (email address $person) not found in local contact list for VO $vo.\n"
+      }
+    }
+  }
+  @email_list = map { ('-m', $_) } sort keys %$email_hash;
+  print "INFO: compiling and distributing report for VO $vo to: ";
+  print join(", ", sort keys %$email_hash),"\n";
+  $reporter->invoke(\@command, \@email_list);
+}
+
+1;
+
+__END__
+
+### Local Variables:
+### mode: cperl
+### End:
