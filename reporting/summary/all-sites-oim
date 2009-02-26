@@ -23,10 +23,10 @@ use lib "$script_top_dir";
 
 use FileHandle;
 
-use ReportingData;
+use GratiaReporting::Data;
+use GratiaReporting::Reporter;
 
 sub expandSites(\@);
-sub invoke(\@\@);
 
 my $options = {};
 my $osg_users_script = "$script_top_dir/osg-users";
@@ -46,6 +46,11 @@ GetOptions($options,
            "grid-type|g=s@",
            "service=s@",
            "for-user|u=s@") or die $@;
+
+my $reporter = new GratiaReporting::Reporter( debug => $options->{debug},
+                                              verbose => $options->{verbose},
+                                              test => $options->{test}
+                                            );
 
 my $wanted_sites = {};
 foreach my $site (@{$options->{"site-name"}}) {
@@ -74,9 +79,9 @@ my $all_sites = not scalar keys %{$wanted_sites};
 
 # Parse reporting data from all sources
 my $reporting_data =
-  new ReportingData( verbose => $options->{verbose},
-                     data_source => $options->{"data-source"}
-                   );
+  new GratiaReporting::Data( verbose => $options->{verbose},
+                             data_source => $options->{"data-source"}
+                           );
 
 # Construct the command line(s) and invoke.
 my @base_command = ("$osg_users_script",
@@ -96,7 +101,7 @@ if ($options->{"exclusive-mail"}) { # Short-circuit people list.
   push @command, map { ("--site", $_) } expandSites(@{$options->{"site-name"}})
     if $options->{"site-name"};
   push @mail_opts, map { ("-m", $_) } @{$options->{"exclusive-mail"}};
-  invoke(@command, @mail_opts);
+  $reporter->invoke(\@command, \@mail_opts);
 } else { # Standard -- take main lead from .dat files and OIM.
   if ($options->{monthly}) {
     push @base_command, "-t", "month";
@@ -141,32 +146,15 @@ if ($options->{"exclusive-mail"}) { # Short-circuit people list.
       foreach my $vo (sort map { lc $_ } @{$person->{site_vos}}) {
         my @looped_cmd = @command;
         push @looped_cmd, "-v", $vo;
-        invoke(@looped_cmd, @mail_opts);
+        $reporter->invoke(\@looped_cmd, \@mail_opts);
       }
     } else {
-      invoke(@command, @mail_opts);
+      $reporter->invoke(\@command, \@mail_opts);
     }
   }
 }
 
 1;
-
-sub invoke(\@\@) {
-  my ($command, $mail_opts) = @_;
-  $mail_opts = [] unless $mail_opts;
-  my @escaped_command = map { my $cmd = $_; $cmd =~ s&"&\\"&g; sprintf('"%s"', $cmd) } @$command, @$mail_opts;
-  if ($options->{debug}) {
-    print "Would execute ",
-      join(" ", @escaped_command), "\n";
-  } else {                      # For real
-    if ($options->{test}) {
-      unshift @escaped_command, "set -x;";
-    } else {
-      push @escaped_command, ">/dev/null 2>&1";
-    }
-    system(join(" ", @escaped_command));
-  }
-}
 
 sub expandSites(\@) {
   my $siteList = shift;
