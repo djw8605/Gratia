@@ -1,9 +1,12 @@
-package ReportingData;
+package GratiaReporting::Data;
 
 use strict;
 require Exporter;
 
 use XML::LibXML; # Parse XML file
+use FileHandle;
+
+use GratiaReporting::Person;
 
 use vars qw(@ISA @EXPORT @EXPORT_OK $vo_data $site_data $people_data @test_addresses);
 
@@ -88,6 +91,7 @@ sub processXmlVoContacts {
     }
     my $reporting_group_nodes = $vo->findnodes('vo_reporting_group');
     $this_vo->{reporting_groups} = {} unless $this_vo->{reporting_groups};
+    $this_vo->{reporting_contacts} = [] unless $this_vo->{reporting_contacts};
     foreach my $reporting_group_node ($reporting_group_nodes->get_nodelist()) {
       my $vo_reporting_name = $reporting_group_node->findvalue('vo_reporting_name');
       $this_vo->{reporting_groups}->{$vo_reporting_name} = {}
@@ -98,12 +102,6 @@ sub processXmlVoContacts {
       my %fqan_node_set  = ( (map { $_?($_ => 1):(); } @{$this_reporting_group->{FQAN}}),
                              (map { $_?($_->string_value() => 1):() } $fqan_nodes->get_nodelist()) );
       $this_reporting_group->{FQAN} = [ sort keys %fqan_node_set ];
-#      print STDERR "$vo_reporting_name: ", join(", ", @{$this_reporting_group->{FQAN}}), "\n";
-      next; # Rest is not ready!
-      $this_reporting_group->{reporting_contacts} = []
-        unless $this_reporting_group->{reporting_contacts};
-      $this_vo->{reporting_groups}->{$vo_reporting_name} = {}
-        unless $this_vo->{reporting_groups}->{$vo_reporting_name};
       my $reporting_contact_nodes = $reporting_group_node->findnodes('reporting_contact');
       foreach my $reporting_contact ($reporting_contact_nodes->get_nodelist()) {
         my $primary_email = $reporting_contact->findvalue('primary_email')
@@ -111,8 +109,8 @@ sub processXmlVoContacts {
         next unless $primary_email;
         my $person = {};
         push @{$this_vo->{reporting_contacts}}, $primary_email;
-        $person->{vo_reportingnames} = [ ] unless $person->{vo_reporting_names};
-        push @{$person->{vo_reporting_names}}, "$vo/$vo_reporting_name";
+        $person->{vo_reporting_names} = [ ] unless $person->{vo_reporting_names};
+        push @{$person->{vo_reporting_names}}, "$vo_name/$vo_reporting_name";
         foreach my $attribute qw(first_name middle_name last_name) { # Name info
           $person->{$attribute} =
             $reporting_contact->findvalue($attribute);
@@ -205,43 +203,13 @@ sub ImportPeopleData {
 }
 
 sub mergePersonData {
-  my ($self, $primary_email, $person) = @_;
-  if (exists $people_data->{$primary_email}) {
-    # Merge
-    foreach my $key (sort keys %$person) {
-      if ($people_data->{$primary_email}->{$key}) {
-        if (ref $people_data->{$primary_email}->{$key} eq 'ARRAY') {
-          my %merging_hash = map { $_ => 1} @{$people_data->{$primary_email}->{$key}};
-          grep { $merging_hash{$_} = 1 } @{$person->{$key}};
-          @{$people_data->{$primary_email}->{$key}} = sort keys %merging_hash;
-        } elsif (ref $people_data->{$primary_email}->{$key} eq 'HASH') {
-          foreach my $subhash_key (keys %{$person->{$key}}) {
-            $people_data->{$primary_email}->{$key}->{$subhash_key} =
-              $person->{$key}->{$subhash_key} if $person->{$key}->{$subhash_key};
-          }
-        } else {
-          $people_data->{$primary_email}->{$key} = $person->{$key} if $person->{$key};
-        }
-      } else {
-        $people_data->{$primary_email}->{$key} = $person->{$key};
-      }
-    }
+  my ($self, $person_email, $person_hash) = @_;
+  if (exists $people_data->{$person_email}) {
+    $people_data->{$person_email}->mergePersonData($person_hash);
   } else {
-    $people_data->{$primary_email} = $person;
+    $person_hash->{primary_email} = $person_email unless $person_hash->{primary_email};
+    $people_data->{$person_email} = new GratiaReporting::Person($person_hash);
   }
-  # Update person's real name.
-  my $full_name = sprintf("%s %s %s",
-                          $people_data->{$primary_email}->{first_name} || "",
-                          $people_data->{$primary_email}->{middle_name} || "",
-                          $people_data->{$primary_email}->{last_name} || "");
-  $full_name =~ s&^\s*&&;
-  $full_name =~ s&\s+& &g;
-  $people_data->{$primary_email}->{full_name} = $full_name;
-  my $contact_string = sprintf("%s <%s>",
-                               $full_name,
-                               $primary_email);
-  $contact_string =~ s&^\s*&&;
-  $people_data->{$primary_email}->{contact_string} = $contact_string;
 }
 
 sub by_lastname {
