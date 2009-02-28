@@ -92,6 +92,10 @@ define name_from_war
 $(subst .war,,$(@F))
 endef
 
+define name_from_jar
+$(subst .jar,,$(@F))
+endef
+
 ifeq ($(target),) 
    $(error The target variable can not be null)
 endif
@@ -207,6 +211,7 @@ $(target)/gratia-servlets.war: $(util_lib) $(servlets)/net/sf/gratia/servlets/*.
 	mkdir -p $(war-dir)/$(name_from_war)/WEB-INF/classes/net/sf/gratia/services
 	mkdir -p $(war-dir)/$(name_from_war)/WEB-INF/classes/net/sf/gratia/servlets
 	mkdir -p $(war-dir)/$(name_from_war)/WEB-INF/classes/net/sf/gratia/util
+	mkdir -p $(war-dir)/$(name_from_war)/WEB-INF/classes/net/sf/gratia/storage
 	echo "$(gratia_release_data)" >$(war-dir)/$(name_from_war)/gratia-release
 	javac -d $(classes-dir) -cp $(classpath) -extdirs $(commonLib) $(servlets)/net/sf/gratia/servlets/*.java
 	cp $(classes-dir)/net/sf/gratia/servlets/*.class $(war-dir)/$(name_from_war)/WEB-INF/classes/net/sf/gratia/servlets
@@ -215,13 +220,16 @@ $(target)/gratia-servlets.war: $(util_lib) $(servlets)/net/sf/gratia/servlets/*.
 	cp $(classes-dir)/net/sf/gratia/services/*Skel.class $(war-dir)/$(name_from_war)/WEB-INF/classes/net/sf/gratia/services
 	cp $(classes-dir)/net/sf/gratia/services/*Stub.class $(war-dir)/$(name_from_war)/WEB-INF/classes/net/sf/gratia/services
 	cp $(classes-dir)/net/sf/gratia/services/JMS*.class $(war-dir)/$(name_from_war)/WEB-INF/classes/net/sf/gratia/services
+	cp $(classes-dir)/net/sf/gratia/services/AccessException.class $(war-dir)/$(name_from_war)/WEB-INF/classes/net/sf/gratia/services
 	cp $(classes-dir)/net/sf/gratia/util/Logging.class $(war-dir)/$(name_from_war)/WEB-INF/classes/net/sf/gratia/util
 	$(copy2_util_lib)
 	jar -cfM $(target)/gratia-servlets.war -C $(war-dir)/$(name_from_war) .
 	# --- Target: services COMPLETED at $(shell date) ---
 
 #------------------------------------------------------------------
-soap: services
+soap: $(target)/gratia-soap.war
+
+$(target)/gratia-soap.war: services
 	#---------------------
 	# --- Target: soap ---
 	#---------------------
@@ -266,7 +274,7 @@ ${target}/gratia-administration.war: $(util_lib)  $(target)/gratiaSecurity.jar \
                                      ${administration}/WebContent/images/*.gif \
                                      $(commonLib)/tar.jar \
                                      $(commonLib)/bzip2.jar \
-                                     $(commonLib)/mysql*.jar util
+                                     $(commonLib)/mysql*.jar
 	#----------------------------------------------------
 	# --- Target: $(target)/gratia-administration.war ---
 	#----------------------------------------------------
@@ -352,16 +360,16 @@ $(target)/gratiaSecurity.jar: $(target)/gratia-services.war $(util_lib) $(securi
 	# ----------------------------
 	# --- Target: $(target)/gratiaSecurity.jar ---
 	# ----------------------------
-	rm   -rf $(jar-dir)/$(name_from_war)
+	rm   -rf $(jar-dir)/$(name_from_jar)
 	mkdir -p $(classes-dir) $(target)
-	mkdir -p $(jar-dir)/$(name_from_war)/net/sf/gratia/util
-	mkdir -p $(jar-dir)/$(name_from_war)/net/sf/gratia/services
-	mkdir -p $(jar-dir)/$(name_from_war)/net/sf/gratia/vomsSecurity
+	mkdir -p $(jar-dir)/$(name_from_jar)/net/sf/gratia/util
+	mkdir -p $(jar-dir)/$(name_from_jar)/net/sf/gratia/services
+	mkdir -p $(jar-dir)/$(name_from_jar)/net/sf/gratia/vomsSecurity
 	javac -d $(classes-dir) -cp $(classpath) -extdirs $(commonLib) $(security)/net/sf/gratia/vomsSecurity/*.java
-	cp $(classes-dir)/net/sf/gratia/util/*.class $(jar-dir)/$(name_from_war)/net/sf/gratia/util
-	cp $(classes-dir)/net/sf/gratia/vomsSecurity/*.class $(jar-dir)/$(name_from_war)/net/sf/gratia/vomsSecurity
-	cp $(classes-dir)/net/sf/gratia/services/JMS*.class $(jar-dir)/$(name_from_war)/net/sf/gratia/services
-	jar -cvfM $(target)/gratiaSecurity.jar -C $(jar-dir)/$(name_from_war) .
+	cp $(classes-dir)/net/sf/gratia/util/*.class $(jar-dir)/$(name_from_jar)/net/sf/gratia/util
+	cp $(classes-dir)/net/sf/gratia/vomsSecurity/*.class $(jar-dir)/$(name_from_jar)/net/sf/gratia/vomsSecurity
+	cp $(classes-dir)/net/sf/gratia/services/JMS*.class $(jar-dir)/$(name_from_jar)/net/sf/gratia/services
+	jar -cvfM $(target)/gratiaSecurity.jar -C $(jar-dir)/$(name_from_jar) .
 	# --- Target: $@ COMPLETED at $(shell date) ---
 
 #-------------------------------------------------------------
