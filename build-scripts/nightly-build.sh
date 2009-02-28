@@ -149,7 +149,7 @@ function validate_environment {
 function svn_checkout_gratia {
   logit "==== svn_checkout_gratia - $(date) ==="
   cd $build_dir
-  cmd="$svn export svn export http://gratia.svn.sourceforge.net/svnroot/gratia $(basename $nightly_dir)"
+  cmd="$svn export http://gratia.svn.sourceforge.net/svnroot/gratia/trunk $(basename $nightly_dir)"
   runit "$cmd"
 }
 # -------------------------------
