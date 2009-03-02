@@ -640,13 +640,13 @@ def GetSiteVOEfficiency(begin,end):
     schema = "gratia.";
 
     select = """\
-            select SiteName,VOName, sum(Njobs),sum(WallDuration),sum(CpuUserDuration+CpuSystemDuration)/sum(WallDuration) 
+            select SiteName, lcase(VOName), sum(Njobs),sum(WallDuration),sum(CpuUserDuration+CpuSystemDuration)/sum(WallDuration) 
             from """+schema+"""VOProbeSummary, """+schema+"""Site, """+schema+"""Probe
             where VOName != \"unknown\" and VOName != \"other\" and
                Probe.siteid = Site.siteid and VOProbeSummary.ProbeName = Probe.probename and 
                EndTime >= \"""" + DateToString(begin) + """\" and
                EndTime < \"""" + DateToString(end) + """\"
-            group by Site.SiteName, VOName
+            group by Site.SiteName, lcase(VOName)
             """
     #print "Query = " + select;
 
@@ -656,13 +656,13 @@ def GetVOEfficiency(begin,end):
     schema = "gratia.";
 
     select = """\
-            select VOName, sum(Njobs),sum(WallDuration),sum(CpuUserDuration+CpuSystemDuration)/sum(WallDuration) 
+            select lcase(VOName), sum(Njobs),sum(WallDuration),sum(CpuUserDuration+CpuSystemDuration)/sum(WallDuration) 
             from """+schema+"""VOProbeSummary, """+schema+"""Site, """+schema+"""Probe
             where VOName != \"unknown\"  and VOName != \"other\" and
                Probe.siteid = Site.siteid and VOProbeSummary.ProbeName = Probe.probename and 
                EndTime >= \"""" + DateToString(begin) + """\" and
                EndTime < \"""" + DateToString(end) + """\"
-            group by VOName
+            group by lcase(VOName)
             """
     #print "Query = " + select;
 
@@ -2122,7 +2122,6 @@ def EfficiencyRange(what, range_end = datetime.date.today(),
             print key
             print printValues[key]
             print [njobs,wall,oldwall,eff,site,vo]
-            print "Error: can not add efficiencies"
         else:
             printValues[key] = [njobs,wall,oldwall,eff,oldeff,site,vo]
                 
