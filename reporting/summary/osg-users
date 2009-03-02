@@ -25,7 +25,7 @@ use DBI();
 
 use IPC::Run; # Available from CPAN / DAG repo.
 
-use ReportingData;
+use GratiaReporting::Data;
 
 use Getopt::Long;
 use Pod::Usage;
@@ -149,8 +149,8 @@ $options{"data-source"} = ["$script_top_dir/user-reports.dat"]
   unless $options{"data-source"};
 
 my $reporting_data =
-  new ReportingData( verbose => $options{verbose},
-                     data_source => $options{"data-source"}
+  new GratiaReporting::Data( verbose => $options{verbose},
+                             data_source => $options{"data-source"}
                    );
 
 my $history = $options{history} || 6;
