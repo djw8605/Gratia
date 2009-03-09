@@ -2825,7 +2825,7 @@ def SoftwareVersion(range_end = datetime.date.today(),
    versions = {
      "Gratia": { "1.65":"v0.27.[1-2]","1.67":"v0.27b","1.68":"v0.28","1.69":"v0.30","1.69.2.1":"v0.32.1","1.78":"v0.32.2","1.84":"v0.34.[1-8]","1.85":"v0.34.[9-10]","1.86":"v0.36","1.90":"v0.38.4","1.91":"v1.00.1","1.93":"v1.00.3","1.95":"v1.00.5","1.100":"v1.02.01"},
      "condor_meter.pl" : { "$""Revision: 1.29 $  (tag unknown)":"v0.99", "$""Revision: 1.31 $  (tag unknown)":"v1.00.3+", "$""Revision: 1.32 $  (tag 1.02.1-5)":"v1.02.1" },
-     "pbs-lsf.py" : { "1.7 (tag )":"v1.00.1+", "1.8 (tag )":"v1.00.x", "1.9 (tag 1.02.1-5)":"v1.02.1" },
+     "pbs-lsf.py" : { "1.7 (tag )":"v1.00.1+", "1.8 (tag )":"v1.00.x", "1.9 (tag 1.02.1-5)":"v1.02.1"},
      "glexec_meter.py": {"1.9 (tag )":"v1.00.[3-5]", "1.9 (tag v1-00-3a-1)":"v1.00.3a-1+", "1.10 (tag 1.02.1-5)":"v1.02.01"}
      }
    renames = {
@@ -2892,6 +2892,8 @@ def SoftwareVersion(range_end = datetime.date.today(),
                v = softinfo[0]
                if (soft == "Condor"):
                   v = v.split(' ')[0]
+               if (soft == "LSF" and v == "sh: bsub: command not found "):
+                  v = "Version information not available"
                if (versions.has_key(soft)):
                   if (versions[soft].has_key(v)):
                      v = versions[soft][v]
