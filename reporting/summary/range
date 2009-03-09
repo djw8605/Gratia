@@ -1,9 +1,9 @@
 #!/bin/env python
  
 import sys
-import PSACCTReport
+import AccountingReports
 
-from PSACCTReport import FromCondor,UseArgs,gOutput,gBegin,CheckDB
+from AccountingReports import FromCondor,UseArgs,gOutput,gBegin,CheckDB
 import sys
 
 def main(argv=None):
@@ -12,37 +12,37 @@ def main(argv=None):
     if not CheckDB() :
         return 1
 
-    argOutput = PSACCTReport.gOutput
+    argOutput = AccountingReports.gOutput
 
-    PSACCTReport.RangeSummup(range_begin = PSACCTReport.gBegin,
-                             range_end = PSACCTReport.gEnd ,
+    AccountingReports.RangeSummup(range_begin = AccountingReports.gBegin,
+                             range_end = AccountingReports.gEnd ,
                              output=argOutput);
     print
 
     
-    PSACCTReport.RangeSiteReport(range_begin = PSACCTReport.gBegin,
-                                 range_end = PSACCTReport.gEnd,
+    AccountingReports.RangeSiteReport(range_begin = AccountingReports.gBegin,
+                                 range_end = AccountingReports.gEnd,
                                  output = argOutput,
                                  header = True,
-                                 with_panda = PSACCTReport.gWithPanda);
+                                 with_panda = AccountingReports.gWithPanda);
     print
-    PSACCTReport.RangeVOReport(range_begin = PSACCTReport.gBegin,
-                               range_end = PSACCTReport.gEnd,
+    AccountingReports.RangeVOReport(range_begin = AccountingReports.gBegin,
+                               range_end = AccountingReports.gEnd,
                                output = argOutput,
                                header = False,
-                               with_panda = PSACCTReport.gWithPanda);
+                               with_panda = AccountingReports.gWithPanda);
     print
-    PSACCTReport.RangeSiteVOReport(range_begin = PSACCTReport.gBegin,
-                                   range_end = PSACCTReport.gEnd,
+    AccountingReports.RangeSiteVOReport(range_begin = AccountingReports.gBegin,
+                                   range_end = AccountingReports.gEnd,
                                    output = argOutput,
                                    header = False,
-                                   with_panda = PSACCTReport.gWithPanda);
+                                   with_panda = AccountingReports.gWithPanda);
     print
-    PSACCTReport.RangeVOSiteReport(range_begin = PSACCTReport.gBegin,
-                                   range_end = PSACCTReport.gEnd,
+    AccountingReports.RangeVOSiteReport(range_begin = AccountingReports.gBegin,
+                                   range_end = AccountingReports.gEnd,
                                    output = argOutput,
                                    header = False,
-                                   with_panda = PSACCTReport.gWithPanda);
+                                   with_panda = AccountingReports.gWithPanda);
 
 if __name__ == "__main__":
     sys.exit(main())

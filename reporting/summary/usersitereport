@@ -1,9 +1,9 @@
 #!/bin/env python
  
 import sys
-import PSACCTReport
+import AccountingReports
 
-from PSACCTReport import FromCondor,UseArgs,gOutput,gBegin,CheckDB
+from AccountingReports import FromCondor,UseArgs,gOutput,gBegin,CheckDB
 import sys
 
 def main(argv=None):
@@ -12,10 +12,10 @@ def main(argv=None):
     if not CheckDB() :
         return 1
 
-    argOutput = PSACCTReport.gOutput
+    argOutput = AccountingReports.gOutput
 
-    PSACCTReport.RangeSiteUserReport(range_begin = PSACCTReport.gBegin,
-                             range_end = PSACCTReport.gEnd ,
+    AccountingReports.RangeSiteUserReport(range_begin = AccountingReports.gBegin,
+                             range_end = AccountingReports.gEnd ,
                              output=argOutput);
 
 if __name__ == "__main__":

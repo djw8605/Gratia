@@ -1,9 +1,9 @@
 #!/bin/env python
  
 import sys
-import PSACCTReport
+import AccountingReports
 
-from PSACCTReport import FromCondor,UseArgs,gOutput,gBegin,CheckDB,gGroupBy
+from AccountingReports import FromCondor,UseArgs,gOutput,gBegin,CheckDB,gGroupBy
 import sys
 
 def main(argv=None):
@@ -12,10 +12,10 @@ def main(argv=None):
     if not CheckDB() :
         return 1
 
-    argOutput = PSACCTReport.gOutput
-    PSACCTReport.GenericDailyStatus( PSACCTReport.DailySiteJobStatusConf(header=True,groupby=PSACCTReport.gGroupBy),PSACCTReport.gBegin,output=argOutput )
+    argOutput = AccountingReports.gOutput
+    AccountingReports.GenericDailyStatus( AccountingReports.DailySiteJobStatusConf(header=True,groupby=AccountingReports.gGroupBy),AccountingReports.gBegin,output=argOutput )
     print
-    #PSACCTReport.GenericDailyStatus( PSACCTReport.DailySiteJobStatusConf(header=True,CondorSpecial=False),PSACCTReport.gBegin,output=argOutput )
+    #AccountingReports.GenericDailyStatus( AccountingReports.DailySiteJobStatusConf(header=True,CondorSpecial=False),AccountingReports.gBegin,output=argOutput )
     #print
 
 if __name__ == "__main__":

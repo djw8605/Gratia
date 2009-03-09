@@ -1,6 +1,6 @@
 #!/bin/env python
  
-from PSACCTReport import Weekly,UseArgs
+from AccountingReports import Weekly,UseArgs
 import sys
 
 def main(argv=None):

@@ -1,9 +1,9 @@
 #!/bin/env python
  
 import sys
-import PSACCTReport
+import AccountingReports
 
-from PSACCTReport import FromCondor,UseArgs,gOutput,gBegin,GenericDaily,DailySiteVOReportFromDailyConf,DateToString,CheckDB
+from AccountingReports import FromCondor,UseArgs,gOutput,gBegin,GenericDaily,DailySiteVOReportFromDailyConf,DateToString,CheckDB
 import sys
 
 def main(argv=None):
@@ -12,20 +12,20 @@ def main(argv=None):
     if not CheckDB() :
         return 1
 
-    print "OSG usage summary (midnight to midnight central time) for %s\nincluding all jobs that finished in that time period.\nWall Duration is expressed in hours and rounded to the nearest hour.\nDeltas are the differences with the previous day.\nIf the number of jobs stated for a site is always 1\nthen this number is actually the number of summary records sent.\n" % DateToString(PSACCTReport.gBegin,False)
+    print "OSG usage summary (midnight to midnight central time) for %s\nincluding all jobs that finished in that time period.\nWall Duration is expressed in hours and rounded to the nearest hour.\nDeltas are the differences with the previous day.\nIf the number of jobs stated for a site is always 1\nthen this number is actually the number of summary records sent.\n" % DateToString(AccountingReports.gBegin,False)
     print "This information is collected by the VO, for example via a framework like PANDA and then sent to the daily summary Gratia db.\n"
 
-    argOutput = PSACCTReport.gOutput
-    #PSACCTReport.DailySiteReport(PSACCTReport.gBegin,output=argOutput);
+    argOutput = AccountingReports.gOutput
+    #AccountingReports.DailySiteReport(AccountingReports.gBegin,output=argOutput);
     #print
-    #PSACCTReport.DailyVOReport(PSACCTReport.gBegin,output=argOutput);
+    #AccountingReports.DailyVOReport(AccountingReports.gBegin,output=argOutput);
     print "From the results sent directly to the Summary database"
     print
-    GenericDaily( DailySiteVOReportFromDailyConf(fromGratia = False, header = False), PSACCTReport.gBegin, output=argOutput);
+    GenericDaily( DailySiteVOReportFromDailyConf(fromGratia = False, header = False), AccountingReports.gBegin, output=argOutput);
     #print
     #print "From the results sent to the detailed Gratia database"
     #print
-    #GenericDaily( DailySiteVOReportFromDailyConf(True), PSACCTReport.gBegin, output=argOutput);
+    #GenericDaily( DailySiteVOReportFromDailyConf(True), AccountingReports.gBegin, output=argOutput);
     
 
 if __name__ == "__main__":

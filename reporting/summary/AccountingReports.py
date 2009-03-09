@@ -1,7 +1,7 @@
 #
 # Author Philippe Canal
 #
-# PSACCTReport
+# AccountingReports
 #
 # library to create simple report using the Gratia psacct database
 #

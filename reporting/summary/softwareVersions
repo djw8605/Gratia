@@ -1,9 +1,9 @@
 #!/bin/env python
  
 import sys
-import PSACCTReport
+import AccountingReports
 
-from PSACCTReport import UseArgs,gOutput,gBegin,CheckDB,gConfig
+from AccountingReports import UseArgs,gOutput,gBegin,CheckDB,gConfig
 import sys
 
 def main(argv=None):
@@ -12,17 +12,17 @@ def main(argv=None):
     if not CheckDB() :
         return 1
 
-    argOutput = PSACCTReport.gOutput
+    argOutput = AccountingReports.gOutput
 
     if (argOutput == "all"):
        text = {}
        for iterOutput in ("text","csv","html"):
-          text[iterOutput] = ( PSACCTReport.SoftwareVersion(range_begin = PSACCTReport.gBegin, range_end = PSACCTReport.gEnd ,output=iterOutput) )
+          text[iterOutput] = ( AccountingReports.SoftwareVersion(range_begin = AccountingReports.gBegin, range_end = AccountingReports.gEnd ,output=iterOutput) )
 
-       PSACCTReport.sendAll(text)
+       AccountingReports.sendAll(text)
 
     else:
-       print PSACCTReport.SoftwareVersion(range_begin = PSACCTReport.gBegin,range_end = PSACCTReport.gEnd ,output=argOutput)
+       print AccountingReports.SoftwareVersion(range_begin = AccountingReports.gBegin,range_end = AccountingReports.gEnd ,output=argOutput)
 
 
 if __name__ == "__main__":

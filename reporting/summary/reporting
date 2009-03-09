@@ -1,19 +1,19 @@
 #!/bin/env python
  
-import PSACCTReport,datetime,sys
+import AccountingReports,datetime,sys
 
 def main(argv=None):
-    PSACCTReport.UseArgs(argv)
+    AccountingReports.UseArgs(argv)
 
-    if not PSACCTReport.CheckDB() :
+    if not AccountingReports.CheckDB() :
         return 1
 
-    argOutput = PSACCTReport.gOutput
+    argOutput = AccountingReports.gOutput
 
-    PSACCTReport.NonReportingSites(when = PSACCTReport.gBegin, output=argOutput) # datetime.date(2008,02,01))
+    AccountingReports.NonReportingSites(when = AccountingReports.gBegin, output=argOutput) # datetime.date(2008,02,01))
 
-    #PSACCTReport.RangeSummup(range_begin = PSACCTReport.gBegin,
-    #                         range_end = PSACCTReport.gEnd)
+    #AccountingReports.RangeSummup(range_begin = AccountingReports.gBegin,
+    #                         range_end = AccountingReports.gEnd)
 
 if __name__ == "__main__":
     sys.exit(main())

@@ -1,6 +1,6 @@
 #!/bin/env python
  
-from PSACCTReport import FromCondor,UseArgs
+from AccountingReports import FromCondor,UseArgs
 import sys
 
 def main(argv=None):

@@ -1,9 +1,9 @@
 #!/bin/env python
  
 import sys
-import PSACCTReport
+import AccountingReports
 
-from PSACCTReport import FromCondor,UseArgs,gOutput,gBegin,CheckDB
+from AccountingReports import FromCondor,UseArgs,gOutput,gBegin,CheckDB
 import sys
 
 def main(argv=None):
@@ -12,11 +12,11 @@ def main(argv=None):
     if not CheckDB() :
         return 1
 
-    argOutput = PSACCTReport.gOutput
+    argOutput = AccountingReports.gOutput
 
-    PSACCTReport.EfficiencyRange(PSACCTReport.RangeVOEfficiencyConf(header = True),
-                              range_begin = PSACCTReport.gBegin,
-                              range_end = PSACCTReport.gEnd ,
+    AccountingReports.EfficiencyRange(AccountingReports.RangeVOEfficiencyConf(header = True),
+                              range_begin = AccountingReports.gBegin,
+                              range_end = AccountingReports.gEnd ,
                               output=argOutput)
 
 

@@ -1,8 +1,8 @@
 #!/bin/env python
 
 import Gratia, string, time, sys
-import PSACCTReport
-from PSACCTReport import FromCondor,UseArgs,gOutput,gBegin
+import AccountingReports
+from AccountingReports import FromCondor,UseArgs,gOutput,gBegin
 import sys
 
 def toint( value ) :
@@ -33,13 +33,13 @@ def SendData(values, dateAsSecondSinceEpoch):
 def main(argv=None):
     UseArgs(argv)
 
-    argOutput = "None" # PSACCTReport.gOutput
+    argOutput = "None" # AccountingReports.gOutput
     Gratia.Initialize()
 
-    result = PSACCTReport.DailySiteVOReport(PSACCTReport.gBegin,output=argOutput)
+    result = AccountingReports.DailySiteVOReport(AccountingReports.gBegin,output=argOutput)
     #print result
     
-    dateAsSecondSinceEpoch = time.mktime(PSACCTReport.gBegin.timetuple())
+    dateAsSecondSinceEpoch = time.mktime(AccountingReports.gBegin.timetuple())
  #       else:
  #               today = time.localtime()
  #               today = (today.tm_year,today.tm_mon,today.tm_mday, 0, 0, 0, today.tm_wday, today.tm_yday, today.tm_isdst)
