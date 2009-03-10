@@ -946,7 +946,7 @@ public class UsageRecordLoader implements RecordLoader {
                     return;
                 } else if (a.getValue().equalsIgnoreCase("ResourceType")) {
                     String val = element.getText().trim();
-                    if (val != null) {
+                    if (val != null && val.length() > 0 ) {
                         StringElement rel = job.getResourceType();
                         if (rel == null) {
                             rel = new StringElement();
