@@ -7,7 +7,7 @@
 # Script to transfer the data from Gratia to APEL (WLCG)
 ########################################################################
 #
-#@(#)gratia/summary:$HeadURL$:$Id$
+#@(#)gratia/summary:$HeadURL$:$Id: LCG.py 3000 2009-02-16 16:15:08Z pcanal 
 #
 #
 ########################################################################
@@ -79,6 +79,15 @@
 #   submit a job on the CE node will be filtered, but should they
 #   at some point be passed to Gratia, these will be identified as
 #   Local.
+#
+# 03/11/2009 (John Weigand)
+#   1. Added a setting of the umask to 002 for all files being written.
+#   This was to, hopefully, insure the setting of the right permissions
+#   on the files sent to the tomcat ./webapps/gratia-data/interfaces/apel-lcg
+#   directory for viewing data in the Gratia reporting service.
+#   2. Also commented out (so it can be re-activated easily) the checking
+#   for 'unknown' VOs with atlas or cms-like unix accounts.  This slow down
+#   the interface considerably and that problem appears to have gone away.
 # 
 ########################################################################
 import traceback
@@ -1080,6 +1089,7 @@ def main(argv=None):
 
   #--- get command line arguments  -------------
   try:
+    old_umask = os.umask(002)  # set so new files are 644 permissions
     GetArgs(argv)
   except Exception, e:
     print >>sys.stderr, e.__str__()
@@ -1110,7 +1120,7 @@ def main(argv=None):
     
     #--- query gratia for each site and create updates ----
     output   = RetrieveVoData(ReportableVOs,ReportableSites,gDatabaseParameters)
-    unknowns = RetrieveUnknownVoData(ReportableSites,gDatabaseParameters)
+    #JGW unknowns = RetrieveUnknownVoData(ReportableSites,gDatabaseParameters)
 
     #--- create the updates for the APEL accounting database ----
     Logit("Sites with data: %s" % gSitesWithData)
