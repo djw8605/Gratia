@@ -1,0 +1,24 @@
+3/12/09 - John Weigand
+-----------------------
+The files in this directory are a history of the configuration file 
+containing the sites being reported and the normalization factors used each 
+month.  
+
+This allows us to rerun a prior months updates to the APEL database
+insuring that we are using the same reportable sites and the normalization
+factors used in that period.  Prior to this we did not have this capability.
+
+This is, admittedly, a crude way of doing it but at least it provides the 
+capability to recover.
+
+The addition of these files new month will unfortunately have to be a manual
+process.
+
+The next step will be to change the LCG.py to use the file in this directory
+for the month being reported.  It will also be changed to save the current
+lcg-reportableSites file (which is what it uses today) in this directory up
+until the last day of the month.  This guarantees the last one used is saved.
+
+This also allows us to change the current months file for new sites and/or
+normalization factors without affecting the updating of the previous month's
+data.  This is a problem today.
