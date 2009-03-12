@@ -88,6 +88,22 @@
 #   2. Also commented out (so it can be re-activated easily) the checking
 #   for 'unknown' VOs with atlas or cms-like unix accounts.  This slow down
 #   the interface considerably and that problem appears to have gone away.
+#
+# 3/12/2009 (John Weigand)
+#   Added a method (DetermineReportableSitesFileToUse) that will retain
+#   the lcg-reportableSites file in a 'history' directory and use that
+#   during the process.  It copies the main configuration file to this
+#   directory on when running in the 'current' month thereby preserving
+#   prior months configuration in the event we have make updates there.
+#   Refer to the comments in that method for more details.
+#   This required an additional attribute in the lcg.conf file
+#   (SiteFilterHistory) to define the directory these are retained in.
+#   This allows us to change the SiteFilterFile at anytime during the
+#   current month without fear of mis-stating the previous months updates
+#   which currently are performed for the 1st 15 days of the current month.
+#   This is not perfect since, in order to really retain this data, the
+#   previous month should be added/updated in SVN/CVS.  A warning notification 
+#   will be sent the first time a new history file as a reminder.
 # 
 ########################################################################
 import traceback
@@ -110,6 +126,7 @@ gKnownVOs = {}
 
 gFilterParameters = {"GratiaCollector"      :None,
                      "SiteFilterFile"       :None,
+                     "SiteFilterHistory"    :None,
                      "VOFilterFile"         :None,
                      "DBConfFile"           :None,
                      "LogSqlDir"            :None,
@@ -397,6 +414,55 @@ def GetFilterConfigParams(filename):
     raise Exception("Required parameter (%s) missing in config file %s" % (key,filename))
 
 #----------------------------------------------
+def DetermineReportableSitesFileToUse(reportingPeriod):
+  """ This determines the configuration file of reportable sites and
+      normalization factors to use.  This data is time sensitive in nature as
+      the list of sites and their normalization factors change over time.
+      We want to insure that we are using a list that was in effect for
+      the month being reported.
+
+      This method will always copy the current SiteFilterFile to the 
+      SiteFilterHistory directory during the current month.
+
+      So, we will always use a file in the SiteFilterHistory directory
+      with the name SiteFilterFile.YYYYMM in our processing.
+
+      If we cannot find one for the month being processed, we have to fail
+      as the data will be repopulated using potentially incorrect data.
+
+      Arguments: reporting period (YYYY/MM)
+      Returns: the reportable sites file to use
+  """
+  filterFile  = gFilterParameters["SiteFilterFile"]
+  historyDir  = gFilterParameters["SiteFilterHistory"]
+  #--- make the history directory if it does not exist ---
+  if not os.path.isdir(historyDir):
+    Logit("... creating %s directory for the reportable sites configuration files" % (historyDir))
+    os.mkdir(historyDir)
+
+  #--- determine date suffix for history file (YYYYMM) ----
+  if reportingPeriod == None:
+    raise Exception("System error: the DetermineReportableSitesFileToUse method requires a reporting period argument (YYYY/MM) which is missing")
+  fileSuffix = reportingPeriod[0:4] + reportingPeriod[5:7]
+  historyFile = historyDir + "/" + filterFile + "." + fileSuffix
+
+  #--- update the history only if it is for the current month --
+  currentPeriod = GetCurrentPeriod()
+  if currentPeriod == reportingPeriod:
+    if not os.path.isfile(historyFile):
+      Logwarn("The %s files should be checked to see if any updates should be made to SVN/CVS in order to retain their history." % (historyDir))
+
+    Logit("... updating the reportable sites configuration file: %s" % (historyFile))
+    os.system("cp -p %s %s" % (filterFile,historyFile))
+
+  #--- verify a history file exists for the time period. ---
+  #--- if it does not, we don't want to update           ---
+  if not os.path.isfile(historyFile):
+    raise Exception("A reportable sites file (%s) does not exist for this time period.  We do not want to perform an update for this time period as it may not accurately reflect what was used at that time." % (historyFile))
+
+  return historyFile
+
+#----------------------------------------------
 def GetConfigParams(filename):
   """ Generic reader of a file containing configuration parameters.
       The format of the file is 'parameter_name parameter value'.
@@ -427,7 +493,7 @@ def GetConfigParams(filename):
 
 #---------------------------------------------
 def GetCurrentPeriod():
-  """ Gets the current time in format for the date filter YYYY?MM 
+  """ Gets the current time in format for the date filter YYYY/MM 
       This will always be the current month.
   """
   return time.strftime("%Y/%m",time.localtime())
@@ -458,7 +524,6 @@ def Logerr(message):
 def Logwarn(message):
     Logit("WARNING: " + message)
     gWarnings.append(message)
-    
 
 #-----------------------------------------------
 def LogToFile(message):
@@ -1100,9 +1165,18 @@ def main(argv=None):
     #--- get paramters -------------
     GetFilterConfigParams(gFilterConfigFile)
     GetDBConfigParams(gFilterParameters["DBConfFile"])
+
     Logit("====================================================")
     Logit("Starting transfer from Gratia to APEL")
-    Logit("Filter date: %s" % gDateFilter)
+    Logit("Filter date............ %s" % (gDateFilter))
+    gFilterParameters["SiteFilterFile"] = DetermineReportableSitesFileToUse(gDateFilter)
+    Logit("Reportable sites file.. %s" % (gFilterParameters["SiteFilterFile"]))
+    Logit("Reportable VOs file.... %s" % (gFilterParameters["VOFilterFile"]))
+    Logit("Gratia database host... %s:%s" % (gDatabaseParameters["GratiaHost"],gDatabaseParameters["GratiaPort"]))
+    Logit("Gratia database........ %s" % (gDatabaseParameters["GratiaDB"]))
+    Logit("APEL database host..... %s:%s" % (gDatabaseParameters["LcgHost"],gDatabaseParameters["LcgPort"]))
+    Logit("APEL database.......... %s" % (gDatabaseParameters["LcgDB"]))
+    Logit("APEL database table.... %s" % (gDatabaseParameters["LcgTable"]))
 
     #--- check db availability -------------
     CheckGratiaDBAvailability(gDatabaseParameters)
