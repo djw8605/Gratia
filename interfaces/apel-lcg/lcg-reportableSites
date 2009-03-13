@@ -218,7 +218,15 @@
 #
 #   02/28/2009 (John Weigand)
 #       Added UFlorida-IHEPA back (This site was decommissioned on 2/14 and
-#             merged into UFlorida-PG. It still counts toward MOU. per Bockjoo Kim.)
+#       merged into UFlorida-PG. It still counts toward MOU. per Bockjoo Kim.)
+#
+#  03/13/2009 (John Weigand)
+#    1. Removed UFlorida-IHEPA again.  
+#       Decommissioned 2/14/09.  Load assumed by UFlorida-PG
+#       Due to the changes made in the LCG.py process to allow for date 
+#       sensitiviy of this file, it can be done at any time in the current month
+#    2. Removed UC_ATLAS_MWT2 - stopped being considered a T2 site in 
+#        2009/06 per Rob Gardner.  We never got word and just realized now.
 #   	 
 #    
 ##################################################################
@@ -236,10 +244,8 @@ Purdue-Steele       3196
 UCSDT2              2871
 UFlorida-HPC        1521
 UFlorida-PG         1535
-UFlorida-IHEPA      1521
-#--- CMS Tier unknown ----    
-#HEPGRID_UERJ        2117
-#SPRACE              2117
+#
+#
 ####################################
 ####################################
 #--- ATLAS Tier 1 ----
@@ -250,24 +256,30 @@ BU_ATLAS_Tier2      2022
 IU_OSG              2101
 MWT2_IU             1836
 MWT2_UC             1935
-OU_OCHEP_SWT2       2389
+OU_OCHEP_SWT2       2389 
 WT2                 2412
 SWT2_CPB            1877
-UC_ATLAS_MWT2       1285
 UTA_SWT2            1543
-#--- ATLAS Tier unknown ----
-#UC_Teraport         1250
-#OU_OSCER_ATLAS      1543
-####################################
+#
+#
 ####################################
 ##-- obsolete --
+####################################
+#--- CMS Tier unknown ----    
+#HEPGRID_UERJ        2117
+#SPRACE              2117
+##UCSDT2-B
+##UTA_DPCC             915
+##Purdue-Lear    1285 (decommissioned 8/1/09 - load assumed by Purdue-Steele)
+##UFlorida-IHEPA 1521 (decommissioned 2/14/09, load assumed by UFlorida-PG)
+#--- ATLAS ----
+##US-T1-BNL           1351
 ##BNL_PANDA           1351 
 ##BNL_OSG             1351
 ##BNL_ATLAS_2         1351
-##US-T1-BNL           1351
-##UCSDT2-B
 ##BU_ATLAS_Tier2o     1624
 ##IU_ATLAS_Tier2       921
-##UTA_DPCC             915
-##Purdue-Lear         1285
-##PROD_SLAC           2412 (replaced by WT2)
+#UC_Teraport         1250
+#OU_OSCER_ATLAS      1543
+##PROD_SLAC      2412 (replaced by WT2)
+##UC_ATLAS_MWT2  1285 (stopped being considered a T2 site in 2009/06 per Rob Gardner)
