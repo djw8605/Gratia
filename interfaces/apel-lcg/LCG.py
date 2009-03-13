@@ -118,6 +118,8 @@ import popen2
 import smtplib, rfc822  # for email notifications via smtp
 import commands, os, sys, time, string
 
+gOutput            = ""
+gUnknowns          = ""
 gWarnings          = []
 gSitesWithData     = []
 gSitesWithNoData   = []
@@ -158,6 +160,7 @@ gFilterConfigFile   = None
 gDateFilter         = None
 gNormalization      = None
 gInUpdateMode       = False  
+gCheckUnknowns      = False
 gEmailNotificationSuppressed = False  #Command line arg to suppress email notice
 
 
@@ -177,11 +180,11 @@ this is the usage
 
 #-----------------------------------------------
 def GetArgs(argv):
-    global gProgramName,gDateFilter,gInUpdateMode,gEmailNotificationSuppressed,gProbename,gOutput,gFilterConfigFile
+    global gProgramName,gDateFilter,gInUpdateMode,gEmailNotificationSuppressed,gProbename,gOutput,gFilterConfigFile,gCheckUnknowns
     if argv is None:
         argv = sys.argv
     gProgramName = argv[0]
-    arglist=["help","no-email","date=","update","config="]
+    arglist=["help","unknowns","no-email","date=","update","config="]
 
     try:
       opts, args = getopt.getopt(argv[1:], "", arglist)
@@ -209,6 +212,9 @@ README--Gratia-APEL-interface file as there is too much to explain here.
       if o in ("--update"):
         gInUpdateMode = True
         continue
+      if o in ("--unknowns"):
+        gCheckUnknowns = True
+        continue
       if o in ("--date"):
         gDateFilter = a
         if gDateFilter  == "current":
@@ -231,18 +237,34 @@ def SendEmailNotificationFailure(error):
   message  = "ERROR: " + error
   SendEmailNotification(subject,message)
 #-----------------------------------------------
-def SendEmailNotificationSuccess(contents):
+def SendEmailNotificationSuccess():
   """ Sends a successful email notification to the EmailNotice attribute""" 
   subject  = "Gratia transfer to APEL (WLCG) for %s - SUCCESS" % gDateFilter
+
+  contents = ""
+  if len(gSitesWithNoData) == 0:
+    contents = contents + "All sites are reporting.\n"
+  else:
+    contents = contents + "Sites with no data:\n%s\n" % gSitesWithNoData
+    gWarnings.append("Sites with no data:\n%s\n" % gSitesWithNoData)
+  contents = contents + "\nResults of all queries:\n" + gOutput 
+  contents = contents + "\nSample query:\n" + gQuery
+
+  if gCheckUnknowns:
+    contents = contents + "\n====== Unknown VOs ========================\n"
+    contents = contents + "\nSites with unknown Atlas VOs (unix account with 'atlas' in name):\n   %s" % (gSitesWithUnknowns)
+    contents = contents + "\nResults of all Atlas unknown queries:\n" + gUnknowns
+    contents = contents + "\nSample Atlas unknown query:\n" + gUnknownQuery 
+
   SendEmailNotification(subject,contents)
-  if len(gWarnings) == 0:
-    Logit("No warning conditions detected.")
-    return
-  SendEmailNotificationWarnings()
 #-----------------------------------------------
 def SendEmailNotificationWarnings():
   """ Sends a warning email notification to the EmailNotice attribute""" 
-  subject  = "Gratia transfer to APEL (WLCG) for %s - WARNINGS" % gDateFilter
+  if len(gWarnings) == 0:
+    Logit("No warning conditions detected.")
+    return
+  Logit("Warning conditions have been detected.")
+  subject  = "Gratia transfer to APEL (WLCG) for %s - WARNINGS/ADVISORY" % gDateFilter
   contents = """
 The interface from Gratia to the APEL (WLCG) database was successful.
 
@@ -250,8 +272,7 @@ However, the following possible problems were detected during the execution
 of the interface script and should be investigated.
 """
   for warning in gWarnings:
-    contents = "%s\n%s\n" % (contents,warning)
-  Logit(contents)
+    contents = "%s\nWARNING/ADVISORY: %s\n" % (contents,warning)
   SendEmailNotification(subject,contents)
 #-----------------------------------------------
 def SendEmailNotification(subject,message):
@@ -263,30 +284,30 @@ def SendEmailNotification(subject,message):
   if gEmailNotificationSuppressed:
     Logit("Email notification suppressed")
     return
-  
+  Logit("Email notification being sent to %s" % gFilterParameters["EmailNotice"])
+  Logit("\n" + message) 
+
   hostname = commands.getoutput("hostname -f")
   logfile  = commands.getoutput("echo $PWD")+"/"+GetFileName(None,"log")
   username = commands.getoutput("whoami")
   sqlfile  = commands.getoutput("echo $PWD")+"/"+GetFileName(None,"sql")
   body = """\
 Gratia to APEL/WLCG transfer. 
+
+This is normally run as a cron process.  The log files associated with this 
+process can provide further details.
+
 Script..... %s
 Node....... %s
 User....... %s
 Log file... %s
 SQL file... %s
-
-This is normally run as a cron process.  The log files associated with this 
-process can provide further details.
-
-Sites with no data:
-  %s
-
-Sites with unknown Atlas VOs (unix account with 'atlas' in name):
-  %s
+Reportable sites file.. %s
+Reportable VOs file.... %s
+Report unknown VOs..... %s
 
 %s
-	""" % (gProgramName,hostname,username,logfile,sqlfile,gSitesWithNoData,gSitesWithUnknowns,message)
+	""" % (gProgramName,hostname,username,logfile,sqlfile,gFilterParameters["SiteFilterFile"],gFilterParameters["VOFilterFile"],gCheckUnknowns,message)
 
 
   try:
@@ -312,7 +333,6 @@ X-Mailer: Python smtplib
   except:
     raise Exception("Unsent Message: %s" % message)
 
-  Logit("Email notification being sent to %s" % gFilterParameters["EmailNotice"])
 
 #-----------------------------------------------
 def GetVOFilters(filename):
@@ -778,8 +798,9 @@ def FindSitesWithUnknownVOs(vos,gDatabaseParameters):
       at seeing the sites the individual query must be performed for. 
       This is a bandaid.
   """
-
+  global gUnknownQuery
   query = GetQuerySitesWithUnknownVOs(vos)
+  gUnknownQuery = query
   Logit("Checking for Unknown VOs with '%s'-like account:" % vos)
   LogToFile(query)
   results = RunGratiaQuery(query,gDatabaseParameters)
@@ -1018,6 +1039,7 @@ def CreateLCGsqlUpdates(results,filename):
 #-----------------------------------------------
 def RetrieveVoData(reportableVOs,reportableSites,params):
   """ Retrieves Gratia data for reportable sites """
+  global gQuery
   output = ""
   firstTime = 1
   sites = reportableSites.keys()
@@ -1060,6 +1082,7 @@ def ProcessEmptyResultsSet(site,reportableVOs,reportableSites):
 #-----------------------------------------------
 def RetrieveUnknownVoData(reportableSites,params):
   """ Retrieves Gratia data for 'unknown' VOs """
+  global gUnknownQuery
   unknowns = ""
   unknown_query = "No sites with 'unknown' VO"
   firstTime = 1
@@ -1098,11 +1121,17 @@ def CreateLCGsqlUnknownUpdates(results,filename):
       We are also maintaining the latest sql update dml in a file
       called YYYY-MM.sql.
   """ 
-  Logit("Creating update sql DML for the LCG database for Unknown atlas VOs:") 
+  if not gCheckUnknowns:
+    Logit("No check for unknown VO's performed")
+    return
+
+  Logit("Sites with Atlas unknown VOs: %s\n" % gSitesWithUnknowns)
 
   if len(results) == 0:
     LogToFile("No updates to apply")
     return
+
+  Logit("Creating update sql DML for the LCG database for Unknown atlas VOs:") 
 
   file = open(filename, 'a')
   lines = results.split("\n")
@@ -1149,8 +1178,8 @@ def main(argv=None):
   global gSitesWithUnknowns
   global gQuery
   global gUnknownQuery
-  output   = ""
-  unknowns = ""
+  global gOutput
+  global gUnknowns
 
   #--- get command line arguments  -------------
   try:
@@ -1177,6 +1206,7 @@ def main(argv=None):
     Logit("APEL database host..... %s:%s" % (gDatabaseParameters["LcgHost"],gDatabaseParameters["LcgPort"]))
     Logit("APEL database.......... %s" % (gDatabaseParameters["LcgDB"]))
     Logit("APEL database table.... %s" % (gDatabaseParameters["LcgTable"]))
+    Logit("Report unknown VOs..... %s" % gCheckUnknowns)
 
     #--- check db availability -------------
     CheckGratiaDBAvailability(gDatabaseParameters)
@@ -1193,24 +1223,25 @@ def main(argv=None):
     ReportableVOs      = GetVOFilters(gFilterParameters["VOFilterFile"])
     
     #--- query gratia for each site and create updates ----
-    output   = RetrieveVoData(ReportableVOs,ReportableSites,gDatabaseParameters)
-    #JGW unknowns = RetrieveUnknownVoData(ReportableSites,gDatabaseParameters)
+    gOutput = RetrieveVoData(ReportableVOs,ReportableSites,gDatabaseParameters)
+    if gCheckUnknowns:
+      gUnknowns = RetrieveUnknownVoData(ReportableSites,gDatabaseParameters)
 
     #--- create the updates for the APEL accounting database ----
     Logit("Sites with data: %s" % gSitesWithData)
     Logit("Sites with no data: %s" % gSitesWithNoData)
-    Logit("Sites with Atlas unknown VOs: %s" % gSitesWithUnknowns)
     if len(gSitesWithData) == 0:
       if len(gSitesWithUnknowns) == 0:
         raise Exception("No updates to apply")
-    CreateLCGsqlUpdates(output,GetFileName(None,"sql"))
-    CreateLCGsqlUnknownUpdates(unknowns,GetFileName(None,"sql"))
+    CreateLCGsqlUpdates(gOutput,GetFileName(None,"sql"))
+    CreateLCGsqlUnknownUpdates(gUnknowns,GetFileName(None,"sql"))
 
     #--- apply the updates to the APEL accounting database ----
     if gInUpdateMode:
       RunLCGUpdate(GetFileName(None,"sql"),gDatabaseParameters)
       CreateXmlHtmlFiles(gDatabaseParameters)
-      SendEmailNotificationSuccess("Sample query:\n" + gQuery + "\n\nResults of all queries:\n" + output + "\n\n#################\nSample Atlas unknown query:\n" + gUnknownQuery + "\n\nResults of all Atlas unknown queries:\n" + unknowns)
+      SendEmailNotificationSuccess()
+      SendEmailNotificationWarnings()
       Logit("Transfer Completed SUCCESSFULLY from Gratia to APEL")
     else:
       Logit("The --update arg was not specified. No updates attempted.")
