@@ -88,6 +88,12 @@ void sharing(FILE *out, FILE *outcsv, TSQLServer *db, TDatime *begin, TDatime *e
    fprintf(out,"OSG usage summary (midnight to midnight UTC) for %s\n"
 "including all jobs that finished in that time period.\n\n"
 "The ownership information was extracted from OIM from http://myosg.grid.iu.edu/trunk/vo/?group=resource.\n"
+"\nThis URL has disappeared without notice and its replacement has a different output format.\n"
+"Both URLs are advertised as 'beta' and are being advertised as 'not advisable' for use.\n"
+"\nThis report is suspended until further notice.\n",buffer);
+   return;
+   
+#if 0
 "with some straightforward changes applied (for example ATLAS -> USATLAS),\n"
 "Some of the information as not yet been updated in OIM and some attempt was\n"
 "made to 'guess' the owner from previous information source; those guessed\n"
@@ -96,6 +102,7 @@ void sharing(FILE *out, FILE *outcsv, TSQLServer *db, TDatime *begin, TDatime *e
 "not be associated with any information from Gratia.\n"
 "All the subgroups in the Fermilab VO are considered owners of the sites\n"
 "owned by the Fermilab VO.\n\n",buffer);
+#endif
 
    TString todaystring = Form("For all jobs finished on %s (UTC)\n",buffer);
    delete [] buffer;
@@ -168,6 +175,7 @@ void sharing(FILE *out, FILE *outcsv, TSQLServer *db, TDatime *begin, TDatime *e
    typedef map<string, OInfo> InnerMap_t;
    map<string, InnerMap_t > ownerShare;
    cmd = "wget -q -O - http://myosg.grid.iu.edu/trunk/vo/xml?group=resource";
+   cmd = "wget -q -O - 'http://myosg.grid.iu.edu/wizardsummary/xml?datasource=summary&summary_attrs_showservice=on&summary_attrs_showvoownership=on&account_type=cumulative_hours&ce_account_type=gip_vo&se_account_type=vo_transfer_volume&start_type=7daysago&all_resources=on&gridtype=on&gridtype_1=on'";
    f = gSystem->OpenPipe(cmd,"r");
    TString xmldoc;
    while ((x = fgetc(f))!=EOF ) {
