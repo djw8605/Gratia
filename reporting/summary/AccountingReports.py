@@ -2562,7 +2562,7 @@ def RangeSummup(range_end = datetime.date.today(),
     print "\nThe non registered sites are: \n"+prettyList(extraSites)
     print "\nThe disabled sites that are reporting: \n"+prettyList(reportingDisabled)
 
-    expectedNoActivity = ['miniboone','sdss']
+    expectedNoActivity = ['sdss']
     emptyVO = [name for name in regVOs if name not in reportingVOs and name not in expectedNoActivity]
     nonregVO = [name for name in reportingVOs if name not in regVOs]
     print "\nThe registered VOs with no recent activity are:\n"+prettyList(emptyVO)
@@ -2642,7 +2642,7 @@ def NonReportingSites(
     print "\nThe sanctioned non registered sites are: \n"+prettyList(knownExtras)
     print "\nThe non registered sites are: \n"+prettyList(extraSites)
 
-    expectedNoActivity = ['miniboone','sdss']
+    expectedNoActivity = ['sdss']
     emptyVO = [name for name in regVOs if name not in reportingVOs and name not in expectedNoActivity]
     nonregVO = [name for name in reportingVOs if name not in regVOs]
     print "\nThe registered VOs with no recent activity are:\n"+prettyList(emptyVO)
