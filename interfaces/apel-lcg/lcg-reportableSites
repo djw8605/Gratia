@@ -227,7 +227,10 @@
 #       sensitiviy of this file, it can be done at any time in the current month
 #    2. Removed UC_ATLAS_MWT2 - stopped being considered a T2 site in 
 #        2009/06 per Rob Gardner.  We never got word and just realized now.
-#   	 
+#   03/24/2009 (Karthik)   	 
+#    GLOW	2408	previously 1832  (jump due to fixing of incorrect lower value assigned after an upgrade)
+#       	 
+#    
 #    
 ##################################################################
 #-- Site  ------- SPECint2000
@@ -236,7 +239,7 @@
 USCMS-FNAL-WC1-CE   1809  
 #--- CMS Tier 2 ----    
 CIT_CMS_T2          2398       
-GLOW                1832
+GLOW                2408
 MIT_CMS             1872
 Nebraska            2027
 Purdue-RCAC         2883
