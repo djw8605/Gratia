@@ -330,6 +330,7 @@ public class ReplicationDataPump extends Thread {
 
     public Boolean uploadXML(String replicationTarget, String xml)
         throws Exception {
+
         Boolean result = false;
         if (!replicationTarget.startsWith("file:")) {
            Post post = new Post(replicationTarget + "/gratia-servlets/rmi", "update", xml);
@@ -373,6 +374,9 @@ public class ReplicationDataPump extends Thread {
            if (!directory.exists()) {
               directory.mkdirs();
            }
+           if (nSentThisLoop == 0) { // Message for first send
+              replicationLog(LogLevel.FINE, " writing to disk in " + replicatePath + "/" + dir);
+           }           
            long part = 0; //nrecords / recordsPerDirectory;
            
            String directory_part = "rep" + replicationId;

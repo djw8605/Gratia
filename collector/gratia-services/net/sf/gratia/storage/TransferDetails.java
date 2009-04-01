@@ -58,7 +58,13 @@ public class TransferDetails extends Record {
       return "";
    }
    
-   public String asXML() {
+   public String asXML()
+   {
+      return asXML(false);
+   }
+   
+   public String asXML(boolean formd5)
+   {
       StringBuilder output = new StringBuilder();
       asXml(output);
       return output.toString();

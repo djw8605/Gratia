@@ -5,6 +5,7 @@ import net.sf.gratia.util.Logging;
 import net.sf.gratia.util.Base64;
 
 import net.sf.gratia.services.*;
+import net.sf.gratia.storage.Origin;
 
 import java.io.*;
 import java.net.*;
@@ -18,10 +19,13 @@ import java.rmi.*;
 import java.security.cert.X509Certificate;
 
 
+
 public class RMIHandlerServlet extends HttpServlet 
    {
       Properties p;
-      boolean fUseCertificate;
+      boolean fCheckConnection;
+      boolean fTrackConnection;
+
       
       static JMSProxy fProxy = null;
       static URLDecoder D;
@@ -52,7 +56,16 @@ public class RMIHandlerServlet extends HttpServlet
          TimeZone.setDefault(null);
          super.init(config);
          p = Configuration.getProperties();
-         fUseCertificate = ! p.getProperty("service.security.level", "0").equals("0");
+         String level = p.getProperty("service.security.level", "0");
+         fCheckConnection = !level.equals("0");
+         fTrackConnection = false;
+         try {
+            if ( 1 == (1 & Integer.parseInt( level ) ) ) {
+               fTrackConnection = true;
+            }
+         } catch (java.lang.NumberFormatException e) {
+            // Ignore parsing issues
+         }
          
          //
          // initialize logging
@@ -82,7 +95,9 @@ public class RMIHandlerServlet extends HttpServlet
          
          int argcount = 0;
          
-         if (fUseCertificate) {
+         String origin = null;
+         
+         if (fCheckConnection) {
             try {
                
                X509Certificate verified_certs = (X509Certificate)req.getSession().getAttribute("GratiaRmiServletVerified");
@@ -90,11 +105,10 @@ public class RMIHandlerServlet extends HttpServlet
 
                if (verified_certs != null && certs != null) {
                   boolean result = ( verified_certs == certs[0] );
-                  Logging.warning("Verified certs found" + result);
-               } else {
-                  Logging.warning("No pre-verification found: "+req.getSession().getId());
+                  Logging.info("Verified certs found" + result);
+               } else if ( certs != null) {
+                  Logging.info("Certificate passed but no pre-verification found: "+req.getSession().getId());
                }
-                  
                 
                if (certs == null) {
                   Logging.info("Certificate checks requested but no certificate seen");
@@ -105,8 +119,9 @@ public class RMIHandlerServlet extends HttpServlet
                   }
                   
                }
-               if (fProxy.checkCertificate(certs)) {
-                  Logging.debug("RMIHandlerServlet: accepted the certificate(s)");
+               origin = fProxy.checkConnection(certs,req.getRemoteAddr(),from);
+               if (origin != null && origin.length() > 0) {
+                  Logging.debug("RMIHandlerServlet: Crudentials accepted.");
                   if (certs != null) {
                      req.getSession().setAttribute("GratiaRmiServletVerified",certs[0]);
                   }
@@ -120,6 +135,16 @@ public class RMIHandlerServlet extends HttpServlet
                   // If we can't check the validity of the certificate, we quit.
                   return;
                }
+               
+            } catch (net.sf.gratia.services.AccessException e) {
+
+               Logging.info("RMIHandlerServlet: rejected the certificate(s)");                  
+               Logging.debug("Exception detail:", e);
+               PrintWriter writer = res.getWriter();
+               writer.write("Error: Upload rejected by the Gratia Collector. " + e.getMessage());
+               writer.flush();
+               
+               // If we can't check the validity of the certificate, we quit.
                
             } catch (Exception e) {
                Logging.warning("RMIHandlerServlet: Proxy communication failure: " + e);
@@ -302,7 +327,15 @@ public class RMIHandlerServlet extends HttpServlet
                      Logging.info("RMIHandlerServlet: received test message from " +
                                   req.getRemoteHost());
                   } else { // Process normally
-                     status = fProxy.update(arg1);
+                     
+                     Logging.warning("Ready to update with"+origin);
+                     
+                     if (fTrackConnection) {
+                        String data = "Origin|"+origin+"|"+arg1;
+                        status = fProxy.update(data);
+                     } else {
+                        status = fProxy.update(arg1);
+                     }
                   }
                   if (status) {
                      writer.write("OK");

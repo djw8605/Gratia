@@ -23,22 +23,11 @@ import java.util.Date;
  */
 public class MetricRecord extends Record
 {
+   // Meta Information (not part of the xml file per se).
+   // See Record class
 
    // Meta Information (from the xml file)
-   private RecordIdentity RecordIdentity;
-   private StringElement ProbeName;
-   private StringElement SiteName;
-   private StringElement Grid;
-
-   // Calculated information (not directly in the xml file)
-   private Probe Probe;
-
-   // Meta Information (not part of the xml file per se).
-   private int RecordId;
-   private String RawXml;   // Complete Usage Record Xml
-   private String ExtraXml; // Xml fragment not used for any of the data members/field
-   private Date ServerDate;
-   private String md5;
+   // See Record class
 
    // Data Content.
     
@@ -101,88 +90,59 @@ public class MetricRecord extends Record
       output = output + "voName: " + VoName + "\n";
       output = output + "samUploadFlag: " + SamUploadFlag + "\n";
       output = output + "hostName: " + HostName + "\n";
+
+      if (Origins != null) output = output + Origins.toString();
       return output;
    }
 
    public String asXML()
    {
-      String output = ""; // ("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-      output = output + ("<MetricRecord  xmlns:urwg=\"http://www.gridforum.org/2003/ur-wg\">\n");
-      if (RecordIdentity != null) output = output + RecordIdentity.asXml();
-      if (ProbeName != null) output = output + ProbeName.asXml("ProbeName");
-      if (SiteName != null) output = output + SiteName.asXml("SiteName");
+      return asXML(false);
+   }
+   
+   public String asXML(boolean formd5)
+   {
+      // If formd5 is true do not include
+      //    RecordIdentity
+      // in calculation.
+      
+      StringBuilder output = new StringBuilder(""); // ("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+      output.append("<MetricRecord  xmlns:urwg=\"http://www.gridforum.org/2003/ur-wg\">\n");
+      if (!formd5) { 
+         if (RecordIdentity != null) RecordIdentity.asXml(output);
+      }
+      if (ProbeName != null) ProbeName.asXml(output,"ProbeName");
+      if (SiteName != null) SiteName.asXml(output,"SiteName");
 
-      if (MetricName != null) output = output + MetricName.asXml("MetricName");
-      if (MetricType != null) output = output + MetricType.asXml("MetricType");
-      if (MetricStatus != null) output = output + MetricStatus.asXml("MetricStatus");
-      if (Timestamp != null) output = output + Timestamp.asXml("Timestamp");
-      if (ServiceType != null) output = output + ServiceType.asXml("ServiceType");
-      if (ServiceUri != null) output = output + ServiceUri.asXml("ServiceUri");
-      if (GatheredAt != null) output = output + GatheredAt.asXml("GatheredAt");
-      if (SummaryData != null) output = output + SummaryData.asXml("SummaryData");
-      if (DetailsData != null) output = output + DetailsData.asXml("DetailsData");
-      if (PerformanceData != null) output = output + PerformanceData.asXml("PerformanceData");
-      if (VoName != null) output = output + VoName.asXml("VoName");
-      if (SamUploadFlag != null) output = output + SamUploadFlag.asXml("SamUploadFlag");
-      if (HostName != null) output = output + HostName.asXml("HostName");
-      output = output + ("</MetricRecord>\n");
-      return output;
+      if (MetricName != null) MetricName.asXml(output,"MetricName");
+      if (MetricType != null) MetricType.asXml(output,"MetricType");
+      if (MetricStatus != null) MetricStatus.asXml(output,"MetricStatus");
+      if (Timestamp != null) Timestamp.asXml(output,"Timestamp");
+      if (ServiceType != null) ServiceType.asXml(output,"ServiceType");
+      if (ServiceUri != null) ServiceUri.asXml(output,"ServiceUri");
+      if (GatheredAt != null) GatheredAt.asXml(output,"GatheredAt");
+      if (SummaryData != null) SummaryData.asXml(output,"SummaryData");
+      if (DetailsData != null) DetailsData.asXml(output,"DetailsData");
+      if (PerformanceData != null) PerformanceData.asXml(output,"PerformanceData");
+      if (VoName != null) VoName.asXml(output,"VoName");
+      if (SamUploadFlag != null) SamUploadFlag.asXml(output,"SamUploadFlag");
+      if (HostName != null) HostName.asXml(output,"HostName");
+
+      if (!formd5) {
+         if (Origins != null) originsAsXml(output);
+      }
+      output.append("</MetricRecord>\n");
+      return output.toString();
    }
 
    public void AttachContent( org.hibernate.Session session ) throws Exception
    {
-
+      AttachOrigins( session );
    }
 
    public String getTableName()
    {
       return "MetricRecord";
-   }
-
-   public void setRecordId(int RecordId)
-   {
-      this.RecordId = RecordId;
-   }
-
-   public int getRecordId()
-   {
-      return RecordId;
-   }
-
-   public void setRecordIdentity(RecordIdentity n) { RecordIdentity = n; }
-   public RecordIdentity getRecordIdentity()
-   {
-      return RecordIdentity;
-   }
-
-   public void addRawXml(String RawXml)
-   {
-      this.RawXml = this.RawXml + RawXml;
-   }
-
-   public void setRawXml(String RawXml)
-   {
-      this.RawXml = RawXml;
-   }
-
-   public String getRawXml()
-   {
-      return RawXml;
-   }
-
-   public void addExtraXml(String ExtraXml)
-   {
-      this.ExtraXml = this.ExtraXml + ExtraXml;
-   }
-
-   public void setExtraXml(String ExtraXml)
-   {
-      this.ExtraXml = ExtraXml;
-   }
-
-   public String getExtraXml()
-   {
-      return ExtraXml;
    }
 
    public static Date expirationDate() {
@@ -195,18 +155,6 @@ public class MetricRecord extends Record
       return this.Timestamp.getValue();
    }
 
-   public Date getServerDate()
-   {
-      return ServerDate;
-   }
-
-   public void setServerDate(Date value)
-   {
-      ServerDate = value;
-   }
-
-   public Probe getProbe() { return Probe; }
-   public void setProbe(Probe p) { this.Probe = p; }
    public boolean setDuplicate(boolean b) 
    {
        // setDuplicate will increase the count (nRecords,nConnections,nDuplicates) for the probe
@@ -219,35 +167,6 @@ public class MetricRecord extends Record
        return b;
    }
 
-   public void setProbeName(StringElement ProbeName)
-   {
-      this.ProbeName = ProbeName;
-   }
-   public StringElement getProbeName()
-   {
-      return ProbeName;
-   }
-
-   public void setSiteName(StringElement SiteName)
-   {
-      this.SiteName = SiteName;
-   }
-
-   public StringElement getSiteName()
-   {
-      return SiteName;
-   }
-
-   public void setGrid(StringElement Grid)
-   {
-      this.Grid = Grid;
-   }
-
-   public StringElement getGrid()
-   {
-      return Grid;
-   }
-
    public String computemd5() throws Exception
    {
       RecordIdentity temp = getRecordIdentity();
@@ -256,21 +175,7 @@ public class MetricRecord extends Record
       setRecordIdentity(temp);
 
       return md5key;
-   }
-
-   public String getmd5()
-   {
-      return md5;
-   }
-
-   public void setmd5(String value)
-   {
-      md5 = value;
-   }
-
-
-
-
+   }   
 
    public void setMetricName(StringElement MetricName)
    {

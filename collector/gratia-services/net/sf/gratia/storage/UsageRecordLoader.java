@@ -25,7 +25,7 @@ import net.sf.gratia.util.Logging;
  * @author Philippe Canal
  * @version 1.0
  */
-public class UsageRecordLoader implements RecordLoader {
+public class UsageRecordLoader extends RecordLoader {
     public ArrayList ReadRecords(Element eroot) throws Exception {
         ArrayList usageRecords = new ArrayList();
 
@@ -77,9 +77,7 @@ public class UsageRecordLoader implements RecordLoader {
             Element sub = (Element) i.next();
             // System.out.println("" + sub.GetName())
             try {
-                if (sub.getName().equalsIgnoreCase("RecordIdentity")) {
-                    SetRecordIdentity(job, sub);
-                } else if (sub.getName().equalsIgnoreCase("JobIdentity")) {
+                if (sub.getName().equalsIgnoreCase("JobIdentity")) {
                     SetJobIdentity(job, sub);
                 } else if (sub.getName().equalsIgnoreCase("UserIdentity")) {
                     SetUserIdentity(job, sub);
@@ -101,8 +99,6 @@ public class UsageRecordLoader implements RecordLoader {
                     SetTimeInstant(job, sub);
                 } else if (sub.getName().equalsIgnoreCase("MachineName")) {
                     SetMachineName(job, sub);
-                } else if (sub.getName().equalsIgnoreCase("SiteName")) {
-                    SetSiteName(job, sub);
                 } else if (sub.getName().equalsIgnoreCase("Host")) {
                     SetHost(job, sub);
                 } else if (sub.getName().equalsIgnoreCase("SubmitHost")) {
@@ -137,12 +133,8 @@ public class UsageRecordLoader implements RecordLoader {
                     AddVolumeResource(job, sub);
                 } else if (sub.getName().equalsIgnoreCase("ConsumableResource")) {
                     AddConsumableResource(job, sub);
-                } else if (sub.getName() == "ProbeName") {
-                    SetProbeName(job, sub);
-                } else if (sub.getName() == "Grid") {
-                    SetGrid(job, sub);
                 } else {
-                    job.addExtraXml(sub.asXML());
+                    ReadCommonRecord(job,sub);
                 }
             } catch (Exception e) {
                 // Something went wrong in the parsing.  We do not die, we
@@ -155,42 +147,6 @@ public class UsageRecordLoader implements RecordLoader {
             }
         }
         return job;
-    }
-
-    public static void SetRecordIdentity(JobUsageRecord job, Element element)
-            throws Exception {
-        
-        RecordIdentity id = job.getRecordIdentity();
-        String extras = "";
-        if (id != null /* record identity already set */) {
-            Utils.GratiaError("SetRecordIdentity", "parsing",
-                    " found a second RecordIdentity field in the xml file",
-                    false);
-            job.addExtraXml(element.asXML());
-            return;
-        }
-        for (Iterator i = element.attributeIterator(); i.hasNext();) {
-            Attribute a = (Attribute) i.next();
-            if (a.getName().equalsIgnoreCase("recordId")) {
-                if (id == null)
-                    id = new RecordIdentity();
-                id.setRecordId(a.getValue());
-            } else if (a.getName().equalsIgnoreCase("createTime")) {
-                if (id == null)
-                    id = new RecordIdentity();
-                DateElement createTime = new DateElement();
-                createTime.setValue(a.getValue());
-                id.setCreateTime(createTime);
-            } else {
-                extras = extras + a.asXML();
-            }
-        }
-        if (id != null)
-            job.setRecordIdentity(id);
-        if (extras.length() > 0) {
-            extras = "<RecordIdentity " + extras + "/>";
-            job.addExtraXml(extras);
-        }
     }
 
     public static void SetJobIdentity(JobUsageRecord job, Element element)
@@ -519,25 +475,6 @@ public class UsageRecordLoader implements RecordLoader {
         }
         el.setValue(element.getText());
         job.setMachineName(el);
-    }
-
-    public static void SetSiteName(JobUsageRecord job, Element element)
-            throws Exception {
-        StringElement el = job.getSiteName();
-        if (el != null /* job identity already set */) {
-            Utils.GratiaError("SetSiteName", "parsing",
-                    " found a second SiteName field in the xml file", false);
-            return;
-        }
-        el = new StringElement();
-        for (Iterator i = element.attributeIterator(); i.hasNext();) {
-            Attribute a = (Attribute) i.next();
-            if (a.getName().equalsIgnoreCase("description")) {
-                el.setDescription(a.getValue());
-            }
-        }
-        el.setValue(element.getText());
-        job.setSiteName(el);
     }
 
     public static void SetHost(JobUsageRecord job, Element element)
@@ -964,62 +901,6 @@ public class UsageRecordLoader implements RecordLoader {
             l = new java.util.LinkedList();
         l.add(el);
         job.setResource(l);
-    }
-
-    public static void SetProbeName(JobUsageRecord job, Element element)
-            throws Exception {
-        StringElement el = job.getProbeName();
-        if (el == null) {
-            el = new StringElement();
-        }
-        for (Iterator i = element.attributeIterator(); i.hasNext();) {
-            Attribute a = (Attribute) i.next();
-            if (a.getName() == "description") {
-                String desc = el.getDescription();
-                if (desc == null)
-                    desc = "";
-                else
-                    desc = desc + " ; ";
-                desc = desc + a.getValue();
-                el.setDescription(desc);
-            }
-        }
-        String val = el.getValue();
-        if (val == null)
-            val = "";
-        else
-            val = val + " ; ";
-        val = val + element.getText();
-        el.setValue(val);
-        job.setProbeName(el);
-    }
-
-    public static void SetGrid(JobUsageRecord job, Element element)
-            throws Exception {
-        StringElement el = job.getGrid();
-        if (el == null) {
-            el = new StringElement();
-        }
-        for (Iterator i = element.attributeIterator(); i.hasNext();) {
-            Attribute a = (Attribute) i.next();
-            if (a.getName() == "description") {
-                String desc = el.getDescription();
-                if (desc == null)
-                    desc = "";
-                else
-                    desc = desc + " ; ";
-                desc = desc + a.getValue();
-                el.setDescription(desc);
-            }
-        }
-        String val = el.getValue();
-        if (val == null)
-            val = "";
-        else
-            val = val + " ; ";
-        val = val + element.getText();
-        el.setValue(val);
-        job.setGrid(el);
     }
     
     public UsageRecordLoader() {

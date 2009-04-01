@@ -20,7 +20,7 @@ public class NewVOUpdate {
         if (rec.getClass() != JobUsageRecord.class) return;
         JobUsageRecord record = (JobUsageRecord)rec;
       
-        Connection connection = session.connection();
+        java.sql.Connection connection = session.connection();
 
         String dq = "\"";
         String comma = ",";

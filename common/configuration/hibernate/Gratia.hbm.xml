@@ -95,11 +95,36 @@
   </class>
 
   <class name="Certificate" table="Certificate" node="Certificate" lazy="false">
-    <id name="Certid" column="certid" type="int">
+    <id name="Certid" column="certid" type="long">
       <generator class="native"/>
     </id>
     <property name="Pem" column="pem" type="text"/>
     <property name="State" column="state"/>
+  </class>
+  
+  <class name="Connection" table="Connection" node="Connection" lazy="false">
+    <id name="cid" column="cid" type="long">
+      <generator class="native"/>
+    </id>
+    <property name="Client" column="client"/>
+    <property name="Sender" column="sender"/>
+    <many-to-one name="Certificate" column="certid" not-null="false"/>
+    <many-to-one name="Server" column="servercid" not-null="false"/>
+    <property name="md5" column="md5" index="index12" unique="true"/>
+
+    <property name="FirstSeen" column="FirstSeen" type="timestamp"/>
+    <property name="LastSeen" column="LastSeen" type="timestamp"/>
+    <property name="State" column="state"/>
+  </class>
+  
+  <class name="Origin" table="Origin" node="Origin" lazy="false">
+    <id name="OriginId" column="originid" type="long">
+      <generator class="native"/>
+    </id>
+    <component name="fServerDate" class="DateElement" access="field" insert="true">
+      <property name="Value" column="ServerDate" type="timestamp"  />
+    </component>
+    <many-to-one name="Connection" column="cid" not-null="false"/>
   </class>
 
   <class name="CPUInfo"

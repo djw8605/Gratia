@@ -1,6 +1,7 @@
 package net.sf.gratia.storage;
 
 import org.apache.commons.lang.StringEscapeUtils;
+import net.sf.gratia.util.Logging;
 
 import java.util.Iterator;
 import java.util.Set;
@@ -28,20 +29,13 @@ public class ProbeDetails extends Record
       private Set Software;
       
       // Calculated information (not directly in the xml file)
-      private Probe Probe;
+      // See Record class
       
       // Meta Information (from the xml file)
-      private RecordIdentity RecordIdentity;
-      private StringElement ProbeName;
-      private StringElement SiteName;
-      private StringElement Grid;
+      // See Record class
       
       // Meta Information (not part of the xml file per se).
-      private int RecordId;
-      private String RawXml;   // Complete Usage Record Xml
-      private String ExtraXml; // Xml fragment not used for any of the data members/field
-      private Date ServerDate;
-      private String md5;
+      // See Record class
       
       public ProbeDetails()
       {
@@ -87,89 +81,12 @@ public class ProbeDetails extends Record
       
       public Set getSoftware() { return this.Software; }
       
-      public void setProbeName(StringElement ProbeName)
-      {
-         this.ProbeName = ProbeName;
-      }
-      
-      public Probe getProbe() { return Probe; }
-      public void setProbe(Probe p) { this.Probe = p; }
       public boolean setDuplicate(boolean b) 
       {
          // setDuplicate will increase the count (nRecords,nConnections,nDuplicates) for the probe
          // and will return true if the duplicate needs to be recorded as a potential error.
          this.Probe.setnConnections( Probe.getnConnections() + 1 );
          return false;
-      }
-      
-      public StringElement getProbeName()
-      {
-         return ProbeName;
-      }
-      
-      public void setSiteName(StringElement SiteName)
-      {
-         this.SiteName = SiteName;
-      }
-      
-      public StringElement getSiteName()
-      {
-         return SiteName;
-      }
-      
-      public void setGrid(StringElement Grid)
-      {
-         this.Grid = Grid;
-      }
-      public StringElement getGrid()
-      {
-         return Grid;
-      }
-      
-      public void setRecordId(int RecordId)
-      {
-         this.RecordId = RecordId;
-      }
-      
-      public int getRecordId()
-      {
-         return RecordId;
-      }
-      
-      public void setRecordIdentity(RecordIdentity n) { RecordIdentity = n; }
-      public RecordIdentity getRecordIdentity()
-      {
-         return RecordIdentity;
-      }
-      
-      public void addRawXml(String RawXml)
-      {
-         this.RawXml = this.RawXml + RawXml;
-      }
-      
-      public void setRawXml(String RawXml)
-      {
-         this.RawXml = RawXml;
-      }
-      
-      public String getRawXml()
-      {
-         return RawXml;
-      }
-      
-      public void addExtraXml(String ExtraXml)
-      {
-         this.ExtraXml = this.ExtraXml + ExtraXml;
-      }
-      
-      public void setExtraXml(String ExtraXml)
-      {
-         this.ExtraXml = ExtraXml;
-      }
-      
-      public String getExtraXml()
-      {
-         return ExtraXml;
       }
       
       public static Date expirationDate() {
@@ -180,16 +97,6 @@ public class ProbeDetails extends Record
       {
          // Returns the date this records is reporting about.
          return new Date(); // We don't know, so say it's about today!
-      }
-      
-      public Date getServerDate()
-      {
-         return ServerDate;
-      }
-      
-      public void setServerDate(Date value)
-      {
-         ServerDate = value;
       }
       
       public String setToString(String name, Set l)
@@ -214,26 +121,20 @@ public class ProbeDetails extends Record
          return output;
       }
       
-      public String setAsXml(String name, Set l)
+      public void setAsXml(StringBuilder output, String name, Set<XmlElement> coll)
       {
-         String output = "";
-         for (Iterator i = l.iterator(); i.hasNext(); )
-         {
-            XmlElement el = (XmlElement)i.next();
-            output = output + el.asXml(name) + "\n";
+         for (XmlElement el : coll) {
+            el.asXml(output, name);
+            output.append("\n");
          }
-         return output;
       }
       
-      public String mapAsXml(String name, java.util.Map<String,Software> l)
+      public void mapAsXml(StringBuilder output, String name, java.util.Map<String,Software> coll)
       {
-         String output = "";
-         for (Iterator i = l.values().iterator(); i.hasNext(); )
-         {
-            XmlElement el = (XmlElement)i.next();
-            output = output + el.asXml(name) + "\n";
+         for (XmlElement el : coll.values() ) {
+            el.asXml(output, name);
+            output.append("\n");
          }
-         return output;
       }
       
       public String toString()
@@ -246,54 +147,81 @@ public class ProbeDetails extends Record
          if (ProbeName != null) output = output + "Grid: " + Grid + "\n";
          if (SoftwareMap != null) output = output + mapToString("", SoftwareMap);
          
+         if (Origins != null) output = output + Origins.toString();
          return output;
       }
       
       public String asXML()
       {
-         String output = ""; // ("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-         output = output + ("<ProbeDetails xmlns:urwg=\"http://www.gridforum.org/2003/ur-wg\">\n");
-         if (RecordIdentity != null) output = output + RecordIdentity.asXml();
-         if (ProbeName != null) output = output + ProbeName.asXml("ProbeName");
-         if (SiteName != null) output = output + SiteName.asXml("SiteName");
-         if (Grid != null) output = output + Grid.asXml("Grid");         
-         if (SoftwareMap != null) output = output + mapAsXml("", SoftwareMap);
+         return asXML(false);
+      }
+      
+      public String asXML(boolean formd5)
+      {
+         // If formd5 is true do not include
+         //    RecordIdentity
+         // in calculation.
          
-         output = output + ("</ProbeDetails>\n");
-         return output;
+         StringBuilder output = new StringBuilder(""); // ("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+         output.append("<ProbeDetails xmlns:urwg=\"http://www.gridforum.org/2003/ur-wg\">\n");
+         if (!formd5) { 
+            if (RecordIdentity != null) RecordIdentity.asXml(output);
+         }
+         if (ProbeName != null) ProbeName.asXml(output,"ProbeName");
+         if (SiteName != null) SiteName.asXml(output,"SiteName");
+         if (Grid != null) Grid.asXml(output,"Grid");
+         
+         if (SoftwareMap != null) mapAsXml(output,"", SoftwareMap);
+
+         if (!formd5) {
+            if (Origins != null) originsAsXml(output);
+         }
+         
+         output.append("</ProbeDetails>\n");
+         return output.toString();
       }
       
       public void AttachContent( org.hibernate.Session session ) throws Exception
       {
+         AttachOrigins( session );
+         
          if (this.SoftwareMap != null) {
+            List oldlist = new java.util.ArrayList<Software>();
+            List newlist = new java.util.ArrayList<Software>();
             Iterator i = this.SoftwareMap.values().iterator();
             while ( i.hasNext() )
             {
                Software s = (Software)i.next();
                
-               s.Attach(session);
+               Software attached = s.Attach(session);
+               
+               if (attached != s) {
+                  // Case where the Software already existed in the cache.
+                  oldlist.add( s );
+                  newlist.add( attached );
+               }
+            }
+            i = oldlist.iterator();
+            while( i.hasNext() )
+            {
+               Software oldsoft = (Software)i.next();
+               this.SoftwareMap.remove( oldsoft.getmd5() );
+               this.Software.remove( oldsoft );
+            }
+            i = newlist.iterator();
+            while( i.hasNext() )
+            {
+               Software newsoft = (Software)i.next();
+               addSoftware( newsoft );
             }
          }
       }
       
       public String computemd5() throws Exception
       {
-         RecordIdentity temp = getRecordIdentity();
-         setRecordIdentity(null);
-         String md5key = Utils.md5key(asXML());
-         setRecordIdentity(temp);
+         String md5key = Utils.md5key(asXML(true));
          
          return md5key;
-      }
-      
-      public String getmd5()
-      {
-         return md5;
-      }
-      
-      public void setmd5(String value)
-      {
-         md5 = value;
       }
       
       public String getTableName()

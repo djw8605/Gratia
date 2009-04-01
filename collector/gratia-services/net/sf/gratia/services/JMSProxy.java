@@ -24,5 +24,5 @@ public interface JMSProxy extends java.rmi.Remote {
     public void disableHousekeepingService() throws RemoteException;
     public Boolean startHousekeepingActionNow() throws RemoteException;
     public String checksumUpgradeStatus() throws RemoteException;
-    public Boolean checkCertificate(java.security.cert.X509Certificate certs[]) throws RemoteException;
+    public String checkConnection(X509Certificate certs[], String client, String sender) throws RemoteException, AccessException;
 }

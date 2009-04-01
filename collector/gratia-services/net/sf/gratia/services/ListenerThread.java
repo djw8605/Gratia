@@ -25,7 +25,8 @@ import org.hibernate.*;
 import org.hibernate.exception.ConstraintViolationException;
 
 public class ListenerThread extends Thread {
-    static String replication = "replication";
+    final static String replicationMarker = "replication";
+    final static String originMarker = "Origin";
 
     String ident = null;
     String directory = null;         // Location of the incoming messages.
@@ -216,6 +217,7 @@ public class ListenerThread extends Thread {
             }
 
             Record current = null;
+            Origin origin = null;
 
             //
             // see if trace requested
@@ -224,19 +226,52 @@ public class ListenerThread extends Thread {
                 Logging.debug(ident + ": XML Trace:" + "\n\n" + blob + "\n\n");
             }
 
+            // See if we have an origin preceding the data.
+           StringTokenizer st = null;
+           String nextpart = blob;
+           
+           if (blob.startsWith(originMarker)) {
+              st = new StringTokenizer(blob, "|");
+              if (st.hasMoreTokens()) {
+                 // skip marker
+                 st.nextToken();
+                 if (st.hasMoreTokens()) {
+                    String originStr = st.nextToken();
+                    try {
+                       origin = converter.convertOrigin(originStr);
+                    }
+                    catch (Exception e) {
+                       Logging.warning(ident + ": Parse error:  ",e);
+                       Logging.warning(ident + ": XML:  " + "\n" + originStr);
+                    }
+                 }
+              }
+              if (st.hasMoreTokens()) {
+                 nextpart = st.nextToken();
+              } else {
+                 nextpart = "";
+              }
+           }
             //
             // see if we got a normal update or a replicated one
             //
             try {
                 int nseen = 0;
-                if (blob.startsWith(replication)) {
-                    StringTokenizer st = new StringTokenizer(blob, "|");
+                if (nextpart.startsWith(replicationMarker)) {
+                    if (st==null) {
+                       // We could assert that nextpart == blob
+                       st = new StringTokenizer(blob, "|");
+                       if (st.hasMoreTokens()) {
+                          // Skip marker
+                          st.nextToken();
+                       }
+                    }
 
                     gotreplication = true;
 
                     while(st.hasMoreTokens()) {
                         String val = st.nextToken();
-                        if (val.equals(replication) && st.hasMoreTokens()) {
+                        if (val.equals(replicationMarker) && st.hasMoreTokens()) {
                             val = st.nextToken();
                         }                 
                         xml = xml.concat(val);
@@ -248,10 +283,10 @@ public class ListenerThread extends Thread {
                         if (st.hasMoreTokens()) {
                             // The extraxml can be directly followed by the word 'replication'
                             String extraxml = st.nextToken();
-                            if (extraxml.endsWith(replication)) {
+                            if (extraxml.endsWith(replicationMarker)) {
                                 extraxml =
                                     extraxml.substring(0, extraxml.length() -
-                                                       replication.length());
+                                                       replicationMarker.length());
                             }
                             extraxmllist.add(extraxml);
                         } else {
@@ -261,11 +296,17 @@ public class ListenerThread extends Thread {
                     }
                 }
                                 
-                else if (blob.startsWith("history")) {
+                else if (nextpart.startsWith("history")) {
                     gothistory = true;
-                    StringTokenizer st = new StringTokenizer(blob, "|");
+                    if (st==null) {
+                       // We could assert that nextpart == blob
+                       st = new StringTokenizer(blob, "|");
+                       if (st.hasMoreTokens()) {
+                          // Skip marker
+                          st.nextToken();
+                       }
+                    }
                     while(st.hasMoreTokens()) {
-                        st.nextToken();
                         if (st.hasMoreTokens()) {
                             historydatelist.add(st.nextToken());
                         } else {
@@ -285,14 +326,23 @@ public class ListenerThread extends Thread {
                             extraxmllist.add(null);
                         }
                         nseen = nseen + 1;
+                       if (st.hasMoreTokens()) {
+                          // Skip next marker
+                          st.nextToken();
+                       }
                     }
-
                 }
-                else if (blob.startsWith("historymd5")) {
+                else if (nextpart.startsWith("historymd5")) {
                     gothistory = true;
-                    StringTokenizer st = new StringTokenizer(blob, "|");
+                    if (st==null) {
+                       // We could assert that nextpart == blob
+                       st = new StringTokenizer(blob, "|");
+                       if (st.hasMoreTokens()) {
+                          // Skip marker
+                          st.nextToken();
+                       }
+                    }
                     while (st.hasMoreTokens()) {
-                        st.nextToken();
                         if (st.hasMoreTokens()) {
                             historydatelist.add(st.nextToken());
                         } else {
@@ -307,10 +357,14 @@ public class ListenerThread extends Thread {
                             md5list.add(null);
                         }
                         nseen = nseen + 1;
+                        if (st.hasMoreTokens()) {
+                           // Skip next marker
+                           st.nextToken();
+                        }
                     }
                 }
                 else {
-                    xml = blob;
+                    xml = nextpart;
                     nseen = nseen + 1;
                 }
                 if (nseen>1) {
@@ -493,7 +547,10 @@ public class ListenerThread extends Thread {
                             current.setmd5((String)md5list.get(j));
                         }
                         current.setDuplicate(false);
-
+                       if (origin != null) {
+                          current.addOrigin(origin);
+                        }
+                       
                         synchronized (lock) {
                             newVOUpdate.check(current, session);
                         }

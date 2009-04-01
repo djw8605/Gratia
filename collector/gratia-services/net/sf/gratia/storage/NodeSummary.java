@@ -58,8 +58,14 @@ public class NodeSummary extends Record {
         return "";
     }
 
-    public String asXML() {
-        // FIXME
+   public String asXML()
+   {
+      return asXML(false);
+   }
+   
+   public String asXML(boolean formd5)
+   {
+      // FIXME
         return "";
     }
 

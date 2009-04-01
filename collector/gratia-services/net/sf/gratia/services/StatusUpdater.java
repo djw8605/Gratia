@@ -19,7 +19,7 @@ public class StatusUpdater
 
    Properties p;
    XP xp = new XP();
-   Connection connection;
+   java.sql.Connection connection;
    Statement statement;
    SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 

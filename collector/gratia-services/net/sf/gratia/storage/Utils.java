@@ -74,12 +74,33 @@ public class Utils
    public static String DurationToXml(double val) throws
                         DatatypeConfigurationException
    {
-      javax.xml.datatype.DatatypeFactory fac = javax.xml.datatype.
-                               DatatypeFactory.
-                               newInstance();
-      Duration du = fac.newDuration((long)(val * 1000));
-      String str = du.toString();      
-      return str;
+      double seconds = (((long)(val*100)) % 6000 ) / 100.0;
+      long value = ((long)(val - seconds)) / 60;
+      long minutes = value % 60;
+      value = (value - minutes) / 60;
+      long hours = value % 24;
+      long days = (value - hours) / 24;
+      StringBuilder str = new StringBuilder("P");
+      if (days > 0) {
+         str.append(days);
+         str.append("D");
+      }
+      if (hours>0 || minutes>0 || seconds>0) {
+         str.append("T");
+         if (hours>0) {
+            str.append(hours).append("H");
+         }
+         if (minutes>0) {
+            str.append(minutes).append("M");
+         }
+         if (seconds>0) {
+            str.append(seconds).append("S");
+         }
+      } else {
+         str.append("T0S");
+      }
+        
+      return str.toString();
    }
 
    /**

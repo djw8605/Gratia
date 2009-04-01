@@ -24,7 +24,7 @@ import net.sf.gratia.storage.StringElement;
  * Updated by Arvind Gopu, Indiana University (http://peart.ucs.indiana.edu)
  *
  */
-public class ProbeDetailsLoader implements RecordLoader
+public class ProbeDetailsLoader extends RecordLoader
 {
    public ArrayList ReadRecords(Element eroot) throws Exception
    {
@@ -32,7 +32,7 @@ public class ProbeDetailsLoader implements RecordLoader
 
       if (eroot.getName() == "ProbeDetails")
       {
-         // The current element is a metric record node.  Use it to populate a ProbeDetails object
+         // The current element is a ProbeDetails record node.  Use it to populate a ProbeDetails object
          records.add(ReadRecord(eroot));
       }
 
@@ -62,23 +62,7 @@ public class ProbeDetailsLoader implements RecordLoader
          // System.out.println("" + sub.GetName())
          try
          {
-            if (sub.getName().equalsIgnoreCase("RecordIdentity"))
-            {
-               SetRecordIdentity(job, sub);
-            }
-            else if (sub.getName() == "SiteName")
-            {
-               SetSiteName(job, sub);
-            }
-            else if (sub.getName() == "ProbeName")
-            {
-               SetProbeName(job, sub);
-            }
-            else if (sub.getName() == "Grid")
-            {
-               SetGrid(job, sub);
-            }
-            else if (sub.getName() == "ReporterLibrary")
+            if (sub.getName() == "ReporterLibrary")
             {
                 AddSoftware(job, sub);
             }
@@ -92,7 +76,7 @@ public class ProbeDetailsLoader implements RecordLoader
             }
             else
             {
-               job.addExtraXml(sub.asXML());
+               ReadCommonRecord(job,sub);
             }
          }
          catch (Exception e)
@@ -107,118 +91,6 @@ public class ProbeDetailsLoader implements RecordLoader
       }
       return job;
    }
-
-   public static void SetRecordIdentity(ProbeDetails job, Element element)
-            throws Exception
-   {
-      RecordIdentity id = job.getRecordIdentity();
-      if (id != null /* record identity already set */)
-      {
-         Utils.GratiaError("SetRecordIdentity", "parsing",
-                                    " found a second RecordIdentity field in the xml file",
-                                    false);
-         return;
-      }
-      for (Iterator i = element.attributeIterator(); i.hasNext(); )
-      {
-         Attribute a = (Attribute)i.next();
-         if (a.getName().equalsIgnoreCase("recordId"))
-         {
-            if (id == null)
-               id = new RecordIdentity();
-            id.setRecordId(a.getValue());
-         }
-         else if (a.getName().equalsIgnoreCase("createTime"))
-         {
-            if (id == null)
-               id = new RecordIdentity();
-            DateElement createTime = new DateElement();
-            createTime.setValue(a.getValue());
-            id.setCreateTime(createTime);
-         }
-      }
-      if (id != null)
-         job.setRecordIdentity(id);
-   }
-
-   public static void SetSiteName(ProbeDetails job, Element element)
-        throws Exception
-   {
-      StringElement el = job.getSiteName();
-      if (el != null /* job identity already set */)
-      {
-         Utils.GratiaError("SetSiteName", "parsing",
-             " found a second SiteName field in the xml file", false);
-         return;
-      }
-      el = new StringElement();
-      for (Iterator i = element.attributeIterator(); i.hasNext(); )
-      {
-         Attribute a = (Attribute)i.next();
-         if (a.getName().equalsIgnoreCase("description"))
-         {
-            el.setDescription(a.getValue());
-         }
-      }
-      el.setValue(element.getText());
-      job.setSiteName(el);
-   }
-
-   public static void SetProbeName(ProbeDetails job, Element element) throws
-            Exception
-   {
-      StringElement el = job.getProbeName();
-      if (el == null)
-      {
-         el = new StringElement();
-      }
-      for (Iterator i = element.attributeIterator(); i.hasNext(); )
-      {
-         Attribute a = (Attribute)i.next();
-         if (a.getName() == "description")
-         {
-            String desc = el.getDescription();
-            if (desc == null) desc = "";
-            else desc = desc + " ; ";
-            desc = desc + a.getValue();
-            el.setDescription(desc);
-         }
-      }
-      String val = el.getValue();
-      if (val == null) val = "";
-      else val = val + " ; ";
-      val = val + element.getText();
-      el.setValue(val);
-      job.setProbeName(el);
-   }
-
-    public static void SetGrid(ProbeDetails job, Element element)
-            throws Exception {
-        StringElement el = job.getGrid();
-        if (el == null) {
-            el = new StringElement();
-        }
-        for (Iterator i = element.attributeIterator(); i.hasNext();) {
-            Attribute a = (Attribute) i.next();
-            if (a.getName() == "description") {
-                String desc = el.getDescription();
-                if (desc == null)
-                    desc = "";
-                else
-                    desc = desc + " ; ";
-                desc = desc + a.getValue();
-                el.setDescription(desc);
-            }
-        }
-        String val = el.getValue();
-        if (val == null)
-            val = "";
-        else
-            val = val + " ; ";
-        val = val + element.getText();
-        el.setValue(val);
-        job.setGrid(el);
-    }
 
     public static void AddSoftware(ProbeDetails job, Element element)
         throws Exception {

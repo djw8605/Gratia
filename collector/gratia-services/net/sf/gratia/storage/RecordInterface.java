@@ -21,6 +21,7 @@ public interface RecordInterface {
     public void setExtraXml(String ExtraXml);
     public String getExtraXml();
     public String asXML();
+    public String asXML(boolean formd5);
 
     public StringElement getSiteName();
     public StringElement getProbeName();

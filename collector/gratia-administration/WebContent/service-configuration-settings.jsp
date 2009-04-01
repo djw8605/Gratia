@@ -226,8 +226,12 @@ td.example
       <td valign="top" class="property">service.security.level</td>
       <td valign="top" class="explanation">Flag indicating what form of security should gratia assume.</td>
       <td valign="top" class="example">0 = No security<br>
-          1 = Use tomcat ssl<br>
-          2 = Apache handling security</td>
+          1 = Track connections without SSL, check connection validity<br>
+          2 = Check only SSL certificate (both cert validity and validity within Collector)<br>
+          3 = Same as 2 + Track connection with SSL and check connection validity<br>
+          4 = Require SSL connection + same checks as 2<br>
+          5 = Same as 4 + Track connection with SSL and check connection validity<br>
+    </td>
     </tr>
     <tr >
       <td valign="top" class="property">service.use.selfgenerated.certs</td>

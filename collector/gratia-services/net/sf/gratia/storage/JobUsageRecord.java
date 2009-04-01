@@ -25,16 +25,16 @@ import net.sf.gratia.util.Logging;
  */
 public class JobUsageRecord extends Record
 {
-   // Calculated information (not directly in the xml file)
-   private Probe Probe;
 
-   private String RawXml;   // Complete Usage Record Xml
-   private String ExtraXml; // Xml fragment not used for any of the data members/field
+   // Meta Information (not part of the xml file per se).
+   // See Record class
+   private String oldMd5;
+   
+   // Meta Information (from the xml file)
+   // See Record class
 
-
-   private RecordIdentity RecordIdentity;
+   // Data Content
    private UserIdentity UserIdentity;  // This should be a list or set of UserIdentity
-   private int RecordId;
    private StringElement ResourceType;
    private JobIdentity JobIdentity;
    private StringElement JobName;
@@ -49,7 +49,6 @@ public class JobUsageRecord extends Record
    private DateElement StartTime;
    private DateElement EndTime;
    private StringElement MachineName;
-   private StringElement SiteName;
    private StringElement SubmitHost;
    private StringElement Queue;
    private StringElement ProjectName;
@@ -65,11 +64,6 @@ public class JobUsageRecord extends Record
    private List VolumeResource;
    private List ConsumableResource;
    private List Resource;
-   private StringElement Grid;
-   private StringElement ProbeName;
-   private Date ServerDate;
-   private String md5;
-   private String oldMd5;
 
     private Set TDSet;
 
@@ -106,7 +100,7 @@ public class JobUsageRecord extends Record
          output.append(el.asXml(name));
       }
    }
-
+   
    public String toString()
    {
       String output = "UsageRecord: Db Id: " + RecordId;
@@ -144,6 +138,7 @@ public class JobUsageRecord extends Record
       if (VolumeResource != null) output = output + listToString("VolumeResource", VolumeResource);
       if (ConsumableResource != null) output = output + listToString("ConsumableResource", ConsumableResource);
       if (Resource != null) output = output + listToString("Resource", Resource);
+      if (Origins != null) output = output + Origins.toString();
 
       // if (RawXml != null) output = output + "\n" + RawXml;
       if (ExtraXml != null) output = output + "\nExtraXml:\n" + ExtraXml;
@@ -152,6 +147,19 @@ public class JobUsageRecord extends Record
 
    public String asXML()
    {
+      return asXML(false);
+   }
+
+   public String asXML(boolean formd5)
+   {
+      // If formd5 is true do not include
+      //    RecordIdentity
+      // in calculation.  If DatabaseMaintenance.UseJobUsageSiteName()
+      // is also false, do not include
+      //    UserIdentity
+      //    SiteName
+      //    Grid
+      // in calculation.
       StringBuilder output = new StringBuilder(""); // ("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
       output.append("<JobUsageRecord xmlns=\"http://www.gridforum.org/2003/ur-wg\"\n");
       output.append("		xmlns:urwg=\"http://www.gridforum.org/2003/ur-wg\"\n");
@@ -159,10 +167,16 @@ public class JobUsageRecord extends Record
       // output.append("		xsi:schemaLocation=\"http://www.gridforum.org/2003/ur-wg file:/Users/bekah/Documents/GGF/URWG/urwg-schema.09.xsd\">\n");
       output.append("		xsi:schemaLocation=\"http://www.gridforum.org/2003/ur-wg file:///u:/OSG/urwg-schema.11.xsd\">\n");
 
+      boolean formd5_optional = formd5 && DatabaseMaintenance.UseJobUsageSiteName();
+      
       // output.append("UsageRecord: Db Id: " + RecordId.asXml(output));
-      if (RecordIdentity != null) RecordIdentity.asXml(output);
+      if (!formd5) { 
+          if (RecordIdentity != null) RecordIdentity.asXml(output);
+      }
       if (JobIdentity != null) JobIdentity.asXml(output);
-      if (UserIdentity != null) UserIdentity.asXml(output);
+      if (!formd5_optional) { 
+          if (UserIdentity != null) UserIdentity.asXml(output);
+      }
       if (JobName != null) JobName.asXml(output,"JobName");
       if (Charge != null) Charge.asXml(output,"Charge");
       if (Status != null) Status.asXml(output,"Status");
@@ -176,7 +190,9 @@ public class JobUsageRecord extends Record
       if (StartTime != null) StartTime.asXml(output,"StartTime");
       if (EndTime != null) EndTime.asXml(output,"EndTime");
       if (MachineName != null) MachineName.asXml(output,"MachineName");
-      if (SiteName != null) SiteName.asXml(output,"SiteName");
+      if (!formd5_optional) {
+         if (SiteName != null) SiteName.asXml(output,"SiteName");
+      }
       if (SubmitHost != null) SubmitHost.asXml(output,"SubmitHost");
       if (Queue != null) Queue.asXml(output,"Queue");
       if (ProjectName != null) ProjectName.asXml(output,"ProjectName");
@@ -193,28 +209,27 @@ public class JobUsageRecord extends Record
       if (ConsumableResource != null) listAsXml(output,"ConsumableResource", ConsumableResource);
       if (Resource != null) listAsXml(output,"Resource", Resource);
       if (ProbeName != null) ProbeName.asXml(output,"ProbeName");
-      if (Grid != null) Grid.asXml(output,"Grid");
+      if (!formd5_optional) {
+          if (Grid != null) Grid.asXml(output,"Grid");
+      }
       if (ResourceType != null) ResourceType.asXml(output,"Resource");
       if (ExtraXml != null) output.append(StringEscapeUtils.escapeXml(ExtraXml));
       if ((TDSet != null) && (TDSet.size() > 0)) getTransferDetails().asXml(output);
+      if (!formd5) {
+         if (Origins != null) originsAsXml(output);
+      }
       output.append("</JobUsageRecord>" + "\n");
       return output.toString();
    }
 
    public void AttachContent( org.hibernate.Session session ) throws Exception
    {
-
+      AttachOrigins( session );
    }
     
    public String getTableName()
    {
       return "JobUsageRecord";
-   }
-
-   public void setRecordIdentity(RecordIdentity n) { RecordIdentity = n; }
-   public RecordIdentity getRecordIdentity()
-   {
-      return RecordIdentity;
    }
 
    public void setUserIdentity(UserIdentity UserIdentity)
@@ -227,16 +242,6 @@ public class JobUsageRecord extends Record
       return UserIdentity;
    }
 
-   public void setRecordId(int RecordId)
-   {
-      this.RecordId = RecordId;
-   }
-
-   public int getRecordId()
-   {
-      return RecordId;
-   }
-
    public void setJobIdentity(JobIdentity JobIdentity)
    {
       this.JobIdentity = JobIdentity;
@@ -245,36 +250,6 @@ public class JobUsageRecord extends Record
    public JobIdentity getJobIdentity()
    {
       return JobIdentity;
-   }
-
-   public void addRawXml(String RawXml)
-   {
-      this.RawXml = this.RawXml + RawXml;
-   }
-
-   public void setRawXml(String RawXml)
-   {
-      this.RawXml = RawXml;
-   }
-
-   public String getRawXml()
-   {
-      return RawXml;
-   }
-
-   public void addExtraXml(String ExtraXml)
-   {
-      this.ExtraXml = this.ExtraXml + ExtraXml;
-   }
-
-   public void setExtraXml(String ExtraXml)
-   {
-      this.ExtraXml = ExtraXml;
-   }
-
-   public String getExtraXml()
-   {
-      return ExtraXml;
    }
 
    public void setJobName(StringElement JobName)
@@ -395,16 +370,6 @@ public class JobUsageRecord extends Record
    public StringElement getMachineName()
    {
       return MachineName;
-   }
-
-   public void setSiteName(StringElement SiteName)
-   {
-      this.SiteName = SiteName;
-   }
-
-   public StringElement getSiteName()
-   {
-      return SiteName;
    }
 
    public void setSubmitHost(StringElement SubmitHost)
@@ -557,8 +522,6 @@ public class JobUsageRecord extends Record
       return Resource;
    }
 
-   public Probe getProbe() { return Probe; }
-   public void setProbe(Probe p) { this.Probe = p; }
    public boolean setDuplicate(boolean b) 
    {
        // setDuplicate will increase the count (nRecords,nConnections,nDuplicates) for the probe
@@ -571,23 +534,6 @@ public class JobUsageRecord extends Record
        return b;
    }
 
-   public void setProbeName(StringElement ProbeName)
-   {
-      this.ProbeName = ProbeName;
-   }
-   public StringElement getProbeName()
-   {
-      return ProbeName;
-   }
-
-   public void setGrid(StringElement Grid)
-   {
-      this.Grid = Grid;
-   }
-   public StringElement getGrid()
-   {
-      return Grid;
-   }
 
    public void setResourceType(StringElement resourceType)
    {
@@ -614,53 +560,12 @@ public class JobUsageRecord extends Record
        return ServerDate;
    }
 
-   public Date getServerDate()
-   {
-      return ServerDate;
-   }
-
-   public void setServerDate(Date value)
-   {
-      ServerDate = value;
-   }
-
    public String computemd5() throws Exception
    {
-       // Zero out things we don't want checksums for
-       RecordIdentity tempRecordIdentity = getRecordIdentity();
-       setRecordIdentity(null);
-
-       UserIdentity tempUserIdentity = getUserIdentity();
-       StringElement tempSiteName = getSiteName();
-       StringElement tempGrid = getGrid();
-
-       if (!DatabaseMaintenance.UseJobUsageSiteName()) { 
-           setUserIdentity(null);
-           setSiteName(null);
-           setGrid(null);
-       }
-
        // Calculate the checksum
-       String md5key = Utils.md5key(asXML());
-//        Logging.debug("DEBUG: Calculated md5v2 value of " + md5key + " on following XML:\n" + asXML());
-
-       // Put things back
-       setRecordIdentity(tempRecordIdentity);
-       setSiteName(tempSiteName);
-       setUserIdentity(tempUserIdentity);
-       setGrid(tempGrid);
-
+       String md5key = Utils.md5key(asXML(true));
+//        Logging.debug("DEBUG: Calculated md5v2 value of " + md5key + " on following XML:\n" + asXML(true));
        return md5key;
-   }
-
-   public String getmd5()
-   {
-      return md5;
-   }
-
-   public void setmd5(String value)
-   {
-      md5 = value;
    }
 
    public String computeOldMd5() throws Exception

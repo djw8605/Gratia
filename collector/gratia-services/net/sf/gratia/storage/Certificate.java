@@ -8,38 +8,45 @@ import net.sf.gratia.util.Base64;
 public class Certificate implements Comparable
    {
       // Persistent members
-      private int fCertid;
+      private long fCertid;
       private String fPem;
       private int fState;
       
       final int kInvalid = 0;
       final int kValid = 1;
       final int kInvalidCertificate = 2;
-
+      
       // Transient members
       private X509Certificate fCert;
-
+      
       public static String GeneratePem(X509Certificate cert) throws java.security.cert.CertificateEncodingException {
          
          return new String("-----BEGIN CERTIFICATE-----\n" + Base64.encodeBytes(cert.getEncoded()) + "\n-----END CERTIFICATE-----\n");
          
       }
       
-		public Certificate()
-		{
+      public Certificate()
+      {
          fState = kInvalidCertificate;
-		}
+      }
       
-		public Certificate(Certificate cert)
-		{
+      public Certificate(Certificate cert)
+      {
          fCertid = cert.fCertid;
          fState = cert.fState;
          fPem = cert.fPem;
          fCert = cert.fCert;
-		}
+      }
       
-		public Certificate(X509Certificate cert) throws java.security.cert.CertificateException
-		{
+      public Certificate(String pem) 
+      {
+         fPem = pem;
+         fCert = null;
+         fState = kValid;
+      }
+      
+      public Certificate(X509Certificate cert) throws java.security.cert.CertificateException
+      {
          fPem = GeneratePem( cert );
          
          fCert = cert;
@@ -49,8 +56,8 @@ public class Certificate implements Comparable
          } catch (Exception e) {
             fState = kInvalidCertificate;
          }
-		}
-
+      }
+      
       public int compareTo(Object obj) {
          try {
             Certificate cmp = (Certificate) obj;
@@ -66,25 +73,25 @@ public class Certificate implements Comparable
          }
       }
       
-		public int getCertid() 
-		{
+      public long getCertid() 
+      {
          return fCertid;
-		}
+      }
       
-		public void setCertid(int value) 
-		{
+      public void setCertid(long value) 
+      {
          fCertid = value;
-		}
+      }
       
-		public String getPem() 
-		{
+      public String getPem() 
+      {
          return fPem;
-		}
+      }
       
-		public void setPem(String value) 
-		{
+      public void setPem(String value) 
+      {
          fPem = value;
-		}
+      }
       
       public X509Certificate getCert() throws java.security.cert.CertificateException
       {
@@ -96,15 +103,15 @@ public class Certificate implements Comparable
          return fCert;
       }
       
-		public boolean isValid() 
-		{
+      public boolean isValid() 
+      {
          return fState == 1;
-		}
+      }
       
-		public void setValid(boolean value) 
-		{
+      public void setValid(boolean value) 
+      {
          fState = value ? 1 : 0;
-		}
+      }
       
       public int getState() {
          return fState;
@@ -112,5 +119,12 @@ public class Certificate implements Comparable
       
       public void setState(int value) {
          fState = value;
+      }
+      
+      public void asXml(StringBuilder output) 
+      {
+         output.append("<Certificate>");
+         output.append(fPem);
+         output.append("</Certificate>\n");
       }
    }

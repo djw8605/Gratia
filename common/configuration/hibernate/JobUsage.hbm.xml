@@ -234,6 +234,12 @@
       <many-to-many column="TransferDetailsId" class="TransferDetails" />
    </set>
 
+   <list name="Origins" table="JobUsageRecord_Origin" cascade="persist">
+      <key column="dbid"/>
+      <list-index column="hop" base="1"/>
+      <many-to-many column="originid" class="Origin"/>
+   </list>
+
    <join table="JobUsageRecord_Meta">
       <key column="dbid"/>
 
@@ -282,6 +288,7 @@
       <property name="ExtraXml" type="text"/>
       <property name="RawXml" type="text" />
    </join>
+   
 
 </class>
 </hibernate-mapping>

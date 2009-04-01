@@ -20,7 +20,45 @@ public class RecordConverter {
         loaderList.add(new ProbeDetailsLoader());
     }
 
-    public ArrayList convert(String xml) throws Exception {
+   public Origin convertOrigin(String xml) throws Exception {
+      SAXReader saxReader = new SAXReader();
+      Document doc = null;
+      Element eroot = null;
+      Origin found = null;
+      
+      // Read the XML into a document for parsing
+      try {
+         doc = saxReader.read(new StringReader(xml));
+      }
+      catch (Exception e) {
+         Utils.GratiaError(e,"XML:" + "\n\n" + xml + "\n\n");
+         throw new Exception("Badly formed xml file");
+      }
+      try {
+         eroot = doc.getRootElement();
+         
+         found = OriginLoader.Read(eroot);
+         
+      }
+      catch (Exception e) {
+         Utils.GratiaError(e);
+         throw e;
+         // throw new Exception("loadURXmlFile saw an error at 2:" + e);
+      }
+      finally {
+         // Cleanup object instantiations
+         saxReader = null;
+         doc = null;
+         eroot = null;
+      }
+      
+      // The records array list is now populated with all the records
+      // found in the given XML file: return it to the caller.
+      return found;
+   }
+   
+   
+   public ArrayList convert(String xml) throws Exception {
         ArrayList foundRecords = new ArrayList(); 
         SAXReader saxReader = new SAXReader();
         Document doc = null;

@@ -48,7 +48,7 @@ public class CertificateTable extends HttpServlet
       String fError = "";
       static Pattern gRowPattern = Pattern.compile("<tr><form .*?</tr>",Pattern.MULTILINE + Pattern.DOTALL);
       StringBuffer buffer = new StringBuffer();
-      Hashtable<Integer,Certificate> fRepTable = null;
+      Hashtable<Long,Certificate> fRepTable = null;
       //
       // globals
       //
@@ -170,11 +170,11 @@ public class CertificateTable extends HttpServlet
          session.close();
          
          // Load hash table with entries
-         fRepTable = new Hashtable<Integer, Certificate>();
+         fRepTable = new Hashtable<Long, Certificate>();
          for ( Object listEntry : records ) {
             Certificate repEntry = (Certificate) listEntry;
             Logging.debug("CertificateTable: loaded entry " + repEntry.getCertid());
-            fRepTable.put(new Integer(repEntry.getCertid()),
+            fRepTable.put(new Long(repEntry.getCertid()),
                           repEntry);
          }
       }
@@ -238,11 +238,11 @@ public class CertificateTable extends HttpServlet
          try {
                         
             if (action.equals("Ban")) {
-               Integer certid = Integer.decode(fRequest.getParameter("certid"));
+               Long certid = Long.decode(fRequest.getParameter("certid"));
                Logging.debug("CertificateTable: Banning :" + certid);
                setState(certid,false);
             } else if (action.equals("Allow")) {
-               Integer certid = Integer.decode(fRequest.getParameter("certid"));
+               Long certid = Long.decode(fRequest.getParameter("certid"));
                Logging.debug("CertificateTable: Allowing :" + certid);
                setState(certid,true);
             } else if (action.equals("BanAll")) {
@@ -262,7 +262,7 @@ public class CertificateTable extends HttpServlet
          
       }
       
-      public void setState(Integer certid, boolean isValid) throws Exception
+      public void setState(Long certid, boolean isValid) throws Exception
       {
          Logging.debug("CertificateTable: changing state of certid" + certid + " to " + (isValid ? "Allowed" : "Banned"));
          
@@ -278,7 +278,7 @@ public class CertificateTable extends HttpServlet
                session.flush();
                tx.commit();
                session.close();
-               fRepTable.put( new Integer(updated.getCertid()), updated );
+               fRepTable.put( new Long(updated.getCertid()), updated );
             }
          } catch (Exception e) {
             throw e;
@@ -293,13 +293,13 @@ public class CertificateTable extends HttpServlet
             Session session = HibernateWrapper.getSession();
             Transaction tx = session.beginTransaction();
          
-            Hashtable<Integer,Certificate> updatedTable = new Hashtable<Integer,Certificate>();
+            Hashtable<Long,Certificate> updatedTable = new Hashtable<Long,Certificate>();
             Enumeration<Certificate> certEntries    = fRepTable.elements();
             while (certEntries.hasMoreElements()) {
                Certificate cert = certEntries.nextElement();
                Certificate updated = new Certificate(cert);
                updated.setValid(isValid);
-               updatedTable.put( new Integer(updated.getCertid()), updated );
+               updatedTable.put( new Long(updated.getCertid()), updated );
                session.saveOrUpdate( updated );
             }
             session.flush();

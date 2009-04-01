@@ -29,7 +29,7 @@ import net.sf.gratia.util.Logging;
  * 
  */
 
-public class MetricRecordLoader implements RecordLoader {
+public class MetricRecordLoader extends RecordLoader {
     public ArrayList ReadRecords(Element eroot) throws Exception {
         ArrayList records = new ArrayList();
         if (eroot.getName() == "MetricRecord") {
@@ -66,10 +66,7 @@ public class MetricRecordLoader implements RecordLoader {
             Element sub = (Element)i.next();
             // System.out.println("" + sub.GetName())
             try {
-                if (sub.getName().equalsIgnoreCase("RecordIdentity")) {
-                    SetRecordIdentity(job, sub);
-                }
-                else if (sub.getName().equalsIgnoreCase("MetricName")) {
+                if (sub.getName().equalsIgnoreCase("MetricName")) {
                     SetMetricName(job, sub);
                 }
                 else if (sub.getName().equalsIgnoreCase("MetricType")) {
@@ -108,17 +105,8 @@ public class MetricRecordLoader implements RecordLoader {
                 else if (sub.getName().equalsIgnoreCase("HostName")) {
                     SetHostName(job, sub);
                 }
-                else if (sub.getName() == "SiteName") {
-                    SetSiteName(job, sub);
-                }
-                else if (sub.getName() == "ProbeName") {
-                    SetProbeName(job, sub);
-                }
-                else if (sub.getName() == "Grid") {
-                    SetGrid(job, sub);
-                }
                 else {
-                    job.addExtraXml(sub.asXML());
+                    ReadCommonRecord(job,sub);
                 }
             }
             catch (Exception e) {
@@ -132,33 +120,6 @@ public class MetricRecordLoader implements RecordLoader {
             }
         }
         return job;
-    }
-
-    public static void SetRecordIdentity(MetricRecord job, Element element)
-        throws Exception {
-        RecordIdentity id = job.getRecordIdentity();
-        if (id != null /* record identity already set */) {
-            Utils.GratiaError("SetRecordIdentity", "parsing",
-                              " found a second RecordIdentity field in the xml file",
-                              false);
-            return;
-        }
-        for (Iterator i = element.attributeIterator(); i.hasNext(); ) {
-            Attribute a = (Attribute)i.next();
-            if (a.getName().equalsIgnoreCase("recordId")) {
-                if (id == null)
-                    id = new RecordIdentity();
-                id.setRecordId(a.getValue());
-            }
-            else if (a.getName().equalsIgnoreCase("createTime")) {
-                if (id == null)
-                    id = new RecordIdentity();
-                DateElement createTime = new DateElement();
-                createTime.setValue(a.getValue());
-                id.setCreateTime(createTime);
-            }
-        }
-        if (id != null) job.setRecordIdentity(id);
     }
 
     public static void SetMetricName(MetricRecord job, Element element)
@@ -408,77 +369,6 @@ public class MetricRecordLoader implements RecordLoader {
         }
         el.setValue(element.getText());
         job.setHostName(el);
-    }
-
-    public static void SetSiteName(MetricRecord job, Element element)
-        throws Exception {
-        StringElement el = job.getSiteName();
-        if (el != null /* job identity already set */) {
-            Utils.GratiaError("SetSiteName", "parsing",
-                              " found a second SiteName field in the xml file", false);
-            return;
-        }
-        el = new StringElement();
-        for (Iterator i = element.attributeIterator(); i.hasNext(); ) {
-            Attribute a = (Attribute)i.next();
-            if (a.getName().equalsIgnoreCase("description")) {
-                el.setDescription(a.getValue());
-            }
-        }
-        el.setValue(element.getText());
-        job.setSiteName(el);
-    }
-
-    public static void SetProbeName(MetricRecord job, Element element) throws
-        Exception {
-        StringElement el = job.getProbeName();
-        if (el == null) {
-            el = new StringElement();
-        }
-        for (Iterator i = element.attributeIterator(); i.hasNext(); ) {
-            Attribute a = (Attribute)i.next();
-            if (a.getName() == "description") {
-                String desc = el.getDescription();
-                if (desc == null) desc = "";
-                else desc = desc + " ; ";
-                desc = desc + a.getValue();
-                el.setDescription(desc);
-            }
-        }
-        String val = el.getValue();
-        if (val == null) val = "";
-        else val = val + " ; ";
-        val = val + element.getText();
-        el.setValue(val);
-        job.setProbeName(el);
-    }
-
-    public static void SetGrid(MetricRecord job, Element element)
-        throws Exception {
-        StringElement el = job.getGrid();
-        if (el == null) {
-            el = new StringElement();
-        }
-        for (Iterator i = element.attributeIterator(); i.hasNext();) {
-            Attribute a = (Attribute) i.next();
-            if (a.getName() == "description") {
-                String desc = el.getDescription();
-                if (desc == null)
-                    desc = "";
-                else
-                    desc = desc + " ; ";
-                desc = desc + a.getValue();
-                el.setDescription(desc);
-            }
-        }
-        String val = el.getValue();
-        if (val == null)
-            val = "";
-        else
-            val = val + " ; ";
-        val = val + element.getText();
-        el.setValue(val);
-        job.setGrid(el);
     }
 
     public MetricRecordLoader() {

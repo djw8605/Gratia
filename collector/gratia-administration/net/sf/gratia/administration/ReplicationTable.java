@@ -661,31 +661,49 @@ public class ReplicationTable extends HttpServlet {
       
       String target = ((repEntry.getsecurity() == 1) ? repEntry.getsecureconnection() :
                        repEntry.getopenconnection()) + "/gratia-servlets/rmi";
-      String response = "";
-      Post post = new Post(target, "update", "xxx");
-      try {
-         response = post.send(true);
-      }
-      catch (Exception e) {
-         fMessage = "Error for " + target + " : " + e;
-         return;
-      }
-      if (!post.success) {
-         fMessage = "Error for " + target + " : " + post.errorMsg;
-         return;
-      }
-      try {
-         String[] results = split(response, ":");
-         if (!results[0].equals("OK")) {
-            fMessage = "Error for " + target + " : " + response;
+      
+      if (target.startsWith("file:")) {
+         target = ((repEntry.getsecurity() == 1) ? repEntry.getsecureconnection() :
+                   repEntry.getopenconnection());
+         
+         String path = target.substring(5); // Skip the prefix.
+         
+         File dir = new File(path);
+         if (!dir.isDirectory()) {
+            fMessage = "Test Failed! " + dir + " is not a directory.";
+         } else if (!dir.canWrite()) {
+            fMessage = "Test Failed! " + dir + " is not writeable.";
+         } else {
+            fMessage = "Test Succeeded!!";
+         }
+
+      } else {
+         String response = "";
+         Post post = new Post(target, "update", "xxx");
+         try {
+            response = post.send(true);
+         }
+         catch (Exception e) {
+            fMessage = "Error for " + target + " : " + e;
             return;
          }
-      } 
-      catch (Exception e) {
-         fMessage = "Error for " + target + " : " + e;
-         return;
+         if (!post.success) {
+            fMessage = "Error for " + target + " : " + post.errorMsg;
+            return;
+         }
+         try {
+            String[] results = split(response, ":");
+            if (!results[0].equals("OK")) {
+               fMessage = "Error for " + target + " : " + response;
+               return;
+            }
+         } 
+         catch (Exception e) {
+            fMessage = "Error for " + target + " : " + e;
+            return;
+         }
+         fMessage = "Test Succeeded !!";
       }
-      fMessage = "Test Succeeded !!";
    }
    
    void update(Replication repEntry) {

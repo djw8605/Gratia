@@ -58,7 +58,7 @@ public class JMSProxyImpl extends UnicastRemoteObject implements JMSProxy {
       }
       
       try {
-         File file = File.createTempFile("job", "xml", new File(queues[iq]));
+         File file = File.createTempFile("job", ".xml", new File(queues[iq]));
          String filename = file.getPath();
          XP.save(filename, xml);
          return true;
@@ -144,8 +144,8 @@ public class JMSProxyImpl extends UnicastRemoteObject implements JMSProxy {
       return collectorService.checksumUpgradeStatus();
    }
    
-   public Boolean checkCertificate(java.security.cert.X509Certificate certs[]) throws RemoteException {
-      return collectorService.checkCertificate(certs);
+   public String checkConnection(java.security.cert.X509Certificate certs[], String client, String sender) throws RemoteException, AccessException {
+      return collectorService.checkConnection(certs,client,sender);
    }
    
 }
