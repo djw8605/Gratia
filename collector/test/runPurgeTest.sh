@@ -145,7 +145,7 @@ function wait_for_server_shutdown {
 
    alive=1
    try=0
-   while [ ${alive} -eq 1 -a ${try} -lt 10 ]; do   \
+   while [ ${alive} -eq 1 -a ${try} -lt 10 ]; do
       echo "Waiting for server shutdown"
       alive=`ssh ${webhost} netstat -l | grep ${http_port} | wc -l`
       try=`expr ${try} + 1`
@@ -456,8 +456,10 @@ EOF
 function upload_war()
 {
     stop_server
-    ssh -l root ${webhost} rm -rf ${tomcatpwd}/webapps/$WAR\*
-    scp ../../target/$WAR.war root@${webhost}:${tomcatpwd}/webapps
+    for warfile in $WAR; do 
+      ssh -l root ${webhost} rm -rf ${tomcatpwd}/webapps/$warfile\*
+      scp ../../target/$warfile.war root@${webhost}:${tomcatpwd}/webapps
+    done
     start_server
 }
 
@@ -468,7 +470,7 @@ while getopts :tshcfdln:w:p: OPT; do
             tomcatpwd=/data/tomcat-$OPTARG
             ;;
         w)  do_war=1
-            WAR=$OPTARG
+            WAR="$WAR $OPTARG"
             ;;
         c)  do_collector=1
             ;;
