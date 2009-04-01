@@ -36,7 +36,8 @@ sub process_data {
       $fh = FileHandle->new("wget -q -O - \"$data_source\" 2>/dev/null|") or 
         die "Unable to open wget pipe for $data_source";
     } else {
-      $fh = FileHandle->new("$data_source");
+      $fh = FileHandle->new("$data_source") or
+        die "Unable to open \"$data_source\"";
     }
     my $data_content = join("", <$fh>);
     if ($data_content =~ m&^\s*<&s) { # XML
@@ -97,6 +98,17 @@ sub processXmlVoContacts {
       $this_vo->{reporting_groups}->{$vo_reporting_name} = {}
         unless $this_vo->{reporting_groups}->{$vo_reporting_name};
       my $this_reporting_group = $this_vo->{reporting_groups}->{$vo_reporting_name};
+      my $reporting_contacts;
+      # If the reporting name is the same as the VO name (almost) then
+      # this is the primary contact list for this VO.
+      if ($vo_name =~ m&^(?:us)?\Q$vo_reporting_name\E$&i or
+          $vo_reporting_name =~ m&^(?:us)?\Q$vo_name\E$&i) {
+        $reporting_contacts = $this_vo->{reporting_contacts};
+      } else {
+        $this_reporting_group->{reporting_contacts} = []
+          unless $this_reporting_group->{reporting_contacts};
+        $reporting_contacts = $this_reporting_group->{reporting_contacts};
+      }
       $this_reporting_group->{FQAN} = [] unless $this_reporting_group->{FQAN};
       my $fqan_nodes = $reporting_group_node->findnodes('vo_fqan_group/fqan');
       my %fqan_node_set  = ( (map { $_?($_ => 1):(); } @{$this_reporting_group->{FQAN}}),
@@ -108,7 +120,7 @@ sub processXmlVoContacts {
           || $reporting_contact->findvalue('alt_email'); # Contact's email
         next unless $primary_email;
         my $person = {};
-        push @{$this_vo->{reporting_contacts}}, $primary_email;
+        push @{$reporting_contacts}, $primary_email;
         $person->{vo_reporting_names} = [ ] unless $person->{vo_reporting_names};
         push @{$person->{vo_reporting_names}}, "$vo_name/$vo_reporting_name";
         foreach my $attribute qw(first_name middle_name last_name) { # Name info

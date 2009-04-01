@@ -110,6 +110,28 @@ foreach my $dat_file (@ARGV) {
 $master_vo_list->{"all-vos-test"} = [ @test_addresses ]
   unless exists $master_vo_list->{"all-vos-test"};
 
+foreach my $primary_email (sort keys %$people_data) {
+  my $person = $people_data->{$primary_email};
+  next unless $person->{reporting_names};
+  my $vo_rep_name_reports = {};
+  foreach my $vo_rep_name (@{$person->{reporting_names}}) {
+    my ($vo, $reporting_name) = ($vo_rep_name =~ m&^([^:]+):(.*)$&);
+    $vo_rep_name_reports->{$vo} = [] unless $vo_rep_name_reports->{$vo};
+    push @{$vo_rep_name_reports->{$vo}}, $reporting_name;
+  }
+  foreach my $vo (sort keys %$vo_rep_name_reports) {
+    my @command =  ("$osg_users_script", "-v", "$vo", "--aux-db-type=none", "-s", "-V");
+    push @command, map { ( "-D", $_) } @{$options->{"data-source"}} if $options->{"data-source"};
+    if ($options->{monthly}) {
+      push @command, "-t", "month";
+    } elsif ($options->{yearly}) {
+      push @command, "-t", "year";
+    }
+    push @command, map { ("--reporting-name", "$vo:$_") } @{$vo_rep_name_reports->{$vo}};
+    $reporter->invoke(\@command, [ "-m", $person->{contact_string} ]);
+  }
+}
+
 foreach my $vo (sort keys %$master_vo_list) {
   next if (lc $vo eq "all" or lc $vo eq "all-vos-test");
   my @command = ("$osg_users_script", "-v", "$vo", "--aux-db-type=none", "-s", "-V");

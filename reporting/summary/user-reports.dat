@@ -18,7 +18,12 @@
    users => [ 'ALL' ],
    vos => [ 'ALL' ],
    all_reports => { site => 1,
-                    vo => 1 }
+                    vo => 1 },
+   reporting_names => [ qw(fermilab:miniboone
+                           fermilab:minos
+                           fermilab:accelerator
+                           fermilab:ktev
+                           fermilab:minerva) ]
   },
   'maltunay@fnal.gov' =>
   {
