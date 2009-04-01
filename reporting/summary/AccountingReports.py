@@ -1812,7 +1812,10 @@ def SimpleRange(what, range_end = datetime.date.today(),
         key = site + " " + vo
         njobs= string.atoi( val[2] )
         wall = string.atof( val[3] )
-        cpu = string.atof( val[4] )
+        if ( val[4] == "NULL"):
+           cpu = 0
+        else:
+           cpu = string.atof( val[4] )
         endtime = val[5]
         if printValues.has_key(key):
             printValues[key][0] += njobs
