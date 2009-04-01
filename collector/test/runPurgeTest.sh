@@ -201,6 +201,7 @@ function reset_collector {
              db_schema => "${schema_name}",
              "properties.attributes" =>
              {
+              "service.security.level" => "1",
               "service.lifetime.JobUsageRecord" => "3 Months",
               "service.lifetime.JobUsageRecord.RawXML" => "1 Month",
               "service.lifetime.MetricRecord" => "36 months",
