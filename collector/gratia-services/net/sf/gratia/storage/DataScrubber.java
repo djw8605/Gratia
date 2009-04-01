@@ -62,7 +62,7 @@ public class DataScrubber {
             Transaction tx = session.beginTransaction();
             try {
                 org.hibernate.SQLQuery query = session.createSQLQuery( deletecmd );
-                Logging.debug("DataScrubber: About to query " + query.getQueryString());
+                Logging.fine("DataScrubber: About to query " + query.getQueryString());
 
                 query.setString( "dateLimit", limit );
 
@@ -124,7 +124,7 @@ public class DataScrubber {
             Transaction tx = session.beginTransaction();
             try {
                 org.hibernate.Query query = session.createQuery( deletecmd );
-                Logging.debug("DataScrubber: About to query " + query.getQueryString());
+                Logging.fine("DataScrubber: About to query " + query.getQueryString());
 
                 query.setString( "dateLimit", limit );
                 query.setMaxResults(batchSize);
@@ -270,7 +270,8 @@ public class DataScrubber {
                             "ConsumableResource",
                             "Resource",
                             "JobUsageRecord_Xml",
-                            "JobUsageRecord_Meta"
+                            "JobUsageRecord_Meta",
+                            "JobUsageRecord_Origin"
                         };
 
                         long n = 0;
@@ -326,7 +327,13 @@ public class DataScrubber {
             // "dbid" which causes an ambiguity with MetricRecord_Meta
             // and MetricRecord_Xml. This means that we're constrained
             // to deleting all out-of-date MetricRecords at once.
+           
+            String sqlDelete = "delete from MetricRecord_Origin where dbid in " +
+                                    "(select R.dbid from MetricRecord R, MetricRecord_Meta M where R.dbid = M.dbid " +
+                                    "and R.Timestamp < :dateLimit and M.ServerDate < :dateLimit)"; 
 
+            nrecords = ExecuteSQL(sqlDelete, limit, "Origin of Metric records");
+           
             String hqlDelete = "delete MetricRecord where Timestamp.Value < :dateLimit and ServerDate < :dateLimit";
             nrecords = Execute(hqlDelete, limit, "Metric records");
 
