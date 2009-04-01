@@ -66,6 +66,11 @@
       <property name="Value" column="HostName" />
     </component>
 
+    <list name="Origins" table="MetricRecord_Origin" cascade="persist">
+       <key column="dbid"/>
+       <list-index column="hop" base="1"/>
+       <many-to-many column="originid" class="Origin"/>
+    </list>
 
     <join table="MetricRecord_Meta">
       <key column="dbid"/>

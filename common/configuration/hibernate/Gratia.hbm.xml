@@ -205,6 +205,12 @@
        <many-to-many column="softid" class="Software"/>
     </set>
 
+    <list name="Origins" table="ProbeDetails_Origin" cascade="persist">
+       <key column="dbid"/>
+       <list-index column="hop" base="1"/>
+       <many-to-many column="originid" class="Origin"/>
+    </list>
+
     <join table="ProbeDetails_Meta">
       <key column="dbid"/>
 
