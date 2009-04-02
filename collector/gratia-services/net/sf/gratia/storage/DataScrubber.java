@@ -62,7 +62,7 @@ public class DataScrubber {
             Transaction tx = session.beginTransaction();
             try {
                 org.hibernate.SQLQuery query = session.createSQLQuery( deletecmd );
-                Logging.fine("DataScrubber: About to query " + query.getQueryString());
+                Logging.debug("DataScrubber: About to query " + query.getQueryString());
 
                 query.setString( "dateLimit", limit );
 
@@ -124,7 +124,7 @@ public class DataScrubber {
             Transaction tx = session.beginTransaction();
             try {
                 org.hibernate.Query query = session.createQuery( deletecmd );
-                Logging.fine("DataScrubber: About to query " + query.getQueryString());
+                Logging.debug("DataScrubber: About to query " + query.getQueryString());
 
                 query.setString( "dateLimit", limit );
                 query.setMaxResults(batchSize);
@@ -152,7 +152,7 @@ public class DataScrubber {
         try {
 
             org.hibernate.Query query = session.createQuery( listcmd );
-            Logging.fine("DataScrubber: About to query " + query.getQueryString());
+            Logging.debug("DataScrubber: About to query " + query.getQueryString());
 
             query.setString( "dateLimit", datelimit );
             query.setMaxResults( batchSize );
