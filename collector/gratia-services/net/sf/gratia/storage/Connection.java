@@ -176,6 +176,8 @@ public class Connection implements AttachableXmlElement
          output = output + "Sender: " + fSender + "\n";
          output = output + "Server: " + getServerName() + "\n";
          output = output + "Certificate: " + fCertificate + "\n";
+         output = output + "FirstSeen: " + fFirstSeen + "\n";
+         output = output + "LastSeen: " + fLastSeen + "\n";
          return output;
       }
       
