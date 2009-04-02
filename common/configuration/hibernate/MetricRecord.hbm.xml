@@ -66,7 +66,7 @@
       <property name="Value" column="HostName" />
     </component>
 
-    <list name="Origins" table="MetricRecord_Origin" cascade="persist">
+    <list name="Origins" table="MetricRecord_Origin" cascade="all">
        <key column="dbid"/>
        <list-index column="hop" base="1"/>
        <many-to-many column="originid" class="Origin"/>
