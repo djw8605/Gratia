@@ -556,6 +556,9 @@ public class ListenerThread extends Thread {
                         }
                         synchronized (lock) {
                             current.AttachContent(session);
+                            // Reduce contention on the attached objects (in particular Connection)
+                            // to avoid DB deadlock.
+                            session.flush();
                         }
 
                         String incomingxml = current.getRawXml();
@@ -584,7 +587,9 @@ public class ListenerThread extends Thread {
                         }
                         // Logging.log(ident + ": After Hibernate Save");
                         // Logging.log(ident + ": Before Transaction Commit");
+                        //Logging.warning(ident + rId + ": Before flush");
                         session.flush();
+                        //Logging.warning(ident + rId + ": After flush");
                         tx.commit();
                         session.close();
                         // Logging.log(ident + ": After Transaction Commit");
