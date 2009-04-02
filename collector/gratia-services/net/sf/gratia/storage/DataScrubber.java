@@ -356,6 +356,45 @@ public class DataScrubber {
         return tableCleanupHelper("DupRecord", "dupid", "error", "eventdate");
     }
 
+    public long Origin() {
+       final String [] types = {
+          "JobUsageRecord",
+          "MetricRecord",
+          "ProbeDetails" 
+       };
+       
+       // Build the command string
+       String sqlDelete = "delete from Origin using Origin "; 
+       String whereClause = "";
+       for (int r=0; r < types.length; ++r) {
+          sqlDelete = sqlDelete + "left outer join "+types[r]+"_Origin on "+types[r]+"_Origin.originid = Origin.originid ";
+          if (r==0) {
+             whereClause = types[r]+"_Origin.dbid is null ";
+          } else {
+             whereClause = whereClause + "and "+types[r]+"_Origin.dbid is null ";
+          }
+       }
+       sqlDelete = sqlDelete + " where " + whereClause;
+       
+       Session session =  HibernateWrapper.getSession();
+       Transaction tx = session.beginTransaction();
+       long result = 0;
+       try {
+          Logging.debug("DataScrubber: About to " + sqlDelete);
+          org.hibernate.SQLQuery query = session.createSQLQuery( sqlDelete );
+       
+          result = query.executeUpdate();
+          tx.commit();
+       }
+       catch (Exception e) {
+          tx.rollback();
+          Logging.warning("DataScrubber: error in deleting Origins!", e);
+       }
+       if (session!=null) session.close();
+       return result;
+       
+    }
+   
     protected long tableCleanupHelper(String tableName,
                                       String idAttribute,
                                       String qualifierColumn,

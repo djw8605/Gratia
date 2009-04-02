@@ -30,7 +30,7 @@ public class DataHousekeepingService extends Thread {
     private DataScrubber housekeeper = new DataScrubber();
 
     public enum HousekeepingAction { 
-        ALL, JOBUSAGEXML, METRICXML, METRICRECORD, JOBUSAGERECORD, DUPRECORD, TRACE, NONE;
+        ALL, JOBUSAGEXML, METRICXML, METRICRECORD, JOBUSAGERECORD, DUPRECORD, TRACE, ORIGIN, NONE;
         private Lock l = new ReentrantLock();
         public Boolean tryLock() {
             return l.tryLock();
@@ -237,6 +237,17 @@ public class DataHousekeepingService extends Thread {
                 finally {
                     action.unlock();
                 }
+            }
+            break;
+        case ORIGIN:
+            if (action.tryLock()) {
+               try {
+                  housekeeper.Origin();
+                  result = true; // OK
+               }
+               finally {
+                  action.unlock();
+               }
             }
             break;
         default:
