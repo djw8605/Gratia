@@ -796,14 +796,34 @@ public class CollectorService implements ServletContextListener {
             session = HibernateWrapper.getSession();
   
             net.sf.gratia.storage.Connection gr_conn = new net.sf.gratia.storage.Connection(client,sender,null);
+            Transaction tx = session.beginTransaction();
             try {
-               Transaction tx = session.beginTransaction();
                gr_conn = gr_conn.attach( session );
+               Logging.warning("Before flush");
                session.flush();
                tx.commit();
+            } catch (org.hibernate.exception.LockAcquisitionException e) {
+               Logging.warning("checkCertificate: Lock acquisition exception.  Trying a second time.");
+               try {
+                  // Try a second time after a little sleep.
+                  Thread.sleep(300);
+                  
+                  session.flush();
+                  tx.commit();
+                
+               } catch (Exception sub_e) {
+                  
+                  Logging.warning("checkCertificate: error during 2nd attempt at storing or retrieving connection object in: ",sub_e);
+                  sub_e.printStackTrace();
+                  
+                  tx.rollback();
+               } 
             } catch (Exception e) {
-               Logging.warning("checkCertificate: error when storing or retrieving connection object: ",e);
+
+               Logging.warning("checkCertificate: error when storing or retrieving connection object in: ",e);
                e.printStackTrace();
+
+               tx.rollback();
             }
 
             session.close();
@@ -818,9 +838,12 @@ public class CollectorService implements ServletContextListener {
       } else {
          
          Session session = null;
-         session = HibernateWrapper.getSession();
+
          
          for(int i=0; i< certs.length; ++i) {
+            if (session == null) {
+               session = HibernateWrapper.getSession();
+            }
             try {
                String pem =  net.sf.gratia.storage.Certificate.GeneratePem(certs[i]);
             
@@ -829,9 +852,11 @@ public class CollectorService implements ServletContextListener {
                if (localcert == null) {
                   // Not registered yet.
                   
+                  Transaction tx = session.beginTransaction();
                   try {
                      localcert = new net.sf.gratia.storage.Certificate( certs[i] );
-                     Transaction tx = session.beginTransaction();
+                     
+
                      session.saveOrUpdate( localcert );
                      session.flush();
                      tx.commit();
@@ -839,6 +864,11 @@ public class CollectorService implements ServletContextListener {
                   } catch (java.security.cert.CertificateException e) {
                      Logging.warning("checkCertificate: Error when creating certificate object: ",e);
                   } catch (Exception e) {
+                     // Must close session!
+                     tx.rollback();
+                     session.close();
+                     session = null;
+
                      Logging.warning("checkCertificate: error when storing certificate object: ",e);
                   }
                }
@@ -849,13 +879,21 @@ public class CollectorService implements ServletContextListener {
                } else if ( needConnectionTracking() ) {
                   // Connection Tracking of has been requested
                   
+                  if (session == null) {
+                     session = HibernateWrapper.getSession();
+                  }
                   net.sf.gratia.storage.Connection gr_conn = new net.sf.gratia.storage.Connection(client,sender,localcert);
+                  Transaction tx = session.beginTransaction();
                   try {
-                     Transaction tx = session.beginTransaction();
                      gr_conn = gr_conn.attach( session );
                      session.flush();
                      tx.commit();
                   } catch (Exception e) {
+                     // Must close session!
+                     tx.rollback();
+                     session.close();
+                     session = null;
+                     
                      Logging.warning("checkCertificate: error when storing or retrieving connection object: ",e);
                   }
                   from.setConnection(gr_conn);
@@ -872,7 +910,9 @@ public class CollectorService implements ServletContextListener {
                Logging.warning("exception in checkCertificate: "+e);
             }            
          }
-         session.close();
+         if (session != null) {
+            session.close();
+         }
       }
       if (result.length()==0) {
          throw new AccessException("Failure during the check of the Certificate or the Gratia Connection.");
