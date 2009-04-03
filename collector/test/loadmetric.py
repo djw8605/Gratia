@@ -42,4 +42,4 @@ if __name__ == '__main__':
         sendRecords(400,"LFC-READ",end)
 
         # Send a few record with ExtraXml
-        sendRecords(12,"MetricXml-Test",end,"<RealJobName>testing extra xml</RealJobName>");
+        sendRecords(17,"MetricXml-Test",end,"<RealJobName>testing extra xml</RealJobName>");

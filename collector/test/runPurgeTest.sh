@@ -361,7 +361,10 @@ function check_result {
    msg=$2
    stem=$1
 
-   diff $1.ref $1.validate
+   # Number of days in the last 3 months:
+   days=`expr \( 3672 + \`date +%s\` - \`date --date='3 month ago' +%s\` \) / 3600 / 24 `
+
+   diff $1.$days.ref $1.validate
    res=$?
    if [ ${res} -eq 0 ]; then
       echo ${msg} is OK.
