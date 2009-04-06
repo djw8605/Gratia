@@ -449,12 +449,19 @@ use ${schema_name};
 select count(*),(ExtraXml!="" and not isnull(ExtraXml)) as hasExtraXml from MetricRecord_Xml group by hasExtraXml
 EOF
 
+   echo "Check Origin"
+   mysql -h ${dbhost} --port=${dbport} -u gratia --password=${update_password} > origin.validate 2>&1 <<EOF 
+use ${schema_name};
+select count(*) from Origin;
+EOF
+
   check_result duplicate "Duplicate"
   check_result jobsummary "JobUsageRecord Summary Table"
   check_result jobusagerecord "JobUsageRecord"
   check_result jobusagerecordxml "JobUsageRecord's RawXml"
   check_result metricrecord "MetricRecord"
-  check_result metricrecordxml "MetricRecord's RawXml" 
+  check_result metricrecordxml "MetricRecord's RawXml"
+  check_result origin "Origin records"
 }
 
 function upload_war()
