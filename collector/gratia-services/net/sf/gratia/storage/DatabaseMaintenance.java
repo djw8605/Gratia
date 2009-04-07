@@ -107,11 +107,17 @@ public class DatabaseMaintenance {
     public void AddIndex(String table, Boolean unique, String name,
                          String content) throws Exception {
 
-        AddIndex(table,unique,name,content,false);
+        AddIndex(table,unique,name,content,false, null);
     }
 
     public void AddIndex(String table, Boolean unique, String name,
                          String content, Boolean avoidDuplicateIndex) throws Exception {
+
+       AddIndex(table,unique,name,content,avoidDuplicateIndex, null);
+    }
+       
+   public void AddIndex(String table, Boolean unique, String name,
+                            String content, Boolean avoidDuplicateIndex, String prefix) throws Exception {
         Statement statement;
         ResultSet resultSet;
 
@@ -122,7 +128,10 @@ public class DatabaseMaintenance {
 
         String cmd = "alter table " + table + " add ";
         if (unique) {
-            cmd = cmd + "unique ";
+           cmd = cmd + "unique ";
+        }
+        if (prefix != null) {
+           content = content + "(" + prefix + ")";
         }
         cmd = cmd + "index " + name + "(" + content + ")";
         try {
@@ -154,7 +163,7 @@ public class DatabaseMaintenance {
             statement.close();
 
         } catch (Exception e) {
-            Logging.log("Command: Error: " + cmd + " : " + e);
+            Logging.warning("Command: Error: " + cmd + " : " + e);
             throw e;
         }
     }
@@ -180,7 +189,7 @@ public class DatabaseMaintenance {
             resultSet.close();
             statement.close();
         } catch (Exception e) {
-            Logging.log("Command: Error: " + cmd + " : " + e);
+            Logging.warning("Command: Error: " + cmd + " : " + e);
             throw e;
         }
     }
@@ -199,6 +208,9 @@ public class DatabaseMaintenance {
         catch (Exception e) {
             // Ignore
         }
+       
+        // Indices for Connection and Certificate tracking
+        AddIndex("Certificate",true,"pem01","pem",true,"128");
 
         //
         // the following were added to get rid of unused indexes
@@ -1609,6 +1621,7 @@ public class DatabaseMaintenance {
             " and index_name != 'md5v2'";
         Session session = HibernateWrapper.getSession();
         Boolean result = false;
+        Boolean noindex = false;
         try {
             SQLQuery q = session.createSQLQuery(checksum_check);
             List results_list = q.list();
@@ -1623,7 +1636,7 @@ public class DatabaseMaintenance {
                 }
             } else {
                 Logging.debug("checkMd5v2Unique: no index found on column md5v2 in JobUsageRecord_Meta.");
-                throw new Exception("No md5v2 index");
+                noindex = true;
             }
             session.close();
         }
@@ -1631,6 +1644,9 @@ public class DatabaseMaintenance {
             Logging.warning("checkMd5v2Unique: attempt to check for index on md5v2 in JobUsageRecord_Meta failed!");
             if (session != null && session.isOpen()) session.close();
             throw e;
+        }
+        if (noindex) {
+           throw new Exception("No md5v2 index");
         }
         return result;
     }
