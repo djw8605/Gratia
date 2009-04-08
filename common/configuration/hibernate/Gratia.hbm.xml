@@ -106,10 +106,11 @@
     <id name="cid" column="cid" type="long">
       <generator class="native"/>
     </id>
-    <property name="Client" column="client"/>
+    <property name="SenderHost" column="senderhost"/>
     <property name="Sender" column="sender"/>
     <many-to-one name="Certificate" column="certid" not-null="false"/>
-    <many-to-one name="Server" column="servercid" not-null="false"/>
+    <!-- many-to-one name="Collector" column="collid" not-null="false"/ -->
+    <property name="CollectorName" column="collector" />
     <property name="md5" column="md5" index="index12" unique="true"/>
 
     <property name="FirstSeen" column="FirstSeen" type="timestamp"/>

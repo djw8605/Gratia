@@ -28,10 +28,10 @@ public class Connection implements AttachableXmlElement
       private String md5;
 
       // XML portion.
-      private String fClient;
-      private String fSender;
+      private String fSenderHost;  // Usually the senderHost ip address. 
+      private String fSender;      // the probe name or collector name
       private Certificate fCertificate;
-      private Connection fServer;
+      private Collector fCollector;  // The name of the receiving collector.
       private Date fFirstSeen; // Local to this collector
       private Date fLastSeen;  // Local to this collector
 
@@ -44,9 +44,9 @@ public class Connection implements AttachableXmlElement
          fState = kValid;
       }
 
-      public Connection(String client, String sender, Certificate cert)
+      public Connection(String senderHost, String sender, Certificate cert)
       {
-         fClient = client;
+         fSenderHost = senderHost;
          fSender = sender;
          fCertificate = cert;
          fState = kValid;
@@ -82,10 +82,10 @@ public class Connection implements AttachableXmlElement
          
          final Connection conn = (Connection) obj;
          
-         if ( !check( getClient(), conn.getClient()) ) return false;
+         if ( !check( getSenderHost(), conn.getSenderHost()) ) return false;
          if ( !check( getSender(), conn.getSender()) ) return false;
          if ( !check( getCertificate(), conn.getCertificate()) ) return false;
-         if ( !check( getServer(), conn.getServer()) ) return false;
+         if ( !check( getCollector(), conn.getCollector()) ) return false;
          
          return true;
       }
@@ -105,8 +105,8 @@ public class Connection implements AttachableXmlElement
       public void setcid(long id) { cid = id; }
       public long getcid() { return cid; }
       
-      public void setClient(String val) { fClient = val; }
-      public String getClient() { return fClient; }
+      public void setSenderHost(String val) { fSenderHost = val; }
+      public String getSenderHost() { return fSenderHost; }
       
       public void setSender(String val) { fSender = val; }
       public String getSender() { return fSender; }
@@ -114,11 +114,18 @@ public class Connection implements AttachableXmlElement
       public void setCertificate(Certificate val) { fCertificate = val; }
       public Certificate getCertificate() { return fCertificate; }
       
-      public void setServer(Connection val) { fServer = val; }
-      public Connection getServer() { return fServer; }
-      public String getServerName() {
-         if (fServer != null) {
-            return fServer.getSender();
+      public void setCollector(Collector val) { fCollector = val; }
+      public Collector getCollector() { return fCollector; }
+      public void setCollectorName(String name) {
+         if (fCollector==null) {
+            fCollector = new Collector(name);
+         } else {
+            fCollector.setName(name);
+         }
+      }
+      public String getCollectorName() {
+         if (fCollector != null) {
+            return fCollector.getName();
          } else {
             return net.sf.gratia.services.CollectorService.getName();
          }
@@ -161,9 +168,9 @@ public class Connection implements AttachableXmlElement
       public void asXml(StringBuilder output, String elementName)
       {
          output.append("<Connection>");
-         asXml(output,"Client",fClient);
+         asXml(output,"SenderHost",fSenderHost);
          asXml(output,"Sender",fSender);
-         asXml(output,"Server",getServerName());
+         asXml(output,"Collector",getCollectorName());
          if (fCertificate != null) fCertificate.asXml(output);
          output.append("</Connection>\n");
 
@@ -172,9 +179,9 @@ public class Connection implements AttachableXmlElement
       public String toString() 
       {
          String output = "Connection id#: " + cid + " and ref " + Integer.toHexString(System.identityHashCode(this)) + "\n";
-         output = output + "Client: " + fClient + "\n";
+         output = output + "SenderHost: " + fSenderHost + "\n";
          output = output + "Sender: " + fSender + "\n";
-         output = output + "Server: " + getServerName() + "\n";
+         output = output + "Collector: " + getCollectorName() + "\n";
          output = output + "Certificate: " + fCertificate + "\n";
          output = output + "FirstSeen: " + fFirstSeen + "\n";
          output = output + "LastSeen: " + fLastSeen + "\n";

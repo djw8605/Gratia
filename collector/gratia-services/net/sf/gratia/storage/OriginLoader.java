@@ -132,16 +132,15 @@ public class OriginLoader
       String extras = "";
       for (Iterator i = element.elementIterator(); i.hasNext();) {
          Element sub = (Element) i.next();
-         if (sub.getName().equalsIgnoreCase("Client")) {
+         if (sub.getName().equalsIgnoreCase("SenderHost")) {
             seen = true;
-            grconn.setClient(sub.getText());
+            grconn.setSenderHost(sub.getText());
          } else if (sub.getName().equalsIgnoreCase("Sender")) {
             seen = true;
             grconn.setSender(sub.getText());
-         } else if (sub.getName().equalsIgnoreCase("Server")) {
+         } else if (sub.getName().equalsIgnoreCase("Collector")) {
             seen = true;
-            // Ignored for now.
-            // grconn.setServer(sub.getText());
+            grconn.setCollectorName(sub.getText());
          } else if (sub.getName().equalsIgnoreCase("Certificate")) {
             seen = true;
             grconn.setCertificate(new Certificate(sub.getText()));

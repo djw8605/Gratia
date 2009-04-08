@@ -119,6 +119,7 @@ public class RMIHandlerServlet extends HttpServlet
                   }
                   
                }
+               from = req.getParameter("from");
                origin = fProxy.checkConnection(certs,req.getRemoteAddr(),from);
                if (origin != null && origin.length() > 0) {
                   Logging.debug("RMIHandlerServlet: Crudentials accepted.");
