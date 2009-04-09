@@ -15,6 +15,9 @@ import re
 import string
 import smtplib
 
+import libxml2
+import urllib2
+
 import logging
 import logging.config
 import ConfigParser
@@ -409,27 +412,36 @@ def NumberOfCpus():
         benchtotal = string.atof(values.split("\t")[1]) 
         return (ncpu,benchtotal);
 
+def GetListOfSites(filter):
+        location = 'http://myosg.grid.iu.edu/wizardsummary/xml?datasource=summary&summary_attrs_showservice=on&account_type=cumulative_hours&ce_account_type=gip_vo&se_account_type=vo_transfer_volume&start_type=7daysago&all_resources=on&gridtype=on&gridtype_1=on'
+        html = urllib2.urlopen(location).read()
+        
+        excludedSites = [ 'Engagement_VOMS', 'OSG_VOMS' ]
+        
+        sites = []
+        doc = libxml2.parseDoc(html)
+        for resource in doc.xpathEval(filter):
+           if (resource.content not in excludedSites): sites.append(resource.content)
+        doc.freeDoc();
+        
+        return sites;
 
 def GetListOfDisabledOSGSites():
+        return GetListOfSites( "//Resource[Active='False']/Name" )
+        
         cmd = "wget --proxy -q -O - http://oim.grid.iu.edu/pub/resource/show.php?format=plain-text | cut -d, -f4,1,16,8 | grep -e ',OSG,\(CE\|Hidden CE/SE\) [^,]*,0' | cut -d, -f1"
-        #print "Will execute: " + cmd;
         allSites = commands.getoutput(cmd).split("\n");
-
         # Call it twice to avoid a 'bug' in wget where on of the row is missing the first few characters.
         allSites = commands.getoutput(cmd).split("\n");
-      
-        #print allSites;
-        return allSites;
+        return allSites
 
 def GetListOfOSGSites():
+        return GetListOfSites("//Resource[Active='True' and ( Services/Service/Name='Compute Element' or Services='no applicable service exists')]/Name")
+        
         cmd = "wget --proxy -q -O - http://oim.grid.iu.edu/pub/resource/show.php?format=plain-text | cut -d, -f4,1,16,8 | grep -e ',OSG,\(CE\|Hidden CE/SE\) [^,]*,1' | cut -d, -f1"
-        #print "Will execute: " + cmd;
         allSites = commands.getoutput(cmd).split("\n");
-
         # Call it twice to avoid a 'bug' in wget where on of the row is missing the first few characters.
         allSites = commands.getoutput(cmd).split("\n");
-      
-        #print allSites;
         return allSites;
 
 def GetListOfOSGSitesVisible():
