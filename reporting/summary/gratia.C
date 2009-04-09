@@ -91,7 +91,7 @@ void sharing(FILE *out, FILE *outcsv, TSQLServer *db, TDatime *begin, TDatime *e
 "with some straightforward changes applied (for example ATLAS -> USATLAS),\n"
 "Some of the information as not yet been updated in OIM and some attempt was\n"
 "made to 'guess' the owner from previous information source; those guessed\n"
-"owners appear in the table with the tag '(not in OIM)'.\n"
+"owners appear in the table with the tag '(not set in OIM)'.\n"
 "OIM also sometimes use a generic name 'Other' for one of the owners; this can\n"
 "not be associated with any information from Gratia.\n"
 "All the subgroups in the Fermilab VO are considered owners of the sites\n"
@@ -167,82 +167,204 @@ void sharing(FILE *out, FILE *outcsv, TSQLServer *db, TDatime *begin, TDatime *e
    
    typedef map<string, OInfo> InnerMap_t;
    map<string, InnerMap_t > ownerShare;
-   cmd = "wget -q -O - http://myosg.grid.iu.edu/trunk/vo/xml?group=resource";
-   // cmd = "wget -q -O - 'http://myosg.grid.iu.edu/wizardsummary/xml?datasource=summary&summary_attrs_showservice=on&summary_attrs_showvoownership=on&account_type=cumulative_hours&ce_account_type=gip_vo&se_account_type=vo_transfer_volume&start_type=7daysago&all_resources=on&gridtype=on&gridtype_1=on'";
-   f = gSystem->OpenPipe(cmd,"r");
-   TString xmldoc;
-   while ((x = fgetc(f))!=EOF ) {
-      xmldoc.Append(x);
-   }
-   fclose(f);
-   TDOMParser loader;
-   loader.SetValidate(false);
-   if ( 0 !=  loader.ParseBuffer( xmldoc.Data(), xmldoc.Length() ) ) {
-      Error("Report","Could not properly parse the result of %s",cmd.Data());
-      return;
-   }
-   TXMLNode *node = loader.GetXMLDocument()->GetRootNode();
-   if (0 != strcmp(node->GetNodeName(),"ResourceOwnerships") ) {
-      Error("Report","Node is not ResourceOwnerships as expected but %s",node->GetNodeName());
-      return;
-   }
-   node = node->GetChildren();
-   while (node) {
-      if ( 0 != strcmp(node->GetNodeName(),"Resource") ) {
-         Error("Report","Node is not Resource as expected but %s",node->GetNodeName());
-         node = node->GetNextNode();
-         continue;
+   if (0) {
+      cmd = "wget -q -O - http://myosg.grid.iu.edu/trunk/vo/xml?group=resource";
+      f = gSystem->OpenPipe(cmd,"r");
+      TString xmldoc;
+      while ((x = fgetc(f))!=EOF ) {
+         xmldoc.Append(x);
       }
-      {
-         TXMLNode *sub = node->GetChildren();
-         //fprintf(stderr,"Sub: %s\n",sub->GetNodeName());
-         InnerMap_t owner_percents;
-         std::string owner_name;
-         std::string resource_name;
-         int percent;
-         while (sub) {
-            if ( 0 == strcmp( "ResourceID", sub->GetNodeName() ) ) {
-               // skip
-            } else if ( 0 == strcmp ("ResourceName", sub->GetNodeName() ) ) {
-               resource_name = sub->GetText();
-            } else if ( 0 == strcmp ( "Ownership", sub->GetNodeName() ) ) {
-               TXMLNode *nowner = sub->GetChildren();
-               while( nowner ) {
-                  if ( 0 != strcmp( "Percentage", nowner->GetNodeName() ) ) {
-                     Error("Report","Node is not Percentage as expected but %s",node->GetNodeName());
-                  }
-                  if (nowner->GetAttributes()) {
-                     TXMLAttr *attr = (TXMLAttr*)nowner->GetAttributes()->FindObject("VO");
-                     if (attr) {
-                        owner_name = attr->GetValue();
-                        std::transform(owner_name.begin(), owner_name.end(), owner_name.begin(), ::tolower);
-                     
-                        if (owner_name == "atlas") {
-                           owner_name = "usatlas";
-                        }
-                        if (owner_name == "other") {
-                           owner_name = "Listed as other in OIM";
-                        }
-                        percent = atoi(nowner->GetText());
-                        //fprintf(stderr,"text %s vs value %d\n",nowner->GetText(),percent);
-                        owner_percents[ owner_name ].fVO = owner_name;
-                        owner_percents[ owner_name ].fPercent = percent;
-                     } else {
-                        Error("ParsingXml","Percentage node does not specify a vo: %s\n",nowner->GetContent());
+      fclose(f);
+      TDOMParser loader;
+      loader.SetValidate(false);
+      if ( 0 !=  loader.ParseBuffer( xmldoc.Data(), xmldoc.Length() ) ) {
+         Error("Report","Could not properly parse the result of %s",cmd.Data());
+         return;
+      }
+      TXMLNode *node = loader.GetXMLDocument()->GetRootNode();
+      if (0 != strcmp(node->GetNodeName(),"ResourceOwnerships") ) {
+         Error("Report","Node is not ResourceOwnerships as expected but %s",node->GetNodeName());
+         return;
+      }
+      node = node->GetChildren();
+      while (node) {
+         if ( 0 != strcmp(node->GetNodeName(),"Resource") ) {
+            Error("Report","Node is not Resource as expected but %s",node->GetNodeName());
+            node = node->GetNextNode();
+            continue;
+         }
+         {
+            TXMLNode *sub = node->GetChildren();
+            //fprintf(stderr,"Sub: %s\n",sub->GetNodeName());
+            InnerMap_t owner_percents;
+            std::string owner_name;
+            std::string resource_name;
+            int percent;
+            while (sub) {
+               if ( 0 == strcmp( "ResourceID", sub->GetNodeName() ) ) {
+                  // skip
+               } else if ( 0 == strcmp ("ResourceName", sub->GetNodeName() ) ) {
+                  resource_name = sub->GetText();
+               } else if ( 0 == strcmp ( "Ownership", sub->GetNodeName() ) ) {
+                  TXMLNode *nowner = sub->GetChildren();
+                  while( nowner ) {
+                     if ( 0 != strcmp( "Percentage", nowner->GetNodeName() ) ) {
+                        Error("Report","Node is not Percentage as expected but %s",node->GetNodeName());
                      }
+                     if (nowner->GetAttributes()) {
+                        TXMLAttr *attr = (TXMLAttr*)nowner->GetAttributes()->FindObject("VO");
+                        if (attr) {
+                           owner_name = attr->GetValue();
+                           std::transform(owner_name.begin(), owner_name.end(), owner_name.begin(), ::tolower);
+                           
+                           if (owner_name == "atlas") {
+                              owner_name = "usatlas";
+                           }
+                           if (owner_name == "other") {
+                              owner_name = "Listed as other in OIM";
+                           }
+                           percent = atoi(nowner->GetText());
+                           //fprintf(stderr,"text %s vs value %d\n",nowner->GetText(),percent);
+                           owner_percents[ owner_name ].fVO = owner_name;
+                           owner_percents[ owner_name ].fPercent = percent;
+                        } else {
+                           Error("ParsingXml","Percentage node does not specify a vo: %s\n",nowner->GetContent());
+                        }
+                     }
+                     nowner = nowner->GetNextNode();
                   }
-                  nowner = nowner->GetNextNode();
+               }
+               sub = sub->GetNextNode();
+            }
+            ownerShare[ resource_name ] = owner_percents;
+            //fprintf(stderr,"for %s %d\n",resource_name.c_str(), owner_percents.size());
+         }
+         node = node->GetNextNode();
+      }
+      
+   } else {
+      cmd = "wget -q -O - 'http://myosg.grid.iu.edu/wizardsummary/xml?datasource=summary&summary_attrs_showservice=on&summary_attrs_showfqdn=on&summary_attrs_showvoownership=on&account_type=cumulative_hours&ce_account_type=gip_vo&se_account_type=vo_transfer_volume&start_type=7daysago&all_resources=on&gridtype=on&gridtype_1=on'";
+      f = gSystem->OpenPipe(cmd,"r");
+      TString xmldoc;
+      while ((x = fgetc(f))!=EOF ) {
+         xmldoc.Append(x);
+      }
+      fclose(f);
+      TDOMParser loader;
+      loader.SetValidate(false);
+      if ( 0 !=  loader.ParseBuffer( xmldoc.Data(), xmldoc.Length() ) ) {
+         Error("Report","Could not properly parse the result of %s",cmd.Data());
+         return;
+      }
+      TXMLNode *node = loader.GetXMLDocument()->GetRootNode();
+      if (0 != strcmp(node->GetNodeName(),"ResourceSummary") ) {
+         Error("Report","Node is not ResourceSummary as expected but %s",node->GetNodeName());
+         return;
+      }
+      node = node->GetChildren();
+      while (node) {
+         if ( 0 == strcmp(node->GetNodeName(),"text") ) {
+            // Skip the comment
+         } else if ( 0 != strcmp(node->GetNodeName(),"ResourceGroup") ) {
+            Error("Report","Node is not ResourceGroup as expected but %s",node->GetNodeName());
+            node = node->GetNextNode();
+            continue;
+         }
+         TXMLNode *rg_node = node->GetChildren();
+         while (rg_node) {
+            if (0 == strcmp(rg_node->GetNodeName(),"Resources") ) {
+               TXMLNode *r_node = rg_node->GetChildren();
+            
+               while (r_node) {
+                  if ( 0 != strcmp(r_node->GetNodeName(),"Resource") ) {
+                     Error("Report","Node is not Resource as expected but %s",r_node->GetNodeName());
+                     node = node->GetNextNode();
+                     continue;
+                  }
+                  {
+                     TXMLNode *sub = r_node->GetChildren();
+                     //fprintf(stderr,"Sub: %s\n",sub->GetNodeName());
+                     InnerMap_t owner_percents;
+                     std::string owner_name;
+                     std::string resource_name;
+                     int percent;
+                     while (sub) {
+                        if (0 == strcmp( "Services", sub->GetNodeName() ) || 
+                            0 == strcmp( "RSVStatus", sub->GetNodeName() ) || 
+                            0 == strcmp( "GIPStatus", sub->GetNodeName() ) || 
+                            0 == strcmp( "Description", sub->GetNodeName() ) || 
+                            0 == strcmp( "FQDN", sub->GetNodeName() ) || 
+                            0 == strcmp( "SupportedVOs", sub->GetNodeName() ) ) {
+                           // skip
+                        } else if ( 0 == strcmp ("Name", sub->GetNodeName() ) ) {
+                           resource_name = sub->GetText();
+                        } else if ( 0 == strcmp ( "VOOwnership", sub->GetNodeName() ) ) {
+                           // Info("Report","VOO Seeing %s %s",sub->GetNodeName(),sub->GetText());
+                           if (sub->GetText() && 0 == strcmp("(Information not available)",sub->GetText()) ) {
+                              //owner_name = "";
+                              //owner_percents[ owner_name ].fVO = owner_name;
+                              //owner_percents[ owner_name ].fPercent = 100;
+                              
+                           } else {
+                              TXMLNode *nowner = sub->GetChildren();
+                              while( nowner ) {
+                                 owner_name.clear();
+                                 percent = -1;
+                                 
+                                 if ( 0 == strcmp( "ChartURL", nowner->GetNodeName() ) ) {
+                                    // skip
+                                 } else if ( 0 != strcmp( "Ownership", nowner->GetNodeName() ) ) {
+                                    Error("ParsingXml","Node for %s is not Ownership as expected but %s %s",resource_name.c_str(),nowner->GetNodeName(), nowner->GetText());
+                                 } else {
+                                    TXMLNode *content = nowner->GetChildren();
+                                    while (content) {
+                                       // Info("Report","Seeing %s %s",content->GetNodeName(),content->GetText());
+                                       if ( 0 == strcmp( "VO", content->GetNodeName() ) ) {
+                                          owner_name = content->GetText();
+                                          std::transform(owner_name.begin(), owner_name.end(), owner_name.begin(), ::tolower);
+                                          
+                                          if (owner_name == "atlas") {
+                                             owner_name = "usatlas";
+                                          }
+                                          if (owner_name == "other" || owner_name == "(other)") {
+                                             owner_name = "Listed as other in OIM";
+                                          }
+                                       } else if ( 0 == strcmp( "Percent", content->GetNodeName() ) ) {
+                                          if (content->GetText()==0) {
+                                             Error("ParsingXml","Missing percentage for %s %s",resource_name.c_str(),owner_name.c_str());
+                                          } else {
+                                             percent = atoi(content->GetText());
+                                          }
+                                       }
+                                       content = content->GetNextNode();
+                                    }
+                                    if (owner_name.empty() || percent < 0) {
+                                       Error("ParsingXml","Ownership node does not specify a vo for %s: %s\n",nowner->GetContent(),resource_name.c_str());
+                                    } else {
+                                       owner_percents[ owner_name ].fVO = owner_name;
+                                       owner_percents[ owner_name ].fPercent = percent;
+                                    }
+                                 }
+                                 nowner = nowner->GetNextNode();
+                              }
+                           }
+                        } else {
+                           Warning("Report","Unexpected sub node: %s %s",sub->GetNodeName(),sub->GetText());
+                        }
+                        sub = sub->GetNextNode();
+                     }
+                     ownerShare[ resource_name ] = owner_percents;
+                     //fprintf(stderr,"for %s %d\n",resource_name.c_str(), owner_percents.size());
+                  }
+                  r_node = r_node->GetNextNode();
                }
             }
-            sub = sub->GetNextNode();
+            rg_node = rg_node->GetNextNode();
          }
-         ownerShare[ resource_name ] = owner_percents;
-         //fprintf(stderr,"for %s %d\n",resource_name.c_str(), owner_percents.size());
+         
+         node = node->GetNextNode();
       }
-      node = node->GetNextNode();
    }
-   
-
    TString pattern = 
       Form("SELECT VOName, Sum(Njobs),Sum(WallDuration), Sum(CpuUserDuration+CpuSystemDuration), SiteName  FROM VOProbeSummary V, Probe, Site where V.ProbeName = Probe.ProbeName and Site.siteid = Probe.siteid and '%s' < EndTime and EndTime < '%s' and SiteName = '%%s' and (UCASE(VOName) = '%%s') group by SiteName",sbegin.Data(),send.Data());
 
@@ -355,7 +477,11 @@ void sharing(FILE *out, FILE *outcsv, TSQLServer *db, TDatime *begin, TDatime *e
             owner_wall = what->second.fWall;
             std::string name( what->second.fVO );
             if (what->second.fGuessed) {
-               name += " (not in OIM)";
+               if (name.empty()) {
+                  name = "No owner info in OIM!";
+               } else {
+                  name += " (not set in OIM)";
+               }
             }
             
             fprintf(out,valueFormat.Data(),site_index, vo_index, site.c_str(), njobs,
