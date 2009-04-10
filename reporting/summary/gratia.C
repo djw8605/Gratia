@@ -349,7 +349,8 @@ void sharing(FILE *out, FILE *outcsv, TSQLServer *db, TDatime *begin, TDatime *e
                               }
                            }
                         } else {
-                           Warning("Report","Unexpected sub node: %s %s",sub->GetNodeName(),sub->GetText());
+                           // Suppress this warning to be able to ignore extension to the format
+			   // Warning("Report","Unexpected sub node: %s %s",sub->GetNodeName(),sub->GetText());
                         }
                         sub = sub->GetNextNode();
                      }
