@@ -314,7 +314,7 @@ registration: $(target)/gratia-registration.war
 	# --- Target: administration COMPLETED at $(shell date) ---
 
 #------------------------------------------------------------------
-${target}/gratia-registration.war: war $(util_lib) $(registration)/net/sf/gratia/registration/*.java $(registration)/net/sf/gratia/registration/web.xml
+${target}/gratia-registration.war: $(util_lib) $(registration)/net/sf/gratia/registration/*.java $(registration)/net/sf/gratia/registration/web.xml
 	#----------------------------------------------------
 	# --- Target: $(target)/gratia-administration.war ---
 	#----------------------------------------------------
@@ -326,11 +326,16 @@ ${target}/gratia-registration.war: war $(util_lib) $(registration)/net/sf/gratia
 	#
 	mkdir -p $(war-dir)/$(name_from_war)/WEB-INF/classes/net/sf/gratia/registration
 	cp $(classes-dir)/net/sf/gratia/registration/*.class $(war-dir)/$(name_from_war)/WEB-INF/classes/net/sf/gratia/registration
-	cp $(classes-dir)/net/sf/gratia/registration/web.xml $(war-dir)/$(name_from_war)/WEB-INF
+	cp $(registration)/net/sf/gratia/registration/web.xml $(war-dir)/$(name_from_war)/WEB-INF
 	#
 	cp $(commonLib)/mysql*.jar $(war-dir)/$(name_from_war)/WEB-INF/lib
 	mkdir -p $(war-dir)/$(name_from_war)/WEB-INF/classes/net/sf/gratia/util
+	mkdir -p $(war-dir)/$(name_from_war)/WEB-INF/classes/net/sf/gratia/services
+	cp $(classes-dir)/net/sf/gratia/services/AccessException.class $(war-dir)/$(name_from_war)/WEB-INF/classes/net/sf/gratia/services
 	cp $(classes-dir)/net/sf/gratia/util/Logging.class $(war-dir)/$(name_from_war)/WEB-INF/classes/net/sf/gratia/util
+	cp $(classes-dir)/net/sf/gratia/services/*Skel.class $(war-dir)/$(name_from_war)/WEB-INF/classes/net/sf/gratia/services
+	cp $(classes-dir)/net/sf/gratia/services/*Stub.class $(war-dir)/$(name_from_war)/WEB-INF/classes/net/sf/gratia/services
+	cp $(classes-dir)/net/sf/gratia/services/JMS*.class $(war-dir)/$(name_from_war)/WEB-INF/classes/net/sf/gratia/services
 	$(copy2_util_lib)
 	jar -cfM $@ -C $(war-dir)/$(name_from_war) .
 	# --- Target: $@ COMPLETED at $(shell date) ---
