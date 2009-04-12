@@ -29,7 +29,8 @@ import java.sql.*;
 public class RegisterServlet extends HttpServlet 
    {
       public Properties p;
-      //public JMSProxy proxy = null;
+      
+      JMSProxy fCollectorProxy = null;
       XP xp = new XP();
       //
       // database related
@@ -49,11 +50,40 @@ public class RegisterServlet extends HttpServlet
       boolean autoregister = false;
       Properties props;
       
+      // Cache configuration info
+      String fSecureUrl;
+      
+      
+      // This is a common routine, it should be 'shared'
+      private synchronized boolean lookupProxy() throws java.rmi.UnmarshalException {
+         int counter = 0;
+         final int maxloop = 20;
+         
+         while (fCollectorProxy == null && counter < 20 ) {
+            try {
+               fCollectorProxy = (JMSProxy) Naming.lookup(p.getProperty("service.rmi.rmilookup") +
+                                                          p.getProperty("service.rmi.service"));
+            }
+            catch (java.rmi.UnmarshalException e) {
+               Logging.warning("RMIHandlerServlet caught exception doing RMI lookup: ", e);
+               // We will not recover from this error, so let's give up now.
+               throw e;
+            }
+            catch (Exception e) {
+               Logging.warning("RMIHandlerServlet caught exception doing RMI lookup: ", e);
+               try {
+                  Thread.sleep(5000);
+               } catch (Exception ignore) {
+               }
+            }
+            counter = counter + 1;
+         }
+         return (fCollectorProxy != null);
+      }
+      
       public void init(ServletConfig config) throws ServletException 
       {
          super.init(config);
-         
-         System.err.println("Registration is starting");
          
          p = Configuration.getProperties();
          
@@ -62,10 +92,12 @@ public class RegisterServlet extends HttpServlet
          //
          
          Logging.initialize("registration");
-         Logging.warning("--RegisterServlet: I am here");
+         Logging.info("RegisterServlet is started");
          try
          {
             props = Configuration.getProperties();
+            fSecureUrl = props.getProperty("service.secure.connection");
+
             driver = props.getProperty("service.mysql.driver");
             url = props.getProperty("service.mysql.url");
             user = props.getProperty("service.mysql.user");
@@ -75,7 +107,6 @@ public class RegisterServlet extends HttpServlet
                   autoregister = true;
 
             Logging.info("RegisterServlet: AutoRegister is " + (autoregister ? "enabled" : "disabled") );
-            Logging.warning("--RegisterServlet: AutoRegister is " + (autoregister ? "enabled" : "disabled") );
          }
          catch (Exception ignore)
          {
@@ -91,13 +122,35 @@ public class RegisterServlet extends HttpServlet
             e.printStackTrace();
             return;
          }
-         System.err.println("Registration is allsetup");
      }
       
       
       
       public void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException 
       {
+         
+         try {
+            lookupProxy();
+         } catch (Exception e) {
+            // lookupProxy already insert the error in the logs.
+            PrintWriter qwriter = res.getWriter();
+            qwriter.write("Error: service is not functional.  Please report the issue to the system adminsitrator.");               
+            qwriter.flush();
+            return;
+         }
+            
+         if ( fCollectorProxy == null) {
+            PrintWriter qwriter = res.getWriter();
+            qwriter.write("Error: service not ready.");
+            qwriter.flush();
+            return;
+         } else if (!fCollectorProxy.servletEnabled()) {
+            PrintWriter qwriter = res.getWriter();
+            qwriter.write("Error: service currently disabled.");
+            qwriter.flush();
+            return;
+         }
+                  
          String command = null;
          String from = null;
          String to = null;
@@ -131,8 +184,9 @@ public class RegisterServlet extends HttpServlet
             arg3 = req.getParameter("arg3");
             arg4 = req.getParameter("arg4");
             
-            if (command != null)
+            if (command != null) {
                command = command.toLowerCase();
+            }
             else
             {
                //
@@ -209,6 +263,53 @@ public class RegisterServlet extends HttpServlet
                writer.write("error:Security Not Supported");
                writer.flush();
                writer.close();
+               return;
+            }
+            
+            if (command.equals("getsecureurl")) {
+               if (argcount == 1) {
+                  // The first argument is the pem of the certificate, let's check it (this will 'register' it).
+                  String origin = null;
+                  try {
+                     origin = fCollectorProxy.checkConnection(arg1, req.getRemoteAddr(), from);
+                  } catch (net.sf.gratia.services.AccessException e) {
+                     
+                     Logging.info("Rejected the certificate(s)");                  
+                     Logging.debug("Exception detail:", e);
+                     writer.write("Error: Certificate rejected by the Gratia Collector. " + e.getMessage());
+                     writer.flush();
+                     return;
+                     
+                  } catch (Exception e) {
+                     Logging.warning("Proxy communication failure: " + e);
+                     Logging.warning("Error: For req: " +
+                                     req +
+                                     ", originating server: " +
+                                     req.getRemoteHost());
+                     Logging.debug("RMIHandlerServlet error diagnostic for req: " +
+                                   req +
+                                   ", headers: \n" + requestDiagnostics(req));
+                     Logging.debug("Exception detail:", e);
+                     writer.write("Error: RMIHandlerServlet: Error: Problematic req: " + req);
+                     writer.flush();
+                     return;
+                  } 
+                  if (origin != null && origin.length() > 0) {
+                     Logging.debug("Crudentials accepted.");
+                  } else {
+                     Logging.info("rejected the certificate(s)");
+                     writer.write("Error: The certificate has been rejected by the Gratia Collector!");
+                     writer.flush();
+                     // If we can't check the validity of the certificate, we quit.
+                     return;
+                  }
+               }
+               Logging.debug("Received request for the secure connection string");
+               Logging.debug("Arg1: " + arg1);
+               writer.write("secureconnection:"+URLEncoder.encode(fSecureUrl));
+               writer.flush();
+               writer.close();
+               Logging.info("Registered: "+from);
                return;
             }
             
@@ -423,8 +524,8 @@ public class RegisterServlet extends HttpServlet
             "server"};
             Execute.execute(command3);
             
-            Export export = new Export();
-            export.export(tempstore,probename,"server",keycert);
+            //Export export = new Export();
+            //export.export(tempstore,probename,"server",keycert);
             
             command = "openssl x509 -out gratia.hostcert.pem -outform pem -in host.cert -inform der";
             String command4[] =
@@ -749,4 +850,19 @@ public class RegisterServlet extends HttpServlet
             return "error:" + xp.parseException(e);
          }
       }
+
+      // Actually same as in RMIhandlerServlet.
+      private String requestDiagnostics(HttpServletRequest req) {
+         Enumeration hNameList = req.getHeaderNames();
+         String hList = new String("");
+         while (hNameList.hasMoreElements()) {
+            if (hList.length() != 0) {
+               hList += ", ";
+            }
+            String hName = (String) hNameList.nextElement();
+            hList += hName + ": " + req.getHeader(hName);
+         }
+         return hList;
+      }
+      
    }

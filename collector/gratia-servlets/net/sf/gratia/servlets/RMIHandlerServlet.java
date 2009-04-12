@@ -27,16 +27,16 @@ public class RMIHandlerServlet extends HttpServlet
       boolean fTrackConnection;
 
       
-      static JMSProxy fProxy = null;
+      static JMSProxy fCollectorProxy = null;
       static URLDecoder D;
       
       private synchronized boolean lookupProxy() {
          int counter = 0;
          final int maxloop = 20;
          
-         while (fProxy == null && counter < 20 ) {
+         while (fCollectorProxy == null && counter < 20 ) {
             try {
-               fProxy = (JMSProxy) Naming.lookup(p.getProperty("service.rmi.rmilookup") +
+               fCollectorProxy = (JMSProxy) Naming.lookup(p.getProperty("service.rmi.rmilookup") +
                                                 p.getProperty("service.rmi.service"));
             }
             catch (Exception e) {
@@ -48,7 +48,7 @@ public class RMIHandlerServlet extends HttpServlet
             }
             counter = counter + 1;
          }
-         return fProxy != null;
+         return fCollectorProxy != null;
       }
       
       public void init(ServletConfig config)
@@ -77,7 +77,7 @@ public class RMIHandlerServlet extends HttpServlet
       public void doPost(HttpServletRequest req, HttpServletResponse res)
       throws ServletException, IOException {
          
-         if (!lookupProxy() || !fProxy.servletEnabled()) {
+         if (!lookupProxy() || !fCollectorProxy.servletEnabled()) {
             PrintWriter writer = res.getWriter();
             writer.write("Error: service not ready.");
             writer.flush();
@@ -120,7 +120,7 @@ public class RMIHandlerServlet extends HttpServlet
                   
                }
                from = req.getParameter("from");
-               origin = fProxy.checkConnection(certs,req.getRemoteAddr(),from);
+               origin = fCollectorProxy.checkConnection(certs,req.getRemoteAddr(),from);
                if (origin != null && origin.length() > 0) {
                   Logging.debug("RMIHandlerServlet: Crudentials accepted.");
                   if (certs != null) {
@@ -333,9 +333,9 @@ public class RMIHandlerServlet extends HttpServlet
                      
                      if (fTrackConnection) {
                         String data = "Origin|"+origin+"|"+arg1;
-                        status = fProxy.update(data);
+                        status = fCollectorProxy.update(data);
                      } else {
-                        status = fProxy.update(arg1);
+                        status = fCollectorProxy.update(arg1);
                      }
                   }
                   if (status) {
@@ -376,6 +376,7 @@ public class RMIHandlerServlet extends HttpServlet
          }
       }
       
+      // Actually same as in Registration servlet
       private String requestDiagnostics(HttpServletRequest req) {
          Enumeration hNameList = req.getHeaderNames();
          String hList = new String("");

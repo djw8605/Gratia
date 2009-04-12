@@ -57,7 +57,10 @@ public class ReplicationTable extends HttpServlet {
    Boolean fModify = false;
    Boolean fInitialized = false;
    Hashtable<Integer,Replication> fRepTable = null;
-   
+
+   // Configuration
+   String fCollectorPem;
+
    //
    // support
    //
@@ -73,7 +76,7 @@ public class ReplicationTable extends HttpServlet {
    
    // Which Records are we replicating
    String RecordTable = "JobUsageRecord";
-    String fApplicationURL = "replicationtable.html";
+   String fApplicationURL = "replicationtable.html";
    
    public void init(ServletConfig config) throws ServletException {
       // javax.servlet.ServletConfig.getInitParameter() 
@@ -108,6 +111,43 @@ public class ReplicationTable extends HttpServlet {
       catch (Exception e) {
          Logging.warning("SystemAdministration: Caught exception during hibernate init", e);
       }
+      String certfile = fProperties.getProperty("service.vdt.cert.file");
+      fCollectorPem = XP.get(certfile);
+
+//      try {
+//         Logging.info("Initializing HTTPS Support");
+//         //
+//         // setup configuration path/https system parameters
+//         //
+//         System.setProperty("java.protocol.handler.pkgs", "com.sun.net.ssl.internal.www.protocol");
+//         java.security.Security.addProvider(new com.sun.net.ssl.internal.ssl.Provider());
+//         
+//         String configurationPath = net.sf.gratia.util.Configuration.getConfigurationPath();
+//
+//         System.setProperty("javax.net.ssl.trustStore", configurationPath + "/truststore");
+//         System.setProperty("javax.net.ssl.trustStorePassword", "server");
+//         
+//         System.setProperty("javax.net.ssl.keyStore", configurationPath + "/keystore");
+//         System.setProperty("javax.net.ssl.keyStorePassword", "server");
+//
+//         Logging.warning("truststrore: "+System.getProperty("javax.net.ssl.trustStore"));
+//         Logging.warning("keyStore   : "+System.getProperty("javax.net.ssl.keyStore"));
+//         
+//         com.sun.net.ssl.HostnameVerifier hv = new com.sun.net.ssl.HostnameVerifier() {
+//            public boolean verify(String urlHostname, String certHostname) {
+//               Logging.info("url host name: " + urlHostname);
+//               Logging.info("cert host name: " + certHostname);
+//               Logging.info("WARNING: Hostname is not matched for cert.");
+//               return true;
+//            }
+//         };
+//         
+//         com.sun.net.ssl.HttpsURLConnection.setDefaultHostnameVerifier(hv);
+//      }
+//      catch (Exception e) {
+//         Logging.warning("contextInitialized() caught exception ", e);
+//      }
+      
       fInitialized = true;
    }
    
@@ -364,6 +404,8 @@ public class ReplicationTable extends HttpServlet {
          vec.add((Replication) repEntries.nextElement());
       }
       Collections.sort(vec); // Sort according to Replication.CompareTo().
+      boolean modifyingEntry = false;
+      
       for ( Replication repEntry : vec ) {
          Boolean modifyThisEntry = false;
          if ((fModify == true) &&
@@ -376,6 +418,7 @@ public class ReplicationTable extends HttpServlet {
                fModify = false;
             } else {
                modifyThisEntry = true;
+               modifyingEntry = true;
             }
          }            
          if (repEntry.getreplicationid() != 0) { // Skip new entry
@@ -385,6 +428,11 @@ public class ReplicationTable extends HttpServlet {
       Replication newEntry;
       if ((newEntry = fRepTable.get(0)) != null) { // Deal with new entry
          buffer.append(process(newEntry, fModify));
+      }
+      if (modifyingEntry) {
+         // Disable the refresh and new entry button
+         fHtml = fHtml.replace("value=\"Refresh\"", "value=\"Refresh\" disabled=\"disabled\"");
+         fHtml = fHtml.replace("value=\"New Entry\"", "value=\"Refresh\" disabled=\"disabled\"");
       }
       fHtml = fHtml.replace(fRow, buffer.toString());
       fHtml = fHtml.replace("#recordtable#", RecordTable)
@@ -555,66 +603,32 @@ public class ReplicationTable extends HttpServlet {
          return;
       }
       
-      // Retrieve PEM
-      Post post = new Post(fProperties.getProperty("service.open.connection")
-                           + "/gratia-registration/register", "get");
+      // Get our own certificate.
+      
+      // Register with host and get secure url
+      Post post = new Post(repEntry.getopenconnection() +
+                      "/gratia-registration/register", "getsecureurl");
+      post.add("arg1", fCollectorPem);
       String response = post.send(true);
       if (!post.success) {
          fMessage = post.errorMsg;
          return;
       }
       String[] results = split(response, ":");
-      String myPEM = results[1];
-      
-      // Register with host
-      post = new Post(repEntry.getopenconnection() +
-                      "/gratia-registration/register", "put");
-      post.add("arg1", "Client:" + 
-               fProperties.getProperty("service.open.connection"));
-      post.add("arg2", "Replication");
-      post.add("arg3", myPEM);
-      response = post.send(true);
-      if (!post.success) {
-         fMessage = post.errorMsg;
-         return;
-      }
-      results = split(response, ":");
-      if (!results[0].equals("ok")) {
+      if (results[0].equals("secureconnection")) {
+
+         String secureconnection = URLDecoder.decode(results[1]);
+         repEntry.setsecureconnection(secureconnection);
+         repEntry.setregistered(1);
+         commitUpdate(repEntry);
+
+      } else if (results[0].equals("Error")) {
          fMessage = "ERROR registering with remote host: " + response;
          Logging.warning("ReplicationTable: " + fMessage);
+      } else {
+         fMessage = "ERROR registering with remote host: " + response;
+         Logging.warning("ReplicationTable got an expected message format: " + fMessage);
       }
-      
-      // Get host's PEM
-      post = new Post(repEntry.getopenconnection() +
-                      "/gratia-registration/register", "get");
-      response = post.send(true);
-      if (!post.success) {
-         fMessage = post.errorMsg;
-         return;
-      }
-      results = split(response, ":");
-      String remotePEM = results[1];
-      String secureconnection = URLDecoder.decode(results[2]);
-      
-      // Register with ourselves
-      post = new Post(fProperties.getProperty("service.open.connection") + "/gratia-registration/register", "put");
-      post.add("arg1", "Server:" + secureconnection);
-      post.add("arg2", "Replication");
-      post.add("arg3", remotePEM);
-      response = post.send(true);
-      if (!post.success) {
-         fMessage = post.errorMsg;
-         return;
-      }
-      results = split(response, ":");
-      if (!results[0].equals("ok")) {
-         fMessage = "ERROR registering with ourselves: " + response;
-         Logging.warning("ReplicationTable: " + fMessage);
-      }
-      
-      repEntry.setsecureconnection(secureconnection);
-      repEntry.setregistered(1);
-      commitUpdate(repEntry);
    }
    
    void activate(Replication repEntry) {
@@ -680,10 +694,11 @@ public class ReplicationTable extends HttpServlet {
       } else {
          String response = "";
          Post post = new Post(target, "update", "xxx");
-         try {
+         try {            
             response = post.send(true);
          }
          catch (Exception e) {
+            Logging.warning("Error for target:"+target,e);
             fMessage = "Error for " + target + " : " + e;
             return;
          }

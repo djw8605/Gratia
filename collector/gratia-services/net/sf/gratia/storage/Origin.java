@@ -102,7 +102,11 @@ public class Origin
          output.append(fServerDate.toString());
          output.append("\n");
          output.append("Connection: ");
-         output.append(fConnection.toString());
+         if (fConnection==null) {
+            output.append("missing!\n");
+         } else {
+            output.append(fConnection.toString());
+         }
          return output.toString();
       }
       
@@ -119,7 +123,9 @@ public class Origin
       public void asXml(StringBuilder output, int hopNumber) {
          output.append("<Origin hop=\""+hopNumber+"\" >");
          fServerDate.asXml(output,"ServerDate");
-         fConnection.asXml(output,"");
+         if (fConnection!=null) {
+            fConnection.asXml(output,"");
+         }
          output.append("</Origin>");
       }
       
@@ -141,6 +147,10 @@ public class Origin
 
          if ( fOriginId != 0) {
             session.update( this );
+            return this;
+         }
+         
+         if (fConnection ==  null) {
             return this;
          }
 

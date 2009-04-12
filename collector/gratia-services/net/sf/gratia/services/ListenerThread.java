@@ -36,7 +36,7 @@ public class ListenerThread extends Thread {
     String directory_part = null;    // stemp for history and old subdirectory
     long recordsPerDirectory = 10000; // Maximum number of records per directory.
     CollectorService collectorService;
-
+   
     //
     // database parameters
     //

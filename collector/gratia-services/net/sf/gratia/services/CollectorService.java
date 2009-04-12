@@ -773,7 +773,25 @@ public class CollectorService implements ServletContextListener {
         FlipSSL.flip();
     }
    
-   public String checkConnection(java.security.cert.X509Certificate certs[], String client, String sender) 
+   public String checkConnection(String certpem, String senderHost, String sender) 
+   throws RemoteException, AccessException {
+      
+      net.sf.gratia.storage.Certificate c  = new net.sf.gratia.storage.Certificate( certpem);
+      
+      java.security.cert.X509Certificate certs[] = new java.security.cert.X509Certificate[1];
+      
+      try { 
+         certs[0] = c.getCert();
+      } catch (java.security.cert.CertificateException e) {
+         Logging.info("Failed to create cert from pem: "+certpem);
+         throw new AccessException("Invalid Certificate.");
+      }
+      
+      return checkConnection(certs,senderHost,sender);
+   }
+
+      
+   public String checkConnection(java.security.cert.X509Certificate certs[], String senderHost, String sender) 
    throws RemoteException, AccessException {
       final String command = "from Certificate where pem = ?";
 
@@ -795,7 +813,7 @@ public class CollectorService implements ServletContextListener {
             Session session = null;
             session = HibernateWrapper.getSession();
   
-            net.sf.gratia.storage.Connection gr_conn = new net.sf.gratia.storage.Connection(client,sender,null);
+            net.sf.gratia.storage.Connection gr_conn = new net.sf.gratia.storage.Connection(senderHost,sender,null);
             Transaction tx = session.beginTransaction();
             try {
                gr_conn = gr_conn.attach( session );
@@ -882,7 +900,7 @@ public class CollectorService implements ServletContextListener {
                   if (session == null) {
                      session = HibernateWrapper.getSession();
                   }
-                  net.sf.gratia.storage.Connection gr_conn = new net.sf.gratia.storage.Connection(client,sender,localcert);
+                  net.sf.gratia.storage.Connection gr_conn = new net.sf.gratia.storage.Connection(senderHost,sender,localcert);
                   Transaction tx = session.beginTransaction();
                   try {
                      gr_conn = gr_conn.attach( session );

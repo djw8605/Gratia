@@ -118,7 +118,9 @@ public class Connection implements AttachableXmlElement
       public Collector getCollector() { return fCollector; }
       public void setCollectorName(String name) {
          if (fCollector==null) {
-            fCollector = new Collector(name);
+            if (name != null) {
+               fCollector = new Collector(name);
+            }
          } else {
             fCollector.setName(name);
          }
