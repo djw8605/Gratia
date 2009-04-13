@@ -120,8 +120,6 @@ JSVC=
 ####################################
 export JAVA_HOME
 
-PATH="${PATH}:${JAVA_HOME}/bin" # Needed for SSL keytool
-
 # This should be fine as a default
 TOMCAT_INSTANCE_NAME=`basename "$0" | sed -e 's/^.*\(tomcat-.*\)$/\1/'`
 
@@ -134,6 +132,8 @@ CATALINA_TMPDIR=/tmp
 [[ -n "${KRB5CCNAME}" ]] && KRB5CCNAME=`echo "${KRB5CCNAME}" | sed -e 's/^FILE://'`
 
 . /etc/init.d/functions
+
+PATH="${PATH}:${JAVA_HOME}/bin" # Needed for SSL keytool
 
 function start {
   JAVA_OPTS="-server"; export JAVA_OPTS
