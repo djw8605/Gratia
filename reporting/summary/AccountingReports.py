@@ -1918,7 +1918,7 @@ def GenericRange(what, range_end = datetime.date.today(),
     start = range_begin
     end = range_end
     lines = what.GetData(start,end)
-    num_header = 1;
+    num_header = what.num_header;
     index = 0
     printValues = {}
     for i in range (0,len(lines)):
@@ -1993,7 +1993,7 @@ def GenericRange(what, range_end = datetime.date.today(),
         printedvalues.append( niceNum(totalwall) )
         printedvalues.append( niceNum(totaljobs-oldnjobs) )
         printedvalues.append( niceNum(totalwall-oldwall) )
-        
+
         print "    ", what.formats[output] % tuple(printedvalues)
         print what.lines[output]
     return result
