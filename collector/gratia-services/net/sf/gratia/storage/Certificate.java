@@ -25,6 +25,12 @@ public class Certificate implements Comparable
          
       }
       
+      public static String GeneratePem(java.security.cert.Certificate cert) throws java.security.cert.CertificateEncodingException {
+         
+         return new String("-----BEGIN CERTIFICATE-----\n" + Base64.encodeBytes(cert.getEncoded()) + "\n-----END CERTIFICATE-----\n");
+         
+      }
+      
       public Certificate()
       {
          fState = kInvalidCertificate;

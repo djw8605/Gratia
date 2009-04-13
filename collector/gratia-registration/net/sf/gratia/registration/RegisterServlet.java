@@ -7,6 +7,7 @@ import net.sf.gratia.util.Execute;
 import net.sf.gratia.util.Configuration;
 
 import net.sf.gratia.util.XP;
+import net.sf.gratia.util.Base64;
 
 import net.sf.gratia.services.*;
 
@@ -266,7 +267,13 @@ public class RegisterServlet extends HttpServlet
                return;
             }
             
-            if (command.equals("getsecureurl")) {
+            if (command==null) {
+               Logging.info("RegisterServlet: Error: no Command");
+               writer.write("Error: no command");
+               
+            } 
+            else if (command.equals("getsecureurl")) 
+            {
                if (argcount == 1) {
                   // The first argument is the pem of the certificate, let's check it (this will 'register' it).
                   String origin = null;
@@ -290,7 +297,7 @@ public class RegisterServlet extends HttpServlet
                                    req +
                                    ", headers: \n" + requestDiagnostics(req));
                      Logging.debug("Exception detail:", e);
-                     writer.write("Error: RMIHandlerServlet: Error: Problematic req: " + req);
+                     writer.write("Error: issue during certificate check"+ xp.parseException(e));
                      writer.flush();
                      return;
                   } 
@@ -311,22 +318,13 @@ public class RegisterServlet extends HttpServlet
                writer.close();
                Logging.info("Registered: "+from);
                return;
-            }
-            
-            if ((command.equals("request")) && (argcount == 1))
+            } 
+            else if ((command.equals("request")) && (argcount == 1))
             {
-               arg1 = arg1 + ":" + req.getRemoteAddr();
-               Logging.debug("Recieved Request Request");
+               Logging.debug("Received Request Request");
                Logging.debug("Arg1: " + arg1);
-               if (probeAlreadyRegistered(arg1))
-               {
-                  output = "error:Error - Already Registered";
-                  writer.write(output);
-                  writer.flush();
-                  writer.close();
-                  return;
-               }
-               output = requestCertificate(arg1);
+
+               output = requestCertificate(from,req.getRemoteAddr());
                writer.write(output);
                writer.flush();
                writer.close();
@@ -334,21 +332,13 @@ public class RegisterServlet extends HttpServlet
             }
             else if ((command.equals("exchange")) && (argcount == 3))
             {
-               arg1 = arg1 + ":" + req.getRemoteAddr();
-               Logging.debug("Recieved Exchange Request");
+               String alias = arg1 + ":" + req.getRemoteAddr();
+               Logging.debug("Received Exchange Request");
                Logging.debug("Arg1: " + arg1);
                Logging.debug("Arg2: " + arg2);
                Logging.debug("Arg3: " + arg3);
-               
-               if (probeAlreadyRegistered(arg1))
-               {
-                  output = "error:Error - Already Registered";
-                  writer.write(output);
-                  writer.flush();
-                  writer.close();
-                  return;
-               }
-               output = exchangeCertificate(arg1,arg2,arg3);
+
+               output = exchangeCertificate(alias,from,req.getRemoteAddr(),arg1);
                writer.write(output);
                writer.flush();
                writer.close();
@@ -356,56 +346,39 @@ public class RegisterServlet extends HttpServlet
             }
             else if ((command.equals("register")) && (argcount == 3))
             {
-               arg1 = arg1 + ":" + req.getRemoteAddr();
-               Logging.debug("Recieved Register Request");
+               Logging.debug("Received Register Request");
                Logging.debug("Arg1: " + arg1);
                Logging.debug("Arg2: " + arg2);
                Logging.debug("Arg3: " + arg3);
                
-               if (probeAlreadyRegistered(arg1))
-               {
-                  output = "error:Error - Already Registered";
-                  writer.write(output);
-                  writer.flush();
-                  writer.close();
-                  return;
-               }
-               output = registerCertificate(arg1,arg2,arg3);
+               output = registerCertificate(from,req.getRemoteAddr(),arg1);
                writer.write(output);
                writer.flush();
                writer.close();
                return;
             }
-            else if (command.equals("get"))
+            else if (command.equals("getpublickey"))
             {
-               Logging.debug("Recieved Get Request");
+               Logging.debug("Received Get Request");
                Logging.debug("Arg1: " + arg1);
                Logging.debug("Arg2: " + arg2);
                Logging.debug("Arg3: " + arg3);
                
-               output = get();
+               output = getCollectorPublicKey();
                writer.write(output);
                writer.flush();
                writer.close();
                return;
             }
-            else if ((command.equals("put")) && (argcount == 3))
+            else if ((command.equals("putpublickey")) && (argcount == 1))
             {
-               arg1 = arg1 + ":" + req.getRemoteAddr();
-               Logging.debug("Recieved Put Request");
+               String alias = arg1 + ":" + req.getRemoteAddr();
+               Logging.debug("Received Put Request");
                Logging.debug("Arg1: " + arg1);
                Logging.debug("Arg2: " + arg2);
                Logging.debug("Arg3: " + arg3);
                
-               if (probeAlreadyRegistered(arg1))
-               {
-                  output = "error:Error - Already Registered";
-                  writer.write(output);
-                  writer.flush();
-                  writer.close();
-                  return;
-               }
-               output = put(arg1,arg2,arg3);
+               output = putPublicKey(alias,from,req.getRemoteAddr(),arg1);
                writer.write(output);
                writer.flush();
                writer.close();
@@ -425,430 +398,171 @@ public class RegisterServlet extends HttpServlet
          }
       }
       
-      public boolean probeAlreadyRegistered(String probename)
-      {
-         String command = "select count(*) from Security where alias = " + dq + probename + dq;
-         int result = 0;
-         try
-         {
-            statement = connection.prepareStatement(command);
-            resultSet = statement.executeQuery(command);
-            
-            while(resultSet.next())
-            {
-               result = resultSet.getInt(1);
-            }
-            resultSet.close();
-            statement.close();
-         }
-         catch (Exception e)
-         {
-            e.printStackTrace();
-         }
-         if (result == 0)
-            return false;
-         return true;
-      }
-      
-      public String requestCertificate(String probename)
+      public String requestCertificate(String from, String remoteAddr)
       {
          String dname = "cn=xxx, ou=Fermi-GridAccounting, o=Fermi, c=US";
-         dname = xp.replace(dname,"xxx",probename);
-         String keystore = Configuration.getConfigurationPath() + "/truststore";
-         String tempstore = Configuration.getConfigurationPath() + "/tempstore";
-         String  keycert = Configuration.getConfigurationPath() + "/key.cert";
+         String keystore = Configuration.getConfigurationPath() + "/keystore";
+         dname = xp.replace(dname,"xxx",from);
+         String alias = from + ":" + remoteAddr;
          String output = "";
          //
          // first - build self certified certs and add to temp keystore
          //
          try
          {
-            String command = "";
-            try
-            {
-               File file = new File(tempstore);
-               if (file.exists())
-                  file.delete();
-            }
-            catch (Exception ignore)
-            {
-            }
             
-            command = "keytool -genkey -dname " + dq + dname + dq + " -alias " + probename + 
-            " -keypass server -keystore tempstore -storepass server";
+            String command = "keytool -genkey -dname " + dq + dname + dq + " -alias " + alias + 
+                      " -keypass server -keystore " + keystore + " -storepass server";
             String command1[] =
             {"keytool",
                "-genkey",
                "-dname",
                dname,
                "-alias",
-               probename,
+               alias,
                "-keypass",
                "server",
                "-keystore",
-               tempstore,
+               keystore,
                "-storepass",
             "server"};
+            
+            Logging.warning("EXECUTING: "+command);
             
             Execute.execute(command1);
+            Execute.execute("echo -${PATH}-");
             
-            command = "keytool -selfcert -alias " + probename + " -keypass server" +
-            " -keystore tempstore -storepass server";
-            String command2[] =
-            {"keytool",
-               "-selfcert",
-               "-alias",
-               probename,
-               "-keypass",
-               "server",
-               "-keystore",
-               tempstore,
-               "-storepass",
-            "server"};
-            Execute.execute(command2);
+            // If it is stored in the keystore:         
+            java.security.KeyStore ks = java.security.KeyStore.getInstance("JKS");
+            ks.load(new FileInputStream(keystore),"server".toCharArray());
             
-            command = "keytool -export -alias " + probename +
-            " -file host.cert -keypass server -keystore tempstore -storepass server";
-            String command3[] =
-            {"keytool",
-               "-export",
-               "-alias",
-               probename,
-               "-file",
-               "host.cert",
-               "-keypass",
-               "server",
-               "-keystore",
-               tempstore,
-               "-storepass",
-            "server"};
-            Execute.execute(command3);
+            java.security.Key key = ks.getKey(alias,"server".toCharArray());
+            String keypem = "-----BEGIN RSA PRIVATE KEY-----\n"+Base64.encodeBytes(key.getEncoded())+"\n-----END RSA PRIVATE KEY-----\n";
+            String certpem = new String("-----BEGIN CERTIFICATE-----\n" + Base64.encodeBytes(ks.getCertificate(alias) .getEncoded()) + "\n-----END CERTIFICATE-----\n");
+            String host = xp.get("gratia.hostcert.pem");
+            return certpem + ":" + keypem;
+         }
+         catch (Exception e)
+         {
+            e.printStackTrace();
+            return "error:" + xp.parseException(e);
+         }
+      }
+      
+      
+      public String registerCertificate(String from, String remoteAddr, String pem)
+      {
+         String origin = null;
+         try {
+            origin = fCollectorProxy.checkConnection(pem, remoteAddr, from);
+         } catch (net.sf.gratia.services.AccessException e) {
             
-            //Export export = new Export();
-            //export.export(tempstore,probename,"server",keycert);
+            Logging.info("Rejected the certificate(s)");                  
+            Logging.debug("Exception detail:", e);
+            return "Error: Certificate rejected by the Gratia Collector. " +  xp.parseException(e);
             
-            command = "openssl x509 -out gratia.hostcert.pem -outform pem -in host.cert -inform der";
-            String command4[] =
-            {"openssl",
-               "x509",
-               "-out",
-               "gratia.hostcert.pem",
-               "-outform",
-               "pem",
-               "-in",
-               "host.cert",
-               "-inform",
-            "der"};
-            Execute.execute(command4);
-            
-            command = "openssl pkcs8 -out gratia.hostkey.pem -in key.cert -inform pem -nocrypt";
-            String command5[] =
-            {"openssl",
-               "pkcs8",
-               "-out",
-               "gratia.hostkey.pem",
-               "-in",
-               keycert,
-               "-inform",
-               "pem",
-            "-nocrypt"};
-            Execute.execute(command5);
-            
+         } catch (Exception e) {
+            Logging.warning("Proxy communication failure: ",e);
+            return "Error: issue during certificate check"+ xp.parseException(e);
+         }
+         return "ok:ok";
+      }
+      
+      public String exchangeCertificate(String alias,String from,String remoteAddr,String pem)
+      {
+         String putoutput = putPublicKey(alias,from,remoteAddr,pem);
+         if (!putoutput.equals("ok:ok")) {
+            return putoutput;
+         } else {
+            return getCollectorPublicKey();
+         }
+      }
+      
+      public String getCollectorPublicKey()
+      {
+         // Return this server public key.
+         
+         String certfile =  net.sf.gratia.util.Configuration.getProperties().getProperty("service.vdt.cert.file");
+         String collectorPem = net.sf.gratia.util.XP.get(certfile);
+         
+         String mypem = collectorPem;
+         
+         //
+         // save cert and import
+         //
+         if (mypem == null || mypem.length()==0) {
             try
             {
-               File file = new File(tempstore);
-               if (file.exists())
-                  file.delete();
-            }
-            catch (Exception ignore)
-            {
-            }
-            
-            String host = xp.get("gratia.hostcert.pem");
-            String key = xp.get("gratia.hostkey.pem");
-            return host + ":" + key;
-         }
-         catch (Exception e)
-         {
-            e.printStackTrace();
-            return "error:" + xp.parseException(e);
-         }
-      }
-      
-      
-      public String registerCertificate(String probename,String type,String pem)
-      {
-         String dname = "cn=xxx, ou=Fermi-GridAccounting, o=Fermi, c=US";
-         dname = xp.replace(dname,"xxx",probename);
-         String configurationPath = Configuration.getConfigurationPath();
-         String keystore = configurationPath + "/truststore";
-         String output = "";
-         String active = "Inactive";
-         String command = "";
-         
-         if (autoregister)
-            active = "Active";
-         
-         //
-         // save cert and import
-         //
-         try
-         {
-            xp.save(configurationPath + "/host.cert",pem);
-            
-            String command1[] =
-            {"keytool",
-               "-import",
-               "-alias",
-               probename,
-               "-file",
-               configurationPath + "/host.cert",
-               "-keystore",
-               keystore,
-               "-storepass",
-               "server",
-               "-trustcacerts",
-               "-noprompt",
-               "-keypass",
-            "server"};
-            if (autoregister)
-               Execute.execute(command1);
-            
-            command = "insert Security(source,alias,hostpem,state) values(" +
-            dq + "Probe" + dq + comma +
-            dq + probename + dq + comma +
-            dq + pem + dq + comma + dq + active + dq + ")";
-            statement = connection.createStatement();
-            statement.executeUpdate(command);
-            statement.close();
-            // FlipSSL.flip();
-            return "ok:ok";
-         }
-         catch (Exception e)
-         {
-            e.printStackTrace();
-            return "error:" + xp.parseException(e);
-         }
-      }
-      
-      public String exchangeCertificate(String probename,String type,String pem)
-      {
-         String dname = "cn=xxx, ou=Fermi-GridAccounting, o=Fermi, c=US";
-         dname = xp.replace(dname,"xxx",probename);
-         String truststore = Configuration.getConfigurationPath() + "/truststore";
-         String keystore = Configuration.getConfigurationPath() + "/keystore";
-         String output = "";
-         String active = "Inactive";
-         
-         if (autoregister)
-            active = "Active";
-         
-         //
-         // save cert and import
-         //
-         try
-         {
-            xp.save("host.cert",pem);
-            
-            String command = "keytool -import -alias " + probename +
-            " -file host.cert -keystore " + truststore + 
-            " -storepass server -trustcacerts -noprompt -keypass server";
-            String command1[] =
-            {"keytool",
-               "-import",
-               "-alias",
-               probename,
-               "-file",
-               "host.cert",
-               "-keystore",
-               truststore,
-               "-storepass",
-               "server",
-               "-trustcacerts",
-               "-noprompt",
-               "-keypass",
-            "server"};
-            if (autoregister)
-               Execute.execute(command1);
-            
-            if (! probeAlreadyRegistered(probename))
-            {
-               command = "insert Security(source,alias,hostpem,state) values(" +
-               dq + "Probe" + dq + comma +
-               dq + probename + dq + comma +
-               dq + pem + dq + comma + dq + active + dq + ")";
+               // If it is stored in the keystore:         
+               String keystore = Configuration.getConfigurationPath() + "/keystore";
+               java.security.KeyStore ks = java.security.KeyStore.getInstance("JKS");
+               ks.load(new FileInputStream(keystore),"server".toCharArray());
                
-               statement = connection.createStatement();
-               statement.executeUpdate(command);
-               statement.close();
+               java.security.Key key = ks.getKey("server","server".toCharArray());
+               mypem = "-----BEGIN RSA PRIVATE KEY-----\n"+Base64.encodeBytes(key.getEncoded())+"\n-----END RSA PRIVATE KEY-----\n";
+               
             }
-            
-            command = "keytool -export -alias server -file host.pem -keystore " + keystore +
-            " -keypass server -storepass server";
-            String command2[] =
-            {"keytool",
-               "-export",
-               "-alias",
-               "server",
-               "-file",
-               "host.pem",
-               "-keystore",
-               keystore,
-               "-keypass",
-               "server",
-               "-storepass",
-            "server"};
-            Execute.execute(command2);
-            
-            command = "openssl x509 -out gratia.hostcert.pem -outform pem -in host.cert -inform der";
-            String command3[] =
-            {"openssl",
-               "x509",
-               "-out",
-               "gratia.hostcert.pem",
-               "-outform",
-               "pem",
-               "-in",
-               "host.cert",
-               "-inform",
-            "der"};
-            Execute.execute(command3);
-            
-            String mypem = xp.get("gratia.hostcert.pem");
-            
-            // FlipSSL.flip();
-            
-            return "ok:" + mypem + ":" + URLEncoder.encode(p.getProperty("service.secure.connection","UTF-8"));
+            catch (Exception e)
+            {
+               Logging.warning("Error during private key retrieval",e);
+               return "error:" + xp.parseException(e);
+            }
+         }
+         try
+         {
+            return "new:"+collectorPem+"\n"+"ok:" + 
+                   URLEncoder.encode(mypem,"UTF-8") + ":" + 
+                   URLEncoder.encode(p.getProperty("service.secure.connection","UTF-8"));
          }
          catch (Exception e)
          {
-            e.printStackTrace();
+            Logging.warning("Error during pem encoding",e);
             return "error:" + xp.parseException(e);
          }
       }
       
-      public String get()
+      public String putPublicKey(String alias, String from, String remoteAddr, String pem)
       {
-         String truststore = Configuration.getConfigurationPath() + "/truststore";
-         String keystore = Configuration.getConfigurationPath() + "/keystore";
-         String configurationPath = Configuration.getConfigurationPath();
-         String output1 = configurationPath + "/get1";
-         String output2 = configurationPath + "/get2";
-         String output = "";
-         //
-         // save cert and import
-         //
+         String origin = null;
+         try {
+            origin = fCollectorProxy.checkConnection(pem, remoteAddr, from);
+         } catch (net.sf.gratia.services.AccessException e) {
+            
+            Logging.info("Rejected the certificate(s)");                  
+            Logging.debug("Exception detail:", e);
+            return "Error: Certificate rejected by the Gratia Collector. " +  xp.parseException(e);
+            
+         } catch (Exception e) {
+            Logging.warning("Proxy communication failure: ",e);
+           return "Error: issue during certificate check"+ xp.parseException(e);
+         }
+         
          try
          {
-            String command2[] =
-            {"keytool",
-               "-export",
-               "-alias",
-               "server",
-               "-file",
-               output1,
-               "-keystore",
-               keystore,
-               "-keypass",
-               "server",
-               "-storepass",
-            "server"};
-            Execute.execute(command2);
+            // If it is stored in the keystore:         
+            String keystore = Configuration.getConfigurationPath() + "/keystore";
+            java.security.KeyStore ks = java.security.KeyStore.getInstance("JKS");
+            ks.load(new FileInputStream(keystore),"server".toCharArray());
+
+            // Remove leading and trailing lines.
+            String keyPem = pem.substring(pem.indexOf('\n')+1,
+                                          pem.lastIndexOf('\n',pem.length()-2));
+            java.security.KeyFactory keyFactory = java.security.KeyFactory.getInstance("RSA");
+            java.security.Key key = keyFactory.generatePublic(new java.security.spec.PKCS8EncodedKeySpec(net.sf.gratia.util.Base64.decode(keyPem)));
             
-            String command3[] =
-            {"openssl",
-               "x509",
-               "-out",
-               output2,
-               "-outform",
-               "pem",
-               "-in",
-               output1,
-               "-inform",
-            "der"};
-            Execute.execute(command3);
+            ks.setKeyEntry(alias,key,"server".toCharArray(),null);
+
+            ks.store(new FileOutputStream(keystore),"server".toCharArray());
             
-            String mypem = xp.get(output2);
-            
-            return "ok:" + 
-            URLEncoder.encode(mypem,"UTF-8") + ":" + 
-            URLEncoder.encode(p.getProperty("service.secure.connection","UTF-8"));
          }
          catch (Exception e)
          {
-            e.printStackTrace();
+            Logging.warning("Error during key storage",e);
             return "error:" + xp.parseException(e);
          }
-      }
-      
-      public String put(String probename,String type,String pem)
-      {
-         String configurationPath = Configuration.getConfigurationPath();
-         String keystore = configurationPath + "/truststore";
-         String output1 = configurationPath + "/put1";
-         String output2 = configurationPath + "/put2";
-         String output = "";
-         String active = "Inactive";
-         String command = "";
          
-         if (autoregister)
-            active = "Active";
-         
-         //
-         // save cert and import
-         //
-         try
-         {
-            pem = URLDecoder.decode(pem,"UTF-8");
-            xp.save(output1,pem);
-            
-            String command1[] =
-            {"openssl",
-               "x509",
-               "-out",
-               output2,
-               "-outform",
-               "der",
-               "-in",
-               output1,
-               "-inform",
-            "pem"};
-            Execute.execute(command1);
-            
-            String command2[] =
-            {"keytool",
-               "-import",
-               "-alias",
-               probename,
-               "-file",
-               output2,
-               "-keystore",
-               keystore,
-               "-storepass",
-               "server",
-               "-trustcacerts",
-               "-noprompt",
-               "-keypass",
-            "server"};
-            
-            if (autoregister)
-               Execute.execute(command2);
-            
-            command = "insert Security(source,alias,hostpem,state) values(" +
-            dq + type + dq + comma +
-            dq + probename + dq + comma +
-            dq + pem + dq + comma + dq + active + dq + ")";
-            statement = connection.createStatement();
-            statement.executeUpdate(command);
-            statement.close();
-            // FlipSSL.flip();
-            return "ok:ok";
-         }
-         catch (Exception e)
-         {
-            e.printStackTrace();
-            return "error:" + xp.parseException(e);
-         }
+
+         return "ok:ok";
       }
 
       // Actually same as in RMIhandlerServlet.
