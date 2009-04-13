@@ -48,8 +48,8 @@ public class Execute {
             int exitValue = proc.waitFor();
             Logging.log("exitValue: " + exitValue);
             return exitValue;
-        } catch (Throwable t) {
-            t.printStackTrace();
+        } catch (Exception t) {
+           Logging.warning("Failed to executed the command: "+cmd,t);
             return 1;
         }
     }
@@ -58,7 +58,7 @@ public class Execute {
         String newcommand = cmd[0];
 
         for (int i = 1; i < cmd.length; i++)
-            newcommand = newcommand + " " + cmd[i];
+            newcommand = newcommand + " \"" + cmd[i] + "\"";
         try {
 
             Runtime rt = Runtime.getRuntime();
@@ -80,8 +80,8 @@ public class Execute {
             int exitValue = proc.waitFor();
             Logging.log("exitValue: " + exitValue);
             return exitValue;
-        } catch (Throwable t) {
-            t.printStackTrace();
+        } catch (Exception t) {
+            Logging.warning("Failed to executed the command: "+cmd,t);
             return 1;
         }
     }
