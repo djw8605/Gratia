@@ -53,7 +53,7 @@
 
 	<hr><label class="menuGroup">Authentication</label> <br />
 	<a href="./certificatetable.html" target="adminContent" class="<%=menuClass%>">Certificates</a><br />
-	<a href="./securitytable.html" target="adminContent" class="<%=menuClass%>">Connections</a><br />
+	<a href="./connectiontable.html" target="adminContent" class="<%=menuClass%>">Connections</a><br />
 
 	<hr><label class="menuGroup">Replication</label> <br />
 	<a href="./jobusagerecordreplicationtable.html" target="adminContent" class="<%=menuClass%>">Job Usage Replication</a><br />

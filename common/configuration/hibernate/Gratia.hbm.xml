@@ -84,16 +84,6 @@
     </property>
   </class>
 
-  <class name="Security" table="Security" node="Security" lazy="false">
-    <id name="securityid" column="securityid" type="int">
-      <generator class="native"/>
-    </id>
-    <property name="source" column="source"/>
-    <property name="alias" column="alias"/>
-    <property name="hostpem" column="hostpem" type="text"/>
-    <property name="state" column="state"/>
-  </class>
-
   <class name="Certificate" table="Certificate" node="Certificate" lazy="false">
     <id name="Certid" column="certid" type="long">
       <generator class="native"/>

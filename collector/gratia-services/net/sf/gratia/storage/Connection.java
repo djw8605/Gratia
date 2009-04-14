@@ -21,7 +21,7 @@ import java.util.Date;
  */
 
 
-public class Connection implements AttachableXmlElement
+public class Connection implements AttachableXmlElement, Comparable
    {
       private long cid;
       private int fState;
@@ -44,6 +44,18 @@ public class Connection implements AttachableXmlElement
          fState = kValid;
       }
 
+      public Connection(Connection conn)
+      {
+         cid = conn.cid;
+         fSenderHost = conn.fSenderHost;
+         fSender = conn.fSender;
+         fCertificate = conn.fCertificate;
+         fState = conn.fState;
+         fCollector = conn.fCollector;
+         fFirstSeen = conn.fFirstSeen;
+         fLastSeen = conn.fLastSeen;
+      }
+      
       public Connection(String senderHost, String sender, Certificate cert)
       {
          fSenderHost = senderHost;
@@ -98,6 +110,26 @@ public class Connection implements AttachableXmlElement
             if (fSender != null) hash = hash + fSender.hashCode();
             if (fCertificate != null) hash = hash + fCertificate.hashCode();
             return hash;
+         }
+      }
+      
+      public int compareTo(Object obj) {
+         try {
+            Connection cmp = (Connection) obj;
+            
+            int result;
+            if (getSender() != null && cmp.getSender() != null) {
+               result = getSender().compareTo( cmp.getSender() );
+            } else {
+               result = getSenderHost().compareTo( cmp.getSenderHost() );
+            }
+            if (result == 0) {
+               result =  getCollectorName().compareTo( cmp.getCollectorName() );
+            }
+            return result;
+         }
+         catch (Exception e) {
+            return -1;
          }
       }
       

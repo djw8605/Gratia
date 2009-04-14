@@ -6,7 +6,7 @@ import net.sf.gratia.util.Execute;
 import net.sf.gratia.util.Configuration;
 
 import net.sf.gratia.services.*;
-import net.sf.gratia.storage.Certificate;
+import net.sf.gratia.storage.Connection;
 
 import java.io.*;
 
@@ -36,7 +36,7 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.exception.*;
 
-public class CertificateTable extends HttpServlet 
+public class ConnectionTable extends HttpServlet 
    {
       XP xp = new XP();
       
@@ -48,7 +48,7 @@ public class CertificateTable extends HttpServlet
       String fError = "";
       static Pattern gRowPattern = Pattern.compile("<tr><form .*?</tr>",Pattern.MULTILINE + Pattern.DOTALL);
       StringBuffer buffer = new StringBuffer();
-      Hashtable<Long,Certificate> fRepTable = null;
+      Hashtable<Long,Connection> fRepTable = null;
       //
       // globals
       //
@@ -121,7 +121,7 @@ public class CertificateTable extends HttpServlet
       {
          if (checkLogin(request,response)) {
              
-            Logging.debug("CertificateTable: doGet");
+            Logging.debug("ConnectionTable: doGet");
             
             setup(request,response);
             if (request.getParameter("action") != null) {
@@ -134,7 +134,7 @@ public class CertificateTable extends HttpServlet
       public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
       {
          if (checkLogin(request,response)) {
-            Logging.debug("CertificateTable: doPost");
+            Logging.debug("ConnectionTable: doPost");
             
             setup(request,response);
             update();
@@ -147,7 +147,7 @@ public class CertificateTable extends HttpServlet
       {
          this.fRequest = request;
          this.fResponse = response;
-         fHtml = xp.get(fRequest.getRealPath("/") + "certificatetable.html");
+         fHtml = xp.get(fRequest.getRealPath("/") + "connectiontable.html");
          Matcher m = gRowPattern.matcher(fHtml);
          while (m.find())
          {
@@ -158,23 +158,23 @@ public class CertificateTable extends HttpServlet
                break;
             }
          }
-         loadCertificates();
+         loadConnections();
       }
       
-      void loadCertificates() {
+      void loadConnections() {
          // Load replication entries from DB
          Session session;
          session = HibernateWrapper.getSession();
-         Query rq = session.createQuery("from Certificate");
+         Query rq = session.createQuery("from Connection");
          List records = rq.list();
          session.close();
          
          // Load hash table with entries
-         fRepTable = new Hashtable<Long, Certificate>();
+         fRepTable = new Hashtable<Long, Connection>();
          for ( Object listEntry : records ) {
-            Certificate repEntry = (Certificate) listEntry;
-            Logging.debug("CertificateTable: loaded entry " + repEntry.getCertid());
-            fRepTable.put(new Long(repEntry.getCertid()),
+            Connection repEntry = (Connection) listEntry;
+            Logging.debug("ConnectionTable: loaded entry " + repEntry.getcid());
+            fRepTable.put(new Long(repEntry.getcid()),
                           repEntry);
          }
       }
@@ -191,38 +191,43 @@ public class CertificateTable extends HttpServlet
       public void process()
       {
          // Loop through replication table entries.
-         Enumeration<Certificate> certEntries = fRepTable.elements();
-         Vector<Certificate> vec = new Vector<Certificate>();
+         Enumeration<Connection> certEntries = fRepTable.elements();
+         Vector<Connection> vec = new Vector<Connection>();
          while (certEntries.hasMoreElements()) {
-            vec.add((Certificate) certEntries.nextElement());
+            vec.add((Connection) certEntries.nextElement());
          }
          Collections.sort(vec); // Sort according to Replication.CompareTo().
          
-         Logging.debug("CertificateTable: processing " + vec.size() + " certificates");
+         Logging.debug("ConnectionTable: processing " + vec.size() + " connections");
          buffer = new StringBuffer();
          int index = 0;
-         for ( Certificate certEntry : vec ) {
-            String issuer = "N/A";
-            String name = "N/A";
-            String serial = "N/A";
-            String date = "N/A";
+         for ( Connection entry : vec ) {
+            String Sender = "N/A";
+            String SenderHost = "N/A";
+            String CollectorName = "N/A";
+            String FirstSeen = "N/A";
+            String LastSeen = "N/A";
             try {
-               issuer = certEntry.getCert().getIssuerDN().toString();
-               name =  certEntry.getCert().getSubjectDN().toString();
-               serial = certEntry.getCert().getSerialNumber().toString(16);
-               date = certEntry.getCert().getNotAfter().toString();
+               if (entry.getSender() != null) {
+                  Sender = entry.getSender();
+               }
+               SenderHost = entry.getSenderHost();
+               CollectorName = entry.getCollectorName();
+               FirstSeen = entry.getFirstSeen().toString();
+               LastSeen = entry.getLastSeen().toString();
             } catch (Exception e) {
-               Logging.warning("CertificateTable: Problem " + e);
+               Logging.warning("ConnectionTable: Problem " + e);
             }
-            
+
             String newrow = fRow.replaceAll("#index#","" + index)
-               .replaceAll("#certid#","" + certEntry.getCertid())
-               .replaceAll("#Issuer#",issuer)
-               .replaceAll("#Name#",name)
-               .replaceAll("#Serial#",serial)
-               .replaceAll("#ExpirationDate#",date)
-               .replaceAll("#Status#", certEntry.isValid() ? "Allowed" : "Banned")
-               .replaceAll("#Change#", certEntry.isValid() ? 
+               .replaceAll("#cid#","" + entry.getcid())
+               .replaceAll("#Sender#",Sender)
+               .replaceAll("#SenderHost#",SenderHost)
+               .replaceAll("#CollectorName#",CollectorName)
+               .replaceAll("#FirstSeen#",FirstSeen)
+               .replaceAll("#LastSeen#",LastSeen)
+               .replaceAll("#Status#", entry.isValid() ? "Allowed" : "Banned")
+               .replaceAll("#Change#", entry.isValid() ? 
                            "<input type=\"submit\" name=\"action\" value=\"Ban\"/>" : 
                            "<input type=\"submit\" name=\"action\" value=\"Allow\"/>");
             index++;
@@ -238,37 +243,37 @@ public class CertificateTable extends HttpServlet
          try {
                         
             if (action.equals("Ban")) {
-               Long certid = Long.decode(fRequest.getParameter("certid"));
-               Logging.debug("CertificateTable: Banning :" + certid);
-               setState(certid,false);
+               Long cid = Long.decode(fRequest.getParameter("cid"));
+               Logging.debug("ConnectionTable: Banning :" + cid);
+               setState(cid,false);
             } else if (action.equals("Allow")) {
-               Long certid = Long.decode(fRequest.getParameter("certid"));
-               Logging.debug("CertificateTable: Allowing :" + certid);
-               setState(certid,true);
+               Long cid = Long.decode(fRequest.getParameter("cid"));
+               Logging.debug("ConnectionTable: Allowing :" + cid);
+               setState(cid,true);
             } else if (action.equals("BanAll")) {
-               Logging.debug("CertificateTable: Banning All");
+               Logging.debug("ConnectionTable: Banning All");
                setAllState(false);
             } else if (action.equals("AllowAll")) {
-               Logging.debug("CertificateTable: Allowing All");
+               Logging.debug("ConnectionTable: Allowing All");
                setAllState(true);
             }
          } catch (NumberFormatException e) {
-            Logging.warning("CertificateTable: Problem when parsing certid in post: "+fRequest.getParameter("certid"));
+            Logging.warning("ConnectionTable: Problem when parsing cid in post: "+fRequest.getParameter("cid"));
             reportError("Internal Error",e.toString());            
          } catch (Exception e) {
-            Logging.warning("CertificateTable: Problem when handling certificate: "+fRequest.getParameter("certid")+": ",e);
+            Logging.warning("ConnectionTable: Problem when handling connection: "+fRequest.getParameter("cid")+": ",e);
             reportError("Internal Error",e.toString());
          }
          
       }
       
-      public void setState(Long certid, boolean isValid) throws Exception
+      public void setState(Long cid, boolean isValid) throws Exception
       {
-         Logging.debug("CertificateTable: changing state of certid" + certid + " to " + (isValid ? "Allowed" : "Banned"));
+         Logging.debug("ConnectionTable: changing state of cid" + cid + " to " + (isValid ? "Allowed" : "Banned"));
          
          try {
-            Certificate cert = fRepTable.get(certid);
-            Certificate updated = new Certificate(cert);
+            Connection cert = fRepTable.get(cid);
+            Connection updated = new Connection(cert);
             updated.setValid(isValid);
          
             if (cert != null) {
@@ -278,7 +283,7 @@ public class CertificateTable extends HttpServlet
                session.flush();
                tx.commit();
                session.close();
-               fRepTable.put( new Long(updated.getCertid()), updated );
+               fRepTable.put( new Long(updated.getcid()), updated );
             }
          } catch (Exception e) {
             throw e;
@@ -287,19 +292,19 @@ public class CertificateTable extends HttpServlet
       
       public void setAllState(boolean isValid) throws Exception
       {
-         Logging.debug("CertificateTable: changing state of all certificates to " + (isValid ? "Allowed" : "Banned"));
+         Logging.debug("ConnectionTable: changing state of all connections to " + (isValid ? "Allowed" : "Banned"));
 
          try {
             Session session = HibernateWrapper.getSession();
             Transaction tx = session.beginTransaction();
          
-            Hashtable<Long,Certificate> updatedTable = new Hashtable<Long,Certificate>();
-            Enumeration<Certificate> certEntries    = fRepTable.elements();
+            Hashtable<Long,Connection> updatedTable = new Hashtable<Long,Connection>();
+            Enumeration<Connection> certEntries    = fRepTable.elements();
             while (certEntries.hasMoreElements()) {
-               Certificate cert = certEntries.nextElement();
-               Certificate updated = new Certificate(cert);
+               Connection cert = certEntries.nextElement();
+               Connection updated = new Connection(cert);
                updated.setValid(isValid);
-               updatedTable.put( new Long(updated.getCertid()), updated );
+               updatedTable.put( new Long(updated.getcid()), updated );
                session.saveOrUpdate( updated );
             }
             session.flush();

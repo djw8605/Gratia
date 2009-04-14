@@ -27,13 +27,13 @@
     <servlet>
         <servlet-name>SiteMgmt</servlet-name>
         <servlet-class>net.sf.gratia.administration.SiteMgmt</servlet-class>
-	<load-on-startup>2</load-on-startup>
+        <load-on-startup>2</load-on-startup>
     </servlet>
 
     <servlet>
         <servlet-name>ProbeTable</servlet-name>
         <servlet-class>net.sf.gratia.administration.ProbeTable</servlet-class>
-	<load-on-startup>1</load-on-startup>
+        <load-on-startup>1</load-on-startup>
     </servlet>
 
     <servlet>
@@ -45,29 +45,29 @@
     <servlet>
         <servlet-name>VONameCorrection</servlet-name>
         <servlet-class>net.sf.gratia.administration.VONameCorrection</servlet-class>
-	<load-on-startup>2</load-on-startup>
+        <load-on-startup>2</load-on-startup>
     </servlet>
 
     <servlet>
         <servlet-name>CertificateTable</servlet-name>
         <servlet-class>net.sf.gratia.administration.CertificateTable</servlet-class>
-				<load-on-startup>2</load-on-startup>
+        <load-on-startup>2</load-on-startup>
     </servlet>
 
     <servlet>
-        <servlet-name>SecurityTable</servlet-name>
-        <servlet-class>net.sf.gratia.administration.SecurityTable</servlet-class>
-				<load-on-startup>2</load-on-startup>
+        <servlet-name>ConnectionTable</servlet-name>
+        <servlet-class>net.sf.gratia.administration.ConnectionTable</servlet-class>
+        <load-on-startup>2</load-on-startup>
     </servlet>
 
     <servlet>
         <servlet-name>jobusagerecordreplicationtable</servlet-name>
         <servlet-class>net.sf.gratia.administration.ReplicationTable</servlet-class>
-				<load-on-startup>2</load-on-startup>
+        <load-on-startup>2</load-on-startup>
         <init-param>
-            <param-name>RecordType</param-name>
-            <param-value>JobUsageRecord</param-value>
-         </init-param>
+           <param-name>RecordType</param-name>
+           <param-value>JobUsageRecord</param-value>
+        </init-param>
     </servlet>
 
     <servlet>
@@ -77,7 +77,7 @@
         <init-param>
            <param-name>RecordType</param-name>
            <param-value>MetricRecord</param-value>
-         </init-param>
+        </init-param>
     </servlet>
 
     <servlet>
@@ -87,43 +87,43 @@
         <init-param>
            <param-name>RecordType</param-name>
            <param-value>ProbeDetails</param-value>
-         </init-param>
+        </init-param>
     </servlet>
 
     <servlet>
         <servlet-name>CPUInfo</servlet-name>
         <servlet-class>net.sf.gratia.administration.CPUInfo</servlet-class>
-				<load-on-startup>2</load-on-startup>
+        <load-on-startup>2</load-on-startup>
     </servlet>
 
     <servlet>
         <servlet-name>Roles</servlet-name>
         <servlet-class>net.sf.gratia.administration.Roles</servlet-class>
-				<load-on-startup>2</load-on-startup>
+        <load-on-startup>2</load-on-startup>
     </servlet>
 
     <servlet>
         <servlet-name>Status</servlet-name>
         <servlet-class>net.sf.gratia.administration.Status</servlet-class>
-				<load-on-startup>2</load-on-startup>
+        <load-on-startup>2</load-on-startup>
     </servlet>
 
     <servlet>
         <servlet-name>MonitorStatus</servlet-name>
         <servlet-class>net.sf.gratia.administration.MonitorStatus</servlet-class>
-	<load-on-startup>2</load-on-startup>
+        <load-on-startup>2</load-on-startup>
     </servlet>
 
     <servlet>
         <servlet-name>SystemAdministration</servlet-name>
         <servlet-class>net.sf.gratia.administration.SystemAdministration</servlet-class>
-	<load-on-startup>2</load-on-startup>
+        <load-on-startup>2</load-on-startup>
     </servlet>
 
     <servlet>
         <servlet-name>StopDatabase</servlet-name>
         <servlet-class>net.sf.gratia.administration.StopDatabase</servlet-class>
-				<load-on-startup>2</load-on-startup>
+        <load-on-startup>2</load-on-startup>
     </servlet>
 
     <servlet-mapping>
@@ -147,8 +147,8 @@
     </servlet-mapping>
 
     <servlet-mapping>
-        <servlet-name>SecurityTable</servlet-name>
-        <url-pattern>/securitytable.html</url-pattern>
+        <servlet-name>ConnectionTable</servlet-name>
+        <url-pattern>/connectiontable.html</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>
