@@ -427,20 +427,63 @@ public class RegisterServlet extends HttpServlet
                "-storepass",
             "server"};
             
-            Logging.warning("EXECUTING: "+command);
-            
             Execute.execute(command1);
-            Execute.execute("echo -${PATH}-");
             
+            command = "keytool -selfcert -dname " + dq + dname + dq + " -alias " + alias + 
+            " -keypass server -keystore " + keystore + " -storepass server";
+            String command2[] =
+            {"keytool",
+               "-selfcert",
+               "-dname",
+               dname,
+               "-alias",
+               alias,
+               "-keypass",
+               "server",
+               "-keystore",
+               keystore,
+               "-storepass",
+               "server"};
+            //Execute.execute(command2);
+           
+ 
             // If it is stored in the keystore:         
             java.security.KeyStore ks = java.security.KeyStore.getInstance("JKS");
             ks.load(new FileInputStream(keystore),"server".toCharArray());
             
             java.security.Key key = ks.getKey(alias,"server".toCharArray());
-            String keypem = "-----BEGIN RSA PRIVATE KEY-----\n"+Base64.encodeBytes(key.getEncoded())+"\n-----END RSA PRIVATE KEY-----\n";
+            //java.security.KeyFactory kf = java.security.KeyFactory.getInstance("RSA");
+            //key = kf.translateKey(key);
+            //This should have led to key.getFormat().equals("RSA") 
+            //but instead it is still PKCS#8
+
+            String keypemfile = "/tmp/key.pem"; // need to add pid
+            String keypkcs8 = "/tmp/keypcks8";
+            StringBuffer buffer = new StringBuffer();
+            buffer.append("-----BEGIN PRIVATE KEY-----" + "\n");
+            buffer.append(Base64.encodeBytes(key.getEncoded()) + "\n");
+            buffer.append("-----END PRIVATE KEY-----" + "\n");
+            xp.save(keypkcs8,buffer.toString());
+
+            command = "openssl pkcs8 -out "+keypemfile+" -in "+keypkcs8+" -inform pem -nocrypt";
+            String command5[] =
+            {"openssl",
+               "pkcs8",
+               "-out",
+               keypemfile, 
+               "-in", 
+               keypkcs8,
+               "-inform",
+               "pem",
+            "-nocrypt"};
+            Execute.execute(command5);
+ 
+            //String keypem = "-----BEGIN RSA PRIVATE KEY-----\n"+Base64.encodeBytes(key.getEncoded())+"\n-----END RSA PRIVATE KEY-----\n";
             String certpem = new String("-----BEGIN CERTIFICATE-----\n" + Base64.encodeBytes(ks.getCertificate(alias) .getEncoded()) + "\n-----END CERTIFICATE-----\n");
-            String host = xp.get("gratia.hostcert.pem");
-            return certpem + ":" + keypem;
+            String keypem = xp.get(keypemfile);
+            new File(keypemfile).delete();
+            new File(keypkcs8).delete();
+            return "ok:" + certpem + ":" + keypem;
          }
          catch (Exception e)
          {
