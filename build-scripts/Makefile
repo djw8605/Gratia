@@ -361,7 +361,8 @@ security: $(target)/gratiaSecurity.jar
 	# --- Target: security COMPLETED at $(shell date) ---
 
 #------------------------------------------------------------------
-$(target)/gratiaSecurity.jar: $(target)/gratia-services.war $(util_lib) $(security)/net/sf/gratia/vomsSecurity/*.java
+$(target)/gratiaSecurity.jar: $(target)/gratia-services.war $(util_lib) $(security)/net/sf/gratia/vomsSecurity/*.java \
+                              $(security)/org/glite/security/trustmanager/*.java $(security)/net/sf/gratia/trustmanager/*.java
 	# ----------------------------
 	# --- Target: $(target)/gratiaSecurity.jar ---
 	# ----------------------------
@@ -370,9 +371,15 @@ $(target)/gratiaSecurity.jar: $(target)/gratia-services.war $(util_lib) $(securi
 	mkdir -p $(jar-dir)/$(name_from_jar)/net/sf/gratia/util
 	mkdir -p $(jar-dir)/$(name_from_jar)/net/sf/gratia/services
 	mkdir -p $(jar-dir)/$(name_from_jar)/net/sf/gratia/vomsSecurity
-	javac -d $(classes-dir) -cp $(classpath) -extdirs $(commonLib) $(security)/net/sf/gratia/vomsSecurity/*.java
+	mkdir -p $(jar-dir)/$(name_from_jar)/net/sf/gratia/trustmanager
+	mkdir -p $(jar-dir)/$(name_from_jar)/org/glite/security/trustmanager
+	javac -Xlint:unchecked -d $(classes-dir) -cp $(classpath) -extdirs $(commonLib) $(security)/net/sf/gratia/vomsSecurity/*.java
+	javac -Xlint:unchecked -d $(classes-dir) -cp $(classpath) -extdirs $(commonLib) $(security)/org/glite/security/trustmanager/*.java
+	javac -Xlint:unchecked -d $(classes-dir) -cp $(classpath) -extdirs $(commonLib) $(security)/net/sf/gratia/trustmanager/*.java
 	cp $(classes-dir)/net/sf/gratia/util/*.class $(jar-dir)/$(name_from_jar)/net/sf/gratia/util
 	cp $(classes-dir)/net/sf/gratia/vomsSecurity/*.class $(jar-dir)/$(name_from_jar)/net/sf/gratia/vomsSecurity
+	cp $(classes-dir)/net/sf/gratia/trustmanager/*.class $(jar-dir)/$(name_from_jar)/net/sf/gratia/trustmanager
+	cp $(classes-dir)/org/glite/security/trustmanager/*.class $(jar-dir)/$(name_from_jar)/org/glite/security/trustmanager/
 	cp $(classes-dir)/net/sf/gratia/services/JMS*.class $(jar-dir)/$(name_from_jar)/net/sf/gratia/services
 	jar -cvfM $(target)/gratiaSecurity.jar -C $(jar-dir)/$(name_from_jar) .
 	# --- Target: $@ COMPLETED at $(shell date) ---
