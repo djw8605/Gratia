@@ -100,9 +100,9 @@ public class CertificateHandler
 		Properties p = net.sf.gratia.util.Configuration.getProperties();
 		String vos;
 		String voName = "";
-		TreeSet tempVOs = new TreeSet();	// sorted arrayList with unique names for the voList
-		List tempFQANs  = new ArrayList();	// FQAN list from service properties file
-		List tempDNs    = new ArrayList();	// DN list from service properties file
+		TreeSet<String> tempVOs = new TreeSet<String>();	// sorted arrayList with unique names for the voList
+		List<String> tempFQANs  = new ArrayList<String>();	// FQAN list from service properties file
+		List<String> tempDNs    = new ArrayList<String>();	// DN list from service properties file
 
 		try
 		{
@@ -185,8 +185,8 @@ public class CertificateHandler
 	// ----------------------------------
 	public String loadVOServers(String voFile)
 	{
-		List voVOMSNam = new ArrayList();	// list of VO names from the voms-server file
-		List voVOMSUrl = new ArrayList();	// list of URLs for VO from the voms-server file
+		List<String> voVOMSNam = new ArrayList<String>();	// list of VO names from the voms-server file
+		List<String> voVOMSUrl = new ArrayList<String>();	// list of URLs for VO from the voms-server file
 
 		String InStrLine;	// Input line
 		String StrLine;		// Line to parse after trimming
