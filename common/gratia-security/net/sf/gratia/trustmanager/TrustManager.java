@@ -13,7 +13,7 @@ import java.security.cert.CertificateException;
 
 import java.util.Vector;
 import java.io.FileInputStream;
-
+import java.io.FileOutputStream;
 
 /**
  * @author Philippe Canal
@@ -22,22 +22,23 @@ import java.io.FileInputStream;
  **/
 public class TrustManager extends org.glite.security.trustmanager.CRLFileTrustManager {
    static org.apache.commons.logging.Log logger = org.apache.commons.logging.LogFactory.getLog(org.glite.security.trustmanager.CRLFileTrustManager.class);
-   X509TrustManager pkixTrustManager;
-   private KeyStore fKeyStore;
    
    /** Creates new CRLTrustManager
     */
-   public TrustManager(Vector trustAnchors) throws CertificateException, NoSuchProviderException, java.security.KeyStoreException, 
-                                                   java.io.FileNotFoundException, java.security.NoSuchAlgorithmException, java.io.IOException 
+   public TrustManager(Vector trustAnchors) throws CertificateException, NoSuchProviderException
    {
       super(trustAnchors);
+   }
       
-      fKeyStore = KeyStore.getInstance("JKS");
-      fKeyStore.load(new FileInputStream(net.sf.gratia.util.Configuration.getConfigurationPath() + "/keystore"),
+   private X509TrustManager getPkixTrustManager() throws CertificateException, java.security.KeyStoreException, 
+                java.io.FileNotFoundException, java.security.NoSuchAlgorithmException, java.io.IOException {
+
+      KeyStore keyStore = KeyStore.getInstance("JKS");
+      keyStore.load(new FileInputStream(net.sf.gratia.util.Configuration.getConfigurationPath() + "/keystore"),
                      "server".toCharArray());
       
       TrustManagerFactory tmf = TrustManagerFactory.getInstance("PKIX");
-      tmf.init(fKeyStore);
+      tmf.init(keyStore);
       
       javax.net.ssl.TrustManager tms [] = tmf.getTrustManagers();
       
@@ -48,11 +49,47 @@ public class TrustManager extends org.glite.security.trustmanager.CRLFileTrustMa
        */
       for (int i = 0; i < tms.length; i++) {
          if (tms[i] instanceof X509TrustManager) {
-            pkixTrustManager = (X509TrustManager) tms[i];
-            return;
+            return (X509TrustManager) tms[i];
          }
       }
+      return null;
+   }
+
+   private boolean addCertificate(java.security.cert.X509Certificate cert[]) {
       
+      // Returns true if we added the cert (i.e. if its DN looks like one of ours.
+      
+      // Our DN pattern:
+      // String dname = "cn=xxx, ou=Fermi-GridAccounting, o=Fermi, c=US";
+      
+      if (cert == null || cert[0] == null) return false;
+      
+      String dn = cert[0].getSubjectDN().toString();
+      int first = dn.indexOf(',');
+      if (first == -1) return false;
+      
+      String cn = dn.substring(0,first);
+      String sn = dn.substring(first+1);
+      
+      if (!sn.toLowerCase().equals(" ou=gratiaaccounting, o=gratia, c=us")) {
+         logger.debug("Gratia Trustmanager failed to add client certificate '"+dn+"' because of:"+sn);
+         return false;
+      }
+          
+      try {
+         KeyStore keyStore = KeyStore.getInstance("JKS");
+         keyStore.load(new FileInputStream(net.sf.gratia.util.Configuration.getConfigurationPath() + "/keystore"),
+                       "server".toCharArray());
+         
+         keyStore.setCertificateEntry( sn, cert[0] );
+         keyStore.store(new FileOutputStream(net.sf.gratia.util.Configuration.getConfigurationPath() + "/keystore"),
+                        "server".toCharArray());
+      } catch (Exception e) {
+         logger.debug("Gratia Trustmanager failed to add client certificate "+dn+" because of:"+e.getMessage());
+         return false;
+      }
+      logger.debug("Gratia Trustmanager added client certificate: "+dn);
+      return true;
    }
    
    /** This method checks that the certificate path is a valid
@@ -85,7 +122,44 @@ public class TrustManager extends org.glite.security.trustmanager.CRLFileTrustMa
       if ( x509Certificate[0].getIssuerDN().equals( x509Certificate[0].getSubjectDN() ) ) 
       {
          logger.debug("Gratia Trustmanager has matching cert");
-         pkixTrustManager.checkClientTrusted(x509Certificate, authType);
+         X509TrustManager manager = null; 
+         try {
+            manager = getPkixTrustManager();
+         } catch (Exception e) {
+            logger.fatal("Gratia Trustmanager can't red the key store"+e.getMessage());
+            super.checkClientTrusted(x509Certificate, authType);
+         } 
+         if (manager != null) {
+            try {
+               manager.checkClientTrusted(x509Certificate, authType);
+            }
+            catch (java.security.cert.CertificateException e) {
+               logger.debug("Gratia Trustmanager rejecting certificate because: "+e.getMessage());
+               if (!addCertificate(x509Certificate)) {
+                  throw e;
+               }
+            } catch(java.lang.RuntimeException re) {
+               Throwable e = re.getCause();
+               if (e instanceof java.security.InvalidAlgorithmParameterException) {
+                  if (e.getMessage().equals("the trustAnchors parameter must be non-empty")) {
+                     logger.debug("Gratia Trustmanager has noticed an empty keystore");
+                     if (!addCertificate(x509Certificate)) {
+                        throw new java.security.cert.CertificateException("empty keystore");
+                     }
+                  } else {
+                     logger.debug("Gratia Trustmanager Unexpected exception message: "+e.getMessage());
+                     throw new java.security.cert.CertificateException(e.getMessage());
+                  }
+               } else {                  
+                  logger.debug("Gratia Trustmanager Unexpected exception type: "+e.getMessage());
+                  throw new java.security.cert.CertificateException("Unexpected exception type: "+e.getMessage());
+               }
+            } catch (Exception e) {
+               logger.debug("Gratia Trustmanager Unexpected exception type: "+e.getMessage());
+               throw new java.security.cert.CertificateException("Unexpected exception type: "+e.getMessage());
+            }
+         }
+         logger.debug("Gratia Trustmanager has matching cert that was accepted");
       } else {         
          logger.debug("Gratia Trustmanager a non matching cert");
          super.checkClientTrusted(x509Certificate, authType);
