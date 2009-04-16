@@ -773,6 +773,11 @@ public class CollectorService implements ServletContextListener {
         FlipSSL.flip();
     }
    
+   public void setConnectionCaching(boolean enable)
+   {
+      net.sf.gratia.storage.Connection.setCaching(enable);
+   }
+   
    public String checkConnection(String certpem, String senderHost, String sender) 
    throws RemoteException, AccessException {
       
@@ -817,7 +822,6 @@ public class CollectorService implements ServletContextListener {
             Transaction tx = session.beginTransaction();
             try {
                gr_conn = gr_conn.attach( session );
-               Logging.warning("Before flush");
                session.flush();
                tx.commit();
             } catch (org.hibernate.exception.LockAcquisitionException e) {
@@ -847,10 +851,11 @@ public class CollectorService implements ServletContextListener {
             session.close();
             
             from.setConnection(gr_conn);
+            Logging.warning("Checked connection"+gr_conn);
             if (gr_conn.isValid()) {
                result = from.asXml(0);
             }
-          
+            Logging.warning("Checked connection and result is"+result);
          }
          
       } else {
@@ -873,8 +878,6 @@ public class CollectorService implements ServletContextListener {
                   Transaction tx = session.beginTransaction();
                   try {
                      localcert = new net.sf.gratia.storage.Certificate( certs[i] );
-                     
-
                      session.saveOrUpdate( localcert );
                      session.flush();
                      tx.commit();

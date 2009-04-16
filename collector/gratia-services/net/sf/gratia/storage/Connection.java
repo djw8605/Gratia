@@ -230,6 +230,12 @@ public class Connection implements AttachableXmlElement, Comparable
             
       private static AttachableCollection<Connection> fgSaved = new AttachableCollection<Connection>();
       
+      public static void setCaching(boolean enable) 
+      {
+         // Enable or disable the caching of connection.
+         fgSaved.setCaching( enable );
+      }
+      
       public static Connection getConnection( org.hibernate.Session session, Connection check )  throws Exception
       {
          return fgSaved.getObject( session, check );         

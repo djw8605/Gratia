@@ -56,6 +56,34 @@ public class ConnectionTable extends HttpServlet
       HttpServletResponse fResponse;
       boolean fInitialized = false;
       
+      JMSProxy fCollectorProxy = null;
+      
+      JMSProxy getCollectorProxy() throws Exception
+      {
+         if (fCollectorProxy!=null) return fCollectorProxy;
+         
+         int loop = 0;
+         Properties p = Configuration.getProperties();
+         while (fCollectorProxy == null) {
+            // Wait until JMS service is up
+            try {
+               fCollectorProxy = (JMSProxy) java.rmi.Naming.lookup(p.getProperty("service.rmi.rmilookup") +
+                                                                   p.getProperty("service.rmi.service"));
+            }
+            catch (Exception e) {
+               try {
+                  Thread.sleep(5000);
+               } catch (Exception ignore) {
+                  if (loop > 5) {
+                     Logging.warning("SystemAdministration: Caught exception during RMI lookup", e);
+                     throw e;
+                  }
+               }
+            }
+         }
+         return fCollectorProxy;
+      }
+      
       public void init(ServletConfig config) throws ServletException 
       {
          try {
@@ -272,6 +300,7 @@ public class ConnectionTable extends HttpServlet
          Logging.debug("ConnectionTable: changing state of cid" + cid + " to " + (isValid ? "Allowed" : "Banned"));
          
          try {
+            getCollectorProxy().setConnectionCaching(false);
             Connection cert = fRepTable.get(cid);
             Connection updated = new Connection(cert);
             updated.setValid(isValid);
@@ -285,7 +314,9 @@ public class ConnectionTable extends HttpServlet
                session.close();
                fRepTable.put( new Long(updated.getcid()), updated );
             }
+            fCollectorProxy.setConnectionCaching(true);
          } catch (Exception e) {
+            if (fCollectorProxy!=null) fCollectorProxy.setConnectionCaching(true);
             throw e;
          }
       }
@@ -295,6 +326,7 @@ public class ConnectionTable extends HttpServlet
          Logging.debug("ConnectionTable: changing state of all connections to " + (isValid ? "Allowed" : "Banned"));
 
          try {
+            getCollectorProxy().setConnectionCaching(false);
             Session session = HibernateWrapper.getSession();
             Transaction tx = session.beginTransaction();
          
@@ -311,7 +343,9 @@ public class ConnectionTable extends HttpServlet
             tx.commit();
             session.close();
             fRepTable = updatedTable;
+            getCollectorProxy().setConnectionCaching(true);
          } catch (Exception e) {
+            if (fCollectorProxy!=null) fCollectorProxy.setConnectionCaching(true);
             throw e;
          }
       }

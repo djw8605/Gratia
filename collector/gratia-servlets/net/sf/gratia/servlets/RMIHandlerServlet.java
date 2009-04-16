@@ -145,7 +145,7 @@ public class RMIHandlerServlet extends HttpServlet
                writer.write("Error: Upload rejected by the Gratia Collector. " + e.getMessage());
                writer.flush();
                
-               // If we can't check the validity of the certificate, we quit.
+               return;
                
             } catch (Exception e) {
                Logging.warning("RMIHandlerServlet: Proxy communication failure: " + e);

@@ -283,7 +283,7 @@ public class RegisterServlet extends HttpServlet
                      
                      Logging.info("Rejected the certificate(s)");                  
                      Logging.debug("Exception detail:", e);
-                     writer.write("Error: Certificate rejected by the Gratia Collector. " + e.getMessage());
+                     writer.write("Error: Certificate rejected by the Gratia Collector.");
                      writer.flush();
                      return;
                      
@@ -324,7 +324,7 @@ public class RegisterServlet extends HttpServlet
                Logging.debug("Received Request Request");
                Logging.debug("Arg1: " + arg1);
 
-               output = requestCertificate(from,req.getRemoteAddr());
+               output = requestCertificate(writer,from,req.getRemoteAddr());
                writer.write(output);
                writer.flush();
                writer.close();
@@ -398,18 +398,21 @@ public class RegisterServlet extends HttpServlet
          }
       }
       
-      public String requestCertificate(String from, String remoteAddr)
+      public String requestCertificate(PrintWriter writer, String from, String remoteAddr)
       {
-         String dname = "cn=xxx, ou=Fermi-GridAccounting, o=Fermi, c=US";
+         String dname = "cn=xxx, ou=GratiaAccounting, o=Gratia, c=US";
          String keystore = Configuration.getConfigurationPath() + "/keystore";
          dname = xp.replace(dname,"xxx",from);
          String alias = from + ":" + remoteAddr;
          String output = "";
-         //
+
+         // 
          // first - build self certified certs and add to temp keystore
          //
          try
          {
+            // First let's make sure the incoming probe is allowed:
+            checkConnection(remoteAddr,from);
             
             String command = "keytool -genkey -dname " + dq + dname + dq + " -alias " + alias + 
                       " -keypass server -keystore " + keystore + " -storepass server";
@@ -484,6 +487,9 @@ public class RegisterServlet extends HttpServlet
             new File(keypemfile).delete();
             new File(keypkcs8).delete();
             return "ok:" + certpem + ":" + keypem;
+         }
+         catch (net.sf.gratia.services.AccessException e) {
+            return "error:"+e.getMessage();
          }
          catch (Exception e)
          {
@@ -607,6 +613,33 @@ public class RegisterServlet extends HttpServlet
 
          return "ok:ok";
       }
+      
+      public void checkConnection(String remoteAddr, String sender) throws Exception {
+         
+         // First let's make sure the connection is 'allowed'
+         String origin = null;
+         try {
+            java.security.cert.X509Certificate certs[] = null;
+            origin = fCollectorProxy.checkConnection(certs, remoteAddr, sender);
+         } catch (net.sf.gratia.services.AccessException e) {
+            
+            Logging.info("Rejected the connection.");                  
+            Logging.debug("Exception detail:", e);
+            throw new net.sf.gratia.services.AccessException("Connection rejected by the Gratia Collector.");
+            
+         } catch (Exception e) {
+            Logging.warning("Proxy communication failure: " + e);
+            Logging.warning("Error: originating server: " + remoteAddr);
+            Logging.debug("Exception detail:", e);
+            throw new Exception("Error: issue during certificate check"+ xp.parseException(e));
+         } 
+         if (origin != null && origin.length() > 0) {
+            Logging.debug("Crudentials accepted.");
+         } else {
+            Logging.info("rejected the connection.");
+            throw new Exception("The connection has been rejected by the Gratia Collector!");
+         }
+      }         
 
       // Actually same as in RMIhandlerServlet.
       private String requestDiagnostics(HttpServletRequest req) {

@@ -19,10 +19,20 @@ public class AttachableCollection<Type extends AttachableXmlElement> {
 
    private java.util.Map<String, Type> fSaved = new java.util.HashMap<String,Type>();
    private long fMaxRecord = -1;
+   private boolean fEnable;
    
    public AttachableCollection() 
    {
       
+   }
+   
+   public synchronized void setCaching(boolean enable) {
+      if (enable) {
+         fEnable = true;
+      } else {
+         fEnable = false;
+         fSaved.clear();
+      }
    }
    
    public synchronized Type getObject( Type check ) throws Exception
@@ -32,29 +42,31 @@ public class AttachableCollection<Type extends AttachableXmlElement> {
    
    public synchronized void setObject( Type obj ) throws Exception
    {
-      if (fMaxRecord == -1) {
-         fMaxRecord = 1000;
-         java.util.Properties p = net.sf.gratia.util.Configuration.getProperties();         
-         String cname = obj.getClass().getName();
-         cname = cname.substring( cname.lastIndexOf('.')+1 );
-         String value = p.getProperty("service.cachesize."+cname);
-         if (value != null ) {
-            try {
-               fMaxRecord = Long.parseLong(value);
-               Logging.fine("AttachableCollection for " + cname + " found cachesize of " + fMaxRecord);
-            } catch (Exception e) {
-               Logging.warning("AttachableCollection: found problem with cachesize property " + value + 
-                               ": error was, " + e.getMessage() + " -- property ignored (using " + fMaxRecord + ")");
+      if (fEnable) {
+         if (fMaxRecord == -1) {
+            fMaxRecord = 1000;
+            java.util.Properties p = net.sf.gratia.util.Configuration.getProperties();         
+            String cname = obj.getClass().getName();
+            cname = cname.substring( cname.lastIndexOf('.')+1 );
+            String value = p.getProperty("service.cachesize."+cname);
+            if (value != null ) {
+               try {
+                  fMaxRecord = Long.parseLong(value);
+                  Logging.fine("AttachableCollection for " + cname + " found cachesize of " + fMaxRecord);
+               } catch (Exception e) {
+                  Logging.warning("AttachableCollection: found problem with cachesize property " + value + 
+                                  ": error was, " + e.getMessage() + " -- property ignored (using " + fMaxRecord + ")");
+               }
+            } else {
+               Logging.fine("AttachableCollection for " + cname + " use default cachesize of " + fMaxRecord);            
             }
-         } else {
-            Logging.fine("AttachableCollection for " + cname + " use default cachesize of " + fMaxRecord);            
          }
-      }
-      fSaved.put( obj.getmd5(), obj );
-      if (fSaved.size() > fMaxRecord) {
-         // Need to remove some elements, since there is not (yet?) a good way to clear just a few
-         // of the oldest record, let's remove them all ... this is not ideal 
-         fSaved.clear();
+         if (fSaved.size() > fMaxRecord) {
+            // Need to remove some elements, since there is not (yet?) a good way to clear just a few
+            // of the oldest record, let's remove them all ... this is not ideal 
+            fSaved.clear();
+         }
+         fSaved.put( obj.getmd5(), obj );
       }
    }
    
