@@ -759,7 +759,7 @@ EOF
                debug="0"
                scheme="https"
                secure="true"
-               sSLImplementation="org.glite.security.trustmanager.tomcat.TMSSLImplementation"
+               sSLImplementation="net.sf.gratia.trustmanager.GratiaTMSSLImplementation"
                sslCAFiles="$collector_config->{sslCAFiles}"
                crlFiles="$collector_config->{crlFiles}"
                sslCertFile="$collector_config->{host_cert}"
