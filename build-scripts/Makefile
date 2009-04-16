@@ -56,7 +56,7 @@ commonLib=$(common)/lib
 server_lib_jars = glite-security-trustmanager \
                   glite-security-util-java \
                   bcprov-
-SERVER_LIBS = $(foreach d, $(server_lib_jars), $(wildcard $(commonLib)/$(d)*.jar))
+SERVER_LIBS = $(foreach d, $(server_lib_jars), $(wildcard $(commonLib)/$(d)*.jar)) $(target)/gratiaSecurity.jar
 
 common_lib_jars = log4j- \
                   commons-logging-1
