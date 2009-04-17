@@ -219,6 +219,7 @@ public class Connection implements AttachableXmlElement, Comparable
          output = output + "Certificate: " + fCertificate + "\n";
          output = output + "FirstSeen: " + fFirstSeen + "\n";
          output = output + "LastSeen: " + fLastSeen + "\n";
+         output = output + "State: " + fState + "\n";
          return output;
       }
       
