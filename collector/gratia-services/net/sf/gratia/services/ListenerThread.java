@@ -819,7 +819,7 @@ public class ListenerThread extends Thread {
                                 Logging.warning(ident + rId +
                                                 ": Caught exception resolving " +
                                                 "duplicates for record with " +
-                                                "md5 checksum" +
+                                                "md5 checksum " +
                                                 current.getmd5() +
                                                 " -- all duplicates of same " +
                                                 "will remain in DB", e2);
