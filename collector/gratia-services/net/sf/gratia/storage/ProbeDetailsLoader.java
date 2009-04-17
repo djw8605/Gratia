@@ -34,6 +34,17 @@ public class ProbeDetailsLoader extends RecordLoader
       {
          // The current element is a ProbeDetails record node.  Use it to populate a ProbeDetails object
          records.add(ReadRecord(eroot));
+         
+      } else if (eroot.getName() == "RecordEnvelope") {
+         for (Iterator i = eroot.elementIterator(); i.hasNext();) {
+            Element element = (Element) i.next();
+            if (element.getName() == "ProbeDetails") {
+               //The current element is a job usage record node.  Use it to populate a JobUsageRecord object
+               records.add(ReadRecord(element));
+            } else {
+               // Don't care
+            }
+         }
       }
 
       if (records.size() == 0)
