@@ -429,6 +429,36 @@ public class ListenerThread extends Thread {
                 catch (Exception ignore) { }
             }
             int rSize = records.size();
+            if (rSize > 1 && origin != null) {
+               // The origin object will be reused.  Let's store it first to avoid
+               // problem in case the very first record is a duplicate!
+               String rId = ": ";
+               if (gotreplication) {
+                  rId += "Replication ";
+               } else if (gothistory) {
+                  rId += "History ";
+               }
+               try {
+                  session = HibernateWrapper.getSession();
+                  tx = session.beginTransaction();
+                  origin = origin.attach(session);
+                  session.flush();
+                  tx.commit();
+               } 
+               catch (Exception e) {
+                  if (session != null && session.isOpen()) {
+                     if ((tx != null) && tx.isActive()) {
+                        tx.rollback();
+                     }
+                     session.close();
+                  }
+                  Logging.warning(ident + rId +
+                                  ": received unexpected exception " +
+                                  e.getMessage() + " while processing origin entry.");
+                  Logging.debug(ident + rId + ": exception details:", e);
+                  return 0;
+               }
+            }
             for (int j = 0; j < rSize; j++) {
                 // For information logging.
                 String rId = ": ";
@@ -547,8 +577,8 @@ public class ListenerThread extends Thread {
                             current.setmd5((String)md5list.get(j));
                         }
                         current.setDuplicate(false);
-                       if (origin != null) {
-                          current.addOrigin(origin);
+                        if (origin != null) {
+                           current.addOrigin(origin);
                         }
                        
                         synchronized (lock) {
