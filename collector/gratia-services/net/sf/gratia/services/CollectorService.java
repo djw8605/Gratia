@@ -851,11 +851,9 @@ public class CollectorService implements ServletContextListener {
             session.close();
             
             from.setConnection(gr_conn);
-            Logging.warning("Checked connection"+gr_conn);
             if (gr_conn.isValid()) {
                result = from.asXml(0);
             }
-            Logging.warning("Checked connection and result is"+result);
          }
          
       } else {
