@@ -329,7 +329,7 @@ public class RMIHandlerServlet extends HttpServlet
                                   req.getRemoteHost());
                   } else { // Process normally
                      
-                     Logging.warning("Ready to update with"+origin);
+                     Logging.debug("Ready to update with:"+origin);
                      
                      if (fTrackConnection) {
                         String data = "Origin|"+origin+"|"+arg1;
@@ -337,6 +337,23 @@ public class RMIHandlerServlet extends HttpServlet
                      } else {
                         status = fCollectorProxy.update(arg1);
                      }
+                  }
+                  if (status) {
+                     writer.write("OK");
+                  } else {
+                     writer.write("Error"); 
+                  }
+               } else if (command.equals("multiupdate")) {
+                  parse_error = false;
+                  boolean status = true;
+                  
+                  Logging.debug("Ready to (multi) update with:"+origin);
+                  
+                  if (fTrackConnection) {
+                     String data = "Origin|"+origin+"|"+arg1;
+                     status = fCollectorProxy.update(data);
+                  } else {
+                     status = fCollectorProxy.update(arg1);
                   }
                   if (status) {
                      writer.write("OK");
