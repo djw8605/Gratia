@@ -88,7 +88,7 @@ public class RecordConverter {
                 if (recordsThisLoader != null) {
                     foundRecords.addAll(recordsThisLoader);
                     if ((expectedRecords == -1) || // Only expected one record or type of record
-                        (expectedRecords >= foundRecords.size())) { // Found what we're looking for
+                        (expectedRecords <= foundRecords.size())) { // Found what we're looking for
                         break; // done
                     }
                 }
