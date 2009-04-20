@@ -366,7 +366,8 @@ DJUR:BEGIN
        n_StartTime,
        n_EndTime,
        n_rowDate,
-       n_Grid
+       n_Grid,
+       n_Cores
   FROM JobUsageRecord J
        JOIN JobUsageRecord_Meta M ON (J.dbid = M.dbid)
        JOIN VONameCorrection VC ON
