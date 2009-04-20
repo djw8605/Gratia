@@ -38,10 +38,10 @@ import org.hibernate.exception.*;
 public class DatabaseMaintenance {
     static final String dq = "\"";
     static final String comma = ",";
-    static final int gratiaDatabaseVersion = 71;
+    static final int gratiaDatabaseVersion = 72;
     static final int latestDBVersionRequiringStoredProcedureLoad = gratiaDatabaseVersion;
     static final int latestDBVersionRequiringSummaryViewLoad = 37;
-    static final int latestDBVersionRequiringSummaryTriggerLoad = 66;
+    static final int latestDBVersionRequiringSummaryTriggerLoad = 72;
     static final int latestDBVersionRequiringTableStatisticsRefresh = 38;
 
     static boolean dbUseJobUsageSiteName = false;
@@ -372,6 +372,10 @@ public class DatabaseMaintenance {
 
         // SystemProplist management (safety)
         AddIndex("SystemProplist", true, "index01", "car");
+
+        // Replication (safety)
+        AddIndex("Replication", true, "index01",
+                 "openconnection, secureconnection, probename, recordtable");
 
         Logging.info("DatabaseMaintenance: table index checking complete.");
 
@@ -1412,10 +1416,10 @@ public class DatabaseMaintenance {
                     UpdateDbVersion(current);
                 }
             }
-            if ((current >= 60) && (current < 71)) {
+            if ((current >= 60) && (current < 72)) {
                 // Stored procedures, trigger procedures.
-                Logging.fine("Gratia database upgraded from " + current + " to 71");
-                current = 71;
+                Logging.fine("Gratia database upgraded from " + current + " to 72");
+                current = 72;
                 UpdateDbVersion(current);
             }
 
