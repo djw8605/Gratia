@@ -174,8 +174,6 @@ public class ListenerThread extends Thread {
         // Return the number of files seen.
         // or 0 in the case of error.
 
-        if (!HibernateWrapper.databaseUp()) return 0;
-
         String files[] = xp.getFileList(directory);
 
         int nfiles = files.length;

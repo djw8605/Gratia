@@ -82,41 +82,38 @@ public class HibernateWrapper {
     }
 
     public static boolean systemDatabaseUp() {
-        int i = 0;
-
-        String command = "select dbid from JobUsageRecord JUR where JUR.dbid = 1";
-        try {
-            org.hibernate.Session session = hibernateFactory.openSession();
-            List result = session.createQuery(command).list();
-            for (i = 0; i < result.size(); i++) {
-                JobUsageRecord record = (JobUsageRecord)result.get(i);
-            }
-            session.close();
-            databaseDown = false;
-            return true;
-        }
-        catch (Exception e) {
-            databaseDown = true;
-            return false;
-        }
+       try {
+          org.hibernate.Session session = hibernateFactory.openSession();
+          java.sql.Connection conn = session.connection();
+          databaseDown = conn.isClosed() || !session.isConnected() || !session.isOpen();
+          session.close();
+          if (databaseDown) {
+             return false;
+          } else {
+             return true;
+          }
+       }
+       catch (Exception e) {
+          databaseDown = true;
+          return false;
+       }
     }
 
     public static synchronized boolean databaseUp() {
-        int i = 0;
-
-        String command = "from JobUsageRecord J where J.RecordId = 1";
         try {
             Logging.log("HibernateWrapper: Database Check");
             org.hibernate.Session session = hibernateFactory.openSession();
-            List result = session.createQuery(command).list();
-            for (i = 0; i < result.size(); i++) {
-                JobUsageRecord record = (JobUsageRecord)result.get(i);
-            }
+            java.sql.Connection conn = session.connection();
+            databaseDown = conn.isClosed() || !session.isConnected() || !session.isOpen();
             session.close();
-            databaseDown = false;
-            Logging.log("HibernateWrapper: Database Check. Database Up.");
-            return true;
-        }
+            if (databaseDown) {
+               Logging.info("HibernateWrapper: Database Check: Database Down");
+               return false;
+            } else {
+               Logging.log("HibernateWrapper: Database Check. Database Up.");
+               return true;
+           }
+         }
         catch (Exception e) {
             databaseDown = true;
             Logging.info("HibernateWrapper: Database Check: Database Down");
