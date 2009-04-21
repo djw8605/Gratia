@@ -2,18 +2,22 @@ PLATFORM := $(shell uname)
 
 ifeq ($(filter CYGWIN%,$(PLATFORM)),)
 # Linux
-root=../../../../../../
+#root=../../../../../../
+root=/home/pcanal/gratia/collector/
 configuratio=${root}/../common/configuration
-jarloc=../../../../../../../common/lib/
-export CLASSPATH=$(root)/gratia-services:${root}/../common/gratia-util:$(jarloc)/antlr-2.7.6.jar:jars/bsh.jar:jars/derby.jar:jars/derbytools.jar:$(jarloc)/hibernate3.jar:$(jarloc)/dom4j-1.6.1.jar:$(jarloc)/commons-logging-1.1.1.jar:$(jarloc)/commons-collections-2.1.1.jar:$(jarloc)/cglib-2.1.3.jar:$(jarloc)/ehcache-1.1.jar:$(jarloc)/jta.jar:$(jarloc)/jaxen-1.1-beta-7.jar:$(jarloc)/asm.jar:$(jarloc)/tar.jar:$(jarloc)/bzip2.jar
+jarloc=$(root)/../common/lib/
+export CLASSPATH=$(root)/gratia-services:${root}/../common/gratia-util:$(jarloc)/antlr-2.7.6.jar:jars/bsh.jar:jars/derby.jar:jars/derbytools.jar:$(jarloc)/hibernate3.jar:$(jarloc)/dom4j-1.6.1.jar:$(jarloc)/commons-logging-1.1.1.jar:$(jarloc)/commons-collections-2.1.1.jar:$(jarloc)/cglib-2.1.3.jar:$(jarloc)/ehcache-1.1.jar:$(jarloc)/jta.jar:$(jarloc)/jaxen-1.1-beta-7.jar:$(jarloc)/asm.jar:$(jarloc)/tar.jar:$(jarloc)/bzip2.jar:$(jarloc)/log4j-1.2.15.jar:$(jarloc)/commons-lang-2.4.jar:$(jarloc)/servlet-api.jar:$(jarloc)/mail.jar
 fixpath=echo
 else
 # Cygwin
 root=..\..\..\..\..\..\\
 jarloc=..\..\..\..\..\..\..\common\lib\\
-export CLASSPATH=$(root)\gratia-services;$(jarloc)\antlr-2.7.5.jar;jars\bsh.jar;jars\derby.jar;jars\derbytools.jar;$(jarloc)\hibernate3.jar;$(jarloc)\dom4j-1.6.1.jar;$(jarloc)\commons-logging-1.0.4.jar;$(jarloc)\commons-collections-2.1.1.jar;$(jarloc)\cglib-2.1.3.jar;$(jarloc)\ehcache-1.1.jar;$(jarloc)\jta.jar;$(jarloc)\jaxen-1.1-beta-7.jar;$(jarloc)\asm.jar
+export CLASSPATH=$(root)\gratia-services;$(jarloc)\antlr-2.7.5.jar;jars\bsh.jar;jars\derby.jar;jars\derbytools.jar;$(jarloc)\hibernate3.jar;$(jarloc)\dom4j-1.6.1.jar;$(jarloc)\commons-logging-1.0.4.jar;$(jarloc)\commons-collections-2.1.1.jar;$(jarloc)\cglib-2.1.3.jar;$(jarloc)\ehcache-1.1.jar;$(jarloc)\jta.jar;$(jarloc)\jaxen-1.1-beta-7.jar;$(jarloc)\asm.jar;$(jarloc)\log4j-1.2.15.jar;$(jarloc)\commons-lang-2.4.jar;$(jarloc)\servlet-api.jar;$(jarloc)\mail.jar
 fixpath=cygpath -w 
 endif
+
+hibconf=${root}/../common/configuration/hibernate
+
 
 all: test
 
@@ -24,16 +28,19 @@ Logging:
 	javac $(shell $(fixpath) '${root}/../common/gratia-util/net/sf/gratia/util/Logging.java' )
 
 storage:
-	javac $(shell $(fixpath) ../../storage/*.java )
+	javac $(shell $(fixpath) $(root)/gratia-services/net/sf/gratia/storage/*.java )
 
-JobUsage.hbm.xml: ../../../../../../../common/configuration/JobUsage.hbm.xml
-	cp ../../../../../../../common/configuration/JobUsage.hbm.xml .
+JobUsage.hbm.xml: $(hibconf)/JobUsage.hbm.xml
+	cp $(hibconf)/JobUsage.hbm.xml .
 
-Gratia.hbm.xml: ../../../../../../../common/configuration/Gratia.hbm.xml
-	cp ../../../../../../../common/configuration/Gratia.hbm.xml .
+Gratia.hbm.xml: $(hibconf)/Gratia.hbm.xml
+	cp $(hibconf)/Gratia.hbm.xml .
 
-MetricRecord.hbm.xml: ../../../../../../../common/configuration/MetricRecord.hbm.xml
-	cp ../../../../../../../common/configuration/MetricRecord.hbm.xml .
+MetricRecord.hbm.xml: $(hibconf)/MetricRecord.hbm.xml
+	cp $(hibconf)/MetricRecord.hbm.xml .
+
+TransferDetails.hbm.xml: $(hibconf)/TransferDetails.hbm.xml
+	cp $(hibconf)/TransferDetails.hbm.xml .
 
 test:  XP Logging storage JobUsage.hbm.xml MetricRecord.hbm.xml Gratia.hbm.xml
 	rm -rf derby output *logfile*; mkdir output
