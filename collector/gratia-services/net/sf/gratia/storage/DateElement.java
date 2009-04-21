@@ -31,20 +31,22 @@ public class DateElement implements XmlElement {
     private Date Value;
     private String Description;
     private String Type;
-    private Pattern wrongDateFixer =
+    private static Pattern wrongDateFixer =
         Pattern.compile("(\\d{4}-\\d{2}-\\d{2})\\s+(\\d+:\\d+:[\\d\\.]+)");
 
     public DateElement() {
     }
 
+    static javax.xml.datatype.DatatypeFactory gFactory = null;
+
     public void setValue(String str) throws Exception {
 				TimeZone.setDefault(TimeZone.getTimeZone("GMT"));
-        javax.xml.datatype.DatatypeFactory fac = javax.xml.datatype.
-                                                 DatatypeFactory.
-                                                 newInstance();
         XMLGregorianCalendar cal;
         try {
-            cal = fac.newXMLGregorianCalendar(str.trim());
+           if (gFactory == null) {
+               gFactory = javax.xml.datatype.DatatypeFactory.newInstance();
+           }
+           cal = gFactory.newXMLGregorianCalendar(str.trim());
         } catch (Exception e) {
             Logging.debug("DateElement: caught bad date element, \"" +
                           str.trim() + "\" -- attempting to fix\"");
@@ -52,7 +54,7 @@ public class DateElement implements XmlElement {
             Matcher m = wrongDateFixer.matcher(str.trim());
             if (m.lookingAt()) {
                 String newStr = m.group(1) + "T" + m.group(2) + "Z";
-                cal = fac.newXMLGregorianCalendar(newStr);
+                cal = gFactory.newXMLGregorianCalendar(newStr);
                 Logging.fine("DateElement: caught problem with date element, \"" +
                              str.trim() + "\", fixed to \"" + newStr + "\"");
             } else {
