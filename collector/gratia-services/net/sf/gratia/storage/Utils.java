@@ -28,6 +28,7 @@ import java.security.MessageDigest;
  */
 public class Utils
 {
+   private static javax.xml.datatype.DatatypeFactory gDurationFactory = null;
 
    public Utils()
    {
@@ -56,12 +57,13 @@ public class Utils
    public static double StringToDuration(String str) throws
                         DatatypeConfigurationException
    {
-      javax.xml.datatype.DatatypeFactory fac = javax.xml.datatype.
-                                     DatatypeFactory.
-                                     newInstance();
       if (str.compareTo("P") == 0) return 0;
 
-      Duration du = fac.newDurationDayTime(str.trim());
+      if (gDurationFactory==null) {
+          gDurationFactory = javax.xml.datatype.DatatypeFactory.newInstance();
+      }
+
+      Duration du = gDurationFactory.newDurationDayTime(str.trim());
       return du.getTimeInMillis(Calendar.getInstance()) / 1000.0;
    }
 
