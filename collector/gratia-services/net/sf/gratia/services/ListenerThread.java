@@ -194,6 +194,7 @@ public class ListenerThread extends Thread {
             }
 
             file = files[i];
+            //MPERF: Logging.fine(ident + ": Start Processing: " + file);
             blob = xp.get(files[i]);
 
             xml = "";
@@ -395,6 +396,7 @@ public class ListenerThread extends Thread {
                 continue;
             }
 
+            //MPERF: Logging.fine(ident + ": Processing: " + file);
             Logging.log(ident + ": Processing: " + file);
 
             ArrayList records = new ArrayList();
@@ -429,6 +431,7 @@ public class ListenerThread extends Thread {
                 catch (Exception ignore) { }
             }
             int rSize = records.size();
+            //MPERF: Logging.fine(ident+ ": converted " + rSize + " records");
             if (rSize > 1 && origin != null) {
                // The origin object will be reused.  Let's store it first to avoid
                // problem in case the very first record is a duplicate!
@@ -458,6 +461,7 @@ public class ListenerThread extends Thread {
                   Logging.debug(ident + rId + ": exception details:", e);
                   return 0;
                }
+               //MPERF: Logging.fine(ident + rId + " saved Origin object.");
             }
             for (int j = 0; j < rSize; j++) {
                 // For information logging.
@@ -468,21 +472,25 @@ public class ListenerThread extends Thread {
                     rId += "History ";
                 }
                 session = HibernateWrapper.getSession();
-                Probe probe;
-                try {
-                    current = (Record)records.get(j);
+
+               current = (Record)records.get(j);
+               String simpleName = current.getClass().getSimpleName();
+               rId += simpleName;
+               if (rSize > 1) {
+                  rId += " " + (j + 1) + " / " + rSize;
+               }
+               rId += " (" + current.getProbeName();
+               if (simpleName.equals("ProbeDetails")) {
+                  rId += ", recordId=" +
+                  ((ProbeDetails)current).getRecordIdentity();
+               }
+               rId += ")";
+               
+               //MPERF: Logging.fine(ident + rId + " starting hibertnate operations.");
+               Probe probe;
+               try {
                     tx = session.beginTransaction();
-                    String simpleName = current.getClass().getSimpleName();
-                    rId += simpleName;
-                    if (rSize > 1) {
-                        rId += " " + (j + 1) + " / " + rSize;
-                    }
-                    rId += " (" + current.getProbeName();
-                    if (simpleName.equals("ProbeDetails")) {
-                        rId += ", recordId=" +
-                            ((ProbeDetails)current).getRecordIdentity();
-                    }
-                    rId += ")";
+
                     probe = statusUpdater.update(session, current, xml);
                     session.flush();
                     tx.commit();
@@ -500,6 +508,7 @@ public class ListenerThread extends Thread {
                     Logging.debug(ident + rId + ": exception details:", e);
                     return 0;
                 }
+                //MPERF: Logging.fine(ident + rId + " saved probe object.");
                 try {
                     tx = session.beginTransaction();
                     current.setProbe(probe);
@@ -578,9 +587,11 @@ public class ListenerThread extends Thread {
                         }
                         current.setDuplicate(false);
                         if (origin != null) {
+                           //MPERF: Logging.fine(ident + rId + " about to add origin objects.");
                            current.addOrigin(origin);
                         }
                        
+                        //MPERF: Logging.fine(ident + rId + " attaching VO and other content.");
                         synchronized (lock) {
                             newVOUpdate.check(current, session);
                         }
@@ -591,6 +602,7 @@ public class ListenerThread extends Thread {
                             session.flush();
                         }
 
+                        //MPERF: Logging.fine(ident + rId + " managing RawXML.");
                         String incomingxml = current.getRawXml();
                         String rawxml = null;
                         String extraxml = null;
@@ -606,7 +618,9 @@ public class ListenerThread extends Thread {
                                                     historydatelist.get(j)));
                             current.setServerDate(serverDate);
                         }
+                        //MPERF: Logging.fine(ident + rId + " saving object.");
                         session.save(current);
+                        //MPERF: Logging.fine(ident + rId + " executing trigger.");
                         current.executeTrigger(session);
                         //
                         // now - save history
@@ -615,11 +629,9 @@ public class ListenerThread extends Thread {
                             saveHistory(current, incomingxml,
                                         rawxml, extraxml, gotreplication);
                         }
-                        // Logging.log(ident + ": After Hibernate Save");
-                        // Logging.log(ident + ": Before Transaction Commit");
-                        //Logging.warning(ident + rId + ": Before flush");
+                        //MPERF: Logging.fine(ident + rId + " executing flush.");
                         session.flush();
-                        //Logging.warning(ident + rId + ": After flush");
+                        //MPERF: Logging.fine(ident + rId + " executing comming.");
                         tx.commit();
                         session.close();
                         // Logging.log(ident + ": After Transaction Commit");
