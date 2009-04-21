@@ -35,9 +35,7 @@ catch (Exception ignore)
 //
 
 hibernateConfiguration = new org.hibernate.cfg.Configuration();
-hibernateConfiguration.addFile(new File("Gratia.hbm.xml"));
-hibernateConfiguration.addFile(new File("JobUsage.hbm.xml"));
-hibernateConfiguration.addFile(new File("MetricRecord.hbm.xml"));
+hibernateConfiguration.addDirectory(new File("hibernate"));
 hibernateConfiguration.configure(new File("hibernate.cfg.xml"));
 
 factory = hibernateConfiguration.buildSessionFactory();
@@ -55,7 +53,7 @@ RecordUpdaterManager updater = new RecordUpdaterManager();
 JobUsageRecordUpdater.AddDefaults(updater);
 RecordConverter converter = new RecordConverter();
 
-Logging.initialize("logfile","5000","1","OFF","1");
+Logging.initialize("test.bsh"); // "logfile","5000","1","OFF","1");
 
 int record_idx = 0;
 for (int i = 0; i < filenames.length; i++)
