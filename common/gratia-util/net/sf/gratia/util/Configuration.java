@@ -17,6 +17,9 @@ public class Configuration {
     public static String getConfigurationPath()
     {
         String path = System.getProperty("catalina.home");
+        if (path == null) {
+           path = ".";
+        }
         path = path + "/gratia";
         return path;
     }
