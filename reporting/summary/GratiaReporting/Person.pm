@@ -68,13 +68,17 @@ sub item_info {
   return $result;
 }
 
-sub wants_vo {
+sub wants_vo_report_oim {
+  my ($self, $vo, $reporting_name) = @_;
+  $reporting_name = '' unless defined $reporting_name;
+  return (grep m&^$vo:$reporting_name&i, @{$self->{vo_reporting_names}})?1:0;
+}
+
+sub wants_all_vos {
   my ($self, $vo) = @_;
   my $result = 0;
   if ((exists $self->{all_reports} and $self->{all_reports}->{vo}) or
-      grep m&^all$&i, @{$self->{vos}} or
-      grep m&^$vo/&i, @{$self->{vos}} or
-      grep m&^$vo/&i, @{$self->{vo_reporting_names}}) {
+      (exists $self->{vos} and grep m&^all$&i, @{$self->{vos}})) {
     $result = 1;
   }
   return $result

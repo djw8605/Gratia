@@ -122,7 +122,7 @@ sub processXmlVoContacts {
         my $person = {};
         push @{$reporting_contacts}, $primary_email;
         $person->{vo_reporting_names} = [ ] unless $person->{vo_reporting_names};
-        push @{$person->{vo_reporting_names}}, "$vo_name/$vo_reporting_name";
+        push @{$person->{vo_reporting_names}}, "$vo_name:$vo_reporting_name";
         foreach my $attribute qw(first_name middle_name last_name) { # Name info
           $person->{$attribute} =
             $reporting_contact->findvalue($attribute);

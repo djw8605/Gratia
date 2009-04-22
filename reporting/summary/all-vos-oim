@@ -152,8 +152,12 @@ foreach my $vo (sort keys %$master_vo_list) {
   foreach my $email (sort keys %$email_hash) {
     # Check whether we have information about this person from OIM
     if (exists $people_data->{$email_hash->{$email}} and
-        $people_data->{$email_hash->{$email}}->wants_vo($vo)) {
+        $people_data->{$email_hash->{$email}}->wants_vo_report_oim($vo)) {
       print "INFO: Matched $email_hash->{$email} in OIM contacts list for VO $vo.\n"
+        if $options->{verbose};
+    } elsif (exists $people_data->{$email_hash->{$email}} and
+        $people_data->{$email_hash->{$email}}->wants_all_vos()) {
+      print "INFO: $email_hash->{$email} wants all VO reports: added to report for VO $vo\n"
         if $options->{verbose};
     } else {
       print "OIM_WARNING: Local contact $email not found in OIM contacts list for VO $vo.\n";
@@ -161,12 +165,12 @@ foreach my $vo (sort keys %$master_vo_list) {
   }
   # Check whether OIM knows something we don't
   foreach my $person (sort keys %$people_data) {
-    print "INFO: checking $person in OIM data\n" if $options->{verbose};
+    print "INFO: Checking $person in OIM data\n" if $options->{verbose};
 #    print "INFO: person data for $person:\n",
 #      '-' x 72, "\n",
 #        $people_data->{$person}->info(),
 #        '-' x 72, "\n" if $options->{verbose};
-    if ($people_data->{$person}->wants_vo($vo)) {
+    if ($people_data->{$person}->wants_vo_report_oim($vo)) {
       if (grep m&$person&i, %$email_hash) {
         print "INFO: OIM contact $people_data->{$person}->{full_name} matches data-file email $person for VO $vo.\n"
           if $options->{verbose};
