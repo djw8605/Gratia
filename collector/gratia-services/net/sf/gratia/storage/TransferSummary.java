@@ -62,10 +62,10 @@ public class TransferSummary extends Record {
 
    public String asXML()
    {
-      return asXML(false);
+      return asXML(false,false);
    }
    
-   public String asXML(boolean formd5)
+   public String asXML(boolean formd5,boolean optional)
    {
       // FIXME
         return "";
@@ -89,7 +89,7 @@ public class TransferSummary extends Record {
         // FIXME
     }
 
-    public String computemd5() throws Exception {
+    public String computemd5(boolean optional) throws Exception {
         // FIXME
         return "";
     }

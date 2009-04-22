@@ -566,24 +566,26 @@ public class ListenerThread extends Thread {
 
                         if ((!gothistory) || (!(md5list.size()>j)) ||
                             md5list.get(j) == null) {
-                            String md5key = current.computemd5();
-                            current.setmd5(md5key);
-                            if (current.getTableName()
-                                .equals("JobUsageRecord")) {
-                                // Need to do this to keep number of
-                                // duplicates making it into the DB
-                                // under control during the upgrade
-                                // procedure. This will be removed for a
-                                // future upgrade as it is only really
-                                // necessary for very large DBs.
-                                Logging.debug("Calculating and saving " +
-                                              "old-style checksum for " +
-                                              "JobUsageRecord");
-                                JobUsageRecord jRecord =
+                           if (current.getTableName().equals("JobUsageRecord")) {
+                              String md5key = current.computemd5(DatabaseMaintenance.UseJobUsageSiteName());
+                              current.setmd5(md5key);
+                              // Need to do this to keep number of
+                              // duplicates making it into the DB
+                              // under control during the upgrade
+                              // procedure. This will be removed for a
+                              // future upgrade as it is only really
+                              // necessary for very large DBs.
+                              Logging.debug("Calculating and saving " +
+                                    "old-style checksum for " +
+                                    "JobUsageRecord");
+                              JobUsageRecord jRecord =
                                     (JobUsageRecord) current;
-                                String oldMd5 = jRecord.computeOldMd5();
-                                jRecord.setoldMd5(oldMd5);
-                            }
+                              String oldMd5 = jRecord.computeOldMd5();
+                              jRecord.setoldMd5(oldMd5);
+                           } else {
+                              String md5key = current.computemd5(false);
+                              current.setmd5(md5key);
+                           }
                         } else {
                             current.setmd5((String)md5list.get(j));
                         }

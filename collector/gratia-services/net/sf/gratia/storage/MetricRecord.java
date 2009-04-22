@@ -97,10 +97,10 @@ public class MetricRecord extends Record
 
    public String asXML()
    {
-      return asXML(false);
+      return asXML(false, false);
    }
    
-   public String asXML(boolean formd5)
+   public String asXML(boolean formd5, boolean optional)
    {
       // If formd5 is true do not include
       //    RecordIdentity
@@ -167,7 +167,7 @@ public class MetricRecord extends Record
        return b;
    }
 
-   public String computemd5() throws Exception
+   public String computemd5(boolean optional) throws Exception
    {
       RecordIdentity temp = getRecordIdentity();
       setRecordIdentity(null);

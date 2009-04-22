@@ -21,13 +21,13 @@ public interface RecordInterface {
     public void setExtraXml(String ExtraXml);
     public String getExtraXml();
     public String asXML();
-    public String asXML(boolean formd5);
+    public String asXML(boolean formd5, boolean optional);
 
     public StringElement getSiteName();
     public StringElement getProbeName();
     public Date getServerDate();
     public void setServerDate(Date value);
-    public String computemd5() throws Exception;
+    public String computemd5(boolean optional) throws Exception;
     public String getmd5();
     public void setmd5(String md5set);
     public int getRecordId();

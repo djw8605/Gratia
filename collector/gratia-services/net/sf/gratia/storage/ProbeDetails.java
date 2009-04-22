@@ -153,10 +153,10 @@ public class ProbeDetails extends Record
       
       public String asXML()
       {
-         return asXML(false);
+         return asXML(false,false);
       }
       
-      public String asXML(boolean formd5)
+      public String asXML(boolean formd5, boolean optional)
       {
          // If formd5 is true do not include
          //    RecordIdentity
@@ -217,9 +217,9 @@ public class ProbeDetails extends Record
          }
       }
       
-      public String computemd5() throws Exception
+      public String computemd5(boolean optional) throws Exception
       {
-         String md5key = Utils.md5key(asXML(true));
+         String md5key = Utils.md5key(asXML(true, optional));
          
          return md5key;
       }

@@ -443,7 +443,7 @@ public class ChecksumUpgrader extends Thread {
             current_dbid = record.getRecordId();
             Logging.debug("UpdateJobUsageRecords: read record " + current_dbid);
             try {
-                String new_md5 = record.computemd5();
+                String new_md5 = record.computemd5(DatabaseMaintenance.UseJobUsageSiteName());
                 // Set the new checksum.
                 Logging.debug("UpdateJobUsageRecords: writing " +
                               "new checksum: " + new_md5);

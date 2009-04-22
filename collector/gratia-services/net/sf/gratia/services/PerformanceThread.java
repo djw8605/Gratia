@@ -124,7 +124,7 @@ public class PerformanceThread extends Thread
       if (duplicateCheck == false)
          return false;
 
-      String md5key = record.computemd5();
+      String md5key = record.computemd5(DatabaseMaintenance.UseJobUsageSiteName());
       record.setmd5(md5key);
 
       String table = record.getTableName();

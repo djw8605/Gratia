@@ -148,10 +148,10 @@ public class JobUsageRecord extends Record
 
    public String asXML()
    {
-      return asXML(false);
+      return asXML(false,false);
    }
 
-   public String asXML(boolean formd5)
+   public String asXML(boolean formd5, boolean optional)
    {
       // If formd5 is true do not include
       //    RecordIdentity
@@ -168,7 +168,7 @@ public class JobUsageRecord extends Record
       // output.append("		xsi:schemaLocation=\"http://www.gridforum.org/2003/ur-wg file:/Users/bekah/Documents/GGF/URWG/urwg-schema.09.xsd\">\n");
       output.append("		xsi:schemaLocation=\"http://www.gridforum.org/2003/ur-wg file:///u:/OSG/urwg-schema.11.xsd\">\n");
 
-      boolean formd5_optional = formd5 && DatabaseMaintenance.UseJobUsageSiteName();
+      boolean formd5_optional = formd5 && optional /* == DatabaseMaintenance.UseJobUsageSiteName() */ ;
       
       // output.append("UsageRecord: Db Id: " + RecordId.asXml(output));
       if (!formd5) { 
@@ -561,10 +561,10 @@ public class JobUsageRecord extends Record
        return ServerDate;
    }
 
-   public String computemd5() throws Exception
+   public String computemd5(boolean optional) throws Exception
    {
        // Calculate the checksum
-       String md5key = Utils.md5key(asXML(true));
+       String md5key = Utils.md5key(asXML(true, optional));
 //        Logging.debug("DEBUG: Calculated md5v2 value of " + md5key + " on following XML:\n" + asXML(true));
        return md5key;
    }
