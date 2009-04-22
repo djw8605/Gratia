@@ -47,6 +47,7 @@ public class ListenerThread extends Thread {
    ErrorRecorder errorRecorder = new ErrorRecorder();
    final Object lock;
    String historypath = "";
+   Hashtable<String,Integer> fProbeDetails = new Hashtable<String,Integer>();
 
    //
    // various things used in the update loop
@@ -580,16 +581,29 @@ public class ListenerThread extends Thread {
             } else {
                current.setmd5((String) md5list.get(j));
             }
-            current.setDuplicate(false);
-            if (origin != null) {
-               //MPERF: Logging.fine(ident + rId + " about to add origin objects.");
-               current.addOrigin(origin);
+            if (current.getTableName().equals("ProbeDetails")) {
+               Integer pd_dbid = fProbeDetails.get(current.getmd5());
+               if (pd_dbid != null) {
+                  // This is a duplicate.
+                  Logging.fine(ident + rId +
+                        ": " + "(fast) Ignore duplicate of record " +
+                        pd_dbid);
+                  acceptRecord = false;
+               }
             }
 
-            Session rec_session = pr_session; // Reused the session object.
-            Transaction rec_tx = rec_session.beginTransaction();
+
             if (acceptRecord) {
                // This is a recent record, let's process it
+
+               current.setDuplicate(false);
+               if (origin != null) {
+                  //MPERF: Logging.fine(ident + rId + " about to add origin objects.");
+                  current.addOrigin(origin);
+               }
+
+               Session rec_session = pr_session; // Reused the session object.
+               Transaction rec_tx = rec_session.beginTransaction();
 
                try {
 
@@ -818,13 +832,16 @@ public class ListenerThread extends Thread {
                         needCurrentSaveDup = current.setDuplicate(true);
                         Session dup2_session = HibernateWrapper.getSession();
                         try {
-                           dupdbid = ((Record) (dup2_session.createQuery("select record from " +
+                           String cmd = "select dbid from " +
                                  current.getTableName() +
-                                 " record where " +
+                                 "_Meta record where " +
                                  "record.md5 = " +
                                  "'" +
                                  current.getmd5() +
-                                 "'").setCacheMode(CacheMode.IGNORE).list().get(0))).getRecordId();
+                                 "'";
+                           Integer dup_dbid = (Integer) (dup2_session.createSQLQuery(cmd).uniqueResult());
+                           fProbeDetails.put(current.getmd5(), dup_dbid);
+                           dupdbid = dup_dbid;
                         } finally {
                            dup2_session.close();
                         }
