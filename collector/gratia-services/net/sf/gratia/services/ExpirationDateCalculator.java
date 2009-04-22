@@ -4,10 +4,8 @@ import net.sf.gratia.util.Logging;
 import net.sf.gratia.services.Duration.*;
 
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.Hashtable;
-import java.util.List;
 import java.util.Properties;
 import java.util.TimeZone;
 import java.util.Date;
@@ -15,7 +13,6 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.Enumeration;
 import java.util.regex.*;
-import java.lang.Integer;
 
 public class ExpirationDateCalculator {
     // Caching handler class for calculating expiration dates of various
