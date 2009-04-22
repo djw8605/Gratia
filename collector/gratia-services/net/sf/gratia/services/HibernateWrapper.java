@@ -1,13 +1,10 @@
 package net.sf.gratia.services;
 
-import net.sf.gratia.util.Configuration;
-
+// import net.sf.gratia.util.Configuration;
 import net.sf.gratia.util.Logging;
 
 import java.util.*;
 import java.io.*;
-
-import net.sf.gratia.storage.*;
 
 public class HibernateWrapper {
     static Properties p = null;
@@ -41,9 +38,10 @@ public class HibernateWrapper {
         // String configurationPath = net.sf.gratia.util.Configuration.getConfigurationPath();
 
         try {
-            hibernateFactory.close();
-        }
-        catch (Exception ignore) {
+            if (hibernateFactory != null) {
+                hibernateFactory.close();
+            }
+        } catch  (Exception ignore) {
         }
 
         try {

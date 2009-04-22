@@ -1,13 +1,15 @@
 package net.sf.gratia.services;
 
 import net.sf.gratia.util.Logging;
-import net.sf.gratia.storage.DataScrubber;
-import net.sf.gratia.services.Duration.*;
+import net.sf.gratia.services.DataScrubber;
+import net.sf.gratia.storage.Duration;
+import net.sf.gratia.storage.Duration.*;
 
 import java.util.Date;
 import java.util.Properties;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+
 
 public class DataHousekeepingService extends Thread {
 
@@ -23,7 +25,7 @@ public class DataHousekeepingService extends Thread {
     private Boolean stopRequested = false;
     private Boolean sleepEnabled = true;
     private Date lastCompletionDate;
-    private Duration checkInterval;
+    private Duration fCheckInterval;
 
     private static final int defaultCheckIntervalDays = 2;
 
@@ -76,15 +78,15 @@ public class DataHousekeepingService extends Thread {
                          "Please use service.lifetimeManagement.checkInterval instead " +
                          "with value <num> [hdwmy] (default [d]ays)");
             try {
-                checkInterval = new Duration(checkIntervalDays, DurationUnit.DAY);
+                fCheckInterval = new Duration(checkIntervalDays, DurationUnit.DAY);
             } catch (DurationParseException e) {
                 Logging.warning("DataHouseKeepingService: caught exception " +
                                 "parsing service.lifetimeManagement.checkIntervalDays property", e);
-                checkInterval = new Duration(defaultCheckIntervalDays, DurationUnit.DAY);
+                fCheckInterval = new Duration(defaultCheckIntervalDays, DurationUnit.DAY);
             }
         } else { // Preferred control
             try {
-                checkInterval =
+                fCheckInterval =
                     new Duration(p.getProperty("service.lifetimeManagement.checkInterval",
                                                defaultCheckIntervalDays +
                                                " d"), DurationUnit.DAY);
@@ -92,7 +94,7 @@ public class DataHousekeepingService extends Thread {
             catch (DurationParseException e) {
                 Logging.warning("DataHouseKeepingService: caught exception " +
                                 "parsing service.lifetimeManagement.checkInterval property", e);
-                checkInterval = new Duration(defaultCheckIntervalDays, DurationUnit.DAY);
+                fCheckInterval = new Duration(defaultCheckIntervalDays, DurationUnit.DAY);
             }
         }
     }
@@ -115,13 +117,14 @@ public class DataHousekeepingService extends Thread {
         stopRequested = true;
     }
 
+    @Override
     public void run() {
         Logging.info("DataHousekeepingService started");
         while (!stopRequested) {
             if (sleepEnabled) {
                 currentStatus = Status.SLEEPING;
                 try {
-                    long checkInterval = this.checkInterval.msFromDate(new Date());
+                    long checkInterval = this.fCheckInterval.msFromDate(new Date());
                     Logging.debug("DataHousekeepingService: going to sleep for " +
                                   checkInterval + "ms.");
                     Thread.sleep(checkInterval);

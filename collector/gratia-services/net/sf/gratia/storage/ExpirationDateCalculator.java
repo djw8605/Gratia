@@ -1,7 +1,7 @@
-package net.sf.gratia.services;
+package net.sf.gratia.storage;
 
 import net.sf.gratia.util.Logging;
-import net.sf.gratia.services.Duration.*;
+import net.sf.gratia.storage.Duration.*;
 
 import java.text.SimpleDateFormat;
 import java.util.GregorianCalendar;

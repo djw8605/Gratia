@@ -88,8 +88,11 @@ public class ListenerThread extends Thread {
             Logging.warning(ident + ": ERROR! Serious problems starting listener");
             Logging.debug(ident + "Exception detail: ", e);
         }
-        historypath = System.getProperties().getProperty("catalina.home") +
-            "/gratia/data/";
+        historypath = System.getProperties().getProperty("catalina.home");
+        if (historypath == null) {
+            historypath = ".";
+        }
+        historypath = historypath + "/gratia/data/";
 
         JobUsageRecordUpdater.AddDefaults(updater);
     }
@@ -115,6 +118,7 @@ public class ListenerThread extends Thread {
         Logging.log(ident + ": Stop Requested");
     }
 
+    @Override
     public void run() {
         while (true) {
             if (stopflag) {

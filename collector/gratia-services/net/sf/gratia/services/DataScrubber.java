@@ -1,15 +1,9 @@
-package net.sf.gratia.storage;
+package net.sf.gratia.services;
 
-import net.sf.gratia.services.HibernateWrapper;
-import net.sf.gratia.services.ExpirationDateCalculator;
+import net.sf.gratia.storage.ExpirationDateCalculator;
 import net.sf.gratia.util.Logging;
 
-import java.text.SimpleDateFormat;
-import java.util.TimeZone;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.util.Properties;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.Date;
 import java.util.Enumeration;

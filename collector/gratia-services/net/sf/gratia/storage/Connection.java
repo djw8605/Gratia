@@ -2,7 +2,6 @@ package net.sf.gratia.storage;
 
 import org.apache.commons.lang.StringEscapeUtils;
 
-import net.sf.gratia.util.Logging;
 import java.util.Date;
 
 /**
@@ -87,6 +86,7 @@ public class Connection implements AttachableXmlElement, Comparable
          return false;
       }
       
+    @Override
       public boolean equals(Object obj) 
       {
          if (this == obj) return true;
@@ -102,6 +102,7 @@ public class Connection implements AttachableXmlElement, Comparable
          return true;
       }
       
+    @Override
       public int hashCode() {
          if (false && md5 != null) {
             return md5.hashCode();

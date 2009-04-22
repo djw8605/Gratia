@@ -3,8 +3,6 @@ package net.sf.gratia.storage;
 import java.util.Date;
 import java.util.List;
 import java.util.ArrayList;
-import net.sf.gratia.services.ExpirationDateCalculator;
-import net.sf.gratia.util.Logging;
 
 /**
  * <p>Title: Record </p>
@@ -39,8 +37,7 @@ public abstract class Record implements RecordInterface {
    protected String md5;
 
    
-   static ExpirationDateCalculator eCalc =
-        new ExpirationDateCalculator();
+   static ExpirationDateCalculator eCalc = new ExpirationDateCalculator();
 
    // Returns the date of the oldest raw records we keep
    public Date getExpirationDate() {

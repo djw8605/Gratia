@@ -1,19 +1,16 @@
 package net.sf.gratia.services;
 
-import net.sf.gratia.services.Duration.*;
-import net.sf.gratia.util.Configuration;
+import net.sf.gratia.storage.Duration;
+import net.sf.gratia.storage.Duration.*;
 import net.sf.gratia.util.Execute;
 import net.sf.gratia.util.Logging;
 import net.sf.gratia.util.LogLevel;
 
 import java.lang.Thread.*;
-import java.math.BigInteger;
 import java.rmi.*;
 import java.security.*;
-import java.sql.*;
 import java.util.Enumeration;
 import java.util.Hashtable;
-import java.util.List;
 import java.util.Properties;
 import java.util.TimeZone;
 import javax.servlet.*;
@@ -22,16 +19,11 @@ import javax.servlet.*;
 //import javax.management.remote.JMXConnector;
 //import javax.management.remote.JMXConnectorFactory;
 //import javax.management.remote.JMXServiceURL;
-import net.sf.gratia.storage.DatabaseMaintenance;
+//import net.sf.gratia.services.DatabaseMaintenance;
 
-import org.hibernate.HibernateException;
-import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
-import org.hibernate.exception.*;
 
-import java.security.cert.X509Certificate;
-import net.sf.gratia.util.Base64;
 
 public class CollectorService implements ServletContextListener {
     static String fName;

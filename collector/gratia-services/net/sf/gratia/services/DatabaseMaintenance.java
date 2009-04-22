@@ -1,5 +1,6 @@
-package net.sf.gratia.storage;
+package net.sf.gratia.services;
 
+import net.sf.gratia.storage.*;
 import net.sf.gratia.util.XP;
 import net.sf.gratia.util.Execute;
 import net.sf.gratia.util.Configuration;

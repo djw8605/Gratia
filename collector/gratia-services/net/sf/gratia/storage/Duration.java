@@ -1,4 +1,4 @@
-package net.sf.gratia.services;
+package net.sf.gratia.storage;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;

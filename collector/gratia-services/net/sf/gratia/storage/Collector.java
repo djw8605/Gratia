@@ -1,7 +1,6 @@
 package net.sf.gratia.storage;
 
 import org.apache.commons.lang.StringEscapeUtils;
-import net.sf.gratia.util.Logging;
 
 /**
  * <p>Title: Collector </p>

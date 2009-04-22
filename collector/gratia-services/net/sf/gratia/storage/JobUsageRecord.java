@@ -101,6 +101,7 @@ public class JobUsageRecord extends Record
       }
    }
    
+    @Override
    public String toString()
    {
       String output = "UsageRecord: Db Id: " + RecordId;
@@ -626,6 +627,7 @@ public class JobUsageRecord extends Record
     }
 
     // Trigger called after session.save()
+    @Override
     public void executeTrigger(org.hibernate.Session session) throws Exception {
         TransferDetails td = getTransferDetails();
         if ((td != null) &&
