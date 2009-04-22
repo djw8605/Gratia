@@ -8,7 +8,7 @@
  CompBioGrid => { },
  DES => { mail => [ 'Nickolai Kuropatkin <kuropat@fnal.gov>' ] },
  DOSAR => { mail => [ 'Dick Greenwood <greenw@phys.latech.edu>', 'Horst Severini <hs@nhn.ou.edu>' ] },
- DZero => { mail => [ 'Horst Severini <hs@nhn.ou.edu>', 'Joel Snow <snow@fnal.gov>', 'Qizhong Li <qzli@fnal.gov>' ] },
+ DZero => { mail => [ 'Horst Severini <hs@nhn.ou.edu>', 'Joel Snow <snow@fnal.gov>', 'Qizhong Li <qzli@fnal.gov>', 'Ruth Pordes <ruth@fnal.gov>' ] },
  Engage => { "alt-vos" => [ 'Engagement' ],
              mail => [ 'Engage Team <engage-team@opensciencegrid.org>' ] },
  Fermilab => { mail => [ 'Keith Chadwick <chadwick@fnal.gov>', 'Steve Timm <timm@fnal.gov>' ] },
