@@ -1,14 +1,10 @@
 package net.sf.gratia.services;
 
-import net.sf.gratia.storage.*;
 import net.sf.gratia.util.XP;
 import net.sf.gratia.util.Execute;
-import net.sf.gratia.util.Configuration;
 import net.sf.gratia.util.Logging;
 import net.sf.gratia.util.LogLevel;
-import net.sf.gratia.services.HibernateWrapper;
 import net.sf.gratia.storage.JobUsageRecord;
-import net.sf.gratia.storage.UserIdentity;
 
 import java.io.File;
 import java.lang.Long;
@@ -18,23 +14,17 @@ import java.sql.*;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
-import java.util.regex.*;
 
-import org.hibernate.CacheMode;
-import org.hibernate.FlushMode;
-import org.hibernate.JDBCException;
 import org.hibernate.Query;
 import org.hibernate.SQLQuery;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
-import org.hibernate.exception.*;
 
 public class DatabaseMaintenance {
     static final String dq = "\"";
@@ -49,7 +39,6 @@ public class DatabaseMaintenance {
 
     java.sql.Connection connection;
     int liveVersion = 0;
-    XP xp = new XP();
     boolean isInnoDB = false;
 
     public DatabaseMaintenance(Properties p) {
@@ -67,7 +56,7 @@ public class DatabaseMaintenance {
         catch (Exception e)
             {
                 Logging.warning("DatabaseMaintenance: Error During connection: " + e);
-                Logging.warning(xp.parseException(e));
+                Logging.warning(XP.parseException(e));
                 return;
             }
 
@@ -385,7 +374,7 @@ public class DatabaseMaintenance {
     private int CallPostInstall(String action) {
         Logging.fine("DatabaseMaintenance: calling post-install script for action \"" + action + "\"");
         String post_install = System.getProperty("catalina.home");
-        post_install = xp.replaceAll(post_install, "\\", "" + File.separatorChar);
+        post_install = XP.replaceAll(post_install, "\\", "" + File.separatorChar);
         post_install = post_install + File.separatorChar + "gratia" + File.separatorChar + "post-install.sh";
         String chmod_cmd[] = {"chmod", "700", post_install};
         Execute.execute(chmod_cmd); // Mark executable just in case.

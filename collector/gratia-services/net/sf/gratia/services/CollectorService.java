@@ -70,6 +70,10 @@ public class CollectorService implements ServletContextListener {
     Hashtable global = new Hashtable();
     DatabaseMaintenance checker = null;
 
+    public CollectorService() {
+       net.sf.gratia.storage.Connection.setDefaultCollectorName(getName());
+    }
+
     public void contextInitialized(ServletContextEvent sce) {
         int i = 0;
 

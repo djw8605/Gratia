@@ -36,6 +36,8 @@ public class Connection implements AttachableXmlElement, Comparable
 
       final int kInvalid = 0;
       final int kValid = 1;
+
+      private static String gDefaultCollectorName = "Standalone";
       
       public Connection()
       {
@@ -86,7 +88,7 @@ public class Connection implements AttachableXmlElement, Comparable
          return false;
       }
       
-    @Override
+      @Override
       public boolean equals(Object obj) 
       {
          if (this == obj) return true;
@@ -162,8 +164,14 @@ public class Connection implements AttachableXmlElement, Comparable
          if (fCollector != null) {
             return fCollector.getName();
          } else {
-            return net.sf.gratia.services.CollectorService.getName();
+            return gDefaultCollectorName; // net.sf.gratia.services.CollectorService.getName();
          }
+      }
+      static public void setDefaultCollectorName(String name) {
+         gDefaultCollectorName = name;
+      }
+      static public String getDefaultCollectorName() {
+         return gDefaultCollectorName;
       }
       
       public void setFirstSeen(Date value) { fFirstSeen = value; }
