@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Properties;
 import java.util.StringTokenizer;
-import java.util.List;
 import java.util.Hashtable;
 
 import java.text.*;
@@ -55,7 +54,7 @@ public class ListenerThread extends Thread {
     NewVOUpdate newVOUpdate = null;
     ErrorRecorder errorRecorder = new ErrorRecorder();
 
-    Object lock;
+    final Object lock;
 
     String historypath = "";
 
@@ -162,6 +161,7 @@ public class ListenerThread extends Thread {
         }
     }
 
+   @SuppressWarnings("empty-statement")
     public int loop() {
         String file = "";
         String blob = "";
@@ -178,7 +178,7 @@ public class ListenerThread extends Thread {
         // Return the number of files seen.
         // or 0 in the case of error.
 
-        String files[] = xp.getFileList(directory);
+        String files[] = XP.getFileList(directory);
 
         int nfiles = files.length;
 
@@ -197,7 +197,7 @@ public class ListenerThread extends Thread {
 
             file = files[i];
             //MPERF: Logging.fine(ident + ": Start Processing: " + file);
-            blob = xp.get(files[i]);
+            blob = XP.get(files[i]);
 
             xml = "";
             rawxmllist.clear();
@@ -818,10 +818,10 @@ public class ListenerThread extends Thread {
                                     needCurrentSaveDup =
                                         current.setDuplicate(true);
                                     if (!needCurrentSaveDup) { // Save probe object anyway
-                                        Probe p = current.getProbe();
-                                        if (p != null) {
+                                        Probe localprobe = current.getProbe();
+                                        if (localprobe != null) {
                                             tx = session.beginTransaction();
-                                            session.saveOrUpdate(p);
+                                            session.saveOrUpdate(localprobe);
                                             session.flush();
                                             tx.commit();
                                         }
@@ -962,14 +962,14 @@ public class ListenerThread extends Thread {
         Date now = new Date();
         SimpleDateFormat format = new SimpleDateFormat("yyyyMMddkk");
         String path = historypath + what + "-" + format.format(now);
-        File directory = new File(path);
-        if (!directory.exists()) {
-            directory.mkdir();
+        File dirondisk = new File(path);
+        if (!dirondisk.exists()) {
+            dirondisk.mkdir();
         }
         
         long part = nrecords / recordsPerDirectory;
 
-        File subdir = new File(directory,directory_part + "-" + part);
+        File subdir = new File(dirondisk,directory_part + "-" + part);
         
         if (!subdir.exists()) {
             subdir.mkdir();
