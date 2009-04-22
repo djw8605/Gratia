@@ -116,10 +116,30 @@ foreach my $primary_email (sort keys %$people_data) {
   my $vo_rep_name_reports = {};
   foreach my $vo_rep_name (@{$person->{reporting_names}}) {
     my ($vo, $reporting_name) = ($vo_rep_name =~ m&^([^:]+):(.*)$&);
-    $vo_rep_name_reports->{$vo} = [] unless $vo_rep_name_reports->{$vo};
-    push @{$vo_rep_name_reports->{$vo}}, $reporting_name;
+    $vo = lc $vo;
+    $vo_rep_name_reports->{$vo} = {} unless $vo_rep_name_reports->{$vo};
+    $vo_rep_name_reports->{$vo}->{$reporting_name} = "LOCAL";
+  }
+  foreach my $vo_rep_name (@{$person->{vo_reporting_names}}) {
+    my ($vo, $reporting_name) = ($vo_rep_name =~ m&^([^:]+):(.*)$&);
+    $vo = lc $vo;
+    $vo_rep_name_reports->{$vo} = {} unless $vo_rep_name_reports->{$vo};
+    if ($vo_rep_name_reports->{$vo}->{$reporting_name}) {
+      $vo_rep_name_reports->{$vo}->{$reporting_name} = "BOTH";
+    } else {
+      $vo_rep_name_reports->{$vo}->{$reporting_name} = "OIM";
+    }
   }
   foreach my $vo (sort keys %$vo_rep_name_reports) {
+    my @local_only_entries = map { $_ if $vo_rep_name_reports->{$vo}->{$_} eq "LOCAL" } (sort keys %{$vo_rep_name_reports->{$vo}});
+    foreach my $name (@local_only_entries) {
+      print "OIM_WARNING: $primary_email report request for $vo:$name is missing from OIM.\n";
+    }
+    my @oim_only_entries = map { $_ if $vo_rep_name_reports->{$vo}->{$_} eq "OIM" } (sort keys %{$vo_rep_name_reports->{$vo}});
+    foreach my $name (@oim_only_entries) {
+      print "OIM_WARNING: $primary_email report request for $vo:$name is in OIM only.\n"
+        if $options->{verbose};
+    }
     my @command =  ("$osg_users_script", "-v", "$vo", "--aux-db-type=none", "-s", "-V");
     push @command, map { ( "-D", $_) } @{$options->{"data-source"}} if $options->{"data-source"};
     if ($options->{monthly}) {
@@ -127,7 +147,7 @@ foreach my $primary_email (sort keys %$people_data) {
     } elsif ($options->{yearly}) {
       push @command, "-t", "year";
     }
-    push @command, map { ("--reporting-name", "$vo:$_") } @{$vo_rep_name_reports->{$vo}};
+    push @command, map { ("--reporting-name", "$vo:$_") } (sort keys %{$vo_rep_name_reports->{$vo}});
     $reporter->invoke(\@command, [ "-m", $person->{contact_string} ]);
   }
 }
@@ -157,7 +177,7 @@ foreach my $vo (sort keys %$master_vo_list) {
         if $options->{verbose};
     } elsif (exists $people_data->{$email_hash->{$email}} and
         $people_data->{$email_hash->{$email}}->wants_all_vos()) {
-      print "INFO: $email_hash->{$email} wants all VO reports: added to report for VO $vo\n"
+      print "INFO: $email_hash->{$email} wants all VO reports: added to report for VO $vo.\n"
         if $options->{verbose};
     } else {
       print "OIM_WARNING: Local contact $email not found in OIM contacts list for VO $vo.\n";
@@ -175,7 +195,12 @@ foreach my $vo (sort keys %$master_vo_list) {
         print "INFO: OIM contact $people_data->{$person}->{full_name} matches data-file email $person for VO $vo.\n"
           if $options->{verbose};
       } else {
-        print "OIM_WARNING: OIM contact $people_data->{$person}->{full_name} (email address $person) not found in local contact list for VO $vo.\n"
+        print "OIM_WARNING: OIM contact $people_data->{$person}->{full_name} ",
+          "(email address $person) not found in local contact list for VO $vo.\n";
+        # Add person to send list.
+        $email_hash->{sprintf("%s <%s>",
+                              $people_data->{$person}->{full_name},
+                              $person)} = $person;
       }
     }
   }
