@@ -1,14 +1,11 @@
 package net.sf.gratia.storage;
 
-import net.sf.gratia.util.XP;
-
-import net.sf.gratia.services.*;
-import java.util.*;
-import org.dom4j.*;
-import org.dom4j.io.*;
-import java.io.*;
-
+import java.io.StringReader;
+import java.util.ArrayList;
 import net.sf.gratia.util.Logging;
+import org.dom4j.Document;
+import org.dom4j.Element;
+import org.dom4j.io.SAXReader;
 
 public class RecordConverter {
     private ArrayList<RecordLoader> loaderList = new ArrayList<RecordLoader>();
