@@ -48,8 +48,6 @@ public class ListenerThread extends Thread {
     int itotal = 0;
     Properties p;
 
-    XP xp = new XP();
-
     StatusUpdater statusUpdater = null;
     NewVOUpdate newVOUpdate = null;
     ErrorRecorder errorRecorder = new ErrorRecorder();
@@ -982,7 +980,7 @@ public class ListenerThread extends Thread {
         File where = getDirectory("old");
         File errorfile = File.createTempFile("old-", ".xml", where);
         String filename = errorfile.getPath();
-        xp.save(filename, data);
+        XP.save(filename, data);
     }
 
 
@@ -1006,7 +1004,7 @@ public class ListenerThread extends Thread {
             data = new StringBuffer("historymd5" + "|" + serverDate.getTime() +
                                     "|" + xml + "|" + current.getmd5());
         }
-        xp.save(filename,data.toString());
+        XP.save(filename,data.toString());
     }
     
     public ArrayList convert(String xml) throws Exception {
