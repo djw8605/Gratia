@@ -256,9 +256,6 @@ public class DatabaseMaintenance {
       AddIndex("JobUsageRecord", false, "index15", "CommonName");
 
       //
-      AddIndex("Security", true, "index02", "alias");
-
-      //
       // New index for ResourceType
       //
       AddIndex("JobUsageRecord", false, "index16", "ResourceType");
@@ -835,9 +832,6 @@ public class DatabaseMaintenance {
                q.executeUpdate();
                q = session.createSQLQuery("UPDATE Replication SET " +
                      "registered = 0 where registered IS NULL");
-               q.executeUpdate();
-               q = session.createSQLQuery("UPDATE Replication SET " +
-                     "security = 0 where security IS NULL");
                q.executeUpdate();
                q = session.createSQLQuery("UPDATE Replication SET " +
                      "openconnection = '' where openconnection IS NULL");
