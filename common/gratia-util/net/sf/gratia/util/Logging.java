@@ -69,7 +69,11 @@ public class Logging {
                                 path + " to log4j-style " + newPath);
                     path = newPath;
                 } else {
-                   String newPath = System.getProperty("catalina.home") + (path.startsWith("/")?"":"/") + path;
+                   String newPath = System.getProperty("catalina.home");
+                   if (newPath == null) {
+                       newPath = ".";
+                   }
+                   newPath = newPath + (path.startsWith("/")?"":"/") + path;
                    logToScreen("Use log4j-style path: "+newPath);
                    path = newPath;
                 }
