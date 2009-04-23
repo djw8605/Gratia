@@ -39,7 +39,6 @@ public class CollectorService implements ServletContextListener {
     Boolean opsEnabled = false;
     Boolean m_servletEnabled = false;
     private Boolean housekeepingDisabled = false;
-    private Boolean checksumUpgradeDisabled = false;
     private int fSecurityLevel = 0;
 
     private boolean needConnectionTracking() {
@@ -57,7 +56,6 @@ public class CollectorService implements ServletContextListener {
     QSizeMonitor qsizeMonitor;
     MonitorListenerThread monitorListenerThread;
     DataHousekeepingService housekeepingService;
-    ChecksumUpgrader checksumUpgrader;
 
     public String configurationPath;
 
@@ -326,30 +324,6 @@ public class CollectorService implements ServletContextListener {
 
             Logging.log("CollectorService: Checking for unique index on md5v2");
 
-            Boolean require_checksum_upgrade = false;
-            try {
-                require_checksum_upgrade = !checker.checkMd5v2Unique();
-            }
-            catch (Exception e) {
-                Logging.log(LogLevel.SEVERE,
-                            "CollectorService: unable to ascertain md5v2 index status: not starting upgrade thread", e);
-                checksumUpgradeDisabled = true;
-                housekeepingDisabled = true; // Also don't start housekeeping.
-            }
-
-            if (!checksumUpgradeDisabled) {
-                String upgradeVal = p.getProperty("gratia.database.disableChecksumUpgrade", "0");
-                checksumUpgradeDisabled =
-                    0 < Integer.valueOf(upgradeVal);
-            }
-            
-            if (require_checksum_upgrade && !checksumUpgradeDisabled) {
-                Logging.log("CollectorService: starting checksum upgrade thread.");
-                checksumUpgrader = new ChecksumUpgrader(this);
-                checksumUpgrader.start();
-                Logging.info("CollectorService: ChecksumUpgrader started");
-            }
-
             //
             // Start a thread to periodically clear expired data
             //
@@ -609,20 +583,6 @@ public class CollectorService implements ServletContextListener {
         return replicationService != null && replicationService.isAlive();
     }
 
-    public synchronized String checksumUpgradeStatus() {
-        if (checksumUpgradeDisabled) {
-            if (0 < checker.readIntegerDBProperty("gratia.database.disableChecksumUpgrade")) {
-                return "DISABLED (MANUAL)";
-            } else {
-                return "DISABLED (AUTO-SAFETY)";
-            }
-        } else if (checksumUpgrader  != null) {
-            return checksumUpgrader.checksumUpgradeStatus();
-        } else {
-            return "OFF";
-        }
-    }
-
     public synchronized void stopDatabaseUpdateThreads() {
         if (!databaseUpdateThreadsActive()) {
             Logging.info("CollectorService: DB update threads cannot be stopped -- not started!");
@@ -691,10 +651,6 @@ public class CollectorService implements ServletContextListener {
             if ((threads[i] != null) && threads[i].isAlive()) return true;
         }
         return false;
-    }
-
-    public Boolean checkMd5v2Unique() throws Exception {
-        return checker.checkMd5v2Unique();
     }
 
     public void loadSelfGeneratedCerts() {

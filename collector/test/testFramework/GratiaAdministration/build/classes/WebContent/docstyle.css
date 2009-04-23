@@ -1,0 +1,15 @@
+body
+{
+	font-family: Verdana, Arial, sans-serif;
+	font-size: 0.80em;
+}
+
+li
+{
+margin-bottom:0.3em;
+}
+pre
+{
+	font-size: 1.15em;
+	margin-left:3em;
+}

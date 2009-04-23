@@ -6,19 +6,12 @@ import net.sf.gratia.util.Configuration;
 
 import net.sf.gratia.util.Logging;
 
-import net.sf.gratia.services.*;
-
 import java.io.*;
-import java.net.*;
 
-import java.util.StringTokenizer;
 import java.util.Properties;
-import java.util.Hashtable;
 import java.util.HashMap;
 import java.util.TreeSet;
 import java.util.Iterator;
-import java.util.Enumeration;
-import java.util.Vector;
 
 import javax.servlet.*;
 import javax.servlet.http.*;
@@ -26,7 +19,6 @@ import javax.servlet.http.*;
 import java.sql.*;
 
 import java.util.regex.*;
-import java.text.*;
 import java.lang.Math;
 
 public class Status extends HttpServlet {

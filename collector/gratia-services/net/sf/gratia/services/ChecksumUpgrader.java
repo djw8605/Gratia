@@ -263,7 +263,7 @@ public class ChecksumUpgrader extends Thread {
                         UserIdentity baseUserIdentity = base.getUserIdentity();
                         JobUsageRecord compare = (JobUsageRecord) rIter.next();
                         // Need to add comparison and salt if
-                        // neceessary. Next on the list TODO ...
+                        // necessary. Next on the list TODO ...
                         UserIdentity compareUserIdentity = compare.getUserIdentity();
                         Boolean newerIsBetter = false;
                         String replaceReason = null;

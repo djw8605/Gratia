@@ -1,0 +1,51 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>Gratia Accounting</title>
+<link href="stylesheet.css" type="text/css" rel="stylesheet" />
+<link href="docstyle.css" type="text/css" rel="stylesheet" />
+
+</head>
+<body>
+<h1 align="center" class="osgcolor">&nbsp;&nbsp;&nbsp;&nbsp;Gratia Administration&nbsp;&nbsp;&nbsp;&nbsp;</h1>
+<h3 align="center">Role Maintenance </h3>
+<p align="center">&nbsp;</p>
+<p align="left">Note: The search/where clause component should be set to either &quot;Everything&quot; (meaning just what it says) or to a component of a sql where clause. As an example, if you wanted to set up a role that just returned information for a particular VO, the where clause would be (ignoring the double quotes) &quot;VOName = 'some value'&quot;. A second example: &quot;VOName = 'some value' and ProbeName = 'some value'&quot;. The underlying report software will invoke a stored procedure which will create a dynamic sql query to return just those values. Also note that whatever subtitle you enter is displayed at the top of each report. </p>
+<form id="form1" name="form1" method="post" action="">
+  <table width="100%" border="1">
+    <tr>
+      <th width="15%" bgcolor="#999999" scope="col">Role</th>
+      <th width="15%" bgcolor="#999999" scope="col">Subtitle</th>
+      <th width="15%" bgcolor="#999999" scope="col">Search/Where Clause </th>
+      <th width="10%" bgcolor="#999999" scope="col"><span class="style1">Options</span></th>
+    </tr>
+    <tr>
+      <td>
+          <label>
+          <input name="role:#index#" type="text" value="#role#" size="15" maxlength="32" />
+          </label>
+          <input name="index:#index#" type="hidden" id="index:#index#" value="#index#" />
+          <input name="roleid:#index#2" type="hidden" id="roleid:#index#2" value="#roleid#" />
+      </td>
+      <td>
+          <label>
+          <input name="subtitle:#index#" type="text" value="#subtitle#" size="30" maxlength="100" />
+          </label>        </td>
+      <td>
+          <label>
+          <input name="where:#index#" type="text" value="#where#" size="50" maxlength="120" />
+          </label>        </td>
+      <td><a href="roles.html?action=delete&amp;roleid=#roleid#">Delete</a></td>
+    </tr>
+    <tr>
+      <td colspan="4" align="center"><label>
+          <input type="submit" name="Submit" value="Update" />
+          </label>
+        </td>
+    </tr>
+  </table>
+</form>
+</body>
+</html>
+

@@ -553,22 +553,9 @@ public class ListenerThread extends Thread {
             if ((!gothistory) || (!(md5list.size() > j)) ||
                   md5list.get(j) == null) {
                try {
-                  if (current.getTableName().equals("JobUsageRecord")) {
+                  if (current instanceof JobUsageRecord) {
                      String md5key = current.computemd5(DatabaseMaintenance.UseJobUsageSiteName());
                      current.setmd5(md5key);
-                     // Need to do this to keep number of
-                     // duplicates making it into the DB
-                     // under control during the upgrade
-                     // procedure. This will be removed for a
-                     // future upgrade as it is only really
-                     // necessary for very large DBs.
-                     Logging.debug("Calculating and saving " +
-                           "old-style checksum for " +
-                           "JobUsageRecord");
-                     JobUsageRecord jRecord =
-                           (JobUsageRecord) current;
-                     String oldMd5 = jRecord.computeOldMd5();
-                     jRecord.setoldMd5(oldMd5);
                   } else {
                      String md5key = current.computemd5(false);
                      current.setmd5(md5key);
@@ -841,10 +828,12 @@ public class ListenerThread extends Thread {
                                  "'";
                            Integer dup_dbid = (Integer) (dup2_session.createSQLQuery(cmd).uniqueResult());
                            // Avoid infinite growth
-                           if (fProbeDetails.size() > 500) {
-                              fProbeDetails.clear();
+                           if (current instanceof ProbeDetails) {
+                              if (fProbeDetails.size() > 500) {
+                                 fProbeDetails.clear();
+                              }
+                              fProbeDetails.put(current.getmd5(), dup_dbid);
                            }
-                           fProbeDetails.put(current.getmd5(), dup_dbid);
                            dupdbid = dup_dbid;
                         } finally {
                            dup2_session.close();

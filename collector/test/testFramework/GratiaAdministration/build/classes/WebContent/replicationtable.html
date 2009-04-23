@@ -1,0 +1,58 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>Gratia Accounting</title>
+<link href="stylesheet.css" type="text/css" rel="stylesheet" />
+<link href="docstyle.css" type="text/css" rel="stylesheet" />
+
+</head>
+<body>
+<h1 align="center" class="osgcolor">&nbsp;&nbsp;&nbsp;&nbsp;Gratia Administration&nbsp;&nbsp;&nbsp;&nbsp;</h1>
+  <h3 align="center">#recordtable# Replication Administration </h3>
+  <table width="100%" border="1">
+    <tr>
+      <th bgcolor="#999999" scope="col">ID</th>
+      <th bgcolor="#999999" scope="col">Remote Host</th>
+      <th bgcolor="#999999" scope="col">Registered</th>
+      <th bgcolor="#999999" scope="col">Running</th>
+      <th bgcolor="#999999" scope="col">Security</th>
+      <th bgcolor="#999999" scope="col">Probe Name</th>
+      <th bgcolor="#999999" scope="col">Check Interval (m)</th>
+      <th bgcolor="#999999" scope="col">DBID</th>
+      <th bgcolor="#999999" scope="col">Row Count</th>
+      <th bgcolor="#999999" scope="col">Bundle Size</th>
+      <th bgcolor="#999999" scope="col">Actions</th>
+    </tr>
+    <tr id="datarow:#replicationid#">
+<form id="form-#replicationid#" name="form-#replicationid#" method="post" action="#applicationurl#">
+      <td><input type="hidden" name="replicationid" value="#replicationid#" />#replicationid#</td>
+      <td>
+          #openconnection#
+      </td>
+      <td style="text-align: center">#registered#</td>
+      <td style="text-align: center">#running#</td>
+      <td style="text-align: center">#security#</td>
+      <td style="width: 200px; text-align:left">#probename#</td>
+      <td style="text-align: right">#frequency#</td>
+      <td style="text-align: right">#dbid#</td>
+      <td style="text-align: right">#rowcount#</td>
+      <td style="text-align: right">#bundleSize#</td>
+      <td><table id="optiontable#replicationid#" width="100%" border="1">
+              <colgroup><col width="50%" /><col width="50%" /></colgroup>
+              #actionblock#
+        </table></td>
+</form>
+    </tr>
+    <tr>
+<form id="form-end" name="form-end" method="post" action="#applicationurl#">
+      <td colspan="11" style="text-align: center">
+      <label><input type="submit" name="action" value="Refresh" /></label>&nbsp;&nbsp;&nbsp;
+      <label><input type="submit" name="action" value="New Entry" /></label></td>
+</form>
+    </tr>
+  </table>
+<pre id="message" class="msg">#message#</pre>
+
+</body>
+</html>

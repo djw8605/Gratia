@@ -1,0 +1,46 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>Gratia Accounting Certificate Management</title>
+<link href="stylesheet.css" type="text/css" rel="stylesheet" />
+<link href="docstyle.css" type="text/css" rel="stylesheet" />
+
+</head>
+<body>
+<h1 align="center" class="osgcolor">&nbsp;&nbsp;&nbsp;&nbsp;Gratia Administration&nbsp;&nbsp;&nbsp;&nbsp;</h1>
+<h3 align="center">Certificate Administration </h3>
+  <table width="100%" border="1">
+    <tr>
+      <th colspan="6" bgcolor="#999999" scope="col"><h4>Certificates</h4></th>
+    </tr>
+    <tr>
+      <th width="27%"><h5>Issuer</h5></th>
+      <th width="27%"><h5>Name</h5></th>
+      <th width="10%"><h5>Serial</h5></th>
+      <th width="22%"><h5>Expiration Date</h5></th>
+      <th width="6%"><h5>Status</h5></th>
+      <th width="6%"><h5>Actions</h5></th>
+    </tr>    
+    <tr><form action="certificatetable.html" method="post" name="form-#index#" id="form-#index#">
+      <input name="index" type="hidden" id="index" value="#index#" />
+      <input name="certid" type="hidden" id="certid" value="#certid#" />
+      <td style="text-align: left" width="27%">#Issuer#</td>
+      <td style="text-align: left" width="27%">#Name#</td>
+      <td style="text-align: center" width="10%">#Serial#</td>
+      <td style="text-align: center" width="22%">#ExpirationDate#</td>
+      <td style="text-align: center" width="6%">#Status#</td>
+      <td style="text-align: center" width="6%">#Change#</td>
+    </form></tr>
+  </table>
+  <br>
+<form action="certificatetable.html" method="post" name="form-end" id="form-end">
+  <table width="100%" border="0">
+    <tr>
+      <th scope="col"><a href="/gratia-administration/certificatetable.html?action=AllowAll">Allow All</a> &nbsp;&nbsp; <a href="/gratia-administration/certificatetable.html?action=BanAll">Ban All</a> </th>
+    </tr>
+  </table>
+</form>
+<!--#Error#-->
+</body>
+</html>

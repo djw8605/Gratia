@@ -24,7 +24,6 @@ public class DataHousekeepingService extends Thread {
     private CollectorService collectorService = null;
     private Boolean stopRequested = false;
     private Boolean sleepEnabled = true;
-    private Date lastCompletionDate;
     private Duration fCheckInterval;
 
     private static final int defaultCheckIntervalDays = 2;
@@ -107,10 +106,6 @@ public class DataHousekeepingService extends Thread {
         return ((currentStatus == Status.RUNNING)?currentAction.toString():currentStatus.toString());
     }
 
-    public Date lastCompletionDate() {
-        return lastCompletionDate;
-    }
-
     public void requestStop() {
         currentStatus = Status.STOPPING;
         housekeeper.requestStop();
@@ -140,19 +135,6 @@ public class DataHousekeepingService extends Thread {
             }
             if (!stopRequested) {
                 currentStatus = Status.RUNNING;
-                Boolean md5v2Status = false;
-                try {
-                    md5v2Status = collectorService.checkMd5v2Unique();
-                } catch (Exception e) {
-                    // Ignore
-                }
-                if (md5v2Status) {
-                    executeHousekeeping(defaultAction);
-                    lastCompletionDate = new Date();
-                } else {
-                    Logging.info("DataHousekeepingService: checksums are not " + 
-                                 "upgraded yet -- going back to sleep");
-                }
             }
         }
         Logging.info("DataHousekeepingService exiting");        

@@ -1,22 +1,12 @@
 package net.sf.gratia.services;
 
-import net.sf.gratia.util.Configuration;
-
 import net.sf.gratia.util.Logging;
 
 import java.util.*;
-import java.sql.*;
 
 import org.hibernate.CacheMode;
-import org.hibernate.FlushMode;
-import org.hibernate.HibernateException;
 import org.hibernate.Query;
-import org.hibernate.SQLQuery;
-import org.hibernate.ScrollMode;
-import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
-import org.hibernate.Transaction;
-import org.hibernate.exception.*;
 
 import net.sf.gratia.storage.Replication;
 
@@ -31,6 +21,7 @@ public class ReplicationService extends Thread {
         p = net.sf.gratia.util.Configuration.getProperties();
     }
     
+   @Override
     public void run() {
         Logging.info("ReplicationService Started");
         while (!stopRequested) {

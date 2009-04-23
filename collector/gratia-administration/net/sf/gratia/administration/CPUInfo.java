@@ -4,15 +4,10 @@ import net.sf.gratia.util.XP;
 
 import net.sf.gratia.util.Configuration;
 
-import net.sf.gratia.services.*;
-
 import java.io.*;
-import java.net.*;
 
-import java.util.StringTokenizer;
 import java.util.Properties;
 import java.util.Hashtable;
-import java.util.Enumeration;
 
 import javax.servlet.*;
 import javax.servlet.http.*;

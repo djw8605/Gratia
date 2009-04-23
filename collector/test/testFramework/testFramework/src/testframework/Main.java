@@ -47,21 +47,13 @@ public class Main {
       }
    }
 
-   static void testingListener() {
-      Logging.initialize("testFramework");
+   static boolean startupHibernate() {
 
-      CollectorService collector = new CollectorService();
-      Object lock = new Object();
-      Hashtable global = new Hashtable();
       try {
          HibernateWrapper.start();
       } catch (Exception ex) {
          Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
       }
-      ListenerThread thread = new ListenerThread("testing", "thread0", lock, global, collector);
-      // thread.run();
-
-
       if (!HibernateWrapper.databaseUp()) {
          try {
             HibernateWrapper.start();
@@ -69,20 +61,47 @@ public class Main {
          }
          if (HibernateWrapper.databaseDown) {
             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null);
-            return;
+            return false;
          }
       }
+      return true;
+   }
+
+   static void testingListener() {
+      Logging.initialize("testFramework");
+
+      CollectorService collector = new CollectorService();
+      Object lock = new Object();
+      Hashtable global = new Hashtable();
+
+      if (! startupHibernate() ) {
+         return;
+      }
+      ListenerThread thread = new ListenerThread("testing", "thread0", lock, global, collector);
+      // thread.run();
+
+
       int nfiles = 0;
       do {
          nfiles = thread.loop();
       } while (nfiles != 0);
    }
 
+   static void testingReplication() {
+      Logging.initialize("testFramework");
+
+      if (! startupHibernate() ) {
+         return;
+      }
+      ReplicationService replicationService = new ReplicationService();
+      replicationService.start();
+   }
    /**
     * @param args the command line arguments
     */
    public static void main(String[] args) {
+      //testingParsing();
       testingListener();
-
+      //testingReplication();
    }
 }

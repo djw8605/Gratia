@@ -1,0 +1,55 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>Gratia Accounting</title>
+<link href="stylesheet.css" type="text/css" rel="stylesheet" />
+<link href="docstyle.css" type="text/css" rel="stylesheet" />
+
+</head>
+<body>
+<h1 align="center" class="osgcolor">&nbsp;&nbsp;&nbsp;&nbsp;Gratia Administration&nbsp;&nbsp;&nbsp;&nbsp;</h1>
+<h3 align="center">System Administration </h3>
+<form action="" method="post" name="form1" target=adminContent id="form1">
+  <table width="100%" border="1">
+    <tr>
+      <th width="30%" bgcolor="#999999" scope="col">Replay</th>
+      <th width="70%" bgcolor="#999999" scope="col">&nbsp;</th>
+    </tr>
+    <tr>
+      <td><strong>Status</strong></td>
+      <td><div align="left"><strong>#status#</strong></div></td>
+    </tr>
+    <tr>
+      <td><strong>Processed</strong></td>
+      <td><div align="right"><strong>#processed#</strong></div></td>
+    </tr>
+    <tr>
+      <td><strong>Skipped</strong></td>
+      <td><div align="right"><strong>#skipped#</strong></div></td>
+    </tr>
+  </table>
+</form>
+<hr size="4" />
+<p><strong>Starting/Stopping Database Update Services:</strong></p>
+<p><strong>Current Status: #threadstatus#</strong></p>
+<blockquote>
+  <p><a href="stopDatabaseThreads.html?action=stopDatabaseUpdateThreads" target="adminContent">Stop Update Services</a> </p>
+  <p><a href="stopDatabaseThreads.html?action=startDatabaseUpdateThreads" target="adminContent">Start Update Services</a></p>
+</blockquote>
+<hr size="4" />
+<p><strong>Creating/Recreating Report Summary Tables:</strong></p>
+<p>Unfortunately, this process cannot be (safely) automated. Specifically what you have to do is:</p>
+<ul>
+  <li>Bring down the tomcat service accessing your Gratia database.</li>
+  <li>In your $CATALINA_HOME/gratia subdirectory you will find a script called build-summary-tables.bat (or build-summary-tables.sh) which will drop/create the various summary tables used by reporting and install an &quot;after insert&quot; trigger on the JobUsageRecord table which will dynamically update the summary tables as new information is received by the Gratia system.</li>
+  <li>The actual SQL that is being executed is in $CATALNA_HOME/gratia/build-summary-tables.sql.</li>
+  <li>Restart your tomcat service. </li>
+</ul>
+<p><strong>Warnings:</strong></p>
+<ul>
+  <li><strong>Be very, very careful if you modify the build-summary-table.sql code. Any errors in this can cause the Gratia data collector to hang. If this happens you must stop the tomcat service and delete the trigger.</strong></li>
+  <li><strong>MySQL does not, repeat does not, backup triggers and stored procedures as part of a mysqldump. If you have to do a restore, you must recreate the trigger. </strong></li>
+</ul>
+</body>
+</html>

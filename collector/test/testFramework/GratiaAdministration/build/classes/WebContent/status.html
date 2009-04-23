@@ -1,0 +1,52 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>Gratia Accounting</title>
+<link href="stylesheet.css" type="text/css" rel="stylesheet" />
+<link href="docstyle.css" type="text/css" rel="stylesheet" />
+
+</head>
+<body>
+
+  <table width="60%" border="0">
+  	<tr>
+	<td colspan="3">
+        <h1 align="center" class="osgcolor">&nbsp;&nbsp;&nbsp;&nbsp;Gratia Administration&nbsp;&nbsp;&nbsp;&nbsp;</h1>
+<h2 align="center">System Status </h2></td>
+	</tr>
+  </table>
+
+<h3>Queue information</h3>
+  <table border="1">
+    <tr class="qsize">
+      <td><strong>#queue# Size</strong></td><td align="right">#queuesize#</td>
+    </tr>
+  </table>
+
+<h3>Historical information</h3>
+<form id="form1" name="form1" method="post" action="probetable.html">
+  <table width="60%" border="1">
+    <colgroup />
+    <colgroup class="tablespan" span="#nDcols#" />
+    <thead>
+  	<tr class="tablehead1">
+      <th bgcolor="#999999" scope="col" rowspan="2">Time</th>
+      <th bgcolor="#999999" scope="colgroup" colspan="#nDcols#">#RecordType#</th>
+    </tr>
+  	<tr class="tablehead2">
+      <th bgcolor="#999999" scope="col">#datumHeader#</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr class="timeintervalrow">
+      <td align="right" bgcolor="#bgcolor#" class="timeinterval"><strong>#timeinterval#</strong></td>
+      <td align="right" class="tabledatum" bgcolor="#bgcolor#">#tabledatum#</td>
+    </tr>
+    </tbody>
+  </table>
+</form>
+
+</body>
+</html>
+

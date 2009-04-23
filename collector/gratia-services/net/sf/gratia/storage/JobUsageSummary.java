@@ -20,7 +20,6 @@ public class JobUsageSummary extends Record {
     private int RecordId;
     private DateElement EndTime;
     private IntegerElement VOcorrid;
-    private StringElement ProbeName;
     private StringElement CommonName;
     private StringElement ResourceType;
     private StringElement HostDescription;
@@ -29,45 +28,18 @@ public class JobUsageSummary extends Record {
     private DurationElement WallDuration;
     private DurationElement CpuUserDuration;
     private DurationElement CpuSystemDuration;
-    private StringElement Grid;
     private IntegerElement Cores;
 
     ////////////////////////////////////////////////////////////////////
     // Methods required by interface Record
     //
-    public void addRawXml(String RawXml) {
-        // FIXME
-    }
-
-    public void setRawXml(String RawXml) {
-        // FIXME
-    }
-
-    public String getRawXml() {
-        // FIXME
-        return "";
-    }
-
-    public void addExtraXml(String ExtraXml) {
-        // FIXME
-    }
-
-    public void setExtraXml(String ExtraXml) {
-        // FIXME
-    }
-
-    public String getExtraXml() {
-        // FIXME
-        return "";
-    }
-
-   public String asXML()
-   {
+    public String asXML()
+    {
       return asXML(false,false);
-   }
+    }
    
-   public String asXML(boolean formd5, boolean optional)
-   {
+    public String asXML(boolean formd5, boolean optional)
+    {
       // FIXME
         return "";
     }
@@ -75,10 +47,6 @@ public class JobUsageSummary extends Record {
     public StringElement getSiteName() {
         // FIXME
         return new StringElement();
-    }
-
-    public StringElement getProbeName() {
-        return ProbeName;
     }
 
     public Date getServerDate() {
@@ -95,30 +63,12 @@ public class JobUsageSummary extends Record {
         return "";
     }
 
-    public String getmd5() {
-        // FIXME
-        return "";
-    }
-
-    public void setmd5(String md5set) {
-        // FIXME
-    }
-
     public int getRecordId() {
         return RecordId;
     }
 
     public void setRecordId(int RecordId) {
         this.RecordId = RecordId;
-    }
-
-    public Probe getProbe() {
-        // FIXME
-        return null;
-    }
-
-    public void setProbe(Probe p) {
-        // FIXME
     }
 
     public boolean setDuplicate(boolean b) {
@@ -159,12 +109,6 @@ public class JobUsageSummary extends Record {
         this.VOcorrid = VOcorrid;
     }
     
-    // ProbeName
-    // getter method above (requirement from Record)
-    public void setProbeName(StringElement ProbeName) {
-        this.ProbeName = ProbeName;
-    }
-
     // CommonName
     public StringElement getCommonName() {
         return CommonName;
@@ -235,15 +179,6 @@ public class JobUsageSummary extends Record {
 
     public void setCpuSystemDuration(DurationElement CpuSystemDuration) {
         this.CpuSystemDuration = CpuSystemDuration;
-    }
-
-    // Grid
-    public StringElement getGrid() {
-        return Grid;
-    }
-
-    public void setGrid(StringElement Grid) {
-        this.Grid = Grid;
     }
 
     // Cores

@@ -35,9 +35,9 @@ public class StatusUpdater
     public Site getSite(org.hibernate.Session session, String sitename) throws Exception
     {
         Site site = null;
-        String command = "from Site where SiteName = ?";
+        String siteCommand = "from Site where SiteName = ?";
         
-        site = (Site)session.createQuery(command).setString(0,sitename).uniqueResult();
+        site = (Site)session.createQuery(siteCommand).setString(0,sitename).uniqueResult();
         
         if (site == null) {
             site = new Site(sitename);

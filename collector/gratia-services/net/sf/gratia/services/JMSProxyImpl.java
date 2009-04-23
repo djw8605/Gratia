@@ -6,10 +6,8 @@ import net.sf.gratia.util.XP;
 
 import java.rmi.*;
 import java.rmi.server.*;
-import java.util.Hashtable;
 import java.util.Properties;
 import java.io.*;
-import java.security.cert.X509Certificate;
 
 public class JMSProxyImpl extends UnicastRemoteObject implements JMSProxy {
    
@@ -139,11 +137,7 @@ public class JMSProxyImpl extends UnicastRemoteObject implements JMSProxy {
    public void disableHousekeepingService() throws RemoteException {
       collectorService.disableHousekeepingService();
    }
-   
-   public String checksumUpgradeStatus() throws RemoteException {
-      return collectorService.checksumUpgradeStatus();
-   }
-   
+
    public void setConnectionCaching(boolean enable) throws RemoteException {
       collectorService.setConnectionCaching(enable);
    }

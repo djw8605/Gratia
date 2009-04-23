@@ -1,0 +1,67 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>Gratia Accounting</title>
+<link href="stylesheet.css" type="text/css" rel="stylesheet" />
+
+</head>
+<body>
+<h1 align="center" class="osgcolor">&nbsp;&nbsp;&nbsp;&nbsp;Gratia Administration&nbsp;&nbsp;&nbsp;&nbsp;</h1>
+<h3 align="center">CPU Information</h3>
+<form id="form1" name="form1" method="post" action="">
+  <table width="100%" border="1">
+    <tr>
+      <th width="15%" bgcolor="#999999" scope="col"><span class="style1">Host Description</span></th>
+      <th width="15%" bgcolor="#999999" scope="col"><span class="style1">Benchmark Score </span></th>
+      <th width="15%" bgcolor="#999999" scope="col"><span class="style1">CPU Count </span></th>
+      <th width="15%" bgcolor="#999999" scope="col"><span class="style1">OS</span></th>
+      <th width="15%" bgcolor="#999999" scope="col"><span class="style1">OS Version </span></th>
+      <th width="15%" bgcolor="#999999" scope="col"><span class="style1">CPU Type </span></th>
+      <th width="10%" bgcolor="#999999" scope="col"><span class="style1">Options</span></th>
+    </tr>
+    <tr>
+      <td>
+          <label>
+          <input name="hostdescription:#index#" type="text" value="#hostdescription#" size="15" maxlength="32" />
+          </label>
+          <input name="index:#index#" type="hidden" id="index:#index#" value="#index#" />
+          <input name="hostid:#index#" type="hidden" id="hostid:#index#" value="#hostid#" />
+        </td>
+      <td>
+          <label>
+          <input name="benchmarkscore:#index#" type="text" value="#benchmarkscore#" size="15" maxlength="32" />
+          </label>
+        </td>
+      <td>
+          <label>
+          <input name="cpucount:#index#" type="text" value="#cpucount#" size="15" maxlength="32" />
+          </label>
+        </td>
+      <td>
+          <label>
+          <input name="os:#index#" type="text" value="#os#" size="15" maxlength="32" />
+          </label>
+        </td>
+      <td>
+          <label>
+          <input name="osversion:#index#" type="text" value="#osversion#" size="15" maxlength="32" />
+          </label>
+        </td>
+      <td>
+          <label>
+          <input name="cputype:#index#" type="text" value="#cputype#" size="15" maxlength="32" />
+          </label>
+        </td>
+      <td><a href="cpuinfo.html?action=delete&amp;hostid=#hostid#">Delete</a></td>
+    </tr>
+    <tr>
+      <td colspan="7" align="center">
+          <label><input type="submit" name="Submit" value="Update" /></label>
+      </td>
+    </tr>
+  </table>
+</form>
+</body>
+</html>
+

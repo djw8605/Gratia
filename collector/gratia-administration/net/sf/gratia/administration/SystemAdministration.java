@@ -6,17 +6,13 @@ import net.sf.gratia.util.Logging;
 import net.sf.gratia.services.*;
 
 import java.io.*;
-import java.net.*;
 import java.util.StringTokenizer;
 import java.util.Properties;
-import java.util.Hashtable;
-import java.util.Enumeration;
 import java.util.Vector;
 import java.util.Date;
 import javax.servlet.*;
 import javax.servlet.http.*;
 import java.sql.*;
-import java.util.regex.*;
 import java.text.*;
 import java.rmi.*;
 import org.apache.tools.bzip2.*;
@@ -151,7 +147,6 @@ public class SystemAdministration extends HttpServlet {
         String replicationStatus = "UNKNOWN";
         String servletStatus = "UNKNOWN";
         String housekeepingStatus = "UNKNOWN";
-        String checksumUpgradeStatus = "UNKNOWN";
         String reaperStatus = "UNKNOWN";
 
         if (proxy == null) {
@@ -190,7 +185,6 @@ public class SystemAdministration extends HttpServlet {
                         reaperStatus = "SLEEPING";
                     }
                     housekeepingStatus = proxy.housekeepingServiceStatus();
-                    checksumUpgradeStatus = proxy.checksumUpgradeStatus();
                 }
             }
             catch (Exception e) {
@@ -209,7 +203,6 @@ public class SystemAdministration extends HttpServlet {
             replicationStatus = "SAFE";
             servletStatus = "SAFE";
             housekeepingStatus = "SAFE";
-            checksumUpgradeStatus = "SAFE";
         } else if (operationsStatus.equals("Active")) {
             html = html.replaceAll("#opstatus#",
                                    "<font color=\"green\"><strong>ENABLED</strong></font>").
@@ -337,38 +330,6 @@ public class SystemAdministration extends HttpServlet {
                                "\"><strong>" +
                                housekeepingStatus +
                                "</strong></font>");
-
-        String checksumUpgradeComment = "";
-
-        if (checksumUpgradeStatus.equals("OFF") ||
-            checksumUpgradeStatus.equals("STOPPED")) {
-            color = "red";
-        } else if (checksumUpgradeStatus.equals("SAFE")) {
-            color = "fuchsia";
-        } else if (checksumUpgradeStatus.startsWith("DISABLED")) {
-            color = "fuchsia";
-            if (checksumUpgradeStatus.contains("MANUAL")) {
-                checksumUpgradeComment = "<td>To re-enable, set <strong><tt>gratia.database.checksumUpgradeDisabled = 0<tt></strong> in service-configuration.properties and restart the collector.</td>";
-            } else {
-                checksumUpgradeComment = "<td><strong><font color=\"red\">Disabled automatically due to a serious internal problem. Please contact gratia-operation@opensciencegrid.org for support.</font></strong></td>";
-            }
-        } else {
-            color = "green";
-        }
-        if (!checksumUpgradeStatus.equals("OFF")) {
-            html =
-                html.replaceAll("<!-- CHECKSUM UPGRADE STATUS PLACEHHOLDER -->",
-                                "<tr><td><strong>Checksum upgrade status</strong></td>" +
-                                "<td><div align=\"center\">" +
-                                "<font color=\"" +
-                                color +
-                                "\"><strong>" +
-                                checksumUpgradeStatus +
-                                "</strong></font>" +
-                                "</div></td>" +
-                                checksumUpgradeComment +
-                                "</tr>");
-        }
     }
 
     public void replay() {

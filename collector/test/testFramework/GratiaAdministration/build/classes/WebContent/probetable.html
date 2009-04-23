@@ -1,0 +1,62 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>Gratia Accounting</title>
+<link href="stylesheet.css" type="text/css" rel="stylesheet" />
+<link href="docstyle.css" type="text/css" rel="stylesheet" />
+<style type="text/css">
+<!--
+.red {color: #FF0000}
+-->
+</style>
+<style type="text/css">
+<!--
+.black {color: #000000}
+-->
+</style>
+</head>
+<body>
+<h1 align="center" class="osgcolor">&nbsp;&nbsp;&nbsp;&nbsp;Gratia Administration&nbsp;&nbsp;&nbsp;&nbsp;</h1>
+<h3 align="center">Probe Table Administration</h3>
+<form id="form1" name="form1" method="post" action="probetable.html">
+<input name="activeFilter" type="hidden" id="activeFilter" value="#activeFilter#" />
+  <table width="100%" border="1">
+    <tr>
+      <th width="34%" bgcolor="#999999" scope="col">Last Contact (UTC)</th>
+      <th width="24%" bgcolor="#999999" scope="col">Probe Name </th>
+      <th width="21%" bgcolor="#999999" scope="col">CE Name </th>
+      <th width="21%" bgcolor="#999999" scope="col">Active?</th>
+      <th width="21%" bgcolor="#999999" scope="col">Total records</th>
+    </tr>
+    <tr>
+      <td><span class="red">&nbsp;#lastcontact#</span></td>
+      <td><input name="probename:#index#" type="text" value="#probename#" size="32" />      </td>
+      <td><label>
+        <select name="cename:#index#" id="cename:#index#">
+          <option value="#cename#" #selected#>#cename#</option>
+        </select>
+        </label> 
+        <input name="index:#index#" type="hidden" id="index:#index#" value="#index#" />
+        <input name="dbid:#index#" type="hidden" id="dbid:#index#" value="#dbid#" />
+      </td>
+      <td><label>
+        <select name="active:#index#" id="active:#index#">
+          <option value='Yes'>Yes</option>
+          <option value='No' >No</option>
+        </select>
+        </label>      </td>
+      <td>#nRecords#</td>
+    </tr>
+    <tr>
+      <td colspan="4" align="center">
+          <label>
+          <input name="Apply" type="submit" id="Apply" value="Apply" />
+          </label>
+      </td>
+    </tr>
+  </table>
+</form>
+</body>
+</html>
+

@@ -71,6 +71,7 @@ public class ReplicationDataPump extends Thread {
         }
     }
 
+   @Override
     public void run() {
         replicationLog(LogLevel.FINER, "Started run");
         if (!HibernateWrapper.databaseUp()) {
@@ -277,7 +278,7 @@ public class ReplicationDataPump extends Thread {
                 }
             } // End dbid loop
             if (bundle_count != 0) { // Send tag-end records.
-                replicationLog("Sending: " + lowdbid + " to " + dbid);
+                replicationLog(LogLevel.FINE, "Sending: " + lowdbid + " to " + dbid);
                 if (uploadXML(replicationTarget, xml_msg.toString())) {
                     // Successful -- update replication table entry
                     session.refresh(replicationEntry);

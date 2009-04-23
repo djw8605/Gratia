@@ -1,0 +1,14 @@
+addClassPath("/eclipse/workspace/gratia/services");
+
+import java.util.regex.*;
+import net.sf.gratia.services.*;
+
+XP xp = new XP();
+String html = xp.get("site.html");
+print(html);
+
+Pattern p = Pattern.compile("<tr>.*?</tr>",Pattern.MULTILINE + Pattern.DOTALL);
+Matcher m = p.matcher(html);
+while(m.find())
+	print("found: " + m.group() + "\n");
+System.out.println("Done !!");

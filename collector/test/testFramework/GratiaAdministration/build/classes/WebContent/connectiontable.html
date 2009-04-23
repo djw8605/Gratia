@@ -1,0 +1,48 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>Gratia Accounting Connection Management</title>
+<link href="stylesheet.css" type="text/css" rel="stylesheet" />
+<link href="docstyle.css" type="text/css" rel="stylesheet" />
+
+</head>
+<body>
+<h1 align="center" class="osgcolor">&nbsp;&nbsp;&nbsp;&nbsp;Gratia Administration&nbsp;&nbsp;&nbsp;&nbsp;</h1>
+<h3 align="center">Connection Administration </h3>
+  <table width="100%" border="1">
+    <tr>
+      <th colspan="7" bgcolor="#999999" scope="col">Connections</th>
+    </tr>
+    <tr>
+      <th width="22%"><h5>Sender</h5></th>
+      <th width="8%"><h5>Sending host</h5></th>
+      <th width="22%"><h5>Collector Name</h5></th>
+      <th width="17%"><h5>First Seen</h5></th>
+      <th width="17%"><h5>Last Seen</h5></th>
+      <th width="7%"><h5>Status</h5></th>
+      <!-- th width="6%"><h5>Certificate</h5></th -->
+      <th width="7%"><h5>Actions</h5></th>
+    </tr>    
+    <tr>
+    <tr><form action="connectiontable.html" method="post" name="form-#index#" id="form-#index#">
+      <input name="index" type="hidden" id="index" value="#index#" />
+      <input name="cid" type="hidden" id="cid" value="#cid#" />
+      <td style="text-align: left" width="22%">#Sender#</td>
+      <td style="text-align: left" width="8%">#SenderHost#</td>
+      <td style="text-align: center" width="22%">#CollectorName#</td>
+      <td style="text-align: center" width="17%">#FirstSeen#</td>
+      <td style="text-align: center" width="17%">#LastSeen#</td>
+      <td style="text-align: center" width="7%">#Status#</td>
+      <!-- td style="text-align: center" width="6%">#Certificate#</td -->
+      <td style="text-align: center" width="7%">#Change#</td>
+    </form></tr>
+  </table>
+  <table width="100%" border="0">
+    <tr>
+      <th scope="col"><a href="/gratia-administration/connectiontable.html?action=AllowAll">Allow All</a> &nbsp;&nbsp; <a href="/gratia-administration/connectiontable.html?action=BanAll">Ban All</a> </th>
+
+    </tr>
+  </table>
+</body>
+</html>
