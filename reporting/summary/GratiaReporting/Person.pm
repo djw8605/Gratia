@@ -24,6 +24,7 @@ sub new {
   }
   bless $self, $class;
   $self->update_derivative_data();
+  $self->normalize_case();
   return $self;
 }
 
@@ -74,14 +75,28 @@ sub wants_vo_report_oim {
   return (grep m&^$vo:$reporting_name&i, @{$self->{vo_reporting_names}})?1:0;
 }
 
+sub wants_site_oim {
+  my ($self, $site_hash, $wanted_grid_type_hash, $vo) = @_;
+  return ($site_hash and
+          (not $wanted_grid_type_hash or
+           $wanted_grid_type_hash->{$site_hash->{grid_type}}) and
+          $vo?(exists $self->{site_vos}->{lc $vo} and
+               $self->{site_vos}->{lc $vo} and
+               grep "$site_hash->{name}", @{$self->{site_vos}->{lc $vo}}):
+          (grep "$site_hash->{name}", @{$self->{sites}})
+         )?1:0;
+}
+
+sub wants_all_sites {
+  my $self = shift;
+  return ((exists $self->{all_reports} and $self->{all_reports}->{site}) or
+          (exists $self->{sites} and grep m&^all$&i, @{$self->{sites}}));
+}
+
 sub wants_all_vos {
-  my ($self, $vo) = @_;
-  my $result = 0;
-  if ((exists $self->{all_reports} and $self->{all_reports}->{vo}) or
-      (exists $self->{vos} and grep m&^all$&i, @{$self->{vos}})) {
-    $result = 1;
-  }
-  return $result
+  my ($self) = @_;
+  return ((exists $self->{all_reports} and $self->{all_reports}->{vo}) or
+      (exists $self->{vos} and grep m&^all$&i, @{$self->{vos}}));
 }
 
 sub mergePersonData {
@@ -105,6 +120,21 @@ sub mergePersonData {
       }
     }
   $self->update_derivative_data();
+  $self->normalize_case();
+}
+
+sub normalize_case() {
+  my $self = shift;
+  foreach my $array_key qw(vos users) {
+    $self->{$array_key} = map { lc $_ } @{$self->{$array_key}}
+      if (exists $self->{$array_key} and scalar @{$self->{$array_key}});
+  }
+  return unless exists $self->{site_vos} and scalar keys %{$self->{site_vos}};
+  foreach my $key (keys %{$self->{site_vos}}) {
+    next if $key eq lc $key;
+    $self->{site_vos}->{lc $key} = $self->{site_vos}->{$key};
+    delete $self->{site_vos}->{$key};
+  }
 }
 
 sub update_derivative_data {
