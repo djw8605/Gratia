@@ -265,26 +265,6 @@ public class DatabaseMaintenance {
       //
       AddIndex("VONameCorrection", false, "index01", "VOName, ReportableVOName");
 
-      //
-      // Index for new md5 column
-      //
-      // NOTE: this routine creates a NON-UNIQUE index, even though it
-      // will eventually become unique. The scenarios are as follows:
-      //
-      // 1. Table does not exist, or table exists but column does not:
-      // Hibernate will create column and unique index. Index will be
-      // removed and replaced with a non-unique one called something
-      // different; and then upgrade will take place.
-      //
-      // 2. Table and column exists, index does not: line below will
-      // create index.
-      //
-      // 3. Table, column and index already exist: NOP.
-      //
-      // This is of course exactly what we want: if there is the
-      // chance of data already existing without the new checksum the
-      // upgrade thread will kick in.
-
       // Remove hibernate's index, because it could be premature: replace it
       // with our own. This won't remove the, "final" one because we
       // called it something different. We'll need to calculate the
