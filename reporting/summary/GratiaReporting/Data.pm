@@ -141,7 +141,7 @@ sub processXmlResourceContacts {
     if (exists $site_data->{$site_name}) {
       print STDERR "WARNING: info for $site_name has already been seen: merging.\n";
     } else {
-      $site_data->{$site_name} = {};
+      $site_data->{$site_name} = { name => $site_name };
     }
     $this_site = $site_data->{$site_name};
     $this_site->{grid_type} = $resource->findvalue('grid_type'); # Grid type for resource
