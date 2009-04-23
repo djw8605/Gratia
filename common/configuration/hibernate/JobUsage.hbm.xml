@@ -279,7 +279,6 @@
      </component>
 
      <property name="ServerDate" column="ServerDate" type="timestamp"/>
-     <property name="oldMd5" column="md5"/>
      <property name="md5" column="md5v2"/>
    </join>
 
