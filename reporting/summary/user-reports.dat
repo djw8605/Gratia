@@ -46,17 +46,17 @@
    last_name => 'Bloom',
    users => [ 'ALL' ],
    vos => [ 'CMS' ],
-   site_vos => [ 'CMS' ],
-   sites =>
-   [
-    'Purdue-RCAC',
-    'Nebraska',
-    'CIT_CMS_T2',
-    'UCSDT2',
-    'MIT_CMS',
-    'UFlorida-PG',
-    'GLOW'
-   ]
+   site_vos => { CMS =>
+                 [
+                  'Purdue-RCAC',
+                  'Nebraska',
+                  'CIT_CMS_T2',
+                  'UCSDT2',
+                  'MIT_CMS',
+                  'UFlorida-PG',
+                  'GLOW'
+                 ]
+               }
   }
  }
 )

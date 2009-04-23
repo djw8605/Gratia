@@ -138,19 +138,20 @@ if ($options->{"exclusive-mail"}) { # Short-circuit people list.
     } else {
       push @mail_opts, "-m", "$person->{contact_string}";
     }
+    if ($person->{site_vos}) { # VO-specific site lists.
+      foreach my $vo (sort (map { lc $_ } (keys %{$person->{site_vos}}))) {
+        my @looped_cmd = (@command, "-v", $vo);
+        next unless $person->{site_vos}->{$vo};
+        push @looped_cmd, (map { ("--site-name", $_) }
+                           expandSites(@{$person->{site_vos}->{$vo}}));
+        $reporter->invoke(\@looped_cmd, \@mail_opts);
+      }
+    }
     my @wanted_sites = map { ("--site-name", $_) }
       expandSites(@{$person->{sites}}) if $person->{sites};
     next unless @wanted_sites and scalar @wanted_sites;
     push @command, @wanted_sites;
-    if ($person->{site_vos}) {
-      foreach my $vo (sort map { lc $_ } @{$person->{site_vos}}) {
-        my @looped_cmd = @command;
-        push @looped_cmd, "-v", $vo;
-        $reporter->invoke(\@looped_cmd, \@mail_opts);
-      }
-    } else {
-      $reporter->invoke(\@command, \@mail_opts);
-    }
+    $reporter->invoke(\@command, \@mail_opts);
   }
 }
 
