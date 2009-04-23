@@ -840,6 +840,10 @@ public class ListenerThread extends Thread {
                                  current.getmd5() +
                                  "'";
                            Integer dup_dbid = (Integer) (dup2_session.createSQLQuery(cmd).uniqueResult());
+                           // Avoid infinite growth
+                           if (fProbeDetails.size() > 500) {
+                              fProbeDetails.clear();
+                           }
                            fProbeDetails.put(current.getmd5(), dup_dbid);
                            dupdbid = dup_dbid;
                         } finally {
