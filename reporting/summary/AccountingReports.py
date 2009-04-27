@@ -2775,7 +2775,7 @@ Note that the '+' after the release number indicates that the same version of th
 given release up to the current release.
 
 """
-   headers = ("","Site","Soft","Release","Probe name")
+   headers = ("","Site","Soft","Release","Last Contact","Probe name")
    formats = {}
    start = {}
    startlines = {}
@@ -2785,9 +2785,9 @@ given release up to the current release.
    num_header = 2
    
    def __init__(self, header = False):
-      self.formats["csv"] = "%s,\"%s\",%s,%s,%s  "
-      self.formats["text"] = "%6s | %-20s | %-14s | %-12s | %s"
-      self.formats["html"] = "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>"
+      self.formats["csv"] = "%s,\"%s\",%s,%s,%s,%s  "
+      self.formats["text"] = "%6s | %-20s | %-14s | %-12s | %-12s | %s"
+      self.formats["html"] = "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>"
       self.start["csv"] = ""
       self.start["text"] = ""
       self.start["html"] = "<html><body><br><br>"
@@ -2892,9 +2892,9 @@ def SoftwareVersion(range_end = datetime.date.today(),
       if (len(data)==0):
          if (key in reportingSites):
             #print key,"has reported but no information is available about the probe."
-            msg = msg + conf.formats[output] % ("%3d.%-2d" % (outer,inner),key,"n/a","n/a","has reported but no information is available about the probe(s).") + "\n"
+            msg = msg + conf.formats[output] % ("%3d.%-2d" % (outer,inner),key,"n/a","n/a","n/a/","has reported but no information is available about the probe(s).") + "\n"
          else:
-            msg = msg + conf.formats[output] % ("%3d.%-2d" % (outer,inner),key,"n/a","n/a","has not reported") + "\n"
+            msg = msg + conf.formats[output] % ("%3d.%-2d" % (outer,inner),key,"n/a","n/a","n/a","has not reported") + "\n"
             #print key,"has not reported."
          if (output == "text"):
             msg = msg + conf.startlines[output] + "\n"
@@ -2903,6 +2903,7 @@ def SoftwareVersion(range_end = datetime.date.today(),
          for probename,probeinfo in sortedDictValues(data):
             #print "   ",probename
             inner = inner + 1
+            lastReportTime = probeinfo[0]
             for soft,softinfo in probeinfo[1].iteritems():
                v = softinfo[0]
                if (soft == "Condor"):
@@ -2915,7 +2916,7 @@ def SoftwareVersion(range_end = datetime.date.today(),
                if (renames.has_key(soft)):
                   soft = renames[soft]
                #print "      ",soft,":",v
-               msg = msg + conf.formats[output] % ("%3d.%-2d" % (outer,inner), key,soft,v,probename) + "\n"
+               msg = msg + conf.formats[output] % ("%3d.%-2d" % (outer,inner), key,soft,v,lastReportTime[0:10],probename) + "\n"
             #print 
          if (output == "text"):
             msg = msg + conf.startlines[output] + "\n"
