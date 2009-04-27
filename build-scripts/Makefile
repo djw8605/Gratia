@@ -589,7 +589,7 @@ common_classes: util
 	# --- Target: common_classes COMPLETED at $(shell date) ---
 
 #-------------------------------------------------------------
-gratia: clean util services servlets administration soap reporting reports common_lib server_lib common_classes
+gratia: clean util services servlets registration administration soap reporting reports common_lib server_lib common_classes
 	# ------------------------------
 	# --- Target: gratia         ---
 	# ------------------------------
