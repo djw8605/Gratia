@@ -30,12 +30,15 @@ sub new {
 
 sub info {
   my $self = shift;
-  return sprintf("%s\n",
-                 item_info($self));
+  return sprintf("%s\n%s\n%s\n",
+                 '-' x 72,
+                 item_info(undef, $self),
+                 '-' x 72);
 }
 
 sub item_info {
   my $result = "";
+  my $indent = shift || '';
   my $tot_items = @_;
   my $n_item = 0;
   foreach my $item (@_) {
@@ -49,12 +52,15 @@ sub item_info {
     } elsif ($ref eq "SCALAR") {
       $result = "$result->$$item";
     } elsif ($ref eq "ARRAY") {
-      $result = sprintf("$result\[ %s \]", item_info(@$item));
+      $result = sprintf("$result\[ %s \]", item_info($indent, @$item));
     } else { # Assume item is a class
       my $tot_keys = scalar keys %$item;
       my $n_key = 0;
       foreach my $key (keys %$item) {
-        $result = sprintf("${result}%s => %s", $key, item_info($item->{$key}));
+        $result = sprintf("${result}%s%s => %s",
+                          $n_key?$indent:'',
+                          $key,
+                          item_info(' ' x length("$key => "), $item->{$key}));
         ++$n_key;
         if ($n_key < $tot_keys) {
           $result = "$result\n";
@@ -126,7 +132,7 @@ sub mergePersonData {
 sub normalize_case() {
   my $self = shift;
   foreach my $array_key qw(vos users) {
-    $self->{$array_key} = map { lc $_ } @{$self->{$array_key}}
+    $self->{$array_key} = [ map { lc } @{$self->{$array_key}} ]
       if (exists $self->{$array_key} and scalar @{$self->{$array_key}});
   }
   return unless exists $self->{site_vos} and scalar keys %{$self->{site_vos}};
