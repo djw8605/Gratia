@@ -164,7 +164,7 @@ foreach my $vo (sort keys %$master_vo_list) {
   my $email_hash = {};
   my @email_list = $options->{"test"}?
     @{$master_vo_list->{"all-vos-test"}}:
-      (@{$master_vo_list->{$vo}}, @{$master_vo_list->{"all"}});
+      (@{$master_vo_list->{$vo}}, @{$master_vo_list->{"all"} || []});
   foreach my $email (@email_list) {
     my ($address) = ($email =~ m&<([^>]+)>&);
     $email_hash->{$email} = $address || $email;
