@@ -1,6 +1,5 @@
 (
  "all-vos-test" => { mail => [ 'Chris Green <greenc@fnal.gov>' ] },
- ALL => { mail => [ 'Chris Green <greenc@fnal.gov>', 'Mine Altunay <maltunay@fnal.gov>', 'Abhishek Rana <rana@fnal.gov>' ] },
  CDF => { },
  CIGI => { },
  CMS => { "alt-vos" => [ 'uscms' ],
