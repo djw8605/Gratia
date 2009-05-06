@@ -462,8 +462,17 @@ def GetListOfRegisteredVO():
         # Run a second time to avoid wget bugs
         allVos = commands.getoutput(cmd).split("\n");
         ret = []
+        printederror = False
         for pair in allVos:
-           (longname,description) = pair.split(",");
+           try:
+              (longname,description) = pair.split(",");
+           except:
+              if not printederror:
+                 LogToFile("Gratia Reports GetListOfRegisteredVO unable to parse the result of: "+cmd)
+                 sys.stderr.write("Gratia Reports GetListOfRegisteredVO unable to parse data, one example is: "+pair+"\n")
+                 printederror = True
+              LogToFile("Gratia Reports GetListOfRegisteredVO unable to parse: "+pair)
+              continue
            if ("/" in description):
                (voname,subname) = description.split("/");
                if (subname.lower() not in ret):
