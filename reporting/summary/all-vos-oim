@@ -202,6 +202,13 @@ foreach my $vo (sort keys %$master_vo_list) {
                               $people_data->{$person}->{full_name},
                               $person)} = $person;
       }
+    } elsif ($people_data->{$person}->wants_all_vos()) {
+      print "INFO: OIM contact $people_data->{$person}->{full_name} wants all VO reports: added to report for VO $vo.\n"
+        if $options->{verbose};
+      # Add person to send list.
+      $email_hash->{sprintf("%s <%s>",
+                            $people_data->{$person}->{full_name},
+                            $person)} = $person;
     }
   }
   @email_list = map { ('-m', $_) } sort keys %$email_hash;
