@@ -96,13 +96,13 @@ sub wants_site_oim {
 sub wants_all_sites {
   my $self = shift;
   return ((exists $self->{all_reports} and $self->{all_reports}->{site}) or
-          (exists $self->{sites} and grep m&^all$&i, @{$self->{sites}}));
+          (exists $self->{sites} and grep m&^all$&i, @{$self->{sites}}))?1:0;
 }
 
 sub wants_all_vos {
   my ($self) = @_;
   return ((exists $self->{all_reports} and $self->{all_reports}->{vo}) or
-      (exists $self->{vos} and grep m&^all$&i, @{$self->{vos}}));
+      (exists $self->{vos} and grep m&^all$&i, @{$self->{vos}}))?1:0;
 }
 
 sub mergePersonData {
