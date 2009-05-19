@@ -104,6 +104,44 @@
 #   This is not perfect since, in order to really retain this data, the
 #   previous month should be added/updated in SVN/CVS.  A warning notification 
 #   will be sent the first time a new history file as a reminder.
+#
+# 5/19/2009 (John Weigand)
+#   Added functionality to retrieve summary data by CommonName and populate
+#   a new APEL table called OSG_CN_DATA.  The WLCG requirement is to use full 
+#   DN but Gratia currently only summarizes by the CN portion of the user proxy.
+#   This is an interim solution until Gratia is modified to summarize by DN.
+#   The changes for this new functionality are:
+#   - lcg-db.conf: added an LcgUserTable attribute to identify the new table
+#   - method GetQuery: Changed to optionally add in CommonName to the query.  
+#     I chose to make it a python variable in this query so as not to replicate 
+#     the rest of the query and take a chance on having it in 2 places to modify.
+#     This is a bit of a gimmick but one I think is best.  The DBflag argument, 
+#     if True will allow CommonName to be included in the query and summary.
+#   - added methods GetVoQuery and GetUserQuery
+#     These were added to allow for more intuitive reading of the main
+#     section of the program.  Both call GetQuery, one using the original
+#     Site/VO grouping and the other using Site/User/VO grouping.
+#   - method RetrieveVoData
+#     Changed to call GetVoQuery instead of GetQuery
+#   - added method RetrieveUserData
+#     This is clone of RetrieveVoData except it calls GetUserQuery and does not 
+#     check for empty results at this time.
+#   - added methods ProcessVoData and ProcessUserData
+#     This pulled a section of code from the main section in order to keep the
+#     main section more readable.
+#   - added methods CreateLCGsqlVoUpdates and CreateLCGsqlUserUpdates
+#     Both call CreateLCGsqlUpdates abstracting the table name to that level.
+#   - method CreateLCGsqlUpdates
+#   Added tableName as an argument.
+#   - method RunLCGUpdate
+#     Used for both VO and User summaries.  Added logging to identify the
+#     file being used and the number of insert DML statements being processed.
+#   IMPORTANT NOTE: Changes were NOT made to look for 'unknown' VOs at the User
+#   level.  The 'unknown' VO check was left in (allowing it to be activated via
+#   a command line argument) back on 3/11 in the event it needed to be 
+#   re-activated.  Since it uncertain if this will be needed again and the code 
+#   changes much more complex and maybe no longer needed, I chose NOT to make 
+#   changes to the code for this at this time.  
 # 
 ########################################################################
 import traceback
@@ -118,7 +156,8 @@ import popen2
 import smtplib, rfc822  # for email notifications via smtp
 import commands, os, sys, time, string
 
-gOutput            = ""
+gVoOutput          = ""
+gUserOutput        = ""
 gUnknowns          = ""
 gWarnings          = []
 gSitesWithData     = []
@@ -148,6 +187,7 @@ gDatabaseParameters = {"GratiaHost":None,
                        "LcgPswd"   :None,
                        "LcgDB"     :None,
                        "LcgTable"  :None,
+                       "LcgUserTable"  :None,
                       }
 
 
@@ -166,7 +206,8 @@ gEmailNotificationSuppressed = False  #Command line arg to suppress email notice
 
 # ----------------------------------------------------------
 # special global variables to display queries in the email 
-gQuery        = ""
+gVoQuery      = ""
+gUserQuery    = ""
 gUnknownQuery = ""
 
 
@@ -180,7 +221,7 @@ this is the usage
 
 #-----------------------------------------------
 def GetArgs(argv):
-    global gProgramName,gDateFilter,gInUpdateMode,gEmailNotificationSuppressed,gProbename,gOutput,gFilterConfigFile,gCheckUnknowns
+    global gProgramName,gDateFilter,gInUpdateMode,gEmailNotificationSuppressed,gProbename,gVoOutput,gUserOutput,gFilterConfigFile,gCheckUnknowns
     if argv is None:
         argv = sys.argv
     gProgramName = argv[0]
@@ -239,6 +280,7 @@ def SendEmailNotificationFailure(error):
 #-----------------------------------------------
 def SendEmailNotificationSuccess():
   """ Sends a successful email notification to the EmailNotice attribute""" 
+  global gVoOutput
   subject  = "Gratia transfer to APEL (WLCG) for %s - SUCCESS" % gDateFilter
 
   contents = ""
@@ -247,8 +289,9 @@ def SendEmailNotificationSuccess():
   else:
     contents = contents + "Sites with no data:\n%s\n" % gSitesWithNoData
     gWarnings.append("Sites with no data:\n%s\n" % gSitesWithNoData)
-  contents = contents + "\nResults of all queries:\n" + gOutput 
-  contents = contents + "\nSample query:\n" + gQuery
+  contents = contents + "\nResults of all VO queries (VO):\n" + gVoOutput 
+  contents = contents + "\nSample VO query:\n" + gVoQuery
+  contents = contents + "\nSample User query:\n" + gUserQuery
 
   if gCheckUnknowns:
     contents = contents + "\n====== Unknown VOs ========================\n"
@@ -290,24 +333,37 @@ def SendEmailNotification(subject,message):
   hostname = commands.getoutput("hostname -f")
   logfile  = commands.getoutput("echo $PWD")+"/"+GetFileName(None,"log")
   username = commands.getoutput("whoami")
-  sqlfile  = commands.getoutput("echo $PWD")+"/"+GetFileName(None,"sql")
+  vosqlfile   = commands.getoutput("echo $PWD")+"/"+GetFileName(None,"sql")
+  vosqlrecs   = commands.getoutput("grep -c INSERT %s" % vosqlfile)
+  votable     = gDatabaseParameters["LcgTable"]
+  usersqlfile = commands.getoutput("echo $PWD")+"/"+GetFileName("user","sql")
+  usersqlrecs = commands.getoutput("grep -c INSERT %s" % usersqlfile)
+  usertable   = gDatabaseParameters["LcgUserTable"]
   body = """\
 Gratia to APEL/WLCG transfer. 
 
 This is normally run as a cron process.  The log files associated with this 
 process can provide further details.
 
-Script..... %s
-Node....... %s
-User....... %s
-Log file... %s
-SQL file... %s
+Script............ %s
+Node.............. %s
+User.............. %s
+Log file.......... %s
+
+VO SQL file....... %s  
+VO SQL records.... %s  
+VO table names.... %s  
+
+User SQL file..... %s 
+User SQL records.. %s  
+User table names.. %s  
+
 Reportable sites file.. %s
 Reportable VOs file.... %s
 Report unknown VOs..... %s
 
 %s
-	""" % (gProgramName,hostname,username,logfile,sqlfile,gFilterParameters["SiteFilterFile"],gFilterParameters["VOFilterFile"],gCheckUnknowns,message)
+	""" % (gProgramName,hostname,username,logfile,vosqlfile,vosqlrecs,votable,usersqlfile,usersqlrecs,usertable,gFilterParameters["SiteFilterFile"],gFilterParameters["VOFilterFile"],gCheckUnknowns,message)
 
 
   try:
@@ -701,9 +757,36 @@ def SetNormalizationFactor(query,params):
     Logit("Normalization factor: %s" % normalizationFactor)
     return normalizationFactor
 
-#-----------------------------------------------
-def GetQuery(site,normalizationFactor,vos):
-    """ Creates the SQL query DML statement for the Gratia database """
+#-----------------------------------------------
+def GetVoQuery(site,normalizationFactor,vos):
+    """ Creates the SQL query DML statement for the Gratia database.
+        grouping by Site/VO.
+    """
+    return GetQuery(site,normalizationFactor,vos,"False")
+
+#-----------------------------------------------
+def GetUserQuery(site,normalizationFactor,vos):
+    """ Creates the SQL query DML statement for the Gratia database.
+        grouping by Site/User/VO.
+    """
+    return GetQuery(site,normalizationFactor,vos,"True")
+
+#-----------------------------------------------
+def GetQuery(site,normalizationFactor,vos,DNflag):
+    """ Creates the SQL query DML statement for the Gratia database.
+        On 5/18/09, this was changed to optionally add in CommonName
+        to the query.  I chose to make it a python variable in this
+        query so as not to replicate the rest of the query and take
+        a chance on having it in 2 places to modify.  This is a bit
+        of a gimmick but one I think is best.
+        The DBflag argument, if True will allow CommonName to be included
+        in the query and summary.
+    """
+    userDataClause=""
+    userGroupClause=""
+    if DNflag == "True":
+      userDataClause="CommonName as UserDN, "
+      userGroupClause=", UserDN "
     begin,end = SetQueryDates()
     strBegin =  DateToString(begin)
     strEnd   =  DateToString(end)
@@ -714,6 +797,7 @@ def GetQuery(site,normalizationFactor,vos):
     query="""\
 SELECT Site.SiteName AS ExecutingSite, 
                VOName as LCGUserVO, 
+               %s
                Sum(NJobs), 
                Round(Sum(CpuUserDuration+CpuSystemDuration)/3600) as SumCPU, 
                Round((Sum(CpuUserDuration+CpuSystemDuration)/3600)*%s) as NormSumCPU, 
@@ -738,7 +822,8 @@ where
   and Main.ResourceType = "Batch"
 group by ExecutingSite, 
          LCGUserVO
-""" % (strNormalization,strNormalization,fmtMonth,fmtYear,fmtDate,fmtDate,strNormalization,site,vos,strBegin,strEnd)
+         %s
+""" % (userDataClause,strNormalization,strNormalization,fmtMonth,fmtYear,fmtDate,fmtDate,strNormalization,site,vos,strBegin,strEnd,userGroupClause)
     return query
 
 #-----------------------------------------------
@@ -959,12 +1044,14 @@ def SendXmlHtmlFiles(filename,dest):
 #-----------------------------------------------
 def RunLCGUpdate(inputfile,params):
   """ Performs the update of the APEL database """
-  Logit("Running update on %s of the %s database" % (params["LcgHost"],params["LcgDB"]))
   host = params["LcgHost"]
   port = params["LcgPort"] 
   user = params["LcgUser"] 
   pswd = params["LcgPswd"] 
   db   = params["LcgDB"]
+  
+  Logit("Running update on %s of the %s database" % (host,db))
+  Logit("Input file: %s Inserts: %s" % (inputfile,commands.getoutput("grep -c INSERT %s" % inputfile)))
 
   connectString = CreateConnectString(host,port,user,pswd,db)
   (status,output) = commands.getstatusoutput("cat '" + inputfile + "' | " + connectString)
@@ -998,8 +1085,21 @@ def EvaluateMySqlResults((status,output)):
     output = ""
   return output
 
-#-----------------------------------------------
-def CreateLCGsqlUpdates(results,filename):
+#-----------------------------------------------
+def CreateLCGsqlVoUpdates(results,filename):
+  """ Creates the SQL DML to update the LCG database for the VO summary."""
+  tableName =  gDatabaseParameters["LcgTable"]
+  CreateLCGsqlUpdates(results,filename,tableName)
+
+
+#-----------------------------------------------
+def CreateLCGsqlUserUpdates(results,filename):
+  """ Creates the SQL DML to update the LCG database for the User summary."""
+  tableName =  gDatabaseParameters["LcgUserTable"]
+  CreateLCGsqlUpdates(results,filename,tableName)
+
+#-----------------------------------------------
+def CreateLCGsqlUpdates(results,filename,tableName):
   """ Creates the SQL DML to update the LCG database.
 
       Some special processing is applied here to facillitate handling any
@@ -1022,13 +1122,13 @@ def CreateLCGsqlUpdates(results,filename):
   file.write("set autocommit=0;\n")
 
   dates = gDateFilter.split("/")  # YYYY/MM format
-  file.write("DELETE FROM %s WHERE Month = %s AND Year = %s ;\n" % (gDatabaseParameters["LcgTable"],dates[1],dates[0]))
+  file.write("DELETE FROM %s WHERE Month = %s AND Year = %s ;\n" % (tableName,dates[1],dates[0]))
         
   for i in range (0,len(lines)):  
     val = lines[i].split('\t')
     if len(val) < 13:
       continue
-    output =  "INSERT INTO %s VALUES " % (gDatabaseParameters["LcgTable"]) + str(tuple(val)) + ";"
+    output =  "INSERT INTO %s VALUES " % (tableName) + str(tuple(val)) + ";"
     file.write(output+"\n")
     LogToFile(output)
     gKnownVOs[val[0] +'/'+val[1]] ="1"
@@ -1036,18 +1136,18 @@ def CreateLCGsqlUpdates(results,filename):
   file.write("commit;\n")
   file.close()
 
-#-----------------------------------------------
+#-----------------------------------------------
 def RetrieveVoData(reportableVOs,reportableSites,params):
   """ Retrieves Gratia data for reportable sites """
-  global gQuery
+  global gVoQuery
   output = ""
   firstTime = 1
   sites = reportableSites.keys()
   for site in sites:
     normalizationFactor = reportableSites[site]
-    query = GetQuery(site, normalizationFactor, reportableVOs)
+    query = GetVoQuery(site, normalizationFactor, reportableVOs)
     if firstTime:
-      gQuery = query
+      gVoQuery = query
       Logit("Query:")
       LogToFile(query)
       firstTime = 0
@@ -1057,6 +1157,30 @@ def RetrieveVoData(reportableVOs,reportableSites,params):
       results = ProcessEmptyResultsSet(site,reportableVOs,reportableSites)
     else:
       gSitesWithData.append(site)
+    output = output + results + "\n"
+  return output
+
+#-----------------------------------------------
+def RetrieveUserData(reportableVOs,reportableSites,params):
+  """ Retrieves Gratia data for reportable sites """
+  global gUserQuery
+  output = ""
+  firstTime = 1
+  sites = reportableSites.keys()
+  for site in sites:
+    normalizationFactor = reportableSites[site]
+    query = GetUserQuery(site, normalizationFactor, reportableVOs)
+    if firstTime:
+      gUserQuery = query
+      Logit("Query:")
+      LogToFile(query)
+      firstTime = 0
+    Logit("Site: %s  Normalization Factor: %s" % (site,normalizationFactor)) 
+    results = RunGratiaQuery(query,params)
+#    if len(results) == 0:
+#      results = ProcessEmptyResultsSet(site,reportableVOs,reportableSites)
+#    else:
+#      gSitesWithData.append(site)
     output = output + results + "\n"
   return output
 
@@ -1170,15 +1294,57 @@ def CreateLCGsqlUnknownUpdates(results,filename):
   file.write("commit;\n")
   file.close()
 
+#-----------------------------------------------
+def ProcessVoData(ReportableVOs,ReportableSites):
+  """ Retrieves and creates the DML for the original Site/VO summary
+      data for the APEL interface.
+  """
+  global gVoOutput
+  global gUnknowns
+  global gSitesWithData
+  global gSitesWithUnknowns
+  #--- VO query gratia for each site and create updates ----
+  gVoOutput = RetrieveVoData(ReportableVOs,ReportableSites,gDatabaseParameters)
+  if gCheckUnknowns:
+    gUnknowns = RetrieveUnknownVoData(ReportableSites,gDatabaseParameters)
+
+  #--- create the updates for the APEL accounting database ----
+  Logit("Sites with data: %s" % gSitesWithData)
+  Logit("Sites with no data: %s" % gSitesWithNoData)
+  if len(gSitesWithData) == 0:
+    if len(gSitesWithUnknowns) == 0:
+      raise Exception("No updates to apply")
+  CreateLCGsqlVoUpdates(gVoOutput,GetFileName(None,"sql"))
+  CreateLCGsqlUnknownUpdates(gUnknowns,GetFileName(None,"sql"))
+
+#-----------------------------------------------
+def ProcessUserData(ReportableVOs,ReportableSites):
+  """ Retrieves and creates the DML for the new (5/16/09) Site/User/VO summary
+      data for the APEL interface.
+  """
+  #--- User query gratia for each site and create updates ----
+  gUserOutput = RetrieveUserData(ReportableVOs,ReportableSites,gDatabaseParameters)
+
+  #--- create the updates for the APEL accounting database ----
+#  Logit("Sites with data: %s" % gSitesWithData)
+#  Logit("Sites with no data: %s" % gSitesWithNoData)
+#  if len(gSitesWithData) == 0:
+#    if len(gSitesWithUnknowns) == 0:
+#      raise Exception("No updates to apply")
+  CreateLCGsqlUserUpdates(gUserOutput,GetFileName("user","sql"))
+#  CreateLCGsqlUnknownUpdates(gUnknowns,GetFileName(None,"sql"))
+
 #--- MAIN --------------------------------------------
 def main(argv=None):
   global gWarnings
   global gNormalization
   global gSitesWithNoData
   global gSitesWithUnknowns
-  global gQuery
+  global gVoQuery
+  global gUserQuery
   global gUnknownQuery
-  global gOutput
+  global gVoOutput
+  global gUserOutput
   global gUnknowns
 
   #--- get command line arguments  -------------
@@ -1206,6 +1372,7 @@ def main(argv=None):
     Logit("APEL database host..... %s:%s" % (gDatabaseParameters["LcgHost"],gDatabaseParameters["LcgPort"]))
     Logit("APEL database.......... %s" % (gDatabaseParameters["LcgDB"]))
     Logit("APEL database table.... %s" % (gDatabaseParameters["LcgTable"]))
+    Logit("APEL database table.... %s" % (gDatabaseParameters["LcgUserTable"]))
     Logit("Report unknown VOs..... %s" % gCheckUnknowns)
 
     #--- check db availability -------------
@@ -1222,23 +1389,13 @@ def main(argv=None):
     ReportableSites    = GetSiteFilters(gFilterParameters["SiteFilterFile"])
     ReportableVOs      = GetVOFilters(gFilterParameters["VOFilterFile"])
     
-    #--- query gratia for each site and create updates ----
-    gOutput = RetrieveVoData(ReportableVOs,ReportableSites,gDatabaseParameters)
-    if gCheckUnknowns:
-      gUnknowns = RetrieveUnknownVoData(ReportableSites,gDatabaseParameters)
-
-    #--- create the updates for the APEL accounting database ----
-    Logit("Sites with data: %s" % gSitesWithData)
-    Logit("Sites with no data: %s" % gSitesWithNoData)
-    if len(gSitesWithData) == 0:
-      if len(gSitesWithUnknowns) == 0:
-        raise Exception("No updates to apply")
-    CreateLCGsqlUpdates(gOutput,GetFileName(None,"sql"))
-    CreateLCGsqlUnknownUpdates(gUnknowns,GetFileName(None,"sql"))
+    ProcessVoData(ReportableVOs,ReportableSites)
+    ProcessUserData(ReportableVOs,ReportableSites)
 
     #--- apply the updates to the APEL accounting database ----
     if gInUpdateMode:
       RunLCGUpdate(GetFileName(None,"sql"),gDatabaseParameters)
+      RunLCGUpdate(GetFileName("user","sql"),gDatabaseParameters)
       CreateXmlHtmlFiles(gDatabaseParameters)
       SendEmailNotificationSuccess()
       SendEmailNotificationWarnings()
