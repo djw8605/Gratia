@@ -436,7 +436,7 @@ def GetListOfDisabledOSGSites():
         return allSites
 
 def GetListOfOSGSites():
-        return GetListOfSites("//Resource[Active='True' and ( Services/Service/Name='Compute Element' or Services='no applicable service exists')]/Name")
+        return GetListOfSites("//Resource[Active='True' and ( Services/Service/Name='Compute Element' or Services/Service/Name='CE' or Services='no applicable service exists')]/Name")
         
         cmd = "wget --proxy -q -O - http://oim.grid.iu.edu/pub/resource/show.php?format=plain-text | cut -d, -f4,1,16,8 | grep -e ',OSG,\(CE\|Hidden CE/SE\) [^,]*,1' | cut -d, -f1"
         allSites = commands.getoutput(cmd).split("\n");
