@@ -122,16 +122,18 @@ void sharing(FILE *out, FILE *outcsv, TSQLServer *db, TDatime *begin, TDatime *e
    map<string,string> subvos;
    getSubVOs(subvos);
    
-   map<string,string> owners;
+   map<string,string> default_owner;
+
+   for(UInt_t i=0; i < sizeof(siteOwners)/sizeof(void*); i += 2) {
+      std::string own( siteOwners[i+1] );
+      std::transform(own.begin(), own.end(), own.begin(), ::tolower);
+      default_owner[ siteOwners[i] ] = own;
+   }
+   
+   // Intentionally using the older information source.
    TString cmd = "wget -q -O - http://oim.grid.iu.edu/pub/resource/show.php?format=plain-text | cut -d, -f1,4,7,8,15 | grep -e ',OSG,[^,]*,CE [^,]*,1' | cut -d, -f1,3";
    FILE * f = gSystem->OpenPipe(cmd,"r");
-   //if (!f) {
-      for(UInt_t i=0; i < sizeof(siteOwners)/sizeof(void*); i += 2) {
-         std::string own( siteOwners[i+1] );
-         std::transform(own.begin(), own.end(), own.begin(), ::tolower);
-         owners[ siteOwners[i] ] = own;
-      }
-   //} else {
+   {
       char x;
       string name;
       string owner;
@@ -139,31 +141,31 @@ void sharing(FILE *out, FILE *outcsv, TSQLServer *db, TDatime *begin, TDatime *e
       string result;
       while ((x = fgetc(f))!=EOF ) {
          switch (x) {
-             case ',': left = false; break;
-             case '\n':
-             case '\r':
-                if (owner == "USCMS") {
-                   owner = "CMS";
-                }
-                if (name == "SPRACE-CE") {
-                   name = "SPRACE";
-                }
-                std::transform(owner.begin(), owner.end(), owner.begin(), ::tolower);
-                owners[ name ] = owner;
-                name = "";
-                owner = "";
-                left = true;
-                break;
-             default:
-                if (left) {
-                   name += x;
-                } else {
-                   owner += x;
-                }
+            case ',': left = false; break;
+            case '\n':
+            case '\r':
+               if (owner == "USCMS") {
+                  owner = "CMS";
+               }
+               if (name == "SPRACE-CE") {
+                  name = "SPRACE";
+               }
+               std::transform(owner.begin(), owner.end(), owner.begin(), ::tolower);
+               default_owner[ name ] = owner;
+               name = "";
+               owner = "";
+               left = true;
+               break;
+            default:
+               if (left) {
+                  name += x;
+               } else {
+                  owner += x;
+               }
          }
       }
       fclose(f);
-   //}
+   }
    
    typedef map<string, OInfo> InnerMap_t;
    map<string, InnerMap_t > ownerShare;
@@ -171,6 +173,7 @@ void sharing(FILE *out, FILE *outcsv, TSQLServer *db, TDatime *begin, TDatime *e
       cmd = "wget -q -O - 'http://myosg.grid.iu.edu/wizardsummary/xml?datasource=summary&summary_attrs_showservice=on&summary_attrs_showfqdn=on&summary_attrs_showvoownership=on&account_type=cumulative_hours&ce_account_type=gip_vo&se_account_type=vo_transfer_volume&start_type=7daysago&all_resources=on&gridtype=on&gridtype_1=on'";
       f = gSystem->OpenPipe(cmd,"r");
       TString xmldoc;
+      char x;
       while ((x = fgetc(f))!=EOF ) {
          xmldoc.Append(x);
       }
@@ -326,7 +329,8 @@ void sharing(FILE *out, FILE *outcsv, TSQLServer *db, TDatime *begin, TDatime *e
    while (stmt->NextResultRow()) {
 
       std::string site = stmt->GetString(0);
-      std::string owner = owners[site];
+      std::string owner = default_owner[site];
+
       InnerMap_t &owners = ownerShare[stmt->GetString(0)];
       long njobs = stmt->GetLong(1);
       long wall = (long) (stmt->GetDouble(2) / 3600);
