@@ -432,17 +432,35 @@ def GetListOfDisabledOSGSites():
 def GetListOfOSGSites():
         return GetListOfSites("//Resource[Active='True' and ( Services/Service/Name='Compute Element' or Services/Service/Name='CE' or Services='no applicable service exists')]/Name")
 
-def GetListOfRegisteredVO():
-        cmd = "wget --proxy -q -O - http://oim.grid.iu.edu/pub/vo/show.php?format=plain-text | cut -d, -f1,2  | grep -v -e '^#' -e '^$'  "
+def GetListOfVOs(filter):
+        location = 'http://myosg.grid.iu.edu/vosummary/xml?datasource=summary&summary_attrs_showdesc=on&all_vos=on&show_disabled=on&active_value=1'
+        html = urllib2.urlopen(location).read()
         
-        allVos = commands.getoutput(cmd).split("\n");
+        vos = []
+        doc = libxml2.parseDoc(html)
+        for resource in doc.xpathEval(filter):
+           if resource.name == "Name":
+              name = resource.content
+           elif resource.name == "LongName":
+              vos.append( (name,resource.content) )
+        doc.freeDoc()
+        
+        return vos;
+
+def GetListOfRegisteredVO():
+        #cmd = "wget --proxy -q -O - http://oim.grid.iu.edu/pub/vo/show.php?format=plain-text | cut -d, -f1,2  | grep -v -e '^#' -e '^$'  "
+        
+        #allVos = commands.getoutput(cmd).split("\n");
         # Run a second time to avoid wget bugs
-        allVos = commands.getoutput(cmd).split("\n");
+        #allVos = commands.getoutput(cmd).split("\n");
+
+        allVos = GetListOfVOs( "//VO/Name | //VO/LongName" )
+
         ret = []
         printederror = False
         for pair in allVos:
            try:
-              (longname,description) = pair.split(",");
+              (longname,description) = pair;  # pair.split(",");
            except:
               if not printederror:
                  LogToFile("Gratia Reports GetListOfRegisteredVO unable to parse the result of: "+cmd)
