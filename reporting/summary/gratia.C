@@ -24,6 +24,8 @@
 #include "TXMLNode.h"
 #include "TXMLDocument.h"
 
+#include "libxml/xpath.h"
+
 #include "siteOwner.h"
 
 #include <algorithm>
@@ -44,35 +46,103 @@ public:
    bool fGuessed;
 };
 
+class xpathParser {
+   Bool_t fIsValid;
+   xmlDocPtr fDoc;
+   xmlXPathContextPtr fXpathCtx; 
+   xmlXPathObjectPtr fXpathObj; 
+
+   
+public:
+   xpathParser(const char *location) : fIsValid(true), fDoc(0), fXpathCtx(0), fXpathObj(0) {
+      TString cmd;
+      cmd.Form("wget -q -O - '%s' ",location);
+      
+      FILE *f = gSystem->OpenPipe(cmd,"r");
+      char x;
+      TString document;
+      while ((x = fgetc(f))!=EOF ) {
+         document.Append(x);
+      }
+      fclose(f);
+
+      /* Load XML document */
+      fDoc = xmlParseMemory(document.Data(),document.Length());
+      if (fDoc == NULL) {
+         fprintf(stderr, "Error: unable to parse file \"%s\"\n", location);
+         fIsValid = false;
+         return;
+      }
+      
+      /* Create xpath evaluation context */
+      fXpathCtx = xmlXPathNewContext(fDoc);
+      if(fXpathCtx == NULL) {
+         fprintf(stderr,"Error: unable to create new XPath context\n");
+         xmlFreeDoc(fDoc);  fDoc = 0;
+         fIsValid = false;
+         return;
+      }
+   }
+   
+   xmlXPathObjectPtr Evaluate(const char *xpathExpr) {
+      /* Evaluate xpath expression */
+      if (fXpathObj) {
+         xmlXPathFreeObject(fXpathObj);
+      }
+      
+      fXpathObj = xmlXPathEvalExpression((const xmlChar*)xpathExpr, fXpathCtx);
+      if(fXpathObj == NULL) {
+         fprintf(stderr,"Error: unable to evaluate xpath expression \"%s\"\n", xpathExpr);
+      }
+      return fXpathObj;
+   }
+
+   ~xpathParser() {
+      /* Cleanup */
+      if (fXpathObj) xmlXPathFreeObject(fXpathObj);
+      if (fXpathCtx) xmlXPathFreeContext(fXpathCtx); 
+      if (fDoc) xmlFreeDoc(fDoc); 
+   }      
+};
+
 void getSubVOs(std::map<string,string> &output) 
 {
    output.clear();
    
-   TString cmd = "wget -q -O - http://oim.grid.iu.edu/pub/vo/show.php?format=plain-text | cut -d, -f2 | grep '/'";
-   FILE * f = gSystem->OpenPipe(cmd,"r");
-   char x;
-   string main;
-   string sub;
-   bool left = true;
-   while ((x = fgetc(f))!=EOF ) {
-      switch (x) {
-         case '/': left = false; break;
-         case '\n':
-         case '\r':
-            std::transform(main.begin(), main.end(), main.begin(), ::tolower);
-            std::transform(sub.begin(), sub.end(), sub.begin(), ::tolower);
-            output[sub] = main;
-            //fprintf(stderr,"registered:%s:%s:\n",sub.c_str(),main.c_str());
-            main.clear();
-            sub.clear();
-            left = true;
-            break;
-         default:
-            if (left) {
-               main += x;
+   xpathParser xpath("http://myosg.grid.iu.edu/vosummary/xml?datasource=summary&summary_attrs_showdesc=on&all_vos=on&show_disabled=on&active_value=1");
+   xmlXPathObjectPtr xpathObj = xpath.Evaluate("//VO/LongName");
+   
+   if (xpathObj) {
+      string main;
+      string sub;
+      string value;
+      
+      xmlNodeSetPtr nodes = xpathObj->nodesetval;
+      int size = (nodes) ? nodes->nodeNr : 0;
+      
+      for(int i = 0; i < size; ++i) {
+         assert(nodes->nodeTab[i]);
+         if(nodes->nodeTab[i]->type == XML_ELEMENT_NODE) {
+            xmlNodePtr cur = nodes->nodeTab[i];   	    
+            if(cur->ns) { 
+//               fprintf(stderr, "= element node \"%s:%s = %s\"\n", 
+//                       cur->ns->href, cur->name, cur->content);
             } else {
-               sub += x;
-            }            
+               value = ( cur->children ? (char*)cur->children->content : "" );
+               string::size_type x = value.find_first_of('/');
+               if (x != string::npos) {
+                  main = value.substr(0,x);
+                  sub = value.substr(x+1);
+                  
+                  std::transform(main.begin(), main.end(), main.begin(), ::tolower);
+                  std::transform(sub.begin(), sub.end(), sub.begin(), ::tolower);
+                  output[sub] = main;                  
+               }
+            }
+         } else {
+            //cur = nodes->nodeTab[i];    
+            //fprintf(stderr, "= node \"%s\": type %d\n", cur->name, cur->type);
+         }
       }
    }
 }
@@ -131,7 +201,7 @@ void sharing(FILE *out, FILE *outcsv, TSQLServer *db, TDatime *begin, TDatime *e
    }
    
    // Intentionally using the older information source.
-   TString cmd = "wget -q -O - http://oim.grid.iu.edu/pub/resource/show.php?format=plain-text | cut -d, -f1,4,7,8,15 | grep -e ',OSG,[^,]*,CE [^,]*,1' | cut -d, -f1,3";
+   TString cmd = "wget -q -O - http://oim.grid.iu.edu/pub/resource/show.php?format=plain-text | cut -d, -f1,4,7,8,15 | grep -e ',OSG,[^,]*,CE [^,]*,1' | cut -d, -f1,3";  // Intentionally using the older information source to get default values.
    FILE * f = gSystem->OpenPipe(cmd,"r");
    {
       char x;
