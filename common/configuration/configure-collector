@@ -80,6 +80,7 @@ my %attribute_defaults =
      "service.lifetime.JobUsageRecord.RawXML" => "1 month",
      "service.lifetime.MetricRecord" => "3 months", # Shouldn't get these at all
      "service.lifetime.MetricRecord.RawXML" => "1 month",
+     "service.lifetime.ComputeElementDescription" => "3 months", # Shouldn't get these at all
      "service.lifetime.DupRecord.Duplicate" => "1 month",
      "service.lifetime.DupRecord.ExpirationDate" => "1 month",
      "service.lifetime.DupRecord" => "UNLIMITED",

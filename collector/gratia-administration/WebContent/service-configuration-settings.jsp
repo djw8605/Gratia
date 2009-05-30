@@ -175,6 +175,31 @@ td.example
       <td valign="top" class="example">1 month</td>
     </tr>
     <tr >
+      <td valign="top" class="property">service.lifetime.ComputeElement</td>
+      <td valign="top" class="explanation">Lifetime of ComputeElement records.</td>
+      <td valign="top" class="example">36 months</td>
+    </tr>
+    <tr >
+      <td valign="top" class="property">service.lifetime.StorageElement</td>
+      <td valign="top" class="explanation">Lifetime of StorageElement records.</td>
+      <td valign="top" class="example">36 months</td>
+    </tr>
+    <tr >
+      <td valign="top" class="property">service.lifetime.ComputeElementRecord</td>
+      <td valign="top" class="explanation">Lifetime of ComputeElementRecord records.</td>
+      <td valign="top" class="example">36 months</td>
+    </tr>
+    <tr >
+      <td valign="top" class="property">service.lifetime.StorageElementRecord</td>
+      <td valign="top" class="explanation">Lifetime of StorageElementRecord records.</td>
+      <td valign="top" class="example">36 months</td>
+    </tr>
+    <tr >
+      <td valign="top" class="property">service.lifetime.Subcluster</td>
+      <td valign="top" class="explanation">Lifetime of Subcluster records.</td>
+      <td valign="top" class="example">36 months</td>
+    </tr>
+    <tr >
       <td valign="top" class="property">service.lifetime.DupRecord.<br/>Duplicate</td>
       <td valign="top" class="explanation">Lifetime of duplicates.</td>
       <td valign="top" class="example">1 month</td>

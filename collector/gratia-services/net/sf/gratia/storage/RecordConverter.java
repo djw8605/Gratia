@@ -14,6 +14,11 @@ public class RecordConverter {
         // Load up the list with loaders
         loaderList.add(new UsageRecordLoader());
         loaderList.add(new MetricRecordLoader());
+        loaderList.add(new ComputeElementRecordLoader());
+        loaderList.add(new StorageElementRecordLoader());
+        loaderList.add(new ComputeElementLoader());
+        loaderList.add(new StorageElementLoader());
+        loaderList.add(new SubclusterLoader());
         loaderList.add(new ProbeDetailsLoader());
     }
 

@@ -1,0 +1,80 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+
+<hibernate-mapping package= "net.sf.gratia.storage">
+
+  <class name="ComputeElement"
+         table="ComputeElement"
+         node="ComputeElement" lazy="false">
+
+    <id name="RecordId" column="dbid" type="integer">
+      <generator class="native"/>
+    </id>
+
+    <component name="UniqueID" class="StringElement" insert="true">
+      <property name="Value" column="UniqueID" />
+    </component>
+
+    <component name="CEName" class="StringElement" insert="true">
+      <property name="Value" column="CEName" />
+    </component>
+
+    <component name="Cluster" class="StringElement" insert="true">
+      <property name="Value" column="Cluster" />
+    </component>
+
+    <component name="HostName" class="StringElement" insert="true">
+      <property name="Value" column="HostName" />
+    </component>
+
+    <component name="Timestamp" class="DateElement" insert="true">
+      <property name="Value" column="Timestamp" type="timestamp"  />
+    </component>
+
+    <component name="LrmsType" class="StringElement" insert="true">
+      <property name="Value" column="LrmsType" />
+    </component>
+
+    <component name="LrmsVersion" class="StringElement" insert="true">
+      <property name="Value" column="LrmsVersion" />
+    </component>
+
+    <component name="MaxRunningJobs" class="IntegerElement" insert="true">
+      <property name="Value" column="MaxRunningJobs" />
+    </component>
+
+    <component name="MaxTotalJobs" class="IntegerElement" insert="true">
+      <property name="Value" column="MaxTotalJobs" />
+    </component>
+
+    <component name="AssignedJobSlots" class="IntegerElement" insert="true">
+      <property name="Value" column="AssignedJobSlots" />
+    </component>
+
+    <component name="Status" class="StringElement" insert="true">
+      <property name="Value" column="Status" />
+    </component>
+
+    <component name="ProbeName" class="StringElement" insert="true">
+      <property name="Value" column="ProbeName" />
+    </component>
+
+    <many-to-one name="Probe" class="Probe" column="probeid"/>
+
+    <component name="SiteName" class="StringElement" insert="true">
+      <property name="Value" column="SiteName" />
+    </component>
+
+    <component name="Grid" class="StringElement" insert="true"> 
+      <property name="Value" column="Grid" /> 
+    </component> 
+
+     <property name="ServerDate" column="ServerDate" type="timestamp"/>
+     <property name="md5" column="md5v2"/>
+
+  </class>
+
+</hibernate-mapping>

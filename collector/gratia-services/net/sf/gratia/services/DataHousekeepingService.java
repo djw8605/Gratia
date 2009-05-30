@@ -31,7 +31,7 @@ public class DataHousekeepingService extends Thread {
     private DataScrubber housekeeper = new DataScrubber();
 
     public enum HousekeepingAction { 
-        ALL, JOBUSAGEXML, METRICXML, METRICRECORD, JOBUSAGERECORD, DUPRECORD, TRACE, ORIGIN, NONE;
+        ALL, JOBUSAGEXML, METRICXML, METRICRECORD, JOBUSAGERECORD, CE, SE, CERECORD, SERECORD, SUBCLUSTER, DUPRECORD, TRACE, ORIGIN, NONE;
         private Lock l = new ReentrantLock();
         public Boolean tryLock() {
             return l.tryLock();
@@ -202,6 +202,61 @@ public class DataHousekeepingService extends Thread {
                 }
             }
             break;
+        case CE:
+          if (action.tryLock()) {
+              try {
+                  housekeeper.IndividualComputeElement();
+                  result = true; // OK
+              }
+              finally {
+                  action.unlock();
+              }
+          }
+          break;
+        case SE:
+          if (action.tryLock()) {
+              try {
+                  housekeeper.IndividualStorageElement();
+                  result = true; // OK
+              }
+              finally {
+                  action.unlock();
+              }
+          }
+          break;
+        case SERECORD:
+          if (action.tryLock()) {
+              try {
+                  housekeeper.IndividualStorageElementRecord();
+                  result = true; // OK
+              }
+              finally {
+                  action.unlock();
+              }
+          }
+          break;
+        case CERECORD:
+          if (action.tryLock()) {
+              try {
+                  housekeeper.IndividualComputeElementRecord();
+                  result = true; // OK
+              }
+              finally {
+                  action.unlock();
+              }
+          }
+          break;
+        case SUBCLUSTER:
+          if (action.tryLock()) {
+              try {
+                  housekeeper.IndividualSubclusterRecord();
+                  result = true; // OK
+              }
+              finally {
+                  action.unlock();
+              }
+          }
+          break;
         case DUPRECORD:
             if (action.tryLock()) {
                 try {

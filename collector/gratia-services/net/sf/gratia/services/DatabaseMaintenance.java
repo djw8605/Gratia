@@ -241,6 +241,46 @@ public class DatabaseMaintenance {
       AddIndex("MetricRecord", false, "MetricType", "MetricType");
       AddIndex("MetricRecord", false, "VoName", "VoName");
 
+      // ComputeElement
+      //ensureUniqueMd5("ComputeElement");
+      AddIndex("ComputeElement", true, "md5v2", "md5v2");
+      AddIndex("ComputeElement", false, "Timestamp", "Timestamp");
+      AddIndex("ComputeElement", false, "index03", "ProbeName");
+      AddIndex("ComputeElement", false, "probeid", "probeid");
+      AddIndex("ComputeElement", false, "Cluster", "Cluster");
+
+      // StorageElement
+      //ensureUniqueMd5("StorageElement");
+      AddIndex("StorageElement", true, "md5v2", "md5v2");
+      AddIndex("StorageElement", false, "Timestamp", "Timestamp");
+      AddIndex("StorageElement", false, "index03", "ProbeName");
+      AddIndex("StorageElement", false, "probeid", "probeid");
+      AddIndex("StorageElement", false, "ParentID", "ParentID");
+      AddIndex("StorageElement", false, "OwnerDN", "OwnerDN");
+      AddIndex("StorageElement", false, "SE", "SE");
+
+      // ComputeElementRecord
+      //ensureUniqueMd5("ComputeElementRecord");
+      AddIndex("ComputeElementRecord", true, "md5v2", "md5v2");
+      AddIndex("ComputeElementRecord", false, "Timestamp", "Timestamp");
+      AddIndex("ComputeElementRecord", false, "index03", "ProbeName");
+      AddIndex("ComputeElementRecord", false, "UniqueID", "UniqueID");
+      AddIndex("ComputeElementRecord", false, "probeid", "probeid");
+
+      // StorageElementRecord
+      //ensureUniqueMd5("StorageElementRecord");
+      AddIndex("StorageElementRecord", true, "md5v2", "md5v2");
+      AddIndex("StorageElementRecord", false, "Timestamp", "Timestamp");
+      AddIndex("StorageElementRecord", false, "index03", "ProbeName");
+      AddIndex("StorageElementRecord", false, "UniqueID", "UniqueID");
+      
+      // Subcluster
+      //ensureUniqueMd5("Subcluster");
+      AddIndex("Subcluster", true, "md5v2", "md5v2");
+      AddIndex("Subcluster", false, "Timestamp", "Timestamp");
+      AddIndex("Subcluster", false, "index03", "ProbeName");
+      AddIndex("Subcluster", false, "UniqueID", "UniqueID");
+      
       // Index on DupRecord
       AddIndex("DupRecord", false, "index02", "eventdate");
       if ((liveVersion == 0) || (liveVersion >= 24)) { // Only if we have the correct table format.

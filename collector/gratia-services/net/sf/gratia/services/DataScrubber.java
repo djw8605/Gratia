@@ -17,6 +17,11 @@ public class DataScrubber {
     //
     // service.lifetime.JobUsageRecord = 3 months
     // service.lifetime.JobUsageRecord.RawXML = 1 month
+    // service.lifetime.ComputeElement = 5 years
+    // service.lifetime.StorageElement = 5 years
+    // service.lifetime.ComputeElementRecord = 5 years
+    // service.lifetime.StorageElementRecord = 5 years
+    // service.lifetime.Subcluster = 5 years
     // service.lifetime.MetricRecord = 3 months
     // service.lifetime.MetricRecord.RawXML = 1 month
     // service.lifetime.DupRecord.Duplicates = 1 month
@@ -342,6 +347,120 @@ public class DataScrubber {
         return nrecords;
     }
 
+    public long IndividualComputeElement() {
+        // Execute: delete from tableName set where EndTime < cutoffdate
+        String limit = eCalc.expirationDateAsSQLString(new Date(), "ComputeElement");
+
+        // We need to handle the case where
+        //   a) EndTime is null
+        //   b) EndTime is incorrect (usually 1970-01-01)
+        //   c) Normal case
+
+        //   c) Normal case
+        long nrecords = 0;
+        if (limit.length() > 0) {
+            Logging.fine("DataScrubber: Remove all ComputeElement records older than: " + limit);
+
+            String hqlDelete = "delete ComputeElement where Timestamp.Value < :dateLimit";
+            nrecords = Execute(hqlDelete, limit, "ComputeElement records");
+
+            Logging.info("DataScrubber: deleted " + nrecords + " ComputeElement records.");
+        }
+
+        return nrecords;
+    }
+
+    public long IndividualStorageElement() {
+      // Execute: delete from tableName set where EndTime < cutoffdate
+      String limit = eCalc.expirationDateAsSQLString(new Date(), "StorageElement");
+
+      // We need to handle the case where
+      //   a) EndTime is null
+      //   b) EndTime is incorrect (usually 1970-01-01)
+      //   c) Normal case
+
+      //   c) Normal case
+      long nrecords = 0;
+      if (limit.length() > 0) {
+          Logging.fine("DataScrubber: Remove all StorageElement records older than: " + limit);
+
+          String hqlDelete = "delete StorageElement where Timestamp.Value < :dateLimit";
+          nrecords = Execute(hqlDelete, limit, "StorageElement records");
+
+          Logging.info("DataScrubber: deleted " + nrecords + " StorageElement records.");
+      }
+
+      return nrecords;
+  }
+
+    public long IndividualComputeElementRecord() {
+      // Execute: delete from tableName set where EndTime < cutoffdate
+      String limit = eCalc.expirationDateAsSQLString(new Date(), "ComputeElementRecord");
+
+      // We need to handle the case where
+      //   a) EndTime is null
+      //   b) EndTime is incorrect (usually 1970-01-01)
+      //   c) Normal case
+
+      //   c) Normal case
+      long nrecords = 0;
+      if (limit.length() > 0) {
+          Logging.fine("DataScrubber: Remove all ComputeElementRecord records older than: " + limit);
+
+          String hqlDelete = "delete ComputeElementRecord where Timestamp.Value < :dateLimit";
+          nrecords = Execute(hqlDelete, limit, "ComputeElementRecord records");
+
+          Logging.info("DataScrubber: deleted " + nrecords + " ComputeElementRecord records.");
+      }
+
+      return nrecords;
+  }
+
+    public long IndividualStorageElementRecord() {
+      // Execute: delete from tableName set where EndTime < cutoffdate
+      String limit = eCalc.expirationDateAsSQLString(new Date(), "StorageElementRecord");
+
+      // We need to handle the case where
+      //   a) EndTime is null
+      //   b) EndTime is incorrect (usually 1970-01-01)
+      //   c) Normal case
+
+      //   c) Normal case
+      long nrecords = 0;
+      if (limit.length() > 0) {
+          Logging.fine("DataScrubber: Remove all StorageElementRecord records older than: " + limit);
+
+          String hqlDelete = "delete StorageElementRecord where Timestamp.Value < :dateLimit";
+          nrecords = Execute(hqlDelete, limit, "StorageElementRecord records");
+
+          Logging.info("DataScrubber: deleted " + nrecords + " StorageElementRecord records.");
+      }
+
+      return nrecords;
+  }
+
+    public long IndividualSubclusterRecord() {
+      // Execute: delete from tableName set where EndTime < cutoffdate
+      String limit = eCalc.expirationDateAsSQLString(new Date(), "Subcluster");
+
+      // We need to handle the case where
+      //   a) EndTime is null
+      //   b) EndTime is incorrect (usually 1970-01-01)
+      //   c) Normal case
+
+      //   c) Normal case
+      long nrecords = 0;
+      if (limit.length() > 0) {
+          Logging.fine("DataScrubber: Remove all Subcluster records older than: " + limit);
+
+          String hqlDelete = "delete Subcluster where Timestamp.Value < :dateLimit";
+          nrecords = Execute(hqlDelete, limit, "Subcluster records");
+
+          Logging.info("DataScrubber: deleted " + nrecords + " Subcluster records.");
+      }
+
+      return nrecords;
+  }
     public long Trace() {
         return tableCleanupHelper("Trace", "traceId", "procName", "eventtime");
     }
@@ -354,6 +473,7 @@ public class DataScrubber {
        final String [] types = {
           "JobUsageRecord",
           "MetricRecord",
+          "ComputeElement",
           "ProbeDetails" 
        };
        

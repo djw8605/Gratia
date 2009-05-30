@@ -81,6 +81,56 @@
     </servlet>
 
     <servlet>
+        <servlet-name>computeelementreplicationtable</servlet-name>
+        <servlet-class>net.sf.gratia.administration.ReplicationTable</servlet-class>
+        <load-on-startup>2</load-on-startup>
+        <init-param>
+           <param-name>RecordType</param-name>
+           <param-value>ComputeElement</param-value>
+        </init-param>
+    </servlet>
+
+    <servlet>
+        <servlet-name>storageelementreplicationtable</servlet-name>
+        <servlet-class>net.sf.gratia.administration.ReplicationTable</servlet-class>
+        <load-on-startup>2</load-on-startup>
+        <init-param>
+           <param-name>RecordType</param-name>
+           <param-value>StorageElement</param-value>
+        </init-param>
+    </servlet>
+
+    <servlet>
+        <servlet-name>computeelementrecordreplicationtable</servlet-name>
+        <servlet-class>net.sf.gratia.administration.ReplicationTable</servlet-class>
+        <load-on-startup>2</load-on-startup>
+        <init-param>
+           <param-name>RecordType</param-name>
+           <param-value>ComputeElementRecord</param-value>
+        </init-param>
+    </servlet>
+
+    <servlet>
+        <servlet-name>storageelementrecrdreplicationtable</servlet-name>
+        <servlet-class>net.sf.gratia.administration.ReplicationTable</servlet-class>
+        <load-on-startup>2</load-on-startup>
+        <init-param>
+           <param-name>RecordType</param-name>
+           <param-value>StorageElementRecord</param-value>
+        </init-param>
+    </servlet>
+
+    <servlet>
+        <servlet-name>subclusterreplicationtable</servlet-name>
+        <servlet-class>net.sf.gratia.administration.ReplicationTable</servlet-class>
+        <load-on-startup>2</load-on-startup>
+        <init-param>
+           <param-name>RecordType</param-name>
+           <param-value>Subcluster</param-value>
+        </init-param>
+    </servlet>
+
+    <servlet>
         <servlet-name>probedetailsreplicationtable</servlet-name>
         <servlet-class>net.sf.gratia.administration.ReplicationTable</servlet-class>
         <load-on-startup>2</load-on-startup>

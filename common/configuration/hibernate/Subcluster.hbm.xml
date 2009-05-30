@@ -1,0 +1,92 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+
+<hibernate-mapping package= "net.sf.gratia.storage">
+
+  <class name="Subcluster"
+         table="Subcluster"
+         node="Subcluster" lazy="false">
+
+    <id name="RecordId" column="dbid" type="integer">
+      <generator class="native"/>
+    </id>
+
+    <component name="UniqueID" class="StringElement" insert="true">
+      <property name="Value" column="UniqueID" />
+    </component>
+
+    <component name="Name" class="StringElement" insert="true">
+      <property name="Value" column="Name" />
+    </component>
+
+    <component name="Cluster" class="StringElement" insert="true">
+      <property name="Value" column="Cluster" />
+    </component>
+
+    <component name="Platform" class="StringElement" insert="true">
+      <property name="Value" column="Platform" />
+    </component>
+
+    <component name="OS" class="StringElement" insert="true">
+      <property name="Value" column="OS" />
+    </component>
+
+    <component name="OSVersion" class="StringElement" insert="true">
+      <property name="Value" column="OSVersion" />
+    </component>
+
+    <component name="Timestamp" class="DateElement" insert="true">
+      <property name="Value" column="Timestamp" type="timestamp"  />
+    </component>
+
+    <component name="Cores" class="IntegerElement" insert="true">
+      <property name="Value" column="Cores" />
+    </component>
+
+    <component name="Hosts" class="IntegerElement" insert="true">
+      <property name="Value" column="Hosts" />
+    </component>
+
+    <component name="Cpus" class="IntegerElement" insert="true">
+      <property name="Value" column="Cpus" />
+    </component>
+
+    <component name="RAM" class="IntegerElement" insert="true">
+      <property name="Value" column="RAM" />
+    </component>
+
+    <component name="Processor" class="StringElement" insert="true">
+      <property name="Value" column="Processor" />
+    </component>
+
+    <component name="BenchmarkName" class="StringElement" insert="true">
+      <property name="Value" column="BenchmarkName" />
+    </component>
+
+    <component name="BenchmarkValue" class="StringElement" insert="true">
+      <property name="Value" column="BenchmarkValue" />
+    </component>
+
+     <property name="ServerDate" column="ServerDate" type="timestamp"/>
+     <property name="md5" column="md5v2"/>
+
+    <component name="ProbeName" class="StringElement" insert="true">
+      <property name="Value" column="ProbeName" />
+    </component>
+
+    <many-to-one name="Probe" class="Probe" column="probeid"/>
+
+    <component name="SiteName" class="StringElement" insert="true">
+      <property name="Value" column="SiteName" />
+    </component>
+
+    <component name="Grid" class="StringElement" insert="true"> 
+      <property name="Value" column="Grid" /> 
+    </component> 
+
+  </class>
+
+</hibernate-mapping>

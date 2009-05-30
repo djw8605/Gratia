@@ -1,0 +1,52 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+
+<hibernate-mapping package= "net.sf.gratia.storage">
+
+  <class name="ComputeElementRecord"
+         table="ComputeElementRecord"
+         node="ComputeElementRecord" lazy="false">
+
+    <id name="RecordId" column="dbid" type="integer">
+      <generator class="native"/>
+    </id>
+
+    <component name="UniqueID" class="StringElement" insert="true">
+      <property name="Value" column="UniqueID" />
+    </component>
+
+    <component name="VO" class="StringElement" insert="true">
+      <property name="Value" column="VO" />
+    </component>
+
+    <component name="Timestamp" class="DateElement" insert="true">
+      <property name="Value" column="Timestamp" type="timestamp"  />
+    </component>
+
+    <component name="RunningJobs" class="IntegerElement" insert="true">
+      <property name="Value" column="RunningJobs" />
+    </component>
+
+    <component name="TotalJobs" class="IntegerElement" insert="true">
+      <property name="Value" column="TotalJobs" />
+    </component>
+
+    <component name="WaitingJobs" class="IntegerElement" insert="true">
+      <property name="Value" column="WaitingJobs" />
+    </component>
+
+     <property name="ServerDate" column="ServerDate" type="timestamp"/>
+     <property name="md5" column="md5v2"/>
+
+    <component name="ProbeName" class="StringElement" insert="true">
+      <property name="Value" column="ProbeName" />
+    </component>
+
+    <many-to-one name="Probe" class="Probe" column="probeid"/>
+
+  </class>
+
+</hibernate-mapping>

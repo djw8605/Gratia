@@ -1,0 +1,64 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+
+<hibernate-mapping package= "net.sf.gratia.storage">
+
+  <class name="StorageElementRecord"
+         table="StorageElementRecord"
+         node="StorageElementRecord" lazy="false">
+
+    <id name="RecordId" column="dbid" type="integer">
+      <generator class="native"/>
+    </id>
+
+    <component name="UniqueID" class="StringElement" insert="true">
+      <property name="Value" column="UniqueID" />
+    </component>
+
+    <component name="MeasurementType" class="StringElement" insert="true">
+      <property name="Value" column="MeasurementType" />
+    </component>
+
+    <component name="StorageType" class="StringElement" insert="true">
+      <property name="Value" column="StorageType" />
+    </component>
+
+    <component name="Timestamp" class="DateElement" insert="true">
+      <property name="Value" column="Timestamp" type="timestamp"  />
+    </component>
+
+    <component name="TotalSpace" class="IntegerElement" insert="true">
+      <property name="Value" column="TotalSpace" />
+    </component>
+
+    <component name="FreeSpace" class="IntegerElement" insert="true">
+      <property name="Value" column="FreeSpace" />
+    </component>
+
+    <component name="UsedSpace" class="IntegerElement" insert="true">
+      <property name="Value" column="UsedSpace" />
+    </component>
+
+    <component name="FileCountLimit" class="IntegerElement" insert="true">
+      <property name="Value" column="FileCountLimit" />
+    </component>
+
+    <component name="FileCount" class="IntegerElement" insert="true">
+      <property name="Value" column="FileCount" />
+    </component>
+
+     <property name="ServerDate" column="ServerDate" type="timestamp"/>
+     <property name="md5" column="md5v2"/>
+
+    <component name="ProbeName" class="StringElement" insert="true">
+      <property name="Value" column="ProbeName" />
+    </component>
+
+    <many-to-one name="Probe" class="Probe" column="probeid"/>
+
+  </class>
+
+</hibernate-mapping>

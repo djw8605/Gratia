@@ -70,7 +70,7 @@ COMMON_CLASSES = $(classes-dir)/net/sf/gratia/util/TidiedDailyRollingFileAppende
 
 # check where we are as the tar file ownership cannot be set correctly on cygwin
 ifeq ($(filter CYGWIN%,$(PLATFORM)),)
-  tarowner=--owner=root --group=root
+  tarowner=--owner=root 
   classpath=.:$(classes-dir):$(services)/:$(servlets)/:$(soap)/:$(administration)/:$(reportsrc)/src:$(security)/:$(util)/
 else
   warn := $(shell echo "Building the tar file on cygwin will result in incorrect ownership" 1>&2 )

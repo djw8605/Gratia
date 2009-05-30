@@ -355,7 +355,7 @@ public class MonitorStatus extends HttpServlet
 			// previous hour
 			//
          
-         String tables [] = { "JobUsageRecord", "MetricRecord" };
+         String tables [] = { "JobUsageRecord", "MetricRecord", "ComputeElement", "StorageElement", "ComputeElementRecord", "StorageElementRecord", "Subcluster" };
          
          count1 = new Integer(0);
          
