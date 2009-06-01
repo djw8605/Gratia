@@ -356,13 +356,13 @@ def sendAll(text, filestem = "temp"):
    else:
       sendEmail( (gEmailToNames, gEmailTo), gEmailSubject, text, None)
 
-gMySQLOSGConnectString = " -h gratia09.fnal.gov -u reader --port=3320 --password=reader "
-gMySQLFermiConnectString = " -h gratia-db01.fnal.gov -u reader --port=3320 --password=reader "
+gMySQLOSGConnectString = " -h gratia09.fnal.gov -u reader --port=3320 --password=reader -N gratia "
+gMySQLFermiConnectString = " -h gratia-db01.fnal.gov -u reader --port=3320 --password=reader -N fermi_osg "
 gMySQLConnectString = gMySQLOSGConnectString
 
 def CheckDB():
         global gMySQL,gMySQLConnectString
-        (status, output) = commands.getstatusoutput( gMySQL + gMySQLConnectString + " gratia -e status "  )
+        (status, output) = commands.getstatusoutput( gMySQL + gMySQLConnectString + " -e status "  )
         if status == 0:
             msg =  "Status: \n"+output
             if output.find("ERROR") >= 0 :
@@ -380,8 +380,8 @@ def CheckDB():
 def RunQuery(select):
         global gMySQL,gMySQLConnectString
         LogToFile(select)
-        #print "echo '" + select + "' | " + gMySQL + gMySQLConnectString + " -N gratia "
-        return commands.getoutput("echo '" + select + "' | " + gMySQL + gMySQLConnectString + " -N gratia " )
+        # print "echo '" + select + "' | " + gMySQL + gMySQLConnectString
+        return commands.getoutput("echo '" + select + "' | " + gMySQL + gMySQLConnectString )
 
 def RunQueryAndSplit(select):
         res = RunQuery(select)
@@ -2817,7 +2817,6 @@ given release up to the current release.
       res2 = SoftwareVersionData("fermi_osg",start,end)
 
       gMySQLConnectString = keepConnectionValue;
-
       return res1 + res2;
    
 
