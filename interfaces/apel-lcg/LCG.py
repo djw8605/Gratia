@@ -143,6 +143,13 @@
 #   changes much more complex and maybe no longer needed, I chose NOT to make 
 #   changes to the code for this at this time.  
 # 
+# 6/1/2009 (John Weigand)
+#    In the CreateXmlHtmlFiles method, changed the Path selection criteria
+#    for the org_Tier2 table:
+#     - USA Path changed from 1.31 to 1.32
+#     - for SPRACE (which was inadvertantly omitted since April 2008), they
+#       are not included under USA, but under Brazil which is 1.4.    
+#
 ########################################################################
 import traceback
 import exceptions
@@ -981,7 +988,7 @@ def CreateXmlHtmlFiles(params):
   queries =  {
     lcgtable : "select * from %s where Year=%s and Month=%s order by ExecutingSite,LCGUserVO ;" % (lcgtable,dates[0],dates[1]),
     "org_Tier1" : 'select * from org_Tier1 where Path like "1.10%" or Path like "1.4%" order by Path' ,
-    "org_Tier2" : 'select * from org_Tier2 where Path like "1.31%" order by Path' ,
+    "org_Tier2" : 'select * from org_Tier2 where Path like "1.32%" or Path like "1.4%" order by Path' ,
   } 
   tables = queries.keys() 
   for table in tables:
