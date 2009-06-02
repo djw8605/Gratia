@@ -230,6 +230,11 @@
 #   03/24/2009 (Karthik)   	 
 #    GLOW	2408	previously 1832  (jump due to fixing of incorrect lower value assigned after an upgrade)
 #       	 
+#  06/01/2009 (John Weigand)
+#    Re-added SPRACE (had been removed back mistakenly back in April 2008)
+#    at the request of CMS (Frank Wuerthwein).
+#    Re-added HEPGRID_UERJ (had been removed back mistakenly back in April 2008)
+#    at the request of CMS (Ken Bloom)
 #    
 #    
 ##################################################################
@@ -240,11 +245,13 @@ USCMS-FNAL-WC1-CE   1809
 #--- CMS Tier 2 ----    
 CIT_CMS_T2          2398       
 GLOW                2408
+HEPGRID_UERJ        2117
 MIT_CMS             1872
 Nebraska            2027
 Purdue-RCAC         2883
 Purdue-Steele       3196
 UCSDT2              2871
+SPRACE              2117
 UFlorida-HPC        1521
 UFlorida-PG         1535
 #
@@ -269,8 +276,6 @@ UTA_SWT2            1543
 ##-- obsolete --
 ####################################
 #--- CMS Tier unknown ----    
-#HEPGRID_UERJ        2117
-#SPRACE              2117
 ##UCSDT2-B
 ##UTA_DPCC             915
 ##Purdue-Lear    1285 (decommissioned 8/1/09 - load assumed by Purdue-Steele)

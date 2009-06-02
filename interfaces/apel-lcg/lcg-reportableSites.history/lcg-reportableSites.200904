@@ -244,6 +244,7 @@ MIT_CMS             1872
 Nebraska            2027
 Purdue-RCAC         2883
 Purdue-Steele       3196
+SPRACE              2117
 UCSDT2              2871
 UFlorida-HPC        1521
 UFlorida-PG         1535
@@ -270,7 +271,6 @@ UTA_SWT2            1543
 ####################################
 #--- CMS Tier unknown ----    
 #HEPGRID_UERJ        2117
-#SPRACE              2117
 ##UCSDT2-B
 ##UTA_DPCC             915
 ##Purdue-Lear    1285 (decommissioned 8/1/09 - load assumed by Purdue-Steele)
