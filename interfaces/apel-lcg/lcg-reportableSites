@@ -232,9 +232,12 @@
 #       	 
 #  06/01/2009 (John Weigand)
 #    Re-added SPRACE (had been removed back mistakenly back in April 2008)
-#    at the request of CMS (Frank Wuerthwein).
+#    at the request of CMS (Frank Wuerthwein).  They are in the org_Tier1
+#    table under country Brazil.
 #    Re-added HEPGRID_UERJ (had been removed back mistakenly back in April 2008)
-#    at the request of CMS (Ken Bloom)
+#    at the request of CMS (Ken Bloom). They are currently not in the org_Tier2
+#    table but are working toward an MOU agreement.  They will also be 
+#    under Brazil.
 #    
 #    
 ##################################################################
