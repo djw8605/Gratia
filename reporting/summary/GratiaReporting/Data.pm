@@ -21,8 +21,35 @@ sub new {
   my $class = shift;
   my $self = { options => { @_ } };
   bless $self, $class;
+  $self->initialize();
   $self->process_data();
   return $self;
+}
+
+sub initialize {
+  my $self = shift;
+
+  my $test_cert_info =
+    {
+     "cert-path" => glob("~/.globus/usercert.pem"),
+     "key-path" => glob("~/.globus/userkey.pem"),
+    };
+
+  my $default_cert_info =
+    {
+     "cert-path" => "/etc/grid-security/gratia/gratiacert.pem",
+     "key-path" => "/etc/grid-security/gratia/gratiakey.pem"
+    };
+
+  # Use Service Cert if we can find and read it; else personal cert.
+  my $cert_info = ( -r $default_cert_info->{"key-path"} )?$default_cert_info:$test_cert_info;
+
+  $self->{extra_wget_options} =
+    [ "--certificate=$cert_info->{\"cert-path\"}",
+      "--private-key=$cert_info->{\"key-path\"}",
+      "--no-check-certificate", # Necessary because of use of http certificiate
+      "--ca-directory=/etc/grid-security/certificates"
+    ];
 }
 
 sub process_data {
@@ -33,7 +60,10 @@ sub process_data {
     }
     my $fh;
     if ($data_source =~ m&^(\w+)://&) { # Use wget to obtain XML.
-      $fh = FileHandle->new("wget -q -O - \"$data_source\" 2>/dev/null|") or 
+      my $url_cmd = sprintf('wget %s -q -O - "%s" 2>/dev/null|',
+                            join(" ", @{$self->{extra_wget_options} || []}),
+                            $data_source);
+      $fh = FileHandle->new("$url_cmd") or
         die "Unable to open wget pipe for $data_source";
     } else {
       $fh = FileHandle->new("$data_source") or
@@ -60,13 +90,19 @@ sub processXmlData {
     die "Unable to parse a tree from XML source";
   }
   my $root = $tree->getDocumentElement;
-  if ($self->{options}->{verbose}) {
-    print STDERR "Reading OIM ", $root->nodeName , " data\n";
-  }
+  $self->verbosePrint("DEBUG: Reading OIM ", $root->nodeName , " data\n");
   if ($root->nodeName eq 'resource_contacts') {
+    $self->verbosePrint("DEBUG: Calling processXmlResourceContacts()\n");
     $self->processXmlResourceContacts($root); # OIM site info
+  } elsif ($root->nodeName eq 'ResourceSummary') {
+    $self->verbosePrint("DEBUG: Calling processXmlResourceSummary()\n");
+    $self->processXmlResourceSummary($root); # OIM site info (MyOSG)
   } elsif ($root->nodeName eq 'vo_contacts') {
+    $self->verbosePrint("DEBUG: Calling processXmlVoContacts()\n");
     $self->processXmlVoContacts($root); # OIM VO info
+  } elsif ($root->nodeName eq 'VOSummary') {
+    $self->verbosePrint("DEBUG: Calling processXmlVOSummary()\n");
+    $self->processXmlVOSummary($root); # OIM VO info (MyOSG)
   } else {
     print STDERR "ERROR: OIM data ", $root->nodeName, " not recognized: ignoring.\n";
   }
@@ -129,6 +165,141 @@ sub processXmlVoContacts {
         }
         $self->mergePersonData($primary_email, $person);
       }
+    }
+  }
+}
+
+sub verbosePrint {
+  my $self = shift;
+  return unless $self->{options}->{verbose};
+  print STDERR @_;
+}
+
+sub processXmlVOSummary {
+  my ($self, $root) = @_;
+  foreach my $vo ($root->findnodes('VO')) { # Each vo
+    my $vo_name = $vo->findvalue('Name');
+    $self->verbosePrint("DEBUG: found VO $vo_name",
+                        $vo->findvalue('LongName')?(" (", $vo->findvalue('LongName'), ")"):(),
+                        "\n");
+    my $this_vo;
+    if (exists $vo_data->{$vo_name}) {
+      print STDERR "WARNING: info for $vo_name has already been seen: merging.\n";
+    } else {
+      $vo_data->{$vo_name} = {};
+    }
+    $this_vo = $vo_data->{$vo_name};
+    $this_vo->{alt_vos} = [] unless $this_vo->{alt_vos};
+    push @{$this_vo->{alt_vos}}, $vo_name;
+    $this_vo->{science_fields} = {} unless $this_vo->{science_fields};
+    my $science_nodes = $vo->findnodes('FieldsOfScience/Field');
+    foreach my $science_node ($science_nodes->get_nodelist()) {
+      $self->verbosePrint("DEBUG: found field of science ",
+                          $science_node->string_value(),
+                          "\n");
+      $this_vo->{science_fields}->{$science_node->string_value()} = 1;
+    }
+    my $reporting_group_nodes = $vo->findnodes('ReportingGroups/ReportingGroup');
+    $this_vo->{reporting_groups} = {} unless $this_vo->{reporting_groups};
+    $this_vo->{reporting_contacts} = [] unless $this_vo->{reporting_contacts};
+    foreach my $reporting_group_node ($reporting_group_nodes->get_nodelist()) {
+      my $vo_reporting_name = $reporting_group_node->findvalue('Name');
+      next unless $vo_reporting_name;
+      $self->verbosePrint("DEBUG: found reporting group $vo_reporting_name\n");
+      $this_vo->{reporting_groups}->{$vo_reporting_name} = {}
+        unless $this_vo->{reporting_groups}->{$vo_reporting_name};
+      my $this_reporting_group = $this_vo->{reporting_groups}->{$vo_reporting_name};
+      my $reporting_contacts;
+      # If the reporting name is the same as the VO name (almost) then
+      # this is the primary contact list for this VO.
+      if ($vo_name =~ m&^(?:us)?\Q$vo_reporting_name\E$&i or
+          $vo_reporting_name =~ m&^(?:us)?\Q$vo_name\E$&i) {
+        $reporting_contacts = $this_vo->{reporting_contacts};
+      } else {
+        $this_reporting_group->{reporting_contacts} = []
+          unless $this_reporting_group->{reporting_contacts};
+        $reporting_contacts = $this_reporting_group->{reporting_contacts};
+      }
+      $this_reporting_group->{FQAN} = [] unless $this_reporting_group->{FQAN};
+      my $fqan_nodes = $reporting_group_node->findnodes('FQANS/FQAN');
+      my %fqan_node_set  = ( (map { $_?($_ => 1):(); } @{$this_reporting_group->{FQAN}}),
+                             (map { if ($_) {
+                               my $result = $_->findvalue('GroupName') || '';
+                               $result = sprintf("$result/Role=%s",
+                                                 $_->findvalue('Role'))
+                                 if $_->findvalue('Role');
+                               ($result => 1);
+                             } else { () } } $fqan_nodes->get_nodelist()) );
+      $this_reporting_group->{FQAN} = [ sort keys %fqan_node_set ];
+      my $reporting_contact_nodes = $reporting_group_node->findnodes('Contacts/Contact');
+      foreach my $reporting_contact ($reporting_contact_nodes->get_nodelist()) {
+        my $primary_email = $reporting_contact->findvalue('Email');
+        next unless $primary_email;
+        my $name = $reporting_contact->findvalue('Name');
+        $self->verbosePrint("DEBUG: found reporting contact ",
+                            $name?"$name ":'',
+                            "<",
+                            $primary_email,
+                            ">\n");
+        my $person = {};
+        push @{$reporting_contacts}, $primary_email;
+        $person->{vo_reporting_names} = [ ] unless $person->{vo_reporting_names};
+        push @{$person->{vo_reporting_names}}, "$vo_name:$vo_reporting_name";
+        $person->{'last_name'} = $name;
+        $self->mergePersonData($primary_email, $person);
+      }
+    }
+  }
+}
+
+sub processXmlResourceSummary {
+  my ($self, $root) = @_;
+  foreach my $resource ($root->findnodes('ResourceGroup/Resources/Resource')) { # Each resource
+    my $site_name = $resource->findvalue('Name'); # Resource's name
+    $self->verbosePrint("DEBUG: found resource $site_name\n");
+    my $this_site;
+    if (exists $site_data->{$site_name}) {
+      print STDERR "WARNING: info for $site_name has already been seen: merging.\n";
+    } else {
+      $site_data->{$site_name} = { name => $site_name };
+    }
+    $this_site = $site_data->{$site_name};
+    $this_site->{grid_type} = $resource->findvalue('GridType'); # Grid type for resource
+    my $service_nodes = $resource->findnodes('Services/Service'); # Services
+    $this_site->{services} = {} unless $this_site->{services};
+    foreach my $service_node ($service_nodes->get_nodelist()) {
+      $this_site->{services}->{$service_node->findvalue('Name')} =
+        {
+         hidden => ($service_node->findvalue('HiddenService') =~ m&^(true|t|1)$&)?1:0
+        };
+    }
+    $this_site->{owner_vos} = {} unless $this_site->{owner_vos};
+    my $owner_nodes =  $resource->findnodes('VOOwnership/Ownership');
+    foreach my $owner_node ($owner_nodes->get_nodelist()) {
+      $this_site->{owner_vos}->{$owner_node->findvalue('VO')} =
+        $owner_node->findvalue('Percent');
+    }
+    $this_site->{reporting_contacts} = [ ] unless $this_site->{reporting_contacts};
+    # Find only reporting contacts, not any other kind of contact.
+    my $reporting_contact_nodes = $resource->findnodes("ContactLists/ContactList[child::ContactType='Resource Report Contact']/Contacts/Contact");
+    foreach my $reporting_contact ($reporting_contact_nodes->get_nodelist()) { # Each contact
+      my $primary_email = $reporting_contact->findvalue('Email');
+      next unless $primary_email;
+      my $name = $reporting_contact->findvalue('Name');
+      $self->verbosePrint("DEBUG: found reporting contact ",
+                          $name?"$name ":'',
+                          "<",
+                          $primary_email,
+                          ">\n");
+      my $person = {};
+      push @{$this_site->{reporting_contacts}}, $primary_email;
+      $person->{sites} = [ ] unless $person->{sites};
+      push @{$person->{sites}}, $site_name;
+      foreach my $attribute qw(first_name middle_name last_name) { # Name info
+        $person->{$attribute} =
+          $reporting_contact->findvalue($attribute);
+      }
+      $self->mergePersonData($primary_email, $person);
     }
   }
 }
