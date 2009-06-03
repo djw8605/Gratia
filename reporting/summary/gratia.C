@@ -200,48 +200,11 @@ void sharing(FILE *out, FILE *outcsv, TSQLServer *db, TDatime *begin, TDatime *e
       default_owner[ siteOwners[i] ] = own;
    }
    
-   // Intentionally using the older information source.
-   TString cmd = "wget -q -O - http://oim.grid.iu.edu/pub/resource/show.php?format=plain-text | cut -d, -f1,4,7,8,15 | grep -e ',OSG,[^,]*,CE [^,]*,1' | cut -d, -f1,3";  // Intentionally using the older information source to get default values.
-   FILE * f = gSystem->OpenPipe(cmd,"r");
-   {
-      char x;
-      string name;
-      string owner;
-      bool left = true;
-      string result;
-      while ((x = fgetc(f))!=EOF ) {
-         switch (x) {
-            case ',': left = false; break;
-            case '\n':
-            case '\r':
-               if (owner == "USCMS") {
-                  owner = "CMS";
-               }
-               if (name == "SPRACE-CE") {
-                  name = "SPRACE";
-               }
-               std::transform(owner.begin(), owner.end(), owner.begin(), ::tolower);
-               default_owner[ name ] = owner;
-               name = "";
-               owner = "";
-               left = true;
-               break;
-            default:
-               if (left) {
-                  name += x;
-               } else {
-                  owner += x;
-               }
-         }
-      }
-      fclose(f);
-   }
-   
    typedef map<string, OInfo> InnerMap_t;
    map<string, InnerMap_t > ownerShare;
    {
-      cmd = "wget -q -O - 'http://myosg.grid.iu.edu/wizardsummary/xml?datasource=summary&summary_attrs_showservice=on&summary_attrs_showfqdn=on&summary_attrs_showvoownership=on&account_type=cumulative_hours&ce_account_type=gip_vo&se_account_type=vo_transfer_volume&start_type=7daysago&all_resources=on&gridtype=on&gridtype_1=on'";
-      f = gSystem->OpenPipe(cmd,"r");
+      TString cmd = "wget -q -O - 'http://myosg.grid.iu.edu/wizardsummary/xml?datasource=summary&summary_attrs_showservice=on&summary_attrs_showfqdn=on&summary_attrs_showvoownership=on&account_type=cumulative_hours&ce_account_type=gip_vo&se_account_type=vo_transfer_volume&start_type=7daysago&all_resources=on&gridtype=on&gridtype_1=on'";
+      FILE *f = gSystem->OpenPipe(cmd,"r");
       TString xmldoc;
       char x;
       while ((x = fgetc(f))!=EOF ) {

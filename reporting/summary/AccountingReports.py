@@ -448,12 +448,6 @@ def GetListOfVOs(filter):
         return vos;
 
 def GetListOfRegisteredVO():
-        #cmd = "wget --proxy -q -O - http://oim.grid.iu.edu/pub/vo/show.php?format=plain-text | cut -d, -f1,2  | grep -v -e '^#' -e '^$'  "
-        
-        #allVos = commands.getoutput(cmd).split("\n");
-        # Run a second time to avoid wget bugs
-        #allVos = commands.getoutput(cmd).split("\n");
-
         allVos = GetListOfVOs( "//VO/Name | //VO/LongName" )
 
         ret = []
