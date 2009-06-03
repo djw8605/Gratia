@@ -131,7 +131,7 @@ sub processXmlVoContacts {
     my $vo_name = $vo->findvalue('vo_name');
     my $this_vo;
     if (exists $vo_data->{$vo_name}) {
-      print STDERR "WARNING: info for $vo_name has already been seen: merging.\n";
+      print "WARNING: info for $vo_name has already been seen: merging.\n";
     } else {
       $vo_data->{$vo_name} = {};
     }
@@ -202,12 +202,12 @@ sub processXmlVOSummary {
                         "\n");
     # Attempt to merge sub-VOs (stop-gap handling)
     if ($long_name =~ m&^/?([^/]+)/& or $vo_name =~ m&^(fermilab)&i) {
-      print STDERR "INFO: Storing info for $vo_name as parent VO $1\n";
+      print "INFO: Storing info for $vo_name as parent VO $1\n";
       $vo_name = $1;
     }
     my $this_vo;
     if (exists $vo_data->{$vo_name}) {
-      print STDERR "WARNING: info for $vo_name has already been seen: merging.\n";
+      print "WARNING: info for $vo_name has already been seen: merging.\n";
     } else {
       $vo_data->{$vo_name} = {};
     }
