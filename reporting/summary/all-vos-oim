@@ -107,6 +107,15 @@ foreach my $dat_file (@ARGV) {
   }
 }
 
+foreach my $vo_key (sort keys %$vo_data) {
+ unless ($master_vo_list->{lc $vo_key} or
+         (scalar @wanted_vos and
+          not grep /^\Q$vo_key\E$/i, @wanted_vos)) {
+   print "INFO: Added VO $vo_key to list\n";
+   $master_vo_list->{lc $vo_key} = [];
+ }
+}
+
 $master_vo_list->{"all-vos-test"} = [ @test_addresses ]
   unless exists $master_vo_list->{"all-vos-test"};
 
