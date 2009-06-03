@@ -1314,18 +1314,21 @@ $text
 <html>
 EOF
     close(OUT);
-    my $cmd = sprintf(qq&mutt -F "$script_top_dir/muttrc" -a "$html_filename" -s "OSG site metrics report for $timeperiod $current_date to $current_date_end" %s&,
+    my $subject_sites = '';
+    if ($options{"site-name"}) {
+      $subject_sites =
+        (scalar @{$options{"site-name"}} > 1)?
+          "for $options{\"site-name\"}->[0] et al. ":
+            "for $options{\"site-name\"}->[0] ";
+    }
+
+    my $cmd = sprintf(qq&mutt -F "$script_top_dir/muttrc" -a "$html_filename" -s "OSG site metrics report ${subject_sites}for $timeperiod $current_date to $current_date_end" %s&,
                       join(" ", map { qq/"$_"/ } @$email_addresses));
 
     open(MUTT, "|$cmd") or die "Unable to open mail command for input";
     print MUTT <<EOF;
 Please find below the Gratia site-oriented statistics for OSG usage
 for the $timeperiod $current_date - $current_date_end (inclusive).
-
-Sites included:
-
-
-Deltas are with respect to the $timeperiod $previous_date - $previous_date_end (inclusive).
 
 Notes follow below the tables.
 
