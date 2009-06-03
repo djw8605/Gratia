@@ -20,8 +20,7 @@ my $parser = XML::LibXML->new();
 $default_data_sources =
   [
    'https://myosg.grid.iu.edu/vosummary/xml?datasource=summary&summary_attrs_showmember_resource=on&summary_attrs_showfield_of_science=on&summary_attrs_showreporting_group=on&all_vos=on&active=on&active_value=1',
-   'https://myosg.grid.iu.edu/wizardsummary/xml?datasource=summary&summary_attrs_showdesc=on&summary_attrs_showservice=on&summary_attrs_showrsvstatus=on&summary_attrs_showgipstatus=on&summary_attrs_showfqdn=on&summary_attrs_showvomembership=on&summary_attrs_showvoownership=on&summary_attrs_showwlcg=on&summary_attrs_showenv=on&summary_attrs_showcontact=on&gip_status_attrs_showtestresults=on&gip_status_attrs_showfqdn=on&account_type=cumulative_hours&ce_account_type=gip_vo&se_account_type=vo_transfer_volume&start_type=7daysago&start_date=03%2F20%2F2009&end_type=now&end_date=03%2F27%2F2009&all_resources=on&gridtype=on&gridtype_1=on&service=on&service_1=on&active=on&active_value=1&disable_value=1',
-   'user-reports.dat'
+   'https://myosg.grid.iu.edu/wizardsummary/xml?datasource=summary&summary_attrs_showdesc=on&summary_attrs_showservice=on&summary_attrs_showrsvstatus=on&summary_attrs_showgipstatus=on&summary_attrs_showfqdn=on&summary_attrs_showvomembership=on&summary_attrs_showvoownership=on&summary_attrs_showwlcg=on&summary_attrs_showenv=on&summary_attrs_showcontact=on&gip_status_attrs_showtestresults=on&gip_status_attrs_showfqdn=on&account_type=cumulative_hours&ce_account_type=gip_vo&se_account_type=vo_transfer_volume&start_type=7daysago&start_date=03%2F20%2F2009&end_type=now&end_date=03%2F27%2F2009&all_resources=on&gridtype=on&gridtype_1=on&service=on&service_1=on&active=on&active_value=1&disable_value=1'
   ];
 
 sub new {
