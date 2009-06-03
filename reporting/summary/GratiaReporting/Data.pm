@@ -8,14 +8,21 @@ use FileHandle;
 
 use GratiaReporting::Person;
 
-use vars qw(@ISA @EXPORT @EXPORT_OK $vo_data $site_data $people_data @test_addresses);
+use vars qw(@ISA @EXPORT @EXPORT_OK $vo_data $site_data $people_data @test_addresses $default_data_sources);
 
 @ISA = qw(Exporter);
 
 @EXPORT = qw($vo_data $site_data $people_data @test_addresses);
-@EXPORT_OK = qw();
+@EXPORT_OK = qw($default_data_sources);
 
 my $parser = XML::LibXML->new();
+
+$default_data_sources =
+  [
+   'https://myosg.grid.iu.edu/vosummary/xml?datasource=summary&summary_attrs_showmember_resource=on&summary_attrs_showfield_of_science=on&summary_attrs_showreporting_group=on&all_vos=on&active=on&active_value=1',
+   'https://myosg.grid.iu.edu/wizardsummary/xml?datasource=summary&summary_attrs_showdesc=on&summary_attrs_showservice=on&summary_attrs_showrsvstatus=on&summary_attrs_showgipstatus=on&summary_attrs_showfqdn=on&summary_attrs_showvomembership=on&summary_attrs_showvoownership=on&summary_attrs_showwlcg=on&summary_attrs_showenv=on&summary_attrs_showcontact=on&gip_status_attrs_showtestresults=on&gip_status_attrs_showfqdn=on&account_type=cumulative_hours&ce_account_type=gip_vo&se_account_type=vo_transfer_volume&start_type=7daysago&start_date=03%2F20%2F2009&end_type=now&end_date=03%2F27%2F2009&all_resources=on&gridtype=on&gridtype_1=on&service=on&service_1=on&active=on&active_value=1&disable_value=1',
+   'user-reports.dat'
+  ];
 
 sub new {
   my $class = shift;
@@ -50,11 +57,22 @@ sub initialize {
       "--no-check-certificate", # Necessary because of use of http certificiate
       "--ca-directory=/etc/grid-security/certificates"
     ];
+
+  # Set up data sources
+  $self->{options}->{data_source} = [ ':default' ]
+    unless ($self->{options}->{data_source});
+
+  $self->{data_sources} = [];
+
+  foreach my $data_source (@{$self->{options}->{data_source}}) {
+    push @{$self->{data_sources}}, ($data_source eq ':default')?@$default_data_sources:$data_source;
+  }
+
 }
 
 sub process_data {
   my $self = shift;
-  foreach my $data_source (@{$self->{options}->{data_source}}) {
+  foreach my $data_source (@{$self->{data_sources}}) {
     if ($self->{options}->{verbose}) {
       print STDERR "Reading from $data_source\n";
     }
@@ -179,9 +197,15 @@ sub processXmlVOSummary {
   my ($self, $root) = @_;
   foreach my $vo ($root->findnodes('VO')) { # Each vo
     my $vo_name = $vo->findvalue('Name');
+    my $long_name = $vo->findvalue('LongName');
     $self->verbosePrint("DEBUG: found VO $vo_name",
-                        $vo->findvalue('LongName')?(" (", $vo->findvalue('LongName'), ")"):(),
+                        $long_name?(" (", $long_name, ")"):(),
                         "\n");
+    # Attempt to merge sub-VOs (stop-gap handling)
+    if ($long_name =~ m&^/?([^/]+)/& or $vo_name =~ m&^(fermilab)&i) {
+      print STDERR "INFO: Storing info for $vo_name as parent VO $1\n";
+      $vo_name = $1;
+    }
     my $this_vo;
     if (exists $vo_data->{$vo_name}) {
       print STDERR "WARNING: info for $vo_name has already been seen: merging.\n";
