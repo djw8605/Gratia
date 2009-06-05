@@ -29,7 +29,21 @@ done
 
 where=`dirname $0`
 
-. /fnal/ups/etc/setups.sh
+#--- find a mysql client ----
+if [ "$(type mysql >/dev/null 2>&1;echo $?)" != 0 ];then
+  setups=/fnal/ups/etc/setups.sh
+  if [ ! -f $setups ];then
+    logerr  "UPS setups.sh ($setups) script not available"
+    exit 1
+  fi
+  source $setups
+  setup mysql 2>/dev/null
+fi
+if [ "$(type mysql >/dev/null 2>&1;echo $?)" != "0" ];then
+  logerr "MySql client not available.  This script assumes it is
+available via Fermi UPS in $setups or an rpm install"
+  exit 1
+fi
 cd $HOME/root.mysql
 . ../set_root_opt
 

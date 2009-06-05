@@ -88,21 +88,20 @@ DBNODE=""
 PORT=""
 
 #--- source ups for setup script for mysql ----
-setups=/fnal/ups/etc/setups.sh
-if [ ! -f $setups ];then
-  logerr  "UPS setups.sh ($setups) script not available"
-  exit 1
+if [ "$(type mysql >/dev/null 2>&1;echo $?)" != 0 ];then
+  setups=/fnal/ups/etc/setups.sh
+  if [ ! -f $setups ];then
+    logerr  "UPS setups.sh ($setups) script not available"
+    exit 1
+  fi
+  source $setups
+  setup mysql 2>/dev/null
 fi
-source $setups
-
-#--- setup mysql ----
-setup mysql 2>/dev/null
-if [ "$(type mysql 1>/dev/null 2>&1;echo $?)" != "0" ];then
+if [ "$(type mysql >/dev/null 2>&1;echo $?)" != "0" ];then
   logerr "MySql client not available.  This script assumes it is
-available via Fermi UPS in $setups"
+available via Fermi UPS in $setups or an rpm install"
   exit 1
 fi
-
 
 #--- validate any command line arguments
 while test "x$1" != "x"; do
