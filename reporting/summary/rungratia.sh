@@ -28,6 +28,9 @@ while test "x$1" != "x"; do
 done
 
 where=`dirname $0`
+#Use pushd/popd rather than a simple 'cd', just in case
+#`dirname $0 is 'dot'/current directory
+pushd $where > /dev/null
 
 #--- find a mysql client ----
 if [ "$(type mysql >/dev/null 2>&1;echo $?)" != 0 ];then
@@ -47,7 +50,7 @@ fi
 cd $HOME/root.mysql
 . ../set_root_opt
 
-cd $where
+popd > /dev/null
 
 WORK_DIR=/var/tmp/workdir.${RANDOM}
 mkdir -p $WORK_DIR
