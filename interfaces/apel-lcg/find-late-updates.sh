@@ -10,6 +10,13 @@
 #
 # See the usage function for more details.
 #############################################################################
+# Changes:
+#   6/10/09 (John Weigand)
+#     Needed to make a change on the selection from the log files of
+#     the update DML due to the updating of OSG_CN_DATA. 
+#     Previous was 'INSERT INTO'.. now 'INSERT INTO OSG_DATA'.
+#     This was to keep the deltas at the site level.
+#############################################################################
 function logerr {
   echo "ERROR: $1"
   if [ -d "$tmpdir" ];then
@@ -184,7 +191,7 @@ do
   days=$((days+1))
   day=$(printf "%02d" $days)
   tmpfile=$tmpdir/$curr_period-$day
-  egrep "INSERT INTO" $prev_period.log |sed -e's/INSERT INTO OSG_DATA VALUES (//'  |grep $curr_period-$day|cut -d"," -f1,2,3,4,5,6,7,8,9,12 |sort -u >$tmpfile
+  egrep "INSERT INTO OSG_DATA" $prev_period.log |sed -e's/INSERT INTO OSG_DATA VALUES (//'  |grep $curr_period-$day|cut -d"," -f1,2,3,4,5,6,7,8,9,12 |sort -u >$tmpfile
   if [ ! -s "$tmpfile" ];then
     rm -f $tmpfile
   fi
