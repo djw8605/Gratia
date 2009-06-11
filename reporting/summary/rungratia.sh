@@ -30,7 +30,8 @@ done
 where=`dirname $0`
 #Use pushd/popd rather than a simple 'cd', just in case
 #`dirname $0 is 'dot'/current directory
-pushd $where > /dev/null
+cd $where
+pushd . > /dev/null
 
 #--- find a mysql client ----
 if [ "$(type mysql >/dev/null 2>&1;echo $?)" != 0 ];then
