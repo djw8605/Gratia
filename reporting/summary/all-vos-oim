@@ -204,8 +204,6 @@ foreach my $vo (sort keys %$master_vo_list) {
         print "INFO: OIM contact $people_data->{$person}->{full_name} matches data-file email $person for VO $vo.\n"
           if $options->{verbose};
       } else {
-        print "OIM_WARNING: OIM contact $people_data->{$person}->{full_name} ",
-          "(email address $person) not found in local contact list for VO $vo.\n";
         # Add person to send list.
         $email_hash->{sprintf("%s <%s>",
                               $people_data->{$person}->{full_name},
