@@ -19,8 +19,8 @@ my $parser = XML::LibXML->new();
 
 $default_data_sources =
   [
-   'https://myosg.grid.iu.edu/vosummary/xml?datasource=summary&summary_attrs_showmember_resource=on&summary_attrs_showfield_of_science=on&summary_attrs_showreporting_group=on&all_vos=on&active=on&active_value=1',
-   'https://myosg.grid.iu.edu/wizardsummary/xml?datasource=summary&summary_attrs_showdesc=on&summary_attrs_showservice=on&summary_attrs_showrsvstatus=on&summary_attrs_showgipstatus=on&summary_attrs_showfqdn=on&summary_attrs_showvomembership=on&summary_attrs_showvoownership=on&summary_attrs_showwlcg=on&summary_attrs_showenv=on&summary_attrs_showcontact=on&gip_status_attrs_showtestresults=on&gip_status_attrs_showfqdn=on&account_type=cumulative_hours&ce_account_type=gip_vo&se_account_type=vo_transfer_volume&start_type=7daysago&start_date=03%2F20%2F2009&end_type=now&end_date=03%2F27%2F2009&all_resources=on&gridtype=on&gridtype_1=on&service=on&service_1=on&active=on&active_value=1&disable_value=1'
+   'https://myosg.grid.iu.edu/vosummary/xml?datasource=summary&summary_attrs_showdesc=on&summary_attrs_showmember_resource=on&summary_attrs_showfield_of_science=on&summary_attrs_showreporting_group=on&summary_attrs_showparent_vo=on&all_vos=on&active=on&active_value=1',
+   'https://myosg.grid.iu.edu/wizardsummary/xml?datasource=summary&summary_attrs_showdesc=on&summary_attrs_showservice=on&summary_attrs_showrsvstatus=on&summary_attrs_showgipstatus=on&summary_attrs_showfqdn=on&summary_attrs_showvomembership=on&summary_attrs_showvoownership=on&summary_attrs_showwlcg=on&summary_attrs_showenv=on&summary_attrs_showcontact=on&gip_status_attrs_showtestresults=on&gip_status_attrs_showfqdn=on&account_type=cumulative_hours&ce_account_type=gip_vo&se_account_type=vo_transfer_volume&all_resources=on&gridtype=on&gridtype_1=on&service=on&service_1=on&active=on&active_value=1&disable_value=1'
   ];
 
 sub new {
@@ -200,17 +200,21 @@ sub processXmlVOSummary {
     $self->verbosePrint("DEBUG: found VO $vo_name",
                         $long_name?(" (", $long_name, ")"):(),
                         "\n");
-    # Attempt to merge sub-VOs (stop-gap handling)
-    if ($long_name =~ m&^/?([^/]+)/& or $vo_name =~ m&^(fermilab)&i) {
-      print "INFO: Storing info for $vo_name as parent VO $1\n";
+    my $parent_vo = $vo->findvalue('ParentVO/Name');
+    if ($parent_vo) {
+      if ($parent_vo eq $vo_name) {
+        print "WARNING: VO $vo_name is listed as its own parent!\n";
+      } else {
+        print "INFO: Storing info for $vo_name ($long_name) as parent VO $parent_vo\n";
+        $vo_name = $parent_vo;
+      }
+    } elsif ($long_name =~ m&^/?([^/]+)/& or $vo_name =~ m&^(fermilab).&i) {
+      # Attempt to merge sub-VOs if parent VO info is missing.
+      print "INFO: Deduced parent VO of $vo_name ($long_name) as $1\n";
       $vo_name = $1;
     }
     my $this_vo;
-    if (exists $vo_data->{$vo_name}) {
-      print "WARNING: info for $vo_name has already been seen: merging.\n";
-    } else {
-      $vo_data->{$vo_name} = {};
-    }
+    $vo_data->{$vo_name} = {} unless exists $vo_data->{$vo_name};
     $this_vo = $vo_data->{$vo_name};
     $this_vo->{alt_vos} = [] unless $this_vo->{alt_vos};
     push @{$this_vo->{alt_vos}}, $vo_name;
