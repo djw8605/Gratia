@@ -50,14 +50,17 @@
       <property name="Value" column="FileCount" />
     </component>
 
-     <property name="ServerDate" column="ServerDate" type="timestamp"/>
-     <property name="md5" column="md5v2"/>
-
     <component name="ProbeName" class="StringElement" insert="true">
       <property name="Value" column="ProbeName" />
     </component>
 
     <many-to-one name="Probe" class="Probe" column="probeid"/>
+
+   <join table="StorageElementRecord_Meta">
+      <key column="dbid"/>
+      <property name="ServerDate" column="ServerDate" type="timestamp"/>
+      <property name="md5" column="md5"/>
+   </join>
 
   </class>
 

@@ -70,9 +70,6 @@
       <property name="Value" column="BenchmarkValue" />
     </component>
 
-     <property name="ServerDate" column="ServerDate" type="timestamp"/>
-     <property name="md5" column="md5v2"/>
-
     <component name="ProbeName" class="StringElement" insert="true">
       <property name="Value" column="ProbeName" />
     </component>
@@ -86,6 +83,12 @@
     <component name="Grid" class="StringElement" insert="true"> 
       <property name="Value" column="Grid" /> 
     </component> 
+
+   <join table="Subcluster_Meta">
+      <key column="dbid"/>
+      <property name="ServerDate" column="ServerDate" type="timestamp"/>
+      <property name="md5" column="md5"/>
+   </join>
 
   </class>
 

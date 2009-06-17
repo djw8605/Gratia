@@ -72,8 +72,11 @@
       <property name="Value" column="Grid" /> 
     </component> 
 
-     <property name="ServerDate" column="ServerDate" type="timestamp"/>
-     <property name="md5" column="md5v2"/>
+   <join table="StorageElement_Meta">
+      <key column="dbid"/>
+      <property name="ServerDate" column="ServerDate" type="timestamp"/>
+      <property name="md5" column="md5"/>
+   </join>
 
   </class>
 

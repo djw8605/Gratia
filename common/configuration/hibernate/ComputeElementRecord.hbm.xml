@@ -38,14 +38,17 @@
       <property name="Value" column="WaitingJobs" />
     </component>
 
-     <property name="ServerDate" column="ServerDate" type="timestamp"/>
-     <property name="md5" column="md5v2"/>
-
     <component name="ProbeName" class="StringElement" insert="true">
       <property name="Value" column="ProbeName" />
     </component>
 
     <many-to-one name="Probe" class="Probe" column="probeid"/>
+
+   <join table="ComputeElementRecord_Meta">
+      <key column="dbid"/>
+      <property name="ServerDate" column="ServerDate" type="timestamp"/>
+      <property name="md5" column="md5"/>
+   </join>
 
   </class>
 
