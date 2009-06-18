@@ -242,16 +242,14 @@ public class DatabaseMaintenance {
       AddIndex("MetricRecord", false, "VoName", "VoName");
 
       // ComputeElement
-      //ensureUniqueMd5("ComputeElement");
-      AddIndex("ComputeElement", true, "md5v2", "md5v2");
+      ensureUniqueMd5("ComputeElement");
       AddIndex("ComputeElement", false, "Timestamp", "Timestamp");
       AddIndex("ComputeElement", false, "index03", "ProbeName");
       AddIndex("ComputeElement", false, "probeid", "probeid");
       AddIndex("ComputeElement", false, "Cluster", "Cluster");
 
       // StorageElement
-      //ensureUniqueMd5("StorageElement");
-      AddIndex("StorageElement", true, "md5v2", "md5v2");
+      ensureUniqueMd5("StorageElement");
       AddIndex("StorageElement", false, "Timestamp", "Timestamp");
       AddIndex("StorageElement", false, "index03", "ProbeName");
       AddIndex("StorageElement", false, "probeid", "probeid");
@@ -260,23 +258,20 @@ public class DatabaseMaintenance {
       AddIndex("StorageElement", false, "SE", "SE");
 
       // ComputeElementRecord
-      //ensureUniqueMd5("ComputeElementRecord");
-      AddIndex("ComputeElementRecord", true, "md5v2", "md5v2");
+      ensureUniqueMd5("ComputeElementRecord");
       AddIndex("ComputeElementRecord", false, "Timestamp", "Timestamp");
       AddIndex("ComputeElementRecord", false, "index03", "ProbeName");
       AddIndex("ComputeElementRecord", false, "UniqueID", "UniqueID");
       AddIndex("ComputeElementRecord", false, "probeid", "probeid");
 
       // StorageElementRecord
-      //ensureUniqueMd5("StorageElementRecord");
-      AddIndex("StorageElementRecord", true, "md5v2", "md5v2");
+      ensureUniqueMd5("StorageElementRecord");
       AddIndex("StorageElementRecord", false, "Timestamp", "Timestamp");
       AddIndex("StorageElementRecord", false, "index03", "ProbeName");
       AddIndex("StorageElementRecord", false, "UniqueID", "UniqueID");
       
       // Subcluster
-      //ensureUniqueMd5("Subcluster");
-      AddIndex("Subcluster", true, "md5v2", "md5v2");
+      ensureUniqueMd5("Subcluster");
       AddIndex("Subcluster", false, "Timestamp", "Timestamp");
       AddIndex("Subcluster", false, "index03", "ProbeName");
       AddIndex("Subcluster", false, "UniqueID", "UniqueID");
