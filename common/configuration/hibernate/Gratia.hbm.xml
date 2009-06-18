@@ -92,7 +92,7 @@
     <property name="State" column="state"/>
   </class>
   
-  <class name="Connection" table="Connection" node="Connection" lazy="false">
+  <class name="Connection" table="ConnectionTable" node="Connection" lazy="false">
     <id name="cid" column="cid" type="long">
       <generator class="native"/>
     </id>
