@@ -239,14 +239,16 @@
 #    table but are working toward an MOU agreement.  They will also be 
 #    under Brazil.
 #    
-#    
+#  06/18/2009    
+#  CIT_CMS_T2	3046 	previously 2398 (jump due to addition of 500 new cores)
+#
 ##################################################################
 #-- Site  ------- SPECint2000
 #
 #--- CMS Tier 1 ----    
 USCMS-FNAL-WC1-CE   1809  
 #--- CMS Tier 2 ----    
-CIT_CMS_T2          2398       
+CIT_CMS_T2          3046       
 GLOW                2408
 HEPGRID_UERJ        2117
 MIT_CMS             1872
