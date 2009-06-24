@@ -887,6 +887,9 @@ public class DatabaseMaintenance {
                   session.close();
                }
                Logging.debug("Exception detail: ", e);
+               if ((Exception) e.getCause() != null) {
+                   Logging.debug("Causing exception detail: ", (Exception) e.getCause());
+               }
                Logging.warning("Gratia database FAILED to upgrade from " + current +
                      " to " + (current + 1));
                result = -1;
@@ -1224,11 +1227,16 @@ public class DatabaseMaintenance {
                   "_Meta ADD UNIQUE INDEX `index12` (md5)");
             q.executeUpdate();
             // Clear up other tables.
-            q = session.createSQLQuery("DELETE X FROM " + table + "_Xml " +
-                  "X LEFT JOIN " + table + "_Meta M " +
-                  "ON (X.dbid = M.dbid) " +
-                  "WHERE M.dbid IS NULL");
-            q.executeUpdate();
+            if (1 == getCount("select count(*) from information_schema.tables where " +
+                              "table_schema = Database() and table_name = " +
+                              dq + table + "_Xml" + dq)) {
+                // Table is optional, but clean it up if we have it.
+                q = session.createSQLQuery("DELETE X FROM " + table + "_Xml " +
+                                           "X LEFT JOIN " + table + "_Meta M " +
+                                           "ON (X.dbid = M.dbid) " +
+                                           "WHERE M.dbid IS NULL");
+                q.executeUpdate();
+            }
             q = session.createSQLQuery("DELETE X FROM " + table +
                   " X LEFT JOIN " + table + "_Meta M " +
                   "ON (X.dbid = M.dbid) " +
