@@ -489,7 +489,7 @@ release: gratia
 	mkdir -p tarball/tomcat/v55/gratia; \
 	mkdir -p tarball/gratia/gratia_reporting; \
 	echo "$(gratia_release_data)" >tarball/tomcat/v55/gratia/gratia-release
-	cp $(configuration)/*gov $(configuration)/*properties $(staticScript)/*.py tarball/tomcat/v55/gratia; \
+	cp $(configuration)/*gov $(configuration)/log4j.properties $(staticScript)/*.py tarball/tomcat/v55/gratia; \
 	chmod 755 tarball/tomcat/v55/gratia/*.py
 	cp $(configuration)/*sql $(configuration)/*sh tarball/tomcat/v55/gratia; \
 	rm -rf tarball/tomcat/v55/gratia/.svn; \
@@ -499,7 +499,7 @@ release: gratia
 	perl -wapi.bak -e 's&CMD_(?:PREAMBLE|PREFIX|SUFFIX)&&g' tarball/tomcat/v55/gratia/post-install.sh; \
 	rm -f tarball/tomcat/v55/gratia/post-install.sh.bak; \
 	cp $(configuration)/truststore $(configuration)/keystore tarball/tomcat/v55/gratia; \
-	perl -wape 's&^(\s*gratia\.services\.version\s*=\s*).*$$&$$1$(gratia_services_version)&; s&^(\s*gratia\.reporting\.version\s*=\s*).*$$&$$1$(gratia_reporting_version)&; ' $(configuration)/service-configuration.properties > tarball/tomcat/v55/gratia/service-configuration.properties && chmod 600 tarball/tomcat/v55/gratia/service-configuration.properties; \
+	perl -wape 's&^(\s*gratia\.services\.version\s*=\s*).*$$&$$1$(gratia_services_version)&; s&^(\s*gratia\.reporting\.version\s*=\s*).*$$&$$1$(gratia_reporting_version)&; ' $(configuration)/service-configuration.properties > tarball/tomcat/v55/gratia/service-configuration.properties.new && chmod 600 tarball/tomcat/v55/gratia/service-configuration.properties.new; \
 	cp $(target)/gratia-reports.war tarball/gratia/gratia_reporting; \
 	cp $(target)/gratia-reporting.war tarball/gratia/gratia_reporting; \
 	tar $(tarowner) -cvf $(target)/gratia_reporting_$(gratia_reporting_version).tar -C tarball .; \
@@ -519,7 +519,7 @@ release: gratia
 	chmod 644 tarball/tomcat/v55/gratia/voms-servers;
 	cp $(security)/scripts/voms-server.sh   tarball/tomcat/v55/gratia; 
 	chmod 744 tarball/tomcat/v55/gratia/voms-server.sh;
-	cp $(configuration)/*gov $(configuration)/*properties  $(staticScript)/*.py tarball/tomcat/v55/gratia; \
+	cp $(configuration)/*gov $(configuration)/log4j.properties  $(staticScript)/*.py tarball/tomcat/v55/gratia; \
 	chmod 755 tarball/tomcat/v55/gratia/*.py
 	cp -R $(configuration)/hibernate tarball/tomcat/v55/gratia; \
 	rm -rf tarball/tomcat/v55/gratia/hibernate/.svn; \
@@ -527,7 +527,7 @@ release: gratia
 	perl -wapi.bak -e 's&CMD_(?:PREAMBLE|PREFIX|SUFFIX)&&g' tarball/tomcat/v55/gratia/post-install.sh; \
 	rm -f tarball/tomcat/v55/gratia/post-install.sh.bak; \
 	cp $(configuration)/truststore $(configuration)/keystore tarball/tomcat/v55/gratia; \
-	perl -wape 's&^(\s*gratia\.services\.version\s*=\s*).*$$&$$1$(gratia_services_version)&; s&^(\s*gratia\.reporting\.version\s*=\s*).*$$&$$1$(gratia_reporting_version)&; ' $(configuration)/service-configuration.properties > tarball/tomcat/v55/gratia/service-configuration.properties && chmod 600 tarball/tomcat/v55/gratia/service-configuration.properties; \
+	perl -wape 's&^(\s*gratia\.services\.version\s*=\s*).*$$&$$1$(gratia_services_version)&; s&^(\s*gratia\.reporting\.version\s*=\s*).*$$&$$1$(gratia_reporting_version)&; ' $(configuration)/service-configuration.properties > tarball/tomcat/v55/gratia/service-configuration.properties.new && chmod 600 tarball/tomcat/v55/gratia/service-configuration.properties.new; \
 	cp $(target)/gratia-services.war tarball/gratia/gratia_services; \
 	cp $(target)/gratia-servlets.war tarball/gratia/gratia_services; \
 	cp $(target)/gratia-soap.war tarball/gratia/gratia_services; \
