@@ -38,7 +38,7 @@ public class TidiedDailyRollingFileAppender
         return maxAgeDays;
     }
 
-    protected void subAppend(LoggingEvent event) {
+    protected synchronized void subAppend(LoggingEvent event) {
         super.subAppend(event);
         checkAndDeleteFiles();
     }
