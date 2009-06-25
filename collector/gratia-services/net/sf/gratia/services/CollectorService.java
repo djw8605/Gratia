@@ -223,6 +223,10 @@ public class CollectorService implements ServletContextListener {
             catch (Exception e) {
                 Logging.log(LogLevel.SEVERE, "CollectorService: error while checking indexes.");
                 Logging.log(LogLevel.SEVERE, "CollectorService: manual correction required");
+                Logging.debug("Exception detail: ", e);
+                if ((Exception) e.getCause() != null) {
+                    Logging.debug("Causing exception detail: ", (Exception) e.getCause());
+                }
                 return;
             }
 
