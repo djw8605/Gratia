@@ -42,6 +42,7 @@ public class ReplicationDataPump extends Thread {
     private boolean exitflag = false;
     private int nSentThisLoop = 0;
     private int nSentThisRun = 0;
+    private Boolean firstLoopThisRun = true;
     private String replicatePath = "";
 
     public ReplicationDataPump(int replicationId) {
@@ -90,7 +91,14 @@ public class ReplicationDataPump extends Thread {
             loop();
             nSentThisRun += nSentThisLoop;
             if (exitflag) break; // Skip wait
-            replicationLog(LogLevel.FINE,
+            LogLevel messageLevel;
+            if (firstLoopThisRun || nSentThisLoop > 0) {
+                messageLevel = LogLevel.FINE;
+            } else {
+                messageLevel = LogLevel.FINER;
+            }
+            if (firstLoopThisRun) firstLoopThisRun = false;
+            replicationLog(messageLevel,
                            " waiting for more records (" + nSentThisLoop +
                            " records sent, " + nSentThisRun + " this run)");
             //
@@ -267,7 +275,7 @@ public class ReplicationDataPump extends Thread {
                         replicationEntry.setrowcount(replicationEntry.getrowcount() + bundle_count);
                         session.flush();
                         session.getTransaction().commit();
-                        if (nSentThisLoop == 0) { // Message for first send
+                        if (firstLoopThisRun) { // Message for first send
                             replicationLog(LogLevel.FINE, " active");
                         }
                         nSentThisLoop += bundle_count;

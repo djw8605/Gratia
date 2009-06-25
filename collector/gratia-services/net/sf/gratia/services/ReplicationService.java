@@ -21,7 +21,6 @@ public class ReplicationService extends Thread {
         p = net.sf.gratia.util.Configuration.getProperties();
     }
     
-   @Override
     public void run() {
         Logging.info("ReplicationService Started");
         while (!stopRequested) {
@@ -39,7 +38,6 @@ public class ReplicationService extends Thread {
                 pump.exit();
             }
         }
-        Logging.info("ReplicationService: All pumps sent exit() directive");
         Logging.info("ReplicationService: Exiting");
     }
 
