@@ -19,9 +19,9 @@ public class Logging {
     static boolean console = false;
     static DateFormat format = new SimpleDateFormat("kk:mm:ss z");
     static DateFormat screenFormat = new SimpleDateFormat("MMM dd, yyyy kk:mm:ss z");
-    static String logDomain = "";
+    static String logDomain = "Unknown";
 
-    public static void initialize(String logDomain) {
+    public static synchronized void initialize(String logDomain) {
         if (initialized)
             return;
         screenFormat.setTimeZone(TimeZone.getDefault());
@@ -69,13 +69,13 @@ public class Logging {
                                 path + " to log4j-style " + newPath);
                     path = newPath;
                 } else {
-                   String newPath = System.getProperty("catalina.home");
-                   if (newPath == null) {
-                       newPath = ".";
-                   }
-                   newPath = newPath + (path.startsWith("/")?"":"/") + path;
-                   logToScreen("Use log4j-style path: "+newPath);
-                   path = newPath;
+                    String newPath = System.getProperty("catalina.home");
+                    if (newPath == null) {
+                        newPath = ".";
+                    }
+                    newPath = newPath + (path.startsWith("/")?"":"/") + path;
+                    logToScreen("Use log4j-style path: "+newPath);
+                    path = newPath;
                 }
 
                 Layout layout =
@@ -89,9 +89,9 @@ public class Logging {
                     ((TidiedDailyRollingFileAppender) appender).setDatePattern("'.'yyyy-MM-dd");
                     ((TidiedDailyRollingFileAppender) appender).setMaxAgeDays(numLogFiles);
                 } else {
-                   appender = new RollingFileAppender();
-                   ((RollingFileAppender) appender).setMaximumFileSize(limit);
-                   ((RollingFileAppender) appender).setMaxBackupIndex(numLogFiles);
+                    appender = new RollingFileAppender();
+                    ((RollingFileAppender) appender).setMaximumFileSize(limit);
+                    ((RollingFileAppender) appender).setMaxBackupIndex(numLogFiles);
                 }
                 appender.setFile(path);
                 appender.setAppend(true);
@@ -300,8 +300,7 @@ public class Logging {
         }
     }
     
-    private static void logToScreen(String message) {
-        if (logDomain == null) logDomain = "Unknown";
+    public static void logToScreen(String message) {
         System.out.println(screenFormat.format(new Date()) + " Logging (" + logDomain + "): " + message);
     }
 
