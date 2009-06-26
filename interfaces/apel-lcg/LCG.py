@@ -157,6 +157,9 @@
 #    on sites that are having problems.  Not perfect, but better.
 #    Added new parameter to lcg.conf (MissingDataDays) to set the threshold.
 #
+#    Also added a method (SetDatesWhereClause) to insure consistency in 
+#    the where clause for the time period across all the queries.
+#
 ########################################################################
 import traceback
 import exceptions
@@ -694,6 +697,18 @@ def CheckDB(host,port,user,pswd,db):
   Logit("Status: available")
       
 #-----------------------------------------------
+def SetDatesWhereClause():
+  """ Sets the beginning and ending dates in a sql 'where' clause format
+      to insure consistency on all queries. 
+      This is always 1 month.
+  """
+  begin,end = SetDateFilter(1)
+  strBegin =  DateToString(begin)
+  strEnd   =  DateToString(end)
+  whereClause = """ "%s" <= Main.EndTime and Main.EndTime < "%s" """ % (strBegin,strEnd)
+  return whereClause
+
+#-----------------------------------------------
 def SetQueryDates():
   """ Sets the beginning and ending dates for the basic Gratia query.
       This is always 1 month.
@@ -805,9 +820,7 @@ def GetQuery(site,normalizationFactor,vos,DNflag):
     if DNflag == "True":
       userDataClause="CommonName as UserDN, "
       userGroupClause=", UserDN "
-    begin,end = SetQueryDates()
-    strBegin =  DateToString(begin)
-    strEnd   =  DateToString(end)
+    periodWhereClause = SetDatesWhereClause()
     strNormalization = str(normalizationFactor)
     fmtMonth = "%m"
     fmtYear  = "%Y"
@@ -836,13 +849,14 @@ where
   and Site.siteid = Probe.siteid 
   and Probe.ProbeName  = Main.ProbeName 
   and Main.VOName in ( %s )
-  and "%s" <= Main.EndTime and Main.EndTime < "%s"
+  and %s
   and Main.ResourceType = "Batch"
 group by ExecutingSite, 
          LCGUserVO
          %s
-""" % (userDataClause,strNormalization,strNormalization,fmtMonth,fmtYear,fmtDate,fmtDate,strNormalization,site,vos,strBegin,strEnd,userGroupClause)
+""" % (userDataClause,strNormalization,strNormalization,fmtMonth,fmtYear,fmtDate,fmtDate,strNormalization,site,vos,periodWhereClause,userGroupClause)
     return query
+
 
 #-----------------------------------------------
 def GetQueryForDaysReported(site,vos):
@@ -853,9 +867,7 @@ def GetQueryForDaysReported(site,vos):
     """
     userDataClause=""
     userGroupClause=""
-    begin,end = SetQueryDates()
-    strBegin =  DateToString(begin)
-    strEnd   =  DateToString(end)
+    periodWhereClause = SetDatesWhereClause()
     dateFmt  =  "%Y-%m-%d"
     query="""\
 SELECT distinct(date_format(EndTime,"%s"))
@@ -868,9 +880,9 @@ where
   and Site.siteid = Probe.siteid 
   and Probe.ProbeName  = Main.ProbeName 
   and Main.VOName in ( %s )
-  and "%s" <= Main.EndTime and Main.EndTime < "%s"
+  and %s 
   and Main.ResourceType = "Batch"
-""" % (dateFmt,site,vos,strBegin,strEnd)
+""" % (dateFmt,site,vos,periodWhereClause)
     return query
 
 #-----------------------------------------------
@@ -878,9 +890,7 @@ def GetQueryAtlasUnknowns(site,normalizationFactor,vos):
     """ Creates the SQL query DML statement for the Gratia database 
         This is special to pick up those with an 'Unknown VO' for atlas.
     """
-    begin,end = SetQueryDates()
-    strBegin =  DateToString(begin)
-    strEnd   =  DateToString(end)
+    periodWhereClause = SetDatesWhereClause()
     strNormalization = str(normalizationFactor)
     fmtMonth = "%m"
     fmtYear  = "%Y"
@@ -912,12 +922,12 @@ where
   and Probe.probeid  = M.probeid 
   and M.dbid           = R.dbid
   and R.VOName = "Unknown"
-  and "%s" <= R.EndTime and R.EndTime < "%s"
+  and %s 
   and R.ResourceType = "Batch"
   and R.LocalUserid like "%s%s%s"  
 group by ExecutingSite, 
          LCGUserVO
-""" % (vos,strNormalization,strNormalization,fmtMonth,fmtYear,fmtDate,fmtDate,strNormalization,site,strBegin,strEnd,percent,vos,percent)
+""" % (vos,strNormalization,strNormalization,fmtMonth,fmtYear,fmtDate,fmtDate,strNormalization,site,periodWhereClause,percent,vos,percent)
     return query
 
 #-----------------------------------------------
@@ -952,9 +962,7 @@ def GetQuerySitesWithUnknownVOs(vos):
         This is a bandaid.
     """
     
-    begin,end = SetQueryDates()
-    strBegin =  DateToString(begin)
-    strEnd   =  DateToString(end)
+    periodWhereClause = SetDatesWhereClause()
     percent  = "%"
     query="""\
 SELECT STRAIGHT_JOIN
@@ -965,14 +973,14 @@ from
      Probe,
      Site
 where
-      "%s" <= R.EndTime and R.EndTime < "%s"
+      %s
   and R.ResourceType = "Batch"
   and R.VOName      = "Unknown"
   and R.LocalUserid like "%s%s%s"  
   and R.dbid        = M.dbid
   and M.probeid     = Probe.probeid
   and Probe.siteid  = Site.siteid
-""" % (strBegin,strEnd,percent,vos,percent)
+""" % (periodWhereClause,percent,vos,percent)
 
     return query
 
@@ -1390,12 +1398,10 @@ def CheckForUnreportedDays(reportableVOs,reportableSites):
   Logit("Starting checking for sites that are missing data for more than %d days" % (daysMissing))
   output = ""
   firstTime = 1
-  begin,end = SetQueryDates()
-  strBegin =  DateToString(begin)
-  strEnd   =  DateToString(end)
+  periodWhereClause = SetDatesWhereClause()
   endTimeFmt = "%Y-%m-%d"
   sites = reportableSites.keys()
-  query="""select distinct(date_format(EndTime,"%s")) from VOProbeSummary where "%s" <= EndTime and EndTime < "%s" """ % (endTimeFmt,strBegin,strEnd)
+  query="""select distinct(date_format(EndTime,"%s")) from VOProbeSummary Main where %s """ % (endTimeFmt,periodWhereClause)
   dateResults = RunGratiaQuery(query,gDatabaseParameters,False)
   Logit("Available dates: " + str(dateResults.split("\n"))) 
   #---------------------------
