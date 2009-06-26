@@ -835,7 +835,16 @@ public class CollectorService implements ServletContextListener {
                      session.saveOrUpdate( localcert );
                      session.flush();
                      tx.commit();
-                     Logging.info("checkCertificate has created an entry for: " + certs[i].toString());
+                     Logging.info("checkCertificate has created an entry for subject " +
+                                  certs[i].getSubjectX500Principal().getName() +
+                                  ", issuer: " +
+                                  certs[i].getIssuerX500Principal().getName() +
+                                  " valid from " +
+                                  certs[i].getNotBefore() +
+                                  " to " +
+                                  certs[i].getNotAfter()
+                                  );
+                     Logging.log(LogLevel.FINER,"certificate details: " + certs[i].toString());
                   } catch (java.security.cert.CertificateException e) {
                      Logging.warning("checkCertificate: Error when creating certificate object: ",e);
                   } catch (Exception e) {
