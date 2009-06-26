@@ -150,6 +150,13 @@
 #     - for SPRACE (which was inadvertantly omitted since April 2008), they
 #       are not included under USA, but under Brazil which is 1.4.    
 #
+# 6/26/2009 (John Weigand)
+#    Added method (CheckForUnreportedDays) to check to see if a site
+#    has more than 2 days unreported during the month and send a warning
+#    email so it can be investigated.  This provides a little better handle
+#    on sites that are having problems.  Not perfect, but better.
+#    Added new parameter to lcg.conf (MissingDataDays) to set the threshold.
+#
 ########################################################################
 import traceback
 import exceptions
@@ -168,6 +175,7 @@ gUserOutput        = ""
 gUnknowns          = ""
 gWarnings          = []
 gSitesWithData     = []
+gSitesMissingData  = {}
 gSitesWithNoData   = []
 gSitesWithUnknowns = []
 gKnownVOs = {}
@@ -178,6 +186,7 @@ gFilterParameters = {"GratiaCollector"      :None,
                      "VOFilterFile"         :None,
                      "DBConfFile"           :None,
                      "LogSqlDir"            :None,
+                     "MissingDataDays"      :None,
                      "NormalizationProbe"   :None,
                      "NormalizationPeriod"  :None,
                      "NormalizationDefault" :None,
@@ -288,15 +297,18 @@ def SendEmailNotificationFailure(error):
 def SendEmailNotificationSuccess():
   """ Sends a successful email notification to the EmailNotice attribute""" 
   global gVoOutput
+  global gSitesMissingData
   subject  = "Gratia transfer to APEL (WLCG) for %s - SUCCESS" % gDateFilter
 
   contents = ""
-  if len(gSitesWithNoData) == 0:
+  if len(gSitesMissingData) == 0:
     contents = contents + "All sites are reporting.\n"
   else:
-    contents = contents + "Sites with no data:\n%s\n" % gSitesWithNoData
-    gWarnings.append("Sites with no data:\n%s\n" % gSitesWithNoData)
-  contents = contents + "\nResults of all VO queries (VO):\n" + gVoOutput 
+    contents = contents + "Sites missing data for more than %s days:" % gFilterParameters["MissingDataDays"]
+    sites = gSitesMissingData.keys()
+    for site in sites:
+      contents = contents + "\n" + site + ": " + str(gSitesMissingData[site])
+  contents = contents + "\n\nResults of all VO queries (VO):\n" + gVoOutput 
   contents = contents + "\nSample VO query:\n" + gVoQuery
   contents = contents + "\nSample User query:\n" + gUserQuery
 
@@ -704,7 +716,6 @@ def SetDateFilter(interval):
         The ending date will always be the 1st of the next month to
         insure a complete set of monthly data is selected.
     """
-    Logit("Setting begin and end periods with interval of %s months" % interval)
     # --- set the begin date compensating for year change --
     t = time.strptime(gDateFilter, "%Y/%m")[0:3]
     interval = int(interval)
@@ -753,7 +764,7 @@ AS sub;""" % (strBegin,strEnd,normalizationProbe)
 #-----------------------------------------
 def SetNormalizationFactor(query,params):
     """ Sets the normalization factor applied to all data."""
-    results = RunGratiaQuery(query,params)
+    results = RunGratiaQuery(query,params,True)
     if results == "":
       Logit("WARNING: no data return from query")
       normalizationFactor = gFilterParameters["NormalizationDefault"]
@@ -833,6 +844,35 @@ group by ExecutingSite,
 """ % (userDataClause,strNormalization,strNormalization,fmtMonth,fmtYear,fmtDate,fmtDate,strNormalization,site,vos,strBegin,strEnd,userGroupClause)
     return query
 
+#-----------------------------------------------
+def GetQueryForDaysReported(site,vos):
+    """ Creates the SQL query DML statement for the Gratia database.
+        This is used to determine if there are any gaps in the
+        reporting for a site. It just identifies the days that
+        data is reported for the site and period (only works if its a month).
+    """
+    userDataClause=""
+    userGroupClause=""
+    begin,end = SetQueryDates()
+    strBegin =  DateToString(begin)
+    strEnd   =  DateToString(end)
+    dateFmt  =  "%Y-%m-%d"
+    query="""\
+SELECT distinct(date_format(EndTime,"%s"))
+from 
+     Site,
+     Probe,
+     VOProbeSummary Main 
+where 
+      Site.SiteName = "%s"
+  and Site.siteid = Probe.siteid 
+  and Probe.ProbeName  = Main.ProbeName 
+  and Main.VOName in ( %s )
+  and "%s" <= Main.EndTime and Main.EndTime < "%s"
+  and Main.ResourceType = "Batch"
+""" % (dateFmt,site,vos,strBegin,strEnd)
+    return query
+
 #-----------------------------------------------
 def GetQueryAtlasUnknowns(site,normalizationFactor,vos):
     """ Creates the SQL query DML statement for the Gratia database 
@@ -895,7 +935,7 @@ def FindSitesWithUnknownVOs(vos,gDatabaseParameters):
   gUnknownQuery = query
   Logit("Checking for Unknown VOs with '%s'-like account:" % vos)
   LogToFile(query)
-  results = RunGratiaQuery(query,gDatabaseParameters)
+  results = RunGratiaQuery(query,gDatabaseParameters,True)
   sites = results.split("\n")
   return sites
 
@@ -937,7 +977,7 @@ where
     return query
 
 #-----------------------------------------------
-def RunGratiaQuery(select,params):
+def RunGratiaQuery(select,params,LogResults=True):
   """ Runs the query of the Gratia database """
   Logit("Running query on %s of the %s database" % (params["GratiaHost"],params["GratiaDB"]))
   host = params["GratiaHost"]
@@ -949,10 +989,11 @@ def RunGratiaQuery(select,params):
   connectString = CreateConnectString(host,port,user,pswd,db)
   (status,output) = commands.getstatusoutput("echo '" + select + "' | " + connectString)
   results = EvaluateMySqlResults((status,output))
-  if len(results) == 0:
-    Logit("Results: empty results set")
-  else:
-    Logit("Results:\n%s" % results)
+  if LogResults:
+    if len(results) == 0:
+      Logit("Results: empty results set")
+    else:
+      Logit("Results:\n%s" % results)
   return results
 
 #-----------------------------------------------
@@ -1159,7 +1200,7 @@ def RetrieveVoData(reportableVOs,reportableSites,params):
       LogToFile(query)
       firstTime = 0
     Logit("Site: %s  Normalization Factor: %s" % (site,normalizationFactor)) 
-    results = RunGratiaQuery(query,params)
+    results = RunGratiaQuery(query,params,True)
     if len(results) == 0:
       results = ProcessEmptyResultsSet(site,reportableVOs,reportableSites)
     else:
@@ -1183,7 +1224,7 @@ def RetrieveUserData(reportableVOs,reportableSites,params):
       LogToFile(query)
       firstTime = 0
     Logit("Site: %s  Normalization Factor: %s" % (site,normalizationFactor)) 
-    results = RunGratiaQuery(query,params)
+    results = RunGratiaQuery(query,params,True)
 #    if len(results) == 0:
 #      results = ProcessEmptyResultsSet(site,reportableVOs,reportableSites)
 #    else:
@@ -1232,7 +1273,7 @@ def RetrieveUnknownVoData(reportableSites,params):
       LogToFile(unknown_query)
       firstTime = 0
     Logit("Site (Unknown atlas VO): %s  Normalization Factor: %s" % (site,normalizationFactor)) 
-    unknown_results = RunGratiaQuery(unknown_query,params)
+    unknown_results = RunGratiaQuery(unknown_query,params,True)
     if len(unknown_results) == 0:
       continue
     gSitesWithUnknowns.append(site)
@@ -1333,13 +1374,55 @@ def ProcessUserData(ReportableVOs,ReportableSites):
   gUserOutput = RetrieveUserData(ReportableVOs,ReportableSites,gDatabaseParameters)
 
   #--- create the updates for the APEL accounting database ----
-#  Logit("Sites with data: %s" % gSitesWithData)
-#  Logit("Sites with no data: %s" % gSitesWithNoData)
-#  if len(gSitesWithData) == 0:
-#    if len(gSitesWithUnknowns) == 0:
-#      raise Exception("No updates to apply")
   CreateLCGsqlUserUpdates(gUserOutput,GetFileName("user","sql"))
-#  CreateLCGsqlUnknownUpdates(gUnknowns,GetFileName(None,"sql"))
+
+#-----------------------------------------------
+def CheckForUnreportedDays(reportableVOs,reportableSites):
+  """ Checks to see if any sites have specific days where no data is
+      reported.  If a site is off-line for maintenance, upgrades, etc, this
+      could be valid.  There is no easy way to check for this however.
+      So the best we can do is check for this condition and then manually
+      validate by contacting the site admins.
+  """
+  global gSitesMissingData 
+  daysMissing = int(gFilterParameters["MissingDataDays"])
+  Logit("--------- Missing data check -------")
+  Logit("Starting checking for sites that are missing data for more than %d days" % (daysMissing))
+  output = ""
+  firstTime = 1
+  begin,end = SetQueryDates()
+  strBegin =  DateToString(begin)
+  strEnd   =  DateToString(end)
+  endTimeFmt = "%Y-%m-%d"
+  sites = reportableSites.keys()
+  query="""select distinct(date_format(EndTime,"%s")) from VOProbeSummary where "%s" <= EndTime and EndTime < "%s" """ % (endTimeFmt,strBegin,strEnd)
+  dateResults = RunGratiaQuery(query,gDatabaseParameters,False)
+  Logit("Available dates: " + str(dateResults.split("\n"))) 
+  #---------------------------
+  for site in sites:
+    allDates = dateResults.split("\n")
+    query = GetQueryForDaysReported(site,reportableVOs)
+    if firstTime:
+      Logit("Sample Query:")
+      LogToFile(query)
+      firstTime = 0
+    results = RunGratiaQuery(query,gDatabaseParameters,False)
+    reportedDates = results.split("\n")
+    for i in range (0,len(reportedDates)):  
+      allDates.remove(reportedDates[i])
+    if  len(allDates) > 0: 
+      Logit(site + ": " + str(allDates))
+    if  len(allDates) > daysMissing: 
+      gSitesMissingData[site] = allDates
+  #--- see if any need to be reported ---
+  if len(gSitesMissingData) > 0:
+    sites = gSitesMissingData.keys()
+    for site in sites:
+      Logwarn(site + " missing data for more than %d days: " % (daysMissing) + str(gSitesMissingData[site]))
+  else:
+      Logit("No sites had missing data for more than %d days" % (daysMissing))
+  Logit("Ended checking for sites that are missing data for more than %d days" % (daysMissing))
+  Logit("--------- Missing data check complete -------")
 
 #--- MAIN --------------------------------------------
 def main(argv=None):
@@ -1381,6 +1464,7 @@ def main(argv=None):
     Logit("APEL database table.... %s" % (gDatabaseParameters["LcgTable"]))
     Logit("APEL database table.... %s" % (gDatabaseParameters["LcgUserTable"]))
     Logit("Report unknown VOs..... %s" % gCheckUnknowns)
+    Logit("Missing days threshold. %s" % (gFilterParameters["MissingDataDays"]))
 
     #--- check db availability -------------
     CheckGratiaDBAvailability(gDatabaseParameters)
@@ -1398,6 +1482,7 @@ def main(argv=None):
     
     ProcessVoData(ReportableVOs,ReportableSites)
     ProcessUserData(ReportableVOs,ReportableSites)
+    CheckForUnreportedDays(ReportableVOs,ReportableSites)
 
     #--- apply the updates to the APEL accounting database ----
     if gInUpdateMode:
