@@ -10,18 +10,19 @@
 
   <h1 align="center">Security How To</h1>
   <h3>Introduction:</h3>
-  <p>Gratia &ldquo;understands&rdquo; 3 levels of security:</p>
-  <ol>
-    <li>No security at all.</li>
-    <li>SSL with 2 way authentication between clients (such as a probe) and gratia, 
-	or between two instances of gratia using Tomcat&rsquo;s authentication mechanism.</li>
-	<li>(Untested) Gratia running under Apache using Apache&rsquo;s authentication mechanism. 
-	Note that this is what a normal vdt install does.</li>
+  <p>Gratia supports 5 levels of security:</p>
+  <ol start="0">
+    <li>no security [Current default]</li>
+    <li>Track connections without SSL, check connection validity</li>
+    <li>Check only SSL certificate (both cert validity and validity within Collector)</li>
+    <li>Same as 2 + Track connection with SSL and check connection validity</li>
+    <li>Require SSL connection + same checks as 2</li>
+    <li>Same as 4 + Track connection with SSL and check connection validity</li>
   </ol>
   <p>All of these options (and variations) are controlled by flags in the service-configuration.properties file 
   found in the $CATALINA_HOME/gratia directory.
   <br>The first security level is straight-forward. Gratia does nothing.
-  <br>The second level involves gratia working with tomcat. Using this approach requires a number of prerequisites:
+  <br>The second level and up involve gratia working with tomcat. Using this approach requires a number of prerequisites:
   <ul>
    <li>The tomcat environment must have access to both the openssl binaries (which are located somewhere in 
 	the globus installation directory) as well as the java program &ldquo;keytool&rdquo;. 
