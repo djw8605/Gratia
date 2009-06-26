@@ -102,13 +102,14 @@ public class RMIHandlerServlet extends HttpServlet {
 
                 if (verified_certs != null && certs != null) {
                     boolean result = ( verified_certs == certs[0] );
-                    Logging.info("Verified certs found" + result);
-                } else if ( certs != null) {
-                    Logging.info("Certificate passed but no pre-verification found: "+req.getSession().getId());
-                }
+                    Logging.log("Verified certs found" + result);
+                }// else if ( certs != null) {
+                //    Logging.info("Certificate passed but no pre-verification found: "+req.getSession().getId());
+                //}
                 
                 if (certs == null) {
-                    Logging.info("Certificate checks requested but no certificate seen");
+                    // If we *require* a cert there will be a warning later.
+                    Logging.log("Certificate checks requested but no certificate seen");
                 } else {
                     Logging.debug("Certificate checks requested.");
                     for(int i=0; i< certs.length; ++i) {
