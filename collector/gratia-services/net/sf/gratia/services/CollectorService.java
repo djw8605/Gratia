@@ -116,6 +116,8 @@ public class CollectorService implements ServletContextListener {
         }
 
         fSecurityLevel = Integer.parseInt(p.getProperty("service.security.level", "0"));
+        Logging.info("Certificate security level: " + fSecurityLevel);
+
         if (fSecurityLevel >= 2) {
             try {
                 Logging.info("Initializing HTTPS Support");
@@ -756,8 +758,6 @@ public class CollectorService implements ServletContextListener {
    throws RemoteException, AccessException {
       final String command = "from Certificate where pem = ?";
 
-      Logging.info("checkCertificate security level: " + fSecurityLevel);
-
       String result = "";
       net.sf.gratia.storage.Origin from = new net.sf.gratia.storage.Origin(new java.util.Date());
 
@@ -766,10 +766,10 @@ public class CollectorService implements ServletContextListener {
             Logging.warning("checkCertificate: No certificate");
             return "";
          } else if (fSecurityLevel >= 2) {
-            Logging.info("checkCertificate: No certificate");
+            Logging.log("checkCertificate: No certificate");
          }
          if ( needConnectionTracking() ) {
-            // Connection Tracking of has been requested
+            // Connection Tracking has been requested
 
             Session session = null;
             session = HibernateWrapper.getSession();
