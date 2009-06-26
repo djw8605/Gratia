@@ -865,11 +865,11 @@ sub verify_remote_host_setting {
 
 sub maybe_print_config_info {
   my ($instance_name, $config_name, $collector_config) = @_;
-  my $printed_info = 0;
+  my $want_info = 0;
   if ($options{"print-config"}) {
     foreach my $item (sort keys %{$collector_config}) {
       next if $item eq "properties.attributes";
-      ++$printed_info;
+      $want_info = 1;
       print "config: ",
         $item,
           " = ",
@@ -877,7 +877,6 @@ sub maybe_print_config_info {
               "\n";
     }
     foreach my $item (sort keys %{$collector_config->{"properties.attributes"}}) {
-      ++$printed_info;
       print "property: ",
         $item,
           " = ",
@@ -886,9 +885,9 @@ sub maybe_print_config_info {
     }
   } else {
     if ($options{"obtain-config-item"} and scalar @{$options{"obtain-config-item"}}) {
+      $want_info = 1;
       foreach my $item (@{$options{"obtain-config-item"}}) {
         if (exists ($collector_config->{$item})) {
-          ++$printed_info;
           print "config: ",
             $item,
               " = ",
@@ -898,9 +897,9 @@ sub maybe_print_config_info {
       }
     }
     if ($options{"obtain-properties-item"} and scalar @{$options{"obtain-properties-item"}}) {
+      $want_info = 1;
       foreach my $item (@{$options{"obtain-properties-item"}}) {
         if (exists ($collector_config->{"properties.attributes"}->{$item})) {
-          ++$printed_info;
           print "property: ",
             $item,
               " = ",
@@ -910,7 +909,7 @@ sub maybe_print_config_info {
       }
     }
   }
-  return $printed_info;
+  return $want_info;
 }
 
 
