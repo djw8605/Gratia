@@ -532,6 +532,7 @@ release: gratia
 	cp $(target)/gratia-servlets.war tarball/gratia/gratia_services; \
 	cp $(target)/gratia-soap.war tarball/gratia/gratia_services; \
 	cp $(target)/gratia-administration.war tarball/gratia/gratia_services; \
+	cp $(target)/gratia-registration.war tarball/gratia/gratia_services; \
 	cp $(target)/cleanup_{server,common}_lib tarball/gratia/gratia_services; \
 	cp $(target)/{server,common}_lib.tar tarball/gratia/gratia_services; \
 	cp $(target)/common_classes.tar tarball/gratia/gratia_services; \
