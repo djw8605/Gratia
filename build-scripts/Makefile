@@ -233,30 +233,30 @@ $(target)/gratia-soap.war: services
 	#---------------------
 	# --- Target: soap ---
 	#---------------------
-	rm -rf $(war-dir)/$@
+	rm -rf $(war-dir)/$(name_from_war)
 	mkdir -p $(classes-dir) $(target) $(war-dir)
-	mkdir -p $(war-dir)/$@/wsdl
-	mkdir -p $(war-dir)/$@/META-INF
-	mkdir -p $(war-dir)/$@/WEB-INF/lib
-	mkdir -p $(war-dir)/$@/WEB-INF/classes/net/sf/gratia/services
-	mkdir -p $(war-dir)/$@/WEB-INF/classes/net/sf/gratia/soap
-	echo "$(gratia_release_data)" >$(war-dir)/$@/gratia-release
+	mkdir -p $(war-dir)/$(name_from_war)/wsdl
+	mkdir -p $(war-dir)/$(name_from_war)/META-INF
+	mkdir -p $(war-dir)/$(name_from_war)/WEB-INF/lib
+	mkdir -p $(war-dir)/$(name_from_war)/WEB-INF/classes/net/sf/gratia/services
+	mkdir -p $(war-dir)/$(name_from_war)/WEB-INF/classes/net/sf/gratia/soap
+	echo "$(gratia_release_data)" >$(war-dir)/$(name_from_war)/gratia-release
 	javac -d $(classes-dir) -cp $(classpath) -extdirs $(commonLib) $(soap)/net/sf/gratia/soap/*.java
-	cp $(classes-dir)/net/sf/gratia/soap/*.class $(war-dir)/$@/WEB-INF/classes/net/sf/gratia/soap
-	cp $(classes-dir)/net/sf/gratia/services/*Skel.class $(war-dir)/$@/WEB-INF/classes/net/sf/gratia/services
-	cp $(classes-dir)/net/sf/gratia/services/*Stub.class $(war-dir)/$@/WEB-INF/classes/net/sf/gratia/services
-	cp $(classes-dir)/net/sf/gratia/services/JMS*.class $(war-dir)/$@/WEB-INF/classes/net/sf/gratia/services
-	cp $(soap)/net/sf/gratia/soap/server-config.wsdd $(war-dir)/$@/WEB-INF/server-config.wsdd
-	cp $(soap)/net/sf/gratia/soap/web.xml $(war-dir)/$@/WEB-INF/web.xml
-	cp $(soap)/net/sf/gratia/soap/collector.wsdl $(war-dir)/$@/wsdl
-	cp $(commonLib)/axis*.jar $(war-dir)/$@/WEB-INF/lib
-	cp $(commonLib)/commons-discovery*.jar $(war-dir)/$@/WEB-INF/lib
-	cp $(commonLib)/jaxrpc*.jar $(war-dir)/$@/WEB-INF/lib
-	cp $(commonLib)/saaj*.jar $(war-dir)/$@/WEB-INF/lib
-	cp $(commonLib)/wsdl*.jar $(war-dir)/$@/WEB-INF/lib
+	cp $(classes-dir)/net/sf/gratia/soap/*.class $(war-dir)/$(name_from_war)/WEB-INF/classes/net/sf/gratia/soap
+	cp $(classes-dir)/net/sf/gratia/services/*Skel.class $(war-dir)/$(name_from_war)/WEB-INF/classes/net/sf/gratia/services
+	cp $(classes-dir)/net/sf/gratia/services/*Stub.class $(war-dir)/$(name_from_war)/WEB-INF/classes/net/sf/gratia/services
+	cp $(classes-dir)/net/sf/gratia/services/JMS*.class $(war-dir)/$(name_from_war)/WEB-INF/classes/net/sf/gratia/services
+	cp $(soap)/net/sf/gratia/soap/server-config.wsdd $(war-dir)/$(name_from_war)/WEB-INF/server-config.wsdd
+	cp $(soap)/net/sf/gratia/soap/web.xml $(war-dir)/$(name_from_war)/WEB-INF/web.xml
+	cp $(soap)/net/sf/gratia/soap/collector.wsdl $(war-dir)/$(name_from_war)/wsdl
+	cp $(commonLib)/axis*.jar $(war-dir)/$(name_from_war)/WEB-INF/lib
+	cp $(commonLib)/commons-discovery*.jar $(war-dir)/$(name_from_war)/WEB-INF/lib
+	cp $(commonLib)/jaxrpc*.jar $(war-dir)/$(name_from_war)/WEB-INF/lib
+	cp $(commonLib)/saaj*.jar $(war-dir)/$(name_from_war)/WEB-INF/lib
+	cp $(commonLib)/wsdl*.jar $(war-dir)/$(name_from_war)/WEB-INF/lib
 	$(copy_util_lib)
-	jar -cfM $(target)/gratia-soap.war -C $(war-dir)/$@ .
-	rm -rf $(war-dir)/$@
+	jar -cfM $(target)/gratia-soap.war -C $(war-dir)/$(name_from_war) .
+	rm -rf $(war-dir)/$(name_from_war)
 	# --- Target: soap COMPLETED at $(shell date) ---
 
 #------------------------------------------------------------------
