@@ -92,7 +92,7 @@ public class TransferDetails extends Record {
       output.append(StringEscapeUtils.escapeXml(name));
       output.append("\">");
       output.append(StringEscapeUtils.escapeXml(value));
-      output.append("/urwg:Resource>");
+      output.append("</urwg:Resource>");
    }
    
    public StringElement getSiteName() {
