@@ -160,7 +160,18 @@
 #    Also added a method (SetDatesWhereClause) to insure consistency in 
 #    the where clause for the time period across all the queries.
 #
+# 7/7/2009 (John Weigand)
+#    Added new method (CheckForShutdownDays) called by CheckForUnreportedDays
+#    that will use a new class (Downtimes) to check MyOSG for days in 
+#    which there are planned shutdowns for a site.  This will eliminate
+#    sending a warning email for sites that have unreported days for this
+#    reason.  It should be noted that if the url/criteria used in the
+#    Downtime class to query MyOSG changes, this class will not be able 
+#    to detect it as different xml and may not detect planned shutdowns
+#    accurately.
+#
 ########################################################################
+import Downtimes
 import traceback
 import exceptions
 import time
@@ -173,6 +184,7 @@ import popen2
 import smtplib, rfc822  # for email notifications via smtp
 import commands, os, sys, time, string
 
+downtimes          = Downtimes.Downtimes()
 gVoOutput          = ""
 gUserOutput        = ""
 gUnknowns          = ""
@@ -221,6 +233,7 @@ gNormalization      = None
 gInUpdateMode       = False  
 gCheckUnknowns      = False
 gEmailNotificationSuppressed = False  #Command line arg to suppress email notice
+gMyOSG_available    = True  # flag indicating if there is a problem w/MyOSG
 
 
 # ----------------------------------------------------------
@@ -1393,18 +1406,22 @@ def CheckForUnreportedDays(reportableVOs,reportableSites):
       validate by contacting the site admins.
   """
   global gSitesMissingData 
+  global gMyOSG_available
   daysMissing = int(gFilterParameters["MissingDataDays"])
   Logit("--------- Missing data check -------")
   Logit("Starting checking for sites that are missing data for more than %d days" % (daysMissing))
   output = ""
   firstTime = 1
+
+  #-- using general query to see all dates reported for the period --
   periodWhereClause = SetDatesWhereClause()
   endTimeFmt = "%Y-%m-%d"
   sites = reportableSites.keys()
   query="""select distinct(date_format(EndTime,"%s")) from VOProbeSummary Main where %s """ % (endTimeFmt,periodWhereClause)
   dateResults = RunGratiaQuery(query,gDatabaseParameters,False)
   Logit("Available dates: " + str(dateResults.split("\n"))) 
-  #---------------------------
+
+  #-- now checking for each site ---
   for site in sites:
     allDates = dateResults.split("\n")
     query = GetQueryForDaysReported(site,reportableVOs)
@@ -1413,13 +1430,34 @@ def CheckForUnreportedDays(reportableVOs,reportableSites):
       LogToFile(query)
       firstTime = 0
     results = RunGratiaQuery(query,gDatabaseParameters,False)
-    reportedDates = results.split("\n")
+
+    #--- determine is any days are missing
+
+    reportedDates = []
+    if len(results) > 0:
+      reportedDates = results.split("\n")
     for i in range (0,len(reportedDates)):  
       allDates.remove(reportedDates[i])
     if  len(allDates) > 0: 
-      Logit(site + ": " + str(allDates))
-    if  len(allDates) > daysMissing: 
-      gSitesMissingData[site] = allDates
+      Logit(site + "  (missing days): " + str(allDates))
+
+      #--- see if dowmtime for those days was scheduled ---
+      if gMyOSG_available:
+        try:
+          shutdownDays = CheckForShutdownDays(site,allDates)
+          Logit(site + " (shutdown days): " + str(shutdownDays))
+          for i in range (0,len(shutdownDays)):  
+            allDates.remove(shutdownDays[i])
+        except Exception, e:
+          allDates.append("WARNING: Unable to determine planned shutdowns - MyOSG error (" + str(sys.exc_info()[1]) +")" )
+          gMyOSG_available = False   
+      else: 
+        allDates.append("WARNING: Unable to determine planned shutdowns - MyOSG error (" + str(sys.exc_info()[1]) +")" )
+
+      #--- see if we have any missing days now ----
+      if  len(allDates) > daysMissing: 
+        gSitesMissingData[site] = allDates
+
   #--- see if any need to be reported ---
   if len(gSitesMissingData) > 0:
     sites = gSitesMissingData.keys()
@@ -1427,8 +1465,22 @@ def CheckForUnreportedDays(reportableVOs,reportableSites):
       Logwarn(site + " missing data for more than %d days: " % (daysMissing) + str(gSitesMissingData[site]))
   else:
       Logit("No sites had missing data for more than %d days" % (daysMissing))
+
   Logit("Ended checking for sites that are missing data for more than %d days" % (daysMissing))
   Logit("--------- Missing data check complete -------")
+
+#-----------------------------------------
+def CheckForShutdownDays(site,missingDays):
+  """ Determines if a site had a scheduled shutdown for the days that
+      accounting data was unreported.
+  """
+  shutdownDates = []
+  for i in range (0,len(missingDays)):  
+    day = missingDays[i]
+    if downtimes.site_is_shutdown(site,day,"CE"):
+      shutdownDates.append(day)
+  return shutdownDates
+
 
 #--- MAIN --------------------------------------------
 def main(argv=None):
