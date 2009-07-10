@@ -34,21 +34,22 @@ CREATE PROCEDURE `TransferSimple`(StartMonth DATE,
 SQL SECURITY INVOKER
 READS SQL DATA
 BEGIN
-SELECT 
+SELECT `Date`, S.SiteName AS `Site Name`, `Probe Name`,
+`# Jobs`, `Data transferred (MiB)`
+FROM (SELECT
 DATE_FORMAT(StartTime, '%Y-%m') AS `Date`,
-S.SiteName as `Site Name`,
 T.ProbeName as `Probe Name`,
 SUM(T.Njobs) AS `# Jobs`,
 SUM(T.TransferSize * Multiplier) AS `Data Transferred (MiB)`
 FROM
 MasterTransferSummary T
-JOIN Probe P ON (T.ProbeName = P.probename)
-JOIN Site S ON (P.siteid = S.siteid)
 JOIN SizeUnits SU ON (T.StorageUnit = SU.Unit)
 WHERE StartTime >= DATE_FORMAT(IFNULL(StartMonth, '2006-01-01'), '%Y-%m-01')
   AND StartTime < DATE_FORMAT(IFNULL(EndMonth, NOW()) + INTERVAL 1 MONTH, '%Y-%m-01')
-GROUP BY `Date`, `Probe Name`, `Site Name`
-ORDER BY `Date` desc, `Probe Name`, `Site Name`;
+GROUP BY `Date`, `Probe Name`) X
+JOIN Probe P on (X.`Probe Name` = P.Probename)
+JOIN Site S on (P.siteid = S.siteid)
+ORDER BY `Date` desc, `Site Name`, `Probe Name`;
 END
 ||
 DELIMITER ;
