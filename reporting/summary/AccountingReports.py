@@ -2466,6 +2466,20 @@ select sum(Njobs),sum(WallDuration),sum(CpuUserDuration+CpuSystemDuration)/sum(W
 
     return RunQueryAndSplit(select)[0].split('\t');
     
+def GetNewUsers(begin,end):
+    schema = "gratia.";
+    select = """\
+select CommonName, FirstSubmission from 
+( select CommonName, min(EndTime) as FirstSubmission 
+  from """+schema+"""MasterSummaryData
+  where EndTime > '2005/01/01'
+  group by CommonName ) as subquery
+where FirstSubmission >= \"""" + DateToString(begin) + """\" and
+      FirstSubmission < \"""" + DateToString(end) + """\"
+order by CommonName
+"""
+    return RunQueryAndSplit(select);
+  
 def prettyInt(n):
     return str(n)
 
@@ -2922,6 +2936,38 @@ def SoftwareVersion(range_end = datetime.date.today(),
    msg = msg + conf.endlines[output] + "\n"
    msg = msg + conf.end[output] + "\n"
    return msg
+
+def NewUsers(range_end = datetime.date.today(),
+                range_begin = None,
+                output = "text",
+                header = True):
+   if not range_end:
+      if not range_begin:
+         range_end = datetime.date.today()
+      else:
+            range_end = range_begin + datetime.timedelta(days=+1)
+   if not range_begin:
+      range_begin = range_end + datetime.timedelta(days=-1)
+
+   timediff = range_end - range_begin
+
+   title = """\
+The following users's CN very first's job on on the OSG site finished 
+between %s - %s (midnight UTC - midnight UTC):
+"""
+   
+   newusers = GetNewUsers(range_begin,range_end)
+
+   if len(newusers) > 0:
+      print title % ( range_begin, range_end )
+      if (output == "csv"):
+         print "\"User\",\"End date of first job\""
+      for line in newusers:
+         (name,when) = line.split('\t')
+         if (output == "csv"):
+            print "\"%s\",%s" % (name,when)
+         else:
+            print name
 
 #
 #

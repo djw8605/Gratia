@@ -1,0 +1,22 @@
+#!/bin/env python
+ 
+import sys
+import AccountingReports
+
+from AccountingReports import FromCondor,UseArgs,gOutput,gBegin,CheckDB
+import sys
+
+def main(argv=None):
+    UseArgs(argv)
+
+    if not CheckDB() :
+        return 1
+
+    argOutput = AccountingReports.gOutput
+    AccountingReports.NewUsers(range_begin = AccountingReports.gBegin,range_end = AccountingReports.gEnd ,output=argOutput);
+
+if __name__ == "__main__":
+    sys.exit(main())
+
+
+
