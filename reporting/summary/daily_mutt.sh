@@ -69,11 +69,15 @@ function sendto {
     echo "For more information see:,$WEBLOC" > $csvfile
     echo >> $csvfile
     eval $1 --output=csv $when >>  $csvfile
-    mutt -F./muttrc -a $csvfile -s "$subject" $MAILTO < $txtfile
+
+    if [ `cat $txtfile | wc -l ` -ne 2 ] ; then
+       mutt -F./muttrc -a $csvfile -s "$subject" $MAILTO < $txtfile
+    fi
 }
 
 rm -f daily.check
 
+sendto ./newUsers $whenarg ${WORK_DIR}/report "New users on OSG ($when)"
 sendto ./daily $whenarg ${WORK_DIR}/report "$MAIL_MSG"
 sendto ./dailyFromSummary $whenarg ${WORK_DIR}/summary_report "$SUM_MAIL_MSG"
 sendto ./dailyStatus  $whenarg ${WORK_DIR}/status_report "$STATUS_MAIL_MSG"
