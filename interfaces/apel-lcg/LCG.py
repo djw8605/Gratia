@@ -170,6 +170,11 @@
 #    to detect it as different xml and may not detect planned shutdowns
 #    accurately.
 #
+# 7/29/2009 (John Weigand)
+#    Added method FindTierPath to find the correct org_Tier1/2 entries for
+#    the OSG data.  It was using a query based on Path but this has been
+#    changing to much.  Now using the Name which appears pretty stable.
+#
 ########################################################################
 import Downtimes
 import traceback
@@ -1030,7 +1035,10 @@ def RunLCGQuery(query,type,params):
   Logit("Running query on %s of the %s database" % (host,db))
   Logit("Query - type %s: %s" % (type,query))
 
-  connectString = CreateQueryConnectString(host,port,user,pswd,db,type)
+  if type == "data":
+    connectString = CreateConnectString(host,port,user,pswd,db)
+  else:
+    connectString = CreateQueryConnectString(host,port,user,pswd,db,type)
   (status,output) = commands.getstatusoutput("echo '" + query + "' | " + connectString)
   results = EvaluateMySqlResults((status,output))
   return results
@@ -1049,8 +1057,8 @@ def CreateXmlHtmlFiles(params):
   lcgtable = gDatabaseParameters["LcgTable"]
   queries =  {
     lcgtable : "select * from %s where Year=%s and Month=%s order by ExecutingSite,LCGUserVO ;" % (lcgtable,dates[0],dates[1]),
-    "org_Tier1" : 'select * from org_Tier1 where Path like "1.10%" or Path like "1.4%" order by Path' ,
-    "org_Tier2" : 'select * from org_Tier2 where Path like "1.32%" or Path like "1.4%" order by Path' ,
+    "org_Tier1" : 'select * from org_Tier1 ' + FindTierPath(params,"org_Tier1"),
+    "org_Tier2" : 'select * from org_Tier2 ' + FindTierPath(params,"org_Tier2"),
   } 
   tables = queries.keys() 
   for table in tables:
@@ -1081,6 +1089,32 @@ def CreateXmlHtmlFiles(params):
     SendXmlHtmlFiles(filename,gFilterParameters["GratiaCollector"])
   Logit("Retrieval of APEL database data complete")
   Logit("------")
+#-----------------------------------------------
+def FindTierPath(params,table):
+  """ The path in the org_Tier1/2 table keeps changing so we need to find it
+      using the top level name which does not appear to change that
+      frequently.
+  """
+  Logit("... finding path in table %s" % table)
+  type = "data"
+  if table == "org_Tier1":
+    query = 'select Path from org_Tier1 where Name in ("US-FNAL-CMS","US-T1-BNL")'
+  elif  table == "org_Tier2":
+    query = 'select Path from org_Tier2 where Name in ("USA","Brazil")'
+  else:
+    Logerr("System error: method(FindTierPath) does not support this table (%s)" % (table))
+  results = RunLCGQuery(query,type,params)
+  if len(results) == 0:
+    Logit("Results: None")
+  else:
+    LogToFile("Results:\n%s" % results)
+  whereClause = "where "
+  lines = results.split("\n")
+  for i in range (0,len(lines)):
+    if i > 0:
+      whereClause = whereClause + " or "
+    whereClause = whereClause + " Path like \"%s" % lines[i] + "%\""
+  return whereClause + " order by Path"
 
 #-----------------------------------------------
 def WriteFile(data,filename):
