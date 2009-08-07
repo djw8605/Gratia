@@ -45,7 +45,9 @@ public class UsageRecordLoader extends RecordLoader {
             for (Iterator i = eroot.elementIterator(); i.hasNext();) {
                 Element element = (Element) i.next();
                 if (element.getName().equals("JobUsageRecord") 
-                    || element.getName().equals("UsageRecord")) {
+                    || element.getName().equals("UsageRecord")
+                    || element.getName().equals("Usage")
+                    || element.getName().equals("UsageRecordType")) {
                     //The current element is a job usage record node.  Use it to populate a JobUsageRecord object
                     Record job = ReadRecord(element);
                     usageRecords.add(job);
