@@ -44,7 +44,8 @@ public class UsageRecordLoader extends RecordLoader {
             // which should contain one to many job usage record nodes so start a loop through its children
             for (Iterator i = eroot.elementIterator(); i.hasNext();) {
                 Element element = (Element) i.next();
-                if (element.getName().equals("JobUsageRecord")) {
+                if (element.getName().equals("JobUsageRecord") 
+                    || element.getName().equals("UsageRecord")) {
                     //The current element is a job usage record node.  Use it to populate a JobUsageRecord object
                     Record job = ReadRecord(element);
                     usageRecords.add(job);
