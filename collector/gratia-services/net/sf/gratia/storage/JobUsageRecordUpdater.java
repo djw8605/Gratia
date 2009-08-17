@@ -368,6 +368,7 @@ public abstract class JobUsageRecordUpdater implements RecordUpdater {
       private String getCNFromDN(String subjectName) {
          String[] subjectNameFields = subjectName.split("[,/]");
          String userName = null;
+         boolean prevCN = false;
          for (int i = 0; i < subjectNameFields.length; ++i) {
             String caseFieldValue = subjectNameFields[i].trim();
             String fieldValue = subjectNameFields[i].toLowerCase().trim();
@@ -377,6 +378,15 @@ public abstract class JobUsageRecordUpdater implements RecordUpdater {
                } else {
                   userName = userName + "/" + caseFieldValue;
                }
+               prevCN = true;
+            } else {
+               if (prevCN) {
+                  // Deal with a CN like CN=http/hepcms-0.umd.edu
+                  if (userName == null &&  subjectNameFields[i].length < 3 || subjectNameFields[i][2] != '=') {
+                      userName = userName + "/" + caseFieldValue;
+                  }
+               }
+               prevCN = false;
             }
          }
          if (userName != null) {
