@@ -365,6 +365,15 @@ public abstract class JobUsageRecordUpdater implements RecordUpdater {
          current.getUserIdentity().setCommonName(userName);
       }
 
+      static final java.util.regex.Pattern gCertFieldPat = java.util.regex.Pattern.compile("\\s*[a-zA-Z]+=");
+ 
+      private boolean isCertField(String text) {
+          // return subjectNameFields[i].length() < 3 || subjectNameFields[i].charAt(2) != '=');
+          java.util.regex.Matcher matcher = gCertFieldPat.matcher(text);
+          Utils.GratiaInfo("Checking "+text+" result= "+matcher.lookingAt());
+          return matcher.lookingAt();
+      }
+
       private String getCNFromDN(String subjectName) {
          String[] subjectNameFields = subjectName.split("[,/]");
          String userName = null;
@@ -380,13 +389,12 @@ public abstract class JobUsageRecordUpdater implements RecordUpdater {
                }
                prevCN = true;
             } else {
-               if (prevCN) {
-                  // Deal with a CN like CN=http/hepcms-0.umd.edu
-                  if (userName == null &&  subjectNameFields[i].length() < 3 || subjectNameFields[i].charAt(2) != '=') {
-                      userName = userName + "/" + caseFieldValue;
-                  }
+               // Deal with a CN like CN=http/hepcms-0.umd.edu
+               if (prevCN && userName != null && !isCertField(subjectNameFields[i])) {
+                   userName = userName + "/" + caseFieldValue;
+               } else {
+                   prevCN = false;
                }
-               prevCN = false;
             }
          }
          if (userName != null) {
