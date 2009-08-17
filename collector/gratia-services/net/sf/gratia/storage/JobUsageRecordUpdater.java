@@ -382,7 +382,7 @@ public abstract class JobUsageRecordUpdater implements RecordUpdater {
             } else {
                if (prevCN) {
                   // Deal with a CN like CN=http/hepcms-0.umd.edu
-                  if (userName == null &&  subjectNameFields[i].length < 3 || subjectNameFields[i][2] != '=') {
+                  if (userName == null &&  subjectNameFields[i].length() < 3 || subjectNameFields[i].charAt(2) != '=') {
                       userName = userName + "/" + caseFieldValue;
                   }
                }
