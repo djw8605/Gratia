@@ -203,7 +203,7 @@ void sharing(FILE *out, FILE *outcsv, TSQLServer *db, TDatime *begin, TDatime *e
    typedef map<string, OInfo> InnerMap_t;
    map<string, InnerMap_t > ownerShare;
    {
-      TString cmd = "wget -q -O - 'http://myosg.grid.iu.edu/wizardsummary/xml?datasource=summary&summary_attrs_showservice=on&summary_attrs_showfqdn=on&summary_attrs_showvoownership=on&account_type=cumulative_hours&ce_account_type=gip_vo&se_account_type=vo_transfer_volume&start_type=7daysago&all_resources=on&gridtype=on&gridtype_1=on'";
+      TString cmd = "wget -q -O - 'http://myosg.grid.iu.edu/wizardsummary/xml?datasource=summary&summary_attrs_showservice=on&summary_attrs_showfqdn=on&summary_attrs_showvoownership=on&account_type=cumulative_hours&ce_account_type=gip_vo&se_account_type=vo_transfer_volume&start_type=7daysago&all_resources=on&gridtype=on&gridtype_1=on&service=on&service_1=on'";
       FILE *f = gSystem->OpenPipe(cmd,"r");
       TString xmldoc;
       char x;
