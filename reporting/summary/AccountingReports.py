@@ -413,7 +413,7 @@ def NumberOfCpus():
         return (ncpu,benchtotal);
 
 def GetListOfSites(filter):
-        location = 'http://myosg.grid.iu.edu/wizardsummary/xml?datasource=summary&summary_attrs_showservice=on&account_type=cumulative_hours&ce_account_type=gip_vo&se_account_type=vo_transfer_volume&start_type=7daysago&all_resources=on&gridtype=on&gridtype_1=on'
+        location = 'http://myosg.grid.iu.edu/wizardsummary/xml?datasource=summary&summary_attrs_showservice=on&account_type=cumulative_hours&ce_account_type=gip_vo&se_account_type=vo_transfer_volume&start_type=7daysago&all_resources=on&gridtype=on&gridtype_1=on&service=on&service_1=on'
         html = urllib2.urlopen(location).read()
         
         excludedSites = [ 'Engagement_VOMS', 'OSG_VOMS' ]
@@ -2522,7 +2522,8 @@ def RangeSummup(range_end = datetime.date.today(),
            (name,lastreport) = data.split("\t")
            pingSites.append(name)
 
-    exceptionSites = ['BNL_ATLAS_1', 'BNL_ATLAS_2', 'USCMS-FNAL-WC1-CE2', 'USCMS-FNAL-WC1-CE3', 'USCMS-FNAL-WC1-CE4', 'BNL_LOCAL', 'BNL_OSG', 'BNL_PANDA', 'GLOW-CMS', 'UCSDT2-B']
+    exceptionSites = ['AGLT2_CE_2','BNL-LCG2','BNL_ATLAS_1', 'BNL_ATLAS_2','FNAL_GPGRID_2','USCMS-FNAL-XEN','USCMS-FNAL-WC1-CE2', 'USCMS-FNAL-WC1-CE3', 'USCMS-FNAL-WC1-CE4', 'BNL_LOCAL', 'BNL_OSG', 'BNL_PANDA', 'GLOW-CMS', 'UCSDT2-B', 'Purdue-Lear' ]
+    #exceptionSites = ['BNL_ATLAS_1', 'BNL_ATLAS_2', 'USCMS-FNAL-WC1-CE2', 'USCMS-FNAL-WC1-CE3', 'USCMS-FNAL-WC1-CE4', 'BNL_LOCAL', 'BNL_OSG', 'BNL_PANDA', 'GLOW-CMS', 'UCSDT2-B']
 
     allSites = [name for name in allSites if name not in exceptionSites]
     reportingSites = GetListOfReportingSites(range_begin,range_end);
@@ -2610,7 +2611,7 @@ def NonReportingSites(
     allSites = GetListOfOSGSites();
     regVOs = GetListOfRegisteredVO();
  
-    exceptionSites = ['BNL_ATLAS_1', 'BNL_ATLAS_2', 'USCMS-FNAL-WC1-CE2', 'USCMS-FNAL-WC1-CE3', 'USCMS-FNAL-WC1-CE4', 'BNL_LOCAL', 'BNL_OSG', 'BNL_PANDA', 'GLOW-CMS', 'UCSDT2-B', 'Purdue-Lear' ]
+    exceptionSites = ['AGLT2_CE_2','BNL-LCG2','BNL_ATLAS_1', 'BNL_ATLAS_2','FNAL_GPGRID_2','USCMS-FNAL-XEN','USCMS-FNAL-WC1-CE2', 'USCMS-FNAL-WC1-CE3', 'USCMS-FNAL-WC1-CE4', 'BNL_LOCAL', 'BNL_OSG', 'BNL_PANDA', 'GLOW-CMS', 'UCSDT2-B', 'Purdue-Lear' ]
 
     allSites = [name for name in allSites if name not in exceptionSites]
     reportingVOs = GetLastReportingVOs(when)
@@ -2844,7 +2845,8 @@ def SoftwareVersion(range_end = datetime.date.today(),
    lines = conf.GetData(range_begin,range_end)
    values  = {}
 
-   exceptionSites = ['BNL_ATLAS_2', 'USCMS-FNAL-WC1-CE2', 'USCMS-FNAL-WC1-CE3', 'USCMS-FNAL-WC1-CE4', 'Generic Site', 'BNL_LOCAL', 'BNL_OSG', 'BNL_PANDA', 'GLOW-CMS', 'UCSDT2-B']
+   exceptionSites = ['AGLT2_CE_2','BNL-LCG2','BNL_ATLAS_1', 'BNL_ATLAS_2','FNAL_GPGRID_2','USCMS-FNAL-XEN','USCMS-FNAL-WC1-CE2', 'USCMS-FNAL-WC1-CE3', 'USCMS-FNAL-WC1-CE4', 'BNL_LOCAL', 'BNL_OSG', 'BNL_PANDA', 'GLOW-CMS', 'UCSDT2-B', 'Purdue-Lear' ]
+   #exceptionSites = ['BNL_ATLAS_2', 'USCMS-FNAL-WC1-CE2', 'USCMS-FNAL-WC1-CE3', 'USCMS-FNAL-WC1-CE4', 'Generic Site', 'BNL_LOCAL', 'BNL_OSG', 'BNL_PANDA', 'GLOW-CMS', 'UCSDT2-B']
    sites = [name for name in GetListOfOSGSites()  if name not in exceptionSites]
    reportingSites = GetListOfReportingSites(range_begin,range_end);
 
