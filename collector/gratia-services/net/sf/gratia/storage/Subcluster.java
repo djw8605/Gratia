@@ -109,7 +109,7 @@ public class Subcluster extends Record
       if (Platform != null) Platform.asXml(output,"Platform");
       if (OS != null) OS.asXml(output,"OS");
       if (OSVersion != null) OSVersion.asXml(output,"OSVersion");
-      if (Timestamp != null) Timestamp.asXml(output,"Timestamp");
+      if (Timestamp != null && !formd5) Timestamp.asXml(output,"Timestamp");
       if (Cores != null) Cores.asXml(output,"Cores");
       if (Hosts != null) Hosts.asXml(output,"Hosts");
       if (Cpus != null) Cpus.asXml(output,"Cpus");
@@ -164,19 +164,15 @@ public class Subcluster extends Record
    {
        // setDuplicate will increase the count (nRecords,nConnections,nDuplicates) for the probe
        // and will return true if the duplicate needs to be recorded as a potential error.
-       if (b) {
-           this.Probe.setnDuplicates( this.Probe.getnDuplicates() + 1 );
-       } else {
-           this.Probe.setnRecords( this.Probe.getnRecords() + 1 );
-       }
-       return b;
+     this.Probe.setnConnections( Probe.getnConnections() + 1 );
+     return false;
    }
 
    public String computemd5(boolean optional) throws Exception
    {
       RecordIdentity temp = getRecordIdentity();
       setRecordIdentity(null);
-      String md5key = Utils.md5key(asXML());
+      String md5key = Utils.md5key(asXML(true, optional));
       setRecordIdentity(temp);
 
       return md5key;

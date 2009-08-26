@@ -157,6 +157,28 @@
      </property>
      <property name="VOid" column="VOid" type="int"/>
   </class>
+  
+  <class name="Cluster" table="Cluster" node="Cluster" lazy="false">
+    <id name="clusterid" column="clusterid" type="int">
+       <generator class="native"/>
+    </id>
+    <property name="name" type="string">
+      <column name="name" sql-type="varchar(255)" unique="true" />
+    </property>
+  </class>
+  
+  <class name="ClusterNameCorrection" table="ClusterNameCorrection" node="ClusterNameCorrection" lazy="true">
+    <id name="corrid" column="corrid" type="int">
+      <generator class="native"/>
+    </id>
+    <property name="ClusterName" type="string">
+      <column name="ClusterName" sql-type="varchar(255)"/>
+    </property>
+    <property name="clusterid" column="clusterid" type="int"/>
+    <property name="type" type="int">
+      <column name="type" not-null="true" default="1" />
+    </property>
+  </class>
        
   <class name="Site" table="Site" node="Site" lazy="false">
     <id name="siteid" column="siteid" type="int">

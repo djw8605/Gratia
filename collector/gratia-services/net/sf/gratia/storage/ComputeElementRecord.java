@@ -38,6 +38,7 @@ public class ComputeElementRecord extends Record
    private IntegerElement TotalJobs;
    private IntegerElement WaitingJobs;
 
+   private static boolean wantSummary = true;
 
    public ComputeElementRecord()
    {
@@ -203,5 +204,23 @@ public class ComputeElementRecord extends Record
   public void setWaitingJobs(IntegerElement waitingJobs) {
     WaitingJobs = waitingJobs;
   }
+
+  public static void setwantSummary(Boolean wantSummary) {
+    ComputeElementRecord.wantSummary = wantSummary;
+  }
+
+  public void executeTrigger(org.hibernate.Session session) throws Exception {
+    if (wantSummary) {
+       session.flush();
+       org.hibernate.Query q =
+             session.createSQLQuery("call add_service_to_hourly_summary(" +
+             getRecordId() + ")");
+       q.executeUpdate();
+       q =
+         session.createSQLQuery("call add_service_to_daily_summary(" +
+         getRecordId() + ")");
+       q.executeUpdate();
+    }
+ }
 
 }

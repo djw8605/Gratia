@@ -170,10 +170,13 @@ while [[ -n "$1" ]]; do
         ;;
       trigger)
         proc="${script_location}build-trigger.sql"
-        set -- "$@" summary-procedures
+        set -- "$@" summary-procedures service-summary-procedures
         ;;
       summary-procedures)
         proc="${script_location}summary-procedures.sql"
+        ;;
+      service-summary-procedures)
+        proc="${script_location}service-summary-procedures.sql"
         ;;
       ps)
 #        proc="${script_location}build-ps-node-summary-table.sql"

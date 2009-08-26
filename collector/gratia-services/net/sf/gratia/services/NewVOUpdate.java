@@ -17,19 +17,29 @@ public class NewVOUpdate {
    ResultSet resultSet = null;
 
    public void check(Record rec, Session session) throws Exception {
-      if (rec.getClass() != JobUsageRecord.class) {
-         return;
-      }
-      JobUsageRecord record = (JobUsageRecord) rec;
+     String voname;
+     String reportablevoname;
+     
+     if (rec instanceof JobUsageRecord) {
+       JobUsageRecord record = (JobUsageRecord) rec;
+       voname = record.getUserIdentity().getVOName();
+       reportablevoname = record.getUserIdentity().getReportableVOName();
+     } else if (rec instanceof ComputeElementRecord) {
+       ComputeElementRecord record = (ComputeElementRecord)rec;
+       voname = record.getVO().getValue();
+       reportablevoname = new String(voname);
+       Logging.debug("VO from ComputeElementRecord: " + voname);
+     } else {
+       return;
+     }
 
+      Logging.debug("Checking for new VO name.");
+      
       java.sql.Connection connection = session.connection();
 
       String dq = "\"";
       String comma = ",";
-
-      StringElement site = record.getSiteName();
-      String voname = record.getUserIdentity().getVOName();
-      String reportablevoname = record.getUserIdentity().getReportableVOName();
+      
       String comparisonString;
       if (reportablevoname == null) {
          comparisonString = "is null";

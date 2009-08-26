@@ -99,7 +99,7 @@ public class StorageElement extends Record
       if (SE != null) SE.asXml(output,"SE");
       if (Name != null) Name.asXml(output,"Name");
       if (SpaceType != null) SpaceType.asXml(output,"SpaceType");
-      if (Timestamp != null) Timestamp.asXml(output,"Timestamp");
+      if (Timestamp != null && !formd5) Timestamp.asXml(output,"Timestamp");
       if (Implementation != null) Implementation.asXml(output,"Implementation");
       if (Version != null) Version.asXml(output,"Version");
       if (Status != null) Status.asXml(output,"Status");
@@ -150,19 +150,15 @@ public class StorageElement extends Record
    {
        // setDuplicate will increase the count (nRecords,nConnections,nDuplicates) for the probe
        // and will return true if the duplicate needs to be recorded as a potential error.
-       if (b) {
-           this.Probe.setnDuplicates( this.Probe.getnDuplicates() + 1 );
-       } else {
-           this.Probe.setnRecords( this.Probe.getnRecords() + 1 );
-       }
-       return b;
+     this.Probe.setnConnections( Probe.getnConnections() + 1 );
+     return false;
    }
 
    public String computemd5(boolean optional) throws Exception
    {
       RecordIdentity temp = getRecordIdentity();
       setRecordIdentity(null);
-      String md5key = Utils.md5key(asXML());
+      String md5key = Utils.md5key(asXML(true, optional));
       setRecordIdentity(temp);
 
       return md5key;

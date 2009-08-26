@@ -44,10 +44,14 @@ public class ListenerThread extends Thread {
    Properties p;
    StatusUpdater statusUpdater = null;
    NewVOUpdate newVOUpdate = null;
+   NewClusterUpdate newClusterUpdate = null;
    ErrorRecorder errorRecorder = new ErrorRecorder();
    final Object lock;
    String historypath = "";
    Hashtable<String,Integer> fProbeDetails = new Hashtable<String,Integer>();
+   Hashtable<String,Integer> fSubcluster = new Hashtable<String,Integer>();
+   Hashtable<String,Integer> fComputeElement = new Hashtable<String,Integer>();
+   Hashtable<String,Integer> fStorageElement = new Hashtable<String,Integer>();
 
    //
    // various things used in the update loop
@@ -173,6 +177,7 @@ public class ListenerThread extends Thread {
 
       statusUpdater = new StatusUpdater();
       newVOUpdate = new NewVOUpdate();
+      newClusterUpdate = new NewClusterUpdate();
 
       for (int i = 0; i < files.length; i++) {
          global.put("listener", new java.util.Date());
@@ -578,6 +583,34 @@ public class ListenerThread extends Thread {
                   acceptRecord = false;
                }
             }
+            else if (current.getTableName().equals("Subcluster")) {
+              Integer pd_dbid = fSubcluster.get(current.getmd5());
+              if (pd_dbid != null) {
+                 // This is a duplicate.
+                 Logging.fine(ident + rId +
+                       ": " + "(fast) Ignore duplicate of Subcluster " +
+                       pd_dbid);
+                 acceptRecord = false;
+              }
+           } else if (current.getTableName().equals("ComputeElement")) {
+             Integer pd_dbid = fComputeElement.get(current.getmd5());
+             if (pd_dbid != null) {
+                // This is a duplicate.
+                Logging.fine(ident + rId +
+                      ": " + "(fast) Ignore duplicate of ComputeElement " +
+                      pd_dbid);
+                acceptRecord = false;
+             }             
+           } else if (current.getTableName().equals("StorageElement")) {
+             Integer pd_dbid = fStorageElement.get(current.getmd5());
+             if (pd_dbid != null) {
+                // This is a duplicate.
+                Logging.fine(ident + rId +
+                      ": " + "(fast) Ignore duplicate of StorageElement " +
+                      pd_dbid);
+                acceptRecord = false;
+             }             
+           }
 
 
             if (acceptRecord) {
@@ -598,6 +631,8 @@ public class ListenerThread extends Thread {
                   synchronized (lock) {
                      newVOUpdate.check(current, rec_session);
                   }
+                  // We don't synchronize newClusterUpdate because the check method itself is synchronized.
+                  newClusterUpdate.check(current, rec_session);
                   synchronized (lock) {
                      current.AttachContent(rec_session);
                      // Reduce contention on the attached objects (in particular Connection)
@@ -833,6 +868,21 @@ public class ListenerThread extends Thread {
                                  fProbeDetails.clear();
                               }
                               fProbeDetails.put(current.getmd5(), dup_dbid);
+                           } else if (current instanceof Subcluster) {
+                             if (fSubcluster.size() > 500) {
+                               fSubcluster.clear();
+                             }
+                             fSubcluster.put(current.getmd5(), dup_dbid);
+                           } else if (current instanceof ComputeElement) {
+                             if (fComputeElement.size() > 5000) {
+                               fComputeElement.clear();
+                             }
+                             fComputeElement.put(current.getmd5(), dup_dbid);
+                           } else if (current instanceof StorageElement) {
+                             if (fStorageElement.size() > 1000) {
+                               fStorageElement.clear();
+                             }
+                             fStorageElement.put(current.getmd5(), dup_dbid);
                            }
                            dupdbid = dup_dbid;
                         } finally {

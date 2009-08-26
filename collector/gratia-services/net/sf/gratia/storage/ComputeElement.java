@@ -46,8 +46,6 @@ public class ComputeElement extends Record
 
    private StringElement Status;
 
-
-
    public ComputeElement()
    {
       RecordIdentity = null; // new RecordIdentity();
@@ -103,7 +101,7 @@ public class ComputeElement extends Record
       if (CEName != null) CEName.asXml(output,"CEName");
       if (Cluster != null) Cluster.asXml(output,"Cluster");
       if (HostName != null) HostName.asXml(output,"HostName");
-      if (Timestamp != null) Timestamp.asXml(output,"Timestamp");
+      if (Timestamp != null && !formd5) Timestamp.asXml(output,"Timestamp");
       if (LrmsType != null) LrmsType.asXml(output,"LrmsType");
       if (LrmsVersion != null) LrmsVersion.asXml(output,"LrmsVersion");
       if (MaxRunningJobs != null) MaxRunningJobs.asXml(output,"MaxRunningJobs");
@@ -157,19 +155,15 @@ public class ComputeElement extends Record
    {
        // setDuplicate will increase the count (nRecords,nConnections,nDuplicates) for the probe
        // and will return true if the duplicate needs to be recorded as a potential error.
-       if (b) {
-           this.Probe.setnDuplicates( this.Probe.getnDuplicates() + 1 );
-       } else {
-           this.Probe.setnRecords( this.Probe.getnRecords() + 1 );
-       }
-       return b;
+       this.Probe.setnConnections( Probe.getnConnections() + 1 );
+       return false;
    }
 
    public String computemd5(boolean optional) throws Exception
    {
       RecordIdentity temp = getRecordIdentity();
       setRecordIdentity(null);
-      String md5key = Utils.md5key(asXML());
+      String md5key = Utils.md5key(asXML(true, optional));
       setRecordIdentity(temp);
 
       return md5key;
@@ -262,5 +256,5 @@ public class ComputeElement extends Record
   public void setStatus(StringElement status) {
     Status = status;
   }
-
+  
 }

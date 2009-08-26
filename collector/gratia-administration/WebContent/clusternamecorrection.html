@@ -1,0 +1,61 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>Gratia Accounting</title>
+<link href="stylesheet.css" type="text/css" rel="stylesheet">
+<link href="docstyle.css" type="text/css" rel="stylesheet">
+<style type="text/css">
+<!--
+.red {color: #FF0000}
+-->
+</style>
+<style type="text/css">
+<!--
+.black {color: #000000}
+-->
+</style>
+</head>
+<body>
+<h1 align="center" class="osgcolor">&nbsp;&nbsp;&nbsp;&nbsp;Gratia Administration&nbsp;&nbsp;&nbsp;&nbsp;</h1>
+<h3 align="center">Cluster Name Correction</h3>
+<form id="form1" name="form1" method="post" action="clusternamecorrection.html">
+  <table width="100%" border="1">
+    <tr>
+      <th width="33%" bgcolor="#999999" scope="col">Reported Cluster Name</th>
+      <th width="34%" bgcolor="#999999" scope="col">Actual Cluster Name</th>
+      <th width="33%" bgcolor="#999999" scope="col">Aggregation Type</th>
+    </tr>
+    <tr>
+      <td><input name="name:#index#" type="text" value="#name#" size="32" />      </td>
+      <td><label>
+        <select name="actualname:#index#" id="actualname:#index#">
+          <option value="#actualname#" #selected#>#actualname#</option>
+        </select>
+      </label> 
+        <input name="index:#index#" type="hidden" id="index:#index#" value="#index#" />
+        <input name="corrid:#index#" type="hidden" id="corrid:#index#" value="#corrid#" />
+      </td>
+      <td>Multi-host Aggregation policy
+        <label>
+          <select name="aggtype:#type#" id="aggtype:#type#">
+            <option value="1">Unspecified</option>
+            <option value="2">MAX</option>
+            <option value="3">SUM</option>
+          </select>
+        </label>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="4"><label></label>
+        <div align="center">
+          <label>
+          <input name="Apply" type="submit" id="Apply" value="Apply" />
+          </label>
+      </div></td>
+    </tr>
+  </table>
+</form>
+</body>
+</html>
+

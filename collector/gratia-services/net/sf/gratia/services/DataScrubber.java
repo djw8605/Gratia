@@ -14,7 +14,6 @@ import org.hibernate.Transaction;
 
 public class DataScrubber {
     // This class is used to delete expired data as set by the configuration items:
-    //
     // service.lifetime.JobUsageRecord = 3 months
     // service.lifetime.JobUsageRecord.RawXML = 1 month
     // service.lifetime.ComputeElement = 5 years
@@ -22,6 +21,8 @@ public class DataScrubber {
     // service.lifetime.ComputeElementRecord = 5 years
     // service.lifetime.StorageElementRecord = 5 years
     // service.lifetime.Subcluster = 5 years
+    // service.lifetime.MasterServiceSummary = UNLIMITED
+    // service.lifetime.MasterServiceSummaryHourly = 5 days
     // service.lifetime.MetricRecord = 3 months
     // service.lifetime.MetricRecord.RawXML = 1 month
     // service.lifetime.DupRecord.Duplicates = 1 month
@@ -461,6 +462,41 @@ public class DataScrubber {
 
       return nrecords;
   }
+
+    public long MasterServiceSummary() {
+      // Execute: delete from tableName set where EndTime < cutoffdate
+      String limit = eCalc.expirationDateAsSQLString(new Date(), "MasterServiceSummary");
+
+      long nrecords = 0;
+      if (limit.length() > 0) {
+          Logging.fine("DataScrubber: Remove all service summary records older than: " + limit);
+
+          String hqlDelete = "delete ServiceSummary where Timestamp.Value < :dateLimit";
+          nrecords = Execute(hqlDelete, limit, "Service summary records");
+
+          Logging.info("DataScrubber: deleted " + nrecords + " Service summary records.");
+      }
+
+      return nrecords;
+  }
+
+    public long MasterServiceSummaryHourly() {
+      // Execute: delete from tableName set where EndTime < cutoffdate
+      String limit = eCalc.expirationDateAsSQLString(new Date(), "MasterServiceSummaryHourly");
+
+      long nrecords = 0;
+      if (limit.length() > 0) {
+          Logging.fine("DataScrubber: Remove all hourly service summary records older than: " + limit);
+
+          String hqlDelete = "delete ServiceSummaryHourly where Timestamp.Value < :dateLimit";
+          nrecords = Execute(hqlDelete, limit, "Service summary hourly records");
+
+          Logging.info("DataScrubber: deleted " + nrecords + " Service summary hourly records.");
+      }
+
+      return nrecords;
+  }
+
     public long Trace() {
         return tableCleanupHelper("Trace", "traceId", "procName", "eventtime");
     }

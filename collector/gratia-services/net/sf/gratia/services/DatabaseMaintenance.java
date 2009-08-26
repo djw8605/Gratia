@@ -4,6 +4,7 @@ import net.sf.gratia.util.XP;
 import net.sf.gratia.util.Execute;
 import net.sf.gratia.util.Logging;
 import net.sf.gratia.util.LogLevel;
+import net.sf.gratia.storage.ComputeElementRecord;
 import net.sf.gratia.storage.JobUsageRecord;
 
 import java.io.File;
@@ -336,6 +337,18 @@ public class DatabaseMaintenance {
       AddIndex("MasterTransferSummary", true, "index10",
             "StartTime, VOcorrid, ProbeName, " +
             "CommonName, Protocol, RemoteSite, Status, IsNew, StorageUnit");
+      
+      // Indexes for MasterServiceSummary
+      AddIndex("MasterServiceSummary", false, "index01", "Timestamp");
+      AddIndex("MasterServiceSummary", false, "index02", "CEUniqueID");
+      AddIndex("MasterServiceSummary", false, "index03", "SiteName");
+      AddIndex("MasterServiceSummary", false, "index04", "VOcorrid");
+
+      // Indexes for MasterServiceSummaryHourly
+      AddIndex("MasterServiceSummaryHourly", false, "index01", "Timestamp");
+      AddIndex("MasterServiceSummaryHourly", false, "index02", "CEUniqueID");
+      AddIndex("MasterServiceSummaryHourly", false, "index03", "SiteName");
+      AddIndex("MasterServiceSummaryHourly", false, "index04", "VOcorrid");
 
       if (readIntegerDBProperty("gratia.database.wantNodeSummary") > 0) {
          // Indexes for NodeSummary
@@ -521,6 +534,7 @@ public class DatabaseMaintenance {
       UpdateDbProperty("gratia.database.wantSummaryTrigger",
             wantSummaryTrigger);
       JobUsageRecord.setwantSummary(wantSummaryTrigger == 1);
+      ComputeElementRecord.setwantSummary(wantSummaryTrigger == 1);
       UpdateDbProperty("gratia.database.wantStoredProcedures",
             p.getProperty("gratia.database.wantStoredProcedures", "1"));
       UpdateDbProperty("gratia.database.useJobUsageSiteName",

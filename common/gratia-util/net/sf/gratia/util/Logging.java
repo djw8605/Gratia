@@ -10,6 +10,7 @@ import org.apache.log4j.RollingFileAppender;
 import org.apache.log4j.PatternLayout;
 import org.apache.log4j.Layout;
 import org.apache.log4j.DailyRollingFileAppender;
+import org.apache.log4j.net.SyslogAppender;
 
 public class Logging {
     static Logger oldLogger;
@@ -108,6 +109,14 @@ public class Logging {
                 log4jLogger.setLevel(LogLevel.toLevel(level));
                 log4jLogger.addAppender(appender);
 
+                String syslog_host = p.getProperty("service.logging.syslog_host", "example.com"); 
+                if (!syslog_host.equals("example.com")) {
+                  SyslogAppender syslog_appender = new SyslogAppender();
+                  syslog_appender.setHeader(true);
+                  syslog_appender.setSyslogHost(syslog_host);
+                  log4jLogger.addAppender(syslog_appender);
+                }
+                
                 if (useConsole.equals("1")) {
                     ConsoleAppender consoleAppender =
                         new ConsoleAppender(layout);

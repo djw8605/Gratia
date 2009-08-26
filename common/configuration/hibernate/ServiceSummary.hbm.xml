@@ -1,0 +1,155 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+    
+<hibernate-mapping package= "net.sf.gratia.storage">
+
+<class name="ServiceSummary"
+       table="MasterServiceSummary"
+       node="ServiceSummary"
+       lazy="false">
+
+    <id name="RecordId"
+        column="dbid"
+        type="integer">
+        <generator class="native"/>
+    </id>
+
+   <component name="Timestamp" class="DateElement" insert="true">
+       <property name="Value" type="timestamp">
+           <column name="Timestamp" not-null="true" default="0" />
+       </property>
+   </component>
+   <component name="ProbeName" class="StringElement" insert="true">
+       <property name="Value">
+           <column name="ProbeName" not-null="true" default="''" />
+       </property>
+   </component>
+   <component name="CEUniqueID" class="StringElement" insert="true">
+       <property name="Value">
+           <column name="CEUniqueID" not-null="true" default="''" />
+       </property>
+   </component>
+   <component name="VOcorrid" class="IntegerElement" insert="true">
+       <property name="Value">
+           <column name="VOcorrid" not-null="true" default="0" />
+       </property>
+   </component>
+   <component name="CEName" class="StringElement" insert="true">
+       <property name="Value">
+           <column name="CEName" not-null="true" default="'Unknown'" />
+       </property>
+   </component>
+   <component name="HostName" class="StringElement" insert="true">
+       <property name="Value">
+           <column name="HostName" not-null="true" default="'Unknown'" />
+       </property>
+   </component>
+   <component name="Clustercorrid" class="StringElement" insert="true">
+       <property name="Value">
+           <column name="Clustercorrid" not-null="true" default="0" />
+       </property>
+   </component>
+   <component name="SiteName" class="StringElement" insert="true">
+       <property name="Value">
+           <column name="SiteName" not-null="true" default="'Unknown'" />
+       </property>
+   </component>
+   <component name="RecordCount" class="IntegerElement" insert="true">
+       <property name="Value">
+           <column name="RecordCount" not-null="true" default="1" />
+       </property>
+   </component>
+   <component name="RunningJobs" class="IntegerElement" insert="true">
+       <property name="Value">
+           <column name="RunningJobs" not-null="true" default="0" />
+       </property>
+   </component>
+   <component name="WaitingJobs" class="IntegerElement" insert="true">
+       <property name="Value">
+           <column name="WaitingJobs" not-null="true" default="0" />
+       </property>
+   </component>
+   <component name="TotalJobs" class="IntegerElement" insert="true">
+       <property name="Value">
+           <column name="TotalJobs" not-null="true" default="0" />
+       </property>
+   </component>
+</class>
+
+<class name="ServiceSummaryHourly"
+       table="MasterServiceSummaryHourly"
+       node="ServiceSummaryHourly"
+       lazy="false">
+
+    <id name="RecordId"
+        column="dbid"
+        type="integer">
+        <generator class="native"/>
+    </id>
+
+   <component name="Timestamp" class="DateElement" insert="true">
+       <property name="Value" type="timestamp">
+           <column name="Timestamp" not-null="true" default="0" />
+       </property>
+   </component>
+   <component name="ProbeName" class="StringElement" insert="true">
+       <property name="Value">
+           <column name="ProbeName" not-null="true" default="''" />
+       </property>
+   </component>
+   <component name="CEUniqueID" class="StringElement" insert="true">
+       <property name="Value">
+           <column name="CEUniqueID" not-null="true" default="''" />
+       </property>
+   </component>
+   <component name="VOcorrid" class="IntegerElement" insert="true">
+       <property name="Value">
+           <column name="VOcorrid" not-null="true" default="0" />
+       </property>
+   </component>
+   <component name="CEName" class="StringElement" insert="true">
+       <property name="Value">
+           <column name="CEName" not-null="true" default="'Unknown'" />
+       </property>
+   </component>
+   <component name="HostName" class="StringElement" insert="true">
+       <property name="Value">
+           <column name="HostName" not-null="true" default="'Unknown'" />
+       </property>
+   </component>
+   <component name="Clustercorrid" class="StringElement" insert="true">
+       <property name="Value">
+           <column name="Clustercorrid" not-null="true" default="0" />
+       </property>
+   </component>
+   <component name="SiteName" class="StringElement" insert="true">
+       <property name="Value">
+           <column name="SiteName" not-null="true" default="'Unknown'" />
+       </property>
+   </component>
+   <component name="RecordCount" class="IntegerElement" insert="true">
+       <property name="Value">
+           <column name="RecordCount" not-null="true" default="1" />
+       </property>
+   </component>
+   <component name="RunningJobs" class="IntegerElement" insert="true">
+       <property name="Value">
+           <column name="RunningJobs" not-null="true" default="0" />
+       </property>
+   </component>
+   <component name="WaitingJobs" class="IntegerElement" insert="true">
+       <property name="Value">
+           <column name="WaitingJobs" not-null="true" default="0" />
+       </property>
+   </component>
+   <component name="TotalJobs" class="IntegerElement" insert="true">
+       <property name="Value">
+           <column name="TotalJobs" not-null="true" default="0" />
+       </property>
+   </component>
+</class>
+
+</hibernate-mapping>

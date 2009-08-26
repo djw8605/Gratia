@@ -50,6 +50,7 @@ public class HibernateWrapper {
             //          hibernateConfiguration.addFile(new File(net.sf.gratia.util.Configuration.getGratiaHbmPath()));
             //          hibernateConfiguration.addFile(new File(net.sf.gratia.util.Configuration.getJobUsagePath()));
             //          hibernateConfiguration.addFile(new File(net.sf.gratia.util.Configuration.getMetricRecordPath()));
+            //          hibernateConfiguration.addFile(new File(net.sf.gratia.util.Configuration.getGlueCERecordPath()));
             //          hibernateConfiguration.addFile(new File(net.sf.gratia.util.Configuration.getJobUsageSummaryPath()));
             //          hibernateConfiguration.addFile(new File(net.sf.gratia.util.Configuration.getTracePath()));
             //          hibernateConfiguration.addFile(new File(net.sf.gratia.util.Configuration.getNodeSummaryPath()));

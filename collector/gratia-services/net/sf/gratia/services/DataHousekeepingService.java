@@ -31,7 +31,7 @@ public class DataHousekeepingService extends Thread {
     private DataScrubber housekeeper = new DataScrubber();
 
     public enum HousekeepingAction { 
-        ALL, JOBUSAGEXML, METRICXML, METRICRECORD, JOBUSAGERECORD, CE, SE, CERECORD, SERECORD, SUBCLUSTER, DUPRECORD, TRACE, ORIGIN, NONE;
+        ALL, JOBUSAGEXML, METRICXML, METRICRECORD, JOBUSAGERECORD, CE, SE, CERECORD, SERECORD, SUBCLUSTER, SERVICESUMMARY, SERVICESUMMARYHOURLY, DUPRECORD, TRACE, ORIGIN, NONE;
         private Lock l = new ReentrantLock();
         public Boolean tryLock() {
             return l.tryLock();
@@ -250,6 +250,28 @@ public class DataHousekeepingService extends Thread {
           if (action.tryLock()) {
               try {
                   housekeeper.IndividualSubclusterRecord();
+                  result = true; // OK
+              }
+              finally {
+                  action.unlock();
+              }
+          }
+          break;
+        case SERVICESUMMARY:
+          if (action.tryLock()) {
+              try {
+                  housekeeper.MasterServiceSummary();
+                  result = true; // OK
+              }
+              finally {
+                  action.unlock();
+              }
+          }
+          break;
+        case SERVICESUMMARYHOURLY:
+          if (action.tryLock()) {
+              try {
+                  housekeeper.MasterServiceSummaryHourly();
                   result = true; // OK
               }
               finally {
