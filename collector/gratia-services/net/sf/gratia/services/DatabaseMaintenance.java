@@ -31,10 +31,10 @@ public class DatabaseMaintenance {
 
    static final String dq = "\"";
    static final String comma = ",";
-   static final int gratiaDatabaseVersion = 73;
+   static final int gratiaDatabaseVersion = 74;
    static final int latestDBVersionRequiringStoredProcedureLoad = gratiaDatabaseVersion;
    static final int latestDBVersionRequiringSummaryViewLoad = 37;
-   static final int latestDBVersionRequiringSummaryTriggerLoad = 72;
+   static final int latestDBVersionRequiringSummaryTriggerLoad = 74;
    static final int latestDBVersionRequiringTableStatisticsRefresh = 38;
    static boolean dbUseJobUsageSiteName = false;
    java.sql.Connection connection;
@@ -1005,10 +1005,10 @@ public class DatabaseMaintenance {
                UpdateDbVersion(current);
             }
          }
-         if ((current >= 60) && (current < 73)) {
+         if ((current >= 60) && (current < 74)) {
             // Stored procedures, trigger procedures.
-            Logging.fine("Gratia database upgraded from " + current + " to 73");
-            current = 73;
+            Logging.fine("Gratia database upgraded from " + current + " to 74");
+            current = 74;
             UpdateDbVersion(current);
          }
 
