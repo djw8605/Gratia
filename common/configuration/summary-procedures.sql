@@ -61,7 +61,7 @@ AJUR:BEGIN
          IFNULL(EC.`Value`,
                 IF(EBS.`Value` = 'TRUE' OR EBS.`Value` = '1',
                    IFNULL(ES.`Value`, 0) + 128,
-                   IFNULL(J.`Status`, 0))),
+                   IF(JS.`Value` = 3, 3 << 16, IFNULL(J.`Status`, 0)))),
          J.Njobs,
          J.WallDuration,
          J.CpuUserDuration,
@@ -106,6 +106,9 @@ AJUR:BEGIN
        LEFT JOIN Resource EBS ON
         ((J.dbid = EBS.dbid) AND
          (EBS.description = 'ExitBySignal'))
+       LEFT JOIN Resource JS ON
+        ((J.dbid = JS.dbid) AND
+         (JS.description = 'JobStatus'))
   WHERE J.dbid = inputDbid;
 
   -- Basic data checks
