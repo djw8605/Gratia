@@ -175,6 +175,10 @@
 #    the OSG data.  It was using a query based on Path but this has been
 #    changing to much.  Now using the Name which appears pretty stable.
 #
+# 8/28/2009 (John Weigand)
+#    Changed the syntax on the lcg.conf attributes for the email
+#    notifications so that multiple 'To' addresses can be specified.
+#
 ########################################################################
 import Downtimes
 import traceback
@@ -196,7 +200,7 @@ gUnknowns          = ""
 gWarnings          = []
 gSitesWithData     = []
 gSitesMissingData  = {}
-gSitesWithNoData   = []
+gSitesWithNoData   = [] 
 gSitesWithUnknowns = []
 gKnownVOs = {}
 
@@ -210,7 +214,8 @@ gFilterParameters = {"GratiaCollector"      :None,
                      "NormalizationProbe"   :None,
                      "NormalizationPeriod"  :None,
                      "NormalizationDefault" :None,
-                     "EmailNotice"          :None,
+                     "FromEmail"            :None,
+                     "ToEmail"              :None,
                     }
 gDatabaseParameters = {"GratiaHost":None,
                        "GratiaPort":None,
@@ -308,7 +313,7 @@ README--Gratia-APEL-interface file as there is too much to explain here.
     if gDateFilter == None:
       raise Exception("--date is a required argument")
    
-#-----------------------------------------------
+#-----------------------------------------------
 def SendEmailNotificationFailure(error):
   """ Sends a failure  email notification to the EmailNotice attribute""" 
   subject  = "Gratia transfer to APEL (WLCG) for %s - FAILED" % gDateFilter
@@ -367,7 +372,7 @@ def SendEmailNotification(subject,message):
   if gEmailNotificationSuppressed:
     Logit("Email notification suppressed")
     return
-  Logit("Email notification being sent to %s" % gFilterParameters["EmailNotice"])
+  Logit("Email notification being sent to %s" % gFilterParameters["ToEmail"])
   Logit("\n" + message) 
 
   hostname = commands.getoutput("hostname -f")
@@ -405,10 +410,9 @@ Report unknown VOs..... %s
 %s
 	""" % (gProgramName,hostname,username,logfile,vosqlfile,vosqlrecs,votable,usersqlfile,usersqlrecs,usertable,gFilterParameters["SiteFilterFile"],gFilterParameters["VOFilterFile"],gCheckUnknowns,message)
 
-
   try:
-    fromaddr = gFilterParameters["EmailNotice"]
-    toaddrs  = gFilterParameters["EmailNotice"]
+    fromaddr = gFilterParameters["FromEmail"]
+    toaddrs  = string.split(gFilterParameters["ToEmail"],",")
     server   = smtplib.SMTP('localhost')
     server.set_debuglevel(0)
     message = """\
@@ -417,7 +421,7 @@ To: %s
 Subject: %s
 X-Mailer: Python smtplib
 %s
-""" % (fromaddr,toaddrs,subject,body)
+""" % (fromaddr,gFilterParameters["ToEmail"],subject,body)
     server.sendmail(fromaddr,toaddrs,message)
     server.quit()
   except smtplib.SMTPSenderRefused:
@@ -521,7 +525,6 @@ def GetDBConfigParams(filename):
 #----------------------------------------------
 def GetFilterConfigParams(filename):
   """ Retrieves and validates the filter configuration file parameters"""
-
   params = GetConfigParams(filename)
   for key in gFilterParameters.keys():
     if params.has_key(key):
