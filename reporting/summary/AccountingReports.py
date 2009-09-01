@@ -2779,10 +2779,10 @@ class SoftwareVersionConf:
 Only sites registered in OIM are listed.
 
 The recommended probe versions are those available in VDT 1.10.1n or higher and will be listed below as:
-Probe Library: v1.02.1
-Condor Probe:  v1.02.1
-PBS/LSF Probe: v1.02.1
-glexec Probe:  v1.02.1
+Probe Library: v1.04.4d
+Condor Probe:  v1.04.4d
+PBS/LSF Probe: v1.04.4d
+glexec Probe:  v1.04.4d
 
 Note that the '+' after the release number indicates that the same version of the probe has been available in the
 given release up to the current release.
@@ -2851,16 +2851,25 @@ def SoftwareVersion(range_end = datetime.date.today(),
    reportingSites = GetListOfReportingSites(range_begin,range_end);
 
    versions = {
-     "Gratia": { "1.65":"v0.27.[1-2]","1.67":"v0.27b","1.68":"v0.28","1.69":"v0.30","1.69.2.1":"v0.32.1","1.78":"v0.32.2","1.84":"v0.34.[1-8]","1.85":"v0.34.[9-10]","1.86":"v0.36","1.90":"v0.38.4","1.91":"v1.00.1","1.93":"v1.00.3","1.95":"v1.00.5","1.100":"v1.02.01"},
-     "condor_meter.pl" : { "$""Revision: 1.29 $  (tag unknown)":"v0.99", "$""Revision: 1.31 $  (tag unknown)":"v1.00.3+", "$""Revision: 1.32 $  (tag 1.02.1-5)":"v1.02.1" },
-     "pbs-lsf.py" : { "1.7 (tag )":"v1.00.1+", "1.8 (tag )":"v1.00.x", "1.9 (tag 1.02.1-5)":"v1.02.1"},
-     "glexec_meter.py": {"1.9 (tag )":"v1.00.[3-5]", "1.9 (tag v1-00-3a-1)":"v1.00.3a-1+", "1.10 (tag 1.02.1-5)":"v1.02.01"}
+     "Gratia": { "1.65":"v0.27.[1-2]","1.67":"v0.27b","1.68":"v0.28","1.69":"v0.30","1.69.2.1":"v0.32.1","1.78":"v0.32.2",
+                 "1.84":"v0.34.[1-8]","1.85":"v0.34.[9-10]","1.86":"v0.36","1.90":"v0.38.4","1.91":"v1.00.1",
+                 "1.93":"v1.00.3","1.95":"v1.00.5","1.100":"v1.02.01",
+                 "3002":"v1.04.1","3266":"v1.04.3","3316":"v1.04.4c"},
+     "condor_meter.pl" : { "$""Revision: 1.29 $  (tag unknown)":"v0.99", "$""Revision: 1.31 $  (tag unknown)":"v1.00.3+", 
+                           "$""Revision: 1.32 $  (tag 1.02.1-5)":"v1.02.1", "$""Revision: 3277 $  (tag 1.04.3c-1)":"v1.04.3",
+                           "$""Revision: 3277 $  (tag 1.04.4d-1)":"v1.04.4d" },
+     "pbs-lsf.py" : { "1.7 (tag )":"v1.00.1+", "1.8 (tag )":"v1.00.x", "1.9 (tag 1.02.1-5)":"v1.02.1", "3002 (tag 1.04.3c-1)":"v1.04.3",
+                      "3002 (tag 1.04.4d-1)":"v1.04.4d"},
+     "glexec_meter.py": {"1.9 (tag )":"v1.00.[3-5]", "1.9 (tag v1-00-3a-1)":"v1.00.3a-1+", "1.10 (tag 1.02.1-5)":"v1.02.01",
+                         "3002 (tag 1.04.3a-1)":"v1.04.3","3274 (tag 1.04.3c-1)":"v1.04.03c","3274 (tag 1.04.4d-1)":"v1.04.4d"},
+     "GridftpTransferProbeDriver.py" : { "1.2 (tag v0-3)":"v0-3" }
      }
    renames = {
      "Gratia":"Probe Library",
      "condor_meter.pl":"Condor Probe",
      "pbs-lsf.py":"Pbs/Lsf Probe",
-     "glexec_meter.py":"Glexec Probe"
+     "glexec_meter.py":"Glexec Probe",
+     "GridftpTransferProbeDriver.py":"GridFtp Probe"
      }
      
    for site in sites:
