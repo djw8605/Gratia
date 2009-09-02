@@ -108,7 +108,7 @@ AJUR:BEGIN
          (EBS.description = 'ExitBySignal'))
        LEFT JOIN Resource JS ON
         ((J.dbid = JS.dbid) AND
-         (JS.description = 'JobStatus'))
+         (JS.description = 'condor.JobStatus'))
   WHERE J.dbid = inputDbid;
 
   -- Basic data checks
