@@ -2469,8 +2469,8 @@ select sum(Njobs),sum(WallDuration),sum(CpuUserDuration+CpuSystemDuration)/sum(W
 def GetNewUsers(begin,end):
     schema = "gratia.";
     select = """\
-select CommonName, VO.VOName, FirstSubmission from 
-( select CommonName, VOcorrid, min(EndTime) as FirstSubmission 
+select CommonName, VO.VOName, ProbeName, FirstSubmission from 
+( select CommonName, VOcorrid, ProbeName, min(EndTime) as FirstSubmission 
   from """+schema+"""MasterSummaryData
   where EndTime > '2005/01/01'
   group by CommonName ) as subquery, VONameCorrection VOCorr, VO
@@ -2975,11 +2975,11 @@ between %s - %s (midnight UTC - midnight UTC):
       if (output == "csv"):
          print "\"User\",\"End date of first job\""
       for line in newusers:
-         (name,voname, when) = line.split('\t')
+         (name,voname, probename, when) = line.split('\t')
          if (output == "csv"):
             print "\"%s\",\"%s\",%s" % (name,voname,when)
          else:
-            print name," in ",voname
+            print "%40s for %15s at %s" % (name,voname,probename)
 
 #
 #
