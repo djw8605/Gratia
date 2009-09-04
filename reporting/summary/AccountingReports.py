@@ -2469,15 +2469,20 @@ select sum(Njobs),sum(WallDuration),sum(CpuUserDuration+CpuSystemDuration)/sum(W
 def GetNewUsers(begin,end):
     schema = "gratia.";
     select = """\
-select CommonName, VO.VOName, ProbeName, FirstSubmission from 
-( select CommonName, VOcorrid, ProbeName, min(EndTime) as FirstSubmission 
-  from """+schema+"""MasterSummaryData
-  where EndTime > '2005/01/01'
-  group by CommonName ) as subquery, VONameCorrection VOCorr, VO
-where FirstSubmission >= \"""" + DateToString(begin) + """\" and
-      FirstSubmission < \"""" + DateToString(end) + """\" and
-      VOcorrid = VOCorr.corrid and VOCorr.VOid = VO.VOid
-order by CommonName
+select CommonName, VO.VOName, MasterSummaryData.ProbeName, SiteName, EndTime, sum(NJobs) from 
+(
+   select * from ( select CommonName as subCommonName, min(EndTime) as FirstSubmission
+     from """+schema+"""MasterSummaryData
+     where EndTime > '2005/01/01'
+     group by CommonName ) as innerquery
+   where FirstSubmission >= \"""" + DateToString(begin) + """\" and
+         FirstSubmission < \"""" + DateToString(end) + """\"
+) as subquery, """+schema+"""MasterSummaryData, """+schema+"""VONameCorrection VOCorr, """+schema+"""VO, """+schema+"""Probe, """+schema+"""Site
+where CommonName = subCommonName and
+      VOcorrid = VOCorr.corrid and VOCorr.VOid = VO.VOid and
+      MasterSummaryData.ProbeName = Probe.ProbeName and Probe.siteid = Site.siteid
+group by CommonName, VO.VOName,  MasterSummaryData.ProbeName, SiteName
+order by CommonName, VO.VOName, SiteName
 """
     return RunQueryAndSplit(select);
   
@@ -2975,11 +2980,11 @@ between %s - %s (midnight UTC - midnight UTC):
       if (output == "csv"):
          print "\"User\",\"End date of first job\""
       for line in newusers:
-         (name,voname, probename, when) = line.split('\t')
+         (name,voname, probename, sitename, when, njobs) = line.split('\t')
          if (output == "csv"):
-            print "\"%s\",\"%s\",%s" % (name,voname,when)
+            print "\"%s\",\"%s\",\"%s\",\"%s\",%s" % (name,voname,probename,sitename,when)
          else:
-            print "%40s for %15s at %s" % (name,voname,probename)
+            print "%-40s for %-15s at %s (%s)" % (name,voname,probename,sitename)
 
 #
 #
