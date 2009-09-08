@@ -408,7 +408,11 @@ function turn_on_purging {
    done
 }
 
-function check_data {
+function check_data 
+{
+   # Number of days in the last 3 months:
+   days=`expr \( 3672 + \`date +%s\` - \`date --date='3 month ago' +%s\` \) / 3600 / 24 `
+   echo "Checking results with $days days in the last 3 months"
 
    echo "Checking duplicates"
    mysql -h ${dbhost} --port=${dbport} -u gratia --password=${update_password} > duplicate.validate 2>&1 <<EOF 
@@ -452,7 +456,7 @@ EOF
    echo "Check Origin"
    mysql -h ${dbhost} --port=${dbport} -u gratia --password=${update_password} > origin.validate 2>&1 <<EOF 
 use ${schema_name};
-select count(*) from Origin;
+select count(*)<60 from Origin;
 EOF
 
   check_result duplicate "Duplicate"

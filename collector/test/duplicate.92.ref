@@ -1,0 +1,4 @@
+RecordType	error	count(*)
+NULL	Parse	12
+JobUsageRecord	Duplicate	4
+JobUsageRecord	ExpirationDate	10
