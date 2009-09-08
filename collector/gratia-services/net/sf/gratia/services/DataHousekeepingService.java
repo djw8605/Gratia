@@ -135,6 +135,7 @@ public class DataHousekeepingService extends Thread {
             }
             if (!stopRequested) {
                 currentStatus = Status.RUNNING;
+                executeHousekeeping(defaultAction); 	 
             }
         }
         Logging.info("DataHousekeepingService exiting");        
