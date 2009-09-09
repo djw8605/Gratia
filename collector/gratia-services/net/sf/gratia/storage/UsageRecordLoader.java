@@ -282,7 +282,13 @@ public class UsageRecordLoader extends RecordLoader {
                 el.setDescription(a.getValue());
             }
         }
-        el.setValue(element.getText());
+        String name = element.getText();
+        if (name.length() >= 255) {
+           name = name.substring(0,255);
+           Utils.GratiaInfo("SetJobName found a JobName field longer than 255 characters");
+           job.addExtraXml(element.asXML());
+        }
+        el.setValue(name);
         job.setJobName(el);
     }
 
