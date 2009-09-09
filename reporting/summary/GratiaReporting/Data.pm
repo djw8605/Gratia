@@ -80,6 +80,7 @@ sub process_data {
       my $url_cmd = sprintf('wget %s -q -O - "%s" 2>/dev/null|',
                             join(" ", @{$self->{extra_wget_options} || []}),
                             $data_source);
+      $self->verbosePrint("DEBUG: executing $url_cmd\n");
       $fh = FileHandle->new("$url_cmd") or
         die "Unable to open wget pipe for $data_source";
     } else {
