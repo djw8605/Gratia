@@ -386,6 +386,9 @@ DJUR:BEGIN
        LEFT JOIN Resource EBS ON
         ((J.dbid = EBS.dbid) AND
          (EBS.description = 'ExitBySignal'))
+       LEFT JOIN Resource JS ON
+        ((J.dbid = JS.dbid) AND
+         (JS.description = 'condor.JobStatus'))
   WHERE J.dbid = inputDbid;
 
   -- Basic data checks
