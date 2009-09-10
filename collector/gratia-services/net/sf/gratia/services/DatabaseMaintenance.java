@@ -31,7 +31,7 @@ public class DatabaseMaintenance {
 
    static final String dq = "\"";
    static final String comma = ",";
-   static final int gratiaDatabaseVersion = 77;
+   static final int gratiaDatabaseVersion = 78;
    static final int latestDBVersionRequiringStoredProcedureLoad = gratiaDatabaseVersion;
    static final int latestDBVersionRequiringSummaryViewLoad = 37;
    static final int latestDBVersionRequiringSummaryTriggerLoad = 77;
@@ -1006,15 +1006,58 @@ public class DatabaseMaintenance {
             }
          }
          final Integer schemaOnlyLowerBound = 60;
-         // Change below if you need to do something more substantive.
-         final Integer schemaOnlyUpperBound = gratiaDatabaseVersion;
+         final Integer schemaOnlyUpperBound = 77;
          if ((current >= schemaOnlyLowerBound) && (current < schemaOnlyUpperBound)) {
             // Stored procedures, trigger procedures.
             Logging.fine("Gratia database upgraded from " + current + " to " + schemaOnlyUpperBound);
             current = schemaOnlyUpperBound;
             UpdateDbVersion(current);
          }
-
+         if (current == 77) {
+             // Update smaller XML tables to use MEDIUMTEXT (this is a
+             // patch release). Defer Update of JobUsageRecord_Xml to a
+             // major release.
+             int result = 0;
+             Session session = null;
+             try {
+                 session = HibernateWrapper.getSession();
+                 Transaction tx = session.beginTransaction();
+                 Query q =
+                     session.createSQLQuery("ALTER TABLE DupRecord " +
+                                            "MODIFY COLUMN extraxml MDEIUMTEXT," +
+                                            "MODIFY COLUMN rawxml MEDIUMTEXT ;");
+                 q.executeUpdate();
+                 q =
+                     session.createSQLQuery("ALTER TABLE ProbeDetails_Xml " +
+                                            "MODIFY COLUMN extraxml MDEIUMTEXT," +
+                                            "MODIFY COLUMN rawxml MEDIUMTEXT ;");
+                 q.executeUpdate();
+                 q =
+                     session.createSQLQuery("ALTER TABLE MetricRecord_Xml " +
+                                            "MODIFY COLUMN extraxml MDEIUMTEXT," +
+                                            "MODIFY COLUMN rawxml MEDIUMTEXT ;");
+                 q.executeUpdate();
+                 tx.commit();
+             } catch (Exception e) {
+                 if ((session != null) && (session.isOpen())) {
+                     Transaction tx = session.getTransaction();
+                     if (tx != null) {
+                         tx.rollback();
+                     }
+                     session.close();
+                 }
+                 Logging.debug("Exception detail: ", e);
+                 Logging.warning("Gratia database FAILED to upgrade from " + current +
+                                 " to " + (current + 1));
+                 result = -1;
+             }
+             if (result > -1) {
+                 Logging.fine("Gratia database upgraded from " + current +
+                              " to " + (current + 1));
+                 ++current;
+                 UpdateDbVersion(current);
+             }
+         }
          return ((current == gratiaDatabaseVersion) && checkAndUpgradeDbAuxiliaryItems());
       }
    }
