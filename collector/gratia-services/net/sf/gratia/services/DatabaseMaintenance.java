@@ -1024,17 +1024,17 @@ public class DatabaseMaintenance {
                  Transaction tx = session.beginTransaction();
                  Query q =
                      session.createSQLQuery("ALTER TABLE DupRecord " +
-                                            "MODIFY COLUMN extraxml MDEIUMTEXT," +
+                                            "MODIFY COLUMN extraxml MEDIUMTEXT," +
                                             "MODIFY COLUMN rawxml MEDIUMTEXT ;");
                  q.executeUpdate();
                  q =
                      session.createSQLQuery("ALTER TABLE ProbeDetails_Xml " +
-                                            "MODIFY COLUMN extraxml MDEIUMTEXT," +
+                                            "MODIFY COLUMN extraxml MEDIUMTEXT," +
                                             "MODIFY COLUMN rawxml MEDIUMTEXT ;");
                  q.executeUpdate();
                  q =
                      session.createSQLQuery("ALTER TABLE MetricRecord_Xml " +
-                                            "MODIFY COLUMN extraxml MDEIUMTEXT," +
+                                            "MODIFY COLUMN extraxml MEDIUMTEXT," +
                                             "MODIFY COLUMN rawxml MEDIUMTEXT ;");
                  q.executeUpdate();
                  tx.commit();
