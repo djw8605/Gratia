@@ -151,7 +151,29 @@ public class UsageRecordLoader extends RecordLoader {
         }
         return job;
     }
-
+   
+    public static String SetLimitedTextField(StringElement el, JobUsageRecord job, Element element, String value, int limit, String fieldname) 
+    {
+       // Return the text field limited to 'limit' charaters and print an warning message
+       // to the log if we are truncating the field.
+       
+       if (value.length() >= limit) {
+          Utils.GratiaInfo("Set"+fieldname+" found a value longer than "+limit+" characters (the value has been truncated).");
+          job.addExtraXml(element.asXML());
+          value = value.substring(0,limit);
+       }
+       el.setValue( value );
+       return value;
+    }
+   
+    public static String SetLimitedTextField(StringElement el, JobUsageRecord job, Element element, int limit, String fieldname) 
+    {
+       // Return the text field limited to 'limit' charaters and print an warning message
+       // to the log if we are truncating the field.
+       
+       return SetLimitedTextField(el,job,element,element.getText(),limit,fieldname);
+    }
+   
     public static void SetJobIdentity(JobUsageRecord job, Element element)
             throws Exception {
         JobIdentity id = job.getJobIdentity();
@@ -282,13 +304,7 @@ public class UsageRecordLoader extends RecordLoader {
                 el.setDescription(a.getValue());
             }
         }
-        String name = element.getText();
-        if (name.length() >= 255) {
-           name = name.substring(0,255);
-           Utils.GratiaInfo("SetJobName found a JobName field longer than 255 characters");
-           job.addExtraXml(element.asXML());
-        }
-        el.setValue(name);
+        SetLimitedTextField(el, job, element, 255, "JobName");
         job.setJobName(el);
     }
 
@@ -515,7 +531,7 @@ public class UsageRecordLoader extends RecordLoader {
         val = val + element.getText();
         if (primary)
             val = val + " (primary) ";
-        el.setValue(val);
+        SetLimitedTextField(el, job, element, val, 255, "Host");
         job.setHost(el);
     }
 
