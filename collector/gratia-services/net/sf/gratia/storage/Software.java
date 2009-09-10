@@ -31,6 +31,9 @@ public class Software implements AttachableXmlElement
          // Default Constructor
       }
       
+      public void setDescription(String Description) {}
+      public String getDescription() { return ""; }
+
       // For AttachableXmlElement interface:
       
       public void setId(long id) { setsoftid((int)id); }

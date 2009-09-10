@@ -35,6 +35,9 @@ public class Collector implements AttachableXmlElement
       fName = name;
    }
    
+   public void setDescription(String Description) {}
+   public String getDescription() { return ""; }
+
    // For AttachableXmlElement interface:
    
    public void setId(long id) { setcollid(id); }

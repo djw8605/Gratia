@@ -13,12 +13,15 @@ package net.sf.gratia.storage;
  * @version 1.0
  */
 public interface XmlElement {
-    /**
-     * asXml
-     *
-     * @param elementName String
-     * @return String
-     */
-    public String asXml(String elementName);
-    public void asXml(StringBuilder output, String elementName);
+   /**
+    * asXml
+    *
+    * @param elementName String
+    * @return String
+    */
+   public String asXml(String elementName);
+   public void asXml(StringBuilder output, String elementName);
+   
+   public void setDescription(String Description);
+   public String getDescription();
 }

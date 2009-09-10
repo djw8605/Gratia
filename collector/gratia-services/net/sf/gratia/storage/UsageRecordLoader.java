@@ -152,28 +152,6 @@ public class UsageRecordLoader extends RecordLoader {
         return job;
     }
    
-    public static String SetLimitedTextField(StringElement el, JobUsageRecord job, Element element, String value, int limit, String fieldname) 
-    {
-       // Return the text field limited to 'limit' charaters and print an warning message
-       // to the log if we are truncating the field.
-       
-       if (value.length() >= limit) {
-          Utils.GratiaInfo("Set"+fieldname+" found a value longer than "+limit+" characters (the value has been truncated).");
-          job.addExtraXml(element.asXML());
-          value = value.substring(0,limit);
-       }
-       el.setValue( value );
-       return value;
-    }
-   
-    public static String SetLimitedTextField(StringElement el, JobUsageRecord job, Element element, int limit, String fieldname) 
-    {
-       // Return the text field limited to 'limit' charaters and print an warning message
-       // to the log if we are truncating the field.
-       
-       return SetLimitedTextField(el,job,element,element.getText(),limit,fieldname);
-    }
-   
     public static void SetJobIdentity(JobUsageRecord job, Element element)
             throws Exception {
         JobIdentity id = job.getJobIdentity();
@@ -301,7 +279,7 @@ public class UsageRecordLoader extends RecordLoader {
         for (Iterator i = element.attributeIterator(); i.hasNext();) {
             Attribute a = (Attribute) i.next();
             if (a.getName().equalsIgnoreCase("description")) {
-                el.setDescription(a.getValue());
+               SetLimitedDescription(el, job, element, a, 255, "JobName");
             }
         }
         SetLimitedTextField(el, job, element, 255, "JobName");
@@ -321,10 +299,10 @@ public class UsageRecordLoader extends RecordLoader {
         for (Iterator i = element.attributeIterator(); i.hasNext();) {
             Attribute a = (Attribute) i.next();
             if (a.getName().equalsIgnoreCase("description")) {
-                el.setDescription(a.getValue());
+               SetLimitedDescription(el, job, element, a, 255, "Status");
             }
         }
-        el.setValue(element.getText());
+        SetLimitedTextField(el, job, element, 255, "Status");
         job.setStatus(el);
     }
 
@@ -344,7 +322,7 @@ public class UsageRecordLoader extends RecordLoader {
         for (Iterator i = element.attributeIterator(); i.hasNext();) {
             Attribute a = (Attribute) i.next();
             if (a.getName().equalsIgnoreCase("description")) {
-                el.setDescription(a.getValue());
+               SetLimitedDescription(el, job, element, a, 255, "WallDuration");
             }
         }
         // Duration d = new Duration();
@@ -361,7 +339,7 @@ public class UsageRecordLoader extends RecordLoader {
         for (Iterator i = element.attributeIterator(); i.hasNext();) {
             Attribute a = (Attribute) i.next();
             if (a.getName().equalsIgnoreCase("description")) {
-                el.setDescription(a.getValue());
+               SetLimitedDescription(el, job, element, a, 255, "CpuDuration");
             } else if (a.getName().equalsIgnoreCase("type")
                     || a.getName().equalsIgnoreCase("usageType")) {
                 usage = a.getValue();
@@ -412,7 +390,7 @@ public class UsageRecordLoader extends RecordLoader {
         for (Iterator i = element.attributeIterator(); i.hasNext();) {
             Attribute a = (Attribute) i.next();
             if (a.getName().equalsIgnoreCase("description")) {
-                el.setDescription(a.getValue());
+               SetLimitedDescription(el, job, element, a, 255, "EndTime");
             }
         }
         // Duration d = new Duration();
@@ -434,7 +412,7 @@ public class UsageRecordLoader extends RecordLoader {
         for (Iterator i = element.attributeIterator(); i.hasNext();) {
             Attribute a = (Attribute) i.next();
             if (a.getName().equalsIgnoreCase("description")) {
-                el.setDescription(a.getValue());
+               SetLimitedDescription(el, job, element, a, 255, "StartTime");
             }
         }
 
@@ -448,7 +426,7 @@ public class UsageRecordLoader extends RecordLoader {
         for (Iterator i = element.attributeIterator(); i.hasNext();) {
             Attribute a = (Attribute) i.next();
             if (a.getName().equalsIgnoreCase("description")) {
-                el.setDescription(a.getValue());
+               SetLimitedDescription(el, job, element, a, 255, "TimeDuration");
             } else if (a.getName().equalsIgnoreCase("type")) {
                 el.setType(a.getValue());
             }
@@ -468,7 +446,7 @@ public class UsageRecordLoader extends RecordLoader {
         for (Iterator i = element.attributeIterator(); i.hasNext();) {
             Attribute a = (Attribute) i.next();
             if (a.getName().equalsIgnoreCase("description")) {
-                el.setDescription(a.getValue());
+               SetLimitedDescription(el, job, element, a, 255, "TimeInstant");
             } else if (a.getName().equalsIgnoreCase("type")) {
                 el.setType(a.getValue());
             }
@@ -495,10 +473,10 @@ public class UsageRecordLoader extends RecordLoader {
         for (Iterator i = element.attributeIterator(); i.hasNext();) {
             Attribute a = (Attribute) i.next();
             if (a.getName().equalsIgnoreCase("description")) {
-                el.setDescription(a.getValue());
+               SetLimitedDescription(el, job, element, a, 255, "MachineName");
             }
         }
-        el.setValue(element.getText());
+        SetLimitedTextField(el, job, element, 255, "MachineName");
         job.setMachineName(el);
     }
 
@@ -512,23 +490,12 @@ public class UsageRecordLoader extends RecordLoader {
         for (Iterator i = element.attributeIterator(); i.hasNext();) {
             Attribute a = (Attribute) i.next();
             if (a.getName().equalsIgnoreCase("description")) {
-                String desc = el.getDescription();
-                if (desc == null)
-                    desc = "";
-                else
-                    desc = desc + " ; ";
-                desc = desc + a.getValue();
-                el.setDescription(desc);
+               SetLimitedDescription(el, job, element, a, 255, "Host");
             } else if (a.getName().equalsIgnoreCase("primary")) {
-                primary = (a.getValue().equalsIgnoreCase("true"));
+               primary = (a.getValue().equalsIgnoreCase("true"));
             }
         }
-        String val = el.getValue();
-        if (val == null)
-            val = "";
-        else
-            val = val + " ; ";
-        val = val + element.getText();
+        String val = ConcatString( el.getValue(),  element.getText() );
         if (primary)
             val = val + " (primary) ";
         SetLimitedTextField(el, job, element, val, 65535, "Host");
@@ -548,10 +515,10 @@ public class UsageRecordLoader extends RecordLoader {
         for (Iterator i = element.attributeIterator(); i.hasNext();) {
             Attribute a = (Attribute) i.next();
             if (a.getName().equalsIgnoreCase("description")) {
-                el.setDescription(a.getValue());
+               SetLimitedDescription(el, job, element, a, 255, "SubmitHost");
             }
         }
-        el.setValue(element.getText());
+        SetLimitedTextField(el, job, element, 255, "SubmitHost");
         job.setSubmitHost(el);
     }
 
@@ -568,10 +535,10 @@ public class UsageRecordLoader extends RecordLoader {
         for (Iterator i = element.attributeIterator(); i.hasNext();) {
             Attribute a = (Attribute) i.next();
             if (a.getName().equalsIgnoreCase("description")) {
-                el.setDescription(a.getValue());
+               SetLimitedDescription(el, job, element, a, 255, "Queue");
             }
         }
-        el.setValue(element.getText());
+        SetLimitedTextField(el, job, element, 255, "Queue");
         job.setQueue(el);
     }
 
@@ -584,22 +551,11 @@ public class UsageRecordLoader extends RecordLoader {
         for (Iterator i = element.attributeIterator(); i.hasNext();) {
             Attribute a = (Attribute) i.next();
             if (a.getName().equalsIgnoreCase("description")) {
-                String desc = el.getDescription();
-                if (desc == null)
-                    desc = "";
-                else
-                    desc = desc + " ; ";
-                desc = desc + a.getValue();
-                el.setDescription(desc);
+               SetLimitedDescription(el, job, element, a, 255, "ProjectName");
             }
         }
-        String val = el.getValue();
-        if (val == null)
-            val = "";
-        else
-            val = val + " ; ";
-        val = val + element.getText();
-        el.setValue(val);
+        String val = ConcatString(el.getValue(),element.getText());
+        SetLimitedTextField(el, job, element, val, 255, "ProjectName");
         job.setProjectName(el);
     }
 
@@ -610,7 +566,7 @@ public class UsageRecordLoader extends RecordLoader {
         for (Iterator i = element.attributeIterator(); i.hasNext();) {
             Attribute a = (Attribute) i.next();
             if (a.getName().equalsIgnoreCase("description")) {
-                el.setDescription(a.getValue());
+               SetLimitedDescription(el, job, element, a, 255, "Network");
             } else if (a.getName().equalsIgnoreCase("metrics")) {
                 el.setMetrics(a.getValue());
             } else if (a.getName().equalsIgnoreCase("phaseUnit")) {
@@ -634,7 +590,7 @@ public class UsageRecordLoader extends RecordLoader {
         for (Iterator i = element.attributeIterator(); i.hasNext();) {
             Attribute a = (Attribute) i.next();
             if (a.getName().equalsIgnoreCase("description")) {
-                el.setDescription(a.getValue());
+               SetLimitedDescription(el, job, element, a, 255, "Disj");
             } else if (a.getName().equalsIgnoreCase("metrics")) {
                 el.setMetrics(a.getValue());
             } else if (a.getName().equalsIgnoreCase("phaseUnit")) {
@@ -660,7 +616,7 @@ public class UsageRecordLoader extends RecordLoader {
         for (Iterator i = element.attributeIterator(); i.hasNext();) {
             Attribute a = (Attribute) i.next();
             if (a.getName().equalsIgnoreCase("description")) {
-                el.setDescription(a.getValue());
+               SetLimitedDescription(el, job, element, a, 255, "Memory");
             } else if (a.getName().equalsIgnoreCase("metrics")) {
                 el.setMetrics(a.getValue());
             } else if (a.getName().equalsIgnoreCase("phaseUnit")) {
@@ -686,7 +642,7 @@ public class UsageRecordLoader extends RecordLoader {
         for (Iterator i = element.attributeIterator(); i.hasNext();) {
             Attribute a = (Attribute) i.next();
             if (a.getName().equalsIgnoreCase("description")) {
-                el.setDescription(a.getValue());
+               SetLimitedDescription(el, job, element, a, 255, "Swap");
             } else if (a.getName().equalsIgnoreCase("metrics")) {
                 el.setMetrics(a.getValue());
             } else if (a.getName().equalsIgnoreCase("phaseUnit")) {
@@ -718,9 +674,9 @@ public class UsageRecordLoader extends RecordLoader {
         for (Iterator i = element.attributeIterator(); i.hasNext();) {
             Attribute a = (Attribute) i.next();
             if (a.getName().equalsIgnoreCase("description")) {
-                el.setDescription(a.getValue());
+               SetLimitedDescription(el, job, element, a, 255, "NodeCount");
             } else if (a.getName().equalsIgnoreCase("metric")) {
-                el.setMetric(a.getValue());
+               el.setMetric(a.getValue());
             }
         }
         el.setValue((new Long(element.getText())).longValue());
@@ -740,9 +696,9 @@ public class UsageRecordLoader extends RecordLoader {
         for (Iterator i = element.attributeIterator(); i.hasNext();) {
             Attribute a = (Attribute) i.next();
             if (a.getName().equalsIgnoreCase("description")) {
-                el.setDescription(a.getValue());
+               SetLimitedDescription(el, job, element, a, 255, "Njobs");
             } else if (a.getName().equalsIgnoreCase("metric")) {
-                el.setMetric(a.getValue());
+               el.setMetric(a.getValue());
             }
         }
         el.setValue((new Long(element.getText())).longValue());
@@ -762,7 +718,7 @@ public class UsageRecordLoader extends RecordLoader {
         for (Iterator i = element.attributeIterator(); i.hasNext();) {
             Attribute a = (Attribute) i.next();
             if (a.getName().equalsIgnoreCase("description")) {
-                el.setDescription(a.getValue());
+               SetLimitedDescription(el, job, element, a, 255, "Processors");
             } else if (a.getName().equalsIgnoreCase("metric")) {
                 el.setMetric(a.getValue());
             } else if (a.getName().equalsIgnoreCase("consumptionRate")) {
@@ -779,12 +735,12 @@ public class UsageRecordLoader extends RecordLoader {
         for (Iterator i = element.attributeIterator(); i.hasNext();) {
             Attribute a = (Attribute) i.next();
             if (a.getName().equalsIgnoreCase("description")) {
-                el.setDescription(a.getValue());
+               SetLimitedDescription(el, job, element, a, 255, "ServiceLevel");
             } else if (a.getName().equalsIgnoreCase("type")) {
                 el.setType(a.getValue());
             }
         }
-        el.setValue(element.getText());
+        SetLimitedTextField(el, job, element, 255, "ServiceLevel");
         List l = job.getServiceLevel();
         if (l == null)
             l = new java.util.LinkedList();
@@ -804,7 +760,7 @@ public class UsageRecordLoader extends RecordLoader {
         for (Iterator i = element.attributeIterator(); i.hasNext();) {
             Attribute a = (Attribute) i.next();
             if (a.getName().equalsIgnoreCase("description")) {
-                el.setDescription(a.getValue());
+               SetLimitedDescription(el, job, element, a, 255, "Charge");
             } else if (a.getName().equalsIgnoreCase("unit")) {
                 el.setUnit(a.getValue());
             } else if (a.getName().equalsIgnoreCase("formula")) {
@@ -822,7 +778,7 @@ public class UsageRecordLoader extends RecordLoader {
         for (Iterator i = element.attributeIterator(); i.hasNext();) {
             Attribute a = (Attribute) i.next();
             if (a.getName().equalsIgnoreCase("description")) {
-                el.setDescription(a.getValue());
+               SetLimitedDescription(el, job, element, a, 255, "PhaseResource");
             } else if (a.getName().equalsIgnoreCase("unit")) {
                 el.setUnit(a.getValue());
             } else if (a.getName().equalsIgnoreCase("phaseUnit")) {
@@ -843,7 +799,7 @@ public class UsageRecordLoader extends RecordLoader {
         for (Iterator i = element.attributeIterator(); i.hasNext();) {
             Attribute a = (Attribute) i.next();
             if (a.getName().equalsIgnoreCase("description")) {
-                el.setDescription(a.getValue());
+               SetLimitedDescription(el, job, element, a, 255, "VolumeResource");
             } else if (a.getName().equalsIgnoreCase("unit")) {
                 el.setUnit(a.getValue());
             } else if (a.getName().equalsIgnoreCase("storageUnit")) {
@@ -864,7 +820,7 @@ public class UsageRecordLoader extends RecordLoader {
         for (Iterator i = element.attributeIterator(); i.hasNext();) {
             Attribute a = (Attribute) i.next();
             if (a.getName().equalsIgnoreCase("description")) {
-                el.setDescription(a.getValue());
+               SetLimitedDescription(el, job, element, a, 255, "ConsumableResource");
             } else if (a.getName().equalsIgnoreCase("unit")) {
                 el.setUnit(a.getValue());
             }
@@ -883,19 +839,19 @@ public class UsageRecordLoader extends RecordLoader {
         for (Iterator i = element.attributeIterator(); i.hasNext();) {
             Attribute a = (Attribute) i.next();
             if (a.getName().equals("description")) {
-                el.setDescription(a.getValue());
+               SetLimitedDescription(el, job, element, a, 255, "Resource");
                 if (a.getValue().equalsIgnoreCase("GlobalUsername")) {
                     UserIdentity id = job.getUserIdentity();
                     if (id == null)
                         id = new UserIdentity();
-                    id.setGlobalUsername(element.getText());
+                    id.setGlobalUsername(LimitedTextField(job,element,element.getText(),255,"GlobalUserName"));
                     job.setUserIdentity(id);
                     return;
                 } else if (a.getValue().equalsIgnoreCase("UserVOName")) {
                     UserIdentity id = job.getUserIdentity();
                     if (id == null)
                         id = new UserIdentity();
-                    id.setVOName(element.getText().trim());
+                    id.setVOName(LimitedTextField(job,element,element.getText().trim(),255,"GlobalUserName"));
                     job.setUserIdentity(id);
                     return;
                 } else if (a.getValue()
@@ -903,24 +859,24 @@ public class UsageRecordLoader extends RecordLoader {
                     UserIdentity id = job.getUserIdentity();
                     if (id == null)
                         id = new UserIdentity();
-                    id.setReportableVOName(element.getText().trim());
+                    id.setReportableVOName(LimitedTextField(job,element,element.getText().trim(),255,"GlobalUserName"));
                     job.setUserIdentity(id);
                     return;
                 } else if (a.getValue().equalsIgnoreCase("ResourceType")) {
-                    String val = element.getText().trim();
+                    String val = LimitedTextField(job,element,element.getText().trim(),255,"GlobalUserName");
                     if (val != null && val.length() > 0 ) {
                         StringElement rel = job.getResourceType();
                         if (rel == null) {
                             rel = new StringElement();
                         } /* else { maybe throw an exception! } */
-                        rel.setValue(val);
+                        rel.setValue(LimitedTextField(job,element,val,255,"ResourceType"));
                         job.setResourceType(rel);
                     }
                     return;
                 }
             }
         }
-        el.setValue(element.getText());
+        SetLimitedTextField(el, job, element, 255, "Resource");
         List l = job.getResource();
         if (l == null)
             l = new java.util.LinkedList();

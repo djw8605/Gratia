@@ -23,8 +23,74 @@ public abstract class RecordLoader
    public abstract ArrayList ReadRecords(Element eroot) throws Exception;
    public abstract Record ReadRecord(Element element) throws Exception;
 
+   public static String ConcatString(String old, String value) 
+   {
+      // Return the old and value string concatenated with ';'
+      // (or just value if old is empty or null)./
+      
+      String res = old;
+      if (res == null || res.length()==0)
+         res = value;
+      else
+         res = res + " ; " + value;
+      return res;
+   }
+   
+   public static String LimitedTextField(Record rec, Element element, String value, int limit, String fieldname) 
+   {
+      // Return the text field limited to 'limit' charaters and print an warning message
+      // to the log if we are truncating the field.
+      
+      if (value.length() >= limit) {
+         Utils.GratiaInfo("Set"+fieldname+" found a value longer than "+limit+" characters (the value has been truncated).");
+         rec.addExtraXml(element.asXML());
+         value = value.substring(0,limit);
+      }
+      return value;
+   }
+   
+   public static String SetLimitedTextField(StringElement el, Record rec, Element element, String value, int limit, String fieldname) 
+   {
+      // Return the text field limited to 'limit' charaters and print an warning message
+      // to the log if we are truncating the field.
+      
+      value = LimitedTextField(rec, element, value, limit, fieldname);
+      el.setValue( value );
+      return value;
+   }
+   
+   public static String SetLimitedTextField(StringElement el, Record rec, Element element, int limit, String fieldname) 
+   {
+      // Return the text field limited to 'limit' charaters and print an warning message
+      // to the log if we are truncating the field.
+      
+      return SetLimitedTextField(el,rec,element,element.getText(),limit,fieldname);
+   }
+
+   public static String SetLimitedDescription(XmlElement el, Record rec, Element element, String value, int limit, String fieldname) 
+   {
+      // Return the text field limited to 'limit' charaters and print an warning message
+      // to the log if we are truncating the field.
+      
+      String desc = ConcatString( el.getDescription(), value );
+      
+      desc = LimitedTextField(rec, element, desc, limit, fieldname + "'s description");
+      el.setDescription( desc );
+      return desc;
+   }
+
+   public static String SetLimitedDescription(XmlElement el, Record rec, Element element, Attribute a, int limit, String fieldname) 
+   {
+      // Return the text field limited to 'limit' charaters and print an warning message
+      // to the log if we are truncating the field.
+      
+      return SetLimitedDescription(el,rec,element,a.getValue(),limit,fieldname);
+   }
+   
+   
+   
    // Common implementations.
-   static void ReadCommonRecord(Record job, Element sub) throws Exception
+   static void ReadCommonRecord(Record rec, Element sub) throws Exception
    {
       // This should be executed last.
       // If the element is not one of the supported element (Grid, ProbeName, SiteName, RecordIdentity, Origins)
@@ -32,52 +98,46 @@ public abstract class RecordLoader
     
       if (sub.getName().equalsIgnoreCase("RecordIdentity"))
       {
-         SetRecordIdentity(job, sub);
+         SetRecordIdentity(rec, sub);
       }
       else if (sub.getName() == "SiteName")
       {
-         SetSiteName(job, sub);
+         SetSiteName(rec, sub);
       }
       else if (sub.getName() == "ProbeName")
       {
-         SetProbeName(job, sub);
+         SetProbeName(rec, sub);
       }
       else if (sub.getName() == "Grid")
       {
-         SetGrid(job, sub);
+         SetGrid(rec, sub);
       }
       else if (sub.getName() == "Origin")
       {
-         AddOrigin(job, sub);
+         AddOrigin(rec, sub);
       }
       else
       {
-         job.addExtraXml(sub.asXML());
+         rec.addExtraXml(sub.asXML());
       }
       
    }
    
-   static void AddOrigin(Record job, Element element) throws Exception
+   static void AddOrigin(Record rec, Element element) throws Exception
    {
-      Origin from = OriginLoader.ReadElement(element, job);
+      Origin from = OriginLoader.ReadElement(element, rec);
    }
    
-   static void SetGrid(Record job, Element element) throws Exception 
+   static void SetGrid(Record rec, Element element) throws Exception 
    {
-      StringElement el = job.getGrid();
+      StringElement el = rec.getGrid();
       if (el == null) {
          el = new StringElement();
       }
       for (Object iter : element.attributes() ) {
          Attribute a = (Attribute)iter;
          if (a.getName() == "description") {
-            String desc = el.getDescription();
-            if (desc == null)
-               desc = "";
-            else
-               desc = desc + " ; ";
-            desc = desc + a.getValue();
-            el.setDescription(desc);
+            SetLimitedDescription(el, rec, element, a, 255, "Grid");
          }
       }
       String val = el.getValue();
@@ -87,22 +147,18 @@ public abstract class RecordLoader
          val = val + " ; ";
       val = val + element.getText();
       el.setValue(val);
-      job.setGrid(el);
+      rec.setGrid(el);
    }
    
-   public static void SetProbeName(Record job, Element element) throws Exception {
-      StringElement el = job.getProbeName();
+   public static void SetProbeName(Record rec, Element element) throws Exception {
+      StringElement el = rec.getProbeName();
       if (el == null) {
          el = new StringElement();
       }
       for (Object iter : element.attributes() ) {
          Attribute a = (Attribute)iter;
          if (a.getName() == "description") {
-            String desc = el.getDescription();
-            if (desc == null) desc = "";
-            else desc = desc + " ; ";
-            desc = desc + a.getValue();
-            el.setDescription(desc);
+            SetLimitedDescription(el, rec, element, a, 255, "ProbeName");
          }
       }
       String val = el.getValue();
@@ -110,12 +166,12 @@ public abstract class RecordLoader
       else val = val + " ; ";
       val = val + element.getText();
       el.setValue(val);
-      job.setProbeName(el);
+      rec.setProbeName(el);
    }
    
-   public static void SetRecordIdentity(Record job, Element element) throws Exception
+   public static void SetRecordIdentity(Record rec, Element element) throws Exception
    {
-      RecordIdentity id = job.getRecordIdentity();
+      RecordIdentity id = rec.getRecordIdentity();
       if (id != null /* record identity already set */)
       {
          Utils.GratiaError("SetRecordIdentity", "parsing",
@@ -141,13 +197,13 @@ public abstract class RecordLoader
          }
       }
       if (id != null)
-         job.setRecordIdentity(id);
+         rec.setRecordIdentity(id);
    }
    
-   public static void SetSiteName(Record job, Element element) throws Exception
+   public static void SetSiteName(Record rec, Element element) throws Exception
    {
-      StringElement el = job.getSiteName();
-      if (el != null /* job identity already set */)
+      StringElement el = rec.getSiteName();
+      if (el != null /* rec identity already set */)
       {
          Utils.GratiaError("SetSiteName", "parsing",
                            " found a second SiteName field in the xml file", false);
@@ -158,10 +214,10 @@ public abstract class RecordLoader
          Attribute a = (Attribute)iter;
          if (a.getName().equalsIgnoreCase("description"))
          {
-            el.setDescription(a.getValue());
+            SetLimitedDescription(el, rec, element, a, 255, "SiteName");
          }
       }
       el.setValue(element.getText());
-      job.setSiteName(el);
+      rec.setSiteName(el);
    }
 }

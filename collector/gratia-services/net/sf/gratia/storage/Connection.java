@@ -39,6 +39,9 @@ public class Connection implements AttachableXmlElement, Comparable
 
       private static String gDefaultCollectorName = "Standalone";
       
+      public void setDescription(String Description) {}
+      public String getDescription() { return ""; }
+
       public Connection()
       {
          // Default Constructor
