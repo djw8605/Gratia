@@ -37,8 +37,8 @@
       <generator class="native"/>
     </id>
     <property name="eventdate" column="eventdate" type="timestamp"/>
-    <property name="rawxml" column="rawxml" type="text"/>
-    <property name="extraxml" column="extraxml" type="text"/>
+    <property name="rawxml" column="rawxml" type="mediumtext"/>
+    <property name="extraxml" column="extraxml" type="mediumtext"/>
     <property name="source" column="source"/>
     <property name="error" column="error"/>
     <property name="dbid" column="dbid" type="int"/>
@@ -259,8 +259,8 @@
 
     <join table="ProbeDetails_Xml">
       <key column="dbid"/>
-      <property name="ExtraXml" type="text"/>
-      <property name="RawXml" type="text" />
+      <property name="ExtraXml" type="mediumtext"/>
+      <property name="RawXml" type="mediumtext" />
     </join>
 
   </class>

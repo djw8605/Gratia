@@ -106,8 +106,8 @@
     </join>
     <join table="MetricRecord_Xml" optional="true">
       <key column="dbid"/>
-      <property name="ExtraXml" type="text"/>
-      <property name="RawXml" type="text" />
+      <property name="ExtraXml" type="mediumtext"/>
+      <property name="RawXml" type="mediumtext" />
     </join>
   </class>
 
