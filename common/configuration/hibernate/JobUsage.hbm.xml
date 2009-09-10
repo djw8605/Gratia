@@ -284,8 +284,8 @@
 
    <join table = "JobUsageRecord_Xml" optional="true">
       <key column="dbid"/>
-      <property name="ExtraXml" type="mediumtext"/>
-      <property name="RawXml" type="mediumtext" />
+      <property name="ExtraXml" type="text" length="16777215"/>
+      <property name="RawXml" type="text" length="16777215" />
    </join>
    
 
