@@ -531,7 +531,7 @@ public class UsageRecordLoader extends RecordLoader {
         val = val + element.getText();
         if (primary)
             val = val + " (primary) ";
-        SetLimitedTextField(el, job, element, val, 255, "Host");
+        SetLimitedTextField(el, job, element, val, 65535, "Host");
         job.setHost(el);
     }
 
