@@ -29,6 +29,7 @@
     "service.admin.FQAN.1" => "/fermilab/Role=GratiaDeveloper",
     "service.reporting.interfaces.apel.folder" => "gratia-data/interfaces/apel-lcg",
     "service.reporting.interfaces.apel.folder.groupowner" => "gratia",
+    "service.lifetimeManagement.checkInterval" => '1 h',
    }
  },
  itb_gratia_psacct =>
@@ -59,6 +60,7 @@
     "service.admin.DN.1" => '/DC=org/DC=doegrids/OU=Services/CN=gratia02.fnal.gov',
     "service.admin.FQAN.0" => "/fermilab/Role=GratiaAdmin",
     "service.admin.FQAN.1" => "/fermilab/Role=GratiaDeveloper",
+    "service.lifetimeManagement.checkInterval" => '1 h',
    }
  },
  itb_gratia_osg_daily =>
@@ -90,6 +92,7 @@
     "service.admin.DN.1" => '/DC=org/DC=doegrids/OU=Services/CN=gratia02.fnal.gov',
     "service.admin.FQAN.0" => "/fermilab/Role=GratiaAdmin",
     "service.admin.FQAN.1" => "/fermilab/Role=GratiaDeveloper",
+    "service.lifetimeManagement.checkInterval" => '1 h',
    }
  }
 );
