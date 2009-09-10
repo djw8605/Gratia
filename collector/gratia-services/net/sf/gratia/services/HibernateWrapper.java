@@ -20,7 +20,6 @@ public class HibernateWrapper {
 
     public static synchronized void start() throws Exception {
         Properties ep = new Properties();
-        ep.setProperty("hibernate.hbm2ddl.auto", "validate");
         start(ep);
     }
 
