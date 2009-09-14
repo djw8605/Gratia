@@ -7,9 +7,7 @@
 #	 Obtain the list of VOs that is published by MyOSG
 #	 Find the difference
  
-import sys,re
-import AccountingReports, sendMail
-from AccountingReports import FromCondor,UseArgs,gOutput,gBegin,gEnd,CheckDB
+import sys,re, AccountingReports
 
 def compareVOs(argv=None):
     # get the list of vos reported by gratia
@@ -85,12 +83,12 @@ def compareVOs(argv=None):
     content['text'] = message
     content['html'] = message
     content['csv'] = str(None)
-    AccountingReports.sendEmail( (['karthik','Arun'], ['karunach@nhn.ou.edu','karthikarun@ou.edu']), subject, content, None,None,'phyast.nhn.ou.edu')
+    AccountingReports.sendEmail( (['karthik'], ['karunach@nhn.ou.edu']), subject, content, None,None,'phyast.nhn.ou.edu')
 
 def main(argv=None):
     # Handle command line arguments
-    UseArgs(argv)
-    if not CheckDB() :
+    AccountingReports.UseArgs(argv)
+    if not AccountingReports.CheckDB() :
         return 1
     # compare the VOs to prepare the report
     compareVOs()
