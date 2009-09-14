@@ -3,13 +3,10 @@
 import sys
 import AccountingReports
 
-from AccountingReports import UseArgs,gOutput,gBegin,CheckDB,gConfig
-import sys
-
 def main(argv=None):
-    UseArgs(argv)
+    AccountingReports.UseArgs(argv)
 
-    if not CheckDB() :
+    if not AccountingReports.CheckDB() :
         return 1
 
     argOutput = AccountingReports.gOutput
