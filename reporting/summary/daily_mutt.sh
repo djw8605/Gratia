@@ -16,6 +16,9 @@ while test "x$1" != "x"; do
    elif [ "$1" == "--debug" ]; then
 	debug=x
 	shift
+   elif [ "$1" == "--dry-run" ]; then
+	dryrun=yes
+	shift
    elif [ "$1" == "--production" ]; then
 	MAILTO=$PROD_MAILTO
         VOREPORT_CONFIG="voreports.production.config"
@@ -71,13 +74,45 @@ function sendto {
     eval $1 --output=csv $when >>  $csvfile
 
     if [ `cat $txtfile | wc -l ` -ne 2 ] ; then
-       mutt -F./muttrc -a $csvfile -s "$subject" $MAILTO < $txtfile
+       if [ "$dryrun" != "yes" ]; then 
+          mutt -F./muttrc -a $csvfile -s "$subject" $MAILTO < $txtfile
+       else 
+          echo mutt -F./muttrc -a $csvfile -s "$subject" $MAILTO < $txtfile
+       fi
     fi
+}
+
+function sendtohtml {
+    cmd=$1
+    rep_args=$2
+    txtfile=$3.txt
+    csvfile=$3.csv
+    htmlfile=$3.html
+    subject="$4"
+    to="$5"
+
+    local whenarg="${ExtraArgs#--}"
+    whenarg=${whenarg:-all}
+
+    if (( $mailOverride == 0 )) && (( $production > 0 )); then
+      newto=$(sed -ne 's/^[ 	]*'"`basename $cmd`"'[ 	]\{1,\}'"${ExtraArgs#--}"'[ 	]\{1,\}\(.*\)$/\1/p' \
+              reportMail.config | sed -e 's/\b\default\b/'"$to"'/' | head -1) 
+      to=${newto:-$to}
+    fi
+    #echo "See $WEBLOC for more information" > $txtfile
+    #echo "For more information see: <a href=$WEBLOC>$WEBLOC</a>" > $htmlfile
+    if [ "$dryrun" != "yes" ]; then 
+       $cmd "--subject=$subject" --emailto=$to --output=all $rep_args
+    else
+       echo $cmd \"--subject=$subject\" --emailto=$to --output=all $rep_args
+       $cmd  --output=all $rep_args
+    fi
+    return   
 }
 
 rm -f daily.check
 
-sendto ./newUsers $whenarg ${WORK_DIR}/report "New users on OSG ($when)"
+sendtohtml ./newUsers $whenarg ${WORK_DIR}/report "New users on OSG ($when)" $MAILTO
 sendto ./daily $whenarg ${WORK_DIR}/report "$MAIL_MSG"
 sendto ./dailyFromSummary $whenarg ${WORK_DIR}/summary_report "$SUM_MAIL_MSG"
 sendto ./dailyStatus  $whenarg ${WORK_DIR}/status_report "$STATUS_MAIL_MSG"
