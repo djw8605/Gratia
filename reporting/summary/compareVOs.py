@@ -13,12 +13,18 @@ def compareVOs(argv=None):
     # get the list of vos reported by gratia
     gratia = AccountingReports.GetReportingVOs(AccountingReports.gBegin, AccountingReports.gEnd) 
 
-    # get the list of vos reported by oim
-    oim = AccountingReports.GetListOfRegisteredVO(voType = 'active') 
+    # get the list of all vos in oim (active + inactive)
+    oimAll = AccountingReports.GetListOfRegisteredVO() 
+    # get the list of VOs in OIM marked as active
+    oimActive = AccountingReports.GetListOfRegisteredVO(voType = 'active') 
+    # get the list of VOs in OIM marked as in-active
+    oimInActive = AccountingReports.GetListOfRegisteredVO(voType = 'inactive') 
     excluded = ['unknown','other']
 
-    # What is in gratia that is not in oim
-    diff = list(set(gratia) - set(oim) - set(excluded))
+    #================================================================================
+    # Section 1) What are the VOs reporting to gratia that are not registered in oim. 
+    #================================================================================
+    diff = list(set(gratia) - set(oimAll) - set(excluded))
     # Find out the sites that report these VOs. The code below creates a detailed formatted report. 
     voStr=""
     # Construct the mysql query string using the conditions for VOnames like (VOName='zeus' or VOName='aceace')
@@ -37,7 +43,7 @@ def compareVOs(argv=None):
 
     # If one or more VOs matched this criteria, then create a formatted report 
     if len(siteVO)!=0:
-        subject = "ALERT! "+ str(len(diff)) + " VOs reported by gratia from " + str(AccountingReports.gBegin) +" to " + str(AccountingReports.gEnd) + " are not in OIM." # alerting header that could be caught by the wrapper script to alert in the subject line of the email
+        subject = "ALERT! "+ str(len(diff)) + " VOs reporting to gratia were not found in OIM." # alerting header that could be caught by the wrapper script to alert in the subject line of the email
         message+=subject
         message+="\nListed below are these VOs along with the sites that reported them.\n"
         dashLen=59; # for decoration
@@ -61,22 +67,29 @@ def compareVOs(argv=None):
   
     message+="\n\n"
 
-    # What is in oim that is not in gratia - might indicate inactivity for that particular VO
-    diff = list(set(oim) - set(gratia) - set(excluded))
+    #============================================================================================
+    # Section 2) What are the VOs reporting to gratia that are registered as in-active VOs in oim 
+    #============================================================================================
+    diff = []
+    diff = list(set(gratia) & set(oimInActive) - set(excluded)) # intersection
     if(len(diff) > 0):
-        message+=str(len(diff)) + " VOs in OIM did not report to gratia. These VOs are listed below."+"\n\n"
-        # sort VOs in the list alphabetically ignoring case
-        count=0
-        for vo in sorted(diff,key=str.lower):
-            count+=1
-            message+= vo + "; "
-            if count%5==0:
-                message+="\n"        
+        message+=str(len(diff)) + " VOs reporting to gratia are marked as in-active in OIM. These VOs are listed below.\n"
+        message+=printBigList(diff)
+        message+="\n\n"
+
+    #================================================================================================================
+    # Section 3) What are the VOs active in OIM but not reporting to gratia - might indicate inactivity for that particular VO
+    #================================================================================================================
+    diff = []
+    diff = list(set(oimActive) - set(gratia) - set(excluded))
+    if(len(diff) > 0):
+        message+=str(len(diff)) + " active VOs in OIM did not report to gratia. These VOs are listed below.\n"
+        message+=printBigList(diff)
+        message+="\n\n"
     else:
         message+="All VOs in OIM have reported"+"\n"
  
-    message+="\n"
-    message+="\n"
+    message+="\n\n"
 
     message = "<pre>" + message + "</pre>"
     content={}
@@ -84,6 +97,18 @@ def compareVOs(argv=None):
     content['html'] = message
     content['csv'] = str(None)
     AccountingReports.sendEmail( (['karthik'], ['karunach@nhn.ou.edu']), subject, content, None,None,'phyast.nhn.ou.edu')
+
+def printBigList(bigList):
+    # print the elements in the list by inserting an end-line character every 'n' elements
+    count=0
+    message=""
+    # sort VOs in the list alphabetically ignoring case
+    for vo in sorted(bigList,key=str.lower):
+        count+=1
+        message+= vo + "; "
+        if count%5==0:
+            message+="\n"        
+    return message
 
 def main(argv=None):
     # Handle command line arguments
