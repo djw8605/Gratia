@@ -3,17 +3,22 @@
 import sys
 import AccountingReports
 
-from AccountingReports import FromCondor,UseArgs,gOutput,gBegin,CheckDB
-import sys
-
 def main(argv=None):
-    UseArgs(argv)
+    AccountingReports.UseArgs(argv)
 
-    if not CheckDB() :
+    if not AccountingReports.CheckDB() :
         return 1
 
     argOutput = AccountingReports.gOutput
-    AccountingReports.NewUsers(range_begin = AccountingReports.gBegin,range_end = AccountingReports.gEnd ,output=argOutput);
+    if (argOutput == "all"):
+       text = {}
+       for iterOutput in ("text","csv","html"):
+          text[iterOutput] = ( AccountingReports. NewUsers(range_begin = AccountingReports.gBegin, range_end = AccountingReports.gEnd ,output=iterOutput) )
+
+       AccountingReports.sendAll(text)
+
+    else:
+       print AccountingReports. NewUsers(range_begin = AccountingReports.gBegin,range_end = AccountingReports.gEnd ,output=argOutput)
 
 if __name__ == "__main__":
     sys.exit(main())

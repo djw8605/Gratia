@@ -2969,6 +2969,56 @@ def SoftwareVersion(range_end = datetime.date.today(),
    msg = msg + conf.end[output] + "\n"
    return msg
 
+class NewUsersConf:
+   title = """\
+The following users's CN very first's job on on the OSG site finished 
+between %s - %s (midnight UTC - midnight UTC):
+"""
+   headers = ("","Site Name","VO","Probe Name","User","End Date Of First Job")
+   titleformats = {}
+   formats = {}
+   start = {}
+   startlines = {}
+   midlines = {}
+   lines = {}
+   endlines = {}
+   end = {}
+   num_header = 2
+   
+   def __init__(self, header = False):
+      self.formats["csv"] = "%s,\"%s\",\"%s\",\"%s\",\"%s\",%s"
+      self.formats["text"] = "%2s | %-20s | %-15s | %-30s | %-20s"
+      self.formats["html"] = "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>"
+      self.titleformats["csv"] = self.formats["csv"]
+      self.titleformats["text"] = self.formats["text"]
+      self.titleformats["html"] = self.formats["html"].replace("td","th")
+      self.start["csv"] = ""
+      self.start["text"] = ""
+      self.start["html"] = "<html><body><br><br>"
+      self.startlines["csv"] = ""
+      self.startlines["text"] = "----------------------------------------------------------------------------------------------------"
+      self.startlines["html"] = "<br><br><table border=\"1\" cellpadding=\"10\" cellspacing=\"0\">"
+      self.midlines["csv"] = ""
+      self.midlines["text"] = self.startlines["text"] + '\n'
+      self.midlines["html"] = ""
+      self.endlines["csv"] = ""
+      self.endlines["text"] = "" # self.startlines["text"]
+      self.endlines["html"] = "</table>"
+      self.end["csv"] = ""
+      self.end["text"] = ""
+      self.end["html"] = "</html></body>"
+
+      if (not header) :  self.title = ""
+
+   def SelectValues(self, output,values) : 
+      if (output == "csv"):
+         return values
+      else:
+         return ( values[0], values[1], values[2], values[3], values[4])
+         
+   def GetData(self,start,end):
+      return GetNewUsers(start,end)
+
 def NewUsers(range_end = datetime.date.today(),
                 range_begin = None,
                 output = "text",
@@ -2983,23 +3033,29 @@ def NewUsers(range_end = datetime.date.today(),
 
    timediff = range_end - range_begin
 
-   title = """\
-The following users's CN very first's job on on the OSG site finished 
-between %s - %s (midnight UTC - midnight UTC):
-"""
-   
+   conf = NewUsersConf(header)
    newusers = GetNewUsers(range_begin,range_end)
 
    if len(newusers) > 0:
-      print title % ( range_begin, range_end )
-      if (output == "csv"):
-         print "\"User\",\"End date of first job\""
+      msg = ""
+      msg = msg + conf.start[output] + '\n'
+      msg = msg + conf.title % (DateToString(range_begin,False), DateToString(range_end,False)) + "\n"
+
+      msg = msg + conf.startlines[output] + "\n"
+      msg = msg + conf.titleformats[output] % conf.SelectValues( output, conf.headers ) + "\n"
+      msg = msg + conf.midlines[output]
+      
+      count = 0
       for line in newusers:
          (name,voname, probename, sitename, when, njobs) = line.split('\t')
-         if (output == "csv"):
-            print "\"%s\",\"%s\",\"%s\",\"%s\",%s" % (name,voname,probename,sitename,when)
-         else:
-            print "%-40s for %-15s at %s (%s)" % (name,voname,probename,sitename)
+         msg = msg + conf.formats[output] %  conf.SelectValues( output,  ("%2d"%count,sitename,voname,probename,name,when) ) + '\n'
+         msg = msg + conf.midlines[output]
+         count += 1
+
+      msg = msg + conf.endlines[output] + "\n"
+      msg = msg + conf.end[output] + "\n"
+      return msg
+   return ""
 
 #
 #
