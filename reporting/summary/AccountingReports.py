@@ -2974,7 +2974,7 @@ class NewUsersConf:
 The following users's CN very first's job on on the OSG site finished 
 between %s - %s (midnight UTC - midnight UTC):
 """
-   headers = ("","Site Name","VO","Probe Name","User","End Date Of First Job")
+   headers = ("","User","VO","Probe Name","Site Name","End Date Of First Job")
    titleformats = {}
    formats = {}
    start = {}
@@ -3013,8 +3013,10 @@ between %s - %s (midnight UTC - midnight UTC):
    def SelectValues(self, output,values) : 
       if (output == "csv"):
          return values
-      else:
+      elif (output == "html"):
          return ( values[0], values[1], values[2], values[3], values[4])
+      else:
+         return ( values[0], values[4], values[2], values[3], values[1])
          
    def GetData(self,start,end):
       return GetNewUsers(start,end)
@@ -3048,7 +3050,7 @@ def NewUsers(range_end = datetime.date.today(),
       count = 0
       for line in newusers:
          (name,voname, probename, sitename, when, njobs) = line.split('\t')
-         msg = msg + conf.formats[output] %  conf.SelectValues( output,  ("%2d"%count,sitename,voname,probename,name,when) ) + '\n'
+         msg = msg + conf.formats[output] %  conf.SelectValues( output,  ("%2d"%count,name,voname,probename,sitename,when) ) + '\n'
          msg = msg + conf.midlines[output]
          count += 1
 
