@@ -432,22 +432,13 @@ def GetListOfDisabledOSGSites():
 def GetListOfOSGSites():
         return GetListOfSites("//Resource[Active='True' and ( Services/Service/Name='Compute Element' or Services/Service/Name='CE' or Services='no applicable service exists')]/Name")
 
-def GetListOfVOs(filter):
-        location = 'http://myosg.grid.iu.edu/vosummary/xml?datasource=summary&summary_attrs_showdesc=on&all_vos=on&show_disabled=on&active_value=1'
-        html = urllib2.urlopen(location).read()
-        vos = []
-        doc = libxml2.parseDoc(html)
-        for resource in doc.xpathEval(filter):
-           if resource.name == "Name":
-              name = resource.content
-           elif resource.name == "LongName":
-              vos.append( (name,resource.content) )
-        doc.freeDoc()
-        
-        return vos;
-
-def GetListOfActiveVOs(filter):
-        location = 'http://myosg.grid.iu.edu/vosummary/xml?datasource=summary&summary_attrs_showdesc=on&all_vos=on&show_disabled=on&active=on&active_value=1'
+def GetListOfVOs(filter,voType=None):
+        if(voType == 'active'):
+            location = 'http://myosg.grid.iu.edu/vosummary/xml?datasource=summary&summary_attrs_showdesc=on&all_vos=on&show_disabled=on&active=on&active_value=1'
+        elif(voType == 'inactive'):
+            location = 'http://myosg.grid.iu.edu/vosummary/xml?datasource=summary&summary_attrs_showdesc=on&all_vos=on&show_disabled=on&active=on&active_value=0'
+        else:
+            location = 'http://myosg.grid.iu.edu/vosummary/xml?datasource=summary&summary_attrs_showdesc=on&all_vos=on&show_disabled=on&active_value=1'
         html = urllib2.urlopen(location).read()
         vos = []
         doc = libxml2.parseDoc(html)
@@ -461,10 +452,8 @@ def GetListOfActiveVOs(filter):
         return vos;
 
 def GetListOfRegisteredVO(voType=None):
-        if(voType == 'active'):
-            allVos = GetListOfActiveVOs( "//VO/Name | //VO/LongName")
-        else:
-            allVos = GetListOfVOs( "//VO/Name | //VO/LongName" )
+        filter = "//VO/Name | //VO/LongName"
+        allVos = GetListOfVOs(filter,voType)
         ret = []
         printederror = False
         for pair in allVos:
@@ -487,8 +476,9 @@ def GetListOfRegisteredVO(voType=None):
                if (longname != "ATLAS" and longname!=""):
                   ret.append( longname.lower() );
         # And hand add a few 'exceptions!"
-        ret.append("usatlas")
-        ret.append("other")
+        if(voType != 'inactive'):
+            ret.append("usatlas")
+            ret.append("other")
         return ret
 
 def UpdateVOName(list, index):
