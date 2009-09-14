@@ -46,19 +46,51 @@ def compareVOs(argv=None):
         subject = "ALERT! "+ str(len(diff)) + " VOs reporting to gratia were not found in OIM." # alerting header that could be caught by the wrapper script to alert in the subject line of the email
         message+=subject
         message+="\nListed below are these VOs along with the sites that reported them.\n"
-        dashLen=59; # for decoration
+        dashLen=60; # for decoration
         count=0
         message+=dashLen*"-" + "\n"
-        message+=(" %s  |%5s%-20s|%5s %-20s|"%("# "," ","VO"," ","SITE"))+"\n"
+        #message+=("| %s.%s  |%5s%-20s|%5s %-20s|"%("#"," "," ","VO"," ","SITE(S)"))+"\n"
+        message+=("| %s.%s  |%5s%-20s|%5s %-20s|"%("#"," "," ","VO"," ","Reporting Site(s)"))+"\n"
         message+=dashLen*"-"+"\n"
+        prevVO = ""
+        voCount = 0
+        siteCount = 0
         for entry in siteVO:
-            count+=1
             site = entry.split('\t')[0]
             vo = entry.split('\t')[1]
-            if(count<10):
-                message+=(" %d.  |%5s%-20s|%5s %-20s|"%(count," ",vo," ",site))+"\n"
+            # prepare/format a table as shown in the sample below:
+            #------------------------------------------------------------
+            #| #.   |     VO                  |      SITE                |
+            #------------------------------------------------------------
+            #| 1.1  |     ahouston            |      Prairiefire         |
+            #| 2.1  |     batelaan            |      Prairiefire         |
+            #| 3.1  |     belashchenko        |      Prairiefire         |
+            #| 4.1  |     berkowitz           |      Prairiefire         |
+            #| 5.1  |     choueiry            |      Prairiefire         |
+            #| 6.1  |     dteam               |      Nebraska            |
+            #| 6.2  |                         |      UFlorida-PG         |
+            #| 7.1  |     ducharme            |      Prairiefire         |
+            #| 8.1  |     fermilab-test       |      FNAL_FERMIGRID      |
+            #| 9.1  |     fgstore             |      FNAL_CDFOSG_1       |
+            #| 9.2  |                         |      FNAL_CDFOSG_2       |
+            #| 9.3  |                         |      FNAL_CDFOSG_3       |
+            #| 9.4  |                         |      FNAL_GPGRID_2       |
+            #| 9.5  |                         |      FNAL_GPGRID_3       |
+            #------------------------------------------------------------
+            if(vo != prevVO):
+                voCount+=1
+                siteCount = 1
+                if(voCount < 10):
+                    message+=("| %d.%d  |%5s%-20s|%5s %-20s|"%(voCount,siteCount," ",vo," ",site))+"\n"
+                else:
+                    message+=("| %d.%d |%5s%-20s|%5s %-20s|"%(voCount,siteCount," ",vo," ",site))+"\n"
             else:
-                message+=(" %d. |%5s%-20s|%5s %-20s|"%(count," ",vo," ",site))+"\n"
+                if(voCount < 10):
+                    message+=("| %d.%d  |%5s%-20s|%5s %-20s|"%(voCount,siteCount," "," "," ",site))+"\n"
+                else:
+                    message+=("| %d.%d |%5s%-20s|%5s %-20s|"%(voCount,siteCount," "," "," ",site))+"\n"
+            prevVO = vo
+            siteCount+=1
         message+=dashLen*"-"+"\n"
     # If no VO matched the criteria
     else:
