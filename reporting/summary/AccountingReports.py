@@ -435,7 +435,6 @@ def GetListOfOSGSites():
 def GetListOfVOs(filter):
         location = 'http://myosg.grid.iu.edu/vosummary/xml?datasource=summary&summary_attrs_showdesc=on&all_vos=on&show_disabled=on&active_value=1'
         html = urllib2.urlopen(location).read()
-        
         vos = []
         doc = libxml2.parseDoc(html)
         for resource in doc.xpathEval(filter):
@@ -447,9 +446,25 @@ def GetListOfVOs(filter):
         
         return vos;
 
-def GetListOfRegisteredVO():
-        allVos = GetListOfVOs( "//VO/Name | //VO/LongName" )
+def GetListOfActiveVOs(filter):
+        location = 'http://myosg.grid.iu.edu/vosummary/xml?datasource=summary&summary_attrs_showdesc=on&all_vos=on&show_disabled=on&active=on&active_value=1'
+        html = urllib2.urlopen(location).read()
+        vos = []
+        doc = libxml2.parseDoc(html)
+        for resource in doc.xpathEval(filter):
+           if resource.name == "Name":
+              name = resource.content
+           elif resource.name == "LongName":
+              vos.append( (name,resource.content) )
+        doc.freeDoc()
+        
+        return vos;
 
+def GetListOfRegisteredVO(voType=None):
+        if(voType == 'active'):
+            allVos = GetListOfActiveVOs( "//VO/Name | //VO/LongName")
+        else:
+            allVos = GetListOfVOs( "//VO/Name | //VO/LongName" )
         ret = []
         printederror = False
         for pair in allVos:
