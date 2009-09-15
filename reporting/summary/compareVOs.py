@@ -78,6 +78,8 @@ def compareVOs(argv=None):
             #| 9.5  |                         |      FNAL_GPGRID_3       |
             #------------------------------------------------------------
             if(vo != prevVO):
+                if(voCount != 0):
+                    message+=dashLen*"-" + "\n"
                 voCount+=1
                 siteCount = 1
                 if(voCount < 10):
@@ -105,7 +107,7 @@ def compareVOs(argv=None):
     diff = []
     diff = list(set(gratia) & set(oimInActive) - set(excluded)) # intersection
     if(len(diff) > 0):
-        message+=str(len(diff)) + " VOs reporting to gratia are marked as in-active in OIM. These VOs are listed below.\n"
+        message+=str(len(diff)) + " VOs reporting to gratia are marked as in-active in OIM. These VOs are listed below.\n\n"
         message+=printBigList(diff)
         message+="\n\n"
 
@@ -115,7 +117,7 @@ def compareVOs(argv=None):
     diff = []
     diff = list(set(oimActive) - set(gratia) - set(excluded))
     if(len(diff) > 0):
-        message+=str(len(diff)) + " active VOs in OIM did not report to gratia. These VOs are listed below.\n"
+        message+=str(len(diff)) + " active VOs in OIM did not report to gratia. These VOs are listed below.\n\n"
         message+=printBigList(diff)
         message+="\n\n"
     else:
@@ -129,6 +131,7 @@ def compareVOs(argv=None):
     content['html'] = message
     content['csv'] = str(None)
     AccountingReports.sendEmail( (['karthik'], ['karunach@nhn.ou.edu']), subject, content, None,None,'phyast.nhn.ou.edu')
+    #AccountingReports.sendEmail( (['karthik','Philippe'], ['karunach@nhn.ou.edu','pcanal@fnal.gov']), subject, content, None,None,'phyast.nhn.ou.edu')
 
 def printBigList(bigList):
     # print the elements in the list by inserting an end-line character every 'n' elements
