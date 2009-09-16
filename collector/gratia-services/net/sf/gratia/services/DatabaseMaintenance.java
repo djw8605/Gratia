@@ -31,10 +31,10 @@ public class DatabaseMaintenance {
 
    static final String dq = "\"";
    static final String comma = ",";
-   static final int gratiaDatabaseVersion = 78;
+   static final int gratiaDatabaseVersion = 79;
    static final int latestDBVersionRequiringStoredProcedureLoad = gratiaDatabaseVersion;
    static final int latestDBVersionRequiringSummaryViewLoad = 37;
-   static final int latestDBVersionRequiringSummaryTriggerLoad = 77;
+   static final int latestDBVersionRequiringSummaryTriggerLoad = 79;
    static final int latestDBVersionRequiringTableStatisticsRefresh = 38;
    static boolean dbUseJobUsageSiteName = false;
    java.sql.Connection connection;
@@ -1005,8 +1005,8 @@ public class DatabaseMaintenance {
                UpdateDbVersion(current);
             }
          }
-         final Integer schemaOnlyLowerBound = 60;
-         final Integer schemaOnlyUpperBound = 77;
+         Integer schemaOnlyLowerBound = 60;
+         Integer schemaOnlyUpperBound = 77;
          if ((current >= schemaOnlyLowerBound) && (current < schemaOnlyUpperBound)) {
             // Stored procedures, trigger procedures.
             Logging.fine("Gratia database upgraded from " + current + " to " + schemaOnlyUpperBound);
@@ -1057,6 +1057,14 @@ public class DatabaseMaintenance {
                  ++current;
                  UpdateDbVersion(current);
              }
+         }
+         schemaOnlyLowerBound = 78;
+         schemaOnlyUpperBound = gratiaDatabaseVersion;
+         if ((current >= schemaOnlyLowerBound) && (current < schemaOnlyUpperBound)) {
+            // Stored procedures, trigger procedures.
+            Logging.fine("Gratia database upgraded from " + current + " to " + schemaOnlyUpperBound);
+            current = schemaOnlyUpperBound;
+            UpdateDbVersion(current);
          }
          return ((current == gratiaDatabaseVersion) && checkAndUpgradeDbAuxiliaryItems());
       }
