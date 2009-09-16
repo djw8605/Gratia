@@ -168,13 +168,14 @@ AJUR:BEGIN
     -- Note entries with different StorageUnit values get stored
     -- independently and must be combined manually outside the DB
 
-    INSERT INTO MasterTransferSummary(StartTime, VOcorrid, ProbeName,
+    INSERT INTO MasterTransferSummary(StartTime, VOcorrid, ProbeName, Grid,
                                       CommonName, Protocol, RemoteSite, Status,
                                       IsNew, Njobs, TransferSize, StorageUnit,
                                       TransferDuration)
     VALUES(n_rowDate,
            n_VOcorrid,
            n_ProbeName,
+           n_Grid,
            n_CommonName,
            n_Protocol,
            n_RemoteSite,

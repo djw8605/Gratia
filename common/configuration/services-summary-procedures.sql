@@ -10,6 +10,7 @@ ASERVH:BEGIN
   DECLARE n_ProbeName VARCHAR(255);
   DECLARE n_VOcorrid INT(11);
   DECLARE n_CEName VARCHAR(255);
+  DECLARE n_Grid VARCHAR(255);
   DECLARE n_HostName VARCHAR(255);
   DECLARE n_Clustercorrid BIGINT(20);
   DECLARE n_SiteName VARCHAR(255);
@@ -78,11 +79,13 @@ ASERVH:BEGIN
   SELECT CE.CEName,
          CE.HostName,
          CNC.corrid,
-         CE.SiteName
+         CE.SiteName,
+         CE.Grid
   INTO n_CEName,
        n_HostName,
        n_Clustercorrid,
-       n_SiteName
+       n_SiteName,
+       n_Grid
   FROM ComputeElement CE
   JOIN ClusterNameCorrection CNC on CE.Cluster = CNC.ClusterName
   WHERE CE.Timestamp = 
@@ -134,14 +137,15 @@ ASERVH:BEGIN
   FROM MasterServiceSummaryHourly MSS
   WHERE MSS.Timestamp = n_SummaryTime AND
         MSS.CEUniqueID = n_CEUniqueID AND
-        MSS.VOcorrid = n_VOcorrid
+        MSS.VOcorrid = n_VOcorrid AND
+        MSS.Grid = n_Grid
   LIMIT 1;
 
 -- In this case, we have a new record; add it to the summary and leave
 IF n_RecordCount=0 THEN
 
   INSERT INTO MasterServiceSummaryHourly(Timestamp, ProbeName, CEUniqueID, VOcorrid,
-                                         CEName, HostName, Clustercorrid, SiteName,
+                                         CEName, HostName, Clustercorrid, SiteName, Grid,
                                          RecordCount, RunningJobs, WaitingJobs, TotalJobs)
   VALUES(n_SummaryTime,
          n_ProbeName,
@@ -151,6 +155,7 @@ IF n_RecordCount=0 THEN
          n_HostName,
          n_Clustercorrid,
          n_SiteName,
+         n_Grid,
          1,
          n_RunningJobs,
          n_WaitingJobs,
@@ -184,6 +189,7 @@ ASERV:BEGIN
   DECLARE n_HostName VARCHAR(255);
   DECLARE n_Clustercorrid VARCHAR(255);
   DECLARE n_SiteName VARCHAR(255);
+  DECLARE n_Grid VARCHAR(255);
   DECLARE n_RunningJobs BIGINT(20);
   DECLARE n_WaitingJobs BIGINT(20);
   DECLARE n_TotalJobs BIGINT(20);
@@ -249,11 +255,13 @@ ASERV:BEGIN
   SELECT CE.CEName,
          CE.HostName,
          CNC.corrid,
-         CE.SiteName
+         CE.SiteName,
+         CE.Grid
   INTO n_CEName,
        n_HostName,
        n_Clustercorrid,
-       n_SiteName
+       n_SiteName,
+       n_Grid
   FROM ComputeElement CE
   JOIN ClusterNameCorrection CNC on CE.Cluster = CNC.ClusterName
   WHERE CE.Timestamp = 
@@ -306,14 +314,15 @@ ASERV:BEGIN
   FROM MasterServiceSummary MSS
   WHERE MSS.Timestamp = n_SummaryTime AND
         MSS.CEUniqueID = n_CEUniqueID AND
-        MSS.VOcorrid = n_VOcorrid
+        MSS.VOcorrid = n_VOcorrid AND
+        MSS.Grid = n_Grid
   LIMIT 1;
 
 -- In this case, we have a new record; add it to the summary and leave
 IF n_RecordCount=0 THEN
 
   INSERT INTO MasterServiceSummary(Timestamp, ProbeName, CEUniqueID, VOcorrid,
-                                    CEName, HostName, Clustercorrid, SiteName,
+                                    CEName, HostName, Clustercorrid, SiteName, Grid,
                                     RecordCount, RunningJobs, WaitingJobs, TotalJobs)
   VALUES(n_SummaryTime,
          n_ProbeName,
@@ -323,6 +332,7 @@ IF n_RecordCount=0 THEN
          n_HostName,
          n_Clustercorrid,
          n_SiteName,
+         n_Grid,
          1,
          n_RunningJobs,
          n_WaitingJobs,
@@ -343,6 +353,8 @@ WHERE
 
 END;
 ||
+
+-- Note: THIS ASSUMES THAT CEUNIQUEID IS UNIQUE THROUGHOUT ALL GRID TYPES
 
 DROP PROCEDURE IF EXISTS del_service_from_hourly_summary
 ||
@@ -450,6 +462,8 @@ DSERVH:BEGIN
 
 END;
 ||
+
+-- Note: THIS ASSUMES THAT CEUNIQUEID IS UNIQUE THROUGHOUT ALL GRID TYPES
 
 DROP PROCEDURE IF EXISTS del_service_from_daily_summary
 ||

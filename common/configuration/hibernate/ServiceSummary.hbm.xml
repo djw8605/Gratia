@@ -57,6 +57,11 @@
            <column name="SiteName" not-null="true" default="'Unknown'" />
        </property>
    </component>
+   <component name="Grid" class="StringElement" insert="true">
+       <property name="Value">
+           <column name="Grid" not-null="true" default="'OSG'" />
+       </property>
+   </component>
    <component name="RecordCount" class="IntegerElement" insert="true">
        <property name="Value">
            <column name="RecordCount" not-null="true" default="1" />
@@ -128,6 +133,11 @@
    <component name="SiteName" class="StringElement" insert="true">
        <property name="Value">
            <column name="SiteName" not-null="true" default="'Unknown'" />
+       </property>
+   </component>
+   <component name="Grid" class="StringElement" insert="true">
+       <property name="Value">
+           <column name="Grid" not-null="true" default="'OSG'" />
        </property>
    </component>
    <component name="RecordCount" class="IntegerElement" insert="true">
