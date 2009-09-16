@@ -303,7 +303,7 @@ def sendEmail( toList, subject, content, log, fromEmail = None, smtpServerHost=N
     if (smtpServerHost == None):
        smtpServerHost = gConfig.get("email", "smtphost")
     if (toList[1] == None):
-       print "Can send mail (no To: specified)!"
+       print "Cannot send mail (no To: specified)!"
        return
        
     msg = MIMEMultipart()
