@@ -145,6 +145,8 @@ sendto ./gradedefficiency "$ExtraArgs $whenarg" ${WORK_DIR}/report "${ExtraHeade
 
 sendto ./usersitereport "$ExtraArgs $whenarg" ${WORK_DIR}/report "${ExtraHeader}Report by user by site for $when" $USER_MAILTO
 
+sendtohtml ./compareVOs.py "$ExtraArgs $whenarg" ${WORK_DIR}/report "Subject will be set in compareVOs.py" $MAILTO 
+
 if [ "$ExtraArgs" == "--monthly" ] ; then
   sendtohtml ./softwareVersions "$ExtraArgs $whenarg" ${WORK_DIR}/report "OSG Installed Probe Versions as of $when" $MAILTO 
 fi
