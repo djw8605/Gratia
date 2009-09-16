@@ -43,7 +43,7 @@ def compareVOs(argv=None):
 
     # If one or more VOs matched this criteria, then create a formatted report 
     if len(siteVO)!=0:
-        subject = "ALERT! "+ str(len(diff)) + " VOs reporting to gratia were not found in OIM." # alerting header that could be caught by the wrapper script to alert in the subject line of the email
+        subject = "ALERT! "+ str(len(diff)) + " VOs reporting to gratia were not found in OIM for "+str(AccountingReports.gBegin) + " to " + str(AccountingReports.gEnd) # alerting header that could be caught by the wrapper script to alert in the subject line of the email
         message+=subject
         message+="\nListed below are these VOs along with the sites that reported them.\n"
         dashLen=60; # for decoration
@@ -101,6 +101,7 @@ def compareVOs(argv=None):
   
     message+="\n\n"
 
+
     #============================================================================================
     # Section 2) What are the VOs reporting to gratia that are registered as in-active VOs in oim 
     #============================================================================================
@@ -130,8 +131,7 @@ def compareVOs(argv=None):
     content['text'] = message
     content['html'] = message
     content['csv'] = str(None)
-    AccountingReports.sendEmail( (['karthik'], ['karunach@nhn.ou.edu']), subject, content, None,None,'phyast.nhn.ou.edu')
-    #AccountingReports.sendEmail( (['karthik','Philippe'], ['karunach@nhn.ou.edu','pcanal@fnal.gov']), subject, content, None,None,'phyast.nhn.ou.edu')
+    AccountingReports.sendEmail( ([None], AccountingReports.gEmailTo), subject, content, None,None,'phyast.nhn.ou.edu')
 
 def printBigList(bigList):
     # print the elements in the list by inserting an end-line character every 'n' elements
