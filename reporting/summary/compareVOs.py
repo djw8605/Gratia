@@ -46,17 +46,19 @@ def compareVOs(argv=None):
         subject = "ALERT! "+ str(len(diff)) + " VOs reporting to gratia were not found in OIM for "+str(AccountingReports.gBegin) + " to " + str(AccountingReports.gEnd) # alerting header that could be caught by the wrapper script to alert in the subject line of the email
         message+=subject
         message+="\nListed below are these VOs along with the sites that reported them.\n"
-        dashLen=60; # for decoration
-        count=0
+        dashLen=60; # number of dashes needed for the horizantal dashed separator line in the table
         message+=dashLen*"-" + "\n"
-        #message+=("| %s.%s  |%5s%-20s|%5s %-20s|"%("#"," "," ","VO"," ","SITE(S)"))+"\n"
+        # heading row
         message+=("| %s.%s  |%5s%-20s|%5s %-20s|"%("#"," "," ","VO"," ","Reporting Site(s)"))+"\n"
+        # separator
         message+=dashLen*"-"+"\n"
+        # variable to keep track of previous vo. This will be compared with the current vo to detect when the vo changes
         prevVO = ""
         voCount = 0
         siteCount = 0
+        # for each row returned by the query, containing the site, vo pair separated by a tab (\t) character
         for entry in siteVO:
-            site = entry.split('\t')[0]
+            site = entry.split('\t')[0] 
             vo = entry.split('\t')[1]
             # prepare/format a table as shown in the sample below:
             #------------------------------------------------------------
@@ -77,22 +79,33 @@ def compareVOs(argv=None):
             #| 9.4  |                         |      FNAL_GPGRID_2       |
             #| 9.5  |                         |      FNAL_GPGRID_3       |
             #------------------------------------------------------------
+
+            # If it is a different VO then print a dashed horizantal line separating this VO entry from the next. This will help to better read the VO discrepancy table.             
             if(vo != prevVO):
+                # no need to print a dashed separator line at the very beginning of the table, since it is already printed to start with
                 if(voCount != 0):
                     message+=dashLen*"-" + "\n"
+                # increase vo count only if we go to the next vo (detected by comparing the current vo to the previous vo)
                 voCount+=1
+                # Reset the site count to 1 for each new vo
                 siteCount = 1
+
+                # check and align the column separators between single digit count and double digit count by printing an extra space for single digit count
                 if(voCount < 10):
                     message+=("| %d.%d  |%5s%-20s|%5s %-20s|"%(voCount,siteCount," ",vo," ",site))+"\n"
                 else:
                     message+=("| %d.%d |%5s%-20s|%5s %-20s|"%(voCount,siteCount," ",vo," ",site))+"\n"
+            # If it is the same VO, then don't print the VO name again, but just the site name that reported that VO in a separate line
             else:
                 if(voCount < 10):
                     message+=("| %d.%d  |%5s%-20s|%5s %-20s|"%(voCount,siteCount," "," "," ",site))+"\n"
                 else:
                     message+=("| %d.%d |%5s%-20s|%5s %-20s|"%(voCount,siteCount," "," "," ",site))+"\n"
+            # keep track of the previous VO
             prevVO = vo
+            # increase site count for every row returned
             siteCount+=1
+        # print the footer horizantal dashed line
         message+=dashLen*"-"+"\n"
     # If no VO matched the criteria
     else:
