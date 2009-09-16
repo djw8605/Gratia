@@ -131,7 +131,7 @@ def compareVOs(argv=None):
     content['text'] = message
     content['html'] = message
     content['csv'] = str(None)
-    AccountingReports.sendEmail( ([None], AccountingReports.gEmailTo), subject, content, None,None,'phyast.nhn.ou.edu')
+    AccountingReports.sendEmail( ([None], AccountingReports.gEmailTo), subject, content, None,None,None)
 
 def printBigList(bigList):
     # print the elements in the list by inserting an end-line character every 'n' elements
