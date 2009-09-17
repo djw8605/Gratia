@@ -44,17 +44,17 @@
 
     <many-to-one name="Probe" class="Probe" column="probeid"/>
 
-   <join table="ComputeElementRecord_Meta">
-      <key column="dbid"/>
-      <property name="ServerDate" column="ServerDate" type="timestamp"/>
-      <property name="md5" column="md5"/>
-   </join>
-
    <list name="Origins" table="ComputeElementRecord_Origin" cascade="persist">
       <key column="dbid"/>
       <list-index column="hop" base="1"/>
       <many-to-many column="originid" class="Origin"/>
    </list>
+
+   <join table="ComputeElementRecord_Meta">
+      <key column="dbid"/>
+      <property name="ServerDate" column="ServerDate" type="timestamp"/>
+      <property name="md5" column="md5"/>
+   </join>
 
   </class>
 

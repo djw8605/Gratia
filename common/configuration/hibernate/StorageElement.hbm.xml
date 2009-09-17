@@ -72,17 +72,17 @@
       <property name="Value" column="Grid" /> 
     </component> 
 
-   <join table="StorageElement_Meta">
-      <key column="dbid"/>
-      <property name="ServerDate" column="ServerDate" type="timestamp"/>
-      <property name="md5" column="md5"/>
-   </join>
-
    <list name="Origins" table="StorageElement_Origin" cascade="persist">
       <key column="dbid"/>
       <list-index column="hop" base="1"/>
       <many-to-many column="originid" class="Origin"/>
    </list>
+
+   <join table="StorageElement_Meta">
+      <key column="dbid"/>
+      <property name="ServerDate" column="ServerDate" type="timestamp"/>
+      <property name="md5" column="md5"/>
+   </join>
 
   </class>
 
