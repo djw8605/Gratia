@@ -321,6 +321,7 @@ public class DatabaseMaintenance {
             "EndTime, VOcorrid, ProbeName, " +
             "CommonName, ResourceType, " +
             "HostDescription, ApplicationExitCode, Grid, Cores");
+      AddIndex("MasterSummaryData", false, "index11", "DistinguishedName");
       DropIndex("MasterSummaryData", "index08");
       DropIndex("MasterSummaryData", "index09");
 

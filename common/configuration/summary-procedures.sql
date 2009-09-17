@@ -13,6 +13,7 @@ AJUR:BEGIN
   -- Main
   DECLARE n_ProbeName VARCHAR(255);
   DECLARE n_CommonName VARCHAR(255);
+  DECLARE n_DistinguishedName VARCHAR(255);
   DECLARE n_VOcorrid INT(11);
   DECLARE n_ResourceType VARCHAR(255);
   DECLARE n_HostDescription VARCHAR(255);
@@ -54,6 +55,7 @@ AJUR:BEGIN
   --
   SELECT M.ProbeName,
          IFNULL(J.CommonName, ''),
+         IFNULL(J.KeyInfoContent, ''),
          VC.corrid,
          IFNULL(J.ResourceType, ''),
          IFNULL(J.HostDescription, ''),
@@ -76,6 +78,7 @@ AJUR:BEGIN
          IFNULL(J.Processors, 1)
   INTO n_ProbeName,
        n_CommonName,
+       n_DistinguishedName,
        n_VOcorrid,
        n_ResourceType,
        n_HostDescription,
@@ -169,7 +172,7 @@ AJUR:BEGIN
     -- independently and must be combined manually outside the DB
 
     INSERT INTO MasterTransferSummary(StartTime, VOcorrid, ProbeName, Grid,
-                                      CommonName, Protocol, RemoteSite, Status,
+                                      CommonName, DistinguishedName, Protocol, RemoteSite, Status,
                                       IsNew, Njobs, TransferSize, StorageUnit,
                                       TransferDuration)
     VALUES(n_rowDate,
@@ -177,6 +180,7 @@ AJUR:BEGIN
            n_ProbeName,
            n_Grid,
            n_CommonName,
+           n_DistinguishedName,
            n_Protocol,
            n_RemoteSite,
            n_Status,
@@ -220,7 +224,7 @@ AJUR:BEGIN
 
   -- MasterSummaryData
   INSERT INTO MasterSummaryData(EndTime, VOcorrid, ProbeName, CommonName,
-                                ResourceType, HostDescription,
+                                DistinguishedName, ResourceType, HostDescription,
                                 ApplicationExitCode, Njobs, WallDuration,
                                 CpuUserDuration, CpuSystemDuration,
                                 Grid, Cores)
@@ -228,6 +232,7 @@ AJUR:BEGIN
          n_VOcorrid,
          n_ProbeName,
          n_CommonName,
+         n_DistinguishedName,
          n_ResourceType,
          n_HostDescription,
          n_ApplicationExitCode,
@@ -296,6 +301,7 @@ DJUR:BEGIN
   -- Main
   DECLARE n_ProbeName VARCHAR(255);
   DECLARE n_CommonName VARCHAR(255);
+  DECLARE n_DistinguishedName VARCHAR(255);
   DECLARE n_VOcorrid INT(11);
   DECLARE n_ResourceType VARCHAR(255);
   DECLARE n_HostDescription VARCHAR(255);
@@ -336,6 +342,7 @@ DJUR:BEGIN
   -- Data collection
   SELECT M.ProbeName,
          IFNULL(J.CommonName, ''),
+         IFNULL(J.KeyInfoContent, ''),
          VC.corrid,
          IFNULL(J.ResourceType, ''),
          IFNULL(J.HostDescription, ''),
@@ -357,6 +364,7 @@ DJUR:BEGIN
          IFNULL(J.Processors, 1)
   INTO n_ProbeName,
        n_CommonName,
+       n_DistinguishedName,
        n_VOcorrid,
        n_ResourceType,
        n_HostDescription,
@@ -455,6 +463,7 @@ DJUR:BEGIN
     WHERE StartTime = n_rowDate
       AND VOcorrid = n_VOcorrid
       AND CommonName = n_CommonName
+      AND DistinguishedName = n_DistinguishedName
       AND Protocol = n_Protocol
       AND RemoteSite = n_RemoteSite
       AND Status = n_Status
@@ -466,6 +475,7 @@ DJUR:BEGIN
     WHERE StartTime = n_rowDate
         AND VOcorrid = n_VOcorrid
         AND CommonName = n_CommonName
+        AND DistinguishedName = n_DistinguishedName
         AND Protocol = n_Protocol
         AND RemoteSite = n_RemoteSite
         AND Status = n_Status
@@ -510,6 +520,7 @@ DJUR:BEGIN
     AND VOcorrid = n_VOcorrid
     AND ProbeName = n_ProbeName
     AND CommonName = n_CommonName
+    AND DistinguishedName = n_DistinguishedName
     AND ResourceType = n_ResourceType
     AND HostDescription = n_HostDescription
     AND ApplicationExitCode = n_ApplicationExitCode
@@ -522,6 +533,7 @@ DJUR:BEGIN
     AND VOcorrid = n_VOcorrid
     AND ProbeName = n_ProbeName
     AND CommonName = n_CommonName
+    AND DistinguishedName = n_DistinguishedName
     AND ResourceType = n_ResourceType
     AND HostDescription = n_HostDescription
     AND ApplicationExitCode = n_ApplicationExitCode

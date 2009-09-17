@@ -41,6 +41,11 @@
            <column name="CommonName" not-null="true" default="'Unknown'" />
        </property>
    </component>
+   <component name="DistinguishedName" class="StringElement" insert="true">
+       <property name="Value">
+           <column name="DistinguishedName" not-null="true" default="'Unknown'" />
+       </property>
+   </component>
    <component name="Protocol" class="StringElement" insert="true">
        <property name="Value">
            <column name="Protocol" not-null="true" default="''" />

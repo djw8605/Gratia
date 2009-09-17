@@ -24,6 +24,7 @@ public class TransferSummary extends Record {
     private StringElement RemoteSite;
     private StringElement Protocol;
     private StringElement CommonName;
+    private StringElement DistinguishedName;
     private StringElement ResourceType;
     private StringElement HostDescription;
     private IntegerElement Status;
@@ -173,6 +174,15 @@ public class TransferSummary extends Record {
         this.CommonName = CommonName;
     }
 
+    // DistinguishedName
+    public StringElement getDistinguishedName() {
+        return DistinguishedName;
+    }
+
+    public void setDistinguishedName(StringElement DistinguishedName) {
+        this.DistinguishedName = DistinguishedName;
+    }
+    
     // RemoteSite
     public StringElement getRemoteSite() {
         return RemoteSite;

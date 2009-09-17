@@ -21,6 +21,7 @@ public class JobUsageSummary extends Record {
     private DateElement EndTime;
     private IntegerElement VOcorrid;
     private StringElement CommonName;
+    private StringElement DistinguishedName;
     private StringElement ResourceType;
     private StringElement HostDescription;
     private StringElement ApplicationExitCode;
@@ -118,6 +119,14 @@ public class JobUsageSummary extends Record {
         this.CommonName = CommonName;
     }
 
+    // DistinguishedName
+    public StringElement getDistinguishedName() {
+        return DistinguishedName;
+    }
+
+    public void setDistinguishedName(StringElement DistinguishedName) {
+        this.DistinguishedName = DistinguishedName;
+    }
     // ResourceType
     public StringElement getResourceType() {
         return ResourceType;

@@ -25,6 +25,7 @@ DROP VIEW IF EXISTS UserProbeSummary;
 CREATE VIEW `UserProbeSummary` AS
   SELECT MSD.EndTime AS EndTime,
          MSD.CommonName as CommonName,
+         MSD.DistinguishedName as DistinguishedName,
          MSD.ProbeName AS ProbeName,
          MSD.ResourceType AS ResourceType,
          MSD.Njobs AS Njobs,
@@ -45,6 +46,7 @@ CREATE VIEW `VOProbeSummary` AS
          VO.VOName AS VOName,
          MSD.ProbeName AS ProbeName,
          MSD.CommonName AS CommonName,
+         MSD.DistinguishedName as DistinguishedName,
          MSD.ResourceType AS ResourceType,
          MSD.Njobs AS Njobs,
          MSD.WallDuration AS WallDuration,

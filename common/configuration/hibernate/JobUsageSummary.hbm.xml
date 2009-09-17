@@ -37,6 +37,11 @@
            <column name="CommonName" not-null="true" default="'Unknown'" />
        </property>
    </component>
+   <component name="DistinguishedName" class="StringElement" insert="true">
+       <property name="Value">
+           <column name="DistinguishedName" not-null="true" default="'Unknown'" />
+       </property>
+   </component>
    <component name="ResourceType" class="StringElement" insert="true">
        <property name="Value">
            <column name="ResourceType" not-null="true" default="'Unknown'" />
