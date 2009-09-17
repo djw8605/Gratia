@@ -45,8 +45,9 @@ ASERVH:BEGIN
        n_TotalJobs,
        n_RecordTime
   FROM ComputeElementRecord CER
-       LEFT OUTER JOIN VONameCorrection VC ON
-        (CER.VO = BINARY VC.VOName)
+       JOIN VONameCorrection VC ON
+        ((BINARY CER.VO = BINARY VC.VOName) AND
+         (BINARY CER.VO = BINARY VC.ReportableVOName))
   WHERE CER.dbid = inputDbid;
 
   -- Basic data checks
@@ -221,8 +222,9 @@ ASERV:BEGIN
        n_TotalJobs,
        n_RecordTime
   FROM ComputeElementRecord CER
-       LEFT OUTER JOIN VONameCorrection VC ON
-        (CER.VO = BINARY VC.VOName)
+       JOIN VONameCorrection VC ON
+        ((BINARY CER.VO = BINARY VC.VOName) AND
+         (BINARY CER.VO = BINARY VC.ReportableVOName))
   WHERE CER.dbid = inputDbid;
 
   -- Basic data checks
@@ -391,8 +393,9 @@ DSERVH:BEGIN
        n_TotalJobs,
        n_RecordTime
   FROM ComputeElementRecord CER
-       LEFT OUTER JOIN VONameCorrection VC ON
-        (CER.VO = BINARY VC.VOName)
+       JOIN VONameCorrection VC ON
+        ((BINARY CER.VO = BINARY VC.VOName) AND
+         (BINARY CER.VO = BINARY VC.ReportableVOName))
   WHERE CER.dbid = inputDbid;
 
   -- Basic data validation
@@ -500,8 +503,9 @@ DSERV:BEGIN
        n_TotalJobs,
        n_RecordTime
   FROM ComputeElementRecord CER
-       LEFT OUTER JOIN VONameCorrection VC ON
-        (CER.VO = BINARY VC.VOName)
+       JOIN VONameCorrection VC ON
+        ((BINARY CER.VO = BINARY VC.VOName) AND
+         (BINARY CER.VO = BINARY VC.ReportableVOName))
   WHERE CER.dbid = inputDbid;
 
   -- Basic data validation
