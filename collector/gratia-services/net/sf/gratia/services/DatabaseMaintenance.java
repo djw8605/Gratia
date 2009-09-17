@@ -31,10 +31,10 @@ public class DatabaseMaintenance {
 
    static final String dq = "\"";
    static final String comma = ",";
-   static final int gratiaDatabaseVersion = 79;
+   static final int gratiaDatabaseVersion = 80;
    static final int latestDBVersionRequiringStoredProcedureLoad = gratiaDatabaseVersion;
-   static final int latestDBVersionRequiringSummaryViewLoad = 37;
-   static final int latestDBVersionRequiringSummaryTriggerLoad = 79;
+   static final int latestDBVersionRequiringSummaryViewLoad = 80;
+   static final int latestDBVersionRequiringSummaryTriggerLoad = 80;
    static final int latestDBVersionRequiringTableStatisticsRefresh = 38;
    static boolean dbUseJobUsageSiteName = false;
    java.sql.Connection connection;
