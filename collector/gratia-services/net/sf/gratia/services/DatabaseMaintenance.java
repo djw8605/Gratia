@@ -317,13 +317,14 @@ public class DatabaseMaintenance {
       AddIndex("MasterSummaryData", false, "index05", "ResourceType");
       AddIndex("MasterSummaryData", false, "index06", "HostDescription");
       AddIndex("MasterSummaryData", false, "index07", "ApplicationExitCode");
-      AddIndex("MasterSummaryData", true, "index10",
+      AddIndex("MasterSummaryData", true, "index12",
             "EndTime, VOcorrid, ProbeName, " +
-            "CommonName, ResourceType, " +
+            "CommonName, DistinguishedName, ResourceType, " +
             "HostDescription, ApplicationExitCode, Grid, Cores");
       AddIndex("MasterSummaryData", false, "index11", "DistinguishedName");
       DropIndex("MasterSummaryData", "index08");
       DropIndex("MasterSummaryData", "index09");
+      DropIndex("MasterSummaryData", "index10");
 
       // Indexes for MasterTransferSummary
       AddIndex("MasterTransferSummary", false, "index01", "StartTime");
