@@ -509,7 +509,11 @@ public class DataScrubber {
        final String [] types = {
           "JobUsageRecord",
           "MetricRecord",
-//          "ComputeElement",
+          "ComputeElement",
+          "StorageElement",
+          "ComputeElementRecord",
+          "StorageElementRecord",
+          "Subcluster",
           "ProbeDetails" 
        };
        
