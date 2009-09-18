@@ -31,7 +31,7 @@ public class DatabaseMaintenance {
 
    static final String dq = "\"";
    static final String comma = ",";
-   static final int gratiaDatabaseVersion = 80;
+   static final int gratiaDatabaseVersion = 81;
    static final int latestDBVersionRequiringStoredProcedureLoad = gratiaDatabaseVersion;
    static final int latestDBVersionRequiringSummaryViewLoad = 80;
    static final int latestDBVersionRequiringSummaryTriggerLoad = 80;
@@ -1067,6 +1067,39 @@ public class DatabaseMaintenance {
             Logging.fine("Gratia database upgraded from " + current + " to " + schemaOnlyUpperBound);
             current = schemaOnlyUpperBound;
             UpdateDbVersion(current);
+         }
+         if (current == 80) {
+             // Update JobUsageRecord_XML tables to use MEDIUMTEXT.
+             int result = 0;
+             Session session = null;
+             try {
+                 session = HibernateWrapper.getSession();
+                 Transaction tx = session.beginTransaction();
+                 Query q =
+                     session.createSQLQuery("ALTER TABLE JobUsageRecord_Xml " +
+                                            "MODIFY COLUMN extraxml MEDIUMTEXT," +
+                                            "MODIFY COLUMN rawxml MEDIUMTEXT ;");
+                 q.executeUpdate();
+                 tx.commit();
+             } catch (Exception e) {
+                 if ((session != null) && (session.isOpen())) {
+                     Transaction tx = session.getTransaction();
+                     if (tx != null) {
+                         tx.rollback();
+                     }
+                     session.close();
+                 }
+                 Logging.debug("Exception detail: ", e);
+                 Logging.warning("Gratia database FAILED to upgrade from " + current +
+                                 " to " + (current + 1));
+                 result = -1;
+             }
+             if (result > -1) {
+                 Logging.fine("Gratia database upgraded from " + current +
+                              " to " + (current + 1));
+                 ++current;
+                 UpdateDbVersion(current);
+             }
          }
          return ((current == gratiaDatabaseVersion) && checkAndUpgradeDbAuxiliaryItems());
       }
