@@ -1,26 +1,39 @@
 #!/bin/bash
 
 mail="gratia-operation@fnal.gov"
+type=release
 
-while getopts :t OPT; do
+while getopts :tab OPT; do
     case $OPT in
+        a)
+            autostart=1
+            ;;
+        b)
+            type=build
+            ;;
         t)
             mail="grid-accounting@fnal.gov" 
             ;;
         *)
-            echo "usage: ${0##*/} [-t} [--] <release>"
+            echo "usage: ${0##*/} [-t|-a|-b] [--] <release>"
             exit 2
     esac
 done
 shift $[ OPTIND - 1 ]
 
+tnstub="${type}s"
 release="$1"
 
 function install_collector() {
   local instance="$1"
-  printf "Installing collector $instance with release $release ... "
-  /home/gratia/gratia-releases/gratia-${release}/build-scripts/gratia-upgrade.sh --instance $instance --source /home/gratia/gratia-releases/gratia-${release} --pswd xx --daily "$mail" --mysql /home/gratia/.itb-mysql-gratia02 --force-log4j
-  local status=$?
+  printf "Installing collector $instance with $type $release ... "
+  if [[ -n "$autostart" ]]; then
+    /home/gratia/gratia-$tnstub/gratia-${release}/build-scripts/gratia-upgrade.sh --instance $instance --source /home/gratia/gratia-$tnstub/gratia-${release} --pswd xx --daily "$mail" --mysql /home/gratia/.itb-mysql-gratia02 --force-log4j
+    local status=$?
+  else
+    yes n | /home/gratia/gratia-$tnstub/gratia-${release}/build-scripts/gratia-upgrade.sh --instance $instance --source /home/gratia/gratia-$tnstub/gratia-${release} --pswd xx --mail "$mail" --mysql /home/gratia/.itb-mysql-gratia02 --force-log4j
+    local status=$?
+  fi
   if (( $status == 0 )); then
     echo "OK"
   else
