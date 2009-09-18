@@ -12,7 +12,8 @@ CREATE VIEW `ProbeSummary` AS
          MSD.Njobs AS Njobs,
          MSD.WallDuration AS WallDuration,
          MSD.CpuUserDuration AS CpuUserDuration,
-         MSD.CpuSystemDuration AS CpuSystemDuration
+         MSD.CpuSystemDuration AS CpuSystemDuration,
+         MSD.Grid AS Grid
   FROM MasterSummaryData MSD;
 
 -- ----------------------------------
@@ -31,7 +32,8 @@ CREATE VIEW `UserProbeSummary` AS
          MSD.Njobs AS Njobs,
          MSD.WallDuration AS WallDuration,
          MSD.CpuUserDuration AS CpuUserDuration,
-         MSD.CpuSystemDuration AS CpuSystemDuration
+         MSD.CpuSystemDuration AS CpuSystemDuration,
+         MSD.Grid AS Grid
   FROM MasterSummaryData MSD;
 
 -- ----------------------------------
@@ -51,7 +53,8 @@ CREATE VIEW `VOProbeSummary` AS
          MSD.Njobs AS Njobs,
          MSD.WallDuration AS WallDuration,
          MSD.CpuUserDuration AS CpuUserDuration,
-         MSD.CpuSystemDuration AS CpuSystemDuration
+         MSD.CpuSystemDuration AS CpuSystemDuration,
+         MSD.Grid AS Grid
   FROM MasterSummaryData MSD
         JOIN VONameCorrection VC ON (MSD.VOcorrid = VC.corrid)
         JOIN VO ON (VC.VOid = VO.VOid);
@@ -71,7 +74,8 @@ CREATE VIEW `HostDescriptionProbeSummary` AS
          MSD.Njobs AS Njobs,
          MSD.WallDuration AS WallDuration,
          MSD.CpuUserDuration AS CpuUserDuration,
-         MSD.CpuSystemDuration AS CpuSystemDuration
+         MSD.CpuSystemDuration AS CpuSystemDuration,
+         MSD.Grid AS Grid
   FROM MasterSummaryData MSD;
 
 -- ----------------------------------
