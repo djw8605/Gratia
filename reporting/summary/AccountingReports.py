@@ -349,6 +349,9 @@ def sendEmail( toList, subject, content, log, fromEmail = None, smtpServerHost=N
 def sendAll(text, filestem = "temp"):
    global gEmailTo,gEmailToNames,gEmailSubject
    
+   if len(text["text"]) == 0:
+      return;
+
    if (gEmailTo == None):
       for iterOutput in ("text","csv","html"):
          print "===="+iterOutput+"===="
