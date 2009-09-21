@@ -137,14 +137,18 @@ def compareVOs(argv=None):
     else:
         message+="All VOs in OIM have reported"+"\n"
  
-    message+="\n\n"
+    message+="\n"
 
-    message = "<pre>" + message + "</pre>"
     content={}
     content['text'] = message
-    content['html'] = message
+    content['html'] = "<pre>" + message + "</pre>"
     content['csv'] = str(None)
-    AccountingReports.sendEmail( ([None], AccountingReports.gEmailTo), subject, content, None,None,None)
+    # If the report is run with a emailto option then email the report to the intended recipients
+    if(AccountingReports.gEmailTo):
+        AccountingReports.sendEmail( ([None], AccountingReports.gEmailTo), subject, content, None,None,None)
+    # otherwise simply print the report to STDOUT
+    else:
+        print content['text']
 
 def printBigList(bigList):
     # print the elements in the list by inserting an end-line character every 'n' elements
