@@ -772,40 +772,50 @@ public class CollectorService implements ServletContextListener {
             // Connection Tracking has been requested
 
             Session session = null;
-            session = HibernateWrapper.getSession();
-  
+            Boolean keepTrying  = true;
+            Integer nTries = 0;
+
             net.sf.gratia.storage.Connection gr_conn = new net.sf.gratia.storage.Connection(senderHost,sender,null);
-            Transaction tx = session.beginTransaction();
-            try {
-               gr_conn = gr_conn.attach( session );
-               session.flush();
-               tx.commit();
-            } catch (org.hibernate.exception.LockAcquisitionException e) {
-               Logging.warning("checkCertificate: Lock acquisition exception.  Trying a second time.");
-               try {
-                  // Try a second time after a little sleep.
-                  Thread.sleep(300);
-                  
-                  session.flush();
-                  tx.commit();
-                
-               } catch (Exception sub_e) {
-                  
-                  Logging.warning("checkCertificate: error during 2nd attempt at storing or retrieving connection object in: ",sub_e);
-                  sub_e.printStackTrace();
-                  
-                  tx.rollback();
-               } 
-            } catch (Exception e) {
-
-               Logging.warning("checkCertificate: error when storing or retrieving connection object in: ",e);
-               e.printStackTrace();
-
-               tx.rollback();
+            while (keepTrying) {
+                session = HibernateWrapper.getSession();
+                Transaction tx = session.beginTransaction();
+                try {
+                    if (++nTries > 1) {
+                        Thread.sleep(300);
+                    }
+                    gr_conn = gr_conn.attach( session );
+                    session.flush();
+                    tx.commit();
+                    keepTrying = false;
+                } catch (org.hibernate.exception.LockAcquisitionException e) {
+                    if (session != null && session.isOpen()) {
+                        if ((tx != null) && tx.isActive()) {
+                            tx.rollback();
+                        }
+                        session.close();
+                    }
+                    if (nTries == 1) {
+                        Logging.info("checkCertificate: Lock acquisition exception.  Trying a second time.");
+                    } else if (nTries < 5) {
+                        Logging.warning("checkCertificate: multiple contiguous lock acquisition errors: keep trying.");
+                    } else if (nTries == 5) {
+                        Logging.warning("checkCertificate: multiple contiguous lock acquisition errors: keep trying (warnings throttled).");
+                    } else if ( (nTries % 100) == 0) {
+                        Logging.warning("checkCertficate: hit " + nTries + " contiguous lock acqusition errors: check DB.");
+                    }
+                } catch (Exception g_e) {
+                    if (session != null && session.isOpen()) {
+                        if ((tx != null) && tx.isActive()) {
+                            tx.rollback();
+                        }
+                        session.close();
+                    }
+                    Logging.warning("checkCertificate: error when storing or retrieving connection object in: ", g_e);
+                    Logging.debug("checkCertificate: exception details:", g_e);
+                    keepTrying = false;
+                }
             }
-
             session.close();
-            
             from.setConnection(gr_conn);
             if (gr_conn.isValid()) {
                result = from.asXml(0);
