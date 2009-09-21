@@ -42,7 +42,7 @@ public class CollectorService implements ServletContextListener {
     private int fSecurityLevel = 0;
 
     private boolean needConnectionTracking() {
-       return 1 == (fSecurityLevel & 1);
+        return 1 == (fSecurityLevel & 1);
     }
    
     //
@@ -69,7 +69,7 @@ public class CollectorService implements ServletContextListener {
     DatabaseMaintenance checker = null;
 
     public CollectorService() {
-       net.sf.gratia.storage.Connection.setDefaultCollectorName(getName());
+        net.sf.gratia.storage.Connection.setDefaultCollectorName(getName());
     }
 
     public void contextInitialized(ServletContextEvent sce) {
@@ -106,13 +106,13 @@ public class CollectorService implements ServletContextListener {
        
         String url = p.getProperty("service.open.connection");
         if ( url != null ) {
-           fName = "collector:" + url;
+            fName = "collector:" + url;
         } else {
-           try {
-              fName = "collector:" + java.net.InetAddress.getLocalHost().toString();
-           } catch (java.net.UnknownHostException e) {
-              fName = "collector:localhost";
-           }
+            try {
+                fName = "collector:" + java.net.InetAddress.getLocalHost().toString();
+            } catch (java.net.UnknownHostException e) {
+                fName = "collector:localhost";
+            }
         }
 
         fSecurityLevel = Integer.parseInt(p.getProperty("service.security.level", "0"));
@@ -299,14 +299,14 @@ public class CollectorService implements ServletContextListener {
    
     // Return the 'name' of this collector.
     public static String getName() {
-       if (fName == null) {
-          try {
-             fName = "collector:" + java.net.InetAddress.getLocalHost().toString();
-          } catch (java.net.UnknownHostException e) {
-             fName = "collector:localhost";
-          }
-       }
-       return fName;
+        if (fName == null) {
+            try {
+                fName = "collector:" + java.net.InetAddress.getLocalHost().toString();
+            } catch (java.net.UnknownHostException e) {
+                fName = "collector:localhost";
+            }
+        }
+        return fName;
     }
       
         
@@ -731,69 +731,182 @@ public class CollectorService implements ServletContextListener {
         FlipSSL.flip();
     }
    
-   public void setConnectionCaching(boolean enable)
-   {
-      net.sf.gratia.storage.Connection.setCaching(enable);
-   }
+    public void setConnectionCaching(boolean enable)
+    {
+        net.sf.gratia.storage.Connection.setCaching(enable);
+    }
    
-   public String checkConnection(String certpem, String senderHost, String sender) 
-   throws RemoteException, AccessException {
+    public String checkConnection(String certpem, String senderHost, String sender) 
+        throws RemoteException, AccessException {
       
-      net.sf.gratia.storage.Certificate c  = new net.sf.gratia.storage.Certificate( certpem);
+        net.sf.gratia.storage.Certificate c  = new net.sf.gratia.storage.Certificate( certpem);
       
-      java.security.cert.X509Certificate certs[] = new java.security.cert.X509Certificate[1];
+        java.security.cert.X509Certificate certs[] = new java.security.cert.X509Certificate[1];
       
-      try { 
-         certs[0] = c.getCert();
-      } catch (java.security.cert.CertificateException e) {
-         Logging.info("Failed to create cert from pem: "+certpem);
-         throw new AccessException("Invalid Certificate.");
-      }
+        try { 
+            certs[0] = c.getCert();
+        } catch (java.security.cert.CertificateException e) {
+            Logging.info("Failed to create cert from pem: "+certpem);
+            throw new AccessException("Invalid Certificate.");
+        }
       
-      return checkConnection(certs,senderHost,sender);
-   }
+        return checkConnection(certs,senderHost,sender);
+    }
 
       
-   public String checkConnection(java.security.cert.X509Certificate certs[], String senderHost, String sender) 
-   throws RemoteException, AccessException {
-      final String command = "from Certificate where pem = ?";
+    public String checkConnection(java.security.cert.X509Certificate certs[], String senderHost, String sender) 
+        throws RemoteException, AccessException {
+        final String command = "from Certificate where pem = ?";
 
-      String result = "";
-      net.sf.gratia.storage.Origin from = new net.sf.gratia.storage.Origin(new java.util.Date());
+        String result = "";
+        net.sf.gratia.storage.Origin from = new net.sf.gratia.storage.Origin(new java.util.Date());
 
-      if (certs == null || fSecurityLevel==1) {
-         if (fSecurityLevel >= 4) {
-            Logging.warning("checkCertificate: No certificate");
-            return "";
-         } else if (fSecurityLevel >= 2) {
-            Logging.log("checkCertificate: No certificate");
-         }
-         if ( needConnectionTracking() ) {
-            // Connection Tracking has been requested
-
+        if (certs == null || fSecurityLevel==1) {
+            if (fSecurityLevel >= 4) {
+                Logging.warning("checkCertificate: No certificate");
+                return "";
+            } else if (fSecurityLevel >= 2) {
+                Logging.log("checkCertificate: No certificate");
+            }
+            if ( needConnectionTracking() ) {
+                // Connection Tracking has been requested
+                net.sf.gratia.storage.Connection gr_conn = new net.sf.gratia.storage.Connection(senderHost,sender,null);
+                this.trackConnection(gr_conn);
+                from.setConnection(gr_conn);
+                if (gr_conn.isValid()) {
+                    result = from.asXml(0);
+                }
+            }
+        } else {
+         
             Session session = null;
-            Boolean keepTrying  = true;
-            Integer nTries = 0;
 
-            net.sf.gratia.storage.Connection gr_conn = new net.sf.gratia.storage.Connection(senderHost,sender,null);
-            while (keepTrying) {
-                session = HibernateWrapper.getSession();
-                Transaction tx = session.beginTransaction();
+            for(int i=0; i< certs.length; ++i) {
+                if (session == null) {
+                    session = HibernateWrapper.getSession();
+                }
+                String pem = null;
+                net.sf.gratia.storage.Certificate localcert = null;
                 try {
-                    if (++nTries > 1) {
-                        Thread.sleep(300);
+                    pem =  net.sf.gratia.storage.Certificate.GeneratePem(certs[i]);
+                    localcert = (net.sf.gratia.storage.Certificate)session.createQuery(command).setString(0,pem).uniqueResult();
+                } catch (java.security.cert.CertificateEncodingException e) {
+                    Logging.warning("checkCertificate exception: " + e);
+                    Logging.debug("Exception details: ", e);
+                    break;
+                }
+                if (localcert == null) {
+                    // Not registered yet.
+                    try {
+                        localcert = new net.sf.gratia.storage.Certificate( certs[i] );
+                    } catch (java.security.cert.CertificateException e) {
+                        Logging.warning("checkCertificate: Error when creating certificate object: " + e);
+                        Logging.debug("Exception details: ", e);
+                        break;
                     }
-                    gr_conn = gr_conn.attach( session );
-                    session.flush();
-                    tx.commit();
-                    keepTrying = false;
-                } catch (org.hibernate.exception.LockAcquisitionException e) {
-                    if (session != null && session.isOpen()) {
-                        if ((tx != null) && tx.isActive()) {
-                            tx.rollback();
+                    Integer nTries = 0;
+                    Boolean keepTrying = true;
+                    while (keepTrying) {
+                        ++nTries;
+                        if (session == null) {
+                            session = HibernateWrapper.getSession();
                         }
-                        session.close();
+                        Transaction tx = session.beginTransaction();
+                        try {
+                            session.saveOrUpdate( localcert );
+                            session.flush();
+                            tx.commit();
+                            keepTrying = false;
+                            Logging.info("checkCertificate has created an entry for subject " +
+                                         certs[i].getSubjectX500Principal().getName() +
+                                         ", issuer: " +
+                                         certs[i].getIssuerX500Principal().getName() +
+                                         " valid from " +
+                                         certs[i].getNotBefore() +
+                                         " to " +
+                                         certs[i].getNotAfter()
+                                         );
+                            Logging.log(LogLevel.FINER,"certificate details: " + certs[i].toString());
+                        } catch (Exception e) {
+                            if (session != null && session.isOpen()) {
+                                if ((tx != null) && tx.isActive()) {
+                                    tx.rollback();
+                                }
+                                session.close();
+                                session = null;
+                            }
+                            if (e instanceof org.hibernate.exception.LockAcquisitionException) {
+                                if (nTries == 1) {
+                                    Logging.info("checkCertificate: Lock acquisition exception.  Trying a second time.");
+                                } else if (nTries < 5) {
+                                    Logging.warning("checkCertificate: multiple contiguous lock acquisition errors: keep trying.");
+                                } else if (nTries == 5) {
+                                    Logging.warning("checkCertificate: multiple contiguous lock acquisition errors: keep trying (warnings throttled).");
+                                } else if ( (nTries % 100) == 0) {
+                                    Logging.warning("checkCertficate: hit " + nTries + " contiguous lock acqusition errors: check DB.");
+                                }
+                            } else {
+                                Logging.warning("checkCertificate: error when storing certificate object: ", e);
+                                Logging.debug("checkCertificate: exception details:", e);
+                                keepTrying = false;
+                            }
+                        }
                     }
+                }
+                if (! localcert.isValid() ) {
+
+                    throw new AccessException("Invalid Certificate.");
+
+                } else if ( needConnectionTracking() ) {
+                    // Connection Tracking has been requested
+                    net.sf.gratia.storage.Connection gr_conn = new net.sf.gratia.storage.Connection(senderHost,sender,localcert);
+                    this.trackConnection(gr_conn);
+                    from.setConnection(gr_conn);
+                    if (gr_conn.isValid()) {
+                        result = from.asXml(0);
+                    } else {
+                        throw new AccessException("Invalid Gratia Connection.");
+                    }
+                } else {
+                    result = from.asXml(0);
+                }
+               
+            }
+            if (session != null) {
+                session.close();
+            }
+        }
+        if (result.length()==0) {
+            throw new AccessException("Failure during the check of the Certificate or the Gratia Connection.");
+        }
+        return result;
+    }
+   
+
+    private void trackConnection(net.sf.gratia.storage.Connection gr_conn) {
+        Session session = null;
+        Boolean keepTrying  = true;
+        Integer nTries = 0;
+
+        while (keepTrying) {
+            session = HibernateWrapper.getSession();
+            Transaction tx = session.beginTransaction();
+            try {
+                if (++nTries > 1) {
+                    Thread.sleep(300);
+                }
+                gr_conn = gr_conn.attach( session );
+                session.flush();
+                tx.commit();
+                keepTrying = false;
+            } catch (Exception e) {
+                if (session != null && session.isOpen()) {
+                    if ((tx != null) && tx.isActive()) {
+                        tx.rollback();
+                    }
+                    session.close();
+                }
+                if (e instanceof org.hibernate.exception.LockAcquisitionException) {
                     if (nTries == 1) {
                         Logging.info("checkCertificate: Lock acquisition exception.  Trying a second time.");
                     } else if (nTries < 5) {
@@ -803,117 +916,22 @@ public class CollectorService implements ServletContextListener {
                     } else if ( (nTries % 100) == 0) {
                         Logging.warning("checkCertficate: hit " + nTries + " contiguous lock acqusition errors: check DB.");
                     }
-                } catch (Exception g_e) {
+                } else {
                     if (session != null && session.isOpen()) {
                         if ((tx != null) && tx.isActive()) {
                             tx.rollback();
                         }
                         session.close();
                     }
-                    Logging.warning("checkCertificate: error when storing or retrieving connection object in: ", g_e);
-                    Logging.debug("checkCertificate: exception details:", g_e);
+                    Logging.warning("checkCertificate: error when storing or retrieving connection object: ", e);
+                    Logging.debug("checkCertificate: exception details:", e);
                     keepTrying = false;
                 }
             }
-            session.close();
-            from.setConnection(gr_conn);
-            if (gr_conn.isValid()) {
-               result = from.asXml(0);
-            }
-         }
-         
-      } else {
-         
-         Session session = null;
+        }
+        session.close();
+    }     
 
-         
-         for(int i=0; i< certs.length; ++i) {
-            if (session == null) {
-               session = HibernateWrapper.getSession();
-            }
-            try {
-               String pem =  net.sf.gratia.storage.Certificate.GeneratePem(certs[i]);
-            
-               net.sf.gratia.storage.Certificate localcert = (net.sf.gratia.storage.Certificate)session.createQuery(command).setString(0,pem).uniqueResult();
-            
-               if (localcert == null) {
-                  // Not registered yet.
-                  
-                  Transaction tx = session.beginTransaction();
-                  try {
-                     localcert = new net.sf.gratia.storage.Certificate( certs[i] );
-                     session.saveOrUpdate( localcert );
-                     session.flush();
-                     tx.commit();
-                     Logging.info("checkCertificate has created an entry for subject " +
-                                  certs[i].getSubjectX500Principal().getName() +
-                                  ", issuer: " +
-                                  certs[i].getIssuerX500Principal().getName() +
-                                  " valid from " +
-                                  certs[i].getNotBefore() +
-                                  " to " +
-                                  certs[i].getNotAfter()
-                                  );
-                     Logging.log(LogLevel.FINER,"certificate details: " + certs[i].toString());
-                  } catch (java.security.cert.CertificateException e) {
-                     Logging.warning("checkCertificate: Error when creating certificate object: ",e);
-                  } catch (Exception e) {
-                     // Must close session!
-                     tx.rollback();
-                     session.close();
-                     session = null;
-
-                     Logging.warning("checkCertificate: error when storing certificate object: ",e);
-                  }
-               }
-               if (! localcert.isValid() ) {
-
-                  throw new AccessException("Invalid Certificate.");
-
-               } else if ( needConnectionTracking() ) {
-                  // Connection Tracking of has been requested
-                  
-                  if (session == null) {
-                     session = HibernateWrapper.getSession();
-                  }
-                  net.sf.gratia.storage.Connection gr_conn = new net.sf.gratia.storage.Connection(senderHost,sender,localcert);
-                  Transaction tx = session.beginTransaction();
-                  try {
-                     gr_conn = gr_conn.attach( session );
-                     session.flush();
-                     tx.commit();
-                  } catch (Exception e) {
-                     // Must close session!
-                     tx.rollback();
-                     session.close();
-                     session = null;
-                     
-                     Logging.warning("checkCertificate: error when storing or retrieving connection object: ",e);
-                  }
-                  from.setConnection(gr_conn);
-                  if (gr_conn.isValid()) {
-                     result = from.asXml(0);
-                  } else {
-                     throw new AccessException("Invalid Gratia Connection.");
-                  }
-               } else {
-                  result = from.asXml(0);
-               }
-               
-            } catch (java.security.cert.CertificateEncodingException e) {
-               Logging.warning("exception in checkCertificate: "+e);
-            }            
-         }
-         if (session != null) {
-            session.close();
-         }
-      }
-      if (result.length()==0) {
-         throw new AccessException("Failure during the check of the Certificate or the Gratia Connection.");
-      }
-      return result;
-   }
-   
 
     public void contextDestroyed(ServletContextEvent sce) {
         if (databaseUpdateThreadsActive()) {
