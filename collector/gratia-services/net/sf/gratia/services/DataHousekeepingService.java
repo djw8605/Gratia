@@ -31,12 +31,14 @@ public class DataHousekeepingService extends Thread {
     private DataScrubber housekeeper = new DataScrubber();
 
     public enum HousekeepingAction { 
-        ALL, JOBUSAGEXML, METRICXML, METRICRECORD, JOBUSAGERECORD, CE, SE, CERECORD, SERECORD, SUBCLUSTER, SERVICESUMMARY, SERVICESUMMARYHOURLY, DUPRECORD, TRACE, ORIGIN, NONE;
+        ALL, DUPRECORD, TRACE, JOBUSAGEXML, METRICXML, METRICRECORD,
+            JOBUSAGERECORD, CE, SE, CERECORD, SERECORD, SUBCLUSTER,
+            SERVICESUMMARY, SERVICESUMMARYHOURLY, ORIGIN, NONE;
         private Lock l = new ReentrantLock();
         public Boolean tryLock() {
             return l.tryLock();
         }
-        public void Lock() {
+        public void lock() {
             l.lock();
         }
         public void unlock() {
