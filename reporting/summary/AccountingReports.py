@@ -42,6 +42,8 @@ gConfig = ConfigParser.ConfigParser()
 gEmailTo = None
 gEmailToNames = None
 gEmailSubject = "not set"
+gDB = None  # variable to indicate which database to connect to (itb or production)
+gGrid = None  # variable to indicate if only to extract rows with Grid='OSG'  
 
 gOutput="text" # Type of output (text, csv, None)
 
@@ -123,7 +125,7 @@ class Usage(Exception):
         self.msg = msg
 
 def UseArgs(argv):
-    global gProbename,gOutput,gWithPanda,gGroupBy,gVOName,gEmailTo,gEmailToNames,gEmailSubject,gConfig
+    global gProbename,gOutput,gWithPanda,gGroupBy,gVOName,gEmailTo,gEmailToNames,gEmailSubject,gConfig,gDB,gGrid
 
     monthly = False
     weekly = False
@@ -135,7 +137,7 @@ def UseArgs(argv):
         argv = sys.argv
     try:
         try:
-            opts, args = getopt.getopt(argv[1:], "hm:p:", ["help","config=","monthly","weekly","daily","probe=","output=","with-panda","groupby=","voname=","emailto=","subject="])
+            opts, args = getopt.getopt(argv[1:], "hm:p:", ["help","config=","monthly","weekly","daily","probe=","output=","with-panda","groupby=","voname=","emailto=","subject=","db=","grid="])
         except getopt.error, msg:
              raise Usage(msg)
         # more code, unchanged
@@ -166,10 +168,19 @@ def UseArgs(argv):
             gEmailTo = [i.strip() for i in a.split(',')]
         if o in ("--subject"):
             gEmailSubject = a
+        if o in ("--db"):
+            gDB = a # which database to connect to: get value from command line option if given
+        if o in ("--grid"):
+            gGrid = a # indicates if we should restrict the queries from summary table by adding Grid="OSG" to the where clause. See RunQuery function for how the query is being manipulated for this purpose.
 
     gConfig.read(configFiles)
     if (gEmailToNames == None and gEmailTo != None):
        gEmailToNames = ["" for i in gEmailTo]
+    if(gDB == None): # means nothing was set from command line. Hence check to see if it is set in the configFiles
+        try:
+            gDB = gConfig.get("db", "type") # if set then read from the config file and set the value. If value is set to "itb" then we will connect to itb. If it is anything else (doesn't matter if it is some invalid value), we will connect to production
+        except:
+            pass # if nothing is set, then ignore - because the default is always assumed to be production in CheckDB
     
     start = ""
     end = ""
@@ -359,12 +370,17 @@ def sendAll(text, filestem = "temp"):
    else:
       sendEmail( (gEmailToNames, gEmailTo), gEmailSubject, text, None)
 
-gMySQLOSGConnectString = " -h gratia09.fnal.gov -u reader --port=3320 --password=reader -N gratia "
+gMySQLOSGConnectStringProduction = " -h gratia09.fnal.gov -u reader --port=3320 --password=reader -N gratia "
+gMySQLOSGConnectStringITB = " -h gratia07.fnal.gov -u reader --port=3322 --password=reader -N itb_gratia_itb "
 gMySQLFermiConnectString = " -h gratia-db01.fnal.gov -u reader --port=3320 --password=reader -N fermi_osg "
-gMySQLConnectString = gMySQLOSGConnectString
 
 def CheckDB():
-        global gMySQL,gMySQLConnectString
+        global gMySQL,gMySQLConnectString,gDB
+        # Set the connection credentials to production account by default
+        gMySQLConnectString = gMySQLOSGConnectStringProduction
+        # Change it to itb if explicitly asked from command line or set in the configFiles
+        if(gDB == "itb"):
+            gMySQLConnectString = gMySQLOSGConnectStringITB
         (status, output) = commands.getstatusoutput( gMySQL + gMySQLConnectString + " -e status "  )
         if status == 0:
             msg =  "Status: \n"+output
@@ -381,10 +397,36 @@ def CheckDB():
         return status == 0
         
 def RunQuery(select):
-        global gMySQL,gMySQLConnectString
+        global gMySQL,gMySQLConnectString,gDB,gGrid
+        # If connecting to the itb database, then change the queries where the db name is explicitly used
+        if(gDB == "itb"):
+            select = select.replace("gratia.","itb_gratia_itb.")
+        # If the user explicitly requests from the command line to restrict queries to contain Grid="OSG" in the where clause, adjust the query to add Grid="OSG" at the appropriate place
+        if(gGrid != None and gGrid.lower() == "osg"): 
+            select = AddOSGToQuery(select)
         LogToFile(select)
         # print "echo '" + select + "' | " + gMySQL + gMySQLConnectString
         return commands.getoutput("echo '" + select + "' | " + gMySQL + gMySQLConnectString )
+
+def AddOSGToQuery(select):
+    query = "" # variable to store the modified query
+    # split the query into several parts using 'from' as the de-limiter and process the parts to decide if to add the Grid="OSG" to the where clause
+    for part in select.split('from'):
+        modified = 0  # flag to indicate if part was altered
+        # if part doesn't start with a (
+        if(re.compile("^ *\(").search(part) == None):
+            # if part has Summary in it
+            if(re.compile(".*Summary.*").search(part)):
+                # if part has where in it
+                if(re.compile(".*where.*").search(part)):
+                    # Add Grid="OSG" to the inner most where clause (which is the 1st where clause) and concat with the rest of the part
+                    query+="from " + part.split('where')[0] + " where Grid=\"OSG\" and " + string.join(part.split('where')[1:],'where ')
+                    modified = 1 # mark that the part was modified
+        if(modified == 0): # if not modified simply put back the part into the query
+            query+="from " + part
+    select = query[5:] # remove the prefix "from " in the query to make it correct
+    return select
+
 
 def RunQueryAndSplit(select):
         res = RunQuery(select)
