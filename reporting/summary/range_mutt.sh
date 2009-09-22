@@ -15,11 +15,15 @@ ExtraArgs=--daily
 
 while test "x$1" != "x"; do
    if [ "$1" == "--help" ]; then 
-	echo "usage: $0 [--dry-run] [--debug] [--mail email] [--draft] [--production] [quoted_string_representing_starting_date (as accepted by date -d)]"
+	echo "usage: $0 [--grid gridType ] [--dry-run] [--debug] [--mail email] [--draft] [--production] [quoted_string_representing_starting_date (as accepted by date -d)]"
 	exit 1
    elif [ "$1" == "--debug" ]; then
 	debug=yes
 	shift
+   elif [ "$1" == "--grid" ]; then
+	gridOption="--grid=$2"
+	shift
+        shift
    elif [ "$1" == "--dry-run" ]; then
 	dryrun=yes
 	shift
@@ -88,7 +92,7 @@ function sendto {
     fi
     echo "See $WEBLOC for more information" > $txtfile
     echo >> $txtfile
-    eval $1 --output=text $rep_args >> $txtfile
+    eval $1 $gridOption --output=text $rep_args >> $txtfile
 
     echo "$subject" >> range.check
     grep All $txtfile >> range.check
@@ -125,10 +129,10 @@ function sendtohtml {
     #echo "See $WEBLOC for more information" > $txtfile
     #echo "For more information see: <a href=$WEBLOC>$WEBLOC</a>" > $htmlfile
     if [ "$dryrun" != "yes" ]; then 
-       $cmd "--subject=$subject" --emailto=$to --output=all $rep_args
+       $cmd "--subject=$subject" --emailto=$to --output=all $gridOption $rep_args
     else
-       echo $cmd \"--subject=$subject\" --emailto=$to --output=all $rep_args
-       $cmd  --output=all $rep_args
+       echo $cmd \"--subject=$subject\" --emailto=$to --output=all $gridOption $rep_args
+       $cmd  --output=all $gridOption $rep_args
     fi
     return   
 }
