@@ -13,27 +13,54 @@ public class ErrorRecorder {
 
     public ErrorRecorder() { }
 
+    private Boolean detectAndReportLockFailure(Exception e, Integer nTries) {
+        if (e instanceof org.hibernate.exception.LockAcquisitionException) {
+            String ident = "ErrorRecorder: ";
+            if (nTries == 1) {
+                Logging.info(ident + ": lock acquisition exception.  Trying a second time.");
+            } else if (nTries < 5) {
+                Logging.warning(ident + ": multiple contiguous lock acquisition errors: keep trying.");
+            } else if (nTries == 5) {
+                Logging.warning(ident + ": multiple contiguous lock acquisition errors: keep trying (warnings throttled).");
+            } else if ( (nTries % 100) == 0) {
+                Logging.warning(ident + ": hit " + nTries + " contiguous lock acqusition errors: check DB.");
+            }
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     private void saveDupRecord(DupRecord record) throws Exception {
         saveDupRecord(record, null);
     }
 
     private void saveDupRecord(DupRecord record,
                                Probe probe) throws Exception {
-        Session session = HibernateWrapper.getSession();
-        Transaction tx = session.beginTransaction();
-
-        try {
-            session.save(record);
-            if (probe != null) {
-                session.saveOrUpdate(probe);
+        Session session;
+        Transaction tx;
+        Integer nTries = 0;
+        Boolean keepTrying = true;
+        while (keepTrying) {
+            ++nTries;
+            session = HibernateWrapper.getSession();
+            tx = session.beginTransaction();
+            try {
+                session.save(record);
+                if (probe != null) {
+                    session.saveOrUpdate(probe);
+                }
+                tx.commit();
+                keepTrying = false;
+            } catch (Exception e) {
+                tx.rollback();
+                session.close();
+                if (!detectAndReportLockFailure(e, nTries)) {
+                    Logging.warning("ErrorRecorder: error saving in table!", e);
+                    keepTrying = false;
+                }
             }
-            tx.commit();
         }
-        catch (Exception e) {
-            tx.rollback();
-            Logging.warning("ErrorRecorder: error saving in table!", e);
-        }
-        session.close();
     }
 
     public void saveDuplicate(String source, String error,
