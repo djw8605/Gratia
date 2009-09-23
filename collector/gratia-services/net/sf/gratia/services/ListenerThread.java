@@ -89,6 +89,23 @@ public class ListenerThread extends Thread {
         JobUsageRecordUpdater.AddDefaults(updater);
     }
 
+    private Boolean detectAndReportLockFailure(Exception e, Integer nTries) {
+        if (e instanceof org.hibernate.exception.LockAcquisitionException) {
+            if (nTries == 1) {
+                Logging.info(ident + ": lock acquisition exception.  Trying a second time.");
+            } else if (nTries < 5) {
+                Logging.warning(ident + ": multiple contiguous lock acquisition errors: keep trying.");
+            } else if (nTries == 5) {
+                Logging.warning(ident + ": multiple contiguous lock acquisition errors: keep trying (warnings throttled).");
+            } else if ( (nTries % 100) == 0) {
+                Logging.warning(ident + ": hit " + nTries + " contiguous lock acqusition errors: check DB.");
+            }
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     public void loadProperties() {
         p = Configuration.getProperties();
 
@@ -150,8 +167,7 @@ public class ListenerThread extends Thread {
         }
     }
 
-    @SuppressWarnings("empty-statement")
-        public int loop() {
+    public int loop() {
         String file = "";
         String blob = "";
 
@@ -427,26 +443,37 @@ public class ListenerThread extends Thread {
                 }
                 Session or_session = null;
                 Transaction or_tx = null;
-                try {
-                    or_session = HibernateWrapper.getSession();
-                    or_tx = or_session.beginTransaction();
-                    origin = origin.attach(or_session);
-                    or_session.flush();
-                    or_tx.commit();
-                } catch (Exception e) {
-                    if (or_session != null && or_session.isOpen()) {
-                        if ((or_tx != null) && or_tx.isActive()) {
-                            or_tx.rollback();
+                Integer nTries = 0;
+                Boolean keepTrying = true;
+                while (keepTrying) {
+                    ++nTries;
+                    try {
+                        or_session = HibernateWrapper.getSession();
+                        or_tx = or_session.beginTransaction();
+                        origin = origin.attach(or_session);
+                        or_session.flush();
+                        or_tx.commit();
+                        keepTrying = false;
+                    } catch (Exception e) {
+                        if (or_session != null && or_session.isOpen()) {
+                            if ((or_tx != null) && or_tx.isActive()) {
+                                or_tx.rollback();
+                            }
+                            or_session.close();
                         }
-                        or_session.close();
+                        if (!this.detectAndReportLockFailure(e, nTries)) {
+                            Logging.warning(ident + rId +
+                                            ": received unexpected exception " +
+                                            e.getMessage() + " while processing origin entry.");
+                            Logging.debug(ident + rId + ": exception details:", e);
+                            return 0;
+                        }
                     }
-                    Logging.warning(ident + rId +
-                                    ": received unexpected exception " +
-                                    e.getMessage() + " while processing origin entry.");
-                    Logging.debug(ident + rId + ": exception details:", e);
-                    return 0;
                 }
                 //MPERF: Logging.fine(ident + rId + " saved Origin object.");
+                if (or_session != null && or_session.isOpen()) {
+                    or_session.close();
+                }
             }
             for (int j = 0; j < rSize; j++) {
 
@@ -472,33 +499,42 @@ public class ListenerThread extends Thread {
                 rId += ")";
 
                 Probe probe;
+                
+                //MPERF: Logging.fine(ident + rId + " starting hibernate operations.");
+                Integer nTries = 0;
+                Boolean keepTrying = true;
+                Session pr_session = null;
+                while (keepTrying) {
+                    ++nTries;
+                    pr_session = HibernateWrapper.getSession();
+                    Transaction pr_tx = null;
+                    try {
+                        pr_tx = pr_session.beginTransaction();
 
-                //MPERF: Logging.fine(ident + rId + " starting hibetnate operations.");
-                Session pr_session = HibernateWrapper.getSession();
-                Transaction pr_tx = null;
-                try {
-                    pr_tx = pr_session.beginTransaction();
-
-                    probe = statusUpdater.update(pr_session, current, xml);
-                    pr_session.flush();
-                    pr_tx.commit();
-                } catch (Exception e) {
-                    if (pr_session.isOpen()) {
-                        if ((pr_tx != null) && pr_tx.isActive()) {
-                            pr_tx.rollback();
+                        probe = statusUpdater.update(pr_session, current, xml);
+                        pr_session.flush();
+                        pr_tx.commit();
+                        // Set the probe on the current object.
+                        current.setProbe(probe);
+                        keepTrying = false;
+                    } catch (Exception e) {
+                        if (pr_session.isOpen()) {
+                            if ((pr_tx != null) && pr_tx.isActive()) {
+                                pr_tx.rollback();
+                            }
+                            pr_session.close();
                         }
-                        pr_session.close();
+                        if (!this.detectAndReportLockFailure(e, nTries)) {
+                            Logging.warning(ident + rId +
+                                            ": received unexpected exception " +
+                                            e.getMessage() + " while processing probe entry.");
+                            Logging.debug(ident + rId + ": exception details:", e);
+                            return 0;
+                        }
                     }
-                    Logging.warning(ident + rId +
-                                    ": received unexpected exception " +
-                                    e.getMessage() + " while processing probe entry.");
-                    Logging.debug(ident + rId + ": exception details:", e);
-                    return 0;
                 }
                 //MPERF: Logging.fine(ident + rId + " saved probe object.");
 
-                // Set the probe on the current object.
-                current.setProbe(probe);
 
                 // Fix up the record; in particular set EndTime if it out of whack.
                 updater.Update(current);
@@ -514,8 +550,6 @@ public class ListenerThread extends Thread {
                     Date expirationDate = current.getExpirationDate();
                     if (date.before(expirationDate)) {
                         acceptRecord = false;
-                        Session reject_session = pr_session; // Reuse the session object.
-                        Transaction reject_tx = reject_session.beginTransaction();
                         try {
                             if (gotreplication) {
                                 Logging.fine(ident + rId +
@@ -542,16 +576,13 @@ public class ListenerThread extends Thread {
                                                             "ExpirationDate",
                                                             0, current);
                             }
-                            reject_session.flush();
-                            reject_tx.commit();
+
                         } catch (Exception e) {
-                            reject_tx.rollback();
-                            if (!handleException(rId, e, gotreplication, current)) {
+                            if (!handleUnexpectedException(rId, e, gotreplication, current)) {
                                 return 0;
                             }
 
                         }
-                        reject_session.close();
                     }
                 }
 
@@ -566,7 +597,7 @@ public class ListenerThread extends Thread {
                             current.setmd5(md5key);
                         }
                     } catch (Exception e) {
-                        if (!handleException(rId, e, gotreplication, current)) {
+                        if (!handleUnexpectedException(rId, e, gotreplication, current)) {
                             return 0;
                         }
                     }
@@ -612,364 +643,93 @@ public class ListenerThread extends Thread {
                     }             
                 }
 
-
                 if (acceptRecord) {
-                    // This is a recent record, let's process it
-
                     current.setDuplicate(false);
                     if (origin != null) {
                         //MPERF: Logging.fine(ident + rId + " about to add origin objects.");
                         current.addOrigin(origin);
                     }
 
-                    Session rec_session = pr_session; // Reused the session object.
-                    Transaction rec_tx = rec_session.beginTransaction();
-
-                    try {
-
-                        //MPERF: Logging.fine(ident + rId + " attaching VO and other content.");
-                        synchronized (lock) {
-                            newVOUpdate.check(current, rec_session);
-                        }
-                        // We don't synchronize newClusterUpdate because the check method itself is synchronized.
-                        newClusterUpdate.check(current, rec_session);
-                        synchronized (lock) {
-                            current.AttachContent(rec_session);
-                            // Reduce contention on the attached objects (in particular Connection)
-                            // to avoid DB deadlock.
+                    Session rec_session = null;
+                    Transaction rec_tx = null;
+                    nTries = 0;
+                    keepTrying = true;
+                    while (keepTrying) {
+                        ++nTries;
+                        try {
+                            rec_session = HibernateWrapper.getSession();
+                            rec_tx = rec_session.beginTransaction();
+                            //MPERF: Logging.fine(ident + rId + " attaching VO and other content.");
+                            synchronized (lock) {
+                                newVOUpdate.check(current, rec_session);
+                            }
+                            // We don't synchronize newClusterUpdate because the check method itself is synchronized.
+                            newClusterUpdate.check(current, rec_session);
+                            synchronized (lock) {
+                                current.AttachContent(rec_session);
+                                // Reduce contention on the attached objects (in particular Connection)
+                                // to avoid DB deadlock.
+                                rec_session.flush();
+                            }
+                            //MPERF: Logging.fine(ident + rId + " managing RawXML.");
+                            String incomingxml = current.getRawXml();
+                            String rawxml = null;
+                            String extraxml = null;
+                            if (rawxmllist.size() > j) {
+                                rawxml = (String) rawxmllist.get(j);
+                                if (rawxml != null) {
+                                    current.setRawXml(rawxml);
+                                }
+                            }
+                            Logging.debug(ident + rId + ": Before Hibernate Save");
+                            if (gothistory) {
+                                Date serverDate = new Date(Long.parseLong((String) historydatelist.get(j)));
+                                current.setServerDate(serverDate);
+                            }
+                            //MPERF: Logging.fine(ident + rId + " saving object.");
+                            rec_session.save(current);
+                            //MPERF: Logging.fine(ident + rId + " executing trigger.");
+                            current.executeTrigger(rec_session);
+                            //MPERF: Logging.fine(ident + rId + " executing flush.");
                             rec_session.flush();
-                        }
-
-                        //MPERF: Logging.fine(ident + rId + " managing RawXML.");
-                        String incomingxml = current.getRawXml();
-                        String rawxml = null;
-                        String extraxml = null;
-                        if (rawxmllist.size() > j) {
-                            rawxml = (String) rawxmllist.get(j);
-                            if (rawxml != null) {
-                                current.setRawXml(rawxml);
+                            //MPERF: Logging.fine(ident + rId + " executing comming.");
+                            rec_tx.commit();
+                            rec_session.close();
+                            //MPERF: Logging.fine(ident + ": After Transaction Commit");
+                            // Save history
+                            if (!gothistory) {
+                                saveHistory(current, incomingxml,
+                                            rawxml, extraxml, gotreplication);
                             }
-                        }
-                        Logging.debug(ident + rId + ": Before Hibernate Save");
-                        if (gothistory) {
-                            Date serverDate = new Date(Long.parseLong((String) historydatelist.get(j)));
-                            current.setServerDate(serverDate);
-                        }
-                        //MPERF: Logging.fine(ident + rId + " saving object.");
-                        rec_session.save(current);
-                        //MPERF: Logging.fine(ident + rId + " executing trigger.");
-                        current.executeTrigger(rec_session);
-                        //
-                        // now - save history
-                        //
-                        if (!gothistory) {
-                            saveHistory(current, incomingxml,
-                                        rawxml, extraxml, gotreplication);
-                        }
-                        //MPERF: Logging.fine(ident + rId + " executing flush.");
-                        rec_session.flush();
-                        //MPERF: Logging.fine(ident + rId + " executing comming.");
-                        rec_tx.commit();
-                        rec_session.close();
-                        // Logging.log(ident + ": After Transaction Commit");
-                        nrecords = nrecords + 1;
-                        Logging.fine(ident + rId + " saved.");
-
-                    } catch (ConstraintViolationException e) {
-                        rec_tx.rollback();
-                        rec_session.close();
-                        int dupdbid = 0;
-                        Boolean needCurrentSaveDup = false;
-
-                        if (e.getSQLException().getMessage().
-                            matches(".*\\b[Dd]uplicate\\b.*")) {
-                            if (current.getTableName().equals("JobUsageRecord")) {
-                                UserIdentity newUserIdentity =
-                                    ((JobUsageRecord) current).getUserIdentity();
-                                Session dup_session = HibernateWrapper.getSession();
-                                Query dup_query = dup_session.createQuery("select record from " +
-                                                                          "JobUsageRecord " +
-                                                                          "record where " +
-                                                                          "record.md5 = " +
-                                                                          "'" +
-                                                                          current.getmd5() +
-                                                                          "'").setCacheMode(CacheMode.IGNORE);
-                                ScrollableResults dups =
-                                    dup_query.scroll(ScrollMode.FORWARD_ONLY);
-                                Boolean savedCurrent = false;
-                                Transaction dup_tx = null;
-                                try {
-                                    if (dups.next()) {
-                                        dup_tx = dup_session.beginTransaction();
-                                        JobUsageRecord original_record =
-                                            (JobUsageRecord) dups.get(0);
-                                        dupdbid = original_record.getRecordId();
-                                        UserIdentity originalUserIdentity =
-                                            original_record.getUserIdentity();
-                                        if (newUserIdentity == null) {
-                                            continue; // No replacement
-                                        }
-                                        Boolean newerIsBetter = false;
-                                        String replaceReason = null;
-                                        if (originalUserIdentity == null) {
-                                            newerIsBetter = true;
-                                            replaceReason = "original UserIdentity block is null";
-                                        } else if ((newUserIdentity.getVOName() !=
-                                                    null) &&
-                                                   (newUserIdentity.getVOName().
-                                                    length() != 0) &&
-                                                   (!newUserIdentity.getVOName().
-                                                    equalsIgnoreCase("Unknown"))) {
-                                            // Have something with which to replace it.
-                                            replaceReason = "New VOName is better";
-                                            if (originalUserIdentity.getVOName() ==
-                                                null) {
-                                                newerIsBetter = true;
-                                                replaceReason +=
-                                                    " -- original VOName is null";
-                                            } else if (originalUserIdentity.getVOName().length() == 0) {
-                                                newerIsBetter = true;
-                                                replaceReason +=
-                                                    " -- original VOName is empty";
-                                            } else if (originalUserIdentity.getVOName().
-                                                       equalsIgnoreCase("Unknown")) {
-                                                newerIsBetter = true;
-                                                replaceReason +=
-                                                    " -- original VOName is " +
-                                                    "\"Unknown\")";
-                                            } else if ((newUserIdentity.getVOName().startsWith("/")) &&
-                                                       (!originalUserIdentity.getVOName().startsWith("/"))) {
-                                                newerIsBetter = true;
-                                                replaceReason +=
-                                                    " -- original VOName is not fully qualified";
-                                            }
-                                        }
-                                        if (!newerIsBetter) { // Still haven't decided
-                                            if ((newUserIdentity.getCommonName() != null) &&
-                                                (!newUserIdentity.getCommonName().
-                                                 startsWith("Generic"))) {
-                                                replaceReason =
-                                                    "New CommonName is better";
-                                                if (originalUserIdentity.getCommonName() == null) {
-                                                    newerIsBetter = true;
-                                                    replaceReason +=
-                                                        " -- original CommonName " +
-                                                        "is null";
-                                                } else if (originalUserIdentity.getCommonName().length() == 0) {
-                                                    newerIsBetter = true;
-                                                    replaceReason +=
-                                                        " -- original CommonName " +
-                                                        "is empty";
-                                                } else if (originalUserIdentity.getCommonName().
-                                                           startsWith("Generic")) {
-                                                    newerIsBetter = true;
-                                                    replaceReason +=
-                                                        " -- original CommonName " +
-                                                        "is generic";
-                                                }
-                                            } else if ((newUserIdentity.getKeyInfo() != null) &&
-                                                       (originalUserIdentity.getKeyInfo() == null)) {
-                                                newerIsBetter = true;
-                                                replaceReason =
-                                                    "Original KeyInfo is null";
-                                            }
-                                        }
-                                        if (newerIsBetter) {
-                                            // Keep the new one and ditch the old
-                                            Logging.fine(ident + rId +
-                                                         ": Replacing record " +
-                                                         dupdbid +
-                                                         " with \"better\" " +
-                                                         "record (" +
-                                                         replaceReason + ").");
-                                            SummaryUpdater.removeFromSummary(original_record.getRecordId(),
-                                                                             dup_session);
-                                            // Delete the record.
-                                            String originalXml =
-                                                original_record.asXML();
-                                            String originalTableName =
-                                                original_record.getTableName();
-                                            dup_session.delete(original_record);
-                                            if (!savedCurrent) {
-                                                // If we haven't saved
-                                                // the current record
-                                                // yet, flush and commit
-                                                // the delete
-                                                // (important) and then
-                                                // save the current record.
-                                                dup_session.flush();
-                                                dup_tx.commit();
-                                                dup_tx = dup_session.beginTransaction();
-                                                dup_session.save(current);
-                                                current.executeTrigger(dup_session);
-                                                savedCurrent = true;
-                                            }
-                                            if (original_record.setDuplicate(true)) {
-                                                if (gotreplication) {
-                                                    errorRecorder.saveDuplicate("Replication",
-                                                                                "Duplicate",
-                                                                                current.getRecordId(),
-                                                                                originalXml,
-                                                                                originalTableName);
-                                                } else if (gothistory) {
-                                                    ;
-                                                } else {
-                                                    errorRecorder.saveDuplicate("Probe",
-                                                                                "Duplicate",
-                                                                                current.getRecordId(),
-                                                                                originalXml,
-                                                                                originalTableName);
-                                                }
-                                            }
-                                        }
-                                        dup_session.flush();
-                                        dup_tx.commit();
-                                    }
-                                    if (!savedCurrent) {
-                                        needCurrentSaveDup =
-                                            current.setDuplicate(true);
-                                        if (!needCurrentSaveDup) { // Save probe object anyway
-                                            Probe localprobe = current.getProbe();
-                                            if (localprobe != null) {
-                                                dup_tx = dup_session.beginTransaction();
-                                                dup_session.saveOrUpdate(localprobe);
-                                                dup_session.flush();
-                                                dup_tx.commit();
-                                            }
-                                        }
-                                    }
-                                    dup_session.close();
-                                } catch (Exception e2) {
-                                    dup_tx.rollback();
-                                    dup_session.close();
-                                    Logging.warning(ident + rId +
-                                                    ": Caught exception resolving " +
-                                                    "duplicates for record with " +
-                                                    "md5 checksum " +
-                                                    current.getmd5() +
-                                                    " -- all duplicates of same " +
-                                                    "will remain in DB", e2);
+                            nrecords = nrecords + 1;
+                            Logging.fine(ident + rId + " saved.");
+                            keepTrying = false;
+                        } catch (ConstraintViolationException e) {
+                            rec_tx.rollback();
+                            rec_session.close();
+                            try {
+                                handleConstraintViolationException(e, current, rId, gotreplication, gothistory);
+                            } catch (ConstraintViolationException e2) {
+                                // Catch rethrown exception that we couldn't handle in the function
+                                if (!handleUnexpectedException(rId, e, gotreplication, current,
+                                                               "Received unexpected constraint violation")) {
+                                    return 0;
                                 }
-                            } else {
-                                needCurrentSaveDup = current.setDuplicate(true);
-                                Session dup2_session = HibernateWrapper.getSession();
-                                try {
-                                    String cmd = "select dbid from " +
-                                        current.getTableName() +
-                                        "_Meta record where " +
-                                        "record.md5 = " +
-                                        "'" +
-                                        current.getmd5() +
-                                        "'";
-                                    Integer dup_dbid = (Integer) (dup2_session.createSQLQuery(cmd).uniqueResult());
-                                    // Avoid infinite growth
-                                    if (current instanceof ProbeDetails) {
-                                        if (fProbeDetails.size() > 500) {
-                                            fProbeDetails.clear();
-                                        }
-                                        fProbeDetails.put(current.getmd5(), dup_dbid);
-                                    } else if (current instanceof Subcluster) {
-                                        if (fSubcluster.size() > 500) {
-                                            fSubcluster.clear();
-                                        }
-                                        fSubcluster.put(current.getmd5(), dup_dbid);
-                                    } else if (current instanceof ComputeElement) {
-                                        if (fComputeElement.size() > 5000) {
-                                            fComputeElement.clear();
-                                        }
-                                        fComputeElement.put(current.getmd5(), dup_dbid);
-                                    } else if (current instanceof StorageElement) {
-                                        if (fStorageElement.size() > 1000) {
-                                            fStorageElement.clear();
-                                        }
-                                        fStorageElement.put(current.getmd5(), dup_dbid);
-                                    }
-                                    dupdbid = dup_dbid;
-                                } finally {
-                                    dup2_session.close();
-                                }
-                                if (!needCurrentSaveDup) {
-                                    Logging.fine(ident + rId +
-                                                 ": " + "Ignore duplicate of record " +
-                                                 dupdbid);
+                            } catch (Exception e2) {
+                                if (!handleUnexpectedException(rId, e, gotreplication, current)) {
+                                    return 0;
                                 }
                             }
-                            if (needCurrentSaveDup) {
-                                try {
-                                    Logging.fine(ident + rId +
-                                                 ": " + (gothistory ? "Ignore" : "Save") +
-                                                 " duplicate of record " +
-                                                 dupdbid);
-                                    if (gotreplication) {
-                                        errorRecorder.saveDuplicate("Replication",
-                                                                    "Duplicate",
-                                                                    dupdbid,
-                                                                    current);
-                                    } else if (gothistory) {
-                                        // If we are reprocessing the
-                                        // history date, we should not be
-                                        // recording the possible
-                                        // duplicates.
-                                        ;
-                                    } else {
-                                        errorRecorder.saveDuplicate("Probe",
-                                                                    "Duplicate",
-                                                                    dupdbid,
-                                                                    current);
-                                    }
-                                } catch (Exception ignore) {
-                                }
-                            }
-                        } else { // Constraint exception, but not a duplicate: oops!
-                            Logging.warning(ident + rId +
-                                            ": Received unexpected constraint violation " +
-                                            e.getSQLException().getMessage());
-                            if (HibernateWrapper.databaseUp()) {
-                                try {
-                                    if (gotreplication) {
-                                        errorRecorder.saveSQL("Replication",
-                                                              "SQLError", current);
-                                    } else {
-                                        errorRecorder.saveSQL("Probe",
-                                                              "SQLError", current);
-                                    }
-                                } catch (Exception ignore) {
-                                }
-                            } else {
-                                Logging.warning(ident + rId +
-                                                ": Communications error: " +
-                                                "shutting down");
+                        } catch (Exception e) {
+                            // Must close session!
+                            rec_tx.rollback();
+                            rec_session.close();
+                            if (detectAndReportLockFailure(e, nTries) ||
+                                handleUnexpectedException(rId, e, gotreplication, current)) {
                                 return 0;
                             }
-                            Logging.warning(ident + rId + ": Error In Process: ", e);
-                            Logging.warning(ident + rId + ": Current: " + current);
-                        }
-                    } catch (Exception e) {
-                        // Must close session!
-                        rec_tx.rollback();
-                        rec_session.close();
-                        Logging.warning(ident + rId +
-                                        ": Received unexpected exception " + e.getMessage());
-                        Logging.debug(ident + rId + ": exception details:", e);
-                        if (HibernateWrapper.databaseUp()) {
-                            try {
-                                if (gotreplication) {
-                                    errorRecorder.saveSQL("Replication",
-                                                          "SQLError", current);
-                                } else {
-                                    errorRecorder.saveSQL("Probe",
-                                                          "SQLError", current);
-                                }
-                            } catch (Exception ignore) {
-                            }
-                        } else {
-                            Logging.warning(ident + ": Communications error: " +
-                                            "shutting down");
-                            return 0;
-                        }
-                        Logging.warning(ident + ": Error In Process: ", e);
-                        Logging.warning(ident + ": Current: " + current);
-                    } // End general catch
+                        } // End general catch
+                    } // End while (keepTrying)
                 } // End of handling accepted records.
             } // End of for each record loop
             // Logging.log(ident + ": Before File Delete: " + file);
@@ -1054,8 +814,16 @@ public class ListenerThread extends Thread {
         return records;
     }
 
-    private boolean handleException(String rId, Exception e, boolean gotreplication, Record current) {
-        Logging.warning(ident + rId + ": Received unexpected exception " + e.getMessage());
+    private boolean handleUnexpectedException(String rId, Exception e,
+                                              boolean gotreplication, Record current) {
+        return handleUnexpectedException(rId, e, gotreplication, current,
+                                         "Received unexpected exception");
+    }
+
+    private boolean handleUnexpectedException(String rId, Exception e,
+                                              boolean gotreplication, Record current,
+                                              String message) {
+        Logging.warning(ident + rId + ": " + message + " " + e.getMessage());
         Logging.debug(ident + rId + ": exception details:", e);
         if (HibernateWrapper.databaseUp()) {
             try {
@@ -1070,8 +838,285 @@ public class ListenerThread extends Thread {
             Logging.warning(ident + ": Communications error: " + "shutting down");
             return false;
         }
-        Logging.warning(ident + ": Error in storing an expired record: ", e);
+        Logging.warning(ident + ": Error in Process: ", e);
         Logging.warning(ident + ": Current: " + current);
         return true;
     }
+
+    private void handleConstraintViolationException(ConstraintViolationException e,
+                                                    Record current,
+                                                    String rId,
+                                                    Boolean gotreplication,
+                                                    Boolean gothistory) throws Exception {
+        int dupdbid = 0;
+        Boolean needCurrentSaveDup = false;
+
+        if (e.getSQLException().getMessage().
+            matches(".*\\b[Dd]uplicate\\b.*")) {
+            if (current.getTableName().equals("JobUsageRecord")) {
+                UserIdentity newUserIdentity =
+                    ((JobUsageRecord) current).getUserIdentity();
+                Session dup_session = HibernateWrapper.getSession();
+                Query dup_query = dup_session.createQuery("select record from " +
+                                                          "JobUsageRecord " +
+                                                          "record where " +
+                                                          "record.md5 = " +
+                                                          "'" +
+                                                          current.getmd5() +
+                                                          "'").setCacheMode(CacheMode.IGNORE);
+                Boolean savedCurrent = false;
+                Transaction dup_tx = null;
+                JobUsageRecord original_record =
+                    (JobUsageRecord) dup_query.uniqueResult();
+                if (original_record == null) {
+                    return;
+                }
+                dupdbid = original_record.getRecordId();
+                UserIdentity originalUserIdentity =
+                    original_record.getUserIdentity();
+                if (newUserIdentity == null) {
+                    return;
+                }
+                Boolean newerIsBetter = false;
+                String replaceReason = null;
+                if (originalUserIdentity == null) {
+                    newerIsBetter = true;
+                    replaceReason = "original UserIdentity block is null";
+                } else if ((newUserIdentity.getVOName() !=
+                            null) &&
+                           (newUserIdentity.getVOName().
+                            length() != 0) &&
+                           (!newUserIdentity.getVOName().
+                            equalsIgnoreCase("Unknown"))) {
+                    // Have something with which to replace it.
+                    replaceReason = "New VOName is better";
+                    if (originalUserIdentity.getVOName() ==
+                        null) {
+                        newerIsBetter = true;
+                        replaceReason +=
+                            " -- original VOName is null";
+                    } else if (originalUserIdentity.getVOName().length() == 0) {
+                        newerIsBetter = true;
+                        replaceReason +=
+                            " -- original VOName is empty";
+                    } else if (originalUserIdentity.getVOName().
+                               equalsIgnoreCase("Unknown")) {
+                        newerIsBetter = true;
+                        replaceReason +=
+                            " -- original VOName is " +
+                            "\"Unknown\")";
+                    } else if ((newUserIdentity.getVOName().startsWith("/")) &&
+                               (!originalUserIdentity.getVOName().startsWith("/"))) {
+                        newerIsBetter = true;
+                        replaceReason +=
+                            " -- original VOName is not fully qualified";
+                    }
+                } // End if (originalUserIdentity == null)
+                if (!newerIsBetter) { // Still haven't decided
+                    if ((newUserIdentity.getCommonName() != null) &&
+                        (!newUserIdentity.getCommonName().
+                         startsWith("Generic"))) {
+                        replaceReason =
+                            "New CommonName is better";
+                        if (originalUserIdentity.getCommonName() == null) {
+                            newerIsBetter = true;
+                            replaceReason +=
+                                " -- original CommonName " +
+                                "is null";
+                        } else if (originalUserIdentity.getCommonName().length() == 0) {
+                            newerIsBetter = true;
+                            replaceReason +=
+                                " -- original CommonName " +
+                                "is empty";
+                        } else if (originalUserIdentity.getCommonName().
+                                   startsWith("Generic")) {
+                            newerIsBetter = true;
+                            replaceReason +=
+                                " -- original CommonName " +
+                                "is generic";
+                        }
+                    } else if ((newUserIdentity.getKeyInfo() != null) &&
+                               (originalUserIdentity.getKeyInfo() == null)) {
+                        newerIsBetter = true;
+                        replaceReason =
+                            "Original KeyInfo is null";
+                    }
+                } // End if (!newerIsBetter)
+                if (newerIsBetter) {
+                    Integer nTries = 0;
+                    Boolean keepTrying = true;
+                    while (keepTrying) {
+                        ++nTries;
+                        if (dup_session == null || ! dup_session.isOpen()) {
+                            dup_session = HibernateWrapper.getSession();
+                        }
+                        try {
+                            dup_tx = dup_session.beginTransaction();
+                            // Keep the new one and ditch the old
+                            Logging.fine(ident + rId +
+                                         ": Replacing record " +
+                                         dupdbid +
+                                         " with \"better\" " +
+                                         "record (" +
+                                         replaceReason + ").");
+                            SummaryUpdater.removeFromSummary(original_record.getRecordId(),
+                                                             dup_session);
+                            // Delete the record.
+                            String originalXml =
+                                original_record.asXML();
+                            String originalTableName =
+                                original_record.getTableName();
+                            dup_session.delete(original_record);
+                            if (!savedCurrent) {
+                                // If we haven't saved
+                                // the current record
+                                // yet, flush and commit
+                                // the delete
+                                // (important) and then
+                                // save the current record.
+                                dup_session.flush();
+                                dup_tx.commit();
+                                dup_tx = dup_session.beginTransaction();
+                                dup_session.save(current);
+                                current.executeTrigger(dup_session);
+                                savedCurrent = true;
+                            }
+                            dup_tx.commit();
+                            keepTrying = false;
+                            if (original_record.setDuplicate(true)) {
+                                if (gotreplication) {
+                                    errorRecorder.saveDuplicate("Replication",
+                                                                "Duplicate",
+                                                                current.getRecordId(),
+                                                                originalXml,
+                                                                originalTableName);
+                                } else if (gothistory) { // NOP
+                                } else {
+                                    errorRecorder.saveDuplicate("Probe",
+                                                                "Duplicate",
+                                                                current.getRecordId(),
+                                                                originalXml,
+                                                                originalTableName);
+                                }
+                            }
+                        } catch (Exception e2) {
+                            if (dup_session != null && dup_session.isOpen()) {
+                                if (dup_tx != null && dup_tx.isActive()) {
+                                    dup_tx.rollback();
+                                }
+                                dup_session.close();
+                            }
+                            if (!detectAndReportLockFailure(e, nTries)) {
+                                throw e2; // Re-throw;
+                            }
+                        } // End try (resolve duplicate JobUsageRecord)
+                    } // End while (keepTrying)
+                    if (dup_session != null && dup_session.isOpen()) {
+                        dup_session.close();
+                    }
+                } // End if (newerIsBetter)
+                if (!savedCurrent) {
+                    needCurrentSaveDup =
+                        current.setDuplicate(true);
+                    if (!needCurrentSaveDup) { // Save probe object anyway
+                        Probe localprobe = current.getProbe();
+                        if (localprobe != null) {
+                            Integer nTries = 0;
+                            Boolean keepTrying = true;
+                            while (keepTrying) {
+                                ++nTries;
+                                try {
+                                    if (dup_session == null || !dup_session.isOpen()) {
+                                        dup_session = HibernateWrapper.getSession();
+                                    }
+                                    dup_tx = dup_session.beginTransaction();
+                                    dup_session.saveOrUpdate(localprobe);
+                                    dup_session.flush();
+                                    dup_tx.commit();
+                                    dup_session.close();
+                                    keepTrying = false;
+                                } catch (Exception e2) {
+                                    if (!detectAndReportLockFailure(e, nTries)) {
+                                        throw e2; // Re-throw
+                                    }
+                                } // End try (save probe)
+                            } // End while (keepTrying)
+                        } // End if (localprobe != null)
+                    } // End if (!needCurrentSaveDup)
+                } // End if (!savedCurrent)
+                if (dup_session != null && dup_session.isOpen()) {
+                    dup_session.close();
+                }
+            } else { // Not JobUsageRecord
+                needCurrentSaveDup = current.setDuplicate(true);
+                Session dup2_session = HibernateWrapper.getSession();
+                try {
+                    String cmd = "select dbid from " +
+                        current.getTableName() +
+                        "_Meta record where " +
+                        "record.md5 = " +
+                        "'" +
+                        current.getmd5() +
+                        "'";
+                    Integer dup_dbid = (Integer) (dup2_session.createSQLQuery(cmd).uniqueResult());
+                    // Avoid infinite growth
+                    if (current instanceof ProbeDetails) {
+                        if (fProbeDetails.size() > 500) {
+                            fProbeDetails.clear();
+                        }
+                        fProbeDetails.put(current.getmd5(), dup_dbid);
+                    } else if (current instanceof Subcluster) {
+                        if (fSubcluster.size() > 500) {
+                            fSubcluster.clear();
+                        }
+                        fSubcluster.put(current.getmd5(), dup_dbid);
+                    } else if (current instanceof ComputeElement) {
+                        if (fComputeElement.size() > 5000) {
+                            fComputeElement.clear();
+                        }
+                        fComputeElement.put(current.getmd5(), dup_dbid);
+                    } else if (current instanceof StorageElement) {
+                        if (fStorageElement.size() > 1000) {
+                            fStorageElement.clear();
+                        }
+                        fStorageElement.put(current.getmd5(), dup_dbid);
+                    }
+                    dupdbid = dup_dbid;
+                } finally {
+                    dup2_session.close();
+                }
+                if (!needCurrentSaveDup) {
+                    Logging.fine(ident + rId +
+                                 ": " + "Ignore duplicate of record " +
+                                 dupdbid);
+                }
+            } // End if (JobUsageRecord)
+            if (needCurrentSaveDup) {
+                try {
+                    Logging.fine(ident + rId +
+                                 ": " + (gothistory ? "Ignore" : "Save") +
+                                 " duplicate of record " +
+                                 dupdbid);
+                    if (gotreplication) {
+                        errorRecorder.saveDuplicate("Replication",
+                                                    "Duplicate",
+                                                    dupdbid,
+                                                    current);
+                    } else if (gothistory) { // NOP
+                    } else {
+                        errorRecorder.saveDuplicate("Probe",
+                                                    "Duplicate",
+                                                    dupdbid,
+                                                    current);
+                    }
+                } catch (Exception ignore) {
+                }
+            } // End if (needCurrentSaveDup)
+        } else {
+            // Constraint exception, but not a duplicate. Re-throw.
+            throw e;
+        } // End if (constraint is duplicate)
+    
+    } // End handleConstrainViolationException()
+
 }
