@@ -31,7 +31,7 @@ public class DatabaseMaintenance {
 
    static final String dq = "\"";
    static final String comma = ",";
-   static final int gratiaDatabaseVersion = 82;
+   static final int gratiaDatabaseVersion = 83;
    static final int latestDBVersionRequiringStoredProcedureLoad = gratiaDatabaseVersion;
    static final int latestDBVersionRequiringSummaryViewLoad = 82;
    static final int latestDBVersionRequiringSummaryTriggerLoad = 80;
@@ -1102,12 +1102,52 @@ public class DatabaseMaintenance {
              }
          }
          schemaOnlyLowerBound = 81;
-         schemaOnlyUpperBound = gratiaDatabaseVersion;
+         schemaOnlyUpperBound = 82;
          if ((current >= schemaOnlyLowerBound) && (current < schemaOnlyUpperBound)) {
             // Stored procedures, trigger procedures.
             Logging.fine("Gratia database upgraded from " + current + " to " + schemaOnlyUpperBound);
             current = schemaOnlyUpperBound;
             UpdateDbVersion(current);
+         }
+         if (current == 82) {
+             // Remove vestigial and obstructive ServerDate from some
+             // non-Meta tables.
+             int result = 0;
+             Statement statement;
+             ResultSet resultSet;
+             String command = "SELECT TABLE_NAME" +
+                 "FROM information_schema.COLUMNS C" +
+                 "JOIN information_schema.TABLES T ON" +
+                 "  (T.TABLE_TYPE = 'BASE TABLE' AND" +
+                 "   T.TABLE_SCHEMA = DATABASE() AND" +
+                 "   C.TABLE_SCHEMA = T.TABLE_SCHEMA AND" +
+                 "   C.TABLE_NAME = T.TABLE_NAME" +
+                 "   )" +
+                 "WHERE COLUMN_NAME = 'ServerDate'" +
+                 "  AND C.TABLE_NAME NOT LIKE '%_Meta'" +
+                 "  AND C.TABLE_NAME != 'Origin'" +
+                 "ORDER by T.TABLE_SCHEMA, T.TABLE_NAME;";
+             try {
+                 Logging.log("Executing: " + command);
+                 statement = connection.createStatement();
+                 resultSet = statement.executeQuery(command);
+                 while (result > -1 && resultSet.next()) {
+                     String tableName = resultSet.getString(1);
+                     Logging.debug("DatabaseMaintenance: removing vestigial ServerDate column from table " + tableName);
+                     result = Execute("ALTER TABLE " + tableName + "DROP COLUMN ServerDate;");
+                 }
+             } catch (Exception e) {
+                 Logging.warning("Command: Error: " + command + " : ", e);
+                 result = -1;
+             }
+            if (result > -1) {
+               Logging.fine("Gratia database upgraded from " + current + " to " + (current + 1));
+               current = current + 1;
+               UpdateDbVersion(current);
+            } else {
+               Logging.warning("Gratia database FAILED to upgrade from " + current +
+                     " to " + (current + 1));
+            }
          }
          return ((current == gratiaDatabaseVersion) && checkAndUpgradeDbAuxiliaryItems());
       }
