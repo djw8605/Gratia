@@ -11,11 +11,15 @@ VOREPORT_CONFIG="voreports.debug.config"
 
 while test "x$1" != "x"; do
    if [ "$1" == "--help" ]; then 
-	echo "usage: $0 [--debug] [--mail email] [quoted_string_representing_starting_date (as accepted by date -d)]"
+	echo "usage: $0 [--grid gridType ] [--debug] [--mail email] [quoted_string_representing_starting_date (as accepted by date -d)]"
 	exit 1
    elif [ "$1" == "--debug" ]; then
 	debug=x
 	shift
+   elif [ "$1" == "--grid" ]; then
+	gridOption="--grid=$2"
+	shift
+        shift
    elif [ "$1" == "--dry-run" ]; then
 	dryrun=yes
 	shift
@@ -64,7 +68,7 @@ function sendto {
 
     echo "See $WEBLOC for more information" > $txtfile
     echo >> $txtfile
-    eval $1 --output=text $when >> $txtfile
+    eval $1 $gridOption --output=text $when >> $txtfile
 
     echo "$subject" >> daily.check
     grep All $txtfile >> daily.check
@@ -102,10 +106,10 @@ function sendtohtml {
     #echo "See $WEBLOC for more information" > $txtfile
     #echo "For more information see: <a href=$WEBLOC>$WEBLOC</a>" > $htmlfile
     if [ "$dryrun" != "yes" ]; then 
-       $cmd "--subject=$subject" --emailto=$to --output=all $rep_args
+       $cmd "--subject=$subject" --emailto=$to --output=all $gridOption $rep_args
     else
-       echo $cmd \"--subject=$subject\" --emailto=$to --output=all $rep_args
-       $cmd  --output=all $rep_args
+       echo $cmd \"--subject=$subject\" --emailto=$to --output=all $gridOption $rep_args
+       $cmd  --output=all $gridOption $rep_args
     fi
     return   
 }
