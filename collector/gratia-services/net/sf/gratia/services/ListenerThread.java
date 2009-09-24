@@ -661,11 +661,13 @@ public class ListenerThread extends Thread {
                             rec_tx = rec_session.beginTransaction();
                             //MPERF: Logging.fine(ident + rId + " attaching VO and other content.");
                             synchronized (lock) {
+                                // Synchronize on lock so we're
+                                // guaranteed only one run per
+                                // collector, not one per thread if we
+                                // were synchronizing on the objects
+                                // themselves.
                                 newVOUpdate.check(current, rec_session);
-                            }
-                            // We don't synchronize newClusterUpdate because the check method itself is synchronized.
-                            newClusterUpdate.check(current, rec_session);
-                            synchronized (lock) {
+                                newClusterUpdate.check(current, rec_session);
                                 current.AttachContent(rec_session);
                                 // Reduce contention on the attached objects (in particular Connection)
                                 // to avoid DB deadlock.
@@ -709,6 +711,7 @@ public class ListenerThread extends Thread {
                             rec_session.close();
                             try {
                                 handleConstraintViolationException(e, current, rId, gotreplication, gothistory);
+                                keepTrying = false;
                             } catch (ConstraintViolationException e2) {
                                 // Catch rethrown exception that we couldn't handle in the function
                                 if (!handleUnexpectedException(rId, e, gotreplication, current,
