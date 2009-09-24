@@ -410,8 +410,8 @@ reporting: birt-reporting
 	# --- copy in needed libraries ---
 	cp -p $(target)/gratiaReporting.jar                    $(war-dir)/$@/WEB-INF/lib/.
 	cp -p $(target)/gratiaReporting.jar                    $(war-dir)/$@/scriptlib/.
-	cp -p $(commonLib)/mysql-connector-java-5.0.8-bin.jar  $(war-dir)/$@/WEB-INF/lib/.
-	cp -p $(commonLib)/mysql-connector-java-5.0.8-bin.jar  $(war-dir)/$@/WEB-INF/platform/plugins/org.eclipse.birt.report.data.oda.jdbc*/drivers/.
+	cp -p $(commonLib)/mysql-connector-java-*-bin.jar      $(war-dir)/$@/WEB-INF/lib/.
+	cp -p $(commonLib)/mysql-connector-java-*-bin.jar      $(war-dir)/$@/WEB-INF/platform/plugins/org.eclipse.birt.report.data.oda.jdbc*/drivers/.
 	cp -p $(commonLib)/dom4j-1.6.1.jar                     $(war-dir)/$@/WEB-INF/lib/.
 	cp -p $(commonLib)/commons-lang-*.jar                  $(war-dir)/$@/WEB-INF/lib/.
 	# --- copy needed jsp and css files ----
