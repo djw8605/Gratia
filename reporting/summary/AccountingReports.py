@@ -378,13 +378,11 @@ def sendAll(text, filestem = "temp"):
 
 
 def DBConnectString(configFiles):
-    global gDBHostName,gDBUserName,gDBPort,gDBPassword,gDBSchema,gMySQLConnectString,gConfig,gMySQLFermiConnectString
+    global gMySQLConnectString,gMySQLFermiConnectString,gMySQLDailyConnectString,gConfig
     gConfig.read(configFiles)
-    DBConnectStringHelper(mainDB)
-    DBConnectStringHelper(psacctDB)
-    DBConnectStringHelper(dailyDB)
-    gMySQLConnectString = " -h " + gDBHostName[mainDB] + " -u " + gDBUserName[mainDB] + " --port=" + gDBPort[mainDB] + " --password=" + gDBPassword[mainDB] + " -N " +  gDBSchema[mainDB]
-    gMySQLFermiConnectString = " -h " + gDBHostName[mainDB] + " -u " + gDBUserName[mainDB] + " --port=" + gDBPort[mainDB] + " --password=" + gDBPassword[mainDB] + " -N " +  gDBSchema[mainDB]
+    gMySQLConnectString      = DBConnectStringHelper(mainDB)
+    gMySQLFermiConnectString = DBConnectStringHelper(psacctDB)
+    gMySQLDailyConnectString = DBConnectStringHelper(dailyDB)
 
 
 def DBConnectStringHelper(dbName):
@@ -411,6 +409,7 @@ def DBConnectStringHelper(dbName):
             gDBPort[dbName] = "3320"
             gDBPassword[dbName] = "reader"
             gDBSchema[dbName] = "fermi_osg"
+    return " -h " + gDBHostName[dbName] + " -u " + gDBUserName[dbName] + " --port=" + gDBPort[dbName] + " --password=" + gDBPassword[dbName] + " -N " +  gDBSchema[dbName]
 
 
 def CheckDB():
@@ -638,7 +637,10 @@ def DailyVOSiteData(begin,end):
         return RunQueryAndSplit(select)
 
 def DailySiteVODataFromDaily(begin,end,select,count):
+        global gMySQLConnectString
         schema = gDBSchema[dailyDB]
+        keepConnectionValue = gMySQLConnectString
+        gMySQLConnectString = gMySQLDailyConnectString
         
         select = " SELECT M.ReportedSiteName, J.VOName, "+count+", sum(J.WallDuration) " \
                 + " from "+schema+".JobUsageRecord J," + schema +".JobUsageRecord_Meta M " \
@@ -646,10 +648,15 @@ def DailySiteVODataFromDaily(begin,end,select,count):
                 + " and M.dbid = J.dbid " \
                 + " and ProbeName " + select + "\"daily:goc\" " \
                 + " group by J.VOName, M.ReportedSiteName order by M.ReportedSiteName, J.VOName "
-        return RunQueryAndSplit(select)
+        result = RunQueryAndSplit(select)
+        gMySQLConnectString = keepConnectionValue
+        return result 
 
 def DailyVOSiteDataFromDaily(begin,end,select,count):
+        global gMySQLConnectString
         schema = gDBSchema[dailyDB]
+        keepConnectionValue = gMySQLConnectString
+        gMySQLConnectString = gMySQLDailyConnectString
         
         select = " SELECT J.VOName, M.ReportedSiteName, "+count+", sum(J.WallDuration) " \
                 + " from "+schema+".JobUsageRecord J," \
@@ -658,7 +665,9 @@ def DailyVOSiteDataFromDaily(begin,end,select,count):
                 + " and M.dbid = J.dbid " \
                 + " and ProbeName " + select + "\"daily:goc\" " \
                 + " group by J.VOName, M.ReportedSiteName order by J.VOName, M.ReportedSiteName "
-        return RunQueryAndSplit(select)
+        result = RunQueryAndSplit(select)
+        gMySQLConnectString = keepConnectionValue
+        return result
 
 def DailySiteJobStatusSummary(begin,end,selection = "", count = "", what = "Site.SiteName"):
         schema = gDBSchema[mainDB]
