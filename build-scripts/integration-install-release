@@ -38,8 +38,8 @@ function install_collector() {
     echo "OK"
   else
     echo "FAILED!"
-    exit $status
   fi
+  return $status
 }
 
 install_collector tomcat-itb_gratia_osg_daily;
