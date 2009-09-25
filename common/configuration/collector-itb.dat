@@ -5,7 +5,6 @@
    http_port => 8880,
    ssl_port => 8845,
    rmi_port => 17000,
-   jmx_port => 8004,
    server_port => 8104,
    db_schema => "itb_gratia_itb",
    db_host => "gratia07.fnal.gov",
@@ -14,6 +13,7 @@
    collector_host => "gratia02.fnal.gov",
    max_perm_size => "256m",
    max_heap_size => "1024m",
+   jsvc => "/data/jsvc/bin/jsvc",
    "properties.attributes" =>
    {
     "maintain.history.checkInterval" => '4 h',
