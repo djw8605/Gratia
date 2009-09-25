@@ -424,7 +424,7 @@ function start_collector {
   runit "/sbin/service $(echo $tomcat |cut -d'/' -f3) start"
   logit
   logit "... collector started
-$(ps -ef |grep file=$tomcat_dir/$tomcat |grep '   1 ' |egrep -v grep 2>/dev/null)
+$(ps -ef |grep -e 'catalina\.\(base\|home\)='$tomcat_dir/$tomcat |grep '   1 ' |egrep -v grep 2>/dev/null)
 "
   logit
   logit "... sleeping 20 seconds to allow tomcat to deploy war files"
@@ -538,20 +538,20 @@ function cleanup {
 function verify_instance_is_running {
   delimit  verify_instance_is_running
   logit "Verifying that the tomcat instance is running using
-   ps -ef |grep file=$tomcat_dir/$tomcat |grep '   1 ' |egrep -v grep 2>/dev/null
+   ps -ef |grep -e 'catalina\.\(base\|home\)='$tomcat_dir/$tomcat |grep '   1 ' |egrep -v grep 2>/dev/null
 "
   sleep 4
-  process_cnt="$(ps -ef |grep file=$tomcat_dir/$tomcat |grep '  1 '|egrep -v grep  2>/dev/null|wc -l)"
+  process_cnt="$(ps -ef |grep -e 'catalina\.\(base\|home\)='$tomcat_dir/$tomcat |grep '  1 '|egrep -v grep  2>/dev/null|wc -l)"
   case $process_cnt in 
     0 ) logerr "... tomcat instance ($tomcat) not running" ;;
     1 ) ;;
     * ) logerr "More than 1 tomcat instance running for this gratia instance:
-$(ps -ef |grep file=$tomcat_dir/$tomcat |grep '  1 '|egrep -v grep 2>/dev/null)
+$(ps -ef |grep -e 'catalina\.\(base\|home\)='$tomcat_dir/$tomcat |grep '  1 '|egrep -v grep 2>/dev/null)
 " 
         ;;
   esac
   logit "Tomcat instance for ($tomcat):
-$(ps -ef |grep file=$tomcat_dir/$tomcat |grep '   1 ' |egrep -v grep 2>/dev/null)
+$(ps -ef |grep -e 'catalina\.\(base\|home\)='$tomcat_dir/$tomcat |grep '   1 ' |egrep -v grep 2>/dev/null)
 "
   logit "PASSED: tomcat instance ($tomcat) is running"
   sleep 1
@@ -590,7 +590,12 @@ $(cat $release_file)
 #--------------------------------
 function verify_port_availability {
   delimit  verify_port_availability
-  expected_number_of_ports=5
+  local jmx_port=`$source/common/configuration/configure-collector $cc_config_arg-p ${tomcat_dir} --obtain-config-item jmx_port $config_name 2>/dev/null | sed -ne 's/^config: jmx_port = //p'`
+  if [[ -n "$jmx_port" ]]; then
+    expected_number_of_ports=6
+  else
+    expected_number_of_ports=5
+  fi
   logit "
 Verifying that the tomcat process has $expected_number_of_ports ports it
 is listening on for this tomcat instance and all are by the same process.
@@ -626,7 +631,7 @@ $(/bin/netstat -n --listening --program |egrep $port  2>/dev/null|egrep -v grep 
     logit "Expected $expected_number_of_ports connections.... found ${connection_cnt}.
 $(/bin/netstat -n --listening --program |egrep $pid 2>/dev/null |egrep -v grep 2>/dev/null)
 "
-    logit "... sleeping $sleep seconda and trying again (try $try of $maxtries)" 
+    logit "... sleeping $sleep seconds and trying again (try $try of $maxtries)" 
     sleep $sleep
     try=$(($try + 1))
   done
