@@ -44,14 +44,17 @@ gEmailToNames = None
 gEmailSubject = "not set"
 gGrid = None  # variable to indicate if only to extract rows with Grid='OSG'  
 # Database connection related global variables
-gDBHostName = None 
-gDBPort = None 
-gDBUserName = None 
-gDBPassword = None 
-gDBSchema = None 
-gDBSchemaMain = None
-gDBSchemaOsgDaily = None
-gDBSchemaPsacct = None
+gDBHostName = {} 
+gDBPort = {} 
+gDBUserName = {} 
+gDBPassword = {} 
+gDBSchema = {} 
+
+# section names in confguration file
+mainDB = "main_db"
+psacctDB = "psacct_db"
+dailyDB = "daily_db"
+
 
 gOutput="text" # Type of output (text, csv, None)
 
@@ -183,7 +186,7 @@ def UseArgs(argv):
        gEmailToNames = ["" for i in gEmailTo]
 
     # Get DB connection credentials
-    DBConnectionString(configFiles)
+    DBConnectString(configFiles)
     
     start = ""
     end = ""
@@ -373,31 +376,42 @@ def sendAll(text, filestem = "temp"):
    else:
       sendEmail( (gEmailToNames, gEmailTo), gEmailSubject, text, None)
 
-def DBConnectionString(configFiles):
-    global gDBHostName,gDBUserName,gDBPort,gDBPassword,gDBSchemaMain,gDBSchemaOsgDaily,gDBSchemaPsacct,gMySQLConnectString,gConfig
-    gConfig.read(configFiles)
-    warn=0
-    try:
-        gDBHostName = gConfig.get("db", "hostname") 
-        gDBUserName = gConfig.get("db", "username") 
-        gDBPort = gConfig.get("db", "port") 
-        gDBPassword = gConfig.get("db", "password") 
-        gDBSchemaMain = gConfig.get("schema", "main") 
-        gDBSchemaPsacct = gConfig.get("schema", "osgdaily") 
-        gDBSchemaOsgDaily = gConfig.get("schema", "psacct") 
-    except:
-        gDBHostName = "gratia09.fnal.gov"
-        gDBUserName = "reader"
-        gDBPort = "3320"
-        gDBPassword = "reader"
-        gDBSchemaMain = "gratia"
-        gDBSchemaPsacct = "gratia_psacct"
-        gDBSchemaOsgDaily = "gratia_osg_daily"
-        warn=1
 
-    gMySQLConnectString = " -h " + gDBHostName + " -u " + gDBUserName + " --port=" + gDBPort + " --password=" + gDBPassword + " -N " +  gDBSchemaMain
-    if(warn == 1):
-        print "WARNING!!! Could not fetch proper database connection credentials from " + configFiles + ". Using " + gMySQLConnectString + ". Data contained in reports might not be accurate."
+def DBConnectString(configFiles):
+    global gDBHostName,gDBUserName,gDBPort,gDBPassword,gDBSchema,gMySQLConnectString,gConfig,gMySQLFermiConnectString
+    gConfig.read(configFiles)
+    DBConnectStringHelper(mainDB)
+    DBConnectStringHelper(psacctDB)
+    DBConnectStringHelper(dailyDB)
+    gMySQLConnectString = " -h " + gDBHostName[mainDB] + " -u " + gDBUserName[mainDB] + " --port=" + gDBPort[mainDB] + " --password=" + gDBPassword[mainDB] + " -N " +  gDBSchema[mainDB]
+    gMySQLFermiConnectString = " -h " + gDBHostName[mainDB] + " -u " + gDBUserName[mainDB] + " --port=" + gDBPort[mainDB] + " --password=" + gDBPassword[mainDB] + " -N " +  gDBSchema[mainDB]
+
+
+def DBConnectStringHelper(dbName):
+    global gDBHostName,gDBUserName,gDBPort,gDBPassword,gDBSchema,gConfig
+    try:
+        gDBHostName[dbName] = gConfig.get(dbName, "hostname") 
+        gDBUserName[dbName] = gConfig.get(dbName, "username") 
+        gDBPort[dbName] = gConfig.get(dbName, "port") 
+        gDBPassword[dbName] = gConfig.get(dbName, "password") 
+        gDBSchema[dbName] = gConfig.get(dbName, "schema") 
+    # Fall back to default values if something isn't set or isn't set properly in the config file
+    except:
+        if(dbName == mainDB or dbName == dailyDB):
+            gDBHostName[dbName] = "gratia09.fnal.gov"
+            gDBUserName[dbName] = "reader"
+            gDBPort[dbName] = "3320"
+            gDBPassword[dbName] = "reader"
+            gDBSchema[dbName] = "gratia"
+            if(dbName == dailyDB):
+                gDBSchema[dbName] = "gratia_osg_daily"
+        elif(dbName == psacctDB):
+            gDBHostName[dbName] = "gratia-db01.fnal.gov"
+            gDBUserName[dbName] = "reader"
+            gDBPort[dbName] = "3320"
+            gDBPassword[dbName] = "reader"
+            gDBSchema[dbName] = "fermi_osg"
+
 
 def CheckDB():
         global gMySQL,gMySQLConnectString
@@ -417,7 +431,7 @@ def CheckDB():
         return status == 0
         
 def RunQuery(select):
-        global gMySQL,gMySQLConnectString,gDB,gGrid
+        global gMySQL,gMySQLConnectString,gGrid
         # If the user explicitly requests from the command line to restrict queries to contain Grid="OSG" in the where clause, adjust the query to add Grid="OSG" at the appropriate place
         if(gGrid != None and gGrid.lower() == "osg"): 
             select = AddOSGToQuery(select)
@@ -456,8 +470,8 @@ def RunQueryAndSplit(select):
 
 
 def NumberOfCpus():
-        global gMySQLConnectString, gDBSchemaPsacct
-        schema = gDBSchemaPsacct;
+        global gMySQLConnectString
+        schema = gDBSchema[psacctDB];
         keepConnectionValue = gMySQLConnectString
         gMySQLConnectString = gMySQLFermiConnectString
         
@@ -554,12 +568,12 @@ def UpdateVOName(list, index):
       return r
 
 def WeeklyData():
-        global gMySQLConnectString, gDBSchemaPsacct
-        schema = gDBSchemaPsacct;
+        global gMySQLConnectString
+        schema = gDBSchema[psacctDB];
         keepConnectionValue = gMySQLConnectString
         gMySQLConnectString = gMySQLFermiConnectString
 
-        schema = gDBSchemaPsacct;
+        schema = gDBSchema[psacctDB];
         select = " SELECT J.VOName, sum((J.CpuUserDuration+J.CpuSystemDuration)) as cputime, " + \
                  " sum((J.CpuUserDuration+J.CpuSystemDuration)*CpuInfo.BenchmarkScore)/1000 as normcpu, " + \
                  " sum(J.WallDuration)*0 as wall, sum(J.WallDuration*CpuInfo.BenchmarkScore)*0/1000 as normwall " + \
@@ -580,8 +594,7 @@ def CondorData():
         return RunQueryAndSplit(select)
 
 def DailySiteData(begin,end):
-        global gDBSchemaMain
-        schema = gDBSchemaMain
+        schema = gDBSchema[mainDB]
         
         select = " SELECT Site.SiteName, sum(NJobs), sum(J.WallDuration) " \
                 + " from "+schema+".Site, "+schema+".Probe, "+schema+".VOProbeSummary J " \
@@ -592,8 +605,7 @@ def DailySiteData(begin,end):
         return RunQueryAndSplit(select)
 
 def DailyVOData(begin,end):
-        global gDBSchemaMain
-        schema = gDBSchemaMain
+        schema = gDBSchema[mainDB]
             
         select = " SELECT J.VOName, Sum(NJobs), sum(J.WallDuration) " \
                 + " from "+schema+".Site, "+schema+".Probe, "+schema+".VOProbeSummary J " \
@@ -604,8 +616,7 @@ def DailyVOData(begin,end):
         return RunQueryAndSplit(select)
 
 def DailySiteVOData(begin,end):
-        global gDBSchemaMain
-        schema = gDBSchemaMain
+        schema = gDBSchema[mainDB]
         
         select = " SELECT Site.SiteName, J.VOName, sum(NJobs), sum(J.WallDuration) " \
                 + " from "+schema+".Site, "+schema+".Probe, "+schema+".VOProbeSummary J " \
@@ -616,8 +627,7 @@ def DailySiteVOData(begin,end):
         return RunQueryAndSplit(select)
 
 def DailyVOSiteData(begin,end):
-        global gDBSchemaMain
-        schema = gDBSchemaMain
+        schema = gDBSchema[mainDB]
         
         select = " SELECT J.VOName, Site.SiteName, sum(NJobs), sum(J.WallDuration) " \
                 + " from "+schema+".Site, "+schema+".Probe, "+schema+".VOProbeSummary J " \
@@ -628,8 +638,7 @@ def DailyVOSiteData(begin,end):
         return RunQueryAndSplit(select)
 
 def DailySiteVODataFromDaily(begin,end,select,count):
-        global gDBSchemaOsgDaily
-        schema = gDBSchemaOsgDaily
+        schema = gDBSchema[dailyDB]
         
         select = " SELECT M.ReportedSiteName, J.VOName, "+count+", sum(J.WallDuration) " \
                 + " from "+schema+".JobUsageRecord J," + schema +".JobUsageRecord_Meta M " \
@@ -640,8 +649,7 @@ def DailySiteVODataFromDaily(begin,end,select,count):
         return RunQueryAndSplit(select)
 
 def DailyVOSiteDataFromDaily(begin,end,select,count):
-        global gDBSchemaOsgDaily
-        schema = gDBSchemaOsgDaily
+        schema = gDBSchema[dailyDB]
         
         select = " SELECT J.VOName, M.ReportedSiteName, "+count+", sum(J.WallDuration) " \
                 + " from "+schema+".JobUsageRecord J," \
@@ -653,8 +661,7 @@ def DailyVOSiteDataFromDaily(begin,end,select,count):
         return RunQueryAndSplit(select)
 
 def DailySiteJobStatusSummary(begin,end,selection = "", count = "", what = "Site.SiteName"):
-        global gDBSchemaMain
-        schema = gDBSchemaMain
+        schema = gDBSchema[mainDB]
         
         select = " SELECT " + what + ", J.ApplicationExitCode, sum(Njobs), sum(WallDuration) " \
                 + " from "+schema+".Site, "+schema+".Probe, " \
@@ -671,8 +678,7 @@ def DailySiteJobStatusSummary(begin,end,selection = "", count = "", what = "Site
         
                         
 def DailySiteJobStatus(begin,end,selection = "", count = "", what = "Site.SiteName"):
-        global gDBSchemaMain
-        schema = gDBSchemaMain
+        schema = gDBSchema[mainDB]
 
         select = " SELECT " + what + ", J.Status, count(*), sum(WallDuration) " \
                 + " from "+schema+".Site, "+schema+".Probe, " \
@@ -689,8 +695,7 @@ def DailySiteJobStatus(begin,end,selection = "", count = "", what = "Site.SiteNa
         return RunQueryAndSplit(select)
 
 def DailySiteJobStatusCondor(begin,end,selection = "", count = "", what = "Site.SiteName"):
-        global gDBSchemaMain
-        schema = gDBSchemaMain
+        schema = gDBSchema[mainDB]
 
         select = " SELECT "+what+", R.Value,count(*), sum(WallDuration) " \
                 + " from "+schema+".Site, "+schema+".Probe, "+schema+".Resource R, " \
@@ -709,8 +714,7 @@ def DailySiteJobStatusCondor(begin,end,selection = "", count = "", what = "Site.
 # Condor Exit Status
 
 def CMSProdData(begin,end):
-    global gDBSchemaMain
-    schema = gDBSchemaMain
+    schema = gDBSchema[mainDB]
     select = "select sum(WallDuration) from JobUsageRecord_Report  " \
             "where \""+ DateToString(begin) +"\"<=EndTime and EndTime<\"" + DateToString(end) + "\" " \
             "and ResourceType = \"Batch\" and VOName = \"cms\" "\
@@ -724,8 +728,7 @@ def CMSProdData(begin,end):
     return RunQueryAndSplit(select)
 
 def GetSiteVOEfficiency(begin,end):
-    global gDBSchemaMain
-    schema = gDBSchemaMain + ".";
+    schema = gDBSchema[mainDB] + ".";
 
     select = """\
             select SiteName, lcase(VOName), sum(Njobs),sum(WallDuration),sum(CpuUserDuration+CpuSystemDuration)/sum(WallDuration) 
@@ -741,8 +744,7 @@ def GetSiteVOEfficiency(begin,end):
     return RunQueryAndSplit(select);    
 
 def GetVOEfficiency(begin,end):
-    global gDBSchemaMain
-    schema = gDBSchemaMain + ".";
+    schema = gDBSchema[mainDB] + ".";
 
     select = """\
             select lcase(VOName), sum(Njobs),sum(WallDuration),sum(CpuUserDuration+CpuSystemDuration)/sum(WallDuration) 
@@ -1364,8 +1366,7 @@ def VONameCorrectionSummaryJoin(table = "sub"):
     return table + ".VOcorrid = VONameCorrection.corrid  and (VONameCorrection.VOid = VO.VOid) "
 
 def RangeVOData(begin, end, with_panda = False):
-    global gDBSchemaMain
-    schema = gDBSchemaMain
+    schema = gDBSchema[mainDB]
     select = """\
 select J.VOName, sum(J.NJobs), sum(J.WallDuration)
   from """ + schema + """.VOProbeSummary J
@@ -1378,10 +1379,10 @@ select J.VOName, sum(J.NJobs), sum(J.WallDuration)
     if with_panda:
         panda_select = """\
 select J.VOName, sum(J.NJobs), sum(J.WallDuration)
-  from """ + gDBSchemaOsgDaily + """.JobUsageRecord_Report J
+  from """ + gDBSchema[dailyDB] + """.JobUsageRecord_Report J
   where 
     J.ProbeName != \"daily:goc\" and
-    J.SiteName not in (select GT.SiteName from """ + gDBSchemaMain + """.Site GT) and
+    J.SiteName not in (select GT.SiteName from """ + gDBSchema[mainDB] + """.Site GT) and
     J.EndTime >= \"""" + DateTimeToString(begin) + """\" and
     J.EndTime < \"""" + DateTimeToString(end) + """\"
     group by J.VOName;"""
@@ -1390,8 +1391,7 @@ select J.VOName, sum(J.NJobs), sum(J.WallDuration)
         return RunQueryAndSplit(select) 
 
 def RangeSiteData(begin, end, with_panda = False):
-    global gDBSchemaMain
-    schema = gDBSchemaMain
+    schema = gDBSchema[mainDB]
     select = """\
 select T.SiteName, sum(J.NJobs), sum(J.WallDuration)
   from """ + schema + ".Site T, " + schema + ".Probe P, " + schema + """.VOProbeSummary J
@@ -1405,10 +1405,10 @@ select T.SiteName, sum(J.NJobs), sum(J.WallDuration)
     if with_panda:
         panda_select = """\
 select J.SiteName, sum(J.NJobs), sum(J.WallDuration)
-  from """ + gDBSchemaOsgDaily + """.JobUsageRecord_Report J
+  from """ + gDBSchema[dailyDB] + """.JobUsageRecord_Report J
   where VOName != \"unknown\" and 
     J.ProbeName != \"daily:goc\" and
-    J.SiteName not in (select GT.SiteName from """ + gDBSchemaMain + """.Site GT) and
+    J.SiteName not in (select GT.SiteName from """ + gDBSchema[mainDB] + """.Site GT) and
     J.EndTime >= \"""" + DateTimeToString(begin) + """\" and
     J.EndTime < \"""" + DateTimeToString(end) + """\"
     group by J.SiteName;"""
@@ -1417,8 +1417,7 @@ select J.SiteName, sum(J.NJobs), sum(J.WallDuration)
         return RunQueryAndSplit(select)
 
 def RangeSiteVOData(begin, end, with_panda = False):
-    global gDBSchemaMain
-    schema = gDBSchemaMain
+    schema = gDBSchema[mainDB]
     select = """\
 select T.SiteName, J.VOName, sum(NJobs), sum(J.WallDuration)
   from """ + schema + ".Site T, " + schema + ".Probe P, " + schema + """.VOProbeSummary J
@@ -1433,10 +1432,10 @@ select T.SiteName, J.VOName, sum(NJobs), sum(J.WallDuration)
     if with_panda:
         panda_select = """\
 select J.SiteName, J.VOName, sum(J.NJobs), sum(J.WallDuration)
-  from """ + gDBSchemaOsgDaily + """.JobUsageRecord_Report J
+  from """ + gDBSchema[dailyDB] + """.JobUsageRecord_Report J
   where VOName != \"unknown\" and 
     J.ProbeName != \"daily:goc\" and
-    J.ReportedSiteName not in (select GT.SiteName from """ + gDBSchemaMain + """.Site GT) and
+    J.ReportedSiteName not in (select GT.SiteName from """ + gDBSchema[mainDB] + """.Site GT) and
     J.EndTime >= \"""" + DateTimeToString(begin) + """\" and
     J.EndTime < \"""" + DateTimeToString(end) + """\"
     group by J.ReportedSiteName, J.VOName
@@ -1446,8 +1445,7 @@ select J.SiteName, J.VOName, sum(J.NJobs), sum(J.WallDuration)
         return RunQueryAndSplit(select)
     
 def RangeVOSiteData(begin, end, with_panda = False):
-    global gDBSchemaMain
-    schema = gDBSchemaMain
+    schema = gDBSchema[mainDB]
     select = """\
 select J.VOName, T.SiteName, sum(NJobs), sum(J.WallDuration)
   from """ + schema + ".Site T, " + schema + ".Probe P, " + schema + """.VOProbeSummary J
@@ -1462,10 +1460,10 @@ select J.VOName, T.SiteName, sum(NJobs), sum(J.WallDuration)
     if with_panda:
         panda_select = """\
 select J.VOName, J.SiteName, sum(J.NJobs), sum(J.WallDuration)
-  from """ + gDBSchemaOsgDaily + """.JobUsageRecord_Report J
+  from """ + gDBSchema[dailyDB] + """.JobUsageRecord_Report J
   where VOName != \"unknown\" and 
     J.ProbeName != \"daily:goc\" and
-    J.SiteName not in (select GT.SiteName from """ + gDBSchemaMain + """.Site GT) and
+    J.SiteName not in (select GT.SiteName from """ + gDBSchema[mainDB] + """.Site GT) and
     J.EndTime >= \"""" + DateTimeToString(begin) + """\" and
     J.EndTime < \"""" + DateTimeToString(end) + """\"
     group by J.SiteName, J.VOName
@@ -1475,8 +1473,7 @@ select J.VOName, J.SiteName, sum(J.NJobs), sum(J.WallDuration)
         return RunQueryAndSplit(select)
 
 def LongJobsData(begin, end, with_panda = False):
-    global gDBSchemaMain
-    schema = gDBSchemaMain
+    schema = gDBSchema[mainDB]
     
     select = """
 select SiteName, VO.VOName, sum(NJobs), avg(WallDuration)/3600.0/24.0, avg(Cpu*100/WallDuration),
@@ -2469,8 +2466,7 @@ def RangeLongJobs(range_end = datetime.date.today(),
                         output)
 
 def GetSiteLastReportingDate(begin,recent):
-    global gDBSchemaMain
-    schema = gDBSchemaMain + ".";
+    schema = gDBSchema[mainDB] + ".";
     if (recent):
         test = ">="
     else:
@@ -2487,8 +2483,7 @@ where currentTime """+test+"""  \"""" + DateToString(begin) + """\" order by cur
     return RunQueryAndSplit(select);
 
 def GetReportingVOs(begin,end):
-    global gDBSchemaMain
-    schema = gDBSchemaMain + ".";
+    schema = gDBSchema[mainDB] + ".";
 
     select = """\
 select distinct VOName from """+schema+"""VOProbeSummary V where VOName != \"unknown\" and 
@@ -2501,8 +2496,7 @@ select distinct VOName from """+schema+"""VOProbeSummary V where VOName != \"unk
     return RunQueryAndSplit(select);
 
 def GetLastReportingVOs(when):
-    global gDBSchemaMain
-    schema = gDBSchemaMain + ".";
+    schema = gDBSchema[mainDB] + ".";
 
     select = """\
 select distinct VOName from """+schema+"""VOProbeSummary V where VOName != \"unknown\" and 
@@ -2514,8 +2508,7 @@ select distinct VOName from """+schema+"""VOProbeSummary V where VOName != \"unk
     return RunQueryAndSplit(select);
 
 def GetSiteLastActivity(begin):
-    global gDBSchemaMain
-    schema = gDBSchemaMain + ".";
+    schema = gDBSchema[mainDB] + ".";
 
     select = """\
     select * from (select SiteName, max(probeMaxTime) as siteMaxTime from
@@ -2529,8 +2522,7 @@ order by siteMaxTime) ssub where siteMaxTime < \"""" + DateToString(begin) + """
     return RunQueryAndSplit(select);
 
 def GetListOfReportingSites(begin,end):
-    global gDBSchemaMain
-    schema = gDBSchemaMain + ".";
+    schema = gDBSchema[mainDB] + ".";
 
     select = """\
 select distinct SiteName from """+schema+"""VOProbeSummary V,Probe P,Site S where VOName != \"unknown\" and 
@@ -2544,8 +2536,7 @@ select distinct SiteName from """+schema+"""VOProbeSummary V,Probe P,Site S wher
     return RunQueryAndSplit(select);
 
 def GetTotals(begin,end):
-    global gDBSchemaMain
-    schema = gDBSchemaMain + ".";
+    schema = gDBSchema[mainDB] + ".";
 
     select = """\
 select sum(Njobs),sum(WallDuration),sum(CpuUserDuration+CpuSystemDuration)/sum(WallDuration) from """+schema+"""VOProbeSummary where VOName != \"unknown\" and 
@@ -2557,8 +2548,7 @@ select sum(Njobs),sum(WallDuration),sum(CpuUserDuration+CpuSystemDuration)/sum(W
     return RunQueryAndSplit(select)[0].split('\t');
     
 def GetNewUsers(begin,end):
-    global gDBSchemaMain
-    schema = gDBSchemaMain + ".";
+    schema = gDBSchema[mainDB] + ".";
     select = """\
 select CommonName, VO.VOName, MasterSummaryData.ProbeName, SiteName, EndTime, sum(NJobs) from 
 (
