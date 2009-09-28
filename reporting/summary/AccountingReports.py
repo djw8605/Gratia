@@ -509,11 +509,11 @@ def GetListOfOSGSites():
 
 def GetListOfVOs(filter,voType=None):
         if(voType == 'active'):
-            location = 'http://myosg.grid.iu.edu/vosummary/xml?datasource=summary&summary_attrs_showdesc=on&all_vos=on&show_disabled=on&active=on&active_value=1'
+            location = 'http://myosg.grid.iu.edu/vosummary/xml?datasource=summary&summary_attrs_showdesc=on&all_vos=on&show_disabled=on&active=on&active_value=1&summary_attrs_showreporting_group=on'
         elif(voType == 'inactive'):
-            location = 'http://myosg.grid.iu.edu/vosummary/xml?datasource=summary&summary_attrs_showdesc=on&all_vos=on&show_disabled=on&active=on&active_value=0'
+            location = 'http://myosg.grid.iu.edu/vosummary/xml?datasource=summary&summary_attrs_showdesc=on&all_vos=on&show_disabled=on&active=on&active_value=0&summary_attrs_showreporting_group=on'
         else:
-            location = 'http://myosg.grid.iu.edu/vosummary/xml?datasource=summary&summary_attrs_showdesc=on&all_vos=on&show_disabled=on&active_value=1'
+            location = 'http://myosg.grid.iu.edu/vosummary/xml?datasource=summary&summary_attrs_showdesc=on&all_vos=on&show_disabled=on&active_value=1&summary_attrs_showreporting_group=on'
         html = urllib2.urlopen(location).read()
         vos = []
         doc = libxml2.parseDoc(html)
@@ -522,6 +522,10 @@ def GetListOfVOs(filter,voType=None):
               name = resource.content
            elif resource.name == "LongName":
               vos.append( (name,resource.content) )
+
+        for resource in doc.xpathEval("/VOSummary/VO/ReportingGroups/ReportingGroup/Name"):
+            vos.append((resource.content,'Additional VOs'))
+
         doc.freeDoc()
         
         return vos;
