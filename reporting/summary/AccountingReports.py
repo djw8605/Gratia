@@ -508,12 +508,11 @@ def GetListOfOSGSites():
         return GetListOfSites("//Resource[Active='True' and ( Services/Service/Name='Compute Element' or Services/Service/Name='CE' or Services='no applicable service exists')]/Name")
 
 def GetListOfVOs(filter,voType=None):
-        if(voType == 'active'):
-            location = 'http://myosg.grid.iu.edu/vosummary/xml?datasource=summary&summary_attrs_showdesc=on&all_vos=on&show_disabled=on&active=on&active_value=1&summary_attrs_showreporting_group=on'
+        location = 'http://myosg.grid.iu.edu/vosummary/xml?datasource=summary&summary_attrs_showdesc=on&all_vos=on&show_disabled=on&summary_attrs_showreporting_group=on'
+        if(voType == 'active' or voType == None):
+            location+= '&active=on&active_value=1'
         elif(voType == 'inactive'):
-            location = 'http://myosg.grid.iu.edu/vosummary/xml?datasource=summary&summary_attrs_showdesc=on&all_vos=on&show_disabled=on&active=on&active_value=0&summary_attrs_showreporting_group=on'
-        else:
-            location = 'http://myosg.grid.iu.edu/vosummary/xml?datasource=summary&summary_attrs_showdesc=on&all_vos=on&show_disabled=on&active_value=1&summary_attrs_showreporting_group=on'
+            location+= '&active=on&active_value=0'
         html = urllib2.urlopen(location).read()
         vos = []
         doc = libxml2.parseDoc(html)
