@@ -50,8 +50,6 @@ public class ReplicationTable extends HttpServlet {
    //
    // globals
    //
-   HttpServletRequest fRequest;
-   HttpServletResponse fResponse;
    Properties fProperties;
    String fMessage = null;
    Boolean fModify = false;
@@ -154,7 +152,7 @@ public class ReplicationTable extends HttpServlet {
    public void doGet(HttpServletRequest request, HttpServletResponse response)
    throws ServletException, IOException {
        if (LoginChecker.checkLogin(request, response)) {
-           setup(request, response);
+           setup(request);
            Integer selectedReplicationId = null;
            try {
                selectedReplicationId = new Integer(request.getParameter("replicationid"));
@@ -185,16 +183,16 @@ public class ReplicationTable extends HttpServlet {
            }
            loadRepTable(); // In case of changes.
            process(selectedReplicationId);
-           compileResponse();
+           compileResponse(response);
        }
    }
    
-   private void compileResponse() throws IOException {
-      fResponse.setContentType("text/html");
-      fResponse.setHeader("Cache-Control", "no-cache"); // HTTP 1.1
-      fResponse.setHeader("Pragma", "no-cache"); // HTTP 1.0
+   private void compileResponse(HttpServletResponse response) throws IOException {
+      response.setContentType("text/html");
+      response.setHeader("Cache-Control", "no-cache"); // HTTP 1.1
+      response.setHeader("Pragma", "no-cache"); // HTTP 1.0
       //        request.getSession().setAttribute("table", table);
-      PrintWriter writer = fResponse.getWriter();
+      PrintWriter writer = response.getWriter();
       //
       // cleanup message
       //
@@ -220,7 +218,7 @@ public class ReplicationTable extends HttpServlet {
            }
                       
 
-           setup(request, response);
+           setup(request);
 
            String action = request.getParameter("action");
       
@@ -228,7 +226,7 @@ public class ReplicationTable extends HttpServlet {
                fModify = false;
                loadRepTable(); // In case of changes.
                process(0);
-               compileResponse();
+               compileResponse(response);
            } else {
                Integer selectedReplicationId = null;
                Replication repEntry = null;
@@ -246,7 +244,7 @@ public class ReplicationTable extends HttpServlet {
                            fRepTable.put(repEntry.getreplicationid(), repEntry);
                        }
                        fModify = false;
-                       update(repEntry);
+                       update(repEntry, request);
                    } else if (fModify) {
                        fMessage = "In modify mode: update or cancel before attempting another action.";
                    } else if (action.equals("Register")) {
@@ -269,7 +267,7 @@ public class ReplicationTable extends HttpServlet {
                    }
                    loadRepTable(); // In case of changes.
                    process(selectedReplicationId);
-                   compileResponse();
+                   compileResponse(response);
                } else {
                    if (action.equals("New Entry")) {
                        repEntry = new Replication(RecordTable);
@@ -279,7 +277,7 @@ public class ReplicationTable extends HttpServlet {
                        fModify = true;
                
                        process(0);
-                       compileResponse();            
+                       compileResponse(response);            
                    } else if (action.equals("Update")) {
                        Logging.debug("ReplicationTable: matched for update: replicationid " + selectedReplicationId);
                        if (selectedReplicationId == null || selectedReplicationId !=0) {
@@ -288,12 +286,12 @@ public class ReplicationTable extends HttpServlet {
                        } else {
                            repEntry = new Replication(RecordTable);
                            fRepTable.put(repEntry.getreplicationid(), repEntry);                  
-                           update(repEntry);
+                           update(repEntry, request);
                            loadRepTable(); // To see change
                        }
                        fModify = false;
                        process(0);
-                       compileResponse();            
+                       compileResponse(response);            
                    } else {
                        // Unknown action
                        fMessage = "Error: Unexpected action ("+action+") has been requested with a correct replication record ("+selectedReplicationId+").";
@@ -304,14 +302,10 @@ public class ReplicationTable extends HttpServlet {
        }
    }
    
-   void setup(HttpServletRequest request, HttpServletResponse response)
+   void setup(HttpServletRequest request)
    throws ServletException, IOException {
       // Once-only init
       initialize();
-      
-      // For other routines to see.
-      this.fRequest = request;
-      this.fResponse = response;
       
       // Slurp page template
       fHtml = XP.get(request.getRealPath("/") + "replicationtable.html");
@@ -686,7 +680,7 @@ public class ReplicationTable extends HttpServlet {
       }
    }
    
-   void update(Replication repEntry) {
+    void update(Replication repEntry, HttpServletRequest request) {
       int repEntryId = repEntry.getreplicationid();
       Logging.debug("ReplicationTable: updating replicationId " +
                     repEntryId);
@@ -696,7 +690,7 @@ public class ReplicationTable extends HttpServlet {
       
       // openconnection
       String key = "openconnection:" + repEntryId;
-      String newValue = fRequest.getParameter(key);
+      String newValue = request.getParameter(key);
       if (!repEntry.getopenconnection().equals(newValue)) {
          repEntry.setopenconnection(newValue);
       }
@@ -705,7 +699,7 @@ public class ReplicationTable extends HttpServlet {
       int newValueInt = 0;
       Boolean successfulConversion = false;
       key = "security:" + repEntryId;
-      newValue = fRequest.getParameter(key);
+      newValue = request.getParameter(key);
       newValueInt = newValue.equals("Yes") ? 1 : 0;
       if (repEntry.getsecurity() != newValueInt) {
          repEntry.setsecurity(newValueInt);
@@ -713,7 +707,7 @@ public class ReplicationTable extends HttpServlet {
       
       // probename
       key = "probename:" + repEntryId;
-      newValue = fRequest.getParameter(key);
+      newValue = request.getParameter(key);
       if (!repEntry.getprobename().equals(newValue)) {
          repEntry.setprobename(newValue);
       }
@@ -721,7 +715,7 @@ public class ReplicationTable extends HttpServlet {
       // frequency
       key = "frequency:" + repEntryId;
       try {
-         newValueInt = Integer.parseInt(fRequest.getParameter(key));
+         newValueInt = Integer.parseInt(request.getParameter(key));
          successfulConversion = true;
       } catch (Exception e) {
          successfulConversion = false;
@@ -733,7 +727,7 @@ public class ReplicationTable extends HttpServlet {
       // dbid
       key = "dbid:" + repEntryId;
       try {
-         newValueInt = Integer.parseInt(fRequest.getParameter(key));
+         newValueInt = Integer.parseInt(request.getParameter(key));
          successfulConversion = true;
       } catch (Exception e) {
          successfulConversion = false;
@@ -745,7 +739,7 @@ public class ReplicationTable extends HttpServlet {
       // bundleSize
       key = "bundleSize:" + repEntryId;
       try {
-         newValueInt = Integer.parseInt(fRequest.getParameter(key));
+         newValueInt = Integer.parseInt(request.getParameter(key));
          successfulConversion = true;
       } catch (Exception e) {
          successfulConversion = false;
