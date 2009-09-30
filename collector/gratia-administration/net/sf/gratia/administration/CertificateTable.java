@@ -41,8 +41,6 @@ public class CertificateTable extends HttpServlet
       //
       // globals
       //
-      HttpServletRequest fRequest;
-      HttpServletResponse fResponse;
       boolean fInitialized = false;
       
       public void init(ServletConfig config) throws ServletException 
@@ -56,15 +54,15 @@ public class CertificateTable extends HttpServlet
          fInitialized = true;
       }
       
-      void displayPage() throws IOException 
+      void displayPage(HttpServletResponse response) throws IOException 
       {
 
          process();
          
-         fResponse.setContentType("text/html");
-         fResponse.setHeader("Cache-Control", "no-cache"); // HTTP 1.1
-         fResponse.setHeader("Pragma", "no-cache"); // HTTP 1.0
-         PrintWriter writer = fResponse.getWriter();
+         response.setContentType("text/html");
+         response.setHeader("Cache-Control", "no-cache"); // HTTP 1.1
+         response.setHeader("Pragma", "no-cache"); // HTTP 1.0
+         PrintWriter writer = response.getWriter();
          writer.write(fHtml);
          writer.flush();
          writer.close();
@@ -77,11 +75,11 @@ public class CertificateTable extends HttpServlet
              
             Logging.debug("CertificateTable: doGet");
             
-            setup(request,response);
+            setup(request);
             if (request.getParameter("action") != null) {
-               update();
+               update(request);
             }
-            displayPage();
+            displayPage(response);
           }
       }
       
@@ -90,18 +88,16 @@ public class CertificateTable extends HttpServlet
          if (LoginChecker.checkLogin(request,response)) {
             Logging.debug("CertificateTable: doPost");
             
-            setup(request,response);
-            update();
+            setup(request);
+            update(request);
             
-            displayPage();
+            displayPage(response);
          }
       }
 
-      public void setup(HttpServletRequest request, HttpServletResponse response)
+      public void setup(HttpServletRequest request)
       {
-         this.fRequest = request;
-         this.fResponse = response;
-         fHtml = xp.get(fRequest.getRealPath("/") + "certificatetable.html");
+         fHtml = xp.get(request.getRealPath("/") + "certificatetable.html");
          Matcher m = gRowPattern.matcher(fHtml);
          while (m.find())
          {
@@ -186,17 +182,17 @@ public class CertificateTable extends HttpServlet
          fHtml = fHtml.replaceFirst(fRow,buffer.toString());
       }
       
-      public void update()
+      public void update(HttpServletRequest request)
       {
-         String action = fRequest.getParameter("action");
+         String action = request.getParameter("action");
          try {
                         
             if (action.equals("Ban")) {
-               Long certid = Long.decode(fRequest.getParameter("certid"));
+               Long certid = Long.decode(request.getParameter("certid"));
                Logging.debug("CertificateTable: Banning :" + certid);
                setState(certid,false);
             } else if (action.equals("Allow")) {
-               Long certid = Long.decode(fRequest.getParameter("certid"));
+               Long certid = Long.decode(request.getParameter("certid"));
                Logging.debug("CertificateTable: Allowing :" + certid);
                setState(certid,true);
             } else if (action.equals("BanAll")) {
@@ -207,10 +203,10 @@ public class CertificateTable extends HttpServlet
                setAllState(true);
             }
          } catch (NumberFormatException e) {
-            Logging.warning("CertificateTable: Problem when parsing certid in post: "+fRequest.getParameter("certid"));
+            Logging.warning("CertificateTable: Problem when parsing certid in post: "+request.getParameter("certid"));
             reportError("Internal Error",e.toString());            
          } catch (Exception e) {
-            Logging.warning("CertificateTable: Problem when handling certificate: "+fRequest.getParameter("certid")+": ",e);
+            Logging.warning("CertificateTable: Problem when handling certificate: "+request.getParameter("certid")+": ",e);
             reportError("Internal Error",e.toString());
          }
          
