@@ -52,8 +52,6 @@ public class ConnectionTable extends HttpServlet
       //
       // globals
       //
-      HttpServletRequest fRequest;
-      HttpServletResponse fResponse;
       boolean fInitialized = false;
       
       JMSProxy fCollectorProxy = null;
@@ -95,15 +93,15 @@ public class ConnectionTable extends HttpServlet
          fInitialized = true;
       }
       
-      void displayPage() throws IOException 
+      void displayPage(HttpServletResponse response) throws IOException 
       {
 
          process();
          
-         fResponse.setContentType("text/html");
-         fResponse.setHeader("Cache-Control", "no-cache"); // HTTP 1.1
-         fResponse.setHeader("Pragma", "no-cache"); // HTTP 1.0
-         PrintWriter writer = fResponse.getWriter();
+         response.setContentType("text/html");
+         response.setHeader("Cache-Control", "no-cache"); // HTTP 1.1
+         response.setHeader("Pragma", "no-cache"); // HTTP 1.0
+         PrintWriter writer = response.getWriter();
          writer.write(fHtml);
          writer.flush();
          writer.close();
@@ -116,11 +114,11 @@ public class ConnectionTable extends HttpServlet
              
             Logging.debug("ConnectionTable: doGet");
             
-            setup(request,response);
+            setup(request);
             if (request.getParameter("action") != null) {
-               update();
+               update(request);
             }
-            displayPage();
+            displayPage(response);
           }
       }
       
@@ -129,18 +127,16 @@ public class ConnectionTable extends HttpServlet
          if (LoginChecker.checkLogin(request,response)) {
             Logging.debug("ConnectionTable: doPost");
             
-            setup(request,response);
-            update();
+            setup(request);
+            update(request);
             
-            displayPage();
+            displayPage(response);
          }
       }
 
-      public void setup(HttpServletRequest request, HttpServletResponse response)
+      public void setup(HttpServletRequest request)
       {
-         this.fRequest = request;
-         this.fResponse = response;
-         fHtml = xp.get(fRequest.getRealPath("/") + "connectiontable.html");
+         fHtml = xp.get(request.getRealPath("/") + "connectiontable.html");
          Matcher m = gRowPattern.matcher(fHtml);
          while (m.find())
          {
@@ -230,17 +226,17 @@ public class ConnectionTable extends HttpServlet
          fHtml = fHtml.replaceFirst(fRow,buffer.toString());
       }
       
-      public void update()
+      public void update(HttpServletRequest request)
       {
-         String action = fRequest.getParameter("action");
+         String action = request.getParameter("action");
          try {
                         
             if (action.equals("Ban")) {
-               Long cid = Long.decode(fRequest.getParameter("cid"));
+               Long cid = Long.decode(request.getParameter("cid"));
                Logging.debug("ConnectionTable: Banning :" + cid);
                setState(cid,false);
             } else if (action.equals("Allow")) {
-               Long cid = Long.decode(fRequest.getParameter("cid"));
+               Long cid = Long.decode(request.getParameter("cid"));
                Logging.debug("ConnectionTable: Allowing :" + cid);
                setState(cid,true);
             } else if (action.equals("BanAll")) {
@@ -251,10 +247,10 @@ public class ConnectionTable extends HttpServlet
                setAllState(true);
             }
          } catch (NumberFormatException e) {
-            Logging.warning("ConnectionTable: Problem when parsing cid in post: "+fRequest.getParameter("cid"));
+            Logging.warning("ConnectionTable: Problem when parsing cid in post: "+request.getParameter("cid"));
             reportError("Internal Error",e.toString());            
          } catch (Exception e) {
-            Logging.warning("ConnectionTable: Problem when handling connection: "+fRequest.getParameter("cid")+": ",e);
+            Logging.warning("ConnectionTable: Problem when handling connection: "+request.getParameter("cid")+": ",e);
             reportError("Internal Error",e.toString());
          }
          
