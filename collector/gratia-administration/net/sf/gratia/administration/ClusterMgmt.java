@@ -45,8 +45,6 @@ public class ClusterMgmt extends HttpServlet
 	//
 	// globals
 	//
-	HttpServletRequest request;
-	HttpServletResponse response;
 	boolean initialized = false;
 	//
 	// support
@@ -97,41 +95,41 @@ public class ClusterMgmt extends HttpServlet
 		}
 	}
 
-	public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
-	{
-      if (LoginChecker.checkLogin(request, response)) {
-          openConnection();
-          this.request = request;
-          this.response = response;
-          table = new Hashtable();
-          setup();
-          process();
-          response.setContentType("text/html");
-          response.setHeader("Cache-Control", "no-cache"); // HTTP 1.1
-          response.setHeader("Pragma", "no-cache"); // HTTP 1.0
-          request.getSession().setAttribute("table",table);
-          PrintWriter writer = response.getWriter();
-          writer.write(html);
-          writer.flush();
-          writer.close();
-          closeConnection();
+	public void doGet(HttpServletRequest request, HttpServletResponse response)
+      throws ServletException, IOException {
+      if (false) { // Deactivated 2009/09/30 CG
+          if (LoginChecker.checkLogin(request, response)) {
+              openConnection();
+              table = new Hashtable();
+              setup(request);
+              process();
+              response.setContentType("text/html");
+              response.setHeader("Cache-Control", "no-cache"); // HTTP 1.1
+              response.setHeader("Pragma", "no-cache"); // HTTP 1.0
+              request.getSession().setAttribute("table",table);
+              PrintWriter writer = response.getWriter();
+              writer.write(html);
+              writer.flush();
+              writer.close();
+              closeConnection();
+          }
       }
 	}
 
-	public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
-	{
-      if (LoginChecker.checkLogin(request, response)) {
-          openConnection();
-          this.request = request;
-          this.response = response;
-          table = (Hashtable) request.getSession().getAttribute("table");
-          update();
-          closeConnection();
-          response.sendRedirect("vo.html");
+	public void doPost(HttpServletRequest request, HttpServletResponse response)
+      throws ServletException, IOException {
+      if (false) { // Deactivated 2009/09/30 CG
+          if (LoginChecker.checkLogin(request, response)) {
+              openConnection();
+              table = (Hashtable) request.getSession().getAttribute("table");
+              update(request);
+              closeConnection();
+              response.sendRedirect("vo.html");
+          }
       }
   }
 
-	public void setup()
+	public void setup(HttpServletRequest request)
 	{
 		html = xp.get(request.getRealPath("/") + "cluster.html");
 		m = p.matcher(html);
@@ -189,7 +187,7 @@ public class ClusterMgmt extends HttpServlet
 		html = xp.replace(html,row,buffer.toString());
 	}
 
-	public void update()
+	public void update(HttpServletRequest request)
 	{
 		int index;
 		String key = "";
@@ -209,65 +207,46 @@ public class ClusterMgmt extends HttpServlet
 			if (oldvalue.equals(newvalue))
 				continue;
 			if (oldvalue.equals(newname))
-				insert(index);
+          insert(index, request);
 			else
-				update(index);
+          update(index, request);
 		}
 	}
 
-	public void update(int index)
-	{
-		String command = 
-			"update VO set" + cr +
-			" VOName = " + dq + (String) request.getParameter("voname:" + index) + dq + cr +
-			" where VOid = " + request.getParameter("void:" + index);
-		try
-		{
-			statement = connection.createStatement();
-			statement.executeUpdate(command);
-			// connection.commit();
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-		finally
-		{
-			try
-			{
-				statement.close();
-			}
-			catch (Exception ignore)
-			{
-			}
-		}
-	}
+    public void update(int index, HttpServletRequest request)	{
+        String command = "update VO set VOName = ? where VOid = ?;";
+        PreparedStatement statement = null;
+        try {
+            statement = connection.prepareStatement(command);
+            statement.setString(1, request.getParameter("voname:" + index));
+            statement.setInt(2, Integer.parseInt(request.getParameter("void:" + index)));
+            statement.executeUpdate(command);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                statement.close();
+            } catch (Exception ignore) {
+            }
+        }
+    }
 
-	public void insert(int index)
-	{
-		String command = 
-			"insert into VO (VOName) values(" + 
-			dq + (String) request.getParameter("voname:" + index) + dq + ")";
-		try
-		{
-			statement = connection.createStatement();
-			statement.executeUpdate(command);
-			// connection.commit();
-		}
-		catch (Exception e)
-		{
-			System.out.println("command: " + command);
-			e.printStackTrace();
-		}
-		finally
-		{
-			try
-			{
-				statement.close();
-			}
-			catch (Exception ignore)
-			{
-			}
-		}
-	}
+    public void insert(int index, HttpServletRequest request) {
+        String command = "insert into VO (VOName) values(?);";
+        PreparedStatement statement = null;
+        try {
+            statement = connection.prepareStatement(command);
+            statement.setString(1, request.getParameter("voname:" + index));
+            statement.executeUpdate(command);
+            // connection.commit();
+        } catch (Exception e) {
+            System.out.println("command: " + command);
+            e.printStackTrace();
+        } finally {
+            try {
+                statement.close();
+            } catch (Exception ignore) {
+            }
+        }
+    }
 }
