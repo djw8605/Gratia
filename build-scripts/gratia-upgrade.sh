@@ -38,15 +38,14 @@ function usage_error {
 }
 #------------------------------------
 function runit {
-  local cmd="$1"
-  logit "... RUNNING: $cmd"
+  logit "... RUNNING: $@"
   export TMP=${TMPDIR:-/tmp}/gratia-upgrade.sh.$$
   trap "[[ -n \"$TMP\" ]] && rm \"$TMP\" 2>/dev/null" EXIT
   case $daily in
-   "yes" ) $cmd >>$logfile 2>&1;rtn=$?
+   "yes" ) "$@" >>$logfile 2>&1;rtn=$?
            echo $rtn > $TMP
           ;;
-       * ) ( $cmd;rtn=$?
+       * ) ( $@;rtn=$?
              echo $rtn > $TMP ) 2>&1 | tee -a $logfile
            ;;
   esac
@@ -54,7 +53,7 @@ function runit {
   rm -f "$TMP"
   if [[ -n "$rtn" ]]; then
     if [ "$rtn" != "0" ]; then
-      logerr "Command failed with non-zero exit code ($rtn): $cmd"
+      logerr "Command failed with non-zero exit code ($rtn): $@"
     fi
   else
     logerr "Internal system error executing command: $cmd"
@@ -341,7 +340,7 @@ function clean_log_directory {
   tomcat_log_dir=$tomcat_dir/$tomcat/logs
   if [ ! -d "$tomcat_log_dir" ];then
     logit "... the tomcat log directory does not exist ($tomcat_log_dir)... creating one."
-    runit "mkdir $tomcat_log_dir"
+    runit mkdir "$tomcat_log_dir"
   fi
   if [ "$(ls  $tomcat_log_dir |wc -l|sed -e's/ //')" = "0" ];then
     logit "... there are no log files to process.. skipping this."
@@ -371,7 +370,7 @@ function install_upgrade {
   if [ "$mysql_file" != "NONE" ];then
     pswd="$(cat $mysql_file)"
   fi
-  runit "$pgm $ugl_config_arg-p ${tomcat_dir} -d $pswd -S $source ${force}-s -C $config_name $(echo $tomcat|cut -d'-' -f2-)"
+  runit $pgm $ugl_config_arg-p ${tomcat_dir} -d $pswd -S $source ${force}-s -C $config_name $(echo $tomcat|cut -d'-' -f2-)
   logit "Install was successful"
   sleep 3
 }
@@ -421,7 +420,7 @@ function ask_to_start_collector {
 function start_collector {
   delimit start_collector
   logit "... starting collector"
-  runit "/sbin/service $(echo $tomcat |cut -d'/' -f3) start"
+  runit /sbin/service $(echo $tomcat |cut -d'/' -f3) start
   logit
   logit "... collector started
 $(ps -ef |grep -e 'catalina\.\(base\|home\)='$tomcat_dir/$tomcat |grep '   1 ' |egrep -v grep 2>/dev/null)
@@ -578,7 +577,7 @@ by doing a wget on the gratia-release file:"
   sleep 4
   cmd="/usr/bin/wget --tries=5 --timeout=30 --dns-timeout=30 -O $release_file $gratia_release"
   rm -f $release_file
-  runit "$cmd"
+  runit $cmd
   logit "\
 $(ls -l $release_file)
 
@@ -601,35 +600,28 @@ Verifying that the tomcat process has $expected_number_of_ports ports it
 is listening on for this tomcat instance and all are by the same process.
 Disclaimer: This is the closest one can do for this type of validation.
 "
-  properties_file=$tomcat_dir/$tomcat/gratia/service-configuration.properties
-  if [ ! -e $properties ];then
-    logerr "Properties file does not exist: $properties_file"
+  pid=$(ps -ef | perl -wane 'm&catalina\.(?:base|home)='$tomcat_dir/$tomcat'& and $F[2] eq "1" and print "$F[1]\n"')
+  if [[ -z "$pid" ]]; then
+    logerr "Could not find PID of tomcat process for port check -- has it died?"
   fi
-  property=service.rmi.port 
-  port="$(grep $property $properties_file |egrep -v '#'  2>/dev/null|egrep -v grep 2>/dev/null| cut -d'=' -f2)"
-  if [ -z $port ];then
-    logerr "Cannot find attribute ($property) in $properties_file"
-  fi
-  pid="$(/bin/netstat -n --listening --program |egrep $port  2>/dev/null|egrep -v grep 2>/dev/null|awk '{print $7}')"
-  logit "...using port $port as the basis for the netstat command:
-  /bin/netstat -n --listening --program |egrep $port 2>/dev/null
-$(/bin/netstat -n --listening --program |egrep $port  2>/dev/null|egrep -v grep 2>/dev/null)
+  cmd="(/bin/netstat -n --listening --program |egrep $pid/ | egrep -v grep) 2>/dev/null"
+  logit "...using PID $pid as the basis for the netstat command:
+  $cmd
 "
 
   #--- check the ports ---
-  cmd="/bin/netstat -n --listening --program |egrep $pid  2>/dev/null|egrep -v grep 2>/dev/null"
   maxtries=6
   sleep=20
   try=1
   while 
     [ $try -lt $maxtries ]
   do
-    connection_cnt="$(/bin/netstat -n --listening --program |egrep $pid  2>/dev/null|egrep -v grep  2>/dev/null|wc -l)"
+    connection_cnt="$(eval $cmd | wc -l)"
     if [ $connection_cnt  -eq  $expected_number_of_ports ];then
       break
     fi
     logit "Expected $expected_number_of_ports connections.... found ${connection_cnt}.
-$(/bin/netstat -n --listening --program |egrep $pid 2>/dev/null |egrep -v grep 2>/dev/null)
+$(eval $cmd)
 "
     logit "... sleeping $sleep seconds and trying again (try $try of $maxtries)" 
     sleep $sleep
@@ -637,17 +629,17 @@ $(/bin/netstat -n --listening --program |egrep $pid 2>/dev/null |egrep -v grep 2
   done
 
   #--- check for failure ---
-  connection_cnt="$(/bin/netstat -n --listening --program |egrep $pid 2>/dev/null |egrep -v grep 2>/dev/null |wc -l)"
+  connection_cnt="$(eval $cmd | wc -l)"
   if [ $connection_cnt  -ne  $expected_number_of_ports ];then
     logerr "Expected $expected_number_of_ports connections.... found ${connection_cnt}.
-$(/bin/netstat -n --listening --program |egrep $pid 2>/dev/null |egrep -v grep 2>/dev/null)
+$(eval $cmd)
 ... giving up!!!
 "
   fi
 
   #--- all ports available ---
   logit "... connections based on pid ($pid):
-$(/bin/netstat -n --listening --program |egrep $pid 2>/dev/null |egrep -v grep 2>/dev/null)
+$(eval $cmd)
 "
   logit "PASSED: number of connections look good"
   sleep 1
@@ -657,10 +649,13 @@ function verify_static_reports {
   delimit verify_static_reports
   pdf_dir=$tomcat_dir/$tomcat/webapps/gratia-reports/reports-static
   csv_dir=$tomcat_dir/$tomcat/webapps/gratia-reports/reports-static_csv
-  script="$(crontab -l| grep -e '^[^#]*'$tomcat_dir/$tomcat |awk '{print $6,$7,$8}' |sed -e s/\'//g)"
-  if [[ -n "$script" ]]; then
+  set -x
+  local doStatic=`$source/common/configuration/configure-collector $cc_config_arg-p ${tomcat_dir} --obtain-config-item staticReports $config_name | sed -ne 's/^config: staticReports = //p'`  
+#  script="$(crontab -l| grep -e '^[^#]*'$tomcat_dir/$tomcat' ' |awk '{print $6,$7,$8}' |sed -e s/\'//g)"
+  if (( ${doStatic:-0} )) || [[ "$doStatic" == [Tt]* ]]; then
+         script="$tomcat_dir/$tomcat/gratia/staticReports.py '$tomcat_dir/$tomcat' '$service/gratia-reporting/'" 
          logit "... running static reports."
-         runit "$script"
+         eval runit $script
          if [ ! -d "$pdf_dir" ];then
            logerr "Static reports not available. Directory does not exist: $pdf_dir"
          fi
@@ -675,6 +670,7 @@ $(ls -l $csv_dir)
   else
     logit "NOT APPLICABLE: static reports not used for $tomcat"
   fi
+  set +x
 }
 #---------------------------
 function verify_upgrade {
