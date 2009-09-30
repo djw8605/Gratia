@@ -348,12 +348,14 @@ function clean_log_directory {
   fi
   sleep 2
   prev_dir=$(pwd)
-  cd $tomcat_log_dir
+  if [[ -z "$tomcat_log_dir" ]] || !cd $tomcat_log_dir; then
+    logerr "Could not cd to tomcat_log_dir tomcat_log_dir"
+  fi
   logit "... tar'ing and cleaning log files in $PWD:
 $(ls -l)
 "
   tar zcf $backup_file *
-  rm -f $tomcat_log_dir/*
+  find $tomcat_log_dir -type f | xargs rm -f
   logit "... all done
 $PWD:
 $(ls -l)
