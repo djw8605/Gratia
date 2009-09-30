@@ -649,7 +649,6 @@ function verify_static_reports {
   delimit verify_static_reports
   pdf_dir=$tomcat_dir/$tomcat/webapps/gratia-reports/reports-static
   csv_dir=$tomcat_dir/$tomcat/webapps/gratia-reports/reports-static_csv
-  set -x
   local doStatic=`$source/common/configuration/configure-collector $cc_config_arg-p ${tomcat_dir} --obtain-config-item staticReports $config_name | sed -ne 's/^config: staticReports = //p'`  
 #  script="$(crontab -l| grep -e '^[^#]*'$tomcat_dir/$tomcat' ' |awk '{print $6,$7,$8}' |sed -e s/\'//g)"
   if (( ${doStatic:-0} )) || [[ "$doStatic" == [Tt]* ]]; then
@@ -670,7 +669,6 @@ $(ls -l $csv_dir)
   else
     logit "NOT APPLICABLE: static reports not used for $tomcat"
   fi
-  set +x
 }
 #---------------------------
 function verify_upgrade {
