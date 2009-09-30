@@ -48,8 +48,6 @@ public class ProbeTable extends HttpServlet {
     //
     // globals
     //
-    HttpServletRequest request;
-    HttpServletResponse response;
     boolean initialized = false;
     //
     // support
@@ -134,12 +132,9 @@ public class ProbeTable extends HttpServlet {
             initHibernate();
             String activeFilter = null;
             openConnection();
-
-            this.request = request;
-            this.response = response;
             table = new Hashtable();
-            setup();
-            process();
+            setup(request);
+            process(request);
             response.setContentType("text/html");
             response.setHeader("Cache-Control", "no-cache"); // HTTP 1.1
             response.setHeader("Pragma", "no-cache"); // HTTP 1.0
@@ -153,22 +148,20 @@ public class ProbeTable extends HttpServlet {
     }
 
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-      if (LoginChecker.checkLogin(request, response)) {
-          openConnection();
-          this.request = request;
-          this.response = response;
-          table = (Hashtable) request.getSession().getAttribute("table");
-          String activeFilter = (String) request.getParameter("activeFilter");
-          if (activeFilter == null) {
-              activeFilter = "none";
-          }
-          update();
-          closeConnection();
-          response.sendRedirect("probetable.html?activeFilter=" + activeFilter);
-      }
+        if (LoginChecker.checkLogin(request, response)) {
+            openConnection();
+            table = (Hashtable) request.getSession().getAttribute("table");
+            String activeFilter = (String) request.getParameter("activeFilter");
+            if (activeFilter == null) {
+                activeFilter = "none";
+            }
+            update(request);
+            closeConnection();
+            response.sendRedirect("probetable.html?activeFilter=" + activeFilter);
+        }
     }
 
-    public void setup() {
+    public void setup(HttpServletRequest request) {
         html = xp.get(request.getRealPath("/") + "probetable.html");
         m = p.matcher(html);
         while (m.find()) {
@@ -180,7 +173,7 @@ public class ProbeTable extends HttpServlet {
         }
     }
 
-    public void process() {
+    public void process(HttpServletRequest request) {
         int index = 0;
         String command = "";
         buffer = new StringBuffer();
@@ -207,7 +200,7 @@ public class ProbeTable extends HttpServlet {
         html = html.replaceFirst("#activeFilter#", activeFilter);
         try {
             command = "select siteid,SiteName from Site order by SiteName";
-            statement = connection.prepareStatement(command);
+            statement = connection.createStatement();
             resultSet = statement.executeQuery(command);
 
             while(resultSet.next()) {
@@ -233,7 +226,7 @@ public class ProbeTable extends HttpServlet {
                 command += " where active = 0";
             }
             command += " order by active desc, probename";
-            statement = connection.prepareStatement(command);
+            statement = connection.createStatement();
             resultSet = statement.executeQuery(command);
 
             while(resultSet.next()) {
@@ -254,12 +247,12 @@ public class ProbeTable extends HttpServlet {
                 newrow = xp.replaceAll(newrow,"#probename#",probename);
                 newrow = xp.replaceAll(newrow, "#nRecords#", nRecords);
 
-		/*
-		  newrow = xp.replaceAll(newrow,"#reporthh#",resultSet.getString(5));
-		  table.put("reporthh:" + index,resultSet.getString(5));
-		  newrow = xp.replaceAll(newrow,"#reportmm#",resultSet.getString(6));
-		  table.put("reportmm:" + index,resultSet.getString(6));
-		*/
+                /*
+                  newrow = xp.replaceAll(newrow,"#reporthh#",resultSet.getString(5));
+                  table.put("reporthh:" + index,resultSet.getString(5));
+                  newrow = xp.replaceAll(newrow,"#reportmm#",resultSet.getString(6));
+                  table.put("reportmm:" + index,resultSet.getString(6));
+                */
 
                 String cename = (String) sitebyid.get(siteid);
                 boolean updateDB = false;
@@ -302,14 +295,14 @@ public class ProbeTable extends HttpServlet {
                 buffer.append(newrow);
                 if (updateDB) {
                     command =
-                        "update Probe set" + cr +
-                        " siteid = " + sitebyname.get(cename) + comma + cr +
-                        " active = " + resultSet.getString(4) + cr +
-                        " where probeid = " + resultSet.getString(1);
-
+                        "update Probe set siteid = ?, active = ? where probeid = ?;";
+                    PreparedStatement statement = null;
                     try {
-                        statement = connection.createStatement();
-                        statement.executeUpdate(command);
+                        statement = connection.prepareStatement(command);
+                        statement.setInt(1, Integer.parseInt((String) sitebyname.get(cename)));
+                        statement.setInt(2, yesorno.equals("Yes")?1:0);
+                        statement.setInt(3, Integer.parseInt(resultSet.getString(1)));
+                        statement.executeUpdate();
                         statement.close();
                         // connection.commit();
                     }
@@ -344,7 +337,7 @@ public class ProbeTable extends HttpServlet {
             newrow = celist(index,newrow,"xxx");
             table.put("index:" + index,"" + index);
             table.put("probename:" + index,newname);
-            index++;
+            ++index;
             buffer.append(newrow);
         }
         html = xp.replace(html,row,buffer.toString());
@@ -405,7 +398,7 @@ public class ProbeTable extends HttpServlet {
         return output;
     }
 
-    public void update() {
+    public void update(HttpServletRequest request) {
         int index;
         String key = "";
         String oldvalue = "";
@@ -432,7 +425,7 @@ public class ProbeTable extends HttpServlet {
             newvalue = (String) request.getParameter(key);
 
             if ((oldvalue != null) && (oldvalue.equals(newname)) && (! oldvalue.equals(newvalue))) {
-                insert(index);
+                insert(index, request);
                 continue;
             }
             if ((oldvalue != null) && (oldvalue.equals(newvalue)))
@@ -442,7 +435,7 @@ public class ProbeTable extends HttpServlet {
             oldvalue = (String) table.get(key);
             newvalue = (String) request.getParameter(key);
             if (! oldvalue.equals(newvalue)) {
-                update(index);
+                update(index, request);
                 continue;
             }
 
@@ -450,7 +443,7 @@ public class ProbeTable extends HttpServlet {
             oldvalue = (String) table.get(key);
             newvalue = (String) request.getParameter(key);
             if (! oldvalue.equals(newvalue)) {
-                update(index);
+                update(index, request);
                 continue;
             }
 
@@ -474,29 +467,24 @@ public class ProbeTable extends HttpServlet {
         }
     }
 
-    public void update(int index) {
-        String dbid = (String) request.getParameter("dbid:" + index);
-        String cename = (String) request.getParameter("cename:" + index);
-        String ceid = (String) sitebyname.get(cename);
-        String active = (String) request.getParameter("active:" + index);
-        if (active.equals("Yes"))
-            active = "1";
-        else
-            active = "0";
-        String reporthh = (String) request.getParameter("reporthh:" + index);
-        String reportmm = (String) request.getParameter("reportmm:" + index);
-
-        String command = 
-            "update Probe set" + cr +
-            " siteid = " + ceid + comma + cr +
-            " active = " + active + cr +
-            " where probeid = " + dbid;
-
+    public void update(int index, HttpServletRequest request) {
+        int dbid = Integer.parseInt(request.getParameter("dbid:" + index));
+        String cename = request.getParameter("cename:" + index);
+        int ceid = Integer.parseInt((String) sitebyname.get(cename));
+        String activeString = request.getParameter("active:" + index);
+        int active = 0;
+        if (activeString.equals("Yes"))
+            active = 1;
+        
+        String command =  "update Probe set siteid = ?, active = ? where probeid = ?;";
+        PreparedStatement statement = null;
         try {
-            statement = connection.createStatement();
-            statement.executeUpdate(command);
+            statement = connection.prepareStatement(command);
+            statement.setInt(1, ceid);
+            statement.setInt(2, active);
+            statement.setInt(3, dbid);
+            statement.executeUpdate();
             statement.close();
-            // connection.commit();
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -510,14 +498,14 @@ public class ProbeTable extends HttpServlet {
         }
     }
 
-    public void insert(int index) {
+    public void insert(int index, HttpServletRequest request) {
         String cename = (String) request.getParameter("cename:" + index);
-        String ceid = (String) sitebyname.get(cename);
-        String active = (String) request.getParameter("active:" + index);
-        if (active.equals("Yes"))
-            active = "1";
-        else
-            active = "0";
+        int ceid = Integer.parseInt((String) sitebyname.get(cename));
+        String activeString = (String) request.getParameter("active:" + index);
+        int active = 0;
+        if (activeString.equals("Yes"))
+            active = 1;
+
         String probename = (String) request.getParameter("probename:" + index);
 
         /*
@@ -531,12 +519,14 @@ public class ProbeTable extends HttpServlet {
           ceid + comma + dq + probename + dq + comma + active + comma + reporthh + comma + reportmm + ")";
         */
 
-        String command = 
-            "insert into Probe (siteid,probename,active) values(" + 
-            ceid + comma + dq + probename + dq + comma + active  + ")";
+        String command = "insert into Probe (siteid,probename,active) values(?, ?, ?);";
+        PreparedStatement statement = null;
         try {
-            statement = connection.createStatement();
-            statement.executeUpdate(command);
+            statement = connection.prepareStatement(command);
+            statement.setInt(1, ceid);
+            statement.setString(2, probename);
+            statement.setInt(3, active);
+            statement.executeUpdate();
             statement.close();
             // connection.commit();
         }
