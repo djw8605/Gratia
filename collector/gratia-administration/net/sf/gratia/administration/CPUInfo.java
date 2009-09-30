@@ -331,19 +331,21 @@ public class CPUInfo extends HttpServlet {
         String osversion = (String) request.getParameter("osversion:" + index);
         String cputype = (String) request.getParameter("cputype:" + index);
 
-        String command =
-            "update CPUInfo set" + cr +
-            " HostDescription = " + dq + HostDescription + dq + comma + cr +
-            " BenchmarkScore = " + dq + benchmarkscore + dq + comma + cr +
-            " CPUCount = " + dq + cpucount + dq + comma + cr +
-            " OS = " + dq + os + dq + comma + cr +
-            " OSVersion = " + dq + osversion + dq + comma + cr +
-            " CPUType = " + dq + cputype + dq + cr +
-            " where hostid = " + hostid;
+        String command = "update CPUInfo set HostDescription = ?, BenchmarkScore = ?, CPUCount = ?," +
+            " OS = ?, OSVersion = ?, CPUType = ? where hostid = ?;";
+
+        PreparedStatement statement = null;
         try
             {
-                statement = connection.createStatement();
-                statement.executeUpdate(command);
+                statement = connection.prepareStatement(command);
+                statement.setString(1, HostDescription);
+                statement.setString(2, benchmarkscore);
+                statement.setString(3, cpucount);
+                statement.setString(4, os);
+                statement.setString(5, osversion);
+                statement.setString(6, cputype);
+                statement.setString(7, hostid);
+                statement.executeUpdate();
                 statement.close();
             }
         catch (Exception e)
@@ -371,21 +373,20 @@ public class CPUInfo extends HttpServlet {
         String osversion = (String) request.getParameter("osversion:" + index);
         String cputype = (String) request.getParameter("cputype:" + index);
 
-        String command =
-            "insert into CPUInfo" +
-            "(HostDescription,BenchmarkScore,CPUCount,OS,OSVersion,CPUType)" + cr +
-            "values(" + cr +
-            dq + HostDescription + dq + comma + cr +
-            dq + benchmarkscore + dq + comma + cr +
-            dq + cpucount + dq + comma + cr +
-            dq + os + dq + comma + cr +
-            dq + osversion + dq + comma + cr +
-            dq + cputype + dq + ")";
+        String command = "insert into CPUInfo(HostDescription,BenchmarkScore,CPUCount,OS,OSVersion,CPUType)" +
+            " values(?,?,?,?,?,?);";
 
+        PreparedStatement statement = null;
         try
             {
-                statement = connection.createStatement();
-                statement.executeUpdate(command);
+                statement = connection.prepareStatement(command);
+                statement.setString(1, HostDescription);
+                statement.setString(2, benchmarkscore);
+                statement.setString(3, cpucount);
+                statement.setString(4, os);
+                statement.setString(5, osversion);
+                statement.setString(6, cputype);
+                statement.executeUpdate();
                 statement.close();
             }
         catch (Exception e)
@@ -411,9 +412,10 @@ public class CPUInfo extends HttpServlet {
 
         try
             {
-                command = "delete from CPUInfo where hostid = " + request.getParameter("hostid");
-                Statement statement = connection.createStatement();
-                statement.executeUpdate(command);
+                command = "delete from CPUInfo where hostid = ?";
+                PreparedStatement statement = connection.prepareStatement(command);
+                statement.setInt(1, Integer.parseInt(request.getParameter("hostid")));
+                statement.executeUpdate();
                 statement.close();
             }
         catch (Exception e)
