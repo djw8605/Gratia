@@ -35,8 +35,6 @@ public class StopDatabase extends HttpServlet
 	//
 	// globals
 	//
-	HttpServletRequest request;
-	HttpServletResponse response;
 	boolean initialized = false;
 	Properties props;
 	Properties p;
@@ -74,43 +72,41 @@ public class StopDatabase extends HttpServlet
 		}
 	}
 
-	public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
-	{
-		initialize();
-		this.request = request;
-		this.response = response;
+	public void doGet(HttpServletRequest request, HttpServletResponse response)
+      throws ServletException, IOException {
+      if (LoginChecker.checkLogin(request, response)) {
+          initialize();
+          String uriPart = request.getRequestURI();
+          int slash2 = uriPart.substring(1).indexOf("/") + 1;
+          uriPart = uriPart.substring(slash2);
+          String queryPart = request.getQueryString();
+          if (queryPart == null)
+              queryPart = "";
+          else
+              queryPart = "?" + queryPart;
 
-		
-		String uriPart = request.getRequestURI();
-		int slash2 = uriPart.substring(1).indexOf("/") + 1;
-		uriPart = uriPart.substring(slash2);
-		String queryPart = request.getQueryString();
-		if (queryPart == null)
-			queryPart = "";
-		else
-			queryPart = "?" + queryPart;
+          request.getSession().setAttribute("displayLink", "." + uriPart + queryPart);
 
-		request.getSession().setAttribute("displayLink", "." + uriPart + queryPart);
+          if (request.getParameter("action") != null)
+              {
+                  if (request.getParameter("action").equals("stopDatabaseUpdateThreads"))
+                      stopDatabaseUpdateThreads();
+                  else if (request.getParameter("action").equals("startDatabaseUpdateThreads"))
+                      startDatabaseUpdateThreads();
+              }
+          setup(request);
+          process();
+          response.setContentType("text/html");
+          response.setHeader("Cache-Control", "no-cache"); // HTTP 1.1
+          response.setHeader("Pragma", "no-cache"); // HTTP 1.0
+          PrintWriter writer = response.getWriter();
+          writer.write(html);
+          writer.flush();
+          writer.close();
+      }
+  }
 
-		if (request.getParameter("action") != null)
-		{
-			if (request.getParameter("action").equals("stopDatabaseUpdateThreads"))
-				stopDatabaseUpdateThreads();
-			else if (request.getParameter("action").equals("startDatabaseUpdateThreads"))
-				startDatabaseUpdateThreads();
-		}
-		setup();
-		process();
-		response.setContentType("text/html");
-		response.setHeader("Cache-Control", "no-cache"); // HTTP 1.1
-		response.setHeader("Pragma", "no-cache"); // HTTP 1.0
-		PrintWriter writer = response.getWriter();
-		writer.write(html);
-		writer.flush();
-		writer.close();
-	}
-
-	public void setup()
+	public void setup(HttpServletRequest request)
 	{
 		html = xp.get(request.getRealPath("/") + "stopGratiaDatabaseUpdateThreads.html");
 	}

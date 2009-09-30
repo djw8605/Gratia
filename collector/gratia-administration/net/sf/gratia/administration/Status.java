@@ -66,8 +66,6 @@ public class Status extends HttpServlet {
 	//
 	// globals
 	//
-	HttpServletRequest request;
-	HttpServletResponse response;
 	boolean initialized = false;
 	Properties props;
 	String message = null;
@@ -173,9 +171,6 @@ public class Status extends HttpServlet {
 	public void doGet(HttpServletRequest request, HttpServletResponse response)
 	throws ServletException, IOException {
 		openConnection();
-		this.request = request;
-		this.response = response;
-		
 		String uriPart = request.getRequestURI();
 		int slash2 = uriPart.substring(1).indexOf("/") + 1;
 		uriPart = uriPart.substring(slash2);
@@ -205,7 +200,7 @@ public class Status extends HttpServlet {
 			catch (NumberFormatException e) {
 			}
 		}
-		setup();
+		setup(request);
 		process();
 		response.setContentType("text/html");
 		response.setHeader("Cache-Control", "no-cache"); // HTTP 1.1
@@ -224,7 +219,7 @@ public class Status extends HttpServlet {
 			return value.toString();
 	}
 
-	public void setup() {
+	public void setup(HttpServletRequest request) {
 		html = xp.get(request.getRealPath("/") + "status.html");
 	}
 

@@ -128,34 +128,10 @@ public class ProbeTable extends HttpServlet {
         }
     }
 
-    public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        initHibernate();
-        String fqan = (String) request.getSession().getAttribute("FQAN");
-        boolean login = true;
-        if (fqan == null)
-            login = false;
-        else if (fqan.indexOf("NoPrivileges") > -1)
-            login = false;
-
-        String uriPart = request.getRequestURI();
-        int slash2 = uriPart.substring(1).indexOf("/") + 1;
-        uriPart = uriPart.substring(slash2);
-        String queryPart = request.getQueryString();
-        if (queryPart == null)
-            queryPart = "";
-        else
-            queryPart = "?" + queryPart;
-
-        request.getSession().setAttribute("displayLink", "." + uriPart + queryPart);
-
-        if (!login) {
-            Properties p = Configuration.getProperties();
-            String loginLink = p.getProperty("service.secure.connection") + request.getContextPath() + "/gratia-login.jsp";
-            String redirectLocation = response.encodeRedirectURL(loginLink);
-            response.sendRedirect(redirectLocation);
-            request.getSession().setAttribute("displayLink", "." + uriPart + queryPart);
-        }
-        else {
+    public void doGet(HttpServletRequest request, HttpServletResponse response)
+        throws ServletException, IOException {
+        if (LoginChecker.checkLogin(request, response)) {
+            initHibernate();
             String activeFilter = null;
             openConnection();
 
@@ -177,17 +153,19 @@ public class ProbeTable extends HttpServlet {
     }
 
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        openConnection();
-        this.request = request;
-        this.response = response;
-        table = (Hashtable) request.getSession().getAttribute("table");
-        String activeFilter = (String) request.getParameter("activeFilter");
-        if (activeFilter == null) {
-            activeFilter = "none";
-        }
-        update();
-        closeConnection();
-        response.sendRedirect("probetable.html?activeFilter=" + activeFilter);
+      if (LoginChecker.checkLogin(request, response)) {
+          openConnection();
+          this.request = request;
+          this.response = response;
+          table = (Hashtable) request.getSession().getAttribute("table");
+          String activeFilter = (String) request.getParameter("activeFilter");
+          if (activeFilter == null) {
+              activeFilter = "none";
+          }
+          update();
+          closeConnection();
+          response.sendRedirect("probetable.html?activeFilter=" + activeFilter);
+      }
     }
 
     public void setup() {

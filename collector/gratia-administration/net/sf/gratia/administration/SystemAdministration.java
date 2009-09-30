@@ -77,36 +77,7 @@ public class SystemAdministration extends HttpServlet {
 
     public void doGet(HttpServletRequest request, HttpServletResponse response)
         throws ServletException, IOException {
-        String fqan = (String) request.getSession().getAttribute("FQAN");
-        boolean login = true;
-        if (fqan == null)
-            login = false;
-        else if (fqan.indexOf("NoPrivileges") > -1)
-            login = false;
-                
-        String uriPart = request.getRequestURI();
-        int slash2 = uriPart.substring(1).indexOf("/") + 1;
-        uriPart = uriPart.substring(slash2);
-        String queryPart = request.getQueryString();
-        if (queryPart == null)
-            queryPart = "";
-        else
-            queryPart = "?" + queryPart;
-
-        request.getSession().setAttribute("displayLink", "." + uriPart + queryPart);
-
-        // This could be use to avoid using redirection altogether in non-interactive browsing (wget)
-        //         String agent = request.getHeader("User-Agent");
-        //         Logging.warning("SystemAdministration: request coming from : "+ agent);
-        //         boolean noninterative = agent.startsWith("Wget/");
-
-        if (!login) {
-            Properties p = Configuration.getProperties();
-            String loginLink = p.getProperty("service.secure.connection") + request.getContextPath() + "/gratia-login.jsp";
-            String redirectLocation = response.encodeRedirectURL(loginLink);
-            response.sendRedirect(redirectLocation);
-            request.getSession().setAttribute("displayLink", "." + uriPart + queryPart);
-        } else {
+        if (LoginChecker.checkLogin(request, response)) {
             initialize();
             this.request = request;
             this.response = response;

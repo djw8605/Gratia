@@ -38,8 +38,6 @@ public class MonitorStatus extends HttpServlet
 	//
 	// globals
 	//
-	HttpServletRequest request;
-	HttpServletResponse response;
 	boolean initialized = false;
 	Properties props;
 	String message = null;
@@ -109,8 +107,6 @@ public class MonitorStatus extends HttpServlet
 
 		request.getSession().setAttribute("displayLink", "." + uriPart + queryPart);
 
-		this.request = request;
-		this.response = response;
 		probename = request.getParameter("probename");
 		sitename = request.getParameter("sitename");
 		allsites = request.getParameter("allsites");

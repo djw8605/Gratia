@@ -47,8 +47,6 @@ public class ClusterNameCorrection extends HttpServlet
   //
   // globals
   //
-  HttpServletRequest request;
-  HttpServletResponse response;
   boolean initialized = false;
   //
   // support
@@ -102,65 +100,36 @@ public class ClusterNameCorrection extends HttpServlet
 
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
   {
-    String fqan = (String) request.getSession().getAttribute("FQAN");
-    boolean login = true;
-    if (fqan == null)
-      login = false;
-    else if (fqan.indexOf("NoPrivileges") > -1)
-      login = false;
+      if (LoginChecker.checkLogin(request, response)) {
+          openConnection();
 
-    String uriPart = request.getRequestURI();
-    int slash2 = uriPart.substring(1).indexOf("/") + 1;
-    uriPart = uriPart.substring(slash2);
-    String queryPart = request.getQueryString();
-    if (queryPart == null)
-      queryPart = "";
-    else
-      queryPart = "?" + queryPart;
-
-    request.getSession().setAttribute("displayLink", "." + uriPart + queryPart);
-
-    if (!login)
-    {
-      Properties p = Configuration.getProperties();
-      String loginLink = p.getProperty("service.secure.connection") + request.getContextPath() + "/gratia-login.jsp";
-      String redirectLocation = response.encodeRedirectURL(loginLink);
-      response.sendRedirect(redirectLocation);
-      request.getSession().setAttribute("displayLink", "." + uriPart + queryPart);
-    }
-    else
-    {
-      openConnection();
-
-      this.request = request;
-      this.response = response;
-      table = new Hashtable();
-      setup();
-      process();
-      response.setContentType("text/html");
-      response.setHeader("Cache-Control", "no-cache"); // HTTP 1.1
-      response.setHeader("Pragma", "no-cache"); // HTTP 1.0
-      request.getSession().setAttribute("table",table);
-      PrintWriter writer = response.getWriter();
-      writer.write(html);
-      writer.flush();
-      writer.close();
-      closeConnection();
-    }
+          table = new Hashtable();
+          setup(request);
+          process();
+          response.setContentType("text/html");
+          response.setHeader("Cache-Control", "no-cache"); // HTTP 1.1
+          response.setHeader("Pragma", "no-cache"); // HTTP 1.0
+          request.getSession().setAttribute("table",table);
+          PrintWriter writer = response.getWriter();
+          writer.write(html);
+          writer.flush();
+          writer.close();
+          closeConnection();
+      }
   }
 
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
   {
-    openConnection();
-    this.request = request;
-    this.response = response;
-    table = (Hashtable) request.getSession().getAttribute("table");
-    update();
-    closeConnection();
-    response.sendRedirect("clusternamecorrection.html");
+      if (LoginChecker.checkLogin(request, response)) {
+          openConnection();
+          table = (Hashtable) request.getSession().getAttribute("table");
+          update(request);
+          closeConnection();
+          response.sendRedirect("clusternamecorrection.html");
+      }
   }
 
-  public void setup()
+  public void setup(HttpServletRequest request)
   {
     html = XP.get(request.getRealPath("/") + "clusternamecorrection.html");
     m = p.matcher(html);
@@ -316,7 +285,7 @@ public class ClusterNameCorrection extends HttpServlet
     return output;
   }
 
-  public void update()
+  public void update(HttpServletRequest request)
   {
     int index;
     String key = "";
@@ -348,7 +317,7 @@ public class ClusterNameCorrection extends HttpServlet
 
       if ((oldvalue != null) && (oldvalue.equals(newname)) && (! oldvalue.equals(newvalue)))
       {
-        insert(index);
+          insert(index, request);
         continue;
       }
       if ((oldvalue != null) && (oldvalue.equals(newvalue)))
@@ -359,14 +328,14 @@ public class ClusterNameCorrection extends HttpServlet
       newvalue = (String) request.getParameter(key);
       if (! oldvalue.equals(newvalue))
       {
-        update(index);
+          update(index, request);
         continue;
       }
 
     }
   }
 
-  public void update(int index)
+    public void update(int index, HttpServletRequest request)
   {
     String corrid = (String) request.getParameter("corrid:" + index);
     String actualname = (String) request.getParameter("actualname:" + index);
@@ -399,7 +368,7 @@ public class ClusterNameCorrection extends HttpServlet
     }
   }
 
-  public void insert(int index)
+    public void insert(int index, HttpServletRequest request)
   {
     String actualname = (String) request.getParameter("actualname:" + index);
     String clusterid = (String) clusterbyname.get(actualname);

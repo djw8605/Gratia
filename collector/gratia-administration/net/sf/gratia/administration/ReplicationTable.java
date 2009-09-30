@@ -151,73 +151,42 @@ public class ReplicationTable extends HttpServlet {
       fInitialized = true;
    }
    
-   private Boolean checkNeedLogin(HttpServletRequest request,
-                                  HttpServletResponse response)
-   throws ServletException, IOException {
-      // Check whether we need to log in.
-      String fqan = (String) request.getSession().getAttribute("FQAN");
-      Boolean needLogin = false;
-      if ((fqan == null) || (fqan.indexOf("NoPrivileges") > -1)) {
-         needLogin = true;
-      }
-      
-      String uriPart = request.getRequestURI();
-      int slash2 = uriPart.substring(1).indexOf("/") + 1;
-      uriPart = uriPart.substring(slash2);
-      String queryPart = request.getQueryString();
-      if (queryPart == null)
-         queryPart = "";
-      else
-         queryPart = "?" + queryPart;
-      
-      request.getSession().setAttribute("displayLink", "." + uriPart + queryPart);
-      
-      if (needLogin) {
-         Properties p = Configuration.getProperties();
-         String loginLink = p.getProperty("service.secure.connection") + request.getContextPath() + "/gratia-login.jsp";
-         String redirectLocation = response.encodeRedirectURL(loginLink);
-         response.sendRedirect(redirectLocation);
-      }
-      return needLogin;
-   }
-   
    public void doGet(HttpServletRequest request, HttpServletResponse response)
    throws ServletException, IOException {
-      if (checkNeedLogin(request, response)) {
-         return; // Redirected, nothing to do.
-      }
-      setup(request, response);
-      Integer selectedReplicationId = null;
-      try {
-         selectedReplicationId = new Integer(request.getParameter("replicationid"));
-      }
-      catch (Exception ignore) {
-      }                
-      Replication repEntry;
-      if ((selectedReplicationId != null) &&
-          ((repEntry = fRepTable.get(selectedReplicationId)) != null) &&
-          (request.getParameter("action") != null)) {
-         if (fModify) {
-            fMessage = "In modify mode: update or cancel before attempting another action.";
-         } else if (request.getParameter("action").equals("register")) {
-            register(repEntry);
-         } else if (request.getParameter("action").equals("activate")) {
-            activate(repEntry);
-         } else if (request.getParameter("action").equals("deactivate")) {
-            deactivate(repEntry);
-         } else if (request.getParameter("action").equals("reset")) {
-            reset(repEntry);
-         } else if (request.getParameter("action").equals("delete")) {
-            delete(repEntry);
-         } else if (request.getParameter("action").equals("test")) {
-            test(repEntry);
-         } else if (request.getParameter("action").equals("modify")) {
-            fModify = true;
-         }
-      }
-      loadRepTable(); // In case of changes.
-      process(selectedReplicationId);
-      compileResponse();
+       if (LoginChecker.checkLogin(request, response)) {
+           setup(request, response);
+           Integer selectedReplicationId = null;
+           try {
+               selectedReplicationId = new Integer(request.getParameter("replicationid"));
+           }
+           catch (Exception ignore) {
+           }                
+           Replication repEntry;
+           if ((selectedReplicationId != null) &&
+               ((repEntry = fRepTable.get(selectedReplicationId)) != null) &&
+               (request.getParameter("action") != null)) {
+               if (fModify) {
+                   fMessage = "In modify mode: update or cancel before attempting another action.";
+               } else if (request.getParameter("action").equals("register")) {
+                   register(repEntry);
+               } else if (request.getParameter("action").equals("activate")) {
+                   activate(repEntry);
+               } else if (request.getParameter("action").equals("deactivate")) {
+                   deactivate(repEntry);
+               } else if (request.getParameter("action").equals("reset")) {
+                   reset(repEntry);
+               } else if (request.getParameter("action").equals("delete")) {
+                   delete(repEntry);
+               } else if (request.getParameter("action").equals("test")) {
+                   test(repEntry);
+               } else if (request.getParameter("action").equals("modify")) {
+                   fModify = true;
+               }
+           }
+           loadRepTable(); // In case of changes.
+           process(selectedReplicationId);
+           compileResponse();
+       }
    }
    
    private void compileResponse() throws IOException {
@@ -241,102 +210,98 @@ public class ReplicationTable extends HttpServlet {
       writer.close();
    }
    
-   public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
-   {
-      // Execute the Post actions.
-      
-      if (checkNeedLogin(request, response)) {
-         return; // Redirected, nothing to do.
-      }
-      
-      Enumeration pars = request.getParameterNames();
-      while (pars.hasMoreElements()) {
-         String par = (String) pars.nextElement();
-         Logging.debug("ReplicationTable: Post Parameter " + par + " : " + request.getParameter(par));
-      }
+   public void doPost(HttpServletRequest request, HttpServletResponse response)
+       throws ServletException, IOException {
+       if (LoginChecker.checkLogin(request, response)) {
+           Enumeration pars = request.getParameterNames();
+           while (pars.hasMoreElements()) {
+               String par = (String) pars.nextElement();
+               Logging.debug("ReplicationTable: Post Parameter " + par + " : " + request.getParameter(par));
+           }
                       
 
-      setup(request, response);
+           setup(request, response);
 
-      String action = request.getParameter("action");
+           String action = request.getParameter("action");
       
-      if (action==null || action.equals("Refresh") || action.equals("Cancel")) {
-         fModify = false;
-         loadRepTable(); // In case of changes.
-         process(0);
-         compileResponse();
-      } else {
-         Integer selectedReplicationId = null;
-         Replication repEntry = null;
-         try {
-            selectedReplicationId = new Integer(request.getParameter("replicationid"));
-            repEntry = fRepTable.get(selectedReplicationId);
-         }
-         catch (Exception ignore) {
-         }
-         if (repEntry != null) {
-            if (action.equals("Update")) {
-               Logging.debug("ReplicationTable: matched for update: replicationid " + selectedReplicationId);
-               if (selectedReplicationId == 0) { // New entry
-                  repEntry = new Replication(RecordTable);
-                  fRepTable.put(repEntry.getreplicationid(), repEntry);
-               }
+           if (action==null || action.equals("Refresh") || action.equals("Cancel")) {
                fModify = false;
-               update(repEntry);
-            } else if (fModify) {
-               fMessage = "In modify mode: update or cancel before attempting another action.";
-            } else if (action.equals("Register")) {
-               register(repEntry);
-            } else if (action.equals("Start")) {
-               activate(repEntry);
-            } else if (action.equals("Stop")) {
-               deactivate(repEntry);
-            } else if (action.equals("Reset")) {
-               reset(repEntry);
-            } else if (action.equals("Delete")) {
-               delete(repEntry);
-            } else if (action.equals("Test")) {
-               test(repEntry);
-            } else if (action.equals("Modify")) {
-               fModify = true;
-            } else {
-               // Unknown action
-               fMessage = "Error: unknown action ("+action+") has been requested.";
-            }
-            loadRepTable(); // In case of changes.
-            process(selectedReplicationId);
-            compileResponse();
-         } else {
-            if (action.equals("New Entry")) {
-               repEntry = new Replication(RecordTable);
-               // Place in fRepTable
-               fRepTable.put(repEntry.getreplicationid(), repEntry);
-               // Set up to modify this new line;
-               fModify = true;
-               
+               loadRepTable(); // In case of changes.
                process(0);
-               compileResponse();            
-            } else if (action.equals("Update")) {
-               Logging.debug("ReplicationTable: matched for update: replicationid " + selectedReplicationId);
-               if (selectedReplicationId == null || selectedReplicationId !=0) {
-                  Logging.warning("Unable to find replication entry ID " +
-                                  selectedReplicationId + " in table for update");
+               compileResponse();
+           } else {
+               Integer selectedReplicationId = null;
+               Replication repEntry = null;
+               try {
+                   selectedReplicationId = new Integer(request.getParameter("replicationid"));
+                   repEntry = fRepTable.get(selectedReplicationId);
+               }
+               catch (Exception ignore) {
+               }
+               if (repEntry != null) {
+                   if (action.equals("Update")) {
+                       Logging.debug("ReplicationTable: matched for update: replicationid " + selectedReplicationId);
+                       if (selectedReplicationId == 0) { // New entry
+                           repEntry = new Replication(RecordTable);
+                           fRepTable.put(repEntry.getreplicationid(), repEntry);
+                       }
+                       fModify = false;
+                       update(repEntry);
+                   } else if (fModify) {
+                       fMessage = "In modify mode: update or cancel before attempting another action.";
+                   } else if (action.equals("Register")) {
+                       register(repEntry);
+                   } else if (action.equals("Start")) {
+                       activate(repEntry);
+                   } else if (action.equals("Stop")) {
+                       deactivate(repEntry);
+                   } else if (action.equals("Reset")) {
+                       reset(repEntry);
+                   } else if (action.equals("Delete")) {
+                       delete(repEntry);
+                   } else if (action.equals("Test")) {
+                       test(repEntry);
+                   } else if (action.equals("Modify")) {
+                       fModify = true;
+                   } else {
+                       // Unknown action
+                       fMessage = "Error: unknown action ("+action+") has been requested.";
+                   }
+                   loadRepTable(); // In case of changes.
+                   process(selectedReplicationId);
+                   compileResponse();
                } else {
-                  repEntry = new Replication(RecordTable);
-                  fRepTable.put(repEntry.getreplicationid(), repEntry);                  
-                  update(repEntry);
-                  loadRepTable(); // To see change
-               }
-               fModify = false;
-               process(0);
-               compileResponse();            
-            } else {
-               // Unknown action
-               fMessage = "Error: Unexpected action ("+action+") has been requested with a correct replication record ("+selectedReplicationId+").";
-            }
+                   if (action.equals("New Entry")) {
+                       repEntry = new Replication(RecordTable);
+                       // Place in fRepTable
+                       fRepTable.put(repEntry.getreplicationid(), repEntry);
+                       // Set up to modify this new line;
+                       fModify = true;
+               
+                       process(0);
+                       compileResponse();            
+                   } else if (action.equals("Update")) {
+                       Logging.debug("ReplicationTable: matched for update: replicationid " + selectedReplicationId);
+                       if (selectedReplicationId == null || selectedReplicationId !=0) {
+                           Logging.warning("Unable to find replication entry ID " +
+                                           selectedReplicationId + " in table for update");
+                       } else {
+                           repEntry = new Replication(RecordTable);
+                           fRepTable.put(repEntry.getreplicationid(), repEntry);                  
+                           update(repEntry);
+                           loadRepTable(); // To see change
+                       }
+                       fModify = false;
+                       process(0);
+                       compileResponse();            
+                   } else {
+                       // Unknown action
+                       fMessage = "Error: Unexpected action ("+action+") has been requested with a correct replication record ("+selectedReplicationId+").";
+                   }
             
-         }
-      }
+               }
+           }
+       }
    }
    
    void setup(HttpServletRequest request, HttpServletResponse response)
