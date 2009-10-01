@@ -191,11 +191,13 @@ public class VONameCorrection extends HttpServlet {
                         table.put("corrid:" + index,resultSet.getString(1));
 
                         newrow = xp.replaceAll(newrow,"#voname#",voname);
-                        if (reportablevoname != null)
+                        if (reportablevoname != null) {
                             newrow = xp.replaceAll(newrow,"#reportablevoname#",reportablevoname);
-                        else
+                            table.put("reportablevoname:" + index, reportablevoname);
+                        } else {
                             newrow = xp.replaceAll(newrow,"#reportablevoname#","");
-
+                            table.put("reportablevoname:" + index, "");
+                        }
                         String actualname = (String) vobyid.get(resultSet.getString(4));
                         newrow = volist(index,newrow,actualname);
 
@@ -336,6 +338,15 @@ public class VONameCorrection extends HttpServlet {
                         continue;
                     }
 
+                key = "reportablevoname:" + index;
+                oldvalue = (String) table.get(key);
+                newvalue = (String) request.getParameter(key);
+                if (! oldvalue.equals(newvalue))
+                    {
+                        update(index, request);
+                        continue;
+                    }
+
             }
     }
 
@@ -344,14 +355,22 @@ public class VONameCorrection extends HttpServlet {
         int corrid = Integer.parseInt(request.getParameter("corrid:" + index));
         String actualname =  request.getParameter("actualname:" + index);
         int VOid = Integer.parseInt((String) vobyname.get(actualname));
+        String voname = (String) request.getParameter("voname:" + index);
+        String reportablevoname = (String) request.getParameter("reportablevoname:" + index);
 
-        String command = "update VONameCorrection set VOid = ? where corrid = ?;";
+        String command = "update VONameCorrection set VOid = ?, VOName = ?, ReportableVOName = ? where corrid = ?;";
         PreparedStatement statement = null;
         try
             {
                 statement = connection.prepareStatement(command);
                 statement.setInt(1, VOid);
-                statement.setInt(2, corrid);
+                statement.setString(2, voname);
+                if (reportablevoname == null || reportablevoname.length()==0) {
+                    statement.setNull(3, java.sql.Types.VARCHAR);
+                } else {
+                    statement.setString(3, reportablevoname);
+                }
+                statement.setInt(4, corrid);
                 statement.executeUpdate();
                 statement.close();
             }
