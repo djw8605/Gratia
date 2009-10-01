@@ -235,11 +235,13 @@ public class Roles extends HttpServlet {
                 oldvalue = (String) table.get(key);
                 newvalue = (String) request.getParameter(key);
 
-                if ((oldvalue != null) && (oldvalue.equals("New Role")) && (! oldvalue.equals(newvalue)))
-                    {
-                        insert(index, request);
-                        continue;
-                    }
+                if ((oldvalue != null) && (oldvalue.equals("New Role")) &&
+                    (! oldvalue.equals(newvalue))) {
+                    insert(index, request);
+                    continue;
+                } else if ((oldvalue != null) && (oldvalue.equals("New Role"))) {
+                    break;
+                }
 
                 key = "subtitle:" + index;
                 oldvalue = (String) table.get(key);
