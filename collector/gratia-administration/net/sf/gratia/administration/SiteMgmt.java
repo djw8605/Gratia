@@ -243,7 +243,6 @@ public class SiteMgmt extends HttpServlet {
             {
                 statement = connection.prepareStatement(command);
                 statement.setString(1, request.getParameter("cename:" + index));
-                statement.setInt(2, Integer.parseInt(request.getParameter("dbid:" + index)));
                 statement.executeUpdate();
             }
         catch (Exception e)
