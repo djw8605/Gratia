@@ -348,7 +348,7 @@ function clean_log_directory {
   fi
   sleep 2
   prev_dir=$(pwd)
-  if [[ -z "$tomcat_log_dir" ]] || !cd $tomcat_log_dir; then
+  if [[ -z "$tomcat_log_dir" ]] || ! cd $tomcat_log_dir; then
     logerr "Could not cd to tomcat_log_dir tomcat_log_dir"
   fi
   logit "... tar'ing and cleaning log files in $PWD:
@@ -594,15 +594,17 @@ function verify_port_availability {
   local jmx_port=`$source/common/configuration/configure-collector $cc_config_arg-p ${tomcat_dir} --obtain-config-item jmx_port $config_name 2>/dev/null | sed -ne 's/^config: jmx_port = //p'`
   if [[ -n "$jmx_port" ]]; then
     expected_number_of_ports=6
+    ppid_check="eq"
   else
     expected_number_of_ports=5
+    ppid_check="ne"
   fi
   logit "
 Verifying that the tomcat process has $expected_number_of_ports ports it
 is listening on for this tomcat instance and all are by the same process.
 Disclaimer: This is the closest one can do for this type of validation.
 "
-  pid=$(ps -ef | perl -wane 'm&catalina\.(?:base|home)='$tomcat_dir/$tomcat'& and $F[2] eq "1" and print "$F[1]\n"')
+  pid=$(ps -ef | perl -wane 'm&catalina\.(?:base|home)='$tomcat_dir/$tomcat'& and $F[2] '$ppid_check' "1" and print "$F[1]\n"')
   if [[ -z "$pid" ]]; then
     logerr "Could not find PID of tomcat process for port check -- has it died?"
   fi
@@ -651,7 +653,7 @@ function verify_static_reports {
   delimit verify_static_reports
   pdf_dir=$tomcat_dir/$tomcat/webapps/gratia-reports/reports-static
   csv_dir=$tomcat_dir/$tomcat/webapps/gratia-reports/reports-static_csv
-  local doStatic=`$source/common/configuration/configure-collector $cc_config_arg-p ${tomcat_dir} --obtain-config-item staticReports $config_name | sed -ne 's/^config: staticReports = //p'`  
+  local doStatic=`$source/common/configuration/configure-collector $cc_config_arg-p ${tomcat_dir} --obtain-config-item staticReports $config_name 2>/dev/null | sed -ne 's/^config: staticReports = //p'`  
 #  script="$(crontab -l| grep -e '^[^#]*'$tomcat_dir/$tomcat' ' |awk '{print $6,$7,$8}' |sed -e s/\'//g)"
   if (( ${doStatic:-0} )) || [[ "$doStatic" == [Tt]* ]]; then
          script="$tomcat_dir/$tomcat/gratia/staticReports.py '$tomcat_dir/$tomcat' '$service/gratia-reporting/'" 
