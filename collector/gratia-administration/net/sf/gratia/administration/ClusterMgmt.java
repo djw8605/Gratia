@@ -220,7 +220,7 @@ public class ClusterMgmt extends HttpServlet
             statement = connection.prepareStatement(command);
             statement.setString(1, request.getParameter("voname:" + index));
             statement.setInt(2, Integer.parseInt(request.getParameter("void:" + index)));
-            statement.executeUpdate(command);
+            statement.executeUpdate();
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -237,7 +237,7 @@ public class ClusterMgmt extends HttpServlet
         try {
             statement = connection.prepareStatement(command);
             statement.setString(1, request.getParameter("voname:" + index));
-            statement.executeUpdate(command);
+            statement.executeUpdate();
             // connection.commit();
         } catch (Exception e) {
             System.out.println("command: " + command);
