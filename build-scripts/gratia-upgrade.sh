@@ -114,6 +114,10 @@ process and it does some validation.
 A major assumption it makes is that all tomcat collectors are in $tomcat_dir.
 If this is not true, you may use the command-line option \"--tomcat-dir <dir>\".
 
+Similarly, the JRE is expected to be in \$tomcat_dir/jre. If this is not true,
+you may use the command-line option \"--jre-dir <dir>\". Note that if you are
+using SDK, you should specify \"<sdk-dir>/jre\".
+
  No prompt mode   Prompt mode questions
  --------------   ---------------------
 
@@ -372,7 +376,10 @@ function install_upgrade {
   if [ "$mysql_file" != "NONE" ];then
     pswd="$(cat $mysql_file)"
   fi
-  runit $pgm $ugl_config_arg-p ${tomcat_dir} -d $pswd -S $source ${force}-s -C $config_name $(echo $tomcat|cut -d'-' -f2-)
+  if [[ -n "$jre_dir" ]]; then
+    jre_opt=" -j "
+  fi
+  runit $pgm $ugl_config_arg-p ${tomcat_dir} -d $pswd$jre_opt$jre_dir -S $source ${force}-s -C $config_name $(echo $tomcat|cut -d'-' -f2-)
   logit "Install was successful"
   sleep 3
 }
@@ -799,6 +806,8 @@ while test "x$1" != "x"; do
         force="${force_log4j} ";shift
    elif [ "$1" == "--tomcat-dir" ]; then
         tomcat_dir="$2";shift;shift
+   elif [ "$1" == "--jre-dir" ]; then
+        jre_dir="$2";shift;shift
    elif [ "$1" == "--mail" ]; then
         wanted_mail="$2";shift;shift
    else
