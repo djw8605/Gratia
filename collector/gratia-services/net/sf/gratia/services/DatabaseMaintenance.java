@@ -31,10 +31,10 @@ public class DatabaseMaintenance {
 
    static final String dq = "\"";
    static final String comma = ",";
-   static final int gratiaDatabaseVersion = 83;
+   static final int gratiaDatabaseVersion = 84;
    static final int latestDBVersionRequiringStoredProcedureLoad = gratiaDatabaseVersion;
    static final int latestDBVersionRequiringSummaryViewLoad = 82;
-   static final int latestDBVersionRequiringSummaryTriggerLoad = 80;
+   static final int latestDBVersionRequiringSummaryTriggerLoad = 84;
    static final int latestDBVersionRequiringTableStatisticsRefresh = 38;
    static boolean dbUseJobUsageSiteName = false;
    java.sql.Connection connection;
@@ -1104,10 +1104,10 @@ public class DatabaseMaintenance {
          schemaOnlyLowerBound = 81;
          schemaOnlyUpperBound = 82;
          if ((current >= schemaOnlyLowerBound) && (current < schemaOnlyUpperBound)) {
-            // Stored procedures, trigger procedures.
-            Logging.fine("Gratia database upgraded from " + current + " to " + schemaOnlyUpperBound);
-            current = schemaOnlyUpperBound;
-            UpdateDbVersion(current);
+             // Stored procedures, trigger procedures.
+             Logging.fine("Gratia database upgraded from " + current + " to " + schemaOnlyUpperBound);
+             current = schemaOnlyUpperBound;
+             UpdateDbVersion(current);
          }
          if (current == 82) {
              // Remove vestigial and obstructive ServerDate from some
@@ -1149,6 +1149,15 @@ public class DatabaseMaintenance {
                      " to " + (current + 1));
             }
          }
+         schemaOnlyLowerBound = 83;
+         schemaOnlyUpperBound = 84;
+         if ((current >= schemaOnlyLowerBound) && (current < schemaOnlyUpperBound)) {
+             // Stored procedures, trigger procedures.
+             Logging.fine("Gratia database upgraded from " + current + " to " + schemaOnlyUpperBound);
+             current = schemaOnlyUpperBound;
+             UpdateDbVersion(current);
+         }
+
          return ((current == gratiaDatabaseVersion) && checkAndUpgradeDbAuxiliaryItems());
       }
    }
