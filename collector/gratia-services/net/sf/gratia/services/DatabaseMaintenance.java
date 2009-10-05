@@ -194,6 +194,7 @@ public class DatabaseMaintenance {
       // Indices for Connection and Certificate tracking
       AddIndex("Certificate", true, "pem01", "pem", true, "128");
       AddIndex("Origin", false, "s01", "ServerDate", false );
+      AddIndex("Origin", true, "o01", "ServerDate,cid", false );
 
       //
       // the following were added to get rid of unused indexes
