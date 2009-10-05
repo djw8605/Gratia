@@ -404,9 +404,10 @@ reporting: birt-reporting
 	[[ -n "$$tmp" ]] || exit 1; \
 	trap "[[ -n \"$$tmp\" ]] && rm -f \"$$tmp\"" EXIT; \
 	perl -we 'use strict; my $$seen_par; my $$par = "BIRT_VIEWER_TIMEZONE"; my $$val = "GMT"; while (<>) { m&<param-name>\Q$$par\E</param-name>& and $$seen_par = 1; $$seen_par and s&<param-value>.*&<param-value>$$val</param-value>& and undef $$seen_par; print }' $(war-dir)/$@/WEB-INF/web.xml > "$$tmp"; \
+	perl -we 'use strict; my $$seen_par; my $$par = "WORKING_FOLDER_ACCESS_ONLY"; my $$val = "false"; while (<>) { m&<param-name>\Q$$par\E</param-name>& and $$seen_par = 1; $$seen_par and s&<param-value>.*&<param-value>$$val</param-value>& and undef $$seen_par; print }' "$$tmp" > "$$tmp.2"; \
         (( $$? == 0 )) || exit 1; \
 	cp -p $(war-dir)/$@/WEB-INF/web.xml $(war-dir)/$@/WEB-INF/web.xml.old; \
-	cat "$$tmp" > $(war-dir)/$@/WEB-INF/web.xml;
+	cat "$$tmp.2" > $(war-dir)/$@/WEB-INF/web.xml;
 	# --- copy in needed libraries ---
 	cp -p $(target)/gratiaReporting.jar                    $(war-dir)/$@/WEB-INF/lib/.
 	cp -p $(target)/gratiaReporting.jar                    $(war-dir)/$@/scriptlib/.
