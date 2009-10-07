@@ -817,6 +817,7 @@ public class CollectorService implements ServletContextListener {
                             session.flush();
                             tx.commit();
                             keepTrying = false;
+                            session.close();
                             Logging.info("checkCertificate has created an entry for subject " +
                                          certs[i].getSubjectX500Principal().getName() +
                                          ", issuer: " +
@@ -828,13 +829,13 @@ public class CollectorService implements ServletContextListener {
                                          );
                             Logging.log(LogLevel.FINER,"certificate details: " + certs[i].toString());
                         } catch (Exception e) {
-                            if (session != null && session.isOpen()) {
+                            if (session != null && session.isOpen() && session.isConnected()) {
                                 if ((tx != null) && tx.isActive()) {
                                     tx.rollback();
                                 }
                                 session.close();
-                                session = null;
                             }
+                            session = null;
                             if (e instanceof org.hibernate.exception.LockAcquisitionException) {
                                 if (nTries == 1) {
                                     Logging.info("checkCertificate: Lock acquisition exception.  Trying a second time.");
@@ -872,7 +873,7 @@ public class CollectorService implements ServletContextListener {
                 }
                
             }
-            if (session != null) {
+            if (session != null && session.isOpen() && session.isConnected()) {
                 session.close();
             }
         }
@@ -901,7 +902,7 @@ public class CollectorService implements ServletContextListener {
                 keepTrying = false;
                 session.close();
             } catch (Exception e) {
-                if (session != null && session.isOpen()) {
+                if (session != null && session.isOpen() && session.isConnected()) {
                     if ((tx != null) && tx.isActive()) {
                         tx.rollback();
                     }
