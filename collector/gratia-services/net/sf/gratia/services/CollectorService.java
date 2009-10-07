@@ -899,6 +899,7 @@ public class CollectorService implements ServletContextListener {
                 session.flush();
                 tx.commit();
                 keepTrying = false;
+                session.close();
             } catch (Exception e) {
                 if (session != null && session.isOpen()) {
                     if ((tx != null) && tx.isActive()) {
@@ -929,7 +930,6 @@ public class CollectorService implements ServletContextListener {
                 }
             }
         }
-        session.close();
     }     
 
 
