@@ -295,7 +295,7 @@ public class ReplicationDataPump extends Thread {
                     replicationEntry.setrowcount(replicationEntry.getrowcount() + bundle_count);
                     session.flush();
                     session.getTransaction().commit();
-                    if (nSentThisLoop == 0) { // Message for first send
+                    if (nfirstLoopThisRun && (SentThisLoop == 0)) { // Message for first send
                         replicationLog(LogLevel.FINE, " active");
                     }
                     nSentThisLoop += bundle_count;
