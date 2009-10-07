@@ -918,12 +918,6 @@ public class CollectorService implements ServletContextListener {
                         Logging.warning("checkCertficate: hit " + nTries + " contiguous lock acqusition errors: check DB.");
                     }
                 } else {
-                    if (session != null && session.isOpen()) {
-                        if ((tx != null) && tx.isActive()) {
-                            tx.rollback();
-                        }
-                        session.close();
-                    }
                     Logging.warning("checkCertificate: error when storing or retrieving connection object: ", e);
                     Logging.debug("checkCertificate: exception details:", e);
                     keepTrying = false;
