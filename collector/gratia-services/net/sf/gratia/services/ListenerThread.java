@@ -211,7 +211,7 @@ public class ListenerThread extends Thread {
             } catch (FileNotFoundException e) {
                 Utils.GratiaError("ListenerThread",
                                   "XML file read",
-                                  ident + ": Unable to find file " + files[i] + "; FS trouble or two collectors runniing?");
+                                  ident + ": Unable to find file " + files[i] + "; FS trouble or two collectors running?");
                 continue;
             } catch (IOException e) {
                 Utils.GratiaError("ListenerThread",

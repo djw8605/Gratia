@@ -243,7 +243,7 @@ public class PerformanceThread extends Thread
             } catch (FileNotFoundException e) {
                 Utils.GratiaError("PerformanceThread",
                                   "XML file read",
-                                  ident + ": Unable to find file " + files[i] + "; FS trouble or two collectors runniing?");
+                                  ident + ": Unable to find file " + files[i] + "; FS trouble or two collectors running?");
                 continue;
             } catch (IOException e) {
                 Utils.GratiaError("PerformanceThread",
