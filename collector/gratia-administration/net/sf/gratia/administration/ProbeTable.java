@@ -161,7 +161,7 @@ public class ProbeTable extends HttpServlet {
         }
     }
 
-    public void setup(HttpServletRequest request) {
+    public void setup(HttpServletRequest request) throws IOException {
         html = xp.get(request.getRealPath("/") + "probetable.html");
         m = p.matcher(html);
         while (m.find()) {

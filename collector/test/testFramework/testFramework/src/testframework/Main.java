@@ -31,10 +31,10 @@ public class Main {
       int record_idx = 0;
       for (int i = 0; i < filenames.length; i++) {
          System.out.println("Processing: " + filenames[i]);
-         String xml = XP.get(filenames[i]);
-
-         ArrayList records;
+         String xml = null;
          try {
+             xml = XP.get(filenames[i]);
+             ArrayList records;
             records = converter.convert(xml);
          } catch (Exception ex) {
             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);

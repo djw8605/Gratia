@@ -135,7 +135,7 @@ public class CPUInfo extends HttpServlet {
         }
     }
 
-    public void setup()
+    public void setup() throws IOException
     {
         html = xp.get(request.getRealPath("/") + "cpuinfo.html");
         m = p.matcher(html);

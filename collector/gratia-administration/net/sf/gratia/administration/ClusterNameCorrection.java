@@ -128,7 +128,7 @@ public class ClusterNameCorrection extends HttpServlet {
         }
     }
 
-    public void setup(HttpServletRequest request)
+    public void setup(HttpServletRequest request) throws IOException
     {
         html = XP.get(request.getRealPath("/") + "clusternamecorrection.html");
         m = p.matcher(html);

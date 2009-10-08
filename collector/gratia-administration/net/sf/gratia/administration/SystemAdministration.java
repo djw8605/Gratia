@@ -108,7 +108,7 @@ public class SystemAdministration extends HttpServlet {
         }
     }
 
-    public void setup() {
+    public void setup() throws IOException {
         html = XP.get(request.getRealPath("/") + "systemadministration.html");
     }
 
@@ -558,7 +558,7 @@ public class SystemAdministration extends HttpServlet {
             recoverDirectory(new File(directory));
         }
 
-        public void recoverFile(File file) {
+        public void recoverFile(File file) throws IOException {
             String blob = XP.get(file);
             recoverRecord(blob,file.getName());
         }
@@ -578,7 +578,12 @@ public class SystemAdministration extends HttpServlet {
                 } else if (current.getName().endsWith(".tar.bz2")) {
                     recoverArchive(current);
                 } else {
-                    recoverFile(current);
+                    try {
+                        recoverFile(current);
+                    } catch (IOException e) {
+                        Logging.warning("Error recovering file " + filelist[i] + ": skipped");
+                        continue;
+                    }
                 }
             }
         }

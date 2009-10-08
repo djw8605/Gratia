@@ -124,7 +124,7 @@ public class VOMgmt extends HttpServlet {
         }
     }
 
-    public void setup(HttpServletRequest request)
+    public void setup(HttpServletRequest request) throws IOException
     {
         html = xp.get(request.getRealPath("/") + "vo.html");
         m = p.matcher(html);

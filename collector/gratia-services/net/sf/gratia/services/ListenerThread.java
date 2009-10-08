@@ -206,8 +206,19 @@ public class ListenerThread extends Thread {
 
             file = files[i];
             //MPERF: Logging.fine(ident + ": Start Processing: " + file);
-            blob = XP.get(files[i]);
-
+            try {
+                blob = XP.get(files[i]);
+            } catch (FileNotFoundException e) {
+                Utils.GratiaError("ListenerThread",
+                                  "XML file read",
+                                  ident + ": Unable to find file " + files[i] + "; FS trouble or two collectors runniing?");
+                continue;
+            } catch (IOException e) {
+                Utils.GratiaError("ListenerThread",
+                                  "XML file read",
+                                  ident + ": Error " + e.getMessage() + " while trying to read " + files[i]);
+                continue;
+            }
             xml = "";
             rawxmllist.clear();
             extraxmllist.clear();

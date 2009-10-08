@@ -106,7 +106,7 @@ public class StopDatabase extends HttpServlet
       }
   }
 
-	public void setup(HttpServletRequest request)
+	public void setup(HttpServletRequest request) throws IOException
 	{
 		html = xp.get(request.getRealPath("/") + "stopGratiaDatabaseUpdateThreads.html");
 	}

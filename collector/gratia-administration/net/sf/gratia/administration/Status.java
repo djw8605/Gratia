@@ -219,7 +219,7 @@ public class Status extends HttpServlet {
 			return value.toString();
 	}
 
-	public void setup(HttpServletRequest request) {
+	public void setup(HttpServletRequest request) throws IOException {
 		html = xp.get(request.getRealPath("/") + "status.html");
 	}
 

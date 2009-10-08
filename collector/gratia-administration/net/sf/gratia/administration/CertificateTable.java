@@ -95,7 +95,7 @@ public class CertificateTable extends HttpServlet
          }
       }
 
-      public void setup(HttpServletRequest request)
+      public void setup(HttpServletRequest request) throws IOException
       {
          fHtml = xp.get(request.getRealPath("/") + "certificatetable.html");
          Matcher m = gRowPattern.matcher(fHtml);

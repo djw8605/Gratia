@@ -128,7 +128,7 @@ public class VONameCorrection extends HttpServlet {
         }
     }
 
-    public void setup(HttpServletRequest request)
+    public void setup(HttpServletRequest request) throws IOException
     {
         html = xp.get(request.getRealPath("/") + "vonamecorrection.html");
         m = p.matcher(html);

@@ -124,7 +124,7 @@ public class SiteMgmt extends HttpServlet {
         }
     }
 
-    public void setup(HttpServletRequest request)
+    public void setup(HttpServletRequest request) throws IOException
     {
         html = xp.get(request.getRealPath("/") + "site.html");
         m = p.matcher(html);

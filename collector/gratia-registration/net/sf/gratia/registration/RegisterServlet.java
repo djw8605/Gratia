@@ -518,6 +518,7 @@ public class RegisterServlet extends HttpServlet
       }
       
       public String exchangeCertificate(String alias,String from,String remoteAddr,String pem)
+          throws IOException
       {
          String putoutput = putPublicKey(alias,from,remoteAddr,pem);
          if (!putoutput.equals("ok:ok")) {
@@ -527,7 +528,7 @@ public class RegisterServlet extends HttpServlet
          }
       }
       
-      public String getCollectorPublicKey()
+      public String getCollectorPublicKey() throws IOException
       {
          // Return this server public key.
          

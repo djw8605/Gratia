@@ -238,7 +238,19 @@ public class PerformanceThread extends Thread
          }
 
          file = files[i];
-         blob = xp.get(files[i]);
+            try {
+                blob = XP.get(files[i]);
+            } catch (FileNotFoundException e) {
+                Utils.GratiaError("PerformanceThread",
+                                  "XML file read",
+                                  ident + ": Unable to find file " + files[i] + "; FS trouble or two collectors runniing?");
+                continue;
+            } catch (IOException e) {
+                Utils.GratiaError("PerformanceThread",
+                                  "XML file read",
+                                  ident + ": Error " + e.getMessage() + " while trying to read " + files[i]);
+                continue;
+            }
          xml = null;
          rawxml = null;
          extraxml = null;

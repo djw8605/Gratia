@@ -134,7 +134,7 @@ public class ConnectionTable extends HttpServlet
          }
       }
 
-      public void setup(HttpServletRequest request)
+      public void setup(HttpServletRequest request) throws IOException
       {
          fHtml = xp.get(request.getRealPath("/") + "connectiontable.html");
          Matcher m = gRowPattern.matcher(fHtml);

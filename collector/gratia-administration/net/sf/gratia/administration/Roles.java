@@ -131,7 +131,7 @@ public class Roles extends HttpServlet {
         }
     }
 
-    public void setup(HttpServletRequest request)
+    public void setup(HttpServletRequest request) throws IOException
     {
         html = xp.get(request.getRealPath("/") + "roles.html");
         m = p.matcher(html);

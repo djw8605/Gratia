@@ -86,7 +86,7 @@ public class ReplicationTable extends HttpServlet {
       Name = config.getServletName();
    }
    
-   void initialize() {
+   void initialize() throws IOException {
       if (fInitialized) return;
       fProperties = Configuration.getProperties();
       while (true) {

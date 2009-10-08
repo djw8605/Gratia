@@ -129,7 +129,7 @@ public class ClusterMgmt extends HttpServlet
       }
   }
 
-	public void setup(HttpServletRequest request)
+	public void setup(HttpServletRequest request) throws IOException
 	{
 		html = xp.get(request.getRealPath("/") + "cluster.html");
 		m = p.matcher(html);

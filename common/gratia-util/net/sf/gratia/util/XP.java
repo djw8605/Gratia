@@ -614,26 +614,18 @@ public class XP
     // file support utilities
     //
 
-    public static String get(String path)
+    public static String get(String path) throws IOException
     {
         return get(new File(path));
     }
 
-    public static String get(File file)
+    public static String get(File file) throws IOException
     {
-        try
-            {
-                FileInputStream input = new FileInputStream(file);
-                byte[] buffer = new byte[(int) file.length()];
-                input.read(buffer,0,(int) file.length());
-                input.close();
-                return new String(buffer);
-            }
-        catch (Exception e)
-            {
-                // Logging.log("File Not Found: " + path + " !!" + "\n");
-                return "File Not Found: " + file.getAbsolutePath() + " !!" + "\n";
-            }
+        FileInputStream input = new FileInputStream(file);
+        byte[] buffer = new byte[(int) file.length()];
+        input.read(buffer,0,(int) file.length());
+        input.close();
+        return new String(buffer);
     }
   
     public static String get(URL url)
