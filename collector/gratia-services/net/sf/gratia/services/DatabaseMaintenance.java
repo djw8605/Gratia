@@ -251,7 +251,7 @@ public class DatabaseMaintenance {
                         s4.setInt(2, toReplace);
                         int nChanges = s4.executeUpdate();
                         if (nChanges > 0) {
-                            Logging.info("Corrected " + nChanges + " problematic entries in table " + tableName);
+                            Logging.fine("Corrected " + nChanges + " problematic entries in table " + tableName);
                         }
                     }
                     // Remove the now-unused duplicate entry from Origin.
@@ -260,7 +260,7 @@ public class DatabaseMaintenance {
                     s5.setInt(1, toReplace);
                     int nDeletes = s5.executeUpdate();
                     if (nDeletes == 1) {
-                        Logging.info("Deleted now-unused duplicate entry " + toReplace + " from Origin table.");
+                        Logging.fine("Deleted now-unused duplicate entry " + toReplace + " from Origin table.");
                     } else {
                         Logging.warning("Unable to delete entry with originid " + toReplace + " from Origin table.");
                     }
