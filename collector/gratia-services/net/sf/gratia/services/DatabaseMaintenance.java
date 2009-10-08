@@ -101,26 +101,37 @@ public class DatabaseMaintenance {
    public void AddIndex(String table, Boolean unique, String name,
          String content) throws Exception {
 
-      AddIndex(table, unique, name, content, false, null);
+       AddIndex(table, unique, name, content, false, false, null);
    }
 
    public void AddIndex(String table, Boolean unique, String name,
          String content, Boolean avoidDuplicateIndex) throws Exception {
 
-      AddIndex(table, unique, name, content, avoidDuplicateIndex, null);
+       AddIndex(table, unique, name, content, avoidDuplicateIndex, false, null);
    }
 
    public void AddIndex(String table, Boolean unique, String name,
-         String content, Boolean avoidDuplicateIndex, String prefix) throws Exception {
+         String content, Boolean avoidDuplicateIndex, Boolean ignore) throws Exception {
+
+       AddIndex(table, unique, name, content, avoidDuplicateIndex, ignore, null);
+   }
+
+   public void AddIndex(String table, Boolean unique, String name,
+                        String content, Boolean avoidDuplicateIndex, Boolean ignore,
+                        String prefix) throws Exception {
       Statement statement;
       ResultSet resultSet;
 
       String check = "show index from " + table + " where Key_name = '" + name + "'";
       String checkcontent = "show index from " + table + " where Column_name = '" + content + "'";
 
-      String cmd = "alter table " + table + " add ";
+      String cmd = "alter ";
+      if (ignore) {
+          cmd.concat("unique ");
+      }
+      cmd.concat("table " + table + " add ");
       if (unique) {
-         cmd = cmd + "unique ";
+          cmd.concat("unique ");
       }
       if (prefix != null) {
          content = content + "(" + prefix + ")";
@@ -192,9 +203,9 @@ public class DatabaseMaintenance {
       AddIndex("Probe", true, "index02", "probename");
 
       // Indices for Connection and Certificate tracking
-      AddIndex("Certificate", true, "pem01", "pem", true, "128");
+      AddIndex("Certificate", true, "pem01", "pem", true, false, "128");
       AddIndex("Origin", false, "s01", "ServerDate", false );
-      AddIndex("Origin", true, "o01", "ServerDate,cid", false );
+      AddIndex("Origin", true, "o01", "ServerDate,cid", false, true );
 
       //
       // the following were added to get rid of unused indexes
