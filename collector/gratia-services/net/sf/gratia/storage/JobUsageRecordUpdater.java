@@ -370,7 +370,12 @@ public abstract class JobUsageRecordUpdater implements RecordUpdater {
       private boolean isCertField(String text) {
           // return subjectNameFields[i].length() < 3 || subjectNameFields[i].charAt(2) != '=');
           java.util.regex.Matcher matcher = gCertFieldPat.matcher(text);
-          Utils.GratiaInfo("Checking "+text+" result= "+matcher.lookingAt());
+          Boolean result = matcher.lookingAt();
+          if (result) {
+              Logging.log("JobUsageRecordUpdater: certificate found for " + text);
+          } else {
+              Logging.debug("JobUsageRecordUpdater: certificate not found for " + text);
+          }
           return matcher.lookingAt();
       }
 
