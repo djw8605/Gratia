@@ -127,11 +127,11 @@ public class DatabaseMaintenance {
 
       String cmd = "alter ";
       if (ignore) {
-          cmd.concat("unique ");
+          cmd += "ignore ";
       }
-      cmd.concat("table " + table + " add ");
+      cmd += "table " + table + " add ";
       if (unique) {
-          cmd.concat("unique ");
+          cmd += "unique ";
       }
       if (prefix != null) {
          content = content + "(" + prefix + ")";
@@ -196,7 +196,85 @@ public class DatabaseMaintenance {
       }
    }
 
-   public void CheckIndices() throws Exception {
+    public void MaybeFixOriginAndAddIndex() throws Exception {
+        Statement statement;
+        ResultSet resultSet;
+
+        String check = "show index from Origin where Key_name = 'o01'";
+
+        statement = connection.createStatement();
+        resultSet = statement.executeQuery(check);
+        Boolean needIndex = false;
+        if (!resultSet.next()) {
+            needIndex = true;
+        }
+        statement.close();
+
+        if (!needIndex) {
+            return; // Nothing to do.
+        }
+
+        Logging.info("Checking for problems with Origin table prior to adding new unique composite index.");
+        String dupFinder = "select ServerDate, cid" +
+            " from Origin group by ServerDate, cid having count(*) > 1";
+        statement = connection.createStatement();
+        resultSet = statement.executeQuery(dupFinder);
+        List<String>tableList = new ArrayList<String>();
+        while (resultSet.next()) {
+            String oidFinder = "select originid from Origin where ServerDate = ? and cid = ?";
+            PreparedStatement s2 = connection.prepareStatement(oidFinder);
+            s2.setTimestamp(1, resultSet.getTimestamp("ServerDate"));
+            s2.setInt(2, resultSet.getInt("cid"));
+            ResultSet r2 = s2.executeQuery();
+            Integer originalOID = null;
+            while (r2.next()) {
+                if (originalOID == null) {
+                    originalOID = r2.getInt("originid");
+                } else {
+                    Integer toReplace = r2.getInt("originid");
+                    if (tableList.isEmpty()) { // Populate tableList
+                        String listSelect = "select table_name " +
+                            "from information_schema.tables " +
+                            "where table_schema = database() " +
+                            "and table_name like '%_Origin'";
+                        Statement s3 = connection.createStatement();
+                        ResultSet r3 = s3.executeQuery(listSelect);
+                        while (r3.next()) {
+                            tableList.add(r3.getString(1)); 
+                        } // End loop over _Origin table names.
+                        s3.close();
+                    } // End if (tableList empty).
+                    for (String tableName : tableList) { // Update _Origin tables to refer to correct originid
+                        String updateCmd = "update " + tableName + " set originid = ? where originid = ?";
+                        PreparedStatement s4 = connection.prepareStatement(updateCmd);
+                        s4.setInt(1, originalOID);
+                        s4.setInt(2, toReplace);
+                        int nChanges = s4.executeUpdate();
+                        if (nChanges > 0) {
+                            Logging.info("Corrected " + nChanges + " problematic entries in table " + tableName);
+                        }
+                    }
+                    // Remove the now-unused duplicate entry from Origin.
+                    String deleteCmd = "delete from Origin where originid = ?";
+                    PreparedStatement s5 = connection.prepareStatement(deleteCmd);
+                    s5.setInt(1, toReplace);
+                    int nDeletes = s5.executeUpdate();
+                    if (nDeletes == 1) {
+                        Logging.info("Deleted now-unused duplicate entry " + toReplace + " from Origin table.");
+                    } else {
+                        Logging.warning("Unable to delete entry with originid " + toReplace + " from Origin table.");
+                    }
+                } // End if (originalOID).
+            } // End loop over originIds for a given duplicate set.
+            s2.close();
+        }
+        Logging.log("Adding unique index to Origin table.");
+        // Add the required index.
+        AddIndex("Origin", true, "o01", "ServerDate,cid", false );
+        Logging.info("Addition of unique index to Origin table complete.");
+    }
+
+    public void CheckIndices() throws Exception {
       Logging.info("DatabaseMaintenance: checking indexes on tables.");
 
       AddIndex("Site", true, "index02", "SiteName");
@@ -205,7 +283,7 @@ public class DatabaseMaintenance {
       // Indices for Connection and Certificate tracking
       AddIndex("Certificate", true, "pem01", "pem", true, false, "128");
       AddIndex("Origin", false, "s01", "ServerDate", false );
-      AddIndex("Origin", true, "o01", "ServerDate,cid", false, true );
+      MaybeFixOriginAndAddIndex();
 
       //
       // the following were added to get rid of unused indexes
