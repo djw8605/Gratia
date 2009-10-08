@@ -90,23 +90,6 @@ public class ListenerThread extends Thread {
         JobUsageRecordUpdater.AddDefaults(updater);
     }
 
-    private Boolean detectAndReportLockFailure(Exception e, Integer nTries) {
-        if (e instanceof org.hibernate.exception.LockAcquisitionException) {
-            if (nTries == 1) {
-                Logging.info(ident + ": lock acquisition exception.  Trying a second time.");
-            } else if (nTries < 5) {
-                Logging.warning(ident + ": multiple contiguous lock acquisition errors: keep trying.");
-            } else if (nTries == 5) {
-                Logging.warning(ident + ": multiple contiguous lock acquisition errors: keep trying (warnings throttled).");
-            } else if ( (nTries % 100) == 0) {
-                Logging.warning(ident + ": hit " + nTries + " contiguous lock acqusition errors: check DB.");
-            }
-            return true;
-        } else {
-            return false;
-        }
-    }
-
     public void loadProperties() {
         p = Configuration.getProperties();
 
@@ -473,7 +456,7 @@ public class ListenerThread extends Thread {
                             }
                             or_session.close();
                         }
-                        if (!this.detectAndReportLockFailure(e, nTries)) {
+                        if (!LockFailureDetector.detectAndReportLockFailure(e, nTries, ident)) {
                             Logging.warning(ident + rId +
                                             ": received unexpected exception " +
                                             e.getMessage() + " while processing origin entry.");
@@ -536,7 +519,7 @@ public class ListenerThread extends Thread {
                             }
                             pr_session.close();
                         }
-                        if (!this.detectAndReportLockFailure(e, nTries)) {
+                        if (!LockFailureDetector.detectAndReportLockFailure(e, nTries, ident)) {
                             Logging.warning(ident + rId +
                                             ": received unexpected exception " +
                                             e.getMessage() + " while processing probe entry.");
@@ -747,7 +730,7 @@ public class ListenerThread extends Thread {
                                 }
                                 rec_session.close();
                             }
-                            if (detectAndReportLockFailure(e, nTries) ||
+                            if (LockFailureDetector.detectAndReportLockFailure(e, nTries, ident) ||
                                 handleUnexpectedException(rId, e, gotreplication, current)) {
                                 return 0;
                             }
@@ -1031,7 +1014,7 @@ public class ListenerThread extends Thread {
                                     }
                                     dup_session.close();
                                 }
-                                if (!detectAndReportLockFailure(e, nTries)) {
+                                if (!LockFailureDetector.detectAndReportLockFailure(e, nTries, ident)) {
                                     throw e2; // Re-throw;
                                 }
                             } // End try (resolve duplicate JobUsageRecord)
@@ -1058,7 +1041,7 @@ public class ListenerThread extends Thread {
                                         dup_session.close();
                                         keepTrying = false;
                                     } catch (Exception e2) {
-                                        if (!detectAndReportLockFailure(e, nTries)) {
+                                        if (!LockFailureDetector.detectAndReportLockFailure(e, nTries, ident)) {
                                             throw e2; // Re-throw
                                         }
                                     } // End try (save probe)

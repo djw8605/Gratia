@@ -908,17 +908,7 @@ public class CollectorService implements ServletContextListener {
                     }
                     session.close();
                 }
-                if (e instanceof org.hibernate.exception.LockAcquisitionException) {
-                    if (nTries == 1) {
-                        Logging.info("checkCertificate: Lock acquisition exception.  Trying a second time.");
-                    } else if (nTries < 5) {
-                        Logging.warning("checkCertificate: multiple contiguous lock acquisition errors: keep trying.");
-                    } else if (nTries == 5) {
-                        Logging.warning("checkCertificate: multiple contiguous lock acquisition errors: keep trying (warnings throttled).");
-                    } else if ( (nTries % 100) == 0) {
-                        Logging.warning("checkCertficate: hit " + nTries + " contiguous lock acqusition errors: check DB.");
-                    }
-                } else {
+                if (!LockFailureDetector.detectAndReportLockFailure(e, nTries, "checkCertificate")) {
                     Logging.warning("checkCertificate: error when storing or retrieving connection object: ", e);
                     Logging.debug("checkCertificate: exception details:", e);
                     keepTrying = false;
