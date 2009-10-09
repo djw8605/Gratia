@@ -920,7 +920,7 @@ public class ListenerThread extends Thread {
                            (!newUserIdentity.getVOName().
                             equalsIgnoreCase("Unknown"))) {
                     // Have something with which to replace it.
-                    replaceReason = "New VOName is better";
+                    replaceReason = "New VOName \"" + newUserIdentity.getVOName() + "\" is better";
                     if (originalUserIdentity.getVOName() ==
                         null) {
                         newerIsBetter = true;
@@ -990,8 +990,7 @@ public class ListenerThread extends Thread {
                                          " with \"better\" " +
                                          "record (" +
                                          replaceReason + ").");
-                            SummaryUpdater.removeFromSummary(original_record.getRecordId(),
-                                                             dup_session);
+                            original_record.maybeRemoveFromSummary(dup_session);
                             // Delete the record.
                             String originalXml =
                                 original_record.asXML();
