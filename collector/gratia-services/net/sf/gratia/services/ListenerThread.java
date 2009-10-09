@@ -1145,7 +1145,7 @@ public class ListenerThread extends Thread {
            return false;
         } // End (constraint failure is an expected duplicate)
     
+       return true;
     } // End handleConstrainViolationException()
 
-    return true;
 } // End class ListenerThread.
