@@ -711,17 +711,18 @@ public class ListenerThread extends Thread {
                                 rec_session.close();
                             }
                             try {
-                                handleConstraintViolationException(e, current, rId, gotreplication, gothistory);
-                            } catch (ConstraintViolationException e2) {
-                                // Catch rethrown exception that we couldn't handle in the function
-                                if (handleUnexpectedException(rId, e, gotreplication, current,
-                                                               "Received unexpected constraint violation")) {
-                                    continue NEXTRECORD; // Process next record.
-                                } else {
-                                    return 0; // DB access trouble.
+                                if (!handleConstraintViolationException(e, current, rId, gotreplication, gothistory)) {
+                                   if (handleUnexpectedException(rId, e, gotreplication, current,
+                                                                 "Received unexpected constraint violation")) {
+                                      continue NEXTRECORD; // Process next record.
+                                   } else {
+                                      return 0; // DB access trouble.
+                                   }                                   
                                 }
                             } catch (Exception e2) {
-                                if (handleUnexpectedException(rId, e, gotreplication, current)) {
+                                String msg = new String("Received unexpected exception while trying to resolved constraint violation: ");
+                                msg += e.getMessage();
+                                if (handleUnexpectedException(rId, e2, gotreplication, current,msg)) {
                                     continue NEXTRECORD; // Process next record.
                                 } else {
                                     return 0; // DB access trouble.
@@ -872,11 +873,11 @@ public class ListenerThread extends Thread {
         return true;
     }
 
-    private void handleConstraintViolationException(ConstraintViolationException e,
-                                                    Record current,
-                                                    String rId,
-                                                    Boolean gotreplication,
-                                                    Boolean gothistory) throws Exception {
+    private boolean handleConstraintViolationException(ConstraintViolationException e,
+                                                       Record current,
+                                                       String rId,
+                                                       Boolean gotreplication,
+                                                       Boolean gothistory) throws Exception {
         Logging.debug(ident + rId + ": handling ConstraintViolationException caused by SQL: " +
                       e.getSQL());
         int dupdbid = 0;
@@ -1140,10 +1141,11 @@ public class ListenerThread extends Thread {
                 }
             } // End if (needCurrentSaveDup)
         } else {
-            // Constraint exception, but not a duplicate on a table we're expecting. Re-throw.
-            throw e;
+            // Constraint exception, but not a duplicate on a table we're expecting. 
+           return false;
         } // End (constraint failure is an expected duplicate)
     
     } // End handleConstrainViolationException()
 
+    return true;
 } // End class ListenerThread.
