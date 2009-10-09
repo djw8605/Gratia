@@ -900,13 +900,13 @@ public class ListenerThread extends Thread {
                 JobUsageRecord original_record =
                     (JobUsageRecord) dup_query.uniqueResult();
                 if (original_record == null) {
-                    return;
+                    return true;
                 }
                 dupdbid = original_record.getRecordId();
                 UserIdentity originalUserIdentity =
                     original_record.getUserIdentity();
                 if (newUserIdentity == null) {
-                    return;
+                    return true;
                 }
                 Boolean newerIsBetter = false;
                 String replaceReason = null;
