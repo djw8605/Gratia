@@ -12,6 +12,7 @@ import java.util.Date;
 import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.Hashtable;
+import java.util.regex.Pattern;
 
 import java.text.*;
 
@@ -53,7 +54,8 @@ public class ListenerThread extends Thread {
     Hashtable<String,Integer> fSubcluster = new Hashtable<String,Integer>();
     Hashtable<String,Integer> fComputeElement = new Hashtable<String,Integer>();
     Hashtable<String,Integer> fStorageElement = new Hashtable<String,Integer>();
-
+    static Pattern duplicateExceptionFinder = Pattern.compile("\\b[Dd]uplicate\\b");
+    static Pattern metaFinder = Pattern.compile("_Meta ");
     //
     // various things used in the update loop
     //
@@ -179,28 +181,28 @@ public class ListenerThread extends Thread {
         newVOUpdate = new NewVOUpdate();
         newClusterUpdate = new NewClusterUpdate();
 
-        for (int i = 0; i < files.length; i++) {
+        for (int i = 0; i < files.length; ++i) { // Loop over files
             global.put("listener", new java.util.Date());
-
+            
             if (stopflag) {
                 Logging.info(ident + ": Exiting");
                 return nfiles;
             }
-
             file = files[i];
             //MPERF: Logging.fine(ident + ": Start Processing: " + file);
             try {
-                blob = XP.get(files[i]);
+                blob = XP.get(file);
             } catch (FileNotFoundException e) {
                 Utils.GratiaError("ListenerThread",
                                   "XML file read",
-                                  ident + ": Unable to find file " + files[i] + "; FS trouble or two collectors running?");
-                continue;
+                                  ident + ": Unable to find file " + file + "; FS trouble or two collectors running?");
+                continue; // Next file
             } catch (IOException e) {
                 Utils.GratiaError("ListenerThread",
                                   "XML file read",
-                                  ident + ": Error " + e.getMessage() + " while trying to read " + files[i]);
-                continue;
+                                  ident + ": Error " + e.getMessage() + " while trying to read " + file);
+                saveQuarantine(file, "Error reading file");
+                continue; // Next file
             }
             xml = "";
             rawxmllist.clear();
@@ -214,7 +216,7 @@ public class ListenerThread extends Thread {
 
             try {
                 saveIncoming(blob);
-            } catch (Exception e) {
+            } catch (IOException e) {
                 Logging.warning(ident +
                                 ": ERROR! Loop failed to backup incoming " +
                                 "message. \nError: " +
@@ -374,22 +376,14 @@ public class ListenerThread extends Thread {
             } catch (Exception e) {
                 Logging.warning(ident + ": Error:Processing File: " + file);
                 Logging.warning(ident + ": Blob: " + blob);
-                try {
-                    File temp = new File(file);
-                    temp.delete();
-                } catch (Exception ignore) {
-                }
-                continue;
+                saveQuarantine(file, "Errror parsing file");
+                continue; // Next file.
             }
 
             if (xml == null) {
                 Logging.warning(ident + ": No data to process: " + file);
-                try {
-                    File temp = new File(file);
-                    temp.delete();
-                } catch (Exception ignore) {
-                }
-                continue;
+                saveQuarantine(file, "Unable to identify XML in file");
+                continue; // Next file.
             }
 
             //MPERF: Logging.fine(ident + ": Processing: " + file);
@@ -424,6 +418,8 @@ public class ListenerThread extends Thread {
                     }
                 } catch (Exception ignore) {
                 }
+                saveQuarantine(file, "Problem parsing XML in file");
+                continue; // Next file.
             }
             int rSize = records.size();
             //MPERF: Logging.fine(ident+ ": converted " + rSize + " records");
@@ -461,7 +457,8 @@ public class ListenerThread extends Thread {
                                             ": received unexpected exception " +
                                             e.getMessage() + " while processing origin entry.");
                             Logging.debug(ident + rId + ": exception details:", e);
-                            return 0;
+                            saveQuarantine(file, "Problem processing origin entry for multi-record file");
+                            continue; // Next file. 
                         }
                     }
                 }
@@ -470,8 +467,7 @@ public class ListenerThread extends Thread {
                     or_session.close();
                 }
             }
-            for (int j = 0; j < rSize; j++) {
-
+            NEXTRECORD: for (int j = 0; j < rSize; j++) { // Loop over records in file
                 current = (Record) records.get(j);
 
                 // For information logging.
@@ -520,11 +516,12 @@ public class ListenerThread extends Thread {
                             pr_session.close();
                         }
                         if (!LockFailureDetector.detectAndReportLockFailure(e, nTries, ident)) {
-                            Logging.warning(ident + rId +
-                                            ": received unexpected exception " +
-                                            e.getMessage() + " while processing probe entry.");
-                            Logging.debug(ident + rId + ": exception details:",e);
-                            return 0;
+                            keepTrying = false;
+                            if (handleUnexpectedException(rId, e, gotreplication, current)) {
+                                continue NEXTRECORD; // Process next record.
+                            } else {
+                                return 0; // DB access problem.
+                            }
                         }
                     }
                 }
@@ -571,10 +568,11 @@ public class ListenerThread extends Thread {
                                                             "ExpirationDate",
                                                             0, current);
                             }
-
                         } catch (Exception e) {
-                            if (!handleUnexpectedException(rId, e, gotreplication, current)) {
-                                return 0;
+                            if (handleUnexpectedException(rId, e, gotreplication, current)) {
+                                continue NEXTRECORD; // Process next record.
+                            } else {
+                                return 0; // DB access problem.
                             }
 
                         }
@@ -592,8 +590,10 @@ public class ListenerThread extends Thread {
                             current.setmd5(md5key);
                         }
                     } catch (Exception e) {
-                        if (!handleUnexpectedException(rId, e, gotreplication, current)) {
-                            return 0;
+                        if (handleUnexpectedException(rId, e, gotreplication, current)) {
+                            continue NEXTRECORD;
+                        } else {
+                            return 0; // DB access problem.
                         }
                     }
                 } else {
@@ -703,6 +703,7 @@ public class ListenerThread extends Thread {
                             nrecords = nrecords + 1;
                             Logging.fine(ident + rId + " saved.");
                         } catch (ConstraintViolationException e) {
+                            keepTrying = false; // KeepTrying only for lock-type exceptions
                             if (rec_session != null && rec_session.isOpen() && rec_session.isConnected()) {
                                 if (rec_tx != null && rec_tx.isActive()) {
                                     rec_tx.rollback();
@@ -711,16 +712,19 @@ public class ListenerThread extends Thread {
                             }
                             try {
                                 handleConstraintViolationException(e, current, rId, gotreplication, gothistory);
-                                keepTrying = false;
                             } catch (ConstraintViolationException e2) {
                                 // Catch rethrown exception that we couldn't handle in the function
-                                if (!handleUnexpectedException(rId, e, gotreplication, current,
+                                if (handleUnexpectedException(rId, e, gotreplication, current,
                                                                "Received unexpected constraint violation")) {
-                                    return 0;
+                                    continue NEXTRECORD; // Process next record.
+                                } else {
+                                    return 0; // DB access trouble.
                                 }
                             } catch (Exception e2) {
-                                if (!handleUnexpectedException(rId, e, gotreplication, current)) {
-                                    return 0;
+                                if (handleUnexpectedException(rId, e, gotreplication, current)) {
+                                    continue NEXTRECORD; // Process next record.
+                                } else {
+                                    return 0; // DB access trouble.
                                 }
                             }
                         } catch (Exception e) {
@@ -730,9 +734,13 @@ public class ListenerThread extends Thread {
                                 }
                                 rec_session.close();
                             }
-                            if (LockFailureDetector.detectAndReportLockFailure(e, nTries, ident) ||
-                                handleUnexpectedException(rId, e, gotreplication, current)) {
-                                return 0;
+                            if (!LockFailureDetector.detectAndReportLockFailure(e, nTries, ident)) {
+                                keepTrying = false;
+                                if (handleUnexpectedException(rId, e, gotreplication, current)) {
+                                    continue NEXTRECORD; // Process next record.
+                                } else {
+                                    return 0; // DB access trouble  .                                  
+                                }
                             }
                         } // End general catch
                     } // End while (keepTrying)
@@ -747,8 +755,8 @@ public class ListenerThread extends Thread {
                 // " Error: " + ignore);
             }
             // Logging.log(ident + ": After File Delete: " + file);
-            itotal++;
-        }
+            ++itotal;
+        } // End loop over files
         Logging.fine(ident + ": Total Input Messages: " + itotal);
         Logging.fine(ident + ": Total Records: " + nrecords);
         return nfiles;
@@ -778,6 +786,21 @@ public class ListenerThread extends Thread {
         File errorfile = File.createTempFile("old-", ".xml", where);
         String filename = errorfile.getPath();
         XP.save(filename, data);
+    }
+
+    public void saveQuarantine(String oldfile, String annot) {
+        try {
+            File where = getDirectory("quarantine");
+            File newxmlfile = File.createTempFile("q-", ".xml", where);
+            File old = new File(oldfile);
+            old.renameTo(newxmlfile);
+            XP.save(newxmlfile.getPath().replace(".xml", ".txt"), annot); // Save annotation
+            Logging.warning(ident + ": file " + oldfile + " quarantined as " +
+                            newxmlfile.getPath() + " (" + annot + ")");
+        } catch (Exception e) {
+            Logging.warning(ident + ": file " + oldfile + " could not be quarantined and remains in input queue.");
+            Logging.debug(ident + ": exception details: ", e);
+        }
     }
 
     public void saveHistory(Record current, String xml, String rawxml,
@@ -858,276 +881,269 @@ public class ListenerThread extends Thread {
                       e.getSQL());
         int dupdbid = 0;
         Boolean needCurrentSaveDup = false;
-        if (e.getSQLException().getMessage().
-            matches(".*\\b[Dd]uplicate\\b.*")) { // Duplicate
-            if (e.getSQL().matches(".*_Meta .*")) {
-                if (current.getTableName().equals("JobUsageRecord")) {
-                    UserIdentity newUserIdentity =
-                        ((JobUsageRecord) current).getUserIdentity();
-                    Session dup_session = HibernateWrapper.getSession();
-                    Query dup_query = dup_session.createQuery("select record from " +
-                                                              "JobUsageRecord " +
-                                                              "record where " +
-                                                              "record.md5 = " +
-                                                              "'" +
-                                                              current.getmd5() +
-                                                              "'").setCacheMode(CacheMode.IGNORE);
-                    Boolean savedCurrent = false;
-                    Transaction dup_tx = null;
-                    JobUsageRecord original_record =
-                        (JobUsageRecord) dup_query.uniqueResult();
-                    if (original_record == null) {
-                        return;
-                    }
-                    dupdbid = original_record.getRecordId();
-                    UserIdentity originalUserIdentity =
-                        original_record.getUserIdentity();
-                    if (newUserIdentity == null) {
-                        return;
-                    }
-                    Boolean newerIsBetter = false;
-                    String replaceReason = null;
-                    if (originalUserIdentity == null) {
+        if (duplicateExceptionFinder.matcher(e.getSQLException().getMessage()).find() &&
+            metaFinder.matcher(e.getSQL()).find()) { // Duplicate of an interesting table
+            if (current.getTableName().equals("JobUsageRecord")) {
+                UserIdentity newUserIdentity =
+                    ((JobUsageRecord) current).getUserIdentity();
+                Session dup_session = HibernateWrapper.getSession();
+                Query dup_query = dup_session.createQuery("select record from " +
+                                                          "JobUsageRecord " +
+                                                          "record where " +
+                                                          "record.md5 = " +
+                                                          "'" +
+                                                          current.getmd5() +
+                                                          "'").setCacheMode(CacheMode.IGNORE);
+                Boolean savedCurrent = false;
+                Transaction dup_tx = null;
+                JobUsageRecord original_record =
+                    (JobUsageRecord) dup_query.uniqueResult();
+                if (original_record == null) {
+                    return;
+                }
+                dupdbid = original_record.getRecordId();
+                UserIdentity originalUserIdentity =
+                    original_record.getUserIdentity();
+                if (newUserIdentity == null) {
+                    return;
+                }
+                Boolean newerIsBetter = false;
+                String replaceReason = null;
+                if (originalUserIdentity == null) {
+                    newerIsBetter = true;
+                    replaceReason = "original UserIdentity block is null";
+                } else if ((newUserIdentity.getVOName() !=
+                            null) &&
+                           (newUserIdentity.getVOName().
+                            length() != 0) &&
+                           (!newUserIdentity.getVOName().
+                            equalsIgnoreCase("Unknown"))) {
+                    // Have something with which to replace it.
+                    replaceReason = "New VOName is better";
+                    if (originalUserIdentity.getVOName() ==
+                        null) {
                         newerIsBetter = true;
-                        replaceReason = "original UserIdentity block is null";
-                    } else if ((newUserIdentity.getVOName() !=
-                                null) &&
-                               (newUserIdentity.getVOName().
-                                length() != 0) &&
-                               (!newUserIdentity.getVOName().
-                                equalsIgnoreCase("Unknown"))) {
-                        // Have something with which to replace it.
-                        replaceReason = "New VOName is better";
-                        if (originalUserIdentity.getVOName() ==
-                            null) {
+                        replaceReason +=
+                            " -- original VOName is null";
+                    } else if (originalUserIdentity.getVOName().length() == 0) {
+                        newerIsBetter = true;
+                        replaceReason +=
+                            " -- original VOName is empty";
+                    } else if (originalUserIdentity.getVOName().
+                               equalsIgnoreCase("Unknown")) {
+                        newerIsBetter = true;
+                        replaceReason +=
+                            " -- original VOName is " +
+                            "\"Unknown\")";
+                    } else if ((newUserIdentity.getVOName().startsWith("/")) &&
+                               (!originalUserIdentity.getVOName().startsWith("/"))) {
+                        newerIsBetter = true;
+                        replaceReason +=
+                            " -- original VOName is not fully qualified";
+                    }
+                } // End if (originalUserIdentity == null)
+                if (!newerIsBetter) { // Still haven't decided
+                    if ((newUserIdentity.getCommonName() != null) &&
+                        (!newUserIdentity.getCommonName().
+                         startsWith("Generic"))) {
+                        replaceReason =
+                            "New CommonName is better";
+                        if (originalUserIdentity.getCommonName() == null) {
                             newerIsBetter = true;
                             replaceReason +=
-                                " -- original VOName is null";
-                        } else if (originalUserIdentity.getVOName().length() == 0) {
+                                " -- original CommonName " +
+                                "is null";
+                        } else if (originalUserIdentity.getCommonName().length() == 0) {
                             newerIsBetter = true;
                             replaceReason +=
-                                " -- original VOName is empty";
-                        } else if (originalUserIdentity.getVOName().
-                                   equalsIgnoreCase("Unknown")) {
+                                " -- original CommonName " +
+                                "is empty";
+                        } else if (originalUserIdentity.getCommonName().
+                                   startsWith("Generic")) {
                             newerIsBetter = true;
                             replaceReason +=
-                                " -- original VOName is " +
-                                "\"Unknown\")";
-                        } else if ((newUserIdentity.getVOName().startsWith("/")) &&
-                                   (!originalUserIdentity.getVOName().startsWith("/"))) {
-                            newerIsBetter = true;
-                            replaceReason +=
-                                " -- original VOName is not fully qualified";
+                                " -- original CommonName " +
+                                "is generic";
                         }
-                    } // End if (originalUserIdentity == null)
-                    if (!newerIsBetter) { // Still haven't decided
-                        if ((newUserIdentity.getCommonName() != null) &&
-                            (!newUserIdentity.getCommonName().
-                             startsWith("Generic"))) {
-                            replaceReason =
-                                "New CommonName is better";
-                            if (originalUserIdentity.getCommonName() == null) {
-                                newerIsBetter = true;
-                                replaceReason +=
-                                    " -- original CommonName " +
-                                    "is null";
-                            } else if (originalUserIdentity.getCommonName().length() == 0) {
-                                newerIsBetter = true;
-                                replaceReason +=
-                                    " -- original CommonName " +
-                                    "is empty";
-                            } else if (originalUserIdentity.getCommonName().
-                                       startsWith("Generic")) {
-                                newerIsBetter = true;
-                                replaceReason +=
-                                    " -- original CommonName " +
-                                    "is generic";
+                    } else if ((newUserIdentity.getKeyInfo() != null) &&
+                               (originalUserIdentity.getKeyInfo() == null)) {
+                        newerIsBetter = true;
+                        replaceReason =
+                            "Original KeyInfo is null";
+                    }
+                } // End if (!newerIsBetter)
+                if (newerIsBetter) {
+                    Integer nTries = 0;
+                    Boolean keepTrying = true;
+                    while (keepTrying) {
+                        ++nTries;
+                        try {
+                            if (dup_session == null || (!dup_session.isOpen()) || (!dup_session.isConnected())) {
+                                dup_session = HibernateWrapper.getSession();
                             }
-                        } else if ((newUserIdentity.getKeyInfo() != null) &&
-                                   (originalUserIdentity.getKeyInfo() == null)) {
-                            newerIsBetter = true;
-                            replaceReason =
-                                "Original KeyInfo is null";
-                        }
-                    } // End if (!newerIsBetter)
-                    if (newerIsBetter) {
-                        Integer nTries = 0;
-                        Boolean keepTrying = true;
-                        while (keepTrying) {
-                            ++nTries;
-                            try {
-                                if (dup_session == null || (!dup_session.isOpen()) || (!dup_session.isConnected())) {
-                                    dup_session = HibernateWrapper.getSession();
-                                }
+                            dup_tx = dup_session.beginTransaction();
+                            // Keep the new one and ditch the old
+                            Logging.fine(ident + rId +
+                                         ": Replacing record " +
+                                         dupdbid +
+                                         " with \"better\" " +
+                                         "record (" +
+                                         replaceReason + ").");
+                            SummaryUpdater.removeFromSummary(original_record.getRecordId(),
+                                                             dup_session);
+                            // Delete the record.
+                            String originalXml =
+                                original_record.asXML();
+                            String originalTableName =
+                                original_record.getTableName();
+                            dup_session.delete(original_record);
+                            if (!savedCurrent) {
+                                // If we haven't saved
+                                // the current record
+                                // yet, flush and commit
+                                // the delete
+                                // (important) and then
+                                // save the current record.
+                                dup_session.flush();
+                                dup_tx.commit();
                                 dup_tx = dup_session.beginTransaction();
-                                // Keep the new one and ditch the old
-                                Logging.fine(ident + rId +
-                                             ": Replacing record " +
-                                             dupdbid +
-                                             " with \"better\" " +
-                                             "record (" +
-                                             replaceReason + ").");
-                                SummaryUpdater.removeFromSummary(original_record.getRecordId(),
-                                                                 dup_session);
-                                // Delete the record.
-                                String originalXml =
-                                    original_record.asXML();
-                                String originalTableName =
-                                    original_record.getTableName();
-                                dup_session.delete(original_record);
-                                if (!savedCurrent) {
-                                    // If we haven't saved
-                                    // the current record
-                                    // yet, flush and commit
-                                    // the delete
-                                    // (important) and then
-                                    // save the current record.
+                                dup_session.save(current);
+                                current.executeTrigger(dup_session);
+                                savedCurrent = true;
+                            }
+                            dup_tx.commit();
+                            keepTrying = false;
+                            if (original_record.setDuplicate(true)) {
+                                if (gotreplication) {
+                                    errorRecorder.saveDuplicate("Replication",
+                                                                "Duplicate",
+                                                                current.getRecordId(),
+                                                                originalXml,
+                                                                originalTableName);
+                                } else if (gothistory) { // NOP
+                                } else {
+                                    errorRecorder.saveDuplicate("Probe",
+                                                                "Duplicate",
+                                                                current.getRecordId(),
+                                                                originalXml,
+                                                                originalTableName);
+                                }
+                            }
+                        } catch (Exception e2) {
+                            if (dup_session != null && dup_session.isOpen() && dup_session.isConnected()) {
+                                if (dup_tx != null && dup_tx.isActive()) {
+                                    dup_tx.rollback();
+                                }
+                                dup_session.close();
+                            }
+                            if (!LockFailureDetector.detectAndReportLockFailure(e, nTries, ident)) {
+                                throw e2; // Re-throw;
+                            }
+                        } // End try (resolve duplicate JobUsageRecord)
+                    } // End while (keepTrying)
+                } // End if (newerIsBetter)
+                if (!savedCurrent) {
+                    needCurrentSaveDup =
+                        current.setDuplicate(true);
+                    if (!needCurrentSaveDup) { // Save probe object anyway
+                        Probe localprobe = current.getProbe();
+                        if (localprobe != null) {
+                            Integer nTries = 0;
+                            Boolean keepTrying = true;
+                            while (keepTrying) {
+                                ++nTries;
+                                try {
+                                    if (dup_session == null || (!dup_session.isOpen()) || (!dup_session.isConnected())) {
+                                        dup_session = HibernateWrapper.getSession();
+                                    }
+                                    dup_tx = dup_session.beginTransaction();
+                                    dup_session.saveOrUpdate(localprobe);
                                     dup_session.flush();
                                     dup_tx.commit();
-                                    dup_tx = dup_session.beginTransaction();
-                                    dup_session.save(current);
-                                    current.executeTrigger(dup_session);
-                                    savedCurrent = true;
-                                }
-                                dup_tx.commit();
-                                keepTrying = false;
-                                if (original_record.setDuplicate(true)) {
-                                    if (gotreplication) {
-                                        errorRecorder.saveDuplicate("Replication",
-                                                                    "Duplicate",
-                                                                    current.getRecordId(),
-                                                                    originalXml,
-                                                                    originalTableName);
-                                    } else if (gothistory) { // NOP
-                                    } else {
-                                        errorRecorder.saveDuplicate("Probe",
-                                                                    "Duplicate",
-                                                                    current.getRecordId(),
-                                                                    originalXml,
-                                                                    originalTableName);
-                                    }
-                                }
-                            } catch (Exception e2) {
-                                if (dup_session != null && dup_session.isOpen() && dup_session.isConnected()) {
-                                    if (dup_tx != null && dup_tx.isActive()) {
-                                        dup_tx.rollback();
-                                    }
                                     dup_session.close();
-                                }
-                                if (!LockFailureDetector.detectAndReportLockFailure(e, nTries, ident)) {
-                                    throw e2; // Re-throw;
-                                }
-                            } // End try (resolve duplicate JobUsageRecord)
-                        } // End while (keepTrying)
-                    } // End if (newerIsBetter)
-                    if (!savedCurrent) {
-                        needCurrentSaveDup =
-                            current.setDuplicate(true);
-                        if (!needCurrentSaveDup) { // Save probe object anyway
-                            Probe localprobe = current.getProbe();
-                            if (localprobe != null) {
-                                Integer nTries = 0;
-                                Boolean keepTrying = true;
-                                while (keepTrying) {
-                                    ++nTries;
-                                    try {
-                                        if (dup_session == null || (!dup_session.isOpen()) || (!dup_session.isConnected())) {
-                                            dup_session = HibernateWrapper.getSession();
-                                        }
-                                        dup_tx = dup_session.beginTransaction();
-                                        dup_session.saveOrUpdate(localprobe);
-                                        dup_session.flush();
-                                        dup_tx.commit();
-                                        dup_session.close();
-                                        keepTrying = false;
-                                    } catch (Exception e2) {
-                                        if (!LockFailureDetector.detectAndReportLockFailure(e, nTries, ident)) {
-                                            throw e2; // Re-throw
-                                        }
-                                    } // End try (save probe)
-                                } // End while (keepTrying)
-                            } // End if (localprobe != null)
-                        } // End if (!needCurrentSaveDup)
-                    } // End if (!savedCurrent)
-                    if (dup_session != null && dup_session.isOpen() && dup_session.isConnected()) {
-                        dup_session.close();
-                    }
-                } else { // Not JobUsageRecord
-                    needCurrentSaveDup = current.setDuplicate(true);
-                    Session dup2_session = HibernateWrapper.getSession();
-                    try {
-                        String cmd = "select dbid from " +
-                            current.getTableName() +
-                            "_Meta record where " +
-                            "record.md5 = " +
-                            "'" +
-                            current.getmd5() +
-                            "'";
-                        Integer dup_dbid = (Integer) (dup2_session.createSQLQuery(cmd).uniqueResult());
-                        // Avoid infinite growth
-                        if (current instanceof ProbeDetails) {
-                            if (fProbeDetails.size() > 500) {
-                                fProbeDetails.clear();
-                            }
-                            fProbeDetails.put(current.getmd5(), dup_dbid);
-                        } else if (current instanceof Subcluster) {
-                            if (fSubcluster.size() > 500) {
-                                fSubcluster.clear();
-                            }
-                            fSubcluster.put(current.getmd5(), dup_dbid);
-                        } else if (current instanceof ComputeElement) {
-                            if (fComputeElement.size() > 5000) {
-                                fComputeElement.clear();
-                            }
-                            fComputeElement.put(current.getmd5(), dup_dbid);
-                        } else if (current instanceof StorageElement) {
-                            if (fStorageElement.size() > 1000) {
-                                fStorageElement.clear();
-                            }
-                            fStorageElement.put(current.getmd5(), dup_dbid);
+                                    keepTrying = false;
+                                } catch (Exception e2) {
+                                    if (!LockFailureDetector.detectAndReportLockFailure(e, nTries, ident)) {
+                                        throw e2; // Re-throw
+                                    }
+                                } // End try (save probe)
+                            } // End while (keepTrying)
+                        } // End if (localprobe != null)
+                    } // End if (!needCurrentSaveDup)
+                } // End if (!savedCurrent)
+                if (dup_session != null && dup_session.isOpen() && dup_session.isConnected()) {
+                    dup_session.close();
+                }
+            } else { // Not JobUsageRecord
+                needCurrentSaveDup = current.setDuplicate(true);
+                Session dup2_session = HibernateWrapper.getSession();
+                try {
+                    String cmd = "select dbid from " +
+                        current.getTableName() +
+                        "_Meta record where " +
+                        "record.md5 = " +
+                        "'" +
+                        current.getmd5() +
+                        "'";
+                    Integer dup_dbid = (Integer) (dup2_session.createSQLQuery(cmd).uniqueResult());
+                    // Avoid infinite growth
+                    if (current instanceof ProbeDetails) {
+                        if (fProbeDetails.size() > 500) {
+                            fProbeDetails.clear();
                         }
-                        dupdbid = dup_dbid;
-                    } finally {
-                        dup2_session.close();
-                    }
-                    if (!needCurrentSaveDup) {
-                        Logging.fine(ident + rId +
-                                     ": " + "Ignore duplicate of record " +
-                                     dupdbid);
-                    }
-                } // End if (JobUsageRecord)
-                if (needCurrentSaveDup) {
-                    try {
-                        Logging.fine(ident + rId +
-                                     ": " + (gothistory ? "Ignore" : "Save") +
-                                     " duplicate of record " +
-                                     dupdbid);
-                        if (gotreplication) {
-                            errorRecorder.saveDuplicate("Replication",
-                                                        "Duplicate",
-                                                        dupdbid,
-                                                        current);
-                        } else if (gothistory) { // NOP
-                        } else {
-                            errorRecorder.saveDuplicate("Probe",
-                                                        "Duplicate",
-                                                        dupdbid,
-                                                        current);
+                        fProbeDetails.put(current.getmd5(), dup_dbid);
+                    } else if (current instanceof Subcluster) {
+                        if (fSubcluster.size() > 500) {
+                            fSubcluster.clear();
                         }
-                    } catch (Exception ignore) {
+                        fSubcluster.put(current.getmd5(), dup_dbid);
+                    } else if (current instanceof ComputeElement) {
+                        if (fComputeElement.size() > 5000) {
+                            fComputeElement.clear();
+                        }
+                        fComputeElement.put(current.getmd5(), dup_dbid);
+                    } else if (current instanceof StorageElement) {
+                        if (fStorageElement.size() > 1000) {
+                            fStorageElement.clear();
+                        }
+                        fStorageElement.put(current.getmd5(), dup_dbid);
                     }
-                } // End if (needCurrentSaveDup)
-            } else if (e.getSQL().matches(".*into Origin.*")) {
-                Logging.warning(ident + rId + ": failure updating Origin table.");
-                Logging.warning(ident + rId + ": exception details:\n" +
-                                ExceptionUtils.getFullStackTrace(e));
-                throw e; // Re-throw.
-            } // End SQL check
+                    dupdbid = dup_dbid;
+                } finally {
+                    dup2_session.close();
+                }
+                if (!needCurrentSaveDup) {
+                    Logging.fine(ident + rId +
+                                 ": " + "Ignore duplicate of record " +
+                                 dupdbid);
+                }
+            } // End if (JobUsageRecord)
+            if (needCurrentSaveDup) {
+                try {
+                    Logging.fine(ident + rId +
+                                 ": " + (gothistory ? "Ignore" : "Save") +
+                                 " duplicate of record " +
+                                 dupdbid);
+                    if (gotreplication) {
+                        errorRecorder.saveDuplicate("Replication",
+                                                    "Duplicate",
+                                                    dupdbid,
+                                                    current);
+                    } else if (gothistory) { // NOP
+                    } else {
+                        errorRecorder.saveDuplicate("Probe",
+                                                    "Duplicate",
+                                                    dupdbid,
+                                                    current);
+                    }
+                } catch (Exception ignore) {
+                }
+            } // End if (needCurrentSaveDup)
         } else {
-            // Constraint exception, but not a duplicate. Re-throw.
+            // Constraint exception, but not a duplicate on a table we're expecting. Re-throw.
             throw e;
-        } // End if (constraint is duplicate)
+        } // End (constraint failure is an expected duplicate)
     
     } // End handleConstrainViolationException()
 
-}
+} // End class ListenerThread.
