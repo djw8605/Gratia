@@ -507,12 +507,11 @@ def GetListOfDisabledOSGSites():
 def GetListOfOSGSites():
         return GetListOfSites("//Resource[Active='True' and ( Services/Service/Name='Compute Element' or Services/Service/Name='CE' or Services='no applicable service exists')]/Name")
 
-def GetListOfVOs(filter,voType=None):
-        location = 'http://myosg.grid.iu.edu/vosummary/xml?datasource=summary&summary_attrs_showdesc=on&all_vos=on&show_disabled=on&summary_attrs_showreporting_group=on'
-        if(voType == 'active' or voType == None):
-            location+= '&active=on&active_value=1'
-        elif(voType == 'inactive'):
-            location+= '&active=on&active_value=0'
+def GetListOfVOs(filter,voStatus,beginDate,endDate):
+        bd = str(beginDate).split("-") # begin date list
+        ed = str(endDate).split("-") # end date list
+        # date specific MyOSG url
+        location = "http://myosg.grid.iu.edu/voactivation/xml?datasource=activation&start_type=specific&start_date=" + bd[1] +"%2F" + bd[2] + "%2F" + bd[0] + "&end_type=specific&end_date=" + ed[1] + "%2F" + ed[2] + "%2F" + ed[0] + "&all_vos=on&active_value=1"
         html = urllib2.urlopen(location).read()
         vos = []
         doc = libxml2.parseDoc(html)
@@ -521,17 +520,18 @@ def GetListOfVOs(filter,voType=None):
               name = resource.content
            elif resource.name == "LongName":
               vos.append( (name,resource.content) )
-
-        for resource in doc.xpathEval("/VOSummary/VO/ReportingGroups/ReportingGroup/Name"):
-            vos.append((resource.content,'Additional VOs'))
-
+        if(voStatus == 'Active'):
+            location = 'http://myosg.grid.iu.edu/vosummary/xml?datasource=summary&summary_attrs_showdesc=on&all_vos=on&show_disabled=on&summary_attrs_showreporting_group=on&active=on&active_value=1'
+            html = urllib2.urlopen(location).read()
+            doc = libxml2.parseDoc(html)
+            for resource in doc.xpathEval("/VOSummary/VO/ReportingGroups/ReportingGroup/Name"):
+                vos.append((resource.content,'Additional VOs'))
         doc.freeDoc()
-        
         return vos;
 
-def GetListOfRegisteredVO(voType=None):
-        filter = "//VO/Name | //VO/LongName"
-        allVos = GetListOfVOs(filter,voType)
+def GetListOfRegisteredVO(voStatus,beginDate,endDate):
+        filter = "/VOActivation/" + voStatus + "/VO/Name|/VOActivation/" + voStatus + "/VO/LongName"
+        allVos = GetListOfVOs(filter,voStatus,beginDate,endDate)
         ret = []
         printederror = False
         for pair in allVos:
@@ -554,7 +554,7 @@ def GetListOfRegisteredVO(voType=None):
                if (longname != "ATLAS" and longname!=""):
                   ret.append( longname.lower() );
         # And hand add a few 'exceptions!"
-        if(voType != 'inactive'):
+        if(voStatus == 'Active'):
             ret.append("usatlas")
             ret.append("other")
         return ret
