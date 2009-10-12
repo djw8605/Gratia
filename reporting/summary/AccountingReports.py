@@ -508,6 +508,7 @@ def GetListOfOSGSites():
         return GetListOfSites("//Resource[Active='True' and ( Services/Service/Name='Compute Element' or Services/Service/Name='CE' or Services='no applicable service exists')]/Name")
 
 def GetListOfVOs(filter,voStatus,beginDate,endDate):
+        name=""
         bd = str(beginDate).split("-") # begin date list
         ed = str(endDate).split("-") # end date list
         # date specific MyOSG url
@@ -528,6 +529,13 @@ def GetListOfVOs(filter,voStatus,beginDate,endDate):
                 vos.append((resource.content,'Additional VOs'))
         doc.freeDoc()
         return vos;
+
+def GetListOfAllRegisteredVO(beginDate,endDate):
+        allVOs = []
+        allVOs.extend(GetListOfRegisteredVO('Active',beginDate,endDate))
+        allVOs.extend(GetListOfRegisteredVO('Enabled',beginDate,endDate))
+        allVOs.extend(GetListOfRegisteredVO('Disabled',beginDate,endDate))
+        return allVOs 
 
 def GetListOfRegisteredVO(voStatus,beginDate,endDate):
         filter = "/VOActivation/" + voStatus + "/VO/Name|/VOActivation/" + voStatus + "/VO/LongName"
@@ -559,8 +567,8 @@ def GetListOfRegisteredVO(voStatus,beginDate,endDate):
             ret.append("other")
         return ret
 
-def UpdateVOName(list, index):
-      vos = GetListOfRegisteredVO()
+def UpdateVOName(list, index, range_begin, range_end):
+      vos = GetListOfAllRegisteredVO(range_begin,range_end)
       r = []
       for row in list:
          srow = row.split('\t')
@@ -981,7 +989,7 @@ class DailyVOReportConf:
            if (not header) :  self.title = ""
 
         def GetData(self,start,end):
-           return UpdateVOName( DailyVOData(start,end), 0 )
+           return UpdateVOName( DailyVOData(start,end), 0 ,start, end)
 
 class DailySiteVOReportConf:
         title = "OSG usage summary (midnight to midnight UTC) for %s\nincluding all jobs that finished in that time period.\nWall Duration is expressed in hours and rounded to the nearest hour.\nWall Duration is the duration between the instant the job start running and the instant the job ends its execution.\nThe number of jobs counted here includes only the jobs directly seen by batch system and does not include the request sent directly to a pilot job.\nThe Wall Duration includes the total duration of the the pilot jobs.\nDeltas are the differences with the previous day.\n"
@@ -1002,7 +1010,7 @@ class DailySiteVOReportConf:
            if (not header) :  self.title = ""
 
         def GetData(self,start,end):
-           return UpdateVOName(DailySiteVOData(start,end),1)  
+           return UpdateVOName(DailySiteVOData(start,end),1,start, end)  
 
 class DailyVOSiteReportConf:
         title = "OSG usage summary (midnight to midnight UTC) for %s\nincluding all jobs that finished in that time period.\nWall Duration is expressed in hours and rounded to the nearest hour.\nWall Duration is the duration between the instant the job start running and the instant the job ends its execution.\nThe number of jobs counted here includes only the jobs directly seen by batch system and does not include the request sent directly to a pilot job.\nThe Wall Duration includes the total duration of the the pilot jobs.\nDeltas are the differences with the previous day.\n(nr) after after a VO name indicates that the VO is not registered with OSG.\n"
@@ -1023,7 +1031,7 @@ class DailyVOSiteReportConf:
            if (not header) :  self.title = ""
 
         def GetData(self,start,end):
-           return UpdateVOName(DailyVOSiteData(start,end),0)   
+           return UpdateVOName(DailyVOSiteData(start,end),0,start, end)   
 
 class DailySiteVOReportFromDailyConf:
         title = "OSG usage summary (midnight to midnight central time) for %s\nincluding all jobs that finished in that time period.\nWall Duration is expressed in hours and rounded to the nearest hour.\nWall Duration is the duration between the instant the job start running and the instant the job ends its execution.\nDeltas are the differences with the previous day.\nIf the number of jobs stated for a site is always 1\nthen this number is actually the number of summary records sent.\n(nr) after after a VO name indicates that the VO is not registered with OSG.\n"
@@ -1563,7 +1571,7 @@ Deltas are the differences with the previous period."""
         if (not header) :  self.title = ""
 
     def GetData(self,start,end):
-        return UpdateVOName(RangeVOData(start, end, self.with_panda),0)
+        return UpdateVOName(RangeVOData(start, end, self.with_panda),0,start, end)
 
 class RangeSiteReportConf:
     title = """\
@@ -1617,7 +1625,7 @@ Deltas are the differences with the previous period."""
         self.with_panda = with_panda
 
     def GetData(self, start,end):
-        return UpdateVOName(RangeSiteVOData(start, end, self.with_panda),1)  
+        return UpdateVOName(RangeSiteVOData(start, end, self.with_panda),1,start, end)  
 
 class RangeVOSiteReportConf:
     title = """\
@@ -1644,7 +1652,7 @@ Deltas are the differences with the previous period."""
         self.with_panda = with_panda
 
     def GetData(self, start,end):
-        return UpdateVOName(RangeVOSiteData(start, end, self.with_panda),0)   
+        return UpdateVOName(RangeVOSiteData(start, end, self.with_panda),0,start, end)   
 
 class RangeUserReportConf:
     title = """\
@@ -1674,7 +1682,7 @@ Deltas are the differences with the previous period."""
             self.ExtraSelect = " and VOName = \""+selectVOName+"\" "
 
     def GetData(self, start,end):
-        l = UpdateVOName(UserReportData(start, end, self.with_panda, self.ExtraSelect),0)
+        l = UpdateVOName(UserReportData(start, end, self.with_panda, self.ExtraSelect),0,start, end)
         r = []
         maxlen = 35
         for x in l:
@@ -1742,7 +1750,7 @@ Deltas are the differences with the previous period."""
             self.ExtraSelect = " and VOName = \""+selectVOName+"\" "
 
     def GetData(self, start,end):
-        l = UpdateVOName(UserSiteReportData(start, end, self.with_panda, self.ExtraSelect),1)
+        l = UpdateVOName(UserSiteReportData(start, end, self.with_panda, self.ExtraSelect),1,start, end)
         r = []
         maxlen = 35
         for x in l:
@@ -1794,7 +1802,7 @@ Only jobs that last 7 days or longer are counted in this report.
         self.with_panda = with_panda
 
     def GetData(self, start,end):
-        return UpdateVOName(LongJobsData(start, end, self.with_panda),1)      
+        return UpdateVOName(LongJobsData(start, end, self.with_panda),1,start, end)      
 
 class RangeSiteVOEfficiencyConf:
         title = """\
@@ -1821,7 +1829,7 @@ Deltas are the differences with the previous period."""
            if (not header) :  self.title = ""
 
         def GetData(self,start,end):
-           return UpdateVOName(GetSiteVOEfficiency(start,end),1)
+           return UpdateVOName(GetSiteVOEfficiency(start,end),1,start, end)
 
 class RangeVOEfficiencyConf:
         title = """\
@@ -1848,7 +1856,7 @@ Deltas are the differences with the previous period."""
            if (not header) :  self.title = ""
 
         def GetData(self,start,end):
-           return UpdateVOName(GetVOEfficiency(start,end),0)
+           return UpdateVOName(GetVOEfficiency(start,end),0,start, end)
                       
 class GradedEfficiencyConf:
         title = """\
@@ -1878,7 +1886,7 @@ Efficiency is the ratio of Cpu Duration used over the WallDuration."""
            if (not header) :  self.title = ""
 
         def GetData(self,start,end):
-           return UpdateVOName(GetVOEfficiency(start,end),0)
+           return UpdateVOName(GetVOEfficiency(start,end),0,start, end)
                       
 def SimpleRange(what, range_end = datetime.date.today(),
                  range_begin = None,
@@ -2610,7 +2618,7 @@ def RangeSummup(range_end = datetime.date.today(),
     timediff = range_end - range_begin
 
     allSites = GetListOfOSGSites();
-    regVOs = GetListOfRegisteredVO();
+    regVOs = GetListOfAllRegisteredVO(range_begin,range_end)
     disabledSites = GetListOfDisabledOSGSites();
 
     reportingVOs = GetReportingVOs(range_begin,range_end)
@@ -2708,7 +2716,7 @@ def NonReportingSites(
     print "This report indicates which sites Gratia has heard from or have known activity\nsince %s (midnight UTC)\n" % ( DateToString(when,False) )
 
     allSites = GetListOfOSGSites();
-    regVOs = GetListOfRegisteredVO();
+    regVOs = GetListOfAllRegisteredVO(when,when)
  
     exceptionSites = ['AGLT2_CE_2','BNL-LCG2', 'BNL_LOCAL', 'BNL_OSG', 'BNL_PANDA', 'GLOW-CMS', 'UCSDT2-B', 'Purdue-Lear' ]
 
