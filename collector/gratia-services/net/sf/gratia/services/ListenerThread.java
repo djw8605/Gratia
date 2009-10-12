@@ -58,6 +58,7 @@ public class ListenerThread extends Thread {
     Hashtable<String,Integer> fStorageElement = new Hashtable<String,Integer>();
     static Pattern duplicateExceptionFinder = Pattern.compile("\\b[Dd]uplicate\\b");
     static Pattern metaFinder = Pattern.compile("_Meta ");
+    File quarantineDir = null;
     //
     // various things used in the update loop
     //
@@ -90,6 +91,10 @@ public class ListenerThread extends Thread {
             historypath = ".";
         }
         historypath = historypath + "/gratia/data/";
+
+        quarantineDir = new File(historypath + 
+                                 "quarantine");
+        quarantineDir.mkdirs();
 
         JobUsageRecordUpdater.AddDefaults(updater);
     }
@@ -803,8 +808,7 @@ public class ListenerThread extends Thread {
 
     public void saveQuarantine(String oldfile, String annot) {
         try {
-            File where = getDirectory("quarantine");
-            File newxmlfile = File.createTempFile("q-", ".xml", where);
+            File newxmlfile = File.createTempFile("quarantine-", ".xml", quarantineDir);
             File old = new File(oldfile);
             old.renameTo(newxmlfile);
             XP.save(newxmlfile.getPath().replace(".xml", ".txt"), annot); // Save annotation
