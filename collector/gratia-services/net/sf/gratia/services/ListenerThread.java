@@ -27,6 +27,8 @@ import org.hibernate.exception.ConstraintViolationException;
 
 public class ListenerThread extends Thread {
 
+    final static long fileOldTime =
+        1000 * 60 * 60 * 24; // Empty files should be deleted after 1 day.
     final static String replicationMarker = "replication";
     final static String originMarker = "Origin";
     String ident = null;
@@ -192,6 +194,16 @@ public class ListenerThread extends Thread {
             //MPERF: Logging.fine(ident + ": Start Processing: " + file);
             try {
                 blob = XP.get(file);
+                if (blob.length() == 0) { // Empty file -- how old is it?
+                    File checkFile = new File(file);
+                    if ((new Date().getTime() - checkFile.lastModified()) > fileOldTime) {
+                        Logging.info(ident + ": removing old empty file " + file);
+                        checkFile.delete();
+                    } else { // Skip file
+                        Logging.log(ident + ": deferring read of recent empty file " + file);
+                        continue;
+                    }
+                }
             } catch (FileNotFoundException e) {
                 Utils.GratiaError("ListenerThread",
                                   "XML file read",
