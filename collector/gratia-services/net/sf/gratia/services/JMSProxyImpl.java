@@ -42,28 +42,33 @@ public class JMSProxyImpl extends UnicastRemoteObject implements JMSProxy {
    }
    
    public Boolean update(String xml) throws RemoteException {
-      ++irecords;
+       ++irecords;
+       Boolean result = false;
+
+       if ((irecords % 100) == 0) {
+           ++iq;
+           if (iq > (queues.length - 1)) {
+               iq = 0;
+           }
+           try {
+               Thread.yield();
+           } catch (Exception ignore) {
+           }
+       }
       
-      if ((irecords % 100) == 0) {
-         ++iq;
-         if (iq > (queues.length - 1)) {
-            iq = 0;
-         }
-         try {
-            Thread.yield();
-         } catch (Exception ignore) {
-         }
-      }
-      
-      try {
-         File file = File.createTempFile("job", ".xml", new File(queues[iq]));
-         String filename = file.getPath();
-         XP.save(filename, xml);
-         return true;
-      } catch (Exception e) {
-         e.printStackTrace();
-      }
-      return false;
+       try {
+           File tmpFile = File.createTempFile("job", ".xml");
+           Boolean tmpResult = XP.save(tmpFile, xml);
+           if (tmpResult) { // Successful save
+               File file = File.createTempFile("job", ".xml", new File(queues[iq]));
+               result = tmpFile.renameTo(file);
+           } else {
+               result = tmpResult;
+           }
+       } catch (Exception e) {
+           e.printStackTrace();
+       }
+       return result;
    }
    
    public void stopDatabaseUpdateThreads() throws RemoteException {
