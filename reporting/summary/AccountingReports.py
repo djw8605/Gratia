@@ -2716,7 +2716,7 @@ def NonReportingSites(
     print "This report indicates which sites Gratia has heard from or have known activity\nsince %s (midnight UTC)\n" % ( DateToString(when,False) )
 
     allSites = GetListOfOSGSites();
-    regVOs = GetListOfAllRegisteredVO(when,when)
+    regVOs = GetListOfAllRegisteredVO(when,datetime.date.today())
  
     exceptionSites = ['AGLT2_CE_2','BNL-LCG2', 'BNL_LOCAL', 'BNL_OSG', 'BNL_PANDA', 'GLOW-CMS', 'UCSDT2-B', 'Purdue-Lear' ]
 
