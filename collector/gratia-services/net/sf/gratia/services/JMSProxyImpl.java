@@ -14,24 +14,32 @@ public class JMSProxyImpl extends UnicastRemoteObject implements JMSProxy {
    static final long serialVersionUID = 1;
    Properties p;
    String queues[] = null;
+   File stageDir = null;
    int iq = 0;
    int irecords = 0;
    CollectorService collectorService = null;
    
    public JMSProxyImpl(CollectorService collectorService)
    throws RemoteException {
-      super();
+       super();
       
-      this.collectorService = collectorService;
+       this.collectorService = collectorService;
       
-      loadProperties();
+       loadProperties();
       
-      int maxthreads = Integer.parseInt(p
-                                        .getProperty("service.listener.threads"));
-      queues = new String[maxthreads];
-      for (int i = 0; i < maxthreads; i++)
-         queues[i] = System.getProperties().getProperty("catalina.home")
-         + "/gratia/data/thread" + i;
+       int maxthreads = Integer.parseInt(p
+                                         .getProperty("service.listener.threads"));
+       queues = new String[maxthreads];
+       for (int i = 0; i < maxthreads; i++) {
+           queues[i] = System.getProperties().getProperty("catalina.home")
+               + "/gratia/data/thread" + i;
+       }
+
+       stageDir = new File(System.getProperties().getProperty("catalina.home")
+                           + "/gratia/data/stage");
+       
+       stageDir.mkdirs();
+
    }
    
    public void loadProperties() {
@@ -57,7 +65,7 @@ public class JMSProxyImpl extends UnicastRemoteObject implements JMSProxy {
        }
       
        try {
-           File tmpFile = File.createTempFile("job", ".xml");
+           File tmpFile = File.createTempFile("stage-", ".xml", stageDir);
            Boolean tmpResult = XP.save(tmpFile, xml);
            if (tmpResult) { // Successful save
                File file = File.createTempFile("job", ".xml", new File(queues[iq]));
