@@ -621,71 +621,28 @@ public class XP
 
     public static String get(File file) throws IOException
     {
+        int bytesToRead = (int) file.length();
         FileInputStream input = new FileInputStream(file);
-        byte[] buffer = new byte[(int) file.length()];
-        input.read(buffer,0,(int) file.length());
+        byte[] buffer = new byte[bytesToRead];
+        input.read(buffer,0,bytesToRead);
         input.close();
         return new String(buffer);
     }
-  
-    public static String get(URL url)
-    {
-        int i = 0;
-				
-        try
-            {
-                InputStream input = url.openStream();
-                byte[] buffer = new byte[16 * 4096];
-                while ((input.read(buffer,i++,1)) != -1);
-                input.close();
-                return new String(buffer,0,i - 1);
-            }
-        catch (Exception e)
-            {
-                Logging.log("get(URL): Error: " + e);
-                return "File Not Found: " + url + " !!" + "\n";
-            }
+    
+    public static boolean save(File path, String contents) {
+        try {
+            FileOutputStream output = new FileOutputStream(path);
+            output.write(contents.getBytes());
+            output.close();
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
-  
-    public static byte[] getBinary(String path)
-    {
-        return getBinary(path,4096);
-    }
-  
-    public static byte[] getBinary(String path,int bufferSize)
-    {
-        try
-            {
-                File file = new File(path);
-                FileInputStream input = new FileInputStream(file);
-                BufferedInputStream stream = new BufferedInputStream(input,bufferSize);
-                byte[] buffer = new byte[(int) file.length()];
-                stream.read(buffer,0,(int) file.length());
-                stream.close();
-                return buffer;
-            }
-        catch (Exception e)
-            {
-                Logging.log("XP: getBinary: " + e);
-                e.printStackTrace();
-                return null;
-            }
-    }
-  
-    public static boolean save(String path,String contents)
-    {
-        try
-            {
-                FileOutputStream output = new FileOutputStream(path);
-                output.write(contents.getBytes());
-                output.close();
-                return true;
-            }
-        catch (Exception e)
-            {
-                e.printStackTrace();
-                return false;
-            }
+
+    public static boolean save(String path,String contents) {
+        return save(new File(path), contents);
     }
 
     public static boolean save_bzip2(String path,String contents)
@@ -740,78 +697,6 @@ public class XP
                 return false;
             }
    }
-
-    public static boolean append(String path,String contents)
-    {
-        try
-            {
-                RandomAccessFile output = new RandomAccessFile(path,"rw");
-                output.seek(output.length());
-                output.write(contents.getBytes());
-                output.close();
-                return true;
-            }
-        catch (Exception e)
-            {
-                Logging.log("Error: " + e + " path: " + path);
-                return false;
-            }
-    }
-
-    public static boolean saveBinary(String path,byte[] contents)
-    {
-        int bufferSize = contents.length;
-				
-        if (bufferSize > 4 * 4096)
-            bufferSize = 4 * 4096;
-				
-        try
-            {
-                FileOutputStream output = new FileOutputStream(path);
-                BufferedOutputStream stream = new BufferedOutputStream(output,bufferSize);
-                stream.write(contents,0,contents.length);
-                stream.close();
-                return true;
-            }
-        catch (Exception e)
-            {
-                Logging.log("saveBinary: Error: " + path);
-                e.printStackTrace();
-                return false;
-            }
-    }
-
-    public static boolean appendBinary(String path,byte[] contents)
-    {
-        try
-            {
-                RandomAccessFile output = new RandomAccessFile(path,"rw");
-                output.seek(output.length());
-                output.write(contents);
-                output.close();
-                return true;
-            }
-        catch (Exception e)
-            {
-                Logging.log("Error: " + e + " path: " + path);
-                return false;
-            }
-    }
-
-    public static boolean appendBinary(RandomAccessFile output,byte[] contents)
-    {
-        try
-            {
-                output.seek(output.length());
-                output.write(contents);
-                return true;
-            }
-        catch (Exception e)
-            {
-                Logging.log("Error: " + e);
-                return false;
-            }
-    }
 
     //
     // parsing support
