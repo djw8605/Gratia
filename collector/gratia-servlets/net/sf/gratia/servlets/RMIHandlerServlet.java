@@ -333,11 +333,11 @@ public class RMIHandlerServlet extends HttpServlet {
             
             PrintWriter writer = res.getWriter();
             boolean parse_error = true;
+            boolean status = true;
             if (argcount == 1) {
                 if (command.equals("update") ||
                     command.equals("urlencodedupdate")) {
                     parse_error = false;
-                    boolean status = true;
                     if (arg1.equals("xxx")) {
                         Logging.info("RMIHandlerServlet: received test message from " +
                                      req.getRemoteHost());
@@ -359,8 +359,6 @@ public class RMIHandlerServlet extends HttpServlet {
                     }
                 } else if (command.equals("multiupdate")) {
                     parse_error = false;
-                    boolean status = true;
-                  
                     Logging.debug("Ready to (multi) update with:"+origin);
                   
                     if (fTrackConnection) {
@@ -381,6 +379,8 @@ public class RMIHandlerServlet extends HttpServlet {
                                 command + " Or Invalid Arg Count: " + argcount);
                 writer.write("Error: Unknown Command: " + command +
                              " or Invalid Arg Count: " + argcount);
+            } else if (!status) {
+                Logging.warning("RMIHandlerServlet: Error: problem saving file in collector queue.");
             }
             writer.flush();
         }
