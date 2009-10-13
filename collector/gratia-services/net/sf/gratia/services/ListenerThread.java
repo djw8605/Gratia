@@ -116,7 +116,7 @@ public class ListenerThread extends Thread {
 
     public void stopRequest() {
         stopflag = true;
-        Logging.log(ident + ": Stop Requested");
+        Logging.fine(ident + ": Stop Requested");
     }
 
     @Override
@@ -178,9 +178,9 @@ public class ListenerThread extends Thread {
 
         String files[] = XP.getFileList(directory);
 
-        int nfiles = files.length;
+        int nfiles = 0;
 
-        if (nfiles == 0) {
+        if (files.length == 0) {
             return 0;
         }
 
@@ -188,13 +188,14 @@ public class ListenerThread extends Thread {
         newVOUpdate = new NewVOUpdate();
         newClusterUpdate = new NewClusterUpdate();
 
+        NEXTFILE:
         for (int i = 0; i < files.length; ++i) { // Loop over files
             global.put("listener", new java.util.Date());
             
-            if (stopflag) {
-                Logging.info(ident + ": Exiting");
-                return nfiles;
+            if (stopflag) { // Stop requested
+                break;
             }
+            ++nfiles;
             file = files[i];
             //MPERF: Logging.fine(ident + ": Start Processing: " + file);
             try {
@@ -485,6 +486,9 @@ public class ListenerThread extends Thread {
                 }
             }
             NEXTRECORD: for (int j = 0; j < rSize; j++) { // Loop over records in file
+                if (stopflag) { // Stop requested. Quit processing completely (don't delete this input file)
+                    break NEXTFILE;
+                }
                 current = (Record) records.get(j);
 
                 // For information logging.
@@ -775,8 +779,8 @@ public class ListenerThread extends Thread {
             // Logging.log(ident + ": After File Delete: " + file);
             ++itotal;
         } // End loop over files
-        Logging.fine(ident + ": Total Input Messages: " + itotal);
-        Logging.fine(ident + ": Total Records: " + nrecords);
+        Logging.fine(ident + ": Input messages this run: " + itotal);
+        Logging.fine(ident + ": Records this run: " + nrecords);
         return nfiles;
     }
 
