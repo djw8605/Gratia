@@ -49,7 +49,94 @@ public class CollectorService implements ServletContextListener {
    // various threads
    //
    
-   RecordProcessor threads[];
+   class RecordProcessorThreads {
+      private RecordProcessor processors[] = null;
+      private String queues[] = null;
+      
+      public RecordProcessorThreads(int nthreads) {
+         SetupQueues(nthreads);
+      }
+      
+      public synchronized void SetupQueues(int nthreads) {
+         //
+         // setup queues for message handling
+         //
+         if (queues == null || queues.length != nthreads) {
+            queues = new String[nthreads];
+            Execute.execute("mkdir -p " + configurationPath + "/data");
+            for (int i = 0; i < nthreads; i++) {
+               Execute.execute("mkdir -p " + configurationPath + "/data/thread" + i);
+               queues[i] = configurationPath + "/data/thread" + i;
+               Logging.log("Created Q: " + queues[i]);
+            }
+         }
+      }
+      
+      public synchronized int GetCount() { 
+         if (processors == null) return 0;
+         else return processors.length;
+      }
+      
+      public synchronized boolean IsAlive() {
+         // Return true if any of the processor thread is active.
+         if (processors == null) return false;
+         for (int i = 0; i < processors.length; i++) {
+            if ((processors[i] != null) && processors[i].isAlive()) return true;
+         }
+         return false;
+         
+      }
+      
+      public synchronized void Start(int nthreads) {
+         SetupQueues(nthreads);
+         if (processors == null || processors.length != nthreads) {
+            processors = new RecordProcessor[nthreads];
+            for (int i = 0; i < nthreads; ++i) {
+               processors[i] = new RecordProcessor("RecordProcessor: " + i, queues[i], lock, global, CollectorService.this);
+               processors[i].setPriority(Thread.MAX_PRIORITY);
+               processors[i].setDaemon(true);
+            }            
+         }
+         for (int i = 0; i < nthreads; i++) {
+            processors[i].start();
+         }
+      }
+      
+      public synchronized int Stop() {
+         // Attempt to stop the threads, return the number of unfinished
+         // threads.
+         
+         int i;
+         for (i = 0; i < processors.length; ++i)
+         {
+            if (processors[i] != null) {
+               processors[i].stopRequest();
+               if (processors[i].getState() == Thread.State.TIMED_WAITING) {
+                  processors[i].interrupt();
+               }
+            }
+         }
+         int unfinished = 0;
+         try {
+            for (i = 0; i < processors.length; i++) {
+               if (processors[i] != null) processors[i].join(threadStopWaitTime);                  
+            }
+         }
+         catch (Exception ignore) {
+         }
+         for (i = 0; i < processors.length; ++i) {
+            if ((processors[i] != null) && processors[i].isAlive()) {
+               // Timeout occurred; thread has not finished
+               unfinished = unfinished + 1;
+            } else {
+               // Finished
+            }
+         }
+         return unfinished;
+      }
+   }
+   
+   RecordProcessorThreads recordProcessors;
    ReplicationService replicationService;
    RMIService rmiservice;
    QSizeMonitor qsizeMonitor;
@@ -62,7 +149,6 @@ public class CollectorService implements ServletContextListener {
    // various globals
    //
    
-   String queues[] = null;
    Object lock = new Object();
    Hashtable global = new Hashtable();
    DatabaseMaintenance checker = null;
@@ -249,19 +335,12 @@ public class CollectorService implements ServletContextListener {
          Logging.info("CollectorService: refreshing views");
          checker.AddViews();
          
-         //
-         // setup queues for message handling
-         //
          
+         //
+         // Setup record processor manager.
+         // 
          int maxthreads = Integer.parseInt(p.getProperty("service.listener.threads"));
-         queues = new String[maxthreads];
-         
-         Execute.execute("mkdir -p " + configurationPath + "/data");
-         for (i = 0; i < maxthreads; i++) {
-            Execute.execute("mkdir -p " + configurationPath + "/data/thread" + i);
-            queues[i] = configurationPath + "/data/thread" + i;
-            Logging.log("Created Q: " + queues[i]);
-         }
+         recordProcessors = new RecordProcessorThreads(maxthreads);
          
          Logging.info("CollectorService: JMS Server Started");
          
@@ -345,15 +424,7 @@ public class CollectorService implements ServletContextListener {
          // start msg listener
          //
          
-         threads = new RecordProcessor[maxthreads];
-         for (i = 0; i < maxthreads; i++) {
-            threads[i] = new RecordProcessor("RecordProcessor: " + i, queues[i], lock, global, this);
-            threads[i].setPriority(Thread.MAX_PRIORITY);
-            threads[i].setDaemon(true);
-         }
-         for (i = 0; i < maxthreads; i++) {
-            threads[i].start();
-         }
+         recordProcessors.Start(maxthreads);
          
          //
          // if requested - start thread to monitor listener activity
@@ -564,74 +635,33 @@ public class CollectorService implements ServletContextListener {
       return replicationService != null && replicationService.isAlive();
    }
    
-   public synchronized void stopDatabaseUpdateThreads() {
+   public void stopDatabaseUpdateThreads() {
       if (!databaseUpdateThreadsActive()) {
          Logging.info("CollectorService: DB update threads cannot be stopped -- not started!");
          return;
       }
       Logging.info("CollectorService: stopping DB update threads");
-      int i;
-      int maxthreads = Integer.parseInt(p.getProperty("service.listener.threads"));
-      for (i = 0; i < maxthreads; i++)
-      {
-         if (threads[i] != null) {
-            threads[i].stopRequest();
-            if (threads[i].getState() == Thread.State.TIMED_WAITING) {
-               threads[i].interrupt();
-            }
-         }
-      }
-      int unfinished = 0;
-      try {
-         for (i = 0; i < maxthreads; i++) {
-            if (threads[i] != null) threads[i].join(threadStopWaitTime);                  
-         }
-      }
-      catch (Exception ignore) {
-      }
-      for (i = 0; i < maxthreads; i++) {
-         if ((threads[i] != null) && threads[i].isAlive()) {
-            // Timeout occurred; thread has not finished
-            unfinished = unfinished + 1;
-         } else {
-            // Finished
-         }
-      }
+      int total = recordProcessors.GetCount();
+      int unfinished = recordProcessors.Stop();
+      
       if (unfinished != 0) {
-         Logging.warning("CollectorService: Some threads ("+unfinished+") have not finished after " +
+         Logging.warning("CollectorService: Some threads ("+unfinished+" out of "+total+") have not finished after " +
                          (long) (threadStopWaitTime / 1000) + "s");
       }
    }
    
-   public synchronized void startDatabaseUpdateThreads() {
+   public void startDatabaseUpdateThreads() {
       if (databaseUpdateThreadsActive()) {
          Logging.info("CollectorService: DB update threads cannot be started -- already active");
          return;
       }
       int i;
       int maxthreads = Integer.parseInt(p.getProperty("service.listener.threads"));
-      threads = new RecordProcessor[maxthreads];
-      for (i = 0; i < maxthreads; i++) {
-         threads[i] = new RecordProcessor("RecordProcessor: " + i, queues[i], lock, global, this);
-         threads[i].setPriority(Thread.MAX_PRIORITY);
-         threads[i].setDaemon(true);
-      }
-      for (i = 0; i < maxthreads; i++) {
-         threads[i].start();
-      }
-      
+      recordProcessors.Start(maxthreads);
    }
    
-   public synchronized boolean databaseUpdateThreadsActive() {
-      int i;
-      int maxthreads = Integer.parseInt(p.getProperty("service.listener.threads"));
-      
-      if (threads == null) return false;
-      
-      for (i = 0; i < maxthreads; i++) {
-         if ((threads[i] != null) && threads[i].isAlive()) return true;
-      }
-      return false;
+   public boolean databaseUpdateThreadsActive() {
+      return recordProcessors.IsAlive();      
    }
    
    public void loadSelfGeneratedCerts() {
