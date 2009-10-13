@@ -65,10 +65,10 @@ public class RecordProcessor extends Thread {
     boolean stopflag = false;
 
     public RecordProcessor(String ident,
-                          String directory,
-                          Object lock,
-                          Hashtable global,
-                          CollectorService collectorService) {
+                           String directory,
+                           Object lock,
+                           Hashtable global,
+                           CollectorService collectorService) {
         this.ident = ident;
         this.directory = directory;
         this.lock = lock;
