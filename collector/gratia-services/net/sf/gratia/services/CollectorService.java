@@ -49,11 +49,11 @@ public class CollectorService implements ServletContextListener {
    // various threads
    //
    
-   ListenerThread threads[];
+   RecordProcessor threads[];
    ReplicationService replicationService;
    RMIService rmiservice;
    QSizeMonitor qsizeMonitor;
-   MonitorListenerThread monitorListenerThread;
+   MonitorRecordProcessor monitorRecordProcessor;
    DataHousekeepingService housekeepingService;
    
    public String configurationPath;
@@ -345,9 +345,9 @@ public class CollectorService implements ServletContextListener {
          // start msg listener
          //
          
-         threads = new ListenerThread[maxthreads];
+         threads = new RecordProcessor[maxthreads];
          for (i = 0; i < maxthreads; i++) {
-            threads[i] = new ListenerThread("ListenerThread: " + i, queues[i], lock, global, this);
+            threads[i] = new RecordProcessor("RecordProcessor: " + i, queues[i], lock, global, this);
             threads[i].setPriority(Thread.MAX_PRIORITY);
             threads[i].setDaemon(true);
          }
@@ -360,9 +360,9 @@ public class CollectorService implements ServletContextListener {
          //
          if ((p.getProperty("monitor.listener.threads") != null) &&
              p.getProperty("monitor.listener.threads").equals("true")) {
-            monitorListenerThread = new MonitorListenerThread(global);
-            monitorListenerThread.start();
-            Logging.info("CollectorService: Started MonitorListenerThread");
+            monitorRecordProcessor = new MonitorRecordProcessor(global);
+            monitorRecordProcessor.start();
+            Logging.info("CollectorService: Started MonitorRecordProcessor");
          }
          //
          // if requested - start service to monitor input queue sizes
@@ -610,9 +610,9 @@ public class CollectorService implements ServletContextListener {
       }
       int i;
       int maxthreads = Integer.parseInt(p.getProperty("service.listener.threads"));
-      threads = new ListenerThread[maxthreads];
+      threads = new RecordProcessor[maxthreads];
       for (i = 0; i < maxthreads; i++) {
-         threads[i] = new ListenerThread("ListenerThread: " + i, queues[i], lock, global, this);
+         threads[i] = new RecordProcessor("RecordProcessor: " + i, queues[i], lock, global, this);
          threads[i].setPriority(Thread.MAX_PRIORITY);
          threads[i].setDaemon(true);
       }

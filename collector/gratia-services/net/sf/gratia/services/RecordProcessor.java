@@ -25,7 +25,7 @@ import org.apache.commons.lang.exception.ExceptionUtils;
 import org.hibernate.*;
 import org.hibernate.exception.ConstraintViolationException;
 
-public class ListenerThread extends Thread {
+public class RecordProcessor extends Thread {
 
     final static long fileOldTime =
         1000 * 60 * 60 * 24; // Empty files should be deleted after 1 day.
@@ -64,7 +64,7 @@ public class ListenerThread extends Thread {
     //
     boolean stopflag = false;
 
-    public ListenerThread(String ident,
+    public RecordProcessor(String ident,
                           String directory,
                           Object lock,
                           Hashtable global,
@@ -211,12 +211,12 @@ public class ListenerThread extends Thread {
                     }
                 }
             } catch (FileNotFoundException e) {
-                Utils.GratiaError("ListenerThread",
+                Utils.GratiaError("RecordProcessor",
                                   "XML file read",
                                   ident + ": Unable to find file " + file + "; FS trouble or two collectors running?");
                 continue; // Next file
             } catch (IOException e) {
-                Utils.GratiaError("ListenerThread",
+                Utils.GratiaError("RecordProcessor",
                                   "XML file read",
                                   ident + ": Error " + e.getMessage() + " while trying to read " + file);
                 saveQuarantine(file, "Error reading file");
@@ -1167,4 +1167,4 @@ public class ListenerThread extends Thread {
        return true;
     } // End handleConstrainViolationException()
 
-} // End class ListenerThread.
+} // End class RecordProcessor.
