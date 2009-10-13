@@ -18,7 +18,7 @@
     "monitor.from.address" => 'gratia-operation@opensciencegrid.org',
     "monitor.to.address.0" => 'gratia-root@fnal.gov',
     "maintain.history.log" => 75,
-    "monitor.listener.wait" => 60,
+    "monitor.recordProcessor.wait" => 60,
     "monitor.q.size" => 1,
     "service.security.level" => 3,
     "service.admin.DN.0" => '/DC=org/DC=doegrids/OU=Services/CN=gratia09.fnal.gov',
@@ -26,7 +26,7 @@
     "service.admin.FQAN.0" => "/fermilab/Role=GratiaAdmin",
     "service.lifetime.JobUsageRecord" => "3 months",
     "service.lifetime.MetricRecord" => "1 month",
-    "service.listener.threads" => 1,
+    "service.recordProcessor.threads" => 1,
     "service.reporting.interfaces.apel.folder" => "gratia-data/interfaces/apel-lcg",
     "service.reporting.interfaces.apel.folder.groupowner" => "gratia"
    }
@@ -54,7 +54,7 @@
     "gratia.database.wantSummaryTable" => 0,
     "gratia.database.wantSummaryTrigger" => 0,
     "maintain.history.log" => 75,
-    "monitor.listener.wait" => 1440,
+    "monitor.recordProcessor.wait" => 1440,
     "service.security.level" => 3,
     "service.admin.DN.0" => '/DC=org/DC=doegrids/OU=Services/CN=gratia09.fnal.gov',
     "service.admin.DN.1" => '/DC=org/DC=doegrids/OU=Services/CN=gr8x1.fnal.gov',
@@ -82,12 +82,12 @@
     "monitor.from.address" => 'gratia-operation@opensciencegrid.org',
     "monitor.to.address.0" => 'gratia-root@fnal.gov',
     "maintain.history.log" => 75,
-    "monitor.listener.wait" => 240,
+    "monitor.recordProcessor.wait" => 240,
     "service.security.level" => 3,
     "service.admin.DN.0" => '/DC=org/DC=doegrids/OU=Services/CN=gratia09.fnal.gov',
     "service.admin.DN.1" => '/DC=org/DC=doegrids/OU=Services/CN=gr8x2.fnal.gov',
     "service.admin.FQAN.0" => "/fermilab/Role=GratiaAdmin",
-    "service.listener.threads" => 1,
+    "service.recordProcessor.threads" => 1,
     "service.lifetime.JobUsageRecord" => "3 months"   
    }
  },
@@ -110,13 +110,13 @@
     "monitor.from.address" => 'gratia-operation@opensciencegrid.org',
     "monitor.to.address.0" => 'gratia-root@fnal.gov',
     "maintain.history.log" => 75,
-    "monitor.listener.wait" => 60,
+    "monitor.recordProcessor.wait" => 60,
     "service.security.level" => 3,
     "service.admin.DN.0" => '/DC=org/DC=doegrids/OU=Services/CN=gratia09.fnal.gov',
     "service.admin.DN.1" => '/DC=org/DC=doegrids/OU=Services/CN=gr8x3.fnal.gov',
     "service.admin.FQAN.0" => "/fermilab/Role=GratiaAdmin",
     "service.lifetime.JobUsageRecord" => "1 year",
-    "service.listener.threads" => 1
+    "service.recordProcessor.threads" => 1
    }
  },
  "osg-integration" =>
@@ -138,13 +138,13 @@
     "monitor.from.address" => 'gratia-operation@opensciencegrid.org',
     "monitor.to.address.0" => 'gratia-root@fnal.gov',
     "maintain.history.log" => 75,
-    "monitor.listener.wait" => 240,
+    "monitor.recordProcessor.wait" => 240,
     "service.security.level" => 3,
     "service.admin.DN.0" => '/DC=org/DC=doegrids/OU=Services/CN=gratia09.fnal.gov',
     "service.admin.DN.1" => '/DC=org/DC=doegrids/OU=Services/CN=gr8x4.fnal.gov',
     "service.admin.FQAN.0" => "/fermilab/Role=GratiaAdmin",
     "service.lifetime.JobUsageRecord" => "1 year",
-    "service.listener.threads" => 1
+    "service.recordProcessor.threads" => 1
    }
  }
 );

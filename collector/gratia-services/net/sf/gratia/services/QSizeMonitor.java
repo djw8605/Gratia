@@ -38,7 +38,7 @@ public class QSizeMonitor extends Thread {
 
     public QSizeMonitor() {
         p = Configuration.getProperties();
-        maxthreads = Integer.parseInt(p.getProperty("service.listener.threads"));
+        maxthreads = Integer.parseInt(p.getProperty("service.recordProcessor.threads"));
         maxqsize = Integer.parseInt(p.getProperty("max.q.size"));
         path = System.getProperties().getProperty("catalina.home");
         path = path.replaceAll("\\\\", "/");

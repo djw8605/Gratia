@@ -67,7 +67,7 @@ public class Main {
       return true;
    }
 
-   static void testingListener() {
+   static void testingRecordProcessor() {
       Logging.initialize("testFramework");
 
       CollectorService collector = new CollectorService();
@@ -77,7 +77,7 @@ public class Main {
       if (! startupHibernate() ) {
          return;
       }
-      ListenerThread thread = new ListenerThread("testing", "thread0", lock, global, collector);
+      RecordProcessorThread thread = new RecordProcessorThread("testing", "thread0", lock, global, collector);
       // thread.run();
 
 
@@ -101,7 +101,7 @@ public class Main {
     */
    public static void main(String[] args) {
       //testingParsing();
-      testingListener();
+      testingRecordProcessor();
       //testingReplication();
    }
 }

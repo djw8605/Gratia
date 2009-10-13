@@ -426,7 +426,7 @@ public class Status extends HttpServlet {
 			}
 			catch (Exception e) { // Ignore if we don't support exceptions
 			}
-			int maxthreads = Integer.parseInt(props.getProperty("service.listener.threads"));
+			int maxthreads = Integer.parseInt(props.getProperty("service.recordProcessor.threads"));
 			String path = System.getProperties().getProperty("catalina.home");
 			path = xp.replaceAll(path,"\\","/");
 

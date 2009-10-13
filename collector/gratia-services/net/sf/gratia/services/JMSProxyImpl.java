@@ -27,8 +27,8 @@ public class JMSProxyImpl extends UnicastRemoteObject implements JMSProxy {
       
        loadProperties();
       
-       int maxthreads = Integer.parseInt(p
-                                         .getProperty("service.listener.threads"));
+       int maxthreads =
+           Integer.parseInt(p.getProperty("service.recordProcessor.threads"));
        queues = new String[maxthreads];
        for (int i = 0; i < maxthreads; i++) {
            queues[i] = System.getProperties().getProperty("catalina.home")

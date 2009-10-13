@@ -56,6 +56,24 @@ public class Configuration {
                 Logging.log("Error Loading: " + getConfigurationPath() + "/" + "service-configuration.properties");
                 e.printStackTrace();
             }
+        if ((!p.containsKey("service.recordProcessor.threads")) &&
+            p.containsKey("service.listener.threads")) {
+            p.setProperty("service.recordProcessor.threads",
+                          p.getProperty("service.listener.threads"));
+            p.remove("service.listener.threads");
+        }
+        if ((!p.containsKey("monitor.recordProcessor.threads")) &&
+            p.containsKey("monitor.listener.threads")) {
+            p.setProperty("monitor.recordProcessor.threads",
+                          p.getProperty("monitor.listener.threads"));
+            p.remove("monitor.listener.threads");
+        }
+        if ((!p.containsKey("monitor.recordProcessor.wait")) &&
+            p.containsKey("monitor.listener.wait")) {
+            p.setProperty("monitor.recordProcessor.wait",
+                          p.getProperty("monitor.listener.wait"));
+            p.remove("monitor.listener.wait");
+        }
         return p;
     }
 

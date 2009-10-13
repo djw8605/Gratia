@@ -59,8 +59,8 @@ my %attribute_defaults =
      "service.mysql.password" => "proto",
      "service.reporting.user" => "reader", # new
      "service.reporting.password" => "reader", # new
-     "monitor.listener.threads" => "true",
-     "monitor.listener.wait" => 240,
+     "monitor.recordProcessor.threads" => "true",
+     "monitor.recordProcessor.wait" => 240,
      "monitor.q.size" => 1,
      "max.q.size" => 100000,
      "monitor.smtp.server" => "smtp.fnal.gov",
@@ -75,7 +75,7 @@ my %attribute_defaults =
      "service.security.console" => 0,
      "service.vdt.cert.file" => "/etc/grid-security/http/httpcert.pem",
      "service.vdt.key.file" => "/etc/grid-security/http/httpkey.pem",
-     "service.listener.threads" => 1,
+     "service.recordProcessor.threads" => 1,
      "service.lifetime.JobUsageRecord" => "1 year", # May wish to dencrease
      "service.lifetime.JobUsageRecord.RawXML" => "1 month",
      "service.lifetime.MetricRecord" => "3 months", # Shouldn't get these at all
@@ -324,19 +324,30 @@ foreach my $config_name (@instance_list) {
     unless exists $config_ref->{"properties.attributes"};
 
   # Standard attribute defaults.
-  my $specified_addresses = grep m&monitor\.to\.address&o, keys %{$config_ref->{"properties.attributes"}};
   foreach my $attribute_key (sort keys %attribute_defaults) {
     $config_ref->{$attribute_key} = $attribute_defaults{$attribute_key}
       unless exists $config_ref->{$attribute_key};
   }
 
   # Properties attribute defaults.
+  my $specified_addresses = grep m&monitor\.to\.address&o, keys %{$config_ref->{"properties.attributes"}};
   foreach my $properties_key (sort keys %{$attribute_defaults{"properties.attributes"}}) {
     # Skip all default email addresses if we specified any at all.
     next if $specified_addresses and $properties_key =~ m&monitor\.to\.address&o;
-    $config_ref->{"properties.attributes"}->{$properties_key} =
-      $attribute_defaults{"properties.attributes"}->{$properties_key}
-        unless exists $config_ref->{"properties.attributes"}->{$properties_key};
+    unless (exists $config_ref->{"properties.attributes"}->{$properties_key}) {
+      my $obsolete_key = $properties_key;
+      if ($obsolete_key =~ s&\.recordProcessor\.&.listener.& and
+          exists $config_ref->{"properties.attributes"}->{$obsolete_key}) {
+        print STDERR "INFO: upgrading obsolete specified property ",
+          $obsolete_key, " to replacement property ", $properties_key, "\n";
+        $config_ref->{"properties.attributes"}->{$properties_key} =
+          $config_ref->{"properties.attributes"}->{$obsolete_key};
+        delete $config_ref->{"properties.attributes"}->{$obsolete_key};
+      } else {
+        $config_ref->{"properties.attributes"}->{$properties_key} =
+          $attribute_defaults{"properties.attributes"}->{$properties_key};
+      }
+    }
   }
 
   # Required attributes
@@ -803,7 +814,7 @@ sub configure_tomcat_users {
 
 sub construct_monitor_message_subject {
   my ($instance_name, $config_name, $collector_config) = @_;
-  return sprintf("%s:%s %s (\"%s\") Potential listener problem",
+  return sprintf("%s:%s %s (\"%s\") Potential recordProcessor problem",
                  $collector_config->{remote_host},
                  $collector_config->{http_port},
                  "tomcat-$instance_name",

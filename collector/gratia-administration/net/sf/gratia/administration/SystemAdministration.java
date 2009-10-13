@@ -114,7 +114,7 @@ public class SystemAdministration extends HttpServlet {
 
     public void process() {
         String operationsStatus = "UNKNOWN";
-        String listenerStatus = "UNKNOWN";
+        String recordProcessorStatus = "UNKNOWN";
         String replicationStatus = "UNKNOWN";
         String servletStatus = "UNKNOWN";
         String housekeepingStatus = "UNKNOWN";
@@ -133,9 +133,9 @@ public class SystemAdministration extends HttpServlet {
                     operationsStatus = "Active";
                     flag = proxy.databaseUpdateThreadsActive();
                     if (flag) {
-                        listenerStatus = "Active";
+                        recordProcessorStatus = "Active";
                     } else {
-                        listenerStatus = "Stopped";
+                        recordProcessorStatus = "Stopped";
                     }
                     flag = proxy.replicationServiceActive();
                     if (flag) {
@@ -170,7 +170,7 @@ public class SystemAdministration extends HttpServlet {
                                    "<font color=\"fuchsia\"><strong>DISABLED</strong></font>").
                 replaceAll("#opcomment#", 
                            "<a href=\"systemadministration.html?action=enableOperations\"><strong>Enable</strong></a><br />To disable safe mode start, set <tt>gratia.service.safeStart = 0</tt> in service-configuration.properties.");
-            listenerStatus = "SAFE";
+            recordProcessorStatus = "SAFE";
             replicationStatus = "SAFE";
             servletStatus = "SAFE";
             housekeepingStatus = "SAFE";
@@ -190,25 +190,25 @@ public class SystemAdministration extends HttpServlet {
             replaceAll("#replayrecordsprocessed#","" + replayRecordsProcessed).
             replaceAll("#replayrecordsskipped#","" + replayRecordsSkipped);
 
-        if (listenerStatus.equals("Active")) {
-            html = html.replaceAll("#listenerstatus#",
+        if (recordProcessorStatus.equals("Active")) {
+            html = html.replaceAll("#recordprocessorstatus#",
                                    "<font color=\"green\"><strong>ACTIVE</strong></font>").
-                replaceAll("#listenercomment#",
+                replaceAll("#recordprocessorcomment#",
                            "<a href=\"systemadministration.html?action=stopDatabaseUpdateThreads\"><strong>Stop</strong></a>.");
-        } else if (listenerStatus.equals("SAFE")) {
-            html = html.replaceAll("#listenerstatus#",
+        } else if (recordProcessorStatus.equals("SAFE")) {
+            html = html.replaceAll("#recordprocessorstatus#",
                                    "<font color=\"fuchsia\"><strong>SAFE</strong></font>").
-                replaceAll("#listenercomment#",
+                replaceAll("#recordprocessorcomment#",
                            "See <strong>Global Operational Status</strong>, above.");
-        } else if (listenerStatus.equals("Stopped")) {
-            html = html.replaceAll("#listenerstatus#",
+        } else if (recordProcessorStatus.equals("Stopped")) {
+            html = html.replaceAll("#recordprocessorstatus#",
                                    "<font color=\"red\"><strong>STOPPED</strong></font>").
-                replaceAll("#listenercomment#",
+                replaceAll("#recordprocessorcomment#",
                            "<a href=\"systemadministration.html?action=startDatabaseUpdateThreads\"><strong>Start</strong></a>.");
         } else {
-            html = html.replaceAll("#listenerstatus#",
+            html = html.replaceAll("#recordprocessorstatus#",
                                    "<font color=\"red\"><strong>UNKNOWN</strong></font>").
-                replaceAll("#listenercomment#",
+                replaceAll("#recordprocessorcomment#",
                            "Check log for errors.");
         }
 

@@ -83,7 +83,7 @@ public class RecordProcessor extends Thread {
             String url = p.getProperty("service.jms.url");
             Logging.info(ident + ": " + directory + ": Started");
         } catch (Exception e) {
-            Logging.warning(ident + ": ERROR! Serious problems starting listener");
+            Logging.warning(ident + ": ERROR! Serious problems starting recordProcessor");
             Logging.debug(ident + "Exception detail: ", e);
         }
         historypath = System.getProperties().getProperty("catalina.home");
@@ -190,7 +190,7 @@ public class RecordProcessor extends Thread {
 
         NEXTFILE:
         for (int i = 0; i < files.length; ++i) { // Loop over files
-            global.put("listener", new java.util.Date());
+            global.put("recordProcessor", new java.util.Date());
             
             if (stopflag) { // Stop requested
                 break;

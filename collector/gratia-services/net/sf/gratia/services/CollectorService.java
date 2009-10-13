@@ -339,7 +339,7 @@ public class CollectorService implements ServletContextListener {
          //
          // Setup record processor manager.
          // 
-         int maxthreads = Integer.parseInt(p.getProperty("service.listener.threads"));
+         int maxthreads = Integer.parseInt(p.getProperty("service.recordProcessor.threads"));
          recordProcessors = new RecordProcessorThreads(maxthreads);
          
          Logging.info("CollectorService: JMS Server Started");
@@ -390,7 +390,7 @@ public class CollectorService implements ServletContextListener {
    
    private void startAllOperations() {
       int i = 0; // Loop variable
-      int maxthreads = Integer.parseInt(p.getProperty("service.listener.threads"));
+      int maxthreads = Integer.parseInt(p.getProperty("service.recordProcessor.threads"));
       
       try {
          Logging.info("CollectorService: beginning normal operational startup.");
@@ -421,16 +421,16 @@ public class CollectorService implements ServletContextListener {
          historyMonitor.start();
          
          //
-         // start msg listener
+         // start msg recordProcessor
          //
          
          recordProcessors.Start(maxthreads);
          
          //
-         // if requested - start thread to monitor listener activity
+         // if requested - start thread to monitor recordProcessor activity
          //
-         if ((p.getProperty("monitor.listener.threads") != null) &&
-             p.getProperty("monitor.listener.threads").equals("true")) {
+         if ((p.getProperty("monitor.recordProcessor.threads") != null) &&
+             p.getProperty("monitor.recordProcessor.threads").equals("true")) {
             monitorRecordProcessor = new MonitorRecordProcessor(global);
             monitorRecordProcessor.start();
             Logging.info("CollectorService: Started MonitorRecordProcessor");
@@ -656,7 +656,7 @@ public class CollectorService implements ServletContextListener {
          return;
       }
       int i;
-      int maxthreads = Integer.parseInt(p.getProperty("service.listener.threads"));
+      int maxthreads = Integer.parseInt(p.getProperty("service.recordProcessor.threads"));
       recordProcessors.Start(maxthreads);
    }
    

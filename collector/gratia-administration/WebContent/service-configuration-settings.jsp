@@ -354,12 +354,12 @@ td.example
       <td valign="top" colspan="3" class="section"><a name="service_controls"/>Service controls</td>
     </tr>
     <tr >
-      <td valign="top" class="property">service.listener.threads</td>
+      <td valign="top" class="property">service.recordprocessor.threads</td>
       <td valign="top">The number of threads used to process incoming data transmissions</td>
       <td valign="top">1</td>
     </tr>
     <tr >
-      <td valign="top" class="property">service.listener.threads</td>
+      <td valign="top" class="property">service.recordprocessor.threads</td>
       <td valign="top" class="explanation"></td>
       <td valign="top" class="example"></td>
     </tr>
@@ -409,12 +409,12 @@ td.example
       <td valign="top" class="example"></td>
     </tr>
     <tr >
-      <td valign="top" class="property">monitor.listener.threads</td>
+      <td valign="top" class="property">monitor.recordprocessor.threads</td>
       <td valign="top" class="explanation"></td>
       <td valign="top" class="example"></td>
     </tr>
     <tr >
-      <td valign="top" class="property">monitor.listener.wait</td>
+      <td valign="top" class="property">monitor.recordprocessor.wait</td>
       <td valign="top" class="explanation"></td>
       <td valign="top" class="example"></td>
     </tr>

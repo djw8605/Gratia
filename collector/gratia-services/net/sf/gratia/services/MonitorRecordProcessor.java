@@ -34,7 +34,7 @@ public class MonitorRecordProcessor extends Thread
       
       public void loop()
       {
-         String waitPeriod = p.getProperty("monitor.listener.wait");
+         String waitPeriod = p.getProperty("monitor.recordProcessor.wait");
          long sleep = Long.parseLong(waitPeriod);
          sleep = sleep * (60 * 1000);
          try
@@ -45,19 +45,19 @@ public class MonitorRecordProcessor extends Thread
          {
          }
          Date now = new Date();
-         Date listener = (Date) global.get("listener");
+         Date recordProcessorDate = (Date) global.get("recordProcessor");
          //
-         // if listener == null we haven't updated anything
+         // if recordProcessorDate == null we haven't updated anything
          //
-         if (listener == null)
+         if (recordProcessorDate == null)
          {
             sendMessage();
             return;
          }
          //
-         // if (listener + sleep) < now we haven't updated within time period
+         // if (recordProcessorDate + sleep) < now we haven't updated within time period
          //
-         if ((listener.getTime() + sleep) < now.getTime())
+         if ((recordProcessorDate.getTime() + sleep) < now.getTime())
          {
             sendMessage();
             return;
@@ -69,7 +69,7 @@ public class MonitorRecordProcessor extends Thread
          String cr = "\n";
          
          Logging.warning("MonitorRecordProcessor: no records processed for last " +
-                         p.getProperty("monitor.listener.wait") +
+                         p.getProperty("monitor.recordProcessor.wait") +
                          " minutes." );
          p = Configuration.getProperties();
          try
@@ -85,7 +85,7 @@ public class MonitorRecordProcessor extends Thread
             MimeMessage message = new MimeMessage(session);
             String textMessage = cr +
             "The MonitorRecordProcessor has detected a possible problem. There have been" + cr +
-            "no input records processed in the past " + p.getProperty("monitor.listener.wait") +
+            "no input records processed in the past " + p.getProperty("monitor.recordProcessor.wait") +
             " minutes. Please check the service." + cr;
             message.setText(textMessage);
             message.setSubject(p.getProperty("monitor.subject", "Gratia collector problems"));

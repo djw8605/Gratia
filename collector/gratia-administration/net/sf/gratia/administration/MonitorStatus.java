@@ -413,7 +413,7 @@ public class MonitorStatus extends HttpServlet
 		append(buffer,"record-count-hour",count1,xml);
 		append(buffer,"record-count-24hour",count24,xml);
 
-		int maxthreads = Integer.parseInt(props.getProperty("service.listener.threads"));
+		int maxthreads = Integer.parseInt(props.getProperty("service.recordProcessor.threads"));
 		String path = System.getProperties().getProperty("catalina.home");
 		path = xp.replaceAll(path,"\\","/");
       path = path + "/gratia/data/thread";

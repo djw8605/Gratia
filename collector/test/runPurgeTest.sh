@@ -209,7 +209,7 @@ function reset_collector {
               "service.lifetime.DupRecord.Duplicates" => "1 month",
               "service.lifetime.DupRecord" => "UNLIMITED",
               "maintain.history.log" => 2,
-              "monitor.listener.wait" => 240,
+              "monitor.recordProcessor.wait" => 240,
               "monitor.to.address0" => '${USER}@fnal.gov',
               "service.admin.DN.0" => 'ALLOW ALL',
               "service.secure.connection" => 'http://${webhost}:${ssl_port}'

@@ -30,7 +30,7 @@ This test will
 
 The data loading is done via a couple of custom probes.  So this test
 exercise the chain:
-  Gratia.py -> Collector -> rmi -> ListenerThread -> database
+  Gratia.py -> Collector -> rmi -> RecordProcessor -> database
 as well as the purge mechanism.
 
 The default port for the server is: 8000 + your numerical userid.
