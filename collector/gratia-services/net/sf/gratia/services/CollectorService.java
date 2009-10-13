@@ -919,6 +919,7 @@ public class CollectorService implements ServletContextListener {
 
 
     public void contextDestroyed(ServletContextEvent sce) {
+        Logging.info("CollectorService: Context Destroy Event");
         if (databaseUpdateThreadsActive()) {
             stopDatabaseUpdateThreads();
         }
@@ -928,7 +929,7 @@ public class CollectorService implements ServletContextListener {
         if ((replicationService != null) && replicationService.isAlive()) {
             stopReplicationService();
         }
-        Logging.info("Context Destroy Event");
+        Logging.info("CollectorService: Context Destroyed");
         System.exit(0);
     }
 
