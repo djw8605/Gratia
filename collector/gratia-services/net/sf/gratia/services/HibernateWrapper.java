@@ -131,7 +131,7 @@ public class HibernateWrapper {
     }
    
    public static boolean isFullyConnected(org.hibernate.Session session) {
-      // Return true is the session is fully useable (i.e rolling back a
+      // Return true if the session is fully useable (i.e rolling back a
       // transaction won't throw because something is 'already closed').
       
       if (session != null) {
