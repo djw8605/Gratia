@@ -88,18 +88,20 @@ public class CollectorService implements ServletContextListener {
       }
       
       public synchronized void Start(int nthreads) {
-         SetupQueues(nthreads);
-         if (processors == null || processors.length != nthreads) {
-            processors = new RecordProcessor[nthreads];
-            for (int i = 0; i < nthreads; ++i) {
-               processors[i] = new RecordProcessor("RecordProcessor: " + i, queues[i], lock, global, CollectorService.this);
-               processors[i].setPriority(Thread.MAX_PRIORITY);
-               processors[i].setDaemon(true);
-            }            
-         }
-         for (int i = 0; i < nthreads; i++) {
-            processors[i].start();
-         }
+          if (IsAlive()) {
+              Logging.info("CollectorService: record processor threads cannot be started -- already active");
+              return;
+          }
+          SetupQueues(nthreads);
+          processors = new RecordProcessor[nthreads];
+          for (int i = 0; i < nthreads; ++i) {
+              processors[i] = new RecordProcessor("RecordProcessor: " + i, queues[i], lock, global, CollectorService.this);
+              processors[i].setPriority(Thread.MAX_PRIORITY);
+              processors[i].setDaemon(true);
+          }            
+          for (int i = 0; i < nthreads; i++) {
+              processors[i].start();
+          }
       }
       
       public synchronized int Stop() {
