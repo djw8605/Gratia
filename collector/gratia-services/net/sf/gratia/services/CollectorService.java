@@ -401,33 +401,43 @@ public class CollectorService implements ServletContextListener {
          // Start the servlet that receives records from probes.
          //
          
-         Logging.info("CollectorService: enabling servlet to receive records.");
-         enableServlet();
-         
-         //
-         // Check whether we need to start a checksum upgrade thread
-         //
-         
-         Logging.log("CollectorService: Checking for unique index on md5v2");
+         if (p.getProperty("service.initial.servlets", "ON").equalsIgnoreCase("ON")) {
+             Logging.info("CollectorService: enabling servlets to receive records.");
+             enableServlet();
+         } else {
+             Logging.info("CollectorService: initial requested state of servlets is OFF.");
+             disableServlet();
+         }
          
          //
          // Start a thread to periodically clear expired data
          //
-         startHousekeepingService();
+         String initialHousekeeping = p.getProperty("service.initial.housekeeping", "ON");
+         if (initialHousekeeping.equalsIgnoreCase("ON")) {
+             startHousekeepingService();
+         } else if (initialHousekeeping.equalsIgnoreCase("RUN_NOW")) {
+             startHousekeepingService(false);
+         } else if (initialHousekeeping.matches("(?i)DISABLE.*")) {
+             Logging.info("CollectorService: initial requested state of housekeeping is DISABLED.");
+             housekeepingDisabled = true;
+         }
          
          //
          // start a thread to recheck history directories every 6 hours
          //
-         
          HistoryMonitor historyMonitor = new HistoryMonitor(p);
          historyMonitor.start();
          
          //
          // start msg recordProcessor
          //
-         
-         recordProcessors.Start(maxthreads);
-         
+         if (p.getProperty("service.initial.recordProcessor", "ON").equalsIgnoreCase("ON")) {
+             Logging.info("CollectorService: starting recordProcessor.");
+             recordProcessors.Start(maxthreads);
+         } else {
+             Logging.info("CollectorService: initial requested state of recordProcessor is OFF.");
+         }
+
          //
          // if requested - start thread to monitor recordProcessor activity
          //
@@ -437,10 +447,10 @@ public class CollectorService implements ServletContextListener {
             monitorRecordProcessor.start();
             Logging.info("CollectorService: Started MonitorRecordProcessor");
          }
+
          //
          // if requested - start service to monitor input queue sizes
          //
-         
          if (p.getProperty("monitor.q.size").equals("1")) {
             Logging.log("CollectorService: Starting QSizeMonitor");
             qsizeMonitor = new QSizeMonitor();
@@ -455,7 +465,6 @@ public class CollectorService implements ServletContextListener {
       //
       // add a server cert if one isn't there
       //
-      
       if (p.getProperty("service.security.level").equals("1")) {
          if ((p.getProperty("service.use.selfgenerated.certs") != null) &&
              (p.getProperty("service.use.selfgenerated.certs").equals("1"))) {
@@ -468,8 +477,11 @@ public class CollectorService implements ServletContextListener {
       //
       // start replication service
       //
-      
-      startReplicationService();
+      if (p.getProperty("service.initial.replication", "ON").equalsIgnoreCase("ON")) {
+          startReplicationService();
+      } else {
+          Logging.info("CollectorService: initial requested state of replication service is OFF.");
+      }
       
       // Let's restart the reporting service to make sure that BIRT is getting the timezone
       // specified in its web.xml. (During the regular tomcat start this seems to be over-ridden by something else)
@@ -576,10 +588,10 @@ public class CollectorService implements ServletContextListener {
    }
    
    public synchronized String housekeepingServiceStatus() {
-      if (housekeepingService == null) {
-         return "STOPPED";
-      } else if (housekeepingDisabled) {
+      if (housekeepingDisabled) {
          return "DISABLED";
+      } else if (housekeepingService == null) {
+         return "STOPPED";
       } else {
          return housekeepingService.housekeepingStatus();
       }
