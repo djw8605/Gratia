@@ -74,7 +74,7 @@ public class DataScrubber {
             catch (Exception e) {
                 tx.rollback();
                 deletedThisIteration = 0;
-                if (!detectAndReportLockFailure(e, nTries)) {
+                if (!LockFailureDetector.detectAndReportLockFailure(e, nTries, "DataScrubber")) {
                     Logging.warning("DataScrubber: error in deleting " + msg + "!", e);
                     keepTrying = false;
                 }
@@ -115,7 +115,7 @@ public class DataScrubber {
             catch (Exception e) {
                 tx.rollback();
                 deletedThisIteration = 0;
-                if (!detectAndReportLockFailure(e, nTries)) {
+                if (!LockFailureDetector.detectAndReportLockFailure(e, nTries, "DataScrubber")) {
                     Logging.warning("DataScrubber: error in deleting " + msg + "!", e);
                     keepTrying = false;
                 }
@@ -151,7 +151,7 @@ public class DataScrubber {
             catch (Exception e) {
                 tx.rollback();
                 deletedThisIteration = 0;
-                if (!detectAndReportLockFailure(e, nTries)) {
+                if (!LockFailureDetector.detectAndReportLockFailure(e, nTries, "DataScrubber")) {
                     Logging.warning("DataScrubber: error in deleting " + msg + "!", e);
                     keepTrying = false;
                 }
@@ -188,7 +188,7 @@ public class DataScrubber {
             catch (Exception e) {
                 tx.rollback();
                 result = null;
-                if (!detectAndReportLockFailure(e, nTries)) {
+                if (!LockFailureDetector.detectAndReportLockFailure(e, nTries, "DataScrubber")) {
                     Logging.warning("DataScrubber: error in deleting " + msg + "!", e);
                     keepTrying = false;
                 }
@@ -325,7 +325,7 @@ public class DataScrubber {
                     catch (Exception e) {
                         tx.rollback();
                         if (session!=null && session.isOpen()) session.close();
-                        if (!detectAndReportLockFailure(e, nTries)) {
+                        if (!LockFailureDetector.detectAndReportLockFailure(e, nTries, "DataScrubber")) {
                             Logging.warning("DataScrubber: error in deleting JobUsageRecord!", e);
                             return nrecords; // Intentionally return now to exit the loop.
                         }
@@ -541,24 +541,6 @@ public class DataScrubber {
                          tableName + extra_message);
         }
         return count;
-    }
-
-    private Boolean detectAndReportLockFailure(Exception e, Integer nTries) {
-        String ident = "DataScrubber";
-        if (e instanceof org.hibernate.exception.LockAcquisitionException) {
-            if (nTries == 1) {
-                Logging.info(ident + ": lock acquisition exception.  Trying a second time.");
-            } else if (nTries < 5) {
-                Logging.warning(ident + ": multiple contiguous lock acquisition errors: keep trying.");
-            } else if (nTries == 5) {
-                Logging.warning(ident + ": multiple contiguous lock acquisition errors: keep trying (warnings throttled).");
-            } else if ( (nTries % 100) == 0) {
-                Logging.warning(ident + ": hit " + nTries + " contiguous lock acqusition errors: check DB.");
-            }
-            return true;
-        } else {
-            return false;
-        }
     }
 
 }

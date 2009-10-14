@@ -13,24 +13,6 @@ public class ErrorRecorder {
 
     public ErrorRecorder() { }
 
-    private Boolean detectAndReportLockFailure(Exception e, Integer nTries) {
-        if (e instanceof org.hibernate.exception.LockAcquisitionException) {
-            String ident = "ErrorRecorder: ";
-            if (nTries == 1) {
-                Logging.info(ident + ": lock acquisition exception.  Trying a second time.");
-            } else if (nTries < 5) {
-                Logging.warning(ident + ": multiple contiguous lock acquisition errors: keep trying.");
-            } else if (nTries == 5) {
-                Logging.warning(ident + ": multiple contiguous lock acquisition errors: keep trying (warnings throttled).");
-            } else if ( (nTries % 100) == 0) {
-                Logging.warning(ident + ": hit " + nTries + " contiguous lock acqusition errors: check DB.");
-            }
-            return true;
-        } else {
-            return false;
-        }
-    }
-
     private void saveDupRecord(DupRecord record) throws Exception {
         saveDupRecord(record, null);
     }
@@ -55,7 +37,7 @@ public class ErrorRecorder {
             } catch (Exception e) {
                 tx.rollback();
                 session.close();
-                if (!detectAndReportLockFailure(e, nTries)) {
+                if (!LockFailureDetector.detectAndReportLockFailure(e, nTries, "ErrorRecorder")) {
                     Logging.warning("ErrorRecorder: error saving in table!", e);
                     keepTrying = false;
                 }
