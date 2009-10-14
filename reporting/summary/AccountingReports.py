@@ -513,6 +513,7 @@ def GetListOfVOs(filter,voStatus,beginDate,endDate):
         ed = str(endDate).split("-") # end date list
         # date specific MyOSG url
         location = "http://myosg.grid.iu.edu/voactivation/xml?datasource=activation&start_type=specific&start_date=" + bd[1] +"%2F" + bd[2] + "%2F" + bd[0] + "&end_type=specific&end_date=" + ed[1] + "%2F" + ed[2] + "%2F" + ed[0] + "&all_vos=on&active_value=1"
+        print location
         html = urllib2.urlopen(location).read()
         vos = []
         doc = libxml2.parseDoc(html)
@@ -951,7 +952,7 @@ class DailySiteJobStatusConf:
     
   
 class DailySiteReportConf:
-        title = "OSG usage summary (midnight to midnight UTC) for %s\nincluding all jobs that finished in that time period.\nWall Duration is expressed in hours and rounded to the nearest hour.\nWall Duration is the duration between the instant the job start running and the instant the job ends its execution.\nThe number of jobs counted here includes only the jobs directly seen by batch system and does not include the request sent directly to a pilot job.\nThe Wall Duration includes the total duration of the the pilot jobs.\nDeltas are the differences with the previous day.\n(nr) after after a VO name indicates that the VO is not registered with OSG.\n"
+        title = "OSG usage summary (midnight to midnight UTC) for %s\nincluding all jobs that finished in that time period.\nWall Duration is expressed in hours and rounded to the nearest hour.\nWall Duration is the duration between the instant the job start running and the instant the job ends its execution.\nThe number of jobs counted here includes only the jobs directly seen by batch system and does not include the request sent directly to a pilot job.\nThe Wall Duration includes the total duration of the the pilot jobs.\nDeltas are the differences with the previous day.\n(nr) after a VO name indicates that the VO is not registered with OSG.\n"
         headline = "For all jobs finished on %s (UTC)"
         headers = ("Site","# of Jobs","Wall Duration","Delta jobs","Delta duration")
         num_header = 1
@@ -972,7 +973,7 @@ class DailySiteReportConf:
            return DailySiteData(start,end)      
 
 class DailyVOReportConf:
-        title = "OSG usage summary (midnight to midnight UTC) for %s\nincluding all jobs that finished in that time period.\nWall Duration is expressed in hours and rounded to the nearest hour.\nWall Duration is the duration between the instant the job start running and the instant the job ends its execution.\nThe number of jobs counted here includes only the jobs directly seen by batch system and does not include the request sent directly to a pilot job.\nThe Wall Duration includes the total duration of the the pilot jobs.\nDeltas are the differences with the previous day.\n(nr) after after a VO name indicates that the VO is not registered with OSG.\n"
+        title = "OSG usage summary (midnight to midnight UTC) for %s\nincluding all jobs that finished in that time period.\nWall Duration is expressed in hours and rounded to the nearest hour.\nWall Duration is the duration between the instant the job start running and the instant the job ends its execution.\nThe number of jobs counted here includes only the jobs directly seen by batch system and does not include the request sent directly to a pilot job.\nThe Wall Duration includes the total duration of the the pilot jobs.\nDeltas are the differences with the previous day.\n(nr) after a VO name indicates that the VO is not registered with OSG.\n"
         headline = "For all jobs finished on %s (UTC)"
         headers = ("VO","# of Jobs","Wall Duration","Delta jobs","Delta duration")
         num_header = 1
@@ -1013,7 +1014,7 @@ class DailySiteVOReportConf:
            return UpdateVOName(DailySiteVOData(start,end),1,start, end)  
 
 class DailyVOSiteReportConf:
-        title = "OSG usage summary (midnight to midnight UTC) for %s\nincluding all jobs that finished in that time period.\nWall Duration is expressed in hours and rounded to the nearest hour.\nWall Duration is the duration between the instant the job start running and the instant the job ends its execution.\nThe number of jobs counted here includes only the jobs directly seen by batch system and does not include the request sent directly to a pilot job.\nThe Wall Duration includes the total duration of the the pilot jobs.\nDeltas are the differences with the previous day.\n(nr) after after a VO name indicates that the VO is not registered with OSG.\n"
+        title = "OSG usage summary (midnight to midnight UTC) for %s\nincluding all jobs that finished in that time period.\nWall Duration is expressed in hours and rounded to the nearest hour.\nWall Duration is the duration between the instant the job start running and the instant the job ends its execution.\nThe number of jobs counted here includes only the jobs directly seen by batch system and does not include the request sent directly to a pilot job.\nThe Wall Duration includes the total duration of the the pilot jobs.\nDeltas are the differences with the previous day.\n(nr) after a VO name indicates that the VO is not registered with OSG.\n"
         headline = "For all jobs finished on %s (UTC)"
         headers = ("VO","Site","# of Jobs","Wall Duration","Delta jobs","Delta duration")
         num_header = 2
@@ -1034,7 +1035,7 @@ class DailyVOSiteReportConf:
            return UpdateVOName(DailyVOSiteData(start,end),0,start, end)   
 
 class DailySiteVOReportFromDailyConf:
-        title = "OSG usage summary (midnight to midnight central time) for %s\nincluding all jobs that finished in that time period.\nWall Duration is expressed in hours and rounded to the nearest hour.\nWall Duration is the duration between the instant the job start running and the instant the job ends its execution.\nDeltas are the differences with the previous day.\nIf the number of jobs stated for a site is always 1\nthen this number is actually the number of summary records sent.\n(nr) after after a VO name indicates that the VO is not registered with OSG.\n"
+        title = "OSG usage summary (midnight to midnight central time) for %s\nincluding all jobs that finished in that time period.\nWall Duration is expressed in hours and rounded to the nearest hour.\nWall Duration is the duration between the instant the job start running and the instant the job ends its execution.\nDeltas are the differences with the previous day.\nIf the number of jobs stated for a site is always 1\nthen this number is actually the number of summary records sent.\n(nr) after a VO name indicates that the VO is not registered with OSG.\n"
         headline = "For all jobs finished on %s (Central Time)"
         headers = ("Site","VO","# of Jobs","Wall Duration","Delta jobs","Delta duration")
         num_header = 2
@@ -2618,7 +2619,7 @@ def RangeSummup(range_end = datetime.date.today(),
     timediff = range_end - range_begin
 
     allSites = GetListOfOSGSites();
-    regVOs = GetListOfAllRegisteredVO(range_begin,range_end)
+    regVOs = GetListOfRegisteredVO('Active',range_begin,range_end)
     disabledSites = GetListOfDisabledOSGSites();
 
     reportingVOs = GetReportingVOs(range_begin,range_end)
@@ -2697,7 +2698,8 @@ def RangeSummup(range_end = datetime.date.today(),
     print "\nThe non registered sites are: \n"+prettyList(extraSites)
     print "\nThe disabled sites that are reporting: \n"+prettyList(reportingDisabled)
 
-    expectedNoActivity = ['sdss']
+    expectedNoActivity = GetListOfRegisteredVO('Disabled',range_begin,range_end)
+    expectedNoActivity.extend(GetListOfRegisteredVO('Enabled',range_begin,range_end))
     emptyVO = [name for name in regVOs if name not in reportingVOs and name not in expectedNoActivity]
     nonregVO = [name for name in reportingVOs if name not in regVOs]
     print "\nThe registered VOs with no recent activity are:\n"+prettyList(emptyVO)
@@ -2716,8 +2718,7 @@ def NonReportingSites(
     print "This report indicates which sites Gratia has heard from or have known activity\nsince %s (midnight UTC)\n" % ( DateToString(when,False) )
 
     allSites = GetListOfOSGSites();
-    regVOs = GetListOfAllRegisteredVO(when,datetime.date.today())
- 
+    regVOs = GetListOfRegisteredVO('Active',when,datetime.date.today())
     exceptionSites = ['AGLT2_CE_2','BNL-LCG2', 'BNL_LOCAL', 'BNL_OSG', 'BNL_PANDA', 'GLOW-CMS', 'UCSDT2-B', 'Purdue-Lear' ]
 
     allSites = [name for name in allSites if name not in exceptionSites]
@@ -2777,7 +2778,9 @@ def NonReportingSites(
     print "\nThe sanctioned non registered sites are: \n"+prettyList(knownExtras)
     print "\nThe non registered sites are: \n"+prettyList(extraSites)
 
-    expectedNoActivity = ['sdss']
+    #expectedNoActivity = ['sdss']
+    expectedNoActivity = GetListOfRegisteredVO('Disabled',when,datetime.date.today())
+    expectedNoActivity.extend(GetListOfRegisteredVO('Enabled',when,datetime.date.today()))
     emptyVO = [name for name in regVOs if name not in reportingVOs and name not in expectedNoActivity]
     nonregVO = [name for name in reportingVOs if name not in regVOs]
     print "\nThe registered VOs with no recent activity are:\n"+prettyList(emptyVO)
