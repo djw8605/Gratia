@@ -98,7 +98,7 @@ public class CollectorService implements ServletContextListener {
               processors[i] = new RecordProcessor("RecordProcessor: " + i, queues[i], lock, global, CollectorService.this);
               processors[i].setPriority(Thread.MAX_PRIORITY);
               processors[i].setDaemon(true);
-          }            
+          }
           for (int i = 0; i < nthreads; i++) {
               processors[i].start();
           }
@@ -836,7 +836,7 @@ public class CollectorService implements ServletContextListener {
                                   );
                      Logging.log(LogLevel.FINER,"certificate details: " + certs[i].toString());
                   } catch (Exception e) {
-                     if (session != null && session.isOpen() && session.isConnected()) {
+                     if (HibernateWrapper.isFullyConnected(session)) {
                         if ((tx != null) && tx.isActive()) {
                            tx.rollback();
                         }
@@ -880,7 +880,7 @@ public class CollectorService implements ServletContextListener {
             }
             
          }
-         if (session != null && session.isOpen() && session.isConnected()) {
+         if (HibernateWrapper.isFullyConnected(session)) {
             session.close();
          }
       }
@@ -909,7 +909,7 @@ public class CollectorService implements ServletContextListener {
             keepTrying = false;
             session.close();
          } catch (Exception e) {
-            if (session != null && session.isOpen() && session.isConnected()) {
+            if (HibernateWrapper.isFullyConnected(session)) {
                if ((tx != null) && tx.isActive()) {
                   tx.rollback();
                }

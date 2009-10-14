@@ -464,7 +464,7 @@ public class RecordProcessor extends Thread {
                         or_tx.commit();
                         keepTrying = false;
                     } catch (Exception e) {
-                        if (or_session != null && or_session.isOpen() && or_session.isConnected()) {
+                        if (HibernateWrapper.isFullyConnected(or_session)) {
                             if ((or_tx != null) && or_tx.isActive()) {
                                 or_tx.rollback();
                             }
@@ -481,7 +481,7 @@ public class RecordProcessor extends Thread {
                     }
                 }
                 //MPERF: Logging.fine(ident + rId + " saved Origin object.");
-                if (or_session != null && or_session.isOpen() && or_session.isConnected()) {
+                if (HibernateWrapper.isFullyConnected(or_session)) {
                     or_session.close();
                 }
             }
@@ -530,7 +530,7 @@ public class RecordProcessor extends Thread {
                         keepTrying = false;
                         pr_session.close();
                     } catch (Exception e) {
-                        if (pr_session != null && pr_session.isOpen() && pr_session.isConnected()) {
+                        if (HibernateWrapper.isFullyConnected(pr_session)) {
                             if ((pr_tx != null) && pr_tx.isActive()) {
                                 pr_tx.rollback();
                             }
@@ -725,7 +725,7 @@ public class RecordProcessor extends Thread {
                             Logging.fine(ident + rId + " saved.");
                         } catch (ConstraintViolationException e) {
                             keepTrying = false; // KeepTrying only for lock-type exceptions
-                            if (rec_session != null && rec_session.isOpen() && rec_session.isConnected()) {
+                            if (HibernateWrapper.isFullyConnected(rec_session)) {
                                 if (rec_tx != null && rec_tx.isActive()) {
                                     rec_tx.rollback();
                                 }
@@ -750,7 +750,7 @@ public class RecordProcessor extends Thread {
                                 }
                             }
                         } catch (Exception e) {
-                            if (rec_session != null && rec_session.isOpen() && rec_session.isConnected()) {
+                            if (HibernateWrapper.isFullyConnected(rec_session)) {
                                 if (rec_tx != null && rec_tx.isActive()) {
                                     rec_tx.rollback();
                                 }
@@ -999,7 +999,7 @@ public class RecordProcessor extends Thread {
                     while (keepTrying) {
                         ++nTries;
                         try {
-                            if (dup_session == null || (!dup_session.isOpen()) || (!dup_session.isConnected())) {
+                            if (HibernateWrapper.isFullyConnected(dup_session)) {
                                 dup_session = HibernateWrapper.getSession();
                             }
                             dup_tx = dup_session.beginTransaction();
@@ -1050,7 +1050,7 @@ public class RecordProcessor extends Thread {
                                 }
                             }
                         } catch (Exception e2) {
-                            if (dup_session != null && dup_session.isOpen() && dup_session.isConnected()) {
+                            if (HibernateWrapper.isFullyConnected(dup_session)) {
                                 if (dup_tx != null && dup_tx.isActive()) {
                                     dup_tx.rollback();
                                 }
@@ -1073,7 +1073,7 @@ public class RecordProcessor extends Thread {
                             while (keepTrying) {
                                 ++nTries;
                                 try {
-                                    if (dup_session == null || (!dup_session.isOpen()) || (!dup_session.isConnected())) {
+                                    if (HibernateWrapper.isFullyConnected(dup_session)) {
                                         dup_session = HibernateWrapper.getSession();
                                     }
                                     dup_tx = dup_session.beginTransaction();
@@ -1091,7 +1091,7 @@ public class RecordProcessor extends Thread {
                         } // End if (localprobe != null)
                     } // End if (!needCurrentSaveDup)
                 } // End if (!savedCurrent)
-                if (dup_session != null && dup_session.isOpen() && dup_session.isConnected()) {
+                if (HibernateWrapper.isFullyConnected(dup_session)) {
                     dup_session.close();
                 }
             } else { // Not JobUsageRecord

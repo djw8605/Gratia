@@ -82,8 +82,7 @@ public class HibernateWrapper {
     public static boolean systemDatabaseUp() {
        try {
           org.hibernate.Session session = hibernateFactory.openSession();
-          java.sql.Connection conn = session.connection();
-          databaseDown = conn.isClosed() || !session.isConnected() || !session.isOpen();
+          databaseDown = ! isFullyConnected(session);
           session.close();
           if (databaseDown) {
              return false;
@@ -101,8 +100,7 @@ public class HibernateWrapper {
         try {
             Logging.log("HibernateWrapper: Database Check");
             org.hibernate.Session session = hibernateFactory.openSession();
-            java.sql.Connection conn = session.connection();
-            databaseDown = conn.isClosed() || !session.isConnected() || !session.isOpen();
+            databaseDown = ! isFullyConnected(session);
             session.close();
             if (databaseDown) {
                Logging.info("HibernateWrapper: Database Check: Database Down");
@@ -131,4 +129,21 @@ public class HibernateWrapper {
             return null;
         }
     }
+   
+   public static boolean isFullyConnected(org.hibernate.Session session) {
+      // Return true is the session is fully useable (i.e rolling back a
+      // transaction won't throw because something is 'already closed').
+      
+      if (session != null) {
+         if (session.isOpen() && session.isConnected()) {
+            java.sql.Connection conn = session.connection();
+            try { 
+               return conn!=null && !conn.isClosed();
+            } catch (java.sql.SQLException e) {
+               return false;
+            }
+         }
+      }
+      return false;
+   }
 }
