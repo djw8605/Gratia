@@ -2701,7 +2701,7 @@ def RangeSummup(range_end = datetime.date.today(),
     expectedNoActivity.extend(GetListOfRegisteredVO('Enabled',range_begin,range_end))
     emptyVO = [name for name in regVOs if name not in reportingVOs and name not in expectedNoActivity]
     nonregVO = [name for name in reportingVOs if name not in regVOs]
-    print "\nThe registered VOs with no recent activity are:\n"+prettyList(emptyVO)
+    print "\nActive VOs with no recent activity are:\n"+prettyList(emptyVO)
     print "\nThe following VOs are expected to have no activity:\n"+prettyList([name for name in expectedNoActivity if name not in reportingVOs])
     print "\nThe non-registered VOs with recent activity are:\n"+prettyList(nonregVO)
     
@@ -2782,7 +2782,7 @@ def NonReportingSites(
     expectedNoActivity.extend(GetListOfRegisteredVO('Enabled',when,datetime.date.today()))
     emptyVO = [name for name in regVOs if name not in reportingVOs and name not in expectedNoActivity]
     nonregVO = [name for name in reportingVOs if name not in regVOs]
-    print "\nThe registered VOs with no recent activity are:\n"+prettyList(emptyVO)
+    print "\nActive VOs with no recent activity are:\n"+prettyList(emptyVO)
     print "\nThe following VOs are expected to have no activity:\n"+prettyList([name for name in expectedNoActivity if name not in reportingVOs])
     print "\nThe non-registered VOs with recent activity are:\n"+prettyList(nonregVO)
 
