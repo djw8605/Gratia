@@ -513,7 +513,6 @@ def GetListOfVOs(filter,voStatus,beginDate,endDate):
         ed = str(endDate).split("-") # end date list
         # date specific MyOSG url
         location = "http://myosg.grid.iu.edu/voactivation/xml?datasource=activation&start_type=specific&start_date=" + bd[1] +"%2F" + bd[2] + "%2F" + bd[0] + "&end_type=specific&end_date=" + ed[1] + "%2F" + ed[2] + "%2F" + ed[0] + "&all_vos=on&active_value=1"
-        print location
         html = urllib2.urlopen(location).read()
         vos = []
         doc = libxml2.parseDoc(html)
