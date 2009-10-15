@@ -1205,17 +1205,17 @@ public class DatabaseMaintenance {
              int result = 0;
              Statement statement;
              ResultSet resultSet;
-             String command = "SELECT TABLE_NAME" +
-                 "FROM information_schema.COLUMNS C" +
-                 "JOIN information_schema.TABLES T ON" +
-                 "  (T.TABLE_TYPE = 'BASE TABLE' AND" +
-                 "   T.TABLE_SCHEMA = DATABASE() AND" +
-                 "   C.TABLE_SCHEMA = T.TABLE_SCHEMA AND" +
-                 "   C.TABLE_NAME = T.TABLE_NAME" +
-                 "   )" +
-                 "WHERE COLUMN_NAME = 'ServerDate'" +
-                 "  AND C.TABLE_NAME NOT LIKE '%_Meta'" +
-                 "  AND C.TABLE_NAME != 'Origin'" +
+             String command = "SELECT T.TABLE_NAME " +
+                 "FROM information_schema.COLUMNS C " +
+                 "JOIN information_schema.TABLES T ON " +
+                 "  (T.TABLE_TYPE = 'BASE TABLE' AND " +
+                 "   T.TABLE_SCHEMA = DATABASE() AND " +
+                 "   C.TABLE_SCHEMA = T.TABLE_SCHEMA AND " +
+                 "   C.TABLE_NAME = T.TABLE_NAME " +
+                 "   ) " +
+                 "WHERE COLUMN_NAME = 'ServerDate' " +
+                 "  AND C.TABLE_NAME NOT LIKE '%_Meta' " +
+                 "  AND C.TABLE_NAME != 'Origin' " +
                  "ORDER by T.TABLE_SCHEMA, T.TABLE_NAME;";
              try {
                  Logging.log("Executing: " + command);
