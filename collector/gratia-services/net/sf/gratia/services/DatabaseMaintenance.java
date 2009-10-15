@@ -1151,7 +1151,7 @@ public class DatabaseMaintenance {
              }
          }
          schemaOnlyLowerBound = 78;
-         schemaOnlyUpperBound = gratiaDatabaseVersion;
+         schemaOnlyUpperBound = 80;
          if ((current >= schemaOnlyLowerBound) && (current < schemaOnlyUpperBound)) {
             // Stored procedures, trigger procedures.
             Logging.fine("Gratia database upgraded from " + current + " to " + schemaOnlyUpperBound);
