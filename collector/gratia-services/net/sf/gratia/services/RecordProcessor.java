@@ -476,11 +476,25 @@ public class RecordProcessor extends Thread {
                           or_session.close();
                        }
                        if (duplicateExceptionFinder.matcher(e.getSQLException().getMessage()).find() &&
-                           originFinder.matcher(e.getSQL()).find() &&
-                           nDuplicateTry < 4)
-                       { // Duplicate of an interesting table
+                           originFinder.matcher(e.getSQL()).find())
+                       {
                           ++nDuplicateTry;
-                          continue;
+                          if (nDuplicateTry < 5)
+                          { // Duplicate of an interesting table
+ 
+                             Logging.fine(ident + rId + ": Received "+nDuplicateTry+
+                                          " consecutive constraint violation exception(s) while processing origin entry.  We will retry."
+                                          "("+e.getMessage()+")");
+                             Logging.debug(ident + rId + ": exception details:", e);
+                             continue;
+                          } else {
+                             Logging.warning(ident + rId +
+                                             ": received too many consecutive constraint violation exception (" + nDuplicateTry + "): "
+                                             e.getMessage() + " while processing origin entry.  We give up on this file.");
+                             Logging.debug(ident + rId + ": exception details:", e);
+                             saveQuarantine(file, "Problem processing origin entry for record file");
+                             continue NEXTFILE; // Next file.                              
+                          }
                        } else {
                           Logging.warning(ident + rId +
                                           ": received unexpected constraint violation exception " +
