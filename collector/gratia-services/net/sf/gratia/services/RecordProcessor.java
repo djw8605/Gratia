@@ -58,6 +58,7 @@ public class RecordProcessor extends Thread {
     Hashtable<String,Integer> fStorageElement = new Hashtable<String,Integer>();
     static Pattern duplicateExceptionFinder = Pattern.compile("\\b[Dd]uplicate\\b");
     static Pattern metaFinder = Pattern.compile("_Meta ");
+    static Pattern originFinder = Pattern.compile("Origin ");
     File quarantineDir = null;
     //
     // various things used in the update loop
@@ -441,9 +442,12 @@ public class RecordProcessor extends Thread {
             }
             int rSize = records.size();
             //MPERF: Logging.fine(ident+ ": converted " + rSize + " records");
-            if (rSize > 1 && origin != null) {
-                // The origin object will be reused.  Let's store it first to avoid
-                // problem in case the very first record is a duplicate!
+            if (origin != null) {
+                // Save the origin first in its own transaction, so to 
+                //   - make sure it is always stored properly even if we have a bundle
+                //       and the first record is a duplicate.
+                //   - reduce the risk that when we lookup the Origin, the previous
+                //       storing is not yet completely flush in the db.
                 String rId = ": ";
                 if (gotreplication) {
                     rId += "Replication ";
@@ -454,7 +458,8 @@ public class RecordProcessor extends Thread {
                 Transaction or_tx = null;
                 Integer nTries = 0;
                 Boolean keepTrying = true;
-                while (keepTrying) {
+                Integer nDuplicateTry = 0;
+                while (keepTrying && nDuplicateTry < 5) {
                     ++nTries;
                     try {
                         or_session = HibernateWrapper.getSession();
@@ -463,6 +468,27 @@ public class RecordProcessor extends Thread {
                         or_session.flush();
                         or_tx.commit();
                         keepTrying = false;
+                    } catch (ConstraintViolationException e) {
+                       if (HibernateWrapper.isFullyConnected(or_session)) {
+                          if ((or_tx != null) && or_tx.isActive()) {
+                             or_tx.rollback();
+                          }
+                          or_session.close();
+                       }
+                       if (duplicateExceptionFinder.matcher(e.getSQLException().getMessage()).find() &&
+                           originFinder.matcher(e.getSQL()).find() &&
+                           nDuplicateTry < 4)
+                       { // Duplicate of an interesting table
+                          ++nDuplicateTry;
+                          continue;
+                       } else {
+                          Logging.warning(ident + rId +
+                                          ": received unexpected constraint violation exception " +
+                                          e.getMessage() + " while processing origin entry.");
+                          Logging.debug(ident + rId + ": exception details:", e);
+                          saveQuarantine(file, "Problem processing origin entry for record file");
+                          continue NEXTFILE; // Next file. 
+                       }
                     } catch (Exception e) {
                         if (HibernateWrapper.isFullyConnected(or_session)) {
                             if ((or_tx != null) && or_tx.isActive()) {
@@ -475,8 +501,8 @@ public class RecordProcessor extends Thread {
                                             ": received unexpected exception " +
                                             e.getMessage() + " while processing origin entry.");
                             Logging.debug(ident + rId + ": exception details:", e);
-                            saveQuarantine(file, "Problem processing origin entry for multi-record file");
-                            continue; // Next file. 
+                            saveQuarantine(file, "Problem processing origin entry for record file");
+                           continue NEXTFILE; // Next file. 
                         }
                     }
                 }
