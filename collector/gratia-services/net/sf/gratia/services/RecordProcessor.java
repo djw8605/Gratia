@@ -483,13 +483,13 @@ public class RecordProcessor extends Thread {
                           { // Duplicate of an interesting table
  
                              Logging.fine(ident + rId + ": Received "+nDuplicateTry+
-                                          " consecutive constraint violation exception(s) while processing origin entry.  We will retry."
+                                          " consecutive constraint violation exception(s) while processing origin entry.  We will retry."+
                                           "("+e.getMessage()+")");
                              Logging.debug(ident + rId + ": exception details:", e);
                              continue;
                           } else {
                              Logging.warning(ident + rId +
-                                             ": received too many consecutive constraint violation exception (" + nDuplicateTry + "): "
+                                             ": received too many consecutive constraint violation exception (" + nDuplicateTry + "): "+
                                              e.getMessage() + " while processing origin entry.  We give up on this file.");
                              Logging.debug(ident + rId + ": exception details:", e);
                              saveQuarantine(file, "Problem processing origin entry for record file");
