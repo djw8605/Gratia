@@ -129,18 +129,12 @@ public class RecordProcessor extends Thread {
             }
 
             if (!HibernateWrapper.databaseUp()) {
+                Logging.log(ident + ": Hibernate Down: Sleeping");
                 try {
-                    HibernateWrapper.start();
-                } catch (Exception e) { // Ignore
+                    Thread.sleep(30 * 1000);
+                } catch (Exception ignore) {
                 }
-                if (HibernateWrapper.databaseDown) {
-                    Logging.log(ident + ": Hibernate Down: Sleeping");
-                    try {
-                        Thread.sleep(30 * 1000);
-                    } catch (Exception ignore) {
-                    }
-                    continue;
-                }
+                continue;
             }
             if (stopflag) {
                 Logging.info(ident + ": Exiting");
