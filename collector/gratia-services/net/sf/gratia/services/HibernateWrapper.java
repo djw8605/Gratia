@@ -7,34 +7,30 @@ import java.util.*;
 import java.io.*;
 
 public class HibernateWrapper {
-    static Properties p = null;
-
     static org.hibernate.cfg.Configuration hibernateConfiguration;
     static org.hibernate.SessionFactory hibernateFactory;
 
-    public static boolean databaseDown = true;
+    static private Boolean hibernateInitialized = false;
+    static private Properties initProperties = null;
 
     public static synchronized org.hibernate.cfg.Configuration getHibernateConfiguration() {
         return hibernateConfiguration;
     }
 
     public static synchronized void start() throws Exception {
-        Properties ep = new Properties();
-        start(ep);
+        startImpl();
     }
 
     public static synchronized void startMaster() throws Exception {
-        Properties ep = new Properties();
-        ep.setProperty("hibernate.hbm2ddl.auto", "update");
-        start(ep);
+        initProperties = new Properties();
+        initProperties.setProperty("hibernate.hbm2ddl.auto", "update");
+        startImpl();
     }
 
-    private static synchronized void start(Properties ep) throws Exception {
-        if (p != null) return; // Already done
-
-        p = net.sf.gratia.util.Configuration.getProperties();
-
-        // String configurationPath = net.sf.gratia.util.Configuration.getConfigurationPath();
+    private static synchronized void startImpl() throws Exception {
+        if (hibernateInitialized) {
+            systemDatabaseUp();
+        }
 
         try {
             if (hibernateFactory != null) {
@@ -46,17 +42,14 @@ public class HibernateWrapper {
         try {
             hibernateConfiguration = new org.hibernate.cfg.Configuration();
             hibernateConfiguration.addDirectory(new File(net.sf.gratia.util.Configuration.getHibernateConfigurationPath()));
-            //          hibernateConfiguration.addFile(new File(net.sf.gratia.util.Configuration.getGratiaHbmPath()));
-            //          hibernateConfiguration.addFile(new File(net.sf.gratia.util.Configuration.getJobUsagePath()));
-            //          hibernateConfiguration.addFile(new File(net.sf.gratia.util.Configuration.getMetricRecordPath()));
-            //          hibernateConfiguration.addFile(new File(net.sf.gratia.util.Configuration.getGlueCERecordPath()));
-            //          hibernateConfiguration.addFile(new File(net.sf.gratia.util.Configuration.getJobUsageSummaryPath()));
-            //          hibernateConfiguration.addFile(new File(net.sf.gratia.util.Configuration.getTracePath()));
-            //          hibernateConfiguration.addFile(new File(net.sf.gratia.util.Configuration.getNodeSummaryPath()));
 
             hibernateConfiguration.configure(new File(net.sf.gratia.util.Configuration.getHibernatePath()));
 
-            hibernateConfiguration.addProperties(ep); // Provided by init.
+            if (initProperties != null) {
+                hibernateConfiguration.addProperties(initProperties); // Provided by init.
+            }
+
+            Properties p = net.sf.gratia.util.Configuration.getProperties();
 
             Properties hp = new Properties();
             hp.setProperty("hibernate.connection.driver_class", p.getProperty("service.mysql.driver"));
@@ -69,49 +62,43 @@ public class HibernateWrapper {
             hibernateFactory = hibernateConfiguration.buildSessionFactory();
 
             Logging.info("HibernateWrapper: Hibernate Services Started");
-
-            databaseDown = false;
         }
         catch (Exception databaseError) {
             Logging.warning("HibernateWrapper: Error Starting Hibernate", databaseError);
-            databaseDown = true;
             throw databaseError; // Rethrow
         }
+        hibernateInitialized = true;
     }
 
     public static boolean systemDatabaseUp() {
        try {
           org.hibernate.Session session = hibernateFactory.openSession();
-          databaseDown = ! isFullyConnected(session);
+          Boolean connected = isFullyConnected(session);
           session.close();
-          if (databaseDown) {
-             return false;
-          } else {
-             return true;
-          }
+          return connected;
        }
        catch (Exception e) {
-          databaseDown = true;
           return false;
        }
     }
 
     public static synchronized boolean databaseUp() {
         try {
+            if (!hibernateInitialized) {
+                startImpl();
+            }
             Logging.log("HibernateWrapper: Database Check");
             org.hibernate.Session session = hibernateFactory.openSession();
-            databaseDown = ! isFullyConnected(session);
+            Boolean connected = isFullyConnected(session);
             session.close();
-            if (databaseDown) {
-               Logging.info("HibernateWrapper: Database Check: Database Down");
-               return false;
+            if (connected) {
+                Logging.log("HibernateWrapper: Database Check. Database Up.");
             } else {
-               Logging.log("HibernateWrapper: Database Check. Database Up.");
-               return true;
-           }
-         }
+                Logging.info("HibernateWrapper: Database Check: Database Down");
+            }
+            return connected;
+        }
         catch (Exception e) {
-            databaseDown = true;
             Logging.info("HibernateWrapper: Database Check: Database Down");
             Logging.debug("Exception details: ", e);
             return false;
@@ -120,11 +107,13 @@ public class HibernateWrapper {
 
     public static synchronized org.hibernate.Session getSession() {
         try {
+            if (!hibernateInitialized) {
+                startImpl();
+            }
             org.hibernate.Session session = hibernateFactory.openSession();
             return session;
         }
         catch (Exception e) {
-            databaseDown = true;
             Logging.info("HibernateWrapper: Get Session: Database Down");
             return null;
         }
