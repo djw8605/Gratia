@@ -855,20 +855,10 @@ public class CollectorService implements ServletContextListener {
                         session.close();
                      }
                      session = null;
-                     if (e instanceof org.hibernate.exception.LockAcquisitionException) {
-                        if (nTries == 1) {
-                           Logging.info("checkCertificate: Lock acquisition exception.  Trying a second time.");
-                        } else if (nTries < 5) {
-                           Logging.warning("checkCertificate: multiple contiguous lock acquisition errors: keep trying.");
-                        } else if (nTries == 5) {
-                           Logging.warning("checkCertificate: multiple contiguous lock acquisition errors: keep trying (warnings throttled).");
-                        } else if ( (nTries % 100) == 0) {
-                           Logging.warning("checkCertficate: hit " + nTries + " contiguous lock acqusition errors: check DB.");
-                        }
-                     } else {
-                        Logging.warning("checkCertificate: error when storing certificate object: ", e);
-                        Logging.debug("checkCertificate: exception details:", e);
+                     if (!LockFailureDetector.detectAndReportLockFailure(e, nTries, "checkCertificate")) {
                         keepTrying = false;
+                        Logging.warning("checkCertificate: error when storing certificate object: " + e.getMessage());
+                        Logging.debug("checkCertificate: exception details:", e);
                      }
                   }
                }
@@ -904,36 +894,36 @@ public class CollectorService implements ServletContextListener {
    
    
    private void trackConnection(net.sf.gratia.storage.Connection gr_conn) {
-      Session session = null;
-      Boolean keepTrying  = true;
-      Integer nTries = 0;
+       Session session = null;
+       Boolean keepTrying  = true;
+       Integer nTries = 0;
       
-      while (keepTrying) {
-         session = HibernateWrapper.getSession();
-         Transaction tx = session.beginTransaction();
-         try {
-            if (++nTries > 1) {
-               Thread.sleep(300);
-            }
-            gr_conn = gr_conn.attach( session );
-            session.flush();
-            tx.commit();
-            keepTrying = false;
-            session.close();
-         } catch (Exception e) {
-            if (HibernateWrapper.isFullyConnected(session)) {
-               if ((tx != null) && tx.isActive()) {
-                  tx.rollback();
+       while (keepTrying) {
+           session = HibernateWrapper.getSession();
+           Transaction tx = session.beginTransaction();
+           try {
+               if (++nTries > 1) {
+                   Thread.sleep(300);
                }
-               session.close();
-            }
-            if (!LockFailureDetector.detectAndReportLockFailure(e, nTries, "checkCertificate")) {
-               Logging.warning("checkCertificate: error when storing or retrieving connection object: ", e);
-               Logging.debug("checkCertificate: exception details:", e);
+               gr_conn = gr_conn.attach( session );
+               session.flush();
+               tx.commit();
                keepTrying = false;
-            }
-         }
-      }
+               session.close();
+           } catch (Exception e) {
+               if (HibernateWrapper.isFullyConnected(session)) {
+                   if ((tx != null) && tx.isActive()) {
+                       tx.rollback();
+                   }
+                   session.close();
+               }
+               if (!LockFailureDetector.detectAndReportLockFailure(e, nTries, "checkCertificate")) {
+                   Logging.warning("checkCertificate: error when storing or retrieving connection object: " + e.getMessage());
+                   Logging.debug("checkCertificate: exception details:", e);
+                   keepTrying = false;
+               }
+           }
+       }
    }     
    
    
