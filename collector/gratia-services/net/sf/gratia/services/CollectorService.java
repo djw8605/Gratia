@@ -776,7 +776,7 @@ public class CollectorService implements ServletContextListener {
    public String checkConnection(java.security.cert.X509Certificate certs[], String senderHost, String sender) 
    throws RemoteException, AccessException {
       final String command = "from Certificate where pem = ?";
-      
+
       String result = "";
       net.sf.gratia.storage.Origin from = new net.sf.gratia.storage.Origin(new java.util.Date());
       
@@ -790,10 +790,12 @@ public class CollectorService implements ServletContextListener {
          if ( needConnectionTracking() ) {
             // Connection Tracking has been requested
             net.sf.gratia.storage.Connection gr_conn = new net.sf.gratia.storage.Connection(senderHost,sender,null);
-            this.trackConnection(gr_conn);
-            from.setConnection(gr_conn);
+            gr_conn = this.trackConnection(gr_conn);
             if (gr_conn.isValid()) {
+               from.setConnection(gr_conn);
                result = from.asXml(0);
+            } else {
+               throw new AccessException("Invalid Gratia Connection.");
             }
          }
       } else {
@@ -830,8 +832,9 @@ public class CollectorService implements ServletContextListener {
                   if (session == null) {
                      session = HibernateWrapper.getSession();
                   }
-                  Transaction tx = session.beginTransaction();
+                  Transaction tx = null;
                   try {
+                     tx = session.beginTransaction();
                      session.saveOrUpdate( localcert );
                      session.flush();
                      tx.commit();
@@ -870,7 +873,7 @@ public class CollectorService implements ServletContextListener {
             } else if ( needConnectionTracking() ) {
                // Connection Tracking has been requested
                net.sf.gratia.storage.Connection gr_conn = new net.sf.gratia.storage.Connection(senderHost,sender,localcert);
-               this.trackConnection(gr_conn);
+               gr_conn = this.trackConnection(gr_conn);
                from.setConnection(gr_conn);
                if (gr_conn.isValid()) {
                   result = from.asXml(0);
@@ -893,15 +896,16 @@ public class CollectorService implements ServletContextListener {
    }
    
    
-   private void trackConnection(net.sf.gratia.storage.Connection gr_conn) {
+   private net.sf.gratia.storage.Connection trackConnection(net.sf.gratia.storage.Connection gr_conn) throws AccessException {
        Session session = null;
        Boolean keepTrying  = true;
        Integer nTries = 0;
       
        while (keepTrying) {
            session = HibernateWrapper.getSession();
-           Transaction tx = session.beginTransaction();
+           Transaction tx = null;
            try {
+               tx = session.beginTransaction();
                if (++nTries > 1) {
                    Thread.sleep(300);
                }
@@ -921,9 +925,14 @@ public class CollectorService implements ServletContextListener {
                    Logging.warning("checkCertificate: error when storing or retrieving connection object: " + e.getMessage());
                    Logging.debug("checkCertificate: exception details:", e);
                    keepTrying = false;
+
+                   // If we can not read the connection, let's assume it is set to invalid.
+                   // Apriori if this is wrong, the probe will try again later.
+                   throw new AccessException("Failure during the check of the the Gratia Connection.");
                }
            }
        }
+      return gr_conn;
    }     
    
    

@@ -141,6 +141,11 @@ public class HibernateWrapper {
                return conn!=null && !conn.isClosed();
             } catch (java.sql.SQLException e) {
                return false;
+            } catch (org.hibernate.exception.JDBCConnectionException e) {
+               return false;
+            } catch (Exception e) {
+               Logging.info("HibernateWrapper::isFullyConnected unexcepted exception: "+e.getMessage());
+               Logging.debug("Exception details: ", e);
             }
          }
       }
