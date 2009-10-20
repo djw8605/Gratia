@@ -43,6 +43,7 @@ when=$(date -d "${date_arg:-yesterday}" +"%d %B %Y")
 whenarg=$(date -d "${date_arg:-yesterday}" +"%Y/%m/%d")
 
 MAIL_MSG="Report from the job level Gratia db for $when"
+TR_MAIL_MSG="Data transfer report summary by site for $when"
 SUM_MAIL_MSG="Report from the daily summary Gratia db (i.e. provided by VOs) for $when"
 STATUS_MAIL_MSG="Job Success Rate by Site for $when (from the job level Gratia db)"
 VO_STATUS_MAIL_MSG="Job Success Rate by VO for $when (from the job level Gratia db) "
@@ -122,6 +123,7 @@ sendto ./dailyFromSummary $whenarg ${WORK_DIR}/summary_report "$SUM_MAIL_MSG"
 sendto ./dailyStatus  $whenarg ${WORK_DIR}/status_report "$STATUS_MAIL_MSG"
 sendto "./dailyStatus --groupby=VO"  $whenarg ${WORK_DIR}/vo_status_report "$VO_STATUS_MAIL_MSG"
 sendto "./dailyStatus --groupby=Both"  $whenarg ${WORK_DIR}/vo_status_report "$BOTH_STATUS_MAIL_MSG"
+sendto ./transfer $whenarg ${WORK_DIR}/report "$TR_MAIL_MSG"
 
 grep -v '^#' $VOREPORT_CONFIG | while read line; do
     MYVO=`echo $line | cut -d\  -f1`
