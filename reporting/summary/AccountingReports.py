@@ -889,7 +889,10 @@ def FromCondor():
         print "# of CPUS : ",ncpu
         print "Date : " + gBegin.strftime("%m/%Y") + " (" + str(days )+ " days)"
 
-class DailySiteJobStatusConf:
+class GenericConf: # top parent class. Just for sake of adding a single common attribute to all other Conf classes (triggered by Brian's request of having the delta columns adjacent to the data columns in the DataTransferReport instead of all bunched to the right) 
+    delta_column_location = "right"
+
+class DailySiteJobStatusConf(GenericConf):
     title = "Summary of the job exit status (midnight to midnight UTC) for %s\nincluding all jobs that finished in that time period.\n\nFor Condor the value used is taken from 'ExitCode' and NOT from 'Exit Status'\n\nWall Success: Wall clock hours of successfully completed jobs\nWall Failed: Wall clock hours of unsuccessfully completed jobs\nWall Success Rate: Wall Success / (Wall Success + Wall Failed)\nSuccess: number of successfully completed jobs\nFailed: Number of unsuccessfully completed jobs\nSuccess Rate: number of successfull jobs / total number of jobs\n"
     headline = "For all jobs finished on %s (UTC)"
     headers = ("Site","Wall Succ Rate","Wall Success","Wall Failed","Success Rate","Success","Failed")
@@ -950,7 +953,7 @@ class DailySiteJobStatusConf:
        return DailySiteJobStatusSummary(start,end,what=self.GroupBy,selection=self.ExtraSelect)
     
   
-class DailySiteReportConf:
+class DailySiteReportConf(GenericConf):
         title = "OSG usage summary (midnight to midnight UTC) for %s\nincluding all jobs that finished in that time period.\nWall Duration is expressed in hours and rounded to the nearest hour.\nWall Duration is the duration between the instant the job start running and the instant the job ends its execution.\nThe number of jobs counted here includes only the jobs directly seen by batch system and does not include the request sent directly to a pilot job.\nThe Wall Duration includes the total duration of the the pilot jobs.\nDeltas are the differences with the previous day.\n(nr) after a VO name indicates that the VO is not registered with OSG.\n"
         headline = "For all jobs finished on %s (UTC)"
         headers = ("Site","# of Jobs","Wall Duration","Delta jobs","Delta duration")
@@ -971,7 +974,7 @@ class DailySiteReportConf:
         def GetData(self,start,end):
            return DailySiteData(start,end)      
 
-class DailyVOReportConf:
+class DailyVOReportConf(GenericConf):
         title = "OSG usage summary (midnight to midnight UTC) for %s\nincluding all jobs that finished in that time period.\nWall Duration is expressed in hours and rounded to the nearest hour.\nWall Duration is the duration between the instant the job start running and the instant the job ends its execution.\nThe number of jobs counted here includes only the jobs directly seen by batch system and does not include the request sent directly to a pilot job.\nThe Wall Duration includes the total duration of the the pilot jobs.\nDeltas are the differences with the previous day.\n(nr) after a VO name indicates that the VO is not registered with OSG.\n"
         headline = "For all jobs finished on %s (UTC)"
         headers = ("VO","# of Jobs","Wall Duration","Delta jobs","Delta duration")
@@ -991,7 +994,7 @@ class DailyVOReportConf:
         def GetData(self,start,end):
            return UpdateVOName( DailyVOData(start,end), 0 ,start, end)
 
-class DailySiteVOReportConf:
+class DailySiteVOReportConf(GenericConf):
         title = "OSG usage summary (midnight to midnight UTC) for %s\nincluding all jobs that finished in that time period.\nWall Duration is expressed in hours and rounded to the nearest hour.\nWall Duration is the duration between the instant the job start running and the instant the job ends its execution.\nThe number of jobs counted here includes only the jobs directly seen by batch system and does not include the request sent directly to a pilot job.\nThe Wall Duration includes the total duration of the the pilot jobs.\nDeltas are the differences with the previous day.\n"
         headline = "For all jobs finished on %s (UTC)"
         headers = ("Site","VO","# of Jobs","Wall Duration","Delta jobs","Delta duration")
@@ -1012,7 +1015,7 @@ class DailySiteVOReportConf:
         def GetData(self,start,end):
            return UpdateVOName(DailySiteVOData(start,end),1,start, end)  
 
-class DailyVOSiteReportConf:
+class DailyVOSiteReportConf(GenericConf):
         title = "OSG usage summary (midnight to midnight UTC) for %s\nincluding all jobs that finished in that time period.\nWall Duration is expressed in hours and rounded to the nearest hour.\nWall Duration is the duration between the instant the job start running and the instant the job ends its execution.\nThe number of jobs counted here includes only the jobs directly seen by batch system and does not include the request sent directly to a pilot job.\nThe Wall Duration includes the total duration of the the pilot jobs.\nDeltas are the differences with the previous day.\n(nr) after a VO name indicates that the VO is not registered with OSG.\n"
         headline = "For all jobs finished on %s (UTC)"
         headers = ("VO","Site","# of Jobs","Wall Duration","Delta jobs","Delta duration")
@@ -1033,7 +1036,7 @@ class DailyVOSiteReportConf:
         def GetData(self,start,end):
            return UpdateVOName(DailyVOSiteData(start,end),0,start, end)   
 
-class DailySiteVOReportFromDailyConf:
+class DailySiteVOReportFromDailyConf(GenericConf):
         title = "OSG usage summary (midnight to midnight central time) for %s\nincluding all jobs that finished in that time period.\nWall Duration is expressed in hours and rounded to the nearest hour.\nWall Duration is the duration between the instant the job start running and the instant the job ends its execution.\nDeltas are the differences with the previous day.\nIf the number of jobs stated for a site is always 1\nthen this number is actually the number of summary records sent.\n(nr) after a VO name indicates that the VO is not registered with OSG.\n"
         headline = "For all jobs finished on %s (Central Time)"
         headers = ("Site","VO","# of Jobs","Wall Duration","Delta jobs","Delta duration")
@@ -1061,7 +1064,7 @@ class DailySiteVOReportFromDailyConf:
         def GetData(self,start,end):
            return DailySiteVODataFromDaily(start,end,self.select,self.count)
 
-class DailyVOSiteReportFromDailyConf:
+class DailyVOSiteReportFromDailyConf(GenericConf):
         title = "OSG usage summary (midnight to midnight central time) for %s\nincluding all jobs that finished in that time period.\nWall Duration is expressed in hours and rounded to the nearest hour.\nWall Duration is the duration between the instant the job start running and the instant the job ends its execution.\nDeltas are the differences with the previous day.\nIf the number of jobs stated for a site is always 1\nthen this number is actually the number of summary records sent.\n"
         headline = "For all jobs finished on %s (Central Time)"
         headers = ("VO","Site","# of Jobs","Wall Duration","Delta jobs","Delta duration")
@@ -1410,6 +1413,29 @@ select J.VOName, sum(J.NJobs), sum(J.WallDuration)
     else:
         return RunQueryAndSplit(select) 
 
+#| TransferSummaryID | int(11)      | NO   | PRI | NULL                | auto_increment | 
+#| StartTime         | datetime     | NO   | MUL | 0000-00-00 00:00:00 |                | 
+#| VOcorrid          | bigint(20)   | NO   | MUL | 0                   |                | 
+#| ProbeName         | varchar(255) | NO   | MUL |                     |                | 
+#| CommonName        | varchar(255) | NO   | MUL | Unknown             |                | 
+#| Protocol          | varchar(255) | NO   | MUL |                     |                | 
+#| RemoteSite        | varchar(255) | NO   | MUL |                     |                | 
+#| Status            | bigint(20)   | NO   | MUL | 0                   |                | 
+#| IsNew             | bigint(20)   | NO   | MUL | 0                   |                | 
+#| Njobs             | bigint(20)   | NO   |     | 0                   |                | 
+#| TransferSize      | double       | NO   |     | 0                   |                | 
+#| TransferDuration  | double       | NO   |     | 0                   |                | 
+#| StorageUnit       | varchar(255) | NO   | MUL | 0                   |                | 
+
+#Site, TB Transferred, Delta transfers, # of transfers, Delta transferred
+
+def DataTransferData(begin, end, with_panda = False):
+    schema = "gratia_osg_transfer" 
+#Summary.ProbeName=Probe.ProbeName and Probe.siteid = Site.siteid
+    select = "select T.SiteName, M.Protocol, sum(M.Njobs), sum(M.TransferSize) from " + schema + ".MasterTransferSummary M, " + schema + ".Probe P, " + schema + ".Site T where P.siteid = T.siteid and M.ProbeName = P.Probename and StartTime >= \"" + DateTimeToString(begin) + "\" and StartTime < \"" + DateTimeToString(end) + "\" and M.ProbeName not like \"psacct:%\" group by P.siteid"
+    #print select
+    return RunQueryAndSplit(select)
+
 def RangeSiteData(begin, end, with_panda = False):
     schema = gDBSchema[mainDB]
     select = """\
@@ -1546,7 +1572,7 @@ FROM VOProbeSummary U, Probe P, Site S where
 """
     return RunQueryAndSplit(select)
 
-class RangeVOReportConf:
+class RangeVOReportConf(GenericConf):
     title = """\
 OSG usage summary for  %s - %s (midnight UTC - midnight UTC)
 including all jobs that finished in that time period.
@@ -1573,7 +1599,7 @@ Deltas are the differences with the previous period."""
     def GetData(self,start,end):
         return UpdateVOName(RangeVOData(start, end, self.with_panda),0,start, end)
 
-class RangeSiteReportConf:
+class RangeSiteReportConf(GenericConf):
     title = """\
 OSG usage summary for  %s - %s (midnight UTC - midnight UTC)
 including all jobs that finished in that time period.
@@ -1599,8 +1625,37 @@ Deltas are the differences with the previous period."""
 
     def GetData(self, start, end):
         return RangeSiteData(start, end, self.with_panda)
-    
-class RangeSiteVOReportConf:
+
+class DataTransferReportConf(GenericConf):
+    title = """\
+OSG Data transfer summary for  %s - %s (midnight UTC - midnight UTC)
+including all data that transferred in that time period.
+Deltas are the differences with the previous period."""
+    headline = "For all data transferred between %s and %s (midnight, UTC)"
+    #headers = ("Site","Protocol","TB Transferred","Delta transfers","# of transfers","Delta transferred")
+    #headers = ("Site","Protocol","Number of\n transfers","N TB","D tr","D TB")
+    headers = ("Site","Protocol","Num transfer","Delta transfer","Number of TB","Delta TB")
+    num_header = 2
+    delta_column_location = "adjacent"
+    formats = {}
+    lines = {}
+    totalheaders = ["All sites","All Protocols"]
+    defaultSort = True
+
+    def __init__(self, header = False, with_panda = False):
+        self.formats["csv"] = ",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""
+        #self.formats["text"] = "| %-30s | %-18s | %9s | %13s | %10s | %14s"
+        #self.formats["text"] = "| %-30s | %-25s | %9s | %17s | %10s | %17s"
+        self.formats["text"] = "| %-30s | %-25s | %15s | %15s | %17s | %17s"
+        self.lines["csv"] = ""
+        self.lines["text"] = "---------------------------------------------------------------------------------------------------------------------------------------------"
+        if (not header) :  self.title = ""
+        self.with_panda = with_panda
+
+    def GetData(self, start, end):
+        return DataTransferData(start, end, self.with_panda)
+
+class RangeSiteVOReportConf(GenericConf):
     title = """\
 OSG usage summary for  %s - %s (midnight UTC - midnight UTC)
 including all jobs that finished in that time period.
@@ -1627,7 +1682,7 @@ Deltas are the differences with the previous period."""
     def GetData(self, start,end):
         return UpdateVOName(RangeSiteVOData(start, end, self.with_panda),1,start, end)  
 
-class RangeVOSiteReportConf:
+class RangeVOSiteReportConf(GenericConf):
     title = """\
 OSG usage summary for  %s - %s (midnight UTC - midnight UTC)
 including all jobs that finished in that time period.
@@ -1654,7 +1709,7 @@ Deltas are the differences with the previous period."""
     def GetData(self, start,end):
         return UpdateVOName(RangeVOSiteData(start, end, self.with_panda),0,start, end)   
 
-class RangeUserReportConf:
+class RangeUserReportConf(GenericConf):
     title = """\
 OSG usage summary for  %s - %s (midnight UTC - midnight UTC)
 including all jobs that finished in that time period.
@@ -1722,7 +1777,7 @@ Deltas are the differences with the previous period."""
            res = cmp(xval,yval)
         return res
 
-class RangeUserSiteReportConf:
+class RangeUserSiteReportConf(GenericConf):
     title = """\
 OSG usage summary for  %s - %s (midnight UTC - midnight UTC)
 including all jobs that finished in that time period.
@@ -1778,7 +1833,7 @@ Deltas are the differences with the previous period."""
               res = cmp(xval,yval)
         return res
 
-class LongJobsConf:
+class LongJobsConf(GenericConf):
     title = """\
 Summary of long running jobs that finished between %s - %s (midnight UTC - midnight UTC)
 
@@ -1804,7 +1859,7 @@ Only jobs that last 7 days or longer are counted in this report.
     def GetData(self, start,end):
         return UpdateVOName(LongJobsData(start, end, self.with_panda),1,start, end)      
 
-class RangeSiteVOEfficiencyConf:
+class RangeSiteVOEfficiencyConf(GenericConf):
         title = """\
 OSG efficiency summary for  %s - %s (midnight UTC - midnight UTC)
 including all jobs that finished in that time period.
@@ -1831,7 +1886,7 @@ Deltas are the differences with the previous period."""
         def GetData(self,start,end):
            return UpdateVOName(GetSiteVOEfficiency(start,end),1,start, end)
 
-class RangeVOEfficiencyConf:
+class RangeVOEfficiencyConf(GenericConf):
         title = """\
 OSG efficiency summary for  %s - %s (midnight UTC - midnight UTC)
 including all jobs that finished in that time period.
@@ -1858,7 +1913,7 @@ Deltas are the differences with the previous period."""
         def GetData(self,start,end):
            return UpdateVOName(GetVOEfficiency(start,end),0,start, end)
                       
-class GradedEfficiencyConf:
+class GradedEfficiencyConf(GenericConf):
         title = """\
 OSG efficiency summary for  %s - %s (midnight UTC - midnight UTC)
 including all jobs that finished in that time period.
@@ -2073,11 +2128,17 @@ def GenericRange(what, range_end = datetime.date.today(),
         printedvalues = []
         for iheaders in range(0,num_header):
            printedvalues.append( key[iheaders] )
-        printedvalues.append( niceNum(njobs) )
-        printedvalues.append( niceNum(wall) )
-        printedvalues.append( niceNum(njobs-oldnjobs) )
-        printedvalues.append( niceNum(wall-oldwall) )
-        
+        if(what.delta_column_location == "adjacent"): # print the delta columns adjacent to the corresponding field for which the delta has been calculated
+            printedvalues.append( niceNum(njobs) )
+            printedvalues.append( niceNum(njobs-oldnjobs) )
+            printedvalues.append( niceNum(wall) )
+            printedvalues.append( niceNum(wall-oldwall) )
+	else: # print the delta columns to the right
+            printedvalues.append( niceNum(njobs) )
+            printedvalues.append( niceNum(wall) )
+            printedvalues.append( niceNum(njobs-oldnjobs) )
+            printedvalues.append( niceNum(wall-oldwall) )
+
         if (output != "None") :
             print "%3d " %(index), what.formats[output] % tuple(printedvalues)
         result.append(tuple(printedvalues))       
@@ -2088,10 +2149,16 @@ def GenericRange(what, range_end = datetime.date.today(),
         printedvalues = []
         for iheaders in range(0,num_header):
            printedvalues.append( what.totalheaders[iheaders] )
-        printedvalues.append( niceNum(totaljobs) )
-        printedvalues.append( niceNum(totalwall) )
-        printedvalues.append( niceNum(totaljobs-oldnjobs) )
-        printedvalues.append( niceNum(totalwall-oldwall) )
+        if(what.delta_column_location == "adjacent"): # sum delta columns adjacent to the corresponding field for which the delta has been calculated
+            printedvalues.append( niceNum(totaljobs) )
+            printedvalues.append( niceNum(totaljobs-oldnjobs) )
+            printedvalues.append( niceNum(totalwall) )
+            printedvalues.append( niceNum(totalwall-oldwall) )
+	else:
+            printedvalues.append( niceNum(totaljobs) )
+            printedvalues.append( niceNum(totalwall) )
+            printedvalues.append( niceNum(totaljobs-oldnjobs) )
+            printedvalues.append( niceNum(totalwall-oldwall) )
 
         print "    ", what.formats[output] % tuple(printedvalues)
         print what.lines[output]
@@ -2443,6 +2510,16 @@ def RangeSiteVOReport(range_end = datetime.date.today(),
                         range_begin,
                         output)
 
+def DataTransferReport(range_end = datetime.date.today(),
+                      range_begin = None,
+                      output = "text",
+                      header = True,
+                      with_panda = False):
+    return GenericRange(DataTransferReportConf(header, with_panda),
+                        range_end,
+                        range_begin,
+                        output)
+
 def RangeVOSiteReport(range_end = datetime.date.today(),
                       range_begin = None,
                       output = "text",
@@ -2617,7 +2694,7 @@ def RangeSummup(range_end = datetime.date.today(),
 #        range_begin = datetime.date(*time.strptime(range_begin, "%Y/%m/%d")[0:3])
     timediff = range_end - range_begin
 
-    regSites = GetListOfOSGSites();
+    allSites = GetListOfOSGSites();
     regVOs = GetListOfRegisteredVO('Active',range_begin,range_end)
     disabledSites = GetListOfDisabledOSGSites();
 
@@ -2629,17 +2706,17 @@ def RangeSummup(range_end = datetime.date.today(),
            (name,lastreport) = data.split("\t")
            pingSites.append(name)
 
-    exceptionSites = ['AGLT2_CE_2','BNL-LCG2','BNL_ATLAS_1', 'BNL_ATLAS_2','FNAL_GPGRID_2','USCMS-FNAL-XEN','USCMS-FNAL-WC1-CE2', 'USCMS-FNAL-WC1-CE3', 'USCMS-FNAL-WC1-CE4', 'BNL_LOCAL', 'BNL_OSG', 'BNL_PANDA', 'GLOW-CMS', 'UCSDT2-B', 'Purdue-Lear' ]
+    exceptionSites = ['AGLT2_CE_2','BNL-LCG2', 'BNL_LOCAL', 'BNL_OSG', 'BNL_PANDA', 'GLOW-CMS', 'UCSDT2-B', 'Purdue-Lear' ]
     #exceptionSites = ['BNL_ATLAS_1', 'BNL_ATLAS_2', 'USCMS-FNAL-WC1-CE2', 'USCMS-FNAL-WC1-CE3', 'USCMS-FNAL-WC1-CE4', 'BNL_LOCAL', 'BNL_OSG', 'BNL_PANDA', 'GLOW-CMS', 'UCSDT2-B']
 
-    allSites = [name for name in regSites if name not in exceptionSites]
+    allSites = [name for name in allSites if name not in exceptionSites]
     reportingSites = GetListOfReportingSites(range_begin,range_end);
 
     missingSites = [name for name in allSites if name not in reportingSites and name not in pingSites]
     emptySites = [name for name in allSites if name not in reportingSites and name in pingSites]
     
     extraSites = [name for name in reportingSites if name not in allSites and name not in disabledSites]
-    knownExtras = [name for name in extraSites if name in exceptionSites and name not in regSites]
+    knownExtras = [name for name in extraSites if name in exceptionSites]
     extraSites = [name for name in extraSites if name not in exceptionSites]
     reportingDisabled = [name for name in reportingSites if name in disabledSites]
 
@@ -2716,11 +2793,11 @@ def NonReportingSites(
 
     print "This report indicates which sites Gratia has heard from or have known activity\nsince %s (midnight UTC)\n" % ( DateToString(when,False) )
 
-    regSites = GetListOfOSGSites();
+    allSites = GetListOfOSGSites();
     regVOs = GetListOfRegisteredVO('Active',when,datetime.date.today())
-    exceptionSites = ['AGLT2_CE_2','BNL-LCG2','BNL_ATLAS_1', 'BNL_ATLAS_2','FNAL_GPGRID_2','USCMS-FNAL-XEN','USCMS-FNAL-WC1-CE2', 'USCMS-FNAL-WC1-CE3', 'USCMS-FNAL-WC1-CE4', 'BNL_LOCAL', 'BNL_OSG', 'BNL_PANDA', 'GLOW-CMS', 'UCSDT2-B', 'Purdue-Lear' ]
+    exceptionSites = ['AGLT2_CE_2','BNL-LCG2', 'BNL_LOCAL', 'BNL_OSG', 'BNL_PANDA', 'GLOW-CMS', 'UCSDT2-B', 'Purdue-Lear' ]
 
-    allSites = [name for name in regSites if name not in exceptionSites]
+    allSites = [name for name in allSites if name not in exceptionSites]
     reportingVOs = GetLastReportingVOs(when)
     reportingSitesDate = GetSiteLastReportingDate(when,True)
     stoppedSitesDate = GetSiteLastReportingDate(when,False)
@@ -2741,7 +2818,7 @@ def NonReportingSites(
     stoppedSites = [name for name in stoppedSites if name in allSites]
     missingSites = [name for name in allSites if name not in reportingSites and name not in stoppedSites]
     extraSites = [name for name in reportingSites if name not in allSites]
-    knownExtras = [name for name in extraSites if name in exceptionSites and name not in regSites]
+    knownExtras = [name for name in extraSites if name in exceptionSites]
     extraSites = [name for name in extraSites if name not in exceptionSites]
 
     #print allSites
@@ -2882,7 +2959,7 @@ order by Si.SiteName, ProbeName, S.Name, ServerDate"""
    return RunQueryAndSplit(select);
 
 
-class SoftwareVersionConf:
+class SoftwareVersionConf(GenericConf):
    title = """This reports list the current version of the Gratia probe(s) installed and reporting at each site as of %s.
 
 Only sites registered in OIM are listed.
@@ -3057,7 +3134,7 @@ def SoftwareVersion(range_end = datetime.date.today(),
    msg = msg + conf.end[output] + "\n"
    return msg
 
-class NewUsersConf:
+class NewUsersConf(GenericConf):
    title = """\
 The following users's CN very first's job on on the OSG site finished 
 between %s - %s (midnight UTC - midnight UTC):
