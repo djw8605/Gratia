@@ -30,6 +30,7 @@ public class HibernateWrapper {
     private static synchronized void startImpl() throws Exception {
         if (hibernateInitialized) {
             systemDatabaseUp();
+            return;
         }
 
         try {
