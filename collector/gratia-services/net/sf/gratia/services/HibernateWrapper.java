@@ -71,15 +71,18 @@ public class HibernateWrapper {
     }
 
     public static boolean systemDatabaseUp() {
-       try {
-          org.hibernate.Session session = hibernateFactory.openSession();
-          Boolean connected = isFullyConnected(session);
-          session.close();
-          return connected;
-       }
-       catch (Exception e) {
-          return false;
-       }
+        try {
+            if (!hibernateInitialized) {
+                startImpl();
+            }
+            org.hibernate.Session session = hibernateFactory.openSession();
+            Boolean connected = isFullyConnected(session);
+            session.close();
+            return connected;
+        }
+        catch (Exception e) {
+            return false;
+        }
     }
 
     public static synchronized boolean databaseUp() {
