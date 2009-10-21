@@ -54,7 +54,7 @@ gDBSchema = {}
 mainDB = "main_db"
 psacctDB = "psacct_db"
 dailyDB = "daily_db"
-
+transferDB = "transfer_db"
 
 gOutput="text" # Type of output (text, csv, None)
 
@@ -378,12 +378,12 @@ def sendAll(text, filestem = "temp"):
 
 
 def DBConnectString(configFiles):
-    global gMySQLConnectString,gMySQLFermiConnectString,gMySQLDailyConnectString,gConfig
+    global gMySQLConnectString,gMySQLFermiConnectString,gMySQLDailyConnectString,gMySQLTransferConnectString, gConfig
     gConfig.read(configFiles)
     gMySQLConnectString      = DBConnectStringHelper(mainDB)
     gMySQLFermiConnectString = DBConnectStringHelper(psacctDB)
     gMySQLDailyConnectString = DBConnectStringHelper(dailyDB)
-
+    gMySQLTransferConnectString = DBConnectStringHelper(transferDB)
 
 def DBConnectStringHelper(dbName):
     global gDBHostName,gDBUserName,gDBPort,gDBPassword,gDBSchema,gConfig
@@ -1414,9 +1414,14 @@ select J.VOName, sum(J.NJobs), sum(J.WallDuration)
         return RunQueryAndSplit(select) 
 
 def DataTransferData(begin, end, with_panda = False):
-    schema = "gratia_osg_transfer" 
-    select = "select T.SiteName, M.Protocol, sum(M.Njobs), sum(M.TransferSize)/1000000 from " + schema + ".MasterTransferSummary M, " + schema + ".Probe P, " + schema + ".Site T where P.siteid = T.siteid and M.ProbeName = P.Probename and StartTime >= \"" + DateTimeToString(begin) + "\" and StartTime < \"" + DateTimeToString(end) + "\" and M.ProbeName not like \"psacct:%\" group by P.siteid"
-    return RunQueryAndSplit(select)
+    global gMySQLConnectString
+    schema = gDBSchema[transferDB]
+    keepConnectionValue = gMySQLConnectString
+    gMySQLConnectString = gMySQLTransferConnectString
+    select = "select T.SiteName, M.Protocol, sum(M.Njobs), sum(M.TransferSize * Multiplier) from " + schema + ".MasterTransferSummary M, " + schema + ".Probe P, " + schema + ".Site T, " + schema + ".SizeUnits su where M.StorageUnit = su.Unit and P.siteid = T.siteid and M.ProbeName = P.Probename and StartTime >= \"" + DateTimeToString(begin) + "\" and StartTime < \"" + DateTimeToString(end) + "\" and M.ProbeName not like \"psacct:%\" group by P.siteid, Protocol"
+    result = RunQueryAndSplit(select)
+    gMySQLConnectString = keepConnectionValue 
+    return result
 
 def RangeSiteData(begin, end, with_panda = False):
     schema = gDBSchema[mainDB]
@@ -1608,13 +1613,15 @@ Deltas are the differences with the previous period."""
     def GetData(self, start, end):
         return RangeSiteData(start, end, self.with_panda)
 
+import inspect
+
 class DataTransferReportConf(GenericConf):
     title = """\
 OSG Data transfer summary for  %s - %s (midnight UTC - midnight UTC)
 including all data that transferred in that time period.
 Deltas are the differences with the previous period."""
     headline = "For all data transferred between %s and %s (midnight, UTC)"
-    headers = ("Site","Protocol","Num transfer","Delta transfer","Number of KB","Delta KB")
+    headers = ("Site","Protocol","Num transfer","Delta transfer","Number of MiB","Delta MiB")
     num_header = 2
     delta_column_location = "adjacent"
     formats = {}
