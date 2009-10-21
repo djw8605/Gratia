@@ -152,11 +152,28 @@ public class ConnectionTable extends HttpServlet
       
       void loadConnections() {
          // Load replication entries from DB
-         Session session;
-         session = HibernateWrapper.getSession();
-         Query rq = session.createQuery("from Connection");
-         List records = rq.list();
-         session.close();
+         Session session = null;
+         List records = null;
+         try {
+            session = HibernateWrapper.getCheckedSession();
+            Query rq = session.createQuery("from Connection");
+            records = rq.list();
+            session.close();
+         } catch (Exception e) {
+            session.close();
+            Logging.warning("Load connection caught: "+e.getMessage());
+         }
+         if (records == null) {
+            try {
+               session = HibernateWrapper.getCheckedSession();
+               Query rq = session.createQuery("from Connection");
+               records = rq.list();
+               session.close();
+            } catch (Exception e) {
+               session.close();
+               Logging.warning("Load connection part-2 caught: "+e.getMessage());
+            }
+         }            
          
          // Load hash table with entries
          fRepTable = new Hashtable<Long, Connection>();
@@ -267,7 +284,7 @@ public class ConnectionTable extends HttpServlet
             updated.setValid(isValid);
          
             if (cert != null) {
-               Session session = HibernateWrapper.getSession();
+               Session session = HibernateWrapper.getCheckedSession();
                Transaction tx = session.beginTransaction();
                session.saveOrUpdate( updated );
                session.flush();
@@ -288,7 +305,7 @@ public class ConnectionTable extends HttpServlet
 
          try {
             getCollectorProxy().setConnectionCaching(false);
-            Session session = HibernateWrapper.getSession();
+            Session session = HibernateWrapper.getCheckedSession();
             Transaction tx = session.beginTransaction();
          
             Hashtable<Long,Connection> updatedTable = new Hashtable<Long,Connection>();

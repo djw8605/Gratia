@@ -7,11 +7,41 @@ import java.util.*;
 import java.io.*;
 
 public class HibernateWrapper {
+    private static class ConnectionChecker implements org.hibernate.jdbc.Work {
+        private boolean fConnectionStatus = false;
+
+        ConnectionChecker() {
+        }
+
+        public synchronized boolean isFullyConnected(org.hibernate.Session session)
+            throws java.sql.SQLException {
+            if (session.connection() == null) {
+                Logging.debug("ConnectionChecker.isFullyConnected: session.connection() is null.");
+                fConnectionStatus = false;
+            } else {
+                session.doWork(this);
+            }
+            Logging.debug("ConnectionChecker.isFullyConnected returning " + fConnectionStatus);
+            return fConnectionStatus;
+        }
+
+        public synchronized void execute(java.sql.Connection conn)
+            throws java.sql.SQLException { // Required method 
+            // Set connection status.
+            Logging.debug("ConnectionChecker.execute called");
+            if (conn == null) {
+                Logging.fine("ConnectionChecker.execute: Connection is null!");
+            }
+            fConnectionStatus = (conn!=null) && (!conn.isClosed());
+        }
+    }
+
     static org.hibernate.cfg.Configuration hibernateConfiguration;
     static org.hibernate.SessionFactory hibernateFactory;
 
     static private Boolean hibernateInitialized = false;
     static private Properties initProperties = null;
+    static private ConnectionChecker cChecker = new ConnectionChecker();
 
     public static synchronized org.hibernate.cfg.Configuration getHibernateConfiguration() {
         return hibernateConfiguration;
@@ -29,7 +59,7 @@ public class HibernateWrapper {
 
     private static synchronized void startImpl() throws Exception {
         if (hibernateInitialized) {
-            systemDatabaseUp();
+            databaseUp();
             return;
         }
 
@@ -71,21 +101,6 @@ public class HibernateWrapper {
         hibernateInitialized = true;
     }
 
-    public static boolean systemDatabaseUp() {
-        try {
-            if (!hibernateInitialized) {
-                startImpl();
-            }
-            org.hibernate.Session session = hibernateFactory.openSession();
-            Boolean connected = isFullyConnected(session);
-            session.close();
-            return connected;
-        }
-        catch (Exception e) {
-            return false;
-        }
-    }
-
     public static synchronized boolean databaseUp() {
         try {
             if (!hibernateInitialized) {
@@ -109,7 +124,7 @@ public class HibernateWrapper {
         }
     }
 
-    public static synchronized org.hibernate.Session getSession() {
+    public static synchronized org.hibernate.Session getSession() { // Fast
         try {
             if (!hibernateInitialized) {
                 startImpl();
@@ -123,25 +138,52 @@ public class HibernateWrapper {
         }
     }
    
-   public static boolean isFullyConnected(org.hibernate.Session session) {
-      // Return true if the session is fully useable (i.e rolling back a
-      // transaction won't throw because something is 'already closed').
-      
-      if (session != null) {
-         if (session.isOpen() && session.isConnected()) {
-            java.sql.Connection conn = session.connection();
-            try { 
-               return conn!=null && !conn.isClosed();
-            } catch (java.sql.SQLException e) {
-               return false;
-            } catch (org.hibernate.exception.JDBCConnectionException e) {
-               return false;
-            } catch (Exception e) {
-               Logging.info("HibernateWrapper::isFullyConnected unexcepted exception: "+e.getMessage());
-               Logging.debug("Exception details: ", e);
+    public static synchronized org.hibernate.Session getCheckedSession() { // Slower
+        try {
+            if (!hibernateInitialized) {
+                startImpl();
             }
-         }
-      }
-      return false;
+            org.hibernate.Session session = hibernateFactory.openSession();
+            if (!isFullyConnected(session)) {
+                // Try one more time.
+                Logging.log("HibernateWrapper: Get Session: initial attempt to get session failed; trying one more time");
+                session = hibernateFactory.openSession();
+                if (!isFullyConnected(session)) {
+                    // Failed.
+                    Logging.info("HibernateWrapper: Get Session: Database Down");
+                    return null;
+                }
+                Logging.log("HibernateWrapper: Get Session: retry succeeded.");
+            }
+            return session;
+        }
+        catch (Exception e) {
+            Logging.info("HibernateWrapper: Get Session: Database Down");
+            return null;
+        }
+    }
+   
+   public static boolean isFullyConnected(org.hibernate.Session session) {
+       // Return true if the session is fully useable (i.e rolling back a
+       // transaction won't throw because something is 'already closed').
+
+       if (session != null) {
+           if (session.isOpen() && session.isConnected()) {
+               try { 
+                   return cChecker.isFullyConnected(session);
+               } catch (java.sql.SQLException e) {
+                   Logging.debug("HibernateWrapper::isFullyConnected caught SQLException: " + e.getMessage());
+                   return false;
+               } catch (org.hibernate.exception.JDBCConnectionException e) {
+                   Logging.debug("HibernateWrapper::isFullyConnected caught JDBCConnectionException: " + e.getMessage());
+                   return false;
+               } catch (Exception e) {
+                   Logging.info("HibernateWrapper::isFullyConnected unexcepted exception: "+e.getMessage());
+                   Logging.debug("Exception details: ", e);
+               }
+           }
+       }
+       return false;
    }
+
 }

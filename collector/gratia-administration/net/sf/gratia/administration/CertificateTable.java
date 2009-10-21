@@ -114,7 +114,7 @@ public class CertificateTable extends HttpServlet
       void loadCertificates() {
          // Load replication entries from DB
          Session session;
-         session = HibernateWrapper.getSession();
+         session = HibernateWrapper.getCheckedSession();
          Query rq = session.createQuery("from Certificate");
          List records = rq.list();
          session.close();
@@ -222,7 +222,7 @@ public class CertificateTable extends HttpServlet
             updated.setValid(isValid);
          
             if (cert != null) {
-               Session session = HibernateWrapper.getSession();
+               Session session = HibernateWrapper.getCheckedSession();
                Transaction tx = session.beginTransaction();
                session.saveOrUpdate( updated );
                session.flush();
@@ -240,7 +240,7 @@ public class CertificateTable extends HttpServlet
          Logging.debug("CertificateTable: changing state of all certificates to " + (isValid ? "Allowed" : "Banned"));
 
          try {
-            Session session = HibernateWrapper.getSession();
+            Session session = HibernateWrapper.getCheckedSession();
             Transaction tx = session.beginTransaction();
          
             Hashtable<Long,Certificate> updatedTable = new Hashtable<Long,Certificate>();

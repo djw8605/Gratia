@@ -274,7 +274,8 @@ ${target}/gratia-administration.war: $(util_lib)  $(target)/gratiaSecurity.jar \
                                      ${administration}/WebContent/images/*.gif \
                                      $(commonLib)/tar.jar \
                                      $(commonLib)/bzip2.jar \
-                                     $(commonLib)/mysql*.jar
+                                     $(commonLib)/mysql*.jar \
+				$(administration)/ehcache.xml $(administration)/c3p0.properties
 	#----------------------------------------------------
 	# --- Target: $(target)/gratia-administration.war ---
 	#----------------------------------------------------
@@ -298,8 +299,8 @@ ${target}/gratia-administration.war: $(util_lib)  $(target)/gratiaSecurity.jar \
 	cp $(administration)/WebContent/*.jsp $(war-dir)/$(name_from_war)
 	cp $(administration)/WebContent/*.js $(war-dir)/$(name_from_war)
 	cp $(administration)/WebContent/images/*.gif $(war-dir)/$(name_from_war)/images
-	cp $(services)/ehcache.xml $(war-dir)/$(name_from_war)/WEB-INF/classes/
-	cp $(services)/c3p0.properties $(war-dir)/$(name_from_war)/WEB-INF/classes/
+	cp $(administration)/ehcache.xml $(war-dir)/$(name_from_war)/WEB-INF/classes/
+	cp $(administration)/c3p0.properties $(war-dir)/$(name_from_war)/WEB-INF/classes/
 	# cp $(docs)/*.html war # included in the administration WebContent
 	cp $(classes-dir)/net/sf/gratia/util/Logging.class $(war-dir)/$(name_from_war)/WEB-INF/classes/net/sf/gratia/util
 	cp $(commonLib)/*.jar $(war-dir)/$(name_from_war)/WEB-INF/lib
