@@ -1613,8 +1613,6 @@ Deltas are the differences with the previous period."""
     def GetData(self, start, end):
         return RangeSiteData(start, end, self.with_panda)
 
-import inspect
-
 class DataTransferReportConf(GenericConf):
     title = """\
 OSG Data transfer summary for  %s - %s (midnight UTC - midnight UTC)
