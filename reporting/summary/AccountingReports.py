@@ -1415,7 +1415,7 @@ select J.VOName, sum(J.NJobs), sum(J.WallDuration)
 
 def DataTransferData(begin, end, with_panda = False):
     schema = "gratia_osg_transfer" 
-    select = "select T.SiteName, M.Protocol, sum(M.Njobs), sum(M.TransferSize) from " + schema + ".MasterTransferSummary M, " + schema + ".Probe P, " + schema + ".Site T where P.siteid = T.siteid and M.ProbeName = P.Probename and StartTime >= \"" + DateTimeToString(begin) + "\" and StartTime < \"" + DateTimeToString(end) + "\" and M.ProbeName not like \"psacct:%\" group by P.siteid"
+    select = "select T.SiteName, M.Protocol, sum(M.Njobs), sum(M.TransferSize)/1000000 from " + schema + ".MasterTransferSummary M, " + schema + ".Probe P, " + schema + ".Site T where P.siteid = T.siteid and M.ProbeName = P.Probename and StartTime >= \"" + DateTimeToString(begin) + "\" and StartTime < \"" + DateTimeToString(end) + "\" and M.ProbeName not like \"psacct:%\" group by P.siteid"
     return RunQueryAndSplit(select)
 
 def RangeSiteData(begin, end, with_panda = False):
