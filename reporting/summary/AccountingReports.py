@@ -1413,27 +1413,9 @@ select J.VOName, sum(J.NJobs), sum(J.WallDuration)
     else:
         return RunQueryAndSplit(select) 
 
-#| TransferSummaryID | int(11)      | NO   | PRI | NULL                | auto_increment | 
-#| StartTime         | datetime     | NO   | MUL | 0000-00-00 00:00:00 |                | 
-#| VOcorrid          | bigint(20)   | NO   | MUL | 0                   |                | 
-#| ProbeName         | varchar(255) | NO   | MUL |                     |                | 
-#| CommonName        | varchar(255) | NO   | MUL | Unknown             |                | 
-#| Protocol          | varchar(255) | NO   | MUL |                     |                | 
-#| RemoteSite        | varchar(255) | NO   | MUL |                     |                | 
-#| Status            | bigint(20)   | NO   | MUL | 0                   |                | 
-#| IsNew             | bigint(20)   | NO   | MUL | 0                   |                | 
-#| Njobs             | bigint(20)   | NO   |     | 0                   |                | 
-#| TransferSize      | double       | NO   |     | 0                   |                | 
-#| TransferDuration  | double       | NO   |     | 0                   |                | 
-#| StorageUnit       | varchar(255) | NO   | MUL | 0                   |                | 
-
-#Site, TB Transferred, Delta transfers, # of transfers, Delta transferred
-
 def DataTransferData(begin, end, with_panda = False):
     schema = "gratia_osg_transfer" 
-#Summary.ProbeName=Probe.ProbeName and Probe.siteid = Site.siteid
     select = "select T.SiteName, M.Protocol, sum(M.Njobs), sum(M.TransferSize) from " + schema + ".MasterTransferSummary M, " + schema + ".Probe P, " + schema + ".Site T where P.siteid = T.siteid and M.ProbeName = P.Probename and StartTime >= \"" + DateTimeToString(begin) + "\" and StartTime < \"" + DateTimeToString(end) + "\" and M.ProbeName not like \"psacct:%\" group by P.siteid"
-    #print select
     return RunQueryAndSplit(select)
 
 def RangeSiteData(begin, end, with_panda = False):
@@ -1632,9 +1614,7 @@ OSG Data transfer summary for  %s - %s (midnight UTC - midnight UTC)
 including all data that transferred in that time period.
 Deltas are the differences with the previous period."""
     headline = "For all data transferred between %s and %s (midnight, UTC)"
-    #headers = ("Site","Protocol","TB Transferred","Delta transfers","# of transfers","Delta transferred")
-    #headers = ("Site","Protocol","Number of\n transfers","N TB","D tr","D TB")
-    headers = ("Site","Protocol","Num transfer","Delta transfer","Number of TB","Delta TB")
+    headers = ("Site","Protocol","Num transfer","Delta transfer","Number of KB","Delta KB")
     num_header = 2
     delta_column_location = "adjacent"
     formats = {}
@@ -1644,8 +1624,6 @@ Deltas are the differences with the previous period."""
 
     def __init__(self, header = False, with_panda = False):
         self.formats["csv"] = ",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""
-        #self.formats["text"] = "| %-30s | %-18s | %9s | %13s | %10s | %14s"
-        #self.formats["text"] = "| %-30s | %-25s | %9s | %17s | %10s | %17s"
         self.formats["text"] = "| %-30s | %-25s | %15s | %15s | %17s | %17s"
         self.lines["csv"] = ""
         self.lines["text"] = "---------------------------------------------------------------------------------------------------------------------------------------------"
