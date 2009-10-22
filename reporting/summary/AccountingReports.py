@@ -2677,7 +2677,7 @@ def RangeSummup(range_end = datetime.date.today(),
 #        range_begin = datetime.date(*time.strptime(range_begin, "%Y/%m/%d")[0:3])
     timediff = range_end - range_begin
 
-    allSites = GetListOfOSGSites();
+    regSites = GetListOfOSGSites();
     regVOs = GetListOfRegisteredVO('Active',range_begin,range_end)
     disabledSites = GetListOfDisabledOSGSites();
 
@@ -2689,17 +2689,17 @@ def RangeSummup(range_end = datetime.date.today(),
            (name,lastreport) = data.split("\t")
            pingSites.append(name)
 
-    exceptionSites = ['AGLT2_CE_2','BNL-LCG2', 'BNL_LOCAL', 'BNL_OSG', 'BNL_PANDA', 'GLOW-CMS', 'UCSDT2-B', 'Purdue-Lear' ]
+    exceptionSites = ['AGLT2_CE_2','BNL-LCG2','BNL_ATLAS_1', 'BNL_ATLAS_2','FNAL_GPGRID_2','USCMS-FNAL-XEN','USCMS-FNAL-WC1-CE2', 'USCMS-FNAL-WC1-CE3', 'USCMS-FNAL-WC1-CE4', 'BNL_LOCAL', 'BNL_OSG', 'BNL_PANDA', 'GLOW-CMS', 'UCSDT2-B', 'Purdue-Lear' ]
     #exceptionSites = ['BNL_ATLAS_1', 'BNL_ATLAS_2', 'USCMS-FNAL-WC1-CE2', 'USCMS-FNAL-WC1-CE3', 'USCMS-FNAL-WC1-CE4', 'BNL_LOCAL', 'BNL_OSG', 'BNL_PANDA', 'GLOW-CMS', 'UCSDT2-B']
 
-    allSites = [name for name in allSites if name not in exceptionSites]
+    allSites = [name for name in regSites if name not in exceptionSites]
     reportingSites = GetListOfReportingSites(range_begin,range_end);
 
     missingSites = [name for name in allSites if name not in reportingSites and name not in pingSites]
     emptySites = [name for name in allSites if name not in reportingSites and name in pingSites]
     
     extraSites = [name for name in reportingSites if name not in allSites and name not in disabledSites]
-    knownExtras = [name for name in extraSites if name in exceptionSites]
+    knownExtras = [name for name in extraSites if name in exceptionSites and name not in regSites]
     extraSites = [name for name in extraSites if name not in exceptionSites]
     reportingDisabled = [name for name in reportingSites if name in disabledSites]
 
@@ -2776,11 +2776,11 @@ def NonReportingSites(
 
     print "This report indicates which sites Gratia has heard from or have known activity\nsince %s (midnight UTC)\n" % ( DateToString(when,False) )
 
-    allSites = GetListOfOSGSites();
+    regSites = GetListOfOSGSites();
     regVOs = GetListOfRegisteredVO('Active',when,datetime.date.today())
-    exceptionSites = ['AGLT2_CE_2','BNL-LCG2', 'BNL_LOCAL', 'BNL_OSG', 'BNL_PANDA', 'GLOW-CMS', 'UCSDT2-B', 'Purdue-Lear' ]
+    exceptionSites = ['AGLT2_CE_2','BNL-LCG2','BNL_ATLAS_1', 'BNL_ATLAS_2','FNAL_GPGRID_2','USCMS-FNAL-XEN','USCMS-FNAL-WC1-CE2', 'USCMS-FNAL-WC1-CE3', 'USCMS-FNAL-WC1-CE4', 'BNL_LOCAL', 'BNL_OSG', 'BNL_PANDA', 'GLOW-CMS', 'UCSDT2-B', 'Purdue-Lear' ]
 
-    allSites = [name for name in allSites if name not in exceptionSites]
+    allSites = [name for name in regSites if name not in exceptionSites]
     reportingVOs = GetLastReportingVOs(when)
     reportingSitesDate = GetSiteLastReportingDate(when,True)
     stoppedSitesDate = GetSiteLastReportingDate(when,False)
@@ -2801,7 +2801,7 @@ def NonReportingSites(
     stoppedSites = [name for name in stoppedSites if name in allSites]
     missingSites = [name for name in allSites if name not in reportingSites and name not in stoppedSites]
     extraSites = [name for name in reportingSites if name not in allSites]
-    knownExtras = [name for name in extraSites if name in exceptionSites]
+    knownExtras = [name for name in extraSites if name in exceptionSites and name not in regSites]
     extraSites = [name for name in extraSites if name not in exceptionSites]
 
     #print allSites
