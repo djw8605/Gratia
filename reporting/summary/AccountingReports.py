@@ -891,6 +891,7 @@ def FromCondor():
 
 class GenericConf: # top parent class. Just for sake of adding a single common attribute to all other Conf classes (triggered by Brian's request of having the delta columns adjacent to the data columns in the DataTransferReport instead of all bunched to the right) 
     delta_column_location = "right"
+    factor = 3600 # conversion factor for time from hours to seconds for most reports (except data transfere report where it will be set to 1)
 
 class DailySiteJobStatusConf(GenericConf):
     title = "Summary of the job exit status (midnight to midnight UTC) for %s\nincluding all jobs that finished in that time period.\n\nFor Condor the value used is taken from 'ExitCode' and NOT from 'Exit Status'\n\nWall Success: Wall clock hours of successfully completed jobs\nWall Failed: Wall clock hours of unsuccessfully completed jobs\nWall Success Rate: Wall Success / (Wall Success + Wall Failed)\nSuccess: number of successfully completed jobs\nFailed: Number of unsuccessfully completed jobs\nSuccess Rate: number of successfull jobs / total number of jobs\n"
@@ -1621,6 +1622,7 @@ Deltas are the differences with the previous period."""
     headline = "For all data transferred between %s and %s (midnight, UTC)"
     headers = ("Site","Protocol","Num transfer","Delta transfer","Number of MiB","Delta MiB")
     num_header = 2
+    factor = 1 # This is the factor to convert time from seconds to hours for other reports. But for data transfer report there is nothing to convert since we are just dealing with the transfer size (not time)
     delta_column_location = "adjacent"
     formats = {}
     lines = {}
@@ -1986,9 +1988,7 @@ def SimpleRange(what, range_end = datetime.date.today(),
 def GenericRange(what, range_end = datetime.date.today(),
                  range_begin = None,
                  output = "text"):
-    factor = 3600  # Convert number of seconds to number of hours
-    if(what.delta_column_location == "adjacent"): # A silly way of differentiating data transfere report from other reports
-        factor = 1  # No conversion - because it is just the data transfer size 
+    factor = what.factor # Convert number of seconds to number of hours for most reports except data transfer report
 
     if (not range_begin or range_begin == None): range_begin = range_end + datetime.timedelta(days=-1)
     if (not range_end or range_end == None): range_end = range_begin + datetime.timedelta(days=+1)
