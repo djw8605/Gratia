@@ -483,8 +483,8 @@ def NumberOfCpus():
         gMySQLConnectString = keepConnectionValue;
         LogToFile(res)
         values = res.split("\n")[1]
-        ncpu = string.atoi(values.split("\t")[0])
-        benchtotal = string.atof(values.split("\t")[1]) 
+        ncpu = int(values.split("\t")[0])
+        benchtotal = float(values.split("\t")[1]) 
         return (ncpu,benchtotal);
 
 def GetListOfSites(filter):
@@ -797,10 +797,10 @@ class Record:
                 factor = 3600  # Convert number of seconds to number of hours
 
                 self.voname = vals[0]
-                self.cputime = string.atof(vals[1]) / factor
-                self.normcpu = string.atof(vals[2]) / factor
-                self.walltime= string.atof(vals[3]) / factor
-                self.normwall= string.atof(vals[4]) / factor
+                self.cputime = float(vals[1]) / factor
+                self.normcpu = float(vals[2]) / factor
+                self.walltime= float(vals[3]) / factor
+                self.normwall= float(vals[4]) / factor
 
         def Norm(self,ncpu,days,benchtotal):
                 fulltime = ncpu * days * 24 # number of Cpu hours
@@ -1137,19 +1137,19 @@ def GenericDailyStatus(what, when = datetime.date.today(), output = "text"):
                 if (what.Both):
                    vo = val[1]
                    status = val[2]
-                   count = string.atoi(val[3])
+                   count = int(val[3])
                    if val[4] == "NULL":
                       wall = 0
                    else:
-                      wall = string.atof( val[4] ) / factor
+                      wall = float( val[4] ) / factor
                 else:
                    vo = ""
                    status = val[1]
-                   count = string.atoi(val[2])
+                   count = int(val[2])
                    if val[3] == "NULL":
                       wall = 0
                    else:
-                      wall = string.atof( val[3] ) / factor
+                      wall = float( val[3] ) / factor
 
                 key = site + ";" + vo + " has status " + status
 
@@ -1259,11 +1259,11 @@ def GenericDaily(what, when = datetime.date.today(), output = "text"):
                         offset = 1
                         num_header = 2
                         key = site + " " + vo
-                njobs= string.atoi( val[offset+1] )
+                njobs= int( val[offset+1] )
                 if val[offset+2] == "NULL":
                    wall = 0
                 else:
-                   wall = string.atof( val[offset+2] ) / factor
+                   wall = float( val[offset+2] ) / factor
                 totalwall = totalwall + wall
                 totaljobs = totaljobs + njobs                
                 oldValues[key] = (njobs,wall,site,vo)
@@ -1287,11 +1287,11 @@ def GenericDaily(what, when = datetime.date.today(), output = "text"):
  #                       offset = 1
  #                       num_header = 2
  #                       key = site + " " + vo
- #               njobs= string.atoi( val[offset+1] )
+ #               njobs= int( val[offset+1] )
  #               if val[offset+2] == "NULL":
  #                  wall = 0
  #               else:
- #                  wall = string.atof( val[offset+2] ) / factor
+ #                  wall = float( val[offset+2] ) / factor
  #               totalwall = totalwall + wall
  #               totaljobs = totaljobs + njobs                
  #               weekValues[key] = (njobs,wall,site,vo)
@@ -1324,11 +1324,11 @@ def GenericDaily(what, when = datetime.date.today(), output = "text"):
                 if oldValues.has_key(key):
                         (oldnjobs,oldwall,s,v) = oldValues[key]
                         del oldValues[key]
-                njobs= string.atoi( val[offset+1] )
+                njobs= int( val[offset+1] )
                 if val[offset+2] == "NULL":
                    wall = 0
                 else:
-                   wall = string.atof( val[offset+2] ) / factor
+                   wall = float( val[offset+2] ) / factor
                 totalwall = totalwall + wall
                 totaljobs = totaljobs + njobs
                 printValues[key] = (njobs,wall,oldnjobs,oldwall,site,vo)
@@ -1959,12 +1959,12 @@ def SimpleRange(what, range_end = datetime.date.today(),
         site = val[0]
         vo = val[1]
         key = site + " " + vo
-        njobs= string.atoi( val[2] )
-        wall = string.atof( val[3] )
+        njobs= int( val[2] )
+        wall = float( val[3] )
         if ( val[4] == "NULL"):
            cpu = 0
         else:
-           cpu = string.atof( val[4] )
+           cpu = float( val[4] )
         endtime = val[5]
         if printValues.has_key(key):
             printValues[key][0] += njobs
@@ -1987,6 +1987,8 @@ def GenericRange(what, range_end = datetime.date.today(),
                  range_begin = None,
                  output = "text"):
     factor = 3600  # Convert number of seconds to number of hours
+    if(what.delta_column_location == "adjacent"): # A silly way of differentiating data transfere report from other reports
+        factor = 1  # No conversion - because it is just the data transfer size 
 
     if (not range_begin or range_begin == None): range_begin = range_end + datetime.timedelta(days=-1)
     if (not range_end or range_end == None): range_end = range_begin + datetime.timedelta(days=+1)
@@ -2038,8 +2040,8 @@ def GenericRange(what, range_end = datetime.date.today(),
         num_header = what.num_header;
         offset = num_header - 1;
 
-        njobs= string.atoi( val[offset+1] )
-        wall = string.atof( val[offset+2] ) / factor
+        njobs= int( val[offset+1] )
+        wall = float( val[offset+2] ) / factor
         totalwall = totalwall + wall
         totaljobs = totaljobs + njobs
         if (oldValues.has_key(keys)):
@@ -2087,8 +2089,8 @@ def GenericRange(what, range_end = datetime.date.today(),
         if oldValues.has_key(keys):
             (oldnjobs,oldwall) = oldValues[keys]
             del oldValues[keys]
-        njobs= string.atoi( val[offset+1] )
-        wall = string.atof( val[offset+2] ) / factor
+        njobs= int( val[offset+1] )
+        wall = float( val[offset+2] ) / factor
         totalwall = totalwall + wall
         totaljobs = totaljobs + njobs
         if printValues.has_key(keys):
@@ -2205,10 +2207,10 @@ def EfficiencyRange(what, range_end = datetime.date.today(),
               vo = val[1]
               key = site + " " + vo
 
-        njobs= string.atoi( val[offset+1] )
-        wall = string.atof( val[offset+2] ) / factor
+        njobs= int( val[offset+1] )
+        wall = float( val[offset+2] ) / factor
         if (wall != 0) :
-            eff = string.atof( val[offset+3] )
+            eff = float( val[offset+3] )
         else:
             eff = -1
         nrecords = nrecords + 1
@@ -2224,9 +2226,9 @@ def EfficiencyRange(what, range_end = datetime.date.today(),
             oldValues[key] = [njobs,wall,eff,site,vo]
 
     [totaljobs,totalwall,totaleff] = GetTotals(start,end)
-    totaljobs = string.atoi(totaljobs);
-    totalwall = string.atof(totalwall) /factor
-    totaleff = string.atof(totaleff)
+    totaljobs = int(totaljobs);
+    totalwall = float(totalwall) /factor
+    totaleff = float(totaleff)
 
     oldValues["total"] = (totaljobs, totalwall, totaleff, "total","")
 
@@ -2271,10 +2273,10 @@ def EfficiencyRange(what, range_end = datetime.date.today(),
         if oldValues.has_key(key):
             (oldnjobs,oldwall,oldeff,s,v) = oldValues[key]
             del oldValues[key]
-        njobs= string.atoi( val[offset+1] )
-        wall = string.atof( val[offset+2] ) / factor
+        njobs= int( val[offset+1] )
+        wall = float( val[offset+2] ) / factor
         if (wall != 0) :
-            eff = string.atof( val[offset+3] )
+            eff = float( val[offset+3] )
         else:
             eff = -1
         totalwall = totalwall + wall
@@ -2328,9 +2330,9 @@ def EfficiencyRange(what, range_end = datetime.date.today(),
         
         
     [totaljobs,totalwall,totaleff] = GetTotals(range_begin,range_end)
-    totaljobs = string.atoi(totaljobs);
-    totalwall = string.atof(totalwall) /factor
-    totaleff = string.atof(totaleff)
+    totaljobs = int(totaljobs);
+    totalwall = float(totalwall) /factor
+    totaleff = float(totaleff)
 
     (oldnjobs,oldwall,oldeff,s,v) = oldValues["total"]
     if (output != "None") :
@@ -2396,10 +2398,10 @@ def EfficiencyGraded(what, range_end = datetime.date.today(),
              second = ""
              key = first
              
-          njobs= string.atoi( val[offset+1] )
-          wall = string.atof( val[offset+2] ) / factor
+          njobs= int( val[offset+1] )
+          wall = float( val[offset+2] ) / factor
           if (wall != 0) :
-             eff = string.atof( val[offset+3] )
+             eff = float( val[offset+3] )
           else:
              eff = -1
 
@@ -2423,9 +2425,9 @@ def EfficiencyGraded(what, range_end = datetime.date.today(),
              values[key] = empty
 
     [totaljobs,totalwall,totaleff] = GetTotals(start,end)
-    totaljobs = string.atoi(totaljobs);
-    totalwall = string.atof(totalwall) /factor
-    totaleff = string.atof(totaleff)
+    totaljobs = int(totaljobs);
+    totalwall = float(totalwall) /factor
+    totaleff = float(totaleff)
 
 #    for key,(oldnjobs,oldwall,oldeff,site,vo) in values.iteritems():            
 #        if (key != "total") :
@@ -2716,9 +2718,9 @@ def RangeSummup(range_end = datetime.date.today(),
 
     [njobs,wallduration,div] = GetTotals(range_begin,range_end)
     if (njobs != "NULL"):
-       njobs = string.atoi(njobs);
-       wallduration = string.atof(wallduration)
-       div = string.atof(div)
+       njobs = int(njobs);
+       wallduration = float(wallduration)
+       div = float(div)
     else:
        njobs = 0
        wallduration = 0
@@ -2915,9 +2917,9 @@ def CMSProd(range_end = datetime.date.today(),
     for line in data:
        (prod, value) = line.split("\t")
        if (prod == "0"):
-          user = string.atof( value ) / factor
+          user = float( value ) / factor
        elif (prod == "1"):
-          wall = string.atof( value ) / factor
+          wall = float( value ) / factor
        else:
           print "Unexpected value in first column (production):",prod
     total = wall + user
