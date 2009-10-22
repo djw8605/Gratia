@@ -214,7 +214,7 @@ public class RecordProcessor extends Thread {
                 Utils.GratiaError("RecordProcessor",
                                   "XML file read",
                                   ident + ": Error " + e.getMessage() + " while trying to read " + file);
-                saveQuarantine(file, "Error reading file");
+                saveQuarantine(file, "Error reading file: ", e);
                 continue; // Next file
             }
             xml = "";
@@ -389,7 +389,7 @@ public class RecordProcessor extends Thread {
             } catch (Exception e) {
                 Logging.warning(ident + ": Error:Processing File: " + file);
                 Logging.warning(ident + ": Blob: " + blob);
-                saveQuarantine(file, "Errror parsing file");
+                saveQuarantine(file, "Errror parsing file", e);
                 continue; // Next file.
             }
 
@@ -431,7 +431,7 @@ public class RecordProcessor extends Thread {
                     }
                 } catch (Exception ignore) {
                 }
-                saveQuarantine(file, "Problem parsing XML in file");
+                saveQuarantine(file, "Problem parsing XML in file", e);
                 continue; // Next file.
             }
             int rSize = records.size();
@@ -486,7 +486,7 @@ public class RecordProcessor extends Thread {
                                              ": received too many consecutive constraint violation exception (" + nDuplicateTry + "): "+
                                              e.getMessage() + " while processing origin entry.  We give up on this file.");
                              Logging.debug(ident + rId + ": exception details:", e);
-                             saveQuarantine(file, "Problem processing origin entry for record file");
+                             saveQuarantine(file, "Problem processing origin entry for record file", e);
                              continue NEXTFILE; // Next file.                              
                           }
                        } else {
@@ -494,7 +494,7 @@ public class RecordProcessor extends Thread {
                                           ": received unexpected constraint violation exception " +
                                           e.getMessage() + " while processing origin entry.");
                           Logging.debug(ident + rId + ": exception details:", e);
-                          saveQuarantine(file, "Problem processing origin entry for record file");
+                          saveQuarantine(file, "Problem processing origin entry for record file", e);
                           continue NEXTFILE; // Next file. 
                        }
                     } catch (Exception e) {
@@ -509,7 +509,7 @@ public class RecordProcessor extends Thread {
                                             ": received unexpected exception " +
                                             e.getMessage() + " while processing origin entry.");
                             Logging.debug(ident + rId + ": exception details:", e);
-                            saveQuarantine(file, "Problem processing origin entry for record file");
+                            saveQuarantine(file, "Problem processing origin entry for record file", e);
                            continue NEXTFILE; // Next file. 
                         }
                     }
@@ -844,8 +844,17 @@ public class RecordProcessor extends Thread {
         XP.save(filename, data);
     }
 
+    public void saveQuarantine(String oldfile, String annot, Exception e) {
+        saveQuarantine(oldfile,
+                       annot + e.getMessage() + "\n" +
+                       ExceptionUtils.getFullStackTrace(e));
+    }
+
     public void saveQuarantine(String oldfile, String annot) {
         try {
+            if ((annot != null) && (! annot.endsWith("\n"))) {
+                annot.concat("\n"); // End with a line feed.
+            }
             File newxmlfile = File.createTempFile("quarantine-", ".xml", quarantineDir);
             File old = new File(oldfile);
             old.renameTo(newxmlfile);
