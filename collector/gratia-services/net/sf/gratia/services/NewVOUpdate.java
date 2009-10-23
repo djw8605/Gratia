@@ -33,8 +33,6 @@ public class NewVOUpdate {
        return;
      }
 
-      Logging.debug("Checking for new VO name.");
-      
       java.sql.Connection connection = session.connection();
 
       String dq = "\"";

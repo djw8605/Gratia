@@ -339,12 +339,14 @@ public class DatabaseMaintenance {
       AddIndex("ComputeElement", false, "index03", "ProbeName");
       AddIndex("ComputeElement", false, "probeid", "probeid");
       AddIndex("ComputeElement", false, "Cluster", "Cluster");
+      AddIndex("ComputeElement", false, "UniqueID", "UniqueID");
 
       // StorageElement
       ensureUniqueMd5("StorageElement");
       AddIndex("StorageElement", false, "Timestamp", "Timestamp");
       AddIndex("StorageElement", false, "index03", "ProbeName");
       AddIndex("StorageElement", false, "probeid", "probeid");
+      AddIndex("StorageElement", false, "UniqueID", "UniqueID");
       AddIndex("StorageElement", false, "ParentID", "ParentID");
       AddIndex("StorageElement", false, "OwnerDN", "OwnerDN");
       AddIndex("StorageElement", false, "SE", "SE");
