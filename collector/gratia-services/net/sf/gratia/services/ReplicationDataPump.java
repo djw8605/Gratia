@@ -201,14 +201,14 @@ public class ReplicationDataPump extends Thread {
          SQLQuery sq = session.createSQLQuery(command);
          sq.setMaxResults(chunksize);
          dbidList = sq.list();
-         if (dbidList.size() == 0) {
+         int lSize = dbidList.size();
+         session.close();
+         if (lSize == 0) {
             replicationLog(LogLevel.FINEST,
                            "No records found");
             return;
          }
-         session.close();
-      }
-      catch (Exception e) {
+      } catch (Exception e) {
          HibernateWrapper.closeSession(session);
          replicationLog(LogLevel.WARNING,
                         "Problem encountered obtaining list of records to replicate");
@@ -247,6 +247,7 @@ public class ReplicationDataPump extends Thread {
          session = HibernateWrapper.getSession();
          while (dIter.hasNext()) { // For each dbid in this batch
             if (exitflag) {
+               session.close();
                return; // Abandon unsent bundle
             }
             dbid = ((Integer) dIter.next()).longValue();
@@ -278,7 +279,10 @@ public class ReplicationDataPump extends Thread {
                   }
                   nSentThisLoop += bundle_count;
                }
-               if (exitflag) return;
+               if (exitflag)  {
+                  session.close();
+                  return;
+               }
                bundle_count = 0;
                xml_msg = new StringBuilder();
             }
@@ -307,7 +311,6 @@ public class ReplicationDataPump extends Thread {
          replicationLog(LogLevel.FINEST,
                         "Exception details: ", e);
       }
-      if (exitflag) return;
    }
 
    public String getXML(long dbid, String table, Session session)
