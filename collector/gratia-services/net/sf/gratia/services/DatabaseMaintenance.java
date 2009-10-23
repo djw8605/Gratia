@@ -985,14 +985,9 @@ public class DatabaseMaintenance {
                      "MODIFY COLUMN recordtable VARCHAR(255) NOT NULL DEFAULT '';");
                q.executeUpdate();
                tx.commit();
+               session.close();
             } catch (Exception e) {
-               if ((session != null) && (session.isOpen())) {
-                  Transaction tx = session.getTransaction();
-                  if (tx != null) {
-                     tx.rollback();
-                  }
-                  session.close();
-               }
+               HibernateWrapper.closeSession( session );
                Logging.debug("Exception detail: ", e);
                if ((Exception) e.getCause() != null) {
                    Logging.debug("Causing exception detail: ", (Exception) e.getCause());
@@ -1037,14 +1032,9 @@ public class DatabaseMaintenance {
                      "MODIFY COLUMN Njobs BIGINT(20) NOT NULL DEFAULT 0;");
                q.executeUpdate();
                tx.commit();
+               session.close();
             } catch (Exception e) {
-               if ((session != null) && (session.isOpen())) {
-                  Transaction tx = session.getTransaction();
-                  if (tx != null) {
-                     tx.rollback();
-                  }
-                  session.close();
-               }
+               HibernateWrapper.closeSession( session );
                Logging.debug("Exception detail: ", e);
                Logging.warning("Gratia database FAILED to upgrade from " + current +
                      " to 58");
@@ -1077,14 +1067,9 @@ public class DatabaseMaintenance {
                      "MODIFY COLUMN DaysInMonth BIGINT(20);");
                q.executeUpdate();
                tx.commit();
+               session.close();
             } catch (Exception e) {
-               if ((session != null) && (session.isOpen())) {
-                  Transaction tx = session.getTransaction();
-                  if (tx != null) {
-                     tx.rollback();
-                  }
-                  session.close();
-               }
+               HibernateWrapper.closeSession( session );
                Logging.debug("Exception detail: ", e);
                Logging.warning("Gratia database FAILED to upgrade from " + current +
                      " to " + (current + 1));
@@ -1106,49 +1091,41 @@ public class DatabaseMaintenance {
             UpdateDbVersion(current);
          }
          if (current == 77) {
-             // Update smaller XML tables to use MEDIUMTEXT (this is a
-             // patch release). Defer Update of JobUsageRecord_Xml to a
-             // major release.
-             int result = 0;
-             Session session = null;
-             try {
-                 session = HibernateWrapper.getSession();
-                 Transaction tx = session.beginTransaction();
-                 Query q =
-                     session.createSQLQuery("ALTER TABLE DupRecord " +
-                                            "MODIFY COLUMN extraxml MEDIUMTEXT," +
-                                            "MODIFY COLUMN rawxml MEDIUMTEXT ;");
-                 q.executeUpdate();
-                 q =
-                     session.createSQLQuery("ALTER TABLE ProbeDetails_Xml " +
-                                            "MODIFY COLUMN extraxml MEDIUMTEXT," +
-                                            "MODIFY COLUMN rawxml MEDIUMTEXT ;");
-                 q.executeUpdate();
-                 q =
-                     session.createSQLQuery("ALTER TABLE MetricRecord_Xml " +
-                                            "MODIFY COLUMN extraxml MEDIUMTEXT," +
-                                            "MODIFY COLUMN rawxml MEDIUMTEXT ;");
-                 q.executeUpdate();
-                 tx.commit();
-             } catch (Exception e) {
-                 if ((session != null) && (session.isOpen())) {
-                     Transaction tx = session.getTransaction();
-                     if (tx != null) {
-                         tx.rollback();
-                     }
-                     session.close();
-                 }
-                 Logging.debug("Exception detail: ", e);
-                 Logging.warning("Gratia database FAILED to upgrade from " + current +
-                                 " to " + (current + 1));
-                 result = -1;
-             }
-             if (result > -1) {
-                 Logging.fine("Gratia database upgraded from " + current +
-                              " to " + (current + 1));
-                 ++current;
-                 UpdateDbVersion(current);
-             }
+            // Update smaller XML tables to use MEDIUMTEXT (this is a
+            // patch release). Defer Update of JobUsageRecord_Xml to a
+            // major release.
+            int result = 0;
+            Session session = null;
+            try {
+               session = HibernateWrapper.getSession();
+               Transaction tx = session.beginTransaction();
+               Query q = session.createSQLQuery("ALTER TABLE DupRecord " +
+                                                "MODIFY COLUMN extraxml MEDIUMTEXT," +
+                                                "MODIFY COLUMN rawxml MEDIUMTEXT ;");
+               q.executeUpdate();
+               q = session.createSQLQuery("ALTER TABLE ProbeDetails_Xml " +
+                                          "MODIFY COLUMN extraxml MEDIUMTEXT," +
+                                          "MODIFY COLUMN rawxml MEDIUMTEXT ;");
+               q.executeUpdate();
+               q = session.createSQLQuery("ALTER TABLE MetricRecord_Xml " +
+                                          "MODIFY COLUMN extraxml MEDIUMTEXT," +
+                                          "MODIFY COLUMN rawxml MEDIUMTEXT ;");
+               q.executeUpdate();
+               tx.commit();
+               session.close();
+            } catch (Exception e) {
+               HibernateWrapper.closeSession( session );
+               Logging.debug("Exception detail: ", e);
+               Logging.warning("Gratia database FAILED to upgrade from " + current +
+                               " to " + (current + 1));
+               result = -1;
+            }
+            if (result > -1) {
+               Logging.fine("Gratia database upgraded from " + current +
+                            " to " + (current + 1));
+               ++current;
+               UpdateDbVersion(current);
+            }
          }
          schemaOnlyLowerBound = 78;
          schemaOnlyUpperBound = 80;
@@ -1171,14 +1148,9 @@ public class DatabaseMaintenance {
                                             "MODIFY COLUMN rawxml MEDIUMTEXT ;");
                  q.executeUpdate();
                  tx.commit();
+                 session.close();
              } catch (Exception e) {
-                 if ((session != null) && (session.isOpen())) {
-                     Transaction tx = session.getTransaction();
-                     if (tx != null) {
-                         tx.rollback();
-                     }
-                     session.close();
-                 }
+                 HibernateWrapper.closeSession( session );
                  Logging.debug("Exception detail: ", e);
                  Logging.warning("Gratia database FAILED to upgrade from " + current +
                                  " to " + (current + 1));
@@ -1495,14 +1467,9 @@ public class DatabaseMaintenance {
             q.executeUpdate();
          }
          tx.commit();
+         session.close();
       } catch (Exception e) {
-         if ((session != null) && (session.isOpen())) {
-            Transaction tx = session.getTransaction();
-            if (tx != null) {
-               tx.rollback();
-            }
-            session.close();
-         }
+         HibernateWrapper.closeSession( session );
          throw e;
       }
    }

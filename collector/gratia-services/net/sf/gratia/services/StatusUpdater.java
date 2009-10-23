@@ -57,7 +57,6 @@ public class StatusUpdater
       Probe probe = null;
       Site site = null;
       {
-          // org.hibernate.Session session =  HibernateWrapper.getSession();
           probe = (Probe)session.createQuery(command).setString(0,probeName).uniqueResult();
 
           int record_idx = 0;

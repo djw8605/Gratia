@@ -449,26 +449,21 @@ public class RecordProcessor extends Thread {
                     rId += "History ";
                 }
                 Session or_session = null;
-                Transaction or_tx = null;
                 Integer nTries = 0;
                 Boolean keepTrying = true;
                 Integer nDuplicateTry = 0;
                 while (keepTrying && nDuplicateTry < 5) {
                     ++nTries;
                     try {
-                        or_session = HibernateWrapper.getSession();
-                        or_tx = or_session.beginTransaction();
-                        origin = origin.attach(or_session);
-                        or_session.flush();
-                        or_tx.commit();
-                        keepTrying = false;
+                       or_session = HibernateWrapper.getSession();
+                       Transaction or_tx = or_session.beginTransaction();
+                       origin = origin.attach(or_session);
+                       or_session.flush();
+                       or_tx.commit();
+                       keepTrying = false;
+                       or_session.close();
                     } catch (ConstraintViolationException e) {
-                       if (HibernateWrapper.isFullyConnected(or_session)) {
-                          if ((or_tx != null) && or_tx.isActive()) {
-                             or_tx.rollback();
-                          }
-                          or_session.close();
-                       }
+                       HibernateWrapper.closeSession( or_session );
                        if (duplicateExceptionFinder.matcher(e.getSQLException().getMessage()).find() &&
                            originFinder.matcher(e.getSQL()).find())
                        {
@@ -498,12 +493,7 @@ public class RecordProcessor extends Thread {
                           continue NEXTFILE; // Next file. 
                        }
                     } catch (Exception e) {
-                        if (HibernateWrapper.isFullyConnected(or_session)) {
-                            if ((or_tx != null) && or_tx.isActive()) {
-                                or_tx.rollback();
-                            }
-                            or_session.close();
-                        }
+                        HibernateWrapper.closeSession( or_session );
                         if (!LockFailureDetector.detectAndReportLockFailure(e, nTries, ident)) {
                             Logging.warning(ident + rId +
                                             ": received unexpected exception " +
@@ -515,9 +505,6 @@ public class RecordProcessor extends Thread {
                     }
                 }
                 //MPERF: Logging.fine(ident + rId + " saved Origin object.");
-                if (HibernateWrapper.isFullyConnected(or_session)) {
-                    or_session.close();
-                }
             }
             NEXTRECORD: for (int j = 0; j < rSize; j++) { // Loop over records in file
                 if (stopflag) { // Stop requested. Quit processing completely (don't delete this input file)
@@ -551,10 +538,10 @@ public class RecordProcessor extends Thread {
                 Boolean keepTrying = true;
                 while (keepTrying) {
                     ++nTries;
-                    Session pr_session = HibernateWrapper.getSession();
-                    Transaction pr_tx = null;
+                    Session pr_session = null;
                     try {
-                        pr_tx = pr_session.beginTransaction();
+                        pr_session = HibernateWrapper.getSession();
+                        Transaction pr_tx = pr_session.beginTransaction();
 
                         probe = statusUpdater.update(pr_session, current, xml);
                         pr_session.flush();
@@ -564,12 +551,7 @@ public class RecordProcessor extends Thread {
                         keepTrying = false;
                         pr_session.close();
                     } catch (Exception e) {
-                        if (HibernateWrapper.isFullyConnected(pr_session)) {
-                            if ((pr_tx != null) && pr_tx.isActive()) {
-                                pr_tx.rollback();
-                            }
-                            pr_session.close();
-                        }
+                        HibernateWrapper.closeSession( pr_session );
                         if (!LockFailureDetector.detectAndReportLockFailure(e, nTries, ident)) {
                             keepTrying = false;
                             if (handleUnexpectedException(rId, e, gotreplication, current)) {
@@ -701,14 +683,13 @@ public class RecordProcessor extends Thread {
                     }
 
                     Session rec_session = null;
-                    Transaction rec_tx = null;
                     nTries = 0;
                     keepTrying = true;
                     while (keepTrying) {
                         ++nTries;
                         try {
                             rec_session = HibernateWrapper.getSession();
-                            rec_tx = rec_session.beginTransaction();
+                            Transaction rec_tx = rec_session.beginTransaction();
                             //MPERF: Logging.fine(ident + rId + " attaching VO and other content.");
                             synchronized (lock) {
                                 // Synchronize on lock so we're
@@ -759,12 +740,7 @@ public class RecordProcessor extends Thread {
                             Logging.fine(ident + rId + " saved.");
                         } catch (ConstraintViolationException e) {
                             keepTrying = false; // KeepTrying only for lock-type exceptions
-                            if (HibernateWrapper.isFullyConnected(rec_session)) {
-                                if (rec_tx != null && rec_tx.isActive()) {
-                                    rec_tx.rollback();
-                                }
-                                rec_session.close();
-                            }
+                            HibernateWrapper.closeSession(rec_session);
                             try {
                                 if (!handleConstraintViolationException(e, current, rId, gotreplication, gothistory)) {
                                    if (handleUnexpectedException(rId, e, gotreplication, current,
@@ -784,12 +760,7 @@ public class RecordProcessor extends Thread {
                                 }
                             }
                         } catch (Exception e) {
-                            if (HibernateWrapper.isFullyConnected(rec_session)) {
-                                if (rec_tx != null && rec_tx.isActive()) {
-                                    rec_tx.rollback();
-                                }
-                                rec_session.close();
-                            }
+                            HibernateWrapper.closeSession(rec_session);
                             if (!LockFailureDetector.detectAndReportLockFailure(e, nTries, ident)) {
                                 keepTrying = false;
                                 if (handleUnexpectedException(rId, e, gotreplication, current)) {
@@ -959,17 +930,14 @@ public class RecordProcessor extends Thread {
                                                           current.getmd5() +
                                                           "'").setCacheMode(CacheMode.IGNORE);
                 Boolean savedCurrent = false;
-                Transaction dup_tx = null;
-                JobUsageRecord original_record =
-                    (JobUsageRecord) dup_query.uniqueResult();
+                JobUsageRecord original_record = (JobUsageRecord) dup_query.uniqueResult();
                 if (original_record == null) {
-                    return true;
+                   return true;
                 }
                 dupdbid = original_record.getRecordId();
-                UserIdentity originalUserIdentity =
-                    original_record.getUserIdentity();
+                UserIdentity originalUserIdentity = original_record.getUserIdentity();
                 if (newUserIdentity == null) {
-                    return true;
+                   return true;
                 }
                 Boolean newerIsBetter = false;
                 String replaceReason = null;
@@ -1042,10 +1010,12 @@ public class RecordProcessor extends Thread {
                     while (keepTrying) {
                         ++nTries;
                         try {
-                            if (HibernateWrapper.isFullyConnected(dup_session)) {
+                            if (! HibernateWrapper.isFullyConnected(dup_session)) {
                                 dup_session = HibernateWrapper.getSession();
                             }
-                            dup_tx = dup_session.beginTransaction();
+                            dup_session = HibernateWrapper.getSession();
+
+                            Transaction dup_tx = dup_session.beginTransaction();
                             // Keep the new one and ditch the old
                             Logging.fine(ident + rId +
                                          ": Replacing record " +
@@ -1093,15 +1063,10 @@ public class RecordProcessor extends Thread {
                                 }
                             }
                         } catch (Exception e2) {
-                            if (HibernateWrapper.isFullyConnected(dup_session)) {
-                                if (dup_tx != null && dup_tx.isActive()) {
-                                    dup_tx.rollback();
-                                }
-                                dup_session.close();
-                            }
-                            if (!LockFailureDetector.detectAndReportLockFailure(e, nTries, ident)) {
-                                throw e2; // Re-throw;
-                            }
+                           HibernateWrapper.closeSession(dup_session);
+                           if (!LockFailureDetector.detectAndReportLockFailure(e, nTries, ident)) {
+                              throw e2; // Re-throw;
+                           }
                         } // End try (resolve duplicate JobUsageRecord)
                     } // End while (keepTrying)
                 } // End if (newerIsBetter)
@@ -1116,16 +1081,17 @@ public class RecordProcessor extends Thread {
                             while (keepTrying) {
                                 ++nTries;
                                 try {
-                                    if (HibernateWrapper.isFullyConnected(dup_session)) {
+                                    if (! HibernateWrapper.isFullyConnected(dup_session)) {
                                         dup_session = HibernateWrapper.getSession();
                                     }
-                                    dup_tx = dup_session.beginTransaction();
+                                    Transaction dup_tx = dup_session.beginTransaction();
                                     dup_session.saveOrUpdate(localprobe);
                                     dup_session.flush();
                                     dup_tx.commit();
                                     dup_session.close();
                                     keepTrying = false;
                                 } catch (Exception e2) {
+                                    HibernateWrapper.closeSession(dup_session);
                                     if (!LockFailureDetector.detectAndReportLockFailure(e, nTries, ident)) {
                                         throw e2; // Re-throw
                                     }
@@ -1139,8 +1105,9 @@ public class RecordProcessor extends Thread {
                 }
             } else { // Not JobUsageRecord
                 needCurrentSaveDup = current.setDuplicate(true);
-                Session dup2_session = HibernateWrapper.getSession();
+                Session dup2_session = null;
                 try {
+                    dup2_session = HibernateWrapper.getSession();
                     String cmd = "select dbid from " +
                         current.getTableName() +
                         "_Meta record where " +
@@ -1172,8 +1139,11 @@ public class RecordProcessor extends Thread {
                         fStorageElement.put(current.getmd5(), dup_dbid);
                     }
                     dupdbid = dup_dbid;
-                } finally {
                     dup2_session.close();
+                } catch (Exception sub_except) {
+                   // Ignore all exceptions, if we can get and store the
+                   // cached value, it will simply need to be redone later.
+                   HibernateWrapper.closeSession(dup2_session);
                 }
                 if (!needCurrentSaveDup) {
                     Logging.fine(ident + rId +

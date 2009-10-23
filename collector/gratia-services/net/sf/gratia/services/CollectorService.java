@@ -88,20 +88,20 @@ public class CollectorService implements ServletContextListener {
       }
       
       public synchronized void Start(int nthreads) {
-          if (IsAlive()) {
-              Logging.info("CollectorService: record processor threads cannot be started -- already active");
-              return;
-          }
-          SetupQueues(nthreads);
-          processors = new RecordProcessor[nthreads];
-          for (int i = 0; i < nthreads; ++i) {
-              processors[i] = new RecordProcessor("RecordProcessor: " + i, queues[i], lock, global, CollectorService.this);
-              processors[i].setPriority(Thread.MAX_PRIORITY);
-              processors[i].setDaemon(true);
-          }
-          for (int i = 0; i < nthreads; i++) {
-              processors[i].start();
-          }
+         if (IsAlive()) {
+            Logging.info("CollectorService: record processor threads cannot be started -- already active");
+            return;
+         }
+         SetupQueues(nthreads);
+         processors = new RecordProcessor[nthreads];
+         for (int i = 0; i < nthreads; ++i) {
+            processors[i] = new RecordProcessor("RecordProcessor: " + i, queues[i], lock, global, CollectorService.this);
+            processors[i].setPriority(Thread.MAX_PRIORITY);
+            processors[i].setDaemon(true);
+         }
+         for (int i = 0; i < nthreads; i++) {
+            processors[i].start();
+         }
       }
       
       public synchronized int Stop() {
@@ -402,11 +402,11 @@ public class CollectorService implements ServletContextListener {
          //
          
          if (p.getProperty("service.initial.servlets", "ON").equalsIgnoreCase("ON")) {
-             Logging.info("CollectorService: enabling servlets to receive records.");
-             enableServlet();
+            Logging.info("CollectorService: enabling servlets to receive records.");
+            enableServlet();
          } else {
-             Logging.info("CollectorService: initial requested state of servlets is OFF.");
-             disableServlet();
+            Logging.info("CollectorService: initial requested state of servlets is OFF.");
+            disableServlet();
          }
          
          //
@@ -414,12 +414,12 @@ public class CollectorService implements ServletContextListener {
          //
          String initialHousekeeping = p.getProperty("service.initial.housekeeping", "ON");
          if (initialHousekeeping.equalsIgnoreCase("ON")) {
-             startHousekeepingService();
+            startHousekeepingService();
          } else if (initialHousekeeping.equalsIgnoreCase("RUN_NOW")) {
-             startHousekeepingService(false);
+            startHousekeepingService(false);
          } else if (initialHousekeeping.matches("(?i)DISABLE.*")) {
-             Logging.info("CollectorService: initial requested state of housekeeping is DISABLED.");
-             housekeepingDisabled = true;
+            Logging.info("CollectorService: initial requested state of housekeeping is DISABLED.");
+            housekeepingDisabled = true;
          }
          
          //
@@ -432,12 +432,12 @@ public class CollectorService implements ServletContextListener {
          // start msg recordProcessor
          //
          if (p.getProperty("service.initial.recordProcessor", "ON").equalsIgnoreCase("ON")) {
-             Logging.info("CollectorService: starting recordProcessor.");
-             recordProcessors.Start(maxthreads);
+            Logging.info("CollectorService: starting recordProcessor.");
+            recordProcessors.Start(maxthreads);
          } else {
-             Logging.info("CollectorService: initial requested state of recordProcessor is OFF.");
+            Logging.info("CollectorService: initial requested state of recordProcessor is OFF.");
          }
-
+         
          //
          // if requested - start thread to monitor recordProcessor activity
          //
@@ -447,7 +447,7 @@ public class CollectorService implements ServletContextListener {
             monitorRecordProcessor.start();
             Logging.info("CollectorService: Started MonitorRecordProcessor");
          }
-
+         
          //
          // if requested - start service to monitor input queue sizes
          //
@@ -478,9 +478,9 @@ public class CollectorService implements ServletContextListener {
       // start replication service
       //
       if (p.getProperty("service.initial.replication", "ON").equalsIgnoreCase("ON")) {
-          startReplicationService();
+         startReplicationService();
       } else {
-          Logging.info("CollectorService: initial requested state of replication service is OFF.");
+         Logging.info("CollectorService: initial requested state of replication service is OFF.");
       }
       
       // Let's restart the reporting service to make sure that BIRT is getting the timezone
@@ -776,7 +776,7 @@ public class CollectorService implements ServletContextListener {
    public String checkConnection(java.security.cert.X509Certificate certs[], String senderHost, String sender) 
    throws RemoteException, AccessException {
       final String command = "from Certificate where pem = ?";
-
+      
       String result = "";
       net.sf.gratia.storage.Origin from = new net.sf.gratia.storage.Origin(new java.util.Date());
       
@@ -851,12 +851,7 @@ public class CollectorService implements ServletContextListener {
                                   );
                      Logging.log(LogLevel.FINER,"certificate details: " + certs[i].toString());
                   } catch (Exception e) {
-                     if (HibernateWrapper.isFullyConnected(session)) {
-                        if ((tx != null) && tx.isActive()) {
-                           tx.rollback();
-                        }
-                        session.close();
-                     }
+                     HibernateWrapper.closeSession(session);
                      session = null;
                      if (!LockFailureDetector.detectAndReportLockFailure(e, nTries, "checkCertificate")) {
                         keepTrying = false;
@@ -885,9 +880,7 @@ public class CollectorService implements ServletContextListener {
             }
             
          }
-         if (HibernateWrapper.isFullyConnected(session)) {
-            session.close();
-         }
+         HibernateWrapper.closeSession(session);
       }
       if (result.length()==0) {
          throw new AccessException("Failure during the check of the Certificate or the Gratia Connection.");
@@ -897,41 +890,36 @@ public class CollectorService implements ServletContextListener {
    
    
    private net.sf.gratia.storage.Connection trackConnection(net.sf.gratia.storage.Connection gr_conn) throws AccessException {
-       Session session = null;
-       Boolean keepTrying  = true;
-       Integer nTries = 0;
+      Session session = null;
+      Boolean keepTrying  = true;
+      Integer nTries = 0;
       
-       while (keepTrying) {
-           session = HibernateWrapper.getSession();
-           Transaction tx = null;
-           try {
-               tx = session.beginTransaction();
-               if (++nTries > 1) {
-                   Thread.sleep(300);
-               }
-               gr_conn = gr_conn.attach( session );
-               session.flush();
-               tx.commit();
+      while (keepTrying) {
+         session = HibernateWrapper.getSession();
+         Transaction tx = null;
+         try {
+            tx = session.beginTransaction();
+            if (++nTries > 1) {
+               Thread.sleep(300);
+            }
+            gr_conn = gr_conn.attach( session );
+            session.flush();
+            tx.commit();
+            keepTrying = false;
+            session.close();
+         } catch (Exception e) {
+            HibernateWrapper.closeSession(session);
+            if (!LockFailureDetector.detectAndReportLockFailure(e, nTries, "checkCertificate")) {
+               Logging.warning("checkCertificate: error when storing or retrieving connection object: " + e.getMessage());
+               Logging.debug("checkCertificate: exception details:", e);
                keepTrying = false;
-               session.close();
-           } catch (Exception e) {
-               if (HibernateWrapper.isFullyConnected(session)) {
-                   if ((tx != null) && tx.isActive()) {
-                       tx.rollback();
-                   }
-                   session.close();
-               }
-               if (!LockFailureDetector.detectAndReportLockFailure(e, nTries, "checkCertificate")) {
-                   Logging.warning("checkCertificate: error when storing or retrieving connection object: " + e.getMessage());
-                   Logging.debug("checkCertificate: exception details:", e);
-                   keepTrying = false;
-
-                   // If we can not read the connection, let's assume it is set to invalid.
-                   // Apriori if this is wrong, the probe will try again later.
-                   throw new AccessException("Failure during the check of the the Gratia Connection.");
-               }
-           }
-       }
+               
+               // If we can not read the connection, let's assume it is set to invalid.
+               // Apriori if this is wrong, the probe will try again later.
+               throw new AccessException("Failure during the check of the the Gratia Connection.");
+            }
+         }
+      }
       return gr_conn;
    }     
    
