@@ -47,7 +47,6 @@ public class ConnectionTable extends HttpServlet
       String fRow = "";
       String fError = "";
       static Pattern gRowPattern = Pattern.compile("<tr><form .*?</tr>",Pattern.MULTILINE + Pattern.DOTALL);
-      StringBuffer buffer = new StringBuffer();
       Hashtable<Long,Connection> fRepTable = null;
       //
       // globals
@@ -82,6 +81,11 @@ public class ConnectionTable extends HttpServlet
          return fCollectorProxy;
       }
       
+      private void done() 
+      {
+         fRepTable = null;
+      }
+      
       public void init(ServletConfig config) throws ServletException 
       {
          try {
@@ -95,7 +99,7 @@ public class ConnectionTable extends HttpServlet
       
       void displayPage(HttpServletResponse response) throws IOException 
       {
-
+         
          process();
          
          response.setContentType("text/html");
@@ -111,7 +115,7 @@ public class ConnectionTable extends HttpServlet
       public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
       {
          if (LoginChecker.checkLogin(request,response)) {
-             
+            
             Logging.debug("ConnectionTable: doGet");
             
             setup(request);
@@ -119,7 +123,8 @@ public class ConnectionTable extends HttpServlet
                update(request);
             }
             displayPage(response);
-          }
+            done();
+         }
       }
       
       public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
@@ -131,9 +136,10 @@ public class ConnectionTable extends HttpServlet
             update(request);
             
             displayPage(response);
+            done();
          }
       }
-
+      
       public void setup(HttpServletRequest request) throws IOException
       {
          fHtml = xp.get(request.getRealPath("/") + "connectiontable.html");
@@ -160,20 +166,11 @@ public class ConnectionTable extends HttpServlet
             records = rq.list();
             session.close();
          } catch (Exception e) {
-            session.close();
-            Logging.warning("Load connection caught: "+e.getMessage());
+            Logging.debug("Load connection caught: "+e.getMessage());
+            HibernateWrapper.closeSession(session);
+            reportError("Failed to load information from database due a connection error. Try reloading the page.","");
+            return;
          }
-         if (records == null) {
-            try {
-               session = HibernateWrapper.getCheckedSession();
-               Query rq = session.createQuery("from Connection");
-               records = rq.list();
-               session.close();
-            } catch (Exception e) {
-               session.close();
-               Logging.warning("Load connection part-2 caught: "+e.getMessage());
-            }
-         }            
          
          // Load hash table with entries
          fRepTable = new Hashtable<Long, Connection>();
@@ -196,6 +193,9 @@ public class ConnectionTable extends HttpServlet
       
       public void process()
       {
+         if (fRepTable == null) {
+            return;
+         }
          // Loop through replication table entries.
          Enumeration<Connection> certEntries = fRepTable.elements();
          Vector<Connection> vec = new Vector<Connection>();
@@ -205,7 +205,7 @@ public class ConnectionTable extends HttpServlet
          Collections.sort(vec); // Sort according to Replication.CompareTo().
          
          Logging.debug("ConnectionTable: processing " + vec.size() + " connections");
-         buffer = new StringBuffer();
+         StringBuffer buffer = new StringBuffer();
          int index = 0;
          for ( Connection entry : vec ) {
             String Sender = "N/A";
@@ -224,18 +224,18 @@ public class ConnectionTable extends HttpServlet
             } catch (Exception e) {
                Logging.warning("ConnectionTable: Problem " + e);
             }
-
+            
             String newrow = fRow.replaceAll("#index#","" + index)
-               .replaceAll("#cid#","" + entry.getcid())
-               .replaceAll("#Sender#",Sender)
-               .replaceAll("#SenderHost#",SenderHost)
-               .replaceAll("#CollectorName#",CollectorName)
-               .replaceAll("#FirstSeen#",FirstSeen)
-               .replaceAll("#LastSeen#",LastSeen)
-               .replaceAll("#Status#", entry.isValid() ? "Allowed" : "Banned")
-               .replaceAll("#Change#", entry.isValid() ? 
-                           "<input type=\"submit\" name=\"action\" value=\"Ban\"/>" : 
-                           "<input type=\"submit\" name=\"action\" value=\"Allow\"/>");
+            .replaceAll("#cid#","" + entry.getcid())
+            .replaceAll("#Sender#",Sender)
+            .replaceAll("#SenderHost#",SenderHost)
+            .replaceAll("#CollectorName#",CollectorName)
+            .replaceAll("#FirstSeen#",FirstSeen)
+            .replaceAll("#LastSeen#",LastSeen)
+            .replaceAll("#Status#", entry.isValid() ? "Allowed" : "Banned")
+            .replaceAll("#Change#", entry.isValid() ? 
+                        "<input type=\"submit\" name=\"action\" value=\"Ban\"/>" : 
+                        "<input type=\"submit\" name=\"action\" value=\"Allow\"/>");
             index++;
             buffer.append(newrow);
          }
@@ -245,9 +245,10 @@ public class ConnectionTable extends HttpServlet
       
       public void update(HttpServletRequest request)
       {
+         if (fRepTable == null) return;
+         
          String action = request.getParameter("action");
          try {
-                        
             if (action.equals("Ban")) {
                Long cid = Long.decode(request.getParameter("cid"));
                Logging.debug("ConnectionTable: Banning :" + cid);
@@ -282,14 +283,21 @@ public class ConnectionTable extends HttpServlet
             Connection cert = fRepTable.get(cid);
             Connection updated = new Connection(cert);
             updated.setValid(isValid);
-         
+            
             if (cert != null) {
-               Session session = HibernateWrapper.getCheckedSession();
-               Transaction tx = session.beginTransaction();
-               session.saveOrUpdate( updated );
-               session.flush();
-               tx.commit();
-               session.close();
+               Session session = null;
+               Transaction tx = null;
+               try {
+                  session = HibernateWrapper.getCheckedSession();
+                  tx = session.beginTransaction();
+                  session.saveOrUpdate( updated );
+                  session.flush();
+                  tx.commit();
+                  session.close();
+               } catch (Exception e) {
+                  HibernateWrapper.closeSession(session);
+                  reportError("Unable to save the state change:",e.getMessage());
+               }
                fRepTable.put( new Long(updated.getcid()), updated );
             }
             fCollectorProxy.setConnectionCaching(true);
@@ -302,12 +310,14 @@ public class ConnectionTable extends HttpServlet
       public void setAllState(boolean isValid) throws Exception
       {
          Logging.debug("ConnectionTable: changing state of all connections to " + (isValid ? "Allowed" : "Banned"));
-
+         
+         Session session = null;
+         Transaction tx = null;
          try {
             getCollectorProxy().setConnectionCaching(false);
-            Session session = HibernateWrapper.getCheckedSession();
-            Transaction tx = session.beginTransaction();
-         
+            session = HibernateWrapper.getCheckedSession();
+            tx = session.beginTransaction();
+            
             Hashtable<Long,Connection> updatedTable = new Hashtable<Long,Connection>();
             Enumeration<Connection> certEntries    = fRepTable.elements();
             while (certEntries.hasMoreElements()) {
@@ -324,6 +334,8 @@ public class ConnectionTable extends HttpServlet
             getCollectorProxy().setConnectionCaching(true);
          } catch (Exception e) {
             if (fCollectorProxy!=null) fCollectorProxy.setConnectionCaching(true);
+            HibernateWrapper.closeSession(session);
+            reportError("Unable to save the state change:",e.getMessage());
             throw e;
          }
       }

@@ -43,6 +43,11 @@ public class CertificateTable extends HttpServlet
       //
       boolean fInitialized = false;
       
+      private void done() 
+      {
+         fRepTable = null;
+      }
+
       public void init(ServletConfig config) throws ServletException 
       {
          try {
@@ -56,7 +61,7 @@ public class CertificateTable extends HttpServlet
       
       void displayPage(HttpServletResponse response) throws IOException 
       {
-
+         
          process();
          
          response.setContentType("text/html");
@@ -72,7 +77,7 @@ public class CertificateTable extends HttpServlet
       public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
       {
          if (LoginChecker.checkLogin(request,response)) {
-             
+            
             Logging.debug("CertificateTable: doGet");
             
             setup(request);
@@ -80,7 +85,8 @@ public class CertificateTable extends HttpServlet
                update(request);
             }
             displayPage(response);
-          }
+            done();
+         }
       }
       
       public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
@@ -92,9 +98,10 @@ public class CertificateTable extends HttpServlet
             update(request);
             
             displayPage(response);
+            done();
          }
       }
-
+      
       public void setup(HttpServletRequest request) throws IOException
       {
          fHtml = xp.get(request.getRealPath("/") + "certificatetable.html");
@@ -113,11 +120,19 @@ public class CertificateTable extends HttpServlet
       
       void loadCertificates() {
          // Load replication entries from DB
-         Session session;
-         session = HibernateWrapper.getCheckedSession();
-         Query rq = session.createQuery("from Certificate");
-         List records = rq.list();
-         session.close();
+         Session session = null;
+         List records = null;
+         try {
+            session = HibernateWrapper.getCheckedSession();
+            Query rq = session.createQuery("from Certificate");
+            records = rq.list();
+            session.close();
+         } catch (Exception e) {
+            Logging.debug("Load Certificate caught: "+e.getMessage());
+            HibernateWrapper.closeSession(session);
+            reportError("Failed to load information from database due a connection error. Try reloading the page.","");
+            return;
+         }
          
          // Load hash table with entries
          fRepTable = new Hashtable<Long, Certificate>();
@@ -140,6 +155,9 @@ public class CertificateTable extends HttpServlet
       
       public void process()
       {
+         if (fRepTable == null) {
+            return;
+         }
          // Loop through replication table entries.
          Enumeration<Certificate> certEntries = fRepTable.elements();
          Vector<Certificate> vec = new Vector<Certificate>();
@@ -166,15 +184,15 @@ public class CertificateTable extends HttpServlet
             }
             
             String newrow = fRow.replaceAll("#index#","" + index)
-               .replaceAll("#certid#","" + certEntry.getCertid())
-               .replaceAll("#Issuer#",issuer)
-               .replaceAll("#Name#",name)
-               .replaceAll("#Serial#",serial)
-               .replaceAll("#ExpirationDate#",date)
-               .replaceAll("#Status#", certEntry.isValid() ? "Allowed" : "Banned")
-               .replaceAll("#Change#", certEntry.isValid() ? 
-                           "<input type=\"submit\" name=\"action\" value=\"Ban\"/>" : 
-                           "<input type=\"submit\" name=\"action\" value=\"Allow\"/>");
+            .replaceAll("#certid#","" + certEntry.getCertid())
+            .replaceAll("#Issuer#",issuer)
+            .replaceAll("#Name#",name)
+            .replaceAll("#Serial#",serial)
+            .replaceAll("#ExpirationDate#",date)
+            .replaceAll("#Status#", certEntry.isValid() ? "Allowed" : "Banned")
+            .replaceAll("#Change#", certEntry.isValid() ? 
+                        "<input type=\"submit\" name=\"action\" value=\"Ban\"/>" : 
+                        "<input type=\"submit\" name=\"action\" value=\"Allow\"/>");
             index++;
             buffer.append(newrow);
          }
@@ -184,9 +202,12 @@ public class CertificateTable extends HttpServlet
       
       public void update(HttpServletRequest request)
       {
+         if (fRepTable == null) {
+            return;
+         }
          String action = request.getParameter("action");
          try {
-                        
+            
             if (action.equals("Ban")) {
                Long certid = Long.decode(request.getParameter("certid"));
                Logging.debug("CertificateTable: Banning :" + certid);
@@ -220,14 +241,21 @@ public class CertificateTable extends HttpServlet
             Certificate cert = fRepTable.get(certid);
             Certificate updated = new Certificate(cert);
             updated.setValid(isValid);
-         
+            
             if (cert != null) {
-               Session session = HibernateWrapper.getCheckedSession();
-               Transaction tx = session.beginTransaction();
-               session.saveOrUpdate( updated );
-               session.flush();
-               tx.commit();
-               session.close();
+               Session session = null;
+               Transaction tx = null;
+               try {
+                  session = HibernateWrapper.getCheckedSession();
+                  tx = session.beginTransaction();
+                  session.saveOrUpdate( updated );
+                  session.flush();
+                  tx.commit();
+                  session.close();
+               } catch (Exception e) {
+                  HibernateWrapper.closeSession(session);
+                  reportError("Unable to save the state change:",e.getMessage());
+               }
                fRepTable.put( new Long(updated.getCertid()), updated );
             }
          } catch (Exception e) {
@@ -238,11 +266,13 @@ public class CertificateTable extends HttpServlet
       public void setAllState(boolean isValid) throws Exception
       {
          Logging.debug("CertificateTable: changing state of all certificates to " + (isValid ? "Allowed" : "Banned"));
-
-         try {
-            Session session = HibernateWrapper.getCheckedSession();
-            Transaction tx = session.beginTransaction();
          
+         Session session = null;
+         Transaction tx = null;
+         try {
+            session = HibernateWrapper.getCheckedSession();
+            tx = session.beginTransaction();
+            
             Hashtable<Long,Certificate> updatedTable = new Hashtable<Long,Certificate>();
             Enumeration<Certificate> certEntries    = fRepTable.elements();
             while (certEntries.hasMoreElements()) {
@@ -257,6 +287,8 @@ public class CertificateTable extends HttpServlet
             session.close();
             fRepTable = updatedTable;
          } catch (Exception e) {
+            HibernateWrapper.closeSession(session);
+            reportError("Unable to save the state change:",e.getMessage());
             throw e;
          }
       }
