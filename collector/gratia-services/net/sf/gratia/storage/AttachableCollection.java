@@ -112,7 +112,7 @@ public class AttachableCollection<Type extends AttachableXmlElement> {
          // Logging.warning("connection from collection: "+attached.toString());
          session.update( attached );
          return attached;
-
+         
       } else {
          
          // Check whether this Type is already in the db
@@ -126,13 +126,33 @@ public class AttachableCollection<Type extends AttachableXmlElement> {
          } else {
             
             // Otherwise save it.
-            session.save(obj);            
+            try { 
+               session.save(obj);
+            } catch (org.hibernate.exception.ConstraintViolationException e) {
+               
+               Logging.fine("AttachableCollection::attach caught a constraint violation: "+e.getMessage());
+               Logging.debug("AttachableCollection::attach exception details: ",e);
+               
+               // The object is a duplicate, so let's try again to get it
+               attached = getObject( session, obj );
+               if (attached != null) 
+               {
+                  // Logging.warning("connection from db: "+attached.toString());
+                  setObject( attached );
+                  return attached;
+                  
+               } else {
+                  // Weird, we can't find the original, maybe we have a different
+                  // problem, so let's just rethrow the original exception.
+                  throw e;
+               }
+            }
             // Logging.warning("connection from create: "+obj.toString());
             setObject( obj );
             return obj;
             
          }
-
+         
       }
    }
 }
