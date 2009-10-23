@@ -137,7 +137,7 @@ public class RMIHandlerServlet extends HttpServlet {
                
             } catch (net.sf.gratia.services.AccessException e) {
 
-                Logging.info("RMIHandlerServlet: rejected the certificate(s)");                  
+                Logging.info("RMIHandlerServlet: rejected the certificate(s) or connection(s): " + e.getMessage());                  
                 Logging.debug("Exception detail:", e);
                 PrintWriter writer = res.getWriter();
                 writer.write("Error: Upload rejected by the Gratia Collector. " + e.getMessage());
