@@ -41,8 +41,8 @@ public class ReplicationTable extends HttpServlet {
    String fRow = "";
    
    Pattern fDatarowPattern =
-   Pattern.compile("<tr id=\"datarow.*?>.*#replicationid#.*?</table>.*?</tr>",
-                   Pattern.MULTILINE + Pattern.DOTALL);
+      Pattern.compile("<tr id=\"datarow.*?>.*#replicationid#.*?</table>.*?</tr>",
+                      Pattern.MULTILINE + Pattern.DOTALL);
    Pattern fUpdateButtonPattern = Pattern.compile("update:(\\d+)");
    Pattern fCancelButtonPattern = Pattern.compile("cancel:(\\d+)");
    Matcher fMatcher = null;
@@ -56,10 +56,10 @@ public class ReplicationTable extends HttpServlet {
    Boolean fInitialized = false;
    Hashtable<Integer,Replication> fRepTable = null;
    Boolean fDBOK = true;
-   
+
    // Configuration
    String fCollectorPem;
-   
+
    //
    // support
    //
@@ -76,14 +76,14 @@ public class ReplicationTable extends HttpServlet {
    // Which Records are we replicating
    String RecordTable = "JobUsageRecord";
    String fApplicationURL = "replicationtable.html";
-   
-   private void done() 
-   {
+
+   private void done() {
       fRepTable = null;
    }
-   
+
    public void init(ServletConfig config) throws ServletException {
       // javax.servlet.ServletConfig.getInitParameter() 
+      Logging.debug("ReplicationTable.init()");
       String what = config.getInitParameter("RecordType");
       if ((what != null) && (what.length() > 0)) {
          RecordTable = what;
@@ -93,14 +93,16 @@ public class ReplicationTable extends HttpServlet {
    }
    
    void initialize() throws IOException {
+      Logging.debug("ReplicationTable.initialize()");
       if (fInitialized) return;
+      Logging.debug("ReplicationTable.initialize() continue");
       fProperties = Configuration.getProperties();
       while (true) {
          // Wait until JMS service is up
          try { 
             JMSProxy proxy = (JMSProxy)
-            Naming.lookup(fProperties.getProperty("service.rmi.rmilookup") +
-                          fProperties.getProperty("service.rmi.service"));
+               Naming.lookup(fProperties.getProperty("service.rmi.rmilookup") +
+                             fProperties.getProperty("service.rmi.service"));
          } catch (Exception e) {
             try {
                Thread.sleep(5000);
@@ -111,12 +113,13 @@ public class ReplicationTable extends HttpServlet {
       }
       String certfile = fProperties.getProperty("service.vdt.cert.file");
       fCollectorPem = XP.get(certfile);
-      
+
       fInitialized = true;
    }
    
    public void doGet(HttpServletRequest request, HttpServletResponse response)
-   throws ServletException, IOException {
+      throws ServletException, IOException {
+      Logging.debug("ReplicationTable.doGet()");
       if (LoginChecker.checkLogin(request, response)) {
          setup(request);
          Integer selectedReplicationId = null;
@@ -158,6 +161,7 @@ public class ReplicationTable extends HttpServlet {
    }
    
    private void compileResponse(HttpServletResponse response) throws IOException {
+      Logging.debug("ReplicationTable.compileResponse()");
       response.setContentType("text/html");
       response.setHeader("Cache-Control", "no-cache"); // HTTP 1.1
       response.setHeader("Pragma", "no-cache"); // HTTP 1.0
@@ -171,7 +175,7 @@ public class ReplicationTable extends HttpServlet {
       } else {
          fHtml = fHtml.replace("#message#", "");
       }
-      
+
       fMessage = null;
       writer.write(fHtml);
       writer.flush();
@@ -179,19 +183,20 @@ public class ReplicationTable extends HttpServlet {
    }
    
    public void doPost(HttpServletRequest request, HttpServletResponse response)
-   throws ServletException, IOException {
+      throws ServletException, IOException {
+      Logging.debug("ReplicationTable.doPost()");
       if (LoginChecker.checkLogin(request, response)) {
          Enumeration pars = request.getParameterNames();
          while (pars.hasMoreElements()) {
             String par = (String) pars.nextElement();
             Logging.debug("ReplicationTable: Post Parameter " + par + " : " + request.getParameter(par));
          }
-         
-         
+                      
+
          setup(request);
-         
+
          String action = request.getParameter("action");
-         
+      
          if (action==null || action.equals("Refresh") || action.equals("Cancel")) {
             fModify = false;
             loadRepTable(); // In case of changes.
@@ -245,7 +250,7 @@ public class ReplicationTable extends HttpServlet {
                   fRepTable.put(repEntry.getreplicationid(), repEntry);
                   // Set up to modify this new line;
                   fModify = true;
-                  
+               
                   process(0);
                   compileResponse(response);            
                } else if (action.equals("Update")) {
@@ -266,7 +271,7 @@ public class ReplicationTable extends HttpServlet {
                   // Unknown action
                   fMessage = "Error: Unexpected action ("+action+") has been requested with a correct replication record ("+selectedReplicationId+").";
                }
-               
+            
             }
          }
       }
@@ -274,7 +279,8 @@ public class ReplicationTable extends HttpServlet {
    }
    
    void setup(HttpServletRequest request)
-   throws ServletException, IOException {
+      throws ServletException, IOException {
+      Logging.debug("ReplicationTable.setup()");
       // Once-only init
       initialize();
       fDBOK = true; // Default state
@@ -300,6 +306,7 @@ public class ReplicationTable extends HttpServlet {
    }
    
    void loadRepTable() {
+      Logging.debug("ReplicationTable.loadRepTable()");
       if (!fDBOK) return; // Don't try.
       // Load replication entries from DB
       Session session = null;
@@ -311,6 +318,10 @@ public class ReplicationTable extends HttpServlet {
                                         sq + RecordTable + sq +
                                         " order by record.replicationid");
          records = rq.list();
+         for (Object obj : records) {
+            // Make sure we're not getting out-of-date info from the cache.
+            session.refresh(obj);
+         }
          session.close();
       } catch (Exception e) {
          HibernateWrapper.closeSession(session);
@@ -338,7 +349,7 @@ public class ReplicationTable extends HttpServlet {
    
    void process(Integer selectedReplicationId) {
       if (fRepTable == null) return;
-      
+      Logging.debug("ReplicationTable.process(selectedReplicationId)");
       Logging.debug("ReplicationTable: received selectedReplicationId " +
                     selectedReplicationId);
       Logging.debug("ReplicationTable: modify = " + fModify);
@@ -382,11 +393,12 @@ public class ReplicationTable extends HttpServlet {
       }
       fHtml = fHtml.replace(fRow, buffer.toString());
       fHtml = fHtml.replace("#recordtable#", RecordTable)
-      .replaceAll("#applicationurl#",
-                  fApplicationURL);
+         .replaceAll("#applicationurl#",
+                     fApplicationURL);
    }
    
    String process(Replication repEntry, Boolean modifyThisEntry) {
+      Logging.debug("ReplicationTable.process(repRentry, modifyThisEntry)");
       // Start updating the row.
       String newrow = new String(fRow);
       
@@ -405,70 +417,70 @@ public class ReplicationTable extends HttpServlet {
                        "  bundleSize: "  + repEntry.getbundleSize());
          // This line should be editable;
          newrow = newrow
-         .replaceAll("#openconnection#",
-                     "<input id=\"openconnection:#replicationid#\" " +
-                     "name=\"openconnection:#replicationid#\" " +
-                     "type=\"text\" value=\"" +
-                     repEntry.getopenconnection() +
-                     "\" size=\"35\" maxlength=\"120\" />")
-         .replaceAll("#registered#",
-                     (repEntry.getregistered() == 0)?"No":"Yes")
-         .replaceAll("#running#",
-                     (repEntry.getrunning() == 0)?"No":"Yes")
-         .replaceAll("#security#",
-                     "<select id=\"security:#replicationid#\" name=\"security:#replicationid#\">\n" +
-                     ((repEntry.getsecurity() == 0)?
-                      ("  <option>Yes</option>\n" +
-                       "  <option selected=\"selected\">No</option>"):
-                      ("  <option selected=\"selected\">Yes</option>\n" +
-                       "  <option>No</option>")) +
-                     "</select>")
-         .replaceAll("#probename#", probeList(repEntry.getprobename()))
-         .replaceAll("#frequency#", 
-                     "<input name=\"frequency:#replicationid#\" " +
-                     "type=\"text\" value=\"" +
-                     Integer.toString(repEntry.getfrequency()) +
-                     "\" size=\"3\" maxlength=\"4\" />")
-         .replaceAll("#dbid#", 
-                     "<input name=\"dbid:#replicationid#\" " +
-                     "type=\"text\" value=\"" +
-                     Integer.toString(repEntry.getdbid()) +
-                     "\" size=\"8\" maxlength=\"10\" />")
-         .replaceAll("#rowcount#", Integer.toString(repEntry.getrowcount()))
-         .replaceAll("#bundleSize#", 
-                     "<input name=\"bundleSize:#replicationid#\" " +
-                     "type=\"text\" value=\"" +
-                     Integer.toString(repEntry.getbundleSize()) +
-                     "\" size=\"3\" maxlength=\"4\" />")
-         .replaceAll("#actionblock#",
-                     "<tr><td style=\"text-align: center\">" +
-                     "<input type=\"submit\" name=\"action\" value=\"Update\"/>" +
-                     "</td>" +
-                     "<td style=\"text-align: center\">" +
-                     "<input type=\"submit\" name=\"action\" value=\"Cancel\"/>" +
-                     "</td></tr>")
-         .replaceAll("#webpagename#", Name)
-         .replaceAll("#replicationid#",
-                     Integer.toString(repEntry.getreplicationid()));
+            .replaceAll("#openconnection#",
+                        "<input id=\"openconnection:#replicationid#\" " +
+                        "name=\"openconnection:#replicationid#\" " +
+                        "type=\"text\" value=\"" +
+                        repEntry.getopenconnection() +
+                        "\" size=\"35\" maxlength=\"120\" />")
+            .replaceAll("#registered#",
+                        (repEntry.getregistered() == 0)?"No":"Yes")
+            .replaceAll("#running#",
+                        (repEntry.getrunning() == 0)?"No":"Yes")
+            .replaceAll("#security#",
+                        "<select id=\"security:#replicationid#\" name=\"security:#replicationid#\">\n" +
+                        ((repEntry.getsecurity() == 0)?
+                         ("  <option>Yes</option>\n" +
+                          "  <option selected=\"selected\">No</option>"):
+                         ("  <option selected=\"selected\">Yes</option>\n" +
+                          "  <option>No</option>")) +
+                        "</select>")
+            .replaceAll("#probename#", probeList(repEntry.getprobename()))
+            .replaceAll("#frequency#", 
+                        "<input name=\"frequency:#replicationid#\" " +
+                        "type=\"text\" value=\"" +
+                        Integer.toString(repEntry.getfrequency()) +
+                        "\" size=\"3\" maxlength=\"4\" />")
+            .replaceAll("#dbid#", 
+                        "<input name=\"dbid:#replicationid#\" " +
+                        "type=\"text\" value=\"" +
+                        Integer.toString(repEntry.getdbid()) +
+                        "\" size=\"8\" maxlength=\"10\" />")
+            .replaceAll("#rowcount#", Integer.toString(repEntry.getrowcount()))
+            .replaceAll("#bundleSize#", 
+                        "<input name=\"bundleSize:#replicationid#\" " +
+                        "type=\"text\" value=\"" +
+                        Integer.toString(repEntry.getbundleSize()) +
+                        "\" size=\"3\" maxlength=\"4\" />")
+            .replaceAll("#actionblock#",
+                        "<tr><td style=\"text-align: center\">" +
+                        "<input type=\"submit\" name=\"action\" value=\"Update\"/>" +
+                        "</td>" +
+                        "<td style=\"text-align: center\">" +
+                        "<input type=\"submit\" name=\"action\" value=\"Cancel\"/>" +
+                        "</td></tr>")
+            .replaceAll("#webpagename#", Name)
+            .replaceAll("#replicationid#",
+                        Integer.toString(repEntry.getreplicationid()));
       } else { // Simple
          newrow = newrow
-         .replaceAll("#openconnection#",
-                     repEntry.getopenconnection())
-         .replaceAll("#registered#",
-                     (repEntry.getregistered() == 0)?"No":"Yes")
-         .replaceAll("#running#",
-                     (repEntry.getrunning() == 0)?"No":"Yes")
-         .replaceAll("#frequency#",
-                     Integer.toString(repEntry.getfrequency()))
-         .replaceAll("#dbid#",
-                     Integer.toString(repEntry.getdbid()))
-         .replaceAll("#rowcount#",
-                     Integer.toString(repEntry.getrowcount()))
-         .replaceAll("#security#",
-                     (repEntry.getsecurity() == 0)?"No":"Yes")
-         .replaceAll("#bundleSize#",
-                     Integer.toString(repEntry.getbundleSize()))
-         .replaceAll("#probename#", repEntry.getprobename());
+            .replaceAll("#openconnection#",
+                        repEntry.getopenconnection())
+            .replaceAll("#registered#",
+                        (repEntry.getregistered() == 0)?"No":"Yes")
+            .replaceAll("#running#",
+                        (repEntry.getrunning() == 0)?"No":"Yes")
+            .replaceAll("#frequency#",
+                        Integer.toString(repEntry.getfrequency()))
+            .replaceAll("#dbid#",
+                        Integer.toString(repEntry.getdbid()))
+            .replaceAll("#rowcount#",
+                        Integer.toString(repEntry.getrowcount()))
+            .replaceAll("#security#",
+                        (repEntry.getsecurity() == 0)?"No":"Yes")
+            .replaceAll("#bundleSize#",
+                        Integer.toString(repEntry.getbundleSize()))
+            .replaceAll("#probename#", repEntry.getprobename());
          if (fModify) {
             newrow = newrow.replaceAll("#actionblock#",
                                        "          <tr>\n" +
@@ -503,7 +515,7 @@ public class ReplicationTable extends HttpServlet {
                                        "              <input type=\"submit\" name=\"action\" value=\"Modify\"/></td></tr>");
          }
          newrow = newrow.replaceAll("#webpagename#", Name)
-         .replaceAll("#replicationid#", Integer.toString(repEntry.getreplicationid()));
+            .replaceAll("#replicationid#", Integer.toString(repEntry.getreplicationid()));
       }
       return newrow;
    }
@@ -516,15 +528,16 @@ public class ReplicationTable extends HttpServlet {
       Session session = null;
       try {
          session = HibernateWrapper.getCheckedSession();
-      
-         Query q = session.createSQLQuery("select distinct ProbeName from " +
-                                          RecordTable + "_Meta order by ProbeName");
+
+         Query q =
+            session.createSQLQuery("select distinct ProbeName from " +
+                                   RecordTable + "_Meta order by ProbeName");
          for (Object probeName : q.list()) {
             probelist.add("Probe:" + (String) probeName);
          }
          if (RecordTable.equals("JobUsageRecord")) {
             q = session.createSQLQuery("select distinct(VO.VOName) from VO " + 
-                                    "join VONameCorrection VC on " +
+                                       "join VONameCorrection VC on " +
                                        "(VO.void = VC.void) order by VO.VOName");
             for (Object voName : q.list()) {
                probelist.add("VO:" + (String) voName);
@@ -551,6 +564,7 @@ public class ReplicationTable extends HttpServlet {
    }
    
    void register(Replication repEntry) {
+      Logging.debug("ReplicationTable.register()");
       if (repEntry.getsecurity() == 0) {
          fMessage = "Security is not enable for this replication entry.  No registration needed.";
          return;
@@ -569,12 +583,12 @@ public class ReplicationTable extends HttpServlet {
       }
       String[] results = split(response, ":");
       if (results[0].equals("secureconnection")) {
-         
+
          String secureconnection = URLDecoder.decode(results[1]);
          repEntry.setsecureconnection(secureconnection);
          repEntry.setregistered(1);
          commitUpdate(repEntry);
-         
+
       } else if (results[0].equals("Error")) {
          fMessage = "ERROR registering with remote host: " + response;
          Logging.warning("ReplicationTable: " + fMessage);
@@ -611,8 +625,8 @@ public class ReplicationTable extends HttpServlet {
       catch (Exception e) {
          HibernateWrapper.closeSession(session);
          fMessage = "ERROR deleting replication entry " +
-         repEntry.getreplicationid() +
-         " from DB";
+            repEntry.getreplicationid() +
+            " from DB";
          Logging.warning("ReplicationTable: " + fMessage);
          Logging.debug("ReplicationTable: exception details:", e);
       }
@@ -639,7 +653,7 @@ public class ReplicationTable extends HttpServlet {
          } else {
             fMessage = "Test Succeeded!!";
          }
-         
+
       } else {
          String response = "";
          Post post = new Post(target, "update", "xxx");
@@ -741,7 +755,8 @@ public class ReplicationTable extends HttpServlet {
       commitUpdate(repEntry);
    }
    
-   void commitUpdate(Replication repEntry) {
+   private void commitUpdate(Replication repEntry) {
+      Logging.debug("ReplicationTable.commitUpdate()");
       // Update record in DB
       Session session = null;
       try {
@@ -753,14 +768,14 @@ public class ReplicationTable extends HttpServlet {
       catch (Exception e) {
          HibernateWrapper.closeSession(session);
          fMessage = "ERROR updating replication entry " +
-         repEntry.getreplicationid() +
-         " in DB";
+            repEntry.getreplicationid() +
+            " in DB";
          Logging.warning("ReplicationTable: " + fMessage);
          Logging.debug("ReplicationTable: exception details:", e);
       }
    }
    
-   public String[] split(String input, String sep) {
+   private String[] split(String input, String sep) {
       Vector vector = new Vector();
       StringTokenizer st = new StringTokenizer(input, sep);
       while (st.hasMoreTokens())
