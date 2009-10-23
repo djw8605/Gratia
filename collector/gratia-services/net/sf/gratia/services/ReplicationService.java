@@ -52,6 +52,7 @@ public class ReplicationService extends Thread {
       Hashtable<Integer, Integer> checkedPumps = new Hashtable<Integer, Integer>();
       try {
          session = HibernateWrapper.getSession();
+         org.hibernate.Transaction tx = session.beginTransaction();
          Query rq = session.createQuery("select replicationEntry from " +
                                         "Replication replicationEntry ")
             .setCacheMode(CacheMode.IGNORE);
@@ -72,6 +73,7 @@ public class ReplicationService extends Thread {
                pump.start();
             }
          }
+         tx.commit();
          session.close();
       }
       catch (Exception e) {

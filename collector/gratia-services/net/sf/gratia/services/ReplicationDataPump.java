@@ -144,7 +144,7 @@ public class ReplicationDataPump extends Thread {
       List dbidList = null;
       try {
          session = HibernateWrapper.getSession();
-
+         Transaction tx = session.beginTransaction();
          replicationEntry =
             (Replication) session.get("net.sf.gratia.storage.Replication", replicationId);
 
@@ -161,6 +161,8 @@ public class ReplicationDataPump extends Thread {
                            replicationId +
                            " has been removed or turned off.");
             exitflag = true;
+            tx.commit();
+            session.close();
             return;
          }
 
@@ -202,6 +204,7 @@ public class ReplicationDataPump extends Thread {
          sq.setMaxResults(chunksize);
          dbidList = sq.list();
          int lSize = dbidList.size();
+         tx.commit();
          session.close();
          if (lSize == 0) {
             replicationLog(LogLevel.FINEST,
