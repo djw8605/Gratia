@@ -124,8 +124,10 @@ public class CertificateTable extends HttpServlet
          List records = null;
          try {
             session = HibernateWrapper.getCheckedSession();
+            Transaction tx = session.beginTransaction();
             Query rq = session.createQuery("from Certificate");
             records = rq.list();
+            tx.commit();
             session.close();
          } catch (Exception e) {
             Logging.debug("Load Certificate caught: "+e.getMessage());

@@ -313,6 +313,7 @@ public class ReplicationTable extends HttpServlet {
       List records;
       try {
          session = HibernateWrapper.getCheckedSession();
+         Transaction tx = session.beginTransaction();
          Query rq = session.createQuery("select record from Replication record " +
                                         "where record.recordtable = " +
                                         sq + RecordTable + sq +
@@ -322,6 +323,7 @@ public class ReplicationTable extends HttpServlet {
             // Make sure we're not getting out-of-date info from the cache.
             session.refresh(obj);
          }
+         tx.commit();
          session.close();
       } catch (Exception e) {
          HibernateWrapper.closeSession(session);
@@ -528,7 +530,7 @@ public class ReplicationTable extends HttpServlet {
       Session session = null;
       try {
          session = HibernateWrapper.getCheckedSession();
-
+         Transaction tx = session.beginTransaction();
          Query q =
             session.createSQLQuery("select distinct ProbeName from " +
                                    RecordTable + "_Meta order by ProbeName");
@@ -543,6 +545,7 @@ public class ReplicationTable extends HttpServlet {
                probelist.add("VO:" + (String) voName);
             }
          }
+         tx.commit();
          session.close();
       } catch (Exception e) {
          HibernateWrapper.closeSession(session);

@@ -162,8 +162,10 @@ public class ConnectionTable extends HttpServlet
          List records = null;
          try {
             session = HibernateWrapper.getCheckedSession();
+            Transaction tx = session.beginTransaction();
             Query rq = session.createQuery("from Connection");
             records = rq.list();
+            tx.commit();
             session.close();
          } catch (Exception e) {
             Logging.debug("Load connection caught: "+e.getMessage());
