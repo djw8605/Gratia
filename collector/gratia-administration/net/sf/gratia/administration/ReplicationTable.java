@@ -319,10 +319,6 @@ public class ReplicationTable extends HttpServlet {
                                         sq + RecordTable + sq +
                                         " order by record.replicationid");
          records = rq.list();
-         for (Object obj : records) {
-            // Make sure we're not getting out-of-date info from the cache.
-            session.refresh(obj);
-         }
          tx.commit();
          session.close();
       } catch (Exception e) {
@@ -335,7 +331,17 @@ public class ReplicationTable extends HttpServlet {
       fRepTable = new Hashtable<Integer, Replication>();
       for ( Object listEntry : records ) {
          Replication repEntry = (Replication) listEntry;
-         Logging.debug("Replication: loaded entry " + repEntry.getreplicationid());
+         Logging.debug("Replication: loaded entry " +
+                       repEntry.getreplicationid() + ": " +
+                       repEntry.getopenconnection() + ", " +
+                       repEntry.getregistered() + ", " +
+                       repEntry.getrunning() + ", " + 
+                       repEntry.getsecurity() + ", " +
+                       repEntry.getfrequency() + ", " +
+                       repEntry.getdbid() + ", " +
+                       repEntry.getrowcount() + ", " +
+                       repEntry.getbundleSize() + "."
+                       );
          fRepTable.put(new Integer(repEntry.getreplicationid()),
                        repEntry);
       }

@@ -165,13 +165,20 @@ public class HibernateWrapper {
          return false;
       }
    }
-   
+
    public static synchronized org.hibernate.Session getSession() { // Fast
+      return getSession(null);
+   }
+   
+   public static synchronized org.hibernate.Session getSession(org.hibernate.CacheMode mode) { // Fast
       try {
          if (!hibernateInitialized) {
             startImpl();
          }
          org.hibernate.Session session = hibernateFactory.openSession();
+         if (mode != null) {
+            session.setCacheMode(mode);
+         }
          return session;
       }
       catch (Exception e) {
@@ -181,6 +188,10 @@ public class HibernateWrapper {
    }
    
    public static synchronized org.hibernate.Session getCheckedSession() { // Slower
+      return getCheckedSession(null);
+   }
+   
+   public static synchronized org.hibernate.Session getCheckedSession(org.hibernate.CacheMode mode) { // Slower
       try {
          if (!hibernateInitialized) {
             startImpl();
@@ -196,6 +207,9 @@ public class HibernateWrapper {
                return null;
             }
             Logging.log("HibernateWrapper: Get Session: retry succeeded.");
+         }
+         if (mode != null) {
+            session.setCacheMode(mode);
          }
          return session;
       }

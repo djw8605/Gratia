@@ -60,9 +60,10 @@ public class DataScrubber {
       do {
          ++nTries;
          Session session = null;
+         Transaction tx = null;
          try {
             session = HibernateWrapper.getSession();
-            Transaction tx = session.beginTransaction();
+            tx = session.beginTransaction();
             org.hibernate.SQLQuery query = session.createSQLQuery( deletecmd );
             Logging.debug("DataScrubber: About to query " + query.getQueryString());
             
@@ -97,6 +98,8 @@ public class DataScrubber {
       long deletedThisIteration = 0;
       Integer nTries = 0;
       Boolean keepTrying = true;
+      Transaction tx = null;
+      String deleteCmd = "delete " + className + " record where record." + idAttribute + " in ( :ids )";
       do {
          ++nTries;
          String selectCmd = ( "select record.id from " + className +
@@ -106,8 +109,7 @@ public class DataScrubber {
          Session session = null;
          try {
             session = HibernateWrapper.getSession();
-            Transaction tx = session.beginTransaction();
-            String deleteCmd = "delete " + className + " record where record." + idAttribute + " in ( :ids )";
+            tx = session.beginTransaction();
             org.hibernate.Query query = session.createQuery( deleteCmd );
             Logging.debug("DataScrubber: About to " + query.getQueryString());
             query.setParameterList("ids", ids);
@@ -137,12 +139,13 @@ public class DataScrubber {
       long deletedThisIteration = 0;
       Integer nTries = 0;
       Boolean keepTrying = true;
+      Transaction tx = null;
       do {
          ++nTries;
          Session session = null;
          try {
             session = HibernateWrapper.getSession();
-            Transaction tx = session.beginTransaction();
+            tx = session.beginTransaction();
             org.hibernate.Query query = session.createQuery( deletecmd );
             Logging.debug("DataScrubber: About to query " + query.getQueryString());
             
@@ -175,13 +178,13 @@ public class DataScrubber {
       List result = null;
       Integer nTries = 0;
       Boolean keepTrying = true;
-      
+      Transaction tx = null;
       while (keepTrying) {
          ++nTries;
          Session session = null;
          try {
             session =  HibernateWrapper.getSession();
-            Transaction tx = session.beginTransaction();
+            tx = session.beginTransaction();
             org.hibernate.Query query = session.createQuery( listcmd );
             Logging.debug("DataScrubber: About to query " + query.getQueryString());
             query.setString( "dateLimit", datelimit );
@@ -273,6 +276,7 @@ public class DataScrubber {
          "(EndTime.Value < :dateLimit)) and ServerDate < :dateLimit";
          boolean done = false;
          Integer nTries = 0;
+         Transaction tx = null;
          while (!done) {
             ++nTries;
             ids = GetList(hqlList, limit, "JobUsageRecord records");
@@ -312,7 +316,7 @@ public class DataScrubber {
                   // Special case multi-table delete since
                   // TransferDetails isn't keyed on dbid.
                   session = HibernateWrapper.getSession();
-                  Transaction tx = session.beginTransaction();
+                  tx = session.beginTransaction();
                   DeleteRows("delete TD, T from TransferDetails TD, " +
                              "TDCorr T where T.TransferDetailsId = " +
                              "TD.TransferDetailsId and T.dbid in " +

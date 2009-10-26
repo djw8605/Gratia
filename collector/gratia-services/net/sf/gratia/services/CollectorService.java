@@ -801,6 +801,7 @@ public class CollectorService implements ServletContextListener {
       } else {
          
          Session session = null;
+         Transaction tx = null;
          
          for(int i=0; i< certs.length; ++i) {
             if (session == null) {
@@ -810,7 +811,9 @@ public class CollectorService implements ServletContextListener {
             net.sf.gratia.storage.Certificate localcert = null;
             try {
                pem =  net.sf.gratia.storage.Certificate.GeneratePem(certs[i]);
+               tx = session.beginTransaction();
                localcert = (net.sf.gratia.storage.Certificate)session.createQuery(command).setString(0,pem).uniqueResult();
+               tx.commit();
             } catch (java.security.cert.CertificateEncodingException e) {
                Logging.warning("checkCertificate exception: " + e);
                Logging.debug("Exception details: ", e);
@@ -832,7 +835,6 @@ public class CollectorService implements ServletContextListener {
                   if (session == null) {
                      session = HibernateWrapper.getSession();
                   }
-                  Transaction tx = null;
                   try {
                      tx = session.beginTransaction();
                      session.saveOrUpdate( localcert );

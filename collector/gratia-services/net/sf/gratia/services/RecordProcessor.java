@@ -452,11 +452,12 @@ public class RecordProcessor extends Thread {
                 Integer nTries = 0;
                 Boolean keepTrying = true;
                 Integer nDuplicateTry = 0;
+                Transaction or_tx = null;
                 while (keepTrying && nDuplicateTry < 5) {
                     ++nTries;
                     try {
                        or_session = HibernateWrapper.getSession();
-                       Transaction or_tx = or_session.beginTransaction();
+                       or_tx = or_session.beginTransaction();
                        origin = origin.attach(or_session);
                        or_session.flush();
                        or_tx.commit();
@@ -536,12 +537,13 @@ public class RecordProcessor extends Thread {
                 //MPERF: Logging.fine(ident + rId + " starting hibernate operations.");
                 Integer nTries = 0;
                 Boolean keepTrying = true;
+                Session pr_session = null;
+                Transaction pr_tx = null;
                 while (keepTrying) {
                     ++nTries;
-                    Session pr_session = null;
                     try {
                         pr_session = HibernateWrapper.getSession();
-                        Transaction pr_tx = pr_session.beginTransaction();
+                        pr_tx = pr_session.beginTransaction();
 
                         probe = statusUpdater.update(pr_session, current, xml);
                         pr_session.flush();
@@ -565,7 +567,7 @@ public class RecordProcessor extends Thread {
                 //MPERF: Logging.fine(ident + rId + " saved probe object.");
 
 
-                // Fix up the record; in particular set EndTime if it out of whack.
+                // Fix up the record; in particular set EndTime if it is out of whack.
                 updater.Update(current);
 
                 Boolean acceptRecord = true;
@@ -683,13 +685,17 @@ public class RecordProcessor extends Thread {
                     }
 
                     Session rec_session = null;
+                    Transaction rec_tx = null;
+                    String incomingxml;
+                    String rawxml;
+                    String extraxml;
                     nTries = 0;
                     keepTrying = true;
                     while (keepTrying) {
                         ++nTries;
                         try {
                             rec_session = HibernateWrapper.getSession();
-                            Transaction rec_tx = rec_session.beginTransaction();
+                            rec_tx = rec_session.beginTransaction();
                             //MPERF: Logging.fine(ident + rId + " attaching VO and other content.");
                             synchronized (lock) {
                                 // Synchronize on lock so we're
@@ -706,9 +712,9 @@ public class RecordProcessor extends Thread {
                                 rec_session.flush();
                             }
                             //MPERF: Logging.fine(ident + rId + " managing RawXML.");
-                            String incomingxml = current.getRawXml();
-                            String rawxml = null;
-                            String extraxml = null;
+                            incomingxml = current.getRawXml();
+                            rawxml = null;
+                            extraxml = null;
                             if (rawxmllist.size() > j) {
                                 rawxml = (String) rawxmllist.get(j);
                                 if (rawxml != null) {
@@ -916,12 +922,14 @@ public class RecordProcessor extends Thread {
                       e.getSQL());
         int dupdbid = 0;
         Boolean needCurrentSaveDup = false;
+        Transaction tx = null;
         if (duplicateExceptionFinder.matcher(e.getSQLException().getMessage()).find() &&
             metaFinder.matcher(e.getSQL()).find()) { // Duplicate of an interesting table
             if (current.getTableName().equals("JobUsageRecord")) {
                 UserIdentity newUserIdentity =
                     ((JobUsageRecord) current).getUserIdentity();
                 Session dup_session = HibernateWrapper.getSession();
+                tx = dup_session.beginTransaction();
                 Query dup_query = dup_session.createQuery("select record from " +
                                                           "JobUsageRecord " +
                                                           "record where " +
@@ -929,6 +937,7 @@ public class RecordProcessor extends Thread {
                                                           "'" +
                                                           current.getmd5() +
                                                           "'").setCacheMode(CacheMode.IGNORE);
+                tx.commit();
                 Boolean savedCurrent = false;
                 JobUsageRecord original_record = (JobUsageRecord) dup_query.uniqueResult();
                 if (original_record == null) {
@@ -1013,9 +1022,7 @@ public class RecordProcessor extends Thread {
                             if (! HibernateWrapper.isFullyConnected(dup_session)) {
                                 dup_session = HibernateWrapper.getSession();
                             }
-                            dup_session = HibernateWrapper.getSession();
-
-                            Transaction dup_tx = dup_session.beginTransaction();
+                            tx = dup_session.beginTransaction();
                             // Keep the new one and ditch the old
                             Logging.fine(ident + rId +
                                          ": Replacing record " +
@@ -1038,13 +1045,13 @@ public class RecordProcessor extends Thread {
                                 // (important) and then
                                 // save the current record.
                                 dup_session.flush();
-                                dup_tx.commit();
-                                dup_tx = dup_session.beginTransaction();
+                                tx.commit();
+                                tx = dup_session.beginTransaction();
                                 dup_session.save(current);
                                 current.executeTrigger(dup_session);
                                 savedCurrent = true;
                             }
-                            dup_tx.commit();
+                            tx.commit();
                             keepTrying = false;
                             if (original_record.setDuplicate(true)) {
                                 if (gotreplication) {
@@ -1084,10 +1091,10 @@ public class RecordProcessor extends Thread {
                                     if (! HibernateWrapper.isFullyConnected(dup_session)) {
                                         dup_session = HibernateWrapper.getSession();
                                     }
-                                    Transaction dup_tx = dup_session.beginTransaction();
+                                    tx = dup_session.beginTransaction();
                                     dup_session.saveOrUpdate(localprobe);
                                     dup_session.flush();
-                                    dup_tx.commit();
+                                    tx.commit();
                                     dup_session.close();
                                     keepTrying = false;
                                 } catch (Exception e2) {
@@ -1115,7 +1122,9 @@ public class RecordProcessor extends Thread {
                         "'" +
                         current.getmd5() +
                         "'";
+                    tx = dup2_session.beginTransaction();
                     Integer dup_dbid = (Integer) (dup2_session.createSQLQuery(cmd).uniqueResult());
+                    tx.commit();
                     // Avoid infinite growth
                     if (current instanceof ProbeDetails) {
                         if (fProbeDetails.size() > 500) {

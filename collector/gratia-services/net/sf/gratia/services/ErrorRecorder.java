@@ -21,12 +21,13 @@ public class ErrorRecorder {
                               Probe probe) throws Exception {
       Integer nTries = 0;
       Boolean keepTrying = true;
+      Session session = null;
+      Transaction tx = null;
       while (keepTrying) {
          ++nTries;
-         Session session = null;
          try {
             session = HibernateWrapper.getSession();
-            Transaction tx = session.beginTransaction();
+            tx = session.beginTransaction();
             session.save(record);
             if (probe != null) {
                session.saveOrUpdate(probe);
