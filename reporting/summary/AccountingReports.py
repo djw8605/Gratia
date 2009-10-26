@@ -143,9 +143,6 @@ def UseArgs(argv):
     daily = False
     
     configFiles = "gratiareports.conf"
-    if not os.path.isfile(configFiles):
-        print "ERROR!!! Cannot read " + configFiles + ". Please create " + configFiles + " by copying " + configFiles + ".template and filling in the appropriate values."
-        sys.exit(1)
     
     if argv is None:
         argv = sys.argv
@@ -184,12 +181,19 @@ def UseArgs(argv):
             gEmailSubject = a
         if o in ("--grid"):
             gGrid = a # indicates if we should restrict the queries from summary table by adding Grid="OSG" to the where clause. See RunQuery function for how the query is being manipulated for this purpose.
-        gConfig.read(configFiles)
-    if (gEmailToNames == None and gEmailTo != None):
-       gEmailToNames = ["" for i in gEmailTo]
+
+    # Check and make sure that config file exists
+    if not os.path.isfile(configFiles):
+        print "ERROR!!! Cannot read " + configFiles + ". Please create " + configFiles + " by copying " + configFiles + ".template and filling in the appropriate values."
+        sys.exit(1)
+
+    gConfig.read(configFiles)
 
     # Get DB connection credentials
     DBConnectString(configFiles)
+
+    if (gEmailToNames == None and gEmailTo != None):
+       gEmailToNames = ["" for i in gEmailTo]
     
     start = ""
     end = ""
@@ -382,7 +386,6 @@ def sendAll(text, filestem = "temp"):
 
 def DBConnectString(configFiles):
     global gMySQLConnectString,gMySQLFermiConnectString,gMySQLDailyConnectString,gMySQLTransferConnectString, gConfig
-    gConfig.read(configFiles)
     gMySQLConnectString      = DBConnectStringHelper(mainDB,configFiles)
     gMySQLFermiConnectString = DBConnectStringHelper(psacctDB,configFiles)
     gMySQLDailyConnectString = DBConnectStringHelper(dailyDB,configFiles)
