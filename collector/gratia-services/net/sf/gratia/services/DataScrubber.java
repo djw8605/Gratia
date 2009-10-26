@@ -71,6 +71,7 @@ public class DataScrubber {
             deletedThisIteration = query.executeUpdate();
             tx.commit();
             nTries = 0;
+            keepTrying = false;
             session.close();
          }
          catch (Exception e) {
@@ -113,6 +114,7 @@ public class DataScrubber {
             deletedThisIteration = query.executeUpdate();
             tx.commit();
             nTries = 0;
+            keepTrying = false;
             session.close();
          }
          catch (Exception e) {
@@ -150,6 +152,7 @@ public class DataScrubber {
             deletedThisIteration = query.executeUpdate();
             tx.commit();
             nTries = 0;
+            keepTrying = false;
             session.close();
          }
          catch (Exception e) {
