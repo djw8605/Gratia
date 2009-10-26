@@ -58,8 +58,12 @@
 	<hr><label class="menuGroup">Replication</label> <br />
 	<a href="./jobusagerecordreplicationtable.html" target="adminContent" class="<%=menuClass%>">Job Usage Replication</a><br />
 	<a href="./metricrecordreplicationtable.html" target="adminContent" class="<%=menuClass%>">Metric Replication</a><br />
-	<a href="./computeelementdescriptionreplicationtable.html" target="adminContent" class="<%=menuClass%>">CE Description Replication</a><br />
 	<a href="./probedetailsreplicationtable.html" target="adminContent" class="<%=menuClass%>">ProbeDetails Replication</a><br />
+	<a href="./computeelementreplicationtable.html" target="adminContent" class="<%=menuClass%>">CE Description Replication</a><br />
+	<a href="./storageelementreplicationtable.html" target="adminContent" class="<%=menuClass%>">SE Description Replication</a><br />
+	<a href="./subclusterreplicationtable.html" target="adminContent" class="<%=menuClass%>">Sub-cluster Description Replication</a><br />
+	<a href="./computeelementrecordreplicationtable.html" target="adminContent" class="<%=menuClass%>">CE Record Replication</a><br />
+	<a href="./storageelementrecordreplicationtable.html" target="adminContent" class="<%=menuClass%>">SE Record Replication</a><br />
 
 
 	<hr><label class="menuGroup">System</label> <br />

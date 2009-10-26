@@ -111,7 +111,7 @@
     </servlet>
 
     <servlet>
-        <servlet-name>storageelementrecrdreplicationtable</servlet-name>
+        <servlet-name>storageelementrecordreplicationtable</servlet-name>
         <servlet-class>net.sf.gratia.administration.ReplicationTable</servlet-class>
         <load-on-startup>2</load-on-startup>
         <init-param>
@@ -214,6 +214,31 @@
     <servlet-mapping>
         <servlet-name>metricrecordreplicationtable</servlet-name>
         <url-pattern>/metricrecordreplicationtable.html</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>computeelementreplicationtable</servlet-name>
+        <url-pattern>/computeelementreplicationtable.html</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>storageelementreplicationtable</servlet-name>
+        <url-pattern>/storageelementreplicationtable.html</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>computeelementrecordreplicationtable</servlet-name>
+        <url-pattern>/computeelementrecordreplicationtable.html</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>storageelementrecrdreplicationtable</servlet-name>
+        <url-pattern>/storageelementrecrdreplicationtable.html</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>subclusterreplicationtable</servlet-name>
+        <url-pattern>/subclusterreplicationtable.html</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>
