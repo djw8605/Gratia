@@ -9,7 +9,7 @@ build:
 	(cd ../../build-scripts; gmake )
 
 test: build
-	./runPurgeTest.sh -c -d -l -f -t
+	./runPurgeTest.sh -c -d -l -f -k -t
 
 clean:
 	rm -rf MAGIC_VDT_LOCATION ProbeConfig collector-for-test *~ *.validate *.count

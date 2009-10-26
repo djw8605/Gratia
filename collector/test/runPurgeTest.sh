@@ -9,6 +9,7 @@ usage: runPurgeTest.sh [-h] [-l] [-d] [-c] [-p port_number]
    -p use this port for the main collector (default 9000)
    -l load the data
    -f execute fix ups
+   -k Turn on the housekeeping
    -w [filename] upload the war file
    -s stop server
    -t test content
@@ -479,7 +480,7 @@ function upload_war()
 }
 
 #--- get command line args ----
-while getopts :tshcfdln:w:p: OPT; do
+while getopts :tshcfkdln:w:p: OPT; do
     case $OPT in
         n)  schema_name=$OPTARG
             tomcatpwd=/data/tomcat-$OPTARG
@@ -493,7 +494,9 @@ while getopts :tshcfdln:w:p: OPT; do
             ;;
         d)  do_databasereset=1
             ;;
-        f)  do_fixup=1
+        f)  do_fixup=1; 
+            ;;
+        k)  do_purge=1
             ;;
         h)
             usage
@@ -541,6 +544,9 @@ fi
 if [ $do_fixup ]; then 
    fix_duplicate_date
    fix_server_date
+fi
+
+if [ $do_purge ]; then
    turn_on_purging
 fi
 
