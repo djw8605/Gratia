@@ -143,6 +143,9 @@ def UseArgs(argv):
     daily = False
     
     configFiles = "gratiareports.conf"
+    if not os.path.isfile(configFiles):
+        print "ERROR!!! Cannot read " + configFiles + ". Please create " + configFiles + " by copying " + configFiles + ".template and filling in the appropriate values."
+        sys.exit(1)
     
     if argv is None:
         argv = sys.argv
@@ -181,7 +184,7 @@ def UseArgs(argv):
             gEmailSubject = a
         if o in ("--grid"):
             gGrid = a # indicates if we should restrict the queries from summary table by adding Grid="OSG" to the where clause. See RunQuery function for how the query is being manipulated for this purpose.
-    gConfig.read(configFiles)
+        gConfig.read(configFiles)
     if (gEmailToNames == None and gEmailTo != None):
        gEmailToNames = ["" for i in gEmailTo]
 
@@ -380,12 +383,12 @@ def sendAll(text, filestem = "temp"):
 def DBConnectString(configFiles):
     global gMySQLConnectString,gMySQLFermiConnectString,gMySQLDailyConnectString,gMySQLTransferConnectString, gConfig
     gConfig.read(configFiles)
-    gMySQLConnectString      = DBConnectStringHelper(mainDB)
-    gMySQLFermiConnectString = DBConnectStringHelper(psacctDB)
-    gMySQLDailyConnectString = DBConnectStringHelper(dailyDB)
-    gMySQLTransferConnectString = DBConnectStringHelper(transferDB)
+    gMySQLConnectString      = DBConnectStringHelper(mainDB,configFiles)
+    gMySQLFermiConnectString = DBConnectStringHelper(psacctDB,configFiles)
+    gMySQLDailyConnectString = DBConnectStringHelper(dailyDB,configFiles)
+    gMySQLTransferConnectString = DBConnectStringHelper(transferDB,configFiles)
 
-def DBConnectStringHelper(dbName):
+def DBConnectStringHelper(dbName,configFiles):
     global gDBHostName,gDBUserName,gDBPort,gDBPassword,gDBSchema,gConfig
     try:
         gDBHostName[dbName] = gConfig.get(dbName, "hostname") 
@@ -393,22 +396,10 @@ def DBConnectStringHelper(dbName):
         gDBPort[dbName] = gConfig.get(dbName, "port") 
         gDBPassword[dbName] = gConfig.get(dbName, "password") 
         gDBSchema[dbName] = gConfig.get(dbName, "schema") 
-    # Fall back to default values if something isn't set or isn't set properly in the config file
+    # Issue an error and exit if a section is missing or something isn't set or isn't set properly in the config file
     except:
-        if(dbName == mainDB or dbName == dailyDB):
-            gDBHostName[dbName] = "gratia09.fnal.gov"
-            gDBUserName[dbName] = "reader"
-            gDBPort[dbName] = "3320"
-            gDBPassword[dbName] = "reader"
-            gDBSchema[dbName] = "gratia"
-            if(dbName == dailyDB):
-                gDBSchema[dbName] = "gratia_osg_daily"
-        elif(dbName == psacctDB):
-            gDBHostName[dbName] = "gratia-db01.fnal.gov"
-            gDBUserName[dbName] = "reader"
-            gDBPort[dbName] = "3320"
-            gDBPassword[dbName] = "reader"
-            gDBSchema[dbName] = "fermi_osg"
+        print "ERROR!!! The " + dbName + " section in " + configFiles + " either does not exist or does not contain all the needed information or has an error in it. See " + configFiles + ".template for examples and make sure " + configFiles + " confirms to the requirement."
+        sys.exit(1)
     return " -h " + gDBHostName[dbName] + " -u " + gDBUserName[dbName] + " --port=" + gDBPort[dbName] + " --password=" + gDBPassword[dbName] + " -N " +  gDBSchema[dbName]
 
 
