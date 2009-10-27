@@ -232,8 +232,8 @@
     </servlet-mapping>
 
     <servlet-mapping>
-        <servlet-name>storageelementrecrdreplicationtable</servlet-name>
-        <url-pattern>/storageelementrecrdreplicationtable.html</url-pattern>
+        <servlet-name>storageelementrecordreplicationtable</servlet-name>
+        <url-pattern>/storageelementrecordreplicationtable.html</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>
