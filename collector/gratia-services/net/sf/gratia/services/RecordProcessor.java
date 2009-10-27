@@ -473,7 +473,7 @@ public class RecordProcessor extends Thread {
          }
          int rSize = records.size();
          //MPERF: Logging.fine(ident+ ": converted " + rSize + " records");
-         DuplicateOriginHandler dupHandler = new DuplicateOriginHandler();
+         DuplicateOriginHandler dupOriginHandler = new DuplicateOriginHandler();
          if (origin != null) {
             // Save the origin first in its own transaction, so to 
             //   - make sure it is always stored properly even if we have a bundle
@@ -502,10 +502,12 @@ public class RecordProcessor extends Thread {
                   or_session.close();
                } catch (ConstraintViolationException e) {
                   HibernateWrapper.closeSession( or_session );
-                  switch (dupHandler.maybeHandleDuplicateOrigin(e, ident + rId)) {
+                  switch (dupOriginHandler.maybeHandleDuplicateOrigin(e, ident + rId)) {
                   case DuplicateOriginHandler.HANDLED: break;
                   case DuplicateOriginHandler.TOO_MANY_DUPS:
-                     saveQuarantine(file, "Problem processing origin entry for record file", e);
+                     saveQuarantine(file, "Too many consecutive duplicate origin failures (" +
+                                    DuplicateOriginHandler.TOO_MANY_DUPS + ")",
+                                    e);
                      continue NEXTFILE; // Next file.                              
                   case DuplicateOriginHandler.NOT_RELEVANT:
                   default:
@@ -702,7 +704,7 @@ public class RecordProcessor extends Thread {
 
             if (acceptRecord) {
                current.setDuplicate(false);
-               dupHandler.reset(); // Start counting duplicate origins from 0.
+               dupOriginHandler.reset(); // Start counting duplicate origins from 0.
                if (origin != null) {
                   //MPERF: Logging.fine(ident + rId + " about to add origin objects.");
                   current.addOrigin(origin);
@@ -790,10 +792,10 @@ public class RecordProcessor extends Thread {
                            keepTrying = false; // Don't retry
                         } else {
                            String message = "Received unexpected constraint violation";
-                           switch (dupHandler.maybeHandleDuplicateOrigin(e, ident + rId)) {
+                           switch (dupOriginHandler.maybeHandleDuplicateOrigin(e, ident + rId)) {
                            case DuplicateOriginHandler.HANDLED: break; // Retry.
                            case DuplicateOriginHandler.TOO_MANY_DUPS: // Too many retries
-                              message = "Received too many consecutive origin duplicates (" +
+                              message = "Received too many consecutive duplicate origin failures (" +
                                  DuplicateOriginHandler.TOO_MANY_DUPS + ")";
                            case DuplicateOriginHandler.NOT_RELEVANT:
                            default:
