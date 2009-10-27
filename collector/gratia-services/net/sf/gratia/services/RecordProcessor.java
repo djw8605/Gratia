@@ -718,8 +718,23 @@ public class RecordProcessor extends Thread {
                             if (rawxmllist.size() > j) {
                                 rawxml = (String) rawxmllist.get(j);
                                 if (rawxml != null) {
-                                    current.setRawXml(rawxml);
+                                   if (rawxml.equals("null")) {
+                                      // The info was scrubbed from the sender's database.
+                                      current.setRawXml(null);
+                                   } else {
+                                      current.setRawXml(rawxml);
+                                   }
                                 }
+                            }
+                            if (extraxmllist.size()>j) { 	 
+                               extraxml = (String)extraxmllist.get(j); 	 
+                               if (extraxml != null && !extraxml.equals("null")) {
+                                  String oldExtraXml = current.getExtraXml();
+                                  if (oldExtraXml != null) {
+                                     extraxml = oldExtraXml + extraxml;
+                                  }
+                                  current.setExtraXml(extraxml);
+                               }
                             }
                             Logging.debug(ident + rId + ": Before Hibernate Save");
                             if (gothistory) {
