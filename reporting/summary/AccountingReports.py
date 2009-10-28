@@ -183,8 +183,6 @@ def UseArgs(argv):
         if o in ("--grid"):
             gGrid = a # indicates if we should restrict the queries from summary table by adding Grid="OSG" to the where clause. See RunQuery function for how the query is being manipulated for this purpose.
 
-    print "config files is",configFiles
-
     # Check and make sure that config file exists
     for file in configFiles:
         if not os.path.isfile(file):
