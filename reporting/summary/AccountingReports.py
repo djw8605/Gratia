@@ -38,6 +38,7 @@ gEnd = None
 gWithPanda = False
 gGroupBy = "Site"
 gVOName = ""
+gConfigFiles = None
 gConfig = ConfigParser.ConfigParser()
 gEmailTo = None
 gEmailToNames = None
@@ -136,7 +137,7 @@ class Usage(Exception):
         self.msg = msg
 
 def UseArgs(argv):
-    global gProbename,gOutput,gWithPanda,gGroupBy,gVOName,gEmailTo,gEmailToNames,gEmailSubject,gConfig,gGrid
+    global gProbename,gOutput,gWithPanda,gGroupBy,gVOName,gEmailTo,gEmailToNames,gEmailSubject,gConfig,gGrid,gConfigFiles
 
     monthly = False
     weekly = False
@@ -187,10 +188,11 @@ def UseArgs(argv):
         print "ERROR!!! Cannot read " + configFiles + ". Please create " + configFiles + " by copying " + configFiles + ".template and filling in the appropriate values."
         sys.exit(1)
 
+    gConfigFiles = configFiles # store value to a global variable to be used later
     gConfig.read(configFiles)
 
     # Get DB connection credentials
-    DBConnectString(configFiles)
+    DBConnectString()
 
     if (gEmailToNames == None and gEmailTo != None):
        gEmailToNames = ["" for i in gEmailTo]
@@ -321,11 +323,14 @@ def sendEmail( toList, subject, content, log, fromEmail = None, smtpServerHost=N
     This turns the "report" into an email attachment
     and sends it to the EmailTarget(s).
     """
-    
     if (fromEmail == None):
        fromEmail = (gConfig.get("email","realname"),gConfig.get("email","from"))
     if (smtpServerHost == None):
-       smtpServerHost = gConfig.get("email", "smtphost")
+       try:
+           smtpServerHost = gConfig.get("email", "smtphost")
+       except:
+           print "ERROR!!! The email section in " + gConfigFiles + " either does not exist or does not contain the smtphost information or has an error in it. See " + gConfigFiles + ".template for examples and make sure " + gConfigFiles + " confirms to the requirement and has all values properly filled-in."
+           sys.exit(1)
     if (toList[1] == None):
        print "Cannot send mail (no To: specified)!"
        return
@@ -384,14 +389,14 @@ def sendAll(text, filestem = "temp"):
       sendEmail( (gEmailToNames, gEmailTo), gEmailSubject, text, None)
 
 
-def DBConnectString(configFiles):
-    global gMySQLConnectString,gMySQLFermiConnectString,gMySQLDailyConnectString,gMySQLTransferConnectString, gConfig
-    gMySQLConnectString      = DBConnectStringHelper(mainDB,configFiles)
-    gMySQLFermiConnectString = DBConnectStringHelper(psacctDB,configFiles)
-    gMySQLDailyConnectString = DBConnectStringHelper(dailyDB,configFiles)
-    gMySQLTransferConnectString = DBConnectStringHelper(transferDB,configFiles)
+def DBConnectString():
+    global gMySQLConnectString,gMySQLFermiConnectString,gMySQLDailyConnectString,gMySQLTransferConnectString
+    gMySQLConnectString      = DBConnectStringHelper(mainDB)
+    gMySQLFermiConnectString = DBConnectStringHelper(psacctDB)
+    gMySQLDailyConnectString = DBConnectStringHelper(dailyDB)
+    gMySQLTransferConnectString = DBConnectStringHelper(transferDB)
 
-def DBConnectStringHelper(dbName,configFiles):
+def DBConnectStringHelper(dbName):
     global gDBHostName,gDBUserName,gDBPort,gDBPassword,gDBSchema,gConfig
     try:
         gDBHostName[dbName] = gConfig.get(dbName, "hostname") 
@@ -401,7 +406,7 @@ def DBConnectStringHelper(dbName,configFiles):
         gDBSchema[dbName] = gConfig.get(dbName, "schema") 
     # Issue an error and exit if a section is missing or something isn't set or isn't set properly in the config file
     except:
-        print "ERROR!!! The " + dbName + " section in " + configFiles + " either does not exist or does not contain all the needed information or has an error in it. See " + configFiles + ".template for examples and make sure " + configFiles + " confirms to the requirement."
+        print "ERROR!!! The " + dbName + " section in " + gConfigFiles + " either does not exist or does not contain all the needed information or has an error in it. See " + gConfigFiles + ".template for examples and make sure " + gConfigFiles + " confirms to the requirement and has all values properly filled-in."
         sys.exit(1)
     return " -h " + gDBHostName[dbName] + " -u " + gDBUserName[dbName] + " --port=" + gDBPort[dbName] + " --password=" + gDBPassword[dbName] + " -N " +  gDBSchema[dbName]
 
