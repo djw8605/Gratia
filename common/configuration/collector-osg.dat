@@ -1,6 +1,7 @@
 (
  "osg-prod" =>
- { tomcat_user => "daemon",
+ { install_prefix => "/data",
+   tomcat_user => "daemon",
    tomcat_group => "daemon",
    instance_name => "gratia",
    http_port => 80,
@@ -32,7 +33,8 @@
    }
  },
  "osg-daily" =>
- { tomcat_user => "daemon",
+ { install_prefix => "/data",
+   tomcat_user => "daemon",
    tomcat_group => "daemon",
    instance_name => "gratia",
    http_port => 80,
@@ -63,7 +65,8 @@
    }
  },
  "osg-transfer" =>
- { tomcat_user => "daemon",
+ { install_prefix => "/data",
+   tomcat_user => "daemon",
    tomcat_group => "daemon",
    instance_name => "gratia",
    http_port => 80,
@@ -92,7 +95,8 @@
    }
  },
  "osg-itb" =>
- { tomcat_user => "daemon",
+ { install_prefix => "/data",
+   tomcat_user => "daemon",
    tomcat_group => "daemon",
    instance_name => "gratia",
    http_port => 80,
@@ -120,7 +124,8 @@
    }
  },
  "osg-integration" =>
- { tomcat_user => "daemon",
+ { install_prefix => "/data",
+   tomcat_user => "daemon",
    tomcat_group => "daemon",
    instance_name => "gratia",
    http_port => 80,

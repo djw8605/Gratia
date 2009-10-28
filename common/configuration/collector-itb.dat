@@ -1,6 +1,7 @@
 (
  itb_gratia_itb =>
- { tomcat_user => "daemon",
+ { install_prefix => "/data",
+   tomcat_user => "daemon",
    tomcat_group => "daemon",
    http_port => 8880,
    ssl_port => 8845,
@@ -10,7 +11,6 @@
    db_host => "gratia07.fnal.gov",
    db_port => "3322",
    remote_host => "gratia02.fnal.gov",
-   collector_host => "gratia02.fnal.gov",
    max_perm_size => "256m",
    max_heap_size => "1024m",
    jsvc => "/data/jsvc/bin/jsvc",
@@ -18,6 +18,7 @@
    {
     "maintain.history.checkInterval" => '2 h',
     "maintain.history.log" => 1,
+    "maintain.history.compress" => 1,
     "monitor.listener.wait" => 60,
     "service.listener.threads" => 1,
     "monitor.from.address" => 'grid-accounting@fnal.gov',
@@ -40,7 +41,8 @@
    }
  },
  itb_gratia_psacct =>
- { tomcat_user => "daemon",
+ { install_prefix => "/data",
+   tomcat_user => "daemon",
    tomcat_group => "daemon",
    http_port => 8881,
    ssl_port => 8846,
@@ -51,7 +53,6 @@
    db_host => "gratia07.fnal.gov",
    db_port => "3322",
    remote_host => "gratia02.fnal.gov",
-   collector_host => "gratia02.fnal.gov",
    UserConfig => "UserConfig_pacct.xml",
    staticReports => 0,
    max_perm_size => "256m",
@@ -71,7 +72,8 @@
    }
  },
  itb_gratia_osg_daily =>
- { tomcat_user => "daemon",
+ { install_prefix => "/data",
+   tomcat_user => "daemon",
    tomcat_group => "daemon",
    http_port => 8882,
    ssl_port => 8847,
@@ -82,7 +84,6 @@
    db_host => "gratia07.fnal.gov",
    db_port => "3322",
    remote_host => "gratia02.fnal.gov",
-   collector_host => "gratia02.fnal.gov",
    UserConfig => "UserConfig_osg_daily.xml",
    PostInstallCmdPreamble => '[[ "$action" == *"stored"* ]] || continue',
    staticReports => 0,

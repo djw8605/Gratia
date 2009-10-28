@@ -1,6 +1,7 @@
 (
  "fermi-osg" =>
- { tomcat_user => "daemon",
+ { install_prefix => "/data",
+   tomcat_user => "daemon",
    tomcat_group => "daemon",
    instance_name => "gratia",
    http_port => 80,
@@ -27,7 +28,8 @@
    }
  },
  "fermi-psacct" =>
- { tomcat_user => "daemon",
+ { install_prefix => "/data",
+   tomcat_user => "daemon",
    tomcat_group => "daemon",
    instance_name => "gratia",
    http_port => 80,
@@ -55,7 +57,8 @@
    },
  },
  "fermi-qcd" =>
- { tomcat_user => "daemon",
+ { install_prefix => "/data",
+   tomcat_user => "daemon",
    tomcat_group => "daemon",
    instance_name => "gratia",
    http_port => 80,
@@ -80,7 +83,8 @@
    }
  },
  "fermi-transfer" =>
- { tomcat_user => "daemon",
+ { install_prefix => "/data",
+   tomcat_user => "daemon",
    tomcat_group => "daemon",
    instance_name => "gratia",
    http_port => 80,
@@ -108,7 +112,8 @@
    }
  },
  "fermi-itb" =>
- { tomcat_user => "daemon",
+ { install_prefix => "/data",
+   tomcat_user => "daemon",
    tomcat_group => "daemon",
    instance_name => "gratia",
    http_port => 80,
