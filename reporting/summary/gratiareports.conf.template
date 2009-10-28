@@ -1,7 +1,7 @@
 [email]
 realname=Gratia Operation
 from=gratia-operation@opensciencegrid.org
-smtphost=phyast.nhn.ou.edu
+smtphost=
 
 [main_db]
 hostname=
