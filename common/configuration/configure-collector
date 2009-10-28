@@ -277,13 +277,20 @@ unless (exists $options{"java-home"} or
 unless (exists $options{prefix}) {
   if (-d $default_prefix and -w $default_prefix) {
     print STDERR "INFO: tomcat install prefix not specified, ",
-      "using default $default_prefix\n";
+      "using default \"$default_prefix\"\n";
     $options{prefix} = $default_prefix;
   } else {
-    print STDERR "ERROR: tomcat install prefix not specified ",
-      "and default \"$default_prefix\"",
-        "\ndoes not exist as a directory or is not writable\"";
-    pod2usage(-exitval => 1);
+    if (wants_config_info()) {
+      print STDERR "WARNING: tomcat install prefix not specified ",
+        "and default \"$default_prefix\"",
+          "\ndoes not exist as a directory or is not writable\n";
+      print STDERR " Therefore config information will not be taken from the installed release\n";
+    } else {
+      print STDERR "ERROR: tomcat install prefix not specified ",
+        "and default \"$default_prefix\"",
+          "\ndoes not exist as a directory or is not writable\n";
+      Pod2usage(-exitval => 1);
+    }
   }
 }
 
@@ -820,7 +827,7 @@ sub configure_tomcat_users {
 sub construct_monitor_message_subject {
   my ($instance_name, $config_name, $collector_config) = @_;
   return sprintf("%s:%s %s (\"%s\") Potential recordProcessor problem",
-                 $collector_config->{remote_host},
+                 $collector_config->{collector_host},
                  $collector_config->{http_port},
                  "tomcat-$instance_name",
                  $config_name
@@ -847,7 +854,7 @@ sub configure_static_report_generation {
   my @script_pars = ("$options{prefix}/tomcat-${instance_name}",
                      sprintf("%s%s:%s/gratia-reporting/",
                              "http://",
-                             $collector_config->{remote_host},
+                             $collector_config->{collector_host},
                              $collector_config->{http_port}));
   print STDERR "INFO: ",
     ($wantStatic?
@@ -877,6 +884,12 @@ sub verify_remote_host_setting {
   $collector_config->{collector_host} =
     ( $collector_config->{remote_host} || "localhost" )
       unless exists $collector_config->{collector_host};
+}
+
+sub wants_config_info {
+  return 1 if ($options{"print-config"} ||
+               $options{"obtain-config-item"} ||
+               $options{"obtain-properties-item"});
 }
 
 sub maybe_print_config_info {
