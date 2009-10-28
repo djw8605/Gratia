@@ -63,7 +63,7 @@ Examples
       install-release -a -L ~greenc/gratia-test
 
    Install an integration collector with the latest build (manual start):
-      install-release -B latest
+      install-release -c itb_gratia_itb -B latest
 
 EOF
 }
