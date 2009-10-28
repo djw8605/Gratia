@@ -1,0 +1,261 @@
+#!/bin/bash
+########################################################################
+# install-release
+#
+# Low-fuss wrapper around gratia-upgrade.sh, which is a wrapper around
+# upgrade-gratia-local.sh, which is a wrapper around
+# configure-collector. Sheesh.
+########################################################################
+
+####################################
+# Useful variables
+username=${USER:-${LOGNAME:-$(whoami)}}
+
+# Defaults.
+type=release
+####################################
+
+########################################################################
+# Functions
+
+####################################
+# usage
+function usage() {
+cat 1>&2 <<EOF
+${0##*/} [<opt>] <release>
+${0##*/} [<opt>] -B <official-build>
+${0##*/} [<opt>] -L <full-release-path>
+${0##*/} [-h]
+
+Build Types:
+   Default
+      Official release (found as ~gratia/gratia-releases/gratia-<release>.
+   -B
+      Official build (found as ~gratia/gratia-builds/gratia-<official-build>.
+   -L
+      Local build (found as <full-release-path>).
+
+Help:
+   -h
+      This help.
+
+Options:
+   -a
+      Auto-start collector (default no start).
+
+   -c <config>
+      Instance name is tomcat-<config> (except see -p).
+
+   -p
+      Production: instance name is tomcat-gratia, config-name=<config>
+
+   -v
+      Verbose: mention a little more about what we're doing.
+
+Default config name is current user name ($username), unless -p is
+specified (in which case there is no default and -c is required).
+EOF
+}
+####################################
+
+####################################
+# get_config
+#
+# Get config or property item
+function get_config() {
+  OPTIND=1  
+  while getopts :pv OPT; do
+    case $OPT in
+      v)
+         local verbose=1
+         ;;
+      p)
+         local config_opt=obtain-properties-item
+         ;;
+      *)
+         return 1;
+    esac
+  done
+  shift $[ OPTIND - 1 ]
+  local item=$1
+  if (( ${verbose:-0} )); then
+    echo "Executing ${get_config_cmd[@]} --${config_opt:-obtain-config-item} $item $config_name"
+  fi
+  "${get_config_cmd[@]}" --${config_opt:-obtain-config-item} $item $config_name \
+   2>/dev/null | sed -ne 's/\(config\|property\): '"$item"' = //p'
+}
+####################################
+
+########################################################################
+# Main body.
+
+####################################
+# Options
+OPTIND=1
+
+while getopts :aBLhvpc: OPT; do
+    case $OPT in
+        a)
+            autostart=1
+            ;;
+        B)
+            type=build
+            ;;
+        h)
+            usage
+            exit 1
+            ;;
+        L)
+            type=local
+            ;;
+        c)
+            config_name=$OPTARG
+            ;;
+        p)
+            production=1
+            ;;
+        v)
+            verbose=1
+            ;;
+        *)
+            usage
+            exit 2
+    esac
+done
+shift $[ OPTIND - 1 ]
+
+if [[ -z "$1" ]]; then
+  echo "Required non-option argument not specified." 1>&2
+  usage
+  exit 1
+fi
+
+####################################
+# Setup
+if [[ "$type" == "local" ]]; then
+  release_dir="$1"
+else
+  tnstub="${type}s"
+  release="$1"
+  release_dir="/home/gratia/gratia-$tnstub/gratia-${release}"
+fi
+
+if (( ${production:-0} )); then
+  if [[ -z "$config_name" ]]; then
+    echo "Configuration name required for production installs" 1>&2
+    usage
+    exit 1
+  fi
+  instance_name="tomcat-gratia"
+  mail="grid-accounting@fnal.gov"
+else
+  [[ -n "$config_name" ]] || config_name=$username
+  instance_name="tomcat-$config_name"
+  mail="gratia-operation@fnal.gov"
+fi
+
+if [[ "$username" == "root" ]]; then
+  echo "INFO: running as root. You should specify config-name. Mail will be sent to grid-accounting or gratia-operation as appropriate." 1>&2
+else
+  echo "INFO: running as $username. Collector host will be obtained from config for login and install as root." 1>&2 
+  mail="${username}@fnal.gov"
+fi
+
+# Check for release integrity:
+if ! { [[ -d "$release_dir" ]] && [[ -r "$release_dir" ]]; };  then
+  echo "Specified release directory $release_dir does not exist or is not readable" 1>&2
+  exit 2
+fi
+
+upgrade_script=${release_dir}/build-scripts/gratia-upgrade.sh
+configure_script=${release_dir}/common/configuration/configure-collector
+
+declare -a get_config_cmd=("$configure_script" \
+"-c" "$release_dir/common/configuration/collector-dev.dat" \
+"-c" "$release_dir/common/configuration/collector-itb.dat" \
+"-c" "$release_dir/common/configuration/collector-osg.dat" \
+"-c" "$release_dir/common/configuration/collector-fermi.dat"
+)
+
+# First, check for configuration (especially DB location).
+install_prefix=`get_config install_prefix`
+remote_host=`get_config remote_host`
+db_host=`get_config db_host`
+if [[ "$db_host" == "localhost" ]]; then
+  db_host=$remote_host
+fi
+
+pswd_file=~gratia/.mysql-${db_host%%.*}
+
+if [[ -z "$install_prefix" ]]; then
+  echo "WARNING: configuration for instance $config_name does not specify install prefix: defaulting to /data" 1>&2
+fi
+
+if [[ ! -f "$pswd_file" ]]; then
+  echo "ERROR: DB password file $pswd_file does not exist!" 1>&2
+  exit 2
+fi
+
+declare -a install_command=("$upgrade_script" --instance $instance_name \
+                            --config-name $config_name \
+                            --source "$release_dir" \
+                            --pswd xx --mysql "$pswd_file" \
+                            --daily "$mail" \
+                            --force-log4j)
+
+# Now do different things if we're root
+if [[ "$username" == "root" ]]; then
+  printf "INFO: performing install of collector $instance_name ($config_name) locally with $type ${release:-build} from $release_dir ... "
+  if (( ${autostart:-0} )); then
+    "${install_command[@]}" >/dev/null 2>&1
+    status=$?
+  else
+    install_command[11]=--mail
+    yes n | "${install_command[@]}" >/dev/null 2>&1
+    status=$?
+  fi
+else
+  echo "INFO: checking root login privilege to install host $remote_host for user $username" 1>&2
+  ssh root@$remote_host echo >/dev/null 2>&1
+  status=$?
+  if (( ${status:-1} != 0 )); then
+    echo "ERROR: User $username unable to login as root to $remote_host for install!" 1>&2
+    exit 2
+  fi
+  printf "INFO: performing install of collector $instance_name ($config_name) on host $remote_host with $type ${release:-build} from $release_dir ... " 1>&2
+  if (( ${autostart:-0} )); then
+    ssh root@$remote_host "${install_command[@]}" >/dev/null 2>&1
+    status=$?
+  else
+    install_command[11]=--mail
+    ssh root@$remote_host "yes n | ${install_command[@]}" >/dev/null 2>&1
+    status=$?
+  fi
+fi
+
+if (( ${status:-1} == 0 )); then
+  echo "OK"
+  if [[ "$username" == "root" ]]; then
+    if (( ${autostart:-0} )); then
+      echo "INFO: locally installed collector $instance_name ($config_name) is now running." 1>&2
+    else
+      echo "INFO: locally installed collector must be started -- use:" 1>&2
+      echo "      service $instance_name start" 1>&2
+    fi
+  else
+    if (( ${autostart:-0} )); then
+      echo "INFO: collector $instance_name ($config_name) is now running on $remote_host" 1>&2
+    else
+      echo "INFO: collector $instance_name ($config_name) on $remote_host must be started -- use:" 1>&2
+      echo "      ssh root@$remote_host service $instance_name start" 1>&2
+    fi
+  fi
+else
+  echo "FAILED!"
+fi
+
+echo "INFO: upgrade log may be found in $remote_host:$install_prefix/$instance_name-upgrade.log/"
+
+exit $status
+
+
