@@ -54,6 +54,17 @@ Options:
 
 Default config name is current user name ($username), unless -p is
 specified (in which case there is no default and -c is required).
+
+Examples
+   Install and start a development collector tomcat-greenc as root on the machine in question:
+      install-release -a -c greenc -L ~greenc/gratia-test
+
+   Install and start a development collector tomcat-greenc remotely (assuming user is greenc):
+      install-release -a -L ~greenc/gratia-test
+
+   Install an integration collector with the latest build (manual start):
+      install-release -B latest
+
 EOF
 }
 ####################################
