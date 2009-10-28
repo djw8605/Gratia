@@ -183,10 +183,13 @@ def UseArgs(argv):
         if o in ("--grid"):
             gGrid = a # indicates if we should restrict the queries from summary table by adding Grid="OSG" to the where clause. See RunQuery function for how the query is being manipulated for this purpose.
 
+    print "config files is",configFiles
+
     # Check and make sure that config file exists
-    if not os.path.isfile(configFiles):
-        print "ERROR!!! Cannot read " + configFiles + ". Please create " + configFiles + " by copying " + configFiles + ".template and filling in the appropriate values."
-        sys.exit(1)
+    for file in configFiles:
+        if not os.path.isfile(file):
+            print "ERROR!!! Cannot read " + file + ". Make sure file exists and is readable. For an example, refer to gratiareports.conf.template."
+            sys.exit(1)
 
     gConfigFiles = configFiles # store value to a global variable to be used later
     gConfig.read(configFiles)
