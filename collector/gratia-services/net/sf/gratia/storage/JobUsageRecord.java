@@ -197,7 +197,7 @@ public class JobUsageRecord extends Record {
             output = output + listToString("Resource", Resource);
         }
         if (Origins != null) {
-            output = output + Origins.toString();
+            output = output + originsToString();
         }
 
         // if (RawXml != null) output = output + "\n" + RawXml;

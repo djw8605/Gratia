@@ -145,7 +145,7 @@ public class Origin
          
          AttachContent( session );
 
-         if ( fOriginId != 0) {
+         if (fOriginId != 0) {
             session.update( this );
             return this;
          }
