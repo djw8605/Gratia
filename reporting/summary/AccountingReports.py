@@ -175,7 +175,7 @@ def UseArgs(argv):
         if o in ("--voname"):
             gVOName = a
         if o in ("--config"):
-            configFiles = [i.strip() for i in a.split(',')]
+            configFiles = [i.strip() for i in a.split(',')][0]
         if o in ("--emailto"):
             gEmailTo = [i.strip() for i in a.split(',')]
         if o in ("--subject"):
@@ -183,11 +183,9 @@ def UseArgs(argv):
         if o in ("--grid"):
             gGrid = a # indicates if we should restrict the queries from summary table by adding Grid="OSG" to the where clause. See RunQuery function for how the query is being manipulated for this purpose.
 
-    # Check and make sure that config file exists
-    for file in configFiles:
-        if not os.path.isfile(file):
-            print "ERROR!!! Cannot read " + file + ". Make sure file exists and is readable. For an example, refer to gratiareports.conf.template."
-            sys.exit(1)
+    if not os.path.isfile(configFiles):
+        print "ERROR!!! Cannot read " + configFiles + ". Make sure file exists and is readable. For an example, refer to gratiareports.conf.template."
+        sys.exit(1)
 
     gConfigFiles = configFiles # store value to a global variable to be used later
     gConfig.read(configFiles)
@@ -330,7 +328,8 @@ def sendEmail( toList, subject, content, log, fromEmail = None, smtpServerHost=N
        try:
            smtpServerHost = gConfig.get("email", "smtphost")
        except:
-           print "ERROR!!! The email section in " + gConfigFiles + " either does not exist or does not contain the smtphost information or has an error in it. See " + gConfigFiles + ".template for examples and make sure " + gConfigFiles + " confirms to the requirement and has all values properly filled-in."
+           #print "ERROR!!! The email section in " + gConfigFiles + " either does not exist or does not contain the smtphost information or has an error in it. See " + gConfigFiles + ".template for examples and make sure " + gConfigFiles + " confirms to the requirement and has all values properly filled-in."
+           print "ERROR!!! The email section in " + gConfigFiles + " either does not exist or does not contain the smtphost information or has an error in it. See  gratiareports.conf.template for examples and make sure " + gConfigFiles + " confirms to the requirement and has all values properly filled-in."
            sys.exit(1)
     if (toList[1] == None):
        print "Cannot send mail (no To: specified)!"
@@ -407,7 +406,8 @@ def DBConnectStringHelper(dbName):
         gDBSchema[dbName] = gConfig.get(dbName, "schema") 
     # Issue an error and exit if a section is missing or something isn't set or isn't set properly in the config file
     except:
-        print "ERROR!!! The " + dbName + " section in " + gConfigFiles + " either does not exist or does not contain all the needed information or has an error in it. See " + gConfigFiles + ".template for examples and make sure " + gConfigFiles + " confirms to the requirement and has all values properly filled-in."
+        #print "ERROR!!! The " + dbName + " section in " + gConfigFiles + " either does not exist or does not contain all the needed information or has an error in it. See " + gConfigFiles + ".template for examples and make sure " + gConfigFiles + " confirms to the requirement and has all values properly filled-in."
+        print "ERROR!!! The " + dbName + " section in " + gConfigFiles + " either does not exist or does not contain all the needed information or has an error in it. See gratiareports.conf.template for examples and make sure " + gConfigFiles + " confirms to the requirement and has all values properly filled-in."
         sys.exit(1)
     return " -h " + gDBHostName[dbName] + " -u " + gDBUserName[dbName] + " --port=" + gDBPort[dbName] + " --password=" + gDBPassword[dbName] + " -N " +  gDBSchema[dbName]
 
