@@ -3,10 +3,13 @@
 #
 # AccountingReports
 #
-# library to create simple report using the Gratia psacct database
+# library to create reports using the Gratia databases
 #
 #@(#)gratia/summary:$HeadURL$:$Id$
 
+import os
+import sys
+import commands
 import time
 import datetime
 import getopt
@@ -19,6 +22,7 @@ import libxml2
 import urllib2
 
 import logging
+import optparse
 import logging.config
 import ConfigParser
 
@@ -137,7 +141,8 @@ class Usage(Exception):
         self.msg = msg
 
 def UseArgs(argv):
-    global gProbename,gOutput,gWithPanda,gGroupBy,gVOName,gEmailTo,gEmailToNames,gEmailSubject,gConfig,gGrid,gConfigFiles
+    global gProbename, gOutput, gWithPanda, gGroupBy, gVOName, gEmailTo
+    global gEmailToNames,gEmailSubject,gConfig,gGrid,gConfigFiles
 
     monthly = False
     weekly = False
@@ -146,42 +151,53 @@ def UseArgs(argv):
     configFiles = "gratiareports.conf"
     
     if argv is None:
-        argv = sys.argv
-    try:
-        try:
-            opts, args = getopt.getopt(argv[1:], "hm:p:", ["help","config=","monthly","weekly","daily","probe=","output=","with-panda","groupby=","voname=","emailto=","subject=","grid="])
-        except getopt.error, msg:
-             raise Usage(msg)
-        # more code, unchanged
-    except Usage, err:
-        print >>sys.stderr, err.msg
-        print >>sys.stderr, "for help use --help"
-        return 2
-    for o, a in opts:
-        if o in ("-m","--monthly"):
-                monthly = True;
-        if o in ("-w","--weekly"):
-                weekly = True;                
-        if o in ("-d","--daily"):
-                daily = True;                
-        if o in ("-p","--probe"):
-                gProbename = a;
-        if o in ("--output"):
-                gOutput = a
-        if o in ("--with-panda"):
-            gWithPanda = True
-        if o in ("--groupby"):
-            gGroupBy = a
-        if o in ("--voname"):
-            gVOName = a
-        if o in ("--config"):
-            configFiles = [i.strip() for i in a.split(',')][0]
-        if o in ("--emailto"):
-            gEmailTo = [i.strip() for i in a.split(',')]
-        if o in ("--subject"):
-            gEmailSubject = a
-        if o in ("--grid"):
-            gGrid = a # indicates if we should restrict the queries from summary table by adding Grid="OSG" to the where clause. See RunQuery function for how the query is being manipulated for this purpose.
+        argv = sys.argv[1:]
+
+    parser = optparse.OptionParser()
+    parser.add_option("-m", "--monthly", help="Report range covers the last" \
+        " month's worth of data", dest="monthly", default=False, action=\
+        "store_true")
+    parser.add_option("-w", "--weekly", help="Report range covers the last " \
+        " week's worth of data", dest="weekly", default=False, action=\
+        "store_true")
+    parser.add_option("-d", "--daily", help="Report range covers the last " \
+        "day's worth of data", dest="daily", default=False, action="store_true")
+    parser.add_option("-p", "--probe", help="Probe to query for report (if " \
+        "applicable", dest="probename")
+    parser.add_option("--output", help="Output format (text,csv,None).",
+        dest="output", default="text")
+    parser.add_option("--with-panda", help="Include separate ATLAS " \
+        "Panda data.", dest="panda", default=False, action="store_true")
+    parser.add_option("--groupby", help="What entity to group data by " \
+        "(Site,VO).", dest="groupby", default="Site")
+    parser.add_option("--voname", help="VOName for VO-specific reports.",
+        dest="voname", default="")
+    parser.add_option("-c", "--config", help="Config file(s) to use.",
+        dest="config", default=configFiles)
+    parser.add_option("--emailto", help="Destination email addresses.",
+        dest="email", default=None)
+    parser.add_option("--subject", help="Subject line for email.",
+        dest="subject", default="not set")
+    parser.add_option("--grid", help="Grid to restrict reports to.",
+        dest="grid", default=None)
+
+    options, args = parser.parse_args(argv)
+
+    # Eventually, it would be nice to treat options as a configuration object
+    # instead of passing around global data.  Eventually.
+    monthly       = options.monthly
+    weekly        = options.weekly
+    daily         = options.daily
+    gProbename    = options.probename
+    gOutput       = options.output
+    gWithPanda    = options.panda
+    gGroupBy      = options.groupby
+    gVOName       = options.voname
+    configFiles   = [i.strip() for i in options.config.split(',')][0]
+    if options.email:
+        gEmailTo  = [i.strip() for i in options.email.split(',')]
+    gEmailSubject = options.subject
+    gGrid         = options.grid
 
     if not os.path.isfile(configFiles):
         print "ERROR!!! Cannot read " + configFiles + ". Make sure file exists and is readable. For an example, refer to gratiareports.conf.template."
@@ -198,24 +214,27 @@ def UseArgs(argv):
     
     start = ""
     end = ""
-    if len(argv) > len(opts) + 1:
-        start = argv[len(opts)+1]
-        if len(argv) > len(opts) + 2:
-                end =  argv[len(opts)+2]
+    if args:
+        start = args[0]
+        if len(argv) > 1:
+                end =  args[1]
         if monthly:
-           if len(end)>0:
-              print >> sys.stderr, "Warning: With --monthly the 2nd date is ignored"
-           SetMonthlyDate(start)
+            if end:
+                print >> sys.stderr, "Warning: With --monthly the 2nd date is" \
+                    " ignored"
+            SetMonthlyDate(start)
         elif weekly:
-           if len(end)>0:
-              print >> sys.stderr, "Warning: With --weekly the 2nd date is ignored"
-           SetWeeklyDate(start)
+            if end:
+                print >> sys.stderr, "Warning: With --weekly the 2nd date is" \
+                    " ignored"
+            SetWeeklyDate(start)
         elif daily:
-           if len(end)>0:
-              print >> sys.stderr, "Warning: With --daily the 2nd date is ignored"
-           SetDailyDate(start)
+            if end:
+                print >> sys.stderr, "Warning: With --daily the 2nd date is " \
+                    "ignored"
+            SetDailyDate(start)
         else:
-           SetDate(start,end)
+            SetDate(start,end)
 
 
 def AddMonth(fromd, month):
@@ -502,10 +521,25 @@ def GetListOfSites(filter):
         return sites;
 
 def GetListOfDisabledOSGSites():
-        return GetListOfSites( "//Resource[Active='False']/Name" )
+        if not gGrid or gGrid.lower() != "local":
+            return GetListOfSites( "//Resource[Active='False']/Name" )
+        else:
+            try:
+                return [i.strip() for i in gConfig.get("local",
+                    "disabled_sites").split(",")]
+            except:
+                return None
+                
 
 def GetListOfOSGSites():
+    if not gGrid or gGrid.lower() != "local":
         return GetListOfSites("//Resource[Active='True' and ( Services/Service/Name='Compute Element' or Services/Service/Name='CE' or Services='no applicable service exists')]/Name")
+    else:
+        try:
+            return [i.strip() for i in gConfig.get("local", "active_sites").\
+                split(",")]
+        except:
+            return None
 
 def GetListOfVOs(filter,voStatus,beginDate,endDate):
         name=""
@@ -528,21 +562,38 @@ def GetListOfVOs(filter,voStatus,beginDate,endDate):
             for resource in doc.xpathEval("/VOSummary/VO/ReportingGroups/ReportingGroup/Name"):
                 vos.append((resource.content,'Additional VOs'))
         doc.freeDoc()
-        return vos;
+        return vos
 
 def GetListOfAllRegisteredVO(beginDate,endDate):
-        allVOs = []
-        allVOs.extend(GetListOfRegisteredVO('Active',beginDate,endDate))
-        allVOs.extend(GetListOfRegisteredVO('Enabled',beginDate,endDate))
-        allVOs.extend(GetListOfRegisteredVO('Disabled',beginDate,endDate))
-        return allVOs 
+    allVOs = []
+    active = GetListOfRegisteredVO('Active',beginDate,endDate)
+    if active:
+        allVOs.extend(active)
+    enabled = GetListOfRegisteredVO('Enabled',beginDate,endDate)
+    if enabled:
+        allVOs.extend(enabled)
+    disabled = GetListOfRegisteredVO('Disabled',beginDate,endDate)
+    if disabled:
+        allVOs.extend(disabled)
+    if disabled == None and active == None and enabled == None:
+        return None
+    return allVOs 
 
 def GetListOfRegisteredVO(voStatus,beginDate,endDate):
-        filter = "/VOActivation/" + voStatus + "/VO/Name|/VOActivation/" + voStatus + "/VO/LongName"
-        allVos = GetListOfVOs(filter,voStatus,beginDate,endDate)
-        ret = []
-        printederror = False
-        for pair in allVos:
+    if not gGrid or gGrid.lower() != "local":
+        return GetListOfOSGRegisteredVO(voStatus, beginDate, endDate)
+    try:
+        vos = gConfig.get("local", "%s_vos" % voStatus.lower())
+        return [i.strip() for i in vos.split(",")]
+    except:
+        return None
+
+def GetListOfOSGRegisteredVO(voStatus, beginDate, endDate):
+    filter = "/VOActivation/" + voStatus + "/VO/Name|/VOActivation/" + voStatus + "/VO/LongName"
+    allVos = GetListOfVOs(filter,voStatus,beginDate,endDate)
+    ret = []
+    printederror = False
+    for pair in allVos:
            try:
               (longname,description) = pair;  # pair.split(",");
            except:
@@ -561,18 +612,18 @@ def GetListOfRegisteredVO(voStatus,beginDate,endDate):
            else:
                if (longname != "ATLAS" and longname!=""):
                   ret.append( longname.lower() );
-        # And hand add a few 'exceptions!"
-        if(voStatus == 'Active'):
+    # And hand add a few 'exceptions!"
+    if(voStatus == 'Active'):
             ret.append("usatlas")
             ret.append("other")
-        return ret
+    return ret
 
 def UpdateVOName(list, index, range_begin, range_end):
       vos = GetListOfAllRegisteredVO(range_begin,range_end)
       r = []
       for row in list:
          srow = row.split('\t')
-         if len(srow)>index and srow[index] not in vos:
+         if len(srow)>index and vos and srow[index] not in vos:
             srow[index] = srow[index] + " (nr)"
          r.append( "\t".join(srow) )
       return r
@@ -1103,7 +1154,10 @@ def sortedDictValuesFunc(adict,compare):
     items.sort( compare )
     return [(key,value) for key, value in items]
 
-def GenericDailyStatus(what, when = datetime.date.today(), output = "text"):
+def GenericDailyStatus(what, when=datetime.date.today(), output = "text"):
+        if not when:
+            when = datetime.date.today()
+
         factor = 3600  # Convert number of seconds to number of hours
 
         if (output != "None") :
@@ -1228,13 +1282,16 @@ def GenericDailyStatus(what, when = datetime.date.today(), output = "text"):
         return result
             
         
-def GenericDaily(what, when = datetime.date.today(), output = "text"):
+def GenericDaily(what, when=datetime.date.today(), output = "text"):
         factor = 3600  # Convert number of seconds to number of hours
 
-        if (output != "None") :
-            if (what.title != "") :
+        if not when:
+            when=datetime.date.today()
+
+        if output != "None":
+            if what.title:
                 print what.title % ( DateToString(when,False) )
-            if (what.headline != "") :
+            if what.headline:
                 print what.headline % (DateToString(when,False))
             print what.lines[output]
             print "    ", what.formats[output] % what.headers
@@ -2668,6 +2725,14 @@ def RangeSummup(range_end = datetime.date.today(),
                 output = "text",
                 header = True):
 
+    if not gGrid or gGrid.lower() == 'local':
+        try:
+            gridDisplayName = gConfig.get("local", "grid_name")
+        except:
+            gridDisplayName = ""
+    else:
+        gridDisplayName = 'OSG'
+
     if not range_end:
         if not range_begin:
             range_end = datetime.date.today()
@@ -2681,38 +2746,57 @@ def RangeSummup(range_end = datetime.date.today(),
 
     regSites = GetListOfOSGSites();
     regVOs = GetListOfRegisteredVO('Active',range_begin,range_end)
-    disabledSites = GetListOfDisabledOSGSites();
+    disabledSites = GetListOfDisabledOSGSites()
 
-    reportingVOs = GetReportingVOs(range_begin,range_end)
-    reportingSitesDate = GetSiteLastReportingDate(range_begin,True)
+    reportingVOs = GetReportingVOs(range_begin, range_end)
+    reportingSitesDate = GetSiteLastReportingDate(range_begin, True)
     pingSites = []
     for data in reportingSitesDate:
         if ( len(data) > 0 ):
            (name,lastreport) = data.split("\t")
            pingSites.append(name)
 
-    exceptionSites = ['AGLT2_CE_2','BNL-LCG2','BNL_ATLAS_1', 'BNL_ATLAS_2','FNAL_GPGRID_2','USCMS-FNAL-XEN','USCMS-FNAL-WC1-CE2', 'USCMS-FNAL-WC1-CE3', 'USCMS-FNAL-WC1-CE4', 'BNL_LOCAL', 'BNL_OSG', 'BNL_PANDA', 'GLOW-CMS', 'UCSDT2-B', 'Purdue-Lear' ]
+    exceptionSites = ['AGLT2_CE_2', 'BNL-LCG2', 'BNL_ATLAS_1', 'BNL_ATLAS_2',
+        'FNAL_GPGRID_2', 'USCMS-FNAL-XEN', 'USCMS-FNAL-WC1-CE2',
+        'USCMS-FNAL-WC1-CE3', 'USCMS-FNAL-WC1-CE4', 'BNL_LOCAL', 'BNL_OSG',
+        'BNL_PANDA', 'GLOW-CMS', 'UCSDT2-B', 'Purdue-Lear' ]
     #exceptionSites = ['BNL_ATLAS_1', 'BNL_ATLAS_2', 'USCMS-FNAL-WC1-CE2', 'USCMS-FNAL-WC1-CE3', 'USCMS-FNAL-WC1-CE4', 'BNL_LOCAL', 'BNL_OSG', 'BNL_PANDA', 'GLOW-CMS', 'UCSDT2-B']
 
-    allSites = [name for name in regSites if name not in exceptionSites]
-    reportingSites = GetListOfReportingSites(range_begin,range_end);
+    reportingSites = GetListOfReportingSites(range_begin,range_end)
+    allSites = None
+    if regSites != None:
+        allSites = [name for name in regSites if name not in exceptionSites]
 
-    missingSites = [name for name in allSites if name not in reportingSites and name not in pingSites]
-    emptySites = [name for name in allSites if name not in reportingSites and name in pingSites]
+    missingSites, emptySites = None, None
+    if allSites:
+        missingSites = [name for name in allSites if name not in \
+            reportingSites and name not in pingSites]
+        emptySites = [name for name in allSites if name not in reportingSites \
+            and name in pingSites]
     
-    extraSites = [name for name in reportingSites if name not in allSites and name not in disabledSites]
-    knownExtras = [name for name in extraSites if name in exceptionSites and name not in regSites]
+    extraSites = [name for name in reportingSites if allSites and name not in \
+        allSites and disabledSites and name not in disabledSites]
+    knownExtras = [name for name in extraSites if name in exceptionSites and \
+        name not in regSites]
     extraSites = [name for name in extraSites if name not in exceptionSites]
-    reportingDisabled = [name for name in reportingSites if name in disabledSites]
+
+    reportingDisabled = None
+    if disabledSites != None:
+        reportingDisabled = [name for name in reportingSites if name in \
+            disabledSites]
 
     #print allSites
     #print reportingSites
     #print missingSites
     #print extraSites
-    print "As of "+DateToString(datetime.date.today(),False) +", there are "+prettyInt(len(allSites))+" registered OSG sites"
+    if allSites != None:
+        print "As of %s, there are %s registered %s sites." % \
+            (DateToString(datetime.date.today(),False),
+            prettyInt(len(allSites)), gridDisplayName)
 
-    print "\nBetween %s - %s (midnight - midnight UTC):\n" % ( DateToString(range_begin,False),
-                                                               DateToString(range_end,False) )
+    print "\nBetween %s - %s (midnight - midnight UTC):\n" % \
+        (DateToString(range_begin, False), DateToString(range_end, False))
+                                                               
     n = len(reportingSites)
     print prettyInt(n)+" sites reported\n"
 
@@ -2729,43 +2813,79 @@ def RangeSummup(range_end = datetime.date.today(),
     print "Total number of jobs: "+prettyInt(njobs)
     print "Total wall duration: "+niceNum( wallduration / 3600, 1 )+ " hours"
     print "Total cpu / wall duration: "+niceNum(div,0.01)
-    
-    n = len(reportingSites)-len(extraSites)-len(knownExtras)
-    print prettyInt(n)+" registered sites reported ("+niceNum(n*100/len(allSites),1)+"% of OSG Sites)"
 
-    n = len(missingSites);
-    print prettyInt(n)+" registered sites have NOT reported ("+niceNum(n*100/len(allSites),1)+"% of OSG Sites)"
+    if reportingSites != None and extraSites != None and knownExtras != None \
+            and allSites != None:
+        n = len(reportingSites)-len(extraSites)-len(knownExtras)
+        print "%s registered sites reported (%s%% of %s sites)" % \
+            (prettyInt(n), niceNum(n*100/len(allSites),1), gridDisplayName)
 
-    n = len(emptySites);
-    print prettyInt(n)+" registered sites have reported but have no activity ("+niceNum(n*100/len(allSites),1)+"% of OSG Sites)"
+    if missingSites != None and allSites != None:
+        n = len(missingSites)
+        print "%s registered sites have NOT reported (%s%% of %s sites)" % \
+            (prettyInt(n), niceNum(n*100/len(allSites),1), gridDisplayName)
+
+    if emptySites != None and allSites != None:
+        n = len(emptySites)
+        print "%s registered sites have reported but have no activity (%s%% " \
+            "of %s sites)" % (prettyInt(n), niceNum(n*100/len(allSites), 1),
+            gridDisplayName)
 
     print
     
     n = len(extraSites);
-    print prettyInt(n)+" non-sanctioned non-registered sites reported (might indicate a discrepancy between OIM and Gratia)"
+    if not gGrid or gGrid.lower() != "local":
+        print prettyInt(n)+" non-sanctioned non-registered sites reported " \
+            "(might indicate a discrepancy between OIM and Gratia)."
+    elif allSites != None:
+        print prettyInt(n)+" non-sanctioned non-registered sites reported."
 
     #n = len(knownExtras);
     #print prettyInt(n)+" sanctioned non-registered sites reported"
- 
-    n = len(reportingDisabled)
-    print prettyInt(n)+" disabled sites have reported."
+
+    if reportingDisabled != None: 
+        n = len(reportingDisabled)
+        print prettyInt(n)+" disabled sites have reported."
 
     #print "\nThe reporting sites are:\n"+prettyList(reportingSites)
     #print "\nThe registered sites are:\n"+prettyList(allSites)
     
-    print "\nThe sites with no activity are: \n"+prettyList(emptySites);
-    print "\nThe non reporting sites are: \n"+prettyList(missingSites);
+    if emptySites != None:
+        print "\nThe sites with no activity are: \n"+prettyList(emptySites)
+
+    if missingSites != None:
+        print "\nThe non reporting sites are: \n"+prettyList(missingSites)
     #print "\nThe sanctioned non registered sites are: \n"+prettyList(knownExtras)
-    print "\nThe non registered sites are: \n"+prettyList(extraSites)
-    print "\nThe disabled sites that are reporting: \n"+prettyList(reportingDisabled)
+
+    if allSites != None:
+        print "\nThe non registered sites are: \n"+prettyList(extraSites)
+    if reportingDisabled != None:
+        print "\nThe disabled sites that are reporting: \n" + \
+            prettyList(reportingDisabled)
 
     expectedNoActivity = GetListOfRegisteredVO('Disabled',range_begin,range_end)
-    expectedNoActivity.extend(GetListOfRegisteredVO('Enabled',range_begin,range_end))
-    emptyVO = [name for name in regVOs if name not in reportingVOs and name not in expectedNoActivity]
-    nonregVO = [name for name in reportingVOs if name not in regVOs]
-    print "\nActive VOs with no recent activity are:\n"+prettyList(emptyVO)
-    print "\nThe following VOs are expected to have no activity:\n"+prettyList([name for name in expectedNoActivity if name not in reportingVOs])
-    print "\nThe non-registered VOs with recent activity are:\n"+prettyList(nonregVO)
+    expectedNoActivityAlt = GetListOfRegisteredVO('Enabled', range_begin,
+        range_end)
+    if expectedNoActivity and expectedNoActivityAlt:
+        expectedNoActivity += expectedNoActivityAlt
+    elif expectedNoActivity == None:
+        expectedNoActivity = expectedNoActivityAlt
+
+    emptyVO = None
+    if regVOs != None:
+        emptyVO = [name for name in regVOs if name not in reportingVOs and \
+            (not expectedNoActivity or name not in expectedNoActivity)]
+    if emptyVO:
+        print "\nActive VOs with no recent activity are:\n"+prettyList(emptyVO)
+    if expectedNoActivity != None:
+        print "\nThe following VOs are expected to have no activity:\n" + \
+            prettyList([name for name in expectedNoActivity if name not in \
+            reportingVOs])
+
+    if regVOs != None:
+        nonregVO = [name for name in reportingVOs if name not in regVOs]
+        print "\nThe non-registered VOs with recent activity are:\n" + \
+            prettyList(nonregVO)
     
     print "\n"
 
@@ -2780,7 +2900,10 @@ def NonReportingSites(
 
     regSites = GetListOfOSGSites();
     regVOs = GetListOfRegisteredVO('Active',when,datetime.date.today())
-    exceptionSites = ['AGLT2_CE_2','BNL-LCG2','BNL_ATLAS_1', 'BNL_ATLAS_2','FNAL_GPGRID_2','USCMS-FNAL-XEN','USCMS-FNAL-WC1-CE2', 'USCMS-FNAL-WC1-CE3', 'USCMS-FNAL-WC1-CE4', 'BNL_LOCAL', 'BNL_OSG', 'BNL_PANDA', 'GLOW-CMS', 'UCSDT2-B', 'Purdue-Lear' ]
+    exceptionSites = ['AGLT2_CE_2', 'BNL-LCG2', 'BNL_ATLAS_1', 'BNL_ATLAS_2',
+        'FNAL_GPGRID_2', 'USCMS-FNAL-XEN', 'USCMS-FNAL-WC1-CE2',
+        'USCMS-FNAL-WC1-CE3', 'USCMS-FNAL-WC1-CE4', 'BNL_LOCAL', 'BNL_OSG',
+        'BNL_PANDA', 'GLOW-CMS', 'UCSDT2-B', 'Purdue-Lear' ]
 
     allSites = [name for name in regSites if name not in exceptionSites]
     reportingVOs = GetLastReportingVOs(when)
