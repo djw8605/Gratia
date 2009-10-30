@@ -9,10 +9,10 @@ package net.sf.gratia.storage;
  */
 public abstract class StorageElementRecordUpdater implements RecordUpdater
 {
-   public void Update(Record rec)
+   public boolean Update(Record rec)
    {
-      if (rec.getClass() != StorageElementRecord.class) return;
-      Update((StorageElementRecord)rec);
+      if (rec.getClass() != StorageElementRecord.class) return true;
+      return Update((StorageElementRecord)rec);
    }
-   public abstract void Update(StorageElementRecord rec);
+   public abstract boolean Update(StorageElementRecord rec);
 }

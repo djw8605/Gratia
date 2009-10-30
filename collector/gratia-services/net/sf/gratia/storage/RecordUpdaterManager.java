@@ -28,11 +28,14 @@ public class RecordUpdaterManager implements RecordUpdater
       return upd;
    }
    
-   public void Update(Record rec) 
+   public boolean Update(Record rec) throws UpdateException
    {
        for (Iterator i = Updaters.iterator(); i.hasNext(); ) {
           RecordUpdater el = (RecordUpdater)i.next();
-          el.Update(rec);
+          if (!el.Update(rec)) {
+             return false;
+          }
        }
+       return true;
    }
 }

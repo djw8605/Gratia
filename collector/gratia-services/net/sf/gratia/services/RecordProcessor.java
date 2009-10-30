@@ -593,8 +593,31 @@ public class RecordProcessor extends Thread {
 
 
             // Fix up the record; in particular set EndTime if it is out of whack.
-            updater.Update(current);
-
+            try {
+               updater.Update(current);
+            } catch (RecordUpdater.UpdateException e) {
+               // One of the updater found the record to be improper for storage
+               // For example a Job Usage Record might be missing EndTime and 
+               // at least StartTime and WallDuration (i.e. we have no clue about
+               // the EndTime).
+               Logging.warning(ident + rId + ": Error in record updating: " + e.getMessage());
+               Logging.debug(ident + rId + ": exception details: ", e);
+               if (HibernateWrapper.databaseUp()) {
+                  try {
+                     if (gotreplication) {
+                        errorRecorder.saveSQL("Replication", "RecordUpdate", current);
+                     } else {
+                        errorRecorder.saveSQL("Probe", "RecordUpdate", current);
+                     }
+                  } catch (Exception ignore) {
+                  }
+                  continue NEXTRECORD; // Process next record.
+               } else {
+                  Logging.warning(ident + ": Communications error: " + "shutting down");
+                  return 0; // DB access trouble.
+               }
+            }
+            
             boolean acceptRecord = true;
             if (!collectorService.housekeepingServiceDisabled()) {
                Date date;

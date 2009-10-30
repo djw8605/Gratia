@@ -8,5 +8,10 @@ package net.sf.gratia.storage;
  *
  */
 public interface RecordUpdater {
-   public void Update(Record rec);
+   public class UpdateException extends Exception {
+      public UpdateException(String msg) {
+         super(msg);
+      }
+   }
+   public boolean Update(Record rec) throws UpdateException;
 }

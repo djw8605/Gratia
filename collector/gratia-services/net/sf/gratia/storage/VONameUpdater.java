@@ -143,7 +143,7 @@ public class VONameUpdater extends JobUsageRecordUpdater {
       /* (non-Javadoc)
        * @see net.sf.gratia.storage.JobUsageRecordUpdater#Update(net.sf.gratia.storage.JobUsageRecord)
        */
-      public void Update(JobUsageRecord rec) {
+      public boolean Update(JobUsageRecord rec) {
             UserIdentity user = rec.getUserIdentity();
             if( user == null) {
                   // TODO lookup when there is no user identity at all.
@@ -169,6 +169,7 @@ public class VONameUpdater extends JobUsageRecordUpdater {
                               }
                         }
             }
+         return true;
       }
 
 }
