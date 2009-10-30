@@ -62,7 +62,14 @@ public class Utils
       if (gDurationFactory==null) {
           gDurationFactory = javax.xml.datatype.DatatypeFactory.newInstance();
       }
-
+      
+      if (str.charAt(str.length()-1) == 'T') {
+         // According to http://www.w3.org/TR/xmlschema-2/#duration
+         // the T must be followed by a time specification.   Let's
+         // assume that here the original author of the xml fragment
+         // we got meant to actually say T0S
+         str = str + "0S";
+      }
       Duration du = gDurationFactory.newDurationDayTime(str.trim());
       return du.getTimeInMillis(Calendar.getInstance()) / 1000.0;
    }
