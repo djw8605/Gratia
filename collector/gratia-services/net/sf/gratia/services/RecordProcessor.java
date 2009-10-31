@@ -10,7 +10,6 @@ import java.util.ArrayList;
 
 import java.util.Date;
 import java.util.Properties;
-import java.util.StringTokenizer;
 import java.util.Hashtable;
 import java.util.regex.Pattern;
 
@@ -284,11 +283,11 @@ public class RecordProcessor extends Thread {
          }
 
          // See if we have an origin preceding the data.
-         StringTokenizer st = null;
+         ReplicationTokenizer st = null;
          String nextpart = blob;
 
          if (blob.startsWith(originMarker)) {
-            st = new StringTokenizer(blob, "|");
+            st = new ReplicationTokenizer(blob, "|");
             if (st.hasMoreTokens()) {
                // skip marker
                st.nextToken();
@@ -316,7 +315,7 @@ public class RecordProcessor extends Thread {
             if (nextpart.startsWith(replicationMarker)) {
                if (st == null) {
                   // We could assert that nextpart == blob
-                  st = new StringTokenizer(blob, "|");
+                  st = new ReplicationTokenizer(blob, "|");
                   if (st.hasMoreTokens()) {
                      // Skip marker
                      st.nextToken();
@@ -354,7 +353,7 @@ public class RecordProcessor extends Thread {
                gothistory = true;
                if (st == null) {
                   // We could assert that nextpart == blob
-                  st = new StringTokenizer(blob, "|");
+                  st = new ReplicationTokenizer(blob, "|");
                   if (st.hasMoreTokens()) {
                      // Skip marker
                      st.nextToken();
@@ -389,7 +388,7 @@ public class RecordProcessor extends Thread {
                gothistory = true;
                if (st == null) {
                   // We could assert that nextpart == blob
-                  st = new StringTokenizer(blob, "|");
+                  st = new ReplicationTokenizer(blob, "|");
                   if (st.hasMoreTokens()) {
                      // Skip marker
                      st.nextToken();
