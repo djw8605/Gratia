@@ -1236,7 +1236,7 @@ def CreateLCGsqlUpdates(results,filename,tableName):
       continue
     output =  "INSERT INTO %s VALUES " % (tableName) + str(tuple(val)) + ";"
     file.write(output+"\n")
-    LogToFile(output)
+    ##  LogToFile(output)    ## commented to reduce log file output
     gKnownVOs[val[0] +'/'+val[1]] ="1"
         
   file.write("commit;\n")
