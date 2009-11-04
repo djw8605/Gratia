@@ -12,6 +12,15 @@
 #
 ########################################################################
 # Changes:
+#
+# 11/04/09 (Chris Green).
+#   Inclusion of CommonName from summary table was changed to:
+#     IF(DistinguishedName NOT IN ('', 'Unknown'),DistinguishedName,CommonName)
+#   to take advantage of new information. November 2009 is the first month for
+#   which any item with a CommonName also has a DistinguishedName (except in
+#   the case where CommonName is "Generic XXX user", in which case
+#   DistinguishedName is blank).
+#
 # 6/19/07 (John Weigand)
 #   Instead of using 1 normalization factor for all sites, the
 #   lcg-reportableSites now contains a normalization factor for 
@@ -835,11 +844,13 @@ def GetQuery(site,normalizationFactor,vos,DNflag):
         of a gimmick but one I think is best.
         The DBflag argument, if True will allow CommonName to be included
         in the query and summary.
+        On 11/04/09, this was changed to be the \"best\" of
+        DistinguishedName and CommonName.
     """
     userDataClause=""
     userGroupClause=""
     if DNflag == "True":
-      userDataClause="CommonName as UserDN, "
+      userDataClause="IF(DistinguishedName NOT IN ('', 'Unknown'),DistinguishedName,CommonName) as UserDN, "
       userGroupClause=", UserDN "
     periodWhereClause = SetDatesWhereClause()
     strNormalization = str(normalizationFactor)
