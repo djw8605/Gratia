@@ -60,6 +60,8 @@ mainDB = "main_db"
 psacctDB = "psacct_db"
 dailyDB = "daily_db"
 transferDB = "transfer_db"
+gDBCurrent = mainDB # variable to keep track of current db on which RunQuery is running the query from
+gDBConnectOK = {} # variable to keep track of if the connection to a particular DB is fine, so that this doesn't have to be checked again and again
 
 gOutput="text" # Type of output (text, csv, None)
 
@@ -347,7 +349,6 @@ def sendEmail( toList, subject, content, log, fromEmail = None, smtpServerHost=N
        try:
            smtpServerHost = gConfig.get("email", "smtphost")
        except:
-           #print "ERROR!!! The email section in " + gConfigFiles + " either does not exist or does not contain the smtphost information or has an error in it. See " + gConfigFiles + ".template for examples and make sure " + gConfigFiles + " confirms to the requirement and has all values properly filled-in."
            print "ERROR!!! The email section in " + gConfigFiles + " either does not exist or does not contain the smtphost information or has an error in it. See  gratiareports.conf.template for examples and make sure " + gConfigFiles + " confirms to the requirement and has all values properly filled-in."
            sys.exit(1)
     if (toList[1] == None):
@@ -416,16 +417,16 @@ def DBConnectString():
     gMySQLTransferConnectString = DBConnectStringHelper(transferDB)
 
 def DBConnectStringHelper(dbName):
-    global gDBHostName,gDBUserName,gDBPort,gDBPassword,gDBSchema,gConfig
+    global gDBHostName,gDBUserName,gDBPort,gDBPassword,gDBSchema,gConfig,gDBConnectOK
     try:
         gDBHostName[dbName] = gConfig.get(dbName, "hostname") 
         gDBUserName[dbName] = gConfig.get(dbName, "username") 
         gDBPort[dbName] = gConfig.get(dbName, "port") 
         gDBPassword[dbName] = gConfig.get(dbName, "password") 
         gDBSchema[dbName] = gConfig.get(dbName, "schema") 
+        gDBConnectOK[dbName] = False
     # Issue an error and exit if a section is missing or something isn't set or isn't set properly in the config file
     except:
-        #print "ERROR!!! The " + dbName + " section in " + gConfigFiles + " either does not exist or does not contain all the needed information or has an error in it. See " + gConfigFiles + ".template for examples and make sure " + gConfigFiles + " confirms to the requirement and has all values properly filled-in."
         print "ERROR!!! The " + dbName + " section in " + gConfigFiles + " either does not exist or does not contain all the needed information or has an error in it. See gratiareports.conf.template for examples and make sure " + gConfigFiles + " confirms to the requirement and has all values properly filled-in."
         sys.exit(1)
     return " -h " + gDBHostName[dbName] + " -u " + gDBUserName[dbName] + " --port=" + gDBPort[dbName] + " --password=" + gDBPassword[dbName] + " -N " +  gDBSchema[dbName]
@@ -445,11 +446,17 @@ def CheckDB():
         if status != 0:
             LogToFile("Gratia: "+ msg)
             print msg
-
         return status == 0
-        
+
 def RunQuery(select):
         global gMySQL,gMySQLConnectString,gGrid
+        if not gDBConnectOK[gDBCurrent]:
+            if not CheckDB():
+                print  >> sys.stderr, "ERROR!!! Connecting to " + gDBCurrent + " failed. Connection string is \"mysql" + gMySQLConnectString + "\". Check for validity of " + gDBCurrent + " connection credentials in the " + gConfigFiles + " file "
+                gDBConnectOK[gDBCurrent] = False
+                sys.exit(1) 
+            else:
+                gDBConnectOK[gDBCurrent] = True
         # If the user explicitly requests from the command line to restrict queries to contain Grid="OSG" in the where clause, adjust the query to add Grid="OSG" at the appropriate place
         if(gGrid != None and gGrid.lower() == "osg"): 
             select = AddOSGToQuery(select)
@@ -488,8 +495,9 @@ def RunQueryAndSplit(select):
 
 
 def NumberOfCpus():
-        global gMySQLConnectString
+        global gMySQLConnectString,gDBCurrent
         schema = gDBSchema[psacctDB];
+        gDBCurrent = psacctDB
         keepConnectionValue = gMySQLConnectString
         gMySQLConnectString = gMySQLFermiConnectString
         
@@ -506,8 +514,9 @@ def NumberOfCpus():
         benchtotal = float(values.split("\t")[1]) 
         return (ncpu,benchtotal);
 
-def GetListOfSites(filter):
-        location = 'http://myosg.grid.iu.edu/wizardsummary/xml?datasource=summary&summary_attrs_showservice=on&account_type=cumulative_hours&ce_account_type=gip_vo&se_account_type=vo_transfer_volume&start_type=7daysago&all_resources=on&gridtype=on&gridtype_1=on&service=on&service_1=on'
+def GetListOfSites(filter,location = None):
+        if location == None:
+            location = 'http://myosg.grid.iu.edu/wizardsummary/xml?datasource=summary&summary_attrs_showservice=on&account_type=cumulative_hours&ce_account_type=gip_vo&se_account_type=vo_transfer_volume&start_type=7daysago&all_resources=on&gridtype=on&gridtype_1=on&service=on&service_1=on'
         html = urllib2.urlopen(location).read()
         
         excludedSites = [ 'Engagement_VOMS', 'OSG_VOMS' ]
@@ -529,6 +538,17 @@ def GetListOfDisabledOSGSites():
                     "disabled_sites").split(",")]
             except:
                 return None
+
+def GetListOfOSGSEs():
+    ret = []
+    if not gGrid or gGrid.lower() != "local":
+        location = 'http://myosg.grid.iu.edu/wizardsummary/xml?datasource=summary&summary_attrs_showservice=on&account_type=cumulative_hours&ce_account_type=gip_vo&se_account_type=vo_transfer_volume&start_type=7daysago&start_date=11%2F04%2F2009&end_type=now&end_date=11%2F04%2F2009&all_resources=on&gridtype=on&gridtype_1=on&service=on&service_3=on&active_value=1&disable_value=1'
+        return GetListOfSites("//Resource/Name",location)
+    else:
+        try:
+            return [i.strip() for i in gConfig.get("local", "active_sites").split(",")]
+        except:
+            return None
                 
 
 def GetListOfOSGSites():
@@ -629,12 +649,12 @@ def UpdateVOName(list, index, range_begin, range_end):
       return r
 
 def WeeklyData():
-        global gMySQLConnectString
+        global gMySQLConnectString,gDBCurrent
         schema = gDBSchema[psacctDB];
+        gDBCurrent = psacctDB
         keepConnectionValue = gMySQLConnectString
         gMySQLConnectString = gMySQLFermiConnectString
 
-        schema = gDBSchema[psacctDB];
         select = " SELECT J.VOName, sum((J.CpuUserDuration+J.CpuSystemDuration)) as cputime, " + \
                  " sum((J.CpuUserDuration+J.CpuSystemDuration)*CpuInfo.BenchmarkScore)/1000 as normcpu, " + \
                  " sum(J.WallDuration)*0 as wall, sum(J.WallDuration*CpuInfo.BenchmarkScore)*0/1000 as normwall " + \
@@ -699,8 +719,9 @@ def DailyVOSiteData(begin,end):
         return RunQueryAndSplit(select)
 
 def DailySiteVODataFromDaily(begin,end,select,count):
-        global gMySQLConnectString
+        global gMySQLConnectString,gDBCurrent
         schema = gDBSchema[dailyDB]
+        gDBCurrent = dailyDB
         keepConnectionValue = gMySQLConnectString
         gMySQLConnectString = gMySQLDailyConnectString
         
@@ -715,8 +736,9 @@ def DailySiteVODataFromDaily(begin,end,select,count):
         return result 
 
 def DailyVOSiteDataFromDaily(begin,end,select,count):
-        global gMySQLConnectString
+        global gMySQLConnectString,gDBCurrent
         schema = gDBSchema[dailyDB]
+        gDBCurrent = dailyDB
         keepConnectionValue = gMySQLConnectString
         gMySQLConnectString = gMySQLDailyConnectString
         
@@ -1472,8 +1494,9 @@ select J.VOName, sum(J.NJobs), sum(J.WallDuration)
         return RunQueryAndSplit(select) 
 
 def DataTransferData(begin, end, with_panda = False):
-    global gMySQLConnectString
+    global gMySQLConnectString,gDBCurrent
     schema = gDBSchema[transferDB]
+    gDBCurrent = transferDB
     keepConnectionValue = gMySQLConnectString
     gMySQLConnectString = gMySQLTransferConnectString
     select = "select T.SiteName, M.Protocol, sum(M.Njobs), sum(M.TransferSize * Multiplier) from " + schema + ".MasterTransferSummary M, " + schema + ".Probe P, " + schema + ".Site T, " + schema + ".SizeUnits su where M.StorageUnit = su.Unit and P.siteid = T.siteid and M.ProbeName = P.Probename and StartTime >= \"" + DateTimeToString(begin) + "\" and StartTime < \"" + DateTimeToString(end) + "\" and M.ProbeName not like \"psacct:%\" group by P.siteid, Protocol"
@@ -2382,6 +2405,8 @@ def EfficiencyRange(what, range_end = datetime.date.today(),
             values = (site,niceNum(njobs), wallstring,
                       effstring,oldeffstring)
         if (output != "None") :
+            #print index
+            #print values
             print "%3d " %(index), what.formats[output] % values
         result.append(values)       
         
@@ -2674,6 +2699,20 @@ select distinct SiteName from """+schema+"""VOProbeSummary V,Probe P,Site S wher
 
     return RunQueryAndSplit(select);
 
+def GetListOfDataTransferReportingSites(begin,end):
+    global gMySQLConnectString, gDBCurrent
+    schema = gDBSchema[transferDB] + ".";
+    gDBCurrent = transferDB
+
+    keepConnectionValue = gMySQLConnectString
+    gMySQLConnectString = gMySQLTransferConnectString
+
+    select = "select distinct SiteName from " + schema + "MasterTransferSummary M,Probe P,Site S where StartTime >= \"" + DateToString(begin) + "\" and StartTime < \"" + DateToString(end) + "\" and M.ProbeName = P.ProbeName and P.siteid = S.siteid order by SiteName"
+
+    result =  RunQueryAndSplit(select);
+    gMySQLConnectString = keepConnectionValue
+    return result
+
 def GetTotals(begin,end):
     schema = gDBSchema[mainDB] + ".";
 
@@ -2685,6 +2724,17 @@ select sum(Njobs),sum(WallDuration),sum(CpuUserDuration+CpuSystemDuration)/sum(W
     #print "Query = " + select;
 
     return RunQueryAndSplit(select)[0].split('\t');
+
+def GetDataTransferTotals(begin,end):
+    global gMySQLConnectString, gDBCurrent
+    schema = gDBSchema[transferDB] + ".";
+    gDBCurrent = transferDB
+    keepConnectionValue = gMySQLConnectString
+    gMySQLConnectString = gMySQLTransferConnectString
+    select = "select sum(Njobs),sum(TransferDuration) from " + schema + "MasterTransferSummary where StartTime >= \"" + DateToString(begin) + "\" and StartTime < \"" + DateToString(end) + "\""
+    result =  RunQueryAndSplit(select)[0].split('\t');
+    gMySQLConnectString = keepConnectionValue
+    return result
     
 def GetNewUsers(begin,end):
     schema = gDBSchema[mainDB] + ".";
@@ -2719,6 +2769,144 @@ def prettyList(l):
     result = result + lastname
     l.append(lastname)
     return result
+
+def DataTransferSumup(range_end = datetime.date.today(),
+                range_begin = None,
+                output = "text",
+                header = True):
+
+    if not gGrid or gGrid.lower() == 'local':
+        try:
+            gridDisplayName = gConfig.get("local", "grid_name")
+        except:
+            gridDisplayName = ""
+    else:
+        gridDisplayName = 'OSG'
+
+    if not range_end:
+        if not range_begin:
+            range_end = datetime.date.today()
+        else:
+            range_end = range_begin + datetime.timedelta(days=+1)
+    if not range_begin:
+        range_begin = range_end + datetime.timedelta(days=-1)
+    timediff = range_end - range_begin
+
+    regSites = GetListOfOSGSEs();
+    disabledSites = GetListOfDisabledOSGSites()
+
+    reportingSitesDate = GetSiteLastReportingDate(range_begin, True)
+    pingSites = []
+    for data in reportingSitesDate:
+        if ( len(data) > 0 ):
+           (name,lastreport) = data.split("\t")
+           pingSites.append(name)
+
+    exceptionSites = ['AGLT2_CE_2', 'BNL-LCG2', 'BNL_ATLAS_1', 'BNL_ATLAS_2',
+        'FNAL_GPGRID_2', 'USCMS-FNAL-XEN', 'USCMS-FNAL-WC1-CE2',
+        'USCMS-FNAL-WC1-CE3', 'USCMS-FNAL-WC1-CE4', 'BNL_LOCAL', 'BNL_OSG',
+        'BNL_PANDA', 'GLOW-CMS', 'UCSDT2-B', 'Purdue-Lear' ]
+    #exceptionSites = ['BNL_ATLAS_1', 'BNL_ATLAS_2', 'USCMS-FNAL-WC1-CE2', 'USCMS-FNAL-WC1-CE3', 'USCMS-FNAL-WC1-CE4', 'BNL_LOCAL', 'BNL_OSG', 'BNL_PANDA', 'GLOW-CMS', 'UCSDT2-B']
+
+    reportingSites = GetListOfDataTransferReportingSites(range_begin,range_end)
+    #print "reporting sites",reportingSites
+
+    allSites = None
+    if regSites != None:
+        allSites = [name for name in regSites if name not in exceptionSites]
+    #print "allSites is ", allSites
+
+    missingSites, emptySites = None, None
+    if allSites:
+        missingSites = [name for name in allSites if name not in \
+            reportingSites and name not in pingSites]
+        emptySites = [name for name in allSites if name not in reportingSites \
+            and name in pingSites]
+    
+    extraSites = [name for name in reportingSites if allSites and name not in \
+        allSites and disabledSites and name not in disabledSites]
+    knownExtras = [name for name in extraSites if name in exceptionSites and \
+        name not in regSites]
+    extraSites = [name for name in extraSites if name not in exceptionSites]
+
+    reportingDisabled = None
+    if disabledSites != None:
+        reportingDisabled = [name for name in reportingSites if name in \
+            disabledSites]
+
+    #print allSites
+    #print reportingSites
+    #print missingSites
+    #print extraSites
+
+    if allSites != None:
+        print "As of %s, there are %s registered SRMv2 %s sites." % \
+            (DateToString(datetime.date.today(),False),
+            prettyInt(len(allSites)), gridDisplayName)
+
+    print "\nBetween %s - %s (midnight - midnight UTC):\n" % \
+        (DateToString(range_begin, False), DateToString(range_end, False))
+                                                               
+    n = len(reportingSites)
+    print prettyInt(n)+" sites reported\n"
+
+    #[njobs,wallduration,div] = GetTotals(range_begin,range_end)
+    [njobs,wallduration] = GetDataTransferTotals(range_begin,range_end)
+    if (njobs != "NULL"):
+       njobs = int(njobs);
+       wallduration = float(wallduration)
+    else:
+       njobs = 0
+       wallduration = 0
+    
+    print "Total number of transfers: "+prettyInt(njobs)
+    print "Total transfer duration: "+niceNum( wallduration / 3600, 1 )+ " hours"
+
+    if reportingSites != None and extraSites != None and knownExtras != None \
+            and allSites != None:
+        n = len(reportingSites)-len(extraSites)-len(knownExtras)
+        print "%s registered sites reported (%s%% of %s sites)" % \
+            (prettyInt(n), niceNum(n*100/len(allSites),1), gridDisplayName)
+
+    if missingSites != None and allSites != None:
+        n = len(missingSites)
+        print "%s registered sites have NOT reported (%s%% of %s sites)" % \
+            (prettyInt(n), niceNum(n*100/len(allSites),1), gridDisplayName)
+
+    if emptySites != None and allSites != None:
+        n = len(emptySites)
+        print "%s registered sites have reported but have no activity (%s%% " \
+            "of %s sites)" % (prettyInt(n), niceNum(n*100/len(allSites), 1),
+            gridDisplayName)
+
+    print
+    
+    n = len(extraSites);
+    if not gGrid or gGrid.lower() != "local":
+        print prettyInt(n)+" non-sanctioned non-registered sites reported " \
+            "(might indicate a discrepancy between OIM and Gratia)."
+    elif allSites != None:
+        print prettyInt(n)+" non-sanctioned non-registered sites reported."
+
+    if reportingDisabled != None: 
+        n = len(reportingDisabled)
+        print prettyInt(n)+" disabled sites have reported."
+    
+    if emptySites != None:
+        print "\nThe sites with no activity are: \n"+prettyList(emptySites)
+
+    if missingSites != None:
+        print "\nThe non reporting sites are: \n"+prettyList(missingSites)
+
+    if allSites != None:
+        print "\nThe non registered sites are: \n"+prettyList(extraSites)
+    if reportingDisabled != None:
+        print "\nThe disabled sites that are reporting: \n" + \
+            prettyList(reportingDisabled)
+
+    print "\n"
+
+    return missingSites
 
 def RangeSummup(range_end = datetime.date.today(),
                 range_begin = None,
