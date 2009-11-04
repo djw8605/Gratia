@@ -149,18 +149,10 @@ def voTable(voList):
                 voCount+=1
                 # Reset the site count to 1 for each new vo
                 siteCount = 1
-
-                # check and align the column separators between single digit count and double digit count by printing an extra space for single digit count
-                if(voCount < 10):
-                    message+=("| %d.%d  |%5s%-20s|%5s %-20s|"%(voCount,siteCount," ",vo," ",site))+"\n"
-                else:
-                    message+=("| %d.%d |%5s%-20s|%5s %-20s|"%(voCount,siteCount," ",vo," ",site))+"\n"
+                message+=("| %2s.%s |%5s%-20s|%5s %-20s|"%(voCount,siteCount," ",vo," ",site))+"\n"
             # If it is the same VO, then don't print the VO name again, but just the site name that reported that VO in a separate line
             else:
-                if(voCount < 10):
-                    message+=("| %d.%d  |%5s%-20s|%5s %-20s|"%(voCount,siteCount," "," "," ",site))+"\n"
-                else:
-                    message+=("| %d.%d |%5s%-20s|%5s %-20s|"%(voCount,siteCount," "," "," ",site))+"\n"
+                message+=("| %2s.%s |%5s%-20s|%5s %-20s|"%(voCount,siteCount," "," "," ",site))+"\n"
             # keep track of the previous VO
             prevVO = vo
             # increase site count for every row returned
