@@ -218,7 +218,7 @@ def UseArgs(argv):
     end = ""
     if args:
         start = args[0]
-        if len(argv) > 1:
+        if len(args) > 1:
                 end =  args[1]
         if monthly:
             if end:
