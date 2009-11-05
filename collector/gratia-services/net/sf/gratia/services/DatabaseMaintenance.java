@@ -31,7 +31,7 @@ public class DatabaseMaintenance {
 
    static final String dq = "\"";
    static final String comma = ",";
-   static final int gratiaDatabaseVersion = 84;
+   static final int gratiaDatabaseVersion = 85;
    static final int latestDBVersionRequiringStoredProcedureLoad = gratiaDatabaseVersion;
    static final int latestDBVersionRequiringSummaryViewLoad = 82;
    static final int latestDBVersionRequiringSummaryTriggerLoad = 84;
@@ -1166,14 +1166,14 @@ public class DatabaseMaintenance {
              }
          }
          schemaOnlyLowerBound = 81;
-         schemaOnlyUpperBound = 82;
+         schemaOnlyUpperBound = 84;
          if ((current >= schemaOnlyLowerBound) && (current < schemaOnlyUpperBound)) {
              // Stored procedures, trigger procedures.
              Logging.fine("Gratia database upgraded from " + current + " to " + schemaOnlyUpperBound);
              current = schemaOnlyUpperBound;
              UpdateDbVersion(current);
          }
-         if (current == 82) {
+         if (current == 84) {
              // Remove vestigial and obstructive ServerDate from some
              // non-Meta tables.
              int result = 0;
@@ -1198,7 +1198,7 @@ public class DatabaseMaintenance {
                  while (result > -1 && resultSet.next()) {
                      String tableName = resultSet.getString(1);
                      Logging.debug("DatabaseMaintenance: removing vestigial ServerDate column from table " + tableName);
-                     result = Execute("ALTER TABLE " + tableName + "DROP COLUMN ServerDate;");
+                     result = Execute("ALTER TABLE " + tableName + " DROP COLUMN ServerDate;");
                  }
              } catch (Exception e) {
                  Logging.warning("Command: Error: " + command + " : ", e);
@@ -1213,15 +1213,6 @@ public class DatabaseMaintenance {
                      " to " + (current + 1));
             }
          }
-         schemaOnlyLowerBound = 83;
-         schemaOnlyUpperBound = 84;
-         if ((current >= schemaOnlyLowerBound) && (current < schemaOnlyUpperBound)) {
-             // Stored procedures, trigger procedures.
-             Logging.fine("Gratia database upgraded from " + current + " to " + schemaOnlyUpperBound);
-             current = schemaOnlyUpperBound;
-             UpdateDbVersion(current);
-         }
-
          return ((current == gratiaDatabaseVersion) && checkAndUpgradeDbAuxiliaryItems());
       }
    }
