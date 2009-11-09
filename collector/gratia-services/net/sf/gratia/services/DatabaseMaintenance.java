@@ -335,6 +335,7 @@ public class DatabaseMaintenance {
 
       // ComputeElement
       ensureUniqueMd5("ComputeElement");
+      AddIndex("ComputeElement_Meta", false, "index13", "ServerDate");
       AddIndex("ComputeElement", false, "Timestamp", "Timestamp");
       AddIndex("ComputeElement", false, "index03", "ProbeName");
       AddIndex("ComputeElement", false, "probeid", "probeid");
@@ -343,6 +344,7 @@ public class DatabaseMaintenance {
 
       // StorageElement
       ensureUniqueMd5("StorageElement");
+      AddIndex("StorageElement_Meta", false, "index13", "ServerDate");
       AddIndex("StorageElement", false, "Timestamp", "Timestamp");
       AddIndex("StorageElement", false, "index03", "ProbeName");
       AddIndex("StorageElement", false, "probeid", "probeid");
@@ -353,6 +355,7 @@ public class DatabaseMaintenance {
 
       // ComputeElementRecord
       ensureUniqueMd5("ComputeElementRecord");
+      AddIndex("ComputeElementRecord_Meta", false, "index13", "ServerDate");
       AddIndex("ComputeElementRecord", false, "Timestamp", "Timestamp");
       AddIndex("ComputeElementRecord", false, "index03", "ProbeName");
       AddIndex("ComputeElementRecord", false, "UniqueID", "UniqueID");
@@ -360,12 +363,14 @@ public class DatabaseMaintenance {
 
       // StorageElementRecord
       ensureUniqueMd5("StorageElementRecord");
+      AddIndex("StorageElementRecord_Meta", false, "index13", "ServerDate");
       AddIndex("StorageElementRecord", false, "Timestamp", "Timestamp");
       AddIndex("StorageElementRecord", false, "index03", "ProbeName");
       AddIndex("StorageElementRecord", false, "UniqueID", "UniqueID");
       
       // Subcluster
       ensureUniqueMd5("Subcluster");
+      AddIndex("Subcluster_Meta", false, "index13", "ServerDate");
       AddIndex("Subcluster", false, "Timestamp", "Timestamp");
       AddIndex("Subcluster", false, "index03", "ProbeName");
       AddIndex("Subcluster", false, "UniqueID", "UniqueID");
