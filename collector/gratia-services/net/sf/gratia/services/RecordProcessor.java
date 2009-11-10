@@ -425,7 +425,7 @@ public class RecordProcessor extends Thread {
          } catch (Exception e) {
             Logging.warning(ident + ": Error:Processing File: " + file);
             Logging.warning(ident + ": Blob: " + blob);
-            saveQuarantine(file, "Errror parsing file", e);
+            saveQuarantine(file, "Errror parsing file: ", e);
             continue; // Next file.
          }
 
@@ -467,7 +467,7 @@ public class RecordProcessor extends Thread {
                }
             } catch (Exception ignore) {
             }
-            saveQuarantine(file, "Problem parsing XML in file", e);
+            saveQuarantine(file, "Problem parsing XML in file: ", e);
             continue; // Next file.
          }
          int rSize = records.size();
@@ -505,7 +505,7 @@ public class RecordProcessor extends Thread {
                   case DuplicateOriginHandler.HANDLED: break;
                   case DuplicateOriginHandler.TOO_MANY_DUPS:
                      saveQuarantine(file, "Too many consecutive duplicate origin failures (" +
-                                    DuplicateOriginHandler.TOO_MANY_DUPS + ")",
+                                    DuplicateOriginHandler.TOO_MANY_DUPS + "): ",
                                     e);
                      continue NEXTFILE; // Next file.                              
                   case DuplicateOriginHandler.NOT_RELEVANT:
@@ -514,7 +514,7 @@ public class RecordProcessor extends Thread {
                                      ": received unexpected constraint violation exception " +
                                      e.getMessage() + " while processing origin entry.");
                      Logging.debug(ident + rId + ": exception details:", e);
-                     saveQuarantine(file, "Problem processing origin entry for record file", e);
+                     saveQuarantine(file, "Problem processing origin entry for record file: ", e);
                      continue NEXTFILE; // Next file. 
                   }
                } catch (Exception e) {
@@ -524,7 +524,7 @@ public class RecordProcessor extends Thread {
                                      ": received unexpected exception " +
                                      e.getMessage() + " while processing origin entry.");
                      Logging.debug(ident + rId + ": exception details:", e);
-                     saveQuarantine(file, "Problem processing origin entry for record file", e);
+                     saveQuarantine(file, "Problem processing origin entry for record file: ", e);
                      continue NEXTFILE; // Next file. 
                   }
                }
