@@ -28,6 +28,7 @@ public class ReplicationDataPump extends Thread {
    private static final char dq = '\'';
    private static final char cr = '\n';
    private static final int default_bundle_size = 10;
+   private static final double maxBundleDataSize = 0.9*2*1000*1000;
 
    // Class attributes
    private Properties p;
@@ -253,12 +254,22 @@ public class ReplicationDataPump extends Thread {
                session.close();
                return; // Abandon unsent bundle
             }
+            long prevdbid = dbid;
             dbid = ((Integer) dIter.next()).longValue();
             String xml = getXML(dbid, replicationEntry.getrecordtable(), session);
             if (xml.length() == 0) {
                replicationLog(LogLevel.INFO,
                               "Received Null XML: dbid: " + dbid);
                continue;
+            }
+            if ( (xml.length() + xml_msg.length()) > maxBundleDataSize ) {
+               // This xml would lead to the total message length to be
+               // to large for the receiving Collector.  So we need to
+               // close-out and send the bundle.
+               
+               uploadBundle(session,lowdbid,prevdbid,replicationTarget, xml_msg.toString(), bundle_count);
+               bundle_count = 0;
+               xml_msg = new StringBuilder();
             }
             if (trace) {
                replicationLog(LogLevel.FINEST, "TRACE dbid: " + dbid);
@@ -268,20 +279,7 @@ public class ReplicationDataPump extends Thread {
             if (bundle_count == 0) lowdbid = dbid;
             bundle_count = bundle_count + 1;
             if (bundle_count == bundle_size) {
-               replicationLog("Sending: " + lowdbid + " to " + dbid);
-               if (uploadXML(replicationTarget, xml_msg.toString())) {
-                  // Successful -- update replication table entry
-                  session.refresh(replicationEntry);
-                  Transaction tx = session.beginTransaction();
-                  replicationEntry.setdbid((int)dbid);
-                  replicationEntry.setrowcount(replicationEntry.getrowcount() + bundle_count);
-                  session.flush();
-                  tx.commit();
-                  if (firstLoopThisRun && (nSentThisLoop == 0)) { // Message for first send
-                     replicationLog(LogLevel.FINE, " active");
-                  }
-                  nSentThisLoop += bundle_count;
-               }
+               uploadBundle(session, lowdbid, dbid, replicationTarget, xml_msg.toString(),bundle_count);
                if (exitflag)  {
                   session.close();
                   return;
@@ -291,20 +289,7 @@ public class ReplicationDataPump extends Thread {
             }
          } // End dbid loop
          if (bundle_count != 0) { // Send tag-end records.
-            replicationLog(LogLevel.FINE, "Sending: " + lowdbid + " to " + dbid);
-            if (uploadXML(replicationTarget, xml_msg.toString())) {
-               // Successful -- update replication table entry
-               session.refresh(replicationEntry);
-               Transaction tx = session.beginTransaction();
-               replicationEntry.setdbid((int)dbid);
-               replicationEntry.setrowcount(replicationEntry.getrowcount() + bundle_count);
-               session.flush();
-               tx.commit();
-               if (firstLoopThisRun && (nSentThisLoop == 0)) { // Message for first send
-                  replicationLog(LogLevel.FINE, " active");
-               }
-               nSentThisLoop += bundle_count;
-            }
+            uploadBundle(session, lowdbid, dbid, replicationTarget, xml_msg.toString(),bundle_count);
          }
          session.close();
       } catch (Exception e) {
@@ -333,6 +318,30 @@ public class ReplicationDataPump extends Thread {
       buffer.append(record.getExtraXml() + "|");
  
       return buffer.toString();
+   }
+   
+   public Boolean uploadBundle(Session session, long lowdbid, long dbid, String replicationTarget, String xml, int bundle_count) 
+   throws java.lang.Exception 
+   {
+      // Upload a bundle
+      
+      replicationLog(LogLevel.FINE, "Sending: " + lowdbid + " to " + dbid);
+      if (uploadXML(replicationTarget, xml)) {
+         // Successful -- update replication table entry
+         session.refresh(replicationEntry);
+         Transaction tx = session.beginTransaction();
+         replicationEntry.setdbid((int)dbid);
+         replicationEntry.setrowcount(replicationEntry.getrowcount() + bundle_count);
+         session.flush();
+         tx.commit();
+         if (firstLoopThisRun && (nSentThisLoop == 0)) { // Message for first send
+            replicationLog(LogLevel.FINE, " active");
+         }
+         nSentThisLoop += bundle_count;                  
+         return true;
+      }
+      return false;
+      
    }
 
    public Boolean uploadXML(String replicationTarget, String xml)
