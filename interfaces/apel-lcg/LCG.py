@@ -850,7 +850,7 @@ def GetQuery(site,normalizationFactor,vos,DNflag):
     userDataClause=""
     userGroupClause=""
     if DNflag == "True":
-      userDataClause="IF(DistinguishedName NOT IN (\"\", \"Unknown\"),DistinguishedName,CommonName) as UserDN, "
+      userDataClause="IF(DistinguishedName NOT IN (\"\", \"Unknown\"),IF(INSTR(DistinguishedName,\":/\")>0,LEFT(DistinguishedName,INSTR(DistinguishedName,\":/\")-1), DistinguishedName),CommonName) as UserDN, "
       userGroupClause=", UserDN "
     periodWhereClause = SetDatesWhereClause()
     strNormalization = str(normalizationFactor)
