@@ -425,7 +425,7 @@ public class RecordProcessor extends Thread {
          } catch (Exception e) {
             Logging.warning(ident + ": Error:Processing File: " + file);
             Logging.warning(ident + ": Blob: " + blob);
-            saveQuarantine(file, "Errror parsing file: ", e);
+            saveQuarantine(file, "Error parsing file: ", e);
             continue; // Next file.
          }
 
