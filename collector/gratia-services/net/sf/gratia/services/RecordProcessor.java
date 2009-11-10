@@ -615,6 +615,24 @@ public class RecordProcessor extends Thread {
                   Logging.warning(ident + ": Communications error: " + "shutting down");
                   return 0; // DB access trouble.
                }
+            } catch (Exception e) {
+               // Humm an unexception exception.
+               Logging.warning(ident + rId + ": Error in record updating: " + e.getMessage());
+               Logging.debug(ident + rId + ": exception details: ", e);
+               if (HibernateWrapper.databaseUp()) {
+                  try {
+                     if (gotreplication) {
+                        errorRecorder.saveSQL("Replication", "RecordUpdateInternalError", current);
+                     } else {
+                        errorRecorder.saveSQL("Probe", "RecordUpdateInternalError", current);
+                     }
+                  } catch (Exception ignore) {
+                  }
+                  continue NEXTRECORD; // Process next record.
+               } else {
+                  Logging.warning(ident + ": Communications error: " + "shutting down");
+                  return 0; // DB access trouble.
+               }               
             }
             
             boolean acceptRecord = true;
