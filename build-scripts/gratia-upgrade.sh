@@ -869,7 +869,13 @@ fi
 #--- this is so we don't write badly named log files in $tomcat_dir --
 if [ "$prompt" = "no" ];then
   if [ ! -d "$tomcat_dir/$tomcat" ];then
-    usage_error "--instance directory ($tomcat_dir/$tomcat) does not exist."
+    if [[ -n "$install_tomcat_arg" ]]; then
+      # Make directory into which we will install a fresh tomcat.
+      logit "Making instance directory $tomcat_dir/$tomcat for new tomcat install."
+      mkdir "$tomcat_dir/$tomcat"
+    else
+      usage_error "--instance directory ($tomcat_dir/$tomcat) does not exist and --install-tomcat not specified."
+    fi
   fi
 fi
 
