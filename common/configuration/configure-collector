@@ -21,6 +21,11 @@ if (-l $0) {
 
 my %collector_configs = ();
 
+my @collector_wars =
+  qw(administration registration services servlets soap);
+
+my @reporting_wars = qw(reporting reports);
+
 my @required_attributes =
   (
    'http_port',
@@ -51,6 +56,8 @@ my %attribute_defaults =
    sslCAFiles => "/etc/grid-security/certificates/*.0",
    crlFiles => "/etc/grid-security/certificates/*.r0",
    service_auto_start => 1,
+   want_collector => 1,
+   want_reporting => 1,
    "properties.attributes" =>
    {
     "service.initial.servlets" => "ON",
@@ -101,7 +108,6 @@ my $tomcat_users_txt = <<'EOF';
   <role rolename="role1"/>
   <role rolename="manager"/>
   <role rolename="admin"/>
-  <user username="penelope" password="vdt-gratia" fullName="Penelope Constanta" roles="admin,manager"/>
   <user username="gratia" password="proto" fullName="gratia prototype user" roles="admin,manager"/>
   <user username="root" password="lisp01" roles="admin,manager"/>
 </tomcat-users>
@@ -283,8 +289,8 @@ unless (exists $options{prefix}) {
     if (wants_config_info()) {
       print STDERR "WARNING: tomcat install prefix not specified ",
         "and default \"$default_prefix\"",
-          "\ndoes not exist as a directory or is not writable\n";
-      print STDERR " Therefore config information will not be taken from the installed release\n";
+          "\n does not exist as a directory or is not writable.\n";
+      print STDERR " Therefore config information will not be taken from the installed release.\n";
     } else {
       print STDERR "ERROR: tomcat install prefix not specified ",
         "and default \"$default_prefix\"",
@@ -397,9 +403,8 @@ foreach my $config_name (@instance_list) {
   configure_init_file($instance_name, $config_name, $config_ref);
   configure_tomcat_config($instance_name, $config_name, $config_ref);
   configure_tomcat_users($instance_name, $config_name, $config_ref);
-  # configure_log4j_properties($instance_name, $config_name, $config_ref) if $options{"use-ssl"};
   configure_static_report_generation($instance_name, $config_name, $config_ref);
-
+  maybe_restrict_services($instance_name, $config_name, $config_ref);
   configure_name_file($instance_name, $config_name, $config_ref);
 
   if (exists $options{"db-root"}) {
@@ -421,6 +426,31 @@ foreach my $config_name (@instance_list) {
 1;
 
 #--------------------------------------
+sub maybe_restrict_services {
+  my ($instance_name, $config_name, $collector_config) = @_;
+  if (!$collector_config->{want_reporting}) {
+    remove_services($instance_name, $config_name, $collector_config, @reporting_wars);
+  } elsif (!$collector_config->{want_collector}) {
+    remove_services($instance_name, $config_name, $collector_config, @collector_wars);
+  }
+}
+
+sub remove_services {
+  my ($instance_name, $config_name, $collector_config, @services) = @_;
+  foreach my $service (@services) {
+    next unless $service;
+    my $war = "$options{prefix}/tomcat-${instance_name}/webapps/gratia-$service.war";
+    my $service_dir = "$options{prefix}/tomcat-${instance_name}/webapps/gratia-$service";
+    next unless (-f $war or -d $service_dir);
+    print STDERR "INFO: Removing unneeded service, \"$service\"\n";
+    if (system("rm -rf \"$war\" \"$service_dir\"") != 0) {
+      print STDERR "ERROR: Unable to remove unwanted service $service from $options{prefix}/tomcat-${instance_name}/webapps\n";
+      exit 1;
+    }
+  }
+}
+
+#--------------------------------------
 sub configure_apel_directory {
   my ($instance_name, $config_name, $collector_config) = @_;
   my $type = "APEL interfaces folder -";
@@ -433,7 +463,7 @@ sub configure_apel_directory {
     return 1;
   }
   unless ( defined $apel_group ) {
-    print  STDERR "ERROR: $type requested but no service.reporting.interfaces.apel.folder.groupowner specified.\n";
+    print STDERR "ERROR: $type requested but no service.reporting.interfaces.apel.folder.groupowner specified.\n";
     exit 1;
   }
   my $data_directory = "$options{prefix}/tomcat-${instance_name}/webapps/$apel";
@@ -464,35 +494,6 @@ sub configure_apel_directory {
     print STDERR "ERROR: $type failed changing permissions of $data_directory files\n"; exit 1
   } 
   print STDERR "INFO: $type complete\n"; 
-}
-
-#--------------------------------------
-sub configure_log4j_properties {
-  return unless $options{"use-ssl"};
-  my ($instance_name, $config_name, $collector_config) = @_;
-  my $log4j_prop = ">$options{prefix}/tomcat-${instance_name}/conf/log4j-trustmanager.properties";
-  open(LOG4J_PROP, $log4j_prop) or die "Unable to open $log4j_prop for writing";
-  print LOG4J_PROP <<'EOF';
-log4j.logger.org.glite.security=INFO, fileout
-
-log4j.appender.fileout=org.apache.log4j.RollingFileAppender
-
-# the OUTPUT FILE for the logging messages
-log4j.appender.fileout.File=${catalina.base}/logs/glite-security-trustmanager.log
-
-# define max file size for the debug file
-log4j.appender.fileout.MaxFileSize=100KB
-
-# Keep one backup file
-log4j.appender.fileout.MaxBackupIndex=1
-
-log4j.appender.fileout.layout=org.apache.log4j.PatternLayout
-# define the pattern of the messages
-log4j.appender.fileout.layout.ConversionPattern=%d{ISO8601} %-5p [%t] %c{2} %x - %m%n
-# this also outputs the method name, but is very slow
-#log4j.appender.fileout.layout.ConversionPattern=%d{ISO8601} %-5p [%t] %c{2} %M %x - %m%n
-EOF
-  close(LOG4J_PROP);
 }
 
   sub configure_post_install {
@@ -945,18 +946,20 @@ sub maybe_print_config_info {
 use File::Find;
 my (@found_files, $list_file);
 sub wanted {
-  #  print STDERR "File::Find: dir = $File::Find::dir\n";
+  # print STDERR "File::Find::dir = $File::Find::dir\n";
   if ($File::Find::name =~ m&gratia/data/(?:history-|old-|thread)&) {
-    #    print STDERR "File::Find: pruning search tree\n";
+    # print STDERR "File::Find: pruning search tree\n";
     $File::Find::prune = 1;
     return;
   }
   if (-d $_) {
-    #    print STDERR "File::Find: looking in $File::Find::name ...\n";
+    # print STDERR "File::Find: looking in $File::Find::name ...\n";
     if (-f "$_/$list_file") {
+      # print STDERR "File::Find found $File::Find::name/$list_file";
       push @found_files, "$File::Find::name/$list_file";
       $File::Find::prune = 1;
     } elsif (-f "$_/$list_file.dat") { # Default extension
+      # print STDERR "File::Find found $File::Find::name/$list_file.dat";
       push @found_files, "$File::Find::name/$list_file.dat";
       $File::Find::prune = 1;
     }
@@ -968,7 +971,18 @@ sub find_dat_file {
   @found_files = ();
   my @search_path = ( "$gratia_dir", @_ );
   chomp $list_file;
-  unless ( -f $list_file ) {
+  if ( -f $list_file ) {
+    if ($list_file =~ m&/&) {
+      my ($file, $dir) = fileparse($list_file);
+      $dir=`cd "$dir" && /bin/pwd`;
+      chomp $dir;
+      $list_file="$dir/$file";
+    } else {
+      my $dir = `/bin/pwd`;
+      chomp $dir;
+      $list_file="$dir/$list_file";
+    }
+  } else {
     my @dir_list = map { (-d)?$_:() } @search_path;
     #    print STDERR "Looking for $list_file, dir list = ", join(", ", @dir_list), "\n";
     find ( \&wanted, @dir_list );
