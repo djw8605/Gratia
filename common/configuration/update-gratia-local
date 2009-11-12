@@ -379,8 +379,7 @@ configuration_dir=$source_prefix/common/configuration
 for dir in $source_prefix \
            $configuration_dir \
            $tomcat_root \
-           $target_dir \
-           $tomcat_webapps
+           $target_dir
 do
   echo "... checking $dir"
   if [ ! -d $dir ]; then
@@ -389,6 +388,10 @@ do
   fi
 done
 
+if (( ! ${install_tomcat:-0} )) && [ ! -d "$tomcat_webapps" ]; then
+  echo "ERROR: Unable to find specified directory $tomcat_webapps and --install-tomcat not specified." 1>&2
+  exit 1
+fi
 
 #-----------------------
 # Check for java
