@@ -56,7 +56,8 @@ Options:
       Comma-separated list of email addresses for notification of release.
 
    -p
-      Production: instance name is tomcat-gratia, config-name=<config>
+      Production: shorthand for "-m gratia-operation@fnal.gov." Also
+      triggers an extra check for a specified configuration name.
 
    -v
       Verbose: mention a little more about what we're doing.
@@ -194,20 +195,6 @@ else
   release_dir="/home/gratia/gratia-$tnstub/gratia-${release}"
 fi
 
-if (( ${production:-0} )); then
-  if [[ -z "$config_name" ]]; then
-    echo "Configuration name required for production installs" 1>&2
-    usage
-    exit 1
-  fi
-  instance_name="tomcat-gratia"
-  [[ -z "$mail" ]] && mail="grid-accounting@fnal.gov"
-else
-  [[ -n "$config_name" ]] || config_name=$username
-  instance_name="tomcat-$config_name"
-  [[ -z "$mail" ]] && mail="gratia-operation@fnal.gov"
-fi
-
 if [[ "$username" == "root" ]]; then
   echo "INFO: running as root. You should specify config-name. Mail will be sent to grid-accounting or gratia-operation as appropriate." 1>&2
 else
@@ -235,6 +222,19 @@ fi
 
 # First, check for configuration (especially DB location).
 install_prefix=`get_config install_prefix`
+if (( ${production:-0} )); then
+  if [[ -z "$config_name" ]]; then
+    echo "Configuration name required for production installs" 1>&2
+    usage
+    exit 1
+  fi
+  [[ -z "$mail" ]] && mail="grid-accounting@fnal.gov"
+else
+  [[ -n "$config_name" ]] || config_name=$username
+  [[ -z "$mail" ]] && mail="gratia-operation@fnal.gov"
+fi
+instance_name=$(get_config instance_name)
+instance_name="tomcat-${instance_name:-$config_name}"
 remote_host=`get_config remote_host`
 db_host=`get_config db_host`
 if [[ "$db_host" == "localhost" ]]; then
