@@ -8,6 +8,8 @@ usage: update-gratia-local [-S <source-prefix>] [-j <jre-home>] [-s]
                            [-i <collector-info-file>]
                            [-c <configure-collector-script>]
                            [-C <config-name>]
+                           [--force-log4j]
+                           [--install-tomcat]
                            [-h] [-v <vdt_location>] [--] <instance>
 
        -c <configure-collector-script>
@@ -31,6 +33,10 @@ usage: update-gratia-local [-S <source-prefix>] [-j <jre-home>] [-s]
 
           Use collector-info-file instead of the default files
           (collector-pro.dat collector-itb.dat collector-dev.dat)
+
+       --install-tomcat
+
+          Install latest tomcat from ~gratia/tomcat-tarballs.
 
        -j <jre-home>
 
@@ -149,6 +155,47 @@ $(/bin/netstat -n --listening --program |egrep $pid |egrep -v grep)
     fi
 }
 #-----------------
+function maybe_install_tomcat() {
+  if (( ${install_tomcat:-0} )); then
+    # Install latest tomcat from tomcat-tarballs
+    if [[ ! -d "$tomcat_tarballs" ]] || [[ ! -r "$tomcat_tarballs" ]]; then
+      echo "ERROR: cannot install tomcat from missing or unreadable directory \"$tomcat_tarballs\""
+      exit 1
+    fi
+    echo "... installing latest version of tomcat from $tomcat_tarballs"
+    declare -a latest_version
+    for i in $tomcat_tarballs/apache-tomcat-*; do
+      version=${i#*/apache-tomcat-}
+      version=${version%%.[^0-9]*}
+      if (( $(echo $version | cut -d. -f 1) > ${latest_version[0]:-0} )) ||
+         (( $(echo $version | cut -d. -f 1) == ${latest_version[0]:-0} &&
+            $(echo $version | cut -d. -f 2) > ${latest_version[1]:-0} )) ||
+         (( $(echo $version | cut -d. -f 1) == ${latest_version[0]:-0} &&
+            $(echo $version | cut -d. -f 2) == ${latest_version[1]:-0} &&
+            $(echo $version | cut -d. -f 3) > ${latest_version[2]:-0} )); then
+        latest_version=($(echo $version | cut -d. -f 1),$(echo $version | cut -d. -f 2),$(echo $version | cut -d. -f 3))
+        latest_tomcat=$i
+      fi
+    done
+    if [[ -z "$latest_tomcat" ]]; then
+      echo "ERROR: unable to identify latest tomcat tarball in $tomcat_tarballs"
+      exit 1
+    fi
+    echo "... installing $latest_tomcat to $tomcat_top"
+    file_type=$(file "$latest_tomcat")
+    if [[ $file_type == *gzip* ]]; then
+      compress_arg="z"
+    elif [[ $file_type == *bzip2* ]]; then
+      compress_arg="j"
+    fi
+    tar -${compress_arg}xf "$latest_tomcat" --strip=1 -C "$tomcat_top"
+    if (( $? != 0 )); then
+      echo "ERROR: untar of $latest_tomcat into $tomcat_top failed!"
+      exit 1
+    fi
+  fi
+}
+#-----------------
 function remove_deprecated_webapps_services {
   sleep 3
   removed_services=n
@@ -239,7 +286,7 @@ birt
 "
 
 # Use getopt(1) -- enhanced to process long options
-TEMP=`getopt -o :c:C:i:j:sp:d:v:hS: --long force-log4j -n "update-gratia-local" -- "$@"`
+TEMP=`getopt -o :c:C:i:j:sp:d:v:hS: --long force-log4j --long install-tomcat -n "update-gratia-local" -- "$@"`
 
 if [ $? != 0 ]; then
   echo "terminating due to option parse errors" 1>&2
@@ -261,6 +308,10 @@ while true; do
             ;;
         --force-log4j)
             forcelog4j=1
+            shift
+            ;;
+        --install-tomcat)
+            install_tomcat=1
             shift
             ;;
         -S)
@@ -323,6 +374,7 @@ configuration_dir=$source_prefix/common/configuration
        target_dir=$source_prefix/target
    tomcat_webapps=$tomcat_top/webapps
     tomcat_gratia=$tomcat_top/gratia
+  tomcat_tarballs=~gratia/tomcat-tarballs
 
 for dir in $source_prefix \
            $configuration_dir \
@@ -336,6 +388,7 @@ do
     exit 1
   fi
 done
+
 
 #-----------------------
 # Check for java
@@ -361,6 +414,11 @@ done
 # Stop tomcat
 #-----------------------
 stop_tomcat
+
+#-----------------------
+# Install new tomcat if requested
+#-----------------------
+maybe_install_tomcat
 
 #-----------------------
 # Update gratia directory
