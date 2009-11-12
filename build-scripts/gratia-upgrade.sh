@@ -20,8 +20,8 @@ function logit {
     mkdir -p $logdir
   fi
   case $daily in
-    "yes" ) echo "$1" >>$logfile 2>&1 ;;
-       *  ) echo "$1" 2>&1 | tee -a $logfile ;;
+    "yes" ) echo "$@" >>$logfile 2>&1 ;;
+       *  ) echo "$@" 2>&1 | tee -a $logfile ;;
   esac
 }
 #------------------------------------
@@ -137,6 +137,7 @@ using SDK, you should specify \"<sdk-dir>/jre\".
                   (required when running from cron and when used the 
                   --pswd argument is ignored)
  --force-log4j    Force overwrite of log4j config file.
+ --install-tomcat Install the latest tomcat from ~gratia/tomcat-tarballs.
 
 If '--daily' is used, then all arguments are required and use of this argument
 will automatically start the tomcat/collector and requires specifying the
@@ -155,6 +156,9 @@ The '--force-log4j' argument is used to force the over-writing of the
 log4j.properties file used for logging.  If these properties have been 
 modified locally and you desire to preserve these changes, then this option
 should not be used and any changes will have to be performed manually.
+
+The '--install-tomcat' argument will cause the latest version of tomcat
+to be installed from ~gratia/tomcat-tarballs.
 
 The script performs the following:
  1. shutdown your tomcat instance/collector
@@ -379,7 +383,7 @@ function install_upgrade {
   if [[ -n "$jre_dir" ]]; then
     jre_opt=" -j "
   fi
-  runit $pgm $ugl_config_arg-p ${tomcat_dir} -d $pswd$jre_opt$jre_dir -S $source ${force}-s -C $config_name $(echo $tomcat|cut -d'-' -f2-)
+  runit $pgm $ugl_config_arg-p ${tomcat_dir} -d $pswd$jre_opt$jre_dir -S $source ${install_tomcat_arg}${force}-s -C $config_name $(echo $tomcat|cut -d'-' -f2-)
   logit "Install was successful"
   sleep 3
 }
@@ -779,6 +783,7 @@ log_backup_dir=$tomcat_dir/gratia_tomcat_logs_backups
 update_pgm=common/configuration/update-gratia-local
 mysql_file=NONE
 force_log4j="--force-log4j"
+install_tomcat="--install-tomcat"
 
 #--- get command line arguements ----
 while test "x$1" != "x"; do
@@ -788,6 +793,9 @@ while test "x$1" != "x"; do
         cc_config_arg="-c $2 "
         ugl_config_arg="-i $2 "
         shift;shift
+   elif [ "$1" == $install_tomcat ]; then
+        install_tomcat_arg="$install_tomcat "
+        shift
    elif [ "$1" == "--instance" ];then
         tomcat="$2";shift;shift
    elif [ "$1" == "--config-name" ];then
