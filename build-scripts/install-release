@@ -11,8 +11,6 @@
 # Useful variables
 username=${USER:-${LOGNAME:-$(whoami)}}
 
-# Defaults.
-type=release
 ####################################
 
 ########################################################################
@@ -22,17 +20,18 @@ type=release
 # usage
 function usage() {
 cat 1>&2 <<EOF
-${0##*/} [<opt>] <release>
+${0##*/} [<opt>] -R <release>
 ${0##*/} [<opt>] -B <official-build>
 ${0##*/} [<opt>] -L <full-release-path>
+${0##*/} [<opt>] <release> (deprecated)
 ${0##*/} [-h]
 
-Build Types:
-   Default
-      Official release (found as ~gratia/gratia-releases/gratia-<release>.
-   -B
-      Official build (found as ~gratia/gratia-builds/gratia-<official-build>.
-   -L
+Build-specifying options:
+   -R <release>
+      Official release (found as ~gratia/gratia-releases/gratia-<release>).
+   -B <official-build>
+      Official build (found as ~gratia/gratia-builds/gratia-<official-build>).
+   -L <full-release-path>
       Local build (found as <full-release-path>).
 
 Help:
@@ -43,8 +42,18 @@ Options:
    -a
       Auto-start collector (default no start).
 
+   -C <config-dat>
+      Specify explicitly the config file from which to take the instance
+      configuration.
+      
    -c <config>
       Instance name is tomcat-<config> (except see -p).
+
+   -t
+      Install latest tomcat from ~gratia/tomcat-tarballs.
+
+   -m <notify-mail>[,...]
+      Comma-separated list of email addresses for notification of release.
 
    -p
       Production: instance name is tomcat-gratia, config-name=<config>
@@ -117,26 +126,41 @@ function get_config() {
 # Options
 OPTIND=1
 
-while getopts :aBLhvpc: OPT; do
+while getopts :B:C:L:R:ac:hm:ptv OPT; do
     case $OPT in
-        a)
-            autostart=1
-            ;;
         B)
             type=build
+            relarg=$OPTARG
+            ;;
+        C)
+            config_dat=$OPTARG
+            ;;
+        L)
+            type=local
+            relarg=$OPTARG
+            ;;
+        R)
+            type=release
+            relarg=$OPTARG
+            ;;
+        a)
+            autostart=1
+            ;;        
+        c)
+            config_name=$OPTARG
             ;;
         h)
             usage
             exit 1
             ;;
-        L)
-            type=local
-            ;;
-        c)
-            config_name=$OPTARG
+        m)
+            mail=$OPTARG
             ;;
         p)
             production=1
+            ;;
+        t)
+            tomcat_arg=--install-tomcat
             ;;
         v)
             verbose=1
@@ -148,19 +172,25 @@ while getopts :aBLhvpc: OPT; do
 done
 shift $[ OPTIND - 1 ]
 
-if [[ -z "$1" ]]; then
-  echo "Required non-option argument not specified." 1>&2
-  usage
-  exit 1
+if [[ -z "type" ]]; then
+  if [[ -n "$1" ]]; then
+    echo "INFO: not specified -R, -L or -B options. Defaulting to official release $1" 1>&2
+    type=release
+    relarg="$1"
+  else
+    echo "ERROR: required options -R, -L or -B not specified." 1>&2
+    usage
+    exit 1
+  fi
 fi
 
 ####################################
 # Setup
 if [[ "$type" == "local" ]]; then
-  release_dir="$1"
+  release_dir="$relarg"
 else
   tnstub="${type}s"
-  release="$1"
+  release="$relarg"
   release_dir="/home/gratia/gratia-$tnstub/gratia-${release}"
 fi
 
@@ -171,18 +201,18 @@ if (( ${production:-0} )); then
     exit 1
   fi
   instance_name="tomcat-gratia"
-  mail="grid-accounting@fnal.gov"
+  [[ -z "$mail" ]] && mail="grid-accounting@fnal.gov"
 else
   [[ -n "$config_name" ]] || config_name=$username
   instance_name="tomcat-$config_name"
-  mail="gratia-operation@fnal.gov"
+  [[ -z "$mail" ]] && mail="gratia-operation@fnal.gov"
 fi
 
 if [[ "$username" == "root" ]]; then
   echo "INFO: running as root. You should specify config-name. Mail will be sent to grid-accounting or gratia-operation as appropriate." 1>&2
 else
   echo "INFO: running as $username. Collector host will be obtained from config for login and install as root." 1>&2 
-  mail="${username}@fnal.gov"
+  [[ -z "$mail" ]] && mail="${username}@fnal.gov"
 fi
 
 # Check for release integrity:
@@ -194,12 +224,14 @@ fi
 upgrade_script=${release_dir}/build-scripts/gratia-upgrade.sh
 configure_script=${release_dir}/common/configuration/configure-collector
 
-declare -a get_config_cmd=("$configure_script" \
-"-c" "$release_dir/common/configuration/collector-dev.dat" \
-"-c" "$release_dir/common/configuration/collector-itb.dat" \
-"-c" "$release_dir/common/configuration/collector-osg.dat" \
-"-c" "$release_dir/common/configuration/collector-fermi.dat"
+# configure command
+  declare -a get_config_cmd=("$configure_script")
+if [[ -n "$config_dat" ]]; then
+  declare -a get_config_cmd=("${get_config_cmd[@]}" \
+"-c" "$config_dat"
 )
+  declare -a config_dat_args=("--config" "$config_dat")
+fi
 
 # First, check for configuration (especially DB location).
 install_prefix=`get_config install_prefix`
@@ -220,11 +252,19 @@ if [[ ! -f "$pswd_file" ]]; then
   exit 2
 fi
 
+if (( ${autostart:-0} )); then
+  mail_opt=daily
+else
+  mail_opt=mail
+fi
+
 declare -a install_command=("$upgrade_script" --instance $instance_name \
+                            "${config_dat_args[@]}" \
                             --config-name $config_name \
                             --source "$release_dir" \
                             --pswd xx --mysql "$pswd_file" \
-                            --daily "$mail" \
+                            --$mail_opt "$mail" \
+                            ${tomcat_arg} \
                             --force-log4j)
 
 # Now do different things if we're root
@@ -234,7 +274,6 @@ if [[ "$username" == "root" ]]; then
     "${install_command[@]}" >/dev/null 2>&1
     status=$?
   else
-    install_command[11]=--mail
     yes n | "${install_command[@]}" >/dev/null 2>&1
     status=$?
   fi
@@ -251,7 +290,6 @@ else
     ssh root@$remote_host "${install_command[@]}" >/dev/null 2>&1
     status=$?
   else
-    install_command[11]=--mail
     ssh root@$remote_host "yes n | ${install_command[@]}" >/dev/null 2>&1
     status=$?
   fi
