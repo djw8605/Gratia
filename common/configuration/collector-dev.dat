@@ -101,7 +101,7 @@
             "maintain.history.checkInterval" => "2 h",
             "monitor.recordProcessor.wait" => 240,
             "service.service.numLogs" => 10,
-            "monitor.to.address.0" => 'greenc@fnal.gov' ,
+            "monitor.to.address.0" => 'thor@fnal.gov' ,
             "service.admin.DN.0" => '/DC=org/DC=doegrids/OU=Services/CN=gratia-vm02.fnal.gov',
             "service.admin.FQAN.0" => "/fermilab/Role=GratiaAdmin",
             "service.admin.FQAN.1" => "/fermilab/Role=GratiaDeveloper",
