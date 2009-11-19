@@ -433,14 +433,25 @@ function ask_to_start_collector {
 function start_collector {
   delimit start_collector
   logit "... starting collector"
-  runit /sbin/service $(echo $tomcat |cut -d'/' -f3) start
+  local max_retries=2
+  (( retries = 0 ))
+  while (( 1 )); do
+    runit /sbin/service $(echo $tomcat |cut -d'/' -f3) start
+    if instance_is_running; then
+      break;
+    elif (( ++retries > max_retries )); then
+      logerr "Unable to start collector after $max_retries retries"
+    else
+      logit "Collector did not start: retry"
+    fi
+  done
   logit
   logit "... collector started
 $(ps -ef |grep -e 'catalina\.\(base\|home\)='$tomcat_dir/$tomcat |grep '   1 ' |egrep -v grep 2>/dev/null)
 "
   logit
-  logit "... sleeping 25 seconds to allow tomcat to deploy war files"
-  sleep 25
+  logit "... sleeping 20 seconds to allow tomcat to deploy war files"
+  sleep 20
   verify_upgrade
 }
 #-----------------------
@@ -547,27 +558,19 @@ function cleanup {
   fi
 }
 #--------------------------------
-function verify_instance_is_running {
-  delimit  verify_instance_is_running
-  logit "Verifying that the tomcat instance is running using
-   ps -ef |grep -e 'catalina\.\(base\|home\)='$tomcat_dir/$tomcat |grep '   1 ' |egrep -v grep 2>/dev/null
-"
+function instance_is_running() {
   sleep 4
   process_cnt="$(ps -ef |grep -e 'catalina\.\(base\|home\)='$tomcat_dir/$tomcat |grep '  1 '|egrep -v grep  2>/dev/null|wc -l)"
-  case $process_cnt in 
-    0 ) logerr "... tomcat instance ($tomcat) not running" ;;
-    1 ) ;;
+  case $process_cnt in
+    0 ) return 1 ;;
+    1 ) return 0 ;;
     * ) logerr "More than 1 tomcat instance running for this gratia instance:
-$(ps -ef |grep -e 'catalina\.\(base\|home\)='$tomcat_dir/$tomcat |grep '  1 '|egrep -v grep 2>/dev/null)
-" 
+$(ps -ef |grep -e 'catalina\.\(base\|home\)='$tomcat_dir/$tomcat |grep '  1 '|egrep -v grep  2>/dev/null)
+"
         ;;
   esac
-  logit "Tomcat instance for ($tomcat):
-$(ps -ef |grep -e 'catalina\.\(base\|home\)='$tomcat_dir/$tomcat |grep '   1 ' |egrep -v grep 2>/dev/null)
-"
-  logit "PASSED: tomcat instance ($tomcat) is running"
-  sleep 1
 }
+
 #--------------------------------
 function verify_tomcat_connection {
   delimit  verify_tomcat_connection
@@ -626,7 +629,7 @@ Disclaimer: This is the closest one can do for this type of validation.
 
   #--- check the ports ---
   maxtries=6
-  sleep=25
+  sleep=20
   try=1
   while 
     [ $try -lt $maxtries ]
@@ -687,7 +690,6 @@ $(ls -l $csv_dir)
 }
 #---------------------------
 function verify_upgrade {
-   verify_instance_is_running 
    verify_port_availability 
    verify_tomcat_connection 
 }
