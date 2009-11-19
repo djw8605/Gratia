@@ -10,6 +10,10 @@
 ####################################
 # Useful variables
 username=${USER:-${LOGNAME:-$(whoami)}}
+TMP=`mktemp ${TMPDIR:-/tmp}/install-release.XXXXXXXXXX`
+
+# Trap for cleanup
+trap "[[ -n "\$TMP" ]] && rm -f \"$TMP*\" 2>/dev/null" EXIT
 
 ####################################
 
@@ -116,7 +120,14 @@ function get_config() {
     echo "Executing ${get_config_cmd[@]} --${config_opt:-obtain-config-item} $item $config_name"
   fi
   "${get_config_cmd[@]}" --${config_opt:-obtain-config-item} $item $config_name \
-   2>/dev/null | sed -ne 's/\(config\|property\): '"$item"' = //p'
+   >"$TMP.out" \
+   2>"$TMP.err" && cat "$TMP.out" | sed -ne 's/\(config\|property\): '"$item"' = //p'
+  if (( $? != 0 )); then
+    echo "ERROR executing ${get_config_cmd[@]} --${config_opt:-obtain-config-item} $item $config_name: " 1>&2
+    cat "$TMP.out" 1>&2
+    cat "$TMP.err" 1>&2
+    return 1
+  fi
 }
 ####################################
 
@@ -222,6 +233,8 @@ fi
 
 # First, check for configuration (especially DB location).
 install_prefix=`get_config install_prefix`
+(( $? == 0 )) || exit 1
+
 if (( ${production:-0} )); then
   if [[ -z "$config_name" ]]; then
     echo "Configuration name required for production installs" 1>&2
@@ -234,9 +247,15 @@ else
   [[ -z "$mail" ]] && mail="gratia-operation@fnal.gov"
 fi
 instance_name=$(get_config instance_name)
+(( $? == 0 )) || exit 1
+
 instance_name="tomcat-${instance_name:-$config_name}"
 remote_host=`get_config remote_host`
+(( $? == 0 )) || exit 1
+
 db_host=`get_config db_host`
+(( $? == 0 )) || exit 1
+
 if [[ "$db_host" == "localhost" ]]; then
   db_host=$remote_host
 fi
