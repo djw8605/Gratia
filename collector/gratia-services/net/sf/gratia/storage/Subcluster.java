@@ -100,9 +100,6 @@ public class Subcluster extends Record
       if (!formd5) { 
          if (RecordIdentity != null) RecordIdentity.asXml(output);
       }
-      if (ProbeName != null) ProbeName.asXml(output,"ProbeName");
-      if (SiteName != null) SiteName.asXml(output,"SiteName");
-
       if (UniqueID != null) UniqueID.asXml(output,"UniqueID");
       if (Name != null) Name.asXml(output,"Name");
       if (Cluster != null) Cluster.asXml(output,"Cluster");

@@ -172,11 +172,12 @@ public abstract class RecordLoader
    public static void SetRecordIdentity(Record rec, Element element) throws Exception
    {
       RecordIdentity id = rec.getRecordIdentity();
-      if (id != null /* record identity already set */)
+      if (id != null) /* record identity already set */
       {
          Utils.GratiaError("SetRecordIdentity", "parsing",
                            " found a second RecordIdentity field in the xml file",
                            false);
+         rec.addExtraXml(element.asXML());
          return;
       }
       for (Object iter : element.attributes() ) {
@@ -203,10 +204,13 @@ public abstract class RecordLoader
    public static void SetSiteName(Record rec, Element element) throws Exception
    {
       StringElement el = rec.getSiteName();
-      if (el != null /* rec identity already set */)
-      {
-         Utils.GratiaError("SetSiteName", "parsing",
-                           " found a second SiteName field in the xml file", false);
+      if (el != null) {
+         /* site name already set */
+         if (!el.getValue().equals(element.getText())) {
+            Utils.GratiaError("SetSiteName", "parsing",
+                              " found a second SiteName field in the xml file", false);
+         }
+         rec.addExtraXml(element.asXML());
          return;
       }
       el = new StringElement();

@@ -83,9 +83,6 @@ public class ComputeElementRecord extends Record
       if (!formd5) { 
          if (RecordIdentity != null) RecordIdentity.asXml(output);
       }
-      if (ProbeName != null) ProbeName.asXml(output,"ProbeName");
-      if (SiteName != null) SiteName.asXml(output,"SiteName");
-
       if (UniqueID != null) UniqueID.asXml(output,"UniqueID");
       if (VO != null) VO.asXml(output,"VO");
       if (Timestamp != null) Timestamp.asXml(output,"Timestamp");

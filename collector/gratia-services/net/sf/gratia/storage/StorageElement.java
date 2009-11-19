@@ -92,9 +92,6 @@ public class StorageElement extends Record
       if (!formd5) { 
          if (RecordIdentity != null) RecordIdentity.asXml(output);
       }
-      if (ProbeName != null) ProbeName.asXml(output,"ProbeName");
-      if (SiteName != null) SiteName.asXml(output,"SiteName");
-
       if (UniqueID != null) UniqueID.asXml(output,"UniqueID");
       if (SE != null) SE.asXml(output,"SE");
       if (Name != null) Name.asXml(output,"Name");
