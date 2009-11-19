@@ -393,7 +393,7 @@ foreach my $config_name (@instance_list) {
   my $instance_name = $collector_config->{instance_name} || $config_name;
 
   # Maybe print requested config information and exit
-  maybe_print_config_info($instance_name, $config_name, $collector_config) and exit(1);
+  maybe_print_config_info($instance_name, $config_name, $collector_config) and exit(0);
 
   # Check and (maybe) override remote_host setting
   verify_remote_host_setting($instance_name, $config_name, $collector_config);
