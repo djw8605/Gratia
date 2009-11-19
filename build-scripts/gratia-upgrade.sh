@@ -439,8 +439,8 @@ function start_collector {
 $(ps -ef |grep -e 'catalina\.\(base\|home\)='$tomcat_dir/$tomcat |grep '   1 ' |egrep -v grep 2>/dev/null)
 "
   logit
-  logit "... sleeping 20 seconds to allow tomcat to deploy war files"
-  sleep 20
+  logit "... sleeping 25 seconds to allow tomcat to deploy war files"
+  sleep 25
   verify_upgrade
 }
 #-----------------------
@@ -626,7 +626,7 @@ Disclaimer: This is the closest one can do for this type of validation.
 
   #--- check the ports ---
   maxtries=6
-  sleep=20
+  sleep=25
   try=1
   while 
     [ $try -lt $maxtries ]
