@@ -45,6 +45,7 @@ public class ReplicationTable extends HttpServlet {
                       Pattern.MULTILINE + Pattern.DOTALL);
    Pattern fUpdateButtonPattern = Pattern.compile("update:(\\d+)");
    Pattern fCancelButtonPattern = Pattern.compile("cancel:(\\d+)");
+   Pattern fTableFinder = Pattern.compile("(?:(?:Compute|Storage)Element(?:Record)?|Subcluster)");
    Matcher fMatcher = null;
    
    //
@@ -537,9 +538,15 @@ public class ReplicationTable extends HttpServlet {
       try {
          session = HibernateWrapper.getCheckedSession();
          Transaction tx = session.beginTransaction();
+         String pTable;
+         if (fTableFinder.matcher(RecordTable).matches()) {
+            pTable = RecordTable;
+         } else {
+            pTable = RecordTable + "_Meta";
+         }
          Query q =
             session.createSQLQuery("select distinct ProbeName from " +
-                                   RecordTable + "_Meta order by ProbeName");
+                                   pTable + " order by ProbeName");
          for (Object probeName : q.list()) {
             probelist.add("Probe:" + (String) probeName);
          }

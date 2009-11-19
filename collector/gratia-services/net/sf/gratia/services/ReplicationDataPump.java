@@ -8,6 +8,7 @@ import net.sf.gratia.util.Configuration;
 
 import net.sf.gratia.util.Logging;
 import net.sf.gratia.util.LogLevel;
+import java.util.regex.Pattern;
 
 import java.math.BigInteger;
 import java.util.*;
@@ -29,7 +30,8 @@ public class ReplicationDataPump extends Thread {
    private static final char cr = '\n';
    private static final int default_bundle_size = 10;
    private static final double maxBundleDataSize = 0.9*2*1000*1000;
-
+   private static Pattern tableFinder =
+      Pattern.compile("(?:(?:Compute|Storage)Element(?:Record)?|Subcluster)");
    // Class attributes
    private Properties p;
    private int replicationId;
@@ -171,7 +173,12 @@ public class ReplicationDataPump extends Thread {
          // create base retrieval
          //
          String table = replicationEntry.getrecordtable();
-         String tables = table + "_Meta M";
+         String tables;
+         if (tableFinder.matcher(table).matches()) {
+            tables = table + " M";
+         } else {
+            tables = table + "_Meta M";
+         }
          String where = "M.dbid > " + replicationEntry.getdbid();
          String probename = replicationEntry.getprobename();
          if (probename.startsWith("VO:")) {
