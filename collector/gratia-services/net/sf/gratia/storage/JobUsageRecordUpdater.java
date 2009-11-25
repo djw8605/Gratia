@@ -50,8 +50,12 @@ public abstract class JobUsageRecordUpdater implements RecordUpdater {
          String[] splits = probeName.toLowerCase().split(":");
          
          if (type != null) {
-            if (splits[0].equals("glexec")) {
-               type.setValue("Glexec");
+            String resourceType = type.getValue();
+            if (resourceType.equalsIgnoreCase("glexec") ||
+                (splits[0].equalsIgnoreCase("glexec") &&
+                 ! resourceType.equals("BatchPilot"))) {
+               // Correct obsolete value.
+               type.setValue("BatchPilot");
             }
             return true;
          }
@@ -64,9 +68,9 @@ public abstract class JobUsageRecordUpdater implements RecordUpdater {
                     splits[0].equals("daily")) {
             type = new StringElement();
             type.setValue("Batch");
-         } else if (splits[0].equals("glexec")) {
+         } else if (splits[0].equalsIgnoreCase("glexec")) {
             type = new StringElement();
-            type.setValue("Glexec");
+            type.setValue("BatchPilot");
          } else if (splits[0].equals("dcache")) {
             type = new StringElement();
             type.setValue("Storage");
