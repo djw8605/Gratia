@@ -822,34 +822,12 @@ def CMSProdData(begin,end):
 
 def GetSiteVOEfficiency(begin,end):
     schema = gDBSchema[mainDB] + ".";
-
-    select = """\
-            select SiteName, lcase(VOName), sum(Njobs),sum(WallDuration),sum(CpuUserDuration+CpuSystemDuration)/sum(WallDuration) 
-            from """+schema+"""VOProbeSummary, """+schema+"""Site, """+schema+"""Probe
-            where VOName != \"unknown\" and VOName != \"other\" and
-               Probe.siteid = Site.siteid and VOProbeSummary.ProbeName = Probe.probename and 
-               EndTime >= \"""" + DateToString(begin) + """\" and
-               EndTime < \"""" + DateToString(end) + """\"
-            group by Site.SiteName, lcase(VOName)
-            """
-    #print "Query = " + select;
-
+    select = "select SiteName, lcase(VO.VOName), sum(Njobs),sum(WallDuration),round(sum(CpuUserDuration+CpuSystemDuration)/sum(WallDuration),2) as CpuToWall, Cores, round(sum(CpuUserDuration+CpuSystemDuration)/(sum(WallDuration)*Cores),2)*100 as eff from " + schema + "MasterSummaryData MSD, " + schema + "Site, " + schema + "Probe, VONameCorrection VC, VO where VO.VOName != \"unknown\" and VO.VOName != \"other\" and Probe.siteid = Site.siteid and MSD.ProbeName = Probe.probename and MSD.VOcorrid = VC.corrid and VC.VOid = VO.VOid and EndTime >= \"" + DateToString(begin) + "\" and EndTime < \"" + DateToString(end) + "\" group by Site.SiteName, lcase(VO.VOName),Cores"
     return RunQueryAndSplit(select);    
 
 def GetVOEfficiency(begin,end):
     schema = gDBSchema[mainDB] + ".";
-
-    select = """\
-            select lcase(VOName), sum(Njobs),sum(WallDuration),sum(CpuUserDuration+CpuSystemDuration)/sum(WallDuration) 
-            from """+schema+"""VOProbeSummary, """+schema+"""Site, """+schema+"""Probe
-            where VOName != \"unknown\"  and VOName != \"other\" and
-               Probe.siteid = Site.siteid and VOProbeSummary.ProbeName = Probe.probename and 
-               EndTime >= \"""" + DateToString(begin) + """\" and
-               EndTime < \"""" + DateToString(end) + """\"
-            group by lcase(VOName)
-            """
-    #print "Query = " + select;
-
+    select = "select lcase(VO.VOName), sum(Njobs),sum(WallDuration),round(sum(CpuUserDuration+CpuSystemDuration)/sum(WallDuration),2) as CpuToWall, Cores, round(sum(CpuUserDuration+CpuSystemDuration)/(sum(WallDuration)*Cores),2)*100 as eff from " + schema + "MasterSummaryData MSD, " + schema + "Site, " + schema + "Probe, VONameCorrection VC, VO where VO.VOName != \"unknown\" and VO.VOName != \"other\" and Probe.siteid = Site.siteid and MSD.ProbeName = Probe.probename and MSD.VOcorrid = VC.corrid and VC.VOid = VO.VOid and EndTime >= \"" + DateToString(begin) + "\" and EndTime < \"" + DateToString(end) + "\" group by lcase(VO.VOName),Cores"
     return RunQueryAndSplit(select);    
 
 def PrintHeader():
@@ -1926,25 +1904,32 @@ Only jobs that last 7 days or longer are counted in this report.
 
 class RangeSiteVOEfficiencyConf(GenericConf):
         title = """\
-OSG efficiency summary for  %s - %s (midnight UTC - midnight UTC)
+OSG efficiency summary by Site & VO for  %s - %s (midnight UTC - midnight UTC)
 including all jobs that finished in that time period.
-Wall Duration is expressed in hours and rounded to the nearest hour. Wall
+Wall Duration (Wall) is expressed in hours and rounded to the nearest hour. Wall
 Duration is the duration between the instant the job started running
 and the instant the job ended its execution.
 Deltas are the differences with the previous period."""
         headline = "For all jobs finished between %s and %s (midnight UTC)"
-        headers = ("Site", "VO","# of Jobs","Wall Dur.","Cpu / Wall","Delta")
+        headers = ("#","Site", "VO","Cores","Njobs","Delta","Wall","Delta","CpuToWall","Delta","%Effi","Delta")
         num_header = 2
         formats = {}
+        formats1 = {}
         lines = {}
         totalheaders = ["All sites","All VOs"]
         defaultSort = True
+        type = "site_vo"
 
         def __init__(self, header = False):
-           self.formats["csv"] = ",\"%s\",\"%s\",%s,%s,%s,\"%s\"  "
-           self.formats["text"] = "| %-22s | %-14s | %9s | %9s | %10s | %10s"
+           self.formats["csv"] = "\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""
+           self.formats1["csv"] = "\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""
+           self.formats["text"] = " %4s. | %-22s | %-15s | %9s | %9s | %9s | %9s | %10s | %10s | %9s | %5s | %5s"
+           self.formats1["text"] = " %4s. | %-22s | %-15s | %9s | %9s | %9s | %9s | %10s | %10s | %9.2f | %5s | %5s"
+           self.formats["html"] = " <tr bgcolor=white><td>%s. </td><td> %s </td><td> %s </td><td align=right> %s </td><td align=right> %s </td><td align=right> %s </td><td align=right> %s </td><td align=right> %s </td><td align=right> %s </td><td align=right> %s </td><td align=right> %s </td><td align=right> %s </td></tr>"
+           self.formats1["html"] = " <tr bgcolor=white><td>%s. </td><td> %s </td><td> %s </td><td align=right> %s </td><td align=right> %s </td><td align=right> %s </td><td align=right> %s </td><td align=right> %s </td><td align=right> %s </td><td align=right> %9.2f </td><td align=right> %s </td><td align=right> %s </td></tr>"
            self.lines["csv"] = ""
-           self.lines["text"] = "-------------------------------------------------------------------------------------------------"
+           self.lines["text"] = "---------------------------------------------------------------------------------------------------------------------------------------------------------"
+           self.lines["html"] = ""
 
            if (not header) :  self.title = ""
 
@@ -1953,25 +1938,34 @@ Deltas are the differences with the previous period."""
 
 class RangeVOEfficiencyConf(GenericConf):
         title = """\
-OSG efficiency summary for  %s - %s (midnight UTC - midnight UTC)
+OSG efficiency summary by VO for  %s - %s (midnight UTC - midnight UTC)
 including all jobs that finished in that time period.
-Wall Duration is expressed in hours and rounded to the nearest hour. Wall
+Wall Duration (Wall) is expressed in hours and rounded to the nearest hour. Wall
 Duration is the duration between the instant the job started running
 and the instant the job ended its execution.
 Deltas are the differences with the previous period."""
         headline = "For all jobs finished between %s and %s (midnight UTC)"
-        headers = ("VO","# of Jobs","Wall Dur.","Cpu / Wall","Delta")
+        headers = ("#","VO","Cores","Njobs","Delta","Wall","Delta","CpuToWall","Delta","%Effi","Delta")
         num_header = 1
         formats = {}
+        formats1 = {}
         lines = {}
         totalheaders = ["All VOs"]
         defaultSort = True
+        type = "vo"
 
         def __init__(self, header = False):
-           self.formats["csv"] = ",\"%s\",%s,%s,%s,\"%s\"  "
-           self.formats["text"] = "| %-14s | %9s | %9s | %10s | %10s"
+           self.formats["csv"] = "\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""
+           self.formats1["csv"] = "\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""
+           self.formats["text"] = " %4s. | %-15s | %9s | %9s | %9s | %9s | %10s | %10s | %9s | %5s | %5s"
+           self.formats1["text"] = " %4s. | %-15s | %9s | %9s | %9s | %9s | %10s | %10s | %9.2f | %5s | %5s"
+           self.formats["html"] = " <tr bgcolor=white><td>%s. </td><td> %s </td><td align=right> %s </td><td align=right> %s </td><td align=right> %s </td><td align=right> %s </td><td align=right> %s </td><td align=right> %s </td><td align=right> %s </td><td align=right> %s </td><td align=right> %s </td></tr>"
+           self.formats1["html"] = " <tr bgcolor=white><td>%s. </td><td> %s </td><td align=right> %s </td><td align=right> %s </td><td align=right> %s </td><td align=right> %s </td><td align=right> %s </td><td align=right> %s </td><td align=right> %9.2f </td><td align=right> %s </td><td align=right> %s </td></tr>"
+
+
            self.lines["csv"] = ""
-           self.lines["text"] = "------------------------------------------------------------------------"
+           self.lines["text"] = "---------------------------------------------------------------------------------------------------------------------------------"
+           self.lines["html"] = ""
 
            if (not header) :  self.title = ""
 
@@ -2229,208 +2223,211 @@ def GenericRange(what, range_end = datetime.date.today(),
         print what.lines[output]
     return result
 
-def EfficiencyRange(what, range_end = datetime.date.today(),
+def EfficiencyRangeBySiteVO(what, range_end = datetime.date.today(),
                  range_begin = None,
                  output = "text"):
-    factor = 3600  # Convert number of seconds to number of hours
 
     if (not range_begin or range_begin == None): range_begin = range_end + datetime.timedelta(days=-1)
     if (not range_end or range_end == None): range_end = range_begin + datetime.timedelta(days=+1)
     timediff = range_end - range_begin
+    out = ""
 
     if (output != "None") :
         if (what.title != "") :
-            print what.title % ( DateToString(range_begin,False),
-                                 DateToString(range_end,False) )
+            out+= what.title % ( DateToString(range_begin,False), DateToString(range_end,False) ) + "\n"
         if (what.headline != "") :
-            print what.headline % ( DateToString(range_begin,False),
-                                    DateToString(range_end,False) )
-        print what.lines[output]
-        print "    ", what.formats[output] % what.headers
-        print what.lines[output]
-        
-    # First get the previous' range-length's information
-    totalwall = 0
-    totaljobs = 0
-    totaleff = 0
-    nrecords = 0
-    oldValues = {}
-    result = []
+            out+= what.headline % ( DateToString(range_begin,False), DateToString(range_end,False) ) + "\n"
+        out+= what.lines[output] + "\n"
+        if(output == "html"):
+            out+="<table bgcolor=black cellspacing=1 cellpadding=5>"
+        out+= what.formats[output] % what.headers + "\n"
+        out+= what.lines[output] + "\n"
 
-    start = range_begin - timediff
-    end = range_end - timediff
-    lines = what.GetData(start,end)
-    for i in range (0,len(lines)):
-        val = lines[i].split('\t')
-        offset = 0
-        site = val[0]
-        if what.headers[0] == "VO":
-            # "site" is really "VO": hack to harmonize Panda output
-            if site != "unknown": site = string.lower(site)
-            if site == "atlas": site = "usatlas"
-        key = site
-        vo = ""
+        data = what.GetData(range_begin,range_end)
+        data_prev = what.GetData(range_begin - timediff,range_end - timediff)
 
-        num_header = what.num_header;
-        offset = num_header - 1;
+        count = 0
+        njobs_sum = 0 
+        delta_njobs_sum = 0 
+        wall_sum = 0 
+        delta_wall_sum = 0 
+        cpuToWall_sum = 0 
+        delta_cpuToWall_sum = 0 
+        eff_sum = 0
+        delta_eff_sum = 0
 
-        if (num_header==2):
-           if (len(val)==4) :
-              # Nasty hack to harmonize Panda output
-              if what.headers[1] == "VO":
-                 if vo != "unknown": vo = string.lower(val[1])
-                 if vo == "atlas": vo = "usatlas"
-              else:
-		           vo = val[1]
-              key = site + " " + vo
-           else:
-              vo = val[1]
-              key = site + " " + vo
+        njobs = {} 
+        wall = {} 
+        cpuToWall = {} 
+        eff = {}
 
-        njobs= int( val[offset+1] )
-        wall = float( val[offset+2] ) / factor
-        if (wall != 0) :
-            eff = float( val[offset+3] )
-        else:
-            eff = -1
-        nrecords = nrecords + 1
-        totalwall = totalwall + wall
-        totaljobs = totaljobs + njobs
-        totaleff = totaleff + eff
-        if (oldValues.has_key(key)):
-            print "Error: can not add efficiencies"
-            print key
-            print oldValues[key]
-            print [njobs,wall,eff,site,vo]
-        else:
-            oldValues[key] = [njobs,wall,eff,site,vo]
+        for i in range(0,len(data)):
+            col = data[i].split('\t')
+            site = col[0]
+            vo = col[1]
+            cores = col[5]
+            key = site + "~" + vo + "~" + str(cores) 
+            njobs[key] = int(col[2])
+            wall[key] = float(col[3])/3600
+            cpuToWall[key] = col[4]
+            eff[key] = col[6].split('.')[0]
 
-    [totaljobs,totalwall,totaleff] = GetTotals(start,end)
-    totaljobs = int(totaljobs);
-    totalwall = float(totalwall) /factor
-    totaleff = float(totaleff)
+        for i in range(0,len(data_prev)):
+            col_prev = data_prev[i].split('\t')
+            site_prev = col_prev[0]
+            vo_prev = col_prev[1]
+            cores_prev = col_prev[5]
+            key = site_prev + "~" + vo_prev + "~" + str(cores_prev) + "~prev"
+            njobs[key] = col_prev[2]
+            wall[key] = float(col_prev[3])/3600
+            cpuToWall[key] = col_prev[4]
+            eff[key] = col_prev[6].split('.')[0]
 
-    oldValues["total"] = (totaljobs, totalwall, totaleff, "total","")
+        for k in sorted(njobs.iterkeys()):
+            if(re.compile("~prev$").search(k) == None):
+                count+=1
+                prev_k = k + "~prev"
+                site,vo,cores = k.split('~')
+                if prev_k not in njobs:
+                    delta_njobs = njobs[k]
+                    delta_wall = wall[k]
+                    delta_cpuToWall = cpuToWall[k]
+                    delta_eff = eff[k]
+                else:
+                    delta_njobs = int(njobs[k]) - int(njobs[prev_k])
+                    delta_wall = wall[k] - wall[prev_k]
+                    if(cpuToWall[k] != "NULL" and cpuToWall[prev_k] != "NULL"):
+                        delta_cpuToWall = float(cpuToWall[k]) - float(cpuToWall[prev_k])
+                        delta_eff = float(eff[k]) - float(eff[prev_k])
+                    else:
+                        delta_cpuToWall = "n/a"
+                        delta_eff = "n/a"
+                njobs_sum+= int(njobs[k])
+                delta_njobs_sum+= int(delta_njobs)
+                wall_sum+= int(wall[k])
+                delta_wall_sum+= int(delta_wall) 
+                if(cpuToWall[k] != "NULL"):
+                    cpuToWall_sum+= float(cpuToWall[k]) 
+                    if(delta_cpuToWall != "n/a"):
+                        delta_cpuToWall_sum+= float(delta_cpuToWall)
+                        delta_eff_sum+= float(delta_eff)
+                    eff_sum+= float(eff[k])
+                if(delta_cpuToWall != 'n/a' and delta_cpuToWall != 'NULL'):
+                    if(wall[k] < 1):
+                        out+= what.formats1[output] % (count,site,vo,cores,niceNum(int(njobs[k])),niceNum(int(delta_njobs)),niceNum(float(wall[k]),.1),niceNum(int(delta_wall)),cpuToWall[k],float(delta_cpuToWall),niceNum(int(eff[k])),niceNum(int(delta_eff))) + "\n"
+                    else:
+                        out+= what.formats1[output] % (count,site,vo,cores,niceNum(int(njobs[k])),niceNum(int(delta_njobs)),niceNum(int(wall[k])),niceNum(int(delta_wall)),cpuToWall[k],float(delta_cpuToWall),niceNum(int(eff[k])),niceNum(int(delta_eff))) + "\n"
 
-    # Then getting the current information and print it
-    totalwall = 0
-    totaljobs = 0
-    totaleff = 0
-    nrecords = 0
-    start = range_begin
-    end = range_end
-    lines = what.GetData(start,end)
-    num_header = 1;
-    index = 0
-    printValues = {}
-    for i in range (0,len(lines)):
-        val = lines[i].split('\t')
-        site = val[0]
-        if what.headers[0] == "VO":
-            # "site" is really "VO": hack to harmonize Panda output
-            if site != "unknown": site = string.lower(site)
-            if site == "atlas": site = "usatlas"
-        key = site
-        offset = 0
+        cpuToWall_avg = float(cpuToWall_sum)/count
+        eff_avg = int(eff_sum)/count
+        out+= what.lines[output] + "\n"
+        out+= what.formats1[output] % ("","All sites","All VOs","All Cores",niceNum(int(njobs_sum)),niceNum(int(delta_njobs_sum)),niceNum(int(wall_sum)),niceNum(int(delta_wall_sum)),niceNum(float(cpuToWall_avg),2),delta_cpuToWall_sum/count,eff_avg,niceNum(int(delta_eff_sum/count))) + "\n"
+        out+= what.lines[output] + "\n"
+        if(output == "html"):
+            out+="</table>"
+        return out
 
-        num_header = what.num_header;
-        offset = num_header - 1;
-        
-        if (num_header==2):
-           if (len(val)==4):
-              # Nasty hack to harmonize Panda output
-              if what.headers[1] == "VO":
-                 if vo != "unknown": vo = string.lower(val[1])
-                 if vo == "atlas": vo = "usatlas"
-              else:
-		           vo = val[1]
-              key = site + " " + vo
-           else:
-              vo = val[1]
-              key = site + " " + vo
+def EfficiencyRangeByVO(what, range_end = datetime.date.today(),
+                 range_begin = None,
+                 output = "text"):
 
-        (oldnjobs,oldwall,oldeff) = (0,0,0)
-        if oldValues.has_key(key):
-            (oldnjobs,oldwall,oldeff,s,v) = oldValues[key]
-            del oldValues[key]
-        njobs= int( val[offset+1] )
-        wall = float( val[offset+2] ) / factor
-        if (wall != 0) :
-            eff = float( val[offset+3] )
-        else:
-            eff = -1
-        totalwall = totalwall + wall
-        totaljobs = totaljobs + njobs
-        totaleff = totaleff + eff
-        nrecords = nrecords + 1
-        if printValues.has_key(key):
-            print "Error: can not add efficiencies"
-            print key
-            print printValues[key]
-            print [njobs,wall,oldwall,eff,site,vo]
-        else:
-            printValues[key] = [njobs,wall,oldwall,eff,oldeff,site,vo]
-                
-    for key,(oldnjobs,oldwall,oldeff,site,vo) in oldValues.iteritems():            
-        if (key != "total") :
-            printValues[key] = (0,0,oldwall,0,oldeff,site,vo)
+    if (not range_begin or range_begin == None): range_begin = range_end + datetime.timedelta(days=-1)
+    if (not range_end or range_end == None): range_end = range_begin + datetime.timedelta(days=+1)
+    timediff = range_end - range_begin
+    out = ""
 
-    if (what.defaultSort):
-        sortedValues = sortedDictValues(printValues)
-    else:
-        sortedValues = sortedDictValuesFunc(printValues,what.Sorting)
-        
-    for key,(njobs,wall,oldwall,eff,oldeff,site,vo) in sortedValues:
-        index = index + 1;
-        if (eff==-1) : 
-           effstring = "n/a"
-           oldeffstring = niceNum(oldeff*100.0,0.1)
-        else: 
-           effstring = niceNum(eff*100.0,0.1)
-           if (oldeff == - 1 or oldwall < 0.1): 
-              oldeffstring = "n/a"
-           else:
-              oldeffstring = niceNum((eff-oldeff)*100.0,1)
-        if (wall < 0.1):
-           wallstring = "0.0"
-           effstring = "n/a"
-        elif (wall < 1):
-           wallstring = niceNum( wall, 0.1)
-        else:
-           wallstring = niceNum( wall )
-        if (num_header == 2) :
-            values = (site,vo,niceNum(njobs), wallstring,
-                      effstring,oldeffstring)
-        else:
-            values = (site,niceNum(njobs), wallstring,
-                      effstring,oldeffstring)
-        if (output != "None") :
-            #print index
-            #print values
-            print "%3d " %(index), what.formats[output] % values
-        result.append(values)       
-        
-        
-    [totaljobs,totalwall,totaleff] = GetTotals(range_begin,range_end)
-    totaljobs = int(totaljobs);
-    totalwall = float(totalwall) /factor
-    totaleff = float(totaleff)
-
-    (oldnjobs,oldwall,oldeff,s,v) = oldValues["total"]
     if (output != "None") :
-        print what.lines[output]
-        if (num_header == 2) :
-            print "    ", what.formats[output] % \
-                  (what.totalheaders[0], what.totalheaders[1], niceNum(totaljobs),
-                   niceNum(totalwall), niceNum( totaleff * 100.0, 0.1 ),
-                   niceNum( 100.0* (totaleff- oldeff), 0.1 ) )
-        else:
-            print "    ", what.formats[output] % \
-                  (what.totalheaders[0], niceNum(totaljobs), niceNum(totalwall),
-                    niceNum( totaleff / nrecords * 100.0 ),
-                   niceNum( 100.0* (totaleff - oldeff) ))
-        print what.lines[output]
-    return result
+        if (what.title != "") :
+            out+= what.title % ( DateToString(range_begin,False), DateToString(range_end,False) ) + "\n"
+        if (what.headline != "") :
+            out+= what.headline % ( DateToString(range_begin,False), DateToString(range_end,False) ) + "\n"
+        out+= what.lines[output] + "\n"
+        if(output == "html"):
+            out+="<table bgcolor=black cellspacing=1 cellpadding=5>"
+        out+= what.formats[output] % what.headers + "\n"
+        out+= what.lines[output] + "\n"
+
+        data = what.GetData(range_begin,range_end)
+        data_prev = what.GetData(range_begin - timediff,range_end - timediff)
+
+        count = 0
+        njobs_sum = 0 
+        delta_njobs_sum = 0 
+        wall_sum = 0 
+        delta_wall_sum = 0 
+        cpuToWall_sum = 0 
+        delta_cpuToWall_sum = 0 
+        eff_sum = 0
+        delta_eff_sum = 0
+
+        njobs = {} 
+        wall = {} 
+        cpuToWall = {} 
+        eff = {}
+
+        for i in range(0,len(data)):
+            col = data[i].split('\t')
+            vo = col[0]
+            cores = col[4]
+            key = vo + "~" + str(cores) 
+            njobs[key] = int(col[1])
+            wall[key] = float(col[2])/3600
+            cpuToWall[key] = col[3]
+            eff[key] = col[5].split('.')[0]
+
+        for i in range(0,len(data_prev)):
+            col_prev = data_prev[i].split('\t')
+            vo_prev = col_prev[0]
+            cores_prev = col_prev[4]
+            key = vo_prev + "~" + str(cores_prev) + "~prev"
+            njobs[key] = col_prev[1]
+            wall[key] = float(col_prev[2])/3600
+            cpuToWall[key] = col_prev[3]
+            eff[key] = col_prev[5].split('.')[0]
+
+        for k in sorted(njobs.iterkeys()):
+            if(re.compile("~prev$").search(k) == None):
+                count+=1
+                prev_k = k + "~prev"
+                vo,cores = k.split('~')
+                if prev_k not in njobs:
+                    delta_njobs = njobs[k]
+                    delta_wall = wall[k]
+                    delta_cpuToWall = cpuToWall[k]
+                    delta_eff = eff[k]
+                else:
+                    delta_njobs = int(njobs[k]) - int(njobs[prev_k])
+                    delta_wall = wall[k] - wall[prev_k]
+                    if(cpuToWall[k] != "NULL" and cpuToWall[prev_k] != "NULL"):
+                        delta_cpuToWall = float(cpuToWall[k]) - float(cpuToWall[prev_k])
+                        delta_eff = float(eff[k]) - float(eff[prev_k])
+                    else:
+                        delta_cpuToWall = "n/a"
+                        delta_eff = "n/a"
+                njobs_sum+= int(njobs[k])
+                delta_njobs_sum+= int(delta_njobs)
+                wall_sum+= int(wall[k])
+                delta_wall_sum+= int(delta_wall) 
+                if(cpuToWall[k] != "NULL"):
+                    cpuToWall_sum+= float(cpuToWall[k]) 
+                    if(delta_cpuToWall != "n/a"):
+                        delta_cpuToWall_sum+= float(delta_cpuToWall)
+                        delta_eff_sum+= float(delta_eff)
+                    eff_sum+= float(eff[k])
+                if(delta_cpuToWall != 'n/a' and delta_cpuToWall != 'NULL'):
+                    if(wall[k] < 1):
+                        out+= what.formats1[output] % (count,vo,cores,niceNum(int(njobs[k])),niceNum(int(delta_njobs)),niceNum(float(wall[k]),.1),niceNum(int(delta_wall)),cpuToWall[k],float(delta_cpuToWall),niceNum(int(eff[k])),niceNum(int(delta_eff))) + "\n"
+                    else:
+                        out+= what.formats1[output] % (count,vo,cores,niceNum(int(njobs[k])),niceNum(int(delta_njobs)),niceNum(int(wall[k])),niceNum(int(delta_wall)),cpuToWall[k],float(delta_cpuToWall),niceNum(int(eff[k])),niceNum(int(delta_eff))) + "\n"
+
+        cpuToWall_avg = float(cpuToWall_sum/count)
+        eff_avg = int(eff_sum)/count
+        out+= what.lines[output] + "\n"
+        out+= what.formats1[output] % ("","All VOs","All Cores",niceNum(int(njobs_sum)),niceNum(int(delta_njobs_sum)),niceNum(int(wall_sum)),niceNum(int(delta_wall_sum)),niceNum(float(cpuToWall_avg),2),delta_cpuToWall_sum/count,eff_avg,niceNum(int(delta_eff_sum/count))) + "\n"
+        out+= what.lines[output] + "\n"
+        if(output == "html"):
+            out+="</table>"
+        return out
 
 def EfficiencyGraded(what, range_end = datetime.date.today(),
                      output = "text"):
