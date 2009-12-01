@@ -3327,7 +3327,7 @@ def SoftwareVersion(range_end = datetime.date.today(),
    lines = conf.GetData(range_begin,range_end)
    values  = {}
 
-   exceptionSites = ['AGLT2_CE_2','BNL-LCG2','BNL_ATLAS_1', 'BNL_ATLAS_2','FNAL_GPGRID_2','USCMS-FNAL-XEN','USCMS-FNAL-WC1-CE2', 'USCMS-FNAL-WC1-CE3', 'USCMS-FNAL-WC1-CE4', 'BNL_LOCAL', 'BNL_OSG', 'BNL_PANDA', 'GLOW-CMS', 'UCSDT2-B', 'Purdue-Lear' ]
+   exceptionSites = ['AGLT2_CE_2','BNL-LCG2','BNL_ATLAS_1', 'BNL_ATLAS_2','USCMS-FNAL-XEN','USCMS-FNAL-WC1-CE2', 'USCMS-FNAL-WC1-CE3', 'USCMS-FNAL-WC1-CE4', 'BNL_LOCAL', 'BNL_OSG', 'BNL_PANDA', 'GLOW-CMS', 'UCSDT2-B', 'Purdue-Lear' ]
    #exceptionSites = ['BNL_ATLAS_2', 'USCMS-FNAL-WC1-CE2', 'USCMS-FNAL-WC1-CE3', 'USCMS-FNAL-WC1-CE4', 'Generic Site', 'BNL_LOCAL', 'BNL_OSG', 'BNL_PANDA', 'GLOW-CMS', 'UCSDT2-B']
    sites = [name for name in GetListOfOSGSites()  if name not in exceptionSites]
    reportingSites = GetListOfReportingSites(range_begin,range_end);
@@ -3363,7 +3363,7 @@ def SoftwareVersion(range_end = datetime.date.today(),
          continue
       site = row[0]
       probe= row[1]
-      
+
       if (values.has_key(site)):
          current = values[site]
          if (current.has_key(probe)):
