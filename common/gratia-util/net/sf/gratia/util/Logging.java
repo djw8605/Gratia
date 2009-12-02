@@ -31,7 +31,7 @@ public class Logging {
         String path = p.getProperty("service." + logDomain + ".logfile" , "/logs/gratia-" + logDomain + ".log");
         String maxSize = p.getProperty("service." + logDomain + ".maxlog" , "10000000");
         String useConsole = p.getProperty("service." + logDomain + ".console", "0");
-        String level = p.getProperty("service." + logDomain + ".level" , "FINEST");
+        String level = p.getProperty("service." + logDomain + ".level" , "INFO");
         String sNumLogFiles = p.getProperty("service." + logDomain + ".numLogs" , "30");
 
         Logging.logDomain = logDomain;
