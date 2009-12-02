@@ -383,7 +383,7 @@ function install_upgrade {
   if [[ -n "$jre_dir" ]]; then
     jre_opt=" -j "
   fi
-  runit $pgm $ugl_config_arg-p ${tomcat_dir} -d "$pswd"$jre_opt$jre_dir -S $source ${install_tomcat_arg}${force}-s -C $config_name $(echo $tomcat|cut -d'-' -f2-)
+  runit $pgm $ugl_config_arg-p ${tomcat_dir} -d "\"$pswd\""$jre_opt$jre_dir -S $source ${install_tomcat_arg}${force}-s -C $config_name $(echo $tomcat|cut -d'-' -f2-)
   logit "Install was successful"
   sleep 3
 }
