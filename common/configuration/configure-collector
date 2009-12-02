@@ -29,7 +29,6 @@ my @reporting_wars = qw(reporting reports);
 my @required_attributes =
   (
    'http_port',
-   'ssl_port',
    'rmi_port',
    'db_schema',
    'UserConfig',
@@ -140,7 +139,7 @@ TOMCAT_INSTANCE_NAME=`basename "$0" | sed -e 's/^.*\(tomcat-.*\)$/\1/'`
 CATALINA_HOME="${TOMCAT_PATH_STEM}/${TOMCAT_INSTANCE_NAME}"; export CATALINA_HOME
 CATALINA_PID=/var/run/catalina.pid
 CATALINA_TMPDIR=/tmp
-
+[[ -n "${TOMCAT_SSL_PORT}" ]] && TOMCAT_SSL_ARG="-Dssl_port=${TOMCAT_SSL_PORT} "
 [[ -n "${KRB5CCNAME}" ]] && KRB5CCNAME=`echo "${KRB5CCNAME}" | sed -e 's/^FILE://'`
 
 . /etc/init.d/functions
@@ -149,7 +148,7 @@ PATH="${PATH}:${JAVA_HOME}/bin" # Needed for SSL keytool
 
 function start {
   JAVA_OPTS="-server"; export JAVA_OPTS
-  CATALINA_OPTS="-Dsun.net.inetaddr.ttl=297 -Dcom.sun.management.jmxremote -Dssl.port=${TOMCAT_SSL_PORT} -Dcom.mchange.v2.c3p0.management.ManagementCoordinator=com.mchange.v2.c3p0.management.NullManagementCoordinator"; export CATALINA_OPTS
+  CATALINA_OPTS="-Dsun.net.inetaddr.ttl=297 -Dcom.sun.management.jmxremote ${TOMCAT_SSL_ARG}-Dcom.mchange.v2.c3p0.management.ManagementCoordinator=com.mchange.v2.c3p0.management.NullManagementCoordinator"; export CATALINA_OPTS
   if [[ -n "$JSVC" ]] && [[ -x "$JSVC" ]] && [[ -n "$TOMCAT_USER" ]]; then
     echo -n "Starting tomcat-gratia: "
     daemon --pidfile="$CATALINA_PID" "$JSVC" -user $TOMCAT_USER \
@@ -263,6 +262,10 @@ GetOptions(\%options, "java-home|j=s",
            "help|h|\?") or pod2usage(-exitval => 2);
 
 pod2usage(-exitval => 1, -verbose => 3) if $options{help};
+
+if ($options{"use-ssl"}) {
+  print STDERR "INFO: ignoring obsolete option use-ssl. SSL will be configured if ssl_port is specified in config\n";
+}
 
 unless (exists $options{"java-home"} or
         exists $options{"obtain-config-item"} or
@@ -536,7 +539,7 @@ sub configure_init_file {
   $init_script_txt =~ s&^(JAVA_HOME=).*$&${1}"$options{"java-home"}"&m;
   $init_script_txt =~ s&^(TOMCAT_HTTP_PORT=).*$&${1}$collector_config->{http_port}&m;
   $init_script_txt =~ s&^(TOMCAT_PATH_STEM=).*$&${1}"$options{prefix}"&m;
-  $init_script_txt =~ s&^(TOMCAT_SSL_PORT=).*$&${1}$collector_config->{ssl_port}&m;
+  $init_script_txt =~ s&^(TOMCAT_SSL_PORT=).*$&${1}$collector_config->{ssl_port}&m if $collector_config->{ssl_port};
   $init_script_txt =~ s&^(JSVC=).*$&${1}"$collector_config->{jsvc}"&m if $collector_config->{jsvc};
   $init_script_txt =~
     s&^(TOMCAT_USER=).*$&${1}$collector_config->{tomcat_user}&m
@@ -565,7 +568,7 @@ sub configure_collector_config {
   my $in_summary_comment;
   my $spaced_rmi_port = sprintf("%5d", $collector_config->{rmi_port});
   my $spaced_http_port = sprintf("%5d", $collector_config->{http_port});
-  my $spaced_ssl_port = sprintf("%5d", $collector_config->{ssl_port});
+  my $spaced_ssl_port = $collector_config->{ssl_port}?sprintf("%5d", $collector_config->{ssl_port}):" n/a";
   my $spaced_db_port = sprintf("%5d", $collector_config->{db_port});
 
   foreach my $config_name_attribute (sort keys %{$collector_config->{"properties.attributes"}}) {
@@ -764,10 +767,16 @@ sub configure_tomcat_config {
     <!-- Gratia connectors -->
     <Connector port="$collector_config->{http_port}" maxHttpHeaderSize="8192"
                maxThreads="150" minSpareThreads="25" maxSpareThreads="75"
-               enableLookups="false" redirectPort="$collector_config->{ssl_port}" acceptCount="100"
+               enableLookups="false"
+EOF
+        print REPORTING_CONFIG <<EOF if $collector_config->{ssl_port};
+               redirectPort="$collector_config->{ssl_port}"
+EOF
+        print REPORTING_CONFIG <<EOF;
+               acceptCount="100"
                connectionTimeout="20000" disableUploadTimeout="true" />
 EOF
-        print REPORTING_CONFIG <<EOF if $options{"use-ssl"};
+        print REPORTING_CONFIG <<EOF if $collector_config->{ssl_port};
     <Connector port="$collector_config->{ssl_port}"
                maxHttpHeaderSize="8192"
                maxThreads="150"
@@ -1013,7 +1022,6 @@ I<global-options>: B<-r> I<collector-host-name> | B<--remote-host> I<collector-h
                  B<-p> I<install-path-prefix> | B<--prefix> I<install-path-prefix> |
                  B<--db-root> I<db-root-pword> | B<-d> I<db-root-dir> |
                  B<--collector-info> I<collector-dat-file> | B<-c> I<collector-dat-file> |
-                 B<--use-ssl> | B<-s>
 
 Options marked with B<+> are repeatable and cumulative.
 
@@ -1059,14 +1067,6 @@ The directory above the tomcat instance (eg /scratch).
 
 
 The DB (not system) root password.
-
-
-=item B<-s>
-
-=item B<--use-ssl>
-
-
-Configure tomcat to open the SSL port (default is yes).
 
 
 =item B<--print-config>
