@@ -383,7 +383,7 @@ function install_upgrade {
   if [[ -n "$jre_dir" ]]; then
     jre_opt=" -j "
   fi
-  runit $pgm $ugl_config_arg-p ${tomcat_dir} -d $pswd$jre_opt$jre_dir -S $source ${install_tomcat_arg}${force}-s -C $config_name $(echo $tomcat|cut -d'-' -f2-)
+  runit $pgm $ugl_config_arg-p ${tomcat_dir} -d "$pswd"$jre_opt$jre_dir -S $source ${install_tomcat_arg}${force}-s -C $config_name $(echo $tomcat|cut -d'-' -f2-)
   logit "Install was successful"
   sleep 3
 }
@@ -587,7 +587,12 @@ by doing a wget on the gratia-release file:"
     logerr "Cannot find attribute ($property) in $properties_file"
   fi
   logit "    tomcat service: $service" 
-  gratia_release="$service/gratia-services/gratia-release"
+  local want_collector=`$source/common/configuration/configure-collector $cc_config_arg-p ${tomcat_dir} --obtain-config-item want_collector $config_name 2>/dev/null | sed -ne 's/^config: want_collector = //p'`
+  if (( ${want_collector:-1} )); then
+    gratia_release="$service/gratia-services/gratia-release"
+  else
+    gratia_release="$service/gratia-reporting/gratia-release"
+  fi
   release_file=$tomcat_dir/$tomcat.$(basename $gratia_release)
   logit "... checking access to $gratia_release"
   sleep 4
@@ -605,14 +610,26 @@ $(cat $release_file)
 #--------------------------------
 function verify_port_availability {
   delimit  verify_port_availability
+  (( expected_number_of_ports = 6 ))
   local jmx_port=`$source/common/configuration/configure-collector $cc_config_arg-p ${tomcat_dir} --obtain-config-item jmx_port $config_name 2>/dev/null | sed -ne 's/^config: jmx_port = //p'`
   if [[ -n "$jmx_port" ]]; then
-    expected_number_of_ports=6
     ppid_check="eq"
   else
-    expected_number_of_ports=5
+    # One less port to look for.
+    (( expected_number_of_ports -= 1 ))
     ppid_check="ne"
   fi
+  local ssl_port=`$source/common/configuration/configure-collector $cc_config_arg-p ${tomcat_dir} --obtain-config-item ssl_port $config_name 2>/dev/null | sed -ne 's/^config: ssl_port = //p'`
+  if [[ -z "$ssl_port" ]]; then
+    # One less port to look for
+    (( expected_number_of_ports -= 1 ))
+  fi
+  local want_collector=`$source/common/configuration/configure-collector $cc_config_arg-p ${tomcat_dir} --obtain-config-item want_collector $config_name 2>/dev/null | sed -ne 's/^config: want_collector = //p'`
+  if (( ${want_collector:-1} == 0 )); then
+    # No collector -> 2 less ports to look for.
+    (( expected_number_of_ports -= 2 ))
+  fi
+
   logit "
 Verifying that the tomcat process has $expected_number_of_ports ports it
 is listening on for this tomcat instance and all are by the same process.
