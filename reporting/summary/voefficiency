@@ -14,10 +14,13 @@ def main(argv=None):
 
     argOutput = AccountingReports.gOutput
 
-    AccountingReports.EfficiencyRange(AccountingReports.RangeVOEfficiencyConf(header = True),
-                              range_begin = AccountingReports.gBegin,
-                              range_end = AccountingReports.gEnd ,
-                              output=argOutput)
+    if (argOutput == "all"):
+       text = {}
+       for iterOutput in ("text","csv","html"):
+           text[iterOutput] = AccountingReports.EfficiencyRange(AccountingReports.RangeVOEfficiencyConf(header = True), range_begin = AccountingReports.gBegin, range_end = AccountingReports.gEnd , output=iterOutput)
+       AccountingReports.sendAll(text)
+    else:
+       print AccountingReports.EfficiencyRange(AccountingReports.RangeVOEfficiencyConf(header = True), range_begin = AccountingReports.gBegin, range_end = AccountingReports.gEnd , output=argOutput)
 
 
 if __name__ == "__main__":
