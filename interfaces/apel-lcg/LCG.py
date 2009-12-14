@@ -188,8 +188,16 @@
 #   the case where CommonName is "Generic XXX user", in which case
 #   DistinguishedName is blank).
 #
+# 12/14/09 (John Weigand)
+#   Added use of a new class (InactiveResources) to query MyOsg for Resource 
+#   that have been marked inactive.  This is used in conjunction with the 
+#   Downtimes class when checking why a site/resource has no data for a
+#   day.  Unfortunately, there is no MyOSG query that will give downtimes and
+#   active/inactive status.
+#
 ########################################################################
 import Downtimes
+import InactiveResources
 import traceback
 import exceptions
 import time
@@ -203,6 +211,7 @@ import smtplib, rfc822  # for email notifications via smtp
 import commands, os, sys, time, string
 
 downtimes          = Downtimes.Downtimes()
+inactives          = InactiveResources.InactiveResources()
 gVoOutput          = ""
 gUserOutput        = ""
 gUnknowns          = ""
@@ -1452,6 +1461,11 @@ def CheckForUnreportedDays(reportableVOs,reportableSites):
       could be valid.  There is no easy way to check for this however.
       So the best we can do is check for this condition and then manually
       validate by contacting the site admins.
+      On 12/10/09, another condition arose.  If a site goes inactive at 
+      anytime, then all downtimes for that site are never available in
+      MyOsg.  So, best we can do under those circumstances is 'pretend'
+      any missing days were after the site went inactive and not raise
+      any alarm.
   """
   global gSitesMissingData 
   global gMyOSG_available
@@ -1470,6 +1484,7 @@ def CheckForUnreportedDays(reportableVOs,reportableSites):
   Logit("Available dates: " + str(dateResults.split("\n"))) 
 
   #-- now checking for each site ---
+  missingDataList = []
   for site in sites:
     allDates = dateResults.split("\n")
     query = GetQueryForDaysReported(site,reportableVOs)
@@ -1487,15 +1502,21 @@ def CheckForUnreportedDays(reportableVOs,reportableSites):
     for i in range (0,len(reportedDates)):  
       allDates.remove(reportedDates[i])
     if  len(allDates) > 0: 
-      Logit(site + "  (missing days): " + str(allDates))
+      missingDataList.append("")
+      missingDataList.append(site + "  (missing days): " + str(allDates))
 
       #--- see if dowmtime for those days was scheduled ---
       if gMyOSG_available:
         try:
           shutdownDays = CheckForShutdownDays(site,allDates)
-          Logit(site + " (shutdown days): " + str(shutdownDays))
+          missingDataList.append(site + " (shutdown days): " + str(shutdownDays))
           for i in range (0,len(shutdownDays)):  
             allDates.remove(shutdownDays[i])
+          #--- see if the site is inactive ----
+          if  len(allDates) > daysMissing: 
+            if inactives.resource_is_inactive(site):
+              missingDataList.append(site + " is marked as inactive in MyOsg")
+              allDates = []  # this keeps it from being reported as missing data
         except Exception, e:
           allDates.append("WARNING: Unable to determine planned shutdowns - MyOSG error (" + str(sys.exc_info()[1]) +")" )
           gMyOSG_available = False   
@@ -1504,7 +1525,11 @@ def CheckForUnreportedDays(reportableVOs,reportableSites):
 
       #--- see if we have any missing days now ----
       if  len(allDates) > daysMissing: 
+        missingDataList.append(site + " is missing data for %d days" % len(allDates))
         gSitesMissingData[site] = allDates
+
+  #--- create html file of missing data ---
+  CreateMissingDaysHtml(missingDataList)
 
   #--- see if any need to be reported ---
   if len(gSitesMissingData) > 0:
@@ -1518,9 +1543,42 @@ def CheckForUnreportedDays(reportableVOs,reportableSites):
   Logit("--------- Missing data check complete -------")
 
 #-----------------------------------------
+def CreateMissingDaysHtml(missingData):
+  """ Creates an html file of those sites that are missing data for
+      any days during the period.
+  """
+  file = None
+  filename = ""
+  try:
+    filename = GetFileName("missingdays","html") 
+    Logit("Creating html file of sites with missing data: %s" % filename)
+    file = open(filename, 'w')  
+    file.write("<html>\n")
+    period = "%s-%s" % (gDateFilter[0:4],gDateFilter[5:7])
+    file.write("<title>Gratia - APEL/LCG Interface (Missing data for %s</title>\n" % period)
+    file.write("<head><h2><center><b>Gratia - APEL/LCG Interface<br/> (Missing data for %s)</b></center></h2></head>\n" % (period)) 
+    file.write("<body><hr width=\"75%\" /><pre>\n")
+    if len(missingData) > 0:
+      for line in range (0,len(missingData)):
+        Logit(missingData[line])
+        file.write( missingData[line] + "\n")
+    else:
+      Logit("All sites reporting for all days in time period")
+      file.write("\nAll sites reporting for all days in time period\n")
+    file.write("</pre><hr width=\"75%\" />\n")
+    file.write("Last update %s\n" % (time.strftime("%Y-%m-%d %H:%M:%S",time.localtime())))
+    file.write("</body></html>\n")
+    if file != None:
+      file.close()
+  except IOError, (errno,strerror):
+    raise Exception,"IO error(%s): %s (%s)" % (errno,strerror,filename)
+  # ---- send to collector -----
+  SendXmlHtmlFiles(filename,gFilterParameters["GratiaCollector"])
+
+#-----------------------------------------
 def CheckForShutdownDays(site,missingDays):
   """ Determines if a site had a scheduled shutdown for the days that
-      accounting data was unreported.
+      accounting data was unreported. 
   """
   shutdownDates = []
   for i in range (0,len(missingDays)):  

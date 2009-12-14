@@ -200,6 +200,7 @@ column "OSG_DATA"  "colspan=2"
 column "org_Tier1" "colspan=2"
 column "org_Tier2" "colspan=2"
 column "late updates" "colspan=1"
+column "missing data" "colspan=1"
 end TR
 ## -- new row ---
 formatStart="<font color=black><b>"
@@ -217,6 +218,8 @@ do
     done ## done with type
   done ## done with table
   file=$date.late_updates.html
+  check_for_file $file html
+  file=$date.missingdays.html
   check_for_file $file html
   end TR
 done
