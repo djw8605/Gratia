@@ -10,12 +10,6 @@ public class HibernateWrapper {
    private static class ConnectionChecker implements org.hibernate.jdbc.Work {
       private final boolean fExtraCheck;
       
-      private static class ConnectionException extends java.sql.SQLException {
-         public ConnectionException(String msg) {
-            super(msg);
-         }
-      }
-      
       ConnectionChecker() {
          fExtraCheck = false;
       }
