@@ -578,6 +578,7 @@ public class RecordProcessor extends Thread {
                   pr_session.close();
                } catch (Exception e) {
                   HibernateWrapper.closeSession( pr_session );
+                  if (pr_session.isOpen()) return 0; // Session could not close; DB problem
                   if (!LockFailureDetector.detectAndReportLockFailure(e, nTries, ident)) {
                      keepTrying = false;
                      if (handleUnexpectedException(rId, e, gotreplication, current)) {
@@ -827,6 +828,7 @@ public class RecordProcessor extends Thread {
                      Logging.fine(ident + rId + " saved.");
                   } catch (ConstraintViolationException e) {
                      HibernateWrapper.closeSession(rec_session);
+                     if (rec_session.isOpen()) return 0; // Session could not close; DB problem
                      try {
                         if (maybeHandleDuplicateRecord(e, current, rId, gotreplication, gothistory)) {
                            keepTrying = false; // Don't retry
@@ -858,6 +860,7 @@ public class RecordProcessor extends Thread {
                      }
                   } catch (Exception e) {
                      HibernateWrapper.closeSession(rec_session);
+                     if (rec_session.isOpen()) return 0; // Session could not close; DB problem
                      if (!LockFailureDetector.detectAndReportLockFailure(e, nTries, ident)) {
                         keepTrying = false;
                         if (handleUnexpectedException(rId, e, gotreplication, current)) {
@@ -986,18 +989,22 @@ public class RecordProcessor extends Thread {
                                              String message) {
       Logging.warning(ident + rId + ": " + message + " " + e.getMessage());
       Logging.debug(ident + rId + ": exception details:", e);
-      if (HibernateWrapper.databaseUp()) {
+      if ((e instanceof ConnectionException) ||
+          (e instanceof com.mysql.jdbc.CommunicationsException) ||
+          (!HibernateWrapper.databaseUp())) {
+         Logging.warning(ident + ": Communications error: " + "shutting down");
+         return false;
+      } else {
          try {
             if (gotreplication) {
                errorRecorder.saveSQL("Replication", "SQLError", current);
             } else {
                errorRecorder.saveSQL("Probe", "SQLError", current);
             }
-         } catch (Exception ignore) {
+         } catch (Exception e2) {
+            Logging.warning(ident + ": Error saving in DupRecord table: " + "shutting down");
+            return false;
          }
-      } else {
-         Logging.warning(ident + ": Communications error: " + "shutting down");
-         return false;
       }
       Logging.warning(ident + ": Error in Process: ", e);
       Logging.warning(ident + ": Current: " + current);
@@ -1162,7 +1169,8 @@ public class RecordProcessor extends Thread {
                      }
                   } catch (Exception e2) {
                      HibernateWrapper.closeSession(dup_session);
-                     if (!LockFailureDetector.detectAndReportLockFailure(e, nTries, ident)) {
+                     if (dup_session.isOpen()) throw new ConnectionException(e2); // Session could not close; DB problem
+                     if (!LockFailureDetector.detectAndReportLockFailure(e2, nTries, ident)) {
                         throw e2; // Re-throw;
                      }
                   } // End try (resolve duplicate JobUsageRecord)
@@ -1190,7 +1198,8 @@ public class RecordProcessor extends Thread {
                            keepTrying = false;
                         } catch (Exception e2) {
                            HibernateWrapper.closeSession(dup_session);
-                           if (!LockFailureDetector.detectAndReportLockFailure(e, nTries, ident)) {
+                           if (dup_session.isOpen()) throw new ConnectionException(e2); // Session could not close; DB problem
+                           if (!LockFailureDetector.detectAndReportLockFailure(e2, nTries, ident)) {
                               throw e2; // Re-throw
                            }
                         } // End try (save probe)

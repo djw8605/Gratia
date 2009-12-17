@@ -38,7 +38,7 @@ public class ErrorRecorder {
             HibernateWrapper.closeSession(session);
             if (!LockFailureDetector.detectAndReportLockFailure(e, nTries, "ErrorRecorder")) {
                Logging.warning("ErrorRecorder: error saving in table!", e);
-               keepTrying = false;
+               throw e; // Rethrow
             }
          }
       }
