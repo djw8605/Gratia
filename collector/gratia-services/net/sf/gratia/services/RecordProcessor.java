@@ -250,7 +250,7 @@ public class RecordProcessor extends Thread {
             Utils.GratiaError("RecordProcessor",
                               "XML file read",
                               ident + ": Error " + e.getMessage() + " while trying to read " + file);
-            saveQuarantine(file, "Error reading file: ", e);
+            saveQuarantineFile(file, "Error reading file: ", e);
             continue; // Next file
          }
          xml = "";
@@ -425,13 +425,13 @@ public class RecordProcessor extends Thread {
          } catch (Exception e) {
             Logging.warning(ident + ": Error:Processing File: " + file);
             Logging.warning(ident + ": Blob: " + blob);
-            saveQuarantine(file, "Error parsing file: ", e);
+            saveQuarantineFile(file, "Error parsing file: ", e);
             continue; // Next file.
          }
 
          if (xml == null) {
             Logging.warning(ident + ": No data to process: " + file);
-            saveQuarantine(file, "Unable to identify XML in file");
+            saveQuarantineFile(file, "Unable to identify XML in file");
             continue; // Next file.
          }
 
@@ -466,8 +466,10 @@ public class RecordProcessor extends Thread {
                   errorRecorder.saveParse("Probe", "Parse", xml);
                }
             } catch (Exception ignore) {
+               // Even if there's a connection problem, ignore it, save
+               // the XML in the quarantine area and move on.
             }
-            saveQuarantine(file, "Problem parsing XML in file: ", e);
+            saveQuarantineFile(file, "Problem parsing XML in file: ", e);
             continue; // Next file.
          }
          int rSize = records.size();
@@ -504,7 +506,7 @@ public class RecordProcessor extends Thread {
                   switch (dupOriginHandler.maybeHandleDuplicateOrigin(e, ident + rId)) {
                   case DuplicateOriginHandler.HANDLED: break;
                   case DuplicateOriginHandler.TOO_MANY_DUPS:
-                     saveQuarantine(file, "Too many consecutive duplicate origin failures (" +
+                     saveQuarantineFile(file, "Too many consecutive duplicate origin failures (" +
                                     DuplicateOriginHandler.TOO_MANY_DUPS + "): ",
                                     e);
                      continue NEXTFILE; // Next file.                              
@@ -514,7 +516,7 @@ public class RecordProcessor extends Thread {
                                      ": received unexpected constraint violation exception " +
                                      e.getMessage() + " while processing origin entry.");
                      Logging.debug(ident + rId + ": exception details:", e);
-                     saveQuarantine(file, "Problem processing origin entry for record file: ", e);
+                     saveQuarantineFile(file, "Problem processing origin entry for record file: ", e);
                      continue NEXTFILE; // Next file. 
                   }
                } catch (Exception e) {
@@ -524,7 +526,7 @@ public class RecordProcessor extends Thread {
                                      ": received unexpected exception " +
                                      e.getMessage() + " while processing origin entry.");
                      Logging.debug(ident + rId + ": exception details:", e);
-                     saveQuarantine(file, "Problem processing origin entry for record file: ", e);
+                     saveQuarantineFile(file, "Problem processing origin entry for record file: ", e);
                      continue NEXTFILE; // Next file. 
                   }
                }
@@ -578,12 +580,16 @@ public class RecordProcessor extends Thread {
                   pr_session.close();
                } catch (Exception e) {
                   HibernateWrapper.closeSession( pr_session );
-                  if (pr_session.isOpen()) return 0; // Session could not close; DB problem
+                  if (pr_session.isOpen()) {
+                     Logging.warning(ident + ": Communications error: " + "shutting down");
+                     return 0; // Session could not close; DB problem
+                  }
                   if (!LockFailureDetector.detectAndReportLockFailure(e, nTries, ident)) {
                      keepTrying = false;
                      if (handleUnexpectedException(rId, e, gotreplication, current)) {
                         continue NEXTRECORD; // Process next record.
                      } else {
+                        Logging.warning(ident + ": Communications error: " + "shutting down");
                         return 0; // DB access problem.
                      }
                   }
@@ -602,38 +608,45 @@ public class RecordProcessor extends Thread {
                // the EndTime).
                Logging.warning(ident + rId + ": Error in record updating: " + e.getMessage());
                Logging.debug(ident + rId + ": exception details: ", e);
-               if (HibernateWrapper.databaseUp()) {
+               if ((e.getCause() instanceof ConnectionException) ||
+                   (e.getCause() instanceof com.mysql.jdbc.CommunicationsException) ||
+                   (!HibernateWrapper.databaseUp())) {
+                  Logging.warning(ident + ": Communications error: " + "shutting down");
+                  return 0; // DB access trouble.
+               } else {
                   try {
                      if (gotreplication) {
                         errorRecorder.saveSQL("Replication", "RecordUpdate", current);
                      } else {
                         errorRecorder.saveSQL("Probe", "RecordUpdate", current);
                      }
-                  } catch (Exception ignore) {
+                  } catch (Exception e2) {
+                     saveQuarantineFile(file, "Unexpected error while recording RecordUpdate error", e2);
                   }
                   continue NEXTRECORD; // Process next record.
-               } else {
-                  Logging.warning(ident + ": Communications error: " + "shutting down");
-                  return 0; // DB access trouble.
                }
             } catch (Exception e) {
                // Humm an unexception exception.
                Logging.warning(ident + rId + ": Error in record updating: " + e.getMessage());
                Logging.debug(ident + rId + ": exception details: ", e);
-               if (HibernateWrapper.databaseUp()) {
+               if ((e instanceof ConnectionException) ||
+                   (e instanceof com.mysql.jdbc.CommunicationsException) ||
+                   (e.getCause() instanceof com.mysql.jdbc.CommunicationsException) ||
+                   (!HibernateWrapper.databaseUp())) {
+                  Logging.warning(ident + ": Communications error: " + "shutting down");
+                  return 0; // DB access trouble.
+               } else {
                   try {
                      if (gotreplication) {
                         errorRecorder.saveSQL("Replication", "RecordUpdateInternalError", current);
                      } else {
                         errorRecorder.saveSQL("Probe", "RecordUpdateInternalError", current);
                      }
-                  } catch (Exception ignore) {
+                  } catch (Exception e2) {
+                     saveQuarantineFile(file, "Unexpected error while recording RecordUpdate error", e2);
                   }
                   continue NEXTRECORD; // Process next record.
-               } else {
-                  Logging.warning(ident + ": Communications error: " + "shutting down");
-                  return 0; // DB access trouble.
-               }               
+               }            
             }
             
             boolean acceptRecord = true;
@@ -675,8 +688,10 @@ public class RecordProcessor extends Thread {
                      }
                   } catch (Exception e) {
                      if (handleUnexpectedException(rId, e, gotreplication, current)) {
+                        saveQuarantineFile(file, "Unexpected error while recording expired record", e);
                         continue NEXTRECORD; // Process next record.
                      } else {
+                        Logging.warning(ident + ": Communications error: " + "shutting down");
                         return 0; // DB access problem.
                      }
 
@@ -696,8 +711,10 @@ public class RecordProcessor extends Thread {
                   }
                } catch (Exception e) {
                   if (handleUnexpectedException(rId, e, gotreplication, current)) {
+                     saveQuarantineFile(file, "Unexpected error while calculating checksum for record", e);
                      continue NEXTRECORD;
                   } else {
+                     Logging.warning(ident + ": Communications error: " + "shutting down");
                      return 0; // DB access problem.
                   }
                }
@@ -765,10 +782,9 @@ public class RecordProcessor extends Thread {
                      rec_tx = rec_session.beginTransaction();
                      //MPERF: Logging.fine(ident + rId + " attaching VO and other content.");
                      synchronized (lock) {
-                        // Synchronize on lock so we're
-                        // guaranteed only one run per
-                        // collector, not one per thread if we
-                        // were synchronizing on the objects
+                        // Synchronize on lock so we're guaranteed only
+                        // one run per collector, not one per thread if
+                        // we were synchronizing on the objects
                         // themselves.
                         newVOUpdate.check(current, rec_session);
                         newClusterUpdate.check(current, rec_session);
@@ -828,7 +844,10 @@ public class RecordProcessor extends Thread {
                      Logging.fine(ident + rId + " saved.");
                   } catch (ConstraintViolationException e) {
                      HibernateWrapper.closeSession(rec_session);
-                     if (rec_session.isOpen()) return 0; // Session could not close; DB problem
+                     if (rec_session.isOpen()) {
+                        Logging.warning(ident + ": Communications error: " + "shutting down");
+                        return 0; // Session could not close; DB problem
+                     }
                      try {
                         if (maybeHandleDuplicateRecord(e, current, rId, gotreplication, gothistory)) {
                            keepTrying = false; // Don't retry
@@ -845,6 +864,7 @@ public class RecordProcessor extends Thread {
                                                             message)) {
                                  continue NEXTRECORD; // Process next record.
                               } else {
+                                 Logging.warning(ident + ": Communications error: " + "shutting down");
                                  return 0; // DB access trouble.
                               }                                   
                            } // End switch.
@@ -855,17 +875,22 @@ public class RecordProcessor extends Thread {
                         if (handleUnexpectedException(rId, e2, gotreplication, current,msg)) {
                            continue NEXTRECORD; // Process next record.
                         } else {
+                           Logging.warning(ident + ": Communications error: " + "shutting down");
                            return 0; // DB access trouble.
                         }
                      }
                   } catch (Exception e) {
                      HibernateWrapper.closeSession(rec_session);
-                     if (rec_session.isOpen()) return 0; // Session could not close; DB problem
+                     if (rec_session.isOpen()) {
+                        Logging.warning(ident + ": Communications error: " + "shutting down");
+                        return 0; // Session could not close; DB problem
+                     }
                      if (!LockFailureDetector.detectAndReportLockFailure(e, nTries, ident)) {
                         keepTrying = false;
                         if (handleUnexpectedException(rId, e, gotreplication, current)) {
                            continue NEXTRECORD; // Process next record.
                         } else {
+                           Logging.warning(ident + ": Communications error: " + "shutting down");
                            return 0; // DB access trouble  .                                  
                         }
                      }
@@ -915,13 +940,40 @@ public class RecordProcessor extends Thread {
       XP.save(filename, data);
    }
 
-   public void saveQuarantine(String oldfile, String annot, Exception e) {
-      saveQuarantine(oldfile,
-                     annot + e.getMessage() + "\n" +
+   public void saveQuarantineRecord(Record current, String annot, Exception e) {
+      saveQuarantineRecord(current, annot + " " + e.getMessage() + "\n" +
+                           ExceptionUtils.getFullStackTrace(e));
+   }
+
+   public void saveQuarantineFile(String oldfile, String annot, Exception e) {
+      saveQuarantineFile(oldfile,
+                     annot + " " + e.getMessage() + "\n" +
                      ExceptionUtils.getFullStackTrace(e));
    }
 
-   public void saveQuarantine(String oldfile, String annot) {
+   public void saveQuarantineRecord(Record current, String annot) {
+      String xml = "";
+      try {
+         xml = current.getRawXml();
+         if (xml == null || (xml.length() == 0) || xml.equals("null")) {
+            xml = current.asXML();
+         }
+         if ((annot != null) && (! annot.endsWith("\n"))) {
+            annot.concat("\n"); // End with a line feed.
+         }
+         File newxmlfile = File.createTempFile("quarantine-", ".xml", quarantineDir);
+         XP.save(newxmlfile.getPath(), xml); // Save XML.
+         XP.save(newxmlfile.getPath().replace(".xml", ".txt"), annot); // Save annotation
+         Logging.warning(ident + ": record XML quarantined as " +
+                         newxmlfile.getPath() + " (" + annot + ")");
+      } catch (Exception e) {
+         Logging.warning(ident + ": record could not be quarantined! XML follows as last-ditch preservation:");
+         Logging.warning(ident + xml);
+         Logging.debug(ident + ": exception details: ", e);
+      }
+   }
+
+   public void saveQuarantineFile(String oldfile, String annot) {
       try {
          if ((annot != null) && (! annot.endsWith("\n"))) {
             annot.concat("\n"); // End with a line feed.
@@ -991,6 +1043,7 @@ public class RecordProcessor extends Thread {
       Logging.debug(ident + rId + ": exception details:", e);
       if ((e instanceof ConnectionException) ||
           (e instanceof com.mysql.jdbc.CommunicationsException) ||
+          (e.getCause() instanceof com.mysql.jdbc.CommunicationsException) ||
           (!HibernateWrapper.databaseUp())) {
          Logging.warning(ident + ": Communications error: " + "shutting down");
          return false;
@@ -1002,8 +1055,14 @@ public class RecordProcessor extends Thread {
                errorRecorder.saveSQL("Probe", "SQLError", current);
             }
          } catch (Exception e2) {
-            Logging.warning(ident + ": Error saving in DupRecord table: " + "shutting down");
-            return false;
+            saveQuarantineRecord(current, rId + ": unable to record error in table", e2); 
+            if ((e2 instanceof ConnectionException) ||
+                (e2 instanceof com.mysql.jdbc.CommunicationsException) ||
+                (e2.getCause() instanceof com.mysql.jdbc.CommunicationsException) ||
+                (!HibernateWrapper.databaseUp())) {
+               Logging.warning(ident + ": Error saving in DupRecord table: " + "shutting down");
+               return false;
+            }
          }
       }
       Logging.warning(ident + ": Error in Process: ", e);
@@ -1278,7 +1337,8 @@ public class RecordProcessor extends Thread {
                                               dupdbid,
                                               current);
                }
-            } catch (Exception ignore) {
+            } catch (Exception e2) {
+               saveQuarantineRecord(current, rId + ": unable to save duplicate in DupRecord table", e2);
             }
          } // End if (needCurrentSaveDup)
       } else {
