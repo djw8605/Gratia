@@ -12,6 +12,12 @@ public interface RecordUpdater {
       public UpdateException(String msg) {
          super(msg);
       }
+      public UpdateException(String msg, Throwable e) {
+         super(msg, e);
+      }
+      public UpdateException(Throwable e) {
+         super(e);
+      }
    }
    public boolean Update(Record rec) throws UpdateException;
 }
