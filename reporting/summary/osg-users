@@ -845,7 +845,7 @@ EOF
                       "WallDuration"),
           convert_num($vomrs_user_info->{"totals"}->{$timeperiod}->{$date}->{0}->{"WallDuration"} || 0,
                       "WallDuration") );
-      $efficiency = $total?(100.0*$success/$total):0;
+      $efficiency = ($total and $total > 0)?(100.0*$success/$total):0;
       print $output_filehandle ' ' x length($string),
         $total, " wall clock hours total (",
           $success, " / ",
@@ -1665,6 +1665,9 @@ sub translation_report($) {
   # From OIM
   foreach my $reporting_name_group (sort keys %{$vo_data->{$vo}->{reporting_groups}}) {
     foreach my $fqan (@{$vo_data->{$vo}->{reporting_groups}->{$reporting_name_group}->{FQAN}}) {
+      next if ($options{"reporting-name"} and
+               scalar @{$options{"reporting-name"}} and not
+               grep { $_ eq sprintf("%s:%s", lc $vo, $reporting_name_group) } @{$options{"reporting-name"}});
       my @row = (
                  $fqan,
                  $reporting_name_group,
@@ -1688,6 +1691,9 @@ EOF
   $sth->execute();
   while (my $row = $sth->fetchrow_hashref()) {
     my $ReportableVOName = (defined $row->{ReportableVOName})?($row->{ReportableVOName} || '""'):"NULL";
+    next if ($options{"reporting-name"} and
+             scalar @{$options{"reporting-name"}} and not
+             grep { $_ eq sprintf("%s:%s", lc $vo, $row->{VOName}) } @{$options{"reporting-name"}});
     my $fqan = $row->{ReportedVOName};
     if ($fqan =~ m&^/&) {
       $fqan =~ s&/Role=NULL&&;
