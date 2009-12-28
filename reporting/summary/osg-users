@@ -1567,13 +1567,16 @@ sub reporting_name_summary($) {
   my $want_vo_column = (scalar keys %used_real_vos) > 1;
   my $message = sprintf("Summary of active%s reporting names%s:\n",
                         ($using_reporting_names)?" selected":"",
-                       $want_vo_column?"":sprintf(" for VO %s", (keys %used_real_vos)[0]));
+                        $want_vo_column?"":sprintf(" for VO %s (%s)",
+                                                   (keys %used_real_vos)[0],
+                                                   join(", ", sort keys %{$vo_data->{(keys %used_real_vos)[0]}->{science_fields}})));
   print $output_filehandle $message;
   my $reporting_name_table = Text::Table->new
     (
      {
       title => '| ', is_sep => '1' },
-     $want_vo_column?({ title => 'VO', align_title => 'center' }, $column_separator):(),
+     $want_vo_column?({ title => 'VO', align_title => 'center' }, $column_separator,
+                      { title => 'Field(s) of Science', align_title => 'center' }, $column_separator):(),
      {
       title => 'Reporting Name', align_title => 'center' },
      $column_separator,
@@ -1609,7 +1612,8 @@ sub reporting_name_summary($) {
                      "Njobs", 1);
       my @row =
         (
-         $want_vo_column?($vo_name):(),
+         $want_vo_column?($vo_name,
+                          join(", ", sort keys %{$vo_data->{$vo_name}->{science_fields}})):(),
          $short_reporting_name,
          $success?"Yes":"No",
          num_sites($current_date, $rep_name, $success),
