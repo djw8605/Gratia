@@ -121,7 +121,6 @@ $master_vo_list->{"all-vos-test"} = [ @test_addresses ]
 
 foreach my $primary_email (sort keys %$people_data) {
   my $person = $people_data->{$primary_email};
-  next unless $person->{reporting_names};
   my $vo_rep_name_reports = {};
   foreach my $vo_rep_name (@{$person->{reporting_names}}) {
     my ($vo, $reporting_name) = ($vo_rep_name =~ m&^([^:]+):(.*)$&);
@@ -132,6 +131,8 @@ foreach my $primary_email (sort keys %$people_data) {
   foreach my $vo_rep_name (@{$person->{vo_reporting_names}}) {
     my ($vo, $reporting_name) = ($vo_rep_name =~ m&^([^:]+):(.*)$&);
     $vo = lc $vo;
+    my ($matching_vo_key) = (grep { lc $_ eq $vo } keys %$vo_data);
+    next if (grep { lc $_ eq $reporting_name } @{$vo_data->{$matching_vo_key}->{alt_vos}});
     $vo_rep_name_reports->{$vo} = {} unless $vo_rep_name_reports->{$vo};
     if ($vo_rep_name_reports->{$vo}->{$reporting_name}) {
       $vo_rep_name_reports->{$vo}->{$reporting_name} = "BOTH";
@@ -140,11 +141,11 @@ foreach my $primary_email (sort keys %$people_data) {
     }
   }
   foreach my $vo (sort keys %$vo_rep_name_reports) {
-    my @local_only_entries = map { $_ if $vo_rep_name_reports->{$vo}->{$_} eq "LOCAL" } (sort keys %{$vo_rep_name_reports->{$vo}});
+    my @local_only_entries = map { ($vo_rep_name_reports->{$vo}->{$_} eq "LOCAL")?$_:() } (sort keys %{$vo_rep_name_reports->{$vo}});
     foreach my $name (@local_only_entries) {
       print "OIM_WARNING: $primary_email report request for $vo:$name is missing from OIM.\n";
     }
-    my @oim_only_entries = map { $_ if $vo_rep_name_reports->{$vo}->{$_} eq "OIM" } (sort keys %{$vo_rep_name_reports->{$vo}});
+    my @oim_only_entries = map { ($vo_rep_name_reports->{$vo}->{$_} eq "OIM")?$_:() } (sort keys %{$vo_rep_name_reports->{$vo}});
     foreach my $name (@oim_only_entries) {
       print "OIM_WARNING: $primary_email report request for $vo:$name is in OIM only.\n"
         if $options->{verbose};
