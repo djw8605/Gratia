@@ -270,7 +270,7 @@ sub processXmlVOSummary {
                             $name?"$name ":'',
                             "<",
                             $primary_email,
-                            ">\n");
+                            "> for reporting name $vo_reporting_name\n");
         my $person = {};
         push @{$reporting_contacts}, $primary_email;
         $person->{vo_reporting_names} = [ ] unless $person->{vo_reporting_names};
