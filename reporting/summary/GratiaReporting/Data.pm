@@ -249,13 +249,15 @@ sub processXmlVOSummary {
         $reporting_contacts = $this_reporting_group->{reporting_contacts};
       }
       $this_reporting_group->{FQAN} = [] unless $this_reporting_group->{FQAN};
-      my $fqan_nodes = $reporting_group_node->findnodes('FQANS/FQAN');
+      my $fqan_nodes = $reporting_group_node->findnodes('FQANs/FQAN');
       my %fqan_node_set  = ( (map { $_?($_ => 1):(); } @{$this_reporting_group->{FQAN}}),
                              (map { if ($_) {
                                my $result = $_->findvalue('GroupName') || '';
                                $result = sprintf("$result/Role=%s",
                                                  $_->findvalue('Role'))
                                  if $_->findvalue('Role');
+                               $self->verbosePrint("DEBUG: found FQAN $result for reporting name $vo_reporting_name\n")
+                                 if $result;
                                ($result => 1);
                              } else { () } } $fqan_nodes->get_nodelist()) );
       $this_reporting_group->{FQAN} = [ sort keys %fqan_node_set ];

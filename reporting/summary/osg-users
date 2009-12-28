@@ -1688,15 +1688,21 @@ EOF
   $sth->execute();
   while (my $row = $sth->fetchrow_hashref()) {
     my $ReportableVOName = (defined $row->{ReportableVOName})?($row->{ReportableVOName} || '""'):"NULL";
+    my $fqan = $row->{ReportedVOName};
+    if ($fqan =~ m&^/&) {
+      $fqan =~ s&/Role=NULL&&;
+      $fqan =~ s&/Capability=NULL&&;
+    } else {
+      $fqan = sprintf("%s:%s",
+                      $row->{ReportedVOName},
+                      $ReportableVOName);
+    }
     my @row =
       (
-       ($row->{ReportedVOName} =~ m&^/&)?
-       $row->{ReportedVOName}:
-       sprintf("%s:%s",
-               $row->{ReportedVOName},
-               $ReportableVOName),
+       $fqan,
        $row->{VOName},
-       "Gratia", undef
+       "Gratia",
+       undef
       );
     push @rows, \@row;
   }
