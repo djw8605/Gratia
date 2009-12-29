@@ -45,12 +45,22 @@ GetOptions($options,
            "exclusive-mail|m=s@",
            "grid-type|g=s@",
            "service=s@",
+           "compare-period|comparison-period=s",
+           "target-period=s",
            "for-user|u=s@") or die $@;
 
 my $reporter = new GratiaReporting::Reporter( debug => $options->{debug},
                                               verbose => $options->{verbose},
                                               test => $options->{test}
                                             );
+
+my @extra_args = ();
+if ($options->{"compare-period"}) {
+  push @extra_args, "--compare-period", $options->{"compare-period"};
+}
+if ($options->{"target-period"}) {
+  push @extra_args, "--target-period", $options->{"target-period"};
+}
 
 my $wanted_sites = {};
 foreach my $site (@{$options->{"site-name"}}) {
@@ -88,6 +98,7 @@ my @base_command = ("$osg_users_script",
                     "-s",
                     "-S",
                     "--aux-db-type=none",
+                    @extra_args,
                     ($options->{"data-source"})?(map { ("-D", $_) } @{$options->{"data-source"}}):());
 my @base_mail_opts = ();
 if ($options->{"exclusive-mail"}) { # Short-circuit people list.

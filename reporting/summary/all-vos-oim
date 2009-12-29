@@ -42,6 +42,8 @@ GetOptions($options,
            "weekly|W",
            "yearly|Y",
            "test|t",
+           "compare-period|comparison-period=s",
+           "target-period=s",
            "vo|v=s@" => sub { push @wanted_vos, lc $_[1] } ) or die $@;
 
 $merge = 0 if ($options->{"data-file-precdence"});
@@ -50,6 +52,14 @@ my $reporter = new GratiaReporting::Reporter( debug => $options->{debug},
                                               verbose => $options->{verbose},
                                               test => $options->{test}
                                             );
+
+my @extra_args = ();
+if ($options->{"target-period"}) {
+  push @extra_args, "--target-period", $options->{"target-period"};
+}
+if ($options->{"compare-period"}) {
+  push @extra_args, "--compare-period", $options->{"compare-period"};
+}
 
 if (not scalar @ARGV) {
   push @ARGV, "$script_top_dir/all-vos.dat";
@@ -150,7 +160,7 @@ foreach my $primary_email (sort keys %$people_data) {
       print "OIM_WARNING: $primary_email report request for $vo:$name is in OIM only.\n"
         if $options->{verbose};
     }
-    my @command =  ("$osg_users_script", "-v", "$vo", "--aux-db-type=none", "-s", "-V");
+    my @command =  ("$osg_users_script", "-v", "$vo", "--aux-db-type=none", "-s", "-V", @extra_args);
     push @command, map { ( "-D", $_) } @{$options->{"data-source"}} if $options->{"data-source"};
     if ($options->{monthly}) {
       push @command, "-t", "month";
@@ -164,7 +174,7 @@ foreach my $primary_email (sort keys %$people_data) {
 
 foreach my $vo (sort keys %$master_vo_list) {
   next if (lc $vo eq "all" or lc $vo eq "all-vos-test");
-  my @command = ("$osg_users_script", "-v", "$vo", "--aux-db-type=none", "-s", "-V");
+  my @command = ("$osg_users_script", "-v", "$vo", "--aux-db-type=none", "-s", "-V", @extra_args);
   push @command, map { ( "-D", $_) } @{$options->{"data-source"}} if $options->{"data-source"};
   if ($options->{monthly}) {
     push @command, "-t", "month";
