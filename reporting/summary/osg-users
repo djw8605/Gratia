@@ -80,7 +80,7 @@ B<osg-users> [B<-u>|B<--user-regex> I<regex>]+
 [B<-m>|B<--mail> I<recipient>]+
 [B<--history> I<# months>]
 [B<--target-period> I<target-date>]
-[B<--compare-period> I<compare-date>]
+[B<--compare-period>|B<--comparison-period> I<compare-date>]
 [B<-s>|B<--suppress-idle-users>]
 
 Options marked with B<+> are repeatable and cumulative.
@@ -130,7 +130,7 @@ GetOptions(\%options,
            "history=i",
            "aux-db-type=s",
            "aux-db-connect=s",
-           "compare-period=s",
+           "compare-period|comparison-period=s",
            "target-period=s",
            "suppress-idle-users|s",
            "reporting-name|reporting|r=s@",
@@ -396,35 +396,22 @@ my $sites = {};
 
 my %dates = ();
 
-my @default_dates = ();
+my $default_target = subtract_period(Today(1), 1);
 
-my ($year, $month, $day) = Today(1);
-if ($timeperiod eq "month") {
-  @default_dates =
-    (scalar convert_to_date(sprintf "%4d-%02d-%02d\n", Add_Delta_YM($year, $month, $day, 0, -2)),
-     scalar convert_to_date(sprintf "%4d-%02d-%02d\n", Add_Delta_YM($year, $month, $day, 0, -1)));
-} elsif ($timeperiod eq "week") {
-  @default_dates =
-    (scalar convert_to_date(sprintf "%4d-%02d-%02d\n", Add_Delta_Days($year, $month, $day, -14)),
-     scalar convert_to_date(sprintf "%4d-%02d-%02d\n", Add_Delta_Days($year, $month, $day, -7)));
-} elsif ($timeperiod eq "year") {
-  @default_dates =
-      (scalar convert_to_date(sprintf "%4d-%02d-%02d\n", Add_Delta_YM($year, $month, $day, -2, 0)),
-       scalar convert_to_date(sprintf "%4d-%02d-%02d\n", Add_Delta_YM($year, $month, $day, -1, 0))),;
-}
-
+# Process date options.
 my ($previous_date, $previous_date_end) =
   convert_to_date($options{"compare-period"});
-unless ($previous_date) {
-  ($previous_date, $previous_date_end) =
-    convert_to_date($default_dates[0]);
-}
-
 my ($current_date, $current_date_end, $next_date) =
   convert_to_date($options{"target-period"});
+
 unless ($current_date) {
   ($current_date, $current_date_end, $next_date) =
-    convert_to_date($default_dates[1]);
+    convert_to_date($default_target);
+}
+
+unless ($previous_date) {
+  ($previous_date, $previous_date_end) =
+    convert_to_date(subtract_period(process_date($current_date), 1));
 }
 
 my $interval_clause = $old_report?
@@ -570,6 +557,32 @@ END { # Things to do at the end of the program
 }
 
 1;
+
+sub subtract_period {
+  my @args = @_;
+  $args[3] = -$args[3] if $args[3];
+  return add_period(@args);
+}
+
+sub add_period {
+  if ($#_ < 2) {
+    print STDERR "INTERNAL ERROR: not enough arguments to add_period\n";
+    exit 1;
+  }
+  my ($year, $month, $day, $num_periods) = @_;
+  $num_periods = $num_periods || 0;
+  my $result;
+  if ($timeperiod eq "month") {
+    $result = convert_to_date(sprintf "%4d-%02d-%02d\n", Add_Delta_YM($year, $month, $day, 0, $num_periods));
+  } elsif ($timeperiod eq "week") {
+    $result = convert_to_date(sprintf "%4d-%02d-%02d\n", Add_Delta_Days($year, $month, $day, $num_periods * 7));
+  } elsif ($timeperiod eq "year") {
+    $result = convert_to_date(sprintf "%4d-%02d-%02d\n", Add_Delta_YM($year, $month, $day, $num_periods, 0));
+  } else {
+    print STDERR "INTERNAL ERROR: unknown timeperiod \"$timeperiod\"\n;";
+    exit 1;
+  }
+}
 
 sub wrapped_report(\@\&;$$) {
   my ($email_addresses, $func, $output_filename, $extension) = @_;
@@ -962,7 +975,7 @@ sub by_usage {
     ($vomrs_user_info->{$a}->{"totals"}->{$timeperiod}->{$current_date}->{"WallDuration"} || 0);
 }
 
-sub convert_to_date {
+sub process_date {
   my $date = shift;
   return unless $date;
   my $result;
@@ -1016,29 +1029,44 @@ sub convert_to_date {
     print STDERR "ERROR: convert_to_dates does not understand timeperiod $timeperiod\n";
     exit(1);
   }
-  $result = sprintf("%04d-%02d-%02d", $year, $month, $day);
-  if (wantarray) { # Want period end too
-    if ($timeperiod eq "month") {
-      return ($result,
-              sprintf("%04d-%02d-%02d",
-                      Add_Delta_YMD($year, $month, $day, 0, 1, -1)),
-              sprintf("%04d-%02d-%02d",
-                      Add_Delta_YMD($year, $month, $day, 0, 1, 0)));
-    } elsif ($timeperiod eq "week") {
-      return ($result,
-              sprintf("%04d-%02d-%02d",
-                      Add_Delta_Days($year, $month, $day, 6)),
-              sprintf("%04d-%02d-%02d",
-                     Add_Delta_Days($year, $month, $day, 7)));
-    } elsif ($timeperiod eq "year") {
-      return ($result,
-              sprintf("%04d-%02d-%02d",
-                      Add_Delta_YMD($year, $month, $day, 1, 0, -1)),
-              sprintf("%04d-%02d-%02d",
-                      Add_Delta_YMD($year, $month, $day, 1, 0, 0)));
-    }
+  if (wantarray) {
+    return ($year, $month, $day);
   } else {
-    return $result;
+    string_date($year, $month, $day);
+  }
+}
+
+sub string_date {
+  my ($year, $month, $day) = @_;
+  return unless ($year and $month and $day);
+  return sprintf("%04d-%02d-%02d", $year, $month, $day);
+}
+
+sub convert_to_date {
+  my $date = shift;
+  return process_date($date) unless wantarray;
+  # Return (current_date, current_date_end, next_date)
+  my ($year, $month, $day) = process_date($date);
+  return unless $year;
+  my $result = string_date($year, $month, $day);
+  if ($timeperiod eq "month") {
+    return ($result,
+            sprintf("%04d-%02d-%02d",
+                    Add_Delta_YMD($year, $month, $day, 0, 1, -1)),
+            sprintf("%04d-%02d-%02d",
+                    Add_Delta_YMD($year, $month, $day, 0, 1, 0)));
+  } elsif ($timeperiod eq "week") {
+    return ($result,
+            sprintf("%04d-%02d-%02d",
+                    Add_Delta_Days($year, $month, $day, 6)),
+            sprintf("%04d-%02d-%02d",
+                    Add_Delta_Days($year, $month, $day, 7)));
+  } elsif ($timeperiod eq "year") {
+    return ($result,
+            sprintf("%04d-%02d-%02d",
+                    Add_Delta_YMD($year, $month, $day, 1, 0, -1)),
+            sprintf("%04d-%02d-%02d",
+                    Add_Delta_YMD($year, $month, $day, 1, 0, 0)));
   }
 }
 
