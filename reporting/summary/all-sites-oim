@@ -55,11 +55,11 @@ my $reporter = new GratiaReporting::Reporter( debug => $options->{debug},
                                             );
 
 my @extra_args = ();
-if ($options->{"compare-period"}) {
-  push @extra_args, "--compare-period", $options->{"compare-period"};
-}
 if ($options->{"target-period"}) {
   push @extra_args, "--target-period", $options->{"target-period"};
+}
+if ($options->{"compare-period"}) {
+  push @extra_args, "--compare-period", $options->{"compare-period"};
 }
 
 my $wanted_sites = {};
