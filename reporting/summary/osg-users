@@ -33,6 +33,7 @@ use Getopt::Long;
 use Pod::Usage;
 
 use Text::Table; # Available from CPAN / DAG repo.
+use Text::Wrap; # Standard in perl.
 
 use Date::Calc ':all'; # Available from CPAN / DAG repo.
 
@@ -1638,10 +1639,15 @@ sub reporting_name_summary($) {
       my $delta_njobs = convert_num($njobs -
                      ($vomrs_user_info->{"totals"}->{"Reporting Name"}->{$rep_name}->{$timeperiod}->{$previous_date}->{$success}->{"Njobs"} || 0),
                      "Njobs", 1);
+      local($Text::Wrap::columns) = 40;
+      local($Text::Wrap::huge) = 'overflow';
+      my $science_fields = (exists $vo_data->{$vo_name}->{reporting_groups}->{$short_reporting_name}->{science_fields})?
+        $vo_data->{$vo_name}->{reporting_groups}->{$short_reporting_name}->{science_fields}:
+          $vo_data->{$vo_name}->{science_fields};
       my @row =
         (
          $want_vo_column?($vo_name,
-                          join(", ", sort keys %{$vo_data->{$vo_name}->{science_fields}})):(),
+                          wrap("", "  ", join(", ", sort keys %{$science_fields}))):(),
          $short_reporting_name,
          $success?"Yes":"No",
          num_sites($current_date, $rep_name, $success),
