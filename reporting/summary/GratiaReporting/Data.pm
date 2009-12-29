@@ -193,6 +193,15 @@ sub verbosePrint {
   print STDERR @_;
 }
 
+sub merge_ulist_hashes {
+  my ($dest_hash, @source_hashes) = @_;
+  foreach my $source_hash (@source_hashes) {
+    foreach my $key (keys %$source_hash) {
+      $dest_hash->{$key} = 1;
+    }
+  }
+}
+
 sub processXmlVOSummary {
   my ($self, $root) = @_;
   foreach my $vo ($root->findnodes('VO')) { # Each vo
@@ -205,6 +214,7 @@ sub processXmlVOSummary {
     if ($parent_vo) {
       if ($parent_vo eq $vo_name) {
         print "WARNING: VO $vo_name is listed as its own parent!\n";
+        undef $parent_vo;
       } else {
         print "INFO: Storing info for $vo_name ($long_name) as parent VO $parent_vo\n";
         $vo_name = $parent_vo;
@@ -212,7 +222,7 @@ sub processXmlVOSummary {
     } elsif ($long_name =~ m&^/?([^/]+)/& or $vo_name =~ m&^(fermilab).&i) {
       # Attempt to merge sub-VOs if parent VO info is missing.
       print "INFO: Deduced parent VO of $vo_name ($long_name) as $1\n";
-      $vo_name = $1;
+      $parent_vo = $vo_name = $1;
     }
     my $this_vo;
     $vo_data->{$vo_name} = {} unless exists $vo_data->{$vo_name};
@@ -221,11 +231,18 @@ sub processXmlVOSummary {
     push @{$this_vo->{alt_vos}}, $vo_name;
     $this_vo->{science_fields} = {} unless $this_vo->{science_fields};
     my $science_nodes = $vo->findnodes('FieldsOfScience/Field');
+    my $science_fields = {};
     foreach my $science_node ($science_nodes->get_nodelist()) {
       $self->verbosePrint("DEBUG: found field of science ",
                           $science_node->string_value(),
                           "\n");
-      $this_vo->{science_fields}->{$science_node->string_value()} = 1;
+      $science_fields->{$science_node->string_value()} = 1;
+    }
+    unless ($parent_vo) {
+      # Add this list to top-level science list.
+      $self->verbosePrint("DEBUG: Adding fields of science (", join(", ", sort keys %$science_fields),
+                          ") to top level $vo_name\n");
+      merge_ulist_hashes($this_vo->{science_fields}, $science_fields);
     }
     my $reporting_group_nodes = $vo->findnodes('ReportingGroups/ReportingGroup');
     $this_vo->{reporting_groups} = {} unless $this_vo->{reporting_groups};
@@ -237,6 +254,11 @@ sub processXmlVOSummary {
       $this_vo->{reporting_groups}->{$vo_reporting_name} = {}
         unless $this_vo->{reporting_groups}->{$vo_reporting_name};
       my $this_reporting_group = $this_vo->{reporting_groups}->{$vo_reporting_name};
+      $this_reporting_group->{science_fields}  = {}
+        unless $this_reporting_group->{science_fields};
+      $self->verbosePrint("DEBUG: Adding fields of science (", join(", ", sort keys %$science_fields),
+                          ") to reporting group $vo_reporting_name\n");
+      merge_ulist_hashes($this_reporting_group->{science_fields}, $science_fields);
       my $reporting_contacts;
       # If the reporting name is the same as the VO name (almost) then
       # this is the primary contact list for this VO.
