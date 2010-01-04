@@ -242,6 +242,9 @@
 #  06/18/2009    
 #  CIT_CMS_T2	3046 	previously 2398 (jump due to addition of 500 new cores)
 #
+#  01/04/2010 (Karthik Arunachalam)    
+#  AGLT2	3507 	previously 3130 
+#
 ##################################################################
 #-- Site  ------- SPECint2000
 #
@@ -266,7 +269,7 @@ UFlorida-PG         1535
 #--- ATLAS Tier 1 ----
 BNL_ATLAS_1         2302
 #--- ATLAS Tier 2 ----
-AGLT2               3130
+AGLT2               3507
 BU_ATLAS_Tier2      2022
 IU_OSG              2101
 MWT2_IU             1836
