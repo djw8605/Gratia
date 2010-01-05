@@ -1473,13 +1473,31 @@ select J.VOName, sum(J.NJobs), sum(J.WallDuration)
     else:
         return RunQueryAndSplit(select) 
 
+def getLocalSiteStr(localSites):
+    if gGrid != 'local':
+        return
+    siteStr = '' 
+    if localSites == None:
+        print "Grid specified as local, but no local active_sites were found in the configuration file. Plese check. Exiting..."
+        sys.exit(1)
+    else:
+        for site in localSites:
+            siteStr+="T.SiteName=\"" + site + "\" or "
+        if siteStr!='':
+            siteStr=re.compile("(.*) or $",re.IGNORECASE).search(siteStr).group(1)
+            siteStr = " (" + siteStr + ") and "
+    return siteStr
+
 def DataTransferData(begin, end, with_panda = False):
+    siteStr=""
+    if gGrid == 'local': 
+        siteStr = getLocalSiteStr(GetListOfOSGSEs())
     global gMySQLConnectString,gDBCurrent
     schema = gDBSchema[transferDB]
     gDBCurrent = transferDB
     keepConnectionValue = gMySQLConnectString
     gMySQLConnectString = gMySQLTransferConnectString
-    select = "select T.SiteName, M.Protocol, sum(M.Njobs), sum(M.TransferSize * Multiplier) from " + schema + ".MasterTransferSummary M, " + schema + ".Probe P, " + schema + ".Site T, " + schema + ".SizeUnits su where M.StorageUnit = su.Unit and P.siteid = T.siteid and M.ProbeName = P.Probename and StartTime >= \"" + DateTimeToString(begin) + "\" and StartTime < \"" + DateTimeToString(end) + "\" and M.ProbeName not like \"psacct:%\" group by P.siteid, Protocol"
+    select = "select T.SiteName, M.Protocol, sum(M.Njobs), sum(M.TransferSize * Multiplier) from " + schema + ".MasterTransferSummary M, " + schema + ".Probe P, " + schema + ".Site T, " + schema + ".SizeUnits su where " + siteStr + " M.StorageUnit = su.Unit and P.siteid = T.siteid and M.ProbeName = P.Probename and StartTime >= \"" + DateTimeToString(begin) + "\" and StartTime < \"" + DateTimeToString(end) + "\" and M.ProbeName not like \"psacct:%\" group by P.siteid, Protocol"
     result = RunQueryAndSplit(select)
     gMySQLConnectString = keepConnectionValue 
     return result
