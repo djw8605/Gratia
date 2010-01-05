@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash -x
 
 # space separated list of mail recipients
 PROD_MAILTO="osg-accounting-info@fnal.gov"
@@ -13,49 +13,58 @@ ExtraArgs=--daily
 (( mailOverride = 0 ))
 (( production = 0 ))
 
+cmdFile=`(cd \`dirname $0\`; /bin/pwd)`/range_mutt_nightly.sh
+
 while test "x$1" != "x"; do
-   if [ "$1" == "--help" ]; then 
-	echo "usage: $0 [--grid gridType ] [--dry-run] [--debug] [--mail email] [--draft] [--production] [quoted_string_representing_starting_date (as accepted by date -d)]"
-	exit 1
-   elif [ "$1" == "--debug" ]; then
-	debug=yes
-	shift
-   elif [ "$1" == "--grid" ]; then
-	gridOption="--grid=$2"
-	shift
+    if [ "$1" == "--help" ]; then 
+        echo "usage: $0 [--grid gridType ] [--dry-run] [--debug] [--mail email] [--draft] [--production] [quoted_string_representing_starting_date (as accepted by date -d)]"
+        exit 1
+    elif [ "$1" == "--debug" ]; then
+        debug=yes
         shift
-   elif [ "$1" == "--dry-run" ]; then
-	dryrun=yes
-	shift
-   elif [ "$1" == "--draft" ]; then
+    elif [ "$1" == "--grid" ]; then
+        gridOption="--grid=$2"
+        shift
+        shift
+    elif [ "$1" == "--dry-run" ]; then
+        dryrun=yes
+        shift
+    elif [ "$1" == "--draft" ]; then
         ExtraHeader="[Draft] ${ExtraHeader}"
-	MAILTO=$PROD_MAILTO
+        MAILTO=$PROD_MAILTO
         USER_MAILTO=$PROD_USER_MAILTO
         (( production = 1 ))
-	shift
-   elif [ "$1" == "--production" ]; then
-	MAILTO=$PROD_MAILTO
+        shift
+    elif [ "$1" == "--production" ]; then
+        MAILTO=$PROD_MAILTO
         USER_MAILTO=$PROD_USER_MAILTO
         (( production = 1 ))
-	shift
-   elif [ "$1" == "--mail" ]; then
-	MAILTO=$2
+        shift
+    elif [ "$1" == "--mail" ]; then
+        MAILTO=$2
         USER_MAILTO=$2
         (( mailOverride = 1 ))
-	shift
-	shift
-   elif [ "$1" == "--weekly" ]; then
-    ExtraArgs=$1
-    ExtraHeader="${ExtraHeader}Weekly "
-    shift
-   elif [ "$1" == "--monthly" ]; then
-    ExtraArgs=$1
-    ExtraHeader="${ExtraHeader}Monthly "
-    shift
-   else 
-    date_arg=$1
-	shift
-   fi
+        shift
+        shift
+    elif [ "$1" == "--weekly" ]; then
+        ExtraArgs="$ExtraArgs $1"
+        ExtraHeader="${ExtraHeader}Weekly "
+        shift
+    elif [ "$1" == "--monthly" ]; then
+        ExtraArgs="$ExtraArgs $1"
+        ExtraHeader="${ExtraHeader}Monthly "
+        shift
+    elif [[ "$1" == --cmd[Ff]ile ]]; then
+        cmdFile=$2
+        shift
+        shift
+    elif [ "$1" == "--config" ]; then
+        ExtraArgs="$ExtraArgs --config=$2"
+        shift; shift
+    else 
+        date_arg=$1
+        shift
+    fi
 done
 
 when=$(date -d "${date_arg:-yesterday}" +"%d %B %Y")
@@ -70,9 +79,10 @@ LONGJOBS_MAIL_MSG="${ExtraHeader}Report of jobs longer than 7 days for $when"
 USER_MAIL_MSG="${ExtraHeader}Report by user for $when"
 
 # Transfer the file now
-WORK_DIR=workdir.${RANDOM}
-
-mkdir $WORK_DIR
+WORK_DIR=`mktemp -d "${TMPDIR:-/tmp}/range_mutt.workdir.XXXXXXXXXX"`
+if [ "$debug" != "yes" ]; then 
+  trap "[[ -d \"$WORK_DIR\" ]] && rm -rf \"$WORK_DIR\" 2>/dev/null" EXIT
+fi
 
 function sendto {
 
@@ -95,8 +105,8 @@ function sendto {
     echo >> $txtfile
     eval $1 $gridOption --output=text $rep_args >> $txtfile
 
-    echo "$subject" >> range.check
-    grep All $txtfile >> range.check
+    echo "$subject" >> "$WORK_DIR/range.check"
+    grep 'All ' $txtfile >> "$WORK_DIR/range.check"
 
     echo "For more information see:,$WEBLOC" > $csvfile
     echo >> $csvfile
@@ -138,27 +148,8 @@ function sendtohtml {
     return   
 }
 
-rm -f range.check
+rm -f "$WORK_DIR/range.check"
 
-sendto ./range "$ExtraArgs $whenarg" ${WORK_DIR}/report "$MAIL_MSG" $MAILTO
-sendto ./reporting "$ExtraArgs $whenarg" ${WORK_DIR}/report "$REPORTING_MAIL_MSG" $MAILTO
-sendto ./longjobs "$ExtraArgs $whenarg" ${WORK_DIR}/report "$LONGJOBS_MAIL_MSG" $MAILTO
-sendto ./usersreport "$ExtraArgs $whenarg" ${WORK_DIR}/report "$USER_MAIL_MSG" $MAILTO
-sendtohtml ./efficiency "$ExtraArgs $whenarg" ${WORK_DIR}/report "${ExtraHeader}OSG Efficiency by Site and VO for $when" $MAILTO
-sendtohtml ./voefficiency "$ExtraArgs $whenarg" ${WORK_DIR}/report "${ExtraHeader}OSG Efficiency by VO for $when" $MAILTO
-sendtohtml ./gradedefficiency "$ExtraArgs $whenarg" ${WORK_DIR}/report "${ExtraHeader}OSG Efficiency by VO by time period for $when" $MAILTO
-sendto ./transfer "$ExtraArgs $whenarg" ${WORK_DIR}/report "$TR_MAIL_MSG" $MAILTO
+. $cmdFile || { echo "Execution of commands $cmdFile failed" 1>&2; exit 1; }
 
-sendto ./usersitereport "$ExtraArgs $whenarg" ${WORK_DIR}/report "${ExtraHeader}Report by user by site for $when" $USER_MAILTO
-
-sendtohtml ./compareVOs.py "$ExtraArgs $whenarg" ${WORK_DIR}/report "Subject will be set in compareVOs.py" $MAILTO 
-
-if [ "$ExtraArgs" == "--monthly" ] ; then
-  sendtohtml ./softwareVersions "$ExtraArgs $whenarg" ${WORK_DIR}/report "OSG Installed Probe Versions as of $when" $MAILTO 
-fi
-
-if [ "$debug" != "yes" ]; then 
-   rm -rf $WORK_DIR
-fi
-
-exit 1
+exit 0
