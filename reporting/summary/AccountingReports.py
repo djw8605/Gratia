@@ -546,7 +546,7 @@ def GetListOfOSGSEs():
         return GetListOfSites("//Resource/Name",location)
     else:
         try:
-            return [i.strip() for i in gConfig.get("local", "active_sites").split(",")]
+            return [i.strip() for i in gConfig.get("local", "active_ses").split(",")]
         except:
             return None
                 
