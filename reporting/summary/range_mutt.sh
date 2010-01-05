@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash
 
 # space separated list of mail recipients
 PROD_MAILTO="osg-accounting-info@fnal.gov"
