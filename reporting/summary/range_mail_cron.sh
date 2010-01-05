@@ -18,9 +18,4 @@ fi
 export http_proxy=http://squid.fnal.gov:3128
 where=`dirname $0`
 cd $where
-if [ "$3" == "--grid" -a "$4" != "" ] ; then
-  $where/range_mutt.sh $1 $2 $3 $4 
-else
-  $where/range_mutt.sh $1 $2
-fi
-
+$where/range_mutt.sh "$@"
