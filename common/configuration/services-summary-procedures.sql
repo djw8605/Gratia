@@ -227,7 +227,7 @@ ASERV:BEGIN
         ((BINARY CER.VO = BINARY VC.VOName) AND
          (BINARY CER.VO = BINARY VC.ReportableVOName))
   WHERE CER.dbid = inputDbid
-  LIMTI 1;
+  LIMIT 1;
 
   -- Basic data checks
   IF n_ProbeName IS NULL THEN
