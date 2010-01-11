@@ -1,0 +1,57 @@
+Patch required for hibernate.
+
+Hibernate 3.3.2 has an unresolved bug in the way it creates queries involving the 'id'
+using to join the table for objects spanning several tables.  One example can be 
+found at http://opensource.atlassian.com/projects/hibernate/browse/HHH-1657
+
+However the patches that have been provided by the other user's are insufficient
+for our case.   The hibernate team will also not look at the problem seriously
+until they are provided with a free standing running example ...
+
+So while the situation clarify, we need to use a patched version of hibernate.
+
+We currently use 2 patch file:
+
+hibernate-update-version.patch which change the version from 3.3.2.GA to 3.3.2.f01
+hibernate-ambiguous-delete.patch which effecitively fix the problem for Gratia.
+
+To apply the patch you will need to download maven 2 and download, patch and build
+hibernate.  Note: you will need to use a JDK 5!
+
+Install Maven (see https://www.hibernate.org/422.html for details):
+
+* Get Maven 2 from http://maven.apache.org/run-maven/index.html
+* If not already set, set your PATH to include maven2/bin (eg. export PATH=$PATH:/opt/maven2/bin)
+* If not already set, Set your JAVA_HOME to point to a JDK 5 (e.g. export JAVA_HOME=$PATH:/opt/jdk-1.5.x) (JDK 6 will not work at the current time because of changes in JDBC interfaces)
+* It might be necessary to increase the memory available to Maven, the easiest option is to set MAVEN_OPTS -Xms128m -Xmx512m=
+
+* Setup JBoss Maven repository
+
+Hibernate uses some custom Maven plugins in its build. Those plugins are hosted at the JBoss Maven repo (for the time being, at least). You'll need to account for this fact in your local Maven set up. The best way is via the ~/.m2/settings.xml file (you may need to create this file by using hibernate3.m2.settings as a template). Be sure to replace the jdk16_home property with your own setting. 
+
+
+Download hibernate source code for 3.3.2.GA:
+
+svn co http://anonsvn.jboss.org/repos/hibernate/core/tags/hibernate-3.3.2.GA
+
+
+
+Apply the patches:
+
+cd hibernate-3.3.2.GA
+cat where_gratia_is/common/lib/hibernate3-*.patch | patch -p0 
+
+
+Build Hibernate:
+
+mvn clean install 
+
+
+
+Build the hibernate bundle:
+
+cd distribution 
+mvn assembly:assembly 
+cp target/hibernate-distribution-3.3.2.f01-all.jar where_gratia_is/common/lib/hibernate3.jar
+
+

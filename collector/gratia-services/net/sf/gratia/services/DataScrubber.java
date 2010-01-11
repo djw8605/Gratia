@@ -123,6 +123,7 @@ public class DataScrubber {
             HibernateWrapper.closeSession(session);
             deletedThisIteration = 0;
             if (!LockFailureDetector.detectAndReportLockFailure(e, nTries, "DataScrubber")) {
+               Logging.warning("DataScrubber: error in deleting " + msg + ":" + selectCmd + "\n" + deleteCmd);
                Logging.warning("DataScrubber: error in deleting " + msg + "!", e);
                keepTrying = false;
             }
@@ -232,7 +233,7 @@ public class DataScrubber {
       "MetricRecord R on (M.dbid = R.dbid)" +
       " where (Timestamp is null || Timestamp < :dateLimit) and " +
       "ServerDate < :dateLimit)" + " limit " + fBatchSize;
-      long nrecords = ExecuteSQL( delquery, limit, "MetricRecord RawXML");
+      long nrecords = ExecuteSQL( delquery, limit, "MetricRecord RawXML" );
       
       Logging.info("DataScrubber: Removed " + nrecords +
                    " MetricRecord RawXML records older than: " + limit);
@@ -364,21 +365,25 @@ public class DataScrubber {
       if (limit.length() > 0) {
          Logging.fine("DataScrubber: Remove all "+name+" older than: " + limit);
          
-         // Can't use deleteHibernateRecords until we find a way to
-         // specify to hibernate that the key field should be referred
-         // in raw SQL to as, "XXXRecord.dbid" and not, "dbid" which
-         // causes an ambiguity with XXXRecord_Meta and
-         // XXXRecord_Xml. This means that we're constrained to
-         // deleting all out-of-date XXXRecords at once.
-         
          String sqlDelete = ("delete from "+type+"_Origin where dbid in " +
                              "(select R.dbid from "+type+" R, "+type+"_Meta M where R.dbid = M.dbid " +
                              "and R.Timestamp < :dateLimit and M.ServerDate < :dateLimit)" );
          
          nrecords = ExecuteSQL(sqlDelete, limit, "Origin of "+name+" records");
          
-         String hqlDelete = "delete "+type+" where Timestamp.Value < :dateLimit and ServerDate < :dateLimit";
-         nrecords = Execute(hqlDelete, limit, type);
+         // With the 'stock' version of hibernate we can not use deleteHibernateRecords,
+         // because there is no until way to specify to hibernate that the key field should 
+         // be referred in raw SQL to as, "XXXRecord.dbid" and not, "dbid" which
+         // causes an ambiguity with XXXRecord_Meta and XXXRecord_Xml. This means that we're constrained to
+         // deleting all out-of-date XXXRecords at once.
+         
+         // String hqlDelete = "delete "+type+" where Timestamp.Value < :dateLimit and ServerDate < :dateLimit";
+         // nrecords = Execute(hqlDelete, limit, type);
+         
+         // The follwing works with the version of a hibernate that is patched, see details
+         // in the file gratia/common/lib/hibernate3.README.
+         
+         nrecords = deleteHibernateRecords( type, "RecordId", "Timestamp.Value < :dateLimit and ServerDate < :dateLimit", limit, type );
          
          Logging.info("DataScrubber: deleted " + nrecords + " " + name + " records.");
       }
