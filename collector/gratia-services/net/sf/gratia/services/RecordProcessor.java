@@ -83,13 +83,13 @@ public class RecordProcessor extends Thread {
              originFinder.matcher(e.getSQL()).find()) {
             if (++fTries < TOO_MANY_DUPS) {
                Logging.fine(ident + ": detected " + fTries +
-                            ((fTries > 1)?"consecutive ":"") +
-                            "duplicate origin " + ((fTries > 1)?"entries":"entry") + " -- retry.");
+                            ((fTries > 1)?" consecutive ":"") +
+                            " duplicate origin " + ((fTries > 1)?"entries":"entry") + " -- retry.");
                Logging.debug(ident + ": exception details: ", e);
                return HANDLED;
             } else {
                Logging.warning(ident + ": detected too many consecutive duplicate origin failures (" +
-                               fTries + " while processing origin entry.");
+                               fTries + " while processing origin entry.)");
                Logging.debug(ident + ": exception details: ", e);
                return TOO_MANY_DUPS;
             }
@@ -506,7 +506,7 @@ public class RecordProcessor extends Thread {
                   switch (dupOriginHandler.maybeHandleDuplicateOrigin(e, ident + rId)) {
                   case DuplicateOriginHandler.HANDLED: break;
                   case DuplicateOriginHandler.TOO_MANY_DUPS:
-                     saveQuarantineFile(file, "Too many consecutive duplicate origin failures (" +
+                     saveQuarantineFile(file, "Too many consecutive duplicate origin failures in origin initial storing (" +
                                     DuplicateOriginHandler.TOO_MANY_DUPS + "): ",
                                     e);
                      continue NEXTFILE; // Next file.                              
@@ -856,7 +856,7 @@ public class RecordProcessor extends Thread {
                            switch (dupOriginHandler.maybeHandleDuplicateOrigin(e, ident + rId)) {
                            case DuplicateOriginHandler.HANDLED: break; // Retry.
                            case DuplicateOriginHandler.TOO_MANY_DUPS: // Too many retries
-                              message = "Received too many consecutive duplicate origin failures (" +
+                              message = "Received too many consecutive duplicate origin failures (main loop) (" +
                                  DuplicateOriginHandler.TOO_MANY_DUPS + ")";
                            case DuplicateOriginHandler.NOT_RELEVANT:
                            default:

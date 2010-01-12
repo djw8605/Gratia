@@ -145,20 +145,26 @@ public class Origin
          
          AttachContent( session );
 
+         // Logging.info("Origin.attach ("+java.util.TimeZone.getDefault().getDisplayName()+") for " + fOriginId + " : " + this );
+
          if (fOriginId != 0) {
+            // Logging.info("Origin.attach ("+java.util.TimeZone.getDefault().getDisplayName()+")  will update for " + fOriginId + " : " + this );
             session.update( this );
             return this;
          }
          
          if (fConnection ==  null) {
+            // Logging.info("Origin.attach ("+java.util.TimeZone.getDefault().getDisplayName()+")  will return early for " + fOriginId + " : " + this );
             return this;
          }
 
          Origin indb = (Origin) session.createQuery(selectCommand).setTimestamp(0,fServerDate.getValue()).setLong(1,fConnection.getcid()).uniqueResult();
          
          if (indb != null) {            
+            // Logging.info("Origin.attach ("+java.util.TimeZone.getDefault().getDisplayName()+")  did not find a match for " + fOriginId + " : " + this );
             return indb;
          } else {
+            // Logging.info("Origin.attach ("+java.util.TimeZone.getDefault().getDisplayName()+")  found a match for " + fOriginId + " : " + this );
             session.saveOrUpdate(this);
             return this;
          }
