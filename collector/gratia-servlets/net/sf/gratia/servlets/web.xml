@@ -25,6 +25,11 @@
       Gratia RMIHandlerServlet
     </description>
 
+    <!-- Gratia Servlets Service Listener -->
+    <listener>
+            <listener-class>net.sf.gratia.servlets.ServletService</listener-class>
+    </listener>
+
     <servlet>
         <servlet-name>javarmi</servlet-name>
         <servlet-class>net.sf.gratia.servlets.RMIHandlerServlet</servlet-class>

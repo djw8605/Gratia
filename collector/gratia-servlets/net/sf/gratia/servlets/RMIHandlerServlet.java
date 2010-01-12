@@ -18,8 +18,6 @@ import java.rmi.*;
 
 import java.security.cert.X509Certificate;
 
-
-
 public class RMIHandlerServlet extends HttpServlet {
     Properties p;
     boolean fCheckConnection;
@@ -51,7 +49,6 @@ public class RMIHandlerServlet extends HttpServlet {
       
     public void init(ServletConfig config)
         throws ServletException {
-        TimeZone.setDefault(null);
         super.init(config);
         p = Configuration.getProperties();
         String level = p.getProperty("service.security.level", "0");
@@ -65,11 +62,6 @@ public class RMIHandlerServlet extends HttpServlet {
             // Ignore parsing issues
         }
          
-        //
-        // initialize logging
-        //
-         
-        Logging.initialize("rmiservlet");
     }
       
     public void doPost(HttpServletRequest req, HttpServletResponse res)
