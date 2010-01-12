@@ -57,12 +57,15 @@ def sendRecords(nrecords, end, extra = ""):
 
         current = start
         
+        #print "Starting at ",current
         for i in range(nrecords):
                 r = GetRecord(i,current)
                 r.RecordData.append(extra);
                 Gratia.Send(r)
                 ndays = ndays + step;
                 current = start + datetime.timedelta(days=ndays)
+        ndays = ndays - step
+        #print "Ending at ", start + datetime.timedelta(days=ndays)
         
 
 if __name__ == '__main__': 

@@ -51,18 +51,20 @@ def GetRecord(jobid, endtime, type):
 
 def sendRecords(nrecords, end, type, extra = ""):
         start =  end - datetime.timedelta(days=365)
-        start = start.replace(hour=18,minute=10,second=00);
+        start = start.replace(hour=12,minute=10,second=00);
         step = 365.0 / nrecords;
         ndays = 0;
 
         current = start
         
+        #print "Starting at ",current
         for i in range(nrecords):
                 r = GetRecord(i,current, type)
                 r.RecordData.append(extra);
                 Gratia.Send(r)
                 ndays = ndays + step;
                 current = start + datetime.timedelta(days=ndays)
+        #print "Ending at ", start + datetime.timedelta(days=ndays)
         
 
 if __name__ == '__main__': 

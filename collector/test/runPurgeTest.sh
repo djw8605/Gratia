@@ -48,6 +48,7 @@ function stop_server {
        server_status=stopping
        wait_for_server_shutdown 
      fi
+     echo "Stopped server ${webhost}:${http_port}"
      server_status=stopped
   fi
 }
@@ -121,7 +122,7 @@ function wait_for_server {
 
    alive=0
    try=0
-   while [ ${alive} -eq 0 -a ${try} -lt 10 ]; do   \
+   while [ ${alive} -eq 0 -a ${try} -lt 100 ]; do   \
       echo "Waiting for server"
       python > alive.tmp <<EOF
 import Gratia
@@ -135,10 +136,11 @@ EOF
          sleep 1
       fi
    done
-   if [ ${try} -gt 9 ]; then
+   if [ ${try} -gt 99 ]; then
       echo "Error server is not started after 10 checks"
       exit
    fi
+   
    server_status=started
 }
 
@@ -155,7 +157,7 @@ function wait_for_server_shutdown {
       fi
    done
    if [ ${try} -gt 9 ]; then
-      echo "Error server is not started after 10 checks"
+      echo "Error server is not shutdown after 10 checks"
       exit
    fi
 }
@@ -359,13 +361,11 @@ EOF
 }
 
 function check_result {
-   msg=$2
-   stem=$1
+   period=$1
+   stem=$2
+   msg=$3
 
-   # Number of days in the last 3 months:
-   days=`expr \( 3672 + \`date +%s\` - \`date --date='3 month ago' +%s\` \) / 3600 / 24 `
-
-   diff $1.$days.ref $1.validate
+   diff $stem.$period.ref $stem.validate
    res=$?
    if [ ${res} -eq 0 ]; then
       echo ${msg} is OK.
@@ -413,7 +413,9 @@ function check_data
 {
    # Number of days in the last 3 months:
    days=`expr \( 3672 + \`date +%s\` - \`date --date='3 month ago' +%s\` \) / 3600 / 24 `
+   mdays=`expr \( 3672 + \`date +%s\` - \`date --date='1 month ago' +%s\` \) / 3600 / 24 `
    echo "Checking results with $days days in the last 3 months"
+   echo "Checking results with $mdays days in the last month"
 
    echo "Checking duplicates"
    mysql -h ${dbhost} --port=${dbport} -u gratia --password=${update_password} > duplicate.validate 2>&1 <<EOF 
@@ -460,13 +462,13 @@ use ${schema_name};
 select count(*)<60 from Origin;
 EOF
 
-  check_result duplicate "Duplicate"
-  check_result jobsummary "JobUsageRecord Summary Table"
-  check_result jobusagerecord "JobUsageRecord"
-  check_result jobusagerecordxml "JobUsageRecord's RawXml"
-  check_result metricrecord "MetricRecord"
-  check_result metricrecordxml "MetricRecord's RawXml"
-  check_result origin "Origin records"
+  check_result $days duplicate "Duplicate"
+  check_result 366 jobsummary "JobUsageRecord Summary Table"
+  check_result $days jobusagerecord "JobUsageRecord"
+  check_result $mdays jobusagerecordxml "JobUsageRecord's RawXml"
+  check_result $days metricrecord "MetricRecord"
+  check_result $days metricrecordxml "MetricRecord's RawXml"
+  check_result $days origin "Origin records"
 }
 
 function upload_war()

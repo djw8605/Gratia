@@ -17,7 +17,7 @@ def GetRecord(id,name,endtime):
 def sendRecords(nrecords, name, end, extra = ""):
         len = 4 * 365.0
         start =  end - datetime.timedelta(days=len)
-        start = start.replace(hour=18,minute=10,second=00);
+        start = start.replace(hour=12,minute=10,second=00);
 
         step = len / nrecords;
         ndays = 0;
