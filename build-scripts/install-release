@@ -66,6 +66,12 @@ Options:
    -v
       Verbose: mention a little more about what we're doing.
 
+   --configure-script <configure-script>
+      Use a different configure-collector script than the one in the release.
+
+   --upgrade-script <upgrade-script>
+      Use a different gratia-upgrade.sh script than the one in the release.
+
 Default config name is current user name ($username), unless -p is
 specified (in which case there is no default and -c is required).
 
@@ -137,45 +143,74 @@ function get_config() {
 ####################################
 # Options
 OPTIND=1
+TEMP=`getopt -o :B:C:L:R:ac:hm:ptv --long configure-script: --long upgrade-script: -n "install-release" -- "$@"`
 
-while getopts :B:C:L:R:ac:hm:ptv OPT; do
-    case $OPT in
-        B)
+if [ $? != 0 ]; then
+  echo "terminating due to option parse errors" 1>&2
+  exit 1
+fi
+
+eval set -- "$TEMP"
+
+while true; do
+    case $1 in
+        -B)
             type=build
-            relarg=$OPTARG
+            relarg=$2
+            shift 2
             ;;
-        C)
-            config_dat=$OPTARG
+        -C)
+            config_dat=$2
+            shift 2
             ;;
-        L)
+        -L)
             type=local
-            relarg=$OPTARG
+            relarg=$2
+            shift 2
             ;;
-        R)
+        -R)
             type=release
-            relarg=$OPTARG
+            relarg=$2
+            shift 2
             ;;
-        a)
+        -a)
             autostart=1
-            ;;        
-        c)
-            config_name=$OPTARG
+            shift
+            ;; 
+        -c)
+            config_name=$2
+            shift 2
             ;;
-        h)
+        -h)
             usage
             exit 1
             ;;
-        m)
-            mail=$OPTARG
+        -m)
+            mail=$2
+            shift 2
             ;;
-        p)
+        -p)
             production=1
+            shift
             ;;
-        t)
+        -t)
             tomcat_arg=--install-tomcat
+            shift
             ;;
-        v)
+        -v)
             verbose=1
+            shift
+            ;;
+        --configure-script)
+            configure_script="$2"
+            shift 2
+            ;;
+        --upgrade-script)
+            upgrade_script="$2"
+            shift 2
+            ;;
+        --)
+            break
             ;;
         *)
             usage
@@ -219,8 +254,8 @@ if ! { [[ -d "$release_dir" ]] && [[ -r "$release_dir" ]]; };  then
   exit 2
 fi
 
-upgrade_script=${release_dir}/build-scripts/gratia-upgrade.sh
-configure_script=${release_dir}/common/configuration/configure-collector
+upgrade_script=${upgrade_script:-${release_dir}/build-scripts/gratia-upgrade.sh}
+configure_script=${configure_script:-${release_dir}/common/configuration/configure-collector}
 
 # configure command
   declare -a get_config_cmd=("$configure_script")
@@ -277,7 +312,9 @@ else
   mail_opt=mail
 fi
 
-declare -a install_command=("$upgrade_script" --instance $instance_name \
+declare -a install_command=("$upgrade_script" \
+                            --configure-script ${configure_script} \
+                            --instance $instance_name \
                             "${config_dat_args[@]}" \
                             --config-name $config_name \
                             --source "$release_dir" \
