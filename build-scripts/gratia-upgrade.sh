@@ -124,19 +124,32 @@ using SDK, you should specify \"<sdk-dir>/jre\".
  --config         N/A. Used in only expert or cron modes to specify a
                   different .dat file from which to obtain the instance
                   configuration.
+
+--configure-script
+                  N/A. Used only in expert or cron modes to specify a
+                  different configure-collector script than the one in
+                  the release.
+
  --instance       tomcat instance (e.g, tomcat-itb_gratia_itb).
+
  --config-name    Name of config in data file where difference to instance.
                   Default is instance.
+
  --source         source directory
                     - daily builds..... /home/gratia/gratia-builds
                     - release builds... /home/gratia/gratia-releases
                     - other............ specified by you
+
  --pswd           mysql root password.
+
  --daily          Do you want to start the tomcat/collector service?
+
  --mysql          DB MySql file containing the password for upgrades 
                   (required when running from cron and when used the 
                   --pswd argument is ignored)
+
  --force-log4j    Force overwrite of log4j config file.
+
  --install-tomcat Install the latest tomcat from ~gratia/tomcat-tarballs.
 
 If '--daily' is used, then all arguments are required and use of this argument
@@ -587,7 +600,7 @@ by doing a wget on the gratia-release file:"
     logerr "Cannot find attribute ($property) in $properties_file"
   fi
   logit "    tomcat service: $service" 
-  local want_collector=`$source/common/configuration/configure-collector $cc_config_arg-p ${tomcat_dir} --obtain-config-item want_collector $config_name 2>/dev/null | sed -ne 's/^config: want_collector = //p'`
+  local want_collector=`$configure_script $cc_config_arg-p ${tomcat_dir} --obtain-config-item want_collector $config_name 2>/dev/null | sed -ne 's/^config: want_collector = //p'`
   if (( ${want_collector:-1} )); then
     gratia_release="$service/gratia-services/gratia-release"
   else
@@ -611,7 +624,7 @@ $(cat $release_file)
 function verify_port_availability {
   delimit  verify_port_availability
   (( expected_number_of_ports = 6 ))
-  local jmx_port=`$source/common/configuration/configure-collector $cc_config_arg-p ${tomcat_dir} --obtain-config-item jmx_port $config_name 2>/dev/null | sed -ne 's/^config: jmx_port = //p'`
+  local jmx_port=`$configure_script $cc_config_arg-p ${tomcat_dir} --obtain-config-item jmx_port $config_name 2>/dev/null | sed -ne 's/^config: jmx_port = //p'`
   if [[ -n "$jmx_port" ]]; then
     ppid_check="eq"
   else
@@ -619,12 +632,12 @@ function verify_port_availability {
     (( expected_number_of_ports -= 1 ))
     ppid_check="ne"
   fi
-  local ssl_port=`$source/common/configuration/configure-collector $cc_config_arg-p ${tomcat_dir} --obtain-config-item ssl_port $config_name 2>/dev/null | sed -ne 's/^config: ssl_port = //p'`
+  local ssl_port=`$configure_script $cc_config_arg-p ${tomcat_dir} --obtain-config-item ssl_port $config_name 2>/dev/null | sed -ne 's/^config: ssl_port = //p'`
   if [[ -z "$ssl_port" ]]; then
     # One less port to look for
     (( expected_number_of_ports -= 1 ))
   fi
-  local want_collector=`$source/common/configuration/configure-collector $cc_config_arg-p ${tomcat_dir} --obtain-config-item want_collector $config_name 2>/dev/null | sed -ne 's/^config: want_collector = //p'`
+  local want_collector=`$configure_script $cc_config_arg-p ${tomcat_dir} --obtain-config-item want_collector $config_name 2>/dev/null | sed -ne 's/^config: want_collector = //p'`
   if (( ${want_collector:-1} == 0 )); then
     # No collector -> 2 less ports to look for.
     (( expected_number_of_ports -= 2 ))
@@ -684,7 +697,7 @@ function verify_static_reports {
   delimit verify_static_reports
   pdf_dir=$tomcat_dir/$tomcat/webapps/gratia-reports/reports-static
   csv_dir=$tomcat_dir/$tomcat/webapps/gratia-reports/reports-static_csv
-  local doStatic=`$source/common/configuration/configure-collector $cc_config_arg-p ${tomcat_dir} --obtain-config-item staticReports $config_name 2>/dev/null | sed -ne 's/^config: staticReports = //p'`  
+  local doStatic=`$configure_script $cc_config_arg-p ${tomcat_dir} --obtain-config-item staticReports $config_name 2>/dev/null | sed -ne 's/^config: staticReports = //p'`  
 #  script="$(crontab -l| grep -e '^[^#]*'$tomcat_dir/$tomcat' ' |awk '{print $6,$7,$8}' |sed -e s/\'//g)"
   if (( ${doStatic:-0} )) || [[ "$doStatic" == [Tt]* ]]; then
          script="$tomcat_dir/$tomcat/gratia/staticReports.py '$tomcat_dir/$tomcat' '$service/gratia-reporting/'" 
@@ -765,7 +778,7 @@ $(cat $tomcat_dir/$tomcat/gratia/gratia-release)
 #----------------------------
 function find_configured_user_set_email {
   [[ -n "$recipients" ]] && return
-  local user=`$source/common/configuration/configure-collector $cc_config_arg-p ${tomcat_dir} --obtain-config-item tomcat_user $config_name | sed -ne 's/^config: tomcat_user = //p'`
+  local user=`$configure_script $cc_config_arg-p ${tomcat_dir} --obtain-config-item tomcat_user $config_name | sed -ne 's/^config: tomcat_user = //p'`
   if [[ $user != "root" ]] && [[ $user != "daemon" ]]; then
     if [[ -n "$user" ]]; then
       echo "Setting recipients for upgrade status email to $user@fnal.gov based on configured user $user"
@@ -837,10 +850,15 @@ while test "x$1" != "x"; do
         jre_dir="$2";shift;shift
    elif [ "$1" == "--mail" ]; then
         wanted_mail="$2";shift;shift
+   elif [ "$1" == "--configure-script" ]; then
+        configure_script="$2";shift;shift
    else
         usage_error "Invalid command line argument: $1"
    fi
 done
+
+configure_script=${configure_script:-$source/common/configuration/configure-collector}
+ugl_config_arg="$ugl_config_arg -c $configure_script "
 
 case $daily in
   "yes" )
