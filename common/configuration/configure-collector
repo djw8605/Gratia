@@ -128,11 +128,16 @@ TOMCAT_PATH_STEM=
 TOMCAT_SSL_PORT=
 TOMCAT_USER=
 JSVC=
+REDIRECT_REPORTING=
 ####################################
 export JAVA_HOME
 
+prog_base=$(basename ${0})
+[[ "$prog_base" == *-all ]] && REDIRECT_REPORTING="false"
+prog_base=${prog_base%-all}
+
 # This should be fine as a default
-TOMCAT_INSTANCE_NAME=`basename "$0" | sed -e 's/^.*\(tomcat-.*\)$/\1/'`
+TOMCAT_INSTANCE_NAME=`echo "$prog_base" | sed -e 's/^.*\(tomcat-.*\)$/\1/'`
 
 ########################################################################
 # No User Servicable Parts
@@ -149,6 +154,7 @@ PATH="${PATH}:${JAVA_HOME}/bin" # Needed for SSL keytool
 function start {
   JAVA_OPTS="-server"; export JAVA_OPTS
   CATALINA_OPTS="-Dsun.net.inetaddr.ttl=297 -Dcom.sun.management.jmxremote ${TOMCAT_SSL_ARG}-Dcom.mchange.v2.c3p0.management.ManagementCoordinator=com.mchange.v2.c3p0.management.NullManagementCoordinator"; export CATALINA_OPTS
+  perl -wapi.bak -e 's/enabled\s*=\s*".*?"(.*<!-- Controlled by REDIRECT_REPORTING in service start -->.*)$/enabled="'"$REDIRECT_REPORTING"'"$1/' "$CATALINA_HOME"/webapps/*/WEB-INF/urlrewrite.xml
   if [[ -n "$JSVC" ]] && [[ -x "$JSVC" ]] && [[ -n "$TOMCAT_USER" ]]; then
     echo -n "Starting tomcat-gratia: "
     daemon --pidfile="$CATALINA_PID" "$JSVC" -user $TOMCAT_USER \
@@ -428,8 +434,106 @@ sub maybe_restrict_services {
   my ($instance_name, $config_name, $collector_config) = @_;
   if (!$collector_config->{want_reporting}) {
     remove_services($instance_name, $config_name, $collector_config, @reporting_wars);
+  } elsif (lc $collector_config->{want_reporting} eq "redirect") {
+    install_urlrewrite($instance_name, $config_name, $collector_config, "reporting");
   } elsif (!$collector_config->{want_collector}) {
     remove_services($instance_name, $config_name, $collector_config, @collector_wars);
+  }
+}
+
+sub install_urlrewrite {
+  my ($instance_name, $config_name, $collector_config, @services) = @_;
+  my ($urlrewrite_pkg, @dummy) = glob "$gratia_dir/urlrewrite*.zip";
+  unless ($urlrewrite_pkg and -f $urlrewrite_pkg) {
+    print STDERR "INFO: unable to find urlrewrite package in $gratia_dir: looking on tuckey.org ...\n";
+    $urlrewrite_pkg=`wget -q -O - 'http://tuckey.org/urlrewrite/' | sed -ne 's/^.*"\\([^"]*dist\\/urlrewritefilter-[^"]*\\.zip\\)".*\$/\\1/p' | grep -v src`;
+    chomp $urlrewrite_pkg;
+    unless ($urlrewrite_pkg) {
+      print STDERR "ERROR: unable to ascertain location of urlrewrite\n";
+      exit 1;
+    }
+    system("cd $gratia_dir; wget -q \"$urlrewrite_pkg\"");
+    ($urlrewrite_pkg,@dummy) = glob "$gratia_dir/urlrewrite*.zip";
+    unless (-f $urlrewrite_pkg) {
+      print STDERR "ERROR: unable to obtain urlrewrite package\n";
+      exit 1;
+    }
+  }
+  foreach my $service (@services) {
+    next unless $service;
+    print STDERR "INFO: Installing urlrewrite for $service service\n";
+    my $war = "$options{prefix}/tomcat-${instance_name}/webapps/gratia-$service.war";
+    my $service_dir = "$options{prefix}/tomcat-${instance_name}/webapps/gratia-$service";
+    next unless (-f $war or -d $service_dir);
+    if (-f $war) {
+      unless (system("type jar >/dev/null 2>&1") == 0) {
+        print STDERR "ERROR: unable to find jar executable to expand new service war\n";
+        exit 1;
+      }
+      unless (system("rm -rf \"$service_dir\"") == 0) {
+        print STDERR "ERROR: unable to remove $service_dir in order to expand new service\n";
+        exit 1;
+      }
+      unless (system("mkdir -p \"$service_dir\" && cd \"$service_dir\" && jar xf \"$war\"") == 0) {
+        print STDERR "ERROR: unable to expand new service war $war\n";
+        exit 1;
+      }
+    }
+    unless (system("cd \"$service_dir\" && unzip -q $urlrewrite_pkg") == 0) {
+      print STDERR "ERROR: unable to expand urlrewrite package\n";
+      exit 1;
+    }
+    open(WEBXML, "$service_dir/WEB-INF/web.xml") or do {
+      print STDERR "ERROR: unable to find web.xml in $service_dir/WEB-INF/\n";
+      exit 1;
+    };
+    my $webxml = join("", <WEBXML>);
+    close(WEBXML);
+    $webxml =~ s&(<web-app.*?>.*?\n)&$1
+  <!-- UrlRewriteFilter configuration -->
+  <filter>
+    <filter-name>UrlRewriteFilter</filter-name>
+    <filter-class>org.tuckey.web.filters.urlrewrite.UrlRewriteFilter</filter-class>
+    <init-param>
+      <param-name>logLevel</param-name>
+      <param-value>WARN</param-value>
+    </init-param>
+  </filter>
+  <filter-mapping>
+    <filter-name>UrlRewriteFilter</filter-name>
+    <url-pattern>/*</url-pattern>
+  </filter-mapping>
+
+
+&so;
+    open(WEBXML, ">$service_dir/WEB-INF/web.xml") or do {
+      print STDERR "ERROR: unable to write amended web.xml in $service_dir/WEB-INF/";
+      exit 1;
+    };
+    print WEBXML $webxml;
+    close(WEBXML);
+    open(URLXML, "$service_dir/WEB-INF/urlrewrite.xml") or do {
+      print STDERR "ERROR: unable to find urlrewrite.xml in $service_dir/WEB-INF/\n";
+      exit 1;
+    };
+    my $urlxml = join("", <URLXML>);
+    close(URLXML);
+    $urlxml =~ s&(<urlrewrite>.*?\n)&$1
+
+  <rule enabled="true"> <!-- Controlled by REDIRECT_REPORTING in service start -->
+    <note>
+      This rule should redirect all reporting to the correct reporting service.
+    </note>
+    <from>/(.*)</from>
+    <to type="permanent-redirect">http://$collector_config->{collector_host}-reports:$collector_config->{http_port}/gratia-reporting/\$1</to>
+  </rule>
+&so;
+    open(URLXML, ">$service_dir/WEB-INF/urlrewrite.xml") or do {
+      print STDERR "ERROR: unable to write amended urlrewrite.xml in $service_dir/WEB-INF/\n";
+      exit 1;
+    };
+    print URLXML $urlxml;
+    close(URLXML);
   }
 }
 
@@ -529,7 +633,8 @@ sub configure_apel_directory {
 
 sub configure_init_file {
   my ($instance_name, $config_name, $collector_config) = @_;
-  my $init_script = "/etc/rc.d/init.d/tomcat-$instance_name";
+  my $init_dir = "/etc/rc.d/init.d/";
+  my $init_script = "$init_dir/tomcat-$instance_name";
   my $init_script_txt = $init_script_template;
   $init_script_txt =~ s&^(\s*CATALINA_OPTS\s*=\s*".*?)"&${1} -Xmx$collector_config->{max_heap_size}"&m if $collector_config->{max_heap_size};
   $init_script_txt =~ s&^(\s*CATALINA_OPTS\s*=\s*".*?)"&${1} -Xms$collector_config->{initial_heap_size}"&m if $collector_config->{inital_heap_size};
@@ -546,10 +651,19 @@ sub configure_init_file {
       if $collector_config->{tomcat_user};
   $init_script_txt =~ s&\^\^\^HOST_CERT\^\^\^&$collector_config->{host_cert}&;
   $init_script_txt =~ s&\^\^\^HOST_KEY\^\^\^&$collector_config->{host_key}&;
+  my $redirect_val = ($collector_config->{want_reporting} and lc $collector_config->{want_reporting} eq "redirect")?"false":"true";
+  $init_script_txt =~ s&^(REDIRECT_REPORTING=).*$&${1}"$redirect_val"&m;
   open(INIT_SCRIPT, ">$init_script") or die("Unable to open $init_script for writing");
   print INIT_SCRIPT $init_script_txt;
   close(INIT_SCRIPT);
   chmod 0755, $init_script;
+  if (!$collector_config->{want_reporting}) {
+    # Want to be able to start with redirect off.
+    system("cd $init_dir && rm -f tomcat-$instance_name-all && ln -s tomcat-$instance_name tomcat-$instance_name-all");
+  } else {
+    # Remove any vestigial -all startup script.
+    system("cd $init_dir && rm -f tomcat-$instance_name-all");
+  }
   if ($collector_config->{service_auto_start}) {
     system("/sbin/chkconfig --add tomcat-$instance_name");
   } else { # De-activate.
