@@ -154,7 +154,7 @@ PATH="${PATH}:${JAVA_HOME}/bin" # Needed for SSL keytool
 function start {
   JAVA_OPTS="-server"; export JAVA_OPTS
   CATALINA_OPTS="-Dsun.net.inetaddr.ttl=297 -Dcom.sun.management.jmxremote ${TOMCAT_SSL_ARG}-Dcom.mchange.v2.c3p0.management.ManagementCoordinator=com.mchange.v2.c3p0.management.NullManagementCoordinator"; export CATALINA_OPTS
-  perl -wapi.bak -e 's/enabled\s*=\s*".*?"(.*<!-- Controlled by REDIRECT_REPORTING in service start -->.*)$/enabled="'"$REDIRECT_REPORTING"'"$1/' "$CATALINA_HOME"/webapps/*/WEB-INF/urlrewrite.xml
+ find "$CATALINA_HOME"/webapps -path '*/WEB-INF/urlrewrite.xml' | xargs perl -wapi.bak -e 's/enabled\s*=\s*".*?"(.*<!-- Controlled by REDIRECT_REPORTING in service start -->.*)$/enabled="'"$REDIRECT_REPORTING"'"$1/'
   if [[ -n "$JSVC" ]] && [[ -x "$JSVC" ]] && [[ -n "$TOMCAT_USER" ]]; then
     echo -n "Starting tomcat-gratia: "
     daemon --pidfile="$CATALINA_PID" "$JSVC" -user $TOMCAT_USER \
@@ -657,7 +657,7 @@ sub configure_init_file {
   print INIT_SCRIPT $init_script_txt;
   close(INIT_SCRIPT);
   chmod 0755, $init_script;
-  if (!$collector_config->{want_reporting}) {
+  if ($collector_config->{want_reporting} and $collector_config->{want_reporting} eq "redirect") {
     # Want to be able to start with redirect off.
     system("cd $init_dir && rm -f tomcat-$instance_name-all && ln -s tomcat-$instance_name tomcat-$instance_name-all");
   } else {
