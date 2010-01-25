@@ -651,7 +651,7 @@ sub configure_init_file {
       if $collector_config->{tomcat_user};
   $init_script_txt =~ s&\^\^\^HOST_CERT\^\^\^&$collector_config->{host_cert}&;
   $init_script_txt =~ s&\^\^\^HOST_KEY\^\^\^&$collector_config->{host_key}&;
-  my $redirect_val = ($collector_config->{want_reporting} and lc $collector_config->{want_reporting} eq "redirect")?"false":"true";
+  my $redirect_val = ($collector_config->{want_reporting} and lc $collector_config->{want_reporting} eq "redirect")?"true":"false";
   $init_script_txt =~ s&^(REDIRECT_REPORTING=).*$&${1}"$redirect_val"&m;
   open(INIT_SCRIPT, ">$init_script") or die("Unable to open $init_script for writing");
   print INIT_SCRIPT $init_script_txt;
