@@ -313,7 +313,7 @@ public class DataScrubber {
       
       // We handle the case where
       //   a) EndTime is null
-      //   b) EndTime is incorrect (usually 1970-01-01)
+      //   b) EndTime is incorrect (usually 1970-01-01), including in the future.
       //   c) Normal case
       List ids = null;
       long nrecords = 0;
@@ -322,7 +322,7 @@ public class DataScrubber {
          
          String hqlList = "select RecordId from JobUsageRecord where " +
          "((EndTime.Value is null) or " +
-         "(EndTime.Value < :dateLimit)) and ServerDate < :dateLimit";
+         "(EndTime.Value < :dateLimit) or (EndTime.value > (now() + interval 6 month)) and ServerDate < :dateLimit";
          boolean done = false;
          Integer nTries = 0;
          Transaction tx = null;
