@@ -3,10 +3,14 @@ package net.sf.gratia.services;
 import net.sf.gratia.storage.ExpirationDateCalculator;
 import net.sf.gratia.util.Logging;
 
-import java.util.Properties;
-import java.util.List;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.GregorianCalendar;
+import java.util.List;
+import java.util.Properties;
+import java.util.TimeZone;
 import java.util.regex.*;
 
 import org.hibernate.Session;
@@ -309,7 +313,16 @@ public class DataScrubber {
    
    public long IndividualJobUsageRecords() {
       // Execute: delete from tableName set where EndTime < cutoffdate
-      String limit = fExpCalc.expirationDateAsSQLString(new Date(), "JobUsageRecord");
+      SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
+      Date now = new Date();
+      String limit = fExpCalc.expirationDateAsSQLString(now, "JobUsageRecord");
+
+      // Calculate 6 months from now
+      GregorianCalendar cal = new
+            GregorianCalendar(TimeZone.getTimeZone("GMT"));
+      cal.setTime(now);
+      cal.add(Calendar.MONTH, 6);
+      String endTimeLimit = dateFormatter.format(cal.getTime());
       
       // We handle the case where
       //   a) EndTime is null
@@ -322,7 +335,7 @@ public class DataScrubber {
          
          String hqlList = "select RecordId from JobUsageRecord where " +
          "((EndTime.Value is null) or " +
-         "(EndTime.Value < :dateLimit) or (EndTime.value > (now() + interval 6 month))) and ServerDate < :dateLimit";
+         "(EndTime.Value < :dateLimit) or (EndTime.Value > '" + endTimeLimit + "')) and ServerDate < :dateLimit";
          boolean done = false;
          Integer nTries = 0;
          Transaction tx = null;
