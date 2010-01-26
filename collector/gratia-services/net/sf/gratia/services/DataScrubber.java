@@ -322,7 +322,7 @@ public class DataScrubber {
          
          String hqlList = "select RecordId from JobUsageRecord where " +
          "((EndTime.Value is null) or " +
-         "(EndTime.Value < :dateLimit) or (EndTime.value > (now() + interval 6 month)) and ServerDate < :dateLimit";
+         "(EndTime.Value < :dateLimit) or (EndTime.value > (now() + interval 6 month))) and ServerDate < :dateLimit";
          boolean done = false;
          Integer nTries = 0;
          Transaction tx = null;
