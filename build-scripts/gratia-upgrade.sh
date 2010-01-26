@@ -698,6 +698,8 @@ function verify_static_reports {
   pdf_dir=$tomcat_dir/$tomcat/webapps/gratia-reports/reports-static
   csv_dir=$tomcat_dir/$tomcat/webapps/gratia-reports/reports-static_csv
   local doStatic=`$configure_script $cc_config_arg-p ${tomcat_dir} --obtain-config-item staticReports $config_name 2>/dev/null | sed -ne 's/^config: staticReports = //p'`  
+  local want_reporting=`$configure_script $cc_config_arg-p ${tomcat_dir} --obtain-config-item want_reporting $config_name 2>/dev/null | sed -ne 's/^config: want_reporting = //p'`  
+  { [[ "$want_reporting" == "redirect" ]] || ! { [[ "$want_reporting" == [Tt]* ]] || (( ${want_reporting:-0} )); }; } && doStatic=0
 #  script="$(crontab -l| grep -e '^[^#]*'$tomcat_dir/$tomcat' ' |awk '{print $6,$7,$8}' |sed -e s/\'//g)"
   if (( ${doStatic:-0} )) || [[ "$doStatic" == [Tt]* ]]; then
          script="$tomcat_dir/$tomcat/gratia/staticReports.py '$tomcat_dir/$tomcat' '$service/gratia-reporting/'" 
