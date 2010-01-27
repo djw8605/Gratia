@@ -630,7 +630,7 @@ def GetListOfOSGRegisteredVO(voStatus, beginDate, endDate):
                else:
                   ret.append(description.lower())
            else:
-               if (longname != "ATLAS" and longname!=""):
+               if (longname != "ATLAS" and longname!="" and longname.lower() not in ret):
                   ret.append( longname.lower() );
     # And hand add a few 'exceptions!"
     if(voStatus == 'Active'):
