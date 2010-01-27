@@ -412,6 +412,7 @@ foreach my $config_name (@instance_list) {
   configure_collector_config($instance_name, $config_name, $collector_config);
   configure_init_file($instance_name, $config_name, $collector_config);
   configure_tomcat_config($instance_name, $config_name, $collector_config);
+  maybe_configure_tmpwatch($instance_name, $config_name, $collector_config);
   configure_tomcat_users($instance_name, $config_name, $collector_config);
   maybe_restrict_services($instance_name, $config_name, $collector_config);
   configure_static_report_generation($instance_name, $config_name, $collector_config);
@@ -430,6 +431,28 @@ foreach my $config_name (@instance_list) {
 1;
 
 #--------------------------------------
+sub maybe_configure_tmpwatch {
+  my ($instance_name, $config_name, $collector_config) = @_;
+  if ($collector_config->{access_log}) {
+    print STDERR "INFO: Configuring /etc/cron.daily/gratia-tmpwatch to clean up access.log files.\n";
+    open(GRATIA_TMPWATCH, ">/etc/cron.daily/gratia-tmpwatch") or do {
+      print STDERR "ERROR: unable to configure gratia-tmpwatch for access.log files: permissions?\n";
+      exit 1;
+      };
+    print GRATIA_TMPWATCH <<EOF;
+#!/bin/bash
+
+flags=-m
+
+/usr/sbin/tmpwatch "\$flags" 720 $options{prefix}/tomcat-${instance_name}/logs/access
+EOF
+    close GRATIA_TMPWATCH;
+  } else {
+    system("rm -f /etc/cron.daily/gratia-tmpwatch");
+  }
+
+}
+
 sub maybe_restrict_services {
   my ($instance_name, $config_name, $collector_config) = @_;
   if (!$collector_config->{want_reporting}) {
@@ -855,6 +878,8 @@ sub configure_tomcat_config {
   my $in_comment;
   my $in_catalina;
   my $in_connector;
+  my $in_engine;
+  my $seen_engine;
   while (<ORIG_CONFIG>) {
     next if m&<!-- Gratia connectors -->&; # Avoid comment build-up, floss regularly.
     $line_buffer = "${line_buffer}$_";
@@ -865,18 +890,41 @@ sub configure_tomcat_config {
 
     next if $in_comment;
 
-    $line_buffer =~ s&(<Server\s*port\s*=\s*)"[^"]+"&${1}"$collector_config->{server_port}"&;
+    $line_buffer =~ s&(<Server\s+port\s*=\s*)"[^"]+"&${1}"$collector_config->{server_port}"&;
 
-    $line_buffer =~ m&<\s*Service\s*name\s*=\s*"Catalina"\s*>\s*$& and $in_catalina = 1;
+    $line_buffer =~ m&<\s*Service\s+name\s*=\s*"Catalina"\s*>\s*$& and $in_catalina = 1;
 
     if ($in_catalina and not $in_comment) {
       $line_buffer =~ m&^\s*<\s*Connector\s*& and $in_connector = 1;
+      if ($in_engine) {
+        next unless $line_buffer =~ m&/\s*Engine\s*>&;
+        undef $in_engine;
+        print STDERR "DEBUG: Engine complete!\n";
+        print '-' x 72, "\n";
+        print $line_buffer;
+        print '-' x 72, "\n";
+        # Remove existing FastCommonAccessLogValves *only*
+        $line_buffer =~ s&\n[ \t]*<\s*Valve[^>]*?\Q"org.apache.catalina.valves.FastCommonAccessLogValve"\E.*?\s*/\s*>\s*?&&sg;
+        # Put optinal new one in.
+        if ($collector_config->{access_log}) {
+          my $insert_valve = <<EOF;
+        <Valve className="org.apache.catalina.valves.FastCommonAccessLogValve"
+               directory="logs/access"
+               prefix="access.log."
+               resolveHosts="false"
+               rotatable="true"
+               fileDateFormat="yyyy-MM-dd"/>
+EOF
+          $line_buffer =~ s&^(\s*<\s*Engine.*?>.*?\n)&$1$insert_valve&s;
+        }
+      }
       if ($in_connector) {
         next unless $line_buffer =~ m&/\s*>&;
         undef $in_connector;
         $line_buffer =~ s&<\s*Connector.*\s*/\s*>(?:\s*$)?&&s;
       }
-      if ($line_buffer =~ m&^\s*<\s*Engine&) {
+      if (not $seen_engine and not $in_engine and $line_buffer =~ m&^\s*<\s*Engine&) {
+        $in_engine = $seen_engine = 1;
         print REPORTING_CONFIG <<EOF;
     <!-- Gratia connectors -->
     <Connector port="$collector_config->{http_port}" maxHttpHeaderSize="8192"
@@ -915,7 +963,7 @@ EOF
         #               keystoreFile="$options{prefix}/tomcat-${instance_name}/gratia/keystore" keystorePass="server"
         #               truststoreFile="$options{prefix}/tomcat-${instance_name}/gratia/truststore" truststorePass="server"
         #               log4jConfFile="$options{prefix}/tomcat-${instance_name}/conf/log4j-trustmanager.properties"
-
+        next; # Accumulate line buffer.
       }
     }
     print REPORTING_CONFIG "$line_buffer";
