@@ -57,6 +57,7 @@ my %attribute_defaults =
    service_auto_start => 1,
    want_collector => 1,
    want_reporting => 1,
+   robots => "User-agent: *\nDisallow: /\n",
    "properties.attributes" =>
    {
     "service.initial.servlets" => "ON",
@@ -110,6 +111,19 @@ my $tomcat_users_txt = <<'EOF';
   <user username="gratia" password="proto" fullName="gratia prototype user" roles="admin,manager"/>
   <user username="root" password="lisp01" roles="admin,manager"/>
 </tomcat-users>
+EOF
+
+my $root_index_html = <<'EOF';
+<html>
+
+<head>
+<meta http-equiv="refresh" content="0;URL=/gratia-reporting/">
+</head>
+
+<body>
+</body>
+
+</html>
 EOF
 
 my $init_script_template = <<'EOF';
@@ -412,6 +426,7 @@ foreach my $config_name (@instance_list) {
   configure_collector_config($instance_name, $config_name, $collector_config);
   configure_init_file($instance_name, $config_name, $collector_config);
   configure_tomcat_config($instance_name, $config_name, $collector_config);
+  configure_ROOT($instance_name, $config_name, $collector_config);
   maybe_configure_tmpwatch($instance_name, $config_name, $collector_config);
   configure_tomcat_users($instance_name, $config_name, $collector_config);
   maybe_restrict_services($instance_name, $config_name, $collector_config);
@@ -431,6 +446,25 @@ foreach my $config_name (@instance_list) {
 1;
 
 #--------------------------------------
+sub configure_ROOT {
+  my ($instance_name, $config_name, $collector_config) = @_;
+  open(INDEX_HTML,
+       ">$options{prefix}/tomcat-${instance_name}/webapps/ROOT/index.html") or do {
+         print STDERR "ERROR: unable to open $options{prefix}/tomcat-${instance_name}/webapps/ROOT/index.html for write.\n";
+         exit 1;
+       };
+  print INDEX_HTML $root_index_html;
+  close INDEX_HTML;
+  if ($collector_config->{robots}) {
+    open (ROBOTS_TXT, ">$options{prefix}/tomcat-${instance_name}/webapps/ROOT/robots.txt") or do {
+      print STDERR "ERROR: unable to open $options{prefix}/tomcat-${instance_name}/webapps/ROOT/robots.txt for write.\n";
+      exit 1;
+    };
+    print ROBOTS_TXT $collector_config->{robots};
+    close ROBOTS_TXT;
+  }
+}
+
 sub maybe_configure_tmpwatch {
   my ($instance_name, $config_name, $collector_config) = @_;
   if ($collector_config->{access_log}) {
@@ -899,10 +933,6 @@ sub configure_tomcat_config {
       if ($in_engine) {
         next unless $line_buffer =~ m&/\s*Engine\s*>&;
         undef $in_engine;
-        print STDERR "DEBUG: Engine complete!\n";
-        print '-' x 72, "\n";
-        print $line_buffer;
-        print '-' x 72, "\n";
         # Remove existing FastCommonAccessLogValves *only*
         $line_buffer =~ s&\n[ \t]*<\s*Valve[^>]*?\Q"org.apache.catalina.valves.FastCommonAccessLogValve"\E.*?\s*/\s*>\s*?&&sg;
         # Put optinal new one in.
