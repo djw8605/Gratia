@@ -1256,7 +1256,7 @@ def CreateLCGsqlUpdates(results,filename,tableName):
       continue
     output =  "INSERT INTO %s VALUES " % (tableName) + str(tuple(val)) + ";"
     file.write(output+"\n")
-    ##  LogToFile(output)    ## commented to reduce log file output
+    LogToFile(output) ## commenting this to reduce log file output will affect the ability to find late updates (find-late-update.sh)
     gKnownVOs[val[0] +'/'+val[1]] ="1"
         
   file.write("commit;\n")
