@@ -165,10 +165,18 @@ CATALINA_TMPDIR=/tmp
 
 PATH="${PATH}:${JAVA_HOME}/bin" # Needed for SSL keytool
 
+function check_hostkeys {
+  for i in /etc/grid-security/hostkey-*.pem; do
+    [[ /etc/grid-security/hostkey.pem -nt "$i" ]] && \
+      cat /etc/grid-security/hostkey.pem > "$i"
+  done
+}
+
 function start {
   JAVA_OPTS="-server"; export JAVA_OPTS
   CATALINA_OPTS="-Dsun.net.inetaddr.ttl=297 -Dcom.sun.management.jmxremote ${TOMCAT_SSL_ARG}-Dcom.mchange.v2.c3p0.management.ManagementCoordinator=com.mchange.v2.c3p0.management.NullManagementCoordinator"; export CATALINA_OPTS
  find "$CATALINA_HOME"/webapps -path '*/WEB-INF/urlrewrite.xml' | xargs perl -wapi.bak -e 's/enabled\s*=\s*".*?"(.*<!-- Controlled by REDIRECT_REPORTING in service start -->.*)$/enabled="'"$REDIRECT_REPORTING"'"$1/'
+  check_hostkeys
   if [[ -n "$JSVC" ]] && [[ -x "$JSVC" ]] && [[ -n "$TOMCAT_USER" ]]; then
     echo -n "Starting tomcat-gratia: "
     daemon --pidfile="$CATALINA_PID" "$JSVC" -user $TOMCAT_USER \
@@ -575,6 +583,7 @@ sub install_urlrewrite {
     };
     my $urlxml = join("", <URLXML>);
     close(URLXML);
+    my ($shorthost, $domain) = ($collector_config->{collector_host} =~ m&^([^\.]+)(.*)&);
     $urlxml =~ s&(<urlrewrite>.*?\n)&$1
 
   <rule enabled="true"> <!-- Controlled by REDIRECT_REPORTING in service start -->
@@ -582,7 +591,7 @@ sub install_urlrewrite {
       This rule should redirect all reporting to the correct reporting service.
     </note>
     <from>/(.*)</from>
-    <to type="permanent-redirect">http://$collector_config->{collector_host}-reports:$collector_config->{http_port}/gratia-reporting/\$1</to>
+    <to type="permanent-redirect">http://${shorthost}-reports${domain}:$collector_config->{http_port}/gratia-reporting/\$1</to>
   </rule>
 &so;
     open(URLXML, ">$service_dir/WEB-INF/urlrewrite.xml") or do {
