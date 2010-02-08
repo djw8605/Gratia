@@ -245,11 +245,22 @@
 #  01/04/2010 (Karthik Arunachalam)    
 #  AGLT2	3507 	previously 3130 
 #
+#  01/27/2010 (John Wegiand)    
+#    Added GridUNESP_CENTRAL as a part of the BR_SP_SPRACE fenderation.
+#    - they are part of SPRACE and have temporarily given them the same
+#      normalization factor.  This site may not have a steady load of
+#      cms/atlas jobs.
+#
+# 02/08/2010 (Karthik Arunachalam)
+# USCMS-FNAL-WC1-CE	1995	previously 1809 
+# MWT2_IU		2339	previously 1836
+# UTA_SWT2		2851	previously 1543
+#
 ##################################################################
 #-- Site  ------- SPECint2000
 #
 #--- CMS Tier 1 ----    
-USCMS-FNAL-WC1-CE   1809  
+USCMS-FNAL-WC1-CE   1995  
 #--- CMS Tier 2 ----    
 CIT_CMS_T2          3046       
 GLOW                2408
@@ -260,6 +271,7 @@ Purdue-RCAC         2883
 Purdue-Steele       3196
 UCSDT2              2871
 SPRACE              2117
+GridUNESP_CENTRAL   2117
 UFlorida-HPC        1521
 UFlorida-PG         1535
 #
@@ -272,12 +284,12 @@ BNL_ATLAS_1         2302
 AGLT2               3507
 BU_ATLAS_Tier2      2022
 IU_OSG              2101
-MWT2_IU             1836
+MWT2_IU             2339
 MWT2_UC             1935
 OU_OCHEP_SWT2       2389 
 WT2                 2412
 SWT2_CPB            1877
-UTA_SWT2            1543
+UTA_SWT2            2851
 #
 #
 ####################################
