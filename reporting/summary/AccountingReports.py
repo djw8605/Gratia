@@ -636,6 +636,7 @@ def GetListOfOSGRegisteredVO(voStatus, beginDate, endDate):
     if(voStatus == 'Active'):
             ret.append("usatlas")
             ret.append("other")
+            ret.append("other EGEE")
     return ret
 
 def UpdateVOName(list, index, range_begin, range_end):
@@ -822,14 +823,14 @@ def CMSProdData(begin,end):
 
 def GetSiteVOEfficiency(begin,end):
     schema = gDBSchema[mainDB] + ".";
-    #select = "select SiteName, lcase(VO.VOName), sum(Njobs),sum(WallDuration),round(sum(CpuUserDuration+CpuSystemDuration)/sum(WallDuration),2) as CpuToWall, Cores, round(sum(CpuUserDuration+CpuSystemDuration)/(sum(WallDuration)*Cores),2)*100 as eff from " + schema + "MasterSummaryData MSD, " + schema + "Site, " + schema + "Probe, VONameCorrection VC, VO where VO.VOName != \"unknown\" and VO.VOName != \"other\" and Probe.siteid = Site.siteid and MSD.ProbeName = Probe.probename and MSD.VOcorrid = VC.corrid and VC.VOid = VO.VOid and EndTime >= \"" + DateToString(begin) + "\" and EndTime < \"" + DateToString(end) + "\" group by Site.SiteName, lcase(VO.VOName),Cores"
-    select = "select SiteName, lcase(VO.VOName), sum(Njobs),sum(WallDuration),round(sum(CpuUserDuration+CpuSystemDuration)/sum(WallDuration),2) as CpuToWall, Cores, round(sum(CpuUserDuration+CpuSystemDuration)/(sum(WallDuration)*Cores),2)*100 as eff from " + schema + "MasterSummaryData MSD, " + schema + "Site, " + schema + "Probe, VONameCorrection VC, VO where VO.VOName != \"unknown\" and VO.VOName != \"other\" and Probe.siteid = Site.siteid and MSD.ProbeName = Probe.probename and MSD.VOcorrid = VC.corrid and VC.VOid = VO.VOid and EndTime >= \"" + DateToString(begin) + "\" and EndTime < \"" + DateToString(end) + "\" group by Site.SiteName, lcase(VO.VOName),Cores order by Site.SiteName, lcase(VO.VOName), Cores"
+    #select = "select SiteName, lcase(VO.VOName), sum(Njobs),sum(WallDuration),round(sum(CpuUserDuration+CpuSystemDuration)/sum(WallDuration),2) as CpuToWall, Cores, round(sum(CpuUserDuration+CpuSystemDuration)/(sum(WallDuration)*Cores),2)*100 as eff from " + schema + "MasterSummaryData MSD, " + schema + "Site, " + schema + "Probe, VONameCorrection VC, VO where VO.VOName != \"unknown\" and VO.VOName != \"other\" and VO.VOName != \"other EGEE\" and Probe.siteid = Site.siteid and MSD.ProbeName = Probe.probename and MSD.VOcorrid = VC.corrid and VC.VOid = VO.VOid and EndTime >= \"" + DateToString(begin) + "\" and EndTime < \"" + DateToString(end) + "\" group by Site.SiteName, lcase(VO.VOName),Cores"
+    select = "select SiteName, lcase(VO.VOName), sum(Njobs),sum(WallDuration),round(sum(CpuUserDuration+CpuSystemDuration)/sum(WallDuration),2) as CpuToWall, Cores, round(sum(CpuUserDuration+CpuSystemDuration)/(sum(WallDuration)*Cores),2)*100 as eff from " + schema + "MasterSummaryData MSD, " + schema + "Site, " + schema + "Probe, VONameCorrection VC, VO where VO.VOName != \"unknown\" and VO.VOName != \"other\" and VO.VOName != \"other EGEE\" and Probe.siteid = Site.siteid and MSD.ProbeName = Probe.probename and MSD.VOcorrid = VC.corrid and VC.VOid = VO.VOid and EndTime >= \"" + DateToString(begin) + "\" and EndTime < \"" + DateToString(end) + "\" group by Site.SiteName, lcase(VO.VOName),Cores order by Site.SiteName, lcase(VO.VOName), Cores"
     return RunQueryAndSplit(select);    
 
 def GetVOEfficiency(begin,end):
     schema = gDBSchema[mainDB] + ".";
-    #select = "select lcase(VO.VOName), sum(Njobs),sum(WallDuration),round(sum(CpuUserDuration+CpuSystemDuration)/sum(WallDuration),2) as CpuToWall, Cores, round(sum(CpuUserDuration+CpuSystemDuration)/(sum(WallDuration)*Cores),2)*100 as eff from " + schema + "MasterSummaryData MSD, " + schema + "Site, " + schema + "Probe, VONameCorrection VC, VO where VO.VOName != \"unknown\" and VO.VOName != \"other\" and Probe.siteid = Site.siteid and MSD.ProbeName = Probe.probename and MSD.VOcorrid = VC.corrid and VC.VOid = VO.VOid and EndTime >= \"" + DateToString(begin) + "\" and EndTime < \"" + DateToString(end) + "\" group by lcase(VO.VOName),Cores"
-    select = "select lcase(VO.VOName), sum(Njobs),sum(WallDuration),round(sum(CpuUserDuration+CpuSystemDuration)/sum(WallDuration),2) as CpuToWall, Cores, round(sum(CpuUserDuration+CpuSystemDuration)/(sum(WallDuration)*Cores),2)*100 as eff from " + schema + "MasterSummaryData MSD, " + schema + "Site, " + schema + "Probe, VONameCorrection VC, VO where VO.VOName != \"unknown\" and VO.VOName != \"other\" and Probe.siteid = Site.siteid and MSD.ProbeName = Probe.probename and MSD.VOcorrid = VC.corrid and VC.VOid = VO.VOid and EndTime >= \"" + DateToString(begin) + "\" and EndTime < \"" + DateToString(end) + "\" group by lcase(VO.VOName),Cores order by lcase(VO.VOName),Cores"
+    #select = "select lcase(VO.VOName), sum(Njobs),sum(WallDuration),round(sum(CpuUserDuration+CpuSystemDuration)/sum(WallDuration),2) as CpuToWall, Cores, round(sum(CpuUserDuration+CpuSystemDuration)/(sum(WallDuration)*Cores),2)*100 as eff from " + schema + "MasterSummaryData MSD, " + schema + "Site, " + schema + "Probe, VONameCorrection VC, VO where VO.VOName != \"unknown\" and VO.VOName != \"other\" and VO.VOName != \"other EGEE\" and Probe.siteid = Site.siteid and MSD.ProbeName = Probe.probename and MSD.VOcorrid = VC.corrid and VC.VOid = VO.VOid and EndTime >= \"" + DateToString(begin) + "\" and EndTime < \"" + DateToString(end) + "\" group by lcase(VO.VOName),Cores"
+    select = "select lcase(VO.VOName), sum(Njobs),sum(WallDuration),round(sum(CpuUserDuration+CpuSystemDuration)/sum(WallDuration),2) as CpuToWall, Cores, round(sum(CpuUserDuration+CpuSystemDuration)/(sum(WallDuration)*Cores),2)*100 as eff from " + schema + "MasterSummaryData MSD, " + schema + "Site, " + schema + "Probe, VONameCorrection VC, VO where VO.VOName != \"unknown\" and VO.VOName != \"other\" and VO.VOName != \"other EGEE\" and Probe.siteid = Site.siteid and MSD.ProbeName = Probe.probename and MSD.VOcorrid = VC.corrid and VC.VOid = VO.VOid and EndTime >= \"" + DateToString(begin) + "\" and EndTime < \"" + DateToString(end) + "\" group by lcase(VO.VOName),Cores order by lcase(VO.VOName),Cores"
     return RunQueryAndSplit(select);    
 
 def PrintHeader():
@@ -1805,7 +1806,7 @@ Deltas are the differences with the previous period."""
         maxlen = 35
         for x in l:
             (vo,user,njobs,wall) = x.split('\t')
-            if ( vo != "unknown" and vo != "other" ):
+            if ( vo != "unknown" and vo != "other" and vo != "other EGEE"):
                pos = user.find("/CN=cron/");
                if ( pos >= 0) : user = user[pos+8:maxlen+pos+8]
                pat1 = re.compile("/CN=[0-9]*/");
@@ -1873,7 +1874,7 @@ Deltas are the differences with the previous period."""
         maxlen = 35
         for x in l:
             (user,vo,site,njobs,wall) = x.split('\t')
-            if ( vo != "unknown" and vo != "other" ):
+            if ( vo != "unknown" and vo != "other" and vo != "other EGEE"):
                pos = user.find("/CN=cron/");
                if ( pos >= 0) : user = user[pos+8:maxlen+pos+8]
                pat1 = re.compile("/CN=[0-9]*/");
