@@ -26,10 +26,12 @@ import sys,re, AccountingReports
 
 def compareVOs(argv=None):
     # Gather different VO lists needed for the report from OIM
-    gratia = sorted(AccountingReports.GetReportingVOs(AccountingReports.gBegin, AccountingReports.gEnd))
-    oimActive = sorted(AccountingReports.GetListOfRegisteredVO('Active',AccountingReports.gBegin,AccountingReports.gEnd))
-    oimEnabled = sorted(AccountingReports.GetListOfRegisteredVO('Enabled',AccountingReports.gBegin,AccountingReports.gEnd))
-    oimDisabled = sorted(AccountingReports.GetListOfRegisteredVO('Disabled',AccountingReports.gBegin,AccountingReports.gEnd))
+
+    gratia = adjustFermilabVOs(sorted(AccountingReports.GetReportingVOs(AccountingReports.gBegin, AccountingReports.gEnd)))
+    oimActive = adjustFermilabVOs(sorted(AccountingReports.GetListOfRegisteredVO('Active',AccountingReports.gBegin,AccountingReports.gEnd)))
+    oimEnabled = adjustFermilabVOs(sorted(AccountingReports.GetListOfRegisteredVO('Enabled',AccountingReports.gBegin,AccountingReports.gEnd)))
+    oimDisabled = adjustFermilabVOs(sorted(AccountingReports.GetListOfRegisteredVO('Disabled',AccountingReports.gBegin,AccountingReports.gEnd)))
+
     oimAll = oimActive + oimEnabled + oimDisabled
     excluded = ['unknown','other']
 
@@ -80,6 +82,17 @@ def compareVOs(argv=None):
     # otherwise simply print the report to STDOUT
     else:
         print content['text']
+
+def adjustFermilabVOs(voList):
+   # input list sample: ["fermilab-astro", "fermilab-hypercp", "usatlas", "astro", "engage", "hypercp"]
+   # output list sample: [ "usatlas", "astro", "engage", "hypercp"]
+   # logic: The vo "fermilab-xxx" is consider the same as "xxx". Hence strip-off the "fermilab-" prefix and remove duplicates
+   ret = [] 
+   for vo in voList:
+      if(vo.find("fermilab-") >= 0): # "fermilab-xxx" will  match
+         vo = re.compile("^fermilab-(.*)").search(vo).group(1) # "fermilab-xxx" becomes xxx
+      ret.append(vo)
+   return list(set(ret)) # eliminate duplicates by converting the list to a set and back to a list
 
 def voReport(diff,type):
     message = ""
@@ -170,9 +183,9 @@ def printBigList(bigList,cols=2): # print into 2 columns by default
     for vo in sorted(bigList,key=str.lower):
         count+=1
         if(count < 10):
-            message+="%d.  %-15s"%(count,vo)
+            message+="%d.  %-30s"%(count,vo)
         else:
-            message+="%d. %-15s"%(count,vo)
+            message+="%d. %-30s"%(count,vo)
         if count%cols==0:
             message+="\n"        
     return message
