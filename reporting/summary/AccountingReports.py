@@ -3006,9 +3006,6 @@ def NonReportingSites(
 
     allSites = [name for name in regSites if name not in exceptionSites]
 
-    # a super list of all sites to be used as a reference to restore lists back to their original case after finding common entries between one or more lists using a case insensitive search
-    completeSiteList = list(set(regSites) | set(exceptionSites))
-
     reportingVOs = GetLastReportingVOs(when)
     reportingSitesDate = GetSiteLastReportingDate(when,True)
     stoppedSitesDate = GetSiteLastReportingDate(when,False)
@@ -3025,6 +3022,9 @@ def NonReportingSites(
         (name,lastreport) = data.split("\t")
         dates[name] = lastreport
         stoppedSites.append(name);
+
+    # a super list of all sites to be used as a reference to restore lists back to their original case after finding common entries between one or more lists using a case insensitive search
+    completeSiteList = list(set(regSites) | set(exceptionSites) | set(reportingSites) | set(stoppedSites))
 
     stoppedSites = restoreOriginalCase([name for name in listToLower(stoppedSites) if name in listToLower(allSites)], completeSiteList)
     missingSites = restoreOriginalCase([name for name in listToLower(allSites) if name not in listToLower(reportingSites) and name not in listToLower(stoppedSites)], completeSiteList)
@@ -3066,9 +3066,9 @@ def NonReportingSites(
     expectedNoActivity.extend(GetListOfRegisteredVO('Enabled',when,datetime.date.today()))
     emptyVO = [name for name in regVOs if name not in reportingVOs and name not in expectedNoActivity]
     nonregVO = [name for name in reportingVOs if name not in regVOs]
-    print "\nActive VOs with no recent activity are:\n"+prettyList(emptyVO)
-    print "\nThe following VOs are expected to have no activity:\n"+prettyList([name for name in expectedNoActivity if name not in reportingVOs])
-    print "\nThe non-registered VOs with recent activity are:\n"+prettyList(nonregVO)
+    #print "\nActive VOs with no recent activity are:\n"+prettyList(emptyVO)
+    #print "\nThe following VOs are expected to have no activity:\n"+prettyList([name for name in expectedNoActivity if name not in reportingVOs])
+    #print "\nThe non-registered VOs with recent activity are:\n"+prettyList(nonregVO)
 
     print "\nThe non reporting sites are: " # \n"+prettyList(missingSites)
     for name in missingSites:
