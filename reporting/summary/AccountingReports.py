@@ -2966,6 +2966,30 @@ def RangeSummup(range_end = datetime.date.today(),
 
     return missingSites
 
+def findOriginalEntry(toFind,list):
+   if(len(list) > 0):
+      for entry in list:
+         if entry.lower() == toFind.lower():
+            return entry
+
+def listToLower(list):
+   ret = []
+   if(len(list) > 0):
+      for entry in list:
+         if(entry != None):
+            ret.append(entry.lower())
+   return ret
+
+def restoreOriginalCase(listToModify,referenceList):
+   ret = []
+   if(len(listToModify) > 0):
+      for entry in listToModify:
+            val = findOriginalEntry(entry,referenceList)
+            if(val != None):
+                ret.append(val)
+   return ret
+
+
 def NonReportingSites(
                 when = datetime.date.today(),
                 output = "text",
@@ -2981,6 +3005,10 @@ def NonReportingSites(
         'BNL_PANDA', 'GLOW-CMS', 'UCSDT2-B', 'Purdue-Lear' ]
 
     allSites = [name for name in regSites if name not in exceptionSites]
+
+    # a super list of all sites to be used as a reference to restore lists back to their original case after finding common entries between one or more lists using a case insensitive search
+    completeSiteList = list(set(regSites) | set(exceptionSites))
+
     reportingVOs = GetLastReportingVOs(when)
     reportingSitesDate = GetSiteLastReportingDate(when,True)
     stoppedSitesDate = GetSiteLastReportingDate(when,False)
@@ -2998,16 +3026,12 @@ def NonReportingSites(
         dates[name] = lastreport
         stoppedSites.append(name);
 
-    stoppedSites = [name for name in stoppedSites if name in allSites]
-    missingSites = [name for name in allSites if name not in reportingSites and name not in stoppedSites]
-    extraSites = [name for name in reportingSites if name not in allSites]
-    knownExtras = [name for name in extraSites if name in exceptionSites and name not in regSites]
-    extraSites = [name for name in extraSites if name not in exceptionSites]
+    stoppedSites = restoreOriginalCase([name for name in listToLower(stoppedSites) if name in listToLower(allSites)], completeSiteList)
+    missingSites = restoreOriginalCase([name for name in listToLower(allSites) if name not in listToLower(reportingSites) and name not in listToLower(stoppedSites)], completeSiteList)
+    extraSites = restoreOriginalCase([name for name in listToLower(reportingSites) if name not in listToLower(allSites)], completeSiteList)
+    knownExtras = restoreOriginalCase([name for name in listToLower(extraSites) if name in listToLower(exceptionSites) and name not in listToLower(regSites)], completeSiteList)
+    extraSites = restoreOriginalCase([name for name in listToLower(extraSites) if name not in listToLower(exceptionSites)], completeSiteList)
 
-    #print allSites
-    #print reportingSites
-    #print missingSites
-    #print extraSites
     print "As of "+DateToString(datetime.date.today(),False) +", there are "+prettyInt(len(allSites))+" registered OSG sites"
 
     n = len(reportingSites)
