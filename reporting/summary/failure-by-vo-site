@@ -65,7 +65,7 @@ UNION ALL
 order by LVOName, ABS(pcFailed) desc;
 EOF
 
-mysql -u reader -h gratia-db01.fnal.gov -P 3320 --password="reader" -B -t gratia \
+mysql -u reader -h gr-osg-mysql-reports.opensciencegrid.org -P 3306 --password="reader" -B -t gratia \
 > "$TMP/failure.txt" < "$TMP/failure.sql"
 
 cat > "$TMP/failure.pl" <<\EOF
