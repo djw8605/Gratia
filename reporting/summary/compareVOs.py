@@ -89,8 +89,12 @@ def adjustFermilabVOs(voList):
    # logic: The vo "fermilab-xxx" is consider the same as "xxx". Hence strip-off the "fermilab-" prefix and remove duplicates
    ret = [] 
    for vo in voList:
-      if(vo.find("fermilab-") >= 0): # "fermilab-xxx" will  match
+      if(vo == "fermilabgrid"):
+         vo = "fermilab"
+      elif(vo.find("fermilab-") >= 0): # "fermilab-xxx" will  match
          vo = re.compile("^fermilab-(.*)").search(vo).group(1) # "fermilab-xxx" becomes xxx
+      elif(vo.find("fermilab") >= 0): # "fermilabxxx" will  match
+         vo = re.compile("^fermilab(.*)").search(vo).group(1) # "fermilabxxx" becomes xxx
       ret.append(vo)
    return list(set(ret)) # eliminate duplicates by converting the list to a set and back to a list
 
