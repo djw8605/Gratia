@@ -34,11 +34,19 @@ def compareVOs(argv=None):
 
     oimAll = oimActive + oimEnabled + oimDisabled
     excluded = ['unknown','other']
+    allVOs = oimAll + gratia
 
     diff = {}
-    diff['registered'] = list(set(gratia) - set(oimAll) - set(excluded))
-    diff['enabled']    = list(set(gratia) & set(oimEnabled) - set(excluded))  # intersection
-    diff['disabled']   = list(set(gratia) & set(oimDisabled) - set(excluded)) # intersection
+
+    # case sensitive vo comparison
+    #diff['registered'] = list(set(gratia) - set(oimAll) - set(excluded))
+    #diff['enabled']    = list(set(gratia) & set(oimEnabled) - set(excluded))  # intersection
+    #diff['disabled']   = list(set(gratia) & set(oimDisabled) - set(excluded)) # intersection
+
+    # case in-sensitive vo comparison
+    diff['registered'] = AccountingReports.restoreOriginalCase(list(set(AccountingReports.listToLower(gratia)) - set(AccountingReports.listToLower(oimAll)) - set(AccountingReports.listToLower(excluded))), allVOs)
+    diff['enabled']    = AccountingReports.restoreOriginalCase(list(set(AccountingReports.listToLower(gratia)) & set(AccountingReports.listToLower(oimEnabled)) - set(AccountingReports.listToLower(excluded))), allVOs)  # intersection
+    diff['disabled']   = AccountingReports.restoreOriginalCase(list(set(AccountingReports.listToLower(gratia)) & set(AccountingReports.listToLower(oimDisabled)) - set(AccountingReports.listToLower(excluded))), allVOs) # intersection
 
     #==========================================================================================================================
     # Section 1 to 3:
