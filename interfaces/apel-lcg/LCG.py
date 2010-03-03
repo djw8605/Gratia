@@ -195,6 +195,22 @@
 #   day.  Unfortunately, there is no MyOSG query that will give downtimes and
 #   active/inactive status.
 #
+#  2/1/10 (John Weigand)
+#   Uncommented a logging of the INSERT dml to the log file.
+#   The commenting of this entry (done in revision 3654 on 11/2/2009)
+#   inadvertantly #  affected the checking for late updates performed by the
+#   find-late--updates.sh script.
+#   I had forgotten that script was parsing the log file to make this
+#   determination.  I added a comment to that affect when I uncommented the line
+#   so I don't do this again.  I am not sure if it is worth creating another
+#   method of detecting this type of condition at this time.
+#
+#  3/3/10 (John Weigand)  
+#   In theGetQueryForDaysReported method, which checks to see if a resource
+#   has missed any days of reporting,  I removed the check for just cms and
+#   atlas VOs.  Some sites are only used as a backup or for overflow from the
+#   main site.  This eliminates falsely reoprting problems. 
+#
 ########################################################################
 import Downtimes
 import InactiveResources
@@ -920,7 +936,7 @@ where
       Site.SiteName = "%s"
   and Site.siteid = Probe.siteid 
   and Probe.ProbeName  = Main.ProbeName 
-  and Main.VOName in ( %s )
+--  and Main.VOName in ( %s )
   and %s 
   and Main.ResourceType = "Batch"
 """ % (dateFmt,site,vos,periodWhereClause)
