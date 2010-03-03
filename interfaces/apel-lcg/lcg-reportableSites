@@ -256,6 +256,17 @@
 # MWT2_IU		2339	previously 1836
 # UTA_SWT2		2851	previously 1543
 #
+# 03/03/2010 (Karthik Arunachalam)
+# Updated NFapel to the NFgip values for the following sites
+# ------------------------------------------------
+# Site            	NFgip   NFapel   %diff
+# ------------------------------------------------
+# GridUNESP_CENTRAL    	3672    2117     73
+# UFlorida-HPC        	2415    1521     58
+# BU_ATLAS_Tier2        2897    2022     43
+# MWT2_UC            	2449    1935     26
+# ------------------------------------------------
+
 ##################################################################
 #-- Site  ------- SPECint2000
 #
@@ -271,8 +282,8 @@ Purdue-RCAC         2883
 Purdue-Steele       3196
 UCSDT2              2871
 SPRACE              2117
-GridUNESP_CENTRAL   2117
-UFlorida-HPC        1521
+GridUNESP_CENTRAL   3672
+UFlorida-HPC        2415
 UFlorida-PG         1535
 #
 #
@@ -282,10 +293,10 @@ UFlorida-PG         1535
 BNL_ATLAS_1         2302
 #--- ATLAS Tier 2 ----
 AGLT2               3507
-BU_ATLAS_Tier2      2022
+BU_ATLAS_Tier2      2897
 IU_OSG              2101
 MWT2_IU             2339
-MWT2_UC             1935
+MWT2_UC             2449
 OU_OCHEP_SWT2       2389 
 WT2                 2412
 SWT2_CPB            1877
