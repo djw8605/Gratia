@@ -110,7 +110,7 @@ function sendto {
 
     echo "For more information see:,$WEBLOC" > $csvfile
     echo >> $csvfile
-    eval $1 --output=csv $rep_args >>  $csvfile
+    eval $1 $gridOption --output=csv $rep_args >>  $csvfile
     
     if [ "$dryrun" != "yes" ]; then 
        mutt -F ./muttrc -a $csvfile -s "$subject" $to < $txtfile
