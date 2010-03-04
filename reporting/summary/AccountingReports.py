@@ -458,13 +458,13 @@ def RunQuery(select):
             else:
                 gDBConnectOK[gDBCurrent] = True
         # If the user explicitly requests from the command line to restrict queries to contain Grid="OSG" in the where clause, adjust the query to add Grid="OSG" at the appropriate place
-        if(gGrid != None and gGrid.lower() == "osg"): 
-            select = AddOSGToQuery(select)
+        if(gGrid != None): # and gGrid.lower() == "osg"):
+            select = AddGridToQuery(select,gGrid)
         LogToFile(select)
         # print "echo '" + select + "' | " + gMySQL + gMySQLConnectString
         return commands.getoutput("echo '" + select + "' | " + gMySQL + gMySQLConnectString )
 
-def AddOSGToQuery(select):
+def AddGridToQuery(select,gridvalue):
     query = "" # variable to store the modified query
     # split the query into several parts using 'from' as the de-limiter and process the parts to decide if to add the Grid="OSG" to the where clause
     for part in select.split('from'):
@@ -476,7 +476,7 @@ def AddOSGToQuery(select):
                 # if part has where in it
                 if(re.compile(".*where.*").search(part)):
                     # Add Grid="OSG" to the inner most where clause (which is the 1st where clause) and concat with the rest of the part
-                    query+="from " + part.split('where')[0] + " where Grid=\"OSG\" and " + string.join(part.split('where')[1:],'where ')
+                    query+="from " + part.split('where')[0] + " where Grid=\""+gridvalue+"\" and " + string.join(part.split('where')[1:],'where ')
                     modified = 1 # mark that the part was modified
         if(modified == 0): # if not modified simply put back the part into the query
             query+="from " + part
@@ -659,7 +659,7 @@ def WeeklyData():
         select = " SELECT J.VOName, sum((J.CpuUserDuration+J.CpuSystemDuration)) as cputime, " + \
                  " sum((J.CpuUserDuration+J.CpuSystemDuration)*CpuInfo.BenchmarkScore)/1000 as normcpu, " + \
                  " sum(J.WallDuration)*0 as wall, sum(J.WallDuration*CpuInfo.BenchmarkScore)*0/1000 as normwall " + \
-                 " FROM "+schema+".JobUsageRecord_Report J, "+schema+".CPUInfo CpuInfo " + \
+                 " from "+schema+".JobUsageRecord_Report J, "+schema+".CPUInfo CpuInfo " + \
                  " where J.HostDescription=CpuInfo.NodeName " + CommonWhere() + \
                  " group by J.VOName; "
         result = RunQueryAndSplit(select)
@@ -670,7 +670,7 @@ def CondorData():
         select = " SELECT J.VOName, sum((J.CpuUserDuration+J.CpuSystemDuration)) as cputime, " + \
                       " sum((J.CpuUserDuration+J.CpuSystemDuration)*0) as normcpu, " + \
                       " sum(J.WallDuration) as wall, sum(J.WallDuration*0) as normwall " + \
-                 " FROM VOProbeSummary J " + \
+                 " from VOProbeSummary J " + \
                  " where 1=1 " + CommonWhere() + \
                  " group by VOName; "
         return RunQueryAndSplit(select)
@@ -1617,7 +1617,7 @@ order by VO.VOName, SiteName"""
 def UserReportData(begin, end, with_panda = False, selection = ""):
     select = """
 SELECT VOName, CommonName, sum(NJobs), sum(WallDuration) as Wall
-FROM VOProbeSummary U where
+from VOProbeSummary U where
     EndTime >= \"""" + DateTimeToString(begin) + """\" and
     EndTime < \"""" + DateTimeToString(end) + """\"
     and CommonName != \"unknown\"
@@ -1629,7 +1629,7 @@ FROM VOProbeSummary U where
 def UserSiteReportData(begin, end, with_panda = False, selection = ""):
     select = """
 SELECT CommonName, VOName, SiteName, sum(NJobs), sum(WallDuration) as Wall
-FROM VOProbeSummary U, Probe P, Site S where
+from VOProbeSummary U, Probe P, Site S where
     EndTime >= \"""" + DateTimeToString(begin) + """\" and
     EndTime < \"""" + DateTimeToString(end) + """\" and
     U.ProbeName = P.ProbeName and P.siteid = S.siteid 
@@ -1792,7 +1792,7 @@ Deltas are the differences with the previous period."""
 
     def __init__(self, header = False, with_panda = False, selectVOName = ""):
         self.formats["csv"] = ",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""
-        self.formats["text"] = "| %-14s | %-35s | %9s | %13s | %10s | %14s"
+        self.formats["text"] = "| %-22s | %-35s | %9s | %13s | %10s | %14s"
         self.lines["csv"] = ""
         self.lines["text"] = "----------------------------------------------------------------------------------------------------------------------"
         if (not header) :  self.title = ""
@@ -3152,7 +3152,7 @@ def CMSProd(range_end = datetime.date.today(),
 
 def SoftwareVersionData(schema,begin,end):
    select = """SELECT Si.SiteName, M.ProbeName, S.Name, S.Version, M.ServerDate as StartedOn, Pr.CurrentTime as LastReport
-FROM """+schema+""".ProbeSoftware P, """+schema+""".ProbeDetails_Meta M, """+schema+""".Software S, """+schema+""".Probe Pr, """+schema+""".Site Si
+from """+schema+""".ProbeSoftware P, """+schema+""".ProbeDetails_Meta M, """+schema+""".Software S, """+schema+""".Probe Pr, """+schema+""".Site Si
 where M.dbid = P.dbid and S.dbid = P.softid and M.probeid = Pr.probeid and Pr.siteid = Si.siteid
 and Pr.active = true
 and M.ServerDate <=  \"""" + DateTimeToString(end) + """\" 
