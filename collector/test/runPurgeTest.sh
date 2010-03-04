@@ -467,7 +467,7 @@ EOF
   check_result $days jobusagerecord "JobUsageRecord"
   check_result $mdays jobusagerecordxml "JobUsageRecord's RawXml"
   check_result $days metricrecord "MetricRecord"
-  check_result $days metricrecordxml "MetricRecord's RawXml"
+  check_result $mdays metricrecordxml "MetricRecord's RawXml"
   check_result $days origin "Origin records"
 }
 
