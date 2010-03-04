@@ -42,7 +42,7 @@ my @required_properties = ();
 my %attribute_defaults =
   (
    max_heap_size => "256m",
-   db_port => 3320,
+   db_port => 3306,
    db_host => "gratia-db01.fnal.gov",
    UserConfig => "UserConfig_osg.xml",
    UserConfigPath => "gratia-reports/MenuConfig/",
