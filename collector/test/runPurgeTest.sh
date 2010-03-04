@@ -19,9 +19,9 @@ EOF
 http_port=`expr 8000 + ${UID}`
 
 
-dbhost=gratia-vm02.fnal.gov
-dbport=3320
-webhost=gratia-vm02.fnal.gov
+dbhost=gr6x2.fnal.gov
+dbport=3306
+webhost=gr6x0.fnal.gov
 
 # Need obfuscation
 update_password=proto
@@ -227,7 +227,7 @@ EOF
 
    stop_server
 
-   ssh -l root ${webhost} mkdir -p ${tomcatpwd} \; cp -rp /data/tomcat-install/\* ${tomcatpwd}\; mkdir -p ${tomcatpwd}/gratia\; chown -R ${USER} ${tomcatpwd}\; rm -f ${tomcatpwd}/logs/*
+   ssh -l root ${webhost} mkdir -p ${tomcatpwd} \; tar -zxf ~gratia/tomcat-tarballs/apache-tomcat-5.5.28.tar.gz --strip 1 -C ${tomcatpwd}\; mkdir -p ${tomcatpwd}/gratia\; chown -R ${USER} ${tomcatpwd}\; rm -f ${tomcatpwd}/logs/*
 
    ssh -l root ${webhost}  cd ${source}/common/configuration\; \
      ./update-gratia-local -s -S ${source} -d ${pass} -i ${filename} ${schema_name} \; \
