@@ -119,7 +119,7 @@ rm -f daily.check
 
 sendtohtml ./newUsers $whenarg ${WORK_DIR}/report "New users on OSG ($when)" $MAILTO
 sendto ./daily $whenarg ${WORK_DIR}/report "$MAIL_MSG"
-sendto ./dailyFromSummary $whenarg ${WORK_DIR}/summary_report "$SUM_MAIL_MSG"
+# sendto ./dailyFromSummary $whenarg ${WORK_DIR}/summary_report "$SUM_MAIL_MSG"
 sendto ./dailyStatus  $whenarg ${WORK_DIR}/status_report "$STATUS_MAIL_MSG"
 sendto "./dailyStatus --groupby=VO"  $whenarg ${WORK_DIR}/vo_status_report "$VO_STATUS_MAIL_MSG"
 sendto "./dailyStatus --groupby=Both"  $whenarg ${WORK_DIR}/vo_status_report "$BOTH_STATUS_MAIL_MSG"
