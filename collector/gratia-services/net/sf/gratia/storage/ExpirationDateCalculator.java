@@ -37,6 +37,7 @@ public class ExpirationDateCalculator {
 
     public ExpirationDateCalculator() {
         cacheLock.lock();
+        Pattern lifetimeManagementPattern = Pattern.compile("service\\.lifetimeManagement\\.(.*)");
         try {
             if (p == null) {
                 p = net.sf.gratia.util.Configuration.getProperties(); // Read once
@@ -59,8 +60,10 @@ public class ExpirationDateCalculator {
                                             e.getMessage() + " -- property ignored");
                         }
                     } else {
-                        // Trim properties object to only have lifetime properties.
-                        p.remove(key);
+                        if (!lifetimeManagementPattern.matcher(key).lookingAt()) {
+                            // Trim properties object to only have lifetime and lifetimeManagement properties.
+                            p.remove(key);
+                        }
                     }
                 }
             }
