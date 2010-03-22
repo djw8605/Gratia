@@ -561,6 +561,39 @@ def GetListOfOSGSites():
         except:
             return None
 
+def extractReportingGroupVOs():
+   location = 'http://myosg.grid.iu.edu/vosummary/xml?datasource=summary&summary_attrs_showdesc=on&all_vos=on&show_disabled=on&summary_attrs_showreporting_group=on&active=on&active_value=1'
+   html = urllib2.urlopen(location).read()
+   doc = libxml2.parseDoc(html)
+   vos = []
+   for resource in doc.xpathEval("//VO/Name"):
+      voName = ""
+      voName = resource.content
+
+      longName = ""
+      filter = "//VO[Name='" + voName + "']/LongName"
+      for resource in doc.xpathEval(filter):
+         longName = resource.content
+
+      reportingGroupName = []
+      filter = "/VOSummary/VO[Name='" + voName + "']/ReportingGroups/ReportingGroup/Name"
+      for resource in doc.xpathEval(filter):
+         reportingGroupName.append(resource.content)
+
+      fqanGroupName = ""
+      filter = "/VOSummary/VO[Name='" + voName + "']/ReportingGroups/ReportingGroup/FQANs/FQAN[1]/GroupName"
+      for resource in doc.xpathEval(filter):
+         fqanGroupName = resource.content
+
+      if (voName.lower() != "fermilab" and voName.lower() != "FermilabGrid" and voName.lower().find("fermilab") != -1 and longName.find("/") == -1):
+         vos.append((voName, re.compile("^/(.*)").search(fqanGroupName).group(1)))
+      elif len(reportingGroupName) > 0:
+         for rgName in reportingGroupName:
+            vos.append((rgName, longName))
+
+      #vos.append((voName, longName, reportingGroupName, fqanGroupName))
+   return vos
+
 def GetListOfVOs(filter,voStatus,beginDate,endDate):
         name=""
         bd = str(beginDate).split("-") # begin date list
@@ -570,19 +603,22 @@ def GetListOfVOs(filter,voStatus,beginDate,endDate):
         html = urllib2.urlopen(location).read()
         vos = []
         doc = libxml2.parseDoc(html)
+        if(voStatus == 'Active'):
+           vos.extend(extractReportingGroupVOs())
         for resource in doc.xpathEval(filter):
            if resource.name == "Name":
               name = resource.content
-           elif resource.name == "LongName":
+           elif resource.name == "LongName" and not vosContainsName(name, vos):
               vos.append( (name,resource.content) )
-        if(voStatus == 'Active'):
-            location = 'http://myosg.grid.iu.edu/vosummary/xml?datasource=summary&summary_attrs_showdesc=on&all_vos=on&show_disabled=on&summary_attrs_showreporting_group=on&active=on&active_value=1'
-            html = urllib2.urlopen(location).read()
-            doc = libxml2.parseDoc(html)
-            for resource in doc.xpathEval("/VOSummary/VO/ReportingGroups/ReportingGroup/Name"):
-                vos.append((resource.content,'Additional VOs'))
         doc.freeDoc()
         return vos
+
+def vosContainsName(inName, vos):
+   for vo in vos:
+      name, longName = vo 
+      if name == inName:
+         return True
+   return False      
 
 def GetListOfAllRegisteredVO(beginDate,endDate):
     allVOs = []
@@ -624,11 +660,11 @@ def GetListOfOSGRegisteredVO(voStatus, beginDate, endDate):
               LogToFile("Gratia Reports GetListOfRegisteredVO unable to parse: "+pair)
               continue
            if ("/" in description):
+               if(description.lower() == "fermilab/grid"):
+                   description = "fermilab/fermilab"
                (voname,subname) = description.split("/");
                if (subname.lower() not in ret):
                   ret.append(subname.lower())
-               else:
-                  ret.append(description.lower())
            else:
                if (longname != "ATLAS" and longname!="" and longname.lower() not in ret):
                   ret.append( longname.lower() );

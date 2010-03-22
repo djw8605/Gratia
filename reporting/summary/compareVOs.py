@@ -27,10 +27,10 @@ import sys,re, AccountingReports
 def compareVOs(argv=None):
     # Gather different VO lists needed for the report from OIM
 
-    gratia = adjustFermilabVOs(sorted(AccountingReports.GetReportingVOs(AccountingReports.gBegin, AccountingReports.gEnd)))
-    oimActive = adjustFermilabVOs(sorted(AccountingReports.GetListOfRegisteredVO('Active',AccountingReports.gBegin,AccountingReports.gEnd)))
-    oimEnabled = adjustFermilabVOs(sorted(AccountingReports.GetListOfRegisteredVO('Enabled',AccountingReports.gBegin,AccountingReports.gEnd)))
-    oimDisabled = adjustFermilabVOs(sorted(AccountingReports.GetListOfRegisteredVO('Disabled',AccountingReports.gBegin,AccountingReports.gEnd)))
+    gratia = sorted(AccountingReports.GetReportingVOs(AccountingReports.gBegin, AccountingReports.gEnd))
+    oimActive = sorted(AccountingReports.GetListOfRegisteredVO('Active',AccountingReports.gBegin,AccountingReports.gEnd))
+    oimEnabled = sorted(AccountingReports.GetListOfRegisteredVO('Enabled',AccountingReports.gBegin,AccountingReports.gEnd))
+    oimDisabled = sorted(AccountingReports.GetListOfRegisteredVO('Disabled',AccountingReports.gBegin,AccountingReports.gEnd))
 
     oimAll = oimActive + oimEnabled + oimDisabled
     excluded = ['unknown','other']
@@ -90,21 +90,6 @@ def compareVOs(argv=None):
     # otherwise simply print the report to STDOUT
     else:
         print content['text']
-
-def adjustFermilabVOs(voList):
-   # input list sample: ["fermilab-astro", "fermilab-hypercp", "usatlas", "astro", "engage", "hypercp"]
-   # output list sample: [ "usatlas", "astro", "engage", "hypercp"]
-   # logic: The vo "fermilab-xxx" is consider the same as "xxx". Hence strip-off the "fermilab-" prefix and remove duplicates
-   ret = [] 
-   for vo in voList:
-      if(vo == "fermilabgrid"):
-         vo = "fermilab"
-      elif(vo.find("fermilab-") >= 0): # "fermilab-xxx" will  match
-         vo = re.compile("^fermilab-(.*)").search(vo).group(1) # "fermilab-xxx" becomes xxx
-      elif(vo.find("fermilab") >= 0): # "fermilabxxx" will  match
-         vo = re.compile("^fermilab(.*)").search(vo).group(1) # "fermilabxxx" becomes xxx
-      ret.append(vo)
-   return list(set(ret)) # eliminate duplicates by converting the list to a set and back to a list
 
 def voReport(diff,type):
     message = ""
