@@ -45,7 +45,7 @@ function runit {
    "yes" ) "$@" >>$logfile 2>&1;rtn=$?
            echo $rtn > $TMP
           ;;
-       * ) ( $@;rtn=$?
+       * ) ( "$@";rtn=$?
              echo $rtn > $TMP ) 2>&1 | tee -a $logfile
            ;;
   esac
@@ -67,7 +67,7 @@ function try_again {
   fi
   logit "$1";logit "... try again!";sleep 2;continue
 }
-#------------------------------------
+#--------------------------------,----
 function delimit {
   logit;
   logit "#-------------------------------" 
@@ -396,7 +396,12 @@ function install_upgrade {
   if [[ -n "$jre_dir" ]]; then
     jre_opt=" -j "
   fi
-  runit $pgm $ugl_config_arg-p ${tomcat_dir} -d "\"$pswd\""$jre_opt$jre_dir -S $source ${install_tomcat_arg}${force}-s -C $config_name $(echo $tomcat|cut -d'-' -f2-)
+  declare -a args=($pgm $ugl_config_arg -p ${tomcat_dir})
+  if [[ -n "$pswd" ]] && [[ "$pswd" != "NONE" ]]; then
+    declare -a args=("${args[@]}" -d "$pswd")
+  fi
+  declare -a args=("${args[@]}" $jre_opt $jre_dir -S $source ${install_tomcat_arg} ${force} -s -C $config_name "$(echo $tomcat|cut -d'-' -f2-)")
+  runit "${args[@]}"
   logit "Install was successful"
   sleep 3
 }
@@ -878,8 +883,7 @@ verify_root_user
 
 #-- check for Q/A mode or required args---
 if [ "$tomcat" != "NONE" ] && \
-   [ "$source" != "NONE" ] && \
-   [ "$pswd"   != "NONE" -o "$mysql_file" != "NONE" ];then
+   [ "$source" != "NONE" ]; then
   prompt=no
 elif [ "$tomcat" = "NONE" ] && \
      [ "$source" = "NONE" ] && \
@@ -901,7 +905,7 @@ if [ "$daily" = "yes" ];then
     usage_error "--mysql argument required when --daily is used"
   fi
   if [ ! -e "$mysql_file" ];then
-    usage_error "--mysql file ($mysql_file) does not exist."
+      logit "WARNING: --mysql file ($mysql_file) does not exist: delegating root password discovery."
   fi
 fi
 

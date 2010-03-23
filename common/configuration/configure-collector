@@ -273,7 +273,7 @@ chomp $default_remote_host;
 my $default_prefix = "/scratch";
 
 my @default_collector_info =
-  ( "collector-itb.dat",
+  ( "collector-nbuild.dat",
     "collector-dev.dat" );
 
 Getopt::Long::Configure(qw(no_ignore_case bundling require_order));
@@ -441,11 +441,25 @@ foreach my $config_name (@instance_list) {
   configure_static_report_generation($instance_name, $config_name, $collector_config);
   configure_name_file($instance_name, $config_name, $collector_config);
 
-  if (exists $options{"db-root"}) {
-    configure_post_install($instance_name, $config_name, $collector_config);
-  } else {
-    print STDERR "WARNING: no DB root password specified: post-install.sh not configured\n";
+  unless (exists $options{"db-root"}) {
+    my ($db_short_host) = ($collector_config->{"db_host"} =~ m&^([^\.]+)&);
+    my $alternative_pw_file = "$options{prefix}/.mysql-${db_short_host}";
+    print STDERR "INFO: no DB root password specified in options: checking for $alternative_pw_file\n";
+    if (-r $alternative_pw_file) {
+      my @stat = stat($alternative_pw_file);
+      if ($stat[4] != 0) {
+        print STDERR "WARNING: $alternative_pw_file not owned by root: DB root user may be insecure!\n";
+      }
+      if ($stat[2] != 0600) {
+        print STDERR "WARNING: unsafe permissions on $alternative_pw_file: DB root user may be insecure!\n";
+      }
+      $options{"db-root"} = `cat "${alternative_pw_file}"`;
+      chomp $options{"db-root"};
+    } else {
+      print STDERR "WARNING: no DB root password specified and no file $alternative_pw_file assuming an empty password.\n";
+    }
   }
+  configure_post_install($instance_name, $config_name, $collector_config);
 
   configure_installation_owner($instance_name, $config_name, $collector_config);
 
@@ -668,6 +682,7 @@ sub configure_apel_directory {
     my ($instance_name, $config_name, $collector_config) = @_;
     my $post_file = "$options{prefix}/tomcat-${instance_name}/gratia/post-install.sh";
     my $new_post = temporary_filename("post-install.sh");
+    $options{"db-root"} = "" unless exists $options{"db-root"};
     open(ORIG_POST, "<$post_file") or die "Unable to open $post_file for reading";
     open(NEW_POST, ">$new_post") or die "Unable to open $new_post for writing";
     chmod 0700, $new_post;
