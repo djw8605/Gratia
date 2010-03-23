@@ -19,7 +19,7 @@ EOF
 http_port=`expr 8000 + ${UID}`
 
 
-dbhost=gr6x2.fnal.gov
+dbhost=gr8x0.fnal.gov
 dbport=3306
 webhost=gr6x0.fnal.gov
 
@@ -109,9 +109,51 @@ function write_ProbeConfig {
     SuppressUnknownVORecords="0"
     SuppressNoDNRecords="0"
     EnableProbe="0"
-
 />
+EOF
 
+   cat > ProbeConfigSingle <<EOF
+<ProbeConfiguration 
+    UseSSL="0" 
+
+    UseGratiaCertificates="0"
+
+    SSLHost="${webhost}:8443" 
+    SSLCollectorService="/gratia-servlets/rmi"
+    SSLRegistrationHost="${webhost}:${http_port}"
+    SSLRegistrationService="/gratia-security/security"
+
+    GratiaCertificateFile="gratia.hostcert.pem"
+    GratiaKeyFile="gratia.hostkey.pem"
+
+    SOAPHost="${webhost}:${http_port}" 
+    CollectorService="/gratia-servlets/rmi" 
+    UseSoapProtocol="0"
+    
+    MeterName="LocalTester" 
+    SiteName="LocalTesting"
+    Grid="OSG"
+    
+    BundleSize="1"
+    LogLevel="2"
+    DebugLevel="0" 
+    GratiaExtension="gratia.xml"
+    CertificateFile="/etc/grid-security/hostcert.pem"
+    KeyFile="/etc/grid-security/hostkey.pem"
+
+    VDTSetupFile="MAGIC_VDT_LOCATION/setup.sh"
+    UserVOMapFile="MAGIC_VDT_LOCATION/monitoring/grid3-user-vo-map.txt"
+
+    MaxPendingFiles="100000"
+    DataFolder="MAGIC_VDT_LOCATION/gratia/var/data/"
+    WorkingFolder="MAGIC_VDT_LOCATION/gratia/var/tmp"
+    LogFolder="MAGIC_VDT_LOCATION/gratia/var/logs/"
+    LogRotate="31"
+    UseSyslog="0"
+    SuppressUnknownVORecords="0"
+    SuppressNoDNRecords="0"
+    EnableProbe="0"
+/>
 EOF
 
 }
@@ -127,6 +169,7 @@ function wait_for_server {
       python > alive.tmp <<EOF
 import Gratia
 Gratia.Initialize()
+Gratia.ProcessBundle(Gratia.CurrentBundle)
 print Gratia.successfulHandshakes
 EOF
       alive=`cat alive.tmp`
@@ -238,7 +281,7 @@ EOF
 
 
 function fix_duplicate_date {
-  expected_duplicate=23
+  expected_duplicate=21
 
   echo '0' > dups.count
   while [ `tail -1 dups.count` -lt ${expected_duplicate} ]; do
@@ -351,7 +394,7 @@ function loaddata {
 
    python <<EOF
 import Gratia
-Gratia.Initialize()
+Gratia.Initialize("ProbeConfigSingle")
 EOF
 
    echo "Loading job usage record"
@@ -365,11 +408,15 @@ function check_result {
    stem=$2
    msg=$3
 
-   diff $stem.$period.ref $stem.validate
+   diffcmd="diff $stem.$period.ref $stem.validate"
+   
+   eval $diffcmd > /var/tmp/diff.$$
    res=$?
    if [ ${res} -eq 0 ]; then
       echo ${msg} is OK.
    else
+      echo $diffcmd
+      cat /var/tmp/diff.$$
       echo ${msg} is INCORRECT.
       check_failed=1
    fi;
@@ -412,6 +459,7 @@ function turn_on_purging {
 function check_data 
 {
    # Number of days in the last 3 months:
+   ydays=`expr \( 3672 + \`date +%s\` - \`date --date='12 month ago' +%s\` \) / 3600 / 24 `
    days=`expr \( 3672 + \`date +%s\` - \`date --date='3 month ago' +%s\` \) / 3600 / 24 `
    mdays=`expr \( 3672 + \`date +%s\` - \`date --date='1 month ago' +%s\` \) / 3600 / 24 `
    echo "Checking results with $days days in the last 3 months"
@@ -463,7 +511,7 @@ select count(*)<60 from Origin;
 EOF
 
   check_result $days duplicate "Duplicate"
-  check_result 366 jobsummary "JobUsageRecord Summary Table"
+  check_result $ydays jobsummary "JobUsageRecord Summary Table"
   check_result $days jobusagerecord "JobUsageRecord"
   check_result $mdays jobusagerecordxml "JobUsageRecord's RawXml"
   check_result $days metricrecord "MetricRecord"
