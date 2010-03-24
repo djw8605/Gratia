@@ -10,6 +10,7 @@
 ####################################
 # Useful variables
 username=${USER:-${LOGNAME:-$(whoami)}}
+install_access_type=remote
 TMP=`mktemp ${TMPDIR:-/tmp}/install-release.XXXXXXXXXX`
 
 # Trap for cleanup
@@ -69,6 +70,10 @@ Options:
    --configure-script <configure-script>
       Use a different configure-collector script than the one in the release.
 
+   --force-local
+      Force local install even if local host name and remote host name don't
+      match (ignored if user is not root).
+
    --upgrade-script <upgrade-script>
       Use a different gratia-upgrade.sh script than the one in the release.
 
@@ -105,7 +110,7 @@ EOF
 ####################################
 # get_config
 #
-# Get config or property item
+# Get config or property item.
 function get_config() {
   OPTIND=1  
   while getopts :pv OPT; do
@@ -135,6 +140,61 @@ function get_config() {
     return 1
   fi
 }
+
+####################################
+# install_collector
+#
+# Actually perform the install.
+function install_collector() {
+  local status
+  if [[ "${1:-remote}" == "local" ]]; then
+    printf "INFO: performing LOCAL install of collector $instance_name ($config_name) with $type ${release:-build} from $release_dir ... "
+    if (( ${autostart:-0} )); then
+      "${install_command[@]}" >/dev/null 2>&1
+      status=$?
+    else
+      yes n | "${install_command[@]}" >/dev/null 2>&1
+      status=$?
+    fi
+  else
+    echo "INFO: checking root login privilege to install host $remote_host for user $username" 1>&2
+    ssh root@$remote_host echo >/dev/null 2>&1
+    status=$?
+    if (( ${status:-1} != 0 )); then
+      echo "ERROR: User $username unable to login as root to $remote_host for install!" 1>&2
+      exit 2
+    fi
+    printf "INFO: performing REMOTE install of collector $instance_name ($config_name) on host $remote_host with $type ${release:-build} from $release_dir ... " 1>&2
+    if (( ${autostart:-0} )); then
+      ssh root@$remote_host "${install_command[@]}" >/dev/null 2>&1
+      status=$?
+    else
+      ssh root@$remote_host "yes n | ${install_command[@]}" >/dev/null 2>&1
+      status=$?
+    fi
+  fi 
+  if (( ${status:-1} == 0 )); then
+    echo "OK"
+    if [[ "$username" == "root" ]]; then
+      if (( ${autostart:-0} )); then
+        echo "INFO: locally installed collector $instance_name ($config_name) is now running." 1>&2
+      else
+        echo "INFO: locally installed collector must be started -- use:" 1>&2
+        echo "      service $instance_name start" 1>&2
+      fi
+    else
+      if (( ${autostart:-0} )); then
+        echo "INFO: collector $instance_name ($config_name) is now running on $remote_host" 1>&2
+      else
+        echo "INFO: collector $instance_name ($config_name) on $remote_host must be started -- use:" 1>&2
+        echo "      ssh root@$remote_host service $instance_name start" 1>&2
+      fi
+    fi
+  else
+    echo "FAILED!"
+  fi
+  return $status
+}
 ####################################
 
 ########################################################################
@@ -143,7 +203,7 @@ function get_config() {
 ####################################
 # Options
 OPTIND=1
-TEMP=`getopt -o :B:C:L:R:ac:hm:ptv --long configure-script: --long upgrade-script: -n "install-release" -- "$@"`
+TEMP=`getopt -o :B:C:L:R:ac:hm:ptv --long configure-script: --long force-local --long upgrade-script: -n "install-release" -- "$@"`
 
 if [ $? != 0 ]; then
   echo "terminating due to option parse errors" 1>&2
@@ -204,6 +264,10 @@ while true; do
         --configure-script)
             configure_script="$2"
             shift 2
+            ;;
+        --force-local)
+            force_local=1
+            shift
             ;;
         --upgrade-script)
             upgrade_script="$2"
@@ -286,6 +350,8 @@ instance_name=$(get_config instance_name)
 
 instance_name="tomcat-${instance_name:-$config_name}"
 remote_host=`get_config remote_host`
+local_host=`hostname -f`
+
 (( $? == 0 )) || exit 1
 
 db_host=`get_config db_host`
@@ -315,9 +381,11 @@ declare -a install_command=("$upgrade_script" \
                             "${config_dat_args[@]}" \
                             --config-name $config_name \
                             --source "$release_dir" )
+
 if [[ -f "$pswd_file" ]]; then
   declare -a install_command=("${install_command[@]}" --mysql "$pswd_file")
 fi
+
 declare -a install_command=("${install_command[@]}" \
                             --$mail_opt "$mail" \
                             ${tomcat_arg} \
@@ -325,55 +393,17 @@ declare -a install_command=("${install_command[@]}" \
 
 # Now do different things if we're root
 if [[ "$username" == "root" ]]; then
-  printf "INFO: performing install of collector $instance_name ($config_name) locally with $type ${release:-build} from $release_dir ... "
-  if (( ${autostart:-0} )); then
-    "${install_command[@]}" >/dev/null 2>&1
-    status=$?
+  if (( ${force_local:-0} )) || [[ "$local_host" == "$remote_host" ]]; then
+    install_access_type=local
   else
-    yes n | "${install_command[@]}" >/dev/null 2>&1
-    status=$?
-  fi
-else
-  echo "INFO: checking root login privilege to install host $remote_host for user $username" 1>&2
-  ssh root@$remote_host echo >/dev/null 2>&1
-  status=$?
-  if (( ${status:-1} != 0 )); then
-    echo "ERROR: User $username unable to login as root to $remote_host for install!" 1>&2
-    exit 2
-  fi
-  printf "INFO: performing install of collector $instance_name ($config_name) on host $remote_host with $type ${release:-build} from $release_dir ... " 1>&2
-  if (( ${autostart:-0} )); then
-    ssh root@$remote_host "${install_command[@]}" >/dev/null 2>&1
-    status=$?
-  else
-    ssh root@$remote_host "yes n | ${install_command[@]}" >/dev/null 2>&1
-    status=$?
+    echo "INFO: Local user is root but local and remote host names do not match."
+    echo "INFO: use --force-local to force a local install on this node."
   fi
 fi
 
-if (( ${status:-1} == 0 )); then
-  echo "OK"
-  if [[ "$username" == "root" ]]; then
-    if (( ${autostart:-0} )); then
-      echo "INFO: locally installed collector $instance_name ($config_name) is now running." 1>&2
-    else
-      echo "INFO: locally installed collector must be started -- use:" 1>&2
-      echo "      service $instance_name start" 1>&2
-    fi
-  else
-    if (( ${autostart:-0} )); then
-      echo "INFO: collector $instance_name ($config_name) is now running on $remote_host" 1>&2
-    else
-      echo "INFO: collector $instance_name ($config_name) on $remote_host must be started -- use:" 1>&2
-      echo "      ssh root@$remote_host service $instance_name start" 1>&2
-    fi
-  fi
-else
-  echo "FAILED!"
-fi
+install_collector ${install_access_type}
+install_status=$?
 
 echo "INFO: upgrade log may be found in $remote_host:$install_prefix/$instance_name-upgrade.log/"
 
-exit $status
-
-
+exit $install_status
