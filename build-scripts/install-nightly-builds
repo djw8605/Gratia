@@ -14,14 +14,14 @@
 #
 # 2010/03/24 Chris Green
 ########################################################################
+prog=${0##*/}
 TMP=`mktemp ${TMPDIR:-/tmp}/install-nightly-builds.XXXXXXXXXX`
-trap "rm \"$TMP\" 2>/dev/null" EXIT
+trap "cleanup" EXIT
 
-if (( $(id -u) == 0 )); then
-  # If we're running this script as root, get the host credentials.
-  export KRB5CCNAME=$TMP
-  kinit -k
-fi
+cat > $TMP.muttrc <<EOF
+set realname = "Gratia nightly builds"
+set from = "gratia-builds@fnal.gov"
+EOF
 
 VERSION_OPT="-B"
 VERSION_ARG=latest
@@ -29,6 +29,63 @@ SCRIPT_TOPDIR=~gratia/gratia-builds/gratia-${VERSION_ARG}
 INSTALL_SCRIPT=${SCRIPT_TOPDIR}/build-scripts/install-release
 CONFIG_DIR=${SCRIPT_TOPDIR}/common/configuration
 MAILTO=gratia-builds@fnal.gov
+
+function cleanup() {
+  # Restore output and close file
+  exec 4>&2 1>&3-
+  if [[ -s "$TMP.log" ]]; then
+    subject="REPORT from install-nightly-builds on `hostname -s`"
+    mutt -F "$TMP.muttrc" -s "$subject" "$MAILTO" <"$TMP.log" >/dev/null 2>&1
+  fi
+  rm "$TMP*" 2>/dev/null
+}
+
+# Redirect output to file
+exec 3>&1 4>&2 >"$TMP.log" 2>&1
+trap "cleanup" EXIT
+(( max_retries = 5 ))
+(( retry = 0 ))
+
+TEMP=`getopt -n "$prog" --long mail: -- "$@"`
+
+if [ $? != 0 ]; then
+  echo "terminating due to option parse errors" 1>&2
+  exit 1
+fi
+
+eval set -- "$TEMP"
+
+while true; do
+    case $1 in
+      --mail)
+        MAILTO=$2
+        shift 2
+        ;;
+      --)
+        shift
+        break
+        ;;
+      *)
+    esac
+done
+
+if (( $(id -u) == 0 )); then
+  # If we're running this script as root, get the host credentials.
+  export KRB5CCNAME=$TMP
+  kinit -k
+fi
+
+while [[ ! -r "${SCRIPT_TOPDIR}/target/gratia.tar" ]] && (( retry < max_retries )); do
+  printf "WARNING: build not complete -- waiting 1 minute (retry %d of %d)\n"  \
+    $(( ++retry )) $(( max_retries ))
+  sleep 60
+done
+
+if (( retry > max_retries )); then # failed
+  echo "ERROR: build was not completed in time to install: please check" 1>&2
+  exit 1
+fi
+
 for INSTANCE in nightly_{batch,psacct,osg_daily}; do
   service=nbuild
   ${INSTALL_SCRIPT} -t -p -a \
