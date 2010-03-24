@@ -274,6 +274,7 @@ while true; do
             shift 2
             ;;
         --)
+            shift
             break
             ;;
         *)
@@ -281,7 +282,6 @@ while true; do
             exit 2
     esac
 done
-shift $[ OPTIND - 1 ]
 
 if [[ -z "type" ]]; then
   if [[ -n "$1" ]]; then
