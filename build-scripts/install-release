@@ -157,14 +157,14 @@ function install_collector() {
       status=$?
     fi
   else
-    echo "INFO: checking root login privilege to install host $remote_host for user $username" 1>&2
+    echo "INFO: checking root login privilege to install host $remote_host for user $username"
     ssh root@$remote_host echo >/dev/null 2>&1
     status=$?
     if (( ${status:-1} != 0 )); then
       echo "ERROR: User $username unable to login as root to $remote_host for install!" 1>&2
       exit 2
     fi
-    printf "INFO: performing REMOTE install of collector $instance_name ($config_name) on host $remote_host with $type ${release:-build} from $release_dir ... " 1>&2
+    printf "INFO: performing REMOTE install of collector $instance_name ($config_name) on host $remote_host with $type ${release:-build} from $release_dir ... "
     if (( ${autostart:-0} )); then
       ssh root@$remote_host "${install_command[@]}" >/dev/null 2>&1
       status=$?
@@ -177,17 +177,17 @@ function install_collector() {
     echo "OK"
     if [[ "$username" == "root" ]]; then
       if (( ${autostart:-0} )); then
-        echo "INFO: locally installed collector $instance_name ($config_name) is now running." 1>&2
+        echo "INFO: locally installed collector $instance_name ($config_name) is now running."
       else
-        echo "INFO: locally installed collector must be started -- use:" 1>&2
-        echo "      service $instance_name start" 1>&2
+        echo "INFO: locally installed collector must be started -- use:"
+        echo "      service $instance_name start"
       fi
     else
       if (( ${autostart:-0} )); then
-        echo "INFO: collector $instance_name ($config_name) is now running on $remote_host" 1>&2
+        echo "INFO: collector $instance_name ($config_name) is now running on $remote_host"
       else
-        echo "INFO: collector $instance_name ($config_name) on $remote_host must be started -- use:" 1>&2
-        echo "      ssh root@$remote_host service $instance_name start" 1>&2
+        echo "INFO: collector $instance_name ($config_name) on $remote_host must be started -- use:"
+        echo "      ssh root@$remote_host service $instance_name start"
       fi
     fi
   else
@@ -203,10 +203,10 @@ function install_collector() {
 ####################################
 # Options
 OPTIND=1
-TEMP=`getopt -o :B:C:L:R:ac:hm:ptv --long configure-script: --long force-local --long upgrade-script: -n "install-release" -- "$@"`
+TEMP=`getopt -o :B:C:L:R:ac:h\?m:ptv --long configure-script: --long force-local --long help --long mail: --long upgrade-script: -n "install-release" -- "$@"`
 
 if [ $? != 0 ]; then
-  echo "terminating due to option parse errors" 1>&2
+  echo "ERROR :terminating due to option parse errors" 1>&2
   exit 1
 fi
 
@@ -241,11 +241,11 @@ while true; do
             config_name=$2
             shift 2
             ;;
-        -h)
+        --help|-h|\?)
             usage
             exit 1
             ;;
-        -m)
+        --mail|m)
             mail=$2
             shift 2
             ;;
@@ -285,11 +285,11 @@ done
 
 if [[ -z "type" ]]; then
   if [[ -n "$1" ]]; then
-    echo "INFO: not specified -R, -L or -B options. Defaulting to official release $1" 1>&2
+    echo "INFO: not specified -R, -L or -B options. Defaulting to official release $1"
     type=release
     relarg="$1"
   else
-    echo "ERROR: required options -R, -L or -B not specified." 1>&2
+    echo "ERROR: required options -R, -L or -B not specified."
     usage
     exit 1
   fi
@@ -306,15 +306,18 @@ else
 fi
 
 if [[ "$username" == "root" ]]; then
-  echo "INFO: running as root. You should specify config-name. Mail will be sent to grid-accounting or gratia-operation as appropriate." 1>&2
+  printf "INFO: running as root. You should specify config-name."
+  [[ -n "$mail" ]] && \
+    printf " Mail will be sent to grid-accounting or gratia-operation as appropriate."
+  printf "\n"
 else
-  echo "INFO: running as $username. Collector host will be obtained from config for login and install as root." 1>&2 
+  echo "INFO: running as $username. Collector host will be obtained from config for login and install as root."
   [[ -z "$mail" ]] && mail="${username}@fnal.gov"
 fi
 
 # Check for release integrity:
 if ! { [[ -d "$release_dir" ]] && [[ -r "$release_dir" ]]; };  then
-  echo "Specified release directory $release_dir does not exist or is not readable" 1>&2
+  echo "ERROR: Specified release directory $release_dir does not exist or is not readable" 1>&2
   exit 2
 fi
 
@@ -336,7 +339,7 @@ install_prefix=`get_config install_prefix`
 
 if (( ${production:-0} )); then
   if [[ -z "$config_name" ]]; then
-    echo "Configuration name required for production installs" 1>&2
+    echo "ERROR: onfiguration name required for production installs" 1>&2
     usage
     exit 1
   fi
@@ -367,7 +370,7 @@ if [[ -z "$install_prefix" ]]; then
   echo "WARNING: configuration for instance $config_name does not specify install prefix: defaulting to /data" 1>&2
 fi
 
-echo "INFO: If DB password file $pswd_file does not exist or is not readable, configure script will look in $install_prefix/.mysql-${db_host%%.*} on $remote_host" 1>&2
+echo "INFO: If DB password file $pswd_file does not exist or is not readable, configure script will look in $install_prefix/.mysql-${db_host%%.*} on $remote_host"
 
 if (( ${autostart:-0} )); then
   mail_opt=daily
