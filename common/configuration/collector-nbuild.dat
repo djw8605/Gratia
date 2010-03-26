@@ -1,6 +1,7 @@
 (
  nightly_batch =>
  { install_prefix => "/data",
+   instance_name => "gratia",
    tomcat_user => "daemon",
    tomcat_group => "daemon",
    http_port => 80,
@@ -42,6 +43,7 @@
  },
  nightly_psacct =>
  { install_prefix => "/data",
+   instance_name => "gratia",
    tomcat_user => "daemon",
    tomcat_group => "daemon",
    http_port => 80,
@@ -73,6 +75,7 @@
  },
  nightly_osg_daily =>
  { install_prefix => "/data",
+   instance_name => "gratia",
    tomcat_user => "daemon",
    tomcat_group => "daemon",
    http_port => 80,
