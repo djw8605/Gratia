@@ -241,11 +241,11 @@ while true; do
             config_name=$2
             shift 2
             ;;
-        --help|-h|\?)
+        --help|-h|-\?)
             usage
             exit 1
             ;;
-        --mail|m)
+        --mail|-m)
             mail=$2
             shift 2
             ;;
@@ -278,6 +278,7 @@ while true; do
             break
             ;;
         *)
+            echo "ERROR: unknown argument \"$1\"" 1>&2
             usage
             exit 2
     esac
