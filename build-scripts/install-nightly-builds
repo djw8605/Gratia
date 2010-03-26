@@ -163,7 +163,7 @@ done
 # If we're running this script as root, get the host credentials.
 if (( $(id -u) == 0 )); then
   export KRB5CCNAME=$TMP.krb5
-  kinit -k
+  /usr/krb5/bin/kinit -k
 fi
 
 # Make sure the build is actually ready to be used.
