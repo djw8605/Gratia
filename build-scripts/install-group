@@ -93,7 +93,7 @@ trap "cleanup" EXIT # Need to re-do trap after exit.
 
 ####################################
 # Parse options, including long options.
-TEMP=`getopt -o :dh\?v -n "$prog" --long debug --long verbose --long mail: --long help -- "$@"`
+TEMP=`getopt -o :dh\?m:v -n "$prog" --long debug --long verbose --long mail: --long help -- "$@"`
 
 if [ $? != 0 ]; then
   echo "terminating due to option parse errors" 1>&2
@@ -112,7 +112,7 @@ while true; do
         usage
         exit 1
         ;;
-      --mail)
+      --mail|-m)
         MAILTO=$2
         shift 2
         ;;
