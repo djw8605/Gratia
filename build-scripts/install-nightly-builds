@@ -23,7 +23,7 @@ function do_installs() {
     printf "########################################################################\n"
     "${INSTALL_SCRIPT}" -t -p -a \
                         "$VERSION_OPT" "$VERSION_ARG" \
-                         -C "${CONFIG_DIR}/collector-nightly.dat" \
+                         -C "${CONFIG_DAT}" \
                          -m "$MAILTO" \
                          -c "${c}"
   done
@@ -35,7 +35,7 @@ VERSION_OPT="-B"
 VERSION_ARG=latest
 SCRIPT_TOPDIR=~gratia/gratia-builds/gratia-${VERSION_ARG}
 INSTALL_SCRIPT=${SCRIPT_TOPDIR}/build-scripts/install-release
-CONFIG_DIR=${SCRIPT_TOPDIR}/common/configuration
+CONFIG_DAT=${SCRIPT_TOPDIR}/common/configuration/collector-nbuild.dat
 MAILTO=gratia-builds@fnal.gov
 
 # Handle build retries.
