@@ -64,4 +64,4 @@ fi
 # Main program.
 ####################################
 
-. ~gratia/gratia-builds/gratia-latest/install-group "$@"
+. ~gratia/gratia-builds/gratia-latest/build-scripts/install-group "$@"
