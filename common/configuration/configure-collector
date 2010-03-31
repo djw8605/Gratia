@@ -1034,6 +1034,10 @@ sub configure_name_file {
     or die "Unable to open $options{prefix}/tomcat-${instance_name}/collector-host.txt for write!";
   print NAME_FILE $collector_config->{collector_host}, "\n";
   close(NAME_FILE);
+  open(NAME_FILE, ">$options{prefix}/tomcat-${instance_name}/collector-config-name.txt")
+    or die "Unable to open $options{prefix}/tomcat-${instance_name}/collector-config-name.txt for write!";
+  print NAME_FILE $config_name, "\n";
+  close(NAME_FILE);
 }
 
 sub configure_tomcat_users {
