@@ -527,7 +527,7 @@ function send_mail {
   if [ -z "$recipients" ];then
     recipients=$default_recipients
   fi
-  subject="Gratia upgrade: $(hostname -s) of $tomcat - $status"
+  subject="Gratia upgrade: $(hostname -s) of $tomcat ($config_name) - $status"
   logit "Sending mail to $recipients"
   logit "Subject: $subject"
 
