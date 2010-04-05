@@ -175,10 +175,12 @@ function check_hostkeys {
 function start {
   JAVA_OPTS="-server"; export JAVA_OPTS
   CATALINA_OPTS="-Dsun.net.inetaddr.ttl=297 -Dcom.sun.management.jmxremote ${TOMCAT_SSL_ARG}-Dcom.mchange.v2.c3p0.management.ManagementCoordinator=com.mchange.v2.c3p0.management.NullManagementCoordinator"; export CATALINA_OPTS
- find "$CATALINA_HOME"/webapps -path '*/WEB-INF/urlrewrite.xml' | xargs perl -wapi.bak -e 's/enabled\s*=\s*".*?"(.*<!-- Controlled by REDIRECT_REPORTING in service start -->.*)$/enabled="'"$REDIRECT_REPORTING"'"$1/'
+  find "$CATALINA_HOME"/webapps -path '*/WEB-INF/urlrewrite.xml' | xargs perl -wapi.bak -e 's/enabled\s*=\s*".*?"(.*<!-- Controlled by REDIRECT_REPORTING in service start -->.*)$/enabled="'"$REDIRECT_REPORTING"'"$1/'
   check_hostkeys
   if [[ -n "$JSVC" ]] && [[ -x "$JSVC" ]] && [[ -n "$TOMCAT_USER" ]]; then
     echo -n "Starting tomcat-gratia: "
+    # daemon function does not run pam hooks, so /etc/security/limits.conf has no effect.
+    ulimit -n 8192
     daemon --pidfile="$CATALINA_PID" "$JSVC" -user $TOMCAT_USER \
       -cp "$CATALINA_HOME"/bin/bootstrap.jar \
       -outfile "$CATALINA_HOME"/logs/catalina.out \
