@@ -590,8 +590,6 @@ def extractReportingGroupVOs():
       elif len(reportingGroupName) > 0:
          for rgName in reportingGroupName:
             vos.append((rgName, longName))
-
-      #vos.append((voName, longName, reportingGroupName, fqanGroupName))
    return vos
 
 def GetListOfVOs(filter,voStatus,beginDate,endDate):
@@ -1730,11 +1728,13 @@ Deltas are the differences with the previous period."""
         return RangeSiteData(start, end, self.with_panda)
 
 class DataTransferReportConf(GenericConf):
-    title = """\
-OSG Data transfer summary for  %s - %s (midnight UTC - midnight UTC)
-including all data that transferred in that time period.
-Deltas are the differences with the previous period."""
-    headline = "For all data transferred between %s and %s (midnight, UTC)"
+    #title = """\
+#OSG Data transfer summary for  %s - %s (midnight UTC - midnight UTC)
+#including all data that transferred in that time period.
+#Deltas are the differences with the previous period."""
+    #headline = "For all data transferred between %s and %s (midnight, UTC)"
+    title = ""
+    headline = ""
     headers = ("Site","Protocol","Num transfer","Delta transfer","Number of MiB","Delta MiB")
     num_header = 2
     factor = 1 # This is the factor to convert time from seconds to hours for other reports. But for data transfer report there is nothing to convert since we are just dealing with the transfer size (not time)
@@ -2654,11 +2654,20 @@ def GetDataTransferTotals(begin,end):
     gDBCurrent = transferDB
     keepConnectionValue = gMySQLConnectString
     gMySQLConnectString = gMySQLTransferConnectString
-    select = "select sum(Njobs),sum(TransferDuration) from " + schema + "MasterTransferSummary where StartTime >= \"" + DateToString(begin) + "\" and StartTime < \"" + DateToString(end) + "\""
-    result =  RunQueryAndSplit(select)[0].split('\t');
+    select = "select T.SiteName, M.Protocol, sum(M.Njobs) as Njobs, round(sum(M.TransferSize * Multiplier ),0) as SizeTotal, round(sum(M.TransferSize * Multiplier )/sum(TransferDuration),4) as rate, round(sum(TransferDuration),2) as duration from gratia_osg_transfer.MasterTransferSummary M, gratia_osg_transfer.Probe P, gratia_osg_transfer.Site T,gratia_osg_transfer.SizeUnits su where M.StorageUnit = su.Unit and P.siteid = T.siteid and M.ProbeName = P.Probename and StartTime >= \"" + DateToString(begin) + "\" and StartTime < \"" + DateToString(end) + "\" and M.ProbeName not like \"psacct:%\" group by P.siteid, Protocol;"
+    res = RunQueryAndSplit(select)
+    size = 0
+    avg = 0
+    dur = 0
+    njobs = 0
+    for entry in res:
+        njobs+= int(entry.split('\t')[2])
+        size+= int(entry.split('\t')[3])
+        avg+= float(entry.split('\t')[4])
+        dur+= float(entry.split('\t')[5])
     gMySQLConnectString = keepConnectionValue
-    return result
-    
+    return (njobs,size,avg,dur)
+
 def GetNewUsers(begin,end):
     schema = gDBSchema[mainDB] + ".";
     select = """\
@@ -2698,13 +2707,23 @@ def DataTransferSumup(range_end = datetime.date.today(),
                 output = "text",
                 header = True):
 
+    title = """\
+OSG Data transfer summary for  %s - %s (midnight UTC - midnight UTC)
+including all data that transferred in that time period.
+Deltas are the differences with the previous period.\n"""
+
+    #title += "\nFor all data transferred between %s and %s (midnight, UTC)\n"
+    #title += "\nFor all data transferred in the above time period.\n"
+
+    print title % (range_begin, range_end)
+ 
     if not gGrid or gGrid.lower() == 'local':
         try:
             gridDisplayName = gConfig.get("local", "grid_name")
         except:
-            gridDisplayName = ""
+            gridDisplayName = "OSG"
     else:
-        gridDisplayName = 'OSG'
+        gridDisplayName = gGrid 
 
     if not range_end:
         if not range_begin:
@@ -2717,8 +2736,8 @@ def DataTransferSumup(range_end = datetime.date.today(),
 
     regSites = GetListOfOSGSEs();
     disabledSites = GetListOfDisabledOSGSites()
-
     reportingSitesDate = GetSiteLastReportingDate(range_begin, True)
+
     pingSites = []
     for data in reportingSitesDate:
         if ( len(data) > 0 ):
@@ -2729,105 +2748,95 @@ def DataTransferSumup(range_end = datetime.date.today(),
         'FNAL_GPGRID_2', 'USCMS-FNAL-XEN', 'USCMS-FNAL-WC1-CE2',
         'USCMS-FNAL-WC1-CE3', 'USCMS-FNAL-WC1-CE4', 'BNL_LOCAL', 'BNL_OSG',
         'BNL_PANDA', 'GLOW-CMS', 'UCSDT2-B', 'Purdue-Lear' ]
-    #exceptionSites = ['BNL_ATLAS_1', 'BNL_ATLAS_2', 'USCMS-FNAL-WC1-CE2', 'USCMS-FNAL-WC1-CE3', 'USCMS-FNAL-WC1-CE4', 'BNL_LOCAL', 'BNL_OSG', 'BNL_PANDA', 'GLOW-CMS', 'UCSDT2-B']
 
     reportingSites = GetListOfDataTransferReportingSites(range_begin,range_end)
-    #print "reporting sites",reportingSites
+
+    # a super list of all sites to be used as a reference to restore lists back to their original case after finding common entries between one or more lists using a case insensitive search
+    completeSiteList = list(set(regSites) | set(exceptionSites) | set(reportingSites) | set(pingSites) | set(disabledSites))
 
     allSites = None
     if regSites != None:
-        allSites = [name for name in regSites if name not in exceptionSites]
-    #print "allSites is ", allSites
+        allSites = restoreOriginalCase([name for name in listToLower(regSites) if name not in listToLower(exceptionSites)], completeSiteList)
 
     missingSites, emptySites = None, None
     if allSites:
-        missingSites = [name for name in allSites if name not in \
-            reportingSites and name not in pingSites]
-        emptySites = [name for name in allSites if name not in reportingSites \
-            and name in pingSites]
-    
-    extraSites = [name for name in reportingSites if allSites and name not in \
-        allSites and disabledSites and name not in disabledSites]
-    knownExtras = [name for name in extraSites if name in exceptionSites and \
-        name not in regSites]
-    extraSites = [name for name in extraSites if name not in exceptionSites]
+        missingSites = restoreOriginalCase([name for name in listToLower(allSites) if name not in \
+            listToLower(reportingSites) and name not in listToLower(pingSites)], completeSiteList)
+        emptySites = restoreOriginalCase([name for name in listToLower(allSites) if name not in listToLower(reportingSites) \
+            and name in listToLower(pingSites)], completeSiteList)
+ 
+    extraSites = restoreOriginalCase([name for name in listToLower(reportingSites) if listToLower(allSites) and name not in \
+        listToLower(allSites) and listToLower(disabledSites) and name not in listToLower(disabledSites)], completeSiteList)
+    knownExtras = restoreOriginalCase([name for name in listToLower(extraSites) if name in listToLower(exceptionSites) and \
+        name not in listToLower(regSites)], completeSiteList)
+    extraSites = restoreOriginalCase([name for name in listToLower(extraSites) if name not in listToLower(exceptionSites)], completeSiteList)
 
     reportingDisabled = None
     if disabledSites != None:
-        reportingDisabled = [name for name in reportingSites if name in \
-            disabledSites]
-
-    #print allSites
-    #print reportingSites
-    #print missingSites
-    #print extraSites
+        reportingDisabled = restoreOriginalCase([name for name in listToLower(reportingSites) if name in \
+            listToLower(disabledSites)], completeSiteList)
 
     if allSites != None:
-        print "As of %s, there are %s registered SRMv2 %s sites." % \
+        print "As of %s, there are %s registered SRMv2 %s storage resources." % \
             (DateToString(datetime.date.today(),False),
             prettyInt(len(allSites)), gridDisplayName)
 
-    print "\nBetween %s - %s (midnight - midnight UTC):\n" % \
-        (DateToString(range_begin, False), DateToString(range_end, False))
+    #print "\nBetween %s - %s (midnight - midnight UTC):\n" % \
+    #    (DateToString(range_begin, False), DateToString(range_end, False))
                                                                
     n = len(reportingSites)
-    print prettyInt(n)+" sites reported\n"
+    print prettyInt(n)+" storage resources reported\n"
 
-    #[njobs,wallduration,div] = GetTotals(range_begin,range_end)
-    [njobs,wallduration] = GetDataTransferTotals(range_begin,range_end)
-    if (njobs != "NULL"):
-       njobs = int(njobs);
-       wallduration = float(wallduration)
-    else:
-       njobs = 0
-       wallduration = 0
-    
-    print "Total number of transfers: "+prettyInt(njobs)
-    print "Total transfer duration: "+niceNum( wallduration / 3600, 1 )+ " hours"
+    (njobs, totalSize, avgRate, duration) = GetDataTransferTotals(range_begin,range_end)
+
+    print "Total number of transfers: " + niceNum(njobs)
+    print "Total transfer size: "+niceNum(totalSize/(1024*1024))+ " TiB\n"
 
     if reportingSites != None and extraSites != None and knownExtras != None \
             and allSites != None:
         n = len(reportingSites)-len(extraSites)-len(knownExtras)
-        print "%s registered sites reported (%s%% of %s sites)" % \
-            (prettyInt(n), niceNum(n*100/len(allSites),1), gridDisplayName)
-
-    if missingSites != None and allSites != None:
-        n = len(missingSites)
-        print "%s registered sites have NOT reported (%s%% of %s sites)" % \
+        print "%s registered storage resources reported some activity (%s%% of %s storage resources)" % \
             (prettyInt(n), niceNum(n*100/len(allSites),1), gridDisplayName)
 
     if emptySites != None and allSites != None:
         n = len(emptySites)
-        print "%s registered sites have reported but have no activity (%s%% " \
-            "of %s sites)" % (prettyInt(n), niceNum(n*100/len(allSites), 1),
+        print "%s registered storage resources have reported but have no activity (%s%% " \
+            "of %s storage resources)" % (prettyInt(n), niceNum(n*100/len(allSites), 1),
             gridDisplayName)
+
+    if missingSites != None and allSites != None:
+        n = len(missingSites)
+        print "%s registered storage resources have NOT reported (%s%% of %s storage resources)" % \
+            (prettyInt(n), niceNum(n*100/len(allSites),1), gridDisplayName)
+
 
     print
     
     n = len(extraSites);
     if not gGrid or gGrid.lower() != "local":
-        print prettyInt(n)+" non-sanctioned non-registered sites reported " \
+        print prettyInt(n)+" non-sanctioned non-registered storage resources reported " \
             "(might indicate a discrepancy between OIM and Gratia)."
     elif allSites != None:
-        print prettyInt(n)+" non-sanctioned non-registered sites reported."
+        print prettyInt(n)+" non-sanctioned non-registered storage resources reported."
 
     if reportingDisabled != None: 
         n = len(reportingDisabled)
-        print prettyInt(n)+" disabled sites have reported."
+        print prettyInt(n)+" disabled storage resources have reported.\n"
+
+    # data transfer table
+    DataTransferReport(range_end, range_begin, output, True, gWithPanda)
     
     if emptySites != None:
-        print "\nThe sites with no activity are: \n"+prettyList(emptySites)
+        print "\nThe storage resources with no activity are: \n"+prettyList(emptySites)
 
     if missingSites != None:
-        print "\nThe non reporting sites are: \n"+prettyList(missingSites)
+        print "\nThe non reporting storage resources are: \n"+prettyList(missingSites)
 
     if allSites != None:
-        print "\nThe non registered sites are: \n"+prettyList(extraSites)
+        print "\nSites that are registered but have not registered/advertised a SRMV2 service are: \n"+prettyList(extraSites)
     if reportingDisabled != None:
-        print "\nThe disabled sites that are reporting: \n" + \
+        print "\nThe disabled storage resources that are reporting: \n" + \
             prettyList(reportingDisabled)
-
-    print "\n"
 
     return missingSites
 
