@@ -1,5 +1,5 @@
 #!/bin/env python
- 
+
 import sys
 import AccountingReports
 
@@ -14,10 +14,11 @@ def main(argv=None):
 
     argOutput = AccountingReports.gOutput
 
-    AccountingReports.DataTransferReport(range_begin = AccountingReports.gBegin, range_end = AccountingReports.gEnd, output = argOutput, header = True, with_panda = AccountingReports.gWithPanda);
+    AccountingReports.DataTransferSumup(range_begin = AccountingReports.gBegin,
+                             range_end = AccountingReports.gEnd ,
+                             output=argOutput);
+    print
+
 
 if __name__ == "__main__":
     sys.exit(main())
-
-
-
