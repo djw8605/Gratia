@@ -570,27 +570,23 @@ def extractReportingGroupVOs():
       voName = ""
       voName = resource.content
 
-      longName = ""
-      filter = "//VO[Name='" + voName + "']/LongName"
-      for resource in doc.xpathEval(filter):
-         longName = resource.content
-
       reportingGroupName = []
       filter = "/VOSummary/VO[Name='" + voName + "']/ReportingGroups/ReportingGroup/Name"
       for resource in doc.xpathEval(filter):
          reportingGroupName.append(resource.content)
 
-      fqanGroupName = ""
-      filter = "/VOSummary/VO[Name='" + voName + "']/ReportingGroups/ReportingGroup/FQANs/FQAN[1]/GroupName"
-      for resource in doc.xpathEval(filter):
-         fqanGroupName = resource.content
+      if(voName == "FermilabGrid"):
+         vos.append((voName, "Fermilab/Fermilab"))
+      elif(voName == "FermilabArgoneut"):
+         vos.append((voName, "Fermilab/Argoneut"))
+      elif(len(reportingGroupName) > 0):
+         for rg in reportingGroupName:
+            if(rg.lower().find("fermilab-") != -1):
+               rg = re.compile("^fermilab-(.*)").search(rg).group(1)
+            if not vosContainsName(rg,vos):
+               vos.append((rg, ""))
+   return list(vos)
 
-      if (voName.lower() != "fermilab" and voName.lower() != "FermilabGrid" and voName.lower().find("fermilab") != -1 and longName.find("/") == -1):
-         vos.append((voName, re.compile("^/(.*)").search(fqanGroupName).group(1)))
-      elif len(reportingGroupName) > 0:
-         for rgName in reportingGroupName:
-            vos.append((rgName, longName))
-   return vos
 
 def GetListOfVOs(filter,voStatus,beginDate,endDate):
         name=""
@@ -607,14 +603,14 @@ def GetListOfVOs(filter,voStatus,beginDate,endDate):
            if resource.name == "Name":
               name = resource.content
            elif resource.name == "LongName" and not vosContainsName(name, vos):
-              vos.append( (name,resource.content) )
+              vos.append( (name,resource.content))
         doc.freeDoc()
         return vos
 
 def vosContainsName(inName, vos):
    for vo in vos:
       name, longName = vo 
-      if name == inName:
+      if name.lower() == inName.lower():
          return True
    return False      
 
@@ -645,11 +641,11 @@ def GetListOfRegisteredVO(voStatus,beginDate,endDate):
 def GetListOfOSGRegisteredVO(voStatus, beginDate, endDate):
     filter = "/VOActivation/" + voStatus + "/VO/Name|/VOActivation/" + voStatus + "/VO/LongName"
     allVos = GetListOfVOs(filter,voStatus,beginDate,endDate)
-    ret = []
+    ret = set([])
     printederror = False
     for pair in allVos:
            try:
-              (longname,description) = pair;  # pair.split(",");
+              (longname,description) = pair
            except:
               if not printederror:
                  LogToFile("Gratia Reports GetListOfRegisteredVO unable to parse the result of: "+cmd)
@@ -658,20 +654,16 @@ def GetListOfOSGRegisteredVO(voStatus, beginDate, endDate):
               LogToFile("Gratia Reports GetListOfRegisteredVO unable to parse: "+pair)
               continue
            if ("/" in description):
-               if(description.lower() == "fermilab/grid"):
-                   description = "fermilab/fermilab"
-               (voname,subname) = description.split("/");
-               if (subname.lower() not in ret):
-                  ret.append(subname.lower())
-           else:
-               if (longname != "ATLAS" and longname!="" and longname.lower() not in ret):
-                  ret.append( longname.lower() );
+               ret.add(description.split("/")[1].lower())
+           elif longname.lower() != "atlas":
+               ret.add( longname.lower() );
     # And hand add a few 'exceptions!"
     if(voStatus == 'Active'):
-            ret.append("usatlas")
-            ret.append("other")
-            ret.append("other EGEE")
-    return ret
+            ret.add("usatlas")
+            ret.add("other")
+            ret.add("other EGEE")
+    return list(ret)
+
 
 def UpdateVOName(list, index, range_begin, range_end):
       vos = GetListOfAllRegisteredVO(range_begin,range_end)
