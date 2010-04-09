@@ -211,6 +211,17 @@
 #   atlas VOs.  Some sites are only used as a backup or for overflow from the
 #   main site.  This eliminates falsely reoprting problems. 
 #
+#  4/8/10 (John Weigand)
+#   Modified the  CreateXmlHtmlFiles method to output an extract of the
+#   OSG_DATA table with 3 additional calculated columns in order to
+#   see what the HepSpec2006 value, that is now used in WLCG reporting,
+#   would be:
+#      HS06_CPU    HS06_WCT    HS06Factor
+#   Since HepSpec2006 is not available across all sites, WLCG does a simple
+#   multiplication by 4 on the SI2K normalization factor we use. At some
+#   my guess is we will start using the HS06 value but,until then, this 
+#   is the only means of being able to compare easily.
+#
 ########################################################################
 import Downtimes
 import InactiveResources
@@ -1082,13 +1093,19 @@ def RunLCGQuery(query,type,params):
   results = EvaluateMySqlResults((status,output))
   return results
 
-#-----------------------------------------------
+#-----------------------------------------------
 def CreateXmlHtmlFiles(params):
   """ Performs a query of the APEL database tables with output in either xml or 
       an html format creating those files.
       Additionally, it creates a .dat file for use with a shell script. The
       format of this data (showing relationships only using the Path column)
       makes it difficult to parse using xml.
+
+      NOTE: The 'HS06' query needed a little gimmick added in the naming
+            of the output file.  As HepSpec2006 normalized values are
+            currently being done by WLCG and a Nebraska interface uses
+            the current OSG_DATA extract, I had to add this to keep
+            the files unique. (John Weigand 4/8/10)            
   """
   Logit("------")
   Logit("Retrieving APEL database data")
@@ -1098,6 +1115,7 @@ def CreateXmlHtmlFiles(params):
     lcgtable : "select * from %s where Year=%s and Month=%s order by ExecutingSite,LCGUserVO ;" % (lcgtable,dates[0],dates[1]),
     "org_Tier1" : 'select * from org_Tier1 ' + FindTierPath(params,"org_Tier1"),
     "org_Tier2" : 'select * from org_Tier2 ' + FindTierPath(params,"org_Tier2"),
+    "HS06"      : """select ExecutingSite, LCGUserVO, Njobs, SumCPU, NormSumCPU, (NormSumCPU * 4) as HS06_CPU, SumWCT, NormSumWCT, (NormSumWCT * 4) as HS06_WCT, Month, Year, RecordStart, RecordEnd, NormFactor, (NormFactor * 4) as HS06Factor, MeasurementDate FROM %s WHERE Year=%s and Month=%s ORDER BY ExecutingSite, LCGUserVO""" % (lcgtable,dates[0],dates[1]),
   } 
   tables = queries.keys() 
   for table in tables:
@@ -1106,6 +1124,9 @@ def CreateXmlHtmlFiles(params):
     type = "xml"
     output = RunLCGQuery(queries[table],type,params)
     filename = GetFileName(table,type)
+    if table == "HS06":                                          #gimmick
+      filename = GetFileName(lcgtable,type)                      #gimmick
+      filename = re.sub(lcgtable,table+'_'+lcgtable,filename,1)  #gimmick
     WriteFile(output,filename)
     Logit("%s file created: %s" % (type,filename)) 
     SendXmlHtmlFiles(filename,gFilterParameters["GratiaCollector"])
@@ -1114,6 +1135,9 @@ def CreateXmlHtmlFiles(params):
     type = "html"
     output = RunLCGQuery(queries[table],type,params)
     filename = GetFileName(table,type)
+    if table == "HS06":                                          #gimmick
+      filename = GetFileName(lcgtable,type)                      #gimmick
+      filename = re.sub(lcgtable,table+'_'+lcgtable,filename,1)  #gimmick
     WriteFile(output,filename)
     Logit("%s file created: %s" % (type,filename)) 
     SendXmlHtmlFiles(filename,gFilterParameters["GratiaCollector"])
@@ -1123,11 +1147,15 @@ def CreateXmlHtmlFiles(params):
     output = RunLCGQuery(queries[table],type,params)
     type = "dat"
     filename = GetFileName(table,type)
+    if table == "HS06":                                          #gimmick
+      filename = GetFileName(lcgtable,type)                      #gimmick
+      filename = re.sub(lcgtable,table+'_'+lcgtable,filename,1)  #gimmick
     WriteFile(output,filename)
     Logit("%s file created: %s" % (type,filename)) 
     SendXmlHtmlFiles(filename,gFilterParameters["GratiaCollector"])
   Logit("Retrieval of APEL database data complete")
   Logit("------")
+
 #-----------------------------------------------
 def FindTierPath(params,table):
   """ The path in the org_Tier1/2 table keeps changing so we need to find it
