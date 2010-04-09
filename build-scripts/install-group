@@ -6,7 +6,6 @@
 # *sourced*, not executed, by a script which provides a function
 # do_installs and an optional default value for MAILTO.
 #
-#
 # 2010/03/31 Chris Green
 ########################################################################
 prog=${prog:-${0##*/}}
