@@ -575,11 +575,7 @@ def extractReportingGroupVOs():
       for resource in doc.xpathEval(filter):
          reportingGroupName.append(resource.content)
 
-      if(voName == "FermilabGrid"):
-         vos.append((voName, "Fermilab/Fermilab"))
-      elif(voName == "FermilabArgoneut"):
-         vos.append((voName, "Fermilab/Argoneut"))
-      elif(len(reportingGroupName) > 0):
+      if(len(reportingGroupName) > 0):
          for rg in reportingGroupName:
             if(rg.lower().find("fermilab-") != -1):
                rg = re.compile("^fermilab-(.*)").search(rg).group(1)
@@ -655,7 +651,7 @@ def GetListOfOSGRegisteredVO(voStatus, beginDate, endDate):
               continue
            if ("/" in description):
                ret.add(description.split("/")[1].lower())
-           elif longname.lower() != "atlas":
+           elif longname.lower() != "atlas" and longname.lower() != "fermilabgrid" and longname.lower() != "fermilabargoneut":
                ret.add( longname.lower() );
     # And hand add a few 'exceptions!"
     if(voStatus == 'Active'):
