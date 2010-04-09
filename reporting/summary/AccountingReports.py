@@ -561,7 +561,9 @@ def GetListOfOSGSites():
         except:
             return None
 
+gVOsWithReportingGroup = []
 def extractReportingGroupVOs():
+   global gVOsWithReportingGroup
    location = 'http://myosg.grid.iu.edu/vosummary/xml?datasource=summary&summary_attrs_showdesc=on&all_vos=on&show_disabled=on&summary_attrs_showreporting_group=on&active=on&active_value=1'
    html = urllib2.urlopen(location).read()
    doc = libxml2.parseDoc(html)
@@ -574,14 +576,15 @@ def extractReportingGroupVOs():
       filter = "/VOSummary/VO[Name='" + voName + "']/ReportingGroups/ReportingGroup/Name"
       for resource in doc.xpathEval(filter):
          reportingGroupName.append(resource.content)
-
       if(len(reportingGroupName) > 0):
          for rg in reportingGroupName:
             if(rg.lower().find("fermilab-") != -1):
                rg = re.compile("^fermilab-(.*)").search(rg).group(1)
             if not vosContainsName(rg,vos):
-               vos.append((rg, ""))
-   return list(vos)
+               vos.append((rg,""))
+            gVOsWithReportingGroup.append(voName.lower())
+
+   return vos
 
 
 def GetListOfVOs(filter,voStatus,beginDate,endDate):
@@ -598,7 +601,7 @@ def GetListOfVOs(filter,voStatus,beginDate,endDate):
         for resource in doc.xpathEval(filter):
            if resource.name == "Name":
               name = resource.content
-           elif resource.name == "LongName" and not vosContainsName(name, vos):
+           elif resource.name == "LongName" and name.lower() not in gVOsWithReportingGroup:
               vos.append( (name,resource.content))
         doc.freeDoc()
         return vos
@@ -651,7 +654,7 @@ def GetListOfOSGRegisteredVO(voStatus, beginDate, endDate):
               continue
            if ("/" in description):
                ret.add(description.split("/")[1].lower())
-           elif longname.lower() != "atlas" and longname.lower() != "fermilabgrid" and longname.lower() != "fermilabargoneut":
+           elif longname.lower() != "atlas" :
                ret.add( longname.lower() );
     # And hand add a few 'exceptions!"
     if(voStatus == 'Active'):
