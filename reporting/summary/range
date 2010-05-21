@@ -3,49 +3,67 @@
 import sys
 import AccountingReports
 
-from AccountingReports import FromCondor,UseArgs,gOutput,gBegin,CheckDB
-import sys
-
 def main(argv=None):
-    UseArgs(argv)
+    AccountingReports.UseArgs(argv)
 
-    if not CheckDB() :
+    if not AccountingReports.CheckDB() :
         return 1
 
     argOutput = AccountingReports.gOutput
-
-    AccountingReports.RangeSummup(range_begin = AccountingReports.gBegin,
-                             range_end = AccountingReports.gEnd ,
-                             output=argOutput);
-    print
-
-    
-    AccountingReports.RangeSiteReport(range_begin = AccountingReports.gBegin,
+    if (argOutput == "all"):
+       text = {}
+       for iterOutput in ("text","csv","html"):
+          text[iterOutput] = AccountingReports.RangeSummup(range_begin = AccountingReports.gBegin,
+                                 range_end = AccountingReports.gEnd ,
+                                 output=iterOutput);
+          text[iterOutput] += AccountingReports.RangeSiteReport(range_begin = AccountingReports.gBegin,
                                  range_end = AccountingReports.gEnd,
-                                 output = argOutput,
+                                 output = iterOutput,
                                  header = True,
                                  with_panda = AccountingReports.gWithPanda);
-    print
-    AccountingReports.RangeVOReport(range_begin = AccountingReports.gBegin,
+          text[iterOutput] += AccountingReports.RangeVOReport(range_begin = AccountingReports.gBegin,
                                range_end = AccountingReports.gEnd,
-                               output = argOutput,
+                               output = iterOutput,
                                header = False,
                                with_panda = AccountingReports.gWithPanda);
-    print
-    AccountingReports.RangeSiteVOReport(range_begin = AccountingReports.gBegin,
+          text[iterOutput] += AccountingReports.RangeSiteVOReport(range_begin = AccountingReports.gBegin,
                                    range_end = AccountingReports.gEnd,
-                                   output = argOutput,
+                                   output = iterOutput,
                                    header = False,
                                    with_panda = AccountingReports.gWithPanda);
-    print
-    AccountingReports.RangeVOSiteReport(range_begin = AccountingReports.gBegin,
+          text[iterOutput] += AccountingReports.RangeVOSiteReport(range_begin = AccountingReports.gBegin,
                                    range_end = AccountingReports.gEnd,
-                                   output = argOutput,
+                                   output = iterOutput,
+                                   header = False,
+                                   with_panda = AccountingReports.gWithPanda);
+       AccountingReports.sendAll(text)
+
+    else:
+          print AccountingReports.RangeSiteReport(range_begin = AccountingReports.gBegin,
+                                 range_end = AccountingReports.gEnd,
+                                 output = iterOutput,
+                                 header = True,
+                                 with_panda = AccountingReports.gWithPanda);
+          print AccountingReports.RangeSiteReport(range_begin = AccountingReports.gBegin,
+                                 range_end = AccountingReports.gEnd,
+                                 output = iterOutput,
+                                 header = True,
+                                 with_panda = AccountingReports.gWithPanda);
+          print AccountingReports.RangeVOReport(range_begin = AccountingReports.gBegin,
+                               range_end = AccountingReports.gEnd,
+                               output = iterOutput,
+                               header = False,
+                               with_panda = AccountingReports.gWithPanda);
+          print AccountingReports.RangeSiteVOReport(range_begin = AccountingReports.gBegin,
+                                   range_end = AccountingReports.gEnd,
+                                   output = iterOutput,
+                                   header = False,
+                                   with_panda = AccountingReports.gWithPanda);
+          print AccountingReports.RangeVOSiteReport(range_begin = AccountingReports.gBegin,
+                                   range_end = AccountingReports.gEnd,
+                                   output = iterOutput,
                                    header = False,
                                    with_panda = AccountingReports.gWithPanda);
 
 if __name__ == "__main__":
     sys.exit(main())
-
-
-

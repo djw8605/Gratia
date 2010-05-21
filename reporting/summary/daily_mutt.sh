@@ -117,13 +117,14 @@ function sendtohtml {
 
 rm -f daily.check
 
-sendtohtml ./newUsers $whenarg ${WORK_DIR}/report "New users on OSG ($when)" $MAILTO
-sendto ./daily $whenarg ${WORK_DIR}/report "$MAIL_MSG"
 # sendto ./dailyFromSummary $whenarg ${WORK_DIR}/summary_report "$SUM_MAIL_MSG"
-sendto ./dailyStatus  $whenarg ${WORK_DIR}/status_report "$STATUS_MAIL_MSG"
-sendto "./dailyStatus --groupby=VO"  $whenarg ${WORK_DIR}/vo_status_report "$VO_STATUS_MAIL_MSG"
-sendto "./dailyStatus --groupby=Both"  $whenarg ${WORK_DIR}/vo_status_report "$BOTH_STATUS_MAIL_MSG"
-sendto ./transfer $whenarg ${WORK_DIR}/report "$TR_MAIL_MSG"
+
+sendtohtml ./daily    $whenarg ${WORK_DIR}/report "$MAIL_MSG" $MAILTO
+sendtohtml ./newUsers $whenarg ${WORK_DIR}/report "New users on OSG ($when)" $MAILTO
+sendtohtml ./dailyStatus $whenarg ${WORK_DIR}/report "$STATUS_MAIL_MSG" $MAILTO
+sendtohtml "./dailyStatus --groupby=VO" $whenarg ${WORK_DIR}/report "$VO_STATUS_MAIL_MSG" $MAILTO
+sendtohtml "./dailyStatus --groupby=Both" $whenarg ${WORK_DIR}/report "$BOTH_STATUS_MAIL_MSG" $MAILTO
+sendtohtml ./transfer $whenarg ${WORK_DIR}/report "$TR_MAIL_MSG" $MAILTO
 
 grep -v '^#' $VOREPORT_CONFIG | while read line; do
     MYVO=`echo $line | cut -d\  -f1`
@@ -136,7 +137,7 @@ grep -v '^#' $VOREPORT_CONFIG | while read line; do
           export MAILTO="-c \"$EMAIL_CC\" $EMAIL1"
        fi
     fi
-    sendto "./dailyForVO --voname=${MYVO}"   $whenarg ${WORK_DIR}/forvo "${VO_MAIL_MSG}${MYVO}"
+    sendtohtml "./dailyForVO --voname=${MYVO}" $whenarg ${WORK_DIR}/forvo "${VO_MAIL_MSG}${MYVO}" $MAILTO
 done 
 
 if [ "$debug" != "x" ]; then 

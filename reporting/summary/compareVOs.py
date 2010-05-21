@@ -115,6 +115,7 @@ def voTable(voList):
     # Run the query and get the results
     siteVO = AccountingReports.RunQueryAndSplit(query)
     # If one or more VOs matched this criteria, then create a formatted report 
+    message = ""
     if len(siteVO)!=0:
         dashLen=60; # number of dashes needed for the horizantal dashed separator line in the table
         message = dashLen*"-" + "\n"

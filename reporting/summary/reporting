@@ -9,11 +9,13 @@ def main(argv=None):
         return 1
 
     argOutput = AccountingReports.gOutput
-
-    AccountingReports.NonReportingSites(when = AccountingReports.gBegin, output=argOutput) # datetime.date(2008,02,01))
-
-    #AccountingReports.RangeSummup(range_begin = AccountingReports.gBegin,
-    #                         range_end = AccountingReports.gEnd)
+    if (argOutput == "all"):
+       text = {}
+       for iterOutput in ("text","csv","html"):
+          text[iterOutput] = AccountingReports.NonReportingSites(when = AccountingReports.gBegin, output=iterOutput) # datetime.date(2008,02,01))
+       AccountingReports.sendAll(text)
+    else:
+       print AccountingReports.NonReportingSites(when = AccountingReports.gBegin, output=argOutput) # datetime.date(2008,02,01))
 
 if __name__ == "__main__":
     sys.exit(main())

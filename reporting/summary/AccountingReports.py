@@ -32,6 +32,7 @@ from email.MIMEMultipart import MIMEMultipart
 from email.MIMEBase import MIMEBase
 from email.Utils import formataddr
 from email.quopriMIME import encode
+from cStringIO import StringIO
 
 gMySQL = "mysql"
 gProbename = "cmslcgce.fnal.gov"
@@ -407,7 +408,6 @@ def sendAll(text, filestem = "temp"):
          print text[iterOutput]
    else:
       sendEmail( (gEmailToNames, gEmailTo), gEmailSubject, text, None)
-
 
 def DBConnectString():
     global gMySQLConnectString,gMySQLFermiConnectString,gMySQLDailyConnectString,gMySQLTransferConnectString
@@ -974,8 +974,8 @@ class GenericConf: # top parent class. Just for sake of adding a single common a
 
 class DailySiteJobStatusConf(GenericConf):
     title = "Summary of the job exit status (midnight to midnight UTC) for %s\nincluding all jobs that finished in that time period.\n\nFor Condor the value used is taken from 'ExitCode' and NOT from 'Exit Status'\n\nWall Success: Wall clock hours of successfully completed jobs\nWall Failed: Wall clock hours of unsuccessfully completed jobs\nWall Success Rate: Wall Success / (Wall Success + Wall Failed)\nSuccess: number of successfully completed jobs\nFailed: Number of unsuccessfully completed jobs\nSuccess Rate: number of successfull jobs / total number of jobs\n"
-    headline = "For all jobs finished on %s (UTC)"
-    headers = ("Site","Wall Succ Rate","Wall Success","Wall Failed","Success Rate","Success","Failed")
+    headline = "\nFor all jobs finished on %s (UTC)\n"
+    headers = ("","Site","Wall Succ Rate","Wall Success","Wall Failed","Success Rate","Success","Failed")
     num_header = 1
     formats = {}
     lines = {}
@@ -987,26 +987,34 @@ class DailySiteJobStatusConf(GenericConf):
     VOName = ""
 
     def __init__(self, header = False, CondorSpecial = True, groupby = "Site", VOName = ""):
-           self.formats["csv"] = ",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""
-           self.formats["text"] = "| %-22s | %14s | %12s | %11s | %12s | %10s | %10s "
+           self.formats["csv"] = ",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""
+           self.formats["text"] = "| %3s | %-22s | %14s | %12s | %11s | %12s | %10s | %10s "
+           self.formats["html"] = "<tr bgcolor=white><td>%s</td><td>%s</td><td align=right>%s</td><td align=right>%s</td><td align=right>%s</td><td align=right>%s</td><td align=right>%s</td><td align=right>%s</td></tr>"
+
            self.lines["csv"] = ""
            self.lines["text"] = "--------------------------------------------------------------------------------------------------------------------"
+           self.lines["html"] = ""
 
            if (not header) :  self.title = ""
            self.CondorSpecial = CondorSpecial
            self.VOName = VOName
+
            if (groupby == "VO"):
                self.GroupBy = "VO.VOName"
-               self.headers = ("VO","Wall Succ Rate","Wall Success","Wall Failed","Success Rate","Success","Failed")
+               self.headers = ("","VO","Wall Succ Rate","Wall Success","Wall Failed","Success Rate","Success","Failed")
                self.totalheaders = ["All VOs"]
+
            elif (groupby == "Both"):
-               self.formats["csv"] = ",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""
-               self.formats["text"] = "| %-22s | %-22s | %14s | %12s | %11s | %12s | %10s | %10s "
+               self.formats["csv"] = ",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""
+               self.formats["text"] = "| %3s | %-22s | %-22s | %14s | %12s | %11s | %12s | %10s | %10s "
+               self.formats["html"] = "<tr bgcolor=white><td>%s</td><td>%s</td><td>%s</td><td align=right>%s</td><td align=right>%s</td><td align=right>%s</td><td align=right>%s</td><td align=right>%s</td><td align=right>%s</td></tr>"
+
                self.lines["text"] = "---------------------------------------------------------------------------------------------------------------------------------------------"
                self.GroupBy = "Site.SiteName,VO.VOName"
-               self.headers = ("Site","VO","Wall Succ Rate","Wall Success","Wall Failed","Success Rate","Success","Failed")
+               self.headers = ("","Site","VO","Wall Succ Rate","Wall Success","Wall Failed","Success Rate","Success","Failed")
                self.totalheaders = ["All Sites","All VOs"]
                self.Both = True
+
            elif (groupby == "ForVO"):
                self.GroupBy = "Site.SiteName"
                self.ExtraSelect = " and VO.VOName = " + " \"" + self.VOName + "\" "
@@ -1034,19 +1042,23 @@ class DailySiteJobStatusConf(GenericConf):
     
   
 class DailySiteReportConf(GenericConf):
-        title = "OSG usage summary (midnight to midnight UTC) for %s\nincluding all jobs that finished in that time period.\nWall Duration is expressed in hours and rounded to the nearest hour.\nWall Duration is the duration between the instant the job start running and the instant the job ends its execution.\nThe number of jobs counted here includes only the jobs directly seen by batch system and does not include the request sent directly to a pilot job.\nThe Wall Duration includes the total duration of the the pilot jobs.\nDeltas are the differences with the previous day.\n(nr) after a VO name indicates that the VO is not registered with OSG.\n"
-        headline = "For all jobs finished on %s (UTC)"
-        headers = ("Site","# of Jobs","Wall Duration","Delta jobs","Delta duration")
+        title = "&nbsp;<p>OSG usage summary (midnight to midnight UTC) for %s\nincluding all jobs that finished in that time period.\nWall Duration is expressed in hours and rounded to the nearest hour.\nWall Duration is the duration between the instant the job start running and the instant the job ends its execution.\nThe number of jobs counted here includes only the jobs directly seen by batch system and does not include the request sent directly to a pilot job.\nThe Wall Duration includes the total duration of the the pilot jobs.\nDeltas are the differences with the previous day.\n(nr) after a VO name indicates that the VO is not registered with OSG.\n"
+        headline = "<p>For all jobs finished on %s (UTC)<p>"
+        headers = ("","Site","# of Jobs","Wall Duration","Delta jobs","Delta duration")
         num_header = 1
         formats = {}
         lines = {}
         totalheaders = ["All sites"]
 
         def __init__(self, header = False):
-           self.formats["csv"] = ",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""
-           self.formats["text"] = "| %-22s | %9s | %13s | %10s | %14s"
+
+           self.formats["csv"] = ",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""
+           self.formats["text"] = "| %3s | %-22s | %9s | %13s | %10s | %14s"
+           self.formats["html"] = "<tr bgcolor=white><td>%s</td><td>%s</td><td align=right> %s </td><td align=right> %s </td><td align=right> %s </td><td align=right> %s</td></tr>"
+
            self.lines["csv"] = ""
            self.lines["text"] = "---------------------------------------------------------------------------------------"
+           self.lines["html"] = ""
 
            if (not header) :  self.title = ""
 
@@ -1055,19 +1067,22 @@ class DailySiteReportConf(GenericConf):
            return DailySiteData(start,end)      
 
 class DailyVOReportConf(GenericConf):
-        title = "OSG usage summary (midnight to midnight UTC) for %s\nincluding all jobs that finished in that time period.\nWall Duration is expressed in hours and rounded to the nearest hour.\nWall Duration is the duration between the instant the job start running and the instant the job ends its execution.\nThe number of jobs counted here includes only the jobs directly seen by batch system and does not include the request sent directly to a pilot job.\nThe Wall Duration includes the total duration of the the pilot jobs.\nDeltas are the differences with the previous day.\n(nr) after a VO name indicates that the VO is not registered with OSG.\n"
-        headline = "For all jobs finished on %s (UTC)"
-        headers = ("VO","# of Jobs","Wall Duration","Delta jobs","Delta duration")
+        title = "&nbsp;<p>OSG usage summary (midnight to midnight UTC) for %s\nincluding all jobs that finished in that time period.\nWall Duration is expressed in hours and rounded to the nearest hour.\nWall Duration is the duration between the instant the job start running and the instant the job ends its execution.\nThe number of jobs counted here includes only the jobs directly seen by batch system and does not include the request sent directly to a pilot job.\nThe Wall Duration includes the total duration of the the pilot jobs.\nDeltas are the differences with the previous day.\n(nr) after a VO name indicates that the VO is not registered with OSG.\n"
+        headline = "<p>For all jobs finished on %s (UTC)<p>"
+        headers = ("","VO","# of Jobs","Wall Duration","Delta jobs","Delta duration")
         num_header = 1
         formats = {}
         lines = {}
         totalheaders = ["All VOs"]
 
         def __init__(self, header = False):
-           self.formats["csv"] = ",%s,\"%s\",\"%s\",\"%s\",\"%s\""
-           self.formats["text"] = "| %-18s | %9s | %13s | %10s | %14s"
+           self.formats["csv"] = ",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""
+           self.formats["text"] = "| %3s | %-22s | %9s | %13s | %10s | %14s"
+           self.formats["html"] = "<tr bgcolor=white><td>%s</td><td>%s</td><td align=right> %s </td><td align=right> %s </td><td align=right> %s </td><td align=right> %s</td></tr>"
+
            self.lines["csv"] = ""
            self.lines["text"] = "-----------------------------------------------------------------------------------"
+           self.lines["html"] = ""
 
            if (not header) :  self.title = ""
 
@@ -1075,9 +1090,9 @@ class DailyVOReportConf(GenericConf):
            return UpdateVOName( DailyVOData(start,end), 0 ,start, end)
 
 class DailySiteVOReportConf(GenericConf):
-        title = "OSG usage summary (midnight to midnight UTC) for %s\nincluding all jobs that finished in that time period.\nWall Duration is expressed in hours and rounded to the nearest hour.\nWall Duration is the duration between the instant the job start running and the instant the job ends its execution.\nThe number of jobs counted here includes only the jobs directly seen by batch system and does not include the request sent directly to a pilot job.\nThe Wall Duration includes the total duration of the the pilot jobs.\nDeltas are the differences with the previous day.\n"
-        headline = "For all jobs finished on %s (UTC)"
-        headers = ("Site","VO","# of Jobs","Wall Duration","Delta jobs","Delta duration")
+        title = "&nbsp;<p>OSG usage summary (midnight to midnight UTC) for %s\nincluding all jobs that finished in that time period.\nWall Duration is expressed in hours and rounded to the nearest hour.\nWall Duration is the duration between the instant the job start running and the instant the job ends its execution.\nThe number of jobs counted here includes only the jobs directly seen by batch system and does not include the request sent directly to a pilot job.\nThe Wall Duration includes the total duration of the the pilot jobs.\nDeltas are the differences with the previous day.\n"
+        headline = "<p>For all jobs finished on %s (UTC)<p>"
+        headers = ("","Site","VO","# of Jobs","Wall Duration","Delta jobs","Delta duration")
         num_header = 2
         formats = {}
         lines = {}
@@ -1085,10 +1100,13 @@ class DailySiteVOReportConf(GenericConf):
         totalheaders = ["All sites", "All VOs"]
         
         def __init__(self, header = False):
-           self.formats["csv"] = ",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""
-           self.formats["text"] = "| %-22s | %-14s | %9s | %13s | %10s | %14s"
+           self.formats["csv"] = ",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""
+           self.formats["text"] = "| %3s | %-22s | %-14s | %9s | %13s | %10s | %14s"
+           self.formats["html"] = "<tr bgcolor=white><td>%s</td><td>%s</td><td>%s</td><td align=right> %s </td><td align=right> %s </td><td align=right> %s </td><td align=right> %s</td></tr>"
+
            self.lines["csv"] = ""
            self.lines["text"] = "--------------------------------------------------------------------------------------------------------"
+           self.lines["html"] = ""
 
            if (not header) :  self.title = ""
 
@@ -1096,20 +1114,23 @@ class DailySiteVOReportConf(GenericConf):
            return UpdateVOName(DailySiteVOData(start,end),1,start, end)  
 
 class DailyVOSiteReportConf(GenericConf):
-        title = "OSG usage summary (midnight to midnight UTC) for %s\nincluding all jobs that finished in that time period.\nWall Duration is expressed in hours and rounded to the nearest hour.\nWall Duration is the duration between the instant the job start running and the instant the job ends its execution.\nThe number of jobs counted here includes only the jobs directly seen by batch system and does not include the request sent directly to a pilot job.\nThe Wall Duration includes the total duration of the the pilot jobs.\nDeltas are the differences with the previous day.\n(nr) after a VO name indicates that the VO is not registered with OSG.\n"
-        headline = "For all jobs finished on %s (UTC)"
-        headers = ("VO","Site","# of Jobs","Wall Duration","Delta jobs","Delta duration")
+        title = "&nbsp;<p>OSG usage summary (midnight to midnight UTC) for %s\nincluding all jobs that finished in that time period.\nWall Duration is expressed in hours and rounded to the nearest hour.\nWall Duration is the duration between the instant the job start running and the instant the job ends its execution.\nThe number of jobs counted here includes only the jobs directly seen by batch system and does not include the request sent directly to a pilot job.\nThe Wall Duration includes the total duration of the the pilot jobs.\nDeltas are the differences with the previous day.\n(nr) after a VO name indicates that the VO is not registered with OSG.\n"
+        headline = "<p>For all jobs finished on %s (UTC)<p>"
+        headers = ("","VO","Site","# of Jobs","Wall Duration","Delta jobs","Delta duration")
         num_header = 2
         formats = {}
         lines = {}
         select = "=="
-        totalheaders = ["All sites","All VOs"]
+        totalheaders = ["All VOs","All sites"]
         
         def __init__(self, header = False):
-           self.formats["csv"] = ",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""
-           self.formats["text"] = "| %-14s | %-22s | %9s | %13s | %10s | %14s"
+           self.formats["csv"] = ",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""
+           self.formats["text"] = "| %3s | %-22s | %-22s | %9s | %13s | %10s | %14s"
+           self.formats["html"] = "<tr bgcolor=white><td>%s</td><td>%s</td><td>%s</td><td align=right> %s </td><td align=right> %s </td><td align=right> %s </td><td align=right> %s</td></tr>"
+
            self.lines["csv"] = ""
            self.lines["text"] = "--------------------------------------------------------------------------------------------------------"
+           self.lines["html"] = ""
 
            if (not header) :  self.title = ""
 
@@ -1183,20 +1204,35 @@ def sortedDictValuesFunc(adict,compare):
     return [(key,value) for key, value in items]
 
 def GenericDailyStatus(what, when=datetime.date.today(), output = "text"):
+        old_stdout = sys.stdout
+        sys.stdout = stdout = StringIO()
+        ret = ""
+
         if not when:
             when = datetime.date.today()
 
         factor = 3600  # Convert number of seconds to number of hours
 
+        if(output == "html"):
+            print "<table><tr><td>"
+
         if (output != "None") :
             if (what.title != "") :
+                if(output == "html"):
+                    what.title = what.title.replace("\n","<br>");
                 print what.title % ( DateToString(when,False) )
             if (what.headline != "") :
+                if(output == "html"):
+                    what.headline = what.headline.replace("\n","<br>");
                 print what.headline % (DateToString(when,False))
+            if(output == "html"):
+                print "&nbsp<p>"
+                print "</td></tr></table>"
+                print "<table bgcolor=black cellspacing=1 cellpadding=5>"
             print what.lines[output]
-            print "    ", what.formats[output] % what.headers
+            print what.formats[output] % what.headers
             print what.lines[output]
-        
+
         # Get the correct day information
         start = when
         end = start + datetime.timedelta(days=1)
@@ -1279,16 +1315,16 @@ def GenericDailyStatus(what, when=datetime.date.today(), output = "text"):
                wrate = rate
             if (wrate > 90): wrate = wrate - 0.5
             if (what.Both):
-               values = (site,vo,str(niceNum(wrate))+" %",niceNum(wsuccess),niceNum(wfailed),str(rate)+" %",success,failed)
+               values = (index,site,vo,str(niceNum(wrate))+" %",niceNum(wsuccess),niceNum(wfailed),str(rate)+" %",success,failed)
             else: 
-               values = (site,str(niceNum(wrate))+" %",niceNum(wsuccess),niceNum(wfailed),str(rate)+" %",success,failed)
+               values = (index,site,str(niceNum(wrate))+" %",niceNum(wsuccess),niceNum(wfailed),str(rate)+" %",success,failed)
             totaljobs = totaljobs + total
             totalsuccess = totalsuccess + success
             totalfailed = totalfailed + failed
             totalws = totalws + wsuccess
             totalwf = totalwf + wfailed
             if (output != "None") :
-                     print "%3d " %(index), what.formats[output] % values
+                     print what.formats[output] % values
             result.append(values)
 
         if (output != "None") :
@@ -1300,31 +1336,48 @@ def GenericDailyStatus(what, when=datetime.date.today(), output = "text"):
                 else:
                    totalwrate = 0
                 if (what.Both):
-                    print "    ", what.formats[output] % ( what.totalheaders[0], what.totalheaders[1], str(totalwrate) + " %", niceNum(totalws),niceNum(totalwf), str(totalsuccess*100/totaljobs) + " %", niceNum(totalsuccess),niceNum(totalfailed))
+                    print what.formats[output] % ("", what.totalheaders[0], what.totalheaders[1], str(totalwrate) + " %", niceNum(totalws),niceNum(totalwf), str(totalsuccess*100/totaljobs) + " %", niceNum(totalsuccess),niceNum(totalfailed))
                 else:
                     tsrate = 0
                     if ( totaljobs > 0) : tsrate = totalsuccess*100/totaljobs
-                    print "    ", what.formats[output] % ( what.totalheaders[0], str(totalwrate) + " %", niceNum(totalws),niceNum(totalwf), str(tsrate) + " %",niceNum(totalsuccess),niceNum(totalfailed))
+                    print what.formats[output] % ("", what.totalheaders[0], str(totalwrate) + " %", niceNum(totalws),niceNum(totalwf), str(tsrate) + " %",niceNum(totalsuccess),niceNum(totalfailed))
                 print what.lines[output]
 
-        return result
+        if(output == "html"):
+            print "</table>"
+        sys.stdout = old_stdout
+        ret = stdout.getvalue()
+
+        return ret
             
         
 def GenericDaily(what, when=datetime.date.today(), output = "text"):
+        old_stdout = sys.stdout
+	sys.stdout = stdout = StringIO()
+	ret = ""
+
         factor = 3600  # Convert number of seconds to number of hours
 
         if not when:
             when=datetime.date.today()
+
+        if(output == "html"):
+            print "<table><tr><td>"
 
         if output != "None":
             if what.title:
                 print what.title % ( DateToString(when,False) )
             if what.headline:
                 print what.headline % (DateToString(when,False))
+            if(output == "html"):
+                print "&nbsp<p>"
+                print "</td></tr></table>"
+                print "<table bgcolor=black cellspacing=1 cellpadding=5>"
             print what.lines[output]
-            print "    ", what.formats[output] % what.headers
+            #print "    ", what.formats[output] % what.headers
+            print what.formats[output] % what.headers
             print what.lines[output]
-        
+
         # First get the previous day's information
         totalwall = 0
         totaljobs = 0
@@ -1426,11 +1479,11 @@ def GenericDaily(what, when=datetime.date.today(), output = "text"):
         for key,(njobs,wall,oldnjobs,oldwall,site,vo) in sortedDictValues(printValues):
             index = index + 1;
             if (num_header == 2) :
-                     values = (site,vo,niceNum(njobs), niceNum(wall),niceNum(njobs-oldnjobs),niceNum(wall-oldwall))
+                     values = (index, site,vo,niceNum(njobs), niceNum(wall),niceNum(njobs-oldnjobs),niceNum(wall-oldwall))
             else:
-                     values = (site,niceNum(njobs), niceNum(wall),niceNum(njobs-oldnjobs),niceNum(wall-oldwall))
+                     values = (index, site,niceNum(njobs), niceNum(wall),niceNum(njobs-oldnjobs),niceNum(wall-oldwall))
             if (output != "None") :
-                     print "%3d " %(index), what.formats[output] % values
+                     print what.formats[output] % values
             result.append(values)       
                 
         (oldnjobs,oldwall,s,v) = oldValues["total"]
@@ -1439,12 +1492,15 @@ def GenericDaily(what, when=datetime.date.today(), output = "text"):
                 if (num_header == 0) :
                     print 
                 elif (num_header == 2) :
-                    print "    ",what.formats[output] % (what.totalheaders[0], what.totalheaders[1], niceNum(totaljobs), niceNum(totalwall), niceNum(totaljobs-oldnjobs), niceNum(totalwall-oldwall))
+                    print what.formats[output] % ("",what.totalheaders[0], what.totalheaders[1], niceNum(totaljobs), niceNum(totalwall), niceNum(totaljobs-oldnjobs), niceNum(totalwall-oldwall))
                 else:
-                    print "    ",what.formats[output] % (what.totalheaders[0], niceNum(totaljobs), niceNum(totalwall), niceNum(totaljobs-oldnjobs), niceNum(totalwall-oldwall))
+                    print what.formats[output] % ("",what.totalheaders[0], niceNum(totaljobs), niceNum(totalwall), niceNum(totaljobs-oldnjobs), niceNum(totalwall-oldwall))
                 print what.lines[output]
-        return result
-
+        if(output == "html"):
+            print "</table>"
+	sys.stdout = old_stdout
+	ret = stdout.getvalue()
+        return ret
         
 def DailySiteReport(when = datetime.date.today(), output = "text", header = True):
         return GenericDaily( DailySiteReportConf(header), when, output)
@@ -1673,7 +1729,7 @@ Duration is the duration between the instant the job started running
 and the instant the job ended its execution.
 Deltas are the differences with the previous period."""
     headline = "For all jobs finished between %s and %s (midnight UTC)"
-    headers = ("VO","# of Jobs","Wall Duration","Delta jobs","Delta duration")
+    headers = ("","VO","# of Jobs","Wall Duration","Delta jobs","Delta duration")
     num_header = 1
     formats = {}
     lines = {}
@@ -1681,9 +1737,11 @@ Deltas are the differences with the previous period."""
     defaultSort = True
 
     def __init__(self, header = False, with_panda = False):
-        self.formats["csv"] = ",%s,\"%s\",\"%s\",\"%s\",\"%s\""
-        self.formats["text"] = "| %-18s | %9s | %13s | %10s | %14s"
+        self.formats["csv"] = ",%s,\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""
+        self.formats["text"] = "| %3s | %-18s | %9s | %13s | %10s | %14s"
+        self.formats["html"] = "<tr bgcolor=white><td>%s</td><td>%s</td><td align=right> %s </td><td align=right> %s </td><td align=right> %s </td><td align=right> %s</td></tr>"
         self.lines["csv"] = ""
+        self.lines["html"] = ""
         self.lines["text"] = "-----------------------------------------------------------------------------------"
         self.with_panda = with_panda
         if (not header) :  self.title = ""
@@ -1700,7 +1758,7 @@ Duration is the duration between the instant the job started running
 and the instant the job ended its execution.
 Deltas are the differences with the previous period."""
     headline = "For all jobs finished between %s and %s (midnight, UTC)"
-    headers = ("Site","# of Jobs","Wall Duration","Delta jobs","Delta duration")
+    headers = ("","Site","# of Jobs","Wall Duration","Delta jobs","Delta duration")
     num_header = 1
     formats = {}
     lines = {}
@@ -1708,9 +1766,11 @@ Deltas are the differences with the previous period."""
     defaultSort = True
 
     def __init__(self, header = False, with_panda = False):
-        self.formats["csv"] = ",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""
-        self.formats["text"] = "| %-30s | %9s | %13s | %10s | %14s"
+        self.formats["csv"] = ",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""
+        self.formats["text"] = "| %3s | %-30s | %9s | %13s | %10s | %14s"
+        self.formats["html"] = "<tr bgcolor=white><td>%s</td><td>%s</td><td align=right> %s </td><td align=right> %s </td><td align=right> %s </td><td align=right> %s</td></tr>"
         self.lines["csv"] = ""
+        self.lines["html"] = ""
         self.lines["text"] = "-----------------------------------------------------------------------------------------------"
         if (not header) :  self.title = ""
         self.with_panda = with_panda
@@ -1726,7 +1786,7 @@ class DataTransferReportConf(GenericConf):
     #headline = "For all data transferred between %s and %s (midnight, UTC)"
     title = ""
     headline = ""
-    headers = ("Site","Protocol","Num transfer","Delta transfer","Number of MiB","Delta MiB")
+    headers = ("","Site","Protocol","Num transfer","Delta transfer","Number of MiB","Delta MiB")
     num_header = 2
     factor = 1 # This is the factor to convert time from seconds to hours for other reports. But for data transfer report there is nothing to convert since we are just dealing with the transfer size (not time)
     delta_column_location = "adjacent"
@@ -1736,10 +1796,14 @@ class DataTransferReportConf(GenericConf):
     defaultSort = True
 
     def __init__(self, header = False, with_panda = False):
-        self.formats["csv"] = ",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""
-        self.formats["text"] = "| %-30s | %-25s | %15s | %15s | %17s | %17s"
+        self.formats["csv"] = ",\%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""
+        self.formats["text"] = "| %3s | %-30s | %-25s | %15s | %15s | %17s | %17s"
+        self.formats["html"] = "<tr bgcolor=white><td>%s</td><td>%s</td><td align=right>%s</td><td align=right> %s </td><td align=right> %s </td><td align=right> %s </td><td align=right> %s</td></tr>"
+
         self.lines["csv"] = ""
+        self.lines["html"] = ""
         self.lines["text"] = "---------------------------------------------------------------------------------------------------------------------------------------------"
+
         if (not header) :  self.title = ""
         self.with_panda = with_panda
 
@@ -1755,7 +1819,7 @@ Duration is the duration between the instant the job started running
 and the instant the job ended its execution.
 Deltas are the differences with the previous period."""
     headline = "For all jobs finished between %s and %s (midnight UTC)"
-    headers = ("Site", "VO","# of Jobs","Wall Duration","Delta jobs","Delta duration")
+    headers = ("","Site", "VO","# of Jobs","Wall Duration","Delta jobs","Delta duration")
     num_header = 2
     formats = {}
     lines = {}
@@ -1763,9 +1827,11 @@ Deltas are the differences with the previous period."""
     defaultSort = True
 
     def __init__(self, header = False, with_panda = False):
-        self.formats["csv"] = ",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""
-        self.formats["text"] = "| %-30s | %-18s | %9s | %13s | %10s | %14s"
+        self.formats["csv"] = ",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""
+        self.formats["text"] = "| %3s | %-30s | %-18s | %9s | %13s | %10s | %14s"
+        self.formats["html"] = "<tr bgcolor=white><td>%s</td><td>%s</td><td align=right>%s</td><td align=right> %s </td><td align=right> %s </td><td align=right> %s </td><td align=right> %s</td></tr>"
         self.lines["csv"] = ""
+        self.lines["html"] = ""
         self.lines["text"] = "--------------------------------------------------------------------------------------------------------------------"
         if (not header) :  self.title = ""
         self.with_panda = with_panda
@@ -1782,7 +1848,7 @@ Duration is the duration between the instant the job started running
 and the instant the job ended its execution.
 Deltas are the differences with the previous period."""
     headline = "For all jobs finished between %s and %s (midnight UTC)"
-    headers = ("VO", "Site","# of Jobs","Wall Duration","Delta jobs","Delta duration")
+    headers = ("","VO", "Site","# of Jobs","Wall Duration","Delta jobs","Delta duration")
     num_header = 2
     formats = {}
     lines = {}
@@ -1790,9 +1856,11 @@ Deltas are the differences with the previous period."""
     defaultSort = True
 
     def __init__(self, header = False, with_panda = False):
-        self.formats["csv"] = ",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""
-        self.formats["text"] = "| %-18s | %-30s | %-9s | %13s | %10s | %14s"
+        self.formats["csv"] = ",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""
+        self.formats["text"] = "| %3s | %-18s | %-30s | %-9s | %13s | %10s | %14s"
+        self.formats["html"] = "<tr bgcolor=white><td>%s</td><td>%s</td><td align=right>%s</td><td align=right> %s </td><td align=right> %s </td><td align=right> %s </td><td align=right> %s</td></tr>"
         self.lines["csv"] = ""
+        self.lines["html"] = ""
         self.lines["text"] = "--------------------------------------------------------------------------------------------------------------------"
         if (not header) :  self.title = ""
         self.with_panda = with_panda
@@ -1809,7 +1877,7 @@ Duration is the duration between the instant the job started running
 and the instant the job ended its execution.
 Deltas are the differences with the previous period."""
     headline = "For all jobs finished between %s and %s (midnight UTC)"
-    headers = ("VO", "User", "# of Jobs", "Wall Duration", "Delta jobs", "Delta duration")
+    headers = ("","VO", "User", "# of Jobs", "Wall Duration", "Delta jobs", "Delta duration")
     num_header = 2
     formats = {}
     lines = {}
@@ -1818,9 +1886,12 @@ Deltas are the differences with the previous period."""
     ExtraSelect = ""
 
     def __init__(self, header = False, with_panda = False, selectVOName = ""):
-        self.formats["csv"] = ",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""
-        self.formats["text"] = "| %-22s | %-35s | %9s | %13s | %10s | %14s"
+        self.formats["csv"] = ",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""
+        self.formats["text"] = "| %3s | %-22s | %-35s | %9s | %13s | %10s | %14s"
+        self.formats["html"] = "<tr bgcolor=white><td>%s</td><td>%s</td><td align=right> %s </td><td align=right> %s </td><td align=right> %s </td><td align=right> %s</td><td align=right>%s</td></tr>"
+
         self.lines["csv"] = ""
+        self.lines["html"] = ""
         self.lines["text"] = "----------------------------------------------------------------------------------------------------------------------"
         if (not header) :  self.title = ""
         self.with_panda = with_panda
@@ -1877,7 +1948,7 @@ Duration is the duration between the instant the job started running
 and the instant the job ended its execution.
 Deltas are the differences with the previous period."""
     headline = "For all jobs finished between %s and %s (midnight UTC)"
-    headers = ("User", "VO", "Site", "# of Jobs", "Wall Duration", "Delta jobs", "Delta duration")
+    headers = ("","User", "VO", "Site", "# of Jobs", "Wall Duration", "Delta jobs", "Delta duration")
     num_header = 3
     formats = {}
     lines = {}
@@ -1886,9 +1957,11 @@ Deltas are the differences with the previous period."""
     ExtraSelect = ""
 
     def __init__(self, header = False, with_panda = False, selectVOName = ""):
-        self.formats["csv"] = ",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""
-        self.formats["text"] = "| %-35s | %-14s | %-19s | %9s | %13s | %10s | %14s"
+        self.formats["csv"] = ",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""
+        self.formats["text"] = "| %3s | %-35s | %-14s | %-19s | %9s | %13s | %10s | %14s"
+        self.formats["html"] = "<tr bgcolor=white><td>%s</td><td>%s</td><td align=right> %s </td><td align=right> %s </td><td align=right> %s </td><td align=right> %s</td><td align=right>%s</td><td align=right>%s</td></tr>"
         self.lines["csv"] = ""
+        self.lines["html"] = ""
         self.lines["text"] = "-------------------------------------------------------------------------------------------------------------------------------------------"
         if (not header) :  self.title = ""
         self.with_panda = with_panda
@@ -1927,22 +2000,24 @@ Deltas are the differences with the previous period."""
 class LongJobsConf(GenericConf):
     title = """\
 Summary of long running jobs that finished between %s - %s (midnight UTC - midnight UTC)
-
 Wall Duration is expressed in days to the nearest days.
 %% Cpu is the percentage of the wall duration time where the cpu was used.
-Only jobs that last 7 days or longer are counted in this report.
+Only jobs that last 7 days or longer are counted in this report.\n
 """
-    headline = "For all jobs finished between %s and %s (midnight UTC)"
-    headers = ("Site", "VO", "# of Jobs","Avg Wall","% Cpu","Max EndTime")
+    headline = "For all jobs finished between %s and %s (midnight UTC)\n"
+    headers = ("","Site", "VO", "# of Jobs","Avg Wall","% Cpu","Max EndTime")
     num_header = 2
     formats = {}
     lines = {}
     totalheaders = ["All VOs","All sites"]
 
     def __init__(self, header = False, with_panda = False):
-        self.formats["csv"] = ",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""
-        self.formats["text"] = "| %-18s | %-14s | %9s | %8s | %5s | %11s"
+        self.formats["csv"] = ",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""
+        self.formats["text"] = "| %3s | %-18s | %-14s | %9s | %8s | %5s | %11s"
+        self.formats["html"] = "<tr bgcolor=white><td>%s</td><td>%s</td><td align=right> %s </td><td align=right> %s </td><td align=right> %s </td><td align=right> %s</td><td align=right>%s</td></tr>"
+
         self.lines["csv"] = ""
+        self.lines["html"] = ""
         self.lines["text"] = "---------------------------------------------------------------------------------------"
         if (not header) :  self.title = ""
         self.with_panda = with_panda
@@ -2058,18 +2133,35 @@ def SimpleRange(what, range_end = datetime.date.today(),
                  range_begin = None,
                  output = "text"):
 
+    old_stdout = sys.stdout
+    sys.stdout = stdout = StringIO()
+    ret = ""
+
+    if(output == "html"):
+        print "<table><tr><td>"
+
     if not range_begin: range_begin = range_end + datetime.timedelta(days=-1)
     timediff = range_end - range_begin
 
     if (output != "None") :
         if (what.title != "") :
+            if(output == "html"):
+                what.title = what.title.replace("\n","<br>");
             print what.title % ( DateToString(range_begin,False),
                                  DateToString(range_end,False) )
         if (what.headline != "") :
+            if(output == "html"):
+                what.headline = what.headline.replace("\n","<br>");
             print what.headline % ( DateToString(range_begin,False),
                                     DateToString(range_end,False) )
+
+        if(output == "html"):
+            print "</td></tr></table>"
+            print "<table bgcolor=black cellspacing=1 cellpadding=5>"
+
         print what.lines[output]
-        print "    ", what.formats[output] % what.headers
+        #print "    ", what.formats[output] % what.headers
+        print what.formats[output] % what.headers
         print what.lines[output]
 
     start = range_begin
@@ -2104,16 +2196,29 @@ def SimpleRange(what, range_end = datetime.date.today(),
 
     for key,(njobs,wall,cpu,endtime,site,vo) in sortedDictValues(printValues):
         index = index + 1;
-        values = (site,vo,niceNum(njobs), niceNum(wall), niceNum(cpu), endtime)
+        values = (index,site,vo,niceNum(njobs), niceNum(wall), niceNum(cpu), endtime)
 
         if (output != "None"):
-            print "%3d " %(index), what.formats[output] % values
+            #print "%3d " %(index), what.formats[output] % values
+            print what.formats[output] % values
         result.append(values)       
+
+    if(output == "html"):
+       print "</table>"
+
+    sys.stdout = old_stdout
+    ret = stdout.getvalue()
+    return ret
                 
 
 def GenericRange(what, range_end = datetime.date.today(),
                  range_begin = None,
                  output = "text"):
+
+    old_stdout = sys.stdout
+    sys.stdout = stdout = StringIO()
+    ret = ""
+
     factor = what.factor # Convert number of seconds to number of hours for most reports except data transfer report
 
     if (not range_begin or range_begin == None): range_begin = range_end + datetime.timedelta(days=-1)
@@ -2122,13 +2227,24 @@ def GenericRange(what, range_end = datetime.date.today(),
 
     if (output != "None") :
         if (what.title != "") :
+            if(output == "html"):
+                what.title = "<br>" + what.title + "<br>"
             print what.title % ( DateToString(range_begin,False),
                                  DateToString(range_end,False) )
         if (what.headline != "") :
+            if(output == "html"):
+                what.headline = "<br>" + what.headline + "<br>"
+
             print what.headline % ( DateToString(range_begin,False),
                                     DateToString(range_end,False) )
+
+        if(output == "html"):
+            print "&nbsp<p>"
+            print "</td></tr></table>"
+            print "<table bgcolor=black cellspacing=1 cellpadding=5>"
+
         print what.lines[output]
-        print "    ", what.formats[output] % what.headers
+        print what.formats[output] % what.headers
         print what.lines[output]
         
     # First get the previous' range-length's information
@@ -2237,6 +2353,7 @@ def GenericRange(what, range_end = datetime.date.today(),
     for key,(njobs,wall,oldnjobs,oldwall) in sortedValues:
         index = index + 1;
         printedvalues = []
+        printedvalues.append(index)
         for iheaders in range(0,num_header):
            printedvalues.append( key[iheaders] )
         if(what.delta_column_location == "adjacent"): # print the delta columns adjacent to the corresponding field for which the delta has been calculated
@@ -2251,7 +2368,8 @@ def GenericRange(what, range_end = datetime.date.today(),
             printedvalues.append( niceNum(wall-oldwall) )
 
         if (output != "None") :
-            print "%3d " %(index), what.formats[output] % tuple(printedvalues)
+            #print "%3d " %(index), what.formats[output] % tuple(printedvalues)
+            print what.formats[output] % tuple(printedvalues)
         result.append(tuple(printedvalues))       
                 
     (oldnjobs,oldwall) = oldValues[("total","","")]
@@ -2259,6 +2377,7 @@ def GenericRange(what, range_end = datetime.date.today(),
         print what.lines[output]
         printedvalues = []
         for iheaders in range(0,num_header):
+           printedvalues.append("")
            printedvalues.append( what.totalheaders[iheaders] )
         if(what.delta_column_location == "adjacent"): # sum delta columns adjacent to the corresponding field for which the delta has been calculated
             printedvalues.append( niceNum(totaljobs) )
@@ -2271,9 +2390,16 @@ def GenericRange(what, range_end = datetime.date.today(),
             printedvalues.append( niceNum(totaljobs-oldnjobs) )
             printedvalues.append( niceNum(totalwall-oldwall) )
 
-        print "    ", what.formats[output] % tuple(printedvalues)
+        #print "    ", what.formats[output] % tuple(printedvalues)
+        #print what.formats[output] % tuple(printedvalues)
         print what.lines[output]
-    return result
+
+    if(output == "html"):
+        print "</table>"
+
+    sys.stdout = old_stdout
+    ret = stdout.getvalue()
+    return ret
 
 def negate(val):
     if(val != 0):
@@ -2698,6 +2824,14 @@ def DataTransferSumup(range_end = datetime.date.today(),
                 output = "text",
                 header = True):
 
+    old_stdout = sys.stdout
+    sys.stdout = stdout = StringIO()
+    ret = ""
+
+    br = "\n" # line break
+    if(output == "html"):
+       br = "<br>" # line break
+
     title = """\
 OSG Data transfer summary for  %s - %s (midnight UTC - midnight UTC)
 including all data that transferred in that time period.
@@ -2768,7 +2902,7 @@ Deltas are the differences with the previous period.\n"""
             listToLower(disabledSites)], completeSiteList)
 
     if allSites != None:
-        print "As of %s, there are %s registered SRMv2 %s storage resources." % \
+        print br + "As of %s, there are %s registered SRMv2 %s storage resources." % \
             (DateToString(datetime.date.today(),False),
             prettyInt(len(allSites)), gridDisplayName)
 
@@ -2776,65 +2910,71 @@ Deltas are the differences with the previous period.\n"""
     #    (DateToString(range_begin, False), DateToString(range_end, False))
                                                                
     n = len(reportingSites)
-    print prettyInt(n)+" storage resources reported\n"
+    print prettyInt(n)+" storage resources reported" + br
 
     (njobs, totalSize, avgRate, duration) = GetDataTransferTotals(range_begin,range_end)
 
-    print "Total number of transfers: " + niceNum(njobs)
-    print "Total transfer size: "+niceNum(totalSize/(1024*1024))+ " TiB\n"
+    print br + "Total number of transfers: " + niceNum(njobs)
+    print br + "Total transfer size: "+niceNum(totalSize/(1024*1024))+ " TiB" + br
 
     if reportingSites != None and extraSites != None and knownExtras != None \
             and allSites != None:
         n = len(reportingSites)-len(extraSites)-len(knownExtras)
-        print "%s registered storage resources reported some activity (%s%% of %s storage resources)" % \
+        print br + "%s registered storage resources reported some activity (%s%% of %s storage resources)" % \
             (prettyInt(n), niceNum(n*100/len(allSites),1), gridDisplayName)
 
     if emptySites != None and allSites != None:
         n = len(emptySites)
-        print "%s registered storage resources have reported but have no activity (%s%% " \
+        print br + "%s registered storage resources have reported but have no activity (%s%% " \
             "of %s storage resources)" % (prettyInt(n), niceNum(n*100/len(allSites), 1),
             gridDisplayName)
 
     if missingSites != None and allSites != None:
         n = len(missingSites)
-        print "%s registered storage resources have NOT reported (%s%% of %s storage resources)" % \
+        print br + "%s registered storage resources have NOT reported (%s%% of %s storage resources)" % \
             (prettyInt(n), niceNum(n*100/len(allSites),1), gridDisplayName)
 
-
-    print
+    print br
     
     n = len(extraSites);
     if not gGrid or gGrid.lower() != "local":
-        print prettyInt(n)+" non-sanctioned non-registered storage resources reported " \
+        print br + prettyInt(n)+" non-sanctioned non-registered storage resources reported " \
             "(might indicate a discrepancy between OIM and Gratia)."
     elif allSites != None:
-        print prettyInt(n)+" non-sanctioned non-registered storage resources reported."
+        print br + prettyInt(n)+" non-sanctioned non-registered storage resources reported."
 
     if reportingDisabled != None: 
         n = len(reportingDisabled)
-        print prettyInt(n)+" disabled storage resources have reported.\n"
+        print br + prettyInt(n)+" disabled storage resources have reported." + br
 
     # data transfer table
-    DataTransferReport(range_end, range_begin, output, True, gWithPanda)
+    print br + DataTransferReport(range_end, range_begin, output, True, gWithPanda)
     
     if emptySites != None:
-        print "\nThe storage resources with no activity are: \n"+prettyList(emptySites)
+        print br + "The storage resources with no activity are: "+ br +prettyList(emptySites)
 
     if missingSites != None:
-        print "\nThe non reporting storage resources are: \n"+prettyList(missingSites)
+        print br + br + "The non reporting storage resources are: "+ br +prettyList(missingSites)
 
     if allSites != None:
-        print "\nSites that are registered but have not registered/advertised a SRMV2 service are: \n"+prettyList(extraSites)
+        print br + br + "Sites that are registered but have not registered/advertised a SRMV2 service are: " + br +prettyList(extraSites)
     if reportingDisabled != None:
-        print "\nThe disabled storage resources that are reporting: \n" + \
+        print br + br + "The disabled storage resources that are reporting: " + br + \
             prettyList(reportingDisabled)
 
-    return missingSites
+    sys.stdout = old_stdout
+    ret = stdout.getvalue()
+    return ret
 
 def RangeSummup(range_end = datetime.date.today(),
                 range_begin = None,
                 output = "text",
                 header = True):
+    ret = ""
+
+    br = "\n" # line break
+    if(output == "html"):
+       br = "<br>" # line break
 
     if not gGrid or gGrid.lower() == 'local':
         try:
@@ -2901,15 +3041,15 @@ def RangeSummup(range_end = datetime.date.today(),
     #print missingSites
     #print extraSites
     if allSites != None:
-        print "As of %s, there are %s registered %s sites." % \
+        ret += "As of %s, there are %s registered %s sites." % \
             (DateToString(datetime.date.today(),False),
             prettyInt(len(allSites)), gridDisplayName)
 
-    print "\nBetween %s - %s (midnight - midnight UTC):\n" % \
+    ret += (br + br + "Between %s - %s (midnight - midnight UTC):" + br) % \
         (DateToString(range_begin, False), DateToString(range_end, False))
                                                                
     n = len(reportingSites)
-    print prettyInt(n)+" sites reported\n"
+    ret += prettyInt(n)+" sites reported" + br
 
     [njobs,wallduration,div] = GetTotals(range_begin,range_end)
     if (njobs != "NULL"):
@@ -2921,58 +3061,58 @@ def RangeSummup(range_end = datetime.date.today(),
        wallduration = 0
        div = 1
     
-    print "Total number of jobs: "+prettyInt(njobs)
-    print "Total wall duration: "+niceNum( wallduration / 3600, 1 )+ " hours"
-    print "Total cpu / wall duration: "+niceNum(div,0.01)
+    ret += (br + "Total number of jobs: "+prettyInt(njobs))
+    ret += (br + "Total wall duration: "+niceNum( wallduration / 3600, 1 )+ " hours")
+    ret += (br + "Total cpu / wall duration: "+niceNum(div,0.01))
 
     if reportingSites != None and extraSites != None and knownExtras != None \
             and allSites != None:
         n = len(reportingSites)-len(extraSites)-len(knownExtras)
-        print "%s registered sites reported (%s%% of %s sites)" % \
-            (prettyInt(n), niceNum(n*100/len(allSites),1), gridDisplayName)
+        ret += (br + "%s registered sites reported (%s%% of %s sites)" % \
+            (prettyInt(n), niceNum(n*100/len(allSites),1), gridDisplayName))
 
     if missingSites != None and allSites != None:
         n = len(missingSites)
-        print "%s registered sites have NOT reported (%s%% of %s sites)" % \
-            (prettyInt(n), niceNum(n*100/len(allSites),1), gridDisplayName)
+        ret += (br + "%s registered sites have NOT reported (%s%% of %s sites)" % \
+            (prettyInt(n), niceNum(n*100/len(allSites),1), gridDisplayName))
 
     if emptySites != None and allSites != None:
         n = len(emptySites)
-        print "%s registered sites have reported but have no activity (%s%% " \
+        ret += (br + "%s registered sites have reported but have no activity (%s%% " \
             "of %s sites)" % (prettyInt(n), niceNum(n*100/len(allSites), 1),
-            gridDisplayName)
+            gridDisplayName))
 
-    print
+    #print
     
     n = len(extraSites);
     if not gGrid or gGrid.lower() != "local":
-        print prettyInt(n)+" non-sanctioned non-registered sites reported " \
-            "(might indicate a discrepancy between OIM and Gratia)."
+        ret += (br + prettyInt(n)+" non-sanctioned non-registered sites reported " \
+            "(might indicate a discrepancy between OIM and Gratia).")
     elif allSites != None:
-        print prettyInt(n)+" non-sanctioned non-registered sites reported."
+        ret += (br + prettyInt(n)+" non-sanctioned non-registered sites reported.")
 
     #n = len(knownExtras);
     #print prettyInt(n)+" sanctioned non-registered sites reported"
 
     if reportingDisabled != None: 
         n = len(reportingDisabled)
-        print prettyInt(n)+" disabled sites have reported."
+        ret += (br + prettyInt(n)+" disabled sites have reported.")
 
     #print "\nThe reporting sites are:\n"+prettyList(reportingSites)
     #print "\nThe registered sites are:\n"+prettyList(allSites)
     
     if emptySites != None:
-        print "\nThe sites with no activity are: \n"+prettyList(emptySites)
+        ret += (br + br + "The sites with no activity are: " + br +prettyList(emptySites))
 
     if missingSites != None:
-        print "\nThe non reporting sites are: \n"+prettyList(missingSites)
+        ret += (br + br + "The non reporting sites are: "+ br +prettyList(missingSites))
     #print "\nThe sanctioned non registered sites are: \n"+prettyList(knownExtras)
 
     if allSites != None:
-        print "\nThe non registered sites are: \n"+prettyList(extraSites)
+        ret += (br + br + "The non registered sites are: "+ br +prettyList(extraSites))
     if reportingDisabled != None:
-        print "\nThe disabled sites that are reporting: \n" + \
-            prettyList(reportingDisabled)
+        ret += (br + br + "The disabled sites that are reporting: "+ br + \
+            prettyList(reportingDisabled))
 
     expectedNoActivity = GetListOfRegisteredVO('Disabled',range_begin,range_end)
     expectedNoActivityAlt = GetListOfRegisteredVO('Enabled', range_begin,
@@ -2987,20 +3127,23 @@ def RangeSummup(range_end = datetime.date.today(),
         emptyVO = [name for name in regVOs if name not in reportingVOs and \
             (not expectedNoActivity or name not in expectedNoActivity)]
     if emptyVO:
-        print "\nActive VOs with no recent activity are:\n"+prettyList(emptyVO)
+        ret += (br + br + "Active VOs with no recent activity are:" + br +prettyList(sorted(emptyVO)))
+
     if expectedNoActivity != None:
-        print "\nThe following VOs are expected to have no activity:\n" + \
-            prettyList([name for name in expectedNoActivity if name not in \
-            reportingVOs])
+        ret += (br + br + "The following VOs are expected to have no activity:"+ br + \
+            prettyList(sorted([name for name in expectedNoActivity if name not in reportingVOs])))
 
     if regVOs != None:
-        nonregVO = [name for name in reportingVOs if name not in regVOs]
-        print "\nThe non-registered VOs with recent activity are:\n" + \
-            prettyList(nonregVO)
+        nonregVO = sorted([name for name in reportingVOs if name not in regVOs])
+        ret += (br + br + "The non-registered VOs with recent activity are:" + br + \
+            prettyList(nonregVO))
     
-    print "\n"
+    ret += br 
 
-    return missingSites
+    if(output == "html"):
+       return "<pre>"+ret+"</pre>"
+    return ret
+
 
 def findOriginalEntry(toFind,list):
    if(len(list) > 0):
@@ -3030,6 +3173,10 @@ def NonReportingSites(
                 when = datetime.date.today(),
                 output = "text",
                 header = True):
+
+    old_stdout = sys.stdout
+    sys.stdout = stdout = StringIO()
+    ret = ""
 
     print "This report indicates which sites Gratia has heard from or have known activity\nsince %s (midnight UTC)\n" % ( DateToString(when,False) )
 
@@ -3134,19 +3281,38 @@ def NonReportingSites(
             else:
                 delim = "\t\t\t"
             print name+":"+delim+lastreport
-            
-            
     
-    return missingSites
+    sys.stdout = old_stdout
+    ret = stdout.getvalue()
+    if(output == "html"):
+       ret = ret.replace("\n","<br>");
+    return ret
 
 def LongJobs(range_end = datetime.date.today(),
             range_begin = None,
             output = "text",
             header = True):
 
-    print "This report is a summary of long running jobs that finished between %s - %s (midnight - midnight UTC):\n" % ( DateToString(range_begin,False),
+    old_stdout = sys.stdout
+    sys.stdout = stdout = StringIO()
+    ret = ""
+    br = "\n"
+
+    if(output == "html"):
+        print "<table><tr><td>"
+        br = "<br>"
+
+    print ("This report is a summary of long running jobs that finished between %s - %s (midnight - midnight UTC):"+br) % ( DateToString(range_begin,False),
                                                                         DateToString(range_end,False) )
-    RangeLongJobs(range_end,range_begin,output,header)
+    if(output == "html"):
+        print "</td></tr></table>"
+
+    sys.stdout = old_stdout
+    ret = stdout.getvalue()
+
+    ret += RangeLongJobs(range_end,range_begin,output,header)
+
+    return ret
 
 def CMSProd(range_end = datetime.date.today(),
             range_begin = None,

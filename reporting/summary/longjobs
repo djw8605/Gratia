@@ -14,9 +14,17 @@ def main(argv=None):
 
     argOutput = AccountingReports.gOutput
 
-    AccountingReports.LongJobs(range_begin = AccountingReports.gBegin,
+    if (argOutput == "all"):
+       text = {}
+       for iterOutput in ("text","csv","html"):
+          text[iterOutput] = AccountingReports.LongJobs(range_begin = AccountingReports.gBegin,
                              range_end = AccountingReports.gEnd ,
-                             output=argOutput);
+                             output=iterOutput);
+       AccountingReports.sendAll(text)
+    else:
+          print AccountingReports.LongJobs(range_begin = AccountingReports.gBegin,
+                             range_end = AccountingReports.gEnd ,
+                             output=iterOutput);
 
 if __name__ == "__main__":
     sys.exit(main())

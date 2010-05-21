@@ -3,28 +3,29 @@
 import sys
 import AccountingReports
 
-from AccountingReports import FromCondor,UseArgs,gOutput,gBegin,CheckDB
-import sys
-
 def main(argv=None):
-    UseArgs(argv)
+    AccountingReports.UseArgs(argv)
 
-    if not CheckDB() :
+    if not AccountingReports.CheckDB() :
         return 1
 
     argOutput = AccountingReports.gOutput
-    AccountingReports.RangeSummup(range_begin = AccountingReports.gBegin,range_end = AccountingReports.gEnd ,output=argOutput);
-    print
-    AccountingReports.DailySiteReport(AccountingReports.gBegin,output=argOutput);
-    print
-    AccountingReports.DailyVOReport(AccountingReports.gBegin,output=argOutput, header = False);
-    print
-    AccountingReports.DailySiteVOReport(AccountingReports.gBegin,output=argOutput, header = False);
-    print
-    AccountingReports.DailyVOSiteReport(AccountingReports.gBegin,output=argOutput, header = False);
+    if (argOutput == "all"):
+       text = {}
+       for iterOutput in ("text","csv","html"):
+          text[iterOutput] = ( AccountingReports. RangeSummup(range_begin = AccountingReports.gBegin, range_end = AccountingReports.gEnd ,output=iterOutput) )
+          text[iterOutput] += AccountingReports.DailySiteReport(AccountingReports.gBegin,output=iterOutput)
+          text[iterOutput] += AccountingReports.DailyVOReport(AccountingReports.gBegin,output=iterOutput)
+          text[iterOutput] += AccountingReports.DailySiteVOReport(AccountingReports.gBegin,output=iterOutput)
+          text[iterOutput] += AccountingReports.DailyVOSiteReport(AccountingReports.gBegin,output=iterOutput)
+       AccountingReports.sendAll(text)
+
+    else:
+       print AccountingReports. RangeSummup(range_begin = AccountingReports.gBegin,range_end = AccountingReports.gEnd ,output=argOutput)
+       print AccountingReports.DailySiteReport(AccountingReports.gBegin,output=argOutput);
+       print AccountingReports.DailyVOReport(AccountingReports.gBegin,output=argOutput);
+       print AccountingReports.DailySiteVOReport(AccountingReports.gBegin,output=argOutput);
+       print AccountingReports.DailyVOSiteReport(AccountingReports.gBegin,output=argOutput);
 
 if __name__ == "__main__":
     sys.exit(main())
-
-
-

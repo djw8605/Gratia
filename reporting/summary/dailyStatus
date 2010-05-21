@@ -13,10 +13,15 @@ def main(argv=None):
         return 1
 
     argOutput = AccountingReports.gOutput
-    AccountingReports.GenericDailyStatus( AccountingReports.DailySiteJobStatusConf(header=True,groupby=AccountingReports.gGroupBy),AccountingReports.gBegin,output=argOutput )
-    print
-    #AccountingReports.GenericDailyStatus( AccountingReports.DailySiteJobStatusConf(header=True,CondorSpecial=False),AccountingReports.gBegin,output=argOutput )
-    #print
+
+    if (argOutput == "all"):
+       text = {}
+       for iterOutput in ("text","csv","html"):
+          text[iterOutput] = AccountingReports.GenericDailyStatus( AccountingReports.DailySiteJobStatusConf(header=True,groupby=AccountingReports.gGroupBy),AccountingReports.gBegin,output=iterOutput )
+       AccountingReports.sendAll(text)
+
+    else:
+       print AccountingReports.GenericDailyStatus( AccountingReports.DailySiteJobStatusConf(header=True,groupby=AccountingReports.gGroupBy),AccountingReports.gBegin,output=argOutput )
 
 if __name__ == "__main__":
     sys.exit(main())

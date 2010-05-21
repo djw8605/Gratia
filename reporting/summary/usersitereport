@@ -14,7 +14,15 @@ def main(argv=None):
 
     argOutput = AccountingReports.gOutput
 
-    AccountingReports.RangeSiteUserReport(range_begin = AccountingReports.gBegin,
+    if (argOutput == "all"):
+       text = {}
+       for iterOutput in ("text","csv","html"):
+          text[iterOutput] = AccountingReports.RangeSiteUserReport(range_begin = AccountingReports.gBegin,
+                             range_end = AccountingReports.gEnd ,
+                             output=iterOutput);
+       AccountingReports.sendAll(text)
+    else:
+       print AccountingReports.RangeSiteUserReport(range_begin = AccountingReports.gBegin,
                              range_end = AccountingReports.gEnd ,
                              output=argOutput);
 

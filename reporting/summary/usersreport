@@ -13,10 +13,18 @@ def main(argv=None):
         return 1
 
     argOutput = AccountingReports.gOutput
-
-    AccountingReports.RangeUserReport(range_begin = AccountingReports.gBegin,
+    if (argOutput == "all"):
+       text = {}
+       for iterOutput in ("text","csv","html"):
+           text[iterOutput] = AccountingReports.RangeUserReport(range_begin = AccountingReports.gBegin,
+                             range_end = AccountingReports.gEnd ,
+                             output=iterOutput);
+       AccountingReports.sendAll(text)
+    else:
+       print AccountingReports.RangeUserReport(range_begin = AccountingReports.gBegin,
                              range_end = AccountingReports.gEnd ,
                              output=argOutput);
+
 
 if __name__ == "__main__":
     sys.exit(main())

@@ -12,20 +12,31 @@ def main(argv=None):
     if not CheckDB() :
         return 1
 
-    print "Summary of the job exit status (midnight to midnight central time) for %s\nincluding all jobs that finished in that time period.\n\nFor Condor the value used is taken from 'ExitCode' and NOT from 'Exit Status'"
-    print "\nFor VO: ", AccountingReports.gVOName, "\n"
-    
-    argOutput = AccountingReports.gOutput
-    AccountingReports.GenericDailyStatus( AccountingReports.DailySiteJobStatusConf(header=False,groupby="ForVO",VOName=AccountingReports.gVOName),AccountingReports.gBegin,output=argOutput )
-    print
 
-    AccountingReports.RangeUserReport(range_begin = AccountingReports.gBegin,
+    argOutput = AccountingReports.gOutput
+
+    br = "\n"
+
+    if (argOutput == "all"):
+       text = {}
+       for iterOutput in ("text","csv","html"):
+           if(iterOutput == "html"):
+               br = "<br>"
+           text[iterOutput] = "Summary of the job exit status (midnight to midnight central time)" + br + "including all jobs that finished in that time period." + 2*br + "For Condor the value used is taken from 'ExitCode' and NOT from 'Exit Status'" + 2*br + "For VO: " + AccountingReports.gVOName + 2*br
+           text[iterOutput] += AccountingReports.GenericDailyStatus( AccountingReports.DailySiteJobStatusConf(header=False,groupby="ForVO",VOName=AccountingReports.gVOName),AccountingReports.gBegin,output=iterOutput)
+           text[iterOutput] += AccountingReports.RangeUserReport(range_begin = AccountingReports.gBegin,
+                             range_end = AccountingReports.gEnd ,
+                             output=iterOutput,
+                             selectVOName=AccountingReports.gVOName);
+       AccountingReports.sendAll(text)
+
+    else:
+        print "Summary of the job exit status (midnight to midnight central time)" + br + "including all jobs that finished in that time period." + 2*br + "For Condor the value used is taken from 'ExitCode' and NOT from 'Exit Status'" + br + "For VO: " + AccountingReports.gVOName + br
+        print AccountingReports.GenericDailyStatus( AccountingReports.DailySiteJobStatusConf(header=False,groupby="ForVO",VOName=AccountingReports.gVOName),AccountingReports.gBegin,output=argOutput)
+        print AccountingReports.RangeUserReport(range_begin = AccountingReports.gBegin,
                              range_end = AccountingReports.gEnd ,
                              output=argOutput,
                              selectVOName=AccountingReports.gVOName);
 
 if __name__ == "__main__":
     sys.exit(main())
-
-
-
