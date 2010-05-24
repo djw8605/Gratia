@@ -341,6 +341,7 @@ public class DatabaseMaintenance {
       AddIndex("ComputeElement", false, "probeid", "probeid");
       AddIndex("ComputeElement", false, "Cluster", "Cluster");
       AddIndex("ComputeElement", false, "UniqueID", "UniqueID");
+      AddIndex("ComputeElement", true, "time_unique", "UniqueID, Timestamp");
 
       // StorageElement
       ensureUniqueMd5("StorageElement");
