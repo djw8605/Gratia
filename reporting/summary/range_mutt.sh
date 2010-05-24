@@ -3,7 +3,7 @@
 # space separated list of mail recipients
 PROD_MAILTO="osg-accounting-info@fnal.gov"
 PROD_USER_MAILTO="osg-accounting-info@opensciencegrid.org"
-MAILTO="pcanal@fnal.gov"
+MAILTO="$USER"
 USER_MAILTO=$MAILTO
 WEBLOC="http://gratia-osg.fnal.gov:8880/gratia-reporting"
 SUM_WEBLOC="http://gratia-osg.fnal.gov:8884/gratia-reporting"
