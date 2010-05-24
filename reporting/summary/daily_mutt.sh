@@ -11,7 +11,7 @@ VOREPORT_CONFIG="voreports.debug.config"
 
 while test "x$1" != "x"; do
    if [ "$1" == "--help" ]; then 
-	echo "usage: $0 [--grid gridType ] [--debug] [--mail email] [quoted_string_representing_starting_date (as accepted by date -d)]"
+	echo "usage: $0 [--grid gridType ] [--debug] [--mail|--email email] [quoted_string_representing_starting_date (as accepted by date -d)]"
 	exit 1
    elif [ "$1" == "--debug" ]; then
 	debug=x
@@ -29,6 +29,11 @@ while test "x$1" != "x"; do
         (( production = 1 ))
 	shift
    elif [ "$1" == "--mail" ]; then
+        (( mailOverride = 1 ))
+	MAILTO=$2
+	shift
+	shift
+   elif [ "$1" == "--email" ]; then
         (( mailOverride = 1 ))
 	MAILTO=$2
 	shift
