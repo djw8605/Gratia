@@ -134,13 +134,7 @@ sendtohtml ./transfer $whenarg ${WORK_DIR}/report "$TR_MAIL_MSG" $MAILTO
 grep -v '^#' $VOREPORT_CONFIG | while read line; do
     MYVO=`echo $line | cut -d\  -f1`
     if (( $mailOverride == 0 )) && (( $production > 0 )); then
-       export EMAIL1=`echo $line | cut -d\  -f2`
-       export EMAIL_CC=`echo $line | cut -d\  -f3-`
-       if [ "x$EMAIL_CC" == "x" ]; then
-          export MAILTO=$EMAIL1
-       else 
-          export MAILTO="-c \"$EMAIL_CC\" $EMAIL1"
-       fi
+       export MAILTO=`echo $line | cut -d\  -f2- | sed -e "s: :,:g" `
     fi
     sendtohtml "./dailyForVO --voname=${MYVO}" $whenarg ${WORK_DIR}/forvo "${VO_MAIL_MSG}${MYVO}" $MAILTO
 done 
