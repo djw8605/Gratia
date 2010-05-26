@@ -167,10 +167,10 @@ function wait_for_server {
    while [ ${alive} -eq 0 -a ${try} -lt 100 ]; do   \
       echo "Waiting for server"
       python > alive.tmp <<EOF
-import Gratia
-Gratia.Initialize()
-Gratia.ProcessBundle(Gratia.CurrentBundle)
-print Gratia.successfulHandshakes
+import GratiaCore
+GratiaCore.Initialize()
+GratiaCore.ProcessBundle(GratiaCore.CurrentBundle)
+print GratiaCore.successfulHandshakes
 EOF
       alive=`cat alive.tmp`
       rm alive.tmp
