@@ -56,6 +56,7 @@
 	<a href="./connectiontable.html" target="adminContent" class="<%=menuClass%>">Connections</a><br />
 
 	<hr><label class="menuGroup">Replication</label> <br />
+	<a href="./replicationtablesummary.html" target="adminContent" class="menuItem">Replication Summary</a><br />
 	<a href="./jobusagerecordreplicationtable.html" target="adminContent" class="<%=menuClass%>">Job Usage Replication</a><br />
 	<a href="./metricrecordreplicationtable.html" target="adminContent" class="<%=menuClass%>">Metric Replication</a><br />
 	<a href="./probedetailsreplicationtable.html" target="adminContent" class="<%=menuClass%>">ProbeDetails Replication</a><br />

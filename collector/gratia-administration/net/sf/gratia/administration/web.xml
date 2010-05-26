@@ -61,6 +61,12 @@
     </servlet>
 
     <servlet>
+        <servlet-name>ReplicationTableSummary</servlet-name>
+        <servlet-class>net.sf.gratia.administration.ReplicationTableSummary</servlet-class>
+        <load-on-startup>2</load-on-startup>
+    </servlet>
+
+    <servlet>
         <servlet-name>jobusagerecordreplicationtable</servlet-name>
         <servlet-class>net.sf.gratia.administration.ReplicationTable</servlet-class>
         <load-on-startup>2</load-on-startup>
@@ -205,6 +211,17 @@
         <servlet-name>CertificateTable</servlet-name>
         <url-pattern>/certificatetable.html</url-pattern>
     </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>ReplicationTableSummary</servlet-name>
+        <url-pattern>/replicationtablesummary.html</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>jobusagerecordreplicationtable</servlet-name>
+        <url-pattern>/jobusagerecordreplicationtable.html</url-pattern>
+    </servlet-mapping>
+
 
     <servlet-mapping>
         <servlet-name>jobusagerecordreplicationtable</servlet-name>
