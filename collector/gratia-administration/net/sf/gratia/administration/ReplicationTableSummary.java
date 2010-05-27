@@ -254,7 +254,7 @@ public class ReplicationTableSummary extends HttpServlet {
          buffer.append("<h4>").append(entry.getKey()).append("</h4>");
          buffer.append("<table width=\"100%\" border=\"1\" cellpadding=\"10\">\n");
          buffer.append("<tr><th bgcolor=\"#999999\" scope=\"col\">ID</th>\n");
-         buffer.append("    <th bgcolor=\"#999999\" scope=\"col\">Remote Host</th>\n");
+         buffer.append("    <th width=\"30%\" bgcolor=\"#999999\" scope=\"col\">Remote Host</th>\n");
          buffer.append("    <th bgcolor=\"#999999\" scope=\"col\">Registered</th>\n");
          buffer.append("    <th bgcolor=\"#999999\" scope=\"col\">Running</th>\n");
          buffer.append("    <th bgcolor=\"#999999\" scope=\"col\">Security</th>\n");
