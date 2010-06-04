@@ -311,15 +311,18 @@ public class DatabaseMaintenance {
       AddIndex("JobUsageRecord", false, "index08", "Host(255)");
 
       AddIndex("JobUsageRecord_Meta", false, "index13", "ServerDate");
+      AddIndex("JobUsageRecord_Xml", false, "NullExtraXml", "ExtraXml(1)");
 
       // ProbeDetails
       ensureUniqueMd5("ProbeDetails");
       AddIndex("ProbeDetails_Meta", false, "index03", "ProbeName");
       AddIndex("ProbeDetails_Meta", false, "index13", "ServerDate");
       AddIndex("ProbeDetails_Meta", false, "probeid", "probeid");
+      AddIndex("ProbeDetails_Xml", false, "NullExtraXml", "ExtraXml(1)");
 
       // MetricRecord
       ensureUniqueMd5("MetricRecord");
+      AddIndex("MetricRecord_Xml", false, "NullExtraXml", "ExtraXml(1)");
       AddIndex("MetricRecord_Meta", false, "index03", "ProbeName");
       AddIndex("MetricRecord_Meta", false, "index13", "ServerDate");
       AddIndex("MetricRecord_Meta", false, "probeid", "probeid");
