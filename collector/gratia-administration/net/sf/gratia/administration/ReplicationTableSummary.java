@@ -244,7 +244,10 @@ public class ReplicationTableSummary extends HttpServlet {
    }
    
    private void process() {
-      if (fRepTable == null) return;
+      if (fRepTable == null || fRepTable.isEmpty()) {
+         fHtml = "<br>No replication has been set.<br>";
+         return;
+      }
       Logging.debug("ReplicationTableSummary.process()");
 
       StringBuffer buffer = new StringBuffer();
