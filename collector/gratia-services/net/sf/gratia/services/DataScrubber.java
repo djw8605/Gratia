@@ -36,7 +36,8 @@ public class DataScrubber {
    // service.lifetime.Trace.<procName> = 1 month
    //
    
-   int fBatchSize = 200; // Default only
+   int fBatchSize    =  1000;
+   long fXmlBatchSize = 100000;
    
    private Boolean fStopRequested = false;
    
@@ -47,6 +48,20 @@ public class DataScrubber {
          // Get batch size from properties if set.
          fBatchSize = Integer.valueOf(fExpCalc.lifetimeProperties().
                                       getProperty("service.lifetimeManagement.fBatchSize"));
+      }
+      catch (Exception ignore) {
+      }
+      try {
+         // Get batch size from properties if set.
+         fBatchSize = Integer.valueOf(fExpCalc.lifetimeProperties().
+                                      getProperty("service.lifetimeManagement.BatchSize"));
+      }
+      catch (Exception ignore) {
+      }
+      try {
+         // Get batch size from properties if set.
+         fXmlBatchSize = Long.valueOf(fExpCalc.lifetimeProperties().
+                                      getProperty("service.lifetimeManagement.XmlBatchSize"));
       }
       catch (Exception ignore) {
       }
@@ -62,13 +77,9 @@ public class DataScrubber {
       Integer nTries = 0;
       Boolean keepTrying = true;
       
-      String tempTable = "gr_idlist_" + type;
-      String dropTemporary = "drop temporary table if exists " + tempTable;
-      String createTemporary = "create temporary table " + tempTable + 
-          " ( select M.dbid from "+type+"_Meta M join "+type+" R on (M.dbid = R.dbid) join "+type+"_Xml X on (X.dbid = R.dbid) " +
-          " where ExtraXml = \"\" and " + selection +
-          " ServerDate < :dateLimit limit " + fBatchSize + " ) ";
-      String deletecmd = "delete from X using "+type+"_Xml as X inner join "+tempTable+" T on X.dbid = T.dbid";
+      long maxdbid = 0;
+      long mindbid = 0;
+      
       do {
          ++nTries;
          Session session = null;
@@ -76,30 +87,96 @@ public class DataScrubber {
          try {
             session = HibernateWrapper.getSession();
             tx = session.beginTransaction();
-                        
-            org.hibernate.SQLQuery query = session.createSQLQuery( dropTemporary );
-            Logging.debug("DataScrubber: About to execute " + query.getQueryString());
-            query.executeUpdate();
             
-            query = session.createSQLQuery( createTemporary );
-            Logging.debug("DataScrubber: About to execute " + query.getQueryString());
-            query.setString( "dateLimit", limit );
-            query.executeUpdate();
-            
-            query = session.createSQLQuery( deletecmd );
-            Logging.debug("DataScrubber: About to execute " + query.getQueryString());
-            deletedThisIteration = query.executeUpdate();
-            
-            query = session.createSQLQuery( dropTemporary );
-            Logging.debug("DataScrubber: About to execute " + query.getQueryString());
-            query.executeUpdate();
+            // First get the max dbid where we might want to delet something.
+            // In order to speed up the query let first assume a dense set of record (i.e.
+            // at least one record per day):
 
-            tx.commit();
+            org.hibernate.SQLQuery query = session.createSQLQuery("select max(dbid) from "+type+"_Meta where ServerDate between :dateLimit and date_add(:dateLimit,interval 1 day)");
+            query.setString( "dateLimit", limit );
+            
+            Logging.debug("DataScrubber: About to execute " + query.getQueryString());
+            Integer result = (Integer) query.uniqueResult();
+            
+            if ( result == null ) {
+               query = session.createSQLQuery("select max(dbid) from "+type+"_Meta where ServerDate < :dateLimit");
+               query.setString( "dateLimit", limit );
+               
+               Logging.debug("DataScrubber: About to execute " + query.getQueryString());
+               result = (Integer) query.uniqueResult();
+            }
+            if ( result == null ) {
+               
+               Logging.debug("DataScrubber: found no max(dbid) in "+type+"_Xml");
+               // Nothing to do.
+               return 0;
+            }
+            maxdbid = result;
+            
+            // Now get the minimum plausible dbid.
+            // The natural query would be:
+            //     select min(dbid) from JobUsageRecord_Xml where ExtraXml = "";
+            // however in our case this is much slower than this alternative:
+            query = session.createSQLQuery("select dbid from "+type+"_Xml X where ExtraXml = \"\" order by dbid limit 1");
+ 
+            Logging.debug("DataScrubber: About to execute " + query.getQueryString());
+            result = (Integer) query.uniqueResult();
+            if ( result == null ) {
+               Logging.debug("DataScrubber: found no min(dbid) in "+type+"_Xml");
+               // Nothing to do.
+               return 0;
+            }
+            
+            mindbid = result;
+
             nTries = 0;
             keepTrying = false;
             session.close();
+         } catch (Exception e) {
+            HibernateWrapper.closeSession(session);
+            if (!LockFailureDetector.detectAndReportLockFailure(e, nTries, "DataScrubber")) {
+               Logging.warning("DataScrubber: error in acquiring min/max dbid for deleting " + msg + "!", e);
+               keepTrying = false;
+            }
+            
          }
-         catch (Exception e) {
+      } while (keepTrying && (!fStopRequested));
+      
+      // Now iterate through the dbids.
+      String deletecmd = "delete from X using "+type+"_Xml X inner join "+type+"_Meta M  where " +
+         " X.dbid = M.dbid "+selection+" and ExtraXml = \"\" and ServerDate < :dateLimit and :mindbid <= X.dbid and X.dbid < :maxdbid";
+
+      Logging.debug("DataScrubber: To delete rawxml will loop on dbid "+mindbid+" to "+maxdbid);
+      long cursor = mindbid;
+      keepTrying = true;
+      while ( keepTrying && cursor < maxdbid && !fStopRequested ) 
+      {
+         keepTrying = true;
+         ++nTries;
+         Session session = null;
+         Transaction tx = null;
+         try {
+            session = HibernateWrapper.getSession();
+            tx = session.beginTransaction();
+
+            org.hibernate.SQLQuery query = session.createSQLQuery( deletecmd );
+            query.setString( "dateLimit", limit );
+            query.setLong( "mindbid", cursor );
+            query.setLong( "maxdbid", cursor + fXmlBatchSize);
+            Logging.debug("DataScrubber: About to execute " + query.getQueryString() + " with dateLimit = " + limit + " and mindbid = " + cursor + " and maxdbid = " + (cursor + fXmlBatchSize) );
+            deletedThisIteration = query.executeUpdate();
+            Logging.debug("DataScrubber: Deleted " + deletedThisIteration + " "+type+"_Xml records" );
+
+            tx.commit();
+            nTries = 0;
+            keepTrying = false;  // If the session.close() fails we do not try again.
+            
+            session.close();
+            
+            keepTrying = true;
+            cursor = cursor + fXmlBatchSize;
+
+         } catch (Exception e) {
             HibernateWrapper.closeSession(session);
             deletedThisIteration = 0;
             if (!LockFailureDetector.detectAndReportLockFailure(e, nTries, "DataScrubber")) {
@@ -108,9 +185,7 @@ public class DataScrubber {
             }
          }
          deletedEntities += deletedThisIteration;
-      } while (((deletedThisIteration == fBatchSize) ||
-                keepTrying) &&
-               (!fStopRequested));
+      }
       return deletedEntities;
    }
    
@@ -188,6 +263,8 @@ public class DataScrubber {
                Logging.warning("DataScrubber: error in deleting " + msg + ":" + selectCmd + "\n" + deleteCmd);
                Logging.warning("DataScrubber: error in deleting " + msg + "!", e);
                keepTrying = false;
+            } else {
+               Logging.warning("DataScrubber: Lock failure detected in deleting " + msg + ":" + selectCmd + "\n" + deleteCmd);  
             }
          }
          deletedEntities += deletedThisIteration;
@@ -290,7 +367,7 @@ public class DataScrubber {
       if (!(limit.length() > 0)) return 0;
       Logging.fine("DataScrubber: Remove all MetricRecord RawXML records older than: " + limit);
       
-      long nrecords = deleteRawXml("MetricRecord", "(Timestamp is null || Timestamp < :dateLimit) and", limit, "MetricRecord RawXML" );
+      long nrecords = deleteRawXml("MetricRecord", "", limit, "MetricRecord RawXML" );
       
       Logging.info("DataScrubber: Removed " + nrecords +
                    " MetricRecord RawXML records older than: " + limit);
@@ -304,7 +381,7 @@ public class DataScrubber {
       if (!(limit.length() > 0)) return 0;
       Logging.fine("DataScrubber: Remove all JobUsage RawXML records older than: " + limit);
       
-      long nrecords = deleteRawXml("JobUsageRecord", "(EndTime is null || EndTime < :dateLimit) and ", limit, "JobUsageRecord RawXML" );
+      long nrecords = deleteRawXml("JobUsageRecord", "", limit, "JobUsageRecord RawXML" );
       
       Logging.info("DataScrubber: Removed " + nrecords +
                    " JobUsage RawXML records older than: " + limit);
