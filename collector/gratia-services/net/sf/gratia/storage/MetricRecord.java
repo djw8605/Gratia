@@ -145,10 +145,6 @@ public class MetricRecord extends Record
       return "MetricRecord";
    }
 
-   public static Date expirationDate() {
-      return new Date(0);
-   }
-
    public Date getDate() 
    {
       // Returns the date this records is reporting about.

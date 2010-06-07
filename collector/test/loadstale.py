@@ -59,6 +59,7 @@ def sendRecords(nrecords, end, extra = ""):
         
         #print "Starting at ",current
         for i in range(nrecords):
+                # print current
                 r = GetRecord(i,current)
                 r.RecordData.append(extra);
                 Gratia.Send(r)
@@ -76,6 +77,10 @@ if __name__ == '__main__':
 
         end = datetime.datetime.now();
 
-        # Send a few duplicates
+        # Send a few very old records
+        sendRecords(10,end)
+        
+        # Send a few record about the future!
+        end = end +  datetime.timedelta(days=365*2)
         sendRecords(10,end)
         

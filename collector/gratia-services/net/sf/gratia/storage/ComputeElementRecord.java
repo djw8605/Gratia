@@ -122,10 +122,6 @@ public class ComputeElementRecord extends Record
       return "ComputeElementRecord";
    }
 
-   public static Date expirationDate() {
-      return new Date(0);
-   }
-
    public Date getDate() 
    {
       // Returns the date this records is reporting about.

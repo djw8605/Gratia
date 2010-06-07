@@ -657,31 +657,31 @@ public class RecordProcessor extends Thread {
                } catch (NullPointerException e) {
                   date = current.getServerDate();
                }
-               Date expirationDate = current.getExpirationDate();
-               if (date.before(expirationDate)) {
+               ExpirationDateCalculator.Range expirationRange = current.getExpirationRange();
+               if (date.before(expirationRange.fExpirationDate)) {
                   acceptRecord = false;
                   try {
                      if (gotreplication) {
                         Logging.fine(ident + rId +
                                      ": Rejected record because " +
-                                     "its 'data' are too old (" +
+                                     "its 'data' is too old (" +
                                      current.getDate() + " < " +
-                                     expirationDate + ")");
+                                     expirationRange.fExpirationDate + ")");
                         errorRecorder.saveDuplicate("Replication",
                                                     "ExpirationDate",
                                                     0, current);
                      } else if (gothistory) {
                         Logging.fine(ident + rId +
                                      ": Ignored history record " +
-                                     "because its 'data' are too " +
+                                     "because its 'data' is too " +
                                      "old (" + current.getDate() +
-                                     " < " + expirationDate + ")");
+                                     " < " + expirationRange.fExpirationDate + ")");
                      } else {
                         Logging.fine(ident + rId +
                                      ": Rejected record because " +
-                                     "its 'data' are too old (" +
+                                     "its 'data' is too old (" +
                                      current.getDate() + " < " +
-                                     expirationDate + ")");
+                                     expirationRange.fExpirationDate + ")");
                         errorRecorder.saveDuplicate("Probe",
                                                     "ExpirationDate",
                                                     0, current);
@@ -695,6 +695,44 @@ public class RecordProcessor extends Thread {
                         return 0; // DB access problem.
                      }
 
+                  }
+               } else if(date.after(expirationRange.fCutoffDate)) {
+                  acceptRecord = false;
+                  try {
+                     if (gotreplication) {
+                        Logging.fine(ident + rId +
+                                     ": Rejected record because " +
+                                     "its 'data' is too far in the future (" +
+                                     current.getDate() + " < " +
+                                     expirationRange.fCutoffDate + ")");
+                        errorRecorder.saveDuplicate("Replication",
+                                                    "CutoffDate",
+                                                    0, current);
+                     } else if (gothistory) {
+                        Logging.fine(ident + rId +
+                                     ": Ignored history record " +
+                                     "because its 'data' is too " +
+                                     "far in the future (" + current.getDate() +
+                                     " < " + expirationRange.fCutoffDate + ")");
+                     } else {
+                        Logging.fine(ident + rId +
+                                     ": Rejected record because " +
+                                     "its 'data' is too far in the future (" +
+                                     current.getDate() + " > " +
+                                     expirationRange.fCutoffDate + ")");
+                        errorRecorder.saveDuplicate("Probe",
+                                                    "CutoffDate",
+                                                    0, current);
+                     }
+                  } catch (Exception e) {
+                     if (handleUnexpectedException(rId, e, gotreplication, current)) {
+                        saveQuarantineFile(file, "Unexpected error while recording expired record", e);
+                        continue NEXTRECORD; // Process next record.
+                     } else {
+                        Logging.warning(ident + ": Communications error: " + "shutting down");
+                        return 0; // DB access problem.
+                     }
+                     
                   }
                }
             }

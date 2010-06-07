@@ -133,10 +133,6 @@ public class StorageElement extends Record
       return "StorageElement";
    }
 
-   public static Date expirationDate() {
-      return new Date(0);
-   }
-
    public Date getDate() 
    {
       // Returns the date this records is reporting about.

@@ -95,6 +95,7 @@ my %attribute_defaults =
     "service.lifetime.ComputeElementDescription" => "3 months", # Shouldn't get these at all
     "service.lifetime.DupRecord.Duplicate" => "1 month",
     "service.lifetime.DupRecord.ExpirationDate" => "1 month",
+    "service.lifetime.DupRecord.CutoffDate" => "1 month",
     "service.lifetime.DupRecord" => "UNLIMITED",
     "service.lifetime.Trace" => "6 months",
     "service.lifetime.Trace.add_JUR_to_summary" => "3 months"

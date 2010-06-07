@@ -40,6 +40,10 @@ public abstract class Record implements RecordInterface {
    static ExpirationDateCalculator eCalc = new ExpirationDateCalculator();
 
    // Returns the date of the oldest raw records we keep
+   public ExpirationDateCalculator.Range getExpirationRange() {
+      return eCalc.expirationRange(new Date(), getTableName());
+   }
+   
    public Date getExpirationDate() {
       return eCalc.expirationDate(new Date(), getTableName());
    }
