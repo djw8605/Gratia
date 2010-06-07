@@ -2483,6 +2483,9 @@ def EfficiencyRange(what, range_end = datetime.date.today(),
                 if(prev[k][2] != "NULL"):
                     delta_cpuToWall = negate(float(prev[k][2]))
                     delta_eff = negate(int(prev[k][3]))
+                else:
+                    delta_cpuToWall = "n/a"
+                    delta_eff = "n/a"
             elif (k in prev) and (k in current):
                 delta_njobs = int(current[k][0]) - int(prev[k][0])
                 delta_wall = current[k][1] - prev[k][1]
