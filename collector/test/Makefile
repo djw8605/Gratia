@@ -6,10 +6,10 @@ def:
 	@echo for details
 
 build:
-	(cd ../../build-scripts; gmake )
+	(cd ../../build-scripts; gmake all testtimeout )
 
 test: build
-	./runPurgeTest.sh -c -d -l -f -k -t
+	./runPurgeTest.sh -c -d -l -f -k -m -t
 
 clean:
 	rm -rf MAGIC_VDT_LOCATION ProbeConfig collector-for-test *~ *.validate *.count

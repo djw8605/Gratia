@@ -12,6 +12,7 @@ usage: runPurgeTest.sh [-h] [-l] [-d] [-c] [-p port_number]
    -k Turn on the housekeeping
    -w [filename] upload the war file
    -s stop server
+   -m test timeout feature
    -t test content
 EOF
 }
@@ -68,73 +69,38 @@ function restart_server {
   start_server
 }
 
-function write_ProbeConfig {
-   cat > ProbeConfig <<EOF
+function write_ProbeConfig
+{  
+   name=$1
+   remotehost=$2
+   bundleSize=$3
+   service=$4
+
+   cat > $name <<EOF
 <ProbeConfiguration 
     UseSSL="0" 
 
     UseGratiaCertificates="0"
 
-    SSLHost="${webhost}:8443" 
+    SSLHost="${remotehost}:8443" 
     SSLCollectorService="/gratia-servlets/rmi"
-    SSLRegistrationHost="${webhost}:${http_port}"
+    SSLRegistrationHost="${remotehost}:${http_port}"
     SSLRegistrationService="/gratia-security/security"
 
     GratiaCertificateFile="gratia.hostcert.pem"
     GratiaKeyFile="gratia.hostkey.pem"
 
-    SOAPHost="${webhost}:${http_port}" 
-    CollectorService="/gratia-servlets/rmi" 
+    SOAPHost="${remotehost}:${http_port}" 
+    CollectorService="/$service/rmi" 
     UseSoapProtocol="0"
     
     MeterName="LocalTester" 
     SiteName="LocalTesting"
     Grid="OSG"
-    
-    LogLevel="2"
-    DebugLevel="0" 
-    GratiaExtension="gratia.xml"
-    CertificateFile="/etc/grid-security/hostcert.pem"
-    KeyFile="/etc/grid-security/hostkey.pem"
+   
+    ${bundleSize}
+    ConnectionTimeout="3" 
 
-    VDTSetupFile="MAGIC_VDT_LOCATION/setup.sh"
-    UserVOMapFile="MAGIC_VDT_LOCATION/monitoring/grid3-user-vo-map.txt"
-
-    MaxPendingFiles="100000"
-    DataFolder="MAGIC_VDT_LOCATION/gratia/var/data/"
-    WorkingFolder="MAGIC_VDT_LOCATION/gratia/var/tmp"
-    LogFolder="MAGIC_VDT_LOCATION/gratia/var/logs/"
-    LogRotate="31"
-    UseSyslog="0"
-    SuppressUnknownVORecords="0"
-    SuppressNoDNRecords="0"
-    EnableProbe="0"
-/>
-EOF
-
-   cat > ProbeConfigSingle <<EOF
-<ProbeConfiguration 
-    UseSSL="0" 
-
-    UseGratiaCertificates="0"
-
-    SSLHost="${webhost}:8443" 
-    SSLCollectorService="/gratia-servlets/rmi"
-    SSLRegistrationHost="${webhost}:${http_port}"
-    SSLRegistrationService="/gratia-security/security"
-
-    GratiaCertificateFile="gratia.hostcert.pem"
-    GratiaKeyFile="gratia.hostkey.pem"
-
-    SOAPHost="${webhost}:${http_port}" 
-    CollectorService="/gratia-servlets/rmi" 
-    UseSoapProtocol="0"
-    
-    MeterName="LocalTester" 
-    SiteName="LocalTesting"
-    Grid="OSG"
-    
-    BundleSize="1"
     LogLevel="2"
     DebugLevel="0" 
     GratiaExtension="gratia.xml"
@@ -158,9 +124,17 @@ EOF
 
 }
 
+function write_ProbeConfigs
+{  
+   write_ProbeConfig ProbeConfig ${webhost} "" gratia-servlets
+   write_ProbeConfig ProbeConfigSingle ${webhost} 'BundleSize="1"' gratia-servlets
+   write_ProbeConfig ProbeConfigTimeout ${webhost} "" gratia-testtimeout
+   write_ProbeConfig ProbeConfigFirewall atlasgw.bnl.gov "" gratia-testtimeout
+}
+
 function wait_for_server {
 
-   write_ProbeConfig
+   write_ProbeConfigs
 
    alive=0
    try=0
@@ -276,6 +250,8 @@ EOF
      ./update-gratia-local -s -S ${source} -d ${pass} -i ${filename} ${schema_name} \; \
      chown ${USER} ${tomcatpwd}/gratia/service-configuration.properties
 
+   scp ../../target/gratia-testtimeout.war root@${webhost}:${tomcatpwd}/webapps
+
    start_server
 }
 
@@ -369,7 +345,7 @@ function loaddata {
 
    start_server
 
-   write_ProbeConfig
+   write_ProbeConfigs
    wait_for_server
 
    # First extend artificially the retention to let the old record in.
@@ -519,6 +495,35 @@ EOF
   check_result $days origin "Origin records"
 }
 
+function check_timeout()
+{
+   echo "Checking timeout feature"
+
+   start_server
+
+   write_ProbeConfigs
+   wait_for_server
+
+   echo "Checking connection timeout"
+   start=`date +%s`
+   python timeout.py ProbeConfigFirewall
+   len=`expr \( \`date +%s\` - $start \)`
+   if [ $len -gt 12 ] ; then 
+      echo "Error: the timeout time ($len) when accessing a firewall host was too long (expected less than 12)"
+      check_failed=1
+   fi
+
+   echo "Checking post timeout"
+   start=`date +%s`
+   python timeout.py ProbeConfigTimeout
+   len=`expr \( \`date +%s\` - $start \)`
+   if [ $len -gt 12 ] ; then 
+      echo "Error: the timeout time ($len) when accesing a hung server was too long (expected less than 12)"
+      check_failed=1
+   fi
+
+}
+
 function upload_war()
 {
     stop_server
@@ -530,7 +535,7 @@ function upload_war()
 }
 
 #--- get command line args ----
-while getopts :tshcfkdln:w:p: OPT; do
+while getopts :tshcfkdlmn:w:p: OPT; do
     case $OPT in
         n)  schema_name=$OPTARG
             tomcatpwd=/data/tomcat-$OPTARG
@@ -557,6 +562,8 @@ while getopts :tshcfkdln:w:p: OPT; do
         t)  do_test=1
             ;;
         s)  do_stop=1
+            ;;
+        m)  do_timeout=1
             ;;
         *)
             usage
@@ -598,6 +605,10 @@ fi
 
 if [ $do_purge ]; then
    turn_on_purging
+fi
+
+if [ $do_timeout ]; then
+   check_timeout
 fi
 
 if [ $do_test ]; then
