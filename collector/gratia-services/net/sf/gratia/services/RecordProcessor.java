@@ -664,7 +664,7 @@ public class RecordProcessor extends Thread {
                      if (gotreplication) {
                         Logging.fine(ident + rId +
                                      ": Rejected record because " +
-                                     "its 'data' is too old (" +
+                                     "its data are too old (" +
                                      current.getDate() + " < " +
                                      expirationRange.fExpirationDate + ")");
                         errorRecorder.saveDuplicate("Replication",
@@ -673,13 +673,13 @@ public class RecordProcessor extends Thread {
                      } else if (gothistory) {
                         Logging.fine(ident + rId +
                                      ": Ignored history record " +
-                                     "because its 'data' is too " +
+                                     "because data are is too " +
                                      "old (" + current.getDate() +
                                      " < " + expirationRange.fExpirationDate + ")");
                      } else {
                         Logging.fine(ident + rId +
                                      ": Rejected record because " +
-                                     "its 'data' is too old (" +
+                                     "its data are too old (" +
                                      current.getDate() + " < " +
                                      expirationRange.fExpirationDate + ")");
                         errorRecorder.saveDuplicate("Probe",
@@ -702,7 +702,7 @@ public class RecordProcessor extends Thread {
                      if (gotreplication) {
                         Logging.fine(ident + rId +
                                      ": Rejected record because " +
-                                     "its 'data' is too far in the future (" +
+                                     "its data are too far in the future (" +
                                      current.getDate() + " < " +
                                      expirationRange.fCutoffDate + ")");
                         errorRecorder.saveDuplicate("Replication",
@@ -711,13 +711,13 @@ public class RecordProcessor extends Thread {
                      } else if (gothistory) {
                         Logging.fine(ident + rId +
                                      ": Ignored history record " +
-                                     "because its 'data' is too " +
+                                     "because its data are too " +
                                      "far in the future (" + current.getDate() +
                                      " < " + expirationRange.fCutoffDate + ")");
                      } else {
                         Logging.fine(ident + rId +
                                      ": Rejected record because " +
-                                     "its 'data' is too far in the future (" +
+                                     "its data are too far in the future (" +
                                      current.getDate() + " > " +
                                      expirationRange.fCutoffDate + ")");
                         errorRecorder.saveDuplicate("Probe",
