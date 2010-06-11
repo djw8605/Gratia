@@ -37,7 +37,6 @@ def main(argv=None):
     Gratia.Initialize()
 
     result = AccountingReports.DailySiteVOReport(AccountingReports.gBegin,output=argOutput)
-    #print result
     
     dateAsSecondSinceEpoch = time.mktime(AccountingReports.gBegin.timetuple())
  #       else:
@@ -47,7 +46,7 @@ def main(argv=None):
 
     # Read the date and send it to Gratia
     for line in result:
-        SendData( line[0:4], dateAsSecondSinceEpoch)
+        SendData( line[1:5], dateAsSecondSinceEpoch)
 
 if __name__ == "__main__":
     sys.exit(main())

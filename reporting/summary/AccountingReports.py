@@ -1353,8 +1353,8 @@ def GenericDailyStatus(what, when=datetime.date.today(), output = "text"):
         
 def GenericDaily(what, when=datetime.date.today(), output = "text"):
         old_stdout = sys.stdout
-	sys.stdout = stdout = StringIO()
-	ret = ""
+        sys.stdout = stdout = StringIO()
+        ret = ""
 
         factor = 3600  # Convert number of seconds to number of hours
 
@@ -1498,9 +1498,12 @@ def GenericDaily(what, when=datetime.date.today(), output = "text"):
                 print what.lines[output]
         if(output == "html"):
             print "</table>"
-	sys.stdout = old_stdout
-	ret = stdout.getvalue()
-        return ret
+        sys.stdout = old_stdout
+        ret = stdout.getvalue()
+        if (output=="None"):
+           return result
+        else:
+           return ret
         
 def DailySiteReport(when = datetime.date.today(), output = "text", header = True):
         return GenericDaily( DailySiteReportConf(header), when, output)
