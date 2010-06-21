@@ -437,7 +437,7 @@ reporting: birt-reporting
   (( $$? == 0 )) || exit 1; \
 	perl -we 'use strict; my $$seen_par; my $$par = "WORKING_FOLDER_ACCESS_ONLY"; my $$val = "false"; while (<>) { m&<param-name>\Q$$par\E</param-name>& and $$seen_par = 1; $$seen_par and s&<param-value>.*&<param-value>$$val</param-value>& and undef $$seen_par; print }' "$$tmp" > "$$tmp.2"; \
   (( $$? == 0 )) || exit 1; \
-  perl -wpe 'use strict; m&display-name& and print "        <!-- Gratia Reporting Service Listener -->\n        <listener>\n                <listener-class>net.sf.gratia.reporting.ReportingService</listener-class>\n        </listener>\n\n";' "$$tmp.2" > "$$tmp"; \
+  perl -wpe 'use strict; m&display-name& and do { print "        <!-- Gratia Reporting Service Listener -->\n        <listener>\n                <listener-class>net.sf.gratia.reporting.ReportingService</listener-class>\n        </listener>\n\n"; print "    <servlet>\n        <servlet-name>MonitorStatus</servlet-name>\n        <servlet-class>net.sf.gratia.administration.MonitorStatus</servlet-class>\n        <load-on-startup>2</load-on-startup>\n    </servlet>\n\n    <servlet-mapping>\n        <servlet-name>MonitorStatus</servlet-name>\n        <url-pattern>/monitor-status.html</url-pattern>\n    </servlet-mapping>\n\n"};' "$$tmp.2" > "$$tmp"; \
   (( $$? == 0 )) || exit 1; \
 	cp -p $(war-dir)/$@/WEB-INF/web.xml $(war-dir)/$@/WEB-INF/web.xml.old; \
 	cat "$$tmp" > $(war-dir)/$@/WEB-INF/web.xml;
