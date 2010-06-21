@@ -458,11 +458,13 @@ reporting: birt-reporting
 	cp -R $(reportsrc)/WebContent/tooltip                  $(war-dir)/$@/.
 	# --- Remove .svn directories
 	find $(war-dir)/$@ -depth -type d -name .svn -exec rm -rf {} \;
+	# -- Copy required class files in from other services:
+	mkdir -p $(war-dir)/$@/WEB-INF/classes/net/sf/gratia/administration
+	cp $(classes-dir)/net/sf/gratia/administration/MonitorStatus*.class $(war-dir)/$@/WEB-INF/classes/net/sf/gratia/administration
 	# --- copy the web.xml  file ---
 	jar -cfM $(target)/gratia-reporting.war -C $(war-dir)/$@ .
 	rm -rf $(war-dir)/$@
 	# --- Target: reporting COMPLETED at $(shell date) ---
-
 #-------------------------------------------------------------
 reports:
 	# -----------------------

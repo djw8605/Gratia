@@ -59,8 +59,8 @@ public class MonitorStatus extends HttpServlet
 			props = Configuration.getProperties();
 			driver = props.getProperty("service.mysql.driver");
 			url = props.getProperty("service.mysql.url");
-			user = props.getProperty("service.mysql.user");
-			password = props.getProperty("service.mysql.password");
+			user = props.getProperty("service.reporting.user");
+			password = props.getProperty("service.reporting.password");
 		}
 		catch (Exception ignore)
 		{
