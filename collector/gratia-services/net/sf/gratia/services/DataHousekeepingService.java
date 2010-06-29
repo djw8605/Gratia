@@ -145,8 +145,9 @@ public class DataHousekeepingService extends Thread {
 
     private Boolean executeHousekeeping(HousekeepingAction action) {
         Boolean result = false;
+        if (action == null) return result;
         currentAction = action;
-        Logging.info("DataHousekeepingService: run started.");
+        Logging.info("DataHousekeepingService: " + action + ".");
         switch(action) {
         case ALL:
             for (HousekeepingAction a : HousekeepingAction.values()) {
@@ -318,7 +319,7 @@ public class DataHousekeepingService extends Thread {
             break;
         default:
         }
-        Logging.info("DataHousekeepingService: run complete.");
+        Logging.info("DataHousekeepingService: " + action + " complete.");
         return result;
     }
 }
