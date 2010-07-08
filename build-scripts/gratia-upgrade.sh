@@ -629,14 +629,19 @@ $(cat $release_file)
 function verify_port_availability {
   delimit  verify_port_availability
   (( expected_number_of_ports = 6 ))
-  local jmx_port=`$configure_script $cc_config_arg-p ${tomcat_dir} --obtain-config-item jmx_port $config_name 2>/dev/null | sed -ne 's/^config: jmx_port = //p'`
-  if [[ -n "$jmx_port" ]]; then
-    ppid_check="eq"
-  else
-    # One less port to look for.
-    (( expected_number_of_ports -= 1 ))
+  local running_jsvc=`$configure_script $cc_config_arg-p ${tomcat_dir} --obtain-config-item jsvc $config_name 2>/dev/null | sed -ne 's/^config: jsvc = //p'`
+  if [[ -n "$running_jsvc" ]]; then
     ppid_check="ne"
+  else
+    ppid_check="eq"
   fi
+#  local jmx_port=`$configure_script $cc_config_arg-p ${tomcat_dir} --obtain-config-item jmx_port $config_name 2>/dev/null | sed -ne 's/^config: jmx_port = //p'`
+#  if [[ -n "$jmx_port" ]]; then
+#      :
+#  else
+#    # One less port to look for.
+#    (( expected_number_of_ports -= 1 ))
+#  fi
   local ssl_port=`$configure_script $cc_config_arg-p ${tomcat_dir} --obtain-config-item ssl_port $config_name 2>/dev/null | sed -ne 's/^config: ssl_port = //p'`
   if [[ -z "$ssl_port" ]]; then
     # One less port to look for
