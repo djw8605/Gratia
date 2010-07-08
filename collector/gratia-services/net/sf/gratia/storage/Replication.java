@@ -3,15 +3,15 @@ package net.sf.gratia.storage;
 import java.lang.Comparable;
 
 public class Replication implements Comparable {
-    private int replicationid;
+    private long replicationid;
     private int registered;
     private int running;
     private int security;
     private String openconnection;
     private String secureconnection;
     private int frequency;
-    private int dbid;
-    private int rowcount;
+    private long dbid;
+    private long rowcount;
     private String probename;
     private String recordtable;
     private int bundleSize;
@@ -47,11 +47,11 @@ public class Replication implements Comparable {
         setfrequency(1);
     }
 
-    public int getreplicationid() {
+    public long getreplicationid() {
         return replicationid;
     }
 
-    public void setreplicationid(int value) {
+    public void setreplicationid(long value) {
         replicationid = value;
     }
 
@@ -104,11 +104,11 @@ public class Replication implements Comparable {
         }
     }
 
-    public void setdbid(int value) {
+    public void setdbid(long value) {
         dbid = value;
     }
 
-    public int getdbid() {
+    public long getdbid() {
         return dbid;
     }
 
@@ -120,11 +120,11 @@ public class Replication implements Comparable {
         return frequency;
     }
 
-    public void setrowcount(int value) {
+    public void setrowcount(long value) {
         rowcount = value;
     }
 
-    public int getrowcount() {
+    public long getrowcount() {
         return rowcount;
     }
 

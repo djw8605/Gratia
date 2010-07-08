@@ -31,7 +31,7 @@ public class DatabaseMaintenance {
 
    static final String dq = "\"";
    static final String comma = ",";
-   static final int gratiaDatabaseVersion = 85;
+   static final int gratiaDatabaseVersion = 86;
    static final int latestDBVersionRequiringStoredProcedureLoad = gratiaDatabaseVersion;
    static final int latestDBVersionRequiringSummaryViewLoad = 82;
    static final int latestDBVersionRequiringSummaryTriggerLoad = 84;
@@ -1221,6 +1221,40 @@ public class DatabaseMaintenance {
                Logging.warning("Gratia database FAILED to upgrade from " + current +
                      " to " + (current + 1));
             }
+         }
+         if(current == 85) {
+            Upgrade86 bigintUpgrader = new Upgrade86();
+
+		//Upgrade from 85 to 86
+		//This involves updating the data type of a bunch of fields from int to bigint 
+		//All the details of the upgrade could be seen in Upgrade86.java 
+                try
+                {
+		        //Try doing the db upgrade from version 85 to version 86
+                        Logging.fine("Upgrade86 - Beginning database schema upgrade from version " + current + " to version " + (current + 1));
+                        bigintUpgrader.upgrade(connection);
+                        Logging.fine("Success!!! Upgrade86 - Finished database schema upgrade from version " + current + " to version " + (current + 1));
+
+			//If and only if the upgrade finished OK, then we will reach this point in the code, where we update the gratia database version
+			//If we didn't reach this point i.e. if an Exception was thrown and the code went into the catch clause, that means the value of 
+			//'current' won't be updated and this will cause the Upgrade method to return false
+			//By doing the version equality at the very end of the Upgrade method, if the upgrade failed, we can ensure that the code will exit CollectorService.java with a message about 
+			//failed upgrade and the need for 'Manual intervention'. Refer to the CollectorService.java code for further details
+
+               		current = current + 1;
+               		UpdateDbVersion(current);
+
+                }
+		//If something goes wrong, catch the Exception and log it 
+                catch(Exception e)
+                {
+			//Capture and log the full stack trace of the exception so that we have available all the details about what went wrong 
+                        Logging.warning("Error!!! Gratia database FAILED to upgrade from " +
+                                        current + " to " +
+                                        (current + 1) + ". Here is a stack trace of the Exception. \n" +
+                                        bigintUpgrader.getStackTrace(e));
+			
+                }
          }
          return ((current == gratiaDatabaseVersion) && checkAndUpgradeDbAuxiliaryItems());
       }

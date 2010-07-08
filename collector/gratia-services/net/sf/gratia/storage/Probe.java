@@ -2,7 +2,7 @@ package net.sf.gratia.storage;
 
 public class Probe
 {
-    private int probeid;
+    private long probeid;
 
     private Site site;
 
@@ -12,9 +12,9 @@ public class Probe
     private int reporthh;
     private int reportmm;
     private String status;
-    private int nRecords;
+    private long nRecords;
     private int nConnections;
-    private int nDuplicates;
+    private long nDuplicates;
 
     public Probe()
     {
@@ -30,7 +30,7 @@ public class Probe
         site = null;
     }
     
-    public int getsiteid() 
+    public long getsiteid() 
     {
         if (site != null) return site.getsiteid();
         else return 0;
@@ -44,12 +44,12 @@ public class Probe
     public Site getsite() { return site; }
     public void setsite(Site s) { site = s; }
     
-    public int getprobeid() 
+    public long getprobeid() 
     {
         return probeid;
     }
     
-    public void setprobeid(int probeid) 
+    public void setprobeid(long probeid) 
     {
         this.probeid = probeid;
     }
@@ -114,12 +114,12 @@ public class Probe
         return status;
     }
     
-    public int getnRecords()
+    public long getnRecords()
     {
         return nRecords;
     }
     
-    public void setnRecords(int value)
+    public void setnRecords(long value)
     {
         this.nRecords = value;
     }
@@ -134,12 +134,12 @@ public class Probe
         this.nConnections = value;
     }
     
-    public int getnDuplicates()
+    public long getnDuplicates()
     {
         return nDuplicates;
     }
     
-    public void setnDuplicates(int value)
+    public void setnDuplicates(long value)
     {
         this.nDuplicates = value;
     }

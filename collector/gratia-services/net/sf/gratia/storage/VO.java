@@ -2,18 +2,18 @@ package net.sf.gratia.storage;
 
 public class VO
 {
-		private int VOid;
+		private long VOid;
 		private String VOName;
 	
 		public VO()
 		{
 		}
 
-		public int getVOid() {
+		public long getVOid() {
 				return VOid;
 		}
 
-		public void setVOid(int id) {
+		public void setVOid(long id) {
 				this.VOid = id;
 		}
 

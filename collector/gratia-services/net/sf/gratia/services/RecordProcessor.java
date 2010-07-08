@@ -51,10 +51,10 @@ public class RecordProcessor extends Thread {
    ErrorRecorder errorRecorder = new ErrorRecorder();
    final Object lock;
    String historypath = "";
-   Hashtable<String,Integer> fProbeDetails = new Hashtable<String,Integer>();
-   Hashtable<String,Integer> fSubcluster = new Hashtable<String,Integer>();
-   Hashtable<String,Integer> fComputeElement = new Hashtable<String,Integer>();
-   Hashtable<String,Integer> fStorageElement = new Hashtable<String,Integer>();
+   Hashtable<String,Long> fProbeDetails = new Hashtable<String,Long>();
+   Hashtable<String,Long> fSubcluster = new Hashtable<String,Long>();
+   Hashtable<String,Long> fComputeElement = new Hashtable<String,Long>();
+   Hashtable<String,Long> fStorageElement = new Hashtable<String,Long>();
    static Pattern duplicateExceptionFinder = Pattern.compile("\\b[Dd]uplicate\\b");
    static Pattern metaFinder = Pattern.compile("_Meta ");
    static Pattern originFinder = Pattern.compile("Origin ");
@@ -760,7 +760,7 @@ public class RecordProcessor extends Thread {
                current.setmd5((String) md5list.get(j));
             }
             if (current.getTableName().equals("ProbeDetails")) {
-               Integer pd_dbid = fProbeDetails.get(current.getmd5());
+               Long pd_dbid = fProbeDetails.get(current.getmd5());
                if (pd_dbid != null) {
                   // This is a duplicate.
                   Logging.fine(ident + rId +
@@ -770,7 +770,7 @@ public class RecordProcessor extends Thread {
                }
             }
             else if (current.getTableName().equals("Subcluster")) {
-               Integer pd_dbid = fSubcluster.get(current.getmd5());
+               Long pd_dbid = fSubcluster.get(current.getmd5());
                if (pd_dbid != null) {
                   // This is a duplicate.
                   Logging.fine(ident + rId +
@@ -779,7 +779,7 @@ public class RecordProcessor extends Thread {
                   acceptRecord = false;
                }
             } else if (current.getTableName().equals("ComputeElement")) {
-               Integer pd_dbid = fComputeElement.get(current.getmd5());
+               Long pd_dbid = fComputeElement.get(current.getmd5());
                if (pd_dbid != null) {
                   // This is a duplicate.
                   Logging.fine(ident + rId +
@@ -788,7 +788,7 @@ public class RecordProcessor extends Thread {
                   acceptRecord = false;
                }             
             } else if (current.getTableName().equals("StorageElement")) {
-               Integer pd_dbid = fStorageElement.get(current.getmd5());
+               Long pd_dbid = fStorageElement.get(current.getmd5());
                if (pd_dbid != null) {
                   // This is a duplicate.
                   Logging.fine(ident + rId +
@@ -1115,7 +1115,7 @@ public class RecordProcessor extends Thread {
                                               boolean gothistory) throws Exception {
       Logging.debug(ident + rId + ": handling ConstraintViolationException caused by SQL: " +
                     e.getSQL());
-      int dupdbid = 0;
+      long dupdbid = 0;
       boolean needCurrentSaveDup = false;
       Transaction tx = null;
       if (duplicateExceptionFinder.matcher(e.getSQLException().getMessage()).find() &&
@@ -1320,7 +1320,8 @@ public class RecordProcessor extends Thread {
                   current.getmd5() +
                   "'";
                tx = dup2_session.beginTransaction();
-               Integer dup_dbid = (Integer) (dup2_session.createSQLQuery(cmd).uniqueResult());
+               //Integer dup_dbid = (Integer) (dup2_session.createSQLQuery(cmd).uniqueResult());
+               Long dup_dbid = (Long) (dup2_session.createSQLQuery(cmd).uniqueResult());
                tx.commit();
                // Avoid infinite growth
                if (current instanceof ProbeDetails) {

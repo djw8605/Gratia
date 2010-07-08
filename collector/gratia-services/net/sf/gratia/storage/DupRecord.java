@@ -4,25 +4,25 @@ import java.util.*;
 
 public class DupRecord
 {
-   private int dupid;
+   private long dupid;
    private Date eventdate;
    private String rawxml;
    private String extraxml;
    private String source;
    private String error;
-   private int dbid;
+   private long dbid;
    private String RecordType;
 
    public DupRecord()
    {
    }
 
-   public int getdupid()
+   public long getdupid()
    {
       return dupid;
    }
 
-   public void setdupid(int value)
+   public void setdupid(long value)
    {
       dupid = value;
    }
@@ -78,12 +78,12 @@ public class DupRecord
       return error;
    }
 
-   public void setdbid(int value)
+   public void setdbid(long value)
    {
       dbid = value;
    }
 
-   public int getdbid()
+   public long getdbid()
    {
       return dbid;
    }

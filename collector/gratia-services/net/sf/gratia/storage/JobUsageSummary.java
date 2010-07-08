@@ -17,7 +17,7 @@ import org.apache.commons.lang.StringEscapeUtils;
 public class JobUsageSummary extends Record {
 
     // Information directly reflecting DB contents
-    private int RecordId;
+    private long RecordId;
     private DateElement EndTime;
     private IntegerElement VOcorrid;
     private StringElement CommonName;
@@ -64,11 +64,11 @@ public class JobUsageSummary extends Record {
         return "";
     }
 
-    public int getRecordId() {
+    public long getRecordId() {
         return RecordId;
     }
 
-    public void setRecordId(int RecordId) {
+    public void setRecordId(long RecordId) {
         this.RecordId = RecordId;
     }
 

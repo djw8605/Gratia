@@ -30,7 +30,7 @@ public abstract class Record implements RecordInterface {
    protected StringElement Grid;
    
    // Meta Information (not part of the xml file per se).
-   protected int RecordId;
+   protected long RecordId;
    protected String RawXml;   // Complete Usage Record Xml
    protected String ExtraXml; // Xml fragment not used for any of the data members/field
    protected Date ServerDate;
@@ -97,11 +97,11 @@ public abstract class Record implements RecordInterface {
       return RecordIdentity;
    }
    
-   public void setRecordId(int RecordId)
+   public void setRecordId(long RecordId)
    {
       this.RecordId = RecordId;
    }
-   public int getRecordId()
+   public long getRecordId()
    {
       return RecordId;
    }

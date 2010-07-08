@@ -237,6 +237,7 @@
                    "monitor.recordProcessor.wait" => 240,
                    "service.rmiservlet.level" => "FINEST",
                    "service.service.level" => 'FINEST',
+                   "service.administration.level" => 'FINEST',
                    "service.service.numLogs" => 200,
                    "monitor.to.address.0" => 'greenc@fnal.gov',
                    "service.recordProcessor.threads" => 1,

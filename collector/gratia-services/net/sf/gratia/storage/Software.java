@@ -20,7 +20,7 @@ import org.apache.commons.lang.StringEscapeUtils;
 
 public class Software implements AttachableXmlElement
    {
-      private int softid;
+      private long softid;
       private String Name;
       private String Version;
       private String Type;
@@ -79,8 +79,8 @@ public class Software implements AttachableXmlElement
       
       // Software Specific interface.
       
-      public void setsoftid(int id) { softid = id; }
-      public int getsoftid() { return softid; }
+      public void setsoftid(long id) { softid = id; }
+      public long getsoftid() { return softid; }
       
       public void setName(String val) { Name = val; }
       public String getName() { return Name; }

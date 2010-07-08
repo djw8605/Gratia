@@ -2,7 +2,7 @@ package net.sf.gratia.storage;
 
 public class Site
 {
-    private int siteid;
+    private long siteid;
     private String siteName;
 	
     public Site()
@@ -14,11 +14,11 @@ public class Site
         siteName = name;
     }
 
-    public int getsiteid() {
+    public long getsiteid() {
         return siteid;
     }
     
-    public void setsiteid(int id) {
+    public void setsiteid(long id) {
         this.siteid = id;
     }
     

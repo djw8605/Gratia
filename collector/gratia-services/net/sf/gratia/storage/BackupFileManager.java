@@ -31,7 +31,7 @@ public class BackupFileManager {
         Utils.GratiaInfo("Initializing Gratia");
         // Setting the pid
         java.util.Random r = new java.util.Random();
-        RecordPid = r.nextInt();
+        RecordPid = r.nextLong();
         // Need to initialize the list of possible directories
         InitDirList();
         // Need to look for left over files
@@ -223,7 +223,7 @@ public class BackupFileManager {
 
     private List BackupDirList;
     private List OutstandingRecord;
-    private int RecordPid;
+    private long RecordPid;
     private String GratiaExtension = ".gratia.xml";
 
 

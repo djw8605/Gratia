@@ -10,7 +10,7 @@
          table="StorageElement"
          node="StorageElement" lazy="false">
 
-    <id name="RecordId" column="dbid" type="integer">
+    <id name="RecordId" column="dbid" type="long">
       <generator class="native"/>
     </id>
 

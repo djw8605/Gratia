@@ -8,8 +8,8 @@ package net.sf.gratia.storage;
  *
  */
 public class VONameCorrection {
-    private int corrid;
-    private int VOid;
+    private long corrid;
+    private long VOid;
     private String VOName;
     private String ReportableVOName;
     
@@ -17,19 +17,19 @@ public class VONameCorrection {
     {
     }
 
-    public int getVOid() {
+    public long getVOid() {
             return VOid;
     }
 
-    public void setVOid(int id) {
+    public void setVOid(long id) {
             this.VOid = id;
     }
 
-    public int getcorrid() {
+    public long getcorrid() {
         return corrid;
     }
 
-    public void setcorrid(int id) {
+    public void setcorrid(long id) {
         this.corrid = id;
     }
 

@@ -2,13 +2,13 @@ DELIMITER ||
 
 DROP PROCEDURE IF EXISTS add_service_to_hourly_summary
 ||
-CREATE PROCEDURE add_service_to_hourly_summary(inputDbid INT(11))
+CREATE PROCEDURE add_service_to_hourly_summary(inputDbid BIGINT(20))
 SQL SECURITY INVOKER
 DETERMINISTIC
 ASERVH:BEGIN
   -- Main
   DECLARE n_ProbeName VARCHAR(255);
-  DECLARE n_VOcorrid INT(11);
+  DECLARE n_VOcorrid BIGINT(20);
   DECLARE n_CEName VARCHAR(255);
   DECLARE n_Grid VARCHAR(255);
   DECLARE n_HostName VARCHAR(255);
@@ -180,13 +180,13 @@ END;
 
 DROP PROCEDURE IF EXISTS add_service_to_daily_summary
 ||
-CREATE PROCEDURE add_service_to_daily_summary(inputDbid INT(11))
+CREATE PROCEDURE add_service_to_daily_summary(inputDbid BIGINT(20))
 SQL SECURITY INVOKER
 DETERMINISTIC
 ASERV:BEGIN
   -- Main
   DECLARE n_ProbeName VARCHAR(255);
-  DECLARE n_VOcorrid INT(11);
+  DECLARE n_VOcorrid BIGINT(20);
   DECLARE n_CEName VARCHAR(255);
   DECLARE n_HostName VARCHAR(255);
   DECLARE n_Clustercorrid VARCHAR(255);
@@ -362,20 +362,20 @@ END;
 
 DROP PROCEDURE IF EXISTS del_service_from_hourly_summary
 ||
-CREATE PROCEDURE del_service_from_hourly_summary(inputDbid INT(11))
+CREATE PROCEDURE del_service_from_hourly_summary(inputDbid BIGINT(20))
 SQL SECURITY INVOKER
 DETERMINISTIC
 DSERVH:BEGIN
   -- Main
   DECLARE n_ProbeName VARCHAR(255);
-  DECLARE n_VOcorrid INT(11);
+  DECLARE n_VOcorrid BIGINT(20);
   DECLARE n_CEUniqueID VARCHAR(255);
   DECLARE n_RunningJobs BIGINT(20);
   DECLARE n_WaitingJobs BIGINT(20);
   DECLARE n_TotalJobs BIGINT(20);
   DECLARE n_RecordTime DATETIME;
   DECLARE n_SummaryTime DATETIME;
-  DECLARE n_dbid BIGINT(11);
+  DECLARE n_dbid BIGINT(20);
   DECLARE n_RecordCount BIGINT(20);
 
   -- Data collection from the record table
@@ -473,20 +473,20 @@ END;
 
 DROP PROCEDURE IF EXISTS del_service_from_daily_summary
 ||
-CREATE PROCEDURE del_service_from_daily_summary(inputDbid INT(11))
+CREATE PROCEDURE del_service_from_daily_summary(inputDbid BIGINT(20))
 SQL SECURITY INVOKER
 DETERMINISTIC
 DSERV:BEGIN
   -- Main
   DECLARE n_ProbeName VARCHAR(255);
-  DECLARE n_VOcorrid INT(11);
+  DECLARE n_VOcorrid BIGINT(20);
   DECLARE n_CEUniqueID VARCHAR(255);
   DECLARE n_RunningJobs BIGINT(20);
   DECLARE n_WaitingJobs BIGINT(20);
   DECLARE n_TotalJobs BIGINT(20);
   DECLARE n_RecordTime DATETIME;
   DECLARE n_SummaryTime DATETIME;
-  DECLARE n_dbid BIGINT(11);
+  DECLARE n_dbid BIGINT(20);
   DECLARE n_RecordCount BIGINT(20);
 
   -- Data collection from the record table

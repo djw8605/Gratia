@@ -2,7 +2,7 @@ package net.sf.gratia.storage;
 
 public class CPUInfo 
 {
-		private int _id;
+		private long _id;
 		private String _hostDescription;
 		private String _benchmarkScore;
 		private String _CPUCount;
@@ -14,10 +14,10 @@ public class CPUInfo
 		{
 		}
 
-		public int get_id() {
+		public long get_id() {
 				return _id;
 		}
-		public void set_id(int _id) {
+		public void set_id(long _id) {
 				this._id = _id;
 		}
 		public String get_benchmarkScore() {

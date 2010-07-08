@@ -6,7 +6,7 @@ DROP PROCEDURE IF EXISTS updatenodesummary -- Obsolete summary procedure
 ||
 DROP PROCEDURE IF EXISTS add_JUR_to_summary
 ||
-CREATE PROCEDURE add_JUR_to_summary(inputDbid INT(11))
+CREATE PROCEDURE add_JUR_to_summary(inputDbid BIGINT(20))
 SQL SECURITY INVOKER
 DETERMINISTIC
 AJUR:BEGIN
@@ -14,7 +14,7 @@ AJUR:BEGIN
   DECLARE n_ProbeName VARCHAR(255);
   DECLARE n_CommonName VARCHAR(255);
   DECLARE n_DistinguishedName VARCHAR(255);
-  DECLARE n_VOcorrid INT(11);
+  DECLARE n_VOcorrid BIGINT(20);
   DECLARE n_ResourceType VARCHAR(255);
   DECLARE n_HostDescription VARCHAR(255);
   DECLARE n_ApplicationExitCode VARCHAR(255);
@@ -27,7 +27,7 @@ AJUR:BEGIN
   DECLARE n_EndTime DATETIME;
   DECLARE n_rowDate DATETIME;
   DECLARE n_Grid VARCHAR(255);
-  DECLARE n_Cores INT(11);
+  DECLARE n_Cores BIGINT(20);
 
   -- Storage only
   DECLARE n_DN VARCHAR(255);
@@ -42,8 +42,8 @@ AJUR:BEGIN
   -- NodeSummary update only
   DECLARE wantNodeSummary VARCHAR(64) DEFAULT '';
   DECLARE n_Host text;
-  DECLARE mycpucount INT DEFAULT 0;
-  DECLARE mybenchmarkscore INT DEFAULT 0;
+  DECLARE mycpucount BIGINT DEFAULT 0;
+  DECLARE mybenchmarkscore BIGINT DEFAULT 0;
   DECLARE divide INT DEFAULT 0;
   DECLARE counter INT DEFAULT 0;  
   DECLARE newdate DATETIME;
@@ -302,7 +302,7 @@ END;
 ||
 DROP PROCEDURE IF EXISTS del_JUR_from_summary
 ||
-CREATE PROCEDURE del_JUR_from_summary(inputDbid INT(11))
+CREATE PROCEDURE del_JUR_from_summary(inputDbid BIGINT(20))
 SQL SECURITY INVOKER
 DETERMINISTIC
 DJUR:BEGIN
@@ -310,7 +310,7 @@ DJUR:BEGIN
   DECLARE n_ProbeName VARCHAR(255);
   DECLARE n_CommonName VARCHAR(255);
   DECLARE n_DistinguishedName VARCHAR(255);
-  DECLARE n_VOcorrid INT(11);
+  DECLARE n_VOcorrid BIGINT(20);
   DECLARE n_ResourceType VARCHAR(255);
   DECLARE n_HostDescription VARCHAR(255);
   DECLARE n_ApplicationExitCode VARCHAR(255);
@@ -323,7 +323,7 @@ DJUR:BEGIN
   DECLARE n_EndTime DATETIME;
   DECLARE n_rowDate DATE;
   DECLARE n_Grid VARCHAR(255);
-  DECLARE n_Cores INT(11);
+  DECLARE n_Cores BIGINT(20);
 
   -- Storage only
   DECLARE n_DN VARCHAR(255);
@@ -338,8 +338,8 @@ DJUR:BEGIN
   -- NodeSummary update only
   DECLARE wantNodeSummary VARCHAR(64) DEFAULT '';
   DECLARE n_Host text;
-  DECLARE mycpucount INT DEFAULT 0;
-  DECLARE mybenchmarkscore INT DEFAULT 0;
+  DECLARE mycpucount BIGINT DEFAULT 0;
+  DECLARE mybenchmarkscore BIGINT DEFAULT 0;
   DECLARE divide INT DEFAULT 0;
   DECLARE counter INT DEFAULT 0;  
   DECLARE newdate DATETIME;

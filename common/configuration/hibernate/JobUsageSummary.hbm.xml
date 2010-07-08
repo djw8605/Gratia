@@ -13,7 +13,7 @@
 
     <id name="RecordId"
         column="SummaryID"
-        type="integer">
+        type="long">
         <generator class="native"/>
     </id>
 

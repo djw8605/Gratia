@@ -45,7 +45,7 @@ public class ErrorRecorder {
    }
    
    public void saveDuplicate(String source, String error,
-                             int dupdbid, Record current) throws Exception {
+                             long dupdbid, Record current) throws Exception {
       DupRecord record = new DupRecord();
       
       record.seteventdate(new java.util.Date());
@@ -59,7 +59,7 @@ public class ErrorRecorder {
    }
    
    public void saveDuplicate(String source, String error,
-                             int dupdbid, String xml,
+                             long dupdbid, String xml,
                              String tableName) throws Exception {
       DupRecord record = new DupRecord();
       

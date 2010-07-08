@@ -5,7 +5,7 @@
 
 <hibernate-mapping package= "net.sf.gratia.storage">
   <class name="Trace" table="trace" node="Trace" lazy="false">
-    <id name="traceId" column="traceId" type="int">
+    <id name="traceId" column="traceId" type="long">
       <generator class="native" />
     </id>
    <property name="eventtime" type="timestamp">

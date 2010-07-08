@@ -17,7 +17,7 @@ import org.apache.commons.lang.StringEscapeUtils;
 public class TransferSummary extends Record {
 
     // Information directly reflecting DB contents
-    private int RecordId;
+    private long RecordId;
     private DateElement StartTime;
     private IntegerElement VOcorrid;
     private StringElement ProbeName;
@@ -104,11 +104,11 @@ public class TransferSummary extends Record {
         // FIXME
     }
 
-    public int getRecordId() {
+    public long getRecordId() {
         return RecordId;
     }
  
-    public void setRecordId(int RecordId) {
+    public void setRecordId(long RecordId) {
         this.RecordId = RecordId;
     }
 

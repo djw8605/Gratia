@@ -41,6 +41,7 @@ my @required_properties = ();
 
 my %attribute_defaults =
   (
+   max_perm_size => "128m",
    max_heap_size => "256m",
    db_port => 3306,
    db_host => "gratia-db01.fnal.gov",

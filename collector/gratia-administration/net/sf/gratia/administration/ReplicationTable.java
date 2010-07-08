@@ -55,7 +55,7 @@ public class ReplicationTable extends HttpServlet {
    String fMessage = null;
    Boolean fModify = false;
    Boolean fInitialized = false;
-   Hashtable<Integer,Replication> fRepTable = null;
+   Hashtable<Long,Replication> fRepTable = null;
    Boolean fDBOK = true;
 
    // Configuration
@@ -123,9 +123,9 @@ public class ReplicationTable extends HttpServlet {
       Logging.debug("ReplicationTable.doGet()");
       if (LoginChecker.checkLogin(request, response)) {
          setup(request);
-         Integer selectedReplicationId = null;
+         Long selectedReplicationId = null;
          try {
-            selectedReplicationId = new Integer(request.getParameter("replicationid"));
+            selectedReplicationId = new Long(request.getParameter("replicationid"));
          }
          catch (Exception ignore) {
          }                
@@ -204,10 +204,10 @@ public class ReplicationTable extends HttpServlet {
             process(0);
             compileResponse(response);
          } else {
-            Integer selectedReplicationId = null;
+            Long selectedReplicationId = null;
             Replication repEntry = null;
             try {
-               selectedReplicationId = new Integer(request.getParameter("replicationid"));
+               selectedReplicationId = new Long(request.getParameter("replicationid"));
                repEntry = fRepTable.get(selectedReplicationId);
             }
             catch (Exception ignore) {
@@ -246,7 +246,9 @@ public class ReplicationTable extends HttpServlet {
                compileResponse(response);
             } else {
                if (action.equals("New Entry")) {
+                  Logging.debug("Selected New Entry with repEntry NULL");
                   repEntry = new Replication(RecordTable);
+                  Logging.debug("New entry has ID " + repEntry.getreplicationid());
                   // Place in fRepTable
                   fRepTable.put(repEntry.getreplicationid(), repEntry);
                   // Set up to modify this new line;
@@ -329,7 +331,7 @@ public class ReplicationTable extends HttpServlet {
          return;
       }
       // Load hash table with entries
-      fRepTable = new Hashtable<Integer, Replication>();
+      fRepTable = new Hashtable<Long, Replication>();
       for ( Object listEntry : records ) {
          Replication repEntry = (Replication) listEntry;
          Logging.debug("Replication: loaded entry " +
@@ -343,7 +345,7 @@ public class ReplicationTable extends HttpServlet {
                        repEntry.getrowcount() + ", " +
                        repEntry.getbundleSize() + "."
                        );
-         fRepTable.put(new Integer(repEntry.getreplicationid()),
+         fRepTable.put(new Long(repEntry.getreplicationid()),
                        repEntry);
       }
    }
@@ -355,8 +357,12 @@ public class ReplicationTable extends HttpServlet {
          return "";
       }
    }
+
+   void process(int selectedReplicationId) {
+      process((long) selectedReplicationId);
+   }
    
-   void process(Integer selectedReplicationId) {
+   void process(Long selectedReplicationId) {
       if (fRepTable == null) return;
       Logging.debug("ReplicationTable.process(selectedReplicationId)");
       Logging.debug("ReplicationTable: received selectedReplicationId " +
@@ -376,7 +382,7 @@ public class ReplicationTable extends HttpServlet {
          Boolean modifyThisEntry = false;
          if ((fModify == true) &&
              (selectedReplicationId != null) &&
-             (repEntry.getreplicationid() == selectedReplicationId.intValue())) {
+             (repEntry.getreplicationid() == selectedReplicationId.longValue())) {
             Logging.debug("ReplicationTable: request to modify replication Id "
                           + selectedReplicationId);
             if (repEntry.getrunning() > 0) {
@@ -392,7 +398,8 @@ public class ReplicationTable extends HttpServlet {
          }
       }
       Replication newEntry;
-      if ((newEntry = fRepTable.get(0)) != null) { // Deal with new entry
+      if ((newEntry = fRepTable.get((long)0)) != null) { // Deal with new entry
+         Logging.debug("Calling process(newEntry, " + fModify.toString() + ").");
          buffer.append(process(newEntry, fModify));
       }
       if (modifyingEntry) {
@@ -453,9 +460,9 @@ public class ReplicationTable extends HttpServlet {
             .replaceAll("#dbid#", 
                         "<input name=\"dbid:#replicationid#\" " +
                         "type=\"text\" value=\"" +
-                        Integer.toString(repEntry.getdbid()) +
+                        Long.toString(repEntry.getdbid()) +
                         "\" size=\"8\" maxlength=\"10\" />")
-            .replaceAll("#rowcount#", Integer.toString(repEntry.getrowcount()))
+            .replaceAll("#rowcount#", Long.toString(repEntry.getrowcount()))
             .replaceAll("#bundleSize#", 
                         "<input name=\"bundleSize:#replicationid#\" " +
                         "type=\"text\" value=\"" +
@@ -470,7 +477,7 @@ public class ReplicationTable extends HttpServlet {
                         "</td></tr>")
             .replaceAll("#webpagename#", Name)
             .replaceAll("#replicationid#",
-                        Integer.toString(repEntry.getreplicationid()));
+                        Long.toString(repEntry.getreplicationid()));
       } else { // Simple
          newrow = newrow
             .replaceAll("#openconnection#",
@@ -482,9 +489,9 @@ public class ReplicationTable extends HttpServlet {
             .replaceAll("#frequency#",
                         Integer.toString(repEntry.getfrequency()))
             .replaceAll("#dbid#",
-                        Integer.toString(repEntry.getdbid()))
+                        Long.toString(repEntry.getdbid()))
             .replaceAll("#rowcount#",
-                        Integer.toString(repEntry.getrowcount()))
+                        Long.toString(repEntry.getrowcount()))
             .replaceAll("#security#",
                         (repEntry.getsecurity() == 0)?"No":"Yes")
             .replaceAll("#bundleSize#",
@@ -524,7 +531,7 @@ public class ReplicationTable extends HttpServlet {
                                        "              <input type=\"submit\" name=\"action\" value=\"Modify\"/></td></tr>");
          }
          newrow = newrow.replaceAll("#webpagename#", Name)
-            .replaceAll("#replicationid#", Integer.toString(repEntry.getreplicationid()));
+            .replaceAll("#replicationid#", Long.toString(repEntry.getreplicationid()));
       }
       return newrow;
    }
@@ -701,7 +708,7 @@ public class ReplicationTable extends HttpServlet {
    }
    
    void update(Replication repEntry, HttpServletRequest request) {
-      int repEntryId = repEntry.getreplicationid();
+      long repEntryId = repEntry.getreplicationid();
       Logging.debug("ReplicationTable: updating replicationId " +
                     repEntryId);
       if (repEntryId == 0) {
@@ -746,14 +753,15 @@ public class ReplicationTable extends HttpServlet {
       
       // dbid
       key = "dbid:" + repEntryId;
+      long newValueLong = 0;
       try {
-         newValueInt = Integer.parseInt(request.getParameter(key));
+         newValueLong = Long.parseLong(request.getParameter(key));
          successfulConversion = true;
       } catch (Exception e) {
          successfulConversion = false;
       }
-      if (successfulConversion && (repEntry.getdbid() != newValueInt)) {
-         repEntry.setdbid(newValueInt);
+      if (successfulConversion && (repEntry.getdbid() != newValueLong)) {
+         repEntry.setdbid(newValueLong);
       }
       
       // bundleSize

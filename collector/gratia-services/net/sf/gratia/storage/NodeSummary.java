@@ -17,7 +17,7 @@ import org.apache.commons.lang.StringEscapeUtils;
 public class NodeSummary extends Record {
 
     // Information directly reflecting DB contents
-    private int RecordId;
+    private long RecordId;
     private DateElement EndTime;
     private StringElement Node;
     private StringElement ProbeName;
@@ -101,11 +101,11 @@ public class NodeSummary extends Record {
         // FIXME
     }
 
-    public int getRecordId() {
+    public long getRecordId() {
         return RecordId;
     }
 
-    public void setRecordId(int RecordId) {
+    public void setRecordId(long RecordId) {
         this.RecordId = RecordId;
     }
 

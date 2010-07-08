@@ -96,14 +96,14 @@ public class DataScrubber {
             query.setString( "dateLimit", limit );
             
             Logging.debug("DataScrubber: About to execute " + query.getQueryString());
-            Integer result = (Integer) query.uniqueResult();
+            Long result = (Long) query.uniqueResult();
             
             if ( result == null ) {
                query = session.createSQLQuery("select max(dbid) from "+type+"_Meta where ServerDate < :dateLimit");
                query.setString( "dateLimit", limit );
                
                Logging.debug("DataScrubber: About to execute " + query.getQueryString());
-               result = (Integer) query.uniqueResult();
+               result = (Long) query.uniqueResult();
             }
             if ( result == null ) {
                
@@ -120,7 +120,7 @@ public class DataScrubber {
             query = session.createSQLQuery("select dbid from "+type+"_Xml X where ExtraXml = \"\" order by dbid limit 1");
  
             Logging.debug("DataScrubber: About to execute " + query.getQueryString());
-            result = (Integer) query.uniqueResult();
+            result = (Long) query.uniqueResult();
             if ( result == null ) {
                Logging.debug("DataScrubber: found no min(dbid) in "+type+"_Xml");
                // Nothing to do.

@@ -18,7 +18,7 @@ import org.apache.commons.lang.StringEscapeUtils;
 public class ServiceSummary extends Record {
 
     // Information directly reflecting DB contents
-    private int RecordId;
+    private long RecordId;
     private DateElement Timestamp;
     private StringElement ProbeName;
     private StringElement CEUniqueID;
@@ -64,11 +64,11 @@ public class ServiceSummary extends Record {
         return "";
     }
 
-    public int getRecordId() {
+    public long getRecordId() {
         return RecordId;
     }
 
-    public void setRecordId(int RecordId) {
+    public void setRecordId(long RecordId) {
         this.RecordId = RecordId;
     }
 

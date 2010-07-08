@@ -3,7 +3,7 @@ package net.sf.gratia.storage;
 import java.util.*;
 
 public class Trace {
-    private int traceId;
+    private long traceId;
     private Date eventtime;
     private String procName;
     private String userKey;
@@ -17,11 +17,11 @@ public class Trace {
     private String p2;
     private String p3;
 
-    public int gettraceId() {
+    public long gettraceId() {
         return traceId;
     }
 
-    public void settraceId(int traceId) {
+    public void settraceId(long traceId) {
         this.traceId = traceId;
     }
 

@@ -12,8 +12,8 @@ import net.sf.gratia.storage.Replication;
 
 public class ReplicationService extends Thread {
    
-   Hashtable<Integer, ReplicationDataPump> pumpStore =
-   new Hashtable<Integer, ReplicationDataPump>();
+   Hashtable<Long, ReplicationDataPump> pumpStore =
+   new Hashtable<Long, ReplicationDataPump>();
    Properties p;
    Boolean stopRequested = false;
    
@@ -28,9 +28,9 @@ public class ReplicationService extends Thread {
       }
       Logging.info("ReplicationService: Stop requested");
       // Stop all pumps.
-      Enumeration<Integer> x = pumpStore.keys();
+      Enumeration<Long> x = pumpStore.keys();
       while (x.hasMoreElements()) {
-         Integer key = x.nextElement();
+         Long key = x.nextElement();
          // Need to get the pump and shut it down
          ReplicationDataPump pump = pumpStore.get(key);
          if ((pump != null) && (pump.isAlive())) {
@@ -49,7 +49,7 @@ public class ReplicationService extends Thread {
    public void loop() {
       ReplicationDataPump pump = null;
       Session session = null;
-      Hashtable<Integer, Integer> checkedPumps = new Hashtable<Integer, Integer>();
+      Hashtable<Long, Integer> checkedPumps = new Hashtable<Long, Integer>();
       try {
          session = HibernateWrapper.getSession();
          org.hibernate.Transaction tx = session.beginTransaction();
@@ -61,7 +61,7 @@ public class ReplicationService extends Thread {
             Replication replicationEntry = (Replication) rIter.next();
             // Logging.debug("Entity name of replication entry: " +
             //               session.getEntityName(replicationEntry));
-            Integer replicationid = replicationEntry.getreplicationid();
+            Long replicationid = replicationEntry.getreplicationid();
             Integer running = replicationEntry.getrunning();
             checkedPumps.put(replicationid, running);
             
@@ -86,8 +86,8 @@ public class ReplicationService extends Thread {
       // now - loop through running threads, find out if they're still wanted
       // and stop them if not.
       //
-      for (Enumeration<Integer> x = pumpStore.keys(); x.hasMoreElements();) {
-         Integer replicationId = x.nextElement();
+      for (Enumeration<Long> x = pumpStore.keys(); x.hasMoreElements();) {
+         Long replicationId = x.nextElement();
          try {
             Integer running = checkedPumps.get(replicationId);
             if (running == null || running.intValue() == 0) {

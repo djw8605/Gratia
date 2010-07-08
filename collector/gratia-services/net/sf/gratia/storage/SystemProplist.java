@@ -2,7 +2,7 @@ package net.sf.gratia.storage;
 
 public class SystemProplist
 {
-		private int propid;
+		private long propid;
 		private String car;
 		private String cdr;
 
@@ -10,12 +10,12 @@ public class SystemProplist
 		{
 		}
 
-		public int getpropid()
+		public long getpropid()
 		{
 				return propid;
 		}
 
-		public void setpropid(int value)
+		public void setpropid(long value)
 		{
 				propid = value;
 		}

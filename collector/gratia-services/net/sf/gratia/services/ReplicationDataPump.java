@@ -34,7 +34,7 @@ public class ReplicationDataPump extends Thread {
       Pattern.compile("(?:(?:Compute|Storage)Element(?:Record)?|Subcluster)");
    // Class attributes
    private Properties p;
-   private int replicationId;
+   private long replicationId;
    private boolean trace;
    private int chunksize;
 
@@ -48,7 +48,7 @@ public class ReplicationDataPump extends Thread {
    private Boolean firstLoopThisRun = true;
    private String replicatePath = "";
 
-   public ReplicationDataPump(int replicationId) {
+   public ReplicationDataPump(long replicationId) {
       this.replicationId = replicationId;
       p = Configuration.getProperties();
       
@@ -262,7 +262,8 @@ public class ReplicationDataPump extends Thread {
                return; // Abandon unsent bundle
             }
             long prevdbid = dbid;
-            dbid = ((Integer) dIter.next()).longValue();
+            //dbid = ((Integer) dIter.next()).longValue();
+            dbid = ((BigInteger) dIter.next()).longValue();
             String xml = getXML(dbid, replicationEntry.getrecordtable(), session);
             if (xml.length() == 0) {
                replicationLog(LogLevel.INFO,
@@ -314,7 +315,7 @@ public class ReplicationDataPump extends Thread {
 
       replicationLog(LogLevel.FINEST, "getXML: dbid: " + dbid);
 
-      Record record = (Record) session.get("net.sf.gratia.storage." + table, (int) dbid);
+      Record record = (Record) session.get("net.sf.gratia.storage." + table, dbid);
 
       // Record has disappeared -- nothing to replicate
       if (record == null) return "";
@@ -337,7 +338,7 @@ public class ReplicationDataPump extends Thread {
          // Successful -- update replication table entry
          session.refresh(replicationEntry);
          Transaction tx = session.beginTransaction();
-         replicationEntry.setdbid((int)dbid);
+         replicationEntry.setdbid(dbid);
          replicationEntry.setrowcount(replicationEntry.getrowcount() + bundle_count);
          session.flush();
          tx.commit();

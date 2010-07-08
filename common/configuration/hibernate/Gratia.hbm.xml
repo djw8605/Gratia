@@ -23,7 +23,7 @@
   </class>
 
   <class name="SystemProplist" table="SystemProplist" node="SystemProplist" lazy="false">
-    <id name="propid" column="propid" type="int">
+    <id name="propid" column="propid" type="long">
       <generator class="native"/>
     </id>
     <property name="car">
@@ -33,7 +33,7 @@
   </class>
 
   <class name="DupRecord" table="DupRecord" node="DupRecord" lazy="false">
-    <id name="dupid" column="dupid" type="int">
+    <id name="dupid" column="dupid" type="long">
       <generator class="native"/>
     </id>
     <property name="eventdate" column="eventdate" type="timestamp"/>
@@ -41,12 +41,12 @@
     <property name="extraxml" column="extraxml" type="text" length="16777215"/>
     <property name="source" column="source"/>
     <property name="error" column="error"/>
-    <property name="dbid" column="dbid" type="int"/>
+    <property name="dbid" column="dbid" type="long"/>
     <property name="RecordType" column="RecordType"/>
   </class>
 
   <class name="Replication" table="Replication" node="Replication" lazy="false">
-    <id name="replicationid" column="replicationid" type="int">
+    <id name="replicationid" column="replicationid" type="long">
       <generator class="native"/>
     </id>
     <property name="registered" type="int">
@@ -67,10 +67,10 @@
     <property name="frequency" type="int">
       <column name="frequency" not-null="true" default="1" />
     </property>
-    <property name="dbid" type="int">
+    <property name="dbid" type="long">
       <column name="dbid" not-null="true" default="0" />
     </property>
-    <property name="rowcount" type="int">
+    <property name="rowcount" type="long">
       <column name="rowcount" not-null="true" default="0" />
     </property>
     <property name="probename">
@@ -124,7 +124,7 @@
 
     <id name="_id"
             column="HostId"
-            type="int">
+            type="long">
       <generator class="native"/>
     </id>
 
@@ -137,7 +137,7 @@
   </class>
 
   <class name="VO" table="VO" node="VO" lazy="false">
-    <id name="VOid" column="VOid" type="int">
+    <id name="VOid" column="VOid" type="long">
        <generator class="native"/>
     </id>
     <property name="VOName" type="string">
@@ -146,7 +146,7 @@
   </class>
   
   <class name="VONameCorrection" table="VONameCorrection" node="VONameCorrection" lazy="false">
-     <id name="corrid" column="corrid" type="int">
+     <id name="corrid" column="corrid" type="long">
         <generator class="native"/>
      </id>
      <property name="VOName" type="string">
@@ -155,11 +155,11 @@
      <property name="ReportableVOName" type="string">
        <column name="ReportableVOName" sql-type="varchar(255) binary" />
      </property>
-     <property name="VOid" column="VOid" type="int"/>
+     <property name="VOid" column="VOid" type="long"/>
   </class>
   
   <class name="Cluster" table="Cluster" node="Cluster" lazy="false">
-    <id name="clusterid" column="clusterid" type="int">
+    <id name="clusterid" column="clusterid" type="long">
        <generator class="native"/>
     </id>
     <property name="name" type="string">
@@ -168,27 +168,27 @@
   </class>
   
   <class name="ClusterNameCorrection" table="ClusterNameCorrection" node="ClusterNameCorrection" lazy="true">
-    <id name="corrid" column="corrid" type="int">
+    <id name="corrid" column="corrid" type="long">
       <generator class="native"/>
     </id>
     <property name="ClusterName" type="string">
       <column name="ClusterName" sql-type="varchar(255)"/>
     </property>
-    <property name="clusterid" column="clusterid" type="int"/>
+    <property name="clusterid" column="clusterid" type="long"/>
     <property name="type" type="int">
       <column name="type" not-null="true" default="1" />
     </property>
   </class>
        
   <class name="Site" table="Site" node="Site" lazy="false">
-    <id name="siteid" column="siteid" type="int">
+    <id name="siteid" column="siteid" type="long">
       <generator class="native"/>
     </id>
     <property name="siteName" column="SiteName"/>
   </class>
 
   <class name="Probe" table="Probe" node="Probe" lazy="false">
-    <id name="probeid" column="probeid" type="int">
+    <id name="probeid" column="probeid" type="long">
       <generator class="native"/>
     </id>
     <many-to-one name="site" column="siteid" not-null="true"/>
@@ -201,15 +201,15 @@
     <property name="reporthh" column="reporthh" type="int"/>
     <property name="reportmm" column="reportmm" type="int"/>
     <property name="status"/>
-    <property name="nRecords"/>
-    <property name="nDuplicates"/>
+    <property name="nRecords" column="nRecords" type="long"/>
+    <property name="nDuplicates" column="nDuplicates" type="long"/>
     <property name="nConnections"/>
   </class>
 
   <class name="ProbeDetails"  table="ProbeDetails"
          node="ProbeDetails" lazy="false">
 
-    <id name="RecordId" column="dbid" type="integer">
+    <id name="RecordId" column="dbid" type="long">
         <generator class="native"/>
     </id>
 
@@ -266,7 +266,7 @@
   </class>
 
   <class name="Software" table="Software" node="Software">
-    <id name="softid" column="dbid" type="integer">
+    <id name="softid" column="dbid" type="long">
         <generator class="native"/>
     </id>
     <property name="Type"/>

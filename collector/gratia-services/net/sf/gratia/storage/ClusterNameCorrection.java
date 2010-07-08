@@ -8,8 +8,8 @@ package net.sf.gratia.storage;
  *
  */
 public class ClusterNameCorrection {
-  private int corrid;
-  private int clusterid;
+  private long corrid;
+  private long clusterid;
   private String ClusterName;
   private int type;
 
@@ -31,19 +31,19 @@ public class ClusterNameCorrection {
     return output;
   }
 
-  public int getCorrid() {
+  public long getCorrid() {
     return corrid;
   }
 
-  public void setCorrid(int corrid) {
+  public void setCorrid(long corrid) {
     this.corrid = corrid;
   }
 
-  public int getClusterid() {
+  public long getClusterid() {
     return clusterid;
   }
 
-  public void setClusterid(int clusterid) {
+  public void setClusterid(long clusterid) {
     this.clusterid = clusterid;
   }
 

@@ -2,7 +2,7 @@ package net.sf.gratia.storage;
 
 public class Cluster
 {
-  private int clusterid;
+  private long clusterid;
   private String name;
 
   public Cluster()
@@ -14,11 +14,11 @@ public class Cluster
     return output;
   }
 
-  public int getClusterid() {
+  public long getClusterid() {
     return clusterid;
   }
 
-  public void setClusterid(int clusterid) {
+  public void setClusterid(long clusterid) {
     this.clusterid = clusterid;
   }
 

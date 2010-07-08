@@ -30,8 +30,8 @@ public interface RecordInterface {
     public String computemd5(boolean optional) throws Exception;
     public String getmd5();
     public void setmd5(String md5set);
-    public int getRecordId();
-    public void setRecordId(int RecordId);
+    public long getRecordId();
+    public void setRecordId(long RecordId);
 
     public Probe getProbe();
     public void setProbe(Probe p);

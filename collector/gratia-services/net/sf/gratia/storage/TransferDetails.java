@@ -14,7 +14,7 @@ public class TransferDetails extends Record {
    private Set JURSet;
    
    // Information directly reflecting DB contents
-   private int TransferDetailsId;
+   private long TransferDetailsId;
    private String Protocol;
    private String Source;
    private String Destination;
@@ -126,11 +126,11 @@ public class TransferDetails extends Record {
       // FIXME
    }
    
-   public int getRecordId() {
+   public long getRecordId() {
       return TransferDetailsId;
    }
    
-   public void setRecordId(int RecordId) {
+   public void setRecordId(long RecordId) {
       this.TransferDetailsId = RecordId;
    }
    
