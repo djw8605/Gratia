@@ -66,8 +66,19 @@ public class RMIHandlerServlet extends HttpServlet {
       
     public void doPost(HttpServletRequest req, HttpServletResponse res)
         throws ServletException, IOException, IllegalStateException, NoClassDefFoundError {
-         
-        if (!lookupProxy() || !fCollectorProxy.servletEnabled()) {
+
+        boolean result;
+        try {
+           result = lookupProxy() && fCollectorProxy.servletEnabled();
+        }
+        catch (java.rmi.NoSuchObjectException e) {
+           result = false;
+           Logging.warning("RMIHandlerServlet encountered RMI lookup error: resetting RMI.");
+           Logging.debug("Exception details: ", e);
+           fCollectorProxy = null; // Force lookup next time.
+        }
+
+        if (!result) {
             PrintWriter writer = res.getWriter();
             writer.write("Error: service not ready.");
             writer.flush();
@@ -93,7 +104,7 @@ public class RMIHandlerServlet extends HttpServlet {
                 X509Certificate[] certs = (X509Certificate[]) req.getAttribute("javax.servlet.request.X509Certificate");
 
                 if (verified_certs != null && certs != null) {
-                    boolean result = ( verified_certs == certs[0] );
+                    result = ( verified_certs == certs[0] );
                     Logging.log("Verified certs found" + result);
                 }// else if ( certs != null) {
                 //    Logging.info("Certificate passed but no pre-verification found: "+req.getSession().getId());
@@ -112,7 +123,7 @@ public class RMIHandlerServlet extends HttpServlet {
                 from = req.getParameter("from");
                 origin = fCollectorProxy.checkConnection(certs,req.getRemoteAddr(),from);
                 if (origin != null && origin.length() > 0) {
-                    Logging.debug("RMIHandlerServlet: Crudentials accepted.");
+                    Logging.debug("RMIHandlerServlet: Credentials accepted.");
                     if (certs != null) {
                         req.getSession().setAttribute("GratiaRmiServletVerified",certs[0]);
                     }
