@@ -161,8 +161,18 @@ function install_collector() {
     ssh root@$remote_host echo >/dev/null 2>&1
     status=$?
     if (( ${status:-1} != 0 )); then
-      echo "ERROR: User $username unable to login as root to $remote_host for install!" 1>&2
-      exit 2
+      if [[ "$username" == root ]] && [[ "$KRB5CCNAME_OLD" ]] && [[ "$KRB5CCNAME" != "$KRB5CCNAME_OLD" ]]; then
+        # install-group saved the existing credentials location prior to
+        # getting host credentials -- restore and try again.
+        echo "WARNING: unable to login as root to $remote_host with current credentials ... " 1>&2
+        echo "         resetting KRB5CCNAME and trying again" 1>&2
+        KRB5CCNAME=$KRB5CCNAME_OLD
+        install_collector "$@"
+        return $?
+      else
+        echo "ERROR: User $username unable to login as root to $remote_host for install!" 1>&2
+        exit 2
+      fi
     fi
     printf "INFO: performing REMOTE install of collector $instance_name ($config_name) on host $remote_host with $type ${release:-build} from $release_dir ... "
     if (( ${autostart:-0} )); then

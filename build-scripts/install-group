@@ -130,6 +130,8 @@ done
 
 # If we're running this script as root, get the host credentials.
 if (( $(id -u) == 0 )); then
+  # Save existing KRB5CCNAME just in case the host credentials won't get us where we need to be.
+  export KRB5CCNAME_OLD=$KRB5CCNAME
   export KRB5CCNAME=$TMP.krb5
   /usr/krb5/bin/kinit -k
 fi
