@@ -151,7 +151,7 @@ public class DataHousekeepingService extends Thread {
         switch(action) {
         case ALL:
             for (HousekeepingAction a : HousekeepingAction.values()) {
-                if (a == HousekeepingAction.ALL) {
+               if ((a == HousekeepingAction.ALL) || (a == HousekeepingAction.NONE)) {
                     continue;
                 }
                 if (stopRequested) {
