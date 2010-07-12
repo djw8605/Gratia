@@ -2,6 +2,7 @@ package net.sf.gratia.servlets;
 
 import net.sf.gratia.util.Configuration;
 import net.sf.gratia.util.Logging;
+import net.sf.gratia.util.LogLevel;
 import net.sf.gratia.util.Base64;
 
 import net.sf.gratia.services.*;
@@ -73,9 +74,9 @@ public class RMIHandlerServlet extends HttpServlet {
         }
         catch (java.rmi.NoSuchObjectException e) {
            result = false;
-           Logging.warning("RMIHandlerServlet encountered RMI lookup error: resetting RMI.");
-           Logging.debug("Exception details: ", e);
-           fCollectorProxy = null; // Force lookup next time.
+           Logging.log(LogLevel.SEVERE,
+                       "RMIHandlerServlet encountered RMI lookup error: expected object has gone away!");
+           throw e;
         }
 
         if (!result) {

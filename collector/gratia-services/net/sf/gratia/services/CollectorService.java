@@ -31,7 +31,7 @@ public class CollectorService implements ServletContextListener {
    String rmibind;
    String rmilookup;
    String service;
-   
+   private JMSProxyImpl theProxy;
    Properties p;
    
    static final long threadStopWaitTime = 60 * 1000; // One minute, in milliseconds
@@ -349,8 +349,8 @@ public class CollectorService implements ServletContextListener {
          //
          // poke in rmi
          //
-         JMSProxyImpl proxy = new JMSProxyImpl(this);
-         Naming.rebind(rmibind + service, proxy);
+         theProxy = new JMSProxyImpl(this);
+         Naming.rebind(rmibind + service, theProxy);
          Logging.info("JMSProxy started");
          
          // Determine whether we can start normal operations.
