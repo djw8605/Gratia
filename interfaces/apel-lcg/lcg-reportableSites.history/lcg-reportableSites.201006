@@ -266,19 +266,29 @@
 # BU_ATLAS_Tier2        2897    2022     43
 # MWT2_UC            	2449    1935     26
 # ------------------------------------------------
+#
+# 07/09/2010 (Karthik Arunachalam)
+# Updated NFapel values to NFgip values for the following sites
+# ------------------------------------------------
+# Site            	NFgip   NFapel   %diff
+# ------------------------------------------------
+# USCMS-FNAL-WC1-CE	2566	1995	28 
+# Nebraska		2603	2027	28
+# Purdue-RCAC		3031	2883	5
+#
 
 ##################################################################
 #-- Site  ------- SPECint2000
 #
 #--- CMS Tier 1 ----    
-USCMS-FNAL-WC1-CE   1995  
+USCMS-FNAL-WC1-CE   2566  
 #--- CMS Tier 2 ----    
 CIT_CMS_T2          3046       
 GLOW                2408
 HEPGRID_UERJ        2117
 MIT_CMS             1872
-Nebraska            2027
-Purdue-RCAC         2883
+Nebraska            2603
+Purdue-RCAC         3031
 Purdue-Steele       3196
 UCSDT2              2871
 SPRACE              2117
