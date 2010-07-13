@@ -149,7 +149,7 @@ if ($options->{"test"}) {
 foreach my ${primary_email} (sort keys %${people_data}) {
   my $person = $people_data->{$primary_email};
   my $vo_rep_name_reports = {};
-  foreach my ${vo _rep_name} (@{$person->{reporting_names}}) {
+  foreach my ${vo_rep_name} (@{$person->{reporting_names}}) {
     my ($vo, $reporting_name) = ($vo_rep_name =~ m&^([^:]+):(.*)$&);
     $vo = lc $vo;
     $vo_rep_name_reports->{$vo} = {} unless $vo_rep_name_reports->{$vo};
@@ -187,7 +187,7 @@ foreach my ${primary_email} (sort keys %${people_data}) {
     push @command, map { ("--reporting-name", "$vo:$_") } (sort keys %{$vo_rep_name_reports->{$vo}});
     my @address_list = ();
     if ($options->{production}) {
-      push @address_list, $person->{contact_string}, @{$master_vo_list->{"all"} || };
+      push @address_list, $person->{contact_string}, @{$master_vo_list->{"all"} || [] };
     } elsif ($options->{test}) {
       push @address_list, @{$master_vo_list->{"all-vos-test"}};
     }
@@ -211,11 +211,11 @@ foreach my $vo (sort keys %$master_vo_list) {
   } elsif ($options->{"test"}) {
     push @email_list, @{$master_vo_list->{"all-vos-test"}};
   }
-  foreach my $email (@email_list) {
+  foreach my ${email} (@email_list) {
     my ($address) = ($email =~ m&<([^>]+)>&);
     $email_hash->{$email} = $address || $email;
   }
-  foreach my $email (sort keys %$email_hash) {
+  foreach my ${email} (sort keys %$email_hash) {
     # Check whether we have information about this person from OIM
     if (exists $people_data->{$email_hash->{$email}} and
         $people_data->{$email_hash->{$email}}->wants_vo_report_oim($vo)) {
@@ -259,7 +259,11 @@ foreach my $vo (sort keys %$master_vo_list) {
   }
   @email_list = map { ('-m', $_) } sort keys %$email_hash;
   print "INFO: compiling and distributing report for VO $vo to: ";
-  print join(", ", sort keys %$email_hash),"\n";
+  if (scalar keys %$email_hash) {
+    print join(", ", sort keys %$email_hash),"\n";
+  } else {
+    print "<none>\n";
+  }
   $reporter->invoke(\@command, \@email_list);
 }
 
@@ -270,7 +274,7 @@ sub usage {
 Usage: $ARGV[0] [<options>] [<local-data-file>]
 
 EOF
-  GratiaReporting::Reporter::usage(STDERR);
+  GratiaReporting::Reporter::usage(\*STDERR);
   print STDERR <<EOF;
 
 $ARGV[0] options:
