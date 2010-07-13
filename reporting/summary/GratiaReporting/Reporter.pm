@@ -27,7 +27,7 @@ sub invoke($\@\@) {
   } else {                      # For real
     if ($self->{options}->{test}) {
       unshift @escaped_command, "set -x;";
-    } else {
+    } elsif (scalar @$mail_opts) { # Suppress output if mailing
       push @escaped_command, ">/dev/null 2>&1";
     }
     system(join(" ", @escaped_command));
