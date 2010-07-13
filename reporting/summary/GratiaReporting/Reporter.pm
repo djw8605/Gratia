@@ -34,6 +34,24 @@ sub invoke($\@\@) {
   }
 }
 
+sub usage {
+  my $fh = shift;
+  print $fh <<EOF;
+General options:
+
+  --debug
+   -d
+
+    Don't actually execute the reports, just state what would happen.
+
+  --verbose
+   -v
+
+    Be more verbose.
+EOF
+}
+
+
 1;
 
 __END__

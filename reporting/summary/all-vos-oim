@@ -33,18 +33,33 @@ my @wanted_vos = ();
 my @test_addresses = ( 'Chris Green <chris.h.green@gmail.com>' );
 
 GetOptions($options,
-           "merge|m",
+           "compare-period|comparison-period=s",
            "data-file-precdence|p|r",
            "data-source|D=s@",
            "debug|d",
-           "verbose",
+           "help|h|?",
+           "merge|m",
            "monthly|M",
-           "weekly|W",
-           "yearly|Y",
-           "test|t",
-           "compare-period|comparison-period=s",
+           "production",
            "target-period=s",
-           "vo|v=s@" => sub { push @wanted_vos, lc $_[1] } ) or die $@;
+           "test|t",
+           "verbose",
+           "vo|v=s@" => sub { push @wanted_vos, lc $_[1] },
+           "weekly|W",
+           "yearly|Y"
+          ) or do { print STDERR "ERROR: $@"; usage(1); };
+
+$options->{"help"} and usage(1);
+
+# Check options with an effect on each other:
+if ($options->{production} and $options->{test}) {
+  print STDERR "INFO: test option negates production option.\n";
+  delete $options->{production};
+}
+
+if ($options->{debug} and not $options->{test}) {
+  $options->{production} = 1;
+}
 
 $merge = 0 if ($options->{"data-file-precdence"});
 
@@ -117,28 +132,30 @@ foreach my $dat_file (@ARGV) {
   }
 }
 
-foreach my $vo_key (sort keys %$vo_data) {
- unless ($master_vo_list->{lc $vo_key} or
-         (scalar @wanted_vos and
-          not grep /^\Q$vo_key\E$/i, @wanted_vos)) {
-   print "INFO: Added VO $vo_key to list\n";
-   $master_vo_list->{lc $vo_key} = [];
- }
+foreach my ${vo_key} (sort keys %$vo_data) {
+  unless ($master_vo_list->{lc $vo_key} or
+          (scalar @wanted_vos and
+           not grep /^\Q$vo_key\E$/i, @wanted_vos)) {
+    print "INFO: Added VO $vo_key to list\n";
+    $master_vo_list->{lc $vo_key} = [];
+  }
 }
 
-$master_vo_list->{"all-vos-test"} = [ @test_addresses ]
-  unless exists $master_vo_list->{"all-vos-test"};
+if ($options->{"test"}) {
+  $master_vo_list->{"all-vos-test"} = [ @test_addresses ]
+    unless exists $master_vo_list->{"all-vos-test"};
+}
 
-foreach my $primary_email (sort keys %$people_data) {
+foreach my ${primary_email} (sort keys %${people_data}) {
   my $person = $people_data->{$primary_email};
   my $vo_rep_name_reports = {};
-  foreach my $vo_rep_name (@{$person->{reporting_names}}) {
+  foreach my ${vo _rep_name} (@{$person->{reporting_names}}) {
     my ($vo, $reporting_name) = ($vo_rep_name =~ m&^([^:]+):(.*)$&);
     $vo = lc $vo;
     $vo_rep_name_reports->{$vo} = {} unless $vo_rep_name_reports->{$vo};
     $vo_rep_name_reports->{$vo}->{$reporting_name} = "LOCAL";
   }
-  foreach my $vo_rep_name (@{$person->{vo_reporting_names}}) {
+  foreach my ${vo_rep_name} (@{$person->{vo_reporting_names}}) {
     my ($vo, $reporting_name) = ($vo_rep_name =~ m&^([^:]+):(.*)$&);
     $vo = lc $vo;
     my ($matching_vo_key) = (grep { lc $_ eq $vo } keys %$vo_data);
@@ -168,7 +185,13 @@ foreach my $primary_email (sort keys %$people_data) {
       push @command, "-t", "year";
     }
     push @command, map { ("--reporting-name", "$vo:$_") } (sort keys %{$vo_rep_name_reports->{$vo}});
-    $reporter->invoke(\@command, [ "-m", $person->{contact_string} ]);
+    my @address_list = ();
+    if ($options->{production}) {
+      push @address_list, $person->{contact_string}, @{$master_vo_list->{"all"} || };
+    } elsif ($options->{test}) {
+      push @address_list, @{$master_vo_list->{"all-vos-test"}};
+    }
+    $reporter->invoke(\@command, [ map { ("-m", $_) } @address_list ]);
   }
 }
 
@@ -182,9 +205,12 @@ foreach my $vo (sort keys %$master_vo_list) {
     push @command, "-t", "year";
   }
   my $email_hash = {};
-  my @email_list = $options->{"test"}?
-    @{$master_vo_list->{"all-vos-test"}}:
-      (@{$master_vo_list->{$vo}}, @{$master_vo_list->{"all"} || []});
+  my @email_list = ();
+  if ($options->{production}) {
+    push @email_list, @{$master_vo_list->{$vo}}, @{$master_vo_list->{"all"} || [] };
+  } elsif ($options->{"test"}) {
+    push @email_list, @{$master_vo_list->{"all-vos-test"}};
+  }
   foreach my $email (@email_list) {
     my ($address) = ($email =~ m&<([^>]+)>&);
     $email_hash->{$email} = $address || $email;
@@ -196,37 +222,39 @@ foreach my $vo (sort keys %$master_vo_list) {
       print "INFO: Matched $email_hash->{$email} in OIM contacts list for VO $vo.\n"
         if $options->{verbose};
     } elsif (exists $people_data->{$email_hash->{$email}} and
-        $people_data->{$email_hash->{$email}}->wants_all_vos()) {
+             $people_data->{$email_hash->{$email}}->wants_all_vos()) {
       print "INFO: $email_hash->{$email} wants all VO reports: added to report for VO $vo.\n"
         if $options->{verbose};
     } else {
       print "OIM_WARNING: Local contact $email not found in OIM contacts list for VO $vo.\n";
     }
   }
-  # Check whether OIM knows something we don't
-  foreach my $person (sort keys %$people_data) {
-    print "INFO: Checking $person in OIM data\n" if $options->{verbose};
-#    print "INFO: person data for $person:\n",
-#      '-' x 72, "\n",
-#        $people_data->{$person}->info(),
-#        '-' x 72, "\n" if $options->{verbose};
-    if ($people_data->{$person}->wants_vo_report_oim($vo)) {
-      if (grep m&$person&i, %$email_hash) {
-        print "INFO: OIM contact $people_data->{$person}->{full_name} matches data-file email $person for VO $vo.\n"
+  if ($options->{production}) { # Only
+    # Check whether OIM knows something we don't
+    foreach my $person (sort keys %$people_data) {
+      print "INFO: Checking $person in OIM data\n" if $options->{verbose};
+      #    print "INFO: person data for $person:\n",
+      #      '-' x 72, "\n",
+      #        $people_data->{$person}->info(),
+      #        '-' x 72, "\n" if $options->{verbose};
+      if ($people_data->{$person}->wants_vo_report_oim($vo)) {
+        if (grep m&$person&i, %$email_hash) {
+          print "INFO: OIM contact $people_data->{$person}->{full_name} matches data-file email $person for VO $vo.\n"
+            if $options->{verbose};
+        } else {
+          # Add person to send list.
+          $email_hash->{sprintf("%s <%s>",
+                                $people_data->{$person}->{full_name},
+                                $person)} = $person;
+        }
+      } elsif ($people_data->{$person}->wants_all_vos()) {
+        print "INFO: OIM contact $people_data->{$person}->{full_name} wants all VO reports: added to report for VO $vo.\n"
           if $options->{verbose};
-      } else {
         # Add person to send list.
         $email_hash->{sprintf("%s <%s>",
                               $people_data->{$person}->{full_name},
                               $person)} = $person;
       }
-    } elsif ($people_data->{$person}->wants_all_vos()) {
-      print "INFO: OIM contact $people_data->{$person}->{full_name} wants all VO reports: added to report for VO $vo.\n"
-        if $options->{verbose};
-      # Add person to send list.
-      $email_hash->{sprintf("%s <%s>",
-                            $people_data->{$person}->{full_name},
-                            $person)} = $person;
     }
   }
   @email_list = map { ('-m', $_) } sort keys %$email_hash;
@@ -236,6 +264,88 @@ foreach my $vo (sort keys %$master_vo_list) {
 }
 
 1;
+
+sub usage {
+  print STDERR <<EOF;
+Usage: $ARGV[0] [<options>] [<local-data-file>]
+
+EOF
+  GratiaReporting::Reporter::usage(STDERR);
+  print STDERR <<EOF;
+
+$ARGV[0] options:
+
+  --help
+   -h
+   -\?
+
+    This help.
+
+  --compare-period <time-string>
+  --comparison-period <time-string>
+
+    Time period from which to calculate deltas to target.
+
+  --data-file-precedence
+   -p
+   -r
+
+    Do not merge (use local file configuration only). Negates effect of
+    --merge.
+
+  --data-source <data-source>
+   -D <data-source>
+
+    Specify a file or remote XML data source.
+
+  --merge
+   -m
+
+    Merge local file configuration data and OIM, XML sources (default).
+
+  --monthly
+   -M
+
+    Monthly report.
+
+  --production
+
+    Send email to all requesting parties as ascertained from all
+    specified information sources.  Note: the presence of the debug
+    option combined with the lack of the "test" option will activate the
+    production option but not invoke any reports.
+
+  --target-period <time-string>
+
+    Time period upon which to report.
+
+  --test
+   -t
+
+    Send email only to 'all-vos-test' group (default no email). If set,
+    negates, "production" option.
+
+  --vo <VO>
+   -v <VO>
+
+    Add VO <VO> to list upon which to report.
+
+  --weekly
+   -W
+
+    Weekly report.
+
+  --yearly
+   -Y
+
+    Yearly report.
+
+
+EOF
+  if (defined $_[0]) {
+    exit($_[0]);
+  }
+}
 
 __END__
 
