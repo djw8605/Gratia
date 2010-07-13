@@ -31,23 +31,44 @@ sub expandSites(\@);
 my $options = {};
 my $osg_users_script = "$script_top_dir/osg-users";
 my @test_addresses = ( 'Chris Green <chris.h.green@gmail.com>' );
+my $prog = basename($0);
 
 GetOptions($options,
-           "debug|d",
-           "verbose|v",
-           "monthly|M",
-           "weekly|W",
-           "yearly|Y",
-           "test|t",
-           "data-source|D=s@",
-           "site-name|s=s@",
-           "extra-mail|e=s@",
-           "exclusive-mail|m=s@",
-           "grid-type|g=s@",
-           "service=s@",
            "compare-period|comparison-period=s",
+           "data-source|D=s@",
+           "debug|d",
+           "exclusive-mail|m=s@",
+           "extra-mail|e=s@",
+           "for-user|u=s@",
+           "grid-type|g=s@",
+           "help|h|?",
+           "monthly|M",
+           "production",
+           "service=s@",
+           "site-name|s=s@",
            "target-period=s",
-           "for-user|u=s@") or die $@;
+           "test|t",
+           "verbose|v",
+           "weekly|W",
+           "yearly|Y"
+          ) or do { print STDERR "ERROR: $@"; usage(1); };
+
+$options->{"help"} and usage(1);
+
+# Check options with an effect on each other:
+if ($options->{production} and $options->{test}) {
+  print STDERR "INFO: test option negates production option.\n";
+  delete $options->{production};
+}
+
+if ($options->{production} and $options->{"exclusive-mail"}) {
+  print STDERR "INFO: exclusive-mail option negates production option.\n";
+  delete $options->{production};
+}
+
+if ($options->{debug} and not $options->{test}) {
+  $options->{production} = 1;
+}
 
 my $reporter = new GratiaReporting::Reporter( debug => $options->{debug},
                                               verbose => $options->{verbose},
@@ -120,9 +141,11 @@ if ($options->{"exclusive-mail"}) { # Short-circuit people list.
     push @base_command, "-t", "year";
   }
   $options->{"extra-mail"} = [] unless $options->{"extra-mail"};
-  push @{$options->{"extra-mail"}},
-    map { (exists $people_data->{$_}->{all_reports}->{site} and
-           $people_data->{$_}->{all_reports}->{site})?($_):()} keys %{$people_data};
+  if ($options->{production}) { # People wanting "all reports"
+    push @{$options->{"extra-mail"}},
+      map { (exists $people_data->{$_}->{all_reports}->{site} and
+             $people_data->{$_}->{all_reports}->{site})?($_):()} keys %{$people_data};
+  }
   push @base_mail_opts, map { ("-m", $_) } @{$options->{"extra-mail"}} if $options->{"extra-mail"};
   my @user_list;
   if ($options->{"for-user"}) { # mini-short-circuit
@@ -146,7 +169,7 @@ if ($options->{"exclusive-mail"}) { # Short-circuit people list.
     if ($options->{test}) {
       push @mail_opts, map { ("-m", $_) } @test_addresses
         if scalar @test_addresses;
-    } else {
+    } elsif ($options->{production}) {
       push @mail_opts, "-m", "$person->{contact_string}";
     }
     if ($person->{site_vos}) { # VO-specific site lists.
@@ -188,6 +211,106 @@ sub expandSites(\@) {
     }
   }
   return sort keys %u_sites;
+}
+
+sub usage {
+  my $test_addresses_string = join(", ", @test_addresses);
+  print STDERR <<EOF;
+Usage: $prog [<options>] [<local-data-file>]
+
+Options marked (+) may be specified multiple times, arguments being
+cumulative.
+
+EOF
+  GratiaReporting::Reporter::usage(\*STDERR);
+  print STDERR <<EOF;
+
+$prog options:
+
+  --help
+   -h
+   -\?
+
+    This help.
+
+  --compare-period <time-string>
+  --comparison-period <time-string>
+
+    Time period from which to calculate deltas to target.
+
+  --data-source <data-source>
+   -D <data-source>
+
+    Specify a file or remote XML data source.
+
+  --exclusive-mail <address> (+)
+   -m <address> (+)
+
+    Specify an address to which to send reports *instead* of those
+    gleaned from other data sources (eg OIM).
+
+  --extra-mail <address> (+)
+   -e <address> (+)
+
+    Specify an address to which to send reports *in addition* to those
+    gleaned from other data sources (eg OIM).
+
+  --for-user <address> (+)
+   -u <address> (+)
+
+    Process only those reports for which <address> is a recipient.
+
+  --grid-type <grid> (+)
+   -g <grid> (+)
+
+    Process resports only for those sites in grid <grid>.
+
+  --monthly
+   -M
+
+    Monthly report.
+
+  --production
+
+    Send email to all requesting parties as ascertained from all
+    specified information sources.  Note: the presence of the debug
+    option combined with the lack of the "test" option will activate the
+    production option but not invoke any reports.
+
+  --service <service> (+)
+
+    Process reports only for those sites offering service <service>.
+
+  --site-name <site> (+)
+   -s <site> (+)
+
+    Process reports only for <site>.
+
+  --target-period <time-string>
+
+    Time period upon which to report.
+
+  --test
+   -t
+
+    Send email only to test addresses (currently $test_addresses_string). If set,
+    negates, "production" option.
+
+  --weekly
+   -W
+
+    Weekly report.
+
+  --yearly
+   -Y
+
+    Yearly report.
+
+
+EOF
+  if (defined $_[0]) {
+    exit($_[0]);
+  }
 }
 
 __END__
