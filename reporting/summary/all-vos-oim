@@ -31,6 +31,7 @@ my $osg_users_script = "$script_top_dir/osg-users";
 my $merge = 1;
 my @wanted_vos = ();
 my @test_addresses = ( 'Chris Green <chris.h.green@gmail.com>' );
+my $prog = basename($0);
 
 GetOptions($options,
            "compare-period|comparison-period=s",
@@ -271,13 +272,13 @@ foreach my $vo (sort keys %$master_vo_list) {
 
 sub usage {
   print STDERR <<EOF;
-Usage: $ARGV[0] [<options>] [<local-data-file>]
+Usage: $prog [<options>] [<local-data-file>]
 
 EOF
   GratiaReporting::Reporter::usage(\*STDERR);
   print STDERR <<EOF;
 
-$ARGV[0] options:
+$prog options:
 
   --help
    -h
