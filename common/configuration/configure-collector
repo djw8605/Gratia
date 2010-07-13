@@ -878,7 +878,7 @@ sub configure_keyfile_owner {
           ": verifying readable copy of key at $$key_ref for $key_message ...\n";
       my (@temp) = stat($$key_ref);
       @temp = getpwuid($temp[4]);
-      my $user = $temp[0];
+      my $user = $temp[0] || $temp[4];
       print STDERR "DEBUG: Extracted user name $user as owner of $$key_ref\n";
       if ($user ne
           $collector_config->{"tomcat_user"}) {
