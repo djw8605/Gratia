@@ -420,7 +420,13 @@ public class MonitorStatus extends HttpServlet
       
 		for (int i = 0; i < maxthreads; i++)
 		{
-			append(buffer,"queuesize",i,XP.getFileNumber(path + i),xml);
+       long nFiles = 0;
+       try {
+          nFiles = XP.getFileNumber(path + i);
+       }
+       catch (Exception ignore) { // Ignore
+       }
+			append(buffer,"queuesize",i,nFiles,xml);
 		}
 	}
 }
