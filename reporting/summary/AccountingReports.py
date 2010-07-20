@@ -1336,7 +1336,9 @@ def GenericDailyStatus(what, when=datetime.date.today(), output = "text"):
                 else:
                    totalwrate = 0
                 if (what.Both):
-                    print what.formats[output] % ("", what.totalheaders[0], what.totalheaders[1], str(totalwrate) + " %", niceNum(totalws),niceNum(totalwf), str(totalsuccess*100/totaljobs) + " %", niceNum(totalsuccess),niceNum(totalfailed))
+                    tsrate = 0
+                    if ( totaljobs > 0) : tsrate = totalsuccess*100/totaljobs
+                    print what.formats[output] % ("", what.totalheaders[0], what.totalheaders[1], str(totalwrate) + " %", niceNum(totalws),niceNum(totalwf), str(tsrate) + " %", niceNum(totalsuccess),niceNum(totalfailed))
                 else:
                     tsrate = 0
                     if ( totaljobs > 0) : tsrate = totalsuccess*100/totaljobs
