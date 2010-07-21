@@ -119,56 +119,8 @@ function write_ProbeConfig
     SuppressUnknownVORecords="0"
     SuppressNoDNRecords="0"
     EnableProbe="0"
-<<<<<<< .working
-=======
 />
 EOF
-
->>>>>>> .merge-right.r4105
-   cat > ProbeConfigSingle <<EOF
-<ProbeConfiguration 
-    UseSSL="0" 
-
-    UseGratiaCertificates="0"
-
-    SSLHost="${webhost}:8443" 
-    SSLCollectorService="/gratia-servlets/rmi"
-    SSLRegistrationHost="${webhost}:${http_port}"
-    SSLRegistrationService="/gratia-security/security"
-
-    GratiaCertificateFile="gratia.hostcert.pem"
-    GratiaKeyFile="gratia.hostkey.pem"
-
-    SOAPHost="${webhost}:${http_port}" 
-    CollectorService="/gratia-servlets/rmi" 
-    UseSoapProtocol="0"
-    
-    MeterName="LocalTester" 
-    SiteName="LocalTesting"
-    Grid="OSG"
-    
-    BundleSize="1"
-    LogLevel="2"
-    DebugLevel="0" 
-    GratiaExtension="gratia.xml"
-    CertificateFile="/etc/grid-security/hostcert.pem"
-    KeyFile="/etc/grid-security/hostkey.pem"
-
-    VDTSetupFile="MAGIC_VDT_LOCATION/setup.sh"
-    UserVOMapFile="MAGIC_VDT_LOCATION/monitoring/grid3-user-vo-map.txt"
-
-    MaxPendingFiles="100000"
-    DataFolder="MAGIC_VDT_LOCATION/gratia/var/data/"
-    WorkingFolder="MAGIC_VDT_LOCATION/gratia/var/tmp"
-    LogFolder="MAGIC_VDT_LOCATION/gratia/var/logs/"
-    LogRotate="31"
-    UseSyslog="0"
-    SuppressUnknownVORecords="0"
-    SuppressNoDNRecords="0"
-    EnableProbe="0"
-/>
-EOF
-
 }
 
 function write_ProbeConfigs
@@ -188,17 +140,10 @@ function wait_for_server {
    while [ ${alive} -eq 0 -a ${try} -lt 100 ]; do   \
       echo "Waiting for server"
       python > alive.tmp <<EOF
-<<<<<<< .working
 import GratiaCore
 GratiaCore.Initialize()
 GratiaCore.ProcessBundle(GratiaCore.CurrentBundle)
 print GratiaCore.successfulHandshakes
-=======
-import Gratia
-Gratia.Initialize()
-Gratia.ProcessBundle(Gratia.CurrentBundle)
-print Gratia.successfulHandshakes
->>>>>>> .merge-right.r4105
 EOF
       alive=`cat alive.tmp`
       rm alive.tmp
