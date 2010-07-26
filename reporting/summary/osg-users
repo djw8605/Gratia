@@ -1594,11 +1594,13 @@ sub reporting_name_summary($) {
      values %{$all_info->get_alt_branch($timeperiod)->get_alt_branches()});
   my %used_real_vos = map { s&:.*$&&; $_ => 1 } keys %wanted_reporting_names;
   my $want_vo_column = (scalar keys %used_real_vos) > 1;
+  my $want_vo_in_intro_line = (scalar keys %used_real_vos) == 1;
   my $message = sprintf("Summary of active%s reporting names%s:\n",
                         ($using_reporting_names)?" selected":"",
-                        $want_vo_column?"":sprintf(" for VO %s (%s)",
-                                                   (keys %used_real_vos)[0],
-                                                   join(", ", sort keys %{$vo_data->{(keys %used_real_vos)[0]}->{science_fields}})));
+                        $want_vo_in_intro_line?"":
+                        sprintf(" for VO %s (%s)",
+                                (keys %used_real_vos)[0],
+                                join(", ", sort keys %{$vo_data->{(keys %used_real_vos)[0]}->{science_fields}})));
   print $output_filehandle $message;
   my $reporting_name_table = Text::Table->new
     (
