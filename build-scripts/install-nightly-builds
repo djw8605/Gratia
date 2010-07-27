@@ -19,6 +19,8 @@ prog=${0##*/}
 ####################################
 # Required function do_installs
 function do_installs() {
+  [[ -n "$1" ]] && VERSION_OPT="$1"
+  [[ -n "$2" ]] && VERSION_ARG="$2"
   for c in nightly_{batch,psacct,osg_daily}; do
     printf "########################################################################\n"
     "${INSTALL_SCRIPT}" -t -p -a \
@@ -30,6 +32,29 @@ function do_installs() {
 }
 ####################################
 
+####################################
+# Optional help functions
+function install-nightly-builds-help-description() {
+    cat 1>&2 <<EOF
+Install specified version (default latest nightly build) on nightly
+build collectors.
+EOF
+}
+
+function install-nightly-builds-help-options() {
+    cat 1>&2 <<EOF
+    [VERSION_OPT]
+    -B (build in ~gratia/gratia-builds)
+    -L (local build)
+    -R (release in ~gratia/gratia-releases)
+
+    [VERSION_ARG]
+    Release (VERSION_OPT -B or -R) or local build location (-L)
+EOF
+}
+####################################
+
+####################################
 # Install-related variables.
 VERSION_OPT="-B"
 VERSION_ARG=latest
@@ -38,6 +63,7 @@ INSTALL_SCRIPT=${SCRIPT_TOPDIR}/build-scripts/install-release
 CONFIG_DAT=${SCRIPT_TOPDIR}/common/configuration/collector-nbuild.dat
 MAILTO=gratia-builds@fnal.gov
 
+####################################
 # Handle build retries.
 (( max_retries = 5 ))
 (( retry = 0 ))
@@ -47,6 +73,7 @@ if [[ ! -r "${SCRIPT_TOPDIR}" ]]; then
   exit 1
 fi
 
+####################################
 # Make sure the build is actually ready to be used.
 while [[ ! -r "${SCRIPT_TOPDIR}/target/gratia.tar" ]] && (( retry < max_retries )); do
   printf "WARNING: build not complete -- waiting 1 minute (retry %d of %d)\n"  \
@@ -54,6 +81,7 @@ while [[ ! -r "${SCRIPT_TOPDIR}/target/gratia.tar" ]] && (( retry < max_retries 
   sleep 60
 done
 
+####################################
 # Failure.
 if (( retry > max_retries )); then # failed
   echo "ERROR: build was not completed in time to install: please check" 1>&2
@@ -64,4 +92,7 @@ fi
 # Main program.
 ####################################
 
-. ~gratia/gratia-builds/gratia-latest/build-scripts/install-group "$@"
+install_script=$(type -p install-group 2>/dev/null)
+install_script=${install_script:-~gratia/gratia-builds/gratia-latest/build-scripts/install-group}
+.  "${install_script}" "$@"
+exit $?
