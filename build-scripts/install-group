@@ -22,9 +22,23 @@ MAILTO=${MAILTO:-gratia-builds@fnal.gov}
 function usage() {
     cat 1>&2 <<EOF
 usage: $prog --help|-h|\?
-       $prog [<options>]
+       $prog [<install-group-options>] [-- <do_installs-options>]
 
-Options:
+EOF
+    if type ${prog}-help-description >/dev/null 2>&1; then
+${prog}-help-description
+printf "\n" 1>&2
+fi
+    cat 1>&2 <<EOF
+$prog uses the install-group script machinery to facilitate installation
+of multiple similar collectors as one set. If functions
+${prog}-help-description and/or ${prog}-help-options are found, its
+output will be included herein.
+
+$prog will source the install-group script, which requires the
+do_installs function to be defined.
+
+install-group options:
 
    -h
    -\?
@@ -48,7 +62,14 @@ Options:
     recipient. If --verbose is specified, then standard output from this
     script will not be suppressed.
 
+Any remaining non-option arguments or any arguments following the first
+bare "--" will be passed direct to the do_installs() callout function. 
+
 EOF
+if type ${prog}-help-options >/dev/null 2>&1; then
+  printf "$prog-specific options:\n\n" 1>&2
+  ${prog}-help-options
+fi
 }
 ####################################
 
@@ -88,17 +109,13 @@ set realname = "Gratia builds"
 set from = "gratia-builds@fnal.gov"
 EOF
 
-# Redirect output to file and trap exit.
-exec 3>&1 4>&2 >"$TMP.log" 2>&1
-trap "cleanup" EXIT # Need to re-do trap after exit.
-
 ####################################
 # Parse options, including long options.
 TEMP=`getopt -o :dh\?m:v -n "$prog" --long debug --long verbose --long mail: --long help -- "$@"`
 
 if [ $? != 0 ]; then
   echo "terminating due to option parse errors" 1>&2
-  exit 1
+  return 1
 fi
 
 eval set -- "$TEMP"
@@ -111,7 +128,7 @@ while true; do
         ;;
       --help|-h|-\?)
         usage
-        exit 1
+        return 1
         ;;
       --mail|-m)
         MAILTO=$2
@@ -130,6 +147,10 @@ while true; do
 done
 ####################################
 
+# Redirect output to file and trap exit.
+exec 3>&1 4>&2 >"$TMP.log" 2>&1
+trap "cleanup" EXIT # Need to re-do trap after exec.
+
 # If we're running this script as root, get the host credentials.
 if (( $(id -u) == 0 )); then
   # Save existing KRB5CCNAME just in case the host credentials won't get us where we need to be.
@@ -142,7 +163,7 @@ fi
 (( ${verbose:-0} )) || redirect=">/dev/null"
 
 if type do_installs >/dev/null 2>&1; then
-  eval do_installs "$redirect"
+  eval do_installs "$@" "$redirect"
 else
   echo "ERROR: install-group should be sourced by a script that has already defined the \"do_installs\" function!" 1>&2
 fi
