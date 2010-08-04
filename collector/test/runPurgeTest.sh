@@ -274,11 +274,16 @@ EOF
 
   echo "Attempt fix-up the DupRecord table so that we have a range of eventtime."
 
-  mysql -h ${dbhost} --port=${dbport} -u gratia --password=${update_password}<<EOF 
-use ${schema_name};
-update DupRecord set eventdate = date_sub(eventdate,interval dupid week) where Error = 'Parse';
-update DupRecord set eventdate = date_sub(eventdate,interval dupid-12 week) where Error = 'Duplicate';
-EOF
+echo "use ${schema_name}; select dupid from DupRecord where error='Parse'" \
+  | mysql -s -h ${dbhost} --port=${dbport} -u reader --password=${reader_password} \
+  | perl -wane "use strict; use vars qw(\$weeks \$dupid); BEGIN { \$weeks = 1; printf \"use ${schema_name};\n\" }; chomp; \$dupid=\$_; printf \"update  DupRecord set eventdate = date_sub(eventdate,interval \$weeks week) where dupid = \$dupid;\n\"; ++\$weeks; " \
+  | mysql -s -h ${dbhost} --port=${dbport} -u gratia --password=${update_password}
+
+echo "use ${schema_name}; select dupid from DupRecord where error='Duplicate'" \
+  | mysql -s -h ${dbhost} --port=${dbport} -u reader --password=${reader_password} \
+  | perl -wane "use strict; use vars qw(\$weeks \$dupid); BEGIN { \$weeks = 1; printf \"use ${schema_name};\n\" }; chomp; \$dupid=\$_; printf \"update  DupRecord set eventdate = date_sub(eventdate,interval \$weeks week) where dupid = \$dupid;\n\"; ++\$weeks; " \
+  | mysql -s -h ${dbhost} --port=${dbport} -u gratia --password=${update_password}
+
 }
 
 function fix_usage_server_date {
