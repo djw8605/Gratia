@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.TimeZone;
 import java.util.regex.*;
+import java.math.BigInteger;
 
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -96,14 +97,19 @@ public class DataScrubber {
             query.setString( "dateLimit", limit );
             
             Logging.debug("DataScrubber: About to execute " + query.getQueryString());
-            Long result = (Long) query.uniqueResult();
+            Long result = null;
+	    BigInteger resultBig = (BigInteger)query.uniqueResult();
+            if(resultBig != null)
+                result = (Long) (resultBig.longValue());
             
             if ( result == null ) {
                query = session.createSQLQuery("select max(dbid) from "+type+"_Meta where ServerDate < :dateLimit");
                query.setString( "dateLimit", limit );
                
                Logging.debug("DataScrubber: About to execute " + query.getQueryString());
-               result = (Long) query.uniqueResult();
+	       resultBig = (BigInteger)query.uniqueResult();
+               if(resultBig != null)
+                   result = (Long) (resultBig.longValue());
             }
             if ( result == null ) {
                
@@ -120,7 +126,9 @@ public class DataScrubber {
             query = session.createSQLQuery("select dbid from "+type+"_Xml X where ExtraXml = \"\" order by dbid limit 1");
  
             Logging.debug("DataScrubber: About to execute " + query.getQueryString());
-            result = (Long) query.uniqueResult();
+	    resultBig = (BigInteger)query.uniqueResult();
+            if(resultBig != null)
+                result = (Long) (resultBig.longValue());
             if ( result == null ) {
                Logging.debug("DataScrubber: found no min(dbid) in "+type+"_Xml");
                // Nothing to do.
