@@ -1,4 +1,5 @@
 import Gratia
+import GratiaCore
 import time
 import datetime
 
@@ -34,7 +35,8 @@ def GetRecord(jobid, endtime, type):
         r.Processors(3,.75,"total")
         r.StartTime(1130946550,"Was entered in seconds")
 
-        r.EndTime(time.mktime(endtime.timetuple()))
+        # Use TimeToString since endtime is already in UTC.
+        r.EndTime(GratiaCore.TimeToString(endtime.timetuple())) 
 
         r.MachineName("flxi02.fnal.gov")
         r.SubmitHost("patlx7.fnal.gov")
@@ -50,8 +52,11 @@ def GetRecord(jobid, endtime, type):
 
 
 def sendRecords(nrecords, end, type, extra = ""):
-        start =  end - datetime.timedelta(days=365)
-        start = start.replace(hour=12,minute=10,second=00);
+
+        # We want to start a bit (17 hours) less than 1 year ago.
+        end_fixed = end.replace(hour=17,minute=10,second=00)
+        start = end_fixed - datetime.timedelta(days=365)
+
         step = 365.0 / nrecords;
         ndays = 0;
 
@@ -73,7 +78,8 @@ if __name__ == '__main__':
         
         Gratia.Initialize()
 
-        end = datetime.datetime.now();
+        # Use UTC(/GMT) time to be in sync with the Collector (the DataScrubber in particular)
+        end = datetime.datetime.utcnow();
 
         #sendRecords(3,end)
 

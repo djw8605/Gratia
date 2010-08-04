@@ -1,3 +1,4 @@
+import GratiaCore
 import Gratia
 import Metric
 import time
@@ -9,15 +10,17 @@ def GetRecord(id,name,endtime):
 
         r.MetricName(name)
         r.MetricStatus("OK")
-        r.Timestamp(time.mktime(endtime.timetuple()))
+        r.Timestamp(GratiaCore.TimeToString(endtime.timetuple()))
 
         return r
         
 
 def sendRecords(nrecords, name, end, extra = ""):
         len = 4 * 365.0
-        start =  end - datetime.timedelta(days=len)
-        start = start.replace(hour=12,minute=10,second=00);
+
+        # We want to start a bit (17 hours) less than 1 year ago.
+        end_fixed = end.replace(hour=17,minute=10,second=00)
+        start = end_fixed - datetime.timedelta(days=len)
 
         step = len / nrecords;
         ndays = 0;
