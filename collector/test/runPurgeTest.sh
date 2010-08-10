@@ -395,10 +395,13 @@ EOF
 
 function check_result {
    period=$1
+   if [ "x$period" != "x" ] ; then
+     period=".$period"
+   fi 
    stem=$2
    msg=$3
 
-   diffcmd="diff $stem.$period.ref $stem.validate"
+   diffcmd="diff $stem$period.ref $stem.validate"
    
    eval $diffcmd > /var/tmp/diff.$$
    res=$?
@@ -500,6 +503,9 @@ use ${schema_name};
 select count(*)<60 from Origin;
 EOF
 
+  echo "Check status monitoring"
+  wget --dns-timeout=5 --connect-timeout=10 --read-timeout=40 -O status.validate "http://${webhost}:${ssl_port}/gratia-administration/monitor-status.html" > wet.full.log  2>&1
+
   check_result $days duplicate "Duplicate"
   check_result $ydays jobsummary "JobUsageRecord Summary Table"
   check_result $days jobusagerecord "JobUsageRecord"
@@ -507,6 +513,7 @@ EOF
   check_result $days metricrecord "MetricRecord"
   check_result $mdays metricrecordxml "MetricRecord's RawXml"
   check_result $days origin "Origin records"
+  check_result "" status "Status monitoring"
 }
 
 function check_timeout()
