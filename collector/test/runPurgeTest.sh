@@ -239,6 +239,7 @@ function reset_collector {
               "service.lifetime.DupRecord" => "UNLIMITED",
               "maintain.history.log" => 2,
               "monitor.recordProcessor.wait" => 240,
+              "max.q.size" => 700,
               "monitor.to.address0" => '${USER}@fnal.gov',
               "service.admin.DN.0" => 'ALLOW ALL',
               "service.secure.connection" => 'http://${webhost}:${ssl_port}'
@@ -416,6 +417,16 @@ function check_result {
 }
 
 
+function wait_for_input_use {
+   expected_count=$1
+   ssh ${webhost} ls ${tomcatpwd}/gratia/data/thread\? | wc -l > file.count
+   while [ `tail -1 file.count` -gt ${expected_count} ]; do
+      ssh ${webhost} ls ${tomcatpwd}/gratia/data/thread\? | wc -l > file.count
+      echo "Waiting for all input msg to be used." `tail -1 file.count` left
+      sleep 2
+   done
+}
+
 function turn_on_purging {
 
    # Restore the original (we could also set it to specific values)
@@ -439,14 +450,7 @@ function turn_on_purging {
    # Load a few old record to make sure they are caught by the filter.
    python loadstale.py
 
-   sleep 2
-   expected_count=0
-   echo 99 > file.count
-   while [ `tail -1 file.count` -gt ${expected_count} ]; do
-      ssh ${webhost} ls ${tomcatpwd}/gratia/data/thread\? | wc -l > file.count
-      echo "Waiting for all input msg to be used." `tail -1 file.count` left
-      sleep 2
-   done
+   wait_for_input_use 0
 }
 
 function check_data 
@@ -504,7 +508,8 @@ select count(*)<60 from Origin;
 EOF
 
   echo "Check status monitoring"
-  wget --dns-timeout=5 --connect-timeout=10 --read-timeout=40 -O status.validate "http://${webhost}:${ssl_port}/gratia-administration/monitor-status.html" > wet.full.log  2>&1
+  wait_for_input_use 0
+  wget --dns-timeout=5 --connect-timeout=10 --read-timeout=40 -O - "http://${webhost}:${ssl_port}/gratia-administration/monitor-status.html" 2>wget.full.log | cut -d\| -f3- > status.validate
 
   check_result $days duplicate "Duplicate"
   check_result $ydays jobsummary "JobUsageRecord Summary Table"
@@ -542,6 +547,21 @@ function check_timeout()
       echo "Error: the timeout time ($len) when accesing a hung server was too long (expected less than 12)"
       check_failed=1
    fi
+
+}
+
+function check_queue_threshold()
+{
+   echo "Check the queue threshold mechanism"
+set -x
+   # Turn off updates so the record are not consumed
+   wget --dns-timeout=5 --connect-timeout=10 --read-timeout=40 -O - "http://${webhost}:${ssl_port}/gratia-administration/systemadministration.html?action=stopDatabaseUpdateThreads" 2>&1 | tee wget.full.log | grep 'Database' > wget.log
+
+   # Dump a bunch of (empty) files in the thread0 queue.
+   ssh ${webhost}  "for i in \`seq 1 800\` ; do touch ${tomcatpwd}/gratia/data/thread0/emptyfile\$i.0.xml ; done"
+
+   # Refresh the queue statistics.
+   #wget --dns-timeout=5 --connect-timeout=10 --read-timeout=40 -O - "http://${webhost}:${ssl_port}/gratia-administration/systemadministration.html?action=refreshStatus" 2>&1 | tee wget.full.log | grep 'Collector Status' > wget.log
 
 }
 
@@ -615,6 +635,9 @@ ssl_port=`expr $http_port + 0`
 rmi_port=`expr $http_port + 2`
 jmx_port=`expr $http_port + 3`
 server_port=`expr $http_port + 4`
+
+#check_queue_threshold
+#exit 0
 
 if [ $do_stop ]; then
    stop_server
