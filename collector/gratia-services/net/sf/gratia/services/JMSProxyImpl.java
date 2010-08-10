@@ -147,8 +147,13 @@ public class JMSProxyImpl extends UnicastRemoteObject implements JMSProxy
       return collectorService.checkConnection(certpem,senderHost,sender);
    }
    
-   public String resetStatus() throws RemoteException {
-      QueueManager.resetStatus();
+   public String refreshStatus() throws RemoteException {
+      QueueManager.refreshStatus();
       return "";
    }
+   
+   public String queueManagerStatus() throws RemoteException {
+      return QueueManager.getStatus();
+   }
+
 }

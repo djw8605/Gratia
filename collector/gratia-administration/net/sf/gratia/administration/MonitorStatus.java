@@ -403,7 +403,8 @@ public class MonitorStatus extends HttpServlet
 				error24 = resultSet.getInt(1);
 			resultSet.close();
 			statement.close();
-
+         
+ 
 		}
 		catch (Exception e)
 		{
@@ -413,20 +414,24 @@ public class MonitorStatus extends HttpServlet
 		append(buffer,"record-count-hour",count1,xml);
 		append(buffer,"record-count-24hour",count24,xml);
 
-		int maxthreads = Integer.parseInt(props.getProperty("service.recordProcessor.threads"));
-		String path = System.getProperties().getProperty("catalina.home");
-		path = xp.replaceAll(path,"\\","/");
-      path = path + "/gratia/data/thread";
-      
-		for (int i = 0; i < maxthreads; i++)
+		try
 		{
-       long nFiles = 0;
-       try {
-          nFiles = XP.getFileNumber(path + i);
-       }
-       catch (Exception ignore) { // Ignore
-       }
-			append(buffer,"queuesize",i,nFiles,xml);
-		}
+         command = "select Queue, Files, Records from CollectorStatus order by Queue";
+         statement = connection.prepareStatement(command);
+         resultSet = statement.executeQuery(command);
+         while(resultSet.next()) {
+            int q = resultSet.getInt(1);
+            long nFiles = resultSet.getLong(2);
+            long nRecords = resultSet.getLong(3);
+            append(buffer,"queuesize",q,nFiles,xml);
+            append(buffer,"record",q,nRecords,xml);
+         }
+         resultSet.close();
+         statement.close();
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+      }   
 	}
 }

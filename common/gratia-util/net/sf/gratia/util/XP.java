@@ -614,7 +614,7 @@ public class XP
     // file support utilities
     //
 
-    public static String get(String path) throws IOException
+    public static String get(String path) throws IOException, FileNotFoundException
     {
         return get(new File(path));
     }

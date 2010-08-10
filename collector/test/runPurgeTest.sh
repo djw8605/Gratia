@@ -11,6 +11,7 @@ usage: runPurgeTest.sh [-h] [-l] [-d] [-c] [-p port_number]
    -f execute fix ups
    -k Turn on the housekeeping
    -w [filename] upload the war file
+   -b [filename] build and upload the war file
    -s stop server
    -m test timeout feature
    -t test content
@@ -528,6 +529,15 @@ function check_timeout()
 
 }
 
+function build_war()
+{
+    (cd ../../build-scripts; gmake $BUILDWAR)
+    result=$?
+    if [ $result -ne 0 ]; then
+       exit $result  
+    fi
+}
+
 function upload_war()
 {
     stop_server
@@ -542,13 +552,18 @@ function upload_war()
 }
 
 #--- get command line args ----
-while getopts :tshcfkdlmn:w:p: OPT; do
+while getopts :tshcfkdlmn:w:p:b: OPT; do
     case $OPT in
         n)  schema_name=$OPTARG
             tomcatpwd=/data/tomcat-$OPTARG
             ;;
         w)  do_war=1
             WAR="$WAR $OPTARG"
+            ;;
+        b)  do_war=1
+            do_build=1
+            WAR="$WAR $OPTARG"
+            BUILDWAR="$BUILDWAR $OPTARG"
             ;;
         c)  do_collector=1
             ;;
@@ -595,6 +610,10 @@ fi
 
 if [ $do_collector ]; then 
    reset_collector
+fi
+
+if [ $do_build ]; then
+   build_war
 fi
 
 if [ $do_war ]; then

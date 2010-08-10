@@ -568,15 +568,39 @@ public class Status extends HttpServlet {
 			row = m.group();
 			buffer = new StringBuffer();
 
-			for (int i = 0; i < maxthreads; i++)
-			{
-				String newrow = new String(row);
-				String xpath = path + "/gratia/data/thread" + i;
-				long filenumber = xp.getFileNumber(xpath);
-				newrow = xp.replaceAll(newrow,"#queue#","Q" + i);
-				newrow = xp.replaceAll(newrow,"#queuesize#","" + filenumber);
-				buffer.append(newrow);
-			}
+         try
+         {
+            command = "select Queue, Files, Records from CollectorStatus order by Queue";
+            statement = connection.prepareStatement(command);
+            resultSet = statement.executeQuery(command);
+            while(resultSet.next()) {
+               int q = resultSet.getInt(1);
+               long nFiles = resultSet.getLong(2);
+               long nRecords = resultSet.getLong(3);
+               String newrow = new String(row);
+               newrow = xp.replaceAll(newrow,"#queue#","" + q);
+               newrow = xp.replaceAll(newrow,"#queuefiles#","" + nFiles);
+               newrow = xp.replaceAll(newrow,"#queuerecords#","" + nRecords);
+               buffer.append(newrow);
+            }
+            resultSet.close();
+            statement.close();
+         }
+         catch (Exception e)
+         {
+            e.printStackTrace();
+         }   
+
+//			for (int i = 0; i < maxthreads; i++)
+//			{
+//				String newrow = new String(row);
+//				String xpath = path + "/gratia/data/thread" + i;
+//				long filenumber = xp.getFileNumber(xpath);
+//				newrow = xp.replaceAll(newrow,"#queue#","Q" + i);
+//				newrow = xp.replaceAll(newrow,"#queuefiles#","" + nFile);
+//				newrow = xp.replaceAll(newrow,"#queuerecords#","" + nRecords);
+//				buffer.append(newrow);
+//			}
 			html = xp.replaceAll(html,row,buffer.toString());
 		}
 		catch (Exception e) {

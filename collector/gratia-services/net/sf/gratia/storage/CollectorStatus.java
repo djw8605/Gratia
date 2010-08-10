@@ -20,6 +20,7 @@ import java.util.Date;
 public class CollectorStatus {
    private Date   fUpdateDate;
    private String fName;
+   private int    fQueue;    // Queue index on the collector
    private long   fFiles;    // File in queue
    private long   fRecords;  // Record in queue
 
@@ -57,6 +58,15 @@ public class CollectorStatus {
    public long getFiles()
    {
       return fFiles;
+   }
+   
+   public void setQueue(int Queue)
+   {
+      this.fQueue = Queue;
+   }
+   public long getQueue()
+   {
+      return fQueue;
    }
    
    public void setRecords(long Records)

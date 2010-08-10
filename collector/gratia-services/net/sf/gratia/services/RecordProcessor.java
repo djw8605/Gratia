@@ -191,7 +191,8 @@ public class RecordProcessor extends Thread {
    }
 
    public int loop() {
-      String file = "";
+      QueueManager.File file = new QueueManager.File("");
+      
       String blob = "";
 
       String xml = "";
@@ -226,15 +227,15 @@ public class RecordProcessor extends Thread {
             break;
          }
          ++nfiles;
-         file = files[i];
+         file.reset( files[i] );
+         
          //MPERF: Logging.fine(ident + ": Start Processing: " + file);
          try {
-            blob = XP.get(file);
-            if (blob.length() == 0) { // Empty file -- how old is it?
-               File checkFile = new File(file);
-               if ((new Date().getTime() - checkFile.lastModified()) > fileOldTime) {
+            blob = file.getData();
+            if (blob.length() == 0) { // Empty file -- how old is it.
+               if (file.getAge() > fileOldTime) {
                   Logging.info(ident + ": removing old empty file " + file);
-                  checkFile.delete();
+                  queue.deleteFile(file);               
                } else { // Skip file
                   Logging.log(ident + ": deferring read of recent empty file " + file);
                   continue;
@@ -294,6 +295,9 @@ public class RecordProcessor extends Thread {
                   String originStr = st.nextToken();
                   try {
                      origin = converter.convertOrigin(originStr);
+                     if (origin != null && origin.getConnection() != null) {
+                        file.setFrom( origin.getConnection().getSender() );
+                     }
                   } catch (Exception e) {
                      Logging.warning(ident + ": Parse error:  ", e);
                      Logging.warning(ident + ": XML:  " + "\n" + originStr);
@@ -435,7 +439,7 @@ public class RecordProcessor extends Thread {
          }
 
          //MPERF: Logging.fine(ident + ": Processing: " + file);
-         Logging.log(ident + ": Processing: " + file);
+         Logging.log(ident + ": Processing: " + file.getPath());
 
          ArrayList records = new ArrayList();
 
@@ -472,6 +476,8 @@ public class RecordProcessor extends Thread {
             continue; // Next file.
          }
          int rSize = records.size();
+         file.setNRecords(rSize);
+
          //MPERF: Logging.fine(ident+ ": converted " + rSize + " records");
          DuplicateOriginHandler dupOriginHandler = new DuplicateOriginHandler();
          if (origin != null) {
@@ -936,11 +942,7 @@ public class RecordProcessor extends Thread {
             } // End of handling accepted records.
          } // End of for each record loop
          // Logging.log(ident + ": Before File Delete: " + file);
-         if (origin != null && origin.getConnection() != null) {
-            queue.deleteFile(file,origin.getConnection().getSender(),rSize);
-         } else {
-            queue.deleteFile(file,"",rSize);               
-         }
+         queue.deleteFile(file);               
          // Logging.log(ident + ": After File Delete: " + file);
          ++itotal;
       } // End loop over files
@@ -980,7 +982,7 @@ public class RecordProcessor extends Thread {
                            ExceptionUtils.getFullStackTrace(e));
    }
 
-   public void saveQuarantineFile(String oldfile, String annot, Exception e) {
+   public void saveQuarantineFile(QueueManager.File oldfile, String annot, Exception e) {
       saveQuarantineFile(oldfile,
                      annot + " " + e.getMessage() + "\n" +
                      ExceptionUtils.getFullStackTrace(e));
@@ -1008,14 +1010,13 @@ public class RecordProcessor extends Thread {
       }
    }
 
-   public void saveQuarantineFile(String oldfile, String annot) {
+   public void saveQuarantineFile(QueueManager.File oldfile, String annot) {
       try {
          if ((annot != null) && (! annot.endsWith("\n"))) {
             annot.concat("\n"); // End with a line feed.
          }
          File newxmlfile = File.createTempFile("quarantine-", ".xml", quarantineDir);
-         File old = new File(oldfile);
-         old.renameTo(newxmlfile);
+         queue.renameTo(oldfile,newxmlfile);
          XP.save(newxmlfile.getPath().replace(".xml", ".txt"), annot); // Save annotation
          Logging.warning(ident + ": file " + oldfile + " quarantined as " +
                          newxmlfile.getPath() + " (" + annot + ")");

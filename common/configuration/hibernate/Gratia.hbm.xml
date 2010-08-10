@@ -277,6 +277,7 @@
   
   <class name="CollectorStatus" table="CollectorStatus" node="CollectorStatus">
      <id name="Name"/>
+     <property name="Queue" />
      <property name="UpdateDate" column="UpdateDate" type="timestamp"/>
      <property name="Files"/>
      <property name="Records"/> 
