@@ -232,15 +232,6 @@ public class RecordProcessor extends Thread {
          //MPERF: Logging.fine(ident + ": Start Processing: " + file);
          try {
             blob = file.getData();
-            if (blob.length() == 0) { // Empty file -- how old is it.
-               if (file.getAge() > fileOldTime) {
-                  Logging.info(ident + ": removing old empty file " + file);
-                  queue.deleteFile(file);               
-               } else { // Skip file
-                  Logging.log(ident + ": deferring read of recent empty file " + file);
-                  continue;
-               }
-            }
          } catch (FileNotFoundException e) {
             Utils.GratiaError("RecordProcessor",
                               "XML file read",
@@ -252,6 +243,15 @@ public class RecordProcessor extends Thread {
                               ident + ": Error " + e.getMessage() + " while trying to read " + file);
             saveQuarantineFile(file, "Error reading file: ", e);
             continue; // Next file
+         }
+         if (blob.length() == 0) { // Empty file -- how old is it.
+            if (file.getAge() > fileOldTime) {
+               Logging.info(ident + ": removing old empty file " + file);
+               queue.deleteFile(file);               
+            } else { // Skip file
+               Logging.log(ident + ": deferring read of recent empty file " + file);
+               continue;
+            }
          }
          xml = "";
          rawxmllist.clear();
@@ -299,7 +299,7 @@ public class RecordProcessor extends Thread {
                         file.setFrom( origin.getConnection().getSender() );
                      }
                   } catch (Exception e) {
-                     Logging.warning(ident + ": Parse error:  ", e);
+                     Logging.warning(ident + ": Origin parse error:  ", e);
                      Logging.warning(ident + ": XML:  " + "\n" + originStr);
                   }
                }
@@ -1021,7 +1021,7 @@ public class RecordProcessor extends Thread {
          Logging.warning(ident + ": file " + oldfile + " quarantined as " +
                          newxmlfile.getPath() + " (" + annot + ")");
       } catch (Exception e) {
-         Logging.warning(ident + ": file " + oldfile + " could not be quarantined and remains in input queue.");
+         Logging.warning(ident + ": file " + oldfile.getPath() + " could not be quarantined and remains in input queue.");
          Logging.debug(ident + ": exception details: ", e);
       }
    }

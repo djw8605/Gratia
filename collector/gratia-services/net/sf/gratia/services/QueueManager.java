@@ -282,11 +282,16 @@ public class QueueManager
       {
          // Move one of the file out of the queue and update the CollectorStatus accordingly.
 
-         java.io.File old = new java.io.File(oldfile.getPath());
-         synchronized(this) {
-            old.renameTo(newfile);
-            updateStatus(oldfile);
-         }
+         try {
+            java.io.File old = new java.io.File(oldfile.getPath());
+            synchronized(this) {
+               old.renameTo(newfile);
+               updateStatus(oldfile.getFrom(),-oldfile.getNRecords(),-1);
+            }
+         } catch (Exception ignore) {
+            Logging.debug(fQueueName + ": File rename Failed from " + oldfile.fPath + " to " + newfile.getPath() + " Error: ",ignore);
+            fOutOfDate = true;
+         }         
       }
                            
       public void refreshStatus()
@@ -323,20 +328,6 @@ public class QueueManager
             Logging.warning("Queue::refreshStatus: Problem during the update (we will attempt to refresh the status at the next update):",e);
             fOutOfDate = true;
          }
-      }
-      
-      public void updateStatus(QueueManager.File file)
-      {
-         // Update the status information to note that there is new files (nfiles)
-         // containing new records (nrecords) coming from the probe 'from'.
-         
-         try {
-            updateStatus(file.getFrom(), file.getNRecords(), -1);
-         } catch (java.io.IOException e) {
-            Logging.warning("Queue::updateStatus: Problem during the update (we will attempt to refresh the status at the next update):",e);
-            fOutOfDate = true;
-         }
-         
       }
       
       public void updateStatus(String from, long nrecords, long nfiles)
