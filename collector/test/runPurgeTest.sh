@@ -56,7 +56,16 @@ function stop_server {
 }
 
 function start_server {
-  if [ "${server_status}" = "unknown" -o "${server_status}" = "stopped"  ]; then 
+  if [ "${server_status}" = "unknown" ] ; then 
+      echo "Checking for server status"
+      alive=`ssh ${webhost} netstat -l | grep ${http_port} | wc -l`
+      if [ ${alive} -ne 0 ]; then
+         server_status=started
+      else
+         server_status=stopped
+      fi
+  fi
+  if [ "${server_status}" = "stopped"  ]; then 
      echo "Starting server ${webhost}:${http_port}"
      ssh -l root ${webhost} service tomcat-${schema_name} start
      server_status=starting
