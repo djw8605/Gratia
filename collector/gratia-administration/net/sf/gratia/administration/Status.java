@@ -305,7 +305,7 @@ public class Status extends HttpServlet {
 
 				// Error info
 				command = "select timestampdiff(HOUR, D.eventdate, " +
-				"UTC_TIMESTAMP()) as period, error, count(*) from DupRecord D " + 
+				"UTC_TIMESTAMP()) as period, error, count(*) from DupRecord D force index(index02) " + 
 				"where D.eventdate > (UTC_TIMESTAMP() - INTERVAL " + hourly_time_limit + " HOUR) " +
 				"and D.RecordType = " + dq + table_name + dq +
 				" group by period, error " +
@@ -358,7 +358,7 @@ public class Status extends HttpServlet {
 				}
 				resultSet.close();
 				statement.close();
-				command = "select count(*), error from DupRecord D " +
+				command = "select count(*), error from DupRecord D force index(index02) " +
 				"where D.eventdate > (UTC_TIMESTAMP() - interval 1 week) " +
 				"and D.RecordType = " + dq + table_name + dq +
 				" group by error ";

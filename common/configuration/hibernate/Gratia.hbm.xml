@@ -274,5 +274,25 @@
     <property name="Version"/>
     <property name="md5" column="md5" index="index12" unique="true"/>
   </class>
+  
+  <class name="CollectorStatus" table="CollectorStatus" node="CollectorStatus">
+     <id name="Name"/>
+     <property name="UpdateDate" column="UpdateDate" type="timestamp"/>
+     <property name="Files"/>
+     <property name="Records"/> 
+  </class>
+
+  <class name="Backlog" table="Backlog" node="Backlog">
+     <id name="BackId" column="backid" type="long">
+        <generator class="native"/>
+     </id>    
+     <property name="UpdateDate" column="UpdateDate" type="timestamp"/>
+     <property name="Type"/>
+     <property name="Name"/>
+     <property name="Files"/>
+     <property name="Records"/>
+     <property name="ServiceBacklog"/> 
+     <property name="ServerDate" column="ServerDate" type="timestamp"/>
+  </class>
 
 </hibernate-mapping>

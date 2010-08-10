@@ -1,9 +1,12 @@
 def:
-	@echo You need to run:
-	@echo    ./runPurgeTest.sh -p your_port -c -d -l 
+	@echo You can run the test directly with:
+	@echo "   ./runPurgeTest.sh -p your_port -c -d -l" 
 	@echo See
-	@echo    ./runPurgeTest.sh -h 
+	@echo "   ./runPurgeTest.sh -h" 
 	@echo for details
+	@echo Or you can run the full build and test with 
+	@echo the default options:
+	@echo "   gmake test"
 
 build:
 	(cd ../../build-scripts; gmake all testtimeout )

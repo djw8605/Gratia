@@ -31,12 +31,12 @@ public class RecordProcessor extends Thread {
    final static String replicationMarker = "replication";
    final static String originMarker = "Origin";
    String ident = null;
-   String directory = null;         // Location of the incoming messages.
+   QueueManager.Queue queue = null;    // Location of the incoming messages.
    Hashtable global;
-   long ninput = 0;                 // Number of input messages processed
-   long nrecords = 0;                // Number of records processed;
-   String directory_part = null;    // stemp for history and old subdirectory
-   long recordsPerDirectory = 10000; // Maximum number of records per directory.
+   long ninput = 0;                    // Number of input messages processed
+   long nrecords = 0;                  // Number of records processed;
+   String directory_part = null;       // stemp for history and old subdirectory
+   long recordsPerDirectory = 10000;   // Maximum number of records per directory.
    CollectorService collectorService;
    //
    // database parameters
@@ -102,23 +102,22 @@ public class RecordProcessor extends Thread {
 
 
    public RecordProcessor(String ident,
-                          String directory,
+                          QueueManager.Queue queue,
                           Object lock,
                           Hashtable global,
                           CollectorService collectorService) {
       this.ident = ident;
-      this.directory = directory;
+      this.queue = queue;
       this.lock = lock;
       this.global = global;
       this.collectorService = collectorService;
 
-      File tmp = new File(directory);
-      this.directory_part = tmp.getName();
+      this.directory_part = queue.getShortName();
 
       loadProperties();
       try {
          String url = p.getProperty("service.jms.url");
-         Logging.info(ident + ": " + directory + ": Started");
+         Logging.info(ident + ": " + queue.toString() + ": Started");
       } catch (Exception e) {
          Logging.warning(ident + ": ERROR! Serious problems starting recordProcessor");
          Logging.debug(ident + "Exception detail: ", e);
@@ -207,7 +206,7 @@ public class RecordProcessor extends Thread {
       // Return the number of files seen.
       // or 0 in the case of error.
 
-      String files[] = XP.getFileList(directory);
+      String files[] = queue.getFileList();
 
       int nfiles = 0;
 
@@ -937,12 +936,10 @@ public class RecordProcessor extends Thread {
             } // End of handling accepted records.
          } // End of for each record loop
          // Logging.log(ident + ": Before File Delete: " + file);
-         try {
-            File temp = new File(file);
-            temp.delete();
-         } catch (Exception ignore) {
-            // Logging.log(ident + ": File Delete Failed: " + file +
-            // " Error: " + ignore);
+         if (origin != null && origin.getConnection() != null) {
+            queue.deleteFile(file,origin.getConnection().getSender(),rSize);
+         } else {
+            queue.deleteFile(file,"",rSize);               
          }
          // Logging.log(ident + ": After File Delete: " + file);
          ++itotal;

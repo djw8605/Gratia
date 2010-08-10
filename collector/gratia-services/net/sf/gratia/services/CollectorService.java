@@ -51,27 +51,11 @@ public class CollectorService implements ServletContextListener {
    
    class RecordProcessorThreads {
       private RecordProcessor processors[] = null;
-      private String queues[] = null;
       
       public RecordProcessorThreads(int nthreads) {
-         SetupQueues(nthreads);
+         QueueManager.setupQueues(nthreads);
       }
-      
-      public synchronized void SetupQueues(int nthreads) {
-         //
-         // setup queues for message handling
-         //
-         if (queues == null || queues.length != nthreads) {
-            queues = new String[nthreads];
-            Execute.execute("mkdir -p " + configurationPath + "/data");
-            for (int i = 0; i < nthreads; i++) {
-               Execute.execute("mkdir -p " + configurationPath + "/data/thread" + i);
-               queues[i] = configurationPath + "/data/thread" + i;
-               Logging.log("Created Q: " + queues[i]);
-            }
-         }
-      }
-      
+
       public synchronized int GetCount() { 
          if (processors == null) return 0;
          else return processors.length;
@@ -92,10 +76,10 @@ public class CollectorService implements ServletContextListener {
             Logging.info("CollectorService: record processor threads cannot be started -- already active");
             return;
          }
-         SetupQueues(nthreads);
+         QueueManager.setupQueues(nthreads);
          processors = new RecordProcessor[nthreads];
          for (int i = 0; i < nthreads; ++i) {
-            processors[i] = new RecordProcessor("RecordProcessor: " + i, queues[i], lock, global, CollectorService.this);
+            processors[i] = new RecordProcessor("RecordProcessor: " + i, QueueManager.getQueue(i), lock, global, CollectorService.this);
             processors[i].setPriority(Thread.MAX_PRIORITY);
             processors[i].setDaemon(true);
          }
@@ -734,7 +718,7 @@ public class CollectorService implements ServletContextListener {
       }
       FlipSSL.flip();
    }
-   
+
    public void setConnectionCaching(boolean enable)
    {
       net.sf.gratia.storage.Connection.setCaching(enable);

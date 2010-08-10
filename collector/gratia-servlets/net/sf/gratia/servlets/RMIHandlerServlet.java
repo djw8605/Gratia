@@ -351,9 +351,9 @@ public class RMIHandlerServlet extends HttpServlet {
                      
                         if (fTrackConnection) {
                             String data = "Origin|"+origin+"|"+arg1;
-                            status = fCollectorProxy.update(data);
+                            status = fCollectorProxy.update(from,data);
                         } else {
-                            status = fCollectorProxy.update(arg1);
+                            status = fCollectorProxy.update(from,arg1);
                         }
                     }
                     if (status) {
@@ -367,9 +367,9 @@ public class RMIHandlerServlet extends HttpServlet {
                   
                     if (fTrackConnection) {
                         String data = "Origin|"+origin+"|"+arg1;
-                        status = fCollectorProxy.update(data);
+                        status = fCollectorProxy.update(from,data);
                     } else {
-                        status = fCollectorProxy.update(arg1);
+                        status = fCollectorProxy.update(from,arg1);
                     }
                     if (status) {
                         writer.write("OK");

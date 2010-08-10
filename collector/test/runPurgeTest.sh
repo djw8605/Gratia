@@ -94,7 +94,7 @@ function write_ProbeConfig
     CollectorService="/$service/rmi" 
     UseSoapProtocol="0"
     
-    MeterName="LocalTester" 
+    MeterName="tester:LocalTester.where.edu" 
     SiteName="LocalTesting"
     Grid="OSG"
    
@@ -260,16 +260,16 @@ function fix_duplicate_date {
 
   echo '0' > dups.count
   while [ `tail -1 dups.count` -lt ${expected_duplicate} ]; do
-  echo "Waiting for Duplicate data to be loaded." `tail -1 dups.count`
-  mysql -h ${dbhost} --port=${dbport} -u gratia --password=${update_password} > dups.count 2>&1 <<EOF 
+    echo "Waiting for Duplicate data to be loaded." `tail -1 dups.count`
+    mysql -h ${dbhost} --port=${dbport} -u gratia --password=${update_password} > dups.count 2>&1 <<EOF 
 use ${schema_name};
 select count(*) from DupRecord;
 EOF
-  if [ $? -ne 0 ]; then
-     cat dups.count
-     return
-  fi
-  sleep 2
+    if [ $? -ne 0 ]; then
+      cat dups.count
+      return
+    fi
+    sleep 2
   done
 
   echo "Attempt fix-up the DupRecord table so that we have a range of eventtime."
@@ -367,7 +367,7 @@ function loaddata {
    tar xfz preparedrecords.tar.gz
    if [ "gratia-vm02.fnal.gov_9000" != "${webhost}_${http_port}" ]; then 
       find MAGIC_VDT_LOCATION/gratia/var/tmp/gratiafiles -type f -name '*'"gratia-vm02.fnal.gov_9000"'*' | while read file; do
-         new_file=`echo "$file" | perl -wpe 's&\Q'"gratia-vm02.fnal.gov_9000.gratia.xml"'\E&'"${webhost}_${http_port}.gratia.xml"'&'`
+         new_file=`echo "$file" | perl -wpe 's&\Q'"gratia-vm02.fnal.gov_9000.gratia.xml"'\E&'"${webhost}_${http_port}.gratia.xml"'&' | sed -e 's/LocalTester/tester_LocalTester.where.edu/' `
          mv "$file" "$new_file"
       done
    fi
@@ -532,6 +532,9 @@ function upload_war()
 {
     stop_server
     for warfile in $WAR; do 
+      if [ ! -e ../../target/$warfile.war ] ; then 
+         warfile=gratia-$warfile
+      fi
       ssh -l root ${webhost} rm -rf ${tomcatpwd}/webapps/$warfile\*
       scp ../../target/$warfile.war root@${webhost}:${tomcatpwd}/webapps
     done

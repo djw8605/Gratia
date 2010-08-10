@@ -4,7 +4,7 @@ import java.rmi.RemoteException;
 import java.security.cert.X509Certificate;
 
 public interface JMSProxy extends java.rmi.Remote {
-    public Boolean update(String xml) throws RemoteException;
+    public Boolean update(String from, String xml) throws RemoteException;
     public void stopDatabaseUpdateThreads() throws RemoteException;
     public void startDatabaseUpdateThreads() throws RemoteException;
     public Boolean databaseUpdateThreadsActive() throws RemoteException;
@@ -26,4 +26,5 @@ public interface JMSProxy extends java.rmi.Remote {
     public void setConnectionCaching(boolean enable) throws RemoteException;
     public String checkConnection(X509Certificate certs[], String senderHost, String sender) throws RemoteException, AccessException;
     public String checkConnection(String certspem, String senderHost, String sender) throws RemoteException, AccessException;
+    public String resetStatus() throws RemoteException;
 }

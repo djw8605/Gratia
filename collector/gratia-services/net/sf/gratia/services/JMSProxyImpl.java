@@ -3,17 +3,22 @@ package net.sf.gratia.services;
 import net.sf.gratia.util.Configuration;
 
 import net.sf.gratia.util.XP;
+import net.sf.gratia.util.Logging;
+import net.sf.gratia.util.LogLevel;
 
 import java.rmi.*;
 import java.rmi.server.*;
 import java.util.Properties;
 import java.io.*;
 
-public class JMSProxyImpl extends UnicastRemoteObject implements JMSProxy {
-   
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+public class JMSProxyImpl extends UnicastRemoteObject implements JMSProxy 
+{
+   // For UnicastRemoteObject.
    static final long serialVersionUID = 1;
-   Properties p;
-   String queues[] = null;
+
    File stageDir = null;
    int iq = 0;
    int irecords = 0;
@@ -21,62 +26,41 @@ public class JMSProxyImpl extends UnicastRemoteObject implements JMSProxy {
    
    public JMSProxyImpl(CollectorService collectorService)
    throws RemoteException {
-       super();
+      super();
       
-       this.collectorService = collectorService;
-      
-       loadProperties();
-      
-       int maxthreads =
-           Integer.parseInt(p.getProperty("service.recordProcessor.threads"));
-       queues = new String[maxthreads];
-       for (int i = 0; i < maxthreads; i++) {
-           queues[i] = System.getProperties().getProperty("catalina.home")
-               + "/gratia/data/thread" + i;
-       }
+      this.collectorService = collectorService;
 
-       stageDir = new File(System.getProperties().getProperty("catalina.home")
-                           + "/gratia/data/stage");
-       
-       stageDir.mkdirs();
-
+      QueueManager.initialize();
+      stageDir = QueueManager.getStageDir();
    }
    
-   public void loadProperties() {
+   public Boolean update(String from, String xml) throws RemoteException 
+   {
+      // First attempt to get the xml stored on disk on the stage directory
       try {
-         p = Configuration.getProperties();
-      } catch (Exception ignore) {
-      }
-   }
-   
-   public Boolean update(String xml) throws RemoteException {
-       ++irecords;
-       Boolean result = false;
-
-       if ((irecords % 100) == 0) {
-           ++iq;
-           if (iq > (queues.length - 1)) {
+         File tmpFile = File.createTempFile("stage-", ".xml", stageDir);
+         Boolean tmpResult = XP.save(tmpFile, xml);
+         if (!tmpResult) {
+            return tmpResult;
+         }
+         // Successful save
+         ++irecords;
+         if ((irecords % 100) == 0) {
+            ++iq;
+            if (iq > (QueueManager.getNumberOfQueues() - 1)) {
                iq = 0;
-           }
-           try {
+            }
+            try {
                Thread.yield();
-           } catch (Exception ignore) {
-           }
-       }
-      
-       try {
-           File tmpFile = File.createTempFile("stage-", ".xml", stageDir);
-           Boolean tmpResult = XP.save(tmpFile, xml);
-           if (tmpResult) { // Successful save
-               File file = File.createTempFile("job", ".xml", new File(queues[iq]));
-               result = tmpFile.renameTo(file);
-           } else {
-               result = tmpResult;
-           }
-       } catch (Exception e) {
-           e.printStackTrace();
-       }
-       return result;
+            } catch (Exception ignore) {
+            }
+         }
+         return QueueManager.update(iq,tmpFile,from,xml);
+      } catch (Exception e) {
+         e.printStackTrace();
+         return false;
+      }
+
    }
    
    public void stopDatabaseUpdateThreads() throws RemoteException {
@@ -163,4 +147,8 @@ public class JMSProxyImpl extends UnicastRemoteObject implements JMSProxy {
       return collectorService.checkConnection(certpem,senderHost,sender);
    }
    
+   public String resetStatus() throws RemoteException {
+      QueueManager.resetStatus();
+      return "";
+   }
 }

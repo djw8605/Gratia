@@ -74,7 +74,7 @@ public class Collector {
         try
             {
 								
-                status = proxy.update(xml);
+                status = proxy.update("viasoap",xml);
                 if (! status)
                     {
                         response.set_code(1);

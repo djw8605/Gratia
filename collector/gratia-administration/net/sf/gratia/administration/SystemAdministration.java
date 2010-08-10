@@ -119,6 +119,7 @@ public class SystemAdministration extends HttpServlet {
         String servletStatus = "UNKNOWN";
         String housekeepingStatus = "UNKNOWN";
         String reaperStatus = "UNKNOWN";
+        String queuemanagerStatus = "";
 
         if (proxy == null) {
             initialize();
@@ -301,6 +302,8 @@ public class SystemAdministration extends HttpServlet {
                                "\"><strong>" +
                                housekeepingStatus +
                                "</strong></font>");
+       html = html.replaceAll("#queuemanagerstatus#",queuemanagerStatus);
+       html = html.replaceAll("#queuemanagercomment#","<a href=\"systemadministration.html?action=resetStatus\"><strong>Reset</strong></a> the collector status by recalculating the queues sizes directly from the files on the disk queue (Strongly recommended if you added or removed input files manually from the queue.)");
     }
 
     public void replay() {
@@ -355,6 +358,8 @@ public class SystemAdministration extends HttpServlet {
                 proxy.startHousekeepingActionNow();
             } else if (action.equals("runReaper")) {
                 proxy.runReaper();
+            } else if (action.equals("resetStatus")) {
+               proxy.resetStatus();
             } else {
                 Logging.warning("SystemAdministration.executeProxyAction called with unknown action " + action);
             }
