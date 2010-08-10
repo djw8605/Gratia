@@ -40,11 +40,14 @@ public class DataScrubber {
    int fBatchSize    =  1000;
    long fXmlBatchSize = 100000;
    
-   private Boolean fStopRequested = false;
+   private boolean fStopRequested = false;
+   private boolean fPauseRequested = false;
+   private DataHousekeepingService fService = null;
    
    ExpirationDateCalculator fExpCalc = new ExpirationDateCalculator();
    
-   public DataScrubber() {
+   public DataScrubber(DataHousekeepingService service) {
+      fService = service;
       try {
          // Get batch size from properties if set.
          fBatchSize = Integer.valueOf(fExpCalc.lifetimeProperties().
@@ -70,6 +73,20 @@ public class DataScrubber {
    
    public void requestStop() {
       fStopRequested = true;
+   }
+   
+   public void requestPause() {
+      fPauseRequested = true;
+   }
+   
+   public void cancelPause() {
+      fPauseRequested = false;
+   }
+   
+   public void pause() 
+   {
+      fService.pause();
+      fPauseRequested = false;
    }
    
    protected long deleteRawXml( String type, String selection, String limit, String msg ) {
@@ -98,7 +115,7 @@ public class DataScrubber {
             
             Logging.debug("DataScrubber: About to execute " + query.getQueryString());
             Long result = null;
-	    BigInteger resultBig = (BigInteger)query.uniqueResult();
+            BigInteger resultBig = (BigInteger)query.uniqueResult();
             if(resultBig != null)
                 result = (Long) (resultBig.longValue());
             
@@ -107,7 +124,7 @@ public class DataScrubber {
                query.setString( "dateLimit", limit );
                
                Logging.debug("DataScrubber: About to execute " + query.getQueryString());
-	       resultBig = (BigInteger)query.uniqueResult();
+               resultBig = (BigInteger)query.uniqueResult();
                if(resultBig != null)
                    result = (Long) (resultBig.longValue());
             }
@@ -126,7 +143,7 @@ public class DataScrubber {
             query = session.createSQLQuery("select dbid from "+type+"_Xml X where ExtraXml = \"\" order by dbid limit 1");
  
             Logging.debug("DataScrubber: About to execute " + query.getQueryString());
-	    resultBig = (BigInteger)query.uniqueResult();
+            resultBig = (BigInteger)query.uniqueResult();
             if(resultBig != null)
                 result = (Long) (resultBig.longValue());
             if ( result == null ) {
@@ -159,6 +176,12 @@ public class DataScrubber {
       keepTrying = true;
       while ( keepTrying && cursor < maxdbid && !fStopRequested ) 
       {
+         if (fPauseRequested) {
+            pause();
+            if (fStopRequested) {
+               break;
+            }
+         }
          keepTrying = true;
          ++nTries;
          Session session = null;
@@ -203,6 +226,12 @@ public class DataScrubber {
       Integer nTries = 0;
       Boolean keepTrying = true;
       do {
+         if (fPauseRequested) {
+            pause();
+            if (fStopRequested) {
+               break;
+            }
+         }
          ++nTries;
          Session session = null;
          Transaction tx = null;
@@ -246,6 +275,12 @@ public class DataScrubber {
       Transaction tx = null;
       String deleteCmd = "delete " + className + " record where record." + idAttribute + " in ( :ids )";
       do {
+         if (fPauseRequested) {
+            pause();
+            if (fStopRequested) {
+               break;
+            }
+         }
          ++nTries;
          String selectCmd = ( "select record.id from " + className +
                              " record where " + whereClause );
@@ -289,6 +324,12 @@ public class DataScrubber {
       Boolean keepTrying = true;
       Transaction tx = null;
       do {
+         if (fPauseRequested) {
+            pause();
+            if (fStopRequested) {
+               break;
+            }
+         }
          ++nTries;
          Session session = null;
          try {
@@ -425,6 +466,12 @@ public class DataScrubber {
          Integer nTries = 0;
          Transaction tx = null;
          while (!done) {
+            if (fPauseRequested) {
+               pause();
+               if (fStopRequested) {
+                  break;
+               }
+            }
             ++nTries;
             ids = GetList(hqlList, limit, "JobUsageRecord records");
             Logging.debug("DataScrubber: deleting " + ids);

@@ -520,15 +520,29 @@ public class CollectorService implements ServletContextListener {
    private synchronized void startHousekeepingService(Boolean initialDelay) {
       if (housekeepingDisabled ||
           housekeepingService == null ||
-          !housekeepingService.isAlive()) {
+          !housekeepingService.isAlive()) 
+      {
          Logging.info("CollectorService: Starting data housekeeping service");
          housekeepingDisabled = false;
-         housekeepingService =
-         new DataHousekeepingService(this,
-                                     DataHousekeepingService.HousekeepingAction.ALL,
-                                     initialDelay);
+         housekeepingService = new DataHousekeepingService(this,
+                                                           DataHousekeepingService.HousekeepingAction.ALL,
+                                                           initialDelay);
          housekeepingService.start();
+      } 
+      else if (housekeepingService.housekeepingStatus().equals("PAUSED"))
+      {
+         Logging.info("CollectorService: Waking up data housekeeping service");
+         housekeepingService.wakeUp();
       }
+   }
+   
+   public synchronized void pauseHousekeepingService() {
+      if (housekeepingService == null || !housekeepingService.isAlive()) {
+         Logging.info("CollectorService: housekeeping service cannot be paused -- not started!");
+         return;
+      }
+      Logging.info("CollectorService: Pausing housekeeping service.");
+      housekeepingService.requestPause();
    }
    
    public synchronized void stopHousekeepingService() {
@@ -572,12 +586,17 @@ public class CollectorService implements ServletContextListener {
    }
    
    public synchronized Boolean startHousekeepingActionNow() {
-      if (housekeepingServiceStatus().equalsIgnoreCase("SLEEPING")) {
+      String status = housekeepingServiceStatus();
+      if (status.equalsIgnoreCase("SLEEPING")) {
          housekeepingService.interrupt();
          return true;
       } else if (housekeepingDisabled ||
-                 housekeepingServiceStatus().equals("STOPPED")) {
+                 status.equals("STOPPED")) {
          startHousekeepingService(false); // No initial delay.
+         return true;
+      } else if (status.equals("PAUSED")) {
+         Logging.info("CollectorService: Waking up data housekeeping service");
+         housekeepingService.wakeUp();
          return true;
       } else {
          return false; // No action.

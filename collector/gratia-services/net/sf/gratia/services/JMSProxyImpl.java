@@ -119,6 +119,10 @@ public class JMSProxyImpl extends UnicastRemoteObject implements JMSProxy
       return collectorService.housekeepingServiceStatus();
    }
    
+   public void pauseHousekeepingService() throws RemoteException {
+      collectorService.pauseHousekeepingService();
+   }
+   
    public void startHousekeepingService() throws RemoteException {
       collectorService.startHousekeepingService();
    }

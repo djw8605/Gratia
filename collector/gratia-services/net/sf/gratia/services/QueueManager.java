@@ -37,7 +37,7 @@ public class QueueManager
    //   private static final Pattern fgRecordIdPattern = Pattern.compile("RecordIdentity");
    //   private static final Pattern fgReplicationPattern = Pattern.compile("replication\|");
    private static final Pattern fgRecordPattern = Pattern.compile("(RecordIdentity)|(replication\\|)");
-   private static final Pattern fgBundleSizePattern = Pattern.compile("bundleSize=\\s*([0-9]*)");
+   private static final Pattern fgBundleSizePattern = Pattern.compile("[bB]undle[sS]ize=\\s*([0-9]*)");
    private static final Pattern fgSizeInFileName = Pattern.compile("\\.([0-9]*)\\.xml");
    
    private static final String fgUpdateStatus = "insert into CollectorStatus values ( :queue, :number, now(), :nfiles, :nrecords) "

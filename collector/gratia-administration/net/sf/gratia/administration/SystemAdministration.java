@@ -279,10 +279,14 @@ public class SystemAdministration extends HttpServlet {
          color = "fuchsia";
          html = html.replaceAll("#housekeepingcomment#",
                                 "Old records are <strong>accepted</strong>. <a href=\"systemadministration.html?action=startHousekeeping\"><strong>Start normally</strong></a> or <a href=\"systemadministration.html?action=startHousekeepingNow\"><strong>Start run now</strong></a>.");
-      } else if (housekeepingStatus.equalsIgnoreCase("STOPPED")) {
+      } else if (housekeepingStatus.equalsIgnoreCase("STOPPED")|| housekeepingStatus.equalsIgnoreCase("STOPPING")) {
          color = "red";
          html = html.replaceAll("#housekeepingcomment#",
                                 "Old records are <strong>rejected</strong> as normal. <a href=\"systemadministration.html?action=startHousekeeping\"><strong>Start normally</strong></a>; <a href=\"systemadministration.html?action=startHousekeepingNow\"><strong>Start run now</strong></a>; or <a href=\"systemadministration.html?action=disableHousekeeping\"><strong>Disable</strong></a> housekeeping service and the rejection of incoming old records.");
+      } else if (housekeepingStatus.equalsIgnoreCase("PAUSED") || housekeepingStatus.equalsIgnoreCase("PAUSING")) {
+         color = "red";
+         html = html.replaceAll("#housekeepingcomment#",
+                                "Old records are <strong>rejected</strong> as normal. <a href=\"systemadministration.html?action=wakeupHousekeeping\"><strong>Wake up</strong></a>, <a href=\"systemadministration.html?action=stopHousekeeping\"><strong>Stop</strong></a> after current run or <a href=\"systemadministration.html?action=disableHousekeeping\"><strong>Disable</strong></a> housekeeping service and the rejection of incoming old records.");
       } else if (housekeepingStatus.equalsIgnoreCase("SLEEPING")) {
          color = "green";
          html = html.replaceAll("#housekeepingcomment#",
@@ -294,7 +298,7 @@ public class SystemAdministration extends HttpServlet {
       } else {
          color = "green";
          html = html.replaceAll("#housekeepingcomment#",
-                                "<a href=\"systemadministration.html?action=stopHousekeeping\"><strong>Stop</strong></a> or " +
+                                "<a href=\"systemadministration.html?action=pauseHousekeeping\"><strong>Pause</strong></a> current run, <a href=\"systemadministration.html?action=stopHousekeeping\"><strong>Stop</strong></a> or " +
                                 "<a href=\"systemadministration.html?action=disableHousekeeping\"><strong>Stop and disable</strong></a> housekeeping service and the rejection of incoming old records after current run.");
       }
       html = html.replaceAll("#housekeepingstatus#",
@@ -363,8 +367,12 @@ public class SystemAdministration extends HttpServlet {
             proxy.disableServlet();
          } else if (action.equals("startHousekeeping")) {
             proxy.startHousekeepingService();
+         } else if (action.equals("wakeupHousekeeping")) {
+            proxy.startHousekeepingActionNow();
          } else if (action.equals("stopHousekeeping")) {
             proxy.stopHousekeepingService();
+         } else if (action.equals("pauseHousekeeping")) {
+            proxy.pauseHousekeepingService();
          } else if (action.equals("disableHousekeeping")) {
             proxy.disableHousekeepingService();
          } else if (action.equals("startHousekeepingNow")) {
