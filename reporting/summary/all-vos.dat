@@ -1,5 +1,5 @@
 (
- "all-vos-test" => { mail => [ 'Chris Green <greenc@fnal.gov>' ] },
+ "all-vos-test" => { mail => [ 'Philippe Canal <pcanal@fnal.gov>' ] },
  CMS => { "alt-vos" => [ 'uscms' ] },
  Engage => { "alt-vos" => [ 'Engagement' ] },
  atlas => { "alt-vos" => [ 'usatlas' ] }
