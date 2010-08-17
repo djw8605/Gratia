@@ -264,7 +264,7 @@ public class SystemAdministration extends HttpServlet {
          replaceAll("#reapercomment#", "");
       } else {
          html = html.replaceAll("#reaperstatus#",
-                                "<font color=\"green\"><strong>SLEEPING</strong></font>").
+                                "<font color=\"fuchsia\"><strong>SLEEPING</strong></font>").
          replaceAll("#reapercomment#",
                     "<a href=\"systemadministration.html?action=runReaper\"><strong>Run now</strong></a>.");
       }

@@ -28,116 +28,112 @@ import javax.management.remote.*;
 //
 
 public class QSizeMonitor extends Thread {
-
-    boolean running = true;
-    Properties p;
-    String path = "";
-    int maxthreads = 0;
-    int maxqsize = 0;
-    static final double restartThreshold = 0.8;
-
-    public QSizeMonitor() {
-        p = Configuration.getProperties();
-        maxthreads = Integer.parseInt(p.getProperty("service.recordProcessor.threads"));
-        maxqsize = Integer.parseInt(p.getProperty("max.q.size"));
-        path = System.getProperties().getProperty("catalina.home");
-        path = path.replaceAll("\\\\", "/");
-    }
-
-    public void run() {
-        Logging.fine("QSizeMonitor: Started");
-        while (true) {
-            try {
-                Thread.sleep(60 * 1000);
-            }
-            catch (Exception e) {
-            }
-            check();
-        }
-    }
-
-    public void check() {
-        boolean toobig = false;
-        long maxfound = 0;
-
-        Logging.log("QSizeMonitor: Checking");
-        for (int i = 0; i < maxthreads; i++) {
-            String xpath = path + "/gratia/data/thread" + i;
-            long nfiles = XP.getFileNumber(xpath);
-            if (nfiles > maxqsize)
-                toobig = true;
-            if (nfiles > maxfound)
-                maxfound = nfiles;
-        }
-        if (toobig && running) {
-            Logging.info("QSizeMonitor: Q Size Exceeded: " + maxfound);
-            Logging.info("QSizeMonitor: Shuttinng Down Input");
-            stopServlet();
-            running = false;
-            return;
-        }
-        if ((! toobig) && (! running)) {
-            if (maxfound < (maxqsize * restartThreshold)){
-                Logging.info("QSizeMonitor: Restarting Input: " + maxfound);
-                startServlet();
-                running = true;
-            }
-        }
-    }
-
-    final String bean_servlets = "Catalina:j2eeType=WebModule," +
-        "name=//localhost/gratia-servlets,J2EEApplication=none,J2EEServer=none";
-
-    void startServlet() {
-        servletCommand(bean_servlets,"start",false);
-    }
-
-    void stopServlet() {
-        servletCommand(bean_servlets,"stop",false);
-    }
-
-    static Boolean servletCommand(String bean_name, String cmd, boolean ignore_missing) {
-        Boolean result = false;
-
-        try {
-            MBeanServerConnection mbsc = null;
-            if (System.getProperty("com.sun.management.jmxremote") == null) {
-                Logging.log(LogLevel.SEVERE, "CollectorService: internal servlet " +
-                            "control is not available." +
-                            " Please ensure that the system property " +
-                            "com.sun.management.jmxremote" +
-                            " is set to allow required control of " +
-                            "servlets and reporting service.");
-                return result; // No point in continuing
-            }
-            Logging.log("CollectorService: attempting to obtain local MBeanServer");
-            mbsc = ManagementFactory.getPlatformMBeanServer();
-
-            ObjectName objectName = new ObjectName(bean_name);
-
-            mbsc.invoke(objectName, cmd, null, null);
-            Logging.log("CollectorService: successfully executed MBean control command " +
-                        cmd + " on MBean " + bean_name);
-            result = true;
-        }
-        catch (javax.management.InstanceNotFoundException missing) {
-            // We might want to ignore this error.
-            if (ignore_missing) {
-                result = true; // Didn't care whether it was there or not.
-            } else {
-                Logging.warning("CollectorService: ServletCommand(\"" +
-                                cmd + "\") caught exception " + missing);
-                Logging.debug("Exception details: ", missing);
-            }
-        }
-        catch (Exception e) {
+   
+   boolean running = true;
+   int maxqsize = 0;
+   static final double restartThreshold = 0.8;
+   CollectorService fService;
+   
+   public QSizeMonitor(CollectorService service) {
+      fService = service;
+      Properties p = Configuration.getProperties();
+      maxqsize = Integer.parseInt(p.getProperty("max.q.size"));
+   }
+   
+   public void run() {
+      Logging.fine("QSizeMonitor: Started");
+      while (true) {
+         try {
+            Thread.sleep(60 * 1000);
+         }
+         catch (Exception e) {
+         }
+         check();
+      }
+   }
+   
+   public void check() {
+      boolean toobig = false;
+      long maxfound = 0;
+      
+      Logging.log("QSizeMonitor: Checking");
+      
+      for (int i = 0; i < QueueManager.getNumberOfQueues(); ++i) {
+         QueueManager.Queue queue = QueueManager.getQueue(i);
+         long nfiles = queue.getNFiles();
+         if (nfiles > maxqsize)
+            toobig = true;
+         if (nfiles > maxfound)
+            maxfound = nfiles;
+      }
+      if (toobig && running) {
+         Logging.info("QSizeMonitor: Q Size Exceeded: " + maxfound);
+         Logging.info("QSizeMonitor: Shutting Down Input");
+         fService.disableServlet();
+         running = false;
+         return;
+      }
+      if ((! toobig) && (! running)) {
+         if (maxfound < (maxqsize * restartThreshold)){
+            Logging.info("QSizeMonitor: Restarting Input: " + maxfound);
+            fService.enableServlet();
+            running = true;
+         }
+      }
+   }
+   
+   final String bean_servlets = "Catalina:j2eeType=WebModule," + "name=//localhost/gratia-servlets,J2EEApplication=none,J2EEServer=none";
+   
+   void startServletService() {
+      servletCommand(bean_servlets,"start",false);
+   }
+   
+   void stopServletService() {
+      servletCommand(bean_servlets,"stop",false);
+   }
+   
+   static Boolean servletCommand(String bean_name, String cmd, boolean ignore_missing) {
+      Boolean result = false;
+      
+      try {
+         MBeanServerConnection mbsc = null;
+         if (System.getProperty("com.sun.management.jmxremote") == null) {
+            Logging.log(LogLevel.SEVERE, "CollectorService: internal servlet " +
+                        "control is not available." +
+                        " Please ensure that the system property " +
+                        "com.sun.management.jmxremote" +
+                        " is set to allow required control of " +
+                        "servlets and reporting service.");
+            return result; // No point in continuing
+         }
+         Logging.log("CollectorService: attempting to obtain local MBeanServer");
+         mbsc = ManagementFactory.getPlatformMBeanServer();
+         
+         ObjectName objectName = new ObjectName(bean_name);
+         
+         mbsc.invoke(objectName, cmd, null, null);
+         Logging.log("CollectorService: successfully executed MBean control command " +
+                     cmd + " on MBean " + bean_name);
+         result = true;
+      }
+      catch (javax.management.InstanceNotFoundException missing) {
+         // We might want to ignore this error.
+         if (ignore_missing) {
+            result = true; // Didn't care whether it was there or not.
+         } else {
             Logging.warning("CollectorService: ServletCommand(\"" +
-                            cmd + "\") caught exception " + e);
-            Logging.debug("Exception details: ", e);
-        }
-        return result;
-    }
+                            cmd + "\") caught exception " + missing);
+            Logging.debug("Exception details: ", missing);
+         }
+      }
+      catch (Exception e) {
+         Logging.warning("CollectorService: ServletCommand(\"" +
+                         cmd + "\") caught exception " + e);
+         Logging.debug("Exception details: ", e);
+      }
+      return result;
+   }
 }
 
 
- 
+

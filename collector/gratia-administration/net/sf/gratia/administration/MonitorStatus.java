@@ -8,7 +8,6 @@ import java.io.*;
 import java.net.*;
 import java.util.StringTokenizer;
 import java.util.Properties;
-import java.util.Hashtable;
 import java.util.Enumeration;
 import java.util.Vector;
 import javax.servlet.*;
@@ -424,7 +423,7 @@ public class MonitorStatus extends HttpServlet
             long nFiles = resultSet.getLong(2);
             long nRecords = resultSet.getLong(3);
             append(buffer,"queuesize",q,nFiles,xml);
-            append(buffer,"record",q,nRecords,xml);
+            append(buffer,"record-queue",q,nRecords,xml);
          }
          resultSet.close();
          statement.close();

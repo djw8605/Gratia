@@ -66,11 +66,15 @@
 	<a href="./computeelementrecordreplicationtable.html" target="adminContent" class="<%=menuClass%>">CE Record Replication</a><br />
 	<a href="./storageelementrecordreplicationtable.html" target="adminContent" class="<%=menuClass%>">SE Record Replication</a><br />
 
-
 	<hr><label class="menuGroup">System</label> <br />
 	<font size="-2">System Status: </font><a href="./status.html?wantDetails=0" target="adminContent" class="menuItem">normal</a>
 	<font size="-2"> or </font><a href="./status.html?wantDetails=1" target="adminContent" class="menuItem">detailed</a>
 	<font size="-2"> or </font><a href="./monitor-status.html" target="adminContent" class="menuItem">minimal</a><br />
+
+	<font size="-2">Subsystem Status: </font>
+    <a href="./collector-status.html?out=html" target="adminContent" class="menuItem">normal</a>
+    <font size="-2"> or </font>	
+    <a href="./collector-status.html?out=txt" target="adminContent" class="menuItem">text</a><br />
 
 	<a href="./systemadministration.html" target="adminContent" class="<%=menuClass%>">Administration</a><br />
 

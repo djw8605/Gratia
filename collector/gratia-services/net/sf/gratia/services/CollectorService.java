@@ -437,7 +437,7 @@ public class CollectorService implements ServletContextListener {
          //
          if (p.getProperty("monitor.q.size").equals("1")) {
             Logging.log("CollectorService: Starting QSizeMonitor");
-            qsizeMonitor = new QSizeMonitor();
+            qsizeMonitor = new QSizeMonitor(this);
             qsizeMonitor.start();
             Logging.info("CollectorService: QSizeMonitor started");
          }

@@ -196,6 +196,7 @@ public class QueueManager
       int          fQueueNumber;
       java.io.File fDirectory;
       boolean      fOutOfDate = false;
+      long         fNFiles = 0;
       
       public Queue(String path, int index)
       {
@@ -229,6 +230,7 @@ public class QueueManager
             session.flush();
             tx.commit();
             keepTrying = false;
+            fNFiles = 0;
             session.close();
          } catch (Exception e) {
             HibernateWrapper.closeSession(session);
@@ -264,6 +266,12 @@ public class QueueManager
          return XP.getFileList(fDirectory.toString());
       }
       
+      public long getNFiles()
+      {
+         // Return the number of files in the queue.
+         return fNFiles;
+      }
+
       public String getShortName()
       {
          // Return the basename of the directory in which the queue keeps its data.
@@ -365,6 +373,7 @@ public class QueueManager
             session.flush();
             tx.commit();
             keepTrying = false;
+            fNFiles += nfiles;
             session.close();
          } catch (Exception e) {
             HibernateWrapper.closeSession(session);

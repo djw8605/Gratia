@@ -224,9 +224,8 @@ public class Status extends HttpServlet {
 	}
 
 	public void process() {
-		HashMap<String, HashMap<Integer, TableStatusInfo> > tableInfo = new
-		HashMap<String, HashMap<Integer, TableStatusInfo> >(5);
-
+		HashMap<String, HashMap<Integer, TableStatusInfo> > tableInfo = new HashMap<String, HashMap<Integer, TableStatusInfo> >(5);
+      
 		Matcher m = null;
 
 		int index = 0;
