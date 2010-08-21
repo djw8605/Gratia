@@ -497,9 +497,9 @@ public class QueueManager
          
          while (recordMatcher.find()) {
             // Logging.log(LogLevel.SEVERE, "QueueManager::update: matched record pattern with:"+recordMatcher.group()+" and "+recordMatcher.group(1)+" and "+recordMatcher.group(2));               
-            if (recordMatcher.group(1).length()>0) {
+            if (recordMatcher.group(1) != null && recordMatcher.group(1).length()>0) {
                nrecords = nrecords + 1;
-            } else if (recordMatcher.group(2).length()>0) {
+            } else if (recordMatcher.group(1) != null && recordMatcher.group(2).length()>0) {
                nrecords = nrecords + 1;
             } else {
                // Logging.log(LogLevel.SEVERE, "QueueManager::update: internal error in the pattern matching, we did not understand the match:"+recordMatcher.group());               
