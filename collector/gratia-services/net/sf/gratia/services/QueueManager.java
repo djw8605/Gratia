@@ -29,14 +29,14 @@ import java.util.concurrent.locks.ReentrantLock;
  *
  * <p>Company: Fermilab </p>
  *
- * @Chris Green
+ * @Philippe Canal
  * @version 1.0
  */
 public class QueueManager 
 {
    //   private static final Pattern fgRecordIdPattern = Pattern.compile("RecordIdentity");
    //   private static final Pattern fgReplicationPattern = Pattern.compile("replication\|");
-   private static final Pattern fgRecordPattern = Pattern.compile("(RecordIdentity)|(replication\\|)");
+   private static final Pattern fgRecordPattern = Pattern.compile("(RecordIdentity)|(replication\\|)|(\\|)");
    private static final Pattern fgBundleSizePattern = Pattern.compile("[bB]undle[sS]ize=\\s*([0-9]*)");
    private static final Pattern fgSizeInFileName = Pattern.compile("\\.([0-9]*)\\.xml");
    
@@ -50,6 +50,36 @@ public class QueueManager
    static Queue              fgQueues[] = null;
    static java.io.File       fgStageDir = null;
    static Date               fgLastReset = null;
+   
+   private static long getNRecordsFromData(String xml)
+   {
+      long nrecords = 0;
+      int replication_count = 0;
+      Matcher recordMatcher = fgRecordPattern.matcher(xml);
+      while (recordMatcher.find()) {
+         Logging.log(LogLevel.SEVERE, "QueueManager::getNRecordsFromData: matched record pattern with:"+recordMatcher.group()+" and "+recordMatcher.group(1)+" and "+recordMatcher.group(2));               
+         if (recordMatcher.group(1) != null && recordMatcher.group(1).length()>0) {
+            if (replication_count == 0 || replication_count == 1) {
+               // We count the payload only if it by itself or in the first part of the replication.
+               nrecords = nrecords + 1;
+            }
+         } else if (recordMatcher.group(2) != null && recordMatcher.group(2).length()>0) {
+            // We found a replication marker, we may get extra RecordIdentity in the ExtraXml (however we don't always have an ExtraXml records.
+            // The syntax of replication is replication|<payload>|<rawxml>|<extraxml>|
+            replication_count = 1;
+         } else if (recordMatcher.group(3) != null && recordMatcher.group(3).length()>0) {
+            if (replication_count > 0) {
+               replication_count = replication_count + 1;
+               if (replication_count == 4) {
+                  replication_count = 0;
+               }
+            }
+         } else {
+            Logging.log(LogLevel.SEVERE, "QueueManager::getNRecordsFromData: internal error in the pattern matching, we did not understand the match:"+recordMatcher.group());               
+         }
+      }
+      return nrecords;
+   }
    
    public static class File
    {
@@ -169,18 +199,7 @@ public class QueueManager
                nrecords = Long.parseLong(bundleSize);
                // Logging.log(LogLevel.SEVERE, "Queue::extractNRecordsFromFile: matched bundles size with:"+bundleMatcher.group()+" and "+bundleMatcher.group(1));               
             } else {
-               Matcher recordMatcher = fgRecordPattern.matcher(xml);
-               
-               while (recordMatcher.find()) {
-                  // Logging.log(LogLevel.SEVERE, "Queue::extractNRecordsFromFile: matched record pattern with:"+recordMatcher.group()+" and "+recordMatcher.group(1)+" and "+recordMatcher.group(2));               
-                  if (recordMatcher.group(1).length()>0) {
-                     nrecords = nrecords + 1;
-                  } else if (recordMatcher.group(2).length()>0) {
-                     nrecords = nrecords + 1;
-                  } else {
-                     // Logging.log(LogLevel.SEVERE, "Queue::extractNRecordsFromFile: internal error in the pattern matching, we did not understand the match:"+recordMatcher.group());               
-                  }
-               }
+               nrecords = getNRecordsFromData(xml);
             }
          }
          return nrecords;
@@ -197,6 +216,7 @@ public class QueueManager
       java.io.File fDirectory;
       boolean      fOutOfDate = false;
       long         fNFiles = 0;
+      long         fNRecords = 0;
       
       public Queue(String path, int index)
       {
@@ -231,6 +251,7 @@ public class QueueManager
             tx.commit();
             keepTrying = false;
             fNFiles = 0;
+            fNRecords = 0;
             session.close();
          } catch (Exception e) {
             HibernateWrapper.closeSession(session);
@@ -271,7 +292,13 @@ public class QueueManager
          // Return the number of files in the queue.
          return fNFiles;
       }
-
+      
+      public long getNRecords()
+      {
+         // Return the number of files in the queue.
+         return fNRecords;
+      }
+      
       public String getShortName()
       {
          // Return the basename of the directory in which the queue keeps its data.
@@ -374,6 +401,7 @@ public class QueueManager
             tx.commit();
             keepTrying = false;
             fNFiles += nfiles;
+            fNRecords += nrecords;
             session.close();
          } catch (Exception e) {
             HibernateWrapper.closeSession(session);
@@ -491,20 +519,9 @@ public class QueueManager
       if (bundleMatcher.find()) {
          bundleSize = bundleMatcher.group(1);
          nrecords = Long.parseLong(bundleSize);
-         // Logging.log(LogLevel.SEVERE, "QueueManager::update: matched bundles size with:"+bundleMatcher.group()+" and "+bundleMatcher.group(1));               
+         Logging.log(LogLevel.SEVERE, "QueueManager::update: matched bundles size with:"+bundleMatcher.group()+" and "+bundleMatcher.group(1));               
       } else {
-         Matcher recordMatcher = fgRecordPattern.matcher(xml);
-         
-         while (recordMatcher.find()) {
-            // Logging.log(LogLevel.SEVERE, "QueueManager::update: matched record pattern with:"+recordMatcher.group()+" and "+recordMatcher.group(1)+" and "+recordMatcher.group(2));               
-            if (recordMatcher.group(1) != null && recordMatcher.group(1).length()>0) {
-               nrecords = nrecords + 1;
-            } else if (recordMatcher.group(1) != null && recordMatcher.group(2).length()>0) {
-               nrecords = nrecords + 1;
-            } else {
-               // Logging.log(LogLevel.SEVERE, "QueueManager::update: internal error in the pattern matching, we did not understand the match:"+recordMatcher.group());               
-            }
-         }
+         nrecords = getNRecordsFromData(xml);
          bundleSize = Long.toString(nrecords);
       }
       
