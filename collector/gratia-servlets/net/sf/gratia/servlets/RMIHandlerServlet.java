@@ -160,7 +160,7 @@ public class RMIHandlerServlet extends HttpServlet {
             catch (Exception e) {
                 Logging.warning("RMIHandlerServlet: Proxy communication failure: " + e);
                 Logging.warning("RMIHandlerServlet: Error: For req: " +
-                                req +
+                                requestDiagnostics(req) +
                                 ", originating server: " +
                                 req.getRemoteHost());
                 Logging.debug("RMIHandlerServlet error diagnostic for req: " +
@@ -168,7 +168,7 @@ public class RMIHandlerServlet extends HttpServlet {
                               ", headers: \n" + requestDiagnostics(req));
                 Logging.debug("Exception detail:", e);
                 PrintWriter writer = res.getWriter();
-                writer.write("Error: RMIHandlerServlet: Error: Problematic req: " + req);
+                writer.write("Error: RMIHandlerServlet: Error: Problematic req: " + requestDiagnostics(req));
                 writer.flush();
                
                 // If we can't check the validity of the certificate, we quit.
@@ -230,13 +230,13 @@ public class RMIHandlerServlet extends HttpServlet {
                 }
                 catch (Exception e) {
                     Logging.warning("RMIHandlerServlet: Error: Problematic req: " +
-                                    req +
+                                    requestDiagnostics(req) +
                                     ", originating server: " +
                                     req.getRemoteHost() +
                                     "\nData received so far:\n" +
                                     body);
                     Logging.debug("RMIHandlerServlet error diagnostic for req: " +
-                                  req +
+                                  requestDiagnostics(req) +
                                   ": read parameters: iteration " +
                                   loopcount +
                                   ", buffer position " +
@@ -248,7 +248,7 @@ public class RMIHandlerServlet extends HttpServlet {
                                   ", headers: \n" + requestDiagnostics(req));
                     Logging.debug("Exception detail:", e);
                     PrintWriter writer = res.getWriter();
-                    writer.write("Error: RMIHandlerServlet: Error: Problematic req: " + req);
+                    writer.write("Error: RMIHandlerServlet: Error: Problematic req: " + requestDiagnostics(req));
                     writer.flush();
                     return;
                 }
@@ -398,15 +398,15 @@ public class RMIHandlerServlet extends HttpServlet {
         }
         catch (Exception e) {
             Logging.warning("RMIHandlerServlet: Error: Problematic req: " +
-                            req +
+                            requestDiagnostics(req) +
                             ", originating server: " +
-                            req.getRemoteHost());
+                            req.getRemoteHost(),e);
             Logging.debug("RMIHandlerServlet error diagnostic for req: " +
                           req +
                           ", headers: \n" + requestDiagnostics(req));
             Logging.debug("Exception detail:", e);
             PrintWriter writer = res.getWriter();
-            writer.write("Error: RMIHandlerServlet: Error: Problematic req: " + req);
+            writer.write("Error: RMIHandlerServlet: Error: Problematic req: " + requestDiagnostics(req));
             writer.flush();
         }
     }

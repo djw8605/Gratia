@@ -676,6 +676,7 @@ public class DataScrubber {
          org.hibernate.SQLQuery query = session.createSQLQuery( sqlDelete );
          
          result = query.executeUpdate();
+         Logging.debug("DataScrubber: deleted " + result);
          tx.commit();
          session.close();
       }
@@ -751,5 +752,37 @@ public class DataScrubber {
       }
       return count;
    }
-   
+ 
+   protected long testLooping()
+   {
+      // This routine is modeled after the other routines and is used to artificially test
+      // that the pausing mechanism works.
+      
+      final long maxloops = 30;
+      long nloops = 0;
+      boolean done = false;
+      while (!done) {
+         if (fPauseRequested) {
+            pause();
+            if (fStopRequested) {
+               break;
+            }
+         }
+
+         try {
+            Logging.warning("DataHousekeepingService: testing routine going to sleep for " +
+                            1000 + "ms.");
+            Thread.sleep(1000); // one second.
+         }
+         catch (Exception e) {
+            // Ignore
+         }
+
+         nloops = nloops + 1;         
+         done = (nloops >= maxloops);
+
+         if (fStopRequested) done = true; // Truncate after this loop if we're asked.
+      }
+      return 0;
+   }
 }

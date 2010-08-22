@@ -579,6 +579,14 @@ public class CollectorService implements ServletContextListener {
          return housekeepingService.housekeepingStatus();
       }
    }
+
+   public synchronized boolean housekeepingRunning() {
+      if (housekeepingDisabled || housekeepingService == null) {
+         return false;
+      } else {
+         return housekeepingService.isRunning();
+      }
+   }
    
    public synchronized void disableHousekeepingService() {
       stopHousekeepingService();
@@ -664,6 +672,14 @@ public class CollectorService implements ServletContextListener {
    
    public boolean databaseUpdateThreadsActive() {
       return recordProcessors.IsAlive();      
+   }
+   
+   public void runQSizeMonitor() {
+      if (qsizeMonitor != null) {
+         qsizeMonitor.check();
+      } else {
+         Logging.info("CollectorService: DB QSizeMonitor.check request but no monitor is running");         
+      }
    }
    
    public void loadSelfGeneratedCerts() {

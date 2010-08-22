@@ -29,15 +29,55 @@ import javax.management.remote.*;
 
 public class QSizeMonitor extends Thread {
    
-   boolean running = true;
-   int maxqsize = 0;
-   static final double restartThreshold = 0.8;
-   CollectorService fService;
+   boolean fStoppedServlets = false;
+   boolean fPausedHousekeeping = false;
    
+   long maxFilesForInput = 0;
+   long minFilesForInput = 0;
+   long maxRecordsForHouseKeeping = 0;
+   long minRecordsForHouseKeeping = 0;
+   CollectorService fService;
+
+   private long getPropertiesValue(Properties p, String valuename)
+   {
+      try {
+         String value = p.getProperty(valuename);
+         if (value == null) {
+            return 0;
+         }
+         return Long.parseLong(value);
+      }
+      catch (java.lang.NumberFormatException e) {
+         Logging.warning("QSizeMonitor: caught exception " + valuename +
+                         " property", e);
+      }
+      return 0;
+   }
+
    public QSizeMonitor(CollectorService service) {
+      final long restartThreshold = 80;
+      final long restartThresholdForHouseKeeping = 10;
+
       fService = service;
+
       Properties p = Configuration.getProperties();
-      maxqsize = Integer.parseInt(p.getProperty("max.q.size"));
+
+      maxFilesForInput = getPropertiesValue(p,"max.q.size");
+      minFilesForInput = (long)restartThreshold * maxFilesForInput / 100;
+      
+      maxRecordsForHouseKeeping = getPropertiesValue(p,"max.housekeeping.nrecords");
+      minRecordsForHouseKeeping = getPropertiesValue(p,"min.housekeeping.nrecords");
+      if (maxRecordsForHouseKeeping > 0) {
+         if (minRecordsForHouseKeeping >= maxRecordsForHouseKeeping) {
+            Logging.warning("QSizeMonitor: restart threshold for housekeeping ("+minRecordsForHouseKeeping+")"+
+                            " is less than the max to stop ("+maxRecordsForHouseKeeping+") using "+
+                            maxRecordsForHouseKeeping*restartThresholdForHouseKeeping+" instead.");
+            minRecordsForHouseKeeping = maxRecordsForHouseKeeping * restartThresholdForHouseKeeping / 100;
+         } else if (minRecordsForHouseKeeping == 0) {
+            // Zero is unlikely to happen when the QSizeMonitor runs.
+            minRecordsForHouseKeeping = maxRecordsForHouseKeeping * restartThresholdForHouseKeeping / 100;
+         }
+      }
    }
    
    public void run() {
@@ -53,31 +93,57 @@ public class QSizeMonitor extends Thread {
    }
    
    public void check() {
-      boolean toobig = false;
-      long maxfound = 0;
       
       Logging.log("QSizeMonitor: Checking");
       
+      long maxFiles = 0;
+      long maxRecords = 0;
       for (int i = 0; i < QueueManager.getNumberOfQueues(); ++i) {
          QueueManager.Queue queue = QueueManager.getQueue(i);
          long nfiles = queue.getNFiles();
-         if (nfiles > maxqsize)
-            toobig = true;
-         if (nfiles > maxfound)
-            maxfound = nfiles;
+         long nrecords = queue.getNRecords();
+         
+         if (nfiles > maxFiles)
+            maxFiles = nfiles;         
+         if (nrecords > maxRecords)
+            maxRecords = nrecords;
       }
-      if (toobig && running) {
-         Logging.info("QSizeMonitor: Q Size Exceeded: " + maxfound);
-         Logging.info("QSizeMonitor: Shutting Down Input");
-         fService.disableServlet();
-         running = false;
-         return;
+      if (maxFilesForInput > 0) {
+         if (fService.servletEnabled()) {
+            if ( maxFiles > maxFilesForInput ) {
+               Logging.info("QSizeMonitor: Queue Size Exceeded: " + maxFiles);
+               Logging.info("QSizeMonitor: Shutting Down Input");
+               fService.disableServlet();
+               fStoppedServlets = true;
+            }
+         } else if (fStoppedServlets) {
+            // If the QSizeMonitor stopped the servlets, it is allowed to
+            // restart them
+            if (maxFiles < minFilesForInput) {
+               Logging.info("QSizeMonitor: Restarting Input: " + maxFiles);
+               fService.enableServlet();
+               fStoppedServlets = false;
+            }
+         }
       }
-      if ((! toobig) && (! running)) {
-         if (maxfound < (maxqsize * restartThreshold)){
-            Logging.info("QSizeMonitor: Restarting Input: " + maxfound);
-            fService.enableServlet();
-            running = true;
+      if (maxRecordsForHouseKeeping > 0) {
+         if (fService.housekeepingRunning()) {
+            if ( maxRecords > maxRecordsForHouseKeeping ) {
+               Logging.info("QSizeMonitor: HouseKeeping max number of records in queue exceeded: " + maxRecords);
+               Logging.info("QSizeMonitor: Pausing Housekeeping.");
+               fService.pauseHousekeepingService();
+               fPausedHousekeeping = true;
+            }
+         } else if (fPausedHousekeeping) {
+            // If the QSizeMonitor stopped the servlets, it is allowed to
+            // restart them
+            if (maxRecords < (minRecordsForHouseKeeping)) {
+               Logging.info("QSizeMonitor: Restarting Housekeeping with " + maxRecords + " records in queue");
+               if (fService.housekeepingServiceStatus().equals("PAUSED") ) {
+                  fService.startHousekeepingActionNow();
+               }
+               fPausedHousekeeping = false;
+            }
          }
       }
    }

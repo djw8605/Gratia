@@ -29,4 +29,5 @@ public interface JMSProxy extends java.rmi.Remote {
    public String checkConnection(String certspem, String senderHost, String sender) throws RemoteException, AccessException;
    public String refreshStatus() throws RemoteException;
    public String queueManagerStatus() throws RemoteException;
+   public void runQSizeMonitor() throws RemoteException;
 }

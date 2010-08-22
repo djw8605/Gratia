@@ -160,4 +160,8 @@ public class JMSProxyImpl extends UnicastRemoteObject implements JMSProxy
       return QueueManager.getStatus();
    }
 
+   public void runQSizeMonitor() throws RemoteException {
+      collectorService.runQSizeMonitor();
+   }
+   
 }

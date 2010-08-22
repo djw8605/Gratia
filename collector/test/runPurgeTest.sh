@@ -41,6 +41,18 @@ export PYTHONPATH=${source}/probe/common:${source}/probe/metric:${PYTHONPATH}
 
 server_status=unknown
 
+function readonly_mysql() {
+    mysql -h ${dbhost} --port=${dbport} -u reader --password=${reader_password} $*
+}
+
+function readwrite_mysql() {
+    ssh ${webhost} mysql -h ${dbhost} --port=${dbport} -u gratia --password=${update_password} $*
+}
+
+function adminCollector() {
+   wget --dns-timeout=5 --connect-timeout=10 --read-timeout=40 -O - "http://${webhost}:${ssl_port}/gratia-administration/systemadministration.html?action=$1"
+}
+
 function stop_server {
   if [ "${server_status}" != "stopped" ]; then 
      echo "Stopping server ${webhost}:${http_port}"
@@ -240,6 +252,8 @@ function reset_collector {
               "maintain.history.log" => 2,
               "monitor.recordProcessor.wait" => 240,
               "max.q.size" => 700,
+              "max.housekeeping.nrecords" => 500,
+              "min.housekeeping.nrecords" => 50,
               "monitor.to.address0" => '${USER}@fnal.gov',
               "service.admin.DN.0" => 'ALLOW ALL',
               "service.secure.connection" => 'http://${webhost}:${ssl_port}'
@@ -272,7 +286,7 @@ function fix_duplicate_date {
   echo '0' > dups.count
   while [ `tail -1 dups.count` -lt ${expected_duplicate} ]; do
     echo "Waiting for Duplicate data to be loaded." `tail -1 dups.count`
-    mysql -h ${dbhost} --port=${dbport} -u gratia --password=${update_password} > dups.count 2>&1 <<EOF 
+    readonly_mysql > dups.count 2>&1 <<EOF 
 use ${schema_name};
 select count(*) from DupRecord;
 EOF
@@ -286,14 +300,14 @@ EOF
   echo "Attempt fix-up the DupRecord table so that we have a range of eventtime."
 
 echo "use ${schema_name}; select dupid from DupRecord where error='Parse'" \
-  | mysql -s -h ${dbhost} --port=${dbport} -u reader --password=${reader_password} \
+  | readonly_mysql -s \
   | perl -wane "use strict; use vars qw(\$weeks \$dupid); BEGIN { \$weeks = 1; printf \"use ${schema_name};\n\" }; chomp; \$dupid=\$_; printf \"update  DupRecord set eventdate = date_sub(eventdate,interval \$weeks week) where dupid = \$dupid;\n\"; ++\$weeks; " \
-  | mysql -s -h ${dbhost} --port=${dbport} -u gratia --password=${update_password}
+  | readwrite_mysql
 
 echo "use ${schema_name}; select dupid from DupRecord where error='Duplicate'" \
-  | mysql -s -h ${dbhost} --port=${dbport} -u reader --password=${reader_password} \
+  | readonly_mysql -s \
   | perl -wane "use strict; use vars qw(\$weeks \$dupid); BEGIN { \$weeks = 1; printf \"use ${schema_name};\n\" }; chomp; \$dupid=\$_; printf \"update  DupRecord set eventdate = date_sub(eventdate,interval \$weeks week) where dupid = \$dupid;\n\"; ++\$weeks; " \
-  | mysql -s -h ${dbhost} --port=${dbport} -u gratia --password=${update_password}
+  | readwrite_mysql
 
 }
 
@@ -304,7 +318,7 @@ function fix_usage_server_date {
   echo '0' > records.count
   while [ `tail -1 records.count` -lt ${expected_records} ]; do
   echo "Waiting for Record data to be loaded." `tail -1 records.count` " out of ${expected_records}"
-  mysql -h ${dbhost} --port=${dbport} -u gratia --password=${update_password} > records.count 2>&1 <<EOF 
+  readonly_mysql > records.count 2>&1 <<EOF 
 use ${schema_name};
 select count(*) from JobUsageRecord;
 EOF
@@ -317,7 +331,7 @@ EOF
 
   echo "Attempt fix-up the JobUsageRecord table so that we have a range of ServerDate."
 
-  mysql -h ${dbhost} --port=${dbport} -u gratia --password=${update_password}<<EOF 
+  readwrite_mysql<<EOF 
 use ${schema_name};
 update JobUsageRecord_Meta M, JobUsageRecord J set ServerDate = date_add(EndTime, interval 65 minute) where M.dbid = J.dbid;
 EOF
@@ -331,7 +345,7 @@ function fix_metric_server_date {
   echo '0' > mrecords.count
   while [ `tail -1 mrecords.count` -lt ${expected_records} ]; do
   echo "Waiting for Metric Record data to be loaded." `tail -1 mrecords.count` " out of ${expected_records}"
-  mysql -h ${dbhost} --port=${dbport} -u gratia --password=${update_password} > mrecords.count 2>&1 <<EOF 
+  readonly_mysql > mrecords.count 2>&1 <<EOF 
 use ${schema_name};
 select count(*) from MetricRecord;
 EOF
@@ -344,7 +358,7 @@ EOF
 
   echo "Attempt fix-up the MetricRecord table so that we have a range of ServerDate."
 
-  mysql -h ${dbhost} --port=${dbport} -u gratia --password=${update_password}<<EOF 
+  readwrite_mysql<<EOF 
 use ${schema_name};
 update MetricRecord_Meta M, MetricRecord J set ServerDate = date_add(Timestamp, interval 65 minute) where M.dbid = J.dbid;
 EOF
@@ -366,7 +380,7 @@ function loaddata {
    # First extend artificially the retention to let the old record in.
    echo "Turning off record purging"
 
-   wget --dns-timeout=5 --connect-timeout=10 --read-timeout=40 -O - "http://${webhost}:${ssl_port}/gratia-administration/systemadministration.html?action=disableHousekeeping" 2>&1 | tee wget.full.log | grep House | grep DISABLED > wget.log
+   adminCollector "disableHousekeeping" 2>&1 | tee wget.full.log | grep House | grep DISABLED > wget.log
    result=$?
    if [ ${result} -ne 0 ]; then
       echo "Error: Turning off the record purging failed"
@@ -437,7 +451,7 @@ function turn_on_purging {
    start_server
    wait_for_server
 
-   wget --dns-timeout=5 --connect-timeout=10 --read-timeout=40 -O - http://${webhost}:${ssl_port}/gratia-administration/systemadministration.html?action=startHousekeepingNow 2>&1 | tee wget.full.log | grep House | grep STOPPED > wget.log
+   adminCollector startHousekeepingNow 2>&1 | tee wget.full.log | grep House | grep STOPPED > wget.log
    result=$?
    if [ ${result} -ne 1 ]; then
       echo "Error: Turning on the record purging failed"
@@ -463,46 +477,46 @@ function check_data
    echo "Checking results with $mdays days in the last month"
 
    echo "Checking duplicates"
-   mysql -h ${dbhost} --port=${dbport} -u gratia --password=${update_password} > duplicate.validate 2>&1 <<EOF 
+   readonly_mysql > duplicate.validate 2>&1 <<EOF 
 use ${schema_name};
 select RecordType, error, count(*) from DupRecord group by RecordType, error;
 EOF
 
    echo "Check JobUsageRecord"
-   mysql -h ${dbhost} --port=${dbport} -u gratia --password=${update_password} > jobusagerecord.validate 2>&1 <<EOF 
+   readonly_mysql > jobusagerecord.validate 2>&1 <<EOF 
 use ${schema_name};
 select ProbeName, VOName, count(*) as Nrecord, Sum(NJobs) as NJobs, Sum(WallDuration) as Wall, Sum(CpuUserDuration+CpuSystemDuration) as Cpu 
     from JobUsageRecord_Report group by ProbeName, VOName;
 EOF
 
    echo "Check JobUsageRecord_Xml"
-   mysql -h ${dbhost} --port=${dbport} -u gratia --password=${update_password} > jobusagerecordxml.validate 2>&1 <<EOF 
+   readonly_mysql > jobusagerecordxml.validate 2>&1 <<EOF 
 use ${schema_name};
 select count(*),(ExtraXml!="" and not isnull(ExtraXml)) as hasExtraXml from JobUsageRecord_Xml group by hasExtraXml
 EOF
 
    echo "Check MasterSummaryData"
-   mysql -h ${dbhost} --port=${dbport} -u gratia --password=${update_password} > jobsummary.validate 2>&1 <<EOF 
+   readonly_mysql > jobsummary.validate 2>&1 <<EOF 
 use ${schema_name};
 select ProbeName, VOName, count(*) as Nrecord, Sum(NJobs) as NJobs, Sum(WallDuration) as Wall, Sum(CpuUserDuration+CpuSystemDuration) as Cpu 
     from VOProbeSummary group by ProbeName, VOName;
 EOF
 
    echo "Check MetricRecord"
-   mysql -h ${dbhost} --port=${dbport} -u gratia --password=${update_password} > metricrecord.validate 2>&1 <<EOF 
+   readonly_mysql > metricrecord.validate 2>&1 <<EOF 
 use ${schema_name};
 select ProbeName, MetricName, count(*) as Nrecord
     from MetricRecord J, MetricRecord_Meta M where J.dbid = M.dbid group by ProbeName, MetricName;
 EOF
 
    echo "Check MetricRecord_Xml"
-   mysql -h ${dbhost} --port=${dbport} -u gratia --password=${update_password} > metricrecordxml.validate 2>&1 <<EOF 
+   readonly_mysql > metricrecordxml.validate 2>&1 <<EOF 
 use ${schema_name};
 select count(*),(ExtraXml!="" and not isnull(ExtraXml)) as hasExtraXml from MetricRecord_Xml group by hasExtraXml
 EOF
 
    echo "Check Origin"
-   mysql -h ${dbhost} --port=${dbport} -u gratia --password=${update_password} > origin.validate 2>&1 <<EOF 
+   readonly_mysql > origin.validate 2>&1 <<EOF 
 use ${schema_name};
 select count(*)<60 from Origin;
 EOF
@@ -553,17 +567,72 @@ function check_timeout()
 function check_queue_threshold()
 {
    echo "Check the queue threshold mechanism"
-set -x
+
+   # Make sure the queue is empty before stopping the database updates
+   wait_for_input_use 0
+
    # Turn off updates so the record are not consumed
-   wget --dns-timeout=5 --connect-timeout=10 --read-timeout=40 -O - "http://${webhost}:${ssl_port}/gratia-administration/systemadministration.html?action=stopDatabaseUpdateThreads" 2>&1 | tee wget.full.log | grep 'Database' > wget.log
+   adminCollector "stopDatabaseUpdateThreads" 2>wget.threshold.stderr.log  | tee wget.threshold.full.log  | grep 'Database' > wget.threshold.log
 
    # Dump a bunch of (empty) files in the thread0 queue.
-   ssh ${webhost}  "for i in \`seq 1 800\` ; do touch ${tomcatpwd}/gratia/data/thread0/emptyfile\$i.0.xml ; done"
+   ssh ${webhost}  "for i in \`seq 1 800\` ; do touch ${tomcatpwd}/gratia/data/thread0/emptyfile\$i.2.xml ; done"
 
    # Refresh the queue statistics.
-   #wget --dns-timeout=5 --connect-timeout=10 --read-timeout=40 -O - "http://${webhost}:${ssl_port}/gratia-administration/systemadministration.html?action=refreshStatus" 2>&1 | tee wget.full.log | grep 'Collector Status' > wget.log
+   adminCollector "refreshStatus" 2>>wget.threshold.stderr.log | tee -a wget.threshold.full.log |  grep 'Collector Status' > wget.threshold.log
+   
+   # Let's start the housekeeping.
+   adminCollector "startHousekeepingNow" 2>>wget.threshold.stderr.log | tee -a wget.threshold.full.log |  grep 'DataHousekeeping' > wget.threshold.log
+   sleep 5
+   # We run the housekeeping twice to make sure our time waster is run.
+   adminCollector "startHousekeepingNow" 2>>wget.threshold.stderr.log | tee -a wget.threshold.full.log |  grep 'DataHousekeeping' > wget.threshold.log
+      
+   # Wait one minute to let the housekeeping time run
+   echo "Sleeping 5s to let the housekeeping time to start"
+   sleep 5
 
-}
+   # Force the checking of the queue sizes
+   adminCollector "runQSizeMonitor"  2>>wget.threshold.stderr.log | grep QSizeMonitor >> tee -a wget.threshold.full.log
+
+   # Wait one minute to let the QSizeMonitor run
+   #echo "Sleeping 5s to let the QSizeMonitor time to run"
+   sleep 2
+
+   # Check whether the servlets are disabled in 2 ways
+   wget --dns-timeout=5 --connect-timeout=10 --read-timeout=40 -O - "http://${webhost}:${ssl_port}/gratia-administration/collector-status.html?out=txt&subsystem=collector"  2>>wget.threshold.stderr.log > collector-status.validate
+   check_result "" collector-status "Servlets Status"
+
+   wget --dns-timeout=5 --connect-timeout=10 --read-timeout=40 -O - "http://${webhost}:${ssl_port}/gratia-servlets/rmi" --post-data="nothing" 2>>wget.threshold.stderr.log > collector-input.validate
+   check_result "" collector-input "Probe response when disabled"
+
+   # Now let's check the housekeeping
+   wget --dns-timeout=5 --connect-timeout=10 --read-timeout=40 -O - "http://${webhost}:${ssl_port}/gratia-administration/collector-status.html?out=txt&subsystem=datahousekeeping"  2>>wget.threshold.stderr.log > housekeeping-status.validate
+   check_result "" housekeeping-status "HouseKeeping Status"
+   
+   # And now remove the files
+   ssh ${webhost}  "rm ${tomcatpwd}/gratia/data/thread0/emptyfile*"
+   
+   # Refresh the queue statistics.
+   adminCollector "refreshStatus" 2>>wget.threshold.stderr.log | tee -a wget.threshold.full.log |  grep 'Collector Status' > wget.threshold.log
+
+   # Force the checking of the queue sizes
+   adminCollector "runQSizeMonitor"  2>>wget.threshold.stderr.log | grep QSizeMonitor >> tee -a wget.threshold.full.log
+
+   # Wait one minute to let the QSizeMonitor run
+   echo "Sleeping 5s to let the QSizeMonitor time to run"
+   sleep 2
+
+   # Check whether the servlets are disabled in 2 ways
+   wget --dns-timeout=5 --connect-timeout=10 --read-timeout=40 -O - "http://${webhost}:${ssl_port}/gratia-administration/collector-status.html?out=txt&subsystem=collector"  2>>wget.threshold.stderr.log > collector-run-status.validate
+   check_result "" collector-run-status "Servlets Status when enabled"
+
+   wget --dns-timeout=5 --connect-timeout=10 --read-timeout=40 -O - "http://${webhost}:${ssl_port}/gratia-servlets/rmi" --post-data="nothing" 2>>wget.threshold.stderr.log  | tee -a wget.threshold.full.log | cut -c-49 > collector-run-input.validate
+   check_result "" collector-run-input "Probe response when enabled"
+
+   # Now let's check the housekeeping
+   wget --dns-timeout=5 --connect-timeout=10 --read-timeout=40 -O - "http://${webhost}:${ssl_port}/gratia-administration/collector-status.html?out=txt&subsystem=datahousekeeping"  2>>wget.threshold.stderr.log > housekeeping-run-status.validate
+   check_result "" housekeeping-run-status "HouseKeeping Status when enabled"
+
+} 
 
 function build_war()
 {
@@ -631,13 +700,13 @@ while getopts :tshcfkdlmn:w:p:b: OPT; do
 done
 shift $[ OPTIND - 1 ]
 
+#NOTE: the ssl_port MUST be equal to the http port for the test to work properly
+# In case of equality, the dataHouskeeping when there is no work do to will spend
+# a minute or two sleeping (by 1 second interval). 
 ssl_port=`expr $http_port + 0`
 rmi_port=`expr $http_port + 2`
 jmx_port=`expr $http_port + 3`
 server_port=`expr $http_port + 4`
-
-#check_queue_threshold
-#exit 0
 
 if [ $do_stop ]; then
    stop_server
@@ -678,6 +747,7 @@ fi
 
 if [ $do_test ]; then
    check_data
+   check_queue_threshold
 fi
 
 if [ $check_failed ]; then

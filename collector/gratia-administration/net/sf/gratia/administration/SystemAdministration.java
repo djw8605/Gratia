@@ -381,6 +381,8 @@ public class SystemAdministration extends HttpServlet {
             proxy.runReaper();
          } else if (action.equals("refreshStatus")) {
             proxy.refreshStatus();
+         } else if (action.equals("runQSizeMonitor")) {
+            proxy.runQSizeMonitor();
          } else {
             Logging.warning("SystemAdministration.executeProxyAction called with unknown action " + action);
          }

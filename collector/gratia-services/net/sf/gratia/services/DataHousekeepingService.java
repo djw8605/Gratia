@@ -28,6 +28,7 @@ public class DataHousekeepingService extends Thread {
    private boolean stopRequested = false;
    private boolean sleepEnabled = true;
    private Duration fCheckInterval;
+   private boolean fIsTesting = false;
    
    private static final int defaultCheckIntervalDays = 2;
    
@@ -36,7 +37,7 @@ public class DataHousekeepingService extends Thread {
    public enum HousekeepingAction { 
       ALL, DUPRECORD, TRACE, JOBUSAGEXML, METRICXML, METRICRECORD,
       JOBUSAGERECORD, CE, SE, CERECORD, SERECORD, SUBCLUSTER,
-      SERVICESUMMARY, SERVICESUMMARYHOURLY, ORIGIN, NONE;
+      SERVICESUMMARY, SERVICESUMMARYHOURLY, ORIGIN, TESTING, NONE;
       private Lock l = new ReentrantLock();
       public Boolean tryLock() {
          return l.tryLock();
@@ -102,8 +103,23 @@ public class DataHousekeepingService extends Thread {
             fCheckInterval = new Duration(defaultCheckIntervalDays, DurationUnit.DAY);
          }
       }
+      // Detect if we are running the test
+      String secure = p.getProperty("service.secure.connection");
+      if (secure.equals(p.getProperty("service.open.connection"))) {
+         // Since the open and secure connection are the same we can safely assume
+         // that we are running runPurge.sh and thus we should spend a minute or
+         // two sleeping if there is no work in order to be able to test the 
+         // pausing of this services
+         fIsTesting = true;
+      }
    }
    
+   public boolean isRunning() {
+      // Return true if the housekeeping is currently in the process of deleting data.
+      
+      return (isAlive() && currentStatus == Status.RUNNING);
+   }
+
    public String housekeepingStatus() {
       // Reset status if neccessary
       if (!isAlive()) {
@@ -190,8 +206,8 @@ public class DataHousekeepingService extends Thread {
       Logging.info("DataHousekeepingService exiting");        
    }
    
-   private Boolean executeHousekeeping(HousekeepingAction action) {
-      Boolean result = false;
+   private long executeHousekeeping(HousekeepingAction action) {
+      long result = 0;
       if (action == null) return result;
       currentAction = action;
       Logging.info("DataHousekeepingService: " + action + ".");
@@ -200,7 +216,7 @@ public class DataHousekeepingService extends Thread {
             for (HousekeepingAction a : HousekeepingAction.values()) {
                if ((a == HousekeepingAction.ALL) || (a == HousekeepingAction.NONE)) {
                   continue;
-               }
+               } 
                if (stopRequested) {
                   currentStatus = Status.STOPPING;
                   break;
@@ -212,16 +228,33 @@ public class DataHousekeepingService extends Thread {
                         break;
                      }
                   }
-                  executeHousekeeping(a);
+                  if (a == HousekeepingAction.TESTING) {
+                     if (fIsTesting && result == 0) {
+                        result = result + executeHousekeeping(a);
+                     }
+                  } else {
+                     result = result + executeHousekeeping(a);
+                  }
                }
             }
-            result = true; // Don't care how many we actually executed.
+            break;
+         case TESTING:
+            // Let's allow for testing pausability.
+            // This code should be a representation of the way the sub-routine
+            // checks for stop/pause.
+            if (action.tryLock()) {
+               try {
+                  result = housekeeper.testLooping();
+               }
+               finally {
+                  action.unlock();
+               }
+            }
             break;
          case JOBUSAGEXML:
             if (action.tryLock()) {
                try {
-                  housekeeper.JobUsageRawXml();
-                  result = true; // OK
+                  result = housekeeper.JobUsageRawXml();
                }
                finally {
                   action.unlock();
@@ -231,8 +264,7 @@ public class DataHousekeepingService extends Thread {
          case METRICXML:
             if (action.tryLock()) {
                try {
-                  housekeeper.MetricRawXml();
-                  result = true; // OK
+                  result = housekeeper.MetricRawXml();
                }
                finally {
                   action.unlock();
@@ -242,8 +274,7 @@ public class DataHousekeepingService extends Thread {
          case METRICRECORD:
             if (action.tryLock()) {
                try {
-                  housekeeper.IndividualMetricRecords();
-                  result = true; // OK
+                  result = housekeeper.IndividualMetricRecords();
                }
                finally {
                   action.unlock();
@@ -253,8 +284,7 @@ public class DataHousekeepingService extends Thread {
          case JOBUSAGERECORD:
             if (action.tryLock()) {
                try {
-                  housekeeper.IndividualJobUsageRecords();
-                  result = true; // OK
+                  result = housekeeper.IndividualJobUsageRecords();
                }
                finally {
                   action.unlock();
@@ -264,8 +294,7 @@ public class DataHousekeepingService extends Thread {
          case CE:
             if (action.tryLock()) {
                try {
-                  housekeeper.IndividualComputeElement();
-                  result = true; // OK
+                  result = housekeeper.IndividualComputeElement();
                }
                finally {
                   action.unlock();
@@ -275,8 +304,7 @@ public class DataHousekeepingService extends Thread {
          case SE:
             if (action.tryLock()) {
                try {
-                  housekeeper.IndividualStorageElement();
-                  result = true; // OK
+                  result = housekeeper.IndividualStorageElement();
                }
                finally {
                   action.unlock();
@@ -286,8 +314,7 @@ public class DataHousekeepingService extends Thread {
          case SERECORD:
             if (action.tryLock()) {
                try {
-                  housekeeper.IndividualStorageElementRecord();
-                  result = true; // OK
+                  result = housekeeper.IndividualStorageElementRecord();
                }
                finally {
                   action.unlock();
@@ -297,8 +324,7 @@ public class DataHousekeepingService extends Thread {
          case CERECORD:
             if (action.tryLock()) {
                try {
-                  housekeeper.IndividualComputeElementRecord();
-                  result = true; // OK
+                  result = housekeeper.IndividualComputeElementRecord();
                }
                finally {
                   action.unlock();
@@ -308,8 +334,7 @@ public class DataHousekeepingService extends Thread {
          case SUBCLUSTER:
             if (action.tryLock()) {
                try {
-                  housekeeper.IndividualSubclusterRecord();
-                  result = true; // OK
+                  result = housekeeper.IndividualSubclusterRecord();
                }
                finally {
                   action.unlock();
@@ -319,8 +344,7 @@ public class DataHousekeepingService extends Thread {
          case SERVICESUMMARY:
             if (action.tryLock()) {
                try {
-                  housekeeper.MasterServiceSummary();
-                  result = true; // OK
+                  result = housekeeper.MasterServiceSummary();
                }
                finally {
                   action.unlock();
@@ -330,8 +354,7 @@ public class DataHousekeepingService extends Thread {
          case SERVICESUMMARYHOURLY:
             if (action.tryLock()) {
                try {
-                  housekeeper.MasterServiceSummaryHourly();
-                  result = true; // OK
+                  result = housekeeper.MasterServiceSummaryHourly();
                }
                finally {
                   action.unlock();
@@ -341,8 +364,7 @@ public class DataHousekeepingService extends Thread {
          case DUPRECORD:
             if (action.tryLock()) {
                try {
-                  housekeeper.DupRecord();
-                  result = true; // OK
+                  result = housekeeper.DupRecord();
                }
                finally {
                   action.unlock();
@@ -352,8 +374,7 @@ public class DataHousekeepingService extends Thread {
          case TRACE:
             if (action.tryLock()) {
                try {
-                  housekeeper.Trace();
-                  result = true; // OK
+                  result = housekeeper.Trace();
                }
                finally {
                   action.unlock();
@@ -363,8 +384,7 @@ public class DataHousekeepingService extends Thread {
          case ORIGIN:
             if (action.tryLock()) {
                try {
-                  housekeeper.Origin();
-                  result = true; // OK
+                  result = housekeeper.Origin();
                }
                finally {
                   action.unlock();
@@ -373,6 +393,7 @@ public class DataHousekeepingService extends Thread {
             break;
          default:
       }
+      Logging.info("DataHousekeepingService: "+action+" has deleted "+result+" rows.");
       Logging.info("DataHousekeepingService: " + action + " complete.");
       return result;
    }

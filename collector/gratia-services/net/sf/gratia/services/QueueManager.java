@@ -57,7 +57,7 @@ public class QueueManager
       int replication_count = 0;
       Matcher recordMatcher = fgRecordPattern.matcher(xml);
       while (recordMatcher.find()) {
-         Logging.log(LogLevel.SEVERE, "QueueManager::getNRecordsFromData: matched record pattern with:"+recordMatcher.group()+" and "+recordMatcher.group(1)+" and "+recordMatcher.group(2));               
+         // Logging.log(LogLevel.SEVERE, "QueueManager::getNRecordsFromData: matched record pattern with:"+recordMatcher.group()+" and "+recordMatcher.group(1)+" and "+recordMatcher.group(2));               
          if (recordMatcher.group(1) != null && recordMatcher.group(1).length()>0) {
             if (replication_count == 0 || replication_count == 1) {
                // We count the payload only if it by itself or in the first part of the replication.
