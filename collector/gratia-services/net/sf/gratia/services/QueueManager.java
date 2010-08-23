@@ -423,9 +423,18 @@ public class QueueManager
             boolean result = false;
             java.io.File file = java.io.File.createTempFile("job", suffix, fDirectory);
             synchronized(this) {
+               file.delete();
                result = stagedFile.renameTo(file);
             }
-            updateStatus(from,nrecords,1);
+            if (result) {
+               updateStatus(from,nrecords,1);
+            } else {
+               Logging.warning("queue::save: Failed to move " + stagedFile + " to " + file);
+               // Delete the bad tempfile.
+               synchronized(this) {
+                  stagedFile.delete();
+               }               
+            }
             return result;
          } catch (Exception e) {
             Logging.warning("queue::save: Failed to add the record to the queue : "+toString(),e);

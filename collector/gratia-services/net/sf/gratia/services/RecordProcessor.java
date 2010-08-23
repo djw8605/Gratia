@@ -235,21 +235,21 @@ public class RecordProcessor extends Thread {
          } catch (FileNotFoundException e) {
             Utils.GratiaError("RecordProcessor",
                               "XML file read",
-                              ident + ": Unable to find file " + file + "; FS trouble or two collectors running?");
+                              ident + ": Unable to find file " + file.getPath() + "; FS trouble or two collectors running?");
             continue; // Next file
          } catch (IOException e) {
             Utils.GratiaError("RecordProcessor",
                               "XML file read",
-                              ident + ": Error " + e.getMessage() + " while trying to read " + file);
+                              ident + ": Error " + e.getMessage() + " while trying to read " + file.getPath());
             saveQuarantineFile(file, "Error reading file: ", e);
             continue; // Next file
          }
          if (blob.length() == 0) { // Empty file -- how old is it.
             if (file.getAge() > fileOldTime) {
-               Logging.info(ident + ": removing old empty file " + file);
+               Logging.info(ident + ": removing old empty file " + file.getPath());
                queue.deleteFile(file);               
             } else { // Skip file
-               Logging.log(ident + ": deferring read of recent empty file " + file);
+               Logging.log(ident + ": deferring read of recent empty file " + file.getPath());
                continue;
             }
          }
@@ -941,9 +941,9 @@ public class RecordProcessor extends Thread {
                } // End while (keepTrying)
             } // End of handling accepted records.
          } // End of for each record loop
-         // Logging.log(ident + ": Before File Delete: " + file);
+         // Logging.log(ident + ": Before File Delete: " + file.getPath());
          queue.deleteFile(file);               
-         // Logging.log(ident + ": After File Delete: " + file);
+         // Logging.log(ident + ": After File Delete: " + file.getPath());
          ++itotal;
       } // End loop over files
       Logging.fine(ident + ": Input messages this run: " + itotal);
