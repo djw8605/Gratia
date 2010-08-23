@@ -471,12 +471,11 @@ public class QueueManager
             return;
          }
          
+         getStageDir().mkdirs();
+
          int maxthreads = Integer.parseInt(p.getProperty("service.recordProcessor.threads"));
          setupQueues(maxthreads);
          
-         fgStageDir = new java.io.File(System.getProperties().getProperty("catalina.home")
-                             + "/gratia/data/stage");
-         fgStageDir.mkdirs();
       }
    }
 
@@ -495,6 +494,10 @@ public class QueueManager
    public static java.io.File getStageDir()
    {
       // Return the directory object where the servlets should stage their input.
+      if (fgStageDir == null) {
+         fgStageDir = new java.io.File(System.getProperties().getProperty("catalina.home")
+                                       + "/gratia/data/stage");
+      }
       return fgStageDir;
    }
    
