@@ -40,7 +40,7 @@ public class QueueManager
    private static final Pattern fgBundleSizePattern = Pattern.compile("[bB]undle[sS]ize=\\s*([0-9]*)");
    private static final Pattern fgSizeInFileName = Pattern.compile("\\.([0-9]*)\\.xml");
    
-   private static final String fgUpdateStatus = "insert into CollectorStatus values ( :queue, :number, now(), :nfiles, :nrecords) "
+   private static final String fgUpdateStatus = "insert into CollectorStatus (Name,Queue,UpdateDate,Files,Records) values ( :queue, :number, now(), :nfiles, :nrecords) "
                                                 + " on duplicate key update UpdateDate=now(), Queue=:number, Records=Records+:nrecords, Files=Files+:nfiles";
    private static final String fgClearStatus = "delete from CollectorStatus where Name = :queue";
 
