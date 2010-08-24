@@ -54,7 +54,13 @@ public class TidiedDailyRollingFileAppender
 
     private void checkAndDeleteFiles() {
         for (File dFile : checkOldFiles()) {
-            LogLog.debug("Deleting old log file " + dFile.getName());
+            try {
+               LogLog.debug("Deleting old log file " + dFile.getName());
+            } catch (Exception e) {
+               System.err.print("Caught an exception in TidiedDailyRollingFileAppender::checkAndDeleteFiles while trying to log an information message:"+e);
+               System.out.print("Caught an exception in TidiedDailyRollingFileAppender::checkAndDeleteFiles while trying to log an information message:"+e);
+               e.printStackTrace();
+            }
             dFile.delete();
         }
     }
