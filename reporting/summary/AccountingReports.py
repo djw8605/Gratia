@@ -604,7 +604,22 @@ def GetListOfVOs(filter,voStatus,beginDate,endDate):
            elif resource.name == "LongName" and name.lower() not in gVOsWithReportingGroup:
               vos.append( (name,resource.content))
         doc.freeDoc()
+        if(voStatus == 'Active'):
+            vos = addReportingGroups(vos)
         return vos
+
+def addReportingGroups(vos):
+    vos1 = addReportingGroupsHelper(vos)
+    vosOnlyInReportingGroups = list(set(gVOsWithReportingGroup) - set(vos1))
+    for vo in vosOnlyInReportingGroups:
+        vos.append((vo,''))
+    return vos
+
+def addReportingGroupsHelper(vos):
+    ret = []
+    for vo in vos:
+        ret.append(vo[0])
+    return ret
 
 def vosContainsName(inName, vos):
    for vo in vos:
