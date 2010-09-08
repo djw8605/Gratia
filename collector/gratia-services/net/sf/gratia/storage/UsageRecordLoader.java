@@ -152,7 +152,7 @@ public class UsageRecordLoader extends RecordLoader {
         return addExtraXmlAttributes(job);
     }
    
-    public static void SetJobIdentity(JobUsageRecord job, Element element)
+    public void SetJobIdentity(JobUsageRecord job, Element element)
             throws Exception {
         JobIdentity id = job.getJobIdentity();
         if (id != null /* job identity already set */) {
@@ -189,7 +189,7 @@ public class UsageRecordLoader extends RecordLoader {
         }
     }
 
-    public static KeyInfoType genKeyInfo(Element element) throws Exception {
+    public KeyInfoType genKeyInfo(Element element) throws Exception {
         KeyInfoType info = new KeyInfoType();
         if (element.getName().equalsIgnoreCase("DN")) { // New DN element
             info.setId(null);
@@ -211,7 +211,7 @@ public class UsageRecordLoader extends RecordLoader {
         return info;
     }
 
-    public static void SetUserIdentity(JobUsageRecord job, Element element)
+    public void SetUserIdentity(JobUsageRecord job, Element element)
             throws Exception {
         UserIdentity id = job.getUserIdentity();
         if (false /* job identity already set */) {
@@ -266,10 +266,8 @@ public class UsageRecordLoader extends RecordLoader {
         }
     }
 
-        public static void SetJobName(JobUsageRecord job, Element element)
+        public void SetJobName(JobUsageRecord job, Element element)
             throws Exception {
-        boolean extraXmlAttributesFound = false;
-        StringBuilder extraAttr = new StringBuilder();
         StringElement el = job.getJobName();
         if (el != null /* job identity already set */) {
             Utils.GratiaError("SetJobName", "parsing",
@@ -284,20 +282,15 @@ public class UsageRecordLoader extends RecordLoader {
                SetLimitedDescription(el, job, element, a, 255, "JobName");
             }
             else { 
-               extraXmlAttributesFound = true;
-               extraAttr.append(extraXmlAttribute(element,a));
+               extraXmlAttributes.append(extraXmlAttribute(element,a));
             }
         }
-        if(extraXmlAttributesFound) 
-           extraXmlAttributes.append(wrapExtraXmlAttributes(extraAttr.toString()));
         SetLimitedTextField(el, job, element, 255, "JobName");
         job.setJobName(el);
     }
 
-    public static void SetStatus(JobUsageRecord job, Element element)
+    public void SetStatus(JobUsageRecord job, Element element)
             throws Exception {
-        boolean extraXmlAttributesFound = false;
-        StringBuilder extraAttr = new StringBuilder();
         StringElement el = job.getStatus();
         if (el != null /* job identity already set */) {
             Utils.GratiaError("SetStatus", "parsing",
@@ -311,20 +304,15 @@ public class UsageRecordLoader extends RecordLoader {
             if (a.getName().equalsIgnoreCase("description")) {
                SetLimitedDescription(el, job, element, a, 255, "Status");
             } else { 
-                 extraXmlAttributesFound = true;
-                 extraAttr.append(extraXmlAttribute(element,a));
+                 extraXmlAttributes.append(extraXmlAttribute(element,a));
             }
         }
-        if(extraXmlAttributesFound) 
-           extraXmlAttributes.append(wrapExtraXmlAttributes(extraAttr.toString()));
         SetLimitedTextField(el, job, element, 255, "Status");
         job.setStatus(el);
     }
 
-    public static void SetWallDuration(JobUsageRecord job, Element element)
+    public void SetWallDuration(JobUsageRecord job, Element element)
             throws Exception {
-        boolean extraXmlAttributesFound = false;
-        StringBuilder extraAttr = new StringBuilder();
         DurationElement el = job.getWallDuration();
         if (el != null /* job identity already set */) {
             Utils.GratiaError(
@@ -341,22 +329,17 @@ public class UsageRecordLoader extends RecordLoader {
             if (a.getName().equalsIgnoreCase("description")) {
                SetLimitedDescription(el, job, element, a, 255, "WallDuration");
             } else { 
-                 extraXmlAttributesFound = true;
-                 extraAttr.append(extraXmlAttribute(element,a));
+                 extraXmlAttributes.append(extraXmlAttribute(element,a));
             }
         }
         // Duration d = new Duration();
 
-        if(extraXmlAttributesFound) 
-           extraXmlAttributes.append(wrapExtraXmlAttributes(extraAttr.toString()));
         el.setValue(element.getText());
         job.setWallDuration(el);
     }
 
-    public static void SetCpuDuration(JobUsageRecord job, Element element)
+    public void SetCpuDuration(JobUsageRecord job, Element element)
             throws Exception {
-        boolean extraXmlAttributesFound = false;
-        StringBuilder extraAttr = new StringBuilder();
         DurationElement el = job.getWallDuration();
         String usage = "user";
         el = new DurationElement();
@@ -368,12 +351,9 @@ public class UsageRecordLoader extends RecordLoader {
                     || a.getName().equalsIgnoreCase("usageType")) {
                 usage = a.getValue();
             } else {
-                 extraXmlAttributesFound = true;
-                 extraAttr.append(extraXmlAttribute(element,a));
+                 extraXmlAttributes.append(extraXmlAttribute(element,a));
             }
         }
-        if(extraXmlAttributesFound) 
-           extraXmlAttributes.append(wrapExtraXmlAttributes(extraAttr.toString()));
         el.setValue(element.getText());
 
         if (usage.equalsIgnoreCase("user")) {
@@ -406,10 +386,8 @@ public class UsageRecordLoader extends RecordLoader {
         }
     }
 
-    public static void SetEndTime(JobUsageRecord job, Element element)
+    public void SetEndTime(JobUsageRecord job, Element element)
             throws Exception {
-        boolean extraXmlAttributesFound = false;
-        StringBuilder extraAttr = new StringBuilder();
         DateElement el = job.getEndTime();
         if (el != null /* job identity already set */) {
             Utils.GratiaError("SetEndTime", "parsing",
@@ -423,22 +401,17 @@ public class UsageRecordLoader extends RecordLoader {
             if (a.getName().equalsIgnoreCase("description")) {
                SetLimitedDescription(el, job, element, a, 255, "EndTime");
             } else { 
-                 extraXmlAttributesFound = true;
-                 extraAttr.append(extraXmlAttribute(element,a));
+                 extraXmlAttributes.append(extraXmlAttribute(element,a));
             }
         }
         // Duration d = new Duration();
-        if(extraXmlAttributesFound) 
-           extraXmlAttributes.append(wrapExtraXmlAttributes(extraAttr.toString()));
 
         el.setValue(element.getText());
         job.setEndTime(el);
     }
 
-    public static void SetStartTime(JobUsageRecord job, Element element)
+    public void SetStartTime(JobUsageRecord job, Element element)
             throws Exception {
-        boolean extraXmlAttributesFound = false;
-        StringBuilder extraAttr = new StringBuilder();
         DateElement el = job.getStartTime();
         if (el != null /* job identity already set */) {
             Utils.GratiaError("SetStartTime", "parsing",
@@ -452,21 +425,16 @@ public class UsageRecordLoader extends RecordLoader {
             if (a.getName().equalsIgnoreCase("description")) {
                SetLimitedDescription(el, job, element, a, 255, "StartTime");
             } else { 
-                 extraXmlAttributesFound = true;
-                 extraAttr.append(extraXmlAttribute(element,a));
+                 extraXmlAttributes.append(extraXmlAttribute(element,a));
             }
         }
 
-        if(extraXmlAttributesFound) 
-           extraXmlAttributes.append(wrapExtraXmlAttributes(extraAttr.toString()));
         el.setValue(element.getText());
         job.setStartTime(el);
     }
 
-    public static void SetTimeDuration(JobUsageRecord job, Element element)
+    public void SetTimeDuration(JobUsageRecord job, Element element)
             throws Exception {
-        boolean extraXmlAttributesFound = false;
-        StringBuilder extraAttr = new StringBuilder();
         DurationElement el = new DurationElement();
         for (Iterator i = element.attributeIterator(); i.hasNext();) {
             Attribute a = (Attribute) i.next();
@@ -475,12 +443,9 @@ public class UsageRecordLoader extends RecordLoader {
             } else if (a.getName().equalsIgnoreCase("type")) {
                 el.setType(a.getValue());
             } else { 
-                 extraXmlAttributesFound = true;
-                 extraAttr.append(extraXmlAttribute(element,a));
+                 extraXmlAttributes.append(extraXmlAttribute(element,a));
             }
         }
-        if(extraXmlAttributesFound) 
-           extraXmlAttributes.append(wrapExtraXmlAttributes(extraAttr.toString()));
         el.setValue(element.getText());
 
         List l = job.getTimeDuration();
@@ -490,10 +455,8 @@ public class UsageRecordLoader extends RecordLoader {
         job.setTimeDuration(l);
     }
 
-    public static void SetTimeInstant(JobUsageRecord job, Element element)
+    public void SetTimeInstant(JobUsageRecord job, Element element)
             throws Exception {
-        boolean extraXmlAttributesFound = false;
-        StringBuilder extraAttr = new StringBuilder();
         DateElement el = new DateElement();
         for (Iterator i = element.attributeIterator(); i.hasNext();) {
             Attribute a = (Attribute) i.next();
@@ -502,12 +465,9 @@ public class UsageRecordLoader extends RecordLoader {
             } else if (a.getName().equalsIgnoreCase("type")) {
                 el.setType(a.getValue());
             } else { 
-                 extraXmlAttributesFound = true;
-                 extraAttr.append(extraXmlAttribute(element,a));
+                 extraXmlAttributes.append(extraXmlAttribute(element,a));
             }
         }
-        if(extraXmlAttributesFound) 
-           extraXmlAttributes.append(wrapExtraXmlAttributes(extraAttr.toString()));
         el.setValue(element.getText());
 
         List l = job.getTimeInstant();
@@ -517,10 +477,8 @@ public class UsageRecordLoader extends RecordLoader {
         job.setTimeInstant(l);
     }
 
-    public static void SetMachineName(JobUsageRecord job, Element element)
+    public void SetMachineName(JobUsageRecord job, Element element)
             throws Exception {
-        boolean extraXmlAttributesFound = false;
-        StringBuilder extraAttr = new StringBuilder();
         StringElement el = job.getMachineName();
         if (el != null /* job identity already set */) {
             Utils.GratiaError("SetMachineName", "parsing",
@@ -534,20 +492,15 @@ public class UsageRecordLoader extends RecordLoader {
             if (a.getName().equalsIgnoreCase("description")) {
                SetLimitedDescription(el, job, element, a, 255, "MachineName");
             } else { 
-                 extraXmlAttributesFound = true;
-                 extraAttr.append(extraXmlAttribute(element,a));
+                 extraXmlAttributes.append(extraXmlAttribute(element,a));
             }
         }
-        if(extraXmlAttributesFound) 
-           extraXmlAttributes.append(wrapExtraXmlAttributes(extraAttr.toString()));
         SetLimitedTextField(el, job, element, 255, "MachineName");
         job.setMachineName(el);
     }
 
-    public static void SetHost(JobUsageRecord job, Element element)
+    public void SetHost(JobUsageRecord job, Element element)
             throws Exception {
-        boolean extraXmlAttributesFound = false;
-        StringBuilder extraAttr = new StringBuilder();
         StringElement el = job.getHost();
         boolean primary = false;
         if (el == null) {
@@ -560,12 +513,9 @@ public class UsageRecordLoader extends RecordLoader {
             } else if (a.getName().equalsIgnoreCase("primary")) {
                primary = (a.getValue().equalsIgnoreCase("true"));
             } else { 
-                 extraXmlAttributesFound = true;
-                 extraAttr.append(extraXmlAttribute(element,a));
+                 extraXmlAttributes.append(extraXmlAttribute(element,a));
             }
         }
-        if(extraXmlAttributesFound) 
-           extraXmlAttributes.append(wrapExtraXmlAttributes(extraAttr.toString()));
         String val = ConcatString( el.getValue(),  element.getText() );
         if (primary)
             val = val + " (primary) ";
@@ -573,10 +523,8 @@ public class UsageRecordLoader extends RecordLoader {
         job.setHost(el);
     }
 
-    public static void SetSubmitHost(JobUsageRecord job, Element element)
+    public void SetSubmitHost(JobUsageRecord job, Element element)
             throws Exception {
-        boolean extraXmlAttributesFound = false;
-        StringBuilder extraAttr = new StringBuilder();
         StringElement el = job.getSubmitHost();
         if (el != null /* job identity already set */) {
             Utils.GratiaError("SetSubmitHost", "parsing",
@@ -590,20 +538,15 @@ public class UsageRecordLoader extends RecordLoader {
             if (a.getName().equalsIgnoreCase("description")) {
                SetLimitedDescription(el, job, element, a, 255, "SubmitHost");
             } else { 
-                 extraXmlAttributesFound = true;
-                 extraAttr.append(extraXmlAttribute(element,a));
+                 extraXmlAttributes.append(extraXmlAttribute(element,a));
             }
         }
-        if(extraXmlAttributesFound) 
-           extraXmlAttributes.append(wrapExtraXmlAttributes(extraAttr.toString()));
         SetLimitedTextField(el, job, element, 255, "SubmitHost");
         job.setSubmitHost(el);
     }
 
-    public static void SetQueue(JobUsageRecord job, Element element)
+    public void SetQueue(JobUsageRecord job, Element element)
             throws Exception {
-        boolean extraXmlAttributesFound = false;
-        StringBuilder extraAttr = new StringBuilder();
         StringElement el = job.getQueue();
         if (el != null /* job identity already set */) {
             Utils.GratiaError("SetQueue", "parsing",
@@ -617,20 +560,15 @@ public class UsageRecordLoader extends RecordLoader {
             if (a.getName().equalsIgnoreCase("description")) {
                SetLimitedDescription(el, job, element, a, 255, "Queue");
             } else { 
-                 extraXmlAttributesFound = true;
-                 extraAttr.append(extraXmlAttribute(element,a));
+                 extraXmlAttributes.append(extraXmlAttribute(element,a));
             }
         }
-        if(extraXmlAttributesFound) 
-           extraXmlAttributes.append(wrapExtraXmlAttributes(extraAttr.toString()));
         SetLimitedTextField(el, job, element, 255, "Queue");
         job.setQueue(el);
     }
 
-    public static void SetProjectName(JobUsageRecord job, Element element)
+    public void SetProjectName(JobUsageRecord job, Element element)
             throws Exception {
-        boolean extraXmlAttributesFound = false;
-        StringBuilder extraAttr = new StringBuilder();
         StringElement el = job.getProjectName();
         if (el == null) {
             el = new StringElement();
@@ -640,21 +578,16 @@ public class UsageRecordLoader extends RecordLoader {
             if (a.getName().equalsIgnoreCase("description")) {
                SetLimitedDescription(el, job, element, a, 255, "ProjectName");
             } else { 
-                 extraXmlAttributesFound = true;
-                 extraAttr.append(extraXmlAttribute(element,a));
+                 extraXmlAttributes.append(extraXmlAttribute(element,a));
             }
         }
-        if(extraXmlAttributesFound) 
-           extraXmlAttributes.append(wrapExtraXmlAttributes(extraAttr.toString()));
         String val = ConcatString(el.getValue(),element.getText());
         SetLimitedTextField(el, job, element, val, 255, "ProjectName");
         job.setProjectName(el);
     }
 
-    public static void SetNetwork(JobUsageRecord job, Element element)
+    public void SetNetwork(JobUsageRecord job, Element element)
             throws Exception {
-        boolean extraXmlAttributesFound = false;
-        StringBuilder extraAttr = new StringBuilder();
         ResourceElement el = new ResourceElement();
         el.setMetrics("total");
         for (Iterator i = element.attributeIterator(); i.hasNext();) {
@@ -668,12 +601,9 @@ public class UsageRecordLoader extends RecordLoader {
             } else if (a.getName().equalsIgnoreCase("storageUnit")) {
                 el.setStorageUnit(a.getValue());
             } else { 
-                 extraXmlAttributesFound = true;
-                 extraAttr.append(extraXmlAttribute(element,a));
+                 extraXmlAttributes.append(extraXmlAttribute(element,a));
             }
         }
-        if(extraXmlAttributesFound) 
-           extraXmlAttributes.append(wrapExtraXmlAttributes(extraAttr.toString()));
         el.setValue((new Double(element.getText())).doubleValue());
         List l = job.getNetwork();
         if (l == null)
@@ -682,10 +612,8 @@ public class UsageRecordLoader extends RecordLoader {
         job.setNetwork(l);
     }
 
-    public static void SetDisk(JobUsageRecord job, Element element)
+    public void SetDisk(JobUsageRecord job, Element element)
             throws Exception {
-        boolean extraXmlAttributesFound = false;
-        StringBuilder extraAttr = new StringBuilder();
         ResourceElement el = new ResourceElement();
         el.setMetrics("total");
         for (Iterator i = element.attributeIterator(); i.hasNext();) {
@@ -701,12 +629,9 @@ public class UsageRecordLoader extends RecordLoader {
             } else if (a.getName().equalsIgnoreCase("type")) {
                 el.setType(a.getValue());
             } else { 
-                 extraXmlAttributesFound = true;
-                 extraAttr.append(extraXmlAttribute(element,a));
+                 extraXmlAttributes.append(extraXmlAttribute(element,a));
             }
         }
-        if(extraXmlAttributesFound) 
-           extraXmlAttributes.append(wrapExtraXmlAttributes(extraAttr.toString()));
         el.setValue((new Double(element.getText())).doubleValue());
         List l = job.getDisk();
         if (l == null)
@@ -715,10 +640,8 @@ public class UsageRecordLoader extends RecordLoader {
         job.setDisk(l);
     }
 
-    public static void SetMemory(JobUsageRecord job, Element element)
+    public void SetMemory(JobUsageRecord job, Element element)
             throws Exception {
-        boolean extraXmlAttributesFound = false;
-        StringBuilder extraAttr = new StringBuilder();
         ResourceElement el = new ResourceElement();
         el.setMetrics("total");
         for (Iterator i = element.attributeIterator(); i.hasNext();) {
@@ -734,12 +657,9 @@ public class UsageRecordLoader extends RecordLoader {
             } else if (a.getName().equalsIgnoreCase("type")) {
                 el.setType(a.getValue());
             } else { 
-                 extraXmlAttributesFound = true;
-                 extraAttr.append(extraXmlAttribute(element,a));
+                 extraXmlAttributes.append(extraXmlAttribute(element,a));
             }
         }
-        if(extraXmlAttributesFound) 
-           extraXmlAttributes.append(wrapExtraXmlAttributes(extraAttr.toString()));
         el.setValue((new Double(element.getText())).doubleValue());
         List l = job.getMemory();
         if (l == null)
@@ -748,10 +668,8 @@ public class UsageRecordLoader extends RecordLoader {
         job.setMemory(l);
     }
 
-    public static void SetSwap(JobUsageRecord job, Element element)
+    public void SetSwap(JobUsageRecord job, Element element)
             throws Exception {
-        boolean extraXmlAttributesFound = false;
-        StringBuilder extraAttr = new StringBuilder();
         ResourceElement el = new ResourceElement();
         el.setMetrics("total");
         for (Iterator i = element.attributeIterator(); i.hasNext();) {
@@ -767,12 +685,9 @@ public class UsageRecordLoader extends RecordLoader {
             } else if (a.getName().equalsIgnoreCase("type")) {
                 el.setType(a.getValue());
             } else { 
-                 extraXmlAttributesFound = true;
-                 extraAttr.append(extraXmlAttribute(element,a));
+                 extraXmlAttributes.append(extraXmlAttribute(element,a));
             }
         }
-        if(extraXmlAttributesFound) 
-           extraXmlAttributes.append(wrapExtraXmlAttributes(extraAttr.toString()));
         el.setValue((new Double(element.getText())).doubleValue());
         List l = job.getSwap();
         if (l == null)
@@ -781,10 +696,8 @@ public class UsageRecordLoader extends RecordLoader {
         job.setSwap(l);
     }
 
-    public static void SetNodeCount(JobUsageRecord job, Element element)
+    public void SetNodeCount(JobUsageRecord job, Element element)
             throws Exception {
-        boolean extraXmlAttributesFound = false;
-        StringBuilder extraAttr = new StringBuilder();
         IntegerElement el = job.getNodeCount();
         if (el != null && el.getValue() != 1) {
             Utils.GratiaError("SetNodeCount", "parsing",
@@ -800,20 +713,15 @@ public class UsageRecordLoader extends RecordLoader {
             } else if (a.getName().equalsIgnoreCase("metric")) {
                el.setMetric(a.getValue());
             } else { 
-                 extraXmlAttributesFound = true;
-                 extraAttr.append(extraXmlAttribute(element,a));
+                 extraXmlAttributes.append(extraXmlAttribute(element,a));
             }
         }
-        if(extraXmlAttributesFound) 
-           extraXmlAttributes.append(wrapExtraXmlAttributes(extraAttr.toString()));
         el.setValue((new Long(element.getText())).longValue());
         job.setNodeCount(el);
     }
 
-    public static void SetNjobs(JobUsageRecord job, Element element)
+    public void SetNjobs(JobUsageRecord job, Element element)
             throws Exception {
-        boolean extraXmlAttributesFound = false;
-        StringBuilder extraAttr = new StringBuilder();
         IntegerElement el = job.getNjobs();
         if (el != null && el.getValue() != 1 /* job identity already set */) {
             Utils.GratiaError("SetNjobs", "parsing",
@@ -829,20 +737,15 @@ public class UsageRecordLoader extends RecordLoader {
             } else if (a.getName().equalsIgnoreCase("metric")) {
                el.setMetric(a.getValue());
             } else { 
-                 extraXmlAttributesFound = true;
-                 extraAttr.append(extraXmlAttribute(element,a));
+                 extraXmlAttributes.append(extraXmlAttribute(element,a));
             }
         }
-        if(extraXmlAttributesFound) 
-           extraXmlAttributes.append(wrapExtraXmlAttributes(extraAttr.toString()));
         el.setValue((new Long(element.getText())).longValue());
         job.setNjobs(el);
     }
 
-    public static void SetProcessors(JobUsageRecord job, Element element)
+    public void SetProcessors(JobUsageRecord job, Element element)
             throws Exception {
-        boolean extraXmlAttributesFound = false;
-        StringBuilder extraAttr = new StringBuilder();
         IntegerElement el = job.getProcessors();
         if (el != null /* job identity already set */) {
             Utils.GratiaError("SetProcessors", "parsing",
@@ -860,20 +763,15 @@ public class UsageRecordLoader extends RecordLoader {
             } else if (a.getName().equalsIgnoreCase("consumptionRate")) {
                 el.setConsumptionRate((new Double(a.getValue())).doubleValue());
             } else { 
-                 extraXmlAttributesFound = true;
-                 extraAttr.append(extraXmlAttribute(element,a));
+                 extraXmlAttributes.append(extraXmlAttribute(element,a));
             }
         }
-        if(extraXmlAttributesFound) 
-           extraXmlAttributes.append(wrapExtraXmlAttributes(extraAttr.toString()));
         el.setValue((new Long(element.getText())).longValue());
         job.setProcessors(el);
     }
 
-    public static void SetServiceLevel(JobUsageRecord job, Element element)
+    public void SetServiceLevel(JobUsageRecord job, Element element)
             throws Exception {
-        boolean extraXmlAttributesFound = false;
-        StringBuilder extraAttr = new StringBuilder();
         StringElement el = new StringElement();
         for (Iterator i = element.attributeIterator(); i.hasNext();) {
             Attribute a = (Attribute) i.next();
@@ -882,12 +780,9 @@ public class UsageRecordLoader extends RecordLoader {
             } else if (a.getName().equalsIgnoreCase("type")) {
                 el.setType(a.getValue());
             } else { 
-                 extraXmlAttributesFound = true;
-                 extraAttr.append(extraXmlAttribute(element,a));
+                 extraXmlAttributes.append(extraXmlAttribute(element,a));
             }
         }
-        if(extraXmlAttributesFound) 
-           extraXmlAttributes.append(wrapExtraXmlAttributes(extraAttr.toString()));
         SetLimitedTextField(el, job, element, 255, "ServiceLevel");
         List l = job.getServiceLevel();
         if (l == null)
@@ -896,10 +791,8 @@ public class UsageRecordLoader extends RecordLoader {
         job.setServiceLevel(l);
     }
 
-    public static void SetCharge(JobUsageRecord job, Element element)
+    public void SetCharge(JobUsageRecord job, Element element)
             throws Exception {
-        boolean extraXmlAttributesFound = false;
-        StringBuilder extraAttr = new StringBuilder();
         FloatElement el = job.getCharge();
         if (el != null /* job identity already set */) {
             Utils.GratiaError("SetCharge", "parsing",
@@ -916,20 +809,15 @@ public class UsageRecordLoader extends RecordLoader {
             } else if (a.getName().equalsIgnoreCase("formula")) {
                 el.setFormula(a.getValue());
             } else { 
-                 extraXmlAttributesFound = true;
-                 extraAttr.append(extraXmlAttribute(element,a));
+                 extraXmlAttributes.append(extraXmlAttribute(element,a));
             }
         }
-        if(extraXmlAttributesFound) 
-           extraXmlAttributes.append(wrapExtraXmlAttributes(extraAttr.toString()));
         el.setValue((new Double(element.getText())).doubleValue());
         job.setCharge(el);
     }
 
-    public static void AddPhaseResource(JobUsageRecord job, Element element)
+    public void AddPhaseResource(JobUsageRecord job, Element element)
             throws Exception {
-        boolean extraXmlAttributesFound = false;
-        StringBuilder extraAttr = new StringBuilder();
         ResourceElement el = new ResourceElement();
         el.setMetrics("total");
         for (Iterator i = element.attributeIterator(); i.hasNext();) {
@@ -941,12 +829,9 @@ public class UsageRecordLoader extends RecordLoader {
             } else if (a.getName().equalsIgnoreCase("phaseUnit")) {
                 el.setPhaseUnit(a.getValue());
             } else { 
-                 extraXmlAttributesFound = true;
-                 extraAttr.append(extraXmlAttribute(element,a));
+                 extraXmlAttributes.append(extraXmlAttribute(element,a));
             }
         }
-        if(extraXmlAttributesFound) 
-           extraXmlAttributes.append(wrapExtraXmlAttributes(extraAttr.toString()));
         el.setValue((new Double(element.getText())).doubleValue());
         List l = job.getPhaseResource();
         if (l == null)
@@ -955,10 +840,8 @@ public class UsageRecordLoader extends RecordLoader {
         job.setPhaseResource(l);
     }
 
-    public static void AddVolumeResource(JobUsageRecord job, Element element)
+    public void AddVolumeResource(JobUsageRecord job, Element element)
             throws Exception {
-        boolean extraXmlAttributesFound = false;
-        StringBuilder extraAttr = new StringBuilder();
         ResourceElement el = new ResourceElement();
         for (Iterator i = element.attributeIterator(); i.hasNext();) {
             Attribute a = (Attribute) i.next();
@@ -969,12 +852,9 @@ public class UsageRecordLoader extends RecordLoader {
             } else if (a.getName().equalsIgnoreCase("storageUnit")) {
                 el.setStorageUnit(a.getValue());
             } else { 
-                 extraXmlAttributesFound = true;
-                 extraAttr.append(extraXmlAttribute(element,a));
+                 extraXmlAttributes.append(extraXmlAttribute(element,a));
             }
         }
-        if(extraXmlAttributesFound) 
-           extraXmlAttributes.append(wrapExtraXmlAttributes(extraAttr.toString()));
         el.setValue((new Double(element.getText())).doubleValue());
         List l = job.getVolumeResource();
         if (l == null)
@@ -983,10 +863,8 @@ public class UsageRecordLoader extends RecordLoader {
         job.setVolumeResource(l);
     }
 
-    public static void AddConsumableResource(JobUsageRecord job, Element element)
+    public void AddConsumableResource(JobUsageRecord job, Element element)
             throws Exception {
-        boolean extraXmlAttributesFound = false;
-        StringBuilder extraAttr = new StringBuilder();
         ResourceElement el = new ResourceElement();
         for (Iterator i = element.attributeIterator(); i.hasNext();) {
             Attribute a = (Attribute) i.next();
@@ -995,12 +873,9 @@ public class UsageRecordLoader extends RecordLoader {
             } else if (a.getName().equalsIgnoreCase("unit")) {
                 el.setUnit(a.getValue());
             } else { 
-                 extraXmlAttributesFound = true;
-                 extraAttr.append(extraXmlAttribute(element,a));
+                 extraXmlAttributes.append(extraXmlAttribute(element,a));
             }
         }
-        if(extraXmlAttributesFound) 
-           extraXmlAttributes.append(wrapExtraXmlAttributes(extraAttr.toString()));
         el.setValue((new Double(element.getText())).doubleValue());
         List l = job.getConsumableResource();
         if (l == null)
@@ -1009,10 +884,8 @@ public class UsageRecordLoader extends RecordLoader {
         job.setConsumableResource(l);
     }
 
-    public static void AddResource(JobUsageRecord job, Element element)
+    public void AddResource(JobUsageRecord job, Element element)
             throws Exception {
-        boolean extraXmlAttributesFound = false;
-        StringBuilder extraAttr = new StringBuilder();
         StringElement el = new StringElement();
         for (Iterator i = element.attributeIterator(); i.hasNext();) {
             Attribute a = (Attribute) i.next();
@@ -1053,12 +926,9 @@ public class UsageRecordLoader extends RecordLoader {
                     return;
                 }
             } else { 
-                 extraXmlAttributesFound = true;
-                 extraAttr.append(extraXmlAttribute(element,a));
+                 extraXmlAttributes.append(extraXmlAttribute(element,a));
             }
         }
-        if(extraXmlAttributesFound) 
-           extraXmlAttributes.append(wrapExtraXmlAttributes(extraAttr.toString()));
         SetLimitedTextField(el, job, element, 255, "Resource");
         List l = job.getResource();
         if (l == null)

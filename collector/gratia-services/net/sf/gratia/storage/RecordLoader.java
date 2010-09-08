@@ -7,6 +7,7 @@ import org.dom4j.Element;
 import org.dom4j.Attribute;
 import org.apache.commons.lang.StringEscapeUtils;
 import net.sf.gratia.util.Logging;
+import java.util.regex.*;
 
 /**
  * <p>Title: RecordLoader</p>
@@ -23,13 +24,12 @@ import net.sf.gratia.util.Logging;
  */
 public abstract class RecordLoader
 {
-   static StringBuilder extraXmlAttributes = new StringBuilder();
-   static ArrayList<String> extraXmlAttributeTagName = new ArrayList<String>();
+   StringBuilder extraXmlAttributes = new StringBuilder();
    // Interface Method
    public abstract ArrayList ReadRecords(Element eroot) throws Exception;
    public abstract Record ReadRecord(Element element) throws Exception;
 
-   public static String ConcatString(String old, String value) 
+   public String ConcatString(String old, String value) 
    {
       // Return the old and value string concatenated with ';'
       // (or just value if old is empty or null)./
@@ -42,7 +42,7 @@ public abstract class RecordLoader
       return res;
    }
    
-   public static String LimitedTextField(Record rec, Element element, String value, int limit, String fieldname) 
+   public String LimitedTextField(Record rec, Element element, String value, int limit, String fieldname) 
    {
       // Return the text field limited to 'limit' charaters and print an warning message
       // to the log if we are truncating the field.
@@ -55,7 +55,7 @@ public abstract class RecordLoader
       return value;
    }
    
-   public static String SetLimitedTextField(StringElement el, Record rec, Element element, String value, int limit, String fieldname) 
+   public String SetLimitedTextField(StringElement el, Record rec, Element element, String value, int limit, String fieldname) 
    {
       // Return the text field limited to 'limit' charaters and print an warning message
       // to the log if we are truncating the field.
@@ -65,7 +65,7 @@ public abstract class RecordLoader
       return value;
    }
    
-   public static String SetLimitedTextField(StringElement el, Record rec, Element element, int limit, String fieldname) 
+   public String SetLimitedTextField(StringElement el, Record rec, Element element, int limit, String fieldname) 
    {
       // Return the text field limited to 'limit' charaters and print an warning message
       // to the log if we are truncating the field.
@@ -73,7 +73,7 @@ public abstract class RecordLoader
       return SetLimitedTextField(el,rec,element,element.getText(),limit,fieldname);
    }
 
-   public static String SetLimitedDescription(XmlElement el, Record rec, Element element, String value, int limit, String fieldname) 
+   public String SetLimitedDescription(XmlElement el, Record rec, Element element, String value, int limit, String fieldname) 
    {
       // Return the text field limited to 'limit' charaters and print an warning message
       // to the log if we are truncating the field.
@@ -85,7 +85,7 @@ public abstract class RecordLoader
       return desc;
    }
 
-   public static String SetLimitedDescription(XmlElement el, Record rec, Element element, Attribute a, int limit, String fieldname) 
+   public String SetLimitedDescription(XmlElement el, Record rec, Element element, Attribute a, int limit, String fieldname) 
    {
       // Return the text field limited to 'limit' charaters and print an warning message
       // to the log if we are truncating the field.
@@ -96,7 +96,7 @@ public abstract class RecordLoader
    
    
    // Common implementations.
-   static void ReadCommonRecord(Record rec, Element sub) throws Exception
+   void ReadCommonRecord(Record rec, Element sub) throws Exception
    {
       // This should be executed last.
       // If the element is not one of the supported element (Grid, ProbeName, SiteName, RecordIdentity, Origins)
@@ -129,15 +129,13 @@ public abstract class RecordLoader
       
    }
    
-   static void AddOrigin(Record rec, Element element) throws Exception
+   void AddOrigin(Record rec, Element element) throws Exception
    {
       Origin from = OriginLoader.ReadElement(element, rec);
    }
    
-   static void SetGrid(Record rec, Element element) throws Exception 
+   void SetGrid(Record rec, Element element) throws Exception 
    {
-      boolean extraXmlAttributesFound = false;
-      StringBuilder extraAttr = new StringBuilder();
       StringElement el = rec.getGrid();
       if (el == null) {
          el = new StringElement();
@@ -147,12 +145,10 @@ public abstract class RecordLoader
          if (a.getName() == "description") {
             SetLimitedDescription(el, rec, element, a, 255, "Grid");
          } else { 
-               extraXmlAttributesFound = true;
-               extraAttr.append(extraXmlAttribute(element,a));
+               extraXmlAttributes.append(extraXmlAttribute(element,a));
+
             }
       }
-      if(extraXmlAttributesFound) 
-         extraXmlAttributes.append(wrapExtraXmlAttributes(extraAttr.toString()));
       String val = el.getValue();
       if (val == null)
          val = "";
@@ -163,9 +159,7 @@ public abstract class RecordLoader
       rec.setGrid(el);
    }
    
-   public static void SetProbeName(Record rec, Element element) throws Exception {
-      boolean extraXmlAttributesFound = false;
-      StringBuilder extraAttr = new StringBuilder();
+   public void SetProbeName(Record rec, Element element) throws Exception {
       StringElement el = rec.getProbeName();
       if (el == null) {
          el = new StringElement();
@@ -175,12 +169,9 @@ public abstract class RecordLoader
          if (a.getName() == "description") {
             SetLimitedDescription(el, rec, element, a, 255, "ProbeName");
          } else { 
-               extraXmlAttributesFound = true;
-               extraAttr.append(extraXmlAttribute(element,a));
+               extraXmlAttributes.append(extraXmlAttribute(element,a));
             }
       }
-      if(extraXmlAttributesFound) 
-         extraXmlAttributes.append(wrapExtraXmlAttributes(extraAttr.toString()));
       String val = el.getValue();
       if (val == null) val = "";
       else val = val + " ; ";
@@ -189,10 +180,8 @@ public abstract class RecordLoader
       rec.setProbeName(el);
    }
    
-   public static void SetRecordIdentity(Record rec, Element element) throws Exception
+   public void SetRecordIdentity(Record rec, Element element) throws Exception
    {
-      boolean extraXmlAttributesFound = false;
-      StringBuilder extraAttr = new StringBuilder();
       RecordIdentity id = rec.getRecordIdentity();
       if (id != null) /* record identity already set */
       {
@@ -218,20 +207,15 @@ public abstract class RecordLoader
             createTime.setValue(a.getValue());
             id.setCreateTime(createTime);
          } else { 
-               extraXmlAttributesFound = true;
-               extraAttr.append(extraXmlAttribute(element,a));
+               extraXmlAttributes.append(extraXmlAttribute(element,a));
             }
       }
-      if(extraXmlAttributesFound) 
-         extraXmlAttributes.append(wrapExtraXmlAttributes(extraAttr.toString()));
       if (id != null)
          rec.setRecordIdentity(id);
    }
    
-   public static void SetSiteName(Record rec, Element element) throws Exception
+   public void SetSiteName(Record rec, Element element) throws Exception
    {
-      boolean extraXmlAttributesFound = false;
-      StringBuilder extraAttr = new StringBuilder();
       StringElement el = rec.getSiteName();
       if (el != null) {
          /* site name already set */
@@ -249,46 +233,44 @@ public abstract class RecordLoader
          {
             SetLimitedDescription(el, rec, element, a, 255, "SiteName");
          } else { 
-               extraXmlAttributesFound = true;
-               extraAttr.append(extraXmlAttribute(element,a));
+               extraXmlAttributes.append(extraXmlAttribute(element,a));
             }
       }
-      if(extraXmlAttributesFound) 
-         extraXmlAttributes.append(wrapExtraXmlAttributes(extraAttr.toString()));
       el.setValue(element.getText());
       rec.setSiteName(el);
    }
 
-   public static String extraXmlAttribute(Element el, Attribute attr)
+   public String extraXmlAttribute(Element el, Attribute attr)
    {
       if(el == null)
           return "";
-      StringBuilder ret = new StringBuilder();
-      if (!extraXmlAttributeTagName.contains(el.getName())) {
-         ret.append(StringEscapeUtils.escapeXml(el.getName()));
-         ret.append(" ");
+
+      String ret = "";
+
+      String tagName = StringEscapeUtils.escapeXml(el.getName());
+
+      if(!Pattern.matches( ".*TAG_NAME_" + tagName + ".*", extraXmlAttributes )) {
+          if(!extraXmlAttributes.toString().equals(""))
+             ret += "/>";
+          ret += "<TAG_NAME_";
+          ret += StringEscapeUtils.escapeXml(el.getName());
       }
-      ret.append(StringEscapeUtils.escapeXml(attr.getName()));
-      ret.append("=\"");
-      ret.append(StringEscapeUtils.escapeXml(attr.getValue()));
-      ret.append("\" ");
-      extraXmlAttributeTagName.add(el.getName());
+      ret +=  " ";
+      ret += StringEscapeUtils.escapeXml(attr.getName());
+      ret += "=\"";
+      ret += StringEscapeUtils.escapeXml(attr.getValue());
+      ret += "\"";
       return ret.toString();
    }
 
-   public static JobUsageRecord addExtraXmlAttributes(JobUsageRecord job)
+   public JobUsageRecord addExtraXmlAttributes(JobUsageRecord job)
    {
        if(extraXmlAttributes.toString().length() > 0)
        {
            job.addExtraXml("<ExtraAttribute xmlns=\"http://www.gridforum.org/2003/ur-wg\">");
-           job.addExtraXml(extraXmlAttributes.toString());
-           job.addExtraXml("</ExtraAttribute>");
+           job.addExtraXml(extraXmlAttributes.toString().replaceAll("TAG_NAME_",""));
+           job.addExtraXml("></ExtraAttribute>");
        }
        return job;
-   }
- 
-   public static String wrapExtraXmlAttributes(String input) {
-      String ret = "<" + input.replaceAll("\\s+$", "") + "/>";
-      return ret;
    }
 }
