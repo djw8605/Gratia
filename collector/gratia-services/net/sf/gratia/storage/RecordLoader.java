@@ -145,7 +145,7 @@ public abstract class RecordLoader
          if (a.getName() == "description") {
             SetLimitedDescription(el, rec, element, a, 255, "Grid");
          } else { 
-               extraXmlAttributes.append(extraXmlAttribute(element,a));
+               extraXmlAttribute(element,a);
 
             }
       }
@@ -169,7 +169,7 @@ public abstract class RecordLoader
          if (a.getName() == "description") {
             SetLimitedDescription(el, rec, element, a, 255, "ProbeName");
          } else { 
-               extraXmlAttributes.append(extraXmlAttribute(element,a));
+               extraXmlAttribute(element,a);
             }
       }
       String val = el.getValue();
@@ -207,7 +207,7 @@ public abstract class RecordLoader
             createTime.setValue(a.getValue());
             id.setCreateTime(createTime);
          } else { 
-               extraXmlAttributes.append(extraXmlAttribute(element,a));
+               extraXmlAttribute(element,a);
             }
       }
       if (id != null)
@@ -233,34 +233,31 @@ public abstract class RecordLoader
          {
             SetLimitedDescription(el, rec, element, a, 255, "SiteName");
          } else { 
-               extraXmlAttributes.append(extraXmlAttribute(element,a));
+               extraXmlAttribute(element,a);
             }
       }
       el.setValue(element.getText());
       rec.setSiteName(el);
    }
 
-   public String extraXmlAttribute(Element el, Attribute attr)
+   public void extraXmlAttribute(Element el, Attribute attr)
    {
-      if(el == null)
-          return "";
+      if(el != null) {
 
-      String ret = "";
+          String tagName = StringEscapeUtils.escapeXml(el.getName());
 
-      String tagName = StringEscapeUtils.escapeXml(el.getName());
-
-      if(!Pattern.matches( ".*TAG_NAME_" + tagName + ".*", extraXmlAttributes )) {
-          if(!extraXmlAttributes.toString().equals(""))
-             ret += "/>";
-          ret += "<TAG_NAME_";
-          ret += StringEscapeUtils.escapeXml(el.getName());
+          if(!Pattern.matches( ".*TAG_NAME_" + tagName + ".*", extraXmlAttributes )) {
+              if(!extraXmlAttributes.toString().equals(""))
+                 extraXmlAttributes.append("/>");
+              extraXmlAttributes.append("<TAG_NAME_");
+              extraXmlAttributes.append(tagName);
+          }
+          extraXmlAttributes.append(" ");
+          extraXmlAttributes.append(StringEscapeUtils.escapeXml(attr.getName()));
+          extraXmlAttributes.append("=\"");
+          extraXmlAttributes.append(StringEscapeUtils.escapeXml(attr.getValue()));
+          extraXmlAttributes.append("\"");
       }
-      ret +=  " ";
-      ret += StringEscapeUtils.escapeXml(attr.getName());
-      ret += "=\"";
-      ret += StringEscapeUtils.escapeXml(attr.getValue());
-      ret += "\"";
-      return ret.toString();
    }
 
    public JobUsageRecord addExtraXmlAttributes(JobUsageRecord job)

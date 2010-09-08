@@ -282,7 +282,7 @@ public class UsageRecordLoader extends RecordLoader {
                SetLimitedDescription(el, job, element, a, 255, "JobName");
             }
             else { 
-               extraXmlAttributes.append(extraXmlAttribute(element,a));
+               extraXmlAttribute(element,a);
             }
         }
         SetLimitedTextField(el, job, element, 255, "JobName");
@@ -304,7 +304,7 @@ public class UsageRecordLoader extends RecordLoader {
             if (a.getName().equalsIgnoreCase("description")) {
                SetLimitedDescription(el, job, element, a, 255, "Status");
             } else { 
-                 extraXmlAttributes.append(extraXmlAttribute(element,a));
+                 extraXmlAttribute(element,a);
             }
         }
         SetLimitedTextField(el, job, element, 255, "Status");
@@ -329,7 +329,7 @@ public class UsageRecordLoader extends RecordLoader {
             if (a.getName().equalsIgnoreCase("description")) {
                SetLimitedDescription(el, job, element, a, 255, "WallDuration");
             } else { 
-                 extraXmlAttributes.append(extraXmlAttribute(element,a));
+                 extraXmlAttribute(element,a);
             }
         }
         // Duration d = new Duration();
@@ -351,7 +351,7 @@ public class UsageRecordLoader extends RecordLoader {
                     || a.getName().equalsIgnoreCase("usageType")) {
                 usage = a.getValue();
             } else {
-                 extraXmlAttributes.append(extraXmlAttribute(element,a));
+                 extraXmlAttribute(element,a);
             }
         }
         el.setValue(element.getText());
@@ -401,7 +401,7 @@ public class UsageRecordLoader extends RecordLoader {
             if (a.getName().equalsIgnoreCase("description")) {
                SetLimitedDescription(el, job, element, a, 255, "EndTime");
             } else { 
-                 extraXmlAttributes.append(extraXmlAttribute(element,a));
+                 extraXmlAttribute(element,a);
             }
         }
         // Duration d = new Duration();
@@ -425,7 +425,7 @@ public class UsageRecordLoader extends RecordLoader {
             if (a.getName().equalsIgnoreCase("description")) {
                SetLimitedDescription(el, job, element, a, 255, "StartTime");
             } else { 
-                 extraXmlAttributes.append(extraXmlAttribute(element,a));
+                 extraXmlAttribute(element,a);
             }
         }
 
@@ -443,7 +443,7 @@ public class UsageRecordLoader extends RecordLoader {
             } else if (a.getName().equalsIgnoreCase("type")) {
                 el.setType(a.getValue());
             } else { 
-                 extraXmlAttributes.append(extraXmlAttribute(element,a));
+                 extraXmlAttribute(element,a);
             }
         }
         el.setValue(element.getText());
@@ -465,7 +465,7 @@ public class UsageRecordLoader extends RecordLoader {
             } else if (a.getName().equalsIgnoreCase("type")) {
                 el.setType(a.getValue());
             } else { 
-                 extraXmlAttributes.append(extraXmlAttribute(element,a));
+                 extraXmlAttribute(element,a);
             }
         }
         el.setValue(element.getText());
@@ -492,7 +492,7 @@ public class UsageRecordLoader extends RecordLoader {
             if (a.getName().equalsIgnoreCase("description")) {
                SetLimitedDescription(el, job, element, a, 255, "MachineName");
             } else { 
-                 extraXmlAttributes.append(extraXmlAttribute(element,a));
+                 extraXmlAttribute(element,a);
             }
         }
         SetLimitedTextField(el, job, element, 255, "MachineName");
@@ -513,7 +513,7 @@ public class UsageRecordLoader extends RecordLoader {
             } else if (a.getName().equalsIgnoreCase("primary")) {
                primary = (a.getValue().equalsIgnoreCase("true"));
             } else { 
-                 extraXmlAttributes.append(extraXmlAttribute(element,a));
+                 extraXmlAttribute(element,a);
             }
         }
         String val = ConcatString( el.getValue(),  element.getText() );
@@ -538,7 +538,7 @@ public class UsageRecordLoader extends RecordLoader {
             if (a.getName().equalsIgnoreCase("description")) {
                SetLimitedDescription(el, job, element, a, 255, "SubmitHost");
             } else { 
-                 extraXmlAttributes.append(extraXmlAttribute(element,a));
+                 extraXmlAttribute(element,a);
             }
         }
         SetLimitedTextField(el, job, element, 255, "SubmitHost");
@@ -560,7 +560,7 @@ public class UsageRecordLoader extends RecordLoader {
             if (a.getName().equalsIgnoreCase("description")) {
                SetLimitedDescription(el, job, element, a, 255, "Queue");
             } else { 
-                 extraXmlAttributes.append(extraXmlAttribute(element,a));
+                 extraXmlAttribute(element,a);
             }
         }
         SetLimitedTextField(el, job, element, 255, "Queue");
@@ -578,7 +578,7 @@ public class UsageRecordLoader extends RecordLoader {
             if (a.getName().equalsIgnoreCase("description")) {
                SetLimitedDescription(el, job, element, a, 255, "ProjectName");
             } else { 
-                 extraXmlAttributes.append(extraXmlAttribute(element,a));
+                 extraXmlAttribute(element,a);
             }
         }
         String val = ConcatString(el.getValue(),element.getText());
@@ -601,7 +601,7 @@ public class UsageRecordLoader extends RecordLoader {
             } else if (a.getName().equalsIgnoreCase("storageUnit")) {
                 el.setStorageUnit(a.getValue());
             } else { 
-                 extraXmlAttributes.append(extraXmlAttribute(element,a));
+                 extraXmlAttribute(element,a);
             }
         }
         el.setValue((new Double(element.getText())).doubleValue());
@@ -629,7 +629,7 @@ public class UsageRecordLoader extends RecordLoader {
             } else if (a.getName().equalsIgnoreCase("type")) {
                 el.setType(a.getValue());
             } else { 
-                 extraXmlAttributes.append(extraXmlAttribute(element,a));
+                 extraXmlAttribute(element,a);
             }
         }
         el.setValue((new Double(element.getText())).doubleValue());
@@ -657,7 +657,7 @@ public class UsageRecordLoader extends RecordLoader {
             } else if (a.getName().equalsIgnoreCase("type")) {
                 el.setType(a.getValue());
             } else { 
-                 extraXmlAttributes.append(extraXmlAttribute(element,a));
+                 extraXmlAttribute(element,a);
             }
         }
         el.setValue((new Double(element.getText())).doubleValue());
@@ -685,7 +685,7 @@ public class UsageRecordLoader extends RecordLoader {
             } else if (a.getName().equalsIgnoreCase("type")) {
                 el.setType(a.getValue());
             } else { 
-                 extraXmlAttributes.append(extraXmlAttribute(element,a));
+                 extraXmlAttribute(element,a);
             }
         }
         el.setValue((new Double(element.getText())).doubleValue());
@@ -713,7 +713,7 @@ public class UsageRecordLoader extends RecordLoader {
             } else if (a.getName().equalsIgnoreCase("metric")) {
                el.setMetric(a.getValue());
             } else { 
-                 extraXmlAttributes.append(extraXmlAttribute(element,a));
+                 extraXmlAttribute(element,a);
             }
         }
         el.setValue((new Long(element.getText())).longValue());
@@ -737,7 +737,7 @@ public class UsageRecordLoader extends RecordLoader {
             } else if (a.getName().equalsIgnoreCase("metric")) {
                el.setMetric(a.getValue());
             } else { 
-                 extraXmlAttributes.append(extraXmlAttribute(element,a));
+                 extraXmlAttribute(element,a);
             }
         }
         el.setValue((new Long(element.getText())).longValue());
@@ -763,7 +763,7 @@ public class UsageRecordLoader extends RecordLoader {
             } else if (a.getName().equalsIgnoreCase("consumptionRate")) {
                 el.setConsumptionRate((new Double(a.getValue())).doubleValue());
             } else { 
-                 extraXmlAttributes.append(extraXmlAttribute(element,a));
+                 extraXmlAttribute(element,a);
             }
         }
         el.setValue((new Long(element.getText())).longValue());
@@ -780,7 +780,7 @@ public class UsageRecordLoader extends RecordLoader {
             } else if (a.getName().equalsIgnoreCase("type")) {
                 el.setType(a.getValue());
             } else { 
-                 extraXmlAttributes.append(extraXmlAttribute(element,a));
+                 extraXmlAttribute(element,a);
             }
         }
         SetLimitedTextField(el, job, element, 255, "ServiceLevel");
@@ -809,7 +809,7 @@ public class UsageRecordLoader extends RecordLoader {
             } else if (a.getName().equalsIgnoreCase("formula")) {
                 el.setFormula(a.getValue());
             } else { 
-                 extraXmlAttributes.append(extraXmlAttribute(element,a));
+                 extraXmlAttribute(element,a);
             }
         }
         el.setValue((new Double(element.getText())).doubleValue());
@@ -829,7 +829,7 @@ public class UsageRecordLoader extends RecordLoader {
             } else if (a.getName().equalsIgnoreCase("phaseUnit")) {
                 el.setPhaseUnit(a.getValue());
             } else { 
-                 extraXmlAttributes.append(extraXmlAttribute(element,a));
+                 extraXmlAttribute(element,a);
             }
         }
         el.setValue((new Double(element.getText())).doubleValue());
@@ -852,7 +852,7 @@ public class UsageRecordLoader extends RecordLoader {
             } else if (a.getName().equalsIgnoreCase("storageUnit")) {
                 el.setStorageUnit(a.getValue());
             } else { 
-                 extraXmlAttributes.append(extraXmlAttribute(element,a));
+                 extraXmlAttribute(element,a);
             }
         }
         el.setValue((new Double(element.getText())).doubleValue());
@@ -873,7 +873,7 @@ public class UsageRecordLoader extends RecordLoader {
             } else if (a.getName().equalsIgnoreCase("unit")) {
                 el.setUnit(a.getValue());
             } else { 
-                 extraXmlAttributes.append(extraXmlAttribute(element,a));
+                 extraXmlAttribute(element,a);
             }
         }
         el.setValue((new Double(element.getText())).doubleValue());
@@ -926,7 +926,7 @@ public class UsageRecordLoader extends RecordLoader {
                     return;
                 }
             } else { 
-                 extraXmlAttributes.append(extraXmlAttribute(element,a));
+                 extraXmlAttribute(element,a);
             }
         }
         SetLimitedTextField(el, job, element, 255, "Resource");
