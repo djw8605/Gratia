@@ -448,6 +448,9 @@ public class QueueManager
       //
       // setup queues for message handling
       //
+      if (fgQueues == null) {
+         initializeImpl();
+      }
       String configurationPath = System.getProperty("catalina.home") + "/gratia";
       if (fgQueues == null || fgQueues.length != nthreads) {
          fgQueues = new Queue[nthreads];
@@ -459,23 +462,26 @@ public class QueueManager
       refreshStatus();
    }
 
+   private static synchronized void initializeImpl()  
+   {
+      try {
+         fgHostName = java.net.InetAddress.getLocalHost().toString(); 
+      } catch (Exception ignore) {
+      }
+      getStageDir().mkdirs();
+   }
+   
    public static synchronized void initialize()  
    {
       if (fgQueues == null) {
-         
-         Properties p = null;
+         initializeImpl();
+         int maxthreads = 1;
          try {
-            p = Configuration.getProperties();
-            fgHostName = java.net.InetAddress.getLocalHost().toString(); 
+            Properties p = Configuration.getProperties();
+            maxthreads = Integer.parseInt(p.getProperty("service.recordProcessor.threads"));
          } catch (Exception ignore) {
-            return;
-         }
-         
-         getStageDir().mkdirs();
-
-         int maxthreads = Integer.parseInt(p.getProperty("service.recordProcessor.threads"));
+         }      
          setupQueues(maxthreads);
-         
       }
    }
 
