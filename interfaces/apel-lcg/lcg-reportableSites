@@ -279,6 +279,14 @@
 #   09/08/2010 (John Weigand)
 #     Added NERSC-PDSF with a 1160 SI2K value per Brian Bockleman email
 #
+# 09/13/2010 (Karthik Arunachalam)
+# Updated NFapel values to NFgip values for the following sites
+#---------------------------------------------------
+# Site                    NFgip   NFapel  % diff
+# ---------------------------------------------------
+# SPRACE                  3370    2117    59
+# ---------------------------------------------------
+#
 ##################################################################
 #-- Site  ------- SPECint2000
 #
@@ -293,7 +301,7 @@ Nebraska            2603
 Purdue-RCAC         3031
 Purdue-Steele       3196
 UCSDT2              2871
-SPRACE              2117
+SPRACE              3370
 GridUNESP_CENTRAL   3672
 UFlorida-HPC        2415
 UFlorida-PG         1535
