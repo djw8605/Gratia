@@ -122,7 +122,7 @@ public class MetricRecordLoader extends RecordLoader {
       return job;
    }
    
-   public static void SetMetricName(MetricRecord job, Element element)
+   public void SetMetricName(MetricRecord job, Element element)
    throws Exception {
       StringElement el = job.getMetricName();
       if (el != null /* job identity already set */) {
@@ -135,13 +135,15 @@ public class MetricRecordLoader extends RecordLoader {
          Attribute a = (Attribute)i.next();
          if (a.getName().equalsIgnoreCase("description")) {
             SetLimitedDescription(el, job, element, a, 255, "MetricName");
-         }
+         } else {
+               extraXmlAttribute(element,a);
+            }
       }
       SetLimitedTextField(el, job, element, 255, "MetricName");
       job.setMetricName(el);
    }
    
-   public static void SetMetricType(MetricRecord job, Element element)
+   public void SetMetricType(MetricRecord job, Element element)
    throws Exception {
       StringElement el = job.getMetricType();
       if (el != null /* job identity already set */) {
@@ -154,13 +156,15 @@ public class MetricRecordLoader extends RecordLoader {
          Attribute a = (Attribute)i.next();
          if (a.getName().equalsIgnoreCase("description")) {
             SetLimitedDescription(el, job, element, a, 255, "MetricType");
-         }
+         } else {
+               extraXmlAttribute(element,a);
+            }
       }
       SetLimitedTextField(el, job, element, 255, "MetricType");
       job.setMetricType(el);
    }
    
-   public static void SetMetricStatus(MetricRecord job, Element element)
+   public void SetMetricStatus(MetricRecord job, Element element)
    throws Exception {
       StringElement el = job.getMetricStatus();
       if (el != null /* job identity already set */) {
@@ -173,13 +177,15 @@ public class MetricRecordLoader extends RecordLoader {
          Attribute a = (Attribute)i.next();
          if (a.getName().equalsIgnoreCase("description")) {
             SetLimitedDescription(el, job, element, a, 255, "MetricStatus");
-         }
+         } else {
+               extraXmlAttribute(element,a);
+            }
       }
       SetLimitedTextField(el, job, element, 255, "MetricStatus");
       job.setMetricStatus(el);
    }
    
-   public static void SetTimestamp(MetricRecord job, Element element)
+   public void SetTimestamp(MetricRecord job, Element element)
    throws Exception {
       DateElement el = job.getTimestamp();
       if (el != null /* job identity already set */) {
@@ -192,7 +198,9 @@ public class MetricRecordLoader extends RecordLoader {
          Attribute a = (Attribute)i.next();
          if (a.getName().equalsIgnoreCase("description")) {
             SetLimitedDescription(el, job, element, a, 255, "Timestamp");
-         }
+         } else {
+               extraXmlAttribute(element,a);
+            }
       }
       // Duration d = new Duration();
       
@@ -200,7 +208,7 @@ public class MetricRecordLoader extends RecordLoader {
       job.setTimestamp(el);
    }
    
-   public static void SetServiceType(MetricRecord job, Element element)
+   public void SetServiceType(MetricRecord job, Element element)
    throws Exception {
       StringElement el = job.getServiceType();
       if (el != null /* job identity already set */) {
@@ -213,13 +221,15 @@ public class MetricRecordLoader extends RecordLoader {
          Attribute a = (Attribute)i.next();
          if (a.getName().equalsIgnoreCase("description")) {
             SetLimitedDescription(el, job, element, a, 255, "ServiceType");
-         }
+         } else {
+               extraXmlAttribute(element,a);
+            }
       }
       SetLimitedTextField(el, job, element, 255, "ServiceType");
       job.setServiceType(el);
    }
    
-   public static void SetServiceUri(MetricRecord job, Element element)
+   public void SetServiceUri(MetricRecord job, Element element)
    throws Exception {
       StringElement el = job.getServiceUri();
       if (el != null /* job identity already set */) {
@@ -232,13 +242,15 @@ public class MetricRecordLoader extends RecordLoader {
          Attribute a = (Attribute)i.next();
          if (a.getName().equalsIgnoreCase("description")) {
             SetLimitedDescription(el, job, element, a, 255, "ServiceUri");
-         }
+         } else {
+               extraXmlAttribute(element,a);
+            }
       }
       SetLimitedTextField(el, job, element, 255, "ServiceUri");
       job.setServiceUri(el);
    }
    
-   public static void SetGatheredAt(MetricRecord job, Element element)
+   public void SetGatheredAt(MetricRecord job, Element element)
    throws Exception {
       StringElement el = job.getGatheredAt();
       if (el != null /* job identity already set */) {
@@ -251,13 +263,15 @@ public class MetricRecordLoader extends RecordLoader {
          Attribute a = (Attribute)i.next();
          if (a.getName().equalsIgnoreCase("description")) {
             SetLimitedDescription(el, job, element, a, 255, "GatheredAt");
-         }
+         } else {
+               extraXmlAttribute(element,a);
+            }
       }
       SetLimitedTextField(el, job, element, 255, "GatherAt");
       job.setGatheredAt(el);
    }
    
-   public static void SetSummaryData(MetricRecord job, Element element)
+   public void SetSummaryData(MetricRecord job, Element element)
    throws Exception {
       StringElement el = job.getSummaryData();
       if (el != null /* job identity already set */) {
@@ -270,13 +284,15 @@ public class MetricRecordLoader extends RecordLoader {
          Attribute a = (Attribute)i.next();
          if (a.getName().equalsIgnoreCase("description")) {
             SetLimitedDescription(el, job, element, a, 255, "SummaryData");
-         }
+         } else {
+               extraXmlAttribute(element,a);
+            }
       }
       SetLimitedTextField(el, job, element, 255, "SummaryData");
       job.setSummaryData(el);
    }
    
-   public static void SetDetailsData(MetricRecord job, Element element)
+   public void SetDetailsData(MetricRecord job, Element element)
    throws Exception {
       StringElement el = job.getDetailsData();
       if (el != null /* job identity already set */) {
@@ -289,13 +305,15 @@ public class MetricRecordLoader extends RecordLoader {
          Attribute a = (Attribute)i.next();
          if (a.getName().equalsIgnoreCase("description")) {
             SetLimitedDescription(el, job, element, a, 255, "DetailsData");
-         }
+         } else {
+               extraXmlAttribute(element,a);
+            }
       }
       SetLimitedTextField(el, job, element, 255, "DetailsData");
       job.setDetailsData(el);
    }
    
-   public static void SetPerformanceData(MetricRecord job, Element element)
+   public void SetPerformanceData(MetricRecord job, Element element)
    throws Exception {
       StringElement el = job.getPerformanceData();
       if (el != null /* Performance Data already set */) {
@@ -308,13 +326,15 @@ public class MetricRecordLoader extends RecordLoader {
          Attribute a = (Attribute)i.next();
          if (a.getName().equalsIgnoreCase("description")) {
             SetLimitedDescription(el, job, element, a, 255, "PerformanceData");
-         }
+         } else {
+               extraXmlAttribute(element,a);
+            }
       }
       SetLimitedTextField(el, job, element, 255, "PerformanceData");
       job.setPerformanceData(el);
    }
    
-   public static void SetVoName(MetricRecord job, Element element)
+   public void SetVoName(MetricRecord job, Element element)
    throws Exception {
       StringElement el = job.getVoName();
       if (el != null /* Vo name already set */) {
@@ -327,13 +347,15 @@ public class MetricRecordLoader extends RecordLoader {
          Attribute a = (Attribute)i.next();
          if (a.getName().equalsIgnoreCase("description")) {
             SetLimitedDescription(el, job, element, a, 255, "VoName");
-         }
+         } else {
+               extraXmlAttribute(element,a);
+            }
       }
       SetLimitedTextField(el, job, element, 255, "VoName");
       job.setVoName(el);
    }
    
-   public static void SetSamUploadFlag(MetricRecord job, Element element)
+   public void SetSamUploadFlag(MetricRecord job, Element element)
    throws Exception {
       IntegerElement el = job.getSamUploadFlag();
       if (el != null /* SamUploadFlag already set */) {
@@ -346,13 +368,15 @@ public class MetricRecordLoader extends RecordLoader {
          Attribute a = (Attribute)i.next();
          if (a.getName().equalsIgnoreCase("description")) {
             SetLimitedDescription(el, job, element, a, 255, "SamUploadFlag");
-         }
+         } else {
+               extraXmlAttribute(element,a);
+            }
       }
       el.setValue((new Long(element.getText())).longValue()); 
       job.setSamUploadFlag(el);
    }
    
-   public static void SetHostName(MetricRecord job, Element element)
+   public void SetHostName(MetricRecord job, Element element)
    throws Exception {
       StringElement el = job.getHostName();
       if (el != null /* job identity already set */) {
@@ -365,7 +389,9 @@ public class MetricRecordLoader extends RecordLoader {
          Attribute a = (Attribute)i.next();
          if (a.getName().equalsIgnoreCase("description")) {
             SetLimitedDescription(el, job, element, a, 255, "HostName");
-         }
+         } else {
+               extraXmlAttribute(element,a);
+            }
       }
       SetLimitedTextField(el, job, element, 255, "HostName");
       job.setHostName(el);

@@ -116,7 +116,7 @@ public class StorageElementLoader extends RecordLoader {
     return job;
   }
 
-  public static void SetUniqueID(StorageElement job, Element element)
+  public void SetUniqueID(StorageElement job, Element element)
   throws Exception {
     StringElement el = job.getUniqueID();
     if (el != null /* job identity already set */) {
@@ -129,13 +129,15 @@ public class StorageElementLoader extends RecordLoader {
       Attribute a = (Attribute)i.next();
       if (a.getName().equalsIgnoreCase("description")) {
         el.setDescription(a.getValue());
-      }
+      } else {
+               extraXmlAttribute(element,a);
+            }
     }
     el.setValue(element.getText());
     job.setUniqueID(el);
   }
 
-  public static void SetSE(StorageElement job, Element element)
+  public void SetSE(StorageElement job, Element element)
   throws Exception {
     StringElement el = job.getSE();
     if (el != null /* job identity already set */) {
@@ -148,13 +150,15 @@ public class StorageElementLoader extends RecordLoader {
       Attribute a = (Attribute)i.next();
       if (a.getName().equalsIgnoreCase("description")) {
         el.setDescription(a.getValue());
-      }
+      } else {
+               extraXmlAttribute(element,a);
+            }
     }
     el.setValue(element.getText());
     job.setSE(el);
   }
 
-  public static void SetName(StorageElement job, Element element)
+  public void SetName(StorageElement job, Element element)
   throws Exception {
     StringElement el = job.getName();
     if (el != null /* job identity already set */) {
@@ -167,13 +171,15 @@ public class StorageElementLoader extends RecordLoader {
       Attribute a = (Attribute)i.next();
       if (a.getName().equalsIgnoreCase("description")) {
         el.setDescription(a.getValue());
-      }
+      } else {
+               extraXmlAttribute(element,a);
+            }
     }
     el.setValue(element.getText());
     job.setName(el);
   }
   
-  public static void SetParentID(StorageElement job, Element element)
+  public void SetParentID(StorageElement job, Element element)
   throws Exception {
     StringElement el = job.getParentID();
     if (el != null /* job identity already set */) {
@@ -186,13 +192,15 @@ public class StorageElementLoader extends RecordLoader {
       Attribute a = (Attribute)i.next();
       if (a.getName().equalsIgnoreCase("description")) {
         el.setDescription(a.getValue());
-      }
+      } else {
+               extraXmlAttribute(element,a);
+            }
     }
     el.setValue(element.getText());
     job.setParentID(el);
   }
 
-  public static void SetVO(StorageElement job, Element element)
+  public void SetVO(StorageElement job, Element element)
   throws Exception {
     StringElement el = job.getVO();
     if (el != null /* job identity already set */) {
@@ -205,13 +213,15 @@ public class StorageElementLoader extends RecordLoader {
       Attribute a = (Attribute)i.next();
       if (a.getName().equalsIgnoreCase("description")) {
         el.setDescription(a.getValue());
-      }
+      } else {
+               extraXmlAttribute(element,a);
+            }
     }
     el.setValue(element.getText());
     job.setVO(el);
   }
 
-  public static void SetOwnerDN(StorageElement job, Element element)
+  public void SetOwnerDN(StorageElement job, Element element)
   throws Exception {
     StringElement el = job.getOwnerDN();
     if (el != null /* job identity already set */) {
@@ -224,14 +234,16 @@ public class StorageElementLoader extends RecordLoader {
       Attribute a = (Attribute)i.next();
       if (a.getName().equalsIgnoreCase("description")) {
         el.setDescription(a.getValue());
-      }
+      } else {
+               extraXmlAttribute(element,a);
+            }
     }
     el.setValue(element.getText());
     job.setOwnerDN(el);
   }
 
 
-  public static void SetSpaceType(StorageElement job, Element element)
+  public void SetSpaceType(StorageElement job, Element element)
   throws Exception {
     StringElement el = job.getSpaceType();
     if (el != null /* job identity already set */) {
@@ -244,13 +256,15 @@ public class StorageElementLoader extends RecordLoader {
       Attribute a = (Attribute)i.next();
       if (a.getName().equalsIgnoreCase("description")) {
         el.setDescription(a.getValue());
-      }
+      } else {
+               extraXmlAttribute(element,a);
+            }
     }
     el.setValue(element.getText());
     job.setSpaceType(el);
   }
 
-  public static void SetTimestamp(StorageElement job, Element element)
+  public void SetTimestamp(StorageElement job, Element element)
   throws Exception {
     DateElement el = job.getTimestamp();
     if (el != null /* job identity already set */) {
@@ -263,7 +277,9 @@ public class StorageElementLoader extends RecordLoader {
       Attribute a = (Attribute)i.next();
       if (a.getName().equalsIgnoreCase("description")) {
         el.setDescription(a.getValue());
-      }
+      } else {
+               extraXmlAttribute(element,a);
+            }
     }
     // Duration d = new Duration();
 
@@ -271,7 +287,7 @@ public class StorageElementLoader extends RecordLoader {
     job.setTimestamp(el);
   }
 
-  public static void SetImplementation(StorageElement job, Element element)
+  public void SetImplementation(StorageElement job, Element element)
   throws Exception {
     StringElement el = job.getImplementation();
     if (el != null /* job identity already set */) {
@@ -284,13 +300,15 @@ public class StorageElementLoader extends RecordLoader {
       Attribute a = (Attribute)i.next();
       if (a.getName().equalsIgnoreCase("description")) {
         el.setDescription(a.getValue());
-      }
+      } else {
+               extraXmlAttribute(element,a);
+            }
     }
     el.setValue(element.getText());
     job.setImplementation(el);
   }
 
-  public static void SetVersion(StorageElement job, Element element)
+  public void SetVersion(StorageElement job, Element element)
   throws Exception {
     StringElement el = job.getVersion();
     if (el != null /* job identity already set */) {
@@ -303,13 +321,15 @@ public class StorageElementLoader extends RecordLoader {
       Attribute a = (Attribute)i.next();
       if (a.getName().equalsIgnoreCase("description")) {
         el.setDescription(a.getValue());
-      }
+      } else {
+               extraXmlAttribute(element,a);
+            }
     }
     el.setValue(element.getText());
     job.setVersion(el);
   }
 
-  public static void SetStatus(StorageElement job, Element element)
+  public void SetStatus(StorageElement job, Element element)
   throws Exception {
     StringElement el = job.getStatus();
     if (el != null /* job identity already set */) {
@@ -322,7 +342,9 @@ public class StorageElementLoader extends RecordLoader {
       Attribute a = (Attribute)i.next();
       if (a.getName().equalsIgnoreCase("description")) {
         el.setDescription(a.getValue());
-      }
+      } else {
+               extraXmlAttribute(element,a);
+            }
     }
     el.setValue(element.getText());
     job.setStatus(el);

@@ -101,7 +101,7 @@ public class ComputeElementRecordLoader extends RecordLoader {
       return job;
    }
    
-   public static void SetUniqueID(ComputeElementRecord job, Element element)
+   public void SetUniqueID(ComputeElementRecord job, Element element)
    throws Exception {
       StringElement el = job.getUniqueID();
       if (el != null /* job identity already set */) {
@@ -114,13 +114,15 @@ public class ComputeElementRecordLoader extends RecordLoader {
          Attribute a = (Attribute)i.next();
          if (a.getName().equalsIgnoreCase("description")) {
             SetLimitedDescription(el, job, element, a, 255, "UniqueID");
-         }
+         } else {
+               extraXmlAttribute(element,a);
+            }
       }
       SetLimitedTextField(el, job, element, 255, "UniqueID");
       job.setUniqueID(el);
    }
    
-   public static void SetVO(ComputeElementRecord job, Element element)
+   public void SetVO(ComputeElementRecord job, Element element)
    throws Exception {
       StringElement el = job.getVO();
       if (el != null /* job identity already set */) {
@@ -133,13 +135,15 @@ public class ComputeElementRecordLoader extends RecordLoader {
          Attribute a = (Attribute)i.next();
          if (a.getName().equalsIgnoreCase("description")) {
             SetLimitedDescription(el, job, element, a, 255, "VO");
-         }
+         } else {
+               extraXmlAttribute(element,a);
+            }
       }
       SetLimitedTextField(el, job, element, 255, "VO");
       job.setVO(el);
    }
    
-   public static void SetTimestamp(ComputeElementRecord job, Element element)
+   public void SetTimestamp(ComputeElementRecord job, Element element)
    throws Exception {
       DateElement el = job.getTimestamp();
       if (el != null /* job identity already set */) {
@@ -152,7 +156,9 @@ public class ComputeElementRecordLoader extends RecordLoader {
          Attribute a = (Attribute)i.next();
          if (a.getName().equalsIgnoreCase("description")) {
             SetLimitedDescription(el, job, element, a, 255, "Timestamp");
-         }
+         } else {
+               extraXmlAttribute(element,a);
+            }
       }
       // Duration d = new Duration();
       
@@ -160,7 +166,7 @@ public class ComputeElementRecordLoader extends RecordLoader {
       job.setTimestamp(el);
    }
    
-   public static void SetRunningJobs(ComputeElementRecord job, Element element)
+   public void SetRunningJobs(ComputeElementRecord job, Element element)
    throws Exception {
       IntegerElement el = job.getRunningJobs();
       if (el != null /* job identity already set */) {
@@ -173,13 +179,15 @@ public class ComputeElementRecordLoader extends RecordLoader {
          Attribute a = (Attribute)i.next();
          if (a.getName().equalsIgnoreCase("description")) {
             SetLimitedDescription(el, job, element, a, 255, "RunningJobs");
-         }
+         } else {
+               extraXmlAttribute(element,a);
+            }
       }
       el.setValue((new Long(element.getText())).longValue());
       job.setRunningJobs(el);
    }
    
-   public static void SetTotalJobs(ComputeElementRecord job, Element element)
+   public void SetTotalJobs(ComputeElementRecord job, Element element)
    throws Exception {
       IntegerElement el = job.getTotalJobs();
       if (el != null /* job identity already set */) {
@@ -192,13 +200,15 @@ public class ComputeElementRecordLoader extends RecordLoader {
          Attribute a = (Attribute)i.next();
          if (a.getName().equalsIgnoreCase("description")) {
             SetLimitedDescription(el, job, element, a, 255, "TotalJobs");
-         }
+         } else {
+               extraXmlAttribute(element,a);
+            }
       }
       el.setValue((new Long(element.getText())).longValue());
       job.setTotalJobs(el);
    }
    
-   public static void SetWaitingJobs(ComputeElementRecord job, Element element)
+   public void SetWaitingJobs(ComputeElementRecord job, Element element)
    throws Exception {
       IntegerElement el = job.getWaitingJobs();
       if (el != null /* job identity already set */) {
@@ -211,7 +221,9 @@ public class ComputeElementRecordLoader extends RecordLoader {
          Attribute a = (Attribute)i.next();
          if (a.getName().equalsIgnoreCase("description")) {
             SetLimitedDescription(el, job, element, a, 255, "WaitingJobs");
-         }
+         } else {
+               extraXmlAttribute(element,a);
+            }
       }
       el.setValue((new Long(element.getText())).longValue());
       job.setWaitingJobs(el);

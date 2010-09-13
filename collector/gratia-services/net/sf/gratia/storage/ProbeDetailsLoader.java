@@ -103,7 +103,7 @@ public class ProbeDetailsLoader extends RecordLoader
       return job;
    }
 
-    public static void AddSoftware(ProbeDetails job, Element element)
+    public void AddSoftware(ProbeDetails job, Element element)
         throws Exception {
 
         Software soft = new Software();
@@ -114,7 +114,7 @@ public class ProbeDetailsLoader extends RecordLoader
             if (a.getName().equalsIgnoreCase("version")) {
                 soft.setVersion(a.getValue());
             } else {
-                // Add To ExtraXml
+               extraXmlAttribute(element,a);
             }
         }
         soft.setName(element.getText());

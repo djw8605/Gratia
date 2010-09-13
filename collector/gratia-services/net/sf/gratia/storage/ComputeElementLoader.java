@@ -116,7 +116,7 @@ public class ComputeElementLoader extends RecordLoader {
     return job;
   }
 
-  public static void SetUniqueID(ComputeElement job, Element element)
+  public void SetUniqueID(ComputeElement job, Element element)
   throws Exception {
     StringElement el = job.getUniqueID();
     if (el != null /* job identity already set */) {
@@ -129,13 +129,15 @@ public class ComputeElementLoader extends RecordLoader {
       Attribute a = (Attribute)i.next();
       if (a.getName().equalsIgnoreCase("description")) {
         el.setDescription(a.getValue());
-      }
+      } else {
+               extraXmlAttribute(element,a);
+            }
     }
     el.setValue(element.getText());
     job.setUniqueID(el);
   }
 
-  public static void SetCEName(ComputeElement job, Element element)
+  public void SetCEName(ComputeElement job, Element element)
   throws Exception {
     StringElement el = job.getCEName();
     if (el != null /* job identity already set */) {
@@ -148,13 +150,15 @@ public class ComputeElementLoader extends RecordLoader {
       Attribute a = (Attribute)i.next();
       if (a.getName().equalsIgnoreCase("description")) {
         el.setDescription(a.getValue());
-      }
+      } else {
+               extraXmlAttribute(element,a);
+            }
     }
     el.setValue(element.getText());
     job.setCEName(el);
   }
 
-  public static void SetCluster(ComputeElement job, Element element)
+  public void SetCluster(ComputeElement job, Element element)
   throws Exception {
     StringElement el = job.getCluster();
     if (el != null /* job identity already set */) {
@@ -167,13 +171,15 @@ public class ComputeElementLoader extends RecordLoader {
       Attribute a = (Attribute)i.next();
       if (a.getName().equalsIgnoreCase("description")) {
         el.setDescription(a.getValue());
-      }
+      } else {
+               extraXmlAttribute(element,a);
+            }
     }
     el.setValue(element.getText());
     job.setCluster(el);
   }
 
-  public static void SetHostName(ComputeElement job, Element element)
+  public void SetHostName(ComputeElement job, Element element)
   throws Exception {
     StringElement el = job.getHostName();
     if (el != null /* job identity already set */) {
@@ -186,13 +192,15 @@ public class ComputeElementLoader extends RecordLoader {
       Attribute a = (Attribute)i.next();
       if (a.getName().equalsIgnoreCase("description")) {
         el.setDescription(a.getValue());
-      }
+      } else {
+               extraXmlAttribute(element,a);
+            }
     }
     el.setValue(element.getText());
     job.setHostName(el);
   }
 
-  public static void SetTimestamp(ComputeElement job, Element element)
+  public void SetTimestamp(ComputeElement job, Element element)
   throws Exception {
     DateElement el = job.getTimestamp();
     if (el != null /* job identity already set */) {
@@ -205,7 +213,9 @@ public class ComputeElementLoader extends RecordLoader {
       Attribute a = (Attribute)i.next();
       if (a.getName().equalsIgnoreCase("description")) {
         el.setDescription(a.getValue());
-      }
+      } else {
+               extraXmlAttribute(element,a);
+            }
     }
     // Duration d = new Duration();
 
@@ -213,7 +223,7 @@ public class ComputeElementLoader extends RecordLoader {
     job.setTimestamp(el);
   }
 
-  public static void SetLrmsType(ComputeElement job, Element element)
+  public void SetLrmsType(ComputeElement job, Element element)
   throws Exception {
     StringElement el = job.getLrmsType();
     if (el != null /* job identity already set */) {
@@ -226,13 +236,15 @@ public class ComputeElementLoader extends RecordLoader {
       Attribute a = (Attribute)i.next();
       if (a.getName().equalsIgnoreCase("description")) {
         el.setDescription(a.getValue());
-      }
+      } else {
+               extraXmlAttribute(element,a);
+            }
     }
     el.setValue(element.getText());
     job.setLrmsType(el);
   }
 
-  public static void SetLrmsVersion(ComputeElement job, Element element)
+  public void SetLrmsVersion(ComputeElement job, Element element)
   throws Exception {
     StringElement el = job.getLrmsVersion();
     if (el != null /* job identity already set */) {
@@ -245,13 +257,15 @@ public class ComputeElementLoader extends RecordLoader {
       Attribute a = (Attribute)i.next();
       if (a.getName().equalsIgnoreCase("description")) {
         el.setDescription(a.getValue());
-      }
+      } else {
+               extraXmlAttribute(element,a);
+            }
     }
     el.setValue(element.getText());
     job.setLrmsVersion(el);
   }
 
-  public static void SetMaxRunningJobs(ComputeElement job, Element element)
+  public void SetMaxRunningJobs(ComputeElement job, Element element)
   throws Exception {
     IntegerElement el = job.getMaxRunningJobs();
     if (el != null /* job identity already set */) {
@@ -264,13 +278,15 @@ public class ComputeElementLoader extends RecordLoader {
       Attribute a = (Attribute)i.next();
       if (a.getName().equalsIgnoreCase("description")) {
         el.setDescription(a.getValue());
-      }
+      } else {
+               extraXmlAttribute(element,a);
+            }
     }
     el.setValue((new Long(element.getText())).longValue());
     job.setMaxRunningJobs(el);
   }
 
-  public static void SetMaxTotalJobs(ComputeElement job, Element element)
+  public void SetMaxTotalJobs(ComputeElement job, Element element)
   throws Exception {
     IntegerElement el = job.getMaxTotalJobs();
     if (el != null /* job identity already set */) {
@@ -283,13 +299,15 @@ public class ComputeElementLoader extends RecordLoader {
       Attribute a = (Attribute)i.next();
       if (a.getName().equalsIgnoreCase("description")) {
         el.setDescription(a.getValue());
-      }
+      } else {
+               extraXmlAttribute(element,a);
+            }
     }
     el.setValue((new Long(element.getText())).longValue());
     job.setMaxTotalJobs(el);
   }
 
-  public static void SetAssignedJobSlots(ComputeElement job, Element element)
+  public void SetAssignedJobSlots(ComputeElement job, Element element)
   throws Exception {
     IntegerElement el = job.getAssignedJobSlots();
     if (el != null /* job identity already set */) {
@@ -302,13 +320,15 @@ public class ComputeElementLoader extends RecordLoader {
       Attribute a = (Attribute)i.next();
       if (a.getName().equalsIgnoreCase("description")) {
         el.setDescription(a.getValue());
-      }
+      } else {
+               extraXmlAttribute(element,a);
+            }
     }
     el.setValue((new Long(element.getText())).longValue());
     job.setAssignedJobSlots(el);
   }
 
-  public static void SetStatus(ComputeElement job, Element element)
+  public void SetStatus(ComputeElement job, Element element)
   throws Exception {
     StringElement el = job.getStatus();
     if (el != null /* job identity already set */) {
@@ -321,7 +341,9 @@ public class ComputeElementLoader extends RecordLoader {
       Attribute a = (Attribute)i.next();
       if (a.getName().equalsIgnoreCase("description")) {
         el.setDescription(a.getValue());
-      }
+      } else {
+               extraXmlAttribute(element,a);
+            }
     }
     el.setValue(element.getText());
     job.setStatus(el);

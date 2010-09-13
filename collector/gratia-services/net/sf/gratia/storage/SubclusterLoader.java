@@ -124,7 +124,7 @@ public class SubclusterLoader extends RecordLoader {
       return job;
    }
    
-   public static void SetUniqueID(Subcluster job, Element element)
+   public void SetUniqueID(Subcluster job, Element element)
    throws Exception {
       StringElement el = job.getUniqueID();
       if (el != null /* job identity already set */) {
@@ -137,13 +137,15 @@ public class SubclusterLoader extends RecordLoader {
          Attribute a = (Attribute)i.next();
          if (a.getName().equalsIgnoreCase("description")) {
             SetLimitedDescription(el, job, element, a, 255, "UniqueID");
-         }
+         } else {
+               extraXmlAttribute(element,a);
+            }
       }
       SetLimitedTextField(el, job, element, 255, "UniqueID");
       job.setUniqueID(el);
    }
    
-   public static void SetName(Subcluster job, Element element)
+   public void SetName(Subcluster job, Element element)
    throws Exception {
       StringElement el = job.getName();
       if (el != null /* job identity already set */) {
@@ -156,13 +158,15 @@ public class SubclusterLoader extends RecordLoader {
          Attribute a = (Attribute)i.next();
          if (a.getName().equalsIgnoreCase("description")) {
             SetLimitedDescription(el, job, element, a, 255, "Name");
-         }
+         } else {
+               extraXmlAttribute(element,a);
+            }
       }
       SetLimitedTextField(el, job, element, 255, "Name");
       job.setName(el);
    }
    
-   public static void SetCluster(Subcluster job, Element element)
+   public void SetCluster(Subcluster job, Element element)
    throws Exception {
       StringElement el = job.getCluster();
       if (el != null /* job identity already set */) {
@@ -175,13 +179,15 @@ public class SubclusterLoader extends RecordLoader {
          Attribute a = (Attribute)i.next();
          if (a.getName().equalsIgnoreCase("description")) {
             SetLimitedDescription(el, job, element, a, 255, "Cluster");
-         }
+         } else {
+               extraXmlAttribute(element,a);
+            }
       }
       SetLimitedTextField(el, job, element, 255, "Cluster");
       job.setCluster(el);
    }
    
-   public static void SetPlatform(Subcluster job, Element element)
+   public void SetPlatform(Subcluster job, Element element)
    throws Exception {
       StringElement el = job.getPlatform();
       if (el != null /* job identity already set */) {
@@ -194,13 +200,15 @@ public class SubclusterLoader extends RecordLoader {
          Attribute a = (Attribute)i.next();
          if (a.getName().equalsIgnoreCase("description")) {
             SetLimitedDescription(el, job, element, a, 255, "Platform");
-         }
+         } else {
+               extraXmlAttribute(element,a);
+            }
       }
       SetLimitedTextField(el, job, element, 255, "Platform");
       job.setPlatform(el);
    }
    
-   public static void SetOS(Subcluster job, Element element)
+   public void SetOS(Subcluster job, Element element)
    throws Exception {
       StringElement el = job.getOS();
       if (el != null /* job identity already set */) {
@@ -213,13 +221,15 @@ public class SubclusterLoader extends RecordLoader {
          Attribute a = (Attribute)i.next();
          if (a.getName().equalsIgnoreCase("description")) {
             SetLimitedDescription(el, job, element, a, 255, "OS");
-         }
+         } else {
+               extraXmlAttribute(element,a);
+            }
       }
       SetLimitedTextField(el, job, element, 255, "OS");
       job.setOS(el);
    }
    
-   public static void SetOSVersion(Subcluster job, Element element)
+   public void SetOSVersion(Subcluster job, Element element)
    throws Exception {
       StringElement el = job.getOSVersion();
       if (el != null /* job identity already set */) {
@@ -232,13 +242,15 @@ public class SubclusterLoader extends RecordLoader {
          Attribute a = (Attribute)i.next();
          if (a.getName().equalsIgnoreCase("description")) {
             SetLimitedDescription(el, job, element, a, 255, "OSVersion");
-         }
+         } else {
+               extraXmlAttribute(element,a);
+            }
       }
       SetLimitedTextField(el, job, element, 255, "OSVersion");
       job.setOSVersion(el);
    }
    
-   public static void SetTimestamp(Subcluster job, Element element)
+   public void SetTimestamp(Subcluster job, Element element)
    throws Exception {
       DateElement el = job.getTimestamp();
       if (el != null /* job identity already set */) {
@@ -251,7 +263,9 @@ public class SubclusterLoader extends RecordLoader {
          Attribute a = (Attribute)i.next();
          if (a.getName().equalsIgnoreCase("description")) {
             SetLimitedDescription(el, job, element, a, 255, "Timestamp");
-         }
+         } else {
+               extraXmlAttribute(element,a);
+            }
       }
       // Duration d = new Duration();
       
@@ -259,7 +273,7 @@ public class SubclusterLoader extends RecordLoader {
       job.setTimestamp(el);
    }
    
-   public static void SetCores(Subcluster job, Element element)
+   public void SetCores(Subcluster job, Element element)
    throws Exception {
       IntegerElement el = job.getCores();
       if (el != null /* job identity already set */) {
@@ -272,13 +286,15 @@ public class SubclusterLoader extends RecordLoader {
          Attribute a = (Attribute)i.next();
          if (a.getName().equalsIgnoreCase("description")) {
             SetLimitedDescription(el, job, element, a, 255, "Cores");
-         }
+         } else {
+               extraXmlAttribute(element,a);
+            }
       }
       el.setValue((new Long(element.getText())).longValue());
       job.setCores(el);
    }
    
-   public static void SetHosts(Subcluster job, Element element)
+   public void SetHosts(Subcluster job, Element element)
    throws Exception {
       IntegerElement el = job.getHosts();
       if (el != null /* job identity already set */) {
@@ -291,13 +307,15 @@ public class SubclusterLoader extends RecordLoader {
          Attribute a = (Attribute)i.next();
          if (a.getName().equalsIgnoreCase("description")) {
             SetLimitedDescription(el, job, element, a, 255, "Hosts");
-         }
+         } else {
+               extraXmlAttribute(element,a);
+            }
       }
       el.setValue((new Long(element.getText())).longValue());
       job.setHosts(el);
    }
    
-   public static void SetCpus(Subcluster job, Element element)
+   public void SetCpus(Subcluster job, Element element)
    throws Exception {
       IntegerElement el = job.getCpus();
       if (el != null /* job identity already set */) {
@@ -310,13 +328,15 @@ public class SubclusterLoader extends RecordLoader {
          Attribute a = (Attribute)i.next();
          if (a.getName().equalsIgnoreCase("description")) {
             SetLimitedDescription(el, job, element, a, 255, "Cpus");
-         }
+         } else {
+               extraXmlAttribute(element,a);
+            }
       }
       el.setValue((new Long(element.getText())).longValue());
       job.setCpus(el);
    }
    
-   public static void SetRAM(Subcluster job, Element element)
+   public void SetRAM(Subcluster job, Element element)
    throws Exception {
       IntegerElement el = job.getRAM();
       if (el != null /* job identity already set */) {
@@ -329,13 +349,15 @@ public class SubclusterLoader extends RecordLoader {
          Attribute a = (Attribute)i.next();
          if (a.getName().equalsIgnoreCase("description")) {
             SetLimitedDescription(el, job, element, a, 255, "RAM");
-         }
+         } else {
+               extraXmlAttribute(element,a);
+            }
       }
       el.setValue((new Long(element.getText())).longValue());
       job.setRAM(el);
    }
    
-   public static void SetProcessor(Subcluster job, Element element)
+   public void SetProcessor(Subcluster job, Element element)
    throws Exception {
       StringElement el = job.getProcessor();
       if (el != null /* job identity already set */) {
@@ -348,13 +370,15 @@ public class SubclusterLoader extends RecordLoader {
          Attribute a = (Attribute)i.next();
          if (a.getName().equalsIgnoreCase("description")) {
             SetLimitedDescription(el, job, element, a, 255, "Processor");
-         }
+         } else {
+               extraXmlAttribute(element,a);
+            }
       }
       SetLimitedTextField(el, job, element, 255, "Processor");
       job.setProcessor(el);
    }
    
-   public static void SetBenchmarkName(Subcluster job, Element element)
+   public void SetBenchmarkName(Subcluster job, Element element)
    throws Exception {
       StringElement el = job.getBenchmarkName();
       if (el != null /* job identity already set */) {
@@ -367,13 +391,15 @@ public class SubclusterLoader extends RecordLoader {
          Attribute a = (Attribute)i.next();
          if (a.getName().equalsIgnoreCase("description")) {
             SetLimitedDescription(el, job, element, a, 255, "BenchmarkName");
-         }
+         } else {
+               extraXmlAttribute(element,a);
+            }
       }
       SetLimitedTextField(el, job, element, 255, "BenchmarkName");
       job.setBenchmarkName(el);
    }
    
-   public static void SetBenchmarkValue(Subcluster job, Element element)
+   public void SetBenchmarkValue(Subcluster job, Element element)
    throws Exception {
       StringElement el = job.getBenchmarkValue();
       if (el != null /* job identity already set */) {
@@ -386,7 +412,9 @@ public class SubclusterLoader extends RecordLoader {
          Attribute a = (Attribute)i.next();
          if (a.getName().equalsIgnoreCase("description")) {
             SetLimitedDescription(el, job, element, a, 255, "BenchmarkValue");
-         }
+         } else {
+               extraXmlAttribute(element,a);
+            }
       }
       SetLimitedTextField(el, job, element, 255, "BenchmarkValue");
       job.setBenchmarkValue(el);

@@ -110,7 +110,7 @@ public class StorageElementRecordLoader extends RecordLoader {
       return job;
    }
    
-   public static void SetUniqueID(StorageElementRecord job, Element element)
+   public void SetUniqueID(StorageElementRecord job, Element element)
    throws Exception {
       StringElement el = job.getUniqueID();
       if (el != null /* job identity already set */) {
@@ -123,14 +123,16 @@ public class StorageElementRecordLoader extends RecordLoader {
          Attribute a = (Attribute)i.next();
          if (a.getName().equalsIgnoreCase("description")) {
             SetLimitedDescription(el, job, element, a, 255, "UniqueID");
-         }
+         } else {
+               extraXmlAttribute(element,a);
+            }
       }
       SetLimitedTextField(el, job, element, 255, "UniqueID");
       job.setUniqueID(el);
    }
    
    
-   public static void SetMeasurementType(StorageElementRecord job, Element element)
+   public void SetMeasurementType(StorageElementRecord job, Element element)
    throws Exception {
       StringElement el = job.getMeasurementType();
       if (el != null /* job identity already set */) {
@@ -143,13 +145,15 @@ public class StorageElementRecordLoader extends RecordLoader {
          Attribute a = (Attribute)i.next();
          if (a.getName().equalsIgnoreCase("description")) {
             SetLimitedDescription(el, job, element, a, 255, "MeasurementType");
-         }
+         } else {
+               extraXmlAttribute(element,a);
+            }
       }
       SetLimitedTextField(el, job, element, 255, "MeasurementType");
       job.setMeasurementType(el);
    }
    
-   public static void SetStorageType(StorageElementRecord job, Element element)
+   public void SetStorageType(StorageElementRecord job, Element element)
    throws Exception {
       StringElement el = job.getStorageType();
       if (el != null /* job identity already set */) {
@@ -162,13 +166,15 @@ public class StorageElementRecordLoader extends RecordLoader {
          Attribute a = (Attribute)i.next();
          if (a.getName().equalsIgnoreCase("description")) {
             SetLimitedDescription(el, job, element, a, 255, "StorageType");
-         }
+         } else {
+               extraXmlAttribute(element,a);
+            }
       }
       SetLimitedTextField(el, job, element, 255, "StorageType");
       job.setStorageType(el);
    }
    
-   public static void SetTimestamp(StorageElementRecord job, Element element)
+   public void SetTimestamp(StorageElementRecord job, Element element)
    throws Exception {
       DateElement el = job.getTimestamp();
       if (el != null /* job identity already set */) {
@@ -181,7 +187,9 @@ public class StorageElementRecordLoader extends RecordLoader {
          Attribute a = (Attribute)i.next();
          if (a.getName().equalsIgnoreCase("description")) {
             SetLimitedDescription(el, job, element, a, 255, "Timestamp");
-         }
+         } else {
+               extraXmlAttribute(element,a);
+            }
       }
       // Duration d = new Duration();
       
@@ -189,7 +197,7 @@ public class StorageElementRecordLoader extends RecordLoader {
       job.setTimestamp(el);
    }
    
-   public static void SetTotalSpace(StorageElementRecord job, Element element)
+   public void SetTotalSpace(StorageElementRecord job, Element element)
    throws Exception {
       IntegerElement el = job.getTotalSpace();
       if (el != null /* job identity already set */) {
@@ -202,13 +210,15 @@ public class StorageElementRecordLoader extends RecordLoader {
          Attribute a = (Attribute)i.next();
          if (a.getName().equalsIgnoreCase("description")) {
             SetLimitedDescription(el, job, element, a, 255, "TotalSpace");
-         }
+         } else {
+               extraXmlAttribute(element,a);
+            }
       }
       el.setValue((new Long(element.getText())).longValue());
       job.setTotalSpace(el);
    }
    
-   public static void SetFreeSpace(StorageElementRecord job, Element element)
+   public void SetFreeSpace(StorageElementRecord job, Element element)
    throws Exception {
       IntegerElement el = job.getFreeSpace();
       if (el != null /* job identity already set */) {
@@ -221,13 +231,15 @@ public class StorageElementRecordLoader extends RecordLoader {
          Attribute a = (Attribute)i.next();
          if (a.getName().equalsIgnoreCase("description")) {
             SetLimitedDescription(el, job, element, a, 255, "FreeSpace");
-         }
+         } else {
+               extraXmlAttribute(element,a);
+            }
       }
       el.setValue((new Long(element.getText())).longValue());
       job.setFreeSpace(el);
    }
    
-   public static void SetUsedSpace(StorageElementRecord job, Element element)
+   public void SetUsedSpace(StorageElementRecord job, Element element)
    throws Exception {
       IntegerElement el = job.getUsedSpace();
       if (el != null /* job identity already set */) {
@@ -240,13 +252,15 @@ public class StorageElementRecordLoader extends RecordLoader {
          Attribute a = (Attribute)i.next();
          if (a.getName().equalsIgnoreCase("description")) {
             SetLimitedDescription(el, job, element, a, 255, "UsedSpace");
-         }
+         } else {
+               extraXmlAttribute(element,a);
+            }
       }
       el.setValue((new Long(element.getText())).longValue());
       job.setUsedSpace(el);
    }
    
-   public static void SetFileCountLimit(StorageElementRecord job, Element element)
+   public void SetFileCountLimit(StorageElementRecord job, Element element)
    throws Exception {
       IntegerElement el = job.getFileCountLimit();
       if (el != null /* job identity already set */) {
@@ -259,13 +273,15 @@ public class StorageElementRecordLoader extends RecordLoader {
          Attribute a = (Attribute)i.next();
          if (a.getName().equalsIgnoreCase("description")) {
             SetLimitedDescription(el, job, element, a, 255, "FileCountLimit");
-         }
+         } else {
+               extraXmlAttribute(element,a);
+            }
       }
       el.setValue((new Long(element.getText())).longValue());
       job.setFileCountLimit(el);
    }
    
-   public static void SetFileCount(StorageElementRecord job, Element element)
+   public void SetFileCount(StorageElementRecord job, Element element)
    throws Exception {
       IntegerElement el = job.getFileCount();
       if (el != null /* job identity already set */) {
@@ -278,7 +294,9 @@ public class StorageElementRecordLoader extends RecordLoader {
          Attribute a = (Attribute)i.next();
          if (a.getName().equalsIgnoreCase("description")) {
             SetLimitedDescription(el, job, element, a, 255, "FileCount");
-         }
+         } else {
+               extraXmlAttribute(element,a);
+            }
       }
       el.setValue((new Long(element.getText())).longValue());
       job.setFileCount(el);
