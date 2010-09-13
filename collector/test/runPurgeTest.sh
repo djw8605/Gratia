@@ -23,7 +23,7 @@ http_port=`expr 8000 + ${UID}`
 
 dbhost=gr8x0.fnal.gov
 dbport=3306
-webhost=gr6x1.fnal.gov
+webhost=gr6x0.fnal.gov
 
 # Need obfuscation
 update_password=proto
