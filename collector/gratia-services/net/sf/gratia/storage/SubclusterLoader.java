@@ -121,7 +121,7 @@ public class SubclusterLoader extends RecordLoader {
                             "; offending XML: " + sub.asXML(), e);
          }
       }
-      return job;
+      return addExtraXmlAttributes(job);
    }
    
    public void SetUniqueID(Subcluster job, Element element)

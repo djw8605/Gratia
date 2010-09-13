@@ -100,7 +100,7 @@ public class ProbeDetailsLoader extends RecordLoader
             e.printStackTrace();
          }
       }
-      return job;
+      return addExtraXmlAttributes(job);
    }
 
     public void AddSoftware(ProbeDetails job, Element element)

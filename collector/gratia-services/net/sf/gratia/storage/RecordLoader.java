@@ -260,7 +260,7 @@ public abstract class RecordLoader
       }
    }
 
-   public JobUsageRecord addExtraXmlAttributes(JobUsageRecord job)
+   public Record addExtraXmlAttributes(Record job)
    {
        if(extraXmlAttributes.toString().length() > 0)
        {

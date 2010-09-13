@@ -119,7 +119,7 @@ public class MetricRecordLoader extends RecordLoader {
                             "; offending XML: " + sub.asXML(), e);
          }
       }
-      return job;
+      return addExtraXmlAttributes(job);
    }
    
    public void SetMetricName(MetricRecord job, Element element)

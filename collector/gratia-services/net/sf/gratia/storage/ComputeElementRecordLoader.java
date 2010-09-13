@@ -98,7 +98,7 @@ public class ComputeElementRecordLoader extends RecordLoader {
                             "; offending XML: " + sub.asXML(), e);
          }
       }
-      return job;
+      return addExtraXmlAttributes(job);
    }
    
    public void SetUniqueID(ComputeElementRecord job, Element element)

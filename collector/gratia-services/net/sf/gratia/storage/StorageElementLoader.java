@@ -113,7 +113,7 @@ public class StorageElementLoader extends RecordLoader {
             "; offending XML: " + sub.asXML(), e);
       }
     }
-    return job;
+    return addExtraXmlAttributes(job);
   }
 
   public void SetUniqueID(StorageElement job, Element element)
