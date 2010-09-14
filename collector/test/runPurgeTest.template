@@ -1,0 +1,3 @@
+dbhost=gr8x0.fnal.gov
+dbport=3306
+webhost=gr6x0.fnal.gov

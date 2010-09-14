@@ -18,12 +18,34 @@ usage: runPurgeTest.sh [-h] [-l] [-d] [-c] [-p port_number]
 EOF
 }
 
+function setfromconfig {
+   what=$1
+   res=`grep -c $what runPurgeTest.config `
+   if [ $res -eq 0 ] ; then
+     echo "The configuration key $what is not set in runPurgeTest.config" 1>&2
+     exit 1;
+   else if [ $res -gt 1 ] ; then
+       echo "The configuration key $what is more than once in runPurgeTest.config" 1>&2
+       exit 1;
+     fi
+   fi
+   echo `grep $what runPurgeTest.config | cut -d= -f2-`
+}
+
 http_port=`expr 8000 + ${UID}`
+if [ ! -e runPurgeTest.config ] ; then
+   echo "runPurgeTest.config does exist, see runPurgeTest.template for an example"
+   exit 1;
+fi
 
+webhost=`setfromconfig webhost`
+if [ "x$webhost" = "x" ] ; then exit 1; fi
 
-dbhost=gr8x0.fnal.gov
-dbport=3306
-webhost=gr6x1.fnal.gov
+dbhost=`setfromconfig dbhost`
+if [ "x$dbhost" = "x" ] ; then exit 1; fi
+
+dbport=`setfromconfig dbport`
+if [ "x$dbport" = "x" ] ; then exit 1; fi
 
 # Need obfuscation
 update_password=proto
