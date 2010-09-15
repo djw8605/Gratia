@@ -7,6 +7,7 @@ import java.util.ArrayList;
 
 import net.sf.gratia.storage.RecordIdentity;
 import net.sf.gratia.storage.StringElement;
+import net.sf.gratia.util.Logging;
 
 /**
  * <p>Title: ProbeDetailsLoader</p>
@@ -50,7 +51,7 @@ public class OriginLoader
          if (a.getName().equalsIgnoreCase("hopNumber")) {
             hopNumber = Integer.parseInt(a.getValue());
          }  else {
-            // Add To ExtraXml
+            Logging.warning("OriginLoader.ReadElement: Warning: extra xml attribute " + a.getName() + " found while parsing.");
          }
       }
 
@@ -108,6 +109,8 @@ public class OriginLoader
          Attribute a = (Attribute)i.next();
          if (a.getName().equalsIgnoreCase("description")) {
             el.setDescription(a.getValue());
+         } else {
+            Logging.warning("OriginLoader.ReadElement: Warning: extra xml attribute " + a.getName() + " found while parsing.");
          }
       }
       
