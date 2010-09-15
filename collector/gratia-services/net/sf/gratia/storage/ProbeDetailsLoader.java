@@ -58,6 +58,8 @@ public class ProbeDetailsLoader extends RecordLoader
    public Record ReadRecord(Element element) throws Exception
    {
       ProbeDetails job = new ProbeDetails();
+      resetExtraXmlAttributes();
+
       job.addRawXml(element.asXML());
 
       for (Iterator i = element.attributeIterator(); i.hasNext(); )

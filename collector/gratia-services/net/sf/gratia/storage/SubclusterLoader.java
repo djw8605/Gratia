@@ -53,6 +53,8 @@ public class SubclusterLoader extends RecordLoader {
    
    public Record ReadRecord(Element element) throws Exception {
       Subcluster job = new Subcluster();
+      resetExtraXmlAttributes();
+
       job.addRawXml(element.asXML());
       
       for (Iterator i = element.attributeIterator(); i.hasNext(); ) {

@@ -54,6 +54,9 @@ public class ComputeElementLoader extends RecordLoader {
 
   public Record ReadRecord(Element element) throws Exception {
     ComputeElement job = new ComputeElement();
+    resetExtraXmlAttributes();
+
+
     job.addRawXml(element.asXML());
 
     for (Iterator i = element.attributeIterator(); i.hasNext(); ) {

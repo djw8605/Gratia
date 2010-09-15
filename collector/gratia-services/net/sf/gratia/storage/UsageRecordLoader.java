@@ -68,6 +68,8 @@ public class UsageRecordLoader extends RecordLoader {
 
     public Record ReadRecord(Element element) throws Exception {
         JobUsageRecord job = new JobUsageRecord();
+        resetExtraXmlAttributes();
+
         job.addRawXml(element.asXML());
 
         for (Iterator i = element.attributeIterator(); i.hasNext();) {
@@ -594,7 +596,7 @@ public class UsageRecordLoader extends RecordLoader {
             Attribute a = (Attribute) i.next();
             if (a.getName().equalsIgnoreCase("description")) {
                SetLimitedDescription(el, job, element, a, 255, "Network");
-            } else if (a.getName().equalsIgnoreCase("metrics")) {
+            } else if (a.getName().equalsIgnoreCase("metric")) {
                 el.setMetrics(a.getValue());
             } else if (a.getName().equalsIgnoreCase("phaseUnit")) {
                 el.setPhaseUnit(a.getValue());
@@ -620,7 +622,7 @@ public class UsageRecordLoader extends RecordLoader {
             Attribute a = (Attribute) i.next();
             if (a.getName().equalsIgnoreCase("description")) {
                SetLimitedDescription(el, job, element, a, 255, "Disj");
-            } else if (a.getName().equalsIgnoreCase("metrics")) {
+            } else if (a.getName().equalsIgnoreCase("metric")) {
                 el.setMetrics(a.getValue());
             } else if (a.getName().equalsIgnoreCase("phaseUnit")) {
                 el.setPhaseUnit(a.getValue());
@@ -648,7 +650,7 @@ public class UsageRecordLoader extends RecordLoader {
             Attribute a = (Attribute) i.next();
             if (a.getName().equalsIgnoreCase("description")) {
                SetLimitedDescription(el, job, element, a, 255, "Memory");
-            } else if (a.getName().equalsIgnoreCase("metrics")) {
+            } else if (a.getName().equalsIgnoreCase("metric")) {
                 el.setMetrics(a.getValue());
             } else if (a.getName().equalsIgnoreCase("phaseUnit")) {
                 el.setPhaseUnit(a.getValue());
@@ -676,7 +678,7 @@ public class UsageRecordLoader extends RecordLoader {
             Attribute a = (Attribute) i.next();
             if (a.getName().equalsIgnoreCase("description")) {
                SetLimitedDescription(el, job, element, a, 255, "Swap");
-            } else if (a.getName().equalsIgnoreCase("metrics")) {
+            } else if (a.getName().equalsIgnoreCase("metric")) {
                 el.setMetrics(a.getValue());
             } else if (a.getName().equalsIgnoreCase("phaseUnit")) {
                 el.setPhaseUnit(a.getValue());

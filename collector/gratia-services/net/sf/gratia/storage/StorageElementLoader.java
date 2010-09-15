@@ -54,6 +54,8 @@ public class StorageElementLoader extends RecordLoader {
 
   public Record ReadRecord(Element element) throws Exception {
     StorageElement job = new StorageElement();
+    resetExtraXmlAttributes();
+
     job.addRawXml(element.asXML());
 
     for (Iterator i = element.attributeIterator(); i.hasNext(); ) {

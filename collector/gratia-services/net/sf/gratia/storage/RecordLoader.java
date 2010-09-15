@@ -41,6 +41,11 @@ public abstract class RecordLoader
          res = res + " ; " + value;
       return res;
    }
+
+   public void resetExtraXmlAttributes() 
+   {
+      extraXmlAttributes.delete(0,extraXmlAttributes.length());
+   }
    
    public String LimitedTextField(Record rec, Element element, String value, int limit, String fieldname) 
    {

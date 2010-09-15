@@ -54,6 +54,8 @@ public class MetricRecordLoader extends RecordLoader {
    
    public Record ReadRecord(Element element) throws Exception {
       MetricRecord job = new MetricRecord();
+      resetExtraXmlAttributes();
+
       job.addRawXml(element.asXML());
       
       for (Iterator i = element.attributeIterator(); i.hasNext(); ) {
