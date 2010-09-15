@@ -87,8 +87,8 @@ if __name__ == '__main__':
         #sendRecords(500,end, "regular");
 
         # Send a few duplicates
-        sendRecords(1,end, "duplicate")
-        sendRecords(1,end, "duplicate")
+        sendRecords(20,end, "duplicate")
+        sendRecords(20,end, "duplicate")
 
         # Send a few record with ExtraXml
         #sendRecords(17,end,"extraxml","<RealJobName>testing extra xml</RealJobName>");
