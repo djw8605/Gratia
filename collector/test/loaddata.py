@@ -81,7 +81,7 @@ if __name__ == '__main__':
         # Use UTC(/GMT) time to be in sync with the Collector (the DataScrubber in particular)
         end = datetime.datetime.utcnow();
 
-        sendRecords(3,end)
+        #sendRecords(3,end)
 
         # Send several records records
         sendRecords(500,end, "regular");
