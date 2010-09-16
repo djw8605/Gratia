@@ -276,7 +276,7 @@
 # Nebraska		2603	2027	28
 # Purdue-RCAC		3031	2883	5
 #
-#   09/08/2010 (John Weigand)
+# 09/08/2010 (John Weigand)
 #     Added NERSC-PDSF with a 1160 SI2K value per Brian Bockleman email
 #
 # 09/13/2010 (Karthik Arunachalam)
@@ -288,6 +288,8 @@
 # OU_OCHEP_SWT2           4020    2389    68
 # ---------------------------------------------------
 #
+# 09/16/2010 (John Weigand)
+#   Updated NF for BNL_ATLAS_1 - from 2302 new 3225
 ##################################################################
 #-- Site  ------- SPECint2000
 #
@@ -311,7 +313,7 @@ UFlorida-PG         1535
 ####################################
 ####################################
 #--- ATLAS Tier 1 ----
-BNL_ATLAS_1         2302
+BNL_ATLAS_1         3225
 #--- ATLAS Tier 2 ----
 AGLT2               3507
 BU_ATLAS_Tier2      2897
