@@ -80,7 +80,7 @@ public class ReplicationService extends Thread {
          HibernateWrapper.closeSession(session);
          Logging.warning("ReplicationService: caught exception " +
                          e + " trying to check and/or start new replication data pumps.");
-         Logging.debug("ReplicationService: exception detail follows: ", e);
+         Logging.warning("ReplicationService: exception detail follows: ", e);
       }
       //
       // now - loop through running threads, find out if they're still wanted
