@@ -290,6 +290,14 @@
 #
 # 09/16/2010 (John Weigand)
 #   Updated NF for BNL_ATLAS_1 - from 2302 new 3225
+# 
+# 09/22/2010 (Karthik Arunachalam)
+# Updated NFapel values to NFgip values for the following sites
+#---------------------------------------------------
+# Site                    NFgip   NFapel  % diff
+# ---------------------------------------------------
+# UCSDT2		  3310	  2871	  15
+# HEPGRID_UERJ		  3196	  2117	  50
 ##################################################################
 #-- Site  ------- SPECint2000
 #
@@ -298,12 +306,12 @@ USCMS-FNAL-WC1-CE   2566
 #--- CMS Tier 2 ----    
 CIT_CMS_T2          3046       
 GLOW                2408
-HEPGRID_UERJ        2117
+HEPGRID_UERJ        3196
 MIT_CMS             1872
 Nebraska            2603
 Purdue-RCAC         3031
 Purdue-Steele       3196
-UCSDT2              2871
+UCSDT2              3310
 SPRACE              3370
 GridUNESP_CENTRAL   3672
 UFlorida-HPC        2415
