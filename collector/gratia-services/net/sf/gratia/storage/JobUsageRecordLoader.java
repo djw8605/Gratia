@@ -13,7 +13,7 @@ import net.sf.gratia.storage.StringElement;
 import net.sf.gratia.util.Logging;
 
 /**
- * <p>Title: UsageRecordLoader</p>
+ * <p>Title: JobUsageRecordLoader</p>
  *
  * <p>Description: Implement the parsing and transformation of the XML Usage Record 
  * (via a sax Element).</p>
@@ -25,7 +25,7 @@ import net.sf.gratia.util.Logging;
  * @author Philippe Canal
  * @version 1.0
  */
-public class UsageRecordLoader extends RecordLoader {
+public class JobUsageRecordLoader extends RecordLoader {
     public ArrayList ReadRecords(Element eroot) throws Exception {
         ArrayList usageRecords = new ArrayList();
 
@@ -939,6 +939,6 @@ public class UsageRecordLoader extends RecordLoader {
         job.setResource(l);
     }
     
-    public UsageRecordLoader() {
+    public JobUsageRecordLoader() {
     }
 }

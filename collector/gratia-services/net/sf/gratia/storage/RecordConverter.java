@@ -12,7 +12,7 @@ public class RecordConverter {
 
     public RecordConverter() {
         // Load up the list with loaders
-        loaderList.add(new UsageRecordLoader());
+        loaderList.add(new JobUsageRecordLoader());
         loaderList.add(new MetricRecordLoader());
         loaderList.add(new ComputeElementRecordLoader());
         loaderList.add(new StorageElementRecordLoader());
