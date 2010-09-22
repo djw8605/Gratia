@@ -4,7 +4,7 @@ function usage {
 cat 1>&2 <<EOF
 usage: runPurgeTest.sh [-h] [-l] [-d] [-c] [-p port_number]
    -h print this help
-   -d reset the schema
+   -d reset the schema and clean collector data directory
    -c reinstall the collector
    -p use this port for the main collector (default 9000)
    -l load the data
@@ -239,6 +239,9 @@ GRANT SELECT,EXECUTE ON ${schema_name}.* TO 'reader'@'${host}' IDENTIFIED BY '${
 GRANT SELECT,EXECUTE ON ${schema_name}.* TO 'reader'@'localhost' IDENTIFIED BY '${reader_password}';
 GRANT SELECT,EXECUTE ON ${schema_name}.* TO 'reader'@'${webhost}' IDENTIFIED BY '${reader_password}';
 EOF
+
+   # And now remove the files
+   ssh ${webhost} "rm ${tomcatpwd}/gratia/data/thread*/*"
 
 #mysql -h ${dbhost} --port=${dbport} -u gratia --password=${update_password}<<EOF 
 #show databases;
@@ -734,7 +737,7 @@ if [ $do_stop ]; then
    stop_server
 fi
 if [ $do_databasereset ];then
-   echo "Cleanup all database content"
+   echo "Cleanup all database content and outstanding collector records"
    reset_database
 fi
 
