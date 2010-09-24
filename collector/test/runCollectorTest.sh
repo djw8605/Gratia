@@ -36,7 +36,7 @@ function setfromconfig {
 
 http_port=`expr 8000 + ${UID}`
 if [ ! -e runCollectorTest.config ] ; then
-   echo "runCollectorTest.config does exist, see runCollectorTest.template for an example"
+   echo "runCollectorTest.config does not exist, see runCollectorTest.template for an example"
    exit 1;
 fi
 
