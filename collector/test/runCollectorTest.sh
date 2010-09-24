@@ -2,7 +2,7 @@
 
 function usage {
 cat 1>&2 <<EOF
-usage: runPurgeTest.sh [-h] [-l] [-d] [-c] [-p port_number]
+usage: runCollectorTest.sh [-h] [-l] [-d] [-c] [-p port_number]
    -h print this help
    -d reset the schema and clean collector data directory
    -c reinstall the collector
@@ -20,21 +20,21 @@ EOF
 
 function setfromconfig {
    what=$1
-   res=`grep -c $what runPurgeTest.config `
+   res=`grep -c $what runCollectorTest.config `
    if [ $res -eq 0 ] ; then
-     echo "The configuration key $what is not set in runPurgeTest.config" 1>&2
+     echo "The configuration key $what is not set in runCollectorTest.config" 1>&2
      exit 1;
    else if [ $res -gt 1 ] ; then
-       echo "The configuration key $what is more than once in runPurgeTest.config" 1>&2
+       echo "The configuration key $what is more than once in runCollectorTest.config" 1>&2
        exit 1;
      fi
    fi
-   echo `grep $what runPurgeTest.config | cut -d= -f2-`
+   echo `grep $what runCollectorTest.config | cut -d= -f2-`
 }
 
 http_port=`expr 8000 + ${UID}`
-if [ ! -e runPurgeTest.config ] ; then
-   echo "runPurgeTest.config does exist, see runPurgeTest.template for an example"
+if [ ! -e runCollectorTest.config ] ; then
+   echo "runCollectorTest.config does exist, see runCollectorTest.template for an example"
    exit 1;
 fi
 

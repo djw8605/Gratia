@@ -2,7 +2,7 @@
 
 This directory contains test of the Gratia collector.
 
---- runPurgeTest.sh 
+--- runCollectorTest.sh 
 
 Goal: test that the collector is properly purging old records.  
 
@@ -13,7 +13,7 @@ This test is ran when doing
 To run it by hand, make sure you build the Gratia war file
 (see ../build-scripts)
 
-   ./runPurgeTest.sh -c -d -l -f -t
+   ./runCollectorTest.sh -c -d -l -f -t
 
 This test requires access to the root user on gratia-vm02 (for
 the tomcat install) and a priviledge db user (from gratia-vm02)
