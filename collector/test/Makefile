@@ -8,15 +8,26 @@ def:
 	@echo the default options:
 	@echo "   gmake test"
 
-build:
+urCollectorFiles=../../probe/pbs-lsf/pbs-* ../../probe/pbs-lsf/urCollector-src/urCreator ../../probe/pbs-lsf/urCollector-src/*.pl
+
+urCollector:
+	(cd ../../build-scripts; gmake urCollector )
+	mkdir -p pbs 
+	mkdir -p lsf
+	cp $(urCollectorFiles) pbs
+	cp  ./urCollector.conf.prepared pbs/urCollector.conf
+	cp $(urCollectorFiles) lsf
+	cat  ./urCollector.conf.prepared | sed -e 's/lrmsType = "pbs"/lrmsType = "lsf"/' > lsf/urCollector.conf
+
+build: urCollector
 	(cd ../../build-scripts; gmake all testtimeout urCollector )
 
 test: build
-	./runCollectorTest.sh -c -d -l -f -k -m -t
+	./runCollectorTest.sh -c -d -l --pbs -f -k -m -t
 
 # Target to use when 'just' wanting to re-run the test without rebuilding nor re-installing the collector
 onlytest:  
-	./runCollectorTest.sh -d -l -f -k -m -t
+	./runCollectorTest.sh -d -l --pbs -f -k -m -t
 
 
 clean:

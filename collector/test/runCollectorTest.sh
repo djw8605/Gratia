@@ -77,6 +77,10 @@ function adminCollector() {
    wget --dns-timeout=5 --connect-timeout=10 --read-timeout=40 -O - "http://${webhost}:${ssl_port}/gratia-administration/systemadministration.html?action=$1"
 }
 
+function statusCollector() {
+   wget --dns-timeout=5 --connect-timeout=10 --read-timeout=40 -O - "http://${webhost}:${ssl_port}/gratia-administration/collector-status.html?out=txt&subsystem=$1"
+}
+
 function stop_server {
   if [ "${server_status}" != "stopped" ]; then 
      echo "Stopping server ${webhost}:${http_port}"
@@ -169,7 +173,7 @@ function write_ProbeConfig
     UseSyslog="0"
     SuppressUnknownVORecords="0"
     SuppressNoDNRecords="0"
-    EnableProbe="0"
+    EnableProbe="1"
 />
 EOF
 }
@@ -250,7 +254,10 @@ GRANT SELECT,EXECUTE ON ${schema_name}.* TO 'reader'@'${webhost}' IDENTIFIED BY 
 EOF
 
    # And now remove the files
-   ssh ${webhost} "rm ${tomcatpwd}/gratia/data/thread*/*"
+   ssh ${webhost} "rm -f ${tomcatpwd}/gratia/data/thread*/*"
+
+   # And the pbs/lsf memory
+   rm -rf */MAGIC_VDT_LOCATION
 
 #mysql -h ${dbhost} --port=${dbport} -u gratia --password=${update_password}<<EOF 
 #show databases;
@@ -464,6 +471,76 @@ function check_result {
    fi;
 }
 
+function loadpbs 
+{
+    pbsprobedir=${PWD}/pbs
+
+    mkdir -p ${pbsprobedir}
+    mkdir -p ${pbsprobedir}/MAGIC_VDT_LOCATION/var/tmp/urCollector
+    mkdir -p ${pbsprobedir}/MAGIC_VDT_LOCATION/var/logs
+    if [ ! -e common ] ; then 
+	ln -s ../../probe/common .
+    fi
+
+    start_server
+
+    # Disable housekeeping
+    echo "Turning off record purging"
+    adminCollector "disableHousekeeping" 2>&1 | tee wget.full.log | grep House | grep DISABLED > wget.log
+    result=$?
+    if [ ${result} -ne 0 ]; then
+	echo "Error: Turning off the record purging failed"
+	exit 1
+    fi
+
+    write_ProbeConfig ${pbsprobedir}/ProbeConfig ${webhost} "" gratia-servlets pbs
+
+    echo "Sending PBS data"
+    export PERL5LIB=${PWD}/../../probe/pbs-lsf/urCollector-src
+    ${pbsprobedir}/pbs-lsf_meter.cron.sh
+
+
+    # Wait for the record to be in
+    wait_for_input_use 0
+
+    # Should we fix the dates?
+
+}
+
+function loadlsf 
+{
+    lsfprobedir=${PWD}/lsf
+
+    mkdir -p ${lsfprobedir}
+    mkdir -p ${lsfprobedir}/MAGIC_VDT_LOCATION/var/tmp/urCollector
+    mkdir -p ${lsfprobedir}/MAGIC_VDT_LOCATION/var/logs
+    if [ ! -e common ] ; then 
+	ln -s ../../probe/common .
+    fi
+
+    start_server
+
+    # Disable housekeeping
+    echo "Turning off record purging"
+    adminCollector "disableHousekeeping" 2>&1 | tee wget.full.log | grep House | grep DISABLED > wget.log
+    result=$?
+    if [ ${result} -ne 0 ]; then
+	echo "Error: Turning off the record purging failed"
+	exit 1
+    fi
+
+    write_ProbeConfig ${lsfprobedir}/ProbeConfig ${webhost} "" gratia-servlets lsf
+
+    echo "Sending LSF data"
+    export PERL5LIB=${PWD}/../../probe/pbs-lsf/urCollector-src
+    ${lsfprobedir}/pbs-lsf_meter.cron.sh
+
+    # Wait for the record to be in
+    wait_for_input_use 0
+
+    # Should we fix the dates?
+
+}
 
 function wait_for_input_use {
    expected_count=$1
@@ -632,14 +709,14 @@ function check_queue_threshold()
    sleep 2
 
    # Check whether the servlets are disabled in 2 ways
-   wget --dns-timeout=5 --connect-timeout=10 --read-timeout=40 -O - "http://${webhost}:${ssl_port}/gratia-administration/collector-status.html?out=txt&subsystem=collector"  2>>wget.threshold.stderr.log > collector-status.validate
+   statusCollector collector  2>>wget.threshold.stderr.log > collector-status.validate
    check_result "" collector-status "Servlets Status"
 
    wget --dns-timeout=5 --connect-timeout=10 --read-timeout=40 -O - "http://${webhost}:${ssl_port}/gratia-servlets/rmi" --post-data="nothing" 2>>wget.threshold.stderr.log > collector-input.validate
    check_result "" collector-input "Probe response when disabled"
 
    # Now let's check the housekeeping
-   wget --dns-timeout=5 --connect-timeout=10 --read-timeout=40 -O - "http://${webhost}:${ssl_port}/gratia-administration/collector-status.html?out=txt&subsystem=datahousekeeping"  2>>wget.threshold.stderr.log > housekeeping-status.validate
+   statusCollector "datahousekeeping"  2>>wget.threshold.stderr.log > housekeeping-status.validate
    check_result "" housekeeping-status "HouseKeeping Status"
    
    # And now remove the files
@@ -656,14 +733,14 @@ function check_queue_threshold()
    sleep 2
 
    # Check whether the servlets are disabled in 2 ways
-   wget --dns-timeout=5 --connect-timeout=10 --read-timeout=40 -O - "http://${webhost}:${ssl_port}/gratia-administration/collector-status.html?out=txt&subsystem=collector"  2>>wget.threshold.stderr.log > collector-run-status.validate
+   statusCollector "collector"  2>>wget.threshold.stderr.log > collector-run-status.validate
    check_result "" collector-run-status "Servlets Status when enabled"
 
    wget --dns-timeout=5 --connect-timeout=10 --read-timeout=40 -O - "http://${webhost}:${ssl_port}/gratia-servlets/rmi" --post-data="nothing" 2>>wget.threshold.stderr.log  | tee -a wget.threshold.full.log | cut -c-49 > collector-run-input.validate
    check_result "" collector-run-input "Probe response when enabled"
 
    # Now let's check the housekeeping
-   wget --dns-timeout=5 --connect-timeout=10 --read-timeout=40 -O - "http://${webhost}:${ssl_port}/gratia-administration/collector-status.html?out=txt&subsystem=datahousekeeping"  2>>wget.threshold.stderr.log > housekeeping-run-status.validate
+   statusCollector "datahousekeeping"  2>>wget.threshold.stderr.log > housekeeping-run-status.validate
    check_result "" housekeeping-run-status "HouseKeeping Status when enabled"
 
 } 
@@ -799,11 +876,11 @@ if [ $do_load ]; then
 fi
 
 if [ $do_pbs ] ; then 
-    echo Check pbs
+   loadpbs
 fi
 
 if [ $do_lsf ] ; then 
-    echo Check lsf
+   loadlsf
 fi
 
 if [ $do_fixup ]; then 
