@@ -34,7 +34,6 @@ function setfromconfig {
    echo `grep $what runCollectorTest.config | cut -d= -f2-`
 }
 
-http_port=`expr 8000 + ${UID}`
 if [ ! -e runCollectorTest.config ] ; then
    echo "runCollectorTest.config does not exist, see runCollectorTest.template for an example"
    exit 1;
@@ -49,15 +48,22 @@ if [ "x$dbhost" = "x" ] ; then exit 1; fi
 dbport=`setfromconfig dbport`
 if [ "x$dbport" = "x" ] ; then exit 1; fi
 
+schema_name=`setfromconfig schema_name`
+if [ "x$schema_name" = "x" ] ; then 
+   schema_name=gratia_purge_${USER}
+fi
+
+http_port=`setfromconfig http_port`
+if [ "x$http_port" = "x" ] ; then  
+   http_port=`expr 8000 + ${UID}`
+fi
+
+
 # Need obfuscation
 update_password=proto
 reader_password=reader
 pass=lisp01
 
-schema_name=`setfromconfig schema_name`
-if [ "x$schema_name" = "x" ] ; then 
-   schema_name=gratia_purge_${USER}
-fi
 tomcatpwd=/data/tomcat-${schema_name}
 
 host=`hostname`
