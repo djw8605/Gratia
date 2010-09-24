@@ -54,7 +54,10 @@ update_password=proto
 reader_password=reader
 pass=lisp01
 
-schema_name=gratia_purge_${USER}
+schema=`setfromconfig schema`
+if [ "x$schema" = "x" ] ; then 
+   schema_name=gratia_purge_${USER}
+fi
 tomcatpwd=/data/tomcat-${schema_name}
 
 host=`hostname`
