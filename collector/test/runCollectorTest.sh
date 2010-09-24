@@ -15,6 +15,8 @@ usage: runCollectorTest.sh [-h] [-l] [-d] [-c] [-p port_number]
    -s stop server
    -m test timeout feature
    -t test content
+   --lsf load lsf data
+   --pbs load pbs data
 EOF
 }
 
@@ -119,6 +121,11 @@ function write_ProbeConfig
    remotehost=$2
    bundleSize=$3
    service=$4
+   if [ "x$5" = "x" ] ; then 
+      probeprefix=tester
+   else 
+      probeprefix=$5
+   fi
 
    cat > $name <<EOF
 <ProbeConfiguration 
@@ -138,7 +145,7 @@ function write_ProbeConfig
     CollectorService="/$service/rmi" 
     UseSoapProtocol="0"
     
-    MeterName="tester:LocalTester.where.edu" 
+    MeterName="${probeprefix}:LocalTester.where.edu" 
     SiteName="LocalTesting"
     Grid="OSG"
    
@@ -173,6 +180,8 @@ function write_ProbeConfigs
    write_ProbeConfig ProbeConfigSingle ${webhost} 'BundleSize="1"' gratia-servlets
    write_ProbeConfig ProbeConfigTimeout ${webhost} "" gratia-testtimeout
    write_ProbeConfig ProbeConfigFirewall atlasgw.bnl.gov "" gratia-testtimeout
+   write_ProbeConfig ProbeConfigLsf ${webhost} "" gratia-servlets lsf
+   write_ProbeConfig ProbeConfigPbs ${webhost} "" gratia-servlets pbs
 }
 
 function wait_for_server {
@@ -682,46 +691,78 @@ function upload_war()
 }
 
 #--- get command line args ----
-while getopts :tshcfkdlmn:w:p:b: OPT; do
+#while getopt :tshcfkdlmn:w:p:b: OPT; do
+
+ARGS=$(getopt -s bash --options :tshcfkdlmn:w:p:b:  \
+  --longoptions pbs,lsf,help --name runCollectorTest.sh -- "$@" )
+
+getoptresult=$?
+
+if [ $getoptresult -eq 1 ] ; then
+   ARGS=`echo $ARGS | sed -e 's/ *-- *$//' `
+   if [ "x$ARGS" != "x" ] ; then 
+      BADS=`echo $@ | sed -e "s/${ARGS}//" `
+   else
+      BADS=$@
+   fi
+   echo "Illegal option(s):" "$BADS"
+   usage
+   exit 1
+fi
+
+eval set -- "$ARGS"
+
+while true ; do 
+    OPT=$1
+    OPTARG=$2
     case $OPT in
-        n)  schema_name=$OPTARG
+        -n)  schema_name=$OPTARG
             tomcatpwd=/data/tomcat-$OPTARG
             ;;
-        w)  do_war=1
+        -w)  do_war=1
             WAR="$WAR $OPTARG"
             ;;
-        b)  do_war=1
+        -b)  do_war=1
             do_build=1
             WAR="$WAR $OPTARG"
             BUILDWAR="$BUILDWAR $OPTARG"
             ;;
-        c)  do_collector=1
+        -c)  do_collector=1
             ;;
-        l)  do_load=1
+        -l)  do_load=1
             ;;
-        d)  do_databasereset=1
+        -d)  do_databasereset=1
             ;;
-        f)  do_fixup=1; 
+        -f)  do_fixup=1; 
             ;;
-        k)  do_purge=1
+        -k)  do_purge=1
             ;;
-        h)
+        -h|--help)
             usage
             exit 1
             ;;
-        p)  http_port=$OPTARG
+        -p)  http_port=$OPTARG
             ;;
-        t)  do_test=1
+        -t)  do_test=1
             ;;
-        s)  do_stop=1
+        -s)  do_stop=1
             ;;
-        m)  do_timeout=1
+        -m)  do_timeout=1
+            ;;
+        --lsf) do_lsf=1
+            ;;
+        --pbs) do_pbs=1
+            ;;
+        --)
+            shift
+            break
             ;;
         *)
-            usage
-            exit 1
-            ;;
+            shift
+            break
+            ;; 
     esac
+    shift
 done
 shift $[ OPTIND - 1 ]
 
@@ -755,6 +796,14 @@ fi
 
 if [ $do_load ]; then
    loaddata
+fi
+
+if [ $do_pbs ] ; then 
+    echo Check pbs
+fi
+
+if [ $do_lsf ] ; then 
+    echo Check lsf
 fi
 
 if [ $do_fixup ]; then 
