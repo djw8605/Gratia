@@ -23,7 +23,7 @@ build: urCollector
 	(cd ../../build-scripts; gmake all testtimeout urCollector )
 
 test: build
-	./runCollectorTest.sh -c -d -l --pbs -f -k -m -t
+	./runCollectorTest.sh -c -d -l --lsf --pbs -f -k -m -t
 
 # Target to use when 'just' wanting to re-run the test without rebuilding nor re-installing the collector
 onlytest:  
