@@ -681,3 +681,8 @@ define defaultdirs
 	mkdir -p gratia/var/tmp/; \
 	chmod -R og+rw gratia/var/; 
 endef
+
+$(base)/probe/pbs-lsf/urCollector-src/urCreator: $(wildcard $(base)/probe/pbs-lsf/urCollector-src/*.h $(base)/probe/pbs-lsf/urCollector-src/*.cpp )
+	cd $(base)/probe/pbs-lsf/urCollector-src &&  make 
+
+urCollector: $(base)/probe/pbs-lsf/urCollector-src/urCreator
