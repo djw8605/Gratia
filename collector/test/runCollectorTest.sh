@@ -702,7 +702,7 @@ function check_queue_threshold()
    sleep 5
 
    # Force the checking of the queue sizes
-   adminCollector "runQSizeMonitor"  2>>wget.threshold.stderr.log | grep QSizeMonitor >> tee -a wget.threshold.full.log
+   adminCollector "runQSizeMonitor"  2>>wget.threshold.stderr.log | grep QSizeMonitor | tee -a wget.threshold.full.log
 
    # Wait one minute to let the QSizeMonitor run
    #echo "Sleeping 5s to let the QSizeMonitor time to run"
@@ -726,7 +726,7 @@ function check_queue_threshold()
    adminCollector "refreshStatus" 2>>wget.threshold.stderr.log | tee -a wget.threshold.full.log |  grep 'Collector Status' > wget.threshold.log
 
    # Force the checking of the queue sizes
-   adminCollector "runQSizeMonitor"  2>>wget.threshold.stderr.log | grep QSizeMonitor >> tee -a wget.threshold.full.log
+   adminCollector "runQSizeMonitor"  2>>wget.threshold.stderr.log | grep QSizeMonitor | tee -a wget.threshold.full.log
 
    # Wait one minute to let the QSizeMonitor run
    echo "Sleeping 5s to let the QSizeMonitor time to run"
