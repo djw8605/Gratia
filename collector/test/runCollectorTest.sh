@@ -318,7 +318,7 @@ EOF
 
    stop_server
 
-   ssh -l root ${webhost} mkdir -p ${tomcatpwd} \; tar -zxf ~gratia/tomcat-tarballs/apache-tomcat-5.5.28.tar.gz --strip 1 -C ${tomcatpwd}\; mkdir -p ${tomcatpwd}/gratia\; chown -R ${USER} ${tomcatpwd}\; rm -f ${tomcatpwd}/logs/*
+   ssh -l root ${webhost} mkdir -p ${tomcatpwd} \; tar -zxf ~gratia/tomcat-tarballs/apache-tomcat-5.5.28.tar.gz --strip 1 -C ${tomcatpwd}\; mkdir -p ${tomcatpwd}/gratia\; mkdir -p ${tomcatpwd}/gratia/data/thread0\; chown -R ${USER} ${tomcatpwd}\; rm -f ${tomcatpwd}/logs/*
 
    ssh -l root ${webhost}  cd ${source}/common/configuration\; \
      ./update-gratia-local -s -S ${source} -d ${pass} -i ${filename} ${schema_name} \; \
