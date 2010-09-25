@@ -431,7 +431,11 @@ echo
 echo "... updating $tomcat_gratia"
 mkdir -p $tomcat_gratia
 # retrieve the latest pre-tar cleanup script
-tar xf $target_dir/gratia.tar ./cleanup_misc -C $tomcat_gratia
+# the cd /var/tmp; is to avoid the error message 
+#    tar: ./cleanup_misc: Cannot open: File exists
+# which is seemingly due to the fact that the file must first be extracted in
+# the local directory (and/or the loca file is in the way).
+(cd /var/tmp; tar xf $target_dir/gratia.tar ./cleanup_misc -C $tomcat_gratia )
 # Run it to clean up some miscellaneous files that could cause trouble
 misc_cleanup
 # Untar the whole thing now.
