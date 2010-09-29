@@ -618,8 +618,8 @@ EOF
    echo "Check MasterSummaryData"
    readonly_mysql > jobsummary.validate 2>&1 <<EOF 
 use ${schema_name};
-select ProbeName, VOName, count(*) as Nrecord, Sum(NJobs) as NJobs, Sum(WallDuration) as Wall, Sum(CpuUserDuration+CpuSystemDuration) as Cpu 
-    from VOProbeSummary group by ProbeName, VOName;
+select ProbeName, V.VOName, Cores, count(*) as Nrecord, Sum(NJobs) as NJobs, Sum(WallDuration) as Wall, Sum(CpuUserDuration+CpuSystemDuration) as Cpu 
+    from MasterSummaryData M join VONameCorrection VC on M.VOcorrid = VC.corrid join VO V on VC.void = V.void  group by ProbeName, V.VOName, Cores;
 EOF
 
    echo "Check MetricRecord"
@@ -641,10 +641,6 @@ use ${schema_name};
 select count(*)<60 from Origin;
 EOF
 
-  echo "Check status monitoring"
-  wait_for_input_use 0
-  wget --dns-timeout=5 --connect-timeout=10 --read-timeout=40 -O - "http://${webhost}:${ssl_port}/gratia-administration/monitor-status.html" 2>wget.full.log | cut -d\| -f3- > status.validate
-
   check_result $days duplicate "Duplicate"
   check_result $ydays jobsummary "JobUsageRecord Summary Table"
   check_result $days jobusagerecord "JobUsageRecord"
@@ -652,7 +648,13 @@ EOF
   check_result $days metricrecord "MetricRecord"
   check_result $mdays metricrecordxml "MetricRecord's RawXml"
   check_result $days origin "Origin records"
+
+  echo "Check status monitoring"
+  wait_for_input_use 0
+  wget --dns-timeout=5 --connect-timeout=10 --read-timeout=40 -O - "http://${webhost}:${ssl_port}/gratia-administration/monitor-status.html" 2>wget.full.log | cut -d\| -f3- > status.validate
+
   check_result "" status "Status monitoring"
+
 }
 
 function check_timeout()

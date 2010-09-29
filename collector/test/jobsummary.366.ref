@@ -1,8 +1,12 @@
-ProbeName	VOName	Nrecord	NJobs	Wall	Cpu
-lsf:LocalTester.where.edu	alice	2	15	13	0
-lsf:LocalTester.where.edu	cms	1	2	30	8
-lsf:LocalTester.where.edu	dteam	31	1042	244715	15790
-lsf:LocalTester.where.edu	infngrid	15	90	3437	656
-pbs:LocalTester.where.edu	dteam	7	168	23166	1728
-pbs:LocalTester.where.edu	infngrid	1	6	0	0
-tester:LocalTester.where.edu	escience	366	1611	289982041244.401	45238759.5
+ProbeName	VOName	Cores	Nrecord	NJobs	Wall	Cpu
+lsf:LocalTester.where.edu	alice	1	2	15	13	0
+lsf:LocalTester.where.edu	cms	1	1	2	30	8
+lsf:LocalTester.where.edu	dteam	1	30	1038	244369	15752
+lsf:LocalTester.where.edu	dteam	2	1	4	346	38
+lsf:LocalTester.where.edu	infngrid	1	12	87	3207	612
+lsf:LocalTester.where.edu	infngrid	2	1	1	61	13
+lsf:LocalTester.where.edu	infngrid	3	1	1	77	15
+lsf:LocalTester.where.edu	infngrid	4	1	1	92	16
+pbs:LocalTester.where.edu	dteam	1	7	168	23166	1728
+pbs:LocalTester.where.edu	infngrid	1	1	6	0	0
+tester:LocalTester.where.edu	escience	3	366	1611	289982041244.401	45238759.5
