@@ -754,6 +754,8 @@ function check_queue_threshold()
    statusCollector "datahousekeeping"  2>>wget.threshold.stderr.log > housekeeping-run-status.validate
    check_result "" housekeeping-run-status "HouseKeeping Status when enabled"
 
+   # Turn on updates to return to normal
+   adminCollector "stopDatabaseUpdateThreads" 2>wget.threshold.stderr.log  | tee wget.threshold.full.log  | grep 'Database' > wget.threshold.log
 } 
 
 function build_war()
