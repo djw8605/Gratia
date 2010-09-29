@@ -50,6 +50,8 @@ public class OriginLoader
          Attribute a = (Attribute) i.next();
          if (a.getName().equalsIgnoreCase("hopNumber")) {
             hopNumber = Integer.parseInt(a.getValue());
+         }  else if (a.getName().equalsIgnoreCase("hop")) {
+            hopNumber = Integer.parseInt(a.getValue());
          }  else {
             Logging.warning("OriginLoader.ReadElement: Warning: extra xml attribute " + a.getName() + " found while parsing.");
          }
