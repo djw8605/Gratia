@@ -605,8 +605,8 @@ EOF
    echo "Check JobUsageRecord"
    readonly_mysql > jobusagerecord.validate 2>&1 <<EOF 
 use ${schema_name};
-select ProbeName, VOName, count(*) as Nrecord, Sum(NJobs) as NJobs, Sum(WallDuration) as Wall, Sum(CpuUserDuration+CpuSystemDuration) as Cpu 
-    from JobUsageRecord_Report group by ProbeName, VOName;
+select ProbeName, VOName, Processors as Cores, count(*) as Nrecord, Sum(NJobs) as NJobs, Sum(WallDuration) as Wall, Sum(CpuUserDuration+CpuSystemDuration) as Cpu 
+    from JobUsageRecord_Report group by ProbeName, VOName, Processors;
 EOF
 
    echo "Check JobUsageRecord_Xml"

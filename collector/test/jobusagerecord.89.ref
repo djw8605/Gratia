@@ -1,2 +1,2 @@
-ProbeName	VOName	Nrecord	NJobs	Wall	Cpu
-tester:LocalTester.where.edu	escience	131	393	70740497957.1998	11035898.5
+ProbeName	VOName	Cores	Nrecord	NJobs	Wall	Cpu
+tester:LocalTester.where.edu	escience	3	131	393	70740497957.1998	11035898.5
