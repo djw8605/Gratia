@@ -22,9 +22,12 @@ EOF
 
 function setfromconfig {
    what=$1
+   opt=$2
    res=`grep -c $what runCollectorTest.config `
    if [ $res -eq 0 ] ; then
-     echo "The configuration key $what is not set in runCollectorTest.config" 1>&2
+     if [ "x$opt" = "x" ] ; then 
+       echo "The configuration key $what is not set in runCollectorTest.config" 1>&2
+     fi
      exit 1;
    else if [ $res -gt 1 ] ; then
        echo "The configuration key $what is more than once in runCollectorTest.config" 1>&2
@@ -48,12 +51,12 @@ if [ "x$dbhost" = "x" ] ; then exit 1; fi
 dbport=`setfromconfig dbport`
 if [ "x$dbport" = "x" ] ; then exit 1; fi
 
-schema_name=`setfromconfig schema_name`
+schema_name=`setfromconfig schema_name optional`
 if [ "x$schema_name" = "x" ] ; then 
    schema_name=gratia_purge_${USER}
 fi
 
-http_port=`setfromconfig http_port`
+http_port=`setfromconfig http_port optional`
 if [ "x$http_port" = "x" ] ; then  
    http_port=`expr 8000 + ${UID}`
 fi
