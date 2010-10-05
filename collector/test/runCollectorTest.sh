@@ -242,8 +242,12 @@ function wait_for_server_shutdown {
       fi
    done
    if [ ${try} -gt 9 ]; then
-      echo "Error server is not shutdown after 10 checks"
-      exit
+      echo "Error: server is not shutdown after 10 checks"
+      echo "Error: waited 9 seconds for the server on ${webhost} on port ${http_port} to shutdown"
+      echo "Error: Last netstat result was: ${alive}"
+      echo "Error: The end of the gratia.log is:"
+      ssh ${webhost} tail ${tomcatpwd}/logs/gratia.log
+      exit 1
    fi
 }
 
