@@ -301,6 +301,14 @@
 #
 # 11/03/2010 (John Weigand)
 #   Changed NF for WT2 from 2412 to 3424
+#
+# 11/05/2010 (John Weigand)
+#   - Added HU_ATLAS_Tier2 based on MyOsg InteropAccounting setting
+#     and the fact that it is defined in the LCG Topology as a
+#     site for US_NET2.  Using BU_ATLAS_Tier2 NF until a real number
+#     is available.  They were registered 9/24/10 so October is the
+#     first month reported.
+#
 ##################################################################
 #-- Site  ------- SPECint2000
 #
@@ -328,6 +336,7 @@ BNL_ATLAS_1         3225
 #--- ATLAS Tier 2 ----
 AGLT2               3507
 BU_ATLAS_Tier2      2897
+HU_ATLAS_Tier2      2897
 IU_OSG              2101
 MWT2_IU             2339
 MWT2_UC             2449
