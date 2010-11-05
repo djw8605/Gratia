@@ -307,7 +307,7 @@
 #     and the fact that it is defined in the LCG Topology as a 
 #     site for US_NET2.  Using BU_ATLAS_Tier2 NF until a real number
 #     is available.
-#   - Added Purdue-Rossman based on MyOsg InteropAccouting setting 
+#   - Added Purdue-Rossmann based on MyOsg InteropAccouting setting 
 #     and confirmation from the site admin on goc ticket 9500.
 #     They will not show in EGEE Tier2 until they register with LCG.
 #     Using Purdue-Steele NF until one is available.
@@ -325,7 +325,7 @@ MIT_CMS             1872
 Nebraska            2603
 Purdue-RCAC         3031
 Purdue-Steele       3196
-Purdue-Rossman      3196
+Purdue-Rossmann     3196
 UCSDT2              3310
 SPRACE              3370
 GridUNESP_CENTRAL   3672
