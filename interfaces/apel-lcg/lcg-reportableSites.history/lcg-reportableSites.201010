@@ -309,6 +309,9 @@
 #     is available.  They were registered 9/24/10 so October is the
 #     first month reported.
 #
+# 11/08/2010 (John Weigand)
+#     Added Purdue-Rossmann with a tmeporary NF of 3196
+#
 ##################################################################
 #-- Site  ------- SPECint2000
 #
@@ -322,6 +325,7 @@ MIT_CMS             1872
 Nebraska            2603
 Purdue-RCAC         3031
 Purdue-Steele       3196
+Purdue-Rossmann     3196
 UCSDT2              3310
 SPRACE              3370
 GridUNESP_CENTRAL   3672
