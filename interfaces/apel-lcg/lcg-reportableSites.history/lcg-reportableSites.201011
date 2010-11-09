@@ -312,20 +312,30 @@
 #     They will not show in EGEE Tier2 until they register with LCG.
 #     Using Purdue-Steele NF until one is available.
 # 
+# 11/09/2010 (John Weigand)
+# Update NF values based on 10/26/10 GIP.  After 10/26, a bug in
+# Gratia (or somewhere else) is causing only deltas to show in the
+# Nebraska Subcluster table these are derived from. 
+#---------------------------------------------------
+# Site                    NFgip   NFapel  % diff
+# ---------------------------------------------------
+# CIT_CMS_T2               3236    3046     6
+# Purdue-Rossmann          2810    3196   -12 
+# HU_ATLAS_Tier2           3748    2897    29
 ##################################################################
 #-- Site  ------- SPECint2000
 #
 #--- CMS Tier 1 ----    
 USCMS-FNAL-WC1-CE   2566  
 #--- CMS Tier 2 ----    
-CIT_CMS_T2          3046       
+CIT_CMS_T2          3236       
 GLOW                2408
 HEPGRID_UERJ        3196
 MIT_CMS             1872
 Nebraska            2603
 Purdue-RCAC         3031
 Purdue-Steele       3196
-Purdue-Rossmann     3196
+Purdue-Rossmann     2810
 UCSDT2              3310
 SPRACE              3370
 GridUNESP_CENTRAL   3672
@@ -340,7 +350,7 @@ BNL_ATLAS_1         3225
 #--- ATLAS Tier 2 ----
 AGLT2               3507
 BU_ATLAS_Tier2      2897
-HU_ATLAS_Tier2      2897
+HU_ATLAS_Tier2      3748
 IU_OSG              2101
 MWT2_IU             2339
 MWT2_UC             2449
