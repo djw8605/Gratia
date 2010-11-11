@@ -322,6 +322,16 @@
 # CIT_CMS_T2               3236    3046     6
 # Purdue-Rossmann          2810    3196   -12 
 # HU_ATLAS_Tier2           3748    2897    29
+# 
+# 11/11/2010 (John Weigand)
+# Update NF values for BNL_ATLAS_1 in preparation for changing from
+# reporting by resource group rather than resource as defined in MyOsg.
+# The GIP NF is based on BNL_ATLAS resource group. 
+#----------------------------------------
+# Site                    NFgip   NFapel  
+# ---------------------------------------
+# BNL_ATLAS_1              3970     3225
+
 ##################################################################
 #-- Site  ------- SPECint2000
 #
@@ -346,7 +356,7 @@ UFlorida-PG         1535
 ####################################
 ####################################
 #--- ATLAS Tier 1 ----
-BNL_ATLAS_1         3225
+BNL_ATLAS_1         3970
 #--- ATLAS Tier 2 ----
 AGLT2               3507
 BU_ATLAS_Tier2      2897
