@@ -106,7 +106,7 @@ public class Subcluster extends Record
       if (Platform != null) Platform.asXml(output,"Platform");
       if (OS != null) OS.asXml(output,"OS");
       if (OSVersion != null) OSVersion.asXml(output,"OSVersion");
-      if (Timestamp != null && !formd5) Timestamp.asXml(output,"Timestamp");
+      if (Timestamp != null) Timestamp.asXml(output,"Timestamp");
       if (Cores != null) Cores.asXml(output,"Cores");
       if (Hosts != null) Hosts.asXml(output,"Hosts");
       if (Cpus != null) Cpus.asXml(output,"Cpus");
@@ -114,6 +114,7 @@ public class Subcluster extends Record
       if (Processor != null) Processor.asXml(output,"Processor");
       if (BenchmarkName != null) BenchmarkName.asXml(output,"BenchmarkName");
       if (BenchmarkValue != null) BenchmarkValue.asXml(output,"BenchmarkValue");
+      if (Timestamp != null) Timestamp.asXml(output, "Timestamp");
       if (ProbeName != null) {
          ProbeName.asXml(output, "ProbeName");
       }

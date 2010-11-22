@@ -96,7 +96,7 @@ public class StorageElement extends Record
       if (SE != null) SE.asXml(output,"SE");
       if (Name != null) Name.asXml(output,"Name");
       if (SpaceType != null) SpaceType.asXml(output,"SpaceType");
-      if (Timestamp != null && !formd5) Timestamp.asXml(output,"Timestamp");
+      if (Timestamp != null) Timestamp.asXml(output,"Timestamp");
       if (Implementation != null) Implementation.asXml(output,"Implementation");
       if (Version != null) Version.asXml(output,"Version");
       if (Status != null) Status.asXml(output,"Status");

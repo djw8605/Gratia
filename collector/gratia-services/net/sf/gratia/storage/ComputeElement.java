@@ -98,7 +98,7 @@ public class ComputeElement extends Record
       if (CEName != null) CEName.asXml(output,"CEName");
       if (Cluster != null) Cluster.asXml(output,"Cluster");
       if (HostName != null) HostName.asXml(output,"HostName");
-      if (Timestamp != null && !formd5) Timestamp.asXml(output,"Timestamp");
+      if (Timestamp != null) Timestamp.asXml(output,"Timestamp");
       if (LrmsType != null) LrmsType.asXml(output,"LrmsType");
       if (LrmsVersion != null) LrmsVersion.asXml(output,"LrmsVersion");
       if (MaxRunningJobs != null) MaxRunningJobs.asXml(output,"MaxRunningJobs");

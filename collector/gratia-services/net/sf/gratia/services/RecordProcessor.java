@@ -51,10 +51,7 @@ public class RecordProcessor extends Thread {
    ErrorRecorder errorRecorder = new ErrorRecorder();
    final Object lock;
    String historypath = "";
-   Hashtable<String,Long> fProbeDetails = new Hashtable<String,Long>();
-   Hashtable<String,Long> fSubcluster = new Hashtable<String,Long>();
-   Hashtable<String,Long> fComputeElement = new Hashtable<String,Long>();
-   Hashtable<String,Long> fStorageElement = new Hashtable<String,Long>();
+   Hashtable<String,Integer> fProbeDetails = new Hashtable<String,Integer>();
    static Pattern duplicateExceptionFinder = Pattern.compile("\\b[Dd]uplicate\\b");
    static Pattern metaFinder = Pattern.compile("_Meta ");
    static Pattern originFinder = Pattern.compile("Origin ");
@@ -774,35 +771,7 @@ public class RecordProcessor extends Thread {
                   acceptRecord = false;
                }
             }
-            else if (current.getTableName().equals("Subcluster")) {
-               Long pd_dbid = fSubcluster.get(current.getmd5());
-               if (pd_dbid != null) {
-                  // This is a duplicate.
-                  Logging.fine(ident + rId +
-                               ": " + "(fast) Ignore duplicate of Subcluster " +
-                               pd_dbid);
-                  acceptRecord = false;
-               }
-            } else if (current.getTableName().equals("ComputeElement")) {
-               Long pd_dbid = fComputeElement.get(current.getmd5());
-               if (pd_dbid != null) {
-                  // This is a duplicate.
-                  Logging.fine(ident + rId +
-                               ": " + "(fast) Ignore duplicate of ComputeElement " +
-                               pd_dbid);
-                  acceptRecord = false;
-               }             
-            } else if (current.getTableName().equals("StorageElement")) {
-               Long pd_dbid = fStorageElement.get(current.getmd5());
-               if (pd_dbid != null) {
-                  // This is a duplicate.
-                  Logging.fine(ident + rId +
-                               ": " + "(fast) Ignore duplicate of StorageElement " +
-                               pd_dbid);
-                  acceptRecord = false;
-               }             
-            }
-
+            
             if (acceptRecord) {
                current.setDuplicate(false);
                dupOriginHandler.reset(); // Start counting duplicate origins from 0.
@@ -1327,21 +1296,6 @@ public class RecordProcessor extends Thread {
                      fProbeDetails.clear();
                   }
                   fProbeDetails.put(current.getmd5(), dup_dbid);
-               } else if (current instanceof Subcluster) {
-                  if (fSubcluster.size() > 500) {
-                     fSubcluster.clear();
-                  }
-                  fSubcluster.put(current.getmd5(), dup_dbid);
-               } else if (current instanceof ComputeElement) {
-                  if (fComputeElement.size() > 5000) {
-                     fComputeElement.clear();
-                  }
-                  fComputeElement.put(current.getmd5(), dup_dbid);
-               } else if (current instanceof StorageElement) {
-                  if (fStorageElement.size() > 1000) {
-                     fStorageElement.clear();
-                  }
-                  fStorageElement.put(current.getmd5(), dup_dbid);
                }
                dupdbid = dup_dbid;
                dup2_session.close();
