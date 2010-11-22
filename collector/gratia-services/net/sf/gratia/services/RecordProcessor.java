@@ -51,7 +51,7 @@ public class RecordProcessor extends Thread {
    ErrorRecorder errorRecorder = new ErrorRecorder();
    final Object lock;
    String historypath = "";
-   Hashtable<String,Integer> fProbeDetails = new Hashtable<String,Integer>();
+   Hashtable<String,Long> fProbeDetails = new Hashtable<String,Long>();
    static Pattern duplicateExceptionFinder = Pattern.compile("\\b[Dd]uplicate\\b");
    static Pattern metaFinder = Pattern.compile("_Meta ");
    static Pattern originFinder = Pattern.compile("Origin ");
