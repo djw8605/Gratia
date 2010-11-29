@@ -306,41 +306,81 @@ public class XP
       return new File(directory).list().length;
    }
    
-    public static String[] getFileList(String directory)
-    {
-        String filelist[] = null;
-        String results[] = new String[0];
-        int i = 0;
-	
-        try
-            {
-                filelist = (new File(directory)).list();
-            }
-        catch (Exception e)
-            {
-                Logging.log("XP: Error Retrieving FileList: " + e);
-                return new String[0];
-            }
-        if (filelist == null) return new String[0];
-        for (i = 0; i < filelist.length; i++)
-            {
-                try
-                    {
-                        String temp = directory + directorySeparator + filelist[i];
-                        File file = new File(temp);
-                        if (file.isDirectory())
-                            results = append(results,getFileList(temp));
-                        else
-                            results = append(results,temp);
-                    }
-                catch (Exception ignore)
-                    {
-                    }
-            }
-        return results;
-    }
-    
-    public static String[] getFileList(String directory,String fileType)
+   public static String[] getFileList(String directory)
+   {
+      String filelist[] = null;
+      String results[] = new String[0];
+      int i = 0;
+      
+      try
+      {
+         filelist = (new File(directory)).list();
+      }
+      catch (Exception e)
+      {
+         Logging.log("XP: Error Retrieving FileList: " + e);
+         return new String[0];
+      }
+      if (filelist == null) return new String[0];
+      for (i = 0; i < filelist.length; i++)
+      {
+         try
+         {
+            String temp = directory + directorySeparator + filelist[i];
+            File file = new File(temp);
+            if (file.isDirectory())
+               results = append(results,getFileList(temp));
+            else
+               results = append(results,temp);
+         }
+         catch (Exception ignore)
+         {
+         }
+      }
+      return results;
+   }
+   
+   public static String[] getFileList(String directory, Long limit)
+   {
+      String filelist[] = null;
+      String results[] = new String[0];
+      int i = 0;
+      
+      try
+      {
+         filelist = (new File(directory)).list();
+      }
+      catch (Exception e)
+      {
+         Logging.log("XP: Error Retrieving FileList: " + e);
+         return new String[0];
+      }
+      if (filelist == null) return new String[0];
+      long nfiles;
+      if (filelist.length < limit) {
+         nfiles = filelist.length;
+      } else {
+         nfiles = limit;
+      }
+      for (i = 0; i < limit; i++)
+      {
+         try
+         {
+            String temp = directory + directorySeparator + filelist[i];
+            File file = new File(temp);
+            if (file.isDirectory())
+               results = append(results,getFileList(temp));
+            else
+               results = append(results,temp);
+         }
+         catch (Exception ignore)
+         {
+         }
+      }
+      return results;
+   }
+   
+   public static String[] getFileList(String directory,String fileType)
     {
        String filelist[] = null;
        Vector<String> files = new Vector<String>();

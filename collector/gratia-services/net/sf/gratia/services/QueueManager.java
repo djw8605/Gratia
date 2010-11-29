@@ -51,6 +51,8 @@ public class QueueManager
    static java.io.File       fgStageDir = null;
    static Date               fgLastReset = null;
    
+   static long fgMaxRecordsForHouseKeeping = 100000;
+   
    private static long getNRecordsFromData(String xml)
    {
       long nrecords = 0;
@@ -284,7 +286,7 @@ public class QueueManager
       public String [] getFileList() 
       {
          // Return the list of all the files in the queue.
-         return XP.getFileList(fDirectory.toString());
+         return XP.getFileList(fDirectory.toString(),fgMaxRecordsForHouseKeeping);
       }
       
       public long getNFiles()
@@ -479,6 +481,7 @@ public class QueueManager
          try {
             Properties p = Configuration.getProperties();
             maxthreads = Integer.parseInt(p.getProperty("service.recordProcessor.threads"));
+            fgMaxRecordsForHouseKeeping = Long.parseLong(p.getProperty("max.q.size"));
          } catch (Exception ignore) {
          }      
          setupQueues(maxthreads);
