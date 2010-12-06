@@ -26,6 +26,7 @@ test: build
 	./runCollectorTest.sh -c -d -l --lsf --pbs -f -k -m -t
 
 # Target to use when 'just' wanting to re-run the test without rebuilding nor re-installing the collector
+testonly: onlytest
 onlytest:  
 	./runCollectorTest.sh -d -l --lsf --pbs -f -k -m -t
 
