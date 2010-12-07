@@ -1,0 +1,3 @@
+ProbeName	MetricName	Nrecord
+tester:LocalTester.where.edu	LFC-READ	300
+tester:LocalTester.where.edu	MetricXml-Test	12
