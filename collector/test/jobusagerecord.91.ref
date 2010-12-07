@@ -1,2 +1,2 @@
 ProbeName	VOName	Cores	Nrecord	NJobs	Wall	Cpu
-tester:LocalTester.where.edu	escience	3	132	396	71280501758.3998	11120142
+tester:LocalTester.where.edu	escience	3	134	402	72360509360.7998	11288629
