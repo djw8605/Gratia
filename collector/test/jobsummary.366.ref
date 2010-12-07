@@ -7,6 +7,8 @@ lsf:LocalTester.where.edu	infngrid	1	12	87	3207	612
 lsf:LocalTester.where.edu	infngrid	2	1	1	61	13
 lsf:LocalTester.where.edu	infngrid	3	1	1	77	15
 lsf:LocalTester.where.edu	infngrid	4	1	1	92	16
+pbs:LocalTester.where.edu	Unknown	1	1	1	1202	0
+pbs:LocalTester.where.edu	Unknown	8	1	1	65918	526870
 pbs:LocalTester.where.edu	dteam	1	7	168	23166	1728
 pbs:LocalTester.where.edu	infngrid	1	1	6	0	0
 tester:LocalTester.where.edu	escience	3	366	1611	289982041244.401	45238759.5
