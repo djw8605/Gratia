@@ -331,7 +331,24 @@
 # Site                    NFgip   NFapel  
 # ---------------------------------------
 # BNL_ATLAS_1              3970     3225
-
+# 
+# 12/10/2010 (John Weigand)
+#   Adding LC-glcc for ALICE VO.  This is a CREAM CE and, at this time
+#   does not have the ability to report to GIP.  So, based on LC-glcc
+#   info on cluster:
+#     864 cores Intel(R) Xeon(R) CPU X5660 @ 2.80GHz
+#   using 3920 NF factor
+#
+#   Changing NERSC-PDSF to 3420 based on this configuration they sent
+#   Cores SI2K  HS06   Model
+#   ----  ---   -----  -----
+#    20   1967         Dual-Core AMD Opteron(tm) Processor 2220
+#    96   3196         Intel(R) Xeon(R) CPU E5410  @ 2.33GHz
+#   672   4020         Intel(R) Xeon(R) CPU E5520  @ 2.27GHz
+#   180   2936  11.75  Intel(R) Xeon(R) CPU L5640  @ 2.27GHz (HS06 number)
+#   248   2347         Quad-Core AMD Opteron(tm) Processor 2350 
+#
+#
 ##################################################################
 #-- Site  ------- SPECint2000
 #
@@ -373,7 +390,8 @@ UTA_SWT2            2851
 ####################################
 ####################################
 #--- ALICE Tier 2 ----
-NERSC-PDSF          1160
+NERSC-PDSF          3420
+LC-glcc             3920
 #
 #
 ####################################
