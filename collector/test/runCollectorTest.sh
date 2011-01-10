@@ -495,7 +495,7 @@ function loadpbs
     mkdir -p ${pbsprobedir}/MAGIC_VDT_LOCATION/var/tmp/urCollector
     mkdir -p ${pbsprobedir}/MAGIC_VDT_LOCATION/var/logs
     if [ ! -e common ] ; then 
-	ln -s ../../probe/common .
+        ln -s ../../probe/common .
     fi
 
     start_server
@@ -505,8 +505,8 @@ function loadpbs
     adminCollector "disableHousekeeping" 2>&1 | tee wget.full.log | grep House | grep DISABLED > wget.log
     result=$?
     if [ ${result} -ne 0 ]; then
-	echo "Error: Turning off the record purging failed"
-	exit 1
+       echo "Error: Turning off the record purging failed"
+       exit 1
     fi
 
     write_ProbeConfig ${pbsprobedir}/ProbeConfig ${webhost} "" gratia-servlets pbs
@@ -531,7 +531,7 @@ function loadlsf
     mkdir -p ${lsfprobedir}/MAGIC_VDT_LOCATION/var/tmp/urCollector
     mkdir -p ${lsfprobedir}/MAGIC_VDT_LOCATION/var/logs
     if [ ! -e common ] ; then 
-	ln -s ../../probe/common .
+        ln -s ../../probe/common .
     fi
 
     start_server
@@ -541,15 +541,15 @@ function loadlsf
     adminCollector "disableHousekeeping" 2>&1 | tee wget.full.log | grep House | grep DISABLED > wget.log
     result=$?
     if [ ${result} -ne 0 ]; then
-	echo "Error: Turning off the record purging failed"
-	exit 1
+        echo "Error: Turning off the record purging failed"
+        exit 1
     fi
 
     write_ProbeConfig ${lsfprobedir}/ProbeConfig ${webhost} "" gratia-servlets lsf
 
     echo "Sending LSF data"
     export PERL5LIB=${PWD}/../../probe/pbs-lsf/urCollector-src
-    ${lsfprobedir}/pbs-lsf_meter.cron.sh
+    PATH=${lsfprobedir}:${PATH} ${lsfprobedir}/pbs-lsf_meter.cron.sh
 
     # Wait for the record to be in
     wait_for_input_use 0

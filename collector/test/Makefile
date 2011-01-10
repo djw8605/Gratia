@@ -17,6 +17,7 @@ urCollector:
 	cp $(urCollectorFiles) pbs
 	cp  ./urCollector.conf.prepared pbs/urCollector.conf
 	cp $(urCollectorFiles) lsf
+	cp ./fake_lshosts lsf/lshosts
 	cat  ./urCollector.conf.prepared | sed -e 's/lrmsType = "pbs"/lrmsType = "lsf"/' > lsf/urCollector.conf
 
 build: urCollector

@@ -1,7 +1,8 @@
 ProbeName	VOName	Cores	Nrecord	NJobs	Wall	Cpu
+lsf:LocalTester.where.edu	Unknown	8	1	4	80	0
 lsf:LocalTester.where.edu	alice	1	2	15	13	0
 lsf:LocalTester.where.edu	cms	1	1	2	30	8
-lsf:LocalTester.where.edu	dteam	1	30	1038	244369	15752
+lsf:LocalTester.where.edu	dteam	1	34	1039	263029	15791
 lsf:LocalTester.where.edu	dteam	2	1	4	346	38
 lsf:LocalTester.where.edu	infngrid	1	12	87	3207	612
 lsf:LocalTester.where.edu	infngrid	2	1	1	61	13

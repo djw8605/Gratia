@@ -1,0 +1,22 @@
+#!/bin/sh
+
+if [ "x$1" = "xc485" ] ; then 
+  echo "HOST_NAME      type    model  cpuf ncpus maxmem maxswp server RESOURCES"
+  echo 'c485         X86_64   PC1133  23.1     8 16046M 16378M    Yes (mpich2)'
+fi
+if [ "x$1" = "xc356" ] ; then 
+  echo "HOST_NAME      type    model  cpuf ncpus maxmem maxswp server RESOURCES"
+  echo 'c356         X86_64   PC1133  23.1     8 16046M 16378M    Yes (mpich2)'
+fi
+if [ "x$1" = "xc381" ] ; then 
+  echo "HOST_NAME      type    model  cpuf ncpus maxmem maxswp server RESOURCES"
+  echo 'c381         X86_64   PC1133  23.1     8 16046M 16378M    Yes (mpich2)'
+fi
+if [ "x$1" = "xv017" ] ; then 
+  echo "HOST_NAME      type    model  cpuf ncpus maxmem maxswp server RESOURCES"
+  echo 'v017         X86_64   PC1133  23.1     8 16046M 16378M    Yes (mpich2)'
+fi
+if [ "x$1" = "xv020" ] ; then 
+  echo "HOST_NAME      type    model  cpuf ncpus maxmem maxswp server RESOURCES"
+  echo 'v020         X86_64   PC1133  23.1     8 16046M 16378M    Yes (mpich2)'
+fi
