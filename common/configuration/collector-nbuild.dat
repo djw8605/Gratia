@@ -32,7 +32,7 @@
     "service.reporting.interfaces.apel.folder" => "gratia-data/interfaces/apel-lcg",
     "service.reporting.interfaces.apel.folder.groupowner" => "gratia",
     "service.lifetimeManagement.checkInterval" => '1 h',
-    "service.initial.housekeeping" => "DISABLED",
+    "service.initial.housekeeping" => "ENABLED",
 #    "service.administration.level" => "FINEST",
 #    "service.service.level" => "FINEST",
 #    "service.rmiservlet.level" => "FINEST",

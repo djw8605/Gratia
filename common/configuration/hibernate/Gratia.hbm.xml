@@ -283,7 +283,7 @@
      <property name="Records"/> 
   </class>
 
-  <class name="Backlog" table="Backlog" node="Backlog">
+  <!-- class name="Backlog" table="Backlog" node="Backlog">
      <id name="BackId" column="backid" type="long">
         <generator class="native"/>
      </id>    
@@ -294,6 +294,6 @@
      <property name="Records"/>
      <property name="ServiceBacklog"/> 
      <property name="ServerDate" column="ServerDate" type="timestamp"/>
-  </class>
+  </class -->
 
 </hibernate-mapping>
