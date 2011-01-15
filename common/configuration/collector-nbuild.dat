@@ -32,7 +32,8 @@
     "service.reporting.interfaces.apel.folder" => "gratia-data/interfaces/apel-lcg",
     "service.reporting.interfaces.apel.folder.groupowner" => "gratia",
     "service.lifetimeManagement.checkInterval" => '1 h',
-    "service.initial.housekeeping" => "ENABLED",
+    "service.initial.housekeeping" => "ON",
+    "service.lifetime.JobUsageRecord" => "6 months",
 #    "service.administration.level" => "FINEST",
 #    "service.service.level" => "FINEST",
 #    "service.rmiservlet.level" => "FINEST",
@@ -71,6 +72,7 @@
     "service.admin.FQAN.0" => "/fermilab/Role=GratiaAdmin",
     "service.admin.FQAN.1" => "/fermilab/Role=GratiaDeveloper",
     "service.lifetimeManagement.checkInterval" => '1 h',
+    "service.lifetime.JobUsageRecord" => "6 months",
    }
  },
  nightly_osg_daily =>
