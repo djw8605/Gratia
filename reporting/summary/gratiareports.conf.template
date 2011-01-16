@@ -1,7 +1,63 @@
+; This is the configuration template for the gratia emailed reports.
+
+; Before you run the scripts to generate and email the various gratia 
+; reports, please copy this file to a file named "gratiareports.conf".
+
+; Then you need to edit "gratiareports.conf" to assign the variables the 
+; appropriate values. 
+
+; Documentation (work in progress) for installation and the configuration of the emailed 
+; repots could be found at 
+; https://twiki.grid.iu.edu/bin/view/Accounting/InstallGratiaMailedReports
+
+; Default values. Don't alter these!!! Also note the all upper case DEFAULT as the 
+; section name. It is important that is it all upper case. Ohterwise python won't
+; recognize these variables!!!
+
+[DEFAULT]
+enable= True
+disable=False
+
+;====================================================================================
+; Email
+;====================================================================================
+; Set the email related values under this section
+
 [email]
+
 realname=Gratia Operation
+; This is the real name from which the report appears to be emailed from
+
 from=gratia-operation@opensciencegrid.org
+; This is the email from which the reports appears to be emailed from
+
+to=
+; This is the default email address of the recipient to which the gratia reports should be emailed to. This 
+; needs to be set.
+
 smtphost=
+; This is the FQDN of the mail server, which gratia will use to send the email
+
+;====================================================================================
+; Cron
+;====================================================================================
+; Set the cron related values under this section.
+
+[cron]
+
+enabled = %(enable)s
+; By default the cronjob for running and emailing the reports periodically is enabled.
+; If you want to turn this off, then set the above value to "disable" 
+
+
+;====================================================================================
+; Databases
+;====================================================================================
+
+; The next four sections are used to set the different database options for gratia
+; from which the data for the reports will be extracted and summarized. The variables
+; are self-explanatory. You should set these to the values corresponding to the databases
+; from which you want to generate the gratia reports
 
 [main_db]
 hostname=
@@ -31,11 +87,15 @@ username=
 password=
 schema=
 
-# Optional
-# If you are running reports on a non-OSG collector, you can add the flag
-# --grid=local to your report script; this allows you to replace the OIM
-# integration with a list of active sites, active VOs, and grid name in this
-# configuration file.
+;====================================================================================
+; Optional
+;====================================================================================
+
+; If you are running reports on a non-OSG collector, you can add the flag
+; --grid=local to your report script; this allows you to replace the OIM
+; integration with a list of active sites, active VOs, and grid name in this
+; configuration file.
+
 [local]
 grid_name=HCC
 active_sites=Merritt, Prairiefire, Red, Firefly
