@@ -82,13 +82,6 @@ while test "x$1" != "x"; do
     fi
 done
 
-echo PROD_MAILTO $PROD_MAILTO
-echo PROD_USER_MAILTO $PROD_USER_MAILTO
-echo MAILTO $MAILTO
-echo USER_MAILTO $USER_MAILTO
-
-exit
-
 when=$(date -d "${date_arg:-yesterday}" +"%d %B %Y")
 whenarg=$(date -d "${date_arg:-yesterday}" +"%Y/%m/%d")
 
