@@ -1,7 +1,18 @@
 #!/usr/bin/env bash
 
+# override and/or merge command line options with the default options provided in the config file
+if [ "$1" != "ignore" ]; then
+    configOptions=`python getConfigInfo.py|grep reportOptions|cut -d ' ' -f2-`
+    commandOptions=$*
+    finalOptions=`python mergeOptions.py "$configOptions" "$commandOptions"`
+    sh $0 ignore $finalOptions && exit 0
+else
+    shift
+fi
+
 # space separated list of mail recipients
-PROD_MAILTO="osg-accounting-info@fnal.gov"
+PROD_MAILTO=`python getConfigInfo.py|grep prod_mailto|cut -d ' ' -f2-` # extract from config file
+[ $PROD_MAILTO == "" ] && PROD_MAILTO="osg-accounting-info@fnal.gov" # if empty, then assign default
 WEBLOC="http://gratia-osg.fnal.gov:8880/gratia-reporting"
 SUM_WEBLOC="http://gratia-osg.fnal.gov:8884/gratia-reporting"
 VOREPORT_CONFIG="voreports.debug.config"

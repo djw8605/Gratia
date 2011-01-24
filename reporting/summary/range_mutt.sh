@@ -1,10 +1,25 @@
 #!/bin/bash
 
+
+# override and/or merge command line options with the default options provided in the config file
+if [ "$1" != "ignore" ]; then
+    configOptions=`python getConfigInfo.py|grep reportOptions|cut -d ' ' -f2-`
+    commandOptions=$*
+    finalOptions=`python mergeOptions.py "$configOptions" "$commandOptions"`
+    sh $0 ignore $finalOptions && exit 0
+else
+    shift
+fi
+
+
 # space separated list of mail recipients
-PROD_MAILTO="osg-accounting-info@fnal.gov"
-PROD_USER_MAILTO="osg-accounting-info@opensciencegrid.org"
+PROD_MAILTO=`python getConfigInfo.py|grep prod_mailto|cut -d ' ' -f2-` # extract from config file
+PROD_USER_MAILTO=`python getConfigInfo.py|grep prod_user_mailto|cut -d ' ' -f2-` # extract from config file
+[ $PROD_MAILTO == "" ] && PROD_MAILTO="osg-accounting-info@fnal.gov" # if empty, then assign default
+[ $PROD_USER_MAILTO == "" ] && PROD_USER_MAILTO="osg-accounting-info@opensciencegrid.org" # if empty, then assign default
 MAILTO="$USER"
 USER_MAILTO=$MAILTO
+
 WEBLOC="http://gratia-osg.fnal.gov:8880/gratia-reporting"
 SUM_WEBLOC="http://gratia-osg.fnal.gov:8884/gratia-reporting"
 
@@ -66,6 +81,13 @@ while test "x$1" != "x"; do
         shift
     fi
 done
+
+echo PROD_MAILTO $PROD_MAILTO
+echo PROD_USER_MAILTO $PROD_USER_MAILTO
+echo MAILTO $MAILTO
+echo USER_MAILTO $USER_MAILTO
+
+exit
 
 when=$(date -d "${date_arg:-yesterday}" +"%d %B %Y")
 whenarg=$(date -d "${date_arg:-yesterday}" +"%Y/%m/%d")

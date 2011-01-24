@@ -6,13 +6,11 @@
 ; Then you need to edit "gratiareports.conf" to assign the variables the 
 ; appropriate values. 
 
-; Documentation (work in progress) for installation and the configuration of the emailed 
+; Documentation for installation and the configuration of the emailed 
 ; repots could be found at 
 ; https://twiki.grid.iu.edu/bin/view/Accounting/InstallGratiaMailedReports
 
-; Default values. Don't alter these!!! Also note the all upper case DEFAULT as the 
-; section name. It is important that is it all upper case. Ohterwise python won't
-; recognize these variables!!!
+; Default values. Don't alter these!!! 
 
 [DEFAULT]
 enable= True
@@ -25,30 +23,47 @@ disable=False
 
 [email]
 
-realname=Gratia Operation
+realname = Gratia Operation
 ; This is the real name from which the report appears to be emailed from
 
-from=gratia-operation@opensciencegrid.org
+from = gratia-operation@opensciencegrid.org
 ; This is the email from which the reports appears to be emailed from
 
-to=
-; This is the default email address of the recipient to which the gratia reports should be emailed to. This 
-; needs to be set.
+nonProductionTo = 
+; This is the recipient non-production email
+; This is the default email of the *non* production user recipient to which the gratia reports should be emailed to. This
+; could be overridden by using the --mail command line option. This needs to be set if the type of report is set to 
+; nonProduction (under the report section)
 
-smtphost=
+productionTo = osg-accounting-info@fnal.gov
+; This is the recipient production administrative email
+; This is the default email of the *production* admin recipient to which the gratia reports should be emailed to.
+; This is optional. If not set here then it will be set to the default value in the reporting script.
+
+productionUserTo = osg-accounting-info@opensciencegrid.org
+; This is the recipient production user email
+; This is the default email of the *production* user recipient to which the gratia reports should be emailed to.
+; This is optional. If not set here then it will be set to the default value in the reporting script.
+
+smtphost = 
 ; This is the FQDN of the mail server, which gratia will use to send the email
 
 ;====================================================================================
-; Cron
+; Report
 ;====================================================================================
-; Set the cron related values under this section.
+; Set the general reporting related values under this section.
 
-[cron]
+[report]
 
-enabled = %(enable)s
+type = nonProduction
+; nonProduction: Report is run for non-production purposes and recipient email will be set to regular 
+; user (as defined under the [email] section). This is the default value.
+; production: Report is run for production purposes and recipient email will be set to 
+; production user (as defined under the [email] section)
+
+cron = %(enable)s
 ; By default the cronjob for running and emailing the reports periodically is enabled.
 ; If you want to turn this off, then set the above value to "disable" 
-
 
 ;====================================================================================
 ; Databases
