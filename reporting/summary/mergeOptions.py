@@ -12,12 +12,10 @@
 import sys
 
 def main(argv):
-    argCount = 0
     dict = {}
     lastValIsArg = True
     for arg in argv[1:]:
         for val in arg.split():
-            print val
             if val.find("--") != -1:
                 dict[val] = ""
                 key = val
