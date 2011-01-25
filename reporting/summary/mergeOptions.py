@@ -14,13 +14,20 @@ import sys
 def main(argv):
     argCount = 0
     dict = {}
+    lastValIsArg = True
     for arg in argv[1:]:
         for val in arg.split():
+            print val
             if val.find("--") != -1:
                 dict[val] = ""
                 key = val
+                lastValIsArg = True
             else:
-                dict[key] += val 
+                if lastValIsArg:
+                    dict[key] += val 
+                else: 
+                    dict[key] += " " + val 
+                lastValIsArg = False
     for key in dict:
         print key, dict[key],
 
