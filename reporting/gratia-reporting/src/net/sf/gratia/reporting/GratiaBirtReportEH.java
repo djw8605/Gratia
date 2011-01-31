@@ -229,7 +229,7 @@ public class GratiaBirtReportEH extends ReportEventAdapter {
 						checkFolder.mkdirs();
 					checkFolder = null;
 					BufferedWriter out = new BufferedWriter(new FileWriter(System.getProperty("catalina.home") + timeStampFile, true));
-					out.write(reportName + " = ,"+ timeStamp);
+					out.write(", initializing: " + reportName + " = ," + timeStamp);
 					out.flush();
 					out.close();
 				}
