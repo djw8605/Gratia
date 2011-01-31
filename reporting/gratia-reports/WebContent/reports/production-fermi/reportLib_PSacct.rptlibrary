@@ -21,9 +21,11 @@
                     <property name="valueType">static</property>
                     <property name="isRequired">true</property>
                     <property name="dataType">string</property>
+                    <property name="distinct">true</property>
                     <simple-property-list name="defaultValue">
-                        <value type="constant">jdbc:mysql://gr8x5.fnal.gov:3306/nightly_batch</value>
+                        <value type="constant">jdbc:mysql://gr8x5.fnal.gov:3306/nightly_psacct</value>
                     </simple-property-list>
+                    <property name="paramType">simple</property>
                     <property name="controlType">text-box</property>
                     <structure name="format">
                         <property name="category">Unformatted</property>
@@ -35,9 +37,11 @@
                     <property name="valueType">static</property>
                     <property name="isRequired">true</property>
                     <property name="dataType">string</property>
+                    <property name="distinct">true</property>
                     <simple-property-list name="defaultValue">
-                        <value type="constant">reader</value>
+                        <value type="constant">gratia</value>
                     </simple-property-list>
+                    <property name="paramType">simple</property>
                     <property name="controlType">text-box</property>
                     <structure name="format">
                         <property name="category">Unformatted</property>
@@ -49,9 +53,11 @@
                     <property name="valueType">static</property>
                     <property name="isRequired">true</property>
                     <property name="dataType">string</property>
+                    <property name="distinct">true</property>
                     <simple-property-list name="defaultValue">
-                        <value type="constant">reader</value>
+                        <value type="constant">proto</value>
                     </simple-property-list>
+                    <property name="paramType">simple</property>
                     <property name="controlType">text-box</property>
                     <structure name="format">
                         <property name="category">Unformatted</property>
@@ -64,8 +70,8 @@
             <parameters>
                 <scalar-parameter name="DisplayMetric" id="25">
                     <property name="hidden">false</property>
-                    <text-property name="helpText">Select metric for chart</text-property>
-                    <text-property name="promptText">Metric for chart</text-property>
+                    <text-property name="helpText">Select metric for Chart (Wallclock, Process etc hours)</text-property>
+                    <text-property name="promptText">Metric</text-property>
                     <property name="valueType">static</property>
                     <property name="isRequired">true</property>
                     <property name="dataType">string</property>
@@ -83,8 +89,12 @@
                             <property name="label">Process Hours</property>
                         </structure>
                         <structure>
-                            <property name="value">Njobs</property>
-                            <property name="label">Job Count</property>
+                            <property name="value">cpuUser</property>
+                            <property name="label">User Hours</property>
+                        </structure>
+                        <structure>
+                            <property name="value">cpuSystem</property>
+                            <property name="label">System hours</property>
                         </structure>
                     </list-property>
                     <property name="paramType">simple</property>
@@ -109,7 +119,7 @@
                     <property name="dataType">string</property>
                     <property name="distinct">true</property>
                     <simple-property-list name="defaultValue">
-                        <value type="constant">2008-01-01</value>
+                        <value type="constant">2011-01-01</value>
                     </simple-property-list>
                     <property name="paramType">simple</property>
                     <property name="controlType">text-box</property>
@@ -120,14 +130,14 @@
                 </scalar-parameter>
                 <scalar-parameter name="EndDate" id="19">
                     <property name="hidden">false</property>
-                    <text-property name="helpText">Only jobs that finished before or on this date will be included</text-property>
+                    <text-property name="helpText">Only jobs that finished before this date will be included</text-property>
                     <text-property name="promptText">To</text-property>
                     <property name="valueType">static</property>
                     <property name="isRequired">true</property>
                     <property name="dataType">string</property>
                     <property name="distinct">true</property>
                     <simple-property-list name="defaultValue">
-                        <value type="constant">2008-02-01</value>
+                        <value type="constant">2011-02-01</value>
                     </simple-property-list>
                     <property name="paramType">simple</property>
                     <property name="controlType">text-box</property>
@@ -215,12 +225,16 @@
                         <property name="category">Unformatted</property>
                     </structure>
                 </scalar-parameter>
-                <scalar-parameter name="ReportName" id="407">
+                <scalar-parameter name="ReportName" id="408">
                     <property name="hidden">true</property>
+                    <text-property name="promptText">Report Name</text-property>
                     <property name="valueType">static</property>
                     <property name="isRequired">false</property>
                     <property name="dataType">string</property>
                     <property name="distinct">true</property>
+                    <simple-property-list name="defaultValue">
+                        <value type="constant">ReportName</value>
+                    </simple-property-list>
                     <property name="paramType">simple</property>
                     <property name="controlType">text-box</property>
                     <structure name="format">
@@ -287,7 +301,7 @@
                     <property name="dataType">string</property>
                     <property name="distinct">true</property>
                     <simple-property-list name="defaultValue">
-                        <value type="constant">FNAL_CDFOSG_1</value>
+                        <value type="constant">FNAL_CDFOSG_3</value>
                     </simple-property-list>
                     <property name="paramType">simple</property>
                     <property name="controlType">text-box</property>
@@ -469,7 +483,7 @@ else{"All VO's"}</expression>
             <property name="fontFamily">sans-serif</property>
             <property name="fontSize">9pt</property>
             <property name="textAlign">center</property>
-            <expression name="valueExpr">"Date:  " + params["StartDate"].value</expression>
+            <expression name="valueExpr">"Date:  " + params["StartDate"]</expression>
             <property name="contentType">html</property>
         </text-data>
         <label name="ShowQuery" id="122">
@@ -527,7 +541,7 @@ else{"All VO's"}</expression>
             <property name="style">sans-style1</property>
             <property name="fontSize">9pt</property>
             <property name="textAlign">center</property>
-            <expression name="valueExpr">"Week of: "+params["StartDate"]</expression>
+            <expression name="valueExpr">"Week: "+params["StartDate"]</expression>
             <property name="contentType">html</property>
         </text-data>
         <text-data name="SelectSites" id="401">
@@ -553,6 +567,13 @@ else{"All VO's"}</expression>
 else{"All SItes"}</expression>
             <property name="contentType">html</property>
         </text-data>
+        <text-data name="SiteName (row)" id="407">
+            <property name="fontFamily">sans-serif</property>
+            <property name="textAlign">center</property>
+            <property name="pageBreakInside">auto</property>
+            <expression name="valueExpr">"Site: "+ row["SiteName"]</expression>
+            <property name="contentType">html</property>
+        </text-data>
     </components>
     <page-setup>
         <simple-master-page name="Gratia_800x600" id="28">
@@ -565,7 +586,7 @@ else{"All SItes"}</expression>
             <property name="showHeaderOnFirst">true</property>
             <property name="showFooterOnLast">true</property>
         </simple-master-page>
-        <simple-master-page name="Gratia_600x800" id="408">
+        <simple-master-page name="Gratia_600x800" id="415">
             <property name="type">us-letter</property>
             <property name="orientation">portrait</property>
             <property name="topMargin">1in</property>

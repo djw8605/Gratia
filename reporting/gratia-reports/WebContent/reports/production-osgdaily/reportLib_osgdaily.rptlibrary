@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<library xmlns="http://www.eclipse.org/birt/2005/design" version="3.2.17" id="1">
-    <property name="createdBy">Eclipse BIRT Designer Version 2.3.1.v20080911 Build &lt;2.3.1.v20080922-1151></property>
+<library xmlns="http://www.eclipse.org/birt/2005/design" version="3.2.22" id="1">
+    <property name="createdBy">Eclipse BIRT Designer Version 2.6.1.v20100902 Build &lt;2.6.1.v20100915-1750></property>
     <property name="units">in</property>
     <property name="theme">defaultTheme</property>
     <list-property name="configVars">
@@ -19,12 +19,12 @@
                 <scalar-parameter name="DatabaseURL" id="5">
                     <property name="hidden">true</property>
                     <property name="valueType">static</property>
-                    <property name="dataType">string</property>
-                    <property name="paramType">simple</property>
                     <property name="isRequired">true</property>
+                    <property name="dataType">string</property>
+                    <simple-property-list name="defaultValue">
+                        <value type="constant">jdbc:mysql://gr8x5.fnal.gov:3306/nightly_batch</value>
+                    </simple-property-list>
                     <property name="controlType">text-box</property>
-                    <property name="defaultValue">jdbc:mysql://gratia-vm02.fnal.gov:3320/gratia_gratiax21_ps</property>
-                    <property name="distinct">true</property>
                     <structure name="format">
                         <property name="category">Unformatted</property>
                         <property name="pattern">Unformatted</property>
@@ -33,12 +33,12 @@
                 <scalar-parameter name="DatabaseUser" id="6">
                     <property name="hidden">true</property>
                     <property name="valueType">static</property>
-                    <property name="dataType">string</property>
-                    <property name="paramType">simple</property>
                     <property name="isRequired">true</property>
+                    <property name="dataType">string</property>
+                    <simple-property-list name="defaultValue">
+                        <value type="constant">reader</value>
+                    </simple-property-list>
                     <property name="controlType">text-box</property>
-                    <property name="defaultValue">gratia</property>
-                    <property name="distinct">true</property>
                     <structure name="format">
                         <property name="category">Unformatted</property>
                         <property name="pattern">Unformatted</property>
@@ -47,12 +47,12 @@
                 <scalar-parameter name="DatabasePassword" id="7">
                     <property name="hidden">true</property>
                     <property name="valueType">static</property>
-                    <property name="dataType">string</property>
-                    <property name="paramType">simple</property>
                     <property name="isRequired">true</property>
+                    <property name="dataType">string</property>
+                    <simple-property-list name="defaultValue">
+                        <value type="constant">reader</value>
+                    </simple-property-list>
                     <property name="controlType">text-box</property>
-                    <property name="defaultValue">proto</property>
-                    <property name="distinct">true</property>
                     <structure name="format">
                         <property name="category">Unformatted</property>
                         <property name="pattern">Unformatted</property>
@@ -64,39 +64,37 @@
             <parameters>
                 <scalar-parameter name="DisplayMetric" id="25">
                     <property name="hidden">false</property>
-                    <text-property name="helpText">Select metric for Chart (Wallclock, Process etc hours)</text-property>
+                    <text-property name="helpText">Select metric for chart</text-property>
+                    <text-property name="promptText">Metric for chart</text-property>
                     <property name="valueType">static</property>
-                    <property name="dataType">string</property>
-                    <property name="paramType">simple</property>
-                    <text-property name="promptText">Metric</text-property>
                     <property name="isRequired">true</property>
-                    <property name="controlType">list-box</property>
-                    <property name="mustMatch">true</property>
-                    <property name="fixedOrder">true</property>
-                    <property name="defaultValue">WallDuration</property>
+                    <property name="dataType">string</property>
                     <property name="distinct">false</property>
-                    <structure name="format">
-                        <property name="category">Unformatted</property>
-                        <property name="pattern">Unformatted</property>
-                    </structure>
+                    <simple-property-list name="defaultValue">
+                        <value type="constant">WallDuration</value>
+                    </simple-property-list>
                     <list-property name="selectionList">
                         <structure>
                             <property name="value">WallDuration</property>
                             <property name="label">Wallclock Hours</property>
                         </structure>
                         <structure>
+                            <property name="value">Njobs</property>
+                            <property name="label">Job Count</property>
+                        </structure>
+                        <structure>
                             <property name="value">cpu</property>
                             <property name="label">Process Hours</property>
                         </structure>
-                        <structure>
-                            <property name="value">cpuUser</property>
-                            <property name="label">User Hours</property>
-                        </structure>
-                        <structure>
-                            <property name="value">cpuSystem</property>
-                            <property name="label">System hours</property>
-                        </structure>
                     </list-property>
+                    <property name="paramType">simple</property>
+                    <property name="controlType">list-box</property>
+                    <property name="mustMatch">true</property>
+                    <property name="fixedOrder">true</property>
+                    <structure name="format">
+                        <property name="category">Unformatted</property>
+                        <property name="pattern">Unformatted</property>
+                    </structure>
                 </scalar-parameter>
             </parameters>
         </parameter-group>
@@ -105,14 +103,16 @@
                 <scalar-parameter name="StartDate" id="18">
                     <property name="hidden">false</property>
                     <text-property name="helpText">Only jobs that finished after this date will be included</text-property>
-                    <property name="valueType">static</property>
-                    <property name="dataType">string</property>
-                    <property name="paramType">simple</property>
                     <text-property name="promptText">From</text-property>
+                    <property name="valueType">static</property>
                     <property name="isRequired">true</property>
-                    <property name="controlType">text-box</property>
-                    <property name="defaultValue">2008-01-01</property>
+                    <property name="dataType">string</property>
                     <property name="distinct">true</property>
+                    <simple-property-list name="defaultValue">
+                        <value type="constant">2010-01-01</value>
+                    </simple-property-list>
+                    <property name="paramType">simple</property>
+                    <property name="controlType">text-box</property>
                     <structure name="format">
                         <property name="category">Unformatted</property>
                         <property name="pattern">Unformatted</property>
@@ -120,15 +120,17 @@
                 </scalar-parameter>
                 <scalar-parameter name="EndDate" id="19">
                     <property name="hidden">false</property>
-                    <text-property name="helpText">Only jobs that finished before this date will be included</text-property>
-                    <property name="valueType">static</property>
-                    <property name="dataType">string</property>
-                    <property name="paramType">simple</property>
+                    <text-property name="helpText">Only jobs that finished before or on this date will be included</text-property>
                     <text-property name="promptText">To</text-property>
+                    <property name="valueType">static</property>
                     <property name="isRequired">true</property>
-                    <property name="controlType">text-box</property>
-                    <property name="defaultValue">2008-02-01</property>
+                    <property name="dataType">string</property>
                     <property name="distinct">true</property>
+                    <simple-property-list name="defaultValue">
+                        <value type="constant">2010-06-01</value>
+                    </simple-property-list>
+                    <property name="paramType">simple</property>
+                    <property name="controlType">text-box</property>
                     <structure name="format">
                         <property name="category">Unformatted</property>
                         <property name="pattern">Unformatted</property>
@@ -141,11 +143,13 @@
                 <scalar-parameter name="UserName" id="21">
                     <property name="hidden">true</property>
                     <property name="valueType">static</property>
-                    <property name="dataType">string</property>
-                    <property name="concealValue">true</property>
                     <property name="isRequired">false</property>
+                    <property name="dataType">string</property>
+                    <simple-property-list name="defaultValue">
+                        <value type="constant">None</value>
+                    </simple-property-list>
+                    <property name="concealValue">true</property>
                     <property name="controlType">text-box</property>
-                    <property name="defaultValue">None</property>
                     <structure name="format">
                         <property name="category">Unformatted</property>
                         <property name="pattern">Unformatted</property>
@@ -154,11 +158,13 @@
                 <scalar-parameter name="UserRole" id="22">
                     <property name="hidden">true</property>
                     <property name="valueType">static</property>
-                    <property name="dataType">string</property>
-                    <property name="concealValue">true</property>
                     <property name="isRequired">false</property>
+                    <property name="dataType">string</property>
+                    <simple-property-list name="defaultValue">
+                        <value type="constant">None</value>
+                    </simple-property-list>
+                    <property name="concealValue">true</property>
                     <property name="controlType">text-box</property>
-                    <property name="defaultValue">None</property>
                     <structure name="format">
                         <property name="category">Unformatted</property>
                         <property name="pattern">Unformatted</property>
@@ -171,10 +177,12 @@
                 <scalar-parameter name="ReportTitle" id="362">
                     <property name="hidden">true</property>
                     <property name="valueType">static</property>
-                    <property name="dataType">string</property>
                     <property name="isRequired">false</property>
+                    <property name="dataType">string</property>
+                    <simple-property-list name="defaultValue">
+                        <value type="constant"></value>
+                    </simple-property-list>
                     <property name="controlType">text-box</property>
-                    <property name="defaultValue"></property>
                     <structure name="format">
                         <property name="category">Unformatted</property>
                     </structure>
@@ -182,11 +190,13 @@
                 <scalar-parameter name="ReportSubtitle" id="23">
                     <property name="hidden">true</property>
                     <property name="valueType">static</property>
-                    <property name="dataType">string</property>
-                    <property name="concealValue">false</property>
                     <property name="isRequired">false</property>
+                    <property name="dataType">string</property>
+                    <simple-property-list name="defaultValue">
+                        <value type="constant"></value>
+                    </simple-property-list>
+                    <property name="concealValue">false</property>
                     <property name="controlType">text-box</property>
-                    <property name="defaultValue"></property>
                     <structure name="format">
                         <property name="category">Unformatted</property>
                         <property name="pattern">Unformatted</property>
@@ -195,24 +205,24 @@
                 <scalar-parameter name="ReportURL" id="389">
                     <property name="hidden">true</property>
                     <property name="valueType">static</property>
-                    <property name="dataType">string</property>
                     <property name="isRequired">false</property>
+                    <property name="dataType">string</property>
+                    <simple-property-list name="defaultValue">
+                        <value type="constant"></value>
+                    </simple-property-list>
                     <property name="controlType">text-box</property>
-                    <property name="defaultValue"></property>
                     <structure name="format">
                         <property name="category">Unformatted</property>
                     </structure>
                 </scalar-parameter>
-                <scalar-parameter name="ReportName" id="408">
+                <scalar-parameter name="ReportName" id="407">
                     <property name="hidden">true</property>
                     <property name="valueType">static</property>
-                    <property name="dataType">string</property>
-                    <property name="paramType">simple</property>
-                    <text-property name="promptText">Report Name</text-property>
                     <property name="isRequired">false</property>
-                    <property name="controlType">text-box</property>
-                    <property name="defaultValue">ReportName</property>
+                    <property name="dataType">string</property>
                     <property name="distinct">true</property>
+                    <property name="paramType">simple</property>
+                    <property name="controlType">text-box</property>
                     <structure name="format">
                         <property name="category">Unformatted</property>
                     </structure>
@@ -224,12 +234,14 @@
                 <scalar-parameter name="VOs" id="13">
                     <property name="hidden">true</property>
                     <text-property name="helpText">Enter VO Name</text-property>
-                    <property name="valueType">static</property>
-                    <property name="dataType">string</property>
                     <text-property name="promptText">VO</text-property>
+                    <property name="valueType">static</property>
                     <property name="isRequired">true</property>
+                    <property name="dataType">string</property>
+                    <simple-property-list name="defaultValue">
+                        <value type="constant">null</value>
+                    </simple-property-list>
                     <property name="controlType">text-box</property>
-                    <property name="defaultValue">null</property>
                     <structure name="format">
                         <property name="category">Unformatted</property>
                         <property name="pattern">Unformatted</property>
@@ -238,12 +250,14 @@
                 <scalar-parameter name="Sites" id="14">
                     <property name="hidden">true</property>
                     <text-property name="helpText">Enter Site Name</text-property>
-                    <property name="valueType">static</property>
-                    <property name="dataType">string</property>
                     <text-property name="promptText">Site</text-property>
+                    <property name="valueType">static</property>
                     <property name="isRequired">true</property>
+                    <property name="dataType">string</property>
+                    <simple-property-list name="defaultValue">
+                        <value type="constant">null</value>
+                    </simple-property-list>
                     <property name="controlType">text-box</property>
-                    <property name="defaultValue">null</property>
                     <structure name="format">
                         <property name="category">Unformatted</property>
                         <property name="pattern">Unformatted</property>
@@ -251,61 +265,62 @@
                 </scalar-parameter>
                 <scalar-parameter name="Probes" id="406">
                     <property name="hidden">true</property>
+                    <text-property name="promptText">Probe</text-property>
                     <property name="valueType">static</property>
                     <property name="dataType">string</property>
-                    <property name="paramType">simple</property>
-                    <text-property name="promptText">Probe</text-property>
-                    <property name="controlType">text-box</property>
-                    <property name="defaultValue">null</property>
                     <property name="distinct">true</property>
+                    <simple-property-list name="defaultValue">
+                        <value type="constant">null</value>
+                    </simple-property-list>
+                    <property name="paramType">simple</property>
+                    <property name="controlType">text-box</property>
                     <structure name="format">
                         <property name="category">Unformatted</property>
                     </structure>
                 </scalar-parameter>
                 <scalar-parameter name="SelectSiteName" id="101">
                     <text-property name="helpText">Select one site from the list</text-property>
-                    <property name="valueType">static</property>
-                    <property name="dataType">string</property>
-                    <property name="paramType">simple</property>
                     <text-property name="promptText">Site Name</text-property>
-                    <property name="controlType">text-box</property>
-                    <property name="defaultValue">FNAL_CDFOSG_1</property>
-                    <property name="distinct">true</property>
+                    <property name="valueType">static</property>
                     <property name="sortBy">label</property>
                     <property name="sortDirection">asc</property>
+                    <property name="dataType">string</property>
+                    <property name="distinct">true</property>
+                    <simple-property-list name="defaultValue">
+                        <value type="constant">FNAL_CDFOSG_1</value>
+                    </simple-property-list>
+                    <property name="paramType">simple</property>
+                    <property name="controlType">text-box</property>
                     <structure name="format">
                         <property name="category">Unformatted</property>
                     </structure>
                 </scalar-parameter>
                 <scalar-parameter name="SelectVOName" id="392">
                     <text-property name="helpText">Select one VO from the list</text-property>
-                    <property name="valueType">static</property>
-                    <property name="dataType">string</property>
-                    <property name="paramType">simple</property>
                     <text-property name="promptText">VO</text-property>
-                    <property name="controlType">text-box</property>
-                    <property name="defaultValue">cms</property>
-                    <property name="distinct">true</property>
+                    <property name="valueType">static</property>
                     <property name="sortBy">label</property>
                     <property name="sortDirection">asc</property>
+                    <property name="dataType">string</property>
+                    <property name="distinct">true</property>
+                    <simple-property-list name="defaultValue">
+                        <value type="constant">cms</value>
+                    </simple-property-list>
+                    <property name="paramType">simple</property>
+                    <property name="controlType">text-box</property>
                     <structure name="format">
                         <property name="category">Unformatted</property>
                     </structure>
                 </scalar-parameter>
                 <scalar-parameter name="GroupsPerChart" id="398">
                     <text-property name="helpText">Select number of groups (e.g. how many VO's or Sites) to be displayed on each chart</text-property>
+                    <text-property name="promptText">Groups per chart</text-property>
                     <property name="valueType">static</property>
                     <property name="dataType">integer</property>
-                    <property name="paramType">simple</property>
-                    <text-property name="promptText">Groups per chart</text-property>
-                    <property name="controlType">list-box</property>
-                    <property name="mustMatch">true</property>
-                    <property name="fixedOrder">true</property>
-                    <property name="defaultValue">15</property>
                     <property name="distinct">false</property>
-                    <structure name="format">
-                        <property name="category">Unformatted</property>
-                    </structure>
+                    <simple-property-list name="defaultValue">
+                        <value type="constant">15</value>
+                    </simple-property-list>
                     <list-property name="selectionList">
                         <structure>
                             <property name="value">1</property>
@@ -340,60 +355,68 @@
                             <property name="label">ALL</property>
                         </structure>
                     </list-property>
+                    <property name="paramType">simple</property>
+                    <property name="controlType">list-box</property>
+                    <property name="mustMatch">true</property>
+                    <property name="fixedOrder">true</property>
+                    <structure name="format">
+                        <property name="category">Unformatted</property>
+                    </structure>
                 </scalar-parameter>
                 <scalar-parameter name="SelectProbeName" id="92">
                     <text-property name="helpText">Select one  probe name  to be reported</text-property>
+                    <text-property name="promptText">Probe</text-property>
                     <property name="valueType">static</property>
                     <property name="dataType">string</property>
-                    <property name="paramType">simple</property>
-                    <text-property name="promptText">Probe</text-property>
-                    <property name="controlType">text-box</property>
-                    <property name="defaultValue">All</property>
                     <property name="distinct">true</property>
+                    <simple-property-list name="defaultValue">
+                        <value type="constant">All</value>
+                    </simple-property-list>
+                    <property name="paramType">simple</property>
+                    <property name="controlType">text-box</property>
                     <structure name="format">
                         <property name="category">Unformatted</property>
                     </structure>
                 </scalar-parameter>
                 <scalar-parameter name="SelectSites" id="400">
                     <text-property name="helpText">List of Site's (one or more) to include/exclude in chart</text-property>
+                    <text-property name="promptText">Sites</text-property>
                     <property name="valueType">static</property>
                     <property name="dataType">string</property>
-                    <property name="paramType">simple</property>
-                    <text-property name="promptText">Sites</text-property>
-                    <property name="controlType">text-box</property>
-                    <property name="defaultValue">('FNAL_FERMIGRID_ITB','FNAL_FERMIGRID_ITB')</property>
                     <property name="distinct">true</property>
+                    <simple-property-list name="defaultValue">
+                        <value type="constant">('FNAL_CDFOSG_3')</value>
+                    </simple-property-list>
+                    <property name="paramType">simple</property>
+                    <property name="controlType">text-box</property>
                     <structure name="format">
                         <property name="category">Unformatted</property>
                     </structure>
                 </scalar-parameter>
                 <scalar-parameter name="SelectVOs" id="402">
                     <text-property name="helpText">List of VO's (one or more) to include/exclude in chart.</text-property>
+                    <text-property name="promptText">VOs</text-property>
                     <property name="valueType">static</property>
                     <property name="dataType">string</property>
-                    <property name="paramType">simple</property>
-                    <text-property name="promptText">VOs</text-property>
-                    <property name="controlType">text-box</property>
-                    <property name="defaultValue">('cms','cdf','d0sar','dzero','usatlas','uscms','uscmspool')</property>
                     <property name="distinct">true</property>
+                    <simple-property-list name="defaultValue">
+                        <value type="constant">('cms','cdf','atlas','dzero','usatlas','uscmsPool2')</value>
+                    </simple-property-list>
+                    <property name="paramType">simple</property>
+                    <property name="controlType">text-box</property>
                     <structure name="format">
                         <property name="category">Unformatted</property>
                     </structure>
                 </scalar-parameter>
                 <scalar-parameter name="SelType" id="404">
                     <text-property name="helpText">Include or exclude selected list values....</text-property>
+                    <text-property name="promptText">Selection Type</text-property>
                     <property name="valueType">static</property>
                     <property name="dataType">string</property>
-                    <property name="paramType">simple</property>
-                    <text-property name="promptText">Selection Type</text-property>
-                    <property name="controlType">list-box</property>
-                    <property name="mustMatch">true</property>
-                    <property name="fixedOrder">true</property>
-                    <property name="defaultValue">IN</property>
                     <property name="distinct">false</property>
-                    <structure name="format">
-                        <property name="category">Unformatted</property>
-                    </structure>
+                    <simple-property-list name="defaultValue">
+                        <value type="constant">IN</value>
+                    </simple-property-list>
                     <list-property name="selectionList">
                         <structure>
                             <property name="value">IN</property>
@@ -404,6 +427,82 @@
                             <property name="label">Exclude</property>
                         </structure>
                     </list-property>
+                    <property name="paramType">simple</property>
+                    <property name="controlType">list-box</property>
+                    <property name="mustMatch">true</property>
+                    <property name="fixedOrder">true</property>
+                    <structure name="format">
+                        <property name="category">Unformatted</property>
+                    </structure>
+                </scalar-parameter>
+            </parameters>
+        </parameter-group>
+        <parameter-group name="Formatting" id="415">
+            <parameters>
+                <scalar-parameter name="GroupByFormat" id="9">
+                    <property name="hidden">true</property>
+                    <property name="valueType">static</property>
+                    <property name="isRequired">false</property>
+                    <property name="dataType">string</property>
+                    <property name="distinct">true</property>
+                    <simple-property-list name="defaultValue">
+                        <value type="constant">day</value>
+                    </simple-property-list>
+                    <list-property name="selectionList">
+                        <structure>
+                            <property name="value">day</property>
+                            <property name="label">Day</property>
+                        </structure>
+                        <structure>
+                            <property name="value">week</property>
+                            <property name="label">Week</property>
+                        </structure>
+                        <structure>
+                            <property name="value">month</property>
+                            <property name="label">Month</property>
+                        </structure>
+                        <structure>
+                            <property name="value">year</property>
+                            <property name="label">Year</property>
+                        </structure>
+                    </list-property>
+                    <property name="paramType">simple</property>
+                    <property name="controlType">list-box</property>
+                    <property name="mustMatch">false</property>
+                    <property name="fixedOrder">true</property>
+                    <structure name="format">
+                        <property name="category">Unformatted</property>
+                        <property name="pattern">Unformatted</property>
+                    </structure>
+                </scalar-parameter>
+                <scalar-parameter name="TimeAxisPattern" id="10">
+                    <property name="hidden">true</property>
+                    <property name="valueType">static</property>
+                    <property name="isRequired">false</property>
+                    <property name="dataType">string</property>
+                    <simple-property-list name="defaultValue">
+                        <value type="constant">MM/dd/yyyy</value>
+                    </simple-property-list>
+                    <property name="concealValue">true</property>
+                    <property name="controlType">text-box</property>
+                    <structure name="format">
+                        <property name="category">Unformatted</property>
+                        <property name="pattern">Unformatted</property>
+                    </structure>
+                </scalar-parameter>
+                <scalar-parameter name="HighlightDate" id="11">
+                    <property name="hidden">true</property>
+                    <property name="valueType">static</property>
+                    <property name="isRequired">false</property>
+                    <property name="dataType">string</property>
+                    <simple-property-list name="defaultValue">
+                        <value type="constant"></value>
+                    </simple-property-list>
+                    <property name="controlType">text-box</property>
+                    <structure name="format">
+                        <property name="category">Unformatted</property>
+                        <property name="pattern">Unformatted</property>
+                    </structure>
                 </scalar-parameter>
             </parameters>
         </parameter-group>
@@ -439,7 +538,7 @@ else{"All VO's"}</expression>
             <property name="fontFamily">sans-serif</property>
             <property name="fontSize">9pt</property>
             <property name="textAlign">center</property>
-            <expression name="valueExpr">"Date:  " + params["StartDate"]</expression>
+            <expression name="valueExpr">"Date:  " + params["StartDate"].value</expression>
             <property name="contentType">html</property>
         </text-data>
         <label name="ShowQuery" id="122">
@@ -450,11 +549,13 @@ else{"All VO's"}</expression>
             <property name="marginBottom">20px</property>
             <property name="paddingTop">1pt</property>
             <text-property name="text">Show Query</text-property>
-            <structure name="action">
-                <property name="linkType">hyperlink</property>
-                <expression name="uri">"../showQuery.jsp?TraceTableKey="+params["UserName"].split("|")[1]+"&amp;ReportTitle="+params["ReportTitle"]</expression>
-                <property name="targetWindow">_self</property>
-            </structure>
+            <list-property name="action">
+                <structure>
+                    <property name="linkType">hyperlink</property>
+                    <expression name="uri">"../showQuery.jsp?TraceTableKey="+params["UserName"].split("|")[1]+"&amp;ReportTitle="+params["ReportTitle"]</expression>
+                    <property name="targetWindow">_self</property>
+                </structure>
+            </list-property>
         </label>
         <label name="ReportURL" id="116">
             <property name="style">sans-style1</property>
@@ -468,11 +569,13 @@ else{"All VO's"}</expression>
                 </structure>
             </list-property>
             <text-property name="text">Retrieve Report URL</text-property>
-            <structure name="action">
-                <property name="linkType">hyperlink</property>
-                <expression name="uri">params["ReportURL"]</expression>
-                <property name="targetWindow">_blank</property>
-            </structure>
+            <list-property name="action">
+                <structure>
+                    <property name="linkType">hyperlink</property>
+                    <expression name="uri">params["ReportURL"]</expression>
+                    <property name="targetWindow">_blank</property>
+                </structure>
+            </list-property>
         </label>
         <text-data name="SelectVOName" id="393">
             <property name="style">sans-style1</property>
@@ -493,7 +596,7 @@ else{"All VO's"}</expression>
             <property name="style">sans-style1</property>
             <property name="fontSize">9pt</property>
             <property name="textAlign">center</property>
-            <expression name="valueExpr">"Week: "+params["StartDate"]</expression>
+            <expression name="valueExpr">"Week of: "+params["StartDate"]</expression>
             <property name="contentType">html</property>
         </text-data>
         <text-data name="SelectSites" id="401">
@@ -519,18 +622,70 @@ else{"All VO's"}</expression>
 else{"All SItes"}</expression>
             <property name="contentType">html</property>
         </text-data>
-        <text-data name="SiteName (row)" id="407">
-            <property name="fontFamily">sans-serif</property>
-            <property name="textAlign">center</property>
-            <property name="pageBreakInside">auto</property>
-            <expression name="valueExpr">"Site: "+ row["SiteName"]</expression>
-            <property name="contentType">html</property>
-        </text-data>
     </components>
     <page-setup>
-        <simple-master-page name="Simple MasterPage" id="28">
+        <simple-master-page name="Gratia_800x600" id="28">
+            <property name="type">us-letter</property>
+            <property name="orientation">landscape</property>
+            <property name="topMargin">1in</property>
+            <property name="leftMargin">0.25in</property>
+            <property name="bottomMargin">1in</property>
+            <property name="rightMargin">0.25in</property>
             <property name="showHeaderOnFirst">true</property>
             <property name="showFooterOnLast">true</property>
+        </simple-master-page>
+        <simple-master-page name="Gratia_600x800" id="408">
+            <property name="type">us-letter</property>
+            <property name="orientation">portrait</property>
+            <property name="topMargin">1in</property>
+            <property name="leftMargin">0.25in</property>
+            <property name="bottomMargin">1in</property>
+        </simple-master-page>
+        <simple-master-page name="Gratia_800x880" id="409">
+            <property name="type">custom</property>
+            <property name="height">14in</property>
+            <property name="width">11in</property>
+        </simple-master-page>
+        <simple-master-page name="Gratia_640x480_550" id="410">
+            <property name="type">custom</property>
+            <property name="height">8.5in</property>
+            <property name="width">9in</property>
+        </simple-master-page>
+        <simple-master-page name="Gratia_600x800Norm" id="411">
+            <property name="topMargin">1in</property>
+            <property name="leftMargin">1.25in</property>
+            <property name="bottomMargin">1in</property>
+            <property name="rightMargin">1.25in</property>
+        </simple-master-page>
+        <simple-master-page name="Gratia_800x480" id="412">
+            <property name="type">custom</property>
+            <property name="height">8.5in</property>
+            <property name="width">11in</property>
+            <property name="topMargin">1in</property>
+            <property name="leftMargin">0.25in</property>
+            <property name="bottomMargin">1in</property>
+        </simple-master-page>
+        <simple-master-page name="Gratia_640x1000" id="413">
+            <property name="type">custom</property>
+            <property name="height">14in</property>
+            <property name="width">9in</property>
+            <property name="topMargin">1in</property>
+            <property name="leftMargin">0.25in</property>
+            <property name="bottomMargin">1in</property>
+        </simple-master-page>
+        <simple-master-page name="Gratia_640x800" id="414">
+            <property name="type">custom</property>
+            <property name="height">11in</property>
+            <property name="width">9in</property>
+            <property name="topMargin">1in</property>
+            <property name="leftMargin">0.25in</property>
+            <property name="bottomMargin">1in</property>
+        </simple-master-page>
+        <simple-master-page name="Gratia_640x1200" id="416">
+            <property name="type">custom</property>
+            <property name="height">17in</property>
+            <property name="width">9in</property>
+            <property name="leftMargin">0.25in</property>
         </simple-master-page>
     </page-setup>
 </library>

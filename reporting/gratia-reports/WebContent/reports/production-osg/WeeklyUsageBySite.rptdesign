@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<report xmlns="http://www.eclipse.org/birt/2005/design" version="3.2.17" id="1">
-    <property name="createdBy">Eclipse BIRT Designer Version 2.3.1.v20080911 Build &lt;2.3.1.v20080922-1151></property>
+<report xmlns="http://www.eclipse.org/birt/2005/design" version="3.2.22" id="1">
+    <property name="createdBy">Eclipse BIRT Designer Version 2.6.1.v20100902 Build &lt;2.6.1.v20100915-1750></property>
     <property name="units">in</property>
     <list-property name="propertyBindings">
         <structure>
@@ -20,6 +20,8 @@
         </structure>
     </list-property>
     <property name="eventHandlerClass">net.sf.gratia.reporting.GratiaBirtReportEH</property>
+    <property name="newHandlerOnEachEvent">true</property>
+    <property name="layoutPreference">auto layout</property>
     <list-property name="libraries">
         <structure>
             <property name="fileName">reportLib.rptlibrary</property>
@@ -27,78 +29,50 @@
         </structure>
     </list-property>
     <parameters>
-        <parameter-group name="MetricsFormatting" id="398" extends="reportLib.MetricsFormatting"/>
+        <parameter-group name="MetricsFormatting" id="398" extends="reportLib.MetricsFormatting">
+            <overridden-values>
+                <ref-entry baseId="25" name="DisplayMetric" id="25"/>
+            </overridden-values>
+        </parameter-group>
         <scalar-parameter name="SelType" id="402" extends="reportLib.SelType"/>
         <scalar-parameter name="SelectSites" id="396" extends="reportLib.SelectSites"/>
-        <parameter-group name="DatabaseAccess" id="401" extends="reportLib.DatabaseAccess"/>
-        <parameter-group name="ReportInfo" id="399" extends="reportLib.ReportInfo"/>
-        <parameter-group name="UserInfo" id="400" extends="reportLib.UserInfo"/>
+        <parameter-group name="DatabaseAccess" id="401" extends="reportLib.DatabaseAccess">
+            <overridden-values>
+                <ref-entry baseId="5" name="DatabaseURL" id="5"/>
+                <ref-entry baseId="6" name="DatabaseUser" id="6"/>
+                <ref-entry baseId="7" name="DatabasePassword" id="7"/>
+            </overridden-values>
+        </parameter-group>
+        <parameter-group name="ReportInfo" id="399" extends="reportLib.ReportInfo">
+            <overridden-values>
+                <ref-entry baseId="362" name="ReportTitle" id="362"/>
+                <ref-entry baseId="23" name="ReportSubtitle" id="23"/>
+                <ref-entry baseId="389" name="ReportURL" id="389"/>
+                <ref-entry baseId="407" name="ReportName" id="407">
+                    <simple-property-list name="defaultValue">
+                        <value type="constant">'WeeklyUsageBySite'</value>
+                    </simple-property-list>
+                    <property name="dataType">string</property>
+                </ref-entry>
+            </overridden-values>
+        </parameter-group>
+        <parameter-group name="UserInfo" id="400" extends="reportLib.UserInfo">
+            <overridden-values>
+                <ref-entry baseId="21" name="UserName" id="21"/>
+                <ref-entry baseId="22" name="UserRole" id="22"/>
+            </overridden-values>
+        </parameter-group>
     </parameters>
     <data-sources>
         <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="Data Source" id="444">
             <property name="odaDriverClass">com.mysql.jdbc.Driver</property>
-            <property name="odaURL">jdbc:mysql://gratia-vm02.fnal.gov:3320/gratia_gratiax21</property>
+            <property name="odaURL">jdbc:mysql://gr8x5.fnal.gov:3306/nightly_batch</property>
             <property name="odaUser">reader</property>
             <encrypted-property name="odaPassword" encryptionID="base64">cmVhZGVy</encrypted-property>
         </oda-data-source>
     </data-sources>
     <data-sets>
         <oda-data-set extensionID="org.eclipse.birt.report.data.oda.jdbc.JdbcSelectDataSet" name="reportsProcedure" id="94">
-            <structure name="cachedMetaData">
-                <list-property name="resultSet">
-                    <structure>
-                        <property name="position">1</property>
-                        <property name="name">SiteName</property>
-                        <property name="dataType">string</property>
-                    </structure>
-                    <structure>
-                        <property name="position">2</property>
-                        <property name="name">WallDuration</property>
-                        <property name="dataType">float</property>
-                    </structure>
-                    <structure>
-                        <property name="position">3</property>
-                        <property name="name">cpu</property>
-                        <property name="dataType">float</property>
-                    </structure>
-                    <structure>
-                        <property name="position">4</property>
-                        <property name="name">cpuUser</property>
-                        <property name="dataType">float</property>
-                    </structure>
-                    <structure>
-                        <property name="position">5</property>
-                        <property name="name">cpuSystem</property>
-                        <property name="dataType">float</property>
-                    </structure>
-                    <structure>
-                        <property name="position">6</property>
-                        <property name="name">Njobs</property>
-                        <property name="dataType">decimal</property>
-                    </structure>
-                    <structure>
-                        <property name="position">7</property>
-                        <property name="name">VOName</property>
-                        <property name="dataType">string</property>
-                    </structure>
-                    <structure>
-                        <property name="position">8</property>
-                        <property name="name">UserName</property>
-                        <property name="dataType">string</property>
-                    </structure>
-                    <structure>
-                        <property name="position">9</property>
-                        <property name="name">ProbeName</property>
-                        <property name="dataType">string</property>
-                    </structure>
-                    <structure>
-                        <property name="position">10</property>
-                        <property name="name">DateValue</property>
-                        <property name="dataType">date</property>
-                    </structure>
-                </list-property>
-            </structure>
-            <property name="dataSource">Data Source</property>
             <list-property name="parameters">
                 <structure>
                     <property name="name">UserName</property>
@@ -234,6 +208,7 @@ if (monthnr.toString().length > 1){
                 </structure>
                 <structure>
                     <property name="name">reportName</property>
+                    <property name="paramName">ReportName</property>
                     <property name="dataType">string</property>
                     <property name="position">15</property>
                     <expression name="defaultValue">'WeeklyUsageBySite'</expression>
@@ -241,6 +216,61 @@ if (monthnr.toString().length > 1){
                     <property name="isOutput">false</property>
                 </structure>
             </list-property>
+            <structure name="cachedMetaData">
+                <list-property name="resultSet">
+                    <structure>
+                        <property name="position">1</property>
+                        <property name="name">SiteName</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">2</property>
+                        <property name="name">WallDuration</property>
+                        <property name="dataType">float</property>
+                    </structure>
+                    <structure>
+                        <property name="position">3</property>
+                        <property name="name">cpu</property>
+                        <property name="dataType">float</property>
+                    </structure>
+                    <structure>
+                        <property name="position">4</property>
+                        <property name="name">cpuUser</property>
+                        <property name="dataType">float</property>
+                    </structure>
+                    <structure>
+                        <property name="position">5</property>
+                        <property name="name">cpuSystem</property>
+                        <property name="dataType">float</property>
+                    </structure>
+                    <structure>
+                        <property name="position">6</property>
+                        <property name="name">Njobs</property>
+                        <property name="dataType">decimal</property>
+                    </structure>
+                    <structure>
+                        <property name="position">7</property>
+                        <property name="name">VOName</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">8</property>
+                        <property name="name">UserName</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">9</property>
+                        <property name="name">ProbeName</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">10</property>
+                        <property name="name">DateValue</property>
+                        <property name="dataType">date</property>
+                    </structure>
+                </list-property>
+            </structure>
+            <property name="dataSource">Data Source</property>
             <list-property name="resultSet">
                 <structure>
                     <property name="position">1</property>
@@ -303,7 +333,7 @@ if (monthnr.toString().length > 1){
                     <property name="dataType">date</property>
                 </structure>
             </list-property>
-            <property name="queryText">call reports(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)</property>
+            <xml-property name="queryText"><![CDATA[call reports(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)]]></xml-property>
         </oda-data-set>
     </data-sets>
     <styles>
@@ -312,10 +342,7 @@ if (monthnr.toString().length > 1){
         </style>
     </styles>
     <page-setup>
-        <simple-master-page name="Simple MasterPage" id="2">
-            <property name="showHeaderOnFirst">true</property>
-            <property name="showFooterOnLast">true</property>
-        </simple-master-page>
+        <simple-master-page name="Gratia_800x600" id="445" extends="reportLib.Gratia_800x600"/>
     </page-setup>
     <body>
         <text-data name="SelectSites" id="390" extends="reportLib.SelectSites"/>
@@ -820,6 +847,37 @@ function beforeDrawAxisTitle( axis, label, context )
   <Interactivity>
     <LegendBehavior>HighlightSerie</LegendBehavior>
   </Interactivity>
+  <EmptyMessage>
+    <Caption>
+      <Value></Value>
+      <Font>
+        <Alignment/>
+      </Font>
+    </Caption>
+    <Background xsi:type="attribute:ColorDefinition">
+      <Transparency>0</Transparency>
+      <Red>255</Red>
+      <Green>255</Green>
+      <Blue>255</Blue>
+    </Background>
+    <Outline>
+      <Style>Solid</Style>
+      <Thickness>1</Thickness>
+      <Color>
+        <Transparency>255</Transparency>
+        <Red>0</Red>
+        <Green>0</Green>
+        <Blue>0</Blue>
+      </Color>
+    </Outline>
+    <Insets>
+      <Top>0.0</Top>
+      <Left>2.0</Left>
+      <Bottom>0.0</Bottom>
+      <Right>3.0</Right>
+    </Insets>
+    <Visible>false</Visible>
+  </EmptyMessage>
   <Axes>
     <Type>DateTime</Type>
     <Title>
@@ -1463,42 +1521,56 @@ if(dotpos > 0) {metricvalue = metricvalue.substring(0,dotpos+2);}&#xD;
 </model:ChartWithAxes>
 ]]></xml-property>
             <property name="outputFormat">SVG</property>
-            <structure name="action">
-                <property name="targetWindow">_self</property>
-                <property name="linkType">drill-through</property>
-                <property name="formatType">html</property>
-                <property name="targetFileType">report-design</property>
-                <property name="reportName">UsageByUserForWeek.rptdesign</property>
-                <list-property name="paramBindings">
-                    <structure>
-                        <property name="paramName">DisplayMetric</property>
-                        <expression name="expression">params["DisplayMetric"]</expression>
-                    </structure>
-                    <structure>
-                        <property name="paramName">ReportTitle</property>
-                        <expression name="expression">params["ReportTitle"] + ' - ' + 'drill-through'</expression>
-                    </structure>
-                    <structure>
-                        <property name="paramName">ReportSubtitle</property>
-                        <expression name="expression">params["ReportSubtitle"]</expression>
-                    </structure>
-                </list-property>
-            </structure>
+            <list-property name="action">
+                <structure>
+                    <property name="targetWindow">_self</property>
+                    <property name="linkType">drill-through</property>
+                    <property name="formatType">html</property>
+                    <property name="targetFileType">report-design</property>
+                    <property name="reportName">UsageByUserForWeek.rptdesign</property>
+                    <list-property name="paramBindings">
+                        <structure>
+                            <property name="paramName">DisplayMetric</property>
+                            <simple-property-list name="expression">
+                                <value>params["DisplayMetric"]</value>
+                            </simple-property-list>
+                        </structure>
+                        <structure>
+                            <property name="paramName">ReportTitle</property>
+                            <simple-property-list name="expression">
+                                <value>params["ReportTitle"] + ' - ' + 'drill-through'</value>
+                            </simple-property-list>
+                        </structure>
+                        <structure>
+                            <property name="paramName">ReportSubtitle</property>
+                            <simple-property-list name="expression">
+                                <value>params["ReportSubtitle"]</value>
+                            </simple-property-list>
+                        </structure>
+                    </list-property>
+                </structure>
+            </list-property>
             <property name="dataSet">reportsProcedure</property>
             <property name="height">600px</property>
             <property name="width">800px</property>
             <list-property name="paramBindings">
                 <structure>
                     <property name="paramName">Sites</property>
-                    <expression name="expression">params["SelectSites"]</expression>
+                    <simple-property-list name="expression">
+                        <value>params["SelectSites"]</value>
+                    </simple-property-list>
                 </structure>
                 <structure>
                     <property name="paramName">SelType</property>
-                    <expression name="expression">params["SelType"]</expression>
+                    <simple-property-list name="expression">
+                        <value>params["SelType"]</value>
+                    </simple-property-list>
                 </structure>
                 <structure>
                     <property name="paramName">reportName</property>
-                    <expression name="expression">params["ReportName"].value</expression>
+                    <simple-property-list name="expression">
+                        <value>params["ReportName"].value</value>
+                    </simple-property-list>
                 </structure>
             </list-property>
             <list-property name="boundDataColumns">

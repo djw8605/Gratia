@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<report xmlns="http://www.eclipse.org/birt/2005/design" version="3.2.17" id="1">
-    <property name="createdBy">Eclipse BIRT Designer Version 2.3.1.v20080911 Build &lt;2.3.1.v20080922-1151></property>
+<report xmlns="http://www.eclipse.org/birt/2005/design" version="3.2.22" id="1">
+    <property name="createdBy">Eclipse BIRT Designer Version 2.6.1.v20100902 Build &lt;2.6.1.v20100915-1750></property>
     <property name="units">in</property>
     <list-property name="propertyBindings">
         <structure>
@@ -20,6 +20,8 @@
         </structure>
     </list-property>
     <property name="eventHandlerClass">net.sf.gratia.reporting.GratiaBirtReportEH</property>
+    <property name="newHandlerOnEachEvent">true</property>
+    <property name="layoutPreference">auto layout</property>
     <list-property name="libraries">
         <structure>
             <property name="fileName">reportLib.rptlibrary</property>
@@ -299,6 +301,37 @@
     </OrthogonalSampleData>
   </SampleData>
   <Interactivity/>
+  <EmptyMessage>
+    <Caption>
+      <Value></Value>
+      <Font>
+        <Alignment/>
+      </Font>
+    </Caption>
+    <Background xsi:type="attribute:ColorDefinition">
+      <Transparency>0</Transparency>
+      <Red>255</Red>
+      <Green>255</Green>
+      <Blue>255</Blue>
+    </Background>
+    <Outline>
+      <Style>Solid</Style>
+      <Thickness>1</Thickness>
+      <Color>
+        <Transparency>255</Transparency>
+        <Red>0</Red>
+        <Green>0</Green>
+        <Blue>0</Blue>
+      </Color>
+    </Outline>
+    <Insets>
+      <Top>0.0</Top>
+      <Left>2.0</Left>
+      <Bottom>0.0</Bottom>
+      <Right>3.0</Right>
+    </Insets>
+    <Visible>false</Visible>
+  </EmptyMessage>
   <Axes>
     <Type>Text</Type>
     <Title>
@@ -814,18 +847,50 @@
         </template-parameter-definition>
     </template-parameter-definitions>
     <parameters>
-        <parameter-group name="MetricsFormatting" id="416" extends="reportLib.MetricsFormatting"/>
-        <parameter-group name="DateRange" id="413" extends="reportLib.DateRange"/>
+        <parameter-group name="MetricsFormatting" id="416" extends="reportLib.MetricsFormatting">
+            <overridden-values>
+                <ref-entry baseId="25" name="DisplayMetric" id="445"/>
+            </overridden-values>
+        </parameter-group>
+        <parameter-group name="DateRange" id="413" extends="reportLib.DateRange">
+            <overridden-values>
+                <ref-entry baseId="18" name="StartDate" id="446"/>
+                <ref-entry baseId="19" name="EndDate" id="447"/>
+            </overridden-values>
+        </parameter-group>
         <scalar-parameter name="GroupsPerChart" id="428" extends="reportLib.GroupsPerChart"/>
         <scalar-parameter name="VOs" id="429" extends="reportLib.VOs"/>
-        <parameter-group name="DatabaseAccess" id="419" extends="reportLib.DatabaseAccess"/>
-        <parameter-group name="ReportInfo" id="423" extends="reportLib.ReportInfo"/>
-        <parameter-group name="UserInfo" id="426" extends="reportLib.UserInfo"/>
+        <parameter-group name="DatabaseAccess" id="419" extends="reportLib.DatabaseAccess">
+            <overridden-values>
+                <ref-entry baseId="5" name="DatabaseURL" id="448"/>
+                <ref-entry baseId="6" name="DatabaseUser" id="449"/>
+                <ref-entry baseId="7" name="DatabasePassword" id="450"/>
+            </overridden-values>
+        </parameter-group>
+        <parameter-group name="ReportInfo" id="423" extends="reportLib.ReportInfo">
+            <overridden-values>
+                <ref-entry baseId="362" name="ReportTitle" id="362"/>
+                <ref-entry baseId="23" name="ReportSubtitle" id="451"/>
+                <ref-entry baseId="389" name="ReportURL" id="389"/>
+                <ref-entry baseId="407" name="ReportName" id="452">
+                    <simple-property-list name="defaultValue">
+                        <value type="constant">'WeeklyUsageForVO'</value>
+                    </simple-property-list>
+                    <property name="dataType">string</property>
+                </ref-entry>
+            </overridden-values>
+        </parameter-group>
+        <parameter-group name="UserInfo" id="426" extends="reportLib.UserInfo">
+            <overridden-values>
+                <ref-entry baseId="21" name="UserName" id="21"/>
+                <ref-entry baseId="22" name="UserRole" id="453"/>
+            </overridden-values>
+        </parameter-group>
     </parameters>
     <data-sources>
         <oda-data-source extensionID="org.eclipse.birt.report.data.oda.jdbc" name="Data Source" id="444">
             <property name="odaDriverClass">com.mysql.jdbc.Driver</property>
-            <property name="odaURL">jdbc:mysql://gratia-vm02.fnal.gov:3320/gratia_gratiax21</property>
+            <property name="odaURL">jdbc:mysql://gr8x5.fnal.gov:3306/nightly_batch</property>
             <property name="odaUser">reader</property>
             <encrypted-property name="odaPassword" encryptionID="base64">cmVhZGVy</encrypted-property>
         </oda-data-source>
@@ -849,48 +914,6 @@
                     <property name="alias">DateValue</property>
                 </structure>
             </list-property>
-            <structure name="cachedMetaData">
-                <list-property name="resultSet">
-                    <structure>
-                        <property name="position">1</property>
-                        <property name="name">final_rank</property>
-                        <property name="dataType">float</property>
-                    </structure>
-                    <structure>
-                        <property name="position">2</property>
-                        <property name="name">VOName</property>
-                        <property name="dataType">string</property>
-                    </structure>
-                    <structure>
-                        <property name="position">3</property>
-                        <property name="name">DateValue</property>
-                        <property name="dataType">date</property>
-                    </structure>
-                    <structure>
-                        <property name="position">4</property>
-                        <property name="name">WallDuration</property>
-                        <property name="dataType">float</property>
-                    </structure>
-                    <structure>
-                        <property name="position">5</property>
-                        <property name="name">cpu</property>
-                        <property name="dataType">float</property>
-                    </structure>
-                    <structure>
-                        <property name="position">6</property>
-                        <property name="name">Njobs</property>
-                        <property name="dataType">decimal</property>
-                    </structure>
-                    <structure>
-                        <property name="position">7</property>
-                        <property name="name">ChartNr</property>
-                        <property name="dataType">integer</property>
-                    </structure>
-                </list-property>
-            </structure>
-            <property name="rowFetchLimit">10000</property>
-            <property name="dataSource">Data Source</property>
-            <property name="dataSetRowLimit">0</property>
             <list-property name="parameters">
                 <structure>
                     <property name="name">UserName</property>
@@ -979,6 +1002,7 @@
                 </structure>
                 <structure>
                     <property name="name">reportName</property>
+                    <property name="paramName">ReportName</property>
                     <property name="dataType">string</property>
                     <property name="position">11</property>
                     <expression name="defaultValue">'WeeklyUsageForVO'</expression>
@@ -986,6 +1010,48 @@
                     <property name="isOutput">false</property>
                 </structure>
             </list-property>
+            <structure name="cachedMetaData">
+                <list-property name="resultSet">
+                    <structure>
+                        <property name="position">1</property>
+                        <property name="name">final_rank</property>
+                        <property name="dataType">float</property>
+                    </structure>
+                    <structure>
+                        <property name="position">2</property>
+                        <property name="name">VOName</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">3</property>
+                        <property name="name">DateValue</property>
+                        <property name="dataType">date</property>
+                    </structure>
+                    <structure>
+                        <property name="position">4</property>
+                        <property name="name">WallDuration</property>
+                        <property name="dataType">float</property>
+                    </structure>
+                    <structure>
+                        <property name="position">5</property>
+                        <property name="name">cpu</property>
+                        <property name="dataType">float</property>
+                    </structure>
+                    <structure>
+                        <property name="position">6</property>
+                        <property name="name">Njobs</property>
+                        <property name="dataType">decimal</property>
+                    </structure>
+                    <structure>
+                        <property name="position">7</property>
+                        <property name="name">ChartNr</property>
+                        <property name="dataType">integer</property>
+                    </structure>
+                </list-property>
+            </structure>
+            <property name="rowFetchLimit">10000</property>
+            <property name="dataSetRowLimit">0</property>
+            <property name="dataSource">Data Source</property>
             <list-property name="resultSet">
                 <structure>
                     <property name="position">1</property>
@@ -1024,7 +1090,7 @@
                     <property name="dataType">decimal</property>
                 </structure>
             </list-property>
-            <property name="queryText">call reportsRanked(?,?,?,?,?,?,?,?,?,?,?)</property>
+            <xml-property name="queryText"><![CDATA[call reportsRanked(?,?,?,?,?,?,?,?,?,?,?)]]></xml-property>
         </oda-data-set>
     </data-sets>
     <styles>
@@ -1033,54 +1099,48 @@
         </style>
     </styles>
     <page-setup>
-        <simple-master-page name="Simple MasterPage" id="2">
-            <page-footer>
-                <text id="3">
-                    <property name="contentType">html</property>
-                    <text-property name="content"><![CDATA[<value-of>new Date()</value-of>]]></text-property>
-                </text>
-            </page-footer>
-        </simple-master-page>
+        <simple-master-page name="Gratia_800x600" id="454" extends="reportLib.Gratia_800x600"/>
     </page-setup>
     <body>
-        <grid id="4">
-            <property name="height">0.322in</property>
-            <property name="width">5.968in</property>
-            <column id="5"/>
-            <row id="6">
-                <property name="height">0.322in</property>
-                <cell id="7">
-                    <property name="verticalAlign">top</property>
-                </cell>
-            </row>
-        </grid>
         <table name="table1" id="9">
             <property name="width">100%</property>
             <property name="dataSet">reportsRankedProcedure</property>
             <list-property name="paramBindings">
                 <structure>
                     <property name="paramName">UserName</property>
-                    <expression name="expression">params["UserName"]</expression>
+                    <simple-property-list name="expression">
+                        <value>params["UserName"]</value>
+                    </simple-property-list>
                 </structure>
                 <structure>
                     <property name="paramName">UserRole</property>
-                    <expression name="expression">params["UserRole"]</expression>
+                    <simple-property-list name="expression">
+                        <value>params["UserRole"]</value>
+                    </simple-property-list>
                 </structure>
                 <structure>
                     <property name="paramName">reportName</property>
-                    <expression name="expression">params["ReportName"].value</expression>
+                    <simple-property-list name="expression">
+                        <value>params["ReportName"].value</value>
+                    </simple-property-list>
                 </structure>
                 <structure>
                     <property name="paramName">VOs</property>
-                    <expression name="expression">params["VOs"].value</expression>
+                    <simple-property-list name="expression">
+                        <value>params["VOs"].value</value>
+                    </simple-property-list>
                 </structure>
                 <structure>
                     <property name="paramName">StartDate</property>
-                    <expression name="expression">params["StartDate"].value</expression>
+                    <simple-property-list name="expression">
+                        <value>params["StartDate"].value</value>
+                    </simple-property-list>
                 </structure>
                 <structure>
                     <property name="paramName">EndDate</property>
-                    <expression name="expression">params["EndDate"].value</expression>
+                    <simple-property-list name="expression">
+                        <value>params["EndDate"].value</value>
+                    </simple-property-list>
                 </structure>
             </list-property>
             <list-property name="boundDataColumns">
@@ -1091,7 +1151,7 @@
                 </structure>
                 <structure>
                     <property name="name">ChartNumber</property>
-                    <property name="displayName">ChartNumber</property>
+                    <text-property name="displayName">ChartNumber</text-property>
                     <expression name="expression">1</expression>
                     <property name="dataType">integer</property>
                 </structure>
@@ -1138,11 +1198,17 @@
             </column>
             <header>
                 <row id="10">
-                    <cell id="11"/>
-                    <cell id="12">
-                        <text-data name="DateRange" id="407" extends="reportLib.DateRange"/>
+                    <cell id="11">
+                        <property name="colSpan">3</property>
+                        <property name="rowSpan">1</property>
+                        <text-data name="DateRange" id="407">
+                            <property name="fontFamily">sans-serif</property>
+                            <property name="fontSize">9pt</property>
+                            <property name="textAlign">center</property>
+                            <expression name="valueExpr">"Date range: "+ params["StartDate"] + " - " + params["EndDate"]</expression>
+                            <property name="contentType">html</property>
+                        </text-data>
                     </cell>
-                    <cell id="13"/>
                 </row>
             </header>
             <group id="14">
@@ -1173,6 +1239,7 @@
                             <property name="textAlign">center</property>
                             <extended-item extensionName="Chart" name="NewChart" id="361">
                                 <xml-property name="xmlRepresentation"><![CDATA[<model:ChartWithAxes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:attribute="http://www.birt.eclipse.org/ChartModelAttribute" xmlns:data="http://www.birt.eclipse.org/ChartModelData" xmlns:layout="http://www.birt.eclipse.org/ChartModelLayout" xmlns:model="http://www.birt.eclipse.org/ChartModel" xmlns:type="http://www.birt.eclipse.org/ChartModelType">
+  <Version>2.5.1</Version>
   <Type>Bar Chart</Type>
   <SubType>Stacked</SubType>
   <Description>
@@ -1683,6 +1750,10 @@ function beforeDrawAxisTitle( axis, label, context )
 }</Script>
   <Units>Points</Units>
   <SeriesThickness>10.0</SeriesThickness>
+  <ExtendedProperties>
+    <Name>enable.area.alt</Name>
+    <Value>false</Value>
+  </ExtendedProperties>
   <SampleData>
     <BaseSampleData>
       <DataSetRepresentation>01/05/2000,02/01/2000,04/12/2000,03/12/2000,02/29/2000</DataSetRepresentation>
@@ -1695,6 +1766,37 @@ function beforeDrawAxisTitle( axis, label, context )
   <Interactivity>
     <LegendBehavior>None</LegendBehavior>
   </Interactivity>
+  <EmptyMessage>
+    <Caption>
+      <Value></Value>
+      <Font>
+        <Alignment/>
+      </Font>
+    </Caption>
+    <Background xsi:type="attribute:ColorDefinition">
+      <Transparency>0</Transparency>
+      <Red>255</Red>
+      <Green>255</Green>
+      <Blue>255</Blue>
+    </Background>
+    <Outline>
+      <Style>Solid</Style>
+      <Thickness>1</Thickness>
+      <Color>
+        <Transparency>255</Transparency>
+        <Red>0</Red>
+        <Green>0</Green>
+        <Blue>0</Blue>
+      </Color>
+    </Outline>
+    <Insets>
+      <Top>0.0</Top>
+      <Left>2.0</Left>
+      <Bottom>0.0</Bottom>
+      <Right>3.0</Right>
+    </Insets>
+    <Visible>false</Visible>
+  </EmptyMessage>
   <Axes>
     <Type>DateTime</Type>
     <Title>
@@ -1912,6 +2014,10 @@ function beforeDrawAxisTitle( axis, label, context )
           </Label>
           <DataDefinition>
             <Definition>row[params[&quot;DisplayMetric&quot;].value]</Definition>
+            <Grouping>
+              <GroupType>Text</GroupType>
+              <AggregateExpression>Sum</AggregateExpression>
+            </Grouping>
           </DataDefinition>
           <SeriesIdentifier>&lt;undefined></SeriesIdentifier>
           <DataPoint>
@@ -3708,27 +3814,36 @@ if(dotpos > 0) {metricvalue = metricvalue.substring(0,dotpos+2);}&#xD;
 </model:ChartWithAxes>
 ]]></xml-property>
                                 <property name="outputFormat">JPG</property>
-                                <structure name="action">
-                                    <property name="targetWindow">_self</property>
-                                    <property name="linkType">drill-through</property>
-                                    <property name="formatType">html</property>
-                                    <property name="targetFileType">report-design</property>
-                                    <property name="reportName">UsageByUserForWeek.rptdesign</property>
-                                    <list-property name="paramBindings">
-                                        <structure>
-                                            <property name="paramName">DisplayMetric</property>
-                                            <expression name="expression">params["DisplayMetric"]</expression>
-                                        </structure>
-                                        <structure>
-                                            <property name="paramName">ReportTitle</property>
-                                            <expression name="expression">params["ReportTitle"] + ' - ' + 'drill-through'</expression>
-                                        </structure>
-                                        <structure>
-                                            <property name="paramName">ReportSubtitle</property>
-                                            <expression name="expression">params["ReportSubtitle"]</expression>
-                                        </structure>
-                                    </list-property>
-                                </structure>
+                                <list-property name="action">
+                                    <structure>
+                                        <property name="targetWindow">_self</property>
+                                        <property name="linkType">drill-through</property>
+                                        <property name="formatType">html</property>
+                                        <property name="targetFileType">report-design</property>
+                                        <property name="reportName">UsageByUserForWeek.rptdesign</property>
+                                        <list-property name="paramBindings">
+                                            <structure>
+                                                <property name="paramName">DisplayMetric</property>
+                                                <simple-property-list name="expression">
+                                                    <value>params["DisplayMetric"]</value>
+                                                </simple-property-list>
+                                            </structure>
+                                            <structure>
+                                                <property name="paramName">ReportTitle</property>
+                                                <simple-property-list name="expression">
+                                                    <value>params["ReportTitle"] + ' - ' + 'drill-through'</value>
+                                                </simple-property-list>
+                                            </structure>
+                                            <structure>
+                                                <property name="paramName">ReportSubtitle</property>
+                                                <simple-property-list name="expression">
+                                                    <value>params["ReportSubtitle"]</value>
+                                                </simple-property-list>
+                                            </structure>
+                                        </list-property>
+                                    </structure>
+                                </list-property>
+                                <property name="inheritColumns">true</property>
                                 <property name="height">600px</property>
                                 <property name="width">800px</property>
                                 <property name="refTemplateParameter">NewTemplateParameterDefinition</property>
