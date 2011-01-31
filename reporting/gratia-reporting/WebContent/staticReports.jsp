@@ -40,84 +40,106 @@
 	String csvFolder = staticFolder.substring(0, staticFolder.length() - 1) + "_csv/";
 	String csvFolderPath = staticFolderPath.substring(0, staticFolderPath.length() - 1) + "_csv/";
 	
+		
+	int ppt = -1;
+	int csv = -1;
+	File [] pptObjects = null;
+	File [] csvObjects = null;
+	
 	File f = new File(staticFolderPath);
 	File c = new File(csvFolderPath);
+
 	if (!f.exists() && !c.exists())
 	{
 		%><p class = "reportItem">There are no available reports</p> <%
+		return;
 	}
-	else
+
+// At leat one directory exist
+
+
+	if (staticReportConfig.getStatReportGroups() == null)
 	{
-		if (staticReportConfig.getStatReportGroups() == null)
-		{
-			%><p class = "reportItem">No Static reports have been defined for gratia accounting</p> <%
-		}
-		else
-		{
-			File [] pptObjects = f.listFiles();	// Get all files in the directory
-			File [] csvObjects = c.listFiles();	// Get all files in the directory
-			if ((pptObjects.length == 0) && (csvObjects.length == 0))
-			{
-				%> <p class = "reportItem" >No Static reports are available</p> <%
-			}
-			else
-			{
+		%><p class = "reportItem">No Static reports have been defined for gratia accounting</p> <%
+		return;
+	}
 
-				for(int i=0; i < staticReportConfig.getStatReportGroups().size(); i++)
+// There is a list of static reports
+
+	if (f.exists())
+	{
+		pptObjects = f.listFiles();	// Get all files in the directory
+		ppt = pptObjects.length;
+	}
+	if (c.exists())
+	{
+		csvObjects = c.listFiles();	// Get all files in the directory
+		csv = csvObjects.length;
+	}
+	
+	if ((ppt <= 0) && (csv <= 0))
+	{
+		%> <p class = "reportItem" >No Static reports are available</p> <%
+		return;
+	}
+
+// At this point we have reports
+
+	%> <ul> <%
+	for(int i=0; i < staticReportConfig.getStatReportGroups().size(); i++)
+	{
+		StaticReportGroup statGroup = (StaticReportGroup)staticReportConfig.getStatReportGroups().get(i);
+		groupName = statGroup.getGroup();
+		for(int z=0; z < statGroup.getStatItems().size(); z++)
+		{
+			StaticReportItem statItem = (StaticReportItem)statGroup.getStatItems().get(z);
+
+			linkNAME = statItem.getName();
+			linkURL  = statItem.getLink();
+			linkREPORT  = statItem.getReport();
+
+			linkURL = linkURL.replace(" ", "%20");
+			linkURL = linkURL.replace("&amp;", "&");
+			linkURL = linkURL.replace("&", "&amp;");
+			linkURL = linkURL.replace(">", "%3e");
+			linkURL = linkURL.replace("<", "%3c");
+			linkURL = linkURL.replace("\\", "%5c");
+
+			if (ppt > 0)
+			{
+			  for (int j = 0; j < ppt; j++)
+			  {
+				if(!pptObjects[j].isDirectory())
 				{
-					StaticReportGroup statGroup = (StaticReportGroup)staticReportConfig.getStatReportGroups().get(i);
-					groupName = statGroup.getGroup();
-					%> <ul> <%
-					for(int z=0; z < statGroup.getStatItems().size(); z++)
+					String fileName = pptObjects[j].getName();
+					if (fileName.startsWith(linkREPORT) && (fileName.endsWith(".ppt")))
 					{
-						StaticReportItem statItem = (StaticReportItem)statGroup.getStatItems().get(z);
-
-						linkNAME = statItem.getName();
-						linkURL  = statItem.getLink();
-						linkREPORT  = statItem.getReport();
-
-						linkURL = linkURL.replace(" ", "%20");
-						linkURL = linkURL.replace("&amp;", "&");
-						linkURL = linkURL.replace("&", "&amp;");
-						linkURL = linkURL.replace(">", "%3e");
-						linkURL = linkURL.replace("<", "%3c");
-						linkURL = linkURL.replace("\\", "%5c");
-
-
-						for (int j = 0; j < pptObjects.length; j++)
-						{
-							if(!pptObjects[j].isDirectory())
-							{
-								String fileName = pptObjects[j].getName();
-								if (fileName.startsWith(linkREPORT) && (fileName.endsWith(".ppt")))
-								{
-									%><li><a class = "reportItem" target = "reportFrame" href="<%= staticFolder+fileName %>"><%= linkNAME %> (ppt)</a></li>
-									<%
-								}
-							}
-							
-						}
-						
-
-						for (int j = 0; j < csvObjects.length; j++)
-						{
-							if(!csvObjects[j].isDirectory())
-							{
-								String fileName = csvObjects[j].getName();
-								if (fileName.startsWith(linkREPORT) && (fileName.endsWith(".csv")))
-								{
-										%><li onClick="window.open('downloadFile.jsp?csvFile=<%= csvFolderPath+fileName %>', 'Gratia');"><span class = "txtasLink"><%= linkNAME %> (csv)</span></li>
-										<%
-								}
-							}
-							
-						}
+						%><li><a class = "reportItem" target = "reportFrame" href="<%= staticFolder+fileName %>"><%= linkNAME %> (ppt)</a></li>
+						<%
 					}
 				}
-				%></ul><%
+				
+			  }
+			}
+
+			if (csv > 0)
+			{
+			  for (int j = 0; j < csv; j++)
+			  {
+				if(!csvObjects[j].isDirectory())
+				{
+					String fileName = csvObjects[j].getName();
+					if (fileName.startsWith(linkREPORT) && (fileName.endsWith(".csv")))
+					{
+						%><li onClick="window.open('downloadFile.jsp?csvFile=<%= csvFolderPath+fileName %>', 'Gratia');"><span class = "txtasLink"><%= linkNAME %> (csv)</span></li>
+						<%
+					}
+				}
+			  }
 			}
 		}
 	}
-%>
+	%></ul>
+
 </body>
 </html>

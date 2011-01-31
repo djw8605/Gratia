@@ -64,7 +64,7 @@ function displayReport(link) {
 				BufferedWriter outLog = new BufferedWriter(new FileWriter(timeStampFile, true));
 				checkFolder = null;
 				long endM = System.currentTimeMillis();
-				outLog.write("InJSP = ," + endM + ",");
+				outLog.write("InJSP = ," + endM);
 				outLog.flush();
 				outLog.close();
 			}
