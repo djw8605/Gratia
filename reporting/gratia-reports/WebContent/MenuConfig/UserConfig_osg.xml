@@ -27,7 +27,7 @@
 		<MenuGroup name="Reports - Display in >30 secs">
 <!-- 			<MenuItem name="Usage Report" link="GratiaParameterInput.jsp?report=[ReportsFolder]UsageReport.rptdesign"/>
 -->
-			<MenuItem name="2007 Usage for All VOs" link="GratiaParameterInput.jsp?report=[ReportsFolder]2007WeeklyUsageByVO-ranked.rptdesign&amp;DisplayMetric=WallDuration"/>
+			<MenuItem name="Last Year's Usage for All VOs" link="GratiaParameterInput.jsp?report=[ReportsFolder]LastYearWeeklyUsageByVO-ranked.rptdesign&amp;DisplayMetric=WallDuration"/>
 		</MenuGroup>
 		<MenuGroup name="DCache">
 			<MenuItem name="Dcache Probe Table" link="showQuery.jsp?sql=call dCacheSimple();"/>
