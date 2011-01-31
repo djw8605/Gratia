@@ -1,7 +1,7 @@
 PLATFORM := $(shell uname)
 
 # tarbal version
-version_default = v1.07
+version_default = v1.08
 
 gratia_reporting_version := $(shell echo '$$HeadURL$$' | sed -e 's?^\$$\HeadURL: .*gratia/[^/]*tags/\(v[^ ]*\)/build-scripts/Makefile \$$?\1?' -e 's/-/./g' )
 gratia_services_version = $(gratia_reporting_version)
@@ -47,7 +47,7 @@ staticScript=$(reportsrc)/WebContent/staticReports
 birtDir=$(reporting)/birt-wars
 #birtwarFile=birt-v231-N20080820.war
 #birtwarFile=birt-v231-N20080818.war
-birtwarFile=birt-v231.war
+birtwarFile=birt-v261.war
 # common modules
 configuration=$(common)/configuration
 security=$(common)/gratia-security
