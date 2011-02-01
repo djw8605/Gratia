@@ -1,7 +1,7 @@
 PLATFORM := $(shell uname)
 
 # tarbal version
-version_default = v1.08
+version_default = v1.07
 
 gratia_reporting_version := $(shell echo '$$HeadURL$$' | sed -e 's?^\$$\HeadURL: .*gratia/[^/]*tags/\(v[^ ]*\)/build-scripts/Makefile \$$?\1?' -e 's/-/./g' )
 gratia_services_version = $(gratia_reporting_version)
