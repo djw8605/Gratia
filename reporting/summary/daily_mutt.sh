@@ -1,24 +1,10 @@
 #!/usr/bin/env bash
 
-# override and/or merge command line options with the default options provided in the config file
-if [ "$1" != "ignore" ]; then
-    configOptions=`python getConfigInfo.py|grep reportOptions|cut -d ' ' -f2-`
-    commandOptions=$*
-    finalOptions=`python mergeOptions.py "$configOptions" "$commandOptions"`
-    sh $0 ignore $finalOptions && exit 0
-else
-    shift
-fi
-
-# space separated list of mail recipients
-PROD_MAILTO=`python getConfigInfo.py|grep prod_mailto|cut -d ' ' -f2-` # extract from config file
-[ $PROD_MAILTO == "" ] && PROD_MAILTO="osg-accounting-info@fnal.gov" # if empty, then assign default
 WEBLOC="http://gratia-osg.fnal.gov:8880/gratia-reporting"
 SUM_WEBLOC="http://gratia-osg.fnal.gov:8884/gratia-reporting"
 VOREPORT_CONFIG="voreports.debug.config"
-
-(( mailOverride = 0 ))
-(( production = 0 ))
+[ -z $INSTALL_DIR ] && INSTALL_DIR=`python getConfigInfo.py|grep installDir|cut -d' ' -f2-` && [ `echo $INSTALL_DIR|wc -w` -gt 1 ] && echo $INSTALL_DIR && exit 1
+export INSTALL_DIR
 
 while test "x$1" != "x"; do
    if [ "$1" == "--help" ]; then 
@@ -34,19 +20,8 @@ while test "x$1" != "x"; do
    elif [ "$1" == "--dry-run" ]; then
 	dryrun=yes
 	shift
-   elif [ "$1" == "--production" ]; then
-	MAILTO=$PROD_MAILTO
-        VOREPORT_CONFIG="voreports.production.config"
-        (( production = 1 ))
-	shift
-   elif [ "$1" == "--mail" ]; then
-        (( mailOverride = 1 ))
-	MAILTO=$2
-	shift
-	shift
-   elif [ "$1" == "--email" ]; then
-        (( mailOverride = 1 ))
-	MAILTO=$2
+   elif [ "$1" == "--mail" -o "$1" == "--email" ]; then
+	RECIPIENT=$2
 	shift
 	shift
    else 
@@ -54,6 +29,9 @@ while test "x$1" != "x"; do
 	shift
    fi
 done
+
+[ -z $RECIPIENT ] && RECIPIENT=`python $INSTALL_DIR/getConfigInfo.py|grep "1to"|cut -d' ' -f2-` && [ `echo $RECIPIENT|wc -w` -gt 1 ] && echo $RECIPIENT && exit 1
+[ -z $RECIPIENT ] && echo -e -n "Warning!!! No recipient email has been provided either from command line or in the config file. The reports will be printed to the screen.\\nContinue? (y/n): " && read input && [ $input != "y" ] && echo exiting... && exit 0
 
 when=$(date -d "${date_arg:-yesterday}" +"%d %B %Y")
 whenarg=$(date -d "${date_arg:-yesterday}" +"%Y/%m/%d")
@@ -76,33 +54,6 @@ WORK_DIR=workdir.${RANDOM}
 
 mkdir $WORK_DIR
 
-function sendto {
-    cmd=$1
-    when=$2
-    txtfile=$3.txt
-    csvfile=$3.csv
-    subject="$4"
-
-    echo "See $WEBLOC for more information" > $txtfile
-    echo >> $txtfile
-    eval $1 $gridOption --output=text $when >> $txtfile
-
-    echo "$subject" >> daily.check
-    grep All $txtfile >> daily.check
-
-    echo "For more information see:,$WEBLOC" > $csvfile
-    echo >> $csvfile
-    eval $1 --output=csv $when >>  $csvfile
-
-    if [ `cat $txtfile | wc -l ` -ne 2 ] ; then
-       if [ "$dryrun" != "yes" ]; then 
-          mutt -F./muttrc -a $csvfile -s "$subject" $MAILTO < $txtfile
-       else 
-          echo mutt -F./muttrc -a $csvfile -s "$subject" $MAILTO < $txtfile
-       fi
-    fi
-}
-
 function sendtohtml {
     cmd=$1
     rep_args=$2
@@ -115,13 +66,10 @@ function sendtohtml {
     local whenarg="${ExtraArgs#--}"
     whenarg=${whenarg:-all}
 
-    if (( $mailOverride == 0 )) && (( $production > 0 )); then
-      newto=$(sed -ne 's/^[ 	]*'"`basename $cmd`"'[ 	]\{1,\}'"${ExtraArgs#--}"'[ 	]\{1,\}\(.*\)$/\1/p' \
-              reportMail.config | sed -e 's/\b\default\b/'"$to"'/' | head -1) 
-      to=${newto:-$to}
-    fi
-    #echo "See $WEBLOC for more information" > $txtfile
-    #echo "For more information see: <a href=$WEBLOC>$WEBLOC</a>" > $htmlfile
+    newto=$(sed -ne 's/^[ 	]*'"`basename $cmd`"'[ 	]\{1,\}'"${ExtraArgs#--}"'[ 	]\{1,\}\(.*\)$/\1/p' \
+            $INSTALL_DIR/reportType.config | sed -e 's/\b\default\b/'"$to"'/' | head -1) 
+    to=${newto:-$to}
+
     if [ "$dryrun" != "yes" ]; then 
        $cmd "--subject=$subject" --emailto=$to --output=all $gridOption $rep_args
     else
@@ -133,21 +81,17 @@ function sendtohtml {
 
 rm -f daily.check
 
-# sendto ./dailyFromSummary $whenarg ${WORK_DIR}/summary_report "$SUM_MAIL_MSG"
+sendtohtml $INSTALL_DIR/daily    $whenarg ${WORK_DIR}/report "$MAIL_MSG" $RECIPIENT
+sendtohtml $INSTALL_DIR/newUsers $whenarg ${WORK_DIR}/report "New users on OSG ($when)" $RECIPIENT
+sendtohtml $INSTALL_DIR/dailyStatus $whenarg ${WORK_DIR}/report "$STATUS_MAIL_MSG" $RECIPIENT
+sendtohtml "$INSTALL_DIR/dailyStatus --groupby=VO" $whenarg ${WORK_DIR}/report "$VO_STATUS_MAIL_MSG" $RECIPIENT
+sendtohtml "$INSTALL_DIR/dailyStatus --groupby=Both" $whenarg ${WORK_DIR}/report "$BOTH_STATUS_MAIL_MSG" $RECIPIENT
+sendtohtml $INSTALL_DIR/transfer $whenarg ${WORK_DIR}/report "$TR_MAIL_MSG" $RECIPIENT
 
-sendtohtml ./daily    $whenarg ${WORK_DIR}/report "$MAIL_MSG" $MAILTO
-sendtohtml ./newUsers $whenarg ${WORK_DIR}/report "New users on OSG ($when)" $MAILTO
-sendtohtml ./dailyStatus $whenarg ${WORK_DIR}/report "$STATUS_MAIL_MSG" $MAILTO
-sendtohtml "./dailyStatus --groupby=VO" $whenarg ${WORK_DIR}/report "$VO_STATUS_MAIL_MSG" $MAILTO
-sendtohtml "./dailyStatus --groupby=Both" $whenarg ${WORK_DIR}/report "$BOTH_STATUS_MAIL_MSG" $MAILTO
-sendtohtml ./transfer $whenarg ${WORK_DIR}/report "$TR_MAIL_MSG" $MAILTO
-
-grep -v '^#' $VOREPORT_CONFIG | while read line; do
+echo "`python $INSTALL_DIR/getConfigInfo.py|grep voemaillist|cut -d' ' -f2-`" | while read line; do
     MYVO=`echo $line | cut -d\  -f1`
-    if (( $mailOverride == 0 )) && (( $production > 0 )); then
-       export MAILTO=`echo $line | cut -d\  -f2- | sed -e "s: :,:g" `
-    fi
-    sendtohtml "./dailyForVO --voname=${MYVO}" $whenarg ${WORK_DIR}/forvo "${VO_MAIL_MSG}${MYVO}" $MAILTO
+    export RECIPIENT=`echo $line | cut -d\  -f2- | sed -e "s: :,:g" `
+    sendtohtml "$INSTALL_DIR/dailyForVO --voname=${MYVO}" $whenarg ${WORK_DIR}/forvo "${VO_MAIL_MSG}${MYVO}" $RECIPIENT
 done 
 
 if [ "$debug" != "x" ]; then 

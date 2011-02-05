@@ -1,38 +1,18 @@
 #!/bin/bash
 
-
-# override and/or merge command line options with the default options provided in the config file
-if [ "$1" != "ignore" ]; then
-    configOptions=`python getConfigInfo.py|grep reportOptions|cut -d ' ' -f2-`
-    commandOptions=$*
-    finalOptions=`python mergeOptions.py "$configOptions" "$commandOptions"`
-    sh $0 ignore $finalOptions && exit 0
-else
-    shift
-fi
-
-
-# space separated list of mail recipients
-PROD_MAILTO=`python getConfigInfo.py|grep prod_mailto|cut -d ' ' -f2-` # extract from config file
-PROD_USER_MAILTO=`python getConfigInfo.py|grep prod_user_mailto|cut -d ' ' -f2-` # extract from config file
-[ $PROD_MAILTO == "" ] && PROD_MAILTO="osg-accounting-info@fnal.gov" # if empty, then assign default
-[ $PROD_USER_MAILTO == "" ] && PROD_USER_MAILTO="osg-accounting-info@opensciencegrid.org" # if empty, then assign default
-MAILTO="$USER"
-USER_MAILTO=$MAILTO
-
 WEBLOC="http://gratia-osg.fnal.gov:8880/gratia-reporting"
 SUM_WEBLOC="http://gratia-osg.fnal.gov:8884/gratia-reporting"
+[ -z $INSTALL_DIR ] && INSTALL_DIR=`python getConfigInfo.py|grep installDir|cut -d' ' -f2-` && [ `echo $INSTALL_DIR|wc -w` -gt 1 ] && echo $INSTALL_DIR && exit 1
+export INSTALL_DIR
 
 ExtraHeader=
 ExtraArgs=--daily
-(( mailOverride = 0 ))
-(( production = 0 ))
 
 cmdFile=`(cd \`dirname $0\`; /bin/pwd)`/range_mutt_nightly.sh
 
 while test "x$1" != "x"; do
     if [ "$1" == "--help" ]; then 
-        echo "usage: $0 [--grid gridType ] [--dry-run] [--debug] [--mail email] [--draft] [--production] [quoted_string_representing_starting_date (as accepted by date -d)]"
+        echo "usage: $0 [--grid gridType ] [--dry-run] [--debug] [--mail email] [--draft] [quoted_string_representing_starting_date (as accepted by date -d)]"
         exit 1
     elif [ "$1" == "--debug" ]; then
         debug=yes
@@ -46,19 +26,10 @@ while test "x$1" != "x"; do
         shift
     elif [ "$1" == "--draft" ]; then
         ExtraHeader="[Draft] ${ExtraHeader}"
-        MAILTO=$PROD_MAILTO
-        USER_MAILTO=$PROD_USER_MAILTO
-        (( production = 1 ))
-        shift
-    elif [ "$1" == "--production" ]; then
-        MAILTO=$PROD_MAILTO
-        USER_MAILTO=$PROD_USER_MAILTO
-        (( production = 1 ))
         shift
     elif [ "$1" == "--mail" ]; then
-        MAILTO=$2
-        USER_MAILTO=$2
-        (( mailOverride = 1 ))
+        RECIPIENT=$2
+        USER_RECIPIENT=$2
         shift
         shift
     elif [ "$1" == "--weekly" ]; then
@@ -82,6 +53,10 @@ while test "x$1" != "x"; do
     fi
 done
 
+[ -z $RECIPIENT ] && RECIPIENT=`python $INSTALL_DIR/getConfigInfo.py|grep "1to"|cut -d' ' -f2-` && [ `echo $RECIPIENT|wc -w` -gt 1 ] && echo $RECIPIENT && exit 1
+[ -z $USER_RECIPIENT ] && USER_RECIPIENT=`python $INSTALL_DIR/getConfigInfo.py|grep "2to"|cut -d' ' -f2-` && [ -z $USER_RECIPIENT ] && USER_RECIPIENT=$RECIPIENT
+[ -z $RECIPIENT ] && echo -e -n "Warning!!! No recipient email has been provided either from command line or in the config file. The reports will be printed to the screen.\\nContinue? (y/n): " && read input && [ $input != "y" ] && echo exiting... && exit 0
+
 when=$(date -d "${date_arg:-yesterday}" +"%d %B %Y")
 whenarg=$(date -d "${date_arg:-yesterday}" +"%Y/%m/%d")
 
@@ -99,42 +74,6 @@ if [ "$debug" != "yes" ]; then
   trap "[[ -d \"$WORK_DIR\" ]] && rm -rf \"$WORK_DIR\" 2>/dev/null" EXIT
 fi
 
-function sendto {
-
-    cmd=$1
-    rep_args=$2
-    txtfile=$3.txt
-    csvfile=$3.csv
-    subject="$4"
-    to="$5"
-
-    local whenarg="${ExtraArgs#--}"
-    whenarg=${whenarg:-all}
-
-    if (( $mailOverride == 0 )) && (( $production > 0 )); then
-      newto=$(sed -ne 's/^[ 	]*'"`basename $cmd`"'[ 	]\{1,\}'"${ExtraArgs#--}"'[ 	]\{1,\}\(.*\)$/\1/p' \
-              reportMail.config | sed -e 's/\b\default\b/'"$to"'/' | head -1) 
-      to=${newto:-$to}
-    fi
-    echo "See $WEBLOC for more information" > $txtfile
-    echo >> $txtfile
-    eval $1 $gridOption --output=text $rep_args >> $txtfile
-
-    echo "$subject" >> "$WORK_DIR/range.check"
-    grep 'All ' $txtfile >> "$WORK_DIR/range.check"
-
-    echo "For more information see:,$WEBLOC" > $csvfile
-    echo >> $csvfile
-    eval $1 $gridOption --output=csv $rep_args >>  $csvfile
-    
-    if [ "$dryrun" != "yes" ]; then 
-       mutt -F ./muttrc -a $csvfile -s "$subject" $to < $txtfile
-    else 
-       echo mutt -F ./muttrc -a $csvfile -s "$subject" $to < $txtfile
-    fi
-   
-}
-
 function sendtohtml {
     cmd=$1
     rep_args=$2
@@ -147,11 +86,10 @@ function sendtohtml {
     local whenarg="${ExtraArgs#--}"
     whenarg=${whenarg:-all}
 
-    if (( $mailOverride == 0 )) && (( $production > 0 )); then
-      newto=$(sed -ne 's/^[ 	]*'"`basename $cmd`"'[ 	]\{1,\}'"${ExtraArgs#--}"'[ 	]\{1,\}\(.*\)$/\1/p' \
-              reportMail.config | sed -e 's/\b\default\b/'"$to"'/' | head -1) 
-      to=${newto:-$to}
-    fi
+    newto=$(sed -ne 's/^[ 	]*'"`basename $cmd`"'[ 	]\{1,\}'"${ExtraArgs#--}"'[ 	]\{1,\}\(.*\)$/\1/p' \
+            $INSTALL_DIR/reportType.config | sed -e 's/\b\default\b/'"$to"'/' | head -1) 
+    to=${newto:-$to}
+
     #echo "See $WEBLOC for more information" > $txtfile
     #echo "For more information see: <a href=$WEBLOC>$WEBLOC</a>" > $htmlfile
     if [ "$dryrun" != "yes" ]; then 

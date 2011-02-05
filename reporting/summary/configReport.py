@@ -10,8 +10,8 @@ import sys
 # global variables
 gTmpCronFileOld = "/tmp/tmpCronOld.txt"
 gTmpCronFileNew = "/tmp/tmpCronNew.txt"
-#gCronPattern = "gratia reports - DO NOT edit this line" # unique pattern that identifies a gratia reporting entry in the crontab
-gCronPattern = "Gratia entry created by configReport.py. *DON'T* edit this line." # unique pattern that identifies a gratia reporting entry in the crontab
+gCronPattern = "Gratia entry created by configReport.py. *DON'T* edit this line!!!" # unique pattern that identifies a gratia reporting entry in the crontab
+
 # Save existing crontab entry to a temporary file to start with
 os.system("crontab -l > " + gTmpCronFileOld)
 
@@ -19,29 +19,53 @@ def main(argv=None):
     AccountingReports.UseArgs(argv)
     if not AccountingReports.CheckDB() :
         print "Error!!! Cannot connect to the main database. Please check the connection credentials defined in the [main_db] section of " + '"' + AccountingReports.gConfigFiles + '"'
-        return 1
-    checkSmtpHost()
-    editCronTab(stringToBoolean(AccountingReports.gConfig.get("report","cron")))
+        configFailedExit()
+    sanityCheck()
+    editCronTab(stringToBoolean(extractVar("report","cron"))) # This step needs to be done irrespective of if the cron is enabled or disabled in the config file
+    createReportTypeConfig()
+    print "Configuration completed successfully."
 
-def checkSmtpHost():
+def configFailedExit():
+    print "Configuration failed. Please fix and try again."
+    sys.exit(1)
+
+def sanityCheck():
+    installDirCheck()
+    smtpHostCheck()
+    emailCheck()
+    voEmailListCheck()
+
+def smtpHostCheck():
     if (extractVar("email","smtphost") == ""):
         print "Error!!! smtphost needs to be set under the [email] section of \"" + AccountingReports.gConfigFiles + "\""
+        configFailedExit()
 
-def extractToEmail(type):
-    toEmail = extractVar("email", type+"To")
-    if toEmail == "":
-        print "ERROR!!! Please set the recipient's (" + type + "To) email address under the [email] section in " + AccountingReports.gConfigFiles
-        sys.exit(1)
+def emailCheck():
+    toEmail = extractVar("email", "to")
+    if toEmail == "" :
+        if stringToBoolean(extractVar("report", "cron")):
+            print "ERROR!!! Please set the recipient's \"to\" email address under the [email] section in " + AccountingReports.gConfigFiles + ". This needs to be set because the report cron is enabled."
+            configFailedExit() 
+        else:
+            print "Warning!!! The recipient's \"to\" email address under the [email] section in the config file " + AccountingReports.gConfigFiles + " is empty. This means that when you run the reporting scripts, the reports will be printed to the screen by default, unless you explicitly specify an email recipient by using the \"--mail\" option." 
     return toEmail
+
+def voEmailListCheck():
+    if len(extractVar("email","voEmailList").split()) < 2:
+        print "Please check the \"voEmailList\" variable under the [ email ] section in " + AccountingReports.gConfigFiles + ". You need to specify at least one vo name followed by an email address to which that vo's report needs to be sent to." 
+        configFailedExit()
 
 def extractVar(section, var):
     try:
         return AccountingReports.gConfig.get(section, var)
     except:
-        print "There was a problem trying to extract variable \"" + var + "\" from the section \"" + section + "\" in " + AccountingReports.gConfigFiles + ". Either the section and/or variable doesn't exist. Please check the config file. If you can't figure this out, please report this error to the gratia developers at gratia-operation@opensciencegrid.org along with the contents of the config file."
-        sys.exit(1)
+        print "ERROR!!! There was a problem trying to extract variable \"" + var + "\" from the section \"" + section + "\" in " + AccountingReports.gConfigFiles + ". Either the section and/or variable doesn't exist. Please check the config file. If you can't figure this out, please report this error to the gratia developers at gratia-operation@opensciencegrid.org along with the contents of the config file."
+        configFailedExit() 
 
 def editCronTab(enableCron):
+   # If enableCron is True, the cron entry if it already exists needs to be edited or if the cron entry doesn't exist, it needs to be added
+   # If enableCron is False, the cron entry if it already exists needs to be removed or if the cron entry doesn't exist, nothing needs to be done
+   # All the above logic is incorporated in the editCronTab() function
     added = False
     fileR = open(gTmpCronFileOld, 'r')
     fileW = open(gTmpCronFileNew, 'w')
@@ -63,19 +87,35 @@ def editCronTab(enableCron):
 
 # extract all report options from the values defined in the config file
 def reportOptions():
-    optionStr = ""
-    reportType = AccountingReports.gConfig.get("report","type")
-    toEmail = extractToEmail(reportType)
-    if reportType == "nonProduction":
-        optionStr = "--mail " + toEmail
-    elif reportType == "production":
-        optionStr = "--production"
-    return optionStr
+    return "--mail " + emailCheck()
+
+def userSiteReportEmail():
+    email = extractVar("email","userTo")
+    if email == "":
+        return emailCheck()
+    return email
+
+def installDirCheck():
+    installDir = extractVar("report","installDir")
+    if installDir == "":
+        print "ERROR!!! The installation directory needs to be set. Refer to the installDir variable under the [ report ] section in " + AccountingReports.gConfigFiles + " to set a value."
+        configFailedExit() 
+    return installDir
 
 def cronString():
-    ret = "00 07 * * * sh daily_mutt.sh " + reportOptions() + " # " + gCronPattern + "\n"
-    ret += "05 07 * * * sh range_mutt.sh " + reportOptions() + " # " + gCronPattern + "\n"
+    installDir = installDirCheck()
+    exportStr = "export INSTALL_DIR=" + installDir + ";export PYTHONPATH=$PYTHONPATH:$INSTALL_DIR;"
+    #ret =  "00 07 * * * " + exportStr + "sh $INSTALL_DIR/daily_mutt.sh " + reportOptions() + " # " + gCronPattern + "\n"
+    #ret += "05 07 * * * " + exportStr + "sh $INSTALL_DIR/range_mutt.sh " + reportOptions() + " # " + gCronPattern + "\n"
+    ret =  "00 07 * * * " + exportStr + "sh $INSTALL_DIR/daily_mutt.sh # " + gCronPattern + "\n"
+    ret +=  "05 07 * * * " + exportStr + "sh $INSTALL_DIR/range_mutt.sh # " + gCronPattern + "\n"
     return ret
+
+def createReportTypeConfig():
+    installDir = installDirCheck()
+    fileW = open(installDir + "/reportType.config", 'w')
+    fileW.write(extractVar("report","reportType") + "\n")
+    fileW.close()
 
 # Convert string values ("True", "False") defined in the config file to equivalent boolean values (True, False)
 def stringToBoolean(inStr):

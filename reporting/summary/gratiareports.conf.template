@@ -29,24 +29,35 @@ realname = Gratia Operation
 from = gratia-operation@opensciencegrid.org
 ; This is the email from which the reports appears to be emailed from
 
-nonProductionTo = 
-; This is the recipient non-production email
-; This is the default email of the *non* production user recipient to which the gratia reports should be emailed to. This
-; could be overridden by using the --mail command line option. This needs to be set if the type of report is set to 
-; nonProduction (under the report section)
+to = 
+; Email to which all the reports (except for the user site report which needs to be set below) 
+; need to be sent to. 
+; If you want the reports to be emailed, this value needs to be set
+; Also if the report cron is enabled then this value needs to be set
+; If the cron is disabled and you don't set this value, then the report
+; will be print to screen 
+; Example value: myEmail@myDomain.com
 
-productionTo = osg-accounting-info@fnal.gov
-; This is the recipient production administrative email
-; This is the default email of the *production* admin recipient to which the gratia reports should be emailed to.
-; This is optional. If not set here then it will be set to the default value in the reporting script.
+userTo = 
+; Email to which the user site report needs to be sent to
+; If not set then the value will default to the value set
+; in the "to" variable above.
+; If empty, then the usersitereport is print to screen
+; Example value: userEmail@userDomain.com
 
-productionUserTo = osg-accounting-info@opensciencegrid.org
-; This is the recipient production user email
-; This is the default email of the *production* user recipient to which the gratia reports should be emailed to.
-; This is optional. If not set here then it will be set to the default value in the reporting script.
+voEmailList = 
+; Set the vo specific email recipients here for vo reports
+; vo name followed by space separated email addresses. 
+; Multiple such lists could be included separated by comma
+; Example value: engage email1 email2, osg email3 email4
+; In the above example, "engage" and "osg" are vo names, which are
+; followed by email addresses to which these vo's reports would be sent to
+; This needs to be set in order to email the vo reports 
+; to specific recipients 
 
 smtphost = 
 ; This is the FQDN of the mail server, which gratia will use to send the email
+; Example value: yourSmtpServer.yourDomain.com 
 
 ;====================================================================================
 ; Report
@@ -55,15 +66,20 @@ smtphost =
 
 [report]
 
-type = nonProduction
-; nonProduction: Report is run for non-production purposes and recipient email will be set to regular 
-; user (as defined under the [email] section). This is the default value.
-; production: Report is run for production purposes and recipient email will be set to 
-; production user (as defined under the [email] section)
+installDir = 
+; Absolute path to the reports installation directory. This value needs to be set. 
+; Example value: /home/userName
 
 cron = %(enable)s
 ; By default the cronjob for running and emailing the reports periodically is enabled.
-; If you want to turn this off, then set the above value to "disable" 
+; If you want to turn this off, then set the above value to %(disable)s 
+
+reportType = 
+; ReportType/script followed by frequency (all, daily, weekly or monthly)
+; followed by space-separated list of recipients. 
+; Keyword "default" as an email address is expanded to the existing
+; default-configured destination (eg osg-reporting-info@fnal.gov).
+; Example value: reporting weekly email1 default
 
 ;====================================================================================
 ; Databases
