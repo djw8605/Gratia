@@ -9,18 +9,17 @@ import sys
 def main(argv=None):
     AccountingReports.UseArgs(argv)
 
-    for line in extractVar("email","voEmailList").split(','):
-        print "voemaillist", line.strip()
-
-    installDir = installDirCheck()
-    print "installDir",installDir
-
-    fileW = open(installDir + "/reportType.config", 'w')
-    fileW.write(extractVar("report","reportType") + "\n")
-
     print "1to", emailCheck()
 
     print "2to", userSiteReportEmail()
+
+    for line in extractVar("email","additionalReportRecipients").split("\n"):
+        if line.strip() != "":
+            print "additionalRecipients",line
+
+    for line in extractVar("email","voEmailList").split("\n"):
+        if line.strip() != "":
+            print "voEmailList",line
 
 if __name__ == "__main__":
     sys.exit(main())

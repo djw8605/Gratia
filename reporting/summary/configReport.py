@@ -22,18 +22,16 @@ def main(argv=None):
         configFailedExit()
     sanityCheck()
     editCronTab(stringToBoolean(extractVar("report","cron"))) # This step needs to be done irrespective of if the cron is enabled or disabled in the config file
-    createReportTypeConfig()
-    print "Configuration completed successfully."
+    print "Configuration completed successfully. Please note that you have to rerun this script whenever you make changes to your " + AccountingReports.gConfigFiles + " config file."
 
 def configFailedExit():
     print "Configuration failed. Please fix and try again."
     sys.exit(1)
 
 def sanityCheck():
-    installDirCheck()
     smtpHostCheck()
     emailCheck()
-    voEmailListCheck()
+    installDirCheck()
 
 def smtpHostCheck():
     if (extractVar("email","smtphost") == ""):
@@ -44,16 +42,18 @@ def emailCheck():
     toEmail = extractVar("email", "to")
     if toEmail == "" :
         if stringToBoolean(extractVar("report", "cron")):
-            print "ERROR!!! Please set the recipient's \"to\" email address under the [email] section in " + AccountingReports.gConfigFiles + ". This needs to be set because the report cron is enabled."
+            print "ERROR!!! Please set the recipient's \"to\" email address under the [email] section in " + AccountingReports.gConfigFiles + ". This needs to be set because the report cron is enabled and we need an email to send the reports to."
             configFailedExit() 
         else:
             print "Warning!!! The recipient's \"to\" email address under the [email] section in the config file " + AccountingReports.gConfigFiles + " is empty. This means that when you run the reporting scripts, the reports will be printed to the screen by default, unless you explicitly specify an email recipient by using the \"--mail\" option." 
     return toEmail
 
-def voEmailListCheck():
-    if len(extractVar("email","voEmailList").split()) < 2:
-        print "Please check the \"voEmailList\" variable under the [ email ] section in " + AccountingReports.gConfigFiles + ". You need to specify at least one vo name followed by an email address to which that vo's report needs to be sent to." 
+def installDirCheck():
+    installDir = extractVar("report","installDir")
+    if installDir == "" or installDir[0] != "/":
+        print "ERROR!!! The report installation directory is the absolute directory path in which the reporting scripts have been installed to. This needs to be set with an absolute path. Refer to the installDir variable under the [ report ] section in " + AccountingReports.gConfigFiles + " to set a absolute path value."
         configFailedExit()
+    return installDir
 
 def extractVar(section, var):
     try:
@@ -95,27 +95,19 @@ def userSiteReportEmail():
         return emailCheck()
     return email
 
-def installDirCheck():
+def cronString():
+    ret =  "00 07 * * * sh daily_mutt.sh # " + gCronPattern + "\n"
+    ret +=  "05 07 * * * sh range_mutt.sh # " + gCronPattern + "\n"
+    return ret
+
+def cronString():
     installDir = extractVar("report","installDir")
     if installDir == "":
         print "ERROR!!! The installation directory needs to be set. Refer to the installDir variable under the [ report ] section in " + AccountingReports.gConfigFiles + " to set a value."
-        configFailedExit() 
-    return installDir
-
-def cronString():
-    installDir = installDirCheck()
-    exportStr = "export INSTALL_DIR=" + installDir + ";export PYTHONPATH=$PYTHONPATH:$INSTALL_DIR;"
-    #ret =  "00 07 * * * " + exportStr + "sh $INSTALL_DIR/daily_mutt.sh " + reportOptions() + " # " + gCronPattern + "\n"
-    #ret += "05 07 * * * " + exportStr + "sh $INSTALL_DIR/range_mutt.sh " + reportOptions() + " # " + gCronPattern + "\n"
-    ret =  "00 07 * * * " + exportStr + "sh $INSTALL_DIR/daily_mutt.sh # " + gCronPattern + "\n"
-    ret +=  "05 07 * * * " + exportStr + "sh $INSTALL_DIR/range_mutt.sh # " + gCronPattern + "\n"
+        sys.exit(1)
+    cdStr = "cd " + installDir + ";"
+    ret =  "00 07 * * * " + cdStr + "sh daily_mutt.sh;sh range_mutt.sh  # " + gCronPattern + "\n"
     return ret
-
-def createReportTypeConfig():
-    installDir = installDirCheck()
-    fileW = open(installDir + "/reportType.config", 'w')
-    fileW.write(extractVar("report","reportType") + "\n")
-    fileW.close()
 
 # Convert string values ("True", "False") defined in the config file to equivalent boolean values (True, False)
 def stringToBoolean(inStr):

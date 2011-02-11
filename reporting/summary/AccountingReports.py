@@ -66,14 +66,6 @@ gDBConnectOK = {} # variable to keep track of if the connection to a particular 
 
 gOutput="text" # Type of output (text, csv, None)
 
-# get installation directory if any
-gInstallDir = ""
-if "INSTALL_DIR" in os.environ:
-    gInstallDir = os.environ['INSTALL_DIR'] 
-    if gInstallDir != "": 
-        gInstallDir += "/"
-
-
 """
 Having written a bunch of scientific software, I am always amazed
 at how few languages have built in routines for displaying numbers
@@ -159,7 +151,7 @@ def UseArgs(argv):
     weekly = False
     daily = False
     
-    configFiles = gInstallDir + "gratiareports.conf"
+    configFiles = "gratiareports.conf"
     
     if argv is None:
         argv = sys.argv[1:]

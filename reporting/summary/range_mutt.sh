@@ -2,13 +2,15 @@
 
 WEBLOC="http://gratia-osg.fnal.gov:8880/gratia-reporting"
 SUM_WEBLOC="http://gratia-osg.fnal.gov:8884/gratia-reporting"
-[ -z $INSTALL_DIR ] && INSTALL_DIR=`python getConfigInfo.py|grep installDir|cut -d' ' -f2-` && [ `echo $INSTALL_DIR|wc -w` -gt 1 ] && echo $INSTALL_DIR && exit 1
-export INSTALL_DIR
 
-ExtraHeader=
+ExtraHeader=""
 ExtraArgs=--daily
 
 cmdFile=`(cd \`dirname $0\`; /bin/pwd)`/range_mutt_nightly.sh
+
+function capitalizeFirstLetter {
+echo $(echo $1 | python -c "print raw_input().capitalize()")
+}
 
 while test "x$1" != "x"; do
     if [ "$1" == "--help" ]; then 
@@ -32,13 +34,9 @@ while test "x$1" != "x"; do
         USER_RECIPIENT=$2
         shift
         shift
-    elif [ "$1" == "--weekly" ]; then
-        ExtraArgs="$ExtraArgs $1"
-        ExtraHeader="${ExtraHeader}Weekly "
-        shift
-    elif [ "$1" == "--monthly" ]; then
-        ExtraArgs="$ExtraArgs $1"
-        ExtraHeader="${ExtraHeader}Monthly "
+    elif [ "$1" == "--weekly" -o "$1" == "--monthly" ]; then
+        ExtraArgs="$1"
+        ExtraHeader="${ExtraHeader}"`capitalizeFirstLetter ${1/--/}`
         shift
     elif [[ "$1" == --cmd[Ff]ile ]]; then
         cmdFile=$2
@@ -53,8 +51,8 @@ while test "x$1" != "x"; do
     fi
 done
 
-[ -z $RECIPIENT ] && RECIPIENT=`python $INSTALL_DIR/getConfigInfo.py|grep "1to"|cut -d' ' -f2-` && [ `echo $RECIPIENT|wc -w` -gt 1 ] && echo $RECIPIENT && exit 1
-[ -z $USER_RECIPIENT ] && USER_RECIPIENT=`python $INSTALL_DIR/getConfigInfo.py|grep "2to"|cut -d' ' -f2-` && [ -z $USER_RECIPIENT ] && USER_RECIPIENT=$RECIPIENT
+[ -z $RECIPIENT ] && RECIPIENT=`python getConfigInfo.py|grep "1to"|cut -d' ' -f2-` && [ `echo $RECIPIENT|wc -w` -gt 1 ] && echo $RECIPIENT && exit 1
+[ -z $USER_RECIPIENT ] && USER_RECIPIENT=`python getConfigInfo.py|grep "2to"|cut -d' ' -f2-` && [ -z $USER_RECIPIENT ] && USER_RECIPIENT=$RECIPIENT
 [ -z $RECIPIENT ] && echo -e -n "Warning!!! No recipient email has been provided either from command line or in the config file. The reports will be printed to the screen.\\nContinue? (y/n): " && read input && [ $input != "y" ] && echo exiting... && exit 0
 
 when=$(date -d "${date_arg:-yesterday}" +"%d %B %Y")
@@ -86,9 +84,13 @@ function sendtohtml {
     local whenarg="${ExtraArgs#--}"
     whenarg=${whenarg:-all}
 
-    newto=$(sed -ne 's/^[ 	]*'"`basename $cmd`"'[ 	]\{1,\}'"${ExtraArgs#--}"'[ 	]\{1,\}\(.*\)$/\1/p' \
-            $INSTALL_DIR/reportType.config | sed -e 's/\b\default\b/'"$to"'/' | head -1) 
-    to=${newto:-$to}
+    additionalRecipients=`python getConfigInfo.py|grep additionalRecipients|cut -d' ' -f2-`
+    if [ "$additionalRecipients" != "" ]; then
+        newto=$(echo "$additionalRecipients"|sed -ne 's/^[      ]*'"`basename $cmd`"'[  ]\{1,\}'"${ExtraArgs#--}"'[     ]\{1,\}\(.*\)$/\1/p' \
+                | sed -e 's/\b\default\b/'"$to"'/' | head -1)
+        to="\"${newto:-$to}\""
+        to=${to/ /,}
+    fi
 
     #echo "See $WEBLOC for more information" > $txtfile
     #echo "For more information see: <a href=$WEBLOC>$WEBLOC</a>" > $htmlfile
@@ -100,6 +102,7 @@ function sendtohtml {
     fi
     return   
 }
+
 
 rm -f "$WORK_DIR/range.check"
 
