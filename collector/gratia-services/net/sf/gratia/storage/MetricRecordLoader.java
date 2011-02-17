@@ -311,7 +311,7 @@ public class MetricRecordLoader extends RecordLoader {
                extraXmlAttribute(element,a);
             }
       }
-      SetLimitedTextField(el, job, element, 255, "DetailsData");
+      el.setValue(element.getText());
       job.setDetailsData(el);
    }
    
