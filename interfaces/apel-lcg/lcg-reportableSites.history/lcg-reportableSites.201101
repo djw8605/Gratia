@@ -348,6 +348,20 @@
 #   180   2936  11.75  Intel(R) Xeon(R) CPU L5640  @ 2.27GHz (HS06 number)
 #   248   2347         Quad-Core AMD Opteron(tm) Processor 2350 
 #
+# 2/24/2011 (John Weigand)
+#   Changing normalization factors for these resources.
+#    ----------------------------------------
+#    Site                    NFgip   NFapel
+#    ---------------------------------------
+#    AGLT2                   4489    3507
+#    BU_ATLAS_Tier2          3383    2897
+#    SWT2_CPB                2330    1877
+#
+#   AGLT2 should have been changed in Januuary.
+#   BU_ATLAS_Tier2 and SWT2_CPB should have been changed in December.
+#   (these respective months were rerun for those months)
+#
+#
 #
 ##################################################################
 #-- Site  ------- SPECint2000
@@ -375,15 +389,15 @@ UFlorida-PG         1535
 #--- ATLAS Tier 1 ----
 BNL_ATLAS_1         3970
 #--- ATLAS Tier 2 ----
-AGLT2               3507
-BU_ATLAS_Tier2      2897
+AGLT2               4489
+BU_ATLAS_Tier2      3383
 HU_ATLAS_Tier2      3748
 IU_OSG              2101
 MWT2_IU             2339
 MWT2_UC             2449
 OU_OCHEP_SWT2       4020 
 WT2                 3424
-SWT2_CPB            1877
+SWT2_CPB            2330
 UTA_SWT2            2851
 #
 #
