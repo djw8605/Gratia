@@ -181,6 +181,7 @@ function write_ProbeConfig
     DataFolder="MAGIC_VDT_LOCATION/gratia/var/data/"
     WorkingFolder="MAGIC_VDT_LOCATION/gratia/var/tmp"
     LogFolder="MAGIC_VDT_LOCATION/gratia/var/logs/"
+    CertInfoLogPattern="./blahp/blahp.log-*"
     LogRotate="31"
     UseSyslog="0"
     SuppressUnknownVORecords="0"
