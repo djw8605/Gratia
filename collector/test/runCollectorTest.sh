@@ -15,8 +15,8 @@ usage: runCollectorTest.sh [-h] [-l] [-d] [-c] [-p port_number]
    -s stop server
    -m test timeout feature
    -t test content
-   --lsf load lsf data
-   --pbs load pbs data
+   --probes load data using the actual probes (pbs,lsf,condor)
+   --exec routine For debugging purpose execute just the givent routine.
 EOF
 }
 
@@ -181,7 +181,7 @@ function write_ProbeConfig
     DataFolder="MAGIC_VDT_LOCATION/gratia/var/data/"
     WorkingFolder="MAGIC_VDT_LOCATION/gratia/var/tmp"
     LogFolder="MAGIC_VDT_LOCATION/gratia/var/logs/"
-    CertInfoLogPattern="./blahp/blahp.log-*"
+    CertInfoLogPattern="${PWD}/blahp/blahp.log-*"
     LogRotate="31"
     UseSyslog="0"
     SuppressUnknownVORecords="0"
@@ -197,8 +197,6 @@ function write_ProbeConfigs
    write_ProbeConfig ProbeConfigSingle ${webhost} 'BundleSize="1"' gratia-servlets
    write_ProbeConfig ProbeConfigTimeout ${webhost} "" gratia-testtimeout
    write_ProbeConfig ProbeConfigFirewall atlasgw.bnl.gov "" gratia-testtimeout
-   write_ProbeConfig ProbeConfigLsf ${webhost} "" gratia-servlets lsf
-   write_ProbeConfig ProbeConfigPbs ${webhost} "" gratia-servlets pbs
 }
 
 function wait_for_server {
@@ -488,6 +486,34 @@ function check_result {
    fi;
 }
 
+function loadcondor
+{
+    condorprobedir=${PWD}/condor
+
+    mkdir -p ${condorprobedir}
+    mkdir -p ${condorprobedir}/MAGIC_VDT_LOCATION/gratia/var/data
+    mkdir -p ${condorprobedir}/MAGIC_VDT_LOCATION/gratia/var/tmp
+    cp ../../probe/condor/test/* ${condorprobedir}/MAGIC_VDT_LOCATION/gratia/var/data
+    if [ ! -e common ] ; then 
+        ln -s ../../probe/common .
+    fi
+    write_ProbeConfig ${condorprobedir}/ProbeConfig ${webhost} "" gratia-servlets condor
+
+    start_server
+
+    # Disable housekeeping
+    echo "Turning off record purging"
+    adminCollector "disableHousekeeping" 2>&1 | tee wget.full.log | grep House | grep DISABLED > wget.log
+    result=$?
+    if [ ${result} -ne 0 ]; then
+       echo "Error: Turning off the record purging failed"
+       exit 1
+    fi
+
+    echo "Sending condor data"
+    PATH=${PATH}:${condorprobedir} ${condorprobedir}/condor_meter.cron.sh
+}
+
 function loadpbs 
 {
     pbsprobedir=${PWD}/pbs
@@ -515,13 +541,6 @@ function loadpbs
     echo "Sending PBS data"
     export PERL5LIB=${PWD}/../../probe/pbs-lsf/urCollector-src
     ${pbsprobedir}/pbs-lsf_meter.cron.sh
-
-
-    # Wait for the record to be in
-    wait_for_input_use 0
-
-    # Should we fix the dates?
-
 }
 
 function loadlsf 
@@ -551,12 +570,6 @@ function loadlsf
     echo "Sending LSF data"
     export PERL5LIB=${PWD}/../../probe/pbs-lsf/urCollector-src
     PATH=${lsfprobedir}:${PATH} ${lsfprobedir}/pbs-lsf_meter.cron.sh
-
-    # Wait for the record to be in
-    wait_for_input_use 0
-
-    # Should we fix the dates?
-
 }
 
 function wait_for_input_use {
@@ -613,8 +626,8 @@ EOF
    echo "Check JobUsageRecord"
    readonly_mysql > jobusagerecord.validate 2>&1 <<EOF 
 use ${schema_name};
-select ProbeName, VOName, Processors as Cores, count(*) as Nrecord, Sum(NJobs) as NJobs, Sum(WallDuration) as Wall, Sum(CpuUserDuration+CpuSystemDuration) as Cpu 
-    from JobUsageRecord_Report group by ProbeName, VOName, Processors;
+select ProbeName, VOName, NodeCount as Cores, count(*) as Nrecord, Sum(NJobs) as NJobs, Sum(WallDuration) as Wall, Sum(CpuUserDuration+CpuSystemDuration) as Cpu 
+    from JobUsageRecord_Report group by ProbeName, VOName, NodeCount;
 EOF
 
    echo "Check JobUsageRecord_Xml"
@@ -792,7 +805,7 @@ function upload_war()
 #while getopt :tshcfkdlmn:w:p:b: OPT; do
 
 ARGS=$(getopt -s bash --options :tshcfkdlmn:w:p:b:  \
-  --longoptions pbs,lsf,help --name runCollectorTest.sh -- "$@" )
+  --longoptions probes,help,exec: --name runCollectorTest.sh -- "$@" )
 
 getoptresult=$?
 
@@ -819,11 +832,13 @@ while true ; do
             ;;
         -w)  do_war=1
             WAR="$WAR $OPTARG"
+            shift
             ;;
         -b)  do_war=1
             do_build=1
             WAR="$WAR $OPTARG"
             BUILDWAR="$BUILDWAR $OPTARG"
+            shift
             ;;
         -c)  do_collector=1
             ;;
@@ -847,9 +862,10 @@ while true ; do
             ;;
         -m)  do_timeout=1
             ;;
-        --lsf) do_lsf=1
+        --probes) do_probes=1
             ;;
-        --pbs) do_pbs=1
+        --exec) do_routine=$OPTARG;
+            shift
             ;;
         --)
             shift
@@ -896,13 +912,18 @@ if [ $do_load ]; then
    loaddata
 fi
 
-if [ $do_pbs ] ; then 
-   loadpbs
+if [ $do_routine ] ; then
+   eval `echo $do_routine`
 fi
 
-if [ $do_lsf ] ; then 
+if [ $do_probes ] ; then
+   loadcondor
+   loadpbs
    loadlsf
+    # Wait for the record to be in
+    wait_for_input_use 0
 fi
+
 
 if [ $do_fixup ]; then 
    fix_duplicate_date

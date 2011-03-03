@@ -1,4 +1,6 @@
 ProbeName	VOName	Cores	Nrecord	NJobs	Wall	Cpu
+condor:LocalTester.where.edu	vdt	1	3	29	21055	0
+condor:LocalTester.where.edu	vdt-cream	1	1	1	910	0
 lsf:LocalTester.where.edu	Unknown	8	1	4	80	0
 lsf:LocalTester.where.edu	alice	1	2	15	13	0
 lsf:LocalTester.where.edu	cms	1	1	2	30	8
