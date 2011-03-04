@@ -10,7 +10,7 @@ import sys
 # global variables
 gTmpCronFileOld = "/tmp/tmpCronOld.txt"
 gTmpCronFileNew = "/tmp/tmpCronNew.txt"
-gCronPattern = "Gratia entry created by configReport.py. *DON'T* edit this line!!!" # unique pattern that identifies a gratia reporting entry in the crontab
+gCronPattern = " Gratia cron entry :-). Don't edit after #. Could remove the whole entry though." # unique pattern that identifies a gratia reporting entry in the crontab
 
 # Save existing crontab entry to a temporary file to start with
 os.system("crontab -l > " + gTmpCronFileOld)
@@ -22,7 +22,7 @@ def main(argv=None):
         configFailedExit()
     sanityCheck()
     editCronTab(stringToBoolean(extractVar("report","cron"))) # This step needs to be done irrespective of if the cron is enabled or disabled in the config file
-    print "Configuration completed successfully. Please note that you have to rerun this script whenever you make changes to your " + AccountingReports.gConfigFiles + " config file."
+    print "Configuration completed successfully.\nPlease note that you have to run this script everytime you make changes to your " + AccountingReports.gConfigFiles + " config file."
 
 def configFailedExit():
     print "Configuration failed. Please fix and try again."
@@ -66,6 +66,11 @@ def editCronTab(enableCron):
    # If enableCron is True, the cron entry if it already exists needs to be edited or if the cron entry doesn't exist, it needs to be added
    # If enableCron is False, the cron entry if it already exists needs to be removed or if the cron entry doesn't exist, nothing needs to be done
    # All the above logic is incorporated in the editCronTab() function
+    userInput = ""
+    if not enableCron:
+        print "ALERT!!! Cron has been disabled in " + AccountingReports.gConfigFiles + ". This will remove existing gratia reporting cron entries if any. Are you sure?: "
+        while userInput.strip() != "yes":
+            userInput = raw_input("Type yes to continue: ")
     added = False
     fileR = open(gTmpCronFileOld, 'r')
     fileW = open(gTmpCronFileNew, 'w')
@@ -96,17 +101,21 @@ def userSiteReportEmail():
     return email
 
 def cronString():
-    ret =  "00 07 * * * sh daily_mutt.sh # " + gCronPattern + "\n"
-    ret +=  "05 07 * * * sh range_mutt.sh # " + gCronPattern + "\n"
-    return ret
-
-def cronString():
     installDir = extractVar("report","installDir")
+    userInput = ""
     if installDir == "":
         print "ERROR!!! The installation directory needs to be set. Refer to the installDir variable under the [ report ] section in " + AccountingReports.gConfigFiles + " to set a value."
         sys.exit(1)
-    cdStr = "cd " + installDir + ";"
+    cdStr = "cd " + installDir + "; "
+    print "ALERT!!! In another terminal window, please edit " + installDir + "/user-reports.dat" + " and set/change all the recipient emails for the perl reports (all-vos-oim & all-sites-oim) to the ones of your choice. When done type \"yes\" to continue.\n" 
+    while userInput.strip() != "yes":
+        userInput = raw_input("Are you done editing the report recipient emails in user-reports.dat? (Type yes to continue): ")
     ret =  "00 07 * * * " + cdStr + "sh daily_mutt.sh;sh range_mutt.sh  # " + gCronPattern + "\n"
+    ret += "30 02 * * 1 " + cdStr +"perl all-vos-oim -p --production -D :default -D user-reports.dat > /dev/null # " + gCronPattern + "\n"
+    ret += "17 02 * * 1 " + cdStr +"perl all-sites-oim -p --production -D :default -D user-reports.dat > /dev/null # Monthly " + gCronPattern + "\n"
+    ret += "45 02 1 * * " + cdStr +"perl all-vos-oim -p --production -M -D :default -D user-reports.dat > /dev/null # " + gCronPattern + "\n"
+    ret += "02 03 1 * * " + cdStr +"perl all-sites-oim -p --production -M -D :default -D user-reports.dat > /dev/null # Yearly " + gCronPattern + "\n"
+    ret += "00 03 1 1 * " + cdStr +"perl all-vos-oim -p --production -Y -D :default -D user-reports.dat > /dev/null # " + gCronPattern + "\n"
     return ret
 
 # Convert string values ("True", "False") defined in the config file to equivalent boolean values (True, False)
