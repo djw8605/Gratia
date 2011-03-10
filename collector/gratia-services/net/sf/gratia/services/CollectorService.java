@@ -126,6 +126,7 @@ public class CollectorService implements ServletContextListener {
    ReplicationService replicationService;
    RMIService rmiservice;
    QSizeMonitor qsizeMonitor;
+   TableStatisticsManager tableStatisticsManager;
    MonitorRecordProcessor monitorRecordProcessor;
    DataHousekeepingService housekeepingService;
    
@@ -440,6 +441,16 @@ public class CollectorService implements ServletContextListener {
             qsizeMonitor = new QSizeMonitor(this);
             qsizeMonitor.start();
             Logging.info("CollectorService: QSizeMonitor started");
+         }
+         
+         //
+         // if requested - start service to keep an history of the table statistics.
+         //
+         if (p.getProperty("monitor.q.size").equals("1")) {
+            Logging.log("CollectorService: Starting TableStatisticsManager");
+            tableStatisticsManager = new TableStatisticsManager(this);
+            tableStatisticsManager.start();
+            Logging.info("CollectorService: TableStatisticsManager started");
          }
       }
       catch (Exception e) {

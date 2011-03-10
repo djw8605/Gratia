@@ -32,11 +32,12 @@ function prepareCountTrigger() {
   local table_name=${1##countTrigger}
   TPROC="${TMP}.countTrigger.${table_name}"
   if [[ "${table_name}" == "DupRecord" ]]; then
-    maybe_increment_error_line="  update TableStatistics set nRecords = nRecords + 1 where RecordType = new.RecordType and Qualifier = new.error;"
+    maybe_increment_error_line="  update TableStatistics set nRecords = nRecords + 1 where valueType = 'current' and RecordType = ifnull(new.RecordType,'') and Qualifier = new.error;"
+    maybe_increment_error_line_life="  update TableStatistics set nRecords = nRecords + 1 where valueType = 'lifetime' and RecordType = ifnull(new.RecordType,'') and Qualifier = new.error;"
     maybe_decrement_error_line=${maybe_increment_error_line/\+/-}
     maybe_decrement_error_line=${maybe_decrement_error_line//new/old}
-    maybe_increment_error_line="  insert ignore into TableStatistics values(new.RecordType, 0, new.error);${maybe_increment_error_line}"
-    maybe_decrement_error_line="  insert ignore into TableStatistics values(old.RecordType, 1, old.error);${maybe_decrement_error_line}"
+    maybe_increment_error_line="  insert ignore into TableStatistics (ValueType,RecordType,Qualifier,nRecords) values ('current',ifnull(new.RecordType,''), new.error, 0),('lifetime',ifnull(new.RecordType,''), new.error, 0);${maybe_increment_error_line}${maybe_increment_error_line_life}"
+    maybe_decrement_error_line="  insert ignore into TableStatistics (ValueType,RecordType,Qualifier,nRecords) values ('current',ifnull(old.RecordType,''), old.error, 1);${maybe_decrement_error_line}"
   fi
   cat > "${TPROC}" <<EOF
 delimiter ||
@@ -81,16 +82,18 @@ call conditional_trigger_drop();
 create trigger countInc${table_name} after insert on ${table_name}
 for each row
 f:begin
-  insert ignore into TableStatistics values('${table_name}',0,'');
-  update TableStatistics set nRecords = nRecords + 1 where RecordType = '${table_name}' and Qualifier = '';
+  insert ignore into TableStatistics (ValueType,RecordType,Qualifier,nRecords) values('current','${table_name}','',0);
+  update TableStatistics set nRecords = nRecords + 1 where ValueType = 'current' and RecordType = '${table_name}' and Qualifier = '';
+  insert ignore into TableStatistics (ValueType,RecordType,Qualifier,nRecords) values('lifetime','${table_name}','',0);
+  update TableStatistics set nRecords = nRecords + 1 where ValueType = 'lifetime' and RecordType = '${table_name}' and Qualifier = '';
 ${maybe_increment_error_line}
 end
 ||
 create trigger countDec${table_name} after delete on ${table_name}
 for each row
 f:begin
-  insert ignore into TableStatistics values('${table_name}',1,'');
-  update TableStatistics set nRecords = nRecords - 1 where RecordType = '${table_name}' and Qualifier = '';
+  insert ignore into TableStatistics (ValueType,RecordType,Qualifier,nRecords) values('current','${table_name}','',1);
+  update TableStatistics set nRecords = nRecords - 1 where ValueType = 'current' and RecordType = '${table_name}' and Qualifier = '';
 ${maybe_decrement_error_line}
 end
 EOF
@@ -170,13 +173,16 @@ while [[ -n "$1" ]]; do
         ;;
       trigger)
         proc="${script_location}build-trigger.sql"
-        set -- "$@" summary-procedures services-summary-procedures
+        set -- "$@" summary-procedures services-summary-procedures tablestatistics-summary-procedures
         ;;
       summary-procedures)
         proc="${script_location}summary-procedures.sql"
         ;;
       services-summary-procedures)
         proc="${script_location}services-summary-procedures.sql"
+        ;;
+      tablestatistics-summary-procedures)
+        proc="${script_location}tablestatistics-summary-procedures.sql"
         ;;
       ps)
 #        proc="${script_location}build-ps-node-summary-table.sql"

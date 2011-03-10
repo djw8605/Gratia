@@ -2,6 +2,7 @@ package net.sf.gratia.administration;
 
 import net.sf.gratia.util.XP;
 import net.sf.gratia.util.Configuration;
+import net.sf.gratia.util.Logging;
 import net.sf.gratia.services.*;
 
 import java.io.*;
@@ -21,38 +22,32 @@ public class MonitorStatus extends HttpServlet
 	XP xp = new XP();
 
 	//
-	// database related
-	//
-	String driver = "";
-	String url = "";
-	String user = "";
-	String password = "";
-	Connection connection;
-	Statement statement;
-	ResultSet resultSet;
-	//
 	// processing related
 	//
-	StringBuffer buffer = new StringBuffer();
 	//
 	// globals
 	//
 	boolean initialized = false;
 	Properties props;
-	String message = null;
 	//
 	// support
 	//
-	String dq = "\"";
-	String comma = ",";
-	String cr = "\n\r";
+   static final SimpleDateFormat fgDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
 
 	public void init(ServletConfig config) throws ServletException 
 	{
 	}
 
-	public void openConnection()
+	public Connection openConnection()
 	{
+      //
+      // database related
+      //
+      String driver = "";
+      String url = "";
+      String user = "";
+      String password = "";
 		try
 		{
 			props = Configuration.getProperties();
@@ -67,15 +62,17 @@ public class MonitorStatus extends HttpServlet
 		try
 		{
 			Class.forName(driver).newInstance();
-			connection = DriverManager.getConnection(url,user,password);
+			Connection connection = DriverManager.getConnection(url,user,password);
+         return connection;
 		}
 		catch (Exception e)
 		{
 			e.printStackTrace();
 		}
+      return null;
 	}
 
-	public void closeConnection()
+	public void closeConnection(Connection connection)
 	{
 		try
 		{
@@ -86,14 +83,26 @@ public class MonitorStatus extends HttpServlet
 			e.printStackTrace();
 		}
 	}
-
+   
+   void refreshStatus() 
+   {
+      // Wait until JMS service is up
+      try { 
+         JMSProxy proxy = (JMSProxy)
+         java.rmi.Naming.lookup(Configuration.getProperties().getProperty("service.rmi.rmilookup") +
+                                Configuration.getProperties().getProperty("service.rmi.service"));
+         proxy.refreshStatus();
+      } catch (Exception e) {
+      }         
+   }
+   
 	public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
 	{
 		String probename = null;
 		String sitename = null;
 		String host = null;
 		String allsites = null;
-		openConnection();
+		Connection connection = openConnection();
 		
 		String uriPart = request.getRequestURI();
 		int slash2 = uriPart.substring(1).indexOf("/") + 1;
@@ -115,17 +124,17 @@ public class MonitorStatus extends HttpServlet
       if (xmlreq != null && xmlreq.equals("yes")) {
          xml = true;
       }
-		buffer = new StringBuffer();
+		StringBuffer buffer = new StringBuffer();
 		if (allsites != null)
-			processAllSites(xml);
+			processAllSites(connection,buffer,xml);
 		else if (probename != null)
-			processProbe(probename,xml);
+			processProbe(connection,buffer,probename,xml);
 		else if (sitename != null)
-			processSite(sitename,xml);
+			processSite(connection,buffer,sitename,xml);
 		else if (host != null)
-			processHost(host,xml);
+			processHost(connection,buffer,host,xml);
 		else
-			process(xml);
+			process(connection,buffer,xml);
 		response.setContentType("text/plain");
 		response.setHeader("Cache-Control", "no-cache"); // HTTP 1.1
 		response.setHeader("Pragma", "no-cache"); // HTTP 1.0
@@ -133,7 +142,7 @@ public class MonitorStatus extends HttpServlet
 		writer.write(buffer.toString());
 		writer.flush();
 		writer.close();
-		closeConnection();
+		closeConnection(connection);
 	}
    
    private static void append(StringBuffer buffer, String what, int thread, long value, boolean xml) 
@@ -175,23 +184,19 @@ public class MonitorStatus extends HttpServlet
       }
    }
    
-   public void processProbe(String probename, boolean xml)
+   static final String fgProcessProbeQuery = "select currenttime from Probe where probename = ? ";
+   public void processProbe(Connection connection, StringBuffer buffer, String probename, boolean xml)
 	{
-		String command = "";
-		String dq = "'";
-		java.util.Date date = null;
-
-		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
 		try
 		{
 			//
 			// return time stamp of last probe contact
 			//
-			command = "select currenttime from Probe where probename = " + dq + probename + dq;
-			System.out.println("command: " + command);
-			statement = connection.prepareStatement(command);
-			resultSet = statement.executeQuery(command);
+			Logging.log("MonitorStatus SQL query: " + fgProcessProbeQuery + " with " + probename);
+			PreparedStatement statement = connection.prepareStatement(fgProcessProbeQuery);
+         statement.setString(1,probename);
+			ResultSet resultSet = statement.executeQuery();
+         java.util.Date date = null;         
 			while(resultSet.next())
 				date = resultSet.getTimestamp(1);
 			resultSet.close();
@@ -199,7 +204,7 @@ public class MonitorStatus extends HttpServlet
 			if (date == null)
 				append(buffer,"last-contact","never",xml);
 			else
-				append(buffer,"last-contact",format.format(date),xml);
+				append(buffer,"last-contact",fgDateFormat.format(date),xml);
 		}
 		catch (Exception e)
 		{
@@ -207,24 +212,22 @@ public class MonitorStatus extends HttpServlet
 		}
 	}
 
-	public void processSite(String sitename, boolean xml)
+   static final String fgProcessSiteQuery = "select P.currenttime, P.probename from Probe P, Site T where P.active = 1 and T.SiteName = ? and T.siteid = P.siteid order by currenttime desc";
+	public void processSite(Connection connection, StringBuffer buffer, String sitename, boolean xml)
 	{
-		String command = "";
-		String dq = "'";
-		java.util.Date date = null;
-		String probename = null;
-		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
 		try
 		{
 			//
 			// return time stamp of last site contact
 			//
-			command = "select P.currenttime, P.probename from Probe P, Site T where P.active = 1 and T.SiteName = " + dq + sitename + dq + " and T.siteid = P.siteid order by currenttime desc";
-			System.out.println("command: " + command);
-			statement = connection.prepareStatement(command);
-			resultSet = statement.executeQuery(command);
-			while(resultSet.next()) {
+			Logging.log("MonitorStatus SQL query: " + fgProcessSiteQuery + " with " + sitename);
+			PreparedStatement statement = connection.prepareStatement(fgProcessSiteQuery);
+         statement.setString(1,sitename);
+			ResultSet resultSet = statement.executeQuery();
+
+         java.util.Date date = null;
+         String probename = null;
+         while(resultSet.next()) {
 				date = resultSet.getTimestamp(1);
 				probename = resultSet.getString(2);
 				if (date == null) {
@@ -238,7 +241,7 @@ public class MonitorStatus extends HttpServlet
 					if (probename == null)
 						probename = "Unknown probe";
                append(buffer,"probename",probename,xml);
-               append(buffer,"last-contact",format.format(date),xml);
+               append(buffer,"last-contact",fgDateFormat.format(date),xml);
 				}
             buffer.append("\n");
 			}
@@ -251,23 +254,21 @@ public class MonitorStatus extends HttpServlet
 		}
 	}
 
-	public void processAllSites(boolean xml)
+   static final String fgProcessAllSitesQuery = "select T.SiteName, P.currenttime, P.probename from Probe P, Site T where P.active = 1 and T.siteid = P.siteid order by T.SiteName,P.currenttime desc";
+	public void processAllSites(Connection connection, StringBuffer buffer, boolean xml)
 	{
-		String command = "";
-		String site = "";
-		java.util.Date date = null;
-		String probename = null;
-		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 		try
 		{
 			//
 			// return time stamp of last site contact
 			//
-			command = "select T.SiteName, P.currenttime, P.probename from Probe P, Site T where P.active = 1 and T.siteid = P.siteid order by T.SiteName,P.currenttime desc";
-			System.out.println("command: " + command);
-			statement = connection.prepareStatement(command);
-			resultSet = statement.executeQuery(command);
+         String site = "";
+         java.util.Date date = null;
+         String probename = null;
+			Logging.log("MonitorStatus SQL query: " + fgProcessAllSitesQuery);
+			PreparedStatement statement = connection.prepareStatement(fgProcessAllSitesQuery);
+			ResultSet resultSet = statement.executeQuery();
 			while(resultSet.next()) {
 				site = resultSet.getString(1);
 				date = resultSet.getTimestamp(2);
@@ -279,7 +280,7 @@ public class MonitorStatus extends HttpServlet
 				if (date == null) {
 					append(buffer,"last-contact","never",xml);
 				} else {
-					append(buffer,"last-contact",format.format(date),xml);
+					append(buffer,"last-contact",fgDateFormat.format(date),xml);
 				}
             buffer.append("\n");
 			}
@@ -292,24 +293,20 @@ public class MonitorStatus extends HttpServlet
 		}
 
 	}
-
-	public void processHost(String host, boolean xml)
+   
+   static final String fgProcessHostQuery = "select max(ServerDate) from JobUsageRecord,JobUsageRecord_Meta where JobUsageRecord.dbid = JobUsageRecord_Meta.dbid and Host = ?";
+	public void processHost(Connection connection, StringBuffer buffer, String host, boolean xml)
 	{
-		String command = "";
-		String dq = "'";
-		java.util.Date date = null;
-
-		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
 		try
 		{
 			//
 			// return time stamp of last host contact
 			//
-			command = "select max(ServerDate) from JobUsageRecord,JobUsageRecord_Meta where JobUsageRecord.dbid = JobUsageRecord_Meta.dbid and Host = " + dq + host + dq;
-			System.out.println("command: " + command);
-			statement = connection.prepareStatement(command);
-			resultSet = statement.executeQuery(command);
+			Logging.log("MonitorStatus SQL query: " + fgProcessHostQuery);
+			PreparedStatement statement = connection.prepareStatement(fgProcessHostQuery);
+         statement.setString(1,host);
+			ResultSet resultSet = statement.executeQuery();
+         java.util.Date date = null;
 			while(resultSet.next())
 				date = resultSet.getTimestamp(1);
 			resultSet.close();
@@ -317,7 +314,7 @@ public class MonitorStatus extends HttpServlet
 			if (date == null)
 				append(buffer,"last-contact","never",xml);
 			else
-				append(buffer,"last-contact",format.format(date),xml);
+				append(buffer,"last-contact",fgDateFormat.format(date),xml);
 		}
 		catch (Exception e)
 		{
@@ -325,112 +322,135 @@ public class MonitorStatus extends HttpServlet
 		}
 	}
 
-	public void process(boolean xml)
+   static final String fgProcessQueueLengthQuery = "select Queue, Files, Records from CollectorStatus order by Queue";
+   public StringBuffer processQueueLength(Connection connection, boolean xml, boolean retry)
+   {
+      try
+		{
+         StringBuffer queueBuffer = new StringBuffer();
+         PreparedStatement statement = connection.prepareStatement(fgProcessQueueLengthQuery);
+         ResultSet resultSet = statement.executeQuery();
+         while(resultSet.next()) {
+            int q = resultSet.getInt(1);
+            long nFiles = resultSet.getLong(2);
+            long nRecords = resultSet.getLong(3);
+            if (retry && (nFiles < 0 || nRecords < 0) ) {
+               // We know something went wrong.  We need to abord, refresh the Status
+               // and retry.
+               resultSet.close();
+               statement.close();
+               // RefreshStatus
+               refreshStatus();
+               // Retry
+               return processQueueLength(connection, xml, false);
+            }
+            append(queueBuffer,"queuesize",q,nFiles,xml);
+            append(queueBuffer,"record-queue",q,nRecords,xml);
+         }
+         resultSet.close();
+         statement.close();
+         return queueBuffer;
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+      }
+      return null;
+   }
+
+   static final String fgCountCurrent = "select sum(nRecords) from TableStatistics where ValueType = 'lifetime' and RecordType != 'DupRecord' ";
+   static final String fgCountLastHourQuery =  "select sum(maxRecords) from ( select max(maxRecords) as maxRecords from " +
+      "( select ValueType,RecordType,Qualifier,max(nRecords) as maxRecords from TableStatisticsSnapshots where ValueType = 'lifetime'" +
+      "     and ServerDate <= ? " +
+      "     and RecordType != 'DupRecord' " +
+      "     group by ValueType,RecordType,Qualifier " +
+      "  union select ValueType,RecordType,Qualifier,max(maxRecords) as maxRecords from TableStatisticsHourly where ValueType = 'lifetime'" +
+      "     and EndTime <= ? " +
+      "     and RecordType != 'DupRecord' " +
+      "     group by ValueType,RecordType,Qualifier " + 
+      ") forMax " + 
+      "group by ValueType,RecordType,Qualifier ) forSum ";
+
+   static final String fgCountLastDayQuery = "select sum(maxRecords) from ( select max(maxRecords) as maxRecords from " +
+      "( select ValueType,RecordType,Qualifier,max(nRecords) as maxRecords from TableStatisticsSnapshots where ValueType = 'lifetime'" +
+      "     and ServerDate <= ? " +
+      "     and RecordType != 'DupRecord' " +
+      "     group by ValueType,RecordType,Qualifier" + 
+      "  union select ValueType,RecordType,Qualifier,max(maxRecords) as maxRecords from TableStatisticsHourly where ValueType = 'lifetime'" +
+      "     and EndTime <= ? " +
+      "     and RecordType != 'DupRecord' "+
+      "     group by ValueType,RecordType,Qualifier" +
+      "  union select ValueType,RecordType,Qualifier,max(maxRecords) as maxRecords from TableStatisticsDaily where ValueType = 'lifetime'" +
+      "    and EndTime <= ? " + 
+      "    and RecordType != 'DupRecord' " +
+      "    group by ValueType,RecordType,Qualifier " + 
+      ") forMax " + 
+      "group by ValueType,RecordType,Qualifier ) forSum";
+   
+	public void process(Connection connection, StringBuffer buffer, boolean xml)
 	{
-		int index = 0;
-		String command = "";
-		String dq = "'";
-
-		Integer count1 = null;
-		Integer error1 = null;
-
-		Integer count24 = null;
-		Integer error24 = null;
-
 		java.util.Date now = new java.util.Date();
-		long decrement = 60 * 60 * 1000;
-		java.util.Date to = new java.util.Date();
-		java.util.Date from = new java.util.Date(to.getTime() - decrement);
-
 		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
+      long totalrecords_current;
+      long totalrecords_onehour;
+      long totalrecords_oneday;
 		try
 		{
-			//
-			// previous hour
-			//
-         
-         String tables [] = { "JobUsageRecord", "MetricRecord", "ComputeElement", "StorageElement", "ComputeElementRecord", "StorageElementRecord", "Subcluster" };
-         
-         count1 = new Integer(0);
-         
-         for(int i = 0; i < tables.length; ++i) {
+         // We need to get the information for now (using TableStatistics/current)
 
-            command = "select count(*) from " + tables[i] + "_Meta where ServerDate > " + dq + format.format(from) + dq +
-                      " and ServerDate <= " + dq + format.format(to) + dq;
-            System.out.println("command: " + command);
-            statement = connection.prepareStatement(command);
-            resultSet = statement.executeQuery(command);
-            while(resultSet.next()) {
-               count1 = count1 + resultSet.getInt(1);
-            }
-            resultSet.close();
-            statement.close();
+			Logging.debug("MonitorStatus SQL query: " + fgCountCurrent);
+         PreparedStatement statement = connection.prepareStatement(fgCountCurrent);
+         ResultSet resultSet = statement.executeQuery();
+         if (resultSet.next()) {
+            totalrecords_current = resultSet.getLong(1);
+         } else {
+            totalrecords_current = 0;
          }
+         resultSet.close();
+         statement.close();
          
-			command = "select count(*) from DupRecord where EventDate > " + dq + format.format(from) + dq +
-			" and EventDate <= " + dq + format.format(to) + dq;
-			statement = connection.prepareStatement(command);
-			resultSet = statement.executeQuery(command);
-			while(resultSet.next())
-				error1 = resultSet.getInt(1);
-			resultSet.close();
-			statement.close();
-
-			//
-			// previous day
-			//
-
-			decrement = 24 * 60 * 60 * 1000;
-			java.util.Date date = new java.util.Date(now.getTime() - decrement);
-
-         count24 = new Integer(0);
-         for(int i = 0; i < tables.length; ++i) {
-            command = "select count(*) from " + tables[i] + "_Meta where ServerDate > " + dq + format.format(date) + dq;
-            statement = connection.prepareStatement(command);
-            resultSet = statement.executeQuery(command);
-            while(resultSet.next())
-               count24 = count24 + resultSet.getInt(1);
-            resultSet.close();
-            statement.close();
-         }
-
-			command = "select count(*) from DupRecord where EventDate > " + dq + format.format(date) + dq;
-			statement = connection.prepareStatement(command);
-			resultSet = statement.executeQuery(command);
-			while(resultSet.next())
-				error24 = resultSet.getInt(1);
-			resultSet.close();
-			statement.close();
+         // Then the information one hour ago (as close as possible).
+         java.sql.Timestamp to = new java.sql.Timestamp(now.getTime() - 1 * 3600 * 1000);
          
- 
+         statement = connection.prepareStatement(fgCountLastHourQuery);
+         statement.setTimestamp(1,to);
+         statement.setTimestamp(2,to);
+         Logging.debug("MonitorStatus SQL query: " + statement);
+         resultSet = statement.executeQuery();
+         if (resultSet.next()) {
+            append(buffer,"record-count-hour",totalrecords_current - resultSet.getLong(1),xml);
+         } else {
+            append(buffer,"record-count-hour",totalrecords_current,xml);
+         }            
+         resultSet.close();
+         statement.close();
+
+         // Then the information 24 hour ago (as close as possible).         
+			java.sql.Timestamp yesterday = new java.sql.Timestamp(now.getTime() - 24 * 60 * 60 * 1000);
+         statement = connection.prepareStatement(fgCountLastDayQuery);
+         statement.setTimestamp(1,yesterday);
+         statement.setTimestamp(2,yesterday);
+         statement.setTimestamp(3,yesterday);
+         Logging.debug("MonitorStatus SQL query: " + statement);
+         resultSet = statement.executeQuery();
+         if (resultSet.next()) {
+            append(buffer,"record-count-24hour",totalrecords_current - resultSet.getLong(1),xml);
+         } else {
+            append(buffer,"record-count-24hour",totalrecords_current ,xml);
+         }            
+         resultSet.close();
+         statement.close();
+
 		}
 		catch (Exception e)
 		{
 			e.printStackTrace();
 		}
 
-		append(buffer,"record-count-hour",count1,xml);
-		append(buffer,"record-count-24hour",count24,xml);
-
-		try
-		{
-         command = "select Queue, Files, Records from CollectorStatus order by Queue";
-         statement = connection.prepareStatement(command);
-         resultSet = statement.executeQuery(command);
-         while(resultSet.next()) {
-            int q = resultSet.getInt(1);
-            long nFiles = resultSet.getLong(2);
-            long nRecords = resultSet.getLong(3);
-            append(buffer,"queuesize",q,nFiles,xml);
-            append(buffer,"record-queue",q,nRecords,xml);
-         }
-         resultSet.close();
-         statement.close();
+      StringBuffer queueBuffer = processQueueLength(connection, xml, true);
+      if (queueBuffer != null) {
+         buffer.append(queueBuffer);
       }
-      catch (Exception e)
-      {
-         e.printStackTrace();
-      }   
 	}
 }

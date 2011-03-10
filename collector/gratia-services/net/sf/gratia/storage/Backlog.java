@@ -5,7 +5,7 @@ import java.util.Date;
 /**
  * <p>Title: Collector </p>
  *
- * <p>Description: Keeps track of the status of the backlog on any entity (probe,local collector,remote collecotr).</p>
+ * <p>Description: Keeps track of the status of the backlog on any entity (probe,local collector,remote collector).</p>
  *
  * <p>Note: since this class represent counters, the updates are done directly in mysql, bypassing hibernate.</p>
  *
@@ -17,15 +17,24 @@ import java.util.Date;
  * @version 1.0
  */
 
-public class Backlog extends CollectorStatus {
+public class Backlog //extends Record 
+{
    private long   fBackId;          
    private String fType;            // Type of the entity (Probe,Collector,LocalCollector)
+   private String fName;
+   private Date   fUpdateDate;
+   private long   fFiles;           // File in queue
+   private long   fRecords;         // Record in queue
+   private long   fMaxPendingFiles; // Maximum number of files in 'queue' before it is compressed or incoming record are rejected.
    private long   fServiceBacklog;  // Estimated number of records not yet processed in the underlying service.
-   private Date   fServerDate;
+   private long   fSpan;            // Duration in second convered by this update (i.e. from fUpdateDate-fSpan to fUpdateDate
    
    public Backlog() 
    {
-      fServerDate = null;
+      fBackId = -1;
+      fType = null;
+      fServiceBacklog = 0;
+      fSpan = 0;
    }
    
    public void setBackId(long id)
@@ -53,15 +62,6 @@ public class Backlog extends CollectorStatus {
    public long getServiceBacklog()
    {
       return fServiceBacklog;
-   }
-
-   public Date getServerDate()
-   {
-      return fServerDate;
-   }   
-   public void setServerDate(Date value)
-   {
-      fServerDate = value;
    }
 
 }

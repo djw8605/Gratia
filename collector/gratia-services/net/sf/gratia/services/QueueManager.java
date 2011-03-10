@@ -42,8 +42,8 @@ public class QueueManager
    
    private static final String fgUpdateStatus = "insert into CollectorStatus (Name,Queue,UpdateDate,Files,Records) values ( :queue, :number, now(), :nfiles, :nrecords) "
                                                 + " on duplicate key update UpdateDate=now(), Queue=:number, Records=Records+:nrecords, Files=Files+:nfiles";
-   private static final String fgClearStatus = "delete from CollectorStatus where Name = :queue";
-
+   private static final String fgClearStatus = "insert into CollectorStatus (Name,Queue,UpdateDate,Files,Records) values ( :queue, :number, now(), 0, 0) "
+                                                + " on duplicate key update UpdateDate=now(), Queue=:number, Records=0, Files=0";
    private static String fgHostName = "localhost";
    
    private final static Lock fgFileLock = new ReentrantLock();
@@ -243,6 +243,7 @@ public class QueueManager
             
             org.hibernate.SQLQuery query = session.createSQLQuery( fgClearStatus );
             query.setString( "queue", fQueueName );
+            query.setLong( "number", fQueueNumber );
             
             Logging.debug("Queue::clearStatusTable: About to execute " + query.getQueryString() + " with queue = " + fQueueName );
             long updated = query.executeUpdate();

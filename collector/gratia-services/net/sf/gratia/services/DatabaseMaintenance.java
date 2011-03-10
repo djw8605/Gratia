@@ -31,11 +31,11 @@ public class DatabaseMaintenance {
 
    static final String dq = "\"";
    static final String comma = ",";
-   static final int gratiaDatabaseVersion = 86;
+   static final int gratiaDatabaseVersion = 87;
    static final int latestDBVersionRequiringStoredProcedureLoad = gratiaDatabaseVersion;
    static final int latestDBVersionRequiringSummaryViewLoad = 82;
-   static final int latestDBVersionRequiringSummaryTriggerLoad = 84;
-   static final int latestDBVersionRequiringTableStatisticsRefresh = 38;
+   static final int latestDBVersionRequiringSummaryTriggerLoad = 87;
+   static final int latestDBVersionRequiringTableStatisticsRefresh = 87;
    static boolean dbUseJobUsageSiteName = false;
    java.sql.Connection connection;
    int liveVersion = 0;
@@ -98,6 +98,26 @@ public class DatabaseMaintenance {
       return true;
    }
 
+   public boolean TableExist(String table) 
+   {
+      // Return true if the table exist.
+      
+      String check = "show tables like \"" + table + "\"";
+      
+      try {
+         Logging.log("Executing: " + check);
+         Statement statement = connection.createStatement();
+         ResultSet resultSet = statement.executeQuery(check);
+         boolean exist = (resultSet.next()); 
+         resultSet.close();
+         statement.close();
+         return exist;
+      }  catch (Exception e) {
+         Logging.warning("Command: Error: " + check + " : " + e);
+         return false;
+      }      
+   }
+   
    public void AddIndex(String table, Boolean unique, String name,
          String content) throws Exception {
 
@@ -809,7 +829,7 @@ public class DatabaseMaintenance {
             int result = CallPostInstall("stored");
             if (result > -1) {
                UpdateDbProperty("gratia.database.storedProcedureVersion",
-                     gratiaDatabaseVersion);
+                                gratiaDatabaseVersion);
                Logging.log("Stored procedures updated successfully");
             } else {
                Logging.warning("FAIL: stored procedures NOT updated");
@@ -821,11 +841,11 @@ public class DatabaseMaintenance {
       // Check TableStatistics
       {
          ver = readIntegerDBProperty("gratia.database.TableStatisticsVersion");
-         if (ver < latestDBVersionRequiringTableStatisticsRefresh) {
+         if (ver < latestDBVersionRequiringTableStatisticsRefresh  || !TableExist("TableStatistics")) {
             int result = RefreshTableStatistics();
             if (result > -1) {
                UpdateDbProperty("gratia.database.TableStatisticsVersion",
-                     gratiaDatabaseVersion);
+                                gratiaDatabaseVersion);
                Logging.log("Table statistics updated successfully");
             } else {
                Logging.warning("FAIL: table statistics NOT updated");
@@ -833,6 +853,24 @@ public class DatabaseMaintenance {
             }
          }
       }
+      
+      // Check TableStatistics History
+      {
+         ver = readIntegerDBProperty("gratia.database.TableStatisticsHistoryVersion");
+         if (ver < 0 || !TableExist("TableStatisticsSnapshots")) {
+            int result = UpdateTableStatisticsHistory(ver);
+            if (result > -1) {
+               UpdateDbProperty("gratia.database.TableStatisticsHistoryVersion",
+                                gratiaDatabaseVersion);
+               Logging.log("Table statistics history updated successfully");
+            } else {
+               Logging.warning("FAIL: table statistics history NOT updated properly");
+               return false;
+            }
+         }
+         
+      }
+      
       return true;
    }
 
@@ -1225,36 +1263,43 @@ public class DatabaseMaintenance {
          if(current == 85) {
             Upgrade86 bigintUpgrader = new Upgrade86();
 
-		//Upgrade from 85 to 86
-		//This involves updating the data type of a bunch of fields from int to bigint 
-		//All the details of the upgrade could be seen in Upgrade86.java 
-                try
-                {
-		        //Try doing the db upgrade from version 85 to version 86
-                        Logging.fine("Upgrade86 - Beginning database schema upgrade from version " + current + " to version " + (current + 1));
-                        bigintUpgrader.upgrade(connection);
-                        Logging.fine("Success!!! Upgrade86 - Finished database schema upgrade from version " + current + " to version " + (current + 1));
+            //Upgrade from 85 to 86
+            //This involves updating the data type of a bunch of fields from int to bigint 
+            //All the details of the upgrade could be seen in Upgrade86.java 
+            try
+            {
+               //Try doing the db upgrade from version 85 to version 86
+               Logging.fine("Upgrade86 - Beginning database schema upgrade from version " + current + " to version " + (current + 1));
+               bigintUpgrader.upgrade(connection);
+               Logging.fine("Success!!! Upgrade86 - Finished database schema upgrade from version " + current + " to version " + (current + 1));
 
-			//If and only if the upgrade finished OK, then we will reach this point in the code, where we update the gratia database version
-			//If we didn't reach this point i.e. if an Exception was thrown and the code went into the catch clause, that means the value of 
-			//'current' won't be updated and this will cause the Upgrade method to return false
-			//By doing the version equality at the very end of the Upgrade method, if the upgrade failed, we can ensure that the code will exit CollectorService.java with a message about 
-			//failed upgrade and the need for 'Manual intervention'. Refer to the CollectorService.java code for further details
-
-               		current = current + 1;
-               		UpdateDbVersion(current);
-
+               //If and only if the upgrade finished OK, then we will reach this point in the code, where we update the gratia database version
+               //If we didn't reach this point i.e. if an Exception was thrown and the code went into the catch clause, that means the value of 
+               //'current' won't be updated and this will cause the Upgrade method to return false
+               //By doing the version equality at the very end of the Upgrade method, if the upgrade failed, we can ensure that the code will exit CollectorService.java with a message about 
+               //failed upgrade and the need for 'Manual intervention'. Refer to the CollectorService.java code for further details
+               
+               current = current + 1;
+               UpdateDbVersion(current);
+               
+            }
+            //If something goes wrong, catch the Exception and log it 
+            catch(Exception e)
+            {
+               //Capture and log the full stack trace of the exception so that we have available all the details about what went wrong 
+               Logging.warning("Error!!! Gratia database FAILED to upgrade from " +
+                               current + " to " +
+                               (current + 1) + ". Here is a stack trace of the Exception. \n" +
+                               bigintUpgrader.getStackTrace(e));
                 }
-		//If something goes wrong, catch the Exception and log it 
-                catch(Exception e)
-                {
-			//Capture and log the full stack trace of the exception so that we have available all the details about what went wrong 
-                        Logging.warning("Error!!! Gratia database FAILED to upgrade from " +
-                                        current + " to " +
-                                        (current + 1) + ". Here is a stack trace of the Exception. \n" +
-                                        bigintUpgrader.getStackTrace(e));
-			
-                }
+         }
+         schemaOnlyLowerBound = 86;
+         schemaOnlyUpperBound = 87;
+         if ((current >= schemaOnlyLowerBound) && (current < schemaOnlyUpperBound)) {
+            // Stored procedures, trigger procedures.
+            Logging.fine("Gratia database upgraded from " + current + " to " + schemaOnlyUpperBound);
+            current = schemaOnlyUpperBound;
+            UpdateDbVersion(current);
          }
          return ((current == gratiaDatabaseVersion) && checkAndUpgradeDbAuxiliaryItems());
       }
@@ -1314,9 +1359,10 @@ public class DatabaseMaintenance {
       int result = Execute("DROP TABLE IF EXISTS TableStatistics");
       if (result > -1) {
          String command = "CREATE TABLE TableStatistics(" +
-               "RecordType VARCHAR(255) NOT NULL," +
-               "nRecords INTEGER DEFAULT 0, Qualifier VARCHAR(255) NOT NULL DEFAULT '', " +
-               "UNIQUE KEY index1 (RecordType, Qualifier))";
+               "ValueType VARCHAR(255) NOT NULL, " +
+               "RecordType VARCHAR(255) NOT NULL, Qualifier VARCHAR(255) NOT NULL DEFAULT '', " +
+               "nRecords BIGINT DEFAULT 0, " +
+               "UNIQUE KEY index1 (ValueType, RecordType, Qualifier))";
 
          if (isInnoDB) {
             command += " ENGINE = 'innodb'";
@@ -1344,21 +1390,102 @@ public class DatabaseMaintenance {
             // Put error type information into the TableStatistics record.
             //
             result = Execute("update DupRecord set RecordType = 'JobUsageRecord' where RecordType is null");
-            result = Execute("insert into TableStatistics(RecordType,nRecords,Qualifier)" +
-                  " select RecordType, count(*), error from DupRecord group by RecordType, error;");
+            result = Execute("insert into TableStatistics(ValueType, RecordType,nRecords,Qualifier)" +
+                  " select 'current',RecordType, count(*), error from DupRecord group by RecordType, error;");
             // Put count(*) information in for all tables.
             tableList.add("DupRecord");
             for (Iterator x = tableList.iterator(); (result > -1) && x.hasNext();) {
                String table_name = (String) x.next();
-               result = Execute("insert into TableStatistics(RecordType,nRecords)" +
-                     " select '" + table_name +
-                     "', count(*) from " + table_name);
+               result = Execute("insert into TableStatistics(ValueType,RecordType,nRecords)" +
+                                " select 'current','" + table_name +
+                                "', count(*) from " + table_name);
+               result = Execute("insert into TableStatistics(ValueType,RecordType,nRecords)" +
+                                " select 'lifetime','" + table_name +
+                                "', ifnull(max(dbid),0) from " + table_name);
                if (result > -1) {
                   result = CallPostInstall("countTrigger" + table_name);
                }
             }
          } catch (Exception e) {
             result = -1;
+         }
+      }
+      return result;
+   }
+   
+   private int UpdateTableStatisticsHistory(int oldversion) 
+   {
+      int result = 0;
+      if (oldversion < 0 || !TableExist("TableStatisticsSnapshots"))
+      {
+         result = Execute("DROP TABLE IF EXISTS TableStatisticsSnapshots");
+         if (result < 0) {
+            return result;
+         }
+         String command = "CREATE TABLE TableStatisticsSnapshots(" +
+         "ServerDate DATETIME NOT NULL, " + 
+         "ValueType VARCHAR(255) NOT NULL, " +
+         "RecordType VARCHAR(255) NOT NULL, Qualifier VARCHAR(255) NOT NULL DEFAULT ''," +
+         "nRecords BIGINT DEFAULT 0, " +
+         "UNIQUE KEY index1 (ServerDate, ValueType, RecordType, Qualifier))";
+         if (isInnoDB) {
+            command += " ENGINE = 'innodb'";
+         }
+         result = Execute(command);
+         if (result < 0) {
+            return result;
+         }
+      }
+      if (oldversion < 0 || !TableExist("TableStatisticsHourly"))
+      {
+         result = Execute("DROP TABLE IF EXISTS TableStatisticsHourly");
+         if (result < 0) {
+            return result;
+         }
+         String command = "CREATE TABLE TableStatisticsHourly(" +
+         "tshid BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY, " +
+         "ServerDate DATETIME NOT NULL, " + 
+         "EventDate DATETIME NOT NULL, " + 
+         "ValueType VARCHAR(255) NOT NULL, " +
+         "RecordType VARCHAR(255) NOT NULL, Qualifier VARCHAR(255) NOT NULL DEFAULT ''," +
+         "StartTime DATETIME NOT NULL, " + 
+         "EndTime DATETIME NOT NULL, " + 
+         "avgRecords BIGINT DEFAULT 0, " +
+         "maxRecords BIGINT DEFAULT 0, " +
+         "minRecords BIGINT DEFAULT 0, " +
+         "UNIQUE KEY index1 (EventDate, ValueType, RecordType, Qualifier))";
+         if (isInnoDB) {
+            command += " ENGINE = 'innodb'";
+         }
+         result = Execute(command);
+         if (result < 0) {
+            return result;
+         }
+      }
+      if (oldversion < 0 || !TableExist("TableStatisticsDaily"))
+      {
+         result = Execute("DROP TABLE IF EXISTS TableStatisticsDaily");
+         if (result < 0) {
+            return result;
+         }
+         String command = "CREATE TABLE TableStatisticsDaily(" +
+         "tsdid BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY, " +
+         "ServerDate DATETIME NOT NULL, " + 
+         "EventDate DATETIME NOT NULL, " + 
+         "ValueType VARCHAR(255) NOT NULL, " +
+         "RecordType VARCHAR(255) NOT NULL, Qualifier VARCHAR(255) NOT NULL DEFAULT ''," +
+         "StartTime DATETIME NOT NULL, " + 
+         "EndTime DATETIME NOT NULL, " + 
+         "avgRecords BIGINT DEFAULT 0, " +
+         "maxRecords BIGINT DEFAULT 0, " +
+         "minRecords BIGINT DEFAULT 0, " +
+         "UNIQUE KEY index1 (EventDate, ValueType, RecordType, Qualifier))";
+         if (isInnoDB) {
+            command += " ENGINE = 'innodb'";
+         }
+         result = Execute(command);
+         if (result < 0) {
+            return result;
          }
       }
       return result;

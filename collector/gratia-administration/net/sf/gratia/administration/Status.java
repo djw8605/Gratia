@@ -30,9 +30,6 @@ public class Status extends HttpServlet {
 	String url = "";
 	String user = "";
 	String password = "";
-	Connection connection;
-	Statement statement;
-	ResultSet resultSet;
 	//
 	// processing related
 	//
@@ -41,24 +38,24 @@ public class Status extends HttpServlet {
 	String tableSection = "";
 	String row = "";
 	StringBuffer buffer = new StringBuffer();
-	static Pattern yesMatcher =
+	static final Pattern yesMatcher =
 		Pattern.compile("^[YyTt1]");
-	static Pattern colgroupDefn =
+	static final Pattern colgroupDefn =
 		Pattern.compile("^\\s*<colgroup class=\"tablespan\".*?/>\\s*?\n",
 				Pattern.MULTILINE + Pattern.DOTALL);
-	static Pattern colgroupHdr =
+	static final Pattern colgroupHdr =
 		Pattern.compile("^\\s*<th\\s+.*?#RecordType#</th>\\s*?\n",
 				Pattern.MULTILINE);
-	static Pattern tableHead2 =
+	static final Pattern tableHead2 =
 		Pattern.compile("^(\\s*<tr class=\"tablehead2\">\\s*?\n)" +
 				"(.*?<th.*?\n)(\\s*</tr>\n)",
 				Pattern.MULTILINE + Pattern.DOTALL);
-	static Pattern timeIntervalRow =
+	static final Pattern timeIntervalRow =
 		Pattern.compile("^(\\s*<tr class=\"timeintervalrow\">\\s*?\n)" +
 				"(.*?<td.*?#timeinterval#.*?</td>\\s*?\n)" +
 				"(.*?<td.*?#tabledatum#.*?</td>\\s*?\n)(\\s*</tr>\n)",
 				Pattern.MULTILINE + Pattern.DOTALL);
-	static Pattern qsizeblock =
+	static final Pattern qsizeblock =
 		Pattern.compile("<tr class=\"qsize\">.*?</tr>",
 				Pattern.MULTILINE + Pattern.DOTALL);
 	boolean detailedDisplay = false;
@@ -68,17 +65,9 @@ public class Status extends HttpServlet {
 	//
 	boolean initialized = false;
 	Properties props;
-	String message = null;
 	int nHoursBack = 6;
 	String color_a = "#ffffff";
 	String color_b = "#cccccc";
-
-	//
-	// support
-	//
-	String dq = "\"";
-	String comma = ",";
-	String cr = "\n";
 
 	//
 	// matching
@@ -86,50 +75,50 @@ public class Status extends HttpServlet {
 
 
 	class TableStatusInfo {
-		int nRecords = 0;
-		int nDups = 0;
-		int nSQLErrors = 0;
-		int nParse = 0;
-		int nOther = 0;
+		long nRecords = 0;
+		long nDups = 0;
+		long nSQLErrors = 0;
+		long nParse = 0;
+		long nOther = 0;
 
-		public TableStatusInfo(int nRecords) {
+		public TableStatusInfo(long nRecords) {
 			this.nRecords = nRecords;
 		}
-		public TableStatusInfo(int nRecords, int nDups, int nSQLErrors, int nParse, int nOther) {
+		public TableStatusInfo(long nRecords, long nDups, long nSQLErrors, long nParse, long nOther) {
 			this.nRecords = nRecords;
 			this.nDups = nDups;
 			this.nSQLErrors = nSQLErrors;
 			this.nParse = nParse;
 			this.nOther = nOther;
 		}
-		public int nRecords() {
+		public long nRecords() {
 			return this.nRecords;
 		}
-		public int nDups() {
+		public long nDups() {
 			return this.nDups;
 		}
-		public int nSQLErrors() {
+		public long nSQLErrors() {
 			return this.nSQLErrors;
 		}
-		public int nParse() {
+		public long nParse() {
 			return this.nParse;
 		}
-		public int nOther() {
+		public long nOther() {
 			return this.nOther;
 		}
-		public void nRecords(int in) {
+		public void nRecords(long in) {
 			this.nRecords = in;
 		}
-		public void nDups(int in) {
+		public void nDups(long in) {
 			this.nDups = in;
 		}
-		public void nSQLErrors(int in) {
+		public void nSQLErrors(long in) {
 			this.nSQLErrors = in;
 		}
-		public void nParse(int in) {
+		public void nParse(long in) {
 			this.nParse = in;
 		}
-		public void nOther(int in) {
+		public void nOther(long in) {
 			this.nOther = in;
 		}
 
@@ -139,7 +128,7 @@ public class Status extends HttpServlet {
 	{
 	}
 
-	public void openConnection()
+	public Connection openConnection()
 	{
 		try {
 			props = Configuration.getProperties();
@@ -152,14 +141,15 @@ public class Status extends HttpServlet {
 		}
 		try {
 			Class.forName(driver).newInstance();
-			connection = DriverManager.getConnection(url,user,password);
+			return DriverManager.getConnection(url,user,password);
 		}
 		catch (Exception e) {
 			e.printStackTrace();
 		}
+      return null;
 	}
 
-	public void closeConnection() {
+	public void closeConnection(Connection connection) {
 		try {
 			connection.close();
 		}
@@ -170,7 +160,7 @@ public class Status extends HttpServlet {
 
 	public void doGet(HttpServletRequest request, HttpServletResponse response)
 	throws ServletException, IOException {
-		openConnection();
+		Connection connection = openConnection();
 		String uriPart = request.getRequestURI();
 		int slash2 = uriPart.substring(1).indexOf("/") + 1;
 		uriPart = uriPart.substring(slash2);
@@ -201,7 +191,7 @@ public class Status extends HttpServlet {
 			}
 		}
 		setup(request);
-		process();
+		process(connection);
 		response.setContentType("text/html");
 		response.setHeader("Cache-Control", "no-cache"); // HTTP 1.1
 		response.setHeader("Pragma", "no-cache"); // HTTP 1.0
@@ -209,7 +199,7 @@ public class Status extends HttpServlet {
 		writer.write(html);
 		writer.flush();
 		writer.close();
-		closeConnection();
+		closeConnection(connection);
 	}
 
 	public static String DisplayInt(Integer value) {
@@ -223,7 +213,48 @@ public class Status extends HttpServlet {
 		html = xp.get(request.getRealPath("/") + "status.html");
 	}
 
-	public void process() {
+   static final String fgCountHourly = "select period, RecordType, Qualifier, max(maxRecords) from ( " + 
+      "   select timestampdiff(HOUR, ServerDate, UTC_TIMESTAMP()) as period, RecordType, Qualifier, max(nRecords) as maxRecords" +
+      "   from TableStatisticsSnapshots where ValueType = 'lifetime' and nRecords > 0 " +
+      "   and ServerDate > (UTC_TIMESTAMP() - INTERVAL ? HOUR) " +
+      "   group by RecordType,Qualifier,period " +
+      "   union select 0 as period, RecordType, Qualifier, nRecords as maxRecords from TableStatistics " +
+      "         where nRecords > 0 and ValueType = 'lifetime' ) Sub " + 
+      " where RecordType != 'DupRecord' and RecordType != 'ProbeDetails' and RecordType != '' " +
+      " group by RecordType,Qualifier,period " +
+      " order by RecordType,Qualifier,period desc ";
+   static final String fgCountLastWeekQuery = "select currentRecords - ifnull(maxRecords,0),forJoin.RecordType,forJoin.Qualifier from " +
+      "( select ValueType,RecordType,Qualifier,max(maxRecords) as maxRecords from " +
+      "( select ValueType,RecordType,Qualifier,max(nRecords) as maxRecords from TableStatisticsSnapshots where ValueType = 'lifetime'" +
+      "     and ServerDate <= (UTC_TIMESTAMP() - interval 1 week) " +
+      "     and RecordType != 'DupRecord' and RecordType != 'ProbeDetails' and RecordType != '' " +
+      "     and nRecords > 0 " +
+      "     group by ValueType,RecordType,Qualifier" + 
+      "  union select ValueType,RecordType,Qualifier,max(maxRecords) as maxRecords from TableStatisticsHourly where ValueType = 'lifetime'" +
+      "     and EndTime <= (UTC_TIMESTAMP() - interval 1 week) " +
+      "     and RecordType != 'DupRecord' and RecordType != 'ProbeDetails' and RecordType != '' "+
+      "     and maxRecords > 0 " +
+      "     group by ValueType,RecordType,Qualifier" +
+      "  union select ValueType,RecordType,Qualifier,max(maxRecords) as maxRecords from TableStatisticsDaily where ValueType = 'lifetime'" +
+      "    and EndTime <= (UTC_TIMESTAMP() - interval 1 week) " + 
+      "    and RecordType != 'DupRecord' and RecordType != 'ProbeDetails' and RecordType != '' " +
+      "     and maxRecords > 0 " +
+      "    group by ValueType,RecordType,Qualifier " + 
+      ") forMax " +
+      "group by ValueType,RecordType,Qualifier ) forWrapup " +
+      "right outer join " + 
+      "( select ValueType,RecordType,Qualifier,max(nRecords) as currentRecords from TableStatistics where ValueType = 'lifetime'" + 
+      "     and nRecords > 0 " +
+      "     and RecordType != 'DupRecord' and RecordType != 'ProbeDetails' and RecordType != '' "+
+      "     group by ValueType,RecordType,Qualifier " +
+      ") forJoin " +
+      "on forWrapup.RecordType = forJoin.RecordType and forWrapup.Qualifier = forJoin.Qualifier and forWrapup.ValueType = forJoin.ValueType ";
+   static final String fgCountAllTime = "select nRecords, RecordType, Qualifier from TableStatistics where " +
+      " RecordType != 'DupRecord' and RecordType != 'ProbeDetails' and RecordType != '' " +
+      " and nRecords > 0 " +
+      " and ValueType = 'lifetime' group by RecordType, Qualifier";
+
+	public void process(Connection connection) {
 		HashMap<String, HashMap<Integer, TableStatusInfo> > tableInfo = new HashMap<String, HashMap<Integer, TableStatusInfo> >(5);
       
 		Matcher m = null;
@@ -231,7 +262,6 @@ public class Status extends HttpServlet {
 		int index = 0;
 		String command = "";
 		buffer = new StringBuffer();
-		String dq = "'";
 
 		int nPeriods = nHoursBack + 3;
 		Integer nDataCols = 5;
@@ -241,22 +271,25 @@ public class Status extends HttpServlet {
 		try {
 			// Start transaction so numbers are consistent.
 			connection.setAutoCommit(false);
+         
 			// Get list of _Meta tables in this database
 			command = "select table_name from information_schema.tables " +
-			"where table_schema = Database() and table_name like '%_Meta'" +
-			" order by table_name;";
-			Logging.log("command: " + command);
-			statement = connection.prepareStatement(command);
-			resultSet = statement.executeQuery(command);
+			   "where table_schema = Database() and table_name like '%_Meta'" +
+			   " order by table_name;";
+			PreparedStatement statement = connection.prepareStatement(command);
+			ResultSet resultSet = statement.executeQuery();
+			Logging.log("Status SQL query:"+statement);
 			while(resultSet.next()) {
+
 				String table_name = resultSet.getString(1);
 				if (table_name.equals("ProbeDetails_Meta")) continue; // Not interested
 				int end_index = table_name.lastIndexOf("_Meta");
 				String base_table = table_name.substring(0,end_index);
 				// Only display table if we have any records
+
 				command = "select * from " + base_table + " limit 1";
-				Statement tableUseCheck = connection.prepareStatement(command);
-				ResultSet tableUseResult = tableUseCheck.executeQuery(command);
+				PreparedStatement tableUseCheck = connection.prepareStatement(command);
+				ResultSet tableUseResult = tableUseCheck.executeQuery();
 				if (tableUseResult.next()) {
 					tableInfo.put(base_table,
 							new HashMap<Integer, TableStatusInfo>(nPeriods));
@@ -270,73 +303,99 @@ public class Status extends HttpServlet {
 			// Now for each table, get record information followed by
 			// error info
 			TreeSet keySet = new TreeSet(tableInfo.keySet());
-			int hourly_time_limit = Math.max(nHoursBack, 24);
-			for (Iterator x = keySet.iterator(); x.hasNext();) {
-				String table_name = (String) x.next();
-				HashMap<Integer, TableStatusInfo> thisTableInfo = tableInfo.get(table_name);
-				TableStatusInfo dayTableStatus = new TableStatusInfo(0);
-				thisTableInfo.put(nHoursBack, dayTableStatus);
+			int hourly_time_limit = Math.max(nHoursBack, 25);
+
+//			for (Iterator x = keySet.iterator(); x.hasNext();) {
+//				String table_name = (String) x.next();
+//				HashMap<Integer, TableStatusInfo> thisTableInfo = tableInfo.get(table_name);
+//            if (thisTableInfo == null) {
+//               thisTableInfo = new HashMap<Integer, TableStatusInfo>(nPeriods);
+//               tableInfo.put(table_name,thisTableInfo);
+//            }
+//				TableStatusInfo dayTableStatus = new TableStatusInfo(0);
+//				thisTableInfo.put(nHoursBack, dayTableStatus);
 				////////////////////////////////////
 				// For each of last 24 hours
 				////////////////////////////////////
 
 				// nRecords
-				command = "select timestampdiff(HOUR, M.ServerDate, " +
-				"UTC_TIMESTAMP()) as period, count(*) from " + 
-				table_name + "_Meta M " +
-				"where M.ServerDate > (UTC_TIMESTAMP() - INTERVAL " + hourly_time_limit + " HOUR) " +
-				"group by period " +
-				"order by period;";
-				Logging.log("command: " + command);
-				statement = connection.prepareStatement(command);
-				resultSet = statement.executeQuery(command);
-				while (resultSet.next()) {
-					int time_index = resultSet.getInt(1);
-					int count = resultSet.getInt(2);
-					if (time_index < nHoursBack) { // Don't record if we're not interested
-						thisTableInfo.put(time_index,
-								new TableStatusInfo(count));
-					}
-					dayTableStatus.nRecords(dayTableStatus.nRecords() + count);
-				}
-				resultSet.close();
-				statement.close();
-
 				// Error info
-				command = "select timestampdiff(HOUR, D.eventdate, " +
-				"UTC_TIMESTAMP()) as period, error, count(*) from DupRecord D force index(index02) " + 
-				"where D.eventdate > (UTC_TIMESTAMP() - INTERVAL " + hourly_time_limit + " HOUR) " +
-				"and D.RecordType = " + dq + table_name + dq +
-				" group by period, error " +
-				"order by period";
-				Logging.log("command: " + command);
-				statement = connection.prepareStatement(command);
-				resultSet = statement.executeQuery(command);
-				while (resultSet.next()) {
-					int time_index = resultSet.getInt(1);
-					TableStatusInfo tableStatus = 
-						thisTableInfo.get(time_index);
+				statement = connection.prepareStatement(fgCountHourly);
+            statement.setLong(1,hourly_time_limit);
+//            statement.setString(2,table_name);
+				Logging.debug("Status SQL query: " + statement);
+				resultSet = statement.executeQuery();
+            long prevCount = 0;
+            String prevRecordType = null;
+            String prevQualifier = null;
+            HashMap<Integer, TableStatusInfo> thisTableInfo = null;
+				TableStatusInfo dayTableStatus = null;
+            while (resultSet.next()) {
+               String recordType = resultSet.getString(2);
+
+               if ( ! recordType.equals(prevRecordType) ) {
+                  thisTableInfo = tableInfo.get(recordType);
+                  if (thisTableInfo == null) {
+                     thisTableInfo = new HashMap<Integer, TableStatusInfo>(nPeriods);
+                     tableInfo.put(recordType,thisTableInfo);
+                  }
+                  prevRecordType = recordType;
+                  prevQualifier = null;
+                  prevCount = 0;
+                  
+                  dayTableStatus = new TableStatusInfo(0);
+                  thisTableInfo.put(nHoursBack, dayTableStatus);
+               }
+					
+               int time_index = resultSet.getInt(1);
+
+					TableStatusInfo tableStatus = thisTableInfo.get(time_index);
 					if (tableStatus == null) {
 						tableStatus = new TableStatusInfo(0);
 						if (time_index < nHoursBack) { // Don't record if we're not interested
 							thisTableInfo.put(time_index, tableStatus);
 						}
 					}
-					String errorType = resultSet.getString(2);
-					int count = resultSet.getInt(3);
-					if (errorType.equals("Duplicate")) {
-						tableStatus.nDups(count);
-						dayTableStatus.nDups(dayTableStatus.nDups() + count);
-					} else if (errorType.equals("Parse")) {
-						tableStatus.nParse(count);
-						dayTableStatus.nParse(dayTableStatus.nParse() + count);
-					} else if (errorType.equals("SQLError")) {
-						tableStatus.nSQLErrors(count);
-						dayTableStatus.nSQLErrors(dayTableStatus.nSQLErrors() + count);
-					} else {
-						tableStatus.nOther(tableStatus.nOther() + count);
-						dayTableStatus.nOther(dayTableStatus.nOther() + count);
-					}
+					String qualifier = resultSet.getString(3);
+					long currentCount = resultSet.getLong(4);
+               long count = 0;
+
+               if ( ! qualifier.equals(prevQualifier) ) {
+                  prevCount = currentCount;
+                  prevQualifier = qualifier;
+                  
+                  // We just register the first one.
+               } else {
+                  count = currentCount - prevCount;
+                  prevCount = currentCount;
+               
+                  if (qualifier.equals("")) {
+                     if (time_index < nHoursBack) { // Don't record if we're not interested
+                        thisTableInfo.put(time_index, new TableStatusInfo(count));
+                     }
+                     dayTableStatus.nRecords(dayTableStatus.nRecords() + count);                  
+                  } else if (qualifier.equals("Duplicate")) {
+                     if (time_index < nHoursBack) { // Don't record if we're not interested
+                        tableStatus.nDups(count);
+                     }
+                     dayTableStatus.nDups(dayTableStatus.nDups() + count);
+                  } else if (qualifier.equals("Parse")) {
+                     if (time_index < nHoursBack) { // Don't record if we're not interested
+                        tableStatus.nParse(count);
+                     }
+                     dayTableStatus.nParse(dayTableStatus.nParse() + count);
+                  } else if (qualifier.equals("SQLError")) {
+                     if (time_index < nHoursBack) { // Don't record if we're not interested
+                        tableStatus.nSQLErrors(count);
+                     }
+                     dayTableStatus.nSQLErrors(dayTableStatus.nSQLErrors() + count);
+                  } else {
+                     if (time_index < nHoursBack) { // Don't record if we're not interested
+                        tableStatus.nOther(tableStatus.nOther() + count);
+                     }
+                     dayTableStatus.nOther(dayTableStatus.nOther() + count);
+                  }
+               }
 				}
 				resultSet.close();
 				statement.close();
@@ -344,34 +403,40 @@ public class Status extends HttpServlet {
 				////////////////////////////////////
 				// Total for last 7 days
 				////////////////////////////////////
-				command = "select count(*) from " + table_name + "_Meta M " +
-				"where M.ServerDate > (UTC_TIMESTAMP() - interval 1 week);";
-				Logging.log("command: " + command);
-				statement = connection.prepareStatement(command);
-				resultSet = statement.executeQuery(command);
 
-				TableStatusInfo weekTableStatus = new TableStatusInfo(0);
-				thisTableInfo.put(nHoursBack + 1, weekTableStatus);
-				if (resultSet.next()) {
-					weekTableStatus.nRecords(resultSet.getInt(1));
-				}
-				resultSet.close();
-				statement.close();
-				command = "select count(*), error from DupRecord D force index(index02) " +
-				"where D.eventdate > (UTC_TIMESTAMP() - interval 1 week) " +
-				"and D.RecordType = " + dq + table_name + dq +
-				" group by error ";
-				Logging.log("command: " + command);
-				statement = connection.prepareStatement(command);
-				resultSet = statement.executeQuery(command);
+//				TableStatusInfo weekTableStatus = new TableStatusInfo(0);
+//				thisTableInfo.put(nHoursBack + 1, weekTableStatus);
+
+				statement = connection.prepareStatement(fgCountLastWeekQuery);
+//            statement.setString(1,table_name);
+				Logging.debug("Status SQL query: " + statement);
+				resultSet = statement.executeQuery();
+            prevRecordType = null;
+            TableStatusInfo weekTableStatus = null;
 				while (resultSet.next()) {
-					int count = resultSet.getInt(1);
-					String errorType = resultSet.getString(2);
-					if (errorType.equals("Duplicate")) {
+					long count = resultSet.getLong(1);
+               String recordType = resultSet.getString(2);
+					String qualifier = resultSet.getString(3);
+               
+               if ( ! recordType.equals(prevRecordType) ) {
+                  thisTableInfo = tableInfo.get(recordType);
+                  if (thisTableInfo == null) {
+                     thisTableInfo = new HashMap<Integer, TableStatusInfo>(nPeriods);
+                     tableInfo.put(recordType,thisTableInfo);
+                  }
+                  prevRecordType = recordType;
+
+                  weekTableStatus = new TableStatusInfo(0);
+                  thisTableInfo.put(nHoursBack + 1, weekTableStatus);
+               }
+               
+					if (qualifier.equals("")) {
+                  weekTableStatus.nRecords(count);                 
+               } else if (qualifier.equals("Duplicate")) {
 						weekTableStatus.nDups(count);
-					} else if (errorType.equals("Parse")) {
+					} else if (qualifier.equals("Parse")) {
 						weekTableStatus.nParse(count);
-					} else if (errorType.equals("SQLError")) {
+					} else if (qualifier.equals("SQLError")) {
 						weekTableStatus.nSQLErrors(count);
 					} else {
 						weekTableStatus.nOther(weekTableStatus.nOther() + count);
@@ -383,29 +448,34 @@ public class Status extends HttpServlet {
 				////////////////////////////////////
 				// Totals for all time
 				////////////////////////////////////
-				command = "select nRecords from TableStatistics where RecordType = '" +
-				table_name + "' and Qualifier = ''";
-				Logging.log("command: " + command);
-				statement = connection.prepareStatement(command);
-				resultSet = statement.executeQuery(command);
+//				TableStatusInfo totalTableStatus = new TableStatusInfo(0);
+//				thisTableInfo.put(nHoursBack + 2, totalTableStatus);
 
-				TableStatusInfo totalTableStatus = new TableStatusInfo(0);
-				thisTableInfo.put(nHoursBack + 2, totalTableStatus);
-				if (resultSet.next()) {
-					totalTableStatus.nRecords(resultSet.getInt(1));
-				}
-				resultSet.close();
-				statement.close();
-				command = "select nRecords, Qualifier from TableStatistics where RecordType = " +
-				dq + table_name + dq +
-				" and Qualifier is not null and Qualifier != '' group by Qualifier";
-				Logging.log("command: " + command);
-				statement = connection.prepareStatement(command);
-				resultSet = statement.executeQuery(command);
-				while (resultSet.next()) {
-					int count = resultSet.getInt(1);
-					String errorType = resultSet.getString(2);
-					if (errorType.equals("Duplicate")) {
+				statement = connection.prepareStatement(fgCountAllTime);
+//            statement.setString(1,table_name);
+				Logging.debug("Status SQL query: " + statement);
+				resultSet = statement.executeQuery();
+            prevRecordType = null;
+				TableStatusInfo totalTableStatus = null;
+            while (resultSet.next()) {
+					long count = resultSet.getLong(1);
+               String recordType = resultSet.getString(2);
+					String errorType = resultSet.getString(3);
+
+               if ( ! recordType.equals(prevRecordType) ) {
+                  thisTableInfo = tableInfo.get(recordType);
+                  if (thisTableInfo == null) {
+                     thisTableInfo = new HashMap<Integer, TableStatusInfo>(nPeriods);
+                     tableInfo.put(recordType,thisTableInfo);
+                  }
+                  prevRecordType = recordType;
+                  totalTableStatus = new TableStatusInfo(0);
+                  thisTableInfo.put(nHoursBack + 2, totalTableStatus);
+               }
+
+					if (errorType.equals("")) {
+                  totalTableStatus.nRecords(count);
+               } else if (errorType.equals("Duplicate")) {
 						totalTableStatus.nDups(count);
 					} else if (errorType.equals("Parse")) {
 						totalTableStatus.nParse(count);
@@ -417,7 +487,7 @@ public class Status extends HttpServlet {
 				}
 				resultSet.close();
 				statement.close();
-			}
+//			}
 
 			try {
 				connection.commit();
@@ -438,6 +508,7 @@ public class Status extends HttpServlet {
 			//////////
 			m = colgroupDefn.matcher(html);
 
+         keySet = new TreeSet(tableInfo.keySet());
 			int nTables = tableInfo.size();
 			String nTablesFullGroupString = "";
 			for (int i = 0; i < nTables; ++i) {
@@ -519,9 +590,9 @@ public class Status extends HttpServlet {
 				int table_count = 0;
 				for (Iterator x = keySet.iterator(); x.hasNext(); ++table_count) {
 					String table_name = (String) x.next();
-					HashMap<Integer, TableStatusInfo> thisTableInfo = tableInfo.get(table_name);
+					HashMap<Integer, TableStatusInfo> thisTableInfo2 = tableInfo.get(table_name);
 					TableStatusInfo tableStatus = 
-						thisTableInfo.get(period_index);
+						thisTableInfo2.get(period_index);
 					if (tableStatus == null) {
 						for (int i = 0; i < nDataCols; ++i) {
 							if ((table_count % 2) == 0) {
@@ -540,16 +611,16 @@ public class Status extends HttpServlet {
 							}
 						}
 						newRow = newRow.replaceFirst("#tabledatum#",
-								((Integer) tableStatus.nRecords()).toString());
+								((Long) tableStatus.nRecords()).toString());
 						newRow = newRow.replaceFirst("#tabledatum#",
-								((Integer) tableStatus.nDups()).toString());
+								((Long) tableStatus.nDups()).toString());
 						if (detailedDisplay) {
 							newRow = newRow.replaceFirst("#tabledatum#",
-									((Integer) tableStatus.nParse()).toString());
+									((Long) tableStatus.nParse()).toString());
 							newRow = newRow.replaceFirst("#tabledatum#",
-									((Integer) tableStatus.nSQLErrors()).toString());
+									((Long) tableStatus.nSQLErrors()).toString());
 							newRow = newRow.replaceFirst("#tabledatum#",
-									((Integer) tableStatus.nOther()).toString());
+									((Long) tableStatus.nOther()).toString());
 						}
 					}
 				}
@@ -566,12 +637,11 @@ public class Status extends HttpServlet {
 			m.find();
 			row = m.group();
 			buffer = new StringBuffer();
-
          try
          {
             command = "select Queue, Files, Records from CollectorStatus order by Queue";
             statement = connection.prepareStatement(command);
-            resultSet = statement.executeQuery(command);
+            resultSet = statement.executeQuery();
             while(resultSet.next()) {
                int q = resultSet.getInt(1);
                long nFiles = resultSet.getLong(2);
@@ -590,16 +660,6 @@ public class Status extends HttpServlet {
             e.printStackTrace();
          }   
 
-//			for (int i = 0; i < maxthreads; i++)
-//			{
-//				String newrow = new String(row);
-//				String xpath = path + "/gratia/data/thread" + i;
-//				long filenumber = xp.getFileNumber(xpath);
-//				newrow = xp.replaceAll(newrow,"#queue#","Q" + i);
-//				newrow = xp.replaceAll(newrow,"#queuefiles#","" + nFile);
-//				newrow = xp.replaceAll(newrow,"#queuerecords#","" + nRecords);
-//				buffer.append(newrow);
-//			}
 			html = xp.replaceAll(html,row,buffer.toString());
 		}
 		catch (Exception e) {
