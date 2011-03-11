@@ -20,9 +20,10 @@ public class TableStatisticsManager extends Thread {
    CollectorService fService;
    long fWait;
    ExpirationDateCalculator fExpCalc = new ExpirationDateCalculator();
-   Date fLastHourly = new Date(0);  // Time we last did the hourly check.  We initiliaze it to now, to delay until one hour after the start
-   Date fLastDaily = new Date(0);   // Time we last did the daily check.  We initiliaze it to now, to delay until one dayt after the start
-   Date fLastCleanup = new Date(0); // Time we last did the cleanup.  We initiliaze it to now, to delay until a while after the start
+    // For debugging we keep those at 'beggining of time' rather than now.
+   Date fLastHourly = new Date(0);  // Time we last did the hourly check.  We initialize it to now, to delay until one hour after the start
+   Date fLastDaily = new Date(0);   // Time we last did the daily check.  We initialize it to now, to delay until one dayt after the start
+   Date fLastCleanup = new Date(0); // Time we last did the cleanup.  We initialize it to now, to delay until a while after the start
 
    static final String fgTakeSnapShotCommand = "insert into TableStatisticsSnapshots (ServerDate, ValueType, RecordType, Qualifier, nRecords) " +
                                                   "select :currentTime, ValueType, RecordType, Qualifier, nRecords from TableStatistics";
@@ -185,7 +186,7 @@ public class TableStatisticsManager extends Thread {
          return;
       }
 
-      // fLastHourly = new Date();
+      fLastHourly = new Date();
    }
 
    public void checkDaily() 

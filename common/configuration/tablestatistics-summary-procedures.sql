@@ -124,7 +124,7 @@ insert into TableStatisticsDaily
 )
 select
 @nowDate,
-R.D,
+R.EventDay,
 R.ValueType,
 R.RecordType,
 R.Qualifier,
@@ -184,7 +184,7 @@ left join
    from
    (
       select
-      @serial1 := 0, ValueType, RecordType, Qualifier,ServerDate, avgRecordType, maxRecords, minRecords
+      @serial1 := 0, ValueType, RecordType, Qualifier,ServerDate, avgRecords, maxRecords, minRecords
       from TableStatisticsHourly
       where ServerDate > inputFrom
    )
