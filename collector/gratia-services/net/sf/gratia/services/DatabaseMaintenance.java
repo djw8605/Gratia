@@ -31,10 +31,10 @@ public class DatabaseMaintenance {
 
    static final String dq = "\"";
    static final String comma = ",";
-   static final int gratiaDatabaseVersion = 88;
+   static final int gratiaDatabaseVersion = 89;
    static final int latestDBVersionRequiringStoredProcedureLoad = gratiaDatabaseVersion;
    static final int latestDBVersionRequiringSummaryViewLoad = 82;
-   static final int latestDBVersionRequiringSummaryTriggerLoad = 88;
+   static final int latestDBVersionRequiringSummaryTriggerLoad = 89;
    static final int latestDBVersionRequiringTableStatisticsRefresh = 87;
    static boolean dbUseJobUsageSiteName = false;
    java.sql.Connection connection;
@@ -1294,7 +1294,7 @@ public class DatabaseMaintenance {
                 }
          }
          schemaOnlyLowerBound = 86;
-         schemaOnlyUpperBound = 88;
+         schemaOnlyUpperBound = 89;
          if ((current >= schemaOnlyLowerBound) && (current < schemaOnlyUpperBound)) {
             // Stored procedures, trigger procedures.
             Logging.fine("Gratia database upgraded from " + current + " to " + schemaOnlyUpperBound);

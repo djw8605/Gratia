@@ -106,7 +106,7 @@ DETERMINISTIC
 TSDS:BEGIN
   -- Main
 
-set inputFrom = inputFrom - interval 1 day;
+set @inputFromShifted = inputFrom - interval 1 day;
 set @nowDate = now();
 
 insert into TableStatisticsDaily
@@ -163,7 +163,7 @@ from
       minRecords,
       date_format(ServerDate,"%Y/%m/%d:00:00:00") as EventDay
       from TableStatisticsHourly
-      where ServerDate > inputFrom
+      where ServerDate > @inputFromShifted
    )
    I1
    order by ValueType, RecordType, Qualifier,ServerDate
@@ -186,7 +186,7 @@ left join
       select
       @serial1 := 0, ValueType, RecordType, Qualifier,ServerDate, avgRecords, maxRecords, minRecords
       from TableStatisticsHourly
-      where ServerDate > inputFrom
+      where ServerDate > @inputFromShifted
    )
    I1
    order by ValueType, RecordType, Qualifier,ServerDate
@@ -195,7 +195,7 @@ L on R.serial = L.serial+1
   and L.ValueType = R.ValueType
   and L.RecordType = R.RecordType
   and L.Qualifier = R.Qualifier
-where R.EventDay <= inputUpto
+where R.EventDay < inputUpto
   and R.EventDay > inputFrom
 group by R.ValueType, R.RecordType, R.Qualifier, R.EventDay;
 
