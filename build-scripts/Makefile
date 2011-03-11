@@ -503,6 +503,7 @@ birt-reporting:
 	javac -d $(classes-dir) -cp $(classpath) -extdirs $(commonLib) $(util)/net/sf/gratia/util/*.java
 	javac -d $(classes-dir) -cp $(classpath) -extdirs $(commonLib) $(reportsrc)/src/net/sf/gratia/reporting/exceptions/*.java
 	javac -d $(classes-dir) -cp $(classpath) -extdirs $(commonLib) $(reportsrc)/src/net/sf/gratia/reporting/*.java
+	javac -d $(classes-dir) -cp $(classpath) -extdirs $(commonLib) $(reportsrc)/src/net/sf/gratia/administration/*.java
 	cp $(classes-dir)/net/sf/gratia/util/*.class $(jar-dir)/$@/net/sf/gratia/util
 	cp $(classes-dir)/net/sf/gratia/reporting/*.class $(jar-dir)/$@/net/sf/gratia/reporting
 	cp $(classes-dir)/net/sf/gratia/reporting/exceptions/*.class $(jar-dir)/$@/net/sf/gratia/reporting/exceptions

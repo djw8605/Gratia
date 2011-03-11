@@ -3,7 +3,6 @@ package net.sf.gratia.administration;
 import net.sf.gratia.util.XP;
 import net.sf.gratia.util.Configuration;
 import net.sf.gratia.util.Logging;
-import net.sf.gratia.services.*;
 
 import java.io.*;
 import java.net.*;
@@ -82,18 +81,6 @@ public class MonitorStatus extends HttpServlet
       {
          e.printStackTrace();
       }
-   }
-   
-   void refreshStatus() 
-   {
-      // Wait until JMS service is up
-      try { 
-         JMSProxy proxy = (JMSProxy)
-         java.rmi.Naming.lookup(Configuration.getProperties().getProperty("service.rmi.rmilookup") +
-                                Configuration.getProperties().getProperty("service.rmi.service"));
-         proxy.refreshStatus();
-      } catch (Exception e) {
-      }         
    }
    
    public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
@@ -340,9 +327,13 @@ public class MonitorStatus extends HttpServlet
                resultSet.close();
                statement.close();
                // RefreshStatus
-               refreshStatus();
-               // Retry
-               return processQueueLength(connection, xml, false);
+               if (RefreshCollectorStatus.ExecuteRefresh()) {
+                  // Retry
+                  return processQueueLength(connection, xml, false);
+               } else {
+                  // We can't fix it from here, let's display the
+                  // wrong numbers :(
+               }
             }
             append(queueBuffer,"queuesize",q,nFiles,xml);
             append(queueBuffer,"record-queue",q,nRecords,xml);
