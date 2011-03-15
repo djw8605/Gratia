@@ -123,16 +123,17 @@ function closeAll () {
 		// must replace ' -> \' , / -> \/
 		// and eliminate line feeds, carriage returns and multiple spaces
 
-		String sql = inSQL.replace("'", "\\'").replace("/", "\\/").replace("\n", " ").replace("\r", " ").trim();
+		String sql_for_text = inSQL.replace("'", "\\'").replace("/", "\\/").replace("\n", " ").replace("\r", " ").trim();
+		String sql_for_arg = inSQL.replace("\"", "\\\"").replace("\n", " ").replace("\r", " ").trim();
 
 		// Eliminate multiple blanks
-		StringBuffer sb = new StringBuffer(sql.length());
+		StringBuffer sb = new StringBuffer(sql_for_text.length());
 		char c;
 		boolean firstBlank = false;
-		for(int i = 0; i < sql.length(); ++i)
+		for(int i = 0; i < sql_for_text.length(); ++i)
 		{
-			c = sql.charAt(i);
-			if (c == ' ' && i>1 && (sql.charAt(i-1) != ' '))
+			c = sql_for_text.charAt(i);
+			if (c == ' ' && i>1 && (sql_for_text.charAt(i-1) != ' '))
 				firstBlank = true;
 			else
 				firstBlank = false;
@@ -140,7 +141,7 @@ function closeAll () {
 			if (c != ' ' || firstBlank)
 				sb.append(c);
 		}
-		sql = sb.toString();
+		sql_for_text = sb.toString();
 
 		String tempCsvPath = "";
 		String somethingUnique = "" + System.currentTimeMillis();
@@ -150,10 +151,10 @@ function closeAll () {
 		%>
 		<script type="text/javascript">
 			writeTop('<table class="query"> <tr> <td> <em>Enter below a SQL statement and press "Execute Query" to see the results.<\/em> <br \/>');
-			writeTop('<textarea name="sql" rows="8" cols="85"  class="querytxt"><%= sql %><\/textarea> <\/td>');
+			writeTop('<textarea name="sql" rows="8" cols="85"  class="querytxt"><%= sql_for_text %><\/textarea> <\/td>');
 			writeTop('<td align="center"> <input class= "button" type="submit" value="Execute Query" onclick="clearParamFrame();clearReportFrame();"> <br \/>');
 			writeTop('<p ><input  class= "button" type="button" value="Export Data (csv)" onClick="window.open(\'downloadFile.jsp?csvFile=<%= csvFileName %>\', \'Gratia\');"><\/p> ');
-			writeTop('<p ><a href="downloadQuery.jsp?sql='+encodeURIComponent("<%= inSQL %>")+'" >Link To Download<\/a><\/p> <\/td> <\/tr> <\/table>');
+			writeTop('<p ><a href="downloadQuery.jsp?sql='+encodeURIComponent("<%= sql_for_arg %>")+'" >Link To Download<\/a><\/p> <\/td> <\/tr> <\/table>');
 	                writeTop('<\/form>');
 		</script>
 
