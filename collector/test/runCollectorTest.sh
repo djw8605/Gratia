@@ -721,13 +721,13 @@ function check_queue_threshold()
    ssh ${webhost}  "for i in \`seq 1 800\` ; do touch ${tomcatpwd}/gratia/data/thread0/emptyfile\$i.2.xml ; done"
 
    # Refresh the queue statistics.
-   adminCollector "refreshStatus" 2>>wget.threshold.stderr.log | tee -a wget.threshold.full.log |  grep 'Collector Status' > wget.threshold.log
+   adminCollector "refreshStatus" 2>>wget.threshold.stderr.log | tee -a wget.threshold.full.log |  grep 'Collector Status' >> wget.threshold.log
    
    # Let's start the housekeeping.
-   adminCollector "startHousekeepingNow" 2>>wget.threshold.stderr.log | tee -a wget.threshold.full.log |  grep 'DataHousekeeping' > wget.threshold.log
+   adminCollector "startHousekeepingNow" 2>>wget.threshold.stderr.log | tee -a wget.threshold.full.log |  grep 'DataHousekeeping' >> wget.threshold.log
    sleep 5
    # We run the housekeeping twice to make sure our time waster is run.
-   adminCollector "startHousekeepingNow" 2>>wget.threshold.stderr.log | tee -a wget.threshold.full.log |  grep 'DataHousekeeping' > wget.threshold.log
+   adminCollector "startHousekeepingNow" 2>>wget.threshold.stderr.log | tee -a wget.threshold.full.log |  grep 'DataHousekeeping' >> wget.threshold.log
       
    # Wait one minute to let the housekeeping time run
    echo "Sleeping 5s to let the housekeeping time to start"
@@ -755,7 +755,7 @@ function check_queue_threshold()
    ssh ${webhost}  "rm ${tomcatpwd}/gratia/data/thread0/emptyfile*"
    
    # Refresh the queue statistics.
-   adminCollector "refreshStatus" 2>>wget.threshold.stderr.log | tee -a wget.threshold.full.log |  grep 'Collector Status' > wget.threshold.log
+   adminCollector "refreshStatus" 2>>wget.threshold.stderr.log | tee -a wget.threshold.full.log |  grep 'Collector Status' >> wget.threshold.log
 
    # Force the checking of the queue sizes
    adminCollector "runQSizeMonitor"  2>>wget.threshold.stderr.log | grep QSizeMonitor | tee -a wget.threshold.full.log
@@ -768,7 +768,7 @@ function check_queue_threshold()
    statusCollector "collector"  2>>wget.threshold.stderr.log > collector-run-status.validate
    check_result "" collector-run-status "Servlets Status when enabled"
 
-   wget --dns-timeout=5 --connect-timeout=10 --read-timeout=40 -O - "http://${webhost}:${ssl_port}/gratia-servlets/rmi" --post-data="nothing" 2>>wget.threshold.stderr.log  | tee -a wget.threshold.full.log | cut -c-49 > collector-run-input.validate
+   wget --dns-timeout=5 --connect-timeout=10 --read-timeout=40 -O - "http://${webhost}:${ssl_port}/gratia-servlets/rmi" --post-data="nothing" 2>>wget.threshold.stderr.log  | tee -a wget.threshold.full.log > collector-run-input.validate
    check_result "" collector-run-input "Probe response when enabled"
 
    # Now let's check the housekeeping
@@ -776,7 +776,7 @@ function check_queue_threshold()
    check_result "" housekeeping-run-status "HouseKeeping Status when enabled"
 
    # Turn on updates to return to normal
-   adminCollector "stopDatabaseUpdateThreads" 2>wget.threshold.stderr.log  | tee wget.threshold.full.log  | grep 'Database' > wget.threshold.log
+   adminCollector "stopDatabaseUpdateThreads" 2>>wget.threshold.stderr.log  | tee -a wget.threshold.full.log  | grep 'Database' >> wget.threshold.log
 } 
 
 function build_war()
