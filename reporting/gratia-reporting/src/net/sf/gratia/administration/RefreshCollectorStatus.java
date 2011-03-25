@@ -1,7 +1,5 @@
 package net.sf.gratia.administration;
 
-import net.sf.gratia.services.JMSProxy;
-import net.sf.gratia.util.Configuration;
 import net.sf.gratia.util.Logging;
 
 // Simple class that is implemented in the packaging
