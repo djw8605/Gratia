@@ -39,6 +39,7 @@ soap=$(collector)/gratia-soap
 registration=$(collector)/gratia-registration
 administration=$(collector)/gratia-administration
 testtimeout=$(collector)/gratia-testtimeout
+testbacklog=$(collector)/gratia-testbacklog
 
 # reporting modules
 reports=$(reporting)/gratia-reports
@@ -222,6 +223,38 @@ $(target)/gratia-testtimeout.war: $(util_lib) $(testtimeout)/net/sf/gratia/testt
 	cp $(classes-dir)/net/sf/gratia/util/Logging.class $(war-dir)/$(name_from_war)/WEB-INF/classes/net/sf/gratia/util
 	$(copy2_util_lib)
 	jar -cfM $(target)/gratia-testtimeout.war -C $(war-dir)/$(name_from_war) .
+	# --- Target: services COMPLETED at $(shell date) ---
+
+#-------------------------------------------------------------
+testbacklog: $(target)/gratia-testbacklog.war
+
+#-------------------------------------------------------------
+$(target)/gratia-testbacklog.war: $(util_lib) $(servlets)/net/sf/gratia/servlets/RMIHandlerServlet.java $(testbacklog)/net/sf/gratia/testbacklog/*.java $(testbacklog)/net/sf/gratia/testbacklog/web.xml $(target)/gratia-services.war 
+	#-------------------------
+	# --- Target: servlets for backlog testing ---
+	#-------------------------
+	rm -rf $(war-dir)/$(name_from_war)
+	mkdir -p $(classes-dir) $(target)
+	mkdir -p $(war-dir)/$(name_from_war)/META-INF
+	mkdir -p $(war-dir)/$(name_from_war)/WEB-INF/lib
+	mkdir -p $(war-dir)/$(name_from_war)/WEB-INF/classes/net/sf/gratia/testbacklog
+	mkdir -p $(war-dir)/$(name_from_war)/WEB-INF/classes/net/sf/gratia/services
+	mkdir -p $(war-dir)/$(name_from_war)/WEB-INF/classes/net/sf/gratia/servlets
+	mkdir -p $(war-dir)/$(name_from_war)/WEB-INF/classes/net/sf/gratia/util
+	mkdir -p $(war-dir)/$(name_from_war)/WEB-INF/classes/net/sf/gratia/storage
+	echo "$(gratia_release_data)" >$(war-dir)/$(name_from_war)/gratia-release
+	javac -d $(classes-dir) -cp $(classpath) -extdirs $(commonLib) $(testbacklog)/net/sf/gratia/testbacklog/*.java $(servlets)/net/sf/gratia/servlets/RMIHandlerServlet.java 
+	cp $(classes-dir)/net/sf/gratia/testbacklog/*.class $(war-dir)/$(name_from_war)/WEB-INF/classes/net/sf/gratia/testbacklog
+	cp $(classes-dir)/net/sf/gratia/servlets/*.class $(war-dir)/$(name_from_war)/WEB-INF/classes/net/sf/gratia/servlets
+	cp $(testbacklog)/net/sf/gratia/testbacklog/web.xml $(war-dir)/$(name_from_war)/WEB-INF/web.xml
+	#
+	cp $(classes-dir)/net/sf/gratia/services/*Skel.class $(war-dir)/$(name_from_war)/WEB-INF/classes/net/sf/gratia/services
+	cp $(classes-dir)/net/sf/gratia/services/*Stub.class $(war-dir)/$(name_from_war)/WEB-INF/classes/net/sf/gratia/services
+	cp $(classes-dir)/net/sf/gratia/services/JMS*.class $(war-dir)/$(name_from_war)/WEB-INF/classes/net/sf/gratia/services
+	cp $(classes-dir)/net/sf/gratia/services/AccessException.class $(war-dir)/$(name_from_war)/WEB-INF/classes/net/sf/gratia/services
+	cp $(classes-dir)/net/sf/gratia/util/Logging.class $(war-dir)/$(name_from_war)/WEB-INF/classes/net/sf/gratia/util
+	$(copy2_util_lib)
+	jar -cfM $(target)/gratia-testbacklog.war -C $(war-dir)/$(name_from_war) .
 	# --- Target: services COMPLETED at $(shell date) ---
 
 

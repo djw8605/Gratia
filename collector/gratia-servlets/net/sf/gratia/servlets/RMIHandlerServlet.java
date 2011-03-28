@@ -24,10 +24,10 @@ public class RMIHandlerServlet extends HttpServlet {
    boolean fCheckConnection;
    boolean fTrackConnection;
    
-   static JMSProxy fCollectorProxy = null;
+   static protected JMSProxy fCollectorProxy = null;
    static URLDecoder D;
    
-   private synchronized boolean lookupProxy() {
+   protected synchronized boolean lookupProxy() {
       int counter = 0;
       final int maxloop = 20;
       
@@ -92,6 +92,12 @@ public class RMIHandlerServlet extends HttpServlet {
       String arg1 = null;
       
       String origin = null;
+      
+      String xmlfilesStr = null;
+      String tarfilesStr = null;
+      String maxpendingfilesStr = null;
+      String backlogStr = null;
+      String bundlesizeStr = null;
       
       if (fCheckConnection) {
          try {
@@ -288,12 +294,24 @@ public class RMIHandlerServlet extends HttpServlet {
             from = req.getParameter("from");
             to = req.getParameter("to");
             arg1 = req.getParameter("arg1");
+            
+            // Only support the backlog information, if the post is not 'buggy'.
+            xmlfilesStr = req.getParameter("xmlfiles");
+            tarfilesStr = req.getParameter("tarfiles");
+            maxpendingfilesStr = req.getParameter("maxpendingfiles");
+            backlogStr = req.getParameter("backlog");
+            bundlesizeStr = req.getParameter("bundlesize");
          }
          
          Logging.debug("RMIHandlerServlet: From: " + from);
          Logging.debug("RMIHandlerServlet: To: " + to);
          Logging.debug("RMIHandlerServlet: Command: " + command);
          Logging.debug("RMIHandlerServlet: Arg1: " + arg1);
+         Logging.debug("RMIHandlerServlet: xmlfiles: " + xmlfilesStr);
+         Logging.debug("RMIHandlerServlet: tarfiles: " + tarfilesStr);
+         Logging.debug("RMIHandlerServlet: maxpendingfiles: " + maxpendingfilesStr);
+         Logging.debug("RMIHandlerServlet: backlog: " + backlogStr);
+         Logging.debug("RMIHandlerServlet: bundlesize: " + bundlesizeStr);
          
          //
          // the - connect to rmi

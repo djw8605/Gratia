@@ -177,7 +177,7 @@ function write_ProbeConfig
     VDTSetupFile="MAGIC_VDT_LOCATION/setup.sh"
     UserVOMapFile="MAGIC_VDT_LOCATION/monitoring/grid3-user-vo-map.txt"
 
-    MaxPendingFiles="100000"
+    MaxPendingFiles="20"
     DataFolder="MAGIC_VDT_LOCATION/gratia/var/data/"
     WorkingFolder="MAGIC_VDT_LOCATION/gratia/var/tmp"
     LogFolder="MAGIC_VDT_LOCATION/gratia/var/logs/"
@@ -195,8 +195,6 @@ function write_ProbeConfigs
 {  
    write_ProbeConfig ProbeConfig ${webhost} "" gratia-servlets
    write_ProbeConfig ProbeConfigSingle ${webhost} 'BundleSize="1"' gratia-servlets
-   write_ProbeConfig ProbeConfigTimeout ${webhost} "" gratia-testtimeout
-   write_ProbeConfig ProbeConfigFirewall atlasgw.bnl.gov "" gratia-testtimeout
 }
 
 function wait_for_server {
@@ -331,6 +329,7 @@ EOF
      chown ${USER} ${tomcatpwd}/gratia/service-configuration.properties
 
    scp ../../target/gratia-testtimeout.war root@${webhost}:${tomcatpwd}/webapps
+   scp ../../target/gratia-testbacklog.war root@${webhost}:${tomcatpwd}/webapps
 
    start_server
 }
@@ -678,13 +677,36 @@ EOF
 
 }
 
+function check_backlog()
+{
+   echo "Checking the back log tracking feature"
+
+   start_server
+   write_ProbeConfig ProbeConfigBacklog ${webhost} 'BundleSize="10"' gratia-testbacklog backlog
+   wait_for_server
+
+   # Disable the server
+   adminCollector "disableServlet" 2>&1 | tee wget.full.log | grep House | grep DISABLED > wget.log
+   
+   # Create bunch of local files
+   time python backlogtest.py 1000
+
+   # Enable the server
+   adminCollector "enableServlet" 2>&1 | tee wget.full.log | grep House | grep DISABLED > wget.log   
+   wait_for_server
+
+   # Load the data (and hence the backlog information)
+   time python backlogtest.py 20
+}
+
 function check_timeout()
 {
    echo "Checking timeout feature"
 
    start_server
 
-   write_ProbeConfigs
+   write_ProbeConfig ProbeConfigTimeout ${webhost} "" gratia-testtimeout
+   write_ProbeConfig ProbeConfigFirewall atlasgw.bnl.gov "" gratia-testtimeout
    wait_for_server
 
    echo "Checking connection timeout"

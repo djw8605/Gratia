@@ -32,7 +32,7 @@ condor/condor_history: fake_condor_history
 condor: condor/condor_meter.cron.sh condor/condor_meter.pl condor/condor_history condor/condor_history
 
 build: urCollector condor
-	(cd ../../build-scripts; gmake all testtimeout urCollector )
+	(cd ../../build-scripts; gmake all testtimeout testbacklog urCollector )
 
 test: build
 	./runCollectorTest.sh -c -d -l --probes -f -k -m -t
