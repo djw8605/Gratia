@@ -404,6 +404,15 @@
 # SWT2_CPB            2330	1865
 # UTA_SWT2            2851	2810
 #
+# 
+# 3/28/2011 (Karthik Arunachalam) 
+# Remove IU_OSG from WLCG reporting. 
+# Reason: IU_OSG is marked inactive and removed in MyOSG  
+# and has the InterOp accounting flag set to false. It  
+# doesn't participate in WLCG reporting anymore. 
+# 
+# 
+# 
 ##################################################################
 #
 #-- Site  ------- SPECint2000
@@ -434,7 +443,6 @@ BNL_ATLAS_1         3093
 AGLT2               2125
 HU_ATLAS_Tier2      2218
 BU_ATLAS_Tier2      2003
-IU_OSG              1400		
 MWT2_IU             2170
 MWT2_UC             2178
 OU_OCHEP_SWT2       2413
@@ -470,3 +478,4 @@ LC-glcc             3920
 #OU_OSCER_ATLAS      1543
 ##PROD_SLAC      2412 (replaced by WT2)
 ##UC_ATLAS_MWT2  1285 (stopped being considered a T2 site in 2009/06 per Rob Gardner)
+# IU_OSG              1400 (removed)
