@@ -218,6 +218,10 @@ public class Status extends HttpServlet {
       "   from TableStatisticsSnapshots where ValueType = 'lifetime' and nRecords > 0 " +
       "   and ServerDate > (UTC_TIMESTAMP() - INTERVAL ? HOUR) " +
       "   group by RecordType,Qualifier,period " +
+      "   union select timestampdiff(HOUR, min(ServerDate), UTC_TIMESTAMP())+1 as period, TN.RecordType, TN.Qualifier, min(TN.nRecords) as MaxRecords " +
+      "         from TableStatisticsSnapshots TN join TableStatistics  TS on  TS.RecordType = TN.RecordType and TS.Qualifier=TN.Qualifier" + 
+      "         where (UTC_TIMESTAMP() - interval ? hour) < (select min(ServerDate) from TableStatisticsSnapshots) and TS.nRecords > 0  " +
+      "         group by RecordType,Qualifier" +
       "   union select 0 as period, RecordType, Qualifier, nRecords as maxRecords from TableStatistics " +
       "         where nRecords > 0 and ValueType = 'lifetime' ) Sub " + 
       " where RecordType != 'DupRecord' and RecordType != 'ProbeDetails' and RecordType != '' " +
@@ -322,8 +326,9 @@ public class Status extends HttpServlet {
             // Error info
             statement = connection.prepareStatement(fgCountHourly);
             statement.setLong(1,hourly_time_limit);
+            statement.setLong(2,hourly_time_limit);
 //            statement.setString(2,table_name);
-            Logging.debug("Status SQL query: " + statement);
+            Logging.warning("Status SQL query: " + statement);
             resultSet = statement.executeQuery();
             long prevCount = 0;
             String prevRecordType = null;
@@ -502,13 +507,13 @@ public class Status extends HttpServlet {
          ////////////////////////////////////
          // Fill in the table
          ////////////////////////////////////
-
+         
          //////////
          // Define the right number of column groups
          //////////
          m = colgroupDefn.matcher(html);
 
-                        keySet = new TreeSet(tableInfo.keySet());
+         keySet = new TreeSet(tableInfo.keySet());
          int nTables = tableInfo.size();
          String nTablesFullGroupString = "";
          for (int i = 0; i < nTables; ++i) {
@@ -590,8 +595,7 @@ public class Status extends HttpServlet {
             for (Iterator x = keySet.iterator(); x.hasNext(); ++table_count) {
                String table_name = (String) x.next();
                HashMap<Integer, TableStatusInfo> thisTableInfo2 = tableInfo.get(table_name);
-               TableStatusInfo tableStatus = 
-                  thisTableInfo2.get(period_index);
+               TableStatusInfo tableStatus = thisTableInfo2.get(period_index);
                if (tableStatus == null) {
                   for (int i = 0; i < nDataCols; ++i) {
                      if ((table_count % 2) == 0) {
