@@ -61,7 +61,7 @@ public class TableStatisticsManager extends Thread {
          takeSnapshot();
 
          Date now = new Date();
-         if ( (now.getTime() - fLastHourly.getTime()) > 3600*1000 / 60 ) {
+         if ( (now.getTime() - fLastHourly.getTime()) > 3600*1000 ) {
             checkHourly();
          }
          if ( (now.getTime() - fLastDaily.getTime()) > 24*3600*1000 ) {
