@@ -94,8 +94,12 @@ installDir =
 
 cron = %(enable)s
 ; By default the cronjob for running and emailing the reports periodically is enabled.
-; If you want to turn this off, then set the above value to %(disable)s 
-
+; If enabled, cron entries will be created for *all* the python reports and perl reports.
+; If you choose you could remove individual cron entries by editing your crontab.
+; The details about the reports are available at
+; https://twiki.grid.iu.edu/bin/view/Accounting/ReportsDescription
+; If you don't want gratia report cron entries to be created or if you want to remove
+; the existing gratia reporting cron entries, then set the above value to %(disable)s
 
 ;====================================================================================
 ; Databases

@@ -111,7 +111,7 @@ def cronString():
     while userInput.strip() != "yes":
         userInput = raw_input("Are you done editing the report recipient emails in user-reports.dat? (Type yes to continue): ")
     ret =  "00 07 * * * " + cdStr + "sh daily_mutt.sh; # " + gCronPattern + "\n"
-    ret =  "00 07 * * 1 " + cdStr + "sh range_mutt.sh  # " + gCronPattern + "\n"
+    ret +=  "00 07 * * 1 " + cdStr + "sh range_mutt.sh  # " + gCronPattern + "\n"
     ret += "01 07 * * 1 " + cdStr + " perl all-vos-oim --production -D user-reports.dat > /dev/null #" + gCronPattern + "\n"
     ret += "01 07 * * 1 " + cdStr + " perl all-sites-oim --production -D user-reports.dat > /dev/null #" + gCronPattern + "\n"
     ret += "02 07 1 * * " + cdStr + " perl all-vos-oim --production -M -D user-reports.dat > /dev/null #" + gCronPattern + "\n"
