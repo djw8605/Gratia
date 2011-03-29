@@ -35,7 +35,7 @@ my $prog = basename($0);
 
 GetOptions($options,
            "compare-period|comparison-period=s",
-           "data-file-precdence|p|r",
+           "data-file-precedence|p|r",
            "data-source|D=s@",
            "debug|d",
            "help|h|?",
