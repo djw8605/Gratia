@@ -102,42 +102,62 @@ been uploaded to the APEL accounting database and from there forwarded to the
 WLCG/EGEE portal.
 A full description of the Gratia-APEL interface and the tables is the
 <a href="https://twiki.grid.iu.edu/bin/view/Accounting/GratiaInterfacesApelLcg">Gratia Interfaces - APEL/WLCG document</a>.
-<p/>
+<p>
 The table below contains SQL 'select' dumps of the APEL accounting database
 tables in html and xml format that can be referenced for troubleshooting 
 purposes:
 <UL>
 <TABLE>
-<TR><TD valign="top"><b>OSG_DATA</b></TD><TD> 
+<TR>
+<TD valign="top"><b>OSG_DATA</b></TD>
+<TD> 
     This is the table updated by Gratia which is then 
     transferred to the WCLG/EGEE portal from which WLCG reports are generated. 
-</TR><TR><TD valign="top"><b>org_Tier1</b></TD><TD>
+</TD>
+</TR><TR>
+<TD valign="top"><b>org_Tier1</b></TD>
+<TD>
     Table of Tier 1 resources showing the reporting groups 
     they are a part of and the heirarchy of how they are displayed on the
     EGEE portal.
-</TR><TR><TD valign="top"><b>org_Tier2</b></TD><TD>
+</TD>
+</TR><TR>
+<TD valign="top"><b>org_Tier2</b></TD>
+<TD>
     Table of Tier 2 resources showing the reporting groups 
     they are a part of and the heirarchy of how they are displayed on the
     EGEE portal.
-</TR></TABLE>
+</TD>
+</TR>
+</TABLE>
 </UL>
+
 In addition, there are 3 other views of data shown to assist in trouble
 shooting and validating WCLG MOU monthly reports:
 <UL>
 <TABLE>
-<TR><TD valign="top"><b>HS06_OSG_DATA</b></TD><TD> 
+<TR>
+<TD valign="top"><b>HS06_OSG_DATA</b></TD>
+<TD> 
     The OSG_DATA table data plus the HepSpec2006 normalized values used 
->since January 2010).<br> 
+ since January 2010).<br> 
     Note: The HepSpec2006 factor being used by WLCG is currently 4 times
           the SI2K value.
-</TR><TR<TD valign="top"><b>late_updates</b><TD>
+</TD>
+</TR><TR>
+<TD valign="top"><b>late_updates</b></TD>
+<TD>
     Show the updates that have occurred after the 
     accounting period (month) is over.  This allows us to confirm if
     sites have caught up when problems have occurred, to some extent.
-</TR><TR><TD valign="top"><b>missing_data</b><TD>
+</TD>
+</TR><TR>
+<TD valign="top"><b>missing_data</b></TD>
+<TD>
     Shows resource (and days) where no accounting data was
     found. Also show if planned maintenance was recorded in OIM to account 
     for it.
+</TD>
 </TR></TABLE>
 </UL>
 
@@ -162,7 +182,7 @@ function write_nebraska_description {
  cat >>$index <<EOF
 Additional information related to WLCG Tier 1 and Tier 2 CMS and ATLAS Gratia 
 data can be seen at the 
-<a href="https://t2.unl.edu/gratia/wlcg_reporting">Nebraska WLCG Reporting site</a>.  These pages will
+<a href="http://red-web.unl.edu/gratia/wlcg_reporting">Nebraska WLCG Reporting site</a>.  These pages will
 show:
 <ol>
 <li> WLCG Accounting Summaries</li>
