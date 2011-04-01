@@ -361,7 +361,60 @@
 #   BU_ATLAS_Tier2 and SWT2_CPB should have been changed in December. 
 #   (these respective months will be rerun)
 #
+# 3/17/2011 (Karthik Arunachalam)
+# Changing WT2's KSI2K value based on what Wei Yang of SLAC provided
+# (10.6 as the weighted average HS06 value for WT2), which when divided
+# by 4 yields 2.65 KSI2K 
+#    ----------------------------------------
+#    Site                    NFgip   NFapel
+#    ---------------------------------------
+#    WT2                     3424    2650
+#
+#
+# 3/18/2011 (Karthik Arunachalam)
+# Current SI2K values contained here for USATLAS is taken from the GIP and it is deemed inaccurate,
+# since when converting these to HS06 values by multiplying by 4, they don't match with the 
+# HS06 values directly calculated for the site. To fix this discrepancy, 
+# I Updated the SI2K values for all USATLAS sites based on the values 
+# contained in the spreadsheet maintained by Rob Gardner at 
+# http://www.usatlas.bnl.gov/twiki/bin/view/Admins/CapacitySummary.html
+# The direct link to this particular spreadsheet is
+# http://www.usatlas.bnl.gov/twiki/bin/view/Admins/rsrc/Admins/CapacitySummary/Normalization-factors-USATLAS-v19-v1.xls
+# This spreadsheet maintains the average HEPSPEC values for all the USATLAS sites
+# The SI2K equivalent is obtained by dividing this HEPSPEC value by 4,
+# and this is the value to which the USATLAS sites have been updated below
+# For example the average HEPSPEC value for AGLT2 in Rob Gardner's spreadsheet above 
+# is 8.50. So the equivalent SI2K value is 
+# SI2K = HEPSPEC * 1000/4	= 8.50 * 1000/4 = 2125
+# Here are the updates i.e. old values vs new values for all the USATLAS sites
+#========================================
+# 		      Old	New
+#========================================
+#--- ATLAS Tier 1 ----
+# BNL_ATLAS_1         3970     3093 
+#--- ATLAS Tier 2 ----
+# AGLT2               4489	2125
+# BU_ATLAS_Tier2      3383	2003
+# HU_ATLAS_Tier2      3748	2218
+# IU_OSG              2101	1400		
+# MWT2_IU             2339	2170
+# MWT2_UC             2449	2178
+# OU_OCHEP_SWT2       4020	2413
+# WT2                 2650	2650
+# SWT2_CPB            2330	1865
+# UTA_SWT2            2851	2810
+#
+# 
+# 3/28/2011 (Karthik Arunachalam) 
+# Remove IU_OSG from WLCG reporting. 
+# Reason: IU_OSG is marked inactive and removed in MyOSG  
+# and has the InterOp accounting flag set to false. It  
+# doesn't participate in WLCG reporting anymore. 
+# 
+# 
+# 
 ##################################################################
+#
 #-- Site  ------- SPECint2000
 #
 #--- CMS Tier 1 ----    
@@ -385,18 +438,18 @@ UFlorida-PG         1535
 ####################################
 ####################################
 #--- ATLAS Tier 1 ----
-BNL_ATLAS_1         3970
+BNL_ATLAS_1         3093 
 #--- ATLAS Tier 2 ----
-AGLT2               4489
-BU_ATLAS_Tier2      3383
-HU_ATLAS_Tier2      3748
-IU_OSG              2101
-MWT2_IU             2339
-MWT2_UC             2449
-OU_OCHEP_SWT2       4020 
-WT2                 3424
-SWT2_CPB            2330
-UTA_SWT2            2851
+AGLT2               2125
+HU_ATLAS_Tier2      2218
+BU_ATLAS_Tier2      2003
+MWT2_IU             2170
+MWT2_UC             2178
+OU_OCHEP_SWT2       2413
+WT2                 2650
+SWT2_CPB            1865
+UTA_SWT2            2810
+#
 #
 #
 ####################################
@@ -425,3 +478,4 @@ LC-glcc             3920
 #OU_OSCER_ATLAS      1543
 ##PROD_SLAC      2412 (replaced by WT2)
 ##UC_ATLAS_MWT2  1285 (stopped being considered a T2 site in 2009/06 per Rob Gardner)
+# IU_OSG              1400 (removed)
