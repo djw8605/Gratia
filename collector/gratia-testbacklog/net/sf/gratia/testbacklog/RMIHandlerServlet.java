@@ -39,8 +39,14 @@ public class RMIHandlerServlet extends net.sf.gratia.servlets.RMIHandlerServlet 
          return;
       }
       super.doPost(req,res);
+      try {
+         Thread.sleep(1000); // We need to make sure to wait at least 1 second between snapshot
+      } catch (Exception ex) {
+         // writer.write("Early exit.");
+      }
+      Logging.warning("about to take a snapshot");
       // And now for a snapshot of the backlog information
-      // fCollectorProxy.BacklogSnapshot()
+      fCollectorProxy.takeBacklogSnapshot();
       return;
    }
 }
