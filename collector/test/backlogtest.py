@@ -1,3 +1,4 @@
+import GratiaCore
 import Gratia
 import time
 import datetime
@@ -60,25 +61,25 @@ def GetRecord(jobid = 0):
         return r
 
 def SendRecords(argv=None):
-        rev = "$Revision: 1.6 $"
-        Gratia.RegisterReporterLibrary("samplemeter.py",Gratia.ExtractCvsRevision(rev))
-        Gratia.RegisterReporterLibrary("samplemeter.py",Gratia.ExtractCvsRevision(rev))
-        Gratia.RegisterReporterLibrary("samplemeter.py",Gratia.ExtractCvsRevision(rev))
-       
-
-        Gratia.Initialize("ProbeConfigBacklog")
-
         if (len(argv)>1): nrecords = int(argv[1])
         else: nrecords = 0
 
+        rev = "$Revision: 1.6 $"
+        GratiaCore.RegisterReporterLibrary("samplemeter.py",Gratia.ExtractCvsRevision(rev))
+        GratiaCore.RegisterReporterLibrary("samplemeter.py",Gratia.ExtractCvsRevision(rev))
+        GratiaCore.RegisterReporterLibrary("samplemeter.py",Gratia.ExtractCvsRevision(rev))
+        GratiaCore.RegisterEstimatedServiceBacklog(nrecords)
+
+        Gratia.Initialize("ProbeConfigBacklog")
+
         i = -1
         for i in range(nrecords):
-           if ( i % 100 == 0 ) : print i
+           #if ( i % 100 == 0 ) : print i
            r = GetRecord(i)
            msg = Gratia.Send(r)
            if msg == "Fatal Error: too many pending files":
               break
-        print i+1
+        #print i+1
 
 if __name__ == '__main__': 
         #profile.run('SendRecords()','prof.log')

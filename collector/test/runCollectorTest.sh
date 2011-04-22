@@ -157,7 +157,7 @@ function write_ProbeConfig
     GratiaCertificateFile="gratia.hostcert.pem"
     GratiaKeyFile="gratia.hostkey.pem"
 
-    SOAPHost="${remotehost}:${http_port}" 
+    CollectorHost="${remotehost}:${http_port}" 
     CollectorService="/$service/rmi" 
     UseSoapProtocol="0"
     
@@ -668,6 +668,7 @@ EOF
   check_result $days metricrecord "MetricRecord"
   check_result $mdays metricrecordxml "MetricRecord's RawXml"
   check_result $days origin "Origin records"
+  check_result "" backlog "Backlog tracking"
 
   echo "Check status monitoring"
   wait_for_input_use 0
@@ -683,20 +684,30 @@ function check_backlog()
 
    start_server
    write_ProbeConfig ProbeConfigBacklog ${webhost} 'BundleSize="10"' gratia-testbacklog backlog
+   # Enable the server
+   adminCollector "enableServlet" 2>&1 | tee wget.full.log | grep House | grep DISABLED > wget.log   
    wait_for_server
 
    # Disable the server
    adminCollector "disableServlet" 2>&1 | tee wget.full.log | grep House | grep DISABLED > wget.log
    
    # Create bunch of local files
-   time python backlogtest.py 1000
+   python backlogtest.py 100
 
    # Enable the server
    adminCollector "enableServlet" 2>&1 | tee wget.full.log | grep House | grep DISABLED > wget.log   
    wait_for_server
 
    # Load the data (and hence the backlog information)
-   time python backlogtest.py 20
+   python backlogtest.py 20
+
+   readonly_mysql > backlog.validate 2>&1 <<EOF 
+use ${schema_name};
+select nRecords,xmlFiles,tarFiles,serviceBacklog,maxPendingFiles,bundleSize from 
+(select EventDate, nRecords,xmlFiles,tarFiles,serviceBacklog,maxPendingFiles,bundleSize from BacklogStatisticsSnapshots 
+ where Name = 'backlog:LocalTester.where.edu' order by EventDate desc limit 13 ) sub order by EventDate;
+EOF
+
 }
 
 function check_timeout()
@@ -932,6 +943,7 @@ fi
 
 if [ $do_load ]; then
    loaddata
+   check_backlog
 fi
 
 if [ $do_routine ] ; then
@@ -958,11 +970,11 @@ fi
 
 if [ $do_timeout ]; then
    check_timeout
+   check_queue_threshold
 fi
 
 if [ $do_test ]; then
    check_data
-   check_queue_threshold
 fi
 
 if [ $check_failed ]; then
