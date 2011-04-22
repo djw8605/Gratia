@@ -27,6 +27,19 @@ public class RMIHandlerServlet extends HttpServlet {
    static protected JMSProxy fCollectorProxy = null;
    static URLDecoder D;
    
+   static private long parseLong(String what, String value)
+   {
+      long result = -1;
+      if (value != null) {
+         try {
+            result = Long.parseLong(value.trim());
+         } catch (NumberFormatException nfe) {
+            Logging.warning("RMIHandlerServlet: NumberFormatException for "+what,nfe);
+         }
+      }
+      return result;
+   }
+
    protected synchronized boolean lookupProxy() {
       int counter = 0;
       final int maxloop = 20;
@@ -318,6 +331,20 @@ public class RMIHandlerServlet extends HttpServlet {
          //
          
          PrintWriter writer = res.getWriter();
+         if (xmlfilesStr != null || tarfilesStr != null || maxpendingfilesStr != null || backlogStr != null || bundlesizeStr != null)
+         {
+            // If we have any or the 5 backlog information, let update our field.
+            long xmlfiles = parseLong("xmlfiles",xmlfilesStr);
+            long tarfiles = parseLong("tarfiles",tarfilesStr);
+            long maxpendingfiles = parseLong("maxpendingfiles",maxpendingfilesStr);
+            long backlog = parseLong("backlog",backlogStr);
+            long bundlesize = parseLong("bundlesize",bundlesizeStr);
+            long nrecords = -1;
+            if (xmlfiles > -1 && tarfiles > -1 && maxpendingfiles > -1) {
+               nrecords = xmlfiles + tarfiles * maxpendingfiles;
+            }
+            fCollectorProxy.updateBacklog(from,nrecords,xmlfiles,tarfiles,backlog,maxpendingfiles,bundlesize);
+         }
          if (arg1 != null) {
             boolean status = true;
             boolean parse_error = true;
