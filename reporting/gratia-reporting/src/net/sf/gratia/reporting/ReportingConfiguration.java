@@ -132,7 +132,7 @@ public class ReportingConfiguration
 				_databasePassword  = p.getProperty("service.reporting.password");
 				_staticFolder      = p.getProperty("service.reporting.static.folder");
 
-				_reportingVersion  = p.getProperty("gratia.reporting.version");
+				_reportingVersion  = net.sf.gratia.reporting.Versions.PackageVersionString;
 
 	 // Set a flag indicating the configuration has been loaded, so subsequent calls will not load again
 				 _configLoaded = "1";

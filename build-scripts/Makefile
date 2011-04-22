@@ -118,7 +118,6 @@ ifeq ($(classes-dir),)
    $(error The classes-dir variable can not be null)
 endif
 
-
 #-------------------------------------------------------------
 all: gratia
 	#------------------------------
@@ -164,13 +163,20 @@ services: $(target)/gratia-services.war
 	#$(<) -d > $(@)
 	# --- Target: $(configuration)/build-stored-procedures.sql COMPLETED at $(shell date) ---
 
+
+$(services)/net/sf/gratia/services/Versions.java: ./createVersion.sh ./Makefile
+	./createVersion.sh  services $(gratia_services_version) $@
+
+$(reportsrc)/src/net/sf/gratia/reporting/Versions.java: ./createVersion.sh ./Makefile
+	./createVersion.sh  reporting $(gratia_reporting_version) $@
+
 #-------------------------------------------------------------
 $(target)/gratia-services.war:  $(services)/net/sf/gratia/services/*.java  \
                                 $(services)/net/sf/gratia/storage/*.java \
                                 $(services)/net/sf/gratia/services/web.xml \
 				$(services)/ehcache.xml $(services)/c3p0.properties \
 				$(commonLib)/*.jar \
-                                $(util_lib) 
+                                $(util_lib) $(services)/net/sf/gratia/services/Versions.java
 	#------------------------------------
 	# --- Target: gratia-services.war ---
 	#------------------------------------
@@ -337,6 +343,7 @@ ${target}/gratia-administration.war: $(util_lib)  $(target)/gratiaSecurity.jar \
                                      $(commonLib)/tar.jar \
                                      $(commonLib)/bzip2.jar \
                                      $(commonLib)/mysql*.jar \
+				 $(services)/net/sf/gratia/services/Versions.java \
 				$(administration)/ehcache.xml $(administration)/c3p0.properties
 	#----------------------------------------------------
 	# --- Target: $(target)/gratia-administration.war ---
@@ -352,6 +359,7 @@ ${target}/gratia-administration.war: $(util_lib)  $(target)/gratiaSecurity.jar \
 	mkdir -p $(war-dir)/$(name_from_war)/WEB-INF/lib
 	echo "$(gratia_release_data)" >$(war-dir)/$(name_from_war)/gratia-release
 	javac -d $(classes-dir) -cp $(classpath) -extdirs $(commonLib) $(administration)/net/sf/gratia/administration/*.java
+	javac -d $(classes-dir) -cp $(classpath) -extdirs $(commonLib) $(services)/net/sf/gratia/services/Versions.java
 	cp $(classes-dir)/net/sf/gratia/administration/*.class $(war-dir)/$(name_from_war)/WEB-INF/classes/net/sf/gratia/administration
 	cp $(classes-dir)/net/sf/gratia/services/*.class $(war-dir)/$(name_from_war)/WEB-INF/classes/net/sf/gratia/services
 	cp $(classes-dir)/net/sf/gratia/storage/*.class $(war-dir)/$(name_from_war)/WEB-INF/classes/net/sf/gratia/storage
@@ -523,7 +531,7 @@ reports:
 	# --- Target: reports COMPLETED at $(shell date) ---
 
 #-------------------------------------------------------------
-birt-reporting: 
+birt-reporting: $(reportsrc)/src/net/sf/gratia/reporting/Versions.java
 	# ------------------------------
 	# --- Target: birt-reporting ---
 	# ------------------------------
