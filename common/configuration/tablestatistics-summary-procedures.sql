@@ -9,7 +9,7 @@ TSHS:BEGIN
   -- Main
 
 set @inputFromShifted = inputFrom - interval 1 hour;
-set @nowDate = now();
+set @nowDate = UTC_TIMESTAMP();
 
 insert into TableStatisticsHourly
 (
@@ -107,7 +107,7 @@ TSDS:BEGIN
   -- Main
 
 set @inputFromShifted = inputFrom - interval 1 day;
-set @nowDate = now();
+set @nowDate = UTC_TIMESTAMP();
 
 insert into TableStatisticsDaily
 (
