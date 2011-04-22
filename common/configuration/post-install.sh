@@ -173,7 +173,7 @@ while [[ -n "$1" ]]; do
         ;;
       trigger)
         proc="${script_location}build-trigger.sql"
-        set -- "$@" summary-procedures services-summary-procedures tablestatistics-summary-procedures
+        set -- "$@" summary-procedures services-summary-procedures tablestatistics-summary-procedures backlogstatistics-summary-procedures
         ;;
       summary-procedures)
         proc="${script_location}summary-procedures.sql"
@@ -183,6 +183,9 @@ while [[ -n "$1" ]]; do
         ;;
       tablestatistics-summary-procedures)
         proc="${script_location}tablestatistics-summary-procedures.sql"
+        ;;
+      backlogstatistics-summary-procedures)
+        proc="${script_location}backlogstatistics-summary-procedures.sql"
         ;;
       ps)
 #        proc="${script_location}build-ps-node-summary-table.sql"
