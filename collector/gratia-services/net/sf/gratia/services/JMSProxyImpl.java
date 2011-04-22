@@ -164,4 +164,13 @@ public class JMSProxyImpl extends UnicastRemoteObject implements JMSProxy
       collectorService.runQSizeMonitor();
    }
    
+   public void takeBacklogSnapshot() throws RemoteException {
+      collectorService.takeBacklogSnapshot();
+   }
+
+   public void updateBacklog(String name, long nrecords, long xmlfiles, long tarfiles, long backlog, long maxpendingfiles, long bundlesize) throws RemoteException
+   {
+      collectorService.updateBacklog(name,nrecords,xmlfiles,tarfiles,backlog,maxpendingfiles,bundlesize);
+   }
+
 }

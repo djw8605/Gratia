@@ -30,4 +30,6 @@ public interface JMSProxy extends java.rmi.Remote {
    public String refreshStatus() throws RemoteException;
    public String queueManagerStatus() throws RemoteException;
    public void runQSizeMonitor() throws RemoteException;
+   public void takeBacklogSnapshot() throws RemoteException;
+   public void updateBacklog(String name, long nrecords, long xmlfiles, long tarfiles, long backlog, long maxpendingfiles, long bundlesize) throws RemoteException;
 }

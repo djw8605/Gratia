@@ -31,10 +31,10 @@ public class DatabaseMaintenance {
 
    static final String dq = "\"";
    static final String comma = ",";
-   static final int gratiaDatabaseVersion = 89;
+   static final int gratiaDatabaseVersion = 90;
    static final int latestDBVersionRequiringStoredProcedureLoad = gratiaDatabaseVersion;
    static final int latestDBVersionRequiringSummaryViewLoad = 82;
-   static final int latestDBVersionRequiringSummaryTriggerLoad = 89;
+   static final int latestDBVersionRequiringSummaryTriggerLoad = 90;
    static final int latestDBVersionRequiringTableStatisticsRefresh = 87;
    static boolean dbUseJobUsageSiteName = false;
    java.sql.Connection connection;
@@ -871,6 +871,22 @@ public class DatabaseMaintenance {
          
       }
       
+      // Check BacklgoStatistics History
+      {
+         ver = readIntegerDBProperty("gratia.database.BacklogStatisticsHistoryVersion");
+         if (ver < 0 || !TableExist("BacklogStatistics") || !TableExist("BacklogStatisticsSnapshots")) {
+            int result = CreateBacklogTables(ver);
+            if (result > -1) {
+               UpdateDbProperty("gratia.database.BacklogStatisticsHistoryVersion",
+                                gratiaDatabaseVersion);
+               Logging.log("Backlog statistics history updated successfully");
+            } else {
+               Logging.warning("FAIL: backlog statistics history NOT updated properly");
+               return false;
+            }
+         }
+         
+      }
       return true;
    }
 
@@ -1294,7 +1310,7 @@ public class DatabaseMaintenance {
                 }
          }
          schemaOnlyLowerBound = 86;
-         schemaOnlyUpperBound = 89;
+         schemaOnlyUpperBound = 90;
          if ((current >= schemaOnlyLowerBound) && (current < schemaOnlyUpperBound)) {
             // Stored procedures, trigger procedures.
             Logging.fine("Gratia database upgraded from " + current + " to " + schemaOnlyUpperBound);
@@ -1355,6 +1371,135 @@ public class DatabaseMaintenance {
       }
    }
 
+   private int CreateBacklogTables(int oldversion) 
+   {
+      int result = Execute("DROP TABLE IF EXISTS BacklogStatistics");
+      if (result > -1) {
+         String command = "CREATE TABLE BacklogStatistics(" +
+         "ServerDate DATETIME NOT NULL, " +
+         "EntityType VARCHAR(255) NOT NULL, " +
+         "Name VARCHAR(255) NOT NULL, " +
+         "nRecords BIGINT DEFAULT 0, " +
+         "xmlFiles BIGINT DEFAULT 0, " +
+         "tarFiles BIGINT DEFAULT 0, " +
+         "serviceBacklog BIGINT DEFAULT 0, " +
+         "maxPendingFiles BIGINT DEFAULT 0, " +
+         "bundleSize BIGINT DEFAULT 0, " +
+         "prevServerDate DATETIME, " +
+         "prevRecords BIGINT DEFAULT 0, " +
+         "prevServiceBacklog BIGINT default 0, " + 
+         "UNIQUE KEY index1 (EntityType, Name))";
+         
+         if (isInnoDB) {
+            command += " ENGINE = 'innodb'";
+         }
+         result = Execute(command);
+      }
+      if (oldversion < 0 || !TableExist("BacklogStatisticsSnapshots"))
+      {
+         result = Execute("DROP TABLE IF EXISTS BacklogStatisticsSnapshots");
+         if (result < 0) {
+            return result;
+         }
+         String command = "CREATE TABLE BacklogStatisticsSnapshots(" +
+         "ServerDate DATETIME NOT NULL, " + 
+         "EventDate DATETIME NOT NULL, " + 
+         "EntityType VARCHAR(255) NOT NULL, " +
+         "Name VARCHAR(255) NOT NULL, " +
+         "nRecords BIGINT DEFAULT 0, " +
+         "xmlFiles BIGINT DEFAULT 0, " +
+         "tarFiles BIGINT DEFAULT 0, " +
+         "serviceBacklog BIGINT DEFAULT 0, " +
+         "maxPendingFiles BIGINT DEFAULT 0, " +
+         "bundleSize BIGINT DEFAULT 0, " +
+         "UNIQUE KEY index1 (ServerDate, EntityType, Name))";
+         if (isInnoDB) {
+            command += " ENGINE = 'innodb'";
+         }
+         result = Execute(command);
+         if (result < 0) {
+            return result;
+         }
+      }
+      if (oldversion < 0 || !TableExist("BacklogStatisticsHourly"))
+      {
+         result = Execute("DROP TABLE IF EXISTS BacklogStatisticsHourly");
+         if (result < 0) {
+            return result;
+         }
+         String command = "CREATE TABLE BacklogStatisticsHourly(" +
+         "bshid BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY, " +
+         "ServerDate DATETIME NOT NULL, " + 
+         "EventDate DATETIME NOT NULL, " + 
+         "EntityType VARCHAR(255) NOT NULL, " +
+         "Name VARCHAR(255) NOT NULL, " +
+         "StartTime DATETIME NOT NULL, " + 
+         "EndTime DATETIME NOT NULL, " + 
+         "avgRecords BIGINT DEFAULT 0, " +
+         "maxRecords BIGINT DEFAULT 0, " +
+         "minRecords BIGINT DEFAULT 0, " +
+         "avgXmlFiles BIGINT DEFAULT 0, " +
+         "maxXmlFiles BIGINT DEFAULT 0, " +
+         "minXmlFiles BIGINT DEFAULT 0, " +
+         "avgTarFiles BIGINT DEFAULT 0, " +
+         "minTarFiles BIGINT DEFAULT 0, " +
+         "maxTarFiles BIGINT DEFAULT 0, " +
+         "avgServiceBacklog BIGINT DEFAULT 0, " +
+         "minServiceBacklog BIGINT DEFAULT 0, " +
+         "maxServiceBacklog BIGINT DEFAULT 0, " +
+         "avgMaxPendingFiles BIGINT DEFAULT 0, " +
+         "avgBundleSize BIGINT DEFAULT 0, " +
+
+         "UNIQUE KEY index1 (EventDate, EntityType, Name))";
+         if (isInnoDB) {
+            command += " ENGINE = 'innodb'";
+         }
+         result = Execute(command);
+         if (result < 0) {
+            return result;
+         }
+      }
+      if (oldversion < 0 || !TableExist("BacklogStatisticsDaily"))
+      {
+         result = Execute("DROP TABLE IF EXISTS BacklogStatisticsDaily");
+         if (result < 0) {
+            return result;
+         }
+         String command = "CREATE TABLE BacklogStatisticsDaily(" +
+         "bsdid BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY, " +
+         "ServerDate DATETIME NOT NULL, " + 
+         "EventDate DATETIME NOT NULL, " + 
+         "EntityType VARCHAR(255) NOT NULL, " +
+         "Name VARCHAR(255) NOT NULL, " +
+         "StartTime DATETIME NOT NULL, " + 
+         "EndTime DATETIME NOT NULL, " + 
+         "avgRecords BIGINT DEFAULT 0, " +
+         "maxRecords BIGINT DEFAULT 0, " +
+         "minRecords BIGINT DEFAULT 0, " +
+         "avgXmlFiles BIGINT DEFAULT 0, " +
+         "maxXmlFiles BIGINT DEFAULT 0, " +
+         "minXmlFiles BIGINT DEFAULT 0, " +
+         "avgTarFiles BIGINT DEFAULT 0, " +
+         "minTarFiles BIGINT DEFAULT 0, " +
+         "maxTarFiles BIGINT DEFAULT 0, " +
+         "avgServiceBacklog BIGINT DEFAULT 0, " +
+         "minServiceBacklog BIGINT DEFAULT 0, " +
+         "maxServiceBacklog BIGINT DEFAULT 0, " +
+         "avgMaxPendingFiles BIGINT DEFAULT 0, " +
+         "avgBundleSize BIGINT DEFAULT 0, " +
+         "UNIQUE KEY index1 (EventDate, EntityType, Name))";
+         if (isInnoDB) {
+            command += " ENGINE = 'innodb'";
+         }
+         result = Execute(command);
+         if (result < 0) {
+            return result;
+         }
+      }
+      return result;
+      
+   }
+   
    private int RefreshTableStatistics() {
       int result = Execute("DROP TABLE IF EXISTS TableStatistics");
       if (result > -1) {

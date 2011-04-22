@@ -127,6 +127,7 @@ public class CollectorService implements ServletContextListener {
    RMIService rmiservice;
    QSizeMonitor qsizeMonitor;
    TableStatisticsManager tableStatisticsManager;
+   BacklogStatisticsManager backlogStatisticsManager;
    MonitorRecordProcessor monitorRecordProcessor;
    DataHousekeepingService housekeepingService;
    
@@ -446,11 +447,21 @@ public class CollectorService implements ServletContextListener {
          //
          // if requested - start service to keep an history of the table statistics.
          //
-         if (p.getProperty("monitor.q.size").equals("1")) {
+         if (p.getProperty("monitor.table.history").equals("1")) {
             Logging.log("CollectorService: Starting TableStatisticsManager");
             tableStatisticsManager = new TableStatisticsManager(this);
             tableStatisticsManager.start();
             Logging.info("CollectorService: TableStatisticsManager started");
+         }
+
+         //
+         // if requested - start service to keep an history of the backlog statistics.
+         //
+         if (p.getProperty("monitor.backlog.history").equals("1")) {
+            Logging.log("CollectorService: Starting BacklogStatisticsManager");
+            backlogStatisticsManager = new BacklogStatisticsManager(this);
+            backlogStatisticsManager.start();
+            Logging.info("CollectorService: BacklogStatisticsManager started");
          }
       }
       catch (Exception e) {
@@ -689,10 +700,26 @@ public class CollectorService implements ServletContextListener {
       if (qsizeMonitor != null) {
          qsizeMonitor.check();
       } else {
-         Logging.info("CollectorService: DB QSizeMonitor.check request but no monitor is running");         
+         Logging.info("CollectorService: DB QSizeMonitor.check requested but no monitor is running");         
       }
    }
    
+   public void takeBacklogSnapshot() {
+      if (backlogStatisticsManager != null) {
+         backlogStatisticsManager.updateLocalBacklog();
+         backlogStatisticsManager.takeSnapshot();
+      } else {
+         Logging.info("CollectorService: backlogStatisticsManager.takeSnapshot requested but no monitor is running");         
+      }
+   }
+
+   public void updateBacklog(String name, long nrecords, long xmlfiles, long tarfiles, long backlog, long maxpendingfiles, long bundlesize)
+   {
+      if (backlogStatisticsManager != null) {
+         backlogStatisticsManager.updateBacklog(name,nrecords,xmlfiles,tarfiles,backlog,maxpendingfiles,bundlesize);
+      }
+   }
+
    public void loadSelfGeneratedCerts() {
       String keystore = System.getProperty("catalina.home") + "/gratia/keystore";
       keystore = keystore.replaceAll("\\\\", "/");
