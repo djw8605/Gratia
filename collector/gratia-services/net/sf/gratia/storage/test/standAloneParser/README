@@ -1,0 +1,58 @@
+README for standalone test of the record parsing, self checking 
+===============================================================
+
+Logic
+-----
+
+We use a set of xml files for which the parsing result is already known.
+i.e. they have been parsed already and we know if they could be parsed 
+successfully and if so what are the raw xml part and the extra xml part.
+Look under the testFiles/pass director for an example of this. 
+Now we do the actual parsing using this class which in turn uses the parsing code.
+If the file is expected to parse successfully, then it should be parsed successfully.
+In addition the raw xml part and the extra xml part should be as expected. 
+If this is the case then it means that parsing was done as expected.
+
+In case the parsing is expected to fail (because of a badly formed XML data), then the 
+parsing should fail. In addition the reason for failure (badly formed XML data) should match. 
+
+We could perform more test cases like some kind of an exception is encountered in the
+parsing code itself and it is as expected etc. 
+
+
+When does it make sense to use this code?
+-----------------------------------------
+
+Whenever there is some change in the code that parses the gratia xml records. For example this could 
+be a change in JobUsageRecordLoader.java or a change in RecordConverter.java or...any other code that
+could potentially affect parsing of the gratia XML records. 
+
+
+How to use/execute?
+--------------------
+
+./parseTest.sh <baseDir>
+where baseDir is the absolute path to the root directory in which the gratia code is available/installed.
+This is also the parent directory containing the build-scripts directory underneath it. Please note that
+you should have already built the code using gmake release from the build-scripts directory.
+
+For example
+./parseTest.sh /myhome1/osg/standaloneParser
+
+Other information that might be helpful 
+------------------------------------------
+Here are the typical contents of <baseDir> directory (this is the output of doing a ls)
+build-scripts  collector  common  docs  interfaces  probe  redirex  reporting  scripts  target
+
+Here is the typical svn info of the base directory:
+
+Path: .
+URL: https://gratia.svn.sourceforge.net/svnroot/gratia/trunk
+Repository Root: https://gratia.svn.sourceforge.net/svnroot/gratia
+Repository UUID: c85a5f45-a5f3-44fc-b02c-7891c381c519
+Revision: xxxx
+Node Kind: directory
+Schedule: normal
+Last Changed Author: xxxxxxx
+Last Changed Rev: xxxx 
+Last Changed Date: xxxxxxxxxxxxx

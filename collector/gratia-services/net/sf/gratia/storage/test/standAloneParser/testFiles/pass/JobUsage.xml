@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<JobUsageRecord xmlns="http://www.gridforum.org/2003/ur-wg" xmlns:urwg="http://www.gridforum.org/2003/ur-wg" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.gridforum.org/2003/ur-wg file:///u:/OSG/urwg-schema.11.xsd">
+<RecordIdentity urwg:createTime="2010-06-09T20:32:03Z" urwg:recordId="osgitb1.nhn.ou.edu:20655.4"/>
+<JobIdentity>
+	<GlobalJobId stupidAttribute="pack my box with five dozen liquor jugs">condor.osgitb1.nhn.ou.edu#1276115493#390469.0</GlobalJobId>
+	<LocalJobId>390469</LocalJobId>
+</JobIdentity>
+<UserIdentity>
+	<LocalUserId>mis</LocalUserId>
+	<GlobalUsername>mis@nhn.ou.edu</GlobalUsername>
+	<DN>/DC=org/DC=doegrids/OU=People/CN=Jose Caballero (OSG) 547093</DN>
+	<VOName>/osg/Role=pilot/Capability=NULL</VOName>
+	<ReportableVOName>osg</ReportableVOName>
+</UserIdentity>
+	<JobName fakeAttribute1="This is a fake attribute" fakeAttributeAno="2nd">osgitb1.nhn.ou.edu#1276115493#390469.0</JobName>
+	<Status urwg:description="Condor Exit Status" fakeAttribute2="This is a 2nd fake attribute">0</Status>
+	<WallDuration urwg:description="Was entered in seconds" fakeAttribute3="This is fake attribute 3">PT2.0S</WallDuration>
+	<TimeDuration timeextra1="time extra 1" urwg:type="RemoteUserCpu">PT0S</TimeDuration>
+	<TimeDuration urwg:type="LocalUserCpu">PT0S</TimeDuration>
+	<TimeDuration urwg:type="RemoteSysCpu">PT0S</TimeDuration>
+	<TimeDuration urwg:type="LocalSysCpu">PT0S</TimeDuration>
+	<TimeDuration urwg:type="CumulativeSuspensionTime">PT0S</TimeDuration>
+	<TimeDuration urwg:type="CommittedTime">PT2.0S</TimeDuration>
+        <Extra1>1. This is extra xml. Let us see what happens now.</Extra1>
+	<CpuDuration urwg:description="Was entered in seconds" urwg:usageType="system">PT0S</CpuDuration>
+	<CpuDuration urwg:description="Was entered in seconds" urwg:usageType="user" fakeAttribute2="cpuDuration fake attribute">PT0S</CpuDuration>
+	<EndTime urwg:description="Was entered in seconds">2010-06-09T20:31:38Z</EndTime>
+	<StartTime urwg:description="Was entered in seconds">2010-06-09T20:31:36Z</StartTime>
+	<MachineName>osgitb1.nhn.ou.edu</MachineName>
+	<SubmitHost fake1SubmitHost="111111111111111" fake2SubmitHost="22222222222222222222222">osgitb1.nhn.ou.edu</SubmitHost>
+	<Host primary="true" secondary="false">slot1@osgitb1.nhn.ou.edu</Host>
+	<Queue urwg:description="Condor's JobUniverse field">5</Queue>
+	<NodeCount urwg:metric="max">1</NodeCount>
+	<Resource urwg:description="CondorMyType">Job</Resource>
+	<Resource urwg:description="ExitBySignal">FALSE</Resource>
+        <Extra3 sfjslfs="slfjslfjs">3. This is extra xml. Let us see what happens now.</Extra3>
+	<Resource urwg:description="ExitCode">1</Resource>
+	<Resource urwg:description="condor.JobStatus">4</Resource>
+	<ProbeName pnExtra="----------------------------">condor:osgitb1.nhn.ou.edu</ProbeName>
+	<SiteName blaName="Site blah">OUHEP_ITB</SiteName>
+        <Extra2>2. This is extra xml. Let us see what happens now.</Extra2>
+	<Grid extraGridAttribute="this is a extra grid attribute 1" gridAttr2="grid attr 2">OSG</Grid>
+	<Njobs njobsextra="njobs extra attribute">1</Njobs>
+	<Resource urwg:description="ResourceType">Batch</Resource>
+</JobUsageRecord>
