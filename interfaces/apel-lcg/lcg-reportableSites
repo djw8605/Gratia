@@ -411,7 +411,14 @@
 # and has the InterOp accounting flag set to false. It  
 # doesn't participate in WLCG reporting anymore. 
 # 
-# 
+#
+# 04/29/2011 (Karthik Arunachalam)
+# ------------------------------------- 
+# Site		      old	new
+# ------------------------------------- 
+# BU_ATLAS_Tier2      2003      2095
+# OU_OCHEP_SWT2       2413      2255
+# SWT2_CPB            1865      2107
 # 
 ##################################################################
 #
@@ -442,12 +449,12 @@ BNL_ATLAS_1         3093
 #--- ATLAS Tier 2 ----
 AGLT2               2125
 HU_ATLAS_Tier2      2218
-BU_ATLAS_Tier2      2003
+BU_ATLAS_Tier2      2095
 MWT2_IU             2170
 MWT2_UC             2178
-OU_OCHEP_SWT2       2413
+OU_OCHEP_SWT2       2255
 WT2                 2650
-SWT2_CPB            1865
+SWT2_CPB            2107
 UTA_SWT2            2810
 #
 #
