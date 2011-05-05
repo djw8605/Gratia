@@ -73,12 +73,38 @@ public class Parser
 	   //set the parse result to PASS (expected result) if the contents of the raw xml file and the extra xml file match
 	   //(Note: The default parse result is set to FAIL at the very beginning)
            Record record = (Record)object;
-           if(
-		!diff(record.getRawXml(), readFile(testCase.getRawXmlFile())) 
-   					&& 
-		!diff(record.getExtraXml(), readFile(testCase.getExtraXmlFile())) 
-             )
-	   parseResult.setParseStatus(ParseStatus.PASS);
+
+           String actualRawXml = record.getRawXml();
+	   String expectedRawXml = readFile(testCase.getRawXmlFile());
+
+           String actualExtraXml = record.getExtraXml();
+	   String expectedExtraXml = readFile(testCase.getExtraXmlFile());
+
+
+           if(diff(actualRawXml, expectedRawXml) && diff(actualExtraXml, expectedExtraXml))
+	        parseResult.setParseStatus(ParseStatus.PASS);
+           else 
+           {
+                String additionalDetails = "";
+
+                if(diff(actualRawXml, expectedRawXml))
+                {
+                    additionalDetails += "There are differences between the raw xml resulting from actual parsing vs the expected raw xml. The actual and expected xml data is given below for comparison. \n\n";
+                    additionalDetails += "Actual raw xml:\n";
+                    additionalDetails += actualRawXml + "\n\n";
+                    additionalDetails += "Expected raw xml:\n";
+                    additionalDetails += expectedRawXml + "\n\n";
+                }
+                if(diff(actualExtraXml, expectedExtraXml))
+                {
+                    additionalDetails += "There are differences between the extra xml resulting from actual parsing vs the expected extra xml. The actual and expected xml data is given below for comparison. . \n\n";
+                    additionalDetails += "Actual extra xml:\n";
+                    additionalDetails += actualExtraXml + "\n\n";
+                    additionalDetails += "Expected extra xml:\n";
+                    additionalDetails += expectedExtraXml + "\n\n";
+                }
+                parseResult.setAdditionalDetails("\nAdditional details: " + additionalDetails);
+           }
       }
       return parseResult;
    }

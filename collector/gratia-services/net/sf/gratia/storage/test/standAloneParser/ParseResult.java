@@ -19,6 +19,8 @@ class ParseResult
 	private ParseStatus parseStatus = ParseStatus.FAIL; //Actual or expected result of parsing
 	private String errorMessage = ""; //Error message thrown by any exception encountered during the parsing
 	private String stackTrace = ""; //Detailed stack trace resulting from the exception if any
+        private String additionalDetails = ""; //additional details containing additional information. For example this could include the
+					       //difference between the xml in the correctly parsed results and the actual parsed results
 
 	/**
 		Overloaded constructors
@@ -69,6 +71,14 @@ class ParseResult
 	{
 		return stackTrace;
 	}
+        public void setAdditionalDetails(String additionalDetails)
+	{
+		this.additionalDetails = additionalDetails;
+	}
+	public String getAdditionalDetails()
+	{
+		return additionalDetails;
+	}
 
 	/**
 		Method to determine if two given ParseResult objects are equal.	
@@ -110,6 +120,7 @@ class ParseResult
 			ret += "\n" + "Error message from exception: " + errorMessage;
 		if(!stackTrace.equals("") && stackTrace != null)
 			ret += "\n" + "Stack trace of the exception: " + stackTrace;
+                ret += "\n" + additionalDetails;
 		return ret;
 	}
 }
