@@ -89,19 +89,23 @@ public class Parser
 
                 if(diff(actualRawXml, expectedRawXml))
                 {
-                    additionalDetails += "There are differences between the raw xml resulting from actual parsing vs the expected raw xml. The actual and expected xml data is given below for comparison. \n\n";
+                    additionalDetails += "There are differences between the raw xml resulting from actual parsing vs the expected raw xml. The actual and expected raw xml data and the difference between them is given below. Analyzing the difference could help you to figure out what might be wrong in the parsing code.\n\n";
                     additionalDetails += "Actual raw xml:\n";
                     additionalDetails += actualRawXml + "\n\n";
                     additionalDetails += "Expected raw xml:\n";
                     additionalDetails += expectedRawXml + "\n\n";
+                    additionalDetails += "Difference:\n";
+                    additionalDetails += Diff.difference(actualRawXml, expectedRawXml) + "\n\n";
                 }
                 if(diff(actualExtraXml, expectedExtraXml))
                 {
-                    additionalDetails += "There are differences between the extra xml resulting from actual parsing vs the expected extra xml. The actual and expected xml data is given below for comparison. . \n\n";
+                    additionalDetails += "There are differences between the extra xml resulting from actual parsing vs the expected extra xml. The actual and expected extra xml data and the difference between them is given below. Analyzing the difference could help you to figure out what might be wrong in the parsing code.\n\n";
                     additionalDetails += "Actual extra xml:\n";
                     additionalDetails += actualExtraXml + "\n\n";
                     additionalDetails += "Expected extra xml:\n";
                     additionalDetails += expectedExtraXml + "\n\n";
+                    additionalDetails += "Difference:\n";
+                    additionalDetails += Diff.difference(actualExtraXml, expectedExtraXml) + "\n\n";
                 }
                 parseResult.setAdditionalDetails("\nAdditional details: " + additionalDetails);
            }
