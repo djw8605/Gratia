@@ -76,36 +76,39 @@ public class Parser
 
            String actualRawXml = record.getRawXml();
 	   String expectedRawXml = readFile(testCase.getRawXmlFile());
-
            String actualExtraXml = record.getExtraXml();
 	   String expectedExtraXml = readFile(testCase.getExtraXmlFile());
 
+           int rawXmlDiffIndex = Diff.indexOfDifference(actualRawXml, expectedRawXml);
+           int extraXmlDiffIndex = Diff.indexOfDifference(actualExtraXml, expectedExtraXml);
 
-           if(diff(actualRawXml, expectedRawXml) && diff(actualExtraXml, expectedExtraXml))
+           //if(diff(actualRawXml, expectedRawXml) && diff(actualExtraXml, expectedExtraXml))
+
+           if(rawXmlDiffIndex == -1 && extraXmlDiffIndex == -1)
 	        parseResult.setParseStatus(ParseStatus.PASS);
            else 
            {
                 String additionalDetails = "";
 
-                if(diff(actualRawXml, expectedRawXml))
+                if(rawXmlDiffIndex > 0)
                 {
                     additionalDetails += "There are differences between the raw xml resulting from actual parsing vs the expected raw xml. The actual and expected raw xml data and the difference between them is given below. Analyzing the difference could help you to figure out what might be wrong in the parsing code.\n\n";
                     additionalDetails += "Actual raw xml:\n";
                     additionalDetails += actualRawXml + "\n\n";
                     additionalDetails += "Expected raw xml:\n";
                     additionalDetails += expectedRawXml + "\n\n";
-                    additionalDetails += "Difference:\n";
-                    additionalDetails += Diff.difference(actualRawXml, expectedRawXml) + "\n\n";
+                    additionalDetails += "Difference starting at index " + Diff.indexOfDifference(actualRawXml, expectedRawXml) + " of the expected xml: \n";
+                    additionalDetails += Diff.difference(actualRawXml, expectedRawXml);
                 }
-                if(diff(actualExtraXml, expectedExtraXml))
+                if(extraXmlDiffIndex > 0)
                 {
                     additionalDetails += "There are differences between the extra xml resulting from actual parsing vs the expected extra xml. The actual and expected extra xml data and the difference between them is given below. Analyzing the difference could help you to figure out what might be wrong in the parsing code.\n\n";
                     additionalDetails += "Actual extra xml:\n";
                     additionalDetails += actualExtraXml + "\n\n";
                     additionalDetails += "Expected extra xml:\n";
                     additionalDetails += expectedExtraXml + "\n\n";
-                    additionalDetails += "Difference:\n";
-                    additionalDetails += Diff.difference(actualExtraXml, expectedExtraXml) + "\n\n";
+                    additionalDetails += "Difference starting at index " + Diff.indexOfDifference(actualExtraXml, expectedExtraXml) + " of the expected xml: \n";
+                    additionalDetails += Diff.difference(actualExtraXml, expectedExtraXml);
                 }
                 parseResult.setAdditionalDetails("\nAdditional details: " + additionalDetails);
            }
