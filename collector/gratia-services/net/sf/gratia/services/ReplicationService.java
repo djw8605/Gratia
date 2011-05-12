@@ -12,6 +12,7 @@ import net.sf.gratia.storage.Replication;
 
 public class ReplicationService extends Thread {
    
+   boolean isSleeping = false;
    Hashtable<Long, ReplicationDataPump> pumpStore =
    new Hashtable<Long, ReplicationDataPump>();
    Properties p;
@@ -21,6 +22,10 @@ public class ReplicationService extends Thread {
       p = net.sf.gratia.util.Configuration.getProperties();
    }
    
+   public synchronized boolean isSleeping() {
+      return isSleeping;
+   }
+
    public void run() {
       Logging.info("ReplicationService Started");
       while (!stopRequested) {
@@ -110,7 +115,9 @@ public class ReplicationService extends Thread {
          Logging.log("ReplicationService: Sleeping");
          long wait = Integer.parseInt(p.getProperty("service.replication.wait"));
          wait = wait * 60 * 1000;
+         isSleeping = true;
          Thread.sleep(wait);
+         isSleeping = false;
       }
       catch (Exception ignore) {
       }

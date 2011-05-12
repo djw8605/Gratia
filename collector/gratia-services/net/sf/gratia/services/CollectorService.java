@@ -638,6 +638,8 @@ public class CollectorService implements ServletContextListener {
          Logging.info("CollectorService: Starting replication service");
          replicationService = new ReplicationService();
          replicationService.start();
+      } else if (replicationService.isSleeping()) {
+         replicationService.interrupt();
       }
    }
    
