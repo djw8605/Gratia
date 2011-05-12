@@ -23,21 +23,7 @@ import java.lang.Math;
 
 public class Status extends HttpServlet {
    XP xp = new XP();
-   //
-   // database related
-   //
-   String driver = "";
-   String url = "";
-   String user = "";
-   String password = "";
-   //
-   // processing related
-   //
-   String html = "";
-   String tableHeader = "";
-   String tableSection = "";
-   String row = "";
-   StringBuffer buffer = new StringBuffer();
+
    static final Pattern yesMatcher =
       Pattern.compile("^[YyTt1]");
    static final Pattern colgroupDefn =
@@ -58,16 +44,13 @@ public class Status extends HttpServlet {
    static final Pattern qsizeblock =
        Pattern.compile("<tr class=\"qsize\">.*?</tr>",
             Pattern.MULTILINE + Pattern.DOTALL);
-   boolean detailedDisplay = false;
 
    //
    // globals
    //
-   boolean initialized = false;
    Properties props;
-   int nHoursBack = 6;
-   String color_a = "#ffffff";
-   String color_b = "#cccccc";
+   static final String color_a = "#ffffff";
+   static final String color_b = "#cccccc";
 
    //
    // matching
@@ -126,12 +109,20 @@ public class Status extends HttpServlet {
 
    public void init(ServletConfig config) throws ServletException 
    {
+      props = Configuration.getProperties();
    }
 
    public Connection openConnection()
    {
+      //
+      // database related
+      //
+      String driver = "";
+      String url = "";
+      String user = "";
+      String password = "";
+
       try {
-         props = Configuration.getProperties();
          driver = props.getProperty("service.mysql.driver");
          url = props.getProperty("service.mysql.url");
          user = props.getProperty("service.mysql.user");
@@ -174,7 +165,9 @@ public class Status extends HttpServlet {
       
       String wantDetails = request.getParameter("wantDetails");
       Logging.debug("Got parameter wantDetails=" + wantDetails);
-      if (wantDetails != null) {
+      
+      boolean detailedDisplay = false;
+            if (wantDetails != null) {
          if (yesMatcher.matcher(wantDetails).matches()) {
             detailedDisplay = true;
          } else {
@@ -183,6 +176,7 @@ public class Status extends HttpServlet {
       }
       String lastHours = request.getParameter("lastHours");
       Logging.debug("Got parameter lastHours=" + lastHours);
+      int nHoursBack = 6;
       if ((lastHours != null) && (lastHours != "")) {
          try {
             nHoursBack = Integer.parseInt(lastHours);
@@ -190,8 +184,7 @@ public class Status extends HttpServlet {
          catch (NumberFormatException e) {
          }
       }
-      setup(request);
-      process(connection);
+      String html = process(request, connection, nHoursBack, detailedDisplay);
       response.setContentType("text/html");
       response.setHeader("Cache-Control", "no-cache"); // HTTP 1.1
       response.setHeader("Pragma", "no-cache"); // HTTP 1.0
@@ -207,10 +200,6 @@ public class Status extends HttpServlet {
          return "n/a";
       else 
          return value.toString();
-   }
-
-   public void setup(HttpServletRequest request) throws IOException {
-      html = xp.get(request.getRealPath("/") + "status.html");
    }
 
    static final String fgCountHourly = "select period, RecordType, Qualifier, max(maxRecords) from ( " + 
@@ -258,7 +247,17 @@ public class Status extends HttpServlet {
       " and nRecords > 0 " +
       " and ValueType = 'lifetime' group by RecordType, Qualifier";
 
-   public void process(Connection connection) {
+   public String process(HttpServletRequest request, Connection connection, int nHoursBack, boolean detailedDisplay) throws java.io.IOException {
+      //
+      // processing related
+      //
+      
+      String html = xp.get(request.getRealPath("/") + "status.html");
+      String tableHeader = "";
+      String tableSection = "";
+      String row = "";
+      StringBuffer buffer = new StringBuffer();
+
       HashMap<String, HashMap<Integer, TableStatusInfo> > tableInfo = new HashMap<String, HashMap<Integer, TableStatusInfo> >(5);
       
       Matcher m = null;
@@ -328,7 +327,7 @@ public class Status extends HttpServlet {
             statement.setLong(1,hourly_time_limit);
             statement.setLong(2,hourly_time_limit);
 //            statement.setString(2,table_name);
-            Logging.warning("Status SQL query: " + statement);
+            Logging.debug("Status SQL query: " + statement);
             resultSet = statement.executeQuery();
             long prevCount = 0;
             String prevRecordType = null;
@@ -414,7 +413,7 @@ public class Status extends HttpServlet {
 
             statement = connection.prepareStatement(fgCountLastWeekQuery);
 //            statement.setString(1,table_name);
-            Logging.debug("Status SQL query: " + statement);
+            Logging.debug("Weekly status SQL query: " + statement);
             resultSet = statement.executeQuery();
             prevRecordType = null;
             TableStatusInfo weekTableStatus = null;
@@ -515,6 +514,7 @@ public class Status extends HttpServlet {
 
          keySet = new TreeSet(tableInfo.keySet());
          int nTables = tableInfo.size();
+         Logging.warning("Number of tables: "+nTables);
          String nTablesFullGroupString = "";
          for (int i = 0; i < nTables; ++i) {
             nTablesFullGroupString += "$0";
@@ -549,7 +549,7 @@ public class Status extends HttpServlet {
          }
          tableHead2RepString += "$3";
          html = m.replaceFirst(tableHead2RepString);
-         Logging.debug("Matched " + m.group());
+//         Logging.warning("Matched " + m.group());
 
          //////////
          // Construct the body of the table
@@ -668,5 +668,6 @@ public class Status extends HttpServlet {
       catch (Exception e) {
          e.printStackTrace();
       }
+      return html;
    }
 }
