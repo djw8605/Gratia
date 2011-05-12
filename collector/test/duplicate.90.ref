@@ -3,3 +3,6 @@ NULL	Parse	12
 JobUsageRecord	CutoffDate	10
 JobUsageRecord	Duplicate	4
 JobUsageRecord	ExpirationDate	10
+JobUsageRecord	SQLError	252
+MetricRecord	SQLError	312
+

@@ -1,6 +1,6 @@
 def:
 	@echo You can run the test directly with:
-	@echo "   ./runCollectorTest.sh -p your_port -c -d -l" 
+	@echo "   ./runCollectorTest.sh -p your_port -c -d -l -r --probes -k -m -t" 
 	@echo See
 	@echo "   ./runCollectorTest.sh -h" 
 	@echo for details
@@ -35,12 +35,12 @@ build: urCollector condor
 	(cd ../../build-scripts; gmake all testtimeout testbacklog urCollector )
 
 test: build
-	./runCollectorTest.sh -c -d -l --probes -f -k -m -t
+	./runCollectorTest.sh -c -d -l -r --probes -f -k -m -t
 
 # Target to use when 'just' wanting to re-run the test without rebuilding nor re-installing the collector
 testonly: onlytest
 onlytest:  
-	./runCollectorTest.sh -d -l --probes -f -k -m -t
+	./runCollectorTest.sh -d -l -r --probes -f -k -m -t
 
 clean:
 	rm -rf MAGIC_VDT_LOCATION ProbeConfig collector-for-test *~ *.validate *.count

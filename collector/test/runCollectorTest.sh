@@ -8,6 +8,7 @@ usage: runCollectorTest.sh [-h] [-l] [-d] [-c] [-p port_number]
    -c reinstall the collector
    -p use this port for the main collector (default 9000)
    -l load the data
+   -r run replication
    -f execute fix ups
    -k Turn on the housekeeping
    -w [filename] upload the war file
@@ -17,6 +18,7 @@ usage: runCollectorTest.sh [-h] [-l] [-d] [-c] [-p port_number]
    -t test content
    --probes load data using the actual probes (pbs,lsf,condor)
    --exec routine For debugging purpose execute just the givent routine.
+   --all run all the tests, i.e. -d -l --probes -r -f -k -m -t 
 EOF
 }
 
@@ -571,8 +573,90 @@ function loadlsf
     PATH=${lsfprobedir}:${PATH} ${lsfprobedir}/pbs-lsf_meter.cron.sh
 }
 
+function replication {
+
+   start_server
+#   wait_for_input_use 0
+
+# Prepare for replication by 'fixing' the input
+   job_max_dbid=`echo "use ${schema_name}; select max(dbid) from JobUsageRecord_Meta" | readonly_mysql -s`
+   metric_max_dbid=`echo "use ${schema_name}; select max(dbid) from MetricRecord_Meta" | readonly_mysql -s`
+
+   readwrite_mysql<<EOF
+use ${schema_name};
+update JobUsageRecord_Meta set ProbeName=Concat("replic-",ProbeName) where dbid <= ${job_max_dbid};
+update MetricRecord_Meta set ProbeName=Concat("replic-",ProbeName) where dbid <= ${metric_max_dbid};
+EOF
+
+# Register and start a replication
+   echo "Registering and starting replication."
+   readwrite_mysql<<EOF
+use ${schema_name};
+delete from Replication where openconnection = 'http://${webhost}:${http_port}' and probename = 'All' and recordtable = 'JobUsageRecord';
+INSERT INTO Replication (registered,running,security,openconnection,secureconnection,frequency,dbid,probename,recordtable,bundleSize)
+    VALUES (0,1,0,'http://${webhost}:${http_port}','',1,0,'All','JobUsageRecord',10);
+delete from Replication where openconnection = 'http://${webhost}:${http_port}' and probename = 'All' and recordtable = 'MetricRecord';
+INSERT INTO Replication (registered,running,security,openconnection,secureconnection,frequency,dbid,probename,recordtable,bundleSize)
+    VALUES (0,1,0,'http://${webhost}:${http_port}','',1,0,'All','MetricRecord',10);
+EOF
+   adminCollector startReplication 2>&1 | tee wget.full.log | grep Replication | grep ACTIVE > wget.log
+   result=$?
+   if [ ${result} -ne 0 ]; then
+      echo "Error: failed to start replication"
+      exit 1
+   fi
+   sleep 1
+
+# Wait until it is all done
+   recorddone=0
+   try=0
+   while [ ${recorddone} -eq 0 -a ${try} -lt 100 ]; do   \
+      echo "Waiting for replication to start"
+      if [ ${try} -gt 99 ]; then
+         echo "Error server is not started after 10 0checks"
+         exit 1
+      fi
+      recorddone=`echo "use ${schema_name}; select sum(dbid) from Replication where openconnection = 'http://${webhost}:${http_port}' and probename = 'All' and (recordtable = 'JobUsageRecord' or recordtable = 'MetricRecord') " | readonly_mysql -s`
+      sleep 1
+   done
+   wait_for_input_use 0
+# And wait for the end of the 2nd run (send the duplicates).
+   job_new_max_dbid=`echo "use ${schema_name}; select max(dbid) from JobUsageRecord_Meta" | readonly_mysql -s`
+   metric_new_max_dbid=`echo "use ${schema_name}; select max(dbid) from MetricRecord_Meta" | readonly_mysql -s`
+   try=0
+   job_done=0
+   metric_done=0
+   while [ ${job_done} -lt $job_new_max_dbid -a ${metric_done} -lt $metric_new_max_dbid -a ${try} -lt 100 ]; do   \
+      echo -n "Waiting for replication to finish"
+      if [ ${try} -gt 99 ]; then
+         echo "Error server is not started after 100 checks"
+         exit 1
+      fi
+      job_done=`echo "use ${schema_name}; select dbid from Replication where openconnection = 'http://${webhost}:${http_port}' and probename = 'All' and (recordtable = 'JobUsageRecord') " | readonly_mysql -s`
+      metric_done=`echo "use ${schema_name}; select dbid from Replication where openconnection = 'http://${webhost}:${http_port}' and probename = 'All' and (recordtable = 'MetricRecord') " | readonly_mysql -s`
+      sleep 1
+      job_new_max_dbid=`echo "use ${schema_name}; select max(dbid) from JobUsageRecord_Meta" | readonly_mysql -s`
+      metric_new_max_dbid=`echo "use ${schema_name}; select max(dbid) from MetricRecord_Meta" | readonly_mysql -s`
+      echo " job: ${job_done} vs ${job_new_max_dbid} metric:  ${metric_done} vs $metric_new_max_dbid"
+   done
+   wait_for_input_use 0
+   
+# Repair the 'old data'
+   readwrite_mysql<<EOF 
+use ${schema_name};
+update JobUsageRecord_Meta set  ProbeName=Replace(ProbeName,"replic-","") where dbid <= ${job_max_dbid};
+update MetricRecord_Meta   set  ProbeName=Replace(ProbeName,"replic-","") where dbid <= ${metric_max_dbid};
+EOF
+
+}
+
 function wait_for_input_use {
-   expected_count=$1
+   # default to zero
+   if [ "x$1" = "x" ] ; then 
+      expected_count=0;
+   else
+      expected_count=$1
+   fi
    ssh ${webhost} ls ${tomcatpwd}/gratia/data/thread\? | wc -l > file.count
    while [ `tail -1 file.count` -gt ${expected_count} ]; do
       ssh ${webhost} ls ${tomcatpwd}/gratia/data/thread\? | wc -l > file.count
@@ -658,7 +742,7 @@ EOF
    echo "Check Origin"
    readonly_mysql > origin.validate 2>&1 <<EOF 
 use ${schema_name};
-select count(*)<60 from Origin;
+select count(*)<90 from Origin;
 EOF
 
   check_result $days duplicate "Duplicate"
@@ -809,7 +893,7 @@ function check_queue_threshold()
    check_result "" housekeeping-run-status "HouseKeeping Status when enabled"
 
    # Turn on updates to return to normal
-   adminCollector "stopDatabaseUpdateThreads" 2>>wget.threshold.stderr.log  | tee -a wget.threshold.full.log  | grep 'Database' >> wget.threshold.log
+   adminCollector "startDatabaseUpdateThreads" 2>>wget.threshold.stderr.log  | tee -a wget.threshold.full.log  | grep 'Database' >> wget.threshold.log
 } 
 
 function build_war()
@@ -837,8 +921,8 @@ function upload_war()
 #--- get command line args ----
 #while getopt :tshcfkdlmn:w:p:b: OPT; do
 
-ARGS=$(getopt -s bash --options :tshcfkdlmn:w:p:b:  \
-  --longoptions probes,help,exec: --name runCollectorTest.sh -- "$@" )
+ARGS=$(getopt -s bash --options :tshcfkdlrmn:w:p:b:  \
+  --longoptions all,probes,help,exec: --name runCollectorTest.sh -- "$@" )
 
 getoptresult=$?
 
@@ -877,6 +961,8 @@ while true ; do
             ;;
         -l)  do_load=1
             ;;
+        -r)  do_replication=1
+            ;;
         -d)  do_databasereset=1
             ;;
         -f)  do_fixup=1; 
@@ -899,6 +985,17 @@ while true ; do
             ;;
         --exec) do_routine=$OPTARG;
             shift
+            ;;
+        --all)
+            # Run everythin
+            do_databasereset=1
+            do_load=1
+            do_fixup=1;
+            do_probes=1
+            do_purge=1
+            do_replication=1
+            do_timeout=1
+            do_test=1
             ;;
         --)
             shift
@@ -958,7 +1055,6 @@ if [ $do_probes ] ; then
     wait_for_input_use 0
 fi
 
-
 if [ $do_fixup ]; then 
    fix_duplicate_date
    fix_server_date
@@ -971,6 +1067,10 @@ fi
 if [ $do_timeout ]; then
    check_timeout
    check_queue_threshold
+fi
+
+if [ $do_replication ] ; then 
+   replication
 fi
 
 if [ $do_test ]; then
