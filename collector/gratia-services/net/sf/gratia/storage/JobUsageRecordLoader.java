@@ -598,6 +598,8 @@ public class JobUsageRecordLoader extends RecordLoader {
                SetLimitedDescription(el, job, element, a, 255, "Network");
             } else if (a.getName().equalsIgnoreCase("metric")) {
                 el.setMetrics(a.getValue());
+            } else if (a.getName().equalsIgnoreCase("metrics")) {  // Support typo in older Collection's way of recreating the ressource.
+                el.setMetrics(a.getValue());
             } else if (a.getName().equalsIgnoreCase("phaseUnit")) {
                 el.setPhaseUnit(a.getValue());
             } else if (a.getName().equalsIgnoreCase("storageUnit")) {
@@ -623,6 +625,8 @@ public class JobUsageRecordLoader extends RecordLoader {
             if (a.getName().equalsIgnoreCase("description")) {
                SetLimitedDescription(el, job, element, a, 255, "Disj");
             } else if (a.getName().equalsIgnoreCase("metric")) {
+                el.setMetrics(a.getValue());
+            } else if (a.getName().equalsIgnoreCase("metrics")) { // Support typo in older Collection's way of recreating the ressource.
                 el.setMetrics(a.getValue());
             } else if (a.getName().equalsIgnoreCase("phaseUnit")) {
                 el.setPhaseUnit(a.getValue());
@@ -652,6 +656,8 @@ public class JobUsageRecordLoader extends RecordLoader {
                SetLimitedDescription(el, job, element, a, 255, "Memory");
             } else if (a.getName().equalsIgnoreCase("metric")) {
                 el.setMetrics(a.getValue());
+            } else if (a.getName().equalsIgnoreCase("metrics")) { // Support typo in older Collection's way of recreating the ressource.
+                el.setMetrics(a.getValue());
             } else if (a.getName().equalsIgnoreCase("phaseUnit")) {
                 el.setPhaseUnit(a.getValue());
             } else if (a.getName().equalsIgnoreCase("storageUnit")) {
@@ -679,6 +685,8 @@ public class JobUsageRecordLoader extends RecordLoader {
             if (a.getName().equalsIgnoreCase("description")) {
                SetLimitedDescription(el, job, element, a, 255, "Swap");
             } else if (a.getName().equalsIgnoreCase("metric")) {
+                el.setMetrics(a.getValue());
+            } else if (a.getName().equalsIgnoreCase("metrics")) { // Support typo in older Collection's way of recreating the ressource.
                 el.setMetrics(a.getValue());
             } else if (a.getName().equalsIgnoreCase("phaseUnit")) {
                 el.setPhaseUnit(a.getValue());

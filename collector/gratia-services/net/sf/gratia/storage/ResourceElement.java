@@ -108,7 +108,7 @@ public class ResourceElement implements XmlElement {
          e.printStackTrace();
       }
       if (StorageUnit != null) output.append("urwg:storageUnit=\"" + StringEscapeUtils.escapeXml(StorageUnit) + "\" ");
-      if (Metrics != null) output.append("urwg:metrics=\"" + StringEscapeUtils.escapeXml(Metrics) + "\" ");
+      if (Metrics != null) output.append("urwg:metric=\"" + StringEscapeUtils.escapeXml(Metrics) + "\" ");
       output.append(">" + Value + "</" + elementName + ">\n");
    }
 
