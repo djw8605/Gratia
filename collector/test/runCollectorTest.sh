@@ -626,7 +626,7 @@ EOF
    try=0
    job_done=0
    metric_done=0
-   while [ ${job_done} -lt $job_new_max_dbid -a ${metric_done} -lt $metric_new_max_dbid -a ${try} -lt 100 ]; do   \
+   while [ \( ${job_done} -lt $job_new_max_dbid -o ${metric_done} -lt $metric_new_max_dbid \) -a ${try} -lt 100 ]; do   \
       echo -n "Waiting for replication to finish"
       if [ ${try} -gt 99 ]; then
          echo "Error server is not started after 100 checks"
@@ -637,7 +637,7 @@ EOF
       sleep 1
       job_new_max_dbid=`echo "use ${schema_name}; select max(dbid) from JobUsageRecord_Meta" | readonly_mysql -s`
       metric_new_max_dbid=`echo "use ${schema_name}; select max(dbid) from MetricRecord_Meta" | readonly_mysql -s`
-      echo " job: ${job_done} vs ${job_new_max_dbid} metric:  ${metric_done} vs $metric_new_max_dbid"
+      echo " job: ${job_done} vs ${job_new_max_dbid} metric:  ${metric_done} vs ${metric_new_max_dbid}"
    done
    wait_for_input_use 0
    
