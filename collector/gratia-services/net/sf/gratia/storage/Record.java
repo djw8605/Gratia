@@ -196,7 +196,7 @@ public abstract class Record implements RecordInterface {
          hop++;
       }
    }
-   public void AttachOrigins( org.hibernate.Session session ) throws Exception
+   public void attachOrigins( org.hibernate.Session session ) throws Exception
    {
       if (Origins != null) {
          for(int i = 0; i < Origins.size(); i++) {

@@ -355,8 +355,8 @@ public class JobUsageRecord extends Record {
         return output.toString();
     }
 
-    public void AttachContent(org.hibernate.Session session) throws Exception {
-        AttachOrigins(session);
+    public void attachContent(org.hibernate.Session session) throws Exception {
+        attachOrigins(session);
     }
 
     public String getTableName() {

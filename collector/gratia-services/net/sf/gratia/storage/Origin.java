@@ -129,7 +129,7 @@ public class Origin
          output.append("</Origin>");
       }
       
-      public void AttachContent( org.hibernate.Session session ) throws Exception
+      public void attachContent( org.hibernate.Session session ) throws Exception
       {
          if (fConnection != null) {
             fConnection = fConnection.attach( session );
@@ -143,7 +143,7 @@ public class Origin
          // If an identical origin already exist in the DB return it.
          // If not, persist this instance.
          
-         AttachContent( session );
+         attachContent( session );
 
          // Logging.info("Origin.attach ("+java.util.TimeZone.getDefault().getDisplayName()+") for " + fOriginId + " : " + this );
 

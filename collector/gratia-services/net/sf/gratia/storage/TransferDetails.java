@@ -156,7 +156,8 @@ public class TransferDetails extends Record {
       return getJobUsageRecord().getStartTime().getValue();
    }
    
-   public void AttachContent( org.hibernate.Session session ) throws Exception {
+   public void attachContent( org.hibernate.Session session ) throws Exception {
+      attachOrigins(session);
    }
    
    ////////////////////////////////////////////////////////////////////

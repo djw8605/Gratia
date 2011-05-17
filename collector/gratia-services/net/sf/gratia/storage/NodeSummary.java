@@ -131,7 +131,8 @@ public class NodeSummary extends Record {
         return EndTime.getValue();
     }
 
-    public void AttachContent( org.hibernate.Session session ) throws Exception {
+    public void attachContent( org.hibernate.Session session ) throws Exception {
+       attachOrigins(session);
     }
 
     ////////////////////////////////////////////////////////////////////

@@ -496,6 +496,7 @@ public class RecordProcessor extends Thread {
             while (keepTrying) {
                ++nTries;
                try {
+                  collectorService.readLockCaches();
                   or_session = HibernateWrapper.getSession();
                   or_tx = or_session.beginTransaction();
                   origin = origin.attach(or_session);
@@ -503,7 +504,9 @@ public class RecordProcessor extends Thread {
                   or_tx.commit();
                   keepTrying = false;
                   or_session.close();
+                  collectorService.readUnLockCaches();
                } catch (ConstraintViolationException e) {
+                  collectorService.readUnLockCaches();
                   HibernateWrapper.closeSession( or_session );
                   switch (dupOriginHandler.maybeHandleDuplicateOrigin(e, ident + rId)) {
                   case DuplicateOriginHandler.HANDLED: break;
@@ -522,6 +525,7 @@ public class RecordProcessor extends Thread {
                      continue NEXTFILE; // Next file. 
                   }
                } catch (Exception e) {
+                  collectorService.readUnLockCaches();
                   HibernateWrapper.closeSession( or_session );
                   if (!LockFailureDetector.detectAndReportLockFailure(e, nTries, ident)) {
                      Logging.warning(ident + rId +
@@ -790,6 +794,7 @@ public class RecordProcessor extends Thread {
                while (keepTrying) {
                   ++nTries;
                   try {
+                     collectorService.readLockCaches();
                      rec_session = HibernateWrapper.getSession();
                      rec_tx = rec_session.beginTransaction();
                      //MPERF: Logging.fine(ident + rId + " attaching VO and other content.");
@@ -800,7 +805,7 @@ public class RecordProcessor extends Thread {
                         // themselves.
                         newVOUpdate.check(current, rec_session);
                         newClusterUpdate.check(current, rec_session);
-                        current.AttachContent(rec_session);
+                        current.attachContent(rec_session);
                         // Reduce contention on the attached objects (in particular Connection)
                         // to avoid DB deadlock.
                         Logging.debug(ident + rId + ": Before session flush");
@@ -854,7 +859,10 @@ public class RecordProcessor extends Thread {
                      }
                      nrecords = nrecords + 1;
                      Logging.fine(ident + rId + " saved.");
+                     
+                     collectorService.readUnLockCaches();
                   } catch (ConstraintViolationException e) {
+                     collectorService.readUnLockCaches();
                      HibernateWrapper.closeSession(rec_session);
                      if (rec_session.isOpen()) {
                         Logging.warning(ident + ": Communications error: " + "shutting down");
@@ -892,6 +900,7 @@ public class RecordProcessor extends Thread {
                         }
                      }
                   } catch (Exception e) {
+                     collectorService.readUnLockCaches();
                      HibernateWrapper.closeSession(rec_session);
                      if (rec_session.isOpen()) {
                         Logging.warning(ident + ": Communications error: " + "shutting down");

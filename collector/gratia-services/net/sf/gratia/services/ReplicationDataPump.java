@@ -11,6 +11,7 @@ import net.sf.gratia.util.LogLevel;
 import java.util.regex.Pattern;
 
 import java.math.BigInteger;
+import java.math.BigDecimal;
 import java.util.*;
 import java.sql.*;
 import java.io.*;
@@ -145,6 +146,8 @@ public class ReplicationDataPump extends Thread {
 
       Session session = null;
       List dbidList = null;
+      long maxdbid = 0;
+      long backlog = 0;
       try {
          session = HibernateWrapper.getSession();
          Transaction tx = session.beginTransaction();
@@ -205,10 +208,23 @@ public class ReplicationDataPump extends Thread {
          }
 
          String command = "SELECT M.dbid FROM " + tables + "  WHERE " + where;
+         String maxcommand = "select max(M.dbid) from " + tables + "  WHERE " + where;
+         String backlogcommand = "select sum(nRecords) from BacklogStatistics";
 
+         SQLQuery sq = session.createSQLQuery(maxcommand);
+         Object res = sq.uniqueResult();
+         if (res != null) {
+            maxdbid = ((BigInteger)res).longValue();
+         } else {
+            maxdbid = replicationEntry.getdbid();
+         }
+         
+         sq = session.createSQLQuery(backlogcommand);
+         backlog = ((BigDecimal)sq.uniqueResult()).longValue();
+         
          replicationLog(LogLevel.FINEST,
                         "Getting record information based on " + command);
-         SQLQuery sq = session.createSQLQuery(command);
+         sq = session.createSQLQuery(command);
          sq.setMaxResults(chunksize);
          dbidList = sq.list();
          int lSize = dbidList.size();
@@ -222,9 +238,7 @@ public class ReplicationDataPump extends Thread {
       } catch (Exception e) {
          HibernateWrapper.closeSession(session);
          replicationLog(LogLevel.WARNING,
-                        "Problem encountered obtaining list of records to replicate");
-         replicationLog(LogLevel.FINEST,
-                        "Exception details: ", e);
+                        "Problem encountered obtaining list of records to replicate",e);
          exitflag = true;
          return;
       }
@@ -262,7 +276,6 @@ public class ReplicationDataPump extends Thread {
                return; // Abandon unsent bundle
             }
             long prevdbid = dbid;
-            //dbid = ((Integer) dIter.next()).longValue();
             dbid = ((BigInteger) dIter.next()).longValue();
             String xml = getXML(dbid, replicationEntry.getrecordtable(), session);
             if (xml.length() == 0) {
@@ -275,7 +288,7 @@ public class ReplicationDataPump extends Thread {
                // to large for the receiving Collector.  So we need to
                // close-out and send the bundle.
                
-               uploadBundle(session,lowdbid,prevdbid,replicationTarget, xml_msg.toString(), bundle_count);
+               uploadBundle(session, lowdbid, prevdbid, maxdbid, backlog, replicationTarget, xml_msg.toString(), bundle_count);
                bundle_count = 0;
                xml_msg = new StringBuilder();
             }
@@ -287,7 +300,7 @@ public class ReplicationDataPump extends Thread {
             if (bundle_count == 0) lowdbid = dbid;
             bundle_count = bundle_count + 1;
             if (bundle_count == bundle_size) {
-               uploadBundle(session, lowdbid, dbid, replicationTarget, xml_msg.toString(),bundle_count);
+               uploadBundle(session, lowdbid, dbid, maxdbid, backlog, replicationTarget, xml_msg.toString(), bundle_count);
                if (exitflag)  {
                   session.close();
                   return;
@@ -297,15 +310,13 @@ public class ReplicationDataPump extends Thread {
             }
          } // End dbid loop
          if (bundle_count != 0) { // Send tag-end records.
-            uploadBundle(session, lowdbid, dbid, replicationTarget, xml_msg.toString(),bundle_count);
+            uploadBundle(session, lowdbid, dbid, maxdbid, backlog, replicationTarget, xml_msg.toString(), bundle_count);
          }
          session.close();
       } catch (Exception e) {
          HibernateWrapper.closeSession(session);
          replicationLog(LogLevel.WARNING,
-                        "Problem encountered duplicating records");
-         replicationLog(LogLevel.FINEST,
-                        "Exception details: ", e);
+                        "Problem encountered duplicating records",e);
       }
    }
 
@@ -328,13 +339,15 @@ public class ReplicationDataPump extends Thread {
       return buffer.toString();
    }
    
-   public Boolean uploadBundle(Session session, long lowdbid, long dbid, String replicationTarget, String xml, int bundle_count) 
+   public Boolean uploadBundle(Session session, long lowdbid, long dbid, long maxdbid, long backlog, String replicationTarget, String xml, int bundle_count) 
    throws java.lang.Exception 
    {
       // Upload a bundle
       
       replicationLog(LogLevel.FINE, "Sending: " + lowdbid + " to " + dbid);
-      if (uploadXML(replicationTarget, xml)) {
+      long left = maxdbid - dbid;
+      if (left < 0) { left = 0; }
+      if (uploadXML(replicationTarget, xml, bundle_count, left, backlog)) {
          // Successful -- update replication table entry
          session.refresh(replicationEntry);
          Transaction tx = session.beginTransaction();
@@ -352,12 +365,19 @@ public class ReplicationDataPump extends Thread {
       
    }
 
-   public Boolean uploadXML(String replicationTarget, String xml)
+   public Boolean uploadXML(String replicationTarget, String xml, int bundle_count, long record_left, long backlog)
       throws Exception {
 
       Boolean result = false;
       if (!replicationTarget.startsWith("file:")) {
          Post post = new Post(replicationTarget + "/gratia-servlets/rmi", "update", xml);
+
+         post.add("xmlfiles", String.valueOf(record_left));
+         post.add("tarfiles", String.valueOf(0)); 
+         post.add("maxpendingfiles", p.getProperty("max.q.size"));
+         post.add("backlog", String.valueOf(backlog));
+         post.add("bundlesize", String.valueOf(bundle_count));
+
          String response = post.send();        
          if (post.success && response != null) {
             String[] results = split(response, ":");

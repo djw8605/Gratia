@@ -794,10 +794,36 @@ public class CollectorService implements ServletContextListener {
       FlipSSL.flip();
    }
 
-   public void setConnectionCaching(boolean enable)
+   public void connectionResetAndLock()
    {
-      net.sf.gratia.storage.Connection.setCaching(enable);
+      // Reset and take a 'write' lock on the Connection cache table.
+      
+      net.sf.gratia.storage.Connection.collectionResetAndLock();
    }
+   
+   public void connectionResetUnLock()
+   {
+      // Release the write lock on the Connection cache table.
+
+      net.sf.gratia.storage.Connection.collectionResetUnLock();
+   }
+   
+   public void readLockCaches() {
+      // Take a read lock on __all__ the object caches.
+
+      net.sf.gratia.storage.Connection.collectionReadLock();
+      net.sf.gratia.storage.Collector.collectionReadLock();
+      net.sf.gratia.storage.Software.collectionReadLock();
+   }
+
+   public void readUnLockCaches() {
+      // Release a read lock on __all__ the object caches.
+
+      net.sf.gratia.storage.Connection.collectionReadUnLock();
+      net.sf.gratia.storage.Collector.collectionReadUnLock();
+      net.sf.gratia.storage.Software.collectionReadUnLock();
+   }
+   
    
    public String checkConnection(String certpem, String senderHost, String sender) 
    throws RemoteException, AccessException {

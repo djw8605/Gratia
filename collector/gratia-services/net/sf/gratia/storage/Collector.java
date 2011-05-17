@@ -5,7 +5,7 @@ import org.apache.commons.lang.StringEscapeUtils;
 /**
  * <p>Title: Collector </p>
  *
- * <p>Description: Use to hold the information about (remove) Collectors
+ * <p>Description: Use to hold the information about (remote) Collectors
  *
  * <p>Copyright: Copyright (c) 2005</p>
  *
@@ -128,6 +128,30 @@ public class Collector implements AttachableXmlElement
    
    private static AttachableCollection<Collector> fgSaved = new AttachableCollection<Collector>();
    
+   public static void collectionResetAndLock() 
+   {
+      // Reset and take a 'write' lock on the Collector cache table.
+      fgSaved.resetAndLock( );
+   }
+   
+   public static void collectionResetUnLock() 
+   {
+      // Release the write lock on the Collector cache table.
+      fgSaved.resetUnLock();
+   }
+   
+   public static void collectionReadLock() 
+   {
+      // Take a 'read' lock on the Collector cache table.
+      fgSaved.readLock( );
+   }
+   
+   public static void collectionReadUnLock() 
+   {
+      // Release the read lock on the Collector cache table.
+      fgSaved.readUnLock();
+   }
+
    public static Collector getCollector( org.hibernate.Session session, Collector check )  throws Exception
    {
       return fgSaved.getObject( session, check );         

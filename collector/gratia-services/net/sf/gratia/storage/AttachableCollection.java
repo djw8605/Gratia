@@ -15,23 +15,65 @@ package net.sf.gratia.storage;
 
 import net.sf.gratia.util.Logging;
 
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+
 public class AttachableCollection<Type extends AttachableXmlElement> {
 
    private java.util.Map<String, Type> fSaved = new java.util.HashMap<String,Type>();
    private long fMaxRecord = -1;
-   private boolean fEnable;
+   private boolean fEnable = true;
+   private ReentrantReadWriteLock fReadWriteLock = new ReentrantReadWriteLock();
    
    public AttachableCollection() 
    {
       
    }
+
+   public void resetAndLock() 
+   {
+      // Reset and take a 'write' lock on the Connection cache table.
+      fReadWriteLock.writeLock().lock();
+      fSaved.clear();      
+   }
+   
+   public void resetUnLock() 
+   {
+      // Release the write lock on the Connection cache table.
+      fReadWriteLock.writeLock().unlock();
+   }
+ 
+   public void readLock() 
+   {
+      // Reset and take a 'write' lock on the Connection cache table.
+      
+      if (fSaved.size() > fMaxRecord) {
+         // Need to remove some elements, since there is not (yet?) a good way to clear just a few
+         // of the oldest record, let's remove them all ... this is not ideal 
+         fReadWriteLock.writeLock().lock();
+         fSaved.clear();      
+         fReadWriteLock.readLock().lock(); 
+         fReadWriteLock.writeLock().unlock();
+      } else {   
+         fReadWriteLock.readLock().lock(); 
+      }
+   }
+   
+   public void readUnLock() 
+   {
+      // Release the write lock on the Connection cache table.
+      fReadWriteLock.readLock().unlock();
+   }
+   
    
    public synchronized void setCaching(boolean enable) {
       if (enable) {
          fEnable = true;
-      } else {
+      } else if (fEnable) {
          fEnable = false;
-         fSaved.clear();
+         resetAndLock();
+         resetUnLock();
+      } else {
+         // nothing to do
       }
    }
    
@@ -60,11 +102,6 @@ public class AttachableCollection<Type extends AttachableXmlElement> {
             } else {
                Logging.fine("AttachableCollection for " + cname + " use default cachesize of " + fMaxRecord);            
             }
-         }
-         if (fSaved.size() > fMaxRecord) {
-            // Need to remove some elements, since there is not (yet?) a good way to clear just a few
-            // of the oldest record, let's remove them all ... this is not ideal 
-            fSaved.clear();
          }
          fSaved.put( obj.getmd5(), obj );
       }

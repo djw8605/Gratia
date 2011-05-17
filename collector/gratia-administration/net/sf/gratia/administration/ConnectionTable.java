@@ -281,7 +281,7 @@ public class ConnectionTable extends HttpServlet
          Logging.debug("ConnectionTable: changing state of cid" + cid + " to " + (isValid ? "Allowed" : "Banned"));
          
          try {
-            getCollectorProxy().setConnectionCaching(false);
+            getCollectorProxy().connectionResetAndLock();
             Connection cert = fRepTable.get(cid);
             Connection updated = new Connection(cert);
             updated.setValid(isValid);
@@ -302,9 +302,9 @@ public class ConnectionTable extends HttpServlet
                }
                fRepTable.put( new Long(updated.getcid()), updated );
             }
-            fCollectorProxy.setConnectionCaching(true);
+            fCollectorProxy.connectionResetUnLock();
          } catch (Exception e) {
-            if (fCollectorProxy!=null) fCollectorProxy.setConnectionCaching(true);
+            if (fCollectorProxy!=null) fCollectorProxy.connectionResetUnLock();
             throw e;
          }
       }
@@ -316,7 +316,7 @@ public class ConnectionTable extends HttpServlet
          Session session = null;
          Transaction tx = null;
          try {
-            getCollectorProxy().setConnectionCaching(false);
+            getCollectorProxy().connectionResetAndLock();
             session = HibernateWrapper.getCheckedSession();
             tx = session.beginTransaction();
             
@@ -333,9 +333,9 @@ public class ConnectionTable extends HttpServlet
             tx.commit();
             session.close();
             fRepTable = updatedTable;
-            getCollectorProxy().setConnectionCaching(true);
+            getCollectorProxy().connectionResetUnLock();
          } catch (Exception e) {
-            if (fCollectorProxy!=null) fCollectorProxy.setConnectionCaching(true);
+            if (fCollectorProxy!=null) fCollectorProxy.connectionResetUnLock();
             HibernateWrapper.closeSession(session);
             reportError("Unable to save the state change:",e.getMessage());
             throw e;

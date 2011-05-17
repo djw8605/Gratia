@@ -139,10 +139,14 @@ public class JMSProxyImpl extends UnicastRemoteObject implements JMSProxy
       collectorService.disableHousekeepingService();
    }
 
-   public void setConnectionCaching(boolean enable) throws RemoteException {
-      collectorService.setConnectionCaching(enable);
+   public void connectionResetAndLock() throws RemoteException {
+      collectorService.connectionResetAndLock();
    }
    
+   public void connectionResetUnLock() throws RemoteException {
+      collectorService.connectionResetUnLock();
+   }
+
    public String checkConnection(java.security.cert.X509Certificate certs[], String senderHost, String sender) throws RemoteException, AccessException {
       return collectorService.checkConnection(certs,senderHost,sender);
    }

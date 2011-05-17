@@ -243,10 +243,28 @@ public class Connection implements AttachableXmlElement, Comparable
             
       private static AttachableCollection<Connection> fgSaved = new AttachableCollection<Connection>();
       
-      public static void setCaching(boolean enable) 
+      public static void collectionResetAndLock() 
       {
-         // Enable or disable the caching of connection.
-         fgSaved.setCaching( enable );
+         // Reset and take a 'write' lock on the Connection cache table.
+         fgSaved.resetAndLock( );
+      }
+      
+      public static void collectionResetUnLock() 
+      {
+         // Release the write lock on the Connection cache table.
+         fgSaved.resetUnLock();
+      }
+      
+      public static void collectionReadLock() 
+      {
+         // Take a 'read' lock on the Connection cache table.
+         fgSaved.readLock( );
+      }
+      
+      public static void collectionReadUnLock() 
+      {
+         // Release the read lock on the Connection cache table.
+         fgSaved.readUnLock();
       }
       
       public static Connection getConnection( org.hibernate.Session session, Connection check )  throws Exception

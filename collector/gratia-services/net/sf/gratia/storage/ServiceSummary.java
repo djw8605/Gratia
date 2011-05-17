@@ -85,7 +85,8 @@ public class ServiceSummary extends Record {
         return Timestamp.getValue();
     }
 
-    public void AttachContent( org.hibernate.Session session ) throws Exception {
+    public void attachContent( org.hibernate.Session session ) throws Exception {
+       attachOrigins(session);
     }
 
     public DateElement getTimestamp() {

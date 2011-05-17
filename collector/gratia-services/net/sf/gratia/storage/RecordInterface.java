@@ -45,5 +45,5 @@ public interface RecordInterface {
     // In case anything special needs to be done after saving.
     public void executeTrigger(org.hibernate.Session session) throws Exception;
 
-    public void AttachContent( org.hibernate.Session session ) throws Exception;
+    public void attachContent( org.hibernate.Session session ) throws Exception;
 }

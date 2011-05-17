@@ -108,7 +108,7 @@ public class MetricRecord extends Record
       
       StringBuilder output = new StringBuilder(""); // ("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
       output.append("<MetricRecord  xmlns:urwg=\"http://www.gridforum.org/2003/ur-wg\">\n");
-      if (!formd5) { 
+      if (true || !formd5) { 
          if (RecordIdentity != null) RecordIdentity.asXml(output);
       }
       if (ProbeName != null) ProbeName.asXml(output,"ProbeName");
@@ -135,9 +135,9 @@ public class MetricRecord extends Record
       return output.toString();
    }
 
-   public void AttachContent( org.hibernate.Session session ) throws Exception
+   public void attachContent( org.hibernate.Session session ) throws Exception
    {
-      AttachOrigins( session );
+      attachOrigins( session );
    }
 
    public String getTableName()
@@ -167,7 +167,7 @@ public class MetricRecord extends Record
    {
       RecordIdentity temp = getRecordIdentity();
       setRecordIdentity(null);
-      String md5key = Utils.md5key(asXML());
+      String md5key = Utils.md5key(asXML(true,optional));
       setRecordIdentity(temp);
 
       return md5key;

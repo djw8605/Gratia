@@ -1,7 +1,6 @@
 RecordType	error	count(*)
 NULL	Parse	12
 JobUsageRecord	CutoffDate	10
-JobUsageRecord	Duplicate	4
+JobUsageRecord	Duplicate	254
 JobUsageRecord	ExpirationDate	10
-JobUsageRecord	SQLError	250
-MetricRecord	SQLError	312
+MetricRecord	Duplicate	312

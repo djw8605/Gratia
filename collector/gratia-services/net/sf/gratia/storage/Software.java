@@ -128,6 +128,30 @@ public class Software implements AttachableXmlElement
 
       private static AttachableCollection<Software> fgSaved = new AttachableCollection<Software>();
 
+      public static void collectionResetAndLock() 
+      {
+         // Reset and take a 'write' lock on the Software cache table.
+         fgSaved.resetAndLock( );
+      }
+      
+      public static void collectionResetUnLock() 
+      {
+         // Release the write lock on the Software cache table.
+         fgSaved.resetUnLock();
+      }
+      
+      public static void collectionReadLock() 
+      {
+         // Take a 'read' lock on the Software cache table.
+         fgSaved.readLock( );
+      }
+      
+      public static void collectionReadUnLock() 
+      {
+         // Release the read lock on the Software cache table.
+         fgSaved.readUnLock();
+      }
+
       public static Software getSoftware( org.hibernate.Session session, Software check )  throws Exception
       {
          return fgSaved.getObject( session, check );         

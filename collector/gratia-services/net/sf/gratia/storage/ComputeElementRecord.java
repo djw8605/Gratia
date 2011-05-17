@@ -112,9 +112,9 @@ public class ComputeElementRecord extends Record
       return output.toString();
    }
 
-   public void AttachContent( org.hibernate.Session session ) throws Exception
+   public void attachContent( org.hibernate.Session session ) throws Exception
    {
-      AttachOrigins( session );
+      attachOrigins( session );
    }
 
    public String getTableName()
