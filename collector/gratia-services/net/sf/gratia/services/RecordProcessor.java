@@ -26,40 +26,45 @@ import org.hibernate.exception.ConstraintViolationException;
 
 public class RecordProcessor extends Thread {
 
-   final static long fileOldTime =
-      1000 * 60 * 60 * 24; // Empty files should be deleted after 1 day.
-   final static String replicationMarker = "replication";
-   final static String originMarker = "Origin";
-   String ident = null;
-   QueueManager.Queue queue = null;    // Location of the incoming messages.
-   Hashtable global;
-   long ninput = 0;                    // Number of input messages processed
-   long nrecords = 0;                  // Number of records processed;
-   String directory_part = null;       // stemp for history and old subdirectory
-   long recordsPerDirectory = 10000;   // Maximum number of records per directory.
-   CollectorService collectorService;
-   //
-   // database parameters
-   //
-   RecordUpdaterManager updater = new RecordUpdaterManager();
-   RecordConverter converter = new RecordConverter();
-   int itotal = 0;
-   Properties p;
-   StatusUpdater statusUpdater = null;
-   NewVOUpdate newVOUpdate = null;
-   NewClusterUpdate newClusterUpdate = null;
-   ErrorRecorder errorRecorder = new ErrorRecorder();
-   final Object lock;
-   String historypath = "";
+   final static long    fgFileOldTime = 1000 * 60 * 60 * 24; // Empty files should be deleted after 1 day.
+   final static String  fgReplicationMarker = "replication";
+   final static String  fgOriginMarker = "Origin";
+   final static Pattern fgDuplicateExceptionFinder = Pattern.compile("\\b[Dd]uplicate\\b");
+   final static Pattern fgMetaFinder = Pattern.compile("_Meta ");
+   final static Pattern fgOriginFinder = Pattern.compile("Origin ");
+   
+   Properties   fProperties;
+
+   final Object fLock;
+   String       fIdentity = null;
+
+   // Location of the data files.
+   String             fHistoryPath = "";
+   File               fQuarantineDir = null;
+   QueueManager.Queue fQueue = null;    // Location of the incoming messages.
+   long               fRecordsPerDirectory = 10000;   // Maximum number of records per directory.
+
+   // Main service object.
+   CollectorService fCollectorService;
+
+   // Helper and configuration objects.
+   RecordUpdaterManager fUpdater = new RecordUpdaterManager();
+   RecordConverter      fConverter = new RecordConverter();
+   StatusUpdater        fStatusUpdater = null;
+   NewVOUpdate          fNewVOUpdate = null;
+   NewClusterUpdate     fNewClusterUpdate = null;
+   ErrorRecorder        fErrorRecorder = new ErrorRecorder();
+
+   // Message passing and caching collections.
+   Hashtable              fGlobal;
    Hashtable<String,Long> fProbeDetails = new Hashtable<String,Long>();
-   static Pattern duplicateExceptionFinder = Pattern.compile("\\b[Dd]uplicate\\b");
-   static Pattern metaFinder = Pattern.compile("_Meta ");
-   static Pattern originFinder = Pattern.compile("Origin ");
-   File quarantineDir = null;
+
    //
    // various things used in the update loop
    //
    boolean stopflag = false;
+   long fNFiles = 0;                    // Number of files processed;
+   long fNRecords = 0;                  // Number of records processed;
 
    private class DuplicateOriginHandler {
 
@@ -76,18 +81,18 @@ public class RecordProcessor extends Thread {
       }
 
       public int maybeHandleDuplicateOrigin(ConstraintViolationException e, String ident) {
-         if (duplicateExceptionFinder.matcher(e.getSQLException().getMessage()).find() &&
-             originFinder.matcher(e.getSQL()).find()) {
+         if (fgDuplicateExceptionFinder.matcher(e.getSQLException().getMessage()).find() &&
+             fgOriginFinder.matcher(e.getSQL()).find()) {
             if (++fTries < TOO_MANY_DUPS) {
-               Logging.fine(ident + ": detected " + fTries +
+               Logging.fine(fIdentity + ": detected " + fTries +
                             ((fTries > 1)?" consecutive ":"") +
                             " duplicate origin " + ((fTries > 1)?"entries":"entry") + " -- retry.");
-               Logging.debug(ident + ": exception details: ", e);
+               Logging.debug(fIdentity + ": exception details: ", e);
                return HANDLED;
             } else {
-               Logging.warning(ident + ": detected too many consecutive duplicate origin failures (" +
+               Logging.warning(fIdentity + ": detected too many consecutive duplicate origin failures (" +
                                fTries + " while processing origin entry.)");
-               Logging.debug(ident + ": exception details: ", e);
+               Logging.debug(fIdentity + ": exception details: ", e);
                return TOO_MANY_DUPS;
             }
          } else {
@@ -103,45 +108,43 @@ public class RecordProcessor extends Thread {
                           Object lock,
                           Hashtable global,
                           CollectorService collectorService) {
-      this.ident = ident;
-      this.queue = queue;
-      this.lock = lock;
-      this.global = global;
-      this.collectorService = collectorService;
-
-      this.directory_part = queue.getShortName();
+      this.fIdentity = ident;
+      this.fQueue = queue;
+      this.fLock = lock;
+      this.fGlobal = global;
+      this.fCollectorService = collectorService;
 
       loadProperties();
       try {
-         String url = p.getProperty("service.jms.url");
-         Logging.info(ident + ": " + queue.toString() + ": Started");
+         String url = fProperties.getProperty("service.jms.url");
+         Logging.info(fIdentity + ": " + fQueue.toString() + ": Started");
       } catch (Exception e) {
-         Logging.warning(ident + ": ERROR! Serious problems starting recordProcessor");
-         Logging.debug(ident + "Exception detail: ", e);
+         Logging.warning(fIdentity + ": ERROR! Serious problems starting recordProcessor");
+         Logging.debug(fIdentity + "Exception detail: ", e);
       }
-      historypath = System.getProperties().getProperty("catalina.home");
-      if (historypath == null) {
-         historypath = ".";
+      fHistoryPath = System.getProperties().getProperty("catalina.home");
+      if (fHistoryPath == null) {
+         fHistoryPath = ".";
       }
-      historypath = historypath + "/gratia/data/";
+      fHistoryPath = fHistoryPath + "/gratia/data/";
 
-      quarantineDir = new File(historypath + 
+      fQuarantineDir = new File(fHistoryPath + 
                                "quarantine");
-      quarantineDir.mkdirs();
+      fQuarantineDir.mkdirs();
 
-      JobUsageRecordUpdater.AddDefaults(updater);
+      JobUsageRecordUpdater.AddDefaults(fUpdater);
    }
 
    public void loadProperties() {
-      p = Configuration.getProperties();
+      fProperties= Configuration.getProperties();
 
       try {
          long max_record =
-            Long.parseLong(p.getProperty("maintain.recordsPerDirectory"));
-         recordsPerDirectory = max_record;
+            Long.parseLong(fProperties.getProperty("maintain.recordsPerDirectory"));
+         fRecordsPerDirectory = max_record;
       } catch (Exception e) {
          // Only issue a warning here
-         Logging.warning(ident +
+         Logging.warning(fIdentity +
                          ": Failed to parse property " +
                          "maintain.recordsPerDirectory");
       }
@@ -149,19 +152,19 @@ public class RecordProcessor extends Thread {
 
    public void stopRequest() {
       stopflag = true;
-      Logging.fine(ident + ": Stop Requested");
+      Logging.fine(fIdentity + ": Stop Requested");
    }
 
    @Override
       public void run() {
       while (true) {
          if (stopflag) {
-            Logging.info(ident + ": Exiting");
+            Logging.info(fIdentity + ": Exiting");
             return;
          }
 
          if (!HibernateWrapper.databaseUp()) {
-            Logging.log(ident + ": Hibernate Down: Sleeping");
+            Logging.log(fIdentity + ": Hibernate Down: Sleeping");
             try {
                Thread.sleep(30 * 1000);
             } catch (Exception ignore) {
@@ -169,12 +172,12 @@ public class RecordProcessor extends Thread {
             continue;
          }
          if (stopflag) {
-            Logging.info(ident + ": Exiting");
+            Logging.info(fIdentity + ": Exiting");
             return;
          }
          int nfiles = loop();
          if (stopflag) {
-            Logging.info(ident + ": Exiting");
+            Logging.info(fIdentity + ": Exiting");
             return;
          }
          if (nfiles == 0) {
@@ -204,7 +207,7 @@ public class RecordProcessor extends Thread {
       // Return the number of files seen.
       // or 0 in the case of error.
 
-      String files[] = queue.getFileList();
+      String files[] = fQueue.getFileList();
 
       int nfiles = 0;
 
@@ -212,13 +215,13 @@ public class RecordProcessor extends Thread {
          return 0;
       }
 
-      statusUpdater = new StatusUpdater();
-      newVOUpdate = new NewVOUpdate();
-      newClusterUpdate = new NewClusterUpdate();
+      fStatusUpdater = new StatusUpdater();
+      fNewVOUpdate = new NewVOUpdate();
+      fNewClusterUpdate = new NewClusterUpdate();
 
       NEXTFILE:
       for (int i = 0; i < files.length; ++i) { // Loop over files
-         global.put("recordProcessor", new java.util.Date());
+         fGlobal.put("recordProcessor", new java.util.Date());
             
          if (stopflag) { // Stop requested
             break;
@@ -226,27 +229,27 @@ public class RecordProcessor extends Thread {
          ++nfiles;
          file.reset( files[i] );
          
-         //MPERF: Logging.fine(ident + ": Start Processing: " + file);
+         //MPERF: Logging.fine(fIdentity + ": Start Processing: " + file);
          try {
             blob = file.getData();
          } catch (FileNotFoundException e) {
             Utils.GratiaError("RecordProcessor",
                               "XML file read",
-                              ident + ": Unable to find file " + file.getPath() + "; FS trouble or two collectors running?");
+                              fIdentity + ": Unable to find file " + file.getPath() + "; FS trouble or two collectors running?");
             continue; // Next file
          } catch (IOException e) {
             Utils.GratiaError("RecordProcessor",
                               "XML file read",
-                              ident + ": Error " + e.getMessage() + " while trying to read " + file.getPath());
+                              fIdentity + ": Error " + e.getMessage() + " while trying to read " + file.getPath());
             saveQuarantineFile(file, "Error reading file: ", e);
             continue; // Next file
          }
          if (blob.length() == 0) { // Empty file -- how old is it.
-            if (file.getAge() > fileOldTime) {
-               Logging.info(ident + ": removing old empty file " + file.getPath());
-               queue.deleteFile(file);               
+            if (file.getAge() > fgFileOldTime) {
+               Logging.info(fIdentity + ": removing old empty file " + file.getPath());
+               fQueue.deleteFile(file);               
             } else { // Skip file
-               Logging.log(ident + ": deferring read of recent empty file " + file.getPath());
+               Logging.log(fIdentity + ": deferring read of recent empty file " + file.getPath());
                continue;
             }
          }
@@ -257,13 +260,11 @@ public class RecordProcessor extends Thread {
          historydatelist.clear();
 
          gotreplication = gothistory = false;
-
-         ninput = ninput + 1;
-
+   
          try {
             saveIncoming(blob);
          } catch (IOException e) {
-            Logging.warning(ident +
+            Logging.warning(fIdentity +
                             ": ERROR! Loop failed to backup incoming " +
                             "message. \nError: " +
                             e.getMessage() + "\n");
@@ -275,15 +276,15 @@ public class RecordProcessor extends Thread {
          //
          // see if trace requested
          //
-         if (p.getProperty("service.datapump.trace").equals("1")) {
-            Logging.debug(ident + ": XML Trace:" + "\n\n" + blob + "\n\n");
+         if (fProperties.getProperty("service.datapump.trace").equals("1")) {
+            Logging.debug(fIdentity + ": XML Trace:" + "\n\n" + blob + "\n\n");
          }
 
          // See if we have an origin preceding the data.
          ReplicationTokenizer st = null;
          String nextpart = blob;
 
-         if (blob.startsWith(originMarker)) {
+         if (blob.startsWith(fgOriginMarker)) {
             st = new ReplicationTokenizer(blob, "|");
             if (st.hasMoreTokens()) {
                // skip marker
@@ -291,13 +292,13 @@ public class RecordProcessor extends Thread {
                if (st.hasMoreTokens()) {
                   String originStr = st.nextToken();
                   try {
-                     origin = converter.convertOrigin(originStr);
+                     origin = fConverter.convertOrigin(originStr);
                      if (origin != null && origin.getConnection() != null) {
                         file.setFrom( origin.getConnection().getSender() );
                      }
                   } catch (Exception e) {
-                     Logging.warning(ident + ": Origin parse error:  ", e);
-                     Logging.warning(ident + ": XML:  " + "\n" + originStr);
+                     Logging.warning(fIdentity + ": Origin parse error:  ", e);
+                     Logging.warning(fIdentity + ": XML:  " + "\n" + originStr);
                   }
                }
             }
@@ -312,7 +313,7 @@ public class RecordProcessor extends Thread {
          //
          try {
             int nseen = 0;
-            if (nextpart.startsWith(replicationMarker)) {
+            if (nextpart.startsWith(fgReplicationMarker)) {
                if (st == null) {
                   // We could assert that nextpart == blob
                   st = new ReplicationTokenizer(blob, "|");
@@ -326,7 +327,7 @@ public class RecordProcessor extends Thread {
 
                while (st.hasMoreTokens()) {
                   String val = st.nextToken();
-                  if (val.equals(replicationMarker) && st.hasMoreTokens()) {
+                  if (val.equals(fgReplicationMarker) && st.hasMoreTokens()) {
                      val = st.nextToken();
                   }
                   xml = xml.concat(val);
@@ -338,10 +339,10 @@ public class RecordProcessor extends Thread {
                   if (st.hasMoreTokens()) {
                      // The extraxml can be directly followed by the word 'replication'
                      String extraxml = st.nextToken();
-                     if (extraxml.endsWith(replicationMarker)) {
+                     if (extraxml.endsWith(fgReplicationMarker)) {
                         extraxml =
                            extraxml.substring(0, extraxml.length() -
-                                              replicationMarker.length());
+                                              fgReplicationMarker.length());
                      }
                      extraxmllist.add(extraxml);
                   } else {
@@ -423,20 +424,20 @@ public class RecordProcessor extends Thread {
                   "<RecordEnvelope>" + xml + "</RecordEnvelope>";
             }
          } catch (Exception e) {
-            Logging.warning(ident + ": Error:Processing File: " + file);
-            Logging.warning(ident + ": Blob: " + blob);
+            Logging.warning(fIdentity + ": Error:Processing File: " + file);
+            Logging.warning(fIdentity + ": Blob: " + blob);
             saveQuarantineFile(file, "Error parsing file: ", e);
             continue; // Next file.
          }
 
          if (xml == null) {
-            Logging.warning(ident + ": No data to process: " + file);
-            saveQuarantineFile(file, "Unable to identify XML in file");
+            Logging.warning(fIdentity + ": No data to process: " + file);
+            saveQuarantineFile(file, "Unable to fIdentityify XML in file");
             continue; // Next file.
          }
 
-         //MPERF: Logging.fine(ident + ": Processing: " + file);
-         Logging.log(ident + ": Processing: " + file.getPath());
+         //MPERF: Logging.fine(fIdentity + ": Processing: " + file);
+         Logging.log(fIdentity + ": Processing: " + file.getPath());
 
          ArrayList records = new ArrayList();
 
@@ -450,20 +451,20 @@ public class RecordProcessor extends Thread {
             }
             records = convert(xml);
             if (records.size() > 1) {
-               Logging.log(ident + ": Received envelope of " +
+               Logging.log(fIdentity + ": Received envelope of " +
                            records.size() + " records");
             }
          } catch (Exception e) {
             try {
                if (gotreplication) {
-                  Logging.fine(ident + ": Received bad replication XML");
-                  errorRecorder.saveParse("Replication", "Parse", xml);
+                  Logging.fine(fIdentity + ": Received bad replication XML");
+                  fErrorRecorder.saveParse("Replication", "Parse", xml);
                } else if (gothistory) {
-                  Logging.fine(ident + ": Received bad history XML");
-                  errorRecorder.saveParse("History", "Parse", xml);
+                  Logging.fine(fIdentity + ": Received bad history XML");
+                  fErrorRecorder.saveParse("History", "Parse", xml);
                } else {
-                  Logging.fine(ident + ": Received bad probe XML");
-                  errorRecorder.saveParse("Probe", "Parse", xml);
+                  Logging.fine(fIdentity + ": Received bad probe XML");
+                  fErrorRecorder.saveParse("Probe", "Parse", xml);
                }
             } catch (Exception ignore) {
                // Even if there's a connection problem, ignore it, save
@@ -475,7 +476,7 @@ public class RecordProcessor extends Thread {
          int rSize = records.size();
          file.setNRecords(rSize);
 
-         //MPERF: Logging.fine(ident+ ": converted " + rSize + " records");
+         //MPERF: Logging.fine(fIdentity+ ": converted " + rSize + " records");
          DuplicateOriginHandler dupOriginHandler = new DuplicateOriginHandler();
          if (origin != null) {
             // Save the origin first in its own transaction, so to 
@@ -496,7 +497,7 @@ public class RecordProcessor extends Thread {
             while (keepTrying) {
                ++nTries;
                try {
-                  collectorService.readLockCaches();
+                  fCollectorService.readLockCaches();
                   or_session = HibernateWrapper.getSession();
                   or_tx = or_session.beginTransaction();
                   origin = origin.attach(or_session);
@@ -504,11 +505,11 @@ public class RecordProcessor extends Thread {
                   or_tx.commit();
                   keepTrying = false;
                   or_session.close();
-                  collectorService.readUnLockCaches();
+                  fCollectorService.readUnLockCaches();
                } catch (ConstraintViolationException e) {
-                  collectorService.readUnLockCaches();
+                  fCollectorService.readUnLockCaches();
                   HibernateWrapper.closeSession( or_session );
-                  switch (dupOriginHandler.maybeHandleDuplicateOrigin(e, ident + rId)) {
+                  switch (dupOriginHandler.maybeHandleDuplicateOrigin(e, fIdentity + rId)) {
                   case DuplicateOriginHandler.HANDLED: break;
                   case DuplicateOriginHandler.TOO_MANY_DUPS:
                      saveQuarantineFile(file, "Too many consecutive duplicate origin failures in origin initial storing (" +
@@ -517,27 +518,27 @@ public class RecordProcessor extends Thread {
                      continue NEXTFILE; // Next file.                              
                   case DuplicateOriginHandler.NOT_RELEVANT:
                   default:
-                     Logging.warning(ident + rId +
+                     Logging.warning(fIdentity + rId +
                                      ": received unexpected constraint violation exception " +
                                      e.getMessage() + " while processing origin entry.");
-                     Logging.debug(ident + rId + ": exception details:", e);
+                     Logging.debug(fIdentity + rId + ": exception details:", e);
                      saveQuarantineFile(file, "Problem processing origin entry for record file: ", e);
                      continue NEXTFILE; // Next file. 
                   }
                } catch (Exception e) {
-                  collectorService.readUnLockCaches();
+                  fCollectorService.readUnLockCaches();
                   HibernateWrapper.closeSession( or_session );
-                  if (!LockFailureDetector.detectAndReportLockFailure(e, nTries, ident)) {
-                     Logging.warning(ident + rId +
+                  if (!LockFailureDetector.detectAndReportLockFailure(e, nTries, fIdentity)) {
+                     Logging.warning(fIdentity + rId +
                                      ": received unexpected exception " +
                                      e.getMessage() + " while processing origin entry.");
-                     Logging.debug(ident + rId + ": exception details:", e);
+                     Logging.debug(fIdentity + rId + ": exception details:", e);
                      saveQuarantineFile(file, "Problem processing origin entry for record file: ", e);
                      continue NEXTFILE; // Next file. 
                   }
                }
             }
-            //MPERF: Logging.fine(ident + rId + " saved Origin object.");
+            //MPERF: Logging.fine(fIdentity + rId + " saved Origin object.");
          }
          NEXTRECORD: for (int j = 0; j < rSize; ++j) { // Loop over records in file
             if (stopflag) { // Stop requested. Quit processing completely (don't delete this input file)
@@ -566,7 +567,7 @@ public class RecordProcessor extends Thread {
 
             Probe probe;
                 
-            //MPERF: Logging.fine(ident + rId + " starting hibernate operations.");
+            //MPERF: Logging.fine(fIdentity + rId + " starting hibernate operations.");
             int nTries = 0;
             boolean keepTrying = true;
             Session pr_session = null;
@@ -577,7 +578,7 @@ public class RecordProcessor extends Thread {
                   pr_session = HibernateWrapper.getSession();
                   pr_tx = pr_session.beginTransaction();
 
-                  probe = statusUpdater.update(pr_session, current, xml);
+                  probe = fStatusUpdater.update(pr_session, current, xml);
                   pr_session.flush();
                   pr_tx.commit();
                   // Set the probe on the current object.
@@ -587,44 +588,44 @@ public class RecordProcessor extends Thread {
                } catch (Exception e) {
                   HibernateWrapper.closeSession( pr_session );
                   if (pr_session.isOpen()) {
-                     Logging.warning(ident + ": Communications error: " + "shutting down");
+                     Logging.warning(fIdentity + ": Communications error: " + "shutting down");
                      return 0; // Session could not close; DB problem
                   }
-                  if (!LockFailureDetector.detectAndReportLockFailure(e, nTries, ident)) {
+                  if (!LockFailureDetector.detectAndReportLockFailure(e, nTries, fIdentity)) {
                      keepTrying = false;
                      if (handleUnexpectedException(rId, e, gotreplication, current)) {
                         continue NEXTRECORD; // Process next record.
                      } else {
-                        Logging.warning(ident + ": Communications error: " + "shutting down");
+                        Logging.warning(fIdentity + ": Communications error: " + "shutting down");
                         return 0; // DB access problem.
                      }
                   }
                }
             }
-            //MPERF: Logging.fine(ident + rId + " saved probe object.");
+            //MPERF: Logging.fine(fIdentity + rId + " saved probe object.");
 
 
             // Fix up the record; in particular set EndTime if it is out of whack.
             try {
-               updater.Update(current);
+               fUpdater.Update(current);
             } catch (RecordUpdater.UpdateException e) {
                // One of the updater found the record to be improper for storage
                // For example a Job Usage Record might be missing EndTime and 
                // at least StartTime and WallDuration (i.e. we have no clue about
                // the EndTime).
-               Logging.warning(ident + rId + ": Error in record updating: " + e.getMessage());
-               Logging.debug(ident + rId + ": exception details: ", e);
+               Logging.warning(fIdentity + rId + ": Error in record updating: " + e.getMessage());
+               Logging.debug(fIdentity + rId + ": exception details: ", e);
                if ((e.getCause() instanceof ConnectionException) ||
                    (e.getCause() instanceof com.mysql.jdbc.CommunicationsException) ||
                    (!HibernateWrapper.databaseUp())) {
-                  Logging.warning(ident + ": Communications error: " + "shutting down");
+                  Logging.warning(fIdentity + ": Communications error: " + "shutting down");
                   return 0; // DB access trouble.
                } else {
                   try {
                      if (gotreplication) {
-                        errorRecorder.saveSQL("Replication", "RecordUpdate", current);
+                        fErrorRecorder.saveSQL("Replication", "RecordUpdate", current);
                      } else {
-                        errorRecorder.saveSQL("Probe", "RecordUpdate", current);
+                        fErrorRecorder.saveSQL("Probe", "RecordUpdate", current);
                      }
                   } catch (Exception e2) {
                      saveQuarantineFile(file, "Unexpected error while recording RecordUpdate error", e2);
@@ -633,20 +634,20 @@ public class RecordProcessor extends Thread {
                }
             } catch (Exception e) {
                // Humm an unexception exception.
-               Logging.warning(ident + rId + ": Error in record updating: " + e.getMessage());
-               Logging.debug(ident + rId + ": exception details: ", e);
+               Logging.warning(fIdentity + rId + ": Error in record updating: " + e.getMessage());
+               Logging.debug(fIdentity + rId + ": exception details: ", e);
                if ((e instanceof ConnectionException) ||
                    (e instanceof com.mysql.jdbc.CommunicationsException) ||
                    (e.getCause() instanceof com.mysql.jdbc.CommunicationsException) ||
                    (!HibernateWrapper.databaseUp())) {
-                  Logging.warning(ident + ": Communications error: " + "shutting down");
+                  Logging.warning(fIdentity + ": Communications error: " + "shutting down");
                   return 0; // DB access trouble.
                } else {
                   try {
                      if (gotreplication) {
-                        errorRecorder.saveSQL("Replication", "RecordUpdateInternalError", current);
+                        fErrorRecorder.saveSQL("Replication", "RecordUpdateInternalError", current);
                      } else {
-                        errorRecorder.saveSQL("Probe", "RecordUpdateInternalError", current);
+                        fErrorRecorder.saveSQL("Probe", "RecordUpdateInternalError", current);
                      }
                   } catch (Exception e2) {
                      saveQuarantineFile(file, "Unexpected error while recording RecordUpdate error", e2);
@@ -656,7 +657,7 @@ public class RecordProcessor extends Thread {
             }
             
             boolean acceptRecord = true;
-            if (!collectorService.housekeepingServiceDisabled()) {
+            if (!fCollectorService.housekeepingServiceDisabled()) {
                Date date;
                try {
                   date = current.getDate();
@@ -668,27 +669,27 @@ public class RecordProcessor extends Thread {
                   acceptRecord = false;
                   try {
                      if (gotreplication) {
-                        Logging.fine(ident + rId +
+                        Logging.fine(fIdentity + rId +
                                      ": Rejected record because " +
                                      "its data are too old (" +
                                      current.getDate() + " < " +
                                      expirationRange.fExpirationDate + ")");
-                        errorRecorder.saveDuplicate("Replication",
+                        fErrorRecorder.saveDuplicate("Replication",
                                                     "ExpirationDate",
                                                     0, current);
                      } else if (gothistory) {
-                        Logging.fine(ident + rId +
+                        Logging.fine(fIdentity + rId +
                                      ": Ignored history record " +
                                      "because data are is too " +
                                      "old (" + current.getDate() +
                                      " < " + expirationRange.fExpirationDate + ")");
                      } else {
-                        Logging.fine(ident + rId +
+                        Logging.fine(fIdentity + rId +
                                      ": Rejected record because " +
                                      "its data are too old (" +
                                      current.getDate() + " < " +
                                      expirationRange.fExpirationDate + ")");
-                        errorRecorder.saveDuplicate("Probe",
+                        fErrorRecorder.saveDuplicate("Probe",
                                                     "ExpirationDate",
                                                     0, current);
                      }
@@ -697,7 +698,7 @@ public class RecordProcessor extends Thread {
                         saveQuarantineFile(file, "Unexpected error while recording expired record", e);
                         continue NEXTRECORD; // Process next record.
                      } else {
-                        Logging.warning(ident + ": Communications error: " + "shutting down");
+                        Logging.warning(fIdentity + ": Communications error: " + "shutting down");
                         return 0; // DB access problem.
                      }
 
@@ -706,27 +707,27 @@ public class RecordProcessor extends Thread {
                   acceptRecord = false;
                   try {
                      if (gotreplication) {
-                        Logging.fine(ident + rId +
+                        Logging.fine(fIdentity + rId +
                                      ": Rejected record because " +
                                      "its data are too far in the future (" +
                                      current.getDate() + " < " +
                                      expirationRange.fCutoffDate + ")");
-                        errorRecorder.saveDuplicate("Replication",
+                        fErrorRecorder.saveDuplicate("Replication",
                                                     "CutoffDate",
                                                     0, current);
                      } else if (gothistory) {
-                        Logging.fine(ident + rId +
+                        Logging.fine(fIdentity + rId +
                                      ": Ignored history record " +
                                      "because its data are too " +
                                      "far in the future (" + current.getDate() +
                                      " < " + expirationRange.fCutoffDate + ")");
                      } else {
-                        Logging.fine(ident + rId +
+                        Logging.fine(fIdentity + rId +
                                      ": Rejected record because " +
                                      "its data are too far in the future (" +
                                      current.getDate() + " > " +
                                      expirationRange.fCutoffDate + ")");
-                        errorRecorder.saveDuplicate("Probe",
+                        fErrorRecorder.saveDuplicate("Probe",
                                                     "CutoffDate",
                                                     0, current);
                      }
@@ -735,7 +736,7 @@ public class RecordProcessor extends Thread {
                         saveQuarantineFile(file, "Unexpected error while recording expired record", e);
                         continue NEXTRECORD; // Process next record.
                      } else {
-                        Logging.warning(ident + ": Communications error: " + "shutting down");
+                        Logging.warning(fIdentity + ": Communications error: " + "shutting down");
                         return 0; // DB access problem.
                      }
                      
@@ -758,7 +759,7 @@ public class RecordProcessor extends Thread {
                      saveQuarantineFile(file, "Unexpected error while calculating checksum for record", e);
                      continue NEXTRECORD;
                   } else {
-                     Logging.warning(ident + ": Communications error: " + "shutting down");
+                     Logging.warning(fIdentity + ": Communications error: " + "shutting down");
                      return 0; // DB access problem.
                   }
                }
@@ -769,7 +770,7 @@ public class RecordProcessor extends Thread {
                Long pd_dbid = fProbeDetails.get(current.getmd5());
                if (pd_dbid != null) {
                   // This is a duplicate.
-                  Logging.fine(ident + rId +
+                  Logging.fine(fIdentity + rId +
                                ": " + "(fast) Ignore duplicate of record " +
                                pd_dbid);
                   acceptRecord = false;
@@ -780,7 +781,7 @@ public class RecordProcessor extends Thread {
                current.setDuplicate(false);
                dupOriginHandler.reset(); // Start counting duplicate origins from 0.
                if (origin != null) {
-                  //MPERF: Logging.fine(ident + rId + " about to add origin objects.");
+                  //MPERF: Logging.fine(fIdentity + rId + " about to add origin objects.");
                   current.addOrigin(origin);
                }
 
@@ -794,24 +795,24 @@ public class RecordProcessor extends Thread {
                while (keepTrying) {
                   ++nTries;
                   try {
-                     collectorService.readLockCaches();
+                     fCollectorService.readLockCaches();
                      rec_session = HibernateWrapper.getSession();
                      rec_tx = rec_session.beginTransaction();
-                     //MPERF: Logging.fine(ident + rId + " attaching VO and other content.");
-                     synchronized (lock) {
-                        // Synchronize on lock so we're guaranteed only
+                     //MPERF: Logging.fine(fIdentity + rId + " attaching VO and other content.");
+                     synchronized (fLock) {
+                        // Synchronize on fLock so we're guaranteed only
                         // one run per collector, not one per thread if
                         // we were synchronizing on the objects
                         // themselves.
-                        newVOUpdate.check(current, rec_session);
-                        newClusterUpdate.check(current, rec_session);
+                        fNewVOUpdate.check(current, rec_session);
+                        fNewClusterUpdate.check(current, rec_session);
                         current.attachContent(rec_session);
                         // Reduce contention on the attached objects (in particular Connection)
                         // to avoid DB deadlock.
-                        Logging.debug(ident + rId + ": Before session flush");
+                        Logging.debug(fIdentity + rId + ": Before session flush");
                         rec_session.flush();
                      }
-                     //MPERF: Logging.fine(ident + rId + " managing RawXML.");
+                     //MPERF: Logging.fine(fIdentity + rId + " managing RawXML.");
                      incomingxml = current.getRawXml();
                      rawxml = null;
                      extraxml = null;
@@ -836,36 +837,36 @@ public class RecordProcessor extends Thread {
                            current.setExtraXml(extraxml);
                         }
                      }
-                     Logging.debug(ident + rId + ": Before Hibernate Save");
+                     Logging.debug(fIdentity + rId + ": Before Hibernate Save");
                      if (gothistory) {
                         Date serverDate = new Date(Long.parseLong((String) historydatelist.get(j)));
                         current.setServerDate(serverDate);
                      }
-                     //MPERF: Logging.fine(ident + rId + " saving object.");
+                     //MPERF: Logging.fine(fIdentity + rId + " saving object.");
                      rec_session.save(current);
-                     //MPERF: Logging.fine(ident + rId + " executing trigger.");
+                     //MPERF: Logging.fine(fIdentity + rId + " executing trigger.");
                      current.executeTrigger(rec_session);
-                     //MPERF: Logging.fine(ident + rId + " executing flush.");
+                     //MPERF: Logging.fine(fIdentity + rId + " executing flush.");
                      rec_session.flush();
-                     //MPERF: Logging.fine(ident + rId + " executing comming.");
+                     //MPERF: Logging.fine(fIdentity + rId + " executing comming.");
                      rec_tx.commit();
                      keepTrying = false;
                      rec_session.close();
-                     //MPERF: Logging.fine(ident + ": After Transaction Commit");
+                     //MPERF: Logging.fine(fIdentity + ": After Transaction Commit");
                      // Save history
                      if (!gothistory) {
                         saveHistory(current, incomingxml,
                                     rawxml, extraxml, gotreplication);
                      }
-                     nrecords = nrecords + 1;
-                     Logging.fine(ident + rId + " saved.");
+                     fNRecords = fNRecords + 1;
+                     Logging.fine(fIdentity + rId + " saved.");
                      
-                     collectorService.readUnLockCaches();
+                     fCollectorService.readUnLockCaches();
                   } catch (ConstraintViolationException e) {
-                     collectorService.readUnLockCaches();
+                     fCollectorService.readUnLockCaches();
                      HibernateWrapper.closeSession(rec_session);
                      if (rec_session.isOpen()) {
-                        Logging.warning(ident + ": Communications error: " + "shutting down");
+                        Logging.warning(fIdentity + ": Communications error: " + "shutting down");
                         return 0; // Session could not close; DB problem
                      }
                      try {
@@ -873,7 +874,7 @@ public class RecordProcessor extends Thread {
                            keepTrying = false; // Don't retry
                         } else {
                            String message = "Received unexpected constraint violation";
-                           switch (dupOriginHandler.maybeHandleDuplicateOrigin(e, ident + rId)) {
+                           switch (dupOriginHandler.maybeHandleDuplicateOrigin(e, fIdentity + rId)) {
                            case DuplicateOriginHandler.HANDLED: break; // Retry.
                            case DuplicateOriginHandler.TOO_MANY_DUPS: // Too many retries
                               message = "Received too many consecutive duplicate origin failures (main loop) (" +
@@ -884,7 +885,7 @@ public class RecordProcessor extends Thread {
                                                             message)) {
                                  continue NEXTRECORD; // Process next record.
                               } else {
-                                 Logging.warning(ident + ": Communications error: " + "shutting down");
+                                 Logging.warning(fIdentity + ": Communications error: " + "shutting down");
                                  return 0; // DB access trouble.
                               }                                   
                            } // End switch.
@@ -895,23 +896,23 @@ public class RecordProcessor extends Thread {
                         if (handleUnexpectedException(rId, e2, gotreplication, current,msg)) {
                            continue NEXTRECORD; // Process next record.
                         } else {
-                           Logging.warning(ident + ": Communications error: " + "shutting down");
+                           Logging.warning(fIdentity + ": Communications error: " + "shutting down");
                            return 0; // DB access trouble.
                         }
                      }
                   } catch (Exception e) {
-                     collectorService.readUnLockCaches();
+                     fCollectorService.readUnLockCaches();
                      HibernateWrapper.closeSession(rec_session);
                      if (rec_session.isOpen()) {
-                        Logging.warning(ident + ": Communications error: " + "shutting down");
+                        Logging.warning(fIdentity + ": Communications error: " + "shutting down");
                         return 0; // Session could not close; DB problem
                      }
-                     if (!LockFailureDetector.detectAndReportLockFailure(e, nTries, ident)) {
+                     if (!LockFailureDetector.detectAndReportLockFailure(e, nTries, fIdentity)) {
                         keepTrying = false;
                         if (handleUnexpectedException(rId, e, gotreplication, current)) {
                            continue NEXTRECORD; // Process next record.
                         } else {
-                           Logging.warning(ident + ": Communications error: " + "shutting down");
+                           Logging.warning(fIdentity + ": Communications error: " + "shutting down");
                            return 0; // DB access trouble  .                                  
                         }
                      }
@@ -919,28 +920,28 @@ public class RecordProcessor extends Thread {
                } // End while (keepTrying)
             } // End of handling accepted records.
          } // End of for each record loop
-         // Logging.log(ident + ": Before File Delete: " + file.getPath());
-         queue.deleteFile(file);               
-         // Logging.log(ident + ": After File Delete: " + file.getPath());
-         ++itotal;
+         // Logging.log(fIdentity + ": Before File Delete: " + file.getPath());
+         fQueue.deleteFile(file);               
+         // Logging.log(fIdentity + ": After File Delete: " + file.getPath());
+         ++fNFiles;
       } // End loop over files
-      Logging.fine(ident + ": Input messages this run: " + itotal);
-      Logging.fine(ident + ": Records this run: " + nrecords);
+      Logging.fine(fIdentity + ": Input messages this run: " + fNFiles);
+      Logging.fine(fIdentity + ": Records this run: " + fNRecords);
       return nfiles;
    }
 
    public File getDirectory(String what) {
       Date now = new Date();
       SimpleDateFormat format = new SimpleDateFormat("yyyyMMddkk");
-      String path = historypath + what + "-" + format.format(now);
+      String path = fHistoryPath + what + "-" + format.format(now);
       File dirondisk = new File(path);
       if (!dirondisk.exists()) {
          dirondisk.mkdir();
       }
 
-      long part = nrecords / recordsPerDirectory;
+      long part = fNRecords / fRecordsPerDirectory;
 
-      File subdir = new File(dirondisk, directory_part + "-" + part);
+      File subdir = new File(dirondisk, fQueue.getShortName() + "-" + part);
 
       if (!subdir.exists()) {
          subdir.mkdir();
@@ -976,15 +977,15 @@ public class RecordProcessor extends Thread {
          if ((annot != null) && (! annot.endsWith("\n"))) {
             annot.concat("\n"); // End with a line feed.
          }
-         File newxmlfile = File.createTempFile("quarantine-", ".xml", quarantineDir);
+         File newxmlfile = File.createTempFile("quarantine-", ".xml", fQuarantineDir);
          XP.save(newxmlfile.getPath(), xml); // Save XML.
          XP.save(newxmlfile.getPath().replace(".xml", ".txt"), annot); // Save annotation
-         Logging.warning(ident + ": record XML quarantined as " +
+         Logging.warning(fIdentity + ": record XML quarantined as " +
                          newxmlfile.getPath() + " (" + annot + ")");
       } catch (Exception e) {
-         Logging.warning(ident + ": record could not be quarantined! XML follows as last-ditch preservation:");
-         Logging.warning(ident + xml);
-         Logging.debug(ident + ": exception details: ", e);
+         Logging.warning(fIdentity + ": record could not be quarantined! XML follows as last-ditch preservation:");
+         Logging.warning(fIdentity + xml);
+         Logging.debug(fIdentity + ": exception details: ", e);
       }
    }
 
@@ -993,14 +994,14 @@ public class RecordProcessor extends Thread {
          if ((annot != null) && (! annot.endsWith("\n"))) {
             annot.concat("\n"); // End with a line feed.
          }
-         File newxmlfile = File.createTempFile("quarantine-", ".xml", quarantineDir);
-         queue.renameTo(oldfile,newxmlfile);
+         File newxmlfile = File.createTempFile("quarantine-", ".xml", fQuarantineDir);
+         fQueue.renameTo(oldfile,newxmlfile);
          XP.save(newxmlfile.getPath().replace(".xml", ".txt"), annot); // Save annotation
-         Logging.warning(ident + ": file " + oldfile + " quarantined as " +
+         Logging.warning(fIdentity + ": file " + oldfile + " quarantined as " +
                          newxmlfile.getPath() + " (" + annot + ")");
       } catch (Exception e) {
-         Logging.warning(ident + ": file " + oldfile.getPath() + " could not be quarantined and remains in input queue.");
-         Logging.debug(ident + ": exception details: ", e);
+         Logging.warning(fIdentity + ": file " + oldfile.getPath() + " could not be quarantined and remains in input queue.");
+         Logging.debug(fIdentity + ": exception details: ", e);
       }
    }
 
@@ -1031,10 +1032,10 @@ public class RecordProcessor extends Thread {
       ArrayList records = null;
 
       try {
-         records = converter.convert(xml);
+         records = fConverter.convert(xml);
       } catch (Exception e) {
-         Logging.info(ident + ": Parse error:  " + e.getMessage());
-         Logging.info(ident + ": XML:  " + "\n" + xml);
+         Logging.info(fIdentity + ": Parse error:  " + e.getMessage());
+         Logging.info(fIdentity + ": XML:  " + "\n" + xml);
          throw e;
       }
 
@@ -1053,20 +1054,20 @@ public class RecordProcessor extends Thread {
    private boolean handleUnexpectedException(String rId, Exception e,
                                              boolean gotreplication, Record current,
                                              String message) {
-      Logging.warning(ident + rId + ": " + message + " " + e.getMessage());
-      Logging.debug(ident + rId + ": exception details:", e);
+      Logging.warning(fIdentity + rId + ": " + message + " " + e.getMessage());
+      Logging.debug(fIdentity + rId + ": exception details:", e);
       if ((e instanceof ConnectionException) ||
           (e instanceof com.mysql.jdbc.CommunicationsException) ||
           (e.getCause() instanceof com.mysql.jdbc.CommunicationsException) ||
           (!HibernateWrapper.databaseUp())) {
-         Logging.warning(ident + ": Communications error: " + "shutting down");
+         Logging.warning(fIdentity + ": Communications error: " + "shutting down");
          return false;
       } else {
          try {
             if (gotreplication) {
-               errorRecorder.saveSQL("Replication", "SQLError", current);
+               fErrorRecorder.saveSQL("Replication", "SQLError", current);
             } else {
-               errorRecorder.saveSQL("Probe", "SQLError", current);
+               fErrorRecorder.saveSQL("Probe", "SQLError", current);
             }
          } catch (Exception e2) {
             saveQuarantineRecord(current, rId + ": unable to record error in table", e2); 
@@ -1074,13 +1075,13 @@ public class RecordProcessor extends Thread {
                 (e2 instanceof com.mysql.jdbc.CommunicationsException) ||
                 (e2.getCause() instanceof com.mysql.jdbc.CommunicationsException) ||
                 (!HibernateWrapper.databaseUp())) {
-               Logging.warning(ident + ": Error saving in DupRecord table: " + "shutting down");
+               Logging.warning(fIdentity + ": Error saving in DupRecord table: " + "shutting down");
                return false;
             }
          }
       }
-      Logging.warning(ident + ": Error in Process: ", e);
-      Logging.warning(ident + ": Current: " + current);
+      Logging.warning(fIdentity + ": Error in Process: ", e);
+      Logging.warning(fIdentity + ": Current: " + current);
       return true;
    }
 
@@ -1089,13 +1090,13 @@ public class RecordProcessor extends Thread {
                                               String rId,
                                               boolean gotreplication,
                                               boolean gothistory) throws Exception {
-      Logging.debug(ident + rId + ": handling ConstraintViolationException caused by SQL: " +
+      Logging.debug(fIdentity + rId + ": handling ConstraintViolationException caused by SQL: " +
                     e.getSQL());
       long dupdbid = 0;
       boolean needCurrentSaveDup = false;
       Transaction tx = null;
-      if (duplicateExceptionFinder.matcher(e.getSQLException().getMessage()).find() &&
-          metaFinder.matcher(e.getSQL()).find()) { // Duplicate of an interesting table
+      if (fgDuplicateExceptionFinder.matcher(e.getSQLException().getMessage()).find() &&
+          fgMetaFinder.matcher(e.getSQL()).find()) { // Duplicate of an interesting table
          if (current.getTableName().equals("JobUsageRecord")) {
             UserIdentity newUserIdentity =
                ((JobUsageRecord) current).getUserIdentity();
@@ -1195,7 +1196,7 @@ public class RecordProcessor extends Thread {
                      }
                      tx = dup_session.beginTransaction();
                      // Keep the new one and ditch the old
-                     Logging.fine(ident + rId +
+                     Logging.fine(fIdentity + rId +
                                   ": Replacing record " +
                                   dupdbid +
                                   " with \"better\" " +
@@ -1226,14 +1227,14 @@ public class RecordProcessor extends Thread {
                      keepTrying = false;
                      if (original_record.setDuplicate(true)) {
                         if (gotreplication) {
-                           errorRecorder.saveDuplicate("Replication",
+                           fErrorRecorder.saveDuplicate("Replication",
                                                        "Duplicate",
                                                        current.getRecordId(),
                                                        originalXml,
                                                        originalTableName);
                         } else if (gothistory) { // NOP
                         } else {
-                           errorRecorder.saveDuplicate("Probe",
+                           fErrorRecorder.saveDuplicate("Probe",
                                                        "Duplicate",
                                                        current.getRecordId(),
                                                        originalXml,
@@ -1243,7 +1244,7 @@ public class RecordProcessor extends Thread {
                   } catch (Exception e2) {
                      HibernateWrapper.closeSession(dup_session);
                      if (dup_session.isOpen()) throw new ConnectionException(e2); // Session could not close; DB problem
-                     if (!LockFailureDetector.detectAndReportLockFailure(e2, nTries, ident)) {
+                     if (!LockFailureDetector.detectAndReportLockFailure(e2, nTries, fIdentity)) {
                         throw e2; // Re-throw;
                      }
                   } // End try (resolve duplicate JobUsageRecord)
@@ -1272,7 +1273,7 @@ public class RecordProcessor extends Thread {
                         } catch (Exception e2) {
                            HibernateWrapper.closeSession(dup_session);
                            if (dup_session.isOpen()) throw new ConnectionException(e2); // Session could not close; DB problem
-                           if (!LockFailureDetector.detectAndReportLockFailure(e2, nTries, ident)) {
+                           if (!LockFailureDetector.detectAndReportLockFailure(e2, nTries, fIdentity)) {
                               throw e2; // Re-throw
                            }
                         } // End try (save probe)
@@ -1314,25 +1315,25 @@ public class RecordProcessor extends Thread {
                HibernateWrapper.closeSession(dup2_session);
             }
             if (!needCurrentSaveDup) {
-               Logging.fine(ident + rId +
+               Logging.fine(fIdentity + rId +
                             ": " + "Ignore duplicate of record " +
                             dupdbid);
             }
          } // End if (JobUsageRecord)
          if (needCurrentSaveDup) {
             try {
-               Logging.fine(ident + rId +
+               Logging.fine(fIdentity + rId +
                             ": " + (gothistory ? "Ignore" : "Save") +
                             " duplicate of record " +
                             dupdbid);
                if (gotreplication) {
-                  errorRecorder.saveDuplicate("Replication",
+                  fErrorRecorder.saveDuplicate("Replication",
                                               "Duplicate",
                                               dupdbid,
                                               current);
                } else if (gothistory) { // NOP
                } else {
-                  errorRecorder.saveDuplicate("Probe",
+                  fErrorRecorder.saveDuplicate("Probe",
                                               "Duplicate",
                                               dupdbid,
                                               current);
