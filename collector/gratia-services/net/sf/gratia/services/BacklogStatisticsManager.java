@@ -379,7 +379,7 @@ public class BacklogStatisticsManager extends Thread {
       }
    }
    
-   static final String fgRemoteBacklog = "select sum(nRecords)+sum(serviceBacklog) from BacklogStatistics where EntityType != 'Local'";
+   static final String fgRemoteBacklog = "select sum(nRecords)+sum(serviceBacklog) from BacklogStatistics where EntityType != 'Local' and Name != '"+CollectorService.getName()+"'";
    public long getServiceBacklog() 
    {
       // Logging.log("BacklogStatisticsManager: getServiceBacklog");
@@ -398,9 +398,11 @@ public class BacklogStatisticsManager extends Thread {
          Logging.info("takeSnapshot: About to execute " + query.getQueryString());
          List res = query.list();
          if (!res.isEmpty()) {
-            serviceBacklog = ((java.math.BigDecimal)res.get(0)).longValue();
+            Object value = res.get(0);
+            if (value != null) {
+               serviceBacklog = ((java.math.BigDecimal)value).longValue();
+            }
          }
-         
          session.flush();
          tx.commit();
          keepTrying = false;

@@ -209,7 +209,7 @@ public class ReplicationDataPump extends Thread {
 
          String command = "SELECT M.dbid FROM " + tables + "  WHERE " + where;
          String maxcommand = "select max(M.dbid) from " + tables + "  WHERE " + where;
-         String backlogcommand = "select sum(nRecords) from BacklogStatistics";
+         String remoteBacklogcommand = "select sum(nRecords)+sum(serviceBacklog) from BacklogStatistics where Name != '"+CollectorService.getName()+"' and EntityType != 'local'";
 
          SQLQuery sq = session.createSQLQuery(maxcommand);
          Object res = sq.uniqueResult();
@@ -219,9 +219,12 @@ public class ReplicationDataPump extends Thread {
             maxdbid = replicationEntry.getdbid();
          }
          
-         sq = session.createSQLQuery(backlogcommand);
-         backlog = ((BigDecimal)sq.uniqueResult()).longValue();
-         
+         sq = session.createSQLQuery(remoteBacklogcommand);
+         res = sq.uniqueResult();
+         if (res != null) {
+            backlog = ((BigDecimal)res).longValue();
+         }
+
          replicationLog(LogLevel.FINEST,
                         "Getting record information based on " + command);
          sq = session.createSQLQuery(command);
@@ -242,7 +245,7 @@ public class ReplicationDataPump extends Thread {
          exitflag = true;
          return;
       }
-        
+      
       //
       // start replication
       //
@@ -369,13 +372,21 @@ public class ReplicationDataPump extends Thread {
       throws Exception {
 
       Boolean result = false;
+         
+      long nRecords = 0;
+      int nQueues = QueueManager.getNumberOfQueues();
+      for (int i = 0; i < nQueues; i++) {
+         QueueManager.Queue q = QueueManager.getQueue(i);
+         nRecords += q.getNRecords();
+      }
+         
       if (!replicationTarget.startsWith("file:")) {
          Post post = new Post(replicationTarget + "/gratia-servlets/rmi", "update", xml);
 
          post.add("xmlfiles", String.valueOf(record_left));
          post.add("tarfiles", String.valueOf(0)); 
          post.add("maxpendingfiles", p.getProperty("max.q.size"));
-         post.add("backlog", String.valueOf(backlog));
+         post.add("backlog", String.valueOf(backlog+nRecords));
          post.add("bundlesize", String.valueOf(bundle_count));
 
          String response = post.send();        
