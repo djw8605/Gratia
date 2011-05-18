@@ -20,7 +20,7 @@ def sendRecords(nrecords, name, end, extra = ""):
 
         # We want to start a bit (17 hours) less than 1 year ago.
         end_fixed = end.replace(hour=17,minute=10,second=00)
-        start = end_fixed - datetime.timedelta(days=len)
+        start = end_fixed - datetime.timedelta(days=len-1)
 
         step = len / nrecords;
         ndays = 0;
