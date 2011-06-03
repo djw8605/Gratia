@@ -709,7 +709,7 @@ EOF
    echo "Check JobUsageRecord"
    readonly_mysql > jobusagerecord.validate 2>&1 <<EOF 
 use ${schema_name};
-select ProbeName, VOName, NodeCount as Cores, count(*) as Nrecord, Sum(NJobs) as NJobs, Sum(WallDuration) as Wall, Sum(CpuUserDuration+CpuSystemDuration) as Cpu 
+select ProbeName, VOName, NodeCount as Cores, count(*) as Nrecord, Sum(NJobs) as NJobs, Round(Sum(WallDuration),1) as Wall, Round(Sum(CpuUserDuration+CpuSystemDuration),1) as Cpu 
     from JobUsageRecord_Report group by ProbeName, VOName, NodeCount;
 EOF
 
@@ -722,7 +722,7 @@ EOF
    echo "Check MasterSummaryData"
    readonly_mysql > jobsummary.validate 2>&1 <<EOF 
 use ${schema_name};
-select ProbeName, V.VOName, Cores, count(*) as Nrecord, Sum(NJobs) as NJobs, Sum(WallDuration) as Wall, Sum(CpuUserDuration+CpuSystemDuration) as Cpu 
+select ProbeName, V.VOName, Cores, count(*) as Nrecord, Sum(NJobs) as NJobs, Round(Sum(WallDuration),1) as Wall, Round(Sum(CpuUserDuration+CpuSystemDuration),1) as Cpu 
     from MasterSummaryData M join VONameCorrection VC on M.VOcorrid = VC.corrid join VO V on VC.void = V.void  group by ProbeName, V.VOName, Cores;
 EOF
 
