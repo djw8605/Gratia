@@ -176,5 +176,9 @@ public class JMSProxyImpl extends UnicastRemoteObject implements JMSProxy
    {
       collectorService.updateBacklog(name,nrecords,xmlfiles,tarfiles,backlog,maxpendingfiles,bundlesize);
    }
+   
+   public String getName() throws RemoteException {
+      return collectorService.getName();
+   }
 
 }

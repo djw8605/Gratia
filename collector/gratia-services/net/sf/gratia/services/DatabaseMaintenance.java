@@ -1375,20 +1375,7 @@ public class DatabaseMaintenance {
    {
       int result = Execute("DROP TABLE IF EXISTS BacklogStatistics");
       if (result > -1) {
-         String command = "CREATE TABLE BacklogStatistics(" +
-         "ServerDate DATETIME NOT NULL, " +
-         "EntityType VARCHAR(255) NOT NULL, " +
-         "Name VARCHAR(255) NOT NULL, " +
-         "nRecords BIGINT DEFAULT 0, " +
-         "xmlFiles BIGINT DEFAULT 0, " +
-         "tarFiles BIGINT DEFAULT 0, " +
-         "serviceBacklog BIGINT DEFAULT 0, " +
-         "maxPendingFiles BIGINT DEFAULT 0, " +
-         "bundleSize BIGINT DEFAULT 0, " +
-         "prevServerDate DATETIME, " +
-         "prevRecords BIGINT DEFAULT 0, " +
-         "prevServiceBacklog BIGINT default 0, " + 
-         "UNIQUE KEY index1 (EntityType, Name))";
+         String command = net.sf.gratia.storage.Backlog.fgCreateTable;
          
          if (isInnoDB) {
             command += " ENGINE = 'innodb'";
