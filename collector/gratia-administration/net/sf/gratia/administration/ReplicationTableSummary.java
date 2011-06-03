@@ -36,50 +36,30 @@ public class ReplicationTableSummary extends HttpServlet {
    
    //
    // processing related
-   //
-   String fHtml = "";
-   String fRow = "";
-   
-   Pattern fDatarowPattern =
+   //   
+   static final Pattern fDatarowPattern =
       Pattern.compile("<tr id=\"datarow.*?>.*#replicationid#.*?</table>.*?</tr>",
                       Pattern.MULTILINE + Pattern.DOTALL);
-   Pattern fUpdateButtonPattern = Pattern.compile("update:(\\d+)");
-   Pattern fCancelButtonPattern = Pattern.compile("cancel:(\\d+)");
-   Pattern fTableFinder = Pattern.compile("(?:(?:Compute|Storage)Element(?:Record)?|Subcluster)");
-   Matcher fMatcher = null;
+   static final Pattern fUpdateButtonPattern = Pattern.compile("update:(\\d+)");
+   static final Pattern fCancelButtonPattern = Pattern.compile("cancel:(\\d+)");
+   static final Pattern fTableFinder = Pattern.compile("(?:(?:Compute|Storage)Element(?:Record)?|Subcluster)");
    
    //
    // globals
    //
-   Properties fProperties;
-   String fMessage = null;
-   Boolean fModify = false;
+   String fErrorMessage = null;
    Boolean fInitialized = false;
-   HashMap<String, List<Replication> > fRepTable = null;
    Boolean fDBOK = true;
-
-   // Configuration
-   String fCollectorPem;
 
    //
    // support
    //
-   String sq = "'";
-   String dq = "\"";
-   String comma = ",";
-   String cr = "\n";
-   //    Hashtable table = new Hashtable();
-   String newname = "<New Entry>";
    
    // Which Servlet/web page is this
-   String Name;   
-   String fApplicationURL = "replicationtablesummary.html";
+   String Name;
+   static final String fApplicationURL = "replicationtablesummary.html";
 
-   private void done() {
-      fRepTable = null;
-   }
-
-   static String fgPreamble = 
+   static final String fgPreamble = 
    "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\n" +
    "<html xmlns=\"http://www.w3.org/1999/xhtml\">\n" +
    "<head>\n" +
@@ -102,13 +82,13 @@ public class ReplicationTableSummary extends HttpServlet {
       Logging.debug("ReplicationTableSummary.initialize()");
       if (fInitialized) return;
       Logging.debug("ReplicationTableSummary.initialize() continue");
-      fProperties = Configuration.getProperties();
+      Properties properties = Configuration.getProperties();
       while (true) {
          // Wait until JMS service is up
          try { 
             JMSProxy proxy = (JMSProxy)
-               Naming.lookup(fProperties.getProperty("service.rmi.rmilookup") +
-                             fProperties.getProperty("service.rmi.service"));
+               Naming.lookup(properties.getProperty("service.rmi.rmilookup") +
+                             properties.getProperty("service.rmi.service"));
          } catch (Exception e) {
             try {
                Thread.sleep(5000);
@@ -117,8 +97,6 @@ public class ReplicationTableSummary extends HttpServlet {
          }
          break;
       }
-      String certfile = fProperties.getProperty("service.vdt.cert.file");
-      fCollectorPem = XP.get(certfile);
 
       fInitialized = true;
    }
@@ -129,13 +107,12 @@ public class ReplicationTableSummary extends HttpServlet {
       Logging.debug("ReplicationTableSummary.doGet()");
       setup(request);
       
-      process();
+      String html = process();
 
-      compileResponse(response);
-      done();
+      compileResponse(response,html);
    }
    
-   private void compileResponse(HttpServletResponse response) throws IOException {
+   private void compileResponse(HttpServletResponse response, String html) throws IOException {
       Logging.debug("ReplicationTableSummary.compileResponse()");
       response.setContentType("text/html");
       response.setHeader("Cache-Control", "no-cache"); // HTTP 1.1
@@ -146,16 +123,16 @@ public class ReplicationTableSummary extends HttpServlet {
       // cleanup message
       //
       writer.write(fgPreamble);
-      if (fMessage != null) {
+      if (fErrorMessage != null) {
          writer.write("\n<pre id=\"message\" class=\"msg\">");
-         writer.write(fMessage);
+         writer.write(fErrorMessage);
          writer.write("</pre>\n");
       } else {
-         writer.write(fHtml);
+         writer.write(html);
       }
       writer.write("</body>\n      </html>\n");
 
-      fMessage = null;
+      fErrorMessage = null;
       writer.flush();
       writer.close();
    }
@@ -171,9 +148,8 @@ public class ReplicationTableSummary extends HttpServlet {
          Logging.debug("ReplicationTableSummary: Post Parameter " + par + " : " + request.getParameter(par));
       }
       setup(request);
-      process();
-      compileResponse(response);      
-      done();
+      String html = process();
+      compileResponse(response, html);
    }
    
    void setup(HttpServletRequest request)
@@ -192,15 +168,13 @@ public class ReplicationTableSummary extends HttpServlet {
          Logging.debug("Exception details: ", e);
       }
 
-      // Load up with replication entries from the DB.
-      loadRepTable();
    }
    
-   void loadRepTable() {
+   HashMap<String, List<Replication> > loadRepTable() {
       // Load replication entries from DB
 
       Logging.debug("ReplicationTableSummary.loadRepTable()");
-      if (!fDBOK) return; // Don't try.
+      if (!fDBOK) return null; // Don't try.
       
       Session session = null;
       List records;
@@ -213,13 +187,13 @@ public class ReplicationTableSummary extends HttpServlet {
          session.close();
       } catch (Exception e) {
          HibernateWrapper.closeSession(session);
-         fMessage = "Failed to load replication information from DB. Try reload.";
+         fErrorMessage = "Failed to load replication information from DB. Try reload.";
          fDBOK = false;
-         return;
+         return null;
       }
 
       // Load hash table with entries      
-      fRepTable = new java.util.LinkedHashMap<String, List<Replication> >();
+      HashMap<String, List<Replication> > repTable = new java.util.LinkedHashMap<String, List<Replication> >();
       List<Replication> current;
       for ( Object listEntry : records ) {
          Replication repEntry = (Replication) listEntry;
@@ -234,26 +208,28 @@ public class ReplicationTableSummary extends HttpServlet {
                        repEntry.getrowcount() + ", " +
                        repEntry.getbundleSize() + "."
                        );
-         current = fRepTable.get( repEntry.getrecordtable() );
+         current = repTable.get( repEntry.getrecordtable() );
          if (current == null) {
             current = new java.util.LinkedList<Replication>();
-            fRepTable.put( repEntry.getrecordtable(), current );
+            repTable.put( repEntry.getrecordtable(), current );
          }
          current.add( repEntry );
       }
+      return repTable;
    }
    
-   private void process() {
-      if (fRepTable == null || fRepTable.isEmpty()) {
-         fHtml = "<br>No replication has been set.<br>";
-         return;
+   private String process() {
+      // Load up with replication entries from the DB.
+      HashMap<String, List<Replication> >  repTable = loadRepTable();
+      if (repTable == null || repTable.isEmpty()) {
+         return "<br>No replication has been set.<br>";
       }
       Logging.debug("ReplicationTableSummary.process()");
 
       StringBuffer buffer = new StringBuffer();
 
       // Loop through replication table entries.
-      for (java.util.Map.Entry<String, List<Replication> > entry : fRepTable.entrySet()) {
+      for (java.util.Map.Entry<String, List<Replication> > entry : repTable.entrySet()) {
          buffer.append("<h4>").append(entry.getKey()).append("</h4>");
          buffer.append("<table width=\"100%\" border=\"1\" cellpadding=\"10\">\n");
          buffer.append("<tr><th bgcolor=\"#999999\" scope=\"col\">ID</th>\n");
@@ -299,7 +275,7 @@ public class ReplicationTableSummary extends HttpServlet {
          }
          buffer.append("</table>\n");
       }
-      fHtml = buffer.toString();
+      return buffer.toString();
    }
    
 }
