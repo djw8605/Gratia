@@ -21,7 +21,7 @@ import java.sql.*;
 import java.util.regex.*;
 import java.lang.Math;
 
-public class Status extends HttpServlet {
+public class PerformanceRates extends HttpServlet {
    XP xp = new XP();
 
    static final Pattern yesMatcher =
@@ -160,14 +160,14 @@ public class Status extends HttpServlet {
          queryPart = "";
       else
          queryPart = "?" + queryPart;
-      
+
       request.getSession().setAttribute("displayLink", "." + uriPart + queryPart);
       
       String wantDetails = request.getParameter("wantDetails");
       Logging.debug("Got parameter wantDetails=" + wantDetails);
       
       boolean detailedDisplay = false;
-      if (wantDetails != null) {
+            if (wantDetails != null) {
          if (yesMatcher.matcher(wantDetails).matches()) {
             detailedDisplay = true;
          } else {
@@ -194,7 +194,7 @@ public class Status extends HttpServlet {
       writer.close();
       closeConnection(connection);
    }
-   
+
    public static String DisplayInt(Integer value) {
       if (value == null)
          return "n/a";
@@ -281,7 +281,7 @@ public class Status extends HttpServlet {
             " order by table_name;";
          PreparedStatement statement = connection.prepareStatement(command);
          ResultSet resultSet = statement.executeQuery();
-         Logging.log("Status SQL query:"+statement);
+         Logging.log("PerformanceRates SQL query:"+statement);
          while(resultSet.next()) {
 
             String table_name = resultSet.getString(1);
@@ -327,7 +327,7 @@ public class Status extends HttpServlet {
             statement.setLong(1,hourly_time_limit);
             statement.setLong(2,hourly_time_limit);
 //            statement.setString(2,table_name);
-            Logging.debug("Status SQL query: " + statement);
+            Logging.debug("PerformanceRates SQL query: " + statement);
             resultSet = statement.executeQuery();
             long prevCount = 0;
             String prevRecordType = null;
@@ -457,7 +457,7 @@ public class Status extends HttpServlet {
 
             statement = connection.prepareStatement(fgCountAllTime);
 //            statement.setString(1,table_name);
-            Logging.debug("Status SQL query: " + statement);
+            Logging.debug("PerformanceRates SQL query: " + statement);
             resultSet = statement.executeQuery();
             prevRecordType = null;
             TableStatusInfo totalTableStatus = null;
