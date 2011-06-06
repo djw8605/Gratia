@@ -215,7 +215,7 @@ public class BacklogSummary extends HttpServlet {
    private void addData(StringBuffer buffer, List<Backlog> list, boolean details)
    {
       java.util.Date now = new java.util.Date();
-      long ancient_threshold = 1 * 1 * 3600; // 90 days olds
+      long ancient_threshold = 30 * 24 * 3600; // 30 days olds
       // Collections.sort(list); // Sort according to Backlog.CompareTo().
       for ( Backlog backlog : list ) {
          Logging.debug("BacklogSummary: current object state:\n" +
