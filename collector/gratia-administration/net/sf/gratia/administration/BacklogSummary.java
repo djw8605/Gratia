@@ -63,7 +63,8 @@ public class BacklogSummary extends HttpServlet {
    "<style type=\"text/css\">\n" +
    ".problem {color: #FF0000; font-weight:bold;}\n" +
    ".good {color: green; font-weight:bold;}\n" +
-   ".improving {color: #000000}" +
+   ".improving {color: #000000}\n" +
+   ".ancient {color: purple; font-style:italic; font-weight:bold;}\n" +
    "</style>" +
    "</head>\n" +
    "<body>\n" +
@@ -213,6 +214,8 @@ public class BacklogSummary extends HttpServlet {
    
    private void addData(StringBuffer buffer, List<Backlog> list, boolean details)
    {
+      java.util.Date now = new java.util.Date();
+      long ancient_threshold = 1 * 1 * 3600; // 90 days olds
       // Collections.sort(list); // Sort according to Backlog.CompareTo().
       for ( Backlog backlog : list ) {
          Logging.debug("BacklogSummary: current object state:\n" +
@@ -229,8 +232,12 @@ public class BacklogSummary extends HttpServlet {
                        "  PrevRecords: "  + backlog.getPrevRecords() + "\n" + 
                        "  PrevServiceBacklog: "  + backlog.getPrevServiceBacklog());
          buffer.append("<tr>\n");
+         String style = "";
+         if ( ((now.getTime() - backlog.getServerDate().getTime())/1000) > ancient_threshold) {
+            style = "class=\"ancient\" ";
+         }
          //buffer.append("<td>").append(backlog.getEntityType()).append("</td>");
-         buffer.append("<td style=\"width: 200px; text-align:left\">");
+         buffer.append("<td style=\"width: 200px; text-align:left\"").append(style).append(">");
          if (backlog.getEntityType().equals("collector")) {
             String name = backlog.getName();
             if (name.startsWith("collector:")) {
@@ -240,19 +247,19 @@ public class BacklogSummary extends HttpServlet {
             buffer.append("<a href=\"").append(name).append("/gratia-administration/backlog.html\" target=\"adminContent\">");
             buffer.append(backlog.getName()).append("</a>");
          } else {
-            buffer.append("<a href=\"").append("gratia-administration/backlogHistory.html?name=");
+            buffer.append("<a href=\"").append("gratia-administration/backlog-history.html?name=");
             buffer.append(backlog.getName()).append("\" target=\"adminContent\">");            
             buffer.append(backlog.getName()).append("</a>");
          }
          buffer.append("</td>\n");
-         buffer.append("<td style=\"text-align: center\">").append(backlog.getRecords()).append("</td>\n");
+         buffer.append("<td style=\"text-align: right; padding-right:3%\"  ").append(style).append(">").append(backlog.getRecords()).append("</td>\n");
          if (details) {
-            buffer.append("<td style=\"text-align: center\">").append(backlog.getFiles()).append("</td>\n");
-            buffer.append("<td style=\"text-align: center\">").append(backlog.getTarFiles()).append("</td>\n");
-            buffer.append("<td style=\"text-align: center\">").append(backlog.getMaxPendingFiles()).append("</td>\n");
+            buffer.append("<td style=\"text-align: right; padding-right:3%\" ").append(style).append(">").append(backlog.getFiles()).append("</td>\n");
+            buffer.append("<td style=\"text-align: right; padding-right:3%\" ").append(style).append(">").append(backlog.getTarFiles()).append("</td>\n");
+            buffer.append("<td style=\"text-align: right; padding-right:3%\" ").append(style).append(">").append(backlog.getMaxPendingFiles()).append("</td>\n");
          }
-         buffer.append("<td style=\"text-align: center\">").append(backlog.getServiceBacklog()).append("</td>\n");
-         buffer.append("<td style=\"text-align: center\">").append(backlog.getBundleSize()).append("</td>\n");
+         buffer.append("<td style=\"text-align: right; padding-right:3%\" ").append(style).append(">").append(backlog.getServiceBacklog()).append("</td>\n");
+         buffer.append("<td style=\"text-align: right; padding-right:3%\" ").append(style).append(">").append(backlog.getBundleSize()).append("</td>\n");
          
          long backlogValue = backlog.getRecords()+backlog.getServiceBacklog();
          long backlogDecrease = (backlog.getPrevRecords()+backlog.getPrevServiceBacklog()) - backlogValue;
@@ -270,7 +277,7 @@ public class BacklogSummary extends HttpServlet {
          } else if (backlogDecrease < 10) {
             buffer.append("<td style=\"text-align: center\" class=\"improving\">Stable</td>\n");
             buffer.append("<td style=\"text-align: center\">See ");
-            buffer.append("<a href=\"").append("gratia-administration/backlogHistory.html?name=");
+            buffer.append("<a href=\"").append("gratia-administration/backlog-history.html?name=");
             buffer.append(backlog.getName()).append("\" target=\"adminContent\">");            
             buffer.append("history</a> for additional details</td>");               
          } else {
@@ -285,33 +292,33 @@ public class BacklogSummary extends HttpServlet {
             
             double catchupTime = (double)msSpan * backlogValue / backlogDecrease / (1000*60); // in minutes.
             if (msSpan == 0) {
-               buffer.append("<td style=\"text-align: center\">See ");
-               buffer.append("<a href=\"").append("gratia-administration/backlogHistory.html?name=");
+               buffer.append("<td style=\"text-align: center\" ").append(style).append(">See ");
+               buffer.append("<a href=\"").append("gratia-administration/backlog-history.html?name=");
                buffer.append(backlog.getName()).append("\" target=\"adminContent\">");            
                buffer.append("history</a> for additional details</td>");               
             } else {
                if (catchupTime < 1) {
-                  buffer.append("<td style=\"text-align: center\">less than one minutes</td>");
+                  buffer.append("<td style=\"text-align: center\" ").append(style).append(">less than one minutes</td>");
                } else if ( catchupTime < 100 ) {                  
-                  buffer.append("<td style=\"text-align: center\">");
+                  buffer.append("<td style=\"text-align: center\" ").append(style).append(">");
                   buffer = decForm.format(catchupTime, buffer, pos1);
                   buffer.append(" minutes</td>\n");
                } else {
                   catchupTime = catchupTime / 60; // hours.
                   if ( catchupTime < 48 ) {
-                     buffer.append("<td style=\"text-align: center\">");
+                     buffer.append("<td style=\"text-align: center\" ").append(style).append(">");
                      buffer = decForm.format(catchupTime, buffer, pos1);
                      buffer.append(" hours</td>\n");
                   } else {
                      catchupTime = catchupTime / 24 ; // days
-                     buffer.append("<td style=\"text-align: center\">");
+                     buffer.append("<td style=\"text-align: center\" ").append(style).append(">");
                      buffer = decForm.format(catchupTime, buffer, pos1);
                      buffer.append(" days</td>\n");
                   }
                }
             }
          }
-         buffer.append("<td>").append(backlog.getServerDate()).append("</td>");
+         buffer.append("<td "+style+">").append(backlog.getServerDate()).append("</td>");
          //buffer.append("<td style=\"text-align: center\">").append(backlog.getPrevServerDate()).append("</td>\n");
          //buffer.append("<td style=\"text-align: center\">").append(backlog.getPrevRecords()).append("</td>\n");
          //buffer.append("<td style=\"text-align: center\">").append(backlog.getPrevServiceBacklog()).append("</td>\n");
@@ -335,12 +342,16 @@ public class BacklogSummary extends HttpServlet {
       List<Backlog> locals = null;
       List<Backlog> collectors = null;
       List<Backlog> probes = null;
+      String limit = "";
+      if (details) {
+         limit = " and ServerDate > subdate(now(),30) ";
+      }
       try {
          session = HibernateWrapper.getCheckedSession();
          Transaction tx = session.beginTransaction();
-         collectors = Backlog.getList(session, " where EntityType = 'collector' order by Name, ServerDate "); 
-         probes = Backlog.getList(session, " where EntityType != 'collector' and EntityType != 'local' order by Name, ServerDate ");
-         locals = Backlog.getList(session, " where EntityType = 'local' order by Name, ServerDate ");
+         collectors = Backlog.getList(session, " where EntityType = 'collector' order by Name, ServerDate " + limit); 
+         probes = Backlog.getList(session, " where EntityType != 'collector' and EntityType != 'local' order by Name, ServerDate " + limit);
+         locals = Backlog.getList(session, " where EntityType = 'local' order by Name, ServerDate " + limit);
          tx.commit();
          session.close();
       } catch (Exception e) {
