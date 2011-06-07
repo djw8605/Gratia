@@ -32,7 +32,7 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.exception.*;
 
-public class BacklogSummary extends HttpServlet {
+public class BacklogStatus extends HttpServlet {
    
    static final Pattern yesMatcher = Pattern.compile("^[YyTt1]");
 
@@ -69,18 +69,18 @@ public class BacklogSummary extends HttpServlet {
    "</head>\n" +
    "<body>\n" +
    "<h1 align=\"center\" class=\"osgcolor\">&nbsp;&nbsp;&nbsp;&nbsp;Gratia Administration&nbsp;&nbsp;&nbsp;&nbsp;</h1>\n" +
-   "<h3 align=\"center\">Backlog Summary </h3>\n";
+   "<h3 align=\"center\">Backlog Status</h3>\n";
    
    public void init(ServletConfig config) throws ServletException {
       // javax.servlet.ServletConfig.getInitParameter() 
-      Logging.debug("BacklogSummary.init()");
+      Logging.debug("BacklogStatus.init()");
       Name = config.getServletName();
    }
    
    void initialize() throws IOException {
-      Logging.debug("BacklogSummary.initialize()");
+      Logging.debug("BacklogStatus.initialize()");
       if (fInitialized) return;
-      Logging.debug("BacklogSummary.initialize() continue");
+      Logging.debug("BacklogStatus.initialize() continue");
       Properties properties = Configuration.getProperties();
       while (true) {
          // Wait until JMS service is up
@@ -116,7 +116,7 @@ public class BacklogSummary extends HttpServlet {
    public void doGet(HttpServletRequest request, HttpServletResponse response)
       throws ServletException, IOException 
    {
-      Logging.debug("BacklogSummary.doGet()");
+      Logging.debug("BacklogStatus.doGet()");
       setup(request);
       
       boolean details = wantDetails(request);
@@ -128,12 +128,12 @@ public class BacklogSummary extends HttpServlet {
    public void doPost(HttpServletRequest request, HttpServletResponse response)
    throws ServletException, IOException 
    {
-      Logging.debug("BacklogSummary.doPost()");
+      Logging.debug("BacklogStatus.doPost()");
       
       Enumeration pars = request.getParameterNames();
       while (pars.hasMoreElements()) {
          String par = (String) pars.nextElement();
-         Logging.debug("BacklogSummary: Post Parameter " + par + " : " + request.getParameter(par));
+         Logging.debug("BacklogStatus: Post Parameter " + par + " : " + request.getParameter(par));
       }
       setup(request);
       boolean details = wantDetails(request);
@@ -142,7 +142,7 @@ public class BacklogSummary extends HttpServlet {
    }
 
    private void compileResponse(HttpServletResponse response, String html, boolean details) throws IOException {
-      Logging.debug("BacklogSummary.compileResponse()");
+      Logging.debug("BacklogStatus.compileResponse()");
       response.setContentType("text/html");
       response.setHeader("Cache-Control", "no-cache"); // HTTP 1.1
       response.setHeader("Pragma", "no-cache"); // HTTP 1.0
@@ -178,7 +178,7 @@ public class BacklogSummary extends HttpServlet {
    
    void setup(HttpServletRequest request)
       throws ServletException, IOException {
-      Logging.debug("BacklogSummary.setup()");
+      Logging.debug("BacklogStatus.setup()");
 
       // Once-only init
       initialize();
@@ -194,7 +194,7 @@ public class BacklogSummary extends HttpServlet {
 
    }
 
-   private void addHeader(StringBuffer buffer, boolean details) 
+   static public void addHeader(StringBuffer buffer, boolean details) 
    {
       buffer.append("<table width=\"100%\" border=\"1\" cellpadding=\"10\">\n");
       buffer.append("<tr><th width=\"30%\" bgcolor=\"#999999\" scope=\"col\">Provider</th>\n");
@@ -212,13 +212,13 @@ public class BacklogSummary extends HttpServlet {
       buffer.append("</tr>\n");      
    }
    
-   private void addData(StringBuffer buffer, List<Backlog> list, boolean details)
+   static public void addData(StringBuffer buffer, List<Backlog> list, boolean details)
    {
       java.util.Date now = new java.util.Date();
       long ancient_threshold = 30 * 24 * 3600; // 30 days olds
       // Collections.sort(list); // Sort according to Backlog.CompareTo().
       for ( Backlog backlog : list ) {
-         Logging.debug("BacklogSummary: current object state:\n" +
+         Logging.debug("BacklogStatus: current object state:\n" +
                        "  ServerDate: "  + backlog.getServerDate() + "\n" + 
                        "  EntityType: "  + backlog.getEntityType() + "\n" + 
                        "  Name: "  + backlog.getName() + "\n" + 
@@ -247,7 +247,7 @@ public class BacklogSummary extends HttpServlet {
             buffer.append("<a href=\"").append(name).append("/gratia-administration/backlog.html\" target=\"adminContent\">");
             buffer.append(backlog.getName()).append("</a>");
          } else {
-            buffer.append("<a href=\"").append("gratia-administration/backlog-history.html?name=");
+            buffer.append("<a href=\"").append("backlog-history.html?name=");
             buffer.append(backlog.getName()).append("\" target=\"adminContent\">");            
             buffer.append(backlog.getName()).append("</a>");
          }
@@ -277,7 +277,7 @@ public class BacklogSummary extends HttpServlet {
          } else if (backlogDecrease < 10) {
             buffer.append("<td style=\"text-align: center\" class=\"improving\">Stable</td>\n");
             buffer.append("<td style=\"text-align: center\">See ");
-            buffer.append("<a href=\"").append("gratia-administration/backlog-history.html?name=");
+            buffer.append("<a href=\"").append("backlog-history.html?name=");
             buffer.append(backlog.getName()).append("\" target=\"adminContent\">");            
             buffer.append("history</a> for additional details</td>");               
          } else {
@@ -293,7 +293,7 @@ public class BacklogSummary extends HttpServlet {
             double catchupTime = (double)msSpan * backlogValue / backlogDecrease / (1000*60); // in minutes.
             if (msSpan == 0) {
                buffer.append("<td style=\"text-align: center\" ").append(style).append(">See ");
-               buffer.append("<a href=\"").append("gratia-administration/backlog-history.html?name=");
+               buffer.append("<a href=\"").append("backlog-history.html?name=");
                buffer.append(backlog.getName()).append("\" target=\"adminContent\">");            
                buffer.append("history</a> for additional details</td>");               
             } else {
@@ -326,7 +326,7 @@ public class BacklogSummary extends HttpServlet {
       }      
    }
    
-   private void addFooter(StringBuffer buffer)
+   static public void addFooter(StringBuffer buffer)
    {
       buffer.append("</table>\n");
    }
@@ -334,7 +334,7 @@ public class BacklogSummary extends HttpServlet {
    private String process(boolean details) {
       // Load up with backlog information
       
-      Logging.debug("BacklogSummary.process()");
+      Logging.debug("BacklogStatus.process()");
 
       if (!fDBOK) return "<br>No access to the database.</br>";
       

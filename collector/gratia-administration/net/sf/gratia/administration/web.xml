@@ -177,8 +177,14 @@
     </servlet>
 
     <servlet>
-        <servlet-name>BacklogSummary</servlet-name>
-        <servlet-class>net.sf.gratia.administration.BacklogSummary</servlet-class>
+        <servlet-name>BacklogStatus</servlet-name>
+        <servlet-class>net.sf.gratia.administration.BacklogStatus</servlet-class>
+        <load-on-startup>2</load-on-startup>
+    </servlet>
+
+    <servlet>
+        <servlet-name>BacklogHistory</servlet-name>
+        <servlet-class>net.sf.gratia.administration.BacklogHistory</servlet-class>
         <load-on-startup>2</load-on-startup>
     </servlet>
 
@@ -312,8 +318,13 @@
     </servlet-mapping>
 
     <servlet-mapping>
-        <servlet-name>BacklogSummary</servlet-name>
+        <servlet-name>BacklogStatus</servlet-name>
         <url-pattern>/backlog.html</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>BacklogHistory</servlet-name>
+        <url-pattern>/backlog-history.html</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>
