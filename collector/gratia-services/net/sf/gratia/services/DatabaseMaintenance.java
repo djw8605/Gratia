@@ -871,7 +871,7 @@ public class DatabaseMaintenance {
          
       }
       
-      // Check BacklgoStatistics History
+      // Check BacklogStatistics History
       {
          ver = readIntegerDBProperty("gratia.database.BacklogStatisticsHistoryVersion");
          if (ver < 0 || !TableExist("BacklogStatistics") || !TableExist("BacklogStatisticsSnapshots")) {
@@ -1376,7 +1376,6 @@ public class DatabaseMaintenance {
       int result = Execute("DROP TABLE IF EXISTS BacklogStatistics");
       if (result > -1) {
          String command = net.sf.gratia.storage.Backlog.fgCreateTable;
-         
          if (isInnoDB) {
             command += " ENGINE = 'innodb'";
          }
@@ -1414,30 +1413,7 @@ public class DatabaseMaintenance {
          if (result < 0) {
             return result;
          }
-         String command = "CREATE TABLE BacklogStatisticsHourly(" +
-         "bshid BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY, " +
-         "ServerDate DATETIME NOT NULL, " + 
-         "EventDate DATETIME NOT NULL, " + 
-         "EntityType VARCHAR(255) NOT NULL, " +
-         "Name VARCHAR(255) NOT NULL, " +
-         "StartTime DATETIME NOT NULL, " + 
-         "EndTime DATETIME NOT NULL, " + 
-         "avgRecords BIGINT DEFAULT 0, " +
-         "maxRecords BIGINT DEFAULT 0, " +
-         "minRecords BIGINT DEFAULT 0, " +
-         "avgXmlFiles BIGINT DEFAULT 0, " +
-         "maxXmlFiles BIGINT DEFAULT 0, " +
-         "minXmlFiles BIGINT DEFAULT 0, " +
-         "avgTarFiles BIGINT DEFAULT 0, " +
-         "minTarFiles BIGINT DEFAULT 0, " +
-         "maxTarFiles BIGINT DEFAULT 0, " +
-         "avgServiceBacklog BIGINT DEFAULT 0, " +
-         "minServiceBacklog BIGINT DEFAULT 0, " +
-         "maxServiceBacklog BIGINT DEFAULT 0, " +
-         "avgMaxPendingFiles BIGINT DEFAULT 0, " +
-         "avgBundleSize BIGINT DEFAULT 0, " +
-
-         "UNIQUE KEY index1 (EventDate, EntityType, Name))";
+         String command = net.sf.gratia.storage.BacklogSummary.fgCreateHourlyTable;
          if (isInnoDB) {
             command += " ENGINE = 'innodb'";
          }
@@ -1452,29 +1428,7 @@ public class DatabaseMaintenance {
          if (result < 0) {
             return result;
          }
-         String command = "CREATE TABLE BacklogStatisticsDaily(" +
-         "bsdid BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY, " +
-         "ServerDate DATETIME NOT NULL, " + 
-         "EventDate DATETIME NOT NULL, " + 
-         "EntityType VARCHAR(255) NOT NULL, " +
-         "Name VARCHAR(255) NOT NULL, " +
-         "StartTime DATETIME NOT NULL, " + 
-         "EndTime DATETIME NOT NULL, " + 
-         "avgRecords BIGINT DEFAULT 0, " +
-         "maxRecords BIGINT DEFAULT 0, " +
-         "minRecords BIGINT DEFAULT 0, " +
-         "avgXmlFiles BIGINT DEFAULT 0, " +
-         "maxXmlFiles BIGINT DEFAULT 0, " +
-         "minXmlFiles BIGINT DEFAULT 0, " +
-         "avgTarFiles BIGINT DEFAULT 0, " +
-         "minTarFiles BIGINT DEFAULT 0, " +
-         "maxTarFiles BIGINT DEFAULT 0, " +
-         "avgServiceBacklog BIGINT DEFAULT 0, " +
-         "minServiceBacklog BIGINT DEFAULT 0, " +
-         "maxServiceBacklog BIGINT DEFAULT 0, " +
-         "avgMaxPendingFiles BIGINT DEFAULT 0, " +
-         "avgBundleSize BIGINT DEFAULT 0, " +
-         "UNIQUE KEY index1 (EventDate, EntityType, Name))";
+         String command =  net.sf.gratia.storage.BacklogSummary.fgCreateDailyTable;
          if (isInnoDB) {
             command += " ENGINE = 'innodb'";
          }
