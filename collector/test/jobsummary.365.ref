@@ -16,5 +16,5 @@ pbs:LocalTester.where.edu	Unknown	8	1	1	65918.0	526870.0
 pbs:LocalTester.where.edu	dteam	1	7	168	23166.0	1728.0
 pbs:LocalTester.where.edu	infngrid	1	1	6	0.0	0.0
 replic-backlog:LocalTester.where.edu	escience	3	1	360	64800456144.0	10109220.0
-replic-tester:LocalTester.where.edu	escience	3	92	408	73440516963.2	11457116.0
+replic-tester:LocalTester.where.edu	escience	3	90	396	71280501758.4	11120142.0
 tester:LocalTester.where.edu	escience	3	365	1611	289982041244.4	45238759.5

@@ -1,5 +1,5 @@
 ProbeName	VOName	Cores	Nrecord	NJobs	Wall	Cpu
 backlog:LocalTester.where.edu	escience	3	120	360	64800456144.0	10109220.0
 replic-backlog:LocalTester.where.edu	escience	3	120	360	64800456144.0	10109220.0
-replic-tester:LocalTester.where.edu	escience	3	134	402	72360509360.8	11288629.0
-tester:LocalTester.where.edu	escience	3	134	402	72360509360.8	11288629.0
+replic-tester:LocalTester.where.edu	escience	3	132	396	71280501758.4	11120142.0
+tester:LocalTester.where.edu	escience	3	132	396	71280501758.4	11120142.0

@@ -79,6 +79,10 @@ def SendRecords(argv=None):
         for i in range(nrecords):
            #if ( i % 100 == 0 ) : print i
            r = GetRecord(i)
+           filename = GratiaCore.Config.get_DataFolder() + "/forrecord" + str(i)
+           file = open(filename,'a')
+           file.close()
+           r.AddTransientInputFile(filename)
            msg = Gratia.Send(r)
            if msg == "Fatal Error: too many pending files":
               break
