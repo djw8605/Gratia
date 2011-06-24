@@ -144,6 +144,11 @@ function write_ProbeConfig
    else 
       probeprefix=$5
    fi
+   if [ "x$6" = "x" ] ; then 
+      SuppressGridLocalRecords="0"
+   else 
+      SuppressGridLocalRecords="$6"
+   fi
 
    cat > $name <<EOF
 <ProbeConfiguration 
@@ -188,6 +193,7 @@ function write_ProbeConfig
     UseSyslog="0"
     SuppressUnknownVORecords="0"
     SuppressNoDNRecords="0"
+    SuppressGridLocalRecords="${SuppressGridLocalRecords}"
     EnableProbe="1"
 />
 EOF
@@ -299,11 +305,11 @@ function reset_collector {
              "properties.attributes" =>
              {
               "service.security.level" => "1",
-              "service.lifetime.JobUsageRecord" => "3 Months",
-              "service.lifetime.JobUsageRecord.RawXML" => "1 Month",
+              "service.lifetime.JobUsageRecord" => "90 days",
+              "service.lifetime.JobUsageRecord.RawXML" => "30 days",
               "service.lifetime.MetricRecord" => "36 months",
-              "service.lifetime.MetricRecord.RawXML" => "1 month",
-              "service.lifetime.DupRecord.Duplicates" => "1 month",
+              "service.lifetime.MetricRecord.RawXML" => "30 days",
+              "service.lifetime.DupRecord.Duplicates" => "30 days",
               "service.lifetime.DupRecord" => "UNLIMITED",
               "maintain.history.log" => 2,
               "monitor.recordProcessor.wait" => 240,
@@ -776,14 +782,14 @@ function check_backlog()
    adminCollector "disableServlet" 2>&1 | tee wget.full.log | grep House | grep DISABLED > wget.log
    
    # Create bunch of local files
-   python backlogtest.py 100
+   python sendrecords.py ProbeConfigBacklog 100
 
    # Enable the server
    adminCollector "enableServlet" 2>&1 | tee wget.full.log | grep House | grep DISABLED > wget.log   
    wait_for_server
 
    # Load the data (and hence the backlog information)
-   python backlogtest.py 20
+   python sendrecords.py ProbeConfigBacklog 20
 
    readonly_mysql > backlog.validate 2>&1 <<EOF 
 use ${schema_name};

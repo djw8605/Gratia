@@ -61,16 +61,19 @@ def GetRecord(jobid = 0):
         return r
 
 def SendRecords(argv=None):
-        if (len(argv)>1): nrecords = int(argv[1])
+
+        if (len(argv)>1): configfile = argv[1]
+        else: configfile = "ProbeConfig"
+        if (len(argv)>2): nrecords = int(argv[2])
         else: nrecords = 0
 
         rev = "$Revision: 1.6 $"
-        GratiaCore.RegisterReporterLibrary("samplemeter.py",Gratia.ExtractCvsRevision(rev))
-        GratiaCore.RegisterReporterLibrary("samplemeter.py",Gratia.ExtractCvsRevision(rev))
-        GratiaCore.RegisterReporterLibrary("samplemeter.py",Gratia.ExtractCvsRevision(rev))
+        GratiaCore.RegisterReporterLibrary("sendrecords.py",Gratia.ExtractCvsRevision(rev))
+        GratiaCore.RegisterReporterLibrary("sendrecords.py",Gratia.ExtractCvsRevision(rev))
+        GratiaCore.RegisterReporterLibrary("sendrecords.py",Gratia.ExtractCvsRevision(rev))
         GratiaCore.RegisterEstimatedServiceBacklog(nrecords)
 
-        Gratia.Initialize("ProbeConfigBacklog")
+        Gratia.Initialize(configfile)
 
         i = -1
         for i in range(nrecords):
