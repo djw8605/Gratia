@@ -234,6 +234,8 @@ public class ReplicationDataPump extends Thread {
          tx.commit();
          session.close();
          if (lSize == 0) {
+            // Make sure to tell the remote collector that we are update to date.
+            sendBacklogUpdate(replicationEntry.getDestination(),replicationEntry.getbundleSize(),backlog);
             replicationLog(LogLevel.FINEST,
                            "No records found");
             return;
@@ -366,6 +368,58 @@ public class ReplicationDataPump extends Thread {
       }
       return false;
       
+   }
+
+   public Boolean sendBacklogUpdate(String replicationTarget, int bundle_count, long backlog) throws Exception 
+   {
+      Boolean result = false;
+      if (!replicationTarget.startsWith("file:")) {
+
+         long nRecords = 0;
+         int nQueues = QueueManager.getNumberOfQueues();
+         for (int i = 0; i < nQueues; i++) {
+            QueueManager.Queue q = QueueManager.getQueue(i);
+            nRecords += q.getNRecords();
+         }
+         
+         Post post = new Post(replicationTarget + "/gratia-servlets/rmi", "update", "xxx");
+         post.add("xmlfiles", String.valueOf(0));
+         post.add("tarfiles", String.valueOf(0)); 
+         post.add("maxpendingfiles", p.getProperty("max.q.size"));
+         post.add("backlog", String.valueOf(backlog+nRecords));
+         post.add("bundlesize", String.valueOf(bundle_count));
+         
+         String response = post.send();        
+        
+         if (post.success && response != null) {
+            String[] results = split(response, ":");
+            if (results[0].equals("OK")) {
+               result = true;
+            } else {
+               replicationLog(LogLevel.WARNING, "Error during post: " + response);
+               exitflag = true;
+            }
+         } else {
+            String errorMessage;
+            if (post.exception != null) {
+               errorMessage = post.exception.toString();
+            } else if (response != null) {
+               errorMessage = response;
+            } else {
+               errorMessage = "UNKNOWN";
+            }
+            replicationLog(LogLevel.INFO,
+                           "Error during replication: " +
+                           errorMessage +
+                           "; will retry later.");
+            if (post.exception != null) {
+               replicationLog(LogLevel.DEBUG,
+                              "Exception details:", post.exception);
+            }
+            exitflag = true;
+         }
+      }
+      return result;
    }
 
    public Boolean uploadXML(String replicationTarget, String xml, int bundle_count, long record_left, long backlog)
