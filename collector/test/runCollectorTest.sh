@@ -772,6 +772,8 @@ function check_backlog()
 {
    echo "Checking the back log tracking feature"
 
+    mkdir -p MAGIC_VDT_LOCATION/gratia/var/data
+
    start_server
    write_ProbeConfig ProbeConfigBacklog ${webhost} 'BundleSize="10"' gratia-testbacklog backlog
    # Enable the server
