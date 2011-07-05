@@ -349,8 +349,8 @@ public class MonitorStatus extends HttpServlet
       return null;
    }
 
-   static final String fgCountCurrent = "select sum(nRecords) from TableStatistics where ValueType = 'lifetime' and RecordType != 'DupRecord' ";
-   static final String fgCountLastHourQuery =  "select sum(maxRecords) from ( select max(maxRecords) as maxRecords from " +
+   static public final String fgCountCurrent = "select sum(nRecords) from TableStatistics where ValueType = 'lifetime' and RecordType != 'DupRecord' ";
+   static public final String fgCountLastHourQuery =  "select sum(maxRecords) from ( select max(maxRecords) as maxRecords from " +
       "( select ValueType,RecordType,Qualifier,max(nRecords) as maxRecords from TableStatisticsSnapshots where ValueType = 'lifetime'" +
       "     and ServerDate <= ? " +
       "     and RecordType != 'DupRecord' " +
@@ -410,10 +410,11 @@ public class MonitorStatus extends HttpServlet
          Logging.debug("MonitorStatus SQL query: " + statement);
          resultSet = statement.executeQuery();
          if (resultSet.next()) {
-            append(buffer,"record-count-hour",totalrecords_current - resultSet.getLong(1),xml);
+            totalrecords_onehour = totalrecords_current - resultSet.getLong(1);
          } else {
-            append(buffer,"record-count-hour",totalrecords_current,xml);
+            totalrecords_onehour = totalrecords_current;
          }            
+         append(buffer,"record-count-hour",totalrecords_onehour,xml);
          resultSet.close();
          statement.close();
 
@@ -426,10 +427,11 @@ public class MonitorStatus extends HttpServlet
          Logging.debug("MonitorStatus SQL query: " + statement);
          resultSet = statement.executeQuery();
          if (resultSet.next()) {
-            append(buffer,"record-count-24hour",totalrecords_current - resultSet.getLong(1),xml);
+            totalrecords_oneday = totalrecords_current - resultSet.getLong(1);
          } else {
-            append(buffer,"record-count-24hour",totalrecords_current ,xml);
+            totalrecords_oneday = totalrecords_current;
          }            
+         append(buffer,"record-count-24hour",totalrecords_oneday,xml);
          resultSet.close();
          statement.close();
 
