@@ -1,10 +1,11 @@
 package net.sf.gratia.administration;
 
-import net.sf.gratia.util.XP;
-
 import net.sf.gratia.util.Configuration;
-
 import net.sf.gratia.util.Logging;
+
+import net.sf.gratia.services.JMSProxy;
+
+import net.sf.gratia.storage.ExpirationDateCalculator;
 
 import java.io.*;
 
@@ -12,6 +13,9 @@ import java.util.Properties;
 import java.util.HashMap;
 import java.util.TreeSet;
 import java.util.Iterator;
+import java.util.List;
+
+import java.rmi.Naming;
 
 import javax.servlet.*;
 import javax.servlet.http.*;
@@ -22,33 +26,40 @@ import java.util.regex.*;
 import java.lang.Math;
 
 public class PerformanceRates extends HttpServlet {
-   XP xp = new XP();
 
-   static final Pattern yesMatcher =
-      Pattern.compile("^[YyTt1]");
-   static final Pattern colgroupDefn =
-      Pattern.compile("^\\s*<colgroup class=\"tablespan\".*?/>\\s*?\n",
-            Pattern.MULTILINE + Pattern.DOTALL);
-   static final Pattern colgroupHdr =
-      Pattern.compile("^\\s*<th\\s+.*?#RecordType#</th>\\s*?\n",
-            Pattern.MULTILINE);
-   static final Pattern tableHead2 =
-      Pattern.compile("^(\\s*<tr class=\"tablehead2\">\\s*?\n)" +
-            "(.*?<th.*?\n)(\\s*</tr>\n)",
-            Pattern.MULTILINE + Pattern.DOTALL);
-   static final Pattern timeIntervalRow =
-      Pattern.compile("^(\\s*<tr class=\"timeintervalrow\">\\s*?\n)" +
-            "(.*?<td.*?#timeinterval#.*?</td>\\s*?\n)" +
-            "(.*?<td.*?#tabledatum#.*?</td>\\s*?\n)(\\s*</tr>\n)",
-            Pattern.MULTILINE + Pattern.DOTALL);
-   static final Pattern qsizeblock =
-       Pattern.compile("<tr class=\"qsize\">.*?</tr>",
-            Pattern.MULTILINE + Pattern.DOTALL);
+   JMSProxy fProxy = null;
+   List<String> fTableNames = null;
+   ExpirationDateCalculator fExpCalc = new ExpirationDateCalculator();   
 
+   static final Pattern yesMatcher = Pattern.compile("^[YyTt1]");
+
+   // Which Servlet/web page is this
+   String fName;
+   static final String fApplicationURL = "performance-rate.html";
+   
+   
+   static final String fgPreamble = 
+   "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\n" +
+   "<html xmlns=\"http://www.w3.org/1999/xhtml\">\n" +
+   "<head>\n" +
+   "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=iso-8859-1\" />\n" +
+   "<title>Gratia Accounting</title>\n" +
+   "<link href=\"stylesheet.css\" type=\"text/css\" rel=\"stylesheet\" />\n" +
+   "<link href=\"docstyle.css\" type=\"text/css\" rel=\"stylesheet\" />\n" +
+   "<style type=\"text/css\">\n" +
+   ".problem {color: #FF0000; font-weight:bold;}\n" +
+   ".good {color: green; font-weight:bold;}\n" +
+   ".improving {color: #000000; font-weight:bold;}\n" +
+   ".ancient {color: purple; font-style:italic; font-weight:bold;}\n" +
+   "</style>" +
+   "</head>\n" +
+   "<body>\n" +
+   "<h1 align=\"center\" class=\"osgcolor\">&nbsp;&nbsp;&nbsp;&nbsp;Gratia Administration&nbsp;&nbsp;&nbsp;&nbsp;</h1>\n" +
+   "<h3 align=\"center\">Performance Rates</h3>\n";
+   
    //
    // globals
    //
-   Properties props;
    static final String color_a = "#ffffff";
    static final String color_b = "#cccccc";
 
@@ -56,64 +67,32 @@ public class PerformanceRates extends HttpServlet {
    // matching
    //
 
-
-   class TableStatusInfo {
-      long nRecords = 0;
-      long nDups = 0;
-      long nSQLErrors = 0;
-      long nParse = 0;
-      long nOther = 0;
-
-      public TableStatusInfo(long nRecords) {
-         this.nRecords = nRecords;
-      }
-      public TableStatusInfo(long nRecords, long nDups, long nSQLErrors, long nParse, long nOther) {
-         this.nRecords = nRecords;
-         this.nDups = nDups;
-         this.nSQLErrors = nSQLErrors;
-         this.nParse = nParse;
-         this.nOther = nOther;
-      }
-      public long nRecords() {
-         return this.nRecords;
-      }
-      public long nDups() {
-         return this.nDups;
-      }
-      public long nSQLErrors() {
-         return this.nSQLErrors;
-      }
-      public long nParse() {
-         return this.nParse;
-      }
-      public long nOther() {
-         return this.nOther;
-      }
-      public void nRecords(long in) {
-         this.nRecords = in;
-      }
-      public void nDups(long in) {
-         this.nDups = in;
-      }
-      public void nSQLErrors(long in) {
-         this.nSQLErrors = in;
-      }
-      public void nParse(long in) {
-         this.nParse = in;
-      }
-      public void nOther(long in) {
-         this.nOther = in;
-      }
-
-   }
-
    public void init(ServletConfig config) throws ServletException 
    {
-      props = Configuration.getProperties();
+      Logging.debug("PerformanceRates.init()");
+      fName = config.getServletName();
    }
 
    public Connection openConnection()
    {
+      Properties properties = Configuration.getProperties();
+      if (fProxy == null) {
+         while (true) {
+            // Wait until JMS service is up
+            try { 
+               fProxy = (JMSProxy)
+               Naming.lookup(properties.getProperty("service.rmi.rmilookup") +
+                             properties.getProperty("service.rmi.service"));
+            } catch (Exception e) {
+               try {
+                  Thread.sleep(5000);
+               } catch (Exception ignore) {
+               }
+            }
+            break;
+         }
+      }
+
       //
       // database related
       //
@@ -121,12 +100,11 @@ public class PerformanceRates extends HttpServlet {
       String url = "";
       String user = "";
       String password = "";
-
       try {
-         driver = props.getProperty("service.mysql.driver");
-         url = props.getProperty("service.mysql.url");
-         user = props.getProperty("service.mysql.user");
-         password = props.getProperty("service.mysql.password");
+         driver = properties.getProperty("service.mysql.driver");
+         url = properties.getProperty("service.mysql.url");
+         user = properties.getProperty("service.mysql.user");
+         password = properties.getProperty("service.mysql.password");
       }
       catch (Exception ignore) {
       }
@@ -148,9 +126,28 @@ public class PerformanceRates extends HttpServlet {
          e.printStackTrace();
       }
    }
+   
+   static boolean Requested(HttpServletRequest request, String paramName)
+   {
+      // Return true if the parameter is set to 'y[es]','1' or 'T[rue]'
+      
+      String value = request.getParameter(paramName);
+      Logging.debug("Got parameter "+paramName+"=" + value);
+      
+      if (value != null) {
+         if (yesMatcher.matcher(value).lookingAt()) {
+            return true;
+         } else {
+            return false;
+         }
+      } else {
+         return false;
+      }
+   }
 
    public void doGet(HttpServletRequest request, HttpServletResponse response)
    throws ServletException, IOException {
+      
       Connection connection = openConnection();
       String uriPart = request.getRequestURI();
       int slash2 = uriPart.substring(1).indexOf("/") + 1;
@@ -163,33 +160,20 @@ public class PerformanceRates extends HttpServlet {
 
       request.getSession().setAttribute("displayLink", "." + uriPart + queryPart);
       
-      String wantDetails = request.getParameter("wantDetails");
-      Logging.debug("Got parameter wantDetails=" + wantDetails);
-      
-      boolean detailedDisplay = false;
-            if (wantDetails != null) {
-         if (yesMatcher.matcher(wantDetails).matches()) {
-            detailedDisplay = true;
-         } else {
-            detailedDisplay = false;
-         }
-      }
-      String lastHours = request.getParameter("lastHours");
-      Logging.debug("Got parameter lastHours=" + lastHours);
-      int nHoursBack = 6;
-      if ((lastHours != null) && (lastHours != "")) {
-         try {
-            nHoursBack = Integer.parseInt(lastHours);
-         }
-         catch (NumberFormatException e) {
-         }
-      }
-      String html = process(request, connection, nHoursBack, detailedDisplay);
+      boolean detailedDisplay = Requested(request,"wantDetails");
+      boolean housekeepingDetails = Requested(request,"housekeepingDetails");
+
+      String html = process(request, connection, detailedDisplay, housekeepingDetails);
       response.setContentType("text/html");
       response.setHeader("Cache-Control", "no-cache"); // HTTP 1.1
       response.setHeader("Pragma", "no-cache"); // HTTP 1.0
       PrintWriter writer = response.getWriter();
+      writer.write(fgPreamble);
+      writer.write("<h4 align=\"center\">");
+      writer.write(fProxy.getName());
+      writer.write("</h4>\n");
       writer.write(html);
+      writer.write("</body>\n      </html>\n");
       writer.flush();
       writer.close();
       closeConnection(connection);
@@ -202,472 +186,679 @@ public class PerformanceRates extends HttpServlet {
          return value.toString();
    }
 
-   static final String fgCountHourly = "select period, RecordType, Qualifier, max(maxRecords) from ( " + 
-      "   select timestampdiff(HOUR, ServerDate, UTC_TIMESTAMP()) as period, RecordType, Qualifier, max(nRecords) as maxRecords" +
-      "   from TableStatisticsSnapshots where ValueType = 'lifetime' and nRecords > 0 " +
-      "   and ServerDate > (UTC_TIMESTAMP() - INTERVAL ? HOUR) " +
-      "   group by RecordType,Qualifier,period " +
-      "   union select timestampdiff(HOUR, min(ServerDate), UTC_TIMESTAMP())+1 as period, TN.RecordType, TN.Qualifier, min(TN.nRecords) as MaxRecords " +
-      "         from TableStatisticsSnapshots TN join TableStatistics  TS on  TS.RecordType = TN.RecordType and TS.Qualifier=TN.Qualifier" + 
-      "         where (UTC_TIMESTAMP() - interval ? hour) < (select min(ServerDate) from TableStatisticsSnapshots) and TS.nRecords > 0  " +
-      "         group by RecordType,Qualifier" +
-      "   union select 0 as period, RecordType, Qualifier, nRecords as maxRecords from TableStatistics " +
-      "         where nRecords > 0 and ValueType = 'lifetime' ) Sub " + 
-      " where RecordType != 'DupRecord' and RecordType != 'ProbeDetails' and RecordType != '' " +
-      " group by RecordType,Qualifier,period " +
-      " order by RecordType,Qualifier,period desc ";
-   static final String fgCountLastWeekQuery = "select currentRecords - ifnull(maxRecords,0),forJoin.RecordType,forJoin.Qualifier from " +
-      "( select ValueType,RecordType,Qualifier,max(maxRecords) as maxRecords from " +
-      "( select ValueType,RecordType,Qualifier,max(nRecords) as maxRecords from TableStatisticsSnapshots where ValueType = 'lifetime'" +
-      "     and ServerDate <= (UTC_TIMESTAMP() - interval 1 week) " +
-      "     and RecordType != 'DupRecord' and RecordType != 'ProbeDetails' and RecordType != '' " +
-      "     and nRecords > 0 " +
-      "     group by ValueType,RecordType,Qualifier" + 
-      "  union select ValueType,RecordType,Qualifier,max(maxRecords) as maxRecords from TableStatisticsHourly where ValueType = 'lifetime'" +
-      "     and EndTime <= (UTC_TIMESTAMP() - interval 1 week) " +
-      "     and RecordType != 'DupRecord' and RecordType != 'ProbeDetails' and RecordType != '' "+
-      "     and maxRecords > 0 " +
-      "     group by ValueType,RecordType,Qualifier" +
-      "  union select ValueType,RecordType,Qualifier,max(maxRecords) as maxRecords from TableStatisticsDaily where ValueType = 'lifetime'" +
-      "    and EndTime <= (UTC_TIMESTAMP() - interval 1 week) " + 
-      "    and RecordType != 'DupRecord' and RecordType != 'ProbeDetails' and RecordType != '' " +
-      "     and maxRecords > 0 " +
-      "    group by ValueType,RecordType,Qualifier " + 
-      ") forMax " +
-      "group by ValueType,RecordType,Qualifier ) forWrapup " +
-      "right outer join " + 
-      "( select ValueType,RecordType,Qualifier,max(nRecords) as currentRecords from TableStatistics where ValueType = 'lifetime'" + 
-      "     and nRecords > 0 " +
-      "     and RecordType != 'DupRecord' and RecordType != 'ProbeDetails' and RecordType != '' "+
-      "     group by ValueType,RecordType,Qualifier " +
-      ") forJoin " +
-      "on forWrapup.RecordType = forJoin.RecordType and forWrapup.Qualifier = forJoin.Qualifier and forWrapup.ValueType = forJoin.ValueType ";
-   static final String fgCountAllTime = "select nRecords, RecordType, Qualifier from TableStatistics where " +
-      " RecordType != 'DupRecord' and RecordType != 'ProbeDetails' and RecordType != '' " +
-      " and nRecords > 0 " +
-      " and ValueType = 'lifetime' group by RecordType, Qualifier";
-
-   public String process(HttpServletRequest request, Connection connection, int nHoursBack, boolean detailedDisplay) throws java.io.IOException {
-      //
-      // processing related
-      //
-      
-      String html = xp.get(request.getRealPath("/") + "status.html");
-      String tableHeader = "";
-      String tableSection = "";
-      String row = "";
-      StringBuffer buffer = new StringBuffer();
-
-      HashMap<String, HashMap<Integer, TableStatusInfo> > tableInfo = new HashMap<String, HashMap<Integer, TableStatusInfo> >(5);
-      
-      Matcher m = null;
-
-      int index = 0;
-      String command = "";
-      buffer = new StringBuffer();
-
-      int nPeriods = nHoursBack + 3;
-      Integer nDataCols = 5;
-      if (!detailedDisplay) nDataCols = 2;
-      html = html.replaceAll("#nDcols#", nDataCols.toString());
-
-      try {
-         // Start transaction so numbers are consistent.
-         connection.setAutoCommit(false);
-         
-         // Get list of _Meta tables in this database
-         command = "select table_name from information_schema.tables " +
-            "where table_schema = Database() and table_name like '%_Meta'" +
-            " order by table_name;";
-         PreparedStatement statement = connection.prepareStatement(command);
+   static final String fgProcessQueueLengthQuery = "select Queue, Files, Records from CollectorStatus order by Queue";
+   public static long addQueueLength(StringBuffer buffer, Connection connection, boolean retry)
+   {
+      long total_records = 0;
+      buffer.append("<h3>Queue information</h3>\n");
+      buffer.append("<table border=\"1\">\n");
+      buffer.append("<tr class=\"qsize_head\">\n");
+      buffer.append("<th>Queue</th><th>Files</th><th>Records</th>\n");
+      buffer.append("</tr>\n");
+      try
+      {
+         PreparedStatement statement = connection.prepareStatement(fgProcessQueueLengthQuery);
          ResultSet resultSet = statement.executeQuery();
-         Logging.log("PerformanceRates SQL query:"+statement);
          while(resultSet.next()) {
-
-            String table_name = resultSet.getString(1);
-            if (table_name.equals("ProbeDetails_Meta")) continue; // Not interested
-            int end_index = table_name.lastIndexOf("_Meta");
-            String base_table = table_name.substring(0,end_index);
-            // Only display table if we have any records
-
-            command = "select * from " + base_table + " limit 1";
-            PreparedStatement tableUseCheck = connection.prepareStatement(command);
-            ResultSet tableUseResult = tableUseCheck.executeQuery();
-            if (tableUseResult.next()) {
-               tableInfo.put(base_table,
-                     new HashMap<Integer, TableStatusInfo>(nPeriods));
+            int q = resultSet.getInt(1);
+            long nFiles = resultSet.getLong(2);
+            long nRecords = resultSet.getLong(3);
+            total_records = total_records + nRecords;
+            if (retry && (nFiles < 0 || nRecords < 0) ) {
+               // We know something went wrong.  We need to abord, refresh the Status
+               // and retry.
+               resultSet.close();
+               statement.close();
+               // RefreshStatus
+               if (RefreshCollectorStatus.ExecuteRefresh()) {
+                  // Retry
+                  return addQueueLength(buffer, connection, false);
+               } else {
+                  // We can't fix it from here, let's display the
+                  // wrong numbers :(
+               }
             }
-            tableUseResult.close();
-            tableUseCheck.close();
+            buffer.append("<tr class=\"qsize\">\n");
+            buffer.append("<td align=\"center\"><strong>").append(q).append("</strong></td>");
+            buffer.append("<td align=\"right\">").append(nFiles).append("</td>");
+            buffer.append("<td align=\"right\">").append(nRecords).append("</td>\n");
+         }
+         resultSet.close();
+         statement.close();
+       }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+      }
+      buffer.append("</table>\n");
+      return total_records;
+   }
+   
+   java.util.Date GetOldest(Connection connection, String table) 
+   {
+      String cmd = "select min(ServerDate) from "+table+"_Meta ";
+      java.util.Date result = null;
+      try {
+         PreparedStatement statement = connection.prepareStatement(cmd);
+         Logging.debug("Status SQL query:"+statement);
+         ResultSet resultSet = statement.executeQuery();
+         while(resultSet.next()) {
+            result = resultSet.getTimestamp(1);
+         }
+         resultSet.close();
+         statement.close();
+      } catch (Exception e) {
+         Logging.warning("PerformanceRates: Failed to get table oldest record information.",e);
+      }
+      return result;
+   }
+   
+   long GetRecordNumber(Connection connection, String table, java.util.Date limit) 
+   {
+      String cmd = "select count(*) from "+table+"_Meta where ServerDate < ?";
+      long result = 0;
+      try {
+         PreparedStatement statement = connection.prepareStatement(cmd);
+         statement.setTimestamp(1,new java.sql.Timestamp(limit.getTime()));
+         Logging.debug("Status SQL query:"+statement);
+         ResultSet resultSet = statement.executeQuery();
+         while(resultSet.next()) {
+            result = resultSet.getLong(1);
+         }
+         resultSet.close();
+         statement.close();
+      } catch (Exception e) {
+         Logging.warning("PerformanceRates: Failed to get table oldest record information.",e);
+      }
+      return result;
+   }
+   
+   java.util.Date GetOldestXml(Connection connection, String table) 
+   {
+      String dbidcmd = "select dbid from "+table+"_Xml X where ExtraXml = \"\" order by dbid limit 1";
+      String datecmd = "select ServerDate from "+table+"_Meta M where dbid = ?";
+      // "select min(ServerDate) from "+table+"_Xml X,"+table+"_Meta M where X.dbid = M.dbid and ExtraXml = \"\" ";
+      java.util.Date result = null;
+      try {
+         long dbid = 0;
+         PreparedStatement statement = connection.prepareStatement(dbidcmd);
+         Logging.debug("Status SQL query:"+statement);
+         ResultSet resultSet = statement.executeQuery();
+         while(resultSet.next()) {
+            dbid = resultSet.getLong(1);
+         }
+         resultSet.close();
+         statement.close();
+         if (dbid != 0) {
+            statement = connection.prepareStatement(datecmd);
+            statement.setLong(1,dbid);
+            Logging.debug("Status SQL query:"+statement);
+            resultSet = statement.executeQuery();
+            while(resultSet.next()) {
+               result = resultSet.getTimestamp(1);
+            }
+            resultSet.close();
+            statement.close();
+         }
+      } catch (Exception e) {
+         Logging.warning("PerformanceRates: Failed to get table oldest xml record information.",e);
+      }
+      return result;
+   }
+
+   long GetRecordNumberXml(Connection connection, String table, java.util.Date limit) 
+   {
+      String dbidcmd = "select dbid from "+table+"_Meta M where ServerDate < ?";
+      String countcmd = "select count(*) from "+table+"_Xml X where dbid < ? and ExtraXml = \"\"";
+      long result = 0;
+      try {
+         PreparedStatement statement = connection.prepareStatement(dbidcmd);
+         statement.setTimestamp(1,new java.sql.Timestamp(limit.getTime()));
+         Logging.debug("Status SQL query:"+statement);
+         long highdbid = 0;
+         ResultSet resultSet = statement.executeQuery();
+         while(resultSet.next()) {
+            highdbid = resultSet.getLong(1);
          }
          resultSet.close();
          statement.close();
 
-         // Now for each table, get record information followed by
-         // error info
-         TreeSet keySet = new TreeSet(tableInfo.keySet());
-         int hourly_time_limit = Math.max(nHoursBack, 25);
-
-//         for (Iterator x = keySet.iterator(); x.hasNext();) {
-//            String table_name = (String) x.next();
-//            HashMap<Integer, TableStatusInfo> thisTableInfo = tableInfo.get(table_name);
-//            if (thisTableInfo == null) {
-//               thisTableInfo = new HashMap<Integer, TableStatusInfo>(nPeriods);
-//               tableInfo.put(table_name,thisTableInfo);
-//            }
-//            TableStatusInfo dayTableStatus = new TableStatusInfo(0);
-//            thisTableInfo.put(nHoursBack, dayTableStatus);
-            ////////////////////////////////////
-            // For each of last 24 hours
-            ////////////////////////////////////
-
-            // nRecords
-            // Error info
-            statement = connection.prepareStatement(fgCountHourly);
-            statement.setLong(1,hourly_time_limit);
-            statement.setLong(2,hourly_time_limit);
-//            statement.setString(2,table_name);
-            Logging.debug("PerformanceRates SQL query: " + statement);
-            resultSet = statement.executeQuery();
-            long prevCount = 0;
-            String prevRecordType = null;
-            String prevQualifier = null;
-            HashMap<Integer, TableStatusInfo> thisTableInfo = null;
-            TableStatusInfo dayTableStatus = null;
-            while (resultSet.next()) {
-               String recordType = resultSet.getString(2);
-
-               if ( ! recordType.equals(prevRecordType) ) {
-                  thisTableInfo = tableInfo.get(recordType);
-                  if (thisTableInfo == null) {
-                     thisTableInfo = new HashMap<Integer, TableStatusInfo>(nPeriods);
-                     tableInfo.put(recordType,thisTableInfo);
-                  }
-                  prevRecordType = recordType;
-                  prevQualifier = null;
-                  prevCount = 0;
-                  
-                  dayTableStatus = new TableStatusInfo(0);
-                  thisTableInfo.put(nHoursBack, dayTableStatus);
-               }
-               
-               int time_index = resultSet.getInt(1);
-
-               TableStatusInfo tableStatus = thisTableInfo.get(time_index);
-               if (tableStatus == null) {
-                  tableStatus = new TableStatusInfo(0);
-                  if (time_index < nHoursBack) { // Don't record if we're not interested
-                     thisTableInfo.put(time_index, tableStatus);
-                  }
-               }
-               String qualifier = resultSet.getString(3);
-               long currentCount = resultSet.getLong(4);
-               long count = 0;
-
-               if ( ! qualifier.equals(prevQualifier) ) {
-                  prevCount = currentCount;
-                  prevQualifier = qualifier;
-                  
-                  // We just register the first one.
-               } else {
-                  count = currentCount - prevCount;
-                  prevCount = currentCount;
-               
-                  if (qualifier.equals("")) {
-                     if (time_index < nHoursBack) { // Don't record if we're not interested
-                        thisTableInfo.put(time_index, new TableStatusInfo(count));
-                     }
-                     dayTableStatus.nRecords(dayTableStatus.nRecords() + count);                  
-                  } else if (qualifier.equals("Duplicate")) {
-                     if (time_index < nHoursBack) { // Don't record if we're not interested
-                        tableStatus.nDups(count);
-                     }
-                     dayTableStatus.nDups(dayTableStatus.nDups() + count);
-                  } else if (qualifier.equals("Parse")) {
-                     if (time_index < nHoursBack) { // Don't record if we're not interested
-                        tableStatus.nParse(count);
-                     }
-                     dayTableStatus.nParse(dayTableStatus.nParse() + count);
-                  } else if (qualifier.equals("SQLError")) {
-                     if (time_index < nHoursBack) { // Don't record if we're not interested
-                        tableStatus.nSQLErrors(count);
-                     }
-                     dayTableStatus.nSQLErrors(dayTableStatus.nSQLErrors() + count);
-                  } else {
-                     if (time_index < nHoursBack) { // Don't record if we're not interested
-                        tableStatus.nOther(tableStatus.nOther() + count);
-                     }
-                     dayTableStatus.nOther(dayTableStatus.nOther() + count);
-                  }
-               }
-            }
-            resultSet.close();
-            statement.close();
-
-            ////////////////////////////////////
-            // Total for last 7 days
-            ////////////////////////////////////
-
-//            TableStatusInfo weekTableStatus = new TableStatusInfo(0);
-//            thisTableInfo.put(nHoursBack + 1, weekTableStatus);
-
-            statement = connection.prepareStatement(fgCountLastWeekQuery);
-//            statement.setString(1,table_name);
-            Logging.debug("Weekly status SQL query: " + statement);
-            resultSet = statement.executeQuery();
-            prevRecordType = null;
-            TableStatusInfo weekTableStatus = null;
-            while (resultSet.next()) {
-               long count = resultSet.getLong(1);
-               String recordType = resultSet.getString(2);
-               String qualifier = resultSet.getString(3);
-               
-               if ( ! recordType.equals(prevRecordType) ) {
-                  thisTableInfo = tableInfo.get(recordType);
-                  if (thisTableInfo == null) {
-                     thisTableInfo = new HashMap<Integer, TableStatusInfo>(nPeriods);
-                     tableInfo.put(recordType,thisTableInfo);
-                  }
-                  prevRecordType = recordType;
-
-                  weekTableStatus = new TableStatusInfo(0);
-                  thisTableInfo.put(nHoursBack + 1, weekTableStatus);
-               }
-               
-               if (qualifier.equals("")) {
-                  weekTableStatus.nRecords(count);                 
-               } else if (qualifier.equals("Duplicate")) {
-                  weekTableStatus.nDups(count);
-               } else if (qualifier.equals("Parse")) {
-                  weekTableStatus.nParse(count);
-               } else if (qualifier.equals("SQLError")) {
-                  weekTableStatus.nSQLErrors(count);
-               } else {
-                  weekTableStatus.nOther(weekTableStatus.nOther() + count);
-               }
-            }
-            resultSet.close();
-            statement.close();
-
-            ////////////////////////////////////
-            // Totals for all time
-            ////////////////////////////////////
-//            TableStatusInfo totalTableStatus = new TableStatusInfo(0);
-//            thisTableInfo.put(nHoursBack + 2, totalTableStatus);
-
-            statement = connection.prepareStatement(fgCountAllTime);
-//            statement.setString(1,table_name);
-            Logging.debug("PerformanceRates SQL query: " + statement);
-            resultSet = statement.executeQuery();
-            prevRecordType = null;
-            TableStatusInfo totalTableStatus = null;
-            while (resultSet.next()) {
-               long count = resultSet.getLong(1);
-               String recordType = resultSet.getString(2);
-               String errorType = resultSet.getString(3);
-
-               if ( ! recordType.equals(prevRecordType) ) {
-                  thisTableInfo = tableInfo.get(recordType);
-                  if (thisTableInfo == null) {
-                     thisTableInfo = new HashMap<Integer, TableStatusInfo>(nPeriods);
-                     tableInfo.put(recordType,thisTableInfo);
-                  }
-                  prevRecordType = recordType;
-                  totalTableStatus = new TableStatusInfo(0);
-                  thisTableInfo.put(nHoursBack + 2, totalTableStatus);
-               }
-
-               if (errorType.equals("")) {
-                  totalTableStatus.nRecords(count);
-               } else if (errorType.equals("Duplicate")) {
-                  totalTableStatus.nDups(count);
-               } else if (errorType.equals("Parse")) {
-                  totalTableStatus.nParse(count);
-               } else if (errorType.equals("SQLError")) {
-                  totalTableStatus.nSQLErrors(count);
-               } else {
-                  totalTableStatus.nOther(totalTableStatus.nOther() + count);
-               }
-            }
-            resultSet.close();
-            statement.close();
-//         }
-
-         try {
-            connection.commit();
-            connection.setAutoCommit(true);
+         statement = connection.prepareStatement(countcmd);
+         statement.setLong(1,highdbid);
+         Logging.debug("Status SQL query:"+statement);
+         resultSet = statement.executeQuery();
+         while(resultSet.next()) {
+            result = resultSet.getLong(1);
          }
-         catch (Exception e) { // Ignore if we don't support exceptions
-         }
-         int maxthreads = Integer.parseInt(props.getProperty("service.recordProcessor.threads"));
-         String path = System.getProperties().getProperty("catalina.home");
-         path = xp.replaceAll(path,"\\","/");
-
-         ////////////////////////////////////
-         // Fill in the table
-         ////////////////////////////////////
+         resultSet.close();
+         statement.close();
          
-         //////////
-         // Define the right number of column groups
-         //////////
-         m = colgroupDefn.matcher(html);
+      } catch (Exception e) {
+         Logging.warning("PerformanceRates: Failed to get table oldest record information.",e);
+      }
+      return result;
+   }
+   
+   
+   static final String fgHouseKeepingCmd = "select current.ValueType,EventDate,new_values-old_values,old_values,new_values from " +
+                                           " (select sum(avgRecords) as old_values,EventDate,ValueType from TableStatisticsHourly where "+ 
+                                           "     EventDate < date_sub(?,interval 1 day) group by EventDate,ValueType order by EventDate desc limit 2) as prev,"+
+                                           " (select sum(nRecords) as new_values,ValueType from TableStatistics  group by ValueType) as current "+
+                                          "  where prev.ValueType = current.ValueType";
+   static final String fgHouseKeepingCurrentCmd = "select ValueType,date_sub(?,interval 1 day),sum(nRecords) as new_values from TableStatistics  group by ValueType";
+   void appendHouseKeeping(StringBuffer buffer, Connection connection, boolean housekeepingDetails)
+   {
+      // Add information about housekeeping.
+      buffer.append("<h4>Housekeeping (<a href=\""+fApplicationURL+"?housekeepingDetails=yes\" target=\"adminContent\">details</a>)</h4>\n");
+      
+      java.util.Date now = new java.util.Date();
 
-         keySet = new TreeSet(tableInfo.keySet());
-         int nTables = tableInfo.size();
-         Logging.warning("Number of tables: "+nTables);
-         String nTablesFullGroupString = "";
-         for (int i = 0; i < nTables; ++i) {
-            nTablesFullGroupString += "$0";
-         }
-         html = m.replaceFirst(nTablesFullGroupString);
-         Logging.debug("Matched " + m.group());
-
-         //////////
-         // Construct the table head, first line
-         //////////
-         m = colgroupHdr.matcher(html);
-         html = m.replaceFirst(nTablesFullGroupString);
-         for (Iterator x = keySet.iterator(); x.hasNext();) {
-            String table_name = (String) x.next();
-            html = html.replaceFirst("#RecordType#", table_name);
-         }
-
-         //////////
-         // Construct the table head, second line
-         //////////
-         m = tableHead2.matcher(html);
-         m.find();
-         String tableHead2RepString = "$1";
-         String columnHead = m.group(2);
-         for (int i = 0; i < nTables; ++i) {
-            tableHead2RepString += columnHead.replaceFirst("#datumHeader#", "Records");
-            tableHead2RepString += columnHead.replaceFirst("#datumHeader#", "Duplicates");
-            if (! detailedDisplay) continue; // Less info and clutter
-            tableHead2RepString += columnHead.replaceFirst("#datumHeader#", "Parse errors");
-            tableHead2RepString += columnHead.replaceFirst("#datumHeader#", "SQL errors");
-            tableHead2RepString += columnHead.replaceFirst("#datumHeader#", "Other errors");
-         }
-         tableHead2RepString += "$3";
-         html = m.replaceFirst(tableHead2RepString);
-//         Logging.warning("Matched " + m.group());
-
-         //////////
-         // Construct the body of the table
-         //////////
-
-         // Construct the replace string
-         String rowReplaceString = "$1$2";
-         for (int i = 0; i < nTables * nDataCols; ++i) {
-            rowReplaceString += "$3";
-         }
-         rowReplaceString += "$4";
-
-         m = timeIntervalRow.matcher(html);
-         m.find();
-         String matchedRow = m.group();
-         Logging.debug("Matched " + m.group());
-         m.reset(m.group());
-         String fullRow = m.replaceFirst(rowReplaceString);
-         Logging.debug("Matched " + m.group());
-         Logging.debug("New row:\n" + fullRow);
-
-         // Loop over tables
-         rowReplaceString = "";
-         for (int period_index = 0; period_index < nPeriods; ++period_index) {
-            String newRow = fullRow;
-            String period_label = null;
-            if (period_index < nHoursBack) {
-               period_label = "< " + ((Integer)(period_index + 1)).toString() + " hour";
-               if (period_index != 1) period_label += "s";
-               period_label += " ago";
-            } else if (period_index == nHoursBack) {
-               period_label = "Previous day";
-            } else if (period_index == nHoursBack + 1) {
-               period_label = "Previous week";
-            } else if (period_index == nHoursBack + 2) {
-               period_label = "All time total";
-            } else {
-               Logging.warning("Unrecognized period index: " + period_index);
+      long lifetime = 0;
+      long current = 0;
+      java.util.Date then = null;
+      try {
+         PreparedStatement statement = connection.prepareStatement(fgHouseKeepingCmd);
+         statement.setTimestamp(1,new java.sql.Timestamp(now.getTime()));
+         Logging.debug("Status SQL query:"+statement);
+         ResultSet resultSet = statement.executeQuery();
+         while(resultSet.next()) {
+            String valuetype = resultSet.getString(1);
+            if (valuetype.equals("lifetime")) {
+               lifetime = resultSet.getLong(3);
+            } else if  (valuetype.equals("current")) {
+               current = resultSet.getLong(3);
             }
-            newRow = newRow.replaceFirst("#timeinterval#", period_label);
-            newRow = newRow.replaceFirst("#bgcolor#", color_b);
-            int table_count = 0;
-            for (Iterator x = keySet.iterator(); x.hasNext(); ++table_count) {
-               String table_name = (String) x.next();
-               HashMap<Integer, TableStatusInfo> thisTableInfo2 = tableInfo.get(table_name);
-               TableStatusInfo tableStatus = thisTableInfo2.get(period_index);
-               if (tableStatus == null) {
-                  for (int i = 0; i < nDataCols; ++i) {
-                     if ((table_count % 2) == 0) {
-                        newRow = newRow.replaceFirst("#bgcolor#", color_a);
-                     } else {
-                        newRow = newRow.replaceFirst("#bgcolor#", color_b);
-                     }
-                     newRow = newRow.replaceFirst("#tabledatum#", "0");
-                  }
-               } else {
-                  for (int i = 0; i < nDataCols; ++i) {
-                     if ((table_count % 2) == 0) {
-                        newRow = newRow.replaceFirst("#bgcolor#", color_a);
-                     } else {
-                        newRow = newRow.replaceFirst("#bgcolor#", color_b);
-                     }
-                  }
-                  newRow = newRow.replaceFirst("#tabledatum#",
-                        ((Long) tableStatus.nRecords()).toString());
-                  newRow = newRow.replaceFirst("#tabledatum#",
-                        ((Long) tableStatus.nDups()).toString());
-                  if (detailedDisplay) {
-                     newRow = newRow.replaceFirst("#tabledatum#",
-                           ((Long) tableStatus.nParse()).toString());
-                     newRow = newRow.replaceFirst("#tabledatum#",
-                           ((Long) tableStatus.nSQLErrors()).toString());
-                     newRow = newRow.replaceFirst("#tabledatum#",
-                           ((Long) tableStatus.nOther()).toString());
-                  }
-               }
-            }
-            rowReplaceString += newRow;
+            then = resultSet.getTimestamp(2);
          }
-
-         html = html.replaceFirst(matchedRow, rowReplaceString);
-
-         ////////////////////////////////////
-         // Fill in the thread information.
-         ////////////////////////////////////
-
-         m = qsizeblock.matcher(html);
-         m.find();
-         row = m.group();
-         buffer = new StringBuffer();
-         try
-         {
-            command = "select Queue, Files, Records from CollectorStatus order by Queue";
-            statement = connection.prepareStatement(command);
+         resultSet.close();
+         statement.close();
+         if (then == null) {
+            statement = connection.prepareStatement(fgHouseKeepingCurrentCmd);
+            statement.setTimestamp(1,new java.sql.Timestamp(now.getTime()));
+            Logging.debug("Status SQL query:"+statement);
             resultSet = statement.executeQuery();
             while(resultSet.next()) {
-               int q = resultSet.getInt(1);
-               long nFiles = resultSet.getLong(2);
-               long nRecords = resultSet.getLong(3);
-               String newrow = new String(row);
-               newrow = xp.replaceAll(newrow,"#queue#","" + q);
-               newrow = xp.replaceAll(newrow,"#queuefiles#","" + nFiles);
-               newrow = xp.replaceAll(newrow,"#queuerecords#","" + nRecords);
-               buffer.append(newrow);
+               String valuetype = resultSet.getString(1);
+               if (valuetype.equals("lifetime")) {
+                  lifetime = resultSet.getLong(3);
+               } else if  (valuetype.equals("current")) {
+                  current = resultSet.getLong(3);
+               }
+               then = resultSet.getTimestamp(2);
+            }            
+         }
+         resultSet.close();
+         statement.close();
+      } catch (Exception e) {
+         Logging.warning("PerformanceRates: Failed to get housekeeping information.",e);
+      }
+      try {
+         buffer.append("The house keeping service is currently "+fProxy.housekeepingServiceStatus()+".<p/>");
+      } catch (Exception e) {
+         buffer.append("The house keeping service's status could not be retrieved.<p/>");
+         Logging.warning("PerformanceRates: Failed to get housekeeping information.",e);
+      }
+      double rate_per_day = 0;
+      if (then == null) {
+         buffer.append("The housekeeping rate could not be retrieved.");
+      } else {
+         long housekeeping = lifetime - current;
+         long delta = now.getTime() - then.getTime();
+         if (housekeeping < 0 || delta <= 0) {
+            buffer.append("The housekeeping rate could not be properly retrieved.<p/>");
+         } else {
+            rate_per_day = housekeeping / ( delta / (24 * 3600.0 * 1000.0 ) );
+            buffer.append("The housekeeping is removing ");
+            java.text.DecimalFormat decForm = new java.text.DecimalFormat();
+            decForm.applyPattern("0.0");
+            java.text.FieldPosition pos1 = new java.text.FieldPosition(java.text.NumberFormat.FRACTION_FIELD);
+            decForm.format(rate_per_day, buffer, pos1);
+            buffer.append(" records per day.<p/>");
+         }
+      }
+      if (housekeepingDetails) {
+         class DateInfo implements Comparable<DateInfo> {
+            String         fName;
+            java.util.Date fLimit;
+            java.util.Date fOldest;
+            long           fNRecords;
+            public DateInfo(String name, java.util.Date limit, java.util.Date old, long nrecords) {
+               fName = name;
+               fLimit = limit;
+               fOldest = old;
+               fNRecords = nrecords;
+            }
+            public int compareTo(DateInfo o) {
+               return fName.compareTo(o.fName);
+            }
+         };
+         List<DateInfo> datelist = new java.util.ArrayList<DateInfo>();
+         try {
+            List<String> tables = getListOfTables(connection);
+            for(String name : tables) {
+               java.util.Date limit = fExpCalc.expirationRange(now, name, "").fExpirationDate;
+               java.util.Date oldest = GetOldest(connection,name);
+               long nrecords = GetRecordNumber(connection,name,limit);
+               if (oldest != null) {
+                  // There are some records.
+                  datelist.add(new DateInfo(name,limit,oldest,nrecords));
+               }
+            }
+            java.util.Date limit = fExpCalc.expirationRange(now, "JobUsageRecord", "RawXML").fExpirationDate;
+            java.util.Date oldest = GetOldestXml(connection,"JobUsageRecord");
+            long nrecords = GetRecordNumberXml(connection,"JobUsageRecord",limit);
+            datelist.add(new DateInfo("JobUsageRecord_Xml",limit,oldest,nrecords));
+            limit = fExpCalc.expirationRange(now, "MetricRecord", "RawXML").fExpirationDate;
+            oldest = GetOldestXml(connection,"MetricRecord");
+            nrecords = GetRecordNumberXml(connection,"MetricRecord",limit);
+            datelist.add(new DateInfo("MetricRecord_Xml",limit,oldest,nrecords));
+         } catch (Exception e) {
+            Logging.warning("PerformanceRates: Could not retrieve the list of housekeeping statuses.",e);
+         }
+         buffer.append("<table border=\"1\" cellpadding=\"10\">\n");
+         buffer.append("<tr class=\"housekeeping_head\">\n");
+         buffer.append("<th >Table</th><th>Expiration Date</th><th>Oldest Record</th><th>Backlog</th><th>Backlog in records</th><th>Recovery time</th>\n");
+         buffer.append("</tr>\n");
+         java.util.Collections.sort(datelist);
+         java.text.SimpleDateFormat dateformat = new java.text.SimpleDateFormat("yyyy-MM-dd");
+         java.text.FieldPosition pos2 = new java.text.FieldPosition(0);
+         
+         for(DateInfo line : datelist) {
+            buffer.append("<tr class=\"housekeeping\">\n");
+            buffer.append("<td style=\"text-align: left; font-weight:bold;\" >").append(line.fName).append("</td>");
+            buffer.append("<td style=\"text-align: right; \" >");
+            dateformat.format(line.fLimit,buffer,pos2);
+            buffer.append("</td>");
+            buffer.append("<td style=\"text-align: right; \" >");
+            dateformat.format(line.fOldest,buffer,pos2);
+            buffer.append("</td>\n");
+            buffer.append("<td style=\"text-align: right; \" >");
+            double hours_back = (line.fLimit.getTime() - line.fOldest.getTime()) / (1000.0 * 3600);
+            if (hours_back < 0) {
+               buffer.append("<em class=\"good\">Up to date</em>");
+            } else {
+               appendHours(buffer,hours_back);
+            }
+            buffer.append("</td>\n");
+            buffer.append("<td style=\"text-align: right; \" >");
+            buffer.append(line.fNRecords);
+            buffer.append("</td>\n");
+            buffer.append("<td style=\"text-align: right; \" >");
+            if (rate_per_day > 0 && line.fNRecords > 0) {
+               appendHours(buffer,line.fNRecords / (rate_per_day*24.0) );
+            }
+            buffer.append("</td>\n");
+         }
+         buffer.append("</table>\n");
+      } else {
+         // buffer.append("Details NOT requested.<br/>");
+      }
+   }
+   
+   List<String> getListOfTables(Connection connection) 
+   {
+      
+      if (fTableNames == null) {
+         fTableNames = new java.util.ArrayList();
+         try {
+            // Start transaction so numbers are consistent.
+            connection.setAutoCommit(false);
+            
+            // Get list of _Meta tables in this database
+            String command = "select table_name from information_schema.tables " +
+                             "where table_schema = Database() and table_name like '%_Meta'" +
+                             " order by table_name;";
+            PreparedStatement statement = connection.prepareStatement(command);
+            ResultSet resultSet = statement.executeQuery();
+            Logging.debug("Status SQL query:"+statement);
+            while(resultSet.next()) {
+               
+               String table_name = resultSet.getString(1);
+               if (table_name.equals("ProbeDetails_Meta")) continue; // Not interested
+               int end_index = table_name.lastIndexOf("_Meta");
+               String base_table = table_name.substring(0,end_index);
+               
+               // Extra check to only look at non empty tables.
+               //command = "select * from " + base_table + " limit 1";
+               //PreparedStatement tableUseCheck = connection.prepareStatement(command);
+               //ResultSet tableUseResult = tableUseCheck.executeQuery();
+               //if (tableUseResult.next()) {
+               fTableNames.add(base_table);
+               //}
+               //tableUseResult.close();
+               //tableUseCheck.close();
             }
             resultSet.close();
             statement.close();
+            connection.commit();
+         } catch (Exception e) {
+            Logging.warning("PerformanceRates: Failed to load table information from DB. Try reload.",e);
+            fTableNames = null;
          }
-         catch (Exception e)
-         {
-            e.printStackTrace();
-         }   
+      }
+      return fTableNames;
+   }
+   
+   static void appendHours(StringBuffer buffer, double hours)
+   {
+      java.text.DecimalFormat decForm = new java.text.DecimalFormat();
+      decForm.applyPattern("0.0");
+      java.text.FieldPosition pos1 = new java.text.FieldPosition(java.text.NumberFormat.FRACTION_FIELD);
+      if ( hours < 2.0) {
+         double minutes = 60 * hours;
+         buffer = decForm.format(minutes, buffer, pos1);
+         buffer.append(" minutes");
+      } else if ( hours < 48.0 ) {
+         buffer = decForm.format(hours, buffer, pos1);
+         buffer.append(" hours.");
+      } else if ( hours < (24 * 14) ) {
+         buffer = decForm.format(hours / 24.0, buffer, pos1);
+         buffer.append(" days.");               
+      } else {
+         buffer = decForm.format(hours / (24.0 * 7), buffer, pos1);
+         buffer.append(" weeks.");
+      }      
+   }
+   
+   static final String fgQueueOneHour = "select ServerDate,EventDate,nRecords,serviceBacklog from BacklogStatisticsSnapshots where EntityType = 'local' " +
+                                        " and ServerDate > date_sub(?,interval 1 hour) order by ServerDate limit 1";
+   
+   public String process(HttpServletRequest request, Connection connection, boolean detailedDisplay, boolean housekeepingDetails) throws java.io.IOException
+   {
+      //
+      // processing related
+      //      
+      try {
+         connection.setAutoCommit(false);
+      }
+      catch (Exception e)
+      {
+         Logging.warning("PerformanceRates: Failed to commit the transaction.",e);
+      }
+   
+      java.util.Date now = new java.util.Date();
+      StringBuffer buffer = new StringBuffer();
+      java.text.DecimalFormat decForm = new java.text.DecimalFormat();
+      decForm.applyPattern("0.0");
+      java.text.FieldPosition pos1 = new java.text.FieldPosition(java.text.NumberFormat.FRACTION_FIELD);
+      
+      // Print in the thread/Queue information.      
+      long records_in_queue = addQueueLength(buffer,connection,true);
+      double records_per_hour = 0;
+   
+      buffer.append("<h3>Performance and Catchup</h3>\n");
+      buffer.append("<h4>Performance</h3>\n");
+      // Print the current processing rate.
+      // Sum of the number of records in all the _Meta tables in the last 25 seconds
+      // divided by ( now - earliest ServerDate )
+      if (getListOfTables(connection)!=null) {
+         long nrecords = 0;
 
-         html = xp.replaceAll(html,row,buffer.toString());
+         java.util.Date oldest = now;
+         java.util.Date newest = now;
+         try {
+            for (String table : fTableNames) {
+               String command = "select min(ServerDate),max(ServerDate),count(*) from "+table+"_Meta where ServerDate > date_sub(?,interval 25 second) and ServerDate < ? ";
+               PreparedStatement statement = connection.prepareStatement(command);
+               statement.setTimestamp(1,new java.sql.Timestamp(now.getTime()));
+               statement.setTimestamp(2,new java.sql.Timestamp(now.getTime()));
+               Logging.debug("Performance SQL query:"+statement);
+               ResultSet resultSet = statement.executeQuery();
+               while(resultSet.next()) {
+                  java.util.Date first = resultSet.getTimestamp(1);
+                  java.util.Date last = resultSet.getTimestamp(2);
+                  if (first != null && last != null) {
+                     nrecords = nrecords + resultSet.getLong(3);
+                     if (first.compareTo(oldest) < 0) {
+                        oldest = first;
+                     }
+                     if (newest == now) {
+                        newest = last;
+                     } else if (last.compareTo(newest) > 0) {
+                        newest = last;
+                     }
+                  }
+               }
+            }
+            // And now add the duplicates.
+            {
+               String command = "select min(eventdate),max(eventdate),count(*) from DupRecord where eventdate > date_sub(?,interval 25 second) and eventdate < ? ";
+               PreparedStatement statement = connection.prepareStatement(command);
+               statement.setTimestamp(1,new java.sql.Timestamp(now.getTime()));
+               statement.setTimestamp(2,new java.sql.Timestamp(now.getTime()));
+               Logging.debug("Performance SQL query:"+statement);
+               ResultSet resultSet = statement.executeQuery();
+               while(resultSet.next()) {
+                  java.util.Date first = resultSet.getTimestamp(1);
+                  java.util.Date last = resultSet.getTimestamp(2);
+                  if (first != null && last != null) {
+                     nrecords = nrecords + resultSet.getLong(3);
+                     if (first.compareTo(oldest) < 0) {
+                        oldest = first;
+                     }
+                     if (newest == now) {
+                        newest = last;
+                     } else if (last.compareTo(newest) > 0) {
+                        newest = last;
+                     }
+                  }
+               }
+            }               
+         } catch (Exception e) {
+            Logging.warning("PerformanceRates: Failed to get performance rates.",e);
+         }
+         double hours = (newest.getTime() - oldest.getTime()) / 1000.0 / 3600.0;
+         if (nrecords == 0) {
+            // No recent records
+            buffer.append("The collector is current processing 0 records an hour.<p />");
+         } else {
+            if (hours == 0) {
+               hours = 1 / 3600.0;
+            }
+            buffer.append("The collector is currently processing ");
+            records_per_hour = nrecords/hours;
+            buffer = decForm.format(nrecords/hours, buffer, pos1);
+            buffer.append(" records an hour.<p/>\n");
+         }
       }
-      catch (Exception e) {
-         e.printStackTrace();
+
+      // Total processed the last hour
+      long totalrecords_onehour = 0;
+      try
+      {
+         // We need to get the information for now (using TableStatistics/current)
+         
+         long totalrecords_current = 0;
+         PreparedStatement statement = connection.prepareStatement(MonitorStatus.fgCountCurrent);
+         Logging.debug("PerformanceRates SQL query: " + statement);
+         ResultSet resultSet = statement.executeQuery();
+         if (resultSet.next()) {
+            totalrecords_current = resultSet.getLong(1);
+         } else {
+            totalrecords_current = 0;
+         }
+         resultSet.close();
+         statement.close();
+         
+         // Then the information one hour ago (as close as possible).
+         java.sql.Timestamp to = new java.sql.Timestamp(now.getTime() - 1 * 3600 * 1000);
+         
+         statement = connection.prepareStatement(MonitorStatus.fgCountLastHourQuery);
+         statement.setTimestamp(1,to);
+         statement.setTimestamp(2,to);
+         Logging.debug("PerformanceRates SQL query: " + statement);
+         resultSet = statement.executeQuery();
+         if (resultSet.next()) {
+            totalrecords_onehour = totalrecords_current - resultSet.getLong(1);
+         } else {
+            totalrecords_onehour = totalrecords_current;
+         }            
+         resultSet.close();
+         statement.close();
       }
-      return html;
+      catch (Exception e)
+      {
+         Logging.warning("PerformanceRates: Failed to get number of records processed in the last hour.",e);
+      }
+
+      // Variation in the queue size (number of records) in the last hour.
+      long queue_variation = records_in_queue;
+      long service_backlog_one_hour_ago = 0;
+      try
+      {
+         PreparedStatement statement = connection.prepareStatement(fgQueueOneHour);
+         statement.setTimestamp(1,new java.sql.Timestamp(now.getTime()));
+         Logging.debug("PerformanceRates SQL query: " + statement);
+         ResultSet resultSet = statement.executeQuery();
+         if (resultSet.next()) {
+            queue_variation = queue_variation - resultSet.getLong(3);
+            service_backlog_one_hour_ago = resultSet.getLong(4);
+         }
+         resultSet.close();
+         statement.close();
+      }
+      catch (Exception e)
+      {
+         Logging.warning("PerformanceRates: Failed to get number of records in the queue one hour ago.",e);
+      }
+      
+      // Print the average processing rate for the last hour
+      buffer.append("The collector has processed ");
+      buffer.append(totalrecords_onehour);
+      buffer.append(" records in the last hour.<p/>\n");
+
+      // Print recovery rate (processing rate - incoming rate)
+      buffer.append("The queue has varied by ");
+      buffer.append(queue_variation);
+      buffer.append(" records in the last hour.<p/>\n");
+
+      // Incoming rate is delta in queue length + record processed.
+      buffer.append("The collector has received  ");
+      buffer.append(totalrecords_onehour + queue_variation);
+      buffer.append(" records in the last hour.<p/>\n");
+      
+      buffer.append("<h4>Catchup based on queue size</h4>\n");
+
+      // Print the estimated time to catch up
+      
+      // So we received (totalrecords_onehour + queue_variation) records in one hour,
+      // if we assume that the incoming rate is steady (it isn't but this is a good approximation).
+      // The time to catching up would be with I = incoming rate ((totalrecords_onehour + queue_variation)
+      // with Q = current queue size
+      // with s = processing speed (records_per_hour)
+      // the geometric sum of ( I / s ) multiplied by (Q / s ) (because by the time (Q/s) we finished to 
+      // processed the queue we got more new records (Q/s)*I and etc ...
+      
+      double recovery_time = 0;
+      double incoming_rate = totalrecords_onehour + queue_variation;
+      if (records_in_queue <= records_per_hour / 60) {
+         // Less then one minutes worth of record;
+         buffer.append("The collector is <em class=\"good\">up to date</em>.<p/>");
+      } else {
+         if (records_per_hour == 0) {
+            buffer.append("The collector is not processing records.<p/>");
+         } else {            
+            double incoming_over_speed = incoming_rate / records_per_hour;
+//            buffer.append(records_in_queue);
+//            buffer.append(".<p />\n");
+//            buffer.append(records_per_hour);
+//            buffer.append(".<p />\n");
+//            buffer.append(incoming_rate);
+//            buffer.append(".<p />\n");
+//            buffer.append(incoming_over_speed);
+//            buffer.append(".<p />\n");
+//            buffer.append((records_in_queue / records_per_hour ) );
+//            buffer.append(".<p />\n");
+//            buffer.append(1 - incoming_over_speed );
+//            buffer.append(".<p />\n");
+//            appendHours(buffer,(records_in_queue / records_per_hour ) / ( 1 - incoming_over_speed ));
+//            buffer.append(".<p />\n");
+            if (incoming_over_speed < 1) {
+               recovery_time = (records_in_queue / records_per_hour ) / ( 1 - incoming_over_speed );
+               buffer.append("The collector should <em class=\"improving\">recover</em> in  ");
+               // recovery_time = records_in_queue / records_per_hour;
+               appendHours(buffer,recovery_time);
+            } else if (incoming_over_speed < 1.0001) {
+               buffer.append("The collector is stable");
+            } else {
+               buffer.append("The collector is <em class=\"problem\">losing ground</em>, about ");
+               decForm.format(incoming_rate - records_per_hour, buffer, pos1);
+               buffer.append(" records per hour");
+            }
+            buffer.append(".<p />\n");
+         }
+      }
+
+      buffer.append("<h4>Catchup based on full service backlog</h4>\n");
+      // Get the current service backlog
+      String fgGetServiceBacklog = "select sum(serviceBacklog+nRecords) from BacklogStatistics where EntityType != 'local' and ServerDate > date_sub(?,interval 1 day) ";
+      long service_backlog_current = 0;
+      try
+      {
+         PreparedStatement statement = connection.prepareStatement(fgGetServiceBacklog);
+         statement.setTimestamp(1,new java.sql.Timestamp(now.getTime()));
+         Logging.debug("PerformanceRates SQL query: " + statement);
+         ResultSet resultSet = statement.executeQuery();
+         if (resultSet.next()) {
+            service_backlog_current = resultSet.getLong(1);
+         }
+         resultSet.close();
+         statement.close();
+      }
+      catch (Exception e)
+      {
+         Logging.warning("PerformanceRates: Failed to get the current service backlog.",e);
+      }
+      buffer.append("The collector has ");
+      buffer.append(service_backlog_current);
+      buffer.append(" records in external backlog.<p/>\n");
+      
+      // Print recovery rate (processing rate - incoming rate including the backlog)
+      long service_backlog_variation = service_backlog_current - service_backlog_one_hour_ago;
+      buffer.append("The collector external backlog has varied by ");
+      buffer.append(service_backlog_variation);
+      buffer.append(" records in the last hour.<br/>\n");
+      buffer.append("The collector external backlog plus queue has varied by ");
+      buffer.append(service_backlog_variation + queue_variation);
+      buffer.append(" records in the last hour.<p/>\n");
+      
+      // Print the estimated time to catch up including the backlog
+      double service_incoming_rate = service_backlog_variation + incoming_rate;
+      double service_recovery_time = 0;
+      if (service_backlog_current <= records_per_hour / 60) {
+         // Less then one minutes worth of record;
+         buffer.append("The collector is <em class=\"good\">up to date</em>.<p/>");
+      } else {
+         if (records_per_hour == 0) {
+            buffer.append("The collector is not processing records.<p/>");
+         } else {
+            double backlog_incoming_over_speed = service_incoming_rate / records_per_hour;
+            if (backlog_incoming_over_speed < 1 ) {
+               service_recovery_time = (records_in_queue / records_per_hour ) / ( 1 - backlog_incoming_over_speed );
+               buffer.append("The collector should <em class=\"improving\">recover</em> in  ");
+               appendHours(buffer,service_recovery_time);
+            } else if (backlog_incoming_over_speed < 1.0001) {
+               buffer.append("The collector is stable");
+            } else {
+               buffer.append("The collector is <em class=\"problem\">losing ground</em>, about ");
+               decForm.format(service_incoming_rate - records_per_hour, buffer, pos1);
+               buffer.append(" records per hour");
+            }
+            buffer.append(".<p />\n");
+         }
+      }
+      
+      appendHouseKeeping(buffer, connection, housekeepingDetails);
+      
+      // Information about how housekeeping is doing (or not).
+
+      try {
+         connection.setAutoCommit(false);
+      }
+      catch (Exception e)
+      {
+         Logging.warning("PerformanceRates: Failed to commit the transaction.",e);
+      }
+      return buffer.toString();
    }
 }
