@@ -1,0 +1,126 @@
+#!/bin/sh
+TMP=`mktemp ${TMPDIR:-/tmp}/collectorbacklog-byprobes.XXXXXXXXXX`
+trap "[[ -n \"$TMP\" ]] && rm -f \"$TMP\"* 2>/dev/null" 0
+
+while getopts :dqv OPT; do
+    case $OPT in
+        d)
+          debug=1
+          ;;
+        q)
+          quick=1
+          ;;
+        v)
+          verbose=1
+          ;;
+        *)
+        cat 1>&2 <<EOF
+usage: `basename $0` [-dq] [--] [<thread-queue-dir>]
+
+       Default queue dir is CWD if a standard thread[0-9]* directory,
+       or /data/tomcat-gratia/gratia/data/thread* if not.
+EOF
+        exit 2
+    esac
+done
+shift `expr $OPTIND - 1`
+
+(( ${debug:-0} )) && set -x
+
+if [ "x$1" == "x" ]; then 
+   where=${PWD}
+   if [ `basename $where` != "thread"[0-9]* ]; then 
+      where=/data/tomcat-gratia/gratia/data/thread*
+   fi
+else 
+   where=$1
+fi 
+
+if [ ! -d $where ]; then
+   echo $where is not a directory.
+   exit 
+fi
+
+host=`hostname -f`
+hostfile=$where/../../../collector-host.txt
+if [ -f $hostfile ]; then
+  host="`cat $hostfile` (`hostname -f`)"
+fi
+
+echo "Gratia Backlog on $host under `basename $where`"
+
+date ;
+
+cat >$TMP <<\EOF
+use strict;
+use File::Find;
+use Socket;
+
+my $total = 0;
+my $numSingle = 0;
+my $nFiles = 0;
+my %probes = ();
+my %senderHosts = ();
+EOF
+  printf 'find(\&process_file, "%s");\n' $where >>$TMP
+  cat >>$TMP <<\EOF  
+
+if (scalar keys %probes) {
+  printf "Breakdown by probe: \n";
+  my $max_length = 0;
+  grep { length > $max_length and $max_length = length } (map { m&([^\|]+)& } keys %probes);
+  foreach my $key (sort { $probes{$b} <=> $probes{$a} } keys %probes) {
+    my ($probe, $sender) = ($key =~ m&(.*?)(?:\|(.+))?$&);
+    my $extra = "";
+    if ($senderHosts{$key}) {
+      $extra = sprintf(" (%s%s)",
+                       $senderHosts{$key},
+                       $sender?" via $sender":"");
+    }
+    printf "  %s%s %7d%s\n",
+           $probe,
+           ' ' x ($max_length - length($probe)),
+           $probes{$key},
+           $extra;
+  }
+}
+1;
+
+
+sub process_file {
+  return unless -f;
+  my $filename = $_;
+  open(XML, $filename) or return;
+  ++$nFiles;
+EOF
+  if (( ${verbose:-0} )); then
+    cat >>$TMP <<EOF
+  printf "%7d\\r", \$nFiles;
+EOF
+  fi
+  cat >>$TMP <<\EOF  
+  my $nRecords = 0;
+  my $senderHost = "";
+  my $sender = "";
+  while (<XML>) {
+    m&<SenderHost>([^<]+)</SenderHost>& and $senderHost = $1;
+    m&<Sender>collector:([^<]+)</Sender>& and $sender = $1;
+    m&RecordIdentity& and ++$nRecords;
+    m&replication\|& and --$nRecords;
+    if (m&<ProbeName>([^<]+)</ProbeName>&) {
+      my $probe = $sender?"$1|$sender":$1;
+      ++$probes{$probe};
+      if ($senderHost and not $senderHosts{$probe}) {
+        $senderHosts{$probe} = gethostbyaddr(inet_aton($senderHost), AF_INET) || $senderHost;
+      }
+    }
+  }
+  close(XML);
+  ++$numSingle if ($nRecords == 1);
+  $total += $nRecords;
+}
+
+EOF
+(( ${debug:-0} )) && cat "$TMP"
+ perl -wf "$TMP"
+fi

@@ -155,11 +155,14 @@ public class BacklogStatus extends HttpServlet {
       writer.write("<h4 align=\"center\">");
       writer.write(fProxy.getName());
       writer.write("</h4>\n");
+      writer.write("<h4 align=\"center\">");
       if (details) {
-         writer.write("<h4 align=\"center\"><a href=\"backlog.html?wantDetails=0\" target=\"adminContent\">See less details</a></h4>\n");
+         writer.write("<a href=\"backlog.html?wantDetails=0\" target=\"adminContent\">See less details.</a>\n");
       } else {
-         writer.write("<h4 align=\"center\"><a href=\"backlog.html?wantDetails=1\" target=\"adminContent\">See more details</a></h4>\n");
-      }         
+         writer.write("<a href=\"backlog.html?wantDetails=1\" target=\"adminContent\">See more details.</a>\n");
+      }
+      writer.write(" <a href=\"backlog-byprobes.html\" target=\"adminContent\">See breakdown by probes.</a>\n");
+      writer.write("</h4>\n");      
 
       if (fErrorMessage != null) {
          writer.write("\n<pre id=\"message\" class=\"msg\">");

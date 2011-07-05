@@ -189,6 +189,12 @@
     </servlet>
 
     <servlet>
+        <servlet-name>BacklogByProbes</servlet-name>
+        <servlet-class>net.sf.gratia.administration.BacklogByProbes</servlet-class>
+        <load-on-startup>2</load-on-startup>
+    </servlet>
+
+    <servlet>
         <servlet-name>CollectorStatus</servlet-name>
         <servlet-class>net.sf.gratia.administration.CollectorStatus</servlet-class>
         <load-on-startup>2</load-on-startup>
@@ -325,6 +331,11 @@
     <servlet-mapping>
         <servlet-name>BacklogHistory</servlet-name>
         <url-pattern>/backlog-history.html</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>BacklogByProbes</servlet-name>
+        <url-pattern>/backlog-byprobes.html</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>

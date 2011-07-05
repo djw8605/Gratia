@@ -569,7 +569,7 @@ release: gratia
 	echo "$(gratia_release_data)" >tarball/tomcat/v55/gratia/gratia-release
 	cp $(configuration)/*gov $(configuration)/log4j.properties $(staticScript)/*.py tarball/tomcat/v55/gratia; \
 	chmod 755 tarball/tomcat/v55/gratia/*.py
-	cp $(configuration)/*sql $(configuration)/*sh tarball/tomcat/v55/gratia; \
+	cp $(configuration)/*sql $(configuration)/*sh $(configuration)/collector-backlog-byprobes tarball/tomcat/v55/gratia; \
 	rm -rf tarball/tomcat/v55/gratia/.svn; \
 	cp -R $(configuration)/hibernate tarball/tomcat/v55/gratia; \
 	rm -rf tarball/tomcat/v55/gratia/hibernate/.svn; \
@@ -601,7 +601,7 @@ release: gratia
 	chmod 755 tarball/tomcat/v55/gratia/*.py
 	cp -R $(configuration)/hibernate tarball/tomcat/v55/gratia; \
 	rm -rf tarball/tomcat/v55/gratia/hibernate/.svn; \
-	cp $(configuration)/*sql $(configuration)/*sh tarball/tomcat/v55/gratia; \
+	cp $(configuration)/*sql $(configuration)/*sh $(configuration)/collector-backlog-byprobes  tarball/tomcat/v55/gratia; \
 	perl -wapi.bak -e 's&CMD_(?:PREAMBLE|PREFIX|SUFFIX)&&g' tarball/tomcat/v55/gratia/post-install.sh; \
 	rm -f tarball/tomcat/v55/gratia/post-install.sh.bak; \
 	cp $(configuration)/truststore $(configuration)/keystore tarball/tomcat/v55/gratia; \
@@ -676,7 +676,7 @@ gratia: clean util services servlets registration administration soap reporting 
 	mkdir tarball; \
 	echo "$(gratia_release_data)" >tarball/gratia-release
 	cp $(configuration)/UserVoMap.* $(staticScript)/*.py $(configuration)/*properties tarball; \
-	cp $(configuration)/*sql $(configuration)/*sh tarball; \
+	cp $(configuration)/*sql $(configuration)/*sh $(configuration)/collector-backlog-byprobes tarball; \
 	cp -R $(configuration)/hibernate tarball; \
 	rm -rf tarball/hibernate/.svn; \
 	cp $(security)/scripts/voms-server.sh         tarball; chmod 744 tarball/voms-server.sh
