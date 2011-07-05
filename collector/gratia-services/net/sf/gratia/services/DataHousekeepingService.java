@@ -397,4 +397,9 @@ public class DataHousekeepingService extends Thread {
       Logging.info("DataHousekeepingService: " + action + " complete.");
       return result;
    }
+   
+   java.util.List<Object[]> GetTableStatus()
+   {
+      return housekeeper.GetTableStatus();
+   }
 }

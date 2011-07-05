@@ -602,6 +602,14 @@ public class CollectorService implements ServletContextListener {
       }
    }
 
+   public java.util.List<Object []> getHousekeepingTableStatus()
+   {
+      if (housekeepingService != null) {
+         return housekeepingService.GetTableStatus();
+      }
+      return null;
+   }
+   
    public synchronized boolean housekeepingRunning() {
       if (housekeepingDisabled || housekeepingService == null) {
          return false;

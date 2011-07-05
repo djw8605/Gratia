@@ -542,6 +542,39 @@ public class DataScrubber {
       }
       return nrecords;
    }
+
+   public Object[] GetTableStatus(Date ref, String type, String qualifier) 
+   {
+      // Execute: delete from tableName set where EndTime < cutoffdate
+      Date limit = fExpCalc.expirationRange(ref, type, qualifier).fExpirationDate;
+      Object [] array = new Object[2];
+      array[0] = type;
+      array[1] = limit;
+      return array;
+
+   }
+   
+   public List<Object []> GetTableStatus() 
+   {
+      List<Object []> status = new java.util.ArrayList<Object []>();
+      Date now = new Date();
+      status.add(GetTableStatus(now,"JobUsageRecord",""));
+      status.add(GetTableStatus(now,"JobUsageRecord","RawXML"));
+      status.add(GetTableStatus(now,"MetricRecord",""));
+      status.add(GetTableStatus(now,"MetricRecord","RawXML"));
+      status.add(GetTableStatus(now,"ServiceSummary",""));
+      status.add(GetTableStatus(now,"ServiceSummaryHourly",""));
+      status.add(GetTableStatus(now,"ComputeElement",""));
+      status.add(GetTableStatus(now,"StorageElement",""));
+      status.add(GetTableStatus(now,"ComputeElementRecord",""));
+      status.add(GetTableStatus(now,"StorageElementRecord",""));
+      status.add(GetTableStatus(now,"Subcluster",""));
+      status.add(GetTableStatus(now,"MetricRecord",""));
+      
+      // Ignoring Trace and DupRecord for now.
+
+      return status;
+   }
    
    public long IndividualGenericRecords(String type, String name) {
       
