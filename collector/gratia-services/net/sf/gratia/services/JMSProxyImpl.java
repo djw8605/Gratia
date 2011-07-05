@@ -180,5 +180,4 @@ public class JMSProxyImpl extends UnicastRemoteObject implements JMSProxy
    public String getName() throws RemoteException {
       return collectorService.getName();
    }
-
 }
