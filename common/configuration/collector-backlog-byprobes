@@ -107,7 +107,7 @@ EOF
     m&<Sender>collector:([^<]+)</Sender>& and $sender = $1;
     m&RecordIdentity& and ++$nRecords;
     m&replication\|& and --$nRecords;
-    if (m&<ProbeName>([^<]+)</ProbeName>&) {
+    if (m&< *ProbeName *>([^<]+)</ProbeName *>&) {
       my $probe = $sender?"$1|$sender":$1;
       ++$probes{$probe};
       if ($senderHost and not $senderHosts{$probe}) {
