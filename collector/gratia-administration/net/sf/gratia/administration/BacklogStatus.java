@@ -266,7 +266,10 @@ public class BacklogStatus extends HttpServlet {
          
          long backlogValue = backlog.getRecords()+backlog.getServiceBacklog();
          long backlogDecrease = (backlog.getPrevRecords()+backlog.getPrevServiceBacklog()) - backlogValue;
-         long msSpan = backlog.getServerDate().getTime() - backlog.getPrevServerDate().getTime();
+         long msSpan = 0;
+         if (backlog.getServerDate() != null && backlog.getPrevServerDate() != null) {
+            msSpan = backlog.getServerDate().getTime() - backlog.getPrevServerDate().getTime();
+         }
          boolean progress;
          if (backlogDecrease > 0) {
             // Real decrease
