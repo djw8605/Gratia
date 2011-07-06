@@ -447,11 +447,15 @@ public class PerformanceRates extends HttpServlet {
             java.util.Date limit = fExpCalc.expirationRange(now, "JobUsageRecord", "RawXML").fExpirationDate;
             java.util.Date oldest = GetOldestXml(connection,"JobUsageRecord");
             long nrecords = GetRecordNumberXml(connection,"JobUsageRecord",limit);
-            datelist.add(new DateInfo("JobUsageRecord_Xml",limit,oldest,nrecords));
+            if (oldest != null) {
+               datelist.add(new DateInfo("JobUsageRecord_Xml",limit,oldest,nrecords));
+            }
             limit = fExpCalc.expirationRange(now, "MetricRecord", "RawXML").fExpirationDate;
             oldest = GetOldestXml(connection,"MetricRecord");
             nrecords = GetRecordNumberXml(connection,"MetricRecord",limit);
-            datelist.add(new DateInfo("MetricRecord_Xml",limit,oldest,nrecords));
+            if (oldest != null) {
+               datelist.add(new DateInfo("MetricRecord_Xml",limit,oldest,nrecords));
+            }
          } catch (Exception e) {
             Logging.warning("PerformanceRates: Could not retrieve the list of housekeeping statuses.",e);
          }
