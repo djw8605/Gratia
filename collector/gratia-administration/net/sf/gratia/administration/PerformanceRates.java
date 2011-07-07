@@ -554,18 +554,18 @@ public class PerformanceRates extends HttpServlet {
          buffer.append(" minutes");
       } else if ( hours < 48.0 ) {
          buffer = decForm.format(hours, buffer, pos1);
-         buffer.append(" hours.");
+         buffer.append(" hours");
       } else if ( hours < (24 * 14) ) {
          buffer = decForm.format(hours / 24.0, buffer, pos1);
-         buffer.append(" days.");               
+         buffer.append(" days");               
       } else {
          buffer = decForm.format(hours / (24.0 * 7), buffer, pos1);
-         buffer.append(" weeks.");
+         buffer.append(" week");
       }      
    }
    
    static final String fgQueueOneHour = "select ServerDate,EventDate,nRecords,serviceBacklog from BacklogStatisticsSnapshots where EntityType = 'local' " +
-                                        " and ServerDate > date_sub(?,interval 1 hour) order by ServerDate limit 1";
+                                        " and ServerDate > date_sub(?,interval 1 hour) order by ServerDate desc limit 1";
    
    public String process(HttpServletRequest request, Connection connection, boolean detailedDisplay, boolean housekeepingDetails) throws java.io.IOException
    {
@@ -707,7 +707,6 @@ public class PerformanceRates extends HttpServlet {
 
       // Variation in the queue size (number of records) in the last hour.
       long queue_variation = records_in_queue;
-      long service_backlog_one_hour_ago = 0;
       try
       {
          PreparedStatement statement = connection.prepareStatement(fgQueueOneHour);
@@ -716,7 +715,6 @@ public class PerformanceRates extends HttpServlet {
          ResultSet resultSet = statement.executeQuery();
          if (resultSet.next()) {
             queue_variation = queue_variation - resultSet.getLong(3);
-            service_backlog_one_hour_ago = resultSet.getLong(4);
          }
          resultSet.close();
          statement.close();
@@ -796,7 +794,10 @@ public class PerformanceRates extends HttpServlet {
       buffer.append("<h4>Catchup based on full service backlog</h4>\n");
       // Get the current service backlog
       String fgGetServiceBacklog = "select sum(serviceBacklog+nRecords) from BacklogStatistics where EntityType != 'local' and ServerDate > date_sub(?,interval 1 day) ";
+      String fgGetServiceBacklogOneHour = "select sum(serviceBacklog+nRecords) from BacklogStatisticsSnapshots where EntityType != 'local' " +
+                                          " and ServerDate < date_sub(?,interval 1 hour) group by ServerDate order by ServerDate desc limit 1 ";
       long service_backlog_current = 0;
+      long service_backlog_one_hour_ago = 0;
       try
       {
          PreparedStatement statement = connection.prepareStatement(fgGetServiceBacklog);
@@ -808,6 +809,16 @@ public class PerformanceRates extends HttpServlet {
          }
          resultSet.close();
          statement.close();
+         
+         statement = connection.prepareStatement(fgGetServiceBacklogOneHour);
+         statement.setTimestamp(1,new java.sql.Timestamp(now.getTime()));
+         Logging.debug("PerformanceRates SQL query: " + statement);
+         resultSet = statement.executeQuery();
+         if (resultSet.next()) {
+            service_backlog_one_hour_ago = resultSet.getLong(1);
+         }
+         resultSet.close();
+         statement.close();         
       }
       catch (Exception e)
       {
@@ -827,6 +838,15 @@ public class PerformanceRates extends HttpServlet {
       buffer.append(" records in the last hour.<p/>\n");
       
       // Print the estimated time to catch up including the backlog
+
+      // So the system is seeing (totalrecords_onehour + service_backlog_variation + queue_variation) more records in one hour,
+      // if we assume that the incoming rate is steady (it isn't but this is a good approximation).
+      // The time to catching up would be with I = incoming rate ((service_backlog_variation + totalrecords_onehour + queue_variation)
+      // with Q = current queue size + service_backlog_current
+      // with s = processing speed (records_per_hour)
+      // the geometric sum of ( I / s ) multiplied by (Q / s ) (because by the time (Q/s) we finished to 
+      // processed the queue we got more new records (Q/s)*I and etc ...
+      
       double service_incoming_rate = service_backlog_variation + incoming_rate;
       double service_recovery_time = 0;
       if (service_backlog_current <= records_per_hour / 60) {
@@ -836,12 +856,12 @@ public class PerformanceRates extends HttpServlet {
          if (records_per_hour == 0) {
             buffer.append("The collector is not processing records.<p/>");
          } else {
-            double backlog_incoming_over_speed = service_incoming_rate / records_per_hour;
-            if (backlog_incoming_over_speed < 1 ) {
-               service_recovery_time = (records_in_queue / records_per_hour ) / ( 1 - backlog_incoming_over_speed );
+            double service_incoming_over_speed = service_incoming_rate / records_per_hour;
+            if (service_incoming_over_speed < 1 ) {
+               service_recovery_time = ( (records_in_queue+service_backlog_current) / records_per_hour ) / ( 1 - service_incoming_over_speed );
                buffer.append("The collector should <em class=\"improving\">recover</em> in  ");
                appendHours(buffer,service_recovery_time);
-            } else if (backlog_incoming_over_speed < 1.0001) {
+            } else if (service_incoming_over_speed < 1.0001) {
                buffer.append("The collector is stable");
             } else {
                buffer.append("The collector is <em class=\"problem\">losing ground</em>, about ");
