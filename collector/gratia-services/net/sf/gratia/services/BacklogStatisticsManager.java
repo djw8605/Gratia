@@ -122,7 +122,7 @@ public class BacklogStatisticsManager extends Thread {
          query.setTimestamp( "currentTime", new Date() );
          query.setTimestamp( "datelimit", from );
 
-         Logging.info("takeSnapshot: About to execute " + query.getQueryString());
+         Logging.info("takeSnapshot: About to execute " + query.getQueryString() + "; with dateLimit = " + from);
          long updated = query.executeUpdate();
          
          session.flush();
@@ -196,8 +196,8 @@ public class BacklogStatisticsManager extends Thread {
          query.setParameter( "from", from );
          query.setParameter( "upto", upto );
          
-         Logging.info("checkHourly: About to execute from : " + from + " to " + upto);
-         Logging.info("checkHourly: About to execute " + query.getQueryString());
+         Logging.info("BacklogStatisticsManager checkHourly: About to execute from : " + from + " to " + upto);
+         Logging.info("BacklogStatisticsManager checkHourly: About to execute " + query.getQueryString());
          long updated = query.executeUpdate();
          
          session.flush();
@@ -207,7 +207,7 @@ public class BacklogStatisticsManager extends Thread {
       } catch (Exception e) {
          HibernateWrapper.closeSession(session);
          if (!LockFailureDetector.detectAndReportLockFailure(e, nTries, "checkHourly")) {
-            Logging.warning("takeSnapshot: error when updating BacklogStatisticSnapshot table.", e);
+            Logging.warning("BacklogStatisticsManager checkHourly: error when updating BacklogStatisticSnapshot table.", e);
             keepTrying = false;
          }
          return;
@@ -274,8 +274,8 @@ public class BacklogStatisticsManager extends Thread {
          query.setParameter( "from", from );
          query.setParameter( "upto", upto );
          
-         Logging.info("checkDaily: About to execute from : " + from + " to " + upto);
-         Logging.info("checkDaily: About to execute " + query.getQueryString());
+         Logging.info("BacklogStatisticsManager checkDaily: About to execute from : " + from + " to " + upto);
+         Logging.info("BacklogStatisticsManager checkDaily: About to execute " + query.getQueryString());
          long updated = query.executeUpdate();
          
          session.flush();
@@ -395,7 +395,7 @@ public class BacklogStatisticsManager extends Thread {
          }
          
          org.hibernate.SQLQuery query = session.createSQLQuery( fgRemoteBacklog );
-         Logging.info("takeSnapshot: About to execute " + query.getQueryString());
+         Logging.info("getServiceBacklog: About to execute " + query.getQueryString());
          List res = query.list();
          if (!res.isEmpty()) {
             Object value = res.get(0);
@@ -410,7 +410,7 @@ public class BacklogStatisticsManager extends Thread {
       } catch (Exception e) {
          HibernateWrapper.closeSession(session);
          if (!LockFailureDetector.detectAndReportLockFailure(e, nTries, "getServiceBacklog")) {
-            Logging.warning("takeSnapshot: error when doing getServiceBacklog table",e);
+            Logging.warning("getServiceBacklog: error when doing getServiceBacklog table",e);
             keepTrying = false;
          }
       }
