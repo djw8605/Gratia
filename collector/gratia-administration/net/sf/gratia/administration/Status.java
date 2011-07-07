@@ -62,6 +62,8 @@ public class Status extends HttpServlet {
       long nDups = 0;
       long nSQLErrors = 0;
       long nParse = 0;
+      long nExpiration = 0;
+      long nDateInFuture = 0;
       long nOther = 0;
 
       public TableStatusInfo(long nRecords) {
@@ -86,6 +88,12 @@ public class Status extends HttpServlet {
       public long nParse() {
          return this.nParse;
       }
+      public long nExpiration() {
+         return this.nExpiration;
+      }
+      public long nDateInFuture() {
+         return this.nDateInFuture;
+      }
       public long nOther() {
          return this.nOther;
       }
@@ -100,6 +108,12 @@ public class Status extends HttpServlet {
       }
       public void nParse(long in) {
          this.nParse = in;
+      }
+      public void nExpiration(long in) {
+         this.nExpiration = in;
+      }
+      public void nDateInFuture(long in) {
+         this.nDateInFuture = in;
       }
       public void nOther(long in) {
          this.nOther = in;
@@ -267,7 +281,7 @@ public class Status extends HttpServlet {
       buffer = new StringBuffer();
 
       int nPeriods = nHoursBack + 3;
-      Integer nDataCols = 5;
+      Integer nDataCols = 7;
       if (!detailedDisplay) nDataCols = 2;
       html = html.replaceAll("#nDcols#", nDataCols.toString());
 
@@ -393,6 +407,16 @@ public class Status extends HttpServlet {
                         tableStatus.nSQLErrors(count);
                      }
                      dayTableStatus.nSQLErrors(dayTableStatus.nSQLErrors() + count);
+                  } else if (qualifier.equals("ExpirationDate")) {
+                     if (time_index < nHoursBack) { // Don't record if we're not interested
+                        tableStatus.nExpiration(count);
+                     }
+                     dayTableStatus.nExpiration(dayTableStatus.nSQLErrors() + count);
+                  } else if (qualifier.equals("CutoffDate")) {
+                     if (time_index < nHoursBack) { // Don't record if we're not interested
+                        tableStatus.nDateInFuture(count);
+                     }
+                     dayTableStatus.nDateInFuture(dayTableStatus.nSQLErrors() + count);
                   } else {
                      if (time_index < nHoursBack) { // Don't record if we're not interested
                         tableStatus.nOther(tableStatus.nOther() + count);
@@ -442,6 +466,10 @@ public class Status extends HttpServlet {
                   weekTableStatus.nParse(count);
                } else if (qualifier.equals("SQLError")) {
                   weekTableStatus.nSQLErrors(count);
+               } else if (qualifier.equals("ExpirationDate")) {
+                  weekTableStatus.nExpiration(count);
+               } else if (qualifier.equals("CutoffDate")) {
+                  weekTableStatus.nDateInFuture(count);
                } else {
                   weekTableStatus.nOther(weekTableStatus.nOther() + count);
                }
@@ -485,6 +513,10 @@ public class Status extends HttpServlet {
                   totalTableStatus.nParse(count);
                } else if (errorType.equals("SQLError")) {
                   totalTableStatus.nSQLErrors(count);
+               } else if (errorType.equals("ExpirationDate")) {
+                  totalTableStatus.nExpiration(count);
+               } else if (errorType.equals("CutoffDate")) {
+                  totalTableStatus.nDateInFuture(count);
                } else {
                   totalTableStatus.nOther(totalTableStatus.nOther() + count);
                }
@@ -545,6 +577,8 @@ public class Status extends HttpServlet {
             if (! detailedDisplay) continue; // Less info and clutter
             tableHead2RepString += columnHead.replaceFirst("#datumHeader#", "Parse errors");
             tableHead2RepString += columnHead.replaceFirst("#datumHeader#", "SQL errors");
+            tableHead2RepString += columnHead.replaceFirst("#datumHeader#", "Records too old");
+            tableHead2RepString += columnHead.replaceFirst("#datumHeader#", "Date in the future");
             tableHead2RepString += columnHead.replaceFirst("#datumHeader#", "Other errors");
          }
          tableHead2RepString += "$3";
@@ -622,6 +656,10 @@ public class Status extends HttpServlet {
                            ((Long) tableStatus.nParse()).toString());
                      newRow = newRow.replaceFirst("#tabledatum#",
                            ((Long) tableStatus.nSQLErrors()).toString());
+                     newRow = newRow.replaceFirst("#tabledatum#",
+                           ((Long) tableStatus.nExpiration()).toString());
+                     newRow = newRow.replaceFirst("#tabledatum#",
+                           ((Long) tableStatus.nDateInFuture()).toString());
                      newRow = newRow.replaceFirst("#tabledatum#",
                            ((Long) tableStatus.nOther()).toString());
                   }
