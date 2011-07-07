@@ -254,8 +254,8 @@ public class BacklogSummary
    public static final String fgCreateDailyTable = "CREATE TABLE BacklogStatisticsDaily(" + "bsdid BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY, " +fgCreateColumns;
    
    private static final String fgSelectCommand = " ServerDate,EventDate,EntityType,Name,if(StartTime=0,FROM_UNIXTIME(0),StartTime),EndTime,"+
-   " ifnull(0,avgRecords),ifnull(0,maxRecords),ifnull(0,minRecords),ifnull(0,avgXmlFiles),ifnull(0,maxXmlFiles),ifnull(0,minXmlFiles), " + 
-   " ifnull(0,avgTarFiles),ifnull(0,maxTarFiles),ifnull(0,minTarFiles),ifnull(0,avgServiceBacklog),ifnull(0,maxServiceBacklog),ifnull(0,minServiceBacklog),ifnull(0,avgMaxPendingFiles),ifnull(0,avgBundleSize) " +
+   " ifnull(avgRecords,0),ifnull(maxRecords,0),ifnull(minRecords,0),ifnull(avgXmlFiles,0),ifnull(maxXmlFiles,0),ifnull(minXmlFiles,0), " + 
+   " ifnull(avgTarFiles,0),ifnull(maxTarFiles,0),ifnull(minTarFiles,0),ifnull(avgServiceBacklog,0),ifnull(maxServiceBacklog,0),ifnull(minServiceBacklog,0),ifnull(avgMaxPendingFiles,0),ifnull(avgBundleSize,0) " +
    " from BacklogStatistics";
    
    private static final String fgSelectHourlyCommand = "select bshid, " + fgSelectCommand + "Hourly";
