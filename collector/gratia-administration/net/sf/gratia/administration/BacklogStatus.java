@@ -50,7 +50,7 @@ public class BacklogStatus extends HttpServlet {
    
    // Which Servlet/web page is this
    String Name;
-   static final String fApplicationURL = "Backlog.html";
+   static final String fApplicationURL = "backlog.html";
 
    static final String fgPreamble = 
    "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\n" +

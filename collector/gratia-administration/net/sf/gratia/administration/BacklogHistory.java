@@ -52,7 +52,7 @@ public class BacklogHistory extends HttpServlet {
    
    // Which Servlet/web page is this
    String Name;
-   static final String fApplicationURL = "Backlog.html";
+   static final String fApplicationURL = "backlog-history.html";
 
    static final String fgPreamble = 
    "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\n" +
@@ -263,7 +263,7 @@ public class BacklogHistory extends HttpServlet {
             } else if (backlogDecrease < 10) {
                buffer.append("<td style=\"text-align: center\" class=\"improving\">Stable</td>\n");
                buffer.append("<td style=\"text-align: center\">See ");
-               buffer.append("<a href=\"").append("gratia-administration/backlog-history.html?name=");
+               buffer.append("<a href=\"").append("backlog-history.html?name=");
                buffer.append(backlog.getName()).append("\" target=\"adminContent\">");            
                buffer.append("history</a> for additional details</td>");               
             } else {
@@ -279,7 +279,7 @@ public class BacklogHistory extends HttpServlet {
                double catchupTime = (double)msSpan * backlogValue / backlogDecrease / (1000*60); // in minutes.
                if (msSpan == 0) {
                   buffer.append("<td style=\"text-align: center\">See ");
-                  buffer.append("<a href=\"").append("gratia-administration/backlog-history.html?name=");
+                  buffer.append("<a href=\"").append("backlog-history.html?name=");
                   buffer.append(backlog.getName()).append("\" target=\"adminContent\">");            
                   buffer.append("history</a> for additional details</td>");               
                } else {
