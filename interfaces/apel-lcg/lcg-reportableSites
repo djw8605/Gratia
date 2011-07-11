@@ -428,7 +428,11 @@
 # ------------------------------------- 
 # Site      old       new
 # ------------------------------------- 
-# WT2      2650      2689
+# WT2      2650      2823
+#     based on this rationale from Wei Yang..
+#     Since WT2 is using HS06factor = 10.6 now and we see 6.1% 
+#     under reporting, I would like to update the HS06Factor to 
+#        10.6/(1-6.1%) = 11.29
 #  
 ##################################################################
 #
@@ -462,7 +466,7 @@ HU_ATLAS_Tier2      2218
 BU_ATLAS_Tier2      2095
 MWT2_UC             2178
 OU_OCHEP_SWT2       2255
-WT2                 2689
+WT2                 2823
 SWT2_CPB            2107
 UTA_SWT2            2810
 #
