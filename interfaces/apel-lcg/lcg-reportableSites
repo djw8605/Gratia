@@ -424,6 +424,11 @@
 #  1. removed MWT2_IU effective for July 2011 per goc ticket 10543
 #     There is another resource (MWT2) expected to be added to 
 #     resource group MWT2_UC sometime in the future.
+#  2. Changed NF for:
+# ------------------------------------- 
+# Site      old       new
+# ------------------------------------- 
+# WT2      2650      2689
 #  
 ##################################################################
 #
@@ -457,7 +462,7 @@ HU_ATLAS_Tier2      2218
 BU_ATLAS_Tier2      2095
 MWT2_UC             2178
 OU_OCHEP_SWT2       2255
-WT2                 2650
+WT2                 2689
 SWT2_CPB            2107
 UTA_SWT2            2810
 #
