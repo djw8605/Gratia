@@ -419,7 +419,12 @@
 # BU_ATLAS_Tier2      2003      2095
 # OU_OCHEP_SWT2       2413      2255
 # SWT2_CPB            1865      2107
-# 
+
+# 07/11/2011 (John Weigand)
+#  1. removed MWT2_IU effective for July 2011 per goc ticket 10543
+#     There is another resource (MWT2) expected to be added to 
+#     resource group MWT2_UC sometime in the future.
+#  
 ##################################################################
 #
 #-- Site  ------- SPECint2000
@@ -450,7 +455,6 @@ BNL_ATLAS_1         3093
 AGLT2               2125
 HU_ATLAS_Tier2      2218
 BU_ATLAS_Tier2      2095
-MWT2_IU             2170
 MWT2_UC             2178
 OU_OCHEP_SWT2       2255
 WT2                 2650
@@ -486,3 +490,4 @@ LC-glcc             3920
 ##PROD_SLAC      2412 (replaced by WT2)
 ##UC_ATLAS_MWT2  1285 (stopped being considered a T2 site in 2009/06 per Rob Gardner)
 # IU_OSG              1400 (removed)
+# MWT2_IU             2170 (removed eff 7/1/11)
