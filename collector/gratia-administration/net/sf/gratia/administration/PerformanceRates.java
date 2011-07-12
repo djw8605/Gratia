@@ -560,7 +560,7 @@ public class PerformanceRates extends HttpServlet {
          buffer.append(" days");               
       } else {
          buffer = decForm.format(hours / (24.0 * 7), buffer, pos1);
-         buffer.append(" week");
+         buffer.append(" weeks");
       }      
    }
    
