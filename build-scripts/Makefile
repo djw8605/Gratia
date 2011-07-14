@@ -1,7 +1,7 @@
 PLATFORM := $(shell uname)
 
 # tarbal version
-version_default = v1.07
+version_default = v1.08
 
 gratia_reporting_version := $(shell echo '$$HeadURL$$' | sed -e 's?^\$$\HeadURL: .*gratia/[^/]*tags/\(v[^ ]*\)/build-scripts/Makefile \$$?\1?' -e 's/-/./g' )
 gratia_services_version = $(gratia_reporting_version)
@@ -674,9 +674,10 @@ gratia: clean util services servlets registration administration soap reporting 
 	# ------------------------------
 	rm -f -r tarball; \
 	mkdir tarball; \
+	mkdir tarball; \
 	echo "$(gratia_release_data)" >tarball/gratia-release
 	cp $(configuration)/UserVoMap.* $(staticScript)/*.py $(configuration)/*properties tarball; \
-	cp $(configuration)/*sql $(configuration)/*sh $(configuration)/collector-backlog-byprobes tarball; \
+	cp $(configuration)/*sql $(configuration)/*sh tarball; \
 	cp -R $(configuration)/hibernate tarball; \
 	rm -rf tarball/hibernate/.svn; \
 	cp $(security)/scripts/voms-server.sh         tarball; chmod 744 tarball/voms-server.sh
