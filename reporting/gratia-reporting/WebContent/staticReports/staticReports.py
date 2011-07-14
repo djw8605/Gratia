@@ -22,7 +22,7 @@ def showNode(node, reportsFolder, staticFolder, birtURL):
                 i = urlQuery.index(']') + 1
                 s1 = urlQuery[i:]
                 i = s1.index('.') + 1
-                reportFile = os.path.join(staticFolder, s1[:i] + 'ppt')
+                reportFile = os.path.join(staticFolder, s1[:i] + 'pdf')
                 ## print reportFile
                 callURL = birtURL + '/' + attrs.get(attrName).nodeValue.replace('[ReportsFolder]', reportsFolder)
                 #print ('URL \n%s\n' % (callURL))

@@ -41,9 +41,9 @@
 	String csvFolderPath = staticFolderPath.substring(0, staticFolderPath.length() - 1) + "_csv/";
 	
 		
-	int ppt = -1;
+	int pdf = -1;
 	int csv = -1;
-	File [] pptObjects = null;
+	File [] pdfObjects = null;
 	File [] csvObjects = null;
 	
 	File f = new File(staticFolderPath);
@@ -68,8 +68,8 @@
 
 	if (f.exists())
 	{
-		pptObjects = f.listFiles();	// Get all files in the directory
-		ppt = pptObjects.length;
+		pdfObjects = f.listFiles();	// Get all files in the directory
+		pdf = pdfObjects.length;
 	}
 	if (c.exists())
 	{
@@ -77,7 +77,7 @@
 		csv = csvObjects.length;
 	}
 	
-	if ((ppt <= 0) && (csv <= 0))
+	if ((pdf <= 0) && (csv <= 0))
 	{
 		%> <p class = "reportItem" >No Static reports are available</p> <%
 		return;
@@ -105,16 +105,16 @@
 			linkURL = linkURL.replace("<", "%3c");
 			linkURL = linkURL.replace("\\", "%5c");
 
-			if (ppt > 0)
+			if (pdf > 0)
 			{
-			  for (int j = 0; j < ppt; j++)
+			  for (int j = 0; j < pdf; j++)
 			  {
-				if(!pptObjects[j].isDirectory())
+				if(!pdfObjects[j].isDirectory())
 				{
-					String fileName = pptObjects[j].getName();
-					if (fileName.startsWith(linkREPORT) && (fileName.endsWith(".ppt")))
+					String fileName = pdfObjects[j].getName();
+					if (fileName.startsWith(linkREPORT) && (fileName.endsWith(".pdf")))
 					{
-						%><li><a class = "reportItem" target = "reportFrame" href="<%= staticFolder+fileName %>"><%= linkNAME %> (ppt)</a></li>
+						%><li><a class = "reportItem" target = "reportFrame" href="<%= staticFolder+fileName %>"><%= linkNAME %> (pdf)</a></li>
 						<%
 					}
 				}
