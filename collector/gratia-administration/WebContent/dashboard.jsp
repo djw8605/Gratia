@@ -28,7 +28,7 @@
 	dbConnection1 = dbConnection1.substring(dbConnection1.indexOf(":")+1);
 	String dbConnection = dbConnection1.substring(dbConnection1.lastIndexOf("/")+1);
 	
-	String version = net.sf.gratia.services.Versions.PackageVersionString;
+	String version = net.sf.gratia.services.Versions.GetPackageVersionString();
 	String fqan = (String) session.getAttribute("FQAN");
 	boolean login = false;
 	String menuClass = "menuItem2";

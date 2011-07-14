@@ -7,8 +7,9 @@ file=$3
 cat > /var/tmp/versions.$$.java <<EOF 
 package net.sf.gratia.$package;
 public class Versions { 
-public static final String PackageVersionString = "$version"; 
-}; 
+private static final String fgPackageVersionString = "$version";
+public static String GetPackageVersionString() { return fgPackageVersionString; }
+};
 EOF
 
 if [ ! -e $file ] ;  then 

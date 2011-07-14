@@ -372,6 +372,7 @@ fi
 
 configuration_dir=$source_prefix/common/configuration
        target_dir=$source_prefix/target
+   tomcat_work=$tomcat_top/work/Catalina/localhost
    tomcat_webapps=$tomcat_top/webapps
     tomcat_gratia=$tomcat_top/gratia
   tomcat_tarballs=~gratia/tomcat-tarballs
@@ -457,6 +458,11 @@ do
   echo "...... $warfile"
   wardir=$(echo $warfile | cut -d'.' -f1)
   rm -rf ${tomcat_webapps}/${wardir} ${tomcat_webapps}/${warfile}
+  # Insure the jsp class are always recreated ..
+  appname=${warfile%\.*}
+  if [ "x${appname}" != "x" ] ; then 
+    rm -rf ${tomcat_work}/${appname}
+  fi
   if [ ! $vdt_install ];then
     cp -pv ${target_dir}/${warfile}  ${tomcat_webapps}/.
     continue
