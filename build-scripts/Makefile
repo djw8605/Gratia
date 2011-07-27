@@ -1,7 +1,7 @@
 PLATFORM := $(shell uname)
 
 # tarbal version
-version_default = v1.08
+version_default = v1.09
 
 gratia_reporting_version := $(shell echo '$$HeadURL$$' | sed -e 's?^\$$\HeadURL: .*gratia/[^/]*tags/\(v[^ ]*\)/build-scripts/Makefile \$$?\1?' -e 's/-/./g' )
 gratia_services_version = $(gratia_reporting_version)
@@ -673,7 +673,6 @@ gratia: clean util services servlets registration administration soap reporting 
 	# --- Target: gratia         ---
 	# ------------------------------
 	rm -f -r tarball; \
-	mkdir tarball; \
 	mkdir tarball; \
 	echo "$(gratia_release_data)" >tarball/gratia-release
 	cp $(configuration)/UserVoMap.* $(staticScript)/*.py $(configuration)/*properties tarball; \
