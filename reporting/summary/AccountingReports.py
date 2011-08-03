@@ -516,7 +516,7 @@ def NumberOfCpus():
 
 def GetListOfSites(filter,location = None):
         if location == None:
-            location = 'http://myosg.grid.iu.edu/wizardsummary/xml?datasource=summary&summary_attrs_showservice=on&account_type=cumulative_hours&ce_account_type=gip_vo&se_account_type=vo_transfer_volume&start_type=7daysago&all_resources=on&gridtype=on&gridtype_1=on&service=on&service_1=on'
+            location = 'http://myosg.grid.iu.edu/rgsummary/xml?datasource=summary&summary_attrs_showservice=on&account_type=cumulative_hours&ce_account_type=gip_vo&se_account_type=vo_transfer_volume&start_type=7daysago&all_resources=on&gridtype=on&gridtype_1=on&service=on&service_1=on'
         html = urllib2.urlopen(location).read()
         
         excludedSites = [ 'Engagement_VOMS', 'OSG_VOMS' ]
@@ -542,7 +542,7 @@ def GetListOfDisabledOSGSites():
 def GetListOfOSGSEs():
     ret = []
     if not gGrid or gGrid.lower() != "local":
-        location = 'http://myosg.grid.iu.edu/wizardsummary/xml?datasource=summary&summary_attrs_showservice=on&account_type=cumulative_hours&ce_account_type=gip_vo&se_account_type=vo_transfer_volume&start_type=7daysago&start_date=11%2F04%2F2009&end_type=now&end_date=11%2F04%2F2009&all_resources=on&gridtype=on&gridtype_1=on&service=on&service_3=on&active_value=1&disable_value=1'
+        location = 'http://myosg.grid.iu.edu/rgsummary/xml?datasource=summary&summary_attrs_showservice=on&account_type=cumulative_hours&ce_account_type=gip_vo&se_account_type=vo_transfer_volume&start_type=7daysago&start_date=11%2F04%2F2009&end_type=now&end_date=11%2F04%2F2009&all_resources=on&gridtype=on&gridtype_1=on&service=on&service_3=on&active_value=1&disable_value=1'
         return GetListOfSites("//Resource/Name",location)
     else:
         try:
