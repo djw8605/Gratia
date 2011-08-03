@@ -35,15 +35,20 @@ class Downtimes:
   """
   #-------------------------------------- 
   def __init__(self):
-    #----------------------------------------------------
-    # --- url for retrieving all Downtimes from MyOsg ---
-    #----------------------------------------------------
-    self.location = "http://myosg.grid.iu.edu/wizarddowntime/xml?datasource=downtime&summary_attrs_showservice=on&summary_attrs_showrsvstatus=on&summary_attrs_showgipstatus=on&summary_attrs_showfqdn=on&summary_attrs_showwlcg=on&summary_attrs_showenv=on&summary_attrs_showcontact=on&gip_status_attrs_showtestresults=on&gip_status_attrs_showfqdn=on&downtime_attrs_showpast=on&account_type=cumulative_hours&ce_account_type=gip_vo&se_account_type=vo_transfer_volume&start_type=7daysago&start_date=03%2F20%2F2009&end_type=now&end_date=03%2F27%2F2009&all_resources=on&gridtype=on&gridtype_1=on&service_4=on&service_1=on&service_5=on&service_2=on&service_3=on&active=on&active_value=1&disable_value=1"
-    #-----------------------------------------------------------------
-    # --- urls below are deliberately incorrect and used for testing ---
-    #-----------------------------------------------------------------
-    #self.location = "htt://myosg.grid.iu.edu/wizarddowntime/xml?datasource=downtime&summary_attrs_showservice=on&summary_attrs_showrsvstatus=on&summary_attrs_showgipstatus=on&summary_attrs_showfqdn=on&summary_attrs_showwlcg=on&summary_attrs_showenv=on&summary_attrs_showcontact=on&gip_status_attrs_showtestresults=on&gip_status_attrs_showfqdn=on&downtime_attrs_showpast=on&account_type=cumulative_hours&ce_account_type=gip_vo&se_account_type=vo_transfer_volume&start_type=7daysago&start_date=03%2F20%2F2009&end_type=now&end_date=03%2F27%2F2009&all_resources=on&gridtype=on&gridtype_1=on&service_4=on&service_1=on&service_5=on&service_2=on&service_3=on&active=on&active_value=1&disable_value=1"
-    #self.location = "http://myosg.grid.iu.edu/wizarddowntime/xml?datasource=owntime&summary_attrs_showservice=on&summary_attrs_showrsvstatus=on&summary_attrs_showgipstatus=on&summary_attrs_showfqdn=on&summary_attrs_showwlcg=on&summary_attrs_showenv=on&summary_attrs_showcontact=on&gip_status_attrs_showtestresults=on&gip_status_attrs_showfqdn=on&downtime_attrs_showpast=on&account_type=cumulative_hours&ce_account_type=gip_vo&se_account_type=vo_transfer_volume&start_type=7daysago&start_date=03%2F20%2F2009&end_type=now&end_date=03%2F27%2F2009&all_resources=on&gridtype=on&gridtype_1=on&service_4=on&service_1=on&service_5=on&service_2=on&service_3=on&active=on&active_value=1&disable_value=1"
+    """
+    MyOSG url for retrieving Downtimes using the following criteria
+      Information to display: Downtime Information
+      Show Past Downtime for: All  
+         The reason for requesting "All" is that it is based on End Time
+         in which case the "past.." ones will not show resource groups
+         currently down.
+      Resource Groups to display: All Resource Groups
+      For Resource Group: Grid type OSG
+      For Resource: Provides following Services - Grid Service/CE
+      Active Status: active
+    """
+    self.location = "http://myosg.grid.iu.edu/rgdowntime/xml?datasource=downtime&summary_attrs_showgipstatus=on&summary_attrs_showwlcg=on&summary_attrs_showservice=on&summary_attrs_showrsvstatus=on&summary_attrs_showfqdn=on&summary_attrs_showenv=on&summary_attrs_showcontact=on&gip_status_attrs_showtestresults=on&downtime_attrs_showpast=90&account_type=cumulative_hours&ce_account_type=gip_vo&se_account_type=vo_transfer_volume&bdiitree_type=total_jobs&bdii_object=service&bdii_server=is-osg&start_type=7daysago&start_date=08%2F03%2F2011&end_type=now&end_date=08%2F03%2F2011&all_resources=on&gridtype=on&gridtype_1=on&service=on&service_1=on&service_central_value=0&service_hidden_value=0&active=on&active_value=1&disable_value=1"
+    #-- used until 8/3/11 - self.location = "http://myosg.grid.iu.edu/wizarddowntime/xml?datasource=downtime&summary_attrs_showservice=on&summary_attrs_showrsvstatus=on&summary_attrs_showgipstatus=on&summary_attrs_showfqdn=on&summary_attrs_showwlcg=on&summary_attrs_showenv=on&summary_attrs_showcontact=on&gip_status_attrs_showtestresults=on&gip_status_attrs_showfqdn=on&downtime_attrs_showpast=on&account_type=cumulative_hours&ce_account_type=gip_vo&se_account_type=vo_transfer_volume&start_type=7daysago&start_date=03%2F20%2F2009&end_type=now&end_date=03%2F27%2F2009&all_resources=on&gridtype=on&gridtype_1=on&service_4=on&service_1=on&service_5=on&service_2=on&service_3=on&active=on&active_value=1&disable_value=1"
   
     self.doc = None
       

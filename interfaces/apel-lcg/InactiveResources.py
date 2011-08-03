@@ -34,16 +34,17 @@ class InactiveResources:
   """
   #-------------------------------------- 
   def __init__(self):
-    #----------------------------------------------------
-    # --- url for retrieving all inactive Resources from MyOsg ---
-    #----------------------------------------------------
-    self.location = "http://myosg.grid.iu.edu/rgsummary/xml?datasource=summary&summary_attrs_showwlcg=on&summary_attrs_showservice=on&summary_attrs_showfqdn=on&gip_status_attrs_showtestresults=on&downtime_attrs_showpast=90&account_type=cumulative_hours&ce_account_type=gip_vo&se_account_type=vo_transfer_volume&start_type=7daysago&start_date=03%2F20%2F2009&end_type=now&end_date=03%2F27%2F2009&all_resources=on&rg_42=on&gridtype=on&gridtype_1=on&service_1=on&service_5=on&service_2=on&service_3=on&service_central_value=0&service_hidden_value=0&active=on&active_value=0&disable_value=1"
-    #-----------------------------------------------------------------
-    # --- urls below are deliberately incorrect and used for testing ---
-    #-----------------------------------------------------------------
-    #self.location = "htt://myosg.grid.iu.edu/rgsummary/xml?datasource=summary&summary_attrs_showwlcg=on&summary_attrs_showservice=on&summary_attrs_showfqdn=on&gip_status_attrs_showtestresults=on&downtime_attrs_showpast=90&account_type=cumulative_hours&ce_account_type=gip_vo&se_account_type=vo_transfer_volume&start_type=7daysago&start_date=03%2F20%2F2009&end_type=now&end_date=03%2F27%2F2009&all_resources=on&rg_42=on&gridtype=on&gridtype_1=on&service_1=on&service_5=on&service_2=on&service_3=on&service_central_value=0&service_hidden_value=0&active=on&active_value=0&disable_value=1"
-    #--- this one should retrieve no data and thorw excepetion --
-    #self.location = "http://myosg.grid.iu.edu/rgsummary/xml?datasurce=summary&summary_attrs_showwlcg=on&summary_attrs_showservice=on&summary_attrs_showfqdn=on&gip_status_attrs_showtestresults=on&downtime_attrs_showpast=90&account_type=cumulative_hours&ce_account_type=gip_vo&se_account_type=vo_transfer_volume&start_type=7daysago&start_date=03%2F20%2F2009&end_type=now&end_date=03%2F27%2F2009&all_resources=on&rg_42=on&gridtype=on&gridtype_1=on&service_1=on&service_5=on&service_2=on&service_3=on&service_central_value=0&service_hidden_value=0&active=on&active_value=0&disable_value=1"
+    """
+    MyOSG url for retrieving all inactive Resources using this criteria:
+      Information to display: Resource Group Summary
+      For Resource: Show services
+      Resource Groups to display: All resource groups
+      For Resource Group: Grid Type - OSG
+      For Resource: Provides the following services - Grid Services / CE
+    """
+    self.location = "http://myosg.grid.iu.edu/rgsummary/xml?datasource=summary&summary_attrs_showservice=on&gip_status_attrs_showtestresults=on&downtime_attrs_showpast=all&account_type=cumulative_hours&ce_account_type=gip_vo&se_account_type=vo_transfer_volume&bdiitree_type=total_jobs&bdii_object=service&bdii_server=is-osg&start_type=7daysago&start_date=08%2F03%2F2011&end_type=now&end_date=08%2F03%2F2011&all_resources=on&gridtype=on&gridtype_1=on&service=on&service_1=on&service_central_value=0&service_hidden_value=0&active_value=0&disable_value=1"
+    #---
+    # old one used until 8/3/11 self.location = "http://myosg.grid.iu.edu/rgsummary/xml?datasource=summary&summary_attrs_showwlcg=on&summary_attrs_showservice=on&summary_attrs_showfqdn=on&gip_status_attrs_showtestresults=on&downtime_attrs_showpast=90&account_type=cumulative_hours&ce_account_type=gip_vo&se_account_type=vo_transfer_volume&start_type=7daysago&start_date=03%2F20%2F2009&end_type=now&end_date=03%2F27%2F2009&all_resources=on&rg_42=on&gridtype=on&gridtype_1=on&service_1=on&service_5=on&service_2=on&service_3=on&service_central_value=0&service_hidden_value=0&active=on&active_value=0&disable_value=1"
   
     self.doc = None
       
