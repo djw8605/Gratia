@@ -206,7 +206,7 @@
 #   method of detecting this type of condition at this time.
 #
 #  3/3/10 (John Weigand)  
-#   In theGetQueryForDaysReported method, which checks to see if a resource
+#   In the etQueryForDaysReported method, which checks to see if a resource
 #   has missed any days of reporting,  I removed the check for just cms and
 #   atlas VOs.  Some sites are only used as a backup or for overflow from the
 #   main site.  This eliminates falsely reoprting problems. 
@@ -222,9 +222,69 @@
 #   my guess is we will start using the HS06 value but,until then, this 
 #   is the only means of being able to compare easily.
 #
+#  8/16/11 (John Weigand)
+#  ---------------------
+#  This represents a major change to the interface.  All OSG reporting to
+#  WLCG has been in reference to MyOsg resource group.  However, the MyOsg
+#  InteropAccounting flag for WLCG Information is at the resource,
+#  not resource group, level.  The changes made in this revision will now
+#   1. treat the lcg-reportableSites config file entries as resource groups
+#      This also means the Normalization Factors should be calculated
+#      at the resource group level.
+#   2. determine which resources within that resource group should have
+#      their gratia data reported to APEL/WLCG.
+#   3. summarize (using sql) the accounting data for the month for all
+#      interfaced resources for the resource group.
+#  A new class, InteropAccounting(.py), provides the access to MyOsg.
+#
+#  Due to a disconnect between Gratia site and MyOsg resource group/resource
+#  that has existed from the beginning of time, some previously identifiable
+#  "non-reporting" conditions may not get detected.  If all "resources"
+#  reported to Gratia with the resource name, this would resolve that
+#  problem.  However, many resources report to Gratia with the
+#  resource group name.  Due to this, any "non-reporting" conditions
+#  are ignored unless the entire "resource group" shows as not reporting.
+#
+#  Added a couple more validations for the WARNING email:
+#   1. site we are reporting that do not have the MyOsg InteropAccounting set
+#   2. sites we are not reporting that do have the MyOsg InteropAccounting set
+#   3. Resource groups we are reporting that are not defined in Rebus
+#   4. Resource groups that have and Accounting Name different from Rebus
+#
+#  A new class, Rebus(.py), provides the access the the WLCG REBUS
+#  topology necessarty to do items 3 and 4 above.
+#
+#  Another word of warning.  Since this is now assuming Gratia sites
+#  are equivalent to MyOsg resource groups and not resources, any updates
+#  needed to re-populate will be a problem since MyOsg is not time 
+#  sensitive.  Resource may be added or dropped from MyOsg at any point
+#  in time.  It only reflects the current state.  So re-populating previous
+#  periods may  result in the wrong data being used.
+#  
+#  Additional cleanup to simplify the change to SSM/ActiveMQ for the interface
+#   1. Eliminated all code associated with updating the OSG_DATA table.
+#      The OSG_CN_TABLE is the one soley used by APEL.
+#   2. Eliminated all code associated with find "unknown" VOs for Atlas
+#      which was a problem with Atlas rerorting that has since been resolved.
+#   3. Eliminated all code assoicated with using a default Normalization
+#      Factor.  All resource groups/sites must have one
+#
+#  Another new module, NormalizationFactors.py, was added but is not used
+#  by the interface module LCG.py.  It may or may not be useful in 
+#  determining NFs.  Not sure yet.
+#
+#  Last word... These changes have all been done over the last 6 months
+#  and have been running in parallel for that period to verify that
+#  there is no affect on the data sent.  It was not until Nebraska
+#  added 2 resources (not being reported as Nebraska) this month that this
+#  change had to go into production.  In all existing cases, MyOsg and
+#  Gratia were in a state that it did not matter.
 ########################################################################
 import Downtimes
 import InactiveResources
+import InteropAccounting
+import Rebus
+
 import traceback
 import exceptions
 import time
@@ -241,12 +301,10 @@ downtimes          = Downtimes.Downtimes()
 inactives          = InactiveResources.InactiveResources()
 gVoOutput          = ""
 gUserOutput        = ""
-gUnknowns          = ""
 gWarnings          = []
 gSitesWithData     = []
 gSitesMissingData  = {}
 gSitesWithNoData   = [] 
-gSitesWithUnknowns = []
 gKnownVOs = {}
 
 gFilterParameters = {"GratiaCollector"      :None,
@@ -256,9 +314,6 @@ gFilterParameters = {"GratiaCollector"      :None,
                      "DBConfFile"           :None,
                      "LogSqlDir"            :None,
                      "MissingDataDays"      :None,
-                     "NormalizationProbe"   :None,
-                     "NormalizationPeriod"  :None,
-                     "NormalizationDefault" :None,
                      "FromEmail"            :None,
                      "ToEmail"              :None,
                     }
@@ -272,7 +327,6 @@ gDatabaseParameters = {"GratiaHost":None,
                        "LcgUser"   :None,
                        "LcgPswd"   :None,
                        "LcgDB"     :None,
-                       "LcgTable"  :None,
                        "LcgUserTable"  :None,
                       }
 
@@ -284,9 +338,7 @@ gDatabaseParameters = {"GratiaHost":None,
 gProgramName        = None
 gFilterConfigFile   = None
 gDateFilter         = None
-gNormalization      = None
 gInUpdateMode       = False  
-gCheckUnknowns      = False
 gEmailNotificationSuppressed = False  #Command line arg to suppress email notice
 gMyOSG_available    = True  # flag indicating if there is a problem w/MyOSG
 
@@ -295,10 +347,18 @@ gMyOSG_available    = True  # flag indicating if there is a problem w/MyOSG
 # special global variables to display queries in the email 
 gVoQuery      = ""
 gUserQuery    = ""
-gUnknownQuery = ""
+
+# -----------------------------------------------------------------------
+# Used to get the set of resource for the resource groups being reported
+gInteropAccounting = InteropAccounting.InteropAccounting()
+
+# -----------------------------------------------------------------------
+# Used to validate MyOSG Interoperability against WLCG Rebus topology
+# to verify is a site/resource group is registered
+gRebus = Rebus.Rebus()
 
 
-#-----------------------------------------------
+#-----------------------------------------------
 def Usage():
   """ Display usage """
   print  """\
@@ -306,13 +366,13 @@ this is the usage
 """
 
 
-#-----------------------------------------------
+#-----------------------------------------------
 def GetArgs(argv):
-    global gProgramName,gDateFilter,gInUpdateMode,gEmailNotificationSuppressed,gProbename,gVoOutput,gUserOutput,gFilterConfigFile,gCheckUnknowns
+    global gProgramName,gDateFilter,gInUpdateMode,gEmailNotificationSuppressed,gProbename,gVoOutput,gUserOutput,gFilterConfigFile
     if argv is None:
         argv = sys.argv
     gProgramName = argv[0]
-    arglist=["help","unknowns","no-email","date=","update","config="]
+    arglist=["help","no-email","date=","update","config="]
 
     try:
       opts, args = getopt.getopt(argv[1:], "", arglist)
@@ -339,9 +399,6 @@ README--Gratia-APEL-interface file as there is too much to explain here.
         continue
       if o in ("--update"):
         gInUpdateMode = True
-        continue
-      if o in ("--unknowns"):
-        gCheckUnknowns = True
         continue
       if o in ("--date"):
         gDateFilter = a
@@ -382,13 +439,6 @@ def SendEmailNotificationSuccess():
   contents = contents + "\n\nResults of all VO queries (VO):\n" + gVoOutput 
   contents = contents + "\nSample VO query:\n" + gVoQuery
   contents = contents + "\nSample User query:\n" + gUserQuery
-
-  if gCheckUnknowns:
-    contents = contents + "\n====== Unknown VOs ========================\n"
-    contents = contents + "\nSites with unknown Atlas VOs (unix account with 'atlas' in name):\n   %s" % (gSitesWithUnknowns)
-    contents = contents + "\nResults of all Atlas unknown queries:\n" + gUnknowns
-    contents = contents + "\nSample Atlas unknown query:\n" + gUnknownQuery 
-
   SendEmailNotification(subject,contents)
 #-----------------------------------------------
 def SendEmailNotificationWarnings():
@@ -425,7 +475,6 @@ def SendEmailNotification(subject,message):
   username = commands.getoutput("whoami")
   vosqlfile   = commands.getoutput("echo $PWD")+"/"+GetFileName(None,"sql")
   vosqlrecs   = commands.getoutput("grep -c INSERT %s" % vosqlfile)
-  votable     = gDatabaseParameters["LcgTable"]
   usersqlfile = commands.getoutput("echo $PWD")+"/"+GetFileName("user","sql")
   usersqlrecs = commands.getoutput("grep -c INSERT %s" % usersqlfile)
   usertable   = gDatabaseParameters["LcgUserTable"]
@@ -435,25 +484,29 @@ Gratia to APEL/WLCG transfer.
 This is normally run as a cron process.  The log files associated with this 
 process can provide further details.
 
-Script............ %s
-Node.............. %s
-User.............. %s
-Log file.......... %s
+Script............ %(program)s
+Node.............. %(hostname)s
+User.............. %(username)s
+Log file.......... %(logfile)s
 
-VO SQL file....... %s  
-VO SQL records.... %s  
-VO table names.... %s  
+User SQL file..... %(usersqlfile)s 
+User SQL records.. %(usersqlrecs)s  
+User table names.. %(usertable)s  
 
-User SQL file..... %s 
-User SQL records.. %s  
-User table names.. %s  
+Reportable sites file.. %(sitefilter)s
+Reportable VOs file.... %(vofilter)s
 
-Reportable sites file.. %s
-Reportable VOs file.... %s
-Report unknown VOs..... %s
-
-%s
-	""" % (gProgramName,hostname,username,logfile,vosqlfile,vosqlrecs,votable,usersqlfile,usersqlrecs,usertable,gFilterParameters["SiteFilterFile"],gFilterParameters["VOFilterFile"],gCheckUnknowns,message)
+%(message)s
+	""" % { "program"     : gProgramName,
+                "hostname"    : hostname,
+                "username"    : username,
+                "logfile"     : logfile,
+                "usersqlfile" : usersqlfile,
+                "usersqlrecs" : usersqlrecs,
+                "usertable"   : usertable,
+                "sitefilter"  : gFilterParameters["SiteFilterFile"],
+                "vofilter"    : gFilterParameters["VOFilterFile"],
+                "message"     : message,} 
 
   try:
     fromaddr = gFilterParameters["FromEmail"]
@@ -479,7 +532,7 @@ X-Mailer: Python smtplib
     raise Exception("Unsent Message: %s" % message)
 
 
-#-----------------------------------------------
+#-----------------------------------------------
 def GetVOFilters(filename):
   """ Reader for a file of reportable VOs . 
       The file contains a single entry for each filter value.  
@@ -505,19 +558,14 @@ def GetVOFilters(filename):
   except IOError, (errno,strerror):
     raise Exception("IO error(%s): %s (%s)" % (errno,strerror,filename))
 
-#-----------------------------------------------
+#-----------------------------------------------
 def GetSiteFilters(filename):
   """ Reader for a file of reportable sites. 
       The file contains 2 tokens: the site name and a normalization factor.  
-      The normalization factor is optional.  If not available, a default
-      normalization factor will be set using the gNormalization value.
       The method returns a hash table with the key being site and the value
       the normalization factor to use.
   """
   try:
-    #--- verify the gNormalization value has been set --
-    if gNormalization == None:
-      raise Exception("Internal error: something in the logic is screwed up. The gNormalization variable must be set before this method (GetSiteFilters) is called.")
     #--- process the reportable sites file ---
     sites = {}
     fd = open(filename)
@@ -535,7 +583,7 @@ def GetSiteFilters(filename):
         raise Exception("System error: duplicate - site (%s) already set" % site[0])
       factor = 0
       if len(site) == 1:
-        sites[site[0]] = gNormalization
+        raise Exception("System error: No normalization factory was provide for site: %s" % site[0])
       elif len(site) > 1:
         #-- verify the factor is an integer --
         try:
@@ -556,7 +604,7 @@ def GetSiteFilters(filename):
   except IOError, (errno,strerror):
     raise Exception("IO error(%s): %s (%s)" % (errno,strerror,filename))
 
-#----------------------------------------------
+#----------------------------------------------
 def GetDBConfigParams(filename):
   """ Retrieves and validates the database configuration file parameters"""
 
@@ -655,7 +703,7 @@ def GetConfigParams(filename):
   except IOError, (errno,strerror):
     raise Exception("IO error(%s): %s (%s)" % (errno,strerror,filename))
 
-#---------------------------------------------
+#---------------------------------------------
 def GetCurrentPeriod():
   """ Gets the current time in format for the date filter YYYY/MM 
       This will always be the current month.
@@ -726,7 +774,7 @@ def GetFileName(type,suffix):
       os.mkdir(gFilterParameters["LogSqlDir"])
     return filename
 
-#-----------------------------------------------
+#-----------------------------------------------
 def CheckGratiaDBAvailability(params):
   """ Checks the availability of the Gratia database. """
   CheckDB(params["GratiaHost"], 
@@ -762,7 +810,7 @@ def CheckDB(host,port,user,pswd,db):
     raise Exception(msg)
   Logit("Status: available")
       
-#-----------------------------------------------
+#-----------------------------------------------
 def SetDatesWhereClause():
   """ Sets the beginning and ending dates in a sql 'where' clause format
       to insure consistency on all queries. 
@@ -774,19 +822,19 @@ def SetDatesWhereClause():
   whereClause = """ "%s" <= Main.EndTime and Main.EndTime < "%s" """ % (strBegin,strEnd)
   return whereClause
 
-#-----------------------------------------------
-def SetQueryDates():
-  """ Sets the beginning and ending dates for the basic Gratia query.
-      This is always 1 month.
-  """
-  return SetDateFilter(1)
-#-----------------------------------------------
-def SetNormalizationDates():
-  """ Sets the beginning and ending dates for the Gratia query used to 
-      determining the normalization factor used.
-      This is set be a parameter in the configuration file.
-  """
-  return SetDateFilter(gFilterParameters["NormalizationPeriod"]) 
+##JGW #-----------------------------------------------
+##JGW def SetQueryDates():
+##JGW   """ Sets the beginning and ending dates for the basic Gratia query.
+##JGW       This is always 1 month.
+##JGW   """
+##JGW   return SetDateFilter(1)
+##JGW #-----------------------------------------------
+##JGW def SetNormalizationDates():
+##JGW   """ Sets the beginning and ending dates for the Gratia query used to 
+##JGW       determining the normalization factor used.
+##JGW       This is set be a parameter in the configuration file.
+##JGW   """
+##JGW  return SetDateFilter(gFilterParameters["NormalizationPeriod"]) 
 #-----------------------------------------------
 def SetDateFilter(interval):
     """ Given the month and year (YYYY/MM, returns the starting and 
@@ -821,57 +869,16 @@ def DateToString(input,gmt=True):
     else:
         return input.strftime("%Y-%m-%d")
 
-#-----------------------------------------------
-def GetNormalizationQuery(normalizationProbe):
-    """ Returns the query used to get the normalization factor."""
-
-    begin,end = SetNormalizationDates()
-    strBegin =  DateToString(begin)
-    strEnd   =  DateToString(end)
-    query = """\
-
-SELECT sum(score)/count(*) FROM 
- (SELECT I.BenchmarkScore/1000 AS score
-  FROM gratia_psacct.NodeSummary H, 
-     gratia_psacct.CPUInfo I 
-  WHERE "%s" <= EndTime and EndTime < "%s"
-    AND ProbeName = "%s" 
-    AND H.HostDescription = I.NodeName 
-  GROUP BY Node) 
-AS sub;""" % (strBegin,strEnd,normalizationProbe)
-    Logit("Normalization query: %s" % query)
-    return query
-
-#-----------------------------------------
-def SetNormalizationFactor(query,params):
-    """ Sets the normalization factor applied to all data."""
-    results = RunGratiaQuery(query,params,True)
-    if results == "":
-      Logit("WARNING: no data return from query")
-      normalizationFactor = gFilterParameters["NormalizationDefault"]
-      Logit("WARNING: Using default normalization factor")
-    else:
-      lines = results.split("\n")
-      normalizationFactor = "%.6f" % string.atof(lines[0])
-    Logit("Normalization factor: %s" % normalizationFactor)
-    return normalizationFactor
-
 #-----------------------------------------------
-def GetVoQuery(site,normalizationFactor,vos):
-    """ Creates the SQL query DML statement for the Gratia database.
-        grouping by Site/VO.
-    """
-    return GetQuery(site,normalizationFactor,vos,"False")
-
-#-----------------------------------------------
-def GetUserQuery(site,normalizationFactor,vos):
+def GetUserQuery(resource_grp,normalizationFactor,vos):
     """ Creates the SQL query DML statement for the Gratia database.
         grouping by Site/User/VO.
     """
-    return GetQuery(site,normalizationFactor,vos,"True")
+    Logit("------ User Query: %s  ------" % resource_grp)
+    return GetQuery(resource_grp,normalizationFactor,vos,"True")
 
 #-----------------------------------------------
-def GetQuery(site,normalizationFactor,vos,DNflag):
+def GetQuery(resource_grp,normalizationFactor,vos,DNflag):
     """ Creates the SQL query DML statement for the Gratia database.
         On 5/18/09, this was changed to optionally add in CommonName
         to the query.  I chose to make it a python variable in this
@@ -883,51 +890,80 @@ def GetQuery(site,normalizationFactor,vos,DNflag):
         On 11/04/09, this was changed to be the \"best\" of
         DistinguishedName and CommonName.
     """
+    Logit("Resource Group: %s  Normalization Factor: %s" % (resource_grp,normalizationFactor)) 
     userDataClause=""
     userGroupClause=""
     if DNflag == "True":
       userDataClause="IF(DistinguishedName NOT IN (\"\", \"Unknown\"),IF(INSTR(DistinguishedName,\":/\")>0,LEFT(DistinguishedName,INSTR(DistinguishedName,\":/\")-1), DistinguishedName),CommonName) as UserDN, "
       userGroupClause=", UserDN "
     periodWhereClause = SetDatesWhereClause()
+    siteClause        = GetSiteClause(resource_grp)
     strNormalization = str(normalizationFactor)
     fmtMonth = "%m"
     fmtYear  = "%Y"
     fmtDate  = "%Y-%m-%d"
     query="""\
-SELECT Site.SiteName AS ExecutingSite, 
-               VOName as LCGUserVO, 
-               %s
-               Sum(NJobs), 
-               Round(Sum(CpuUserDuration+CpuSystemDuration)/3600) as SumCPU, 
-               Round((Sum(CpuUserDuration+CpuSystemDuration)/3600)*%s) as NormSumCPU, 
-               Round(Sum(WallDuration)/3600) as SumWCT, 
-               Round((Sum(WallDuration)/3600)*%s) as NormSumWCT, 
-               date_format(min(EndTime),"%s")       as Month, 
-               date_format(min(EndTime),"%s")       as Year, 
-               date_format(min(EndTime),"%s") as RecordStart, 
-               date_format(max(EndTime),"%s") as RecordEnd, 
-               "%s",
-               NOW() 
-from 
+SELECT "%(site)s" AS ExecutingSite,  
+   VOName as LCGUserVO,
+   %(user_data_clause)s
+   Sum(NJobs), 
+   Round(Sum(CpuUserDuration+CpuSystemDuration)/3600) as SumCPU,
+   Round((Sum(CpuUserDuration+CpuSystemDuration)/3600) * %(nf)s) as NormSumCPU,
+   Round(Sum(WallDuration)/3600) as SumWCT,
+   Round((Sum(WallDuration)/3600) * %(nf)s ) as NormSumWCT,
+   date_format(min(EndTime),"%(month)s")  as Month,
+   date_format(min(EndTime),"%(year)s")   as Year,
+   date_format(min(EndTime),"%(date_format)s") as RecordStart,
+   date_format(max(EndTime),"%(date_format)s") as RecordEnd,
+   "%(nf)s",
+   NOW()
+from
      Site,
      Probe,
-     VOProbeSummary Main 
-where 
-      Site.SiteName = "%s"
-  and Site.siteid = Probe.siteid 
-  and Probe.ProbeName  = Main.ProbeName 
-  and Main.VOName in ( %s )
-  and %s
+     VOProbeSummary Main
+where
+      Site.SiteName in (%(site_clause)s)
+  and Site.siteid = Probe.siteid
+  and Probe.ProbeName  = Main.ProbeName
+  and Main.VOName in ( %(vos)s )
+  and %(period)s
   and Main.ResourceType = "Batch"
-group by ExecutingSite, 
+group by ExecutingSite,
          LCGUserVO
-         %s
-""" % (userDataClause,strNormalization,strNormalization,fmtMonth,fmtYear,fmtDate,fmtDate,strNormalization,site,vos,periodWhereClause,userGroupClause)
+         %(user)s
+""" % { "site"             : resource_grp,
+        "site_clause"      : siteClause,
+        "user_data_clause" : userDataClause,
+        "nf"               : strNormalization,
+        "month"            : fmtMonth,
+        "year"             : fmtYear,
+        "date_format"      : fmtDate,
+        "vos"              : vos,
+        "period"           : periodWhereClause,
+        "user"             : userGroupClause
+}
     return query
+
+#-----------------------------------------------
+def GetSiteClause(resource_grp):
+  global gInteropAccounting
+  siteClause = ""
+  resources = gInteropAccounting.interfacedResources(resource_grp)
+##JGW hack for Nebraska
+  if resource_grp == "Nebraska":
+    resources.append("Red")
+##JGW end of hack
+  if len(resources) == 0:
+    resources = [resource_grp]
+  Logit("Resource Group: %s Resources: %s" % (resource_grp,resources))
+  for resource in resources:
+    siteClause = siteClause + '"%s",' % resource 
+  siteClause = siteClause[0:len(siteClause)-1]
+  return siteClause
 
 
 #-----------------------------------------------
-def GetQueryForDaysReported(site,vos):
+def GetQueryForDaysReported(resource_grp,vos):
     """ Creates the SQL query DML statement for the Gratia database.
         This is used to determine if there are any gaps in the
         reporting for a site. It just identifies the days that
@@ -936,126 +972,32 @@ def GetQueryForDaysReported(site,vos):
     userDataClause=""
     userGroupClause=""
     periodWhereClause = SetDatesWhereClause()
+    siteClause        = GetSiteClause(resource_grp)
     dateFmt  =  "%Y-%m-%d"
     query="""\
-SELECT distinct(date_format(EndTime,"%s"))
+SELECT distinct(date_format(EndTime,"%(date_format)s"))
 from 
      Site,
      Probe,
      VOProbeSummary Main 
 where 
-      Site.SiteName = "%s"
+      Site.SiteName in ( %(resources)s )
   and Site.siteid = Probe.siteid 
   and Probe.ProbeName  = Main.ProbeName 
---  and Main.VOName in ( %s )
-  and %s 
+--  and Main.VOName in ( %(vos)s )
+  and %(period)s 
   and Main.ResourceType = "Batch"
-""" % (dateFmt,site,vos,periodWhereClause)
+""" % { "date_format"  : dateFmt,
+        "resources"    : siteClause,
+        "vos"          : vos,
+        "period"       : periodWhereClause
+      }
     return query
 
-#-----------------------------------------------
-def GetQueryAtlasUnknowns(site,normalizationFactor,vos):
-    """ Creates the SQL query DML statement for the Gratia database 
-        This is special to pick up those with an 'Unknown VO' for atlas.
-    """
-    periodWhereClause = SetDatesWhereClause()
-    strNormalization = str(normalizationFactor)
-    fmtMonth = "%m"
-    fmtYear  = "%Y"
-    fmtDate  = "%Y-%m-%d"
-    percent  = "%"
-    query="""\
-SELECT STRAIGHT_JOIN
-               Site.SiteName AS ExecutingSite, 
-               "us%s" as LCGUserVO, 
-               Sum(R.NJobs), 
-               Round(Sum(R.CpuUserDuration+R.CpuSystemDuration)/3600) as SumCPU, 
-               Round((Sum(R.CpuUserDuration+R.CpuSystemDuration)/3600)*%s) as NormSumCPU, 
-               Round(Sum(R.WallDuration)/3600) as SumWCT, 
-               Round((Sum(R.WallDuration)/3600)*%s) as NormSumWCT, 
-               date_format(min(R.EndTime),"%s")       as Month, 
-               date_format(min(R.EndTime),"%s")       as Year, 
-               date_format(min(R.EndTime),"%s") as RecordStart, 
-               date_format(max(R.EndTime),"%s") as RecordEnd, 
-               "%s",
-               NOW() 
-from 
-     Site,
-     Probe,
-     JobUsageRecord_Meta M,
-     JobUsageRecord R
-where 
-      Site.SiteName = "%s"
-  and Site.siteid   = Probe.siteid 
-  and Probe.probeid  = M.probeid 
-  and M.dbid           = R.dbid
-  and R.VOName = "Unknown"
-  and %s 
-  and R.ResourceType = "Batch"
-  and R.LocalUserid like "%s%s%s"  
-group by ExecutingSite, 
-         LCGUserVO
-""" % (vos,strNormalization,strNormalization,fmtMonth,fmtYear,fmtDate,fmtDate,strNormalization,site,periodWhereClause,percent,vos,percent)
-    return query
-
-#-----------------------------------------------
-def FindSitesWithUnknownVOs(vos,gDatabaseParameters):
-  """ Finds the sites with an 'Unknown' VO name and UNIX account like the
-      'vos' variable, specifically  'atlas' at this point.
-
-      Due to the length of time when the query was performed for every site
-      in the lcg-reportableSites table, this is an attempt to make one pass
-      at seeing the sites the individual query must be performed for. 
-      This is a bandaid.
-  """
-  global gUnknownQuery
-  query = GetQuerySitesWithUnknownVOs(vos)
-  gUnknownQuery = query
-  Logit("Checking for Unknown VOs with '%s'-like account:" % vos)
-  LogToFile(query)
-  results = RunGratiaQuery(query,gDatabaseParameters,True)
-  sites = results.split("\n")
-  return sites
-
-  
 #-----------------------------------------------
-def GetQuerySitesWithUnknownVOs(vos):
-    """ Creates the SQL query DML statement for the Gratia database 
-        This query looks to find the sites with an 'Unknown' VO name
-        with an 'atlas' like UNIX account.  
-
-        Due to the length of time when the query was performed for every site
-        in the lcg-reportableSites table, this is an attempt to make one pass
-        at seeing the sites the individual query must be performed for. 
-        This is a bandaid.
-    """
-    
-    periodWhereClause = SetDatesWhereClause()
-    percent  = "%"
-    query="""\
-SELECT STRAIGHT_JOIN
-  DISTINCT(Site.SiteName)
-from
-     JobUsageRecord R,
-     JobUsageRecord_Meta M,
-     Probe,
-     Site
-where
-      %s
-  and R.ResourceType = "Batch"
-  and R.VOName      = "Unknown"
-  and R.LocalUserid like "%s%s%s"  
-  and R.dbid        = M.dbid
-  and M.probeid     = Probe.probeid
-  and Probe.siteid  = Site.siteid
-""" % (periodWhereClause,percent,vos,percent)
-
-    return query
-
-#-----------------------------------------------
 def RunGratiaQuery(select,params,LogResults=True):
   """ Runs the query of the Gratia database """
-  Logit("Running query on %s of the %s database" % (params["GratiaHost"],params["GratiaDB"]))
+  Logit("Running query on %s of the %s db" % (params["GratiaHost"],params["GratiaDB"]))
   host = params["GratiaHost"]
   port = params["GratiaPort"] 
   user = params["GratiaUser"] 
@@ -1065,11 +1007,12 @@ def RunGratiaQuery(select,params,LogResults=True):
   connectString = CreateConnectString(host,port,user,pswd,db)
   (status,output) = commands.getstatusoutput("echo '" + select + "' | " + connectString)
   results = EvaluateMySqlResults((status,output))
+  if len(results) == 0:
+    Logit("Results: empty results set")
   if LogResults:
-    if len(results) == 0:
-      Logit("Results: empty results set")
-    else:
-      Logit("Results:\n%s" % results)
+    Logit("Results:\n%s" % results)
+  else:
+    Logit("Results: %s records" % len(results))
   return results
 
 #-----------------------------------------------
@@ -1082,7 +1025,7 @@ def RunLCGQuery(query,type,params):
   user = params["LcgUser"] 
   pswd = params["LcgPswd"] 
   db   = params["LcgDB"]
-  Logit("Running query on %s of the %s database" % (host,db))
+  Logit("Running query on %s of the %s db" % (host,db))
   Logit("Query - type %s: %s" % (type,query))
 
   if type == "data":
@@ -1107,15 +1050,16 @@ def CreateXmlHtmlFiles(params):
             the current OSG_DATA extract, I had to add this to keep
             the files unique. (John Weigand 4/8/10)            
   """
-  Logit("------")
-  Logit("Retrieving APEL database data")
+  Logit("---------------------------------------")
+  Logit("---- Retrieving APEL database data ----")
+  Logit("---------------------------------------")
   dates = gDateFilter.split("/")  # YYYY/MM format
-  lcgtable = gDatabaseParameters["LcgTable"]
+  lcgtable = gDatabaseParameters["LcgUserTable"]
   queries =  {
-    lcgtable : "select * from %s where Year=%s and Month=%s order by ExecutingSite,LCGUserVO ;" % (lcgtable,dates[0],dates[1]),
+    "OSG_DATA"      : """select ExecutingSite, LCGUserVO, SUM(Njobs) as Njobs, SUM(SumCPU) as SumCPU, SUM(NormSumCPU) as NormSumCPU, SUM(SumWCT) as SumWCT, SUM(NormSumWCT) as NormSumWCT, Month, Year, MIN(RecordStart) as RecordStart, MAX(RecordEnd) as RecordEnd, MIN(NormFactor) as NormFactor, MeasurementDate FROM %(table)s WHERE Year=%(year)s and Month=%(month)s GROUP BY ExecutingSite, LCGUserVO, Year, Month""" % { "table" : lcgtable, "year"  : dates[0], "month" : dates[1], },
     "org_Tier1" : 'select * from org_Tier1 ' + FindTierPath(params,"org_Tier1"),
     "org_Tier2" : 'select * from org_Tier2 ' + FindTierPath(params,"org_Tier2"),
-    "HS06"      : """select ExecutingSite, LCGUserVO, Njobs, SumCPU, NormSumCPU, (NormSumCPU * 4) as HS06_CPU, SumWCT, NormSumWCT, (NormSumWCT * 4) as HS06_WCT, Month, Year, RecordStart, RecordEnd, NormFactor, (NormFactor * 4) as HS06Factor, MeasurementDate FROM %s WHERE Year=%s and Month=%s ORDER BY ExecutingSite, LCGUserVO""" % (lcgtable,dates[0],dates[1]),
+    "HS06_OSG_DATA"  : """select ExecutingSite, LCGUserVO, SUM(Njobs) as Njobs, SUM(SumCPU) as SumCPU, SUM(NormSumCPU) as NormSumCPU, (SUM(NormSumCPU) * 4) as HS06_CPU, SUM(SumWCT) as SumWCT, SUM(NormSumWCT) as NormSumWCT, (SUM(NormSumWCT) * 4) as HS06_WCT, Month, Year, MIN(RecordStart) as RecordStart, MAX(RecordEnd) as RecordEnd, MIN(NormFactor) as NormFactor, (MIN(NormFactor) * 4) as HS06Factor, MeasurementDate FROM %(table)s WHERE Year=%(year)s and Month=%(month)s GROUP BY ExecutingSite, LCGUserVO, Year, Month""" % { "table" : lcgtable, "year"  : dates[0], "month" : dates[1], },
   } 
   tables = queries.keys() 
   for table in tables:
@@ -1124,37 +1068,31 @@ def CreateXmlHtmlFiles(params):
     type = "xml"
     output = RunLCGQuery(queries[table],type,params)
     filename = GetFileName(table,type)
-    if table == "HS06":                                          #gimmick
-      filename = GetFileName(lcgtable,type)                      #gimmick
-      filename = re.sub(lcgtable,table+'_'+lcgtable,filename,1)  #gimmick
     WriteFile(output,filename)
     Logit("%s file created: %s" % (type,filename)) 
     SendXmlHtmlFiles(filename,gFilterParameters["GratiaCollector"])
+
     #--- create html file ---
     Logit("")
     type = "html"
     output = RunLCGQuery(queries[table],type,params)
     filename = GetFileName(table,type)
-    if table == "HS06":                                          #gimmick
-      filename = GetFileName(lcgtable,type)                      #gimmick
-      filename = re.sub(lcgtable,table+'_'+lcgtable,filename,1)  #gimmick
     WriteFile(output,filename)
     Logit("%s file created: %s" % (type,filename)) 
     SendXmlHtmlFiles(filename,gFilterParameters["GratiaCollector"])
+
     #--- create dat file ---
     Logit("")
     type = "skip-column-names"
     output = RunLCGQuery(queries[table],type,params)
     type = "dat"
     filename = GetFileName(table,type)
-    if table == "HS06":                                          #gimmick
-      filename = GetFileName(lcgtable,type)                      #gimmick
-      filename = re.sub(lcgtable,table+'_'+lcgtable,filename,1)  #gimmick
     WriteFile(output,filename)
     Logit("%s file created: %s" % (type,filename)) 
     SendXmlHtmlFiles(filename,gFilterParameters["GratiaCollector"])
-  Logit("Retrieval of APEL database data complete")
-  Logit("------")
+  Logit("-------------------------------------------------")
+  Logit("--- Retrieval of APEL database data complete ----")
+  Logit("-------------------------------------------------")
 
 #-----------------------------------------------
 def FindTierPath(params,table):
@@ -1211,7 +1149,7 @@ def SendXmlHtmlFiles(filename,dest):
   Logit("%s file successfully copied" % filename)
   
 
-#-----------------------------------------------
+#-----------------------------------------------
 def RunLCGUpdate(inputfile,params):
   """ Performs the update of the APEL database """
   host = params["LcgHost"]
@@ -1220,7 +1158,9 @@ def RunLCGUpdate(inputfile,params):
   pswd = params["LcgPswd"] 
   db   = params["LcgDB"]
   
-  Logit("Running update on %s of the %s database" % (host,db))
+  Logit("---------------------------------------------------------")
+  Logit("--- Updating APEL %s database at %s" % (db,host))
+  Logit("---------------------------------------------------------")
   Logit("Input file: %s Inserts: %s" % (inputfile,commands.getoutput("grep -c INSERT %s" % inputfile)))
 
   connectString = CreateConnectString(host,port,user,pswd,db)
@@ -1254,13 +1194,6 @@ def EvaluateMySqlResults((status,output)):
   if output == "NULL": 
     output = ""
   return output
-
-#-----------------------------------------------
-def CreateLCGsqlVoUpdates(results,filename):
-  """ Creates the SQL DML to update the LCG database for the VO summary."""
-  tableName =  gDatabaseParameters["LcgTable"]
-  CreateLCGsqlUpdates(results,filename,tableName)
-
 
 #-----------------------------------------------
 def CreateLCGsqlUserUpdates(results,filename):
@@ -1300,192 +1233,51 @@ def CreateLCGsqlUpdates(results,filename,tableName):
       continue
     output =  "INSERT INTO %s VALUES " % (tableName) + str(tuple(val)) + ";"
     file.write(output+"\n")
-    LogToFile(output) ## commenting this to reduce log file output will affect the ability to find late updates (find-late-update.sh)
+    if tableName[0:8] == "OSG_DATA":
+      LogToFile(output) ## this is needed to find late updates (find-late-update.sh)
     gKnownVOs[val[0] +'/'+val[1]] ="1"
         
   file.write("commit;\n")
   file.close()
 
 #-----------------------------------------------
-def RetrieveVoData(reportableVOs,reportableSites,params):
-  """ Retrieves Gratia data for reportable sites """
-  global gVoQuery
-  output = ""
-  firstTime = 1
-  sites = reportableSites.keys()
-  for site in sites:
-    normalizationFactor = reportableSites[site]
-    query = GetVoQuery(site, normalizationFactor, reportableVOs)
-    if firstTime:
-      gVoQuery = query
-      Logit("Query:")
-      LogToFile(query)
-      firstTime = 0
-    Logit("Site: %s  Normalization Factor: %s" % (site,normalizationFactor)) 
-    results = RunGratiaQuery(query,params,True)
-    if len(results) == 0:
-      results = ProcessEmptyResultsSet(site,reportableVOs,reportableSites)
-    else:
-      gSitesWithData.append(site)
-    output = output + results + "\n"
-  return output
-
-#-----------------------------------------------
 def RetrieveUserData(reportableVOs,reportableSites,params):
   """ Retrieves Gratia data for reportable sites """
   global gUserQuery
+  global gInteropAccounting
   output = ""
   firstTime = 1
-  sites = reportableSites.keys()
-  for site in sites:
-    normalizationFactor = reportableSites[site]
-    query = GetUserQuery(site, normalizationFactor, reportableVOs)
+  resource_grps = sorted(reportableSites.keys())
+  for resource_grp in resource_grps:
+    normalizationFactor = reportableSites[resource_grp]
+    query = GetUserQuery(resource_grp,normalizationFactor,reportableVOs)
     if firstTime:
       gUserQuery = query
       Logit("Query:")
       LogToFile(query)
       firstTime = 0
-    Logit("Site: %s  Normalization Factor: %s" % (site,normalizationFactor)) 
-    results = RunGratiaQuery(query,params,True)
-#    if len(results) == 0:
-#      results = ProcessEmptyResultsSet(site,reportableVOs,reportableSites)
-#    else:
-#      gSitesWithData.append(site)
+    results = RunGratiaQuery(query,params,False)
     output = output + results + "\n"
   return output
 
-#-----------------------------------------------
-def ProcessEmptyResultsSet(site,reportableVOs,reportableSites):
-  """ Creates an update for each reportable VO with no Gratia
-      data from query. 
-      The purpose of this is to indicate in the APEL table that
-      the site was processes.
-  """
-  gSitesWithNoData.append(site)
-  output      = ""
-  year        = gDateFilter[0:4]
-  month       = gDateFilter[5:7]
-  currentTime = time.strftime("%Y-%m-%d %H:%M:%S",time.localtime())
-  today       = time.strftime("%Y-%m-%d",time.localtime())
-  for vo in reportableVOs.split(","):
-    normalizationFactor = reportableSites[site]
-    output = output + "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" % (site,vo.strip('"'),"0","0","0","0","0",month,year,today,today,normalizationFactor,currentTime)
-
-  return output
-
-#-----------------------------------------------
-def RetrieveUnknownVoData(reportableSites,params):
-  """ Retrieves Gratia data for 'unknown' VOs """
-  global gUnknownQuery
-  unknowns = ""
-  unknown_query = "No sites with 'unknown' VO"
-  firstTime = 1
-  sites = FindSitesWithUnknownVOs("atlas",params)
-  for site in sites:
-    if reportableSites.has_key(site):
-      Logit("Site(%s) is LCG reportable." % site)
-    else:
-      Logit("Site(%s) is not LCG reportable." % site)
-      continue
-    normalizationFactor = reportableSites[site]
-    unknown_query = GetQueryAtlasUnknowns(site,normalizationFactor,"atlas")
-    if firstTime:
-      gUnknownQuery = unknown_query
-      Logit("Query:")
-      LogToFile(unknown_query)
-      firstTime = 0
-    Logit("Site (Unknown atlas VO): %s  Normalization Factor: %s" % (site,normalizationFactor)) 
-    unknown_results = RunGratiaQuery(unknown_query,params,True)
-    if len(unknown_results) == 0:
-      continue
-    gSitesWithUnknowns.append(site)
-    unknowns = unknowns + unknown_results + "\n"
-  return unknowns
-
-#-----------------------------------------------
-def CreateLCGsqlUnknownUpdates(results,filename):
-  """ Creates the SQL DML to update the LCG database.
-
-      This update will actually be a sql dml 'UPDATE' which
-      is different from the  'INSERT's done for normal queries.
-      This will allow us to add the results to that has already been 
-      added.  This will cause the RecordStart and RecordEnd dates to
-      likely not be accurate.
-
-      We are also maintaining the latest sql update dml in a file
-      called YYYY-MM.sql.
-  """ 
-  if not gCheckUnknowns:
-    Logit("No check for unknown VO's performed")
-    return
-
-  Logit("Sites with Atlas unknown VOs: %s\n" % gSitesWithUnknowns)
-
-  if len(results) == 0:
-    LogToFile("No updates to apply")
-    return
-
-  Logit("Creating update sql DML for the LCG database for Unknown atlas VOs:") 
-
-  file = open(filename, 'a')
-  lines = results.split("\n")
-
-  file.write("set autocommit=0;\n")
-
-  dates = gDateFilter.split("/")  # YYYY/MM format
-        
-  for i in range (0,len(lines)):  
-    val = lines[i].split('\t')
-    if len(val) < 13:
-      continue
-    if gKnownVOs.has_key(val[0] +'/'+val[1]):
-      output =  "UPDATE %s SET " % (gDatabaseParameters["LcgTable"])
-      output =  output + " NJobs=Njobs+%s, "            % (int(val[2]))
-      output =  output + " SumCPU=SumCPU+%s, "          % (int(val[3]))
-      output =  output + " NormSumCPU=NormSumCPU+%s, "  % (int(val[4]))
-      output =  output + " SumWCT=SumWCT+%s, "          % (int(val[5]))
-      output =  output + " NormSumWCT=NormSumWCT+%s, "  % (int(val[6]))
-      output =  output + " Month=%s, "                  % (int(val[7]))
-      output =  output + " YEAR=%s, "                   % (int(val[8]))
-      output =  output + " RecordStart='%s', "            % (val[9])
-      output =  output + " RecordEnd='%s', "              % (val[10])
-      output =  output + " NormFactor=%s,"              % (val[11])
-      output =  output + " MeasurementDate = '%s'  "    % (val[12])
-      output =  output + " WHERE ExecutingSite = '%s' " % (val[0])
-      output =  output + "   AND LCGUserVO = '%s' " % (val[1])
-      output =  output + "   AND Month = %s " % (val[7])
-      output =  output + "   AND Year  = %s " % (val[8])
-      output =  output + ";"
-    else:
-      output =  "INSERT INTO %s VALUES " % (gDatabaseParameters["LcgTable"]) + str(tuple(val)) + ";"
-    file.write(output+"\n")
-    LogToFile(output)
-                
-  file.write("commit;\n")
-  file.close()
-
-#-----------------------------------------------
-def ProcessVoData(ReportableVOs,ReportableSites):
-  """ Retrieves and creates the DML for the original Site/VO summary
-      data for the APEL interface.
-  """
-  global gVoOutput
-  global gUnknowns
-  global gSitesWithData
-  global gSitesWithUnknowns
-  #--- VO query gratia for each site and create updates ----
-  gVoOutput = RetrieveVoData(ReportableVOs,ReportableSites,gDatabaseParameters)
-  if gCheckUnknowns:
-    gUnknowns = RetrieveUnknownVoData(ReportableSites,gDatabaseParameters)
-
-  #--- create the updates for the APEL accounting database ----
-  Logit("Sites with data: %s" % gSitesWithData)
-  Logit("Sites with no data: %s" % gSitesWithNoData)
-  if len(gSitesWithData) == 0:
-    if len(gSitesWithUnknowns) == 0:
-      raise Exception("No updates to apply")
-  CreateLCGsqlVoUpdates(gVoOutput,GetFileName(None,"sql"))
-  CreateLCGsqlUnknownUpdates(gUnknowns,GetFileName(None,"sql"))
+##JGW #-----------------------------------------------
+##JGW def ProcessEmptyResultsSet(site,reportableVOs,reportableSites):
+##JGW   """ Creates an update for each reportable VO with no Gratia
+##JGW       data from query. 
+##JGW       The purpose of this is to indicate in the APEL table that
+##JGW       the site was processes.
+##JGW   """
+##JGW   gSitesWithNoData.append(site)
+##JGW   output      = ""
+##JGW   year        = gDateFilter[0:4]
+##JGW   month       = gDateFilter[5:7]
+##JGW   currentTime = time.strftime("%Y-%m-%d %H:%M:%S",time.localtime())
+##JGW   today       = time.strftime("%Y-%m-%d",time.localtime())
+##JGW   for vo in reportableVOs.split(","):
+##JGW     normalizationFactor = reportableSites[site]
+##JGW     output = output + "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" % (site,vo.strip('"'),"0","0","0","0","0",month,year,today,today,normalizationFactor,currentTime)
+##JGW 
+##JGW   return output
 
 #-----------------------------------------------
 def ProcessUserData(ReportableVOs,ReportableSites):
@@ -1493,10 +1285,78 @@ def ProcessUserData(ReportableVOs,ReportableSites):
       data for the APEL interface.
   """
   #--- User query gratia for each site and create updates ----
+  Logit("----------------------------------------")
+  Logit("---- User updates retrieval started ----")
+  Logit("----------------------------------------")
   gUserOutput = RetrieveUserData(ReportableVOs,ReportableSites,gDatabaseParameters)
 
   #--- create the updates for the APEL accounting database ----
   CreateLCGsqlUserUpdates(gUserOutput,GetFileName("user","sql"))
+  Logit("------------------------------------------")
+  Logit("---- User updates retrieval completed ----")
+  Logit("------------------------------------------")
+
+#-----------------------------------------------
+def CheckMyOsgInteropFlag(reportableSites):
+  """ Checks to see for mismatches between the reportable sites config
+      file and MyOsg.  Include in email potential problems.
+  """
+  Logit("-------------------------------------------------------")
+  Logit("---- Checking against MyOsg InteropAccounting flag ----")
+  Logit("---- and against the WLCG REBUS Topology           ----")
+  Logit("-------------------------------------------------------")
+  global gInteropAccounting
+  global gRebus
+  if not gRebus.isAvailable():
+    Logwarn("The WLCG REBUS topology is not available so no validations are being performed")
+  myosgRGs = gInteropAccounting.interfacedResourceGroups()
+
+  #-- for resource groups we are reporting, see if registered in MyOsg and Rebus
+  for rg in reportableSites:
+    #--- check MyOsg --
+    if not gInteropAccounting.isRegistered(rg):
+      if gRebus.isAvailable():
+        if gRebus.isRegistered(rg):
+          Logwarn("Resource group (%s) is being reported and is registered in REBUS, but is not registered in MyOSG/OIM" % rg)
+        else:
+          Logwarn("Resource group (%s) is being reported but is not registered in REBUS and not registered in MyOSG/OIM" % rg)
+      else:
+        Logwarn("Resource group (%s) is being reported but is not registered in MyOSG/OIM" % rg)
+
+#    elif not gInteropAccounting.isInterfaced(rg):
+#      if gRebus.isAvailable():
+#        if gRebus.isRegistered(rg):
+#          Logwarn("Resource group (%s) is being reported, is registered in MyOSG/OIM and REBUS, but has no resources with the InteropAccounting flag set in MyOsg" % rg)
+#        else:
+#          Logwarn("Resource group (%s) is being reported, is registered in MyOSG/OIM, but not registered in REBUS and has no resources with the InteropAccounting flag set in MyOsg" % rg)
+#      else:
+#        Logwarn("Resource group (%s) is being reported, is registered in MyOSG/OIM, but has no resources with the InteropAccounting flag set in MyOsg" % rg)
+
+    #--- check Rebus ----
+    if gRebus.isAvailable():
+      if not gRebus.isRegistered(rg):
+        Logwarn("Resource group (%s) is being reported but is not registered in the WLCG Rebus topology" % rg)
+      elif gInteropAccounting.isInterfaced(rg) and \
+            gRebus.accountingName(rg) != gInteropAccounting.WLCGAcountingName(rg):
+          Logwarn("Resource group (%(rg)s) MyOsg AccountingName (%(myosg)s) does not match the REBUS Accounting Name (%(rebus)s)" % \
+               { "rg"     : rg, 
+                 "rebus"  : gRebus.accountingName(rg), 
+                 "myosg"  : gInteropAccounting.WLCGAcountingName(rg)})
+
+
+  #-- for MyOsg resource groups with Interop flag set, see if we are reporting
+  #-- and if they have been registered in Rebus
+  for rg in myosgRGs:
+    if rg not in reportableSites:
+      if gRebus.isAvailable():
+        if gRebus.isRegistered(rg):
+          Logwarn("Resource group (%s) is NOT interfaced but has resources with the InteropAccounting flag set in MyOsg and IS registered in REBUS as %s" % (rg,gRebus.tier(rg)))
+        else:
+          Logwarn("Resource group (%s) is NOT interfaced but has resources with the InteropAccounting flag set in MyOsg and IS NOT registered in REBUS" % rg)
+
+  Logit("-----------------------------------------------------------------")
+  Logit("---- Checking against MyOsg InteropAccounting flag completed ----")
+  Logit("-----------------------------------------------------------------")
 
 #-----------------------------------------------
 def CheckForUnreportedDays(reportableVOs,reportableSites):
@@ -1514,7 +1374,9 @@ def CheckForUnreportedDays(reportableVOs,reportableSites):
   global gSitesMissingData 
   global gMyOSG_available
   daysMissing = int(gFilterParameters["MissingDataDays"])
-  Logit("--------- Missing data check -------")
+  Logit("-------------------------------------------")
+  Logit("---- Check for unreported days started ----")
+  Logit("-------------------------------------------")
   Logit("Starting checking for sites that are missing data for more than %d days" % (daysMissing))
   output = ""
   firstTime = 1
@@ -1529,7 +1391,7 @@ def CheckForUnreportedDays(reportableVOs,reportableSites):
 
   #-- now checking for each site ---
   missingDataList = []
-  for site in sites:
+  for site in sorted(sites):
     allDates = dateResults.split("\n")
     query = GetQueryForDaysReported(site,reportableVOs)
     if firstTime:
@@ -1584,7 +1446,9 @@ def CheckForUnreportedDays(reportableVOs,reportableSites):
       Logit("No sites had missing data for more than %d days" % (daysMissing))
 
   Logit("Ended checking for sites that are missing data for more than %d days" % (daysMissing))
-  Logit("--------- Missing data check complete -------")
+  Logit("---------------------------------------------")
+  Logit("---- Check for unreported days completed ----")
+  Logit("---------------------------------------------")
 
 #-----------------------------------------
 def CreateMissingDaysHtml(missingData):
@@ -1632,18 +1496,14 @@ def CheckForShutdownDays(site,missingDays):
   return shutdownDates
 
 
-#--- MAIN --------------------------------------------
+#--- MAIN --------------------------------------------
 def main(argv=None):
   global gWarnings
-  global gNormalization
   global gSitesWithNoData
-  global gSitesWithUnknowns
   global gVoQuery
   global gUserQuery
-  global gUnknownQuery
   global gVoOutput
   global gUserOutput
-  global gUnknowns
 
   #--- get command line arguments  -------------
   try:
@@ -1669,9 +1529,7 @@ def main(argv=None):
     Logit("Gratia database........ %s" % (gDatabaseParameters["GratiaDB"]))
     Logit("APEL database host..... %s:%s" % (gDatabaseParameters["LcgHost"],gDatabaseParameters["LcgPort"]))
     Logit("APEL database.......... %s" % (gDatabaseParameters["LcgDB"]))
-    Logit("APEL database table.... %s" % (gDatabaseParameters["LcgTable"]))
     Logit("APEL database table.... %s" % (gDatabaseParameters["LcgUserTable"]))
-    Logit("Report unknown VOs..... %s" % gCheckUnknowns)
     Logit("Missing days threshold. %s" % (gFilterParameters["MissingDataDays"]))
 
     #--- check db availability -------------
@@ -1679,22 +1537,16 @@ def main(argv=None):
     if gInUpdateMode:
       CheckLcgDBAvailability(gDatabaseParameters)
 
-    #--- set the default normalization factor --------------
-    ## query = GetNormalizationQuery(gFilterParameters["NormalizationProbe"])
-    ## gNormalization =  SetNormalizationFactor(query,gDatabaseParameters)
-    gNormalization = gFilterParameters["NormalizationDefault"]
-
     #--- get all filters -------------
     ReportableSites    = GetSiteFilters(gFilterParameters["SiteFilterFile"])
     ReportableVOs      = GetVOFilters(gFilterParameters["VOFilterFile"])
     
-    ProcessVoData(ReportableVOs,ReportableSites)
     ProcessUserData(ReportableVOs,ReportableSites)
     CheckForUnreportedDays(ReportableVOs,ReportableSites)
+    CheckMyOsgInteropFlag(ReportableSites)
 
     #--- apply the updates to the APEL accounting database ----
     if gInUpdateMode:
-      RunLCGUpdate(GetFileName(None,"sql"),gDatabaseParameters)
       RunLCGUpdate(GetFileName("user","sql"),gDatabaseParameters)
       CreateXmlHtmlFiles(gDatabaseParameters)
       SendEmailNotificationSuccess()
@@ -1707,6 +1559,7 @@ def main(argv=None):
   except Exception, e:
     SendEmailNotificationFailure(e.__str__())
     Logit("Transfer FAILED from Gratia to APEL.")
+    traceback.print_exc()
     Logerr(e.__str__())
     Logit("====================================================")
     return 1

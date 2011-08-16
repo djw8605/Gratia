@@ -50,7 +50,9 @@ class Downtimes:
     self.location = "http://myosg.grid.iu.edu/rgdowntime/xml?datasource=downtime&summary_attrs_showgipstatus=on&summary_attrs_showwlcg=on&summary_attrs_showservice=on&summary_attrs_showrsvstatus=on&summary_attrs_showfqdn=on&summary_attrs_showenv=on&summary_attrs_showcontact=on&gip_status_attrs_showtestresults=on&downtime_attrs_showpast=90&account_type=cumulative_hours&ce_account_type=gip_vo&se_account_type=vo_transfer_volume&bdiitree_type=total_jobs&bdii_object=service&bdii_server=is-osg&start_type=7daysago&start_date=08%2F03%2F2011&end_type=now&end_date=08%2F03%2F2011&all_resources=on&gridtype=on&gridtype_1=on&service=on&service_1=on&service_central_value=0&service_hidden_value=0&active=on&active_value=1&disable_value=1"
     #-- used until 8/3/11 - self.location = "http://myosg.grid.iu.edu/wizarddowntime/xml?datasource=downtime&summary_attrs_showservice=on&summary_attrs_showrsvstatus=on&summary_attrs_showgipstatus=on&summary_attrs_showfqdn=on&summary_attrs_showwlcg=on&summary_attrs_showenv=on&summary_attrs_showcontact=on&gip_status_attrs_showtestresults=on&gip_status_attrs_showfqdn=on&downtime_attrs_showpast=on&account_type=cumulative_hours&ce_account_type=gip_vo&se_account_type=vo_transfer_volume&start_type=7daysago&start_date=03%2F20%2F2009&end_type=now&end_date=03%2F27%2F2009&all_resources=on&gridtype=on&gridtype_1=on&service_4=on&service_1=on&service_5=on&service_2=on&service_3=on&active=on&active_value=1&disable_value=1"
   
-    self.doc = None
+    self.doc       = None
+    self.startTime = None
+    self.endTime   = None
       
   #-------------------------------------- 
   def site_is_shutdown(self,site,date,service):
@@ -62,14 +64,26 @@ class Downtimes:
     downtimes = self.__GetListOfSiteDownTimes__(site) 
     shutdown = False
     for downtime in downtimes:
-      startTime = self.__convert_date__(self.__get_element_value__(downtime,"StartTime"))
-      endTime   = self.__convert_date__(self.__get_element_value__(downtime,"EndTime"))
+      self.startTime = self.__convert_date__(self.__get_element_value__(downtime,"StartTime"))
+      self.endTime   = self.__convert_date__(self.__get_element_value__(downtime,"EndTime"))
       if self.__find_service__(downtime,service) == False:
         continue
-      if date >= startTime and date <= endTime:
+      if date >= self.startTime and date <= self.endTime:
         shutdown = True
         break
     return shutdown
+
+  #-------------------------------------- 
+  def shutdown_period(self,site,date,service):
+    """ Returns the shutdown period if a site is shutdown for the date specified.
+        Returns an empty string if not shutdown.
+        Returns a string "start - end" if it is shutdown
+    """
+    period = ""
+    if self.site_is_shutdown(site,date,service):
+      period = """%s - %s""" % (self.startTime,self.endTime)
+    return period
+
 
   #---------------------------------
   def __RetrieveXML__(self):
@@ -89,8 +103,9 @@ class Downtimes:
       filter="/Downtimes/*/Downtime[ResourceName='%s']" % (site)
       downtimes =  self.doc.xpathEval(filter)
     except:
-      raise Exception("Cannot find " + path + " in the xml retrieved")
+      raise Exception("Cannot find " + site + " in the xml retrieved")
     return downtimes
+
   #-----------------------------
   def __convert_date__(self,downtime):
     """ Converts a date in the format MyOSG keeps them

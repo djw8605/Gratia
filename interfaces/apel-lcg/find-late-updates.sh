@@ -16,6 +16,12 @@
 #     the update DML due to the updating of OSG_CN_DATA. 
 #     Previous was 'INSERT INTO'.. now 'INSERT INTO OSG_DATA'.
 #     This was to keep the deltas at the site level.
+#
+#   8/16/11 (John Weigand)
+#     Changed to use the OSG_DATA.dat file instead of scanning the logs
+#     since the log files no longer contain the INSERT sql records for
+#     the OSG_DATA table.  The .dat file is kind of a hack but the
+#     best that can be done at this point.
 #############################################################################
 function logerr {
   echo "ERROR: $1"
@@ -149,6 +155,7 @@ curr_month=$(echo $curr_period | cut -d'-' -f2)
 
 determine_previous_period
 
+data_file=$logs/$prev_period.OSG_DATA.dat
 html_file=$logs/$prev_period.late_updates.html
 
 #-----------------------
@@ -158,8 +165,8 @@ if [ ! -d "$logs" ];then
   logerr "APEL interface log dir ($logs) does not exist"
 fi
 
-if [ ! -f "$logs/$prev_period.log" ];then
-  logerr "Log file for previous month does not exist ($logs/$prev_period.log)"
+if [ ! -f "$data_file" ];then
+  logerr "Data file for previous month does not exist ($data_file)"
 fi
 
 if [ ! -d "$(dirname $tmpdir)" ];then
@@ -169,39 +176,33 @@ fi
 #-----------------------
 # make a tmp directory
 #-----------------------
-if [ -d "$tmpdir" ];then
-  rm -rf "$tmpdir"
+if [ ! -d "$tmpdir" ];then
+  mkdir $tmpdir
+  if [ "$?" != "0" ];then
+    logerr " Cannot create tmp directory ($tmpdir)"
+  fi
 fi
-mkdir $tmpdir
-if [ "$?" != "0" ];then
-  logerr " Cannot create tmp directory ($tmpdir)"
-fi
+#--------------------------------------
+# clean up the last periods tmp files
+#--------------------------------------
+rm -f $tmpdir/$prev_period-*
 
 #--------------------------------------
-# select the data from the logs files 
+# create a file in ./tmp for comparison
 #--------------------------------------
 cd $logs
-if [ ! -f $prev_period.log ];then
-  logerr "There is no log file ($prev_period.log) in the log directory ($logs)."
+if [ ! -f $data_file ];then
+  logerr "There is no data file ($data_file) in the log directory ($logs)."
 fi
-days=1
-while
-  [ $days -lt 31 ]
-do
-  days=$((days+1))
-  day=$(printf "%02d" $days)
-  tmpfile=$tmpdir/$curr_period-$day
-  egrep "INSERT INTO OSG_DATA" $prev_period.log |sed -e's/INSERT INTO OSG_DATA VALUES (//'  |grep $curr_period-$day|cut -d"," -f1,2,3,4,5,6,7,8,9,12 |sort -u >$tmpfile
-  if [ ! -s "$tmpfile" ];then
-    rm -f $tmpfile
-  fi
-done
-file_first=$(ls $tmpdir|head -1)
-file_all="$(ls $tmpdir |sort -r)"
+day=$(head -1 $data_file | awk '{print $13}')
+tmpfile=$tmpdir/$day
+cat $data_file| awk '{print  $1,$2,$3,$4,$5,$6,$7,$8,$9}'  |sort >$tmpfile
 
 #---------------------
 # start the diffs 
 #---------------------
+file_first=$(ls $tmpdir/$curr_period-* |head -1)
+file_all="$(ls $tmpdir/$curr_period-*  |sort -r)"
 found_one="no"
 start_html
 prev_file=""
@@ -242,6 +243,5 @@ if [ "$TOMCAT_INSTANCE" != "NONE" ];then
   fi
 fi  
 
-rm -rf $tmpdir
 exit 0
 
