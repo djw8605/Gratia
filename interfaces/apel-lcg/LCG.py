@@ -1313,46 +1313,54 @@ def CheckMyOsgInteropFlag(reportableSites):
 
   #-- for resource groups we are reporting, see if registered in MyOsg and Rebus
   for rg in reportableSites:
+    msg = "Resource group (%s) is being reported" % rg
     #--- check MyOsg --
-    if not gInteropAccounting.isRegistered(rg):
-      if gRebus.isAvailable():
-        if gRebus.isRegistered(rg):
-          Logwarn("Resource group (%s) is being reported and is registered in REBUS, but is not registered in MyOSG/OIM" % rg)
-        else:
-          Logwarn("Resource group (%s) is being reported but is not registered in REBUS and not registered in MyOSG/OIM" % rg)
-      else:
-        Logwarn("Resource group (%s) is being reported but is not registered in MyOSG/OIM" % rg)
-
-#    elif not gInteropAccounting.isInterfaced(rg):
-#      if gRebus.isAvailable():
-#        if gRebus.isRegistered(rg):
-#          Logwarn("Resource group (%s) is being reported, is registered in MyOSG/OIM and REBUS, but has no resources with the InteropAccounting flag set in MyOsg" % rg)
-#        else:
-#          Logwarn("Resource group (%s) is being reported, is registered in MyOSG/OIM, but not registered in REBUS and has no resources with the InteropAccounting flag set in MyOsg" % rg)
-#      else:
-#        Logwarn("Resource group (%s) is being reported, is registered in MyOSG/OIM, but has no resources with the InteropAccounting flag set in MyOsg" % rg)
-
-    #--- check Rebus ----
-    if gRebus.isAvailable():
-      if not gRebus.isRegistered(rg):
-        Logwarn("Resource group (%s) is being reported but is not registered in the WLCG Rebus topology" % rg)
-      elif gInteropAccounting.isInterfaced(rg) and \
-            gRebus.accountingName(rg) != gInteropAccounting.WLCGAcountingName(rg):
-          Logwarn("Resource group (%(rg)s) MyOsg AccountingName (%(myosg)s) does not match the REBUS Accounting Name (%(rebus)s)" % \
-               { "rg"     : rg, 
+    if gInteropAccounting.isRegistered(rg):
+      msg += "and is registered in MyOSG/OIM"
+      if gInteropAccounting.isInterfaced(rg):
+        msg += " and has resources with the InteropAccounting flag set in MyOsg"
+        #-- check Rebus ---
+        if gRebus.isAvailable():
+          if gRebus.isRegistered(rg):
+            if gRebus.accountingName(rg) != gInteropAccounting.WLCGAcountingName(rg):
+              Logwarn("Resource group %(rg)s MyOsg AccountingName (%(myosg)s) does NOT match the REBUS Accounting Name (%(rebus)s)" % \
+               { "rg"     : rg,
                  "rebus"  : gRebus.accountingName(rg), 
                  "myosg"  : gInteropAccounting.WLCGAcountingName(rg)})
-
+          else:
+            Logwarn("%s and is NOT registered in REBUS" % msg)
+      else:
+        msg += " BUT has NO resources with the InteropAccounting flag set in MyOsg"
+        if gRebus.isAvailable():
+          if gRebus.isRegistered(rg):
+            Logwarn("%s and IS registered in REBUS" % msg)
+          else:
+            Logwarn("%s and is NOT registered in REBUS" % msg)
+        else:
+            Logwarn(msg)
+    else:
+      msg += " and is NOT registered in MyOSG/OIM" 
+      #-- check Rebus ---
+      if gRebus.isAvailable():
+        if gRebus.isRegistered(rg):
+          Logwarn("%s and is registered in Rebus" % msg)
+        else:
+          Logwarn("%s and is NOT registered in Rebus" % msg)
+      else:
+        Logwarn(msg)
 
   #-- for MyOsg resource groups with Interop flag set, see if we are reporting
   #-- and if they have been registered in Rebus
   for rg in myosgRGs:
     if rg not in reportableSites:
+      msg = "Resource group (%s) is NOT being reported BUT HAS resources with the InteropAccounting flag set in MyOsg" % rg
       if gRebus.isAvailable():
         if gRebus.isRegistered(rg):
-          Logwarn("Resource group (%s) is NOT interfaced but has resources with the InteropAccounting flag set in MyOsg and IS registered in REBUS as %s" % (rg,gRebus.tier(rg)))
+          Logwarn("%s but IS registered in REBUS as %s" % (msg,gRebus.tier(rg)))
         else:
-          Logwarn("Resource group (%s) is NOT interfaced but has resources with the InteropAccounting flag set in MyOsg and IS NOT registered in REBUS" % rg)
+          Logwarn("%s and is NOT registered in REBUS" % msg)
+      else:
+        Logwarn(msg)
 
   Logit("-----------------------------------------------------------------")
   Logit("---- Checking against MyOsg InteropAccounting flag completed ----")
