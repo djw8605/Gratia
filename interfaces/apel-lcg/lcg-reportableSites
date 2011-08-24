@@ -443,6 +443,7 @@
 # If this is not done, we will be double reporting MWT2 resource
 # under MWT2 and MWT2_UC resource groups.
 #
+#
 # 08/16/11 (John Weigand)
 #  Changed to using resource group as the aggregator.  This affected
 #  only the Tier 1 sites.  Name changes affected:
@@ -451,6 +452,11 @@
 #   USCMS-FNAL-WC1-CE   USCMS-FNAL-WC1
 #   BNL_ATLAS_1         BNL-ATLAS
 #
+#
+# 08/24/11 (John Weigand)
+#   Removed HEPGRID_UERJ based on goc ticket 10904
+#    https://ticket.grid.iu.edu/goc/viewer?id=10904
+#   (this was part of an attempt to clean up MyOSG/OIM data)
 ##################################################################
 #
 #-- Site  ------- SPECint2000
@@ -460,7 +466,6 @@ USCMS-FNAL-WC1      2566
 #--- CMS Tier 2 ----    
 CIT_CMS_T2          3236       
 GLOW                2408
-HEPGRID_UERJ        3196
 MIT_CMS             1872
 Nebraska            2603
 Purdue-RCAC         3031
@@ -518,3 +523,4 @@ LC-glcc             3920
 ##UC_ATLAS_MWT2  1285 (stopped being considered a T2 site in 2009/06 per Rob Gardner)
 # IU_OSG              1400 (removed)
 # MWT2_IU             2170 (removed eff 7/1/11)
+# HEPGRID_UERJ        3196 (removed eff 8/24/11)
