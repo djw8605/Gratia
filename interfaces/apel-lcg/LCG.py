@@ -1318,7 +1318,7 @@ def CheckMyOsgInteropFlag(reportableSites):
     if gInteropAccounting.isRegistered(rg):
       msg += "and is registered in MyOSG/OIM"
       if gInteropAccounting.isInterfaced(rg):
-        msg += " and has resources with the InteropAccounting flag set in MyOsg"
+        msg += " and has resources (%s) with the InteropAccounting flag set in MyOsg" %  gInteropAccounting.interfacedResources(rg)
         #-- check Rebus ---
         if gRebus.isAvailable():
           if gRebus.isRegistered(rg):
@@ -1353,7 +1353,9 @@ def CheckMyOsgInteropFlag(reportableSites):
   #-- and if they have been registered in Rebus
   for rg in myosgRGs:
     if rg not in reportableSites:
-      msg = "Resource group (%s) is NOT being reported BUT HAS resources with the InteropAccounting flag set in MyOsg" % rg
+      msg = "Resource group (%(rg)s) is NOT being reported BUT HAS resources (%(resources)s) with the InteropAccounting flag set in MyOsg" % \
+            { "rg"       : rg, 
+             "resources" : gInteropAccounting.interfacedResources(rg), }
       if gRebus.isAvailable():
         if gRebus.isRegistered(rg):
           Logwarn("%s but IS registered in REBUS as %s" % (msg,gRebus.tier(rg)))
