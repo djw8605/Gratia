@@ -75,7 +75,7 @@ class NormalizationFactors:
     port  = "49152"
     user  = "gratia-reader"
     db    = "gratia"
-    pswd  = ".nebraska"
+    pswd  = "pswd-norm"
     #-- verify db is available -- 
     self.checkDB(host,port,user,pswd,db)
     #-- run the query -- 
@@ -172,7 +172,6 @@ class NormalizationFactors:
     if self.currentNF != None:  # already have it
       return
     self.currentNF = {}
-    filename = "/home/weigand/OIM-WLCG/test-lcg-reportableSites"
     filename = "/home/gratia/interfaces/apel-lcg/lcg-reportableSites"
     try:
       fd = open(filename)
