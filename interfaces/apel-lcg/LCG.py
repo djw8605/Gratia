@@ -949,10 +949,6 @@ def GetSiteClause(resource_grp):
   global gInteropAccounting
   siteClause = ""
   resources = gInteropAccounting.interfacedResources(resource_grp)
-##JGW hack for Nebraska
-  if resource_grp == "Nebraska":
-    resources.append("Red")
-##JGW end of hack
   if len(resources) == 0:
     resources = [resource_grp]
   Logit("Resource Group: %s Resources: %s" % (resource_grp,resources))
