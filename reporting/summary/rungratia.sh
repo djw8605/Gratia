@@ -5,7 +5,7 @@ mutt=/usr/bin/mutt
 # space separated list of mail recipients
 PROD_MAILTO="osg-accounting-info@fnal.gov"
 MAILTO="pcanal@fnal.gov"
-WEBLOC="http://gratia-osg.fnal.gov:8880/gratia-reporting"
+WEBLOC="http://gratia-osg-prod-reports.opensciencegrid.org/gratia-reporting"
 
 while test "x$1" != "x"; do
    if [ "$1" == "--help" ]; then 

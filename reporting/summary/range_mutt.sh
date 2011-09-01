@@ -1,7 +1,7 @@
 #!/bin/bash
 
-WEBLOC="http://gratia-osg.fnal.gov:8880/gratia-reporting"
-SUM_WEBLOC="http://gratia-osg.fnal.gov:8884/gratia-reporting"
+WEBLOC="http://gratia-osg-prod-reports.opensciencegrid.org/gratia-reporting"
+SUM_WEBLOC="http://gratia-osg-daily-reports.opensciencegrid.org/gratia-reporting"
 
 ExtraHeader=""
 ExtraArgs=--daily
