@@ -518,7 +518,7 @@ function loadcondor
     fi
 
     echo "Sending condor data"
-    PATH=${PATH}:${condorprobedir} ${condorprobedir}/condor_meter.cron.sh
+    PATH=${PATH}:${condorprobedir} ${condorprobedir}/condor_meter.cron.sh ${condorprobedir}/ProbeConfig
 }
 
 function loadpbs 
@@ -547,7 +547,7 @@ function loadpbs
 
     echo "Sending PBS data"
     export PERL5LIB=${PWD}/../../probe/pbs-lsf/urCollector-src
-    ${pbsprobedir}/pbs-lsf_meter.cron.sh
+    ${pbsprobedir}/pbs-lsf_meter.cron.sh ${pbsprobedir}/ProbeConfig
 }
 
 function loadlsf 
@@ -576,7 +576,7 @@ function loadlsf
 
     echo "Sending LSF data"
     export PERL5LIB=${PWD}/../../probe/pbs-lsf/urCollector-src
-    PATH=${lsfprobedir}:${PATH} ${lsfprobedir}/pbs-lsf_meter.cron.sh
+    PATH=${lsfprobedir}:${PATH} ${lsfprobedir}/pbs-lsf_meter.cron.sh ${lsfprobedir}/ProbeConfig
 }
 
 function replication {
