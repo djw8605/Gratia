@@ -219,8 +219,8 @@ GratiaCore.Initialize()
 GratiaCore.ProcessBundle(GratiaCore.CurrentBundle)
 print GratiaCore.successfulHandshakes
 EOF
-      alive=`cat alive.tmp`
-      rm alive.tmp
+      alive=`cat alive.tmp || echo 0`
+      rm -f alive.tmp
       try=`expr ${try} + 1`
       if [ ${alive} -ne 1 ]; then
          sleep 1
