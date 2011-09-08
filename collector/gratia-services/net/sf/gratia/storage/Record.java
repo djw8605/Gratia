@@ -47,6 +47,10 @@ public abstract class Record implements RecordInterface {
    public Date getExpirationDate() {
       return eCalc.expirationDate(new Date(), getTableName());
    }
+
+   public String getExpirationDateAsSQLString() {
+      return eCalc.expirationDateAsSQLString(new Date(), getTableName());
+   }
    
    public void executeTrigger(org.hibernate.Session session) throws Exception {
       // NOP

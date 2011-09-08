@@ -140,13 +140,12 @@ public class ExpirationDateCalculator {
                 cal.set(GregorianCalendar.MILLISECOND, 0);
                 cal.set(GregorianCalendar.SECOND, 0);
                 cal.set(GregorianCalendar.MINUTE, 0);
-                cal.set(GregorianCalendar.HOUR, 0);
+                cal.set(GregorianCalendar.HOUR_OF_DAY, 0);  // GregorianCalendar.HOUR only set the hour between 0 and 12 and does not modify the am/pm 'field'!
                 lastExpirationRefDate = dateFormatter.format(cal.getTime());
             }
             // Obtain the duration from the limit cache
             try {
-                Duration limitDuration =
-                    (Duration) limitCache.get(key);
+                Duration limitDuration = limitCache.get(key);
                 if (limitDuration.unit().equals(DurationUnit.UNLIMITED)) {
                     eDateCache.put(key, invalidRange);
                     return (Range) invalidRange.clone();
