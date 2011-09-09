@@ -238,7 +238,7 @@ function wait_for_server_shutdown {
 
    alive=1
    try=0
-   while [ ${alive} -eq 1 -a ${try} -lt 10 ]; do
+   while [ ${alive} -eq 1 -a ${try} -lt 30 ]; do
       echo "Waiting for server shutdown"
       alive=`ssh ${webhost} netstat -l | grep ${http_port} | wc -l`
       try=`expr ${try} + 1`
@@ -246,7 +246,7 @@ function wait_for_server_shutdown {
          sleep 1
       fi
    done
-   if [ ${try} -gt 9 ]; then
+   if [ ${try} -gt 29 ]; then
       echo "Error: server is not shutdown after 10 checks"
       echo "Error: waited 9 seconds for the server on ${webhost} on port ${http_port} to shutdown"
       echo "Error: Last netstat result was: ${alive}"
@@ -407,16 +407,16 @@ function fix_metric_server_date {
 
   echo '0' > mrecords.count
   while [ `tail -1 mrecords.count` -lt ${expected_records} ]; do
-  echo "Waiting for Metric Record data to be loaded." `tail -1 mrecords.count` " out of ${expected_records}"
-  readonly_mysql > mrecords.count 2>&1 <<EOF 
+     echo "Waiting for Metric Record data to be loaded." `tail -1 mrecords.count` " out of ${expected_records}"
+     readonly_mysql > mrecords.count 2>&1 <<EOF 
 use ${schema_name};
 select count(*) from MetricRecord;
 EOF
-  if [ $? -ne 0 ]; then
-     cat mrecords.count
-     return
-  fi
-  sleep 2
+     if [ $? -ne 0 ]; then
+        cat mrecords.count
+        return
+     fi
+     sleep 2
   done
 
   echo "Attempt fix-up the MetricRecord table so that we have a range of ServerDate."
@@ -762,7 +762,7 @@ EOF
 
   echo "Check status monitoring"
   wait_for_input_use 0
-  wget --dns-timeout=5 --connect-timeout=10 --read-timeout=40 -O - "http://${webhost}:${ssl_port}/gratia-administration/monitor-status.html" 2>wget.full.log | cut -d\| -f3- > status.validate
+  wget --dns-timeout=5 --connect-timeout=10 --read-timeout=40 -O - "http://${webhost}:${ssl_port}/gratia-administration/monitor-status.html" 2>wget.full.log | cut -d\| -f3- | sed -e 's:|$::' > status.validate
 
   check_result "" status "Status monitoring"
 
