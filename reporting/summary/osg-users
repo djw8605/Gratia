@@ -1259,7 +1259,7 @@ EOF
                       "WallDuration"),
           convert_num($vomrs_user_info->{"totals"}->{$timeperiod}->{$date}->{0}->{"WallDuration"} || 0,
                       "WallDuration") );
-      $efficiency = $total?(100.0*$success/$total):0;
+      $efficiency = ($total+0)?(100.0*$success/$total):0;
       print $output_filehandle ' ' x length($string),
         $total, " wall clock hours total (",
           $success, " / ",
@@ -1595,85 +1595,95 @@ sub reporting_name_summary($) {
   my %used_real_vos = map { s&:.*$&&; $_ => 1 } keys %wanted_reporting_names;
   my $want_vo_column = (scalar keys %used_real_vos) > 1;
   my $want_vo_in_intro_line = (scalar keys %used_real_vos) == 1;
-  my $message = sprintf("Summary of active%s reporting names%s:\n",
-                        ($using_reporting_names)?" selected":"",
-                        $want_vo_in_intro_line?"":
-                        sprintf(" for VO %s (%s)",
-                                (keys %used_real_vos)[0],
-                                join(", ", sort keys %{$vo_data->{(keys %used_real_vos)[0]}->{science_fields}})));
-  print $output_filehandle $message;
-  my $reporting_name_table = Text::Table->new
-    (
-     {
-      title => '| ', is_sep => '1' },
-     $want_vo_column?({ title => 'VO', align_title => 'center' }, $column_separator,
-                      { title => 'Field(s) of Science', align_title => 'center' }, $column_separator):(),
-     {
-      title => 'Reporting Name', align_title => 'center' },
-     $column_separator,
-     {
-      title => "Job\nSuccess?", align_title => 'center' },
-     $column_separator,
-     {
-      title => '# Sites', align_title => 'center', align => 'num' },
-     $column_separator,
-     {
-      title => "# Jobs", align_title => "center", align => 'num' },
-     $column_separator,
-     {
-      title => "Wall\nTime (h)", align_title => "center", align => 'num' },
-     $column_separator,
-     {
-      title => "Delta\nSites", align => "right", align_title => "center", align => 'num' },
-     $column_separator,
-     {
-      title => "Delta\nJobs", align => "right", align_title => "center", align => 'num' },
-     $column_separator,
-     {
-      title => "Delta Wall\nTime (h)", align_title => "center", align => 'num' },
-     {
-      title => ' |', is_sep => '1' }
-    );
-  for my $rep_name (sort keys %wanted_reporting_names) {
-    my ($vo_name, $short_reporting_name) = ($rep_name =~ m&^([^:]*):(.*)$&);
-    foreach my $success (1, 0) {
-      my $njobs = $vomrs_user_info->{"totals"}->{"Reporting Name"}->{$rep_name}->{$timeperiod}->{$current_date}->{$success}->{"Njobs"} || 0;
-      my $delta_njobs = convert_num($njobs -
-                     ($vomrs_user_info->{"totals"}->{"Reporting Name"}->{$rep_name}->{$timeperiod}->{$previous_date}->{$success}->{"Njobs"} || 0),
-                     "Njobs", 1);
-      local($Text::Wrap::columns) = 40;
-      local($Text::Wrap::huge) = 'overflow';
-      my $science_fields = (exists $vo_data->{$vo_name}->{reporting_groups}->{$short_reporting_name}->{science_fields})?
-        $vo_data->{$vo_name}->{reporting_groups}->{$short_reporting_name}->{science_fields}:
-          $vo_data->{$vo_name}->{science_fields};
-      my @row =
-        (
-         $want_vo_column?($vo_name,
-                          wrap("", "  ", join(", ", sort keys %{$science_fields}))):(),
-         $short_reporting_name,
-         $success?"Yes":"No",
-         num_sites($current_date, $rep_name, $success),
-         $njobs,
-         convert_num($vomrs_user_info->{"totals"}->{"Reporting Name"}->{$rep_name}->{$timeperiod}->{$current_date}->{$success}->{"WallDuration"} || 0,
-                     "WallDuration"),
-         convert_num(num_sites($current_date, $rep_name, $success) - num_sites($previous_date, $rep_name, $success), "Sites", 1),
-         $delta_njobs,
-         convert_num(($vomrs_user_info->{"totals"}->{"Reporting Name"}->{$rep_name}->{$timeperiod}->{$current_date}->{$success}->{"WallDuration"} || 0) -
-                     ($vomrs_user_info->{"totals"}->{"Reporting Name"}->{$rep_name}->{$timeperiod}->{$previous_date}->{$success}->{"WallDuration"} || 0),
-                     "WallDuration", 1)
-        );
-      if ($njobs || $delta_njobs) {
-        $reporting_name_table->add(@row);
+  
+  if (scalar (keys %used_real_vos)) {
+    my $science_fields = "";
+    if (exists $vo_data->{(keys %used_real_vos)[0]}
+	and exists $vo_data->{(keys %used_real_vos)[0]}->{science_fields}) {
+      $science_fields = join(", ", sort keys %{$vo_data->{(keys %used_real_vos)[0]}->{science_fields}});
+    }
+    my $message = sprintf("Summary of active%s reporting names%s:\n",
+			  ($using_reporting_names)?" selected":"",
+			  $want_vo_in_intro_line?"":
+			  sprintf(" for VO %s (%s)",
+				  (keys %used_real_vos)[0],
+				  $science_fields));
+    print $output_filehandle $message;
+    my $reporting_name_table = Text::Table->new
+      (
+       {
+	title => '| ', is_sep => '1' },
+       $want_vo_column?({ title => 'VO', align_title => 'center' }, $column_separator,
+			{ title => 'Field(s) of Science', align_title => 'center' }, $column_separator):(),
+       {
+	title => 'Reporting Name', align_title => 'center' },
+       $column_separator,
+       {
+	title => "Job\nSuccess?", align_title => 'center' },
+       $column_separator,
+       {
+	title => '# Sites', align_title => 'center', align => 'num' },
+       $column_separator,
+       {
+	title => "# Jobs", align_title => "center", align => 'num' },
+       $column_separator,
+       {
+	title => "Wall\nTime (h)", align_title => "center", align => 'num' },
+       $column_separator,
+       {
+	title => "Delta\nSites", align => "right", align_title => "center", align => 'num' },
+       $column_separator,
+       {
+	title => "Delta\nJobs", align => "right", align_title => "center", align => 'num' },
+       $column_separator,
+       {
+	title => "Delta Wall\nTime (h)", align_title => "center", align => 'num' },
+       {
+	title => ' |', is_sep => '1' }
+      );
+    for my $rep_name (sort keys %wanted_reporting_names) {
+      my ($vo_name, $short_reporting_name) = ($rep_name =~ m&^([^:]*):(.*)$&);
+      foreach my $success (1, 0) {
+	my $njobs = $vomrs_user_info->{"totals"}->{"Reporting Name"}->{$rep_name}->{$timeperiod}->{$current_date}->{$success}->{"Njobs"} || 0;
+	my $delta_njobs = convert_num($njobs -
+				      ($vomrs_user_info->{"totals"}->{"Reporting Name"}->{$rep_name}->{$timeperiod}->{$previous_date}->{$success}->{"Njobs"} || 0),
+				      "Njobs", 1);
+	local($Text::Wrap::columns) = 40;
+	local($Text::Wrap::huge) = 'overflow';
+	my $science_fields = (exists $vo_data->{$vo_name}->{reporting_groups}->{$short_reporting_name}->{science_fields})?
+	  $vo_data->{$vo_name}->{reporting_groups}->{$short_reporting_name}->{science_fields}:
+	    $vo_data->{$vo_name}->{science_fields};
+	my @row =
+	  (
+	   $want_vo_column?($vo_name,
+			    wrap("", "  ", join(", ", sort keys %{$science_fields}))):(),
+	   $short_reporting_name,
+	   $success?"Yes":"No",
+	   num_sites($current_date, $rep_name, $success),
+	   $njobs,
+	   convert_num($vomrs_user_info->{"totals"}->{"Reporting Name"}->{$rep_name}->{$timeperiod}->{$current_date}->{$success}->{"WallDuration"} || 0,
+		       "WallDuration"),
+	   convert_num(num_sites($current_date, $rep_name, $success) - num_sites($previous_date, $rep_name, $success), "Sites", 1),
+	   $delta_njobs,
+	   convert_num(($vomrs_user_info->{"totals"}->{"Reporting Name"}->{$rep_name}->{$timeperiod}->{$current_date}->{$success}->{"WallDuration"} || 0) -
+		       ($vomrs_user_info->{"totals"}->{"Reporting Name"}->{$rep_name}->{$timeperiod}->{$previous_date}->{$success}->{"WallDuration"} || 0),
+		       "WallDuration", 1)
+	  );
+	if ($njobs || $delta_njobs) {
+	  $reporting_name_table->add(@row);
+	}
       }
     }
+    print $output_filehandle
+      $reporting_name_table->rule('_', '_'),
+	$reporting_name_table->title(),
+	  $reporting_name_table->rule('_', '|'),
+	    $reporting_name_table->body(),
+	      $reporting_name_table->rule('=', '='),
+		"\n";
+  } else {
+    print  $output_filehandle "There is no active VO.\n";
   }
-  print $output_filehandle
-    $reporting_name_table->rule('_', '_'),
-      $reporting_name_table->title(),
-        $reporting_name_table->rule('_', '|'),
-          $reporting_name_table->body(),
-            $reporting_name_table->rule('=', '='),
-              "\n";
 }
 
 sub translation_report($) {
