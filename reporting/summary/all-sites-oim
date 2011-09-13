@@ -30,7 +30,7 @@ sub expandSites(\@);
 
 my $options = {};
 my $osg_users_script = "$script_top_dir/osg-users";
-my @test_addresses = ( 'Chris Green <chris.h.green@gmail.com>' );
+my @test_addresses = ( 'Philippe Canal <pcanal@fnal.gov>' );
 my $prog = basename($0);
 
 GetOptions($options,
