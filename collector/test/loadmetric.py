@@ -1,6 +1,6 @@
-import GratiaCore
-import Gratia
-import Metric
+import gratia.common.GratiaCore as GratiaCore
+import gratia.common.Gratia as Gratia
+import gratia.metric.Metric as Metric
 import time
 import datetime
 

@@ -1,5 +1,5 @@
-import GratiaCore
-import Gratia
+import gratia.common.GratiaCore as GratiaCore
+import gratia.common.Gratia as Gratia
 import time
 import datetime
 import profile

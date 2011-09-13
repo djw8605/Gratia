@@ -75,7 +75,7 @@ host=`hostname`
 source=${PWD}
 source=`dirname $source`
 source=`dirname $source`
-export PYTHONPATH=${source}/probe/common:${source}/probe/common/gratia/common:${source}/probe/metric/gratia/metric:${PYTHONPATH}
+export PYTHONPATH=${source}/probe/common:${source}/probe/metric:${PYTHONPATH}
 
 server_status=unknown
 
