@@ -11,7 +11,7 @@ lsf:LocalTester.where.edu	infngrid	1	12	87	3207.0	612.0
 lsf:LocalTester.where.edu	infngrid	2	1	1	61.0	13.0
 lsf:LocalTester.where.edu	infngrid	3	1	1	77.0	15.0
 lsf:LocalTester.where.edu	infngrid	4	1	1	92.0	16.0
-pbs:LocalTester.where.edu	Unknown	1	1	1	1202.0	0.0
+pbs:LocalTester.where.edu	Unknown	1	3	8	311920.0	286882.0
 pbs:LocalTester.where.edu	Unknown	8	1	1	65918.0	526870.0
 pbs:LocalTester.where.edu	dteam	1	7	168	23166.0	1728.0
 pbs:LocalTester.where.edu	infngrid	1	1	6	0.0	0.0

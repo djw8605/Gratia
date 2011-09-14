@@ -1,4 +1,4 @@
-import GratiaCore
+import gratia.common.GratiaCore as GratiaCore
 import sys
 
 if __name__ == '__main__':

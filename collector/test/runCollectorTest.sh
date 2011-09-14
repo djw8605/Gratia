@@ -214,7 +214,7 @@ function wait_for_server {
    while [ ${alive} -eq 0 -a ${try} -lt 100 ]; do   \
       echo "Waiting for server"
       python > alive.tmp <<EOF
-import GratiaCore
+import gratia.common.GratiaCore as GratiaCore
 GratiaCore.Initialize()
 GratiaCore.ProcessBundle(GratiaCore.CurrentBundle)
 print GratiaCore.successfulHandshakes
@@ -461,7 +461,7 @@ function loaddata {
    fi
 
    python <<EOF
-import Gratia
+import gratia.common.Gratia as Gratia
 Gratia.Initialize("ProbeConfigSingle")
 EOF
 
