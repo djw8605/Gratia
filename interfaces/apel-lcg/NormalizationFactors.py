@@ -14,6 +14,9 @@ class NFerror(Exception):
 
 class NormalizationFactors:
   def __init__(self,date=None,site=None,debug=False):
+    self.reportableSites = "/home/gratia/interfaces/ssm.apel-lcg/lcg-reportableSites"
+    self.dbArgs         = "/home/gratia/interfaces/ssm.apel-lcg/lcg-db.conf"
+    self.dbDict         = None
     self.period         = date
     self.site           = site
     self.DEBUG          = debug
@@ -69,13 +72,15 @@ class NormalizationFactors:
   #------------------------------------------
   def runGratiaQuery(self,query,LogResults=True):
     """ Runs the query of the Gratia database """
+    #-- get database parameters ---
+    self.get_databaseArgs()
+
     #-- db parameters ---
-    socket=""
-    host  = "rcf-gratia.unl.edu"
-    port  = "49152"
-    user  = "gratia-reader"
-    db    = "gratia"
-    pswd  = "pswd-norm"
+    host  = self.dbDict["NormHost"]
+    port  = self.dbDict["NormPort"]
+    user  = self.dbDict["NormUser"]
+    pswd  = self.dbDict["NormPswd"]
+    db    = self.dbDict["NormDB"]
     #-- verify db is available -- 
     self.checkDB(host,port,user,pswd,db)
     #-- run the query -- 
@@ -85,8 +90,7 @@ class NormalizationFactors:
     results = self.evaluateMySqlResults(status,output)
     if LogResults:
       if len(results) == 0:
-        self.Logit("Results: empty results set")
-        #raise Exception("No Subcluster data returned from Gratia")
+        raise NFerror("""No Subcluster data returned from Gratia database""")
       else:
         self.Logit("Results:\n%s" % results)
     lines =  results.split("\n")
@@ -97,8 +101,8 @@ class NormalizationFactors:
         continue
       data.append(i)
       self.Logdebug(i)
-    #if len(data) == 0:
-    #  self.Logerr("No Subcluster data returned from Gratia query for %s" % self.period)
+    if len(data) == 0:
+      self.Logerr("No Subcluster data returned from Gratia query for %s" % self.period)
     return data
   
   #-----------------------------------------
@@ -115,6 +119,7 @@ class NormalizationFactors:
   WHERE
        DATE(Timestamp) = "%(period)s"
     AND BenchmarkName   = "SI2K"
+    -- AND BenchmarkName   = "HS06"
   GROUP BY
        SiteName,
        date,
@@ -168,13 +173,48 @@ class NormalizationFactors:
     return output
   
   #------------------------------------------
+  def get_databaseArgs(self):
+    if self.dbDict != None:  # already have it
+      return
+    self.dbDict = {}
+    requiredAttrs = ["NormHost","NormPort", "NormUser", "NormPswd", "NormDB",]
+    try:
+      fd = open(self.dbArgs)
+      while 1:
+        line = fd.readline()
+        if line == "":   # EOF
+          break
+        line = line.strip().strip("\n")
+        if line.startswith("#"):
+          continue
+        if len(line) == 0:
+          continue
+        dbList    = line.split()
+        attribute = dbList[0]
+        if attribute not in requiredAttrs:
+          continue
+        value =  dbList[1]
+        self.dbDict[attribute] = value
+        requiredAttrs.remove(attribute)
+      fd.close()
+    except IOError, (errno,strerror):
+      raise NFerror("""Cannot access configuration file with the databae arguments.
+IO error(%(errno)s): %(error)s (%(file)s)""" % \
+     { "errno" : errno, "error" : strerror, "file" : self.dbArgs})
+    #-- make sure all the needed attributes are available --
+    if len(requiredAttrs) != 0:
+      raise NFerror("""Required attribute (%(attr)s) needed to access the database
+not found in %(file)s.""" % \
+             { "attr" : requiredAttrs, "file" : self.dbArgs})
+  
+  
+  #------------------------------------------
   def get_currentNF(self):
     if self.currentNF != None:  # already have it
       return
     self.currentNF = {}
-    filename = "/home/gratia/interfaces/apel-lcg/lcg-reportableSites"
     try:
-      fd = open(filename)
+      fd = open(self.reportableSites)
       while 1:
         line = fd.readline()
         if line == "":   # EOF
@@ -190,8 +230,9 @@ class NormalizationFactors:
         self.currentNF[sitename] = nf
       fd.close()
     except IOError, (errno,strerror):
-      raise Exception("IO error(%s): %s (%s)" % (errno,strerror,filename))
-  
+      raise NFerror("""Cannot access configuration file with the reportable sites  and normalization factors.
+IO error(%(errno)s): %(error)s (%(file)s)""" % \
+     { "errno" : errno, "error" : strerror, "file" : self.reportableSites})
   
   #------------------------------------------
   def siteIsInGIP(self,site):
@@ -252,9 +293,14 @@ class NormalizationFactors:
       else:
         self.add_to_problemList(site,"Reporting to APEL/WLCG. No GIP data. Not a registered MyOsg Resource Group")
         output = head_format % (site,"",self.currentNF[site],"","","","")
-      for problem in self.returnProblems(site):
-        self.Logit("%-52s %s" % (output,problem))
-        output = ""
+      if len(self.returnProblems(site)) == 0:
+        self.show_output(site,output)
+      else:
+        for problem in self.returnProblems(site):
+        ##  self.Logit("%-52s %s" % (output,problem))
+          output += problem
+          self.show_output(site,output)
+          output = "%-52s" % ""
     self.Logit("############################################")
     self.Logit("#####  Normalization Factor Comparisons ####")
     self.Logit("#####  Date used: %s            ####" % self.period)
@@ -427,11 +473,14 @@ class NormalizationFactors:
     self.Logit(format % ("--------------","----","----"," -----------"))
     for site in sorted(self.gipNF.keys()):
       hs06 = self.gipNF[site] * 4
-      #self.show_output(site, format % (site,self.gipNF[site],hs06))
       output = format % (site,self.gipNF[site],hs06,"")
-      for problem in self.returnProblems(site):
-        self.Logit("%-37s %s" % (output,problem))
-        output = " "
+      if len(self.returnProblems(site)) == 0:
+        self.show_output(site,output)
+      else:
+        for problem in self.returnProblems(site):
+          output += problem
+          self.show_output(site,output)
+          output = " "
     self.Logit("#################################################")
     self.Logit("#####  GIP Calculated Normalization Factors  ####")
     self.Logit("#####  Date used: %s                 ####" % self.period)
@@ -451,11 +500,12 @@ class NormalizationFactors:
     self.Logit(format % ("Resource Group","SI2K","HS06","Cores","Cluster","Name","SI2K","HS06","Processor"))
     self.Logit(format % ("--------------","----","----","-----","-------","----","----","----","---------"))
     for site in sorted(self.gipNF.keys()):
+      rg = site
       si2knf = self.gipNF[site]
       hs06nf = si2knf * 4
       for subcluster in  self.subclusterData[site]:
         hs06 = int(subcluster[1]) * 4
-        self.show_output(site, format % (site,si2knf,hs06nf,
+        self.show_output(site, format % (rg,si2knf,hs06nf,
                                              subcluster[0],
                                              subcluster[2],
                                              subcluster[3],
@@ -463,10 +513,10 @@ class NormalizationFactors:
                                              hs06,
                                              subcluster[4],
                                              ))
-        site   = ""
+        rg   = ""
         si2knf = ""
         hs06nf = ""
-      print ""
+      self.show_output(site,"")
     self.Logit("#################################################")
     self.Logit("#####  GIP subcluster data                   ####")
     self.Logit("#####  Date used: %s                  ####" % self.period)
@@ -526,6 +576,7 @@ def retrieve_NF():
 #--------------------------
 def usage(arglist):
   global gProgamName
+  nf = NormalizationFactors()
   print """
 Usage:  %(program)s  action [--help] [--debug] [--site=<resource group>]
 
@@ -535,19 +586,33 @@ Usage:  %(program)s  action [--help] [--debug] [--site=<resource group>]
   Actions:
    --show-current  
         Displays the currently reportable resource groups and NFs
+        Requires access to the reportable sites files used in the interface:
+          %(sites)s
    --show-gip      
         Displays the NFs for resource groups caluculated from GIP 
         subcluster data.
+        Requires access to the Gratia database containing the SubCluster table
+        using a config file: %(conf)s 
    --compare       
         Displays all resource groups NFs compared against the currently 
-        reportable  resource group's NF
+        reportable  resource group's NF.
+        Requires access to the reportable sites files used in the interface:
+          %(sites)s
+        Requires access to the Gratia database containing the SubCluster table
+        using a config file: %(conf)s 
    --show-subcluster-data 
         Displays the NFs for resource groups caluculated and the details of the
         GIP subcluster data used to calculate the NF.
+        Requires access to the Gratia database containing the SubCluster table
+        using a config file: %(conf)s 
    --show-benchmark
         Displays the SI2K value for all processor models
+        Requires access to the Gratia database containing the SubCluster table
+        using a config file: %(conf)s 
 
-""" %  {"program" : gProgramName,
+""" %  {"program" : gProgramName, 
+        "sites"   : nf.reportableSites,
+        "conf"    : nf.dbArgs,
 }
  
 #--------------------------
@@ -603,6 +668,7 @@ def main(argv):
     usage(arglist)
     return 1
   except NFerror,e:
+    print "ERROR:",e
     return 1
   except Exception,e:
     traceback.print_exc()
