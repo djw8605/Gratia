@@ -460,6 +460,10 @@
 #
 # 10/3/11 (John Weigand)
 #   Added Purdue-Hansen with SI2K NF of 2170
+#
+# 10/11/11 (John Weigand)
+#    Updated NF factor per Jeff Porter for NERSC-PDSF
+#       old  3420      3480
 ##################################################################
 #
 #-- Site  ------- SPECint2000
@@ -502,7 +506,7 @@ UTA_SWT2            2810
 ####################################
 ####################################
 #--- ALICE Tier 2 ----
-NERSC-PDSF          3420
+NERSC-PDSF          3480
 LC-glcc             3920
 #
 #
