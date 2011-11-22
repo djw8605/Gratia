@@ -1565,7 +1565,7 @@ def main(argv=None):
   except Exception, e:
     SendEmailNotificationFailure(e.__str__())
     Logit("Transfer FAILED from Gratia to APEL.")
-    traceback.print_exc()
+    ## traceback.print_exc()
     Logerr(e.__str__())
     Logit("====================================================")
     return 1
