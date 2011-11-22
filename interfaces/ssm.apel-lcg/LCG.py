@@ -18,6 +18,7 @@ import Downtimes
 import InactiveResources
 import InteropAccounting
 import Rebus
+import SSMInterface
 
 import traceback
 import exceptions
@@ -57,6 +58,8 @@ gDatabaseParameters = {"GratiaHost":None,
                        "GratiaUser":None,
                        "GratiaPswd":None,
                        "GratiaDB"  :None,
+                       "SSMHome"   :None,
+                       "SSMConfig" :None,
                        "SSMupdates":None,
                        "SSMdeletes":None,
                       }
@@ -87,7 +90,6 @@ gInteropAccounting = InteropAccounting.InteropAccounting()
 # Used to validate MyOSG Interoperability against WLCG Rebus topology
 # to verify is a site/resource group is registered
 gRebus = Rebus.Rebus()
-
 
 #-----------------------------------------------
 def Usage():
@@ -212,9 +214,12 @@ Node................. %(hostname)s
 User................. %(username)s
 Log file............. %(logfile)s
 
+SSM_HOME variable.... %(ssmhome)s 
+SSM config file...... %(ssmconfig)s 
 SSM summary file..... %(ssmupdates)s 
 SSM summary records.. %(ssmrecs)s  
 SSM deletes file..... %(ssmdeletes)s 
+SSM deletes records.. %(ssmdels)s 
 
 Reportable sites file.. %(sitefilter)s
 Reportable VOs file.... %(vofilter)s
@@ -226,9 +231,12 @@ Reportable VOs file.... %(vofilter)s
                 "logfile"     : commands.getoutput("echo $PWD")+"/"+GetFileName(None,"log"),
                 "sitefilter"  : gFilterParameters["SiteFilterFile"],
                 "vofilter"    : gFilterParameters["VOFilterFile"],
-                "ssmupdates"     : commands.getoutput("echo $PWD")+"/"+GetFileName(gDatabaseParameters["SSMupdates"],"txt"),
+                "ssmhome"     : gDatabaseParameters["SSMHome"],
+                "ssmconfig"   : gDatabaseParameters["SSMConfig"],
+                "ssmupdates"  : commands.getoutput("echo $PWD")+"/"+GetFileName(gDatabaseParameters["SSMupdates"],"txt"),
                 "ssmrecs"     : commands.getoutput("grep -c '%%' %s" % GetFileName(gDatabaseParameters["SSMupdates"],"txt")),
-                "ssmdeletes"   : commands.getoutput("echo $PWD")+"/"+GetFileName(gDatabaseParameters["SSMdeletes"],"txt"),
+                "ssmdeletes"  : commands.getoutput("echo $PWD")+"/"+GetFileName(gDatabaseParameters["SSMdeletes"],"txt"),
+                "ssmdels"     : commands.getoutput("grep -c '%%' %s" % GetFileName(gDatabaseParameters["SSMdeletes"],"txt")),
                 "message"     : message,} 
 
   try:
@@ -607,6 +615,7 @@ def GetQuery(resource_grp,normalizationFactor,vos):
     query="""\
 SELECT "%(site)s"                  as Site,  
    VOName                          as VO,
+   "%(nf)s"                        as NF,
    "%(month)s"                     as Month,
    "%(year)s"                      as Year,
    IF(DistinguishedName NOT IN (\"\", \"Unknown\"),IF(INSTR(DistinguishedName,\":/\")>0,LEFT(DistinguishedName,INSTR(DistinguishedName,\":/\")-1), DistinguishedName),CommonName) as GlobalUserName, 
@@ -669,6 +678,8 @@ def GetQueryForDaysReported(resource_grp,vos):
     periodWhereClause = SetDatesWhereClause()
     siteClause        = GetSiteClause(resource_grp)
     dateFmt  =  "%Y-%m-%d"
+    Logit("Resource Group: %(rg)s  Resources: %(resources)s" % \
+       { "rg" : resource_grp, "resources" : siteClause } )
     query="""\
 SELECT distinct(date_format(EndTime,"%(date_format)s"))
 from 
@@ -703,11 +714,14 @@ def RunGratiaQuery(select,params,LogResults=True,headers=False):
   (status,output) = commands.getstatusoutput("echo '" + select + "' | " + connectString)
   results = EvaluateMySqlResults((status,output))
   if len(results) == 0:
-    Logit("Results: empty results set")
+    cnt = 0
+  elif headers:
+    cnt = len(results.split("\n")) - 1
+  else:
+    cnt = len(results.split("\n")) 
+  Logit("Results: %s records" % cnt)
   if LogResults:
     Logit("Results:\n%s" % results)
-  else:
-    Logit("Results: %s records" % len(results))
   return results
 
 #-----------------------------------------------
@@ -766,27 +780,40 @@ def SendXmlHtmlFiles(filename,dest):
   
 
 #-----------------------------------------------
-def RunLCGUpdate(params):
+def RunLCGUpdate(params,type):
   """ Performs the update of the APEL database """
-  updatefile = GetFileName(params["SSMupdates"],"txt")
-  deletefile = GetFileName(params["SSMdeletes"],"txt")
-  
+  configfile = params["SSMConfig"]
+  os.putenv("SSM_HOME",params["SSMHome"])
+
   Logit("---------------------")
   Logit("--- Updating APEL ---")
   Logit("---------------------")
-  Logit("Delete file.. %(deletions)s" % { "deletions" : deletefile, })
-  Logit("Update file... %(updatefile)s Records: %(count)s" % \
-       { "updatefile" : updatefile, 
-         "count"      : commands.getoutput("grep -c '%%' %s" % updatefile), 
-       } )
-
-  Logit("NO UPDATE CAPABILITY AT THIS TIME")
-  
+  if type == "delete":
+    file = GetFileName(params["SSMdeletes"],"txt")
+    if not os.path.isfile(file):
+      Logit("... this is likely the 1st time run for this period therefore no file to send")
+      return
+  if type == "update":
+    file = GetFileName(params["SSMupdates"],"txt")
+  Logit("%(type)s file... %(file)s Records: %(count)s" % \
+         { "type"   : type,
+           "file"   : file,
+           "count"  : commands.getoutput("grep -c '%%' %s" % file), 
+         } )
+  try:
+    ssm = SSMInterface.SSMInterface(configfile)
+    ssm.send_outgoing(file)
+  except SSMInterface.SSMException,e:
+    raise Exception(e)
+ 
+  if ssm.outgoing_sent(): 
+    Logit("... successfulling sent")
+  else:
+    raise Exception("""SSM Interface failed. These files still exist:
+%s""" % ssm.show_outgoing())
   Logit("------------------------------")
   Logit("--- Updating APEL complete ---")
   Logit("------------------------------")
-  results = ""
-  return results
 
 #------------------------------------------------
 def CreateConnectString(host,port,user,pswd,db,headers=False):
@@ -830,6 +857,12 @@ def CreateVOSummary(results,params):
              "NormalisedCpuDuration", 
              "NormalisedWallDuration", 
             ]
+  headers = { "NumberOfJobs"          : "Jobs",
+             "CpuDuration"            : "CPU<br>(hours)", 
+             "WallDuration"           : "Wall<br>(hours)", 
+             "NormalisedCpuDuration"  : "Normalized CPU<br>(hours)", 
+             "NormalisedWallDuration" : "Normalized Wall<br>(hours)", 
+            }
   totals = {}
   totals = totalsList(metrics)
   resourceGrp = None
@@ -842,9 +875,13 @@ def CreateVOSummary(results,params):
   summaryfile = open(summary,"w")
   htmlfile.write("""<HTML><BODY>\n""")
   htmlfile.write("Last update: " + time.strftime('%Y-%m-%d %H:%M',time.localtime()))
-  htmlfile.write("""<TABLE border="1"><TR><TH align="center">Resource Group</TH><TH align="center">VO</TH>""")
+  htmlfile.write("""<TABLE border="1">""")
+  htmlfile.write("""<TR>""")
+  htmlfile.write("""<TH align="center">Resource Group</TH>""")
+  htmlfile.write("""<TH align="center">NF<br>HS06</TH>""")
+  htmlfile.write("""<TH align="center">VO</TH>""")
   for metric in metrics:
-    htmlfile.write("""<TH align="center">%s</TH>""" % metric)
+    htmlfile.write("""<TH align="center">%s</TH>""" % headers[metric])
   htmlfile.write("""<TH align="left">Resources / Gratia Sites</TH>""")
   htmlfile.write("</TR>\n")
 
@@ -864,10 +901,11 @@ def CreateVOSummary(results,params):
       if resourceGrp == None:
         resourceGrp = values[0]
         vo          = values[1]
+        nf          = values[2]
         continue
       else:
-        writeHtmlLine(htmlfile, resourceGrp, vo, totals, metrics)
-        writeSummaryFile(summaryfile, resourceGrp, vo, totals, metrics)
+        writeHtmlLine(htmlfile, resourceGrp, vo, nf, totals, metrics)
+        writeSummaryFile(summaryfile, resourceGrp, vo, nf, totals, metrics)
         totals = totalsList(metrics)
     idx = 0
     for val in values:
@@ -876,9 +914,10 @@ def CreateVOSummary(results,params):
       idx = idx +1
     resourceGrp = values[0]
     vo          = values[1]
+    nf          = values[2]
 
-  writeHtmlLine(htmlfile, resourceGrp, vo, totals, metrics)
-  writeSummaryFile(summaryfile, resourceGrp, vo, totals, metrics)
+  writeHtmlLine(htmlfile, resourceGrp, vo, nf, totals, metrics)
+  writeSummaryFile(summaryfile, resourceGrp, vo, nf, totals, metrics)
   htmlfile.write("</TABLE></BODY></HTML>\n")
 
   htmlfile.close()
@@ -891,16 +930,16 @@ def totalsList(metrics):
     totalsDict[metric] = 0 
   return totalsDict
 #--------------------------------
-def writeHtmlLine(file, rg, vo, totals, metrics):
-  file.write("""<TR><TD>%s</TD><TD align="center">%s</TD>""" % (rg,vo))
+def writeHtmlLine(file, rg, vo, nf, totals, metrics):
+  file.write("""<TR><TD>%s</TD><TD align="center">%s</TD><TD align="center">%s</TD>""" % (rg,nf,vo))
   for metric in metrics:
     file.write("""<TD align="right">"""+str(totals[metric])+"</TD>")
   file.write("<TD>"+GetSiteClause(rg)+"</TD>")
   file.write("</TR>\n")
 
 #--------------------------------
-def writeSummaryFile(file, rg, vo, totals, metrics):
-  line = "%s\t%s" % (rg,vo)
+def writeSummaryFile(file, rg, vo, nf, totals, metrics):
+  line = "%s\t%s\t%s" % (rg,nf,vo)
   for metric in metrics:
     line += "\t" + str(totals[metric])
   line += "\t" + GetSiteClause(rg)
@@ -1127,6 +1166,7 @@ def CheckForUnreportedDays(reportableVOs,reportableSites):
   missingDataList = []
   for site in sorted(sites):
     allDates = dateResults.split("\n")
+    Logit("------ User Query: %s  ------" % site)
     query = GetQueryForDaysReported(site,reportableVOs)
     if firstTime:
       Logit("Sample Query:")
@@ -1193,6 +1233,7 @@ def CreateMissingDaysHtml(missingData):
   filename = ""
   try:
     filename = GetFileName("missingdays","html") 
+    Logit("#--------------------------------#")
     Logit("Creating html file of sites with missing data: %s" % filename)
     file = open(filename, 'w')  
     file.write("<html>\n")
@@ -1262,8 +1303,14 @@ def main(argv=None):
     Logit("Gratia database host... %s:%s" % (gDatabaseParameters["GratiaHost"],gDatabaseParameters["GratiaPort"]))
     Logit("Gratia database........ %s" % (gDatabaseParameters["GratiaDB"]))
     Logit("Missing days threshold. %s" % (gFilterParameters["MissingDataDays"]))
+    Logit("LCG SSM_HOME variable.. %s" % (gDatabaseParameters["SSMHome"]))
+    Logit("LCG SSM config file.... %s" % (gDatabaseParameters["SSMConfig"]))
     Logit("LCG SSM update file.... %s" % (GetFileName(gDatabaseParameters["SSMupdates"]  ,"txt")))
     Logit("LCG SSM delete file.... %s" % (GetFileName(gDatabaseParameters["SSMdeletes"],"txt")))
+
+    #--- process deletions ---
+    if gInUpdateMode:
+      RunLCGUpdate(gDatabaseParameters,"delete")
 
     #--- check db availability -------------
     CheckGratiaDBAvailability(gDatabaseParameters)
@@ -1278,7 +1325,7 @@ def main(argv=None):
 
     #--- apply the updates to the APEL accounting database ----
     if gInUpdateMode:
-      RunLCGUpdate(gDatabaseParameters)
+      RunLCGUpdate(gDatabaseParameters,"update")
       SendEmailNotificationSuccess()
       SendEmailNotificationWarnings()
       Logit("Transfer Completed SUCCESSFULLY from Gratia to APEL")
@@ -1289,7 +1336,7 @@ def main(argv=None):
   except Exception, e:
     SendEmailNotificationFailure(e.__str__())
     Logit("Transfer FAILED from Gratia to APEL.")
-    traceback.print_exc()
+    ## traceback.print_exc()
     Logerr(e.__str__())
     Logit("====================================================")
     return 1
