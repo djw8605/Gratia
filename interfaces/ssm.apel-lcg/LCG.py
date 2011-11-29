@@ -762,6 +762,10 @@ def SendXmlHtmlFiles(filename,dest):
       data area to they are accessible for reporting on the
       collector or by other software.
   """
+  global gInUpdateMode
+  if not gInUpdateMode:  # no updates
+    Logit("%s file NOT copied to a Gratia collector. Not in update mode." % (filename,))
+    return
   if dest == 'DO_NOT_SEND':
     Logit("%s file NOT copied to a Gratia collector (arg is '%s')" % (filename,dest))
     return
@@ -846,7 +850,6 @@ def EvaluateMySqlResults((status,output)):
 #-----------------------------------------------
 def CreateVOSummary(results,params,reportableSites):
   """ Creates a summary by site,vo for troubleshooting purposes. """
-
   Logit("-----------------------------------------------------")
   Logit("-- Creating a resource group, vo summary html page --") 
   Logit("-----------------------------------------------------")
@@ -866,12 +869,12 @@ def CreateVOSummary(results,params,reportableSites):
   totals = totalsList(metrics)
   resourceGrp = None
   vo          = None
-  filename = GetFileName("summary","html")
-  summary  = GetFileName("summary","dat")
-  Logit("... summary html file: %s" % filename) 
-  Logit("... summary dat  file: %s" % summary) 
-  htmlfile    = open(filename,"w")
-  summaryfile = open(summary,"w")
+  htmlfilename = GetFileName("summary","html")
+  datfilename  = GetFileName("summary","dat")
+  Logit("... summary html file: %s" % htmlfilename) 
+  Logit("... summary dat  file: %s" % datfilename) 
+  htmlfile    = open(htmlfilename,"w")
+  summaryfile = open(datfilename,"w")
   htmlfile.write("""<HTML><BODY>\n""")
   htmlfile.write("Last update: " + time.strftime('%Y-%m-%d %H:%M',time.localtime()))
   htmlfile.write("""<TABLE border="1">""")
@@ -921,6 +924,8 @@ def CreateVOSummary(results,params,reportableSites):
 
   htmlfile.close()
   summaryfile.close()
+  SendXmlHtmlFiles(htmlfilename,gFilterParameters["GratiaCollector"])
+  SendXmlHtmlFiles(datfilename, gFilterParameters["GratiaCollector"])
 
 #--------------------------------
 def totalsList(metrics):

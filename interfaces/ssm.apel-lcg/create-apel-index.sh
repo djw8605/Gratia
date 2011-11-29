@@ -22,7 +22,7 @@ visiblity to:
 
 In addition, the following data is also presented to assist in 
 trouble shooting and in validating WCLG MOU monthly reports:
-  HS06_OSG_DATA - inlcudes the HepSpec2006 normalized values used
+  HS06_OSG_DATA - includes the HepSpec2006 normalized values used
   late_updates  - show the updates that have occurred after the accounting
                   period (month) is over.  This allows us to confirm if
                   sites have caught up when problems have occurred, to some
@@ -99,52 +99,59 @@ function write_description {
  cat >>$index <<EOF
 The intent of this page is to provide visibility into the Gratia data that has
 been uploaded to the APEL accounting database and from there forwarded to the 
-WLCG/EGEE portal.
+WLCG/EGI portal.
 A full description of the Gratia-APEL interface and the tables is the
 <a href="https://twiki.grid.iu.edu/bin/view/Accounting/GratiaInterfacesApelLcg">Gratia Interfaces - APEL/WLCG document</a>.
 <p>
-The table below contains SQL 'select' dumps of the APEL accounting database
+Prior to $SSM_DATE,
+the table below contains SQL 'select' dumps of the APEL accounting database
 tables in html and xml format that can be referenced for troubleshooting 
 purposes:
 <UL>
 <TABLE>
 <TR>
 <TD valign="top"><b>OSG_DATA</b></TD>
-<TD> 
+<TD>
     This is the table updated by Gratia which is then 
-    transferred to the WCLG/EGEE portal from which WLCG reports are generated. 
+    transferred to the WCLG/EGI portal from which WLCG reports are generated. 
+</TD>
+</TR><TR>
+<TD valign="top"><b>HS06_OSG_DATA</b></TD>
+<TD>
+    The OSG_DATA table data plus the HepSpec2006 normalized values used 
+    since January 2010).<br> 
+    Note: The HepSpec2006 factor being used by WLCG is currently 4 times
+          the SI2K value.
 </TD>
 </TR><TR>
 <TD valign="top"><b>org_Tier1</b></TD>
 <TD>
     Table of Tier 1 resources showing the reporting groups 
     they are a part of and the heirarchy of how they are displayed on the
-    EGEE portal.
+    EGI portal.
 </TD>
 </TR><TR>
 <TD valign="top"><b>org_Tier2</b></TD>
 <TD>
     Table of Tier 2 resources showing the reporting groups 
     they are a part of and the heirarchy of how they are displayed on the
-    EGEE portal.
-</TD>
-</TR>
-</TABLE>
+    EGI portal.
+</TD> </TR> </TABLE>
+</UL>
+Beginning in $SSM_DATE,
+access to the APEL accounting tables was replaced with an Active/MQ interface
+using an SSM protocal.
+<UL>
+<B>Summary</B> - 
+    Shows the summary data (by Resource Group / VO) of the data that was
+    sent to APEL/EGI.
 </UL>
 
-In addition, there are 3 other views of data shown to assist in trouble
+In addition, there are 2 other views of data shown to assist in trouble
 shooting and validating WCLG MOU monthly reports:
 <UL>
 <TABLE>
 <TR>
-<TD valign="top"><b>HS06_OSG_DATA</b></TD>
-<TD> 
-    The OSG_DATA table data plus the HepSpec2006 normalized values used 
- since January 2010).<br> 
-    Note: The HepSpec2006 factor being used by WLCG is currently 4 times
-          the SI2K value.
-</TD>
-</TR><TR>
 <TD valign="top"><b>late_updates</b></TD>
 <TD>
     Show the updates that have occurred after the 
@@ -195,6 +202,7 @@ EOF
 }
 ### MAIN #############################
 PGM=$(basename $0)
+SSM_DATE="2011-11"
 path=gratia-data/interfaces/apel-lcg
 TOMCAT_INSTANCE=""
 url="./"
@@ -270,6 +278,7 @@ start "TABLE BORDER=1"
 ##--- header row --
 start "TR BGCOLOR=black"
 column "Month"
+column "Summary"  "colspan=2"
 column "OSG_DATA"  "colspan=2"
 column "HS06_OSG_DATA"  "colspan=2"
 column "org_Tier1" "colspan=2"
@@ -284,9 +293,9 @@ start "TR BGCOLOR=beige"
 for date in $dates
 do
   column "$date"
-  for table in OSG_DATA HS06_OSG_DATA org_Tier1 org_Tier2 
+  for table in summary OSG_DATA HS06_OSG_DATA org_Tier1 org_Tier2 
   do
-    for type in html xml
+    for type in html dat 
     do
       file=$date.$table.$type
       check_for_file $file $type
