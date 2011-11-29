@@ -600,7 +600,7 @@ def GetQuery(resource_grp,normalizationFactor,vos):
         DistinguishedName and CommonName.
 
         IMPORTANT coding gimmick:
-        Dor the ssm/activeMQ updates, the column labels MUST
+        For the ssm/activeMQ updates, the column labels MUST
         match those for the message format. They are being
         used to more easily (prgrammatically) provide the key
         for each value.
@@ -615,7 +615,6 @@ def GetQuery(resource_grp,normalizationFactor,vos):
     query="""\
 SELECT "%(site)s"                  as Site,  
    VOName                          as VO,
-   "%(nf)s"                        as NF,
    "%(month)s"                     as Month,
    "%(year)s"                      as Year,
    IF(DistinguishedName NOT IN (\"\", \"Unknown\"),IF(INSTR(DistinguishedName,\":/\")>0,LEFT(DistinguishedName,INSTR(DistinguishedName,\":/\")-1), DistinguishedName),CommonName) as GlobalUserName, 
@@ -845,7 +844,7 @@ def EvaluateMySqlResults((status,output)):
   return output
 
 #-----------------------------------------------
-def CreateVOSummary(results,params):
+def CreateVOSummary(results,params,reportableSites):
   """ Creates a summary by site,vo for troubleshooting purposes. """
 
   Logit("-----------------------------------------------------")
@@ -901,7 +900,7 @@ def CreateVOSummary(results,params):
       if resourceGrp == None:
         resourceGrp = values[0]
         vo          = values[1]
-        nf          = values[2]
+        nf          = reportableSites[resourceGrp]
         continue
       else:
         writeHtmlLine(htmlfile, resourceGrp, vo, nf, totals, metrics)
@@ -914,7 +913,7 @@ def CreateVOSummary(results,params):
       idx = idx +1
     resourceGrp = values[0]
     vo          = values[1]
-    nf          = values[2]
+    nf          = reportableSites[resourceGrp]
 
   writeHtmlLine(htmlfile, resourceGrp, vo, nf, totals, metrics)
   writeSummaryFile(summaryfile, resourceGrp, vo, nf, totals, metrics)
@@ -1057,7 +1056,7 @@ def ProcessUserData(ReportableVOs,ReportableSites):
   """
   gUserOutput = RetrieveUserData(ReportableVOs,ReportableSites,gDatabaseParameters)
   CreateLCGssmUpdates(gUserOutput,gDatabaseParameters)
-  CreateVOSummary(gUserOutput,gDatabaseParameters)
+  CreateVOSummary(gUserOutput,gDatabaseParameters,ReportableSites)
 
 #-----------------------------------------------
 def CheckMyOsgInteropFlag(reportableSites):
