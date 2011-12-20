@@ -1312,7 +1312,7 @@ def CheckMyOsgInteropFlag(reportableSites):
     msg = "Resource group (%s) is being reported" % rg
     #--- check MyOsg --
     if gInteropAccounting.isRegistered(rg):
-      msg += "and is registered in MyOSG/OIM"
+      msg += " and is registered in MyOSG/OIM"
       if gInteropAccounting.isInterfaced(rg):
         msg += " and has resources (%s) with the InteropAccounting flag set in MyOsg" %  gInteropAccounting.interfacedResources(rg)
         #-- check Rebus ---
