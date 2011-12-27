@@ -271,8 +271,11 @@ IO error(%(errno)s): %(error)s (%(file)s)""" % \
     self.Logit(head_format % ("--------------","------","-------","-----","-------","","----------------"))
     #-- combine GIP and configuration file resource so we can cross check --
     allSites = self.merge_Sites([self.gipNF.keys(), self.currentNF.keys(),])
+    #-- convert the GIP NF to HS06 --
+    for site in self.gipNF.keys():
+      self.gipNF[site] = self.gipNF[site] * 4
     #-- check them all --
-    for site in sorted(allSites):
+    for site in sorted(self.currentNF.keys()):
       # -- in both --
       if site in self.currentNF and site in self.gipNF:
         delta = self.gipNF[site] - int(self.currentNF[site])
@@ -494,18 +497,25 @@ IO error(%(errno)s): %(error)s (%(file)s)""" % \
     self.Logit("#####  Date used: %s                 ####" % self.period)
     self.Logit("#################################################")
     self.get_gipNF()
-    format = "%-20s  %-13s"
-    self.Logit(format % ("","   NF Factor"))
-    format = "%-20s  %6s %6s %6s %-30s %-40s %6s %6s %-30s"
-    self.Logit(format % ("Resource Group","SI2K","HS06","Cores","Cluster","Name","SI2K","HS06","Processor"))
-    self.Logit(format % ("--------------","----","----","-----","-------","----","----","----","---------"))
+    self.get_currentNF()
+    format = "%-20s  %6s %6s %7s %6s %-30s %-40s %6s %6s %-30s"
+    self.print_subclusterHdr(format)
+    cnt = 0
+    maxSites = 5
     for site in sorted(self.gipNF.keys()):
+      if cnt > maxSites:
+        self.print_subclusterHdr(format)
+        cnt = 0
+      cnt = cnt +1
       rg = site
       si2knf = self.gipNF[site]
       hs06nf = si2knf * 4
+      apelnf = ""
+      if site in self.currentNF:
+        apelnf = self.currentNF[site]
       for subcluster in  self.subclusterData[site]:
         hs06 = int(subcluster[1]) * 4
-        self.show_output(site, format % (rg,si2knf,hs06nf,
+        self.show_output(site, format % (rg,si2knf,hs06nf,apelnf,
                                              subcluster[0],
                                              subcluster[2],
                                              subcluster[3],
@@ -516,11 +526,19 @@ IO error(%(errno)s): %(error)s (%(file)s)""" % \
         rg   = ""
         si2knf = ""
         hs06nf = ""
+        apelnf = ""
       self.show_output(site,"")
     self.Logit("#################################################")
     self.Logit("#####  GIP subcluster data                   ####")
     self.Logit("#####  Date used: %s                  ####" % self.period)
     self.Logit("#################################################")
+  #----------------------------
+  def print_subclusterHdr(self,format):
+    self.Logit("")
+    format1 = "%-20s  %-13s"
+    self.Logit(format1 % ("","       NF Factor"))
+    self.Logit(format % ("Resource Group","SI2K","HS06","APEL NF","Cores","Cluster","Name","SI2K","HS06","Processor"))
+    self.Logit(format % ("--------------","----","----","-------","-----","-------","----","----","----","---------"))
 
   #------------------------------------------
   def show_benchmarkData(self):
