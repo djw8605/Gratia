@@ -14,7 +14,7 @@ class NFerror(Exception):
 
 class NormalizationFactors:
   def __init__(self,date=None,site=None,debug=False):
-    self.reportableSites = "/home/gratia/interfaces/ssm.apel-lcg/lcg-reportableSites"
+    self.reportableSites = "/home/gratia/interfaces/apel-lcg/lcg-reportableSites"
     self.dbArgs         = "/home/gratia/interfaces/ssm.apel-lcg/lcg-db.conf"
     self.dbDict         = None
     self.period         = date
