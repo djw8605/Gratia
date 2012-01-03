@@ -45,7 +45,6 @@
 #HU_ATLAS_Tier2      2218
 #BU_ATLAS_Tier2      2095
 #MWT2                2178
-#MWT2_UC             2178
 #OU_OCHEP_SWT2       2255
 #WT2                 2823
 #SWT2_CPB            2107
@@ -87,7 +86,6 @@ AGLT2               8500
 HU_ATLAS_Tier2      8872
 BU_ATLAS_Tier2      8380
 MWT2                8712
-MWT2_UC             8712
 OU_OCHEP_SWT2       9020
 WT2                11292
 SWT2_CPB            8428

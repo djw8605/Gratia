@@ -464,9 +464,14 @@
 # 10/11/11 (John Weigand)
 #    Updated NF factor per Jeff Porter for NERSC-PDSF
 #       old  3420      3480
+#
+# 1/1/12 (John Weigand
+#    Removed MWT2_UC.  Site has been disabled. Load going to MWT2
+#
 ##################################################################
 #
 #-- Site  ------- SPECint2000
+FNAL_GPGRID_1       3322
 #
 #--- CMS Tier 1 ----    
 USCMS-FNAL-WC1      2566  
@@ -495,7 +500,6 @@ AGLT2               2125
 HU_ATLAS_Tier2      2218
 BU_ATLAS_Tier2      2095
 MWT2                2178
-MWT2_UC             2178
 OU_OCHEP_SWT2       2255
 WT2                 2823
 SWT2_CPB            2107
@@ -532,3 +536,4 @@ LC-glcc             3920
 # IU_OSG              1400 (removed)
 # MWT2_IU             2170 (removed eff 7/1/11)
 # HEPGRID_UERJ        3196 (removed eff 8/24/11)
+# MWT2_UC             2178 (removed eff 1/1/12)
